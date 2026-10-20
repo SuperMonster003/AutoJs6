@@ -2,11 +2,10 @@
 
 - Device: Sony XQ-AT72, API 31, serial QV710AF65F
 - Host: org.autojs.autojs6 versionCode 5620 (6.8.0), debuggable
-- Run: XQ-AT72-5620-20261020180657, label baseline, 2026-10-20T08:21:50.578470+00:00 -> 2026-10-20T10:13:23.545643+00:00
+- Run: XQ-AT72-5620-20261020191146, label baseline, 2026-10-20T08:21:50.578470+00:00 -> 2026-10-20T11:15:37.098153+00:00
 - Device state at start: {'batteryLevel': 71, 'powered': ['USB'], 'wakefulness': 'Awake'}
-- Merged runs: XQ-AT72-5620-20261020162150 (all); XQ-AT72-5620-20261020172032 (S4e); XQ-AT72-5620-20261020172131 (S4e); XQ-AT72-5620-20261020180657 (S4a)
-- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during S4a normal, S4a force, before `default`, afterwards `default`
-- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture on
+- Merged runs: XQ-AT72-5620-20261020162150 (all); XQ-AT72-5620-20261020172032 (S4e); XQ-AT72-5620-20261020172131 (S4e); XQ-AT72-5620-20261020180657 (S4a); XQ-AT72-5620-20261020190236 (S7); XQ-AT72-5620-20261020190550 (S7); XQ-AT72-5620-20261020191146 (S7)
+- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture off
 - Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)
 - Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start
 
@@ -32,8 +31,8 @@
 | S5 ui script with button, text and webview | F | fail | 1 / +0.05 / -0.20 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S6 floaty.window + floaty.rawWindow | N | fail | 1 / +0.06 / +0.09 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S6 floaty.window + floaty.rawWindow | F | fail | 1 / +0.06 / +0.09 / +0 / +0 / 0 | retained runtimes 1/20 |
-| S7 events / key observer / sensors / accessibility events | N | fail | 1 / +0.04 / +0.03 / +0 / +0 / 0 | retained runtimes 1/20 |
-| S7 events / key observer / sensors / accessibility events | F | fail | 1 / +0.04 / +0.04 / +0 / +0 / 0 | retained runtimes 1/20 |
+| S7 events / key observer / sensors / accessibility events | N | fail | 1 / +0.02 / -0.06 / +0 / +0 / 0 | retained runtimes 1/20 |
+| S7 events / key observer / sensors / accessibility events | F | fail | 1 / +0.04 / +0.15 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S8 JavaAdapter / interface adapters x 100 + runtime.loadDex | N | fail | 1 / +0.04 / -0.37 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S8 JavaAdapter / interface adapters x 100 + runtime.loadDex | F | fail | 1 / +0.04 / -0.45 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S9 engines.execScriptFile restarting itself 3 levels | N | fail | 1 / +0.08 / +0.01 / +0 / +0 / 0 | retained runtimes 1/20 |
@@ -796,7 +795,7 @@ THREAD_OBJECT
   -> org.autojs.autojs.runtime.ScriptRuntime
 ```
 
-### S7 N: 2 exited runtimes in the dump, dump 2004 ms, analysis 8621 ms
+### S7 N: 2 exited runtimes in the dump, dump 2153 ms, analysis 11503 ms
 
 - 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> AccessibilityService.defaultBridge -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator$$ExternalSyntheticLambda4.f$0 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime
 - 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> VersionCodesInfo.obj -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> HashMap[] -> ComposeJsErrors$Localizer.format -> Compose$2.receiver -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime
@@ -828,7 +827,7 @@ THREAD_OBJECT
   -> org.autojs.autojs.runtime.ScriptRuntime
 ```
 
-### S7 F: 2 exited runtimes in the dump, dump 1991 ms, analysis 8619 ms
+### S7 F: 2 exited runtimes in the dump, dump 2352 ms, analysis 10524 ms
 
 - 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> AccessibilityService.defaultBridge -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator$$ExternalSyntheticLambda4.f$0 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime
 - 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> VersionCodesInfo.obj -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> HashMap[] -> ComposeJsErrors$Localizer.format -> Compose$2.receiver -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime
