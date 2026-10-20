@@ -8,36 +8,77 @@ import org.mozilla.javascript.ScriptableObject
 /**
  * Entry of the new script module layer for `ScriptRuntime` (roadmap D8 / T8). The switch
  * ([Pref.isNewScriptModuleLayerEnabled], off by default, in the developer options since P1.3) is read once per runtime
- * in `initPrologue`. When it
- * is off nothing here runs and every module comes from the `augment` package as before; when it is on, the modules
- * migrated so far ([MIGRATED]) are mounted from the generated registry at the position of their old augment call, so
- * the order of `Object.keys(global)` does not change, and the other modules still come from the `augment` package.
+ * in `initPrologue`. [ORDER] decides where every module is mounted (appendix C Q8): `ScriptRuntime.augment()` walks
+ * its top-level modules in order, and each one comes either from the `augment` package (its old augment call) or,
+ * when the switch is on and the module is migrated ([MIGRATED]), from the generated registry. Either way the order of
+ * `Object.keys(global)` stays the one of the old `augment()`.
  *
- * zh-CN: 新脚本模块层在 ScriptRuntime 中的入口 (D8 / T8). 开关 (默认关, P1.3 起位于开发者选项) 在 initPrologue 中每个运行时读取一次. 关闭时这里什么都不执行,
- * 所有模块照旧来自 augment 包; 打开时, 已迁移的模块 ([MIGRATED]) 在原 augment 调用的位置由生成的注册表挂载 (Object.keys(global) 的顺序不变),
- * 其他模块仍来自 augment 包.
+ * zh-CN: 新脚本模块层在 ScriptRuntime 中的入口 (D8 / T8). 开关 (默认关, P1.3 起位于开发者选项) 在 initPrologue 中每个运行时读取一次. [ORDER] 决定每个模块的
+ * 挂载位置 (附录 C Q8): `ScriptRuntime.augment()` 按序遍历其中的顶层模块, 每个模块或来自 augment 包 (原 augment 调用), 或在开关打开且模块已迁移
+ * ([MIGRATED]) 时来自生成的注册表; 两种情况下 Object.keys(global) 的顺序都与原 augment() 相同.
  */
 object ScriptModuleLayer {
+
+    /**
+     * Every module of the old `ScriptRuntime.augment()` in its mounting order (91 augment calls, appendix C Q8): each
+     * top-level module by its primary name, followed by its sub-modules as `parent.name`. `global` and `legacy` assign
+     * their members to the global object without a module object. The relative order of the top-level names is the
+     * one of `Object.keys(global)` in the device baseline `tools/augment/baseline/surface-XQ-AT72-5586.txt`
+     * (`ScriptModuleOrderTest`); the mounter also binds sub-modules in this order. Kept when the old implementation is
+     * removed (P5.2).
+     */
+    @JvmField
+    val ORDER: List<String> = listOf(
+        "global", "legacy", "isNullish",
+        "util", "util.java", "util.version", "util.versionCodes", "util.inspect", "util.morseCode",
+        "species", "app", "autojs", "autojs.version", "shell", "timers", "auto", "automator", "flow", "selector", "events", "keys",
+        "Canvas", "images", "ocr", "ocr.mlkit", "ocr.paddle", "ocr.rapid", "barcode", "qrcode", "yolo", "threads", "ui",
+        "colors", "colors.theme", "Color", "tasks", "workManager", "dialogs", "continuation", "ai", "tts", "http", "web", "WebSocket",
+        "s13n", "cvt", "cvt.bytes", "fmt", "fmt.bytes", "console", "plugins", "plugins.tools", "Arrayx", "Numberx", "Mathx", "jsox",
+        "files", "files.batchRename", "crypto", "RootAutomator", "engines", "floaty", "storages", "device", "powerManager", "settings",
+        "recorder", "toast", "media", "sensors", "base64", "notice", "notice.channel", "shizuku", "opencc", "mime", "sysprops",
+        "sqlite", "zip", "nanoid", "pinyin", "pinyin4j", "mediainfo", "mail", "installer", "epub", "gallery", "terminal",
+        "speech", "speech.models", "compose",
+    )
+
+    /** The top-level entries of [ORDER], the names `ScriptRuntime.augment()` mounts in turn. */
+    @JvmField
+    val TOP_LEVEL_ORDER: List<String> = ORDER.filter { '.' !in it }
 
     /** Top-level modules served by the new layer when the switch is on. */
     @JvmField
     val MIGRATED: Set<String> = setOf("base64")
 
-    init {
-        // Appendix C Q4: a master switch (off by default) plus a per-module list (all on by default), read on every failure.
-        ScriptErrorMapper.debugPrinting = ScriptErrorMapper.DebugPrinting { module ->
-            ScriptModuleDebugSettings.prints(module, Pref.isScriptModuleDebugPrintEnabled, Pref.scriptModuleDebugPrintDisabledModules)
-        }
-    }
+    private val noDebugPrinting = ScriptErrorMapper.DebugPrinting { false }
 
     @JvmStatic
     val isEnabled: Boolean
         get() = Pref.isNewScriptModuleLayerEnabled
 
-    /** A mounter of the host registry for [runtime]'s [global] object, or null when the switch is off. */
+    /**
+     * A mounter of the host registry for [runtime]'s [global] object, or null when the switch is off.
+     *
+     * The debug printing policy (appendix C Q4: a master switch, off by default, plus a per-module list, all on by
+     * default) is read from the preferences here, once per runtime like the switch itself (the developer options say
+     * changes apply to scripts started afterwards), so mapping a Java exception reads no preference (R2); loading this
+     * object (unit tests read [ORDER]) changes nothing.
+     */
     @JvmStatic
-    fun mounterOrNull(runtime: ScriptRuntime, global: ScriptableObject): ScriptModuleMounter? =
-        if (isEnabled) ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global) else null
+    fun mounterOrNull(runtime: ScriptRuntime, global: ScriptableObject): ScriptModuleMounter? {
+        if (!isEnabled) return null
+        val excluded = if (Pref.isScriptModuleDebugPrintEnabled) Pref.scriptModuleDebugPrintDisabledModules else null
+        ScriptErrorMapper.debugPrinting = excluded?.let { ScriptErrorMapper.DebugPrinting { module -> ScriptModuleDebugSettings.prints(module, true, it) } } ?: noDebugPrinting
+        return ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ORDER)
+    }
+
+    /**
+     * Mounts the top-level modules of [ORDER] in turn: each migrated one with [mounter], every other one (and all of
+     * them without a mounter) by [legacy], the old augment call of the module and its sub-modules.
+     */
+    @JvmStatic
+    inline fun mountInOrder(mounter: ScriptModuleMounter?, legacy: (name: String) -> Unit) {
+        for (name in TOP_LEVEL_ORDER) mountOr(mounter, name) { legacy(name) }
+    }
 
     /** Installs the migrated module [name] with [mounter], or runs [legacy] (the old augment call) without one. */
     @JvmStatic

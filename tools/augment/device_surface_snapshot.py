@@ -15,7 +15,8 @@ HERE = pathlib.Path(__file__).resolve().parent
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
-END_MARK = "运行结束"  # "运行结束"
+# The end line of a script run in the Chinese or the English app language.
+END_RE = re.compile(r"运行结束|finished in [\d.]+ seconds")
 
 
 def adb(serial, *args, check=False, text=True):
@@ -39,7 +40,7 @@ def run_snapshot(serial):
     while time.time() < deadline:
         time.sleep(0.5)
         seen = [l for l in console_lines(serial) if l not in before]
-        if any(END_MARK in l for l in seen):
+        if any(END_RE.search(l) for l in seen):
             break
     errors = [l for l in seen if "/E:" in l]
     if errors:

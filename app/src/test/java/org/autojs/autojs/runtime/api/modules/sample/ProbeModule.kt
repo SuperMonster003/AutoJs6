@@ -85,6 +85,15 @@ object ProbeChildModule {
 
 }
 
+/** A second sub-module of [ProbeModule]: the registry lists it after [ProbeChildModule], a mount order can put it first. */
+@ScriptModule(name = "sibling", parent = ProbeModule::class, dollarPrefix = false)
+object ProbeSiblingModule {
+
+    @ScriptFunction
+    fun hi(): String = "hi"
+
+}
+
 /** An eagerly built module with a LITERAL `toString`. */
 @ScriptModule(name = "eagerProbe", eager = true, dollarPrefix = false)
 class EagerProbeModule {

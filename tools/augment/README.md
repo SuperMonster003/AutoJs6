@@ -5,14 +5,17 @@
 ## device_bench.py: 真机计时
 
 ```
-py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--new-modules on|off]
+py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--skip-errors] [--new-modules on|off]
 ```
 
 1. `bench/aj6_init_timing.js` 跑 `--runs` 次, 读取 debug 宿主打印的 `runtime-init-prologue` / `script-init` / `runtime-init-epilogue` (毫秒) 并给出最小 / 中位 / 最大值. release 宿主不打印这些行, 只会得到总用时.
 2. `bench/obsolete_compile_timing.js` 把 `assets/modules/obsolete/` 推到设备, 在脚本里用 `new Function` 编译 45 个旧 JS 模块各 3 遍, 打印每遍总耗时与最慢的 8 个文件 (只编译不执行).
 3. `bench/call_overhead.js` 对比普通 JS 函数, Rhino 内置函数, Augment 函数 / getter / 全局函数, 以及同一 Java 方法经 Rhino 自带桥接的单次耗时 (20 万次), 最后测 1000 次失败调用的异常路径.
+4. `bench/error_path.js` 跑 `--runs` 次, 给出每种失败调用的最小 / 中位 / 最大值 (微秒; 脚本内每项先预热至多 200 次, 再计至多 2000 次, 至少 100 次, 超过 3 秒即停, 每次是一个箭头函数包着的 try / catch): Rhino 自身的错误 (`undefined.x`, 内置函数抛出的 TypeError / RangeError, 经 Rhino 自带桥接调用的 Java 方法抛出的异常 `java.lang.Integer.parseInt("x")`) 与脚本 `throw` 作参照, `base64` 的成功调用与四种失败调用 (参数个数, null 参数, 未知字符集, 实现内的 Java 异常; 开关开时走新脚本模块层, 关时走旧 augment), 读 `e.message` / `e.stack` 的附加开销, 以及经 Rhino 自带 Java 桥接单独测得的各步骤 (`part` 开头: 资源查找, `String.format`, `ScriptMessages` 两条消息, 构造 EcmaError / Java 异常; 减去 `part bridge` 即为该步骤本身). 用于 ROADMAP R2 与 P1.4 的分解.
 
 基线数值见 ROADMAP 附录 A. 设备上的临时目录为 `/sdcard/Download/aj6-augment-bench`, 可随时删除.
+
+脚本是否结束按控制台的结束行判断, 应用语言为中文 (含 "运行结束" 与 "用时 N 秒") 或英文 ("finished in N seconds") 都可识别 (`device_surface_snapshot.py` 同). 数值随设备状态变化很大 (P1.2 与 P1.4 在同一台 XQ-AT72 上相差 4-6 倍, Rhino 自身的错误同比例变化, 见 ROADMAP 附录 A), 比较开关开 / 关或前后版本时在同一状态下交替运行, 并看与同一次运行中 Rhino 参照项的比值.
 
 `--new-modules on|off` 在计时前用一个小脚本设置新脚本模块层的隐藏开关 (ROADMAP T8, 偏好设置键 `key_$_new_script_module_layer`, 经 `Pref.putBooleanSync` 写入), 结束后恢复原值; 开关只影响之后启动的脚本.
 

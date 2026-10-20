@@ -130,9 +130,9 @@ class ScriptModuleBindingPrototypeTest {
     @Test
     fun registriesListTheirCompilationUnit() {
         assertEquals(listOf("base64"), ScriptModules.bindings.map { it.spec.name })
-        assertEquals(listOf("eagerProbe", "probe", "sample", "child"), TestScriptModules.bindings.map { it.spec.name })
+        assertEquals(listOf("eagerProbe", "probe", "sample", "child", "sibling"), TestScriptModules.bindings.map { it.spec.name })
         assertEquals("org.autojs.autojs.runtime.api.modules.sample.ProbeModule", TestScriptModules.find("\$probeAlias")?.spec?.className)
-        assertEquals(listOf("child"), TestScriptModules.childrenOf("org.autojs.autojs.runtime.api.modules.sample.ProbeModule").map { it.spec.name })
+        assertEquals(listOf("child", "sibling"), TestScriptModules.childrenOf("org.autojs.autojs.runtime.api.modules.sample.ProbeModule").map { it.spec.name })
     }
 
     /** Writes [cases] in the format of `tools/augment/device_eval.py` (expected values in "kt"). */

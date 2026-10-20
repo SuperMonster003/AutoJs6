@@ -29,7 +29,8 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * the module object is built on the first read of any of them (all names then hold the same object). Global getters
  * are accessor-like properties that only create the Kotlin module instance. `@ScriptModule(eager = true)` modules
  * are built at install. Sub-modules (`@ScriptModule(parent = ...)`) are built and bound together with their parent
- * module object; their global members are installed with the top-level module.
+ * module object, in the order of their paths (`parent.name`) in [order] (`ScriptModuleLayer.ORDER`, appendix C Q8;
+ * sub-modules not listed follow in registry order); their global members are installed with the top-level module.
  *
  * Within a module object: aliases of a function share one function object, the prototypes of `@ScriptPrototype`
  * (a list is a chain) come first and an event emitter object ends the chain when `emitter = true`, a FUNCTIONAL
@@ -40,7 +41,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * zh-CN: 把注册表中的模块挂载到一个脚本运行时的全局对象上 (D4 / T3). 顶层模块按需挂载: 模块对象的每个名称 (名称, 别名, `$` 形式) 与它挂到全局对象上的
  * 每个成员都定义为带最终特性的惰性数据属性 (LazyDataSlot), Object.keys(global), hasOwnProperty, in 与属性描述符与急切挂载时相同, 首次读取其中任一个时
  * 构建模块对象 (此后所有名称指向同一对象). 全局 getter 是只创建 Kotlin 模块实例的访问器式属性. eager 模块在安装时构建. 子模块随父模块对象一起构建并挂载,
- * 其全局成员随顶层模块一起安装. 模块对象内: 函数的别名共用一个函数对象, @ScriptPrototype 的原型 (列表即原型链) 在前, emitter = true 时事件发射器对象
+ * 顺序按其路径 (`父.名称`) 在 [order] 中的位置 (ScriptModuleLayer.ORDER, 附录 C Q8; 未列出的子模块按注册表顺序排在后面), 其全局成员随顶层模块一起安装. 模块对象内: 函数的别名共用一个函数对象, @ScriptPrototype 的原型 (列表即原型链) 在前, emitter = true 时事件发射器对象
  * 位于链尾, FUNCTIONAL 的 toString 附加隐藏标记 `__augmented_custom_to_string__`, 成员抛出的一切经 ScriptErrorMapper 处理.
  */
 class ScriptModuleMounter @JvmOverloads constructor(
@@ -51,6 +52,8 @@ class ScriptModuleMounter @JvmOverloads constructor(
     private val emitterFactory: EmitterFactory = EmitterFactory.DEFAULT,
     /** Receives the debug entries of [ScriptErrorMapper]: the runtime's script console unless a test passes its own. */
     private val debugConsole: ScriptErrorMapper.DebugConsole? = runtime?.let { r -> ScriptErrorMapper.DebugConsole { level, text -> r.console.println(level, text) } },
+    /** Module paths in mounting order (`ScriptModuleLayer.ORDER`); it orders the sub-modules of a module object. */
+    private val order: List<String> = emptyList(),
 ) {
 
     /** Creates the event emitter object appended to the prototype chain of `emitter = true` modules. */
@@ -124,10 +127,11 @@ class ScriptModuleMounter @JvmOverloads constructor(
     /** Whether the installed top-level module [name] has been built. */
     fun isBuilt(name: String): Boolean = installed[name]?.isBuilt == true
 
-    private inline fun <T> guarded(member: String, block: () -> T): T = try {
+    /** Runs [block] for [member] (as `base64.encode`) of the top-level module [module], mapping what it throws (T5). */
+    private inline fun <T> guarded(member: String, module: String, block: () -> T): T = try {
         block()
     } catch (e: Throwable) {
-        throw ScriptErrorMapper.map(e, member, member.removePrefix("new ").substringBefore('.'), debugConsole)
+        throw ScriptErrorMapper.map(e, member, module, debugConsole)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -136,7 +140,12 @@ class ScriptModuleMounter @JvmOverloads constructor(
         val binding = anyBinding as ScriptModuleBinding<Any>
         val spec = binding.spec
         val path: String = parent?.let { "${it.path}.${spec.name}" } ?: spec.name
-        val children: List<Node> = registry.childrenOf(spec.className).map { Node(it, this) }
+
+        /** The top-level module, which the debug printing switches name (appendix C Q4). */
+        val topLevel: String = parent?.topLevel ?: spec.name
+        val children: List<Node> = registry.childrenOf(spec.className).map { Node(it, this) }.sortedBy { child ->
+            order.indexOf(child.path).let { if (it < 0) Int.MAX_VALUE else it }
+        }
 
         @Volatile
         private var instance: Any? = null
@@ -152,7 +161,7 @@ class ScriptModuleMounter @JvmOverloads constructor(
         fun descendants(): List<Node> = children.flatMap { listOf(it) + it.descendants() }
 
         fun instance(): Any = instance ?: synchronized(lock) {
-            instance ?: guarded(path) { binding.create(runtime) }.also { instance = it }
+            instance ?: guarded(path, topLevel) { binding.create(runtime) }.also { instance = it }
         }
 
         /** The module object; building it builds the whole tree from the top-level module down. */
@@ -175,7 +184,7 @@ class ScriptModuleMounter @JvmOverloads constructor(
                 spec.functions.forEach { f -> bindFunction(obj, module, f) }
                 spec.accessors.filter { it.getter && it.onModule }.forEach { a -> obj.defineProperty(a.name, getter({ module }, a), setter({ module }, a), a.attributes) }
                 spec.accessors.filter { !it.getter }.forEach { a ->
-                    val value = guarded("$path.${a.name}") { binding.get(module, a.id, scope) }
+                    val value = guarded("$path.${a.name}", topLevel) { binding.get(module, a.id, scope) }
                     if (a.onModule) obj.defineProperty(a.name, value, a.attributes)
                     if (a.onGlobal) globalValues[a.name] = value
                 }
@@ -209,24 +218,27 @@ class ScriptModuleMounter @JvmOverloads constructor(
         private fun function(module: Any, f: ScriptFunctionSpec, name: String, length: Int): LambdaFunction {
             val member = "$path.${f.name}"
             return LambdaFunction(scope, name, length, SerializableCallable { cx, s, thisObj, args ->
-                guarded(member) { binding.call(module, f.id, cx, s, thisObj, args) }
+                guarded(member, topLevel) { binding.call(module, f.id, cx, s, thisObj, args) }
             }, false)
         }
 
-        private fun getter(module: () -> Any, a: ScriptAccessorSpec) = Supplier<Any?> {
-            guarded("$path.${a.name}") { binding.get(module(), a.id, scope) }
+        private fun getter(module: () -> Any, a: ScriptAccessorSpec): Supplier<Any?> {
+            val member = "$path.${a.name}"
+            return Supplier { guarded(member, topLevel) { binding.get(module(), a.id, scope) } }
         }
 
-        private fun setter(module: () -> Any, a: ScriptAccessorSpec): Consumer<Any?>? = if (!a.writable) null else Consumer { value ->
-            guarded("$path.${a.name}") { binding.set(module(), a.id, value) }
+        private fun setter(module: () -> Any, a: ScriptAccessorSpec): Consumer<Any?>? {
+            if (!a.writable) return null
+            val member = "$path.${a.name}"
+            return Consumer { value -> guarded(member, topLevel) { binding.set(module(), a.id, value) } }
         }
 
         private fun newModuleObject(module: Any): ScriptableObject {
             val invoke = SerializableCallable { cx, s, thisObj, args ->
-                guarded(path) { binding.call(module, ScriptModuleBinding.INVOKE, cx, s, thisObj, args) }
+                guarded(path, topLevel) { binding.call(module, ScriptModuleBinding.INVOKE, cx, s, thisObj, args) }
             }
             val construct = SerializableConstructable { cx, _, s, args ->
-                guarded("new $path") { binding.call(module, ScriptModuleBinding.CONSTRUCT, cx, s, null, args) as Scriptable }
+                guarded("new $path", topLevel) { binding.call(module, ScriptModuleBinding.CONSTRUCT, cx, s, null, args) as Scriptable }
             }
             return when {
                 spec.invokeLength >= 0 && spec.constructLength >= 0 -> LambdaConstructor(scope, spec.name, spec.invokeLength, invoke, construct)
@@ -238,7 +250,7 @@ class ScriptModuleMounter @JvmOverloads constructor(
 
         /** Module object -> declared prototypes (nearest first) -> emitter object -> the original prototype. */
         private fun applyPrototypes(obj: ScriptableObject, module: Any) {
-            val declared = guarded(path) { binding.prototype(module) }
+            val declared = guarded(path, topLevel) { binding.prototype(module) }
             val links = when {
                 declared == null -> emptyList()
                 declared is List<*> && declared !is Scriptable -> declared.filterNotNull()

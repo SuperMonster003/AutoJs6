@@ -994,108 +994,121 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private fun augment(target: ScriptableObject) {
 
-        // Roadmap T8: with the hidden switch on, the migrated modules come from the new script module layer, at the
-        // position of their old augment call; with it off, the mounter is null and nothing changes.
-        // zh-CN: ROADMAP T8: 隐藏开关打开时, 已迁移的模块在原 augment 调用的位置由新脚本模块层挂载; 关闭时 mounter 为 null, 行为不变.
+        // Roadmap T8 / appendix C Q8: ScriptModuleLayer.ORDER decides where every module is mounted. With the hidden
+        // switch on, the migrated modules come from the new script module layer at their position; with it off, the
+        // mounter is null and every module comes from its old augment call (augmentLegacy) as before.
+        // zh-CN: ROADMAP T8 / 附录 C Q8: ScriptModuleLayer.ORDER 决定每个模块的挂载位置. 隐藏开关打开时, 已迁移的模块在该位置由新脚本模块层挂载;
+        // 关闭时 mounter 为 null, 所有模块照旧来自原 augment 调用 (augmentLegacy).
         val modules = ScriptModuleLayer.mounterOrNull(this, target)
-
-        Global(this).assignWithRuntime(target, this, GlobalClasses)
-        GlobalLegacy(this).assignWithRuntime(target, this)
-        IsNullish.augmentWithRuntime(target, this)
-        Util.augmentWithRuntime(target, this, util).also { util ->
-            UtilJava.augmentWithRuntime(util, this)
-            UtilVersion.augmentWithRuntime(util, this)
-            UtilVersionCodes.augmentWithRuntime(util, this, VersionCodesInfo.obj)
-            UtilInspect.augmentWithRuntime(util, this)
-            UtilMorseCode.augmentWithRuntime(util, this)
-        }
-        Species.augmentWithRuntime(target, this)
-        App(this).augment(target, app).also { augmentedApp = it }
-        Autojs(this).augment(target).also { augmentedAutojs = it }.also { autojs ->
-            AutojsVersion.augmentWithRuntime(autojs, this)
-        }
-        Shell(this).augment(target)
-        Timers(this).augment(target, timers)
-        Auto(this).augment(target)
-        Automator(this).augment(target)
-        Flow(this).augment(target)
-        Selector(this).augment(target, additionalAttributes = READONLY)
-        Events(this).augment(target, events)
-        Keys.augmentWithRuntime(target, this)
-        Canvas(this).augment(target)
-        Images(this).augment(target)
-        Ocr(this).augment(target).also { ocr ->
-            OcrMLKit(this).augment(ocr).also { augmentedOcrMLKit = it }
-            OcrPaddle(this).augment(ocr).also { augmentedOcrPaddle = it }
-            OcrRapid(this).augment(ocr).also { augmentedOcrRapid = it }
-        }
-        Barcode(this).augment(target)
-        QrCode(this).augment(target)
-        Yolo(this).augment(target)
-        Threads(this).augment(target, threads)
-        UI(this).proxying(target, ui)
-        Colors.augmentWithRuntime(target, this, Colors.colorTables + colors).also { colors ->
-            ColorsTheme(this).augment(colors)
-        }
-        Color.augmentWithRuntime(target, this, Colors.colorTables)
-        Tasks(this).augment(target)
-        WorkManager(this).augment(target)
-        Dialogs(this).augment(target)
-        Continuation(this).augment(target, js_mod_continuation, additionalAttributes = READONLY)
-        Ai(this, ai).augment(target)
-        Tts(this, tts).augment(target)
-        Http(this).augment(target, http)
-        Web(this).augment(target)
-        WebSocket(this).augment(target, WebSocketFields)
-        S13n.augmentWithRuntime(target, this)
-        Converter.augmentWithRuntime(target, this).also { cvt ->
-            BytesCvt.augmentWithRuntime(cvt, this)
-        }
-        Formatter.augmentWithRuntime(target, this).also { fmt ->
-            BytesFmt.augmentWithRuntime(fmt, this)
-        }
-        Console(this).proxying(target, console).also { consoleProxyObject = it }
-        Plugins(this).augment(target).also { PluginsTools(this).augment(it) }
-        Arrayx(this).augment(target)
-        Numberx(this).augment(target)
-        Mathx(this).augment(target)
-        Jsox(this).augment(target)
-        Files(this).augment(target, files).also { BatchRename(this).augment(it) }
-        Crypto.augmentWithRuntime(target, this, CoreCrypto)
-        RootAutomator(this).augment(target)
-        Engines(this).augment(target)
-        Floaty(this).augment(target)
-        Storages.augmentWithRuntime(target, this)
-        Device(this).augment(target, device)
-        PowerManager(this).augment(target)
-        Settings(this).augment(target)
-        Recorder(this).augment(target, recorder)
-        Toast(this).augment(target)
-        Media.augmentWithRuntime(target, this, media)
-        Sensors.augmentWithRuntime(target, this, sensors)
-        ScriptModuleLayer.mountOr(modules, "base64") { Base64.augmentWithRuntime(target, this) }
-        Notice(this).augment(target).also { notice ->
-            NoticeChannel(this).augment(notice)
-        }
-        Shizuku(this).augment(target, shizuku)
-        OpenCC.augmentWithRuntime(target, this)
-        Mime(this).augment(target, mime)
-        SysProps(this).augment(target)
-        SQLite(this).augment(target)
-        Zip(this).augment(target)
-        NanoID.augmentWithRuntime(target, this)
-        Pinyin.augmentWithRuntime(target, this)
-        Pinyin4j.augmentWithRuntime(target, this)
-        Mediainfo(this).augment(target)
-        Mail(this, mail).augment(target)
-        Installer(this, installer).augment(target)
-        Epub(this, epub).augment(target)
-        Gallery(this, gallery).augment(target)
-        Terminal(this, terminal).augment(target)
-        Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it) }
-        Compose(this).also { compose = it }.augment(target)
+        ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }
 
         augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
+    }
+
+    /**
+     * The old augment call of the top-level module [name] of `ScriptModuleLayer.ORDER`, its sub-modules included (the
+     * `augment` package, unchanged until P5.2 by roadmap R5).
+     * zh-CN: `ScriptModuleLayer.ORDER` 中顶层模块 [name] 的原 augment 调用, 含其子模块 (augment 包, 按 R5 在 P5.2 前不改动).
+     */
+    private fun augmentLegacy(target: ScriptableObject, name: String) {
+        when (name) {
+            "global" -> Global(this).assignWithRuntime(target, this, GlobalClasses)
+            "legacy" -> GlobalLegacy(this).assignWithRuntime(target, this)
+            "isNullish" -> IsNullish.augmentWithRuntime(target, this)
+            "util" -> Util.augmentWithRuntime(target, this, util).also { util ->
+                UtilJava.augmentWithRuntime(util, this)
+                UtilVersion.augmentWithRuntime(util, this)
+                UtilVersionCodes.augmentWithRuntime(util, this, VersionCodesInfo.obj)
+                UtilInspect.augmentWithRuntime(util, this)
+                UtilMorseCode.augmentWithRuntime(util, this)
+            }
+            "species" -> Species.augmentWithRuntime(target, this)
+            "app" -> App(this).augment(target, app).also { augmentedApp = it }
+            "autojs" -> Autojs(this).augment(target).also { augmentedAutojs = it }.also { autojs ->
+                AutojsVersion.augmentWithRuntime(autojs, this)
+            }
+            "shell" -> Shell(this).augment(target)
+            "timers" -> Timers(this).augment(target, timers)
+            "auto" -> Auto(this).augment(target)
+            "automator" -> Automator(this).augment(target)
+            "flow" -> Flow(this).augment(target)
+            "selector" -> Selector(this).augment(target, additionalAttributes = READONLY)
+            "events" -> Events(this).augment(target, events)
+            "keys" -> Keys.augmentWithRuntime(target, this)
+            "Canvas" -> Canvas(this).augment(target)
+            "images" -> Images(this).augment(target)
+            "ocr" -> Ocr(this).augment(target).also { ocr ->
+                OcrMLKit(this).augment(ocr).also { augmentedOcrMLKit = it }
+                OcrPaddle(this).augment(ocr).also { augmentedOcrPaddle = it }
+                OcrRapid(this).augment(ocr).also { augmentedOcrRapid = it }
+            }
+            "barcode" -> Barcode(this).augment(target)
+            "qrcode" -> QrCode(this).augment(target)
+            "yolo" -> Yolo(this).augment(target)
+            "threads" -> Threads(this).augment(target, threads)
+            "ui" -> UI(this).proxying(target, ui)
+            "colors" -> Colors.augmentWithRuntime(target, this, Colors.colorTables + colors).also { colors ->
+                ColorsTheme(this).augment(colors)
+            }
+            "Color" -> Color.augmentWithRuntime(target, this, Colors.colorTables)
+            "tasks" -> Tasks(this).augment(target)
+            "workManager" -> WorkManager(this).augment(target)
+            "dialogs" -> Dialogs(this).augment(target)
+            "continuation" -> Continuation(this).augment(target, js_mod_continuation, additionalAttributes = READONLY)
+            "ai" -> Ai(this, ai).augment(target)
+            "tts" -> Tts(this, tts).augment(target)
+            "http" -> Http(this).augment(target, http)
+            "web" -> Web(this).augment(target)
+            "WebSocket" -> WebSocket(this).augment(target, WebSocketFields)
+            "s13n" -> S13n.augmentWithRuntime(target, this)
+            "cvt" -> Converter.augmentWithRuntime(target, this).also { cvt ->
+                BytesCvt.augmentWithRuntime(cvt, this)
+            }
+            "fmt" -> Formatter.augmentWithRuntime(target, this).also { fmt ->
+                BytesFmt.augmentWithRuntime(fmt, this)
+            }
+            "console" -> Console(this).proxying(target, console).also { consoleProxyObject = it }
+            "plugins" -> Plugins(this).augment(target).also { PluginsTools(this).augment(it) }
+            "Arrayx" -> Arrayx(this).augment(target)
+            "Numberx" -> Numberx(this).augment(target)
+            "Mathx" -> Mathx(this).augment(target)
+            "jsox" -> Jsox(this).augment(target)
+            "files" -> Files(this).augment(target, files).also { BatchRename(this).augment(it) }
+            "crypto" -> Crypto.augmentWithRuntime(target, this, CoreCrypto)
+            "RootAutomator" -> RootAutomator(this).augment(target)
+            "engines" -> Engines(this).augment(target)
+            "floaty" -> Floaty(this).augment(target)
+            "storages" -> Storages.augmentWithRuntime(target, this)
+            "device" -> Device(this).augment(target, device)
+            "powerManager" -> PowerManager(this).augment(target)
+            "settings" -> Settings(this).augment(target)
+            "recorder" -> Recorder(this).augment(target, recorder)
+            "toast" -> Toast(this).augment(target)
+            "media" -> Media.augmentWithRuntime(target, this, media)
+            "sensors" -> Sensors.augmentWithRuntime(target, this, sensors)
+            "base64" -> Base64.augmentWithRuntime(target, this)
+            "notice" -> Notice(this).augment(target).also { notice ->
+                NoticeChannel(this).augment(notice)
+            }
+            "shizuku" -> Shizuku(this).augment(target, shizuku)
+            "opencc" -> OpenCC.augmentWithRuntime(target, this)
+            "mime" -> Mime(this).augment(target, mime)
+            "sysprops" -> SysProps(this).augment(target)
+            "sqlite" -> SQLite(this).augment(target)
+            "zip" -> Zip(this).augment(target)
+            "nanoid" -> NanoID.augmentWithRuntime(target, this)
+            "pinyin" -> Pinyin.augmentWithRuntime(target, this)
+            "pinyin4j" -> Pinyin4j.augmentWithRuntime(target, this)
+            "mediainfo" -> Mediainfo(this).augment(target)
+            "mail" -> Mail(this, mail).augment(target)
+            "installer" -> Installer(this, installer).augment(target)
+            "epub" -> Epub(this, epub).augment(target)
+            "gallery" -> Gallery(this, gallery).augment(target)
+            "terminal" -> Terminal(this, terminal).augment(target)
+            "speech" -> Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it) }
+            "compose" -> Compose(this).also { compose = it }.augment(target)
+            else -> throw IllegalStateException("Script module $name has no augment call")
+        }
     }
 
     private fun applyInternalModules(global: Scriptable) {

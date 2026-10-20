@@ -5,6 +5,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
+import java.util.Locale
+import java.util.MissingFormatArgumentException
 
 /**
  * Roadmap P1.2 / T5: the messages of the script module layer come from the string resources; without an Android
@@ -70,6 +72,65 @@ class ScriptMessagesTest {
         "text_script_modules",
     )
 
+    /**
+     * P1.4: [ScriptMessages.format] (no java.util.Formatter on the error path) gives what `Resources.getString(id, args)`
+     * gives, that is `String.format` in the resource locale, for every message of the layer in every language,
+     * including localized digits; other specifiers and missing arguments go to `String.format` itself.
+     */
+    @Test
+    fun formatMatchesStringFormatInEveryLanguage() {
+        val languages = mapOf(
+            "values" to Locale.ENGLISH, "values-en" to Locale.ENGLISH, "values-ar" to Locale.forLanguageTag("ar"), "values-es" to Locale.forLanguageTag("es"),
+            "values-fr" to Locale.FRENCH, "values-ja" to Locale.JAPANESE, "values-ko" to Locale.KOREAN, "values-ru" to Locale.forLanguageTag("ru"),
+            "values-zh" to Locale.SIMPLIFIED_CHINESE, "values-zh-rHK" to Locale.forLanguageTag("zh-HK"), "values-zh-rTW" to Locale.TRADITIONAL_CHINESE,
+        )
+        val problems = mutableListOf<String>()
+        var checked = 0
+        languages.forEach { (dir, locale) ->
+            val strings = resources(File(res, "$dir/strings.xml"))
+            val plurals = if (File(res, "$dir/plurals.xml").exists()) plurals(File(res, "$dir/plurals.xml")) else emptyMap()
+            val patterns = MESSAGE_STRINGS.mapNotNull { strings[it] } + plurals.filterKeys { key -> MESSAGE_PLURALS.any { key.startsWith("$it/") } }.values
+            patterns.forEach { pattern ->
+                listOf(arrayOf<Any?>("base64.encode", 2, "x"), arrayOf<Any?>("f", 1234567, "-"), arrayOf<Any?>(-12, -3, 0)).forEach { sample ->
+                    val args = argumentsFor(pattern, sample)
+                    checked++
+                    val expected = String.format(locale, pattern, *args)
+                    val actual = ScriptMessages.format(locale, ScriptMessages.zeroDigit(locale), pattern, args)
+                    if (actual != expected) problems += "$dir: \"$pattern\" with ${args.toList()}: expected \"$expected\", got \"$actual\""
+                }
+            }
+        }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
+        assertTrue("only $checked messages were checked", checked >= 200)
+        // Digits of locales whose zero is not '0', and the specifiers and cases handed to String.format.
+        listOf(Locale.forLanguageTag("ar-EG"), Locale.forLanguageTag("th-TH-u-nu-thai"), Locale.forLanguageTag("hi-IN-u-nu-deva"), Locale.ROOT).forEach { locale ->
+            listOf(
+                "%1\$d..%2\$d" to arrayOf<Any?>(-7, 1234567890123L),
+                "%d %s %%" to arrayOf<Any?>(42, null),
+                "%5d|%-4s|%x|%n|%S" to arrayOf<Any?>(7, "a", 255, "s"),
+                "%s %s" to arrayOf<Any?>(1.5, true),
+                "%d" to arrayOf<Any?>(1.5),
+            ).forEach { (pattern, args) ->
+                val expected = runCatching { String.format(locale, pattern, *args) }
+                val actual = runCatching { ScriptMessages.format(locale, ScriptMessages.zeroDigit(locale), pattern, args) }
+                assertEquals("$locale \"$pattern\"", expected.getOrNull() ?: expected.exceptionOrNull()?.javaClass, actual.getOrNull() ?: actual.exceptionOrNull()?.javaClass)
+            }
+        }
+        assertEquals("missing arguments fail like String.format", MissingFormatArgumentException::class.java, runCatching { ScriptMessages.format(Locale.ROOT, '0', "%2\$s", arrayOf("a")) }.exceptionOrNull()?.javaClass)
+    }
+
+    /** One argument per placeholder of [pattern]: strings for `%s`, integers for `%d`, picked from [sample] by position. */
+    private fun argumentsFor(pattern: String, sample: Array<Any?>): Array<Any?> {
+        val specifiers = Regex("%(?:(\\d+)\\$)?([sd])").findAll(pattern).toList()
+        var sequential = 0
+        val kinds = sortedMapOf<Int, Char>()
+        specifiers.forEach { m -> kinds[m.groupValues[1].toIntOrNull()?.minus(1) ?: sequential++] = m.groupValues[2][0] }
+        return Array((kinds.keys.maxOrNull() ?: -1) + 1) { i ->
+            val value = sample[i % sample.size]
+            if (kinds[i] == 'd') (value as? Int) ?: (i + 2) else value?.toString() ?: "null"
+        }
+    }
+
     private fun checkEveryLanguage(vararg names: String) {
         val default = resources(File(res, "values/strings.xml"))
         val languages = listOf("values", "values-en", "values-ar", "values-es", "values-fr", "values-ja", "values-ko", "values-ru", "values-zh", "values-zh-rHK", "values-zh-rTW")
@@ -128,6 +189,19 @@ class ScriptMessagesTest {
     }
 
     companion object {
+
+        /** The resources [ScriptMessages] formats. */
+        private val MESSAGE_STRINGS = listOf(
+            "error_failed_to_call_method_with_cause",
+            "error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m",
+            "error_script_argument_cannot_be",
+            "error_script_argument_must_be_integer",
+            "error_script_argument_must_be_of_type",
+            "error_script_no_overload_accepts_arguments",
+            "error_unknown_charset",
+        )
+        private val MESSAGE_PLURALS = listOf("error_method_only_accepts_n_arguments", "error_method_only_accepts_no_less_than_n_arguments")
+
         private const val FULL_WIDTH_PUNCTUATION = "\uFF0C\u3002\uFF1A\uFF1B\uFF01\uFF1F\uFF08\uFF09\u201C\u201D\u2018\u2019\u3001\u060C"
     }
 

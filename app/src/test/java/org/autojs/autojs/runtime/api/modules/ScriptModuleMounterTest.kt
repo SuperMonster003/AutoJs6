@@ -77,6 +77,82 @@ class ScriptModuleMounterTest {
         assertFalse(mounter.isBuilt("probe"))
     }
 
+    /** P1.4: reflection that lists or tests names (keys, own names, for-in, in, hasOwnProperty) never builds a module. */
+    @Test
+    fun reflectionDoesNotBuildPendingModules() {
+        check(
+            listOf(
+                "['probe', '\$probe', 'probeAlias', 'probeGlobal', 'probeConstant'].every(k => Object.getOwnPropertyNames(globalThis).indexOf(k) >= 0)" to "true",
+                "(function () { var seen = []; for (var k in globalThis) if (/^\\\$?probe(Alias)?\$/.test(k)) seen.push(k); return seen.join(); })()" to "\"probe,\$probe,probeAlias,\$probeAlias\"",
+                "Object.prototype.propertyIsEnumerable.call(globalThis, '\$probe')" to "true",
+                "['probe', '\$probe', 'probeChildGlobal', 'ProbeUnit'].every(k => k in globalThis && globalThis.hasOwnProperty(k))" to "true",
+                // Sub-modules and the `$` form of a module without dollarPrefix are not global names.
+                "['child', 'sibling', '\$child', '\$eagerProbe'].some(k => k in globalThis)" to "false",
+            )
+        )
+        assertEquals("Reflection must not build the module", 0, ProbeModule.created)
+        assertTrue(LazyDataSlot.isPending(global, "\$probe"))
+    }
+
+    /**
+     * P1.4: `delete` and `Object.defineProperty` on pending names keep the final attributes: non-configurable names
+     * refuse both (strict mode throws TypeError), a refused delete does not build the module, and a writable global
+     * member can still be redefined with a new value, which replaces the pending one. This Rhino refuses a descriptor
+     * that omits `enumerable` for any non-configurable enumerable property (`checkPropertyChangeForSlot` compares the
+     * missing field as false), lazy or not, so the eagerly built module behaves the same.
+     */
+    @Test
+    fun deleteAndDefinePropertyOnPendingNames() {
+        check(
+            listOf(
+                "delete globalThis.probe" to "false",
+                "delete globalThis.probeGlobal" to "false",
+                "(function () { 'use strict'; try { delete globalThis.\$probeAlias; return 'deleted'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+                "['probe', 'probeGlobal', '\$probeAlias'].every(k => globalThis.hasOwnProperty(k))" to "true",
+            )
+        )
+        assertEquals("A refused delete must not build the module", 0, ProbeModule.created)
+        check(
+            listOf(
+                "(function () { try { Object.defineProperty(globalThis, 'probe', { get: function () { return 1; } }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+                "(function () { try { Object.defineProperty(globalThis, 'probeAlias', { enumerable: false }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+                "(function () { try { Object.defineProperty(globalThis, 'eagerProbe', { value: 1 }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+                "(function () { try { Object.defineProperty(globalThis, 'probeGlobal', { value: 1 }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+                "(Object.defineProperty(globalThis, 'probeGlobal', { value: 5, enumerable: true }), probeGlobal)" to "5",
+                "JSON.stringify(Object.getOwnPropertyDescriptor(globalThis, 'probeGlobal'))" to "\"{\\\"value\\\":5,\\\"writable\\\":true,\\\"enumerable\\\":true,\\\"configurable\\\":false}\"",
+                "typeof probe.probeGlobal" to "\"function\"",
+                "Object.keys(probe).indexOf('probeGlobal') >= 0 && probe === probeAlias" to "true",
+            )
+        )
+        assertEquals(1, ProbeModule.created)
+    }
+
+    /** T3: assigning a writable name before its first read replaces the pending value; read-only names ignore it. */
+    @Test
+    fun assignmentBeforeTheFirstRead() {
+        check(
+            listOf(
+                "(probeGlobal = 'mine', probeGlobal)" to "\"mine\"",
+                "(probe = 1, typeof probe)" to "\"object\"",
+                "(function () { 'use strict'; try { \$probeAlias = 1; return 'assigned'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+            )
+        )
+        assertEquals("Reading probe builds it once; the assigned global member keeps the script's value", 1, ProbeModule.created)
+        check(listOf("probeGlobal" to "\"mine\"", "probe.probeGlobal()" to "\"global\""))
+    }
+
+    /** `$` forms exist only with dollarPrefix, share the object and the attributes of the plain names. */
+    @Test
+    fun dollarAliases() = check(
+        listOf(
+            "\$probeAlias === probe && \$probe === probe" to "true",
+            "JSON.stringify(Object.getOwnPropertyDescriptor(globalThis, '\$probe'), (k, v) => k === 'value' ? typeof v : v) === JSON.stringify(Object.getOwnPropertyDescriptor(globalThis, 'probe'), (k, v) => k === 'value' ? typeof v : v)" to "true",
+            "typeof eagerProbe + ':' + typeof globalThis['\$eagerProbe']" to "\"object:undefined\"",
+            "['child', 'sibling'].map(k => typeof probe[k] + ':' + typeof probe['\$' + k]).join()" to "\"object:undefined,object:undefined\"",
+            "probe.child === probe.child && probe.sibling.hi()" to "\"hi\"",
+        )
+    )
+
     @Test
     fun firstReadBuildsOnceAndEveryNameHoldsTheSameObject() {
         check(

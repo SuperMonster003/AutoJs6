@@ -1,7 +1,9 @@
 """Runs the Augment timing scripts on a device through RunIntentActivity and prints the timing lines.
 
-Usage: py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--new-modules on|off]
+Usage: py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--skip-errors]
+    [--new-modules on|off]
 --new-modules sets the hidden switch of the new script module layer (ROADMAP T8) for the run and restores it afterwards.
+The failing call benchmark (bench/error_path.js) runs --runs times and prints min / median / max per case.
 GlobalConsole lines are polled from logcat every half second and accumulated, so a logcat clear by another
 process in the middle of a run only loses lines that were never seen. logcat is never cleared here.
 """
@@ -21,8 +23,11 @@ PACKAGE = "org.autojs.autojs6"
 SWITCH_KEY = "key_$_new_script_module_layer"
 SWITCH_MARK = "AJ6SWITCH"
 TIMING_RE = re.compile(r"(runtime-init-prologue|script-init|runtime-init-epilogue): (\d+)")
-TOTAL_RE = re.compile(r"用时 ([\d.]+) 秒")  # "用时 N 秒"
-END_MARK = "运行结束"  # "运行结束"
+# The end line of a script run in the app language: "... 用时 N 秒" (Chinese) or "... finished in N seconds" (English).
+TOTAL_RE = re.compile(r"用时 ([\d.]+) 秒|finished in ([\d.]+) seconds")
+ERROR_RE = re.compile(r"AJ6BENCH error (.+) ([\d.]+) us$")
+# The end line of a script run in the Chinese or the English app language.
+END_RE = re.compile(r"运行结束|finished in [\d.]+ seconds")
 
 
 def adb(serial, *args, check=False):
@@ -53,7 +58,7 @@ def run_script(serial, remote, wait):
     while time.time() < deadline:
         time.sleep(0.5)
         collect()
-        if any(END_MARK in l for l in seen):
+        if any(END_RE.search(l) for l in seen):
             time.sleep(0.5)
             collect()
             break
@@ -96,6 +101,7 @@ def main():
     parser.add_argument("--runs", type=int, default=5)
     parser.add_argument("--skip-compile", action="store_true", help="skip the obsolete JS compile timing")
     parser.add_argument("--skip-calls", action="store_true", help="skip the per-call overhead benchmark")
+    parser.add_argument("--skip-errors", action="store_true", help="skip the failing call (error path) benchmark")
     parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     args = parser.parse_args()
     s = args.serial
@@ -121,7 +127,7 @@ def bench(args):
                 row[m.group(1)] = int(m.group(2))
             m = TOTAL_RE.search(l)
             if m:
-                row["total_s"] = float(m.group(1))
+                row["total_s"] = float(m.group(1) or m.group(2))
         rows.append(row)
         print(f"run {i + 1}: {row}" if row else f"run {i + 1}: no timing lines; raw={lines[:6]}")
         time.sleep(2)
@@ -144,6 +150,23 @@ def bench(args):
         for l in run_script(s, push_script(s, "call_overhead.js"), 240):
             if "AJ6BENCH" in l or "/E:" in l:
                 print(l)
+
+    if not args.skip_errors:
+        print("--- failing calls (error path) ---")
+        script = push_script(s, "error_path.js")
+        samples = {}
+        for i in range(args.runs):
+            for l in run_script(s, script, 240):
+                m = ERROR_RE.search(l)
+                if m:
+                    samples.setdefault(m.group(1), []).append(float(m.group(2)))
+                elif "AJ6BENCH error java-frames" in l or "/E:" in l:
+                    if i == 0:
+                        print(l)
+            time.sleep(2)
+        for label, vals in samples.items():
+            vals.sort()
+            print(f"{label}: min={vals[0]} median={vals[len(vals) // 2]} max={vals[-1]} us n={len(vals)}")
 
 
 if __name__ == "__main__":

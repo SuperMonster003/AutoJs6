@@ -100,7 +100,8 @@ object ScriptArgs {
     @JvmStatic
     fun long(value: Any?, function: String, param: String): Long {
         val d = double(value, function, param)
-        if (d.isNaN() || d.isInfinite() || d != Math.floor(d) || d < Long.MIN_VALUE.toDouble() || d > Long.MAX_VALUE.toDouble()) {
+        // Long.MAX_VALUE is not a double: 2^63 (the double nearest to it) is already out of range, -2^63 is not.
+        if (d.isNaN() || d.isInfinite() || d != Math.floor(d) || d < -LONG_BOUND || d >= LONG_BOUND) {
             throw RhinoScriptRuntime.rangeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentInteger(param, 64, RhinoScriptRuntime.numberToString(d, 10))))
         }
         return d.toLong()
@@ -120,10 +121,10 @@ object ScriptArgs {
     @JvmStatic
     fun bytesOrNull(value: Any?, function: String, param: String): ByteArray? = if (isNullish(value)) null else bytes(value, function, param)
 
-    /** A JS array (elements as raw script values) or a Java list. */
+    /** A JS array (elements as raw script values, holes as `undefined`) or a Java list. */
     @JvmStatic
     fun list(value: Any?, function: String, param: String): List<Any?> = when (val v = if (value is NativeArray) value else unwrap(value)) {
-        is NativeArray -> List(v.length.toInt()) { i -> v.get(i, v) }
+        is NativeArray -> List(v.length.toInt()) { i -> v.get(i, v).let { if (it === Scriptable.NOT_FOUND) Undefined.instance else it } }
         is List<*> -> v
         else -> throw typeError(function, param, "Array", value)
     }
@@ -131,10 +132,20 @@ object ScriptArgs {
     @JvmStatic
     fun listOrNull(value: Any?, function: String, param: String): List<Any?>? = if (isNullish(value)) null else list(value, function, param)
 
-    /** A plain JS object (own enumerable string keys, values as raw script values) or a Java map. */
+    /**
+     * A plain JS object (own enumerable keys as strings, index keys such as `1` included, values as raw script values)
+     * or a Java map.
+     */
     @JvmStatic
     fun map(value: Any?, function: String, param: String): Map<String, Any?> = when (val v = if (value is NativeObject) value else unwrap(value)) {
-        is NativeObject -> LinkedHashMap<String, Any?>().also { out -> v.ids.forEach { id -> if (id is String) out[id] = v.get(id, v) } }
+        is NativeObject -> LinkedHashMap<String, Any?>().also { out ->
+            v.ids.forEach { id ->
+                when (id) {
+                    is String -> out[id] = v.get(id, v)
+                    is Int -> out[id.toString()] = v.get(id, v)
+                }
+            }
+        }
         is Map<*, *> -> v.entries.associate { (k, e) -> k.toString() to e }
         else -> throw typeError(function, param, "Object", value)
     }
@@ -235,11 +246,15 @@ object ScriptArgs {
         value is Number -> "number"
         value is Boolean -> "boolean"
         value is NativeArray -> "Array"
+        value is org.mozilla.javascript.Symbol -> "symbol"
         value is Wrapper -> value.unwrap()?.javaClass?.name ?: "null"
         value is Scriptable -> RhinoScriptRuntime.`typeof`(value).let { if (it == "object") value.className else it }
         else -> value.javaClass.name
     }
 
     private fun unwrap(value: Any?): Any? = if (value is Wrapper && value !is NativeArray && value !is NativeObject) value.unwrap() else value
+
+    /** 2^63, the first double above the Long range. */
+    private const val LONG_BOUND = 9.223372036854775808E18
 
 }
