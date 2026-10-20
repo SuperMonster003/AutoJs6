@@ -33,7 +33,11 @@ S2   N FAIL  retained=20/20 java=+3.10MB native=+0.12MB threads=+0 contexts=+0 e
 
 单元格 (ROADMAP 附录 A): `残留 / Java 堆增量 MB / 原生堆增量 MB / 脚本线程增量 / Rhino Context 增量 / 存活引擎数`. 阈值 (T1): 残留 0, Java <= 2 MB, 原生 <= 4 MB (截屏场景再加一帧), 线程与 Context 回到开始前, 引擎回到开始前.
 
-其他参数: `--capture on` 运行 S4a (每次运行都会请求截屏授权, 需维护者确认授权方式后再开), `--wake` 每个场景前发送 `KEYCODE_WAKEUP` (只点亮屏幕, 不点击), `--timeout` 单个场景与模式的上限秒数 (默认 1500).
+其他参数: `--capture on` 运行 S4a, `--wake` 每个场景前发送 `KEYCODE_WAKEUP` (只点亮屏幕, 不点击), `--timeout` 单个场景与模式的上限秒数 (默认 1500), `--merge` 只替换同名报告中本次重跑的场景与模式 (补跑被打断的部分).
+
+S4a 的截屏授权 (ROADMAP 附录 C Q3, 维护者 2026-10-20 拍板方案 (a)): 每次运行都是新的 runtime, 脚本结束时会释放 MediaProjection, 因此每次都会重新申请授权. `--capture on` 时脚本在每个 S4a 进程开始前执行 `adb shell appops set org.autojs.autojs6 PROJECT_MEDIA allow`, 系统据此跳过授权框; 该进程结束后 (包括失败, 超时与异常路径) 立即执行 `appops set ... PROJECT_MEDIA default` 恢复. 报告头部记录设置前的模式与恢复后的模式. 脚本被强行结束 (例如直接杀掉 Python 进程) 时来不及恢复, 需手动执行 `adb -s SERIAL shell appops set org.autojs.autojs6 PROJECT_MEDIA default`.
+
+设备占用防护 (ROADMAP R6): 每个场景开始前若设备上已有其他 `am instrument` 在运行就等待 (最长 10 分钟); 运行中宿主或测试 APK 被替换则停止并把该场景标为 `invalid`; 设备离线 (adb 断开) 时停止, 已读到的报告保留.
 
 场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过).
 

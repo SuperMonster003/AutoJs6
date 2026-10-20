@@ -162,6 +162,9 @@ def markdown(meta, reports, failures):
         *([f"- Merged runs: " + "; ".join(f"{r.get('runId')} ({', '.join(r.get('scenarios') or ['all'])})"
                                          for r in meta["mergedRuns"])] if meta.get("mergedRuns") else []),
         *([f"- Stopped early: {meta['interrupted']}"] if meta.get("interrupted") else []),
+        *([f"- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during {', '.join(meta['projectionAppOp']['allowedDuring'])}, "
+           f"before `{meta['projectionAppOp'].get('before')}`, afterwards `{meta['projectionAppOp'].get('restoredTo')}`"]
+          if meta.get("projectionAppOp") else []),
         f"- Warm-ups {meta['warmups']}, iterations {meta['iterations']}, poll {meta['pollMs']} ms, force delay {meta['forceDelayMs']} ms, capture {meta['capture']}",
         "- Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)",
         "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start",
@@ -224,6 +227,19 @@ def merge_evidence(previous, reports, failures, meta):
     return merged, kept_failures + failures, meta
 
 
+def projection_mode(device, package):
+    """PROJECT_MEDIA app-op mode of the host (`default` when none is set)."""
+    found = re.search(r"PROJECT_MEDIA: (\w+)", device.shell("appops", "get", package, "PROJECT_MEDIA")["stdout"])
+    return found[1] if found else "default"
+
+
+def set_projection(device, package, mode):
+    """ROADMAP appendix C Q3 (decided 2026-10-20): PROJECT_MEDIA is `allow` only while S4a runs, then `default`."""
+    result = device.shell("appops", "set", package, "PROJECT_MEDIA", mode)
+    if result["exitCode"] != 0:
+        raise RuntimeError(f"appops set PROJECT_MEDIA {mode} failed: {(result['stdout'] + result['stderr']).strip()}")
+
+
 def package_stamp(device, package):
     """versionCode and lastUpdateTime of the host and its test APK; a change means another session reinstalled them."""
     stamp = []
@@ -260,7 +276,7 @@ def main():
     parser.add_argument("--mode", choices=("normal", "force", "both"), default="both")
     parser.add_argument("--hprof", action="store_true", help="Keep heap dumps of failing scenarios and pull them to <out>/hprof")
     parser.add_argument("--no-analyze", action="store_true", help="Skip the on-device shark analysis (ROADMAP T4 fallback)")
-    parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a; each run asks for screen capture consent")
+    parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a with the PROJECT_MEDIA app-op set to allow for its duration, then reset to default (ROADMAP Q3)")
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--iterations", type=int, default=20)
     parser.add_argument("--poll-ms", type=int, default=10000)
@@ -303,6 +319,7 @@ def main():
     reports, failures = [], []
     stamp = package_stamp(device, args.package)
     interrupted = None
+    projection = {"allowedDuring": []}
     for scenario in args.scenarios:
         for mode in modes:
             if interrupted:
@@ -320,6 +337,11 @@ def main():
                 device.shell("input", "keyevent", "KEYCODE_WAKEUP")
             device.shell("am", "force-stop", args.package)
             device.call("logcat", "-c")
+            capture = scenario == "S4a" and args.capture == "on"
+            if capture:
+                projection.setdefault("before", projection_mode(device, args.package))
+                set_projection(device, args.package, "allow")
+                projection["allowedDuring"].append(f"{scenario} {mode}")
             command = ["am", "instrument", "-w", "-r",
                        "-e", "class", f"{TEST_CLASS}#{SCENARIOS[scenario]}",
                        "-e", "memoryGateRunId", run_id, "-e", "memoryGateModes", mode,
@@ -328,7 +350,12 @@ def main():
                        "-e", "memoryGateKeepHprof", "true" if args.hprof else "false",
                        "-e", "memoryGateAnalyze", "false" if args.no_analyze else "true",
                        "-e", "memoryGateCapture", args.capture, runner]
-            result = device.shell(*command, timeout=args.timeout)
+            try:
+                result = device.shell(*command, timeout=args.timeout)
+            finally:
+                if capture:
+                    set_projection(device, args.package, "default")
+                    projection["restoredTo"] = projection_mode(device, args.package)
             text = result["stdout"] + result["stderr"]
             outcome = "timeout" if result.get("timeout") else test_outcome(text)
             found = [r for r in parse_reports(text) if r.get("scenario") == scenario and r.get("mode") == mode]
@@ -367,7 +394,11 @@ def main():
                         if pulled["exitCode"] == 0:
                             device.shell("rm", "-f", hprof)
                             report["heap"]["pulledTo"] = str((target / Path(hprof).name).relative_to(ROOT)).replace("\\", "/")
-            if package_stamp(device, args.package) != stamp:
+            current = package_stamp(device, args.package)
+            if not current:
+                # dumpsys failed: the device left adb, which is not a reinstall; reports already read stay valid.
+                interrupted = f"the device went offline after {scenario} {mode}"
+            elif current != stamp:
                 interrupted = f"the host or test APK was reinstalled during {scenario} {mode} (another session?)"
                 for report in found:
                     report["status"], report["reasons"] = "invalid", [interrupted]
@@ -380,7 +411,8 @@ def main():
             "device": {k: identity.get(k) for k in ("serial", "manufacturer", "model", "sdk", "release", "abiList", "emulator")},
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
-            "capture": args.capture, "hprof": args.hprof, "interrupted": interrupted}
+            "capture": args.capture, "hprof": args.hprof, "interrupted": interrupted,
+            **({"projectionAppOp": projection} if projection["allowedDuring"] else {})}
     stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
     if args.merge and (args.out / f"{stem}.json").is_file():
         reports, failures, meta = merge_evidence(json.loads((args.out / f"{stem}.json").read_text(encoding="utf-8")),
