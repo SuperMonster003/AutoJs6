@@ -846,6 +846,9 @@ dependencies /* Test */ {
     androidTestImplementation(libs.bcpkix.jdk15on)
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.ext.junit)
+    // Memory gate (docs/memory/ROADMAP.md T4): shortest strong reference path from a heap dump, same version as LeakCanary.
+    // zh-CN: 内存门禁 (docs/memory/ROADMAP.md T4): 从堆转储中找最短强引用链, 与 LeakCanary 同版本.
+    androidTestImplementation(libs.leakcanary.shark.android)
 
     // Rhino is compileOnly for the main source set; tests need it on their compile classpath too.
     // zh-CN: Rhino 在主源码集是 compileOnly, 测试的编译类路径也需要它.
