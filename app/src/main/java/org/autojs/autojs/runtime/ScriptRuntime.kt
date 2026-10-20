@@ -840,10 +840,6 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         ignoresException { compose?.close() }
 
-        // Recycle all ImageWrapper instances recorded for this runtime (never those of other running scripts).
-        // zh-CN: 回收当前运行时记录的全部 ImageWrapper 实例 (不影响其他仍在运行的脚本).
-        ignoresException { CoreImageWrapper.recycleAll(this) }
-
         // Clear interrupt status.
         // zh-CN: 清除 interrupt 状态.
         ignoresException { ThreadCompat.interrupted() }
@@ -868,7 +864,28 @@ class ScriptRuntime private constructor(builder: Builder) {
         ignoresException { speech.close() }
         ignoresException { ai.close() }
         ignoresException { tts.close() }
-        if (::threads.isInitialized) ignoresException { threads.shutDownAll() }
+
+        // Stop the script threads and thread pools and wait for them to end before recycling the images,
+        // so that no thread of this script can touch an image after it has been recycled (docs/memory/ROADMAP.md H20).
+        // The UI thread does not wait; if some threads are still alive, the images are recycled once those threads have ended.
+        // zh-CN: 先停止脚本线程与线程池并等待它们结束, 再回收图像, 使本脚本的任何线程都不会在图像回收后再访问它 (docs/memory/ROADMAP.md H20).
+        // UI 线程不等待; 若仍有线程存活, 则在这些线程结束后再回收图像.
+        var aliveThreads = emptyList<Thread>()
+        if (::threads.isInitialized) ignoresException {
+            aliveThreads = threads.shutDownAllAndAwait(if (isMainThread()) 0L else EXIT_THREADS_AWAIT_MILLIS)
+        }
+
+        // Recycle all ImageWrapper instances recorded for this runtime (never those of other running scripts).
+        // zh-CN: 回收当前运行时记录的全部 ImageWrapper 实例 (不影响其他仍在运行的脚本).
+        ignoresException {
+            when {
+                aliveThreads.isEmpty() -> CoreImageWrapper.recycleAll(this)
+                else -> ApiThreads.runAfterTermination(threads.mainThread.name, aliveThreads, EXIT_THREADS_DEFERRED_MILLIS) {
+                    CoreImageWrapper.recycleAll(this)
+                }
+            }
+        }
+
         if (::events.isInitialized) ignoresException { events.recycle() }
         ignoresException { media.recycle() }
         if (::loopers.isInitialized) ignoresException { loopers.recycle() }
@@ -1173,6 +1190,12 @@ class ScriptRuntime private constructor(builder: Builder) {
     companion object {
 
         private val TAG = ScriptRuntime::class.java.simpleName
+
+        // How long onExit waits on a script thread for the script's own threads to end (docs/memory/ROADMAP.md H20),
+        // and how long a helper thread waits before it gives up recycling the images of threads which never end.
+        // zh-CN: onExit 在脚本线程上等待脚本自身线程结束的时长 (docs/memory/ROADMAP.md H20), 以及线程一直不结束时辅助线程放弃回收图像前的等待时长.
+        private const val EXIT_THREADS_AWAIT_MILLIS = 2_000L
+        private const val EXIT_THREADS_DEFERRED_MILLIS = 60_000L
 
         private var sApplicationContext: WeakReference<Context>? = null
 
