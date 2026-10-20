@@ -216,6 +216,126 @@ var CALLERS = {
             return expect(G.LAUNCHER_ICON.storedKey(), sp.getString(G.LAUNCHER_ICON.getName(), null), 'launcher icon');
         });
     },
+    ExplorerKeys: function () {
+        var E = Keys.ExplorerKeys;
+        check('explorer-hidden-files', function () {
+            touch(E.HIDDEN_FILES);
+            var show = key('key_hidden_files_show');
+            var expected = same(sp.getString(E.HIDDEN_FILES.getName(), key('key_hidden_files_not_show')), show);
+            if (!same(Pref.isHiddenFilesShown(), expected) || !same(E.isHiddenFilesShown(), expected)) return 'stored reading';
+            E.HIDDEN_FILES.set(show, true);
+            if (!Pref.isHiddenFilesShown()) return 'show';
+            E.HIDDEN_FILES.setStoredKey('key_$_hidden_files_removed', true);
+            return !E.isHiddenFilesShown() || 'unknown key shows hidden files';
+        });
+        check('explorer-file-extensions', function () {
+            touch(E.FILE_EXTENSIONS);
+            var states = function () {
+                return [Pref.isFileExtensionsShownForAll(), Pref.isFileExtensionsShownForAllButExecutable(), Pref.isFileExtensionsHidden()].join(',');
+            };
+            E.FILE_EXTENSIONS.remove(true);
+            if (states() !== 'true,false,false') return 'default ' + states();
+            E.FILE_EXTENSIONS.set(key('key_file_extensions_not_show'), true);
+            if (states() !== 'false,false,true') return 'not show ' + states();
+            E.FILE_EXTENSIONS.setStoredKey('key_$_file_extensions_removed', true);
+            return states() === 'false,false,false' || 'unknown key ' + states();
+        });
+        check('explorer-working-directory', function () {
+            var stored = sp.getString(E.WORKING_DIRECTORY.getName(), null);
+            var path = String(org.autojs.autojs.util.WorkingDirectoryUtils.getPath());
+            info('working directory stored ' + stored + ', path ' + path);
+            return path.length > 0 && same(E.WORKING_DIRECTORY.get(), stored === null ? context.getString(res.getIdentifier('default_value_working_directory', 'string', pkg)) : stored) || 'path ' + path;
+        });
+        check('explorer-batch-rename-retention', function () {
+            touch(E.BATCH_RENAME_HISTORY_RETENTION);
+            E.setBatchRenameHistoryRetention(50);
+            if (!same(org.autojs.autojs.core.plugin.batchrename.BatchRenameHistoryPrefs.INSTANCE.retention(), 50)) return 'deprecated reader';
+            sp.edit().putInt(E.BATCH_RENAME_HISTORY_RETENTION.getName(), 33).commit();
+            return expect(E.batchRenameHistoryRetention(), 20, 'not a choice');
+        });
+    },
+    HistoryKeys: function () {
+        var H = Keys.HistoryKeys;
+        var HistoryPrefs = org.autojs.autojs.storage.history.HistoryPrefs.INSTANCE;
+        var Retention = org.autojs.autojs.ui.settings.RetentionLimitSettings.INSTANCE;
+        check('history-deprecated-readers', function () {
+            var pairs = [
+                [HistoryPrefs.maxFileSizeToTrackBytes(), sp.getLong(H.HISTORY_MAX_FILE_SIZE_TO_TRACK_BYTES.getName(), 20 * 1024 * 1024)],
+                [HistoryPrefs.historyMaxDays(), sp.getInt(H.HISTORY_MAX_DAYS.getName(), 30)],
+                [HistoryPrefs.historyMaxVersions(), sp.getInt(H.HISTORY_MAX_VERSIONS.getName(), 50)],
+                [HistoryPrefs.historyMaxTotalBytesPerFile(), sp.getLong(H.HISTORY_MAX_TOTAL_BYTES_PER_FILE.getName(), 200 * 1024 * 1024)],
+                [HistoryPrefs.historyMaxTotalBytes(), sp.getLong(H.HISTORY_MAX_TOTAL_BYTES.getName(), 2 * 1024 * 1024 * 1024)],
+                [HistoryPrefs.trashMaxDays(), sp.getInt(H.TRASH_MAX_DAYS.getName(), 30)],
+                [HistoryPrefs.trashMaxTotalBytes(), sp.getLong(H.TRASH_MAX_TOTAL_BYTES.getName(), 500 * 1024 * 1024)],
+                [HistoryPrefs.draftsMaxDays(), sp.getInt(H.DRAFTS_MAX_DAYS.getName(), 7)],
+                [HistoryPrefs.draftsMaxTotalBytes(), sp.getLong(H.DRAFTS_MAX_TOTAL_BYTES.getName(), 200 * 1024 * 1024)],
+                [HistoryPrefs.deletePermanentlyAlsoClearHistory(), sp.getBoolean(H.DELETE_PERMANENTLY_ALSO_CLEAR_HISTORY.getName(), false)],
+            ];
+            var bad = pairs.map(function (p, i) { return same(p[0], p[1]) ? null : i + ': ' + p[0] + ' != ' + p[1]; }).filter(function (x) { return x; });
+            return bad.length === 0 || bad.join('; ');
+        });
+        check('history-retention-page', function () {
+            touch(H.DRAFTS_MAX_DAYS);
+            touch(H.TRASH_MAX_TOTAL_BYTES);
+            var specs = Retention.getSpecs();
+            if (specs.size() !== 9) return 'specs ' + specs.size();
+            var days = Retention.specForKey(H.DRAFTS_MAX_DAYS.getName());
+            Retention.write(days, 12);
+            if (!same(sp.getInt(H.DRAFTS_MAX_DAYS.getName(), 0), 12) || !same(Retention.read(days), 12)) return 'days';
+            var bytes = Retention.specForKey(H.TRASH_MAX_TOTAL_BYTES.getName());
+            Retention.write(bytes, -3);
+            return same(sp.getLong(H.TRASH_MAX_TOTAL_BYTES.getName(), 1), 0) || 'bytes ' + sp.getLong(H.TRASH_MAX_TOTAL_BYTES.getName(), 1);
+        });
+    },
+    EditorKeys: function () {
+        var K = Keys.EditorKeys;
+        var Display = org.autojs.autojs.ui.edit.editor.EditorDisplayPreferences.INSTANCE;
+        var Lsp = org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences;
+        var Font = org.autojs.autojs.ui.edit.editor.ace.AceEditorFontPreferences;
+        var Themes = org.autojs.autojs.ui.edit.theme.Themes;
+        check('editor-text-size', function () {
+            touch(K.EDITOR_TEXT_SIZE);
+            var stored = sp.contains(K.EDITOR_TEXT_SIZE.getName());
+            if (!stored && !same(K.EDITOR_TEXT_SIZE.get(), 14)) return 'default ' + K.EDITOR_TEXT_SIZE.get();
+            if (!same(Pref.getEditorTextSize(99), stored ? sp.getInt(K.EDITOR_TEXT_SIZE.getName(), 0) : 99)) return 'deprecated getter';
+            Pref.setEditorTextSize(17);
+            return expect(sp.getInt(K.EDITOR_TEXT_SIZE.getName(), 0), 17, 'deprecated setter');
+        });
+        check('editor-thresholds', function () {
+            touch(K.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES);
+            touch(K.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES);
+            K.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(java.lang.Integer.valueOf(-5), true);
+            var def = res.getInteger(res.getIdentifier('editor_code_highlight_threshold_default_value', 'integer', pkg));
+            if (!same(Pref.getCodeHighlightThresholdChars(), def)) return 'below -1 is not the default';
+            K.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(java.lang.Integer.valueOf(-1), true);
+            if (!K.isCodeHighlightEnabledForLength(1 << 30)) return 'no threshold is not always';
+            K.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.set(java.lang.Integer.valueOf(0), true);
+            return Pref.shouldEnableLargeFileModeForSize(1) || 'zero is not always large file mode';
+        });
+        check('editor-display-preferences', function () {
+            touch(K.EDITOR_GUTTER_WIDTH_MODE);
+            touch(K.ACE_WORD_WRAP_ENABLED);
+            Display.setWordWrapEnabled(!Display.isWordWrapEnabled());
+            if (!same(Display.isWordWrapEnabled(), sp.getBoolean(K.ACE_WORD_WRAP_ENABLED.getName(), false))) return 'word wrap';
+            K.EDITOR_GUTTER_WIDTH_MODE.setStoredKey('removed', true);
+            return expect(Display.gutterWidthMode(), 'dynamic', 'unknown gutter mode');
+        });
+        check('editor-theme-and-font', function () {
+            var unified = same(sp.getString(K.EDITOR_THEME_MODE.getName(), 'separate_light_dark'), 'unified_light_dark');
+            if (!same(Themes.isSeparateLightDarkMode(), !unified)) return 'theme mode';
+            if (!same(Pref.getCurrentTheme(), sp.getString(K.EDITOR_THEME.getName(), null))) return 'current theme';
+            var id = Font.getId();
+            return /^[a-z0-9][a-z0-9_]{0,63}$/.test(String(id)) || 'font id ' + id;
+        });
+        check('editor-lsp', function () {
+            touch(K.ACE_SEMANTIC_KOTLIN_ENABLED);
+            if (!same(Lsp.isEnabled(), sp.getBoolean(K.ACE_LSP_ENABLED.getName(), true))) return 'lsp enabled';
+            var fileTypes = Lsp.getFileTypes();
+            if (!sp.contains(K.ACE_LSP_FILE_TYPES.getName()) && fileTypes.size() !== Lsp.INSTANCE.getDEFAULT_FILE_TYPES().size()) return 'default file types';
+            sp.edit().remove(K.ACE_SEMANTIC_KOTLIN_ENABLED.getName()).commit();
+            return expect(K.ACE_SEMANTIC_KOTLIN_ENABLED.get(), Lsp.INSTANCE.getDEFAULT_SEMANTIC_LANGUAGES().get('kotlin'), 'semantic default');
+        });
+    },
 };
 
 info('registry: ' + Registry.DOMAINS.size() + ' domains, ' + Registry.getKeys().size() + ' keys, ' + Registry.describe().size() + ' descriptors');

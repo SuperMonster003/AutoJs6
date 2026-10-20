@@ -21,6 +21,8 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.ExplorerKeys;
+import org.autojs.autojs.core.pref.keys.HistoryKeys;
 import org.autojs.autojs.external.ScriptIntents;
 import org.autojs.autojs.model.explorer.Explorer;
 import org.autojs.autojs.model.explorer.ExplorerDirPage;
@@ -38,7 +40,6 @@ import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.storage.file.TmpScriptFiles;
 import org.autojs.autojs.storage.history.HistoryPaths;
-import org.autojs.autojs.storage.history.HistoryPrefs;
 import org.autojs.autojs.storage.history.HistoryRepository;
 import org.autojs.autojs.storage.history.TrashEntities;
 import org.autojs.autojs.storage.history.TrashQuotaHint;
@@ -163,7 +164,7 @@ public class ScriptOperations {
 
     public void newFile() {
         final AtomicReference<MaterialDialog> dialogRef = new AtomicReference<>();
-        String presetFileNamePrefix = getNewFileNamePresetPrefill(availablePrefixes.get(Pref.getInt(R.string.key_explorer_file_default_prefix, 0)));
+        String presetFileNamePrefix = getNewFileNamePresetPrefill(availablePrefixes.get(ExplorerKeys.EXPLORER_FILE_DEFAULT_PREFIX.get()));
         MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext)
                 .title(R.string.text_name)
                 .inputType(InputType.TYPE_CLASS_TEXT)
@@ -202,8 +203,8 @@ public class ScriptOperations {
                             // TODO 自定义前缀
                             // TODO 添加 "无/禁用"
                             .items(availablePrefixes)
-                            .itemsCallbackSingleChoice(Pref.getInt(R.string.key_explorer_file_default_prefix, 0), (dDefaultPrefix, view, i, text) -> {
-                                Pref.putInt(R.string.key_explorer_file_default_prefix, i);
+                            .itemsCallbackSingleChoice(ExplorerKeys.EXPLORER_FILE_DEFAULT_PREFIX.get(), (dDefaultPrefix, view, i, text) -> {
+                                ExplorerKeys.EXPLORER_FILE_DEFAULT_PREFIX.set(i);
                                 EditText editText = dialogRef.get().getInputEditText();
                                 if (editText != null) {
                                     editText.setText(getNewFileNamePresetPrefill(text));
@@ -1297,7 +1298,7 @@ public class ScriptOperations {
      * 彻底删除, 或取消. 大小统计在非主线程执行.
      */
     private void checkTrashQuotaThenRun(@NonNull List<ScriptFile> scriptFiles, @NonNull Runnable proceed, @NonNull Runnable deletePermanently) {
-        long limit = HistoryPrefs.INSTANCE.trashMaxTotalBytes();
+        long limit = HistoryKeys.trashMaxTotalBytes();
         if (!TrashQuotaHint.INSTANCE.needsMeasurement(limit)) {
             proceed.run();
             return;
@@ -1700,7 +1701,7 @@ public class ScriptOperations {
     }
 
     private void clearHistoryAfterPermanentDelete(@NonNull ScriptFile scriptFile) {
-        if (!HistoryPrefs.deletePermanentlyAlsoClearHistory()) {
+        if (!HistoryKeys.deletePermanentlyAlsoClearHistory()) {
             return;
         }
         String scriptFilePath = scriptFile.getPath();

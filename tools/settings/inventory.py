@@ -16,7 +16,10 @@ Scans:
      `PreferenceManager.getDefaultSharedPreferences`, and JSON file names used next to `filesDir` / `noBackupFilesDir`;
   5. default values: the second argument of `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` /
      `getStringSet` calls whose first argument resolves to a key, followed through `R.bool` / `R.integer` / `R.string`,
-     companion constants and local variables; XML defaults are added as separate sources.
+     companion constants and local variables; the default argument of the key declarations in core/pref/keys
+     (`boolResource` / `intResource` / `stringResource` / `keyResource`, `SettingDefault.of(...)`,
+     `SettingDefault.computed("<expression>")`, `SettingDefault.None`, docs/settings/ROADMAP.md P2); XML defaults are
+     added as separate sources.
 
 The hand-written classification (kind, category id, note, extra default sources) lives in
 tools/settings/classification.json and is merged into the outputs when present. `--check` exits with status 2 when an
@@ -799,6 +802,86 @@ def scan_defaults(sources, resolver, key_values, literal_by_const):
     return found
 
 
+# Key declarations of the domain objects (docs/settings/ROADMAP.md P2): `SettingKey.Bool(R.string.key_x, CATEGORY,
+# <default>, ...)` or with `name = "key_$_..."`; the default is the third positional argument (the fourth for Enum and
+# Json, after the type) or the named argument `default`.
+DECLARATION = re.compile(r'\bSettingKey\.(Bool|Int|Long|Float|Str|StrSet|Enum|Json)\s*\(')
+DECLARED_TYPES = {'Bool': 'Boolean', 'Int': 'Int', 'Long': 'Long', 'Float': 'Float', 'Str': 'String',
+                  'StrSet': 'StringSet', 'Enum': 'String (Enum)', 'Json': 'Json'}
+DECLARATION_DIR = 'core/pref/keys/'
+RESOURCE_DEFAULT = re.compile(r'(bool|int|string|key)Resource\(\s*R\.(bool|integer|string)\.(\w+)\s*,')
+NAMED_ARG = re.compile(r'^(\w+)\s*=(?!=)\s*(.*)$', re.S)
+
+
+def declared_default(expr, resolver, res, f, line):
+    """dict(form, expr, value, ...) for the default argument of a key declaration."""
+    expr = re.sub(r'\s+', ' ', expr.strip())
+    m = RESOURCE_DEFAULT.match(expr)
+    if m:
+        kind, ref = m.group(2), m.group(3)
+        if kind == 'bool':
+            return {'form': 'R.bool', 'ref': ref, 'value': res.bools.get(ref, {}).get('value'), 'expr': expr}
+        if kind == 'integer':
+            return {'form': 'R.integer', 'ref': ref, 'value': res.integers.get(ref, {}).get('value'), 'expr': expr}
+        final, value = res.string(ref)
+        return {'form': 'R.string', 'ref': ref, 'resolved': final, 'value': value, 'expr': expr}
+    m = re.match(r'SettingDefault\.computed\(\s*"((?:[^"\\]|\\.)*)"', expr)
+    if m:
+        source = m.group(1).replace(chr(92) + '$', '$')
+        return {'form': '表达式', 'expr': source, 'value': '运行时: ' + source}
+    m = re.fullmatch(r'SettingDefault\.of\((.*)\)', expr)
+    if m:
+        inner = resolver.default_value(m.group(1), f, line)
+        inner['expr'] = expr
+        return inner
+    if expr == 'SettingDefault.None':
+        return {'form': '声明', 'expr': expr, 'value': 'null'}
+    return {'form': '表达式', 'expr': expr, 'value': None}
+
+
+def scan_declared_defaults(sources, resolver, res):
+    """Default value sources of the key declarations in core/pref/keys: {pref key name: [source, ...]}."""
+    found = {}
+    for f in sources:
+        if not f.display.startswith(DECLARATION_DIR):
+            continue
+        for m in DECLARATION.finditer(f.text):
+            line = f.line_of(m.start())
+            if f.is_comment_line(line):
+                continue
+            args, _ = scan_args(f.text, m.end())
+            named = {}
+            positional = []
+            for a in args:
+                nm = NAMED_ARG.match(a)
+                if nm and nm.group(1) in ('keyRes', 'category', 'default', 'effect', 'sensitive', 'deployment', 'store',
+                                         'name', 'enumType', 'jsonType'):
+                    named[nm.group(1)] = nm.group(2).strip()
+                else:
+                    positional.append(a)
+            key = None
+            if 'name' in named:
+                lm = re.fullmatch(r'"((?:[^"\\]|\\.)*)"', named['name'])
+                key = lm.group(1).replace(chr(92) + '$', '$') if lm else None
+            else:
+                km = re.fullmatch(r'R\.string\.(key_\w+)', named.get('keyRes', positional[0] if positional else ''))
+                key = km.group(1) if km else None
+            if key is None:
+                continue
+            kind = m.group(1)
+            index = 3 if kind in ('Enum', 'Json') else 2
+            if 'default' in named:
+                default_expr = named['default']
+            elif len(positional) > index:
+                default_expr = positional[index]
+            else:
+                continue
+            d = declared_default(default_expr, resolver, res, f, line)
+            d.update({'file': f.display, 'line': line, 'method': 'SettingKey.' + kind, 'type': DECLARED_TYPES[kind]})
+            found.setdefault(key, []).append(d)
+    return found
+
+
 def xml_defaults(page_entries, res):
     out = {}
     for e in page_entries:
@@ -888,6 +971,8 @@ def build(host, date):
     json_files, json_missing, json_extra = scan_json_files(sources)
     literal_by_const = {}
     defaults = scan_defaults(sources, resolver, key_values, literal_by_const)
+    for name, d in scan_declared_defaults(sources, resolver, res).items():
+        defaults.setdefault(name, []).extend(d)
     for name, d in xml_defaults(page_entries, res).items():
         defaults.setdefault(name, []).extend(d)
 

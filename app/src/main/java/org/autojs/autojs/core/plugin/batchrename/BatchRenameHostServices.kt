@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.TrashRepository
@@ -27,7 +28,7 @@ object BatchRenameHostServices {
     fun journal(context: Context): BatchRenameJournalStore = journal ?: synchronized(this) {
         journal ?: BatchRenameJournalStore(
             File(context.applicationContext.noBackupFilesDir, "batch-rename/journals"),
-            retention = BatchRenameHistoryPrefs::retention,
+            retention = ExplorerKeys::batchRenameHistoryRetention,
         ).also { journal = it }
     }
 

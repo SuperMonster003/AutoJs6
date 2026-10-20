@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-20, 扫描基线: `master@124f826d5`
+- 生成日期: 2026-10-20, 扫描基线: `master@a199a97f7`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -41,32 +41,32 @@
 | `key_ace_whitespaces_in_selection_enabled` | Boolean | R.bool | `app:defaultValue="@bool/pref_ace_whitespaces_in_selection_enabled"` | `true` | res/xml/fragment_code_editor_settings.xml:113 |  |
 | `key_ace_word_wrap_enabled` | Boolean | 伴生常量 | `DEFAULT_WORD_WRAP_ENABLED (经 常量 DEFAULT_WORD_WRAP_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:41))` | `false` | ui/edit/editor/EditorDisplayPreferences.kt:53 |  |
 | `key_ace_word_wrap_enabled` | Boolean | R.bool | `app:defaultValue="@bool/pref_ace_word_wrap_enabled"` | `false` | res/xml/fragment_code_editor_settings.xml:96 |  |
-| `key_app_language` | String | 调用处字面量 | `(方法默认)` | `null` | core/pref/Language.kt:78 |  |
+| `key_app_language` | String (Enum) | R.string | `keyResource(R.string.default_key_app_language, "default_key_app_language")` | `key_app_language_auto = key_$_app_language_auto` | core/pref/keys/AppearanceKeys.kt:53 |  |
 | `key_app_language` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_app_language"` | `key_app_language_auto = key_$_app_language_auto` | res/xml/fragment_preferences.xml:9 |  |
-| `key_auto_check_for_updates` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_auto_check_for_updates)` | `true` | core/pref/Pref.kt:175 |  |
+| `key_auto_check_for_updates` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_auto_check_for_updates)` | `true` | core/pref/Pref.kt:184 |  |
 | `key_auto_check_for_updates` | Boolean | R.bool | `app:defaultValue="@bool/pref_auto_check_for_updates"` | `true` | res/xml/fragment_preferences.xml:348 |  |
-| `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `AutoNightMode.isFunctional()` | `运行时: AutoNightMode.isFunctional()` | util/ViewUtils.kt:129 |  |
+| `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `AutoNightMode.isFunctional()` | `运行时: AutoNightMode.isFunctional()` | core/pref/keys/AppearanceKeys.kt:71 |  |
 | `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isAutoNightModeEnabled = isFunctional()` | `运行时: 缺键时 Pref 初始化写入 isFunctional()` | core/pref/Pref.kt:49 |  |
-| `key_batch_rename_history_retention` | Int | 伴生常量 | `BatchRenameJournalStore.MAX_BATCHES (经 常量 MAX_BATCHES (core/plugin/batchrename/BatchRenameJournalStore.kt:231))` | `20` | core/plugin/batchrename/BatchRenameHistoryPrefs.kt:13 |  |
+| `key_batch_rename_history_retention` | Int | 伴生常量 | `SettingDefault.of(BatchRenameJournalStore.MAX_BATCHES) (经 常量 MAX_BATCHES (core/plugin/batchrename/BatchRenameJournalStore.kt:231))` | `20` | core/pref/keys/ExplorerKeys.kt:73 |  |
 | `key_client_mode_auto_reconnect` | Boolean | R.bool | `R.bool.pref_client_mode_auto_reconnect` | `true` | pluginclient/DevPluginPrefs.kt:14 |  |
 | `key_client_mode_reconnect_on_network_change` | Boolean | R.bool | `R.bool.pref_client_mode_reconnect_on_network_change` | `true` | pluginclient/DevPluginPrefs.kt:18 |  |
 | `key_client_mode_restore_on_launch` | Boolean | R.bool | `R.bool.pref_client_mode_restore_on_launch` | `true` | pluginclient/DevPluginPrefs.kt:22 |  |
 | `key_codegen_model_current` | String | 调用处字面量 (人工) | `preferences.getString(preferenceKey, null)` | `null` | ui/settings/codegen/CodegenModelStoreFactory.kt:40 | 未选择模型 |
 | `key_console_element_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
 | `key_console_element_time_visible` | Boolean | 伴生常量 (人工) | `CONSOLE_ELEMENT(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:16 |  |
-| `key_delete_permanently_also_clear_history` | Boolean | 调用处字面量 | `false` | `false` | storage/history/HistoryPrefs.kt:64 |  |
+| `key_delete_permanently_also_clear_history` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/HistoryKeys.kt:67 |  |
 | `key_delete_permanently_also_clear_history` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_preferences.xml:152 |  |
-| `key_documentation_source` | String | 调用处字面量 | `(方法默认)` | `null` | util/DocsUtils.kt:23 |  |
+| `key_documentation_source` | String (Enum) | R.string | `keyResource(R.string.default_key_documentation_source, "default_key_documentation_source")` | `key_documentation_source_local = key_$_documentation_source_local` | core/pref/keys/GeneralKeys.kt:47 |  |
 | `key_documentation_source` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_documentation_source"` | `key_documentation_source_local = key_$_documentation_source_local` | res/xml/fragment_preferences.xml:51 |  |
-| `key_drafts_max_days` | Int | 伴生常量 | `DEFAULT_DRAFTS_MAX_DAYS (经 常量 DEFAULT_DRAFTS_MAX_DAYS (storage/history/HistoryPrefs.kt:76))` | `7` | storage/history/HistoryPrefs.kt:53 |  |
-| `key_drafts_max_total_bytes` | Long | 伴生常量 | `DEFAULT_DRAFTS_MAX_TOTAL_BYTES (经 常量 DEFAULT_DRAFTS_MAX_TOTAL_BYTES (storage/history/HistoryPrefs.kt:77))` | `209715200` | storage/history/HistoryPrefs.kt:58 |  |
+| `key_drafts_max_days` | Int | 伴生常量 | `SettingDefault.of(DEFAULT_DRAFTS_MAX_DAYS) (经 常量 DEFAULT_DRAFTS_MAX_DAYS (core/pref/keys/HistoryKeys.kt:34))` | `7` | core/pref/keys/HistoryKeys.kt:60 |  |
+| `key_drafts_max_total_bytes` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_DRAFTS_MAX_TOTAL_BYTES) (经 常量 DEFAULT_DRAFTS_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:35))` | `209715200` | core/pref/keys/HistoryKeys.kt:63 |  |
 | `key_editor_auto_show_log_bottom_sheet_on_run` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_editor_auto_show_log_bottom_sheet_on_run)` | `true` | ui/edit/EditorView.kt:5377 |  |
 | `key_editor_auto_show_log_bottom_sheet_on_run` | Boolean | R.bool | `R.bool.pref_editor_auto_show_log_bottom_sheet_on_run` | `true` | ui/settings/PreferencesFragment.kt:66 |  |
 | `key_editor_auto_show_log_bottom_sheet_on_run` | Boolean | R.bool | `app:defaultValue="@bool/pref_editor_auto_show_log_bottom_sheet_on_run"` | `true` | res/xml/fragment_preferences.xml:174 |  |
 | `key_editor_auto_show_log_bottom_sheet_on_run` | Boolean | R.bool | `app:defaultValue="@bool/pref_editor_auto_show_log_bottom_sheet_on_run"` | `true` | res/xml/fragment_code_editor_settings.xml:152 |  |
 | `key_editor_breakpoint_markers_enabled` | Boolean | 伴生常量 | `DEFAULT_BREAKPOINT_MARKERS_ENABLED (经 常量 DEFAULT_BREAKPOINT_MARKERS_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:46))` | `true` | ui/edit/editor/EditorDisplayPreferences.kt:98 |  |
 | `key_editor_breakpoint_markers_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_code_editor_settings.xml:309 |  |
-| `key_editor_code_highlight_threshold_bytes` | Int | R.integer | `defValue (经 局部变量 defValue (core/pref/Pref.kt:82))` | `524288` | core/pref/Pref.kt:83 |  |
+| `key_editor_code_highlight_threshold_bytes` | Int | R.integer | `defValue (经 局部变量 defValue (core/pref/Pref.kt:91))` | `524288` | core/pref/Pref.kt:92 |  |
 | `key_editor_engine` | String | 伴生常量 (人工) | `EditorEngineType.NATIVE.preferenceValue` | `native` | ui/edit/editor/engine/EditorEnginePreferences.kt:110 | 枚举 EditorEngineType.NATIVE |
 | `key_editor_engine` | String | 调用处字面量 | `(方法默认)` | `null` | ui/edit/editor/engine/EditorEnginePreferences.kt:118 |  |
 | `key_editor_engine` | String | 调用处字面量 | `null` | `null` | ui/edit/editor/engine/EditorEnginePreferences.kt:128 |  |
@@ -80,7 +80,7 @@
 | `key_editor_fullscreen_mode` | Boolean | R.bool | `app:defaultValue="@bool/pref_editor_fullscreen_mode"` | `false` | res/xml/fragment_code_editor_settings.xml:49 |  |
 | `key_editor_gutter_width_mode` | String | 伴生常量 | `DEFAULT_GUTTER_WIDTH_MODE (经 常量 DEFAULT_GUTTER_WIDTH_MODE (ui/edit/editor/EditorDisplayPreferences.kt:48))` | `dynamic` | ui/edit/editor/EditorDisplayPreferences.kt:114 |  |
 | `key_editor_gutter_width_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_gutter_width_mode"` | `key_editor_gutter_width_mode_dynamic = dynamic` | res/xml/fragment_code_editor_settings.xml:300 |  |
-| `key_editor_large_file_mode_threshold_bytes` | Int | R.integer | `defValue (经 局部变量 defValue (core/pref/Pref.kt:95))` | `524288` | core/pref/Pref.kt:96 |  |
+| `key_editor_large_file_mode_threshold_bytes` | Int | R.integer | `defValue (经 局部变量 defValue (core/pref/Pref.kt:104))` | `524288` | core/pref/Pref.kt:105 |  |
 | `key_editor_log_button_behavior` | String | R.string | `key(R.string.default_key_editor_log_button_behavior)` | `key_editor_log_button_behavior_bottom_sheet = key_$_editor_log_button_behavior_bottom_sheet` | ui/edit/EditorView.kt:273 |  |
 | `key_editor_log_button_behavior` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_log_button_behavior"` | `key_editor_log_button_behavior_bottom_sheet = key_$_editor_log_button_behavior_bottom_sheet` | res/xml/fragment_preferences.xml:181 |  |
 | `key_editor_log_button_behavior` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_log_button_behavior"` | `key_editor_log_button_behavior_bottom_sheet = key_$_editor_log_button_behavior_bottom_sheet` | res/xml/fragment_code_editor_settings.xml:143 |  |
@@ -90,11 +90,11 @@
 | `key_editor_log_panel_typescript_console_visible` | Boolean | 调用处字面量 | `false` | `false` | ui/log/LogBottomSheet.kt:360 |  |
 | `key_editor_pinch_to_zoom_change_text_size_enabled` | Boolean | 调用处字面量 | `true` | `true` | ui/edit/editor/EditorPinchToZoomPreferences.kt:21 |  |
 | `key_editor_pinch_to_zoom_change_text_size_enabled` | Boolean | R.bool | `app:defaultValue="@bool/pref_editor_pinch_to_zoom_change_text_size_enabled"` | `true` | res/xml/fragment_code_editor_settings.xml:279 |  |
-| `key_editor_text_size` | Int | 调用方传入 | `defValue` | `(由调用方决定)` | core/pref/Pref.kt:347 | 函数参数 defValue, 默认值由调用方决定 |
+| `key_editor_text_size` | Int | 调用方传入 | `defValue` | `(由调用方决定)` | core/pref/Pref.kt:365 | 函数参数 defValue, 默认值由调用方决定 |
 | `key_editor_text_size` | Int | R.integer (人工) | `getEditorTextSize(resources.getInteger(R.integer.editor_text_size_default_value))` | `14` | ui/settings/EditorTextSizePreference.kt:52 | 设置页显示的默认字号 |
 | `key_editor_text_size` | Int | 表达式 (人工) | `getEditorTextSize(pxToSp(it.textSize).toInt())` | `15` | ui/edit/editor/CodeEditor.kt:65 | 原生编辑器取布局 res/layout/code_editor.xml:14 的 textSize 15sp |
 | `key_editor_text_size` | Int | 表达式 (人工) | `getEditorTextSize(editor.getTextSizeSp().toInt())` | `运行时: 当前编辑器字号` | ui/edit/editor/service/EditorThemeFontService.kt:69 |  |
-| `key_editor_theme` | String | 调用处字面量 | `(方法默认)` | `null` | core/pref/Pref.kt:273 |  |
+| `key_editor_theme` | String | 调用处字面量 | `(方法默认)` | `null` | core/pref/Pref.kt:287 |  |
 | `key_editor_theme` | String | 表达式 (人工) | `Themes.getCurrentThemeName(...)` | `运行时: 原生编辑器 "Quiet Light" (分离模式夜间 "Dark (Visual Studio)"), Ace 为 AceEditorThemes.getDefault(dark)` | ui/edit/theme/Themes.java:181 |  |
 | `key_editor_theme_dark` | String | 调用处字面量 | `(方法默认)` | `null` | ui/edit/theme/Themes.java:208 |  |
 | `key_editor_theme_dark` | String | 调用处字面量 | `(方法默认)` | `null` | ui/edit/theme/Themes.java:214 |  |
@@ -110,61 +110,61 @@
 | `key_editor_theme_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_theme_mode"` | `key_editor_theme_mode_separate = separate_light_dark` | res/xml/fragment_code_editor_settings.xml:24 |  |
 | `key_editor_word_wrap_indent_style` | String | 伴生常量 | `DEFAULT_WORD_WRAP_INDENT_STYLE (经 常量 DEFAULT_WORD_WRAP_INDENT_STYLE (ui/edit/editor/EditorDisplayPreferences.kt:42))` | `continuation` | ui/edit/editor/EditorDisplayPreferences.kt:61 |  |
 | `key_editor_word_wrap_indent_style` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_word_wrap_indent_style"` | `key_editor_word_wrap_indent_style_continuation = continuation` | res/xml/fragment_code_editor_settings.xml:104 |  |
-| `key_enable_a11y_service_with_root_access` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_root_access)` | `true` | core/pref/Pref.kt:315 |  |
+| `key_enable_a11y_service_with_root_access` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_root_access)` | `true` | core/pref/Pref.kt:329 |  |
 | `key_enable_a11y_service_with_root_access` | Boolean | 调用处字面量 | `true` | `true` | inrt/Pref.kt:45 |  |
 | `key_enable_a11y_service_with_root_access` | Boolean | R.bool | `app:defaultValue="@bool/pref_enable_a11y_service_with_root_access"` | `true` | res/xml/fragment_preferences.xml:217 |  |
 | `key_enable_a11y_service_with_root_access` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(resolvePreferenceKey(it), false)` | `false` | runtime/api/augment/settings/Settings.kt:50 | 脚本 API settings.isEnabled 对所有别名统一用 false |
-| `key_enable_a11y_service_with_secure_settings` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_secure_settings)` | `true` | core/pref/Pref.kt:321 |  |
+| `key_enable_a11y_service_with_secure_settings` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_secure_settings)` | `true` | core/pref/Pref.kt:335 |  |
 | `key_enable_a11y_service_with_secure_settings` | Boolean | R.bool | `app:defaultValue="@bool/pref_enable_a11y_service_with_secure_settings"` | `true` | res/xml/fragment_preferences.xml:224 |  |
-| `key_enable_a11y_service_with_shizuku` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_shizuku)` | `true` | core/pref/Pref.kt:327 |  |
+| `key_enable_a11y_service_with_shizuku` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_enable_a11y_service_with_shizuku)` | `true` | core/pref/Pref.kt:341 |  |
 | `key_enable_a11y_service_with_shizuku` | Boolean | R.bool | `app:defaultValue="@bool/pref_enable_a11y_service_with_shizuku"` | `true` | res/xml/fragment_preferences.xml:231 |  |
-| `key_explorer_file_default_prefix` | Int | 调用处字面量 | `0` | `0` | ui/common/ScriptOperations.java:166 |  |
-| `key_explorer_file_default_prefix` | Int | 调用处字面量 | `0` | `0` | ui/common/ScriptOperations.java:205 |  |
-| `key_explorer_playback_history` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_explorer_playback_history)` | `false` | core/pref/Pref.kt:247 |  |
+| `key_explorer_file_default_prefix` | Int | 调用处字面量 | `SettingDefault.of(0)` | `0` | core/pref/keys/ExplorerKeys.kt:69 |  |
+| `key_explorer_playback_history` | Boolean | R.bool | `boolResource(R.bool.pref_explorer_playback_history, "pref_explorer_playback_history")` | `false` | core/pref/keys/ExplorerKeys.kt:62 |  |
 | `key_explorer_playback_history` | Boolean | R.bool | `app:defaultValue="@bool/pref_explorer_playback_history"` | `false` | res/xml/fragment_preferences.xml:127 |  |
-| `key_extending_js_build_in_objects` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_extending_js_build_in_objects)` | `false` | core/pref/Pref.kt:123 |  |
+| `key_extending_js_build_in_objects` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_extending_js_build_in_objects)` | `false` | core/pref/Pref.kt:132 |  |
 | `key_extending_js_build_in_objects` | Boolean | R.bool | `app:defaultValue="@bool/pref_extending_js_build_in_objects"` | `false` | res/xml/fragment_preferences.xml:320 |  |
-| `key_file_extensions` | String | R.string | `key(R.string.default_key_file_extensions)` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | core/pref/Pref.kt:254 |  |
-| `key_file_extensions` | String | R.string | `key(R.string.default_key_file_extensions)` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | core/pref/Pref.kt:258 |  |
-| `key_file_extensions` | String | R.string | `key(R.string.default_key_file_extensions)` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | core/pref/Pref.kt:262 |  |
-| `key_file_extensions` | String | R.string | `context.getString(R.string.default_key_file_extensions)` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | ui/explorer/ExplorerPathMenu.kt:327 |  |
+| `key_file_extensions` | String (Enum) | R.string | `keyResource(R.string.default_key_file_extensions, "default_key_file_extensions")` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | core/pref/keys/ExplorerKeys.kt:56 |  |
 | `key_file_extensions` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_file_extensions"` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | res/xml/fragment_preferences.xml:118 |  |
 | `key_floating_console_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
 | `key_floating_console_time_visible` | Boolean | 伴生常量 (人工) | `FLOATING_WINDOW(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:17 |  |
+| `key_foreground_service` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/GeneralKeys.kt:80 |  |
 | `key_foreground_service` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(prefKey, false)` | `false` | ui/main/drawer/DrawerMenuToggleableItem.kt:258 | 抽屉 "前台服务" 开关 (prefKey = R.string.key_foreground_service) |
 | `key_foreground_service` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(resolvePreferenceKey(it), false)` | `false` | runtime/api/augment/settings/Settings.kt:50 | 脚本 API settings.isEnabled |
-| `key_gesture_observing` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_gesture_observing)` | `false` | core/pref/Pref.kt:228 |  |
+| `key_gesture_observing` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_gesture_observing)` | `false` | core/pref/Pref.kt:238 |  |
 | `key_global_console_element_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
 | `key_global_console_element_time_visible` | Boolean | 伴生常量 (人工) | `GLOBAL_CONSOLE_ELEMENT(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:15 |  |
-| `key_guard_mode` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_guard_mode)` | `false` | core/pref/Pref.kt:154 |  |
+| `key_guard_mode` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_guard_mode)` | `false` | core/pref/Pref.kt:163 |  |
 | `key_guard_mode` | Boolean | R.bool | `app:defaultValue="@bool/pref_guard_mode"` | `false` | res/xml/fragment_preferences.xml:263 |  |
-| `key_hidden_files` | String | R.string | `key(R.string.default_key_hidden_files)` | `key_hidden_files_not_show = key_$_hidden_files_not_show` | core/pref/Pref.kt:243 |  |
+| `key_hidden_files` | String (Enum) | R.string | `keyResource(R.string.default_key_hidden_files, "default_key_hidden_files")` | `key_hidden_files_not_show = key_$_hidden_files_not_show` | core/pref/keys/ExplorerKeys.kt:50 |  |
 | `key_hidden_files` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_hidden_files"` | `key_hidden_files_not_show = key_$_hidden_files_not_show` | res/xml/fragment_preferences.xml:109 |  |
-| `key_history_max_days` | Int | 伴生常量 | `DEFAULT_HISTORY_MAX_DAYS (经 常量 DEFAULT_HISTORY_MAX_DAYS (storage/history/HistoryPrefs.kt:68))` | `30` | storage/history/HistoryPrefs.kt:23 |  |
-| `key_history_max_file_size_to_track_bytes` | Long | 伴生常量 | `DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES (经 常量 DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES (storage/history/HistoryPrefs.kt:66))` | `20971520` | storage/history/HistoryPrefs.kt:18 |  |
-| `key_history_max_total_bytes` | Long | 伴生常量 | `DEFAULT_HISTORY_MAX_TOTAL_BYTES (经 常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES (storage/history/HistoryPrefs.kt:71))` | `2147483648` | storage/history/HistoryPrefs.kt:38 |  |
-| `key_history_max_total_bytes_per_file` | Long | 伴生常量 | `DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE (经 常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE (storage/history/HistoryPrefs.kt:70))` | `209715200` | storage/history/HistoryPrefs.kt:33 |  |
-| `key_history_max_versions` | Int | 伴生常量 | `DEFAULT_HISTORY_MAX_VERSIONS (经 常量 DEFAULT_HISTORY_MAX_VERSIONS (storage/history/HistoryPrefs.kt:69))` | `50` | storage/history/HistoryPrefs.kt:28 |  |
+| `key_history_max_days` | Int | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_DAYS) (经 常量 DEFAULT_HISTORY_MAX_DAYS (core/pref/keys/HistoryKeys.kt:26))` | `30` | core/pref/keys/HistoryKeys.kt:42 |  |
+| `key_history_max_file_size_to_track_bytes` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES) (经 常量 DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES (core/pref/keys/HistoryKeys.kt:24))` | `20971520` | core/pref/keys/HistoryKeys.kt:39 |  |
+| `key_history_max_total_bytes` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_TOTAL_BYTES) (经 常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:29))` | `2147483648` | core/pref/keys/HistoryKeys.kt:51 |  |
+| `key_history_max_total_bytes_per_file` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE) (经 常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE (core/pref/keys/HistoryKeys.kt:28))` | `209715200` | core/pref/keys/HistoryKeys.kt:48 |  |
+| `key_history_max_versions` | Int | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_VERSIONS) (经 常量 DEFAULT_HISTORY_MAX_VERSIONS (core/pref/keys/HistoryKeys.kt:27))` | `50` | core/pref/keys/HistoryKeys.kt:45 |  |
 | `key_ignored_updates` | Json (Gson LinkedHashSet) | 调用处字面量 | `(方法默认)` | `[] (键不存在时)` | ui/settings/ManageIgnoredUpdatesPreference.kt:28 |  |
 | `key_ignored_updates` | Json (Gson LinkedHashSet) | 调用处字面量 | `(方法默认)` | `[] (键不存在时)` | util/UpdateUtils.kt:27 |  |
-| `key_keep_screen_on_when_in_foreground` | String | R.string | `key(R.string.default_key_keep_screen_on_when_in_foreground)` | `key_keep_screen_on_when_in_foreground_disabled = key_$_keep_screen_on_when_in_foreground_disabled` | core/pref/Pref.kt:209 |  |
+| `key_keep_screen_on_when_in_foreground` | String (Enum) | R.string | `keyResource(R.string.default_key_keep_screen_on_when_in_foreground, "default_key_keep_screen_on_when_in_foreground")` | `key_keep_screen_on_when_in_foreground_disabled = key_$_keep_screen_on_when_in_foreground_disabled` | core/pref/keys/AppearanceKeys.kt:95 |  |
 | `key_keep_screen_on_when_in_foreground` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_keep_screen_on_when_in_foreground"` | `key_keep_screen_on_when_in_foreground_disabled = key_$_keep_screen_on_when_in_foreground_disabled` | res/xml/fragment_preferences.xml:36 |  |
-| `key_keep_screen_on_when_in_foreground_enabled` | Boolean | 调用处字面量 | `false` | `false` | util/ViewUtils.kt:115 |  |
+| `key_keep_screen_on_when_in_foreground_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:102 |  |
+| `key_launcher_icon` | String (Enum) | R.string | `keyResource(R.string.default_key_launcher_icon, "default_key_launcher_icon")` | `key_launcher_icon_adaptive = key_$_launcher_icon_adaptive` | core/pref/keys/GeneralKeys.kt:73 |  |
 | `key_launcher_icon` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_launcher_icon"` | `key_launcher_icon_adaptive = key_$_launcher_icon_adaptive` | res/xml/fragment_preferences.xml:70 |  |
 | `key_layout_inspector_filter_profile_selected` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/search/FilterProfileStore.kt:20 |  |
 | `key_layout_inspector_filter_profiles` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/search/FilterProfileStore.kt:19 |  |
 | `key_layout_inspector_node_copy_mode` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/NodeInfoDialog.kt:23 |  |
 | `key_layout_inspector_query_mode` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/search/QueryModeStore.kt:17 |  |
+| `key_leakcanary_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:154 |  |
 | `key_log_activity_input_bar_visible` | Boolean | 伴生常量 (人工) | `DEFAULT_INPUT_BAR_VISIBLE` | `false` | ui/log/LogPageConsoleSettings.kt:61 |  |
 | `key_log_activity_log_coloring` | Boolean | 伴生常量 | `DEFAULT_COLORFUL (经 常量 DEFAULT_COLORFUL (ui/log/LogPageConsoleSettings.kt:82))` | `true` | ui/log/LogPageConsoleSettings.kt:39 |  |
 | `key_log_activity_text_size` | Int | 调用处字面量 | `0` | `0` | ui/log/LogPageConsoleSettings.kt:68 |  |
 | `key_log_activity_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
 | `key_log_activity_time_visible` | Boolean | 伴生常量 (人工) | `LOG_ACTIVITY(..., true)` | `true` | core/console/ConsoleTimeSettings.kt:14 |  |
 | `key_log_activity_typescript_console_visible` | Boolean | 调用处字面量 | `false` | `false` | ui/log/LogActivity.kt:183 |  |
-| `key_new_script_module_layer` | Boolean | 调用处字面量 | `false` | `false` | core/pref/Pref.kt:135 |  |
+| `key_new_script_module_layer` | Boolean | 调用处字面量 | `false` | `false` | core/pref/Pref.kt:144 |  |
 | `key_new_script_module_layer` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:9 |  |
+| `key_night_mode` | String (Enum) | R.string | `keyResource(R.string.default_key_night_mode, "default_key_night_mode")` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | core/pref/keys/AppearanceKeys.kt:60 |  |
 | `key_night_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_night_mode"` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | res/xml/fragment_preferences.xml:20 |  |
-| `key_night_mode_enabled` | Boolean | 调用处字面量 | `false` | `false` | util/ViewUtils.kt:133 |  |
+| `key_night_mode_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:67 |  |
 | `key_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isNightModeEnabled = isNightModeYes(app)` | `运行时: 缺键时 Pref 初始化写入系统当前是否夜间` | core/pref/Pref.kt:59 |  |
 | `key_nodejs_inspector_enabled` | Boolean | 调用处字面量 | `false` | `false` | engine/NodeJsRuntimePluginBridge.kt:78 |  |
 | `key_nodejs_inspector_enabled` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:117 |  |
@@ -174,48 +174,46 @@
 | `key_plugin_center_show_official_plugins` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_show_official_plugins"` | `true` | res/xml/fragment_plugin_center_preferences.xml:9 |  |
 | `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `R.bool.pref_plugin_center_show_third_party_plugins` | `true` | core/plugin/center/PluginOnlineSettingsStore.kt:18 |  |
 | `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_show_third_party_plugins"` | `true` | res/xml/fragment_plugin_center_preferences.xml:16 |  |
-| `key_record_toast` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_record_toast)` | `true` | core/pref/Pref.kt:266 |  |
+| `key_record_toast` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_record_toast)` | `true` | core/pref/Pref.kt:280 |  |
 | `key_record_toast` | Boolean | R.bool | `app:defaultValue="@bool/pref_record_toast"` | `true` | res/xml/fragment_preferences.xml:298 |  |
-| `key_restart_strategy` | String | R.string | `key(R.string.default_key_restart_strategy)` | `key_restart_strategy_quick = key_$_restart_strategy_quick` | core/pref/Pref.kt:235 |  |
+| `key_restart_strategy` | String (Enum) | R.string | `keyResource(R.string.default_key_restart_strategy, "default_key_restart_strategy")` | `key_restart_strategy_quick = key_$_restart_strategy_quick` | core/pref/keys/GeneralKeys.kt:53 |  |
 | `key_restart_strategy` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_restart_strategy"` | `key_restart_strategy_quick = key_$_restart_strategy_quick` | res/xml/fragment_preferences.xml:61 |  |
 | `key_rhino_java_primitive_wrap` | Boolean | R.bool | `R.bool.pref_rhino_java_primitive_wrap` | `true` | rhino/AndroidContextFactory.kt:77 |  |
 | `key_rhino_java_primitive_wrap` | Boolean | R.bool | `app:defaultValue="@bool/pref_rhino_java_primitive_wrap"` | `true` | res/xml/fragment_preferences.xml:328 |  |
 | `key_root_manager_apps_custom` | StringSet | 调用处字面量 | `mutableSetOf()` | `[]` | ui/accessibility/RootManagerAppsDialog.kt:115 |  |
 | `key_root_manager_apps_custom` | StringSet | 调用处字面量 | `mutableSetOf()` | `[]` | ui/accessibility/RootManagerAppsDialog.kt:171 |  |
-| `key_root_mode` | String | R.string (人工) | `RootUtils.RootMode.AUTO_DETECT.key` | `key_$_root_mode_auto_detect` | core/pref/Pref.kt:214 | RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect) |
+| `key_root_mode` | String | R.string (人工) | `RootUtils.RootMode.AUTO_DETECT.key` | `key_$_root_mode_auto_detect` | core/pref/Pref.kt:224 | RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect) |
 | `key_root_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_root_mode"` | `key_root_mode_auto_detect = key_$_root_mode_auto_detect` | res/xml/fragment_preferences.xml:270 |  |
-| `key_root_record_out_file_type` | String | R.string | `key(R.string.default_key_root_record_out_file_type)` | `key_root_record_out_file_type_binary = key_$_root_record_out_file_type_binary` | core/pref/Pref.kt:341 |  |
+| `key_root_record_out_file_type` | String | R.string | `key(R.string.default_key_root_record_out_file_type)` | `key_root_record_out_file_type_binary = key_$_root_record_out_file_type_binary` | core/pref/Pref.kt:359 |  |
 | `key_root_record_out_file_type` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_root_record_out_file_type"` | `key_root_record_out_file_type_binary = key_$_root_record_out_file_type_binary` | res/xml/fragment_preferences.xml:305 |  |
-| `key_scheduled_restart_backend` | String | R.string | `key(R.string.default_key_scheduled_restart_backend)` | `key_scheduled_restart_backend_work_manager = key_$_scheduled_restart_backend_work_manager` | core/pref/Pref.kt:239 |  |
-| `key_scheduled_restart_backend` | String | R.string | `key(R.string.default_key_scheduled_restart_backend)` | `key_scheduled_restart_backend_work_manager = key_$_scheduled_restart_backend_work_manager` | ui/settings/ScheduledRestartSettingsDialogBuilder.kt:40 |  |
-| `key_scheduled_restart_delay` | Int | R.integer | `context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value)` | `300` | ui/settings/ScheduledRestartSettingsDialogBuilder.kt:34 |  |
-| `key_scheduled_restart_delay` | Int | R.integer | `context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value)` | `300` | util/IntentUtils.kt:373 |  |
-| `key_screen_capture_request_delay` | Int | R.integer | `defValue (经 局部变量 defValue (core/pref/Pref.kt:72))` | `350` | core/pref/Pref.kt:75 |  |
+| `key_scheduled_restart_backend` | String (Enum) | R.string | `keyResource(R.string.default_key_scheduled_restart_backend, "default_key_scheduled_restart_backend")` | `key_scheduled_restart_backend_work_manager = key_$_scheduled_restart_backend_work_manager` | core/pref/keys/GeneralKeys.kt:59 |  |
+| `key_scheduled_restart_delay` | Int | R.integer | `intResource(R.integer.scheduled_restart_start_delay_default_value, "scheduled_restart_start_delay_default_value")` | `300` | core/pref/keys/GeneralKeys.kt:66 |  |
+| `key_screen_capture_request_delay` | Int | R.integer | `defValue (经 局部变量 defValue (core/pref/Pref.kt:81))` | `350` | core/pref/Pref.kt:84 |  |
 | `key_screen_capture_request_delay` | Int | R.integer | `context.resources.getInteger(R.integer.screen_capture_request_delay_default_value)` | `350` | ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt:29 |  |
-| `key_script_module_debug_print` | Boolean | 调用处字面量 | `false` | `false` | core/pref/Pref.kt:145 |  |
+| `key_script_module_debug_print` | Boolean | 调用处字面量 | `false` | `false` | core/pref/Pref.kt:154 |  |
 | `key_script_module_debug_print` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:16 |  |
-| `key_script_module_debug_print_disabled_modules` | StringSet | 调用处字面量 | `null` | `null` | core/pref/Pref.kt:149 |  |
-| `key_server_address` | String | 表达式 (人工) | `if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS` | `运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)` | core/pref/Pref.kt:335 |  |
+| `key_script_module_debug_print_disabled_modules` | StringSet | 调用处字面量 | `null` | `null` | core/pref/Pref.kt:158 |  |
+| `key_server_address` | String | 表达式 (人工) | `if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS` | `运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)` | core/pref/Pref.kt:353 |  |
 | `key_server_mode_lan_discovery` | Boolean | R.bool | `R.bool.pref_server_mode_lan_discovery` | `true` | pluginclient/DevPluginPrefs.kt:34 |  |
 | `key_server_mode_notify_connection_changes` | Boolean | R.bool | `R.bool.pref_server_mode_notify_connection_changes` | `true` | pluginclient/DevPluginPrefs.kt:30 |  |
 | `key_server_mode_restore_on_launch` | Boolean | R.bool | `R.bool.pref_server_mode_restore_on_launch` | `true` | pluginclient/DevPluginPrefs.kt:26 |  |
-| `key_stable_mode` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_stable_mode)` | `false` | core/pref/Pref.kt:222 |  |
+| `key_stable_mode` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_stable_mode)` | `false` | core/pref/Pref.kt:232 |  |
 | `key_stable_mode` | Boolean | R.bool | `app:defaultValue="@bool/pref_stable_mode"` | `false` | res/xml/fragment_preferences.xml:238 |  |
 | `key_stable_mode` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(resolvePreferenceKey(it), false)` | `false` | runtime/api/augment/settings/Settings.kt:50 | 脚本 API settings.isEnabled |
-| `key_theme_color_accent` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorAccent` | `由 #FFDEAD 派生 (inrt 为 #263238)` | theme/ThemeColor.kt:60 | ThemeColorManager.kt:20 defaultThemeColor |
-| `key_theme_color_primary` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorPrimary` | `由 #FFDEAD 派生 (inrt 为 #263238)` | theme/ThemeColor.kt:59 | ThemeColorManager.kt:20 defaultThemeColor |
-| `key_theme_color_primary_dark` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorPrimaryDark` | `由 #FFDEAD 派生 (inrt 为 #263238)` | theme/ThemeColor.kt:61 | ThemeColorManager.kt:20 defaultThemeColor |
+| `key_theme_color_accent` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorAccent` | `由 #FFDEAD 派生 (inrt 为 #263238)` | core/pref/keys/AppearanceKeys.kt:89 | ThemeColorManager.kt:20 defaultThemeColor |
+| `key_theme_color_primary` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorPrimary` | `由 #FFDEAD 派生 (inrt 为 #263238)` | core/pref/keys/AppearanceKeys.kt:77 | ThemeColorManager.kt:20 defaultThemeColor |
+| `key_theme_color_primary_dark` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorPrimaryDark` | `由 #FFDEAD 派生 (inrt 为 #263238)` | core/pref/keys/AppearanceKeys.kt:83 | ThemeColorManager.kt:20 defaultThemeColor |
 | `key_timed_task_backend` | String | R.string | `defRes (经 局部变量 defRes (timing/TimedTaskScheduler.kt:33))` | `key_timed_task_backend_alarm = key_$_timed_task_backend_alarm` | timing/TimedTaskScheduler.kt:34 |  |
 | `key_timed_task_backend` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_timed_task_backend"` | `key_timed_task_backend_alarm = key_$_timed_task_backend_alarm` | res/xml/fragment_preferences.xml:201 |  |
-| `key_trash_max_days` | Int | 伴生常量 | `DEFAULT_TRASH_MAX_DAYS (经 常量 DEFAULT_TRASH_MAX_DAYS (storage/history/HistoryPrefs.kt:73))` | `30` | storage/history/HistoryPrefs.kt:43 |  |
-| `key_trash_max_total_bytes` | Long | 伴生常量 | `DEFAULT_TRASH_MAX_TOTAL_BYTES (经 常量 DEFAULT_TRASH_MAX_TOTAL_BYTES (storage/history/HistoryPrefs.kt:74))` | `524288000` | storage/history/HistoryPrefs.kt:48 |  |
-| `key_use_volume_control_record` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_use_volume_control_record)` | `true` | core/pref/Pref.kt:168 |  |
+| `key_trash_max_days` | Int | 伴生常量 | `SettingDefault.of(DEFAULT_TRASH_MAX_DAYS) (经 常量 DEFAULT_TRASH_MAX_DAYS (core/pref/keys/HistoryKeys.kt:31))` | `30` | core/pref/keys/HistoryKeys.kt:54 |  |
+| `key_trash_max_total_bytes` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_TRASH_MAX_TOTAL_BYTES) (经 常量 DEFAULT_TRASH_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:32))` | `524288000` | core/pref/keys/HistoryKeys.kt:57 |  |
+| `key_use_volume_control_record` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_use_volume_control_record)` | `true` | core/pref/Pref.kt:177 |  |
 | `key_use_volume_control_record` | Boolean | R.bool | `app:defaultValue="@bool/pref_use_volume_control_record"` | `true` | res/xml/fragment_preferences.xml:291 |  |
-| `key_use_volume_control_running` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_use_volume_control_running)` | `true` | core/pref/Pref.kt:161 |  |
+| `key_use_volume_control_running` | Boolean | R.bool | `resources.getBoolean(R.bool.pref_use_volume_control_running)` | `true` | core/pref/Pref.kt:170 |  |
 | `key_use_volume_control_running` | Boolean | 调用处字面量 | `true` | `true` | inrt/Pref.kt:53 |  |
 | `key_use_volume_control_running` | Boolean | R.bool | `app:defaultValue="@bool/pref_use_volume_control_running"` | `true` | res/xml/fragment_preferences.xml:256 |  |
 | `key_use_volume_control_running` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(resolvePreferenceKey(it), false)` | `false` | runtime/api/augment/settings/Settings.kt:50 | 脚本 API settings.isEnabled 对所有别名统一用 false |
-| `key_working_directory` | String | R.string | `str(R.string.default_value_working_directory)` | `/Scripts` | util/WorkingDirectoryUtils.kt:21 |  |
+| `key_working_directory` | String | R.string | `stringResource(R.string.default_value_working_directory, "default_value_working_directory")` | `/Scripts` | core/pref/keys/ExplorerKeys.kt:43 |  |
 | `key_working_directory` | String | 表达式 (人工) | `WorkingDirectoryUtils.determineIfNeeded()` | `运行时: 首次启动在各语言的默认目录中选最近修改且非空者` | util/WorkingDirectoryUtils.kt:57 | `default_value_working_directory` 按语言不同 (/Scripts, /脚本 等 10 种) |
 | `key_$_ace_semantic_java_enabled` | Boolean | 伴生常量 (人工) | `DEFAULT_SEMANTIC_LANGUAGES[java]` | `true` | ui/edit/editor/ace/AceEditorLspPreferences.kt:123 |  |
 | `key_$_ace_semantic_kotlin_enabled` | Boolean | 伴生常量 (人工) | `DEFAULT_SEMANTIC_LANGUAGES[kotlin]` | `false` | ui/edit/editor/ace/AceEditorLspPreferences.kt:123 |  |
@@ -236,5 +234,5 @@
 只比较能求出取值的来源; 取值为 `null` 的行 (`getStringOrNull` 或变更检测, 调用处自行回退) 不参与比较. 逐条登记在 ROADMAP 附录 C Q10, 由维护者定统一值; P1-P5 期间保持现状 (红线 R2).
 
 1. `key_editor_text_size`: `14` <- ui/settings/EditorTextSizePreference.kt:52; `15` <- ui/edit/editor/CodeEditor.kt:65
-2. `key_enable_a11y_service_with_root_access`: `true` <- core/pref/Pref.kt:315, inrt/Pref.kt:45, res/xml/fragment_preferences.xml:217; `false` <- runtime/api/augment/settings/Settings.kt:50
-3. `key_use_volume_control_running`: `true` <- core/pref/Pref.kt:161, inrt/Pref.kt:53, res/xml/fragment_preferences.xml:256; `false` <- runtime/api/augment/settings/Settings.kt:50
+2. `key_enable_a11y_service_with_root_access`: `true` <- core/pref/Pref.kt:329, inrt/Pref.kt:45, res/xml/fragment_preferences.xml:217; `false` <- runtime/api/augment/settings/Settings.kt:50
+3. `key_use_volume_control_running`: `true` <- core/pref/Pref.kt:170, inrt/Pref.kt:53, res/xml/fragment_preferences.xml:256; `false` <- runtime/api/augment/settings/Settings.kt:50

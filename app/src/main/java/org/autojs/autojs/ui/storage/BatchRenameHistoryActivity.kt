@@ -10,11 +10,11 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameBatchState
-import org.autojs.autojs.core.plugin.batchrename.BatchRenameHistoryPrefs
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameHostServices
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalRecord
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalStore
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameSource
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.ViewUtils
@@ -186,7 +186,7 @@ class BatchRenameHistoryActivity : BaseSearchSortListActivity<ActivityTrashBindi
      */
     private fun chooseRetention() {
         val choices = BatchRenameJournalStore.RETENTION_CHOICES
-        val current = BatchRenameHistoryPrefs.retention()
+        val current = ExplorerKeys.batchRenameHistoryRetention()
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(this)
                 .title(R.string.text_rename_history_retention)
@@ -195,7 +195,7 @@ class BatchRenameHistoryActivity : BaseSearchSortListActivity<ActivityTrashBindi
                 .itemsCallbackSingleChoice(choices.indexOf(current)) { _, _, which, _ ->
                     val chosen = choices[which]
                     if (chosen != current) {
-                        BatchRenameHistoryPrefs.setRetention(chosen)
+                        ExplorerKeys.setBatchRenameHistoryRetention(chosen)
                         inBackground({ journal.trim() }) { ViewUtils.showToast(this, R.string.text_done) }
                     }
                     true

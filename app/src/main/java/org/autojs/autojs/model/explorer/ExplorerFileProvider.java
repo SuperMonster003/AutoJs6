@@ -1,7 +1,7 @@
 package org.autojs.autojs.model.explorer;
 
+import org.autojs.autojs.core.pref.keys.ExplorerKeys;
 import org.autojs.autojs.pio.PFile;
-import org.autojs.autojs.core.pref.Pref;
 
 import java.io.FileFilter;
 
@@ -42,7 +42,7 @@ public class ExplorerFileProvider implements ExplorerProvider {
 
     protected Observable<PFile> listFiles(PFile directory) {
         return Observable.fromCallable(() -> {
-                    boolean isShowHidden = Pref.isHiddenFilesShown();
+                    boolean isShowHidden = ExplorerKeys.isHiddenFilesShown();
                     PFile[] files;
                     try {
                         if (mFileFilter == null) {

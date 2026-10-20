@@ -18,12 +18,12 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.model.explorer.PrivilegedEditSessions
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.storage.file.EmergencyDraftDirectoryGuard
 import org.autojs.autojs.storage.file.StableDraftFileHelper
 import org.autojs.autojs.storage.history.HistoryPaths
-import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingCodec
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingProbe
 import org.autojs.autojs.ui.edit.editor.loading.EditorFileReadMetadata
@@ -1049,7 +1049,7 @@ class EditorFileService(
             if (files.isEmpty()) return
 
             val now = System.currentTimeMillis()
-            val maxDraftLifetime = HistoryPrefs.draftsMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
+            val maxDraftLifetime = HistoryKeys.draftsMaxDays().coerceAtLeast(0).toLong() * 24L * 60L * 60L * 1000L
             val expiredBefore = now - maxDraftLifetime
             files.forEach { f ->
                 if (!EmergencyDraftDirectoryGuard.isProtectedFromDeletion(f, now) &&
@@ -1061,7 +1061,7 @@ class EditorFileService(
 
             val remained = draftsDir.listFiles()?.toList()?.sortedByDescending { it.lastModified() } ?: return
             var total = remained.sumOf { it.length().coerceAtLeast(0L) }
-            val draftLimit = HistoryPrefs.draftsMaxTotalBytes().coerceAtLeast(0L)
+            val draftLimit = HistoryKeys.draftsMaxTotalBytes().coerceAtLeast(0L)
 
             if (total <= draftLimit) return
 

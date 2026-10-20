@@ -1,7 +1,7 @@
 """Device checks of the settings store layer (docs/settings/ROADMAP.md P1.2 / P1.4 / P2, evidence level E3).
 
 Usage: py -3.12 -I tools/settings/device_store_check.py -s SERIAL CHECK [--install APK] [--state FILE]
-       [--domains NAMES]
+       [--domains NAMES] [--activity CLASS --screenshot PNG]
 
 CHECK is one of
   interop       P1.2: SharedPreferencesStore and the old Pref / SharedPreferences calls read and write the same file
@@ -14,6 +14,8 @@ CHECK is one of
   domains       P2: for the domain objects in --domains (comma separated, e.g. AppearanceKeys,GeneralKeys), each
                 declared key reads what the old code read (default and stored value, device resources), and the
                 callers moved to the keys still work; written keys are restored; runs device/domain_keys.js.
+  page          P2: starts the activity --activity (a settings page, not exported) from inside the app and saves a
+                screenshot to --screenshot after --settle seconds; runs device/open_page.js.
 
 --install installs APK with "adb install -r -d" first (debug builds of the same signature keep their data). The
 script is pushed to /sdcard/Download/aj6-settings-check, started through RunIntentActivity and removed afterwards;
@@ -34,7 +36,7 @@ RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 DEVICE_DIR = "/sdcard/Download/aj6-settings-check"
 MARK = "AJ6SET"
 SCRIPTS = {"interop": "store_interop.js", "lists-before": "legacy_lists.js", "lists-after": "legacy_lists.js",
-           "domains": "domain_keys.js"}
+           "domains": "domain_keys.js", "page": "open_page.js"}
 
 
 def adb(serial, *args, check=False):
@@ -92,12 +94,17 @@ def main():
     parser.add_argument("--state", type=pathlib.Path, help="state file written by lists-before and read by lists-after")
     parser.add_argument("--wait", type=int, default=60, help="seconds to wait for the script (default 60)")
     parser.add_argument("--domains", help="domain objects for the domains check, comma separated")
+    parser.add_argument("--activity", help="activity class for the page check")
+    parser.add_argument("--screenshot", type=pathlib.Path, help="PNG written by the page check")
+    parser.add_argument("--settle", type=float, default=3.0, help="seconds between starting the page and the screenshot")
     args = parser.parse_args()
 
     if args.check.startswith("lists-") and args.state is None:
         parser.error("--state is required for lists-before / lists-after")
     if args.check == "domains" and not args.domains:
         parser.error("--domains is required for domains")
+    if args.check == "page" and not (args.activity and args.screenshot):
+        parser.error("--activity and --screenshot are required for page")
     if args.install:
         result = adb(args.serial, "install", "-r", "-d", str(args.install))
         if "Success" not in result.stdout:
@@ -116,6 +123,8 @@ def main():
     elif args.check == "domains":
         names = [name.strip() for name in args.domains.split(",") if name.strip()]
         script = f"var AJ6_DOMAINS = {json.dumps(names)};\n" + script
+    elif args.check == "page":
+        script = f"var AJ6_ACTIVITY = {json.dumps(args.activity)};\n" + script
     lines = run_script(args.serial, script, args.wait)
 
     failed = 0
@@ -136,6 +145,12 @@ def main():
         args.state.parent.mkdir(parents=True, exist_ok=True)
         args.state.write_text(json.dumps({"serial": args.serial, "model": model, "sdk": sdk, "values": values},
                                          ensure_ascii=True, indent=1), encoding="utf-8")
+    if args.check == "page" and not failed:
+        time.sleep(args.settle)
+        png = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True).stdout
+        args.screenshot.parent.mkdir(parents=True, exist_ok=True)
+        args.screenshot.write_bytes(png)
+        print(f"INFO screenshot {args.screenshot} ({len(png)} bytes)")
     if "done" not in lines:
         print("FAIL the script did not finish (see logcat GlobalConsole)")
         failed += 1

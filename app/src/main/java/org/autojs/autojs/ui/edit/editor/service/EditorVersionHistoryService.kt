@@ -6,7 +6,7 @@ import android.text.InputType
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.storage.history.HistoryPrefs
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.storage.history.HistoryUriUtils
@@ -138,7 +138,7 @@ class EditorVersionHistoryService(
     }
 
     private fun shouldTrackHistory(oldBytes: ByteArray, newBytes: ByteArray): Boolean {
-        val limit = HistoryPrefs.maxFileSizeToTrackBytes()
+        val limit = HistoryKeys.maxFileSizeToTrackBytes()
         if (HistoryRetentionPolicy.isUnlimited(limit)) return true
 
         return oldBytes.size.toLong() <= limit && newBytes.size.toLong() <= limit

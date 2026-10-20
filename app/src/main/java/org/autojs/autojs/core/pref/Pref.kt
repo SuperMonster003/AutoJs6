@@ -12,6 +12,7 @@ import org.autojs.autojs.annotation.KeyRes
 import org.autojs.autojs.annotation.ScriptInterfaceCompatible
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.store.SettingsStore
 import org.autojs.autojs.core.pref.store.SettingsStores
@@ -250,27 +251,29 @@ object Pref {
         get() = GeneralKeys.isScheduledRestartPreferredWorkManager
 
     @JvmStatic
+    @Deprecated("Use ExplorerKeys.isHiddenFilesShown (docs/settings/ROADMAP.md P2.2)", ReplaceWith("ExplorerKeys.isHiddenFilesShown", "org.autojs.autojs.core.pref.keys.ExplorerKeys"))
     val isHiddenFilesShown
-        get() = getString(R.string.key_hidden_files, key(R.string.default_key_hidden_files)) == key(R.string.key_hidden_files_show)
+        get() = ExplorerKeys.isHiddenFilesShown
 
     @JvmStatic
+    @Deprecated("Use ExplorerKeys.EXPLORER_PLAYBACK_HISTORY (docs/settings/ROADMAP.md P2.2)", ReplaceWith("ExplorerKeys.EXPLORER_PLAYBACK_HISTORY.get()", "org.autojs.autojs.core.pref.keys.ExplorerKeys"))
     val isExplorerPlaybackHistoryEnabled
-        get() = getBoolean(
-            R.string.key_explorer_playback_history,
-            resources.getBoolean(R.bool.pref_explorer_playback_history),
-        )
+        get() = ExplorerKeys.EXPLORER_PLAYBACK_HISTORY.get()
 
     @JvmStatic
+    @Deprecated("Use ExplorerKeys.isFileExtensionsShownForAll (docs/settings/ROADMAP.md P2.2)", ReplaceWith("ExplorerKeys.isFileExtensionsShownForAll", "org.autojs.autojs.core.pref.keys.ExplorerKeys"))
     val isFileExtensionsShownForAll
-        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all)
+        get() = ExplorerKeys.isFileExtensionsShownForAll
 
     @JvmStatic
+    @Deprecated("Use ExplorerKeys.isFileExtensionsShownForAllButExecutable (docs/settings/ROADMAP.md P2.2)", ReplaceWith("ExplorerKeys.isFileExtensionsShownForAllButExecutable", "org.autojs.autojs.core.pref.keys.ExplorerKeys"))
     val isFileExtensionsShownForAllButExecutable
-        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_show_all_but_executable)
+        get() = ExplorerKeys.isFileExtensionsShownForAllButExecutable
 
     @JvmStatic
+    @Deprecated("Use ExplorerKeys.isFileExtensionsHidden (docs/settings/ROADMAP.md P2.2)", ReplaceWith("ExplorerKeys.isFileExtensionsHidden", "org.autojs.autojs.core.pref.keys.ExplorerKeys"))
     val isFileExtensionsHidden
-        get() = getString(R.string.key_file_extensions, key(R.string.default_key_file_extensions)) == key(R.string.key_file_extensions_not_show)
+        get() = ExplorerKeys.isFileExtensionsHidden
 
     @JvmStatic
     val isRecordToastEnabled

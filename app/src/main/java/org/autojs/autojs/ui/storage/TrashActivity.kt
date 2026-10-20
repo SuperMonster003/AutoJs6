@@ -12,11 +12,11 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
-import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.TrashEntities
 import org.autojs.autojs.storage.history.TrashExpiry
 import org.autojs.autojs.storage.history.TrashPreviewController
@@ -111,10 +111,7 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
 
         val dao = HistoryDatabase.getInstance(applicationContext).historyDao()
 
-        val limitBytesFlow = PrefRx.observeLong(
-            keyRes = R.string.key_trash_max_total_bytes,
-            defaultValue = HistoryPrefs.DEFAULT_TRASH_MAX_TOTAL_BYTES,
-        )
+        val limitBytesFlow = PrefRx.observeLong(HistoryKeys.TRASH_MAX_TOTAL_BYTES)
 
         val disposable = Observable
             .combineLatest(
@@ -165,7 +162,7 @@ class TrashActivity : BaseSearchSortListActivity<ActivityTrashBinding, TrashEnti
     override fun submitToAdapter(items: List<TrashEntities.TrashItem>) {
         // Derived state travels with the row so DiffUtil sees countdown / broken-state changes.
         // zh-CN: 派生状态随行一起提交, 使 DiffUtil 能感知倒计时 / 失效状态的变化.
-        val maxDays = HistoryPrefs.trashMaxDays()
+        val maxDays = HistoryKeys.trashMaxDays()
         val now = System.currentTimeMillis()
         val missing = missingBlobIds
         adapter.submit(items.map { item ->

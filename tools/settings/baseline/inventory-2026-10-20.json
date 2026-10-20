@@ -2,22 +2,22 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-20",
  "git": {
-  "commit": "124f826d5",
+  "commit": "a199a97f7",
   "branch": "master",
-  "dirtyScannedFiles": 0
+  "dirtyScannedFiles": 38
  },
  "summary": {
-  "keyResources": 267,
-  "keyResourcesInStringsDonottranslate": 265,
+  "keyResources": 268,
+  "keyResourcesInStringsDonottranslate": 266,
   "keyResourcesElsewhere": [
    "key_ace_language_support_matrix",
    "key_ace_semantic_languages"
   ],
-  "keysOnSettingsPages": 98,
+  "keysOnSettingsPages": 99,
   "keysPerPage": {
    "fragment_preferences.xml": 39,
    "fragment_code_editor_settings.xml": 40,
-   "fragment_developer_options.xml": 10,
+   "fragment_developer_options.xml": 11,
    "fragment_trash_and_version_history_settings.xml": 9,
    "fragment_plugin_center_preferences.xml": 3
   },
@@ -55,10 +55,8 @@
    "key_ace_smart_hint_signature_trigger_off",
    "key_ace_smart_hint_signature_trigger_typing",
    "key_ai_settings",
-   "key_change_working_dir",
    "key_check_for_updates",
    "key_check_for_updates_while_ignoring_the_local_version",
-   "key_clear_explorer_playback_history",
    "key_dialog_foreground_svc",
    "key_dialog_layout_inspector_exit_tips",
    "key_dialog_log_entries_exported",
@@ -72,16 +70,11 @@
    "key_editor_word_wrap_indent_style_continuation",
    "key_enable_observe_key",
    "key_github_token",
-   "key_launcher_icon",
-   "key_launcher_shortcuts",
    "key_mail_settings",
    "key_manage_ignored_updates",
    "key_nodejs_doctor_report",
    "key_release_history",
-   "key_restart_strategy_scheduled",
    "key_root_record_out_file_type_js",
-   "key_theme_color",
-   "key_trash_and_version_history_settings",
    "key_updates_checked_states_cleared"
   ],
   "keysWithoutAnyRefs": [
@@ -104,7 +97,7 @@
   "namedStoreCallFiles": 34,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 8,
-  "prefUserFiles": 119,
+  "prefUserFiles": 109,
   "jsonFileStores": 13
  },
  "keys": [
@@ -116,7 +109,7 @@
    "sourceRefs": [
     {
      "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 230
+     "line": 231
     }
    ],
    "kind": "State",
@@ -1571,25 +1564,14 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Language.kt",
-     "line": 78
-    },
-    {
-     "file": "core/pref/Language.kt",
-     "line": 97
-    },
-    {
-     "file": "core/pref/Language.kt",
-     "line": 101
-    },
-    {
-     "file": "core/pref/Language.kt",
-     "line": 105
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 54
     }
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "列表项 (Language)"
+   "note": "列表项 (Language)",
+   "effect": "APPLY"
   },
   {
    "name": "key_app_language_ar",
@@ -1605,7 +1587,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 21
+     "line": 22
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 35
     }
    ],
    "kind": "ValueConstant",
@@ -1628,7 +1614,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 22
+     "line": 23
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 25
     }
    ],
    "kind": "ValueConstant",
@@ -1648,7 +1638,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 15
+     "line": 16
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 29
     }
    ],
    "kind": "ValueConstant",
@@ -1668,7 +1662,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 17
+     "line": 18
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 31
     }
    ],
    "kind": "ValueConstant",
@@ -1688,7 +1686,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 16
+     "line": 17
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 30
     }
    ],
    "kind": "ValueConstant",
@@ -1708,7 +1710,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 18
+     "line": 19
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 32
     }
    ],
    "kind": "ValueConstant",
@@ -1728,7 +1734,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 19
+     "line": 20
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 33
     }
    ],
    "kind": "ValueConstant",
@@ -1748,7 +1758,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 20
+     "line": 21
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 34
     }
    ],
    "kind": "ValueConstant",
@@ -1768,7 +1782,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 12
+     "line": 13
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 26
     }
    ],
    "kind": "ValueConstant",
@@ -1788,7 +1806,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 13
+     "line": 14
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 27
     }
    ],
    "kind": "ValueConstant",
@@ -1808,7 +1830,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Language.kt",
-     "line": 14
+     "line": 15
+    },
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 28
     }
    ],
    "kind": "ValueConstant",
@@ -1836,7 +1862,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 176
+     "line": 185
     }
    ],
    "kind": "Setting",
@@ -1854,41 +1880,18 @@
      "line": 981
     },
     {
-     "file": "core/pref/Pref.kt",
-     "line": 49
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 640
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 72
     },
     {
      "file": "ui/main/plugin/PluginFragment.kt",
      "line": 66
-    },
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 33
-    },
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 38
-    },
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 43
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 129
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 130
     }
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "与 `key_night_mode` 一起由 NightModePreference 与抽屉写入"
+   "note": "与 `key_night_mode` 一起由 NightModePreference 与抽屉写入",
+   "effect": "APPLY"
   },
   {
    "name": "key_batch_rename_history_retention",
@@ -1897,12 +1900,8 @@
    "line": 148,
    "sourceRefs": [
     {
-     "file": "core/plugin/batchrename/BatchRenameHistoryPrefs.kt",
-     "line": 13
-    },
-    {
-     "file": "core/plugin/batchrename/BatchRenameHistoryPrefs.kt",
-     "line": 18
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 73
     }
    ],
    "kind": "Setting",
@@ -1926,6 +1925,12 @@
      "categoryTitles": [
       "文件管理器"
      ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 81
     }
    ],
    "kind": "Excluded",
@@ -1992,6 +1997,12 @@
      "categoryTitles": [
       "文件管理器"
      ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 81
     }
    ],
    "kind": "Excluded",
@@ -2218,8 +2229,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 64
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 67
     }
    ],
    "kind": "Setting",
@@ -2291,11 +2302,11 @@
    "sourceRefs": [
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 88
+     "line": 89
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 110
+     "line": 111
     }
    ],
    "kind": "State",
@@ -2343,16 +2354,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/doc/DocumentationPageController.kt",
-     "line": 273
-    },
-    {
-     "file": "util/DocsUtils.kt",
-     "line": 23
-    },
-    {
-     "file": "util/DocsUtils.kt",
-     "line": 57
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 48
     }
    ],
    "kind": "Setting",
@@ -2375,6 +2378,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 26
+    },
+    {
      "file": "util/DocsUtils.kt",
      "line": 24
     }
@@ -2395,8 +2402,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 27
+    },
+    {
      "file": "ui/doc/DocumentationPageController.kt",
-     "line": 274
+     "line": 273
     }
    ],
    "kind": "ValueConstant",
@@ -2423,12 +2434,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 53
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 40
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 60
     }
    ],
    "kind": "Setting",
@@ -2456,12 +2463,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 58
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 41
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 63
     }
    ],
    "kind": "Setting",
@@ -2583,11 +2586,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 83
+     "line": 92
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 350
+     "line": 368
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -2883,11 +2886,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 96
+     "line": 105
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 353
+     "line": 371
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3245,11 +3248,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 344
+     "line": 362
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 347
+     "line": 365
     },
     {
      "file": "ui/edit/EditorView.kt",
@@ -3286,11 +3289,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 273
+     "line": 287
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 275
+     "line": 289
     },
     {
      "file": "ui/edit/EditorView.kt",
@@ -3570,7 +3573,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 316
+     "line": 330
     },
     {
      "file": "inrt/Pref.kt",
@@ -3617,7 +3620,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 322
+     "line": 336
     },
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
@@ -3650,7 +3653,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 328
+     "line": 342
     },
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
@@ -3677,16 +3680,8 @@
    "line": 217,
    "sourceRefs": [
     {
-     "file": "ui/common/ScriptOperations.java",
-     "line": 166
-    },
-    {
-     "file": "ui/common/ScriptOperations.java",
-     "line": 205
-    },
-    {
-     "file": "ui/common/ScriptOperations.java",
-     "line": 206
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 69
     }
    ],
    "kind": "Setting",
@@ -3714,8 +3709,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 248
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 63
     }
    ],
    "kind": "Setting",
@@ -3744,7 +3739,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 124
+     "line": 133
     }
    ],
    "kind": "Setting",
@@ -3772,24 +3767,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 254
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 258
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 262
-    },
-    {
-     "file": "ui/explorer/ExplorerPathMenu.kt",
-     "line": 311
-    },
-    {
-     "file": "ui/explorer/ExplorerPathMenu.kt",
-     "line": 327
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 57
     }
    ],
    "kind": "Setting",
@@ -3809,8 +3788,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 262
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 30
+    },
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 98
     }
    ],
    "kind": "ValueConstant",
@@ -3832,8 +3815,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 254
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 31
+    },
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 90
     }
    ],
    "kind": "ValueConstant",
@@ -3852,8 +3839,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 258
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 32
+    },
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 94
     }
    ],
    "kind": "ValueConstant",
@@ -3901,7 +3892,7 @@
     },
     {
      "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 279
+     "line": 280
     }
    ],
    "kind": "State",
@@ -3915,16 +3906,16 @@
    "line": 227,
    "sourceRefs": [
     {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 80
+    },
+    {
      "file": "inrt/SettingsActivity.kt",
      "line": 52
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
      "line": 29
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 249
     }
    ],
    "otherResRefs": [
@@ -3946,7 +3937,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 229
+     "line": 239
     }
    ],
    "kind": "Setting",
@@ -4027,7 +4018,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 155
+     "line": 164
     }
    ],
    "kind": "Setting",
@@ -4055,12 +4046,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 243
-    },
-    {
-     "file": "ui/explorer/ExplorerPathMenu.kt",
-     "line": 174
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 51
     }
    ],
    "kind": "Setting",
@@ -4083,6 +4070,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 25
+    },
+    {
      "file": "ui/explorer/ExplorerPathMenu.kt",
      "line": 174
     }
@@ -4103,8 +4094,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 243
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 26
+    },
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 86
     },
     {
      "file": "ui/explorer/ExplorerPathMenu.kt",
@@ -4135,12 +4130,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 23
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 33
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 42
     }
    ],
    "kind": "Setting",
@@ -4168,12 +4159,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 18
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 37
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 39
     }
    ],
    "kind": "Setting",
@@ -4201,20 +4188,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 38
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 858
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 36
-    },
-    {
-     "file": "ui/storage/VersionHistoryActivity.kt",
-     "line": 109
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 51
     }
    ],
    "kind": "Setting",
@@ -4242,12 +4217,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 33
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 35
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 48
     }
    ],
    "kind": "Setting",
@@ -4275,12 +4246,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 28
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 34
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 45
     }
    ],
    "kind": "Setting",
@@ -4347,28 +4314,12 @@
      "line": 172
     },
     {
-     "file": "core/pref/Pref.kt",
-     "line": 209
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 96
     },
     {
      "file": "ui/main/MainActivity.kt",
      "line": 184
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 1292
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 1297
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 1303
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 1309
     }
    ],
    "kind": "Setting",
@@ -4388,16 +4339,20 @@
    ],
    "sourceRefs": [
     {
-     "file": "util/ViewUtils.kt",
-     "line": 122
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 47
     },
     {
      "file": "util/ViewUtils.kt",
-     "line": 1297
+     "line": 123
     },
     {
      "file": "util/ViewUtils.kt",
      "line": 1298
+    },
+    {
+     "file": "util/ViewUtils.kt",
+     "line": 1299
     }
    ],
    "kind": "ValueConstant",
@@ -4419,12 +4374,16 @@
    ],
    "sourceRefs": [
     {
-     "file": "util/ViewUtils.kt",
-     "line": 119
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 46
     },
     {
      "file": "util/ViewUtils.kt",
-     "line": 1292
+     "line": 120
+    },
+    {
+     "file": "util/ViewUtils.kt",
+     "line": 1293
     }
    ],
    "kind": "ValueConstant",
@@ -4437,12 +4396,8 @@
    "line": 245,
    "sourceRefs": [
     {
-     "file": "util/ViewUtils.kt",
-     "line": 115
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 116
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 102
     }
    ],
    "kind": "Setting",
@@ -4462,16 +4417,20 @@
    ],
    "sourceRefs": [
     {
-     "file": "util/ViewUtils.kt",
-     "line": 125
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 48
     },
     {
      "file": "util/ViewUtils.kt",
-     "line": 1303
+     "line": 126
     },
     {
      "file": "util/ViewUtils.kt",
      "line": 1304
+    },
+    {
+     "file": "util/ViewUtils.kt",
+     "line": 1305
     }
    ],
    "kind": "ValueConstant",
@@ -4485,11 +4444,11 @@
    "sourceRefs": [
     {
      "file": "util/ViewUtils.kt",
-     "line": 125
+     "line": 126
     },
     {
      "file": "util/ViewUtils.kt",
-     "line": 126
+     "line": 127
     }
    ],
    "kind": "State",
@@ -4504,15 +4463,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 197
+     "line": 206
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 298
+     "line": 312
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 308
+     "line": 322
     }
    ],
    "kind": "State",
@@ -4527,15 +4486,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 205
+     "line": 214
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 304
+     "line": 318
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 311
+     "line": 325
     }
    ],
    "kind": "State",
@@ -4550,15 +4509,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 181
+     "line": 190
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 295
+     "line": 309
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 310
+     "line": 324
     }
    ],
    "kind": "State",
@@ -4573,15 +4532,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 201
+     "line": 210
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 301
+     "line": 315
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 309
+     "line": 323
     }
    ],
    "kind": "State",
@@ -4607,9 +4566,16 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 74
+    }
+   ],
    "kind": "Setting",
    "category": "general",
-   "note": "列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY)"
+   "note": "列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY)",
+   "effect": "APPLY"
   },
   {
    "name": "key_launcher_icon_adaptive",
@@ -4627,16 +4593,20 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 55
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 41
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 94
+     "line": 56
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 216
+     "line": 95
+    },
+    {
+     "file": "ui/settings/LauncherIconPreference.kt",
+     "line": 217
     }
    ],
    "kind": "ValueConstant",
@@ -4655,12 +4625,16 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 54
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 42
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 215
+     "line": 55
+    },
+    {
+     "file": "ui/settings/LauncherIconPreference.kt",
+     "line": 216
     }
    ],
    "kind": "ValueConstant",
@@ -4683,6 +4657,12 @@
      "categoryTitles": [
       "配置"
      ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 90
     }
    ],
    "kind": "Excluded",
@@ -4822,10 +4802,39 @@
    "note": "功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1)"
   },
   {
+   "name": "key_leakcanary_enabled",
+   "value": "key_$_leakcanary_enabled",
+   "file": "strings_donottranslate.xml",
+   "line": 263,
+   "pages": [
+    {
+     "page": "fragment_developer_options.xml",
+     "pageLabel": "开发者选项",
+     "line": 154,
+     "tag": "ThemeColorSwitchPreference",
+     "categoryTitleRes": [
+      "text_debug"
+     ],
+     "categoryTitles": [
+      "调试"
+     ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "ui/settings/DeveloperOptionsFragment.kt",
+     "line": 24
+    }
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "LeakCanary 开关 (开发者选项, 页面不可见, XML 默认 true); 来自内存路线图 P1 的新资源, 由调度会话决定登记 (附录 C Q15)"
+  },
+  {
    "name": "key_local_network_permission",
    "value": "key_local_network_permission",
    "file": "strings_donottranslate.xml",
-   "line": 263,
+   "line": 264,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -4845,7 +4854,7 @@
    "name": "key_log_activity_input_bar_visible",
    "value": "key_$_log_activity_input_bar_visible",
    "file": "strings_donottranslate.xml",
-   "line": 264,
+   "line": 265,
    "sourceRefs": [
     {
      "file": "ui/log/LogActivity.kt",
@@ -4860,7 +4869,7 @@
    "name": "key_log_activity_log_coloring",
    "value": "key_$_log_activity_log_coloring",
    "file": "strings_donottranslate.xml",
-   "line": 265,
+   "line": 266,
    "sourceRefs": [
     {
      "file": "ui/log/LogPageConsoleSettings.kt",
@@ -4879,7 +4888,7 @@
    "name": "key_log_activity_text_size",
    "value": "key_$_log_activity_text_size",
    "file": "strings_donottranslate.xml",
-   "line": 266,
+   "line": 267,
    "sourceRefs": [
     {
      "file": "ui/log/LogPageConsoleSettings.kt",
@@ -4898,7 +4907,7 @@
    "name": "key_log_activity_time_format",
    "value": "key_$_log_activity_time_format",
    "file": "strings_donottranslate.xml",
-   "line": 267,
+   "line": 268,
    "sourceRefs": [
     {
      "file": "core/console/ConsoleTimeSettings.kt",
@@ -4913,7 +4922,7 @@
    "name": "key_log_activity_time_visible",
    "value": "key_$_log_activity_time_visible",
    "file": "strings_donottranslate.xml",
-   "line": 268,
+   "line": 269,
    "sourceRefs": [
     {
      "file": "core/console/ConsoleTimeSettings.kt",
@@ -4928,7 +4937,7 @@
    "name": "key_log_activity_typescript_console_visible",
    "value": "key_$_log_activity_typescript_console_visible",
    "file": "strings_donottranslate.xml",
-   "line": 269,
+   "line": 270,
    "sourceRefs": [
     {
      "file": "ui/log/LogActivity.kt",
@@ -4947,7 +4956,7 @@
    "name": "key_mail_settings",
    "value": "key_$_mail_settings",
    "file": "strings_donottranslate.xml",
-   "line": 270,
+   "line": 271,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -4969,7 +4978,7 @@
    "name": "key_manage_ignored_updates",
    "value": "key_$_manage_ignored_updates",
    "file": "strings_donottranslate.xml",
-   "line": 271,
+   "line": 272,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -4991,7 +5000,7 @@
    "name": "key_mcp_server_normally_closed",
    "value": "key_$_mcp_server_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 272,
+   "line": 273,
    "sourceRefs": [
     {
      "file": "app/tool/McpServerTool.kt",
@@ -5010,7 +5019,7 @@
    "name": "key_new_script_module_layer",
    "value": "key_$_new_script_module_layer",
    "file": "strings_donottranslate.xml",
-   "line": 273,
+   "line": 274,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5028,7 +5037,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 135
+     "line": 144
     }
    ],
    "kind": "Setting",
@@ -5039,7 +5048,7 @@
    "name": "key_night_mode",
    "value": "key_$_night_mode",
    "file": "strings_donottranslate.xml",
-   "line": 274,
+   "line": 275,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5060,20 +5069,8 @@
      "line": 979
     },
     {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 623
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 628
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 659
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 664
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 61
     },
     {
      "file": "ui/main/plugin/PluginFragment.kt",
@@ -5082,35 +5079,12 @@
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "列表项 (ViewUtils.MODE)"
+   "note": "列表项 (ViewUtils.MODE)",
+   "effect": "APPLY"
   },
   {
    "name": "key_night_mode_always_off",
    "value": "key_$_night_mode_always_off",
-   "file": "strings_donottranslate.xml",
-   "line": 275,
-   "arrays": [
-    {
-     "array": "keys_night_mode",
-     "owner": "key_night_mode"
-    }
-   ],
-   "sourceRefs": [
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 54
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 1674
-    }
-   ],
-   "kind": "ValueConstant",
-   "note": "候选值 (MODE.DAY)"
-  },
-  {
-   "name": "key_night_mode_always_on",
-   "value": "key_$_night_mode_always_on",
    "file": "strings_donottranslate.xml",
    "line": 276,
    "arrays": [
@@ -5121,8 +5095,40 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 41
+    },
+    {
+     "file": "ui/settings/NightModePreference.kt",
+     "line": 54
+    },
+    {
      "file": "util/ViewUtils.kt",
      "line": 1675
+    }
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值 (MODE.DAY)"
+  },
+  {
+   "name": "key_night_mode_always_on",
+   "value": "key_$_night_mode_always_on",
+   "file": "strings_donottranslate.xml",
+   "line": 277,
+   "arrays": [
+    {
+     "array": "keys_night_mode",
+     "owner": "key_night_mode"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 40
+    },
+    {
+     "file": "util/ViewUtils.kt",
+     "line": 1676
     }
    ],
    "kind": "ValueConstant",
@@ -5132,58 +5138,31 @@
    "name": "key_night_mode_enabled",
    "value": "key_$_night_mode_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 277,
+   "line": 278,
    "sourceRefs": [
-    {
-     "file": "App.kt",
-     "line": 188
-    },
     {
      "file": "core/plugin/center/PluginCenterFragment.kt",
      "line": 980
     },
     {
-     "file": "core/pref/Pref.kt",
-     "line": 59
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 677
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 67
     },
     {
      "file": "ui/main/plugin/PluginFragment.kt",
      "line": 65
-    },
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 34
-    },
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 39
-    },
-    {
-     "file": "ui/settings/NightModePreference.kt",
-     "line": 44
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 133
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 134
     }
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "与 `key_night_mode` 一起由 NightModePreference 与抽屉写入"
+   "note": "与 `key_night_mode` 一起由 NightModePreference 与抽屉写入",
+   "effect": "APPLY"
   },
   {
    "name": "key_night_mode_follow_system",
    "value": "key_$_night_mode_follow_system",
    "file": "strings_donottranslate.xml",
-   "line": 278,
+   "line": 279,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5195,12 +5174,16 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 39
+    },
+    {
      "file": "ui/settings/NightModePreference.kt",
      "line": 55
     },
     {
      "file": "util/ViewUtils.kt",
-     "line": 1676
+     "line": 1677
     }
    ],
    "kind": "ValueConstant",
@@ -5210,11 +5193,15 @@
    "name": "key_night_mode_null",
    "value": "key_$_night_mode_null",
    "file": "strings_donottranslate.xml",
-   "line": 279,
+   "line": 280,
    "sourceRefs": [
     {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 42
+    },
+    {
      "file": "util/ViewUtils.kt",
-     "line": 1677
+     "line": 1678
     }
    ],
    "kind": "ValueConstant",
@@ -5224,7 +5211,7 @@
    "name": "key_nodejs_doctor_report",
    "value": "key_$_nodejs_doctor_report",
    "file": "strings_donottranslate.xml",
-   "line": 280,
+   "line": 281,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5246,7 +5233,7 @@
    "name": "key_nodejs_inspector_enabled",
    "value": "key_$_nodejs_inspector_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 281,
+   "line": 282,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5275,7 +5262,7 @@
    "name": "key_not_showing_main_activity",
    "value": "key_$_not_showing_main_activity",
    "file": "strings_donottranslate.xml",
-   "line": 282,
+   "line": 283,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -5303,7 +5290,7 @@
    "name": "key_pc_server_address_history",
    "value": "key_$_pc_server_address_histories",
    "file": "strings_donottranslate.xml",
-   "line": 283,
+   "line": 284,
    "sourceRefs": [
     {
      "file": "pluginclient/JsonSocketClient.kt",
@@ -5322,7 +5309,7 @@
    "name": "key_plugin_center_auto_check_updates",
    "value": "key_$_plugin_center_auto_check_updates",
    "file": "strings_donottranslate.xml",
-   "line": 284,
+   "line": 285,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5355,7 +5342,7 @@
    "name": "key_plugin_center_last_online_check_ts",
    "value": "key_$_plugin_center_last_online_check_ts",
    "file": "strings_donottranslate.xml",
-   "line": 285,
+   "line": 286,
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
@@ -5374,7 +5361,7 @@
    "name": "key_plugin_center_show_official_plugins",
    "value": "key_$_plugin_center_show_official_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 286,
+   "line": 287,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5407,7 +5394,7 @@
    "name": "key_plugin_center_show_third_party_plugins",
    "value": "key_$_plugin_center_show_third_party_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 287,
+   "line": 288,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5440,7 +5427,7 @@
    "name": "key_post_notifications_permission",
    "value": "key_$_post_notifications_permission",
    "file": "strings_donottranslate.xml",
-   "line": 288,
+   "line": 289,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -5460,7 +5447,7 @@
    "name": "key_post_notifications_permission_request_attempted",
    "value": "key_$_post_notifications_permission_request_attempted",
    "file": "strings_donottranslate.xml",
-   "line": 289,
+   "line": 290,
    "sourceRefs": [
     {
      "file": "permission/PostNotificationsPermission.kt",
@@ -5487,7 +5474,7 @@
    "name": "key_pref_bundle_default_item",
    "value": "key_$_pref_bundle_default_item",
    "file": "strings_donottranslate.xml",
-   "line": 290,
+   "line": 291,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
@@ -5495,7 +5482,7 @@
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 215
+     "line": 216
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5509,7 +5496,7 @@
    "name": "key_pref_bundle_disabled_items",
    "value": "key_$_pref_bundle_disabled_items",
    "file": "strings_donottranslate.xml",
-   "line": 291,
+   "line": 292,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
@@ -5517,7 +5504,7 @@
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 216
+     "line": 217
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5531,7 +5518,7 @@
    "name": "key_record_toast",
    "value": "key_$_record_toast",
    "file": "strings_donottranslate.xml",
-   "line": 292,
+   "line": 293,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5549,7 +5536,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 267
+     "line": 281
     }
    ],
    "kind": "Setting",
@@ -5560,7 +5547,7 @@
    "name": "key_release_history",
    "value": "key_$_release_history",
    "file": "strings_donottranslate.xml",
-   "line": 293,
+   "line": 294,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5582,7 +5569,7 @@
    "name": "key_restart_strategy",
    "value": "key_$_restart_strategy",
    "file": "strings_donottranslate.xml",
-   "line": 294,
+   "line": 295,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5599,8 +5586,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 235
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 54
     }
    ],
    "kind": "Setting",
@@ -5611,7 +5598,7 @@
    "name": "key_restart_strategy_quick",
    "value": "key_$_restart_strategy_quick",
    "file": "strings_donottranslate.xml",
-   "line": 295,
+   "line": 296,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5623,8 +5610,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 235
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 31
+    },
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 102
     }
    ],
    "kind": "ValueConstant",
@@ -5634,11 +5625,17 @@
    "name": "key_restart_strategy_scheduled",
    "value": "key_$_restart_strategy_scheduled",
    "file": "strings_donottranslate.xml",
-   "line": 296,
+   "line": 297,
    "arrays": [
     {
      "array": "keys_restart_strategy",
      "owner": "key_restart_strategy"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 32
     }
    ],
    "kind": "ValueConstant",
@@ -5648,7 +5645,7 @@
    "name": "key_rhino_java_primitive_wrap",
    "value": "key_$_rhino_java_primitive_wrap",
    "file": "strings_donottranslate.xml",
-   "line": 297,
+   "line": 298,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5677,7 +5674,7 @@
    "name": "key_root_manager_apps_cache",
    "value": "root_manager_apps_cache",
    "file": "strings_donottranslate.xml",
-   "line": 298,
+   "line": 299,
    "sourceRefs": [
     {
      "file": "ui/accessibility/RootManagerAppsDialog.kt",
@@ -5695,7 +5692,7 @@
    "name": "key_root_manager_apps_custom",
    "value": "root_manager_apps_custom",
    "file": "strings_donottranslate.xml",
-   "line": 299,
+   "line": 300,
    "sourceRefs": [
     {
      "file": "ui/accessibility/RootManagerAppsDialog.kt",
@@ -5718,7 +5715,7 @@
    "name": "key_root_mode",
    "value": "key_$_root_mode",
    "file": "strings_donottranslate.xml",
-   "line": 300,
+   "line": 301,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5736,11 +5733,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 214
+     "line": 224
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 218
+     "line": 228
     }
    ],
    "kind": "Setting",
@@ -5751,7 +5748,7 @@
    "name": "key_root_mode_auto_detect",
    "value": "key_$_root_mode_auto_detect",
    "file": "strings_donottranslate.xml",
-   "line": 301,
+   "line": 302,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5774,7 +5771,7 @@
    "name": "key_root_mode_force_non_root",
    "value": "key_$_root_mode_force_non_root",
    "file": "strings_donottranslate.xml",
-   "line": 302,
+   "line": 303,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5794,7 +5791,7 @@
    "name": "key_root_mode_force_root",
    "value": "key_$_root_mode_force_root",
    "file": "strings_donottranslate.xml",
-   "line": 303,
+   "line": 304,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5814,7 +5811,7 @@
    "name": "key_root_record_out_file_type",
    "value": "key_$_root_record_out_file_type",
    "file": "strings_donottranslate.xml",
-   "line": 304,
+   "line": 305,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5832,7 +5829,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 341
+     "line": 359
     }
    ],
    "kind": "Setting",
@@ -5843,7 +5840,7 @@
    "name": "key_root_record_out_file_type_binary",
    "value": "key_$_root_record_out_file_type_binary",
    "file": "strings_donottranslate.xml",
-   "line": 305,
+   "line": 306,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -5856,7 +5853,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 341
+     "line": 359
     }
    ],
    "kind": "ValueConstant",
@@ -5866,7 +5863,7 @@
    "name": "key_root_record_out_file_type_js",
    "value": "key_$_root_record_out_file_type_js",
    "file": "strings_donottranslate.xml",
-   "line": 306,
+   "line": 307,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -5880,7 +5877,7 @@
    "name": "key_run_on_boot_inrt",
    "value": "key_$_run_on_boot_inrt",
    "file": "strings_donottranslate.xml",
-   "line": 307,
+   "line": 308,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -5904,23 +5901,11 @@
    "name": "key_scheduled_restart_backend",
    "value": "key_$_scheduled_restart_backend",
    "file": "strings_donottranslate.xml",
-   "line": 308,
+   "line": 309,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 239
-    },
-    {
-     "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-     "line": 40
-    },
-    {
-     "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-     "line": 90
-    },
-    {
-     "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-     "line": 91
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 60
     }
    ],
    "kind": "Setting",
@@ -5931,8 +5916,12 @@
    "name": "key_scheduled_restart_backend_alarm_manager",
    "value": "key_$_scheduled_restart_backend_alarm_manager",
    "file": "strings_donottranslate.xml",
-   "line": 309,
+   "line": 310,
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 36
+    },
     {
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
      "line": 41
@@ -5953,14 +5942,18 @@
    "name": "key_scheduled_restart_backend_work_manager",
    "value": "key_$_scheduled_restart_backend_work_manager",
    "file": "strings_donottranslate.xml",
-   "line": 310,
+   "line": 311,
    "defaultOf": [
     "default_key_scheduled_restart_backend"
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 239
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 37
+    },
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 107
     },
     {
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
@@ -5974,19 +5967,11 @@
    "name": "key_scheduled_restart_delay",
    "value": "key_$_scheduled_restart_delay",
    "file": "strings_donottranslate.xml",
-   "line": 311,
+   "line": 312,
    "sourceRefs": [
     {
-     "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-     "line": 34
-    },
-    {
-     "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-     "line": 93
-    },
-    {
-     "file": "util/IntentUtils.kt",
-     "line": 373
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 67
     }
    ],
    "kind": "Setting",
@@ -5997,7 +5982,7 @@
    "name": "key_screen_capture_request_delay",
    "value": "key_$_screen_capture_request_delay_ms",
    "file": "strings_donottranslate.xml",
-   "line": 312,
+   "line": 313,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6015,7 +6000,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 75
+     "line": 84
     },
     {
      "file": "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
@@ -6034,7 +6019,7 @@
    "name": "key_script_module_debug_print",
    "value": "key_$_script_module_debug_print",
    "file": "strings_donottranslate.xml",
-   "line": 313,
+   "line": 314,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6052,7 +6037,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 145
+     "line": 154
     }
    ],
    "kind": "Setting",
@@ -6063,7 +6048,7 @@
    "name": "key_script_module_debug_print_disabled_modules",
    "value": "key_$_script_module_debug_print_disabled_modules",
    "file": "strings_donottranslate.xml",
-   "line": 314,
+   "line": 315,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6081,11 +6066,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 149
+     "line": 158
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 150
+     "line": 159
     }
    ],
    "kind": "Setting",
@@ -6096,15 +6081,19 @@
    "name": "key_scripts_after_app_restart",
    "value": "key_$_scripts_after_app_restart",
    "file": "strings_donottranslate.xml",
-   "line": 315,
+   "line": 316,
    "sourceRefs": [
     {
-     "file": "util/IntentUtils.kt",
-     "line": 439
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 92
     },
     {
      "file": "util/IntentUtils.kt",
-     "line": 477
+     "line": 440
+    },
+    {
+     "file": "util/IntentUtils.kt",
+     "line": 478
     }
    ],
    "kind": "Excluded",
@@ -6114,15 +6103,15 @@
    "name": "key_server_address",
    "value": "key_$_server_address",
    "file": "strings_donottranslate.xml",
-   "line": 316,
+   "line": 317,
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 335
+     "line": 353
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 338
+     "line": 356
     }
    ],
    "kind": "Setting",
@@ -6133,7 +6122,7 @@
    "name": "key_server_mode_lan_discovery",
    "value": "key_$_server_mode_lan_discovery",
    "file": "strings_donottranslate.xml",
-   "line": 317,
+   "line": 318,
    "sourceRefs": [
     {
      "file": "pluginclient/DevPluginPrefs.kt",
@@ -6152,7 +6141,7 @@
    "name": "key_server_mode_manager_clients_level",
    "value": "key_$_server_mode_manager_clients_level",
    "file": "strings_donottranslate.xml",
-   "line": 318,
+   "line": 319,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6167,7 +6156,7 @@
    "name": "key_server_mode_manager_control_level",
    "value": "key_$_server_mode_manager_control_level",
    "file": "strings_donottranslate.xml",
-   "line": 319,
+   "line": 320,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6182,7 +6171,7 @@
    "name": "key_server_mode_manager_settings_collapsed",
    "value": "key_$_server_mode_manager_settings_collapsed",
    "file": "strings_donottranslate.xml",
-   "line": 320,
+   "line": 321,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6197,7 +6186,7 @@
    "name": "key_server_mode_manager_status_level",
    "value": "key_$_server_mode_manager_status_level",
    "file": "strings_donottranslate.xml",
-   "line": 321,
+   "line": 322,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6212,7 +6201,7 @@
    "name": "key_server_mode_notify_connection_changes",
    "value": "key_$_server_mode_notify_connection_changes",
    "file": "strings_donottranslate.xml",
-   "line": 322,
+   "line": 323,
    "sourceRefs": [
     {
      "file": "pluginclient/DevPluginPrefs.kt",
@@ -6231,7 +6220,7 @@
    "name": "key_server_mode_restore_on_launch",
    "value": "key_$_server_mode_restore_on_launch",
    "file": "strings_donottranslate.xml",
-   "line": 323,
+   "line": 324,
    "sourceRefs": [
     {
      "file": "pluginclient/DevPluginPrefs.kt",
@@ -6250,7 +6239,7 @@
    "name": "key_server_socket_normally_closed",
    "value": "key_$_server_socket_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 324,
+   "line": 325,
    "sourceRefs": [
     {
      "file": "pluginclient/JsonSocketServer.kt",
@@ -6269,7 +6258,7 @@
    "name": "key_setup_wizard_welcome_done",
    "value": "key_$_setup_wizard_welcome_done",
    "file": "strings_donottranslate.xml",
-   "line": 325,
+   "line": 326,
    "sourceRefs": [
     {
      "file": "ui/settings/ResetSetupWizardWelcomePreference.kt",
@@ -6292,7 +6281,7 @@
    "name": "key_setup_wizards",
    "value": "key_$_setup_wizards",
    "file": "strings_donottranslate.xml",
-   "line": 326,
+   "line": 327,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6309,6 +6298,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 91
+    },
+    {
      "file": "ui/settings/PreferencesFragment.kt",
      "line": 24
     }
@@ -6320,7 +6313,7 @@
    "name": "key_stable_mode",
    "value": "key_$_stable_mode",
    "file": "strings_donottranslate.xml",
-   "line": 327,
+   "line": 328,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6338,7 +6331,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 223
+     "line": 233
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
@@ -6371,7 +6364,7 @@
    "name": "key_theme_color",
    "value": "key_$_theme_color",
    "file": "strings_donottranslate.xml",
-   "line": 328,
+   "line": 329,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6386,6 +6379,12 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 112
+    }
+   ],
    "kind": "Excluded",
    "note": "动作条目 (打开主题色选择), 值存于 `key_theme_color_primary` / `_primary_dark` / `_accent`"
   },
@@ -6393,76 +6392,55 @@
    "name": "key_theme_color_accent",
    "value": "key_$_theme_color_accent",
    "file": "strings_donottranslate.xml",
-   "line": 329,
+   "line": 330,
    "sourceRefs": [
     {
-     "file": "theme/ThemeColor.kt",
-     "line": 45
-    },
-    {
-     "file": "theme/ThemeColor.kt",
-     "line": 60
-    },
-    {
-     "file": "theme/ThemeColor.kt",
-     "line": 74
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 90
     }
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "主题色三项之一"
+   "note": "主题色三项之一",
+   "effect": "APPLY"
   },
   {
    "name": "key_theme_color_primary",
    "value": "key_$_theme_color_primary",
    "file": "strings_donottranslate.xml",
-   "line": 330,
+   "line": 331,
    "sourceRefs": [
     {
-     "file": "theme/ThemeColor.kt",
-     "line": 43
-    },
-    {
-     "file": "theme/ThemeColor.kt",
-     "line": 59
-    },
-    {
-     "file": "theme/ThemeColor.kt",
-     "line": 72
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 78
     }
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "主题色三项之一"
+   "note": "主题色三项之一",
+   "effect": "APPLY"
   },
   {
    "name": "key_theme_color_primary_dark",
    "value": "key_$_theme_color_primary_dark",
    "file": "strings_donottranslate.xml",
-   "line": 331,
+   "line": 332,
    "sourceRefs": [
     {
-     "file": "theme/ThemeColor.kt",
-     "line": 44
-    },
-    {
-     "file": "theme/ThemeColor.kt",
-     "line": 61
-    },
-    {
-     "file": "theme/ThemeColor.kt",
-     "line": 73
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 84
     }
    ],
    "kind": "Setting",
    "category": "appearance",
-   "note": "主题色三项之一"
+   "note": "主题色三项之一",
+   "effect": "APPLY"
   },
   {
    "name": "key_timed_task_backend",
    "value": "key_$_timed_task_backend",
    "file": "strings_donottranslate.xml",
-   "line": 332,
+   "line": 333,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6491,7 +6469,7 @@
    "name": "key_timed_task_backend_alarm",
    "value": "key_$_timed_task_backend_alarm",
    "file": "strings_donottranslate.xml",
-   "line": 333,
+   "line": 334,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6518,7 +6496,7 @@
    "name": "key_timed_task_backend_job",
    "value": "key_$_timed_task_backend_job",
    "file": "strings_donottranslate.xml",
-   "line": 334,
+   "line": 335,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6538,7 +6516,7 @@
    "name": "key_timed_task_backend_work",
    "value": "key_$_timed_task_backend_work",
    "file": "strings_donottranslate.xml",
-   "line": 335,
+   "line": 336,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6558,7 +6536,7 @@
    "name": "key_trash_and_version_history_settings",
    "value": "key_$_trash_and_version_history_settings",
    "file": "strings_donottranslate.xml",
-   "line": 336,
+   "line": 337,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6573,6 +6551,12 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 75
+    }
+   ],
    "kind": "Excluded",
    "note": "动作条目 (打开回收站与版本历史子页)"
   },
@@ -6580,7 +6564,7 @@
    "name": "key_trash_max_days",
    "value": "key_$_trash_max_days",
    "file": "strings_donottranslate.xml",
-   "line": 337,
+   "line": 338,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6597,12 +6581,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 43
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 38
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 54
     }
    ],
    "kind": "Setting",
@@ -6613,7 +6593,7 @@
    "name": "key_trash_max_total_bytes",
    "value": "key_$_trash_max_total_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 338,
+   "line": 339,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6630,20 +6610,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "storage/history/HistoryPrefs.kt",
-     "line": 48
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 825
-    },
-    {
-     "file": "ui/settings/RetentionLimitSettings.kt",
-     "line": 39
-    },
-    {
-     "file": "ui/storage/TrashActivity.kt",
-     "line": 115
+     "file": "core/pref/keys/HistoryKeys.kt",
+     "line": 57
     }
    ],
    "kind": "Setting",
@@ -6654,7 +6622,7 @@
    "name": "key_updates_checked_states_cleared",
    "value": "key_$_updates_checked_states_cleared",
    "file": "strings_donottranslate.xml",
-   "line": 339,
+   "line": 340,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6676,7 +6644,7 @@
    "name": "key_use_volume_control_record",
    "value": "key_$_use_volume_control_record",
    "file": "strings_donottranslate.xml",
-   "line": 340,
+   "line": 341,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6694,7 +6662,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 169
+     "line": 178
     }
    ],
    "kind": "Setting",
@@ -6705,7 +6673,7 @@
    "name": "key_use_volume_control_running",
    "value": "key_$_use_volume_control_running",
    "file": "strings_donottranslate.xml",
-   "line": 341,
+   "line": 342,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6723,7 +6691,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 162
+     "line": 171
     },
     {
      "file": "inrt/Pref.kt",
@@ -6748,7 +6716,7 @@
    "name": "key_version_history_restore_does_not_auto_save_to_disk",
    "value": "key_$_version_history_restore_does_not_auto_save_to_disk",
    "file": "strings_donottranslate.xml",
-   "line": 342,
+   "line": 343,
    "sourceRefs": [
     {
      "file": "storage/history/VersionHistoryController.kt",
@@ -6763,23 +6731,11 @@
    "name": "key_working_directory",
    "value": "key_$_working_directory",
    "file": "strings_donottranslate.xml",
-   "line": 343,
+   "line": 344,
    "sourceRefs": [
     {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 21
-    },
-    {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 28
-    },
-    {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 36
-    },
-    {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 63
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 44
     }
    ],
    "kind": "Setting",
@@ -6791,7 +6747,7 @@
    "name": "key_working_directory_history",
    "value": "key_$_working_directory_histories",
    "file": "strings_donottranslate.xml",
-   "line": 344,
+   "line": 345,
    "sourceRefs": [
     {
      "file": "util/WorkingDirectoryUtils.kt",
@@ -6810,11 +6766,11 @@
    "name": "key_working_directory_initialized",
    "value": "key_$_working_directory_initialized",
    "file": "strings_donottranslate.xml",
-   "line": 345,
+   "line": 346,
    "sourceRefs": [
     {
      "file": "util/WorkingDirectoryUtils.kt",
-     "line": 58
+     "line": 54
     }
    ],
    "kind": "State",
@@ -8779,7 +8735,7 @@
   {
    "file": "core/pref/Pref.kt",
    "lines": [
-    38
+    47
    ]
   },
   {
@@ -8836,7 +8792,6 @@
   }
  ],
  "prefUsers": [
-  "App.kt",
   "app/tool/JsonSocketClientTool.kt",
   "app/tool/McpServerTool.kt",
   "core/accessibility/AccessibilityServiceUsher.kt",
@@ -8845,18 +8800,20 @@
   "core/accessibility/diagnostics/A11yServiceDiagnostics.kt",
   "core/console/ConsoleTimeSettings.kt",
   "core/plugin/agent/ThreeStoveAgentConnectionOwner.kt",
-  "core/plugin/batchrename/BatchRenameHistoryPrefs.kt",
   "core/plugin/center/PluginCenterFragment.kt",
   "core/plugin/center/PluginMountStore.kt",
   "core/plugin/center/PluginOnlineSettingsStore.kt",
   "core/plugin/center/PluginUpdateCheckStore.kt",
   "core/plugin/center/PluginVariantPriorityStore.kt",
   "core/plugin/dex/DexCompilerOptInStore.kt",
-  "core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt",
   "core/plugin/r8/R8CompilerOptInStore.kt",
   "core/plugin/terminal/TerminalLegacyCleanup.kt",
-  "core/pref/Language.kt",
   "core/pref/PrefRxLongObserver.kt",
+  "core/pref/SettingKey.kt",
+  "core/pref/SettingsJson.kt",
+  "core/pref/keys/AppearanceKeys.kt",
+  "core/pref/keys/ExplorerKeys.kt",
+  "core/pref/keys/GeneralKeys.kt",
   "core/record/GlobalActionRecorder.java",
   "engine/NodeScreenCaptureSession.kt",
   "event/GlobalKeyObserver.java",
@@ -8867,7 +8824,6 @@
   "inrt/SettingsActivity.kt",
   "inrt/SplashActivity.kt",
   "inrt/launch/AssetsProjectLauncher.kt",
-  "model/explorer/ExplorerFileProvider.java",
   "network/UpdateChecker.java",
   "permission/PostNotificationsPermission.kt",
   "pluginclient/DevPluginClientReconnector.kt",
@@ -8881,8 +8837,7 @@
   "runtime/api/augment/colors/ColorsTheme.kt",
   "runtime/api/augment/settings/Settings.kt",
   "runtime/api/modules/ScriptModuleLayer.kt",
-  "storage/history/HistoryPrefs.kt",
-  "theme/ThemeColor.kt",
+  "runtime/api/modules/colors/ColorsThemeModule.kt",
   "theme/ThemeColorManager.kt",
   "theme/app/ColorLibrariesActivity.kt",
   "theme/app/ColorSelectBaseActivity.kt",
@@ -8896,7 +8851,6 @@
   "ui/accessibility/A11yServiceManagerDialog.kt",
   "ui/accessibility/RootManagerAppsDialog.kt",
   "ui/common/ManagerSettingsSection.kt",
-  "ui/common/ScriptOperations.java",
   "ui/devplugin/ClientModeManagerDialog.kt",
   "ui/devplugin/ConnectionManagerDialog.kt",
   "ui/doc/DocumentationPageController.kt",
@@ -8909,9 +8863,6 @@
   "ui/edit/editor/engine/EditorEnginePreferences.kt",
   "ui/edit/editor/loading/EditorTextLoadPolicy.kt",
   "ui/edit/theme/Themes.java",
-  "ui/explorer/ExplorerPathMenu.kt",
-  "ui/explorer/ExplorerView.kt",
-  "ui/explorer/ExplorerViewHelper.kt",
   "ui/floating/CircularMenu.java",
   "ui/floating/CircularMenuWindow.java",
   "ui/floating/controller/FloatingControllerWindow.kt",
@@ -8924,7 +8875,6 @@
   "ui/log/LogBottomSheet.kt",
   "ui/log/LogPageConsoleSettings.kt",
   "ui/main/MainActivity.kt",
-  "ui/main/drawer/DrawerFragment.kt",
   "ui/main/drawer/DrawerMenuToggleableItem.kt",
   "ui/main/plugin/PluginFragment.kt",
   "ui/settings/CheckForUpdatesPreference.kt",
@@ -8936,11 +8886,8 @@
   "ui/settings/KeepScreenOnWhenInForegroundPreference.kt",
   "ui/settings/LauncherIconPreference.kt",
   "ui/settings/ManageIgnoredUpdatesPreference.kt",
-  "ui/settings/NightModePreference.kt",
   "ui/settings/PreferencesFragment.kt",
   "ui/settings/ResetSetupWizardWelcomePreference.kt",
-  "ui/settings/RetentionLimitSettings.kt",
-  "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
   "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
   "ui/settings/ScreenCaptureRequestDelayPreference.kt",
   "ui/settings/ScriptModuleDebugPrintModulesPreference.kt",
@@ -8949,7 +8896,6 @@
   "ui/widget/PrefSwitch.java",
   "ui/wizard/SetupWizards.kt",
   "ui/wizard/permission/PermissionWizardRunner.kt",
-  "util/DocsUtils.kt",
   "util/IntentUtils.kt",
   "util/RootUtils.java",
   "util/UpdateUtils.kt",
@@ -9825,13 +9771,15 @@
   ],
   "key_app_language": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "core/pref/Language.kt",
-    "line": 78,
-    "method": "getStringOrNull",
-    "type": "String"
+    "form": "R.string",
+    "ref": "default_key_app_language",
+    "resolved": "key_app_language_auto",
+    "value": "key_$_app_language_auto",
+    "expr": "keyResource(R.string.default_key_app_language, \"default_key_app_language\")",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 53,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -9852,7 +9800,7 @@
     "value": "true",
     "ref": "pref_auto_check_for_updates",
     "file": "core/pref/Pref.kt",
-    "line": 175,
+    "line": 184,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -9869,12 +9817,12 @@
   ],
   "key_auto_night_mode_enabled": [
    {
-    "expr": "AutoNightMode.isFunctional()",
     "form": "表达式",
+    "expr": "AutoNightMode.isFunctional()",
     "value": "运行时: AutoNightMode.isFunctional()",
-    "file": "util/ViewUtils.kt",
-    "line": 129,
-    "method": "getBoolean",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 71,
+    "method": "SettingKey.Bool",
     "type": "Boolean",
     "ignoreForConflict": true,
     "manual": true
@@ -9892,13 +9840,13 @@
   ],
   "key_batch_rename_history_retention": [
    {
-    "expr": "BatchRenameJournalStore.MAX_BATCHES",
+    "expr": "SettingDefault.of(BatchRenameJournalStore.MAX_BATCHES)",
     "form": "伴生常量",
     "value": "20",
     "via": "常量 MAX_BATCHES (core/plugin/batchrename/BatchRenameJournalStore.kt:231)",
-    "file": "core/plugin/batchrename/BatchRenameHistoryPrefs.kt",
-    "line": 13,
-    "method": "getInt",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 73,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -9962,12 +9910,12 @@
   ],
   "key_delete_permanently_also_clear_history": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 64,
-    "method": "getBoolean",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 67,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9982,13 +9930,15 @@
   ],
   "key_documentation_source": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "util/DocsUtils.kt",
-    "line": 23,
-    "method": "getStringOrNull",
-    "type": "String"
+    "form": "R.string",
+    "ref": "default_key_documentation_source",
+    "resolved": "key_documentation_source_local",
+    "value": "key_$_documentation_source_local",
+    "expr": "keyResource(R.string.default_key_documentation_source, \"default_key_documentation_source\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 47,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10004,13 +9954,13 @@
   ],
   "key_drafts_max_days": [
    {
-    "expr": "DEFAULT_DRAFTS_MAX_DAYS",
+    "expr": "SettingDefault.of(DEFAULT_DRAFTS_MAX_DAYS)",
     "form": "伴生常量",
     "value": "7",
-    "via": "常量 DEFAULT_DRAFTS_MAX_DAYS (storage/history/HistoryPrefs.kt:76)",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 53,
-    "method": "getInt",
+    "via": "常量 DEFAULT_DRAFTS_MAX_DAYS (core/pref/keys/HistoryKeys.kt:34)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 60,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -10018,11 +9968,11 @@
    {
     "value": "209715200",
     "form": "伴生常量",
-    "via": "常量 DEFAULT_DRAFTS_MAX_TOTAL_BYTES (storage/history/HistoryPrefs.kt:77)",
-    "expr": "DEFAULT_DRAFTS_MAX_TOTAL_BYTES",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 58,
-    "method": "getLong",
+    "via": "常量 DEFAULT_DRAFTS_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:35)",
+    "expr": "SettingDefault.of(DEFAULT_DRAFTS_MAX_TOTAL_BYTES)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 63,
+    "method": "SettingKey.Long",
     "type": "Long"
    }
   ],
@@ -10095,9 +10045,9 @@
     "form": "R.integer",
     "value": "524288",
     "ref": "editor_code_highlight_threshold_default_value",
-    "via": "局部变量 defValue (core/pref/Pref.kt:82)",
+    "via": "局部变量 defValue (core/pref/Pref.kt:91)",
     "file": "core/pref/Pref.kt",
-    "line": 83,
+    "line": 92,
     "method": "getInt",
     "type": "Int"
    }
@@ -10247,9 +10197,9 @@
     "form": "R.integer",
     "value": "524288",
     "ref": "editor_large_file_mode_threshold_default_value",
-    "via": "局部变量 defValue (core/pref/Pref.kt:95)",
+    "via": "局部变量 defValue (core/pref/Pref.kt:104)",
     "file": "core/pref/Pref.kt",
-    "line": 96,
+    "line": 105,
     "method": "getInt",
     "type": "Int"
    }
@@ -10350,7 +10300,7 @@
     "value": null,
     "note": "函数参数 defValue, 默认值由调用方决定",
     "file": "core/pref/Pref.kt",
-    "line": 347,
+    "line": 365,
     "method": "getInt",
     "type": "Int"
    },
@@ -10391,7 +10341,7 @@
     "expr": "(方法默认)",
     "value": "null",
     "file": "core/pref/Pref.kt",
-    "line": 273,
+    "line": 287,
     "method": "getStringOrNull",
     "type": "String"
    },
@@ -10556,7 +10506,7 @@
     "value": "true",
     "ref": "pref_enable_a11y_service_with_root_access",
     "file": "core/pref/Pref.kt",
-    "line": 315,
+    "line": 329,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10597,7 +10547,7 @@
     "value": "true",
     "ref": "pref_enable_a11y_service_with_secure_settings",
     "file": "core/pref/Pref.kt",
-    "line": 321,
+    "line": 335,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10619,7 +10569,7 @@
     "value": "true",
     "ref": "pref_enable_a11y_service_with_shizuku",
     "file": "core/pref/Pref.kt",
-    "line": 327,
+    "line": 341,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10636,33 +10586,24 @@
   ],
   "key_explorer_file_default_prefix": [
    {
-    "expr": "0",
+    "expr": "SettingDefault.of(0)",
     "form": "调用处字面量",
     "value": "0",
-    "file": "ui/common/ScriptOperations.java",
-    "line": 166,
-    "method": "getInt",
-    "type": "Int"
-   },
-   {
-    "expr": "0",
-    "form": "调用处字面量",
-    "value": "0",
-    "file": "ui/common/ScriptOperations.java",
-    "line": 205,
-    "method": "getInt",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 69,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
   "key_explorer_playback_history": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_explorer_playback_history)",
     "form": "R.bool",
-    "value": "false",
     "ref": "pref_explorer_playback_history",
-    "file": "core/pref/Pref.kt",
-    "line": 247,
-    "method": "getBoolean",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_explorer_playback_history, \"pref_explorer_playback_history\")",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 62,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10683,7 +10624,7 @@
     "value": "false",
     "ref": "pref_extending_js_build_in_objects",
     "file": "core/pref/Pref.kt",
-    "line": 123,
+    "line": 132,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10700,48 +10641,15 @@
   ],
   "key_file_extensions": [
    {
-    "expr": "key(R.string.default_key_file_extensions)",
     "form": "R.string",
-    "value": "key_$_file_extensions_show_all",
     "ref": "default_key_file_extensions",
     "resolved": "key_file_extensions_show_all",
-    "file": "core/pref/Pref.kt",
-    "line": 254,
-    "method": "getString",
-    "type": "String"
-   },
-   {
-    "expr": "key(R.string.default_key_file_extensions)",
-    "form": "R.string",
     "value": "key_$_file_extensions_show_all",
-    "ref": "default_key_file_extensions",
-    "resolved": "key_file_extensions_show_all",
-    "file": "core/pref/Pref.kt",
-    "line": 258,
-    "method": "getString",
-    "type": "String"
-   },
-   {
-    "expr": "key(R.string.default_key_file_extensions)",
-    "form": "R.string",
-    "value": "key_$_file_extensions_show_all",
-    "ref": "default_key_file_extensions",
-    "resolved": "key_file_extensions_show_all",
-    "file": "core/pref/Pref.kt",
-    "line": 262,
-    "method": "getString",
-    "type": "String"
-   },
-   {
-    "expr": "context.getString(R.string.default_key_file_extensions)",
-    "form": "R.string",
-    "value": "key_$_file_extensions_show_all",
-    "ref": "default_key_file_extensions",
-    "resolved": "key_file_extensions_show_all",
-    "file": "ui/explorer/ExplorerPathMenu.kt",
-    "line": 327,
-    "method": "getString",
-    "type": "String"
+    "expr": "keyResource(R.string.default_key_file_extensions, \"default_key_file_extensions\")",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 56,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10766,6 +10674,37 @@
     "type": "Boolean"
    }
   ],
+  "key_foreground_service": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 80,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(prefKey, false)",
+    "value": "false",
+    "file": "ui/main/drawer/DrawerMenuToggleableItem.kt",
+    "line": 258,
+    "note": "抽屉 \"前台服务\" 开关 (prefKey = R.string.key_foreground_service)",
+    "manual": true
+   },
+   {
+    "form": "调用处字面量",
+    "type": "Boolean",
+    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
+    "value": "false",
+    "file": "runtime/api/augment/settings/Settings.kt",
+    "line": 50,
+    "note": "脚本 API settings.isEnabled",
+    "manual": true
+   }
+  ],
   "key_gesture_observing": [
    {
     "expr": "resources.getBoolean(R.bool.pref_gesture_observing)",
@@ -10773,7 +10712,7 @@
     "value": "false",
     "ref": "pref_gesture_observing",
     "file": "core/pref/Pref.kt",
-    "line": 228,
+    "line": 238,
     "method": "getBoolean",
     "type": "Boolean"
    }
@@ -10785,7 +10724,7 @@
     "value": "false",
     "ref": "pref_guard_mode",
     "file": "core/pref/Pref.kt",
-    "line": 154,
+    "line": 163,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10802,15 +10741,15 @@
   ],
   "key_hidden_files": [
    {
-    "expr": "key(R.string.default_key_hidden_files)",
     "form": "R.string",
-    "value": "key_$_hidden_files_not_show",
     "ref": "default_key_hidden_files",
     "resolved": "key_hidden_files_not_show",
-    "file": "core/pref/Pref.kt",
-    "line": 243,
-    "method": "getString",
-    "type": "String"
+    "value": "key_$_hidden_files_not_show",
+    "expr": "keyResource(R.string.default_key_hidden_files, \"default_key_hidden_files\")",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 50,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10826,13 +10765,13 @@
   ],
   "key_history_max_days": [
    {
-    "expr": "DEFAULT_HISTORY_MAX_DAYS",
+    "expr": "SettingDefault.of(DEFAULT_HISTORY_MAX_DAYS)",
     "form": "伴生常量",
     "value": "30",
-    "via": "常量 DEFAULT_HISTORY_MAX_DAYS (storage/history/HistoryPrefs.kt:68)",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 23,
-    "method": "getInt",
+    "via": "常量 DEFAULT_HISTORY_MAX_DAYS (core/pref/keys/HistoryKeys.kt:26)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 42,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -10840,11 +10779,11 @@
    {
     "value": "20971520",
     "form": "伴生常量",
-    "via": "常量 DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES (storage/history/HistoryPrefs.kt:66)",
-    "expr": "DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 18,
-    "method": "getLong",
+    "via": "常量 DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES (core/pref/keys/HistoryKeys.kt:24)",
+    "expr": "SettingDefault.of(DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 39,
+    "method": "SettingKey.Long",
     "type": "Long"
    }
   ],
@@ -10852,11 +10791,11 @@
    {
     "value": "2147483648",
     "form": "伴生常量",
-    "via": "常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES (storage/history/HistoryPrefs.kt:71)",
-    "expr": "DEFAULT_HISTORY_MAX_TOTAL_BYTES",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 38,
-    "method": "getLong",
+    "via": "常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:29)",
+    "expr": "SettingDefault.of(DEFAULT_HISTORY_MAX_TOTAL_BYTES)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 51,
+    "method": "SettingKey.Long",
     "type": "Long"
    }
   ],
@@ -10864,23 +10803,23 @@
    {
     "value": "209715200",
     "form": "伴生常量",
-    "via": "常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE (storage/history/HistoryPrefs.kt:70)",
-    "expr": "DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 33,
-    "method": "getLong",
+    "via": "常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE (core/pref/keys/HistoryKeys.kt:28)",
+    "expr": "SettingDefault.of(DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 48,
+    "method": "SettingKey.Long",
     "type": "Long"
    }
   ],
   "key_history_max_versions": [
    {
-    "expr": "DEFAULT_HISTORY_MAX_VERSIONS",
+    "expr": "SettingDefault.of(DEFAULT_HISTORY_MAX_VERSIONS)",
     "form": "伴生常量",
     "value": "50",
-    "via": "常量 DEFAULT_HISTORY_MAX_VERSIONS (storage/history/HistoryPrefs.kt:69)",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 28,
-    "method": "getInt",
+    "via": "常量 DEFAULT_HISTORY_MAX_VERSIONS (core/pref/keys/HistoryKeys.kt:27)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 45,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -10917,15 +10856,15 @@
   ],
   "key_keep_screen_on_when_in_foreground": [
    {
-    "expr": "key(R.string.default_key_keep_screen_on_when_in_foreground)",
     "form": "R.string",
-    "value": "key_$_keep_screen_on_when_in_foreground_disabled",
     "ref": "default_key_keep_screen_on_when_in_foreground",
     "resolved": "key_keep_screen_on_when_in_foreground_disabled",
-    "file": "core/pref/Pref.kt",
-    "line": 209,
-    "method": "getString",
-    "type": "String"
+    "value": "key_$_keep_screen_on_when_in_foreground_disabled",
+    "expr": "keyResource(R.string.default_key_keep_screen_on_when_in_foreground, \"default_key_keep_screen_on_when_in_foreground\")",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 95,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10941,12 +10880,12 @@
   ],
   "key_keep_screen_on_when_in_foreground_enabled": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "util/ViewUtils.kt",
-    "line": 115,
-    "method": "getBoolean",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 102,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
@@ -10958,7 +10897,7 @@
     "ref": "key_keep_screen_on_when_in_foreground_homepage_only",
     "resolved": "key_keep_screen_on_when_in_foreground_homepage_only",
     "file": "util/ViewUtils.kt",
-    "line": 125,
+    "line": 126,
     "method": "getString",
     "type": "String"
    }
@@ -10969,7 +10908,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 197,
+    "line": 206,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -10980,7 +10919,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 205,
+    "line": 214,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -10991,7 +10930,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 181,
+    "line": 190,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11002,12 +10941,23 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 201,
+    "line": 210,
     "method": "getTimestamp",
     "type": "Long"
    }
   ],
   "key_launcher_icon": [
+   {
+    "form": "R.string",
+    "ref": "default_key_launcher_icon",
+    "resolved": "key_launcher_icon_adaptive",
+    "value": "key_$_launcher_icon_adaptive",
+    "expr": "keyResource(R.string.default_key_launcher_icon, \"default_key_launcher_icon\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 73,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   },
    {
     "form": "R.string",
     "ref": "default_key_launcher_icon",
@@ -11097,6 +11047,17 @@
     "type": "Boolean"
    }
   ],
+  "key_leakcanary_enabled": [
+   {
+    "form": "XML 字面量",
+    "value": "true",
+    "expr": "app:defaultValue=\"true\"",
+    "file": "res/xml/fragment_developer_options.xml",
+    "line": 154,
+    "method": "ThemeColorSwitchPreference",
+    "type": "Boolean"
+   }
+  ],
   "key_log_activity_log_coloring": [
    {
     "expr": "DEFAULT_COLORFUL",
@@ -11148,7 +11109,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/Pref.kt",
-    "line": 135,
+    "line": 144,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11168,6 +11129,17 @@
     "ref": "default_key_night_mode",
     "resolved": "key_night_mode_follow_system",
     "value": "key_$_night_mode_follow_system",
+    "expr": "keyResource(R.string.default_key_night_mode, \"default_key_night_mode\")",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 60,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   },
+   {
+    "form": "R.string",
+    "ref": "default_key_night_mode",
+    "resolved": "key_night_mode_follow_system",
+    "value": "key_$_night_mode_follow_system",
     "expr": "app:itemDefaultKey=\"@string/default_key_night_mode\"",
     "file": "res/xml/fragment_preferences.xml",
     "line": 20,
@@ -11177,12 +11149,12 @@
   ],
   "key_night_mode_enabled": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "util/ViewUtils.kt",
-    "line": 133,
-    "method": "getBoolean",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 67,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11353,7 +11325,7 @@
     "value": "true",
     "ref": "pref_record_toast",
     "file": "core/pref/Pref.kt",
-    "line": 266,
+    "line": 280,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11370,15 +11342,15 @@
   ],
   "key_restart_strategy": [
    {
-    "expr": "key(R.string.default_key_restart_strategy)",
     "form": "R.string",
-    "value": "key_$_restart_strategy_quick",
     "ref": "default_key_restart_strategy",
     "resolved": "key_restart_strategy_quick",
-    "file": "core/pref/Pref.kt",
-    "line": 235,
-    "method": "getString",
-    "type": "String"
+    "value": "key_$_restart_strategy_quick",
+    "expr": "keyResource(R.string.default_key_restart_strategy, \"default_key_restart_strategy\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 53,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -11452,7 +11424,7 @@
     "value": "key_$_root_mode_auto_detect",
     "note": "RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect)",
     "file": "core/pref/Pref.kt",
-    "line": 214,
+    "line": 224,
     "method": "getString",
     "type": "String",
     "manual": true
@@ -11477,7 +11449,7 @@
     "ref": "default_key_root_record_out_file_type",
     "resolved": "key_root_record_out_file_type_binary",
     "file": "core/pref/Pref.kt",
-    "line": 341,
+    "line": 359,
     "method": "getString",
     "type": "String"
    },
@@ -11506,47 +11478,26 @@
   ],
   "key_scheduled_restart_backend": [
    {
-    "expr": "key(R.string.default_key_scheduled_restart_backend)",
     "form": "R.string",
-    "value": "key_$_scheduled_restart_backend_work_manager",
     "ref": "default_key_scheduled_restart_backend",
     "resolved": "key_scheduled_restart_backend_work_manager",
-    "file": "core/pref/Pref.kt",
-    "line": 239,
-    "method": "getString",
-    "type": "String"
-   },
-   {
-    "expr": "key(R.string.default_key_scheduled_restart_backend)",
-    "form": "R.string",
     "value": "key_$_scheduled_restart_backend_work_manager",
-    "ref": "default_key_scheduled_restart_backend",
-    "resolved": "key_scheduled_restart_backend_work_manager",
-    "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-    "line": 40,
-    "method": "getString",
-    "type": "String"
+    "expr": "keyResource(R.string.default_key_scheduled_restart_backend, \"default_key_scheduled_restart_backend\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 59,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    }
   ],
   "key_scheduled_restart_delay": [
    {
-    "expr": "context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value)",
     "form": "R.integer",
-    "value": "300",
     "ref": "scheduled_restart_start_delay_default_value",
-    "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
-    "line": 34,
-    "method": "getInt",
-    "type": "Int"
-   },
-   {
-    "expr": "context.resources.getInteger(R.integer.scheduled_restart_start_delay_default_value)",
-    "form": "R.integer",
     "value": "300",
-    "ref": "scheduled_restart_start_delay_default_value",
-    "file": "util/IntentUtils.kt",
-    "line": 373,
-    "method": "getInt",
+    "expr": "intResource(R.integer.scheduled_restart_start_delay_default_value, \"scheduled_restart_start_delay_default_value\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 66,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -11556,9 +11507,9 @@
     "form": "R.integer",
     "value": "350",
     "ref": "screen_capture_request_delay_default_value",
-    "via": "局部变量 defValue (core/pref/Pref.kt:72)",
+    "via": "局部变量 defValue (core/pref/Pref.kt:81)",
     "file": "core/pref/Pref.kt",
-    "line": 75,
+    "line": 84,
     "method": "getInt",
     "type": "Int"
    },
@@ -11579,7 +11530,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/Pref.kt",
-    "line": 145,
+    "line": 154,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11599,7 +11550,7 @@
     "form": "调用处字面量",
     "value": "null",
     "file": "core/pref/Pref.kt",
-    "line": 149,
+    "line": 158,
     "method": "getStringSet",
     "type": "StringSet"
    }
@@ -11610,7 +11561,7 @@
     "expr": "(方法默认)",
     "value": "null",
     "file": "util/IntentUtils.kt",
-    "line": 478,
+    "line": 479,
     "method": "getStringOrNull",
     "type": "String"
    }
@@ -11621,7 +11572,7 @@
     "form": "表达式",
     "value": "运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)",
     "file": "core/pref/Pref.kt",
-    "line": 335,
+    "line": 353,
     "method": "getString",
     "type": "String",
     "ignoreForConflict": true,
@@ -11693,7 +11644,7 @@
     "value": "false",
     "ref": "pref_stable_mode",
     "file": "core/pref/Pref.kt",
-    "line": 222,
+    "line": 232,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11720,12 +11671,12 @@
   ],
   "key_theme_color_accent": [
    {
-    "expr": "ThemeColorManager.defaultThemeColor.colorAccent",
     "form": "伴生常量",
+    "expr": "ThemeColorManager.defaultThemeColor.colorAccent",
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
-    "file": "theme/ThemeColor.kt",
-    "line": 60,
-    "method": "getInt",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 89,
+    "method": "SettingKey.Int",
     "type": "Int",
     "ignoreForConflict": true,
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
@@ -11734,12 +11685,12 @@
   ],
   "key_theme_color_primary": [
    {
-    "expr": "ThemeColorManager.defaultThemeColor.colorPrimary",
     "form": "伴生常量",
+    "expr": "ThemeColorManager.defaultThemeColor.colorPrimary",
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
-    "file": "theme/ThemeColor.kt",
-    "line": 59,
-    "method": "getInt",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 77,
+    "method": "SettingKey.Int",
     "type": "Int",
     "ignoreForConflict": true,
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
@@ -11748,12 +11699,12 @@
   ],
   "key_theme_color_primary_dark": [
    {
-    "expr": "ThemeColorManager.defaultThemeColor.colorPrimaryDark",
     "form": "伴生常量",
+    "expr": "ThemeColorManager.defaultThemeColor.colorPrimaryDark",
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
-    "file": "theme/ThemeColor.kt",
-    "line": 61,
-    "method": "getInt",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 83,
+    "method": "SettingKey.Int",
     "type": "Int",
     "ignoreForConflict": true,
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
@@ -11787,13 +11738,13 @@
   ],
   "key_trash_max_days": [
    {
-    "expr": "DEFAULT_TRASH_MAX_DAYS",
+    "expr": "SettingDefault.of(DEFAULT_TRASH_MAX_DAYS)",
     "form": "伴生常量",
     "value": "30",
-    "via": "常量 DEFAULT_TRASH_MAX_DAYS (storage/history/HistoryPrefs.kt:73)",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 43,
-    "method": "getInt",
+    "via": "常量 DEFAULT_TRASH_MAX_DAYS (core/pref/keys/HistoryKeys.kt:31)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 54,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
@@ -11801,11 +11752,11 @@
    {
     "value": "524288000",
     "form": "伴生常量",
-    "via": "常量 DEFAULT_TRASH_MAX_TOTAL_BYTES (storage/history/HistoryPrefs.kt:74)",
-    "expr": "DEFAULT_TRASH_MAX_TOTAL_BYTES",
-    "file": "storage/history/HistoryPrefs.kt",
-    "line": 48,
-    "method": "getLong",
+    "via": "常量 DEFAULT_TRASH_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:32)",
+    "expr": "SettingDefault.of(DEFAULT_TRASH_MAX_TOTAL_BYTES)",
+    "file": "core/pref/keys/HistoryKeys.kt",
+    "line": 57,
+    "method": "SettingKey.Long",
     "type": "Long"
    }
   ],
@@ -11816,7 +11767,7 @@
     "value": "true",
     "ref": "pref_use_volume_control_record",
     "file": "core/pref/Pref.kt",
-    "line": 168,
+    "line": 177,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11838,7 +11789,7 @@
     "value": "true",
     "ref": "pref_use_volume_control_running",
     "file": "core/pref/Pref.kt",
-    "line": 161,
+    "line": 170,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11874,14 +11825,14 @@
   ],
   "key_working_directory": [
    {
-    "expr": "str(R.string.default_value_working_directory)",
     "form": "R.string",
-    "value": "/Scripts",
     "ref": "default_value_working_directory",
     "resolved": "default_value_working_directory",
-    "file": "util/WorkingDirectoryUtils.kt",
-    "line": 21,
-    "method": "getString",
+    "value": "/Scripts",
+    "expr": "stringResource(R.string.default_value_working_directory, \"default_value_working_directory\")",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 43,
+    "method": "SettingKey.Str",
     "type": "String"
    },
    {
@@ -11905,28 +11856,6 @@
     "line": 16,
     "method": "getLinkedHashSet",
     "type": "Json (Gson LinkedHashSet)"
-   }
-  ],
-  "key_foreground_service": [
-   {
-    "form": "调用处字面量",
-    "type": "Boolean",
-    "expr": "Pref.getBoolean(prefKey, false)",
-    "value": "false",
-    "file": "ui/main/drawer/DrawerMenuToggleableItem.kt",
-    "line": 258,
-    "note": "抽屉 \"前台服务\" 开关 (prefKey = R.string.key_foreground_service)",
-    "manual": true
-   },
-   {
-    "form": "调用处字面量",
-    "type": "Boolean",
-    "expr": "Pref.getBoolean(resolvePreferenceKey(it), false)",
-    "value": "false",
-    "file": "runtime/api/augment/settings/Settings.kt",
-    "line": 50,
-    "note": "脚本 API settings.isEnabled",
-    "manual": true
    }
   ],
   "key_codegen_model_current": [
@@ -12298,7 +12227,7 @@
    "stores": 0
   },
   "developer": {
-   "keys": 4,
+   "keys": 5,
    "literalKeys": 0,
    "stores": 0
   },

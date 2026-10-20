@@ -2,6 +2,7 @@ package org.autojs.autojs.storage.history
 
 import android.content.Context
 import android.util.Log
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.util.DialogUtils
 import java.io.BufferedInputStream
@@ -334,7 +335,7 @@ class TrashRepository(private val context: Context) {
      */
     @JvmOverloads
     fun enforceRetentionPolicy(now: Long = System.currentTimeMillis()) {
-        HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryPrefs.trashMaxDays())?.let { expiredBefore ->
+        HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryKeys.trashMaxDays())?.let { expiredBefore ->
             val expired = dao.listExpiredTrashItems(expiredBefore)
             if (expired.isNotEmpty()) {
                 dao.deleteTrashItemsByIds(expired.map { it.trashId })
@@ -356,7 +357,7 @@ class TrashRepository(private val context: Context) {
      */
     @JvmOverloads
     fun enforceTotalBytesLimit(protectedTrashIds: Set<String> = emptySet()): List<TrashEntities.TrashItem> {
-        val limit = HistoryPrefs.trashMaxTotalBytes()
+        val limit = HistoryKeys.trashMaxTotalBytes()
         if (HistoryRetentionPolicy.isUnlimited(limit)) return emptyList()
 
         val newestFirst = dao.listTrashItemsDesc()

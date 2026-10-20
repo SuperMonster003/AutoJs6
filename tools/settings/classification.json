@@ -185,6 +185,7 @@
   "key_layout_inspector_query_history": {"kind": "State", "category": "other", "note": "查询历史 JSON"},
   "key_layout_inspector_query_mode": {"kind": "Setting", "category": "layout_inspector", "note": "查询模式"},
   "key_layout_inspector_selector_mode_introduced": {"kind": "State", "category": "other", "note": "功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1)"},
+  "key_leakcanary_enabled": {"kind": "Setting", "category": "developer", "note": "LeakCanary 开关 (开发者选项, 页面不可见, XML 默认 true); 来自内存路线图 P1 的新资源, 由调度会话决定登记 (附录 C Q15)"},
   "key_local_network_permission": {"kind": "Excluded", "note": "inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板)"},
   "key_log_activity_input_bar_visible": {"kind": "Setting", "category": "console", "note": "日志页 (LogPageConsoleSettings)"},
   "key_log_activity_log_coloring": {"kind": "Setting", "category": "console", "note": "日志页"},

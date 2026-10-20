@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.plugin.explorer.session
 
 import android.content.Context
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import java.io.File
 
 /** Host-private single-item playback history. Preference keys contain only SHA-256 path digests. */
@@ -16,7 +16,7 @@ internal class ExplorerPlaybackHistoryStore(
     )
 
     val enabled: Boolean
-        get() = Pref.isExplorerPlaybackHistoryEnabled
+        get() = ExplorerKeys.EXPLORER_PLAYBACK_HISTORY.get()
 
     fun get(file: File): ExplorerPlaybackProgressRecord? = synchronized(LOCK) {
         if (!enabled) return@synchronized null

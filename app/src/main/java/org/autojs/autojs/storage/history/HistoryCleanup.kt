@@ -2,6 +2,7 @@ package org.autojs.autojs.storage.history
 
 import android.content.Context
 import android.util.Log
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.storage.file.EmergencyDraftDirectoryGuard
 import org.autojs.autojs.storage.history.TrashBlobStore.Companion.TRASH_BLOB_DIR_REL
 import java.io.File
@@ -140,7 +141,7 @@ object HistoryCleanup {
 
         // 1) Remove expired by days (zero or negative days means unlimited).
         // zh-CN: 1) 按天数删除过期草稿 (天数为 0 或负数表示不限).
-        HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryPrefs.draftsMaxDays())?.let { expiredBefore ->
+        HistoryRetentionPolicy.expiredBeforeOrNull(now, HistoryKeys.draftsMaxDays())?.let { expiredBefore ->
             draftsDir.listFiles()?.forEach { f ->
                 if (f.isFile && !EmergencyDraftDirectoryGuard.isProtectedFromDeletion(f, now) &&
                     f.lastModified() < expiredBefore
@@ -153,7 +154,7 @@ object HistoryCleanup {
 
         // 2) Enforce total bytes limit, oldest first (zero or negative bytes means unlimited).
         // zh-CN: 2) 约束总容量上限, 优先删除最旧 (容量为 0 或负数表示不限).
-        val limit = HistoryPrefs.draftsMaxTotalBytes()
+        val limit = HistoryKeys.draftsMaxTotalBytes()
         if (HistoryRetentionPolicy.isUnlimited(limit)) return
 
         val oldestFirst = draftsDir.listFiles()

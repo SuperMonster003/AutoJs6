@@ -9,10 +9,10 @@ import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.history.HistoryDatabase
-import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.storage.history.VersionHistoryEditorBridge
@@ -120,7 +120,7 @@ class RevisionListActivity : BaseSearchSortListActivity<ActivityRevisionListBind
     private fun currentFileSha256OrNull(): String? = runCatching {
         val file = File(canonicalPath)
         if (!file.isFile) return@runCatching null
-        val limit = HistoryPrefs.maxFileSizeToTrackBytes()
+        val limit = HistoryKeys.maxFileSizeToTrackBytes()
         if (!HistoryRetentionPolicy.isUnlimited(limit) && file.length() > limit) return@runCatching null
         if (file.length() > CURRENT_SHA_MAX_BYTES) return@runCatching null
         val digest = MessageDigest.getInstance("SHA-256")

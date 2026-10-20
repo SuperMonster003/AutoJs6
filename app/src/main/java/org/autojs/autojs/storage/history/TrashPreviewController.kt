@@ -5,6 +5,7 @@ import android.content.Context
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.storage.file.TmpScriptFiles
 import org.autojs.autojs.ui.edit.EditActivity
@@ -32,7 +33,7 @@ class TrashPreviewController(private val context: Context) {
     fun showDetails(item: TrashEntities.TrashItem) {
         val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val now = System.currentTimeMillis()
-        val expiresAt = TrashExpiry.expiresAtOrNull(item.trashedAt, HistoryPrefs.trashMaxDays())
+        val expiresAt = TrashExpiry.expiresAtOrNull(item.trashedAt, HistoryKeys.trashMaxDays())
         fun line(label: String, value: String) = context.getString(R.string.text_property_colon_value, label, value)
         val text = buildList {
             add(line(context.getString(R.string.text_name), File(item.originalPath).name))

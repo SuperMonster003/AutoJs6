@@ -9,13 +9,13 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.FileUtils
 import org.autojs.autojs.core.pref.PrefRx
 import org.autojs.autojs.storage.history.HistoryCleanupUi
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.HistoryEntities
-import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRepository
 import org.autojs.autojs.storage.history.VersionHistoryController
 import org.autojs.autojs.util.ViewUtils
@@ -105,10 +105,7 @@ class VersionHistoryActivity : BaseSearchSortListActivity<ActivityVersionHistory
 
         val dao = HistoryDatabase.getInstance(applicationContext).historyDao()
 
-        val limitBytesFlow = PrefRx.observeLong(
-            keyRes = R.string.key_history_max_total_bytes,
-            defaultValue = HistoryPrefs.DEFAULT_HISTORY_MAX_TOTAL_BYTES,
-        )
+        val limitBytesFlow = PrefRx.observeLong(HistoryKeys.HISTORY_MAX_TOTAL_BYTES)
 
         val disposable = Observable
             .combineLatest(

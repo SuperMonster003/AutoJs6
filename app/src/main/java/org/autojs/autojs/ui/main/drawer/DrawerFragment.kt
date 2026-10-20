@@ -27,6 +27,7 @@ import org.autojs.autojs.app.tool.McpServerTool
 import org.autojs.autojs.core.plugin.mcp.McpServerUiPolicy
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.ui.settings.McpServerSettingsLauncher
 import kotlinx.coroutines.launch
 import org.autojs.autojs.app.tool.PointerLocationTool
@@ -61,7 +62,6 @@ import org.autojs.autojs.service.AccessibilityServiceItemHelper
 import org.autojs.autojs.service.ForegroundService
 import org.autojs.autojs.service.NotificationService
 import org.autojs.autojs.storage.history.HistoryDatabase
-import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.HistoryRetentionPolicy
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
@@ -822,10 +822,7 @@ open class DrawerFragment : Fragment() {
 
         // Trash: observe DB stats + observe limit preference.
         // zh-CN: 回收站: 监听 DB 统计 + 监听容量上限偏好.
-        val trashLimitFlow = PrefRx.observeLong(
-            keyRes = R.string.key_trash_max_total_bytes,
-            defaultValue = HistoryPrefs.DEFAULT_TRASH_MAX_TOTAL_BYTES,
-        )
+        val trashLimitFlow = PrefRx.observeLong(HistoryKeys.TRASH_MAX_TOTAL_BYTES)
 
         val trashDisposable = Observable
             .combineLatest(
@@ -855,10 +852,7 @@ open class DrawerFragment : Fragment() {
 
         // Version history: observe DB stats + observe limit preference.
         // zh-CN: 版本历史: 监听 DB 统计 + 监听容量上限偏好.
-        val historyLimitFlow = PrefRx.observeLong(
-            keyRes = R.string.key_history_max_total_bytes,
-            defaultValue = HistoryPrefs.DEFAULT_HISTORY_MAX_TOTAL_BYTES,
-        )
+        val historyLimitFlow = PrefRx.observeLong(HistoryKeys.HISTORY_MAX_TOTAL_BYTES)
 
         val historyDisposable = Observable
             .combineLatest(

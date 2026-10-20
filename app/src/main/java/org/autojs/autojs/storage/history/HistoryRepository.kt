@@ -1,6 +1,7 @@
 package org.autojs.autojs.storage.history
 
 import android.content.Context
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.ui.edit.editor.encoding.EditorEncodingDetector
 import java.io.File
 import java.security.MessageDigest
@@ -90,7 +91,7 @@ class HistoryRepository(private val context: Context) {
         val file = File(logicalPath)
         if (!file.isFile) return@runCatching null
 
-        val limit = HistoryPrefs.maxFileSizeToTrackBytes()
+        val limit = HistoryKeys.maxFileSizeToTrackBytes()
         if (!HistoryRetentionPolicy.isUnlimited(limit) && file.length() > limit) return@runCatching null
 
         val bytes = file.readBytes()
@@ -411,9 +412,9 @@ class HistoryRepository(private val context: Context) {
         val toDelete = HistoryRetentionPolicy.selectToDelete(
             itemsOldestFirst = revisions,
             now = now,
-            maxDays = HistoryPrefs.historyMaxDays(),
-            maxCount = HistoryPrefs.historyMaxVersions(),
-            maxBytes = HistoryPrefs.historyMaxTotalBytesPerFile(),
+            maxDays = HistoryKeys.historyMaxDays(),
+            maxCount = HistoryKeys.historyMaxVersions(),
+            maxBytes = HistoryKeys.historyMaxTotalBytesPerFile(),
             createdAt = { it.createdAt },
             sizeOf = { it.sizeBytes },
         )
@@ -466,7 +467,7 @@ class HistoryRepository(private val context: Context) {
      * zh-CN: 约束全局历史总容量上限 (优先删除最旧 revision). 先删未固定的, 仅当没有未固定的 revision 时才删固定的.
      */
     private fun cleanupGlobal() {
-        val maxTotalBytes = HistoryPrefs.historyMaxTotalBytes()
+        val maxTotalBytes = HistoryKeys.historyMaxTotalBytes()
         if (HistoryRetentionPolicy.isUnlimited(maxTotalBytes)) return
 
         var totalBytes = (dao.sumAllRevisionBytes() ?: 0L).coerceAtLeast(0L)

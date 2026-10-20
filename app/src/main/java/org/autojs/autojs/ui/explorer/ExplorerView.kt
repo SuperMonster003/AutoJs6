@@ -32,6 +32,7 @@ import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerItem
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerProvider
 import org.autojs.autojs.core.plugin.explorer.archive.ExplorerArchiveSessionConnection
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerChangeEvent
@@ -44,7 +45,6 @@ import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.explorer.PrivilegedAccessMode
 import org.autojs.autojs.model.explorer.PrivilegedExplorerAccess
 import org.autojs.autojs.model.explorer.PrivilegedExplorerItem
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.project.ProjectConfig
@@ -1857,7 +1857,7 @@ open class ExplorerView : ThemeColorSwipeRefreshLayout,
 
                 Observable.fromIterable(snapshot)
             }
-            .filter { item -> (item !is PrivilegedExplorerItem && item !is ArchiveExplorerItem) || Pref.isHiddenFilesShown || !item.name.startsWith('.') }
+            .filter { item -> (item !is PrivilegedExplorerItem && item !is ArchiveExplorerItem) || ExplorerKeys.isHiddenFilesShown || !item.name.startsWith('.') }
             .filter { f: ExplorerItem -> mFilter == null || mFilter!!.invoke(f) }
             .collectInto(explorerItemManager.cloneConfig(), ExplorerItemManager::add)
             .observeOn(Schedulers.computation())

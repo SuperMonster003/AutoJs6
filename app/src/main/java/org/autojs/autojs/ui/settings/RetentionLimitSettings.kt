@@ -2,9 +2,9 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import androidx.annotation.StringRes
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.SettingKey
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.pio.PFiles
-import org.autojs.autojs.storage.history.HistoryPrefs
 import org.autojs.autojs.storage.history.RetentionLimitUnits
 import org.autojs.autojs6.R
 
@@ -16,45 +16,68 @@ import org.autojs.autojs6.R
  * value means unlimited, matching HistoryRetentionPolicy.
  * zh-CN: 存储格式保持不变 (天数 / 条数为 Int, 字节为 Long); 0 或负数表示不限制, 与 HistoryRetentionPolicy 一致.
  *
+ * The keys and their defaults are the declarations of [HistoryKeys] (docs/settings/ROADMAP.md P2.2); this object keeps
+ * the page part (titles, units, formatting).
+ * zh-CN: 键及其默认值即 [HistoryKeys] 的声明 (ROADMAP P2.2); 本对象只保留页面部分 (标题, 单位, 格式化).
+ *
  * Created by Claude (Fable 5.1) on Sep 16, 2026.
  */
 object RetentionLimitSettings {
 
     enum class Kind { DAYS, COUNT, BYTES }
 
-    class Spec(
-        @StringRes val keyRes: Int,
+    /** A limit: an Int key of [HistoryKeys] for days and counts, a Long key for bytes. */
+    class Spec private constructor(
+        val key: SettingKey<*>,
         @StringRes val titleRes: Int,
         val kind: Kind,
-        val defaultValue: Long,
-    )
+    ) {
+        constructor(key: SettingKey.Int, @StringRes titleRes: Int, kind: Kind) : this(key as SettingKey<*>, titleRes, kind) {
+            require(kind != Kind.BYTES) { "${key.name}: byte limits are Long keys" }
+        }
 
-    val specs: List<Spec> = listOf(
-        Spec(R.string.key_history_max_days, R.string.text_history_max_days, Kind.DAYS, HistoryPrefs.DEFAULT_HISTORY_MAX_DAYS.toLong()),
-        Spec(R.string.key_history_max_versions, R.string.text_history_max_versions, Kind.COUNT, HistoryPrefs.DEFAULT_HISTORY_MAX_VERSIONS.toLong()),
-        Spec(R.string.key_history_max_total_bytes_per_file, R.string.text_history_max_total_bytes_per_file, Kind.BYTES, HistoryPrefs.DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE),
-        Spec(R.string.key_history_max_total_bytes, R.string.text_history_max_total_bytes, Kind.BYTES, HistoryPrefs.DEFAULT_HISTORY_MAX_TOTAL_BYTES),
-        Spec(R.string.key_history_max_file_size_to_track_bytes, R.string.text_history_max_file_size_to_track, Kind.BYTES, HistoryPrefs.DEFAULT_MAX_FILE_SIZE_TO_TRACK_BYTES),
-        Spec(R.string.key_trash_max_days, R.string.text_trash_max_days, Kind.DAYS, HistoryPrefs.DEFAULT_TRASH_MAX_DAYS.toLong()),
-        Spec(R.string.key_trash_max_total_bytes, R.string.text_trash_max_total_bytes, Kind.BYTES, HistoryPrefs.DEFAULT_TRASH_MAX_TOTAL_BYTES),
-        Spec(R.string.key_drafts_max_days, R.string.text_drafts_max_days, Kind.DAYS, HistoryPrefs.DEFAULT_DRAFTS_MAX_DAYS.toLong()),
-        Spec(R.string.key_drafts_max_total_bytes, R.string.text_drafts_max_total_bytes, Kind.BYTES, HistoryPrefs.DEFAULT_DRAFTS_MAX_TOTAL_BYTES),
-    )
+        constructor(key: SettingKey.Long, @StringRes titleRes: Int) : this(key as SettingKey<*>, titleRes, Kind.BYTES)
 
-    fun specForKey(context: Context, key: String?): Spec? {
-        key ?: return null
-        return specs.firstOrNull { context.getString(it.keyRes) == key }
+        @get:StringRes
+        val keyRes: Int
+            get() = key.keyRes
+
+        val defaultValue: Long
+            get() = (key.defaultOrNull() as Number).toLong()
     }
 
-    fun read(spec: Spec): Long = when (spec.kind) {
-        Kind.DAYS, Kind.COUNT -> Pref.getInt(spec.keyRes, spec.defaultValue.toInt()).toLong()
-        Kind.BYTES -> Pref.getLong(spec.keyRes, spec.defaultValue)
+    val specs: List<Spec> = listOf(
+        Spec(HistoryKeys.HISTORY_MAX_DAYS, R.string.text_history_max_days, Kind.DAYS),
+        Spec(HistoryKeys.HISTORY_MAX_VERSIONS, R.string.text_history_max_versions, Kind.COUNT),
+        Spec(HistoryKeys.HISTORY_MAX_TOTAL_BYTES_PER_FILE, R.string.text_history_max_total_bytes_per_file),
+        Spec(HistoryKeys.HISTORY_MAX_TOTAL_BYTES, R.string.text_history_max_total_bytes),
+        Spec(HistoryKeys.HISTORY_MAX_FILE_SIZE_TO_TRACK_BYTES, R.string.text_history_max_file_size_to_track),
+        Spec(HistoryKeys.TRASH_MAX_DAYS, R.string.text_trash_max_days, Kind.DAYS),
+        Spec(HistoryKeys.TRASH_MAX_TOTAL_BYTES, R.string.text_trash_max_total_bytes),
+        Spec(HistoryKeys.DRAFTS_MAX_DAYS, R.string.text_drafts_max_days, Kind.DAYS),
+        Spec(HistoryKeys.DRAFTS_MAX_TOTAL_BYTES, R.string.text_drafts_max_total_bytes),
+    )
+
+    @Suppress("UNUSED_PARAMETER")
+    fun specForKey(context: Context, key: String?): Spec? = specForKey(key)
+
+    /** The spec whose key name is [key] (a preference key of the page). */
+    fun specForKey(key: String?): Spec? {
+        key ?: return null
+        return specs.firstOrNull { it.key.name == key }
+    }
+
+    fun read(spec: Spec): Long = when (val key = spec.key) {
+        is SettingKey.Int -> key.get().toLong()
+        is SettingKey.Long -> key.get()
+        else -> throw IllegalStateException("${key.name} is no retention limit key")
     }
 
     fun write(spec: Spec, value: Long) {
-        when (spec.kind) {
-            Kind.DAYS, Kind.COUNT -> Pref.putInt(spec.keyRes, value.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt())
-            Kind.BYTES -> Pref.putLong(spec.keyRes, value.coerceAtLeast(0L))
+        when (val key = spec.key) {
+            is SettingKey.Int -> key.set(value.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt())
+            is SettingKey.Long -> key.set(value.coerceAtLeast(0L))
+            else -> throw IllegalStateException("${key.name} is no retention limit key")
         }
     }
 

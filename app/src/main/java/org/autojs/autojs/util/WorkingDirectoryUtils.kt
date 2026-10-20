@@ -3,10 +3,10 @@ package org.autojs.autojs.util
 import org.autojs.autojs.annotation.MinSize
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.util.EnvironmentUtils.externalStorageDirectory
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
 import org.autojs.autojs.util.StringUtils.key
-import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import java.io.File
 
@@ -18,24 +18,20 @@ object WorkingDirectoryUtils {
 
     @JvmStatic
     var path: String
-        get() = Pref.getString(R.string.key_working_directory, str(R.string.default_value_working_directory)).let {
+        get() = ExplorerKeys.WORKING_DIRECTORY.get().let {
             WorkingDirectoryPathPolicy.resolveStored(it, externalStoragePath)
         }
         set(path) {
             val scriptDirPath = WorkingDirectoryPathPolicy.decodeAbsolute(path)?.let {
                 WorkingDirectoryPathPolicy.encodeAbsolute(it, externalStoragePath)
             } ?: toRelativePath(path)
-            val dirKey = key(R.string.key_working_directory)
-            Pref.putString(dirKey, scriptDirPath)
+            ExplorerKeys.WORKING_DIRECTORY.set(scriptDirPath)
         }
 
     /** File-picker and Explorer results are already absolute, unlike legacy preference input. */
     @JvmStatic
     fun setAbsolutePath(path: String) {
-        Pref.putString(
-            R.string.key_working_directory,
-            WorkingDirectoryPathPolicy.encodeAbsolute(path, externalStoragePath),
-        )
+        ExplorerKeys.WORKING_DIRECTORY.set(WorkingDirectoryPathPolicy.encodeAbsolute(path, externalStoragePath))
     }
 
     @JvmStatic
@@ -60,8 +56,7 @@ object WorkingDirectoryUtils {
             return
         }
         Pref.putBoolean(initKey, true)
-        val dirKey = key(R.string.key_working_directory)
-        if (Pref.containsKey(dirKey)) {
+        if (ExplorerKeys.WORKING_DIRECTORY.isStored()) {
             return
         }
         // @Hint by SuperMonster003 on Oct 14, 2022.
@@ -77,7 +72,7 @@ object WorkingDirectoryUtils {
         val selectedDir = newestNonEmptyDir?.let {
             toRelativePath(it.path)
         } ?: getRecommendedDefaultPaths().firstOrNull()
-        selectedDir?.let { Pref.putString(dirKey, it) }
+        selectedDir?.let { ExplorerKeys.WORKING_DIRECTORY.set(it) }
     }
 
     @JvmStatic

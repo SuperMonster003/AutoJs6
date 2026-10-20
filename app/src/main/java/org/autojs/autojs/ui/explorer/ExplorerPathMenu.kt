@@ -32,7 +32,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.plugin.explorer.archive.ArchiveExplorerPage
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.common.ScriptOperations
 import org.autojs.autojs.ui.settings.PreferencesActivity
@@ -166,12 +166,12 @@ internal class ExplorerPathMenu(
             setPadding(dp(12), dp(4), dp(12), dp(4))
             switchPadding = dp(12)
             background = ripple()
-            isChecked = Pref.isHiddenFilesShown
+            isChecked = ExplorerKeys.isHiddenFilesShown
             val checked = intArrayOf(android.R.attr.state_checked)
             thumbTintList = ColorStateList(arrayOf(checked, intArrayOf()), intArrayOf(accent, secondary))
             trackTintList = ColorStateList(arrayOf(checked, intArrayOf()), intArrayOf(ColorUtils.setAlphaComponent(accent, 90), ColorUtils.setAlphaComponent(secondary, 55)))
             setOnCheckedChangeListener { _, checkedValue ->
-                Pref.putString(R.string.key_hidden_files, context.getString(if (checkedValue) R.string.key_hidden_files_show else R.string.key_hidden_files_not_show))
+                ExplorerKeys.HIDDEN_FILES.set(context.getString(if (checkedValue) R.string.key_hidden_files_show else R.string.key_hidden_files_not_show))
                 explorer.refreshFromPathMenu()
             }
         })
@@ -308,7 +308,7 @@ internal class ExplorerPathMenu(
             .items(*values)
             .itemsCallbackSingleChoice(extensionIndex()) { dialog, _, which, _ ->
                 if (which in keys.indices) {
-                    Pref.putString(R.string.key_file_extensions, keys[which])
+                    ExplorerKeys.FILE_EXTENSIONS.set(keys[which])
                     explorer.notifyDataSetChanged()
                     explorer.refreshFromPathMenu()
                 }
@@ -324,7 +324,7 @@ internal class ExplorerPathMenu(
 
     private fun extensionIndex(): Int {
         val keys = context.resources.getStringArray(R.array.keys_file_extensions)
-        val value = Pref.getString(R.string.key_file_extensions, context.getString(R.string.default_key_file_extensions))
+        val value = ExplorerKeys.FILE_EXTENSIONS.storedKeyOrDefault()
         return keys.indexOf(value).takeIf { it >= 0 } ?: keys.indexOf(context.getString(R.string.default_key_file_extensions)).coerceAtLeast(0)
     }
 

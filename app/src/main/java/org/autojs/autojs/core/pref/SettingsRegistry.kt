@@ -1,7 +1,9 @@
 package org.autojs.autojs.core.pref
 
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
+import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.core.pref.store.StoreId
 
 /**
@@ -62,6 +64,8 @@ object SettingsRegistry {
     val DOMAINS: List<SettingsDomain> = listOf(
         AppearanceKeys,
         GeneralKeys,
+        ExplorerKeys,
+        HistoryKeys,
     )
 
     /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */
