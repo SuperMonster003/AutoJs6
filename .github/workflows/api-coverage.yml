@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
+      - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
       - 'tools/ace-completion/**'
@@ -12,6 +14,8 @@ on:
     branches: [master]
     paths:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
+      - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
       - 'tools/ace-completion/**'
@@ -26,6 +30,12 @@ on:
         required: false
       ace_ref:
         description: Ace plugin branch or commit (empty uses default branch)
+        required: false
+      node_runtime_ref:
+        description: Node Runtime branch or commit (empty uses default branch)
+        required: false
+      bun_runtime_ref:
+        description: Bun Runtime branch or commit (empty uses default branch)
         required: false
 
 permissions:
@@ -58,6 +68,18 @@ jobs:
           repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Ace-Editor
           ref: ${{ inputs.ace_ref }}
           path: AutoJs6-Plugin-Ace-Editor
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-NodeJs-Runtime
+          ref: ${{ inputs.node_runtime_ref }}
+          path: AutoJs6-Plugin-NodeJs-Runtime
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Bun-Runtime
+          ref: ${{ inputs.bun_runtime_ref }}
+          path: AutoJs6-Plugin-Bun-Runtime
+          lfs: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -69,6 +91,8 @@ jobs:
         run: |
           python -m unittest discover -s tools/api-coverage -p 'test_*.py'
           python tools/api-coverage/check.py
+          node tools/api-coverage/check-runtime-java-callbacks.mjs
+          node tools/api-coverage/check-runtime-tts.mjs
       - name: Check handwritten types and conditional extensions
         working-directory: AutoJs6-TypeScript-Declarations
         run: |
