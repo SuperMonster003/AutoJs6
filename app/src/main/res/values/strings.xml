@@ -522,7 +522,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">Required property \"%1$s\" is nullish or does not exist</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Resolved path for \"%1$s\" cannot be null</string>
     <string name="error_save_failed">Save failed</string>
+    <string name="error_script_argument_cannot_be">Argument \"%1$s\" cannot be %2$s</string>
+    <string name="error_script_argument_must_be_integer">Argument \"%1$s\" must be a %2$d-bit integer, got %3$s</string>
+    <string name="error_script_argument_must_be_of_type">Argument \"%1$s\" must be of type %2$s, got %3$s</string>
     <string name="error_script_is_on_exiting">Script is on exiting</string>
+    <string name="error_script_no_overload_accepts_arguments">No overload accepts the arguments (%1$s). Candidates: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">The script shortcut no longer matches its saved engine. Recreate the shortcut.</string>
     <string name="error_selector_method_without_calling">Selector method should be called rather than passed as a parameter: %s</string>
     <string name="error_selector_result_type_with_compass">Cannot use a compass when result type is selector</string>
@@ -584,6 +588,7 @@
     <string name="error_unacceptable_character">Unacceptable character</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_unknown_algorithm_selector_param">Unknown algorithm selector param: %s</string>
+    <string name="error_unknown_charset">Unknown charset \"%1$s\"</string>
     <string name="error_unknown_color_name">Unknown color name: %s</string>
     <string name="error_unknown_element_name">Unknown element name: %1$s</string>
     <string name="error_unknown_exception">Unknown exception</string>

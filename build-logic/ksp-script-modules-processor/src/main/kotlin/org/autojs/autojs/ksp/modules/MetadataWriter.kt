@@ -28,6 +28,8 @@ internal object MetadataWriter {
         "dollarPrefix" to m.dollarPrefix,
         "eager" to m.eager,
         "parent" to m.parent,
+        "attributes" to m.attributes,
+        "emitter" to m.emitter,
         "class" to m.qualifiedName,
         "binding" to "${BindingGenerator.PACKAGE}.${m.bindingName}",
         "source" to m.source,
@@ -41,6 +43,7 @@ internal object MetadataWriter {
                 "aliases" to g.aliases,
                 "global" to g.placement.label,
                 "attributes" to g.attributes,
+                "toStringRole" to g.toStringRole,
                 "length" to g.length,
                 "overloads" to g.overloads.map(::overload),
             )

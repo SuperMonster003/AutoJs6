@@ -270,6 +270,7 @@
     <string name="key_mail_settings" translatable="false">key_$_mail_settings</string>
     <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
     <string name="key_mcp_server_normally_closed" translatable="false">key_$_mcp_server_normally_closed</string>
+    <string name="key_new_script_module_layer" translatable="false">key_$_new_script_module_layer</string>
     <string name="key_night_mode" translatable="false">key_$_night_mode</string>
     <string name="key_night_mode_always_off" translatable="false">key_$_night_mode_always_off</string>
     <string name="key_night_mode_always_on" translatable="false">key_$_night_mode_always_on</string>
@@ -309,6 +310,8 @@
     <string name="key_scheduled_restart_backend_work_manager" translatable="false">key_$_scheduled_restart_backend_work_manager</string>
     <string name="key_scheduled_restart_delay" translatable="false">key_$_scheduled_restart_delay</string>
     <string name="key_screen_capture_request_delay" translatable="false">key_$_screen_capture_request_delay_ms</string>
+    <string name="key_script_module_debug_print" translatable="false">key_$_script_module_debug_print</string>
+    <string name="key_script_module_debug_print_disabled_modules" translatable="false">key_$_script_module_debug_print_disabled_modules</string>
     <string name="key_scripts_after_app_restart" translatable="false">key_$_scripts_after_app_restart</string>
     <string name="key_server_address" translatable="false">key_$_server_address</string>
     <string name="key_server_mode_lan_discovery" translatable="false">key_$_server_mode_lan_discovery</string>

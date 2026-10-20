@@ -527,7 +527,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">La propriété requise \"%1$s\" est nulle ou n\'existe pas</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Le chemin résolu pour \"%1$s\" ne peut pas être nul</string>
     <string name="error_save_failed">Echec de l\'enregistrement</string>
+    <string name="error_script_argument_cannot_be">L\'argument \"%1$s\" ne peut pas être %2$s</string>
+    <string name="error_script_argument_must_be_integer">L\'argument \"%1$s\" doit être un entier de %2$d bits, reçu %3$s</string>
+    <string name="error_script_argument_must_be_of_type">L\'argument \"%1$s\" doit être de type %2$s, reçu %3$s</string>
     <string name="error_script_is_on_exiting">Le script est en train de sortir</string>
+    <string name="error_script_no_overload_accepts_arguments">Aucune surcharge n\'accepte les arguments (%1$s). Candidats : %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">Le raccourci du script ne correspond plus au moteur enregistré. Recréez le raccourci.</string>
     <string name="error_selector_method_without_calling">La méthode du sélecteur doit être appelée plutôt que passée en paramètre : %s.</string>
     <string name="error_selector_result_type_with_compass">Impossible d\'utiliser un compas lorsque le type de résultat est un sélecteur</string>
@@ -589,6 +593,7 @@
     <string name="error_unacceptable_character">Caractère inacceptable</string>
     <string name="error_unknown">Erreur inconnue</string>
     <string name="error_unknown_algorithm_selector_param">Param inconnu du sélecteur d\'algorithme : %s</string>
+    <string name="error_unknown_charset">Jeu de caractères inconnu \"%1$s\"</string>
     <string name="error_unknown_color_name">Nom de couleur inconnu : %s</string>
     <string name="error_unknown_element_name">Nom d\'élément inconnu : %1$s</string>
     <string name="error_unknown_exception">Exception inconnue</string>

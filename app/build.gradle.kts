@@ -490,6 +490,15 @@ ksp {
     arg("scriptModules.projectDir", rootDir.path)
 }
 
+// The unit test compilation sees the main script module registry (generated.ScriptModules) on its classpath, so its
+// own registry of test fixtures gets another name (docs/augment/ROADMAP.md P1.2).
+// zh-CN: 单元测试编译能在 classpath 上看到主源码的脚本模块注册表 (generated.ScriptModules), 测试夹具的注册表因此使用另一个名称 (ROADMAP P1.2).
+tasks.withType<com.google.devtools.ksp.gradle.KspAATask>().configureEach {
+    if (name.contains("UnitTest")) {
+        commandLineArgumentProviders.add(CommandLineArgumentProvider { listOf("scriptModules.registry=TestScriptModules") })
+    }
+}
+
 // The local Rhino build is a fat jar that bundles JLine (org.jline.**, native terminal helpers including
 // Windows DLLs) for Rhino's interactive shell. The host only uses ShellContextFactory and the debugger
 // API and interpreter. Exclude the JVM-only optimizer (MethodHandle bytecode requires API 26)

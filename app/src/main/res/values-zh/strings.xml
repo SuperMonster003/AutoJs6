@@ -523,7 +523,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">必需属性 \"%1$s\" 为空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析后的路径 \"%1$s\" 不可为 null</string>
     <string name="error_save_failed">保存失败</string>
+    <string name="error_script_argument_cannot_be">参数 \"%1$s\" 不能为 %2$s</string>
+    <string name="error_script_argument_must_be_integer">参数 \"%1$s\" 需要是 %2$d 位整数, 实际为 %3$s</string>
+    <string name="error_script_argument_must_be_of_type">参数 \"%1$s\" 需要是 %2$s 类型, 实际为 %3$s</string>
     <string name="error_script_is_on_exiting">脚本正在退出中</string>
+    <string name="error_script_no_overload_accepts_arguments">没有可接受参数 (%1$s) 的重载. 候选: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">脚本快捷方式保存的引擎信息与当前文件不一致. 请重新创建该快捷方式.</string>
     <string name="error_selector_method_without_calling">选择器方法需调用而不可作为参数直接传入: %s</string>
     <string name="error_selector_result_type_with_compass">结果类型为 selector 时, 无法同时使用罗盘参数</string>
@@ -585,6 +589,7 @@
     <string name="error_unacceptable_character">不接受的字符</string>
     <string name="error_unknown">未知错误</string>
     <string name="error_unknown_algorithm_selector_param">未知的 algorithm 选择器参数: %s</string>
+    <string name="error_unknown_charset">未知的字符集 \"%1$s\"</string>
     <string name="error_unknown_color_name">未知颜色名称: %s</string>
     <string name="error_unknown_element_name">未知的元素名称: %1$s</string>
     <string name="error_unknown_exception">未知异常</string>

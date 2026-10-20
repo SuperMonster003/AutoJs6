@@ -1,6 +1,6 @@
 """Evaluates the documented differences of the JVM differential tests with the host installed on a device.
 
-Usage: py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep]
+Usage: py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep] [--new-modules on|off] [--strict-errors]
 
 The differential tests (app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/) write their
 documented differences and the expressions they had to skip on the JVM to app/build/augment-differential/*.json.
@@ -9,6 +9,11 @@ way DifferentialRhino.render does and compares it with the Kotlin value recorded
 agreeing whatever their error names (the JVM cannot build the Kotlin error messages), as in the P0 differential
 tests. Skipped expressions have no expected value and are only printed. The pushed script is removed afterwards
 unless --keep is given.
+
+--new-modules sets the hidden switch of the new script module layer (ROADMAP T8) for the run and restores it
+afterwards; with --strict-errors two failures only agree when their error names are the same. The new layer's JVM
+tests write their cases to app/build/script-modules-device/ (expected values in "kt"), for example:
+py -3.12 -I tools/augment/device_eval.py -s SERIAL --cases app/build/script-modules-device --new-modules on --strict-errors
 """
 import argparse
 import json
@@ -26,6 +31,8 @@ DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
 MARK = "AJ6EVAL"
+SWITCH_KEY = "key_$_new_script_module_layer"
+SWITCH_MARK = "AJ6SWITCH"
 
 RENDER_JS = r"""
 function aj6Render(source) {
@@ -84,6 +91,37 @@ def run_script(serial, remote, count, wait):
     return results
 
 
+def set_new_modules(serial, value):
+    """Sets the hidden switch of the new script module layer (ROADMAP T8) and returns its previous value."""
+    lines = [
+        "var pref = org.autojs.autojs.core.pref.Pref.INSTANCE;",
+        f"var before = pref.getBoolean('{SWITCH_KEY}', false);",
+        f"pref.putBooleanSync('{SWITCH_KEY}', {'true' if value else 'false'});",
+        f"console.log('{SWITCH_MARK} ' + before + ' ' + pref.getBoolean('{SWITCH_KEY}', false));",
+    ]
+    local = HERE / "__pycache__" / "aj6_switch.js"
+    local.parent.mkdir(exist_ok=True)
+    local.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
+    remote = f"{DEVICE_DIR}/aj6_switch.js"
+    adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
+    adb(serial, "push", str(local), remote, check=True)
+    before_lines = set(console_lines(serial))
+    adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        time.sleep(0.5)
+        for line in console_lines(serial):
+            start = line.find(SWITCH_MARK + " ")
+            if line in before_lines or start < 0:
+                continue
+            before, after = line[start + len(SWITCH_MARK) + 1:].split()[:2]
+            if after != ("true" if value else "false"):
+                sys.exit(f"the switch did not change: {line}")
+            print(f"new script module layer: {before} -> {after}")
+            return before == "true"
+    sys.exit("no switch output from the device")
+
+
 def key_of(rendered):
     """The comparison key of a rendered result: the part before the error detail."""
     return rendered.split("\u0000", 1)[0]
@@ -105,7 +143,11 @@ def main():
     parser.add_argument("--cases", nargs="*", type=pathlib.Path, default=[DEFAULT_CASES])
     parser.add_argument("--keep", action="store_true", help="keep the pushed script on the device")
     parser.add_argument("--wait", type=int, default=120)
+    parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
+    parser.add_argument("--strict-errors", action="store_true", help="two failures agree only with the same error name")
     args = parser.parse_args()
+    # Device results may hold characters the console code page cannot show (a GBK console on Windows).
+    sys.stdout.reconfigure(errors="backslashreplace")
 
     cases = load_cases(args.cases)
     if not cases:
@@ -117,9 +159,13 @@ def main():
     remote = f"{DEVICE_DIR}/aj6_device_eval.js"
     adb(args.serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(args.serial, "push", str(local), remote, check=True)
+    wanted = args.new_modules == "on"
+    previous = set_new_modules(args.serial, wanted) if args.new_modules else None
     try:
         results = run_script(args.serial, remote, len(cases), args.wait)
     finally:
+        if previous is not None and previous != wanted:
+            set_new_modules(args.serial, previous)
         if not args.keep:
             adb(args.serial, "shell", "rm", "-rf", DEVICE_DIR)
 
@@ -132,7 +178,7 @@ def main():
             printed += 1
             print(f"INFO {test}: {entry['expression']}\n     device={device_key}")
             continue
-        same = device_key == expected or (device_key.startswith("throws") and expected.startswith("throws"))
+        same = device_key == expected or (not args.strict_errors and device_key.startswith("throws") and expected.startswith("throws"))
         if same:
             passed += 1
         else:

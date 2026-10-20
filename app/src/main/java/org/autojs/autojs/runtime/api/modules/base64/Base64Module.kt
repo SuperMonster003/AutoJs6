@@ -1,6 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.base64
 
+import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
+import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.NativeArray
@@ -11,14 +13,15 @@ import android.util.Base64 as AndroidBase64
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 /**
- * The `base64` module on the new script module layer (roadmap P1.1 example; it is not mounted by `ScriptRuntime` yet).
+ * The `base64` module on the new script module layer (roadmap P1.1 example, mounted by `ScriptRuntime` from P1.2 on when
+ * the hidden switch of T8 is on).
  *
  * Behavior follows the documentation and the d.ts: charset names ignore case and punctuation and an unknown charset is
  * an error; besides strings and byte arrays, any other value is encoded through its script `toString`, which fixes the
  * two deviations of the current module recorded in ROADMAP appendix E (`encode(123)` gave "123.0", objects with a
  * custom `toString` were encoded as "[object Object]").
  *
- * zh-CN: 新脚本模块层上的 base64 模块 (P1.1 示例, 尚未由 ScriptRuntime 挂载). 行为以文档与 d.ts 为准; 字符串与字节数组以外的值按脚本的 toString 编码,
+ * zh-CN: 新脚本模块层上的 base64 模块 (P1.1 示例, P1.2 起在 T8 隐藏开关打开时由 ScriptRuntime 挂载). 行为以文档与 d.ts 为准; 字符串与字节数组以外的值按脚本的 toString 编码,
  * 修正了附录 E 记录的现有模块的两处偏差.
  */
 @ScriptModule(name = "base64")
@@ -40,7 +43,7 @@ object Base64Module {
     private fun bytesOf(o: Any?, charset: Charset, function: String): ByteArray {
         val value = if (o is Wrapper) o.unwrap() else o
         return when {
-            value == null || Undefined.isUndefined(value) -> throw RhinoScriptRuntime.typeError("$function: argument \"o\" must not be ${if (value == null) "null" else "undefined"}")
+            value == null || Undefined.isUndefined(value) -> throw RhinoScriptRuntime.typeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentCannotBe("o", ScriptArgs.describe(value))))
             value is String -> value.toByteArray(charset)
             value is ConsString -> value.toString().toByteArray(charset)
             value is ByteArray -> value
@@ -49,12 +52,23 @@ object Base64Module {
         }
     }
 
+    /**
+     * Charsets by normalized name and alias, built once per process: `Charset.availableCharsets()` costs milliseconds
+     * (about 16 ms per call on XQ-AT72). The first charset in name order that has a key as its name or alias wins.
+     */
+    private val charsets: Map<String, Charset> by lazy {
+        HashMap<String, Charset>().also { map ->
+            Charset.availableCharsets().values.forEach { charset ->
+                map.putIfAbsent(normalize(charset.name()), charset)
+                charset.aliases().forEach { alias -> map.putIfAbsent(normalize(alias), charset) }
+            }
+        }
+    }
+
     private fun charsetOf(encoding: String?, function: String): Charset {
         if (encoding == null) return Charset.defaultCharset()
-        val wanted = normalize(encoding)
-        return Charset.availableCharsets().values.firstOrNull { charset ->
-            normalize(charset.name()) == wanted || charset.aliases().any { normalize(it) == wanted }
-        } ?: throw RhinoScriptRuntime.rangeError("$function: unknown charset \"$encoding\"")
+        return charsets[normalize(encoding)]
+            ?: throw RhinoScriptRuntime.rangeError(ScriptMessages.failedToCall(function, ScriptMessages.unknownCharset(encoding)))
     }
 
     private fun normalize(name: String) = name.lowercase().filter { it in 'a'..'z' || it in '0'..'9' }

@@ -15,11 +15,13 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * bindings: argument counting, conversion per parameter kind, overload guards, result normalization and the errors
  * of the generated layer (T5: a failed conversion is a JS `TypeError`, an out-of-range number a `RangeError`).
  *
- * P1.1 prototype: the messages are plain English; P1.2 moves them to the string resources (R4) with a fallback for
- * the JVM tests, and settles the remaining rules of the table (see ROADMAP T4).
+ * Messages come from the string resources through [ScriptMessages] (R4), prefixed with the function name like every
+ * error of a module function; expected types are written as script type names (`string`, `number`, `Array`, ...) or
+ * Java class names.
  *
  * zh-CN: 脚本值与 Kotlin 参数类型之间的转换表 (T4), 只供生成的绑定调用: 参数计数, 按参数种类转换, 重载判别, 返回值归一化, 以及生成层的错误
- * (T5: 转换失败为 JS TypeError, 数值越界为 RangeError). P1.1 原型的消息为英文, P1.2 改走字符串资源 (R4) 并为 JVM 测试提供回退.
+ * (T5: 转换失败为 JS TypeError, 数值越界为 RangeError). 消息经 [ScriptMessages] 取自字符串资源 (R4), 与模块函数的其他错误一样以函数名为前缀;
+ * 期望类型写作脚本类型名 (string, number, Array 等) 或 Java 类名.
  */
 object ScriptArgs {
 
@@ -38,7 +40,7 @@ object ScriptArgs {
 
     @JvmStatic
     fun nonNullish(value: Any?, function: String, param: String): Any {
-        if (isNullish(value)) throw typeError(function, param, "a value", value)
+        if (isNullish(value)) throw RhinoScriptRuntime.typeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentCannotBe(param, describe(value))))
         return value!!
     }
 
@@ -46,8 +48,8 @@ object ScriptArgs {
     fun string(value: Any?, function: String, param: String): String = when (val v = unwrap(value)) {
         is String -> v
         is ConsString, is CharSequence -> v.toString()
-        null, Undefined.instance -> throw typeError(function, param, "a string", value)
-        is org.mozilla.javascript.Symbol -> throw typeError(function, param, "a string", value)
+        null, Undefined.instance -> throw typeError(function, param, "string", value)
+        is org.mozilla.javascript.Symbol -> throw typeError(function, param, "string", value)
         is Scriptable, is Number, is Boolean -> RhinoScriptRuntime.toString(v)
         else -> v.toString()
     }
@@ -58,7 +60,7 @@ object ScriptArgs {
     @JvmStatic
     fun boolean(value: Any?, function: String, param: String): Boolean = when (val v = unwrap(value)) {
         is Boolean -> v
-        else -> throw typeError(function, param, "a boolean", value)
+        else -> throw typeError(function, param, "boolean", value)
     }
 
     @JvmStatic
@@ -69,9 +71,9 @@ object ScriptArgs {
     fun double(value: Any?, function: String, param: String): Double = when (val v = unwrap(value)) {
         is Number -> v.toDouble()
         is CharSequence -> RhinoScriptRuntime.toNumber(v.toString()).also { d ->
-            if (d.isNaN() && v.toString().trim() != "NaN") throw typeError(function, param, "a number", value)
+            if (d.isNaN() && v.toString().trim() != "NaN") throw typeError(function, param, "number", value)
         }
-        else -> throw typeError(function, param, "a number", value)
+        else -> throw typeError(function, param, "number", value)
     }
 
     @JvmStatic
@@ -87,7 +89,7 @@ object ScriptArgs {
     fun int(value: Any?, function: String, param: String): Int {
         val d = double(value, function, param)
         if (d.isNaN() || d.isInfinite() || d != Math.floor(d) || d < Int.MIN_VALUE || d > Int.MAX_VALUE) {
-            throw RhinoScriptRuntime.rangeError("$function: argument \"$param\" must be an integer within the 32-bit range, got ${RhinoScriptRuntime.numberToString(d, 10)}")
+            throw RhinoScriptRuntime.rangeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentInteger(param, 32, RhinoScriptRuntime.numberToString(d, 10))))
         }
         return d.toInt()
     }
@@ -99,7 +101,7 @@ object ScriptArgs {
     fun long(value: Any?, function: String, param: String): Long {
         val d = double(value, function, param)
         if (d.isNaN() || d.isInfinite() || d != Math.floor(d) || d < Long.MIN_VALUE.toDouble() || d > Long.MAX_VALUE.toDouble()) {
-            throw RhinoScriptRuntime.rangeError("$function: argument \"$param\" must be an integer, got ${RhinoScriptRuntime.numberToString(d, 10)}")
+            throw RhinoScriptRuntime.rangeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentInteger(param, 64, RhinoScriptRuntime.numberToString(d, 10))))
         }
         return d.toLong()
     }
@@ -112,7 +114,7 @@ object ScriptArgs {
     fun bytes(value: Any?, function: String, param: String): ByteArray = when (val v = unwrap(value)) {
         is ByteArray -> v
         is NativeArray -> ByteArray(v.length.toInt()) { i -> (v.get(i, v) as? Number)?.toByte() ?: 0 }
-        else -> throw typeError(function, param, "a byte array or an array of numbers", value)
+        else -> throw typeError(function, param, "byte[] / number[]", value)
     }
 
     @JvmStatic
@@ -123,7 +125,7 @@ object ScriptArgs {
     fun list(value: Any?, function: String, param: String): List<Any?> = when (val v = if (value is NativeArray) value else unwrap(value)) {
         is NativeArray -> List(v.length.toInt()) { i -> v.get(i, v) }
         is List<*> -> v
-        else -> throw typeError(function, param, "an array", value)
+        else -> throw typeError(function, param, "Array", value)
     }
 
     @JvmStatic
@@ -134,7 +136,7 @@ object ScriptArgs {
     fun map(value: Any?, function: String, param: String): Map<String, Any?> = when (val v = if (value is NativeObject) value else unwrap(value)) {
         is NativeObject -> LinkedHashMap<String, Any?>().also { out -> v.ids.forEach { id -> if (id is String) out[id] = v.get(id, v) } }
         is Map<*, *> -> v.entries.associate { (k, e) -> k.toString() to e }
-        else -> throw typeError(function, param, "an object", value)
+        else -> throw typeError(function, param, "Object", value)
     }
 
     @JvmStatic
@@ -147,7 +149,7 @@ object ScriptArgs {
         if (type.isInstance(value)) return value as T
         val unwrapped = (value as? Wrapper)?.unwrap()
         if (type.isInstance(unwrapped)) return unwrapped as T
-        throw typeError(function, param, "an instance of ${type.name}", value)
+        throw typeError(function, param, type.name, value)
     }
 
     @JvmStatic
@@ -209,27 +211,20 @@ object ScriptArgs {
 
     // Errors of the generated layer.
 
+    /** [actual] is not in the message: the existing resources only state the accepted count. */
     @JvmStatic
-    fun arityError(function: String, min: Int, max: Int, actual: Int): RuntimeException {
-        val expected = when {
-            max < 0 -> "at least $min argument${plural(min)}"
-            min == max -> "$min argument${plural(min)}"
-            else -> "$min to $max arguments"
-        }
-        return RhinoScriptRuntime.typeError("$function expects $expected, got $actual")
-    }
+    fun arityError(function: String, min: Int, max: Int, @Suppress("UNUSED_PARAMETER") actual: Int): RuntimeException =
+        RhinoScriptRuntime.typeError(ScriptMessages.failedToCall(function, ScriptMessages.arity(min, max)))
 
     @JvmStatic
     fun noOverload(function: String, args: Array<out Any?>, signatures: String): RuntimeException =
-        RhinoScriptRuntime.typeError("$function: no overload accepts (${args.joinToString { describe(it) }}); candidates: $signatures")
+        RhinoScriptRuntime.typeError(ScriptMessages.failedToCall(function, ScriptMessages.noOverload(args.joinToString { describe(it) }, signatures)))
 
     @JvmStatic
     fun unknownMember(module: String, id: Int): RuntimeException = IllegalStateException("Script module $module has no member with id $id")
 
     private fun typeError(function: String, param: String, expected: String, value: Any?): RuntimeException =
-        RhinoScriptRuntime.typeError("$function: argument \"$param\" must be $expected, got ${describe(value)}")
-
-    private fun plural(n: Int) = if (n == 1) "" else "s"
+        RhinoScriptRuntime.typeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentType(param, expected, describe(value))))
 
     /** A short description of a script value for error messages. */
     @JvmStatic

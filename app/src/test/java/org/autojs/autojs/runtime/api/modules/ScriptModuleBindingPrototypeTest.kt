@@ -1,19 +1,22 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.modules.generated.Base64ModuleBinding
-import org.autojs.autojs.runtime.api.modules.generated.SampleModuleBinding
+import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
+import org.autojs.autojs.runtime.api.modules.generated.TestScriptModules
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.ScriptableObject
+import java.io.File
 
 /**
  * Roadmap P1.1: the bindings that `ksp-script-modules-processor` generates for the test fixture `SampleModule` (every
  * annotation and parameter kind) and for the example `Base64Module` (main source set) compile, mount on a global object
- * and dispatch calls, getters, setters, overloads and errors as declared.
+ * and dispatch calls, getters, setters, overloads and errors as declared. Since P1.2 they are mounted on demand from
+ * the generated registries, and the base64 cases are also written to `build/script-modules-device/` for
+ * `tools/augment/device_eval.py --new-modules on`.
  */
 class ScriptModuleBindingPrototypeTest {
 
@@ -23,8 +26,8 @@ class ScriptModuleBindingPrototypeTest {
     fun setUp() {
         rhino = DifferentialRhino()
         val global = rhino.ktScope.globalThis
-        ScriptModuleMounter.mount(SampleModuleBinding, rhino.ktRuntime, global, global, rhino.ktScope, rhino.context)
-        ScriptModuleMounter.mount(Base64ModuleBinding, rhino.ktRuntime, global, global, rhino.ktScope, rhino.context)
+        ScriptModuleMounter(TestScriptModules, rhino.ktRuntime, rhino.ktScope, global).install("sample")
+        ScriptModuleMounter(ScriptModules, rhino.ktRuntime, rhino.ktScope, global).install("base64")
     }
 
     @After
@@ -102,20 +105,10 @@ class ScriptModuleBindingPrototypeTest {
 
     /** The example module fixes the two base64 deviations recorded in ROADMAP appendix E. */
     @Test
-    fun base64Example() = check(
-        listOf(
-            "base64.encode('hello')" to "\"aGVsbG8=\"",
-            "base64.encode('\\u4f60\\u597d', 'utf_16le')" to "\"YE99WQ==\"",
-            "base64.encode(123)" to "\"MTIz\"",
-            "base64.encode({ toString() { return 'obj'; } })" to "\"b2Jq\"",
-            "base64.decode('aGVsbG8=')" to "\"hello\"",
-            "base64.decode({ toString() { return 'aGk='; } })" to "\"hi\"",
-            "base64.encode('a', 'definitely-not-a-charset')" to "throws RangeError",
-            "base64.encode(null)" to "throws TypeError",
-            "base64.encode()" to "throws TypeError",
-            "\$base64 === base64" to "true",
-        )
-    )
+    fun base64Example() {
+        check(BASE64_CASES)
+        exportForDevice("Base64Module", BASE64_CASES)
+    }
 
     @Test
     fun attributeConstantsMatchRhino() {
@@ -131,6 +124,58 @@ class ScriptModuleBindingPrototypeTest {
         assertTrue("script-modules.json of the test fixtures is missing", files.any { "\"class\": \"org.autojs.autojs.runtime.api.modules.sample.SampleModule\"" in it })
         val sample = files.first { "SampleModule" in it }
         assertTrue(sample.contains("\"name\": \"pick\"") && sample.contains("\"kind\": \"TYPED\"") && sample.contains("\"global\": \"ONLY\""))
+        assertTrue(sample.contains("\"toStringRole\": \"FUNCTIONAL\"") && sample.contains("\"emitter\": true") && sample.contains("\"attributes\": 5"))
+    }
+
+    @Test
+    fun registriesListTheirCompilationUnit() {
+        assertEquals(listOf("base64"), ScriptModules.bindings.map { it.spec.name })
+        assertEquals(listOf("eagerProbe", "probe", "sample", "child"), TestScriptModules.bindings.map { it.spec.name })
+        assertEquals("org.autojs.autojs.runtime.api.modules.sample.ProbeModule", TestScriptModules.find("\$probeAlias")?.spec?.className)
+        assertEquals(listOf("child"), TestScriptModules.childrenOf("org.autojs.autojs.runtime.api.modules.sample.ProbeModule").map { it.spec.name })
+    }
+
+    /** Writes [cases] in the format of `tools/augment/device_eval.py` (expected values in "kt"). */
+    private fun exportForDevice(name: String, cases: List<Pair<String, String>>) {
+        val dir = File("build/script-modules-device").apply { mkdirs() }
+        val entries = cases.joinToString(",\n") { (expression, expected) ->
+            "  {\"expression\": ${json(expression)}, \"js\": null, \"kt\": ${json(expected)}, \"reason\": \"new script module layer\"}"
+        }
+        File(dir, "$name.json").writeText("[\n$entries\n]\n", Charsets.UTF_8)
+    }
+
+    /** A JSON string literal; the expressions are ASCII, so only quotes and backslashes need escaping. */
+    private fun json(value: String): String = buildString {
+        append('"')
+        value.forEach { c ->
+            if (c == '"' || c == BACKSLASH) append(BACKSLASH)
+            append(c)
+        }
+        append('"')
+    }
+
+    companion object {
+
+        private const val BACKSLASH = '\\'
+
+        private val BASE64_CASES = listOf(
+            "base64.encode('hello')" to "\"aGVsbG8=\"",
+            "base64.encode(String.fromCharCode(0x4f60, 0x597d), 'utf_16le')" to "\"YE99WQ==\"",
+            "base64.encode(123)" to "\"MTIz\"",
+            "base64.encode({ toString() { return 'obj'; } })" to "\"b2Jq\"",
+            "base64.decode('aGVsbG8=')" to "\"hello\"",
+            "base64.decode({ toString() { return 'aGk='; } })" to "\"hi\"",
+            "base64.encode('a', 'definitely-not-a-charset')" to "throws RangeError",
+            "base64.encode(null)" to "throws TypeError",
+            "base64.encode()" to "throws TypeError",
+            "base64.encode('a', 'UTF-8', 'extra')" to "throws TypeError",
+            "base64.decode(undefined)" to "throws TypeError",
+            "(function () { try { base64.encode(null); } catch (e) { return e instanceof TypeError; } })()" to "true",
+            "(function () { try { base64.decode('aGk=', 'no-such-charset'); } catch (e) { return e instanceof RangeError; } })()" to "true",
+            "base64.decode(base64.encode([104, 105]))" to "\"hi\"",
+            "\$base64 === base64" to "true",
+        )
+
     }
 
 }

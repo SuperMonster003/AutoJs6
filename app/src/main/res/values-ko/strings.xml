@@ -529,7 +529,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">필수 속성 \"%1$s\" 가 null 이거나 존재하지 않습니다</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" 에 대한 해결된 경로는 null 일 수 없습니다</string>
     <string name="error_save_failed">저장에 실패했습니다</string>
+    <string name="error_script_argument_cannot_be">인수 \"%1$s\" 는 %2$s 일 수 없습니다</string>
+    <string name="error_script_argument_must_be_integer">인수 \"%1$s\" 는 %2$d 비트 정수여야 하지만 %3$s 입니다</string>
+    <string name="error_script_argument_must_be_of_type">인수 \"%1$s\" 는 %2$s 유형이어야 하지만 %3$s 입니다</string>
     <string name="error_script_is_on_exiting">스크립트가 종료 중입니다</string>
+    <string name="error_script_no_overload_accepts_arguments">인수 (%1$s) 를 받는 오버로드가 없습니다. 후보: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">스크립트 바로 가기가 저장된 엔진과 더 이상 일치하지 않습니다. 바로 가기를 다시 만드세요.</string>
     <string name="error_selector_method_without_calling">셀렉터 메소드는 매개 변수로 전달되지 않고 호출되어야합니다: %s</string>
     <string name="error_selector_result_type_with_compass">결과 유형이 선택기 일 때 나침반을 사용할 수 없습니다</string>
@@ -591,6 +595,7 @@
     <string name="error_unacceptable_character">허용되지 않는 문자</string>
     <string name="error_unknown">알수없는 오류</string>
     <string name="error_unknown_algorithm_selector_param">알 수없는 알고리즘 선택기 매개 변수: %s</string>
+    <string name="error_unknown_charset">알 수 없는 문자 집합 \"%1$s\"</string>
     <string name="error_unknown_color_name">알 수 없는 색상 이름: %s</string>
     <string name="error_unknown_element_name">알 수 없는 요소 이름: %1$s</string>
     <string name="error_unknown_exception">알 수 없는 예외</string>

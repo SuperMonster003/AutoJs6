@@ -528,7 +528,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">必要なプロパティ \"%1$s\" が null か存在しません</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">\"%1$s\" の解決済みパスは null にできません</string>
     <string name="error_save_failed">保存に失敗しました</string>
+    <string name="error_script_argument_cannot_be">引数 \"%1$s\" は %2$s にできません</string>
+    <string name="error_script_argument_must_be_integer">引数 \"%1$s\" は %2$d ビット整数である必要がありますが, %3$s が渡されました</string>
+    <string name="error_script_argument_must_be_of_type">引数 \"%1$s\" は %2$s 型である必要がありますが, %3$s が渡されました</string>
     <string name="error_script_is_on_exiting">スクリプトが終了してしまう</string>
+    <string name="error_script_no_overload_accepts_arguments">引数 (%1$s) を受け付けるオーバーロードがありません. 候補: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">スクリプトのショートカットが保存済みのエンジンと一致しなくなりました. ショートカットを作り直してください.</string>
     <string name="error_selector_method_without_calling">セレクタメソッドはパラメータとして渡されるのではなく, 呼び出される必要があります: %s</string>
     <string name="error_selector_result_type_with_compass">結果タイプがセレクタの場合, コンパスを使用できません</string>
@@ -590,6 +594,7 @@
     <string name="error_unacceptable_character">使用できない文字</string>
     <string name="error_unknown">不明なエラー</string>
     <string name="error_unknown_algorithm_selector_param">不明なアルゴリズムセレクタパラメータ: %s</string>
+    <string name="error_unknown_charset">不明な文字セット \"%1$s\"</string>
     <string name="error_unknown_color_name">不明な色名: %s</string>
     <string name="error_unknown_element_name">不明な要素名: %1$s</string>
     <string name="error_unknown_exception">不明な例外</string>

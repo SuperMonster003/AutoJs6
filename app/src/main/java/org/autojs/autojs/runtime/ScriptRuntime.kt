@@ -199,6 +199,7 @@ import org.autojs.autojs.runtime.api.augment.util.Java as UtilJava
 import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
 import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
+import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.script.JavaScriptSource
 
 /**
@@ -993,6 +994,11 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private fun augment(target: ScriptableObject) {
 
+        // Roadmap T8: with the hidden switch on, the migrated modules come from the new script module layer, at the
+        // position of their old augment call; with it off, the mounter is null and nothing changes.
+        // zh-CN: ROADMAP T8: 隐藏开关打开时, 已迁移的模块在原 augment 调用的位置由新脚本模块层挂载; 关闭时 mounter 为 null, 行为不变.
+        val modules = ScriptModuleLayer.mounterOrNull(this, target)
+
         Global(this).assignWithRuntime(target, this, GlobalClasses)
         GlobalLegacy(this).assignWithRuntime(target, this)
         IsNullish.augmentWithRuntime(target, this)
@@ -1067,7 +1073,7 @@ class ScriptRuntime private constructor(builder: Builder) {
         Toast(this).augment(target)
         Media.augmentWithRuntime(target, this, media)
         Sensors.augmentWithRuntime(target, this, sensors)
-        Base64.augmentWithRuntime(target, this)
+        ScriptModuleLayer.mountOr(modules, "base64") { Base64.augmentWithRuntime(target, this) }
         Notice(this).augment(target).also { notice ->
             NoticeChannel(this).augment(notice)
         }

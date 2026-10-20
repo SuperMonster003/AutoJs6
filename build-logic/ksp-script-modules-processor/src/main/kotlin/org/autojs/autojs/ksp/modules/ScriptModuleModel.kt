@@ -18,6 +18,8 @@ internal data class ModuleModel(
     val dollarPrefix: Boolean,
     val eager: Boolean,
     val parent: String?,
+    val attributes: Int,
+    val emitter: Boolean,
     val instance: ModuleInstance,
     val functions: List<FunctionGroup>,
     val invoke: Overload?,
@@ -50,6 +52,8 @@ internal data class FunctionGroup(
     val aliases: List<String>,
     val placement: Placement,
     val attributes: Int,
+    /** `NONE`, `LITERAL` or `FUNCTIONAL` (the annotation's `ScriptToString` entry). */
+    val toStringRole: String,
     val overloads: List<Overload>,
 ) {
     /** The JS `length` of the function object: the parameters before the first optional one, over all overloads. */

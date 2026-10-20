@@ -527,7 +527,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">Требуемое свойство \"%1$s\" пусто или не существует</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">Разрешённый путь для \"%1$s\" не может быть равен null</string>
     <string name="error_save_failed">Не удалось сохранить</string>
+    <string name="error_script_argument_cannot_be">Аргумент \"%1$s\" не может быть %2$s</string>
+    <string name="error_script_argument_must_be_integer">Аргумент \"%1$s\" должен быть %2$d-битным целым числом, получено %3$s</string>
+    <string name="error_script_argument_must_be_of_type">Аргумент \"%1$s\" должен иметь тип %2$s, получено %3$s</string>
     <string name="error_script_is_on_exiting">Скрипт завершается</string>
+    <string name="error_script_no_overload_accepts_arguments">Нет перегрузки, принимающей аргументы (%1$s). Варианты: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">Ярлык скрипта больше не соответствует сохраненному движку. Создайте ярлык заново.</string>
     <string name="error_selector_method_without_calling">Метод селектора должен быть вызван, а не передан в качестве параметра: %s</string>
     <string name="error_selector_result_type_with_compass">Невозможно использовать компас, когда тип результата - селектор</string>
@@ -589,6 +593,7 @@
     <string name="error_unacceptable_character">Недопустимый символ</string>
     <string name="error_unknown">Неизвестная ошибка</string>
     <string name="error_unknown_algorithm_selector_param">Неизвестный параметр селектора алгоритма: %s</string>
+    <string name="error_unknown_charset">Неизвестная кодировка \"%1$s\"</string>
     <string name="error_unknown_color_name">Неизвестное имя цвета: %s</string>
     <string name="error_unknown_element_name">Неизвестное имя элемента: %1$s</string>
     <string name="error_unknown_exception">Неизвестное исключение</string>

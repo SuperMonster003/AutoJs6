@@ -524,7 +524,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">必需屬性 \"%1$s\" 為空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_save_failed">保存失敗</string>
+    <string name="error_script_argument_cannot_be">參數 \"%1$s\" 不能為 %2$s</string>
+    <string name="error_script_argument_must_be_integer">參數 \"%1$s\" 需要是 %2$d 位整數, 實際為 %3$s</string>
+    <string name="error_script_argument_must_be_of_type">參數 \"%1$s\" 需要是 %2$s 類型, 實際為 %3$s</string>
     <string name="error_script_is_on_exiting">腳本正在退出中</string>
+    <string name="error_script_no_overload_accepts_arguments">沒有可接受參數 (%1$s) 的重載. 候選: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">腳本快捷方式保存的引擎信息與當前文件不一致. 請重新創建該快捷方式.</string>
     <string name="error_selector_method_without_calling">選擇器方法需調用而不可作為參數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果類型為 selector 時, 無法同時使用羅盤參數</string>
@@ -586,6 +590,7 @@
     <string name="error_unacceptable_character">不接受的字符</string>
     <string name="error_unknown">未知錯誤</string>
     <string name="error_unknown_algorithm_selector_param">未知的 algorithm 選擇器參數: %s</string>
+    <string name="error_unknown_charset">未知的字符集 \"%1$s\"</string>
     <string name="error_unknown_color_name">未知顏色名稱: %s</string>
     <string name="error_unknown_element_name">未知的元素名稱: %1$s</string>
     <string name="error_unknown_exception">未知異常</string>

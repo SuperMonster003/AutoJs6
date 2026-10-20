@@ -524,7 +524,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">必需屬性 \"%1$s\" 為空或不存在</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">解析後的路徑 \"%1$s\" 不可為 null</string>
     <string name="error_save_failed">儲存失敗</string>
+    <string name="error_script_argument_cannot_be">引數 \"%1$s\" 不能為 %2$s</string>
+    <string name="error_script_argument_must_be_integer">引數 \"%1$s\" 需要是 %2$d 位元整數, 實際為 %3$s</string>
+    <string name="error_script_argument_must_be_of_type">引數 \"%1$s\" 需要是 %2$s 型別, 實際為 %3$s</string>
     <string name="error_script_is_on_exiting">指令碼正在退出中</string>
+    <string name="error_script_no_overload_accepts_arguments">沒有可接受引數 (%1$s) 的多載. 候選: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">指令碼快捷方式儲存的引擎資訊與目前檔案不一致. 請重新建立該快捷方式.</string>
     <string name="error_selector_method_without_calling">選擇器方法需呼叫而不可作為引數直接傳入: %s</string>
     <string name="error_selector_result_type_with_compass">結果型別為 selector 時, 無法同時使用羅盤引數</string>
@@ -586,6 +590,7 @@
     <string name="error_unacceptable_character">不接受的字元</string>
     <string name="error_unknown">未知錯誤</string>
     <string name="error_unknown_algorithm_selector_param">未知的 algorithm 選擇器引數: %s</string>
+    <string name="error_unknown_charset">未知的字元集 \"%1$s\"</string>
     <string name="error_unknown_color_name">未知顏色名稱: %s</string>
     <string name="error_unknown_element_name">未知的元素名稱: %1$s</string>
     <string name="error_unknown_exception">未知異常</string>

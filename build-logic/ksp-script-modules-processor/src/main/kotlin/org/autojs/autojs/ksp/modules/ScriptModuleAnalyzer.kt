@@ -98,6 +98,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         checkDuplicateNames(declaration, groups, accessors, javaClasses)
 
         val parent = moduleAnnotation.type("parent")?.declaration?.qualifiedName?.asString()?.takeUnless { it == "kotlin.Unit" }
+        if (parent == qualifiedName) error(declaration, "A script module cannot be its own parent")
+        if (parent != null && moduleAnnotation.boolean("eager", false)) error(declaration, "A sub-module is built with its parent; eager applies to top-level modules only")
 
         return ModuleModel(
             qualifiedName = qualifiedName,
@@ -107,6 +109,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             dollarPrefix = moduleAnnotation.boolean("dollarPrefix", true),
             eager = moduleAnnotation.boolean("eager", false),
             parent = parent,
+            attributes = moduleAnnotation.int("attributes", PERMANENT),
+            emitter = moduleAnnotation.boolean("emitter", false),
             instance = instance,
             functions = groups,
             invoke = invoke,
@@ -134,15 +138,22 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         val placement = firstAnnotation.placement()
         val attributes = firstAnnotation.int("attributes", PERMANENT)
         val aliases = firstAnnotation.strings("aliases")
+        val toStringRole = firstAnnotation.enumEntry("toStringRole", "NONE")
         members.drop(1).forEach { (function, annotation) ->
-            if (annotation.placement() != placement || annotation.int("attributes", PERMANENT) != attributes || annotation.strings("aliases") != aliases) {
-                error(function, "Overloads of script function \"$name\" must declare the same aliases, global placement and attributes as ${first.simpleName.asString()}")
+            if (annotation.placement() != placement || annotation.int("attributes", PERMANENT) != attributes || annotation.strings("aliases") != aliases || annotation.enumEntry("toStringRole", "NONE") != toStringRole) {
+                error(function, "Overloads of script function \"$name\" must declare the same aliases, global placement, attributes and toStringRole as ${first.simpleName.asString()}")
             }
+        }
+        if (toStringRole != "NONE" && "toString" !in listOf(name) + aliases) {
+            error(first, "$moduleName.$name: toStringRole applies to a script function named or aliased \"toString\" only")
+        }
+        if (toStringRole == "FUNCTIONAL" && !placement.onModule) {
+            error(first, "$moduleName.$name: a FUNCTIONAL toString must be bound on the module object")
         }
         val overloads = members.mapNotNull { (function, _) -> overloadOf(function, "$moduleName.$name") }
         if (overloads.size != members.size) return null
         checkAmbiguity(first, name, overloads)
-        return FunctionGroup(id, name, aliases, placement, attributes, overloads)
+        return FunctionGroup(id, name, aliases, placement, attributes, toStringRole, overloads)
     }
 
     private fun overloadOf(function: KSFunctionDeclaration, display: String): Overload? {
@@ -347,14 +358,15 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         fun KSAnnotation.type(name: String): KSType? = value(name) as? KSType
 
         /** Enum arguments arrive as the entry's declaration (KSP2) or as its type (KSP1). */
+        fun KSAnnotation.enumEntry(name: String, default: String): String = when (val raw = value(name)) {
+            is KSType -> raw.declaration.simpleName.asString()
+            is KSDeclaration -> raw.simpleName.asString()
+            null -> default
+            else -> raw.toString().substringAfterLast('.')
+        }
+
         fun KSAnnotation.placement(): Placement {
-            val entry = when (val raw = value("global")) {
-                is KSType -> raw.declaration.simpleName.asString()
-                is KSDeclaration -> raw.simpleName.asString()
-                null -> "NONE"
-                else -> raw.toString().substringAfterLast('.')
-            }
-            return when (entry) {
+            return when (enumEntry("global", "NONE")) {
                 "ALSO" -> Placement(onModule = true, onGlobal = true)
                 "ONLY" -> Placement(onModule = false, onGlobal = true)
                 else -> Placement(onModule = true, onGlobal = false)

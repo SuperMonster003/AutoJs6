@@ -28,7 +28,11 @@ import kotlin.reflect.KClass
  * @property eager build the module when the runtime starts instead of on first access (roadmap T3), for modules
  * with start-up side effects or held by the host directly.
  * @property parent the @ScriptModule class this module is mounted on (as `util.inspect`); `Unit::class` for a
- * top-level module.
+ * top-level module. A sub-module is built together with its parent module object.
+ * @property attributes Rhino attributes ([ScriptAttributes]) of the names binding the module object on its target
+ * (the current `augment(target, additionalAttributes = READONLY)` of selector / continuation adds READONLY).
+ * @property emitter append an event emitter object (the methods of `scriptRuntime.events.emitter()`) to the end of the
+ * module object's prototype chain, after the [ScriptPrototype] objects (the current `AsEmitter` of engines / images).
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
@@ -39,6 +43,8 @@ annotation class ScriptModule(
     val dollarPrefix: Boolean = true,
     val eager: Boolean = false,
     val parent: KClass<*> = Unit::class,
+    val attributes: Int = ScriptAttributes.PERMANENT,
+    val emitter: Boolean = false,
 )
 
 /**
@@ -55,6 +61,8 @@ annotation class ScriptModule(
  * @property aliases further names bound to the same function object.
  * @property global where the function is bound besides (or instead of) the module object.
  * @property attributes Rhino property attributes ([ScriptAttributes]).
+ * @property toStringRole for a script function named (or aliased) `toString`: whether it describes the module object
+ * or converts its arguments ([ScriptToString]); any other function keeps [ScriptToString.NONE].
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
@@ -64,6 +72,7 @@ annotation class ScriptFunction(
     val aliases: Array<String> = [],
     val global: ScriptGlobal = ScriptGlobal.NONE,
     val attributes: Int = ScriptAttributes.PERMANENT,
+    val toStringRole: ScriptToString = ScriptToString.NONE,
 )
 
 /**
@@ -118,7 +127,8 @@ annotation class ScriptConstruct
 
 /**
  * Provides the prototype of the module object (a Java object such as `ScriptRuntime.util`, or a script object), read
- * once when the module object is built; the prototype's own prototype becomes the module object's original one.
+ * once when the module object is built; the prototype's own prototype becomes the module object's original one. A
+ * `List` value is a chain, nearest first (the current `augment(target, listOf(...))`, as colors with its color tables).
  */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
@@ -135,6 +145,23 @@ enum class ScriptGlobal {
 
     /** Only on the global object (the current `globalAssignmentFunctions` / `globalAssignmentGetters`). */
     ONLY,
+}
+
+/**
+ * Role of a script function named `toString` (the current `AS_LITERAL_TO_STRING` / `AS_FUNCTIONAL_TO_STRING` flags).
+ */
+enum class ScriptToString {
+    /** Not a `toString` function, or nothing to declare. */
+    NONE,
+
+    /** Describes the module object (as `String(global)`); `util.inspect` treats it as the object's custom toString. */
+    LITERAL,
+
+    /**
+     * Converts its arguments (as `colors.toString(color)`); the module object also gets the hidden marker function
+     * `__augmented_custom_to_string__` (DONTENUM), so `util.inspect` does not treat it as a custom toString.
+     */
+    FUNCTIONAL,
 }
 
 /**

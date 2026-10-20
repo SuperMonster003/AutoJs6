@@ -529,7 +529,11 @@
     <string name="error_required_property_is_nullish_or_does_not_exist">الخاصية المطلوبة \"%1$s\" خالية أو غير موجودة</string>
     <string name="error_resolved_path_for_a_relative_path_cannot_be_null">المسار المُحلّ لـ \"%1$s\" لا يمكن أن يكون null</string>
     <string name="error_save_failed">فشل الحفظ</string>
+    <string name="error_script_argument_cannot_be">الوسيطة \"%1$s\" لا يمكن أن تكون %2$s</string>
+    <string name="error_script_argument_must_be_integer">يجب أن تكون الوسيطة \"%1$s\" عددا صحيحا من %2$d بت, القيمة الفعلية %3$s</string>
+    <string name="error_script_argument_must_be_of_type">يجب أن تكون الوسيطة \"%1$s\" من النوع %2$s, القيمة الفعلية %3$s</string>
     <string name="error_script_is_on_exiting">السيناريو عند الخروج</string>
+    <string name="error_script_no_overload_accepts_arguments">لا توجد صيغة محملة تقبل الوسائط (%1$s). الصيغ المرشحة: %2$s</string>
     <string name="error_script_shortcut_descriptor_mismatch">لم يعد اختصار البرنامج النصي يطابق المحرك المحفوظ. أعد إنشاء الاختصار.</string>
     <string name="error_selector_method_without_calling">يجب أن تسمى طريقة المحدد بدلاً من تمريرها كمعلمة: %s</string>
     <string name="error_selector_result_type_with_compass">لا يمكن استخدام بوصلة عندما يكون نوع النتيجة محددًا</string>
@@ -591,6 +595,7 @@
     <string name="error_unacceptable_character">الطابع غير المقبول</string>
     <string name="error_unknown">خطأ غير معروف</string>
     <string name="error_unknown_algorithm_selector_param">محدد خوارزمية غير معروف بارام: %s</string>
+    <string name="error_unknown_charset">مجموعة أحرف غير معروفة \"%1$s\"</string>
     <string name="error_unknown_color_name">اسم لون غير معروف: %s</string>
     <string name="error_unknown_element_name">اسم عنصر غير معروف: %1$s</string>
     <string name="error_unknown_exception">استثناء غير معروف</string>

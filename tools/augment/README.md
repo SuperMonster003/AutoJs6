@@ -5,7 +5,7 @@
 ## device_bench.py: 真机计时
 
 ```
-py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls]
+py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--new-modules on|off]
 ```
 
 1. `bench/aj6_init_timing.js` 跑 `--runs` 次, 读取 debug 宿主打印的 `runtime-init-prologue` / `script-init` / `runtime-init-epilogue` (毫秒) 并给出最小 / 中位 / 最大值. release 宿主不打印这些行, 只会得到总用时.
@@ -13,6 +13,8 @@ py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] 
 3. `bench/call_overhead.js` 对比普通 JS 函数, Rhino 内置函数, Augment 函数 / getter / 全局函数, 以及同一 Java 方法经 Rhino 自带桥接的单次耗时 (20 万次), 最后测 1000 次失败调用的异常路径.
 
 基线数值见 ROADMAP 附录 A. 设备上的临时目录为 `/sdcard/Download/aj6-augment-bench`, 可随时删除.
+
+`--new-modules on|off` 在计时前用一个小脚本设置新脚本模块层的隐藏开关 (ROADMAP T8, 偏好设置键 `key_$_new_script_module_layer`, 经 `Pref.putBooleanSync` 写入), 结束后恢复原值; 开关只影响之后启动的脚本.
 
 ## device_surface_snapshot.py: 真机 API 表面快照
 
@@ -27,10 +29,12 @@ py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augm
 ## device_eval.py: 真机复核差分测试记录的 Kotlin 值
 
 ```
-py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep]
+py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep] [--new-modules on|off] [--strict-errors]
 ```
 
 JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`) 运行时把已记录的偏差与 JVM 上只能跳过的表达式导出到 `app/build/augment-differential/<测试类>.json`. 本脚本把这些表达式合成一个脚本在设备上运行, 按 `DifferentialRhino.render` 的规则渲染结果, 与 JVM 上记录的 Kotlin 值比对 (两侧都抛出时视为一致, JVM 构造不出 Kotlin 的错误消息); 跳过的表达式没有期望值, 只打印设备结果. 输出只有不一致的条目与汇总行. 先运行差分测试生成 JSON; 设备上的临时目录 `/sdcard/Download/aj6-augment-bench` 用完即删 (`--keep` 保留).
+
+新脚本模块层的 JVM 测试 (`app/src/test/java/org/autojs/autojs/runtime/api/modules/`) 把新模块的期望值导出到 `app/build/script-modules-device/*.json` (同一格式, 期望值在 `kt`). 复核新模块时打开开关并比较错误类型: `--cases app/build/script-modules-device --new-modules on --strict-errors` (`--new-modules` 与 device_bench.py 相同, 结束后恢复原值; `--strict-errors` 让两侧都抛出时也要求错误名一致).
 
 ## inventory_diff.py: 旧 JS 成员名 对 Kotlin 注册名
 
