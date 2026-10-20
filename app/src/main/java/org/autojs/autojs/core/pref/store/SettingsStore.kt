@@ -165,6 +165,15 @@ fun <T : Any> SettingsStore.put(key: PrefKey<T>, value: T?, commit: Boolean): Se
     return put(key.name, value?.let(key::encode), commit)
 }
 
+/**
+ * Puts [value] for [key] within one [SettingsStore.edit] block (null removes it); the key must belong to the store
+ * being edited.
+ * zh-CN: 在一个 [SettingsStore.edit] 块中写入 [key] 的值 (null 即删除); 键须属于正在编辑的存储.
+ */
+operator fun <T : Any> SettingsStore.Editor.set(key: PrefKey<T>, value: T?) {
+    put(key.name, value?.let(key::encode))
+}
+
 private fun SettingsStore.checkStore(key: PrefKey<*>) {
     require(key.store == id) { "${key.name} belongs to ${key.store}, not $id" }
 }

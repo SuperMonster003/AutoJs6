@@ -12,6 +12,7 @@ import org.autojs.autojs.annotation.KeyRes
 import org.autojs.autojs.annotation.ScriptInterfaceCompatible
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.store.SettingsStore
@@ -37,7 +38,6 @@ object Pref {
 
     private val globalAppContext: Context = GlobalAppContext.get()
     private val resources: Resources = globalAppContext.resources
-    private const val NO_THRESHOLD = -1
 
     // Reads and writes go through the default settings store (docs/settings/ROADMAP.md P1.4, T3); the SharedPreferences
     // behind it is still the one of PreferenceManager, so get() and the registered change listeners stay the same.
@@ -86,46 +86,22 @@ object Pref {
         }
 
     @JvmStatic
+    @Deprecated("Use EditorKeys.codeHighlightThresholdChars (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.codeHighlightThresholdChars", "org.autojs.autojs.core.pref.keys.EditorKeys"))
     val codeHighlightThresholdChars: Int
-        get() {
-            val defValue = resources.getInteger(R.integer.editor_code_highlight_threshold_default_value)
-            val value = getInt(R.string.key_editor_code_highlight_threshold_bytes, defValue)
-            return when {
-                value < NO_THRESHOLD -> defValue
-                value == NO_THRESHOLD -> NO_THRESHOLD
-                value <= 0 -> 0
-                else -> value
-            }
-        }
+        get() = EditorKeys.codeHighlightThresholdChars
 
     @JvmStatic
+    @Deprecated("Use EditorKeys.largeFileModeThresholdBytes (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.largeFileModeThresholdBytes", "org.autojs.autojs.core.pref.keys.EditorKeys"))
     val largeFileModeThresholdBytes: Int
-        get() {
-            val defValue = resources.getInteger(R.integer.editor_large_file_mode_threshold_default_value)
-            val value = getInt(R.string.key_editor_large_file_mode_threshold_bytes, defValue)
-            return when {
-                value < NO_THRESHOLD -> defValue
-                value == NO_THRESHOLD -> NO_THRESHOLD
-                value <= 0 -> 0
-                else -> value
-            }
-        }
+        get() = EditorKeys.largeFileModeThresholdBytes
 
     @JvmStatic
-    fun isCodeHighlightEnabledForLength(length: Int): Boolean =
-        when (val threshold = codeHighlightThresholdChars) {
-            NO_THRESHOLD -> true
-            0 -> false
-            else -> length <= threshold
-        }
+    @Deprecated("Use EditorKeys.isCodeHighlightEnabledForLength (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.isCodeHighlightEnabledForLength(length)", "org.autojs.autojs.core.pref.keys.EditorKeys"))
+    fun isCodeHighlightEnabledForLength(length: Int): Boolean = EditorKeys.isCodeHighlightEnabledForLength(length)
 
     @JvmStatic
-    fun shouldEnableLargeFileModeForSize(size: Long): Boolean =
-        when (val threshold = largeFileModeThresholdBytes) {
-            NO_THRESHOLD -> false
-            0 -> true
-            else -> size > threshold.toLong()
-        }
+    @Deprecated("Use EditorKeys.shouldEnableLargeFileModeForSize (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.shouldEnableLargeFileModeForSize(size)", "org.autojs.autojs.core.pref.keys.EditorKeys"))
+    fun shouldEnableLargeFileModeForSize(size: Long): Boolean = EditorKeys.shouldEnableLargeFileModeForSize(size)
 
     @JvmStatic
     val isExtendingJsBuildInObjectsEnabled
@@ -283,10 +259,11 @@ object Pref {
         )
 
     @JvmStatic
+    @Deprecated("Use EditorKeys.EDITOR_THEME (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_THEME", "org.autojs.autojs.core.pref.keys.EditorKeys"))
     var currentTheme: String?
-        get() = getStringOrNull(R.string.key_editor_theme)
+        get() = EditorKeys.EDITOR_THEME.storedOrNull()
         set(theme) {
-            putString(R.string.key_editor_theme, theme)
+            EditorKeys.EDITOR_THEME.set(theme)
         }
 
     private fun getTimestamp(@KeyRes keyRes: Int): Long = getLong(keyRes, -1)
@@ -359,16 +336,20 @@ object Pref {
     fun rootRecordGeneratesBinary() = getString(R.string.key_root_record_out_file_type, key(R.string.default_key_root_record_out_file_type)) == key(R.string.key_root_record_out_file_type_binary)
 
     @JvmStatic
-    fun setEditorTextSize(value: Int) = putInt(R.string.key_editor_text_size, value)
+    @Deprecated("Use EditorKeys.EDITOR_TEXT_SIZE (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_TEXT_SIZE.set(value)", "org.autojs.autojs.core.pref.keys.EditorKeys"))
+    fun setEditorTextSize(value: Int) = EditorKeys.EDITOR_TEXT_SIZE.set(value)
 
     @JvmStatic
-    fun getEditorTextSize(defValue: Int): Int = getInt(R.string.key_editor_text_size, defValue)
+    @Deprecated("Use EditorKeys.EDITOR_TEXT_SIZE (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_TEXT_SIZE.storedOrNull() ?: defValue", "org.autojs.autojs.core.pref.keys.EditorKeys"))
+    fun getEditorTextSize(defValue: Int): Int = EditorKeys.EDITOR_TEXT_SIZE.storedOrNull() ?: defValue
 
     @JvmStatic
-    fun setCodeHighlightThresholdChars(value: Int) = putInt(R.string.key_editor_code_highlight_threshold_bytes, value)
+    @Deprecated("Use EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(value)", "org.autojs.autojs.core.pref.keys.EditorKeys"))
+    fun setCodeHighlightThresholdChars(value: Int) = EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(value)
 
     @JvmStatic
-    fun setLargeFileModeThresholdBytes(value: Int) = putInt(R.string.key_editor_large_file_mode_threshold_bytes, value)
+    @Deprecated("Use EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES (docs/settings/ROADMAP.md P2.3)", ReplaceWith("EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.set(value)", "org.autojs.autojs.core.pref.keys.EditorKeys"))
+    fun setLargeFileModeThresholdBytes(value: Int) = EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.set(value)
 
     @JvmStatic
     fun putString(@KeyRes keyRes: Int, value: String?) = putString(key(keyRes), value)

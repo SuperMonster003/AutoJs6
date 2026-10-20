@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-20",
  "git": {
-  "commit": "a199a97f7",
+  "commit": "09e355833",
   "branch": "master",
-  "dirtyScannedFiles": 38
+  "dirtyScannedFiles": 24
  },
  "summary": {
   "keyResources": 268,
@@ -32,42 +32,12 @@
   "keysWithoutSourceRefs": [
    "key_about_app_and_developer",
    "key_about_app_tips",
-   "key_ace_editor_font_cascadia_code",
-   "key_ace_editor_font_fira_code",
-   "key_ace_editor_font_hack",
-   "key_ace_editor_font_ibm_plex_mono",
-   "key_ace_editor_font_intel_one_mono",
-   "key_ace_editor_font_iosevka",
-   "key_ace_editor_font_iosevka_slab",
-   "key_ace_editor_font_jetbrains_mono",
-   "key_ace_editor_font_source_code_pro",
-   "key_ace_editor_font_system_monospace",
-   "key_ace_smart_hint_completion_delay_0",
-   "key_ace_smart_hint_completion_delay_100",
-   "key_ace_smart_hint_completion_delay_250",
-   "key_ace_smart_hint_completion_min_chars_1",
-   "key_ace_smart_hint_completion_min_chars_2",
-   "key_ace_smart_hint_completion_min_chars_3",
-   "key_ace_smart_hint_completion_trigger_dot",
-   "key_ace_smart_hint_completion_trigger_identifier",
-   "key_ace_smart_hint_completion_trigger_off",
-   "key_ace_smart_hint_signature_trigger_cursor",
-   "key_ace_smart_hint_signature_trigger_off",
-   "key_ace_smart_hint_signature_trigger_typing",
    "key_ai_settings",
    "key_check_for_updates",
    "key_check_for_updates_while_ignoring_the_local_version",
    "key_dialog_foreground_svc",
    "key_dialog_layout_inspector_exit_tips",
    "key_dialog_log_entries_exported",
-   "key_editor_engine_ace",
-   "key_editor_engine_native",
-   "key_editor_gutter_width_mode_dynamic",
-   "key_editor_gutter_width_mode_fixed",
-   "key_editor_log_button_behavior_bottom_sheet",
-   "key_editor_theme_mode_separate",
-   "key_editor_word_wrap_indent_style_classic",
-   "key_editor_word_wrap_indent_style_continuation",
    "key_enable_observe_key",
    "key_github_token",
    "key_mail_settings",
@@ -78,15 +48,6 @@
    "key_updates_checked_states_cleared"
   ],
   "keysWithoutAnyRefs": [
-   "key_ace_editor_font_cascadia_code",
-   "key_ace_editor_font_fira_code",
-   "key_ace_editor_font_hack",
-   "key_ace_editor_font_ibm_plex_mono",
-   "key_ace_editor_font_intel_one_mono",
-   "key_ace_editor_font_iosevka_slab",
-   "key_ace_editor_font_jetbrains_mono",
-   "key_ace_editor_font_source_code_pro",
-   "key_ace_editor_font_system_monospace",
    "key_dialog_foreground_svc",
    "key_dialog_layout_inspector_exit_tips",
    "key_dialog_log_entries_exported",
@@ -97,7 +58,7 @@
   "namedStoreCallFiles": 34,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 8,
-  "prefUserFiles": 109,
+  "prefUserFiles": 100,
   "jsonFileStores": 13
  },
  "keys": [
@@ -234,6 +195,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 143
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 252
     },
@@ -274,8 +239,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 110
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 928
+     "line": 922
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -307,6 +276,12 @@
    "value": "cascadia_code",
    "file": "strings_donottranslate.xml",
    "line": 89,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 73
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -315,6 +290,12 @@
    "value": "fira_code",
    "file": "strings_donottranslate.xml",
    "line": 90,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 74
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -323,6 +304,12 @@
    "value": "hack",
    "file": "strings_donottranslate.xml",
    "line": 91,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 75
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -331,6 +318,12 @@
    "value": "ibm_plex_mono",
    "file": "strings_donottranslate.xml",
    "line": 92,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 76
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -339,6 +332,12 @@
    "value": "intel_one_mono",
    "file": "strings_donottranslate.xml",
    "line": 93,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 77
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -350,6 +349,12 @@
    "defaultOf": [
     "default_key_ace_editor_font"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 78
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, `default_key_ace_editor_font` 的目标"
   },
@@ -358,6 +363,12 @@
    "value": "iosevka_slab",
    "file": "strings_donottranslate.xml",
    "line": 95,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 79
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -366,6 +377,12 @@
    "value": "jetbrains_mono",
    "file": "strings_donottranslate.xml",
    "line": 96,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 80
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -374,6 +391,12 @@
    "value": "source_code_pro",
    "file": "strings_donottranslate.xml",
    "line": 97,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 81
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -382,6 +405,12 @@
    "value": "system_monospace",
    "file": "strings_donottranslate.xml",
    "line": 98,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 82
+    }
+   ],
    "kind": "ValueConstant",
    "note": "字体 id 常量, 源码与资源均无引用 (Q12)"
   },
@@ -405,6 +434,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 116
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 246
@@ -446,6 +479,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 119
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 247
     },
@@ -485,6 +522,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 128
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 250
@@ -526,6 +567,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 125
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 249
     },
@@ -565,6 +610,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 285
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 268
@@ -606,6 +655,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 359
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 293
     },
@@ -637,6 +690,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 299
+    },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 54
@@ -674,8 +731,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 218
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 946
+     "line": 937
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -689,7 +750,7 @@
    "literalRefs": [
     {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 9,
+     "line": 11,
      "const": "KEY_ACE_LSP_DECLARATION_GROUPS"
     }
    ],
@@ -718,8 +779,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 201
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 945
+     "line": 936
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -737,7 +802,7 @@
    "literalRefs": [
     {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 6,
+     "line": 8,
      "const": "KEY_ACE_LSP_ENABLED"
     }
    ],
@@ -766,8 +831,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 211
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 947
+     "line": 938
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -781,7 +850,7 @@
    "literalRefs": [
     {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 7,
+     "line": 9,
      "const": "KEY_ACE_LSP_FILE_TYPES"
     }
    ],
@@ -809,6 +878,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 122
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 248
@@ -850,6 +923,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 146
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 253
     },
@@ -890,6 +967,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 360
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 297
     },
@@ -921,6 +1002,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 279
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 266
@@ -962,6 +1047,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 268
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 264
     },
@@ -995,6 +1084,12 @@
    "defaultOf": [
     "default_key_ace_smart_hint_completion_delay"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 61
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1009,6 +1104,12 @@
      "owner": "key_ace_smart_hint_completion_delay"
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 62
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1021,6 +1122,12 @@
     {
      "array": "keys_ace_smart_hint_completion_delay",
      "owner": "key_ace_smart_hint_completion_delay"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 63
     }
    ],
    "kind": "ValueConstant",
@@ -1046,6 +1153,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 262
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 263
@@ -1084,6 +1195,12 @@
    "defaultOf": [
     "default_key_ace_smart_hint_completion_min_chars"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 56
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1102,6 +1219,12 @@
      "owner": null
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 57
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1118,6 +1241,12 @@
     {
      "array": "values_ace_smart_hint_completion_min_chars",
      "owner": null
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 58
     }
    ],
    "kind": "ValueConstant",
@@ -1143,6 +1272,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 256
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 262
@@ -1174,6 +1307,12 @@
      "owner": "key_ace_smart_hint_completion_trigger"
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 51
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1191,6 +1330,12 @@
    "defaultOf": [
     "default_key_ace_smart_hint_completion_trigger"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 52
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1203,6 +1348,12 @@
     {
      "array": "keys_ace_smart_hint_completion_trigger",
      "owner": "key_ace_smart_hint_completion_trigger"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 53
     }
    ],
    "kind": "ValueConstant",
@@ -1228,6 +1379,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 274
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 265
@@ -1262,6 +1417,16 @@
    "defaultOf": [
     "default_key_ace_smart_hint_signature_trigger"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 66
+    },
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 355
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1276,6 +1441,12 @@
      "owner": "key_ace_smart_hint_signature_trigger"
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 67
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -1288,6 +1459,16 @@
     {
      "array": "keys_ace_smart_hint_signature_trigger",
      "owner": "key_ace_smart_hint_signature_trigger"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 68
+    },
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 355
     }
    ],
    "kind": "ValueConstant",
@@ -1313,6 +1494,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 302
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 254
@@ -1354,6 +1539,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 282
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 267
     },
@@ -1393,6 +1582,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 290
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 255
@@ -1434,6 +1627,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 140
+    },
+    {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 251
     },
@@ -1473,6 +1670,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 131
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 94
@@ -1862,7 +2063,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 185
+     "line": 161
     }
    ],
    "kind": "Setting",
@@ -2504,8 +2705,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/edit/EditorView.kt",
-     "line": 5378
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 177
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -2517,11 +2718,7 @@
     },
     {
      "file": "ui/settings/PreferencesFragment.kt",
-     "line": 67
-    },
-    {
-     "file": "ui/settings/PreferencesFragment.kt",
-     "line": 76
+     "line": 73
     }
    ],
    "kind": "Setting",
@@ -2548,6 +2745,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 305
+    },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 53
@@ -2585,12 +2786,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 92
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 368
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 321
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -2638,8 +2835,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 97
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 934
+     "line": 928
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -2659,13 +2860,13 @@
     },
     {
      "file": "ui/settings/PreferencesFragment.kt",
-     "line": 75
+     "line": 72
     }
    ],
    "literalRefs": [
     {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 11,
+     "line": 13,
      "const": "KEY_EDITOR_ENGINE"
     }
    ],
@@ -2684,6 +2885,12 @@
      "owner": "key_editor_engine"
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 45
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -2700,6 +2907,12 @@
    ],
    "defaultOf": [
     "default_key_editor_engine"
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 45
+    }
    ],
    "kind": "ValueConstant",
    "note": "候选值, 默认值"
@@ -2724,6 +2937,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 308
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 261
@@ -2765,24 +2982,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/edit/EditorView.kt",
-     "line": 748
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 149
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 935
-    },
-    {
-     "file": "ui/edit/EditorView.kt",
-     "line": 938
-    },
-    {
-     "file": "ui/edit/EditorView.kt",
-     "line": 1362
-    },
-    {
-     "file": "ui/edit/EditorView.kt",
-     "line": 1366
+     "line": 929
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -2813,6 +3018,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 312
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 260
@@ -2847,6 +3056,12 @@
    "defaultOf": [
     "default_key_editor_gutter_width_mode"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 49
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值, 默认值"
   },
@@ -2859,6 +3074,12 @@
     {
      "array": "keys_editor_gutter_width_mode",
      "owner": "key_editor_gutter_width_mode"
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 49
     }
    ],
    "kind": "ValueConstant",
@@ -2885,12 +3106,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 105
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 371
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 328
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -2938,8 +3155,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/edit/EditorView.kt",
-     "line": 274
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 181
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -2951,7 +3168,7 @@
     },
     {
      "file": "ui/settings/PreferencesFragment.kt",
-     "line": 77
+     "line": 74
     }
    ],
    "kind": "Setting",
@@ -2972,6 +3189,12 @@
    "defaultOf": [
     "default_key_editor_log_button_behavior"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 48
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值, 默认值"
   },
@@ -2988,8 +3211,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 48
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 277
+     "line": 275
     }
    ],
    "kind": "ValueConstant",
@@ -3001,6 +3228,10 @@
    "file": "strings_donottranslate.xml",
    "line": 193,
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 187
+    },
     {
      "file": "ui/log/LogBottomSheet.kt",
      "line": 237
@@ -3019,6 +3250,10 @@
     {
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 13
+    },
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 193
     }
    ],
    "kind": "Setting",
@@ -3034,6 +3269,10 @@
     {
      "file": "core/console/ConsoleTimeSettings.kt",
      "line": 13
+    },
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 190
     }
    ],
    "kind": "Setting",
@@ -3047,12 +3286,8 @@
    "line": 196,
    "sourceRefs": [
     {
-     "file": "ui/log/LogBottomSheet.kt",
-     "line": 361
-    },
-    {
-     "file": "ui/log/LogBottomSheet.kt",
-     "line": 374
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 196
     }
    ],
    "kind": "Setting",
@@ -3074,6 +3309,10 @@
     "default_key_editor_pinch_to_zoom_strategy"
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 87
+    },
     {
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
      "line": 84
@@ -3103,16 +3342,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 294
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 944
-    },
-    {
-     "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-     "line": 10
-    },
-    {
-     "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-     "line": 19
+     "line": 935
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -3143,12 +3378,16 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 88
+    },
+    {
      "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
      "line": 15
     },
     {
      "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-     "line": 23
+     "line": 22
     }
    ],
    "kind": "ValueConstant",
@@ -3160,6 +3399,10 @@
    "file": "strings_donottranslate.xml",
    "line": 200,
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 89
+    },
     {
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
      "line": 83
@@ -3176,7 +3419,7 @@
    "sourceRefs": [
     {
      "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-     "line": 28
+     "line": 27
     },
     {
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
@@ -3219,6 +3462,10 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 361
+    },
+    {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
      "line": 37
     }
@@ -3247,16 +3494,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 362
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 365
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 154
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 927
+     "line": 921
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -3288,16 +3531,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 287
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 289
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 160
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 929
+     "line": 923
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3327,28 +3566,12 @@
    "line": 205,
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 166
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 931
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 168
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 208
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 214
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 219
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 233
+     "line": 925
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3366,28 +3589,12 @@
    "line": 206,
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 163
+    },
+    {
      "file": "ui/edit/EditorView.kt",
-     "line": 930
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 170
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 209
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 213
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 222
-    },
-    {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 235
+     "line": 924
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3419,12 +3626,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "ui/edit/EditorView.kt",
-     "line": 932
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 170
     },
     {
-     "file": "ui/edit/theme/Themes.java",
-     "line": 252
+     "file": "ui/edit/EditorView.kt",
+     "line": 926
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3453,6 +3660,12 @@
    "defaultOf": [
     "default_key_editor_theme_mode"
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 46
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值, 默认值"
   },
@@ -3469,8 +3682,12 @@
    ],
    "sourceRefs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 46
+    },
+    {
      "file": "ui/edit/theme/Themes.java",
-     "line": 255
+     "line": 252
     }
    ],
    "kind": "ValueConstant",
@@ -3496,6 +3713,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 135
+    },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
      "line": 307
@@ -3531,6 +3752,12 @@
      "owner": "key_editor_word_wrap_indent_style"
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 47
+    }
+   ],
    "kind": "ValueConstant",
    "note": "候选值"
   },
@@ -3547,6 +3774,12 @@
    ],
    "defaultOf": [
     "default_key_editor_word_wrap_indent_style"
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 47
+    }
    ],
    "kind": "ValueConstant",
    "note": "候选值, 默认值"
@@ -3573,7 +3806,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 330
+     "line": 307
     },
     {
      "file": "inrt/Pref.kt",
@@ -3620,7 +3853,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 336
+     "line": 313
     },
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
@@ -3653,7 +3886,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 342
+     "line": 319
     },
     {
      "file": "ui/accessibility/A11yServiceManagerDialog.kt",
@@ -3739,7 +3972,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 133
+     "line": 109
     }
    ],
    "kind": "Setting",
@@ -3937,7 +4170,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 239
+     "line": 215
     }
    ],
    "kind": "Setting",
@@ -4018,7 +4251,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 164
+     "line": 140
     }
    ],
    "kind": "Setting",
@@ -4463,15 +4696,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 206
+     "line": 182
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 312
+     "line": 289
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 322
+     "line": 299
     }
    ],
    "kind": "State",
@@ -4486,15 +4719,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 214
+     "line": 190
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 318
+     "line": 295
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 325
+     "line": 302
     }
    ],
    "kind": "State",
@@ -4509,15 +4742,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 190
+     "line": 166
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 309
+     "line": 286
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 324
+     "line": 301
     }
    ],
    "kind": "State",
@@ -4532,15 +4765,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 210
+     "line": 186
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 315
+     "line": 292
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 323
+     "line": 300
     }
    ],
    "kind": "State",
@@ -5037,7 +5270,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 144
+     "line": 120
     }
    ],
    "kind": "Setting",
@@ -5536,7 +5769,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 281
+     "line": 257
     }
    ],
    "kind": "Setting",
@@ -5733,11 +5966,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 224
+     "line": 200
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 228
+     "line": 204
     }
    ],
    "kind": "Setting",
@@ -5829,7 +6062,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 359
+     "line": 336
     }
    ],
    "kind": "Setting",
@@ -5853,7 +6086,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 359
+     "line": 336
     }
    ],
    "kind": "ValueConstant",
@@ -6037,7 +6270,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 154
+     "line": 130
     }
    ],
    "kind": "Setting",
@@ -6066,11 +6299,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 158
+     "line": 134
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 159
+     "line": 135
     }
    ],
    "kind": "Setting",
@@ -6107,11 +6340,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 353
+     "line": 330
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 356
+     "line": 333
     }
    ],
    "kind": "Setting",
@@ -6331,7 +6564,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 233
+     "line": 209
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
@@ -6662,7 +6895,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 178
+     "line": 154
     }
    ],
    "kind": "Setting",
@@ -6691,7 +6924,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 171
+     "line": 147
     },
     {
      "file": "inrt/Pref.kt",
@@ -6933,7 +7166,7 @@
    "refs": [
     {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 8,
+     "line": 10,
      "const": "KEY_ACE_LSP_FILE_TYPES_REVISION"
     }
    ],
@@ -6949,8 +7182,13 @@
    "name": "key_$_ace_semantic_java_enabled",
    "refs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 242,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 13,
+     "line": 15,
      "const": "KEY_ACE_SEMANTIC_JAVA_ENABLED"
     }
    ],
@@ -6966,8 +7204,13 @@
    "name": "key_$_ace_semantic_kotlin_enabled",
    "refs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 248,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 14,
+     "line": 16,
      "const": "KEY_ACE_SEMANTIC_KOTLIN_ENABLED"
     }
    ],
@@ -6983,8 +7226,13 @@
    "name": "key_$_ace_semantic_lua_enabled",
    "refs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 236,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 12,
+     "line": 14,
      "const": "KEY_ACE_SEMANTIC_LUA_ENABLED"
     }
    ],
@@ -7000,8 +7248,13 @@
    "name": "key_$_ace_semantic_python_enabled",
    "refs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 230,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 11,
+     "line": 13,
      "const": "KEY_ACE_SEMANTIC_PYTHON_ENABLED"
     }
    ],
@@ -7017,8 +7270,13 @@
    "name": "key_$_ace_semantic_typescript_enabled",
    "refs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 224,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-     "line": 10,
+     "line": 12,
      "const": "KEY_ACE_SEMANTIC_TYPESCRIPT_ENABLED"
     }
    ],
@@ -7050,8 +7308,13 @@
    "name": "key_$_editor_engine_selection_mode",
    "refs": [
     {
+     "file": "core/pref/keys/EditorKeys.kt",
+     "line": 103,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 12,
+     "line": 14,
      "const": "KEY_EDITOR_ENGINE_SELECTION_MODE"
     }
    ],
@@ -7765,7 +8028,7 @@
    "refs": [
     {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 14,
+     "line": 16,
      "const": "KEY_SEEN_ACE_FALLBACK_NOTICE"
     }
    ],
@@ -7782,7 +8045,7 @@
    "refs": [
     {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 15,
+     "line": 17,
      "const": "KEY_SEEN_ACE_LARGE_FILE_NOTICE"
     }
    ],
@@ -7799,7 +8062,7 @@
    "refs": [
     {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 13,
+     "line": 15,
      "const": "KEY_SEEN_EDITOR_SWITCH_UNDO_NOTICE"
     }
    ],
@@ -8812,6 +9075,7 @@
   "core/pref/SettingKey.kt",
   "core/pref/SettingsJson.kt",
   "core/pref/keys/AppearanceKeys.kt",
+  "core/pref/keys/EditorKeys.kt",
   "core/pref/keys/ExplorerKeys.kt",
   "core/pref/keys/GeneralKeys.kt",
   "core/record/GlobalActionRecorder.java",
@@ -8855,14 +9119,9 @@
   "ui/devplugin/ConnectionManagerDialog.kt",
   "ui/doc/DocumentationPageController.kt",
   "ui/edit/EditorView.kt",
-  "ui/edit/editor/EditorDisplayPreferences.kt",
   "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-  "ui/edit/editor/JavaScriptHighlighter.java",
-  "ui/edit/editor/ace/AceEditorFontPreferences.kt",
   "ui/edit/editor/ace/AceEditorLspPreferences.kt",
   "ui/edit/editor/engine/EditorEnginePreferences.kt",
-  "ui/edit/editor/loading/EditorTextLoadPolicy.kt",
-  "ui/edit/theme/Themes.java",
   "ui/floating/CircularMenu.java",
   "ui/floating/CircularMenuWindow.java",
   "ui/floating/controller/FloatingControllerWindow.kt",
@@ -8872,21 +9131,16 @@
   "ui/floating/layoutinspector/search/QueryModeStore.kt",
   "ui/keystore/ManageKeyStoreActivity.kt",
   "ui/log/LogActivity.kt",
-  "ui/log/LogBottomSheet.kt",
   "ui/log/LogPageConsoleSettings.kt",
   "ui/main/MainActivity.kt",
   "ui/main/drawer/DrawerMenuToggleableItem.kt",
   "ui/main/plugin/PluginFragment.kt",
   "ui/settings/CheckForUpdatesPreference.kt",
   "ui/settings/ClearUpdatesCheckedStatesPreference.kt",
-  "ui/settings/EditorCodeHighlightThresholdPreference.kt",
-  "ui/settings/EditorLargeFileModeThresholdPreference.kt",
   "ui/settings/EditorPinchToZoomPreference.kt",
-  "ui/settings/EditorThresholdDialogBuilder.kt",
   "ui/settings/KeepScreenOnWhenInForegroundPreference.kt",
   "ui/settings/LauncherIconPreference.kt",
   "ui/settings/ManageIgnoredUpdatesPreference.kt",
-  "ui/settings/PreferencesFragment.kt",
   "ui/settings/ResetSetupWizardWelcomePreference.kt",
   "ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt",
   "ui/settings/ScreenCaptureRequestDelayPreference.kt",
@@ -9187,28 +9441,124 @@
     "form": "调用处字面量",
     "value": "1",
     "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 255,
+    "line": 257,
     "method": "getInt",
     "type": "Int"
    }
   ],
-  "key_$_editor_engine_selection_mode": [
+  "key_$_ace_semantic_java_enabled": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-    "line": 115,
-    "method": "getStringOrNull",
-    "type": "String"
+    "form": "表达式",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[java]",
+    "value": "运行时: DEFAULT_SEMANTIC_LANGUAGES[java]",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 241,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
    },
    {
-    "expr": "null",
-    "form": "调用处字面量",
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[java]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_kotlin_enabled": [
+   {
+    "form": "表达式",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[kotlin]",
+    "value": "运行时: DEFAULT_SEMANTIC_LANGUAGES[kotlin]",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 247,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[kotlin]",
+    "value": "false",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_lua_enabled": [
+   {
+    "form": "表达式",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[lua]",
+    "value": "运行时: DEFAULT_SEMANTIC_LANGUAGES[lua]",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 235,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[lua]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_python_enabled": [
+   {
+    "form": "表达式",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[python]",
+    "value": "运行时: DEFAULT_SEMANTIC_LANGUAGES[python]",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 229,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[python]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_ace_semantic_typescript_enabled": [
+   {
+    "form": "表达式",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[typescript]",
+    "value": "运行时: DEFAULT_SEMANTIC_LANGUAGES[typescript]",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 223,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_SEMANTIC_LANGUAGES[typescript]",
+    "value": "true",
+    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
+    "line": 123,
+    "manual": true
+   }
+  ],
+  "key_$_editor_engine_selection_mode": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-    "line": 127,
-    "method": "getString",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 103,
+    "method": "SettingKey.Str",
     "type": "String"
    }
   ],
@@ -9421,6 +9771,16 @@
     "form": "R.bool",
     "ref": "pref_ace_custom_scrollbar_enabled",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_custom_scrollbar_enabled, \"pref_ace_custom_scrollbar_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 143,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_custom_scrollbar_enabled",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_ace_custom_scrollbar_enabled\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 121,
@@ -9430,26 +9790,27 @@
   ],
   "key_ace_editor_font": [
    {
-    "expr": "AceEditorFont.IOSEVKA.preferenceValue",
     "form": "伴生常量",
+    "expr": "AceEditorFont.IOSEVKA.preferenceValue",
     "value": "iosevka",
-    "note": "枚举 AceEditorFont.IOSEVKA, 与 `default_key_ace_editor_font` 一致",
-    "file": "ui/edit/editor/ace/AceEditorFontPreferences.kt",
-    "line": 12,
-    "method": "getString",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 109,
+    "method": "SettingKey.Str",
     "type": "String",
+    "note": "枚举 AceEditorFont.IOSEVKA, 与 `default_key_ace_editor_font` 一致",
     "manual": true
    }
   ],
   "key_ace_font_ligatures_enabled": [
    {
-    "expr": "DEFAULT_FONT_LIGATURES_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_font_ligatures_enabled",
     "value": "true",
-    "via": "常量 DEFAULT_FONT_LIGATURES_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:49)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 122,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_font_ligatures_enabled, \"pref_ace_font_ligatures_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 116,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9465,13 +9826,13 @@
   ],
   "key_ace_font_styles_enabled": [
    {
-    "expr": "DEFAULT_FONT_STYLES_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_font_styles_enabled",
     "value": "true",
-    "via": "常量 DEFAULT_FONT_STYLES_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:50)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 130,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_font_styles_enabled, \"pref_ace_font_styles_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 119,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9490,6 +9851,16 @@
     "form": "R.bool",
     "ref": "pref_ace_highlight_indent_guides_enabled",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_highlight_indent_guides_enabled, \"pref_ace_highlight_indent_guides_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 128,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_highlight_indent_guides_enabled",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_ace_highlight_indent_guides_enabled\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 88,
@@ -9499,13 +9870,13 @@
   ],
   "key_ace_indent_guides_enabled": [
    {
-    "expr": "DEFAULT_INDENT_GUIDES_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_indent_guides_enabled",
     "value": "true",
-    "via": "常量 DEFAULT_INDENT_GUIDES_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:45)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 90,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_indent_guides_enabled, \"pref_ace_indent_guides_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 125,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9524,6 +9895,16 @@
     "form": "R.bool",
     "ref": "pref_ace_inline_completion_preview_enabled",
     "value": "false",
+    "expr": "boolResource(R.bool.pref_ace_inline_completion_preview_enabled, \"pref_ace_inline_completion_preview_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 285,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_inline_completion_preview_enabled",
+    "value": "false",
     "expr": "app:defaultValue=\"@bool/pref_ace_inline_completion_preview_enabled\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 265,
@@ -9533,13 +9914,13 @@
   ],
   "key_ace_line_numbers_enabled": [
    {
-    "expr": "DEFAULT_LINE_NUMBERS_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_line_numbers_enabled",
     "value": "true",
-    "via": "常量 DEFAULT_LINE_NUMBERS_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:43)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 74,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_line_numbers_enabled, \"pref_ace_line_numbers_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 299,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9555,26 +9936,27 @@
   ],
   "key_ace_lsp_declaration_groups": [
    {
-    "expr": "\"\"",
     "form": "伴生常量",
+    "expr": "DEFAULT_DECLARATION_GROUPS",
     "value": "[] (缺键时 DEFAULT_DECLARATION_GROUPS)",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 290,
-    "method": "getString",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 217,
+    "method": "SettingKey.Str",
     "type": "String",
-    "note": "先判断 containsKey, 缺键返回 DEFAULT_DECLARATION_GROUPS (233 行); 空串只在键存在时出现",
+    "note": "读取方先判断 isStored, 缺键返回 AceEditorLspPreferences.DEFAULT_DECLARATION_GROUPS; 声明的默认值是其逗号拼接 (P2.3)",
     "manual": true
    }
   ],
   "key_ace_lsp_enabled": [
    {
-    "expr": "DEFAULT_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_lsp_enabled",
     "value": "true",
-    "via": "常量 DEFAULT_ENABLED (ui/edit/editor/ace/AceEditorLspPreferences.kt:15)",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 237,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_lsp_enabled, \"pref_ace_lsp_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 201,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9590,26 +9972,27 @@
   ],
   "key_ace_lsp_file_types": [
    {
-    "expr": "\"\"",
     "form": "伴生常量",
+    "expr": "DEFAULT_FILE_TYPES",
     "value": "DEFAULT_FILE_TYPES (19 个扩展名, 缺键时)",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 256,
-    "method": "getString",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 210,
+    "method": "SettingKey.Str",
     "type": "String",
-    "note": "先判断 containsKey, 缺键返回 DEFAULT_FILE_TYPES (56 行); 空串只在键存在时出现",
+    "note": "读取方先判断 isStored, 缺键返回 AceEditorLspPreferences.DEFAULT_FILE_TYPES; 声明的默认值是其逗号拼接 (P2.3)",
     "manual": true
    }
   ],
   "key_ace_print_margin_enabled": [
    {
-    "expr": "DEFAULT_PRINT_MARGIN_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_print_margin_enabled",
     "value": "false",
-    "via": "常量 DEFAULT_PRINT_MARGIN_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:44)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 82,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_print_margin_enabled, \"pref_ace_print_margin_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 122,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9628,6 +10011,16 @@
     "form": "R.bool",
     "ref": "pref_ace_scrollbar_auto_hide_enabled",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_scrollbar_auto_hide_enabled, \"pref_ace_scrollbar_auto_hide_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 146,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_scrollbar_auto_hide_enabled",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_ace_scrollbar_auto_hide_enabled\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 129,
@@ -9640,6 +10033,16 @@
     "form": "R.bool",
     "ref": "pref_ace_smart_hint_arrow_overload_cycling",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_smart_hint_arrow_overload_cycling, \"pref_ace_smart_hint_arrow_overload_cycling\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 279,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_smart_hint_arrow_overload_cycling",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_ace_smart_hint_arrow_overload_cycling\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 249,
@@ -9648,6 +10051,17 @@
    }
   ],
   "key_ace_smart_hint_completion_delay": [
+   {
+    "form": "R.string",
+    "ref": "default_key_ace_smart_hint_completion_delay",
+    "resolved": "key_ace_smart_hint_completion_delay_0",
+    "value": "0",
+    "expr": "keyResource(R.string.default_key_ace_smart_hint_completion_delay, \"default_key_ace_smart_hint_completion_delay\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 267,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   },
    {
     "form": "R.string",
     "ref": "default_key_ace_smart_hint_completion_delay",
@@ -9666,6 +10080,17 @@
     "ref": "default_key_ace_smart_hint_completion_min_chars",
     "resolved": "key_ace_smart_hint_completion_min_chars_1",
     "value": "1",
+    "expr": "keyResource(R.string.default_key_ace_smart_hint_completion_min_chars, \"default_key_ace_smart_hint_completion_min_chars\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 261,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   },
+   {
+    "form": "R.string",
+    "ref": "default_key_ace_smart_hint_completion_min_chars",
+    "resolved": "key_ace_smart_hint_completion_min_chars_1",
+    "value": "1",
     "expr": "app:itemDefaultKey=\"@string/default_key_ace_smart_hint_completion_min_chars\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 222,
@@ -9674,6 +10099,17 @@
    }
   ],
   "key_ace_smart_hint_completion_trigger": [
+   {
+    "form": "R.string",
+    "ref": "default_key_ace_smart_hint_completion_trigger",
+    "resolved": "key_ace_smart_hint_completion_trigger_identifier",
+    "value": "identifier",
+    "expr": "keyResource(R.string.default_key_ace_smart_hint_completion_trigger, \"default_key_ace_smart_hint_completion_trigger\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 255,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   },
    {
     "form": "R.string",
     "ref": "default_key_ace_smart_hint_completion_trigger",
@@ -9692,6 +10128,17 @@
     "ref": "default_key_ace_smart_hint_signature_trigger",
     "resolved": "key_ace_smart_hint_signature_trigger_cursor",
     "value": "cursor",
+    "expr": "keyResource(R.string.default_key_ace_smart_hint_signature_trigger, \"default_key_ace_smart_hint_signature_trigger\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 273,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   },
+   {
+    "form": "R.string",
+    "ref": "default_key_ace_smart_hint_signature_trigger",
+    "resolved": "key_ace_smart_hint_signature_trigger_cursor",
+    "value": "cursor",
     "expr": "app:itemDefaultKey=\"@string/default_key_ace_smart_hint_signature_trigger\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 240,
@@ -9700,6 +10147,16 @@
    }
   ],
   "key_ace_svg_gutter_icons_enabled": [
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_svg_gutter_icons_enabled",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_svg_gutter_icons_enabled, \"pref_ace_svg_gutter_icons_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 302,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
    {
     "form": "R.bool",
     "ref": "pref_ace_svg_gutter_icons_enabled",
@@ -9716,6 +10173,16 @@
     "form": "R.bool",
     "ref": "pref_ace_symbol_highlight_enabled",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_symbol_highlight_enabled, \"pref_ace_symbol_highlight_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 282,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_symbol_highlight_enabled",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_ace_symbol_highlight_enabled\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 257,
@@ -9724,6 +10191,16 @@
    }
   ],
   "key_ace_touch_magnifier_enabled": [
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_touch_magnifier_enabled",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_ace_touch_magnifier_enabled, \"pref_ace_touch_magnifier_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 290,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
    {
     "form": "R.bool",
     "ref": "pref_ace_touch_magnifier_enabled",
@@ -9740,6 +10217,16 @@
     "form": "R.bool",
     "ref": "pref_ace_whitespaces_in_selection_enabled",
     "value": "true",
+    "expr": "boolResource(R.bool.pref_ace_whitespaces_in_selection_enabled, \"pref_ace_whitespaces_in_selection_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 140,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "R.bool",
+    "ref": "pref_ace_whitespaces_in_selection_enabled",
+    "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_ace_whitespaces_in_selection_enabled\"",
     "file": "res/xml/fragment_code_editor_settings.xml",
     "line": 113,
@@ -9749,13 +10236,13 @@
   ],
   "key_ace_word_wrap_enabled": [
    {
-    "expr": "DEFAULT_WORD_WRAP_ENABLED",
-    "form": "伴生常量",
+    "form": "R.bool",
+    "ref": "pref_ace_word_wrap_enabled",
     "value": "false",
-    "via": "常量 DEFAULT_WORD_WRAP_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:41)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 53,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_ace_word_wrap_enabled, \"pref_ace_word_wrap_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 131,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -9800,7 +10287,7 @@
     "value": "true",
     "ref": "pref_auto_check_for_updates",
     "file": "core/pref/Pref.kt",
-    "line": 184,
+    "line": 160,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -9820,11 +10307,11 @@
     "form": "表达式",
     "expr": "AutoNightMode.isFunctional()",
     "value": "运行时: AutoNightMode.isFunctional()",
+    "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
     "line": 71,
     "method": "SettingKey.Bool",
     "type": "Boolean",
-    "ignoreForConflict": true,
     "manual": true
    },
    {
@@ -9978,23 +10465,13 @@
   ],
   "key_editor_auto_show_log_bottom_sheet_on_run": [
    {
-    "expr": "resources.getBoolean(R.bool.pref_editor_auto_show_log_bottom_sheet_on_run)",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_editor_auto_show_log_bottom_sheet_on_run",
-    "file": "ui/edit/EditorView.kt",
-    "line": 5377,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
-    "expr": "R.bool.pref_editor_auto_show_log_bottom_sheet_on_run",
-    "form": "R.bool",
     "value": "true",
-    "ref": "pref_editor_auto_show_log_bottom_sheet_on_run",
-    "file": "ui/settings/PreferencesFragment.kt",
-    "line": 66,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_editor_auto_show_log_bottom_sheet_on_run, \"pref_editor_auto_show_log_bottom_sheet_on_run\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 177,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10020,13 +10497,12 @@
   ],
   "key_editor_breakpoint_markers_enabled": [
    {
-    "expr": "DEFAULT_BREAKPOINT_MARKERS_ENABLED",
-    "form": "伴生常量",
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
     "value": "true",
-    "via": "常量 DEFAULT_BREAKPOINT_MARKERS_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:46)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 98,
-    "method": "getBoolean",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 305,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10041,46 +10517,27 @@
   ],
   "key_editor_code_highlight_threshold_bytes": [
    {
-    "expr": "defValue",
     "form": "R.integer",
-    "value": "524288",
     "ref": "editor_code_highlight_threshold_default_value",
-    "via": "局部变量 defValue (core/pref/Pref.kt:91)",
-    "file": "core/pref/Pref.kt",
-    "line": 92,
-    "method": "getInt",
+    "value": "524288",
+    "expr": "intResource(R.integer.editor_code_highlight_threshold_default_value, \"editor_code_highlight_threshold_default_value\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 320,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
   "key_editor_engine": [
    {
-    "expr": "EditorEngineType.NATIVE.preferenceValue",
-    "form": "伴生常量",
+    "form": "R.string",
+    "ref": "default_key_editor_engine",
+    "resolved": "key_editor_engine_native",
     "value": "native",
-    "note": "枚举 EditorEngineType.NATIVE",
-    "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-    "line": 110,
-    "method": "getString",
-    "type": "String",
-    "manual": true
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-    "line": 118,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "expr": "null",
-    "form": "调用处字面量",
-    "value": "null",
-    "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-    "line": 128,
-    "method": "getString",
-    "type": "String"
+    "expr": "keyResource(R.string.default_key_editor_engine, \"default_key_editor_engine\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 96,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10107,13 +10564,12 @@
   ],
   "key_editor_fold_markers_enabled": [
    {
-    "expr": "DEFAULT_FOLD_MARKERS_ENABLED",
-    "form": "伴生常量",
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
     "value": "true",
-    "via": "常量 DEFAULT_FOLD_MARKERS_ENABLED (ui/edit/editor/EditorDisplayPreferences.kt:47)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 106,
-    "method": "getBoolean",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 308,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10128,33 +10584,13 @@
   ],
   "key_editor_fullscreen_mode": [
    {
-    "expr": "R.bool.pref_editor_fullscreen_mode",
     "form": "R.bool",
-    "value": "false",
     "ref": "pref_editor_fullscreen_mode",
-    "file": "ui/edit/EditorView.kt",
-    "line": 747,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
-    "expr": "R.bool.pref_editor_fullscreen_mode",
-    "form": "R.bool",
     "value": "false",
-    "ref": "pref_editor_fullscreen_mode",
-    "file": "ui/edit/EditorView.kt",
-    "line": 937,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
-    "expr": "R.bool.pref_editor_fullscreen_mode",
-    "form": "R.bool",
-    "value": "false",
-    "ref": "pref_editor_fullscreen_mode",
-    "file": "ui/edit/EditorView.kt",
-    "line": 1361,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_editor_fullscreen_mode, \"pref_editor_fullscreen_mode\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 149,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10170,14 +10606,15 @@
   ],
   "key_editor_gutter_width_mode": [
    {
-    "expr": "DEFAULT_GUTTER_WIDTH_MODE",
-    "form": "伴生常量",
+    "form": "R.string",
+    "ref": "default_key_editor_gutter_width_mode",
+    "resolved": "key_editor_gutter_width_mode_dynamic",
     "value": "dynamic",
-    "via": "常量 DEFAULT_GUTTER_WIDTH_MODE (ui/edit/editor/EditorDisplayPreferences.kt:48)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 114,
-    "method": "getString",
-    "type": "String"
+    "expr": "keyResource(R.string.default_key_editor_gutter_width_mode, \"default_key_editor_gutter_width_mode\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 311,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10193,28 +10630,27 @@
   ],
   "key_editor_large_file_mode_threshold_bytes": [
    {
-    "expr": "defValue",
     "form": "R.integer",
-    "value": "524288",
     "ref": "editor_large_file_mode_threshold_default_value",
-    "via": "局部变量 defValue (core/pref/Pref.kt:104)",
-    "file": "core/pref/Pref.kt",
-    "line": 105,
-    "method": "getInt",
+    "value": "524288",
+    "expr": "intResource(R.integer.editor_large_file_mode_threshold_default_value, \"editor_large_file_mode_threshold_default_value\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 327,
+    "method": "SettingKey.Int",
     "type": "Int"
    }
   ],
   "key_editor_log_button_behavior": [
    {
-    "expr": "key(R.string.default_key_editor_log_button_behavior)",
     "form": "R.string",
-    "value": "key_$_editor_log_button_behavior_bottom_sheet",
     "ref": "default_key_editor_log_button_behavior",
     "resolved": "key_editor_log_button_behavior_bottom_sheet",
-    "file": "ui/edit/EditorView.kt",
-    "line": 273,
-    "method": "getString",
-    "type": "String"
+    "value": "key_$_editor_log_button_behavior_bottom_sheet",
+    "expr": "keyResource(R.string.default_key_editor_log_button_behavior, \"default_key_editor_log_button_behavior\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 180,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10239,25 +10675,87 @@
     "type": "String (Enum)"
    }
   ],
-  "key_editor_log_panel_typescript_console_visible": [
+  "key_editor_log_panel_input_bar_visible": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "ui/log/LogBottomSheet.kt",
-    "line": 360,
-    "method": "getBoolean",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 187,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_INPUT_BAR_VISIBLE",
+    "value": "false",
+    "file": "ui/log/LogPageConsoleSettings.kt",
+    "line": 61,
+    "manual": true
+   }
+  ],
+  "key_editor_log_panel_time_format": [
+   {
+    "expr": "SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN)",
+    "form": "伴生常量",
+    "value": "HH:mm:ss.SSS",
+    "via": "常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23)",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 193,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_editor_log_panel_time_visible": [
+   {
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 190,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "EDITOR_PANEL(..., true)",
+    "value": "true",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 13,
+    "manual": true
+   }
+  ],
+  "key_editor_log_panel_typescript_console_visible": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 196,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_editor_pinch_to_zoom_change_text_size_enabled": [
    {
-    "expr": "true",
-    "form": "调用处字面量",
+    "form": "R.bool",
+    "ref": "pref_editor_pinch_to_zoom_change_text_size_enabled",
     "value": "true",
-    "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-    "line": 21,
-    "method": "getBoolean",
+    "expr": "boolResource(R.bool.pref_editor_pinch_to_zoom_change_text_size_enabled, \"pref_editor_pinch_to_zoom_change_text_size_enabled\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 294,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -10277,7 +10775,7 @@
     "expr": "(方法默认)",
     "value": "null",
     "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-    "line": 28,
+    "line": 27,
     "method": "getStringOrNull",
     "type": "String"
    },
@@ -10295,54 +10793,35 @@
   ],
   "key_editor_text_size": [
    {
-    "expr": "defValue",
-    "form": "调用方传入",
-    "value": null,
-    "note": "函数参数 defValue, 默认值由调用方决定",
-    "file": "core/pref/Pref.kt",
-    "line": 365,
-    "method": "getInt",
+    "form": "R.integer",
+    "ref": "editor_text_size_default_value",
+    "value": "14",
+    "expr": "intResource(R.integer.editor_text_size_default_value, \"editor_text_size_default_value\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 153,
+    "method": "SettingKey.Int",
     "type": "Int"
    },
    {
-    "form": "R.integer",
-    "type": "Int",
-    "expr": "getEditorTextSize(resources.getInteger(R.integer.editor_text_size_default_value))",
-    "value": "14",
-    "file": "ui/settings/EditorTextSizePreference.kt",
-    "line": 52,
-    "note": "设置页显示的默认字号",
-    "manual": true
-   },
-   {
     "form": "表达式",
     "type": "Int",
-    "expr": "getEditorTextSize(pxToSp(it.textSize).toInt())",
-    "value": "15",
-    "file": "ui/edit/editor/CodeEditor.kt",
-    "line": 65,
-    "note": "原生编辑器取布局 res/layout/code_editor.xml:14 的 textSize 15sp",
-    "manual": true
-   },
-   {
-    "form": "表达式",
-    "type": "Int",
-    "expr": "getEditorTextSize(editor.getTextSizeSp().toInt())",
+    "expr": "EditorKeys.EDITOR_TEXT_SIZE.storedOrNull() ?: editor.getTextSizeSp().toInt()",
     "value": "运行时: 当前编辑器字号",
     "file": "ui/edit/editor/service/EditorThemeFontService.kt",
-    "line": 69,
+    "line": 68,
     "ignoreForConflict": true,
+    "note": "缺键时保持编辑器当前字号; 原生编辑器的初值已改读声明的默认值 14 (附录 C Q10 (1), P2.3)",
     "manual": true
    }
   ],
   "key_editor_theme": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "core/pref/Pref.kt",
-    "line": 287,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 160,
+    "method": "SettingKey.Str",
     "type": "String"
    },
    {
@@ -10358,39 +10837,12 @@
   ],
   "key_editor_theme_dark": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 208,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 214,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 219,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 233,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 166,
+    "method": "SettingKey.Str",
     "type": "String"
    },
    {
@@ -10406,39 +10858,12 @@
   ],
   "key_editor_theme_light": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 209,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 213,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 222,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 235,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 163,
+    "method": "SettingKey.Str",
     "type": "String"
    },
    {
@@ -10454,15 +10879,15 @@
   ],
   "key_editor_theme_mode": [
    {
-    "expr": "org.autojs.autojs.util.StringUtils.key(R.string.default_key_editor_theme_mode)",
     "form": "R.string",
-    "value": "separate_light_dark",
     "ref": "default_key_editor_theme_mode",
     "resolved": "key_editor_theme_mode_separate",
-    "file": "ui/edit/theme/Themes.java",
-    "line": 251,
-    "method": "getString",
-    "type": "String"
+    "value": "separate_light_dark",
+    "expr": "keyResource(R.string.default_key_editor_theme_mode, \"default_key_editor_theme_mode\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 169,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10478,14 +10903,15 @@
   ],
   "key_editor_word_wrap_indent_style": [
    {
-    "expr": "DEFAULT_WORD_WRAP_INDENT_STYLE",
-    "form": "伴生常量",
+    "form": "R.string",
+    "ref": "default_key_editor_word_wrap_indent_style",
+    "resolved": "key_editor_word_wrap_indent_style_continuation",
     "value": "continuation",
-    "via": "常量 DEFAULT_WORD_WRAP_INDENT_STYLE (ui/edit/editor/EditorDisplayPreferences.kt:42)",
-    "file": "ui/edit/editor/EditorDisplayPreferences.kt",
-    "line": 61,
-    "method": "getString",
-    "type": "String"
+    "expr": "keyResource(R.string.default_key_editor_word_wrap_indent_style, \"default_key_editor_word_wrap_indent_style\")",
+    "file": "core/pref/keys/EditorKeys.kt",
+    "line": 134,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
    },
    {
     "form": "R.string",
@@ -10506,7 +10932,7 @@
     "value": "true",
     "ref": "pref_enable_a11y_service_with_root_access",
     "file": "core/pref/Pref.kt",
-    "line": 329,
+    "line": 306,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10547,7 +10973,7 @@
     "value": "true",
     "ref": "pref_enable_a11y_service_with_secure_settings",
     "file": "core/pref/Pref.kt",
-    "line": 335,
+    "line": 312,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10569,7 +10995,7 @@
     "value": "true",
     "ref": "pref_enable_a11y_service_with_shizuku",
     "file": "core/pref/Pref.kt",
-    "line": 341,
+    "line": 318,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10624,7 +11050,7 @@
     "value": "false",
     "ref": "pref_extending_js_build_in_objects",
     "file": "core/pref/Pref.kt",
-    "line": 132,
+    "line": 108,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10712,7 +11138,7 @@
     "value": "false",
     "ref": "pref_gesture_observing",
     "file": "core/pref/Pref.kt",
-    "line": 238,
+    "line": 214,
     "method": "getBoolean",
     "type": "Boolean"
    }
@@ -10724,7 +11150,7 @@
     "value": "false",
     "ref": "pref_guard_mode",
     "file": "core/pref/Pref.kt",
-    "line": 163,
+    "line": 139,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -10908,7 +11334,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 206,
+    "line": 182,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -10919,7 +11345,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 214,
+    "line": 190,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -10930,7 +11356,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 190,
+    "line": 166,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -10941,7 +11367,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 210,
+    "line": 186,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11109,7 +11535,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/Pref.kt",
-    "line": 144,
+    "line": 120,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11325,7 +11751,7 @@
     "value": "true",
     "ref": "pref_record_toast",
     "file": "core/pref/Pref.kt",
-    "line": 280,
+    "line": 256,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11424,7 +11850,7 @@
     "value": "key_$_root_mode_auto_detect",
     "note": "RootMode.AUTO_DETECT = key(R.string.key_root_mode_auto_detect)",
     "file": "core/pref/Pref.kt",
-    "line": 224,
+    "line": 200,
     "method": "getString",
     "type": "String",
     "manual": true
@@ -11449,7 +11875,7 @@
     "ref": "default_key_root_record_out_file_type",
     "resolved": "key_root_record_out_file_type_binary",
     "file": "core/pref/Pref.kt",
-    "line": 359,
+    "line": 336,
     "method": "getString",
     "type": "String"
    },
@@ -11530,7 +11956,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/Pref.kt",
-    "line": 154,
+    "line": 130,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11550,7 +11976,7 @@
     "form": "调用处字面量",
     "value": "null",
     "file": "core/pref/Pref.kt",
-    "line": 158,
+    "line": 134,
     "method": "getStringSet",
     "type": "StringSet"
    }
@@ -11572,7 +11998,7 @@
     "form": "表达式",
     "value": "运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)",
     "file": "core/pref/Pref.kt",
-    "line": 353,
+    "line": 330,
     "method": "getString",
     "type": "String",
     "ignoreForConflict": true,
@@ -11644,7 +12070,7 @@
     "value": "false",
     "ref": "pref_stable_mode",
     "file": "core/pref/Pref.kt",
-    "line": 232,
+    "line": 208,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11674,11 +12100,11 @@
     "form": "伴生常量",
     "expr": "ThemeColorManager.defaultThemeColor.colorAccent",
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
+    "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
     "line": 89,
     "method": "SettingKey.Int",
     "type": "Int",
-    "ignoreForConflict": true,
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
     "manual": true
    }
@@ -11688,11 +12114,11 @@
     "form": "伴生常量",
     "expr": "ThemeColorManager.defaultThemeColor.colorPrimary",
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
+    "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
     "line": 77,
     "method": "SettingKey.Int",
     "type": "Int",
-    "ignoreForConflict": true,
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
     "manual": true
    }
@@ -11702,11 +12128,11 @@
     "form": "伴生常量",
     "expr": "ThemeColorManager.defaultThemeColor.colorPrimaryDark",
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
+    "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
     "line": 83,
     "method": "SettingKey.Int",
     "type": "Int",
-    "ignoreForConflict": true,
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
     "manual": true
    }
@@ -11767,7 +12193,7 @@
     "value": "true",
     "ref": "pref_use_volume_control_record",
     "file": "core/pref/Pref.kt",
-    "line": 177,
+    "line": 153,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11789,7 +12215,7 @@
     "value": "true",
     "ref": "pref_use_volume_control_running",
     "file": "core/pref/Pref.kt",
-    "line": 170,
+    "line": 146,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11892,39 +12318,6 @@
     "manual": true
    }
   ],
-  "key_editor_log_panel_input_bar_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_INPUT_BAR_VISIBLE",
-    "value": "false",
-    "file": "ui/log/LogPageConsoleSettings.kt",
-    "line": 61,
-    "manual": true
-   }
-  ],
-  "key_editor_log_panel_time_format": [
-   {
-    "form": "伴生常量",
-    "type": "String",
-    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
-    "value": "HH:mm:ss.SSS",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 24,
-    "manual": true
-   }
-  ],
-  "key_editor_log_panel_time_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "EDITOR_PANEL(..., true)",
-    "value": "true",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 13,
-    "manual": true
-   }
-  ],
   "key_floating_console_time_format": [
    {
     "form": "伴生常量",
@@ -11999,61 +12392,6 @@
     "value": "true",
     "file": "core/console/ConsoleTimeSettings.kt",
     "line": 14,
-    "manual": true
-   }
-  ],
-  "key_$_ace_semantic_java_enabled": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_SEMANTIC_LANGUAGES[java]",
-    "value": "true",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 123,
-    "manual": true
-   }
-  ],
-  "key_$_ace_semantic_kotlin_enabled": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_SEMANTIC_LANGUAGES[kotlin]",
-    "value": "false",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 123,
-    "manual": true
-   }
-  ],
-  "key_$_ace_semantic_lua_enabled": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_SEMANTIC_LANGUAGES[lua]",
-    "value": "true",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 123,
-    "manual": true
-   }
-  ],
-  "key_$_ace_semantic_python_enabled": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_SEMANTIC_LANGUAGES[python]",
-    "value": "true",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 123,
-    "manual": true
-   }
-  ],
-  "key_$_ace_semantic_typescript_enabled": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_SEMANTIC_LANGUAGES[typescript]",
-    "value": "true",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 123,
     "manual": true
    }
   ],
@@ -12274,13 +12612,6 @@
  },
  "classificationProblems": [],
  "defaultConflicts": [
-  {
-   "key": "key_editor_text_size",
-   "values": [
-    "14",
-    "15"
-   ]
-  },
   {
    "key": "key_enable_a11y_service_with_root_access",
    "values": [

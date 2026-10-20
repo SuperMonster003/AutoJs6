@@ -10,8 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import io.reactivex.Observable
-import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.edit.completion.CodeCompletionBar
 import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
@@ -66,7 +65,7 @@ class EditorThemeFontService(
 
     fun applyPreferredTextSize() {
         val editor = currentEditor()
-        editor.setTextSizeSp(getEditorTextSize(editor.getTextSizeSp().toInt()).toFloat())
+        editor.setTextSizeSp((EditorKeys.EDITOR_TEXT_SIZE.storedOrNull() ?: editor.getTextSizeSp().toInt()).toFloat())
     }
 
     fun applyTheme(theme: Theme?): Theme? {
@@ -115,7 +114,7 @@ class EditorThemeFontService(
     }
 
     fun setTextSize(value: Int) {
-        setEditorTextSize(value)
+        EditorKeys.EDITOR_TEXT_SIZE.set(value)
         currentEditor().setTextSizeSp(value.toFloat())
     }
 

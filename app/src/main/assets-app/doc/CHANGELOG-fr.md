@@ -261,6 +261,7 @@
 * `Correction` L'éditeur de code pouvait perdre le curseur, la sélection ou les modifications non enregistrées après recréation de la page
 * `Correction` Le clavier virtuel ou la barre de saisie pouvait masquer ou comprimer le contenu de l'éditeur et de la page des journaux
 * `Correction` Les menus "Plus" des boîtes de dialogue de l'éditeur étaient difficiles à lire, leurs couleurs de texte et de fond étant proches lorsque le thème de l'éditeur différait du mode clair/sombre de l'application
+* `Correction` L'éditeur de code natif (JsDroidEditor) utilisait la taille de texte 15 lorsqu'aucune taille n'était définie, au lieu de la valeur par défaut 14 affichée dans les paramètres
 * `Correction` Anomalies de sauvegarde d'état, de couleur du curseur et de langue de l'indication du champ de recherche de l'accueil
 * `Correction` Des gestes multitactiles anormaux dans l'onglet Documentation de l'accueil pouvaient faire planter l'application
 * `Correction` Animation de transition absente lors du passage à l'onglet Fichiers de l'accueil

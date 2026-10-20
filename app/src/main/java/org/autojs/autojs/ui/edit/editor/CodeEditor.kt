@@ -14,8 +14,7 @@ import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener
 import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Observable
-import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.script.JsBeautifier
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.util.ClipboardUtils.setClip
@@ -62,7 +61,10 @@ class CodeEditor : HVScrollView {
 
     val codeEditText: CodeEditText = binding.codeEditText.also {
         it.addTextChangedListener(AutoIndent(it))
-        lastTextSize = getEditorTextSize(pxToSp(it.textSize).toInt())
+        // The stored size, else the default of the settings page (14), not the 15sp of the layout (appendix C Q10).
+        // zh-CN: 存储的字号, 否则为设置页的默认字号 (14), 而非布局中的 15sp (附录 C Q10).
+        lastTextSize = EditorKeys.EDITOR_TEXT_SIZE.get()
+        it.textSize = lastTextSize.toFloat()
     }
 
     // Whether the user is interacting with the editor via touch.
@@ -124,7 +126,7 @@ class CodeEditor : HVScrollView {
                 //  ! Dismiss a floating text size changing bar in 2 seconds.
                 //  ! zh-CN: 字体大小调整栏于 2 秒钟后消失.
                 mLastScaleFactor = 1.0
-                setEditorTextSize(lastTextSize)
+                EditorKeys.EDITOR_TEXT_SIZE.set(lastTextSize)
                 super.onScaleEnd(detector)
             }
         }

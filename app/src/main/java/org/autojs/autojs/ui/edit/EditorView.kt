@@ -60,6 +60,7 @@ import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectRenameExc
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectRenameFailureReason
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectRenameTransaction
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.event.BackPressedHandler.HostActivity
@@ -270,10 +271,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     }
 
     fun openEditorLogByPreference() {
-        val mode = Pref.getString(
-            R.string.key_editor_log_button_behavior,
-            key(R.string.default_key_editor_log_button_behavior),
-        )
+        val mode = EditorKeys.EDITOR_LOG_BUTTON_BEHAVIOR.storedKeyOrDefault()
         if (mode == key(R.string.key_editor_log_button_behavior_fullscreen_page)) {
             LogActivity.launch(context, name, uri?.path)
             return
@@ -743,11 +741,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private var mAceShortcutBottomBarDrawerGuardInstalled = false
     private var mEditorUiPaletteChangedListener: ((EditorChromePalette.Colors) -> Unit)? = null
     private val mFullscreenModeSupported = activity is EditActivity
-    private var mFullscreenMode = mFullscreenModeSupported &&
-        Pref.getBoolean(
-            R.string.key_editor_fullscreen_mode,
-            R.bool.pref_editor_fullscreen_mode,
-        )
+    private var mFullscreenMode = mFullscreenModeSupported && EditorKeys.EDITOR_FULLSCREEN_MODE.get()
     private var mFullscreenHintPending = mFullscreenMode
     private var mFullscreenHintSnackbar: Snackbar? = null
     private var mFullscreenSnackbarBottomProtection: View? = null
@@ -934,10 +928,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             key(R.string.key_editor_engine) -> post { applyCurrentEditorEnginePreference() }
             key(R.string.key_editor_fullscreen_mode) -> post {
                 if (mFullscreenModeSupported) {
-                    val enabled = Pref.getBoolean(
-                        R.string.key_editor_fullscreen_mode,
-                        R.bool.pref_editor_fullscreen_mode,
-                    )
+                    val enabled = EditorKeys.EDITOR_FULLSCREEN_MODE.get()
                     setFullscreenMode(enabled, persist = false, showHint = enabled)
                 }
             }
@@ -1358,12 +1349,9 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         if (
             persist &&
-            Pref.getBoolean(
-                R.string.key_editor_fullscreen_mode,
-                R.bool.pref_editor_fullscreen_mode,
-            ) != enabled
+            EditorKeys.EDITOR_FULLSCREEN_MODE.get() != enabled
         ) {
-            Pref.putBoolean(R.string.key_editor_fullscreen_mode, enabled)
+            EditorKeys.EDITOR_FULLSCREEN_MODE.set(enabled)
         }
 
         mEditorAppBar.isVisible = !enabled
@@ -2624,7 +2612,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                         publishCursorStatusAfterInitialLoadIfReady(
                             preserveCurrentCursor = preserveExistingText || mUserMovedCursorDuringLoading,
                         )
-                        if (Pref.isCodeHighlightEnabledForLength(textLength)) {
+                        if (EditorKeys.isCodeHighlightEnabledForLength(textLength)) {
                             editor.refreshHighlightTokensIfAllowed()
                         }
                     }
@@ -2749,7 +2737,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
         // Re-highlight once after fast load, but only when size is within highlighter limit.
         // zh-CN: 快速加载完成后主动触发一次高亮, 但仅在文本大小不超过高亮上限时执行.
-        if (Pref.isCodeHighlightEnabledForLength(text.length)) {
+        if (EditorKeys.isCodeHighlightEnabledForLength(text.length)) {
             post { editor.refreshHighlightTokensIfAllowed() }
         }
     }
@@ -2920,7 +2908,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
                     mHadDirectEditSinceSave = false
                     mLargeFileFrameCallback = null
                     finishInitialTextLoad(endLoadingUiWhenFinished)
-                    if (Pref.isCodeHighlightEnabledForLength(text.length)) {
+                    if (EditorKeys.isCodeHighlightEnabledForLength(text.length)) {
                         post { editor.refreshHighlightTokensIfAllowed() }
                     }
                     return
@@ -5374,10 +5362,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }, Observers.toastMessage())
     }
 
-    private fun shouldAutoShowLogBottomSheetOnRun(): Boolean = Pref.getBoolean(
-        R.string.key_editor_auto_show_log_bottom_sheet_on_run,
-        resources.getBoolean(R.bool.pref_editor_auto_show_log_bottom_sheet_on_run),
-    )
+    private fun shouldAutoShowLogBottomSheetOnRun(): Boolean = EditorKeys.EDITOR_AUTO_SHOW_LOG_BOTTOM_SHEET_ON_RUN.get()
 
     @JvmOverloads
     fun run(showMessage: Boolean, file: File? = null, overriddenFullPath: String? = null): ScriptExecution? {

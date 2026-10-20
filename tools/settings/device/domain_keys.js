@@ -75,7 +75,22 @@ var OLD_EXPRESSIONS = {
     'ThemeColorManager.defaultThemeColor.colorPrimary': function () { return org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor.getColorPrimary(); },
     'ThemeColorManager.defaultThemeColor.colorPrimaryDark': function () { return org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor.getColorPrimaryDark(); },
     'ThemeColorManager.defaultThemeColor.colorAccent': function () { return org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor.getColorAccent(); },
+    'AceEditorFont.IOSEVKA.preferenceValue': function () { return org.autojs.autojs.ui.edit.editor.ace.AceEditorFont.IOSEVKA.getPreferenceValue(); },
+    'DEFAULT_FILE_TYPES': function () { return lspList('getDEFAULT_FILE_TYPES'); },
+    'DEFAULT_DECLARATION_GROUPS': function () { return lspList('getDEFAULT_DECLARATION_GROUPS'); },
 };
+['typescript', 'python', 'lua', 'java', 'kotlin'].forEach(function (language) {
+    OLD_EXPRESSIONS['DEFAULT_SEMANTIC_LANGUAGES[' + language + ']'] = function () {
+        return org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences.INSTANCE.getDEFAULT_SEMANTIC_LANGUAGES().get(language);
+    };
+});
+
+function lspList(getter) {
+    var list = org.autojs.autojs.ui.edit.editor.ace.AceEditorLspPreferences.INSTANCE[getter]();
+    var items = [];
+    for (var i = 0; i < list.size(); i++) items.push(String(list.get(i)));
+    return items.join(',');
+}
 
 function oldDefault(k) {
     var d = k.getDefault();

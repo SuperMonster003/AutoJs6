@@ -1,10 +1,12 @@
 package org.autojs.autojs.ui.edit.editor.engine
 
 import android.content.Context
-import androidx.core.content.edit
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 
 object EditorEnginePreferences {
 
@@ -107,15 +109,15 @@ object EditorEnginePreferences {
     }
 
     private fun readEffectiveType(): EditorEngineType = EditorEngineType.fromPreferenceValue(
-        Pref.getString(KEY_EDITOR_ENGINE, EditorEngineType.NATIVE.preferenceValue),
+        EditorKeys.EDITOR_ENGINE.storedKeyOrDefault(),
     )
 
     private fun readMode(): EditorEngineSelectionPolicy.Mode {
         val stored = EditorEngineSelectionPolicy.Mode.fromPreferenceValue(
-            Pref.getStringOrNull(KEY_EDITOR_ENGINE_SELECTION_MODE),
+            EditorKeys.EDITOR_ENGINE_SELECTION_MODE.storedOrNull(),
         )
         if (stored != null) return stored
-        val rawEngineValue = Pref.getStringOrNull(KEY_EDITOR_ENGINE)
+        val rawEngineValue = EditorKeys.EDITOR_ENGINE.storedKey()
         return EditorEngineSelectionPolicy.migrateMode(rawEngineValue)
     }
 
@@ -123,13 +125,14 @@ object EditorEnginePreferences {
         mode: EditorEngineSelectionPolicy.Mode,
         effectiveType: EditorEngineType,
     ) {
-        val preferences = Pref.get()
-        val modeChanged = preferences.getString(KEY_EDITOR_ENGINE_SELECTION_MODE, null) != mode.preferenceValue
-        val engineChanged = preferences.getString(KEY_EDITOR_ENGINE, null) != effectiveType.preferenceValue
+        val modeChanged = EditorKeys.EDITOR_ENGINE_SELECTION_MODE.storedOrNull() != mode.preferenceValue
+        val engineChanged = EditorKeys.EDITOR_ENGINE.storedKey() != effectiveType.preferenceValue
         if (!modeChanged && !engineChanged) return
-        preferences.edit {
-            putString(KEY_EDITOR_ENGINE_SELECTION_MODE, mode.preferenceValue)
-            putString(KEY_EDITOR_ENGINE, effectiveType.preferenceValue)
+        // One write for both keys, as before.
+        // zh-CN: 两个键一次写入, 与原先相同.
+        SettingsStores.default.edit {
+            this[EditorKeys.EDITOR_ENGINE_SELECTION_MODE] = mode.preferenceValue
+            this[EditorKeys.EDITOR_ENGINE] = effectiveType.preferenceValue
         }
     }
 

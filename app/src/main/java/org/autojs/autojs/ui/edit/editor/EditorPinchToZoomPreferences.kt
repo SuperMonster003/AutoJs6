@@ -1,24 +1,23 @@
 package org.autojs.autojs.ui.edit.editor
 
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
 object EditorPinchToZoomPreferences {
 
     fun migrateLegacyPreferenceIfNeeded() {
-        val enabledKey = key(R.string.key_editor_pinch_to_zoom_change_text_size_enabled)
-        if (Pref.containsKey(enabledKey)) {
+        if (EditorKeys.EDITOR_PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED.isStored()) {
             return
         }
         val legacyKey = legacyStrategyKey() ?: return
-        Pref.putBoolean(enabledKey, legacyKey != key(R.string.key_editor_pinch_to_zoom_disable))
+        EditorKeys.EDITOR_PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED.set(legacyKey != key(R.string.key_editor_pinch_to_zoom_disable))
     }
 
     fun isChangeTextSizeEnabled(): Boolean {
-        val enabledKey = key(R.string.key_editor_pinch_to_zoom_change_text_size_enabled)
-        if (Pref.containsKey(enabledKey)) {
-            return Pref.getBoolean(enabledKey, true)
+        if (EditorKeys.EDITOR_PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED.isStored()) {
+            return EditorKeys.EDITOR_PINCH_TO_ZOOM_CHANGE_TEXT_SIZE_ENABLED.get()
         }
         return legacyStrategyKey() != key(R.string.key_editor_pinch_to_zoom_disable)
     }

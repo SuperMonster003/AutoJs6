@@ -9,7 +9,7 @@ import android.os.SystemClock
 import android.view.View
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptEditorProjectSnapshotProvider
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.model.autocomplete.AutoCompletion
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnostics
 import org.autojs.autojs.ui.edit.editor.ace.diagnostics.AceDiagnosticsSnapshot
@@ -54,7 +54,7 @@ class AceScriptEditorEngine private constructor(
     private val releaseSession: () -> Unit,
     private val callbackRelay: CallbackRelay,
     private val pluginContractVersion: Int = 0,
-    private val persistTextSize: (Int) -> Unit = ::setEditorTextSize,
+    private val persistTextSize: (Int) -> Unit = { EditorKeys.EDITOR_TEXT_SIZE.set(it) },
 ) : ScriptEditorEngine {
 
     // Keep the already-created views on the host side. Once the package disappears, even a

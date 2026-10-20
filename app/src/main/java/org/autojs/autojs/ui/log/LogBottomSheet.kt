@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.console.ConsoleTimeSettings
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ContextUtils.getColorsForMode
@@ -357,10 +357,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 mTypeScriptEvaluator.stop()
             }
             setTypeScriptConsoleVisible(
-                visible = available && Pref.getBoolean(
-                    R.string.key_editor_log_panel_typescript_console_visible,
-                    false,
-                ),
+                visible = available && EditorKeys.EDITOR_LOG_PANEL_TYPESCRIPT_CONSOLE_VISIBLE.get(),
                 persist = false,
             )
         }
@@ -371,7 +368,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
         mTypeScriptConsoleVisible = resolved
         _binding?.console?.isCommandModeEnabled = resolved
         if (persist) {
-            Pref.putBoolean(R.string.key_editor_log_panel_typescript_console_visible, resolved)
+            EditorKeys.EDITOR_LOG_PANEL_TYPESCRIPT_CONSOLE_VISIBLE.set(resolved)
         }
     }
 

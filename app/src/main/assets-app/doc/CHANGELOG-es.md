@@ -261,6 +261,7 @@
 * `Corrección` El editor podía perder cursor, selección o contenido sin guardar al recrearse la página
 * `Corrección` El contenido del editor y la página de registros podía quedar oculto o comprimido al mostrar el teclado o campo de entrada
 * `Corrección` Los menús "Más" de los diálogos del editor eran difíciles de leer porque el texto y el fondo tenían colores similares cuando el tema del editor difería del modo claro/oscuro de la aplicación
+* `Corrección` El editor de código nativo (JsDroidEditor) usaba el tamaño de texto 15 cuando no se había establecido ninguno, en lugar del valor predeterminado 14 que muestra la página de ajustes
 * `Corrección` Errores al guardar el estado, colorear el cursor y elegir el idioma de las sugerencias del cuadro de búsqueda principal
 * `Corrección` Los eventos multitáctiles anómalos en la pestaña de documentación podían bloquear la aplicación
 * `Corrección` Faltaba la animación de transición al cambiar a la pestaña de archivos

@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.settings
 
 import android.content.Context
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs6.R
 import kotlin.math.abs
 
@@ -71,11 +72,13 @@ object EditorThresholdSettings {
         )
     }
 
-    fun defaultCodeHighlightThreshold(context: Context): Int =
-        context.resources.getInteger(R.integer.editor_code_highlight_threshold_default_value)
+    @Deprecated("Use the default of EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES (docs/settings/ROADMAP.md P2.3)")
+    @Suppress("UNUSED_PARAMETER")
+    fun defaultCodeHighlightThreshold(context: Context): Int = EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.defaultOrNull()!!
 
-    fun defaultLargeFileModeThreshold(context: Context): Int =
-        context.resources.getInteger(R.integer.editor_large_file_mode_threshold_default_value)
+    @Deprecated("Use the default of EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES (docs/settings/ROADMAP.md P2.3)")
+    @Suppress("UNUSED_PARAMETER")
+    fun defaultLargeFileModeThreshold(context: Context): Int = EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.defaultOrNull()!!
 
     fun formatSize(bytes: Int): String = when {
         bytes >= MIB && bytes % MIB == 0 -> "${bytes / MIB} MiB"

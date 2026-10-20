@@ -5,7 +5,7 @@ import android.text.TextWatcher;
 
 import androidx.annotation.NonNull;
 
-import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.EditorKeys;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.rhino.TokenStream;
 import org.autojs.autojs.ui.edit.theme.Theme;
@@ -99,7 +99,7 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
 
         // Avoid calling toString() on huge Editable, which allocates a large String on UI thread.
         // zh-CN: 避免对超大的 Editable 调用 toString(), 否则会在 UI 线程分配巨大的 String.
-        if (s != null && !Pref.isCodeHighlightEnabledForLength(s.length())) {
+        if (s != null && !EditorKeys.isCodeHighlightEnabledForLength(s.length())) {
             mRunningHighlighterId.incrementAndGet();
             if (mCodeEditText != null) {
                 mCodeEditText.clearHighlightTokens();
@@ -121,7 +121,7 @@ public class JavaScriptHighlighter implements SimpleTextWatcher.AfterTextChanged
 
         // Disable highlighting for very large text to avoid ANR/OOM on low-end devices.
         // zh-CN: 对超大文本禁用高亮, 避免低端设备出现 ANR/OOM.
-        if (!Pref.isCodeHighlightEnabledForLength(sourceString.length())) {
+        if (!EditorKeys.isCodeHighlightEnabledForLength(sourceString.length())) {
             mRunningHighlighterId.incrementAndGet();
             mCodeEditText.clearHighlightTokens();
             return;

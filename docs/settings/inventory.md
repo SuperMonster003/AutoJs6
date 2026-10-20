@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; kind / 分类 id / 备注来自 `tools/settings/classification.json`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.2 / P0.3).
 
-- 生成日期: 2026-10-20, 扫描基线: `master@a199a97f7` (扫描范围内未提交文件 38 个)
+- 生成日期: 2026-10-20, 扫描基线: `master@09e355833` (扫描范围内未提交文件 24 个)
 - 源码路径相对 `app/src/main/java/org/autojs/autojs/` (其他包保留 `com/...` 等前缀); 资源路径相对 `app/src/main/`.
 - 引用处只计非注释行; 超过 6 处时只列前 6 处, 完整列表见 JSON 基线.
 - kind: Setting (用户设置), State (记忆型状态, 归 `other`), Cache (缓存, 不可导出), ValueConstant (设置值常量, 列表项候选值或默认值别名), Excluded (不是偏好键或永久排除, 见 ROADMAP 附录 A.2).
@@ -15,11 +15,11 @@
 | 出现在设置页 XML 的 `key_*` 键 (各页之和去重) | 99 (preferences 39, code_editor_settings 40, developer_options 11, trash_and_version_history_settings 9, plugin_center_preferences 3) |
 | 设置页中不经字符串资源的字面量键 | 3 (developer_options 1, plugin_center_preferences 2) |
 | 不在设置页的 `key_*` 键 | 169 |
-| 源码 (`app/src/main/java`) 没有引用的键 | 46 (其中设置页, 数组与其他资源也没有引用的 13 个: `key_ace_editor_font_cascadia_code`, `key_ace_editor_font_fira_code`, `key_ace_editor_font_hack`, `key_ace_editor_font_ibm_plex_mono`, `key_ace_editor_font_intel_one_mono`, `key_ace_editor_font_iosevka_slab`, `key_ace_editor_font_jetbrains_mono`, `key_ace_editor_font_source_code_pro`, `key_ace_editor_font_system_monospace`, `key_dialog_foreground_svc`, `key_dialog_layout_inspector_exit_tips`, `key_dialog_log_entries_exported`, `key_enable_observe_key`) |
+| 源码 (`app/src/main/java`) 没有引用的键 | 16 (其中设置页, 数组与其他资源也没有引用的 4 个: `key_dialog_foreground_svc`, `key_dialog_layout_inspector_exit_tips`, `key_dialog_log_entries_exported`, `key_enable_observe_key`) |
 | 源码字面量键 (不对应 `key_*` 资源) | 71 |
 | 命名 SharedPreferences / 调用文件 | 29 / 34 |
 | 绕过 `Pref` 读默认偏好的文件 | 8 |
-| 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 109 |
+| 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 100 |
 | filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 13 |
 
 kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, Excluded 29
@@ -34,53 +34,53 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_a11y_service_manager_status_level` |  | ui/accessibility/A11yServiceManagerDialog.kt:128, ui/accessibility/A11yServiceManagerDialog.kt:293 | State | `other` | 管理器状态区展开级别 |
 | `key_about_app_and_developer` | 设置 > 关于 |  | Excluded |  | 动作条目 (打开关于页), 不持久化值 |
 | `key_about_app_tips` | 设置 > 关于 |  | Excluded |  | 动作条目 (提示对话框), 不持久化值 |
-| `key_ace_custom_scrollbar_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:252, ui/settings/EditorSettingActionRegistry.kt:33, ui/edit/editor/EditorDisplayPreferences.kt:22 | Setting | `editor_appearance` | 开关 |
-| `key_ace_editor_font` | 代码编辑器设置 > 外观 | ui/edit/EditorView.kt:928, ui/settings/CodeEditorSettingsFragment.kt:245, ui/settings/CodeEditorSettingsFragment.kt:287, ui/settings/EditorSettingActionRegistry.kt:22, ui/edit/editor/ace/AceEditorFontPreferences.kt:7 | Setting | `editor_appearance`, deployment `DOWNLOAD_EDITOR_FONT` | 字体 id; 字体未安装时作为部署项下载 (D20 / Q2) |
-| `key_ace_editor_font_cascadia_code` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_fira_code` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_hack` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_ibm_plex_mono` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_intel_one_mono` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_iosevka` | 默认值 `default_key_ace_editor_font` |  | ValueConstant |  | 字体 id 常量, `default_key_ace_editor_font` 的目标 |
-| `key_ace_editor_font_iosevka_slab` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_jetbrains_mono` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_source_code_pro` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_editor_font_system_monospace` |  |  | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
-| `key_ace_font_ligatures_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:246, ui/settings/EditorSettingActionRegistry.kt:25, ui/edit/editor/EditorDisplayPreferences.kt:15 | Setting | `editor_appearance` | 开关 |
-| `key_ace_font_styles_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:247, ui/settings/EditorSettingActionRegistry.kt:26, ui/edit/editor/EditorDisplayPreferences.kt:16 | Setting | `editor_appearance` | 开关 |
-| `key_ace_highlight_indent_guides_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:250, ui/settings/EditorSettingActionRegistry.kt:29, ui/edit/editor/EditorDisplayPreferences.kt:20 | Setting | `editor_appearance` | 开关 |
-| `key_ace_indent_guides_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:249, ui/settings/EditorSettingActionRegistry.kt:28, ui/edit/editor/EditorDisplayPreferences.kt:11 | Setting | `editor_appearance` | 开关 |
-| `key_ace_inline_completion_preview_enabled` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:268, ui/settings/EditorSettingActionRegistry.kt:49, ui/edit/editor/EditorDisplayPreferences.kt:34 | Setting | `editor_smart_hint` | 开关 |
-| `key_ace_language_support_matrix` | 代码编辑器设置 > 辅助 | ui/settings/CodeEditorSettingsFragment.kt:293, ui/settings/EditorSettingActionRegistry.kt:38 | Excluded |  | 动作条目 (语言支持矩阵对话框), 不持久化值 |
-| `key_ace_line_numbers_enabled` | 代码编辑器设置 > 边栏标记 | ui/settings/EditorSettingActionRegistry.kt:54, ui/edit/editor/EditorDisplayPreferences.kt:9 | Setting | `editor_gutter` | 开关 |
-| `key_ace_lsp_declaration_groups` | 代码编辑器设置 > 辅助 | ui/edit/EditorView.kt:946, ui/settings/CodeEditorSettingsFragment.kt:295, ui/settings/EditorSettingActionRegistry.kt:40, ui/edit/editor/ace/AceEditorLspPreferences.kt:9 | Setting | `editor_assistance` | 声明组集合 |
-| `key_ace_lsp_enabled` | 代码编辑器设置 > 辅助 | ui/edit/EditorView.kt:945, ui/settings/CodeEditorSettingsFragment.kt:93, ui/settings/CodeEditorSettingsFragment.kt:256, ui/settings/EditorSettingActionRegistry.kt:39, ui/edit/editor/ace/AceEditorLspPreferences.kt:6 | Setting | `editor_assistance` | 开关 |
-| `key_ace_lsp_file_types` | 代码编辑器设置 > 辅助 | ui/edit/EditorView.kt:947, ui/settings/CodeEditorSettingsFragment.kt:296, ui/settings/EditorSettingActionRegistry.kt:41, ui/edit/editor/ace/AceEditorLspPreferences.kt:7 | Setting | `editor_assistance` | 文件类型列表; 迁移版本号见字面量键 `key_$_ace_lsp_file_types_revision` |
-| `key_ace_print_margin_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:248, ui/settings/EditorSettingActionRegistry.kt:27, ui/edit/editor/EditorDisplayPreferences.kt:10 | Setting | `editor_appearance` | 开关 |
-| `key_ace_scrollbar_auto_hide_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:253, ui/settings/EditorSettingActionRegistry.kt:34, ui/edit/editor/EditorDisplayPreferences.kt:23 | Setting | `editor_appearance` | 开关 |
-| `key_ace_semantic_languages` | 代码编辑器设置 > 辅助 | ui/settings/CodeEditorSettingsFragment.kt:297, ui/settings/EditorSettingActionRegistry.kt:42 | Excluded |  | 动作条目, 值存于 5 个 `key_$_ace_semantic_*_enabled` 字面量键 |
-| `key_ace_smart_hint_arrow_overload_cycling` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:266, ui/settings/EditorSettingActionRegistry.kt:47, ui/edit/editor/EditorDisplayPreferences.kt:32 | Setting | `editor_smart_hint` | 开关 |
-| `key_ace_smart_hint_completion_delay` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:264, ui/settings/EditorSettingActionRegistry.kt:45, ui/edit/editor/EditorDisplayPreferences.kt:30 | Setting | `editor_smart_hint` | 列表项 |
-| `key_ace_smart_hint_completion_delay_0` | 候选值 `keys_ace_smart_hint_completion_delay` (`key_ace_smart_hint_completion_delay`); 默认值 `default_key_ace_smart_hint_completion_delay` |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_delay_100` | 候选值 `keys_ace_smart_hint_completion_delay` (`key_ace_smart_hint_completion_delay`) |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_delay_250` | 候选值 `keys_ace_smart_hint_completion_delay` (`key_ace_smart_hint_completion_delay`) |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_min_chars` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:263, ui/settings/EditorSettingActionRegistry.kt:44, ui/edit/editor/EditorDisplayPreferences.kt:29 | Setting | `editor_smart_hint` | 列表项 |
-| `key_ace_smart_hint_completion_min_chars_1` | 候选值 `keys_ace_smart_hint_completion_min_chars` (`key_ace_smart_hint_completion_min_chars`); 候选值 `values_ace_smart_hint_completion_min_chars`; 默认值 `default_key_ace_smart_hint_completion_min_chars` |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_min_chars_2` | 候选值 `keys_ace_smart_hint_completion_min_chars` (`key_ace_smart_hint_completion_min_chars`); 候选值 `values_ace_smart_hint_completion_min_chars` |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_min_chars_3` | 候选值 `keys_ace_smart_hint_completion_min_chars` (`key_ace_smart_hint_completion_min_chars`); 候选值 `values_ace_smart_hint_completion_min_chars` |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_trigger` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:262, ui/settings/EditorSettingActionRegistry.kt:43, ui/edit/editor/EditorDisplayPreferences.kt:28 | Setting | `editor_smart_hint` | 列表项 |
-| `key_ace_smart_hint_completion_trigger_dot` | 候选值 `keys_ace_smart_hint_completion_trigger` (`key_ace_smart_hint_completion_trigger`) |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_trigger_identifier` | 候选值 `keys_ace_smart_hint_completion_trigger` (`key_ace_smart_hint_completion_trigger`); 默认值 `default_key_ace_smart_hint_completion_trigger` |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_completion_trigger_off` | 候选值 `keys_ace_smart_hint_completion_trigger` (`key_ace_smart_hint_completion_trigger`) |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_signature_trigger` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:265, ui/settings/EditorSettingActionRegistry.kt:46, ui/edit/editor/EditorDisplayPreferences.kt:31 | Setting | `editor_smart_hint` | 列表项 |
-| `key_ace_smart_hint_signature_trigger_cursor` | 候选值 `keys_ace_smart_hint_signature_trigger` (`key_ace_smart_hint_signature_trigger`); 默认值 `default_key_ace_smart_hint_signature_trigger` |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_signature_trigger_off` | 候选值 `keys_ace_smart_hint_signature_trigger` (`key_ace_smart_hint_signature_trigger`) |  | ValueConstant |  | 候选值 |
-| `key_ace_smart_hint_signature_trigger_typing` | 候选值 `keys_ace_smart_hint_signature_trigger` (`key_ace_smart_hint_signature_trigger`) |  | ValueConstant |  | 候选值 |
-| `key_ace_svg_gutter_icons_enabled` | 代码编辑器设置 > 边栏标记 | ui/settings/CodeEditorSettingsFragment.kt:254, ui/settings/EditorSettingActionRegistry.kt:56, ui/edit/editor/EditorDisplayPreferences.kt:21 | Setting | `editor_gutter` | 开关 |
-| `key_ace_symbol_highlight_enabled` | 代码编辑器设置 > 智能提示 | ui/settings/CodeEditorSettingsFragment.kt:267, ui/settings/EditorSettingActionRegistry.kt:48, ui/edit/editor/EditorDisplayPreferences.kt:33 | Setting | `editor_smart_hint` | 开关 |
-| `key_ace_touch_magnifier_enabled` | 代码编辑器设置 > 操作手势 | ui/settings/CodeEditorSettingsFragment.kt:255, ui/settings/EditorSettingActionRegistry.kt:51, ui/edit/editor/EditorDisplayPreferences.kt:25 | Setting | `editor_gestures` | 开关 |
-| `key_ace_whitespaces_in_selection_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:251, ui/settings/EditorSettingActionRegistry.kt:32, ui/edit/editor/EditorDisplayPreferences.kt:24 | Setting | `editor_appearance` | 开关 |
-| `key_ace_word_wrap_enabled` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:94, ui/settings/CodeEditorSettingsFragment.kt:258, ui/settings/EditorSettingActionRegistry.kt:30, ui/edit/editor/EditorDisplayPreferences.kt:7 | Setting | `editor_appearance` | 开关 |
+| `key_ace_custom_scrollbar_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:143, ui/settings/CodeEditorSettingsFragment.kt:252, ui/settings/EditorSettingActionRegistry.kt:33, ui/edit/editor/EditorDisplayPreferences.kt:22 | Setting | `editor_appearance` | 开关 |
+| `key_ace_editor_font` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:110, ui/edit/EditorView.kt:922, ui/settings/CodeEditorSettingsFragment.kt:245, ui/settings/CodeEditorSettingsFragment.kt:287, ui/settings/EditorSettingActionRegistry.kt:22, ui/edit/editor/ace/AceEditorFontPreferences.kt:7 | Setting | `editor_appearance`, deployment `DOWNLOAD_EDITOR_FONT` | 字体 id; 字体未安装时作为部署项下载 (D20 / Q2) |
+| `key_ace_editor_font_cascadia_code` |  | core/pref/keys/EditorKeys.kt:73 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_fira_code` |  | core/pref/keys/EditorKeys.kt:74 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_hack` |  | core/pref/keys/EditorKeys.kt:75 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_ibm_plex_mono` |  | core/pref/keys/EditorKeys.kt:76 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_intel_one_mono` |  | core/pref/keys/EditorKeys.kt:77 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_iosevka` | 默认值 `default_key_ace_editor_font` | core/pref/keys/EditorKeys.kt:78 | ValueConstant |  | 字体 id 常量, `default_key_ace_editor_font` 的目标 |
+| `key_ace_editor_font_iosevka_slab` |  | core/pref/keys/EditorKeys.kt:79 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_jetbrains_mono` |  | core/pref/keys/EditorKeys.kt:80 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_source_code_pro` |  | core/pref/keys/EditorKeys.kt:81 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_editor_font_system_monospace` |  | core/pref/keys/EditorKeys.kt:82 | ValueConstant |  | 字体 id 常量, 源码与资源均无引用 (Q12) |
+| `key_ace_font_ligatures_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:116, ui/settings/CodeEditorSettingsFragment.kt:246, ui/settings/EditorSettingActionRegistry.kt:25, ui/edit/editor/EditorDisplayPreferences.kt:15 | Setting | `editor_appearance` | 开关 |
+| `key_ace_font_styles_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:119, ui/settings/CodeEditorSettingsFragment.kt:247, ui/settings/EditorSettingActionRegistry.kt:26, ui/edit/editor/EditorDisplayPreferences.kt:16 | Setting | `editor_appearance` | 开关 |
+| `key_ace_highlight_indent_guides_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:128, ui/settings/CodeEditorSettingsFragment.kt:250, ui/settings/EditorSettingActionRegistry.kt:29, ui/edit/editor/EditorDisplayPreferences.kt:20 | Setting | `editor_appearance` | 开关 |
+| `key_ace_indent_guides_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:125, ui/settings/CodeEditorSettingsFragment.kt:249, ui/settings/EditorSettingActionRegistry.kt:28, ui/edit/editor/EditorDisplayPreferences.kt:11 | Setting | `editor_appearance` | 开关 |
+| `key_ace_inline_completion_preview_enabled` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:285, ui/settings/CodeEditorSettingsFragment.kt:268, ui/settings/EditorSettingActionRegistry.kt:49, ui/edit/editor/EditorDisplayPreferences.kt:34 | Setting | `editor_smart_hint` | 开关 |
+| `key_ace_language_support_matrix` | 代码编辑器设置 > 辅助 | core/pref/keys/EditorKeys.kt:359, ui/settings/CodeEditorSettingsFragment.kt:293, ui/settings/EditorSettingActionRegistry.kt:38 | Excluded |  | 动作条目 (语言支持矩阵对话框), 不持久化值 |
+| `key_ace_line_numbers_enabled` | 代码编辑器设置 > 边栏标记 | core/pref/keys/EditorKeys.kt:299, ui/settings/EditorSettingActionRegistry.kt:54, ui/edit/editor/EditorDisplayPreferences.kt:9 | Setting | `editor_gutter` | 开关 |
+| `key_ace_lsp_declaration_groups` | 代码编辑器设置 > 辅助 | core/pref/keys/EditorKeys.kt:218, ui/edit/EditorView.kt:937, ui/settings/CodeEditorSettingsFragment.kt:295, ui/settings/EditorSettingActionRegistry.kt:40, ui/edit/editor/ace/AceEditorLspPreferences.kt:11 | Setting | `editor_assistance` | 声明组集合 |
+| `key_ace_lsp_enabled` | 代码编辑器设置 > 辅助 | core/pref/keys/EditorKeys.kt:201, ui/edit/EditorView.kt:936, ui/settings/CodeEditorSettingsFragment.kt:93, ui/settings/CodeEditorSettingsFragment.kt:256, ui/settings/EditorSettingActionRegistry.kt:39, ui/edit/editor/ace/AceEditorLspPreferences.kt:8 | Setting | `editor_assistance` | 开关 |
+| `key_ace_lsp_file_types` | 代码编辑器设置 > 辅助 | core/pref/keys/EditorKeys.kt:211, ui/edit/EditorView.kt:938, ui/settings/CodeEditorSettingsFragment.kt:296, ui/settings/EditorSettingActionRegistry.kt:41, ui/edit/editor/ace/AceEditorLspPreferences.kt:9 | Setting | `editor_assistance` | 文件类型列表; 迁移版本号见字面量键 `key_$_ace_lsp_file_types_revision` |
+| `key_ace_print_margin_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:122, ui/settings/CodeEditorSettingsFragment.kt:248, ui/settings/EditorSettingActionRegistry.kt:27, ui/edit/editor/EditorDisplayPreferences.kt:10 | Setting | `editor_appearance` | 开关 |
+| `key_ace_scrollbar_auto_hide_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:146, ui/settings/CodeEditorSettingsFragment.kt:253, ui/settings/EditorSettingActionRegistry.kt:34, ui/edit/editor/EditorDisplayPreferences.kt:23 | Setting | `editor_appearance` | 开关 |
+| `key_ace_semantic_languages` | 代码编辑器设置 > 辅助 | core/pref/keys/EditorKeys.kt:360, ui/settings/CodeEditorSettingsFragment.kt:297, ui/settings/EditorSettingActionRegistry.kt:42 | Excluded |  | 动作条目, 值存于 5 个 `key_$_ace_semantic_*_enabled` 字面量键 |
+| `key_ace_smart_hint_arrow_overload_cycling` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:279, ui/settings/CodeEditorSettingsFragment.kt:266, ui/settings/EditorSettingActionRegistry.kt:47, ui/edit/editor/EditorDisplayPreferences.kt:32 | Setting | `editor_smart_hint` | 开关 |
+| `key_ace_smart_hint_completion_delay` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:268, ui/settings/CodeEditorSettingsFragment.kt:264, ui/settings/EditorSettingActionRegistry.kt:45, ui/edit/editor/EditorDisplayPreferences.kt:30 | Setting | `editor_smart_hint` | 列表项 |
+| `key_ace_smart_hint_completion_delay_0` | 候选值 `keys_ace_smart_hint_completion_delay` (`key_ace_smart_hint_completion_delay`); 默认值 `default_key_ace_smart_hint_completion_delay` | core/pref/keys/EditorKeys.kt:61 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_delay_100` | 候选值 `keys_ace_smart_hint_completion_delay` (`key_ace_smart_hint_completion_delay`) | core/pref/keys/EditorKeys.kt:62 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_delay_250` | 候选值 `keys_ace_smart_hint_completion_delay` (`key_ace_smart_hint_completion_delay`) | core/pref/keys/EditorKeys.kt:63 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_min_chars` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:262, ui/settings/CodeEditorSettingsFragment.kt:263, ui/settings/EditorSettingActionRegistry.kt:44, ui/edit/editor/EditorDisplayPreferences.kt:29 | Setting | `editor_smart_hint` | 列表项 |
+| `key_ace_smart_hint_completion_min_chars_1` | 候选值 `keys_ace_smart_hint_completion_min_chars` (`key_ace_smart_hint_completion_min_chars`); 候选值 `values_ace_smart_hint_completion_min_chars`; 默认值 `default_key_ace_smart_hint_completion_min_chars` | core/pref/keys/EditorKeys.kt:56 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_min_chars_2` | 候选值 `keys_ace_smart_hint_completion_min_chars` (`key_ace_smart_hint_completion_min_chars`); 候选值 `values_ace_smart_hint_completion_min_chars` | core/pref/keys/EditorKeys.kt:57 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_min_chars_3` | 候选值 `keys_ace_smart_hint_completion_min_chars` (`key_ace_smart_hint_completion_min_chars`); 候选值 `values_ace_smart_hint_completion_min_chars` | core/pref/keys/EditorKeys.kt:58 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_trigger` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:256, ui/settings/CodeEditorSettingsFragment.kt:262, ui/settings/EditorSettingActionRegistry.kt:43, ui/edit/editor/EditorDisplayPreferences.kt:28 | Setting | `editor_smart_hint` | 列表项 |
+| `key_ace_smart_hint_completion_trigger_dot` | 候选值 `keys_ace_smart_hint_completion_trigger` (`key_ace_smart_hint_completion_trigger`) | core/pref/keys/EditorKeys.kt:51 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_trigger_identifier` | 候选值 `keys_ace_smart_hint_completion_trigger` (`key_ace_smart_hint_completion_trigger`); 默认值 `default_key_ace_smart_hint_completion_trigger` | core/pref/keys/EditorKeys.kt:52 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_completion_trigger_off` | 候选值 `keys_ace_smart_hint_completion_trigger` (`key_ace_smart_hint_completion_trigger`) | core/pref/keys/EditorKeys.kt:53 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_signature_trigger` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:274, ui/settings/CodeEditorSettingsFragment.kt:265, ui/settings/EditorSettingActionRegistry.kt:46, ui/edit/editor/EditorDisplayPreferences.kt:31 | Setting | `editor_smart_hint` | 列表项 |
+| `key_ace_smart_hint_signature_trigger_cursor` | 候选值 `keys_ace_smart_hint_signature_trigger` (`key_ace_smart_hint_signature_trigger`); 默认值 `default_key_ace_smart_hint_signature_trigger` | core/pref/keys/EditorKeys.kt:66, core/pref/keys/EditorKeys.kt:355 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_signature_trigger_off` | 候选值 `keys_ace_smart_hint_signature_trigger` (`key_ace_smart_hint_signature_trigger`) | core/pref/keys/EditorKeys.kt:67 | ValueConstant |  | 候选值 |
+| `key_ace_smart_hint_signature_trigger_typing` | 候选值 `keys_ace_smart_hint_signature_trigger` (`key_ace_smart_hint_signature_trigger`) | core/pref/keys/EditorKeys.kt:68, core/pref/keys/EditorKeys.kt:355 | ValueConstant |  | 候选值 |
+| `key_ace_svg_gutter_icons_enabled` | 代码编辑器设置 > 边栏标记 | core/pref/keys/EditorKeys.kt:302, ui/settings/CodeEditorSettingsFragment.kt:254, ui/settings/EditorSettingActionRegistry.kt:56, ui/edit/editor/EditorDisplayPreferences.kt:21 | Setting | `editor_gutter` | 开关 |
+| `key_ace_symbol_highlight_enabled` | 代码编辑器设置 > 智能提示 | core/pref/keys/EditorKeys.kt:282, ui/settings/CodeEditorSettingsFragment.kt:267, ui/settings/EditorSettingActionRegistry.kt:48, ui/edit/editor/EditorDisplayPreferences.kt:33 | Setting | `editor_smart_hint` | 开关 |
+| `key_ace_touch_magnifier_enabled` | 代码编辑器设置 > 操作手势 | core/pref/keys/EditorKeys.kt:290, ui/settings/CodeEditorSettingsFragment.kt:255, ui/settings/EditorSettingActionRegistry.kt:51, ui/edit/editor/EditorDisplayPreferences.kt:25 | Setting | `editor_gestures` | 开关 |
+| `key_ace_whitespaces_in_selection_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:140, ui/settings/CodeEditorSettingsFragment.kt:251, ui/settings/EditorSettingActionRegistry.kt:32, ui/edit/editor/EditorDisplayPreferences.kt:24 | Setting | `editor_appearance` | 开关 |
+| `key_ace_word_wrap_enabled` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:131, ui/settings/CodeEditorSettingsFragment.kt:94, ui/settings/CodeEditorSettingsFragment.kt:258, ui/settings/EditorSettingActionRegistry.kt:30, ui/edit/editor/EditorDisplayPreferences.kt:7 | Setting | `editor_appearance` | 开关 |
 | `key_ai_settings` | 开发者选项 > AI |  | Excluded |  | 动作条目, 打开 AI 插件设置 (插件自身设置第一期不含, D3) |
 | `key_all_files_access` | 其他资源 res/xml/fragment_preferences_inrt.xml:42 | inrt/SettingsActivity.kt:56, inrt/SettingsActivity.kt:65 | Excluded |  | inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板) |
 | `key_app_language` | 设置 > 外观 | core/pref/keys/AppearanceKeys.kt:54 | Setting | `appearance` | 列表项 (Language) |
@@ -95,7 +95,7 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_app_language_zh_hans` | 候选值 `keys_app_language` (`key_app_language`) | core/pref/Language.kt:13, core/pref/keys/AppearanceKeys.kt:26 | ValueConstant |  | Language 枚举候选值 |
 | `key_app_language_zh_hant_hk` | 候选值 `keys_app_language` (`key_app_language`) | core/pref/Language.kt:14, core/pref/keys/AppearanceKeys.kt:27 | ValueConstant |  | Language 枚举候选值 |
 | `key_app_language_zh_hant_tw` | 候选值 `keys_app_language` (`key_app_language`) | core/pref/Language.kt:15, core/pref/keys/AppearanceKeys.kt:28 | ValueConstant |  | Language 枚举候选值 |
-| `key_auto_check_for_updates` | 设置 > 更新 | core/pref/Pref.kt:185 | Setting | `updates` | 开关 |
+| `key_auto_check_for_updates` | 设置 > 更新 | core/pref/Pref.kt:161 | Setting | `updates` | 开关 |
 | `key_auto_night_mode_enabled` |  | core/plugin/center/PluginCenterFragment.kt:981, core/pref/keys/AppearanceKeys.kt:72, ui/main/plugin/PluginFragment.kt:66 | Setting | `appearance` | 与 `key_night_mode` 一起由 NightModePreference 与抽屉写入 |
 | `key_batch_rename_history_retention` |  | core/pref/keys/ExplorerKeys.kt:73 | Setting | `explorer` | 批量重命名历史保留批数 (BatchRenameHistoryPrefs) |
 | `key_change_working_dir` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:81 | Excluded |  | 动作条目, 工作目录存于 `key_working_directory` |
@@ -127,48 +127,48 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_documentation_source_online` | 候选值 `keys_documentation_source` (`key_documentation_source`) | core/pref/keys/GeneralKeys.kt:27, ui/doc/DocumentationPageController.kt:273 | ValueConstant |  | 候选值 |
 | `key_drafts_max_days` | 回收站与版本历史设置 > 紧急草稿 | core/pref/keys/HistoryKeys.kt:60 | Setting | `history` | 保留策略 |
 | `key_drafts_max_total_bytes` | 回收站与版本历史设置 > 紧急草稿 | core/pref/keys/HistoryKeys.kt:63 | Setting | `history` | 保留策略 |
-| `key_editor_auto_show_log_bottom_sheet_on_run` | 设置 > 代码编辑器; 代码编辑器设置 > 日志 | ui/edit/EditorView.kt:5378, ui/settings/EditorSettingActionRegistry.kt:36, ui/settings/PreferencesFragment.kt:65, ui/settings/PreferencesFragment.kt:67, ui/settings/PreferencesFragment.kt:76 | Setting | `editor_log` | 开关, 设置页与代码编辑器设置两处 |
-| `key_editor_breakpoint_markers_enabled` | 代码编辑器设置 > 边栏标记 | ui/settings/EditorSettingActionRegistry.kt:53, ui/edit/editor/EditorDisplayPreferences.kt:12 | Setting | `editor_gutter` | 开关 |
-| `key_editor_code_highlight_threshold_bytes` | 代码编辑器设置 > 性能 | core/pref/Pref.kt:92, core/pref/Pref.kt:368, ui/settings/CodeEditorSettingsFragment.kt:269, ui/settings/EditorSettingActionRegistry.kt:57 | Setting | `editor_performance` | 阈值 |
-| `key_editor_engine` | 设置 > 代码编辑器; 代码编辑器设置 > 常规 | ui/edit/EditorView.kt:934, ui/settings/CodeEditorSettingsFragment.kt:92, ui/settings/CodeEditorSettingsFragment.kt:99, ui/settings/EditorSettingActionRegistry.kt:19, ui/settings/PreferencesFragment.kt:63, ui/settings/PreferencesFragment.kt:75 等 7 处 | Setting | `editor_general` | 列表项, 与字面量键 `key_$_editor_engine_selection_mode` 一起写入 |
-| `key_editor_engine_ace` | 候选值 `keys_editor_engine` (`key_editor_engine`) |  | ValueConstant |  | 候选值 |
-| `key_editor_engine_native` | 候选值 `keys_editor_engine` (`key_editor_engine`); 默认值 `default_key_editor_engine` |  | ValueConstant |  | 候选值, 默认值 |
-| `key_editor_fold_markers_enabled` | 代码编辑器设置 > 边栏标记 | ui/settings/CodeEditorSettingsFragment.kt:261, ui/settings/EditorSettingActionRegistry.kt:55, ui/edit/editor/EditorDisplayPreferences.kt:13 | Setting | `editor_gutter` | 开关 |
-| `key_editor_fullscreen_mode` | 代码编辑器设置 > 外观 | ui/edit/EditorView.kt:748, ui/edit/EditorView.kt:935, ui/edit/EditorView.kt:938, ui/edit/EditorView.kt:1362, ui/edit/EditorView.kt:1366, ui/settings/EditorSettingActionRegistry.kt:24 | Setting | `editor_appearance` | 开关, 编辑器菜单也会写入 |
-| `key_editor_gutter_width_mode` | 代码编辑器设置 > 边栏标记 | ui/settings/CodeEditorSettingsFragment.kt:260, ui/settings/EditorSettingActionRegistry.kt:52, ui/edit/editor/EditorDisplayPreferences.kt:14 | Setting | `editor_gutter` | 列表项 |
-| `key_editor_gutter_width_mode_dynamic` | 候选值 `keys_editor_gutter_width_mode` (`key_editor_gutter_width_mode`); 默认值 `default_key_editor_gutter_width_mode` |  | ValueConstant |  | 候选值, 默认值 |
-| `key_editor_gutter_width_mode_fixed` | 候选值 `keys_editor_gutter_width_mode` (`key_editor_gutter_width_mode`) |  | ValueConstant |  | 候选值 |
-| `key_editor_large_file_mode_threshold_bytes` | 代码编辑器设置 > 性能 | core/pref/Pref.kt:105, core/pref/Pref.kt:371, ui/settings/CodeEditorSettingsFragment.kt:270, ui/settings/EditorSettingActionRegistry.kt:58 | Setting | `editor_performance` | 阈值 |
-| `key_editor_log_button_behavior` | 设置 > 代码编辑器; 代码编辑器设置 > 日志 | ui/edit/EditorView.kt:274, ui/settings/EditorSettingActionRegistry.kt:35, ui/settings/PreferencesFragment.kt:64, ui/settings/PreferencesFragment.kt:77 | Setting | `editor_log` | 列表项, 设置页与代码编辑器设置两处 |
-| `key_editor_log_button_behavior_bottom_sheet` | 候选值 `keys_editor_log_button_behavior` (`key_editor_log_button_behavior`); 默认值 `default_key_editor_log_button_behavior` |  | ValueConstant |  | 候选值, 默认值 |
-| `key_editor_log_button_behavior_fullscreen_page` | 候选值 `keys_editor_log_button_behavior` (`key_editor_log_button_behavior`) | ui/edit/EditorView.kt:277 | ValueConstant |  | 候选值 |
-| `key_editor_log_panel_input_bar_visible` |  | ui/log/LogBottomSheet.kt:237 | Setting | `editor_log` | 日志面板输入栏 (LogPageConsoleSettings) |
-| `key_editor_log_panel_time_format` |  | core/console/ConsoleTimeSettings.kt:13 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
-| `key_editor_log_panel_time_visible` |  | core/console/ConsoleTimeSettings.kt:13 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
-| `key_editor_log_panel_typescript_console_visible` |  | ui/log/LogBottomSheet.kt:361, ui/log/LogBottomSheet.kt:374 | Setting | `editor_log` | 日志面板开关 |
-| `key_editor_pinch_to_zoom_change_text_size` | 候选值 `keys_editor_pinch_to_zoom_strategy`; 默认值 `default_key_editor_pinch_to_zoom_strategy` | ui/settings/EditorPinchToZoomPreference.kt:84 | ValueConstant |  | 旧策略键 `key_editor_pinch_to_zoom_strategy` 的候选值, `default_key_editor_pinch_to_zoom_strategy` 的目标 |
-| `key_editor_pinch_to_zoom_change_text_size_enabled` | 代码编辑器设置 > 操作手势 | ui/edit/EditorView.kt:944, ui/edit/editor/EditorPinchToZoomPreferences.kt:10, ui/edit/editor/EditorPinchToZoomPreferences.kt:19, ui/settings/EditorSettingActionRegistry.kt:50, ui/settings/EditorSettingActionRegistry.kt:11 | Setting | `editor_gestures` | 开关, 取代旧策略键 |
-| `key_editor_pinch_to_zoom_disable` | 候选值 `keys_editor_pinch_to_zoom_strategy` | ui/edit/editor/EditorPinchToZoomPreferences.kt:15, ui/edit/editor/EditorPinchToZoomPreferences.kt:23 | ValueConstant |  | 旧策略键的候选值, 迁移时比较 |
-| `key_editor_pinch_to_zoom_scale_view` |  | ui/settings/EditorPinchToZoomPreference.kt:83 | ValueConstant |  | 旧策略键的候选值, 只在未被设置页引用的 EditorPinchToZoomPreference 中使用 |
-| `key_editor_pinch_to_zoom_strategy` |  | ui/edit/editor/EditorPinchToZoomPreferences.kt:28, ui/settings/EditorPinchToZoomPreference.kt:48, ui/settings/EditorPinchToZoomPreference.kt:80, ui/settings/EditorSettingActionRegistry.kt:10 | State | `other` | 旧版策略设置, 只作 migrateLegacyPreferenceIfNeeded 的迁移来源; 写入方 EditorPinchToZoomPreference 已不在任何设置页 |
-| `key_editor_shortcut_input_bar` | 代码编辑器设置 > 辅助 | ui/settings/EditorSettingActionRegistry.kt:37 | Excluded |  | 动作条目, 打开 SymbolsSettingsActivity (数据在命名存储 `editor_symbols_config`) |
-| `key_editor_text_size` | 代码编辑器设置 > 外观 | core/pref/Pref.kt:362, core/pref/Pref.kt:365, ui/edit/EditorView.kt:927, ui/settings/EditorSettingActionRegistry.kt:23 | Setting | `editor_appearance` | 字号 |
-| `key_editor_theme` | 代码编辑器设置 > 外观 | core/pref/Pref.kt:287, core/pref/Pref.kt:289, ui/edit/EditorView.kt:929, ui/settings/CodeEditorSettingsFragment.kt:101, ui/settings/CodeEditorSettingsFragment.kt:105, ui/settings/CodeEditorSettingsFragment.kt:278 等 7 处 | Setting | `editor_appearance` | 统一模式下的主题名 |
-| `key_editor_theme_dark` |  | ui/edit/EditorView.kt:931, ui/edit/theme/Themes.java:168, ui/edit/theme/Themes.java:208, ui/edit/theme/Themes.java:214, ui/edit/theme/Themes.java:219, ui/edit/theme/Themes.java:233 等 7 处 | Setting | `editor_appearance` | 分离模式下的深色主题名 (Themes.java) |
-| `key_editor_theme_light` |  | ui/edit/EditorView.kt:930, ui/edit/theme/Themes.java:170, ui/edit/theme/Themes.java:209, ui/edit/theme/Themes.java:213, ui/edit/theme/Themes.java:222, ui/edit/theme/Themes.java:235 等 7 处 | Setting | `editor_appearance` | 分离模式下的浅色主题名 (Themes.java) |
-| `key_editor_theme_mode` | 代码编辑器设置 > 外观 | ui/edit/EditorView.kt:932, ui/edit/theme/Themes.java:252, ui/settings/CodeEditorSettingsFragment.kt:100, ui/settings/EditorSettingActionRegistry.kt:20 | Setting | `editor_appearance` | 列表项 |
-| `key_editor_theme_mode_separate` | 候选值 `keys_editor_theme_mode` (`key_editor_theme_mode`); 默认值 `default_key_editor_theme_mode` |  | ValueConstant |  | 候选值, 默认值 |
-| `key_editor_theme_mode_unified` | 候选值 `keys_editor_theme_mode` (`key_editor_theme_mode`) | ui/edit/theme/Themes.java:255 | ValueConstant |  | 候选值 |
-| `key_editor_word_wrap_indent_style` | 代码编辑器设置 > 外观 | ui/settings/CodeEditorSettingsFragment.kt:307, ui/settings/CodeEditorSettingsFragment.kt:312, ui/settings/EditorSettingActionRegistry.kt:31, ui/edit/editor/EditorDisplayPreferences.kt:8 | Setting | `editor_appearance` | 列表项 |
-| `key_editor_word_wrap_indent_style_classic` | 候选值 `keys_editor_word_wrap_indent_style` (`key_editor_word_wrap_indent_style`) |  | ValueConstant |  | 候选值 |
-| `key_editor_word_wrap_indent_style_continuation` | 候选值 `keys_editor_word_wrap_indent_style` (`key_editor_word_wrap_indent_style`); 默认值 `default_key_editor_word_wrap_indent_style` |  | ValueConstant |  | 候选值, 默认值 |
-| `key_enable_a11y_service_with_root_access` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:85 | core/pref/Pref.kt:330, inrt/Pref.kt:45, runtime/api/augment/settings/Settings.kt:26, ui/accessibility/A11yServiceManagerDialog.kt:187 | Setting | `a11y` | 开关, 也是脚本 API settings 的 ROOT_ACCESSIBILITY_SERVICE |
-| `key_enable_a11y_service_with_secure_settings` | 设置 > 无障碍服务 | core/pref/Pref.kt:336, ui/accessibility/A11yServiceManagerDialog.kt:193 | Setting | `a11y` | 开关 |
-| `key_enable_a11y_service_with_shizuku` | 设置 > 无障碍服务 | core/pref/Pref.kt:342, ui/accessibility/A11yServiceManagerDialog.kt:199 | Setting | `a11y` | 开关 |
+| `key_editor_auto_show_log_bottom_sheet_on_run` | 设置 > 代码编辑器; 代码编辑器设置 > 日志 | core/pref/keys/EditorKeys.kt:177, ui/settings/EditorSettingActionRegistry.kt:36, ui/settings/PreferencesFragment.kt:65, ui/settings/PreferencesFragment.kt:73 | Setting | `editor_log` | 开关, 设置页与代码编辑器设置两处 |
+| `key_editor_breakpoint_markers_enabled` | 代码编辑器设置 > 边栏标记 | core/pref/keys/EditorKeys.kt:305, ui/settings/EditorSettingActionRegistry.kt:53, ui/edit/editor/EditorDisplayPreferences.kt:12 | Setting | `editor_gutter` | 开关 |
+| `key_editor_code_highlight_threshold_bytes` | 代码编辑器设置 > 性能 | core/pref/keys/EditorKeys.kt:321, ui/settings/CodeEditorSettingsFragment.kt:269, ui/settings/EditorSettingActionRegistry.kt:57 | Setting | `editor_performance` | 阈值 |
+| `key_editor_engine` | 设置 > 代码编辑器; 代码编辑器设置 > 常规 | core/pref/keys/EditorKeys.kt:97, ui/edit/EditorView.kt:928, ui/settings/CodeEditorSettingsFragment.kt:92, ui/settings/CodeEditorSettingsFragment.kt:99, ui/settings/EditorSettingActionRegistry.kt:19, ui/settings/PreferencesFragment.kt:63 等 8 处 | Setting | `editor_general` | 列表项, 与字面量键 `key_$_editor_engine_selection_mode` 一起写入 |
+| `key_editor_engine_ace` | 候选值 `keys_editor_engine` (`key_editor_engine`) | core/pref/keys/EditorKeys.kt:45 | ValueConstant |  | 候选值 |
+| `key_editor_engine_native` | 候选值 `keys_editor_engine` (`key_editor_engine`); 默认值 `default_key_editor_engine` | core/pref/keys/EditorKeys.kt:45 | ValueConstant |  | 候选值, 默认值 |
+| `key_editor_fold_markers_enabled` | 代码编辑器设置 > 边栏标记 | core/pref/keys/EditorKeys.kt:308, ui/settings/CodeEditorSettingsFragment.kt:261, ui/settings/EditorSettingActionRegistry.kt:55, ui/edit/editor/EditorDisplayPreferences.kt:13 | Setting | `editor_gutter` | 开关 |
+| `key_editor_fullscreen_mode` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:149, ui/edit/EditorView.kt:929, ui/settings/EditorSettingActionRegistry.kt:24 | Setting | `editor_appearance` | 开关, 编辑器菜单也会写入 |
+| `key_editor_gutter_width_mode` | 代码编辑器设置 > 边栏标记 | core/pref/keys/EditorKeys.kt:312, ui/settings/CodeEditorSettingsFragment.kt:260, ui/settings/EditorSettingActionRegistry.kt:52, ui/edit/editor/EditorDisplayPreferences.kt:14 | Setting | `editor_gutter` | 列表项 |
+| `key_editor_gutter_width_mode_dynamic` | 候选值 `keys_editor_gutter_width_mode` (`key_editor_gutter_width_mode`); 默认值 `default_key_editor_gutter_width_mode` | core/pref/keys/EditorKeys.kt:49 | ValueConstant |  | 候选值, 默认值 |
+| `key_editor_gutter_width_mode_fixed` | 候选值 `keys_editor_gutter_width_mode` (`key_editor_gutter_width_mode`) | core/pref/keys/EditorKeys.kt:49 | ValueConstant |  | 候选值 |
+| `key_editor_large_file_mode_threshold_bytes` | 代码编辑器设置 > 性能 | core/pref/keys/EditorKeys.kt:328, ui/settings/CodeEditorSettingsFragment.kt:270, ui/settings/EditorSettingActionRegistry.kt:58 | Setting | `editor_performance` | 阈值 |
+| `key_editor_log_button_behavior` | 设置 > 代码编辑器; 代码编辑器设置 > 日志 | core/pref/keys/EditorKeys.kt:181, ui/settings/EditorSettingActionRegistry.kt:35, ui/settings/PreferencesFragment.kt:64, ui/settings/PreferencesFragment.kt:74 | Setting | `editor_log` | 列表项, 设置页与代码编辑器设置两处 |
+| `key_editor_log_button_behavior_bottom_sheet` | 候选值 `keys_editor_log_button_behavior` (`key_editor_log_button_behavior`); 默认值 `default_key_editor_log_button_behavior` | core/pref/keys/EditorKeys.kt:48 | ValueConstant |  | 候选值, 默认值 |
+| `key_editor_log_button_behavior_fullscreen_page` | 候选值 `keys_editor_log_button_behavior` (`key_editor_log_button_behavior`) | core/pref/keys/EditorKeys.kt:48, ui/edit/EditorView.kt:275 | ValueConstant |  | 候选值 |
+| `key_editor_log_panel_input_bar_visible` |  | core/pref/keys/EditorKeys.kt:187, ui/log/LogBottomSheet.kt:237 | Setting | `editor_log` | 日志面板输入栏 (LogPageConsoleSettings) |
+| `key_editor_log_panel_time_format` |  | core/console/ConsoleTimeSettings.kt:13, core/pref/keys/EditorKeys.kt:193 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
+| `key_editor_log_panel_time_visible` |  | core/console/ConsoleTimeSettings.kt:13, core/pref/keys/EditorKeys.kt:190 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
+| `key_editor_log_panel_typescript_console_visible` |  | core/pref/keys/EditorKeys.kt:196 | Setting | `editor_log` | 日志面板开关 |
+| `key_editor_pinch_to_zoom_change_text_size` | 候选值 `keys_editor_pinch_to_zoom_strategy`; 默认值 `default_key_editor_pinch_to_zoom_strategy` | core/pref/keys/EditorKeys.kt:87, ui/settings/EditorPinchToZoomPreference.kt:84 | ValueConstant |  | 旧策略键 `key_editor_pinch_to_zoom_strategy` 的候选值, `default_key_editor_pinch_to_zoom_strategy` 的目标 |
+| `key_editor_pinch_to_zoom_change_text_size_enabled` | 代码编辑器设置 > 操作手势 | core/pref/keys/EditorKeys.kt:294, ui/edit/EditorView.kt:935, ui/settings/EditorSettingActionRegistry.kt:50, ui/settings/EditorSettingActionRegistry.kt:11 | Setting | `editor_gestures` | 开关, 取代旧策略键 |
+| `key_editor_pinch_to_zoom_disable` | 候选值 `keys_editor_pinch_to_zoom_strategy` | core/pref/keys/EditorKeys.kt:88, ui/edit/editor/EditorPinchToZoomPreferences.kt:15, ui/edit/editor/EditorPinchToZoomPreferences.kt:22 | ValueConstant |  | 旧策略键的候选值, 迁移时比较 |
+| `key_editor_pinch_to_zoom_scale_view` |  | core/pref/keys/EditorKeys.kt:89, ui/settings/EditorPinchToZoomPreference.kt:83 | ValueConstant |  | 旧策略键的候选值, 只在未被设置页引用的 EditorPinchToZoomPreference 中使用 |
+| `key_editor_pinch_to_zoom_strategy` |  | ui/edit/editor/EditorPinchToZoomPreferences.kt:27, ui/settings/EditorPinchToZoomPreference.kt:48, ui/settings/EditorPinchToZoomPreference.kt:80, ui/settings/EditorSettingActionRegistry.kt:10 | State | `other` | 旧版策略设置, 只作 migrateLegacyPreferenceIfNeeded 的迁移来源; 写入方 EditorPinchToZoomPreference 已不在任何设置页 |
+| `key_editor_shortcut_input_bar` | 代码编辑器设置 > 辅助 | core/pref/keys/EditorKeys.kt:361, ui/settings/EditorSettingActionRegistry.kt:37 | Excluded |  | 动作条目, 打开 SymbolsSettingsActivity (数据在命名存储 `editor_symbols_config`) |
+| `key_editor_text_size` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:154, ui/edit/EditorView.kt:921, ui/settings/EditorSettingActionRegistry.kt:23 | Setting | `editor_appearance` | 字号 |
+| `key_editor_theme` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:160, ui/edit/EditorView.kt:923, ui/settings/CodeEditorSettingsFragment.kt:101, ui/settings/CodeEditorSettingsFragment.kt:105, ui/settings/CodeEditorSettingsFragment.kt:278, ui/settings/EditorSettingActionRegistry.kt:21 | Setting | `editor_appearance` | 统一模式下的主题名 |
+| `key_editor_theme_dark` |  | core/pref/keys/EditorKeys.kt:166, ui/edit/EditorView.kt:925, ui/settings/CodeEditorSettingsFragment.kt:103 | Setting | `editor_appearance` | 分离模式下的深色主题名 (Themes.java) |
+| `key_editor_theme_light` |  | core/pref/keys/EditorKeys.kt:163, ui/edit/EditorView.kt:924, ui/settings/CodeEditorSettingsFragment.kt:102 | Setting | `editor_appearance` | 分离模式下的浅色主题名 (Themes.java) |
+| `key_editor_theme_mode` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:170, ui/edit/EditorView.kt:926, ui/settings/CodeEditorSettingsFragment.kt:100, ui/settings/EditorSettingActionRegistry.kt:20 | Setting | `editor_appearance` | 列表项 |
+| `key_editor_theme_mode_separate` | 候选值 `keys_editor_theme_mode` (`key_editor_theme_mode`); 默认值 `default_key_editor_theme_mode` | core/pref/keys/EditorKeys.kt:46 | ValueConstant |  | 候选值, 默认值 |
+| `key_editor_theme_mode_unified` | 候选值 `keys_editor_theme_mode` (`key_editor_theme_mode`) | core/pref/keys/EditorKeys.kt:46, ui/edit/theme/Themes.java:252 | ValueConstant |  | 候选值 |
+| `key_editor_word_wrap_indent_style` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:135, ui/settings/CodeEditorSettingsFragment.kt:307, ui/settings/CodeEditorSettingsFragment.kt:312, ui/settings/EditorSettingActionRegistry.kt:31, ui/edit/editor/EditorDisplayPreferences.kt:8 | Setting | `editor_appearance` | 列表项 |
+| `key_editor_word_wrap_indent_style_classic` | 候选值 `keys_editor_word_wrap_indent_style` (`key_editor_word_wrap_indent_style`) | core/pref/keys/EditorKeys.kt:47 | ValueConstant |  | 候选值 |
+| `key_editor_word_wrap_indent_style_continuation` | 候选值 `keys_editor_word_wrap_indent_style` (`key_editor_word_wrap_indent_style`); 默认值 `default_key_editor_word_wrap_indent_style` | core/pref/keys/EditorKeys.kt:47 | ValueConstant |  | 候选值, 默认值 |
+| `key_enable_a11y_service_with_root_access` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:85 | core/pref/Pref.kt:307, inrt/Pref.kt:45, runtime/api/augment/settings/Settings.kt:26, ui/accessibility/A11yServiceManagerDialog.kt:187 | Setting | `a11y` | 开关, 也是脚本 API settings 的 ROOT_ACCESSIBILITY_SERVICE |
+| `key_enable_a11y_service_with_secure_settings` | 设置 > 无障碍服务 | core/pref/Pref.kt:313, ui/accessibility/A11yServiceManagerDialog.kt:193 | Setting | `a11y` | 开关 |
+| `key_enable_a11y_service_with_shizuku` | 设置 > 无障碍服务 | core/pref/Pref.kt:319, ui/accessibility/A11yServiceManagerDialog.kt:199 | Setting | `a11y` | 开关 |
 | `key_enable_observe_key` |  |  | State | `other` | 按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板) |
 | `key_explorer_file_default_prefix` |  | core/pref/keys/ExplorerKeys.kt:69 | Setting | `explorer` | 新文件默认前缀序号 (ScriptOperations) |
 | `key_explorer_playback_history` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:63 | Setting | `explorer` | 开关; 历史数据在命名存储 `explorer_playback_history` (永久排除) |
-| `key_extending_js_build_in_objects` | 设置 > 扩展性 | core/pref/Pref.kt:133 | Setting | `extensibility` | 开关 |
+| `key_extending_js_build_in_objects` | 设置 > 扩展性 | core/pref/Pref.kt:109 | Setting | `extensibility` | 开关 |
 | `key_file_extensions` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:57 | Setting | `explorer` | 列表项, 文件管理器菜单也会写入 |
 | `key_file_extensions_not_show` | 候选值 `keys_file_extensions` (`key_file_extensions`) | core/pref/keys/ExplorerKeys.kt:30, core/pref/keys/ExplorerKeys.kt:98 | ValueConstant |  | 候选值 |
 | `key_file_extensions_show_all` | 候选值 `keys_file_extensions` (`key_file_extensions`); 默认值 `default_key_file_extensions` | core/pref/keys/ExplorerKeys.kt:31, core/pref/keys/ExplorerKeys.kt:90 | ValueConstant |  | 候选值, 默认值 |
@@ -177,11 +177,11 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_floating_console_time_visible` |  | core/console/ConsoleTimeSettings.kt:17 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
 | `key_floating_menu_shown` |  | ui/floating/CircularMenu.java:495, ui/main/drawer/DrawerFragment.kt:280 | State | `other` | 抽屉 "悬浮按钮" 开关的镜像, 按悬浮窗实际状态回写 |
 | `key_foreground_service` | 其他资源 res/xml/fragment_preferences_inrt.xml:12 | core/pref/keys/GeneralKeys.kt:80, inrt/SettingsActivity.kt:52, runtime/api/augment/settings/Settings.kt:29 | Setting | `general` | 抽屉 "前台服务" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12) |
-| `key_gesture_observing` |  | core/pref/Pref.kt:239 | Setting | `a11y` | 开关 (手势观察) |
+| `key_gesture_observing` |  | core/pref/Pref.kt:215 | Setting | `a11y` | 开关 (手势观察) |
 | `key_github_token` | 开发者选项 > GitHub |  | Excluded |  | 动作条目, 令牌存于命名存储 `github_auth` (credentials) |
 | `key_global_console_element_time_format` |  | core/console/ConsoleTimeSettings.kt:15 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
 | `key_global_console_element_time_visible` |  | core/console/ConsoleTimeSettings.kt:15 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
-| `key_guard_mode` | 设置 > 脚本运行 | core/pref/Pref.kt:164 | Setting | `running` | 开关 |
+| `key_guard_mode` | 设置 > 脚本运行 | core/pref/Pref.kt:140 | Setting | `running` | 开关 |
 | `key_hidden_files` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:51 | Setting | `explorer` | 列表项, 文件管理器菜单也会写入 |
 | `key_hidden_files_not_show` | 候选值 `keys_hidden_files` (`key_hidden_files`); 默认值 `default_key_hidden_files` | core/pref/keys/ExplorerKeys.kt:25, ui/explorer/ExplorerPathMenu.kt:174 | ValueConstant |  | 候选值, 默认值 |
 | `key_hidden_files_show` | 候选值 `keys_hidden_files` (`key_hidden_files`) | core/pref/keys/ExplorerKeys.kt:26, core/pref/keys/ExplorerKeys.kt:86, ui/explorer/ExplorerPathMenu.kt:174 | ValueConstant |  | 候选值 |
@@ -197,10 +197,10 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_keep_screen_on_when_in_foreground_enabled` |  | core/pref/keys/AppearanceKeys.kt:102 | Setting | `appearance` | 与主键一起由 ViewUtils 写入的布尔镜像, 须与主键同进同出 |
 | `key_keep_screen_on_when_in_foreground_homepage_only` | 候选值 `keys_keep_screen_on_when_in_foreground` (`key_keep_screen_on_when_in_foreground`) | core/pref/keys/AppearanceKeys.kt:48, util/ViewUtils.kt:126, util/ViewUtils.kt:1304, util/ViewUtils.kt:1305 | ValueConstant |  | 候选值 |
 | `key_keep_screen_on_when_in_foreground_last_enabled` |  | util/ViewUtils.kt:126, util/ViewUtils.kt:127 | State | `other` | 抽屉开关恢复用的上次启用模式 |
-| `key_last_no_newer_updates` |  | core/pref/Pref.kt:206, core/pref/Pref.kt:312, core/pref/Pref.kt:322 | State | `other` | 时间戳 |
-| `key_last_updates_auto_checked` |  | core/pref/Pref.kt:214, core/pref/Pref.kt:318, core/pref/Pref.kt:325 | State | `other` | 时间戳 |
-| `key_last_updates_checked` |  | core/pref/Pref.kt:190, core/pref/Pref.kt:309, core/pref/Pref.kt:324 | State | `other` | 时间戳 |
-| `key_last_updates_postponed` |  | core/pref/Pref.kt:210, core/pref/Pref.kt:315, core/pref/Pref.kt:323 | State | `other` | 时间戳 |
+| `key_last_no_newer_updates` |  | core/pref/Pref.kt:182, core/pref/Pref.kt:289, core/pref/Pref.kt:299 | State | `other` | 时间戳 |
+| `key_last_updates_auto_checked` |  | core/pref/Pref.kt:190, core/pref/Pref.kt:295, core/pref/Pref.kt:302 | State | `other` | 时间戳 |
+| `key_last_updates_checked` |  | core/pref/Pref.kt:166, core/pref/Pref.kt:286, core/pref/Pref.kt:301 | State | `other` | 时间戳 |
+| `key_last_updates_postponed` |  | core/pref/Pref.kt:186, core/pref/Pref.kt:292, core/pref/Pref.kt:300 | State | `other` | 时间戳 |
 | `key_launcher_icon` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:74 | Setting | `general` | 列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY) |
 | `key_launcher_icon_adaptive` | 候选值 `keys_launcher_icon` (`key_launcher_icon`); 默认值 `default_key_launcher_icon` | core/pref/keys/GeneralKeys.kt:41, ui/settings/LauncherIconPreference.kt:56, ui/settings/LauncherIconPreference.kt:95, ui/settings/LauncherIconPreference.kt:217 | ValueConstant |  | 候选值, 默认值 |
 | `key_launcher_icon_transparent_background` | 候选值 `keys_launcher_icon` (`key_launcher_icon`) | core/pref/keys/GeneralKeys.kt:42, ui/settings/LauncherIconPreference.kt:55, ui/settings/LauncherIconPreference.kt:216 | ValueConstant |  | 候选值 |
@@ -223,7 +223,7 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_mail_settings` | 开发者选项 > 邮件 |  | Excluded |  | 动作条目, 打开邮件插件设置 (插件自身设置第一期不含, D3) |
 | `key_manage_ignored_updates` | 设置 > 更新 |  | Excluded |  | 动作条目 (管理忽略的更新) |
 | `key_mcp_server_normally_closed` |  | app/tool/McpServerTool.kt:168, app/tool/McpServerTool.kt:169 | State | `other` | 上次是否正常关闭, 用于启动时恢复 |
-| `key_new_script_module_layer` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:144 | Setting | `developer` | 开关 |
+| `key_new_script_module_layer` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:120 | Setting | `developer` | 开关 |
 | `key_night_mode` | 设置 > 外观 | core/plugin/center/PluginCenterFragment.kt:979, core/pref/keys/AppearanceKeys.kt:61, ui/main/plugin/PluginFragment.kt:64 | Setting | `appearance` | 列表项 (ViewUtils.MODE) |
 | `key_night_mode_always_off` | 候选值 `keys_night_mode` (`key_night_mode`) | core/pref/keys/AppearanceKeys.kt:41, ui/settings/NightModePreference.kt:54, util/ViewUtils.kt:1675 | ValueConstant |  | 候选值 (MODE.DAY) |
 | `key_night_mode_always_on` | 候选值 `keys_night_mode` (`key_night_mode`) | core/pref/keys/AppearanceKeys.kt:40, util/ViewUtils.kt:1676 | ValueConstant |  | 候选值 (MODE.NIGHT) |
@@ -242,7 +242,7 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_post_notifications_permission_request_attempted` |  | permission/PostNotificationsPermission.kt:45, permission/PostNotificationsPermission.kt:61, ui/wizard/permission/PermissionWizardRunner.kt:122, ui/wizard/permission/PermissionWizardRunner.kt:128 | State | `other` | 是否已请求过通知权限 |
 | `key_pref_bundle_default_item` |  | theme/preference/MaterialListPreference.kt:74, ui/settings/LauncherIconPreference.kt:216, ui/settings/NightModePreference.kt:54 | Excluded |  | MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2) |
 | `key_pref_bundle_disabled_items` |  | theme/preference/MaterialListPreference.kt:79, ui/settings/LauncherIconPreference.kt:217, ui/settings/NightModePreference.kt:55 | Excluded |  | MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2) |
-| `key_record_toast` | 设置 > 录制脚本 | core/pref/Pref.kt:281 | Setting | `record` | 开关 |
+| `key_record_toast` | 设置 > 录制脚本 | core/pref/Pref.kt:257 | Setting | `record` | 开关 |
 | `key_release_history` | 设置 > 更新 |  | Excluded |  | 动作条目 (发行历史) |
 | `key_restart_strategy` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:54 | Setting | `general` | 列表项 |
 | `key_restart_strategy_quick` | 候选值 `keys_restart_strategy` (`key_restart_strategy`); 默认值 `default_key_restart_strategy` | core/pref/keys/GeneralKeys.kt:31, core/pref/keys/GeneralKeys.kt:102 | ValueConstant |  | 候选值, 默认值 |
@@ -250,12 +250,12 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_rhino_java_primitive_wrap` | 设置 > 扩展性 | rhino/AndroidContextFactory.kt:77 | Setting | `extensibility` | 开关 |
 | `key_root_manager_apps_cache` |  | ui/accessibility/RootManagerAppsDialog.kt:117, ui/accessibility/RootManagerAppsDialog.kt:216 | Cache |  | Root 管理器应用列表缓存 (附录 A.2) |
 | `key_root_manager_apps_custom` |  | ui/accessibility/RootManagerAppsDialog.kt:115, ui/accessibility/RootManagerAppsDialog.kt:171, ui/accessibility/RootManagerAppsDialog.kt:173 | Setting | `running` | 用户追加的 Root 管理器包名 (StringSet) |
-| `key_root_mode` | 设置 > 脚本运行 | core/pref/Pref.kt:224, core/pref/Pref.kt:228 | Setting | `running` | 列表项 (RootUtils.RootMode) |
+| `key_root_mode` | 设置 > 脚本运行 | core/pref/Pref.kt:200, core/pref/Pref.kt:204 | Setting | `running` | 列表项 (RootUtils.RootMode) |
 | `key_root_mode_auto_detect` | 候选值 `keys_root_mode` (`key_root_mode`); 默认值 `default_key_root_mode` | util/RootUtils.java:133 | ValueConstant |  | 候选值, 默认值 |
 | `key_root_mode_force_non_root` | 候选值 `keys_root_mode` (`key_root_mode`) | util/RootUtils.java:132 | ValueConstant |  | 候选值 |
 | `key_root_mode_force_root` | 候选值 `keys_root_mode` (`key_root_mode`) | util/RootUtils.java:131 | ValueConstant |  | 候选值 |
-| `key_root_record_out_file_type` | 设置 > 录制脚本 | core/pref/Pref.kt:359 | Setting | `record` | 列表项 |
-| `key_root_record_out_file_type_binary` | 候选值 `keys_root_record_out_file_type` (`key_root_record_out_file_type`); 默认值 `default_key_root_record_out_file_type` | core/pref/Pref.kt:359 | ValueConstant |  | 候选值, 默认值 |
+| `key_root_record_out_file_type` | 设置 > 录制脚本 | core/pref/Pref.kt:336 | Setting | `record` | 列表项 |
+| `key_root_record_out_file_type_binary` | 候选值 `keys_root_record_out_file_type` (`key_root_record_out_file_type`); 默认值 `default_key_root_record_out_file_type` | core/pref/Pref.kt:336 | ValueConstant |  | 候选值, 默认值 |
 | `key_root_record_out_file_type_js` | 候选值 `keys_root_record_out_file_type` (`key_root_record_out_file_type`) |  | ValueConstant |  | 候选值 |
 | `key_run_on_boot_inrt` | 其他资源 res/xml/fragment_preferences_inrt.xml:66 | inrt/Pref.kt:57, inrt/Pref.kt:76 | Excluded |  | inrt 运行配置 (打包时由 launchConfig 写入; 附录 A.2, Q13 已拍板) |
 | `key_scheduled_restart_backend` |  | core/pref/keys/GeneralKeys.kt:60 | Setting | `general` | 计划重启后端 (ScheduledRestartSettingsDialogBuilder) |
@@ -263,10 +263,10 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_scheduled_restart_backend_work_manager` | 默认值 `default_key_scheduled_restart_backend` | core/pref/keys/GeneralKeys.kt:37, core/pref/keys/GeneralKeys.kt:107, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:90 | ValueConstant |  | 候选值, 默认值 |
 | `key_scheduled_restart_delay` |  | core/pref/keys/GeneralKeys.kt:67 | Setting | `general` | 计划重启延迟 |
 | `key_screen_capture_request_delay` | 设置 > 脚本运行 | core/pref/Pref.kt:84, ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt:29, ui/settings/ScreenCaptureRequestDelayDialogBuilder.kt:72 | Setting | `running` | 截图授权延迟 |
-| `key_script_module_debug_print` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:154 | Setting | `developer` | 开关 |
-| `key_script_module_debug_print_disabled_modules` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:158, core/pref/Pref.kt:159 | Setting | `developer` | StringSet |
+| `key_script_module_debug_print` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:130 | Setting | `developer` | 开关 |
+| `key_script_module_debug_print_disabled_modules` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:134, core/pref/Pref.kt:135 | Setting | `developer` | StringSet |
 | `key_scripts_after_app_restart` |  | core/pref/keys/GeneralKeys.kt:92, util/IntentUtils.kt:440, util/IntentUtils.kt:478 | Excluded |  | 重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (附录 A.2, Q13 已拍板) |
-| `key_server_address` |  | core/pref/Pref.kt:353, core/pref/Pref.kt:356 | Setting | `connection` | 服务端地址 |
+| `key_server_address` |  | core/pref/Pref.kt:330, core/pref/Pref.kt:333 | Setting | `connection` | 服务端地址 |
 | `key_server_mode_lan_discovery` |  | pluginclient/DevPluginPrefs.kt:34, ui/devplugin/ServerModeManagerDialog.kt:89 | Setting | `connection` | 服务端模式管理器开关 |
 | `key_server_mode_manager_clients_level` |  | ui/devplugin/ServerModeManagerDialog.kt:39 | State | `other` | 管理器对话框展开级别 |
 | `key_server_mode_manager_control_level` |  | ui/devplugin/ServerModeManagerDialog.kt:37 | State | `other` | 管理器对话框展开级别 |
@@ -277,7 +277,7 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_server_socket_normally_closed` |  | pluginclient/JsonSocketServer.kt:167, pluginclient/JsonSocketServer.kt:169 | State | `other` | 上次是否正常关闭, 用于启动时恢复 |
 | `key_setup_wizard_welcome_done` |  | ui/settings/ResetSetupWizardWelcomePreference.kt:28, ui/wizard/SetupWizards.kt:54, ui/wizard/SetupWizards.kt:84 | State | `other` | 欢迎向导已完成 |
 | `key_setup_wizards` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:91, ui/settings/PreferencesFragment.kt:24 | Excluded |  | 动作条目 (打开设置向导) |
-| `key_stable_mode` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:92 | core/pref/Pref.kt:233, runtime/api/augment/settings/Settings.kt:25, ui/accessibility/A11yServiceManagerDialog.kt:202, ui/accessibility/A11yServiceManagerDialog.kt:403, ui/accessibility/A11yServiceManagerDialog.kt:428 | Setting | `a11y` | 开关, 也出现在无障碍服务管理器与脚本 API settings |
+| `key_stable_mode` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:92 | core/pref/Pref.kt:209, runtime/api/augment/settings/Settings.kt:25, ui/accessibility/A11yServiceManagerDialog.kt:202, ui/accessibility/A11yServiceManagerDialog.kt:403, ui/accessibility/A11yServiceManagerDialog.kt:428 | Setting | `a11y` | 开关, 也出现在无障碍服务管理器与脚本 API settings |
 | `key_theme_color` | 设置 > 外观 | core/pref/keys/AppearanceKeys.kt:112 | Excluded |  | 动作条目 (打开主题色选择), 值存于 `key_theme_color_primary` / `_primary_dark` / `_accent` |
 | `key_theme_color_accent` |  | core/pref/keys/AppearanceKeys.kt:90 | Setting | `appearance` | 主题色三项之一 |
 | `key_theme_color_primary` |  | core/pref/keys/AppearanceKeys.kt:78 | Setting | `appearance` | 主题色三项之一 |
@@ -290,8 +290,8 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_trash_max_days` | 回收站与版本历史设置 > 回收站 | core/pref/keys/HistoryKeys.kt:54 | Setting | `history` | 保留策略 |
 | `key_trash_max_total_bytes` | 回收站与版本历史设置 > 回收站 | core/pref/keys/HistoryKeys.kt:57 | Setting | `history` | 保留策略 |
 | `key_updates_checked_states_cleared` | 开发者选项 > 更新 |  | Excluded |  | 动作条目 (开发者选项, 清除检查更新状态) |
-| `key_use_volume_control_record` | 设置 > 录制脚本 | core/pref/Pref.kt:178 | Setting | `record` | 开关 |
-| `key_use_volume_control_running` | 设置 > 脚本运行; 其他资源 res/xml/fragment_preferences_inrt.xml:60 | core/pref/Pref.kt:171, inrt/Pref.kt:53, runtime/api/augment/settings/Settings.kt:27 | Setting | `running` | 开关, 也是脚本 API settings 的 STOP_ALL_ON_VOLUME_UP |
+| `key_use_volume_control_record` | 设置 > 录制脚本 | core/pref/Pref.kt:154 | Setting | `record` | 开关 |
+| `key_use_volume_control_running` | 设置 > 脚本运行; 其他资源 res/xml/fragment_preferences_inrt.xml:60 | core/pref/Pref.kt:147, inrt/Pref.kt:53, runtime/api/augment/settings/Settings.kt:27 | Setting | `running` | 开关, 也是脚本 API settings 的 STOP_ALL_ON_VOLUME_UP |
 | `key_version_history_restore_does_not_auto_save_to_disk` |  | storage/history/VersionHistoryController.kt:443 | State | `other` | VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1) |
 | `key_working_directory` |  | core/pref/keys/ExplorerKeys.kt:44 | Setting | `explorer`, deployment `CREATE_DIRECTORY` | 工作目录; 目标不存在时作为部署项创建 (D20 / Q1) |
 | `key_working_directory_history` |  | util/WorkingDirectoryUtils.kt:16, util/WorkingDirectoryUtils.kt:17 | State | `other` | 工作目录历史 (Gson LinkedHashSet) |
@@ -309,14 +309,14 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_$_ace_editor_font_selected_variant_` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:96 | Setting | `editor_keyboard` | 前缀键, 属于命名存储, 随整份计数 |
 | `key_$_ace_editor_font_size_sort_type_locked` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:92 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
 | `key_$_ace_editor_font_sort_mode` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:90 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
-| `key_$_ace_lsp_file_types_revision` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:8 | State | `other` | 默认文件类型列表的迁移版本号 (AceEditorLspPreferences) |
-| `key_$_ace_semantic_java_enabled` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:13 | Setting | `editor_assistance` | 语义语言开关 (AceSemanticLanguagesPreference) |
-| `key_$_ace_semantic_kotlin_enabled` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:14 | Setting | `editor_assistance` | 语义语言开关 |
-| `key_$_ace_semantic_lua_enabled` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:12 | Setting | `editor_assistance` | 语义语言开关 |
-| `key_$_ace_semantic_python_enabled` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:11 | Setting | `editor_assistance` | 语义语言开关 |
-| `key_$_ace_semantic_typescript_enabled` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:10 | Setting | `editor_assistance` | 语义语言开关 |
+| `key_$_ace_lsp_file_types_revision` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:10 | State | `other` | 默认文件类型列表的迁移版本号 (AceEditorLspPreferences) |
+| `key_$_ace_semantic_java_enabled` | default | core/pref/keys/EditorKeys.kt:242, ui/edit/editor/ace/AceEditorLspPreferences.kt:15 | Setting | `editor_assistance` | 语义语言开关 (AceSemanticLanguagesPreference) |
+| `key_$_ace_semantic_kotlin_enabled` | default | core/pref/keys/EditorKeys.kt:248, ui/edit/editor/ace/AceEditorLspPreferences.kt:16 | Setting | `editor_assistance` | 语义语言开关 |
+| `key_$_ace_semantic_lua_enabled` | default | core/pref/keys/EditorKeys.kt:236, ui/edit/editor/ace/AceEditorLspPreferences.kt:14 | Setting | `editor_assistance` | 语义语言开关 |
+| `key_$_ace_semantic_python_enabled` | default | core/pref/keys/EditorKeys.kt:230, ui/edit/editor/ace/AceEditorLspPreferences.kt:13 | Setting | `editor_assistance` | 语义语言开关 |
+| `key_$_ace_semantic_typescript_enabled` | default | core/pref/keys/EditorKeys.kt:224, ui/edit/editor/ace/AceEditorLspPreferences.kt:12 | Setting | `editor_assistance` | 语义语言开关 |
 | `key_$_dialog_terminal_tips` | default | core/plugin/terminal/TerminalLegacyCleanup.kt:29 | Excluded |  | 已移除的宿主终端的旧键, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板) |
-| `key_$_editor_engine_selection_mode` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:12 | Setting | `editor_general` | 与 `key_editor_engine` 一起由 EditorEnginePreferences.persist 写入 |
+| `key_$_editor_engine_selection_mode` | default | core/pref/keys/EditorKeys.kt:103, ui/edit/editor/engine/EditorEnginePreferences.kt:14 | Setting | `editor_general` | 与 `key_editor_engine` 一起由 EditorEnginePreferences.persist 写入 |
 | `key_$_enabled_plugin_$_*` | plugin_center_enable_state | core/plugin/center/PluginEnableStore.kt:68 | Setting | `plugin_enable_state` | 属于命名存储, 随整份计数 |
 | `key_$_ignored_plugin_$_*` | key_$_ignored_updates | network/UpdateIgnoreStore.kt:64 | Setting | `updates` | UpdateIgnoreStore 中忽略的插件版本, 随整份计数 |
 | `key_$_last_install_time_$_*` | plugin_center_recent | core/plugin/center/PluginRecentStore.kt:33 | State | `other` | 属于命名存储, 随整份计数 |
@@ -358,9 +358,9 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_$_plugin_mount_point_$_` | default | core/plugin/center/PluginMountStore.kt:16 | Setting | `plugin_center` | PluginMountStore 前缀键 (挂载点) |
 | `key_$_plugin_update_check_$_` | default | core/plugin/center/PluginUpdateCheckStore.kt:10 | Setting | `plugin_center` | PluginUpdateCheckStore 每个插件的 "检查更新" 开关, 是用户设置 (Q13 (c) 已拍板, P3.1) |
 | `key_$_plugin_variant_priority_$_` | default | core/plugin/center/PluginVariantPriorityStore.kt:11 | Setting | `plugin_center` | PluginVariantPriorityStore 每个引擎的变体优先级 (JSON 数组) |
-| `key_$_seen_ace_fallback_notice` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:14 | State | `other` | 一次性提示已展示 (EditorEnginePreferences) |
-| `key_$_seen_ace_large_file_notice` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:15 | State | `other` | 一次性提示已展示 |
-| `key_$_seen_editor_switch_undo_notice` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:13 | State | `other` | 一次性提示已展示 |
+| `key_$_seen_ace_fallback_notice` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:16 | State | `other` | 一次性提示已展示 (EditorEnginePreferences) |
+| `key_$_seen_ace_large_file_notice` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:17 | State | `other` | 一次性提示已展示 |
+| `key_$_seen_editor_switch_undo_notice` | default | ui/edit/editor/engine/EditorEnginePreferences.kt:15 | State | `other` | 一次性提示已展示 |
 | `key_$_suspended_plugin_$_*` | plugin_center_enable_state | core/plugin/center/PluginEnableStore.kt:70 | Setting | `plugin_enable_state` | 挂起标记, 属于命名存储, 随整份计数 |
 | `key_$_terminal_` | default | core/plugin/terminal/TerminalLegacyCleanup.kt:26 | Excluded |  | 已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板) |
 | `key_dont_show_main_activity` | default | runtime/api/augment/settings/Settings.kt:41 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |

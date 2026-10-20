@@ -103,7 +103,9 @@ class SettingsDomainsTest {
                 // A run-time expression, or the fallback a reader returns for a missing key, which P0.4 recorded in
                 // the value column ("[] (... DEFAULT_DECLARATION_GROUPS)").
                 null -> source["expr"] == default.source || (source["value"] as String?)?.contains(default.source) == true
-                else -> source["form"] == "R.${resource.groupValues[1]}" && source["ref"] == resource.groupValues[2] &&
+                // Hand-written sources of P0.4 name the resource in the expression only.
+                else -> source["form"] == "R.${resource.groupValues[1]}" &&
+                        (source["ref"] == resource.groupValues[2] || (source["expr"] as String?)?.contains(default.source) == true) &&
                         source["value"] == key.defaultOrNull().toString()
             }
         }

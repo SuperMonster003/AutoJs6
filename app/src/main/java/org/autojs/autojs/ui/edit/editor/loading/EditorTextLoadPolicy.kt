@@ -1,6 +1,6 @@
 package org.autojs.autojs.ui.edit.editor.loading
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType
 
 object EditorTextLoadPolicy {
@@ -10,11 +10,11 @@ object EditorTextLoadPolicy {
     const val ACE_LIGHTWEIGHT_DOCUMENT_LENGTH = 256 * 1024
 
     fun shouldStreamAsLargeFile(sizeBytes: Long?): Boolean {
-        return sizeBytes != null && Pref.shouldEnableLargeFileModeForSize(sizeBytes)
+        return sizeBytes != null && EditorKeys.shouldEnableLargeFileModeForSize(sizeBytes)
     }
 
     fun shouldLoadProgressively(textLength: Int): Boolean {
-        return Pref.shouldEnableLargeFileModeForSize(textLength.toLong())
+        return EditorKeys.shouldEnableLargeFileModeForSize(textLength.toLong())
     }
 
     /**
@@ -61,6 +61,6 @@ object EditorTextLoadPolicy {
             largeFileMode -> "auto-native-large-file"
             else -> "auto"
         }
-        return "$route;thresholdBytes=${Pref.largeFileModeThresholdBytes}"
+        return "$route;thresholdBytes=${EditorKeys.largeFileModeThresholdBytes}"
     }
 }

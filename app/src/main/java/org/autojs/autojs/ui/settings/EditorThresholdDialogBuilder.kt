@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.theme.preference.MaterialDialogPreference
 import org.autojs.autojs.theme.widget.ThemeColorSeekBar
 import org.autojs.autojs6.R
@@ -85,13 +85,13 @@ class EditorThresholdDialogBuilder(
     }
 
     private fun initialValue(): Int = when (mode) {
-        Mode.CODE_HIGHLIGHT -> Pref.codeHighlightThresholdChars
-        Mode.LARGE_FILE_MODE -> Pref.largeFileModeThresholdBytes
+        Mode.CODE_HIGHLIGHT -> EditorKeys.codeHighlightThresholdChars
+        Mode.LARGE_FILE_MODE -> EditorKeys.largeFileModeThresholdBytes
     }
 
     private fun defaultValue(): Int = when (mode) {
-        Mode.CODE_HIGHLIGHT -> EditorThresholdSettings.defaultCodeHighlightThreshold(context)
-        Mode.LARGE_FILE_MODE -> EditorThresholdSettings.defaultLargeFileModeThreshold(context)
+        Mode.CODE_HIGHLIGHT -> EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.defaultOrNull()!!
+        Mode.LARGE_FILE_MODE -> EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.defaultOrNull()!!
     }
 
     private fun titleRes(): Int = when (mode) {
@@ -114,8 +114,8 @@ class EditorThresholdDialogBuilder(
 
     private fun saveValue(value: Int) {
         when (mode) {
-            Mode.CODE_HIGHLIGHT -> Pref.setCodeHighlightThresholdChars(value)
-            Mode.LARGE_FILE_MODE -> Pref.setLargeFileModeThresholdBytes(value)
+            Mode.CODE_HIGHLIGHT -> EditorKeys.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(value)
+            Mode.LARGE_FILE_MODE -> EditorKeys.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.set(value)
         }
     }
 }

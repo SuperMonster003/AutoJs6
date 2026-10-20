@@ -4,8 +4,8 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
+import org.autojs.autojs.core.pref.keys.EditorKeys;
 import org.autojs.autojs.pio.UncheckedIOException;
-import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.app.GlobalAppContext;
 import org.autojs.autojs.ui.edit.editor.engine.EditorEngineType;
 import org.autojs.autojs.util.ViewUtils;
@@ -165,12 +165,12 @@ public class Themes {
     public static void setCurrent(Context context, String name) {
         if (isSeparateLightDarkMode()) {
             if (ViewUtils.isNightModeYes(context)) {
-                Pref.putString(R.string.key_editor_theme_dark, name);
+                EditorKeys.EDITOR_THEME_DARK.set(name);
             } else {
-                Pref.putString(R.string.key_editor_theme_light, name);
+                EditorKeys.EDITOR_THEME_LIGHT.set(name);
             }
         } else {
-            Pref.setCurrentTheme(name);
+            EditorKeys.EDITOR_THEME.set(name);
         }
     }
 
@@ -205,34 +205,34 @@ public class Themes {
     private static String getCurrentThemeNameRaw(Context context) {
         if (!isSeparateLightDarkMode()) {
             String activeSeparateTheme = ViewUtils.isNightModeYes(context)
-                    ? Pref.getStringOrNull(R.string.key_editor_theme_dark)
-                    : Pref.getStringOrNull(R.string.key_editor_theme_light);
+                    ? EditorKeys.EDITOR_THEME_DARK.storedOrNull()
+                    : EditorKeys.EDITOR_THEME_LIGHT.storedOrNull();
             return firstNonBlank(
-                    Pref.getCurrentTheme(),
+                    EditorKeys.EDITOR_THEME.storedOrNull(),
                     activeSeparateTheme,
-                    Pref.getStringOrNull(R.string.key_editor_theme_light),
-                    Pref.getStringOrNull(R.string.key_editor_theme_dark),
+                    EditorKeys.EDITOR_THEME_LIGHT.storedOrNull(),
+                    EditorKeys.EDITOR_THEME_DARK.storedOrNull(),
                     DEFAULT_THEME
             );
         }
         if (ViewUtils.isNightModeYes(context)) {
-            return firstNonBlank(Pref.getStringOrNull(R.string.key_editor_theme_dark), DARK_THEME);
+            return firstNonBlank(EditorKeys.EDITOR_THEME_DARK.storedOrNull(), DARK_THEME);
         }
         return firstNonBlank(
-                Pref.getStringOrNull(R.string.key_editor_theme_light),
-                Pref.getCurrentTheme(),
+                EditorKeys.EDITOR_THEME_LIGHT.storedOrNull(),
+                EditorKeys.EDITOR_THEME.storedOrNull(),
                 DEFAULT_THEME
         );
     }
 
     private static String getCurrentThemeNameRawWithoutDefault(Context context) {
         if (!isSeparateLightDarkMode()) {
-            return firstNonBlank(Pref.getCurrentTheme());
+            return firstNonBlank(EditorKeys.EDITOR_THEME.storedOrNull());
         }
         if (ViewUtils.isNightModeYes(context)) {
-            return firstNonBlank(Pref.getStringOrNull(R.string.key_editor_theme_dark));
+            return firstNonBlank(EditorKeys.EDITOR_THEME_DARK.storedOrNull());
         }
-        return firstNonBlank(Pref.getStringOrNull(R.string.key_editor_theme_light));
+        return firstNonBlank(EditorKeys.EDITOR_THEME_LIGHT.storedOrNull());
     }
 
     private static String resolveNativeThemeName(Context context, String name) {
@@ -248,10 +248,7 @@ public class Themes {
     }
 
     public static boolean isSeparateLightDarkMode() {
-        String mode = Pref.getString(
-                R.string.key_editor_theme_mode,
-                org.autojs.autojs.util.StringUtils.key(R.string.default_key_editor_theme_mode)
-        );
+        String mode = EditorKeys.EDITOR_THEME_MODE.storedKeyOrDefault();
         return !org.autojs.autojs.util.StringUtils.key(R.string.key_editor_theme_mode_unified).equals(mode);
     }
 

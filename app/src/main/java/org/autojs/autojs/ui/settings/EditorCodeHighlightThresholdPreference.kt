@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.content.Context
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 
 /**
@@ -62,7 +62,7 @@ class EditorCodeHighlightThresholdPreference : MaterialPreference {
 
     private fun useThresholdSummaryProvider() {
         summaryProvider = SummaryProvider<EditorCodeHighlightThresholdPreference> {
-            EditorThresholdSettings.formatCodeHighlightSummary(prefContext, Pref.codeHighlightThresholdChars)
+            EditorThresholdSettings.formatCodeHighlightSummary(prefContext, EditorKeys.codeHighlightThresholdChars)
         }
     }
 }

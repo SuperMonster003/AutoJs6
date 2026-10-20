@@ -445,6 +445,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Issue where the code editor could lose the cursor, selection or unsaved content after page recreation
 * `Fix` Issue where the content area of the code editor and log page could be obscured or compressed when showing the keyboard or input bar
 * `Fix` The "More" menus in code editor dialogs having similar background and text colors when the editor theme and the app light/dark mode differed, making menu items hard to read
+* `Fix` Issue where the native code editor (JsDroidEditor) used text size 15 when no size was set, instead of the default 14 shown on the settings page
 * `Fix` Incorrect saved state, cursor colors and hint language in the home page search field
 * `Fix` Issue where handling abnormal multi-touch input on the home Documentation tab could crash the app
 * `Fix` Missing transition animation when switching to the home Files tab

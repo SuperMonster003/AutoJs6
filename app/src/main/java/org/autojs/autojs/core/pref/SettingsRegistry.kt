@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.pref
 
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
@@ -66,6 +67,7 @@ object SettingsRegistry {
         GeneralKeys,
         ExplorerKeys,
         HistoryKeys,
+        EditorKeys,
     )
 
     /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */

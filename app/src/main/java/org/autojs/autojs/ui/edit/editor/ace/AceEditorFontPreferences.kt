@@ -1,6 +1,6 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 
 object AceEditorFontPreferences {
 
@@ -9,7 +9,7 @@ object AceEditorFontPreferences {
 
     @JvmStatic
     fun getId(): String {
-        return Pref.getString(KEY_ACE_EDITOR_FONT, AceEditorFont.IOSEVKA.preferenceValue)
+        return EditorKeys.ACE_EDITOR_FONT.get()
             .takeIf(VALID_FONT_ID::matches)
             ?: AceEditorFont.IOSEVKA.preferenceValue
     }
@@ -27,6 +27,6 @@ object AceEditorFontPreferences {
     @JvmStatic
     fun setId(fontId: String) {
         require(VALID_FONT_ID.matches(fontId)) { "Invalid ACE editor font id: $fontId" }
-        Pref.putString(KEY_ACE_EDITOR_FONT, fontId)
+        EditorKeys.ACE_EDITOR_FONT.set(fontId)
     }
 }

@@ -8,9 +8,9 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import androidx.recyclerview.widget.RecyclerView
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.preference.MaterialListPreference
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.ui.edit.editor.engine.EditorEnginePreferences
 import org.autojs.autojs.ui.wizard.SetupWizards
 import org.autojs.autojs.util.ViewUtils.excludePaddingClippableViewFromBottomNavigationBar
@@ -63,10 +63,7 @@ class PreferencesFragment : PreferenceFragmentCompat(), SharedPreferences.OnShar
         findPreference<MaterialListPreference>(getString(R.string.key_editor_engine))?.useEntrySummaryProvider()
         findPreference<MaterialListPreference>(getString(R.string.key_editor_log_button_behavior))?.useEntrySummaryProvider()
         findPreference<SwitchPreference>(getString(R.string.key_editor_auto_show_log_bottom_sheet_on_run))?.isChecked =
-            Pref.getBoolean(
-                R.string.key_editor_auto_show_log_bottom_sheet_on_run,
-                R.bool.pref_editor_auto_show_log_bottom_sheet_on_run,
-            )
+            EditorKeys.EDITOR_AUTO_SHOW_LOG_BOTTOM_SHEET_ON_RUN.get()
         listView.adapter?.notifyDataSetChanged()
     }
 

@@ -399,10 +399,10 @@
    {"match": "AceEditorFont.IOSEVKA.preferenceValue", "form": "伴生常量", "value": "iosevka", "note": "枚举 AceEditorFont.IOSEVKA, 与 `default_key_ace_editor_font` 一致"}
   ],
   "key_ace_lsp_declaration_groups": [
-   {"match": "\"\"", "form": "伴生常量", "value": "[] (缺键时 DEFAULT_DECLARATION_GROUPS)", "note": "先判断 containsKey, 缺键返回 DEFAULT_DECLARATION_GROUPS (233 行); 空串只在键存在时出现"}
+   {"match": "DEFAULT_DECLARATION_GROUPS", "form": "伴生常量", "value": "[] (缺键时 DEFAULT_DECLARATION_GROUPS)", "note": "读取方先判断 isStored, 缺键返回 AceEditorLspPreferences.DEFAULT_DECLARATION_GROUPS; 声明的默认值是其逗号拼接 (P2.3)"}
   ],
   "key_ace_lsp_file_types": [
-   {"match": "\"\"", "form": "伴生常量", "value": "DEFAULT_FILE_TYPES (19 个扩展名, 缺键时)", "note": "先判断 containsKey, 缺键返回 DEFAULT_FILE_TYPES (56 行); 空串只在键存在时出现"}
+   {"match": "DEFAULT_FILE_TYPES", "form": "伴生常量", "value": "DEFAULT_FILE_TYPES (19 个扩展名, 缺键时)", "note": "读取方先判断 isStored, 缺键返回 AceEditorLspPreferences.DEFAULT_FILE_TYPES; 声明的默认值是其逗号拼接 (P2.3)"}
   ],
   "key_auto_night_mode_enabled": [
    {"match": "AutoNightMode.isFunctional()", "value": "运行时: AutoNightMode.isFunctional()", "ignoreForConflict": true},
@@ -424,9 +424,6 @@
   "key_console_element_time_visible": [
    {"form": "伴生常量", "type": "Boolean", "expr": "CONSOLE_ELEMENT(..., false)", "value": "false", "file": "core/console/ConsoleTimeSettings.kt", "line": 16}
   ],
-  "key_editor_engine": [
-   {"match": "EditorEngineType.NATIVE.preferenceValue", "form": "伴生常量", "value": "native", "note": "枚举 EditorEngineType.NATIVE"}
-  ],
   "key_editor_log_panel_input_bar_visible": [
    {"form": "伴生常量", "type": "Boolean", "expr": "DEFAULT_INPUT_BAR_VISIBLE", "value": "false", "file": "ui/log/LogPageConsoleSettings.kt", "line": 61}
   ],
@@ -437,9 +434,7 @@
    {"form": "伴生常量", "type": "Boolean", "expr": "EDITOR_PANEL(..., true)", "value": "true", "file": "core/console/ConsoleTimeSettings.kt", "line": 13}
   ],
   "key_editor_text_size": [
-   {"form": "R.integer", "type": "Int", "expr": "getEditorTextSize(resources.getInteger(R.integer.editor_text_size_default_value))", "value": "14", "file": "ui/settings/EditorTextSizePreference.kt", "line": 52, "note": "设置页显示的默认字号"},
-   {"form": "表达式", "type": "Int", "expr": "getEditorTextSize(pxToSp(it.textSize).toInt())", "value": "15", "file": "ui/edit/editor/CodeEditor.kt", "line": 65, "note": "原生编辑器取布局 res/layout/code_editor.xml:14 的 textSize 15sp"},
-   {"form": "表达式", "type": "Int", "expr": "getEditorTextSize(editor.getTextSizeSp().toInt())", "value": "运行时: 当前编辑器字号", "file": "ui/edit/editor/service/EditorThemeFontService.kt", "line": 69, "ignoreForConflict": true}
+   {"form": "表达式", "type": "Int", "expr": "EditorKeys.EDITOR_TEXT_SIZE.storedOrNull() ?: editor.getTextSizeSp().toInt()", "value": "运行时: 当前编辑器字号", "file": "ui/edit/editor/service/EditorThemeFontService.kt", "line": 68, "ignoreForConflict": true, "note": "缺键时保持编辑器当前字号; 原生编辑器的初值已改读声明的默认值 14 (附录 C Q10 (1), P2.3)"}
   ],
   "key_editor_theme": [
    {"form": "表达式", "type": "String", "expr": "Themes.getCurrentThemeName(...)", "value": "运行时: 原生编辑器 \"Quiet Light\" (分离模式夜间 \"Dark (Visual Studio)\"), Ace 为 AceEditorThemes.getDefault(dark)", "file": "ui/edit/theme/Themes.java", "line": 181, "ignoreForConflict": true}

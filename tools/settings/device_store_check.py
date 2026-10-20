@@ -1,7 +1,7 @@
 """Device checks of the settings store layer (docs/settings/ROADMAP.md P1.2 / P1.4 / P2, evidence level E3).
 
 Usage: py -3.12 -I tools/settings/device_store_check.py -s SERIAL CHECK [--install APK] [--state FILE]
-       [--domains NAMES] [--activity CLASS --screenshot PNG]
+       [--domains NAMES] [--activity CLASS --screenshot PNG] [--engines native,ace]
 
 CHECK is one of
   interop       P1.2: SharedPreferencesStore and the old Pref / SharedPreferences calls read and write the same file
@@ -16,6 +16,10 @@ CHECK is one of
                 callers moved to the keys still work; written keys are restored; runs device/domain_keys.js.
   page          P2: starts the activity --activity (a settings page, not exported) from inside the app and saves a
                 screenshot to --screenshot after --settle seconds; runs device/open_page.js.
+  editor        P2.3: with no stored text size, a new native code editor starts with the settings page default, and a
+                demo script opens in the code editor with each engine of --engines; one screenshot per engine
+                (--screenshot is the prefix), then the engine, selection mode and text size are restored; runs
+                device/editor_engines.js.
 
 --install installs APK with "adb install -r -d" first (debug builds of the same signature keep their data). The
 script is pushed to /sdcard/Download/aj6-settings-check, started through RunIntentActivity and removed afterwards;
@@ -36,7 +40,7 @@ RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 DEVICE_DIR = "/sdcard/Download/aj6-settings-check"
 MARK = "AJ6SET"
 SCRIPTS = {"interop": "store_interop.js", "lists-before": "legacy_lists.js", "lists-after": "legacy_lists.js",
-           "domains": "domain_keys.js", "page": "open_page.js"}
+           "domains": "domain_keys.js", "page": "open_page.js", "editor": "editor_engines.js"}
 
 
 def adb(serial, *args, check=False):
@@ -86,6 +90,45 @@ def host_version(serial):
     return "?"
 
 
+def screenshot(serial, path):
+    png = subprocess.run(["adb", "-s", serial, "exec-out", "screencap", "-p"], capture_output=True).stdout
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(png)
+    print(f"INFO screenshot {path} ({len(png)} bytes)")
+
+
+def editor_check(args, script):
+    failed = 0
+    snapshot = None
+    for index, engine in enumerate(e.strip() for e in args.engines.split(",") if e.strip()):
+        prefix = f"var AJ6_ENGINE = {json.dumps(engine)}; var AJ6_SNAPSHOT = {json.dumps(index == 0)};"
+        lines = run_script(args.serial, prefix + chr(10) + script, args.wait)
+        for line in lines:
+            kind, _, rest = line.partition(" ")
+            if kind in ("PASS", "FAIL"):
+                print(f"{kind} {rest}")
+                failed += kind == "FAIL"
+            elif kind == "snapshot":
+                snapshot = json.loads(urllib.parse.unquote(rest))
+        if "done" not in lines:
+            print(f"FAIL the {engine} run did not finish (see logcat GlobalConsole)")
+            failed += 1
+        time.sleep(args.settle)
+        screenshot(args.serial, args.screenshot.with_name(f"{args.screenshot.stem}-{engine}{args.screenshot.suffix or '.png'}"))
+    if snapshot is None:
+        print("FAIL no snapshot to restore")
+        failed += 1
+    else:
+        lines = run_script(args.serial, f"var AJ6_RESTORE = {json.dumps(snapshot)};" + chr(10) + script, args.wait)
+        for line in lines:
+            kind, _, rest = line.partition(" ")
+            if kind in ("PASS", "FAIL"):
+                print(f"{kind} {rest}")
+                failed += kind == "FAIL"
+    print(f"editor: {'FAIL' if failed else 'PASS'} ({failed} failed)")
+    return 1 if failed else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
@@ -97,6 +140,7 @@ def main():
     parser.add_argument("--activity", help="activity class for the page check")
     parser.add_argument("--screenshot", type=pathlib.Path, help="PNG written by the page check")
     parser.add_argument("--settle", type=float, default=3.0, help="seconds between starting the page and the screenshot")
+    parser.add_argument("--engines", default="native,ace", help="editor engines for the editor check")
     args = parser.parse_args()
 
     if args.check.startswith("lists-") and args.state is None:
@@ -105,6 +149,8 @@ def main():
         parser.error("--domains is required for domains")
     if args.check == "page" and not (args.activity and args.screenshot):
         parser.error("--activity and --screenshot are required for page")
+    if args.check == "editor" and not args.screenshot:
+        parser.error("--screenshot (a prefix) is required for editor")
     if args.install:
         result = adb(args.serial, "install", "-r", "-d", str(args.install))
         if "Success" not in result.stdout:
@@ -115,6 +161,8 @@ def main():
     print(f"device {args.serial}: {model}, API {sdk}, host versionCode {host_version(args.serial)}")
 
     script = (HERE / "device" / SCRIPTS[args.check]).read_text(encoding="utf-8")
+    if args.check == "editor":
+        return editor_check(args, script)
     if args.check == "lists-before":
         script = "var AJ6_PHASE = 'before'; var AJ6_STATE = null;\n" + script
     elif args.check == "lists-after":
@@ -147,10 +195,7 @@ def main():
                                          ensure_ascii=True, indent=1), encoding="utf-8")
     if args.check == "page" and not failed:
         time.sleep(args.settle)
-        png = subprocess.run(["adb", "-s", args.serial, "exec-out", "screencap", "-p"], capture_output=True).stdout
-        args.screenshot.parent.mkdir(parents=True, exist_ok=True)
-        args.screenshot.write_bytes(png)
-        print(f"INFO screenshot {args.screenshot} ({len(png)} bytes)")
+        screenshot(args.serial, args.screenshot)
     if "done" not in lines:
         print("FAIL the script did not finish (see logcat GlobalConsole)")
         failed += 1

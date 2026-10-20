@@ -1,6 +1,6 @@
 package org.autojs.autojs.ui.edit.editor
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.EditorKeys
 
 object EditorDisplayPreferences {
 
@@ -38,100 +38,91 @@ object EditorDisplayPreferences {
     const val GUTTER_WIDTH_MODE_DYNAMIC = "dynamic"
     const val GUTTER_WIDTH_MODE_FIXED = "fixed"
 
-    private const val DEFAULT_WORD_WRAP_ENABLED = false
+    // The defaults are the declarations of EditorKeys (docs/settings/ROADMAP.md P2.3); these two normalize values.
+    // zh-CN: 默认值即 EditorKeys 中的声明 (ROADMAP P2.3); 这两个常量用于规范化取值.
     private const val DEFAULT_WORD_WRAP_INDENT_STYLE = WORD_WRAP_INDENT_STYLE_CONTINUATION
-    private const val DEFAULT_LINE_NUMBERS_ENABLED = true
-    private const val DEFAULT_PRINT_MARGIN_ENABLED = false
-    private const val DEFAULT_INDENT_GUIDES_ENABLED = true
-    private const val DEFAULT_BREAKPOINT_MARKERS_ENABLED = true
-    private const val DEFAULT_FOLD_MARKERS_ENABLED = true
     private const val DEFAULT_GUTTER_WIDTH_MODE = GUTTER_WIDTH_MODE_DYNAMIC
-    private const val DEFAULT_FONT_LIGATURES_ENABLED = true
-    private const val DEFAULT_FONT_STYLES_ENABLED = true
 
     fun isWordWrapEnabled(): Boolean {
-        return Pref.getBoolean(KEY_WORD_WRAP_ENABLED, DEFAULT_WORD_WRAP_ENABLED)
+        return EditorKeys.ACE_WORD_WRAP_ENABLED.get()
     }
 
     fun setWordWrapEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_WORD_WRAP_ENABLED, enabled)
+        EditorKeys.ACE_WORD_WRAP_ENABLED.set(enabled)
     }
 
     fun wordWrapIndentStyle(): String {
-        return Pref.getString(KEY_WORD_WRAP_INDENT_STYLE, DEFAULT_WORD_WRAP_INDENT_STYLE)
+        return EditorKeys.EDITOR_WORD_WRAP_INDENT_STYLE.storedKeyOrDefault()
             .takeIf { it in WORD_WRAP_INDENT_STYLES }
             ?: DEFAULT_WORD_WRAP_INDENT_STYLE
     }
 
     fun setWordWrapIndentStyle(style: String) {
-        Pref.putString(
-            KEY_WORD_WRAP_INDENT_STYLE,
-            style.takeIf { it in WORD_WRAP_INDENT_STYLES } ?: DEFAULT_WORD_WRAP_INDENT_STYLE,
-        )
+        EditorKeys.EDITOR_WORD_WRAP_INDENT_STYLE.set(style.takeIf { it in WORD_WRAP_INDENT_STYLES } ?: DEFAULT_WORD_WRAP_INDENT_STYLE)
     }
 
     fun isLineNumbersEnabled(): Boolean {
-        return Pref.getBoolean(KEY_LINE_NUMBERS_ENABLED, DEFAULT_LINE_NUMBERS_ENABLED)
+        return EditorKeys.ACE_LINE_NUMBERS_ENABLED.get()
     }
 
     fun setLineNumbersEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_LINE_NUMBERS_ENABLED, enabled)
+        EditorKeys.ACE_LINE_NUMBERS_ENABLED.set(enabled)
     }
 
     fun isPrintMarginEnabled(): Boolean {
-        return Pref.getBoolean(KEY_PRINT_MARGIN_ENABLED, DEFAULT_PRINT_MARGIN_ENABLED)
+        return EditorKeys.ACE_PRINT_MARGIN_ENABLED.get()
     }
 
     fun setPrintMarginEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_PRINT_MARGIN_ENABLED, enabled)
+        EditorKeys.ACE_PRINT_MARGIN_ENABLED.set(enabled)
     }
 
     fun isIndentGuidesEnabled(): Boolean {
-        return Pref.getBoolean(KEY_INDENT_GUIDES_ENABLED, DEFAULT_INDENT_GUIDES_ENABLED)
+        return EditorKeys.ACE_INDENT_GUIDES_ENABLED.get()
     }
 
     fun setIndentGuidesEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_INDENT_GUIDES_ENABLED, enabled)
+        EditorKeys.ACE_INDENT_GUIDES_ENABLED.set(enabled)
     }
 
     fun isBreakpointMarkersEnabled(): Boolean {
-        return Pref.getBoolean(KEY_BREAKPOINT_MARKERS_ENABLED, DEFAULT_BREAKPOINT_MARKERS_ENABLED)
+        return EditorKeys.EDITOR_BREAKPOINT_MARKERS_ENABLED.get()
     }
 
     fun setBreakpointMarkersEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_BREAKPOINT_MARKERS_ENABLED, enabled)
+        EditorKeys.EDITOR_BREAKPOINT_MARKERS_ENABLED.set(enabled)
     }
 
     fun isFoldMarkersEnabled(): Boolean {
-        return Pref.getBoolean(KEY_FOLD_MARKERS_ENABLED, DEFAULT_FOLD_MARKERS_ENABLED)
+        return EditorKeys.EDITOR_FOLD_MARKERS_ENABLED.get()
     }
 
     fun setFoldMarkersEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_FOLD_MARKERS_ENABLED, enabled)
+        EditorKeys.EDITOR_FOLD_MARKERS_ENABLED.set(enabled)
     }
 
     fun gutterWidthMode(): String {
-        return normalizeGutterWidthMode(Pref.getString(KEY_GUTTER_WIDTH_MODE, DEFAULT_GUTTER_WIDTH_MODE))
+        return normalizeGutterWidthMode(EditorKeys.EDITOR_GUTTER_WIDTH_MODE.storedKeyOrDefault())
     }
 
     fun setGutterWidthMode(mode: String) {
-        Pref.putString(KEY_GUTTER_WIDTH_MODE, normalizeGutterWidthMode(mode))
+        EditorKeys.EDITOR_GUTTER_WIDTH_MODE.set(normalizeGutterWidthMode(mode))
     }
 
     fun isFontLigaturesEnabled(): Boolean {
-        return Pref.getBoolean(KEY_FONT_LIGATURES_ENABLED, DEFAULT_FONT_LIGATURES_ENABLED)
+        return EditorKeys.ACE_FONT_LIGATURES_ENABLED.get()
     }
 
     fun setFontLigaturesEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_FONT_LIGATURES_ENABLED, enabled)
+        EditorKeys.ACE_FONT_LIGATURES_ENABLED.set(enabled)
     }
 
     fun isFontStylesEnabled(): Boolean {
-        return Pref.getBoolean(KEY_FONT_STYLES_ENABLED, DEFAULT_FONT_STYLES_ENABLED)
+        return EditorKeys.ACE_FONT_STYLES_ENABLED.get()
     }
 
     fun setFontStylesEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_FONT_STYLES_ENABLED, enabled)
+        EditorKeys.ACE_FONT_STYLES_ENABLED.set(enabled)
     }
 
     fun normalizeGutterWidthMode(mode: String?): String {

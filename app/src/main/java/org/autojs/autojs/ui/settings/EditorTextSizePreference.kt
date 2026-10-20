@@ -2,8 +2,7 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import org.autojs.autojs.core.pref.Pref.getEditorTextSize
-import org.autojs.autojs.core.pref.Pref.setEditorTextSize
+import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.ui.edit.TextSizeSettingDialogBuilder
 import org.autojs.autojs.util.DialogUtils
@@ -41,7 +40,7 @@ class EditorTextSizePreference : MaterialPreference {
             TextSizeSettingDialogBuilder(prefContext)
                 .initialValue(currentValue())
                 .callback { value ->
-                    setEditorTextSize(value)
+                    EditorKeys.EDITOR_TEXT_SIZE.set(value)
                     notifyChanged()
                 }
                 .build()
@@ -49,6 +48,6 @@ class EditorTextSizePreference : MaterialPreference {
     }
 
     private fun currentValue(): Int {
-        return getEditorTextSize(prefContext.resources.getInteger(R.integer.editor_text_size_default_value))
+        return EditorKeys.EDITOR_TEXT_SIZE.get()
     }
 }

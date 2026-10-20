@@ -1,6 +1,8 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.SettingKey
+import org.autojs.autojs.core.pref.keys.EditorKeys
 
 object AceEditorLspPreferences {
     const val KEY_ACE_LSP_ENABLED = "key_\$_ace_lsp_enabled"
@@ -234,26 +236,26 @@ object AceEditorLspPreferences {
 
     @JvmStatic
     fun isEnabled(): Boolean {
-        return Pref.getBoolean(KEY_ACE_LSP_ENABLED, DEFAULT_ENABLED)
+        return EditorKeys.ACE_LSP_ENABLED.get()
     }
 
     @JvmStatic
     fun setEnabled(enabled: Boolean) {
-        Pref.putBoolean(KEY_ACE_LSP_ENABLED, enabled)
+        EditorKeys.ACE_LSP_ENABLED.set(enabled)
     }
 
     @JvmStatic
     fun resetEnabled() {
-        Pref.remove(KEY_ACE_LSP_ENABLED)
+        EditorKeys.ACE_LSP_ENABLED.remove()
     }
 
     @JvmStatic
     fun getFileTypes(): List<String> {
-        if (!Pref.containsKey(KEY_ACE_LSP_FILE_TYPES)) {
+        if (!EditorKeys.ACE_LSP_FILE_TYPES.isStored()) {
             return DEFAULT_FILE_TYPES
         }
         val revision = Pref.getInt(KEY_ACE_LSP_FILE_TYPES_REVISION, 1)
-        return resolveStoredFileTypes(Pref.getString(KEY_ACE_LSP_FILE_TYPES, ""), revision)
+        return resolveStoredFileTypes(EditorKeys.ACE_LSP_FILE_TYPES.storedOrNull() ?: "", revision)
     }
 
     internal fun resolveStoredFileTypes(raw: String?, revision: Int): List<String> {
@@ -272,35 +274,32 @@ object AceEditorLspPreferences {
 
     @JvmStatic
     fun setFileTypes(fileTypes: Collection<String>) {
-        Pref.putString(KEY_ACE_LSP_FILE_TYPES, normalizeFileTypes(fileTypes).joinToString(","))
+        EditorKeys.ACE_LSP_FILE_TYPES.set(normalizeFileTypes(fileTypes).joinToString(","))
         Pref.putInt(KEY_ACE_LSP_FILE_TYPES_REVISION, FILE_TYPES_REVISION)
     }
 
     @JvmStatic
     fun resetFileTypes() {
-        Pref.remove(KEY_ACE_LSP_FILE_TYPES)
+        EditorKeys.ACE_LSP_FILE_TYPES.remove()
         Pref.remove(KEY_ACE_LSP_FILE_TYPES_REVISION)
     }
 
     @JvmStatic
     fun getDeclarationGroups(): List<String> {
-        if (!Pref.containsKey(KEY_ACE_LSP_DECLARATION_GROUPS)) {
+        if (!EditorKeys.ACE_LSP_DECLARATION_GROUPS.isStored()) {
             return DEFAULT_DECLARATION_GROUPS
         }
-        return normalizeDeclarationGroups(Pref.getString(KEY_ACE_LSP_DECLARATION_GROUPS, ""))
+        return normalizeDeclarationGroups(EditorKeys.ACE_LSP_DECLARATION_GROUPS.storedOrNull() ?: "")
     }
 
     @JvmStatic
     fun setDeclarationGroups(groups: Collection<String>) {
-        Pref.putString(
-            KEY_ACE_LSP_DECLARATION_GROUPS,
-            normalizeDeclarationGroups(groups).joinToString(","),
-        )
+        EditorKeys.ACE_LSP_DECLARATION_GROUPS.set(normalizeDeclarationGroups(groups).joinToString(","))
     }
 
     @JvmStatic
     fun resetDeclarationGroups() {
-        Pref.remove(KEY_ACE_LSP_DECLARATION_GROUPS)
+        EditorKeys.ACE_LSP_DECLARATION_GROUPS.remove()
     }
 
     @JvmStatic
@@ -308,10 +307,7 @@ object AceEditorLspPreferences {
         if (!isEnabled()) return false
         val normalized = normalizeSemanticLanguage(language) ?: return false
         if (!isSemanticAvailable(normalized)) return false
-        return Pref.getBoolean(
-            semanticPreferenceKey(normalized),
-            DEFAULT_SEMANTIC_LANGUAGES.getValue(normalized),
-        )
+        return semanticKey(normalized).get()
     }
 
     @JvmStatic
@@ -322,7 +318,7 @@ object AceEditorLspPreferences {
         require(!enabled || isSemanticAvailable(normalized)) {
             "Semantic provider is unavailable for language: $language"
         }
-        Pref.putBoolean(semanticPreferenceKey(normalized), enabled)
+        semanticKey(normalized).set(enabled)
     }
 
     @JvmStatic
@@ -330,7 +326,7 @@ object AceEditorLspPreferences {
         val normalized = requireNotNull(normalizeSemanticLanguage(language)) {
             "Unsupported semantic language: $language"
         }
-        Pref.remove(semanticPreferenceKey(normalized))
+        semanticKey(normalized).remove()
     }
 
     @JvmStatic
@@ -460,12 +456,12 @@ object AceEditorLspPreferences {
         return language.trim().lowercase().takeIf { it in SUPPORTED_SEMANTIC_LANGUAGES }
     }
 
-    private fun semanticPreferenceKey(language: String): String = when (language) {
-        SEMANTIC_LANGUAGE_TYPESCRIPT -> KEY_ACE_SEMANTIC_TYPESCRIPT_ENABLED
-        SEMANTIC_LANGUAGE_PYTHON -> KEY_ACE_SEMANTIC_PYTHON_ENABLED
-        SEMANTIC_LANGUAGE_LUA -> KEY_ACE_SEMANTIC_LUA_ENABLED
-        SEMANTIC_LANGUAGE_JAVA -> KEY_ACE_SEMANTIC_JAVA_ENABLED
-        SEMANTIC_LANGUAGE_KOTLIN -> KEY_ACE_SEMANTIC_KOTLIN_ENABLED
+    private fun semanticKey(language: String): SettingKey.Bool = when (language) {
+        SEMANTIC_LANGUAGE_TYPESCRIPT -> EditorKeys.ACE_SEMANTIC_TYPESCRIPT_ENABLED
+        SEMANTIC_LANGUAGE_PYTHON -> EditorKeys.ACE_SEMANTIC_PYTHON_ENABLED
+        SEMANTIC_LANGUAGE_LUA -> EditorKeys.ACE_SEMANTIC_LUA_ENABLED
+        SEMANTIC_LANGUAGE_JAVA -> EditorKeys.ACE_SEMANTIC_JAVA_ENABLED
+        SEMANTIC_LANGUAGE_KOTLIN -> EditorKeys.ACE_SEMANTIC_KOTLIN_ENABLED
         else -> error("Unsupported semantic language: $language")
     }
 

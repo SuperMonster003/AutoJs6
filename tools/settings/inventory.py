@@ -828,7 +828,8 @@ def declared_default(expr, resolver, res, f, line):
     m = re.match(r'SettingDefault\.computed\(\s*"((?:[^"\\]|\\.)*)"', expr)
     if m:
         source = m.group(1).replace(chr(92) + '$', '$')
-        return {'form': '表达式', 'expr': source, 'value': '运行时: ' + source}
+        # Evaluated at run time, so it takes no part in the conflict check (like the run-time extraDefaults).
+        return {'form': '表达式', 'expr': source, 'value': '运行时: ' + source, 'ignoreForConflict': True}
     m = re.fullmatch(r'SettingDefault\.of\((.*)\)', expr)
     if m:
         inner = resolver.default_value(m.group(1), f, line)
