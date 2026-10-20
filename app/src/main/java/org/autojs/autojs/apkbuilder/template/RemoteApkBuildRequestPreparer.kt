@@ -204,6 +204,10 @@ object RemoteApkBuildRequestPreparer {
                 if ("android.permission.POST_NOTIFICATIONS" in shellManifest.androidPermissions) remoteConfig.setPermissions((remoteConfig.permissions + "android.permission.POST_NOTIFICATIONS").distinct())
                 if("moe.shizuku.manager.permission.API_V23" in shellManifest.androidPermissions)remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + NodeJsPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
+                if (!shellManifest.enforced || org.autojs.autojs.engine.NodeBridgePermissionManifest.missingCapabilities(
+                        shellManifest.permissions, listOf(org.autojs.autojs.engine.NodeBridgePermissionManifest.SPEECH)).isEmpty()) {
+                    remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.speech.api.SpeechPluginActions.PACKAGED_PERMISSION).distinct())
+                }
             }
             if (requiresBunRuntime(projectConfig, source)) {
                 org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants.validatePackagedCapabilities(projectConfig.bunConfig?.hostCapabilities.orEmpty())
@@ -215,6 +219,9 @@ object RemoteApkBuildRequestPreparer {
                 if ("notifications.post" in projectConfig.bunConfig?.hostCapabilities.orEmpty()) remoteConfig.setPermissions((remoteConfig.permissions + "android.permission.POST_NOTIFICATIONS").distinct())
                 if("shell.shizuku" in projectConfig.bunConfig?.hostCapabilities.orEmpty())remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.bun.runtime.api.BunPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
+                if (org.autojs.autojs.engine.NodeBridgePermissionManifest.SPEECH in deviceCapabilities) {
+                    remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.speech.api.SpeechPluginActions.PACKAGED_PERMISSION).distinct())
+                }
             }
             typeScriptPlan = TypeScriptApkBuildCompiler.prepare(
                 context = appContext,

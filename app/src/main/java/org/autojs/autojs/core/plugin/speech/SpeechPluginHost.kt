@@ -71,8 +71,16 @@ object SpeechPluginHost {
 
     private val defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(SpeechPluginIds.ENGINE)
 
-    private val host = AidlPluginHost(
-        action = ACTION_SPEECH,
+    private val signedHost = createHost(ACTION_SPEECH, SpeechPluginActions.PLUGIN_PERMISSION)
+    private val packagedHost = createHost(SpeechPluginActions.PACKAGED_SPEECH, SpeechPluginActions.PACKAGED_PERMISSION)
+
+    private fun usesPackagedEntry(context: Context) =
+        context.checkSelfPermission(SpeechPluginActions.PLUGIN_PERMISSION) != PackageManager.PERMISSION_GRANTED
+
+    private fun host(context: Context) = if (usesPackagedEntry(context)) packagedHost else signedHost
+
+    private fun createHost(action: String, permission: String) = AidlPluginHost(
+        action = action,
         category = SpeechPluginActions.SERVICE_CATEGORY,
         tag = "SpeechPluginHost",
         moduleLabel = LABEL,
@@ -80,20 +88,20 @@ object SpeechPluginHost {
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         defaultEnabled = defaultEnabled,
         allowActivityStarts = ALLOW_ACTIVITY_STARTS,
-        preBindValidator = ::validateService,
+        preBindValidator = { context, service -> validateService(context, service, action, permission) },
         includeCapabilities = INCLUDE_CAPABILITIES,
         important = IMPORTANT,
     )
 
     suspend fun discover(context: Context, packageName: String? = null) = withContext(Dispatchers.IO) {
-        host.discover(context, packageName)
+        host(context).discover(context, packageName)
     }
 
     suspend fun probe(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
-        host.probe(context, packageName)
+        host(context).probe(context, packageName)
     }
 
-    fun queryServiceCount(context: Context): Int = host.queryServiceCount(context)
+    fun queryServiceCount(context: Context): Int = host(context).queryServiceCount(context)
 
     /** Whether a compatible, enabled and authorized speech plugin answers right now; never throws. zh-CN: 当前是否有兼容, 已启用且已授权的语音插件应答; 从不抛出. */
     suspend fun isAvailable(context: Context): Boolean = withContext(Dispatchers.IO) {
@@ -345,14 +353,20 @@ object SpeechPluginHost {
         val mapped = SpeechErrorMapper.fromThrowable(cause, SpeechErrorMapper.Phase.DISCOVERY)
         if (mapped.code != SpeechErrorCodes.PLUGIN_UNAVAILABLE) return mapped
         val discovered = try {
-            host.discover(context)
+            host(context).discover(context)
         } catch (e: CancellationException) {
             throw e
         } catch (_: Exception) {
             emptyList()
         }
         val message = cause.message?.takeIf { it.isNotBlank() } ?: mapped.message
-        if (discovered.isEmpty()) return SpeechErrorMapper.normalize(SpeechErrorCodes.PLUGIN_UNAVAILABLE, message)
+        if (discovered.isEmpty()) {
+            if (usesPackagedEntry(context) && signedHost.queryServiceCount(context) > 0) {
+                return SpeechErrorMapper.normalize(SpeechErrorCodes.PLUGIN_INCOMPATIBLE,
+                    "The installed speech plugin has no packaged-application entry; update the speech plugin")
+            }
+            return SpeechErrorMapper.normalize(SpeechErrorCodes.PLUGIN_UNAVAILABLE, message)
+        }
         val packages = discovered.map { it.serviceInfo.packageName }.distinct()
         val usable = discovered.filter { item ->
             val packageName = item.serviceInfo.packageName
@@ -372,7 +386,7 @@ object SpeechPluginHost {
         return SpeechErrorMapper.normalize(SpeechErrorCodes.PLUGIN_INCOMPATIBLE, message)
     }
 
-    internal suspend fun selectOrThrow(context: Context): AidlPluginHost.Discovered = host.selectOrThrow(
+    internal suspend fun selectOrThrow(context: Context): AidlPluginHost.Discovered = host(context).selectOrThrow(
         context = context,
         engineId = null,
         engine = SpeechPluginIds.ENGINE,
@@ -415,19 +429,19 @@ object SpeechPluginHost {
         @Suppress("DEPRECATION") bundle.get(key),
     )?.toInt()
 
-    private fun validateService(context: Context, serviceInfo: ServiceInfo) {
+    private fun validateService(context: Context, serviceInfo: ServiceInfo, action: String, permission: String) {
         require(serviceInfo.exported && serviceInfo.enabled) { "speech plugin service is not exported and enabled" }
-        require(serviceInfo.permission == SpeechPluginActions.PLUGIN_PERMISSION) {
-            "speech plugin service must require ${SpeechPluginActions.PLUGIN_PERMISSION}"
+        require(serviceInfo.permission == permission) {
+            "speech plugin service must require $permission"
         }
         val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
-        require(component in queryContractServices(context, serviceInfo.packageName)) {
+        require(component in queryContractServices(context, serviceInfo.packageName, action)) {
             "speech plugin service does not declare the required action and category"
         }
     }
 
-    private fun queryContractServices(context: Context, packageName: String): Set<ComponentName> {
-        val intent = Intent(SpeechPluginActions.SPEECH).apply {
+    private fun queryContractServices(context: Context, packageName: String, action: String): Set<ComponentName> {
+        val intent = Intent(action).apply {
             addCategory(SpeechPluginActions.SERVICE_CATEGORY)
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             setPackage(packageName)
@@ -451,7 +465,7 @@ object SpeechPluginHost {
 
     /** A short call on the pooled binding, bounded by [timeoutMs]; failures leave as [SpeechPluginException]. zh-CN: 连接池绑定上的短调用, 受 [timeoutMs] 限制; 失败以 [SpeechPluginException] 离开. */
     private suspend fun <T> call(context: Context, target: AidlPluginHost.Discovered, timeoutMs: Long, label: String, block: (ISpeechPlugin) -> T): T = try {
-        withTimeout(timeoutMs) { host.call(context.applicationContext, target, retryOnRemoteException = false, block = block) }
+        withTimeout(timeoutMs) { host(context).call(context.applicationContext, target, retryOnRemoteException = false, block = block) }
     } catch (e: TimeoutCancellationException) {
         throw SpeechErrorMapper.failure(SpeechErrorCodes.TIMEOUT, "$label did not answer within $timeoutMs ms", e)
     } catch (e: CancellationException) {
@@ -463,7 +477,7 @@ object SpeechPluginHost {
     /** A call whose result keeps a dedicated binding lease (sessions, operations). zh-CN: 其结果持有专用绑定租约的调用 (会话, 操作). */
     private suspend fun <T> lease(context: Context, target: AidlPluginHost.Discovered, block: (ISpeechPlugin) -> T): AidlPluginHost.LeasedCall<T> = try {
         withTimeout(SpeechContract.CALL_TIMEOUT_MS) {
-            host.callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false, block = block)
+            host(context).callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false, block = block)
         }
     } catch (e: TimeoutCancellationException) {
         throw SpeechErrorMapper.failure(SpeechErrorCodes.TIMEOUT, "the speech plugin did not open the request within ${SpeechContract.CALL_TIMEOUT_MS} ms", e)

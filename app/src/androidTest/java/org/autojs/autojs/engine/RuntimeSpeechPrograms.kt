@@ -8,7 +8,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 internal object RuntimeSpeechPrograms {
-    fun body() : String {
+    fun body(packagedMicrophone: Boolean? = null) : String {
         val audio = InstrumentationRegistry.getInstrumentation().context.assets.open("runtime-speech/en.wav").use { it.readBytes() }
         val archive = ByteArrayOutputStream().also { bytes ->
             ZipOutputStream(bytes).use { zip ->
@@ -19,6 +19,7 @@ internal object RuntimeSpeechPrograms {
         }.toByteArray()
         return """
             const wav=Buffer.from(${JSONObject.quote(Base64.encodeToString(audio,Base64.NO_WRAP))},'base64');
+            const packagedMicrophone=${packagedMicrophone?.toString() ?: "null"};
             const archive=Buffer.from(${JSONObject.quote(Base64.encodeToString(archive,Base64.NO_WRAP))},'base64');
             const check=(value,label)=>{if(!value)throw Error(label);};
             const same=(a,b,label)=>check(JSON.stringify(a)===JSON.stringify(b),label);
@@ -90,9 +91,22 @@ internal object RuntimeSpeechPrograms {
                 try{same(await read.call('readInt'),0x52494646,'WAV RIFF');await read.call('seek',[8]);same(await read.call('readInt'),0x57415645,'WAV WAVE');}finally{await read.call('close');await read.release();}
                 const spoken=await speech.speak('你好',{model:tts.id,volume:0,usage:'media',timeout:20000});
                 same(spoken.status,'done','muted speech');
+                if(packagedMicrophone!==null) {
+                    const kws=installed.find(model=>model.kind==='kws');check(kws,'installed wake model');
+                    for(const open of [
+                        ()=>speech.listen({model:asr.id,timeoutMillis:0,maxDurationMillis:10000}),
+                        ()=>speech.wake('hello',{model:kws.id})
+                    ]) {
+                        const capture=await open();
+                        const ready=event(capture,'ready'),ended=new Promise(resolve=>capture.once('end',resolve));
+                        if(packagedMicrophone){await ready;await capture.stop();same((await ended).reason,'stopped','packaged microphone stop');}
+                        else{await rejects(()=>ready,'PERMISSION_DENIED');same((await ended).reason,'error','caller microphone denial');}
+                    }
+                }
                 summary={packageName,plugin: caps.packageName,pluginVersion:caps.versionCode,model:asr.id,catalogCount:models.length,
                     file,pcm:fromPcm,vadSegments:detected.segments.length,externalCharacters:session.result().length,trace,
-                    modelImport:true,progress:progress.length,missing,synthesisBytes:synthesis.sizeBytes,mutedSpeech:true,quiet:true};
+                    modelImport:true,progress:progress.length,missing,synthesisBytes:synthesis.sizeBytes,mutedSpeech:true,quiet:true,
+                    packagedMicrophone};
             }finally {
                 try {
                     if(originalAsr)await speech.models.setDefault('asr',originalAsr.id);

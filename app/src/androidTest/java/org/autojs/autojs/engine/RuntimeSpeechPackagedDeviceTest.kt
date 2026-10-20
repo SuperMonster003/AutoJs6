@@ -33,6 +33,7 @@ class RuntimeSpeechPackagedDeviceTest {
                 val config=ProjectConfig().setName("Speech $mode Test").setPackageName(packageName(mode)).setVersionName("1.0.0").setVersionCode(1)
                     .setMainScriptFileName(entry).setProjectType(if(bun)"bun" else "node").setSourcePath(root.path).setAbis(listOf("arm64-v8a")).setLibs(emptyList()).setPermissions(listOf(Manifest.permission.INTERNET))
                 config.launchConfig.apply{isSplashVisible=false;isLogsVisible=false;isRunOnBoot=false;requiresSharedStorage=false}
+                if(!bun)config.setPermissions(config.permissions+Manifest.permission.RECORD_AUDIO)
                 if(bun)config.setBunConfig(ProjectConfig.BunConfig().setHostCapabilities(listOf("speech.control","java.interop","ui.layout")).setTimeoutMs(180000L))
                 else config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(listOf("speech","java_interop","ui","network")).setTimeoutMs(180000L))
                 if(bun) {
@@ -41,7 +42,7 @@ class RuntimeSpeechPackagedDeviceTest {
                     assertArrayEquals(installed,sdk.readBytes());sdk.copyTo(File(root,"host-client.mjs"))
                 }
                 val prelude="const expectedPackage=${JSONObject.quote(packageName(mode))};const eq=(a,b,label)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw Error(label);};"
-                val program=prelude+RuntimeSpeechPrograms.body()
+                val program=prelude+RuntimeSpeechPrograms.body(packagedMicrophone=!bun)
                 val worker="const {parentPort}=require('node:worker_threads'),java=require('autojs6:java'),speech=require('speech');(async()=>{$program})().then(v=>parentPort.postMessage(v)).catch(e=>{throw e;});"
                 val imports=if(bun)"const {createHostClient}=await import('./host-client.mjs');const host=await createHostClient(),java=host.java,speech=host.speech,ui=host.ui;"
                     else "const java=require('java'),speech=require('autojs6:speech'),ui=require('ui'),{Worker}=require('node:worker_threads');"
@@ -61,6 +62,7 @@ class RuntimeSpeechPackagedDeviceTest {
                         }catch(error){await field.set({text:'Speech failure '+String(error.stack||error)});await pause(60000);throw error;}
                     })().catch(e=>{console.error(e.stack||e);process.exitCode=1;});
                 """.trimIndent())
+                File(root,"NOTICE.txt").writeText(InstrumentationRegistry.getInstrumentation().context.assets.open("runtime-speech/NOTICE.txt").bufferedReader().use{it.readText()})
                 File(root,"project.json").writeText(config.toJson(false))
                 val built=RemoteApkBuildClient.buildBlocking(context,config,output,AtomicBoolean(false),RemoteApkBuildClient.ProgressListener{},ApkBuilderTemplatePluginIds.PACKAGE_NAME)
                 assertTrue("APK Builder $mode: ${built.errors}",built.isSuccess)
@@ -88,6 +90,7 @@ class RuntimeSpeechPackagedDeviceTest {
                 assertTrue(value.getBoolean("mutedSpeech"))
                 assertTrue(value.getLong("synthesisBytes")>44)
                 assertTrue(value.getInt("externalCharacters")>20)
+                assertEquals(mode=="worker",value.getBoolean("packagedMicrophone"))
             }
             proofs.put(row);Thread.sleep(2000);shell("am force-stop $pkg")
         }

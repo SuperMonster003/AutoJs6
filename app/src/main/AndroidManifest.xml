@@ -32,6 +32,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
+    <uses-permission android:name="org.autojs.plugin.speech.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.plugin.nodejs.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.permission.BUN_PACKAGED_RUNTIME" />
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
@@ -117,6 +118,10 @@
         </intent>
         <intent>
             <action android:name="org.autojs.plugin.SPEECH" />
+            <category android:name="speech" />
+        </intent>
+        <intent>
+            <action android:name="org.autojs.plugin.speech.PACKAGED" />
             <category android:name="speech" />
         </intent>
         <intent>

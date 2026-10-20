@@ -18,9 +18,15 @@ object SpeechPluginActions {
     /** Action of the [ISpeechPlugin] service; always paired with [SERVICE_CATEGORY]. */
     const val SPEECH = "org.autojs.plugin.SPEECH"
 
+    /** Separate entry for generated applications signed by their authors. The original entry stays signature protected. */
+    const val PACKAGED_SPEECH = "org.autojs.plugin.speech.PACKAGED"
+
+    /** Normal permission declared by the speech provider and requested explicitly by generated applications. */
+    const val PACKAGED_PERMISSION = "org.autojs.plugin.speech.permission.RUNTIME"
+
     /** Intent category of the [SPEECH] service, so unrelated `org.autojs.plugin.*` services never match. */
     const val SERVICE_CATEGORY = "speech"
 
-    /** Signature permission every exported entry point of the plugin requires. */
+    /** Signature permission of the original host capability entry. */
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
 }
