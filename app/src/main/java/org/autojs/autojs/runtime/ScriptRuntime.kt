@@ -560,9 +560,7 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         callFunction(this, js_structured_clone, topLevelScope, topLevelScope.globalThis, arrayOf(topLevelScope.globalThis))
 
-        // Roadmap P2.1: with the new script module layer serving jsox, the built-in objects are extended by its modules.
-        // zh-CN: ROADMAP P2.1: 新脚本模块层提供 jsox 时, 由新层的模块扩展内置对象.
-        if (Pref.isExtendingJsBuildInObjectsEnabled) ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }
+        if (Pref.isExtendingJsBuildInObjectsEnabled) extendJsBuiltIns()
 
         // @Hint by Stardust (https://github.com/hyb1996) on Feb 27, 2018
         //  ! 重定向 require 以支持相对路径和 npm 模块.
@@ -573,6 +571,14 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         PluginAutoMountManager.apply(this)
     }
+
+    /**
+     * Extends the JavaScript built-in objects for the "extend JavaScript built-in objects" option and the execution mode
+     * "jsox": with the modules of the new script module layer when it serves jsox (roadmap P2.1), otherwise with the old
+     * Jsox.
+     * zh-CN: 为 "JavaScript 内置对象扩展" 设置与执行模式 "jsox" 扩展内置对象: 新脚本模块层提供 jsox 时用新层的模块 (ROADMAP P2.1), 否则用旧 Jsox.
+     */
+    fun extendJsBuiltIns() = ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }
 
     @ScriptInterface
     fun requestPermissions(permissions: Array<String?>) {

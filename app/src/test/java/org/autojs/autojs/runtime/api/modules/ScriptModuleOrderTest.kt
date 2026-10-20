@@ -61,7 +61,10 @@ class ScriptModuleOrderTest {
         val labels = Regex("^ {12}\"([^\"]+)\" ->", RegexOption.MULTILINE).findAll(body).map { it.groupValues[1] }.toList()
         assertEquals(topLevel, labels)
         assertTrue("augment() must walk ScriptModuleLayer.ORDER", source.contains("ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }"))
-        assertTrue("initEpilogue() must extend the built-in objects through the layer", source.contains("ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }"))
+        assertTrue("the built-in objects must be extended through the layer", source.contains("ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }"))
+        assertTrue("initEpilogue() must use extendJsBuiltIns()", source.contains("if (Pref.isExtendingJsBuildInObjectsEnabled) extendJsBuiltIns()"))
+        val engine = File(JAVASCRIPT_ENGINE).readText()
+        assertTrue("the execution mode jsox must use extendJsBuiltIns()", engine.contains("mRuntime.extendJsBuiltIns();") && !engine.contains("Jsox."))
     }
 
     @Test
@@ -104,6 +107,7 @@ class ScriptModuleOrderTest {
         private const val REGISTRATIONS = "../tools/augment/baseline/registrations.json"
         private const val SURFACE = "../tools/augment/baseline/surface-XQ-AT72-5586.txt"
         private const val SCRIPT_RUNTIME = "src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt"
+        private const val JAVASCRIPT_ENGINE = "src/main/java/org/autojs/autojs/engine/JavaScriptEngine.java"
         private const val KEYS_ORDER = "# keys order:"
     }
 

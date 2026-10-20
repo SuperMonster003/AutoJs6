@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.runtime.ScriptRuntime;
-import org.autojs.autojs.runtime.api.augment.jsox.Jsox;
 import org.autojs.autojs.script.JavaScriptFileSource;
 import org.autojs.autojs.script.JavaScriptSource;
 import org.autojs.autojs.script.ScriptSource;
@@ -30,7 +29,8 @@ public abstract class JavaScriptEngine extends ScriptEngine.AbstractScriptEngine
             mRuntime.accessibilityBridge.ensureServiceStarted();
         }
         if ((scriptSource.getExecutionMode() & JavaScriptSource.EXECUTION_MODE_JSOX) != 0) {
-            Jsox.extendAllRhinoWithRuntime(mRuntime);
+            // Roadmap P2.1: through the new script module layer when it serves jsox.
+            mRuntime.extendJsBuiltIns();
         }
         return doExecution(scriptSource);
     }
