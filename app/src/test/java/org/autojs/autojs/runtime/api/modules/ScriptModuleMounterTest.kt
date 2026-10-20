@@ -96,10 +96,10 @@ class ScriptModuleMounterTest {
 
     /**
      * P1.4: `delete` and `Object.defineProperty` on pending names keep the final attributes: non-configurable names
-     * refuse both (strict mode throws TypeError), a refused delete does not build the module, and a writable global
-     * member can still be redefined with a new value, which replaces the pending one. This Rhino refuses a descriptor
-     * that omits `enumerable` for any non-configurable enumerable property (`checkPropertyChangeForSlot` compares the
-     * missing field as false), lazy or not, so the eagerly built module behaves the same.
+     * refuse both (strict mode throws TypeError), a refused delete does not build the module, and a writable name can
+     * still be redefined with a new value, which replaces the pending one without building the module. A descriptor
+     * that omits `enumerable` keeps the current enumerability (Rhino-For-AutoJs6 88748ed39; the jar used to compare the
+     * missing field as false and refuse `{ value: 1 }`).
      */
     @Test
     fun deleteAndDefinePropertyOnPendingNames() {
@@ -116,8 +116,14 @@ class ScriptModuleMounterTest {
             listOf(
                 "(function () { try { Object.defineProperty(globalThis, 'probe', { get: function () { return 1; } }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
                 "(function () { try { Object.defineProperty(globalThis, 'probeAlias', { enumerable: false }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
-                "(function () { try { Object.defineProperty(globalThis, 'eagerProbe', { value: 1 }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
-                "(function () { try { Object.defineProperty(globalThis, 'probeGlobal', { value: 1 }); return 'redefined'; } catch (e) { return e.name; } })()" to "\"TypeError\"",
+                "(function () { try { Object.defineProperty(globalThis, 'eagerProbe', { value: 1 }); return eagerProbe; } catch (e) { return e.name; } })()" to "1",
+                "(function () { try { Object.defineProperty(globalThis, 'probeGlobal', { value: 1 }); return probeGlobal; } catch (e) { return e.name; } })()" to "1",
+                "JSON.stringify(Object.getOwnPropertyDescriptor(globalThis, 'probeGlobal'))" to "\"{\\\"value\\\":1,\\\"writable\\\":true,\\\"enumerable\\\":true,\\\"configurable\\\":false}\"",
+            )
+        )
+        assertEquals("Redefining a pending writable name must not build the module", 0, ProbeModule.created)
+        check(
+            listOf(
                 "(Object.defineProperty(globalThis, 'probeGlobal', { value: 5, enumerable: true }), probeGlobal)" to "5",
                 "JSON.stringify(Object.getOwnPropertyDescriptor(globalThis, 'probeGlobal'))" to "\"{\\\"value\\\":5,\\\"writable\\\":true,\\\"enumerable\\\":true,\\\"configurable\\\":false}\"",
                 "typeof probe.probeGlobal" to "\"function\"",
