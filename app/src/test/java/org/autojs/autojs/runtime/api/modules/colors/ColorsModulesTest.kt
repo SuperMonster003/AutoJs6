@@ -365,8 +365,8 @@ class ColorsModulesTest {
 
     companion object {
 
-        /** A 2 x 2 opaque red PNG. */
-        private const val SMALL_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP4z8DwnwEIGP4z/AcxGAA9MAT8nAqILQAAAABJRU5ErkJggg=="
+        /** A 2 x 2 opaque red PNG (RGB, 8 bits per channel). */
+        private const val SMALL_PNG = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR42mP4z8AARAwQCgAf7gP9Y167WwAAAABJRU5ErkJggg=="
 
         /** Every exported case so far (JUnit creates an instance per test method). */
         private val exported = LinkedHashMap<String, String>()
