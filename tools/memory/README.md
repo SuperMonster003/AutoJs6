@@ -37,6 +37,14 @@ S2   N FAIL  retained=20/20 java=+3.10MB native=+0.12MB threads=+0 contexts=+0 e
 
 S4a 的截屏授权 (ROADMAP 附录 C Q3, 维护者 2026-10-20 拍板方案 (a)): 每次运行都是新的 runtime, 脚本结束时会释放 MediaProjection, 因此每次都会重新申请授权. `--capture on` 时脚本在每个 S4a 进程开始前执行 `adb shell appops set org.autojs.autojs6 PROJECT_MEDIA allow`, 系统据此跳过授权框; 该进程结束后 (包括失败, 超时与异常路径) 立即执行 `appops set ... PROJECT_MEDIA default` 恢复. 报告头部记录设置前的模式与恢复后的模式. 脚本被强行结束 (例如直接杀掉 Python 进程) 时来不及恢复, 需手动执行 `adb -s SERIAL shell appops set org.autojs.autojs6 PROJECT_MEDIA default`.
 
+S7 的无障碍部分 (ROADMAP 附录 C Q9): instrumentation 在启动和结束时都会杀掉宿主进程, 系统随即把宿主无障碍服务列入 "Crashed services" 并不再绑定, 测试进程里因此拿不到服务 (设置里仍显示开启). 做法:
+
+```
+py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7 --keep-process --one-process --a11y-wait 600 --timeout 2400 --merge --label <名>
+```
+
+`--one-process` 让两种模式在同一个进程里跑, `--keep-process` 跳过场景前后的 `am force-stop` (它会把服务从已开启列表中移除), `--a11y-wait` 让 S7 最长等待该秒数并在手机上反复弹出 Toast; 看到提示后由维护者在系统无障碍设置里把 AutoJs6 关掉再开启一次, 服务即绑定到正在运行的测试进程. 脚本不代点, 也不改设置; 跑完后服务仍会落回 "Crashed" 状态, 维护者可直接关回.
+
 设备占用防护 (ROADMAP R6): 每个场景开始前若设备上已有其他 `am instrument` 在运行就等待 (最长 10 分钟); 运行中宿主或测试 APK 被替换则停止并把该场景标为 `invalid`; 设备离线 (adb 断开) 时停止, 已读到的报告保留.
 
 场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过).

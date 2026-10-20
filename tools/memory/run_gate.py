@@ -285,6 +285,12 @@ def main():
     parser.add_argument("--label", default="", help="Inserted into the report name, e.g. baseline")
     parser.add_argument("--out", type=Path, default=ROOT / "docs" / "memory" / "evidence")
     parser.add_argument("--wake", action="store_true", help="Send KEYCODE_WAKEUP before each scenario (no taps)")
+    parser.add_argument("--one-process", action="store_true",
+                        help="Run all selected modes of a scenario in one instrumentation process (S7 with the accessibility service)")
+    parser.add_argument("--a11y-wait", type=int, default=0,
+                        help="Seconds S7 waits, showing a toast, for the maintainer to turn the host accessibility service off and on")
+    parser.add_argument("--keep-process", action="store_true",
+                        help="Skip am force-stop around scenarios; force-stop removes the host accessibility service from the enabled list")
     parser.add_argument("--merge", action="store_true", help="Replace only the rerun scenarios in an existing report of the same name")
     args = parser.parse_args()
     if args.label and not re.fullmatch(r"[a-z0-9-]{1,32}", args.label):
@@ -321,7 +327,7 @@ def main():
     interrupted = None
     projection = {"allowedDuring": []}
     for scenario in args.scenarios:
-        for mode in modes:
+        for mode in ([",".join(modes)] if args.one_process else modes):
             if interrupted:
                 break
             waited = 0
@@ -335,7 +341,8 @@ def main():
                 break
             if args.wake:
                 device.shell("input", "keyevent", "KEYCODE_WAKEUP")
-            device.shell("am", "force-stop", args.package)
+            if not args.keep_process:
+                device.shell("am", "force-stop", args.package)
             device.call("logcat", "-c")
             capture = scenario == "S4a" and args.capture == "on"
             if capture:
@@ -349,7 +356,8 @@ def main():
                        "-e", "memoryGatePollMs", str(args.poll_ms), "-e", "memoryGateForceDelayMs", str(args.force_delay_ms),
                        "-e", "memoryGateKeepHprof", "true" if args.hprof else "false",
                        "-e", "memoryGateAnalyze", "false" if args.no_analyze else "true",
-                       "-e", "memoryGateCapture", args.capture, runner]
+                       "-e", "memoryGateCapture", args.capture,
+                       "-e", "memoryGateAccessibilityWaitMs", str(args.a11y_wait * 1000), runner]
             try:
                 result = device.shell(*command, timeout=args.timeout)
             finally:
@@ -358,7 +366,7 @@ def main():
                     projection["restoredTo"] = projection_mode(device, args.package)
             text = result["stdout"] + result["stderr"]
             outcome = "timeout" if result.get("timeout") else test_outcome(text)
-            found = [r for r in parse_reports(text) if r.get("scenario") == scenario and r.get("mode") == mode]
+            found = [r for r in parse_reports(text) if r.get("scenario") == scenario and r.get("mode") in mode.split(",")]
             if not found:
                 local = args.out / f".{run_id}-{scenario}-{mode}.json"
                 pulled = device.call("pull", f"{device_dir}/{run_id}-{scenario}-{mode}.json", str(local))
@@ -367,7 +375,7 @@ def main():
                     local.unlink()
             if not found:
                 logcat = device.call("logcat", "-d", "-v", "raw", "-s", f"{LOG_TAG}:I", timeout=60)
-                found = [r for r in parse_logcat_reports(logcat["stdout"], run_id) if r.get("scenario") == scenario and r.get("mode") == mode]
+                found = [r for r in parse_logcat_reports(logcat["stdout"], run_id) if r.get("scenario") == scenario and r.get("mode") in mode.split(",")]
             for report in found:
                 report["instrumentation"] = outcome
                 reports.append(report)
@@ -404,14 +412,15 @@ def main():
                     report["status"], report["reasons"] = "invalid", [interrupted]
     if interrupted:
         print(f"Stopped: {interrupted}; scenarios after this point were not run", file=sys.stderr)
-    device.shell("am", "force-stop", args.package)
+    if not args.keep_process:
+        device.shell("am", "force-stop", args.package)
     meta = {"suite": "memory-gate", "runId": run_id, "label": args.label, "started": started,
             "finished": physical_device.utc_now(), "date": today, "package": args.package,
             "versionCode": int(version[1]), "versionName": version_name[1] if version_name else None,
             "device": {k: identity.get(k) for k in ("serial", "manufacturer", "model", "sdk", "release", "abiList", "emulator")},
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
-            "capture": args.capture, "hprof": args.hprof, "interrupted": interrupted,
+            "capture": args.capture, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
             **({"projectionAppOp": projection} if projection["allowedDuring"] else {})}
     stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
     if args.merge and (args.out / f"{stem}.json").is_file():
