@@ -2,9 +2,11 @@
 
 - Device: Google Android SDK built for x86, API 24, serial emulator-5580
 - Host: org.autojs.autojs6 versionCode 5620 (6.8.0), debuggable
-- Run: Android_SDK_built_for_x86-5620-20261020163751, label baseline, 2026-10-20T08:37:51.417676+00:00 -> 2026-10-20T09:35:57.622958+00:00
+- Run: Android_SDK_built_for_x86-5620-20261020181439, label baseline, 2026-10-20T08:37:51.417676+00:00 -> 2026-10-20T10:24:17.057584+00:00
 - Device state at start: {'batteryLevel': 100, 'powered': ['AC'], 'wakefulness': 'Awake'}
-- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture off
+- Merged runs: Android_SDK_built_for_x86-5620-20261020163751 (all); Android_SDK_built_for_x86-5620-20261020181439 (S4a)
+- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during S4a normal, S4a force, before `default`, afterwards `default`
+- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture on
 - Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)
 - Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start
 
@@ -16,8 +18,8 @@
 | S2 threads.start x 10 + threads.pool | F | fail | 20 / +30.60 / +0.73 / +44 / +44 / 0 | retained runtimes 20/20; java heap +30.60 MB; script threads +44; rhino contexts +44 |
 | S3 nested timers on main and child threads | N | fail | 20 / +29.68 / -0.01 / +0 / +0 / 0 | retained runtimes 20/20; java heap +29.68 MB |
 | S3 nested timers on main and child threads | F | fail | 20 / +29.76 / +0.00 / +0 / +0 / 0 | retained runtimes 20/20; java heap +29.76 MB |
-| S4a captureScreen x 20 | N | skipped | skipped | screen capture needs MediaProjection consent for every run; pass memoryGateCapture=on once the maintainer has agreed how consent is given |
-| S4a captureScreen x 20 | F | skipped | skipped | screen capture needs MediaProjection consent for every run; pass memoryGateCapture=on once the maintainer has agreed how consent is given |
+| S4a captureScreen x 20 | N | fail | 1 / +0.05 / +4.47 / +0 / +0 / 0 | retained runtimes 1/20 |
+| S4a captureScreen x 20 | F | fail | 2 / +1.53 / +4.49 / +0 / +0 / 0 | retained runtimes 2/20 |
 | S4b images.read + findImage | N | fail | 1 / +0.04 / -0.21 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S4b images.read + findImage | F | fail | 2 / +1.52 / -0.24 / +0 / +0 / 0 | retained runtimes 2/20 |
 | S4c images.copy / clip / resize chain | N | fail | 1 / +0.04 / +0.38 / +0 / +0 / 0 | retained runtimes 1/20 |
@@ -251,6 +253,68 @@ STICKY_CLASS (second pass ignoring java.lang.Thread.target)
   org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl.tap
   org.autojs.autojs.core.accessibility.SimpleActionAutomator$$ExternalSyntheticLambda4.f$0
   org.autojs.autojs.core.accessibility.SimpleActionAutomator.scriptRuntime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+### S4a N: 2 exited runtimes in the dump, dump 18104 ms, analysis 3678 ms
+
+- 1 runtime(s), root STICKY_CLASS: AccessibilityService.defaultBridge -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator$$ExternalSyntheticLambda4.f$0 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime
+- 1 runtime(s), root STICKY_CLASS: VersionCodesInfo.obj -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> HashMap[] -> ComposeJsErrors$Localizer.format -> Compose$2.receiver -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime
+
+```
+STICKY_CLASS
+  org.autojs.autojs.core.accessibility.AccessibilityService.defaultBridge (static)
+  org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl.tap
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator$$ExternalSyntheticLambda4.f$0
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator.scriptRuntime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+```
+STICKY_CLASS
+  org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.obj (static)
+  org.mozilla.javascript.NativeObject.parentScopeObject
+  org.autojs.autojs.rhino.TopLevelScope.associatedValues
+  java.util.HashMap[]
+  org.autojs.autojs.runtime.api.augment.compose.ComposeJsErrors$Localizer.format
+  org.autojs.autojs.runtime.api.augment.compose.Compose$2.receiver
+  org.autojs.autojs.runtime.api.augment.compose.AndroidComposeScriptPlatform.runtime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+### S4a F: 3 exited runtimes in the dump, dump 9798 ms, analysis 5930 ms
+
+- 1 runtime(s), root STICKY_CLASS: AccessibilityService.defaultBridge -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator$$ExternalSyntheticLambda4.f$0 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime
+- 1 runtime(s), root STICKY_CLASS: VersionCodesInfo.obj -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> HashMap[] -> ComposeJsErrors$Localizer.format -> Compose$2.receiver -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime
+- 1 runtime(s), root THREAD_OBJECT: TermSession$2<local> -> Message.callback -> LoopBasedJavaScriptEngine$$ExternalSyntheticLambda0.f$0 -> LoopBasedJavaScriptEngine.mRuntime -> ScriptRuntime
+
+```
+STICKY_CLASS
+  org.autojs.autojs.core.accessibility.AccessibilityService.defaultBridge (static)
+  org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl.tap
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator$$ExternalSyntheticLambda4.f$0
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator.scriptRuntime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+```
+STICKY_CLASS
+  org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.obj (static)
+  org.mozilla.javascript.NativeObject.parentScopeObject
+  org.autojs.autojs.rhino.TopLevelScope.associatedValues
+  java.util.HashMap[]
+  org.autojs.autojs.runtime.api.augment.compose.ComposeJsErrors$Localizer.format
+  org.autojs.autojs.runtime.api.augment.compose.Compose$2.receiver
+  org.autojs.autojs.runtime.api.augment.compose.AndroidComposeScriptPlatform.runtime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+```
+THREAD_OBJECT
+  jackpal.androidterm.emulatorview.TermSession$2 <local>
+  android.os.Message.callback
+  org.autojs.autojs.engine.LoopBasedJavaScriptEngine$$ExternalSyntheticLambda0.f$0
+  org.autojs.autojs.engine.LoopBasedJavaScriptEngine.mRuntime
   -> org.autojs.autojs.runtime.ScriptRuntime
 ```
 

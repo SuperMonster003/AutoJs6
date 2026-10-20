@@ -2,10 +2,11 @@
 
 - Device: Sony XQ-AT72, API 31, serial QV710AF65F
 - Host: org.autojs.autojs6 versionCode 5620 (6.8.0), debuggable
-- Run: XQ-AT72-5620-20261020172131, label baseline, 2026-10-20T08:21:50.578470+00:00 -> 2026-10-20T09:23:45.861104+00:00
+- Run: XQ-AT72-5620-20261020180657, label baseline, 2026-10-20T08:21:50.578470+00:00 -> 2026-10-20T10:13:23.545643+00:00
 - Device state at start: {'batteryLevel': 71, 'powered': ['USB'], 'wakefulness': 'Awake'}
-- Merged runs: XQ-AT72-5620-20261020162150 (all); XQ-AT72-5620-20261020172032 (S4e); XQ-AT72-5620-20261020172131 (S4e)
-- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture off
+- Merged runs: XQ-AT72-5620-20261020162150 (all); XQ-AT72-5620-20261020172032 (S4e); XQ-AT72-5620-20261020172131 (S4e); XQ-AT72-5620-20261020180657 (S4a)
+- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during S4a normal, S4a force, before `default`, afterwards `default`
+- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture on
 - Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)
 - Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start
 
@@ -17,8 +18,8 @@
 | S2 threads.start x 10 + threads.pool | F | fail | 20 / +30.21 / +0.88 / +44 / +44 / 0 | retained runtimes 20/20; java heap +30.21 MB; script threads +44; rhino contexts +44 |
 | S3 nested timers on main and child threads | N | fail | 20 / +29.23 / +0.36 / +0 / +0 / 0 | retained runtimes 20/20; java heap +29.23 MB |
 | S3 nested timers on main and child threads | F | fail | 20 / +29.32 / +0.39 / +0 / +0 / 0 | retained runtimes 20/20; java heap +29.32 MB |
-| S4a captureScreen x 20 | N | skipped | skipped | screen capture needs MediaProjection consent for every run; pass memoryGateCapture=on once the maintainer has agreed how consent is given |
-| S4a captureScreen x 20 | F | skipped | skipped | screen capture needs MediaProjection consent for every run; pass memoryGateCapture=on once the maintainer has agreed how consent is given |
+| S4a captureScreen x 20 | N | fail | 1 / -0.05 / -0.11 / +0 / +0 / 0 | retained runtimes 1/20 |
+| S4a captureScreen x 20 | F | fail | 1 / +0.07 / +0.00 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S4b images.read + findImage | N | fail | 1 / +0.04 / -0.67 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S4b images.read + findImage | F | fail | 1 / +0.04 / -2.47 / +0 / +0 / 0 | retained runtimes 1/20 |
 | S4c images.copy / clip / resize chain | N | fail | 1 / +0.04 / -0.81 / +0 / +0 / 0 | retained runtimes 1/20 |
@@ -307,6 +308,70 @@ THREAD_OBJECT (second pass ignoring java.lang.Thread.target)
   org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl.tap
   org.autojs.autojs.core.accessibility.SimpleActionAutomator$$ExternalSyntheticLambda4.f$0
   org.autojs.autojs.core.accessibility.SimpleActionAutomator.scriptRuntime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+### S4a N: 2 exited runtimes in the dump, dump 1994 ms, analysis 9921 ms
+
+- 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> AccessibilityService.defaultBridge -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator$$ExternalSyntheticLambda4.f$0 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime
+- 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> VersionCodesInfo.obj -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> HashMap[] -> ComposeJsErrors$Localizer.format -> Compose$2.receiver -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime
+
+```
+THREAD_OBJECT
+  android.app.Instrumentation$InstrumentationThread.contextClassLoader
+  dalvik.system.PathClassLoader.runtimeInternalObjects
+  java.lang.Object[][]
+  org.autojs.autojs.core.accessibility.AccessibilityService.defaultBridge (static)
+  org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl.tap
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator$$ExternalSyntheticLambda4.f$0
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator.scriptRuntime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+```
+THREAD_OBJECT
+  android.app.Instrumentation$InstrumentationThread.contextClassLoader
+  dalvik.system.PathClassLoader.runtimeInternalObjects
+  java.lang.Object[][]
+  org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.obj (static)
+  org.mozilla.javascript.NativeObject.parentScopeObject
+  org.autojs.autojs.rhino.TopLevelScope.associatedValues
+  java.util.HashMap[]
+  org.autojs.autojs.runtime.api.augment.compose.ComposeJsErrors$Localizer.format
+  org.autojs.autojs.runtime.api.augment.compose.Compose$2.receiver
+  org.autojs.autojs.runtime.api.augment.compose.AndroidComposeScriptPlatform.runtime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+### S4a F: 2 exited runtimes in the dump, dump 1999 ms, analysis 9560 ms
+
+- 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> AccessibilityService.defaultBridge -> AccessibilityBridgeImpl.tap -> SimpleActionAutomator$$ExternalSyntheticLambda4.f$0 -> SimpleActionAutomator.scriptRuntime -> ScriptRuntime
+- 1 runtime(s), root THREAD_OBJECT: Instrumentation$InstrumentationThread.contextClassLoader -> PathClassLoader.runtimeInternalObjects -> Object[][] -> VersionCodesInfo.obj -> NativeObject.parentScopeObject -> TopLevelScope.associatedValues -> HashMap[] -> ComposeJsErrors$Localizer.format -> Compose$2.receiver -> AndroidComposeScriptPlatform.runtime -> ScriptRuntime
+
+```
+THREAD_OBJECT
+  android.app.Instrumentation$InstrumentationThread.contextClassLoader
+  dalvik.system.PathClassLoader.runtimeInternalObjects
+  java.lang.Object[][]
+  org.autojs.autojs.core.accessibility.AccessibilityService.defaultBridge (static)
+  org.autojs.autojs.core.accessibility.AccessibilityBridgeImpl.tap
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator$$ExternalSyntheticLambda4.f$0
+  org.autojs.autojs.core.accessibility.SimpleActionAutomator.scriptRuntime
+  -> org.autojs.autojs.runtime.ScriptRuntime
+```
+
+```
+THREAD_OBJECT
+  android.app.Instrumentation$InstrumentationThread.contextClassLoader
+  dalvik.system.PathClassLoader.runtimeInternalObjects
+  java.lang.Object[][]
+  org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.obj (static)
+  org.mozilla.javascript.NativeObject.parentScopeObject
+  org.autojs.autojs.rhino.TopLevelScope.associatedValues
+  java.util.HashMap[]
+  org.autojs.autojs.runtime.api.augment.compose.ComposeJsErrors$Localizer.format
+  org.autojs.autojs.runtime.api.augment.compose.Compose$2.receiver
+  org.autojs.autojs.runtime.api.augment.compose.AndroidComposeScriptPlatform.runtime
   -> org.autojs.autojs.runtime.ScriptRuntime
 ```
 
