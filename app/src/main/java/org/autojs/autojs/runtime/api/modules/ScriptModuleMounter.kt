@@ -35,8 +35,9 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * Within a module object: aliases of a function share one function object, the prototypes of `@ScriptPrototype`
  * (a list is a chain) come first and an event emitter object ends the chain when `emitter = true`, a FUNCTIONAL
  * `toString` adds the hidden marker `__augmented_custom_to_string__`, and everything a member throws goes through
- * [ScriptErrorMapper]. Members are bound in the order of `Augmentable.assign` (functions, getters, properties, Java
- * classes, then sub-modules), global members in the order properties, functions, getters, Java classes.
+ * [ScriptErrorMapper]. Members are bound in the order of `Augmentable.assign` (data properties, functions, getters, Java
+ * classes, then sub-modules; P2.1 corrected the first ones, which came after the functions), global members in the
+ * same order.
  *
  * zh-CN: 把注册表中的模块挂载到一个脚本运行时的全局对象上 (D4 / T3). 顶层模块按需挂载: 模块对象的每个名称 (名称, 别名, `$` 形式) 与它挂到全局对象上的
  * 每个成员都定义为带最终特性的惰性数据属性 (LazyDataSlot), Object.keys(global), hasOwnProperty, in 与属性描述符与急切挂载时相同, 首次读取其中任一个时
@@ -184,13 +185,13 @@ class ScriptModuleMounter @JvmOverloads constructor(
                 val module = instance()
                 val obj = newModuleObject(module)
                 applyPrototypes(obj, module)
-                spec.functions.forEach { f -> bindFunction(obj, module, f) }
-                spec.accessors.filter { it.getter && it.onModule }.forEach { a -> obj.defineProperty(a.name, getter({ module }, a), setter({ module }, a), a.attributes) }
                 spec.accessors.filter { !it.getter }.forEach { a ->
                     val value = guarded("$path.${a.name}", topLevel) { binding.get(module, a.id, scope) }
                     if (a.onModule) obj.defineProperty(a.name, value, a.attributes)
                     if (a.onGlobal) globalValues[a.name] = value
                 }
+                spec.functions.forEach { f -> bindFunction(obj, module, f) }
+                spec.accessors.filter { it.getter && it.onModule }.forEach { a -> obj.defineProperty(a.name, getter({ module }, a), setter({ module }, a), a.attributes) }
                 spec.javaClasses.forEach { j ->
                     val javaClass = NativeJavaClass(scope, j.type)
                     if (j.onModule) obj.defineProperty(j.name, javaClass, j.attributes)

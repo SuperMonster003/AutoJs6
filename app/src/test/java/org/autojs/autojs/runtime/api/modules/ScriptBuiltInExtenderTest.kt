@@ -49,7 +49,8 @@ class ScriptBuiltInExtenderTest {
             "typeof numberProbeGlobal" to "\"undefined\"",
             "numberProbe.twice(2)" to "4",
             "typeof numberProbe.negate" to "\"undefined\"",
-            "Object.keys(numberProbe).join()" to "\"twice,plus,describe,fail,numberProbeGlobal,ANSWER\"",
+            // Data properties come before functions, as in Augmentable.assign (P2.1 corrected the mounter's order).
+            "Object.keys(numberProbe).join()" to "\"ANSWER,twice,plus,describe,fail,numberProbeGlobal\"",
         )
     )
 
