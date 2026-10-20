@@ -1,12 +1,11 @@
 package org.autojs.autojs.ui.log
 
 import android.content.Context
-import androidx.annotation.StringRes
 import org.autojs.autojs.core.console.ConsoleSettingsDialog
 import org.autojs.autojs.core.console.ConsoleTimeSettings
 import org.autojs.autojs.core.console.ConsoleView
-import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs6.R
+import org.autojs.autojs.core.pref.SettingKey
+import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import kotlin.math.roundToInt
 
 /**
@@ -17,7 +16,7 @@ import kotlin.math.roundToInt
  */
 class LogPageConsoleSettings(
     private val view: ConsoleView,
-    @StringRes private val inputBarKeyRes: Int,
+    private val inputBarKey: SettingKey.Bool,
     private val timeSettings: ConsoleTimeSettings = ConsoleTimeSettings.LOG_ACTIVITY,
 ) : ConsoleSettingsDialog.Model {
 
@@ -36,16 +35,16 @@ class LogPageConsoleSettings(
         }
 
     override var isColorful: Boolean
-        get() = Pref.getBoolean(R.string.key_log_activity_log_coloring, DEFAULT_COLORFUL)
+        get() = ConsoleKeys.LOG_ACTIVITY_LOG_COLORING.get()
         set(value) {
-            Pref.putBoolean(R.string.key_log_activity_log_coloring, value)
+            ConsoleKeys.LOG_ACTIVITY_LOG_COLORING.set(value)
             view.isColorful = value
         }
 
     override var textSize: Float
         get() = persistedTextSize ?: view.textSize
         set(value) {
-            Pref.putInt(R.string.key_log_activity_text_size, value.roundToInt())
+            ConsoleKeys.LOG_ACTIVITY_TEXT_SIZE.set(value.roundToInt())
             view.textSize = value
         }
 
@@ -58,14 +57,14 @@ class LogPageConsoleSettings(
     override var contentBackgroundAlpha = 1.0
 
     var isInputBarVisible: Boolean
-        get() = Pref.getBoolean(inputBarKeyRes, DEFAULT_INPUT_BAR_VISIBLE)
+        get() = inputBarKey.get()
         set(value) {
-            Pref.putBoolean(inputBarKeyRes, value)
+            inputBarKey.set(value)
             view.isInputBarVisible = value
         }
 
     private val persistedTextSize: Float?
-        get() = Pref.getInt(R.string.key_log_activity_text_size, 0).takeIf { it > 0 }?.toFloat()
+        get() = ConsoleKeys.LOG_ACTIVITY_TEXT_SIZE.get().takeIf { it > 0 }?.toFloat()
 
     /** Applies the persisted values to the bound view. zh-CN: 把持久化的值应用到绑定的视图. */
     fun apply() {
@@ -77,10 +76,5 @@ class LogPageConsoleSettings(
     }
 
     fun showDialog(context: Context) = ConsoleSettingsDialog(context, this).show()
-
-    companion object {
-        private const val DEFAULT_COLORFUL = true
-        private const val DEFAULT_INPUT_BAR_VISIBLE = false
-    }
 
 }

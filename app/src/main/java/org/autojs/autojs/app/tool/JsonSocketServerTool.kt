@@ -2,8 +2,8 @@ package org.autojs.autojs.app.tool
 
 import android.annotation.SuppressLint
 import android.content.Context
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.permission.LocalNetworkPermission
-import org.autojs.autojs.pluginclient.DevPluginPrefs
 import org.autojs.autojs.util.Observers
 import org.autojs.autojs.util.ViewUtils
 
@@ -37,7 +37,7 @@ class JsonSocketServerTool(context: Context) : AbstractJsonSocketTool(context) {
     }
 
     override fun connectIfNotNormallyClosed() {
-        if (!isNormallyClosed && DevPluginPrefs.isServerRestoreOnLaunchEnabled && LocalNetworkPermission.isGranted(context)) startServer()
+        if (!isNormallyClosed && ConnectionKeys.SERVER_MODE_RESTORE_ON_LAUNCH.get() && LocalNetworkPermission.isGranted(context)) startServer()
     }
 
     override fun disconnect() {

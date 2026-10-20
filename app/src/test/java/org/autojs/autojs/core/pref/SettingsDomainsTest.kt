@@ -43,6 +43,11 @@ class SettingsDomainsTest {
         var checked = 0
         SettingsRegistry.keys.filterIsInstance<SettingKey<*>>().forEach { key ->
             val baselineName = baselineNameOf(key)
+            KEYS_AFTER_P0[baselineName]?.let { expected ->
+                if (key.defaultText != expected) problems.add("$baselineName: default ${key.defaultText}, expected $expected (added after P0)")
+                checked++
+                return@forEach
+            }
             val sources = baselineDefaults[baselineName]
             if (sources == null) {
                 problems.add("$baselineName: no default source in the baseline")
@@ -128,6 +133,12 @@ class SettingsDomainsTest {
             "key_ace_editor_font_iosevka_slab", "key_ace_editor_font_jetbrains_mono", "key_ace_editor_font_source_code_pro",
             "key_ace_editor_font_system_monospace",
             "key_editor_pinch_to_zoom_change_text_size", "key_editor_pinch_to_zoom_disable", "key_editor_pinch_to_zoom_scale_view",
+        )
+
+        /** Settings added after the P0 baseline: resource name -> default text (their source, appendix C Q15). */
+        private val KEYS_AFTER_P0 = mapOf(
+            // fragment_developer_options.xml app:defaultValue="true" (memory roadmap P1.2).
+            "key_leakcanary_enabled" to "true",
         )
 
         private lateinit var resources: AutoCloseable

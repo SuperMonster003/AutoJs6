@@ -13,6 +13,8 @@ import org.autojs.autojs.annotation.ScriptInterfaceCompatible
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
+import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
@@ -112,8 +114,9 @@ object Pref {
      * zh-CN: Augment 重构的开关 (ROADMAP T8), 默认关, 位于开发者选项 (P1.3): 打开后新启动的脚本从新脚本模块层挂载已迁移的模块.
      */
     @JvmStatic
+    @Deprecated("Use DeveloperKeys.NEW_SCRIPT_MODULE_LAYER (docs/settings/ROADMAP.md P2.5)", ReplaceWith("DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()", "org.autojs.autojs.core.pref.keys.DeveloperKeys"))
     val isNewScriptModuleLayerEnabled
-        get() = getBoolean(R.string.key_new_script_module_layer, false)
+        get() = DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()
 
     /**
      * Debug printing of the new script module layer (ROADMAP T5, appendix C Q4): the master switch, off by default, and the
@@ -122,13 +125,17 @@ object Pref {
      * zh-CN: 新脚本模块层的调试打印 (ROADMAP T5, 附录 C Q4): 总开关默认关; 不打印的顶层模块列表默认为空 (总开关打开后全部模块都打印). 在开发者选项中设置 (P1.3).
      */
     @JvmStatic
+    @Deprecated("Use DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT (docs/settings/ROADMAP.md P2.5)", ReplaceWith("DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.get()", "org.autojs.autojs.core.pref.keys.DeveloperKeys"))
     val isScriptModuleDebugPrintEnabled
-        get() = getBoolean(R.string.key_script_module_debug_print, false)
+        get() = DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.get()
 
     @JvmStatic
+    @Deprecated("Use DeveloperKeys.scriptModuleDebugPrintDisabledModules (docs/settings/ROADMAP.md P2.5)", ReplaceWith("DeveloperKeys.scriptModuleDebugPrintDisabledModules", "org.autojs.autojs.core.pref.keys.DeveloperKeys"))
     var scriptModuleDebugPrintDisabledModules: Set<String>
-        get() = getStringSet(R.string.key_script_module_debug_print_disabled_modules, null)?.toSet() ?: emptySet()
-        set(value) = putStringSet(R.string.key_script_module_debug_print_disabled_modules, value.toMutableSet())
+        get() = DeveloperKeys.scriptModuleDebugPrintDisabledModules
+        set(value) {
+            DeveloperKeys.scriptModuleDebugPrintDisabledModules = value
+        }
 
     @JvmStatic
     @Deprecated("Use RunningKeys.GUARD_MODE (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RunningKeys.GUARD_MODE.get()", "org.autojs.autojs.core.pref.keys.RunningKeys"))
@@ -301,10 +308,12 @@ object Pref {
     }
 
     @JvmStatic
-    fun getServerAddress(): String = getString(R.string.key_server_address, if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS)
+    @Deprecated("Use ConnectionKeys.SERVER_ADDRESS (docs/settings/ROADMAP.md P2.5)", ReplaceWith("ConnectionKeys.SERVER_ADDRESS.get()", "org.autojs.autojs.core.pref.keys.ConnectionKeys"))
+    fun getServerAddress(): String = ConnectionKeys.SERVER_ADDRESS.get()
 
     @JvmStatic
-    fun setServerAddress(address: String?) = putString(R.string.key_server_address, address)
+    @Deprecated("Use ConnectionKeys.SERVER_ADDRESS (docs/settings/ROADMAP.md P2.5)", ReplaceWith("ConnectionKeys.SERVER_ADDRESS.set(address)", "org.autojs.autojs.core.pref.keys.ConnectionKeys"))
+    fun setServerAddress(address: String?) = ConnectionKeys.SERVER_ADDRESS.set(address)
 
     @JvmStatic
     @Deprecated("Use RecordKeys.rootRecordGeneratesBinary (docs/settings/ROADMAP.md P2.4)", ReplaceWith("RecordKeys.rootRecordGeneratesBinary()", "org.autojs.autojs.core.pref.keys.RecordKeys"))

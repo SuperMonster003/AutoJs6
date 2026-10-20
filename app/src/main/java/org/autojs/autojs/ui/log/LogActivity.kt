@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.AutoJs.Companion.instance
 import org.autojs.autojs.core.console.GlobalConsole
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import org.autojs.autojs.runtime.api.Mime
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.edit.EditActivity
@@ -74,7 +74,7 @@ class LogActivity : BaseActivity() {
             setOnStackFrameClickListener { fileName, lineNumber, columnNumber ->
                 openStackFrameTarget(fileName, lineNumber, columnNumber)
             }
-            mSettings = LogPageConsoleSettings(this, R.string.key_log_activity_input_bar_visible).also { it.apply() }
+            mSettings = LogPageConsoleSettings(this, ConsoleKeys.LOG_ACTIVITY_INPUT_BAR_VISIBLE).also { it.apply() }
             setOnCommandSubmitListener { source ->
                 setCommandInputBusy(true)
                 mTypeScriptEvaluator.evaluate(source) {
@@ -180,10 +180,7 @@ class LogActivity : BaseActivity() {
                 mTypeScriptEvaluator.stop()
             }
             setTypeScriptConsoleVisible(
-                visible = available && Pref.getBoolean(
-                    R.string.key_log_activity_typescript_console_visible,
-                    false,
-                ),
+                visible = available && ConsoleKeys.LOG_ACTIVITY_TYPESCRIPT_CONSOLE_VISIBLE.get(),
                 persist = false,
             )
         }
@@ -199,7 +196,7 @@ class LogActivity : BaseActivity() {
             null
         }
         if (persist) {
-            Pref.putBoolean(R.string.key_log_activity_typescript_console_visible, resolved)
+            ConsoleKeys.LOG_ACTIVITY_TYPESCRIPT_CONSOLE_VISIBLE.set(resolved)
         }
         invalidateOptionsMenu()
     }

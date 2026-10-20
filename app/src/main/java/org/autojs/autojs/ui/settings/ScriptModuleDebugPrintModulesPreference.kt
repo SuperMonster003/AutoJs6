@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.Preference
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.runtime.api.modules.ScriptModuleDebugSettings
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.DialogUtils
@@ -40,7 +40,7 @@ class ScriptModuleDebugPrintModulesPreference : MaterialPreference {
 
     private fun init() {
         summaryProvider = SummaryProvider<ScriptModuleDebugPrintModulesPreference> {
-            ScriptModuleDebugSettings.printingModules(ScriptModuleDebugSettings.moduleNames, Pref.scriptModuleDebugPrintDisabledModules)
+            ScriptModuleDebugSettings.printingModules(ScriptModuleDebugSettings.moduleNames, DeveloperKeys.scriptModuleDebugPrintDisabledModules)
                 .takeIf { it.isNotEmpty() }
                 ?.joinToString(", ")
                 ?: prefContext.getString(R.string.text_none)
@@ -61,7 +61,7 @@ class ScriptModuleDebugPrintModulesPreference : MaterialPreference {
             return
         }
         val modules = ScriptModuleDebugSettings.moduleNames
-        val excluded = Pref.scriptModuleDebugPrintDisabledModules
+        val excluded = DeveloperKeys.scriptModuleDebugPrintDisabledModules
         val checked = modules.indices.filter { modules[it] !in excluded }.toTypedArray()
         DialogUtils.buildAndShowAdaptive {
             MaterialDialog.Builder(prefContext)
@@ -77,7 +77,7 @@ class ScriptModuleDebugPrintModulesPreference : MaterialPreference {
                 .items(modules)
                 .itemsCallbackMultiChoice(checked) { _, which, _ ->
                     val selected = which.map { modules[it] }
-                    Pref.scriptModuleDebugPrintDisabledModules = ScriptModuleDebugSettings.excludedAfter(modules, selected, Pref.scriptModuleDebugPrintDisabledModules)
+                    DeveloperKeys.scriptModuleDebugPrintDisabledModules = ScriptModuleDebugSettings.excludedAfter(modules, selected, DeveloperKeys.scriptModuleDebugPrintDisabledModules)
                     notifyChanged()
                     true
                 }

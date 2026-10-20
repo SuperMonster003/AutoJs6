@@ -5,7 +5,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.JsonSocketClientTool
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.pluginclient.DevPluginClientReconnector
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs6.R
@@ -67,20 +67,17 @@ class ClientModeManagerDialog private constructor(
         addSwitch(
             R.string.text_auto_reconnect,
             R.string.summary_auto_reconnect,
-            R.string.key_client_mode_auto_reconnect,
-            R.bool.pref_client_mode_auto_reconnect,
+            ConnectionKeys.CLIENT_MODE_AUTO_RECONNECT,
         ) { enabled -> if (!enabled) reconnector.cancel() }
         addSwitch(
             R.string.text_reconnect_on_network_change,
             R.string.summary_reconnect_on_network_change,
-            R.string.key_client_mode_reconnect_on_network_change,
-            R.bool.pref_client_mode_reconnect_on_network_change,
+            ConnectionKeys.CLIENT_MODE_RECONNECT_ON_NETWORK_CHANGE,
         )
         addSwitch(
             R.string.text_restore_connection_on_launch,
             R.string.summary_restore_connection_on_launch,
-            R.string.key_client_mode_restore_on_launch,
-            R.bool.pref_client_mode_restore_on_launch,
+            ConnectionKeys.CLIENT_MODE_RESTORE_ON_LAUNCH,
         )
     }
 
@@ -94,7 +91,7 @@ class ClientModeManagerDialog private constructor(
         val client = service.jsonSocketClient
         return when {
             client?.isSocketReady == true && !client.host.isNullOrEmpty() -> "${client.host}:${client.serverPort}"
-            else -> Pref.getServerAddress().trim()
+            else -> ConnectionKeys.SERVER_ADDRESS.get().trim()
         }
     }
 
@@ -143,7 +140,7 @@ class ClientModeManagerDialog private constructor(
 
         setActionVisible(connect, !isConnected && !isConnecting)
         setActionVisible(disconnect, isConnected || isConnecting)
-        setActionVisible(reconnectNow, !isConnected && !isConnecting && !reconnect.isActive && Pref.getServerAddress().isNotBlank())
+        setActionVisible(reconnectNow, !isConnected && !isConnecting && !reconnect.isActive && ConnectionKeys.SERVER_ADDRESS.get().isNotBlank())
         setActionVisible(stopReconnecting, reconnect.isActive)
     }
 

@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.disposables.CompositeDisposable
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceInfoFormat
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.SettingKey
 import org.autojs.autojs.ui.common.ManagerSettingsSection
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ClipboardUtils
@@ -407,8 +408,7 @@ abstract class ConnectionManagerDialog protected constructor(
     protected fun addSwitch(
         @StringRes titleRes: Int,
         @StringRes summaryRes: Int,
-        @StringRes keyRes: Int,
-        defaultRes: Int? = null,
+        key: SettingKey.Bool,
         onChanged: ((Boolean) -> Unit)? = null,
     ) {
         A11yServiceManagerSwitchItemBinding.inflate(inflater, binding.settingsContainer, true).apply {
@@ -416,7 +416,7 @@ abstract class ConnectionManagerDialog protected constructor(
             subtitle.setText(summaryRes)
             // PrefSwitch persists through setChecked(), so a checked-change listener does not interfere.
             // zh-CN: PrefSwitch 通过 setChecked() 持久化, 因此选中变化监听器不会与之冲突.
-            sw.setPrefKey(context.getString(keyRes), defaultRes?.let(context.resources::getBoolean) ?: false)
+            sw.setPrefKey(key.name, key.defaultOrNull() ?: false)
             onChanged?.let { listener -> sw.setOnCheckedChangeListener { _, isChecked -> listener(isChecked) } }
             root.setOnClickListener { sw.toggle() }
         }

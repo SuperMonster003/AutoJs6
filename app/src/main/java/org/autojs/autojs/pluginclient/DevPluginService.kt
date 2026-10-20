@@ -9,8 +9,8 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import org.autojs.autojs.annotation.ScriptInterface
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.http.LocalNetworkDiagnostics
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs6.R
 import org.autojs.autojs.pluginclient.JsonSocket.HANDSHAKE_TIMEOUT
@@ -70,7 +70,7 @@ class DevPluginService(val context: Context) {
     // zh-CN: 发布当前服务端连接数量.
     val serverConnectionCount = BehaviorSubject.createDefault(0)
 
-    val clientConnectionIpAddress = BehaviorSubject.createDefault(Pref.getServerAddress())
+    val clientConnectionIpAddress = BehaviorSubject.createDefault(ConnectionKeys.SERVER_ADDRESS.get())
 
     @get:ScriptInterface
     @Volatile
@@ -331,7 +331,7 @@ class DevPluginService(val context: Context) {
                     this.jsonSocketServer = it
                     it.setStateConnected()
                     serverStartedAt = System.currentTimeMillis()
-                    if (DevPluginPrefs.isServerLanDiscoveryEnabled) discovery.register(Port.AJ_SERVER)
+                    if (ConnectionKeys.SERVER_MODE_LAN_DISCOVERY.get()) discovery.register(Port.AJ_SERVER)
                     emitter.onNext(it)
                 }
 
@@ -386,14 +386,14 @@ class DevPluginService(val context: Context) {
         // zh-CN: 移除已断开连接并更新计数.
         val removed = mServerConnections.remove(conn)
         serverConnectionCount.onNext(mServerConnections.size)
-        if (removed && conn.peerHelloAt > 0L && DevPluginPrefs.isServerNotifyConnectionChangesEnabled) {
+        if (removed && conn.peerHelloAt > 0L && ConnectionKeys.SERVER_MODE_NOTIFY_CONNECTION_CHANGES.get()) {
             ViewUtils.showToast(context, context.getString(R.string.text_vscode_disconnected_format, describeClient(conn)))
         }
     }
 
     /** A VSCode client completed the handshake on the local server. zh-CN: 一个 VSCode 客户端已在本地服务端完成握手. */
     internal fun onServerClientHello(conn: JsonSocketServer) {
-        if (DevPluginPrefs.isServerNotifyConnectionChangesEnabled) {
+        if (ConnectionKeys.SERVER_MODE_NOTIFY_CONNECTION_CHANGES.get()) {
             ViewUtils.showToast(context, context.getString(R.string.text_vscode_connected_format, describeClient(conn)))
         }
     }

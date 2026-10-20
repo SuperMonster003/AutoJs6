@@ -39,6 +39,7 @@ PACKAGE = "org.autojs.autojs6"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 DEVICE_DIR = "/sdcard/Download/aj6-settings-check"
 MARK = "AJ6SET"
+RESULT_FILE = "aj6set-result.txt"
 SCRIPTS = {"interop": "store_interop.js", "lists-before": "legacy_lists.js", "lists-after": "legacy_lists.js",
            "domains": "domain_keys.js", "page": "open_page.js", "editor": "editor_engines.js"}
 
@@ -75,6 +76,11 @@ def run_script(serial, text, wait):
     lines = []
     while time.time() < deadline:
         time.sleep(1)
+        # A script may write its lines to RESULT_FILE as well, since some ROMs drop log lines of a busy process.
+        result = adb(serial, "shell", "cat", f"{DEVICE_DIR}/{RESULT_FILE}").stdout.splitlines()
+        if "done" in result:
+            lines = result
+            break
         lines = marked_lines(serial, epoch)
         if "done" in lines:
             break

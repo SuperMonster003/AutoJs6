@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; kind / 分类 id / 备注来自 `tools/settings/classification.json`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.2 / P0.3).
 
-- 生成日期: 2026-10-20, 扫描基线: `master@a4b6d2d34` (扫描范围内未提交文件 29 个)
+- 生成日期: 2026-10-20, 扫描基线: `master@ed4674afe` (扫描范围内未提交文件 27 个)
 - 源码路径相对 `app/src/main/java/org/autojs/autojs/` (其他包保留 `com/...` 等前缀); 资源路径相对 `app/src/main/`.
 - 引用处只计非注释行; 超过 6 处时只列前 6 处, 完整列表见 JSON 基线.
 - kind: Setting (用户设置), State (记忆型状态, 归 `other`), Cache (缓存, 不可导出), ValueConstant (设置值常量, 列表项候选值或默认值别名), Excluded (不是偏好键或永久排除, 见 ROADMAP 附录 A.2).
@@ -15,11 +15,11 @@
 | 出现在设置页 XML 的 `key_*` 键 (各页之和去重) | 99 (preferences 39, code_editor_settings 40, developer_options 11, trash_and_version_history_settings 9, plugin_center_preferences 3) |
 | 设置页中不经字符串资源的字面量键 | 3 (developer_options 1, plugin_center_preferences 2) |
 | 不在设置页的 `key_*` 键 | 169 |
-| 源码 (`app/src/main/java`) 没有引用的键 | 10 (其中设置页, 数组与其他资源也没有引用的 4 个: `key_dialog_foreground_svc`, `key_dialog_layout_inspector_exit_tips`, `key_dialog_log_entries_exported`, `key_enable_observe_key`) |
+| 源码 (`app/src/main/java`) 没有引用的键 | 9 (其中设置页, 数组与其他资源也没有引用的 4 个: `key_dialog_foreground_svc`, `key_dialog_layout_inspector_exit_tips`, `key_dialog_log_entries_exported`, `key_enable_observe_key`) |
 | 源码字面量键 (不对应 `key_*` 资源) | 71 |
 | 命名 SharedPreferences / 调用文件 | 29 / 34 |
 | 绕过 `Pref` 读默认偏好的文件 | 8 |
-| 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 88 |
+| 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 78 |
 | filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 13 |
 
 kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, Excluded 29
@@ -102,18 +102,18 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_check_for_updates` | 设置 > 更新 | core/pref/keys/UpdatesKeys.kt:39 | Excluded |  | 动作条目 (立即检查更新) |
 | `key_check_for_updates_while_ignoring_the_local_version` | 开发者选项 > 更新 | core/pref/keys/UpdatesKeys.kt:40 | Excluded |  | 动作条目 (开发者选项, 忽略本机版本检查一次) |
 | `key_clear_explorer_playback_history` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:81 | Excluded |  | 动作条目 (清除回放历史) |
-| `key_client_mode_auto_reconnect` |  | pluginclient/DevPluginPrefs.kt:14, ui/devplugin/ClientModeManagerDialog.kt:70 | Setting | `connection` | 客户端模式管理器开关 |
+| `key_client_mode_auto_reconnect` |  | core/pref/keys/ConnectionKeys.kt:34 | Setting | `connection` | 客户端模式管理器开关 |
 | `key_client_mode_manager_clients_level` |  | ui/devplugin/ClientModeManagerDialog.kt:34 | State | `other` | 管理器对话框展开级别 |
 | `key_client_mode_manager_control_level` |  | ui/devplugin/ClientModeManagerDialog.kt:32 | State | `other` | 管理器对话框展开级别 |
 | `key_client_mode_manager_settings_collapsed` |  | ui/devplugin/ClientModeManagerDialog.kt:33 | State | `other` | 管理器设置区折叠状态 |
 | `key_client_mode_manager_status_level` |  | ui/devplugin/ClientModeManagerDialog.kt:31 | State | `other` | 管理器对话框展开级别 |
-| `key_client_mode_reconnect_on_network_change` |  | pluginclient/DevPluginPrefs.kt:18, ui/devplugin/ClientModeManagerDialog.kt:76 | Setting | `connection` | 客户端模式管理器开关 |
-| `key_client_mode_restore_on_launch` |  | pluginclient/DevPluginPrefs.kt:22, ui/devplugin/ClientModeManagerDialog.kt:82 | Setting | `connection` | 客户端模式管理器开关 |
+| `key_client_mode_reconnect_on_network_change` |  | core/pref/keys/ConnectionKeys.kt:41 | Setting | `connection` | 客户端模式管理器开关 |
+| `key_client_mode_restore_on_launch` |  | core/pref/keys/ConnectionKeys.kt:48 | Setting | `connection` | 客户端模式管理器开关 |
 | `key_client_socket_normally_closed` |  | pluginclient/JsonSocketClient.kt:476, pluginclient/JsonSocketClient.kt:477 | State | `other` | 上次连接是否正常关闭, 用于启动时恢复 |
-| `key_codegen_model_current` |  | ui/settings/codegen/CodegenModelStoreFactory.kt:27 | Setting | `layout_inspector` | 代码生成当前模型 id (经 selectionPreferenceKey 派生实际键); 模型文件不导出, 本机缺该模型时的处理待 P7.2 计划器定 |
+| `key_codegen_model_current` |  | core/pref/keys/LayoutInspectorKeys.kt:45, ui/settings/codegen/CodegenModelStoreFactory.kt:27 | Setting | `layout_inspector` | 代码生成当前模型 id (经 selectionPreferenceKey 派生实际键); 模型文件不导出, 本机缺该模型时的处理待 P7.2 计划器定 |
 | `key_color_select_activity_legacy_layout` |  | theme/app/ColorSelectBaseActivity.kt:1045, theme/app/ColorSelectBaseActivity.kt:1046 | State | `other` | ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13 (b) 已拍板, P4.2) |
-| `key_console_element_time_format` |  | core/console/ConsoleTimeSettings.kt:16 | Setting | `console` | ConsoleTimeSettings.CONSOLE_ELEMENT |
-| `key_console_element_time_visible` |  | core/console/ConsoleTimeSettings.kt:16 | Setting | `console` | ConsoleTimeSettings.CONSOLE_ELEMENT |
+| `key_console_element_time_format` |  | core/pref/keys/ConsoleKeys.kt:52 | Setting | `console` | ConsoleTimeSettings.CONSOLE_ELEMENT |
+| `key_console_element_time_visible` |  | core/pref/keys/ConsoleKeys.kt:49 | Setting | `console` | ConsoleTimeSettings.CONSOLE_ELEMENT |
 | `key_delete_permanently_also_clear_history` | 设置 > 回收站与版本历史 | core/pref/keys/HistoryKeys.kt:67 | Setting | `history` | 开关 |
 | `key_dialog_foreground_svc` |  |  | State | `other` | 不再提示类键名, 源码与资源均无引用 (Q12) |
 | `key_dialog_layout_inspector_exit_tips` |  |  | State | `other` | 不再提示类键名, 只在注释掉的代码中出现 (Q12) |
@@ -142,9 +142,9 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_editor_log_button_behavior` | 设置 > 代码编辑器; 代码编辑器设置 > 日志 | core/pref/keys/EditorKeys.kt:181, ui/settings/EditorSettingActionRegistry.kt:35, ui/settings/PreferencesFragment.kt:64, ui/settings/PreferencesFragment.kt:74 | Setting | `editor_log` | 列表项, 设置页与代码编辑器设置两处 |
 | `key_editor_log_button_behavior_bottom_sheet` | 候选值 `keys_editor_log_button_behavior` (`key_editor_log_button_behavior`); 默认值 `default_key_editor_log_button_behavior` | core/pref/keys/EditorKeys.kt:48 | ValueConstant |  | 候选值, 默认值 |
 | `key_editor_log_button_behavior_fullscreen_page` | 候选值 `keys_editor_log_button_behavior` (`key_editor_log_button_behavior`) | core/pref/keys/EditorKeys.kt:48, ui/edit/EditorView.kt:275 | ValueConstant |  | 候选值 |
-| `key_editor_log_panel_input_bar_visible` |  | core/pref/keys/EditorKeys.kt:187, ui/log/LogBottomSheet.kt:237 | Setting | `editor_log` | 日志面板输入栏 (LogPageConsoleSettings) |
-| `key_editor_log_panel_time_format` |  | core/console/ConsoleTimeSettings.kt:13, core/pref/keys/EditorKeys.kt:193 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
-| `key_editor_log_panel_time_visible` |  | core/console/ConsoleTimeSettings.kt:13, core/pref/keys/EditorKeys.kt:190 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
+| `key_editor_log_panel_input_bar_visible` |  | core/pref/keys/EditorKeys.kt:187 | Setting | `editor_log` | 日志面板输入栏 (LogPageConsoleSettings) |
+| `key_editor_log_panel_time_format` |  | core/pref/keys/EditorKeys.kt:193 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
+| `key_editor_log_panel_time_visible` |  | core/pref/keys/EditorKeys.kt:190 | Setting | `editor_log` | ConsoleTimeSettings.EDITOR_PANEL |
 | `key_editor_log_panel_typescript_console_visible` |  | core/pref/keys/EditorKeys.kt:196 | Setting | `editor_log` | 日志面板开关 |
 | `key_editor_pinch_to_zoom_change_text_size` | 候选值 `keys_editor_pinch_to_zoom_strategy`; 默认值 `default_key_editor_pinch_to_zoom_strategy` | core/pref/keys/EditorKeys.kt:87, ui/settings/EditorPinchToZoomPreference.kt:84 | ValueConstant |  | 旧策略键 `key_editor_pinch_to_zoom_strategy` 的候选值, `default_key_editor_pinch_to_zoom_strategy` 的目标 |
 | `key_editor_pinch_to_zoom_change_text_size_enabled` | 代码编辑器设置 > 操作手势 | core/pref/keys/EditorKeys.kt:294, ui/edit/EditorView.kt:935, ui/settings/EditorSettingActionRegistry.kt:50, ui/settings/EditorSettingActionRegistry.kt:11 | Setting | `editor_gestures` | 开关, 取代旧策略键 |
@@ -173,14 +173,14 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_file_extensions_not_show` | 候选值 `keys_file_extensions` (`key_file_extensions`) | core/pref/keys/ExplorerKeys.kt:30, core/pref/keys/ExplorerKeys.kt:98 | ValueConstant |  | 候选值 |
 | `key_file_extensions_show_all` | 候选值 `keys_file_extensions` (`key_file_extensions`); 默认值 `default_key_file_extensions` | core/pref/keys/ExplorerKeys.kt:31, core/pref/keys/ExplorerKeys.kt:90 | ValueConstant |  | 候选值, 默认值 |
 | `key_file_extensions_show_all_but_executable` | 候选值 `keys_file_extensions` (`key_file_extensions`) | core/pref/keys/ExplorerKeys.kt:32, core/pref/keys/ExplorerKeys.kt:94 | ValueConstant |  | 候选值 |
-| `key_floating_console_time_format` |  | core/console/ConsoleTimeSettings.kt:17 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
-| `key_floating_console_time_visible` |  | core/console/ConsoleTimeSettings.kt:17 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
+| `key_floating_console_time_format` |  | core/pref/keys/ConsoleKeys.kt:58 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
+| `key_floating_console_time_visible` |  | core/pref/keys/ConsoleKeys.kt:55 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
 | `key_floating_menu_shown` |  | ui/floating/CircularMenu.java:496, ui/main/drawer/DrawerFragment.kt:280 | State | `other` | 抽屉 "悬浮按钮" 开关的镜像, 按悬浮窗实际状态回写 |
 | `key_foreground_service` | 其他资源 res/xml/fragment_preferences_inrt.xml:12 | core/pref/keys/GeneralKeys.kt:80, inrt/SettingsActivity.kt:52, runtime/api/augment/settings/Settings.kt:31 | Setting | `general` | 抽屉 "前台服务" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12) |
 | `key_gesture_observing` |  | core/pref/keys/A11yKeys.kt:41 | Setting | `a11y` | 开关 (手势观察) |
 | `key_github_token` | 开发者选项 > GitHub |  | Excluded |  | 动作条目, 令牌存于命名存储 `github_auth` (credentials) |
-| `key_global_console_element_time_format` |  | core/console/ConsoleTimeSettings.kt:15 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
-| `key_global_console_element_time_visible` |  | core/console/ConsoleTimeSettings.kt:15 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
+| `key_global_console_element_time_format` |  | core/pref/keys/ConsoleKeys.kt:46 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
+| `key_global_console_element_time_visible` |  | core/pref/keys/ConsoleKeys.kt:43 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
 | `key_guard_mode` | 设置 > 脚本运行 | core/pref/keys/RunningKeys.kt:37 | Setting | `running` | 开关 |
 | `key_hidden_files` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:51 | Setting | `explorer` | 列表项, 文件管理器菜单也会写入 |
 | `key_hidden_files_not_show` | 候选值 `keys_hidden_files` (`key_hidden_files`); 默认值 `default_key_hidden_files` | core/pref/keys/ExplorerKeys.kt:25, ui/explorer/ExplorerPathMenu.kt:174 | ValueConstant |  | 候选值, 默认值 |
@@ -197,41 +197,41 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_keep_screen_on_when_in_foreground_enabled` |  | core/pref/keys/AppearanceKeys.kt:102 | Setting | `appearance` | 与主键一起由 ViewUtils 写入的布尔镜像, 须与主键同进同出 |
 | `key_keep_screen_on_when_in_foreground_homepage_only` | 候选值 `keys_keep_screen_on_when_in_foreground` (`key_keep_screen_on_when_in_foreground`) | core/pref/keys/AppearanceKeys.kt:48, util/ViewUtils.kt:126, util/ViewUtils.kt:1304, util/ViewUtils.kt:1305 | ValueConstant |  | 候选值 |
 | `key_keep_screen_on_when_in_foreground_last_enabled` |  | util/ViewUtils.kt:126, util/ViewUtils.kt:127 | State | `other` | 抽屉开关恢复用的上次启用模式 |
-| `key_last_no_newer_updates` |  | core/pref/Pref.kt:170, core/pref/Pref.kt:269, core/pref/Pref.kt:279 | State | `other` | 时间戳 |
-| `key_last_updates_auto_checked` |  | core/pref/Pref.kt:178, core/pref/Pref.kt:275, core/pref/Pref.kt:282 | State | `other` | 时间戳 |
-| `key_last_updates_checked` |  | core/pref/Pref.kt:154, core/pref/Pref.kt:266, core/pref/Pref.kt:281 | State | `other` | 时间戳 |
-| `key_last_updates_postponed` |  | core/pref/Pref.kt:174, core/pref/Pref.kt:272, core/pref/Pref.kt:280 | State | `other` | 时间戳 |
+| `key_last_no_newer_updates` |  | core/pref/Pref.kt:177, core/pref/Pref.kt:276, core/pref/Pref.kt:286 | State | `other` | 时间戳 |
+| `key_last_updates_auto_checked` |  | core/pref/Pref.kt:185, core/pref/Pref.kt:282, core/pref/Pref.kt:289 | State | `other` | 时间戳 |
+| `key_last_updates_checked` |  | core/pref/Pref.kt:161, core/pref/Pref.kt:273, core/pref/Pref.kt:288 | State | `other` | 时间戳 |
+| `key_last_updates_postponed` |  | core/pref/Pref.kt:181, core/pref/Pref.kt:279, core/pref/Pref.kt:287 | State | `other` | 时间戳 |
 | `key_launcher_icon` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:74 | Setting | `general` | 列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY) |
 | `key_launcher_icon_adaptive` | 候选值 `keys_launcher_icon` (`key_launcher_icon`); 默认值 `default_key_launcher_icon` | core/pref/keys/GeneralKeys.kt:41, ui/settings/LauncherIconPreference.kt:56, ui/settings/LauncherIconPreference.kt:95, ui/settings/LauncherIconPreference.kt:217 | ValueConstant |  | 候选值, 默认值 |
 | `key_launcher_icon_transparent_background` | 候选值 `keys_launcher_icon` (`key_launcher_icon`) | core/pref/keys/GeneralKeys.kt:42, ui/settings/LauncherIconPreference.kt:55, ui/settings/LauncherIconPreference.kt:216 | ValueConstant |  | 候选值 |
 | `key_launcher_shortcuts` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:90 | Excluded |  | 动作条目 (启动器快捷方式对话框), 不持久化值 |
-| `key_layout_inspector_field_mode_introduced` |  | ui/floating/layoutinspector/search/QueryModeStore.kt:27, ui/floating/layoutinspector/search/QueryModeStore.kt:29 | State | `other` | 功能介绍已展示 |
-| `key_layout_inspector_filter_profile_selected` |  | ui/floating/layoutinspector/search/FilterProfileStore.kt:20, ui/floating/layoutinspector/search/FilterProfileStore.kt:29 | Setting | `layout_inspector` | 选中的筛选配置档 id |
-| `key_layout_inspector_filter_profiles` |  | ui/floating/layoutinspector/search/FilterProfileStore.kt:19, ui/floating/layoutinspector/search/FilterProfileStore.kt:24 | Setting | `layout_inspector` | 筛选配置档 JSON |
-| `key_layout_inspector_node_copy_mode` |  | ui/floating/layoutinspector/NodeInfoDialog.kt:23, ui/floating/layoutinspector/NodeInfoDialog.kt:27 | Setting | `layout_inspector` | 节点复制模式 |
+| `key_layout_inspector_field_mode_introduced` |  | ui/floating/layoutinspector/search/QueryModeStore.kt:28, ui/floating/layoutinspector/search/QueryModeStore.kt:30 | State | `other` | 功能介绍已展示 |
+| `key_layout_inspector_filter_profile_selected` |  | core/pref/keys/LayoutInspectorKeys.kt:29 | Setting | `layout_inspector` | 选中的筛选配置档 id |
+| `key_layout_inspector_filter_profiles` |  | core/pref/keys/LayoutInspectorKeys.kt:25 | Setting | `layout_inspector` | 筛选配置档 JSON |
+| `key_layout_inspector_node_copy_mode` |  | core/pref/keys/LayoutInspectorKeys.kt:33 | Setting | `layout_inspector` | 节点复制模式 |
 | `key_layout_inspector_query_history` |  | ui/floating/layoutinspector/search/QueryHistoryStore.kt:17, ui/floating/layoutinspector/search/QueryHistoryStore.kt:20 | State | `other` | 查询历史 JSON |
-| `key_layout_inspector_query_mode` |  | ui/floating/layoutinspector/search/QueryModeStore.kt:17, ui/floating/layoutinspector/search/QueryModeStore.kt:22 | Setting | `layout_inspector` | 查询模式 |
-| `key_layout_inspector_selector_mode_introduced` |  | ui/floating/layoutinspector/search/QueryModeStore.kt:33, ui/floating/layoutinspector/search/QueryModeStore.kt:35 | State | `other` | 功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1) |
-| `key_leakcanary_enabled` | 开发者选项 > 调试 | ui/settings/DeveloperOptionsFragment.kt:24 | Setting | `developer` | LeakCanary 开关 (开发者选项, 页面不可见, XML 默认 true); 来自内存路线图 P1 的新资源, 由调度会话决定登记 (附录 C Q15) |
+| `key_layout_inspector_query_mode` |  | core/pref/keys/LayoutInspectorKeys.kt:37 | Setting | `layout_inspector` | 查询模式 |
+| `key_layout_inspector_selector_mode_introduced` |  | ui/floating/layoutinspector/search/QueryModeStore.kt:34, ui/floating/layoutinspector/search/QueryModeStore.kt:36 | State | `other` | 功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1) |
+| `key_leakcanary_enabled` | 开发者选项 > 调试 | core/pref/keys/DeveloperKeys.kt:42, ui/settings/DeveloperOptionsFragment.kt:24 | Setting | `developer` | LeakCanary 开关 (开发者选项, 页面不可见, XML 默认 true); 来自内存路线图 P1 的新资源, 由调度会话决定登记 (附录 C Q15) |
 | `key_local_network_permission` | 其他资源 res/xml/fragment_preferences_inrt.xml:24 | inrt/SettingsActivity.kt:54 | Excluded |  | inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板) |
-| `key_log_activity_input_bar_visible` |  | ui/log/LogActivity.kt:77 | Setting | `console` | 日志页 (LogPageConsoleSettings) |
-| `key_log_activity_log_coloring` |  | ui/log/LogPageConsoleSettings.kt:39, ui/log/LogPageConsoleSettings.kt:41 | Setting | `console` | 日志页 |
-| `key_log_activity_text_size` |  | ui/log/LogPageConsoleSettings.kt:48, ui/log/LogPageConsoleSettings.kt:68 | Setting | `console` | 日志页 |
-| `key_log_activity_time_format` |  | core/console/ConsoleTimeSettings.kt:14 | Setting | `console` | ConsoleTimeSettings.LOG_ACTIVITY |
-| `key_log_activity_time_visible` |  | core/console/ConsoleTimeSettings.kt:14 | Setting | `console` | ConsoleTimeSettings.LOG_ACTIVITY |
-| `key_log_activity_typescript_console_visible` |  | ui/log/LogActivity.kt:184, ui/log/LogActivity.kt:202 | Setting | `console` | 日志页 |
+| `key_log_activity_input_bar_visible` |  | core/pref/keys/ConsoleKeys.kt:30 | Setting | `console` | 日志页 (LogPageConsoleSettings) |
+| `key_log_activity_log_coloring` |  | core/pref/keys/ConsoleKeys.kt:33 | Setting | `console` | 日志页 |
+| `key_log_activity_text_size` |  | core/pref/keys/ConsoleKeys.kt:37 | Setting | `console` | 日志页 |
+| `key_log_activity_time_format` |  | core/pref/keys/ConsoleKeys.kt:27 | Setting | `console` | ConsoleTimeSettings.LOG_ACTIVITY |
+| `key_log_activity_time_visible` |  | core/pref/keys/ConsoleKeys.kt:24 | Setting | `console` | ConsoleTimeSettings.LOG_ACTIVITY |
+| `key_log_activity_typescript_console_visible` |  | core/pref/keys/ConsoleKeys.kt:40 | Setting | `console` | 日志页 |
 | `key_mail_settings` | 开发者选项 > 邮件 |  | Excluded |  | 动作条目, 打开邮件插件设置 (插件自身设置第一期不含, D3) |
 | `key_manage_ignored_updates` | 设置 > 更新 | core/pref/keys/UpdatesKeys.kt:41 | Excluded |  | 动作条目 (管理忽略的更新) |
 | `key_mcp_server_normally_closed` |  | app/tool/McpServerTool.kt:168, app/tool/McpServerTool.kt:169 | State | `other` | 上次是否正常关闭, 用于启动时恢复 |
-| `key_new_script_module_layer` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:116 | Setting | `developer` | 开关 |
+| `key_new_script_module_layer` | 开发者选项 > 脚本模块 | core/pref/keys/DeveloperKeys.kt:22 | Setting | `developer` | 开关 |
 | `key_night_mode` | 设置 > 外观 | core/plugin/center/PluginCenterFragment.kt:979, core/pref/keys/AppearanceKeys.kt:61, ui/main/plugin/PluginFragment.kt:64 | Setting | `appearance` | 列表项 (ViewUtils.MODE) |
 | `key_night_mode_always_off` | 候选值 `keys_night_mode` (`key_night_mode`) | core/pref/keys/AppearanceKeys.kt:41, ui/settings/NightModePreference.kt:54, util/ViewUtils.kt:1675 | ValueConstant |  | 候选值 (MODE.DAY) |
 | `key_night_mode_always_on` | 候选值 `keys_night_mode` (`key_night_mode`) | core/pref/keys/AppearanceKeys.kt:40, util/ViewUtils.kt:1676 | ValueConstant |  | 候选值 (MODE.NIGHT) |
 | `key_night_mode_enabled` |  | core/plugin/center/PluginCenterFragment.kt:980, core/pref/keys/AppearanceKeys.kt:67, ui/main/plugin/PluginFragment.kt:65 | Setting | `appearance` | 与 `key_night_mode` 一起由 NightModePreference 与抽屉写入 |
 | `key_night_mode_follow_system` | 候选值 `keys_night_mode` (`key_night_mode`); 默认值 `default_key_night_mode` | core/pref/keys/AppearanceKeys.kt:39, ui/settings/NightModePreference.kt:55, util/ViewUtils.kt:1677 | ValueConstant |  | 候选值 (MODE.FOLLOW), 默认值 |
 | `key_night_mode_null` |  | core/pref/keys/AppearanceKeys.kt:42, util/ViewUtils.kt:1678 | ValueConstant |  | ViewUtils.MODE.NULL, 不在列表候选中 |
-| `key_nodejs_doctor_report` | 开发者选项 > Node.js |  | Excluded |  | 动作条目 (生成 Node.js 诊断报告) |
-| `key_nodejs_inspector_enabled` | 开发者选项 > Node.js | engine/NodeJsRuntimePluginBridge.kt:78 | Setting | `developer` | 开关 |
+| `key_nodejs_doctor_report` | 开发者选项 > Node.js | core/pref/keys/DeveloperKeys.kt:50 | Excluded |  | 动作条目 (生成 Node.js 诊断报告) |
+| `key_nodejs_inspector_enabled` | 开发者选项 > Node.js | core/pref/keys/DeveloperKeys.kt:34, engine/NodeJsRuntimePluginBridge.kt:78 | Setting | `developer` | 开关 |
 | `key_not_showing_main_activity` | 其他资源 res/xml/fragment_preferences_inrt.xml:72 | inrt/Pref.kt:49, inrt/Pref.kt:75, runtime/api/augment/settings/Settings.kt:30 | Excluded |  | inrt 运行配置 (打包时由 launchConfig 写入); 主应用只经脚本 API settings 读写, 无消费方 (附录 A.2, Q13 已拍板) |
 | `key_pc_server_address_history` |  | pluginclient/JsonSocketClient.kt:447, pluginclient/JsonSocketClient.kt:448 | State | `other` | 地址历史 (Gson LinkedHashSet) |
 | `key_plugin_center_auto_check_updates` | 插件中心设置 > 更新 | core/plugin/center/PluginCenterFragment.kt:139, core/plugin/center/PluginOnlineSettingsStore.kt:25 | Setting | `plugin_center` | 开关 |
@@ -263,17 +263,17 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `key_scheduled_restart_backend_work_manager` | 默认值 `default_key_scheduled_restart_backend` | core/pref/keys/GeneralKeys.kt:37, core/pref/keys/GeneralKeys.kt:107, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:90 | ValueConstant |  | 候选值, 默认值 |
 | `key_scheduled_restart_delay` |  | core/pref/keys/GeneralKeys.kt:67 | Setting | `general` | 计划重启延迟 |
 | `key_screen_capture_request_delay` | 设置 > 脚本运行 | core/pref/keys/RunningKeys.kt:49 | Setting | `running` | 截图授权延迟 |
-| `key_script_module_debug_print` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:126 | Setting | `developer` | 开关 |
-| `key_script_module_debug_print_disabled_modules` | 开发者选项 > 脚本模块 | core/pref/Pref.kt:130, core/pref/Pref.kt:131 | Setting | `developer` | StringSet |
+| `key_script_module_debug_print` | 开发者选项 > 脚本模块 | core/pref/keys/DeveloperKeys.kt:26 | Setting | `developer` | 开关 |
+| `key_script_module_debug_print_disabled_modules` | 开发者选项 > 脚本模块 | core/pref/keys/DeveloperKeys.kt:30 | Setting | `developer` | StringSet |
 | `key_scripts_after_app_restart` |  | core/pref/keys/GeneralKeys.kt:92, util/IntentUtils.kt:440, util/IntentUtils.kt:478 | Excluded |  | 重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (附录 A.2, Q13 已拍板) |
-| `key_server_address` |  | core/pref/Pref.kt:304, core/pref/Pref.kt:307 | Setting | `connection` | 服务端地址 |
-| `key_server_mode_lan_discovery` |  | pluginclient/DevPluginPrefs.kt:34, ui/devplugin/ServerModeManagerDialog.kt:89 | Setting | `connection` | 服务端模式管理器开关 |
-| `key_server_mode_manager_clients_level` |  | ui/devplugin/ServerModeManagerDialog.kt:39 | State | `other` | 管理器对话框展开级别 |
-| `key_server_mode_manager_control_level` |  | ui/devplugin/ServerModeManagerDialog.kt:37 | State | `other` | 管理器对话框展开级别 |
-| `key_server_mode_manager_settings_collapsed` |  | ui/devplugin/ServerModeManagerDialog.kt:38 | State | `other` | 管理器设置区折叠状态 |
-| `key_server_mode_manager_status_level` |  | ui/devplugin/ServerModeManagerDialog.kt:36 | State | `other` | 管理器对话框展开级别 |
-| `key_server_mode_notify_connection_changes` |  | pluginclient/DevPluginPrefs.kt:30, ui/devplugin/ServerModeManagerDialog.kt:83 | Setting | `connection` | 服务端模式管理器开关 |
-| `key_server_mode_restore_on_launch` |  | pluginclient/DevPluginPrefs.kt:26, ui/devplugin/ServerModeManagerDialog.kt:77 | Setting | `connection` | 服务端模式管理器开关 |
+| `key_server_address` |  | core/pref/keys/ConnectionKeys.kt:25 | Setting | `connection` | 服务端地址 |
+| `key_server_mode_lan_discovery` |  | core/pref/keys/ConnectionKeys.kt:69 | Setting | `connection` | 服务端模式管理器开关 |
+| `key_server_mode_manager_clients_level` |  | ui/devplugin/ServerModeManagerDialog.kt:40 | State | `other` | 管理器对话框展开级别 |
+| `key_server_mode_manager_control_level` |  | ui/devplugin/ServerModeManagerDialog.kt:38 | State | `other` | 管理器对话框展开级别 |
+| `key_server_mode_manager_settings_collapsed` |  | ui/devplugin/ServerModeManagerDialog.kt:39 | State | `other` | 管理器设置区折叠状态 |
+| `key_server_mode_manager_status_level` |  | ui/devplugin/ServerModeManagerDialog.kt:37 | State | `other` | 管理器对话框展开级别 |
+| `key_server_mode_notify_connection_changes` |  | core/pref/keys/ConnectionKeys.kt:62 | Setting | `connection` | 服务端模式管理器开关 |
+| `key_server_mode_restore_on_launch` |  | core/pref/keys/ConnectionKeys.kt:55 | Setting | `connection` | 服务端模式管理器开关 |
 | `key_server_socket_normally_closed` |  | pluginclient/JsonSocketServer.kt:167, pluginclient/JsonSocketServer.kt:169 | State | `other` | 上次是否正常关闭, 用于启动时恢复 |
 | `key_setup_wizard_welcome_done` |  | ui/settings/ResetSetupWizardWelcomePreference.kt:28, ui/wizard/SetupWizards.kt:54, ui/wizard/SetupWizards.kt:84 | State | `other` | 欢迎向导已完成 |
 | `key_setup_wizards` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:91, ui/settings/PreferencesFragment.kt:24 | Excluded |  | 动作条目 (打开设置向导) |
@@ -413,7 +413,7 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 
 ## 5. 绕过 `Pref` 读默认偏好的文件
 
-- core/pref/Pref.kt:52
+- core/pref/Pref.kt:54
 - engine/NodeJsRuntimePluginBridge.kt:77
 - engine/RootAutomatorEngine.kt:129,159
 - inrt/Pref.kt:25

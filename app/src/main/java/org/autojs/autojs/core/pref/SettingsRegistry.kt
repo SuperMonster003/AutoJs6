@@ -2,11 +2,15 @@ package org.autojs.autojs.core.pref
 
 import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
+import org.autojs.autojs.core.pref.keys.ConsoleKeys
+import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
+import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
 import org.autojs.autojs.core.pref.keys.RecordKeys
 import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.core.pref.keys.TimedTaskKeys
@@ -80,6 +84,10 @@ object SettingsRegistry {
         RecordKeys,
         ExtensibilityKeys,
         UpdatesKeys,
+        ConsoleKeys,
+        ConnectionKeys,
+        LayoutInspectorKeys,
+        DeveloperKeys,
     )
 
     /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */

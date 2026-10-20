@@ -6,6 +6,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.JsonSocketServerTool
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocket
 import org.autojs.autojs.pluginclient.JsonSocketServer
@@ -74,20 +75,17 @@ class ServerModeManagerDialog private constructor(
         addSwitch(
             R.string.text_restore_server_on_launch,
             R.string.summary_restore_server_on_launch,
-            R.string.key_server_mode_restore_on_launch,
-            R.bool.pref_server_mode_restore_on_launch,
+            ConnectionKeys.SERVER_MODE_RESTORE_ON_LAUNCH,
         )
         addSwitch(
             R.string.text_notify_client_connection_changes,
             R.string.summary_notify_client_connection_changes,
-            R.string.key_server_mode_notify_connection_changes,
-            R.bool.pref_server_mode_notify_connection_changes,
+            ConnectionKeys.SERVER_MODE_NOTIFY_CONNECTION_CHANGES,
         )
         addSwitch(
             R.string.text_lan_discovery,
             R.string.summary_lan_discovery,
-            R.string.key_server_mode_lan_discovery,
-            R.bool.pref_server_mode_lan_discovery,
+            ConnectionKeys.SERVER_MODE_LAN_DISCOVERY,
         ) { enabled ->
             // Take effect at once while listening. zh-CN: 监听期间立即生效.
             if (service.isServerSocketConnected) {

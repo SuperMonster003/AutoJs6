@@ -15,13 +15,21 @@ var res = context.getResources();
 var pkg = context.getPackageName();
 var touched = {};
 var snapshot = sp.getAll();
+// Lines also go to RESULT_FILE, which device_store_check.py prefers: some ROMs drop log lines of a busy process.
+var RESULT_FILE = files.join(files.cwd(), 'aj6set-result.txt');
+var resultLines = [];
+
+function emit(line) {
+    console.log(MARK + ' ' + line);
+    resultLines.push(line);
+}
 
 function report(id, ok, detail) {
-    console.log(MARK + ' ' + (ok ? 'PASS' : 'FAIL') + ' ' + id + (detail === undefined ? '' : ' ' + detail));
+    emit((ok ? 'PASS' : 'FAIL') + ' ' + id + (detail === undefined ? '' : ' ' + detail));
 }
 
 function info(text) {
-    console.log(MARK + ' info ' + text);
+    emit('info ' + text);
 }
 
 function check(id, fn) {
@@ -75,6 +83,7 @@ var OLD_EXPRESSIONS = {
     'ThemeColorManager.defaultThemeColor.colorPrimary': function () { return org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor.getColorPrimary(); },
     'ThemeColorManager.defaultThemeColor.colorPrimaryDark': function () { return org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor.getColorPrimaryDark(); },
     'ThemeColorManager.defaultThemeColor.colorAccent': function () { return org.autojs.autojs.theme.ThemeColorManager.defaultThemeColor.getColorAccent(); },
+    'if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS': function () { return org.autojs.autojs.util.NetworkUtils.INSTANCE.getGatewayAddress(); },
     'AceEditorFont.IOSEVKA.preferenceValue': function () { return org.autojs.autojs.ui.edit.editor.ace.AceEditorFont.IOSEVKA.getPreferenceValue(); },
     'DEFAULT_FILE_TYPES': function () { return lspList('getDEFAULT_FILE_TYPES'); },
     'DEFAULT_DECLARATION_GROUPS': function () { return lspList('getDEFAULT_DECLARATION_GROUPS'); },
@@ -417,6 +426,56 @@ var CALLERS = {
             return expect(encoded, raw, 'text written back');
         });
     },
+    ConsoleKeys: function () {
+        check('console-time-settings', function () {
+            var entries = org.autojs.autojs.core.console.ConsoleTimeSettings.values();
+            var bad = [];
+            for (var i = 0; i < entries.length; i++) {
+                var e = entries[i];
+                if (!same(e.isTimeVisible(), sp.getBoolean(e.getVisibleKey().getName(), e.getDefaultVisible()))) bad.push(e + ' visible');
+                var pattern = org.autojs.autojs.core.console.ConsoleLogFormat.INSTANCE.normalizeTimePattern(sp.getString(e.getFormatKey().getName(), 'HH:mm:ss.SSS'));
+                if (!same(e.getTimeFormat(), pattern)) bad.push(e + ' format');
+            }
+            return bad.length === 0 || bad.join(' ');
+        });
+    },
+    ConnectionKeys: function () {
+        var C = Keys.ConnectionKeys;
+        check('connection-deprecated-readers', function () {
+            var D = org.autojs.autojs.pluginclient.DevPluginPrefs.INSTANCE;
+            var pairs = [
+                [D.isClientAutoReconnectEnabled(), C.CLIENT_MODE_AUTO_RECONNECT],
+                [D.isClientReconnectOnNetworkChangeEnabled(), C.CLIENT_MODE_RECONNECT_ON_NETWORK_CHANGE],
+                [D.isClientRestoreOnLaunchEnabled(), C.CLIENT_MODE_RESTORE_ON_LAUNCH],
+                [D.isServerRestoreOnLaunchEnabled(), C.SERVER_MODE_RESTORE_ON_LAUNCH],
+                [D.isServerNotifyConnectionChangesEnabled(), C.SERVER_MODE_NOTIFY_CONNECTION_CHANGES],
+                [D.isServerLanDiscoveryEnabled(), C.SERVER_MODE_LAN_DISCOVERY],
+            ];
+            var bad = pairs.filter(function (p) { return !same(p[0], p[1].get()); }).map(function (p) { return String(p[1].getName()); });
+            if (bad.length) return bad.join(' ');
+            var gateway = org.autojs.autojs.util.NetworkUtils.INSTANCE.getGatewayAddress();
+            return expect(Pref.getServerAddress(), sp.getString(C.SERVER_ADDRESS.getName(), gateway), 'server address');
+        });
+    },
+    LayoutInspectorKeys: function () {
+        var L = Keys.LayoutInspectorKeys;
+        check('layout-inspector-query-mode', function () {
+            touch(L.LAYOUT_INSPECTOR_QUERY_MODE);
+            var Store = org.autojs.autojs.ui.floating.layoutinspector.search.QueryModeStore.INSTANCE;
+            L.LAYOUT_INSPECTOR_QUERY_MODE.set('REMOVED_MODE', true);
+            if (!same(Store.load(), 'KEYWORD')) return 'unknown mode read as ' + Store.load();
+            L.LAYOUT_INSPECTOR_QUERY_MODE.remove(true);
+            return expect(Store.load(), 'KEYWORD', 'missing mode');
+        });
+    },
+    DeveloperKeys: function () {
+        var D = Keys.DeveloperKeys;
+        check('developer-deprecated-readers', function () {
+            if (!same(Pref.isNewScriptModuleLayerEnabled(), D.NEW_SCRIPT_MODULE_LAYER.get())) return 'module layer';
+            if (!same(Pref.isScriptModuleDebugPrintEnabled(), D.SCRIPT_MODULE_DEBUG_PRINT.get())) return 'debug print';
+            return expect(Pref.getScriptModuleDebugPrintDisabledModules().size(), D.getScriptModuleDebugPrintDisabledModules().size(), 'disabled modules');
+        });
+    },
 };
 
 info('registry: ' + Registry.DOMAINS.size() + ' domains, ' + Registry.getKeys().size() + ' keys, ' + Registry.describe().size() + ' descriptors');
@@ -430,4 +489,6 @@ check('restore', function () {
     var diff = Object.keys(touched).filter(function (name) { return !same(after.get(name), snapshot.get(name)); });
     return diff.length === 0 || 'not restored: ' + diff.join(' ');
 });
+resultLines.push('done');
+files.write(RESULT_FILE, resultLines.join(String.fromCharCode(10)));
 console.log(MARK + ' done');

@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-20, 扫描基线: `master@a4b6d2d34`
+- 生成日期: 2026-10-20, 扫描基线: `master@ed4674afe`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -61,11 +61,14 @@
 | `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `AutoNightMode.isFunctional()` | `运行时: AutoNightMode.isFunctional()` | core/pref/keys/AppearanceKeys.kt:71 |  |
 | `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isAutoNightModeEnabled = isFunctional()` | `运行时: 缺键时 Pref 初始化写入 isFunctional()` | core/pref/Pref.kt:49 |  |
 | `key_batch_rename_history_retention` | Int | 伴生常量 | `SettingDefault.of(BatchRenameJournalStore.MAX_BATCHES) (经 常量 MAX_BATCHES (core/plugin/batchrename/BatchRenameJournalStore.kt:231))` | `20` | core/pref/keys/ExplorerKeys.kt:73 |  |
-| `key_client_mode_auto_reconnect` | Boolean | R.bool | `R.bool.pref_client_mode_auto_reconnect` | `true` | pluginclient/DevPluginPrefs.kt:14 |  |
-| `key_client_mode_reconnect_on_network_change` | Boolean | R.bool | `R.bool.pref_client_mode_reconnect_on_network_change` | `true` | pluginclient/DevPluginPrefs.kt:18 |  |
-| `key_client_mode_restore_on_launch` | Boolean | R.bool | `R.bool.pref_client_mode_restore_on_launch` | `true` | pluginclient/DevPluginPrefs.kt:22 |  |
+| `key_client_mode_auto_reconnect` | Boolean | R.bool | `boolResource(R.bool.pref_client_mode_auto_reconnect, "pref_client_mode_auto_reconnect")` | `true` | core/pref/keys/ConnectionKeys.kt:33 |  |
+| `key_client_mode_reconnect_on_network_change` | Boolean | R.bool | `boolResource(R.bool.pref_client_mode_reconnect_on_network_change, "pref_client_mode_reconnect_on_network_change")` | `true` | core/pref/keys/ConnectionKeys.kt:40 |  |
+| `key_client_mode_restore_on_launch` | Boolean | R.bool | `boolResource(R.bool.pref_client_mode_restore_on_launch, "pref_client_mode_restore_on_launch")` | `true` | core/pref/keys/ConnectionKeys.kt:47 |  |
+| `key_codegen_model_current` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:45 |  |
 | `key_codegen_model_current` | String | 调用处字面量 (人工) | `preferences.getString(preferenceKey, null)` | `null` | ui/settings/codegen/CodegenModelStoreFactory.kt:40 | 未选择模型 |
+| `key_console_element_time_format` | String | 伴生常量 | `SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN) (经 常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23))` | `HH:mm:ss.SSS` | core/pref/keys/ConsoleKeys.kt:52 |  |
 | `key_console_element_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
+| `key_console_element_time_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:49 |  |
 | `key_console_element_time_visible` | Boolean | 伴生常量 (人工) | `CONSOLE_ELEMENT(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:16 |  |
 | `key_delete_permanently_also_clear_history` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/HistoryKeys.kt:67 |  |
 | `key_delete_permanently_also_clear_history` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_preferences.xml:152 |  |
@@ -127,12 +130,16 @@
 | `key_extending_js_build_in_objects` | Boolean | R.bool | `app:defaultValue="@bool/pref_extending_js_build_in_objects"` | `false` | res/xml/fragment_preferences.xml:320 |  |
 | `key_file_extensions` | String (Enum) | R.string | `keyResource(R.string.default_key_file_extensions, "default_key_file_extensions")` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | core/pref/keys/ExplorerKeys.kt:56 |  |
 | `key_file_extensions` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_file_extensions"` | `key_file_extensions_show_all = key_$_file_extensions_show_all` | res/xml/fragment_preferences.xml:118 |  |
+| `key_floating_console_time_format` | String | 伴生常量 | `SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN) (经 常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23))` | `HH:mm:ss.SSS` | core/pref/keys/ConsoleKeys.kt:58 |  |
 | `key_floating_console_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
+| `key_floating_console_time_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:55 |  |
 | `key_floating_console_time_visible` | Boolean | 伴生常量 (人工) | `FLOATING_WINDOW(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:17 |  |
 | `key_foreground_service` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/GeneralKeys.kt:80 |  |
 | `key_foreground_service` | Boolean | 调用处字面量 (人工) | `setting.storedOrNull() ?: false` | `false` | ui/main/drawer/DrawerMenuToggleableItem.kt:285 | 抽屉 "前台服务" 开关 (prefSetting = GeneralKeys.FOREGROUND_SERVICE); 脚本 API settings.isEnabled 缺键时读声明的默认值 (附录 C Q10, P2.4) |
 | `key_gesture_observing` | Boolean | R.bool | `boolResource(R.bool.pref_gesture_observing, "pref_gesture_observing")` | `false` | core/pref/keys/A11yKeys.kt:41 |  |
+| `key_global_console_element_time_format` | String | 伴生常量 | `SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN) (经 常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23))` | `HH:mm:ss.SSS` | core/pref/keys/ConsoleKeys.kt:46 |  |
 | `key_global_console_element_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
+| `key_global_console_element_time_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:43 |  |
 | `key_global_console_element_time_visible` | Boolean | 伴生常量 (人工) | `GLOBAL_CONSOLE_ELEMENT(..., false)` | `false` | core/console/ConsoleTimeSettings.kt:15 |  |
 | `key_guard_mode` | Boolean | R.bool | `boolResource(R.bool.pref_guard_mode, "pref_guard_mode")` | `false` | core/pref/keys/RunningKeys.kt:37 |  |
 | `key_guard_mode` | Boolean | R.bool | `app:defaultValue="@bool/pref_guard_mode"` | `false` | res/xml/fragment_preferences.xml:263 |  |
@@ -149,24 +156,29 @@
 | `key_keep_screen_on_when_in_foreground_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:102 |  |
 | `key_launcher_icon` | String (Enum) | R.string | `keyResource(R.string.default_key_launcher_icon, "default_key_launcher_icon")` | `key_launcher_icon_adaptive = key_$_launcher_icon_adaptive` | core/pref/keys/GeneralKeys.kt:73 |  |
 | `key_launcher_icon` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_launcher_icon"` | `key_launcher_icon_adaptive = key_$_launcher_icon_adaptive` | res/xml/fragment_preferences.xml:70 |  |
-| `key_layout_inspector_filter_profile_selected` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/search/FilterProfileStore.kt:20 |  |
-| `key_layout_inspector_filter_profiles` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/search/FilterProfileStore.kt:19 |  |
-| `key_layout_inspector_node_copy_mode` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/NodeInfoDialog.kt:23 |  |
-| `key_layout_inspector_query_mode` | String | 调用处字面量 | `(方法默认)` | `null` | ui/floating/layoutinspector/search/QueryModeStore.kt:17 |  |
+| `key_layout_inspector_filter_profile_selected` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:29 |  |
+| `key_layout_inspector_filter_profiles` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:25 |  |
+| `key_layout_inspector_node_copy_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:33 |  |
+| `key_layout_inspector_query_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:37 |  |
+| `key_leakcanary_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/DeveloperKeys.kt:42 |  |
 | `key_leakcanary_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:154 |  |
+| `key_log_activity_input_bar_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:30 |  |
 | `key_log_activity_input_bar_visible` | Boolean | 伴生常量 (人工) | `DEFAULT_INPUT_BAR_VISIBLE` | `false` | ui/log/LogPageConsoleSettings.kt:61 |  |
-| `key_log_activity_log_coloring` | Boolean | 伴生常量 | `DEFAULT_COLORFUL (经 常量 DEFAULT_COLORFUL (ui/log/LogPageConsoleSettings.kt:82))` | `true` | ui/log/LogPageConsoleSettings.kt:39 |  |
-| `key_log_activity_text_size` | Int | 调用处字面量 | `0` | `0` | ui/log/LogPageConsoleSettings.kt:68 |  |
+| `key_log_activity_log_coloring` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ConsoleKeys.kt:33 |  |
+| `key_log_activity_text_size` | Int | 调用处字面量 | `SettingDefault.of(0)` | `0` | core/pref/keys/ConsoleKeys.kt:37 |  |
+| `key_log_activity_time_format` | String | 伴生常量 | `SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN) (经 常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23))` | `HH:mm:ss.SSS` | core/pref/keys/ConsoleKeys.kt:27 |  |
 | `key_log_activity_time_format` | String | 伴生常量 (人工) | `ConsoleLogFormat.DEFAULT_TIME_PATTERN` | `HH:mm:ss.SSS` | core/console/ConsoleTimeSettings.kt:24 |  |
+| `key_log_activity_time_visible` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ConsoleKeys.kt:24 |  |
 | `key_log_activity_time_visible` | Boolean | 伴生常量 (人工) | `LOG_ACTIVITY(..., true)` | `true` | core/console/ConsoleTimeSettings.kt:14 |  |
-| `key_log_activity_typescript_console_visible` | Boolean | 调用处字面量 | `false` | `false` | ui/log/LogActivity.kt:183 |  |
-| `key_new_script_module_layer` | Boolean | 调用处字面量 | `false` | `false` | core/pref/Pref.kt:116 |  |
+| `key_log_activity_typescript_console_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:40 |  |
+| `key_new_script_module_layer` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:22 |  |
 | `key_new_script_module_layer` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:9 |  |
 | `key_night_mode` | String (Enum) | R.string | `keyResource(R.string.default_key_night_mode, "default_key_night_mode")` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | core/pref/keys/AppearanceKeys.kt:60 |  |
 | `key_night_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_night_mode"` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | res/xml/fragment_preferences.xml:20 |  |
 | `key_night_mode_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:67 |  |
 | `key_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isNightModeEnabled = isNightModeYes(app)` | `运行时: 缺键时 Pref 初始化写入系统当前是否夜间` | core/pref/Pref.kt:59 |  |
 | `key_nodejs_inspector_enabled` | Boolean | 调用处字面量 | `false` | `false` | engine/NodeJsRuntimePluginBridge.kt:78 |  |
+| `key_nodejs_inspector_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:34 |  |
 | `key_nodejs_inspector_enabled` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:117 |  |
 | `key_plugin_center_auto_check_updates` | Boolean | R.bool | `R.bool.pref_plugin_center_auto_check_updates` | `true` | core/plugin/center/PluginOnlineSettingsStore.kt:24 |  |
 | `key_plugin_center_auto_check_updates` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_auto_check_updates"` | `true` | res/xml/fragment_plugin_center_preferences.xml:29 |  |
@@ -188,13 +200,13 @@
 | `key_scheduled_restart_backend` | String (Enum) | R.string | `keyResource(R.string.default_key_scheduled_restart_backend, "default_key_scheduled_restart_backend")` | `key_scheduled_restart_backend_work_manager = key_$_scheduled_restart_backend_work_manager` | core/pref/keys/GeneralKeys.kt:59 |  |
 | `key_scheduled_restart_delay` | Int | R.integer | `intResource(R.integer.scheduled_restart_start_delay_default_value, "scheduled_restart_start_delay_default_value")` | `300` | core/pref/keys/GeneralKeys.kt:66 |  |
 | `key_screen_capture_request_delay` | Int | R.integer | `intResource(R.integer.screen_capture_request_delay_default_value, "screen_capture_request_delay_default_value")` | `350` | core/pref/keys/RunningKeys.kt:48 |  |
-| `key_script_module_debug_print` | Boolean | 调用处字面量 | `false` | `false` | core/pref/Pref.kt:126 |  |
+| `key_script_module_debug_print` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:26 |  |
 | `key_script_module_debug_print` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:16 |  |
-| `key_script_module_debug_print_disabled_modules` | StringSet | 调用处字面量 | `null` | `null` | core/pref/Pref.kt:130 |  |
-| `key_server_address` | String | 表达式 (人工) | `if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS` | `运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)` | core/pref/Pref.kt:304 |  |
-| `key_server_mode_lan_discovery` | Boolean | R.bool | `R.bool.pref_server_mode_lan_discovery` | `true` | pluginclient/DevPluginPrefs.kt:34 |  |
-| `key_server_mode_notify_connection_changes` | Boolean | R.bool | `R.bool.pref_server_mode_notify_connection_changes` | `true` | pluginclient/DevPluginPrefs.kt:30 |  |
-| `key_server_mode_restore_on_launch` | Boolean | R.bool | `R.bool.pref_server_mode_restore_on_launch` | `true` | pluginclient/DevPluginPrefs.kt:26 |  |
+| `key_script_module_debug_print_disabled_modules` | StringSet | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:30 |  |
+| `key_server_address` | String | 表达式 (人工) | `if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS` | `运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)` | core/pref/keys/ConnectionKeys.kt:24 |  |
+| `key_server_mode_lan_discovery` | Boolean | R.bool | `boolResource(R.bool.pref_server_mode_lan_discovery, "pref_server_mode_lan_discovery")` | `true` | core/pref/keys/ConnectionKeys.kt:68 |  |
+| `key_server_mode_notify_connection_changes` | Boolean | R.bool | `boolResource(R.bool.pref_server_mode_notify_connection_changes, "pref_server_mode_notify_connection_changes")` | `true` | core/pref/keys/ConnectionKeys.kt:61 |  |
+| `key_server_mode_restore_on_launch` | Boolean | R.bool | `boolResource(R.bool.pref_server_mode_restore_on_launch, "pref_server_mode_restore_on_launch")` | `true` | core/pref/keys/ConnectionKeys.kt:54 |  |
 | `key_stable_mode` | Boolean | R.bool | `boolResource(R.bool.pref_stable_mode, "pref_stable_mode")` | `false` | core/pref/keys/A11yKeys.kt:38 |  |
 | `key_stable_mode` | Boolean | R.bool | `app:defaultValue="@bool/pref_stable_mode"` | `false` | res/xml/fragment_preferences.xml:238 |  |
 | `key_theme_color_accent` | Int | 伴生常量 (人工) | `ThemeColorManager.defaultThemeColor.colorAccent` | `由 #FFDEAD 派生 (inrt 为 #263238)` | core/pref/keys/AppearanceKeys.kt:89 | ThemeColorManager.kt:20 defaultThemeColor |

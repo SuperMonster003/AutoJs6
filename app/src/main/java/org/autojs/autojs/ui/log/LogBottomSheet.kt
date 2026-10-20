@@ -234,7 +234,7 @@ class LogBottomSheet : BottomSheetDialogFragment() {
                 StackFrameClickResult.FAILED, null -> ViewUtils.showToast(requireContext(), R.string.text_failed_to_locate, true)
             }
         }
-        mSettings = LogPageConsoleSettings(binding.console, R.string.key_editor_log_panel_input_bar_visible,
+        mSettings = LogPageConsoleSettings(binding.console, EditorKeys.EDITOR_LOG_PANEL_INPUT_BAR_VISIBLE,
             ConsoleTimeSettings.EDITOR_PANEL).also { it.apply() }
         binding.console.setOnCommandSubmitListener { source ->
             binding.console.setCommandInputBusy(true)

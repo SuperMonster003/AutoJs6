@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-20",
  "git": {
-  "commit": "a4b6d2d34",
+  "commit": "ed4674afe",
   "branch": "master",
-  "dirtyScannedFiles": 29
+  "dirtyScannedFiles": 27
  },
  "summary": {
   "keyResources": 268,
@@ -38,8 +38,7 @@
    "key_dialog_log_entries_exported",
    "key_enable_observe_key",
    "key_github_token",
-   "key_mail_settings",
-   "key_nodejs_doctor_report"
+   "key_mail_settings"
   ],
   "keysWithoutAnyRefs": [
    "key_dialog_foreground_svc",
@@ -52,7 +51,7 @@
   "namedStoreCallFiles": 34,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 8,
-  "prefUserFiles": 88,
+  "prefUserFiles": 78,
   "jsonFileStores": 13
  },
  "keys": [
@@ -2222,12 +2221,8 @@
    "line": 153,
    "sourceRefs": [
     {
-     "file": "pluginclient/DevPluginPrefs.kt",
-     "line": 14
-    },
-    {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 70
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 34
     }
    ],
    "kind": "Setting",
@@ -2301,12 +2296,8 @@
    "line": 158,
    "sourceRefs": [
     {
-     "file": "pluginclient/DevPluginPrefs.kt",
-     "line": 18
-    },
-    {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 76
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 41
     }
    ],
    "kind": "Setting",
@@ -2320,12 +2311,8 @@
    "line": 159,
    "sourceRefs": [
     {
-     "file": "pluginclient/DevPluginPrefs.kt",
-     "line": 22
-    },
-    {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 82
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 48
     }
    ],
    "kind": "Setting",
@@ -2357,6 +2344,10 @@
    "file": "strings_donottranslate.xml",
    "line": 161,
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/LayoutInspectorKeys.kt",
+     "line": 45
+    },
     {
      "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
      "line": 27
@@ -2392,8 +2383,8 @@
    "line": 163,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 16
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 52
     }
    ],
    "kind": "Setting",
@@ -2407,8 +2398,8 @@
    "line": 164,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 16
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 49
     }
    ],
    "kind": "Setting",
@@ -3237,10 +3228,6 @@
     {
      "file": "core/pref/keys/EditorKeys.kt",
      "line": 187
-    },
-    {
-     "file": "ui/log/LogBottomSheet.kt",
-     "line": 237
     }
    ],
    "kind": "Setting",
@@ -3253,10 +3240,6 @@
    "file": "strings_donottranslate.xml",
    "line": 194,
    "sourceRefs": [
-    {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 13
-    },
     {
      "file": "core/pref/keys/EditorKeys.kt",
      "line": 193
@@ -3272,10 +3255,6 @@
    "file": "strings_donottranslate.xml",
    "line": 195,
    "sourceRefs": [
-    {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 13
-    },
     {
      "file": "core/pref/keys/EditorKeys.kt",
      "line": 190
@@ -4084,8 +4063,8 @@
    "line": 224,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 17
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 58
     }
    ],
    "kind": "Setting",
@@ -4099,8 +4078,8 @@
    "line": 225,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 17
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 55
     }
    ],
    "kind": "Setting",
@@ -4200,8 +4179,8 @@
    "line": 230,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 15
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 46
     }
    ],
    "kind": "Setting",
@@ -4215,8 +4194,8 @@
    "line": 231,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 15
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 43
     }
    ],
    "kind": "Setting",
@@ -4674,15 +4653,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 170
+     "line": 177
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 269
+     "line": 276
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 279
+     "line": 286
     }
    ],
    "kind": "State",
@@ -4697,15 +4676,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 178
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 275
+     "line": 185
     },
     {
      "file": "core/pref/Pref.kt",
      "line": 282
+    },
+    {
+     "file": "core/pref/Pref.kt",
+     "line": 289
     }
    ],
    "kind": "State",
@@ -4720,15 +4699,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 154
+     "line": 161
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 266
+     "line": 273
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 281
+     "line": 288
     }
    ],
    "kind": "State",
@@ -4743,15 +4722,15 @@
    "sourceRefs": [
     {
      "file": "core/pref/Pref.kt",
-     "line": 174
+     "line": 181
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 272
+     "line": 279
     },
     {
      "file": "core/pref/Pref.kt",
-     "line": 280
+     "line": 287
     }
    ],
    "kind": "State",
@@ -4887,11 +4866,11 @@
    "sourceRefs": [
     {
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 27
+     "line": 28
     },
     {
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 29
+     "line": 30
     }
    ],
    "kind": "State",
@@ -4905,11 +4884,7 @@
    "line": 257,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
-     "line": 20
-    },
-    {
-     "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
+     "file": "core/pref/keys/LayoutInspectorKeys.kt",
      "line": 29
     }
    ],
@@ -4924,12 +4899,8 @@
    "line": 258,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
-     "line": 19
-    },
-    {
-     "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
-     "line": 24
+     "file": "core/pref/keys/LayoutInspectorKeys.kt",
+     "line": 25
     }
    ],
    "kind": "Setting",
@@ -4943,12 +4914,8 @@
    "line": 259,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/NodeInfoDialog.kt",
-     "line": 23
-    },
-    {
-     "file": "ui/floating/layoutinspector/NodeInfoDialog.kt",
-     "line": 27
+     "file": "core/pref/keys/LayoutInspectorKeys.kt",
+     "line": 33
     }
    ],
    "kind": "Setting",
@@ -4981,12 +4948,8 @@
    "line": 261,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 17
-    },
-    {
-     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 22
+     "file": "core/pref/keys/LayoutInspectorKeys.kt",
+     "line": 37
     }
    ],
    "kind": "Setting",
@@ -5001,11 +4964,11 @@
    "sourceRefs": [
     {
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 33
+     "line": 34
     },
     {
      "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 35
+     "line": 36
     }
    ],
    "kind": "State",
@@ -5032,6 +4995,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 42
+    },
     {
      "file": "ui/settings/DeveloperOptionsFragment.kt",
      "line": 24
@@ -5068,8 +5035,8 @@
    "line": 265,
    "sourceRefs": [
     {
-     "file": "ui/log/LogActivity.kt",
-     "line": 77
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 30
     }
    ],
    "kind": "Setting",
@@ -5083,12 +5050,8 @@
    "line": 266,
    "sourceRefs": [
     {
-     "file": "ui/log/LogPageConsoleSettings.kt",
-     "line": 39
-    },
-    {
-     "file": "ui/log/LogPageConsoleSettings.kt",
-     "line": 41
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 33
     }
    ],
    "kind": "Setting",
@@ -5102,12 +5065,8 @@
    "line": 267,
    "sourceRefs": [
     {
-     "file": "ui/log/LogPageConsoleSettings.kt",
-     "line": 48
-    },
-    {
-     "file": "ui/log/LogPageConsoleSettings.kt",
-     "line": 68
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 37
     }
    ],
    "kind": "Setting",
@@ -5121,8 +5080,8 @@
    "line": 268,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 14
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 27
     }
    ],
    "kind": "Setting",
@@ -5136,8 +5095,8 @@
    "line": 269,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleTimeSettings.kt",
-     "line": 14
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 24
     }
    ],
    "kind": "Setting",
@@ -5151,12 +5110,8 @@
    "line": 270,
    "sourceRefs": [
     {
-     "file": "ui/log/LogActivity.kt",
-     "line": 184
-    },
-    {
-     "file": "ui/log/LogActivity.kt",
-     "line": 202
+     "file": "core/pref/keys/ConsoleKeys.kt",
+     "line": 40
     }
    ],
    "kind": "Setting",
@@ -5253,8 +5208,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 116
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 22
     }
    ],
    "kind": "Setting",
@@ -5443,6 +5398,12 @@
      ]
     }
    ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 50
+    }
+   ],
    "kind": "Excluded",
    "note": "动作条目 (生成 Node.js 诊断报告)"
   },
@@ -5466,6 +5427,10 @@
     }
    ],
    "sourceRefs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 34
+    },
     {
      "file": "engine/NodeJsRuntimePluginBridge.kt",
      "line": 78
@@ -6257,8 +6222,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 126
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 26
     }
    ],
    "kind": "Setting",
@@ -6286,12 +6251,8 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 130
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 131
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 30
     }
    ],
    "kind": "Setting",
@@ -6327,12 +6288,8 @@
    "line": 317,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 304
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 307
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 25
     }
    ],
    "kind": "Setting",
@@ -6346,12 +6303,8 @@
    "line": 318,
    "sourceRefs": [
     {
-     "file": "pluginclient/DevPluginPrefs.kt",
-     "line": 34
-    },
-    {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 89
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 69
     }
    ],
    "kind": "Setting",
@@ -6366,7 +6319,7 @@
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 39
+     "line": 40
     }
    ],
    "kind": "State",
@@ -6381,7 +6334,7 @@
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 37
+     "line": 38
     }
    ],
    "kind": "State",
@@ -6396,7 +6349,7 @@
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 38
+     "line": 39
     }
    ],
    "kind": "State",
@@ -6411,7 +6364,7 @@
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 36
+     "line": 37
     }
    ],
    "kind": "State",
@@ -6425,12 +6378,8 @@
    "line": 323,
    "sourceRefs": [
     {
-     "file": "pluginclient/DevPluginPrefs.kt",
-     "line": 30
-    },
-    {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 83
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 62
     }
    ],
    "kind": "Setting",
@@ -6444,12 +6393,8 @@
    "line": 324,
    "sourceRefs": [
     {
-     "file": "pluginclient/DevPluginPrefs.kt",
-     "line": 26
-    },
-    {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 77
+     "file": "core/pref/keys/ConnectionKeys.kt",
+     "line": 55
     }
    ],
    "kind": "Setting",
@@ -8993,7 +8938,7 @@
   {
    "file": "core/pref/Pref.kt",
    "lines": [
-    52
+    54
    ]
   },
   {
@@ -9050,9 +8995,7 @@
   }
  ],
  "prefUsers": [
-  "app/tool/JsonSocketClientTool.kt",
   "app/tool/McpServerTool.kt",
-  "core/console/ConsoleTimeSettings.kt",
   "core/plugin/agent/ThreeStoveAgentConnectionOwner.kt",
   "core/plugin/center/PluginCenterFragment.kt",
   "core/plugin/center/PluginMountStore.kt",
@@ -9066,6 +9009,7 @@
   "core/pref/SettingKey.kt",
   "core/pref/SettingsJson.kt",
   "core/pref/keys/AppearanceKeys.kt",
+  "core/pref/keys/DeveloperKeys.kt",
   "core/pref/keys/EditorKeys.kt",
   "core/pref/keys/ExplorerKeys.kt",
   "core/pref/keys/GeneralKeys.kt",
@@ -9081,9 +9025,6 @@
   "inrt/launch/AssetsProjectLauncher.kt",
   "network/UpdateChecker.java",
   "permission/PostNotificationsPermission.kt",
-  "pluginclient/DevPluginClientReconnector.kt",
-  "pluginclient/DevPluginPrefs.kt",
-  "pluginclient/DevPluginService.kt",
   "pluginclient/JsonSocketClient.kt",
   "runtime/ScriptRuntime.kt",
   "runtime/api/Images.java",
@@ -9101,7 +9042,6 @@
   "theme/preference/MaterialListPreference.kt",
   "ui/accessibility/A11yServiceManagerDialog.kt",
   "ui/common/ManagerSettingsSection.kt",
-  "ui/devplugin/ClientModeManagerDialog.kt",
   "ui/devplugin/ConnectionManagerDialog.kt",
   "ui/doc/DocumentationPageController.kt",
   "ui/edit/EditorView.kt",
@@ -9111,13 +9051,9 @@
   "ui/floating/CircularMenu.java",
   "ui/floating/CircularMenuWindow.java",
   "ui/floating/controller/FloatingControllerWindow.kt",
-  "ui/floating/layoutinspector/NodeInfoDialog.kt",
-  "ui/floating/layoutinspector/search/FilterProfileStore.kt",
   "ui/floating/layoutinspector/search/QueryHistoryStore.kt",
   "ui/floating/layoutinspector/search/QueryModeStore.kt",
   "ui/keystore/ManageKeyStoreActivity.kt",
-  "ui/log/LogActivity.kt",
-  "ui/log/LogPageConsoleSettings.kt",
   "ui/main/MainActivity.kt",
   "ui/main/drawer/DrawerMenuToggleableItem.kt",
   "ui/main/plugin/PluginFragment.kt",
@@ -9128,7 +9064,6 @@
   "ui/settings/LauncherIconPreference.kt",
   "ui/settings/ManageIgnoredUpdatesPreference.kt",
   "ui/settings/ResetSetupWizardWelcomePreference.kt",
-  "ui/settings/ScriptModuleDebugPrintModulesPreference.kt",
   "ui/settings/ThemeColorPreference.kt",
   "ui/viewmodel/ExplorerItemManager.kt",
   "ui/widget/PrefSwitch.java",
@@ -10322,37 +10257,37 @@
   ],
   "key_client_mode_auto_reconnect": [
    {
-    "expr": "R.bool.pref_client_mode_auto_reconnect",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_client_mode_auto_reconnect",
-    "file": "pluginclient/DevPluginPrefs.kt",
-    "line": 14,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_client_mode_auto_reconnect, \"pref_client_mode_auto_reconnect\")",
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 33,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_client_mode_reconnect_on_network_change": [
    {
-    "expr": "R.bool.pref_client_mode_reconnect_on_network_change",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_client_mode_reconnect_on_network_change",
-    "file": "pluginclient/DevPluginPrefs.kt",
-    "line": 18,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_client_mode_reconnect_on_network_change, \"pref_client_mode_reconnect_on_network_change\")",
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 40,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_client_mode_restore_on_launch": [
    {
-    "expr": "R.bool.pref_client_mode_restore_on_launch",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_client_mode_restore_on_launch",
-    "file": "pluginclient/DevPluginPrefs.kt",
-    "line": 22,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_client_mode_restore_on_launch, \"pref_client_mode_restore_on_launch\")",
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 47,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
@@ -10367,6 +10302,27 @@
     "type": "Boolean"
    }
   ],
+  "key_codegen_model_current": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/LayoutInspectorKeys.kt",
+    "line": 45,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
+    "form": "调用处字面量",
+    "type": "String",
+    "expr": "preferences.getString(preferenceKey, null)",
+    "value": "null",
+    "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
+    "line": 40,
+    "note": "未选择模型",
+    "manual": true
+   }
+  ],
   "key_color_select_activity_legacy_layout": [
    {
     "expr": "false",
@@ -10376,6 +10332,47 @@
     "line": 1045,
     "method": "getBoolean",
     "type": "Boolean"
+   }
+  ],
+  "key_console_element_time_format": [
+   {
+    "expr": "SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN)",
+    "form": "伴生常量",
+    "value": "HH:mm:ss.SSS",
+    "via": "常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23)",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 52,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_console_element_time_visible": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 49,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "CONSOLE_ELEMENT(..., false)",
+    "value": "false",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 16,
+    "manual": true
    }
   ],
   "key_delete_permanently_also_clear_history": [
@@ -11073,6 +11070,47 @@
     "type": "Boolean"
    }
   ],
+  "key_floating_console_time_format": [
+   {
+    "expr": "SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN)",
+    "form": "伴生常量",
+    "value": "HH:mm:ss.SSS",
+    "via": "常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23)",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 58,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_floating_console_time_visible": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 55,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "FLOATING_WINDOW(..., false)",
+    "value": "false",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 17,
+    "manual": true
+   }
+  ],
   "key_foreground_service": [
    {
     "expr": "SettingDefault.of(false)",
@@ -11104,6 +11142,47 @@
     "line": 41,
     "method": "SettingKey.Bool",
     "type": "Boolean"
+   }
+  ],
+  "key_global_console_element_time_format": [
+   {
+    "expr": "SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN)",
+    "form": "伴生常量",
+    "value": "HH:mm:ss.SSS",
+    "via": "常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23)",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 46,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_global_console_element_time_visible": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 43,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "GLOBAL_CONSOLE_ELEMENT(..., false)",
+    "value": "false",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 15,
+    "manual": true
    }
   ],
   "key_guard_mode": [
@@ -11288,7 +11367,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 170,
+    "line": 177,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11299,7 +11378,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 178,
+    "line": 185,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11310,7 +11389,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 154,
+    "line": 161,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11321,7 +11400,7 @@
     "expr": "(方法默认)",
     "value": "-1",
     "file": "core/pref/Pref.kt",
-    "line": 174,
+    "line": 181,
     "method": "getTimestamp",
     "type": "Long"
    }
@@ -11356,41 +11435,41 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-    "line": 27,
+    "line": 28,
     "method": "getBoolean",
     "type": "Boolean"
    }
   ],
   "key_layout_inspector_filter_profile_selected": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
-    "line": 20,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/LayoutInspectorKeys.kt",
+    "line": 29,
+    "method": "SettingKey.Str",
     "type": "String"
    }
   ],
   "key_layout_inspector_filter_profiles": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/floating/layoutinspector/search/FilterProfileStore.kt",
-    "line": 19,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/LayoutInspectorKeys.kt",
+    "line": 25,
+    "method": "SettingKey.Str",
     "type": "String"
    }
   ],
   "key_layout_inspector_node_copy_mode": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/floating/layoutinspector/NodeInfoDialog.kt",
-    "line": 23,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/LayoutInspectorKeys.kt",
+    "line": 33,
+    "method": "SettingKey.Str",
     "type": "String"
    }
   ],
@@ -11407,12 +11486,12 @@
   ],
   "key_layout_inspector_query_mode": [
    {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-    "line": 17,
-    "method": "getStringOrNull",
+    "file": "core/pref/keys/LayoutInspectorKeys.kt",
+    "line": 37,
+    "method": "SettingKey.Str",
     "type": "String"
    }
   ],
@@ -11422,12 +11501,21 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-    "line": 33,
+    "line": 34,
     "method": "getBoolean",
     "type": "Boolean"
    }
   ],
   "key_leakcanary_enabled": [
+   {
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 42,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
    {
     "form": "XML 字面量",
     "value": "true",
@@ -11438,37 +11526,97 @@
     "type": "Boolean"
    }
   ],
+  "key_log_activity_input_bar_visible": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 30,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "DEFAULT_INPUT_BAR_VISIBLE",
+    "value": "false",
+    "file": "ui/log/LogPageConsoleSettings.kt",
+    "line": 61,
+    "manual": true
+   }
+  ],
   "key_log_activity_log_coloring": [
    {
-    "expr": "DEFAULT_COLORFUL",
-    "form": "伴生常量",
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
     "value": "true",
-    "via": "常量 DEFAULT_COLORFUL (ui/log/LogPageConsoleSettings.kt:82)",
-    "file": "ui/log/LogPageConsoleSettings.kt",
-    "line": 39,
-    "method": "getBoolean",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 33,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_log_activity_text_size": [
    {
-    "expr": "0",
+    "expr": "SettingDefault.of(0)",
     "form": "调用处字面量",
     "value": "0",
-    "file": "ui/log/LogPageConsoleSettings.kt",
-    "line": 68,
-    "method": "getInt",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 37,
+    "method": "SettingKey.Int",
     "type": "Int"
+   }
+  ],
+  "key_log_activity_time_format": [
+   {
+    "expr": "SettingDefault.of(ConsoleLogFormat.DEFAULT_TIME_PATTERN)",
+    "form": "伴生常量",
+    "value": "HH:mm:ss.SSS",
+    "via": "常量 DEFAULT_TIME_PATTERN (core/console/ConsoleLogFormat.kt:23)",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 27,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
+    "form": "伴生常量",
+    "type": "String",
+    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
+    "value": "HH:mm:ss.SSS",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 24,
+    "manual": true
+   }
+  ],
+  "key_log_activity_time_visible": [
+   {
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 24,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "伴生常量",
+    "type": "Boolean",
+    "expr": "LOG_ACTIVITY(..., true)",
+    "value": "true",
+    "file": "core/console/ConsoleTimeSettings.kt",
+    "line": 14,
+    "manual": true
    }
   ],
   "key_log_activity_typescript_console_visible": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "ui/log/LogActivity.kt",
-    "line": 183,
-    "method": "getBoolean",
+    "file": "core/pref/keys/ConsoleKeys.kt",
+    "line": 40,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
@@ -11485,12 +11633,12 @@
   ],
   "key_new_script_module_layer": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "core/pref/Pref.kt",
-    "line": 116,
-    "method": "getBoolean",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 22,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11556,6 +11704,15 @@
     "file": "engine/NodeJsRuntimePluginBridge.kt",
     "line": 78,
     "method": "getBoolean",
+    "type": "Boolean"
+   },
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 34,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11875,12 +12032,12 @@
   ],
   "key_script_module_debug_print": [
    {
-    "expr": "false",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
-    "file": "core/pref/Pref.kt",
-    "line": 126,
-    "method": "getBoolean",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 26,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11895,12 +12052,12 @@
   ],
   "key_script_module_debug_print_disabled_modules": [
    {
-    "expr": "null",
-    "form": "调用处字面量",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "core/pref/Pref.kt",
-    "line": 130,
-    "method": "getStringSet",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 30,
+    "method": "SettingKey.StrSet",
     "type": "StringSet"
    }
   ],
@@ -11917,50 +12074,50 @@
   ],
   "key_server_address": [
    {
-    "expr": "if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS",
     "form": "表达式",
+    "expr": "if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS",
     "value": "运行时: 网关地址 (inrt 为 NetworkUtils.DEFAULT_IP_ADDRESS)",
-    "file": "core/pref/Pref.kt",
-    "line": 304,
-    "method": "getString",
-    "type": "String",
     "ignoreForConflict": true,
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 24,
+    "method": "SettingKey.Str",
+    "type": "String",
     "manual": true
    }
   ],
   "key_server_mode_lan_discovery": [
    {
-    "expr": "R.bool.pref_server_mode_lan_discovery",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_server_mode_lan_discovery",
-    "file": "pluginclient/DevPluginPrefs.kt",
-    "line": 34,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_server_mode_lan_discovery, \"pref_server_mode_lan_discovery\")",
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 68,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_server_mode_notify_connection_changes": [
    {
-    "expr": "R.bool.pref_server_mode_notify_connection_changes",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_server_mode_notify_connection_changes",
-    "file": "pluginclient/DevPluginPrefs.kt",
-    "line": 30,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_server_mode_notify_connection_changes, \"pref_server_mode_notify_connection_changes\")",
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 61,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
   "key_server_mode_restore_on_launch": [
    {
-    "expr": "R.bool.pref_server_mode_restore_on_launch",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_server_mode_restore_on_launch",
-    "file": "pluginclient/DevPluginPrefs.kt",
-    "line": 26,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_server_mode_restore_on_launch, \"pref_server_mode_restore_on_launch\")",
+    "file": "core/pref/keys/ConnectionKeys.kt",
+    "line": 54,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    }
   ],
@@ -12184,117 +12341,6 @@
     "line": 16,
     "method": "getLinkedHashSet",
     "type": "Json (Gson LinkedHashSet)"
-   }
-  ],
-  "key_codegen_model_current": [
-   {
-    "form": "调用处字面量",
-    "type": "String",
-    "expr": "preferences.getString(preferenceKey, null)",
-    "value": "null",
-    "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
-    "line": 40,
-    "note": "未选择模型",
-    "manual": true
-   }
-  ],
-  "key_console_element_time_format": [
-   {
-    "form": "伴生常量",
-    "type": "String",
-    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
-    "value": "HH:mm:ss.SSS",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 24,
-    "manual": true
-   }
-  ],
-  "key_console_element_time_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "CONSOLE_ELEMENT(..., false)",
-    "value": "false",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 16,
-    "manual": true
-   }
-  ],
-  "key_floating_console_time_format": [
-   {
-    "form": "伴生常量",
-    "type": "String",
-    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
-    "value": "HH:mm:ss.SSS",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 24,
-    "manual": true
-   }
-  ],
-  "key_floating_console_time_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "FLOATING_WINDOW(..., false)",
-    "value": "false",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 17,
-    "manual": true
-   }
-  ],
-  "key_global_console_element_time_format": [
-   {
-    "form": "伴生常量",
-    "type": "String",
-    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
-    "value": "HH:mm:ss.SSS",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 24,
-    "manual": true
-   }
-  ],
-  "key_global_console_element_time_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "GLOBAL_CONSOLE_ELEMENT(..., false)",
-    "value": "false",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 15,
-    "manual": true
-   }
-  ],
-  "key_log_activity_input_bar_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "DEFAULT_INPUT_BAR_VISIBLE",
-    "value": "false",
-    "file": "ui/log/LogPageConsoleSettings.kt",
-    "line": 61,
-    "manual": true
-   }
-  ],
-  "key_log_activity_time_format": [
-   {
-    "form": "伴生常量",
-    "type": "String",
-    "expr": "ConsoleLogFormat.DEFAULT_TIME_PATTERN",
-    "value": "HH:mm:ss.SSS",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 24,
-    "manual": true
-   }
-  ],
-  "key_log_activity_time_visible": [
-   {
-    "form": "伴生常量",
-    "type": "Boolean",
-    "expr": "LOG_ACTIVITY(..., true)",
-    "value": "true",
-    "file": "core/console/ConsoleTimeSettings.kt",
-    "line": 14,
-    "manual": true
    }
   ],
   "key_$_plugin_mount_enabled_$_": [

@@ -9,7 +9,7 @@ import android.os.Looper
 import android.util.Log
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.subjects.BehaviorSubject
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import java.io.IOException
 
 /**
@@ -97,13 +97,13 @@ class DevPluginClientReconnector(private val service: DevPluginService) {
                 isArmed = false
                 finish()
             }
-            !isArmed || service.isClientSocketNormallyClosed || !DevPluginPrefs.isClientAutoReconnectEnabled -> finish()
+            !isArmed || service.isClientSocketNormallyClosed || !ConnectionKeys.CLIENT_MODE_AUTO_RECONNECT.get() -> finish()
             else -> scheduleNext(e)
         }
     }
 
     private fun scheduleNext(e: Throwable) {
-        val host = Pref.getServerAddress().trim()
+        val host = ConnectionKeys.SERVER_ADDRESS.get().trim()
         if (host.isEmpty()) {
             finish()
             return
@@ -125,7 +125,7 @@ class DevPluginClientReconnector(private val service: DevPluginService) {
 
     private fun attempt() {
         handler.removeCallbacks(retryRunnable)
-        if (!isArmed || service.isClientSocketNormallyClosed || !DevPluginPrefs.isClientAutoReconnectEnabled) {
+        if (!isArmed || service.isClientSocketNormallyClosed || !ConnectionKeys.CLIENT_MODE_AUTO_RECONNECT.get()) {
             finish()
             return
         }
@@ -133,7 +133,7 @@ class DevPluginClientReconnector(private val service: DevPluginService) {
             finish()
             return
         }
-        val host = Pref.getServerAddress().trim()
+        val host = ConnectionKeys.SERVER_ADDRESS.get().trim()
         if (host.isEmpty()) {
             finish()
             return
@@ -164,7 +164,7 @@ class DevPluginClientReconnector(private val service: DevPluginService) {
      * 未保存服务端地址时返回 false.
      */
     fun reconnectNow(): Boolean {
-        if (Pref.getServerAddress().isBlank()) return false
+        if (ConnectionKeys.SERVER_ADDRESS.get().isBlank()) return false
         if (service.isJsonSocketClientConnected || JsonSocketClient.cxnState.value?.isConnecting() == true) return true
         // An explicit request to connect overrides an earlier explicit disconnect (here or in VSCode).
         // zh-CN: 显式的连接请求覆盖此前 (本地或 VSCode 中) 的显式断开.
@@ -209,7 +209,7 @@ class DevPluginClientReconnector(private val service: DevPluginService) {
     }
 
     private fun registerNetworkCallback() {
-        if (networkCallback != null || !DevPluginPrefs.isClientReconnectOnNetworkChangeEnabled) return
+        if (networkCallback != null || !ConnectionKeys.CLIENT_MODE_RECONNECT_ON_NETWORK_CHANGE.get()) return
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
         val manager = appContext.getSystemService(ConnectivityManager::class.java) ?: return
         val callback = object : ConnectivityManager.NetworkCallback() {

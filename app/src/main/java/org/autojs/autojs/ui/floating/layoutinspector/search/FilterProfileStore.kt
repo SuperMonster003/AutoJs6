@@ -2,8 +2,7 @@ package org.autojs.autojs.ui.floating.layoutinspector.search
 
 import org.autojs.autojs.core.accessibility.inspector.FilterProfile
 import org.autojs.autojs.core.accessibility.inspector.FilterProfileCatalog
-import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs6.R
+import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
 
 /**
  * Persists the inspector [FilterProfileCatalog] (roadmap P3.3, D5): the user profiles as JSON and
@@ -16,17 +15,17 @@ import org.autojs.autojs6.R
 object FilterProfileStore {
 
     fun load(): FilterProfileCatalog = FilterProfileCatalog.fromJson(
-        Pref.getStringOrNull(R.string.key_layout_inspector_filter_profiles),
-        Pref.getStringOrNull(R.string.key_layout_inspector_filter_profile_selected),
+        LayoutInspectorKeys.LAYOUT_INSPECTOR_FILTER_PROFILES.storedOrNull(),
+        LayoutInspectorKeys.LAYOUT_INSPECTOR_FILTER_PROFILE_SELECTED.storedOrNull(),
     )
 
     fun save(catalog: FilterProfileCatalog) {
-        Pref.putString(R.string.key_layout_inspector_filter_profiles, if (catalog.profiles.size <= 1) null else catalog.toJson())
+        LayoutInspectorKeys.LAYOUT_INSPECTOR_FILTER_PROFILES.set(if (catalog.profiles.size <= 1) null else catalog.toJson())
         saveSelection(catalog)
     }
 
     fun saveSelection(catalog: FilterProfileCatalog) {
-        Pref.putString(R.string.key_layout_inspector_filter_profile_selected, catalog.selectedId.takeIf { it != FilterProfile.DEFAULT_ID })
+        LayoutInspectorKeys.LAYOUT_INSPECTOR_FILTER_PROFILE_SELECTED.set(catalog.selectedId.takeIf { it != FilterProfile.DEFAULT_ID })
     }
 
 }

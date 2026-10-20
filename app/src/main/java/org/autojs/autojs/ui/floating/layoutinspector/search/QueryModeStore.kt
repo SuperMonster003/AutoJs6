@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.floating.layoutinspector.search
 
 import org.autojs.autojs.core.accessibility.inspector.InspectorQuery
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
 import org.autojs.autojs6.R
 
 /**
@@ -14,12 +15,12 @@ import org.autojs.autojs6.R
 object QueryModeStore {
 
     fun load(): InspectorQuery.Mode {
-        val name = Pref.getStringOrNull(R.string.key_layout_inspector_query_mode) ?: return InspectorQuery.Mode.KEYWORD
+        val name = LayoutInspectorKeys.LAYOUT_INSPECTOR_QUERY_MODE.storedOrNull() ?: return InspectorQuery.Mode.KEYWORD
         return InspectorQuery.Mode.entries.firstOrNull { it.name == name } ?: InspectorQuery.Mode.KEYWORD
     }
 
     fun save(mode: InspectorQuery.Mode) {
-        Pref.putString(R.string.key_layout_inspector_query_mode, mode.takeIf { it != InspectorQuery.Mode.KEYWORD }?.name)
+        LayoutInspectorKeys.LAYOUT_INSPECTOR_QUERY_MODE.set(mode.takeIf { it != InspectorQuery.Mode.KEYWORD }?.name)
     }
 
     /** Whether the field mode syntax toast has been shown once (roadmap P4.1). zh-CN: 字段模式语法提示是否已展示过一次 (Roadmap P4.1). */

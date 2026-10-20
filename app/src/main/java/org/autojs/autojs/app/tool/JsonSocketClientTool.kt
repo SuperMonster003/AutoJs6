@@ -13,9 +13,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.permission.LocalNetworkPermission
-import org.autojs.autojs.pluginclient.DevPluginPrefs
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs.ui.common.NotAskAgainDialog
@@ -81,7 +80,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
     override fun connectIfNotNormallyClosed() {
         // Launch restore goes through the reconnector so that a PC that is not ready yet gets retried.
         // zh-CN: 启动时恢复经由重连器进行, 使尚未就绪的 PC 也能得到重试.
-        if (!isNormallyClosed && DevPluginPrefs.isClientRestoreOnLaunchEnabled) {
+        if (!isNormallyClosed && ConnectionKeys.CLIENT_MODE_RESTORE_ON_LAUNCH.get()) {
             devPlugin.clientReconnector.restoreOnLaunch()
         }
     }
@@ -212,7 +211,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         return true
     }
 
-    private fun inputRemoteHost(isAutoConnect: Boolean, prefill: String = Pref.getServerAddress()) {
+    private fun inputRemoteHost(isAutoConnect: Boolean, prefill: String = ConnectionKeys.SERVER_ADDRESS.get()) {
         if (isContextInvalidForDialog()) return
 
         if (isAutoConnect) {
@@ -520,7 +519,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    Pref.setServerAddress(trimmedHost)
+                    ConnectionKeys.SERVER_ADDRESS.set(trimmedHost)
                     // The history used to be written only on a failed handshake; a reached server is what it is for.
                     // zh-CN: 历史记录此前仅在握手失败时写入; 而能连上的服务端才是它应记录的.
                     JsonSocketClient.addIntoHistory(trimmedHost)
@@ -546,7 +545,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         if (!state.isConnecting()) return false
         if (isContextInvalidForDialog()) return false
 
-        val host = (lastConnectingHost ?: Pref.getServerAddress()).trim()
+        val host = (lastConnectingHost ?: ConnectionKeys.SERVER_ADDRESS.get()).trim()
         if (host.isEmpty()) return false
 
         // Re-show connecting dialog without starting a new connection attempt.

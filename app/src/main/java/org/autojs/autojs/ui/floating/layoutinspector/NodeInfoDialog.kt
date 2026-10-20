@@ -4,7 +4,7 @@ import android.content.Context
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.accessibility.NodeInfo
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.ViewUtils
@@ -20,11 +20,11 @@ class NodeInfoDialog(private val context: Context) {
 
         companion object {
             fun load(): CopyMode = entries.firstOrNull {
-                it.name == Pref.getStringOrNull(R.string.key_layout_inspector_node_copy_mode)
+                it.name == LayoutInspectorKeys.LAYOUT_INSPECTOR_NODE_COPY_MODE.storedOrNull()
             } ?: ASK
         }
 
-        fun save() = Pref.putString(R.string.key_layout_inspector_node_copy_mode, name)
+        fun save() = LayoutInspectorKeys.LAYOUT_INSPECTOR_NODE_COPY_MODE.set(name)
     }
 
     private val info = NodeInfoView(context).apply {
