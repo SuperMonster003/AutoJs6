@@ -1,0 +1,60 @@
+# S4e force-stop native crash, XQ-AT72 (API 31), host versionCode 5620, XQ-AT72-5620-20261020172357
+# tools/memory/run_gate.py -s QV710AF65F --label crash --scenarios S4e --mode force; 4 of 5 force-mode runs of S4e crashed this way on 2026-10-20
+# logcat -b crash, from the fatal signal line; frames trimmed to the first 60 lines
+
+F/libc    (17876): Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 18015 (1.js] (Spawn-0)), pid 17876 (.autojs.autojs6)
+F/DEBUG   (18022): *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+F/DEBUG   (18022): Build fingerprint: 'Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys'
+F/DEBUG   (18022): Revision: '0'
+F/DEBUG   (18022): ABI: 'arm64'
+F/DEBUG   (18022): Timestamp: 2026-10-20 17:24:50.612958899+0800
+F/DEBUG   (18022): Process uptime: 0s
+F/DEBUG   (18022): Cmdline: org.autojs.autojs6
+F/DEBUG   (18022): pid: 17876, tid: 18015, name: 1.js] (Spawn-0)  >>> org.autojs.autojs6 <<<
+F/DEBUG   (18022): uid: 15056
+F/DEBUG   (18022): signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+F/DEBUG   (18022): Abort message: 'Error, cannot access an invalid/free'd bitmap here!'
+F/DEBUG   (18022):     x0  0000000000000000  x1  000000000000465f  x2  0000000000000006  x3  0000007a9430c980
+F/DEBUG   (18022):     x4  0000000000001b01  x5  0000000000001b01  x6  0000000000001b01  x7  0000007a9430c880
+F/DEBUG   (18022):     x8  00000000000000f0  x9  4bb76b8e570c5cd6  x10 0000000000000000  x11 ffffff80fffffbdf
+F/DEBUG   (18022):     x12 0000000000000001  x13 0000275b812121d0  x14 0017c759a13ba68c  x15 0000000034155555
+F/DEBUG   (18022):     x16 0000007dcf093050  x17 0000007dcf0700a0  x18 0000007a39f26000  x19 00000000000045d4
+F/DEBUG   (18022):     x20 000000000000465f  x21 00000000ffffffff  x22 0000007ab1818000  x23 00000000146df510
+F/DEBUG   (18022):     x24 b400007af5993640  x25 0000000000000005  x26 0000007ab1817000  x27 0000007a9430d430
+F/DEBUG   (18022):     x28 0000007a9430d110  x29 0000007a9430ca00
+F/DEBUG   (18022):     lr  0000007dcf02166c  sp  0000007a9430c960  pc  0000007dcf021698  pst 0000000000001000
+F/DEBUG   (18022): backtrace:
+F/DEBUG   (18022):       #00 pc 0000000000051698  /apex/com.android.runtime/lib64/bionic/libc.so (abort+168)
+F/DEBUG   (18022):       #01 pc 00000000006d7bbc  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+668)
+F/DEBUG   (18022):       #02 pc 000000000001595c  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_3::__invoke(char const*)+76)
+F/DEBUG   (18022):       #03 pc 0000000000006ea8  /system/lib64/liblog.so (__android_log_assert+312)
+F/DEBUG   (18022):       #04 pc 000000000049aa80  /system/lib64/libhwui.so (Bitmap_copy(_JNIEnv*, _jobject*, long, int, unsigned char)+608)
+F/DEBUG   (18022):       #05 pc 00000000002d7644  /apex/com.android.art/lib64/libart.so (art_quick_generic_jni_trampoline+148)
+F/DEBUG   (18022):       #06 pc 00000000020dde14  /memfd:jit-cache (deleted) (android.graphics.Bitmap.copy+260)
+F/DEBUG   (18022):       #07 pc 00000000020b3edc  /memfd:jit-cache (deleted) (org.autojs.autojs.core.image.ImageWrapper.clone+556)
+F/DEBUG   (18022):       #08 pc 000000000020a0a0  /apex/com.android.art/lib64/libart.so (nterp_helper+4016)
+F/DEBUG   (18022):       #09 pc 00000000000bccf0  [anon:dalvik-classes27.dex extracted in memory from <host base.apk>!classes27.dex] (org.autojs.autojs.runtime.api.Images.copy+4)
+F/DEBUG   (18022):       #10 pc 00000000020c7cbc  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.images.Images$Companion.copy$lambda$0+732)
+F/DEBUG   (18022):       #11 pc 0000000000209188  /apex/com.android.art/lib64/libart.so (nterp_helper+152)
+F/DEBUG   (18022):       #12 pc 00000000000f534c  [anon:dalvik-classes22.dex extracted in memory from <host base.apk>!classes22.dex] (org.autojs.autojs.runtime.api.augment.images.Images$Companion$$ExternalSyntheticLambda87.invoke+4)
+F/DEBUG   (18022):       #13 pc 000000000020ae64  /apex/com.android.art/lib64/libart.so (nterp_helper+7540)
+F/DEBUG   (18022):       #14 pc 00000000000d3d68  [anon:dalvik-classes19.dex extracted in memory from <host base.apk>!classes19.dex] (org.autojs.autojs.rhino.ArgumentGuards$Companion.unwrapAndInvokeFirst+20)
+F/DEBUG   (18022):       #15 pc 00000000020c82e0  /memfd:jit-cache (deleted) (org.autojs.autojs.rhino.ArgumentGuards$Companion.ensureArgumentsOnlyOne+256)
+F/DEBUG   (18022):       #16 pc 000000000020a0a0  /apex/com.android.art/lib64/libart.so (nterp_helper+4016)
+F/DEBUG   (18022):       #17 pc 00000000000d3c6a  [anon:dalvik-classes19.dex extracted in memory from <host base.apk>!classes19.dex] (org.autojs.autojs.rhino.ArgumentGuards$Companion.ensureArgumentsOnlyOne+22)
+F/DEBUG   (18022):       #18 pc 0000000002084204  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.images.Images$Companion.copy+292)
+F/DEBUG   (18022):       #19 pc 00000000020b4d8c  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.images.Images.copy+156)
+F/DEBUG   (18022):       #20 pc 00000000002cdfe8  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+568)
+F/DEBUG   (18022):       #21 pc 0000000000362f0c  /apex/com.android.art/lib64/libart.so (_jobject* art::InvokeMethod<(art::PointerSize)8>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jobject*, _jobject*, unsigned long)+608)
+F/DEBUG   (18022):       #22 pc 0000000000362c84  /apex/com.android.art/lib64/libart.so (art::Method_invoke(_JNIEnv*, _jobject*, _jobject*, _jobjectArray*)+52)
+F/DEBUG   (18022):       #23 pc 00000000000b2f74  /apex/com.android.art/javalib/arm64/boot.oat (art_jni_trampoline+132)
+F/DEBUG   (18022):       #24 pc 000000000205930c  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.Augmentable$Companion$CachedFunctionMethod.invoke+492)
+F/DEBUG   (18022):       #25 pc 0000000002060124  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.Augmentable.installFunctions$lambda$0$0+260)
+F/DEBUG   (18022):       #26 pc 000000000202a5fc  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.Augmentable.$r8$lambda$g1onjWNo8_1E0A24q2cl8whc-0M+108)
+F/DEBUG   (18022):       #27 pc 00000000020b4ef4  /memfd:jit-cache (deleted) (org.autojs.autojs.runtime.api.augment.Augmentable$$ExternalSyntheticLambda1.invoke+212)
+F/DEBUG   (18022):       #28 pc 0000000002002c58  /memfd:jit-cache (deleted) (org.autojs.autojs.util.RhinoUtils.callable$lambda$0+168)
+F/DEBUG   (18022):       #29 pc 0000000000209188  /apex/com.android.art/lib64/libart.so (nterp_helper+152)
+F/DEBUG   (18022):       #30 pc 00000000000b61d0  [anon:dalvik-classes25.dex extracted in memory from <host base.apk>!classes25.dex] (org.autojs.autojs.util.RhinoUtils$$ExternalSyntheticLambda33.call+4)
+F/DEBUG   (18022):       #31 pc 00000000020ddc90  /memfd:jit-cache (deleted) (org.mozilla.javascript.LambdaFunction.call+240)
+F/DEBUG   (18022):       #32 pc 000000000020a7c8  /apex/com.android.art/lib64/libart.so (nterp_helper+5848)
+F/DEBUG   (18022):       #33 pc 00000000002990f2  [anon:dalvik-classes37.dex extracted in memory from <host base.apk>!classes37.dex] (
