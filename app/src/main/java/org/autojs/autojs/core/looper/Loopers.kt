@@ -9,6 +9,7 @@ import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.mozilla.javascript.Context
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
@@ -17,7 +18,12 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Created by Stardust on Jul 29, 2017.
  * Modified by SuperMonster003 as of Aug 28, 2023.
  */
-class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
+class Loopers(val scriptRuntime: ScriptRuntime) {
+
+    // Added to the MessageQueue of every thread prepared for this script. It references this object only weakly,
+    // so a queue which outlives the script does not keep the runtime reachable (docs/memory/ROADMAP.md H2).
+    // zh-CN: 加入为本脚本准备过的每个线程的 MessageQueue. 它只弱引用本对象, 因此比脚本活得久的消息队列不会让运行时保持可达 (docs/memory/ROADMAP.md H2).
+    private val mIdleHandler = WeakIdleHandler(this)
 
     private var mMainLooper: Looper?
     private var mMainHandler: Handler?
@@ -68,7 +74,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
         if (Looper.myLooper() == null) {
             LooperHelper.prepare()
         }
-        Looper.myQueue().addIdleHandler(this)
+        Looper.myQueue().addIdleHandler(mIdleHandler)
     }
 
     fun waitWhenIdle(): Int {
@@ -118,7 +124,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
     fun recycle() {
         Log.d(LOG_TAG, "recycle")
         quitServantLooper()
-        mMainMessageQueue.removeIdleHandler(this)
+        mMainMessageQueue.removeIdleHandler(mIdleHandler)
         mMainHandler = null
         mMainLooperQuitHandler = null
         mMainLooper = null
@@ -131,7 +137,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
         mMainHandler?.post(EMPTY_RUNNABLE)
     }
 
-    override fun queueIdle(): Boolean {
+    private fun queueIdle(): Boolean {
         val looper = Looper.myLooper() ?: return true
         if (looper == mMainLooper) {
             if (!shouldQuitLooper()) return true
@@ -174,6 +180,15 @@ class Loopers(val scriptRuntime: ScriptRuntime) : MessageQueue.IdleHandler {
 
     interface LooperQuitHandler {
         fun shouldQuit(): Boolean
+    }
+
+    private class WeakIdleHandler(loopers: Loopers) : MessageQueue.IdleHandler {
+
+        private val mLoopers = WeakReference(loopers)
+
+        // Returning false removes this handler from the queue once the script runtime has been collected.
+        // zh-CN: 脚本运行时被回收后返回 false, 使本处理器从队列中移除.
+        override fun queueIdle() = mLoopers.get()?.queueIdle() ?: false
     }
 
     internal class WaitToken internal constructor(

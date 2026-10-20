@@ -38,7 +38,17 @@ open class TimerThread(
 
     override fun run() {
         val scriptRuntime = mWeakRuntime.get() ?: return
+        try {
+            runLoop(scriptRuntime)
+        } finally {
+            // Drop this thread from the process-wide looper table however the loop ends; a leftover entry kept the looper,
+            // its MessageQueue and the idle handler of the script runtime reachable (docs/memory/ROADMAP.md H1).
+            // zh-CN: 无论循环以何种方式结束, 都把本线程从进程级 Looper 表中移除; 残留的条目曾使该 Looper, 它的 MessageQueue 以及脚本运行时的 IdleHandler 一直可达 (docs/memory/ROADMAP.md H1).
+            LooperHelper.quitForThread(this)
+        }
+    }
 
+    private fun runLoop(scriptRuntime: ScriptRuntime) {
         scriptRuntime.loopers.prepare()
 
         scriptRuntime.timers.newTimer(scriptRuntime).also {
@@ -73,6 +83,7 @@ open class TimerThread(
     }
 
     override fun interrupt() {
+        LooperHelper.quitForThread(this)
         LooperHelper.quit(LooperThread.getLooperOrNull(this))
         super.interrupt()
     }
