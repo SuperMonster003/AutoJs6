@@ -127,10 +127,10 @@ D1-D18 来自 2026-10-20 四轮选择题, D19-D22 来自同日附录 C 的拍板
 ### P0 安全网与清单
 
 - [x] P0.1 (文档) 本文: 现状证据, 决策, 派生决策, 红线, 阶段任务, 附录. 证据: 本文件 (c35f603be, 551b8be14, 第 2 版见本次提交).
-- [x] P0.2 (工具) `tools/settings/inventory.py`: 扫描 `strings_donottranslate.xml` 的 `key_*`, 5 个设置页 XML 的出现位置, 源码引用位置 (文件与行), `getSharedPreferences(` 的文件名字面量与常量, `filesDir` 下的 JSON 文件名; 输出 `tools/settings/baseline/inventory-<date>.json` 与可读的 `docs/settings/inventory.md`. 证据: 提交 `d6b97fbf6` (子会话 roadmap-p0).
-- [ ] P0.3 (文档) 分类初稿: 对 265 个 `key_*` 与约 27 个命名存储逐一标注 kind (Setting / State / Cache / ValueConstant / Excluded) 与分类 id (含 `deployment` 种类), 回填附录 A 的条目数; 无法判断的进附录 C (Q12 起). 证据: 附录 A 更新, `inventory.md` 的 kind 列无空白. 状态: 子会话 roadmap-p0 进行中 (`classification.json` 与 `inventory.md` 的分类列已有半成品, 未提交).
-- [ ] P0.4 (文档) 默认值表: 每个 Setting 的默认值来源 (`R.bool` / `R.integer` / `R.string` / 伴生常量 / 调用处字面量) 与取值, 同一键多处不一致的列入附录 C Q10. 证据: `docs/settings/defaults.md`. 状态: 子会话 roadmap-p0 进行中 (`defaults.md` 半成品, 未提交).
-- [ ] P0.5 (测试) JVM 夹具 `InMemorySettingsStore` 与 `SettingDescriptor` 构造辅助, 放在 `app/src/test/java/org/autojs/autojs/core/pref/`. 证据: 夹具自测通过.
+- [x] P0.2 (工具) `tools/settings/inventory.py`: 扫描 `strings_donottranslate.xml` 的 `key_*`, 5 个设置页 XML 的出现位置, 源码引用位置 (文件与行), `getSharedPreferences(` 的文件名字面量与常量, `filesDir` 下的 JSON 文件名; 输出 `tools/settings/baseline/inventory-<date>.json` 与可读的 `docs/settings/inventory.md`. 证据: 提交 `d6b97fbf6` (子会话 roadmap-p0); 分类合并, 默认值提取与 `--check` 随 `06a331f28` 补入.
+- [x] P0.3 (文档) 分类初稿: 对 265 个 `key_*` 与约 27 个命名存储逐一标注 kind (Setting / State / Cache / ValueConstant / Excluded) 与分类 id (含 `deployment` 种类), 回填附录 A 的条目数; 无法判断的进附录 C (Q12 起). 证据: 提交 `06a331f28`; `tools/settings/classification.json` 覆盖 267 个 `key_*` (Setting 123 / State 40 / ValueConstant 74 / Excluded 29 / Cache 1), 71 组源码字面量键, 29 份命名存储, 13 个 filesDir JSON 存储与 3 个页面字面量键, `py -3.12 -I tools/settings/inventory.py --check` 0 问题; `docs/settings/inventory.md` 的 kind 列无空白, 第 7 节为各分类条目数; 部署项种类 `CREATE_DIRECTORY` (`key_working_directory`) 与 `DOWNLOAD_EDITOR_FONT` (`key_ace_editor_font`); 附录 A 已回填, 附录 A.2 补登 4 行, 新登记 Q12 / Q13 (子会话 roadmap-p0).
+- [x] P0.4 (文档) 默认值表: 每个 Setting 的默认值来源 (`R.bool` / `R.integer` / `R.string` / 伴生常量 / 调用处字面量) 与取值, 同一键多处不一致的列入附录 C Q10. 证据: 提交 `06a331f28`; `docs/settings/defaults.md` 列出 135 个 Setting (123 个 `key_*` + 12 组默认偏好字面量键) 的 218 条来源, 全部有来源 (其中 46 条为 `classification.json` 的 `extraDefaults` 人工补充), 3 处不一致已登记在附录 C Q10 (子会话 roadmap-p0).
+- [x] P0.5 (测试) JVM 夹具 `InMemorySettingsStore` 与 `SettingDescriptor` 构造辅助, 放在 `app/src/test/java/org/autojs/autojs/core/pref/`. 证据: 提交 `f48cb6681`; `InMemorySettingsStore` (T3 成员, SharedPreferences 同款类型与提交 / 监听语义, `commitCount`) 与 `SettingDescriptorFixtures` (`SettingDescriptorSpec` 含 T4 的 8 个字段, 校验 T6 类型 / D10 生效 / T2 kind / T18 部署项); `InMemorySettingsStoreTest` 11 例 + `SettingDescriptorFixturesTest` 8 例, 先在 scratchpad 用 kotlinc 1.7.10 + JUnit 4.13.2 跑通, 放入后 `:app:testAppDebugUnitTest --tests "org.autojs.autojs.core.pref.*"` 19 例 0 失败 (E1); 夹具不在运行时使用 `org.json` (测试类路径只有 android.jar 桩, 见 Q14) (子会话 roadmap-p0).
 
 ### P1 新基座 (`core/pref`)
 
@@ -220,60 +220,61 @@ D1-D18 来自 2026-10-20 四轮选择题, D19-D22 来自同日附录 C 的拍板
 
 ---
 
-## 附录 A 分类清单 (D6, 条目数为 2026-10-20 估计, P0.3 回填精确值)
+## 附录 A 分类清单 (D6, 条目数为 P0.3 精确值, 来源 `docs/settings/inventory.md` 第 7 节, 基线 `master@665c35482`)
 
 ### A.1 可勾选分类 (按页面顺序; "默认" 指导出 / 导入向导的默认勾选)
 
-| id | 标题 (简体中文) | 来源 | 条目估计 | 默认 | 生效 | 备注 |
+| id | 标题 (简体中文) | 来源 | 条目数 | 默认 | 生效 | 备注 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `appearance` | 外观 | 设置 > 外观 | 8 | 是 | APPLY (语言, 夜间模式, 主题色) | `key_theme_color_*` 三项随 `key_theme_color` 一起 |
-| `general` | 配置 | 设置 > 配置 | 12 | 是 | APPLY (启动图标) | 含重启策略与计划重启后端 / 延迟, 自动备份三开关与周期选项 (P9) |
+| `appearance` | 外观 | 设置 > 外观 | 9 | 是 | APPLY (语言, 夜间模式, 主题色) | `key_theme_color_*` 三项随 `key_theme_color` 一起 |
+| `general` | 配置 | 设置 > 配置 | 5 (P9 另加自动备份三开关与周期选项) | 是 | APPLY (启动图标) | 含重启策略与计划重启后端 / 延迟, 自动备份三开关与周期选项 (P9) |
 | `explorer` | 文件管理器 | 设置 > 文件管理器 | 6 | 是 | NONE | 工作目录不存在时作为部署项 "创建工作目录" (D20 / Q1) |
-| `history` | 回收站与版本历史 | 设置 > 回收站与版本历史 及其子页 | 11 | 是 | NONE | 保留策略改变后由既有清理任务按新值执行 |
-| `editor_general` | 代码编辑器 > 常规 | 代码编辑器设置 | 1 | 是 | NONE | 编辑器引擎, 下次打开编辑器生效 |
-| `editor_appearance` | 代码编辑器 > 外观 | 代码编辑器设置 | 14 | 是 | NONE | 字体未安装时作为部署项 "下载编辑器字体" (D20 / Q2), Ace 插件未安装时先提示安装 |
+| `history` | 回收站与版本历史 | 设置 > 回收站与版本历史 及其子页 | 10 | 是 | NONE | 保留策略改变后由既有清理任务按新值执行 |
+| `editor_general` | 代码编辑器 > 常规 | 代码编辑器设置 | 2 (1 键 + 1 组字面量键) | 是 | NONE | 编辑器引擎, 下次打开编辑器生效 |
+| `editor_appearance` | 代码编辑器 > 外观 | 代码编辑器设置 | 17 | 是 | NONE | 字体未安装时作为部署项 "下载编辑器字体" (D20 / Q2), Ace 插件未安装时先提示安装 |
 | `editor_log` | 代码编辑器 > 日志 | 代码编辑器设置 + 代码键 | 6 | 是 | NONE | 含 `key_editor_log_panel_*` |
-| `editor_assistance` | 代码编辑器 > 辅助 | 代码编辑器设置 | 6 | 是 | NONE | LSP 开关, 语言矩阵, 文件类型, 声明组 |
+| `editor_assistance` | 代码编辑器 > 辅助 | 代码编辑器设置 | 8 (3 键 + 5 组字面量键) | 是 | NONE | LSP 开关, 语言矩阵, 文件类型, 声明组 |
 | `editor_smart_hint` | 代码编辑器 > 智能提示 | 代码编辑器设置 | 7 | 是 | NONE | |
-| `editor_gestures` | 代码编辑器 > 操作手势 | 代码编辑器设置 + 代码键 | 3 | 是 | NONE | |
+| `editor_gestures` | 代码编辑器 > 操作手势 | 代码编辑器设置 + 代码键 | 2 | 是 | NONE | |
 | `editor_gutter` | 代码编辑器 > 边栏标记 | 代码编辑器设置 | 5 | 是 | NONE | |
 | `editor_performance` | 代码编辑器 > 性能 | 代码编辑器设置 | 2 | 是 | NONE | |
 | `editor_keyboard` | 代码编辑器 > 符号键盘 | 命名存储 `editor_symbols_config`, `FunctionsKeyboardHelper`, `ace_editor_font_ui_preferences` | 3 份 | 是 | NONE | 整份 JSON 作为一个条目 |
 | `timed_task` | 定时任务 | 设置 > 定时任务 | 1 | 是 | APPLY (重排任务) | |
-| `a11y` | 无障碍服务 | 设置 > 无障碍服务 + 代码键 | 6 | 是 | NONE | 含手势观察, 按键观察 |
+| `a11y` | 无障碍服务 | 设置 > 无障碍服务 + 代码键 | 6 | 是 | NONE | 含手势观察, 按键观察 (`key_enable_observe_key` 无读写方, 见 Q12) |
 | `running` | 脚本运行 | 设置 > 脚本运行 + 代码键 | 5 | 是 | NONE | 含 `key_root_manager_apps_custom` |
 | `record` | 录制脚本 | 设置 > 录制脚本 | 3 | 是 | NONE | |
 | `extensibility` | 扩展性 | 设置 > 扩展性 | 2 | 是 | NONE | 对之后启动的脚本生效 |
-| `updates` | 更新 | 设置 > 更新 + 开发者选项 > 更新 + `UpdateIgnoreStore` | 3 | 是 | NONE | 时间戳归 `other` |
-| `console` | 日志与控制台 | 日志页面与控制台设置对话框的代码键 | 13 | 是 | NONE | |
+| `updates` | 更新 | 设置 > 更新 + 开发者选项 > 更新 + `UpdateIgnoreStore` | 3 (2 键 + 1 份) | 是 | NONE | 时间戳归 `other` |
+| `console` | 日志与控制台 | 日志页面与控制台设置对话框的代码键 | 12 | 是 | NONE | |
 | `connection` | 客户端与服务端模式 | 抽屉连接项的代码键 | 7 | 是 | NONE | 地址历史与管理器折叠状态归 `other` |
-| `layout_inspector` | 布局分析器 | 悬浮窗与代码生成的代码键 | 6 | 是 | NONE | 查询历史归 `other`; 模型文件本身不导出 |
+| `layout_inspector` | 布局分析器 | 悬浮窗与代码生成的代码键 | 5 | 是 | NONE | 查询历史归 `other`; 模型文件本身不导出; 颜色选择旧布局键按代码事实归 `other` (Q13) |
 | `developer` | 开发者选项 | 开发者选项页 | 4 | 否 | NONE | 默认不勾选: 调试类开关不宜跨设备带入 |
-| `plugin_center` | 插件中心 | 插件中心设置页 + 命名存储 (筛选, 排序, 可见性, 启动图标, 挂载, 变体优先级, 在线来源) + `jvm_source_provider_selection` | 5 + 8 份 | 是 | NONE | 列表页面下次打开生效 |
+| `plugin_center` | 插件中心 | 插件中心设置页 + 命名存储 (筛选, 排序, 可见性, 启动图标, 挂载, 变体优先级, 在线来源) + `jvm_source_provider_selection` | 14 (3 键 + 6 组字面量键 + 5 份) | 是 | NONE | 列表页面下次打开生效; 挂载 / 每插件检查更新 / 变体优先级是默认偏好中的字面量前缀键 |
 | `plugin_enable_state` | 插件启用状态 | `plugin_center_enable_state` | 1 份 | 是 | NONE | 未安装的插件条目 -> `TARGET_MISSING`; 只写偏好, 唤醒 / 重绑由插件中心下次刷新处理 (Q11) |
 | `apk_build` | APK 构建配置档 | `build_apk_config_profiles` | 1 份 | 是 | NONE | 签名密钥库不含 (附录 C Q5) |
 | `wizards` | 设置向导配置档 | `permission_wizard`, `plugin_install_wizard` 的自定义配置档 | 2 份 | 是 | NONE | 最近使用的配置档 id 归 `other` |
 | `data_shortcuts` | 快捷方式 (数据) | 现有快捷方式备份 zip (`data/shortcuts.zip`) | 按条 | 是 | NONE | 细化页逐条勾选; 恢复沿用 `ShortcutBackupReconciler` (D21) |
 | `data_color_library` | 颜色库 (数据) | 现有 `ColorLibraryJson` 文档 (`data/color-library.json`) | 按库 | 是 | NONE | 细化页逐库勾选 (用户库与智能库); 预设库不导出 (D21) |
 | `credentials` | 凭据与授权 | `github_auth`, `plugin_center_authorization`, `mcp_server_trust_confirmation`, `three_stove_agent_trust_confirmation`, `bun_host_capability_grants` | 5 份 | 否 | NONE | D2 警告; 脚本 API 不导出 (T15); 自动备份不含 (T20) |
-| `other` | 其他 (内部状态) | 全部 `StateKey` + 运行时发现的未登记键 | 约 40 | 否 | NONE | 不参与恢复默认 (T2); 不展示键名 (Q8) |
+| `other` | 其他 (内部状态) | 全部 `StateKey` + 运行时发现的未登记键 | 51 (40 键 + 8 组字面量键 + 3 份) | 否 | NONE | 不参与恢复默认 (T2); 不展示键名 (Q8) |
 
-合计 31 项 (含 `other` 与两个数据分类). 条目数由 `SettingsRegistry.describe()` 与数据编解码在运行时计算并显示, 本表只作校对.
+合计 31 项 (含 `other` 与两个数据分类). 条目数由 `SettingsRegistry.describe()` 与数据编解码在运行时计算并显示, 本表只作校对. P0.3 计数规则: Setting 与 State 计入; "N 键" 为 `key_*` 资源, "字面量键" 为默认偏好中不经资源的键 (含前缀键, 每组 1 条), "份" 为命名存储 (整份 1 条, 内部键不另计); 未写明来源的数字全部是 `key_*` 键. 待决的归属见附录 C Q12 / Q13.
 
 ### A.2 永久排除 (不出现在任何分类)
 
 | 对象 | 原因 |
 | --- | --- |
 | `device_id_prefs` | 设备标识, 跨设备导入会破坏唯一性 |
-| `autojs.localstorage.*` (`core/storage/LocalStorage`, `runtime/api/augment/storages`), `lua-runtime-storage-v1-*` | 脚本自己的数据, 不是宿主设置 |
+| `autojs.localstorage.*` (`core/storage/LocalStorage`, `runtime/api/augment/storages`), `lua-runtime-storage-v1-*`, `autojs.node.storage.*` (`engine/NodeBridgeProtocol` 的 Node.js storage 桥, P0.3 补登, Q13) | 脚本自己的数据, 不是宿主设置 |
 | `privileged_edit_backups`, `PrivilegedEditSessions`, `PrivilegedFileOperationJournal` | 指向本机文件的操作日志 |
-| `runtime_task_intents`, `NodeLifecycleCheckpointStore`, `NodeWorkManagerBridgeScheduler`, `PythonPrivateExecutionSnapshot` | 运行时状态, 进程重启即失效 |
+| `runtime_task_intents`, `NodeLifecycleCheckpointStore`, `NodeWorkManagerBridgeScheduler`, `PythonPrivateExecutionSnapshot`, `key_scripts_after_app_restart` (P0.3 补登) | 运行时状态, 进程重启即失效 (后者是重启前写入, 重启后消费的一次性交接值) |
 | `ScriptWidgets` | 桌面小部件 id 由启动器分配, 仅本机有效 |
 | `key_root_manager_apps_cache`, `InstalledPluginMetadataStore`, `PluginIndexRepository`, `FontCatalogRepository`, `FontStore` (字体文件), `ModelStore` (模型文件), `RuntimeWebLocalDownloads` | 缓存或可重新下载的资源 (字体经部署项按需重新下载) |
 | `key_pref_bundle_default_item` / `key_pref_bundle_disabled_items` | `MaterialListPreference` 的 Bundle 参数名, 不是偏好键 |
 | `KeyStoreDatabase`, `TimedTaskDatabase`, `IntentTaskDatabase`, `HistoryDatabase` | D1, 第二期候选 (Q5 / Q6) |
 | `ColorHistoryDatabase` 的直接读取 | 颜色库只经 `ColorLibraryJson` 交换 (D21 / R7); 颜色历史记录本身不导出 |
-| `inrt` 的 `key_first_using` / `key_inrt_applied_build_id` | 打包应用运行时状态 |
+| `inrt` 的 `key_first_using` / `key_inrt_applied_build_id`, 以及 inrt 专用的 `key_run_on_boot_inrt`, `key_not_showing_main_activity` 与 4 个权限开关键 (P0.3 补登) | 打包应用运行时状态或打包配置 |
+| 已移除的宿主终端的 `key_$_terminal_*` / `key_$_dialog_terminal_tips` (P0.3 补登) | `TerminalLegacyCleanup` 每次启动删除 |
 
 ---
 
@@ -334,7 +335,7 @@ autojs6-settings-20261020-153000.zip
 
 ## 附录 C 待决事项与拍板结果
 
-Q1-Q11 于 2026-10-20 由维护者拍板 (结论已并入第 2 节 / 第 3 节); Q0 为同日新增并同时拍板; Q10 与 Q12 起待定.
+Q1-Q11 于 2026-10-20 由维护者拍板 (结论已并入第 2 节 / 第 3 节); Q0 为同日新增并同时拍板; Q10 与 Q12 起待定 (Q10 的 3 条与 Q12-Q14 由 P0.3 / P0.4 / P0.5 子会话登记).
 
 | 编号 | 问题 | 结论 (2026-10-20) | 状态 |
 | --- | --- | --- | --- |
@@ -348,9 +349,11 @@ Q1-Q11 于 2026-10-20 由维护者拍板 (结论已并入第 2 节 / 第 3 节);
 | Q7 | 插件契约形状 | ContentProvider `call` (同 `AutoJs6HostSettingsContract`), `exportSettings` / `importSettings`, JSON 载荷与 `formatVersion` (P13.2 写草案) | 已拍板 |
 | Q8 | `other` 分类是否向用户展示键名列表 | 不展示, 只显示条目数 (D7) | 已拍板 |
 | Q9 | 自动备份触发方式 | 三类机制: 周期 (日 / 周 / 月, 默认关), 变更后防抖 (默认关), 操作后立即 (默认开); 术语可微调 (D22 / T20) | 已拍板 |
-| Q10 | P0.4 发现的同一键多处默认值不一致 | 等 P0.4 逐条列出后由维护者定统一值 | 待 P0.4 |
+| Q10 | P0.4 发现的同一键多处默认值不一致 (`docs/settings/defaults.md` 第 2 节, 共 3 条): (1) `key_editor_text_size`: 设置页 `EditorTextSizePreference` 未设置时显示 `R.integer.editor_text_size_default_value` = 14, 原生编辑器 `CodeEditor` 未设置时取布局 `code_editor.xml` 的 `textSize` = 15sp; (2) `key_enable_a11y_service_with_root_access`: `Pref` / 设置页 / inrt 缺键时为 true (`R.bool.pref_enable_a11y_service_with_root_access`), 脚本 API `settings.isEnabled` 缺键时为 false (`Settings.kt:50`, 对所有别名统一用 false); (3) `key_use_volume_control_running`: 同 (2), true 对 false | 建议: (1) 统一为 14, 改原生编辑器的初值读同一资源; (2) / (3) `settings.isEnabled` 缺键时改用各键自身的默认值 (与设置页一致); 拍板前 P1-P5 保持现状 (R2) | 待拍板 (P0.4 已登记) |
 | Q11 | 导入 `plugin_enable_state` 时是否触发插件中心的唤醒 / 重绑 | 只写偏好, 由插件中心下次刷新按现有逻辑处理; P7.5 在 OnePlus (ColorOS) 上验证 | 已拍板 |
-| Q12+ | P0.3 分类初稿中无法判断的键 | 由子会话逐条登记在此 | 待 P0.3 |
+| Q12 | 源码与资源均无引用的 13 个 `key_*` 资源如何登记: 9 个字体 id 常量 (`key_ace_editor_font_cascadia_code` 等, 只有 `iosevka` 是 `default_key_ace_editor_font` 的目标), 3 个不再提示键 (`key_dialog_foreground_svc`, `key_dialog_log_entries_exported`, 只在注释代码中出现的 `key_dialog_layout_inspector_exit_tips`), `key_enable_observe_key` (附录 A 的 "按键观察", 无任何读写方) | 初稿: 字体 id 为 ValueConstant, 不再提示键为 State, `key_enable_observe_key` 暂按附录 A 记为 `a11y` 的 Setting. 建议: 资源保留并按初稿登记 (老用户偏好文件里可能仍有这些键, R1), `key_enable_observe_key` 改登记为 State (无读写方的键不宜作为可导入的设置); 是否删除资源由维护者定 | 待拍板 (P1.3 前) |
+| Q13 | P0.3 初稿与第 5 节 / 附录 A 的描述不一致或需确认的归属: (a) `key_version_history_restore_does_not_auto_save_to_disk`: P2.2 列为 `HistoryKeys` 的设置, 代码中是 `VersionHistoryController` 里 `NotAskAgainDialog` 的不再提示键; (b) `key_color_select_activity_legacy_layout`: P2.5 列在 `LayoutInspectorKeys`, 代码中是 `ColorLibrariesActivity` / `ColorSelectActivity` 打开前写入的界面模式, 用户不直接设置; (c) `PluginUpdateCheckStore` (`key_$_plugin_update_check_$_<包名>`): P4.2 列为状态, 代码中是每个插件的 "检查更新" 开关; (d) `key_foreground_service`: 主应用里是抽屉开关对前台服务运行状态的镜像, 脚本 API `settings` 与 inrt 把它当设置读写; (e) `autojs.node.storage.<包名>.<cwd 摘要>.<存储名>` (`NodeBridgeProtocol` 的 Node.js storage 桥): 不在 1.1 的命名存储清单中 (实测 29 份) | 初稿: (a) State, (b) State, (c) `plugin_center` 的 Setting, (d) State, (e) Excluded 并已补登附录 A.2. 建议按初稿; 若希望跨设备带入 "前台服务" 偏好, (d) 改为 `general` 的 Setting | 待拍板 (P1.3 前) |
+| Q14 | JVM 单测类路径上没有真实的 `org.json`: `app` 的测试依赖只有 JUnit4 与 bcprov, 单测里的 `org.json` 来自 android.jar (P0.5 探针: `new JSONObject().put(...)` 抛 `RuntimeException: Stub!`, AGP 的 mockable jar 同样抛异常), 而 R3 / T6 要求编解码只依赖 `org.json`, P1.1 的 `SettingKeyTest` (Json 往返) 与 P6.1 的编解码测试都需要真实实现 | 建议: P1.1 前在 `gradle/libs.versions.toml` 增加 `org.json:json` (本机 Gradle 缓存已有 20231013) 并 `testImplementation`, 与 Android 运行时的 `org.json` 行为差异 (如 `JSONObject.NULL`, 数字类型) 在测试里显式覆盖; P0.5 夹具因此不在运行时使用 `org.json` | 待拍板 (P1.1 前) |
 
 ---
 
@@ -418,17 +421,17 @@ Q1-Q11 于 2026-10-20 由维护者拍板 (结论已并入第 2 节 / 第 3 节);
 
 ## 附录 G 基线数据 (2026-10-20, `master@4a16be478`)
 
-| 指标 | 数值 | 来源 |
-| --- | --- | --- |
-| `key_*` 字符串资源 | 265 | `strings_donottranslate.xml` |
-| 出现在设置页 XML 的键 | 105 (39 + 40 + 11 + 9 + 5, 去重后) | 5 个 `fragment_*.xml` |
-| 只在代码中使用的键 | 162 | 上两项之差 |
-| 经 `Pref` 读写的源文件 | 122 | grep `Pref.` |
-| 绕过 `Pref` 读默认偏好的源文件 | 8 | grep `PreferenceManager.getDefaultSharedPreferences` |
-| 调用 `getSharedPreferences(` 的源文件 / 命名存储数 | 34 / 约 27 | grep |
-| `*Store` / `*Prefs` / `*Preferences` / `*Settings` / `*Config*` 类 | 约 80, 分布 40 个目录 | find |
-| 序列化方式 | `JSONObject` 11, Gson 1, 逗号拼接 5, `putStringSet` 7 | grep |
-| 文件型 JSON 存储 | 14 | grep `filesDir` + `.json` |
-| 单测环境 | JUnit4 (`libs.junit`), 无 Robolectric | `app/build.gradle.kts` |
+| 指标 | 数值 | 来源 | P0.2 实测 (`inventory.py`, `master@665c35482`) |
+| --- | --- | --- | --- |
+| `key_*` 字符串资源 | 265 | `strings_donottranslate.xml` | 267 (另 2 个在 `ace_editor_language_keys.xml`) |
+| 出现在设置页 XML 的键 | 105 (39 + 40 + 11 + 9 + 5, 去重后) | 5 个 `fragment_*.xml` | `key_*` 98 (39 + 40 + 10 + 9 + 3, 去重后) + 不经资源的字面量键 3 |
+| 只在代码中使用的键 | 162 | 上两项之差 | 169 (其中源码与资源均无引用 13, 见 Q12) |
+| 经 `Pref` 读写的源文件 | 122 | grep `Pref.` | 119 (不含两个 `Pref.kt`) |
+| 绕过 `Pref` 读默认偏好的源文件 | 8 | grep `PreferenceManager.getDefaultSharedPreferences` | 8 |
+| 调用 `getSharedPreferences(` 的源文件 / 命名存储数 | 34 / 约 27 | grep | 34 / 29 (全部解析出文件名或模式) |
+| `*Store` / `*Prefs` / `*Preferences` / `*Settings` / `*Config*` 类 | 约 80, 分布 40 个目录 | find | (未测) |
+| 序列化方式 | `JSONObject` 11, Gson 1, 逗号拼接 5, `putStringSet` 7 | grep | (未测) |
+| 文件型 JSON 存储 | 14 | grep `filesDir` + `.json` | 启发式命中 13, 加 `ModelStore` (目录在工厂类中拼接) 共 14 |
+| 单测环境 | JUnit4 (`libs.junit`), 无 Robolectric | `app/build.gradle.kts` | 同左; 测试类路径上没有真实的 `org.json` 实现 (android.jar 中为桩, 见 Q14) |
 
 P14.3 复测时在本表追加一列, 预期: 绕过文件 0, `getSharedPreferences(` 调用只剩 `SharedPreferencesStore`, 序列化方式只剩 `SettingsJson`, 守卫 "待迁移" 0.
