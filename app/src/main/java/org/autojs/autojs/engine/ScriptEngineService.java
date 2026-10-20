@@ -9,6 +9,7 @@ import org.autojs.autojs.core.plugin.jvm.JvmSourceUserFacingException;
 import org.autojs.autojs.core.plugin.lua.AndroidLuaRuntimeFailureMessages;
 import org.autojs.autojs.core.plugin.typescript.TypeScriptRuntimeStackTraceFormatter;
 import org.autojs.autojs.execution.ExecutionConfig;
+import org.autojs.autojs.leakcanary.LeakCanarySetup;
 import org.autojs.autojs.execution.LoopedBasedJavaScriptExecution;
 import org.autojs.autojs.execution.RunnableScriptExecution;
 import org.autojs.autojs.execution.ScriptExecuteActivity;
@@ -57,6 +58,9 @@ public class ScriptEngineService {
         public void onEngineRemove(ScriptEngine<? extends ScriptSource> engine) {
             mScriptExecutions.remove(engine.getId());
             super.onEngineRemove(engine);
+            // Debug builds hand the removed engine and its runtime to LeakCanary (docs/memory/ROADMAP.md T5).
+            // zh-CN: debug 构建把已移除的引擎及其运行时交给 LeakCanary 监视 (docs/memory/ROADMAP.md T5).
+            LeakCanarySetup.watchEngine(engine);
         }
     };
     private final ScriptExecutionObserver mScriptExecutionObserver = new ScriptExecutionObserver();

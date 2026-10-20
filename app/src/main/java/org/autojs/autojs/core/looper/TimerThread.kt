@@ -6,6 +6,7 @@ import androidx.annotation.CallSuper
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.lang.ThreadCompat
+import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Console
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -45,6 +46,10 @@ open class TimerThread(
             // its MessageQueue and the idle handler of the script runtime reachable (docs/memory/ROADMAP.md H1).
             // zh-CN: 无论循环以何种方式结束, 都把本线程从进程级 Looper 表中移除; 残留的条目曾使该 Looper, 它的 MessageQueue 以及脚本运行时的 IdleHandler 一直可达 (docs/memory/ROADMAP.md H1).
             LooperHelper.quitForThread(this)
+            // A thread ending while its script exits should be collected with the script; debug builds let LeakCanary check that
+            // (docs/memory/ROADMAP.md T5). Threads ending earlier may still be referenced by the running script, so they are not watched.
+            // zh-CN: 脚本结束过程中结束的线程应随脚本一起被回收, debug 构建交给 LeakCanary 核对 (docs/memory/ROADMAP.md T5). 更早结束的线程可能仍被运行中的脚本引用, 因此不监视.
+            if (scriptRuntime.isExiting) LeakCanarySetup.watch(this, "TimerThread ended on script exit")
         }
     }
 

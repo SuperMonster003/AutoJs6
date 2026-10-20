@@ -859,6 +859,7 @@
     <string name="summary_github_token_set">設定済みです. プライバシー保護のため非表示で, 末尾は %1$s です.</string>
     <string name="summary_guard_mode">AutoJs6 がフォアグラウンドにあるときにスクリプトから自動化アクションが実行されないようにする</string>
     <string name="summary_lan_discovery">このデバイスを _autojs6._tcp として通知し, VSCode (拡張機能 1.1.0+) が LAN 接続時に一覧表示できるようにします</string>
+    <string name="summary_leakcanary">終了したスクリプトのオブジェクト (エンジン, ランタイム, スレッド, フローティングウィンドウ) と破棄されたページを監視し, 回収されない場合はヒープをダンプして通知します. debug ビルドのみ</string>
     <string name="summary_new_script_module_layer">移行済みのスクリプトモジュール (現在は base64) を新しいモジュール層からマウントします. 以降に開始したスクリプトに適用されます</string>
     <string name="summary_nodejs_doctor_report">不具合報告用にプライバシー情報を除去した Node ランタイム診断レポートを生成</string>
     <string name="summary_nodejs_inspector_enabled">スクリプトのローカルデバッグとプロファイリングを許可します. PC の DevTools は ADB ポート転送で接続します.</string>

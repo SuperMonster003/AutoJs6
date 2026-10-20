@@ -15,6 +15,7 @@ import org.autojs.autojs.core.floaty.BaseResizableFloatyWindow
 import org.autojs.autojs.core.floaty.RawWindow
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.inflater.Exceptions
+import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.ui.UI
@@ -76,6 +77,10 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
     }
 
     private fun removeWindow(window: JsWindow): Boolean {
+        // A window closed while the script exits should be collected with it; debug builds let LeakCanary check that
+        // (docs/memory/ROADMAP.md T5). A window closed earlier may still be referenced by the running script, so it is not watched.
+        // zh-CN: 脚本结束过程中关闭的窗口应随脚本一起被回收, debug 构建交给 LeakCanary 核对 (docs/memory/ROADMAP.md T5). 更早关闭的窗口可能仍被运行中的脚本引用, 因此不监视.
+        if (scriptRuntime.isExiting) LeakCanarySetup.watch(window, "JsWindow closed on script exit")
         return mWindows.remove(window)
     }
 

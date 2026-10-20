@@ -855,6 +855,7 @@
     <string name="summary_github_token_set">已設置. 已在介面隱藏, 末尾為 %1$s.</string>
     <string name="summary_guard_mode">當 AutoJs6 前置時禁用自動化行為以避免誤操作</string>
     <string name="summary_lan_discovery">以 _autojs6._tcp 廣播本裝置, 使 VSCode (插件 1.1.0+) 建立局域網連接時可直接列出本裝置</string>
+    <string name="summary_leakcanary">監察已結束腳本的物件 (引擎, 運行環境, 線程, 懸浮窗) 與已銷毀的頁面, 未被回收時轉儲堆並發出通知. 僅限 debug 構建</string>
     <string name="summary_new_script_module_layer">從新的模組層掛載已遷移的腳本模組 (目前為 base64). 對之後啟動的腳本生效</string>
     <string name="summary_nodejs_doctor_report">產生已隱去私隱資料的 Node 執行階段診斷報告, 用於提交錯誤報告</string>
     <string name="summary_nodejs_inspector_enabled">允許腳本進行本機偵錯和效能分析. 桌面 DevTools 透過 ADB 連接埠轉發連接.</string>

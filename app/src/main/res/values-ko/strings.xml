@@ -860,6 +860,7 @@
     <string name="summary_github_token_set">설정되었습니다. 개인정보 보호를 위해 숨겨지며 끝 문자는 %1$s입니다.</string>
     <string name="summary_guard_mode">AutoJs6 이 전경에있을 때 스크립트의 자동화 조치 방지</string>
     <string name="summary_lan_discovery">이 기기를 _autojs6._tcp 로 알려 VSCode (확장 1.1.0+) 가 LAN 연결 시 목록에 표시하도록 합니다</string>
+    <string name="summary_leakcanary">종료된 스크립트의 객체 (엔진, 런타임, 스레드, 플로팅 창) 와 파괴된 페이지를 감시하고, 회수되지 않으면 힙을 덤프하고 알립니다. debug 빌드 전용</string>
     <string name="summary_new_script_module_layer">마이그레이션된 스크립트 모듈 (현재 base64) 을 새 모듈 계층에서 마운트합니다. 이후에 시작하는 스크립트에 적용됩니다</string>
     <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
     <string name="summary_nodejs_inspector_enabled">스크립트의 로컬 디버깅 및 프로파일링을 허용합니다. PC DevTools는 ADB 포트 전달로 연결합니다.</string>

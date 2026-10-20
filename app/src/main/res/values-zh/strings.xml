@@ -854,6 +854,7 @@
     <string name="summary_github_token_set">已设置. 已在界面隐藏, 末尾为 %1$s.</string>
     <string name="summary_guard_mode">当 AutoJs6 前置时禁用自动化行为以避免误操作</string>
     <string name="summary_lan_discovery">以 _autojs6._tcp 广播本设备, 使 VSCode (插件 1.1.0+) 建立局域网连接时可直接列出本设备</string>
+    <string name="summary_leakcanary">监视已结束脚本的对象 (引擎, 运行时, 线程, 悬浮窗) 与已销毁的页面, 未被回收时转储堆并发出通知. 仅限 debug 构建</string>
     <string name="summary_new_script_module_layer">从新的模块层挂载已迁移的脚本模块 (目前为 base64). 对之后启动的脚本生效</string>
     <string name="summary_nodejs_doctor_report">生成已隐去隐私信息的 Node 运行时诊断报告, 用于提交错误报告</string>
     <string name="summary_nodejs_inspector_enabled">允许脚本进行本地调试和性能分析. 桌面 DevTools 通过 ADB 端口转发连接.</string>

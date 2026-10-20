@@ -853,6 +853,7 @@
     <string name="summary_github_token_set">Set. Hidden for privacy; ending in %1$s.</string>
     <string name="summary_guard_mode">Prevent automation actions from scripts when AutoJs6 is in the foreground</string>
     <string name="summary_lan_discovery">Advertise this device as _autojs6._tcp so VSCode (extension 1.1.0+) lists it when connecting over LAN</string>
+    <string name="summary_leakcanary">Watch the objects of finished scripts (engines, runtimes, threads, floating windows) and of destroyed pages, and dump the heap with a notification when they are not collected. Debug builds only</string>
     <string name="summary_new_script_module_layer">Mount the migrated script modules (currently base64) from the new module layer. Takes effect for scripts started afterwards</string>
     <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
     <string name="summary_nodejs_inspector_enabled">Allow scripts to use local debugging and profiling. Connect desktop DevTools through ADB port forwarding.</string>

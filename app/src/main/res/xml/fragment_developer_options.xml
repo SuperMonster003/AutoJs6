@@ -151,6 +151,14 @@
             app:title="@string/text_process_exit_history"
             app:summary="@string/summary_process_exit_history" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="@string/key_leakcanary_enabled"
+            app:layout="@layout/preference_custom"
+            app:defaultValue="true"
+            app:isPreferenceVisible="false"
+            app:summary="@string/summary_leakcanary"
+            app:title="@string/text_leakcanary" />
+
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
 </PreferenceScreen>

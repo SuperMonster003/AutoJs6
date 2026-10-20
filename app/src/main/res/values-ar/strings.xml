@@ -860,6 +860,7 @@
     <string name="summary_github_token_set">معين. مخفي للخصوصية; ينتهي بـ %1$s.</string>
     <string name="summary_guard_mode">منع إجراءات الأتمتة من البرامج النصية عندما يكون AutoJs6 في المقدمة</string>
     <string name="summary_lan_discovery">الإعلان عن هذا الجهاز باسم _autojs6._tcp ليعرضه VSCode (الإضافة 1.1.0+) عند الاتصال عبر الشبكة المحلية</string>
+    <string name="summary_leakcanary">مراقبة كائنات البرامج النصية المنتهية (المحركات, بيئات التشغيل, الخيوط, النوافذ العائمة) والصفحات المدمرة, وتفريغ الكومة مع إشعار إذا لم يتم تحريرها. لإصدارات debug فقط</string>
     <string name="summary_new_script_module_layer">تحميل وحدات البرامج النصية المرحلة (حاليا base64) من طبقة الوحدات الجديدة. يسري على البرامج النصية التي تبدأ بعد ذلك</string>
     <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
     <string name="summary_nodejs_inspector_enabled">السماح للنصوص باستخدام التصحيح المحلي وتحليل الأداء. اتصل بأدوات DevTools على الكمبيوتر عبر إعادة توجيه منافذ ADB.</string>

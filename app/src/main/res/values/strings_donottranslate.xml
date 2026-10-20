@@ -260,6 +260,7 @@
     <string name="key_layout_inspector_query_history" translatable="false">key_$_layout_inspector_query_history</string>
     <string name="key_layout_inspector_query_mode" translatable="false">key_$_layout_inspector_query_mode</string>
     <string name="key_layout_inspector_selector_mode_introduced">key_layout_inspector_selector_mode_introduced</string>
+    <string name="key_leakcanary_enabled" translatable="false">key_$_leakcanary_enabled</string>
     <string name="key_local_network_permission" translatable="false">key_local_network_permission</string>
     <string name="key_log_activity_input_bar_visible" translatable="false">key_$_log_activity_input_bar_visible</string>
     <string name="key_log_activity_log_coloring" translatable="false">key_$_log_activity_log_coloring</string>
@@ -416,6 +417,7 @@
     <string name="text_full_version_info" translatable="false">%1$s (%2$d)</string>
     <string name="text_half_ellipsis" translatable="false" formatted="true" tools:ignore="TypographyEllipsis">...</string>
     <string name="text_jks" translatable="false">JKS</string>
+    <string name="text_leakcanary" translatable="false">LeakCanary</string>
     <string name="text_manifest" translatable="false">Manifest</string>
     <string name="text_plugin_mechanism_aidl" translatable="false">AIDL / IPC</string>
     <string name="text_plugin_mechanism_sdk" translatable="false">SDK / In-Process</string>

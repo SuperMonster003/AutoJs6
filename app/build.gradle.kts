@@ -107,7 +107,9 @@ val apkBuilderIncludeBuiltInTemplate = providers.provider {
         apkBuilderIncludeBuiltInTemplateByProperty.get()
     }
 }
-val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("false").get()
+// LeakCanary is included in debug builds by default (docs/memory/ROADMAP.md D5 / T5); release builds never include it.
+// zh-CN: debug 构建默认包含 LeakCanary (docs/memory/ROADMAP.md D5 / T5); release 构建从不包含.
+val leakCanaryEnabled = providers.gradleProperty("autojs.leakcanary.enabled").orElse("true").get()
     .trim()
     .let { it.equals("true", ignoreCase = true) || it.equals("yes", ignoreCase = true) || it == "1" }
 val jvmSourceExperimentalEnabled = providers.gradleProperty("autojs.jvmSource.experimental")
@@ -551,9 +553,13 @@ dependencies /* Unclassified */ {
     // V1 contract is provided by the host parent loader. Rendering remains in the separate plugin APK.
     implementation(project(":plugin-api:compose-ui-api"))
 
-    // LeakCanary
+    // LeakCanary (debug builds of both flavors, app and inrt). When it is excluded, the debug LeakCanarySetup still compiles
+    // against it and turns into a no-op at run time.
+    // zh-CN: LeakCanary (app 与 inrt 两种风味的 debug 构建). 排除时 debug 的 LeakCanarySetup 仍针对它编译, 运行时变为空操作.
     if (leakCanaryEnabled) {
         debugImplementation(libs.leakcanary)
+    } else {
+        debugCompileOnly(libs.leakcanary)
     }
 
     // Android supports

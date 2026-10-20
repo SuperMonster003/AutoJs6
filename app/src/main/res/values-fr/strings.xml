@@ -858,6 +858,7 @@
     <string name="summary_github_token_set">Défini. Masqué pour protéger la confidentialité; se termine par %1$s.</string>
     <string name="summary_guard_mode">Prévenir les actions d\'automatisation des scripts lorsque AutoJs6 est au premier plan.</string>
     <string name="summary_lan_discovery">Annoncer cet appareil en tant que _autojs6._tcp pour que VSCode (extension 1.1.0+) le liste lors de la connexion sur le réseau local</string>
+    <string name="summary_leakcanary">Surveille les objets des scripts terminés (moteurs, environnements d\'exécution, threads, fenêtres flottantes) et des pages détruites; s\'ils ne sont pas libérés, vide le tas et affiche une notification. Builds debug uniquement</string>
     <string name="summary_new_script_module_layer">Monte les modules de script migrés (actuellement base64) depuis la nouvelle couche de modules. S\'applique aux scripts démarrés ensuite</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
     <string name="summary_nodejs_inspector_enabled">Autoriser le débogage local et le profilage. Connecter DevTools sur ordinateur via la redirection de ports ADB.</string>
