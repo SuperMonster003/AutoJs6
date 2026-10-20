@@ -17,6 +17,7 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
@@ -67,7 +68,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * Arguments (all optional): memoryGateRunId, memoryGateModes (normal,force), memoryGateWarmups (2),
  * memoryGateIterations (20), memoryGatePollMs (10000), memoryGateForceDelayMs (1000),
- * memoryGateKeepHprof (false), memoryGateAnalyze (true), memoryGateCapture (off).
+ * memoryGateKeepHprof (false), memoryGateAnalyze (true), memoryGateCapture (off), memoryGateAccessibilityWaitMs (0).
  *
  * zh-CN: 运行时泄漏门禁 (docs/memory/ROADMAP.md D3, T1-T4). 对每个场景与模式, 在本进程内执行脚本 `预热 + 计数` 次, 只保留每次运行的引擎与
  * ScriptRuntime 的弱引用 (在 EngineLifecycleCallback.onEngineRemove 中取得), 强制回收并确认 runtime 全部消失, 再比较 T1 的六项度量.
@@ -99,6 +100,7 @@ class RuntimeLeakGateDeviceTest {
     private val keepHprof by lazy { arguments.getString("memoryGateKeepHprof") == "true" }
     private val analyzeHeap by lazy { arguments.getString("memoryGateAnalyze") != "false" }
     private val captureAllowed by lazy { arguments.getString("memoryGateCapture") == "on" }
+    private val accessibilityWaitMs by lazy { integer("memoryGateAccessibilityWaitMs", 0, 0, 900_000).toLong() }
 
     @Before
     fun register() {
@@ -153,6 +155,7 @@ class RuntimeLeakGateDeviceTest {
         }
         val environment = environment(scenario)
         report.put("environment", JSONObject().put("accessibilityRunning", environment.accessibilityRunning)
+            .put("accessibilityEnabledInSettings", accessibilityEnabledInSettings())
             .put("keyguardLocked", context.getSystemService(KeyguardManager::class.java).isKeyguardLocked)
             .put("interactive", context.getSystemService(PowerManager::class.java).isInteractive))
         val start = GateMetrics.sample()
@@ -338,10 +341,33 @@ class RuntimeLeakGateDeviceTest {
         return GateEnvironment(
             workDir = dir.path, bigImage = big.path, smallImage = small.path, dexFile = dex.path, chainScript = chain.path,
             httpUrl = loopback?.httpUrl, webSocketUrl = loopback?.webSocketUrl,
-            accessibilityRunning = runCatching { AccessibilityService.hasInstance() }.getOrDefault(false),
+            accessibilityRunning = accessibilityRunning(scenario),
             pluginPackage = GateScenarios.PLUGIN_PACKAGE,
         )
     }
+
+    /**
+     * Instrumentation kills the host process when it starts and finishes, so the system lists the host
+     * accessibility service as crashed and does not bind it to the instrumented process. With
+     * memoryGateAccessibilityWaitMs set, S7 waits that long and shows a toast asking the maintainer to turn the
+     * service off and on again on the phone (ROADMAP appendix C Q9); the test never changes the setting itself.
+     * zh-CN: instrumentation 在启动和结束时会杀掉宿主进程, 系统因此把宿主无障碍服务记为崩溃, 不再绑定到被测进程.
+     * 设置 memoryGateAccessibilityWaitMs 后, S7 等待该时长并弹出 Toast, 请维护者在手机上把服务关掉再打开 (ROADMAP 附录 C Q9); 测试本身从不改动该设置.
+     */
+    private fun accessibilityRunning(scenario: GateScenario): Boolean {
+        fun bound() = runCatching { AccessibilityService.hasInstance() }.getOrDefault(false)
+        if (scenario.id != "S7" || accessibilityWaitMs <= 0 || bound()) return bound()
+        val deadline = SystemClock.elapsedRealtime() + accessibilityWaitMs
+        while (SystemClock.elapsedRealtime() < deadline) {
+            instrumentation.runOnMainSync { Toast.makeText(context, ACCESSIBILITY_PROMPT, Toast.LENGTH_LONG).show() }
+            if (awaitCondition(4_000) { bound() }) return true
+        }
+        return bound()
+    }
+
+    private fun accessibilityEnabledInSettings(): Boolean =
+        Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
+            .split(':').any { it.startsWith(context.packageName + "/") }
 
     private fun writeFixtureImages(big: File, small: File) {
         val bitmap = Bitmap.createBitmap(480, 480, Bitmap.Config.ARGB_8888)
@@ -555,6 +581,7 @@ class RuntimeLeakGateDeviceTest {
         private const val NATIVE_HEAP_LIMIT = 4L * 1024 * 1024
         private const val START_TIMEOUT_MS = 30_000L
         private const val READY_TIMEOUT_MS = 20_000L
+        private const val ACCESSIBILITY_PROMPT = "AutoJs6 内存门禁 S7: 请在系统无障碍设置中把 AutoJs6 关闭后重新开启"
         private const val FORCE_END_TIMEOUT_MS = 30_000L
         private const val REDUCED_BUDGET_AFTER = 3
         private const val REDUCED_BUDGET_MS = 1_000L
