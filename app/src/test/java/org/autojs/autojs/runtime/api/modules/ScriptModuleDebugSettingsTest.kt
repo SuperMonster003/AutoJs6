@@ -16,7 +16,8 @@ class ScriptModuleDebugSettingsTest {
     @Test
     fun modulesComeFromTheHostRegistry() {
         assertEquals(ScriptModules.moduleNames, ScriptModuleDebugSettings.moduleNames)
-        assertEquals(listOf("base64"), ScriptModuleDebugSettings.moduleNames)
+        // The host registry grows with every migrated module (P2-P4).
+        assertTrue("base64" in ScriptModuleDebugSettings.moduleNames)
     }
 
     @Test
