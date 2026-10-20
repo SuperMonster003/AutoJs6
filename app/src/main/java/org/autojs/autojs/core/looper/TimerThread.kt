@@ -68,7 +68,7 @@ open class TimerThread(
 
         val currentLooper = Looper.myLooper()
         setLooper(currentLooper)
-        currentLooper?.let { Handler(it).post(target) }
+        currentLooper?.let { Handler(it).post(ReleasingRunnable(target)) }
 
         val exceptionHandler: (t: Throwable) -> Unit = { t ->
             runCatching {
@@ -148,6 +148,26 @@ open class TimerThread(
 
     private fun notifyRunning() {
         mRunningLatch.countDown()
+    }
+
+    /**
+     * A runnable for one post to a Looper which drops its delegate as soon as it starts running (docs/memory/ROADMAP.md H21).
+     * When the delegate throws (for example on a force stop), Looper.loop leaves the dispatched Message unrecycled with its
+     * callback set, and a stale reference to that Message object in the stack frame of another Looper thread (it came from the
+     * shared message pool) then kept the script runtime reachable.
+     * zh-CN: 只投递一次的 Runnable, 一开始运行就丢弃其委托 (docs/memory/ROADMAP.md H21).
+     * 委托抛出异常 (例如强制停止) 时, Looper.loop 不会回收已分发的 Message, 其 callback 仍在; 而另一个 Looper 线程栈帧中对该 Message 对象 (来自共享消息池) 的陈旧引用曾因此让脚本运行时保持可达.
+     */
+    class ReleasingRunnable(delegate: Runnable) : Runnable {
+
+        @Volatile
+        private var mDelegate: Runnable? = delegate
+
+        override fun run() {
+            val delegate = mDelegate ?: return
+            mDelegate = null
+            delegate.run()
+        }
     }
 
     companion object {

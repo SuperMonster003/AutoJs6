@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 import org.autojs.autojs.AbstractAutoJs;
 import org.autojs.autojs.core.looper.LooperHelper;
+import org.autojs.autojs.core.looper.TimerThread;
 import org.autojs.autojs.core.ui.UiContentHost;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
@@ -65,7 +66,9 @@ public class LoopBasedJavaScriptEngine extends RhinoJavaScriptEngine {
             }
         };
 
-        mHandler.post(r);
+        // Posted through a runnable that drops its reference to this engine once it runs (docs/memory/ROADMAP.md H21).
+        // zh-CN: 经由一开始运行就丢弃对本引擎引用的 Runnable 投递 (docs/memory/ROADMAP.md H21).
+        mHandler.post(new TimerThread.ReleasingRunnable(r));
 
         if (!mLooping && isBackgroundThread()) {
             mLooping = true;
