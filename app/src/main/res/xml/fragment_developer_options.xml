@@ -158,6 +158,13 @@
             app:title="@string/text_memory_unreclaimed_warning" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="@string/key_memory_script_heap_dump"
+            app:layout="@layout/preference_custom"
+            app:defaultValue="false"
+            app:summary="@string/summary_memory_script_heap_dump"
+            app:title="@string/text_memory_script_heap_dump" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="@string/key_leakcanary_enabled"
             app:layout="@layout/preference_custom"
             app:defaultValue="true"

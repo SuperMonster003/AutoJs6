@@ -470,6 +470,7 @@
     <string name="error_lua_runtime_unavailable">Lua Runtime n\'est pas disponible. Installez, activez ou autorisez le plugin Lua Runtime officiel dans le Centre des plugins, puis réessayez.</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded : %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 peut ne pas avoir l\'accès root pour exécuter le fichier \"auto\".</string>
+    <string name="error_memory_script_heap_dump_not_allowed">Les versions release n\'autorisent pas les scripts à exporter un vidage du tas tant que \"Autoriser les scripts à exporter un hprof\" n\'est pas activé dans Les options du développeur > Diagnostic de la mémoire</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() appelé avec un argument nul : %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">La méthode n\'accepte qu\'un nombre d\'arguments dans la plage [%1$d..%2$d]</string>
     <string name="error_missing_required_plugin_for_module_label">Plugin requis manquant pour \"%1$s\". Veuillez installer le plugin et réessayer.</string>
@@ -862,6 +863,7 @@
     <string name="summary_memory_copy_report">Copier l\'instantané et la liste des environnements d\'exécution non libérés sous forme de texte</string>
     <string name="summary_memory_export_heap_dump">Enregistrer un fichier hprof lisible par Android Studio. Il contient toutes les données du tas, y compris les variables des scripts, donc partagez-le avec prudence</string>
     <string name="summary_memory_force_gc">Exécuter 3 fois le ramasse-miettes et la finalisation, attendre jusqu\'à 10 s que les environnements d\'exécution terminés soient libérés, puis actualiser</string>
+    <string name="summary_memory_script_heap_dump">Permettre à memory.dumpHeap d\'écrire des vidages du tas dans les versions release (toujours autorisé dans les versions debug). Un vidage du tas contient toutes les données du tas, y compris les variables de tous les scripts</string>
     <string name="summary_memory_unreclaimed_warning">10 s après la fin d\'un script, exécuter une fois le ramasse-miettes; si son environnement d\'exécution n\'est toujours pas libéré, afficher un avertissement dans la console globale</string>
     <string name="summary_new_script_module_layer">Monte les modules de script migrés (actuellement base64) depuis la nouvelle couche de modules. S\'applique aux scripts démarrés ensuite</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
@@ -2156,6 +2158,7 @@
     <string name="text_memory_retained_summary">%1$s, terminé il y a %2$s, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">Contextes Rhino actifs</string>
     <string name="text_memory_runtime_not_reclaimed">L\'environnement d\'exécution du script %1$s n\'a pas été libéré après sa fin, voir Les options du développeur > Diagnostic de la mémoire</string>
+    <string name="text_memory_script_heap_dump">Autoriser les scripts à exporter un hprof</string>
     <string name="text_memory_snapshot">Instantané</string>
     <string name="text_memory_threads">Threads de script</string>
     <string name="text_memory_threads_value">%1$s (tous les threads: %2$s)</string>

@@ -466,6 +466,7 @@
     <string name="error_lua_runtime_unavailable">Lua 运行时不可用. 请在插件中心安装, 启用或授权官方 Lua 运行时插件, 然后重试.</string>
     <string name="error_max_listeners_exceeded">超出最大监听器数量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 权限而无法运行 \"auto\" 文件</string>
+    <string name="error_memory_script_heap_dump_not_allowed">release 版本中脚本不能导出堆转储, 需先在 开发者选项 > 内存诊断 中开启 \"允许脚本导出 hprof\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 传入的 %s 参数为空</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">方法仅可接受参数数量位于 [%1$d\.\.%2$d] 区间内</string>
     <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的插件. 请先安装插件, 然后重试.</string>
@@ -858,6 +859,7 @@
     <string name="summary_memory_copy_report">以文本形式复制快照与未回收的 runtime 列表</string>
     <string name="summary_memory_export_heap_dump">保存可用 Android Studio 打开的 hprof 文件. 文件包含堆中的全部数据 (含脚本变量), 请谨慎分享</string>
     <string name="summary_memory_force_gc">执行 3 次垃圾回收与 finalization, 最长等待 10 秒让已结束的 runtime 被回收, 然后刷新</string>
+    <string name="summary_memory_script_heap_dump">允许 memory.dumpHeap 在 release 版本中写出堆转储 (debug 版本始终允许). 堆转储包含堆中的全部数据 (含所有脚本的变量)</string>
     <string name="summary_memory_unreclaimed_warning">脚本结束 10 秒后执行一次垃圾回收, 若其 runtime 仍未被回收, 则向全局控制台输出一条警告</string>
     <string name="summary_new_script_module_layer">从新的模块层挂载已迁移的脚本模块 (目前为 base64). 对之后启动的脚本生效</string>
     <string name="summary_nodejs_doctor_report">生成已隐去隐私信息的 Node 运行时诊断报告, 用于提交错误报告</string>
@@ -2153,6 +2155,7 @@
     <string name="text_memory_retained_summary">%1$s, 已结束 %2$s, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">活动的 Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">脚本 %1$s 结束后 runtime 未被回收, 见 开发者选项 > 内存诊断</string>
+    <string name="text_memory_script_heap_dump">允许脚本导出 hprof</string>
     <string name="text_memory_snapshot">快照</string>
     <string name="text_memory_threads">脚本线程</string>
     <string name="text_memory_threads_value">%1$s (全部线程: %2$s)</string>

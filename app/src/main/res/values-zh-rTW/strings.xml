@@ -467,6 +467,7 @@
     <string name="error_lua_runtime_unavailable">Lua 執行時無法使用. 請在外掛中心安裝, 啟用或授權官方 Lua 執行時外掛, 然後重試.</string>
     <string name="error_max_listeners_exceeded">超出最大監聽器數量限制: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 可能因缺少 Root 許可權而無法執行 \"auto\" 檔案</string>
+    <string name="error_memory_script_heap_dump_not_allowed">release 版本中指令碼不能匯出堆積傾印, 需先在 開發者選項 > 記憶體診斷 中開啟 \"允許指令碼匯出 hprof\"</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() 傳入的 %s 引數為空</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">方法僅可接受引數數量位於 [%1$d\.\.%2$d] 區間內</string>
     <string name="error_missing_required_plugin_for_module_label">缺少 \"%1$s\" 所需的外掛. 請先安裝外掛, 然後重試.</string>
@@ -859,6 +860,7 @@
     <string name="summary_memory_copy_report">以文字形式複製快照與未回收的 runtime 清單</string>
     <string name="summary_memory_export_heap_dump">儲存可用 Android Studio 開啟的 hprof 檔案. 檔案包含堆積中的全部資料 (含指令碼變數), 請謹慎分享</string>
     <string name="summary_memory_force_gc">執行 3 次垃圾回收與 finalization, 最長等待 10 秒讓已結束的 runtime 被回收, 然後重新整理</string>
+    <string name="summary_memory_script_heap_dump">允許 memory.dumpHeap 在 release 版本中寫出堆積傾印 (debug 版本始終允許). 堆積傾印包含堆積中的全部資料 (含所有指令碼的變數)</string>
     <string name="summary_memory_unreclaimed_warning">指令碼結束 10 秒後執行一次垃圾回收, 若其 runtime 仍未被回收, 則向全域控制台輸出一則警告</string>
     <string name="summary_new_script_module_layer">從新的模組層掛載已遷移的指令碼模組 (目前為 base64). 對之後啟動的指令碼生效</string>
     <string name="summary_nodejs_doctor_report">產生已隱去隱私資訊的 Node 執行階段診斷報告, 用於提交錯誤報告</string>
@@ -2153,6 +2155,7 @@
     <string name="text_memory_retained_summary">%1$s, 已結束 %2$s, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">作用中的 Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">指令碼 %1$s 結束後 runtime 未被回收, 見 開發者選項 > 記憶體診斷</string>
+    <string name="text_memory_script_heap_dump">允許指令碼匯出 hprof</string>
     <string name="text_memory_snapshot">快照</string>
     <string name="text_memory_threads">指令碼執行緒</string>
     <string name="text_memory_threads_value">%1$s (全部執行緒: %2$s)</string>

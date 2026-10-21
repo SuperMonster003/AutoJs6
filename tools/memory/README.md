@@ -77,6 +77,14 @@ ROADMAP P2.2 / P2.3. 开发者选项与内存诊断页面都未导出, 与 `tool
 
 `--warning-check` (P2.3): 先单独运行脚本 B (自行结束), 之后 `--quiet` 秒内不应出现警告 (对照); 再由脚本 A 启动 B 并持有 `engines.all()` 返回的引擎对象 `--pin` 秒, B 的 runtime 因此无法回收, B 结束约 10 s 后宿主应输出警告 (从 logcat 的 `MemoryDiagnostics` 标签读取 id, 结束方式与已过时长, 并核对全局控制台的 W 行); A 持有期间对页面截图一次; A 结束后探针脚本调用 `MemoryDiagnostics.collect()`, 列表中不应再有 A / B. 需要开发者选项 "脚本结束后未回收时在控制台警告" 为开 (默认). 屏幕须点亮并解锁 (脚本只检查不操作). 输出每项一行 PASS / FAIL 与关键数值.
 
+## device_memory_api.py: 脚本 API memory 模块真机核对
+
+```
+py -3.12 -I -u tools/memory/device_memory_api.py -s SERIAL [--keep] [--wait 120]
+```
+
+ROADMAP P5.1. 经 `RunIntentActivity` 在已安装的 debug 宿主中运行一个探针脚本: `memory.snapshot()` 的字段与类型 (T9) 及单次耗时; 第二个脚本把自身 `runtime` 存进静态 Java 表 (System properties) 后结束, `memory.collect(5000)` 后 `memory.retained()` 应列出它 (S2 修前的类比), 探针移除引用后 `memory.collect()` 应回收它 (修后的类比); `memory.dumpHeap()` 写出 hprof 并核对大小后删除 (debug 构建始终允许); `memory.watch()` 的返回值; 各参数错误能以脚本错误抛出. 探针把结果写到设备上的 `result.json` 而不是 logcat (参数错误会打印堆栈, ColorOS 会丢弃超出配额的日志行). 推送的文件默认在结束后删除. 屏幕须点亮, 脚本不点屏幕, 不改设置. 输出每项一行 PASS / FAIL 与关键数值.
+
 ## static_audit.py: 源码静态审计
 
 ```

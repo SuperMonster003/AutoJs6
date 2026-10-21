@@ -470,6 +470,7 @@
     <string name="error_lua_runtime_unavailable">Среда Lua Runtime недоступна. Установите, включите или авторизуйте официальный плагин Lua Runtime в Центре плагинов и повторите попытку.</string>
     <string name="error_max_listeners_exceeded">Превышено максимальное количество слушателей: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 может не иметь root-доступа для запуска файла \"auto\"</string>
+    <string name="error_memory_script_heap_dump_not_allowed">В release-сборках скрипты не могут экспортировать дамп кучи, пока не включен параметр \"Разрешить скриптам экспорт hprof\" в Параметры разработчика > Диагностика памяти</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() вызвана с нулевым аргументом: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">Метод принимает только количество аргументов в диапазоне [%1$d..%2$d]</string>
     <string name="error_missing_required_plugin_for_module_label">Отсутствует требуемый плагин для \"%1$s\". Установите плагин и повторите попытку.</string>
@@ -862,6 +863,7 @@
     <string name="summary_memory_copy_report">Скопировать снимок и список неосвобожденных сред выполнения в виде текста</string>
     <string name="summary_memory_export_heap_dump">Сохранить файл hprof, который можно открыть в Android Studio. Он содержит все данные кучи, включая переменные скриптов, поэтому делитесь им осторожно</string>
     <string name="summary_memory_force_gc">Выполнить сборку мусора и finalization 3 раза, подождать до 10 с, пока завершенные среды выполнения освободятся, затем обновить</string>
+    <string name="summary_memory_script_heap_dump">Разрешить memory.dumpHeap записывать дампы кучи в release-сборках (в debug-сборках разрешено всегда). Дамп кучи содержит все данные кучи, включая переменные всех скриптов</string>
     <string name="summary_memory_unreclaimed_warning">Через 10 с после завершения скрипта выполнить одну сборку мусора; если его среда выполнения все еще не освобождена, вывести предупреждение в глобальную консоль</string>
     <string name="summary_new_script_module_layer">Подключать перенесенные модули скриптов (сейчас base64) из нового слоя модулей. Действует для скриптов, запущенных после изменения</string>
     <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
@@ -2156,6 +2158,7 @@
     <string name="text_memory_retained_summary">%1$s, завершен %2$s назад, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">Активные контексты Rhino</string>
     <string name="text_memory_runtime_not_reclaimed">Среда выполнения скрипта %1$s не освобождена после его завершения, см. Параметры разработчика > Диагностика памяти</string>
+    <string name="text_memory_script_heap_dump">Разрешить скриптам экспорт hprof</string>
     <string name="text_memory_snapshot">Снимок</string>
     <string name="text_memory_threads">Потоки скриптов</string>
     <string name="text_memory_threads_value">%1$s (всего потоков: %2$s)</string>

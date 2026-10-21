@@ -465,6 +465,7 @@
     <string name="error_lua_runtime_unavailable">Lua Runtime is unavailable. Install, enable, or authorize the official Lua Runtime plugin in Plugin Center, then try again.</string>
     <string name="error_max_listeners_exceeded">Max listeners exceeded: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 may not have root access to run \"auto\" file</string>
+    <string name="error_memory_script_heap_dump_not_allowed">Release builds do not allow scripts to export heap dumps unless \"Allow scripts to export hprof\" is turned on in Developer options > Memory diagnostics</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() called with null argument: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">Method only accepts a number of arguments in the range [%1$d\.\.%2$d]</string>
     <string name="error_missing_required_plugin_for_module_label">Missing required plugin for \"%1$s\". Please install the plugin and try again.</string>
@@ -857,6 +858,7 @@
     <string name="summary_memory_copy_report">Copy the snapshot and the unreclaimed runtimes as text</string>
     <string name="summary_memory_export_heap_dump">Save an hprof file that Android Studio can open. It holds everything in the heap, script variables included, so share it with care</string>
     <string name="summary_memory_force_gc">Run garbage collection 3 times with finalization, wait up to 10 s for finished runtimes to be reclaimed, then refresh</string>
+    <string name="summary_memory_script_heap_dump">Let memory.dumpHeap write heap dumps in release builds (always allowed in debug builds). A heap dump holds everything in the heap, the variables of every script included</string>
     <string name="summary_memory_unreclaimed_warning">10 s after a script ends, collect garbage once; if its runtime is still not reclaimed, print a warning to the global console</string>
     <string name="summary_new_script_module_layer">Mount the migrated script modules (currently base64) from the new module layer. Takes effect for scripts started afterwards</string>
     <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
@@ -2152,6 +2154,7 @@
     <string name="text_memory_retained_summary">%1$s, ended %2$s ago, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">Active Rhino contexts</string>
     <string name="text_memory_runtime_not_reclaimed">The runtime of script %1$s was not reclaimed after it ended, see Developer options > Memory diagnostics</string>
+    <string name="text_memory_script_heap_dump">Allow scripts to export hprof</string>
     <string name="text_memory_snapshot">Snapshot</string>
     <string name="text_memory_threads">Script threads</string>
     <string name="text_memory_threads_value">%1$s (all threads: %2$s)</string>

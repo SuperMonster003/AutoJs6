@@ -470,6 +470,7 @@
     <string name="error_lua_runtime_unavailable">Lua Runtime no está disponible. Instala, habilita o autoriza el plugin oficial Lua Runtime en el Centro de plugins y vuelve a intentarlo.</string>
     <string name="error_max_listeners_exceeded">Se superó el número máximo de receptores: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 puede no tener acceso a la raíz para ejecutar el archivo \"auto</string>
+    <string name="error_memory_script_heap_dump_not_allowed">Las compilaciones release no permiten que los scripts exporten volcados del heap a menos que se active \"Permitir que los scripts exporten hprof\" en Opciones del desarrollador > Diagnóstico de memoria</string>
     <string name="error_method_called_with_null_argument" formatted="false">%s() llamada con argumento nulo: %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">El método solo acepta una cantidad de argumentos en el rango [%1$d..%2$d]</string>
     <string name="error_missing_required_plugin_for_module_label">Falta el plugin requerido para \"%1$s\". Instala el plugin e inténtalo de nuevo.</string>
@@ -862,6 +863,7 @@
     <string name="summary_memory_copy_report">Copiar como texto la instantánea y la lista de entornos de ejecución no liberados</string>
     <string name="summary_memory_export_heap_dump">Guardar un archivo hprof que Android Studio puede abrir. Contiene todos los datos del heap, incluidas las variables de los scripts, así que compártelo con cuidado</string>
     <string name="summary_memory_force_gc">Ejecutar 3 veces la recolección de basura y la finalización, esperar hasta 10 s a que se liberen los entornos de ejecución finalizados y luego actualizar</string>
+    <string name="summary_memory_script_heap_dump">Permitir que memory.dumpHeap escriba volcados del heap en las compilaciones release (siempre permitido en las compilaciones debug). Un volcado del heap contiene todos los datos del heap, incluidas las variables de todos los scripts</string>
     <string name="summary_memory_unreclaimed_warning">10 s después de que termine un script, ejecutar una vez la recolección de basura; si su entorno de ejecución sigue sin liberarse, mostrar una advertencia en la consola global</string>
     <string name="summary_new_script_module_layer">Monta los módulos de script migrados (actualmente base64) desde la nueva capa de módulos. Se aplica a los scripts iniciados después</string>
     <string name="summary_nodejs_doctor_report">Generar un informe de diagnóstico del entorno de ejecución de Node con datos privados eliminados para informar errores</string>
@@ -2156,6 +2158,7 @@
     <string name="text_memory_retained_summary">%1$s, finalizado hace %2$s, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">Contextos de Rhino activos</string>
     <string name="text_memory_runtime_not_reclaimed">El entorno de ejecución del script %1$s no se liberó después de finalizar, consulta Opciones del desarrollador > Diagnóstico de memoria</string>
+    <string name="text_memory_script_heap_dump">Permitir que los scripts exporten hprof</string>
     <string name="text_memory_snapshot">Instantánea</string>
     <string name="text_memory_threads">Hilos de script</string>
     <string name="text_memory_threads_value">%1$s (todos los hilos: %2$s)</string>

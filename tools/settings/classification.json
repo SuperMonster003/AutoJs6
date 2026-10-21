@@ -196,6 +196,7 @@
   "key_mail_settings": {"kind": "Excluded", "note": "动作条目, 打开邮件插件设置 (插件自身设置第一期不含, D3)"},
   "key_manage_ignored_updates": {"kind": "Excluded", "note": "动作条目 (管理忽略的更新)"},
   "key_mcp_server_normally_closed": {"kind": "State", "category": "other", "note": "上次是否正常关闭, 用于启动时恢复"},
+  "key_memory_script_heap_dump": {"kind": "Setting", "category": "developer", "note": "开发者选项 > 内存诊断: 允许脚本导出 hprof (release 构建的 memory.dumpHeap, debug 构建始终允许), 默认 false (内存路线图 P5.1, 附录 C Q8); 按 key_memory_unreclaimed_warning 的先例登记, DeveloperKeys 声明"},
   "key_memory_unreclaimed_warning": {"kind": "Setting", "category": "developer", "note": "开发者选项 > 内存诊断: 已结束的脚本未被回收时在控制台警告, 默认 true (内存路线图 P2.3, 6b09b7d8e); 按 Q16 先例登记 (附录 C Q21), DeveloperKeys 声明"},
   "key_new_script_module_layer": {"kind": "Setting", "category": "developer", "note": "开关"},
   "key_night_mode": {"kind": "Setting", "category": "appearance", "effect": "APPLY", "note": "列表项 (ViewUtils.MODE)"},

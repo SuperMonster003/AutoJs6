@@ -1066,6 +1066,18 @@
         "$compose"
       ],
       "callable": true
+    },
+    {
+      "module": "memory",
+      "class": "memory.Memory",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt",
+      "operation": "augment",
+      "target": "target",
+      "aliases": [
+        "memory",
+        "$memory"
+      ],
+      "callable": false
     }
   ],
   "records": [
@@ -10616,6 +10628,61 @@
       "registration": "selfAssignmentFunctions",
       "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/mediainfo/Mediainfo.kt",
       "line": 36
+    },
+    {
+      "api": "memory.collect",
+      "module": "memory",
+      "ownerModule": "memory",
+      "member": "collect",
+      "implementation": "collect",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt",
+      "line": 48
+    },
+    {
+      "api": "memory.dumpHeap",
+      "module": "memory",
+      "ownerModule": "memory",
+      "member": "dumpHeap",
+      "implementation": "dumpHeap",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt",
+      "line": 50
+    },
+    {
+      "api": "memory.retained",
+      "module": "memory",
+      "ownerModule": "memory",
+      "member": "retained",
+      "implementation": "retained",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt",
+      "line": 49
+    },
+    {
+      "api": "memory.snapshot",
+      "module": "memory",
+      "ownerModule": "memory",
+      "member": "snapshot",
+      "implementation": "snapshot",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt",
+      "line": 47
+    },
+    {
+      "api": "memory.watch",
+      "module": "memory",
+      "ownerModule": "memory",
+      "member": "watch",
+      "implementation": "watch",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt",
+      "line": 51
     },
     {
       "api": "newInjectableWebClient",

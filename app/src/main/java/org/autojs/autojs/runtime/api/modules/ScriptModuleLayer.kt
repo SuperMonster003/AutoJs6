@@ -20,12 +20,12 @@ import org.mozilla.javascript.ScriptableObject
 object ScriptModuleLayer {
 
     /**
-     * Every module of the old `ScriptRuntime.augment()` in its mounting order (91 augment calls, appendix C Q8): each
-     * top-level module by its primary name, followed by its sub-modules as `parent.name`. `global` and `legacy` assign
-     * their members to the global object without a module object. The relative order of the top-level names is the
-     * one of `Object.keys(global)` in the device baseline `tools/augment/baseline/surface-XQ-AT72-5586.txt`
-     * (`ScriptModuleOrderTest`); the mounter also binds sub-modules in this order. Kept when the old implementation is
-     * removed (P5.2).
+     * Every module of the old `ScriptRuntime.augment()` in its mounting order (91 augment calls, appendix C Q8; 92 since
+     * `memory` of docs/memory/ROADMAP.md P5.1): each top-level module by its primary name, followed by its sub-modules as
+     * `parent.name`. `global` and `legacy` assign their members to the global object without a module object. The
+     * relative order of the top-level names is the one of `Object.keys(global)` in the device baseline
+     * `tools/augment/baseline/surface-XQ-AT72-5586.txt` (`ScriptModuleOrderTest`), modules added after the baseline go
+     * last; the mounter also binds sub-modules in this order. Kept when the old implementation is removed (P5.2).
      */
     @JvmField
     val ORDER: List<String> = listOf(
@@ -38,7 +38,7 @@ object ScriptModuleLayer {
         "files", "files.batchRename", "crypto", "RootAutomator", "engines", "floaty", "storages", "device", "powerManager", "settings",
         "recorder", "toast", "media", "sensors", "base64", "notice", "notice.channel", "shizuku", "opencc", "mime", "sysprops",
         "sqlite", "zip", "nanoid", "pinyin", "pinyin4j", "mediainfo", "mail", "installer", "epub", "gallery", "terminal",
-        "speech", "speech.models", "compose",
+        "speech", "speech.models", "compose", "memory",
     )
 
     /** The top-level entries of [ORDER], the names `ScriptRuntime.augment()` mounts in turn. */

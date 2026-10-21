@@ -472,6 +472,7 @@
     <string name="error_lua_runtime_unavailable">Lua Runtime을 사용할 수 없습니다. 플러그인 센터에서 공식 Lua Runtime 플러그인을 설치, 활성화 또는 승인한 후 다시 시도하세요.</string>
     <string name="error_max_listeners_exceeded">최대 청취자를 초과했습니다: %d</string>
     <string name="error_may_not_have_root_access_to_run_auto_file">AutoJs6 은 \"auto\" 파일을 실행할 루트 액세스 권한이 없을 수 있습니다.</string>
+    <string name="error_memory_script_heap_dump_not_allowed">release 빌드에서는 스크립트가 힙 덤프를 내보낼 수 없습니다. 개발자 옵션 > 메모리 진단 에서 \"스크립트의 hprof 내보내기 허용\" 을 켜세요</string>
     <string name="error_method_called_with_null_argument" formatted="false">널 인수로 호출 된 %s(): %s</string>
     <string name="error_method_only_accepts_a_number_of_arguments_in_the_range_n_to_m">메소드는 [%1$d..%2$d] 범위의 인수만 허용합니다</string>
     <string name="error_missing_required_plugin_for_module_label">\"%1$s\"에 필요한 플러그인이 없습니다. 플러그인을 설치한 후 다시 시도해 주세요.</string>
@@ -864,6 +865,7 @@
     <string name="summary_memory_copy_report">스냅샷과 회수되지 않은 런타임 목록을 텍스트로 복사합니다</string>
     <string name="summary_memory_export_heap_dump">Android Studio 에서 열 수 있는 hprof 파일을 저장합니다. 힙의 모든 데이터 (스크립트 변수 포함) 가 들어 있으므로 공유에 주의하세요</string>
     <string name="summary_memory_force_gc">가비지 컬렉션과 finalization 을 3 회 실행하고, 종료된 런타임이 회수될 때까지 최대 10 초 기다린 후 새로 고칩니다</string>
+    <string name="summary_memory_script_heap_dump">release 빌드에서 memory.dumpHeap 이 힙 덤프를 기록하도록 허용합니다 (debug 빌드에서는 항상 허용). 힙 덤프에는 힙의 모든 데이터 (모든 스크립트의 변수 포함) 가 들어 있습니다</string>
     <string name="summary_memory_unreclaimed_warning">스크립트가 종료되고 10 초 후 가비지 컬렉션을 한 번 실행하고, 런타임이 여전히 회수되지 않았으면 전역 콘솔에 경고를 출력합니다</string>
     <string name="summary_new_script_module_layer">마이그레이션된 스크립트 모듈 (현재 base64) 을 새 모듈 계층에서 마운트합니다. 이후에 시작하는 스크립트에 적용됩니다</string>
     <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
@@ -2158,6 +2160,7 @@
     <string name="text_memory_retained_summary">%1$s, 종료 후 %2$s, id %3$s\n%4$s</string>
     <string name="text_memory_rhino_contexts">활성 Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">스크립트 %1$s 가 종료된 후 런타임이 회수되지 않았습니다. 개발자 옵션 > 메모리 진단 을 참고하세요</string>
+    <string name="text_memory_script_heap_dump">스크립트의 hprof 내보내기 허용</string>
     <string name="text_memory_snapshot">스냅샷</string>
     <string name="text_memory_threads">스크립트 스레드</string>
     <string name="text_memory_threads_value">%1$s (전체 스레드: %2$s)</string>

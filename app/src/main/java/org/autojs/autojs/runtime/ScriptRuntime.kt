@@ -89,6 +89,7 @@ import org.autojs.autojs.runtime.api.augment.terminal.Terminal
 import org.autojs.autojs.runtime.api.augment.mail.Mail
 import org.autojs.autojs.runtime.api.augment.installer.Installer
 import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
+import org.autojs.autojs.runtime.api.augment.memory.Memory
 import org.autojs.autojs.runtime.api.augment.mime.Mime
 import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
 import org.autojs.autojs.runtime.api.augment.notice.Notice
@@ -1161,6 +1162,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             "terminal" -> Terminal(this, terminal).augment(target)
             "speech" -> Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it) }
             "compose" -> Compose(this).also { compose = it }.augment(target)
+            "memory" -> Memory(this).augment(target)
             else -> throw IllegalStateException("Script module $name has no augment call")
         }
     }

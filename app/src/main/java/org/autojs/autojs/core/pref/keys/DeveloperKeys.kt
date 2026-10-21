@@ -53,6 +53,15 @@ object DeveloperKeys : SettingsDomain {
     @JvmField
     val MEMORY_UNRECLAIMED_WARNING = SettingKey.Bool(R.string.key_memory_unreclaimed_warning, DEVELOPER, SettingDefault.of(true))
 
+    /**
+     * Allow scripts to export hprof: `memory.dumpHeap` of release builds (memory roadmap P5.1, appendix C Q8; debug builds always
+     * allow it); added after the P0 inventory and registered like `key_memory_unreclaimed_warning`.
+     * zh-CN: 允许脚本导出 hprof: release 构建的 `memory.dumpHeap` (内存路线图 P5.1, 附录 C Q8; debug 构建始终允许); 在 P0 清单之后加入, 与
+     * `key_memory_unreclaimed_warning` 一样登记.
+     */
+    @JvmField
+    val MEMORY_SCRIPT_HEAP_DUMP = SettingKey.Bool(R.string.key_memory_script_heap_dump, DEVELOPER, SettingDefault.of(false))
+
     /** The experimental dex compiler plugin is used (only together with a valid component, `DexCompilerOptInStore.read`). */
     @JvmField
     val DEX_COMPILER_EXPERIMENTAL_ENABLED = SettingKey.Bool(name = "dex_compiler_experimental_enabled", category = DEVELOPER, default = SettingDefault.of(false))
@@ -71,7 +80,7 @@ object DeveloperKeys : SettingsDomain {
 
     override val keys: List<PrefKey<*>> = listOf(
         NEW_SCRIPT_MODULE_LAYER, SCRIPT_MODULE_DEBUG_PRINT, SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES, NODEJS_INSPECTOR_ENABLED,
-        LEAKCANARY_ENABLED, MEMORY_UNRECLAIMED_WARNING,
+        LEAKCANARY_ENABLED, MEMORY_UNRECLAIMED_WARNING, MEMORY_SCRIPT_HEAP_DUMP,
         DEX_COMPILER_EXPERIMENTAL_ENABLED, DEX_COMPILER_EXPERIMENTAL_COMPONENT, R8_COMPILER_EXPLICIT_ENABLED, R8_COMPILER_EXPLICIT_COMPONENT,
     )
 

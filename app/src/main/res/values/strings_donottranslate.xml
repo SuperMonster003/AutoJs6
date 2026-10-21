@@ -271,6 +271,7 @@
     <string name="key_mail_settings" translatable="false">key_$_mail_settings</string>
     <string name="key_manage_ignored_updates" translatable="false">key_$_manage_ignored_updates</string>
     <string name="key_mcp_server_normally_closed" translatable="false">key_$_mcp_server_normally_closed</string>
+    <string name="key_memory_script_heap_dump" translatable="false">key_$_memory_script_heap_dump</string>
     <string name="key_memory_unreclaimed_warning" translatable="false">key_$_memory_unreclaimed_warning</string>
     <string name="key_new_script_module_layer" translatable="false">key_$_new_script_module_layer</string>
     <string name="key_night_mode" translatable="false">key_$_night_mode</string>

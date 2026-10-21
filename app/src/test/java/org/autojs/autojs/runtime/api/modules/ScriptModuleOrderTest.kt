@@ -25,10 +25,10 @@ class ScriptModuleOrderTest {
 
     @Test
     fun everyAugmentCallIsListedOnceWithItsSubModulesAfterIt() {
-        assertEquals(91, order.size)
+        assertEquals(92, order.size)
         assertEquals("duplicates in ORDER", order.size, order.toSet().size)
         assertEquals(order.filter { '.' !in it }, topLevel)
-        assertEquals(75, topLevel.size)
+        assertEquals(76, topLevel.size)
         var current = ""
         order.forEach { name ->
             if ('.' in name) assertEquals("$name must follow its parent", current, name.substringBefore('.')) else current = name
@@ -49,8 +49,10 @@ class ScriptModuleOrderTest {
     fun topLevelNamesKeepTheGlobalKeyOrderOfTheDeviceBaseline() {
         val keys = File(SURFACE).useLines { lines -> lines.first { it.startsWith(KEYS_ORDER) }.removePrefix(KEYS_ORDER).trim().split(' ') }
         assertTrue("baseline keys order is missing", keys.size >= 500)
-        // Only "legacy" has no key of its own: it assigns functions to the global object.
-        assertEquals(listOf("legacy"), topLevel.filter { it !in keys })
+        // Only "legacy" has no key of its own: it assigns functions to the global object. Modules added after the
+        // baseline are not on the device list and must come last, in the order they were added.
+        assertEquals(listOf("legacy") + ADDED_AFTER_BASELINE, topLevel.filter { it !in keys })
+        assertEquals(ADDED_AFTER_BASELINE, topLevel.takeLast(ADDED_AFTER_BASELINE.size))
         assertEquals(keys.filter { it in topLevel }, topLevel.filter { it in keys })
     }
 
@@ -109,6 +111,9 @@ class ScriptModuleOrderTest {
         private const val SCRIPT_RUNTIME = "src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt"
         private const val JAVASCRIPT_ENGINE = "src/main/java/org/autojs/autojs/engine/JavaScriptEngine.java"
         private const val KEYS_ORDER = "# keys order:"
+
+        /** Top-level modules added after the device baseline 5586: `memory` (docs/memory/ROADMAP.md P5.1). */
+        private val ADDED_AFTER_BASELINE = listOf("memory")
     }
 
 }

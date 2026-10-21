@@ -159,6 +159,8 @@ class SettingsDomainsTest {
             // fragment_developer_options.xml app:defaultValue="true", MemoryDiagnostics getBoolean(..., true) (memory
             // roadmap P2.3, appendix C Q21).
             "key_memory_unreclaimed_warning" to "true",
+            // fragment_developer_options.xml app:defaultValue="false" (memory roadmap P5.1, appendix C Q8).
+            "key_memory_script_heap_dump" to "false",
             // Literal names the P0 inventory missed (appendix C Q15, P3.6); the defaults are those of the old readers:
             // Pref.getBoolean(KEY_DERIVED_COLORS, false), Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false),
             // Pref.getString(ROOT_CONFIGURATION_KEY, "{}"), booleanOrFalse / stringOrNull of the compiler opt-in stores
