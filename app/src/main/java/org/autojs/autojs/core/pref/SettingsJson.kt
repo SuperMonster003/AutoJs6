@@ -74,6 +74,20 @@ object SettingsJson {
     }
 
     /**
+     * A JSON object as a map of plain values in document order (P3.6: the root configuration of 3-Stove Agent).
+     * zh-CN: JSON 对象, 即按文档顺序的普通值映射 (P3.6: 3-Stove Agent 的根配置).
+     */
+    @JvmField
+    val OBJECT: Codec<Map<String, Any?>> = object : Codec<Map<String, Any?>> {
+        override fun encode(value: Map<String, Any?>): Any = LinkedHashMap(value)
+        override fun decode(json: Any?): Map<String, Any?> {
+            if (json !is Map<*, *>) throw SettingsJsonException("Expected an object, got ${describeType(json)}")
+            @Suppress("UNCHECKED_CAST")
+            return json as Map<String, Any?>
+        }
+    }
+
+    /**
      * Parses one JSON document into a plain value; throws [SettingsJsonException] for malformed text.
      * zh-CN: 把一个 JSON 文档解析为普通值; 文本格式错误时抛 [SettingsJsonException].
      */

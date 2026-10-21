@@ -12,7 +12,7 @@ import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
 import org.autojs.autojs.core.plugin.center.PluginWakeManager
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 
 data class ThreeStoveAgentConnectionState(val state: ThreeStoveAgentUiState, val status: ThreeStoveAgentLinkStatus = ThreeStoveAgentLinkStatus())
 
@@ -23,8 +23,8 @@ class ThreeStoveAgentConnectionOwner internal constructor(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
     private val inspectPlugin: () -> ThreeStoveAgentInspection = { ThreeStoveAgentPluginInspector.inspect(context.applicationContext) },
     observePluginChanges: Boolean = true,
-    private val readRootConfiguration: () -> String = { Pref.getString(ROOT_CONFIGURATION_KEY, "{}") },
-    private val saveRootConfiguration: (String) -> Unit = { Pref.putString(ROOT_CONFIGURATION_KEY, it) },
+    private val readRootConfiguration: () -> String = ExtensibilityKeys::threeStoveAgentScriptRootConfigurationText,
+    private val saveRootConfiguration: (String) -> Unit = ExtensibilityKeys::setThreeStoveAgentScriptRootConfigurationText,
 ) {
     private val context = context.applicationContext
     private val operation = Mutex()
@@ -148,7 +148,9 @@ class ThreeStoveAgentConnectionOwner internal constructor(
     }
 
     companion object {
-        internal const val ROOT_CONFIGURATION_KEY = "three_stove_agent_script_root_configuration"
+        /** The name of [ExtensibilityKeys.THREE_STOVE_AGENT_SCRIPT_ROOT_CONFIGURATION] (device tests read and restore it). */
+        internal val ROOT_CONFIGURATION_KEY: String
+            get() = ExtensibilityKeys.THREE_STOVE_AGENT_SCRIPT_ROOT_CONFIGURATION.name
         @Volatile private var instance: ThreeStoveAgentConnectionOwner? = null
         fun get(context: Context): ThreeStoveAgentConnectionOwner = instance ?: synchronized(this) {
             instance ?: ThreeStoveAgentConnectionOwner(context).also { instance = it }

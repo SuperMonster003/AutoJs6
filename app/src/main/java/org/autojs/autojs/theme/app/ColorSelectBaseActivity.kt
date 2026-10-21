@@ -31,6 +31,7 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.ColorItems
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager
@@ -507,7 +508,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             // "Merge similar colors" keeps the newest of similar entries (roadmap P5.3). zh-CN: "合并相似颜色" 保留相似条目中最新的一条 (Roadmap P5.3).
             fun showHistoryItems() = adapter.updateData(
                 when {
-                    Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false) -> ColorClusterer.cluster(allHistoryItems, { it.colorInt })
+                    AppearanceKeys.COLOR_HISTORY_MERGE_SIMILAR.get() -> ColorClusterer.cluster(allHistoryItems, { it.colorInt })
                         .map { it.representative.copy(mergedCount = it.merged) }
                     else -> allHistoryItems
                 }
@@ -521,11 +522,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                 }
                 val mergeCheck = ThemeColorCheckBox(context).apply {
                     text = getString(R.string.text_merge_similar_colors)
-                    isChecked = Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false)
+                    isChecked = AppearanceKeys.COLOR_HISTORY_MERGE_SIMILAR.get()
                     val padding = (16 * resources.displayMetrics.density).toInt()
                     setPadding(paddingLeft, padding / 2, paddingRight, padding / 2)
                     setOnCheckedChangeListener { _, checked ->
-                        Pref.putBoolean(KEY_HISTORY_MERGE_SIMILAR, checked)
+                        AppearanceKeys.COLOR_HISTORY_MERGE_SIMILAR.set(checked)
                         showHistoryItems()
                     }
                 }
@@ -1024,9 +1025,6 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
          */
         const val KEY_SELECTED_COLOR_LIBRARY_NAME = "SELECTED_COLOR_LIBRARY_NAME"
         const val KEY_SELECTED_COLOR_ITEM_NAME = "SELECTED_COLOR_LIBRARY_ITEM_NAME"
-
-        /** "Merge similar colors" of the history list (roadmap P5.3). zh-CN: 历史列表的 "合并相似颜色" (Roadmap P5.3). */
-        const val KEY_HISTORY_MERGE_SIMILAR = "COLOR_HISTORY_MERGE_SIMILAR"
 
         fun favoriteEntryOf(favorite: FavoriteColor) = FavoriteEntry(favorite.id, favorite.color, favorite.pinned, favorite.position, favorite.createdTime)
 

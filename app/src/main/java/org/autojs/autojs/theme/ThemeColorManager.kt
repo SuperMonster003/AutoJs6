@@ -5,7 +5,7 @@ import android.content.Context
 import android.graphics.Paint
 import android.view.View
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.theme.color.ThemeColorDerivation
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.ViewUtils
@@ -31,8 +31,6 @@ object ThemeColorManager {
     val colorPrimary: Int
         get() = currentThemeColor.colorPrimary
 
-    private const val KEY_DERIVED_COLORS = "THEME_COLOR_DERIVED_ACCENT_AND_DARK"
-
     /**
      * Whether the accent and dark colors are derived from the primary color (D2, roadmap P4.6). Off (the default) keeps
      * them equal to the primary color, exactly as before.
@@ -40,8 +38,8 @@ object ThemeColorManager {
      */
     @JvmStatic
     var isDerivationEnabled: Boolean
-        get() = Pref.getBoolean(KEY_DERIVED_COLORS, false)
-        set(value) = Pref.putBoolean(KEY_DERIVED_COLORS, value)
+        get() = AppearanceKeys.THEME_COLOR_DERIVED_ACCENT_AND_DARK.get()
+        set(value) = AppearanceKeys.THEME_COLOR_DERIVED_ACCENT_AND_DARK.set(value)
 
     /**
      * The theme color for [primary]: explicit [accent] / [dark] win; otherwise they are derived when

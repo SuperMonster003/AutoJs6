@@ -89,6 +89,18 @@ MANUAL_STORE_NAMES = {
         'autojs.localstorage.*', '`.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`'),
 }
 
+# Default preference keys that the sources name through constants whose values do not start with "key_" (so the
+# literal scan misses them) and that no key declaration in core/pref/keys names yet: (display path, constant). They are
+# read from `const val NAME = "..."` (ROADMAP P3.6, appendix C Q15: the colour selection states, declared in P4.2).
+LITERAL_KEY_CONSTANTS = (
+    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_CUSTOM_COLOR'),
+    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_LEGACY_SELECTED_COLOR_INDEX'),
+    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_LIBRARY_ID'),
+    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_ITEM_ID'),
+    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_LIBRARY_NAME'),
+    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_ITEM_NAME'),
+)
+
 KEY_REF = re.compile(r'\bR\.string\.(key_[A-Za-z0-9_]+)\b')
 STRING_LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 KEY_LITERAL_PREFIX = re.compile(r'^key_')
@@ -537,6 +549,8 @@ class Resolver:
             return dict(out, form='调用处字面量', value=m.group(1).replace('\\$', '$'))
         if re.fullmatch(r'(?:mutable|linked|hash)?(?:[Ss]etOf|[Ll]istOf|empty(?:Set|List))\(\s*\)', expr):
             return dict(out, form='调用处字面量', value='[]')
+        if re.fullmatch(r'(?:mutable|linked|hash)?(?:[Mm]apOf|emptyMap)\(\s*\)', expr):
+            return dict(out, form='调用处字面量', value='{}')
         m = re.search(r'R\.bool\.(\w+)', expr)
         if m and re.fullmatch(r'(?:[\w.()]*\.)?(?:getBoolean\()?\s*R\.bool\.\w+\s*\)?', expr):
             v = res.bools.get(m.group(1), {}).get('value')
@@ -684,6 +698,15 @@ def scan_sources(sources, res, key_values):
                     if KEY_LITERAL_PREFIX.match(name):
                         continue
                     literals.append({'name': name, 'file': f.display, 'line': i, 'const': None, 'resource': key_values.get(name)})
+        for path, const in LITERAL_KEY_CONSTANTS:
+            if f.display != path:
+                continue
+            decl = re.compile(r'\bconst\s+val\s+' + re.escape(const) + r'\s*(?::\s*String\s*)?=\s*"([^"]*)"')
+            for i, line in enumerate(f.lines, 1):
+                m = decl.search(line)
+                if m and not f.is_comment_line(i):
+                    literals.append({'name': m.group(1), 'file': f.display, 'line': i, 'const': const,
+                                     'resource': key_values.get(m.group(1))})
     return refs, literals
 
 
@@ -817,6 +840,9 @@ DECLARED_TYPES = {'Bool': 'Boolean', 'Int': 'Int', 'Long': 'Long', 'Float': 'Flo
                   'StrSet': 'StringSet', 'Enum': 'String (Enum)', 'Json': 'Json'}
 DECLARATION_DIR = 'core/pref/keys/'
 DECLARED_NAME = re.compile(r'\bname\s*=\s*"((?:[^"\\]|\\.)*)"')
+# A key family (ROADMAP P3) declares its members with the factory parameter as the name:
+# `KeyFamily("key_$_prefix_") { name -> SettingKey.Bool(name = name, ...) }`; the default belongs to the prefix.
+FAMILY_DECLARATION = re.compile(r'\bKeyFamily\(\s*"([^"]*)"\s*\)\s*\{\s*(\w+)\s*->\s*$')
 RESOURCE_DEFAULT = re.compile(r'(bool|int|string|key)Resource\(\s*R\.(bool|integer|string)\.(\w+)\s*,')
 NAMED_ARG = re.compile(r'^(\w+)\s*=(?!=)\s*(.*)$', re.S)
 
@@ -872,6 +898,11 @@ def scan_declared_defaults(sources, resolver, res):
             if 'name' in named:
                 lm = re.fullmatch(r'"((?:[^"\\]|\\.)*)"', named['name'])
                 key = lm.group(1).replace(chr(92) + '$', '$') if lm else None
+                if lm is None:
+                    # The factory of a key family: the prefix is on the line that opens the lambda.
+                    fm = FAMILY_DECLARATION.search(f.lines[line - 2]) if line >= 2 else None
+                    if fm and fm.group(2) == named['name']:
+                        key = fm.group(1).replace(chr(92) + '$', '$')
             else:
                 km = re.fullmatch(r'R\.string\.(key_\w+)', named.get('keyRes', positional[0] if positional else ''))
                 key = km.group(1) if km else None

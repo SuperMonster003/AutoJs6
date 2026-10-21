@@ -19,7 +19,7 @@ class AppearanceKeysTest : DomainKeysTestBase() {
 
     @Test
     fun keysAndEffects() {
-        assertEquals(9, AppearanceKeys.keys.size)
+        assertEquals(11, AppearanceKeys.keys.size)
         val applied = AppearanceKeys.keys.filterIsInstance<org.autojs.autojs.core.pref.SettingKey<*>>().filter { it.effect == SettingEffect.APPLY }.map { it.name }
         assertEquals(
             listOf("key_app_language", "key_night_mode", "key_night_mode_enabled", "key_auto_night_mode_enabled", "key_theme_color_primary", "key_theme_color_primary_dark", "key_theme_color_accent").map(::key),

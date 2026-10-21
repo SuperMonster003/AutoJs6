@@ -46,12 +46,16 @@ class RegisteredName @JvmOverloads constructor(
 }
 
 /**
- * One domain of key declarations (`core/pref/keys/<Domain>Keys.kt`, P2 onwards): its keys and its registered names.
- * zh-CN: 一个领域的键声明 (P2 起的 `core/pref/keys/<Domain>Keys.kt`): 其中的键与登记名称.
+ * One domain of key declarations (`core/pref/keys/<Domain>Keys.kt`, P2 onwards): its keys, its key families (keys
+ * named by a prefix and a run-time part, P3) and its registered names.
+ * zh-CN: 一个领域的键声明 (P2 起的 `core/pref/keys/<Domain>Keys.kt`): 其中的键, 键族 (以前缀加运行时部分命名的键, P3) 与登记名称.
  */
 interface SettingsDomain {
 
     val keys: List<PrefKey<*>>
+
+    val families: List<KeyFamily<*, *>>
+        get() = emptyList()
 
     val names: List<RegisteredName>
         get() = emptyList()
@@ -107,6 +111,11 @@ object SettingsRegistry {
     val keys: List<PrefKey<*>>
         get() = DOMAINS.flatMap { it.keys }
 
+    /** Every declared key family of [DOMAINS], in declaration order. */
+    @JvmStatic
+    val families: List<KeyFamily<*, *>>
+        get() = DOMAINS.flatMap { it.families }
+
     /**
      * The declared key named [name] in [store], or null.
      * zh-CN: [store] 中名为 [name] 的键声明, 不存在时为 null.
@@ -115,7 +124,16 @@ object SettingsRegistry {
     @JvmOverloads
     fun find(name: String, store: StoreId = StoreId.DEFAULT): PrefKey<*>? = keys.firstOrNull { it.name == name && it.store == store }
 
-    /** Descriptors of [DOMAINS]: keys first, then registered names, both in declaration order. */
+    /**
+     * The declared key family of [store] that [name] is a member of, or null.
+     * zh-CN: [store] 中 [name] 所属的键族, 不存在时为 null.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun findFamily(name: String, store: StoreId = StoreId.DEFAULT): KeyFamily<*, *>? =
+        families.firstOrNull { it.template.store == store && it.matches(name) }
+
+    /** Descriptors of [DOMAINS]: keys first, then key families, then registered names, each in declaration order. */
     @JvmStatic
     fun describe(): List<SettingDescriptor> = describe(DOMAINS)
 
@@ -125,7 +143,9 @@ object SettingsRegistry {
      */
     @JvmStatic
     fun describe(domains: List<SettingsDomain>): List<SettingDescriptor> =
-        domains.flatMap { it.keys }.map(::describe) + domains.flatMap { it.names }.map(::describe)
+        domains.flatMap { it.keys }.map(::describe) +
+                domains.flatMap { it.families }.map(::describe) +
+                domains.flatMap { it.names }.map(::describe)
 
     @JvmStatic
     fun describe(key: PrefKey<*>): SettingDescriptor = SettingDescriptor(
@@ -138,6 +158,10 @@ object SettingsRegistry {
         kind = key.kind,
         deployment = (key as? SettingKey<*>)?.deployment,
     )
+
+    /** The row of [family]: the row of its template, named by the prefix and marked as a family. */
+    @JvmStatic
+    fun describe(family: KeyFamily<*, *>): SettingDescriptor = describe(family.template).copy(family = true)
 
     @JvmStatic
     fun describe(name: RegisteredName): SettingDescriptor = SettingDescriptor(

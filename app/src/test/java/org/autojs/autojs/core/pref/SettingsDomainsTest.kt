@@ -24,7 +24,7 @@ class SettingsDomainsTest {
     fun computedDefaultsReadTheResourceTheyName() {
         val problems = mutableListOf<String>()
         var checked = 0
-        SettingsRegistry.keys.forEach { key ->
+        declaredKeys().forEach { key ->
             val default = key.default as? SettingDefault.Computed ?: return@forEach
             if (!default.source.startsWith("R.")) return@forEach
             SettingsTestResources.reads.clear()
@@ -41,14 +41,18 @@ class SettingsDomainsTest {
     fun typesAndDefaultsMatchTheBaseline() {
         val problems = mutableListOf<String>()
         var checked = 0
-        SettingsRegistry.keys.filterIsInstance<SettingKey<*>>().forEach { key ->
+        declaredKeys().filterIsInstance<SettingKey<*>>().forEach { key ->
             val baselineName = baselineNameOf(key)
-            KEYS_AFTER_P0[baselineName]?.let { expected ->
+            if (baselineName in KEYS_AFTER_P0) {
+                val expected = KEYS_AFTER_P0[baselineName]
                 if (key.defaultText != expected) problems.add("$baselineName: default ${key.defaultText}, expected $expected (added after P0)")
                 checked++
                 return@forEach
             }
-            val sources = baselineDefaults[baselineName]
+            val sources = baselineDefaults[baselineName] ?: baselineDefaults.entries.firstOrNull { (name, _) ->
+                // A family template is named by its prefix; P0.4 recorded some families as globs ("key_$_x_$_*").
+                "*" in name && name.substringBefore("*") == baselineName
+            }?.value
             if (sources == null) {
                 problems.add("$baselineName: no default source in the baseline")
                 return@forEach
@@ -83,6 +87,9 @@ class SettingsDomainsTest {
     }
 
     // ------------------------------------------------------------------------------------------------- helpers
+
+    /** The declared keys and the templates of the declared key families (P3). */
+    private fun declaredKeys(): List<PrefKey<*>> = SettingsRegistry.keys + SettingsRegistry.families.map { it.template }
 
     private fun baselineNameOf(key: PrefKey<*>): String = if (key.keyRes != 0) SettingsTestResources.nameOf("string", key.keyRes) else key.name
 
@@ -135,10 +142,25 @@ class SettingsDomainsTest {
             "key_editor_pinch_to_zoom_change_text_size", "key_editor_pinch_to_zoom_disable", "key_editor_pinch_to_zoom_scale_view",
         )
 
-        /** Settings added after the P0 baseline: resource name -> default text (their source, appendix C Q15). */
-        private val KEYS_AFTER_P0 = mapOf(
-            // fragment_developer_options.xml app:defaultValue="true" (memory roadmap P1.2).
+        /**
+         * Settings the P0 baseline has no default source for: resource or literal name -> default text (null for none).
+         * zh-CN: P0 基线没有默认值来源的设置: 资源名或字面量名称 -> 默认值文本 (无默认值为 null).
+         */
+        private val KEYS_AFTER_P0: Map<String, String?> = mapOf(
+            // fragment_developer_options.xml app:defaultValue="true" (memory roadmap P1.2, appendix C Q16).
             "key_leakcanary_enabled" to "true",
+            // Literal names the P0 inventory missed (appendix C Q15, P3.6); the defaults are those of the old readers:
+            // Pref.getBoolean(KEY_DERIVED_COLORS, false), Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false),
+            // Pref.getString(ROOT_CONFIGURATION_KEY, "{}"), booleanOrFalse / stringOrNull of the compiler opt-in stores
+            // and getString(selectionPreferenceKey(...), null) of the debug model selection.
+            "THEME_COLOR_DERIVED_ACCENT_AND_DARK" to "false",
+            "COLOR_HISTORY_MERGE_SIMILAR" to "false",
+            "three_stove_agent_script_root_configuration" to "{}",
+            "dex_compiler_experimental_enabled" to "false",
+            "dex_compiler_experimental_component" to null,
+            "r8_compiler_explicit_enabled" to "false",
+            "r8_compiler_explicit_component" to null,
+            "key_\$_codegen_model_current_debug_" to null,
         )
 
         private lateinit var resources: AutoCloseable

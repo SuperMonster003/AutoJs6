@@ -11,9 +11,13 @@ import org.autojs.autojs6.R
 /**
  * Developer options (docs/settings/ROADMAP.md P2.5, appendix A.1 `developer`, not selected by default): the new script
  * module layer of the Augment refactor with its debug printing, the Node.js inspector and LeakCanary of debug builds.
+ * P3.6 (appendix C Q15) adds the explicitly selected dex and R8 compiler plugins, each a switch and the component it
+ * names (`DexCompilerOptInStore` / `R8CompilerOptInStore`); an import skips a pair whose plugin is not installed
+ * (`TARGET_MISSING`, P7.3).
  *
  * zh-CN: 开发者选项 (ROADMAP P2.5, 附录 A.1 `developer`, 默认不勾选): Augment 重构的新脚本模块层及其调试打印, Node.js inspector,
- * debug 构建的 LeakCanary.
+ * debug 构建的 LeakCanary. P3.6 (附录 C Q15) 加入显式选择的 dex 与 R8 编译器插件 (各为一个开关与其指向的组件); 导入时组件所属
+ * 插件未安装则整组跳过 (`TARGET_MISSING`, P7.3).
  */
 object DeveloperKeys : SettingsDomain {
 
@@ -41,9 +45,26 @@ object DeveloperKeys : SettingsDomain {
     @JvmField
     val LEAKCANARY_ENABLED = SettingKey.Bool(R.string.key_leakcanary_enabled, DEVELOPER, SettingDefault.of(true))
 
+    /** The experimental dex compiler plugin is used (only together with a valid component, `DexCompilerOptInStore.read`). */
+    @JvmField
+    val DEX_COMPILER_EXPERIMENTAL_ENABLED = SettingKey.Bool(name = "dex_compiler_experimental_enabled", category = DEVELOPER, default = SettingDefault.of(false))
+
+    /** The selected dex compiler component (`DexCompilerComponentCodec`); kept when the switch is turned off. */
+    @JvmField
+    val DEX_COMPILER_EXPERIMENTAL_COMPONENT = SettingKey.Str(name = "dex_compiler_experimental_component", category = DEVELOPER, default = SettingDefault.None)
+
+    /** The explicitly selected R8 compiler plugin is used (only together with a valid component, `R8CompilerOptInStore.read`). */
+    @JvmField
+    val R8_COMPILER_EXPLICIT_ENABLED = SettingKey.Bool(name = "r8_compiler_explicit_enabled", category = DEVELOPER, default = SettingDefault.of(false))
+
+    /** The selected R8 compiler component (`R8CompilerComponentCodec`); kept when the switch is turned off. */
+    @JvmField
+    val R8_COMPILER_EXPLICIT_COMPONENT = SettingKey.Str(name = "r8_compiler_explicit_component", category = DEVELOPER, default = SettingDefault.None)
+
     override val keys: List<PrefKey<*>> = listOf(
         NEW_SCRIPT_MODULE_LAYER, SCRIPT_MODULE_DEBUG_PRINT, SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES, NODEJS_INSPECTOR_ENABLED,
         LEAKCANARY_ENABLED,
+        DEX_COMPILER_EXPERIMENTAL_ENABLED, DEX_COMPILER_EXPERIMENTAL_COMPONENT, R8_COMPILER_EXPLICIT_ENABLED, R8_COMPILER_EXPLICIT_COMPONENT,
     )
 
     // The doctor report entry of the developer options holds no value.

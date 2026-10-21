@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.pref.keys
 
+import org.autojs.autojs.core.pref.KeyFamily
 import org.autojs.autojs.core.pref.PrefKey
 import org.autojs.autojs.core.pref.SettingCategory.Companion.LAYOUT_INSPECTOR
 import org.autojs.autojs.core.pref.SettingDefault
@@ -12,11 +13,12 @@ import org.autojs.autojs6.R
  * selected one, the copy mode of the node info dialog, the query mode and the current code generation model. All
  * missing by default; their readers fall back themselves (keyword query, "ask" copy mode, the default profile, no
  * model). The query history, the one-time introductions and the legacy color picker layout are states (P4.2, appendix
- * C Q13); the model files are not exported.
+ * C Q13); the model files are not exported. Debug builds keep the selection under a key named by the catalog profile
+ * ([CODEGEN_MODEL_CURRENT_DEBUG], P3.6, appendix C Q15).
  *
  * zh-CN: 布局分析器 (ROADMAP P2.5, 附录 A.1 `layout_inspector`): 筛选配置档及选中项, 节点信息对话框的复制模式, 查询模式, 当前代码
  * 生成模型. 默认均缺省, 由读取方自行回退 (关键词查询, "询问" 复制模式, 默认配置档, 无模型). 查询历史, 一次性介绍与颜色选择旧布局为
- * 状态 (P4.2, 附录 C Q13); 模型文件不导出.
+ * 状态 (P4.2, 附录 C Q13); 模型文件不导出. debug 构建按目录配置名把选择保存在派生键下 ([CODEGEN_MODEL_CURRENT_DEBUG], P3.6, 附录 C Q15).
  */
 object LayoutInspectorKeys : SettingsDomain {
 
@@ -44,8 +46,21 @@ object LayoutInspectorKeys : SettingsDomain {
     @JvmField
     val CODEGEN_MODEL_CURRENT = SettingKey.Str(R.string.key_codegen_model_current, LAYOUT_INSPECTOR, SettingDefault.None)
 
+    /**
+     * The current model of a debug catalog, one key per catalog profile: the name of [CODEGEN_MODEL_CURRENT] followed by
+     * `_debug_<profile>` (`ModelCatalogConfiguration.selectionPreferenceKey`; debug builds only, P3.6, appendix C Q15).
+     * zh-CN: 调试目录的当前模型, 每个目录配置一个键: [CODEGEN_MODEL_CURRENT] 的名称加 `_debug_<配置名>` (仅 debug 构建, P3.6,
+     * 附录 C Q15).
+     */
+    @JvmField
+    val CODEGEN_MODEL_CURRENT_DEBUG = KeyFamily("key_\$_codegen_model_current_debug_") { name ->
+        SettingKey.Str(name = name, category = LAYOUT_INSPECTOR, default = SettingDefault.None)
+    }
+
     override val keys: List<PrefKey<*>> = listOf(
         LAYOUT_INSPECTOR_FILTER_PROFILES, LAYOUT_INSPECTOR_FILTER_PROFILE_SELECTED, LAYOUT_INSPECTOR_NODE_COPY_MODE,
         LAYOUT_INSPECTOR_QUERY_MODE, CODEGEN_MODEL_CURRENT,
     )
+
+    override val families: List<KeyFamily<*, *>> = listOf(CODEGEN_MODEL_CURRENT_DEBUG)
 }

@@ -50,7 +50,7 @@ class SettingsRegistryGuardTest {
         val stale = classified.keys - keyResources.keys
         val literals = classification.section("literalKeys")
         val strayRows = rows.filter { it.store == DEFAULT_STORE && it.name !in keyResources.values }.filter { row ->
-            val entry = literals.entries.firstOrNull { matchesLiteral(it.key, row.name) }
+            val entry = literals.entries.firstOrNull { matchesLiteral(it.key, row.name, row.family) }
             if (entry != null) mismatch(row.name, row, entry.value)?.let(mismatched::add)
             entry == null
         }
@@ -241,8 +241,12 @@ class SettingsRegistryGuardTest {
         private fun Map<String, Any?>.section(name: String): Map<String, Map<String, Any?>> =
             (this[name] as Map<String, Any?>).filterKeys { !it.startsWith("_") }.mapValues { it.value as Map<String, Any?> }
 
-        /** A classification literal key matches a name exactly, as a prefix (ends with "_") or as a glob ("*"). */
-        private fun matchesLiteral(pattern: String, name: String): Boolean = when {
+        /**
+         * A classification literal key matches a name exactly, as a prefix (ends with "_") or as a glob ("*"); the row
+         * of a key family (named by its prefix, P3) matches the prefix entry itself or a glob that starts with it.
+         */
+        private fun matchesLiteral(pattern: String, name: String, family: Boolean = false): Boolean = when {
+            family -> pattern == name || ("*" in pattern && pattern.substringBefore("*") == name)
             "*" in pattern -> Regex(pattern.split("*").joinToString(".*") { Regex.escape(it) }).matches(name)
             pattern.endsWith("_") -> name.startsWith(pattern)
             else -> name == pattern

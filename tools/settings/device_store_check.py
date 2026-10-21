@@ -1,7 +1,7 @@
-"""Device checks of the settings store layer (docs/settings/ROADMAP.md P1.2 / P1.4 / P2, evidence level E3).
+"""Device checks of the settings store layer (docs/settings/ROADMAP.md P1.2 / P1.4 / P2 / P3, evidence level E3).
 
 Usage: py -3.12 -I tools/settings/device_store_check.py -s SERIAL CHECK [--install APK] [--state FILE]
-       [--domains NAMES] [--activity CLASS --screenshot PNG] [--engines native,ace]
+       [--domains NAMES] [--groups NAMES] [--activity CLASS --screenshot PNG] [--engines native,ace]
 
 CHECK is one of
   interop       P1.2: SharedPreferencesStore and the old Pref / SharedPreferences calls read and write the same file
@@ -20,6 +20,10 @@ CHECK is one of
                 demo script opens in the code editor with each engine of --engines; one screenshot per engine
                 (--screenshot is the prefix), then the engine, selection mode and text size are restored; runs
                 device/editor_engines.js.
+  stores        P3: for the groups in --groups (comma separated, e.g. q15), the stores and keys moved to the declared
+                layer read what the old code read; one item per group is changed, the app is force-stopped, and a
+                second run checks that the change survived the restart, then restores every changed value; runs
+                device/named_stores.js twice.
 
 --install installs APK with "adb install -r -d" first (debug builds of the same signature keep their data). The
 script is pushed to /sdcard/Download/aj6-settings-check, started through RunIntentActivity and removed afterwards;
@@ -41,7 +45,8 @@ DEVICE_DIR = "/sdcard/Download/aj6-settings-check"
 MARK = "AJ6SET"
 RESULT_FILE = "aj6set-result.txt"
 SCRIPTS = {"interop": "store_interop.js", "lists-before": "legacy_lists.js", "lists-after": "legacy_lists.js",
-           "domains": "domain_keys.js", "page": "open_page.js", "editor": "editor_engines.js"}
+           "domains": "domain_keys.js", "page": "open_page.js", "editor": "editor_engines.js",
+           "stores": "named_stores.js"}
 
 
 def adb(serial, *args, check=False):
@@ -135,6 +140,39 @@ def editor_check(args, script):
     return 1 if failed else 0
 
 
+def stores_check(args, script):
+    groups = [name.strip() for name in args.groups.split(",") if name.strip()]
+    failed = 0
+    state = None
+    for phase in ("change", "verify"):
+        if phase == "verify":
+            if state is None:
+                print("FAIL no state from the change phase")
+                return 1
+            # The second run starts a new process of the app (RunIntentActivity), as after a restart.
+            adb(args.serial, "shell", "am", "force-stop", PACKAGE, check=True)
+            time.sleep(args.settle)
+        prefix = f"var AJ6_PHASE = {json.dumps(phase)}; var AJ6_GROUPS = {json.dumps(groups)}; var AJ6_STATE = {json.dumps(state)};"
+        lines = run_script(args.serial, prefix + chr(10) + script, args.wait)
+        for line in lines:
+            kind, _, rest = line.partition(" ")
+            if kind in ("PASS", "FAIL"):
+                print(f"{kind} {phase} {rest}")
+                failed += kind == "FAIL"
+            elif kind == "info":
+                print(f"INFO {rest}")
+            elif kind == "state":
+                state = json.loads(urllib.parse.unquote(rest))
+                print(f"INFO recorded {len(state['records'])} values to restore")
+        if "done" not in lines:
+            print(f"FAIL the {phase} run did not finish (see logcat GlobalConsole)")
+            failed += 1
+            if phase == "change" and state is None:
+                return 1
+    print(f"stores: {'FAIL' if failed else 'PASS'} ({failed} failed)")
+    return 1 if failed else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
@@ -143,6 +181,7 @@ def main():
     parser.add_argument("--state", type=pathlib.Path, help="state file written by lists-before and read by lists-after")
     parser.add_argument("--wait", type=int, default=60, help="seconds to wait for the script (default 60)")
     parser.add_argument("--domains", help="domain objects for the domains check, comma separated")
+    parser.add_argument("--groups", help="store groups for the stores check, comma separated")
     parser.add_argument("--activity", help="activity class for the page check")
     parser.add_argument("--screenshot", type=pathlib.Path, help="PNG written by the page check")
     parser.add_argument("--settle", type=float, default=3.0, help="seconds between starting the page and the screenshot")
@@ -153,6 +192,8 @@ def main():
         parser.error("--state is required for lists-before / lists-after")
     if args.check == "domains" and not args.domains:
         parser.error("--domains is required for domains")
+    if args.check == "stores" and not args.groups:
+        parser.error("--groups is required for stores")
     if args.check == "page" and not (args.activity and args.screenshot):
         parser.error("--activity and --screenshot are required for page")
     if args.check == "editor" and not args.screenshot:
@@ -169,6 +210,8 @@ def main():
     script = (HERE / "device" / SCRIPTS[args.check]).read_text(encoding="utf-8")
     if args.check == "editor":
         return editor_check(args, script)
+    if args.check == "stores":
+        return stores_check(args, script)
     if args.check == "lists-before":
         script = "var AJ6_PHASE = 'before'; var AJ6_STATE = null;\n" + script
     elif args.check == "lists-after":

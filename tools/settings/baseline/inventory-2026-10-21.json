@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "520825d67",
+  "commit": "be3674c91",
   "branch": "master",
-  "dirtyScannedFiles": 11
+  "dirtyScannedFiles": 14
  },
  "summary": {
   "keyResources": 268,
@@ -46,12 +46,12 @@
    "key_dialog_log_entries_exported",
    "key_enable_observe_key"
   ],
-  "literalKeyGroups": 75,
+  "literalKeyGroups": 89,
   "namedStores": 29,
   "namedStoreCallFiles": 34,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 1,
-  "prefUserFiles": 78,
+  "prefUserFiles": 75,
   "jsonFileStores": 13
  },
  "keys": [
@@ -1759,7 +1759,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 54
+     "line": 57
     }
    ],
    "kind": "Setting",
@@ -1785,7 +1785,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 35
+     "line": 38
     }
    ],
    "kind": "ValueConstant",
@@ -1812,7 +1812,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 25
+     "line": 28
     }
    ],
    "kind": "ValueConstant",
@@ -1836,7 +1836,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 29
+     "line": 32
     }
    ],
    "kind": "ValueConstant",
@@ -1860,7 +1860,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 31
+     "line": 34
     }
    ],
    "kind": "ValueConstant",
@@ -1884,7 +1884,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 30
+     "line": 33
     }
    ],
    "kind": "ValueConstant",
@@ -1908,7 +1908,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 32
+     "line": 35
     }
    ],
    "kind": "ValueConstant",
@@ -1932,7 +1932,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 33
+     "line": 36
     }
    ],
    "kind": "ValueConstant",
@@ -1956,7 +1956,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 34
+     "line": 37
     }
    ],
    "kind": "ValueConstant",
@@ -1980,7 +1980,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 26
+     "line": 29
     }
    ],
    "kind": "ValueConstant",
@@ -2004,7 +2004,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 27
+     "line": 30
     }
    ],
    "kind": "ValueConstant",
@@ -2028,7 +2028,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 28
+     "line": 31
     }
    ],
    "kind": "ValueConstant",
@@ -2075,7 +2075,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 72
+     "line": 75
     },
     {
      "file": "ui/main/plugin/PluginFragment.kt",
@@ -2346,7 +2346,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
-     "line": 45
+     "line": 47
     }
    ],
    "kind": "Setting",
@@ -2361,11 +2361,11 @@
    "sourceRefs": [
     {
      "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1045
+     "line": 1043
     },
     {
      "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1046
+     "line": 1044
     }
    ],
    "kind": "State",
@@ -3941,7 +3941,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExtensibilityKeys.kt",
-     "line": 20
+     "line": 24
     }
    ],
    "kind": "Setting",
@@ -4501,7 +4501,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 96
+     "line": 99
     },
     {
      "file": "ui/main/MainActivity.kt",
@@ -4526,7 +4526,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 47
+     "line": 50
     },
     {
      "file": "util/ViewUtils.kt",
@@ -4561,7 +4561,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 46
+     "line": 49
     },
     {
      "file": "util/ViewUtils.kt",
@@ -4583,7 +4583,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 102
+     "line": 105
     }
    ],
    "kind": "Setting",
@@ -4604,7 +4604,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 48
+     "line": 51
     },
     {
      "file": "util/ViewUtils.kt",
@@ -4881,7 +4881,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
-     "line": 29
+     "line": 31
     }
    ],
    "kind": "Setting",
@@ -4896,7 +4896,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
-     "line": 25
+     "line": 27
     }
    ],
    "kind": "Setting",
@@ -4911,7 +4911,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
-     "line": 33
+     "line": 35
     }
    ],
    "kind": "Setting",
@@ -4945,7 +4945,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
-     "line": 37
+     "line": 39
     }
    ],
    "kind": "Setting",
@@ -4993,7 +4993,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 42
+     "line": 46
     },
     {
      "file": "ui/settings/DeveloperOptionsFragment.kt",
@@ -5205,7 +5205,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 22
+     "line": 26
     }
    ],
    "kind": "Setting",
@@ -5238,7 +5238,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 61
+     "line": 64
     },
     {
      "file": "ui/main/plugin/PluginFragment.kt",
@@ -5264,7 +5264,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 41
+     "line": 44
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5292,7 +5292,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 40
+     "line": 43
     },
     {
      "file": "util/ViewUtils.kt",
@@ -5314,7 +5314,7 @@
     },
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 67
+     "line": 70
     },
     {
      "file": "ui/main/plugin/PluginFragment.kt",
@@ -5343,7 +5343,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 39
+     "line": 42
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5365,7 +5365,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 42
+     "line": 45
     },
     {
      "file": "util/ViewUtils.kt",
@@ -5397,7 +5397,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 50
+     "line": 71
     }
    ],
    "kind": "Excluded",
@@ -5425,7 +5425,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 34
+     "line": 38
     }
    ],
    "kind": "Setting",
@@ -5843,7 +5843,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExtensibilityKeys.kt",
-     "line": 26
+     "line": 30
     }
    ],
    "kind": "Setting",
@@ -6215,7 +6215,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 26
+     "line": 30
     }
    ],
    "kind": "Setting",
@@ -6244,7 +6244,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 30
+     "line": 34
     }
    ],
    "kind": "Setting",
@@ -6528,7 +6528,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 112
+     "line": 129
     }
    ],
    "kind": "Excluded",
@@ -6542,7 +6542,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 90
+     "line": 93
     }
    ],
    "kind": "Setting",
@@ -6558,7 +6558,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 78
+     "line": 81
     }
    ],
    "kind": "Setting",
@@ -6574,7 +6574,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 84
+     "line": 87
     }
    ],
    "kind": "Setting",
@@ -7009,6 +7009,142 @@
    "store": "default"
   },
   {
+   "name": "COLOR_HISTORY_MERGE_SIMILAR",
+   "refs": [
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 118,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "颜色历史列表的 \"合并相似颜色\" (ColorSelectBaseActivity); P3.6 声明为 AppearanceKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "SELECTED_COLOR_LIBRARY_ID",
+   "refs": [
+    {
+     "file": "theme/app/ColorSelectBaseActivity.kt",
+     "line": 1019,
+     "const": "KEY_SELECTED_COLOR_LIBRARY_ID"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "颜色选择页选中的颜色库 id (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "SELECTED_COLOR_LIBRARY_ITEM_ID",
+   "refs": [
+    {
+     "file": "theme/app/ColorSelectBaseActivity.kt",
+     "line": 1020,
+     "const": "KEY_SELECTED_COLOR_ITEM_ID"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "颜色选择页选中的颜色条目 id (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_ID); 声明随 P4.2 (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "SELECTED_COLOR_LIBRARY_ITEM_NAME",
+   "refs": [
+    {
+     "file": "theme/app/ColorSelectBaseActivity.kt",
+     "line": 1027,
+     "const": "KEY_SELECTED_COLOR_ITEM_NAME"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "选中的颜色条目名称缓存 (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_NAME); 声明随 P4.2 (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "SELECTED_COLOR_LIBRARY_NAME",
+   "refs": [
+    {
+     "file": "theme/app/ColorSelectBaseActivity.kt",
+     "line": 1026,
+     "const": "KEY_SELECTED_COLOR_LIBRARY_NAME"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "选中的用户库或智能库名称缓存, 供摘要显示 (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "THEME_COLOR_DERIVED_ACCENT_AND_DARK",
+   "refs": [
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 114,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "强调色与深色是否由主题色派生 (ThemeColorManager); P3.6 声明为 AppearanceKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "dex_compiler_experimental_component",
+   "refs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 54,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "选择的 dex 编译器组件; 导入时插件未安装则与开关一起跳过 (P7.3); P3.6 声明为 DeveloperKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "dex_compiler_experimental_enabled",
+   "refs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 50,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开发者选项选择的实验性 dex 编译器插件开关 (DexCompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
    "name": "find_or_replace_using_regex",
    "refs": [
     {
@@ -7252,6 +7388,23 @@
    "kind": "Setting",
    "category": "editor_assistance",
    "note": "语义语言开关",
+   "store": "default"
+  },
+  {
+   "name": "key_$_codegen_model_current_debug_",
+   "refs": [
+    {
+     "file": "core/pref/keys/LayoutInspectorKeys.kt",
+     "line": 56,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "layout_inspector",
+   "note": "前缀键: debug 包代码生成模型的当前选择, 按目录配置名派生 (ModelCatalogConfiguration.selectionPreferenceKey); P3.6 声明为 LayoutInspectorKeys 的键族 (附录 C Q15)",
    "store": "default"
   },
   {
@@ -8291,6 +8444,40 @@
    "store": "default"
   },
   {
+   "name": "org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR",
+   "refs": [
+    {
+     "file": "theme/app/ColorSelectBaseActivity.kt",
+     "line": 1014,
+     "const": "KEY_CUSTOM_COLOR"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "颜色选择页的自定义颜色 (ColorSelectBaseActivity.KEY_CUSTOM_COLOR); 声明随 P4.2 (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX",
+   "refs": [
+    {
+     "file": "theme/app/ColorSelectBaseActivity.kt",
+     "line": 1017,
+     "const": "KEY_LEGACY_SELECTED_COLOR_INDEX"
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "旧布局选中的颜色序号 (ColorSelectBaseActivity.KEY_LEGACY_SELECTED_COLOR_INDEX); 声明随 P4.2 (附录 C Q15)",
+   "store": "default"
+  },
+  {
    "name": "org.autojs.autojs.ui.edit.debug.CodeEvaluateDialogBuilder.code",
    "refs": [
     {
@@ -8305,6 +8492,57 @@
    "kind": "State",
    "category": "other",
    "note": "代码求值对话框的上次输入 (CodeEvaluateDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "r8_compiler_explicit_component",
+   "refs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 62,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "选择的 R8 编译器组件; 导入时插件未安装则与开关一起跳过 (P7.3); P3.6 声明为 DeveloperKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "r8_compiler_explicit_enabled",
+   "refs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 58,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开发者选项显式选择的 R8 编译器插件开关 (R8CompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "three_stove_agent_script_root_configuration",
+   "refs": [
+    {
+     "file": "core/pref/keys/ExtensibilityKeys.kt",
+     "line": 42,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "extensibility",
+   "note": "3-Stove Agent 的脚本根目录配置, JSON 对象 (ThreeStoveAgentConnectionOwner); P3.6 声明为 ExtensibilityKeys (附录 C Q15)",
    "store": "default"
   }
  ],
@@ -9010,14 +9248,11 @@
  ],
  "prefUsers": [
   "app/tool/McpServerTool.kt",
-  "core/plugin/agent/ThreeStoveAgentConnectionOwner.kt",
   "core/plugin/center/PluginCenterFragment.kt",
   "core/plugin/center/PluginMountStore.kt",
   "core/plugin/center/PluginOnlineSettingsStore.kt",
   "core/plugin/center/PluginUpdateCheckStore.kt",
   "core/plugin/center/PluginVariantPriorityStore.kt",
-  "core/plugin/dex/DexCompilerOptInStore.kt",
-  "core/plugin/r8/R8CompilerOptInStore.kt",
   "core/plugin/terminal/TerminalLegacyCleanup.kt",
   "core/pref/PrefRxLongObserver.kt",
   "core/pref/SettingKey.kt",
@@ -9026,6 +9261,7 @@
   "core/pref/keys/DeveloperKeys.kt",
   "core/pref/keys/EditorKeys.kt",
   "core/pref/keys/ExplorerKeys.kt",
+  "core/pref/keys/ExtensibilityKeys.kt",
   "core/pref/keys/GeneralKeys.kt",
   "core/pref/keys/RecordKeys.kt",
   "core/pref/keys/RunningKeys.kt",
@@ -9045,7 +9281,6 @@
   "runtime/api/augment/colors/ColorsTheme.kt",
   "runtime/api/modules/ScriptModuleLayer.kt",
   "runtime/api/modules/colors/ColorsThemeModule.kt",
-  "theme/ThemeColorManager.kt",
   "theme/app/ColorLibrariesActivity.kt",
   "theme/app/ColorSelectBaseActivity.kt",
   "theme/app/ColorSettingRecyclerView.kt",
@@ -9334,6 +9569,50 @@
   "detectedNotInRoadmap": []
  },
  "defaults": {
+  "COLOR_HISTORY_MERGE_SIMILAR": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 118,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "THEME_COLOR_DERIVED_ACCENT_AND_DARK": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 114,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "dex_compiler_experimental_component": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 54,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
+  "dex_compiler_experimental_enabled": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 50,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
   "key_$_ace_editor_font_preview_excluded_features": [
    {
     "expr": "emptySet()",
@@ -9481,6 +9760,17 @@
     "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
     "line": 123,
     "manual": true
+   }
+  ],
+  "key_$_codegen_model_current_debug_": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/LayoutInspectorKeys.kt",
+    "line": 57,
+    "method": "SettingKey.Str",
+    "type": "String"
    }
   ],
   "key_$_editor_engine_selection_mode": [
@@ -10196,7 +10486,7 @@
     "value": "key_$_app_language_auto",
     "expr": "keyResource(R.string.default_key_app_language, \"default_key_app_language\")",
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 53,
+    "line": 56,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    },
@@ -10241,7 +10531,7 @@
     "value": "运行时: AutoNightMode.isFunctional()",
     "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 71,
+    "line": 74,
     "method": "SettingKey.Bool",
     "type": "Boolean",
     "manual": true
@@ -10322,7 +10612,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/LayoutInspectorKeys.kt",
-    "line": 45,
+    "line": 47,
     "method": "SettingKey.Str",
     "type": "String"
    },
@@ -10343,7 +10633,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "theme/app/ColorSelectBaseActivity.kt",
-    "line": 1045,
+    "line": 1043,
     "method": "getBoolean",
     "type": "Boolean"
    }
@@ -11034,7 +11324,7 @@
     "value": "false",
     "expr": "boolResource(R.bool.pref_extending_js_build_in_objects, \"pref_extending_js_build_in_objects\")",
     "file": "core/pref/keys/ExtensibilityKeys.kt",
-    "line": 19,
+    "line": 23,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -11335,7 +11625,7 @@
     "value": "key_$_keep_screen_on_when_in_foreground_disabled",
     "expr": "keyResource(R.string.default_key_keep_screen_on_when_in_foreground, \"default_key_keep_screen_on_when_in_foreground\")",
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 95,
+    "line": 98,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    },
@@ -11357,7 +11647,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 102,
+    "line": 105,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    }
@@ -11460,7 +11750,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/LayoutInspectorKeys.kt",
-    "line": 29,
+    "line": 31,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -11471,7 +11761,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/LayoutInspectorKeys.kt",
-    "line": 25,
+    "line": 27,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -11482,7 +11772,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/LayoutInspectorKeys.kt",
-    "line": 33,
+    "line": 35,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -11504,7 +11794,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/LayoutInspectorKeys.kt",
-    "line": 37,
+    "line": 39,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -11526,7 +11816,7 @@
     "form": "调用处字面量",
     "value": "true",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 42,
+    "line": 46,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -11651,7 +11941,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 22,
+    "line": 26,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -11673,7 +11963,7 @@
     "value": "key_$_night_mode_follow_system",
     "expr": "keyResource(R.string.default_key_night_mode, \"default_key_night_mode\")",
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 60,
+    "line": 63,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    },
@@ -11695,7 +11985,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 67,
+    "line": 70,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -11716,7 +12006,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 34,
+    "line": 38,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -11913,7 +12203,7 @@
     "value": "true",
     "expr": "boolResource(R.bool.pref_rhino_java_primitive_wrap, \"pref_rhino_java_primitive_wrap\")",
     "file": "core/pref/keys/ExtensibilityKeys.kt",
-    "line": 25,
+    "line": 29,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -12041,7 +12331,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 26,
+    "line": 30,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -12061,7 +12351,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 30,
+    "line": 34,
     "method": "SettingKey.StrSet",
     "type": "StringSet"
    }
@@ -12177,7 +12467,7 @@
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
     "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 89,
+    "line": 92,
     "method": "SettingKey.Int",
     "type": "Int",
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
@@ -12191,7 +12481,7 @@
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
     "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 77,
+    "line": 80,
     "method": "SettingKey.Int",
     "type": "Int",
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
@@ -12205,7 +12495,7 @@
     "value": "由 #FFDEAD 派生 (inrt 为 #263238)",
     "ignoreForConflict": true,
     "file": "core/pref/keys/AppearanceKeys.kt",
-    "line": 83,
+    "line": 86,
     "method": "SettingKey.Int",
     "type": "Int",
     "note": "ThemeColorManager.kt:20 defaultThemeColor",
@@ -12348,6 +12638,39 @@
     "type": "Json (Gson LinkedHashSet)"
    }
   ],
+  "r8_compiler_explicit_component": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 62,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
+  "r8_compiler_explicit_enabled": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 58,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "three_stove_agent_script_root_configuration": [
+   {
+    "expr": "SettingDefault.of(emptyMap())",
+    "form": "调用处字面量",
+    "value": "{}",
+    "file": "core/pref/keys/ExtensibilityKeys.kt",
+    "line": 41,
+    "method": "SettingKey.Json",
+    "type": "Json"
+   }
+  ],
   "key_$_plugin_mount_enabled_$_": [
    {
     "form": "调用处字面量",
@@ -12409,7 +12732,7 @@
  "categoryCounts": {
   "appearance": {
    "keys": 9,
-   "literalKeys": 0,
+   "literalKeys": 2,
    "stores": 0
   },
   "general": {
@@ -12494,7 +12817,7 @@
   },
   "extensibility": {
    "keys": 2,
-   "literalKeys": 0,
+   "literalKeys": 1,
    "stores": 0
   },
   "updates": {
@@ -12514,12 +12837,12 @@
   },
   "layout_inspector": {
    "keys": 5,
-   "literalKeys": 0,
+   "literalKeys": 1,
    "stores": 0
   },
   "developer": {
    "keys": 5,
-   "literalKeys": 0,
+   "literalKeys": 4,
    "stores": 0
   },
   "plugin_center": {
@@ -12559,7 +12882,7 @@
   },
   "other": {
    "keys": 40,
-   "literalKeys": 11,
+   "literalKeys": 17,
    "stores": 3
   }
  },
