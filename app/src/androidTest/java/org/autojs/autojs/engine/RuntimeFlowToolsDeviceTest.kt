@@ -32,6 +32,8 @@ class RuntimeFlowToolsDeviceTest {
         val saved = Settings.Secure.getString(context.contentResolver, "enabled_accessibility_services")
         val enabled = Settings.Secure.getString(context.contentResolver, "accessibility_enabled")
         val component = context.packageName + "/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
+        val manager = context.getSystemService(NotificationManager::class.java)
+        val originalChannels = manager.notificationChannels.map { it.id }.toSet()
         try {
             prefs.edit().apply { keys.forEach { putBoolean(it, overrides[it] ?: true) } }.commit()
             harness.withFixture {
@@ -45,6 +47,7 @@ class RuntimeFlowToolsDeviceTest {
                 action()
             }
         } finally {
+            manager.notificationChannels.filter { it.id !in originalChannels && it.id.startsWith("flow-tools-events_flow_") }.forEach { manager.deleteNotificationChannel(it.id) }
             services(saved)
             shell(if (enabled == null) "settings delete secure accessibility_enabled" else "settings put secure accessibility_enabled $enabled")
             prefs.edit().apply { old.forEach { (k,v) -> if (v == null) remove(k) else putBoolean(k,v) } }.commit()
