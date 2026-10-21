@@ -107,9 +107,20 @@ internal object RuntimeMailPrograms {
             await client.deleteFolder(renamedName);renamedCreated=false;
             watch=await client.watch({folder:'INBOX',mode:'idle',reconnect:true});
             check(watch.isActive&&watch.generation>0,'watch active');
-            const delivered=[],watchErrors=[];
-            watch.on('message',(value,owner)=>{check(owner===watch,'watch callback owner');if(value.subject===tag)delivered.push(value);})
+            const delivered=[],watchErrors=[],readySubject=tag+' readiness';
+            let watchReady=false,readinessProbes=0;
+            watch.on('message',(value,owner)=>{check(owner===watch,'watch callback owner');if(value.subject===readySubject)watchReady=true;if(value.subject===tag)delivered.push(value);})
                 .on('error',error=>watchErrors.push(error.code));
+            // Handle creation starts an asynchronous connection; confirm its cursor before the one SMTP test message.
+            await until('watch subscription baseline',async()=>{
+                if(watchReady)return true;
+                readinessProbes++;
+                await client.append('INBOX',{to:'runtime@example.invalid',subject:readySubject,text:'synthetic readiness probe'});
+                await pause(250);return watchReady;
+            });
+            const probes=await client.search({subject:readySubject},{limit:100,fallback:'always'});
+            if(probes.length)await client.delete(probes,{expunge:true});
+            same((await client.search({subject:readySubject},{limit:100,fallback:'always'})).length,0,'readiness probes removed before POP3');
             await write(uploadPath);
             const sent=await mail.sendAsync({to:'runtime@example.invalid',subject:tag,text:'runtime mail round trip',
                 attachments:[{path:uploadPath,fileName:'upload.bin'}]},{saveToSent:false});
@@ -133,7 +144,7 @@ internal object RuntimeMailPrograms {
             await rejects(()=>client.fetch(),'SESSION_CLOSED');
             summary={packageName,mailbox:'synthetic-loopback',bodyMarkers:fixture.markerCount,
                 attachmentBytes:fixture.attachmentBytes,attachmentSha256:fixture.attachmentSha256,
-                progressEvents:progress.length,watchEvents:delivered.length,watchClosed:watch.isClosed,
+                progressEvents:progress.length,watchEvents:delivered.length,watchClosed:watch.isClosed,watchReady,readinessProbes,
                 protocols:['imap','smtp','pop3'],savedBoundary,credentialsRedacted:true,errors:true,quiet:true};
         }finally{
             try{
