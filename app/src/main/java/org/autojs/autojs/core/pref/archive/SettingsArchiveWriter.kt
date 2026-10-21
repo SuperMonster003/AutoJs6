@@ -49,9 +49,10 @@ object SettingsArchiveWriter {
 
     /**
      * Writes [snapshot], [data] and [plugins] to [out] and returns the manifest written, whose categories are those of
-     * the snapshot in its order (sensitive as their [SettingCategory] declares, and sealed for [key]).
+     * the snapshot in its order (sensitive as their [SettingCategory] declares, and sealed for [key], with a password
+     * slot as well when [password] is given, P7.7).
      * zh-CN: 把 [snapshot], [data] 与 [plugins] 写入 [out], 返回写入的 manifest; 其中的分类即快照中的分类, 顺序不变 (敏感标记取自
-     * [SettingCategory] 的声明, 敏感分类以 [key] 加密).
+     * [SettingCategory] 的声明, 敏感分类以 [key] 加密, 给出 [password] 时另加口令槽, P7.7).
      */
     @JvmStatic
     @JvmOverloads
@@ -65,6 +66,7 @@ object SettingsArchiveWriter {
         maxBytes: Long = SettingsArchive.MAX_BYTES,
         key: SettingsDeviceKey? = null,
         plugins: List<PluginFile> = emptyList(),
+        password: SettingsPassword? = null,
     ): SettingsArchiveManifest {
         val sensitive = snapshot.categories.filter { isSensitive(it.id) }.map { it.id }
         require(sensitive.isEmpty() || key != null) { "The sensitive categories $sensitive need the device key (D23)" }
@@ -81,7 +83,7 @@ object SettingsArchiveWriter {
         zip.put(SettingsArchive.MANIFEST, manifest.toText().toByteArray(Charsets.UTF_8))
         snapshot.categories.forEach { category ->
             val text = SettingsSnapshotCodec.categoryText(category)
-            val file = if (category.id in sensitive) SettingsSealedFile.seal(category.id, text, key!!) else text
+            val file = if (category.id in sensitive) SettingsSealedFile.seal(category.id, text, key!!, password) else text
             zip.put(SettingsArchive.categoryFile(category.id), file.toByteArray(Charsets.UTF_8))
         }
         data.forEach { zip.put(SettingsArchive.dataFile(it.name), it.bytes) }

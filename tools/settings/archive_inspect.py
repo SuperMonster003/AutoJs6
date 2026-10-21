@@ -11,8 +11,9 @@ number of entries the manifest lists and the number the category file holds, the
     listed number of entries, each a {"t", "v"} pair with a known type tag and a value of that type;
   - only "credentials" is flagged sensitive, and its file is a sealed envelope (D23): version 1, AES-256-GCM, a
     12-byte nonce, data with its 16-byte tag, and a device slot (HKDF-SHA256, a 16-digit hex fingerprint, a 12-byte
-    nonce and a wrapped 32-byte key); its entries cannot be counted without the key of the device, so the manifest's
-    number is shown as listed;
+    nonce and a wrapped 32-byte key), and any password slot (P7.7) has PBKDF2-HMAC-SHA256, 1000 to 10000000
+    iterations, a 16- to 64-byte salt, a 12-byte nonce and a wrapped 32-byte key; its entries cannot be counted
+    without the key of the device, so the manifest's number is shown as listed;
   - every data entry has its file under data/, and the data categories of T19 (P10.1) are checked the way their pages
     read them, with the manifest's number of entries being the number of shortcuts / libraries the file holds:
     data_shortcuts is data/shortcuts.zip, a shortcut backup ("autojs6-shortcuts" v1 / v2 holding only manifest.json and
@@ -342,6 +343,13 @@ class Inspector:
                 self.fail(f"{file}: a device slot lacks the kdf HKDF-SHA256 or a 16-digit hex fingerprint")
             if b64(slot.get("nonce"), size=12) is None or b64(slot.get("key"), size=48) is None:
                 self.fail(f"{file}: a device slot lacks a 12-byte nonce or a wrapped 32-byte key")
+        for slot in (slot for slot in slots if isinstance(slot, dict) and slot.get("kind") == "password"):
+            iterations = slot.get("iterations")
+            if slot.get("kdf") != "PBKDF2-HMAC-SHA256" or isinstance(iterations, bool) or not isinstance(iterations, int)                     or not 1000 <= iterations <= 10_000_000:
+                self.fail(f"{file}: a password slot lacks the kdf PBKDF2-HMAC-SHA256 or 1000 to 10000000 iterations")
+            salt = b64(slot.get("salt"), at_least=16)
+            if salt is None or len(salt) > 64 or b64(slot.get("nonce"), size=12) is None or b64(slot.get("key"), size=48) is None:
+                self.fail(f"{file}: a password slot lacks a 16- to 64-byte salt, a 12-byte nonce or a wrapped 32-byte key")
 
     def check_category(self, archive, file, cid, names):
         if file not in names:
