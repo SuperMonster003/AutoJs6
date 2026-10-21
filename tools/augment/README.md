@@ -21,6 +21,22 @@ py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] 
 
 `--calls NAME ...` (P2.1 起) 把 `bench/calls_prelude.js` 与 `bench/calls/NAME.js` 合成一个脚本运行 `--runs` 次, 给出每项的最小 / 中位 / 最大值 (微秒, 计时规则同 `error_path.js`). 前导部分带有 Rhino 参照项 (`ref` 开头: 空循环, `undefined.x`, 桥接 Java 异常, `Math.max`), 每个模块组的成功与失败调用写在自己的 `bench/calls/<组>.js` 中 (如 `jsox.js`), 各 P2 / P3 会话只新增自己的文件, 不改共享脚本. `--skip-init` 跳过启动计时, 只测调用.
 
+## device_r2.py: 一条命令跑完附录 A 规程的一轮 R2 计时 (P2.4)
+
+```
+py -3.12 -I tools/augment/device_r2.py -s SERIAL --restart [--warmup 100] [--rounds 2] [--runs 5] --errors --calls pure jsox colors util --init
+```
+
+`--restart` 先 force-stop 宿主 (新进程), 再以启动计时脚本暖机 `--warmup` 次 (每 20 次切换一次新模块层开关), 然后 `--rounds` 轮 "关, 开": 每种状态下 `bench/error_path.js` (`--errors`), `bench/calls/<组>.js` (`--calls`) 与启动计时 (`--init`) 各跑 `--runs` 次. 前后打印宿主进程的调度组 (PCY), 中途变化则数据不可比 (R2). 输出每项在各轮各状态的中位数 (us, 启动计时为 ms), 开关开的失败调用后附对同次运行中 Rhino 参照项的比值 (参数错误对 `undefined.x`, Java 异常对经 Rhino 桥接抛出的 Java 异常, 读 `e.stack` 对 `undefined.x` 后读 `e.stack`), 即 R2 的判定值; 结束时恢复开关原值. 收到的次数少于 `--runs` 时 (logcat 丢行) 标出 n.
+
+## device_profile.py: 采样确认调用路径已 JIT (P2.4)
+
+```
+py -3.12 -I tools/augment/device_profile.py -s SERIAL [--new-modules on|off] [--seconds 8] "base64.encode()" "isNullish(null)"
+```
+
+每个表达式单独一个脚本, 在 try / catch 循环中运行 `--seconds` 秒以上, 期间以 `simpleperf record --app` 采样宿主进程 (debug 宿主可调试, 解释执行与 JIT 编译的 Java 帧都带方法名). 每个表达式只打印两项: 脚本自己测得的每次耗时, 以及仍在 ART 解释器中执行 (帧在 `base.apk!classesNN.dex` 中) 的模块层 (`org.autojs.autojs.runtime.api.modules`) 与 Rhino (`org.mozilla.javascript`) 方法及其包含占比. 按附录 A 暖机后的进程中模块层应当一项都没有. ROADMAP P2.4 发现过一个长时间运行的宿主进程, 其中模块层热路径上的方法一直停在解释器, 失败调用因此为 Rhino 自身错误的 1.13-1.46 倍; 计时 (R2) 前后各跑一次, 可排除这种状态. 设备上只临时写 `/data/local/tmp/aj6_profile.data`, 用完即删. 需要系统自带的 simpleperf: XQ-AT72 (Android 12) 有, G8441 (Android 9) 没有, NDK r26 的 simpleperf 在 G8441 上无法链接.
+
 ## device_surface_snapshot.py: 真机 API 表面快照
 
 ```
