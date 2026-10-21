@@ -16,7 +16,7 @@ internal class RuntimeFlowPick(private val arena: RuntimeFlowNodes) {
         val type = PickResultType.of(requested)
         val root = RuntimeFlowJson.nullable(options.opt("root"))?.let {
             require(it is JSONObject && it.has("windowId")) { "Flow scope root must be a node snapshot" }
-            arena.reference(it)
+            arena.reference(it, movingRoot = true)
         }
         val direct = target.has("windowId")
         val filter = if (direct) null else RuntimeFlowQuery.filter(target)

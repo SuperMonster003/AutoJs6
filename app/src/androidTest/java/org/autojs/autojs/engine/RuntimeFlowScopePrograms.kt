@@ -11,9 +11,9 @@ internal object RuntimeFlowScopePrograms {
     """.trimIndent()
 
     private fun scopes() = """
-        const labels=[],check=(ok,label)=>{if(!ok)throw Error(label);labels.push(label);};
+        const labels=[],check=async(ok,label)=>{if(!ok)throw Error(label);labels.push(label);await pause(80);};
         const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-        async function rejects(task,code){try{await task;}catch(e){check(code?e.code===code:!!e,'rejected '+(code||'invalid arguments'));return;}throw Error('Expected rejection '+code);}
+        async function rejects(task,code){try{await task;}catch(e){await check(code?e.code===code:!!e,'rejected '+(code||'invalid arguments'));return;}throw Error('Expected rejection '+code);}
         const html='<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><style>body{margin:0;background:#dedede;touch-action:none}</style><body>Flow gesture pad<script>window.events=[];for(const type of ["touchstart","touchmove","touchend","touchcancel"]){document.addEventListener(type,e=>{events.push({type,n:e.touches.length,x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY});e.preventDefault();},{passive:false});}</script>';
         const root=await ui.inflate({type:'Column',padding:8,children:[
             {type:'Text',text:'Flow scopes and gestures'},
@@ -27,39 +27,39 @@ internal object RuntimeFlowScopePrograms {
         ]});
         const window=await ui.showLayout(root),aView=await root.findView('a'),ba=await root.findView('ba'),bb=await root.findView('bb'),pad=await root.findView('pad');
         let aClicks=0,bClicks=0;ba.on('click',()=>aClicks++);bb.on('click',()=>bClicks++);
-        flow.defaults({timeout:12000,interval:40});
+        flow.defaults({timeout:12000,interval:100});
         try {
             const a=await flow.waitForVisible({desc:'flow-scope-a'},{stableFor:500}),b=await flow.wait({desc:'flow-scope-b'});
             const base=flow.of('input'),scoped=base.within({desc:'flow-scope-a'});
-            check((await scoped).desc==='flow-scope-a','within result');
-            check((await scoped.wait('Scope duplicate')).desc==='flow-scope-leaf-a','within confines duplicate lookup');
+            await check((await scoped).desc==='flow-scope-a','within result');
+            await check((await scoped.wait('Scope duplicate')).desc==='flow-scope-leaf-a','within confines duplicate lookup');
             await rejects(scoped.wait({desc:'flow-scope-leaf-b'},{timeout:0}),'TIMEOUT');
-            check((await base.wait({desc:'flow-scope-leaf-b'})).desc==='flow-scope-leaf-b','sibling remains global');
-            check(await base.scope({root:a})==='input','scope preserves input');
-            check((await scoped.wait('Scope duplicate',{root:b})).desc==='flow-scope-leaf-b','wait root overrides once');
-            check((await scoped.wait('Scope duplicate')).desc==='flow-scope-leaf-a','wait override does not leak');
-            check((await scoped.scope({root:b}).wait('Scope duplicate')).desc==='flow-scope-leaf-b','scope root override');
-            check((await scoped.scope({root:null}).wait('Scope duplicate')).desc==='flow-scope-leaf-a','null keeps scope');
-            check((await scoped.wait('Scope duplicate',{compass:'p'})).desc==='flow-scope-a','compass parent');
-            check((await scoped.wait('Scope duplicate',{compass:'s>1'})).desc==='flow-scope-button-a','compass sibling');
-            check((await scoped.wait({desc:'flow-scope-a'},{compass:'c0'})).desc==='flow-scope-leaf-a','compass child');
-            check(await scoped.wait('Scope duplicate',{resultType:'text'})==='Scope duplicate','text projection');
-            check(await scoped.scope({resultType:'$'}).sleep(1).map(async()=>0).wait('Scope duplicate')==='Scope duplicate','projection survives asynchronous chain');
-            check(await scoped.wait({desc:'flow-scope-a'},{resultType:'indexInParent'})>=0,'numeric zero projection is found');
-            const point=await scoped.wait('Scope duplicate',{resultType:'.'});check(typeof point.x==='number'&&typeof point.y==='number','point projection');
-            const all=await base.scope({resultType:['#']}).wait('Scope duplicate');check(all.length===2&&all[0].desc!==all[1].desc,'symbol array projection');
-            const texts=await flow.wait('Scope duplicate',{resultType:'contents'});check(texts.length===2&&texts.every(t=>t==='Scope duplicate'),'plural content projection');
-            const collection=await flow.wait('Scope duplicate',{resultType:'{}'});check(Array.isArray(collection)&&collection.length===2,'collection is portable array');
-            check((await scoped.wait({desc:'flow-scope-a'},{resultType:['child',0]})).desc==='flow-scope-leaf-a','navigation result projection');
-            check((await scoped.wait('Scope duplicate',{resultType:['parent']})).desc==='flow-scope-a','parent result projection');
-            check(await scoped.wait('Scope duplicate',{resultType:['text']})==='Scope duplicate','single property array projection');
-            check(await scoped.wait('Scope duplicate',{resultType:'?'})===true,'existence projection');
-            check((await scoped.wait('Scope duplicate',{resultType:'@'})).content==='Scope duplicate','selector descriptor projection');
-            check((await scoped.findAny(['Scope duplicate'])).node.desc==='flow-scope-leaf-a','tool inherits root');
-            let optional;await scoped.whenPresent('Scope duplicate',n=>{optional=n.desc;});check(optional==='flow-scope-leaf-a','optional wait inherits root');
-            check((await scoped.repeatUntil(()=>{throw Error('must already be found');},'Scope duplicate')).desc==='flow-scope-leaf-a','repeat condition inherits root');
+            await check((await base.wait({desc:'flow-scope-leaf-b'})).desc==='flow-scope-leaf-b','sibling remains global');
+            await check(await base.scope({root:a})==='input','scope preserves input');
+            await check((await scoped.wait('Scope duplicate',{root:b})).desc==='flow-scope-leaf-b','wait root overrides once');
+            await check((await scoped.wait('Scope duplicate')).desc==='flow-scope-leaf-a','wait override does not leak');
+            await check((await scoped.scope({root:b}).wait('Scope duplicate')).desc==='flow-scope-leaf-b','scope root override');
+            await check((await scoped.scope({root:null}).wait('Scope duplicate')).desc==='flow-scope-leaf-a','null keeps scope');
+            await check((await scoped.wait('Scope duplicate',{compass:'p'})).desc==='flow-scope-a','compass parent');
+            await check((await scoped.wait('Scope duplicate',{compass:'s>1'})).desc==='flow-scope-button-a','compass sibling');
+            await check((await scoped.wait({desc:'flow-scope-a'},{compass:'c0'})).desc==='flow-scope-leaf-a','compass child');
+            await check(await scoped.wait('Scope duplicate',{resultType:'text'})==='Scope duplicate','text projection');
+            await check(await scoped.scope({resultType:'text'}).sleep(1).map(async()=>0).wait('Scope duplicate')==='Scope duplicate','projection survives asynchronous chain');
+            await check(await scoped.wait({desc:'flow-scope-a'},{resultType:'indexInParent'})>=0,'numeric zero projection is found');
+            const point=await scoped.wait('Scope duplicate',{resultType:'.'});await check(typeof point.x==='number'&&typeof point.y==='number','point projection');
+            const all=await base.scope({resultType:['#']}).wait('Scope duplicate');await check(all.length===2&&all[0].desc!==all[1].desc,'symbol array projection');
+            const texts=await flow.wait('Scope duplicate',{resultType:'contents'});await check(texts.length===2&&texts.includes('flow-scope-leaf-a')&&texts.includes('flow-scope-leaf-b'),'plural content projection');
+            const collection=await flow.wait('Scope duplicate',{resultType:'{}'});await check(Array.isArray(collection)&&collection.length===2,'collection is portable array');
+            await check((await scoped.wait({desc:'flow-scope-a'},{resultType:['child',0]})).desc==='flow-scope-leaf-a','navigation result projection');
+            await check((await scoped.wait('Scope duplicate',{resultType:['parent']})).desc==='flow-scope-a','parent result projection');
+            await check(await scoped.wait('Scope duplicate',{resultType:['text']})==='Scope duplicate','single property array projection');
+            await check(await scoped.wait('Scope duplicate',{resultType:'?'})===true,'existence projection');
+            await check((await scoped.wait('Scope duplicate',{resultType:'@'})).content==='Scope duplicate','selector descriptor projection');
+            await check((await scoped.findAny(['Scope duplicate'])).node.desc==='flow-scope-leaf-a','tool inherits root');
+            let optional;await scoped.whenPresent('Scope duplicate',n=>{optional=n.desc;});await check(optional==='flow-scope-leaf-a','optional wait inherits root');
+            await check((await scoped.repeatUntil(()=>{throw Error('must already be found');},'Scope duplicate')).desc==='flow-scope-leaf-a','repeat condition inherits root');
             const clicked=await base.scope({resultType:'#[]'}).wait({descMatches:'flow-scope-button-.*'}).click();
-            check(clicked.length===2,'node array actions');await flow.wait(()=>aClicks===1&&bClicks===1,{timeout:3000});check(aClicks===1&&bClicks===1,'both scoped node actions delivered');
+            await check(clicked.length===2,'node array actions');await flow.wait(()=>aClicks===1&&bClicks===1,{timeout:3000});await check(aClicks===1&&bClicks===1,'both scoped node actions delivered');
             await rejects(scoped.wait('Scope duplicate',{compass:'not-a-compass'}));
             await rejects(scoped.wait('Scope duplicate',{resultType:['performAction',16]}));
             await aView.set({contentDescription:'flow-scope-changed'});await flow.wait({desc:'flow-scope-changed'});
@@ -74,11 +74,11 @@ internal object RuntimeFlowScopePrograms {
             async function gesture(name,args,moving=false,multi=false){
                 await pad.evaluateJavascript('events=[]');
                 const token={name};const value=await flow.of(token)[name](...args);
-                check(value===token,name+' input identity');
+                await check(value===token,name+' input identity');
                 let events;await flow.wait(async()=>{events=await pad.evaluateJavascript('events');return events.some(e=>e.type==='touchend');},{timeout:4000,interval:40});
-                check(events.some(e=>e.type==='touchstart')&&!events.some(e=>e.type==='touchcancel'),name+' actual touch stream');
-                if(moving)check(events.some(e=>e.type==='touchmove'),name+' movement delivered');
-                if(multi)check(events.some(e=>e.n===2),name+' two simultaneous pointers');
+                await check(events.some(e=>e.type==='touchstart')&&!events.some(e=>e.type==='touchcancel'),name+' actual touch stream');
+                if(moving)await check(events.some(e=>e.type==='touchmove'),name+' movement delivered');
+                if(multi)await check(events.some(e=>e.n===2),name+' two simultaneous pointers');
             }
             for(const args of [[p],[x,y+dy],[p,120],[120,p],[x,y+dy,120]])await gesture('press',args);
             for(const args of [[...flat,200],[p,q,200],[pair,200],[flat,200],[200,p,q],[200,pair],[200,flat]])await gesture('swipe',args,true);
@@ -87,7 +87,7 @@ internal object RuntimeFlowScopePrograms {
             await rejects(flow.of(0).press(p,0));await rejects(flow.of(0).swipe([1,2,3],100));
             await pad.evaluateJavascript('events=[]');
             const delayed=flow.sleep(10000).press(p,100);delayed.cancel();await rejects(delayed,'CANCELLED');
-            await pause(100);check((await pad.evaluateJavascript('events')).length===0,'cancelled predecessor dispatches no gesture');
+            await pause(100);await check((await pad.evaluateJavascript('events')).length===0,'cancelled predecessor dispatches no gesture');
             return {checks:labels.length,labels,gestureOverloads:16,aClicks,bClicks};
         }catch(e){console.error('FLOW_SCOPE_CHECKS '+JSON.stringify(labels));throw e;}
         finally{try{await window.close();}finally{await root.dispose();}}

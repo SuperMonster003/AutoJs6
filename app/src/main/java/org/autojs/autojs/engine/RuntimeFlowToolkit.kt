@@ -131,7 +131,11 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
         val o = RuntimeFlowOptions(options, if (name == "nodeAction" || name == "globalAction") "action" else name)
         fun arg(i: Int) = RuntimeFlowJson.nullable(args.opt(i))
         fun targets() = RuntimeFlowJson.list(arg(0)).also { require(it.isNotEmpty()) }
-        val root = o.raw("root")?.let { bindings.find(it, null) ?: throw FlowError.InvalidTarget(name, reason = "root missing") }
+        val root = o.raw("root")?.let {
+            val snapshot = (it as? JSONObject)?.optJSONObject("__flowNode")
+            if (snapshot != null) arena.reference(snapshot, movingRoot = true)
+            else bindings.find(it, null) ?: throw FlowError.InvalidTarget(name, reason = "root missing")
+        }
         val bounds = "Bounds" in name
         val value: Any? = when (name) {
             "smartClick", "smartClickBounds" -> smart(kit.smartClick.click(kit.locate(arg(0), root, name, o.locate()), o.click(bounds), name, root))
