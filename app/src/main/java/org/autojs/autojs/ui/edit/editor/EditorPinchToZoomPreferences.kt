@@ -1,7 +1,7 @@
 package org.autojs.autojs.ui.edit.editor
 
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.keys.EditorKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 
@@ -24,7 +24,7 @@ object EditorPinchToZoomPreferences {
 
     private fun legacyStrategyKey(): String? {
         return runCatching {
-            Pref.getStringOrNull(key(R.string.key_editor_pinch_to_zoom_strategy))
+            MiscStateKeys.EDITOR_PINCH_TO_ZOOM_STRATEGY.storedOrNull()
         }.getOrNull()
     }
 }

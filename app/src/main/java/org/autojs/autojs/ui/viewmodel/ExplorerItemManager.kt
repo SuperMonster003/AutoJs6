@@ -1,11 +1,12 @@
 package org.autojs.autojs.ui.viewmodel
 
 import android.content.Context
-import android.content.SharedPreferences
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.ExplorerSorter
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs6.R
 
 /**
@@ -135,10 +136,10 @@ class ExplorerItemManager(private val mContext: Context) {
 
     fun cloneConfig() = ExplorerItemManager(mContext).also { it.setSortConfig(mSortConfig) }
 
-    fun saveSortConfig() = mSortConfig.saveInto(Pref.get())
+    fun saveSortConfig() = mSortConfig.save()
 
     fun restoreSortConfig() {
-        setSortConfig(SortConfig.from(Pref.get()))
+        setSortConfig(SortConfig.load())
     }
 
     internal class SortConfig {
@@ -149,24 +150,25 @@ class ExplorerItemManager(private val mContext: Context) {
         var isDirSortedAscending = true
         var isFileSortedAscending = true
 
-        fun saveInto(preferences: SharedPreferences) {
-            preferences.edit()
-                .putInt("$CLASS_NAME.file_sort_type", fileSortType)
-                .putInt("$CLASS_NAME.dir_sort_type", dirSortType)
-                .putBoolean("$CLASS_NAME.file_ascending", isFileSortedAscending)
-                .putBoolean("$CLASS_NAME.dir_ascending", isDirSortedAscending)
-                .apply()
+        // The four keys are declared in ExplorerKeys with the names this class gave them (docs/settings/ROADMAP.md
+        // P4.2, appendix C Q18) and are written in one edit as before.
+        // zh-CN: 四个键在 ExplorerKeys 中声明, 名称沿用本类原先的命名 (ROADMAP P4.2, 附录 C Q18), 仍在一次写入中保存.
+        fun save() {
+            SettingsStores.default.edit {
+                this[ExplorerKeys.EXPLORER_FILE_SORT_TYPE] = fileSortType
+                this[ExplorerKeys.EXPLORER_DIR_SORT_TYPE] = dirSortType
+                this[ExplorerKeys.EXPLORER_FILE_ASCENDING] = isFileSortedAscending
+                this[ExplorerKeys.EXPLORER_DIR_ASCENDING] = isDirSortedAscending
+            }
         }
 
         companion object {
 
-            private val CLASS_NAME = SortConfig::class.java.name
-
-            fun from(preferences: SharedPreferences) = SortConfig().apply {
-                isDirSortedAscending = preferences.getBoolean("$CLASS_NAME.dir_ascending", true)
-                isFileSortedAscending = preferences.getBoolean("$CLASS_NAME.file_ascending", true)
-                dirSortType = preferences.getInt("$CLASS_NAME.dir_sort_type", SORT_TYPE_NAME)
-                fileSortType = preferences.getInt("$CLASS_NAME.file_sort_type", SORT_TYPE_NAME)
+            fun load() = SortConfig().apply {
+                isDirSortedAscending = ExplorerKeys.EXPLORER_DIR_ASCENDING.get()
+                isFileSortedAscending = ExplorerKeys.EXPLORER_FILE_ASCENDING.get()
+                dirSortType = ExplorerKeys.EXPLORER_DIR_SORT_TYPE.get()
+                fileSortType = ExplorerKeys.EXPLORER_FILE_SORT_TYPE.get()
             }
 
         }

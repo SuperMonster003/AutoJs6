@@ -2,7 +2,7 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
@@ -21,7 +21,7 @@ class ClearUpdatesCheckedStatesPreference : MaterialPreference {
     constructor(context: Context) : super(context)
 
     override fun onClick() {
-        Pref.clearUpdatesCheckedStates()
+        MiscStateKeys.clearUpdatesCheckedStates()
         ViewUtils.showToast(context, R.string.text_updates_checked_states_cleared)
         super.onClick()
     }

@@ -1,7 +1,7 @@
 package org.autojs.autojs.theme.app
 
 import android.content.Context
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.ScriptUndoRules
 import org.autojs.autojs.theme.ScriptUndoSnapshot
 import org.autojs.autojs.theme.ThemeChangeNotifier
@@ -11,12 +11,6 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorEntities.HistorySource
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_PALETTE
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_CUSTOM_COLOR
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_LEGACY_SELECTED_COLOR_INDEX
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_ID
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_NAME
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_NAME
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import org.autojs.autojs.theme.library.ColorLibraryIds
 
@@ -33,8 +27,6 @@ import org.autojs.autojs.theme.library.ColorLibraryIds
  */
 object ScriptThemeChanges : ThemeColorCoordinator.CommitObserver {
 
-    private const val KEY_UNDO = "THEME_COLOR_SCRIPT_UNDO"
-
     private lateinit var appContext: Context
 
     /** Called once from `App.onCreate`. zh-CN: 在 `App.onCreate` 中调用一次. */
@@ -45,15 +37,15 @@ object ScriptThemeChanges : ThemeColorCoordinator.CommitObserver {
 
     /** Whether the latest explicit change came from a script and can be undone. zh-CN: 最近一次显式修改是否来自脚本且可以撤销. */
     val canUndo: Boolean
-        get() = Pref.getStringOrNull(KEY_UNDO) != null
+        get() = MiscStateKeys.THEME_COLOR_SCRIPT_UNDO.storedText() != null
 
     override fun beforeCommit(themeColor: ThemeColor, source: ThemeColorSource) {
-        if (ScriptUndoRules.capturesBefore(source, canUndo)) Pref.putString(KEY_UNDO, capture().encode())
+        if (ScriptUndoRules.capturesBefore(source, canUndo)) MiscStateKeys.THEME_COLOR_SCRIPT_UNDO.setStoredText(capture().encode())
     }
 
     override fun afterCommit(themeColor: ThemeColor, source: ThemeColorSource, scriptName: String?) {
         if (source == ThemeColorSource.SCRIPT) record(themeColor.colorPrimary, scriptName)
-        if (ScriptUndoRules.dropsAfter(source)) Pref.remove(KEY_UNDO)
+        if (ScriptUndoRules.dropsAfter(source)) MiscStateKeys.THEME_COLOR_SCRIPT_UNDO.remove()
     }
 
     /**
@@ -73,15 +65,15 @@ object ScriptThemeChanges : ThemeColorCoordinator.CommitObserver {
      * zh-CN: 恢复脚本修改之前的状态; 在主线程调用. 没有可撤销的内容时返回 false.
      */
     fun undo(): Boolean {
-        val snapshot = ScriptUndoSnapshot.decode(Pref.getStringOrNull(KEY_UNDO))
-        Pref.remove(KEY_UNDO)
+        val snapshot = ScriptUndoSnapshot.decode(MiscStateKeys.THEME_COLOR_SCRIPT_UNDO.storedText())
+        MiscStateKeys.THEME_COLOR_SCRIPT_UNDO.remove()
         snapshot ?: return false
         val intelligent = snapshot.intelligentSnapshot
         if (intelligent != null && IntelligentColorEngine.restoreState(intelligent, snapshot.intelligentRuntime)) return true
-        Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, snapshot.libraryId)
-        Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, snapshot.itemId)
-        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, snapshot.legacyIndex)
-        snapshot.customColor?.let { Pref.putInt(KEY_CUSTOM_COLOR, it) }
+        MiscStateKeys.COLOR_SELECT_LIBRARY_ID.set(snapshot.libraryId)
+        MiscStateKeys.COLOR_SELECT_ITEM_ID.set(snapshot.itemId)
+        MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(snapshot.legacyIndex)
+        snapshot.customColor?.let { MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.set(it) }
         ColorSelectBaseActivity.savePrefsForSelectionNames(snapshot.libraryName, snapshot.itemName)
         ThemeColorCoordinator.apply(ThemeColor(snapshot.primary, snapshot.dark, snapshot.accent), ThemeColorSource.RESTORE)
         return true
@@ -91,12 +83,12 @@ object ScriptThemeChanges : ThemeColorCoordinator.CommitObserver {
         val current = ThemeColorManager.currentThemeColor
         val (intelligentSnapshot, intelligentRuntime) = IntelligentColorEngine.exportState()
         return ScriptUndoSnapshot(
-            libraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, ColorLibraryIds.SELECT_NONE),
-            itemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, ColorLibraryIds.SELECT_NONE),
-            legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, ColorLibraryIds.SELECT_NONE),
-            customColor = if (Pref.containsKey(KEY_CUSTOM_COLOR)) Pref.getInt(KEY_CUSTOM_COLOR, 0) else null,
-            libraryName = Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME),
-            itemName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME),
+            libraryId = MiscStateKeys.COLOR_SELECT_LIBRARY_ID.get(),
+            itemId = MiscStateKeys.COLOR_SELECT_ITEM_ID.get(),
+            legacyIndex = (MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.storedOrNull() ?: ColorLibraryIds.SELECT_NONE),
+            customColor = MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.storedOrNull(),
+            libraryName = MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.storedOrNull(),
+            itemName = MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull(),
             primary = current.colorPrimary,
             dark = current.colorPrimaryDark,
             accent = current.colorAccent,

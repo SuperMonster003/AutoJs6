@@ -5,9 +5,7 @@ import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import com.google.gson.JsonElement
 import io.reactivex.subjects.BehaviorSubject
-import org.autojs.autojs.core.pref.Pref.getBoolean
-import org.autojs.autojs.core.pref.Pref.putBoolean
-import org.autojs.autojs.util.StringUtils.key
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs6.R
 import java.io.IOException
 import java.net.ServerSocket
@@ -164,9 +162,9 @@ class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(servi
             BehaviorSubject.createDefault(DevPluginService.State(DevPluginService.State.DISCONNECTED))
 
         var isServerSocketNormallyClosed
-            get() = getBoolean(key(R.string.key_server_socket_normally_closed), true)
+            get() = MiscStateKeys.SERVER_SOCKET_NORMALLY_CLOSED.get()
             set(state) {
-                putBoolean(key(R.string.key_server_socket_normally_closed), state)
+                MiscStateKeys.SERVER_SOCKET_NORMALLY_CLOSED.set(state)
             }
 
         var serverSocket: ServerSocket? = null

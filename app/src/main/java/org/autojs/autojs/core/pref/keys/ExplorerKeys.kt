@@ -72,8 +72,25 @@ object ExplorerKeys : SettingsDomain {
     @JvmField
     val BATCH_RENAME_HISTORY_RETENTION = SettingKey.Int(R.string.key_batch_rename_history_retention, EXPLORER, SettingDefault.of(BatchRenameJournalStore.MAX_BATCHES))
 
+    // The sort order of the file manager, named by the class `ExplorerItemManager.SortConfig` (P4.2, appendix C Q18);
+    // sort types are the `ExplorerItemManager.SORT_TYPE_*` values (0x10 = by name).
+    // zh-CN: 文件管理器的排序方式, 以类 `ExplorerItemManager.SortConfig` 命名 (P4.2, 附录 C Q18); 排序类型为 `ExplorerItemManager.SORT_TYPE_*` 的值 (0x10 = 按名称).
+
+    @JvmField
+    val EXPLORER_FILE_SORT_TYPE = SettingKey.Int(name = "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.file_sort_type", category = EXPLORER, default = SettingDefault.of(0x10))
+
+    @JvmField
+    val EXPLORER_DIR_SORT_TYPE = SettingKey.Int(name = "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.dir_sort_type", category = EXPLORER, default = SettingDefault.of(0x10))
+
+    @JvmField
+    val EXPLORER_FILE_ASCENDING = SettingKey.Bool(name = "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.file_ascending", category = EXPLORER, default = SettingDefault.of(true))
+
+    @JvmField
+    val EXPLORER_DIR_ASCENDING = SettingKey.Bool(name = "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.dir_ascending", category = EXPLORER, default = SettingDefault.of(true))
+
     override val keys: List<PrefKey<*>> = listOf(
         WORKING_DIRECTORY, HIDDEN_FILES, FILE_EXTENSIONS, EXPLORER_PLAYBACK_HISTORY, EXPLORER_FILE_DEFAULT_PREFIX, BATCH_RENAME_HISTORY_RETENTION,
+        EXPLORER_FILE_SORT_TYPE, EXPLORER_DIR_SORT_TYPE, EXPLORER_FILE_ASCENDING, EXPLORER_DIR_ASCENDING,
     )
 
     override val names: List<RegisteredName> = valueConstants(*HIDDEN_FILES_VALUES, *FILE_EXTENSIONS_VALUES) +

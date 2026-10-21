@@ -15,6 +15,7 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import org.autojs.autojs.AutoJs;
 import org.autojs.autojs.app.AppLevelThemeDialogBuilder;
 import org.autojs.autojs.app.CircularMenuOperationDialogBuilder;
+import org.autojs.autojs.core.pref.keys.MiscStateKeys;
 import org.autojs.autojs.core.pref.keys.RecordKeys;
 import org.autojs.autojs.util.DialogUtils;
 import org.autojs.autojs.app.tool.PointerLocationTool;
@@ -24,7 +25,6 @@ import org.autojs.autojs.core.accessibility.LayoutInspector;
 import org.autojs.autojs.core.accessibility.control.A11yServiceController.EnsureResult;
 import org.autojs.autojs.core.activity.ActivityInfoProvider;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.core.pref.Pref;
 import org.autojs.autojs.core.record.GlobalActionRecorder;
 import org.autojs.autojs.core.record.Recorder;
 import org.autojs.autojs.core.shizuku.IUserService;
@@ -493,7 +493,7 @@ public class CircularMenu implements LayoutInspector.CaptureAvailableListener {
     }
 
     public void closeAndSaveState(boolean state) {
-        Pref.putBooleanSync(R.string.key_floating_menu_shown, state);
+        MiscStateKeys.FLOATING_MENU_SHOWN.set(state, true);
         savePosition();
         close();
     }

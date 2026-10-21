@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.runtime.api.Permissions
 import org.autojs.autojs.ui.main.drawer.PermissionItemHelper
 import org.autojs.autojs.util.ContextUtils.findActivity
@@ -42,7 +42,7 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
                 if (isGrantedNow) return true
 
                 val hasAttemptedRequest =
-                    Pref.getBoolean(R.string.key_post_notifications_permission_request_attempted, false)
+                    MiscStateKeys.POST_NOTIFICATIONS_PERMISSION_REQUEST_ATTEMPTED.get()
 
                 val shouldShowRationale =
                     ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)
@@ -58,7 +58,7 @@ class PostNotificationsPermission(override val context: Context) : PermissionIte
                 val launchRequest = {
                     // Mark request attempt.
                     // zh-CN: 记录已尝试发起系统权限请求.
-                    Pref.putBoolean(R.string.key_post_notifications_permission_request_attempted, true)
+                    MiscStateKeys.POST_NOTIFICATIONS_PERMISSION_REQUEST_ATTEMPTED.set(true)
 
                     // Set one-shot callback to fallback to settings when denied.
                     // zh-CN: 设置一次性回调; 若用户拒绝授权, 则回退到设置页.

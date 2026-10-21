@@ -4,10 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs.core.pref.Pref.lastNoNewerUpdatesTimestamp
-import org.autojs.autojs.core.pref.Pref.lastUpdatesAutoCheckedTimestamp
-import org.autojs.autojs.core.pref.Pref.lastUpdatesPostponedTimestamp
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.pref.keys.UpdatesKeys
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
@@ -156,7 +153,7 @@ object UpdateUtils {
             .build()
             .checkNow()
 
-        Pref.refreshLastUpdatesAutoCheckedTimestamp()
+        MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_AUTO_CHECKED)
     }
 
     private class IntervalChecker {
@@ -168,21 +165,21 @@ object UpdateUtils {
         val isBeyondNoNewer: Boolean
             get() {
                 val now = System.currentTimeMillis()
-                val lastNoNewer = lastNoNewerUpdatesTimestamp
+                val lastNoNewer = MiscStateKeys.LAST_NO_NEWER_UPDATES.get()
                 return now - lastNoNewer > mMinCheckedIntervalNoNewer
             }
 
         val isBeyondPostponed: Boolean
             get() {
                 val now = System.currentTimeMillis()
-                val lastPostponed = lastUpdatesPostponedTimestamp
+                val lastPostponed = MiscStateKeys.LAST_UPDATES_POSTPONED.get()
                 return now - lastPostponed > mMinCheckedIntervalPostponed
             }
 
         val isBeyondAutoChecked: Boolean
             get() {
                 val now = System.currentTimeMillis()
-                val lastAutoChecked = lastUpdatesAutoCheckedTimestamp
+                val lastAutoChecked = MiscStateKeys.LAST_UPDATES_AUTO_CHECKED.get()
                 return now - lastAutoChecked > mMinCheckedIntervalAutoChecked
             }
 

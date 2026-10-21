@@ -2,19 +2,18 @@ package org.autojs.autojs.util
 
 import org.autojs.autojs.annotation.MinSize
 import org.autojs.autojs.core.pref.Language
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.util.EnvironmentUtils.externalStorageDirectory
 import org.autojs.autojs.util.EnvironmentUtils.externalStoragePath
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs6.R
 import java.io.File
 
 object WorkingDirectoryUtils {
 
     var history: LinkedHashSet<String>
-        get() = Pref.getLinkedHashSet(R.string.key_working_directory_history)
-        private set(value) = Pref.putLinkedHashSet(R.string.key_working_directory_history, value)
+        get() = MiscStateKeys.linkedSet(MiscStateKeys.WORKING_DIRECTORY_HISTORY)
+        private set(value) = MiscStateKeys.setLinkedSet(MiscStateKeys.WORKING_DIRECTORY_HISTORY, value)
 
     @JvmStatic
     var path: String
@@ -51,11 +50,10 @@ object WorkingDirectoryUtils {
 
     @JvmStatic
     fun determineIfNeeded() {
-        val initKey = key(R.string.key_working_directory_initialized)
-        if (Pref.containsKey(initKey)) {
+        if (MiscStateKeys.WORKING_DIRECTORY_INITIALIZED.isStored()) {
             return
         }
-        Pref.putBoolean(initKey, true)
+        MiscStateKeys.WORKING_DIRECTORY_INITIALIZED.set(true)
         if (ExplorerKeys.WORKING_DIRECTORY.isStored()) {
             return
         }

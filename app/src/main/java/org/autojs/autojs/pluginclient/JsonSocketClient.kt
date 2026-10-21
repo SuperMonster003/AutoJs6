@@ -11,11 +11,8 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import io.github.g00fy2.versioncompare.Version
 import io.reactivex.subjects.BehaviorSubject
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.http.LocalNetworkDiagnostics
-import org.autojs.autojs.core.pref.Pref.getBoolean
-import org.autojs.autojs.core.pref.Pref.putBoolean
-import org.autojs.autojs.util.StringUtils.key
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -444,8 +441,8 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
         private const val CONNECT_TIMEOUT = HANDSHAKE_TIMEOUT + 5_000
 
         var serverAddressHistory: LinkedHashSet<String>
-            get() = Pref.getLinkedHashSet(R.string.key_pc_server_address_history)
-            private set(value) = Pref.putLinkedHashSet(R.string.key_pc_server_address_history, value)
+            get() = MiscStateKeys.linkedSet(MiscStateKeys.PC_SERVER_ADDRESS_HISTORY)
+            private set(value) = MiscStateKeys.setLinkedSet(MiscStateKeys.PC_SERVER_ADDRESS_HISTORY, value)
 
         fun addIntoHistory(ip: String) {
             serverAddressHistory = linkedSetOf(ip).apply { addAll(serverAddressHistory) }
@@ -473,8 +470,8 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
          * zh-CN: 上次客户端连接是否由用户显式结束 (本地或 VSCode 中). 默认为 true, 使全新安装不会自行连接; 握手成功后置为 false.
          */
         var isClientSocketNormallyClosed
-            get() = getBoolean(key(R.string.key_client_socket_normally_closed), true)
-            set(state) = putBoolean(key(R.string.key_client_socket_normally_closed), state)
+            get() = MiscStateKeys.CLIENT_SOCKET_NORMALLY_CLOSED.get()
+            set(state) = MiscStateKeys.CLIENT_SOCKET_NORMALLY_CLOSED.set(state)
 
     }
 

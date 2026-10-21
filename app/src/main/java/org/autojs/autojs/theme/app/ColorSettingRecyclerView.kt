@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.ThemeColorRecyclerView
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.ThemeColorHelper
 import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorSource
@@ -24,9 +24,6 @@ import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRAR
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_DEFAULT
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.COLOR_LIBRARY_ID_MATERIAL
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_LEGACY_SELECTED_COLOR_INDEX
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_ID
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.SELECT_NONE
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.colorItemsLegacy
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.customColorPosition
@@ -57,7 +54,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
         }
 
     private val customColor: Int
-        get() = Pref.getInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, context.getColor(R.color.custom_color_default))
+        get() = (MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.storedOrNull() ?: context.getColor(R.color.custom_color_default))
 
     private val mActualOnItemClickListener = OnClickListener { v ->
         getChildViewHolder(v)?.let { holder ->
@@ -121,34 +118,34 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
     }
 
     private fun savePrefsForLegacy() {
-        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, mSelectedPosition)
+        MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(mSelectedPosition)
     }
 
     private fun savePrefsForLibraries() {
         when (mSelectedPosition) {
             customColorPosition -> {
-                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_PALETTE)
-                Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, 0)
+                MiscStateKeys.COLOR_SELECT_LIBRARY_ID.set(COLOR_LIBRARY_ID_PALETTE)
+                MiscStateKeys.COLOR_SELECT_ITEM_ID.set(0)
             }
             defaultColorPosition -> {
-                Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_DEFAULT)
+                MiscStateKeys.COLOR_SELECT_LIBRARY_ID.set(COLOR_LIBRARY_ID_DEFAULT)
                 presetColorLibraries.find { it.isDefault }!!.colors.find { colorItem ->
                     context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)
-                }?.let { Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, it.itemId) }
+                }?.let { MiscStateKeys.COLOR_SELECT_ITEM_ID.set(it.itemId) }
             }
             else -> selectedColor?.let { c ->
                 presetColorLibraries.find { it.isMaterial }!!.colors.find { colorItem ->
                     context.getColor(colorItem.colorRes) == c
                 }?.let {
-                    Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, COLOR_LIBRARY_ID_MATERIAL)
-                    Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, it.itemId)
+                    MiscStateKeys.COLOR_SELECT_LIBRARY_ID.set(COLOR_LIBRARY_ID_MATERIAL)
+                    MiscStateKeys.COLOR_SELECT_ITEM_ID.set(it.itemId)
                 }
             }
         }
     }
 
     fun setUpSelectedPosition(currentColor: Int) {
-        val selectedIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+        val selectedIndex = (MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.storedOrNull() ?: SELECT_NONE)
         colorItemsLegacy.getOrNull(selectedIndex)?.let {
             setSelectedPosition(selectedIndex)
         } ?: when (currentColor) {
@@ -171,7 +168,7 @@ class ColorSettingRecyclerView : ThemeColorRecyclerView {
             .create()
             .setColorPickerDialogListener { dialogId: Int, color: Int ->
                 val colorWithFullAlpha = color or Color.BLACK
-                Pref.putInt(ColorSelectBaseActivity.KEY_CUSTOM_COLOR, colorWithFullAlpha)
+                MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.set(colorWithFullAlpha)
                 setSelectedPosition(customColorPosition)
                 saveDatabaseForPaletteHistory(applicationContext = context.applicationContext, color = colorWithFullAlpha)
                 mOnItemClickListener?.onItemClick(v, customColorPosition)

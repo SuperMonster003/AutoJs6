@@ -19,6 +19,7 @@ import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.pref.keys.RecordKeys
 import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.core.pref.keys.UpdatesKeys
@@ -157,13 +158,10 @@ object Pref {
     val isAutoCheckForUpdatesEnabled
         get() = UpdatesKeys.AUTO_CHECK_FOR_UPDATES.get()
 
-    private val lastUpdatesCheckedTimestamp: Long
-        get() = getTimestamp(R.string.key_last_updates_checked)
-
     @JvmStatic
     val lastUpdatesCheckedTimeString: String?
         get() {
-            val ts = lastUpdatesCheckedTimestamp
+            val ts = MiscStateKeys.LAST_UPDATES_CHECKED.get()
             if (ts < 0) {
                 return null
             }
@@ -173,16 +171,19 @@ object Pref {
         }
 
     @JvmStatic
+    @Deprecated("Use MiscStateKeys.LAST_NO_NEWER_UPDATES (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.LAST_NO_NEWER_UPDATES.get()", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
     val lastNoNewerUpdatesTimestamp: Long
-        get() = getTimestamp(R.string.key_last_no_newer_updates)
+        get() = MiscStateKeys.LAST_NO_NEWER_UPDATES.get()
 
     @JvmStatic
+    @Deprecated("Use MiscStateKeys.LAST_UPDATES_POSTPONED (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.LAST_UPDATES_POSTPONED.get()", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
     val lastUpdatesPostponedTimestamp: Long
-        get() = getTimestamp(R.string.key_last_updates_postponed)
+        get() = MiscStateKeys.LAST_UPDATES_POSTPONED.get()
 
     @JvmStatic
+    @Deprecated("Use MiscStateKeys.LAST_UPDATES_AUTO_CHECKED (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.LAST_UPDATES_AUTO_CHECKED.get()", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
     val lastUpdatesAutoCheckedTimestamp: Long
-        get() = getTimestamp(R.string.key_last_updates_auto_checked)
+        get() = MiscStateKeys.LAST_UPDATES_AUTO_CHECKED.get()
 
     @JvmStatic
     @Deprecated("Use AppearanceKeys.keepScreenOnWhenInForegroundKey (docs/settings/ROADMAP.md P2.1)", ReplaceWith("AppearanceKeys.keepScreenOnWhenInForegroundKey", "org.autojs.autojs.core.pref.keys.AppearanceKeys"))
@@ -253,8 +254,6 @@ object Pref {
             EditorKeys.EDITOR_THEME.set(theme)
         }
 
-    private fun getTimestamp(@KeyRes keyRes: Int): Long = getLong(keyRes, -1)
-
     @JvmStatic
     @ScriptInterfaceCompatible
     fun getScriptDirPath() = WorkingDirectoryUtils.path
@@ -270,24 +269,24 @@ object Pref {
     }
 
     @JvmStatic
-    fun refreshLastUpdatesCheckedTimestamp() = updateTimestamp(R.string.key_last_updates_checked)
+    @Deprecated("Use MiscStateKeys.markNow (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_CHECKED)", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
+    fun refreshLastUpdatesCheckedTimestamp() = MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_CHECKED)
 
     @JvmStatic
-    fun refreshLastNoNewerUpdatesTimestamp() = updateTimestamp(R.string.key_last_no_newer_updates)
+    @Deprecated("Use MiscStateKeys.markNow (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.markNow(MiscStateKeys.LAST_NO_NEWER_UPDATES)", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
+    fun refreshLastNoNewerUpdatesTimestamp() = MiscStateKeys.markNow(MiscStateKeys.LAST_NO_NEWER_UPDATES)
 
     @JvmStatic
-    fun refreshLastUpdatesPostponedTimestamp() = updateTimestamp(R.string.key_last_updates_postponed)
+    @Deprecated("Use MiscStateKeys.markNow (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_POSTPONED)", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
+    fun refreshLastUpdatesPostponedTimestamp() = MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_POSTPONED)
 
     @JvmStatic
-    fun refreshLastUpdatesAutoCheckedTimestamp() = updateTimestamp(R.string.key_last_updates_auto_checked)
+    @Deprecated("Use MiscStateKeys.markNow (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_AUTO_CHECKED)", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
+    fun refreshLastUpdatesAutoCheckedTimestamp() = MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_AUTO_CHECKED)
 
     @JvmStatic
-    fun clearUpdatesCheckedStates() = write {
-        remove(key(R.string.key_last_no_newer_updates))
-        remove(key(R.string.key_last_updates_postponed))
-        remove(key(R.string.key_last_updates_checked))
-        remove(key(R.string.key_last_updates_auto_checked))
-    }
+    @Deprecated("Use MiscStateKeys.clearUpdatesCheckedStates (docs/settings/ROADMAP.md P4.2)", ReplaceWith("MiscStateKeys.clearUpdatesCheckedStates()", "org.autojs.autojs.core.pref.keys.MiscStateKeys"))
+    fun clearUpdatesCheckedStates() = MiscStateKeys.clearUpdatesCheckedStates()
 
     @JvmStatic
     @Deprecated("Use A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
@@ -300,8 +299,6 @@ object Pref {
     @JvmStatic
     @Deprecated("Use A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU (docs/settings/ROADMAP.md P2.4)", ReplaceWith("A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get()", "org.autojs.autojs.core.pref.keys.A11yKeys"))
     fun shouldStartA11yServiceWithShizuku() = A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get()
-
-    private fun updateTimestamp(@KeyRes keyRes: Int) = putLong(keyRes, System.currentTimeMillis())
 
     private fun write(commit: Boolean = false, block: SettingsStore.Editor.() -> Unit) {
         sStore.edit(commit, block)

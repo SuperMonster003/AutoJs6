@@ -28,6 +28,7 @@ import org.autojs.autojs.core.plugin.mcp.McpServerUiPolicy
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.ui.settings.McpServerSettingsLauncher
 import kotlinx.coroutines.launch
 import org.autojs.autojs.app.tool.PointerLocationTool
@@ -228,7 +229,7 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_accessibility_black_thicker_48dp,
             title = R.string.text_a11y_service,
             descriptionRes = R.string.description_accessibility_service,
-            prefKey = R.string.key_a11y_service,
+            prefSetting = MiscStateKeys.A11Y_SERVICE,
         ).also { item ->
             item.setOnLaunchManagerListener { d ->
                 // The description dialog is closed first, the manager takes its place.
@@ -277,7 +278,7 @@ open class DrawerFragment : Fragment() {
             icon = R.drawable.ic_robot_thicker_64,
             title = R.string.text_floating_button,
             descriptionRes = R.string.description_floating_button,
-            prefKey = R.string.key_floating_menu_shown,
+            prefSetting = MiscStateKeys.FLOATING_MENU_SHOWN,
         ).also { item ->
             item.setOnLaunchSettingsListener {
                 val helper = DisplayOverOtherAppsPermission(mContext)

@@ -173,6 +173,13 @@ class SettingsDomainsTest {
             "r8_compiler_explicit_enabled" to "false",
             "r8_compiler_explicit_component" to null,
             "key_\$_codegen_model_current_debug_" to null,
+            // Literal settings the P0 inventory missed (appendix C Q18, P4.2): VirtualColorLibraryActivity
+            // getString(KEY_FAVORITE_SORT, null), ExplorerItemManager.SortConfig getInt(..., 0x10) / getBoolean(..., true).
+            "COLOR_FAVORITE_SORT" to null,
+            "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.file_sort_type" to "16",
+            "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.dir_sort_type" to "16",
+            "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.file_ascending" to "true",
+            "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.dir_ascending" to "true",
         )
 
         /**

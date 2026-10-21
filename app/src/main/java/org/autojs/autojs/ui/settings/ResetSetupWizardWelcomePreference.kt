@@ -2,9 +2,8 @@ package org.autojs.autojs.ui.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
@@ -25,7 +24,7 @@ class ResetSetupWizardWelcomePreference : MaterialPreference {
     constructor(context: Context) : super(context)
 
     override fun onClick() {
-        Pref.remove(key(R.string.key_setup_wizard_welcome_done))
+        MiscStateKeys.SETUP_WIZARD_WELCOME_DONE.remove()
         ViewUtils.showToast(context, R.string.text_setup_wizard_welcome_reset_done)
         super.onClick()
     }

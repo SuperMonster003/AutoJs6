@@ -2,6 +2,7 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.SharedPreferences
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.pref.keys.PluginCenterKeys
 import org.autojs.autojs6.R
 
@@ -30,12 +31,12 @@ object PluginOnlineSettingsStore {
         if (!isAutoCheckUpdatesEnabled()) {
             return false
         }
-        val last = Pref.getLong(R.string.key_plugin_center_last_online_check_ts, 0L)
+        val last = MiscStateKeys.PLUGIN_CENTER_LAST_ONLINE_CHECK_TS.get()
         return now - last >= AUTO_CHECK_INTERVAL_MS
     }
 
     fun markCheckedNow(now: Long = System.currentTimeMillis()) {
-        Pref.putLong(R.string.key_plugin_center_last_online_check_ts, now)
+        MiscStateKeys.PLUGIN_CENTER_LAST_ONLINE_CHECK_TS.set(now)
     }
 
     fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {

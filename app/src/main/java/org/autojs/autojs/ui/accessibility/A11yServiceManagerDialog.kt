@@ -23,9 +23,9 @@ import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.P
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceDiagnostics.Report
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceSelfCheck
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry.StateListener
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.SettingKey
 import org.autojs.autojs.core.pref.keys.A11yKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.permission.WriteSecureSettingsPermission
 import org.autojs.autojs.permission.ShizukuPermission
 import org.autojs.autojs.runtime.api.WrappedShizuku
@@ -127,8 +127,8 @@ class A11yServiceManagerDialog private constructor(
     private val isCollecting = AtomicBoolean(false)
     private var isActionRunning = false
     private var latestReport: Report? = null
-    private var statusLevel = StatusLevel.entries[Pref.getInt(R.string.key_a11y_service_manager_status_level, StatusLevel.BASIC.ordinal).coerceIn(StatusLevel.entries.indices)]
-    private var controlLevel = ControlLevel.entries[Pref.getInt(R.string.key_a11y_service_manager_control_level, ControlLevel.START_STOP.ordinal).coerceIn(ControlLevel.entries.indices)]
+    private var statusLevel = StatusLevel.entries[(MiscStateKeys.A11Y_SERVICE_MANAGER_STATUS_LEVEL.storedOrNull() ?: StatusLevel.BASIC.ordinal).coerceIn(StatusLevel.entries.indices)]
+    private var controlLevel = ControlLevel.entries[(MiscStateKeys.A11Y_SERVICE_MANAGER_CONTROL_LEVEL.storedOrNull() ?: ControlLevel.START_STOP.ordinal).coerceIn(ControlLevel.entries.indices)]
 
     // Probed once on a worker thread (may spawn a root shell); never read from the 1 s timer.
     // zh-CN: 只在 worker 线程探测一次 (可能会起 root shell); 不在 1 s 定时器中读取.
@@ -179,7 +179,7 @@ class A11yServiceManagerDialog private constructor(
         binding.controlLess.setOnClickListener { stepControlLevel(-1) }
         binding.controlMore.setOnClickListener { stepControlLevel(+1) }
         settingsSection = ManagerSettingsSection(context, binding.settingsContainer, binding.settingsOpen,
-            binding.settingsHeaderDivider, binding.settingsLess, binding.settingsMore, R.string.key_a11y_service_manager_settings_collapsed)
+            binding.settingsHeaderDivider, binding.settingsLess, binding.settingsMore, MiscStateKeys.A11Y_SERVICE_MANAGER_SETTINGS_COLLAPSED)
         applyStatusLevel()
         applyControlLevel()
 
@@ -289,7 +289,7 @@ class A11yServiceManagerDialog private constructor(
     private fun stepStatusLevel(delta: Int) {
         val next = StatusLevel.entries.getOrNull(statusLevel.ordinal + delta) ?: return
         statusLevel = next
-        Pref.putInt(R.string.key_a11y_service_manager_status_level, next.ordinal)
+        MiscStateKeys.A11Y_SERVICE_MANAGER_STATUS_LEVEL.set(next.ordinal)
         applyStatusLevel()
     }
 
@@ -308,7 +308,7 @@ class A11yServiceManagerDialog private constructor(
     private fun stepControlLevel(delta: Int) {
         val next = ControlLevel.entries.getOrNull(controlLevel.ordinal + delta) ?: return
         controlLevel = next
-        Pref.putInt(R.string.key_a11y_service_manager_control_level, next.ordinal)
+        MiscStateKeys.A11Y_SERVICE_MANAGER_CONTROL_LEVEL.set(next.ordinal)
         applyControlLevel()
     }
 

@@ -1,13 +1,8 @@
 package org.autojs.autojs.ui.explorer
 
-import org.autojs.autojs.core.pref.Pref.getInt
-import org.autojs.autojs.core.pref.Pref.getLinkedList
-import org.autojs.autojs.core.pref.Pref.getStringOrNull
-import org.autojs.autojs.core.pref.Pref.putInt
-import org.autojs.autojs.core.pref.Pref.putLinkedList
-import org.autojs.autojs.core.pref.Pref.putString
-import org.autojs.autojs.core.pref.Pref.remove
-import java.util.LinkedList
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 
 internal data class ExplorerStoredPageState(
     val path: String,
@@ -22,15 +17,18 @@ internal data class ExplorerStoredViewState(
     val history: List<ExplorerStoredPageState>,
 )
 
-/** Typed persistence boundary for Explorer navigation and scroll state. */
+/**
+ * Typed persistence boundary for Explorer navigation and scroll state.
+ * The keys are declared in [MiscStateKeys] (docs/settings/ROADMAP.md P4.2, names unchanged by R1).
+ */
 internal object ExplorerViewStateStore {
 
     fun savePageScroll(scrollPosition: Int) {
-        putInt(prefKey(PAGE_STATE), scrollPosition)
+        MiscStateKeys.EXPLORER_VIEW_PAGE_STATE.set(scrollPosition)
     }
 
     fun restorePageScroll(): Int? {
-        return getInt(prefKey(PAGE_STATE), -1).takeIf { it > 0 }
+        return MiscStateKeys.EXPLORER_VIEW_PAGE_STATE.get().takeIf { it > 0 }
     }
 
     fun saveExplorer(
@@ -38,27 +36,28 @@ internal object ExplorerViewStateStore {
         rootPath: String,
         history: List<ExplorerStoredPageState>,
     ) {
-        putString(prefKey(EXPLORER_CURRENT), currentPath)
-        putString(prefKey(EXPLORER_ROOT), rootPath)
-        putLinkedList(
-            prefKey(EXPLORER_HISTORY),
-            LinkedList(history.map(::encodePageState)),
-        )
+        SettingsStores.default.edit {
+            this[MiscStateKeys.EXPLORER_VIEW_CURRENT] = currentPath
+            this[MiscStateKeys.EXPLORER_VIEW_ROOT] = rootPath
+            this[MiscStateKeys.EXPLORER_VIEW_HISTORY] = history.map(::encodePageState)
+        }
     }
 
     fun restoreExplorer(): ExplorerStoredViewState {
         return ExplorerStoredViewState(
-            currentPath = getStringOrNull(prefKey(EXPLORER_CURRENT)),
-            rootPath = getStringOrNull(prefKey(EXPLORER_ROOT)),
-            history = getLinkedList(prefKey(EXPLORER_HISTORY)).mapNotNull(::decodePageState),
+            currentPath = MiscStateKeys.EXPLORER_VIEW_CURRENT.storedOrNull(),
+            rootPath = MiscStateKeys.EXPLORER_VIEW_ROOT.storedOrNull(),
+            history = MiscStateKeys.stringList(MiscStateKeys.EXPLORER_VIEW_HISTORY).mapNotNull(::decodePageState),
         )
     }
 
     fun clear() {
-        remove(prefKey(PAGE_STATE))
-        remove(prefKey(EXPLORER_CURRENT))
-        remove(prefKey(EXPLORER_ROOT))
-        remove(prefKey(EXPLORER_HISTORY))
+        SettingsStores.default.edit {
+            remove(MiscStateKeys.EXPLORER_VIEW_PAGE_STATE.name)
+            remove(MiscStateKeys.EXPLORER_VIEW_CURRENT.name)
+            remove(MiscStateKeys.EXPLORER_VIEW_ROOT.name)
+            remove(MiscStateKeys.EXPLORER_VIEW_HISTORY.name)
+        }
     }
 
     fun prefKey(key: String): String = ExplorerView::class.java.simpleName + '.' + key
@@ -83,9 +82,5 @@ internal object ExplorerViewStateStore {
         return ExplorerStoredPageState(path, scrollPosition, directoriesCollapsed, filesCollapsed)
     }
 
-    private const val PAGE_STATE = "page_state"
-    private const val EXPLORER_CURRENT = "explorer_current"
-    private const val EXPLORER_ROOT = "explorer_root"
-    private const val EXPLORER_HISTORY = "explorer_history"
     private const val PAGE_STATE_FIELD_COUNT = 4
 }

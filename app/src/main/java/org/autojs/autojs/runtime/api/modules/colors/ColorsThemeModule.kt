@@ -5,7 +5,7 @@ import android.os.Looper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
@@ -20,8 +20,6 @@ import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.displayColorsOf
 import org.autojs.autojs.theme.app.ColorLibrariesActivity.Companion.presetColorLibraries
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_NAME
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_NAME
 import org.autojs.autojs.theme.app.IntelligentSummaryFormatter
 import org.autojs.autojs.theme.app.ScriptThemeChanges
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
@@ -162,10 +160,10 @@ class ColorsThemeModule(private val runtime: ScriptRuntime?) {
                     null -> {
                         val selection = ColorSelectBaseActivity.currentColorSelection()
                         o.put("libraryId", o, ColorSelectionCodec.encode(selection).first)
-                        o.put("libraryName", o, Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME))
+                        o.put("libraryName", o, MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.storedOrNull())
                         o.put("intelligent", o, false)
                         o.put("groupId", o, null)
-                        o.put("groupName", o, Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME))
+                        o.put("groupName", o, MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull())
                         o.put("state", o, null)
                     }
                     else -> {

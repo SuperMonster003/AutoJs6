@@ -19,7 +19,8 @@ class ExplorerKeysTest : DomainKeysTestBase() {
 
     @Test
     fun workingDirectoryDefaultsToTheResourceAndDeploysADirectory() {
-        assertEquals(6, ExplorerKeys.keys.size)
+        // 10 since P4.2 declared the four sort keys of ExplorerItemManager.SortConfig (appendix C Q18).
+        assertEquals(10, ExplorerKeys.keys.size)
         assertEquals("/Scripts", ExplorerKeys.WORKING_DIRECTORY.get())
         assertEquals(DeploymentKind.CREATE_DIRECTORY, ExplorerKeys.WORKING_DIRECTORY.deployment)
         assertFalse(ExplorerKeys.WORKING_DIRECTORY.isStored())

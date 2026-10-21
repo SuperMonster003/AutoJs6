@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.image.ColorItems
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
 import org.autojs.autojs.theme.app.ColorHistoryItemViewHolder.Companion.ColorHistoryItem
 import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
@@ -283,7 +283,7 @@ class ColorLibrariesActivity : ColorSelectBaseActivity() {
             lifecycleScope.launch {
                 val stored = withContext(Dispatchers.IO) { repository.renameLibrary(library.id, name) }
                 if ((currentColorSelection() as? ColorSelection.UserColor)?.libraryRowId == library.id) {
-                    savePrefsForSelectionNames(stored, Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME))
+                    savePrefsForSelectionNames(stored, MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull())
                     updateSubtitle(binding.toolbar)
                 }
                 refreshUserLibraries()

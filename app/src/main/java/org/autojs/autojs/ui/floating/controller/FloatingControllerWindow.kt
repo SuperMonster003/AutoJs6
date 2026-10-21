@@ -14,7 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.core.view.isVisible
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
@@ -175,15 +175,15 @@ class FloatingControllerWindow(
     private fun savePosition(bridge: WindowBridge) {
         val screenWidth = bridge.screenWidth.takeIf { it > 0 } ?: return
         val screenHeight = bridge.screenHeight.takeIf { it > 0 } ?: return
-        Pref.putFloatSync(KEY_POSITION_X_PERCENT, bridge.x / screenWidth.toFloat())
-        Pref.putFloatSync(KEY_POSITION_Y_PERCENT, bridge.y / screenHeight.toFloat())
+        MiscStateKeys.FLOATING_CONTROLLER_POSITION_X_PERCENT.set(bridge.x / screenWidth.toFloat(), true)
+        MiscStateKeys.FLOATING_CONTROLLER_POSITION_Y_PERCENT.set(bridge.y / screenHeight.toFloat(), true)
     }
 
     private fun initialPosition(): Pair<Int, Int> {
         val screenWidth = ScreenMetrics.deviceScreenWidth
         val screenHeight = ScreenMetrics.deviceScreenHeight
-        val x = Pref.getFloat(KEY_POSITION_X_PERCENT, -1f).takeIf { it >= 0f }?.let { (it * screenWidth).roundToInt() } ?: (screenWidth / 10)
-        val y = Pref.getFloat(KEY_POSITION_Y_PERCENT, -1f).takeIf { it >= 0f }?.let { (it * screenHeight).roundToInt() } ?: (screenHeight / 2)
+        val x = MiscStateKeys.FLOATING_CONTROLLER_POSITION_X_PERCENT.get().takeIf { it >= 0f }?.let { (it * screenWidth).roundToInt() } ?: (screenWidth / 10)
+        val y = MiscStateKeys.FLOATING_CONTROLLER_POSITION_Y_PERCENT.get().takeIf { it >= 0f }?.let { (it * screenHeight).roundToInt() } ?: (screenHeight / 2)
         return x to y
     }
 
@@ -192,8 +192,6 @@ class FloatingControllerWindow(
         private const val TRANSITION_DURATION_MS = 300L
         private const val MIN_ACCENT_CONTRAST = 4.5
 
-        private val KEY_POSITION_X_PERCENT = FloatingControllerWindow::class.java.name + ".position.x_percent"
-        private val KEY_POSITION_Y_PERCENT = FloatingControllerWindow::class.java.name + ".position.y_percent"
 
     }
 

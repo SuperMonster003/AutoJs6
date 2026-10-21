@@ -1,8 +1,7 @@
 package org.autojs.autojs.ui.floating.layoutinspector.search
 
 import org.autojs.autojs.core.accessibility.inspector.QueryHistory
-import org.autojs.autojs.core.pref.Pref
-import org.autojs.autojs6.R
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 
 /**
  * Persists the inspector [QueryHistory] in the app preferences (roadmap P2.2, D5). Loading is
@@ -14,10 +13,10 @@ import org.autojs.autojs6.R
  */
 object QueryHistoryStore {
 
-    fun load(): QueryHistory = QueryHistory.fromJson(Pref.getStringOrNull(R.string.key_layout_inspector_query_history))
+    fun load(): QueryHistory = QueryHistory.fromJson(MiscStateKeys.LAYOUT_INSPECTOR_QUERY_HISTORY.storedText())
 
     fun save(history: QueryHistory) {
-        Pref.putString(R.string.key_layout_inspector_query_history, if (history.isEmpty) null else history.toJson())
+        MiscStateKeys.LAYOUT_INSPECTOR_QUERY_HISTORY.setStoredText(if (history.isEmpty) null else history.toJson())
     }
 
 }

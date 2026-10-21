@@ -8,7 +8,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.permission.AllFilesAccessPermission
 import org.autojs.autojs.permission.Base
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
@@ -119,13 +119,13 @@ object PermissionWizardRunner {
         val helper = PostNotificationsPermission(activity)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return openPage(activity) { helper.config() }
         val permission = Manifest.permission.POST_NOTIFICATIONS
-        val attempted = Pref.getBoolean(R.string.key_post_notifications_permission_request_attempted, false)
+        val attempted = MiscStateKeys.POST_NOTIFICATIONS_PERMISSION_REQUEST_ATTEMPTED.get()
         if (attempted && !ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)) {
             // The system no longer shows the dialog; go to the notification settings directly.
             // zh-CN: 系统不再弹出授权对话框, 直接前往通知设置.
             return openPage(activity) { helper.config() }
         }
-        Pref.putBoolean(R.string.key_post_notifications_permission_request_attempted, true)
+        MiscStateKeys.POST_NOTIFICATIONS_PERMISSION_REQUEST_ATTEMPTED.set(true)
         return requestRuntime(activity, arrayOf(permission), PermissionWizardEntry.POST_NOTIFICATIONS) { helper.config() }
     }
 

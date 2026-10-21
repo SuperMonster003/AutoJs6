@@ -13,8 +13,8 @@ import androidx.annotation.StringRes
 import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.disposables.CompositeDisposable
 import org.autojs.autojs.core.accessibility.diagnostics.A11yServiceInfoFormat
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.SettingKey
+import org.autojs.autojs.core.pref.StateKey
 import org.autojs.autojs.ui.common.ManagerSettingsSection
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.ClipboardUtils
@@ -52,10 +52,10 @@ import kotlin.math.roundToInt
 abstract class ConnectionManagerDialog protected constructor(
     protected val context: Context,
     @StringRes titleRes: Int,
-    @StringRes private val statusLevelKeyRes: Int,
-    @StringRes private val controlLevelKeyRes: Int,
-    @StringRes settingsCollapsedKeyRes: Int,
-    @StringRes private val clientsLevelKeyRes: Int,
+    private val statusLevelKey: StateKey<Int>,
+    private val controlLevelKey: StateKey<Int>,
+    settingsCollapsedKey: StateKey<Boolean>,
+    private val clientsLevelKey: StateKey<Int>,
 ) {
 
     /** Verbosity of a section, stored by ordinal. zh-CN: 区块的详略等级, 按序号存储. */
@@ -99,10 +99,10 @@ abstract class ConnectionManagerDialog protected constructor(
     private val actionVisible = HashMap<Action, Boolean>()
     private val clientRows = ArrayList<ConnectionManagerClientItemBinding>()
     private var clientEntries: List<ClientRow> = emptyList()
-    private var statusLevel = Level.entries[Pref.getInt(statusLevelKeyRes, Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
-    private var controlLevel = Level.entries[Pref.getInt(controlLevelKeyRes, Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
+    private var statusLevel = Level.entries[(statusLevelKey.storedOrNull() ?: Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
+    private var controlLevel = Level.entries[(controlLevelKey.storedOrNull() ?: Level.BASIC.ordinal).coerceIn(Level.entries.indices)]
 
-    private var clientsLevel = Level.entries[Pref.getInt(clientsLevelKeyRes, Level.ALL.ordinal).coerceIn(Level.entries.indices)]
+    private var clientsLevel = Level.entries[(clientsLevelKey.storedOrNull() ?: Level.ALL.ordinal).coerceIn(Level.entries.indices)]
     private var clientsTitleRes = R.string.text_clients
     private var emptyClientsRes = R.string.text_no_clients_connected
     private var emptyClientsIconRes = R.drawable.ic_laptop_black_48dp
@@ -133,7 +133,7 @@ abstract class ConnectionManagerDialog protected constructor(
         binding.clientsLess.setOnClickListener { stepClientsLevel(-1) }
         binding.clientsMore.setOnClickListener { stepClientsLevel(+1) }
         settingsSection = ManagerSettingsSection(context, binding.settingsContainer, binding.settingsOpen,
-            binding.settingsHeaderDivider, binding.settingsLess, binding.settingsMore, settingsCollapsedKeyRes)
+            binding.settingsHeaderDivider, binding.settingsLess, binding.settingsMore, settingsCollapsedKey)
         applyStatusLevel()
         applyControlLevel()
         applyClientsLevel()
@@ -213,7 +213,7 @@ abstract class ConnectionManagerDialog protected constructor(
     private fun stepStatusLevel(delta: Int) {
         val next = Level.entries.getOrNull(statusLevel.ordinal + delta) ?: return
         statusLevel = next
-        Pref.putInt(statusLevelKeyRes, next.ordinal)
+        statusLevelKey.set(next.ordinal)
         applyStatusLevel()
     }
 
@@ -287,7 +287,7 @@ abstract class ConnectionManagerDialog protected constructor(
 
     private fun stepClientsLevel(delta: Int) {
         clientsLevel = Level.entries.getOrNull(clientsLevel.ordinal + delta) ?: return
-        Pref.putInt(clientsLevelKeyRes, clientsLevel.ordinal)
+        clientsLevelKey.set(clientsLevel.ordinal)
         applyClientsLevel()
     }
 
@@ -376,7 +376,7 @@ abstract class ConnectionManagerDialog protected constructor(
     private fun stepControlLevel(delta: Int) {
         val next = Level.entries.getOrNull(controlLevel.ordinal + delta) ?: return
         controlLevel = next
-        Pref.putInt(controlLevelKeyRes, next.ordinal)
+        controlLevelKey.set(next.ordinal)
         applyControlLevel()
     }
 

@@ -15,8 +15,8 @@ import kotlinx.coroutines.sync.withLock
 import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.*
 import org.autojs.autojs.core.plugin.mcp.*
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.keys.CredentialKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.ui.main.drawer.SocketItemHelper
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -165,8 +165,8 @@ private class McpServerOwner(context: Context) {
     private val operation = Mutex()
     private var wanted = false
     var isNormallyClosed: Boolean
-        get() = Pref.getBoolean(R.string.key_mcp_server_normally_closed, true)
-        set(value) { Pref.putBoolean(R.string.key_mcp_server_normally_closed, value) }
+        get() = MiscStateKeys.MCP_SERVER_NORMALLY_CLOSED.get()
+        set(value) { MiscStateKeys.MCP_SERVER_NORMALLY_CLOSED.set(value) }
     private val controller: McpServerSessionController = McpServerSessionController(this.context, object : McpServerSessionController.Listener {
         override fun onStatus(status: McpServerStatus) {
             if (expectedClose) return

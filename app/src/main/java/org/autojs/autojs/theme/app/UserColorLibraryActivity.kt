@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView.VERTICAL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
@@ -315,7 +315,7 @@ class UserColorLibraryActivity : ColorSelectBaseActivity() {
             lifecycleScope.launch {
                 val stored = withContext(Dispatchers.IO) { repository.renameLibrary(current.id, name) }
                 if (selectedColorIdInThisLibrary != null) {
-                    savePrefsForSelectionNames(stored, Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME))
+                    savePrefsForSelectionNames(stored, MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull())
                 }
                 load()
             }

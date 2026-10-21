@@ -70,8 +70,8 @@ import com.afollestad.materialdialogs.internal.MDTintHelper
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.intelligent.NightModeState
@@ -123,8 +123,8 @@ object ViewUtils {
         get() = AppearanceKeys.keepScreenOnWhenInForegroundKey == key(R.string.key_keep_screen_on_when_in_foreground_all_pages)
 
     private var keepScreenOnWhenInForegroundFromLastEnabledState: String
-        get() = Pref.getString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, key(R.string.key_keep_screen_on_when_in_foreground_homepage_only))
-        set(s) = Pref.putString(R.string.key_keep_screen_on_when_in_foreground_last_enabled, s)
+        get() = MiscStateKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND_LAST_ENABLED.get()
+        set(s) = MiscStateKeys.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND_LAST_ENABLED.set(s)
 
     var isAutoNightModeEnabled: Boolean
         get() = AppearanceKeys.AUTO_NIGHT_MODE_ENABLED.get()

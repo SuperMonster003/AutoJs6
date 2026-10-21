@@ -117,11 +117,15 @@ object AppearanceKeys : SettingsDomain {
     @JvmField
     val COLOR_HISTORY_MERGE_SIMILAR = SettingKey.Bool(name = "COLOR_HISTORY_MERGE_SIMILAR", category = APPEARANCE, default = SettingDefault.of(false))
 
+    /** Sort order of the favorite colors, the key of a `FavoriteSort` (`VirtualColorLibraryActivity`, P4.2, appendix C Q18); none until chosen. */
+    @JvmField
+    val COLOR_FAVORITE_SORT = SettingKey.Str(name = "COLOR_FAVORITE_SORT", category = APPEARANCE, default = SettingDefault.None)
+
     override val keys: List<PrefKey<*>> = listOf(
         APP_LANGUAGE, NIGHT_MODE, NIGHT_MODE_ENABLED, AUTO_NIGHT_MODE_ENABLED,
         THEME_COLOR_PRIMARY, THEME_COLOR_PRIMARY_DARK, THEME_COLOR_ACCENT,
         KEEP_SCREEN_ON_WHEN_IN_FOREGROUND, KEEP_SCREEN_ON_WHEN_IN_FOREGROUND_ENABLED,
-        THEME_COLOR_DERIVED_ACCENT_AND_DARK, COLOR_HISTORY_MERGE_SIMILAR,
+        THEME_COLOR_DERIVED_ACCENT_AND_DARK, COLOR_HISTORY_MERGE_SIMILAR, COLOR_FAVORITE_SORT,
     )
 
     override val names: List<RegisteredName> = valueConstants(*APP_LANGUAGE_VALUES, *NIGHT_MODE_VALUES, *KEEP_SCREEN_ON_VALUES) +

@@ -19,7 +19,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.app.ColorEntities.FavoriteColor
@@ -63,8 +63,8 @@ class VirtualColorLibraryActivity : ColorSelectBaseActivity() {
     }
 
     private var sort: FavoriteSort
-        get() = FavoriteSort.of(Pref.getStringOrNull(KEY_FAVORITE_SORT))
-        set(value) = Pref.putString(KEY_FAVORITE_SORT, value.key)
+        get() = FavoriteSort.of(AppearanceKeys.COLOR_FAVORITE_SORT.storedOrNull())
+        set(value) = AppearanceKeys.COLOR_FAVORITE_SORT.set(value.key)
 
     private var reorderMenuItem: MenuItem? = null
 
@@ -349,8 +349,6 @@ class VirtualColorLibraryActivity : ColorSelectBaseActivity() {
 
         private const val EXTRA_LIBRARY_ID = "LIBRARY_ID"
         private const val EXTRA_SCROLL_TO_FAVORITE_ID = "SCROLL_TO_FAVORITE_ID"
-
-        private const val KEY_FAVORITE_SORT = "COLOR_FAVORITE_SORT"
 
         private const val OPAQUE = 0xFF shl 24
 

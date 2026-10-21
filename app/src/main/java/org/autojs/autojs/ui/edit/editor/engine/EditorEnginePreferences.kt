@@ -3,8 +3,9 @@ package org.autojs.autojs.ui.edit.editor.engine
 import android.content.Context
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.editor.AceEditorPluginStateMonitor
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.StateKey
 import org.autojs.autojs.core.pref.keys.EditorKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.set
 
@@ -12,9 +13,6 @@ object EditorEnginePreferences {
 
     const val KEY_EDITOR_ENGINE = "key_\$_editor_engine"
     const val KEY_EDITOR_ENGINE_SELECTION_MODE = "key_\$_editor_engine_selection_mode"
-    private const val KEY_SEEN_EDITOR_SWITCH_UNDO_NOTICE = "key_\$_seen_editor_switch_undo_notice"
-    private const val KEY_SEEN_ACE_FALLBACK_NOTICE = "key_\$_seen_ace_fallback_notice"
-    private const val KEY_SEEN_ACE_LARGE_FILE_NOTICE = "key_\$_seen_ace_large_file_notice"
 
     private val initializationLock = Any()
 
@@ -90,15 +88,15 @@ object EditorEnginePreferences {
     }
 
     fun consumeEditorSwitchUndoNotice(): Boolean {
-        return consumeOnce(KEY_SEEN_EDITOR_SWITCH_UNDO_NOTICE)
+        return consumeOnce(MiscStateKeys.SEEN_EDITOR_SWITCH_UNDO_NOTICE)
     }
 
     fun consumeAceFallbackNotice(): Boolean {
-        return consumeOnce(KEY_SEEN_ACE_FALLBACK_NOTICE)
+        return consumeOnce(MiscStateKeys.SEEN_ACE_FALLBACK_NOTICE)
     }
 
     fun consumeAceLargeFileNotice(): Boolean {
-        return consumeOnce(KEY_SEEN_ACE_LARGE_FILE_NOTICE)
+        return consumeOnce(MiscStateKeys.SEEN_ACE_LARGE_FILE_NOTICE)
     }
 
     private fun reconcile(@Suppress("UNUSED_PARAMETER") context: Context, aceAvailable: Boolean): EditorEngineType {
@@ -136,11 +134,11 @@ object EditorEnginePreferences {
         }
     }
 
-    private fun consumeOnce(key: String): Boolean {
-        if (Pref.getBoolean(key, false)) {
+    private fun consumeOnce(key: StateKey<Boolean>): Boolean {
+        if (key.get()) {
             return false
         }
-        Pref.putBoolean(key, true)
+        key.set(true)
         return true
     }
 }

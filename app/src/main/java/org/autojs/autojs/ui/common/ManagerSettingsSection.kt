@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.StateKey
 import org.autojs.autojs.theme.widget.ThemeColorScrollView
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs6.R
@@ -19,9 +19,9 @@ class ManagerSettingsSection(
     private val divider: View,
     private val less: ImageButton,
     private val more: ImageButton,
-    private val collapsedKey: Int,
+    private val collapsedKey: StateKey<Boolean>,
 ) {
-    private var collapsed = Pref.getBoolean(collapsedKey, false)
+    private var collapsed = collapsedKey.storedOrNull() ?: false
     private var popup: MaterialDialog? = null
 
     init {
@@ -33,7 +33,7 @@ class ManagerSettingsSection(
 
     private fun setCollapsed(value: Boolean) {
         collapsed = value
-        Pref.putBoolean(collapsedKey, value)
+        collapsedKey.set(value)
         applyState()
     }
 

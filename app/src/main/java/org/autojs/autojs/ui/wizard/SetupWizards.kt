@@ -12,7 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.plugin.center.wizard.PluginInstallWizardDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.ui.widget.CustomSnackbar
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.theme.ThemeColorManager
@@ -51,7 +51,7 @@ object SetupWizards {
         val anchor = WizardUi.findSnackbarAnchor(activity) ?: return
         anchor.post {
             if (activity.isFinishing || activity.isDestroyed) return@post
-            if (!Pref.getBoolean(R.string.key_setup_wizard_welcome_done, false)) {
+            if (!MiscStateKeys.SETUP_WIZARD_WELCOME_DONE.get()) {
                 showWelcome(activity, anchor)
             } else {
                 remindMissingPermissions(activity, anchor)
@@ -81,7 +81,7 @@ object SetupWizards {
             .show()
     }
 
-    private fun markWelcomeDone() = Pref.putBoolean(R.string.key_setup_wizard_welcome_done, true)
+    private fun markWelcomeDone() = MiscStateKeys.SETUP_WIZARD_WELCOME_DONE.set(true)
 
     /** A non-blocking reminder replaces the permission dialogs that used to appear on every launch. */
     private fun remindMissingPermissions(activity: FragmentActivity, anchor: View) {

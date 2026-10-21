@@ -6,6 +6,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.app.tool.JsonSocketClientTool
 import org.autojs.autojs.core.pref.keys.ConnectionKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.pluginclient.DevPluginClientReconnector
 import org.autojs.autojs.pluginclient.JsonSocketClient
 import org.autojs.autojs6.R
@@ -28,10 +29,10 @@ class ClientModeManagerDialog private constructor(
 ) : ConnectionManagerDialog(
     context,
     R.string.text_client_mode_manager,
-    R.string.key_client_mode_manager_status_level,
-    R.string.key_client_mode_manager_control_level,
-    R.string.key_client_mode_manager_settings_collapsed,
-    R.string.key_client_mode_manager_clients_level,
+    MiscStateKeys.CLIENT_MODE_MANAGER_STATUS_LEVEL,
+    MiscStateKeys.CLIENT_MODE_MANAGER_CONTROL_LEVEL,
+    MiscStateKeys.CLIENT_MODE_MANAGER_SETTINGS_COLLAPSED,
+    MiscStateKeys.CLIENT_MODE_MANAGER_CLIENTS_LEVEL,
 ) {
 
     private val service = AutoJs.instance.devPluginService

@@ -14,15 +14,12 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.theme.ThemeColorSource
 import org.autojs.autojs.theme.app.ColorSelectBaseActivity
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_ITEM_NAME
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_ID
-import org.autojs.autojs.theme.app.ColorSelectBaseActivity.Companion.KEY_SELECTED_COLOR_LIBRARY_NAME
 import org.autojs.autojs.theme.library.ColorLibraryIds
 import java.text.Collator
 import java.time.Instant
@@ -57,10 +54,6 @@ import org.autojs.autojs.script.ScriptSource
 object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.Listener {
 
     private const val LOG_TAG = "IntelligentColorEngine"
-
-    private const val KEY_SNAPSHOT = "INTELLIGENT_COLOR_ACTIVE_SNAPSHOT"
-    private const val KEY_RUNTIME = "INTELLIGENT_COLOR_RUNTIME_STATE"
-    private const val KEY_SCRIPT_STATE = "INTELLIGENT_COLOR_SCRIPT_STATE"
 
     private lateinit var appContext: Context
 
@@ -150,7 +143,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
     }
 
     private fun decodeSaved(): Pair<IntelligentSnapshot?, IntelligentRuntimeState> {
-        return IntelligentEngineJson.decodeSnapshot(Pref.getStringOrNull(KEY_SNAPSHOT)) to IntelligentEngineJson.decodeRuntime(Pref.getStringOrNull(KEY_RUNTIME))
+        return IntelligentEngineJson.decodeSnapshot(MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.storedText()) to IntelligentEngineJson.decodeRuntime(MiscStateKeys.INTELLIGENT_COLOR_RUNTIME_STATE.storedText())
     }
 
     /** A planner input without side effects; its result is discarded. zh-CN: 不产生副作用的规划器输入; 结果会被丢弃. */
@@ -198,7 +191,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      */
     fun activate(snapshot: IntelligentSnapshot, startGroupId: Long?) {
         this.snapshot = snapshot
-        Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(snapshot))
+        MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.setStoredText(IntelligentEngineJson.encodeSnapshot(snapshot))
         ColorSelectBaseActivity.savePrefsForIntelligent(snapshot.libraryId, startGroupId)
         plan(IntelligentEvent.ACTIVATE, startGroupId, ThemeColorSource.ACTIVATION)
     }
@@ -211,7 +204,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         val previous = this.snapshot ?: return
         if (previous.libraryId != snapshot.libraryId) return
         this.snapshot = snapshot
-        Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(snapshot))
+        MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.setStoredText(IntelligentEngineJson.encodeSnapshot(snapshot))
         // A changed configuration re-arms the schedule; a rename or group edit keeps it.
         // zh-CN: 配置变化时重新安排调度; 仅重命名或编辑组时保持原调度.
         when (previous.config) {
@@ -225,7 +218,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      * zh-CN: 最近一次由 `colors.theme.state` 设置的状态名, 供 [StateSource.ScriptStates] 使用 (Roadmap P6.2).
      */
     val scriptState: String?
-        get() = Pref.getStringOrNull(KEY_SCRIPT_STATE)
+        get() = MiscStateKeys.INTELLIGENT_COLOR_SCRIPT_STATE.storedOrNull()
 
     /**
      * Switches the script state of the active library; call on the main thread.
@@ -238,7 +231,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         val source = snapshot?.config?.stateSource as? StateSource.ScriptStates
             ?: throw IllegalStateException("No active intelligent color library uses script states")
         require(name in source.names) { "Unknown script state \"$name\", expected one of: ${source.names.joinToString(", ")}" }
-        Pref.putString(KEY_SCRIPT_STATE, name)
+        MiscStateKeys.INTELLIGENT_COLOR_SCRIPT_STATE.set(name)
         evaluate(IntelligentEvent.EVALUATE)
     }
 
@@ -260,7 +253,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      */
     fun exportState(): Pair<String?, String?> = when (snapshot) {
         null -> null to null
-        else -> Pref.getStringOrNull(KEY_SNAPSHOT) to Pref.getStringOrNull(KEY_RUNTIME)
+        else -> MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.storedText() to MiscStateKeys.INTELLIGENT_COLOR_RUNTIME_STATE.storedText()
     }
 
     /**
@@ -281,8 +274,8 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         if (snapshot == null) return
         snapshot = null
         runtime = IntelligentRuntimeState()
-        Pref.remove(KEY_SNAPSHOT)
-        Pref.remove(KEY_RUNTIME)
+        MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.remove()
+        MiscStateKeys.INTELLIGENT_COLOR_RUNTIME_STATE.remove()
         handler.removeCallbacks(dueRunnable)
         nextStateChangeAt = null
         updateTimeReceiver(false)
@@ -395,7 +388,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         )
         if (result.runtime != runtime) {
             runtime = result.runtime
-            Pref.putString(KEY_RUNTIME, IntelligentEngineJson.encodeRuntime(runtime))
+            MiscStateKeys.INTELLIGENT_COLOR_RUNTIME_STATE.setStoredText(IntelligentEngineJson.encodeRuntime(runtime))
         }
         saveSelectionNames(active.name, active.group(result.groupId)?.let(::groupDisplayName))
         result.color?.let { color ->
@@ -459,7 +452,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
         val fresh = IntelligentPresets.wallpaper(appContext)
         if (fresh == active) return
         snapshot = fresh
-        Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(fresh))
+        MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.setStoredText(IntelligentEngineJson.encodeSnapshot(fresh))
         _changes.postValue(Unit)
         evaluate(IntelligentEvent.EVALUATE)
     }
@@ -476,7 +469,7 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
     private fun refreshPreset(saved: IntelligentSnapshot): IntelligentSnapshot {
         if (!IntelligentPresets.isPreset(saved.libraryId)) return saved
         val fresh = IntelligentPresets.find(appContext, saved.libraryId) ?: return saved
-        if (fresh != saved) Pref.putString(KEY_SNAPSHOT, IntelligentEngineJson.encodeSnapshot(fresh))
+        if (fresh != saved) MiscStateKeys.INTELLIGENT_COLOR_ACTIVE_SNAPSHOT.setStoredText(IntelligentEngineJson.encodeSnapshot(fresh))
         return fresh
     }
 
@@ -529,13 +522,13 @@ object IntelligentColorEngine : ThemeColorCoordinator.Listener, NightModeState.L
      * zh-CN: 智能库 id 有独立的分段 (D9), 因此仅凭保存的库 id 即可判断选中项是否为 [active]; 直接读取可避免冷启动时加载选择页面的类 (Roadmap P7.4).
      */
     private fun isSelectionOf(active: IntelligentSnapshot): Boolean {
-        return Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, ColorLibraryIds.SELECT_NONE) == active.libraryId
+        return MiscStateKeys.COLOR_SELECT_LIBRARY_ID.get() == active.libraryId
     }
 
     /** Writes the names shown in the theme color summary when they changed. zh-CN: 主题色摘要中显示的名称有变化时写入. */
     private fun saveSelectionNames(libraryName: String?, itemName: String?) {
-        if (Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME) != libraryName) Pref.putString(KEY_SELECTED_COLOR_LIBRARY_NAME, libraryName)
-        if (Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME) != itemName) Pref.putString(KEY_SELECTED_COLOR_ITEM_NAME, itemName)
+        if (MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.storedOrNull() != libraryName) MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.set(libraryName)
+        if (MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull() != itemName) MiscStateKeys.COLOR_SELECT_ITEM_NAME.set(itemName)
     }
 
     fun groupDisplayName(group: IntelligentGroup): String? = group.name?.takeIf { it.isNotBlank() }

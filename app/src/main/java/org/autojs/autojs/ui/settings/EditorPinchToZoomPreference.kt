@@ -3,7 +3,7 @@ package org.autojs.autojs.ui.settings
 import android.content.Context
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
@@ -45,7 +45,7 @@ class EditorPinchToZoomPreference : MaterialPreference {
                 .items(values())
                 .choiceWidgetThemeColor()
                 .itemsCallbackSingleChoice(currentIndex()) { _, _, which, _ ->
-                    Pref.putString(key(R.string.key_editor_pinch_to_zoom_strategy), itemKeys[which])
+                    MiscStateKeys.EDITOR_PINCH_TO_ZOOM_STRATEGY.set(itemKeys[which])
                     notifyChanged()
                     true
                 }
@@ -76,10 +76,8 @@ class EditorPinchToZoomPreference : MaterialPreference {
     }
 
     private fun currentKey(): String {
-        val current = Pref.getString(
-            key(R.string.key_editor_pinch_to_zoom_strategy),
-            key(R.string.default_key_editor_pinch_to_zoom_strategy),
-        )
+        val current = MiscStateKeys.EDITOR_PINCH_TO_ZOOM_STRATEGY.storedOrNull()
+            ?: key(R.string.default_key_editor_pinch_to_zoom_strategy)
         return if (current == key(R.string.key_editor_pinch_to_zoom_scale_view)) {
             key(R.string.key_editor_pinch_to_zoom_change_text_size)
         } else {

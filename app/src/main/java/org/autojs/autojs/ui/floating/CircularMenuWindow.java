@@ -5,7 +5,7 @@ import android.graphics.PixelFormat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.MiscStateKeys;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
@@ -13,13 +13,9 @@ import org.autojs.autojs.ui.enhancedfloaty.WindowBridge;
 import org.autojs.autojs.ui.floating.gesture.BounceDragGesture;
 import org.jetbrains.annotations.NotNull;
 
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 public class CircularMenuWindow extends FloatyWindow {
 
-    private static final String KEY_POSITION_X_PERCENT = CircularMenuWindow.class.getName() + ".position.x_percent";
-    private static final String KEY_POSITION_Y_PERCENT = CircularMenuWindow.class.getName() + ".position.y_percent";
-    private static final String KEY_LAST_ORIENTATION = "key_$_last_orientation";
 
     protected CircularMenuFloaty mFloaty;
     protected CircularActionMenu mCircularActionMenu;
@@ -85,8 +81,8 @@ public class CircularMenuWindow extends FloatyWindow {
     }
 
     private void setInitialState() {
-        int x = (int) (ScreenMetrics.getDeviceScreenWidth() * Pref.getFloat(KEY_POSITION_X_PERCENT, 0f));
-        int y = (int) (ScreenMetrics.getDeviceScreenHeight() * Pref.getFloat(KEY_POSITION_Y_PERCENT, 1 - 0.618f));
+        int x = (int) (ScreenMetrics.getDeviceScreenWidth() * MiscStateKeys.CIRCULAR_MENU_POSITION_X_PERCENT.get());
+        int y = (int) (ScreenMetrics.getDeviceScreenHeight() * MiscStateKeys.CIRCULAR_MENU_POSITION_Y_PERCENT.get());
         mActionViewWindowBridge.updatePosition(x, y);
         keepToSide();
     }
@@ -222,16 +218,16 @@ public class CircularMenuWindow extends FloatyWindow {
     public void savePosition() {
         if (mActionViewWindowBridge != null) {
             int x = mActionViewWindowBridge.getX();
-            Pref.putFloatSync(KEY_POSITION_X_PERCENT, x / (float) ScreenMetrics.getDeviceScreenWidth());
+            MiscStateKeys.CIRCULAR_MENU_POSITION_X_PERCENT.set(x / (float) ScreenMetrics.getDeviceScreenWidth(), true);
             int y = mActionViewWindowBridge.getY();
-            Pref.putFloatSync(KEY_POSITION_Y_PERCENT, y / (float) ScreenMetrics.getDeviceScreenHeight());
+            MiscStateKeys.CIRCULAR_MENU_POSITION_Y_PERCENT.set(y / (float) ScreenMetrics.getDeviceScreenHeight(), true);
         }
     }
 
     public void savePosition(@NotNull Configuration configuration) {
         int orientation = configuration.orientation;
-        if (Pref.getInt(KEY_LAST_ORIENTATION, ORIENTATION_PORTRAIT) != orientation) {
-            Pref.putIntSync(KEY_LAST_ORIENTATION, orientation);
+        if (MiscStateKeys.CIRCULAR_MENU_LAST_ORIENTATION.get() != orientation) {
+            MiscStateKeys.CIRCULAR_MENU_LAST_ORIENTATION.set(orientation, true);
             savePosition();
         }
     }

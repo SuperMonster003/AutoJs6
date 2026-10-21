@@ -91,15 +91,9 @@ MANUAL_STORE_NAMES = {
 
 # Default preference keys that the sources name through constants whose values do not start with "key_" (so the
 # literal scan misses them) and that no key declaration in core/pref/keys names yet: (display path, constant). They are
-# read from `const val NAME = "..."` (ROADMAP P3.6, appendix C Q15: the colour selection states, declared in P4.2).
-LITERAL_KEY_CONSTANTS = (
-    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_CUSTOM_COLOR'),
-    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_LEGACY_SELECTED_COLOR_INDEX'),
-    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_LIBRARY_ID'),
-    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_ITEM_ID'),
-    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_LIBRARY_NAME'),
-    ('theme/app/ColorSelectBaseActivity.kt', 'KEY_SELECTED_COLOR_ITEM_NAME'),
-)
+# read from `const val NAME = "..."`. Empty since P4.2: the colour selection states listed here in P3.6 (appendix C
+# Q15) are declared in MiscStateKeys, whose names the declaration scan finds.
+LITERAL_KEY_CONSTANTS = ()
 
 KEY_REF = re.compile(r'\bR\.string\.(key_[A-Za-z0-9_]+)\b')
 STRING_LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')

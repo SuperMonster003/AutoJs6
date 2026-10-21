@@ -2,22 +2,22 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "9a6a00331",
+  "commit": "3babf19c7",
   "branch": "master",
-  "dirtyScannedFiles": 13
+  "dirtyScannedFiles": 44
  },
  "summary": {
-  "keyResources": 269,
-  "keyResourcesInStringsDonottranslate": 267,
+  "keyResources": 270,
+  "keyResourcesInStringsDonottranslate": 268,
   "keyResourcesElsewhere": [
    "key_ace_language_support_matrix",
    "key_ace_semantic_languages"
   ],
-  "keysOnSettingsPages": 100,
+  "keysOnSettingsPages": 101,
   "keysPerPage": {
    "fragment_preferences.xml": 39,
    "fragment_code_editor_settings.xml": 40,
-   "fragment_developer_options.xml": 12,
+   "fragment_developer_options.xml": 13,
    "fragment_trash_and_version_history_settings.xml": 9,
    "fragment_plugin_center_preferences.xml": 3
   },
@@ -33,26 +33,17 @@
    "key_about_app_and_developer",
    "key_about_app_tips",
    "key_ai_settings",
-   "key_dialog_foreground_svc",
-   "key_dialog_layout_inspector_exit_tips",
-   "key_dialog_log_entries_exported",
-   "key_enable_observe_key",
    "key_github_token",
    "key_mail_settings"
   ],
-  "keysWithoutAnyRefs": [
-   "key_dialog_foreground_svc",
-   "key_dialog_layout_inspector_exit_tips",
-   "key_dialog_log_entries_exported",
-   "key_enable_observe_key"
-  ],
-  "literalKeyGroups": 105,
+  "keysWithoutAnyRefs": [],
+  "literalKeyGroups": 126,
   "namedStores": 29,
   "namedStoreCallFiles": 9,
   "namedStoresDeclared": 29,
   "unresolvedStoreCalls": [],
-  "defaultPrefsBypassFiles": 1,
-  "prefUserFiles": 73,
+  "defaultPrefsBypassFiles": 0,
+  "prefUserFiles": 41,
   "jsonFileStores": 13
  },
  "keys": [
@@ -63,13 +54,13 @@
    "line": 81,
    "sourceRefs": [
     {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 231
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 71
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "抽屉 \"无障碍服务\" 开关的镜像, DrawerMenuToggleableItem.sync() 按服务实际状态回写"
+   "note": "抽屉 \"无障碍服务\" 开关的镜像, DrawerMenuToggleableItem.sync() 按服务实际状态回写; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_a11y_service_manager_control_level",
@@ -78,17 +69,13 @@
    "line": 82,
    "sourceRefs": [
     {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 131
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 311
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 86
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "无障碍服务管理器对话框的展开级别"
+   "note": "无障碍服务管理器对话框的展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_a11y_service_manager_settings_collapsed",
@@ -97,13 +84,13 @@
    "line": 83,
    "sourceRefs": [
     {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 182
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 89
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器设置区折叠状态"
+   "note": "管理器设置区折叠状态; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_a11y_service_manager_status_level",
@@ -112,17 +99,13 @@
    "line": 84,
    "sourceRefs": [
     {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 130
-    },
-    {
-     "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-     "line": 292
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 83
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器状态区展开级别"
+   "note": "管理器状态区展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_about_app_and_developer",
@@ -2125,7 +2108,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
-     "line": 81
+     "line": 98
     }
    ],
    "kind": "Excluded",
@@ -2209,7 +2192,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
-     "line": 81
+     "line": 98
     }
    ],
    "kind": "Excluded",
@@ -2237,13 +2220,13 @@
    "line": 154,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 34
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 101
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器对话框展开级别"
+   "note": "管理器对话框展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_client_mode_manager_control_level",
@@ -2252,13 +2235,13 @@
    "line": 155,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 32
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 95
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器对话框展开级别"
+   "note": "管理器对话框展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_client_mode_manager_settings_collapsed",
@@ -2267,13 +2250,13 @@
    "line": 156,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 33
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 98
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器设置区折叠状态"
+   "note": "管理器设置区折叠状态; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_client_mode_manager_status_level",
@@ -2282,13 +2265,13 @@
    "line": 157,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ClientModeManagerDialog.kt",
-     "line": 31
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 92
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器对话框展开级别"
+   "note": "管理器对话框展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_client_mode_reconnect_on_network_change",
@@ -2327,17 +2310,13 @@
    "line": 160,
    "sourceRefs": [
     {
-     "file": "pluginclient/JsonSocketClient.kt",
-     "line": 476
-    },
-    {
-     "file": "pluginclient/JsonSocketClient.kt",
-     "line": 477
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 119
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "上次连接是否正常关闭, 用于启动时恢复"
+   "note": "上次连接是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_codegen_model_current",
@@ -2361,17 +2340,13 @@
    "line": 162,
    "sourceRefs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1043
-    },
-    {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1044
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 190
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13 (b) 已拍板, P4.2)"
+   "note": "ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13 (b) 已拍板, P4.2); P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_console_element_time_format",
@@ -2437,27 +2412,45 @@
    "value": "key_$_dialog_foreground_svc",
    "file": "strings_donottranslate.xml",
    "line": 166,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 59
+    }
+   ],
    "kind": "State",
    "category": "other",
-   "note": "不再提示类键名, 源码与资源均无引用 (Q12)"
+   "note": "不再提示类键名, 源码与资源均无引用 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用"
   },
   {
    "name": "key_dialog_layout_inspector_exit_tips",
    "value": "key_$_dialog_layout_inspector_exit_tips",
    "file": "strings_donottranslate.xml",
    "line": 167,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 67
+    }
+   ],
    "kind": "State",
    "category": "other",
-   "note": "不再提示类键名, 只在注释掉的代码中出现 (Q12)"
+   "note": "不再提示类键名, 只在注释掉的代码中出现 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用"
   },
   {
    "name": "key_dialog_log_entries_exported",
    "value": "key_$_dialog_log_entries_exported",
    "file": "strings_donottranslate.xml",
    "line": 168,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 63
+    }
+   ],
    "kind": "State",
    "category": "other",
-   "note": "不再提示类键名, 源码与资源均无引用 (Q12)"
+   "note": "不再提示类键名, 源码与资源均无引用 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用"
   },
   {
    "name": "key_dialog_num_of_log_entries_exceeds_limit_for_sending",
@@ -2466,13 +2459,13 @@
    "line": 169,
    "sourceRefs": [
     {
-     "file": "core/console/ConsoleImpl.kt",
-     "line": 419
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 39
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "NotAskAgainDialog 不再提示"
+   "note": "NotAskAgainDialog 不再提示 (ConsoleImpl); P4.1 声明为 DialogStateKeys"
   },
   {
    "name": "key_dialog_selected_abi_is_unavailable",
@@ -2481,13 +2474,13 @@
    "line": 170,
    "sourceRefs": [
     {
-     "file": "ui/project/BuildActivity.java",
-     "line": 1780
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 43
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "NotAskAgainDialog 不再提示 (BuildActivity)"
+   "note": "NotAskAgainDialog 不再提示 (BuildActivity); P4.1 声明为 DialogStateKeys"
   },
   {
    "name": "key_dialog_transparent_background_launcher_icon",
@@ -2496,17 +2489,13 @@
    "line": 171,
    "sourceRefs": [
     {
-     "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 89
-    },
-    {
-     "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 111
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 47
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "NotAskAgainDialog 不再提示"
+   "note": "NotAskAgainDialog 不再提示 (LauncherIconPreference); P4.1 声明为 DialogStateKeys"
   },
   {
    "name": "key_display_over_other_apps",
@@ -2860,7 +2849,7 @@
    "literalRefs": [
     {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 13,
+     "line": 14,
      "const": "KEY_EDITOR_ENGINE"
     }
    ],
@@ -3297,7 +3286,7 @@
     },
     {
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
-     "line": 84
+     "line": 82
     }
    ],
    "kind": "ValueConstant",
@@ -3387,7 +3376,7 @@
     },
     {
      "file": "ui/settings/EditorPinchToZoomPreference.kt",
-     "line": 83
+     "line": 81
     }
    ],
    "kind": "ValueConstant",
@@ -3400,16 +3389,8 @@
    "line": 201,
    "sourceRefs": [
     {
-     "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-     "line": 27
-    },
-    {
-     "file": "ui/settings/EditorPinchToZoomPreference.kt",
-     "line": 48
-    },
-    {
-     "file": "ui/settings/EditorPinchToZoomPreference.kt",
-     "line": 80
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 51
     }
    ],
    "literalRefs": [
@@ -3421,7 +3402,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "旧版策略设置, 只作 migrateLegacyPreferenceIfNeeded 的迁移来源; 写入方 EditorPinchToZoomPreference 已不在任何设置页"
+   "note": "旧版策略设置, 只作 migrateLegacyPreferenceIfNeeded 的迁移来源; 写入方 EditorPinchToZoomPreference 已不在任何设置页; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_editor_shortcut_input_bar",
@@ -3872,9 +3853,15 @@
    "value": "key_$_enable_observe_key",
    "file": "strings_donottranslate.xml",
    "line": 216,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 284
+    }
+   ],
    "kind": "State",
    "category": "other",
-   "note": "按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板)"
+   "note": "按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板); P4.2 声明为 MiscStateKeys, 只登记不使用"
   },
   {
    "name": "key_explorer_file_default_prefix",
@@ -3996,7 +3983,7 @@
     },
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
-     "line": 98
+     "line": 115
     }
    ],
    "kind": "ValueConstant",
@@ -4023,7 +4010,7 @@
     },
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
-     "line": 90
+     "line": 107
     }
    ],
    "kind": "ValueConstant",
@@ -4047,7 +4034,7 @@
     },
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
-     "line": 94
+     "line": 111
     }
    ],
    "kind": "ValueConstant",
@@ -4090,17 +4077,13 @@
    "line": 226,
    "sourceRefs": [
     {
-     "file": "ui/floating/CircularMenu.java",
-     "line": 496
-    },
-    {
-     "file": "ui/main/drawer/DrawerFragment.kt",
-     "line": 280
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 75
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "抽屉 \"悬浮按钮\" 开关的镜像, 按悬浮窗实际状态回写"
+   "note": "抽屉 \"悬浮按钮\" 开关的镜像, 按悬浮窗实际状态回写; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_foreground_service",
@@ -4302,7 +4285,7 @@
     },
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
-     "line": 86
+     "line": 103
     },
     {
      "file": "ui/explorer/ExplorerPathMenu.kt",
@@ -4611,8 +4594,12 @@
      "line": 51
     },
     {
-     "file": "util/ViewUtils.kt",
-     "line": 126
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 183
+    },
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 184
     },
     {
      "file": "util/ViewUtils.kt",
@@ -4633,17 +4620,13 @@
    "line": 247,
    "sourceRefs": [
     {
-     "file": "util/ViewUtils.kt",
-     "line": 126
-    },
-    {
-     "file": "util/ViewUtils.kt",
-     "line": 127
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 180
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "抽屉开关恢复用的上次启用模式"
+   "note": "抽屉开关恢复用的上次启用模式; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_last_no_newer_updates",
@@ -4652,21 +4635,13 @@
    "line": 248,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 177
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 276
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 286
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 143
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "时间戳"
+   "note": "时间戳; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_last_updates_auto_checked",
@@ -4675,21 +4650,13 @@
    "line": 249,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 185
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 282
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 289
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 149
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "时间戳"
+   "note": "时间戳; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_last_updates_checked",
@@ -4698,21 +4665,13 @@
    "line": 250,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 161
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 273
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 288
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 140
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "时间戳"
+   "note": "时间戳; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_last_updates_postponed",
@@ -4721,21 +4680,13 @@
    "line": 251,
    "sourceRefs": [
     {
-     "file": "core/pref/Pref.kt",
-     "line": 181
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 279
-    },
-    {
-     "file": "core/pref/Pref.kt",
-     "line": 287
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 146
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "时间戳"
+   "note": "时间戳; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_launcher_icon",
@@ -4788,15 +4739,15 @@
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 56
+     "line": 57
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 95
+     "line": 96
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 217
+     "line": 218
     }
    ],
    "kind": "ValueConstant",
@@ -4820,11 +4771,11 @@
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 55
+     "line": 56
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 216
+     "line": 217
     }
    ],
    "kind": "ValueConstant",
@@ -4865,17 +4816,13 @@
    "line": 256,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 28
-    },
-    {
-     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 30
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 271
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "功能介绍已展示"
+   "note": "功能介绍已展示; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_layout_inspector_filter_profile_selected",
@@ -4929,17 +4876,13 @@
    "line": 260,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/search/QueryHistoryStore.kt",
-     "line": 17
-    },
-    {
-     "file": "ui/floating/layoutinspector/search/QueryHistoryStore.kt",
-     "line": 20
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 279
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "查询历史 JSON"
+   "note": "查询历史 JSON; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_layout_inspector_query_mode",
@@ -4963,17 +4906,13 @@
    "line": 262,
    "sourceRefs": [
     {
-     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 34
-    },
-    {
-     "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-     "line": 36
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 274
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1)"
+   "note": "功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1); P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_leakcanary_enabled",
@@ -4984,7 +4923,7 @@
     {
      "page": "fragment_developer_options.xml",
      "pageLabel": "开发者选项",
-     "line": 160,
+     "line": 167,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_memory_diagnostics"
@@ -5175,23 +5114,48 @@
    "line": 273,
    "sourceRefs": [
     {
-     "file": "app/tool/McpServerTool.kt",
-     "line": 168
-    },
-    {
-     "file": "app/tool/McpServerTool.kt",
-     "line": 169
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 127
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "上次是否正常关闭, 用于启动时恢复"
+   "note": "上次是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys"
+  },
+  {
+   "name": "key_memory_script_heap_dump",
+   "value": "key_$_memory_script_heap_dump",
+   "file": "strings_donottranslate.xml",
+   "line": 274,
+   "pages": [
+    {
+     "page": "fragment_developer_options.xml",
+     "pageLabel": "开发者选项",
+     "line": 160,
+     "tag": "ThemeColorSwitchPreference",
+     "categoryTitleRes": [
+      "text_memory_diagnostics"
+     ],
+     "categoryTitles": [
+      "内存诊断"
+     ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 63
+    }
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开发者选项 > 内存诊断: 允许脚本导出 hprof (release 构建的 memory.dumpHeap, debug 构建始终允许), 默认 false (内存路线图 P5.1, 附录 C Q8); 按 key_memory_unreclaimed_warning 的先例登记, DeveloperKeys 声明"
   },
   {
    "name": "key_memory_unreclaimed_warning",
    "value": "key_$_memory_unreclaimed_warning",
    "file": "strings_donottranslate.xml",
-   "line": 274,
+   "line": 275,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5224,7 +5188,7 @@
    "name": "key_new_script_module_layer",
    "value": "key_$_new_script_module_layer",
    "file": "strings_donottranslate.xml",
-   "line": 275,
+   "line": 276,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5253,7 +5217,7 @@
    "name": "key_night_mode",
    "value": "key_$_night_mode",
    "file": "strings_donottranslate.xml",
-   "line": 276,
+   "line": 277,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5291,7 +5255,7 @@
    "name": "key_night_mode_always_off",
    "value": "key_$_night_mode_always_off",
    "file": "strings_donottranslate.xml",
-   "line": 277,
+   "line": 278,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5319,7 +5283,7 @@
    "name": "key_night_mode_always_on",
    "value": "key_$_night_mode_always_on",
    "file": "strings_donottranslate.xml",
-   "line": 278,
+   "line": 279,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5343,7 +5307,7 @@
    "name": "key_night_mode_enabled",
    "value": "key_$_night_mode_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 279,
+   "line": 280,
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginCenterFragment.kt",
@@ -5367,7 +5331,7 @@
    "name": "key_night_mode_follow_system",
    "value": "key_$_night_mode_follow_system",
    "file": "strings_donottranslate.xml",
-   "line": 280,
+   "line": 281,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5398,7 +5362,7 @@
    "name": "key_night_mode_null",
    "value": "key_$_night_mode_null",
    "file": "strings_donottranslate.xml",
-   "line": 281,
+   "line": 282,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -5416,7 +5380,7 @@
    "name": "key_nodejs_doctor_report",
    "value": "key_$_nodejs_doctor_report",
    "file": "strings_donottranslate.xml",
-   "line": 282,
+   "line": 283,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5434,7 +5398,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 79
+     "line": 88
     }
    ],
    "kind": "Excluded",
@@ -5444,7 +5408,7 @@
    "name": "key_nodejs_inspector_enabled",
    "value": "key_$_nodejs_inspector_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 283,
+   "line": 284,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5473,7 +5437,7 @@
    "name": "key_not_showing_main_activity",
    "value": "key_$_not_showing_main_activity",
    "file": "strings_donottranslate.xml",
-   "line": 284,
+   "line": 285,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -5501,26 +5465,22 @@
    "name": "key_pc_server_address_history",
    "value": "key_$_pc_server_address_histories",
    "file": "strings_donottranslate.xml",
-   "line": 285,
+   "line": 286,
    "sourceRefs": [
     {
-     "file": "pluginclient/JsonSocketClient.kt",
-     "line": 447
-    },
-    {
-     "file": "pluginclient/JsonSocketClient.kt",
-     "line": 448
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 132
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "地址历史 (Gson LinkedHashSet)"
+   "note": "地址历史 (Gson LinkedHashSet); P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_plugin_center_auto_check_updates",
    "value": "key_$_plugin_center_auto_check_updates",
    "file": "strings_donottranslate.xml",
-   "line": 286,
+   "line": 287,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5553,26 +5513,22 @@
    "name": "key_plugin_center_last_online_check_ts",
    "value": "key_$_plugin_center_last_online_check_ts",
    "file": "strings_donottranslate.xml",
-   "line": 287,
+   "line": 288,
    "sourceRefs": [
     {
-     "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 33
-    },
-    {
-     "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 38
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 153
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "时间戳"
+   "note": "时间戳; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_plugin_center_show_official_plugins",
    "value": "key_$_plugin_center_show_official_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 288,
+   "line": 289,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5605,7 +5561,7 @@
    "name": "key_plugin_center_show_third_party_plugins",
    "value": "key_$_plugin_center_show_third_party_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 289,
+   "line": 290,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5638,7 +5594,7 @@
    "name": "key_post_notifications_permission",
    "value": "key_$_post_notifications_permission",
    "file": "strings_donottranslate.xml",
-   "line": 290,
+   "line": 291,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -5658,42 +5614,30 @@
    "name": "key_post_notifications_permission_request_attempted",
    "value": "key_$_post_notifications_permission_request_attempted",
    "file": "strings_donottranslate.xml",
-   "line": 291,
+   "line": 292,
    "sourceRefs": [
     {
-     "file": "permission/PostNotificationsPermission.kt",
-     "line": 45
-    },
-    {
-     "file": "permission/PostNotificationsPermission.kt",
-     "line": 61
-    },
-    {
-     "file": "ui/wizard/permission/PermissionWizardRunner.kt",
-     "line": 122
-    },
-    {
-     "file": "ui/wizard/permission/PermissionWizardRunner.kt",
-     "line": 128
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 159
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "是否已请求过通知权限"
+   "note": "是否已请求过通知权限; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_pref_bundle_default_item",
    "value": "key_$_pref_bundle_default_item",
    "file": "strings_donottranslate.xml",
-   "line": 292,
+   "line": 293,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
-     "line": 74
+     "line": 75
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 216
+     "line": 217
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5707,15 +5651,15 @@
    "name": "key_pref_bundle_disabled_items",
    "value": "key_$_pref_bundle_disabled_items",
    "file": "strings_donottranslate.xml",
-   "line": 293,
+   "line": 294,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
-     "line": 79
+     "line": 80
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 217
+     "line": 218
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5729,7 +5673,7 @@
    "name": "key_record_toast",
    "value": "key_$_record_toast",
    "file": "strings_donottranslate.xml",
-   "line": 294,
+   "line": 295,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5758,7 +5702,7 @@
    "name": "key_release_history",
    "value": "key_$_release_history",
    "file": "strings_donottranslate.xml",
-   "line": 295,
+   "line": 296,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5786,7 +5730,7 @@
    "name": "key_restart_strategy",
    "value": "key_$_restart_strategy",
    "file": "strings_donottranslate.xml",
-   "line": 296,
+   "line": 297,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5815,7 +5759,7 @@
    "name": "key_restart_strategy_quick",
    "value": "key_$_restart_strategy_quick",
    "file": "strings_donottranslate.xml",
-   "line": 297,
+   "line": 298,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5842,7 +5786,7 @@
    "name": "key_restart_strategy_scheduled",
    "value": "key_$_restart_strategy_scheduled",
    "file": "strings_donottranslate.xml",
-   "line": 298,
+   "line": 299,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5862,7 +5806,7 @@
    "name": "key_rhino_java_primitive_wrap",
    "value": "key_$_rhino_java_primitive_wrap",
    "file": "strings_donottranslate.xml",
-   "line": 299,
+   "line": 300,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5891,7 +5835,7 @@
    "name": "key_root_manager_apps_cache",
    "value": "root_manager_apps_cache",
    "file": "strings_donottranslate.xml",
-   "line": 300,
+   "line": 301,
    "sourceRefs": [
     {
      "file": "core/pref/keys/RunningKeys.kt",
@@ -5905,7 +5849,7 @@
    "name": "key_root_manager_apps_custom",
    "value": "root_manager_apps_custom",
    "file": "strings_donottranslate.xml",
-   "line": 301,
+   "line": 302,
    "sourceRefs": [
     {
      "file": "core/pref/keys/RunningKeys.kt",
@@ -5920,7 +5864,7 @@
    "name": "key_root_mode",
    "value": "key_$_root_mode",
    "file": "strings_donottranslate.xml",
-   "line": 302,
+   "line": 303,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5949,7 +5893,7 @@
    "name": "key_root_mode_auto_detect",
    "value": "key_$_root_mode_auto_detect",
    "file": "strings_donottranslate.xml",
-   "line": 303,
+   "line": 304,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5976,7 +5920,7 @@
    "name": "key_root_mode_force_non_root",
    "value": "key_$_root_mode_force_non_root",
    "file": "strings_donottranslate.xml",
-   "line": 304,
+   "line": 305,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -6000,7 +5944,7 @@
    "name": "key_root_mode_force_root",
    "value": "key_$_root_mode_force_root",
    "file": "strings_donottranslate.xml",
-   "line": 305,
+   "line": 306,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -6024,7 +5968,7 @@
    "name": "key_root_record_out_file_type",
    "value": "key_$_root_record_out_file_type",
    "file": "strings_donottranslate.xml",
-   "line": 306,
+   "line": 307,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6053,7 +5997,7 @@
    "name": "key_root_record_out_file_type_binary",
    "value": "key_$_root_record_out_file_type_binary",
    "file": "strings_donottranslate.xml",
-   "line": 307,
+   "line": 308,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -6080,7 +6024,7 @@
    "name": "key_root_record_out_file_type_js",
    "value": "key_$_root_record_out_file_type_js",
    "file": "strings_donottranslate.xml",
-   "line": 308,
+   "line": 309,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -6100,7 +6044,7 @@
    "name": "key_run_on_boot_inrt",
    "value": "key_$_run_on_boot_inrt",
    "file": "strings_donottranslate.xml",
-   "line": 309,
+   "line": 310,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -6124,7 +6068,7 @@
    "name": "key_scheduled_restart_backend",
    "value": "key_$_scheduled_restart_backend",
    "file": "strings_donottranslate.xml",
-   "line": 310,
+   "line": 311,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6139,7 +6083,7 @@
    "name": "key_scheduled_restart_backend_alarm_manager",
    "value": "key_$_scheduled_restart_backend_alarm_manager",
    "file": "strings_donottranslate.xml",
-   "line": 311,
+   "line": 312,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6165,7 +6109,7 @@
    "name": "key_scheduled_restart_backend_work_manager",
    "value": "key_$_scheduled_restart_backend_work_manager",
    "file": "strings_donottranslate.xml",
-   "line": 312,
+   "line": 313,
    "defaultOf": [
     "default_key_scheduled_restart_backend"
    ],
@@ -6190,7 +6134,7 @@
    "name": "key_scheduled_restart_delay",
    "value": "key_$_scheduled_restart_delay",
    "file": "strings_donottranslate.xml",
-   "line": 313,
+   "line": 314,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6205,7 +6149,7 @@
    "name": "key_screen_capture_request_delay",
    "value": "key_$_screen_capture_request_delay_ms",
    "file": "strings_donottranslate.xml",
-   "line": 314,
+   "line": 315,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6234,7 +6178,7 @@
    "name": "key_script_module_debug_print",
    "value": "key_$_script_module_debug_print",
    "file": "strings_donottranslate.xml",
-   "line": 315,
+   "line": 316,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6263,7 +6207,7 @@
    "name": "key_script_module_debug_print_disabled_modules",
    "value": "key_$_script_module_debug_print_disabled_modules",
    "file": "strings_donottranslate.xml",
-   "line": 316,
+   "line": 317,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6292,7 +6236,7 @@
    "name": "key_scripts_after_app_restart",
    "value": "key_$_scripts_after_app_restart",
    "file": "strings_donottranslate.xml",
-   "line": 317,
+   "line": 318,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6314,7 +6258,7 @@
    "name": "key_server_address",
    "value": "key_$_server_address",
    "file": "strings_donottranslate.xml",
-   "line": 318,
+   "line": 319,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6329,7 +6273,7 @@
    "name": "key_server_mode_lan_discovery",
    "value": "key_$_server_mode_lan_discovery",
    "file": "strings_donottranslate.xml",
-   "line": 319,
+   "line": 320,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6344,67 +6288,67 @@
    "name": "key_server_mode_manager_clients_level",
    "value": "key_$_server_mode_manager_clients_level",
    "file": "strings_donottranslate.xml",
-   "line": 320,
+   "line": 321,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 40
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 113
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器对话框展开级别"
+   "note": "管理器对话框展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_server_mode_manager_control_level",
    "value": "key_$_server_mode_manager_control_level",
    "file": "strings_donottranslate.xml",
-   "line": 321,
+   "line": 322,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 38
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 107
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器对话框展开级别"
+   "note": "管理器对话框展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_server_mode_manager_settings_collapsed",
    "value": "key_$_server_mode_manager_settings_collapsed",
    "file": "strings_donottranslate.xml",
-   "line": 322,
+   "line": 323,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 39
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 110
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器设置区折叠状态"
+   "note": "管理器设置区折叠状态; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_server_mode_manager_status_level",
    "value": "key_$_server_mode_manager_status_level",
    "file": "strings_donottranslate.xml",
-   "line": 323,
+   "line": 324,
    "sourceRefs": [
     {
-     "file": "ui/devplugin/ServerModeManagerDialog.kt",
-     "line": 37
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 104
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "管理器对话框展开级别"
+   "note": "管理器对话框展开级别; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_server_mode_notify_connection_changes",
    "value": "key_$_server_mode_notify_connection_changes",
    "file": "strings_donottranslate.xml",
-   "line": 324,
+   "line": 325,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6419,7 +6363,7 @@
    "name": "key_server_mode_restore_on_launch",
    "value": "key_$_server_mode_restore_on_launch",
    "file": "strings_donottranslate.xml",
-   "line": 325,
+   "line": 326,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6434,49 +6378,37 @@
    "name": "key_server_socket_normally_closed",
    "value": "key_$_server_socket_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 326,
+   "line": 327,
    "sourceRefs": [
     {
-     "file": "pluginclient/JsonSocketServer.kt",
-     "line": 167
-    },
-    {
-     "file": "pluginclient/JsonSocketServer.kt",
-     "line": 169
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 123
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "上次是否正常关闭, 用于启动时恢复"
+   "note": "上次是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_setup_wizard_welcome_done",
    "value": "key_$_setup_wizard_welcome_done",
    "file": "strings_donottranslate.xml",
-   "line": 327,
+   "line": 328,
    "sourceRefs": [
     {
-     "file": "ui/settings/ResetSetupWizardWelcomePreference.kt",
-     "line": 28
-    },
-    {
-     "file": "ui/wizard/SetupWizards.kt",
-     "line": 54
-    },
-    {
-     "file": "ui/wizard/SetupWizards.kt",
-     "line": 84
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 163
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "欢迎向导已完成"
+   "note": "欢迎向导已完成; P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_setup_wizards",
    "value": "key_$_setup_wizards",
    "file": "strings_donottranslate.xml",
-   "line": 328,
+   "line": 329,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6508,7 +6440,7 @@
    "name": "key_stable_mode",
    "value": "key_$_stable_mode",
    "file": "strings_donottranslate.xml",
-   "line": 329,
+   "line": 330,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6547,7 +6479,7 @@
    "name": "key_theme_color",
    "value": "key_$_theme_color",
    "file": "strings_donottranslate.xml",
-   "line": 330,
+   "line": 331,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6565,7 +6497,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
-     "line": 129
+     "line": 133
     }
    ],
    "kind": "Excluded",
@@ -6575,7 +6507,7 @@
    "name": "key_theme_color_accent",
    "value": "key_$_theme_color_accent",
    "file": "strings_donottranslate.xml",
-   "line": 331,
+   "line": 332,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6591,7 +6523,7 @@
    "name": "key_theme_color_primary",
    "value": "key_$_theme_color_primary",
    "file": "strings_donottranslate.xml",
-   "line": 332,
+   "line": 333,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6607,7 +6539,7 @@
    "name": "key_theme_color_primary_dark",
    "value": "key_$_theme_color_primary_dark",
    "file": "strings_donottranslate.xml",
-   "line": 333,
+   "line": 334,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6623,7 +6555,7 @@
    "name": "key_timed_task_backend",
    "value": "key_$_timed_task_backend",
    "file": "strings_donottranslate.xml",
-   "line": 334,
+   "line": 335,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6653,7 +6585,7 @@
    "name": "key_timed_task_backend_alarm",
    "value": "key_$_timed_task_backend_alarm",
    "file": "strings_donottranslate.xml",
-   "line": 335,
+   "line": 336,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6665,12 +6597,12 @@
    ],
    "sourceRefs": [
     {
-     "file": "core/pref/keys/TimedTaskKeys.kt",
-     "line": 20
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 55
     },
     {
-     "file": "timing/ExactAlarmPermissionHelper.kt",
-     "line": 39
+     "file": "core/pref/keys/TimedTaskKeys.kt",
+     "line": 20
     },
     {
      "file": "timing/TimedTaskScheduler.kt",
@@ -6678,13 +6610,17 @@
     }
    ],
    "kind": "ValueConstant",
-   "note": "候选值, 默认值; 同一字符串还被 ExactAlarmPermissionHelper 用作 NotAskAgainDialog 的键 (默认偏好中的 Boolean 状态, P4.1 另行声明 StateKey)"
+   "note": "候选值, 默认值; 同一字符串还被 ExactAlarmPermissionHelper 用作 NotAskAgainDialog 的键 (默认偏好中的 Boolean 状态), P4.1 声明为 DialogStateKeys.TIMED_TASK_EXACT_ALARM_PROMPT (storedAs)",
+   "storedAs": {
+    "kind": "State",
+    "category": "other"
+   }
   },
   {
    "name": "key_timed_task_backend_job",
    "value": "key_$_timed_task_backend_job",
    "file": "strings_donottranslate.xml",
-   "line": 336,
+   "line": 337,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6708,7 +6644,7 @@
    "name": "key_timed_task_backend_work",
    "value": "key_$_timed_task_backend_work",
    "file": "strings_donottranslate.xml",
-   "line": 337,
+   "line": 338,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6732,7 +6668,7 @@
    "name": "key_trash_and_version_history_settings",
    "value": "key_$_trash_and_version_history_settings",
    "file": "strings_donottranslate.xml",
-   "line": 338,
+   "line": 339,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6760,7 +6696,7 @@
    "name": "key_trash_max_days",
    "value": "key_$_trash_max_days",
    "file": "strings_donottranslate.xml",
-   "line": 339,
+   "line": 340,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6789,7 +6725,7 @@
    "name": "key_trash_max_total_bytes",
    "value": "key_$_trash_max_total_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 340,
+   "line": 341,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6818,7 +6754,7 @@
    "name": "key_updates_checked_states_cleared",
    "value": "key_$_updates_checked_states_cleared",
    "file": "strings_donottranslate.xml",
-   "line": 341,
+   "line": 342,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6846,7 +6782,7 @@
    "name": "key_use_volume_control_record",
    "value": "key_$_use_volume_control_record",
    "file": "strings_donottranslate.xml",
-   "line": 342,
+   "line": 343,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6875,7 +6811,7 @@
    "name": "key_use_volume_control_running",
    "value": "key_$_use_volume_control_running",
    "file": "strings_donottranslate.xml",
-   "line": 343,
+   "line": 344,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6918,22 +6854,22 @@
    "name": "key_version_history_restore_does_not_auto_save_to_disk",
    "value": "key_$_version_history_restore_does_not_auto_save_to_disk",
    "file": "strings_donottranslate.xml",
-   "line": 344,
+   "line": 345,
    "sourceRefs": [
     {
-     "file": "storage/history/VersionHistoryController.kt",
-     "line": 443
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 51
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1)"
+   "note": "VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1); P4.1 声明为 DialogStateKeys"
   },
   {
    "name": "key_working_directory",
    "value": "key_$_working_directory",
    "file": "strings_donottranslate.xml",
-   "line": 345,
+   "line": 346,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
@@ -6949,42 +6885,38 @@
    "name": "key_working_directory_history",
    "value": "key_$_working_directory_histories",
    "file": "strings_donottranslate.xml",
-   "line": 346,
+   "line": 347,
    "sourceRefs": [
     {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 16
-    },
-    {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 17
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 172
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "工作目录历史 (Gson LinkedHashSet)"
+   "note": "工作目录历史 (Gson LinkedHashSet); P4.2 声明为 MiscStateKeys"
   },
   {
    "name": "key_working_directory_initialized",
    "value": "key_$_working_directory_initialized",
    "file": "strings_donottranslate.xml",
-   "line": 347,
+   "line": 348,
    "sourceRefs": [
     {
-     "file": "util/WorkingDirectoryUtils.kt",
-     "line": 54
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 167
     }
    ],
    "kind": "State",
    "category": "other",
-   "note": "首次确定工作目录的标记"
+   "note": "首次确定工作目录的标记; P4.2 声明为 MiscStateKeys"
   }
  ],
  "pageLiteralKeys": [
   {
    "page": "fragment_developer_options.xml",
    "pageLabel": "开发者选项",
-   "line": 174,
+   "line": 181,
    "tag": "MaterialPreference",
    "categoryTitleRes": [
     "text_debug"
@@ -7033,7 +6965,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 24,
+     "line": 36,
      "const": null
     }
    ],
@@ -7043,6 +6975,40 @@
    "kind": "State",
    "category": "other",
    "note": "代码编辑器查找 / 替换对话框的查找文本, 键名就是三个点 (FindOrReplaceDialogBuilder); P0 清单未识别, P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "AboutActivity.start_feedback_activity",
+   "refs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 87,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "关于页 \"反馈\" 打开 GitHub issue 页前的不再提示, 名称为 AboutActivity 的简单类名加后缀; P0 清单未识别, P4.1 声明为 DialogStateKeys (附录 C Q22)",
+   "store": "default"
+  },
+  {
+   "name": "COLOR_FAVORITE_SORT",
+   "refs": [
+    {
+     "file": "core/pref/keys/AppearanceKeys.kt",
+     "line": 122,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "appearance",
+   "note": "收藏颜色的排序方式, FavoriteSort 的键 (VirtualColorLibraryActivity); P0 清单未识别 (附录 C Q18), P4.2 声明为 AppearanceKeys",
    "store": "default"
   },
   {
@@ -7063,12 +7029,12 @@
    "store": "default"
   },
   {
-   "name": "SELECTED_COLOR_LIBRARY_ID",
+   "name": "DrawerMenuToggleableItem$",
    "refs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1019,
-     "const": "KEY_SELECTED_COLOR_LIBRARY_ID"
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 97,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7076,16 +7042,152 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "颜色选择页选中的颜色库 id (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15)",
+   "note": "前缀键族 (后接抽屉开关在当前语言下的标题): 抽屉开关提示的不再提示 (DrawerMenuToggleableItem.getPrompt), 切换语言后按新标题另记; P0 清单未识别, P4.1 声明为 DialogStateKeys.DRAWER_TOGGLE_PROMPT (附录 C Q22)",
+   "store": "default"
+  },
+  {
+   "name": "ExplorerView.explorer_current",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 256,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "文件管理器的当前目录 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "ExplorerView.explorer_history",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 264,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "文件管理器的页面历史, JSON 字符串列表 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "ExplorerView.explorer_root",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 259,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "文件管理器的根目录 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "ExplorerView.page_state",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 252,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "文件管理器页面的滚动位置 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "INTELLIGENT_COLOR_ACTIVE_SNAPSHOT",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 220,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "智能配色的当前快照, JSON 对象文本 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "INTELLIGENT_COLOR_RUNTIME_STATE",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 223,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "智能配色的运行状态, JSON 对象文本 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "INTELLIGENT_COLOR_SCRIPT_STATE",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 226,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "脚本设置的智能配色状态名 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "SELECTED_COLOR_LIBRARY_ID",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 202,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "颜色选择页选中的颜色库 id (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
    "name": "SELECTED_COLOR_LIBRARY_ITEM_ID",
    "refs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1020,
-     "const": "KEY_SELECTED_COLOR_ITEM_ID"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 205,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7093,16 +7195,16 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "颜色选择页选中的颜色条目 id (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_ID); 声明随 P4.2 (附录 C Q15)",
+   "note": "颜色选择页选中的颜色条目 id (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_ID); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
    "name": "SELECTED_COLOR_LIBRARY_ITEM_NAME",
    "refs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1027,
-     "const": "KEY_SELECTED_COLOR_ITEM_NAME"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 212,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7110,16 +7212,16 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "选中的颜色条目名称缓存 (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_NAME); 声明随 P4.2 (附录 C Q15)",
+   "note": "选中的颜色条目名称缓存 (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_NAME); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
    "name": "SELECTED_COLOR_LIBRARY_NAME",
    "refs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1026,
-     "const": "KEY_SELECTED_COLOR_LIBRARY_NAME"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 209,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7127,7 +7229,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "选中的用户库或智能库名称缓存, 供摘要显示 (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15)",
+   "note": "选中的用户库或智能库名称缓存, 供摘要显示 (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
@@ -7145,6 +7247,23 @@
    "kind": "Setting",
    "category": "appearance",
    "note": "强调色与深色是否由主题色派生 (ThemeColorManager); P3.6 声明为 AppearanceKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "THEME_COLOR_SCRIPT_UNDO",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 216,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "脚本改主题色前的撤销快照, JSON 对象文本 (ScriptThemeChanges); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
@@ -7174,7 +7293,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 62,
+     "line": 71,
      "const": null
     }
    ],
@@ -7191,7 +7310,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 58,
+     "line": 67,
      "const": null
     }
    ],
@@ -7201,6 +7320,23 @@
    "kind": "Setting",
    "category": "developer",
    "note": "开发者选项选择的实验性 dex 编译器插件开关 (DexCompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "editor.debug.long_click_hint",
+   "refs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 83,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "代码编辑器 \"启动调试器\" 菜单的不再提示 (EditorMenu); P0 清单未识别, P4.1 声明为 DialogStateKeys (附录 C Q22)",
    "store": "default"
   },
   {
@@ -7242,7 +7378,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 27,
+     "line": 39,
      "const": null
     }
    ],
@@ -7394,6 +7530,11 @@
    "name": "key_$_ace_lsp_file_types_revision",
    "refs": [
     {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 55,
+     "const": null
+    },
+    {
      "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
      "line": 10,
      "const": "KEY_ACE_LSP_FILE_TYPES_REVISION"
@@ -7404,7 +7545,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "默认文件类型列表的迁移版本号 (AceEditorLspPreferences)",
+   "note": "默认文件类型列表的迁移版本号 (AceEditorLspPreferences); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
@@ -7560,7 +7701,7 @@
     },
     {
      "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 14,
+     "line": 15,
      "const": "KEY_EDITOR_ENGINE_SELECTION_MODE"
     }
    ],
@@ -7627,9 +7768,9 @@
    "name": "key_$_last_orientation",
    "refs": [
     {
-     "file": "ui/floating/CircularMenuWindow.java",
-     "line": 22,
-     "const": "KEY_LAST_ORIENTATION"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 237,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7637,7 +7778,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "CircularMenuWindow 悬浮按钮上次的屏幕方向",
+   "note": "CircularMenuWindow 悬浮按钮上次的屏幕方向; P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
@@ -7712,9 +7853,9 @@
    "name": "key_$_plugin_abi_mismatch_download_prompt",
    "refs": [
     {
-     "file": "core/plugin/center/PluginAbiCompatibilityPrompt.kt",
-     "line": 14,
-     "const": "KEY_PLUGIN_ABI_MISMATCH_DOWNLOAD_PROMPT"
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 71,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7722,16 +7863,16 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "不再提示",
+   "note": "不再提示 (PluginAbiCompatibilityPrompt); P4.1 声明为 DialogStateKeys",
    "store": "default"
   },
   {
    "name": "key_$_plugin_abi_mismatch_enable_prompt",
    "refs": [
     {
-     "file": "core/plugin/center/PluginAbiCompatibilityPrompt.kt",
-     "line": 15,
-     "const": "KEY_PLUGIN_ABI_MISMATCH_ENABLE_PROMPT"
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 75,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -7739,7 +7880,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "不再提示",
+   "note": "不再提示 (PluginAbiCompatibilityPrompt); P4.1 声明为 DialogStateKeys",
    "store": "default"
   },
   {
@@ -8171,9 +8312,9 @@
    "name": "key_$_plugin_hide_confirm_prompt",
    "refs": [
     {
-     "file": "core/plugin/center/PluginSettingsFragment.kt",
-     "line": 1172,
-     "const": "KEY_PLUGIN_HIDE_CONFIRM_PROMPT"
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 79,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -8181,7 +8322,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "隐藏插件确认的不再提示",
+   "note": "隐藏插件确认的不再提示 (PluginSettingsFragment); P4.1 声明为 DialogStateKeys",
    "store": "default"
   },
   {
@@ -8357,9 +8498,9 @@
    "name": "key_$_seen_ace_fallback_notice",
    "refs": [
     {
-     "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 16,
-     "const": "KEY_SEEN_ACE_FALLBACK_NOTICE"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 62,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -8367,16 +8508,16 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "一次性提示已展示 (EditorEnginePreferences)",
+   "note": "一次性提示已展示 (EditorEnginePreferences); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
    "name": "key_$_seen_ace_large_file_notice",
    "refs": [
     {
-     "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 17,
-     "const": "KEY_SEEN_ACE_LARGE_FILE_NOTICE"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 65,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -8384,16 +8525,16 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "一次性提示已展示",
+   "note": "一次性提示已展示; P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
    "name": "key_$_seen_editor_switch_undo_notice",
    "refs": [
     {
-     "file": "ui/edit/editor/engine/EditorEnginePreferences.kt",
-     "line": 15,
-     "const": "KEY_SEEN_EDITOR_SWITCH_UNDO_NOTICE"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 59,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -8401,7 +8542,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "一次性提示已展示",
+   "note": "一次性提示已展示; P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
@@ -8660,7 +8801,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 35,
+     "line": 47,
      "const": null
     }
    ],
@@ -8675,9 +8816,9 @@
    "name": "org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR",
    "refs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1014,
-     "const": "KEY_CUSTOM_COLOR"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 194,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -8685,16 +8826,16 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "颜色选择页的自定义颜色 (ColorSelectBaseActivity.KEY_CUSTOM_COLOR); 声明随 P4.2 (附录 C Q15)",
+   "note": "颜色选择页的自定义颜色 (ColorSelectBaseActivity.KEY_CUSTOM_COLOR); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
    "name": "org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX",
    "refs": [
     {
-     "file": "theme/app/ColorSelectBaseActivity.kt",
-     "line": 1017,
-     "const": "KEY_LEGACY_SELECTED_COLOR_INDEX"
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 198,
+     "const": null
     }
    ],
    "storeGuess": [
@@ -8702,7 +8843,7 @@
    ],
    "kind": "State",
    "category": "other",
-   "note": "旧布局选中的颜色序号 (ColorSelectBaseActivity.KEY_LEGACY_SELECTED_COLOR_INDEX); 声明随 P4.2 (附录 C Q15)",
+   "note": "旧布局选中的颜色序号 (ColorSelectBaseActivity.KEY_LEGACY_SELECTED_COLOR_INDEX); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys",
    "store": "default"
   },
   {
@@ -8710,7 +8851,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 31,
+     "line": 43,
      "const": null
     }
    ],
@@ -8720,6 +8861,142 @@
    "kind": "State",
    "category": "other",
    "note": "代码求值对话框的上次输入 (CodeEvaluateDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 230,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "悬浮按钮位置, 屏幕宽度的比例 (CircularMenuWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 233,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "悬浮按钮位置, 屏幕高度的比例 (CircularMenuWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 241,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "悬浮控制器位置, 屏幕宽度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 244,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "悬浮控制器位置, 屏幕高度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_ascending",
+   "refs": [
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 89,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "文件管理器中目录是否升序 (ExplorerItemManager.SortConfig); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_sort_type",
+   "refs": [
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 83,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "文件管理器中目录的排序类型 (ExplorerItemManager.SortConfig, 0x10 为按名称); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_ascending",
+   "refs": [
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 86,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "文件管理器中文件是否升序 (ExplorerItemManager.SortConfig); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_sort_type",
+   "refs": [
+    {
+     "file": "core/pref/keys/ExplorerKeys.kt",
+     "line": 80,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "explorer",
+   "note": "文件管理器中文件的排序类型 (ExplorerItemManager.SortConfig, 0x10 为按名称); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys",
    "store": "default"
   },
   {
@@ -8762,11 +9039,28 @@
    "store": "editor_symbols_config, build_apk_config_profiles"
   },
   {
+   "name": "prompt_$_",
+   "refs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 91,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "前缀键族 (后接列表偏好的键): 列表偏好确认提示的不再提示 (MaterialListPreference.showPrompt); P0 清单未识别, P4.1 声明为 DialogStateKeys.LIST_PREFERENCE_PROMPT (附录 C Q22)",
+   "store": "default"
+  },
+  {
    "name": "r8_compiler_explicit_component",
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 70,
+     "line": 79,
      "const": null
     }
    ],
@@ -8783,7 +9077,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 66,
+     "line": 75,
      "const": null
     }
    ],
@@ -9023,9 +9317,9 @@
    "calls": [
     {
      "file": "engine/NodeBridgeProtocol.kt",
-     "line": 3366,
+     "line": 3399,
      "arg": "storagePreferencesName(storeName)",
-     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3481)"
+     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3514)"
     }
    ],
    "files": [
@@ -9721,19 +10015,11 @@
   {
    "file": "core/pref/Pref.kt",
    "lines": [
-    54
-   ]
-  },
-  {
-   "file": "ui/common/NotAskAgainDialog.java",
-   "lines": [
-    52,
-    58
+    55
    ]
   }
  ],
  "prefUsers": [
-  "app/tool/McpServerTool.kt",
   "core/plugin/center/PluginCenterFragment.kt",
   "core/plugin/center/PluginOnlineSettingsStore.kt",
   "core/plugin/terminal/TerminalLegacyCleanup.kt",
@@ -9746,6 +10032,7 @@
   "core/pref/keys/ExplorerKeys.kt",
   "core/pref/keys/ExtensibilityKeys.kt",
   "core/pref/keys/GeneralKeys.kt",
+  "core/pref/keys/MiscStateKeys.kt",
   "core/pref/keys/RecordKeys.kt",
   "core/pref/keys/RunningKeys.kt",
   "core/pref/keys/UpdatesKeys.kt",
@@ -9756,56 +10043,24 @@
   "inrt/SettingsActivity.kt",
   "inrt/SplashActivity.kt",
   "inrt/launch/AssetsProjectLauncher.kt",
-  "network/UpdateChecker.java",
-  "permission/PostNotificationsPermission.kt",
-  "pluginclient/JsonSocketClient.kt",
   "runtime/ScriptRuntime.kt",
   "runtime/api/Images.java",
-  "runtime/api/augment/colors/ColorsTheme.kt",
   "runtime/api/modules/ScriptModuleLayer.kt",
-  "runtime/api/modules/colors/ColorsThemeModule.kt",
   "runtime/memory/MemoryDiagnostics.kt",
-  "theme/app/ColorLibrariesActivity.kt",
-  "theme/app/ColorSelectBaseActivity.kt",
-  "theme/app/ColorSettingRecyclerView.kt",
-  "theme/app/ScriptThemeChanges.kt",
-  "theme/app/UserColorLibraryActivity.kt",
-  "theme/app/VirtualColorLibraryActivity.kt",
-  "theme/intelligent/IntelligentColorEngine.kt",
   "theme/preference/MaterialListPreference.kt",
-  "ui/accessibility/A11yServiceManagerDialog.kt",
-  "ui/common/ManagerSettingsSection.kt",
-  "ui/devplugin/ConnectionManagerDialog.kt",
   "ui/doc/DocumentationPageController.kt",
   "ui/edit/EditorView.kt",
-  "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-  "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-  "ui/edit/editor/engine/EditorEnginePreferences.kt",
-  "ui/floating/CircularMenu.java",
-  "ui/floating/CircularMenuWindow.java",
-  "ui/floating/controller/FloatingControllerWindow.kt",
-  "ui/floating/layoutinspector/search/QueryHistoryStore.kt",
-  "ui/floating/layoutinspector/search/QueryModeStore.kt",
   "ui/keystore/ManageKeyStoreActivity.kt",
   "ui/main/MainActivity.kt",
   "ui/main/drawer/DrawerMenuToggleableItem.kt",
   "ui/main/plugin/PluginFragment.kt",
   "ui/settings/CheckForUpdatesPreference.kt",
-  "ui/settings/ClearUpdatesCheckedStatesPreference.kt",
-  "ui/settings/EditorPinchToZoomPreference.kt",
   "ui/settings/KeepScreenOnWhenInForegroundPreference.kt",
   "ui/settings/LauncherIconPreference.kt",
   "ui/settings/ManageIgnoredUpdatesPreference.kt",
-  "ui/settings/ResetSetupWizardWelcomePreference.kt",
   "ui/settings/ThemeColorPreference.kt",
-  "ui/viewmodel/ExplorerItemManager.kt",
   "ui/widget/PrefSwitch.java",
-  "ui/wizard/SetupWizards.kt",
-  "ui/wizard/permission/PermissionWizardRunner.kt",
-  "util/IntentUtils.kt",
-  "util/UpdateUtils.kt",
-  "util/ViewUtils.kt",
-  "util/WorkingDirectoryUtils.kt"
+  "util/IntentUtils.kt"
  ],
  "jsonFileStores": [
   {
@@ -10016,7 +10271,7 @@
    "file": "ui/project/BuildActivity.java",
    "class": "BuildActivity",
    "dirLines": [
-    2036
+    2035
    ],
    "jsonNames": [
     {
@@ -10053,6 +10308,17 @@
   "detectedNotInRoadmap": []
  },
  "defaults": {
+  "COLOR_FAVORITE_SORT": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/AppearanceKeys.kt",
+    "line": 122,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
   "COLOR_HISTORY_MERGE_SIMILAR": [
    {
     "expr": "SettingDefault.of(false)",
@@ -10103,7 +10369,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 62,
+    "line": 71,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -10114,7 +10380,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 58,
+    "line": 67,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    }
@@ -10218,17 +10484,6 @@
     "line": 56,
     "method": "SettingKey.Str",
     "type": "String"
-   }
-  ],
-  "key_$_ace_lsp_file_types_revision": [
-   {
-    "expr": "1",
-    "form": "调用处字面量",
-    "value": "1",
-    "file": "ui/edit/editor/ace/AceEditorLspPreferences.kt",
-    "line": 257,
-    "method": "getInt",
-    "type": "Int"
    }
   ],
   "key_$_ace_semantic_java_enabled": [
@@ -10378,18 +10633,6 @@
     "line": 43,
     "method": "SettingKey.StrSet",
     "type": "StringSet"
-   }
-  ],
-  "key_$_last_orientation": [
-   {
-    "expr": "ORIENTATION_PORTRAIT",
-    "form": "表达式",
-    "value": null,
-    "via": "常量 ORIENTATION_PORTRAIT (core/image/capture/ScreenCapturer.java:67)",
-    "file": "ui/floating/CircularMenuWindow.java",
-    "line": 233,
-    "method": "getInt",
-    "type": "Int"
    }
   ],
   "key_$_plugin_auth_$_": [
@@ -10569,28 +10812,6 @@
     "line": 284,
     "method": "SettingKey.Bool",
     "type": "Boolean"
-   }
-  ],
-  "key_a11y_service_manager_control_level": [
-   {
-    "expr": "ControlLevel.START_STOP.ordinal",
-    "form": "表达式",
-    "value": null,
-    "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-    "line": 131,
-    "method": "getInt",
-    "type": "Int"
-   }
-  ],
-  "key_a11y_service_manager_status_level": [
-   {
-    "expr": "StatusLevel.BASIC.ordinal",
-    "form": "表达式",
-    "value": null,
-    "file": "ui/accessibility/A11yServiceManagerDialog.kt",
-    "line": 130,
-    "method": "getInt",
-    "type": "Int"
    }
   ],
   "key_ace_custom_scrollbar_enabled": [
@@ -11200,17 +11421,6 @@
     "type": "Boolean"
    }
   ],
-  "key_client_socket_normally_closed": [
-   {
-    "expr": "true",
-    "form": "调用处字面量",
-    "value": "true",
-    "file": "pluginclient/JsonSocketClient.kt",
-    "line": 476,
-    "method": "getBoolean",
-    "type": "Boolean"
-   }
-  ],
   "key_codegen_model_current": [
    {
     "form": "声明",
@@ -11230,17 +11440,6 @@
     "line": 40,
     "note": "未选择模型",
     "manual": true
-   }
-  ],
-  "key_color_select_activity_legacy_layout": [
-   {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "theme/app/ColorSelectBaseActivity.kt",
-    "line": 1043,
-    "method": "getBoolean",
-    "type": "Boolean"
    }
   ],
   "key_console_element_time_format": [
@@ -11656,28 +11855,6 @@
     "line": 279,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
-   }
-  ],
-  "key_editor_pinch_to_zoom_strategy": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/edit/editor/EditorPinchToZoomPreferences.kt",
-    "line": 27,
-    "method": "getStringOrNull",
-    "type": "String"
-   },
-   {
-    "expr": "key(R.string.default_key_editor_pinch_to_zoom_strategy)",
-    "form": "R.string",
-    "value": "key_$_editor_pinch_to_zoom_change_text_size",
-    "ref": "default_key_editor_pinch_to_zoom_strategy",
-    "resolved": "key_editor_pinch_to_zoom_change_text_size",
-    "file": "ui/settings/EditorPinchToZoomPreference.kt",
-    "line": 79,
-    "method": "getString",
-    "type": "String"
    }
   ],
   "key_editor_text_size": [
@@ -12257,63 +12434,6 @@
     "type": "Boolean"
    }
   ],
-  "key_keep_screen_on_when_in_foreground_last_enabled": [
-   {
-    "expr": "key(R.string.key_keep_screen_on_when_in_foreground_homepage_only)",
-    "form": "R.string",
-    "value": "key_$_keep_screen_on_when_in_foreground_homepage_only",
-    "ref": "key_keep_screen_on_when_in_foreground_homepage_only",
-    "resolved": "key_keep_screen_on_when_in_foreground_homepage_only",
-    "file": "util/ViewUtils.kt",
-    "line": 126,
-    "method": "getString",
-    "type": "String"
-   }
-  ],
-  "key_last_no_newer_updates": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "-1",
-    "file": "core/pref/Pref.kt",
-    "line": 177,
-    "method": "getTimestamp",
-    "type": "Long"
-   }
-  ],
-  "key_last_updates_auto_checked": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "-1",
-    "file": "core/pref/Pref.kt",
-    "line": 185,
-    "method": "getTimestamp",
-    "type": "Long"
-   }
-  ],
-  "key_last_updates_checked": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "-1",
-    "file": "core/pref/Pref.kt",
-    "line": 161,
-    "method": "getTimestamp",
-    "type": "Long"
-   }
-  ],
-  "key_last_updates_postponed": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "-1",
-    "file": "core/pref/Pref.kt",
-    "line": 181,
-    "method": "getTimestamp",
-    "type": "Long"
-   }
-  ],
   "key_launcher_icon": [
    {
     "form": "R.string",
@@ -12336,17 +12456,6 @@
     "line": 70,
     "method": "LauncherIconPreference",
     "type": "String (Enum)"
-   }
-  ],
-  "key_layout_inspector_field_mode_introduced": [
-   {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-    "line": 28,
-    "method": "getBoolean",
-    "type": "Boolean"
    }
   ],
   "key_layout_inspector_filter_profile_selected": [
@@ -12382,17 +12491,6 @@
     "type": "String"
    }
   ],
-  "key_layout_inspector_query_history": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "null",
-    "file": "ui/floating/layoutinspector/search/QueryHistoryStore.kt",
-    "line": 17,
-    "method": "getStringOrNull",
-    "type": "String"
-   }
-  ],
   "key_layout_inspector_query_mode": [
    {
     "form": "声明",
@@ -12402,17 +12500,6 @@
     "line": 39,
     "method": "SettingKey.Str",
     "type": "String"
-   }
-  ],
-  "key_layout_inspector_selector_mode_introduced": [
-   {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "ui/floating/layoutinspector/search/QueryModeStore.kt",
-    "line": 34,
-    "method": "getBoolean",
-    "type": "Boolean"
    }
   ],
   "key_leakcanary_enabled": [
@@ -12430,7 +12517,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"true\"",
     "file": "res/xml/fragment_developer_options.xml",
-    "line": 160,
+    "line": 167,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12529,14 +12616,23 @@
     "type": "Boolean"
    }
   ],
-  "key_mcp_server_normally_closed": [
+  "key_memory_script_heap_dump": [
    {
-    "expr": "true",
+    "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
-    "value": "true",
-    "file": "app/tool/McpServerTool.kt",
-    "line": 168,
-    "method": "getBoolean",
+    "value": "false",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 63,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "XML 字面量",
+    "value": "false",
+    "expr": "app:defaultValue=\"false\"",
+    "file": "res/xml/fragment_developer_options.xml",
+    "line": 160,
+    "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
   ],
@@ -12665,17 +12761,6 @@
     "type": "Boolean"
    }
   ],
-  "key_pc_server_address_history": [
-   {
-    "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "[] (键不存在时)",
-    "file": "pluginclient/JsonSocketClient.kt",
-    "line": 447,
-    "method": "getLinkedHashSet",
-    "type": "Json (Gson LinkedHashSet)"
-   }
-  ],
   "key_plugin_center_auto_check_updates": [
    {
     "form": "R.bool",
@@ -12696,17 +12781,6 @@
     "line": 29,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
-   }
-  ],
-  "key_plugin_center_last_online_check_ts": [
-   {
-    "expr": "0L",
-    "form": "调用处字面量",
-    "value": "0",
-    "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-    "line": 33,
-    "method": "getLong",
-    "type": "Long"
    }
   ],
   "key_plugin_center_show_official_plugins": [
@@ -12753,33 +12827,13 @@
     "type": "Boolean"
    }
   ],
-  "key_post_notifications_permission_request_attempted": [
-   {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "permission/PostNotificationsPermission.kt",
-    "line": 45,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "ui/wizard/permission/PermissionWizardRunner.kt",
-    "line": 122,
-    "method": "getBoolean",
-    "type": "Boolean"
-   }
-  ],
   "key_pref_bundle_default_item": [
    {
     "expr": "getAttrString(a, R.styleable.MaterialListPreference_itemDefaultKey)",
     "form": "表达式",
     "value": null,
     "file": "theme/preference/MaterialListPreference.kt",
-    "line": 74,
+    "line": 75,
     "method": "getString",
     "type": "String"
    }
@@ -13050,28 +13104,6 @@
     "type": "Boolean"
    }
   ],
-  "key_server_socket_normally_closed": [
-   {
-    "expr": "true",
-    "form": "调用处字面量",
-    "value": "true",
-    "file": "pluginclient/JsonSocketServer.kt",
-    "line": 167,
-    "method": "getBoolean",
-    "type": "Boolean"
-   }
-  ],
-  "key_setup_wizard_welcome_done": [
-   {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "ui/wizard/SetupWizards.kt",
-    "line": 54,
-    "method": "getBoolean",
-    "type": "Boolean"
-   }
-  ],
   "key_stable_mode": [
    {
     "form": "R.bool",
@@ -13261,15 +13293,48 @@
     "manual": true
    }
   ],
-  "key_working_directory_history": [
+  "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_ascending": [
    {
+    "expr": "SettingDefault.of(true)",
     "form": "调用处字面量",
-    "expr": "(方法默认)",
-    "value": "[] (键不存在时)",
-    "file": "util/WorkingDirectoryUtils.kt",
-    "line": 16,
-    "method": "getLinkedHashSet",
-    "type": "Json (Gson LinkedHashSet)"
+    "value": "true",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 89,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_sort_type": [
+   {
+    "expr": "SettingDefault.of(0x10)",
+    "form": "表达式",
+    "value": null,
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 83,
+    "method": "SettingKey.Int",
+    "type": "Int"
+   }
+  ],
+  "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_ascending": [
+   {
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 86,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_sort_type": [
+   {
+    "expr": "SettingDefault.of(0x10)",
+    "form": "表达式",
+    "value": null,
+    "file": "core/pref/keys/ExplorerKeys.kt",
+    "line": 80,
+    "method": "SettingKey.Int",
+    "type": "Int"
    }
   ],
   "profiles_json": [
@@ -13298,7 +13363,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 70,
+    "line": 79,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -13309,7 +13374,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 66,
+    "line": 75,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    }
@@ -13340,7 +13405,7 @@
  "categoryCounts": {
   "appearance": {
    "keys": 9,
-   "literalKeys": 2,
+   "literalKeys": 3,
    "stores": 0
   },
   "general": {
@@ -13350,7 +13415,7 @@
   },
   "explorer": {
    "keys": 6,
-   "literalKeys": 0,
+   "literalKeys": 4,
    "stores": 0
   },
   "history": {
@@ -13449,7 +13514,7 @@
    "stores": 0
   },
   "developer": {
-   "keys": 6,
+   "keys": 7,
    "literalKeys": 4,
    "stores": 0
   },
@@ -13489,8 +13554,8 @@
    "stores": 5
   },
   "other": {
-   "keys": 40,
-   "literalKeys": 17,
+   "keys": 41,
+   "literalKeys": 33,
    "stores": 3
   }
  },

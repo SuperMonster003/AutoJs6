@@ -28,10 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.core.image.ColorItems
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.ThemeChangeNotifier
 import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager
@@ -101,7 +100,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
     private var mSearchView: SearchView? = null
 
     private val customColor: Int
-        get() = Pref.getInt(KEY_CUSTOM_COLOR, getColor(R.color.custom_color_default))
+        get() = (MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.storedOrNull() ?: getColor(R.color.custom_color_default))
 
     protected var currentColor by Delegates.notNull<Int>()
     protected var isForciblyEnableAppBarColorTransition = false
@@ -1010,21 +1009,10 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
         const val SELECT_NONE = -1
 
-        @ReservedForCompatibility
-        const val KEY_CUSTOM_COLOR = "org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR"
-
-        @ReservedForCompatibility
-        const val KEY_LEGACY_SELECTED_COLOR_INDEX = "org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX"
-
-        const val KEY_SELECTED_COLOR_LIBRARY_ID = "SELECTED_COLOR_LIBRARY_ID"
-        const val KEY_SELECTED_COLOR_ITEM_ID = "SELECTED_COLOR_LIBRARY_ITEM_ID"
-
-        /**
-         * Display names of a user or intelligent selection, cached so summaries need no database access.
-         * zh-CN: 用户库或智能库选中项的显示名称缓存, 使摘要无需访问数据库.
-         */
-        const val KEY_SELECTED_COLOR_LIBRARY_NAME = "SELECTED_COLOR_LIBRARY_NAME"
-        const val KEY_SELECTED_COLOR_ITEM_NAME = "SELECTED_COLOR_LIBRARY_ITEM_NAME"
+        // The selection is remembered in MiscStateKeys.COLOR_SELECT_* (docs/settings/ROADMAP.md P4.2, appendix C Q15);
+        // the display names of a user or intelligent selection are cached so summaries need no database access.
+        // zh-CN: 选择记忆在 MiscStateKeys.COLOR_SELECT_* 中 (ROADMAP P4.2, 附录 C Q15); 用户库或智能库选中项的显示名称会缓存,
+        // 使摘要无需访问数据库.
 
         fun favoriteEntryOf(favorite: FavoriteColor) = FavoriteEntry(favorite.id, favorite.color, favorite.pinned, favorite.position, favorite.createdTime)
 
@@ -1040,8 +1028,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             get() = customColorPosition + 1
 
         var isLegacyLayout: Boolean
-            get() = Pref.getBoolean(R.string.key_color_select_activity_legacy_layout, false)
-            set(value) = Pref.putBoolean(R.string.key_color_select_activity_legacy_layout, value)
+            get() = MiscStateKeys.COLOR_SELECT_ACTIVITY_LEGACY_LAYOUT.get()
+            set(value) = MiscStateKeys.COLOR_SELECT_ACTIVITY_LEGACY_LAYOUT.set(value)
 
         val colorItemsLegacy by lazy {
             mutableListOf<Pair</* colorRes */ Int, /* nameRes */ Int>>().apply {
@@ -1078,9 +1066,9 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
          */
         @JvmStatic
         fun currentColorSelection(): ColorSelection = ColorSelectionCodec.decode(
-            libraryId = Pref.getInt(KEY_SELECTED_COLOR_LIBRARY_ID, SELECT_NONE),
-            itemId = Pref.getInt(KEY_SELECTED_COLOR_ITEM_ID, SELECT_NONE),
-            legacyIndex = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE),
+            libraryId = MiscStateKeys.COLOR_SELECT_LIBRARY_ID.get(),
+            itemId = MiscStateKeys.COLOR_SELECT_ITEM_ID.get(),
+            legacyIndex = (MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.storedOrNull() ?: SELECT_NONE),
             materialColorCount = ColorItems.MATERIAL_COLORS.size,
         )
 
@@ -1089,11 +1077,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             // The legacy layout cannot show intelligent libraries; name the active one instead (D13).
             // zh-CN: 旧布局无法显示智能库; 改为显示激活中的智能库名称 (D13).
             isLegacyLayout && currentColorSelection() is ColorSelection.Intelligent -> {
-                val name = Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME) ?: context.getString(R.string.color_library_title_intelligent_colors)
+                val name = MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.storedOrNull() ?: context.getString(R.string.color_library_title_intelligent_colors)
                 val summary = "${context.getString(R.string.color_library_identifier_intelligent_colors)}: $name"
                 if (withHexSuffix) "$summary [${ColorUtils.toString(ThemeColorManager.colorPrimary)}]" else summary
             }
-            isLegacyLayout -> when (val index = Pref.getInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)) {
+            isLegacyLayout -> when (val index = (MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.storedOrNull() ?: defaultColorPosition)) {
                 SELECT_NONE -> {
                     val colorInt = ThemeColorManager.colorPrimary
                     ColorUtils.toString(colorInt)
@@ -1106,7 +1094,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                         !withHexSuffix -> name
                         else -> {
                             val colorInt = when (index) {
-                                customColorPosition -> Pref.getInt(KEY_CUSTOM_COLOR, context.getColor(R.color.custom_color_default))
+                                customColorPosition -> (MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.storedOrNull() ?: context.getColor(R.color.custom_color_default))
                                 else -> context.getColor(colorRes)
                             }
                             "$name [${ColorUtils.toString(colorInt)}]"
@@ -1124,14 +1112,14 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
                     }
                     is ColorSelection.UserColor -> {
                         identifier = selectionLibraryNameForSummary() ?: context.getString(R.string.color_library_identifier_created)
-                        colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
+                        colorName = MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull()
                     }
                     is ColorSelection.Favorite -> {
                         identifier = context.getString(R.string.color_library_identifier_favorites)
                     }
                     is ColorSelection.Intelligent -> {
                         identifier = selectionLibraryNameForSummary() ?: context.getString(R.string.color_library_identifier_intelligent_colors)
-                        colorName = Pref.getStringOrNull(KEY_SELECTED_COLOR_ITEM_NAME)
+                        colorName = MiscStateKeys.COLOR_SELECT_ITEM_NAME.storedOrNull()
                     }
                     is ColorSelection.Unknown -> Unit
                     is ColorSelection.Preset -> presetColorLibraries.find { it.id == selection.libraryId }?.let { lib: PresetColorLibrary ->
@@ -1244,33 +1232,33 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
 
         @JvmStatic
         fun savePrefsForLegacyPalette(color: Int) {
-            Pref.putInt(KEY_CUSTOM_COLOR, color or -0x1000000)
-            Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, customColorPosition)
+            MiscStateKeys.COLOR_SELECT_CUSTOM_COLOR.set(color or -0x1000000)
+            MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(customColorPosition)
         }
 
         fun savePrefsForLegacy(context: Context, colorItem: PresetColorItem) {
             when (colorItem.libraryId) {
                 COLOR_LIBRARY_ID_DEFAULT -> {
                     if (context.getColor(colorItem.colorRes) == context.getColor(R.color.theme_color_default)) {
-                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, defaultColorPosition)
+                        MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(defaultColorPosition)
                     } else {
-                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                        MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(SELECT_NONE)
                     }
                 }
                 COLOR_LIBRARY_ID_MATERIAL -> {
                     val index = colorItem.itemId
                     if (index !in ColorItems.MATERIAL_COLORS.indices) {
-                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                        MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(SELECT_NONE)
                     } else {
                         val fixedIndex = maxOf(
                             defaultColorPosition,
                             customColorPosition,
                         ) + 1 + index
-                        Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, fixedIndex)
+                        MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(fixedIndex)
                     }
                 }
                 else -> {
-                    Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+                    MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(SELECT_NONE)
                 }
             }
         }
@@ -1280,8 +1268,8 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         fun savePrefsForLibraries(libraryId: Int, itemId: Int) {
-            Pref.putInt(KEY_SELECTED_COLOR_LIBRARY_ID, libraryId)
-            Pref.putInt(KEY_SELECTED_COLOR_ITEM_ID, itemId)
+            MiscStateKeys.COLOR_SELECT_LIBRARY_ID.set(libraryId)
+            MiscStateKeys.COLOR_SELECT_ITEM_ID.set(itemId)
         }
 
         /**
@@ -1306,7 +1294,7 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
             ColorSelectionCodec.encode(ColorSelection.Intelligent(libraryId, startGroupId)).let { (library, item) ->
                 savePrefsForLibraries(library, item)
             }
-            Pref.putInt(KEY_LEGACY_SELECTED_COLOR_INDEX, SELECT_NONE)
+            MiscStateKeys.COLOR_SELECT_LEGACY_SELECTED_INDEX.set(SELECT_NONE)
         }
 
         /**
@@ -1323,11 +1311,11 @@ abstract class ColorSelectBaseActivity : BaseActivity() {
         }
 
         fun savePrefsForSelectionNames(libraryName: String?, itemName: String?) {
-            Pref.putString(KEY_SELECTED_COLOR_LIBRARY_NAME, libraryName)
-            Pref.putString(KEY_SELECTED_COLOR_ITEM_NAME, itemName)
+            MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.set(libraryName)
+            MiscStateKeys.COLOR_SELECT_ITEM_NAME.set(itemName)
         }
 
-        private fun selectionLibraryNameForSummary(): String? = Pref.getStringOrNull(KEY_SELECTED_COLOR_LIBRARY_NAME)?.let {
+        private fun selectionLibraryNameForSummary(): String? = MiscStateKeys.COLOR_SELECT_LIBRARY_NAME.storedOrNull()?.let {
             if (it.length <= LIBRARY_NAME_SUMMARY_LENGTH) it else it.take(LIBRARY_NAME_SUMMARY_LENGTH - 2).trimEnd() + "..."
         }
 

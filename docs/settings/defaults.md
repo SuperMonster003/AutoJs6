@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-21, 扫描基线: `master@9a6a00331`
+- 生成日期: 2026-10-21, 扫描基线: `master@3babf19c7`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -161,7 +161,7 @@
 | `key_layout_inspector_node_copy_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:35 |  |
 | `key_layout_inspector_query_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:39 |  |
 | `key_leakcanary_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/DeveloperKeys.kt:46 |  |
-| `key_leakcanary_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:160 |  |
+| `key_leakcanary_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:167 |  |
 | `key_log_activity_input_bar_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:30 |  |
 | `key_log_activity_input_bar_visible` | Boolean | 伴生常量 (人工) | `DEFAULT_INPUT_BAR_VISIBLE` | `false` | ui/log/LogPageConsoleSettings.kt:61 |  |
 | `key_log_activity_log_coloring` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ConsoleKeys.kt:33 |  |
@@ -171,6 +171,8 @@
 | `key_log_activity_time_visible` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ConsoleKeys.kt:24 |  |
 | `key_log_activity_time_visible` | Boolean | 伴生常量 (人工) | `LOG_ACTIVITY(..., true)` | `true` | core/console/ConsoleTimeSettings.kt:14 |  |
 | `key_log_activity_typescript_console_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:40 |  |
+| `key_memory_script_heap_dump` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:63 |  |
+| `key_memory_script_heap_dump` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:160 |  |
 | `key_memory_unreclaimed_warning` | Boolean | 调用处字面量 | `true` | `true` | runtime/memory/MemoryDiagnostics.kt:112 |  |
 | `key_memory_unreclaimed_warning` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/DeveloperKeys.kt:54 |  |
 | `key_memory_unreclaimed_warning` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:153 |  |
@@ -225,10 +227,11 @@
 | `key_use_volume_control_running` | Boolean | R.bool | `app:defaultValue="@bool/pref_use_volume_control_running"` | `true` | res/xml/fragment_preferences.xml:256 |  |
 | `key_working_directory` | String | R.string | `stringResource(R.string.default_value_working_directory, "default_value_working_directory")` | `/Scripts` | core/pref/keys/ExplorerKeys.kt:43 |  |
 | `key_working_directory` | String | 表达式 (人工) | `WorkingDirectoryUtils.determineIfNeeded()` | `运行时: 首次启动在各语言的默认目录中选最近修改且非空者` | util/WorkingDirectoryUtils.kt:57 | `default_value_working_directory` 按语言不同 (/Scripts, /脚本 等 10 种) |
+| `COLOR_FAVORITE_SORT` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/AppearanceKeys.kt:122 |  |
 | `COLOR_HISTORY_MERGE_SIMILAR` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:118 |  |
 | `THEME_COLOR_DERIVED_ACCENT_AND_DARK` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:114 |  |
-| `dex_compiler_experimental_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:62 |  |
-| `dex_compiler_experimental_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:58 |  |
+| `dex_compiler_experimental_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:71 |  |
+| `dex_compiler_experimental_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:67 |  |
 | `key_$_ace_semantic_java_enabled` | Boolean | 表达式 | `DEFAULT_SEMANTIC_LANGUAGES[java]` | `运行时: DEFAULT_SEMANTIC_LANGUAGES[java]` | core/pref/keys/EditorKeys.kt:241 |  |
 | `key_$_ace_semantic_java_enabled` | Boolean | 伴生常量 (人工) | `DEFAULT_SEMANTIC_LANGUAGES[java]` | `true` | ui/edit/editor/ace/AceEditorLspPreferences.kt:123 |  |
 | `key_$_ace_semantic_kotlin_enabled` | Boolean | 表达式 | `DEFAULT_SEMANTIC_LANGUAGES[kotlin]` | `运行时: DEFAULT_SEMANTIC_LANGUAGES[kotlin]` | core/pref/keys/EditorKeys.kt:247 |  |
@@ -252,8 +255,12 @@
 | `key_$_plugin_update_check_$_` | Boolean | 调用处字面量 (人工) | `isEnabled(packageName, defaultEnabled = true)` | `true` | core/plugin/center/PluginUpdateCheckStore.kt:12 |  |
 | `key_$_plugin_variant_priority_$_` | Json | 调用处字面量 | `SettingDefault.of(emptyList())` | `[]` | core/pref/keys/PluginCenterKeys.kt:270 |  |
 | `key_$_plugin_variant_priority_$_` | Json (JSON 数组) | 调用处字面量 (人工) | `Pref.getStringOrNull(key).orEmpty()` | `[]` | core/plugin/center/PluginVariantPriorityStore.kt:15 |  |
-| `r8_compiler_explicit_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:70 |  |
-| `r8_compiler_explicit_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:66 |  |
+| `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_ascending` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ExplorerKeys.kt:89 |  |
+| `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_sort_type` | Int | 表达式 | `SettingDefault.of(0x10)` | `(需人工核对)` | core/pref/keys/ExplorerKeys.kt:83 |  |
+| `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_ascending` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ExplorerKeys.kt:86 |  |
+| `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_sort_type` | Int | 表达式 | `SettingDefault.of(0x10)` | `(需人工核对)` | core/pref/keys/ExplorerKeys.kt:80 |  |
+| `r8_compiler_explicit_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:79 |  |
+| `r8_compiler_explicit_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:75 |  |
 | `three_stove_agent_script_root_configuration` | Json | 调用处字面量 | `SettingDefault.of(emptyMap())` | `{}` | core/pref/keys/ExtensibilityKeys.kt:41 |  |
 
 ## 2. 同一键多处默认值不一致

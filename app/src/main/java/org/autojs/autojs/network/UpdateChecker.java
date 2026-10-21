@@ -20,7 +20,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.MiscStateKeys;
 import org.autojs.autojs.core.ui.widget.CustomSnackbar;
 import org.autojs.autojs.network.api.StreamingUrlApi;
 import org.autojs.autojs.network.github.GitHubApiException;
@@ -182,7 +182,7 @@ public class UpdateChecker {
                 .subscribe(new SimpleObserver<>() {
                     @Override
                     public void onNext(@NotNull ResponseBody responseBody) {
-                        Pref.refreshLastUpdatesCheckedTimestamp();
+                        MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_CHECKED);
 
                         if (mPendingDialog.isShowing()) {
                             mPendingDialog.dismiss();
@@ -204,7 +204,7 @@ public class UpdateChecker {
                                     }
                                     if (!isIgnoreLocalVersions && !(versionInfo.isNewer() && versionInfo.isNotIgnored())) {
                                         ViewUtils.showToast(mContext, R.string.text_is_latest_version, true);
-                                        Pref.refreshLastNoNewerUpdatesTimestamp();
+                                        MiscStateKeys.markNow(MiscStateKeys.LAST_NO_NEWER_UPDATES);
                                         return;
                                     }
                                     mHandler.post(() -> showUpdateInfoDialog(versionInfo));
@@ -356,7 +356,7 @@ public class UpdateChecker {
         SnackbarUtils.coverNavigationBar(CustomSnackbar.make(mView, content, BaseTransientBottomBar.LENGTH_INDEFINITE)
                         .setAnimationMode(BaseTransientBottomBar.ANIMATION_MODE_SLIDE)
                         .setActionOne(R.string.text_updates_snack_bar_act_view, v -> showUpdateInfoDialog(versionInfo, mView.getContext()))
-                        .setActionTwo(R.string.text_updates_snack_bar_act_later, v -> Pref.refreshLastUpdatesPostponedTimestamp()))
+                        .setActionTwo(R.string.text_updates_snack_bar_act_later, v -> MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_POSTPONED)))
                 .show();
     }
 

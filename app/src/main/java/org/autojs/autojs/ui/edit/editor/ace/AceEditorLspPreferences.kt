@@ -1,8 +1,8 @@
 package org.autojs.autojs.ui.edit.editor.ace
 
-import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.SettingKey
 import org.autojs.autojs.core.pref.keys.EditorKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 
 object AceEditorLspPreferences {
     const val KEY_ACE_LSP_ENABLED = "key_\$_ace_lsp_enabled"
@@ -254,7 +254,7 @@ object AceEditorLspPreferences {
         if (!EditorKeys.ACE_LSP_FILE_TYPES.isStored()) {
             return DEFAULT_FILE_TYPES
         }
-        val revision = Pref.getInt(KEY_ACE_LSP_FILE_TYPES_REVISION, 1)
+        val revision = MiscStateKeys.ACE_LSP_FILE_TYPES_REVISION.get()
         return resolveStoredFileTypes(EditorKeys.ACE_LSP_FILE_TYPES.storedOrNull() ?: "", revision)
     }
 
@@ -275,13 +275,13 @@ object AceEditorLspPreferences {
     @JvmStatic
     fun setFileTypes(fileTypes: Collection<String>) {
         EditorKeys.ACE_LSP_FILE_TYPES.set(normalizeFileTypes(fileTypes).joinToString(","))
-        Pref.putInt(KEY_ACE_LSP_FILE_TYPES_REVISION, FILE_TYPES_REVISION)
+        MiscStateKeys.ACE_LSP_FILE_TYPES_REVISION.set(FILE_TYPES_REVISION)
     }
 
     @JvmStatic
     fun resetFileTypes() {
         EditorKeys.ACE_LSP_FILE_TYPES.remove()
-        Pref.remove(KEY_ACE_LSP_FILE_TYPES_REVISION)
+        MiscStateKeys.ACE_LSP_FILE_TYPES_REVISION.remove()
     }
 
     @JvmStatic
