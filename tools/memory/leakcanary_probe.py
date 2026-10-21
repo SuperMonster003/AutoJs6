@@ -12,7 +12,8 @@ It pushes one script file and starts it; it does not tap the screen or change se
 Output: one line per run, then the number of watched and retained objects LeakCanary logged, whether an analysis
 appeared, its number of application leaks and whether the leak traces mention --expect. --out writes the analysis text
 (the text LeakCanary shows in its leak list) to a file. The exit code is 0 when the result matches --expect-leaks
-(yes: an analysis with application leaks mentioning --expect; no: no application leak in --wait seconds).
+(yes: an analysis with application leaks mentioning --expect; no: no application leak in --wait seconds), and 2 when
+leaks are expected but LeakCanary's automatic heap dumps are off (the default since P1.2; Leaks app > About).
 """
 import argparse
 import pathlib
@@ -45,6 +46,7 @@ SCENARIOS = {
 WATCH_RE = re.compile(r"Watching instance of (\S+)")
 RETAINED_RE = re.compile(r"(\d+) retained objects?|Found (\d+) objects? retained")
 LEAKS_RE = re.compile(r"^(\d+) APPLICATION LEAKS?")
+DUMP_TIME_RE = re.compile(r"^Heap dump timestamp: (\d+)")
 
 
 def adb(serial, *args, check=False):
@@ -52,24 +54,43 @@ def adb(serial, *args, check=False):
                           errors="replace", check=check)
 
 
-def leakcanary_lines(serial, since):
-    out = adb(serial, "logcat", "-d", "-v", "brief", "-T", since, "-s", "LeakCanary:*").stdout
-    return [re.sub(r"^[VDIWEF]/LeakCanary\(\s*\d+\):\s?", "", l).rstrip() for l in out.splitlines() if "LeakCanary" in l]
+def leakcanary_lines(serial, since, seen):
+    """LeakCanary lines since [since], accumulated in [seen] (timestamped line -> text) across polls, because the analysis
+    can take minutes and the ring buffer may drop the early lines meanwhile."""
+    out = adb(serial, "logcat", "-d", "-v", "time", "-T", since, "-s", "LeakCanary:*").stdout
+    for line in out.splitlines():
+        if "LeakCanary" in line and line not in seen:
+            seen[line] = re.sub(r"^.*?[VDIWEF]/LeakCanary\(\s*\d+\):\s?", "", line).rstrip()
+    return list(seen.values())
 
 
-def analysis_block(lines):
-    """The last complete "HEAP ANALYSIS RESULT" block, or None."""
+def analysis_blocks(lines):
+    """Every complete "HEAP ANALYSIS RESULT" block."""
+    blocks = []
     starts = [i for i, l in enumerate(lines) if "HEAP ANALYSIS RESULT" in l]
-    if not starts:
-        return None
-    start = max(starts[-1] - 1, 0)
-    for j in range(starts[-1], len(lines)):
-        if lines[j].startswith("Heap dump duration") or lines[j].startswith("Analysis duration"):
-            end = j
-            while end + 1 < len(lines) and not lines[end + 1].startswith("===="):
-                end += 1
-            return lines[start:min(end + 2, len(lines))]
-    return None
+    for n, first in enumerate(starts):
+        limit = starts[n + 1] if n + 1 < len(starts) else len(lines)
+        for j in range(first, limit):
+            if lines[j].startswith("Heap dump duration"):
+                end = j + 1 if j + 1 < limit and lines[j + 1].startswith("====") else j
+                blocks.append(lines[max(first - 1, 0):end + 1])
+                break
+    return blocks
+
+
+def dump_timestamp(block):
+    for line in block:
+        m = DUMP_TIME_RE.match(line.strip())
+        if m:
+            return int(m.group(1))
+    return 0
+
+
+def analysis_block(lines, since_epoch_ms):
+    """The last analysis of a heap dump taken after [since_epoch_ms]. LeakCanary analyzes through WorkManager, so a new
+    process (for example after reinstalling the app) may still report a heap dump of the previous process; those are skipped."""
+    fresh = [b for b in analysis_blocks(lines) if dump_timestamp(b) >= since_epoch_ms]
+    return fresh[-1] if fresh else None
 
 
 def main():
@@ -84,7 +105,9 @@ def main():
     ap.add_argument("--out", help="file for the analysis text")
     args = ap.parse_args()
 
-    since = adb(args.serial, "shell", "date", "+%m-%d %H:%M:%S.000").stdout.strip()
+    # One shell argument: adb joins the arguments with spaces, which would split the format at its space.
+    since = adb(args.serial, "shell", "date '+%m-%d %H:%M:%S.000'").stdout.strip()
+    since_epoch_ms = int(adb(args.serial, "shell", "date +%s").stdout.strip()) * 1000
     remote = f"{DEVICE_DIR}/memory_probe_{args.scenario}.js"
     local = pathlib.Path(tempfile.gettempdir()) / f"memory_probe_{args.scenario}.js"
     local.write_text(SCENARIOS[args.scenario], encoding="utf-8")
@@ -101,9 +124,10 @@ def main():
     deadline = time.time() + args.wait
     block = None
     lines = []
+    seen = {}
     while time.time() < deadline:
-        lines = leakcanary_lines(args.serial, since)
-        block = analysis_block(lines)
+        lines = leakcanary_lines(args.serial, since, seen)
+        block = analysis_block(lines, since_epoch_ms)
         if block:
             break
         time.sleep(5)
@@ -128,6 +152,14 @@ def main():
     else:
         print(f"analysis: none within {args.wait:.0f} s")
 
+    dump_off = any("disabled from LeakCanary About screen" in l for l in lines)
+    if dump_off:
+        print("automatic heap dump: off (Leaks app > About > Dump heap automatically, off by default since P1.2)")
+    if args.expect_leaks == "yes" and not block and dump_off:
+        # Retained objects are only counted, not analyzed, while automatic heap dumps are off.
+        # zh-CN: 自动转储关闭时只计数残留对象, 不做分析.
+        print("INCONCLUSIVE: turn on automatic heap dumps in the Leaks app, or dump from its notification, to get an analysis")
+        return 2
     passed = (leaks > 0 and mentions) if args.expect_leaks == "yes" else (leaks == 0)
     print("PASS" if passed else "FAIL")
     return 0 if passed else 1

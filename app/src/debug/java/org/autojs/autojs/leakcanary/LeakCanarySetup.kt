@@ -1,6 +1,7 @@
 package org.autojs.autojs.leakcanary
 
 import android.app.Application
+import android.content.Context
 import android.os.StrictMode
 import android.util.Log
 import leakcanary.AppWatcher
@@ -47,6 +48,7 @@ object LeakCanarySetup {
             Log.d(TAG, "LeakCanary isn't included in this debug build")
             return
         }
+        defaultAutomaticHeapDumpOff(application)
         val isEnabledByResource = application.resources.getBoolean(R.bool.leak_canary_enabled)
         val isEnabledBySetting = runCatching { SettingsStores.default[ENABLED] }.getOrDefault(true)
         apply(isEnabledByResource && isEnabledBySetting)
@@ -96,6 +98,27 @@ object LeakCanarySetup {
             runCatching { engine.runtime }.getOrNull()?.let { watch(it, "ScriptRuntime of $label exited") }
         }
     }
+
+    /**
+     * LeakCanary's own "Dump heap automatically" switch (About screen of its Leaks app) is on by default, so a few retained
+     * objects froze AutoJs6 for a heap dump during ordinary debugging. It is turned off the first time; LeakCanary still watches
+     * and shows a notification with the retained object count, "Dump Heap Now" in the Leaks app dumps on demand, and a choice
+     * made later on that screen is kept. Store and key are those of LeakCanary 2.14 (InternalLeakCanary.dumpEnabledInAboutScreen).
+     * zh-CN: LeakCanary 自身的 "Dump heap automatically" 开关 (其 Leaks 应用的 About 页) 默认开启, 日常调试时少量残留对象就会让 AutoJs6 因转储堆而短暂冻结.
+     * 首次运行时将其关闭; LeakCanary 仍会监视并以通知显示残留对象数, 可在 Leaks 应用中用 "Dump Heap Now" 按需转储, 之后在该页面所作的选择保持不变.
+     * 存储与键名来自 LeakCanary 2.14 (InternalLeakCanary.dumpEnabledInAboutScreen).
+     */
+    private fun defaultAutomaticHeapDumpOff(application: Application) {
+        runCatching {
+            val prefs = application.getSharedPreferences(LEAK_CANARY_HEAP_DUMP_PREFS, Context.MODE_PRIVATE)
+            if (!prefs.contains(KEY_ABOUT_SCREEN_DUMP_ENABLED)) {
+                prefs.edit().putBoolean(KEY_ABOUT_SCREEN_DUMP_ENABLED, false).apply()
+            }
+        }.onFailure { Log.w(TAG, "Failed to turn off automatic heap dumps of LeakCanary", it) }
+    }
+
+    private const val LEAK_CANARY_HEAP_DUMP_PREFS = "LeakCanaryHeapDumpPrefs"
+    private const val KEY_ABOUT_SCREEN_DUMP_ENABLED = "AboutScreenDumpEnabled"
 
     // Leak checks of StrictMode as log hints besides the memory gate (docs/memory/ROADMAP.md 1.4 / P1.2).
     // zh-CN: StrictMode 的泄漏检查, 作为内存门禁之外的日志线索 (docs/memory/ROADMAP.md 1.4 / P1.2).
