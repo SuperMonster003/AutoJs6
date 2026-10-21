@@ -4,6 +4,8 @@ import org.autojs.autojs.core.pref.TypedValue
 import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.core.pref.archive.SettingsArchiveException
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
+import org.autojs.autojs.core.pref.archive.SettingsArchiveReader
+import org.autojs.autojs.core.pref.archive.SettingsDeviceKey
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
 import org.junit.Assert.assertEquals
@@ -25,6 +27,8 @@ class SettingsExportTest {
 
     private val device = SettingsArchiveManifest.Device("OPD2413", 35)
 
+    private val key = SettingsDeviceKey.fromAndroidId("0123456789abcdef")
+
     private val snapshot = SettingsSnapshot(
         listOf(
             SettingsSnapshot.Category("appearance", linkedMapOf("default" to linkedMapOf("a" to TypedValue("int", 1), "b" to TypedValue("bool", true)))),
@@ -37,7 +41,7 @@ class SettingsExportTest {
     @Test
     fun writesTheManifestFirstAndCountsWhatWasWritten() {
         val out = ByteArrayOutputStream()
-        val manifest = SettingsExporter.write(out, snapshot, 1_761_051_600_000L, host, device)
+        val manifest = SettingsExporter.write(out, snapshot, 1_761_051_600_000L, host, device, key = key)
         val names = ZipInputStream(ByteArrayInputStream(out.toByteArray())).use { zip ->
             generateSequence { zip.nextEntry?.name }.toList()
         }
@@ -45,12 +49,18 @@ class SettingsExportTest {
         assertEquals(listOf(false, false, true), manifest.categories.map { it.sensitive })
         val result = SettingsExporter.result("autojs6-settings-20261021-210000.zip", manifest, snapshot)
         assertEquals(SettingsExporter.Result("autojs6-settings-20261021-210000.zip", 3, 3, 1), result)
+        // P6.5: the credentials are sealed for the device key (D23) and read back only with it.
+        val bytes = out.toByteArray()
+        assertEquals("secret", SettingsArchiveReader({ ByteArrayInputStream(bytes) }, key = key).category("credentials").category.stores.getValue("github_auth").getValue("token").value)
+        assertEquals(true, SettingsArchiveReader({ ByteArrayInputStream(bytes) }).isLocked("credentials"))
+        assertEquals(false, SettingsArchiveReader({ ByteArrayInputStream(bytes) }).isLocked("appearance"))
+        assertThrows(IllegalArgumentException::class.java) { SettingsExporter.write(ByteArrayOutputStream(), snapshot, 0L, host, device) }
     }
 
     @Test
     fun refusesAnArchiveBeyondTheLimit() {
         val error = assertThrows(SettingsArchiveException::class.java) {
-            SettingsExporter.write(ByteArrayOutputStream(), snapshot, 0L, host, device, maxBytes = 64)
+            SettingsExporter.write(ByteArrayOutputStream(), snapshot, 0L, host, device, maxBytes = 64, key = key)
         }
         assertEquals(SettingsArchiveException.Reason.TOO_LARGE, error.reason)
         assertEquals(Failure.TOO_LARGE, Failure.of(error))

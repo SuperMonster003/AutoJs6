@@ -800,12 +800,13 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">设置向导配置档</string>
-    <string name="settings_transfer_credentials_warning">凭据与授权 (GitHub 令牌, 插件中心授权, MCP Server 与 3-Stove Agent 的已信任客户端, Bun 宿主授权) 将以明文写入文件. 拿到文件的人都可以使用它们, 请妥善保管导出的文件.</string>
+    <string name="settings_transfer_credentials_warning">凭据与授权 (GitHub 令牌, 插件中心授权, MCP Server 与 3-Stove Agent 的已信任客户端, Bun 宿主授权) 将以本机密钥加密写入文件, 只能在本机的 AutoJs6 中导入, 其他设备或恢复出厂设置后无法导入. 这种加密可被离线破解, 请仍然妥善保管导出的文件.</string>
     <string name="settings_transfer_credentials_warning_title">导出凭据?</string>
     <string name="settings_transfer_description">设置按分类导出为 zip 文件, 可在本机或其他设备上导入.</string>
     <string name="settings_transfer_error_invalid_file">设置文件中的分类文件已损坏</string>
     <string name="settings_transfer_error_invalid_manifest">设置文件的 manifest.json 已损坏或格式不符</string>
     <string name="settings_transfer_error_io">无法访问文件: %1$s</string>
+    <string name="settings_transfer_error_locked">该文件中的凭据由其他设备或其他构建的 AutoJs6 加密, 本机无法解密</string>
     <string name="settings_transfer_error_missing_file">设置文件缺少其 manifest.json 列出的文件</string>
     <string name="settings_transfer_error_not_an_archive">不是设置文件 (不是 zip 归档)</string>
     <string name="settings_transfer_error_too_large">设置文件将超过上限 %1$s, 请减少分类.</string>
@@ -814,6 +815,7 @@
     <string name="settings_transfer_export_done">文件: %1$s\n分类: %2$d 个\n条目: %3$d 项</string>
     <string name="settings_transfer_export_done_title">设置已导出</string>
     <string name="settings_transfer_export_failed_title">导出失败</string>
+    <string name="settings_transfer_export_sealed">凭据已用本机密钥加密, 只能在本机的 AutoJs6 中导入</string>
     <string name="settings_transfer_export_summary">选择分类并保存为 zip 文件</string>
     <string name="settings_transfer_export_unexportable">略过了 %1$d 个无法写入的值 (如 NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在写入设置文件...</string>

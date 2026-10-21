@@ -804,12 +804,13 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Профили мастеров настройки</string>
-    <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) записываются в файл открытым текстом. Любой, у кого есть файл, может ими воспользоваться, поэтому храните его в надежном месте.</string>
+    <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) шифруются ключом этого устройства. Импортировать их может только AutoJs6 на этом устройстве, но не другое устройство и не после сброса к заводским настройкам. Такое шифрование можно взломать офлайн, поэтому все равно храните файл в надежном месте.</string>
     <string name="settings_transfer_credentials_warning_title">Экспортировать учетные данные?</string>
     <string name="settings_transfer_description">Настройки экспортируются по категориям в zip-файл, который можно импортировать на этом или другом устройстве.</string>
     <string name="settings_transfer_error_invalid_file">Файл категории в файле настроек поврежден</string>
     <string name="settings_transfer_error_invalid_manifest">Файл manifest.json в файле настроек поврежден или имеет другой формат</string>
     <string name="settings_transfer_error_io">Нет доступа к файлу: %1$s</string>
+    <string name="settings_transfer_error_locked">Учетные данные в этом файле зашифрованы на другом устройстве или другой сборкой AutoJs6, поэтому это устройство не может их расшифровать</string>
     <string name="settings_transfer_error_missing_file">В файле настроек нет файла, указанного в его manifest.json</string>
     <string name="settings_transfer_error_not_an_archive">Это не файл настроек (не zip-архив)</string>
     <string name="settings_transfer_error_too_large">Файл настроек превысил бы %1$s, максимально допустимый размер. Выберите меньше категорий.</string>
@@ -818,6 +819,7 @@
     <string name="settings_transfer_export_done">Файл: %1$s\nКатегории: %2$d\nЭлементы: %3$d</string>
     <string name="settings_transfer_export_done_title">Настройки экспортированы</string>
     <string name="settings_transfer_export_failed_title">Не удалось экспортировать</string>
+    <string name="settings_transfer_export_sealed">Учетные данные зашифрованы ключом этого устройства и могут быть импортированы только в AutoJs6 на этом устройстве</string>
     <string name="settings_transfer_export_summary">Выбрать категории и сохранить их в zip-файл</string>
     <string name="settings_transfer_export_unexportable">Пропущено значений, которые нельзя записать (например, NaN): %1$d</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Запись файла настроек...</string>

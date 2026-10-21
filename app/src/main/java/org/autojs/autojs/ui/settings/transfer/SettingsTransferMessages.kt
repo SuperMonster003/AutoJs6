@@ -21,6 +21,7 @@ object SettingsTransferMessages {
         Failure.INVALID_MANIFEST -> R.string.settings_transfer_error_invalid_manifest
         Failure.MISSING_FILE -> R.string.settings_transfer_error_missing_file
         Failure.INVALID_FILE -> R.string.settings_transfer_error_invalid_file
+        Failure.LOCKED -> R.string.settings_transfer_error_locked
         Failure.IO -> R.string.settings_transfer_error_io
     }
 

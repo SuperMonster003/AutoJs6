@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.pref.archive
 
 import org.autojs.autojs.core.pref.SettingCategory
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.core.pref.archive.SettingsBackupVault.LastOperation
 import org.autojs.autojs.core.pref.archive.SettingsBackupVault.Operation
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
@@ -19,6 +20,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.time.ZoneId
+import java.util.zip.ZipFile
 
 /**
  * docs/settings/ROADMAP.md P7.3: the internal backups of [SettingsBackupVault] (T9): five kept for imports and resets
@@ -39,7 +41,7 @@ class SettingsBackupVaultTest : DomainKeysTestBase() {
     private var now = 1_792_548_000_000L
 
     private fun vault(directory: File = File(folder.root, SettingsBackupVault.DIRECTORY)) =
-        SettingsBackupVault(directory, { now.also { now += HOUR } }, ZONE)
+        SettingsBackupVault(directory, { now.also { now += HOUR } }, ZONE, key = KEY)
 
     private fun everything() = SettingsSnapshot.capture(SettingCategory.ALL)
 
@@ -65,7 +67,7 @@ class SettingsBackupVaultTest : DomainKeysTestBase() {
     @Test
     fun backupsOfTheSameSecondAreCountedAndOrdered() {
         val directory = File(folder.root, "same-second")
-        val vault = SettingsBackupVault(directory, { now }, ZONE, keep = 2)
+        val vault = SettingsBackupVault(directory, { now }, ZONE, keep = 2, key = KEY)
         val first = vault.backup(Operation.IMPORT, everything(), host, device)
         val second = vault.backup(Operation.RESET, everything(), host, device)
         val third = vault.backup(Operation.IMPORT, everything(), host, device)
@@ -83,13 +85,24 @@ class SettingsBackupVaultTest : DomainKeysTestBase() {
             put(AppearanceKeys.NIGHT_MODE_ENABLED.name, true)
         }
         val backup = vault().backup(Operation.IMPORT, everything(), host, device)
-        val reader = SettingsArchiveReader({ backup.file.inputStream() })
+        val reader = SettingsArchiveReader({ backup.file.inputStream() }, key = KEY)
         val manifest = reader.manifest()
         assertEquals(SettingCategory.ALL.filterNot { it.isData }.map { it.id }, manifest.categories.map { it.id })
         assertTrue(manifest.categories.single { it.id == "credentials" }.sensitive)
         assertEquals("ghp_secret", reader.category("credentials").category.stores.getValue(token.store.name).getValue(token.name).value)
         assertEquals(true, reader.category("other").category.stores.getValue("default").getValue(MiscStateKeys.FIND_OR_REPLACE_USING_REGEX.name).value)
         assertEquals("2026-10-21T10:00:00+08:00", manifest.exportedAt)
+        // The credentials are sealed for the device key (D23): not readable without it, not in plain text.
+        val sealed = ZipFile(backup.file).use { zip -> zip.getInputStream(zip.getEntry("categories/credentials.json")).readBytes().toString(Charsets.UTF_8) }
+        assertTrue(SettingsSealedFile.isSealed(SettingsJson.parse(sealed)))
+        assertFalse(sealed.contains("ghp_secret") || sealed.contains(token.name))
+        assertTrue(SettingsArchiveReader({ backup.file.inputStream() }).isLocked("credentials"))
+        assertEquals(
+            SettingsArchiveException.Reason.LOCKED,
+            assertThrows(SettingsArchiveException::class.java) { SettingsArchiveReader({ backup.file.inputStream() }).category("credentials") }.reason,
+        )
+        // A vault without the key refuses to back up credentials instead of writing them in plain text.
+        assertThrows(IllegalArgumentException::class.java) { SettingsBackupVault(File(folder.root, "no-key")).backup(Operation.IMPORT, everything(), host, device) }
     }
 
     @Test
@@ -165,5 +178,6 @@ class SettingsBackupVaultTest : DomainKeysTestBase() {
     private companion object {
         const val HOUR = 3_600_000L
         val ZONE: ZoneId = ZoneId.of("+08:00")
+        val KEY = SettingsDeviceKey.ofBytes(ByteArray(32) { (it * 7).toByte() })
     }
 }

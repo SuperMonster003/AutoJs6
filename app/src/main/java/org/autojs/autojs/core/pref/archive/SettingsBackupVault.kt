@@ -18,7 +18,7 @@ import java.util.Locale
 /**
  * The internal backups of imports and resets (docs/settings/ROADMAP.md T9, D8 / D11), in [directory]
  * (`filesDir/settings-backups/` in the app): before an import or a reset to defaults, every settings category,
- * credentials and `other` included (private directory, R6 allows it), is written as `auto-import-<ts>.zip` or
+ * credentials (sealed for the device [key], D23) and `other` included (private directory, R6 allows it), is written as `auto-import-<ts>.zip` or
  * `auto-reset-<ts>.zip`, and [KEEP] of them are kept together, the newest ones. Once the operation is done,
  * [LAST_OPERATION] records what it touched; "undo the last import" ([undoPlan]) imports the touched categories again
  * from its backup, through the same planner (T8) without deployment items, and writes no backup of its own (the
@@ -26,7 +26,7 @@ import java.util.Locale
  * the snapshot, the host and the clock come from the caller.
  *
  * zh-CN: 导入与恢复默认的内部备份 (ROADMAP T9, D8 / D11), 位于 [directory] (应用中为 `filesDir/settings-backups/`): 导入或恢复默认
- * 之前, 把全部设置分类 (含凭据与 `other`, 私有目录, R6 允许) 写为 `auto-import-<ts>.zip` 或 `auto-reset-<ts>.zip`, 两种合计保留最新的
+ * 之前, 把全部设置分类 (含凭据与 `other`, 私有目录, R6 允许; 凭据以设备密钥 [key] 加密, D23) 写为 `auto-import-<ts>.zip` 或 `auto-reset-<ts>.zip`, 两种合计保留最新的
  * [KEEP] 份. 操作完成后由 [LAST_OPERATION] 记录触及的分类; "撤销上次导入" ([undoPlan]) 以其备份对触及分类再做一次导入, 经同一计划器
  * (T8) 且没有部署项, 撤销本身不写内部备份 (T20 的操作后备份属于 P9). 数据分类 (T19) 只记录不撤销 (附录 C Q27). 纯 JVM (R3): 快照,
  * 宿主与时钟由调用方提供.
@@ -36,6 +36,7 @@ class SettingsBackupVault @JvmOverloads constructor(
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
     private val keep: Int = KEEP,
+    private val key: SettingsDeviceKey? = null,
 ) {
 
     init {
@@ -135,7 +136,7 @@ class SettingsBackupVault @JvmOverloads constructor(
         val taken = backups().filter { it.time == time }.maxOfOrNull { it.sequence }
         val sequence = if (taken == null) 0 else taken + 1
         val file = File(directory, operation.prefix + time + (if (sequence == 0) "" else "-$sequence") + ".zip")
-        writeAtomically(file) { out -> SettingsArchiveWriter.write(out, snapshot, SettingsArchive.exportTime(now, zone), host, device, data) }
+        writeAtomically(file) { out -> SettingsArchiveWriter.write(out, snapshot, SettingsArchive.exportTime(now, zone), host, device, data, key = key) }
         prune()
         return backupOf(file)!!
     }
@@ -197,7 +198,7 @@ class SettingsBackupVault @JvmOverloads constructor(
         val last = lastOperation() ?: return null
         val file = File(directory, last.backup)
         if (!file.isFile) throw SettingsArchiveException(SettingsArchiveException.Reason.MISSING_FILE, "The backup ${last.backup} is gone")
-        val reader = SettingsArchiveReader({ file.inputStream() })
+        val reader = SettingsArchiveReader({ file.inputStream() }, key = key)
         val manifest = reader.manifest()
         val held = manifest.categories.map { it.id }.toSet()
         val ids = last.categories.filter { it in held }

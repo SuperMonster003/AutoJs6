@@ -804,12 +804,13 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Profils des assistants de configuration</string>
-    <string name="settings_transfer_credentials_warning">Les identifiants et autorisations (le jeton GitHub, les autorisations du centre des plugins, les clients de confiance de MCP Server et de 3-Stove Agent, les droits de l\'hôte Bun) sont écrits dans le fichier en clair. Toute personne qui possède le fichier peut les utiliser, conservez-le donc en lieu sûr.</string>
+    <string name="settings_transfer_credentials_warning">Les identifiants et autorisations (le jeton GitHub, les autorisations du centre des plugins, les clients de confiance de MCP Server et de 3-Stove Agent, les droits de l\'hôte Bun) sont chiffrés avec une clé de cet appareil. Seul AutoJs6 sur cet appareil peut les importer, pas un autre appareil ni après une réinitialisation d\'usine. Ce chiffrement peut être cassé hors ligne, conservez donc tout de même le fichier en lieu sûr.</string>
     <string name="settings_transfer_credentials_warning_title">Exporter les identifiants?</string>
     <string name="settings_transfer_description">Les paramètres sont exportés par catégorie dans un fichier zip, qui peut être importé sur cet appareil ou sur un autre.</string>
     <string name="settings_transfer_error_invalid_file">Un fichier de catégorie du fichier de paramètres est endommagé</string>
     <string name="settings_transfer_error_invalid_manifest">Le manifest.json du fichier de paramètres est endommagé ou d\'un autre format</string>
     <string name="settings_transfer_error_io">Impossible d\'accéder au fichier: %1$s</string>
+    <string name="settings_transfer_error_locked">Les identifiants de ce fichier ont été chiffrés sur un autre appareil ou par une autre version de AutoJs6, cet appareil ne peut donc pas les déchiffrer</string>
     <string name="settings_transfer_error_missing_file">Il manque au fichier de paramètres un fichier que son manifest.json mentionne</string>
     <string name="settings_transfer_error_not_an_archive">Ce n\'est pas un fichier de paramètres (pas une archive zip)</string>
     <string name="settings_transfer_error_too_large">Le fichier de paramètres dépasserait %1$s, la taille maximale autorisée. Choisissez moins de catégories.</string>
@@ -818,6 +819,7 @@
     <string name="settings_transfer_export_done">Fichier: %1$s\nCatégories: %2$d\nÉléments: %3$d</string>
     <string name="settings_transfer_export_done_title">Paramètres exportés</string>
     <string name="settings_transfer_export_failed_title">Échec de l\'exportation</string>
+    <string name="settings_transfer_export_sealed">Les identifiants sont chiffrés avec une clé de cet appareil et ne peuvent être importés que par AutoJs6 sur cet appareil</string>
     <string name="settings_transfer_export_summary">Choisir des catégories et les enregistrer dans un fichier zip</string>
     <string name="settings_transfer_export_unexportable">%1$d valeurs ont été ignorées car elles ne peuvent pas être écrites (comme NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Écriture du fichier de paramètres...</string>

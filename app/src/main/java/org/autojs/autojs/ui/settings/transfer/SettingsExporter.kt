@@ -6,9 +6,11 @@ import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import org.autojs.autojs.core.pref.SettingCategory
+import org.autojs.autojs.core.pref.archive.AndroidSettingsKeys
 import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
 import org.autojs.autojs.core.pref.archive.SettingsArchiveWriter
+import org.autojs.autojs.core.pref.archive.SettingsDeviceKey
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
 import org.autojs.autojs6.BuildConfig
 import java.io.FileNotFoundException
@@ -18,10 +20,11 @@ import java.io.OutputStream
 /**
  * Writes the archive of the export wizard (docs/settings/ROADMAP.md P6.4, T7 / T11): the snapshot of the chosen
  * categories into the document the user created, at most [SettingsArchive.MAX_BYTES]. A failed write deletes the
- * document, so no partial archive stays behind (the writer leaves that to the caller). Values are never logged (R6).
+ * document, so no partial archive stays behind (the writer leaves that to the caller). Credentials are sealed for the
+ * device key (D23 / T21, P6.5). Values are never logged (R6).
  *
  * zh-CN: 写入导出向导的归档 (ROADMAP P6.4, T7 / T11): 把所选分类的快照写入用户创建的文档, 不超过 [SettingsArchive.MAX_BYTES].
- * 写入失败时删除该文档, 不留下不完整的归档 (写入器把这一步交给调用方). 不记录任何值 (R6).
+ * 写入失败时删除该文档, 不留下不完整的归档 (写入器把这一步交给调用方). 凭据以设备密钥加密 (D23 / T21, P6.5). 不记录任何值 (R6).
  */
 object SettingsExporter {
 
@@ -29,8 +32,9 @@ object SettingsExporter {
     data class Result(val fileName: String, val categories: Int, val entries: Int, val unexportable: Int)
 
     /**
-     * Writes [snapshot] to [out] as exported at [now]; the manifest written is returned. Pure (R3).
-     * zh-CN: 把 [snapshot] 以导出时间 [now] 写入 [out], 返回写入的 manifest. 纯 JVM (R3).
+     * Writes [snapshot] to [out] as exported at [now], sensitive categories sealed for [key]; the manifest written is
+     * returned. Pure (R3).
+     * zh-CN: 把 [snapshot] 以导出时间 [now] 写入 [out], 敏感分类以 [key] 加密; 返回写入的 manifest. 纯 JVM (R3).
      */
     @JvmStatic
     @JvmOverloads
@@ -41,7 +45,8 @@ object SettingsExporter {
         host: SettingsArchiveManifest.Host,
         device: SettingsArchiveManifest.Device,
         maxBytes: Long = SettingsArchive.MAX_BYTES,
-    ): SettingsArchiveManifest = SettingsArchiveWriter.write(out, snapshot, SettingsArchive.exportTime(now), host, device, maxBytes = maxBytes)
+        key: SettingsDeviceKey? = null,
+    ): SettingsArchiveManifest = SettingsArchiveWriter.write(out, snapshot, SettingsArchive.exportTime(now), host, device, maxBytes = maxBytes, key = key)
 
     /** [Result] of a written [manifest] and the [snapshot] it came from. zh-CN: 由写入的 manifest 与快照得出结果. */
     @JvmStatic
@@ -56,10 +61,12 @@ object SettingsExporter {
     @JvmStatic
     @JvmOverloads
     fun export(context: Context, uri: Uri, selected: List<String>, now: Long = System.currentTimeMillis()): Result {
-        val snapshot = SettingsSnapshot.capture(selected.mapNotNull(SettingCategory::ofIdOrNull))
+        val categories = selected.mapNotNull(SettingCategory::ofIdOrNull)
+        val snapshot = SettingsSnapshot.capture(categories)
         val resolver = context.contentResolver
         try {
-            val manifest = openTruncated(context, uri).use { write(it, snapshot, now, host(context), device()) }
+            val key = if (categories.any { it.sensitive }) AndroidSettingsKeys.device(context) else null
+            val manifest = openTruncated(context, uri).use { write(it, snapshot, now, host(context), device(), key = key) }
             return result(displayName(context, uri) ?: uri.lastPathSegment.orEmpty(), manifest, snapshot)
         } catch (e: Exception) {
             runCatching { DocumentsContract.deleteDocument(resolver, uri) }

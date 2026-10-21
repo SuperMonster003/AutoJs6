@@ -1,4 +1,4 @@
-"""Inspect a settings archive of AutoJs6 (docs/settings/ROADMAP.md P6.4, appendix B "format v1", T7).
+"""Inspect a settings archive of AutoJs6 (docs/settings/ROADMAP.md P6.4 / P6.5, appendix B "format v1", T7 / T21).
 
 Usage: py -3.12 -I tools/settings/archive_inspect.py ARCHIVE [--expect-categories N] [--expect-ids ID,ID,...]
        [--set-format-version N --out OUT]
@@ -9,16 +9,22 @@ number of entries the manifest lists and the number the category file holds, the
   - manifest.json has the format "autojs6-settings", a formatVersion >= 1 and every required field (appendix B);
   - every category of the manifest has categories/<id>.json, whose "id" matches and whose stores hold exactly the
     listed number of entries, each a {"t", "v"} pair with a known type tag and a value of that type;
-  - only "credentials" is flagged sensitive; every data entry has its file under data/; nothing else is in the zip
-    except the reserved plugins/ directory (D3);
+  - only "credentials" is flagged sensitive, and its file is a sealed envelope (D23): version 1, AES-256-GCM, a
+    12-byte nonce, data with its 16-byte tag, and a device slot (HKDF-SHA256, a 16-digit hex fingerprint, a 12-byte
+    nonce and a wrapped 32-byte key); its entries cannot be counted without the key of the device, so the manifest's
+    number is shown as listed;
+  - every data entry has its file under data/; nothing else is in the zip except the reserved plugins/ directory (D3);
   - with --expect-categories / --expect-ids, the manifest lists that many categories / exactly those ids in that order.
 Values are never printed (the archive may hold credentials, R6). The exit status is 1 when a check fails.
 
 --set-format-version writes a copy of ARCHIVE to OUT with manifest.json's formatVersion replaced (appendix D item 3).
 """
 import argparse
+import base64
+import binascii
 import json
 import pathlib
+import re
 import sys
 import zipfile
 
@@ -26,6 +32,7 @@ MAX_BYTES = 16 * 1024 * 1024
 FORMAT = "autojs6-settings"
 TAGS = {"bool", "int", "long", "float", "string", "stringSet", "json"}
 INT_RANGE = (-2 ** 31, 2 ** 31 - 1)
+FINGERPRINT = re.compile(r"[0-9a-f]{16}")
 LONG_RANGE = (-2 ** 63, 2 ** 63 - 1)
 
 
@@ -132,6 +139,14 @@ class Inspector:
             file = f"categories/{cid}.json"
             expected_files.add(file)
             held, stores = self.check_category(archive, file, cid, names)
+            if held == "sealed":
+                # The entries of a sealed file cannot be counted without the device key (D23); stores None marks it.
+                if not entry.get("sensitive"):
+                    self.fail(f"{cid}: the file is sealed but the category is not sensitive")
+                rows.append((cid, listed, None, None, entry.get("sensitive")))
+                continue
+            if entry.get("sensitive") and held is not None:
+                self.fail(f"{cid}: a sensitive category is written in plain text, not sealed (D23)")
             if listed != held:
                 self.fail(f"{cid}: the manifest lists {listed} entries, the file holds {held}")
             rows.append((cid, listed, held, stores, entry.get("sensitive")))
@@ -151,11 +166,40 @@ class Inspector:
             self.fail(f"unexpected files: {extra}")
         return rows
 
+    def check_sealed(self, file, cid, doc):
+        if set(doc) != {"id", "sealed"} or doc.get("id") != cid:
+            self.fail(f"{file}: a sealed file holds exactly the id {cid} and the sealed object")
+        sealed = doc.get("sealed")
+        if not isinstance(sealed, dict):
+            self.fail(f"{file}: sealed is not an object")
+            return
+        if sealed.get("version") != 1 or sealed.get("cipher") != "AES-256-GCM":
+            self.fail(f"{file}: sealing version {sealed.get('version')!r} / cipher {sealed.get('cipher')!r} is not 1 / AES-256-GCM")
+        if b64(sealed.get("nonce"), size=12) is None:
+            self.fail(f"{file}: the nonce is not 12 bytes of Base64")
+        if b64(sealed.get("data"), at_least=16) is None:
+            self.fail(f"{file}: the data is not Base64 of at least the 16-byte tag")
+        slots = sealed.get("slots")
+        if not isinstance(slots, list) or not slots:
+            self.fail(f"{file}: no slots")
+            return
+        devices = [slot for slot in slots if isinstance(slot, dict) and slot.get("kind") == "device"]
+        if not devices:
+            self.fail(f"{file}: no device slot")
+        for slot in devices:
+            if slot.get("kdf") != "HKDF-SHA256" or not FINGERPRINT.fullmatch(str(slot.get("fingerprint"))):
+                self.fail(f"{file}: a device slot lacks the kdf HKDF-SHA256 or a 16-digit hex fingerprint")
+            if b64(slot.get("nonce"), size=12) is None or b64(slot.get("key"), size=48) is None:
+                self.fail(f"{file}: a device slot lacks a 12-byte nonce or a wrapped 32-byte key")
+
     def check_category(self, archive, file, cid, names):
         if file not in names:
             self.fail(f"{cid}: {file} is missing")
             return None, 0
         doc = self.read_json(archive, file)
+        if isinstance(doc, dict) and "sealed" in doc:
+            self.check_sealed(file, cid, doc)
+            return "sealed", 0
         if not isinstance(doc, dict) or doc.get("id") != cid or not isinstance(doc.get("stores"), dict):
             self.fail(f"{file}: not a category file of {cid}")
             return None, 0
@@ -171,6 +215,19 @@ class Inspector:
                 elif not value_matches(value["t"], value["v"]):
                     self.fail(f"{file}: {store}/{name} does not hold a {value['t']}")
         return held, len(doc["stores"])
+
+
+def b64(value, size=None, at_least=None):
+    """The bytes of a standard Base64 string, or None when it is not one or has the wrong size."""
+    if not isinstance(value, str):
+        return None
+    try:
+        data = base64.b64decode(value, validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    if size is not None and len(data) != size or at_least is not None and len(data) < at_least:
+        return None
+    return data
 
 
 def set_format_version(source, out, version):
@@ -216,6 +273,8 @@ def main():
         for cid, listed, held, stores, sensitive in rows:
             if isinstance(stores, str):
                 print(f"  {cid:<22} {listed!s:>5} entries  {stores}")
+            elif stores is None:
+                print(f"  {cid:<22} {listed!s:>5} entries  (sealed for the device, D23; listed, not counted)")
             else:
                 note = ", sensitive" if sensitive else ""
                 print(f"  {cid:<22} {listed!s:>5} entries  ({held} in the file, {stores} store{'s' if stores != 1 else ''}{note})")

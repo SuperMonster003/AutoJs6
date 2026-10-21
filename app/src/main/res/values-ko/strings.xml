@@ -806,12 +806,13 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">설정 마법사 프로필</string>
-    <string name="settings_transfer_credentials_warning">자격 증명 및 권한 부여 (GitHub 토큰, 플러그인 센터 권한, MCP Server 와 3-Stove Agent 의 신뢰된 클라이언트, Bun 호스트 권한) 는 파일에 평문으로 기록됩니다. 파일을 가진 사람은 누구나 이를 사용할 수 있으므로 안전하게 보관하세요.</string>
+    <string name="settings_transfer_credentials_warning">자격 증명 및 권한 부여 (GitHub 토큰, 플러그인 센터 권한, MCP Server 와 3-Stove Agent 의 신뢰된 클라이언트, Bun 호스트 권한) 는 이 기기의 키로 암호화되어 파일에 기록됩니다. 이 기기의 AutoJs6 에서만 가져올 수 있으며, 다른 기기나 초기화 후에는 가져올 수 없습니다. 이 암호화는 오프라인에서 해독될 수 있으므로 파일을 계속 안전하게 보관하세요.</string>
     <string name="settings_transfer_credentials_warning_title">자격 증명을 내보내시겠습니까?</string>
     <string name="settings_transfer_description">설정은 카테고리별로 zip 파일로 내보내지며, 이 기기 또는 다른 기기에서 가져올 수 있습니다.</string>
     <string name="settings_transfer_error_invalid_file">설정 파일의 카테고리 파일이 손상되었습니다</string>
     <string name="settings_transfer_error_invalid_manifest">설정 파일의 manifest.json 이 손상되었거나 다른 형식입니다</string>
     <string name="settings_transfer_error_io">파일에 접근할 수 없습니다: %1$s</string>
+    <string name="settings_transfer_error_locked">이 파일의 자격 증명은 다른 기기 또는 다른 빌드의 AutoJs6 에서 암호화되어 이 기기에서 복호화할 수 없습니다</string>
     <string name="settings_transfer_error_missing_file">설정 파일에 manifest.json 에 나열된 파일이 없습니다</string>
     <string name="settings_transfer_error_not_an_archive">설정 파일이 아닙니다 (zip 압축 파일이 아님)</string>
     <string name="settings_transfer_error_too_large">설정 파일이 허용되는 최대 크기 %1$s 를 초과합니다. 카테고리를 줄이세요.</string>
@@ -820,6 +821,7 @@
     <string name="settings_transfer_export_done">파일: %1$s\n카테고리: %2$d\n항목: %3$d</string>
     <string name="settings_transfer_export_done_title">설정을 내보냈습니다</string>
     <string name="settings_transfer_export_failed_title">내보내기 실패</string>
+    <string name="settings_transfer_export_sealed">자격 증명은 이 기기의 키로 암호화되어 이 기기의 AutoJs6 에서만 가져올 수 있습니다</string>
     <string name="settings_transfer_export_summary">카테고리를 선택하여 zip 파일로 저장합니다</string>
     <string name="settings_transfer_export_unexportable">기록할 수 없는 값 %1$d개를 제외했습니다 (NaN 등)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">설정 파일을 쓰는 중...</string>

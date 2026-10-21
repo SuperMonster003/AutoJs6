@@ -57,10 +57,10 @@ class SettingsArchiveTest {
         val written = file.outputStream().use { out ->
             SettingsArchiveWriter.write(
                 out, snapshot, SettingsArchive.exportTime(EXPORTED_AT, ZONE), host, device,
-                listOf(SettingsArchiveWriter.DataFile("data_shortcuts", 2, "shortcuts.zip", shortcuts)),
+                listOf(SettingsArchiveWriter.DataFile("data_shortcuts", 2, "shortcuts.zip", shortcuts)), key = KEY,
             )
         }
-        val reader = SettingsArchiveReader({ file.inputStream() })
+        val reader = SettingsArchiveReader({ file.inputStream() }, key = KEY)
         val manifest = reader.manifest()
         assertEquals(written, manifest)
         assertEquals("2026-10-20T15:30:00+08:00", manifest.exportedAt)
@@ -181,13 +181,13 @@ class SettingsArchiveTest {
         assertEquals(
             Reason.TOO_LARGE,
             assertThrows(SettingsArchiveException::class.java) {
-                SettingsArchiveWriter.write(ByteArrayOutputStream(), snapshot, "t", host, device, maxBytes = 256)
+                SettingsArchiveWriter.write(ByteArrayOutputStream(), snapshot, "t", host, device, maxBytes = 256, key = KEY)
             }.reason,
         )
         // The reader refuses an archive beyond the limit, and a file that inflates beyond it.
         val zeros = ByteArray(64 * 1024)
         val bytes = ByteArrayOutputStream().also { out ->
-            SettingsArchiveWriter.write(out, snapshot, "t", host, device, listOf(SettingsArchiveWriter.DataFile("data_color_library", 1, "color-library.json", zeros)))
+            SettingsArchiveWriter.write(out, snapshot, "t", host, device, listOf(SettingsArchiveWriter.DataFile("data_color_library", 1, "color-library.json", zeros)), key = KEY)
         }.toByteArray()
         assertTrue(bytes.size < 8 * 1024)
         assertEquals(Reason.TOO_LARGE, assertThrows(SettingsArchiveException::class.java) { SettingsArchiveReader({ ByteArrayInputStream(bytes) }, 256).manifest() }.reason)
@@ -231,5 +231,7 @@ class SettingsArchiveTest {
         const val EXPORTED_AT = 1_792_481_400_000L
 
         val ZONE: ZoneId = ZoneId.of("+08:00")
+
+        val KEY = SettingsDeviceKey.ofBytes(ByteArray(32) { it.toByte() })
     }
 }

@@ -804,12 +804,13 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Perfiles de los asistentes de configuración</string>
-    <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se escriben en el archivo como texto sin cifrar. Cualquiera que tenga el archivo puede usarlas, así que guárdelo en un lugar seguro.</string>
+    <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se cifran con una clave de este dispositivo. Solo AutoJs6 en este dispositivo puede importarlas, no otro dispositivo ni tras un restablecimiento de fábrica. Este cifrado puede romperse sin conexión, así que guarde el archivo en un lugar seguro de todos modos.</string>
     <string name="settings_transfer_credentials_warning_title">Exportar credenciales?</string>
     <string name="settings_transfer_description">La configuración se exporta por categorías a un archivo zip que se puede importar en este u otro dispositivo.</string>
     <string name="settings_transfer_error_invalid_file">Un archivo de categoría del archivo de configuración está dañado</string>
     <string name="settings_transfer_error_invalid_manifest">El manifest.json del archivo de configuración está dañado o tiene otro formato</string>
     <string name="settings_transfer_error_io">No se puede acceder al archivo: %1$s</string>
+    <string name="settings_transfer_error_locked">Las credenciales de este archivo se cifraron en otro dispositivo o con otra compilación de AutoJs6, por lo que este dispositivo no puede descifrarlas</string>
     <string name="settings_transfer_error_missing_file">Al archivo de configuración le falta un archivo que su manifest.json enumera</string>
     <string name="settings_transfer_error_not_an_archive">No es un archivo de configuración (no es un archivo zip)</string>
     <string name="settings_transfer_error_too_large">El archivo de configuración superaría %1$s, el tamaño máximo permitido. Elija menos categorías.</string>
@@ -818,6 +819,7 @@
     <string name="settings_transfer_export_done">Archivo: %1$s\nCategorías: %2$d\nElementos: %3$d</string>
     <string name="settings_transfer_export_done_title">Configuración exportada</string>
     <string name="settings_transfer_export_failed_title">Error al exportar</string>
+    <string name="settings_transfer_export_sealed">Las credenciales se cifran con una clave de este dispositivo y solo se pueden importar en AutoJs6 en este dispositivo</string>
     <string name="settings_transfer_export_summary">Elegir categorías y guardarlas en un archivo zip</string>
     <string name="settings_transfer_export_unexportable">Se omitieron %1$d valores porque no se pueden escribir (como NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Escribiendo el archivo de configuración...</string>

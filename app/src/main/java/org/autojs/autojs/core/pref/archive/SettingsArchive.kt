@@ -94,7 +94,10 @@ class SettingsArchiveException @JvmOverloads constructor(
         /** `manifest.json` or a file it lists is missing. */
         MISSING_FILE,
 
-        /** A category file is malformed or names another category. */
+        /** A category file is malformed or names another category, or a sealed one is altered (D23). */
         INVALID_FILE,
+
+        /** A sealed category file has no slot of the key given: another device, another signature, or no key (D23). */
+        LOCKED,
     }
 }

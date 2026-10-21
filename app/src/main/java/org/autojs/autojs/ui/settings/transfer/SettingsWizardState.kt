@@ -58,6 +58,7 @@ data class SettingsWizardState(
         INVALID_MANIFEST,
         MISSING_FILE,
         INVALID_FILE,
+        LOCKED,
         IO,
         ;
 

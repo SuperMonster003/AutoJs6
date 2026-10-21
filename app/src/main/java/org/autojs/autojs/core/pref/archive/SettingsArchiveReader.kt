@@ -15,16 +15,19 @@ import java.util.zip.ZipInputStream
  * An archive of more than [maxBytes], or a file in it that inflates to more, is refused
  * ([SettingsArchiveException.Reason.TOO_LARGE]). An import (P7.1) checks the manifest ([SettingsArchiveManifest.fromJson],
  * [SettingsArchiveManifest.warnings]) and reads the selected categories through [categories], which applies the key
- * renames of [SettingsKeyMigrations]. Pure JVM (R3).
+ * renames of [SettingsKeyMigrations]. A sealed category file (D23) is opened with [key]; [isLocked] tells beforehand
+ * whether it can be. Pure JVM (R3).
  *
  * zh-CN: 以 `java.util.zip` 逐个文件读取设置归档 (ROADMAP T7, 附录 B): 每次读取都由 [open] 重新打开归档流 (应用中为文档 `Uri`),
  * 因此 [manifest] 只解压 `manifest.json`, 向导在勾选后才打开分类文件 ([category]) 或数据文件 ([data]). 归档超过 [maxBytes]
  * 或其中文件解压后超过该值时拒绝 (`TOO_LARGE`). 导入 (P7.1) 校验 manifest ([SettingsArchiveManifest.fromJson],
- * [SettingsArchiveManifest.warnings]), 并经 [categories] 读取勾选的分类, 其中应用 [SettingsKeyMigrations] 的键改名. 纯 JVM (R3).
+ * [SettingsArchiveManifest.warnings]), 并经 [categories] 读取勾选的分类, 其中应用 [SettingsKeyMigrations] 的键改名. 加密的分类文件
+ * (D23) 以 [key] 打开, [isLocked] 可事先判断能否打开. 纯 JVM (R3).
  */
 class SettingsArchiveReader @JvmOverloads constructor(
     private val open: () -> InputStream,
     private val maxBytes: Long = SettingsArchive.MAX_BYTES,
+    private val key: SettingsDeviceKey? = null,
 ) {
 
     /** `manifest.json`; throws [SettingsArchiveException]. zh-CN: 读取 `manifest.json`; 失败时抛 [SettingsArchiveException]. */
@@ -32,13 +35,15 @@ class SettingsArchiveReader @JvmOverloads constructor(
 
     /**
      * The category file of [id]: its values, and the entries left out (D9); throws [SettingsArchiveException] when the
-     * file is missing, malformed or names another category.
-     * zh-CN: [id] 的分类文件: 其中的值与被略去的条目 (D9); 文件缺失, 格式错误或属于其他分类时抛 [SettingsArchiveException].
+     * file is missing, malformed or names another category, and `LOCKED` when it is sealed for another key (D23).
+     * zh-CN: [id] 的分类文件: 其中的值与被略去的条目 (D9); 文件缺失, 格式错误或属于其他分类时抛 [SettingsArchiveException], 以其他密钥
+     * 加密时为 `LOCKED` (D23).
      */
     fun category(id: String): SettingsSnapshotCodec.Decoded {
         val file = SettingsArchive.categoryFile(id)
         val decoded = try {
-            SettingsSnapshotCodec.decodeCategoryText(text(file))
+            val json = SettingsJson.parse(text(file))
+            SettingsSnapshotCodec.decodeCategory(if (SettingsSealedFile.isSealed(json)) SettingsJson.parse(SettingsSealedFile.open(id, json, key)) else json)
         } catch (e: SettingsJson.SettingsJsonException) {
             throw SettingsArchiveException(SettingsArchiveException.Reason.INVALID_FILE, "$file: ${e.message}", e)
         }
@@ -46,6 +51,23 @@ class SettingsArchiveReader @JvmOverloads constructor(
             throw SettingsArchiveException(SettingsArchiveException.Reason.INVALID_FILE, "$file holds the category ${decoded.category.id}")
         }
         return decoded
+    }
+
+    /**
+     * True when the category file of [id] is sealed without a slot of [key], so that [category] fails with `LOCKED`
+     * (the import wizard disables such a category, P7.5); throws [SettingsArchiveException] when the file is missing or
+     * malformed.
+     * zh-CN: [id] 的分类文件已加密且没有 [key] 的槽, 即 [category] 会因 `LOCKED` 失败时为 true (导入向导禁用该分类, P7.5); 文件缺失或
+     * 格式错误时抛 [SettingsArchiveException].
+     */
+    fun isLocked(id: String): Boolean {
+        val file = SettingsArchive.categoryFile(id)
+        val json = try {
+            SettingsJson.parse(text(file))
+        } catch (e: SettingsJson.SettingsJsonException) {
+            throw SettingsArchiveException(SettingsArchiveException.Reason.INVALID_FILE, "$file: ${e.message}", e)
+        }
+        return SettingsSealedFile.isSealed(json) && !SettingsSealedFile.canOpen(json, key)
     }
 
     /**

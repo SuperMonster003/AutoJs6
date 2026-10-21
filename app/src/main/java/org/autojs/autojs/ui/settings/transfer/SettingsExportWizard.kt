@@ -7,6 +7,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Step
@@ -100,6 +101,7 @@ class SettingsExportWizard(host: SettingsWizardHost) : SettingsWizard(host) {
             val activity = wizard.host.hostActivity
             val text = buildString {
                 append(activity.getString(R.string.settings_transfer_export_done, state.fileName.orEmpty(), state.categories, state.entries))
+                if (SettingCategory.CREDENTIALS.id in state.selected) append("\n\n").append(activity.getString(R.string.settings_transfer_export_sealed))
                 if (state.unexportable > 0) append("\n\n").append(activity.getString(R.string.settings_transfer_export_unexportable, state.unexportable))
             }
             dialog(wizard, state, R.string.text_done, back = false, cancel = false)

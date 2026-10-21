@@ -806,12 +806,13 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">ملفات تعريف معالجات الإعداد</string>
-    <string name="settings_transfer_credentials_warning">تُكتب بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) في الملف كنص عادي. يمكن لأي شخص يملك الملف استخدامها, لذا احتفظ به في مكان آمن.</string>
+    <string name="settings_transfer_credentials_warning">تُشفَّر بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) بمفتاح هذا الجهاز قبل كتابتها في الملف. لا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز, وليس على جهاز آخر أو بعد إعادة ضبط المصنع. يمكن كسر هذا التشفير دون اتصال, لذا احتفظ بالملف في مكان آمن على أي حال.</string>
     <string name="settings_transfer_credentials_warning_title">تصدير بيانات الاعتماد?</string>
     <string name="settings_transfer_description">تُصدَّر الإعدادات حسب الفئة إلى ملف zip يمكن استيراده على هذا الجهاز أو على جهاز آخر.</string>
     <string name="settings_transfer_error_invalid_file">أحد ملفات الفئات في ملف الإعدادات تالف</string>
     <string name="settings_transfer_error_invalid_manifest">ملف manifest.json في ملف الإعدادات تالف أو بتنسيق آخر</string>
     <string name="settings_transfer_error_io">تعذر الوصول إلى الملف: %1$s</string>
+    <string name="settings_transfer_error_locked">تم تشفير بيانات الاعتماد في هذا الملف على جهاز آخر أو بإصدار آخر من AutoJs6, لذا لا يمكن لهذا الجهاز فك تشفيرها</string>
     <string name="settings_transfer_error_missing_file">يفتقد ملف الإعدادات إلى ملف مدرج في manifest.json الخاص به</string>
     <string name="settings_transfer_error_not_an_archive">ليس ملف إعدادات (ليس أرشيف zip)</string>
     <string name="settings_transfer_error_too_large">سيتجاوز ملف الإعدادات %1$s, وهو أكبر حجم مسموح به. اختر فئات أقل.</string>
@@ -820,6 +821,7 @@
     <string name="settings_transfer_export_done">الملف: %1$s\nالفئات: %2$d\nالعناصر: %3$d</string>
     <string name="settings_transfer_export_done_title">تم تصدير الإعدادات</string>
     <string name="settings_transfer_export_failed_title">فشل التصدير</string>
+    <string name="settings_transfer_export_sealed">تم تشفير بيانات الاعتماد بمفتاح هذا الجهاز, ولا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز</string>
     <string name="settings_transfer_export_summary">اختر الفئات واحفظها في ملف zip</string>
     <string name="settings_transfer_export_unexportable">تم استبعاد %1$d من القيم لأنه لا يمكن كتابتها (مثل NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">جارٍ كتابة ملف الإعدادات...</string>
