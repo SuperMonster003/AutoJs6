@@ -23,6 +23,10 @@ internal object RuntimeFlowPrograms {
         check(await flow.any([Promise.reject(Error('first')),flow.of('ok')])==='ok','any');
         check(await flow.race([flow.sleep(2).map(()=>true),()=>false])===true,'race');
         const cancelled=flow.sleep(10000).map(()=>false);cancelled.cancel();await failure(cancelled,'CANCELLED');
+        let late;
+        const asyncOwner=flow.run(async()=>{await new Promise(resolve=>setTimeout(resolve,40));late=flow.sleep(10000);return late;});
+        await new Promise(resolve=>setTimeout(resolve,5));asyncOwner.cancel();await failure(asyncOwner,'CANCELLED');
+        await new Promise(resolve=>setTimeout(resolve,80));check(late.state==='cancelled','async callback child cleanup');
         check(flow.wait===flow.waitAsync&&flow.waitForGone===flow.waitForHidden&&flow.delay===flow.sleep,'aliases');
         await new Promise(resolve=>setTimeout(resolve,10));check(flow.pending===0&&flow.workers===0,'settled cleanup');
         return {checks:checks.length,labels:checks,pending:flow.pending};
