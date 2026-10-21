@@ -92,15 +92,21 @@ class ScriptBridges : IScriptBridges {
         Context.javaToJS(obj, scope)
     }
 
+    // Reuses the Context of the calling thread, otherwise enters one and exits it again. Every enter must be paired:
+    // the bridges of the WrapFactory have no engine, and entering on a thread that already had a Context without
+    // exiting (as before) left that Context entered when the thread ended, so it was never released (one per script
+    // thread that called find() or children(), ROADMAP P3.4).
+    // zh-CN: 复用调用线程的 Context, 否则进入一个并在结束时退出. 每次进入都必须配对退出: WrapFactory 使用的 bridges 没有 engine,
+    // 原先在已有 Context 的线程上进入却不退出, 线程结束时该 Context 仍处于进入状态而永远不会释放 (每个调用过 find() 或 children() 的脚本线程一个, 路线图 P3.4).
     private fun <T> useJsContext(f: (Context) -> T): T {
-        val currentContext = Context.getCurrentContext()
+        Context.getCurrentContext()?.let { return f(it) }
+        // Enter Context via engine to ensure WrapFactory and AutoJsContext binding are installed.
+        // zh-CN: 通过 engine 进入 Context, 确保 WrapFactory 与 AutoJsContext 绑定已安装.
+        val cx = engine?.enterContext() ?: Context.enter()
         return try {
-            val engine = engine ?: return f(Context.enter())
-            // Enter Context via engine to ensure WrapFactory and AutoJsContext binding are installed.
-            // zh-CN: 通过 engine 进入 Context, 确保 WrapFactory 与 AutoJsContext 绑定已安装.
-            f(currentContext ?: engine.enterContext())
+            f(cx)
         } finally {
-            currentContext ?: Context.exit()
+            Context.exit()
         }
     }
 
