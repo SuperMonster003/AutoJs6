@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; kind / 分类 id / 备注来自 `tools/settings/classification.json`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.2 / P0.3).
 
-- 生成日期: 2026-10-21, 扫描基线: `master@8ea5c2d23` (扫描范围内未提交文件 17 个)
+- 生成日期: 2026-10-21, 扫描基线: `master@0184745d9` (扫描范围内未提交文件 10 个)
 - 源码路径相对 `app/src/main/java/org/autojs/autojs/` (其他包保留 `com/...` 等前缀); 资源路径相对 `app/src/main/`.
 - 引用处只计非注释行; 超过 6 处时只列前 6 处, 完整列表见 JSON 基线.
 - kind: Setting (用户设置), State (记忆型状态, 归 `other`), Cache (缓存, 不可导出), ValueConstant (设置值常量, 列表项候选值或默认值别名), Excluded (不是偏好键或永久排除, 见 ROADMAP 附录 A.2).
@@ -16,8 +16,8 @@
 | 设置页中不经字符串资源的字面量键 | 3 (developer_options 1, plugin_center_preferences 2) |
 | 不在设置页的 `key_*` 键 | 169 |
 | 源码 (`app/src/main/java`) 没有引用的键 | 9 (其中设置页, 数组与其他资源也没有引用的 4 个: `key_dialog_foreground_svc`, `key_dialog_layout_inspector_exit_tips`, `key_dialog_log_entries_exported`, `key_enable_observe_key`) |
-| 源码字面量键 (不对应 `key_*` 资源) | 93 |
-| 命名 SharedPreferences / 调用文件 / 已登记 `StoreId` | 29 / 18 / 20 |
+| 源码字面量键 (不对应 `key_*` 资源) | 97 |
+| 命名 SharedPreferences / 调用文件 / 已登记 `StoreId` | 29 / 14 / 24 |
 | 绕过 `Pref` 读默认偏好的文件 | 1 |
 | 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 72 |
 | filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 13 |
@@ -310,17 +310,18 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `SELECTED_COLOR_LIBRARY_ITEM_NAME` | default | theme/app/ColorSelectBaseActivity.kt:1027 | State | `other` | 选中的颜色条目名称缓存 (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_NAME); 声明随 P4.2 (附录 C Q15) |
 | `SELECTED_COLOR_LIBRARY_NAME` | default | theme/app/ColorSelectBaseActivity.kt:1026 | State | `other` | 选中的用户库或智能库名称缓存, 供摘要显示 (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15) |
 | `THEME_COLOR_DERIVED_ACCENT_AND_DARK` | default | core/pref/keys/AppearanceKeys.kt:114 | Setting | `appearance` | 强调色与深色是否由主题色派生 (ThemeColorManager); P3.6 声明为 AppearanceKeys (附录 C Q15) |
+| `active_profile` | editor_symbols_config | core/pref/keys/EditorKeyboardKeys.kt:41 | Setting | `editor_keyboard` | 当前符号配置档 (SymbolsConfigStore); P3.2 声明为 EditorKeyboardKeys; 属于命名存储, 随整份计数 |
 | `dex_compiler_experimental_component` | default | core/pref/keys/DeveloperKeys.kt:54 | Setting | `developer` | 选择的 dex 编译器组件; 导入时插件未安装则与开关一起跳过 (P7.3); P3.6 声明为 DeveloperKeys (附录 C Q15) |
 | `dex_compiler_experimental_enabled` | default | core/pref/keys/DeveloperKeys.kt:50 | Setting | `developer` | 开发者选项选择的实验性 dex 编译器插件开关 (DexCompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15) |
 | `find_or_replace_using_regex` | default | core/pref/keys/MiscStateKeys.kt:27 | State | `other` | 查找 / 替换对话框的正则开关 (FindOrReplaceDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15) |
 | `github_token` | github_auth | core/pref/keys/CredentialKeys.kt:31 | Setting | `credentials` | GitHub 令牌 (GitHubTokenStore); P3.4 声明为 CredentialKeys.GITHUB_TOKEN, sensitive, 属于命名存储, 随整份计数 |
 | `initialized_sources` | plugin_center_attention | core/pref/keys/PluginCenterKeys.kt:296 | State | `other` | 已比对过一次的索引来源 (PluginCenterAttentionStore); P3.1 声明为 PluginCenterKeys 的 State; 属于命名存储, 随整份计数 |
-| `key_$_ace_editor_font_name_sort_type_locked` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:91 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
-| `key_$_ace_editor_font_preview_excluded_features` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:93 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
-| `key_$_ace_editor_font_preview_excluded_types` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:94 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
-| `key_$_ace_editor_font_selected_variant_` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:96 | Setting | `editor_keyboard` | 前缀键, 属于命名存储, 随整份计数 |
-| `key_$_ace_editor_font_size_sort_type_locked` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:92 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
-| `key_$_ace_editor_font_sort_mode` | ace_editor_font_ui_preferences | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:90 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
+| `key_$_ace_editor_font_name_sort_type_locked` | ace_editor_font_ui_preferences | core/pref/keys/EditorKeyboardKeys.kt:64 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
+| `key_$_ace_editor_font_preview_excluded_features` | ace_editor_font_ui_preferences | core/pref/keys/EditorKeyboardKeys.kt:78 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
+| `key_$_ace_editor_font_preview_excluded_types` | ace_editor_font_ui_preferences | core/pref/keys/EditorKeyboardKeys.kt:85 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
+| `key_$_ace_editor_font_selected_variant_` | ace_editor_font_ui_preferences | core/pref/keys/EditorKeyboardKeys.kt:91 | Setting | `editor_keyboard` | 前缀键, 属于命名存储, 随整份计数 |
+| `key_$_ace_editor_font_size_sort_type_locked` | ace_editor_font_ui_preferences | core/pref/keys/EditorKeyboardKeys.kt:71 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
+| `key_$_ace_editor_font_sort_mode` | ace_editor_font_ui_preferences | core/pref/keys/EditorKeyboardKeys.kt:57 | Setting | `editor_keyboard` | 属于命名存储, 随整份计数 |
 | `key_$_ace_lsp_file_types_revision` | default | ui/edit/editor/ace/AceEditorLspPreferences.kt:10 | State | `other` | 默认文件类型列表的迁移版本号 (AceEditorLspPreferences) |
 | `key_$_ace_semantic_java_enabled` | default | core/pref/keys/EditorKeys.kt:242, ui/edit/editor/ace/AceEditorLspPreferences.kt:15 | Setting | `editor_assistance` | 语义语言开关 (AceSemanticLanguagesPreference) |
 | `key_$_ace_semantic_kotlin_enabled` | default | core/pref/keys/EditorKeys.kt:248, ui/edit/editor/ace/AceEditorLspPreferences.kt:16 | Setting | `editor_assistance` | 语义语言开关 |
@@ -393,8 +394,11 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 | `org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX` | default | theme/app/ColorSelectBaseActivity.kt:1017 | State | `other` | 旧布局选中的颜色序号 (ColorSelectBaseActivity.KEY_LEGACY_SELECTED_COLOR_INDEX); 声明随 P4.2 (附录 C Q15) |
 | `org.autojs.autojs.ui.edit.debug.CodeEvaluateDialogBuilder.code` | default | core/pref/keys/MiscStateKeys.kt:31 | State | `other` | 代码求值对话框的上次输入 (CodeEvaluateDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15) |
 | `pins` | plugin_center_attention | core/pref/keys/PluginCenterKeys.kt:301 | State | `other` | 当前的临时置顶, org.json 数组文本 (PluginCenterAttentionStore); P3.1 声明为 PluginCenterKeys 的 State; 属于命名存储, 随整份计数 |
+| `profiles_json` | editor_symbols_config | core/pref/keys/EditorKeyboardKeys.kt:48 | Setting | `editor_keyboard` | 符号配置档, org.json 对象文本 (SymbolsConfigStore); P3.2 声明为 EditorKeyboardKeys; 属于命名存储, 随整份计数 |
 | `r8_compiler_explicit_component` | default | core/pref/keys/DeveloperKeys.kt:62 | Setting | `developer` | 选择的 R8 编译器组件; 导入时插件未安装则与开关一起跳过 (P7.3); P3.6 声明为 DeveloperKeys (附录 C Q15) |
 | `r8_compiler_explicit_enabled` | default | core/pref/keys/DeveloperKeys.kt:58 | Setting | `developer` | 开发者选项显式选择的 R8 编译器插件开关 (R8CompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15) |
+| `soft_input_height` | FunctionsKeyboardHelper | core/pref/keys/EditorKeyboardKeys.kt:103 | Cache |  | 本机测得的软键盘高度 (像素, FunctionsKeyboardHelper), 不导出 (附录 C Q19); P3.2 声明为 EditorKeyboardKeys 的 CacheKey |
+| `state_json` | ace_action_history | core/pref/keys/EditorKeyboardKeys.kt:110 | State | `other` | Ace 动作使用历史, org.json 对象文本 (AceActionHistoryStore); P3.2 声明为 EditorKeyboardKeys 的 State; 属于命名存储, 随整份计数 |
 | `three_stove_agent_script_root_configuration` | default | core/pref/keys/ExtensibilityKeys.kt:42 | Setting | `extensibility` | 3-Stove Agent 的脚本根目录配置, JSON 对象 (ThreeStoveAgentConnectionOwner); P3.6 声明为 ExtensibilityKeys (附录 C Q15) |
 
 设置页中不经字符串资源的键: `process_exit_history` (fragment_developer_options.xml:148, kind Excluded), `plugin_center_hidden_plugin_management` (fragment_plugin_center_preferences.xml:42, kind Excluded), `plugin_center_auto_mount_management` (fragment_plugin_center_preferences.xml:54, kind Excluded)
@@ -403,35 +407,35 @@ kind 统计 (`key_*` 资源): Setting 124, State 40, Cache 1, ValueConstant 74, 
 
 | 文件名 | 解析方式 | 调用处 | kind | 分类 id | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| `FunctionsKeyboardHelper` | 常量 SHARE_PREFERENCE_NAME (ui/edit/keyboard/FunctionsKeyboardHelper.java:26) | ui/edit/keyboard/FunctionsKeyboardHelper.java:44 | Setting | `editor_keyboard` | 编辑器功能键盘配置 (附录 A) |
-| `ScriptWidgets` | 排除登记 `NamedStores.SCRIPT_WIDGETS` (core/pref/keys/NamedStores.kt:107); 字面量 | external/widget/ScriptWidgets.java:22 | Excluded |  | 桌面小部件 id 由启动器分配, 仅本机有效 (附录 A.2) |
-| `ace_action_history` | 常量 PREF_NAME (ui/edit/keyboard/AceActionHistoryStore.kt:10) | ui/edit/keyboard/AceActionHistoryStore.kt:40 | State | `other` | Ace 动作历史 (P3.2 为 State) |
-| `ace_editor_font_ui_preferences` | 常量 SHARED_PREFERENCES_NAME (ui/edit/editor/ace/AceEditorFontUiPreferences.kt:89) | ui/edit/editor/ace/AceEditorFontUiPreferences.kt:243 | Setting | `editor_keyboard` | 字体选择界面的排序 / 预览 / 变体偏好 (附录 A) |
-| `autojs.localstorage.*` | 排除登记 `NamedStores.SCRIPT_LOCAL_STORAGES` (core/pref/keys/NamedStores.kt:87); 人工: `.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`; 拼接 | core/storage/LocalStorage.java:28, runtime/api/augment/storages/Storages.kt:48, runtime/api/augment/storages/Storages.kt:61 | Excluded |  | 脚本自己的数据 (附录 A.2) |
-| `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:91); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3481) | engine/NodeBridgeProtocol.kt:3366 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
+| `FunctionsKeyboardHelper` | 登记 `NamedStores.FUNCTIONS_KEYBOARD_HELPER` (core/pref/keys/NamedStores.kt:33) | core/pref/keys/EditorKeyboardKeys.kt:103 | Cache |  | 只有本机测得的软键盘高度 (soft_input_height), 为缓存, 不导出 (附录 C Q19, 原归 editor_keyboard); P3.2 登记为 NamedStores |
+| `ScriptWidgets` | 排除登记 `NamedStores.SCRIPT_WIDGETS` (core/pref/keys/NamedStores.kt:126); 字面量 | external/widget/ScriptWidgets.java:22 | Excluded |  | 桌面小部件 id 由启动器分配, 仅本机有效 (附录 A.2) |
+| `ace_action_history` | 登记 `NamedStores.ACE_ACTION_HISTORY` (core/pref/keys/NamedStores.kt:41) | core/pref/keys/EditorKeyboardKeys.kt:110 | State | `other` | Ace 动作历史 (P3.2 为 State); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
+| `ace_editor_font_ui_preferences` | 登记 `NamedStores.ACE_EDITOR_FONT_UI_PREFERENCES` (core/pref/keys/NamedStores.kt:37) | core/pref/keys/EditorKeyboardKeys.kt:58, core/pref/keys/EditorKeyboardKeys.kt:64, core/pref/keys/EditorKeyboardKeys.kt:71, core/pref/keys/EditorKeyboardKeys.kt:79 等 7 处 | Setting | `editor_keyboard` | 字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
+| `autojs.localstorage.*` | 排除登记 `NamedStores.SCRIPT_LOCAL_STORAGES` (core/pref/keys/NamedStores.kt:106); 人工: `.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`; 拼接 | core/storage/LocalStorage.java:28, runtime/api/augment/storages/Storages.kt:48, runtime/api/augment/storages/Storages.kt:61 | Excluded |  | 脚本自己的数据 (附录 A.2) |
+| `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:110); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3481) | engine/NodeBridgeProtocol.kt:3366 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
 | `build_apk_config_profiles` | 常量 PREF_NAME (ui/project/BuildConfigStore.java:27) | ui/project/BuildConfigStore.java:294 | Setting | `apk_build` | APK 构建配置档 |
-| `bun_host_capability_grants` | 登记 `NamedStores.BUN_HOST_CAPABILITY_GRANTS` (core/pref/keys/NamedStores.kt:76) | core/pref/keys/CredentialKeys.kt:55 | Setting | `credentials` | Bun 宿主能力授权, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
-| `device_id_prefs` | 排除登记 `NamedStores.DEVICE_ID_PREFS` (core/pref/keys/NamedStores.kt:83); 常量 SP_NAME (deviceid/DeviceIdProvider.kt:20) | deviceid/DeviceIdProvider.kt:33 | Excluded |  | 设备标识 (附录 A.2) |
-| `editor_symbols_config` | 常量 PREF_NAME (ui/edit/keyboard/SymbolsConfigStore.kt:26) | ui/edit/keyboard/SymbolsConfigStore.kt:45 | Setting | `editor_keyboard` | 符号键盘配置 (附录 A) |
-| `explorer_playback_history` | 排除登记 `NamedStores.EXPLORER_PLAYBACK_HISTORY` (core/pref/keys/NamedStores.kt:111); 常量 PREFERENCES_NAME (core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:79) | core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:13, core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:84, core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:96 | Excluded |  | 媒体回放进度, 指向本机文件 (P3.5 永久排除) |
-| `github_auth` | 登记 `NamedStores.GITHUB_AUTH` (core/pref/keys/NamedStores.kt:60) | core/pref/keys/CredentialKeys.kt:31 | Setting | `credentials` | GitHub 令牌, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
+| `bun_host_capability_grants` | 登记 `NamedStores.BUN_HOST_CAPABILITY_GRANTS` (core/pref/keys/NamedStores.kt:95) | core/pref/keys/CredentialKeys.kt:55 | Setting | `credentials` | Bun 宿主能力授权, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
+| `device_id_prefs` | 排除登记 `NamedStores.DEVICE_ID_PREFS` (core/pref/keys/NamedStores.kt:102); 常量 SP_NAME (deviceid/DeviceIdProvider.kt:20) | deviceid/DeviceIdProvider.kt:33 | Excluded |  | 设备标识 (附录 A.2) |
+| `editor_symbols_config` | 登记 `NamedStores.EDITOR_SYMBOLS_CONFIG` (core/pref/keys/NamedStores.kt:29) | core/pref/keys/EditorKeyboardKeys.kt:42, core/pref/keys/EditorKeyboardKeys.kt:49 | Setting | `editor_keyboard` | 符号键盘配置 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
+| `explorer_playback_history` | 排除登记 `NamedStores.EXPLORER_PLAYBACK_HISTORY` (core/pref/keys/NamedStores.kt:130); 常量 PREFERENCES_NAME (core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:79) | core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:13, core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:84, core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt:96 | Excluded |  | 媒体回放进度, 指向本机文件 (P3.5 永久排除) |
+| `github_auth` | 登记 `NamedStores.GITHUB_AUTH` (core/pref/keys/NamedStores.kt:79) | core/pref/keys/CredentialKeys.kt:31 | Setting | `credentials` | GitHub 令牌, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
 | `jvm_source_provider_selection` | 常量 PREFERENCES (core/plugin/jvm/JvmSourceProviderSelection.kt:8) | core/plugin/jvm/JvmSourceProviderSelection.kt:19, core/plugin/jvm/JvmSourceProviderSelection.kt:31 | Setting | `plugin_center` | JVM 源码提供方选择 (附录 A) |
 | `key_$_ignored_updates` | 字符串资源 key_ignored_updates | network/UpdateIgnoreStore.kt:13 | Setting | `updates` | UpdateIgnoreStore (文件名取自 `R.string.key_ignored_updates`), 忽略的插件更新 |
-| `lua-runtime-storage-v1-*` | 排除登记 `NamedStores.LUA_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:95); 拼接 | engine/LuaHostStorage.kt:166 | Excluded |  | 脚本自己的数据 (附录 A.2) |
-| `mcp_server_trust_confirmation` | 登记 `NamedStores.MCP_SERVER_TRUST_CONFIRMATION` (core/pref/keys/NamedStores.kt:68) | core/pref/keys/CredentialKeys.kt:43 | Setting | `credentials` | MCP Server 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
+| `lua-runtime-storage-v1-*` | 排除登记 `NamedStores.LUA_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:114); 拼接 | engine/LuaHostStorage.kt:166 | Excluded |  | 脚本自己的数据 (附录 A.2) |
+| `mcp_server_trust_confirmation` | 登记 `NamedStores.MCP_SERVER_TRUST_CONFIRMATION` (core/pref/keys/NamedStores.kt:87) | core/pref/keys/CredentialKeys.kt:43 | Setting | `credentials` | MCP Server 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
 | `permission_wizard` | 构造参数 core/plugin/center/wizard/PluginInstallWizardProfileStore.kt:26, ui/wizard/permission/PermissionWizardDialog.kt:31 | ui/wizard/WizardProfileStore.kt:27 | Setting | `wizards` | 权限向导自定义配置档; 其中 `_last_profile_id` 是状态 (附录 A), 整份随 wizards |
-| `plugin_center_attention` | 登记 `NamedStores.PLUGIN_CENTER_ATTENTION` (core/pref/keys/NamedStores.kt:53) | core/plugin/center/PluginCenterAttentionStore.kt:118, core/pref/keys/PluginCenterKeys.kt:291, core/pref/keys/PluginCenterKeys.kt:296, core/pref/keys/PluginCenterKeys.kt:301 | State | `other` | 插件中心临时置顶 (P4.2); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `plugin_center_authorization` | 登记 `NamedStores.PLUGIN_CENTER_AUTHORIZATION` (core/pref/keys/NamedStores.kt:64) | core/pref/keys/CredentialKeys.kt:37 | Setting | `credentials` | 插件授权记录, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
-| `plugin_center_enable_state` | 登记 `NamedStores.PLUGIN_CENTER_ENABLE_STATE` (core/pref/keys/NamedStores.kt:45) | core/plugin/center/PluginEnableStore.kt:67, core/pref/keys/PluginCenterKeys.kt:264, core/pref/keys/PluginCenterKeys.kt:270 | Setting | `plugin_enable_state` | 插件启用与挂起状态; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `plugin_center_filter_state` | 登记 `NamedStores.PLUGIN_CENTER_FILTER_STATE` (core/pref/keys/NamedStores.kt:29) | core/plugin/center/PluginFilterStore.kt:79, core/pref/keys/PluginCenterKeys.kt:94, core/pref/keys/PluginCenterKeys.kt:320 | Setting | `plugin_center` | 筛选; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `plugin_center_recent` | 登记 `NamedStores.PLUGIN_CENTER_RECENT` (core/pref/keys/NamedStores.kt:49) | core/pref/keys/PluginCenterKeys.kt:278, core/pref/keys/PluginCenterKeys.kt:284 | State | `other` | 最近安装 / 卸载时间 (P4.2); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `plugin_center_sort_state` | 登记 `NamedStores.PLUGIN_CENTER_SORT_STATE` (core/pref/keys/NamedStores.kt:33) | core/plugin/center/PluginSortStore.kt:21, core/plugin/center/PluginSortStoreOfficial.kt:23, core/plugin/center/PluginSortStoreThirdParty.kt:23, core/pref/keys/PluginCenterKeys.kt:117 等 8 处 | Setting | `plugin_center` | 排序, PluginSortStore / Official / ThirdParty 三个类共用一份; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `plugin_center_visibility_state` | 登记 `NamedStores.PLUGIN_CENTER_VISIBILITY_STATE` (core/pref/keys/NamedStores.kt:37) | core/plugin/center/PluginVisibilityStore.kt:23, core/pref/keys/PluginCenterKeys.kt:188, core/pref/keys/PluginCenterKeys.kt:194, core/pref/keys/PluginCenterKeys.kt:200 | Setting | `plugin_center` | 隐藏的插件; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `plugin_center_attention` | 登记 `NamedStores.PLUGIN_CENTER_ATTENTION` (core/pref/keys/NamedStores.kt:72) | core/plugin/center/PluginCenterAttentionStore.kt:118, core/pref/keys/PluginCenterKeys.kt:291, core/pref/keys/PluginCenterKeys.kt:296, core/pref/keys/PluginCenterKeys.kt:301 | State | `other` | 插件中心临时置顶 (P4.2); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `plugin_center_authorization` | 登记 `NamedStores.PLUGIN_CENTER_AUTHORIZATION` (core/pref/keys/NamedStores.kt:83) | core/pref/keys/CredentialKeys.kt:37 | Setting | `credentials` | 插件授权记录, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
+| `plugin_center_enable_state` | 登记 `NamedStores.PLUGIN_CENTER_ENABLE_STATE` (core/pref/keys/NamedStores.kt:64) | core/plugin/center/PluginEnableStore.kt:67, core/pref/keys/PluginCenterKeys.kt:264, core/pref/keys/PluginCenterKeys.kt:270 | Setting | `plugin_enable_state` | 插件启用与挂起状态; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `plugin_center_filter_state` | 登记 `NamedStores.PLUGIN_CENTER_FILTER_STATE` (core/pref/keys/NamedStores.kt:48) | core/plugin/center/PluginFilterStore.kt:79, core/pref/keys/PluginCenterKeys.kt:94, core/pref/keys/PluginCenterKeys.kt:320 | Setting | `plugin_center` | 筛选; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `plugin_center_recent` | 登记 `NamedStores.PLUGIN_CENTER_RECENT` (core/pref/keys/NamedStores.kt:68) | core/pref/keys/PluginCenterKeys.kt:278, core/pref/keys/PluginCenterKeys.kt:284 | State | `other` | 最近安装 / 卸载时间 (P4.2); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `plugin_center_sort_state` | 登记 `NamedStores.PLUGIN_CENTER_SORT_STATE` (core/pref/keys/NamedStores.kt:52) | core/plugin/center/PluginSortStore.kt:21, core/plugin/center/PluginSortStoreOfficial.kt:23, core/plugin/center/PluginSortStoreThirdParty.kt:23, core/pref/keys/PluginCenterKeys.kt:117 等 8 处 | Setting | `plugin_center` | 排序, PluginSortStore / Official / ThirdParty 三个类共用一份; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `plugin_center_visibility_state` | 登记 `NamedStores.PLUGIN_CENTER_VISIBILITY_STATE` (core/pref/keys/NamedStores.kt:56) | core/plugin/center/PluginVisibilityStore.kt:23, core/pref/keys/PluginCenterKeys.kt:188, core/pref/keys/PluginCenterKeys.kt:194, core/pref/keys/PluginCenterKeys.kt:200 | Setting | `plugin_center` | 隐藏的插件; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
 | `plugin_install_wizard` | 字面量; 构造参数 core/plugin/center/wizard/PluginInstallWizardProfileStore.kt:26, ui/wizard/permission/PermissionWizardDialog.kt:31 | core/plugin/center/wizard/PluginInstallWizardProfileStore.kt:18, core/plugin/center/wizard/PluginInstallWizardProfileStore.kt:22, ui/wizard/WizardProfileStore.kt:27 | Setting | `wizards` | 插件安装向导自定义配置档; 其中 `_last_profile_id` 是状态, 整份随 wizards |
-| `plugin_launcher_icons` | 登记 `NamedStores.PLUGIN_LAUNCHER_ICONS` (core/pref/keys/NamedStores.kt:41) | core/pref/keys/PluginCenterKeys.kt:215 | Setting | `plugin_center` | 插件启动图标显示状态 (PluginLauncherIconController); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `privileged_edit_backups` | 排除登记 `NamedStores.PRIVILEGED_EDIT_BACKUPS` (core/pref/keys/NamedStores.kt:99); 常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30) | model/explorer/PrivilegedBackupManager.kt:38, model/explorer/PrivilegedBackupManager.kt:44, model/explorer/PrivilegedBackupManager.kt:87, model/explorer/PrivilegedBackupManager.kt:90 等 5 处 | Excluded |  | 指向本机文件的操作日志 (附录 A.2) |
-| `runtime_task_intents` | 排除登记 `NamedStores.RUNTIME_TASK_INTENTS` (core/pref/keys/NamedStores.kt:103); 字面量 | engine/RuntimeTasksBridge.kt:155 | Excluded |  | 运行时状态 (附录 A.2) |
-| `three_stove_agent_trust_confirmation` | 登记 `NamedStores.THREE_STOVE_AGENT_TRUST_CONFIRMATION` (core/pref/keys/NamedStores.kt:72) | core/pref/keys/CredentialKeys.kt:49 | Setting | `credentials` | 3-Stove Agent 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
+| `plugin_launcher_icons` | 登记 `NamedStores.PLUGIN_LAUNCHER_ICONS` (core/pref/keys/NamedStores.kt:60) | core/pref/keys/PluginCenterKeys.kt:215 | Setting | `plugin_center` | 插件启动图标显示状态 (PluginLauncherIconController); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
+| `privileged_edit_backups` | 排除登记 `NamedStores.PRIVILEGED_EDIT_BACKUPS` (core/pref/keys/NamedStores.kt:118); 常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30) | model/explorer/PrivilegedBackupManager.kt:38, model/explorer/PrivilegedBackupManager.kt:44, model/explorer/PrivilegedBackupManager.kt:87, model/explorer/PrivilegedBackupManager.kt:90 等 5 处 | Excluded |  | 指向本机文件的操作日志 (附录 A.2) |
+| `runtime_task_intents` | 排除登记 `NamedStores.RUNTIME_TASK_INTENTS` (core/pref/keys/NamedStores.kt:122); 字面量 | engine/RuntimeTasksBridge.kt:155 | Excluded |  | 运行时状态 (附录 A.2) |
+| `three_stove_agent_trust_confirmation` | 登记 `NamedStores.THREE_STOVE_AGENT_TRUST_CONFIRMATION` (core/pref/keys/NamedStores.kt:91) | core/pref/keys/CredentialKeys.kt:49 | Setting | `credentials` | 3-Stove Agent 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
 
 ## 5. 绕过 `Pref` 读默认偏好的文件
 
@@ -479,7 +483,7 @@ Setting 与 State 计入条目数; 默认偏好中的字面量键 (含前缀键,
 | `editor_gestures` | 2 | 0 | 0 | 2 |  |
 | `editor_gutter` | 5 | 0 | 0 | 5 |  |
 | `editor_performance` | 2 | 0 | 0 | 2 |  |
-| `editor_keyboard` | 0 | 0 | 3 | 3 |  |
+| `editor_keyboard` | 0 | 0 | 2 | 2 |  |
 | `timed_task` | 1 | 0 | 0 | 1 |  |
 | `a11y` | 5 | 0 | 0 | 5 |  |
 | `running` | 5 | 0 | 0 | 5 |  |

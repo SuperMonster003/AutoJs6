@@ -2,7 +2,10 @@ package org.autojs.autojs.ui.edit.editor.ace
 
 import android.content.Context
 import androidx.annotation.StringRes
-import androidx.core.content.edit
+import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys
+import org.autojs.autojs.core.pref.keys.NamedStores
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 import org.autojs.autojs.ui.edit.editor.ace.font.AceFontIds
 import org.autojs.autojs.ui.edit.editor.ace.font.FontFeature
 import org.autojs.autojs6.R
@@ -83,56 +86,51 @@ data class AceEditorFontPreviewFilter(
     }
 }
 
-/** Persisted presentation preferences shared by the font dialog and font previewer. */
+/**
+ * Persisted presentation preferences shared by the font dialog and font previewer, in the named store
+ * `ace_editor_font_ui_preferences` declared in [EditorKeyboardKeys] (docs/settings/ROADMAP.md P3.2, names unchanged).
+ * The [Context] parameters are kept for the callers; the store is opened by the settings layer with the application
+ * context, as before.
+ */
 object AceEditorFontUiPreferences {
 
-    private const val SHARED_PREFERENCES_NAME = "ace_editor_font_ui_preferences"
-    private const val KEY_SORT_MODE = "key_\$_ace_editor_font_sort_mode"
-    private const val KEY_NAME_SORT_TYPE_LOCKED = "key_\$_ace_editor_font_name_sort_type_locked"
-    private const val KEY_SIZE_SORT_TYPE_LOCKED = "key_\$_ace_editor_font_size_sort_type_locked"
-    private const val KEY_EXCLUDED_PREVIEW_FEATURES = "key_\$_ace_editor_font_preview_excluded_features"
-    private const val KEY_EXCLUDED_PREVIEW_TYPES = "key_\$_ace_editor_font_preview_excluded_types"
     private const val OTHER_FEATURE_STORAGE_VALUE = "other"
-    private const val KEY_SELECTED_VARIANT_PREFIX = "key_\$_ace_editor_font_selected_variant_"
 
+    private val store
+        get() = SettingsStores[NamedStores.ACE_EDITOR_FONT_UI_PREFERENCES]
+
+    @Suppress("UNUSED_PARAMETER")
     fun getSortMode(context: Context): AceEditorFontSortMode =
-        AceEditorFontSortMode.fromStoredValue(preferences(context).getString(KEY_SORT_MODE, null))
+        AceEditorFontSortMode.fromStoredValue(EditorKeyboardKeys.FONT_SORT_MODE.storedOrNull())
 
+    @Suppress("UNUSED_PARAMETER")
     fun setSortMode(context: Context, mode: AceEditorFontSortMode) {
-        preferences(context).edit {
-            if (mode == AceEditorFontSortMode.DEFAULT) {
-                remove(KEY_SORT_MODE)
-            } else {
-                putString(KEY_SORT_MODE, mode.name)
-            }
-        }
+        EditorKeyboardKeys.FONT_SORT_MODE.set(if (mode == AceEditorFontSortMode.DEFAULT) null else mode.name)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun resetSortMode(context: Context) {
-        preferences(context).edit { remove(KEY_SORT_MODE) }
+        EditorKeyboardKeys.FONT_SORT_MODE.remove()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun getTypeLocked(context: Context, field: AceEditorFontSortField): Boolean =
-        preferences(context).getBoolean(typeLockedKey(field), field.typeLockedByDefault)
+        typeLockedKey(field).storedOrNull() ?: field.typeLockedByDefault
 
+    @Suppress("UNUSED_PARAMETER")
     fun setTypeLocked(
         context: Context,
         field: AceEditorFontSortField,
         typeLocked: Boolean,
     ) {
-        preferences(context).edit {
-            if (typeLocked == field.typeLockedByDefault) {
-                remove(typeLockedKey(field))
-            } else {
-                putBoolean(typeLockedKey(field), typeLocked)
-            }
-        }
+        typeLockedKey(field).set(if (typeLocked == field.typeLockedByDefault) null else typeLocked)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun resetTypeLocks(context: Context) {
-        preferences(context).edit {
-            remove(KEY_NAME_SORT_TYPE_LOCKED)
-            remove(KEY_SIZE_SORT_TYPE_LOCKED)
+        store.edit {
+            remove(EditorKeyboardKeys.FONT_NAME_SORT_TYPE_LOCKED.name)
+            remove(EditorKeyboardKeys.FONT_SIZE_SORT_TYPE_LOCKED.name)
         }
     }
 
@@ -152,15 +150,11 @@ object AceEditorFontUiPreferences {
 
     fun getPreviewFilter(context: Context): AceEditorFontPreviewFilter {
         val byCatalogValue = FontFeature.entries.associateBy(FontFeature::catalogValue)
-        val storedFeatures = preferences(context)
-            .getStringSet(KEY_EXCLUDED_PREVIEW_FEATURES, emptySet())
-            .orEmpty()
+        val storedFeatures = EditorKeyboardKeys.FONT_PREVIEW_EXCLUDED_FEATURES.get()
         val excluded = storedFeatures
             .mapNotNullTo(linkedSetOf()) { byCatalogValue[it] }
         val byTypeValue = AceEditorFontType.entries.associateBy(AceEditorFontType::storageValue)
-        val excludedTypes = preferences(context)
-            .getStringSet(KEY_EXCLUDED_PREVIEW_TYPES, emptySet())
-            .orEmpty()
+        val excludedTypes = EditorKeyboardKeys.FONT_PREVIEW_EXCLUDED_TYPES.get()
             .mapNotNullTo(linkedSetOf()) { byTypeValue[it] }
         return AceEditorFontPreviewFilter(
             excludedFeatures = excluded,
@@ -174,57 +168,47 @@ object AceEditorFontUiPreferences {
         setExcludedTypes(context, filter.excludedTypes)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun setExcludedFeatures(
         context: Context,
         features: Set<FontFeature>,
         excludeOther: Boolean = false,
     ) {
-        preferences(context).edit {
-            if (features.isEmpty() && !excludeOther) {
-                remove(KEY_EXCLUDED_PREVIEW_FEATURES)
-            } else {
-                putStringSet(
-                    KEY_EXCLUDED_PREVIEW_FEATURES,
-                    features.mapTo(linkedSetOf(), FontFeature::catalogValue).apply {
-                        if (excludeOther) add(OTHER_FEATURE_STORAGE_VALUE)
-                    },
-                )
-            }
-        }
+        EditorKeyboardKeys.FONT_PREVIEW_EXCLUDED_FEATURES.set(
+            if (features.isEmpty() && !excludeOther) null
+            else features.mapTo(linkedSetOf(), FontFeature::catalogValue).apply {
+                if (excludeOther) add(OTHER_FEATURE_STORAGE_VALUE)
+            },
+        )
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun setExcludedTypes(context: Context, types: Set<AceEditorFontType>) {
-        preferences(context).edit {
-            if (types.isEmpty()) {
-                remove(KEY_EXCLUDED_PREVIEW_TYPES)
-            } else {
-                putStringSet(
-                    KEY_EXCLUDED_PREVIEW_TYPES,
-                    types.mapTo(linkedSetOf(), AceEditorFontType::storageValue),
-                )
-            }
-        }
+        EditorKeyboardKeys.FONT_PREVIEW_EXCLUDED_TYPES.set(
+            if (types.isEmpty()) null else types.mapTo(linkedSetOf(), AceEditorFontType::storageValue),
+        )
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun resetPreviewFilter(context: Context) {
-        preferences(context).edit {
-            remove(KEY_EXCLUDED_PREVIEW_FEATURES)
-            remove(KEY_EXCLUDED_PREVIEW_TYPES)
+        store.edit {
+            remove(EditorKeyboardKeys.FONT_PREVIEW_EXCLUDED_FEATURES.name)
+            remove(EditorKeyboardKeys.FONT_PREVIEW_EXCLUDED_TYPES.name)
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun getSelectedVariantId(context: Context, groupId: String): String? {
         if (!AceFontIds.validId.matches(groupId)) return null
-        return preferences(context).getString(KEY_SELECTED_VARIANT_PREFIX + groupId, null)
+        return EditorKeyboardKeys.FONT_SELECTED_VARIANT.key(groupId).storedOrNull()
             ?.takeIf(AceFontIds.validId::matches)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun setSelectedVariantId(context: Context, groupId: String, fontId: String) {
         require(AceFontIds.validId.matches(groupId)) { "Invalid ACE font group id: $groupId" }
         require(AceFontIds.validId.matches(fontId)) { "Invalid ACE font variant id: $fontId" }
-        preferences(context).edit {
-            putString(KEY_SELECTED_VARIANT_PREFIX + groupId, fontId)
-        }
+        EditorKeyboardKeys.FONT_SELECTED_VARIANT.key(groupId).set(fontId)
     }
 
     fun filteredPreviewOptions(
@@ -240,14 +224,9 @@ object AceEditorFontUiPreferences {
         options: List<AceEditorFontOption>,
     ): List<AceEditorFontOption> = filteredPreviewOptions(context, sortedOptions(context, options))
 
-    private fun preferences(context: Context) = context.applicationContext.getSharedPreferences(
-        SHARED_PREFERENCES_NAME,
-        Context.MODE_PRIVATE,
-    )
-
-    private fun typeLockedKey(field: AceEditorFontSortField): String = when (field) {
-        AceEditorFontSortField.NAME -> KEY_NAME_SORT_TYPE_LOCKED
-        AceEditorFontSortField.SIZE -> KEY_SIZE_SORT_TYPE_LOCKED
+    private fun typeLockedKey(field: AceEditorFontSortField) = when (field) {
+        AceEditorFontSortField.NAME -> EditorKeyboardKeys.FONT_NAME_SORT_TYPE_LOCKED
+        AceEditorFontSortField.SIZE -> EditorKeyboardKeys.FONT_SIZE_SORT_TYPE_LOCKED
     }
 
     private fun comparator(

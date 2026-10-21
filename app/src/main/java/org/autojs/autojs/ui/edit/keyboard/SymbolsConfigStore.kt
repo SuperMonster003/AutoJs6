@@ -1,9 +1,8 @@
 package org.autojs.autojs.ui.edit.keyboard
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys
 import org.autojs.autojs.util.LocaleUtils
 import org.autojs.autojs.util.StringUtils
 import org.autojs.autojs6.R
@@ -23,9 +22,8 @@ object SymbolsConfigStore {
     // zh-CN: "默认名称别名集合" 的缓存 (按语言环境 key 缓存).
     private val sDefaultAliasesCache = ConcurrentHashMap<String, Set<String>>()
 
-    private const val PREF_NAME = "editor_symbols_config"
-    private const val KEY_ACTIVE_PROFILE = "active_profile"
-    private const val KEY_PROFILES_JSON = "profiles_json"
+    // The named store editor_symbols_config: EditorKeyboardKeys.SYMBOLS_ACTIVE_PROFILE and SYMBOLS_PROFILES (P3.2).
+    // zh-CN: 命名存储 editor_symbols_config: EditorKeyboardKeys.SYMBOLS_ACTIVE_PROFILE 与 SYMBOLS_PROFILES (P3.2).
 
     // Internal stable id for default profile.
     // zh-CN: 默认配置的内部稳定标识 (不随语言变化).
@@ -41,14 +39,12 @@ object SymbolsConfigStore {
         ACE,
     }
 
-    private fun prefs(context: Context): SharedPreferences =
-        context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    @Suppress("UNUSED_PARAMETER")
+    fun getActiveProfileName(context: Context): String = EditorKeyboardKeys.SYMBOLS_ACTIVE_PROFILE.get()
 
-    fun getActiveProfileName(context: Context): String =
-        prefs(context).getString(KEY_ACTIVE_PROFILE, PROFILE_DEFAULT_ID) ?: PROFILE_DEFAULT_ID
-
+    @Suppress("UNUSED_PARAMETER")
     fun setActiveProfileName(context: Context, name: String) {
-        prefs(context).edit { putString(KEY_ACTIVE_PROFILE, name) }
+        EditorKeyboardKeys.SYMBOLS_ACTIVE_PROFILE.set(name)
     }
 
     fun getPrefillProfileName(context: Context): String {
@@ -155,7 +151,7 @@ object SymbolsConfigStore {
 
         // Also set SharedPreferences active_profile if absent.
         // zh-CN: 也写入 active_profile, 便于快速读取.
-        if (!prefs(context).contains(KEY_ACTIVE_PROFILE)) {
+        if (!EditorKeyboardKeys.SYMBOLS_ACTIVE_PROFILE.isStored()) {
             setActiveProfileName(context, PROFILE_DEFAULT_ID)
         }
     }
@@ -272,9 +268,9 @@ object SymbolsConfigStore {
         return getAllDefaultNameAliases(context).any { it == n }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun readRootOrCreate(context: Context): JSONObject {
-        val sp = prefs(context)
-        val raw = sp.getString(KEY_PROFILES_JSON, null)
+        val raw = EditorKeyboardKeys.SYMBOLS_PROFILES.storedText()
         return try {
             if (raw.isNullOrBlank()) JSONObject() else JSONObject(raw)
         } catch (_: Throwable) {
@@ -284,8 +280,9 @@ object SymbolsConfigStore {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun persistRoot(context: Context, root: JSONObject) {
-        prefs(context).edit { putString(KEY_PROFILES_JSON, root.toString()) }
+        EditorKeyboardKeys.SYMBOLS_PROFILES.setStoredText(root.toString())
     }
 
     private fun defaultAceSymbols(): List<SymbolItem> = listOf(

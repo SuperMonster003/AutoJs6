@@ -21,6 +21,25 @@ object NamedStores {
 
     private fun excluded(name: String) = SettingsStores.register(StoreId(name, excluded = true))
 
+    // Code editor keyboards and font dialog (P3.2, `EditorKeyboardKeys`).
+    // zh-CN: 代码编辑器键盘与字体对话框 (P3.2, `EditorKeyboardKeys`).
+
+    /** Symbol keyboard profiles (`SymbolsConfigStore`). */
+    @JvmField
+    val EDITOR_SYMBOLS_CONFIG = store("editor_symbols_config")
+
+    /** The measured soft keyboard height of the functions keyboard (`FunctionsKeyboardHelper`, a cache). */
+    @JvmField
+    val FUNCTIONS_KEYBOARD_HELPER = store("FunctionsKeyboardHelper")
+
+    /** Presentation preferences of the font dialog and previewer (`AceEditorFontUiPreferences`). */
+    @JvmField
+    val ACE_EDITOR_FONT_UI_PREFERENCES = store("ace_editor_font_ui_preferences")
+
+    /** Usage history of the Ace editor actions (`AceActionHistoryStore`, a state). */
+    @JvmField
+    val ACE_ACTION_HISTORY = store("ace_action_history")
+
     // Plugin center (P3.1, `PluginCenterKeys`).
     // zh-CN: 插件中心 (P3.1, `PluginCenterKeys`).
 
@@ -113,6 +132,7 @@ object NamedStores {
     /** Every declared named store, in declaration order. */
     @JvmField
     val ALL: List<StoreId> = listOf(
+        EDITOR_SYMBOLS_CONFIG, FUNCTIONS_KEYBOARD_HELPER, ACE_EDITOR_FONT_UI_PREFERENCES, ACE_ACTION_HISTORY,
         PLUGIN_CENTER_FILTER_STATE, PLUGIN_CENTER_SORT_STATE, PLUGIN_CENTER_VISIBILITY_STATE, PLUGIN_LAUNCHER_ICONS,
         PLUGIN_CENTER_ENABLE_STATE, PLUGIN_CENTER_RECENT, PLUGIN_CENTER_ATTENTION,
         GITHUB_AUTH, PLUGIN_CENTER_AUTHORIZATION, MCP_SERVER_TRUST_CONFIRMATION, THREE_STOVE_AGENT_TRUST_CONFIRMATION,

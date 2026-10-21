@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "8ea5c2d23",
+  "commit": "0184745d9",
   "branch": "master",
-  "dirtyScannedFiles": 17
+  "dirtyScannedFiles": 10
  },
  "summary": {
   "keyResources": 268,
@@ -46,10 +46,10 @@
    "key_dialog_log_entries_exported",
    "key_enable_observe_key"
   ],
-  "literalKeyGroups": 93,
+  "literalKeyGroups": 97,
   "namedStores": 29,
-  "namedStoreCallFiles": 18,
-  "namedStoresDeclared": 20,
+  "namedStoreCallFiles": 14,
+  "namedStoresDeclared": 24,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 1,
   "prefUserFiles": 72,
@@ -7112,6 +7112,23 @@
    "store": "default"
   },
   {
+   "name": "active_profile",
+   "refs": [
+    {
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 41,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "当前符号配置档 (SymbolsConfigStore); P3.2 声明为 EditorKeyboardKeys; 属于命名存储, 随整份计数",
+   "store": "editor_symbols_config"
+  },
+  {
    "name": "dex_compiler_experimental_component",
    "refs": [
     {
@@ -7200,13 +7217,13 @@
    "name": "key_$_ace_editor_font_name_sort_type_locked",
    "refs": [
     {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 91,
-     "const": "KEY_NAME_SORT_TYPE_LOCKED"
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 64,
+     "const": null
     }
    ],
    "storeGuess": [
-    "ace_editor_font_ui_preferences"
+    "default"
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
@@ -7217,13 +7234,13 @@
    "name": "key_$_ace_editor_font_preview_excluded_features",
    "refs": [
     {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 93,
-     "const": "KEY_EXCLUDED_PREVIEW_FEATURES"
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 78,
+     "const": null
     }
    ],
    "storeGuess": [
-    "ace_editor_font_ui_preferences"
+    "default"
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
@@ -7234,13 +7251,13 @@
    "name": "key_$_ace_editor_font_preview_excluded_types",
    "refs": [
     {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 94,
-     "const": "KEY_EXCLUDED_PREVIEW_TYPES"
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 85,
+     "const": null
     }
    ],
    "storeGuess": [
-    "ace_editor_font_ui_preferences"
+    "default"
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
@@ -7251,13 +7268,13 @@
    "name": "key_$_ace_editor_font_selected_variant_",
    "refs": [
     {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 96,
-     "const": "KEY_SELECTED_VARIANT_PREFIX"
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 91,
+     "const": null
     }
    ],
    "storeGuess": [
-    "ace_editor_font_ui_preferences"
+    "default"
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
@@ -7268,13 +7285,13 @@
    "name": "key_$_ace_editor_font_size_sort_type_locked",
    "refs": [
     {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 92,
-     "const": "KEY_SIZE_SORT_TYPE_LOCKED"
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 71,
+     "const": null
     }
    ],
    "storeGuess": [
-    "ace_editor_font_ui_preferences"
+    "default"
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
@@ -7285,13 +7302,13 @@
    "name": "key_$_ace_editor_font_sort_mode",
    "refs": [
     {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 90,
-     "const": "KEY_SORT_MODE"
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 57,
+     "const": null
     }
    ],
    "storeGuess": [
-    "ace_editor_font_ui_preferences"
+    "default"
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
@@ -8564,6 +8581,23 @@
    "store": "plugin_center_attention"
   },
   {
+   "name": "profiles_json",
+   "refs": [
+    {
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 48,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "editor_keyboard",
+   "note": "符号配置档, org.json 对象文本 (SymbolsConfigStore); P3.2 声明为 EditorKeyboardKeys; 属于命名存储, 随整份计数",
+   "store": "editor_symbols_config"
+  },
+  {
    "name": "r8_compiler_explicit_component",
    "refs": [
     {
@@ -8598,6 +8632,39 @@
    "store": "default"
   },
   {
+   "name": "soft_input_height",
+   "refs": [
+    {
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 103,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Cache",
+   "note": "本机测得的软键盘高度 (像素, FunctionsKeyboardHelper), 不导出 (附录 C Q19); P3.2 声明为 EditorKeyboardKeys 的 CacheKey",
+   "store": "FunctionsKeyboardHelper"
+  },
+  {
+   "name": "state_json",
+   "refs": [
+    {
+     "file": "core/pref/keys/EditorKeyboardKeys.kt",
+     "line": 110,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "Ace 动作使用历史, org.json 对象文本 (AceActionHistoryStore); P3.2 声明为 EditorKeyboardKeys 的 State; 属于命名存储, 随整份计数",
+   "store": "ace_action_history"
+  },
+  {
    "name": "three_stove_agent_script_root_configuration",
    "refs": [
     {
@@ -8618,20 +8685,25 @@
  "namedStores": [
   {
    "name": "FunctionsKeyboardHelper",
-   "calls": [
-    {
-     "file": "ui/edit/keyboard/FunctionsKeyboardHelper.java",
-     "line": 44,
-     "arg": "SHARE_PREFERENCE_NAME",
-     "how": "常量 SHARE_PREFERENCE_NAME (ui/edit/keyboard/FunctionsKeyboardHelper.java:26)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "ui/edit/keyboard/FunctionsKeyboardHelper.java"
+    "core/pref/keys/EditorKeyboardKeys.kt"
    ],
-   "kind": "Setting",
-   "category": "editor_keyboard",
-   "note": "编辑器功能键盘配置 (附录 A)"
+   "declared": {
+    "name": "FunctionsKeyboardHelper",
+    "const": "FUNCTIONS_KEYBOARD_HELPER",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 33,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 103
+     }
+    ]
+   },
+   "kind": "Cache",
+   "note": "只有本机测得的软键盘高度 (soft_input_height), 为缓存, 不导出 (附录 C Q19, 原归 editor_keyboard); P3.2 登记为 NamedStores"
   },
   {
    "name": "ScriptWidgets",
@@ -8650,7 +8722,7 @@
     "name": "ScriptWidgets",
     "const": "SCRIPT_WIDGETS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 107,
+    "line": 126,
     "excluded": true,
     "refs": []
    },
@@ -8659,37 +8731,74 @@
   },
   {
    "name": "ace_action_history",
-   "calls": [
-    {
-     "file": "ui/edit/keyboard/AceActionHistoryStore.kt",
-     "line": 40,
-     "arg": "PREF_NAME",
-     "how": "常量 PREF_NAME (ui/edit/keyboard/AceActionHistoryStore.kt:10)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "ui/edit/keyboard/AceActionHistoryStore.kt"
+    "core/pref/keys/EditorKeyboardKeys.kt"
    ],
+   "declared": {
+    "name": "ace_action_history",
+    "const": "ACE_ACTION_HISTORY",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 41,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 110
+     }
+    ]
+   },
    "kind": "State",
    "category": "other",
-   "note": "Ace 动作历史 (P3.2 为 State)"
+   "note": "Ace 动作历史 (P3.2 为 State); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys"
   },
   {
    "name": "ace_editor_font_ui_preferences",
-   "calls": [
-    {
-     "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-     "line": 243,
-     "arg": "SHARED_PREFERENCES_NAME",
-     "how": "常量 SHARED_PREFERENCES_NAME (ui/edit/editor/ace/AceEditorFontUiPreferences.kt:89)"
-    }
-   ],
+   "calls": [],
    "files": [
+    "core/pref/keys/EditorKeyboardKeys.kt",
     "ui/edit/editor/ace/AceEditorFontUiPreferences.kt"
    ],
+   "declared": {
+    "name": "ace_editor_font_ui_preferences",
+    "const": "ACE_EDITOR_FONT_UI_PREFERENCES",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 37,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 58
+     },
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 64
+     },
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 71
+     },
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 79
+     },
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 86
+     },
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 92
+     },
+     {
+      "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
+      "line": 100
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "editor_keyboard",
-   "note": "字体选择界面的排序 / 预览 / 变体偏好 (附录 A)"
+   "note": "字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys"
   },
   {
    "name": "autojs.localstorage.*",
@@ -8721,7 +8830,7 @@
     "name": "autojs.localstorage.*",
     "const": "SCRIPT_LOCAL_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 87,
+    "line": 106,
     "excluded": true,
     "refs": []
    },
@@ -8745,7 +8854,7 @@
     "name": "autojs.node.storage.*.*.*",
     "const": "NODE_SCRIPT_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 91,
+    "line": 110,
     "excluded": true,
     "refs": []
    },
@@ -8779,7 +8888,7 @@
     "name": "bun_host_capability_grants",
     "const": "BUN_HOST_CAPABILITY_GRANTS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 76,
+    "line": 95,
     "excluded": false,
     "refs": [
      {
@@ -8809,7 +8918,7 @@
     "name": "device_id_prefs",
     "const": "DEVICE_ID_PREFS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 83,
+    "line": 102,
     "excluded": true,
     "refs": []
    },
@@ -8818,20 +8927,30 @@
   },
   {
    "name": "editor_symbols_config",
-   "calls": [
-    {
-     "file": "ui/edit/keyboard/SymbolsConfigStore.kt",
-     "line": 45,
-     "arg": "PREF_NAME",
-     "how": "常量 PREF_NAME (ui/edit/keyboard/SymbolsConfigStore.kt:26)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "ui/edit/keyboard/SymbolsConfigStore.kt"
+    "core/pref/keys/EditorKeyboardKeys.kt"
    ],
+   "declared": {
+    "name": "editor_symbols_config",
+    "const": "EDITOR_SYMBOLS_CONFIG",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 29,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 42
+     },
+     {
+      "file": "core/pref/keys/EditorKeyboardKeys.kt",
+      "line": 49
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "editor_keyboard",
-   "note": "符号键盘配置 (附录 A)"
+   "note": "符号键盘配置 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys"
   },
   {
    "name": "explorer_playback_history",
@@ -8862,7 +8981,7 @@
     "name": "explorer_playback_history",
     "const": "EXPLORER_PLAYBACK_HISTORY",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 111,
+    "line": 130,
     "excluded": true,
     "refs": []
    },
@@ -8879,7 +8998,7 @@
     "name": "github_auth",
     "const": "GITHUB_AUTH",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 60,
+    "line": 79,
     "excluded": false,
     "refs": [
      {
@@ -8949,7 +9068,7 @@
     "name": "lua-runtime-storage-v1-*",
     "const": "LUA_SCRIPT_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 95,
+    "line": 114,
     "excluded": true,
     "refs": []
    },
@@ -8966,7 +9085,7 @@
     "name": "mcp_server_trust_confirmation",
     "const": "MCP_SERVER_TRUST_CONFIRMATION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 68,
+    "line": 87,
     "excluded": false,
     "refs": [
      {
@@ -9007,7 +9126,7 @@
     "name": "plugin_center_attention",
     "const": "PLUGIN_CENTER_ATTENTION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 53,
+    "line": 72,
     "excluded": false,
     "refs": [
      {
@@ -9042,7 +9161,7 @@
     "name": "plugin_center_authorization",
     "const": "PLUGIN_CENTER_AUTHORIZATION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 64,
+    "line": 83,
     "excluded": false,
     "refs": [
      {
@@ -9066,7 +9185,7 @@
     "name": "plugin_center_enable_state",
     "const": "PLUGIN_CENTER_ENABLE_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 45,
+    "line": 64,
     "excluded": false,
     "refs": [
      {
@@ -9098,7 +9217,7 @@
     "name": "plugin_center_filter_state",
     "const": "PLUGIN_CENTER_FILTER_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 29,
+    "line": 48,
     "excluded": false,
     "refs": [
      {
@@ -9129,7 +9248,7 @@
     "name": "plugin_center_recent",
     "const": "PLUGIN_CENTER_RECENT",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 49,
+    "line": 68,
     "excluded": false,
     "refs": [
      {
@@ -9159,7 +9278,7 @@
     "name": "plugin_center_sort_state",
     "const": "PLUGIN_CENTER_SORT_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 33,
+    "line": 52,
     "excluded": false,
     "refs": [
      {
@@ -9211,7 +9330,7 @@
     "name": "plugin_center_visibility_state",
     "const": "PLUGIN_CENTER_VISIBILITY_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 37,
+    "line": 56,
     "excluded": false,
     "refs": [
      {
@@ -9276,7 +9395,7 @@
     "name": "plugin_launcher_icons",
     "const": "PLUGIN_LAUNCHER_ICONS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 41,
+    "line": 60,
     "excluded": false,
     "refs": [
      {
@@ -9330,7 +9449,7 @@
     "name": "privileged_edit_backups",
     "const": "PRIVILEGED_EDIT_BACKUPS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 99,
+    "line": 118,
     "excluded": true,
     "refs": []
    },
@@ -9354,7 +9473,7 @@
     "name": "runtime_task_intents",
     "const": "RUNTIME_TASK_INTENTS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 103,
+    "line": 122,
     "excluded": true,
     "refs": []
    },
@@ -9371,7 +9490,7 @@
     "name": "three_stove_agent_trust_confirmation",
     "const": "THREE_STOVE_AGENT_TRUST_CONFIRMATION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 72,
+    "line": 91,
     "excluded": false,
     "refs": [
      {
@@ -9742,6 +9861,18 @@
     "type": "Boolean"
    }
   ],
+  "active_profile": [
+   {
+    "expr": "SettingDefault.of(SymbolsConfigStore.PROFILE_DEFAULT_ID)",
+    "form": "伴生常量",
+    "value": "__default__",
+    "via": "常量 PROFILE_DEFAULT_ID (ui/edit/keyboard/SymbolsConfigStore.kt:30)",
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 40,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
   "dex_compiler_experimental_component": [
    {
     "form": "声明",
@@ -9775,36 +9906,71 @@
     "type": "String"
    }
   ],
+  "key_$_ace_editor_font_name_sort_type_locked": [
+   {
+    "form": "表达式",
+    "expr": "AceEditorFontSortField.NAME.typeLockedByDefault",
+    "value": "运行时: AceEditorFontSortField.NAME.typeLockedByDefault",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 63,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
   "key_$_ace_editor_font_preview_excluded_features": [
    {
-    "expr": "emptySet()",
+    "expr": "SettingDefault.of(emptySet())",
     "form": "调用处字面量",
     "value": "[]",
-    "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-    "line": 156,
-    "method": "getStringSet",
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 77,
+    "method": "SettingKey.StrSet",
     "type": "StringSet"
    }
   ],
   "key_$_ace_editor_font_preview_excluded_types": [
    {
-    "expr": "emptySet()",
+    "expr": "SettingDefault.of(emptySet())",
     "form": "调用处字面量",
     "value": "[]",
-    "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-    "line": 162,
-    "method": "getStringSet",
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 84,
+    "method": "SettingKey.StrSet",
     "type": "StringSet"
+   }
+  ],
+  "key_$_ace_editor_font_selected_variant_": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 92,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
+  "key_$_ace_editor_font_size_sort_type_locked": [
+   {
+    "form": "表达式",
+    "expr": "AceEditorFontSortField.SIZE.typeLockedByDefault",
+    "value": "运行时: AceEditorFontSortField.SIZE.typeLockedByDefault",
+    "ignoreForConflict": true,
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 70,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
    }
   ],
   "key_$_ace_editor_font_sort_mode": [
    {
-    "expr": "null",
-    "form": "调用处字面量",
+    "form": "声明",
+    "expr": "SettingDefault.None",
     "value": "null",
-    "file": "ui/edit/editor/ace/AceEditorFontUiPreferences.kt",
-    "line": 99,
-    "method": "getString",
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 56,
+    "method": "SettingKey.Str",
     "type": "String"
    }
   ],
@@ -9962,7 +10128,7 @@
     "expr": "ORIENTATION_PORTRAIT",
     "form": "表达式",
     "value": null,
-    "via": "常量 ORIENTATION_PORTRAIT (core/image/capture/ScreenCapturer.java:63)",
+    "via": "常量 ORIENTATION_PORTRAIT (core/image/capture/ScreenCapturer.java:67)",
     "file": "ui/floating/CircularMenuWindow.java",
     "line": 233,
     "method": "getInt",
@@ -12854,6 +13020,17 @@
     "type": "Json (Gson LinkedHashSet)"
    }
   ],
+  "profiles_json": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/EditorKeyboardKeys.kt",
+    "line": 47,
+    "method": "SettingKey.Json",
+    "type": "Json"
+   }
+  ],
   "r8_compiler_explicit_component": [
    {
     "form": "声明",
@@ -12952,7 +13129,7 @@
   "editor_keyboard": {
    "keys": 0,
    "literalKeys": 0,
-   "stores": 3
+   "stores": 2
   },
   "timed_task": {
    "keys": 1,

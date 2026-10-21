@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.edit.keyboard;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -11,6 +10,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
+import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys;
 import org.autojs.autojs.event.BackPressedHandler;
 
 import java.lang.ref.WeakReference;
@@ -23,8 +23,6 @@ import java.lang.ref.WeakReference;
  */
 public class FunctionsKeyboardHelper implements BackPressedHandler {
 
-    private static final String SHARE_PREFERENCE_NAME = "FunctionsKeyboardHelper";
-    private static final String SHARE_PREFERENCE_SOFT_INPUT_HEIGHT = "soft_input_height";
 
     // Minimum IME height threshold (dp) to filter out navigation bar / gesture insets.
     // zh-CN: IME 高度的最小阈值 (dp), 用于过滤导航栏/手势区域等非 IME 的小高度.
@@ -32,7 +30,6 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
 
     private final WeakReference<Activity> mActivityRef;
     private final InputMethodManager mInputManager;
-    private final SharedPreferences mPreferences;
 
     private View mFunctionsLayout;
     private View mEditView;
@@ -41,7 +38,6 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     private FunctionsKeyboardHelper(Activity activity) {
         mActivityRef = new WeakReference<>(activity);
         mInputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        mPreferences = activity.getSharedPreferences(SHARE_PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 
     public static FunctionsKeyboardHelper with(Activity activity) {
@@ -206,7 +202,8 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
         }
 
         if (softInputHeight >= minImeHeightPx) {
-            mPreferences.edit().putInt(SHARE_PREFERENCE_SOFT_INPUT_HEIGHT, softInputHeight).apply();
+            // The named store FunctionsKeyboardHelper keeps it as a cache of this device (EditorKeyboardKeys, P3.2).
+            EditorKeyboardKeys.SOFT_INPUT_HEIGHT.set(softInputHeight);
         }
         return softInputHeight;
     }
@@ -234,7 +231,7 @@ public class FunctionsKeyboardHelper implements BackPressedHandler {
     }
 
     public int getKeyBoardHeight() {
-        return mPreferences.getInt(SHARE_PREFERENCE_SOFT_INPUT_HEIGHT, 400);
+        return EditorKeyboardKeys.SOFT_INPUT_HEIGHT.get();
     }
 
     @Override

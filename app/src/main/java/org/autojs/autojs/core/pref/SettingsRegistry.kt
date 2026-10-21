@@ -6,6 +6,7 @@ import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.core.pref.keys.DeveloperKeys
+import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
@@ -86,6 +87,7 @@ object SettingsRegistry {
         ExplorerKeys,
         HistoryKeys,
         EditorKeys,
+        EditorKeyboardKeys,
         TimedTaskKeys,
         A11yKeys,
         RunningKeys,

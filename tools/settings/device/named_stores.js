@@ -295,6 +295,43 @@ GROUPS.plugin_center = function () {
     }
 };
 
+// P3.2: the editor keyboard and font dialog stores; the font sort mode and the selected variant of a probe font group
+// are changed.
+GROUPS.editor_keyboard = function () {
+    var E = Keys.EditorKeyboardKeys;
+    var ace = org.autojs.autojs.ui.edit.editor.ace;
+    var Fonts = ace.AceEditorFontUiPreferences.INSTANCE;
+    var Mode = ace.AceEditorFontSortMode;
+    var group = 'aj6_settings_probe';
+    if (AJ6_PHASE === 'change') {
+        ['editor_symbols_config', 'ace_editor_font_ui_preferences', 'ace_action_history', 'FunctionsKeyboardHelper'].forEach(function (name) { compareStore(name); });
+        check('editor-keyboard-readers', function () {
+            var Symbols = org.autojs.autojs.ui.edit.keyboard.SymbolsConfigStore.INSTANCE;
+            var raw = prefs('editor_symbols_config').getString('active_profile', '__default__');
+            if (!same(Symbols.getActiveProfileName(context), raw)) return 'active profile differs';
+            return same(Fonts.getSortMode(context).name(), Mode.Companion.fromStoredValue(prefs('ace_editor_font_ui_preferences').getString(E.FONT_SORT_MODE.getName(), null)).name()) || 'sort mode differs';
+        });
+        check('editor-keyboard-change', function () {
+            record('ace_editor_font_ui_preferences', E.FONT_SORT_MODE.getName(), 'string');
+            record('ace_editor_font_ui_preferences', E.FONT_SELECTED_VARIANT.nameOf(group), 'string');
+            var current = String(Fonts.getSortMode(context).name());
+            var values = Mode.values();
+            var next = null;
+            for (var i = 0; i < values.length; i++) if (String(values[i].name()) !== current) { next = values[i]; break; }
+            Fonts.setSortMode(context, next);
+            Fonts.setSelectedVariantId(context, group, 'aj6_settings_probe_variant');
+            state.expected.editor_keyboard = { mode: String(next.name()), group: group };
+            return true;
+        });
+    } else {
+        var expected = state.expected.editor_keyboard;
+        check('editor-keyboard-after-restart', function () {
+            if (!same(Fonts.getSortMode(context).name(), expected.mode)) return 'sort mode lost';
+            return same(Fonts.getSelectedVariantId(context, expected.group), 'aj6_settings_probe_variant') || 'selected variant lost';
+        });
+    }
+};
+
 // P3.4: the credential stores are compared only (no change, no value printed).
 GROUPS.credentials = function () {
     if (AJ6_PHASE !== 'change') return;

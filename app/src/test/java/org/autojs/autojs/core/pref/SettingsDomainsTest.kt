@@ -192,6 +192,14 @@ class SettingsDomainsTest {
             "plugin_center_visibility_state:key_\$_plugin_center_hidden_source_" to null,
             "plugin_launcher_icons:*" to null,
             "plugin_center_enable_state:key_\$_suspended_plugin_\$_" to "false",
+            // P3.2: SymbolsConfigStore getString(KEY_ACTIVE_PROFILE, PROFILE_DEFAULT_ID) and getString(KEY_PROFILES_JSON,
+            // null); AceEditorFontUiPreferences getBoolean(typeLockedKey(field), field.typeLockedByDefault) and
+            // getString(KEY_SELECTED_VARIANT_PREFIX + groupId, null).
+            "editor_symbols_config:active_profile" to "__default__",
+            "editor_symbols_config:profiles_json" to null,
+            "ace_editor_font_ui_preferences:key_\$_ace_editor_font_name_sort_type_locked" to "AceEditorFontSortField.NAME.typeLockedByDefault",
+            "ace_editor_font_ui_preferences:key_\$_ace_editor_font_size_sort_type_locked" to "AceEditorFontSortField.SIZE.typeLockedByDefault",
+            "ace_editor_font_ui_preferences:key_\$_ace_editor_font_selected_variant_" to null,
         ) + listOf("", "_official", "_third_party").flatMap { list ->
             val base = "plugin_center_sort_state:key_\$_plugin_center_sort_state$list"
             listOf(

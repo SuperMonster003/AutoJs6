@@ -1,14 +1,17 @@
 package org.autojs.autojs.ui.edit.keyboard
 
 import android.content.Context
-import android.content.SharedPreferences
+import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys
 import org.json.JSONArray
 import org.json.JSONObject
 
+/**
+ * Usage history of the Ace editor actions in the named store `ace_action_history`, the state
+ * [EditorKeyboardKeys.ACE_ACTION_HISTORY] (docs/settings/ROADMAP.md P3.2, names unchanged); the JSON text is still
+ * written and parsed with org.json here.
+ */
 object AceActionHistoryStore {
 
-    private const val PREF_NAME = "ace_action_history"
-    private const val KEY_STATE_JSON = "state_json"
     private const val VERSION = 1
     private const val DEFAULT_MANUAL_ORDER = Int.MAX_VALUE
     private const val LEGACY_SHORTCUT_ACTION_PREFIX = "command:"
@@ -35,9 +38,6 @@ object AceActionHistoryStore {
         val payloadJson: String? = null,
         val payloadSummary: String? = null,
     )
-
-    private fun prefs(context: Context): SharedPreferences =
-        context.applicationContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
     fun record(context: Context, action: AceShortcutPanel.Action, now: Long = System.currentTimeMillis()) {
         record(
@@ -147,12 +147,14 @@ object AceActionHistoryStore {
         persistRoot(context, root, entries.values)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun clear(context: Context) {
-        prefs(context).edit().remove(KEY_STATE_JSON).apply()
+        EditorKeyboardKeys.ACE_ACTION_HISTORY.remove()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun readRoot(context: Context): JSONObject {
-        val raw = prefs(context).getString(KEY_STATE_JSON, null)
+        val raw = EditorKeyboardKeys.ACE_ACTION_HISTORY.storedText()
         return runCatching {
             if (raw.isNullOrBlank()) JSONObject() else JSONObject(raw)
         }.getOrDefault(JSONObject()).also { root ->
@@ -167,12 +169,13 @@ object AceActionHistoryStore {
             .associateBy { it.id }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun persistRoot(context: Context, root: JSONObject, entries: Collection<Entry>) {
         val array = JSONArray()
         entries.sortedBy { it.id }.forEach { array.put(it.toJson()) }
         root.put("version", VERSION)
         root.put("entries", array)
-        prefs(context).edit().putString(KEY_STATE_JSON, root.toString()).apply()
+        EditorKeyboardKeys.ACE_ACTION_HISTORY.setStoredText(root.toString())
     }
 
     private fun JSONObject.toEntry(): Entry? {
