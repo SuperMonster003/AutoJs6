@@ -3,7 +3,6 @@ package org.autojs.autojs.ui.settings
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -11,6 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.*
 import org.autojs.autojs.core.plugin.agent.*
 import org.autojs.autojs.core.plugin.center.*
+import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs6.R
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
 
@@ -65,8 +65,7 @@ class ThreeStoveAgentGuide(private val context: Context) : DefaultLifecycleObser
             .negativeText(R.string.dialog_button_cancel).positiveText(R.string.dialog_button_confirm)
             .onPositive { _, _ ->
                 // Pin the confirmation to the current complete signing fingerprint set.
-                if (inspection.signer.isNotBlank()) context.getSharedPreferences(ThreeStoveAgentPluginInspector.CONFIRMATION_STORE, Context.MODE_PRIVATE)
-                    .edit { putBoolean(inspection.signer, true) }
+                if (inspection.signer.isNotBlank()) CredentialKeys.THREE_STOVE_AGENT_TRUST_CONFIRMATION.key(inspection.signer).set(true)
                 connect(configuration)
             }.show()
     }

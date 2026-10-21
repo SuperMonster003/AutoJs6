@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentActions
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentIds
@@ -20,8 +21,6 @@ data class ThreeStoveAgentInspection(
 
 /** Package metadata is inspected before any Binder call or activation side effect. */
 object ThreeStoveAgentPluginInspector {
-    const val CONFIRMATION_STORE = "three_stove_agent_trust_confirmation"
-
     @Suppress("DEPRECATION")
     fun inspect(context: Context): ThreeStoveAgentInspection {
         val pm = context.packageManager
@@ -49,7 +48,8 @@ object ThreeStoveAgentPluginInspector {
         }.maxOrNull() ?: ThreeStoveAgentIds.REQUIRED_HOST_VERSION_CODE
         val trust = PluginTrustManager.resolveTrustInfo(context, ThreeStoveAgentIds.DEFAULT_PACKAGE_NAME)
         val signer = trust.fingerprintsSha256.sorted().joinToString(",")
-        val confirmed = signer.isNotEmpty() && context.getSharedPreferences(CONFIRMATION_STORE, Context.MODE_PRIVATE).getBoolean(signer, false)
+        // The confirmed signers are the named store three_stove_agent_trust_confirmation (CredentialKeys, P3.4).
+        val confirmed = signer.isNotEmpty() && CredentialKeys.THREE_STOVE_AGENT_TRUST_CONFIRMATION.key(signer).get()
         val facts = ThreeStoveAgentPluginFacts(
             installed = true,
             applicationEnabled = enabled,

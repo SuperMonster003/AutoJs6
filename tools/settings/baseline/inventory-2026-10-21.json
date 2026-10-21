@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "6a75ed702",
+  "commit": "541c6b0f2",
   "branch": "master",
-  "dirtyScannedFiles": 3
+  "dirtyScannedFiles": 11
  },
  "summary": {
   "keyResources": 268,
@@ -46,10 +46,10 @@
    "key_dialog_log_entries_exported",
    "key_enable_observe_key"
   ],
-  "literalKeyGroups": 89,
+  "literalKeyGroups": 90,
   "namedStores": 29,
-  "namedStoreCallFiles": 34,
-  "namedStoresDeclared": 8,
+  "namedStoreCallFiles": 27,
+  "namedStoresDeclared": 13,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 1,
   "prefUserFiles": 75,
@@ -7163,6 +7163,23 @@
    "store": "default"
   },
   {
+   "name": "github_token",
+   "refs": [
+    {
+     "file": "core/pref/keys/CredentialKeys.kt",
+     "line": 31,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "credentials",
+   "note": "GitHub 令牌 (GitHubTokenStore); P3.4 声明为 CredentialKeys.GITHUB_TOKEN, sensitive, 属于命名存储, 随整份计数",
+   "store": "github_auth"
+  },
+  {
    "name": "key_$_ace_editor_font_name_sort_type_locked",
    "refs": [
     {
@@ -7583,20 +7600,20 @@
    "store": "default"
   },
   {
-   "name": "key_$_plugin_auth_$_*$_*",
+   "name": "key_$_plugin_auth_$_",
    "refs": [
     {
-     "file": "core/plugin/center/PluginAuthorizationStore.kt",
-     "line": 32,
+     "file": "core/pref/keys/CredentialKeys.kt",
+     "line": 36,
      "const": null
     }
    ],
    "storeGuess": [
-    "plugin_center_authorization"
+    "default"
    ],
    "kind": "Setting",
    "category": "credentials",
-   "note": "属于命名存储, 随整份计数",
+   "note": "前缀键族: 后接 <包名>$_<签名指纹>; P3.4 声明为 CredentialKeys.PLUGIN_AUTHORIZATION, sensitive, 属于命名存储, 随整份计数",
    "store": "plugin_center_authorization"
   },
   {
@@ -8582,7 +8599,7 @@
     "name": "ScriptWidgets",
     "const": "SCRIPT_WIDGETS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 51,
+    "line": 76,
     "excluded": true,
     "refs": []
    },
@@ -8653,7 +8670,7 @@
     "name": "autojs.localstorage.*",
     "const": "SCRIPT_LOCAL_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 31,
+    "line": 56,
     "excluded": true,
     "refs": []
    },
@@ -8677,7 +8694,7 @@
     "name": "autojs.node.storage.*.*.*",
     "const": "NODE_SCRIPT_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 35,
+    "line": 60,
     "excluded": true,
     "refs": []
    },
@@ -8703,62 +8720,26 @@
   },
   {
    "name": "bun_host_capability_grants",
-   "calls": [
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 69,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 72,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 82,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 85,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 89,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 92,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 218,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    },
-    {
-     "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 221,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "core/plugin/bun/BunHostCapabilityGrants.kt"
+    "core/pref/keys/CredentialKeys.kt"
    ],
+   "declared": {
+    "name": "bun_host_capability_grants",
+    "const": "BUN_HOST_CAPABILITY_GRANTS",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 45,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/CredentialKeys.kt",
+      "line": 55
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "credentials",
-   "note": "Bun 宿主能力授权, sensitive"
+   "note": "Bun 宿主能力授权, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys"
   },
   {
    "name": "device_id_prefs",
@@ -8777,7 +8758,7 @@
     "name": "device_id_prefs",
     "const": "DEVICE_ID_PREFS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 27,
+    "line": 52,
     "excluded": true,
     "refs": []
    },
@@ -8830,7 +8811,7 @@
     "name": "explorer_playback_history",
     "const": "EXPLORER_PLAYBACK_HISTORY",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 55,
+    "line": 80,
     "excluded": true,
     "refs": []
    },
@@ -8839,20 +8820,26 @@
   },
   {
    "name": "github_auth",
-   "calls": [
-    {
-     "file": "network/GitHubTokenStore.kt",
-     "line": 44,
-     "arg": "PREF_NAME",
-     "how": "常量 PREF_NAME (network/GitHubTokenStore.kt:7)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "network/GitHubTokenStore.kt"
+    "core/pref/keys/CredentialKeys.kt"
    ],
+   "declared": {
+    "name": "github_auth",
+    "const": "GITHUB_AUTH",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 29,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/CredentialKeys.kt",
+      "line": 31
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "credentials",
-   "note": "GitHub 令牌, sensitive"
+   "note": "GitHub 令牌, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys"
   },
   {
    "name": "jvm_source_provider_selection",
@@ -8911,7 +8898,7 @@
     "name": "lua-runtime-storage-v1-*",
     "const": "LUA_SCRIPT_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 39,
+    "line": 64,
     "excluded": true,
     "refs": []
    },
@@ -8920,27 +8907,26 @@
   },
   {
    "name": "mcp_server_trust_confirmation",
-   "calls": [
-    {
-     "file": "app/tool/McpServerTool.kt",
-     "line": 116,
-     "arg": "McpServerPluginInspector.CONFIRMATION_STORE",
-     "how": "常量 CONFIRMATION_STORE (core/plugin/mcp/McpServerPluginInspector.kt:23)"
-    },
-    {
-     "file": "core/plugin/mcp/McpServerPluginInspector.kt",
-     "line": 51,
-     "arg": "CONFIRMATION_STORE",
-     "how": "常量 CONFIRMATION_STORE (core/plugin/mcp/McpServerPluginInspector.kt:23)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "app/tool/McpServerTool.kt",
-    "core/plugin/mcp/McpServerPluginInspector.kt"
+    "core/pref/keys/CredentialKeys.kt"
    ],
+   "declared": {
+    "name": "mcp_server_trust_confirmation",
+    "const": "MCP_SERVER_TRUST_CONFIRMATION",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 37,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/CredentialKeys.kt",
+      "line": 43
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "credentials",
-   "note": "MCP Server 签名信任确认, sensitive"
+   "note": "MCP Server 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys"
   },
   {
    "name": "permission_wizard",
@@ -8984,32 +8970,26 @@
   },
   {
    "name": "plugin_center_authorization",
-   "calls": [
-    {
-     "file": "core/plugin/center/PluginAuthorizationStore.kt",
-     "line": 12,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/center/PluginAuthorizationStore.kt:8)"
-    },
-    {
-     "file": "core/plugin/center/PluginAuthorizationStore.kt",
-     "line": 18,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/center/PluginAuthorizationStore.kt:8)"
-    },
-    {
-     "file": "core/plugin/center/PluginAuthorizationStore.kt",
-     "line": 26,
-     "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/center/PluginAuthorizationStore.kt:8)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "core/plugin/center/PluginAuthorizationStore.kt"
+    "core/pref/keys/CredentialKeys.kt"
    ],
+   "declared": {
+    "name": "plugin_center_authorization",
+    "const": "PLUGIN_CENTER_AUTHORIZATION",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 33,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/CredentialKeys.kt",
+      "line": 37
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "credentials",
-   "note": "插件授权记录, sensitive"
+   "note": "插件授权记录, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys"
   },
   {
    "name": "plugin_center_enable_state",
@@ -9240,7 +9220,7 @@
     "name": "privileged_edit_backups",
     "const": "PRIVILEGED_EDIT_BACKUPS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 43,
+    "line": 68,
     "excluded": true,
     "refs": []
    },
@@ -9264,7 +9244,7 @@
     "name": "runtime_task_intents",
     "const": "RUNTIME_TASK_INTENTS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 47,
+    "line": 72,
     "excluded": true,
     "refs": []
    },
@@ -9273,27 +9253,26 @@
   },
   {
    "name": "three_stove_agent_trust_confirmation",
-   "calls": [
-    {
-     "file": "core/plugin/agent/ThreeStoveAgentPluginInspector.kt",
-     "line": 52,
-     "arg": "CONFIRMATION_STORE",
-     "how": "常量 CONFIRMATION_STORE (core/plugin/agent/ThreeStoveAgentPluginInspector.kt:23)"
-    },
-    {
-     "file": "ui/settings/ThreeStoveAgentGuide.kt",
-     "line": 68,
-     "arg": "ThreeStoveAgentPluginInspector.CONFIRMATION_STORE",
-     "how": "常量 CONFIRMATION_STORE (core/plugin/agent/ThreeStoveAgentPluginInspector.kt:23)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "core/plugin/agent/ThreeStoveAgentPluginInspector.kt",
-    "ui/settings/ThreeStoveAgentGuide.kt"
+    "core/pref/keys/CredentialKeys.kt"
    ],
+   "declared": {
+    "name": "three_stove_agent_trust_confirmation",
+    "const": "THREE_STOVE_AGENT_TRUST_CONFIRMATION",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 41,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/CredentialKeys.kt",
+      "line": 49
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "credentials",
-   "note": "3-Stove Agent 签名信任确认, sensitive"
+   "note": "3-Stove Agent 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys"
   }
  ],
  "defaultPrefsBypass": [
@@ -9678,6 +9657,17 @@
     "type": "Boolean"
    }
   ],
+  "github_token": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/CredentialKeys.kt",
+    "line": 30,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
   "key_$_ace_editor_font_preview_excluded_features": [
    {
     "expr": "emptySet()",
@@ -9870,6 +9860,17 @@
     "line": 233,
     "method": "getInt",
     "type": "Int"
+   }
+  ],
+  "key_$_plugin_auth_$_": [
+   {
+    "expr": "SettingDefault.of(false)",
+    "form": "调用处字面量",
+    "value": "false",
+    "file": "core/pref/keys/CredentialKeys.kt",
+    "line": 37,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
    }
   ],
   "key_$_plugin_center_filter_enabled_state": [

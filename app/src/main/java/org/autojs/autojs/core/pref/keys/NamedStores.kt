@@ -17,7 +17,32 @@ import org.autojs.autojs.core.pref.store.StoreId
  */
 object NamedStores {
 
+    private fun store(name: String) = SettingsStores.register(StoreId(name))
+
     private fun excluded(name: String) = SettingsStores.register(StoreId(name, excluded = true))
+
+    // Credentials and authorizations (P3.4, `CredentialKeys`): sensitive, never selected by default (D2).
+    // zh-CN: 凭据与授权 (P3.4, `CredentialKeys`): 敏感项, 默认不勾选 (D2).
+
+    /** The GitHub token (`GitHubTokenStore`). */
+    @JvmField
+    val GITHUB_AUTH = store("github_auth")
+
+    /** Plugins authorized per signing fingerprint (`PluginAuthorizationStore`). */
+    @JvmField
+    val PLUGIN_CENTER_AUTHORIZATION = store("plugin_center_authorization")
+
+    /** Confirmed signers of the MCP Server plugin (`McpServerPluginInspector`, `McpServerTool`). */
+    @JvmField
+    val MCP_SERVER_TRUST_CONFIRMATION = store("mcp_server_trust_confirmation")
+
+    /** Confirmed signers of the 3-Stove Agent plugin (`ThreeStoveAgentPluginInspector`, `ThreeStoveAgentGuide`). */
+    @JvmField
+    val THREE_STOVE_AGENT_TRUST_CONFIRMATION = store("three_stove_agent_trust_confirmation")
+
+    /** Host capabilities granted to Bun scripts (`BunHostCapabilityGrants`). */
+    @JvmField
+    val BUN_HOST_CAPABILITY_GRANTS = store("bun_host_capability_grants")
 
     // Permanent exclusions of appendix A.2 (P3.5): registered only, their readers are unchanged.
     // zh-CN: 附录 A.2 的永久排除项 (P3.5): 只登记, 读写方不变.
@@ -57,6 +82,8 @@ object NamedStores {
     /** Every declared named store, in declaration order. */
     @JvmField
     val ALL: List<StoreId> = listOf(
+        GITHUB_AUTH, PLUGIN_CENTER_AUTHORIZATION, MCP_SERVER_TRUST_CONFIRMATION, THREE_STOVE_AGENT_TRUST_CONFIRMATION,
+        BUN_HOST_CAPABILITY_GRANTS,
         DEVICE_ID_PREFS, SCRIPT_LOCAL_STORAGES, NODE_SCRIPT_STORAGES, LUA_SCRIPT_STORAGES, PRIVILEGED_EDIT_BACKUPS,
         RUNTIME_TASK_INTENTS, SCRIPT_WIDGETS, EXPLORER_PLAYBACK_HISTORY,
     )

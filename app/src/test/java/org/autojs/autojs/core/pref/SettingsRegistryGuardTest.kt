@@ -106,7 +106,9 @@ class SettingsRegistryGuardTest {
                 else -> if (row.category != null) problems.add("${row.name}: ${row.kind.label} with category ${row.category}")
             }
         }
-        SettingsRegistry.keys.filterIsInstance<SettingKey<*>>().filter { it.sensitive != (it.category == SettingCategory.CREDENTIALS) }.forEach { problems.add("${it.name}: sensitive outside credentials") }
+        val declared = (SettingsRegistry.keys + SettingsRegistry.families.map { it.template }).filterIsInstance<SettingKey<*>>()
+        declared.filter { it.sensitive != (it.category == SettingCategory.CREDENTIALS) }.forEach { problems.add("${it.store}:${it.name}: sensitive outside credentials") }
+        val sensitive = declared.filter { it.sensitive }
 
         // The combined view: registered rows and the pending Setting / State entries of classification.json.
         val entries = mutableListOf<Pair<String, String>>()
@@ -128,7 +130,7 @@ class SettingsRegistryGuardTest {
         val empty = SettingCategory.ALL.filter { !it.isData && entries.none { e -> e.first == it.id } }.map { it.id }
         val pendingKeyNames = classification.section("keys").filterValues { it["kind"] == "Setting" || it["kind"] == "State" }.keys.mapNotNull { keyResources[it] }
         val overlap = classification.section("literalKeys").filter { (name, entry) -> (entry["kind"] == "Setting" || entry["kind"] == "State") && entry["store"] == DEFAULT_STORE && name in pendingKeyNames }.keys
-        println("T5 c: categories ${SettingCategory.ALL.size}, entries ${entries.size} (registered ${rows.count { it.category != null }})")
+        println("T5 c: categories ${SettingCategory.ALL.size}, entries ${entries.size} (registered ${rows.count { it.category != null }}), sensitive declarations ${sensitive.size} in ${sensitive.map { it.store }.toSet().size} stores, all in credentials")
         assertNone("category problems", problems)
         assertNone("categories without any entry", empty)
         assertNone("names in two places", overlap.toList())

@@ -43,6 +43,13 @@ class SettingsDomainsTest {
         var checked = 0
         declaredKeys().filterIsInstance<SettingKey<*>>().forEach { key ->
             val baselineName = baselineNameOf(key)
+            val qualified = "${key.store.name}:$baselineName"
+            if (!key.store.isDefault && qualified in NAMED_STORE_DEFAULTS) {
+                val expected = NAMED_STORE_DEFAULTS[qualified]
+                if (key.defaultText != expected) problems.add("$qualified: default ${key.defaultText}, expected $expected (the old reader of the named store)")
+                checked++
+                return@forEach
+            }
             if (baselineName in KEYS_AFTER_P0) {
                 val expected = KEYS_AFTER_P0[baselineName]
                 if (key.defaultText != expected) problems.add("$baselineName: default ${key.defaultText}, expected $expected (added after P0)")
@@ -161,6 +168,21 @@ class SettingsDomainsTest {
             "r8_compiler_explicit_enabled" to "false",
             "r8_compiler_explicit_component" to null,
             "key_\$_codegen_model_current_debug_" to null,
+        )
+
+        /**
+         * Keys of named stores whose defaults P0.4 did not record (its table covers the default preferences and some
+         * literal keys only): "store:name" -> the default of the old reader (null for none), P3.
+         * zh-CN: P0.4 未记录默认值的命名存储键 (其默认值表只覆盖默认偏好与部分字面量键): "存储:名称" -> 旧读取方的默认值 (无为 null), P3.
+         */
+        private val NAMED_STORE_DEFAULTS: Map<String, String?> = mapOf(
+            // P3.4: GitHubTokenStore getString(KEY_TOKEN, null); PluginAuthorizationStore getBoolean(key, false); the
+            // trust confirmations getBoolean(signer, false); BunHostCapabilityGrants keeps a default per capability.
+            "github_auth:github_token" to null,
+            "plugin_center_authorization:key_\$_plugin_auth_\$_" to "false",
+            "mcp_server_trust_confirmation:*" to "false",
+            "three_stove_agent_trust_confirmation:*" to "false",
+            "bun_host_capability_grants:*" to null,
         )
 
         private lateinit var resources: AutoCloseable

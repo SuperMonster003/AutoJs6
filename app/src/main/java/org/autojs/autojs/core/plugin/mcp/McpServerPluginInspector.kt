@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginDefaultEnabledPolicy
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs6.BuildConfig
 import org.autojs.plugin.mcp.server.api.McpServerActions
 import org.autojs.plugin.mcp.server.api.McpServerIds
@@ -20,7 +21,6 @@ data class McpServerInspection(
 
 /** Package metadata is inspected before any Binder call or activation side effect. */
 object McpServerPluginInspector {
-    const val CONFIRMATION_STORE = "mcp_server_trust_confirmation"
 
     @Suppress("DEPRECATION")
     fun inspect(context: Context): McpServerInspection {
@@ -48,7 +48,8 @@ object McpServerPluginInspector {
         }.maxOrNull() ?: McpServerIds.REQUIRED_HOST_VERSION_CODE
         val trust = PluginTrustManager.resolveTrustInfo(context, McpServerIds.DEFAULT_PACKAGE_NAME)
         val signer = trust.fingerprintsSha256.sorted().joinToString(",")
-        val confirmed = signer.isNotEmpty() && context.getSharedPreferences(CONFIRMATION_STORE, Context.MODE_PRIVATE).getBoolean(signer, false)
+        // The confirmed signers are the named store mcp_server_trust_confirmation (CredentialKeys, P3.4).
+        val confirmed = signer.isNotEmpty() && CredentialKeys.MCP_SERVER_TRUST_CONFIRMATION.key(signer).get()
         val facts = McpServerPluginFacts(
             installed = true,
             applicationEnabled = enabled,

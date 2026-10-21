@@ -4,6 +4,7 @@ import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
+import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
@@ -96,6 +97,7 @@ object SettingsRegistry {
         LayoutInspectorKeys,
         DeveloperKeys,
         PluginCenterKeys,
+        CredentialKeys,
         MiscStateKeys,
     )
 

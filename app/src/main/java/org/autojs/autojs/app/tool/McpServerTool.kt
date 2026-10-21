@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +16,7 @@ import org.autojs.autojs.core.plugin.PluginAutoWake
 import org.autojs.autojs.core.plugin.center.*
 import org.autojs.autojs.core.plugin.mcp.*
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.ui.main.drawer.SocketItemHelper
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -113,8 +113,8 @@ class McpServerTool(override val context: Context) : SocketItemHelper {
                     }
                     McpServerUiState.TRUST_CONFIRMATION_REQUIRED -> {
                         // Confirmation is pinned to all current signing fingerprints, never just the package name.
-                        context.getSharedPreferences(McpServerPluginInspector.CONFIRMATION_STORE, Context.MODE_PRIVATE)
-                            .edit { putBoolean(inspection.signer, true) }
+                        // An empty signer is never read back as confirmed (McpServerPluginInspector), so it is not written.
+                        if (inspection.signer.isNotEmpty()) CredentialKeys.MCP_SERVER_TRUST_CONFIRMATION.key(inspection.signer).set(true)
                         requestConnect(false)
                     }
                     else -> openPluginCenter(context)
