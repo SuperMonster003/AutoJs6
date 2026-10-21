@@ -9,11 +9,11 @@ import org.junit.Test
 
 /**
  * [ExplorerKeys] (docs/settings/ROADMAP.md P2.2): the readings that `WorkingDirectoryUtils`, the explorer views and
- * menus, `ScriptOperations`, the batch rename history and the deprecated `Pref.isHiddenFilesShown` / file extension
- * getters and `BatchRenameHistoryPrefs` forward to.
+ * menus, `ScriptOperations`, the batch rename history (the former `BatchRenameHistoryPrefs`, removed in P5.2) and the
+ * deprecated `Pref.isHiddenFilesShown` / file extension getters forward to.
  *
  * zh-CN: [ExplorerKeys] (ROADMAP P2.2): `WorkingDirectoryUtils`, 文件管理器视图与菜单, `ScriptOperations`, 批量重命名历史, 以及
- * 已弃用的 `Pref.isHiddenFilesShown` / 文件扩展名读取与 `BatchRenameHistoryPrefs` 所转发的读法.
+ * 已弃用的 `Pref.isHiddenFilesShown` / 文件扩展名读取所转发的读法 (原 `BatchRenameHistoryPrefs` 已于 P5.2 删除).
  */
 class ExplorerKeysTest : DomainKeysTestBase() {
 

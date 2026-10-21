@@ -3,7 +3,6 @@ package org.autojs.autojs.core.pref.keys
 import org.autojs.autojs.core.console.ConsoleLogFormat
 import org.autojs.autojs.core.console.ConsoleTimeSettings
 import org.autojs.autojs.core.pref.SettingCategory
-import org.autojs.autojs.pluginclient.DevPluginPrefs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -11,10 +10,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The domains of docs/settings/ROADMAP.md P2.5: [ConsoleKeys] (with `ConsoleTimeSettings`), [ConnectionKeys] (with the
- * deprecated `DevPluginPrefs`), [LayoutInspectorKeys] and [DeveloperKeys].
+ * The domains of docs/settings/ROADMAP.md P2.5: [ConsoleKeys] (with `ConsoleTimeSettings`), [ConnectionKeys] (the
+ * readers of the former `DevPluginPrefs`, removed in P5.2), [LayoutInspectorKeys] and [DeveloperKeys].
  *
- * zh-CN: ROADMAP P2.5 的领域: 日志与控制台 (含 `ConsoleTimeSettings`), 客户端与服务端模式 (含已弃用的 `DevPluginPrefs`), 布局分析器,
+ * zh-CN: ROADMAP P2.5 的领域: 日志与控制台 (含 `ConsoleTimeSettings`), 客户端与服务端模式 (原 `DevPluginPrefs` 的读法, P5.2 已删除), 布局分析器,
  * 开发者选项.
  */
 class ToolingDomainsKeysTest : DomainKeysTestBase() {
@@ -42,16 +41,16 @@ class ToolingDomainsKeysTest : DomainKeysTestBase() {
 
     @Test
     @Suppress("DEPRECATION")
-    fun connectionSwitchesForwardFromDevPluginPrefs() {
+    fun connectionSwitchesKeepTheirDefaults() {
         assertEquals(7, ConnectionKeys.keys.size)
-        assertTrue(DevPluginPrefs.isClientAutoReconnectEnabled)
-        assertTrue(DevPluginPrefs.isClientReconnectOnNetworkChangeEnabled)
-        assertTrue(DevPluginPrefs.isClientRestoreOnLaunchEnabled)
-        assertTrue(DevPluginPrefs.isServerRestoreOnLaunchEnabled)
-        assertTrue(DevPluginPrefs.isServerNotifyConnectionChangesEnabled)
-        assertTrue(DevPluginPrefs.isServerLanDiscoveryEnabled)
+        assertTrue(ConnectionKeys.CLIENT_MODE_AUTO_RECONNECT.get())
+        assertTrue(ConnectionKeys.CLIENT_MODE_RECONNECT_ON_NETWORK_CHANGE.get())
+        assertTrue(ConnectionKeys.CLIENT_MODE_RESTORE_ON_LAUNCH.get())
+        assertTrue(ConnectionKeys.SERVER_MODE_RESTORE_ON_LAUNCH.get())
+        assertTrue(ConnectionKeys.SERVER_MODE_NOTIFY_CONNECTION_CHANGES.get())
+        assertTrue(ConnectionKeys.SERVER_MODE_LAN_DISCOVERY.get())
         ConnectionKeys.SERVER_MODE_LAN_DISCOVERY.set(false)
-        assertFalse(DevPluginPrefs.isServerLanDiscoveryEnabled)
+        assertFalse(ConnectionKeys.SERVER_MODE_LAN_DISCOVERY.get())
         // The gateway address is a run-time default; a stored address is read as it is.
         assertEquals("if (!isInrt) NetworkUtils.getGatewayAddress() else NetworkUtils.DEFAULT_IP_ADDRESS", ConnectionKeys.SERVER_ADDRESS.defaultText)
         ConnectionKeys.SERVER_ADDRESS.set("192.168.1.8")

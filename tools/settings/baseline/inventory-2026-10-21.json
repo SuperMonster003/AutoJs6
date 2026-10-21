@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "b1114075b",
+  "commit": "7d759ab5b",
   "branch": "master",
-  "dirtyScannedFiles": 12
+  "dirtyScannedFiles": 11
  },
  "summary": {
   "keyResources": 270,

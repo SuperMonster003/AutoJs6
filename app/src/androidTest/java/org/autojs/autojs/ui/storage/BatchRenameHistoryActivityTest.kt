@@ -17,13 +17,13 @@ import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameBatchState
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameEntryState
-import org.autojs.autojs.core.plugin.batchrename.BatchRenameHistoryPrefs
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameHostServices
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalEntry
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalRecord
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameJournalStore
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameOperation
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameSource
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs6.R
 import org.autojs.plugin.batchrename.api.BatchRenamePluginActions
 import org.junit.After
@@ -64,7 +64,7 @@ class BatchRenameHistoryActivityTest {
 
     @Before
     fun setUp() {
-        retention = BatchRenameHistoryPrefs.retention()
+        retention = ExplorerKeys.batchRenameHistoryRetention()
         backup.mkdirs()
         root.mkdirs()
         journalDirectory.listFiles().orEmpty().forEach { file -> check(file.renameTo(File(backup, file.name))) { "could not set ${file.name} aside" } }
@@ -78,7 +78,7 @@ class BatchRenameHistoryActivityTest {
         backup.listFiles().orEmpty().forEach { file -> file.renameTo(File(journalDirectory, file.name)) }
         backup.deleteRecursively()
         root.deleteRecursively()
-        BatchRenameHistoryPrefs.setRetention(retention)
+        ExplorerKeys.setBatchRenameHistoryRetention(retention)
     }
 
     @Test
@@ -148,7 +148,7 @@ class BatchRenameHistoryActivityTest {
 
     @Test
     fun aLowerRetentionIsSavedAndTrimsAtOnce() {
-        BatchRenameHistoryPrefs.setRetention(100)
+        ExplorerKeys.setBatchRenameHistoryRetention(100)
         val ids = (1..55).map { index ->
             BatchRenameJournalRecord(
                 batchId = journal.newBatchId(),
@@ -168,7 +168,7 @@ class BatchRenameHistoryActivityTest {
         screenshot("rename-history-retention")
         clickStableText("50")
         clickStableText(context.getString(R.string.dialog_button_confirm), ignoreCase = true)
-        awaitMain { BatchRenameHistoryPrefs.retention() == 50 && rowCount(activity) == 50 }
+        awaitMain { ExplorerKeys.batchRenameHistoryRetention() == 50 && rowCount(activity) == 50 }
         assertEquals(ids.takeLast(50).reversed(), journal.list().map { it.batchId })
         assertNull(journal.load(ids.first()))
     }

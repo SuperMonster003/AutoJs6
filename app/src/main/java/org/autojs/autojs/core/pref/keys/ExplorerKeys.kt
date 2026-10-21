@@ -115,7 +115,8 @@ object ExplorerKeys : SettingsDomain {
         get() = FILE_EXTENSIONS.storedKeyOrDefault() == keyOf(R.string.key_file_extensions_not_show)
 
     /**
-     * The batch rename retention, falling back to the default for a value that is no choice (`BatchRenameHistoryPrefs`).
+     * The batch rename retention, falling back to the default for a value that is no choice (as the former
+     * `BatchRenameHistoryPrefs` did).
      * zh-CN: 批量重命名保留批数, 不在可选值中时回退为默认值.
      */
     @JvmStatic
