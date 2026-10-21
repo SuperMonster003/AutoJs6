@@ -101,7 +101,7 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
                 else -> n.scrollBackward()
             }
         }
-        override fun tap(x: Int, y: Int): Boolean { service(); return gesture().press(x, y, 1) }
+        override fun tap(x: Int, y: Int): Boolean { service(); return gesture().click(x, y) }
         override fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, durationMillis: Long): Boolean { service(); return gesture().swipe(x1, y1, x2, y2, durationMillis) }
         override fun back() = service().performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
         override fun launch(packageName: String): Boolean {
