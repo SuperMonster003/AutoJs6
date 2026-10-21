@@ -17,6 +17,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.KeyInterceptor;
 import org.autojs.autojs.core.accessibility.NotificationListener;
 import org.autojs.autojs.core.accessibility.OnKeyListener;
+import org.autojs.autojs.core.accessibility.ScriptOwned;
 import org.autojs.autojs.core.broadcast.BroadcastEmitter;
 import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.inputevent.InputEventObserver;
@@ -28,6 +29,8 @@ import org.autojs.autojs.core.notification.Notification;
 import org.autojs.autojs.core.notification.NotificationListenerService;
 import org.autojs.autojs.core.pref.Language;
 import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage;
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope;
 import org.autojs.autojs.runtime.exception.ScriptException;
 import org.autojs.autojs.tool.MapBuilder;
 import org.autojs.autojs.util.IntentUtils;
@@ -43,7 +46,7 @@ import java.util.Set;
  * Modified by JetBrains AI Assistant (GPT-5.2) as of Jan 28, 2026.
  * Modified by SuperMonster003 as of Jan 28, 2026.
  */
-public class Events extends EventEmitter implements OnKeyListener, TouchObserver.OnTouchEventListener, NotificationListener, AccessibilityNotificationObserver.ToastListener, AccessibilityService.Companion.GestureListener {
+public class Events extends EventEmitter implements OnKeyListener, TouchObserver.OnTouchEventListener, NotificationListener, AccessibilityNotificationObserver.ToastListener, AccessibilityService.Companion.GestureListener, ScriptOwned {
 
     private static final String PREFIX_KEY_DOWN = "__key_down__#";
     private static final String PREFIX_KEY_UP = "__key_up__#";
@@ -96,6 +99,33 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         mLoopers = runtime.loopers;
         mScriptRuntime = runtime;
         broadcast = new BroadcastEmitter(runtime.bridges, runtime.timers.getMainTimer());
+        RuntimeResourceScope scope = runtime.resourceScope;
+        scope.own(Stage.EXIT_EVENT, "events.emit(exit)", this::emitExit);
+        scope.own(Stage.EVENTS, "events.recycle", this::recycle);
+    }
+
+    /**
+     * The key listener and the key interceptor of this module are owned by its script runtime, so that the runtime's exit can
+     * release them by owner id if recycle missed them (docs/memory/ROADMAP.md P4.2).
+     * zh-CN: 本模块的按键监听与按键拦截器属于其脚本运行时, 因此 recycle 遗漏时运行时结束可按 owner id 释放它们 (docs/memory/ROADMAP.md P4.2).
+     */
+    @Override
+    public String getScriptOwnerId() {
+        return mScriptRuntime.getOwnerId();
+    }
+
+    /**
+     * Emits the "exit" event when the script exits (docs/memory/ROADMAP.md P4.1); an exception thrown by a listener is
+     * reported to the script console, as before, and does not stop the release steps after it.
+     * zh-CN: 脚本结束时发出 "exit" 事件 (docs/memory/ROADMAP.md P4.1); 监听器抛出的异常照旧报告到脚本控制台, 不影响其后的释放步骤.
+     */
+    private void emitExit() {
+        try {
+            emit("exit");
+        } catch (Throwable e) {
+            mScriptRuntime.console.error(String.format("Exception on exit: %s", e));
+            throw e;
+        }
     }
 
     public EventEmitter emitter() {
@@ -173,14 +203,25 @@ public class Events extends EventEmitter implements OnKeyListener, TouchObserver
         if (mKeyInterceptor != null) {
             return;
         }
-        mKeyInterceptor = event -> {
+        mKeyInterceptor = new OwnedKeyInterceptor();
+        getAccessibilityService().getKeyInterrupterObserver().addKeyInterrupter(mKeyInterceptor);
+    }
+
+    private class OwnedKeyInterceptor implements KeyInterceptor, ScriptOwned {
+
+        @Override
+        public boolean onInterceptKeyEvent(@NonNull KeyEvent event) {
             if (mInterceptsAllKey) {
                 return true;
             }
             String keyName = KeyEvent.keyCodeToString(event.getKeyCode()).substring(8).toLowerCase(Language.getPrefLanguage().getLocale());
             return mInterceptedKeys.contains(keyName);
-        };
-        getAccessibilityService().getKeyInterrupterObserver().addKeyInterrupter(mKeyInterceptor);
+        }
+
+        @Override
+        public String getScriptOwnerId() {
+            return mScriptRuntime.getOwnerId();
+        }
     }
 
     private AccessibilityService getAccessibilityService() {

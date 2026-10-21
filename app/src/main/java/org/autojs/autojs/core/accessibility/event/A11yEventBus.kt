@@ -169,6 +169,19 @@ class A11yEventBus<E : Any>(
         return true
     }
 
+    /** Removes every subscription [predicate] accepts; returns how many. zh-CN: 移除 [predicate] 接受的全部订阅项, 返回数量. */
+    fun unsubscribeIf(predicate: (Subscription<E>) -> Boolean): Int {
+        val removed: List<Subscription<E>>
+        synchronized(subscriptionsLock) {
+            removed = subscriptions.filter(predicate)
+            if (removed.isEmpty()) return 0
+            val gone = removed.toSet()
+            subscriptions = subscriptions.filter { it !in gone }
+        }
+        removed.forEach(::deactivate)
+        return removed.size
+    }
+
     /** Removes every subscription of [owner]; returns how many. zh-CN: 移除 [owner] 的全部订阅项, 返回数量. */
     fun unsubscribeAll(owner: Any): Int {
         val removed: List<Subscription<E>>

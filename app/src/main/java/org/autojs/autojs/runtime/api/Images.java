@@ -40,6 +40,8 @@ import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.ImageFeatureMatching.FeatureMatchingDescriptor;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException;
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope;
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage;
 import org.autojs.autojs.util.BitmapUtils;
 import org.autojs.autojs6.R;
 import org.jetbrains.annotations.Contract;
@@ -145,6 +147,35 @@ public class Images {
         mScreenMetrics = scriptRuntime.getScreenMetrics();
         mScriptRuntime = scriptRuntime;
         this.colorFinder = new RhinoColorFinder(mScreenMetrics);
+        ownExitSteps(scriptRuntime.resourceScope);
+    }
+
+    /**
+     * Registers the exit steps of the images module (docs/memory/ROADMAP.md P4.1): pending quantizations are cancelled first,
+     * the images recorded for this runtime are recycled after the script threads have ended, the screen capturer last.
+     * zh-CN: 登记 images 模块的退出步骤 (docs/memory/ROADMAP.md P4.1): 最先取消进行中的量化, 脚本线程结束后回收本运行时记录的图像, 最后释放截屏.
+     */
+    private void ownExitSteps(RuntimeResourceScope scope) {
+        scope.own(Stage.IMAGE_QUANTIZATIONS, "images.cancelPendingQuantizations", this::cancelPendingQuantizations);
+        scope.own(Stage.IMAGES, "ImageWrapper.recycleAll", () -> recycleImagesOnExit(scope.getSurvivingThreads()));
+        scope.own(Stage.SCREEN_CAPTURER, "images.releaseScreenCapturer", this::releaseScreenCapturer);
+        scope.own(Stage.SCREEN_CAPTURE_SERVICE, "images.stopScreenCapturerForegroundService", this::stopScreenCapturerForegroundService);
+    }
+
+    /**
+     * Recycles all ImageWrapper instances recorded for this runtime (never those of other running scripts), so that no thread of this
+     * script can touch an image after it has been recycled (docs/memory/ROADMAP.md H20): at once if every script thread has ended,
+     * otherwise on a helper thread once the threads still alive have ended.
+     * zh-CN: 回收当前运行时记录的全部 ImageWrapper 实例 (不影响其他仍在运行的脚本), 使本脚本的任何线程都不会在图像回收后再访问它 (docs/memory/ROADMAP.md H20):
+     * 脚本线程都已结束时立即回收, 否则在仍存活的线程结束后于辅助线程回收.
+     */
+    private void recycleImagesOnExit(List<Thread> aliveThreads) {
+        if (aliveThreads.isEmpty()) {
+            ImageWrapper.recycleAll(mScriptRuntime);
+        } else {
+            Threads.runAfterTermination(mScriptRuntime.getThreads().getMainThread().getName(), aliveThreads, Threads.EXIT_DEFERRED_MILLIS,
+                    () -> ImageWrapper.recycleAll(mScriptRuntime));
+        }
     }
 
     public interface OnScreenCaptureAvailableListener {

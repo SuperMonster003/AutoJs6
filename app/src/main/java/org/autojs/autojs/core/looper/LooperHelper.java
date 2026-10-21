@@ -70,4 +70,14 @@ public class LooperHelper {
         }
     }
 
+    /**
+     * Threads with a looper prepared here and not yet quit or collected, for the memory gate (docs/memory/ROADMAP.md P4.2).
+     * zh-CN: 经本类准备 Looper 且尚未退出或被回收的线程数, 供内存门禁使用 (docs/memory/ROADMAP.md P4.2).
+     */
+    public static int size() {
+        synchronized (sLoopers) {
+            return sLoopers.size();
+        }
+    }
+
 }

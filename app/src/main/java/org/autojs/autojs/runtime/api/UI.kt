@@ -9,6 +9,7 @@ import org.autojs.autojs.core.ui.inflater.util.Drawables
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.Scriptable
 import java.util.concurrent.ConcurrentHashMap
@@ -66,6 +67,10 @@ class UI(context: Context, private val scriptRuntime: ScriptRuntime) : ProxyObje
             mProperties.containsKey(key) -> value?.let { mProperties[key] = it } ?: mProperties.remove(key)
             else -> super.put(key, start, value)
         }
+    }
+
+    init {
+        scriptRuntime.resourceScope.own(Stage.UI, "ui.recycle") { recycle() }
     }
 
     fun recycle() {

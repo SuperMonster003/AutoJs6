@@ -2,6 +2,7 @@ package org.autojs.autojs.core.accessibility.event
 
 import android.os.SystemClock
 import org.autojs.autojs.core.accessibility.AccessibilityService
+import org.autojs.autojs.core.accessibility.ScriptOwned
 import org.autojs.autojs.core.accessibility.registry.A11yServiceRegistry
 import org.autojs.autojs.core.automator.event.EventGate
 import org.autojs.autojs.core.automator.event.EventWaitAborted
@@ -32,7 +33,7 @@ class A11yEventPulse(
     /** Watched for the service going away, which aborts the pending waits (roadmap P5.5); `null` never aborts. zh-CN: 监视服务的消失, 届时中止待定的等待 (Roadmap P5.5); `null` 则从不中止. */
     private val registry: A11yServiceRegistry<AccessibilityService>? = null,
     private val clock: () -> Long = { SystemClock.uptimeMillis() },
-) : AutoCloseable {
+) : AutoCloseable, ScriptOwned {
 
     private class Registered(val types: Set<Int>?, val waiter: EventWaiter<A11yEvent>) {
         fun accepts(type: Int) = types == null || type in types
@@ -53,6 +54,10 @@ class A11yEventPulse(
     }
 
     private val lock = Any()
+
+    /** The owner id of the script runtime whose bridge made this pulse (roadmap P4.2). zh-CN: 创建本脉冲的 bridge 所属脚本运行时的 owner id (ROADMAP P4.2). */
+    @Volatile
+    override var scriptOwnerId: String? = null
 
     private var subscription: A11yEventBus.Subscription<A11yEvent>? = null
 

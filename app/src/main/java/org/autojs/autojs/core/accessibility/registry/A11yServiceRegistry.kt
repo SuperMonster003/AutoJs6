@@ -173,6 +173,16 @@ open class A11yServiceRegistry<S : Any>(
 
     val listenerCount: Int get() = synchronized(listenersLock) { listeners.size }
 
+    /** Listeners whose owner [predicate] accepts. zh-CN: 属主被 [predicate] 接受的监听者数. */
+    fun countListeners(predicate: (Any) -> Boolean): Int = synchronized(listenersLock) { listeners.keys.count(predicate) }
+
+    /** Removes the listeners whose owner [predicate] accepts; returns how many. zh-CN: 移除属主被 [predicate] 接受的监听者, 返回数量. */
+    fun removeListenersIf(predicate: (Any) -> Boolean): Int = synchronized(listenersLock) {
+        val owners = listeners.keys.filter(predicate)
+        owners.forEach(listeners::remove)
+        owners.size
+    }
+
     private inline fun transition(next: (current: Snapshot<S>) -> Snapshot<S>) {
         val previous: Snapshot<S>
         val current: Snapshot<S>

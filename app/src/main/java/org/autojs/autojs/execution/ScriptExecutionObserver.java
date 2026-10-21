@@ -37,6 +37,10 @@ public class ScriptExecutionObserver implements ScriptExecutionListener {
         return mScriptExecutionListeners.remove(listener);
     }
 
+    public int getListenerCount() {
+        return mScriptExecutionListeners.size();
+    }
+
     public static class Wrapper implements ScriptExecutionListener {
 
         private final ScriptExecutionObserver mScriptExecutionObserver;

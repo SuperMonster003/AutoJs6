@@ -45,7 +45,14 @@ abstract class AccessibilityBridge(
     private val context: Context,
     val config: AccessibilityConfig,
     private val uiHandler: UiHandler,
-) {
+) : ScriptOwned {
+
+    /**
+     * The owner id of the script runtime this bridge belongs to (one bridge per runtime), set by the runtime (roadmap P4.2).
+     * zh-CN: 本 bridge 所属脚本运行时的 owner id (每个运行时一个 bridge), 由运行时设置 (ROADMAP P4.2).
+     */
+    @Volatile
+    override var scriptOwnerId: String? = null
 
     fun interface WindowFilter {
         fun filter(info: AccessibilityWindowInfo): Boolean
@@ -73,7 +80,9 @@ abstract class AccessibilityBridge(
      */
     val stats: A11yStats = A11yStats()
 
-    private val pulseDelegate = lazy { A11yEventPulse(AccessibilityService.eventBus, AccessibilityService.registry) }
+    private val pulseDelegate = lazy {
+        A11yEventPulse(AccessibilityService.eventBus, AccessibilityService.registry).also { it.scriptOwnerId = scriptOwnerId }
+    }
 
     /**
      * The script's view of the accessibility event stream (roadmap P5.2): `waitForIdle` /

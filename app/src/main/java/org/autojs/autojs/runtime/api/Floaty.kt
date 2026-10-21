@@ -18,6 +18,7 @@ import org.autojs.autojs.core.ui.inflater.Exceptions
 import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.runtime.api.augment.ui.UI
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
@@ -45,6 +46,16 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
     private val mContext = ContextThemeWrapper(uiHandler.applicationContext, R.style.ScriptTheme)
     private val mWindows = CopyOnWriteArraySet<JsWindow>()
     private val mDisplayOverOtherAppsPerm = DisplayOverOtherAppsPermission(mContext)
+
+    init {
+        // Floating windows need to be closed immediately.
+        // To prevent malicious scripts from creating fullscreen floating windows
+        // that obscure the screen and write infinite loops in exit.
+        // zh-CN:
+        // 浮动窗口需要第一时间关闭.
+        // 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题.
+        scriptRuntime.resourceScope.own(Stage.FLOATY, "floaty.closeAll") { closeAll() }
+    }
 
     fun window(supplier: BaseResizableFloatyWindow.ViewSupplier): JsResizableWindow {
         try {
@@ -74,6 +85,7 @@ class Floaty(private val uiHandler: UiHandler, private val scriptRuntime: Script
 
     private fun addWindow(window: JsWindow) {
         mWindows.add(window)
+        scriptRuntime.resourceScope.track(window, "floaty window")
     }
 
     private fun removeWindow(window: JsWindow): Boolean {

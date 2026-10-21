@@ -7,6 +7,8 @@ import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.core.looper.MainThreadProxy
 import org.autojs.autojs.core.looper.Timer
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
+import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
@@ -42,6 +44,18 @@ class Threads(private val scriptRuntime: ScriptRuntime) {
 
     val threadPools = HashSet<ThreadPoolExecutor>()
 
+    init {
+        // Stop the script threads and thread pools and wait for them to end before the images are recycled (stage IMAGES), so that
+        // no thread of this script can touch an image after it has been recycled (docs/memory/ROADMAP.md H20). The UI thread does not
+        // wait; the threads still alive are left to the scope, and what they may use is released once they have ended.
+        // zh-CN: 先停止脚本线程与线程池并等待它们结束, 再回收图像 (IMAGES 阶段), 使本脚本的任何线程都不会在图像回收后再访问它 (docs/memory/ROADMAP.md H20).
+        // UI 线程不等待; 仍存活的线程交给作用域, 它们可能使用的资源在它们结束后再释放.
+        val scope = scriptRuntime.resourceScope
+        scope.own(Stage.THREADS, "threads.shutDownAllAndAwait") {
+            scope.survivingThreads = shutDownAllAndAwait(if (isUiThread()) 0L else EXIT_AWAIT_MILLIS)
+        }
+    }
+
     fun getThreads() = mThreads
 
     fun start(runnable: Runnable): TimerThread {
@@ -53,6 +67,7 @@ class Threads(private val scriptRuntime: ScriptRuntime) {
                 it.name = "${mainThread.name} (Spawn-$mSpawnCount)"
                 mSpawnCount++
                 it.start()
+                scriptRuntime.resourceScope.track(it, it.name)
             }
         }
         return thread
@@ -224,12 +239,25 @@ class Threads(private val scriptRuntime: ScriptRuntime) {
                 return TimerThread(threads.scriptRuntime, runnable, threads.getThreads()).apply {
                     name = "${threads.mainThread.name} (Pool-$threadPoolId, ${mThreadCount.getAndIncrement()})"
                     threads.addPoolThread(this)
+                    threads.scriptRuntime.resourceScope.track(this, name)
                 }
             }
 
         }
 
         private const val TAG = "Threads"
+
+        /**
+         * How long the exit of a script waits on its script thread for the script's own threads to end (docs/memory/ROADMAP.md H20).
+         * zh-CN: 脚本结束时在脚本线程上等待脚本自身线程结束的时长 (docs/memory/ROADMAP.md H20).
+         */
+        const val EXIT_AWAIT_MILLIS = 2_000L
+
+        /**
+         * How long a helper thread waits for threads still alive at exit before it gives up releasing what they may use (R2).
+         * zh-CN: 辅助线程等待退出时仍存活的线程的时长, 超时则放弃释放它们可能使用的资源 (R2).
+         */
+        const val EXIT_DEFERRED_MILLIS = 60_000L
 
         /**
          * Waits until every thread in [threads] (except the current one) has terminated or [timeoutMillis] has elapsed,

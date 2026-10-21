@@ -7,6 +7,7 @@ import android.util.Log
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.util.RhinoUtils.isMainThread
 import org.mozilla.javascript.Context
 import java.lang.ref.WeakReference
@@ -68,6 +69,7 @@ class Loopers(val scriptRuntime: ScriptRuntime) {
         @Suppress("DEPRECATION")
         mMainHandler = Handler()
         mMainMessageQueue = Looper.myQueue()
+        scriptRuntime.resourceScope.own(Stage.LOOPERS, "loopers.recycle") { recycle() }
     }
 
     fun prepare() {

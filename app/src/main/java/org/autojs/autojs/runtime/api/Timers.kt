@@ -6,6 +6,7 @@ import org.autojs.autojs.core.looper.Timer
 import org.autojs.autojs.core.looper.Timer.Companion.getTimerId
 import org.autojs.autojs.core.looper.TimerThread
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.mozilla.javascript.Callable
 import java.lang.ref.WeakReference
@@ -38,6 +39,7 @@ class Timers(scriptRuntime: ScriptRuntime) {
         mainTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, TIMER_ID_MAIN)
         mUiTimer = Timer(scriptRuntime, maxCallbackUptimeMillisForAllThreads, Looper.getMainLooper(), TIMER_ID_UI)
         mUiTimer.onPendingCallbacksChanged = mainTimer::wakeForIdleCheck
+        scriptRuntime.resourceScope.own(Stage.TIMERS, "timers.recycle") { recycle() }
     }
 
     fun getTimerForThread(thread: Thread): Timer? = when {

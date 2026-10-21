@@ -44,6 +44,8 @@ SCENARIOS = {
     "S10": "s10HttpAndWebSocket",
     "S11": "s11DeviceReceivers",
     "S12": "s12PluginBinding",
+    "S13": "s13SpeechSession",
+    "S14": "s14ConsoleWindow",
 }
 MODES = {"normal": "N", "force": "F"}
 CAPTURE_SCENARIOS = {"S4a", "S4f"}

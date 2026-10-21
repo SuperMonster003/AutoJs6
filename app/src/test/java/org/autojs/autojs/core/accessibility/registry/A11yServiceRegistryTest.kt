@@ -289,6 +289,21 @@ class A11yServiceRegistryTest {
         assertFalse("unbinding clears the flag", registry.adoptedByEvent)
     }
 
+    @Test
+    fun listenersAreCountedAndRemovedByOwner() {
+        val before = registry.listenerCount
+        registry.addListener("runtime@1", Recorder())
+        registry.addListener("bridge@1", Recorder())
+        registry.addListener("runtime@2", Recorder())
+        val owned: (Any) -> Boolean = { it == "runtime@1" || it == "bridge@1" }
+
+        assertEquals(2, registry.countListeners(owned))
+        assertEquals(2, registry.removeListenersIf(owned))
+        assertEquals(0, registry.countListeners(owned))
+        assertEquals(before + 1, registry.listenerCount)
+        assertTrue(registry.hasListener("runtime@2"))
+    }
+
     private fun Pair<Snapshot<FakeService>, Snapshot<FakeService>>.states() = first.state to second.state
 
 }

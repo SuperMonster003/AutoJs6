@@ -65,6 +65,20 @@ data class RetainedRuntime(
 )
 
 /**
+ * A resource tracked in the resource scope of a finished runtime (docs/memory/ROADMAP.md P4.1) that the unreclaimed check found still
+ * alive, for example a thread that did not end or a window still referenced; [resource] is the name it was tracked with.
+ * zh-CN: 已结束 runtime 的资源作用域中跟踪的, 未回收检查发现仍存活的资源 (docs/memory/ROADMAP.md P4.1), 例如未结束的线程或仍被引用的窗口;
+ * [resource] 为跟踪时的名称.
+ */
+data class UnreleasedResource(
+    val id: Int,
+    val name: String,
+    val source: String,
+    val resource: String,
+    val elapsedMs: Long,
+)
+
+/**
  * What LeakCanary is doing in a debug build, for the unreclaimed runtime warning (docs/memory/ROADMAP.md P2.3).
  * [automaticHeapDump] tells whether LeakCanary dumps and analyzes the heap by itself once enough objects are retained.
  * zh-CN: debug 构建中 LeakCanary 的状态, 供未回收警告使用 (docs/memory/ROADMAP.md P2.3). [automaticHeapDump] 表示残留对象足够多时 LeakCanary 是否自行转储并分析.

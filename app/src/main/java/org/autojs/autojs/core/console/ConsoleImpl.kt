@@ -1220,6 +1220,10 @@ open class ConsoleImpl @JvmOverloads constructor(
         /** Runtime consoles whose window is requested or attached. zh-CN: 已请求或已附加窗口的控制台. */
         private val sShowingConsoles = CopyOnWriteArraySet<ConsoleImpl>()
 
+        /** How many consoles show a window, for the memory gate (docs/memory/ROADMAP.md P4.2). zh-CN: 显示窗口的控制台数, 供内存门禁使用. */
+        @JvmStatic
+        fun showingConsoleCount() = sShowingConsoles.size
+
         /** Soft cap of retained log entries; older ones are dropped. zh-CN: 保留日志条目的软上限, 更早的条目被丢弃. */
         const val MAX_LOG_ENTRIES = 4096
         const val DEFAULT_TITLE = ""

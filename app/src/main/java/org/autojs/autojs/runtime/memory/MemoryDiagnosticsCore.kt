@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.memory
 
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.TrackedResource
 import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
 
@@ -97,6 +98,19 @@ open class MemoryDiagnosticsCore internal constructor(
         fun describe(now: Long) = RetainedRuntime(id, name, source, endedAt, now - endedElapsed, exitKind)
     }
 
+    // The resources a finished runtime tracked in its resource scope (roadmap P4.1), checked with the runtime but kept apart from
+    // it: a runtime can be reclaimed while one of its threads or windows is still alive.
+    // zh-CN: 已结束 runtime 在其资源作用域中跟踪的资源 (ROADMAP P4.1), 与 runtime 一同检查但分开存放: runtime 可能已被回收而它的某个线程或窗口仍存活.
+    private class Resources(
+        val id: Int,
+        val name: String,
+        val source: String,
+        val endedElapsed: Long,
+        val resources: List<TrackedResource>,
+    ) {
+        fun alive() = resources.filterNot { it.isReclaimed }
+    }
+
     private val lock = Any()
     private val queue = ReferenceQueue<Any>()
 
@@ -104,16 +118,45 @@ open class MemoryDiagnosticsCore internal constructor(
     // zh-CN: 由 lock 保护; 按脚本结束的先后排列.
     private val ended = LinkedHashSet<Ended>()
 
+    // Guarded by lock: resources waiting for the unreclaimed check, and the latest findings (at most MAX_UNRELEASED).
+    // zh-CN: 由 lock 保护: 等待未回收检查的资源, 以及最近的检查结果 (最多 MAX_UNRELEASED 条).
+    private val pendingResources = ArrayList<Resources>()
+    private val unreleased = ArrayDeque<UnreleasedResource>()
+
     /**
      * Registers a finished script runtime by a weak reference. With [check] false the runtime is never reported by [checkEnded].
-     * zh-CN: 以弱引用登记已结束的脚本 runtime. [check] 为 false 时 [checkEnded] 不会报告它.
+     * [resources] are the objects the runtime tracked in its resource scope (held weakly); [checkEnded] reports those still alive.
+     * zh-CN: 以弱引用登记已结束的脚本 runtime. [check] 为 false 时 [checkEnded] 不会报告它. [resources] 是该 runtime 在资源作用域中跟踪的对象
+     * (弱引用), [checkEnded] 报告其中仍存活的.
      */
-    fun track(runtime: Any, id: Int, name: String, source: String, exitKind: ExitKind, check: Boolean = true) {
+    fun track(
+        runtime: Any,
+        id: Int,
+        name: String,
+        source: String,
+        exitKind: ExitKind,
+        check: Boolean = true,
+        resources: List<TrackedResource> = emptyList(),
+    ) {
         synchronized(lock) {
             prune()
-            ended.add(Ended(runtime, queue, id, name, source, clock.currentTimeMillis(), clock.elapsedRealtime(), exitKind, !check))
+            val endedElapsed = clock.elapsedRealtime()
+            ended.add(Ended(runtime, queue, id, name, source, clock.currentTimeMillis(), endedElapsed, exitKind, !check))
+            if (check && resources.isNotEmpty()) pendingResources += Resources(id, name, source, endedElapsed, resources)
         }
     }
+
+    /**
+     * Resources of finished runtimes that the unreclaimed check found still alive, oldest first (the latest [MAX_UNRELEASED]).
+     * zh-CN: 未回收检查发现仍存活的已结束 runtime 的资源, 先发现的在前 (最近 [MAX_UNRELEASED] 条).
+     */
+    fun unreleased(): List<UnreleasedResource> = synchronized(lock) { unreleased.toList() }
+
+    /**
+     * Called by [checkEnded] for each resource it found still alive.
+     * zh-CN: [checkEnded] 每发现一个仍存活的资源调用一次.
+     */
+    protected open fun onUnreleased(resource: UnreleasedResource) = Unit
 
     /**
      * Finished runtimes that are still reachable, earliest first. Right after a script ends its runtime is listed here until the
@@ -212,14 +255,26 @@ open class MemoryDiagnosticsCore internal constructor(
      * 每个 runtime 只检查一次.
      */
     fun checkEnded(delayMs: Long = UNRECLAIMED_CHECK_DELAY_MS, budgetMs: Long = UNRECLAIMED_CHECK_BUDGET_MS): List<RetainedRuntime> {
-        val due = synchronized(lock) {
+        val (due, dueResources) = synchronized(lock) {
             prune()
             val now = clock.elapsedRealtime()
-            ended.filter { !it.checked && now - it.endedElapsed >= delayMs }.onEach { it.checked = true }
+            val runtimes = ended.filter { !it.checked && now - it.endedElapsed >= delayMs }.onEach { it.checked = true }
+            val resources = pendingResources.filter { now - it.endedElapsed >= delayMs }.also { pendingResources.removeAll(it.toSet()) }
+            runtimes to resources
         }
-        if (due.isEmpty()) return emptyList()
-        awaitCleared(budgetMs) { due.all { it.get() == null } }
+        if (due.isEmpty() && dueResources.isEmpty()) return emptyList()
+        awaitCleared(budgetMs) { due.all { it.get() == null } && dueResources.all { it.alive().isEmpty() } }
         val now = clock.elapsedRealtime()
+        val found = dueResources.flatMap { entry ->
+            entry.alive().map { UnreleasedResource(entry.id, entry.name, entry.source, it.name, now - entry.endedElapsed) }
+        }
+        if (found.isNotEmpty()) {
+            synchronized(lock) {
+                unreleased.addAll(found)
+                while (unreleased.size > MAX_UNRELEASED) unreleased.removeFirst()
+            }
+            found.forEach(::onUnreleased)
+        }
         return due.filter { it.get() != null }.map { it.describe(now) }
     }
 
@@ -229,7 +284,9 @@ open class MemoryDiagnosticsCore internal constructor(
      */
     fun nextCheckAt(delayMs: Long = UNRECLAIMED_CHECK_DELAY_MS): Long? = synchronized(lock) {
         prune()
-        ended.filter { !it.checked }.minOfOrNull { it.endedElapsed + delayMs }
+        val runtimes = ended.filter { !it.checked }.minOfOrNull { it.endedElapsed }
+        val resources = pendingResources.minOfOrNull { it.endedElapsed }
+        listOfNotNull(runtimes, resources).minOrNull()?.let { it + delayMs }
     }
 
     // Caller holds lock.
@@ -258,6 +315,9 @@ open class MemoryDiagnosticsCore internal constructor(
          * zh-CN: 未回收检查的轮询预算: 内存门禁在四台设备上看到可回收的 runtime 都在强制回收后约 1 s 内消失 (P1.4), 3 s 让警告紧跟间隔且不误报.
          */
         const val UNRECLAIMED_CHECK_BUDGET_MS = 3_000L
+
+        /** How many findings [unreleased] keeps. zh-CN: [unreleased] 保留的结果条数. */
+        const val MAX_UNRELEASED = 100
 
         /**
          * Thread names created for scripts: the script thread, threads.start, threads.pool, timers, the screen capturer handler thread

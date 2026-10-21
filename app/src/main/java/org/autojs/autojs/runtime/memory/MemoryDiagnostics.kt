@@ -117,8 +117,13 @@ object MemoryDiagnostics : MemoryDiagnosticsCore(AndroidMemoryProbes, AndroidMem
         val name = runCatching { source?.name }.getOrNull() ?: "#${engine.id}"
         val path = runCatching { source?.elegantPath }.getOrNull() ?: name
         val warn = isUnreclaimedWarningEnabled()
-        track(runtime, engine.id, name, path, exitKindOf(engine, runtime), check = warn)
+        val resources = runCatching { runtime.resourceScope.trackedReferences() }.getOrDefault(emptyList())
+        track(runtime, engine.id, name, path, exitKindOf(engine, runtime), check = warn, resources = resources)
         if (warn) scheduleCheck()
+    }
+
+    override fun onUnreleased(resource: UnreleasedResource) {
+        Log.w(TAG, "Resource of a finished script still alive: ${resource.resource} [id=${resource.id}, script=${resource.name}, elapsed=${resource.elapsedMs} ms]")
     }
 
     private fun exitKindOf(engine: ScriptEngine<*>, runtime: ScriptRuntime): ExitKind {

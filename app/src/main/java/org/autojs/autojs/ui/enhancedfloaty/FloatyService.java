@@ -34,6 +34,14 @@ public class FloatyService extends Service {
         windows.remove(window);
     }
 
+    /**
+     * Windows the service hosts or is about to host, for the memory gate (docs/memory/ROADMAP.md P4.2).
+     * zh-CN: 服务正在承载或即将承载的窗口数, 供内存门禁使用 (docs/memory/ROADMAP.md P4.2).
+     */
+    public static int windowCount() {
+        return windows.size();
+    }
+
     /** Whether the service process has created its window manager and can host windows right now. zh-CN: 服务是否已就绪并可立即承载窗口. */
     public static boolean isRunning() {
         return instance != null;

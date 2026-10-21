@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.memory
 
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -180,6 +181,34 @@ class MemoryDiagnosticsCoreTest {
         assertEquals(listOf(1, 2), core.retained().map { it.id })
         assertNotNull(pinned)
         assertNotNull(silent)
+    }
+
+    @Test
+    fun unreclaimedCheckReportsTrackedResourcesStillAlive() {
+        val clock = FakeClock()
+        val core = object : MemoryDiagnosticsCore(FakeProbes(), clock) {
+            val reported = mutableListOf<UnreleasedResource>()
+            override fun onUnreleased(resource: UnreleasedResource) {
+                reported += resource
+            }
+        }
+        val scope = RuntimeResourceScope("runtime@test") { _, _ -> }
+        val window = Any()
+        scope.track(window, "floaty window")
+        // The runtime itself is gone before the check; its resources are still checked (roadmap P4.1).
+        // zh-CN: 检查之前 runtime 本身已被回收; 其资源仍要检查 (ROADMAP P4.1).
+        core.track(Any(), id = 3, name = "d.js", source = "d.js", exitKind = ExitKind.STOPPED, resources = scope.trackedReferences())
+        core.track(Any(), id = 4, name = "e.js", source = "e.js", exitKind = ExitKind.NORMAL, check = false, resources = scope.trackedReferences())
+        assertEquals(10_000L, core.nextCheckAt())
+
+        clock.now = 10_000L
+        core.checkEnded()
+
+        val expected = UnreleasedResource(3, "d.js", "d.js", "floaty window", 10_000L + MemoryDiagnosticsCore.UNRECLAIMED_CHECK_BUDGET_MS)
+        assertEquals(listOf(expected), core.reported)
+        assertEquals(listOf(expected), core.unreleased())
+        assertNull(core.nextCheckAt())
+        assertNotNull(window)
     }
 
     @Test

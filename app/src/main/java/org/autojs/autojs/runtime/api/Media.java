@@ -5,6 +5,7 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import org.autojs.autojs.core.media.ScriptMusicPlayer;
 import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage;
 
 /**
  * Created by Stardust on Feb 12, 2018.
@@ -20,6 +21,7 @@ public class Media implements MediaScannerConnection.MediaScannerConnectionClien
         mRuntime = runtime;
         mMusicPlayer = new ScriptMusicPlayer(context);
         mScannerConnection.connect();
+        runtime.resourceScope.own(Stage.MEDIA, "media.recycle", this::recycle);
     }
 
     public void scanFile(String path) {

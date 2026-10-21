@@ -190,6 +190,19 @@ public class ScriptEngineService {
         return mScriptExecutionObserver.removeScriptExecutionListener(listener);
     }
 
+    /**
+     * Global execution listeners; all of them are process-wide or paired with an unregistration, none is added per script
+     * (docs/memory/ROADMAP.md P4.2). For the memory gate.
+     * zh-CN: 全局执行监听器数; 它们都是进程级的或与注销成对, 没有按脚本添加的 (docs/memory/ROADMAP.md P4.2). 供内存门禁使用.
+     */
+    public int getGlobalScriptExecutionListenerCount() {
+        return mScriptExecutionObserver.getListenerCount();
+    }
+
+    public int getEngineLifecycleCallbackCount() {
+        return mEngineLifecycleObserver.count();
+    }
+
     public ScriptExecution execute(ScriptExecutionTask task) {
         if (task.getConfig().nodeLaunchStartedAtMs == 0L) {
             task.getConfig().nodeLaunchStartedAtMs = android.os.SystemClock.elapsedRealtime();
@@ -367,6 +380,12 @@ public class ScriptEngineService {
         void unregisterCallback(ScriptEngineManager.EngineLifecycleCallback callback) {
             synchronized (mEngineLifecycleCallbacks) {
                 mEngineLifecycleCallbacks.remove(callback);
+            }
+        }
+
+        int count() {
+            synchronized (mEngineLifecycleCallbacks) {
+                return mEngineLifecycleCallbacks.size();
             }
         }
     }

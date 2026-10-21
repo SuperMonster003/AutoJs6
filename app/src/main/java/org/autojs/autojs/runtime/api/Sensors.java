@@ -10,6 +10,7 @@ import org.autojs.autojs.core.eventloop.EventEmitter;
 import org.autojs.autojs.core.looper.Loopers;
 import org.autojs.autojs.runtime.ScriptBridges;
 import org.autojs.autojs.runtime.ScriptRuntime;
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage;
 import org.autojs.autojs.tool.MapBuilder;
 
 import java.lang.reflect.Field;
@@ -57,6 +58,7 @@ public class Sensors extends EventEmitter implements Loopers.LooperQuitHandler {
         mNoOpSensorEventEmitter = new SensorEventEmitter(this, scriptRuntime.bridges);
         mScriptRuntime = scriptRuntime;
         scriptRuntime.loopers.addLooperQuitHandler(this);
+        scriptRuntime.resourceScope.own(Stage.SENSORS, "sensors.unregisterAll", this::unregisterAll);
     }
 
     public static class Delay {

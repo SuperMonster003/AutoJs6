@@ -77,9 +77,9 @@ class GateScenario(
 }
 
 /**
- * Scenario matrix S1-S12 (docs/memory/ROADMAP.md T2; S4 is split into S4a-S4e as in appendix A).
+ * Scenario matrix S1-S14 (docs/memory/ROADMAP.md T2; S4 is split into S4a-S4f as in appendix A; S13 / S14 were added by P4.1 / P4.2).
  * Scripts use ES5 syntax so that every Rhino language level accepts them.
- * zh-CN: 场景矩阵 S1-S12 (docs/memory/ROADMAP.md T2; S4 按附录 A 拆为 S4a-S4e). 脚本使用 ES5 语法, 以便任何 Rhino 语言级别都能接受.
+ * zh-CN: 场景矩阵 S1-S14 (docs/memory/ROADMAP.md T2; S4 按附录 A 拆为 S4a-S4f; S13 / S14 由 P4.1 / P4.2 新增). 脚本使用 ES5 语法, 以便任何 Rhino 语言级别都能接受.
  */
 object GateScenarios {
 
@@ -349,6 +349,33 @@ object GateScenarios {
             """
             var plugin = plugins.load(${q(env.pluginPackage)});
             if (!plugin) throw new Error('memory gate: plugins.load returned nothing');
+            """
+        },
+        GateScenario(
+            "S13", "speech.listen session open when the script ends", "H23",
+            notes = "external source, 200 ms of silence fed after ready, no microphone; N cancels the session, F stops the script with it open",
+        ) { _, _ ->
+            """
+            var session = speech.listen({ source: 'external' });
+            var guard = FORCE ? null : setTimeout(function () { session.cancel(); }, 10000);
+            session.on('ready', function () {
+                gateStat('ready', 1);
+                session.feed(new Int16Array(3200));
+                if (!FORCE) session.cancel();
+            });
+            session.on('error', function () { gateStat('errors', 1); });
+            session.on('end', function () { if (guard !== null) clearTimeout(guard); });
+            """
+        },
+        GateScenario(
+            "S14", "console.show with exitOnClose, then the script ends", "ConsoleImpl.sShowingConsoles",
+            notes = "the console window closes 500 ms after the script ends (exitOnClose); P4.2 coverage of appendix B.1",
+        ) { _, _ ->
+            """
+            console.setExitOnClose(500);
+            console.show();
+            console.log('memory gate');
+            sleep(300);
             """
         },
     )

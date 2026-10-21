@@ -296,6 +296,39 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
             get() = eventBus.count { it.priority == PRIORITY_OBSERVER }
 
         /**
+         * Subscriptions and state listeners on the process-wide buses, by bus, for the memory gate (docs/memory/ROADMAP.md P4.2).
+         * zh-CN: 进程级各总线上的订阅项与状态监听者数, 按总线分列, 供内存门禁使用 (docs/memory/ROADMAP.md P4.2).
+         */
+        fun busCounts(): Map<String, Int> = linkedMapOf(
+            "events" to eventBus.subscriptionCount,
+            "keys" to keyBus.subscriptionCount,
+            "gestures" to gestureBus.subscriptionCount,
+            "stateListeners" to registry.listenerCount,
+        )
+
+        /**
+         * Whether a subscription or listener [owner] belongs to the script runtime [ownerId]: the id itself (script event
+         * callbacks), or a [ScriptOwned] object of that runtime (its events module, bridge, event pulse).
+         * zh-CN: 订阅项或监听者的属主 [owner] 是否属于脚本运行时 [ownerId]: 即该 id 本身 (脚本事件回调), 或该运行时的 [ScriptOwned] 对象 (其 events 模块, bridge, 事件脉冲).
+         */
+        fun isOwnedBy(owner: Any, ownerId: String) = owner == ownerId || (owner as? ScriptOwned)?.scriptOwnerId == ownerId
+
+        /** Subscriptions and listeners of the script runtime [ownerId] on every bus. zh-CN: 脚本运行时 [ownerId] 在各总线上的订阅项与监听者数. */
+        fun countOwnedBy(ownerId: String): Int =
+            eventBus.count { isOwnedBy(it.owner, ownerId) } + keyBus.count { isOwnedBy(it.owner, ownerId) } +
+                gestureBus.count { isOwnedBy(it.owner, ownerId) } + registry.countListeners { isOwnedBy(it, ownerId) }
+
+        /**
+         * Removes every subscription and listener of the script runtime [ownerId] still on the buses; returns how many. Run when
+         * the runtime exits, after its modules have removed their own (roadmap P4.2), so any count above 0 is a missed release.
+         * zh-CN: 移除脚本运行时 [ownerId] 仍留在各总线上的全部订阅项与监听者, 返回数量. 在运行时结束, 各模块移除自己的登记之后执行 (ROADMAP P4.2),
+         * 因此大于 0 即说明有遗漏的释放.
+         */
+        fun releaseOwner(ownerId: String): Int =
+            eventBus.unsubscribeIf { isOwnedBy(it.owner, ownerId) } + keyBus.unsubscribeIf { isOwnedBy(it.owner, ownerId) } +
+                gestureBus.unsubscribeIf { isOwnedBy(it.owner, ownerId) } + registry.removeListenersIf { isOwnedBy(it, ownerId) }
+
+        /**
          * Registers [observer] for [owner], replacing the observer previously registered by the same owner.
          * Observers are invoked on the service's main thread for every delivered event, before script callbacks.
          * zh-CN: 为 [owner] 注册 [observer], 同一 owner 之前的观察者会被替换. 观察者在服务主线程上于每个事件到达时被调用, 先于脚本回调.

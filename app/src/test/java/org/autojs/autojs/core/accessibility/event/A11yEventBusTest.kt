@@ -146,6 +146,24 @@ class A11yEventBusTest {
     }
 
     @Test
+    fun unsubscribeIfRemovesEveryMatchingSubscription() {
+        // The owner sweep of an exiting script runtime (docs/memory/ROADMAP.md P4.2): its id and its objects, nothing else.
+        // zh-CN: 结束中的脚本运行时按 owner 清理 (docs/memory/ROADMAP.md P4.2): 只清它的 id 与它的对象.
+        val owned = setOf("runtime@1", "events@1")
+        val callback = bus.subscribe(owner = "runtime@1", types = setOf(1), handler = record("callback"))
+        bus.subscribe(owner = "events@1", handler = record("keys"))
+        bus.subscribe(owner = "runtime@2", handler = record("other"))
+
+        assertEquals(2, bus.unsubscribeIf { it.owner in owned })
+        assertEquals(0, bus.unsubscribeIf { it.owner in owned })
+        assertFalse(callback.isActive)
+
+        bus.dispatch(Event(1))
+        assertEquals(listOf("other:1"), delivered)
+        assertEquals(1, bus.subscriptionCount)
+    }
+
+    @Test
     fun handlerExceptionsAreLoggedAndDoNotStopTheChain() {
         bus.subscribe(owner = "bad", priority = 0, consumable = true) { throw IllegalStateException("boom") }
         bus.subscribe(owner = "good", priority = 1, handler = record("good"))

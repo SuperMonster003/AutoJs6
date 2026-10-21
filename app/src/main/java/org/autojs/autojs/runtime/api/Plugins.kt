@@ -17,6 +17,8 @@ import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.pio.PFiles.copyAssetDir
 import org.autojs.autojs.pio.PFiles.deleteRecursively
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs6.R
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -26,7 +28,11 @@ import java.util.concurrent.ConcurrentHashMap
  * Transformed by SuperMonster003 on Apr 2, 2024.
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Apr 2, 2024.
-class Plugins(private val context: Context, private val runtime: PluginRuntime) {
+class Plugins(
+    private val context: Context,
+    private val runtime: PluginRuntime,
+    private val resourceScope: RuntimeResourceScope? = null,
+) {
 
     private val mPluginCacheDir = File(context.cacheDir, "plugin-scripts/")
 
@@ -35,6 +41,10 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
     // Connections passed to bindService, unbound when the script exits (docs/memory/ROADMAP.md H8).
     // zh-CN: 传给 bindService 的连接, 在脚本结束时解绑 (docs/memory/ROADMAP.md H8).
     private val mBoundPlugins: MutableSet<Plugin> = ConcurrentHashMap.newKeySet()
+
+    init {
+        resourceScope?.own(Stage.PLUGINS, "plugins.unbindAll") { unbindAll() }
+    }
 
     fun load(packageName: String): Plugin {
         mPlugins[packageName]?.let { return it }
@@ -73,6 +83,7 @@ class Plugins(private val context: Context, private val runtime: PluginRuntime) 
             // A connection must be unbound even if bindService returns false.
             // zh-CN: 即使 bindService 返回 false, 连接也需要解绑.
             mBoundPlugins.add(plugin)
+            resourceScope?.track(plugin, "plugin service ${componentName.packageName}")
             context.applicationContext.bindService(intent, plugin, Context.BIND_AUTO_CREATE)
         } else {
             val service = UnsupportedConnection().asBinder()

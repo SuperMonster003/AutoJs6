@@ -10,6 +10,7 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.eventloop.EventEmitter
 import org.autojs.autojs.core.http.LocalNetworkDiagnostics
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.mozilla.javascript.Callable
 import java.lang.ref.WeakReference
 
@@ -40,6 +41,8 @@ class WebSocket @JvmOverloads constructor(
     init {
         WebSocketMessageListener(this).also { listener = it }
         build()
+        scriptRuntime.resourceScope.ownOnce(Stage.WEBSOCKETS, "WebSocket.onExit") { onExit(scriptRuntime, EXIT_REASON) }
+        scriptRuntime.resourceScope.track(this, "websocket")
     }
 
     private fun build() {
@@ -145,6 +148,13 @@ class WebSocket @JvmOverloads constructor(
         private val TAG = WebSocket::class.java.simpleName
 
         private val instances = ArrayList<WeakReference<WebSocket>>()
+
+        /**
+         * Entries of the socket list (cleared ones included until the next exit prunes them), for the memory gate (docs/memory/ROADMAP.md P4.2).
+         * zh-CN: 连接列表的条目数 (含已清除的, 直到下一次退出时清理), 供内存门禁使用 (docs/memory/ROADMAP.md P4.2).
+         */
+        @JvmStatic
+        fun instanceCount(): Int = synchronized(instances) { instances.size }
 
         /**
          * Successful operation / regular socket shutdown.
@@ -261,6 +271,8 @@ class WebSocket @JvmOverloads constructor(
         const val EVENT_MAX_REBUILDS = "max_rebuilds"
 
         private const val DEFAULT_EXIT_ON_CLOSE_TIMEOUT = 0L
+
+        private const val EXIT_REASON = "Triggered by ScriptRuntime"
 
         /**
          * Releases the sockets of an exiting script runtime (docs/memory/ROADMAP.md H19), never those of other running scripts (R2).

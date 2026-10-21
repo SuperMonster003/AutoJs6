@@ -20,10 +20,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.plugin.speech.SpeechPluginHost
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineManager
@@ -37,6 +39,7 @@ import org.autojs.autojs.memory.scenarios.GateScenario
 import org.autojs.autojs.memory.scenarios.GateScenarios
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.runtime.memory.StaticRegistries
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.script.StringScriptSource
 import org.json.JSONArray
@@ -138,6 +141,8 @@ class RuntimeLeakGateDeviceTest {
     @Test fun s10HttpAndWebSocket() = gate("S10")
     @Test fun s11DeviceReceivers() = gate("S11")
     @Test fun s12PluginBinding() = gate("S12")
+    @Test fun s13SpeechSession() = gate("S13")
+    @Test fun s14ConsoleWindow() = gate("S14")
 
     private fun gate(id: String) {
         val scenario = GateScenarios.byId(id)
@@ -183,6 +188,7 @@ class RuntimeLeakGateDeviceTest {
         val nativeStart = nativeSnapshot(meminfo, instances = true)
         var baseline = start
         var nativeBaseline = nativeStart
+        var registriesBaseline = StaticRegistries.counts()
         val runs = mutableListOf<RunRecord>()
         val samples = JSONArray()
         var budget = pollMs
@@ -201,6 +207,7 @@ class RuntimeLeakGateDeviceTest {
             if (index == warmups - 1) {
                 baseline = sample
                 nativeBaseline = native
+                registriesBaseline = StaticRegistries.counts()
             }
             samples.put(record.json().put("after", sample.json()).put("native", native))
             runs += record
@@ -209,6 +216,7 @@ class RuntimeLeakGateDeviceTest {
         GateMetrics.awaitCleared(measured.flatMap { it.runtimes + it.engines }, pollMs)
         val final = GateMetrics.sample()
         val nativeFinal = nativeSnapshot(meminfo, instances = true)
+        val registriesFinal = StaticRegistries.counts()
         val retainedRuns = measured.filter { it.retained() }
         val retainedWarmups = runs.filter { it.warmup && it.retained() }
         val frameBytes = if (scenario.capture) context.resources.displayMetrics.let { it.widthPixels.toLong() * it.heightPixels * 4 } else 0L
@@ -229,6 +237,14 @@ class RuntimeLeakGateDeviceTest {
             .put("scriptThreadNames", JSONArray(GateMetrics.liveThreads().filter(GateMetrics::isScriptThread).map { it.name }.distinct().take(20)))
         val native = nativeMetrics(nativeStart, nativeBaseline, nativeFinal, measured)
         metrics.put("native", native)
+        // Process-wide registries (ROADMAP T7 / P4.2): every count back where it was at the end of the warm-ups.
+        // zh-CN: 进程级注册表 (ROADMAP T7 / P4.2): 每项计数回到预热结束时的值.
+        val registriesDelta = JSONObject()
+        registriesFinal.forEach { (name, count) ->
+            val delta = count - (registriesBaseline[name] ?: 0)
+            if (delta != 0) registriesDelta.put(name, delta)
+        }
+        metrics.put("registries", JSONObject(registriesFinal)).put("registriesDelta", registriesDelta)
         val reasons = JSONArray()
         if (retainedRuns.isNotEmpty()) reasons.put("retained runtimes ${retainedRuns.size}/${measured.size}")
         if (metrics.getLong("javaHeapDeltaBytes") > JAVA_HEAP_LIMIT) reasons.put("java heap +${mb(metrics.getLong("javaHeapDeltaBytes"))} MB")
@@ -239,6 +255,7 @@ class RuntimeLeakGateDeviceTest {
         if (native.getInt("imagesLiveDelta") > 0) reasons.put("images not recycled +${native.getInt("imagesLiveDelta")}")
         if (native.getInt("openMediaImages") > 0) reasons.put("open media images ${native.getInt("openMediaImages")}")
         if (native.getLong("matsLiveDelta") > 0) reasons.put("live mats +${native.getLong("matsLiveDelta")}")
+        registriesDelta.keys().forEach { name -> registriesDelta.getInt(name).takeIf { it > 0 }?.let { reasons.put("registry $name +$it") } }
         val judgesNodes = scenario.needsAccessibility || scenario.id == "S7" && environment.accessibilityRunning
         val nodesDelta = native.optJSONObject("instanceDeltasFromBaseline")?.opt("accessibilityNode") as? Number
         if (judgesNodes && nodesDelta != null && nodesDelta.toLong() > ACCESSIBILITY_NODE_SLACK) {
@@ -258,7 +275,7 @@ class RuntimeLeakGateDeviceTest {
         }
         if (stopErrors.isNotEmpty()) report.put("stopErrors", JSONArray(stopErrors.take(5)))
         report.put("interruptedRuns", runs.count { it.interrupted > 0 })
-        thresholds.put("imagesLiveDelta", 0).put("openMediaImages", 0).put("matsLiveDelta", 0)
+        thresholds.put("imagesLiveDelta", 0).put("openMediaImages", 0).put("matsLiveDelta", 0).put("registriesDelta", 0)
         if (judgesNodes) thresholds.put("accessibilityNodeDelta", ACCESSIBILITY_NODE_SLACK)
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
@@ -433,9 +450,17 @@ class RuntimeLeakGateDeviceTest {
     private fun skipReason(scenario: GateScenario): String? = when (scenario.id) {
         "S4a", "S4f" -> if (captureAllowed) null else "screen capture needs MediaProjection consent for every run; " +
             "pass memoryGateCapture=on once the maintainer has agreed how consent is given"
-        "S6" -> if (Settings.canDrawOverlays(context)) null else "the host has no overlay permission"
+        "S6", "S14" -> if (Settings.canDrawOverlays(context)) null else "the host has no overlay permission"
         "S12" -> pluginSkipReason()
+        "S13" -> speechSkipReason()
         else -> null
+    }
+
+    // S13 needs a speech plugin the host may use: 3-Macaw Speech or 3-Stone AI, installed, enabled and authorized (appendix C Q13).
+    // zh-CN: S13 需要宿主可用的语音插件: 3-Macaw Speech 或 3-Stone AI, 已安装, 已启用且已授权 (附录 C Q13).
+    private fun speechSkipReason(): String? {
+        val available = runCatching { runBlocking { SpeechPluginHost.isAvailable(context) } }.getOrDefault(false)
+        return if (available) null else "no speech plugin (3-Macaw Speech or 3-Stone AI) is installed, enabled and authorized"
     }
 
     private fun pluginSkipReason(): String? {

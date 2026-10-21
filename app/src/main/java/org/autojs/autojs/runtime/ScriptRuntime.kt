@@ -11,8 +11,8 @@ import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.annotation.ScriptVariable
 import org.autojs.autojs.concurrent.VolatileDispose
 import org.autojs.autojs.core.accessibility.AccessibilityBridge
+import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator
-import org.autojs.autojs.core.accessibility.monitor.CloseableManager
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.image.capture.ScreenCaptureRequester
@@ -131,6 +131,8 @@ import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.tool.Supplier
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.ClipboardUtils
@@ -160,9 +162,7 @@ import kotlin.coroutines.cancellation.CancellationException
 import org.autojs.autojs.core.accessibility.UiSelector as CoreUiSelector
 import org.autojs.autojs.core.crypto.Crypto as CoreCrypto
 import org.autojs.autojs.core.image.Colors as CoreColors
-import org.autojs.autojs.core.image.ImageWrapper as CoreImageWrapper
 import org.autojs.autojs.core.permission.Permissions as CorePermissions
-import org.autojs.autojs.core.web.WebSocket as CoreWebSocket
 import org.autojs.autojs.rhino.continuation.Continuation as RhinoContinuation
 import org.autojs.autojs.runtime.api.Barcode as ApiBarcode
 import org.autojs.autojs.runtime.api.Device as ApiDevice
@@ -222,7 +222,6 @@ class ScriptRuntime private constructor(builder: Builder) {
     val ownerId = "runtime@${System.identityHashCode(this)}"
 
     private var mUiHandlerAppContext: Context
-    private var mRootShell: AbstractShell? = null
     private val mProperties = ConcurrentHashMap<String, Any>()
 
     // @Hint by SuperMonster003 on May 6, 2024.
@@ -232,8 +231,19 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private lateinit var mThread: Thread
 
+    /**
+     * Everything this runtime releases when it exits, registered by the modules and by [ownExitSteps] (docs/memory/ROADMAP.md T6 / P4.1).
+     * zh-CN: 本运行时结束时释放的全部资源, 由各模块与 [ownExitSteps] 登记 (docs/memory/ROADMAP.md T6 / P4.1).
+     */
     @JvmField
-    val closeableManager = CloseableManager()
+    val resourceScope = RuntimeResourceScope(ownerId)
+
+    /**
+     * The former closeable manager: the [Stage.CLOSEABLES] stage of [resourceScope] (`add` / `remove`).
+     * zh-CN: 原 closeable 管理器: 即 [resourceScope] 的 [Stage.CLOSEABLES] 阶段 (`add` / `remove`).
+     */
+    @JvmField
+    val closeableManager = resourceScope
 
     var topLevelScope: TopLevelScope
         get() = mTopLevelScope
@@ -418,7 +428,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     val rootShell: AbstractShell by lazy {
         builder.shellSupplier.get().also {
             it.SetScreenMetrics(screenMetrics)
-            mRootShell = it
+            resourceScope.own(Stage.SHELL, "rootShell") { it.exit() }
         }
     }
 
@@ -511,6 +521,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     internal val js_mod_continuation: ScriptableObject by lazy { ContinuationPrototype.create(topLevelScope) }
 
     init {
+        accessibilityBridge.scriptOwnerId = ownerId
         info = accessibilityBridge.infoProvider
         automator = SimpleActionAutomator(accessibilityBridge, this).apply {
             setScreenMetrics(screenMetrics)
@@ -542,6 +553,8 @@ class ScriptRuntime private constructor(builder: Builder) {
 
         shizuku = WrappedShizuku
         mime = ApiMime
+
+        ownExitSteps()
     }
 
     fun initPrologue() {
@@ -556,7 +569,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             topLevelScope = topLevelScope,
             pluginSearchDir = PFiles.join(engines.myEngine().cwd(), "plugins"),
             engine = engines.myEngine().source?.engineName ?: JavaScriptSource.ENGINE,
-        ).let { ApiPlugins(mUiHandlerAppContext, it) }
+        ).let { ApiPlugins(mUiHandlerAppContext, it, resourceScope) }
 
         augment(topLevelScope.globalThis)
         applyInternalModules(topLevelScope.globalThis)
@@ -817,16 +830,27 @@ class ScriptRuntime private constructor(builder: Builder) {
     fun onExit() {
         Log.d(TAG, "on exit")
         this.isExiting = true
-        ignoresException { images.cancelPendingQuantizations() }
 
-        ignoresException {
+        // Every release step is registered in resourceScope, by the modules when they create their resources and by ownExitSteps
+        // for the state of this runtime; close runs them once, in the fixed order of RuntimeResourceScope.Stage (the order of
+        // this method before roadmap P4.1, appendix B.3 of docs/memory/ROADMAP.md), and a failing step does not stop the others.
+        // zh-CN: 每个释放步骤都登记在 resourceScope 中: 各模块在创建资源时登记, 本运行时自身的状态由 ownExitSteps 登记; close 只执行一次,
+        // 按 RuntimeResourceScope.Stage 的固定顺序 (即 P4.1 之前本方法的顺序, docs/memory/ROADMAP.md 附录 B.3), 某一步失败不影响其余步骤.
+        resourceScope.close()
+    }
+
+    /**
+     * Registers the exit steps of this runtime's own state (roadmap P4.1); the modules register theirs when they create their resources.
+     * zh-CN: 登记本运行时自身状态的退出步骤 (ROADMAP P4.1); 各模块在创建资源时登记各自的步骤.
+     */
+    private fun ownExitSteps() {
+        val scope = resourceScope
+        scope.own(Stage.CONSOLE, "console.onRuntimeExit") {
             console.onRuntimeExit()
             if (console.configurator.isExitOnClose) {
                 console.hideDelayed()
             }
         }
-
-        ignoresException { CoreWebSocket.onExit(this, "Triggered by $TAG") }
 
         // @Hint by 抠脚本人 (https://github.com/little-alei) on Jul 10, 2023.
         //  ! 清空无障碍事件.
@@ -837,87 +861,47 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! by the current script to avoid affecting other still-running scripts.
         //  ! zh-CN: 只清理当前脚本注册的无障碍事件回调, 避免影响其他仍在运行的脚本.
         //  # ignoresException({ AccessibilityService.clearAccessibilityEventCallback() })
-        ignoresException { automator.removeAllEventsForThisRuntime() }
+        scope.own(Stage.ACCESSIBILITY_EVENTS, "automator.removeAllEventsForThisRuntime") { automator.removeAllEventsForThisRuntime() }
 
         // Drop the event subscription of this script's event-driven waits and event-assisted polling (roadmap P5.2).
         // zh-CN: 取消本脚本事件驱动等待与事件辅助轮询的事件订阅 (Roadmap P5.2).
-        ignoresException { accessibilityBridge.releasePulse() }
+        scope.own(Stage.ACCESSIBILITY_PULSE, "accessibilityBridge.releasePulse") { accessibilityBridge.releasePulse() }
 
         // Drop the accessibility state listener registered by this script (auto.stateListener).
         // zh-CN: 移除当前脚本注册的无障碍状态监听器 (auto.stateListener).
-        ignoresException { accessibilityBridge.setAccessibilityListener(null) }
+        scope.own(Stage.ACCESSIBILITY_LISTENER, "accessibilityBridge.setAccessibilityListener") { accessibilityBridge.setAccessibilityListener(null) }
 
-        ignoresException { RootUtils.resetRuntimeOverriddenRootModeState() }
+        scope.own(Stage.ROOT_MODE, "RootUtils.resetRuntimeOverriddenRootModeState") { RootUtils.resetRuntimeOverriddenRootModeState() }
 
-        ignoresException { compose?.close() }
+        scope.own(Stage.COMPOSE, "compose.close") { compose?.close() }
 
         // Clear interrupt status.
         // zh-CN: 清除 interrupt 状态.
-        ignoresException { ThreadCompat.interrupted() }
+        scope.own(Stage.INTERRUPT_STATUS, "ThreadCompat.interrupted") { ThreadCompat.interrupted() }
 
-        // Floating windows need to be closed immediately.
-        // To prevent malicious scripts from creating fullscreen floating windows
-        // that obscure the screen and write infinite loops in exit.
-        // zh-CN:
-        // 浮动窗口需要第一时间关闭.
-        // 以免出现恶意脚本全屏浮动窗口遮蔽屏幕并且在 exit 中写死循环的问题.
-        ignoresException { floaty.closeAll() }
-
-        if (::events.isInitialized) ignoresException("Exception on exit: %s") {
-            events.emit("exit")
-        }
-
-        ignoresException { mail.close() }
-        ignoresException { installer.close() }
-        ignoresException { epub.close() }
-        ignoresException { gallery.close() }
-        ignoresException { terminal.close() }
-        ignoresException { speech.close() }
-        ignoresException { ai.close() }
-        ignoresException { tts.close() }
-
-        // Stop the script threads and thread pools and wait for them to end before recycling the images,
-        // so that no thread of this script can touch an image after it has been recycled (docs/memory/ROADMAP.md H20).
-        // The UI thread does not wait; if some threads are still alive, the images are recycled once those threads have ended.
-        // zh-CN: 先停止脚本线程与线程池并等待它们结束, 再回收图像, 使本脚本的任何线程都不会在图像回收后再访问它 (docs/memory/ROADMAP.md H20).
-        // UI 线程不等待; 若仍有线程存活, 则在这些线程结束后再回收图像.
-        var aliveThreads = emptyList<Thread>()
-        if (::threads.isInitialized) ignoresException {
-            aliveThreads = threads.shutDownAllAndAwait(if (isMainThread()) 0L else EXIT_THREADS_AWAIT_MILLIS)
-        }
-
-        // Recycle all ImageWrapper instances recorded for this runtime (never those of other running scripts).
-        // zh-CN: 回收当前运行时记录的全部 ImageWrapper 实例 (不影响其他仍在运行的脚本).
-        ignoresException {
-            when {
-                aliveThreads.isEmpty() -> CoreImageWrapper.recycleAll(this)
-                else -> ApiThreads.runAfterTermination(threads.mainThread.name, aliveThreads, EXIT_THREADS_DEFERRED_MILLIS) {
-                    CoreImageWrapper.recycleAll(this)
-                }
-            }
-        }
-
-        // Unbind the plugin services this script has bound; the system would keep the connections, and this runtime with them (docs/memory/ROADMAP.md H8).
-        // zh-CN: 解绑本脚本绑定的插件服务; 否则系统会一直持有这些连接, 连同本运行时 (docs/memory/ROADMAP.md H8).
-        if (::plugins.isInitialized) ignoresException { plugins.unbindAll() }
-
-        if (::events.isInitialized) ignoresException { events.recycle() }
-        ignoresException { media.recycle() }
-        if (::loopers.isInitialized) ignoresException { loopers.recycle() }
+        scope.own(Stage.MAIL, "mail.close") { mail.close() }
+        scope.own(Stage.INSTALLER, "installer.close") { installer.close() }
+        scope.own(Stage.EPUB, "epub.close") { epub.close() }
+        scope.own(Stage.GALLERY, "gallery.close") { gallery.close() }
+        scope.own(Stage.TERMINAL, "terminal.close") { terminal.close() }
+        scope.own(Stage.SPEECH, "speech.close") { speech.close() }
+        scope.own(Stage.AI, "ai.close") { ai.close() }
+        scope.own(Stage.TTS, "tts.close") { tts.close() }
 
         // The gesture dispatcher installed on this script's bridge runs on the servant looper just quit by loopers.recycle.
         // The bridge may stay referenced as the process-wide default bridge (AccessibilityService.bridge), so drop the dispatcher,
         // which holds this runtime (docs/memory/ROADMAP.md H17); nodes found through the bridge then use a standalone automator.
         // zh-CN: 本脚本 bridge 上安装的手势派发器运行在刚被 loopers.recycle 退出的 servant Looper 上.
         // 该 bridge 可能仍作为进程级默认 bridge (AccessibilityService.bridge) 被引用, 因此移除持有本运行时的派发器 (docs/memory/ROADMAP.md H17); 之后经该 bridge 找到的节点使用独立的 automator.
-        ignoresException { accessibilityBridge.tap = null }
-        ignoresException { recycleShell() }
-        ignoresException { images.releaseScreenCapturer() }
-        ignoresException { images.stopScreenCapturerForegroundService() }
-        if (::sensors.isInitialized) ignoresException { sensors.unregisterAll() }
-        if (::timers.isInitialized) ignoresException { timers.recycle() }
-        ignoresException { ui.recycle() }
-        ignoresException { closeableManager.recycleAll() }
+        scope.own(Stage.ACCESSIBILITY_TAP, "accessibilityBridge.tap") { accessibilityBridge.tap = null }
+
+        // The modules of this script have removed their accessibility registrations by now; release whatever is left by owner id, so that
+        // nothing on the process-wide buses keeps this runtime after a missed release, and log it (docs/memory/ROADMAP.md T7 / P4.2).
+        // zh-CN: 此时本脚本各模块已移除各自的无障碍登记; 按 owner id 释放剩余的登记, 使进程级总线上的遗漏不会钉住本运行时, 并记录日志 (docs/memory/ROADMAP.md T7 / P4.2).
+        scope.own(Stage.ACCESSIBILITY_OWNER, "AccessibilityService.releaseOwner") {
+            val left = AccessibilityService.releaseOwner(ownerId)
+            if (left > 0) Log.w(TAG, "$ownerId: released $left accessibility registration(s) its modules left behind")
+        }
     }
 
     fun setScreenMetrics(width: Int, height: Int) {
@@ -1026,25 +1010,6 @@ class ScriptRuntime private constructor(builder: Builder) {
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
-    }
-
-    private fun ignoresException(r: Runnable) {
-        ignoresException(null, r)
-    }
-
-    private fun ignoresException(consoleMessage: String?, r: Runnable) {
-        try {
-            r.run()
-        } catch (e: Throwable) {
-            if (consoleMessage != null) {
-                console.error(String.format(consoleMessage, e))
-            }
-            e.printStackTrace()
-        }
-    }
-
-    private fun recycleShell() {
-        mRootShell?.exit()
     }
 
     private fun augment(target: ScriptableObject) {
@@ -1214,12 +1179,6 @@ class ScriptRuntime private constructor(builder: Builder) {
     companion object {
 
         private val TAG = ScriptRuntime::class.java.simpleName
-
-        // How long onExit waits on a script thread for the script's own threads to end (docs/memory/ROADMAP.md H20),
-        // and how long a helper thread waits before it gives up recycling the images of threads which never end.
-        // zh-CN: onExit 在脚本线程上等待脚本自身线程结束的时长 (docs/memory/ROADMAP.md H20), 以及线程一直不结束时辅助线程放弃回收图像前的等待时长.
-        private const val EXIT_THREADS_AWAIT_MILLIS = 2_000L
-        private const val EXIT_THREADS_DEFERRED_MILLIS = 60_000L
 
         private var sApplicationContext: WeakReference<Context>? = null
 
