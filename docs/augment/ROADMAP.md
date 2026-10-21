@@ -417,13 +417,13 @@ fg 下 epilogue 本来只有 4 ms, 其中约 3 ms 是这 7 个类的反射; back
 | Q14 | (P2.5 登记) 非 UI 线程上 `ResultAdapter` 实例的 `get()` 改为直接返回结果或抛出错误, 旧 JS 返回 `{ result }` 包装对象. `ResultAdapter` 是引擎内部对象 (Kotlin 侧反向调用), d.ts 与文档未公开其实例方法. 建议: 接受, P5.3 核对 d.ts 没有相反声明. | 已拍板 (2026-10-20, 维护者): 接受. |
 | Q15 | (P2.5 登记) `__exitIfError__` 的 action 回调内不能再使用协程 (await 等), 与全部 Kotlin 模块的回调一致; 旧 JS 实现允许. 建议: 接受, 文档注明. | 已拍板 (2026-10-20, 维护者): 接受, 文档注明. |
 | Q16 | (P2.5 登记) `runtime-init-epilogue` 收编后仍有 30-31 ms, 大头是 `jvm-npm.js` 加载时访问 7 个 Java 类 (每个新脚本重新反射, 单个类首次访问 0.8-7.5 ms). P2.5 建议不等 P3.7, 先改为用到时才取, 预计再省十几 ms. 建议: 接受, 由 P2.5 会话在等待真机 smoke 期间顺手完成, 计入 P2.5 证据. | 已拍板 (2026-10-20, 维护者): 接受, 由 P2.5 会话在等待真机 smoke 期间完成. |
-| Q17 | (P2.2 登记) global 的迁移 (维护者 2026-10-21 已定顺延 P3) 需要共享设施: `@ScriptModule` 增加 "只挂全局成员, 不建模块对象" 的选项, GlobalClasses 这类 getter 代理的注解或手写挂载, TODO 的消息资源; 成员清单见 P2.2 条目 (8). 建议: P3 开始前由 P3 的第一个会话作为共享设施单独提交, 再做 global. | P3 开始前 |
-| Q18 | (P2.2 登记) cvt / fmt / s13n.bytes 修正后两处改变了 6.7.0 起的可见结果: 超过 2^53 - 1 的整数结果为 bigint (文档写明 number 或 bigint, 脚本对结果做 number 运算会因混用 BigInt 抛 TypeError), fractionDigits 对目标单位 B 也生效. 建议: 按文档 (现状), P5.1 在 changelog 记录. | P2.4 之前 |
-| Q19 | (P2.2 登记) 生成层错误消息里子模块与可调用模块的方法名没有父模块路径 (显示为 "bytes()" / "species()" 而不是 "cvt.bytes"), 是处理器的显示名. 建议: 处理器显示名改为完整路径, 在 P2.4 的共享层修正中一并做. | P2.4 |
-| Q20 | (P2.3 登记) 新层的 Color / colors.build 仍返回旧类 `ColorNativeObject` (未迁移的 images / dialogs / ui / compose / console / s13n / 画笔参数以该类识别 Color 对象), 实例方法因此仍为旧实现且 JVM 不能构造. 建议: P3 迁移这些模块后在新层定义 Color 实例类并让新模块接受, P5.2 删除旧类时一并完成. | P3.1 开始前 |
-| Q21 | (P2.3 登记) util.inspect 的数组输出长度: 文档 maxArrayItems 默认 10000 (新层照此全部输出, 2000 个对象 1.9 s), 现有 Kotlin 只输出前 100 个 (0.24 s); 超过上限时新层保留首 100 / 尾 20 摘要. 建议: 按文档 (现状). | P2.4 之前 |
-| Q22 | (P2.3 登记) colors.summary 的格式: 新层按文档与旧 JS (`hex(...), rgba(r,g,b/a), int(...)`), 现有 Kotlin 为 `Color { ... }`. 建议: 按文档 (现状). | P2.4 之前 |
-| Q23 | (P2.5 登记) UI 模式下协程的第二次挂起会结束脚本 (既有缺陷, 改动前后相同): 定时器回调恢复的协程再次挂起时, `Timer.callFunction` 在主 Looper 把 ContinuationPending 当错误交给 `runtime.exit`; 示例 "协程/UI模式中使用协程" 命中. 建议: 单独的小修复任务 (`core/looper`, `Timer.callFunction` 像 `RhinoUtils.callFunction` 一样放过 ContinuationPending), 以该示例与 P2.5 的 ui smoke (恢复两次挂起) 回归; 不在本路线图范围, 但在 P5.1 切换前完成. | 立即可做 |
+| Q17 | (P2.2 登记) global 的迁移 (维护者 2026-10-21 已定顺延 P3) 需要共享设施: `@ScriptModule` 增加 "只挂全局成员, 不建模块对象" 的选项, GlobalClasses 这类 getter 代理的注解或手写挂载, TODO 的消息资源; 成员清单见 P2.2 条目 (8). 建议: P3 开始前由 P3 的第一个会话作为共享设施单独提交, 再做 global. | 已拍板 (2026-10-21, 维护者): 按建议, P3 第一个会话先做共享设施. |
+| Q18 | (P2.2 登记) cvt / fmt / s13n.bytes 修正后两处改变了 6.7.0 起的可见结果: 超过 2^53 - 1 的整数结果为 bigint (文档写明 number 或 bigint, 脚本对结果做 number 运算会因混用 BigInt 抛 TypeError), fractionDigits 对目标单位 B 也生效. 建议: 按文档 (现状), P5.1 在 changelog 记录. | 已拍板 (2026-10-21, 维护者): 按建议, 按文档 (现状), P5.1 记 changelog. |
+| Q19 | (P2.2 登记) 生成层错误消息里子模块与可调用模块的方法名没有父模块路径 (显示为 "bytes()" / "species()" 而不是 "cvt.bytes"), 是处理器的显示名. 建议: 处理器显示名改为完整路径, 在 P2.4 的共享层修正中一并做. | 已拍板 (2026-10-21, 维护者): 按建议, P2.4 顺带做. |
+| Q20 | (P2.3 登记) 新层的 Color / colors.build 仍返回旧类 `ColorNativeObject` (未迁移的 images / dialogs / ui / compose / console / s13n / 画笔参数以该类识别 Color 对象), 实例方法因此仍为旧实现且 JVM 不能构造. 建议: P3 迁移这些模块后在新层定义 Color 实例类并让新模块接受, P5.2 删除旧类时一并完成. | 已拍板 (2026-10-21, 维护者): 按建议, P3 迁移后定义新层实例类, P5.2 收尾. |
+| Q21 | (P2.3 登记) util.inspect 的数组输出长度: 文档 maxArrayItems 默认 10000 (新层照此全部输出, 2000 个对象 1.9 s), 现有 Kotlin 只输出前 100 个 (0.24 s); 超过上限时新层保留首 100 / 尾 20 摘要. 建议: 按文档 (现状). | 已拍板 (2026-10-21, 维护者): 按建议, 按文档 (现状). |
+| Q22 | (P2.3 登记) colors.summary 的格式: 新层按文档与旧 JS (`hex(...), rgba(r,g,b/a), int(...)`), 现有 Kotlin 为 `Color { ... }`. 建议: 按文档 (现状). | 已拍板 (2026-10-21, 维护者): 按建议, 按文档 (现状). |
+| Q23 | (P2.5 登记) UI 模式下协程的第二次挂起会结束脚本 (既有缺陷, 改动前后相同): 定时器回调恢复的协程再次挂起时, `Timer.callFunction` 在主 Looper 把 ContinuationPending 当错误交给 `runtime.exit`; 示例 "协程/UI模式中使用协程" 命中. 建议: 单独的小修复任务 (`core/looper`, `Timer.callFunction` 像 `RhinoUtils.callFunction` 一样放过 ContinuationPending), 以该示例与 P2.5 的 ui smoke (恢复两次挂起) 回归; 不在本路线图范围, 但在 P5.1 切换前完成. | 已拍板 (2026-10-21, 维护者): 按建议, 单独小修复任务, P5.1 前完成. |
 
 ## 附录 D 工具用法
 
