@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.archive.SettingsSnapshotCodec
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.core.pref.keys.DomainKeysTestBase
@@ -14,9 +16,9 @@ import org.junit.Test
 
 /**
  * docs/settings/ROADMAP.md P4.3: the run-time fallback of the `other` category ([OtherCategoryFallback]) and the typed
- * values of a snapshot ([TypedValue], T6). P6.1 adds the cases of `SettingsSnapshot` itself.
+ * values of a snapshot ([TypedValue], T6); P6.1: the values that [SettingsSnapshot.capture] takes from the stores.
  *
- * zh-CN: ROADMAP P4.3: "其他" 分类的运行时兜底与快照的带类型值 (T6). P6.1 在此补充 `SettingsSnapshot` 本身的用例.
+ * zh-CN: ROADMAP P4.3: "其他" 分类的运行时兜底与快照的带类型值 (T6); P6.1: [SettingsSnapshot.capture] 从存储中取出的值.
  */
 class SettingsSnapshotTest : DomainKeysTestBase() {
 
@@ -122,6 +124,124 @@ class SettingsSnapshotTest : DomainKeysTestBase() {
         assertEquals(emptyMap<String, TypedValue>(), OtherCategoryFallback.collect(mapOf("key_b" to 2, "x" to 1), rows, named).entries)
         assertFalse(OtherCategoryFallback.isKnown("", rows, named))
         assertTrue(OtherCategoryFallback.isKnown("prefix_", rows))
+    }
+
+    @Test
+    fun aSnapshotHoldsTheStoredValuesOfTheSelectedCategories() {
+        val named = StoreId("a_snapshot_test")
+        val flag = SettingKey.Bool(category = SettingCategory.GENERAL, default = SettingDefault.of(false), name = "test_flag")
+        val count = SettingKey.Int(category = SettingCategory.GENERAL, default = SettingDefault.of(1), name = "test_count")
+        val unset = SettingKey.Long(category = SettingCategory.GENERAL, default = SettingDefault.of(1L), name = "test_unset")
+        val list = SettingKey.Json(
+            category = SettingCategory.GENERAL, jsonType = SettingType.Json(SettingsJson.STRING_LIST), default = SettingDefault.of(emptyList()), name = "test_list",
+        )
+        val malformed = SettingKey.Json(
+            category = SettingCategory.GENERAL, jsonType = SettingType.Json(SettingsJson.STRING_LIST), default = SettingDefault.of(emptyList()), name = "test_malformed",
+        )
+        val early = SettingKey.Bool(category = SettingCategory.GENERAL, default = SettingDefault.of(false), store = named, name = "test_early")
+        val ratio = SettingKey.Float(category = SettingCategory.EDITOR_GENERAL, default = SettingDefault.of(1f), store = named, name = "test_ratio")
+        val token = SettingKey.Str(category = SettingCategory.CREDENTIALS, default = SettingDefault.None, sensitive = true, name = "test_token")
+        val recent = KeyFamily("test_recent_") { name ->
+            SettingKey.StrSet(category = SettingCategory.GENERAL, default = SettingDefault.of(emptySet()), name = name)
+        }
+        val keys = listOf(flag, count, unset, list, malformed, early, ratio, token)
+        store.edit {
+            put(flag.name, true)
+            put(count.name, "3")
+            put(list.name, "[\"a\",\"b\"]")
+            put(malformed.name, "[\"a\"")
+            put("test_recent_2", setOf("y"))
+            put("test_recent_1", setOf("x"))
+            put(token.name, "secret")
+            put("test_unrelated", 1)
+        }
+        store(named).edit {
+            put(early.name, true)
+            put(ratio.name, 0.5f)
+        }
+
+        val selected = listOf(SettingCategory.EDITOR_LOG, SettingCategory.DATA_SHORTCUTS, SettingCategory.EDITOR_GENERAL, SettingCategory.GENERAL)
+        val snapshot = SettingsSnapshot.capture(selected, keys, listOf(recent), rows = emptyList())
+        // Page order, no data category (T19), and a category without stored values is listed empty (D8).
+        assertEquals(listOf("general", "editor_general", "editor_log"), snapshot.categories.map { it.id })
+        val general = snapshot.category("general")!!
+        assertEquals(
+            mapOf(
+                "default" to mapOf(
+                    // A value of another type keeps its own tag, a json declaration without a JSON document is a string (D9).
+                    "test_count" to TypedValue("string", "3"),
+                    "test_flag" to TypedValue("bool", true),
+                    "test_list" to TypedValue("json", "[\"a\",\"b\"]"),
+                    "test_malformed" to TypedValue("string", "[\"a\""),
+                    "test_recent_1" to TypedValue("stringSet", setOf("x")),
+                    "test_recent_2" to TypedValue("stringSet", setOf("y")),
+                ),
+                "a_snapshot_test" to mapOf("test_early" to TypedValue("bool", true)),
+            ),
+            general.stores,
+        )
+        // The default store first, then the others by name; keys by name.
+        assertEquals(listOf("default", "a_snapshot_test"), general.stores.keys.toList())
+        assertEquals(general.stores.getValue("default").keys.sorted(), general.stores.getValue("default").keys.toList())
+        assertEquals(7, general.entries)
+        assertEquals(mapOf("a_snapshot_test" to mapOf("test_ratio" to TypedValue("float", 0.5f))), snapshot.category("editor_general")!!.stores)
+        assertEquals(SettingsSnapshot.Category("editor_log", emptyMap()), snapshot.category("editor_log"))
+        assertNull(snapshot.category("credentials"))
+        assertEquals(emptyList<String>(), snapshot.unexportable)
+
+        // Credentials only when they are selected (D2).
+        val credentials = SettingsSnapshot.capture(listOf(SettingCategory.CREDENTIALS), keys, emptyList(), emptyList())
+        assertEquals(listOf("credentials"), credentials.categories.map { it.id })
+        assertEquals(mapOf("default" to mapOf("test_token" to TypedValue("string", "secret"))), credentials.category("credentials")!!.stores)
+    }
+
+    @Test
+    fun theOtherCategoryOfASnapshotKeepsTheRunTimeTags() {
+        val stackTraceKey = "0f343b0931126a20f133d67c2b018a3b"
+        val prompt = DialogStateKeys.LIST_PREFERENCE_PROMPT.key("key_night_mode").name
+        store.edit {
+            put(AppearanceKeys.NIGHT_MODE.name, key("key_night_mode_follow_system"))
+            put(MiscStateKeys.FIND_OR_REPLACE_USING_REGEX.name, true)
+            put(MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.name, 4)
+            put(prompt, false)
+            put(stackTraceKey, false)
+            put("future_key_count", 7)
+            put("future_key_since", 1_700_000_000_000L)
+            put("future_key_ratio", 0.25f)
+            put("future_key_nan", Float.NaN)
+            put("future_key_tags", setOf("z", "a"))
+            put("future_key_text", "{}")
+        }
+        val snapshot = SettingsSnapshot.capture(listOf(SettingCategory.OTHER))
+        assertEquals(listOf("other"), snapshot.categories.map { it.id })
+        val other = snapshot.category("other")!!
+        // States, state families and the run-time fallback (P4.3); settings and the cache are not "other".
+        assertEquals(
+            mapOf(
+                "default" to mapOf(
+                    MiscStateKeys.FIND_OR_REPLACE_USING_REGEX.name to TypedValue("bool", true),
+                    prompt to TypedValue("bool", false),
+                    stackTraceKey to TypedValue("bool", false),
+                    "future_key_count" to TypedValue("int", 7),
+                    "future_key_ratio" to TypedValue("float", 0.25f),
+                    "future_key_since" to TypedValue("long", 1_700_000_000_000L),
+                    "future_key_tags" to TypedValue("stringSet", setOf("a", "z")),
+                    // Without a declaration a text is a string, whatever it holds (T6).
+                    "future_key_text" to TypedValue("string", "{}"),
+                ),
+            ),
+            other.stores,
+        )
+        // A value that no JSON number holds is reported, not exported (P6.4).
+        assertEquals(listOf("default:future_key_nan"), snapshot.unexportable)
+
+        // The tags survive the category file.
+        val text = SettingsSnapshotCodec.categoryText(other)
+        assertEquals(SettingsSnapshotCodec.Decoded(other, emptyList()), SettingsSnapshotCodec.decodeCategoryText(text))
+        val entries = ((SettingsJson.parse(text) as Map<*, *>)["stores"] as Map<*, *>)["default"] as Map<*, *>
+        assertEquals(mapOf("t" to "long", "v" to 1_700_000_000_000L), entries["future_key_since"])
+        assertEquals(mapOf("t" to "float", "v" to 0.25), entries["future_key_ratio"])
+        assertEquals(mapOf("t" to "stringSet", "v" to listOf("a", "z")), entries["future_key_tags"])
     }
 
     private fun row(name: String, store: StoreId, kind: SettingKind, family: Boolean = false) = SettingDescriptor(
