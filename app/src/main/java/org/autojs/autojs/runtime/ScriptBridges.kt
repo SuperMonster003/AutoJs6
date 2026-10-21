@@ -3,7 +3,9 @@ package org.autojs.autojs.runtime
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
+import org.autojs.autojs.project.ScriptConfig
 import org.autojs.autojs.util.RhinoUtils.callFunction
+import org.autojs.autojs.util.RhinoUtils.callFunctionAsCoroutine
 import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.mozilla.javascript.BoundFunction
@@ -41,7 +43,26 @@ class ScriptBridges : IScriptBridges {
         cx.wrapFactory.isJavaPrimitiveWrap
     }
 
-    override fun call(func: Callable, target: Any?, args: Array<*>) = useJsContext { cx ->
+    override fun call(func: Callable, target: Any?, args: Array<*>) = call(func, target, args, asCoroutine = false)
+
+    /**
+     * Calls a listener of an EventEmitter that has no timer, on the thread that emits. In a script with the continuation
+     * feature, a listener called on the script's thread while no script code runs there (UI mode: events of the Activity,
+     * the views and the dialogs, dispatched by the main looper) is the top of a coroutine: it may suspend (`promise.await()`,
+     * `continuation.delay` and so on), and the call returns undefined while it waits to be resumed. Otherwise the same as
+     * [call] (docs/augment/ROADMAP.md Q23).
+     *
+     * zh-CN: 在派发事件的线程上调用没有定时器的 EventEmitter 的监听器. 启用了 continuation 特性的脚本中, 在脚本线程上且此时没有脚本代码运行时调用的监听器
+     * (UI 模式: 由主 Looper 派发的 Activity, 控件与对话框事件) 是协程的顶层: 它可以挂起 (`promise.await()`, `continuation.delay` 等), 此时本调用返回 undefined,
+     * 监听器等待之后恢复. 其他情况与 [call] 相同 (docs/augment/ROADMAP.md Q23).
+     */
+    fun callListener(func: Callable, target: Any?, args: Array<*>): Any? {
+        val engine = engine
+        val asCoroutine = engine != null && engine.hasFeature(ScriptConfig.FEATURE_CONTINUATION) && engine.isOnScriptThread()
+        return call(func, target, args, asCoroutine)
+    }
+
+    private fun call(func: Callable, target: Any?, args: Array<*>, asCoroutine: Boolean) = useJsContext { cx ->
         val scope = when (func) {
             is Function -> func.declarationScope
             is Scriptable -> func.parentScope
@@ -51,7 +72,10 @@ class ScriptBridges : IScriptBridges {
         val niceArgs = args.map { Context.javaToJS(it, niceScope) }.toTypedArray()
         val thisObj = Context.javaToJS(target, niceScope) as? Scriptable ?: Undefined.SCRIPTABLE_UNDEFINED
 
-        callFunction(engine?.runtime, func, niceScope, thisObj, niceArgs)
+        when {
+            asCoroutine -> callFunctionAsCoroutine(engine?.runtime, func, niceScope, thisObj, niceArgs)
+            else -> callFunction(engine?.runtime, func, niceScope, thisObj, niceArgs)
+        }
     }
 
     override fun toArray(o: Iterable<*>?): NativeArray = useJsContext { cx ->

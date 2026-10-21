@@ -29,6 +29,7 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
+import org.mozilla.javascript.ContinuationTopCall
 import org.mozilla.javascript.LambdaConstructor
 import org.mozilla.javascript.LambdaFunction
 import org.mozilla.javascript.NativeArray
@@ -264,7 +265,29 @@ object RhinoUtils {
         callFunction(scriptRuntime, func, scope?.let { getDeclarationScope(it) }, thisObj, args)
 
     @JvmStatic
-    fun callFunction(scriptRuntime: ScriptRuntime?, func: Callable, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? = withRhinoContext(scriptRuntime) { cx ->
+    fun callFunction(scriptRuntime: ScriptRuntime?, func: Callable, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(scriptRuntime, func, scope, thisObj, args, asCoroutine = false)
+
+    /**
+     * Like [callFunction], but when no script code runs on this thread and [func] is an interpreted script function, it is
+     * called as the top of a coroutine ([ContinuationTopCall]): it may suspend (`promise.await()`, `continuation.delay` and so
+     * on), and the call then returns undefined while the coroutine waits to be resumed (docs/augment/ROADMAP.md Q23).
+     *
+     * zh-CN: 与 [callFunction] 相同, 但当前线程上没有脚本代码运行且 [func] 是解释执行的脚本函数时, 把它作为协程的顶层调用 ([ContinuationTopCall]):
+     * 它可以挂起 (`promise.await()`, `continuation.delay` 等), 此时本调用返回 undefined, 协程等待之后恢复 (docs/augment/ROADMAP.md Q23).
+     */
+    @JvmStatic
+    fun callFunctionAsCoroutine(scriptRuntime: ScriptRuntime?, func: Callable, scope: VarScope?, thisObj: Scriptable?, args: Array<Any?>): Any? =
+        callFunction(scriptRuntime, func, scope, thisObj, args, asCoroutine = true)
+
+    private fun callFunction(
+        scriptRuntime: ScriptRuntime?,
+        func: Callable,
+        scope: VarScope?,
+        thisObj: Scriptable?,
+        args: Array<Any?>,
+        asCoroutine: Boolean,
+    ): Any? = withRhinoContext(scriptRuntime) { cx ->
         try {
             // Prefer an existing scope to avoid repeatedly creating standard objects.
             // zh-CN: 优先使用已有的作用域, 避免反复创建标准对象.
@@ -278,6 +301,13 @@ object RhinoUtils {
             val niceThisObj = thisObj ?: Undefined.SCRIPTABLE_UNDEFINED
             when {
                 RhinoScriptRuntime.hasTopCall(cx) -> func.call(cx, niceScope, niceThisObj, args)
+                asCoroutine && ContinuationTopCall.canCall(cx, func) -> try {
+                    ContinuationTopCall.call(cx, func, niceScope, niceThisObj, args)
+                } catch (_: ContinuationPending) {
+                    // Suspended: the coroutine is captured and is resumed later.
+                    // zh-CN: 已挂起: 协程已被捕获, 稍后恢复.
+                    Undefined.instance
+                }
                 else -> RhinoScriptRuntime.doTopCall(func, cx, niceScope, niceThisObj, args, false)
             }
         } catch (e: InterruptedException) {

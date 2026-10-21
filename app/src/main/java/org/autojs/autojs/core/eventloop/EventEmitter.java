@@ -78,7 +78,9 @@ public class EventEmitter {
                     if (mTimer != null) {
                         mTimer.setImmediate(listener, args);
                     } else {
-                        mBridges.call(listener, EventEmitter.this, args);
+                        // A listener may suspend here (ScriptBridges#callListener); the next one runs meanwhile.
+                        // zh-CN: 监听器可以在此挂起 (ScriptBridges#callListener), 其间下一个监听器照常运行.
+                        mBridges.callListener(listener, EventEmitter.this, args);
                     }
                 }
             }

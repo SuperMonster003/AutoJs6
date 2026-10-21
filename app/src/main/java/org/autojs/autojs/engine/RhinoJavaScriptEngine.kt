@@ -72,6 +72,9 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
     lateinit var thread: Thread
         private set
 
+    /** Whether the current thread is the one the script runs on (set by [init]; the main thread in UI mode). */
+    fun isOnScriptThread() = ::thread.isInitialized && thread === Thread.currentThread()
+
     private val mInitScript: Script
         get() = try {
             ProcessWideRhinoAssetCache.getBootstrapScript(
