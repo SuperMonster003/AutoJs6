@@ -1,0 +1,95 @@
+LeakCanary 2.14 analysis text (as shown in its leak list), XQ-AT72 API 31, host debug 5621 built from the work tree with the H1 / H2 commit a2ee7eb03 reverted (pre-H1, everything else as in 8e52a7bcb), 2026-10-20 21:58.
+Command: py -3.12 -I -u tools/memory/leakcanary_probe.py -s QV710AF65F --scenario S2 --runs 6 --interval 4 --wait 480 --expect Loopers --expect-leaks yes (result PASS: 1 application leak, trace through LooperHelper.sLoopers).
+
+====================================
+HEAP ANALYSIS RESULT
+====================================
+1 APPLICATION LEAKS
+
+References underlined with "~~~" are likely causes.
+Learn more at https://squ.re/leaks.
+
+11069 bytes retained by leaking objects
+Displaying only 1 leak trace out of 3 with the same signature
+Signature: a039827e5d389ef7d8805d35cb51f7822947429d
+┬───
+│ GC Root: Thread object
+│
+├─ android.os.HandlerThread instance
+│    Leaking: NO (PathClassLoader↓ is not leaking)
+│    Thread name: 'LeakCanary-Heap-Dump'
+│    ↓ Thread.contextClassLoader
+├─ dalvik.system.PathClassLoader instance
+│    Leaking: NO (LooperHelper↓ is not leaking and A ClassLoader is never leaking)
+│    ↓ ClassLoader.runtimeInternalObjects
+├─ java.lang.Object[] array
+│    Leaking: NO (LooperHelper↓ is not leaking)
+│    ↓ Object[4104]
+├─ org.autojs.autojs.core.looper.LooperHelper class
+│    Leaking: NO (a class is never leaking)
+│    ↓ static LooperHelper.sLoopers
+│                          ~~~~~~~~
+├─ java.util.concurrent.ConcurrentHashMap instance
+│    Leaking: UNKNOWN
+│    Retaining 11.4 MB in 414259 objects
+│    ↓ ConcurrentHashMap[key()]
+│                       ~~~~~~~
+├─ org.autojs.autojs.runtime.api.Threads$Companion$TimerThread instance
+│    Leaking: UNKNOWN
+│    Retaining 1.0 kB in 32 objects
+│    Thread name: 'ScriptThread-6[/storage/emulated/0/Download/aj6-memory-probe/memory_probe_S2.js] (Spawn-5)'
+│    ↓ TimerThread.target
+│                  ~~~~~~
+├─ org.autojs.autojs.util.RhinoUtils$$ExternalSyntheticLambda18 instance
+│    Leaking: UNKNOWN
+│    Retaining 327 B in 11 objects
+│    ↓ RhinoUtils$$ExternalSyntheticLambda18.f$0
+│                                            ~~~
+╰→ org.autojs.autojs.runtime.ScriptRuntime instance
+​     Leaking: YES (ObjectWatcher was watching this because ScriptRuntime of LoopBasedJavaScriptEngine #6
+​     (/storage/emulated/0/Download/aj6-memory-probe/memory_probe_S2.js) exited)
+​     Retaining 3.7 kB in 131 objects
+​     key = 9e9b0916-0d5a-4e98-8eb3-aa410dbb270a
+​     watchDurationMillis = 6330
+​     retainedDurationMillis = 1314
+​     mUiHandlerAppContext instance of org.autojs.autojs.App
+====================================
+0 LIBRARY LEAKS
+
+A Library Leak is a leak caused by a known bug in 3rd party code that you do not have control over.
+See https://square.github.io/leakcanary/fundamentals-how-leakcanary-works/#4-categorizing-leaks
+====================================
+0 UNREACHABLE OBJECTS
+
+An unreachable object is still in memory but LeakCanary could not find a strong reference path
+from GC roots.
+====================================
+METADATA
+
+Please include this in bug reports and Stack Overflow questions.
+
+Build.VERSION.SDK_INT: 31
+Build.MANUFACTURER: Sony
+LeakCanary version: 2.14
+App process name: org.autojs.autojs6
+Class count: 32760
+Instance count: 613788
+Primitive array count: 170039
+Object array count: 67800
+Thread count: 34
+Heap total bytes: 43978376
+Bitmap count: 0
+Bitmap total bytes: 0
+Large bitmap count: 0
+Large bitmap total bytes: 0
+Db 1: open /data/user/0/org.autojs.autojs6/no_backup/androidx.work.workdb
+Db 2: open /data/user/0/org.autojs.autojs6/databases/TimedTaskDatabase.db
+Db 3: open /data/user/0/org.autojs.autojs6/databases/IntentTaskDatabase.db
+Stats: LruCache[maxSize=3000,hits=250479,misses=682674,hitRate=26%]
+RandomAccess[bytes=30719879,reads=682674,travel=252806338153,range=57740007,size=66509861]
+Heap dump reason: 6 retained objects, app is visible
+Analysis duration: 304110 ms
+Heap dump file path: /storage/emulated/0/Download/leakcanary-org.autojs.autojs6/2026-10-20_21-58-41_856.hprof
+Heap dump timestamp: 1792505040240
+Heap dump duration: 3796 ms
+====================================

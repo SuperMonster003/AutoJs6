@@ -1,0 +1,17 @@
+LeakCanary check after P1 (ROADMAP P1.2), XQ-AT72 API 31, host debug 5621 built 21:35 from the work tree at a1e3ab9d9 (all P1 fixes), 2026-10-20 22:10.
+Command: py -3.12 -I -u tools/memory/leakcanary_probe.py -s QV710AF65F --scenario S2 --runs 6 --interval 4 --wait 300 --expect Loopers --expect-leaks no
+
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 41 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.LoopBasedJavaScriptEngine, org.autojs.autojs.external.open.RunIntentActivity, org.autojs.autojs.runtime.ScriptRuntime, org.autojs.autojs.runtime.api.Threads$Companion$TimerThread
+max retained reported: 0
+analysis: none within 300 s
+PASS
+
+Note: the first attempt right after reinstalling showed an analysis of a heap dump taken by the previous (pre-H1) process at
+21:59:46: LeakCanary analyzes through WorkManager, so the new process finished the pending job. leakcanary_probe.py now only
+accepts analyses of heap dumps taken after it started.
