@@ -2090,9 +2090,9 @@ class AndroidNodeBridgeCapabilityProvider(
             }
             "flowForeground" -> {
                 require(request.argsArray().length() == 0) { "flowForeground takes no arguments" }
-                val info = org.autojs.autojs.AutoJs.instance.infoProvider
+                val info = org.autojs.autojs.AutoJs.instance.infoProvider.accessibilityIdentity
                 NodeBridgeResponse.success(request.id, JSONObject().put("available", true).put("value",
-                    JSONObject().put("packageName", info.latestPackage).put("activityName", info.latestActivity)).toString())
+                    JSONObject().put("packageName", info.packageName).put("activityName", info.activityName)).toString())
             }
             "findOne" -> dispatchAccessibilityFindOne(request)
             "findAll" -> dispatchAccessibilityFindAll(request)

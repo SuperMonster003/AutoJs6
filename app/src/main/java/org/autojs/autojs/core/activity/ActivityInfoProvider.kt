@@ -23,6 +23,10 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
     private val mPackageManager: PackageManager = context.packageManager
 
     @Volatile
+    internal var accessibilityIdentity = ActivityWindowIdentity()
+        private set
+
+    @Volatile
     private var mLatestPackage: String = ""
 
     @Volatile
@@ -195,6 +199,14 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         if (isPackageExists(latestPackageStr)) {
             mLatestPackage = latestPackage.toString()
             mLatestActivity = latestClassStr
+            accessibilityIdentity = accessibilityIdentity.observe(latestPackageStr, latestClassStr) { pkg, name ->
+                try {
+                    val component = ComponentName(pkg, name)
+                    if (SDK_INT >= TIRAMISU) mPackageManager.getActivityInfo(component, PackageManager.ComponentInfoFlags.of(0))
+                    else @Suppress("DEPRECATION") mPackageManager.getActivityInfo(component, 0)
+                    true
+                } catch (_: PackageManager.NameNotFoundException) { false }
+            }
             setLatestExternalComponent(latestPackageStr, latestClassStr)
         }
         Log.d(LOG_TAG, "setLatestComponent: $latestPackage/$latestClassStr $mLatestPackage/$mLatestActivity")
