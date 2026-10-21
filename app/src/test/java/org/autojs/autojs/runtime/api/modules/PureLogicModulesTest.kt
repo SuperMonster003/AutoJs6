@@ -349,8 +349,7 @@ class PureLogicModulesTest {
 
         /**
          * Mounts [MODULES] in the order of `ScriptModuleLayer.ORDER` the way `ScriptRuntime.augment()` does: from the new
-         * layer when [newLayer] is true (with `legacy`, not migrated, from its old augment call), otherwise all from their
-         * old augment calls.
+         * layer when [newLayer] is true (`legacy` too since P3.0), otherwise all from their old augment calls.
          */
         private fun mountInOrder(global: ScriptableObject, runtime: ScriptRuntime, newLayer: Boolean) {
             val mounter = if (newLayer) ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ScriptModuleLayer.ORDER) else null

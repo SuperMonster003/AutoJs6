@@ -36,8 +36,8 @@
     <string name="apk_info_package_name">الحزمة</string>
     <string name="apk_info_signature_scheme">طريقة التوقيع</string>
     <string name="apk_info_target_sdk">SDK المستهدف</string>
-    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">لا يمكن تنفيذ العمليات المحظورة في واجهة المستخدم. جرِّب الانتظار لتنفيذ `waitForActivity` في مؤثِّر فرعي أو نص برمجي فرعي، أو استخدم `setInterval` للتكرار والتحقق من النشاط</string>
-    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">لا يمكن تنفيذ العمليات المحظورة في واجهة المستخدم. جرِّب الانتظار لتنفيذ `waitForPackage` في مؤثِّر فرعي أو نص برمجي فرعي، أو استخدم `setInterval` للتكرار والتحقق من الحزمة</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution">لا يمكن تنفيذ العمليات المحظورة في واجهة المستخدم. جرِّب الانتظار لتنفيذ `waitForActivity` في مؤثِّر فرعي أو نص برمجي فرعي, أو استخدم `setInterval` للتكرار والتحقق من النشاط</string>
+    <string name="blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution">لا يمكن تنفيذ العمليات المحظورة في واجهة المستخدم. جرِّب الانتظار لتنفيذ `waitForPackage` في مؤثِّر فرعي أو نص برمجي فرعي, أو استخدم `setInterval` للتكرار والتحقق من الحزمة</string>
     <string name="changelog_label_dependency">التبعيات</string>
     <string name="changelog_label_feature">إضافة جديدة</string>
     <string name="changelog_label_fix">تصليح</string>
