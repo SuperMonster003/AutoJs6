@@ -23,6 +23,14 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
     private val mContextCount = AtomicInteger()
     private val wrapFactory = WrapFactory()
 
+    /**
+     * Rhino contexts entered through this factory and not yet released; read only, for the memory diagnostics
+     * (docs/memory/ROADMAP.md T1 e, P2.1).
+     * zh-CN: 经本工厂进入且尚未释放的 Rhino Context 数; 只读, 供内存诊断使用 (docs/memory/ROADMAP.md T1 e, P2.1).
+     */
+    val activeContextCount: Int
+        get() = mContextCount.get()
+
     init {
         initApplicationClassLoader(createClassLoader(AndroidContextFactory::class.java.classLoader!!))
     }

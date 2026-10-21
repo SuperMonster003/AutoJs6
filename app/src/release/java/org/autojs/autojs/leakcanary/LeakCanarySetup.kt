@@ -1,7 +1,9 @@
 package org.autojs.autojs.leakcanary
 
 import android.app.Application
+import android.content.Context
 import org.autojs.autojs.engine.ScriptEngine
+import org.autojs.autojs.runtime.memory.LeakCanaryStatus
 
 object LeakCanarySetup {
 
@@ -17,5 +19,8 @@ object LeakCanarySetup {
 
     @JvmStatic
     fun watchEngine(@Suppress("UNUSED_PARAMETER") engine: ScriptEngine<*>) = Unit
+
+    @JvmStatic
+    fun status(@Suppress("UNUSED_PARAMETER") context: Context): LeakCanaryStatus? = null
 
 }

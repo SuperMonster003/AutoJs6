@@ -143,13 +143,19 @@
 
     <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
         app:layout="@layout/preference_category_custom"
-        app:title="@string/text_debug">
+        app:title="@string/text_memory_diagnostics">
 
-        <org.autojs.autojs.theme.preference.MaterialPreference
+        <org.autojs.autojs.ui.settings.memory.MemoryDiagnosticsPreference
             app:layout="@layout/preference_custom"
-            app:key="process_exit_history"
-            app:title="@string/text_process_exit_history"
-            app:summary="@string/summary_process_exit_history" />
+            app:summary="@string/summary_open_memory_diagnostics"
+            app:title="@string/text_open_memory_diagnostics" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="@string/key_memory_unreclaimed_warning"
+            app:layout="@layout/preference_custom"
+            app:defaultValue="true"
+            app:summary="@string/summary_memory_unreclaimed_warning"
+            app:title="@string/text_memory_unreclaimed_warning" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="@string/key_leakcanary_enabled"
@@ -158,6 +164,18 @@
             app:isPreferenceVisible="false"
             app:summary="@string/summary_leakcanary"
             app:title="@string/text_leakcanary" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/text_debug">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:key="process_exit_history"
+            app:title="@string/text_process_exit_history"
+            app:summary="@string/summary_process_exit_history" />
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

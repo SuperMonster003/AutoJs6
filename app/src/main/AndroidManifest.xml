@@ -565,6 +565,11 @@
             android:exported="false" />
 
         <activity
+            android:name="org.autojs.autojs.ui.settings.memory.MemoryDiagnosticsActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.Settings" />
+
+        <activity
             android:name="org.autojs.autojs.ui.error.CrashReportActivity"
             android:process=":crash_report"
             android:exported="false"

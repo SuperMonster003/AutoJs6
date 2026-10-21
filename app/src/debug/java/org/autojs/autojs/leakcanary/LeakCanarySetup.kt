@@ -13,6 +13,7 @@ import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.get
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
+import org.autojs.autojs.runtime.memory.LeakCanaryStatus
 import org.autojs.autojs6.R
 
 /**
@@ -97,6 +98,28 @@ object LeakCanarySetup {
         if (engine is JavaScriptEngine) {
             runCatching { engine.runtime }.getOrNull()?.let { watch(it, "ScriptRuntime of $label exited") }
         }
+    }
+
+    /**
+     * What LeakCanary is doing, for the unreclaimed runtime warning and the memory diagnostics page (docs/memory/ROADMAP.md P2.3):
+     * whether it watches, how many watched objects are retained, and whether it dumps and analyzes the heap by itself (its own
+     * "Dump heap automatically" switch, read from the same store as [defaultAutomaticHeapDumpOff]). Null when it is not included.
+     * zh-CN: LeakCanary 的状态, 供未回收警告与内存诊断页面使用 (docs/memory/ROADMAP.md P2.3): 是否在监视, 监视对象中有多少残留, 以及是否会自行转储并分析堆
+     * (其自身的 "Dump heap automatically" 开关, 与 [defaultAutomaticHeapDumpOff] 读写同一存储). 未包含 LeakCanary 时为 null.
+     */
+    @JvmStatic
+    fun status(context: Context): LeakCanaryStatus? {
+        if (!isIncluded) return null
+        if (!isEnabled) return LeakCanaryStatus(enabled = false, retainedObjects = 0, automaticHeapDump = false)
+        return runCatching {
+            val aboutScreenDumpEnabled = context.getSharedPreferences(LEAK_CANARY_HEAP_DUMP_PREFS, Context.MODE_PRIVATE)
+                .getBoolean(KEY_ABOUT_SCREEN_DUMP_ENABLED, true)
+            LeakCanaryStatus(
+                enabled = true,
+                retainedObjects = AppWatcher.objectWatcher.retainedObjectCount,
+                automaticHeapDump = LeakCanary.config.dumpHeap && aboutScreenDumpEnabled,
+            )
+        }.onFailure { Log.w(TAG, "Failed to read the LeakCanary status", it) }.getOrNull()
     }
 
     /**
