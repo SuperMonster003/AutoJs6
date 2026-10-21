@@ -369,7 +369,7 @@ class CaptureWorkerBridgeDeviceTest {
         writeEvidence("worker-modules")
     }
 
-    internal fun execute(kind:String,body:String,owned:AtomicReference<BunPluginScriptEngine>?=null, capabilities:List<String>?=null, workingDirectory:String?=null):JSONObject {
+    internal fun execute(kind:String,body:String,owned:AtomicReference<BunPluginScriptEngine>?=null, capabilities:List<String>?=null, workingDirectory:String?=null, timeoutMs:Long=90_000):JSONObject {
         val marker="CAPTURE_WORKER_${UUID.randomUUID()}:"
         val imports=if(kind=="bun") "const {createHostClient}=await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);const host=await createHostClient();const images=host.images;"
             else "const images=require('images');const host={screenRecorder:require('screen_recorder'),coordinates:require('screen_metrics')};"
@@ -387,7 +387,7 @@ class CaptureWorkerBridgeDeviceTest {
         if(kind=="bun") {
             val engine=BunPluginScriptEngine(context,global){console};owned?.set(engine)
             if(workingDirectory!=null)engine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY,workingDirectory)
-            engine.setTag(ExecutionConfig.tag,ExecutionConfig().apply { setArgument("bun.timeoutMillis",120_000) })
+            engine.setTag(ExecutionConfig.tag,ExecutionConfig().apply { setArgument("bun.timeoutMillis",maxOf(120_000L,timeoutMs)) })
             try { engine.init();engine.execute(StringScriptSource("capture-worker.bun.js",source)) }
             catch(error:Throwable){throw AssertionError("Bun: "+console.snapshotLogEntries().joinToString("\n"){it.content.toString()}.takeLast(4000),error)}
             finally { engine.destroy() }
@@ -396,7 +396,7 @@ class CaptureWorkerBridgeDeviceTest {
             try {
                 val manifest=NodeBridgePermissionManifest.fromDeclaredCapabilities(capabilities?:listOf("opencc","image","media_projection","pinyin","pinyin4j","console","device","media","media.recording"))
                 val result=NodeJsRuntimePluginBridge.runScript(context,NodePluginScriptRequest(source=source,sourceName="capture-worker.cjs",
-                    workingDirectory=workingDirectory?:context.cacheDir.path,timeoutMs=90_000,runtimeModuleSources=mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson())),console=console,
+                    workingDirectory=workingDirectory?:context.cacheDir.path,timeoutMs=timeoutMs,runtimeModuleSources=mapOf(NodeBridgePermissionManifest.RUNTIME_MODULE_NAME to manifest.toJson())),console=console,
                     outputListener={_,text->console.println(android.util.Log.DEBUG,text)})
                 assertTrue("${result.errorCode}: ${result.errorMessage}\n${result.stderr.takeLast(4000)}",result.succeeded&&!result.timedOut);output=result.stdout
             } finally {console.onRuntimeExit()}

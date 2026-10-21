@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_ai_control_grant">Allow AI requests, streaming and sessions through the AI plugin.</string>
+    <string name="text_bun_ai_control_grant">Bun AI requests and sessions</string>
+</resources>

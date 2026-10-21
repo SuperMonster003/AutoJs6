@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_ai_control_grant">允許透過 AI 外掛發起請求, 接收串流結果及管理工作階段.</string>
+    <string name="text_bun_ai_control_grant">Bun AI 請求與工作階段</string>
+</resources>

@@ -362,6 +362,14 @@
             app:summary="@string/summary_bun_mail_control_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_ai_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_ai_control_grant"
+            app:summary="@string/summary_bun_ai_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_epub_control_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"

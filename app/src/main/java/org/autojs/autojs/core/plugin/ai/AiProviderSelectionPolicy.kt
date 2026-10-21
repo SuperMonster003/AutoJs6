@@ -382,7 +382,7 @@ internal object AiProviderSelectionPolicy {
                 AiProviderCandidateRejection.WRONG_ACTION
             !candidate.exported -> AiProviderCandidateRejection.NOT_EXPORTED
             !candidate.applicationEnabled || !candidate.serviceEnabled -> AiProviderCandidateRejection.DISABLED
-            candidate.requiredPermission != AiProviderProtocol.PLUGIN_PERMISSION ->
+            !ThreeStoneAiOfficialPlugin.acceptsPermission(candidate.component, candidate.requiredPermission) ->
                 AiProviderCandidateRejection.WRONG_PERMISSION
             !hasValidPackageIdentity(candidate) -> AiProviderCandidateRejection.INVALID_PACKAGE_IDENTITY
             candidate.sameSignerAsHost || candidate.trustLevel == AiProviderTrustLevel.OFFICIAL -> null

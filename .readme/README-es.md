@@ -190,7 +190,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 
 # v6.8.0
 
-###### 2026/10/21 - Algunas funciones pasan a complementos; actualiza con precaución
+###### 2026/10/22 - Algunas funciones pasan a complementos; actualiza con precaución
 
 * `Sugerencia` Algunas funciones integradas pasan a complementos independientes (como OCR, reconocimiento de códigos de barras, OpenCV, OpenCC, Pinyin, MediaInfo, terminal y documentación del proyecto sin conexión); instala y activa los complementos correspondientes en el Centro de complementos antes de usarlas
 * `Sugerencia` El SDK de destino de las aplicaciones empaquetadas cambia de 29 a 37; el acceso al almacenamiento compartido y a la red local requiere los permisos exigidos por el sistema
@@ -362,6 +362,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` API de síntesis de voz para Node.js, Bun y Workers con consultas de motores y voces, lectura, silencio, archivos de audio y eventos de tareas
 * `Nuevo` API speech de reconocimiento y gestión de modelos para Node.js, Bun y Workers con WAV/PCM, dictado y activación por voz, instalación/importación, síntesis y cancelación
 * `Nuevo` Node.js/Bun/Worker: Lectura de EPUB, exportación de recursos, búsqueda y sesiones del lector con eventos
+* `Nuevo` Generación de texto con IA, transmisión, catálogo de modelos y sesiones persistentes para Node.js, Bun y Workers, con cancelación y autorización Android de aplicaciones empaquetadas
 * `Corrección` Las esperas de eventos de interfaz de Bun bloqueaban otras llamadas al anfitrión y agotaban el tiempo de verificación asíncrona de Flow
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases

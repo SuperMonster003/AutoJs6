@@ -761,7 +761,7 @@ internal class AiProviderHandshakeCoordinator(
             AiProviderCandidateRejection.WRONG_ACTION
         !snapshot.exported -> AiProviderCandidateRejection.NOT_EXPORTED
         !snapshot.applicationEnabled || !snapshot.serviceEnabled -> AiProviderCandidateRejection.DISABLED
-        snapshot.requiredPermission != AiProviderProtocol.PLUGIN_PERMISSION ->
+        !ThreeStoneAiOfficialPlugin.acceptsPermission(snapshot.component, snapshot.requiredPermission) ->
             AiProviderCandidateRejection.WRONG_PERMISSION
         !snapshot.officialSignerMatch && !snapshot.sameSignerAsHost ->
             AiProviderCandidateRejection.TRUST_REQUIRED

@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/21 - Some features moved to plugins; upgrade with care
+###### 2026/10/22 - Some features moved to plugins; upgrade with care
 
 * `Hint` Some built-in features are now provided by independent plugins (such as OCR, barcode recognition, OpenCV, OpenCC, Pinyin, MediaInfo, the terminal and offline project documentation); install and enable the corresponding plugins in the Plugin Center before use
 * `Hint` The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements
@@ -178,6 +178,7 @@
 * `Feature` Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events
 * `Feature` Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup
 * `Feature` Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
+* `Feature` AI text generation, streaming, model catalog and persistent sessions for Node.js, Bun and Workers, with cancellation and Android authorization for packaged apps
 * `Fix` Bun UI event waits blocking other host calls and causing asynchronous Flow verification to time out
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures

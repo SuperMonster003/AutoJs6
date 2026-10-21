@@ -153,7 +153,7 @@ internal class AiPluginCatalogRuntime(
     }
 }
 
-private fun AiPluginCatalog.toPublicValue(): Map<String, Any?> = linkedMapOf(
+internal fun AiPluginCatalog.toPublicValue(): Map<String, Any?> = linkedMapOf(
     "generation" to generation,
     "plugin" to linkedMapOf(
         "provider" to providerId,

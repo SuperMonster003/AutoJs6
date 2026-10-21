@@ -112,6 +112,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunAndroidObjectsGrantPreference: ThemeColorSwitchPreference? = null
     private var bunFlowControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunMailControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunAiControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunEpubControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunSpeechControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTtsControlGrantPreference: ThemeColorSwitchPreference? = null
@@ -277,6 +278,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunAndroidObjectsGrantPreference = findPreference("plugin_bun_android_objects_grant")
         bunFlowControlGrantPreference = findPreference("plugin_bun_flow_control_grant")
         bunMailControlGrantPreference = findPreference("plugin_bun_mail_control_grant")
+        bunAiControlGrantPreference = findPreference("plugin_bun_ai_control_grant")
         bunEpubControlGrantPreference = findPreference("plugin_bun_epub_control_grant")
         bunSpeechControlGrantPreference = findPreference("plugin_bun_speech_control_grant")
         bunTtsControlGrantPreference = findPreference("plugin_bun_tts_control_grant")
@@ -500,6 +502,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setMailControlGranted(requireContext(), value == true)
             true
         }
+        bunAiControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setAiControlGranted(requireContext(), value == true)
+            true
+        }
         bunEpubControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setEpubControlGranted(requireContext(), value == true)
             true
@@ -625,6 +631,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunAndroidObjectsGrantPreference?.isChecked = BunHostCapabilityGrants.isAndroidObjectsGranted(requireContext())
         bunFlowControlGrantPreference?.isChecked = BunHostCapabilityGrants.isFlowControlGranted(requireContext())
         bunMailControlGrantPreference?.isChecked = BunHostCapabilityGrants.isMailControlGranted(requireContext())
+        bunAiControlGrantPreference?.isChecked = BunHostCapabilityGrants.isAiControlGranted(requireContext())
         bunEpubControlGrantPreference?.isChecked = BunHostCapabilityGrants.isEpubControlGranted(requireContext())
         bunSpeechControlGrantPreference?.isChecked = BunHostCapabilityGrants.isSpeechControlGranted(requireContext())
         bunTtsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTtsControlGranted(requireContext())

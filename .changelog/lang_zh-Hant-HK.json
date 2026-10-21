@@ -1,7 +1,7 @@
 {
   "$data": {
     "v6.8.0": {
-      "released_date": "2026/10/21",
+      "released_date": "2026/10/22",
       "released_hint": "部分功能插件化, 謹慎升級",
       "hint": [
         "部分內置功能改由獨立插件提供 (如 OCR, 條碼識別, OpenCV, OpenCC, 拼音, MediaInfo, 終端及離線項目文檔), 使用前需在插件中心安裝並啓用對應插件",
@@ -175,7 +175,8 @@
         "Node.js/Bun/Worker 的 Java 回調代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理",
         "Node.js/Bun/Worker 的文字轉語音介面, 支援引擎與音色查詢, 朗讀, 靜音任務, 音訊檔案合成和任務事件",
         "Node.js/Bun/Worker 的 speech 語音識別與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理",
-        "Node.js/Bun/Worker: EPUB 書籍讀取, 資源匯出, 搜尋及帶事件的閱讀器會話"
+        "Node.js/Bun/Worker: EPUB 書籍讀取, 資源匯出, 搜尋及帶事件的閱讀器會話",
+        "Node.js, Bun 與 Worker 的 AI 文字生成, 串流結果, 模型目錄及持續工作階段, 支援取消與打包應用程式的 Android 存取授權"
       ],
       "fix": [
         "Bun 介面事件等待阻塞其他宿主呼叫並導致 Flow 非同步驗證逾時的問題",

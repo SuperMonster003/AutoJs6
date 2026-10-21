@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_ai_control_grant">Разрешить запросы, потоковые ответы и сеансы через плагин ИИ.</string>
+    <string name="text_bun_ai_control_grant">Запросы и сеансы ИИ Bun</string>
+</resources>

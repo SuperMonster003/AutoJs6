@@ -190,7 +190,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 
 # v6.8.0
 
-###### 2026/10/21 - Certaines fonctions passent par des plugins, mise à niveau avec prudence
+###### 2026/10/22 - Certaines fonctions passent par des plugins, mise à niveau avec prudence
 
 * `Astuce` Certaines fonctions intégrées sont désormais fournies par des plugins indépendants (OCR, reconnaissance de codes-barres, OpenCV, OpenCC, pinyin, MediaInfo, terminal et documentation hors ligne du projet); installez et activez les plugins correspondants dans le centre de plugins avant utilisation
 * `Astuce` Le SDK cible des applications empaquetées passe de 29 à 37; l'accès au stockage partagé et au réseau local nécessite les autorisations requises par le système
@@ -362,6 +362,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Fonctionnalité` API de synthèse vocale pour Node.js, Bun et Workers avec requêtes des moteurs et voix, lecture, silence, fichiers audio et événements des tâches
 * `Fonctionnalité` API speech de reconnaissance vocale et de gestion des modèles pour Node.js, Bun et Workers avec WAV/PCM, dictée et activation vocale, installation/importation, synthèse et annulation
 * `Fonctionnalité` Node.js/Bun/Worker: Lecture EPUB, export des ressources, recherche et sessions du lecteur avec événements
+* `Fonctionnalité` Génération de texte IA, flux, catalogue de modèles et sessions persistantes pour Node.js, Bun et Workers, avec annulation et autorisation Android des applications générées
 * `Correction` Attentes des événements UI Bun bloquant les autres appels hôte et provoquant une expiration de la vérification asynchrone Flow
 * `Correction` Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes
 * `Correction` L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes

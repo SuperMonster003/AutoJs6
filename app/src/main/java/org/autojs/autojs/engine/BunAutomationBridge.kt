@@ -118,18 +118,20 @@ internal class BunAutomationBridge(
         val awake = job.capability == Grants.DEVICE_CONTROL && job.method == "keepScreenOn"
         val mail = job.capability == Grants.MAIL_CONTROL && job.method == "open"
         val flow = job.capability == Grants.FLOW_CONTROL && job.method == "open"
+        val ai = job.capability == Grants.AI_CONTROL && job.method == "open"
         val epub = job.capability == Grants.EPUB_CONTROL && job.method == "open"
         val speech = job.capability == Grants.SPEECH_CONTROL && job.method == "open"
         val tts = job.capability == Grants.TTS_CONTROL && job.method == "open"
         val javaObject = job.capability == Grants.JAVA_INTEROP
         val androidObject=job.capability==Grants.ANDROID_OBJECTS && job.method in setOf("createPaint","createColorStateList")
         val task=job.capability==Grants.TASKS_CONTROL && job.method in setOf("addTimedTask","addIntentTask")
-        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject && !tts && !speech && !epub && !mail && !flow) { job.future.cancel(false); return }
+        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject && !tts && !speech && !ai && !epub && !mail && !flow) { job.future.cancel(false); return }
         // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
                 if (mail) { provider().closeMailClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (flow) { provider().closeFlowClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
+                if (ai) { provider().closeAiClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (epub) { provider().closeEpubClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (speech) { provider().closeSpeechClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (tts) { provider().closeTtsClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
@@ -153,8 +155,8 @@ internal class BunAutomationBridge(
                 }
                 val id = JSONObject(response.resultJson.orEmpty()).getString("id")
                 val module = if (database) NodeBridgeModules.DATABASE else if (shell) NodeBridgeModules.SHELL else if (events) NodeBridgeModules.EVENTS else NodeBridgeModules.SENSORS
-                val args = if (database || shell || events) JSONArray().put(id) else JSONArray().put(JSONObject().put("id", id))
-                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), module, if (database || shell || events) "close" else "unsubscribe",
+                val args = if (ai || database || shell || events) JSONArray().put(id) else JSONArray().put(JSONObject().put("id", id))
+                provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), module, if (ai || database || shell || events) "close" else "unsubscribe",
                     args.toString(), 5000, permissions = listOf(if (database) NodeBridgePermissionManifest.DATABASE else if (shell) NodeBridgePermissionManifest.SHELL else if (events) NodeBridgePermissionManifest.EVENTS else NodeBridgePermissionManifest.SENSORS))) {}
             }
         }
@@ -165,6 +167,7 @@ internal class BunAutomationBridge(
     companion object {
         fun nodeCapabilities(grants: List<String>): List<String> = buildList {
             if (Grants.MAIL_CONTROL in grants) add(NodeBridgePermissionManifest.MAIL)
+            if (Grants.AI_CONTROL in grants) add(NodeBridgePermissionManifest.AI)
             if (Grants.EPUB_CONTROL in grants) add(NodeBridgePermissionManifest.EPUB)
             if (Grants.SPEECH_CONTROL in grants) add(NodeBridgePermissionManifest.SPEECH)
             if (Grants.TTS_CONTROL in grants) add(NodeBridgePermissionManifest.TTS)
@@ -200,6 +203,7 @@ internal class BunAutomationBridge(
         val methods = mapOf(
             Grants.FLOW_CONTROL to RuntimeFlowBridge.methods,
             Grants.MAIL_CONTROL to RuntimeMailBridge.methods,
+            Grants.AI_CONTROL to RuntimeAiBridge.methods,
             Grants.EPUB_CONTROL to RuntimeEpubBridge.methods,
             Grants.SPEECH_CONTROL to RuntimeSpeechBridge.methods,
             Grants.TTS_CONTROL to RuntimeTtsBridge.methods,
@@ -219,6 +223,6 @@ internal class BunAutomationBridge(
             Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
+        private val modules = mapOf(Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
     }
 }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_ai_control_grant">允许通过 AI 插件发起请求, 接收流式结果和管理会话.</string>
+    <string name="text_bun_ai_control_grant">Bun AI 请求与会话</string>
+</resources>

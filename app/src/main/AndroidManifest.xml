@@ -31,6 +31,7 @@
         android:name="org.autojs.permission.PLUGIN"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="org.autojs.permission.AI_RUNTIME" />
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
     <uses-permission android:name="org.autojs.plugin.mail.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.plugin.epub.permission.RUNTIME" />
