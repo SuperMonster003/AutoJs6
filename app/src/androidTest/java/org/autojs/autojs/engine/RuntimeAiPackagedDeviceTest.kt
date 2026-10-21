@@ -34,7 +34,9 @@ class RuntimeAiPackagedDeviceTest {
                 val config = ProjectConfig().setName("AI core $mode Test").setPackageName(packageName(mode)).setVersionName("1.0.0").setVersionCode(1)
                     .setMainScriptFileName(entry).setProjectType(if (bun) "bun" else "node").setSourcePath(root.path).setAbis(listOf("arm64-v8a"))
                     .setLibs(emptyList()).setPermissions(listOf(Manifest.permission.INTERNET))
-                config.launchConfig.apply { isSplashVisible = false; isLogsVisible = false; isRunOnBoot = false; requiresSharedStorage = false }
+                // Keep a foreground Activity while a cold runtime starts, so Android can show
+                // the application-owned consent/checkpoint UI without a background-start race.
+                config.launchConfig.apply { isSplashVisible = false; isLogsVisible = true; isRunOnBoot = false; requiresSharedStorage = false }
                 if (bun) config.setBunConfig(ProjectConfig.BunConfig().setHostCapabilities(RuntimeAiPrograms.grants).setTimeoutMs(600000L))
                 else config.setNodeConfig(ProjectConfig.NodeConfig().setPermissions(RuntimeAiPrograms.capabilities).setTimeoutMs(600000L))
                 if (bun) {
