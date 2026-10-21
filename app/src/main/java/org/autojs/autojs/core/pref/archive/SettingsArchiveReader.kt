@@ -11,7 +11,8 @@ import java.util.zip.ZipInputStream
 /**
  * Reads a settings archive (docs/settings/ROADMAP.md T7, appendix B) with `java.util.zip`, one file at a time: [open]
  * gives a new stream of the archive for every read (a document `Uri` in the app), so that [manifest] inflates only
- * `manifest.json` and the wizard opens a category file ([category]) or a data file ([data]) only once it is selected.
+ * `manifest.json` and the wizard opens a category file ([category]), a data file ([data]) or the settings of a plugin
+ * ([plugin], D3) only once it is selected.
  * An archive of more than [maxBytes], or a file in it that inflates to more, is refused
  * ([SettingsArchiveException.Reason.TOO_LARGE]). An import (P7.1) checks the manifest ([SettingsArchiveManifest.fromJson],
  * [SettingsArchiveManifest.warnings]) and reads the selected categories through [categories], which applies the key
@@ -19,7 +20,8 @@ import java.util.zip.ZipInputStream
  * whether it can be. Pure JVM (R3).
  *
  * zh-CN: 以 `java.util.zip` 逐个文件读取设置归档 (ROADMAP T7, 附录 B): 每次读取都由 [open] 重新打开归档流 (应用中为文档 `Uri`),
- * 因此 [manifest] 只解压 `manifest.json`, 向导在勾选后才打开分类文件 ([category]) 或数据文件 ([data]). 归档超过 [maxBytes]
+ * 因此 [manifest] 只解压 `manifest.json`, 向导在勾选后才打开分类文件 ([category]), 数据文件 ([data]) 或插件的设置 ([plugin], D3).
+ * 归档超过 [maxBytes]
  * 或其中文件解压后超过该值时拒绝 (`TOO_LARGE`). 导入 (P7.1) 校验 manifest ([SettingsArchiveManifest.fromJson],
  * [SettingsArchiveManifest.warnings]), 并经 [categories] 读取勾选的分类, 其中应用 [SettingsKeyMigrations] 的键改名. 加密的分类文件
  * (D23) 以 [key] 打开, [isLocked] 可事先判断能否打开. 纯 JVM (R3).
@@ -88,6 +90,15 @@ class SettingsArchiveReader @JvmOverloads constructor(
         require(file.startsWith(SettingsArchive.DATA_DIR)) { "Not a data file: $file" }
         return bytes(file)
     }
+
+    /**
+     * The settings of the plugin [packageName] (an `id` of the manifest's `plugins`, D3, P13.1): the text of
+     * `plugins/<packageName>/settings.json`, which its provider imports (P13.2); throws [SettingsArchiveException] when
+     * the file is missing or too large.
+     * zh-CN: 插件 [packageName] 的设置 (manifest `plugins` 中的 `id`, D3, P13.1): `plugins/<包名>/settings.json` 的文本, 由其提供方导入
+     * (P13.2); 文件缺失或过大时抛 [SettingsArchiveException].
+     */
+    fun plugin(packageName: String): String = text(SettingsArchive.pluginFile(packageName))
 
     private fun text(name: String): String = bytes(name).toString(Charsets.UTF_8)
 

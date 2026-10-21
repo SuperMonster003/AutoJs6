@@ -114,6 +114,20 @@ object SettingsRegistry {
     @JvmField
     val DEPLOYMENT_IMPLEMENTATIONS: Set<DeploymentKind> = emptySet()
 
+    /**
+     * The providers of the settings of official plugins (D3, P13.1): none in the first phase; the second phase gives one
+     * per installed plugin that supports docs/dev/plugin-settings-transfer-protocol-v1.md (P13.2).
+     * zh-CN: 官方插件设置的提供方 (D3, P13.1): 第一期没有; 第二期为每个支持 docs/dev/plugin-settings-transfer-protocol-v1.md 的已安装
+     * 插件给出一个 (P13.2).
+     */
+    @JvmStatic
+    val pluginSettingsProviders: List<PluginSettingsProvider>
+        get() = emptyList()
+
+    /** The provider of the plugin [packageName], or null. zh-CN: 插件 [packageName] 的提供方, 没有时为 null. */
+    @JvmStatic
+    fun pluginSettingsProvider(packageName: String): PluginSettingsProvider? = pluginSettingsProviders.firstOrNull { it.packageName == packageName }
+
     @JvmStatic
     val categories: List<SettingCategory>
         get() = SettingCategory.ALL

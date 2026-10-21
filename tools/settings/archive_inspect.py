@@ -19,7 +19,9 @@ number of entries the manifest lists and the number the category file holds, the
     icons/<n>.png, each declared icon present once and a PNG), data_color_library is data/color-library.json, a color
     library document ("autojs6.color-library" schemaVersion 1 with plain or intelligent libraries); data of other ids
     is only checked to exist;
-  - nothing else is in the zip except the reserved plugins/ directory (D3);
+  - every plugin entry (D3, P13.1) has a package name as id, listed once, a number of entries, and its file
+    plugins/<id>/settings.json, a JSON object (the payload of the plugin, P13.2); nothing else is in the zip but
+    directory entries under plugins/;
   - with --expect-categories / --expect-ids, the manifest lists that many categories / exactly those ids in that order.
 Values are never printed (the archive may hold credentials, R6). The exit status is 1 when a check fails.
 
@@ -51,6 +53,7 @@ SHORTCUT_LIMITS = {"entries": 1000, "icon": 1024 * 1024, "manifest": 4 * 1024 * 
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 COLOR = re.compile(r"#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})")
 COLOR_LIBRARY_LIMITS = {"bytes": 2 * 1024 * 1024, "libraries": 256, "items": 4096}
+PACKAGE_NAME = re.compile(r"[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+")
 
 
 def value_matches(tag, value):
@@ -180,12 +183,35 @@ class Inspector:
             elif did in DATA_FILES:
                 held = self.check_data(archive, did, file, entry.get("entries"))
             rows.append((did, entry.get("entries"), held, file, False))
-        if not isinstance(manifest.get("plugins", []), list):
-            self.fail("plugins is not an array")
-        extra = [n for n in names if n not in expected_files and not n.startswith("plugins/")]
+        self.check_plugins(archive, manifest.get("plugins", []), names, expected_files)
+        extra = [n for n in names if n not in expected_files and not (n.startswith("plugins/") and n.endswith("/"))]
         if extra:
             self.fail(f"unexpected files: {extra}")
         return rows
+
+    def check_plugins(self, archive, plugins, names, expected_files):
+        """The plugin directories of P13.1 (D3): plugins/<packageName>/settings.json per listed plugin."""
+        if not isinstance(plugins, list):
+            self.fail("plugins is not an array")
+            return
+        seen = set()
+        for entry in plugins:
+            pid = entry.get("id") if isinstance(entry, dict) else None
+            listed = entry.get("entries") if isinstance(entry, dict) else None
+            if not (isinstance(pid, str) and PACKAGE_NAME.fullmatch(pid)) or isinstance(listed, bool) or not isinstance(listed, int) or listed < 0:
+                self.fail(f"a plugin entry is malformed: {entry!r}")
+                continue
+            if pid in seen:
+                self.fail(f"plugin {pid} is listed twice")
+            seen.add(pid)
+            file = f"plugins/{pid}/settings.json"
+            expected_files.add(file)
+            if file not in names:
+                self.fail(f"plugin {pid}: {file} is missing")
+                continue
+            doc = self.read_json(archive, file)
+            if doc is not None and not isinstance(doc, dict):
+                self.fail(f"{file}: not a JSON object")
 
     def check_data(self, archive, did, file, listed):
         """Checks the file of a data category of T19 and returns the number of entries it holds (None if unreadable)."""

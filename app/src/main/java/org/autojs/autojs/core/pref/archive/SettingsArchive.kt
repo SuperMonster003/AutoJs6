@@ -8,11 +8,12 @@ import java.util.Locale
 
 /**
  * The layout of a settings archive, format v1 (docs/settings/ROADMAP.md D5 / T7, appendix B): a zip of [MANIFEST],
- * `categories/<id>.json` and `data/<file>`, with `plugins/` reserved (D3), at most [MAX_BYTES] and named
- * `autojs6-settings-<yyyymmdd-hhmmss>.zip` by default. Pure JVM (R3).
+ * `categories/<id>.json`, `data/<file>` and `plugins/<packageName>/settings.json` (D3, P13.1; none in the first phase),
+ * at most [MAX_BYTES] and named `autojs6-settings-<yyyymmdd-hhmmss>.zip` by default. Pure JVM (R3).
  *
- * zh-CN: 设置归档 v1 的结构 (ROADMAP D5 / T7, 附录 B): zip 内含 [MANIFEST], `categories/<id>.json` 与 `data/<文件>`, 预留
- * `plugins/` (D3), 大小不超过 [MAX_BYTES], 默认文件名为 `autojs6-settings-<yyyymmdd-hhmmss>.zip`. 纯 JVM (R3).
+ * zh-CN: 设置归档 v1 的结构 (ROADMAP D5 / T7, 附录 B): zip 内含 [MANIFEST], `categories/<id>.json`, `data/<文件>` 与
+ * `plugins/<包名>/settings.json` (D3, P13.1; 第一期没有), 大小不超过 [MAX_BYTES], 默认文件名为
+ * `autojs6-settings-<yyyymmdd-hhmmss>.zip`. 纯 JVM (R3).
  */
 object SettingsArchive {
 
@@ -21,12 +22,18 @@ object SettingsArchive {
     const val DATA_DIR = "data/"
     const val PLUGINS_DIR = "plugins/"
 
+    /** The file of a plugin directory (D3, P13.1 / P13.2). zh-CN: 插件目录中的文件名 (D3, P13.1 / P13.2). */
+    const val PLUGIN_SETTINGS_FILE = "settings.json"
+
     /** The limit of an archive, and of every file in it once inflated (T7). zh-CN: 归档及其中每个文件解压后的大小上限 (T7). */
     const val MAX_BYTES: Long = 16L * 1024 * 1024
 
     private val CATEGORY_ID = Regex("[a-z][a-z0-9_]*")
 
     private val DATA_FILE_NAME = Regex("[a-z0-9][a-z0-9._-]*")
+
+    /** An application id: two or more dot-separated Java identifiers. */
+    private val PACKAGE_NAME = Regex("""[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+""")
 
     private val EXPORT_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssxxx", Locale.ROOT)
 
@@ -51,6 +58,20 @@ object SettingsArchive {
     fun dataFile(name: String): String {
         require(DATA_FILE_NAME.matches(name)) { "Invalid data file name \"$name\"" }
         return DATA_DIR + name
+    }
+
+    /**
+     * True for a package name (of the host or of a plugin): an application id, so that it names one directory.
+     * zh-CN: 是否为包名 (宿主或插件): 即 application id, 因此只对应一级目录.
+     */
+    @JvmStatic
+    fun isPackageName(name: String): Boolean = PACKAGE_NAME.matches(name)
+
+    /** The settings file of the plugin [packageName] (D3): `plugins/<packageName>/settings.json`. */
+    @JvmStatic
+    fun pluginFile(packageName: String): String {
+        require(isPackageName(packageName)) { "Invalid plugin package name \"$packageName\"" }
+        return "$PLUGINS_DIR$packageName/$PLUGIN_SETTINGS_FILE"
     }
 
     /**

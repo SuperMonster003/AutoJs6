@@ -9,18 +9,23 @@ import org.autojs.autojs.core.pref.store.StoreId
  * `SettingsImportApplier` (P7.4): for the selected [categories], the values to write ([puts], in their stored form),
  * the stored keys the archive does not have ([removes], back to their defaults, D8), the entries left as they are
  * ([skips], counted by [SkipReason], D9) and the deployment items the user confirms first ([deployments], T18).
- * Categories that are not selected do not appear at all. Pure data (R3).
+ * Categories that are not selected do not appear at all. The plugin directories of the archive (D3, P13.1) whose plugin
+ * has a settings provider on this device are handed to it ([plugins], package names, P13.2); any other is skipped as a
+ * whole: [SkipReason.TARGET_MISSING] with the category [PLUGINS], the package name as store and no name. Pure data (R3).
  *
  * zh-CN: 一次导入的计划 (ROADMAP T8, D8 / D9 / D20), 由 [SettingsImportPlanner] 生成, 由 `SettingsImportApplier` (P7.4) 应用:
  * 对勾选的 [categories], 要写入的值 ([puts], 存储形式), 归档中没有的已存储键 ([removes], 恢复默认, D8), 保持原样的条目 ([skips],
- * 按 [SkipReason] 计数, D9), 以及需要用户先确认的部署项 ([deployments], T18). 未勾选的分类完全不出现. 纯数据 (R3).
+ * 按 [SkipReason] 计数, D9), 以及需要用户先确认的部署项 ([deployments], T18). 未勾选的分类完全不出现. 归档中的插件目录 (D3, P13.1)
+ * 若其插件在本机有设置提供方则交给它 ([plugins], 包名, P13.2); 其余整体跳过: `TARGET_MISSING`, 分类为 [PLUGINS], 存储为包名, 名称为空.
+ * 纯数据 (R3).
  */
-data class ImportPlan(
+data class ImportPlan @JvmOverloads constructor(
     val categories: List<String>,
     val puts: List<Put>,
     val removes: List<Remove>,
     val skips: List<Skip>,
     val deployments: List<Deployment>,
+    val plugins: List<String> = emptyList(),
 ) {
 
     /** Why an entry of the archive is left as it is (T8, D9); the current value stays. zh-CN: 条目被跳过的原因, 当前值不变. */
@@ -34,7 +39,10 @@ data class ImportPlan(
         /** The value does not fit the key: an Enum value out of its candidates, JSON its codec refuses, a malformed entry. */
         INVALID_VALUE,
 
-        /** The plugin the value is about is not installed (`plugin_enable_state`, the compiler plugins of appendix C Q15). */
+        /**
+         * The plugin the value is about is not installed (`plugin_enable_state`, the compiler plugins of appendix C Q15),
+         * or a plugin directory of the archive has no settings provider on this device (D3, P13.1).
+         */
         TARGET_MISSING,
 
         /** A category, or a type tag, of a newer format than this version reads. */
@@ -100,6 +108,15 @@ data class ImportPlan(
             deployments = deployments - given.toSet(),
             skips = skips + given.map { Skip(it.category, it.store.name, it.name, SkipReason.DECLINED) },
         )
+    }
+
+    companion object {
+
+        /**
+         * The category of the skip of a plugin directory (P13.1): `plugins/`, which no category id can be.
+         * zh-CN: 插件目录被跳过时的分类 (P13.1): `plugins/`, 不会与任何分类 id 相同.
+         */
+        const val PLUGINS = SettingsArchive.PLUGINS_DIR
     }
 }
 

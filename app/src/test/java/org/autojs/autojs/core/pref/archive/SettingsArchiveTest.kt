@@ -5,6 +5,7 @@ import org.autojs.autojs.core.pref.TypedValue
 import org.autojs.autojs.core.pref.archive.SettingsArchiveException.Reason
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest.CategoryEntry
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest.DataEntry
+import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest.PluginEntry
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -71,7 +72,7 @@ class SettingsArchiveTest {
             manifest.categories,
         )
         assertEquals(listOf(DataEntry("data_shortcuts", 2, "data/shortcuts.zip")), manifest.data)
-        assertEquals(emptyList<Map<String, Any?>>(), manifest.plugins)
+        assertEquals(emptyList<PluginEntry>(), manifest.plugins)
         assertFalse(manifest.isNewerFormat)
         snapshot.categories.forEach { assertEquals(SettingsSnapshotCodec.Decoded(it, emptyList()), reader.category(it.id)) }
         assertArrayEquals(shortcuts, reader.data(manifest.data.single().file))
@@ -101,7 +102,7 @@ class SettingsArchiveTest {
             device = device,
             categories = listOf(CategoryEntry("general", 3, false)),
             data = listOf(DataEntry("data_color_library", 12, "data/color-library.json")),
-            plugins = listOf(linkedMapOf("id" to "org.autojs.plugin.sample", "entries" to 2, "file" to "plugins/sample.json")),
+            plugins = listOf(PluginEntry("org.autojs.plugin.sample", 2)),
         )
         assertEquals(manifest, SettingsArchiveManifest.fromText(manifest.toText()))
         assertTrue(manifest.toText(), manifest.toText().startsWith("{\n  \"format\": \"autojs6-settings\",\n  \"formatVersion\": 1,\n"))
@@ -128,7 +129,7 @@ class SettingsArchiveTest {
         assertEquals(listOf(CategoryEntry("future_category", 1, false)), manifest.categories)
         assertEquals("categories/future_category.json", manifest.categories.single().file)
         assertEquals(emptyList<DataEntry>(), manifest.data)
-        assertEquals(listOf(mapOf("id" to "org.autojs.plugin.sample", "entries" to 3)), manifest.plugins)
+        assertEquals(listOf(PluginEntry("org.autojs.plugin.sample", 3)), manifest.plugins)
     }
 
     @Test
