@@ -28,10 +28,32 @@ object SettingsSnapshotCodec {
     const val VALUE = "v"
 
     /**
-     * A decoded category file: the category and the entries left out (`<store>:<key> (<reason>)`).
-     * zh-CN: 解码后的分类文件: 分类与被略去的条目 (`<存储>:<键> (<原因>)`).
+     * A decoded category file: the category and the entries left out ([rejections]; [rejected] as text,
+     * `<store>:<key> (<reason>)`).
+     * zh-CN: 解码后的分类文件: 分类与被略去的条目 ([rejections]; [rejected] 为其文本 `<存储>:<键> (<原因>)`).
      */
-    data class Decoded(val category: SettingsSnapshot.Category, val rejected: List<String>)
+    data class Decoded(val category: SettingsSnapshot.Category, val rejections: List<Rejection>) {
+
+        val rejected: List<String>
+            get() = rejections.map(Rejection::toString)
+    }
+
+    /**
+     * An entry left out by [decodeCategory]: [name] of [store] (null when the whole store is no object of entries),
+     * why, and whether its type tag is one this version does not know ([unknownTag], an entry of a newer format; the
+     * import counts it as `NEWER_FORMAT`, the other ones as `INVALID_VALUE`, P7.2).
+     * zh-CN: [decodeCategory] 略去的条目: [store] 中的 [name] (整个存储不是条目对象时为 null), 原因, 以及类型标签是否为本版本不认识的
+     * 标签 ([unknownTag], 更新格式的条目; 导入时计为 `NEWER_FORMAT`, 其余计为 `INVALID_VALUE`, P7.2).
+     */
+    data class Rejection @JvmOverloads constructor(val store: String, val name: String?, val reason: String, val unknownTag: Boolean = false) {
+        override fun toString(): String = (if (name == null) store else "$store:$name") + " ($reason)"
+    }
+
+    /** The type tags this version reads (T6). zh-CN: 本版本能读取的类型标签 (T6). */
+    @JvmField
+    val TAGS: Set<String> = linkedSetOf(
+        SettingType.Bool.tag, SettingType.Int.tag, SettingType.Long.tag, SettingType.Float.tag, SettingType.Str.tag, SettingType.StrSet.tag, TypedValue.JSON_TAG,
+    )
 
     /** The JSON value of one entry: `{"t": <tag>, "v": <value>}`. zh-CN: 一个条目的 JSON 值. */
     @JvmStatic
@@ -90,12 +112,12 @@ object SettingsSnapshotCodec {
         val root = json as? Map<*, *> ?: throw SettingsJsonException("A category file is not a JSON object")
         val id = (root["id"] as? String)?.takeIf(SettingsArchive::isCategoryId) ?: throw SettingsJsonException("A category file has no valid id")
         val stores = root["stores"] as? Map<*, *> ?: throw SettingsJsonException("$id: the category file has no stores object")
-        val rejected = ArrayList<String>()
+        val rejected = ArrayList<Rejection>()
         val decoded = LinkedHashMap<String, Map<String, TypedValue>>()
         stores.forEach { (store, entries) ->
             val storeName = store as String
             val map = entries as? Map<*, *> ?: run {
-                rejected.add("$storeName (not an object of entries)")
+                rejected.add(Rejection(storeName, null, "not an object of entries"))
                 return@forEach
             }
             val values = LinkedHashMap<String, TypedValue>()
@@ -103,7 +125,8 @@ object SettingsSnapshotCodec {
                 try {
                     values[name as String] = decodeValue(entry)
                 } catch (e: SettingsJsonException) {
-                    rejected.add("$storeName:$name (${e.message})")
+                    val tag = (entry as? Map<*, *>)?.get(TYPE)
+                    rejected.add(Rejection(storeName, name as String, e.message.orEmpty(), unknownTag = tag is String && tag !in TAGS))
                 }
             }
             decoded[storeName] = values

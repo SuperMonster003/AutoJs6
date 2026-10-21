@@ -13,11 +13,14 @@ import java.util.zip.ZipInputStream
  * gives a new stream of the archive for every read (a document `Uri` in the app), so that [manifest] inflates only
  * `manifest.json` and the wizard opens a category file ([category]) or a data file ([data]) only once it is selected.
  * An archive of more than [maxBytes], or a file in it that inflates to more, is refused
- * ([SettingsArchiveException.Reason.TOO_LARGE]). Pure JVM (R3).
+ * ([SettingsArchiveException.Reason.TOO_LARGE]). An import (P7.1) checks the manifest ([SettingsArchiveManifest.fromJson],
+ * [SettingsArchiveManifest.warnings]) and reads the selected categories through [categories], which applies the key
+ * renames of [SettingsKeyMigrations]. Pure JVM (R3).
  *
  * zh-CN: 以 `java.util.zip` 逐个文件读取设置归档 (ROADMAP T7, 附录 B): 每次读取都由 [open] 重新打开归档流 (应用中为文档 `Uri`),
  * 因此 [manifest] 只解压 `manifest.json`, 向导在勾选后才打开分类文件 ([category]) 或数据文件 ([data]). 归档超过 [maxBytes]
- * 或其中文件解压后超过该值时拒绝 (`TOO_LARGE`). 纯 JVM (R3).
+ * 或其中文件解压后超过该值时拒绝 (`TOO_LARGE`). 导入 (P7.1) 校验 manifest ([SettingsArchiveManifest.fromJson],
+ * [SettingsArchiveManifest.warnings]), 并经 [categories] 读取勾选的分类, 其中应用 [SettingsKeyMigrations] 的键改名. 纯 JVM (R3).
  */
 class SettingsArchiveReader @JvmOverloads constructor(
     private val open: () -> InputStream,
@@ -44,6 +47,19 @@ class SettingsArchiveReader @JvmOverloads constructor(
         }
         return decoded
     }
+
+    /**
+     * The category files of [ids] as an import reads them (P7.1): each decoded by [category] and renamed by
+     * [SettingsKeyMigrations] for the host version of [manifest]; throws [SettingsArchiveException] like [category].
+     * zh-CN: 导入时读取的 [ids] 的分类文件 (P7.1): 逐个经 [category] 解码, 再按 [manifest] 的宿主版本经 [SettingsKeyMigrations]
+     * 改名; 失败时与 [category] 一样抛 [SettingsArchiveException].
+     */
+    @JvmOverloads
+    fun categories(
+        ids: Collection<String>,
+        manifest: SettingsArchiveManifest = manifest(),
+        renames: List<SettingsKeyMigrations.Rename> = SettingsKeyMigrations.RENAMES,
+    ): List<SettingsSnapshotCodec.Decoded> = ids.distinct().map { SettingsKeyMigrations.migrate(category(it), manifest.host.versionCode, renames) }
 
     /** The bytes of the data file [file] (a `file` of the manifest's `data`). zh-CN: 数据文件 [file] 的内容. */
     fun data(file: String): ByteArray {

@@ -11,10 +11,18 @@ import org.autojs.autojs.core.pref.SettingsJson
  * array, and the entries of a newer archive are kept as plain JSON objects. Reading is lenient (D9): unknown fields are
  * ignored, and a [formatVersion] above [FORMAT_VERSION] is accepted ([isNewerFormat], the import wizard warns).
  *
+ * P7.1 checks what an import relies on: the format name, a [formatVersion] of at least 1, a host package name, entry
+ * counts that are not negative, category and data ids listed once, and data files under `data/`; anything else is
+ * [SettingsArchiveException.Reason.INVALID_MANIFEST]. An archive of a newer format or of another host package (an
+ * `inrt` build, a build with another application id) is not refused but carries a [Warning] ([warnings], appendix C
+ * Q26).
+ *
  * zh-CN: 设置归档的 `manifest.json` (ROADMAP D5 / D9 / T7, 附录 B): 格式与版本, 导出时间, 宿主与设备, 以及每个分类 / 数据分类 /
  * 插件的条目数与所在文件. 读取时先由它列出分类, 再打开分类文件 (T7). [plugins] 为官方插件设置预留 (D3, 附录 C Q7): 第一期写空数组,
  * 更新版本归档中的条目按普通 JSON 对象保留. 读取宽松 (D9): 忽略未知字段, 接受高于 [FORMAT_VERSION] 的 [formatVersion]
- * ([isNewerFormat], 由导入向导提示).
+ * ([isNewerFormat], 由导入向导提示). P7.1 校验导入所依赖的内容: 格式名, 不小于 1 的 [formatVersion], 宿主包名, 非负的条目数,
+ * 不重复的分类与数据分类 id, 位于 `data/` 下的数据文件; 不符即 `INVALID_MANIFEST`. 更新格式或其他宿主包名 (`inrt` 打包应用,
+ * 改了 application id 的构建) 的归档不拒绝, 而是带上 [Warning] ([warnings], 附录 C Q26).
  */
 data class SettingsArchiveManifest @JvmOverloads constructor(
     val exportedAt: String,
@@ -39,9 +47,31 @@ data class SettingsArchiveManifest @JvmOverloads constructor(
     /** A data category of the archive (T19), held by [file] under `data/`. zh-CN: 归档中的一个数据分类 (T19). */
     data class DataEntry(val id: String, val entries: Int, val file: String)
 
+    /**
+     * What the import wizard warns about before the categories are selected (D9, appendix C Q26); the import goes on
+     * once the user accepts.
+     * zh-CN: 导入向导在选择分类之前提示的事项 (D9, 附录 C Q26); 用户确认后导入照常进行.
+     */
+    enum class Warning {
+        /** [formatVersion] is above [FORMAT_VERSION]: entries of the newer format are skipped (`NEWER_FORMAT`). */
+        NEWER_FORMAT,
+
+        /** The archive was exported by another host package than the one importing it. */
+        OTHER_HOST_PACKAGE,
+    }
+
     /** True for an archive of a newer format than this version reads (D9). zh-CN: 归档格式比本版本新时为 true (D9). */
     val isNewerFormat: Boolean
         get() = formatVersion > FORMAT_VERSION
+
+    /**
+     * The warnings of this archive for the host [hostPackageName] that imports it, in the order of [Warning].
+     * zh-CN: 由包名为 [hostPackageName] 的宿主导入时, 本归档的提示事项, 按 [Warning] 的顺序.
+     */
+    fun warnings(hostPackageName: String): Set<Warning> = linkedSetOf<Warning>().apply {
+        if (isNewerFormat) add(Warning.NEWER_FORMAT)
+        if (host.packageName != hostPackageName) add(Warning.OTHER_HOST_PACKAGE)
+    }
 
     fun toJson(): Map<String, Any?> = linkedMapOf(
         "format" to FORMAT,
@@ -74,12 +104,19 @@ data class SettingsArchiveManifest @JvmOverloads constructor(
             val version = SettingsJson.toInt(root["formatVersion"])?.takeIf { it >= 1 } ?: invalid("no valid formatVersion")
             val host = root.obj("host")
             val device = root.obj("device")
+            val categories = root.list("categories").map {
+                CategoryEntry(it.str("id").also(::checkCategoryId), it.count("entries"), it["sensitive"] as? Boolean ?: invalid("no sensitive flag"))
+            }
+            val data = root.list("data", optional = true).map { DataEntry(it.str("id").also(::checkCategoryId), it.count("entries"), it.str("file").also(::checkDataFile)) }
+            checkUnique("categories", categories.map { it.id })
+            checkUnique("data", data.map { it.id })
+            checkUnique("data files", data.map { it.file })
             return SettingsArchiveManifest(
                 exportedAt = root.str("exportedAt"),
-                host = Host(host.str("packageName"), host.int("versionCode"), host.str("versionName")),
+                host = Host(host.str("packageName").also(::checkPackageName), host.int("versionCode"), host.str("versionName")),
                 device = Device(device.str("model"), device.int("sdk")),
-                categories = root.list("categories").map { CategoryEntry(it.str("id").also(::checkCategoryId), it.int("entries"), it["sensitive"] as? Boolean ?: invalid("no sensitive flag")) },
-                data = root.list("data", optional = true).map { DataEntry(it.str("id"), it.int("entries"), it.str("file")) },
+                categories = categories,
+                data = data,
                 plugins = root.list("plugins", optional = true).map { entry -> entry.entries.associateTo(LinkedHashMap()) { (k, v) -> k as String to v } },
                 formatVersion = version,
             )
@@ -97,6 +134,23 @@ data class SettingsArchiveManifest @JvmOverloads constructor(
             if (!SettingsArchive.isCategoryId(id)) invalid("invalid category id \"$id\"")
         }
 
+        private fun checkDataFile(file: String) {
+            val valid = file.startsWith(SettingsArchive.DATA_DIR) && runCatching { SettingsArchive.dataFile(file.removePrefix(SettingsArchive.DATA_DIR)) }.isSuccess
+            if (!valid) invalid("invalid data file \"$file\"")
+        }
+
+        private fun checkPackageName(name: String) {
+            if (!PACKAGE_NAME.matches(name)) invalid("invalid host package name \"$name\"")
+        }
+
+        private fun checkUnique(name: String, values: List<String>) {
+            val duplicates = values.groupingBy { it }.eachCount().filterValues { it > 1 }.keys
+            if (duplicates.isNotEmpty()) invalid("$name listed more than once: $duplicates")
+        }
+
+        /** An application id: two or more dot-separated Java identifiers. */
+        private val PACKAGE_NAME = Regex("""[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+""")
+
         private fun invalid(message: String): Nothing =
             throw SettingsArchiveException(SettingsArchiveException.Reason.INVALID_MANIFEST, "manifest.json: $message")
 
@@ -105,6 +159,8 @@ data class SettingsArchiveManifest @JvmOverloads constructor(
         private fun Map<*, *>.str(name: String): String = this[name] as? String ?: invalid("no $name text")
 
         private fun Map<*, *>.int(name: String): Int = SettingsJson.toInt(this[name]) ?: invalid("no $name number")
+
+        private fun Map<*, *>.count(name: String): Int = int(name).takeIf { it >= 0 } ?: invalid("a negative $name count")
 
         private fun Map<*, *>.list(name: String, optional: Boolean = false): List<Map<*, *>> {
             val list = this[name] as? List<*> ?: if (optional && this[name] == null) return emptyList() else invalid("no $name array")
