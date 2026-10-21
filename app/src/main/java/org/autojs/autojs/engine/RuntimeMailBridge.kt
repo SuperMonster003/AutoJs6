@@ -103,9 +103,10 @@ internal class RuntimeMailBridge(private val context: Context, private val cwd: 
                         emit(id, "resolve", result)
                     } catch (error: Throwable) {
                         releaseCreated(id)
-                        emit(id, "reject", errorValue(error))
+                        if (currentCoroutineContext().isActive) emit(id, "reject", errorValue(error))
                     } finally {
                         synchronized(lock) { jobs.remove(id) }
+                        if (!currentCoroutineContext().isActive) discardEvents(id)
                     }
                 }
                 jobs[id] = job
@@ -302,7 +303,14 @@ internal class RuntimeMailBridge(private val context: Context, private val cwd: 
             val job = synchronized(lock) { jobs[id] }
             job?.cancel()
             // Cleanup runs outside the cancelled operation and also covers a late open result.
-            scope.launch { releaseCreated(id) }
+            scope.launch {
+                try { releaseCreated(id) } finally { discardEvents(id) }
+            }
+            discardEvents(id)
+            return job != null
+        }
+
+        private fun discardEvents(id: String) {
             synchronized(lock) {
                 val iterator = events.iterator()
                 while (iterator.hasNext()) {
@@ -310,7 +318,6 @@ internal class RuntimeMailBridge(private val context: Context, private val cwd: 
                     if (event.id == id) { queuedBytes -= event.bytes.size; iterator.remove() }
                 }
             }
-            return job != null
         }
 
         private fun emit(id: String, type: String, value: Any?) {
