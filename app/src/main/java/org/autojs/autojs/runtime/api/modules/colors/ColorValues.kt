@@ -39,7 +39,6 @@ internal object ColorValues {
     /** `SK_ScalarNearlyZero`. */
     private const val NEARLY_ZERO = 1f / (1 shl 12)
 
-    private val DIGITS = Regex("[+-]?\\d+")
     private val SHORT_HEX = Regex("#\\w{3}")
     private val HEX = Regex("#[A-F\\d]{3}([A-F\\d]{3}([A-F\\d]{2})?)?", RegexOption.IGNORE_CASE)
     private val OPAQUE_HEX = Regex("#FF[A-F\\d]{6}", RegexOption.IGNORE_CASE)
@@ -85,14 +84,26 @@ internal object ColorValues {
     }
 
     /** The color named [name] (case, hyphens and underscores ignored), or null. */
-    fun colorOfName(name: String): Int? = names[name.replace("-", "_").uppercase().replace("_", "")]
+    fun colorOfName(name: String): Int? {
+        val key = StringBuilder(name.length)
+        for (c in name) if (c != '-' && c != '_') key.append(c)
+        return names[key.toString().uppercase()]
+    }
+
+    /** Whether [text] is an optionally signed run of ASCII digits (a color int as text), checked without a regex. */
+    private fun isDigits(text: String): Boolean {
+        val start = if (text.startsWith('+') || text.startsWith('-')) 1 else 0
+        if (start == text.length) return false
+        for (i in start until text.length) if (text[i] !in '0'..'9') return false
+        return true
+    }
 
     /** [text] as a hex code in the form [alpha] asks for (`ColorUtils.toHex(String, alpha)`), or null when it is not a color. */
     fun hexOf(text: String, alpha: Alpha): String? {
         var color = text
         when {
             color.startsWith('#') -> if (SHORT_HEX.matches(color)) color = "#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}"
-            DIGITS.matches(color) -> return hexOf(color.toLongOrNull()?.toInt() ?: return null, alpha)
+            isDigits(color) -> return hexOf(color.toLongOrNull()?.toInt() ?: return null, alpha)
             else -> return colorOfName(color)?.let { hexOf(it, alpha) }
         }
         if (!HEX.matches(color)) return null
