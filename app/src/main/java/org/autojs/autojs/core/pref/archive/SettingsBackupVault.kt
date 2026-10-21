@@ -22,13 +22,15 @@ import java.util.Locale
  * `auto-reset-<ts>.zip`, and [KEEP] of them are kept together, the newest ones. Once the operation is done,
  * [LAST_OPERATION] records what it touched; "undo the last import" ([undoPlan]) imports the touched categories again
  * from its backup, through the same planner (T8) without deployment items, and writes no backup of its own (the
- * operation backup of T20 is P9's). Data categories (T19) are recorded but not undone (appendix C Q27). Pure JVM (R3):
+ * operation backup of T20 is P9's). Data categories (T19) are recorded but not undone yet: appendix C Q27 decided that
+ * they are, which P10.3 implements; until then the undo lists them ([Undo.dataNotUndone]). Pure JVM (R3):
  * the snapshot, the host and the clock come from the caller.
  *
  * zh-CN: 导入与恢复默认的内部备份 (ROADMAP T9, D8 / D11), 位于 [directory] (应用中为 `filesDir/settings-backups/`): 导入或恢复默认
  * 之前, 把全部设置分类 (含凭据与 `other`, 私有目录, R6 允许; 凭据以设备密钥 [key] 加密, D23) 写为 `auto-import-<ts>.zip` 或 `auto-reset-<ts>.zip`, 两种合计保留最新的
  * [KEEP] 份. 操作完成后由 [LAST_OPERATION] 记录触及的分类; "撤销上次导入" ([undoPlan]) 以其备份对触及分类再做一次导入, 经同一计划器
- * (T8) 且没有部署项, 撤销本身不写内部备份 (T20 的操作后备份属于 P9). 数据分类 (T19) 只记录不撤销 (附录 C Q27). 纯 JVM (R3): 快照,
+ * (T8) 且没有部署项, 撤销本身不写内部备份 (T20 的操作后备份属于 P9). 数据分类 (T19) 目前只记录不撤销: 附录 C Q27 已定为也要撤销,
+ * 由 P10.3 实现, 在此之前撤销结果把它们列出 ([Undo.dataNotUndone]). 纯 JVM (R3): 快照,
  * 宿主与时钟由调用方提供.
  */
 class SettingsBackupVault @JvmOverloads constructor(
@@ -106,8 +108,10 @@ class SettingsBackupVault @JvmOverloads constructor(
 
     /**
      * What undoing the last operation does: the plan of importing its touched categories from its backup (no
-     * deployment items), and the data categories it touched that an undo leaves as they are (Q27).
-     * zh-CN: 撤销上次操作的内容: 以其备份导入触及分类的计划 (没有部署项), 以及撤销不处理的触及数据分类 (Q27).
+     * deployment items), and the data categories it touched that this version does not undo yet (Q27 decided they are
+     * undone, P10.3; the result page tells about them only when there are any).
+     * zh-CN: 撤销上次操作的内容: 以其备份导入触及分类的计划 (没有部署项), 以及本版本尚未撤销的触及数据分类 (Q27 已定为也要撤销, P10.3;
+     * 结果页只在有这类分类时提示).
      */
     data class Undo(val operation: LastOperation, val plan: ImportPlan, val dataNotUndone: List<String>)
 
