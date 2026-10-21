@@ -198,7 +198,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Sugerencia` El control console y la consola flotante muestran los registros del script actual; los registros globales se consultan mediante globalconsole o la página de registros
 * `Sugerencia` Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles
 * `Sugerencia` Node.js pinyin/pinyin4j y los controles de ventana de consola ahora llaman al host de forma asíncrona; los scripts deben esperar los resultados con await
-* `Nuevo` Cadenas asíncronas flow y esperas de condición/estabilidad para Node.js, Bun y Workers, con cancelación de ramas, reintentos por paso e instantáneas de la interfaz del anfitrión
+* `Nuevo` Cadenas asíncronas flow y esperas de condición/estabilidad para Node.js, Bun y Workers, con cancelación de ramas, reintentos por paso e instantáneas de la interfaz del anfitrión; Clics avanzados, desplazamiento, entrada, recopilación de listas y espera de eventos reales de Flow para Node.js, Bun y Workers, con suscripciones listas, validación de instantáneas y cancelación
 * `Nuevo` Node.js/Bun/Worker: Conexiones de correo, mensajes, adjuntos y vigilancia de buzones, con cancelación y limpieza de Workers
 * `Nuevo` Los accesos nuevos y ya fijados se archivan automáticamente, con exportación/importación y restauración en lote; los iconos ilegibles se pueden elegir individualmente o completar en lote con los predeterminados sin sobrescribir los guardados; tras descongelar, los accesos ausentes se muestran en la página de copias sin avisos en la página principal, y las eliminaciones manuales reconocidas no se seleccionan por defecto; las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)
 * `Nuevo` Asistente de configuración para ejecutar sucesivamente los asistentes de permisos e instalación de complementos, accesible desde el mensaje de bienvenida tras el primer inicio (acceso: Ajustes > Configuración > Asistente de configuración)
@@ -361,6 +361,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Nuevo` API de síntesis de voz para Node.js, Bun y Workers con consultas de motores y voces, lectura, silencio, archivos de audio y eventos de tareas
 * `Nuevo` API speech de reconocimiento y gestión de modelos para Node.js, Bun y Workers con WAV/PCM, dictado y activación por voz, instalación/importación, síntesis y cancelación
 * `Nuevo` Node.js/Bun/Worker: Lectura de EPUB, exportación de recursos, búsqueda y sesiones del lector con eventos
+* `Corrección` Las esperas de eventos de interfaz de Bun bloqueaban otras llamadas al anfitrión y agotaban el tiempo de verificación asíncrona de Flow
 * `Corrección` runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java
 * `Corrección` En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases
 * `Corrección` Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados

@@ -12,7 +12,7 @@
         "Les méthodes Node.js pinyin/pinyin4j et les contrôles de fenêtre de console appellent désormais l'hôte de façon asynchrone; les scripts doivent attendre leurs résultats avec await"
       ],
       "feature": [
-        "Chaînes asynchrones flow et attentes de condition/stabilité pour Node.js, Bun et Workers, avec annulation des branches, reprise des étapes et instantanés de l'interface hôte",
+        "Chaînes asynchrones flow et attentes de condition/stabilité pour Node.js, Bun et Workers, avec annulation des branches, reprise des étapes et instantanés de l'interface hôte; Clics avancés, défilement, saisie, collecte de listes et attente des événements réels Flow pour Node.js, Bun et Workers, avec préparation des abonnements, validation des instantanés et annulation",
         "Node.js/Bun/Worker: Connexions aux comptes mail, messages, pièces jointes et surveillance des boîtes, avec annulation et nettoyage des Workers",
         "Les raccourcis nouveaux et déjà épinglés sont archivés automatiquement, avec export/import et restauration en lot; les icônes illisibles peuvent être choisies individuellement ou remplacées en lot par les icônes par défaut sans écraser les icônes enregistrées; après dégel, les raccourcis manquants sont indiqués sur la page de sauvegarde sans rappel sur la page principale, et les suppressions manuelles reconnues ne sont pas cochées par défaut; les copies du même script conservent leurs ID distincts (recherche des raccourcis existants sous Android 7.1+, détection automatique sous Android 8+) (accès: Paramètres > Configuration > Sauvegarde des raccourcis)",
         "Assistant de configuration, pour exécuter successivement les assistants d'autorisation et d'installation des plugins, accessible depuis le message de bienvenue après le premier démarrage (accès: Paramètres > Configuration > Assistant de configuration)",
@@ -177,6 +177,7 @@
         "Node.js/Bun/Worker: Lecture EPUB, export des ressources, recherche et sessions du lecteur avec événements"
       ],
       "fix": [
+        "Attentes des événements UI Bun bloquant les autres appels hôte et provoquant une expiration de la vérification asynchrone Flow",
         "Impossible de charger dynamiquement avec runtime.loadJar des fichiers class compilés avec des versions Java plus récentes",
         "L'appel de runtime.loadDex sous Android 7.x pouvait corrompre le cache DEX et faire échouer le chargement des classes",
         "Comportements anormaux de certains scripts dus à des incompatibilités de portée, conversion des paramètres et traitement des retours dans Rhino et les modules intégrés",

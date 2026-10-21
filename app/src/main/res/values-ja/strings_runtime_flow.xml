@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">高度な自動操作とイベント待機を許可します. 各ツールには対応するアクセシビリティ, ジェスチャー, アプリとイベントの許可も必要です.</string>
+    <string name="text_bun_flow_control_grant">Bun Flow ツールとイベント待機</string>
+</resources>

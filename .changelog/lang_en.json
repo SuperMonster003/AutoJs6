@@ -12,7 +12,7 @@
         "Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results"
       ],
       "feature": [
-        "Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots",
+        "Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots; Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation",
         "Node.js/Bun/Worker: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup",
         "Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)",
         "Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)",
@@ -177,6 +177,7 @@
         "Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events"
       ],
       "fix": [
+        "Bun UI event waits blocking other host calls and causing asynchronous Flow verification to time out",
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
         "Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures",
         "Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules",

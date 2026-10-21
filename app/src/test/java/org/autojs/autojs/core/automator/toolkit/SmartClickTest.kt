@@ -48,6 +48,12 @@ class SmartClickTest {
 
     private fun error(block: () -> Unit): FlowError = assertThrows(FlowError::class.java) { block() }
 
+    @Test fun gestureReadsTheRefreshedRectangleInsteadOfCachedWindowAnimationBounds() {
+        b.onRefresh = { it.bounds(40, 100, 240, 200) }
+        click("button", Options(boundsOnly = true))
+        assertEquals(listOf("tap(140, 150)"), actions.calls)
+    }
+
     @Test
     fun clickableNodeIsClickedDirectly() {
         val outcome = click("button")

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">السماح بالأتمتة المتقدمة وانتظار الأحداث. تتحقق كل أداة أيضا من أذونات إمكانية الوصول والإيماءات والتطبيقات والأحداث.</string>
+    <string name="text_bun_flow_control_grant">أدوات Flow وانتظار الأحداث في Bun</string>
+</resources>

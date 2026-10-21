@@ -18,7 +18,7 @@ public class RuntimeEventsToastFixtureActivity extends Activity {
         label.setText("Owned event fixture");
         setContentView(label);
         handler.postDelayed(() -> Toast.makeText(this, text, Toast.LENGTH_SHORT).show(), 250);
-        handler.postDelayed(this::finish, 2000);
+        if (!getIntent().getBooleanExtra("holdUntilBack", false)) handler.postDelayed(this::finish, 2000);
     }
     @Override public void onDestroy() { handler.removeCallbacksAndMessages(null); super.onDestroy(); }
 }

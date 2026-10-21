@@ -10,7 +10,7 @@ import org.json.JSONObject
 internal object RuntimeFlowQuery {
     private val strings = setOf("text", "textContains", "desc", "descContains", "id", "className", "content")
     private val patterns = setOf("textMatches", "descMatches", "idMatches", "classNameMatches", "contentMatches")
-    private val booleans = setOf("clickable", "enabled", "scrollable", "visibleToUser")
+    private val booleans = setOf("clickable", "enabled", "scrollable", "visibleToUser", "checkable", "checked", "editable", "focused", "selected")
     private val bounds = setOf("boundsInside", "boundsContains")
     private val keys = strings + patterns + booleans + bounds + "depth"
 
@@ -39,6 +39,8 @@ internal object RuntimeFlowQuery {
             override fun filter(node: UiNode<*>): Boolean {
                 if (!base.isEmpty && !baseFilter.filter(node)) return false
                 if (visible != null && node.visibleToUser() != visible) return false
+                val extra = mapOf("checkable" to node.checkable(), "checked" to node.checked(), "editable" to node.editable(), "focused" to node.focused(), "selected" to node.selected())
+                if (extra.any { (key, actual) -> selector.has(key) && selector.getBoolean(key) != actual }) return false
                 val values = listOf(node.text(), node.desc(), node.id())
                 if (content != null && values.none { it == content }) return false
                 if (contentPattern != null && values.none { it != null && contentPattern.matches(it) }) return false
@@ -53,6 +55,12 @@ internal object RuntimeFlowQuery {
         .put("checked", node.checked())
         .put("selected", node.selected())
         .put("packageName", node.packageName()?.toString().orEmpty())
+        .put("windowId", node.windowId)
+        .put("depth", node.depth())
+        .put("indexInParent", node.indexInParent())
+        .put("checkable", node.checkable())
+        .put("editable", node.editable())
+        .put("focused", node.focused())
 
     private fun integer(value: Any, name: String): Int {
         require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toInt().toDouble()) { "$name must be a 32-bit integer" }

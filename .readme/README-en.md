@@ -198,7 +198,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
 * `Hint` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
 * `Hint` Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results
-* `Feature` Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots
+* `Feature` Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots; Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
 * `Feature` Node.js/Bun/Worker: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup
 * `Feature` Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)
 * `Feature` Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)
@@ -361,6 +361,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Feature` Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events
 * `Feature` Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup
 * `Feature` Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
+* `Fix` Bun UI event waits blocking other host calls and causing asynchronous Flow verification to time out
 * `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
 * `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
 * `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
