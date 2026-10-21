@@ -12,13 +12,13 @@ import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.model.script.ScriptFile
 import org.autojs.autojs.storage.file.TmpScriptFiles
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.ui.edit.EditActivity
 import org.autojs.autojs.ui.filechooser.FileChooserDialogBuilder
 import org.autojs.autojs.ui.storage.RevisionListActivity
 import org.autojs.autojs.util.DialogUtils
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.File
@@ -440,7 +440,7 @@ class VersionHistoryController(private val context: Context) {
         DialogUtils.buildAndShowAdaptiveOrNull {
             NotAskAgainDialog.Builder(
                 context,
-                key(R.string.key_version_history_restore_does_not_auto_save_to_disk),
+                DialogStateKeys.VERSION_HISTORY_RESTORE_DOES_NOT_AUTO_SAVE_TO_DISK,
             ).apply {
                 title(R.string.text_prompt)
                 content(R.string.text_version_history_restore_does_not_auto_save_to_disk)

@@ -691,9 +691,10 @@ def scan_sources(sources, res, key_values):
                     'name': name, 'file': f.display, 'line': i, 'const': const.group(1) if const else None,
                     'resource': key_values.get(name),
                 })
-            # Key declarations (P2.6) also name states and caches whose names do not start with "key_".
+            # Key declarations (P2.6) also name states and caches whose names do not start with "key_", and key
+            # families (P4.1) are named by such prefixes too.
             if f.display.startswith(DECLARATION_DIR):
-                for m in DECLARED_NAME.finditer(line):
+                for m in list(DECLARED_NAME.finditer(line)) + list(DECLARED_FAMILY.finditer(line)):
                     name = m.group(1).replace(chr(92) + '$', '$')
                     if KEY_LITERAL_PREFIX.match(name):
                         continue
@@ -871,6 +872,7 @@ DECLARED_TYPES = {'Bool': 'Boolean', 'Int': 'Int', 'Long': 'Long', 'Float': 'Flo
                   'StrSet': 'StringSet', 'Enum': 'String (Enum)', 'Json': 'Json'}
 DECLARATION_DIR = 'core/pref/keys/'
 DECLARED_NAME = re.compile(r'\bname\s*=\s*"((?:[^"\\]|\\.)*)"')
+DECLARED_FAMILY = re.compile(r'\bKeyFamily\(\s*"((?:[^"\\]|\\.)+)"')
 # A key family (ROADMAP P3) declares its members with the factory parameter as the name:
 # `KeyFamily("key_$_prefix_") { name -> SettingKey.Bool(name = name, ...) }`; the default belongs to the prefix.
 FAMILY_DECLARATION = re.compile(r'\bKeyFamily\(\s*"([^"]*)"\s*\)\s*\{\s*(\w+)\s*->\s*$')
@@ -1116,7 +1118,7 @@ def merge_classification(data, cls):
             if c is None:
                 problems.append(f'{cls_key}: {ident} 未分类')
                 continue
-            for field in ('kind', 'category', 'note', 'effect', 'store', 'deployment'):
+            for field in ('kind', 'category', 'note', 'effect', 'store', 'deployment', 'storedAs'):
                 if field in c:
                     item[field] = c[field]
             if c.get('kind') not in KINDS:
@@ -1153,6 +1155,10 @@ def category_counts(data):
     for k in data['keys']:
         if k.get('kind') in ('Setting', 'State') and k.get('category') in counts:
             counts[k['category']]['keys'] += 1
+        # A candidate value that also names a stored state (P4.1, "storedAs") is one entry of that category too.
+        stored = k.get('storedAs') or {}
+        if stored.get('kind') in ('Setting', 'State') and stored.get('category') in counts:
+            counts[stored['category']]['keys'] += 1
     for k in data['literalKeys']:
         # Literal keys inside a named store are counted with that store ("one store = one entry").
         store = k.get('store') or (k['storeGuess'][0] if len(k['storeGuess']) == 1 else None)

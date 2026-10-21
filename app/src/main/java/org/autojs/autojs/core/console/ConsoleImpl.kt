@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.annotation.OmniColor
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.core.ui.inflater.util.Gravities
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -30,7 +31,6 @@ import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.IntentUtils.startSafely
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.joda.time.format.DateTimeFormat
@@ -416,7 +416,7 @@ open class ConsoleImpl @JvmOverloads constructor(
 
                 NotAskAgainDialog.Builder(
                     context,
-                    key(R.string.key_dialog_num_of_log_entries_exceeds_limit_for_sending),
+                    DialogStateKeys.DIALOG_NUM_OF_LOG_ENTRIES_EXCEEDS_LIMIT_FOR_SENDING,
                 ).apply {
                     title(R.string.text_prompt)
                     content("$msgReason, $msgAction.")

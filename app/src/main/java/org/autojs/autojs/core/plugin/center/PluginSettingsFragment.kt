@@ -20,6 +20,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
 import org.autojs.autojs.core.accessibility.AdvancedProtectionNotice
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.network.UpdateIgnoreStore
 import org.autojs.autojs.network.entity.VersionInfo
 import org.autojs.autojs.theme.ThemeColorHelper
@@ -654,7 +655,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             refreshVisibilitySummary()
         }
         buildAndShowAdaptiveOrNull {
-            NotAskAgainDialog.Builder(context, KEY_PLUGIN_HIDE_CONFIRM_PROMPT).apply {
+            NotAskAgainDialog.Builder(context, DialogStateKeys.PLUGIN_HIDE_CONFIRM_PROMPT).apply {
                 title(R.string.text_prompt)
                 content(R.string.prompt_plugin_hide_from_center)
                 widgetThemeColor()
@@ -1176,7 +1177,6 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         private const val KEY_PLUGIN_BUN_HOST_INFO_GRANT = "plugin_bun_host_info_grant"
         private const val KEY_PLUGIN_BUN_UI_TOAST_GRANT = "plugin_bun_ui_toast_grant"
         private const val KEY_PLUGIN_BUN_DEVICE_INFO_GRANT = "plugin_bun_device_info_grant"
-        private const val KEY_PLUGIN_HIDE_CONFIRM_PROMPT = "key_\$_plugin_hide_confirm_prompt"
 
         fun newInstance(args: Bundle) = PluginSettingsFragment().apply { arguments = Bundle(args) }
     }

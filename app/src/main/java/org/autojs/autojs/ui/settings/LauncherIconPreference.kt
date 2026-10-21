@@ -13,6 +13,7 @@ import android.util.AttributeSet
 import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.external.shortcut.ShortcutActivity
@@ -86,7 +87,7 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
     }
 
     private fun showPromptAboutTransparentBackground(callback: () -> Unit) {
-        NotAskAgainDialog.Builder(context, key(R.string.key_dialog_transparent_background_launcher_icon)).run {
+        NotAskAgainDialog.Builder(context, DialogStateKeys.DIALOG_TRANSPARENT_BACKGROUND_LAUNCHER_ICON).run {
             title(R.string.text_prompt)
             content(R.string.text_transparent_background_launcher_icon_may_not_take_effect)
             widgetThemeColor()
@@ -108,7 +109,7 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
             callback()
             return
         }
-        NotAskAgainDialog.Builder(context, key(R.string.key_dialog_transparent_background_launcher_icon)).run {
+        NotAskAgainDialog.Builder(context, DialogStateKeys.DIALOG_TRANSPARENT_BACKGROUND_LAUNCHER_ICON).run {
             title(R.string.text_prompt)
             content(R.string.text_launcher_shortcuts_may_be_lost_after_launcher_icon_changed)
             widgetThemeColor()

@@ -15,6 +15,7 @@ import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.network.UpdateChecker
 import org.autojs.autojs.network.UpdateChecker.PromptMode
 import org.autojs.autojs.ui.BaseActivity
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.ClipboardUtils
 import org.autojs.autojs.util.DeviceUtils
@@ -173,8 +174,7 @@ open class AboutActivity : BaseActivity() {
     }
 
     private fun startFeedbackActivity() {
-        val key = "${AboutActivity::class.simpleName}.start_feedback_activity"
-        NotAskAgainDialog.Builder(this, key)
+        NotAskAgainDialog.Builder(this, DialogStateKeys.ABOUT_START_FEEDBACK_ACTIVITY)
             .title(R.string.text_prompt)
             .content(R.string.content_github_feedback)
             .widgetThemeColor()

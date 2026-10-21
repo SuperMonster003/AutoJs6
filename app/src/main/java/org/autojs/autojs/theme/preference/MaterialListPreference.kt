@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.DialogUtils.choiceWidgetThemeColor
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
@@ -139,7 +140,7 @@ open class MaterialListPreference : MaterialDialogPreference {
     }
 
     protected fun showPrompt() = mConfirmedPrompt?.let { content ->
-        NotAskAgainDialog.Builder(prefContext, "prompt_\$_${key}")
+        NotAskAgainDialog.Builder(prefContext, DialogStateKeys.LIST_PREFERENCE_PROMPT.key(key))
             .title(R.string.text_prompt)
             .content(content)
             .widgetThemeColor()

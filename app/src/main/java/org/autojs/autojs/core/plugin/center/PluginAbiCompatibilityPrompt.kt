@@ -1,6 +1,8 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
+import org.autojs.autojs.core.pref.StateKey
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs.util.DialogUtils.buildAndShowAdaptiveOrNull
@@ -11,9 +13,6 @@ import org.autojs.autojs6.R
  */
 object PluginAbiCompatibilityPrompt {
 
-    private const val KEY_PLUGIN_ABI_MISMATCH_DOWNLOAD_PROMPT = "key_\$_plugin_abi_mismatch_download_prompt"
-    private const val KEY_PLUGIN_ABI_MISMATCH_ENABLE_PROMPT = "key_\$_plugin_abi_mismatch_enable_prompt"
-
     fun runBeforeDownload(
         context: Context,
         item: PluginCenterItem,
@@ -22,7 +21,7 @@ object PluginAbiCompatibilityPrompt {
         runBeforeAction(
             context = context,
             item = item,
-            remindKey = KEY_PLUGIN_ABI_MISMATCH_DOWNLOAD_PROMPT,
+            remindKey = DialogStateKeys.PLUGIN_ABI_MISMATCH_DOWNLOAD_PROMPT,
             contentRes = R.string.prompt_plugin_abi_mismatch_before_download,
             onContinue = onContinue,
         )
@@ -37,7 +36,7 @@ object PluginAbiCompatibilityPrompt {
             runBeforeAction(
                 context = context,
                 item = item,
-                remindKey = KEY_PLUGIN_ABI_MISMATCH_ENABLE_PROMPT,
+                remindKey = DialogStateKeys.PLUGIN_ABI_MISMATCH_ENABLE_PROMPT,
                 contentRes = R.string.prompt_plugin_abi_mismatch_before_enable,
                 onContinue = onContinue,
             )
@@ -47,7 +46,7 @@ object PluginAbiCompatibilityPrompt {
     private fun runBeforeAction(
         context: Context,
         item: PluginCenterItem,
-        remindKey: String,
+        remindKey: StateKey<Boolean>,
         contentRes: Int,
         onContinue: () -> Unit,
     ) {

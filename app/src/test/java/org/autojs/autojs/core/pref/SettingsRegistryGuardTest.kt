@@ -17,7 +17,8 @@ import java.io.File
  * neither (a new `key_*` resource, a new `getSharedPreferences(` file name, a new deployment kind), for stale
  * allow-list entries and for declarations that disagree with the allow list; each test prints its pending count.
  *
- * - (a) every `key_*` string resource is registered (Setting / State / Cache / ValueConstant / Excluded) or pending.
+ * - (a) every `key_*` string resource is registered (Setting / State / Cache / ValueConstant / Excluded) or pending; a
+ *   candidate value may also name one stored key (P4.1), which its classification entry states as "storedAs".
  * - (b) every `getSharedPreferences(` file name in the sources is registered or pending (the store layer itself in
  *   `core/pref/store/` is exempt); names are resolved from literals, constants, string resources and
  *   `prefix + ...` concatenations, and the few calls that need more are listed in [MANUAL_STORE_NAMES]. A registered
@@ -38,15 +39,15 @@ class SettingsRegistryGuardTest {
     fun a_everyKeyResourceIsRegisteredOrPending() {
         val rows = registryRows()
         val classified = classification.section("keys")
-        val registeredByName = rows.filter { it.store == DEFAULT_STORE }.associateBy { it.name }
+        val registeredByName = rows.filter { it.store == DEFAULT_STORE }.groupBy { it.name }
         val unknown = mutableListOf<String>()
         val mismatched = mutableListOf<String>()
         var pending = 0
         keyResources.forEach { (resName, value) ->
-            val row = registeredByName[value]
+            val named = registeredByName[value]
             val entry = classified[resName]
             when {
-                row != null -> entry?.let { mismatch(resName, row, it) }?.let(mismatched::add)
+                named != null -> entry?.let { mismatch(resName, named, it) }?.let(mismatched::add)
                 entry != null -> pending++
                 else -> unknown.add(resName)
             }
@@ -94,7 +95,8 @@ class SettingsRegistryGuardTest {
     @Test
     fun c_categoriesAreConsistent() {
         val rows = registryRows()
-        val duplicates = rows.groupingBy { it.store to it.name }.eachCount().filterValues { it > 1 }.keys.map { "${it.first}:${it.second}" }
+        // A candidate value may also name a stored key (P4.1); any other name is registered once.
+        val duplicates = rows.groupBy { it.store to it.name }.filterValues { !isOnceOrCandidateAndKey(it) }.keys.map { "${it.first}:${it.second}" }
         assertNone("names registered more than once", duplicates)
         val categoryIds = SettingCategory.ALL.map { it.id }.toSet()
         val dataIds = SettingCategory.ALL.filter { it.isData }.map { it.id }.toSet()
@@ -124,6 +126,13 @@ class SettingsRegistryGuardTest {
                     entries.add((category ?: "?") to "$section/$name")
                 } else if (category != null) {
                     problems.add("$section/$name: $kind with category $category")
+                }
+                storedAs(entry)?.let { stored ->
+                    if (kind != SettingKind.VALUE_CONSTANT.label || stored["kind"] != SettingKind.STATE.label || stored["category"] != SettingCategory.OTHER.id) {
+                        problems.add("$section/$name: storedAs ${stored["kind"]} in ${stored["category"]} for a $kind (only a ValueConstant may also name a State)")
+                    } else {
+                        entries.add(SettingCategory.OTHER.id to "$section/$name (storedAs)")
+                    }
                 }
             }
         }
@@ -185,6 +194,32 @@ class SettingsRegistryGuardTest {
     }
 
     private fun registryRows(): List<SettingDescriptor> = SettingsRegistry.describe()
+
+    /** One row, or a candidate value ([SettingKind.VALUE_CONSTANT]) and a stored key of the same name (P4.1). */
+    private fun isOnceOrCandidateAndKey(rows: List<SettingDescriptor>): Boolean =
+        rows.size == 1 || rows.size == 2 && rows.count { it.kind == SettingKind.VALUE_CONSTANT } == 1 && rows.none { it.kind == SettingKind.EXCLUDED }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun storedAs(entry: Map<String, Any?>): Map<String, Any?>? = entry["storedAs"] as Map<String, Any?>?
+
+    /**
+     * The rows of one `key_*` value against its classification [entry]. A candidate value that also names a stored key
+     * (P4.1: `key_timed_task_backend_alarm` is a candidate of the timed task backend and the name of the exact alarm
+     * prompt) has two rows: the ValueConstant row agrees with the entry and the other one with its "storedAs" part.
+     * zh-CN: 一个 `key_*` 值的登记行与其分类条目的核对. 同时作为存储键名的候选值 (P4.1) 有两行: 设置值常量行对应条目本身,
+     * 另一行对应条目的 "storedAs" 部分.
+     */
+    private fun mismatch(name: String, rows: List<SettingDescriptor>, entry: Map<String, Any?>): String? {
+        val stored = storedAs(entry)
+        if (rows.size == 1) {
+            val row = rows.single()
+            return if (stored != null) "$name: classified with storedAs ${stored["kind"]}, declared only as ${row.kind.label}" else mismatch(name, row, entry)
+        }
+        if (!isOnceOrCandidateAndKey(rows)) return "$name: registered ${rows.size} times (${rows.map { it.kind.label }})"
+        stored ?: return "$name: also declared as ${rows.first { it.kind != SettingKind.VALUE_CONSTANT }.kind.label}, classification.json has no storedAs"
+        return mismatch(name, rows.first { it.kind == SettingKind.VALUE_CONSTANT }, entry)
+            ?: mismatch(name, rows.first { it.kind != SettingKind.VALUE_CONSTANT }, stored)
+    }
 
     private fun mismatch(name: String, row: SettingDescriptor, entry: Map<String, Any?>): String? {
         val kind = entry["kind"] as String

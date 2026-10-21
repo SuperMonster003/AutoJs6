@@ -48,6 +48,7 @@ import org.autojs.autojs.apkbuilder.template.RemoteProjectConfigUpdater;
 import org.autojs.autojs.apkbuilder.template.TemplateApkResolver;
 import org.autojs.autojs.core.plugin.center.PluginCenterActivity;
 import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.core.pref.keys.DialogStateKeys;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.ScriptFile;
 import org.autojs.autojs.pio.PFiles;
@@ -113,7 +114,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.autojs.autojs.util.StringUtils.key;
 
 /**
  * Created by Stardust on Oct 22, 2017.
@@ -1777,8 +1777,7 @@ public class BuildActivity extends BaseActivity {
     private void promptForUnavailability(RoundCheckboxWithText view) {
         CharSequence abiText = view.getText();
         Context context = BuildActivity.this;
-        String key = key(R.string.key_dialog_selected_abi_is_unavailable);
-        NotAskAgainDialog.Builder builder = new NotAskAgainDialog.Builder(context, key);
+        NotAskAgainDialog.Builder builder = new NotAskAgainDialog.Builder(context, DialogStateKeys.DIALOG_SELECTED_ABI_IS_UNAVAILABLE);
         builder.title(R.string.text_prompt);
         builder.content(getString(R.string.text_unable_to_build_apk_as_autojs6_does_not_include_selected_abi, abiText) + "\n\n" +
                         getString(R.string.text_the_following_solutions_can_be_referred_to) + getString(R.string.symbol_colon_with_blank) + "\n\n" +

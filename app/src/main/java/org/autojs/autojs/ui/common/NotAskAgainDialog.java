@@ -4,8 +4,9 @@ import android.content.Context;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManager;
 import com.afollestad.materialdialogs.MaterialDialog;
+import org.autojs.autojs.core.pref.StateKey;
+import org.autojs.autojs.core.pref.keys.DialogStateKeys;
 import org.autojs.autojs.util.MD5Utils;
 import org.autojs.autojs6.R;
 
@@ -21,17 +22,36 @@ public class NotAskAgainDialog extends MaterialDialog {
 
     public static class Builder extends MaterialDialog.Builder {
 
-        private String mKeyRemind;
+        private final StateKey<Boolean> mRemindKey;
         private boolean mRemind;
 
+        /**
+         * A dialog without a declared key: the key name is made from the stack trace of the caller, so it changes with
+         * the code (docs/settings/ROADMAP.md P4.1, appendix C Q23).
+         * zh-CN: 未声明键的对话框: 键名由调用方的调用栈生成, 随代码变化 (ROADMAP P4.1, 附录 C Q23).
+         */
         public Builder(@NonNull Context context) {
-            this(context, null);
+            this(context, (StateKey<Boolean>) null);
         }
 
-        public Builder(Context context, String key) {
+        /**
+         * @deprecated Declare the key in {@link DialogStateKeys} and use {@link #Builder(Context, StateKey)}
+         * (docs/settings/ROADMAP.md P4.1); the name is read and written as before.
+         */
+        @Deprecated
+        public Builder(Context context, @Nullable String key) {
+            this(context, key == null ? null : DialogStateKeys.forName(key));
+        }
+
+        /**
+         * The remembered state is {@code key}: true while the dialog is shown, false after "do not show again"
+         * ({@link DialogStateKeys}, docs/settings/ROADMAP.md P4.1); a null key is made from the stack trace.
+         * zh-CN: 记忆型状态为 {@code key}: 对话框仍会显示时为 true, 勾选 "不再提示" 后为 false; key 为 null 时由调用栈生成.
+         */
+        public Builder(Context context, @Nullable StateKey<Boolean> key) {
             super(context);
-            mKeyRemind = key;
-            readRemindStatus();
+            mRemindKey = key != null ? key : DialogStateKeys.forName(MD5Utils.toHash(TextUtils.join("", Thread.currentThread().getStackTrace())));
+            mRemind = mRemindKey.get();
             checkBoxPrompt(context.getString(R.string.text_do_not_show_again), false, (buttonView, isChecked) -> setRemindState(!isChecked));
         }
 
@@ -49,19 +69,7 @@ public class NotAskAgainDialog extends MaterialDialog {
 
         private void setRemindState(boolean remind) {
             mRemind = remind;
-            PreferenceManager.getDefaultSharedPreferences(getContext()).edit()
-                    .putBoolean(mKeyRemind, remind).apply();
-        }
-
-        private void readRemindStatus() {
-            generatePreferenceKeyIfNeeded();
-            mRemind = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(mKeyRemind, true);
-        }
-
-        private void generatePreferenceKeyIfNeeded() {
-            if (mKeyRemind == null) {
-                mKeyRemind = MD5Utils.toHash(TextUtils.join("", Thread.currentThread().getStackTrace()));
-            }
+            mRemindKey.set(remind);
         }
 
     }

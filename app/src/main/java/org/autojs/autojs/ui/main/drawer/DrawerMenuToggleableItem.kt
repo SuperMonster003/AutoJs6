@@ -8,6 +8,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.PrefKey
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ViewUtils
@@ -225,7 +226,7 @@ open class DrawerMenuToggleableItem : DrawerMenuItem, IToggleableItem {
     fun getPrompt(aimState: Boolean): MaterialDialog? {
         val dialogContent = content ?: return null
         var isPositiveButtonPressed = false
-        val key = "${DrawerMenuToggleableItem::class.simpleName}\$${mItemHelper.context.getString(title)}"
+        val key = DialogStateKeys.DRAWER_TOGGLE_PROMPT.key(mItemHelper.context.getString(title))
         return NotAskAgainDialog.Builder(mItemHelper.context, key)
             .title(title)
             .content(dialogContent)

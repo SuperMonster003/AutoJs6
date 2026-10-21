@@ -12,6 +12,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import org.autojs.autojs.model.indices.AndroidClass;
 import org.autojs.autojs.model.indices.ClassSearchingItem;
 import org.autojs.autojs.script.JavaScriptFileSource;
+import org.autojs.autojs.core.pref.keys.DialogStateKeys;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;
 import org.autojs.autojs.ui.edit.editor.command.EditorCommandDispatcher;
 import org.autojs.autojs.ui.edit.editor.engine.ScriptEditorEngine;
@@ -149,7 +150,7 @@ public class EditorMenu {
             return true;
         }
         if (itemId == R.id.action_launch_debugger) {
-            var builder = new NotAskAgainDialog.Builder(mEditorView.getContext(), "editor.debug.long_click_hint")
+            var builder = new NotAskAgainDialog.Builder(mEditorView.getContext(), DialogStateKeys.EDITOR_DEBUG_LONG_CLICK_HINT)
                     .title(R.string.text_prompt)
                     .content(R.string.hint_long_click_run_to_debug)
                     .positiveText(R.string.dialog_button_dismiss)

@@ -9,9 +9,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import org.autojs.autojs.util.DialogUtils.showAdaptive
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.IntentUtils.startSafely
-import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 
@@ -36,7 +36,7 @@ object ExactAlarmPermissionHelper {
     fun checkExactAlarmPermission(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
         if (canScheduleExactAlarms(context)) return
-        NotAskAgainDialog.Builder(context, key(R.string.key_timed_task_backend_alarm))
+        NotAskAgainDialog.Builder(context, DialogStateKeys.TIMED_TASK_EXACT_ALARM_PROMPT)
             .title(R.string.text_prompt)
             .content(
                 String.format(

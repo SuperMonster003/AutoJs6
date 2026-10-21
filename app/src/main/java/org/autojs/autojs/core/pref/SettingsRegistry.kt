@@ -7,6 +7,7 @@ import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.core.pref.keys.DeveloperKeys
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
@@ -104,6 +105,7 @@ object SettingsRegistry {
         ApkBuildKeys,
         WizardKeys,
         CredentialKeys,
+        DialogStateKeys,
         MiscStateKeys,
     )
 
