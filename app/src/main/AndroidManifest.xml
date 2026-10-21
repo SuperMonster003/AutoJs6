@@ -663,6 +663,11 @@
             android:label="@string/shortcut_backup_title"
             android:exported="false" />
 
+        <activity
+            android:name="org.autojs.autojs.ui.settings.transfer.SettingsTransferActivity"
+            android:label="@string/settings_transfer_title"
+            android:exported="false" />
+
         <receiver
             android:name="org.autojs.autojs.external.shortcut.ShortcutPinnedReceiver"
             android:exported="false" />

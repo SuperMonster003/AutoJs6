@@ -88,6 +88,11 @@
             app:title="@string/shortcut_backup_title"
             app:summary="@string/shortcut_backup_summary" />
 
+        <org.autojs.autojs.ui.settings.transfer.SettingsTransferPreference
+            app:layout="@layout/preference_custom"
+            app:title="@string/settings_transfer_title"
+            app:summary="@string/settings_transfer_summary" />
+
         <org.autojs.autojs.theme.preference.MaterialPreference
             app:layout="@layout/preference_custom"
             app:key="@string/key_setup_wizards"
