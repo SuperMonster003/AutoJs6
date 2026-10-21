@@ -1,11 +1,15 @@
 """Takes a script API surface snapshot on a device and stores it as a sorted, diff-friendly text file.
 
 Usage: py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augment/baseline] [--tag TAG]
-    [--new-modules on|off] [--extend-builtins on|off] [--roots Array.prototype Number.prototype ...]
+    [--new-modules on|off] [--extend-builtins on|off] [--roots Array.prototype Number.prototype ...] [--global-classes]
 Writes surface-<model>-<versionCode>[-TAG].txt (one line per property) and the raw .json next to it.
 --new-modules / --extend-builtins set the switch of the new script module layer (ROADMAP T8) / the "extend JavaScript
 built-in objects" option for the snapshot and restore them afterwards. --roots also records the own properties of the
 given objects (paths from global, as "Array.prototype"), as lines prefixed with "@<path>." after the global ones.
+--global-classes also records the Java class names of global (the fields of augment/global/Classes.kt), which the
+global object resolves through its prototype without own properties: one "@lookup.<name>" line each with `in`, own
+property, `typeof` of the bare name, and `typeof` / String of the value read from global (surface_compare.py
+--only @lookup compares them).
 """
 import argparse
 import json
@@ -16,6 +20,7 @@ import sys
 import time
 
 HERE = pathlib.Path(__file__).resolve().parent
+CLASSES_KT = HERE.parents[1] / "app/src/main/java/org/autojs/autojs/runtime/api/augment/global/Classes.kt"
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
@@ -69,12 +74,21 @@ def set_pref(serial, key, value, label):
     sys.exit("no preference output from the device")
 
 
-def run_snapshot(serial, roots):
+def global_class_names():
+    """The field names of Classes.kt in declaration order (Canvas is commented out there)."""
+    names = re.findall(r"^\s*val\s+(\w+)\s*=", CLASSES_KT.read_text(encoding="utf-8"), re.MULTILINE)
+    if not names:
+        sys.exit(f"no class names found in {CLASSES_KT}")
+    return names
+
+
+def run_snapshot(serial, roots, lookup_names):
     before = set(console_lines(serial))
     adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(serial, "shell", "rm", "-f", f"{DEVICE_DIR}/surface.json")
     source = (HERE / "surface_snapshot.js").read_text(encoding="utf-8")
     source = source.replace("let EXTRA_ROOTS = [];", "let EXTRA_ROOTS = " + json.dumps(roots) + ";", 1)
+    source = source.replace("let LOOKUP_NAMES = [];", "let LOOKUP_NAMES = " + json.dumps(lookup_names) + ";", 1)
     local = HERE / "__pycache__" / "surface_snapshot.js"
     local.parent.mkdir(exist_ok=True)
     local.write_text(source, encoding="utf-8")
@@ -151,6 +165,7 @@ def main():
     parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the snapshot")
     parser.add_argument("--extend-builtins", choices=["on", "off"], help="set the extend JavaScript built-in objects option for the snapshot")
     parser.add_argument("--roots", nargs="*", default=[], help="further objects to record, as paths from global (Array.prototype)")
+    parser.add_argument("--global-classes", action="store_true", help="record the Java class names global resolves through its prototype")
     args = parser.parse_args()
 
     previous = {}
@@ -159,7 +174,7 @@ def main():
             wanted = getattr(args, option)
             if wanted:
                 previous[option] = (set_pref(args.serial, key, wanted == "on", label), wanted == "on")
-        snapshot = run_snapshot(args.serial, args.roots)
+        snapshot = run_snapshot(args.serial, args.roots, global_class_names() if args.global_classes else [])
     finally:
         for option, (before, wanted) in previous.items():
             if before != wanted:
@@ -177,6 +192,10 @@ def main():
         root_lines = []
         flatten(props, f"@{root}.", root_lines)
         lines += sorted(root_lines)
+    for name, entry in sorted(snapshot.get("lookup", {}).items()):
+        where = f"in={str(entry['inGlobal']).lower()} own={str(entry['own']).lower()}"
+        value = f"error {entry['error']}" if "error" in entry else f"bare={entry['bare']} {entry['type']} {entry['text']}"
+        lines.append(f"@lookup.{name}\t{where}\t{value}")
     header = [
         f"# AutoJs6 script API surface: {snapshot['versionName']} ({snapshot['versionCode']}) on {snapshot['device']}",
         f"# global own properties: {len(snapshot['global'])}; Object.keys(global): {len(snapshot['keysOrder'])}",

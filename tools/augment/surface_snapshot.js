@@ -8,6 +8,9 @@ let MAX_DEPTH = 2;
 // Further objects to record with their own properties (as "Array.prototype", which the walk of global only shows as an
 // array); device_surface_snapshot.py --roots fills this line when it pushes the script.
 let EXTRA_ROOTS = [];
+// Names the global object resolves through its prototype without own properties (the Java classes of global);
+// device_surface_snapshot.py --global-classes fills this line.
+let LOOKUP_NAMES = [];
 let toStr = Object.prototype.toString;
 let JAVA_TAGS = { "[object JavaObject]": 1, "[object JavaClass]": 1, "[object JavaPackage]": 1, "[object JavaArray]": 1 };
 
@@ -137,7 +140,20 @@ let snapshot = {
     aliases: {},
     global: describeOwn(global, 0),
     roots: {},
+    lookup: {},
 };
+LOOKUP_NAMES.forEach(name => {
+    let entry = { inGlobal: name in global, own: Object.prototype.hasOwnProperty.call(global, name) };
+    try {
+        entry.bare = eval("typeof " + name);
+        let v = global[name];
+        entry.type = typeof v;
+        entry.text = String(v);
+    } catch (e) {
+        entry.error = String(e);
+    }
+    snapshot.lookup[name] = entry;
+});
 EXTRA_ROOTS.forEach(path => {
     let o = path.split(".").reduce((v, k) => (v === undefined || v === null ? v : v[k]), global);
     snapshot.roots[path] = o === undefined || o === null ? { "[error]": { error: "missing" } } : describeOwn(o, 1);

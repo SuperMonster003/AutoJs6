@@ -55,6 +55,8 @@ py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL --out OUT --tag o
 py -3.12 -I tools/augment/surface_compare.py OUT/surface-<model>-<versionCode>-off.txt OUT/surface-<model>-<versionCode>-on.txt --only Arrayx Mathx Numberx jsox randomInt randomFloat parseFloat Array Math Number @Array.prototype @Number.prototype --allow-length
 ```
 
+P3.0 增补: `--global-classes` 另外记录 global 经原型解析的 Java 类名 (`augment/global/Classes.kt` 的字段, 不是全局自有属性, 对象枚举看不到), 每个名称一行 `@lookup.<名称>`: `in` 与自有属性两项, 裸名称的 `typeof`, 以及从 global 读取的值的 `typeof` 与字符串形式; 比对时用 `--only @lookup`.
+
 ## surface_compare.py: 比对两份表面快照
 
 ```
