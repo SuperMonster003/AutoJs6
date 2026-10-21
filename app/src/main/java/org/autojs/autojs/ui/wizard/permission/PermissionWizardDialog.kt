@@ -10,6 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.pref.keys.WizardKeys
 import org.autojs.autojs.ui.wizard.WizardProfile
 import org.autojs.autojs.ui.wizard.WizardProfileController
 import org.autojs.autojs.ui.wizard.WizardProfileStore
@@ -29,8 +30,7 @@ import org.autojs.autojs6.databinding.DialogWizardBinding
 object PermissionWizardDialog {
 
     val store = WizardProfileStore(
-        spName = "permission_wizard",
-        keyPrefix = "key_\$_permission_wizard",
+        keys = WizardKeys.PERMISSION_WIZARD,
         membersKey = "permissions",
     )
 

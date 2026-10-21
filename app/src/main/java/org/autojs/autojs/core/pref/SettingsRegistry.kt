@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.pref
 
 import org.autojs.autojs.core.pref.keys.A11yKeys
+import org.autojs.autojs.core.pref.keys.ApkBuildKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.ConnectionKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
@@ -20,6 +21,7 @@ import org.autojs.autojs.core.pref.keys.RecordKeys
 import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.core.pref.keys.TimedTaskKeys
 import org.autojs.autojs.core.pref.keys.UpdatesKeys
+import org.autojs.autojs.core.pref.keys.WizardKeys
 import org.autojs.autojs.core.pref.store.StoreId
 
 /**
@@ -99,6 +101,8 @@ object SettingsRegistry {
         LayoutInspectorKeys,
         DeveloperKeys,
         PluginCenterKeys,
+        ApkBuildKeys,
+        WizardKeys,
         CredentialKeys,
         MiscStateKeys,
     )

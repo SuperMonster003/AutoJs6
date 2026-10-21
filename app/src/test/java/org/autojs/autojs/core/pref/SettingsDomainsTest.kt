@@ -156,6 +156,9 @@ class SettingsDomainsTest {
         private val KEYS_AFTER_P0: Map<String, String?> = mapOf(
             // fragment_developer_options.xml app:defaultValue="true" (memory roadmap P1.2, appendix C Q16).
             "key_leakcanary_enabled" to "true",
+            // fragment_developer_options.xml app:defaultValue="true", MemoryDiagnostics getBoolean(..., true) (memory
+            // roadmap P2.3, appendix C Q21).
+            "key_memory_unreclaimed_warning" to "true",
             // Literal names the P0 inventory missed (appendix C Q15, P3.6); the defaults are those of the old readers:
             // Pref.getBoolean(KEY_DERIVED_COLORS, false), Pref.getBoolean(KEY_HISTORY_MERGE_SIMILAR, false),
             // Pref.getString(ROOT_CONFIGURATION_KEY, "{}"), booleanOrFalse / stringOrNull of the compiler opt-in stores
@@ -200,6 +203,20 @@ class SettingsDomainsTest {
             "ace_editor_font_ui_preferences:key_\$_ace_editor_font_name_sort_type_locked" to "AceEditorFontSortField.NAME.typeLockedByDefault",
             "ace_editor_font_ui_preferences:key_\$_ace_editor_font_size_sort_type_locked" to "AceEditorFontSortField.SIZE.typeLockedByDefault",
             "ace_editor_font_ui_preferences:key_\$_ace_editor_font_selected_variant_" to null,
+            // P3.3: BuildConfigStore getString(KEY_ACTIVE_PROFILE, PROFILE_DEFAULT_ID) / getString(KEY_PROFILES_JSON, null);
+            // WizardProfileStore getString(keyCustomProfiles, null) / getBoolean(keyShowDone, showDoneByDefault = true),
+            // P0.4 recorded the two wizards under one combined name; the launcher icon option getBoolean(key, true);
+            // JvmSourceProviderSelection getString(storageKey(language), null); UpdateIgnoreStore getStringSet(key, emptySet()).
+            "build_apk_config_profiles:active_profile" to "__default__",
+            "build_apk_config_profiles:profiles_json" to null,
+            "permission_wizard:key_\$_permission_wizard_custom_profiles" to null,
+            "permission_wizard:key_\$_permission_wizard_show_done" to "true",
+            "plugin_install_wizard:key_\$_plugin_install_wizard_custom_profiles" to null,
+            "plugin_install_wizard:key_\$_plugin_install_wizard_show_done" to "true",
+            "plugin_install_wizard:show_launcher_icons_for_new_plugins" to "true",
+            "jvm_source_provider_selection:exact_component" to null,
+            "jvm_source_provider_selection:exact_component_kotlin" to null,
+            "key_\$_ignored_updates:key_\$_ignored_plugin_\$_" to "[]",
         ) + listOf("", "_official", "_third_party").flatMap { list ->
             val base = "plugin_center_sort_state:key_\$_plugin_center_sort_state$list"
             listOf(

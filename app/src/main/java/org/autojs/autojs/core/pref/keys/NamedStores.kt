@@ -40,6 +40,32 @@ object NamedStores {
     @JvmField
     val ACE_ACTION_HISTORY = store("ace_action_history")
 
+    // Profile stores (P3.3): `ApkBuildKeys`, `WizardKeys`, `PluginCenterKeys`, `UpdatesKeys`.
+    // zh-CN: 配置档类存储 (P3.3).
+
+    /** APK build profiles (`BuildConfigStore`). */
+    @JvmField
+    val BUILD_APK_CONFIG_PROFILES = store("build_apk_config_profiles")
+
+    /** Profiles and options of the permission wizard (`WizardProfileStore` of `PermissionWizardDialog`). */
+    @JvmField
+    val PERMISSION_WIZARD = store("permission_wizard")
+
+    /** Profiles and options of the plugin install wizard (`WizardProfileStore` of `PluginInstallWizardProfileStore`). */
+    @JvmField
+    val PLUGIN_INSTALL_WIZARD = store("plugin_install_wizard")
+
+    /** The JVM source provider chosen per language (`JvmSourceProviderSelection`). */
+    @JvmField
+    val JVM_SOURCE_PROVIDER_SELECTION = store("jvm_source_provider_selection")
+
+    /**
+     * Ignored plugin versions (`UpdateIgnoreStore`); the file is named by the value of `R.string.key_ignored_updates`,
+     * which `NamedStoresTest` checks.
+     */
+    @JvmField
+    val IGNORED_UPDATES = store("key_\$_ignored_updates")
+
     // Plugin center (P3.1, `PluginCenterKeys`).
     // zh-CN: 插件中心 (P3.1, `PluginCenterKeys`).
 
@@ -133,6 +159,7 @@ object NamedStores {
     @JvmField
     val ALL: List<StoreId> = listOf(
         EDITOR_SYMBOLS_CONFIG, FUNCTIONS_KEYBOARD_HELPER, ACE_EDITOR_FONT_UI_PREFERENCES, ACE_ACTION_HISTORY,
+        BUILD_APK_CONFIG_PROFILES, PERMISSION_WIZARD, PLUGIN_INSTALL_WIZARD, JVM_SOURCE_PROVIDER_SELECTION, IGNORED_UPDATES,
         PLUGIN_CENTER_FILTER_STATE, PLUGIN_CENTER_SORT_STATE, PLUGIN_CENTER_VISIBILITY_STATE, PLUGIN_LAUNCHER_ICONS,
         PLUGIN_CENTER_ENABLE_STATE, PLUGIN_CENTER_RECENT, PLUGIN_CENTER_ATTENTION,
         GITHUB_AUTH, PLUGIN_CENTER_AUTHORIZATION, MCP_SERVER_TRUST_CONFIRMATION, THREE_STOVE_AGENT_TRUST_CONFIRMATION,

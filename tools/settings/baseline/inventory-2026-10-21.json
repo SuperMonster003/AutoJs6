@@ -2,22 +2,22 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "0184745d9",
+  "commit": "9a6a00331",
   "branch": "master",
-  "dirtyScannedFiles": 10
+  "dirtyScannedFiles": 13
  },
  "summary": {
-  "keyResources": 268,
-  "keyResourcesInStringsDonottranslate": 266,
+  "keyResources": 269,
+  "keyResourcesInStringsDonottranslate": 267,
   "keyResourcesElsewhere": [
    "key_ace_language_support_matrix",
    "key_ace_semantic_languages"
   ],
-  "keysOnSettingsPages": 99,
+  "keysOnSettingsPages": 100,
   "keysPerPage": {
    "fragment_preferences.xml": 39,
    "fragment_code_editor_settings.xml": 40,
-   "fragment_developer_options.xml": 11,
+   "fragment_developer_options.xml": 12,
    "fragment_trash_and_version_history_settings.xml": 9,
    "fragment_plugin_center_preferences.xml": 3
   },
@@ -46,13 +46,13 @@
    "key_dialog_log_entries_exported",
    "key_enable_observe_key"
   ],
-  "literalKeyGroups": 97,
+  "literalKeyGroups": 105,
   "namedStores": 29,
-  "namedStoreCallFiles": 14,
-  "namedStoresDeclared": 24,
+  "namedStoreCallFiles": 9,
+  "namedStoresDeclared": 29,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 1,
-  "prefUserFiles": 72,
+  "prefUserFiles": 73,
   "jsonFileStores": 13
  },
  "keys": [
@@ -2057,7 +2057,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 25
+     "line": 26
     }
    ],
    "kind": "Setting",
@@ -2153,7 +2153,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 39
+     "line": 52
     }
    ],
    "kind": "Excluded",
@@ -2181,7 +2181,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 40
+     "line": 53
     }
    ],
    "kind": "Excluded",
@@ -4465,11 +4465,14 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 32
-    },
+     "line": 33
+    }
+   ],
+   "literalRefs": [
     {
-     "file": "network/UpdateIgnoreStore.kt",
-     "line": 13
+     "file": "core/pref/keys/NamedStores.kt",
+     "line": 67,
+     "const": null
     }
    ],
    "kind": "Setting",
@@ -4981,13 +4984,13 @@
     {
      "page": "fragment_developer_options.xml",
      "pageLabel": "开发者选项",
-     "line": 154,
+     "line": 160,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
-      "text_debug"
+      "text_memory_diagnostics"
      ],
      "categoryTitles": [
-      "调试"
+      "内存诊断"
      ]
     }
    ],
@@ -5159,7 +5162,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 41
+     "line": 54
     }
    ],
    "kind": "Excluded",
@@ -5185,10 +5188,43 @@
    "note": "上次是否正常关闭, 用于启动时恢复"
   },
   {
+   "name": "key_memory_unreclaimed_warning",
+   "value": "key_$_memory_unreclaimed_warning",
+   "file": "strings_donottranslate.xml",
+   "line": 274,
+   "pages": [
+    {
+     "page": "fragment_developer_options.xml",
+     "pageLabel": "开发者选项",
+     "line": 153,
+     "tag": "ThemeColorSwitchPreference",
+     "categoryTitleRes": [
+      "text_memory_diagnostics"
+     ],
+     "categoryTitles": [
+      "内存诊断"
+     ]
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/DeveloperKeys.kt",
+     "line": 54
+    },
+    {
+     "file": "runtime/memory/MemoryDiagnostics.kt",
+     "line": 112
+    }
+   ],
+   "kind": "Setting",
+   "category": "developer",
+   "note": "开发者选项 > 内存诊断: 已结束的脚本未被回收时在控制台警告, 默认 true (内存路线图 P2.3, 6b09b7d8e); 按 Q16 先例登记 (附录 C Q21), DeveloperKeys 声明"
+  },
+  {
    "name": "key_new_script_module_layer",
    "value": "key_$_new_script_module_layer",
    "file": "strings_donottranslate.xml",
-   "line": 274,
+   "line": 275,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5217,7 +5253,7 @@
    "name": "key_night_mode",
    "value": "key_$_night_mode",
    "file": "strings_donottranslate.xml",
-   "line": 275,
+   "line": 276,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5255,7 +5291,7 @@
    "name": "key_night_mode_always_off",
    "value": "key_$_night_mode_always_off",
    "file": "strings_donottranslate.xml",
-   "line": 276,
+   "line": 277,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5283,7 +5319,7 @@
    "name": "key_night_mode_always_on",
    "value": "key_$_night_mode_always_on",
    "file": "strings_donottranslate.xml",
-   "line": 277,
+   "line": 278,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5307,7 +5343,7 @@
    "name": "key_night_mode_enabled",
    "value": "key_$_night_mode_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 278,
+   "line": 279,
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginCenterFragment.kt",
@@ -5331,7 +5367,7 @@
    "name": "key_night_mode_follow_system",
    "value": "key_$_night_mode_follow_system",
    "file": "strings_donottranslate.xml",
-   "line": 279,
+   "line": 280,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5362,7 +5398,7 @@
    "name": "key_night_mode_null",
    "value": "key_$_night_mode_null",
    "file": "strings_donottranslate.xml",
-   "line": 280,
+   "line": 281,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -5380,7 +5416,7 @@
    "name": "key_nodejs_doctor_report",
    "value": "key_$_nodejs_doctor_report",
    "file": "strings_donottranslate.xml",
-   "line": 281,
+   "line": 282,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5398,7 +5434,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 71
+     "line": 79
     }
    ],
    "kind": "Excluded",
@@ -5408,7 +5444,7 @@
    "name": "key_nodejs_inspector_enabled",
    "value": "key_$_nodejs_inspector_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 282,
+   "line": 283,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5437,7 +5473,7 @@
    "name": "key_not_showing_main_activity",
    "value": "key_$_not_showing_main_activity",
    "file": "strings_donottranslate.xml",
-   "line": 283,
+   "line": 284,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -5465,7 +5501,7 @@
    "name": "key_pc_server_address_history",
    "value": "key_$_pc_server_address_histories",
    "file": "strings_donottranslate.xml",
-   "line": 284,
+   "line": 285,
    "sourceRefs": [
     {
      "file": "pluginclient/JsonSocketClient.kt",
@@ -5484,7 +5520,7 @@
    "name": "key_plugin_center_auto_check_updates",
    "value": "key_$_plugin_center_auto_check_updates",
    "file": "strings_donottranslate.xml",
-   "line": 285,
+   "line": 286,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5517,7 +5553,7 @@
    "name": "key_plugin_center_last_online_check_ts",
    "value": "key_$_plugin_center_last_online_check_ts",
    "file": "strings_donottranslate.xml",
-   "line": 286,
+   "line": 287,
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
@@ -5536,7 +5572,7 @@
    "name": "key_plugin_center_show_official_plugins",
    "value": "key_$_plugin_center_show_official_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 287,
+   "line": 288,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5569,7 +5605,7 @@
    "name": "key_plugin_center_show_third_party_plugins",
    "value": "key_$_plugin_center_show_third_party_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 288,
+   "line": 289,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5602,7 +5638,7 @@
    "name": "key_post_notifications_permission",
    "value": "key_$_post_notifications_permission",
    "file": "strings_donottranslate.xml",
-   "line": 289,
+   "line": 290,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -5622,7 +5658,7 @@
    "name": "key_post_notifications_permission_request_attempted",
    "value": "key_$_post_notifications_permission_request_attempted",
    "file": "strings_donottranslate.xml",
-   "line": 290,
+   "line": 291,
    "sourceRefs": [
     {
      "file": "permission/PostNotificationsPermission.kt",
@@ -5649,7 +5685,7 @@
    "name": "key_pref_bundle_default_item",
    "value": "key_$_pref_bundle_default_item",
    "file": "strings_donottranslate.xml",
-   "line": 291,
+   "line": 292,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
@@ -5671,7 +5707,7 @@
    "name": "key_pref_bundle_disabled_items",
    "value": "key_$_pref_bundle_disabled_items",
    "file": "strings_donottranslate.xml",
-   "line": 292,
+   "line": 293,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
@@ -5693,7 +5729,7 @@
    "name": "key_record_toast",
    "value": "key_$_record_toast",
    "file": "strings_donottranslate.xml",
-   "line": 293,
+   "line": 294,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5722,7 +5758,7 @@
    "name": "key_release_history",
    "value": "key_$_release_history",
    "file": "strings_donottranslate.xml",
-   "line": 294,
+   "line": 295,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5740,7 +5776,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 42
+     "line": 55
     }
    ],
    "kind": "Excluded",
@@ -5750,7 +5786,7 @@
    "name": "key_restart_strategy",
    "value": "key_$_restart_strategy",
    "file": "strings_donottranslate.xml",
-   "line": 295,
+   "line": 296,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5779,7 +5815,7 @@
    "name": "key_restart_strategy_quick",
    "value": "key_$_restart_strategy_quick",
    "file": "strings_donottranslate.xml",
-   "line": 296,
+   "line": 297,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5806,7 +5842,7 @@
    "name": "key_restart_strategy_scheduled",
    "value": "key_$_restart_strategy_scheduled",
    "file": "strings_donottranslate.xml",
-   "line": 297,
+   "line": 298,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5826,7 +5862,7 @@
    "name": "key_rhino_java_primitive_wrap",
    "value": "key_$_rhino_java_primitive_wrap",
    "file": "strings_donottranslate.xml",
-   "line": 298,
+   "line": 299,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5855,7 +5891,7 @@
    "name": "key_root_manager_apps_cache",
    "value": "root_manager_apps_cache",
    "file": "strings_donottranslate.xml",
-   "line": 299,
+   "line": 300,
    "sourceRefs": [
     {
      "file": "core/pref/keys/RunningKeys.kt",
@@ -5869,7 +5905,7 @@
    "name": "key_root_manager_apps_custom",
    "value": "root_manager_apps_custom",
    "file": "strings_donottranslate.xml",
-   "line": 300,
+   "line": 301,
    "sourceRefs": [
     {
      "file": "core/pref/keys/RunningKeys.kt",
@@ -5884,7 +5920,7 @@
    "name": "key_root_mode",
    "value": "key_$_root_mode",
    "file": "strings_donottranslate.xml",
-   "line": 301,
+   "line": 302,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5913,7 +5949,7 @@
    "name": "key_root_mode_auto_detect",
    "value": "key_$_root_mode_auto_detect",
    "file": "strings_donottranslate.xml",
-   "line": 302,
+   "line": 303,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5940,7 +5976,7 @@
    "name": "key_root_mode_force_non_root",
    "value": "key_$_root_mode_force_non_root",
    "file": "strings_donottranslate.xml",
-   "line": 303,
+   "line": 304,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5964,7 +6000,7 @@
    "name": "key_root_mode_force_root",
    "value": "key_$_root_mode_force_root",
    "file": "strings_donottranslate.xml",
-   "line": 304,
+   "line": 305,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5988,7 +6024,7 @@
    "name": "key_root_record_out_file_type",
    "value": "key_$_root_record_out_file_type",
    "file": "strings_donottranslate.xml",
-   "line": 305,
+   "line": 306,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6017,7 +6053,7 @@
    "name": "key_root_record_out_file_type_binary",
    "value": "key_$_root_record_out_file_type_binary",
    "file": "strings_donottranslate.xml",
-   "line": 306,
+   "line": 307,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -6044,7 +6080,7 @@
    "name": "key_root_record_out_file_type_js",
    "value": "key_$_root_record_out_file_type_js",
    "file": "strings_donottranslate.xml",
-   "line": 307,
+   "line": 308,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -6064,7 +6100,7 @@
    "name": "key_run_on_boot_inrt",
    "value": "key_$_run_on_boot_inrt",
    "file": "strings_donottranslate.xml",
-   "line": 308,
+   "line": 309,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -6088,7 +6124,7 @@
    "name": "key_scheduled_restart_backend",
    "value": "key_$_scheduled_restart_backend",
    "file": "strings_donottranslate.xml",
-   "line": 309,
+   "line": 310,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6103,7 +6139,7 @@
    "name": "key_scheduled_restart_backend_alarm_manager",
    "value": "key_$_scheduled_restart_backend_alarm_manager",
    "file": "strings_donottranslate.xml",
-   "line": 310,
+   "line": 311,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6129,7 +6165,7 @@
    "name": "key_scheduled_restart_backend_work_manager",
    "value": "key_$_scheduled_restart_backend_work_manager",
    "file": "strings_donottranslate.xml",
-   "line": 311,
+   "line": 312,
    "defaultOf": [
     "default_key_scheduled_restart_backend"
    ],
@@ -6154,7 +6190,7 @@
    "name": "key_scheduled_restart_delay",
    "value": "key_$_scheduled_restart_delay",
    "file": "strings_donottranslate.xml",
-   "line": 312,
+   "line": 313,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6169,7 +6205,7 @@
    "name": "key_screen_capture_request_delay",
    "value": "key_$_screen_capture_request_delay_ms",
    "file": "strings_donottranslate.xml",
-   "line": 313,
+   "line": 314,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6198,7 +6234,7 @@
    "name": "key_script_module_debug_print",
    "value": "key_$_script_module_debug_print",
    "file": "strings_donottranslate.xml",
-   "line": 314,
+   "line": 315,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6227,7 +6263,7 @@
    "name": "key_script_module_debug_print_disabled_modules",
    "value": "key_$_script_module_debug_print_disabled_modules",
    "file": "strings_donottranslate.xml",
-   "line": 315,
+   "line": 316,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6256,7 +6292,7 @@
    "name": "key_scripts_after_app_restart",
    "value": "key_$_scripts_after_app_restart",
    "file": "strings_donottranslate.xml",
-   "line": 316,
+   "line": 317,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
@@ -6278,7 +6314,7 @@
    "name": "key_server_address",
    "value": "key_$_server_address",
    "file": "strings_donottranslate.xml",
-   "line": 317,
+   "line": 318,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6293,7 +6329,7 @@
    "name": "key_server_mode_lan_discovery",
    "value": "key_$_server_mode_lan_discovery",
    "file": "strings_donottranslate.xml",
-   "line": 318,
+   "line": 319,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6308,7 +6344,7 @@
    "name": "key_server_mode_manager_clients_level",
    "value": "key_$_server_mode_manager_clients_level",
    "file": "strings_donottranslate.xml",
-   "line": 319,
+   "line": 320,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6323,7 +6359,7 @@
    "name": "key_server_mode_manager_control_level",
    "value": "key_$_server_mode_manager_control_level",
    "file": "strings_donottranslate.xml",
-   "line": 320,
+   "line": 321,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6338,7 +6374,7 @@
    "name": "key_server_mode_manager_settings_collapsed",
    "value": "key_$_server_mode_manager_settings_collapsed",
    "file": "strings_donottranslate.xml",
-   "line": 321,
+   "line": 322,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6353,7 +6389,7 @@
    "name": "key_server_mode_manager_status_level",
    "value": "key_$_server_mode_manager_status_level",
    "file": "strings_donottranslate.xml",
-   "line": 322,
+   "line": 323,
    "sourceRefs": [
     {
      "file": "ui/devplugin/ServerModeManagerDialog.kt",
@@ -6368,7 +6404,7 @@
    "name": "key_server_mode_notify_connection_changes",
    "value": "key_$_server_mode_notify_connection_changes",
    "file": "strings_donottranslate.xml",
-   "line": 323,
+   "line": 324,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6383,7 +6419,7 @@
    "name": "key_server_mode_restore_on_launch",
    "value": "key_$_server_mode_restore_on_launch",
    "file": "strings_donottranslate.xml",
-   "line": 324,
+   "line": 325,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6398,7 +6434,7 @@
    "name": "key_server_socket_normally_closed",
    "value": "key_$_server_socket_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 325,
+   "line": 326,
    "sourceRefs": [
     {
      "file": "pluginclient/JsonSocketServer.kt",
@@ -6417,7 +6453,7 @@
    "name": "key_setup_wizard_welcome_done",
    "value": "key_$_setup_wizard_welcome_done",
    "file": "strings_donottranslate.xml",
-   "line": 326,
+   "line": 327,
    "sourceRefs": [
     {
      "file": "ui/settings/ResetSetupWizardWelcomePreference.kt",
@@ -6440,7 +6476,7 @@
    "name": "key_setup_wizards",
    "value": "key_$_setup_wizards",
    "file": "strings_donottranslate.xml",
-   "line": 327,
+   "line": 328,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6472,7 +6508,7 @@
    "name": "key_stable_mode",
    "value": "key_$_stable_mode",
    "file": "strings_donottranslate.xml",
-   "line": 328,
+   "line": 329,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6511,7 +6547,7 @@
    "name": "key_theme_color",
    "value": "key_$_theme_color",
    "file": "strings_donottranslate.xml",
-   "line": 329,
+   "line": 330,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6539,7 +6575,7 @@
    "name": "key_theme_color_accent",
    "value": "key_$_theme_color_accent",
    "file": "strings_donottranslate.xml",
-   "line": 330,
+   "line": 331,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6555,7 +6591,7 @@
    "name": "key_theme_color_primary",
    "value": "key_$_theme_color_primary",
    "file": "strings_donottranslate.xml",
-   "line": 331,
+   "line": 332,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6571,7 +6607,7 @@
    "name": "key_theme_color_primary_dark",
    "value": "key_$_theme_color_primary_dark",
    "file": "strings_donottranslate.xml",
-   "line": 332,
+   "line": 333,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6587,7 +6623,7 @@
    "name": "key_timed_task_backend",
    "value": "key_$_timed_task_backend",
    "file": "strings_donottranslate.xml",
-   "line": 333,
+   "line": 334,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6617,7 +6653,7 @@
    "name": "key_timed_task_backend_alarm",
    "value": "key_$_timed_task_backend_alarm",
    "file": "strings_donottranslate.xml",
-   "line": 334,
+   "line": 335,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6648,7 +6684,7 @@
    "name": "key_timed_task_backend_job",
    "value": "key_$_timed_task_backend_job",
    "file": "strings_donottranslate.xml",
-   "line": 335,
+   "line": 336,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6672,7 +6708,7 @@
    "name": "key_timed_task_backend_work",
    "value": "key_$_timed_task_backend_work",
    "file": "strings_donottranslate.xml",
-   "line": 336,
+   "line": 337,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6696,7 +6732,7 @@
    "name": "key_trash_and_version_history_settings",
    "value": "key_$_trash_and_version_history_settings",
    "file": "strings_donottranslate.xml",
-   "line": 337,
+   "line": 338,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6724,7 +6760,7 @@
    "name": "key_trash_max_days",
    "value": "key_$_trash_max_days",
    "file": "strings_donottranslate.xml",
-   "line": 338,
+   "line": 339,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6753,7 +6789,7 @@
    "name": "key_trash_max_total_bytes",
    "value": "key_$_trash_max_total_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 339,
+   "line": 340,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6782,7 +6818,7 @@
    "name": "key_updates_checked_states_cleared",
    "value": "key_$_updates_checked_states_cleared",
    "file": "strings_donottranslate.xml",
-   "line": 340,
+   "line": 341,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6800,7 +6836,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
-     "line": 43
+     "line": 56
     }
    ],
    "kind": "Excluded",
@@ -6810,7 +6846,7 @@
    "name": "key_use_volume_control_record",
    "value": "key_$_use_volume_control_record",
    "file": "strings_donottranslate.xml",
-   "line": 341,
+   "line": 342,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6839,7 +6875,7 @@
    "name": "key_use_volume_control_running",
    "value": "key_$_use_volume_control_running",
    "file": "strings_donottranslate.xml",
-   "line": 342,
+   "line": 343,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6882,7 +6918,7 @@
    "name": "key_version_history_restore_does_not_auto_save_to_disk",
    "value": "key_$_version_history_restore_does_not_auto_save_to_disk",
    "file": "strings_donottranslate.xml",
-   "line": 343,
+   "line": 344,
    "sourceRefs": [
     {
      "file": "storage/history/VersionHistoryController.kt",
@@ -6897,7 +6933,7 @@
    "name": "key_working_directory",
    "value": "key_$_working_directory",
    "file": "strings_donottranslate.xml",
-   "line": 344,
+   "line": 345,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
@@ -6913,7 +6949,7 @@
    "name": "key_working_directory_history",
    "value": "key_$_working_directory_histories",
    "file": "strings_donottranslate.xml",
-   "line": 345,
+   "line": 346,
    "sourceRefs": [
     {
      "file": "util/WorkingDirectoryUtils.kt",
@@ -6932,7 +6968,7 @@
    "name": "key_working_directory_initialized",
    "value": "key_$_working_directory_initialized",
    "file": "strings_donottranslate.xml",
-   "line": 346,
+   "line": 347,
    "sourceRefs": [
     {
      "file": "util/WorkingDirectoryUtils.kt",
@@ -6948,7 +6984,7 @@
   {
    "page": "fragment_developer_options.xml",
    "pageLabel": "开发者选项",
-   "line": 148,
+   "line": 174,
    "tag": "MaterialPreference",
    "categoryTitleRes": [
     "text_debug"
@@ -7115,6 +7151,11 @@
    "name": "active_profile",
    "refs": [
     {
+     "file": "core/pref/keys/ApkBuildKeys.kt",
+     "line": 25,
+     "const": null
+    },
+    {
      "file": "core/pref/keys/EditorKeyboardKeys.kt",
      "line": 41,
      "const": null
@@ -7125,15 +7166,15 @@
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
-   "note": "当前符号配置档 (SymbolsConfigStore); P3.2 声明为 EditorKeyboardKeys; 属于命名存储, 随整份计数",
-   "store": "editor_symbols_config"
+   "note": "两份命名存储共用的键名: 当前符号配置档 (SymbolsConfigStore, editor_keyboard) 与当前 APK 构建配置档 (BuildConfigStore, apk_build); P3.2 / P3.3 声明为 EditorKeyboardKeys / ApkBuildKeys; 各随整份计数",
+   "store": "editor_symbols_config, build_apk_config_profiles"
   },
   {
    "name": "dex_compiler_experimental_component",
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 54,
+     "line": 62,
      "const": null
     }
    ],
@@ -7150,7 +7191,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 50,
+     "line": 58,
      "const": null
     }
    ],
@@ -7161,6 +7202,40 @@
    "category": "developer",
    "note": "开发者选项选择的实验性 dex 编译器插件开关 (DexCompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15)",
    "store": "default"
+  },
+  {
+   "name": "exact_component",
+   "refs": [
+    {
+     "file": "core/pref/keys/PluginCenterKeys.kt",
+     "line": 224,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "Java 的 JVM 源码提供方组件 (JvmSourceProviderSelection, 原键只用于 Java); P3.3 声明为 PluginCenterKeys; 属于命名存储, 随整份计数",
+   "store": "jvm_source_provider_selection"
+  },
+  {
+   "name": "exact_component_kotlin",
+   "refs": [
+    {
+     "file": "core/pref/keys/PluginCenterKeys.kt",
+     "line": 230,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "plugin_center",
+   "note": "Kotlin 的 JVM 源码提供方组件; P3.3 声明为 PluginCenterKeys; 属于命名存储, 随整份计数",
+   "store": "jvm_source_provider_selection"
   },
   {
    "name": "find_or_replace_using_regex",
@@ -7201,7 +7276,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 296,
+     "line": 310,
      "const": null
     }
    ],
@@ -7502,7 +7577,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 263,
+     "line": 277,
      "const": null
     }
    ],
@@ -7515,20 +7590,20 @@
    "store": "plugin_center_enable_state"
   },
   {
-   "name": "key_$_ignored_plugin_$_*",
+   "name": "key_$_ignored_plugin_$_",
    "refs": [
     {
-     "file": "network/UpdateIgnoreStore.kt",
-     "line": 64,
+     "file": "core/pref/keys/UpdatesKeys.kt",
+     "line": 42,
      "const": null
     }
    ],
    "storeGuess": [
-    "key_$_ignored_updates"
+    "default"
    ],
    "kind": "Setting",
    "category": "updates",
-   "note": "UpdateIgnoreStore 中忽略的插件版本, 随整份计数",
+   "note": "UpdateIgnoreStore 中每个插件忽略的版本, 前缀键族 (后接包名); P3.3 声明为 UpdatesKeys.IGNORED_PLUGIN_VERSIONS; 属于命名存储, 随整份计数",
    "store": "key_$_ignored_updates"
   },
   {
@@ -7536,7 +7611,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 277,
+     "line": 291,
      "const": null
     }
    ],
@@ -7570,7 +7645,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 283,
+     "line": 297,
      "const": null
     }
    ],
@@ -7583,11 +7658,11 @@
    "store": "plugin_center_recent"
   },
   {
-   "name": "key_$_permission_wizard",
+   "name": "key_$_permission_wizard_custom_profiles",
    "refs": [
     {
-     "file": "ui/wizard/permission/PermissionWizardDialog.kt",
-     "line": 33,
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 58,
      "const": null
     }
    ],
@@ -7596,7 +7671,41 @@
    ],
    "kind": "Setting",
    "category": "wizards",
-   "note": "WizardProfileStore 的 keyPrefix, 键在命名存储中, 随整份计数",
+   "note": "向导的自定义配置档, JSON 数组文本 (WizardProfileCodec); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
+   "store": "permission_wizard"
+  },
+  {
+   "name": "key_$_permission_wizard_last_profile_id",
+   "refs": [
+    {
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 59,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "上次选择的配置档 id, 状态 (附录 A wizards 备注); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
+   "store": "permission_wizard"
+  },
+  {
+   "name": "key_$_permission_wizard_show_done",
+   "refs": [
+    {
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 60,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "\"显示已完成条目\" 选项; P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
    "store": "permission_wizard"
   },
   {
@@ -8076,20 +8185,70 @@
    "store": "default"
   },
   {
-   "name": "key_$_plugin_install_wizard",
+   "name": "key_$_plugin_install_wizard_custom_profiles",
    "refs": [
     {
-     "file": "core/plugin/center/wizard/PluginInstallWizardProfileStore.kt",
-     "line": 28,
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 67,
      "const": null
     }
    ],
    "storeGuess": [
-    "plugin_install_wizard"
+    "default"
    ],
    "kind": "Setting",
    "category": "wizards",
-   "note": "WizardProfileStore 的 keyPrefix, 键在命名存储中, 随整份计数",
+   "note": "向导的自定义配置档, JSON 数组文本 (WizardProfileCodec); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
+   "store": "plugin_install_wizard"
+  },
+  {
+   "name": "key_$_plugin_install_wizard_first_run_shown",
+   "refs": [
+    {
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 84,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Excluded",
+   "note": "插件安装向导的首次运行提示, 2d7c72b33 起不再读写, 旧安装中残留; 按已移除终端遗留键的先例排除 (附录 C Q13 / Q20), P3.3 在 WizardKeys 登记",
+   "store": "plugin_install_wizard"
+  },
+  {
+   "name": "key_$_plugin_install_wizard_last_profile_id",
+   "refs": [
+    {
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 68,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "上次选择的配置档 id, 状态 (附录 A wizards 备注); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
+   "store": "plugin_install_wizard"
+  },
+  {
+   "name": "key_$_plugin_install_wizard_show_done",
+   "refs": [
+    {
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 69,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "\"显示已完成条目\" 选项; P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
    "store": "plugin_install_wizard"
   },
   {
@@ -8097,7 +8256,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 227,
+     "line": 241,
      "const": null
     }
    ],
@@ -8114,7 +8273,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 233,
+     "line": 247,
      "const": null
     }
    ],
@@ -8131,7 +8290,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 223,
+     "line": 237,
      "const": null
     }
    ],
@@ -8148,7 +8307,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 239,
+     "line": 253,
      "const": null
     }
    ],
@@ -8165,7 +8324,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 245,
+     "line": 259,
      "const": null
     }
    ],
@@ -8182,7 +8341,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 255,
+     "line": 269,
      "const": null
     }
    ],
@@ -8250,7 +8409,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 269,
+     "line": 283,
      "const": null
     }
    ],
@@ -8484,7 +8643,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 290,
+     "line": 304,
      "const": null
     }
    ],
@@ -8568,7 +8727,7 @@
    "refs": [
     {
      "file": "core/pref/keys/PluginCenterKeys.kt",
-     "line": 301,
+     "line": 315,
      "const": null
     }
    ],
@@ -8584,6 +8743,11 @@
    "name": "profiles_json",
    "refs": [
     {
+     "file": "core/pref/keys/ApkBuildKeys.kt",
+     "line": 32,
+     "const": null
+    },
+    {
      "file": "core/pref/keys/EditorKeyboardKeys.kt",
      "line": 48,
      "const": null
@@ -8594,15 +8758,15 @@
    ],
    "kind": "Setting",
    "category": "editor_keyboard",
-   "note": "符号配置档, org.json 对象文本 (SymbolsConfigStore); P3.2 声明为 EditorKeyboardKeys; 属于命名存储, 随整份计数",
-   "store": "editor_symbols_config"
+   "note": "两份命名存储共用的键名: 符号配置档 (editor_keyboard) 与 APK 构建配置档 (apk_build), org.json 对象文本; P3.2 / P3.3 声明为 EditorKeyboardKeys / ApkBuildKeys; 各随整份计数",
+   "store": "editor_symbols_config, build_apk_config_profiles"
   },
   {
    "name": "r8_compiler_explicit_component",
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 62,
+     "line": 70,
      "const": null
     }
    ],
@@ -8619,7 +8783,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
-     "line": 58,
+     "line": 66,
      "const": null
     }
    ],
@@ -8630,6 +8794,23 @@
    "category": "developer",
    "note": "开发者选项显式选择的 R8 编译器插件开关 (R8CompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15)",
    "store": "default"
+  },
+  {
+   "name": "show_launcher_icons_for_new_plugins",
+   "refs": [
+    {
+     "file": "core/pref/keys/WizardKeys.kt",
+     "line": 75,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Setting",
+   "category": "wizards",
+   "note": "插件安装向导: 新安装的插件显示启动图标 (PluginInstallWizardProfileStore); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数",
+   "store": "plugin_install_wizard"
   },
   {
    "name": "soft_input_height",
@@ -8722,7 +8903,7 @@
     "name": "ScriptWidgets",
     "const": "SCRIPT_WIDGETS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 126,
+    "line": 152,
     "excluded": true,
     "refs": []
    },
@@ -8830,7 +9011,7 @@
     "name": "autojs.localstorage.*",
     "const": "SCRIPT_LOCAL_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 106,
+    "line": 132,
     "excluded": true,
     "refs": []
    },
@@ -8854,7 +9035,7 @@
     "name": "autojs.node.storage.*.*.*",
     "const": "NODE_SCRIPT_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 110,
+    "line": 136,
     "excluded": true,
     "refs": []
    },
@@ -8863,20 +9044,30 @@
   },
   {
    "name": "build_apk_config_profiles",
-   "calls": [
-    {
-     "file": "ui/project/BuildConfigStore.java",
-     "line": 294,
-     "arg": "PREF_NAME",
-     "how": "常量 PREF_NAME (ui/project/BuildConfigStore.java:27)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "ui/project/BuildConfigStore.java"
+    "core/pref/keys/ApkBuildKeys.kt"
    ],
+   "declared": {
+    "name": "build_apk_config_profiles",
+    "const": "BUILD_APK_CONFIG_PROFILES",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 48,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/ApkBuildKeys.kt",
+      "line": 26
+     },
+     {
+      "file": "core/pref/keys/ApkBuildKeys.kt",
+      "line": 33
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "apk_build",
-   "note": "APK 构建配置档"
+   "note": "APK 构建配置档; P3.3 登记为 NamedStores, 键声明在 ApkBuildKeys"
   },
   {
    "name": "bun_host_capability_grants",
@@ -8888,7 +9079,7 @@
     "name": "bun_host_capability_grants",
     "const": "BUN_HOST_CAPABILITY_GRANTS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 95,
+    "line": 121,
     "excluded": false,
     "refs": [
      {
@@ -8918,7 +9109,7 @@
     "name": "device_id_prefs",
     "const": "DEVICE_ID_PREFS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 102,
+    "line": 128,
     "excluded": true,
     "refs": []
    },
@@ -8981,7 +9172,7 @@
     "name": "explorer_playback_history",
     "const": "EXPLORER_PLAYBACK_HISTORY",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 130,
+    "line": 156,
     "excluded": true,
     "refs": []
    },
@@ -8998,7 +9189,7 @@
     "name": "github_auth",
     "const": "GITHUB_AUTH",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 79,
+    "line": 105,
     "excluded": false,
     "refs": [
      {
@@ -9013,43 +9204,58 @@
   },
   {
    "name": "jvm_source_provider_selection",
-   "calls": [
-    {
-     "file": "core/plugin/jvm/JvmSourceProviderSelection.kt",
-     "line": 19,
-     "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (core/plugin/jvm/JvmSourceProviderSelection.kt:8)"
-    },
-    {
-     "file": "core/plugin/jvm/JvmSourceProviderSelection.kt",
-     "line": 31,
-     "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (core/plugin/jvm/JvmSourceProviderSelection.kt:8)"
-    }
-   ],
+   "calls": [],
    "files": [
-    "core/plugin/jvm/JvmSourceProviderSelection.kt"
+    "core/plugin/jvm/JvmSourceProviderSelection.kt",
+    "core/pref/keys/PluginCenterKeys.kt"
    ],
+   "declared": {
+    "name": "jvm_source_provider_selection",
+    "const": "JVM_SOURCE_PROVIDER_SELECTION",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 60,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/plugin/jvm/JvmSourceProviderSelection.kt",
+      "line": 39
+     },
+     {
+      "file": "core/pref/keys/PluginCenterKeys.kt",
+      "line": 224
+     },
+     {
+      "file": "core/pref/keys/PluginCenterKeys.kt",
+      "line": 230
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "plugin_center",
-   "note": "JVM 源码提供方选择 (附录 A)"
+   "note": "JVM 源码提供方选择 (附录 A); P3.3 登记为 NamedStores, 键声明在 PluginCenterKeys"
   },
   {
    "name": "key_$_ignored_updates",
-   "calls": [
-    {
-     "file": "network/UpdateIgnoreStore.kt",
-     "line": 13,
-     "arg": "context.getString(R.string.key_ignored_updates)",
-     "how": "字符串资源 key_ignored_updates"
-    }
-   ],
+   "calls": [],
    "files": [
-    "network/UpdateIgnoreStore.kt"
+    "core/pref/keys/UpdatesKeys.kt"
    ],
+   "declared": {
+    "name": "key_$_ignored_updates",
+    "const": "IGNORED_UPDATES",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 67,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/UpdatesKeys.kt",
+      "line": 43
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "updates",
-   "note": "UpdateIgnoreStore (文件名取自 `R.string.key_ignored_updates`), 忽略的插件更新"
+   "note": "UpdateIgnoreStore (文件名取自 `R.string.key_ignored_updates`), 忽略的插件更新; P3.3 登记为 NamedStores, 键声明在 UpdatesKeys"
   },
   {
    "name": "lua-runtime-storage-v1-*",
@@ -9068,7 +9274,7 @@
     "name": "lua-runtime-storage-v1-*",
     "const": "LUA_SCRIPT_STORAGES",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 114,
+    "line": 140,
     "excluded": true,
     "refs": []
    },
@@ -9085,7 +9291,7 @@
     "name": "mcp_server_trust_confirmation",
     "const": "MCP_SERVER_TRUST_CONFIRMATION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 87,
+    "line": 113,
     "excluded": false,
     "refs": [
      {
@@ -9100,20 +9306,26 @@
   },
   {
    "name": "permission_wizard",
-   "calls": [
-    {
-     "file": "ui/wizard/WizardProfileStore.kt",
-     "line": 27,
-     "arg": "spName",
-     "how": "构造参数 core/plugin/center/wizard/PluginInstallWizardProfileStore.kt:26, ui/wizard/permission/PermissionWizardDialog.kt:31"
-    }
-   ],
+   "calls": [],
    "files": [
-    "ui/wizard/WizardProfileStore.kt"
+    "core/pref/keys/WizardKeys.kt"
    ],
+   "declared": {
+    "name": "permission_wizard",
+    "const": "PERMISSION_WIZARD",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 52,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/WizardKeys.kt",
+      "line": 57
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "wizards",
-   "note": "权限向导自定义配置档; 其中 `_last_profile_id` 是状态 (附录 A), 整份随 wizards"
+   "note": "权限向导自定义配置档; 其中 `_last_profile_id` 是状态 (附录 A), 整份随 wizards; P3.3 登记为 NamedStores, 键声明在 WizardKeys"
   },
   {
    "name": "plugin_center_attention",
@@ -9126,7 +9338,7 @@
     "name": "plugin_center_attention",
     "const": "PLUGIN_CENTER_ATTENTION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 72,
+    "line": 98,
     "excluded": false,
     "refs": [
      {
@@ -9135,15 +9347,15 @@
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 291
+      "line": 305
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 296
+      "line": 310
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 301
+      "line": 315
      }
     ]
    },
@@ -9161,7 +9373,7 @@
     "name": "plugin_center_authorization",
     "const": "PLUGIN_CENTER_AUTHORIZATION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 83,
+    "line": 109,
     "excluded": false,
     "refs": [
      {
@@ -9185,7 +9397,7 @@
     "name": "plugin_center_enable_state",
     "const": "PLUGIN_CENTER_ENABLE_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 64,
+    "line": 90,
     "excluded": false,
     "refs": [
      {
@@ -9194,11 +9406,11 @@
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 264
+      "line": 278
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 270
+      "line": 284
      }
     ]
    },
@@ -9217,7 +9429,7 @@
     "name": "plugin_center_filter_state",
     "const": "PLUGIN_CENTER_FILTER_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 48,
+    "line": 74,
     "excluded": false,
     "refs": [
      {
@@ -9230,7 +9442,7 @@
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 320
+      "line": 334
      }
     ]
    },
@@ -9248,16 +9460,16 @@
     "name": "plugin_center_recent",
     "const": "PLUGIN_CENTER_RECENT",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 68,
+    "line": 94,
     "excluded": false,
     "refs": [
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 278
+      "line": 292
      },
      {
       "file": "core/pref/keys/PluginCenterKeys.kt",
-      "line": 284
+      "line": 298
      }
     ]
    },
@@ -9278,7 +9490,7 @@
     "name": "plugin_center_sort_state",
     "const": "PLUGIN_CENTER_SORT_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 52,
+    "line": 78,
     "excluded": false,
     "refs": [
      {
@@ -9330,7 +9542,7 @@
     "name": "plugin_center_visibility_state",
     "const": "PLUGIN_CENTER_VISIBILITY_STATE",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 56,
+    "line": 82,
     "excluded": false,
     "refs": [
      {
@@ -9357,33 +9569,34 @@
   },
   {
    "name": "plugin_install_wizard",
-   "calls": [
-    {
-     "file": "core/plugin/center/wizard/PluginInstallWizardProfileStore.kt",
-     "line": 18,
-     "arg": "\"plugin_install_wizard\"",
-     "how": "字面量"
-    },
-    {
-     "file": "core/plugin/center/wizard/PluginInstallWizardProfileStore.kt",
-     "line": 22,
-     "arg": "\"plugin_install_wizard\"",
-     "how": "字面量"
-    },
-    {
-     "file": "ui/wizard/WizardProfileStore.kt",
-     "line": 27,
-     "arg": "spName",
-     "how": "构造参数 core/plugin/center/wizard/PluginInstallWizardProfileStore.kt:26, ui/wizard/permission/PermissionWizardDialog.kt:31"
-    }
-   ],
+   "calls": [],
    "files": [
-    "core/plugin/center/wizard/PluginInstallWizardProfileStore.kt",
-    "ui/wizard/WizardProfileStore.kt"
+    "core/pref/keys/WizardKeys.kt"
    ],
+   "declared": {
+    "name": "plugin_install_wizard",
+    "const": "PLUGIN_INSTALL_WIZARD",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 56,
+    "excluded": false,
+    "refs": [
+     {
+      "file": "core/pref/keys/WizardKeys.kt",
+      "line": 66
+     },
+     {
+      "file": "core/pref/keys/WizardKeys.kt",
+      "line": 75
+     },
+     {
+      "file": "core/pref/keys/WizardKeys.kt",
+      "line": 84
+     }
+    ]
+   },
    "kind": "Setting",
    "category": "wizards",
-   "note": "插件安装向导自定义配置档; 其中 `_last_profile_id` 是状态, 整份随 wizards"
+   "note": "插件安装向导自定义配置档; 其中 `_last_profile_id` 是状态, 整份随 wizards; P3.3 登记为 NamedStores, 键声明在 WizardKeys"
   },
   {
    "name": "plugin_launcher_icons",
@@ -9395,7 +9608,7 @@
     "name": "plugin_launcher_icons",
     "const": "PLUGIN_LAUNCHER_ICONS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 60,
+    "line": 86,
     "excluded": false,
     "refs": [
      {
@@ -9449,7 +9662,7 @@
     "name": "privileged_edit_backups",
     "const": "PRIVILEGED_EDIT_BACKUPS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 118,
+    "line": 144,
     "excluded": true,
     "refs": []
    },
@@ -9473,7 +9686,7 @@
     "name": "runtime_task_intents",
     "const": "RUNTIME_TASK_INTENTS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 122,
+    "line": 148,
     "excluded": true,
     "refs": []
    },
@@ -9490,7 +9703,7 @@
     "name": "three_stove_agent_trust_confirmation",
     "const": "THREE_STOVE_AGENT_TRUST_CONFIRMATION",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 91,
+    "line": 117,
     "excluded": false,
     "refs": [
      {
@@ -9551,6 +9764,7 @@
   "runtime/api/augment/colors/ColorsTheme.kt",
   "runtime/api/modules/ScriptModuleLayer.kt",
   "runtime/api/modules/colors/ColorsThemeModule.kt",
+  "runtime/memory/MemoryDiagnostics.kt",
   "theme/app/ColorLibrariesActivity.kt",
   "theme/app/ColorSelectBaseActivity.kt",
   "theme/app/ColorSettingRecyclerView.kt",
@@ -9863,6 +10077,16 @@
   ],
   "active_profile": [
    {
+    "expr": "SettingDefault.of(BuildConfigStore.PROFILE_DEFAULT_ID)",
+    "form": "伴生常量",
+    "value": "__default__",
+    "via": "常量 PROFILE_DEFAULT_ID (ui/project/BuildConfigStore.java:35)",
+    "file": "core/pref/keys/ApkBuildKeys.kt",
+    "line": 24,
+    "method": "SettingKey.Str",
+    "type": "String"
+   },
+   {
     "expr": "SettingDefault.of(SymbolsConfigStore.PROFILE_DEFAULT_ID)",
     "form": "伴生常量",
     "value": "__default__",
@@ -9879,7 +10103,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 54,
+    "line": 62,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -9890,9 +10114,31 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 50,
+    "line": 58,
     "method": "SettingKey.Bool",
     "type": "Boolean"
+   }
+  ],
+  "exact_component": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/PluginCenterKeys.kt",
+    "line": 223,
+    "method": "SettingKey.Str",
+    "type": "String"
+   }
+  ],
+  "exact_component_kotlin": [
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
+    "file": "core/pref/keys/PluginCenterKeys.kt",
+    "line": 229,
+    "method": "SettingKey.Str",
+    "type": "String"
    }
   ],
   "github_token": [
@@ -10118,9 +10364,20 @@
     "form": "调用处字面量",
     "value": "true",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 264,
+    "line": 278,
     "method": "SettingKey.Bool",
     "type": "Boolean"
+   }
+  ],
+  "key_$_ignored_plugin_$_": [
+   {
+    "expr": "SettingDefault.of(emptySet())",
+    "form": "调用处字面量",
+    "value": "[]",
+    "file": "core/pref/keys/UpdatesKeys.kt",
+    "line": 43,
+    "method": "SettingKey.StrSet",
+    "type": "StringSet"
    }
   ],
   "key_$_last_orientation": [
@@ -10190,47 +10447,13 @@
     "type": "String"
    }
   ],
-  "key_$_plugin_install_wizard | key_$_permission_wizard_custom_profiles": [
-   {
-    "expr": "null",
-    "form": "调用处字面量",
-    "value": "null",
-    "file": "ui/wizard/WizardProfileStore.kt",
-    "line": 30,
-    "method": "getString",
-    "type": "String"
-   }
-  ],
-  "key_$_plugin_install_wizard | key_$_permission_wizard_last_profile_id": [
-   {
-    "expr": "null",
-    "form": "调用处字面量",
-    "value": "null",
-    "file": "ui/wizard/WizardProfileStore.kt",
-    "line": 59,
-    "method": "getString",
-    "type": "String"
-   }
-  ],
-  "key_$_plugin_install_wizard | key_$_permission_wizard_show_done": [
-   {
-    "expr": "showDoneByDefault",
-    "form": "表达式",
-    "value": null,
-    "via": "常量 showDoneByDefault (ui/wizard/WizardProfileStore.kt:17)",
-    "file": "ui/wizard/WizardProfileStore.kt",
-    "line": 67,
-    "method": "getBoolean",
-    "type": "Boolean"
-   }
-  ],
   "key_$_plugin_mount_enabled_$_": [
    {
     "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 228,
+    "line": 242,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -10250,7 +10473,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 234,
+    "line": 248,
     "method": "SettingKey.Str",
     "type": "String"
    },
@@ -10271,7 +10494,7 @@
     "form": "调用处字面量",
     "value": "[]",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 223,
+    "line": 237,
     "method": "SettingKey.StrSet",
     "type": "StringSet"
    }
@@ -10282,7 +10505,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 240,
+    "line": 254,
     "method": "SettingKey.Str",
     "type": "String"
    },
@@ -10303,7 +10526,7 @@
     "form": "调用处字面量",
     "value": "true",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 246,
+    "line": 260,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -10323,7 +10546,7 @@
     "form": "调用处字面量",
     "value": "[]",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 256,
+    "line": 270,
     "method": "SettingKey.Json",
     "type": "Json"
    },
@@ -10343,7 +10566,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/PluginCenterKeys.kt",
-    "line": 270,
+    "line": 284,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    }
@@ -10891,7 +11114,7 @@
     "value": "true",
     "expr": "boolResource(R.bool.pref_auto_check_for_updates, \"pref_auto_check_for_updates\")",
     "file": "core/pref/keys/UpdatesKeys.kt",
-    "line": 24,
+    "line": 25,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -11983,7 +12206,7 @@
     "form": "调用处字面量",
     "value": "[]",
     "file": "core/pref/keys/UpdatesKeys.kt",
-    "line": 31,
+    "line": 32,
     "method": "SettingKey.Json",
     "type": "Json"
    }
@@ -12207,7 +12430,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"true\"",
     "file": "res/xml/fragment_developer_options.xml",
-    "line": 154,
+    "line": 160,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12314,6 +12537,35 @@
     "file": "app/tool/McpServerTool.kt",
     "line": 168,
     "method": "getBoolean",
+    "type": "Boolean"
+   }
+  ],
+  "key_memory_unreclaimed_warning": [
+   {
+    "expr": "true",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "runtime/memory/MemoryDiagnostics.kt",
+    "line": 112,
+    "method": "getBoolean",
+    "type": "Boolean"
+   },
+   {
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "core/pref/keys/DeveloperKeys.kt",
+    "line": 54,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   },
+   {
+    "form": "XML 字面量",
+    "value": "true",
+    "expr": "app:defaultValue=\"true\"",
+    "file": "res/xml/fragment_developer_options.xml",
+    "line": 153,
+    "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
   ],
@@ -13025,6 +13277,15 @@
     "form": "声明",
     "expr": "SettingDefault.None",
     "value": "null",
+    "file": "core/pref/keys/ApkBuildKeys.kt",
+    "line": 31,
+    "method": "SettingKey.Json",
+    "type": "Json"
+   },
+   {
+    "form": "声明",
+    "expr": "SettingDefault.None",
+    "value": "null",
     "file": "core/pref/keys/EditorKeyboardKeys.kt",
     "line": 47,
     "method": "SettingKey.Json",
@@ -13037,7 +13298,7 @@
     "expr": "SettingDefault.None",
     "value": "null",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 62,
+    "line": 70,
     "method": "SettingKey.Str",
     "type": "String"
    }
@@ -13048,7 +13309,18 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/DeveloperKeys.kt",
-    "line": 58,
+    "line": 66,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "show_launcher_icons_for_new_plugins": [
+   {
+    "expr": "SettingDefault.of(true)",
+    "form": "调用处字面量",
+    "value": "true",
+    "file": "core/pref/keys/WizardKeys.kt",
+    "line": 74,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    }
@@ -13177,7 +13449,7 @@
    "stores": 0
   },
   "developer": {
-   "keys": 5,
+   "keys": 6,
    "literalKeys": 4,
    "stores": 0
   },

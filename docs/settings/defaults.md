@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-21, 扫描基线: `master@0184745d9`
+- 生成日期: 2026-10-21, 扫描基线: `master@9a6a00331`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -56,7 +56,7 @@
 | `key_ace_word_wrap_enabled` | Boolean | R.bool | `app:defaultValue="@bool/pref_ace_word_wrap_enabled"` | `false` | res/xml/fragment_code_editor_settings.xml:96 |  |
 | `key_app_language` | String (Enum) | R.string | `keyResource(R.string.default_key_app_language, "default_key_app_language")` | `key_app_language_auto = key_$_app_language_auto` | core/pref/keys/AppearanceKeys.kt:56 |  |
 | `key_app_language` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_app_language"` | `key_app_language_auto = key_$_app_language_auto` | res/xml/fragment_preferences.xml:9 |  |
-| `key_auto_check_for_updates` | Boolean | R.bool | `boolResource(R.bool.pref_auto_check_for_updates, "pref_auto_check_for_updates")` | `true` | core/pref/keys/UpdatesKeys.kt:24 |  |
+| `key_auto_check_for_updates` | Boolean | R.bool | `boolResource(R.bool.pref_auto_check_for_updates, "pref_auto_check_for_updates")` | `true` | core/pref/keys/UpdatesKeys.kt:25 |  |
 | `key_auto_check_for_updates` | Boolean | R.bool | `app:defaultValue="@bool/pref_auto_check_for_updates"` | `true` | res/xml/fragment_preferences.xml:348 |  |
 | `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `AutoNightMode.isFunctional()` | `运行时: AutoNightMode.isFunctional()` | core/pref/keys/AppearanceKeys.kt:74 |  |
 | `key_auto_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isAutoNightModeEnabled = isFunctional()` | `运行时: 缺键时 Pref 初始化写入 isFunctional()` | core/pref/Pref.kt:49 |  |
@@ -150,7 +150,7 @@
 | `key_history_max_total_bytes` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_TOTAL_BYTES) (经 常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:29))` | `2147483648` | core/pref/keys/HistoryKeys.kt:51 |  |
 | `key_history_max_total_bytes_per_file` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE) (经 常量 DEFAULT_HISTORY_MAX_TOTAL_BYTES_PER_FILE (core/pref/keys/HistoryKeys.kt:28))` | `209715200` | core/pref/keys/HistoryKeys.kt:48 |  |
 | `key_history_max_versions` | Int | 伴生常量 | `SettingDefault.of(DEFAULT_HISTORY_MAX_VERSIONS) (经 常量 DEFAULT_HISTORY_MAX_VERSIONS (core/pref/keys/HistoryKeys.kt:27))` | `50` | core/pref/keys/HistoryKeys.kt:45 |  |
-| `key_ignored_updates` | Json | 调用处字面量 | `SettingDefault.of(emptyList())` | `[]` | core/pref/keys/UpdatesKeys.kt:31 |  |
+| `key_ignored_updates` | Json | 调用处字面量 | `SettingDefault.of(emptyList())` | `[]` | core/pref/keys/UpdatesKeys.kt:32 |  |
 | `key_keep_screen_on_when_in_foreground` | String (Enum) | R.string | `keyResource(R.string.default_key_keep_screen_on_when_in_foreground, "default_key_keep_screen_on_when_in_foreground")` | `key_keep_screen_on_when_in_foreground_disabled = key_$_keep_screen_on_when_in_foreground_disabled` | core/pref/keys/AppearanceKeys.kt:98 |  |
 | `key_keep_screen_on_when_in_foreground` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_keep_screen_on_when_in_foreground"` | `key_keep_screen_on_when_in_foreground_disabled = key_$_keep_screen_on_when_in_foreground_disabled` | res/xml/fragment_preferences.xml:36 |  |
 | `key_keep_screen_on_when_in_foreground_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:105 |  |
@@ -161,7 +161,7 @@
 | `key_layout_inspector_node_copy_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:35 |  |
 | `key_layout_inspector_query_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:39 |  |
 | `key_leakcanary_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/DeveloperKeys.kt:46 |  |
-| `key_leakcanary_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:154 |  |
+| `key_leakcanary_enabled` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:160 |  |
 | `key_log_activity_input_bar_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:30 |  |
 | `key_log_activity_input_bar_visible` | Boolean | 伴生常量 (人工) | `DEFAULT_INPUT_BAR_VISIBLE` | `false` | ui/log/LogPageConsoleSettings.kt:61 |  |
 | `key_log_activity_log_coloring` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ConsoleKeys.kt:33 |  |
@@ -171,6 +171,9 @@
 | `key_log_activity_time_visible` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/ConsoleKeys.kt:24 |  |
 | `key_log_activity_time_visible` | Boolean | 伴生常量 (人工) | `LOG_ACTIVITY(..., true)` | `true` | core/console/ConsoleTimeSettings.kt:14 |  |
 | `key_log_activity_typescript_console_visible` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/ConsoleKeys.kt:40 |  |
+| `key_memory_unreclaimed_warning` | Boolean | 调用处字面量 | `true` | `true` | runtime/memory/MemoryDiagnostics.kt:112 |  |
+| `key_memory_unreclaimed_warning` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/DeveloperKeys.kt:54 |  |
+| `key_memory_unreclaimed_warning` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:153 |  |
 | `key_new_script_module_layer` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:26 |  |
 | `key_new_script_module_layer` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:9 |  |
 | `key_night_mode` | String (Enum) | R.string | `keyResource(R.string.default_key_night_mode, "default_key_night_mode")` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | core/pref/keys/AppearanceKeys.kt:63 |  |
@@ -224,8 +227,8 @@
 | `key_working_directory` | String | 表达式 (人工) | `WorkingDirectoryUtils.determineIfNeeded()` | `运行时: 首次启动在各语言的默认目录中选最近修改且非空者` | util/WorkingDirectoryUtils.kt:57 | `default_value_working_directory` 按语言不同 (/Scripts, /脚本 等 10 种) |
 | `COLOR_HISTORY_MERGE_SIMILAR` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:118 |  |
 | `THEME_COLOR_DERIVED_ACCENT_AND_DARK` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:114 |  |
-| `dex_compiler_experimental_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:54 |  |
-| `dex_compiler_experimental_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:50 |  |
+| `dex_compiler_experimental_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:62 |  |
+| `dex_compiler_experimental_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:58 |  |
 | `key_$_ace_semantic_java_enabled` | Boolean | 表达式 | `DEFAULT_SEMANTIC_LANGUAGES[java]` | `运行时: DEFAULT_SEMANTIC_LANGUAGES[java]` | core/pref/keys/EditorKeys.kt:241 |  |
 | `key_$_ace_semantic_java_enabled` | Boolean | 伴生常量 (人工) | `DEFAULT_SEMANTIC_LANGUAGES[java]` | `true` | ui/edit/editor/ace/AceEditorLspPreferences.kt:123 |  |
 | `key_$_ace_semantic_kotlin_enabled` | Boolean | 表达式 | `DEFAULT_SEMANTIC_LANGUAGES[kotlin]` | `运行时: DEFAULT_SEMANTIC_LANGUAGES[kotlin]` | core/pref/keys/EditorKeys.kt:247 |  |
@@ -238,19 +241,19 @@
 | `key_$_ace_semantic_typescript_enabled` | Boolean | 伴生常量 (人工) | `DEFAULT_SEMANTIC_LANGUAGES[typescript]` | `true` | ui/edit/editor/ace/AceEditorLspPreferences.kt:123 |  |
 | `key_$_codegen_model_current_debug_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:57 |  |
 | `key_$_editor_engine_selection_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/EditorKeys.kt:103 |  |
-| `key_$_plugin_mount_enabled_$_` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/PluginCenterKeys.kt:228 |  |
+| `key_$_plugin_mount_enabled_$_` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/PluginCenterKeys.kt:242 |  |
 | `key_$_plugin_mount_enabled_$_` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(enabledKey(packageName), false)` | `false` | core/plugin/center/PluginMountStore.kt:32 |  |
-| `key_$_plugin_mount_object_name_$_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/PluginCenterKeys.kt:234 |  |
+| `key_$_plugin_mount_object_name_$_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/PluginCenterKeys.kt:248 |  |
 | `key_$_plugin_mount_object_name_$_` | String | 调用处字面量 (人工) | `Pref.getStringOrNull(objectNameKey(packageName))` | `null` | core/plugin/center/PluginMountStore.kt:43 | 缺省时用 defaultObjectName(packageName) |
-| `key_$_plugin_mount_packages` | StringSet | 调用处字面量 | `SettingDefault.of(emptySet())` | `[]` | core/pref/keys/PluginCenterKeys.kt:223 |  |
-| `key_$_plugin_mount_point_$_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/PluginCenterKeys.kt:240 |  |
+| `key_$_plugin_mount_packages` | StringSet | 调用处字面量 | `SettingDefault.of(emptySet())` | `[]` | core/pref/keys/PluginCenterKeys.kt:237 |  |
+| `key_$_plugin_mount_point_$_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/PluginCenterKeys.kt:254 |  |
 | `key_$_plugin_mount_point_$_` | String | 调用处字面量 (人工) | `Pref.getStringOrNull(mountPointKey(packageName))` | `null` | core/plugin/center/PluginMountStore.kt:61 | null 与 "global" 都表示全局挂载点 |
-| `key_$_plugin_update_check_$_` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/PluginCenterKeys.kt:246 |  |
+| `key_$_plugin_update_check_$_` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/PluginCenterKeys.kt:260 |  |
 | `key_$_plugin_update_check_$_` | Boolean | 调用处字面量 (人工) | `isEnabled(packageName, defaultEnabled = true)` | `true` | core/plugin/center/PluginUpdateCheckStore.kt:12 |  |
-| `key_$_plugin_variant_priority_$_` | Json | 调用处字面量 | `SettingDefault.of(emptyList())` | `[]` | core/pref/keys/PluginCenterKeys.kt:256 |  |
+| `key_$_plugin_variant_priority_$_` | Json | 调用处字面量 | `SettingDefault.of(emptyList())` | `[]` | core/pref/keys/PluginCenterKeys.kt:270 |  |
 | `key_$_plugin_variant_priority_$_` | Json (JSON 数组) | 调用处字面量 (人工) | `Pref.getStringOrNull(key).orEmpty()` | `[]` | core/plugin/center/PluginVariantPriorityStore.kt:15 |  |
-| `r8_compiler_explicit_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:62 |  |
-| `r8_compiler_explicit_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:58 |  |
+| `r8_compiler_explicit_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:70 |  |
+| `r8_compiler_explicit_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:66 |  |
 | `three_stove_agent_script_root_configuration` | Json | 调用处字面量 | `SettingDefault.of(emptyMap())` | `{}` | core/pref/keys/ExtensibilityKeys.kt:41 |  |
 
 ## 2. 同一键多处默认值不一致

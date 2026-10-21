@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.pref.keys
 
 import org.autojs.autojs.core.pref.SettingsRegistry
+import org.autojs.autojs.core.pref.SettingsTestResources
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.StoreId
 import org.junit.Assert.assertEquals
@@ -25,6 +26,11 @@ class NamedStoresTest {
         )
         assertEquals(excluded, SettingsRegistry.stores.filter { it.excluded }.map { it.name })
         SettingsRegistry.stores.forEach { assertEquals(StoreId.Backend.SHARED_PREFERENCES, it.backend) }
+    }
+
+    @Test
+    fun theIgnoredUpdatesFileIsNamedByItsResource() {
+        assertEquals(SettingsTestResources.value("string", "key_ignored_updates"), NamedStores.IGNORED_UPDATES.name)
     }
 
     @Test

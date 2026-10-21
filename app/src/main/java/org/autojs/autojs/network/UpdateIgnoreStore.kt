@@ -1,30 +1,29 @@
 package org.autojs.autojs.network
 
-import android.content.Context
-import androidx.core.content.edit
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.core.pref.keys.UpdatesKeys
 import org.autojs.autojs6.R
 
+/**
+ * Ignored plugin versions in the named store named like `R.string.key_ignored_updates`, the key family
+ * [UpdatesKeys.IGNORED_PLUGIN_VERSIONS] (docs/settings/ROADMAP.md P3.3, names unchanged).
+ */
 object UpdateIgnoreStore {
 
     private val context by lazy { GlobalAppContext.get() }
-
-    private val sp by lazy {
-        context.getSharedPreferences(context.getString(R.string.key_ignored_updates), Context.MODE_PRIVATE)
-    }
 
     fun ignoreVersion(packageName: String, versionCode: Long, versionName: String? = null) {
         val set = getMutableStringSet(packageName).apply {
             add(encodeVersion(versionCode, versionName))
         }
-        sp.edit { putStringSet(key(packageName), set) }
+        key(packageName).set(set)
     }
 
     fun unignoreVersion(packageName: String, versionCode: Long) {
         val set = getMutableStringSet(packageName).apply {
             removeAll { it.startsWith("$versionCode|") || it == versionCode.toString() }
         }
-        sp.edit { putStringSet(key(packageName), set) }
+        key(packageName).set(set)
     }
 
     fun isIgnored(packageName: String, versionCode: Long): Boolean {
@@ -61,12 +60,11 @@ object UpdateIgnoreStore {
         return versionCode to versionName
     }
 
-    private fun key(packageName: String) = "key_\$_ignored_plugin_\$_$packageName"
+    /** `key_$_ignored_plugin_$_<package name>`. */
+    private fun key(packageName: String) = UpdatesKeys.IGNORED_PLUGIN_VERSIONS.key(packageName)
 
-    private fun getStringSet(packageName: String) =
-        sp.getStringSet(key(packageName), emptySet()) ?: emptySet()
+    private fun getStringSet(packageName: String): Set<String> = key(packageName).get()
 
-    private fun getMutableStringSet(packageName: String) =
-        sp.getStringSet(key(packageName), emptySet())?.toMutableSet() ?: mutableSetOf()
+    private fun getMutableStringSet(packageName: String): MutableSet<String> = key(packageName).get().toMutableSet()
 
 }

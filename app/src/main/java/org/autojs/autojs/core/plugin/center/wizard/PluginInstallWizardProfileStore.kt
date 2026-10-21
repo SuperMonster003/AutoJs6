@@ -1,31 +1,28 @@
 package org.autojs.autojs.core.plugin.center.wizard
 
 import android.content.Context
-import androidx.core.content.edit
+import org.autojs.autojs.core.pref.keys.WizardKeys
 import org.autojs.autojs.ui.wizard.WizardProfileStore
 
 /**
  * Profiles and options of the plugin install wizard. The preference file and keys
- * match the documents written since the wizard was introduced.
+ * match the documents written since the wizard was introduced; they are declared in
+ * [WizardKeys] (docs/settings/ROADMAP.md P3.3).
  *
- * zh-CN: 插件安装向导的配置及选项. 偏好文件与键名与向导引入以来写入的文档保持一致.
+ * zh-CN: 插件安装向导的配置及选项. 偏好文件与键名与向导引入以来写入的文档保持一致, 声明在 [WizardKeys] (ROADMAP P3.3).
  */
 object PluginInstallWizardProfileStore {
 
-    private const val SHOW_LAUNCHER_ICONS = "show_launcher_icons_for_new_plugins"
+    @Suppress("UNUSED_PARAMETER")
+    fun showLauncherIcons(context: Context): Boolean = WizardKeys.PLUGIN_INSTALL_WIZARD_SHOW_LAUNCHER_ICONS.get()
 
-    fun showLauncherIcons(context: Context): Boolean =
-        context.applicationContext.getSharedPreferences("plugin_install_wizard", Context.MODE_PRIVATE)
-            .getBoolean(SHOW_LAUNCHER_ICONS, true)
-
+    @Suppress("UNUSED_PARAMETER")
     fun setShowLauncherIcons(context: Context, show: Boolean) {
-        context.applicationContext.getSharedPreferences("plugin_install_wizard", Context.MODE_PRIVATE)
-            .edit { putBoolean(SHOW_LAUNCHER_ICONS, show) }
+        WizardKeys.PLUGIN_INSTALL_WIZARD_SHOW_LAUNCHER_ICONS.set(show)
     }
 
     val store = WizardProfileStore(
-        spName = "plugin_install_wizard",
-        keyPrefix = "key_\$_plugin_install_wizard",
+        keys = WizardKeys.PLUGIN_INSTALL_WIZARD,
         membersKey = "packages",
     )
 

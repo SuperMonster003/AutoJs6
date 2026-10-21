@@ -767,6 +767,7 @@ def scan_store_declarations(sources):
         if not m or decl.is_comment_line(i):
             continue
         const, how, name = m.groups()
+        name = name.replace(chr(92) + '$', '$')
         ref = re.compile(r'\bNamedStores\.' + re.escape(const) + r'\b')
         refs = [{'file': f.display, 'line': j} for f in sources if f.display != NAMED_STORES_FILE
                 for j, text in enumerate(f.lines, 1) if ref.search(text) and not f.is_comment_line(j)]

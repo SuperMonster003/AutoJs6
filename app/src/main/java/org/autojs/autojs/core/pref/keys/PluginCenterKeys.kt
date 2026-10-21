@@ -216,6 +216,20 @@ object PluginCenterKeys : SettingsDomain {
         )
     }
 
+    // -------------------------------------------------------------------- jvm_source_provider_selection (P3.3)
+
+    /** The exact JVM source provider component chosen for Java (`JvmSourceProviderSelection`; the original key is Java only). */
+    @JvmField
+    val JVM_SOURCE_EXACT_COMPONENT_JAVA = SettingKey.Str(
+        name = "exact_component", category = PLUGIN_CENTER, default = SettingDefault.None, store = NamedStores.JVM_SOURCE_PROVIDER_SELECTION,
+    )
+
+    /** The exact JVM source provider component chosen for Kotlin, which never inherits the Java choice. */
+    @JvmField
+    val JVM_SOURCE_EXACT_COMPONENT_KOTLIN = SettingKey.Str(
+        name = "exact_component_kotlin", category = PLUGIN_CENTER, default = SettingDefault.None, store = NamedStores.JVM_SOURCE_PROVIDER_SELECTION,
+    )
+
     // ---------------------------------------------------------------------- default preferences (P3.1)
 
     /** Package names that have an automatic mount configuration (`PluginMountStore`). */
@@ -305,7 +319,7 @@ object PluginCenterKeys : SettingsDomain {
         PLUGIN_CENTER_SHOW_OFFICIAL_PLUGINS, PLUGIN_CENTER_SHOW_THIRD_PARTY_PLUGINS, PLUGIN_CENTER_AUTO_CHECK_UPDATES,
         FILTER_LEGACY_ORDINAL, FILTER_INSTALL_STATE, FILTER_ENABLED_STATE, FILTER_MECHANISM_STATE, FILTER_SOURCE_STATE, FILTER_UPDATABLE_ONLY,
     ) + SORT_ALL.keys + SORT_OFFICIAL.keys + SORT_THIRD_PARTY.keys + listOf(
-        HIDDEN_PACKAGES, MOUNT_PACKAGES,
+        HIDDEN_PACKAGES, MOUNT_PACKAGES, JVM_SOURCE_EXACT_COMPONENT_JAVA, JVM_SOURCE_EXACT_COMPONENT_KOTLIN,
         ATTENTION_KNOWN_FIRST_INSTALL_TIMES, ATTENTION_INITIALIZED_SOURCES, ATTENTION_PINS,
     )
 

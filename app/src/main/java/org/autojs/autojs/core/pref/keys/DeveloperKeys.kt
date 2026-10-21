@@ -45,6 +45,14 @@ object DeveloperKeys : SettingsDomain {
     @JvmField
     val LEAKCANARY_ENABLED = SettingKey.Bool(R.string.key_leakcanary_enabled, DEVELOPER, SettingDefault.of(true))
 
+    /**
+     * Warn in the console when a finished script is not reclaimed (memory roadmap P2.3, `MemoryDiagnostics`); added
+     * after the P0 inventory and registered like `key_leakcanary_enabled` (appendix C Q16 / Q21).
+     * zh-CN: 已结束的脚本未被回收时在控制台警告 (内存路线图 P2.3); 在 P0 清单之后加入, 与 `key_leakcanary_enabled` 一样登记 (附录 C Q16 / Q21).
+     */
+    @JvmField
+    val MEMORY_UNRECLAIMED_WARNING = SettingKey.Bool(R.string.key_memory_unreclaimed_warning, DEVELOPER, SettingDefault.of(true))
+
     /** The experimental dex compiler plugin is used (only together with a valid component, `DexCompilerOptInStore.read`). */
     @JvmField
     val DEX_COMPILER_EXPERIMENTAL_ENABLED = SettingKey.Bool(name = "dex_compiler_experimental_enabled", category = DEVELOPER, default = SettingDefault.of(false))
@@ -63,7 +71,7 @@ object DeveloperKeys : SettingsDomain {
 
     override val keys: List<PrefKey<*>> = listOf(
         NEW_SCRIPT_MODULE_LAYER, SCRIPT_MODULE_DEBUG_PRINT, SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES, NODEJS_INSPECTOR_ENABLED,
-        LEAKCANARY_ENABLED,
+        LEAKCANARY_ENABLED, MEMORY_UNRECLAIMED_WARNING,
         DEX_COMPILER_EXPERIMENTAL_ENABLED, DEX_COMPILER_EXPERIMENTAL_COMPONENT, R8_COMPILER_EXPLICIT_ENABLED, R8_COMPILER_EXPLICIT_COMPONENT,
     )
 

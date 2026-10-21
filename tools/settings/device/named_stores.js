@@ -146,10 +146,18 @@ function compareStore(storeName, filter) {
     check('stored-entries-' + storeName, function () {
         var id = storeName === 'default' ? org.autojs.autojs.core.pref.store.StoreId.DEFAULT : storeId(storeName);
         var names = prefs(storeName).getAll().keySet().toArray();
-        var compared = 0, undeclared = 0, differ = 0;
+        // Names registered as excluded (left-over keys no code reads any more) are counted apart.
+        var excludedNames = {};
+        var rows = Registry.describe();
+        for (var r = 0; r < rows.size(); r++) {
+            var row = rows.get(r);
+            if (String(row.getStore()) === String(id.getName()) && String(row.getKind().getLabel()) === 'Excluded') excludedNames[String(row.getName())] = true;
+        }
+        var compared = 0, undeclared = 0, differ = 0, excluded = 0;
         for (var i = 0; i < names.length; i++) {
             var name = String(names[i]);
             if (filter && !filter(name)) continue;
+            if (excludedNames[name]) { excluded++; continue; }
             var k = declaredKeyOf(name, id);
             if (!k) { undeclared++; continue; }
             var tag = String(k.getType().getTag());
@@ -164,7 +172,7 @@ function compareStore(storeName, filter) {
             if (!sameRaw(raw.v, tag === 'bool' ? actual === true || String(actual) === 'true' : (tag === 'int' || tag === 'float') ? Number(actual) : (tag === 'stringSet' ? actual : String(actual)))) differ++;
             compared++;
         }
-        info(storeName + ': ' + compared + ' entries compared, ' + undeclared + ' undeclared, ' + differ + ' differ');
+        info(storeName + ': ' + compared + ' entries compared, ' + excluded + ' excluded, ' + undeclared + ' undeclared, ' + differ + ' differ');
         return undeclared === 0 && differ === 0 || undeclared + ' undeclared, ' + differ + ' differ';
     });
 }
@@ -328,6 +336,45 @@ GROUPS.editor_keyboard = function () {
         check('editor-keyboard-after-restart', function () {
             if (!same(Fonts.getSortMode(context).name(), expected.mode)) return 'sort mode lost';
             return same(Fonts.getSelectedVariantId(context, expected.group), 'aj6_settings_probe_variant') || 'selected variant lost';
+        });
+    }
+};
+
+// P3.3: the profile stores; the active APK build profile, the launcher icon option of the plugin install wizard and an
+// ignored version of a probe plugin are changed.
+GROUPS.profiles = function () {
+    var W = Keys.WizardKeys, U = Keys.UpdatesKeys, A = Keys.ApkBuildKeys;
+    var Build = org.autojs.autojs.ui.project.BuildConfigStore;
+    var Install = org.autojs.autojs.core.plugin.center.wizard.PluginInstallWizardProfileStore.INSTANCE;
+    var Ignore = org.autojs.autojs.network.UpdateIgnoreStore.INSTANCE;
+    var probe = 'org.autojs.settings.probe.plugin';
+    var ignoredStore = String(NamedStores.IGNORED_UPDATES.getName());
+    if (AJ6_PHASE === 'change') {
+        ['build_apk_config_profiles', 'permission_wizard', 'plugin_install_wizard', 'jvm_source_provider_selection', ignoredStore]
+            .forEach(function (name) { compareStore(name); });
+        check('profiles-readers', function () {
+            var raw = prefs('build_apk_config_profiles').getString('active_profile', '__default__');
+            var expected = raw === null || String(raw).trim() === '' ? '__default__' : raw;
+            if (!same(Build.getActiveProfileName(context), expected)) return 'active build profile differs';
+            return same(Install.showLauncherIcons(context), prefs('plugin_install_wizard').getBoolean('show_launcher_icons_for_new_plugins', true)) || 'launcher icon option differs';
+        });
+        check('profiles-change', function () {
+            record('build_apk_config_profiles', A.ACTIVE_PROFILE.getName(), 'string');
+            record('plugin_install_wizard', W.PLUGIN_INSTALL_WIZARD_SHOW_LAUNCHER_ICONS.getName(), 'bool');
+            record(ignoredStore, U.IGNORED_PLUGIN_VERSIONS.nameOf(probe), 'stringSet');
+            var show = !Install.showLauncherIcons(context);
+            Build.setActiveProfileName(context, 'aj6_settings_probe');
+            Install.setShowLauncherIcons(context, show);
+            Ignore.ignoreVersion(probe, java.lang.Long.valueOf('999999'), 'probe');
+            state.expected.profiles = { show: show, probe: probe };
+            return true;
+        });
+    } else {
+        var expected = state.expected.profiles;
+        check('profiles-after-restart', function () {
+            if (!same(Build.getActiveProfileName(context), 'aj6_settings_probe')) return 'active build profile lost';
+            if (!same(Install.showLauncherIcons(context), expected.show)) return 'launcher icon option lost';
+            return Ignore.isIgnored(expected.probe, java.lang.Long.valueOf('999999')) || 'ignored version lost';
         });
     }
 };

@@ -56,7 +56,7 @@ class LiteralKeysQ15Test : DomainKeysTestBase() {
         assertNull(DeveloperKeys.R8_COMPILER_EXPLICIT_COMPONENT.getOrNull())
         assertEquals(11, AppearanceKeys.keys.size)
         assertEquals(3, ExtensibilityKeys.keys.size)
-        assertEquals(9, DeveloperKeys.keys.size)
+        assertEquals(10, DeveloperKeys.keys.size)
     }
 
     @Test

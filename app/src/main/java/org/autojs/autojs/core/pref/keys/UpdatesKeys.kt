@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.pref.keys
 
+import org.autojs.autojs.core.pref.KeyFamily
 import org.autojs.autojs.core.pref.PrefKey
 import org.autojs.autojs.core.pref.RegisteredName
 import org.autojs.autojs.core.pref.SettingCategory.Companion.UPDATES
@@ -32,7 +33,19 @@ object UpdatesKeys : SettingsDomain {
         R.string.key_ignored_updates, UPDATES, SettingType.Json(SettingsJson.STRING_LIST, htmlSafe = true), SettingDefault.of(emptyList()),
     )
 
+    /**
+     * Ignored versions per plugin package name in the named store named like [IGNORED_UPDATES] (`UpdateIgnoreStore`,
+     * P3.3): "<versionCode>|<versionName>" or "<versionCode>".
+     * zh-CN: 每个插件包名被忽略的版本, 在与 [IGNORED_UPDATES] 同名的命名存储中 (P3.3).
+     */
+    @JvmField
+    val IGNORED_PLUGIN_VERSIONS = KeyFamily("key_\$_ignored_plugin_\$_") { name ->
+        SettingKey.StrSet(name = name, category = UPDATES, default = SettingDefault.of(emptySet()), store = NamedStores.IGNORED_UPDATES)
+    }
+
     override val keys: List<PrefKey<*>> = listOf(AUTO_CHECK_FOR_UPDATES, IGNORED_UPDATES)
+
+    override val families: List<KeyFamily<*, *>> = listOf(IGNORED_PLUGIN_VERSIONS)
 
     override val names: List<RegisteredName> = excludedNames(
         // Entries of the updates sections that hold no value.

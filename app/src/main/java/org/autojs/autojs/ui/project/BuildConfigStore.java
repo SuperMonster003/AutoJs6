@@ -1,10 +1,10 @@
 package org.autojs.autojs.ui.project;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import org.autojs.autojs.core.pref.Language;
+import org.autojs.autojs.core.pref.keys.ApkBuildKeys;
 import org.autojs.autojs.util.StringUtils;
 import org.autojs.autojs6.R;
 import org.json.JSONArray;
@@ -24,9 +24,7 @@ import java.util.Objects;
  */
 public final class BuildConfigStore {
 
-    private static final String PREF_NAME = "build_apk_config_profiles";
-    private static final String KEY_ACTIVE_PROFILE = "active_profile";
-    private static final String KEY_PROFILES_JSON = "profiles_json";
+    // The named store build_apk_config_profiles: ApkBuildKeys.ACTIVE_PROFILE and ApkBuildKeys.PROFILES (docs/settings/ROADMAP.md P3.3).
 
     private static final String KEY_ROOT_PROFILES = "profiles";
     private static final String KEY_ENTRY_STATE = "state";
@@ -98,8 +96,7 @@ public final class BuildConfigStore {
 
     @NonNull
     public static String getActiveProfileName(@NonNull Context context) {
-        SharedPreferences sp = prefs(context);
-        String name = sp.getString(KEY_ACTIVE_PROFILE, PROFILE_DEFAULT_ID);
+        String name = ApkBuildKeys.ACTIVE_PROFILE.get();
         if (name == null || name.trim().isEmpty()) {
             return PROFILE_DEFAULT_ID;
         }
@@ -107,7 +104,7 @@ public final class BuildConfigStore {
     }
 
     public static void setActiveProfileName(@NonNull Context context, @NonNull String name) {
-        prefs(context).edit().putString(KEY_ACTIVE_PROFILE, name).apply();
+        ApkBuildKeys.ACTIVE_PROFILE.set(name);
     }
 
     @NonNull
@@ -290,13 +287,8 @@ public final class BuildConfigStore {
     }
 
     @NonNull
-    private static SharedPreferences prefs(@NonNull Context context) {
-        return context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-    }
-
-    @NonNull
     private static JSONObject readRootOrCreate(@NonNull Context context) {
-        String raw = prefs(context).getString(KEY_PROFILES_JSON, null);
+        String raw = ApkBuildKeys.PROFILES.storedText();
         JSONObject root;
         try {
             root = raw == null || raw.trim().isEmpty() ? new JSONObject() : new JSONObject(raw);
@@ -310,7 +302,7 @@ public final class BuildConfigStore {
     }
 
     private static void persistRoot(@NonNull Context context, @NonNull JSONObject root) {
-        prefs(context).edit().putString(KEY_PROFILES_JSON, root.toString()).apply();
+        ApkBuildKeys.PROFILES.setStoredText(root.toString());
     }
 
     @NonNull

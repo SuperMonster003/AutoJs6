@@ -23,7 +23,9 @@ CHECK is one of
   stores        P3: for the groups in --groups (comma separated, e.g. q15), the stores and keys moved to the declared
                 layer read what the old code read; one item per group is changed, the app is force-stopped, and a
                 second run checks that the change survived the restart, then restores every changed value; runs
-                device/named_stores.js twice.
+                device/named_stores.js twice. The recorded raw values are kept in --state (default
+                __pycache__/stores-state-SERIAL.json) until the second run has restored them; --phase verify reruns
+                only the second run from that file.
 
 --install installs APK with "adb install -r -d" first (debug builds of the same signature keep their data). The
 script is pushed to /sdcard/Download/aj6-settings-check, started through RunIntentActivity and removed afterwards;
@@ -142,9 +144,15 @@ def editor_check(args, script):
 
 def stores_check(args, script):
     groups = [name.strip() for name in args.groups.split(",") if name.strip()]
+    state_path = args.state or HERE / "__pycache__" / f"stores-state-{args.serial}.json"
     failed = 0
     state = None
-    for phase in ("change", "verify"):
+    phases = ("change", "verify")
+    if args.phase == "verify":
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        print(f"INFO restoring {len(state['records'])} recorded values from {state_path.name}")
+        phases = ("verify",)
+    for phase in phases:
         if phase == "verify":
             if state is None:
                 print("FAIL no state from the change phase")
@@ -163,12 +171,16 @@ def stores_check(args, script):
                 print(f"INFO {rest}")
             elif kind == "state":
                 state = json.loads(urllib.parse.unquote(rest))
-                print(f"INFO recorded {len(state['records'])} values to restore")
+                state_path.parent.mkdir(parents=True, exist_ok=True)
+                state_path.write_text(json.dumps(state, ensure_ascii=True), encoding="utf-8")
+                print(f"INFO recorded {len(state['records'])} values to restore ({state_path.name})")
         if "done" not in lines:
-            print(f"FAIL the {phase} run did not finish (see logcat GlobalConsole)")
+            print(f"FAIL the {phase} run did not finish (see logcat GlobalConsole); rerun with --phase verify to restore")
             failed += 1
             if phase == "change" and state is None:
                 return 1
+        elif phase == "verify" and "PASS restore" in lines and state_path.exists():
+            state_path.unlink()
     print(f"stores: {'FAIL' if failed else 'PASS'} ({failed} failed)")
     return 1 if failed else 0
 
@@ -182,6 +194,7 @@ def main():
     parser.add_argument("--wait", type=int, default=60, help="seconds to wait for the script (default 60)")
     parser.add_argument("--domains", help="domain objects for the domains check, comma separated")
     parser.add_argument("--groups", help="store groups for the stores check, comma separated")
+    parser.add_argument("--phase", choices=("both", "verify"), default="both", help="stores: verify only reruns the restoring run")
     parser.add_argument("--activity", help="activity class for the page check")
     parser.add_argument("--screenshot", type=pathlib.Path, help="PNG written by the page check")
     parser.add_argument("--settle", type=float, default=3.0, help="seconds between starting the page and the screenshot")

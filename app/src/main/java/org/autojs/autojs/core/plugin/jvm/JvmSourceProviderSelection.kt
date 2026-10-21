@@ -2,22 +2,28 @@ package org.autojs.autojs.core.plugin.jvm
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.SharedPreferences
+import org.autojs.autojs.core.pref.keys.NamedStores
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.SharedPreferencesStore
 import org.autojs.plugin.jvmsource.api.JvmSourceLanguage
 
+/**
+ * The exact JVM source provider per language in the named store `jvm_source_provider_selection`
+ * ([PluginCenterKeys.JVM_SOURCE_EXACT_COMPONENT_JAVA] / `_KOTLIN`, docs/settings/ROADMAP.md P3.3, names unchanged).
+ * Writes commit on the SharedPreferences of the store and fail when the commit fails, as before.
+ */
 object JvmSourceProviderSelection {
-    private const val PREFERENCES = "jvm_source_provider_selection"
     // Keep the original key Java-only. Kotlin must never inherit an existing Java selection.
-    private const val KEY_EXACT_COMPONENT_JAVA = "exact_component"
-    private const val KEY_EXACT_COMPONENT_KOTLIN = "exact_component_kotlin"
 
     @JvmStatic
     fun getExact(context: Context): ComponentName? = getExact(context, JvmSourceLanguage.JAVA)
 
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
     fun getExact(context: Context, language: JvmSourceLanguage): ComponentName? {
-        val value = context.applicationContext
-            .getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
-            .getString(storageKey(language), null)
+        val value = key(language).storedOrNull()
         val parsed = JvmSourceComponent.parseExact(value) ?: return null
         return ComponentName(parsed.packageName, parsed.className)
     }
@@ -27,8 +33,10 @@ object JvmSourceProviderSelection {
         setExact(context, JvmSourceLanguage.JAVA, component)
 
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
     fun setExact(context: Context, language: JvmSourceLanguage, component: ComponentName?) {
-        val preferences = context.applicationContext.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+        // The selection must reach the disk, so it commits on the preferences of the store and checks the result.
+        val preferences: SharedPreferences = (SettingsStores[NamedStores.JVM_SOURCE_PROVIDER_SELECTION] as SharedPreferencesStore).preferences
         val key = storageKey(language)
         if (component == null) {
             check(preferences.edit().remove(key).commit()) {
@@ -45,9 +53,11 @@ object JvmSourceProviderSelection {
         }
     }
 
-    internal fun storageKey(language: JvmSourceLanguage): String = when (language) {
-        JvmSourceLanguage.JAVA -> KEY_EXACT_COMPONENT_JAVA
-        JvmSourceLanguage.KOTLIN -> KEY_EXACT_COMPONENT_KOTLIN
+    internal fun storageKey(language: JvmSourceLanguage): String = key(language).name
+
+    private fun key(language: JvmSourceLanguage) = when (language) {
+        JvmSourceLanguage.JAVA -> PluginCenterKeys.JVM_SOURCE_EXACT_COMPONENT_JAVA
+        JvmSourceLanguage.KOTLIN -> PluginCenterKeys.JVM_SOURCE_EXACT_COMPONENT_KOTLIN
     }
 
     internal fun getComponent(
