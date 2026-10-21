@@ -44,7 +44,13 @@ fun interface SpeechEventSink {
  * (插件进程死亡, 脚本停止) 时, [closeLocally] 投递一个合成的 `end` (之前可带一个 `error`). 唤醒会话的轮次事件直接通过, 其 `end` 不结束通道.
  * 纯 Kotlin; Binder 适配器为 [SpeechSessionCallbackBinder] 与 [SpeechWakeCallbackBinder].
  */
-class SpeechEventGate(private val sink: SpeechEventSink) {
+class SpeechEventGate(sink: SpeechEventSink) {
+
+    // Dropped once the channel has ended: the plugin process holds the callback Binder, and with it this gate, for as long as
+    // it keeps its reference, and the sink leads to the script runtime (docs/memory/ROADMAP.md H23).
+    // zh-CN: 通道结束后即丢弃: 插件进程持有回调 Binder (进而持有本闸门) 的时间由它自己决定, 而 sink 通向脚本运行时 (docs/memory/ROADMAP.md H23).
+    @Volatile
+    private var sink: SpeechEventSink? = sink
 
     @Volatile
     var isEnded: Boolean = false
@@ -57,22 +63,29 @@ class SpeechEventGate(private val sink: SpeechEventSink) {
     /** Returns true when the event reached the sink. zh-CN: 事件到达接收方时返回 true. */
     fun accept(event: SpeechEvent): Boolean {
         if (event.type !in SpeechContract.EVENTS) return drop()
+        val target: SpeechEventSink
+        val ending: Boolean
         synchronized(this) {
             if (isEnded) return drop()
-            if (event.round == null && event.type == SpeechContract.EVENT_END) isEnded = true
+            target = sink ?: return drop()
+            ending = event.round == null && event.type == SpeechContract.EVENT_END
+            if (ending) isEnded = true
         }
-        sink.onEvent(event)
+        target.onEvent(event)
+        if (ending) sink = null
         return true
     }
 
     /** Ends the channel on the host side unless it ended already. zh-CN: 若通道尚未结束, 在宿主侧结束它. */
     fun closeLocally(reason: String, error: SpeechError? = null) {
-        synchronized(this) {
+        val target = synchronized(this) {
             if (isEnded) return
             isEnded = true
-        }
-        if (error != null) sink.onEvent(SpeechEvent(SpeechContract.EVENT_ERROR, error = error))
-        sink.onEvent(SpeechEvent(SpeechContract.EVENT_END, linkedMapOf(SpeechResultKeys.REASON to reason)))
+            sink
+        } ?: return
+        if (error != null) target.onEvent(SpeechEvent(SpeechContract.EVENT_ERROR, error = error))
+        target.onEvent(SpeechEvent(SpeechContract.EVENT_END, linkedMapOf(SpeechResultKeys.REASON to reason)))
+        sink = null
     }
 
     private fun drop(): Boolean {
