@@ -21,7 +21,16 @@ internal object ShortcutBackupArchive {
     private val targets = setOf("script", "settings", "docs", "log", "plugins")
     private val pngSignature = byteArrayOf(-119, 80, 78, 71, 13, 10, 26, 10)
 
-    fun write(state: ShortcutBackupState, output: OutputStream) {
+    /**
+     * The exported backup ("Export" of the page, and `data/shortcuts.zip` of a settings archive, D21 / T19), so that
+     * both write the same bytes. Device-local marker generations and in-flight callback tokens are never exported.
+     */
+    fun writeExport(state: ShortcutBackupState, output: OutputStream, time: Long? = null) = write(ShortcutBackupState(entries = state.entries.map {
+        it.copy(requestToken = null, notified = false, iconNoticeShown = false)
+    }), output, time)
+
+    /** [time] is the modification time of the ZIP entries; null leaves it to the writer (the current time). */
+    fun write(state: ShortcutBackupState, output: OutputStream, time: Long? = null) {
         require(state.entries.size <= MAX_ENTRIES)
         require(state.entries.map { it.id }.toSet().size == state.entries.size)
         val root = JsonObject().apply {
@@ -59,7 +68,7 @@ internal object ShortcutBackupArchive {
             override fun close() = flush()
         }).use { zip ->
             fun put(name: String, bytes: ByteArray) {
-                zip.putNextEntry(ZipEntry(name))
+                zip.putNextEntry(ZipEntry(name).also { entry -> time?.let { entry.time = it } })
                 zip.write(bytes)
                 zip.closeEntry()
             }

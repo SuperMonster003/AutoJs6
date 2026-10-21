@@ -13,7 +13,13 @@ number of entries the manifest lists and the number the category file holds, the
     12-byte nonce, data with its 16-byte tag, and a device slot (HKDF-SHA256, a 16-digit hex fingerprint, a 12-byte
     nonce and a wrapped 32-byte key); its entries cannot be counted without the key of the device, so the manifest's
     number is shown as listed;
-  - every data entry has its file under data/; nothing else is in the zip except the reserved plugins/ directory (D3);
+  - every data entry has its file under data/, and the data categories of T19 (P10.1) are checked the way their pages
+    read them, with the manifest's number of entries being the number of shortcuts / libraries the file holds:
+    data_shortcuts is data/shortcuts.zip, a shortcut backup ("autojs6-shortcuts" v1 / v2 holding only manifest.json and
+    icons/<n>.png, each declared icon present once and a PNG), data_color_library is data/color-library.json, a color
+    library document ("autojs6.color-library" schemaVersion 1 with plain or intelligent libraries); data of other ids
+    is only checked to exist;
+  - nothing else is in the zip except the reserved plugins/ directory (D3);
   - with --expect-categories / --expect-ids, the manifest lists that many categories / exactly those ids in that order.
 Values are never printed (the archive may hold credentials, R6). The exit status is 1 when a check fails.
 
@@ -22,6 +28,7 @@ Values are never printed (the archive may hold credentials, R6). The exit status
 import argparse
 import base64
 import binascii
+import io
 import json
 import pathlib
 import re
@@ -34,6 +41,16 @@ TAGS = {"bool", "int", "long", "float", "string", "stringSet", "json"}
 INT_RANGE = (-2 ** 31, 2 ** 31 - 1)
 FINGERPRINT = re.compile(r"[0-9a-f]{16}")
 LONG_RANGE = (-2 ** 63, 2 ** 63 - 1)
+
+# The data categories of T19 and their files (P10.1); the limits are those of ShortcutBackupArchive and ColorLibraryJson.
+DATA_FILES = {"data_shortcuts": "data/shortcuts.zip", "data_color_library": "data/color-library.json"}
+SHORTCUT_ICON = re.compile(r"icons/[0-9]+\.png")
+SHORTCUT_TARGETS = {"script", "settings", "docs", "log", "plugins"}
+SHORTCUT_STATUSES = {"PENDING", "PINNED", "MISSING", "SAVED", "REMOVED"}
+SHORTCUT_LIMITS = {"entries": 1000, "icon": 1024 * 1024, "manifest": 4 * 1024 * 1024, "total": 64 * 1024 * 1024}
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+COLOR = re.compile(r"#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})")
+COLOR_LIBRARY_LIMITS = {"bytes": 2 * 1024 * 1024, "libraries": 256, "items": 4096}
 
 
 def value_matches(tag, value):
@@ -155,16 +172,124 @@ class Inspector:
             if not (isinstance(file, str) and file.startswith("data/")):
                 self.fail(f"a data entry is malformed: {entry!r}")
                 continue
+            did = entry.get("id")
             expected_files.add(file)
+            held = None
             if file not in names:
-                self.fail(f"{entry.get('id')}: {file} is missing")
-            rows.append((entry.get("id"), entry.get("entries"), None, file, False))
+                self.fail(f"{did}: {file} is missing")
+            elif did in DATA_FILES:
+                held = self.check_data(archive, did, file, entry.get("entries"))
+            rows.append((did, entry.get("entries"), held, file, False))
         if not isinstance(manifest.get("plugins", []), list):
             self.fail("plugins is not an array")
         extra = [n for n in names if n not in expected_files and not n.startswith("plugins/")]
         if extra:
             self.fail(f"unexpected files: {extra}")
         return rows
+
+    def check_data(self, archive, did, file, listed):
+        """Checks the file of a data category of T19 and returns the number of entries it holds (None if unreadable)."""
+        if file != DATA_FILES[did]:
+            self.fail(f"{did}: the file is {file}, not {DATA_FILES[did]}")
+        raw = archive.read(file)
+        held = self.check_shortcuts(file, raw) if did == "data_shortcuts" else self.check_color_library(file, raw)
+        if held is not None and listed != held:
+            self.fail(f"{did}: the manifest lists {listed} entries, the file holds {held}")
+        return held
+
+    def check_shortcuts(self, file, raw):
+        """data/shortcuts.zip as ShortcutBackupArchive.read reads it; labels, paths and ids are never printed."""
+        try:
+            inner = zipfile.ZipFile(io.BytesIO(raw))
+        except zipfile.BadZipFile as e:
+            self.fail(f"{file}: not a zip archive: {e}")
+            return None
+        with inner:
+            infos = inner.infolist()
+            names = [info.filename for info in infos]
+            unexpected = [n for n in names if n != "manifest.json" and not SHORTCUT_ICON.fullmatch(n)]
+            if unexpected or len(set(names)) != len(names):
+                self.fail(f"{file}: unexpected or duplicate entries: {sorted(set(unexpected)) or 'duplicates'}")
+            for info in infos:
+                limit = SHORTCUT_LIMITS["manifest" if info.filename == "manifest.json" else "icon"]
+                if info.file_size > limit:
+                    self.fail(f"{file}: {info.filename} inflates to {info.file_size} bytes, more than {limit}")
+            if sum(info.file_size for info in infos) > SHORTCUT_LIMITS["total"]:
+                self.fail(f"{file}: the shortcut backup inflates to more than {SHORTCUT_LIMITS['total']} bytes")
+            if "manifest.json" not in names:
+                self.fail(f"{file}: manifest.json is missing")
+                return None
+            try:
+                root = json.loads(inner.read("manifest.json").decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as e:
+                self.fail(f"{file}: manifest.json is not valid JSON: {e}")
+                return None
+            version = root.get("version") if isinstance(root, dict) else None
+            if not isinstance(root, dict) or root.get("format") != "autojs6-shortcuts" or isinstance(version, bool) or str(version) not in ("1", "2"):
+                self.fail(f"{file}: not a shortcut backup of format autojs6-shortcuts v1 / v2")
+                return None
+            shortcuts = root.get("shortcuts")
+            if not isinstance(shortcuts, list) or len(shortcuts) > SHORTCUT_LIMITS["entries"]:
+                self.fail(f"{file}: shortcuts is not an array of at most {SHORTCUT_LIMITS['entries']} items")
+                return None
+            ids, icons = [], []
+            for index, item in enumerate(shortcuts):
+                fields = ("id", "shortLabel", "longLabel", "target", "status")
+                if not isinstance(item, dict) or not all(isinstance(item.get(k), str) and item[k].strip() for k in fields):
+                    self.fail(f"{file}: shortcut {index} lacks id / shortLabel / longLabel / target / status")
+                    continue
+                ids.append(item["id"])
+                if item["target"] not in SHORTCUT_TARGETS or item["status"] not in SHORTCUT_STATUSES:
+                    self.fail(f"{file}: shortcut {index} has an unknown target or status")
+                if item["target"] == "script" and not str(item.get("path") or "").startswith("/"):
+                    self.fail(f"{file}: shortcut {index} is a script without an absolute path")
+                if "icon" not in item or str(version) == "1" and item["icon"] is None:
+                    self.fail(f"{file}: shortcut {index} declares no icon")
+                elif item["icon"] is not None:
+                    icon = item["icon"]
+                    if not isinstance(icon, str) or icon not in names:
+                        self.fail(f"{file}: the icon of shortcut {index} is missing")
+                    else:
+                        icons.append(icon)
+                        if not inner.read(icon).startswith(PNG_SIGNATURE):
+                            self.fail(f"{file}: the icon of shortcut {index} is not a PNG")
+            if len(set(ids)) != len(ids):
+                self.fail(f"{file}: shortcut ids are not unique")
+            if len(set(icons)) != len(icons) or set(icons) != {n for n in names if n != "manifest.json"}:
+                self.fail(f"{file}: icons are shared or not declared by any shortcut")
+            return len(shortcuts)
+
+    def check_color_library(self, file, raw):
+        """data/color-library.json as ColorLibraryJson.decode reads it; library and color names are never printed."""
+        if len(raw) > COLOR_LIBRARY_LIMITS["bytes"]:
+            self.fail(f"{file}: {len(raw)} bytes, more than {COLOR_LIBRARY_LIMITS['bytes']}")
+        try:
+            doc = json.loads(raw.decode("utf-8").removeprefix("\ufeff"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as e:
+            self.fail(f"{file}: not valid JSON: {e}")
+            return None
+        version = doc.get("schemaVersion") if isinstance(doc, dict) else None
+        if not isinstance(doc, dict) or doc.get("format") != "autojs6.color-library":
+            self.fail(f"{file}: not a color library document (format autojs6.color-library)")
+            return None
+        if isinstance(version, bool) or not isinstance(version, (int, float)) or version != 1:
+            self.fail(f"{file}: schemaVersion {version!r} is not 1")
+            return None
+        libraries = doc.get("libraries")
+        if not isinstance(libraries, list) or not libraries or len(libraries) > COLOR_LIBRARY_LIMITS["libraries"]:
+            self.fail(f"{file}: libraries is not an array of 1 to {COLOR_LIBRARY_LIMITS['libraries']} libraries")
+            return None
+        for index, library in enumerate(libraries):
+            kind = library.get("type") if isinstance(library, dict) else None
+            items = library.get("colors" if kind == "plain" else "groups") if kind in ("plain", "intelligent") else None
+            if not isinstance(items, list):
+                self.fail(f"{file}: library {index} is not a plain library with colors or an intelligent one with groups")
+                continue
+            if len(items) > COLOR_LIBRARY_LIMITS["items"]:
+                self.fail(f"{file}: library {index} holds {len(items)} items, more than {COLOR_LIBRARY_LIMITS['items']}")
+            if kind == "plain" and not all(isinstance(c, dict) and COLOR.fullmatch(str(c.get("color"))) for c in items):
+                self.fail(f"{file}: library {index} holds a color that is not #RRGGBB")
+        return len(libraries)
 
     def check_sealed(self, file, cid, doc):
         if set(doc) != {"id", "sealed"} or doc.get("id") != cid:

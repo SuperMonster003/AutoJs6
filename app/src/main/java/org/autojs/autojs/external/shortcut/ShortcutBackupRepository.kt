@@ -289,13 +289,7 @@ internal class ShortcutBackupRepository private constructor(private val context:
         if (updated != state) save(updated)
     }
 
-    fun export(output: OutputStream) {
-        val state = reconcile()
-        // Device-local marker generations and in-flight callback tokens are never exported.
-        ShortcutBackupArchive.write(ShortcutBackupState(entries = state.entries.map {
-            it.copy(requestToken = null, notified = false, iconNoticeShown = false)
-        }), output)
-    }
+    fun export(output: OutputStream) = ShortcutBackupArchive.writeExport(reconcile(), output)
 
     fun import(input: InputStream): List<String> {
         val incoming = ShortcutBackupArchive.read(input)
