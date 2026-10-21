@@ -221,9 +221,9 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 ### P3 第二批: 重型模块
 
 - [ ] P3.1 images / canvas / ocr (含 mlkit / paddle / rapid) / barcode / qrcode / yolo.
-- [ ] P3.2 dialogs / notice (含 channel) / toast / console / floaty / ui.
+- [ ] P3.2 dialogs / notice (含 channel) / toast / console / floaty / ui. console 迁移时改用新层的 Inspector (P2.3 备忘), 使 `console.log(o)` 与 `util.inspect(o)` 格式一致.
 - [ ] P3.3 automator / auto / selector / RootAutomator / events / keys / flow / toolkit.
-- [ ] P3.4 app / autojs / device / engines / files (含 batchRename) / storages / shell / shizuku / sysprops / settings / power / tasks / WorkManager / threads / timers / continuation / plugins.
+- [ ] P3.4 app / autojs / device / engines / files (含 batchRename) / storages / shell / shizuku / sysprops / settings / power / tasks / WorkManager / threads / timers / continuation / plugins. global 的纯逻辑成员与依赖宿主的成员清单见 P2.2 条目 (8), 先完成附录 C Q17 的共享设施.
 - [ ] P3.5 http / web / WebSocket / zip / sqlite / media / sensors / recorder / crypto / tts.
 - [ ] P3.6 每个模块同 P2.4; 第二批额外要求真机 smoke (XQ-AT72 与 G8441 各一次).
 - [ ] P3.7 `jvm-npm.js` Kotlin 化: 基于 Rhino commonjs `Require` 实现 AutoJs6 的路径解析 (相对路径, npm 目录, 核心模块名), 模块缓存与函数包装隔离, 修复 issue #564; 核心模块名与第三方库名的解析交给 T11 的插件模块源 (附录 C Q6 已拍板: 垫片随 P4.3 迁入插件).
@@ -237,7 +237,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 ### P5 切换与清理
 
 - [ ] P5.1 开关默认开; 真机矩阵 (附录 B 设备) 跑 `tools/augment` 全套与现有设备测试; `.changelog` 记录.
-- [ ] P5.2 删除旧 `augment` 包与 `assets/modules/obsolete/`; 删除开关; `AGENTS.md` 路径更新; `.changelog` 记录.
+- [ ] P5.2 删除旧 `augment` 包与 `assets/modules/obsolete/`; 删除开关; `AGENTS.md` 路径更新; `.changelog` 记录. 删除前迁出新层对旧包的依赖 (P2.3 备忘): `ColorNativeObject` (附录 C Q20), colors.extract 的区域解析 `Images.buildRegionInternal`, versionCodes 的数据 `VersionCodes.Info` / `VersionCodesInfo` (KSP version-codes 处理器生成在 augment.util 包).
 - [ ] P5.3 (文档) `tools/api-coverage` 与 android-dts-generator 改读 `script-modules.json` (T10); 文档仓库与 d.ts 仓库同步. 附录 C Q3 已拍板的两项: 生成 "桥接覆盖报告" (参数与返回全为原始值 / JSON 的函数中尚无 Node 入口者, 与 `NodeBridgeProtocol` 的方法名表比对, 产物放 `tools/augment/`), NodeJs Runtime 插件的 d.ts 生成 (`node-types.gradle.kts`) 改读 `script-modules.json` 的参数规格; 不生成桥接分发代码.
 
 ### P6 门禁
@@ -417,6 +417,13 @@ fg 下 epilogue 本来只有 4 ms, 其中约 3 ms 是这 7 个类的反射; back
 | Q14 | (P2.5 登记) 非 UI 线程上 `ResultAdapter` 实例的 `get()` 改为直接返回结果或抛出错误, 旧 JS 返回 `{ result }` 包装对象. `ResultAdapter` 是引擎内部对象 (Kotlin 侧反向调用), d.ts 与文档未公开其实例方法. 建议: 接受, P5.3 核对 d.ts 没有相反声明. | 已拍板 (2026-10-20, 维护者): 接受. |
 | Q15 | (P2.5 登记) `__exitIfError__` 的 action 回调内不能再使用协程 (await 等), 与全部 Kotlin 模块的回调一致; 旧 JS 实现允许. 建议: 接受, 文档注明. | 已拍板 (2026-10-20, 维护者): 接受, 文档注明. |
 | Q16 | (P2.5 登记) `runtime-init-epilogue` 收编后仍有 30-31 ms, 大头是 `jvm-npm.js` 加载时访问 7 个 Java 类 (每个新脚本重新反射, 单个类首次访问 0.8-7.5 ms). P2.5 建议不等 P3.7, 先改为用到时才取, 预计再省十几 ms. 建议: 接受, 由 P2.5 会话在等待真机 smoke 期间顺手完成, 计入 P2.5 证据. | 已拍板 (2026-10-20, 维护者): 接受, 由 P2.5 会话在等待真机 smoke 期间完成. |
+| Q17 | (P2.2 登记) global 的迁移 (维护者 2026-10-21 已定顺延 P3) 需要共享设施: `@ScriptModule` 增加 "只挂全局成员, 不建模块对象" 的选项, GlobalClasses 这类 getter 代理的注解或手写挂载, TODO 的消息资源; 成员清单见 P2.2 条目 (8). 建议: P3 开始前由 P3 的第一个会话作为共享设施单独提交, 再做 global. | P3 开始前 |
+| Q18 | (P2.2 登记) cvt / fmt / s13n.bytes 修正后两处改变了 6.7.0 起的可见结果: 超过 2^53 - 1 的整数结果为 bigint (文档写明 number 或 bigint, 脚本对结果做 number 运算会因混用 BigInt 抛 TypeError), fractionDigits 对目标单位 B 也生效. 建议: 按文档 (现状), P5.1 在 changelog 记录. | P2.4 之前 |
+| Q19 | (P2.2 登记) 生成层错误消息里子模块与可调用模块的方法名没有父模块路径 (显示为 "bytes()" / "species()" 而不是 "cvt.bytes"), 是处理器的显示名. 建议: 处理器显示名改为完整路径, 在 P2.4 的共享层修正中一并做. | P2.4 |
+| Q20 | (P2.3 登记) 新层的 Color / colors.build 仍返回旧类 `ColorNativeObject` (未迁移的 images / dialogs / ui / compose / console / s13n / 画笔参数以该类识别 Color 对象), 实例方法因此仍为旧实现且 JVM 不能构造. 建议: P3 迁移这些模块后在新层定义 Color 实例类并让新模块接受, P5.2 删除旧类时一并完成. | P3.1 开始前 |
+| Q21 | (P2.3 登记) util.inspect 的数组输出长度: 文档 maxArrayItems 默认 10000 (新层照此全部输出, 2000 个对象 1.9 s), 现有 Kotlin 只输出前 100 个 (0.24 s); 超过上限时新层保留首 100 / 尾 20 摘要. 建议: 按文档 (现状). | P2.4 之前 |
+| Q22 | (P2.3 登记) colors.summary 的格式: 新层按文档与旧 JS (`hex(...), rgba(r,g,b/a), int(...)`), 现有 Kotlin 为 `Color { ... }`. 建议: 按文档 (现状). | P2.4 之前 |
+| Q23 | (P2.5 登记) UI 模式下协程的第二次挂起会结束脚本 (既有缺陷, 改动前后相同): 定时器回调恢复的协程再次挂起时, `Timer.callFunction` 在主 Looper 把 ContinuationPending 当错误交给 `runtime.exit`; 示例 "协程/UI模式中使用协程" 命中. 建议: 单独的小修复任务 (`core/looper`, `Timer.callFunction` 像 `RhinoUtils.callFunction` 一样放过 ContinuationPending), 以该示例与 P2.5 的 ui smoke (恢复两次挂起) 回归; 不在本路线图范围, 但在 P5.1 切换前完成. | 立即可做 |
 
 ## 附录 D 工具用法
 
