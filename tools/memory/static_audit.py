@@ -15,7 +15,15 @@ It is a text scan, not a compiler: comments and string literals are blanked firs
 taken from declarations, and the ownership column (process / script / page) is guessed from the
 package path. Every row needs a human look before it becomes an appendix B decision.
 
+--guard (ROADMAP T8 / P4.3) writes the generated columns of the source guard whitelist instead of the
+report: the fields of (a) other than weak references (Android Context included), the registries of (c)
+and the files of (b) that call registerReceiver / bindService / addIdleHandler / Looper.prepare or
+create a WebView. Reasons already written for a key are kept, new keys get the reason TODO.
+app/src/test/java/org/autojs/autojs/memory/StaticReferenceScanner.kt implements the same rules and
+StaticReferenceGuardTest checks that both give the same rows.
+
 Usage: py -3.12 -I tools/memory/static_audit.py [--out docs/memory/evidence] [--json]
+       py -3.12 -I tools/memory/static_audit.py --guard [--check]
 """
 import argparse
 import datetime
@@ -26,6 +34,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "app" / "src" / "main" / "java"
+WHITELIST = ROOT / "app" / "src" / "test" / "resources" / "memory" / "static-reference-whitelist.txt"
 
 RHINO_SCOPE_TYPES = {"Scriptable", "ScriptableObject", "NativeObject", "NativeArray", "NativeFunction", "BaseFunction",
                      "TopLevelScope", "VarScope", "ImporterTopLevel", "NativeJavaObject", "IdScriptableObject"}
@@ -159,6 +168,10 @@ def container_kind(type_text):
     return "value"
 
 
+# Kotlin collection factories with explicit type arguments give the type of a property declared without one (P4.3).
+KOTLIN_FACTORIES = {"mutableListOf": "MutableList", "mutableSetOf": "MutableSet", "mutableMapOf": "MutableMap",
+                    "arrayListOf": "ArrayList", "hashSetOf": "HashSet", "hashMapOf": "HashMap",
+                    "linkedSetOf": "LinkedHashSet", "linkedMapOf": "LinkedHashMap"}
 REGISTRY_HINT = re.compile(r"Thread|Looper|Listener|Callback|Window|Wrapper|Engine|Runtime|ClassLoader|Receiver|"
                            r"Connection|Observer|Handler|Execution|Session|Scope|Delegate|Bitmap|Image|\bMat\b")
 
@@ -238,7 +251,8 @@ def kotlin_statics(path, code, imports):
         if not type_text:
             source = (initializer or delegate or "").strip()
             inferred = re.match(r"(?:lazy\s*\{\s*)?(?:Collections\.\w+\s*\(\s*)?([A-Z][\w.]*\s*(?:<.*>)?)\s*[({]", source)
-            type_text = inferred[1] if inferred else ""
+            factory = re.match(r"(?:lazy\s*\{\s*)?(" + "|".join(KOTLIN_FACTORIES) + r")\s*(<.*>)\s*\(", source)
+            type_text = inferred[1] if inferred else KOTLIN_FACTORIES[factory[1]] + factory[2] if factory else ""
         if not type_text:
             continue
         found, holding = categories(type_text, imports)
@@ -295,6 +309,102 @@ def registry_rows(statics):
             and row["categories"] != ["AndroidContext"] and interesting(row)
             and (ownership(row["file"]) == "script" or REGISTRY_HINT.search(row["type"]))]
     return sorted(rows, key=lambda r: (ownership(r["file"]) != "script", r["file"], r["line"]))
+
+
+GUARD_CALLS = ("registerReceiver", "bindService", "WebView(", "addIdleHandler", "Looper.prepare")
+GUARD_HEADER = """\
+# Static reference guard whitelist (docs/memory/ROADMAP.md T7 / T8, P4.3)
+#
+# Read by app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt (part of :app:testAppDebugUnitTest).
+# Every process-level reference the guard finds in app/src/main/java needs a line here with a reason:
+#   field   a Java static field or a Kotlin object / companion object / top-level property whose type mentions
+#           ScriptRuntime, ScriptEngine, a Rhino Scriptable or Context, Activity, View, Fragment, Dialog or an Android
+#           Context and is not a WeakReference / SoftReference; or a process-level map / set / list / array in a script
+#           package or typed with threads, loopers, listeners, windows, images, engines or class loaders
+#           (sections (a) and (c) of tools/memory/static_audit.py)
+#   call    a file that calls registerReceiver / bindService / addIdleHandler / Looper.prepare or creates a WebView
+#   manual  an appendix B.1 entry the text scan does not report (instance fields of process singletons, event buses);
+#           written by hand, the test only checks that the file still declares the name
+#
+# Columns: kind | path under org/autojs/autojs/ | name | detail | reason | note. The first four columns of field and
+# call lines are generated. After adding, removing or retyping such a reference run
+#     py -3.12 -I tools/memory/static_audit.py --guard
+# It keeps the reason and note of every existing key, drops keys that are gone and adds new keys with the reason TODO;
+# then replace TODO with a reason and a note (what the reference holds, who releases it). A WeakReference or a cleanup
+# per runtime / owner id (ROADMAP T7) is preferred over a new line.
+#
+# Reasons:
+#   process  process-level by design: holds the Application, process singletons or data that outlive every script
+#   table    constant, function or class table filled once; holds no script, Rhino or UI instance
+#   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds
+#   owner    entries are removed per runtime / owner id when the owner ends (gate scenario in the note)
+#   paired   (call) the release call is in the same file
+#   p4.2     to be normalized in ROADMAP P4.2 (T7): delete the line, or change the reason, when that is done
+#   p4.4     to be handled in ROADMAP P4.4 (Rhino class loaders)
+#   page     page / UI lifetime outside the script path, covered by the P4.5 LeakCanary audit
+#   exempt   a text scan false positive: not a process-level field, or not a registration (the note says why)
+"""
+GUARD_SECTIONS = (("field", "# Process-level fields"), ("call", "# Registration calls"),
+                  ("manual", "# Appendix B.1 entries the scan does not report (hand-written)"))
+GUARD_TODO = "TODO | describe what it holds and who releases it"
+
+
+def guard_rows(statics, pairs):
+    """Generated whitelist columns (kind, path, name, detail) in file order; StaticReferenceScanner gives the same rows."""
+    selected = {}
+    for row in [r for r in statics if r["categories"] and r["holding"] != "weak"] + registry_rows(statics):
+        selected[(row["file"], row["line"], row["name"])] = row
+    rows, seen = [], {}
+    for path, line, name in sorted(selected):
+        row = selected[(path, line, name)]
+        seen[(path, name)] = seen.get((path, name), 0) + 1
+        key = name if seen[(path, name)] == 1 else f"{name}#{seen[(path, name)]}"
+        rows.append(("field", path, key, f"{row['holder']}; {row['holding']}; {', '.join(row['categories']) or '-'}"))
+    for kind in GUARD_CALLS:
+        for row in pairs[kind]:
+            rows.append(("call", row["file"], kind, f"released: {'yes' if row['paired'] else 'no'}; {row['ownership']}"))
+    return sorted(rows, key=" | ".join)
+
+
+def write_guard(rows, check):
+    """Rewrites the whitelist keeping the hand-written columns; with check, only reports whether it is current."""
+    previous = WHITELIST.read_text(encoding="utf-8") if WHITELIST.exists() else ""
+    reasons, manual = {}, []
+    for line in previous.splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        parts = line.split(" | ", 5)
+        if parts[0] == "manual":
+            manual.append(line)
+        elif len(parts) == 6:
+            reasons[tuple(parts[:3])] = " | ".join(parts[4:])
+    lines = [GUARD_HEADER]
+    for kind, title in GUARD_SECTIONS:
+        lines += [title, ""]
+        if kind == "manual":
+            lines += manual
+        else:
+            lines += [" | ".join(row) + " | " + reasons.get(row[:3], GUARD_TODO) for row in rows if row[0] == kind]
+        lines.append("")
+    content = "\n".join(lines)
+    keys = {row[:3] for row in rows}
+    added = [key for key in sorted(keys) if key not in reasons]
+    removed = [key for key in sorted(reasons) if key not in keys]
+    todo = sum(1 for row in rows if reasons.get(row[:3], GUARD_TODO).startswith("TODO "))
+    for key in added:
+        print("added (reason TODO): " + " | ".join(key))
+    for key in removed:
+        print("removed: " + " | ".join(key))
+    print(f"{len(rows)} generated rows ({sum(1 for r in rows if r[0] == 'field')} fields, {sum(1 for r in rows if r[0] == 'call')} calls), "
+          f"{len(manual)} manual; added {len(added)}, removed {len(removed)}, TODO {todo}")
+    if check:
+        current = content == previous.replace("\r\n", "\n")
+        print(f"{WHITELIST.relative_to(ROOT).as_posix()}: {'current' if current else 'out of date, run with --guard'}")
+        return 0 if current else 1
+    with open(WHITELIST, "w", encoding="utf-8", newline="\n") as file:
+        file.write(content)
+    print(f"Written: {WHITELIST.relative_to(ROOT).as_posix()}")
+    return 0
 
 
 def git_head():
@@ -368,8 +478,13 @@ def main():
     parser.add_argument("--out", type=Path, default=ROOT / "docs" / "memory" / "evidence")
     parser.add_argument("--json", action="store_true", help="Also write static-audit-<date>.json")
     parser.add_argument("--date", default=datetime.date.today().strftime("%Y%m%d"))
+    parser.add_argument("--guard", action="store_true", help="Update the source guard whitelist instead of writing the report")
+    parser.add_argument("--check", action="store_true", help="With --guard: write nothing, exit 1 when the whitelist is out of date")
     args = parser.parse_args()
     files, statics, pairs = audit()
+    if args.guard:
+        WHITELIST.parent.mkdir(parents=True, exist_ok=True)
+        return write_guard(guard_rows(statics, pairs), args.check)
     args.out.mkdir(parents=True, exist_ok=True)
     head = git_head()
     report = args.out / f"static-audit-{args.date}.md"
