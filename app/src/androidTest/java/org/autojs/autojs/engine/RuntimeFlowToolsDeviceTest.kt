@@ -79,6 +79,29 @@ class RuntimeFlowToolsDeviceTest {
     @Test fun nodeAdvancedToolsAndEvents() = exercise("node")
     @Test fun bunAdvancedToolsAndEvents() = exercise("bun")
     @Test fun workerAdvancedToolsAndEvents() = exercise("worker")
+    @Test fun workerModesReleaseNativeListenersAndPreserveParent() = fixture {
+        val before = AccessibilityService.eventBus.subscriptionCount
+        val result = harness.execute("node", """
+            const flow=require('flow'),{Worker}=require('node:worker_threads');
+            const parent=flow.waitForEvent('view_clicked',null,Infinity);await parent.ready;
+            const body="const task=flow.waitForEvent('view_clicked',null,Infinity);await task.ready;const found=await flow.findAny(['Flow missing worker target'],{timeout:0});parentPort.postMessage({pending:task.state==='pending',found});";
+            const cjs="const {parentPort}=require('node:worker_threads'),flow=require('flow');(async()=>{"+body+"})().catch(e=>{throw e;});";
+            const esm="import {parentPort} from 'node:worker_threads';import flow from 'autojs6:flow';"+body;
+            const nested="const {parentPort,Worker}=require('node:worker_threads'),w=new Worker("+JSON.stringify(cjs)+",{eval:true});w.on('message',v=>parentPort.postMessage(v));w.on('error',e=>{throw e;});";
+            try{
+                for(const [entry,options] of [[cjs,{eval:true}],[new URL('data:text/javascript,'+encodeURIComponent(esm)),{}],[nested,{eval:true}]]){
+                    const w=new Worker(entry,options);
+                    try{eq(await new Promise((resolve,reject)=>{w.once('message',resolve);w.once('error',reject);}),{pending:true,found:null},'Native Worker Flow');}
+                    finally{await w.terminate();}
+                    eq(parent.state,'pending','Parent listener preserved');
+                }
+                parent.cancel();await parent.catch(error=>eq(error.code,'CANCELLED','Parent cancellation'));
+                return {modes:3,parentPreserved:true};
+            }finally{await flow.dispose();}
+        """.trimIndent(), capabilities = listOf("accessibility", "events"))
+        harness.await("Worker Flow listeners released") { AccessibilityService.eventBus.subscriptionCount == before }
+        File(context.getExternalFilesDir(null), "runtime-flow-tools-worker-modes.json").writeText(result.toString(2))
+    }
     @Test fun bunFlowGrantIsSeparateFromAccessibility() = fixture(mapOf("flow.control" to false)) {
         val result = harness.execute("bun", """
             const flow=host.flow;let error;try{await flow.findAny(['missing']);}catch(e){error=e;}
