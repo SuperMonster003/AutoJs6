@@ -14,6 +14,8 @@ internal data class ModuleModel(
     val qualifiedName: String,
     val simpleName: String,
     val name: String,
+    /** The script path (`util.inspect` for a sub-module), used in the messages of the generated layer (appendix C Q19). */
+    val path: String,
     val aliases: List<String>,
     val dollarPrefix: Boolean,
     val eager: Boolean,

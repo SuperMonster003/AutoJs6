@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.TestScriptModules
+import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -330,12 +331,39 @@ class ScriptArgsTest {
                 "TypeError: Failed to call method \"sample.touch\": [ Method only accepts 1 argument ]",
             "sample.keys({ 2: 'x', a: 1 }).join()" to "2,a",
             "sample.count([1, , 3])" to "3",
+            // The module object called or constructed is named like the mounter names it (appendix C Q19, P2.4).
+            "(function () { try { sample(); } catch (e) { return e.name + ': ' + e.message; } })()" to
+                "TypeError: Failed to call method \"sample\": [ Method only accepts 1 argument ]",
+            "(function () { try { new sample(); } catch (e) { return e.name + ': ' + e.message; } })()" to
+                "TypeError: Failed to call method \"new sample\": [ Method only accepts 1 argument ]",
         )
         val failures = cases.mapNotNull { (expression, expected) ->
             val actual = js(expression).let { if (it is CharSequence) it.toString() else org.mozilla.javascript.Context.toString(it) }
             if (actual == expected) null else "$expression\n    expected $expected\n    actual   $actual"
         }
         assertTrue("Unexpected results:\n" + failures.joinToString("\n"), failures.isEmpty())
+    }
+
+    /**
+     * P2.4: [ScriptArgs.toJs] returns the values `RhinoUtils.toJsValue` leaves unchanged without entering it, and gives
+     * every other value the same conversion; [ScriptArgs.rest] from index 0 is the argument array itself.
+     */
+    @Test
+    fun resultsMatchTheRhinoUtilsConversion() {
+        val scope = rhino.ktScope
+        val unchanged = listOf(null, "s", true, 1.5, 7, js("({ a: 1 })"), js("[1]"), undefined)
+        unchanged.forEach { value -> assertSame("toJs($value)", RhinoUtils.toJsValue(scope, value), ScriptArgs.toJs(scope, value)) }
+        val converted = listOf(7L, 2.5f, ConsString("a", "b"), Unit, Scriptable.NOT_FOUND, listOf(1, "x"), arrayOf("a"), mapOf("k" to 1), TimeUnit.SECONDS)
+        converted.forEach { value ->
+            val expected = RhinoUtils.toJsValue(scope, value)
+            val actual = ScriptArgs.toJs(scope, value)
+            assertEquals("toJs($value)", expected?.javaClass, actual?.javaClass)
+            assertEquals("toJs($value)", org.mozilla.javascript.Context.toString(expected), org.mozilla.javascript.Context.toString(actual))
+        }
+        val args = arrayOf<Any?>("a", 1.0)
+        assertSame(args, ScriptArgs.rest(args, 0, "f", "p"))
+        assertArrayEquals(arrayOf<Any?>(1.0), ScriptArgs.rest(args, 1, "f", "p"))
+        assertEquals(0, ScriptArgs.rest(args, 2, "f", "p").size)
     }
 
     @Test

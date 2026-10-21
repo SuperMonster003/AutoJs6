@@ -45,17 +45,19 @@ internal object BindingGenerator {
         appendSet(model)
         appendLine()
         appendLine("    override fun prototype(module: $m): Any? = ${model.prototype?.let { "module.${id(it.kotlinName)}${if (it.isFunction) "()" else ""}" } ?: "null"}")
+        // Messages name the member by its script path, as the module mounter does for Java exceptions (appendix C Q19):
+        // `cvt.bytes.strict`, `util.inspect` for an invocable sub-module, `new Color`.
         model.functions.forEach { group ->
             appendLine()
-            appendDispatcher("f${group.id}", "${model.name}.${group.name}", group.overloads, model)
+            appendDispatcher("f${group.id}", "${model.path}.${group.name}", group.name, group.overloads, model)
         }
         model.invoke?.let {
             appendLine()
-            appendDispatcher("invoke", "${model.name}()", listOf(it), model)
+            appendDispatcher("invoke", model.path, model.name, listOf(it), model)
         }
         model.construct?.let {
             appendLine()
-            appendDispatcher("construct", "new ${model.name}()", listOf(it), model, constructor = true)
+            appendDispatcher("construct", "new ${model.path}", "new ${model.name}", listOf(it), model, constructor = true)
         }
         appendLine()
         appendLine("}")
@@ -121,7 +123,7 @@ internal object BindingGenerator {
         appendLine("    override fun set(module: ${model.qualifiedName}, id: Int, value: Any?) {")
         appendLine("        when (id) {")
         writable.forEach { a ->
-            appendLine("            ${a.id} -> module.${id(a.kotlinName)} = ${convert(a.setterParam!!, "value", "${model.name}.${a.name}")}")
+            appendLine("            ${a.id} -> module.${id(a.kotlinName)} = ${convert(a.setterParam!!, "value", "${model.path}.${a.name}")}")
         }
         appendLine("            else -> throw ScriptArgs.unknownMember(${lit(model.name)}, id)")
         appendLine("        }")
@@ -131,9 +133,10 @@ internal object BindingGenerator {
     /**
      * One private dispatcher per script function: trailing `undefined` arguments beyond the required ones count as
      * omitted, the argument count selects the overloads, and argument type guards decide between overloads with the
-     * same count.
+     * same count. [display] names the member in messages, [scriptName] heads the candidate signatures of a failed overload
+     * resolution.
      */
-    private fun StringBuilder.appendDispatcher(functionName: String, display: String, overloads: List<Overload>, model: ModuleModel, constructor: Boolean = false) {
+    private fun StringBuilder.appendDispatcher(functionName: String, display: String, scriptName: String, overloads: List<Overload>, model: ModuleModel, constructor: Boolean = false) {
         val m = model.qualifiedName
         val minRequired = overloads.minOf { it.required }
         val finiteMax = overloads.mapNotNull { it.max }.maxOrNull() ?: -1
@@ -152,10 +155,10 @@ internal object BindingGenerator {
         for (count in 0..limit) {
             val candidates = overloads.filter { count >= it.required && (it.max == null || count <= it.max!!) }
             if (candidates.isEmpty()) continue
-            appendLine("            $count -> ${branch(candidates, count.toString(), display, constructor)}")
+            appendLine("            $count -> ${branch(candidates, count.toString(), display, scriptName, constructor)}")
         }
         val tail = if (varargs.isNotEmpty()) {
-            "if (n > $limit) ${branch(varargs, "n", display, constructor)} else throw ScriptArgs.arityError(${lit(display)}, $minRequired, $maxLabel, n)"
+            "if (n > $limit) ${branch(varargs, "n", display, scriptName, constructor)} else throw ScriptArgs.arityError(${lit(display)}, $minRequired, $maxLabel, n)"
         } else {
             "throw ScriptArgs.arityError(${lit(display)}, $minRequired, $maxLabel, n)"
         }
@@ -164,14 +167,13 @@ internal object BindingGenerator {
         appendLine("    }")
     }
 
-    private fun branch(candidates: List<Overload>, count: String, display: String, constructor: Boolean): String {
+    private fun branch(candidates: List<Overload>, count: String, display: String, scriptName: String, constructor: Boolean): String {
         val fixed = count.toIntOrNull()
         if (candidates.size == 1) return result(candidates[0], fixed, display, constructor)
         val ordered = candidates.sortedBy { o -> if (guard(o, fixed) == "true") 1 else 0 }
         return buildString {
             append("when {")
             ordered.forEach { o -> append(" ${guard(o, fixed)} -> ${result(o, fixed, display, constructor)};") }
-            val scriptName = display.substringAfterLast('.')
             append(" else -> throw ScriptArgs.noOverload(${lit(display)}, args, ${lit(candidates.joinToString(" | ") { it.signature(scriptName) })}) }")
         }
     }

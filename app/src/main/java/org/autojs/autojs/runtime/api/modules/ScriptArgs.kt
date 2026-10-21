@@ -183,9 +183,17 @@ object ScriptArgs {
 
     // Variable arguments: everything from index [from] on.
 
+    /**
+     * The raw values from index [from] on. From index 0 this is [args] itself: the generated code only passes it on with
+     * the spread operator, which copies it (P2.4: one copy per call of a rest-parameter function such as `isNullish`).
+     */
     @JvmStatic
-    fun rest(args: Array<out Any?>, from: Int, function: String, param: String): Array<Any?> =
-        if (from >= args.size) emptyArray() else Array(args.size - from) { i -> args[from + i] }
+    @Suppress("UNCHECKED_CAST")
+    fun rest(args: Array<out Any?>, from: Int, function: String, param: String): Array<Any?> = when {
+        from == 0 -> args as Array<Any?>
+        from >= args.size -> emptyArray()
+        else -> Array(args.size - from) { i -> args[from + i] }
+    }
 
     @JvmStatic
     fun strings(args: Array<out Any?>, from: Int, function: String, param: String): Array<String> =
@@ -224,8 +232,16 @@ object ScriptArgs {
 
     // Results.
 
+    /**
+     * The script value of a result, as `RhinoUtils.toJsValue` converts it. Values it returns unchanged (null, script
+     * objects, strings, numbers, booleans, `undefined`) are returned here without entering it, which would look up the
+     * current Context and allocate an identity map for every call (P2.4: most results of the light functions).
+     */
     @JvmStatic
-    fun toJs(scope: VarScope, value: Any?): Any? = RhinoUtils.toJsValue(scope, value)
+    fun toJs(scope: VarScope, value: Any?): Any? = when (value) {
+        null, is String, is Boolean, is Double, is Int, is Scriptable, is Undefined -> value
+        else -> RhinoUtils.toJsValue(scope, value)
+    }
 
     /** The result of a function returning `Unit`. */
     @JvmStatic

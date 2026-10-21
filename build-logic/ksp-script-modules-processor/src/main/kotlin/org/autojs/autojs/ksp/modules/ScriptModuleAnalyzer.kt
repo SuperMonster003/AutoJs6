@@ -112,6 +112,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             qualifiedName = qualifiedName,
             simpleName = declaration.simpleName.asString(),
             name = scriptName,
+            path = pathOf(declaration),
             aliases = moduleAnnotation.strings("aliases"),
             dollarPrefix = moduleAnnotation.boolean("dollarPrefix", true),
             eager = moduleAnnotation.boolean("eager", false),
@@ -128,6 +129,21 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             builtIn = builtIn,
             source = sourceOf(declaration),
         ).takeUnless { failed }
+    }
+
+    /**
+     * The script path of a module, as scripts reach it (`util.inspect`, `cvt.bytes`): the names along its `parent` chain
+     * (appendix C Q19). A cycle or a parent without `@ScriptModule` ends the chain; both are reported elsewhere.
+     */
+    private fun pathOf(declaration: KSClassDeclaration, seen: Set<String> = emptySet()): String {
+        val annotation = declaration.annotation(ScriptModuleNames.MODULE) ?: return declaration.simpleName.asString()
+        val name = annotation.string("name")
+        val self = declaration.qualifiedName?.asString() ?: return name
+        val parent = annotation.type("parent")?.declaration as? KSClassDeclaration ?: return name
+        val parentName = parent.qualifiedName?.asString()
+        if (parentName == null || parentName == "kotlin.Unit" || parentName == self || parentName in seen) return name
+        if (parent.annotation(ScriptModuleNames.MODULE) == null) return name
+        return pathOf(parent, seen + self) + "." + name
     }
 
     private fun instanceOf(declaration: KSClassDeclaration): ModuleInstance? {
