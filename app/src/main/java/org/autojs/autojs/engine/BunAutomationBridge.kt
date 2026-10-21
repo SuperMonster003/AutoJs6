@@ -202,7 +202,7 @@ internal class BunAutomationBridge(
             Grants.EVENTS_OBSERVE to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),
             Grants.NOTIFICATIONS_POST to setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings"),
             Grants.APP_CONTROL to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo"),
-            Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
+            Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "flowProbe", "flowForeground", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
             Grants.CLIPBOARD_CONTROL to setOf("getText", "setText", "hasText"),
             Grants.STORAGE_CONTROL to setOf("get", "put", "remove", "clear", "keys", "contains"),
             Grants.SHELL_CONTROL to setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission"),

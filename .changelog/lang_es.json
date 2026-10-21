@@ -12,6 +12,7 @@
         "Node.js pinyin/pinyin4j y los controles de ventana de consola ahora llaman al host de forma asíncrona; los scripts deben esperar los resultados con await"
       ],
       "feature": [
+        "Cadenas asíncronas flow y esperas de condición/estabilidad para Node.js, Bun y Workers, con cancelación de ramas, reintentos por paso e instantáneas de la interfaz del anfitrión",
         "Node.js/Bun/Worker: Conexiones de correo, mensajes, adjuntos y vigilancia de buzones, con cancelación y limpieza de Workers",
         "Los accesos nuevos y ya fijados se archivan automáticamente, con exportación/importación y restauración en lote; los iconos ilegibles se pueden elegir individualmente o completar en lote con los predeterminados sin sobrescribir los guardados; tras descongelar, los accesos ausentes se muestran en la página de copias sin avisos en la página principal, y las eliminaciones manuales reconocidas no se seleccionan por defecto; las copias del mismo script conservan sus ID independientes (búsqueda de accesos existentes con Android 7.1+, detección automática con Android 8+) (acceso: Ajustes > Configuración > Copia de accesos directos)",
         "Asistente de configuración para ejecutar sucesivamente los asistentes de permisos e instalación de complementos, accesible desde el mensaje de bienvenida tras el primer inicio (acceso: Ajustes > Configuración > Asistente de configuración)",

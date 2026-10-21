@@ -4,7 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const host=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..'),root=path.dirname(host);
-const read=file=>fs.readFileSync(file,'utf8');
+const read=file=>fs.readFileSync(file,'utf8').replace(/\r\n?/g,'\n');
 const native=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeViewAttributes.kt'));
 const widgets=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeViewWidgets.kt'));
 const components=read(path.join(host,'app/src/main/java/org/autojs/autojs/engine/RuntimeViewComponents.kt'));

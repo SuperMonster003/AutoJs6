@@ -747,6 +747,8 @@ object NodeBridgeModules {
         "clickText",
         "findOne",
         "findAll",
+        "flowProbe",
+        "flowForeground",
         "longClick",
         "setText",
         "scrollForward",
@@ -2048,6 +2050,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchAccessibilityOperation(request: NodeBridgeRequest): NodeBridgeResponse {
         val service = AutoJsAccessibilityService.instance
         if (service == null || !AutoJsAccessibilityService.registry.isOperational) {
+            if (request.method == "flowProbe" || request.method == "flowForeground") {
+                return NodeBridgeResponse.success(request.id, JSONObject().put("available", false).toString())
+            }
             return NodeBridgeResponse.failure(
                 request.id,
                 NodeBridgeError.capabilityProviderMissing(
@@ -2073,6 +2078,22 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             "findByText" -> dispatchAccessibilityFindByText(request)
             "clickText" -> dispatchAccessibilityClickText(request)
+            "flowProbe" -> {
+                val args = request.argsArray()
+                require(args.length() == 1) { "flowProbe requires one selector" }
+                val filter = RuntimeFlowQuery.filter(args.getJSONObject(0))
+                val json = withBridgeRoot { root ->
+                    DFS.search(root, filter, limit = 1, lifecycle = NodeLifecycle.default).firstOrNull()
+                        ?.useBridgeNode(root) { RuntimeFlowQuery.snapshot(it).toString() }
+                }
+                NodeBridgeResponse.success(request.id, "{\"available\":true,\"value\":${json ?: "null"}}")
+            }
+            "flowForeground" -> {
+                require(request.argsArray().length() == 0) { "flowForeground takes no arguments" }
+                val info = org.autojs.autojs.AutoJs.instance.infoProvider.accessibilityIdentity
+                NodeBridgeResponse.success(request.id, JSONObject().put("available", true).put("value",
+                    JSONObject().put("packageName", info.packageName).put("activityName", info.activityName)).toString())
+            }
             "findOne" -> dispatchAccessibilityFindOne(request)
             "findAll" -> dispatchAccessibilityFindAll(request)
             "click" -> dispatchAccessibilityClick(request)
