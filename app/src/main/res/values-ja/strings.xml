@@ -808,8 +808,20 @@
     <string name="settings_transfer_credentials_warning">認証情報と承認 (GitHub トークン, プラグインセンターの承認, MCP Server と 3-Stove Agent の信頼済みクライアント, Bun ホストの許可) はファイルに平文で書き込まれます. ファイルを手に入れた人は誰でもそれらを使用できるため, 安全に保管してください.</string>
     <string name="settings_transfer_credentials_warning_title">認証情報をエクスポートしますか?</string>
     <string name="settings_transfer_description">設定はカテゴリごとに zip ファイルへエクスポートされ, この端末または別の端末でインポートできます.</string>
+    <string name="settings_transfer_error_invalid_file">設定ファイル内のカテゴリファイルが壊れています</string>
+    <string name="settings_transfer_error_invalid_manifest">設定ファイルの manifest.json が壊れているか, 別の形式です</string>
+    <string name="settings_transfer_error_io">ファイルにアクセスできません: %1$s</string>
+    <string name="settings_transfer_error_missing_file">設定ファイルに manifest.json が示すファイルがありません</string>
+    <string name="settings_transfer_error_not_an_archive">設定ファイルではありません (zip アーカイブではありません)</string>
+    <string name="settings_transfer_error_too_large">設定ファイルが上限の %1$s を超えます. カテゴリを減らしてください.</string>
     <string name="settings_transfer_export">設定をエクスポート</string>
+    <string name="settings_transfer_export_canceled">エクスポートを取り消しました. ファイルは書き込まれていません</string>
+    <string name="settings_transfer_export_done">ファイル: %1$s\nカテゴリ: %2$d\n項目: %3$d</string>
+    <string name="settings_transfer_export_done_title">設定をエクスポートしました</string>
+    <string name="settings_transfer_export_failed_title">エクスポートに失敗しました</string>
     <string name="settings_transfer_export_summary">カテゴリを選んで zip ファイルに保存します</string>
+    <string name="settings_transfer_export_unexportable">書き込めない値 %1$d 個を省きました (NaN など)</string>
+    <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">設定ファイルを書き込んでいます...</string>
     <string name="settings_transfer_import">設定をインポート</string>
     <string name="settings_transfer_later_version">今後のバージョンで対応予定</string>
     <string name="settings_transfer_pick_export">エクスポートするカテゴリを選択してください</string>

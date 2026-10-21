@@ -807,8 +807,20 @@
     <string name="settings_transfer_credentials_warning">Les identifiants et autorisations (le jeton GitHub, les autorisations du centre des plugins, les clients de confiance de MCP Server et de 3-Stove Agent, les droits de l\'hôte Bun) sont écrits dans le fichier en clair. Toute personne qui possède le fichier peut les utiliser, conservez-le donc en lieu sûr.</string>
     <string name="settings_transfer_credentials_warning_title">Exporter les identifiants?</string>
     <string name="settings_transfer_description">Les paramètres sont exportés par catégorie dans un fichier zip, qui peut être importé sur cet appareil ou sur un autre.</string>
+    <string name="settings_transfer_error_invalid_file">Un fichier de catégorie du fichier de paramètres est endommagé</string>
+    <string name="settings_transfer_error_invalid_manifest">Le manifest.json du fichier de paramètres est endommagé ou d\'un autre format</string>
+    <string name="settings_transfer_error_io">Impossible d\'accéder au fichier: %1$s</string>
+    <string name="settings_transfer_error_missing_file">Il manque au fichier de paramètres un fichier que son manifest.json mentionne</string>
+    <string name="settings_transfer_error_not_an_archive">Ce n\'est pas un fichier de paramètres (pas une archive zip)</string>
+    <string name="settings_transfer_error_too_large">Le fichier de paramètres dépasserait %1$s, la taille maximale autorisée. Choisissez moins de catégories.</string>
     <string name="settings_transfer_export">Exporter les paramètres</string>
+    <string name="settings_transfer_export_canceled">Exportation annulée, aucun fichier n\'a été écrit</string>
+    <string name="settings_transfer_export_done">Fichier: %1$s\nCatégories: %2$d\nÉléments: %3$d</string>
+    <string name="settings_transfer_export_done_title">Paramètres exportés</string>
+    <string name="settings_transfer_export_failed_title">Échec de l\'exportation</string>
     <string name="settings_transfer_export_summary">Choisir des catégories et les enregistrer dans un fichier zip</string>
+    <string name="settings_transfer_export_unexportable">%1$d valeurs ont été ignorées car elles ne peuvent pas être écrites (comme NaN)</string>
+    <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Écriture du fichier de paramètres...</string>
     <string name="settings_transfer_import">Importer les paramètres</string>
     <string name="settings_transfer_later_version">Disponible dans une version ultérieure</string>
     <string name="settings_transfer_pick_export">Choisissez les catégories à exporter</string>

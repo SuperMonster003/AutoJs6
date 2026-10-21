@@ -804,8 +804,20 @@
     <string name="settings_transfer_credentials_warning">憑證與授權 (GitHub 權杖, 外掛中心授權, MCP Server 與 3-Stove Agent 的已信任客戶端, Bun 宿主授權) 將以明文寫入檔案. 拿到檔案的人都可以使用它們, 請妥善保管匯出的檔案.</string>
     <string name="settings_transfer_credentials_warning_title">匯出憑證?</string>
     <string name="settings_transfer_description">設定按分類匯出為 zip 檔案, 可在本機或其他裝置上匯入.</string>
+    <string name="settings_transfer_error_invalid_file">設定檔案中的分類檔案已損壞</string>
+    <string name="settings_transfer_error_invalid_manifest">設定檔案的 manifest.json 已損壞或格式不符</string>
+    <string name="settings_transfer_error_io">無法存取檔案: %1$s</string>
+    <string name="settings_transfer_error_missing_file">設定檔案缺少其 manifest.json 列出的檔案</string>
+    <string name="settings_transfer_error_not_an_archive">不是設定檔案 (不是 zip 封存檔)</string>
+    <string name="settings_transfer_error_too_large">設定檔案將超過上限 %1$s, 請減少分類.</string>
     <string name="settings_transfer_export">匯出設定</string>
+    <string name="settings_transfer_export_canceled">已取消匯出, 未寫入檔案</string>
+    <string name="settings_transfer_export_done">檔案: %1$s\n分類: %2$d 個\n條目: %3$d 項</string>
+    <string name="settings_transfer_export_done_title">設定已匯出</string>
+    <string name="settings_transfer_export_failed_title">匯出失敗</string>
     <string name="settings_transfer_export_summary">選擇分類並儲存為 zip 檔案</string>
+    <string name="settings_transfer_export_unexportable">略過了 %1$d 個無法寫入的值 (如 NaN)</string>
+    <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在寫入設定檔案...</string>
     <string name="settings_transfer_import">匯入設定</string>
     <string name="settings_transfer_later_version">後續版本提供</string>
     <string name="settings_transfer_pick_export">選擇要匯出的分類</string>

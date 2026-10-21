@@ -807,8 +807,20 @@
     <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) записываются в файл открытым текстом. Любой, у кого есть файл, может ими воспользоваться, поэтому храните его в надежном месте.</string>
     <string name="settings_transfer_credentials_warning_title">Экспортировать учетные данные?</string>
     <string name="settings_transfer_description">Настройки экспортируются по категориям в zip-файл, который можно импортировать на этом или другом устройстве.</string>
+    <string name="settings_transfer_error_invalid_file">Файл категории в файле настроек поврежден</string>
+    <string name="settings_transfer_error_invalid_manifest">Файл manifest.json в файле настроек поврежден или имеет другой формат</string>
+    <string name="settings_transfer_error_io">Нет доступа к файлу: %1$s</string>
+    <string name="settings_transfer_error_missing_file">В файле настроек нет файла, указанного в его manifest.json</string>
+    <string name="settings_transfer_error_not_an_archive">Это не файл настроек (не zip-архив)</string>
+    <string name="settings_transfer_error_too_large">Файл настроек превысил бы %1$s, максимально допустимый размер. Выберите меньше категорий.</string>
     <string name="settings_transfer_export">Экспорт настроек</string>
+    <string name="settings_transfer_export_canceled">Экспорт отменен, файл не записан</string>
+    <string name="settings_transfer_export_done">Файл: %1$s\nКатегории: %2$d\nЭлементы: %3$d</string>
+    <string name="settings_transfer_export_done_title">Настройки экспортированы</string>
+    <string name="settings_transfer_export_failed_title">Не удалось экспортировать</string>
     <string name="settings_transfer_export_summary">Выбрать категории и сохранить их в zip-файл</string>
+    <string name="settings_transfer_export_unexportable">Пропущено значений, которые нельзя записать (например, NaN): %1$d</string>
+    <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Запись файла настроек...</string>
     <string name="settings_transfer_import">Импорт настроек</string>
     <string name="settings_transfer_later_version">Будет доступно в следующей версии</string>
     <string name="settings_transfer_pick_export">Выберите категории для экспорта</string>

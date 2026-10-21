@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.settings.transfer
 
 import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.archive.SettingsArchiveException
 
 /**
  * The state of a settings wizard (docs/settings/ROADMAP.md T10): which wizard runs, the step it shows and every choice
@@ -58,6 +59,15 @@ data class SettingsWizardState(
         MISSING_FILE,
         INVALID_FILE,
         IO,
+        ;
+
+        companion object {
+
+            /** The failure of [error]: its reason for a `SettingsArchiveException`, else [IO]. zh-CN: [error] 对应的失败原因. */
+            @JvmStatic
+            fun of(error: Throwable): Failure =
+                (error as? SettingsArchiveException)?.let { e -> entries.firstOrNull { it.name == e.reason.name } } ?: IO
+        }
     }
 
     fun toJson(): Map<String, Any?> = linkedMapOf(

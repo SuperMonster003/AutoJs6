@@ -802,8 +802,20 @@
     <string name="settings_transfer_credentials_warning">Credentials and authorizations (the GitHub token, the authorizations of the plugin center, the trusted clients of MCP Server and 3-Stove Agent, the grants of the Bun host) are written to the file in plain text. Anyone who has the file can use them, so keep it safe.</string>
     <string name="settings_transfer_credentials_warning_title">Export credentials?</string>
     <string name="settings_transfer_description">Settings are exported by category into a zip file, which can be imported on this or another device.</string>
+    <string name="settings_transfer_error_invalid_file">A category file in the settings file is damaged</string>
+    <string name="settings_transfer_error_invalid_manifest">The manifest.json of the settings file is damaged or of another format</string>
+    <string name="settings_transfer_error_io">Cannot access the file: %1$s</string>
+    <string name="settings_transfer_error_missing_file">The settings file lacks a file that its manifest.json lists</string>
+    <string name="settings_transfer_error_not_an_archive">Not a settings file (not a zip archive)</string>
+    <string name="settings_transfer_error_too_large">The settings file would exceed %1$s, the largest size allowed. Choose fewer categories.</string>
     <string name="settings_transfer_export">Export settings</string>
+    <string name="settings_transfer_export_canceled">Export canceled, no file was written</string>
+    <string name="settings_transfer_export_done">File: %1$s\nCategories: %2$d\nEntries: %3$d</string>
+    <string name="settings_transfer_export_done_title">Settings exported</string>
+    <string name="settings_transfer_export_failed_title">Export failed</string>
     <string name="settings_transfer_export_summary">Choose categories and save them to a zip file</string>
+    <string name="settings_transfer_export_unexportable">%1$d values were left out because they cannot be written (such as NaN)</string>
+    <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Writing the settings file...</string>
     <string name="settings_transfer_import">Import settings</string>
     <string name="settings_transfer_later_version">Available in a later version</string>
     <string name="settings_transfer_pick_export">Choose the categories to export</string>

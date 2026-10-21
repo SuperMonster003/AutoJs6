@@ -12,6 +12,10 @@ CHECK is one of
            remembered selection of the export wizard is set to IDS before the wizard opens and to the complement after
            it has opened: the wizard must still show IDS after the rotation (the selection comes from the saved wizard
            state, not from the remembered one). The remembered selection and the rotation are restored afterwards.
+  wizard   P6.3 / P6.4: opens the page with the export wizard and saves DIR/wizard-<locale>.png; the maintainer then
+           goes through the wizard on the device (dialogs and the system "save" page are not tapped by this script).
+  collect  P6.4: saves DIR/collect-<locale>.png (the done page), pulls the newest /sdcard/Download/autojs6-settings-*.zip
+           into DIR and checks it with archive_inspect.py (--expect-categories N, --expect-ids IDS).
 
 --locale sets the language of the app (`cmd locale set-app-locales`, Android 13+) for the check and restores the
 previous one. Screenshots are only saved; compare them by eye (no taps are sent, dialogs are left to the maintainer).
@@ -28,6 +32,7 @@ import urllib.parse
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import archive_inspect  # noqa: E402
 import device_store_check as base  # noqa: E402
 
 ACTIVITY = "org.autojs.autojs.ui.settings.transfer.SettingsTransferActivity"
@@ -119,14 +124,44 @@ def rotate_check(args, tag):
     return failed
 
 
+def collect_check(args, tag):
+    base.screenshot(args.serial, args.out / f"collect-{tag}.png")
+    listing = base.adb(args.serial, "shell", "ls", "-t", "/sdcard/Download/").stdout.split()
+    names = [n for n in listing if n.startswith("autojs6-settings-") and n.endswith(".zip")]
+    if not names:
+        print("FAIL no autojs6-settings-*.zip in /sdcard/Download")
+        return 1
+    local = args.out / f"{args.serial}-{names[0]}"
+    local.parent.mkdir(parents=True, exist_ok=True)
+    base.adb(args.serial, "pull", f"/sdcard/Download/{names[0]}", str(local), check=True)
+    print(f"INFO pulled {names[0]} ({local.stat().st_size} bytes)")
+    ids = [i.strip() for i in args.expect_ids.split(",") if i.strip()] if args.expect_ids else None
+    inspector = archive_inspect.Inspector()
+    result = inspector.inspect(local, args.expect_categories, ids)
+    if result:
+        size, manifest, rows = result
+        host, device = manifest.get("host") or {}, manifest.get("device") or {}
+        settings = [row for row in rows if not isinstance(row[3], str)]
+        print(f"INFO manifest v{manifest.get('formatVersion')}, {manifest.get('exportedAt')}, host {host.get('versionCode')}, "
+              f"device {device.get('model')} API {device.get('sdk')}")
+        print(f"INFO categories {len(settings)}, entries {sum(row[1] or 0 for row in settings)}, "
+              f"sensitive {[row[0] for row in settings if row[4]]}, data {len(rows) - len(settings)}")
+    for problem in inspector.problems:
+        print(f"FAIL {problem}")
+    print(f"{'FAIL' if inspector.problems else 'PASS'} archive structure ({len(inspector.problems)} problems)")
+    return len(inspector.problems)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("check", choices=("page", "rotate"))
+    parser.add_argument("check", choices=("page", "rotate", "wizard", "collect"))
     parser.add_argument("--out", type=pathlib.Path, required=True, help="directory of the screenshots")
     parser.add_argument("--install", type=pathlib.Path, help="APK to install with adb install -r -d before the check")
     parser.add_argument("--locale", help="language tag of the app during the check, e.g. en-US or zh-CN")
     parser.add_argument("--remembered", help="rotate: category ids of the remembered selection (P6.3)")
+    parser.add_argument("--expect-categories", type=int, help="collect: number of categories the manifest must list")
+    parser.add_argument("--expect-ids", help="collect: category ids the manifest must list, comma separated, in order")
     parser.add_argument("--wait", type=int, default=60, help="seconds to wait for the in-app script (default 60)")
     parser.add_argument("--settle", type=float, default=3.0, help="seconds before each screenshot (default 3)")
     args = parser.parse_args()
@@ -152,6 +187,13 @@ def main():
             failed += open_page(args)[0]
             time.sleep(args.settle)
             base.screenshot(args.serial, args.out / f"page-{tag}.png")
+        elif args.check == "wizard":
+            base.adb(args.serial, "shell", "am", "force-stop", base.PACKAGE, check=True)
+            failed += open_page(args, wizard="export")[0]
+            time.sleep(args.settle)
+            base.screenshot(args.serial, args.out / f"wizard-{tag}.png")
+        elif args.check == "collect":
+            failed += collect_check(args, tag)
         else:
             failed += rotate_check(args, tag)
     finally:

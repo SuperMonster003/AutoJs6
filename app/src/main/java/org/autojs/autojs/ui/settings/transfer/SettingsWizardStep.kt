@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.settings.transfer
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.DialogAction
@@ -20,6 +21,18 @@ interface SettingsWizardHost {
 
     /** The state of the running wizard, null when none runs. zh-CN: 运行中向导的状态, 没有向导时为 null. */
     var wizardState: SettingsWizardState?
+
+    /**
+     * Opens the system page that creates a document (SAF, T11) named [fileName]; its result reaches [awaitDocument].
+     * zh-CN: 打开系统的创建文档页面 (SAF, T11), 文件名为 [fileName]; 结果经 [awaitDocument] 取得.
+     */
+    fun requestDocument(fileName: String)
+
+    /**
+     * The document created after [requestDocument], also when the result reaches a recreated page; null when canceled.
+     * zh-CN: [requestDocument] 之后创建的文档, 结果到达重建后的页面时同样可取得; 取消时为 null.
+     */
+    suspend fun awaitDocument(): Uri?
 }
 
 /**
@@ -81,20 +94,24 @@ abstract class SettingsWizardStep(val id: SettingsWizardState.Step) {
      */
     abstract suspend fun run(wizard: SettingsWizard, state: SettingsWizardState): SettingsWizardState?
 
+    /** [back] / [cancel] false leave out "Back" / "Cancel" (pages after the work is done). */
     protected fun dialog(
         wizard: SettingsWizard,
         state: SettingsWizardState,
         @StringRes positiveRes: Int = R.string.dialog_button_next_step,
+        back: Boolean = true,
+        cancel: Boolean = true,
     ): MaterialDialog.Builder = MaterialDialog.Builder(wizard.host.hostActivity)
         .title(wizard.titleRes)
         .widgetThemeColor()
         .canceledOnTouchOutside(false)
-        .negativeText(R.string.dialog_button_cancel)
-        .negativeColorRes(R.color.dialog_button_default)
         .positiveText(positiveRes)
         .positiveColorRes(R.color.dialog_button_attraction)
         .also { builder ->
-            if (wizard.previous(state) != null) {
+            if (cancel) {
+                builder.negativeText(R.string.dialog_button_cancel).negativeColorRes(R.color.dialog_button_default)
+            }
+            if (back && wizard.previous(state) != null) {
                 builder.neutralText(R.string.dialog_button_back).neutralColorRes(R.color.dialog_button_default)
             }
         }

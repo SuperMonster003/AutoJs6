@@ -1,12 +1,15 @@
 package org.autojs.autojs.ui.settings.transfer
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
@@ -35,6 +38,14 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
 
     private var wizardJob: Job? = null
     private var startExport = false
+
+    // A new page instance gets the result of a request made by the one before it (rotation, process death).
+    // zh-CN: 新的页面实例接收前一个实例发出的请求的结果 (旋转屏幕, 进程被回收).
+    private var document = CompletableDeferred<Uri?>()
+
+    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        document.complete(uri)
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         wizardState = SettingsWizardState.fromText(savedInstanceState?.getString(STATE_WIZARD))
@@ -90,6 +101,13 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         }
         startExport = false
     }
+
+    override fun requestDocument(fileName: String) {
+        document = CompletableDeferred()
+        createDocument.launch(fileName)
+    }
+
+    override suspend fun awaitDocument(): Uri? = document.await()
 
     private fun exportState() = SettingsExportWizard.initialState(MiscStateKeys.SETTINGS_EXPORT_CATEGORIES.storedOrNull())
 

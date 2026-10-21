@@ -809,8 +809,20 @@
     <string name="settings_transfer_credentials_warning">تُكتب بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) في الملف كنص عادي. يمكن لأي شخص يملك الملف استخدامها, لذا احتفظ به في مكان آمن.</string>
     <string name="settings_transfer_credentials_warning_title">تصدير بيانات الاعتماد?</string>
     <string name="settings_transfer_description">تُصدَّر الإعدادات حسب الفئة إلى ملف zip يمكن استيراده على هذا الجهاز أو على جهاز آخر.</string>
+    <string name="settings_transfer_error_invalid_file">أحد ملفات الفئات في ملف الإعدادات تالف</string>
+    <string name="settings_transfer_error_invalid_manifest">ملف manifest.json في ملف الإعدادات تالف أو بتنسيق آخر</string>
+    <string name="settings_transfer_error_io">تعذر الوصول إلى الملف: %1$s</string>
+    <string name="settings_transfer_error_missing_file">يفتقد ملف الإعدادات إلى ملف مدرج في manifest.json الخاص به</string>
+    <string name="settings_transfer_error_not_an_archive">ليس ملف إعدادات (ليس أرشيف zip)</string>
+    <string name="settings_transfer_error_too_large">سيتجاوز ملف الإعدادات %1$s, وهو أكبر حجم مسموح به. اختر فئات أقل.</string>
     <string name="settings_transfer_export">تصدير الإعدادات</string>
+    <string name="settings_transfer_export_canceled">تم إلغاء التصدير, ولم تتم كتابة أي ملف</string>
+    <string name="settings_transfer_export_done">الملف: %1$s\nالفئات: %2$d\nالعناصر: %3$d</string>
+    <string name="settings_transfer_export_done_title">تم تصدير الإعدادات</string>
+    <string name="settings_transfer_export_failed_title">فشل التصدير</string>
     <string name="settings_transfer_export_summary">اختر الفئات واحفظها في ملف zip</string>
+    <string name="settings_transfer_export_unexportable">تم استبعاد %1$d من القيم لأنه لا يمكن كتابتها (مثل NaN)</string>
+    <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">جارٍ كتابة ملف الإعدادات...</string>
     <string name="settings_transfer_import">استيراد الإعدادات</string>
     <string name="settings_transfer_later_version">متاح في إصدار لاحق</string>
     <string name="settings_transfer_pick_export">اختر الفئات المراد تصديرها</string>
