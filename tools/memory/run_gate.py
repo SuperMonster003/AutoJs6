@@ -157,6 +157,9 @@ def native_cell(report):
     inst = native.get("instanceDeltas") or {}
     memory = "/".join(kb(mem.get(key)) for key in ("nativePssKb", "nativeHeapAllocKb", "graphicsKb", "unknownPssKb")) if mem else "-"
     instances = "/".join("-" if inst.get(key) is None else f"{inst[key]:+d}" for key in ("bitmap", "cvMat", "accessibilityNode")) if inst else "-"
+    nodes = (native.get("instanceDeltasFromBaseline") or {}).get("accessibilityNode")
+    if nodes is not None and inst:
+        instances += f" (nodes {nodes:+d} vs warm-ups)"
     return (f"{mb(native.get('nativePeakMaxBytes'))} | {memory} | {delta(native.get('imagesLiveDelta'))} / "
             f"{native.get('openMediaImages', '-')} / {delta(native.get('matsLiveDelta'))} | {instances}")
 
@@ -216,7 +219,8 @@ def markdown(meta, reports, failures):
                   "- Peak: largest rise of the native heap inside a measured run (sampled every 20 ms, before the after-run GC)",
                   "- Meminfo: dumpsys meminfo deltas in MB from the end of the warm-ups to the end: Native Heap Pss / Native Heap Alloc / Graphics / Unknown Pss",
                   "- Counters: images not recycled (vs start) / open media images at the end / live Mats (vs end of warm-ups)",
-                  "- Instances: VMDebug instance count deltas from the start: Bitmap / org.opencv.core.Mat / AccessibilityNodeInfo",
+                  "- Instances: VMDebug instance count deltas from the start: Bitmap / org.opencv.core.Mat / AccessibilityNodeInfo, "
+                  "then AccessibilityNodeInfo against the end of the warm-ups (S7 / S7b fail above +50, ROADMAP P3.4)",
                   "", "| Scenario | Mode | Peak MB | Meminfo MB | Counters | Instances | Script stats (max) |",
                   "| --- | --- | --- | --- | --- | --- | --- |"]
         for report in detailed:
@@ -328,7 +332,7 @@ def main():
     parser.add_argument("--one-process", action="store_true",
                         help="Run all selected scenarios and modes in one instrumentation process (S7 / S7b with the accessibility service)")
     parser.add_argument("--a11y-wait", type=int, default=0,
-                        help="Seconds S7 waits, showing a toast, for the maintainer to turn the host accessibility service off and on")
+                        help="Seconds (0-900) S7 / S7b wait, showing a toast, for the maintainer to turn the host accessibility service off and on")
     parser.add_argument("--keep-process", action="store_true",
                         help="Skip am force-stop around scenarios; force-stop removes the host accessibility service from the enabled list")
     parser.add_argument("--merge", action="store_true", help="Replace only the rerun scenarios in an existing report of the same name")
@@ -339,6 +343,9 @@ def main():
         parser.error("--label must be lower-case letters, digits or '-'")
     if not 60 <= args.timeout <= 7200:
         parser.error("--timeout must be between 60 and 7200 seconds")
+    # The test rejects memoryGateAccessibilityWaitMs above 900 s before showing any toast.
+    if not 0 <= args.a11y_wait <= 900:
+        parser.error("--a11y-wait must be between 0 and 900 seconds")
 
     device = physical_device.Device(args.adb, args.serial)
     device.require_online()

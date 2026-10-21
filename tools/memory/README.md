@@ -31,7 +31,7 @@ S2   N FAIL  retained=20/20 java=+3.10MB native=+0.12MB threads=+0 contexts=+0 e
      20 runtime(s), root STATIC_FIELD: LooperHelper.sLoopers -> ...
 ```
 
-单元格 (ROADMAP 附录 A): `残留 / Java 堆增量 MB / 原生堆增量 MB / 脚本线程增量 / Rhino Context 增量 / 存活引擎数`. 阈值 (T1): 残留 0, Java <= 2 MB, 原生 <= 4 MB (截屏场景再加一帧), 线程与 Context 回到开始前, 引擎回到开始前; P3.1 起另有 (g): 未回收的图像 (`ImageWrapper.liveCount`) 与未关闭的 media Image (`ImageWrapper.openMediaImageCount`) 回到开始前, 存活 Mat (`core/opencv/Mat.getLiveCount`) 回到预热结束时.
+单元格 (ROADMAP 附录 A): `残留 / Java 堆增量 MB / 原生堆增量 MB / 脚本线程增量 / Rhino Context 增量 / 存活引擎数`. 阈值 (T1): 残留 0, Java <= 2 MB, 原生 <= 4 MB (截屏场景再加一帧), 线程与 Context 回到开始前, 引擎回到开始前; P3.1 起另有 (g): 未回收的图像 (`ImageWrapper.liveCount`) 与未关闭的 media Image (`ImageWrapper.openMediaImageCount`) 回到开始前, 存活 Mat (`core/opencv/Mat.getLiveCount`) 回到预热结束时. P3.4 起, 宿主无障碍服务运行时的 S7 与 S7b 另判 AccessibilityNodeInfo 的可达实例数 (VMDebug) 相对预热结束时不超过 +50 (框架的 AccessibilityCache 会随前台窗口重新填充, 节点泄漏则每次运行增长数百个; ROADMAP 附录 C Q33).
 
 原生明细 (ROADMAP P3.1, 报告的 "Native detail" 表与终端行尾的 `peak= images= media= mats=`):
 
@@ -50,7 +50,7 @@ S7 的无障碍部分与 S7b (ROADMAP 附录 C Q9): instrumentation 在启动和
 py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7,S7b --keep-process --one-process --a11y-wait 600 --timeout 3600 --merge --label <名>
 ```
 
-`--one-process` 让所选的全部场景与模式在同一个进程里跑 (服务只需重新开启一次), `--keep-process` 跳过场景前后的 `am force-stop` (它会把服务从已开启列表中移除), `--a11y-wait` 让 S7 / S7b 最长等待该秒数并在手机上反复弹出 Toast; 看到提示后由维护者在系统无障碍设置里把 AutoJs6 关掉再开启一次, 服务即绑定到正在运行的测试进程. 脚本不代点, 也不改设置; 跑完后服务仍会落回 "Crashed" 状态, 维护者可直接关回. 注意: S7 开始运行后, 场景脚本里的 `auto.registerEvent` 会调用 `ensureService()`, 宿主有安全设置 (或 root / Shizuku) 权限时会自动重新启用无障碍服务, 所以 S7 运行期间手动关闭的服务会立即被打开 (2026-10-21 维护者在 XQ-AT72 上观察到); 要关回请等 S7 结束.
+`--one-process` 让所选的全部场景与模式在同一个进程里跑 (服务只需重新开启一次), `--keep-process` 跳过场景前后的 `am force-stop` (它会把服务从已开启列表中移除), `--a11y-wait` 让 S7 / S7b 最长等待该秒数 (0-900, 测试端的上限) 并在手机上反复弹出 Toast; 看到提示后由维护者在系统无障碍设置里把 AutoJs6 关掉再开启一次, 服务即绑定到正在运行的测试进程. 脚本不代点, 也不改设置; 跑完后服务仍会落回 "Crashed" 状态, 维护者可直接关回. 注意: S7 开始运行后, 场景脚本里的 `auto.registerEvent` 会调用 `ensureService()`, 宿主有安全设置 (或 root / Shizuku) 权限时会自动重新启用无障碍服务, 所以 S7 运行期间手动关闭的服务会立即被打开 (2026-10-21 维护者在 XQ-AT72 上观察到); 要关回请等 S7 结束.
 
 设备占用防护 (ROADMAP R6): 每个场景开始前若设备上已有其他 `am instrument` 在运行就等待 (最长 10 分钟); 运行中宿主或测试 APK 被替换则停止并把该场景标为 `invalid`; 设备离线 (adb 断开) 时停止, 已读到的报告保留.
 

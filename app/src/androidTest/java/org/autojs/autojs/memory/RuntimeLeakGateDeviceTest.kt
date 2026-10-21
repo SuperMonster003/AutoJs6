@@ -239,6 +239,11 @@ class RuntimeLeakGateDeviceTest {
         if (native.getInt("imagesLiveDelta") > 0) reasons.put("images not recycled +${native.getInt("imagesLiveDelta")}")
         if (native.getInt("openMediaImages") > 0) reasons.put("open media images ${native.getInt("openMediaImages")}")
         if (native.getLong("matsLiveDelta") > 0) reasons.put("live mats +${native.getLong("matsLiveDelta")}")
+        val judgesNodes = scenario.needsAccessibility || scenario.id == "S7" && environment.accessibilityRunning
+        val nodesDelta = native.optJSONObject("instanceDeltasFromBaseline")?.opt("accessibilityNode") as? Number
+        if (judgesNodes && nodesDelta != null && nodesDelta.toLong() > ACCESSIBILITY_NODE_SLACK) {
+            reasons.put("accessibility nodes +$nodesDelta (vs end of warm-ups)")
+        }
         val errors = runs.flatMap { it.errors }.distinct()
         val stopErrors = runs.flatMap { it.stopErrors }.distinct()
         val unstarted = runs.count { !it.started }
@@ -254,6 +259,7 @@ class RuntimeLeakGateDeviceTest {
         if (stopErrors.isNotEmpty()) report.put("stopErrors", JSONArray(stopErrors.take(5)))
         report.put("interruptedRuns", runs.count { it.interrupted > 0 })
         thresholds.put("imagesLiveDelta", 0).put("openMediaImages", 0).put("matsLiveDelta", 0)
+        if (judgesNodes) thresholds.put("accessibilityNodeDelta", ACCESSIBILITY_NODE_SLACK)
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
             .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
@@ -310,23 +316,27 @@ class RuntimeLeakGateDeviceTest {
             after.keys().forEach { key -> if (key.endsWith("Kb") && before.has(key)) deltas.put(key, after.getLong(key) - before.getLong(key)) }
             result.put("meminfoDeltaKb", deltas)
         }
-        val first = start.optJSONObject("instances")
         val last = final.optJSONObject("instances")
-        if (first != null && last != null) {
-            val deltas = JSONObject()
-            last.keys().forEach { key ->
-                val a = first.optLong(key, -1)
-                val b = last.optLong(key, -1)
-                deltas.put(key, if (a < 0 || b < 0) JSONObject.NULL else b - a)
-            }
-            result.put("instanceDeltas", deltas)
-        }
+        instanceDeltas(start.optJSONObject("instances"), last)?.let { result.put("instanceDeltas", it) }
+        instanceDeltas(baseline.optJSONObject("instances"), last)?.let { result.put("instanceDeltasFromBaseline", it) }
         val stats = JSONObject()
         measured.flatMap { it.stats.entries }.groupBy({ it.key }, { it.value }).forEach { (key, values) ->
             stats.put(key, values.maxOf { it })
         }
         if (stats.length() > 0) result.put("scriptStatsMax", stats)
         return result
+    }
+
+    /** Instance count deltas per class (null where VMDebug was unavailable). zh-CN: 每个类的实例数增量 (VMDebug 不可用时为 null). */
+    private fun instanceDeltas(first: JSONObject?, last: JSONObject?): JSONObject? {
+        if (first == null || last == null) return null
+        val deltas = JSONObject()
+        last.keys().forEach { key ->
+            val a = first.optLong(key, -1)
+            val b = last.optLong(key, -1)
+            deltas.put(key, if (a < 0 || b < 0) JSONObject.NULL else b - a)
+        }
+        return deltas
     }
 
     private fun runOnce(scenario: GateScenario, environment: GateEnvironment, mode: GateMode, index: Int, warmup: Boolean): RunRecord {
@@ -696,6 +706,13 @@ class RuntimeLeakGateDeviceTest {
         private const val LOG_CHUNK = 3000
         private const val JAVA_HEAP_LIMIT = 2L * 1024 * 1024
         private const val NATIVE_HEAP_LIMIT = 4L * 1024 * 1024
+
+        // Reachable AccessibilityNodeInfo instances may move by a few dozen between two samples because the framework's
+        // per-connection AccessibilityCache refills when the foreground window changes; a node leak grows by hundreds per run
+        // (S7b touches several hundred nodes per run). ROADMAP P3.4, appendix C Q33.
+        // zh-CN: 两次采样之间可达的 AccessibilityNodeInfo 实例数可能相差几十个, 因为框架按连接维护的 AccessibilityCache 会在前台窗口变化时重新填充;
+        // 节点泄漏则每次运行增长数百个 (S7b 每次运行触及数百个节点). 路线图 P3.4, 附录 C Q33.
+        private const val ACCESSIBILITY_NODE_SLACK = 50L
         private const val START_TIMEOUT_MS = 30_000L
         private const val READY_TIMEOUT_MS = 20_000L
         private const val ACCESSIBILITY_PROMPT = "AutoJs6 内存门禁 S7: 请在系统无障碍设置中把 AutoJs6 关闭后重新开启"
