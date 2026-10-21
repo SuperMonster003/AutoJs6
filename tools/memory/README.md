@@ -56,7 +56,7 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7,S7b --keep-proc
 
 场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S4f 连续 200 次 `captureScreen` 不显式回收 (issue #204 的 "卡住不返回"; 每个进程固定预热 1 + 计数 3, 单次截图超过 15 s 或截图后打开的 media Image 超过 1 个即脚本失败; 需 `--capture on`), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S7b `className(...).find()` / `findOnce` / `children` / `parent` 循环 (需宿主无障碍服务, 未绑定时跳过), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过).
 
-度量目前是测试内的临时实现 (`GateMetrics.kt`; Rhino Context 计数经反射读取 `AndroidContextFactory.mContextCount`), ROADMAP P2.1 的 `MemoryDiagnostics` 落地后切换. 脚本线程按线程名标记计数 (`ScriptThread-` / `Spawn-` / `Pool-` / `Timer` / `ScreenCapturer` / `LooperThread`), Android 14 起框架自带的 `SurfaceSyncGroupTimer` 不计 (P1 起).
+度量自 P2.1 起全部取自宿主的 `org.autojs.autojs.runtime.memory.MemoryDiagnostics` (`GateMetrics.kt` 只做转接; Rhino Context 计数为 `AndroidContextFactory.activeContextCount`, 图像数为 `ImageWrapper.liveCount`), 与开发者选项 "内存诊断" 页面同源 (ROADMAP T3). 脚本线程按线程名标记计数 (`ScriptThread-` / `Spawn-` / `Pool-` / `Timer` / `ScreenCapturer` / `LooperThread`), Android 14 起框架自带的 `SurfaceSyncGroupTimer` 不计 (P1 起).
 
 ## leakcanary_probe.py: LeakCanary 报告核对
 
@@ -65,6 +65,17 @@ py -3.12 -I -u tools/memory/leakcanary_probe.py -s SERIAL [--scenario S2] [--run
 ```
 
 LeakCanary 在 instrumentation 测试进程里不转储堆, 所以门禁看不到它的报告 (ROADMAP P1.2 / T5). 本脚本把场景脚本 (门禁正常结束模式的版本, 目前 S1 / S2) 推到 `/sdcard/Download/aj6-memory-probe/`, 经 `RunIntentActivity` 以普通脚本运行 `--runs` 次, 然后在 `--wait` 秒内从 logcat (`LeakCanary` 标签) 收集 LeakCanary 的堆分析结果. 输出: 每次启动一行, LeakCanary 记录的监视对象与最大残留数, 是否出现分析, 应用泄漏数, 引用链是否包含 `--expect`; `--out` 把分析文本 (与 LeakCanary 泄漏列表中显示的文本相同) 写入文件. `--expect-leaks yes` 时出现含 `--expect` 的应用泄漏即 PASS (修前构建), `no` 时等待期内没有应用泄漏即 PASS (修后构建). 需要 debug 构建且开发者选项中的 LeakCanary 开关为开 (默认). LeakCanary 自身的 "Dump heap automatically" (Leaks 应用 > About) 自 P1.2 起默认关闭 (维护者要求, 避免调试时自动转储造成短暂冻结), 此时 LeakCanary 只计数残留对象并发通知, 不做分析; `--expect-leaks yes` 需要分析时先在该页面打开它 (或点通知中的 "Dump Heap Now"), 否则脚本以退出码 2 报 INCONCLUSIVE. 脚本不点屏幕, 不改设置.
+
+## device_diagnostics_page.py: 内存诊断页面截图与未回收警告核对
+
+```
+py -3.12 -I -u tools/memory/device_diagnostics_page.py -s SERIAL [--shots developer,page,actions] [--out DIR]
+py -3.12 -I -u tools/memory/device_diagnostics_page.py -s SERIAL --warning-check [--pin 60] [--quiet 15] [--out DIR]
+```
+
+ROADMAP P2.2 / P2.3. 开发者选项与内存诊断页面都未导出, 与 `tools/augment/device_developer_options.py` 一样经 `RunIntentActivity` 运行一个小脚本在宿主进程内打开页面, 滚动也在进程内完成 (`scrollToPreference` / `scrollToPosition`), 不点屏幕, 不滑动. `--shots`: `developer` 打开开发者选项并滚到 "内存诊断" 类别, `page` 打开内存诊断页面, `actions` 滚到该页末尾 (未回收列表与操作). 截图存 `--out` (默认 `tools/memory/__pycache__/`, 不入库), 人工核对后把结论写进路线图.
+
+`--warning-check` (P2.3): 先单独运行脚本 B (自行结束), 之后 `--quiet` 秒内不应出现警告 (对照); 再由脚本 A 启动 B 并持有 `engines.all()` 返回的引擎对象 `--pin` 秒, B 的 runtime 因此无法回收, B 结束约 10 s 后宿主应输出警告 (从 logcat 的 `MemoryDiagnostics` 标签读取 id, 结束方式与已过时长, 并核对全局控制台的 W 行); A 持有期间对页面截图一次; A 结束后探针脚本调用 `MemoryDiagnostics.collect()`, 列表中不应再有 A / B. 需要开发者选项 "脚本结束后未回收时在控制台警告" 为开 (默认). 屏幕须点亮并解锁 (脚本只检查不操作). 输出每项一行 PASS / FAIL 与关键数值.
 
 ## static_audit.py: 源码静态审计
 
