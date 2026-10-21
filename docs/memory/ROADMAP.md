@@ -86,6 +86,7 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 | H20 (门禁发现, 崩溃) | `ScriptRuntime.onExit()` 释放顺序 (附录 B.3) | `ImageWrapper.recycleAll(this)` 在 `threads.shutDownAll()` 之前执行, 强制停止时子线程仍在用图像 | 不是泄漏而是 R2 所说的 "更早释放换更早崩溃": S4e F (4 个 `threads.start` 线程循环 `images.copy` + `findImage`) 在 XQ-AT72 上 5 次有 4 次 `SIGABRT: 'Error, cannot access an invalid/free'd bitmap here!'`, 栈为 `Spawn-N -> Images.copy -> ImageWrapper.clone -> Bitmap.copy` (`docs/memory/evidence/crash-XQ-AT72-5620-S4e-force-20261020.txt`), issue #200 的 "停止 / 启动后崩溃" 可能与此有关 | S4e F |
 | H21 (门禁发现, P1 证实) | 线程栈局部变量 + 未回收的 Message | S4b / S4c / S4d 的 F 模式在 23046RP50C 与 AVD 上偶有第 2 个残留, 根为某个 `TermSession$2` 线程的栈局部变量 | `TermSession$2<local> -> Message.callback -> LoopBasedJavaScriptEngine 回调 -> mRuntime -> ScriptRuntime`; P1 复核 (23046RP50C, 修完 H1 / H17 / H18 后) 不是暂态: S4a / S4d / S4e F 各残留 1 个, 链还有 `Message.callback -> RhinoUtils lambda (TimerThread.target) -> ScriptRuntime`. 机理: 脚本线程投递的 Runnable 在强制停止时抛出, `Looper.loop` 不回收已分发的 Message (callback 仍在); Message 来自共享池, 另一个 Looper 线程 (`TermSession$2`) 栈帧里仍留着对同一 Message 对象的陈旧引用. 修复见 P1.3.7 | S4a-S4e F |
 | H22 (P1 门禁发现) | Application 的 `ContextImpl.mServiceCache` 中的 `AudioManager` | 进程内第一次取得 AudioManager 的线程决定其事件 Handler 的 Looper; `device.getMusicVolume` 等在脚本线程上首次取得 | `Toaster.sApplication -> App.mBase -> ContextImpl.mServiceCache -> AudioManager.mServiceEventHandlerDelegate -> Handler.mLooper -> Looper.mThread -> ThreadCompat.target -> LoopedBasedJavaScriptExecution.mScriptEngine -> LoopBasedJavaScriptEngine.mRuntime -> ScriptRuntime`, 钉住进程内第一个读音量的脚本; 修完 H17 / H18 后在 AVD API 24 的 S11 预热中出现 (其他设备上 AudioManager 多半已由别处在主线程取得). 修复见 P1.3.8 | S11 |
+| H23 (P1.4 门禁发现) | `core/plugin/speech/SpeechSessionProxy.kt` 的 `SpeechEventGate` | 语音插件进程持有宿主的回调 Binder (`ISpeechSessionCallback.Stub`), 其生命由远端决定; 闸门在通道结束后仍持有 sink | `JNI_GLOBAL: SpeechSessionCallbackBinder.gate -> SpeechEventGate.sink -> SpeechSessionRunner.controller -> SpeechSession$Controller.session -> SpeechSession.scriptRuntime -> ScriptRuntime`; XQ-AT72 最终矩阵第一次跑 S4e N 时 1/20 (S4e 脚本不用语音, 推测是维护者当时操作手机, 3-Macaw 按键触发把一次语音会话开在了运行中的门禁脚本里), 同一构建复跑 0/20. 修复见 P1.3.10 | 任意场景 (外部触发的语音会话) |
 
 ### 1.4 现有诊断与测试基础设施 (可复用)
 
@@ -203,8 +204,10 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
   - [x] P1.3.7 H21: S4a / S4d / S4e F (23046RP50C). 链 `TermSession$2<local> -> Message.callback -> LoopBasedJavaScriptEngine lambda -> mRuntime` 与 `... -> Message.callback -> RhinoUtils lambda (TimerThread.target) -> ScriptRuntime`, 机理见 1.3 H21. 引擎 `execute` 的 Runnable 与 `TimerThread` 的 target 改经 `TimerThread.ReleasingRunnable` 投递, 一开始运行就丢弃委托, Message 即使未被回收也不再通向 runtime. 改动 `core/looper/TimerThread.kt`, `engine/LoopBasedJavaScriptEngine.java`; 提交 `ca95c8744`. 修完这一步 (`8dcba0d67` 的构建) 23046RP50C 的 S4a / S4d / S4e F 仍各残留 1 个, 链变为 `TermSession$2<local> -> Message.target -> Handler.mLooper -> Looper.mThread -> ThreadCompat.target (或 TimerThread.target) -> 脚本执行 / RhinoUtils lambda -> ScriptRuntime`: ART 在线程结束时不清 `Thread.target`. 第二步 `f7c7ee309`: `ThreadCompat` 经运行完即丢弃的持有者把 Runnable 交给 `Thread`, `TimerThread` 不再把 target 交给 `Thread` 而由自己在 run() 结束时清空. 改动 `lang/ThreadCompat.java`, `core/looper/TimerThread.kt`. 证据: 23046RP50C 第一步之前 (`a1e3ab9d9` 的构建, 报告已被覆盖, 数值记在此处) S4a F 1/20 (Java +57.59 MB), S4d F 1/20, S4e F 1/20; 第一步之后 (`gate-23046RP50C-5621-p1-20261020.md`) S4a F 1/20 (Java +1.87 MB), S4d F 1/20, S4e F 1/20; 两步之后见附录 A.
   - [x] P1.3.8 H22 (P1 新发现): S11 (AVD API 24 预热). 链见 1.3 H22. `Device` 在自带 Looper 的线程上首次取 `AudioManager` 时改在不带 Looper 的辅助线程上取得并缓存 (Handler 落到主 Looper). 改动 `runtime/api/Device.java`; 提交 `a1e3ab9d9`.
   - [x] P1.3.9 (非泄漏, 门禁稳定性) `threads.start` 线程退出竞态: 线程先唤醒主 Looper 再移出线程集合, 主线程恰好在两者之间检查时会再次空闲且不再被唤醒, 脚本不结束 (AVD API 24 的 S4e N 22 次中 1 次挂到 60 s 超时). 改为先移出再唤醒. 改动 `runtime/api/Threads.kt`; 提交 `8dcba0d67`.
+  - [x] P1.3.10 H23 (P1.4 新发现): 链见 1.3 H23. `SpeechEventGate` 在通道结束 (收到不带轮次的 `end`, 或 `closeLocally` 合成 `end`) 后丢弃 sink, 远端插件继续持有回调 Binder 时也不再通向脚本; 结束后的事件原本就丢弃, 行为不变. 改动 `core/plugin/speech/SpeechSessionProxy.kt`; 提交 `cff2d1fab`; JVM 单测 `SpeechEventGateTest` 3/3 通过 (E1). 门禁场景里没有语音会话, 设备侧只记录发现时的链 (外部触发, 不可稳定复现); 语音场景的门禁覆盖留给 P4.1 (附录 C Q13).
   - changelog (zh-Hans, `ff16eab0d`): 改写 #548 "(试修)" 条目 (R5), 新增 H20 崩溃, WebSocket 结束处理, LeakCanary 三条; 其他语言待维护者同步. P1.3.7-P1.3.9 未另加条目 (同属 #548 条目与 "子线程 / 定时器导致脚本不结束" 的既有范围).
-- [ ] P1.4 (基线) 三台真机 + AVD 复测, 附录 A 新增 "P1 后" 列; 完成条件: 全部场景两种模式 "残留 runtime" 为 0, Java 堆增量达标; 原生列允许仍有失败 (留给 P3) 但要记编号.
+- [x] P1.4 (基线) 三台真机 + AVD 复测, 附录 A 新增 "P1 后" 列; 完成条件: 全部场景两种模式 "残留 runtime" 为 0, Java 堆增量达标; 原生列允许仍有失败 (留给 P3) 但要记编号.
+  - 证据 (E3): 宿主 debug versionCode 5679 (`4be14ab38` 的构建, 2026-10-21 08:2x 安装; 工作区当时另含其他会话未提交的改动, augment P2.x 与设置层 P2.x), 预热 2 + 计数 20, 两种模式, S4a `--capture on`, XQ-AT72 的 S7 在宿主无障碍服务运行中跑 (维护者开关一次). 报告 `gate-XQ-AT72-5679-p1-20261021`, `gate-G8441-5679-p1-20261021`, `gate-23046RP50C-5679-p1-20261021`, `gate-Android_SDK_built_for_x86-5679-p1-20261021` (`.md` / `.json`). 结果: 四台 128 个场景模式的 "残留 runtime" 全部为 0 (预热也没有残留, 没有脚本错误或超时), Java 堆增量 -0.04 至 +0.27 MB (阈值 2 MB); XQ-AT72, G8441, 23046RP50C 各 32/32 通过; AVD 28/32, 失败的 4 格 (S1 / S3 / S8 / S12 的 F) 都是原生堆在某一次运行中出现约 +10 MB 的一次性台阶后持平, 不是线性增长, 记为 P3 N1. 线程与 Rhino Context 增量全部为 0 (含 23046RP50C 的 S4a / S5 / S6, `SurfaceSyncGroupTimer` 已不计). XQ-AT72 的 S4e N 第一次跑时 1/20 (H23), 修复前用同一构建以 `--merge` 复跑, 0/20, 表中为复跑结果.
 
 ### P2 开发者选项 "内存诊断" 页面 (D8 / T10)
 
@@ -250,22 +253,22 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 
 | 场景 | 模式 | 修前基线 (P0.5) | P1 后 | P3 后 | P4 后 | 终表 (P6.2) |
 | --- | --- | --- | --- | --- | --- | --- |
-| S1 空脚本 | N / F | N `1 / +0.04 / +0.03 / +0 / +0 / 0`; F `1 / +0.04 / +0.02 / +0 / +0 / 0` (单 runtime 钉住 (H17 最近一个 + H18 第一个, 预热里那次计入 retainedWarmups)) | | | | |
-| S2 threads.start + pool | N / F | N `20 / +30.18 / +0.44 / +0 / +0 / 0`; F `20 / +30.21 / +0.88 / +44 / +44 / 0` (H1 (N, 第二遍链经 Looper.mQueue -> mIdleHandlers -> Loopers); F 另有 44 个池线程与 Rhino Context 存活 (H15)) | | | | |
-| S3 timers 嵌套 | N / F | N `20 / +29.23 / +0.36 / +0 / +0 / 0`; F `20 / +29.32 / +0.39 / +0 / +0 / 0` (H1; F 偶发 stopErrors `TimerCallbackRejectedException`) | | | | |
-| S4a captureScreen 连续 | N / F | N `1 / -0.05 / -0.11 / +0 / +0 / 0`; F `1 / +0.07 / +0.00 / +0 / +0 / 0` (只有 H17 / H18; 截屏线程与原生堆都回到基线, H5 本轮未复现; 门禁期间 `PROJECT_MEDIA` 为 `allow`, 见附录 C Q3) | | | | |
-| S4b read + findImage | N / F | N `1 / +0.04 / -0.67 / +0 / +0 / 0`; F `1 / +0.04 / -2.47 / +0 / +0 / 0` | | | | |
-| S4c copy / clip / resize | N / F | N `1 / +0.04 / -0.81 / +0 / +0 / 0`; F `1 / +0.04 / -0.31 / +0 / +0 / 0` | | | | |
-| S4d matchTemplate + oneShot | N / F | N `1 / +0.04 / -1.29 / +0 / +0 / 0`; F `1 / +0.03 / -5.93 / +0 / +0 / 0` | | | | |
-| S4e #372 / #200 复现 | N / F | N `20 / +29.59 / -5.80 / +0 / +0 / 0`; F `20 / +29.82 / -3.48 / +0 / +0 / 0` (H1; F 5 次中 4 次原生崩溃 (H20, `crash-XQ-AT72-5620-S4e-force-20261020.txt`), 表中为第 5 次的完整结果) | | | | |
-| S5 UI 脚本 + webview | N / F | N `1 / +0.06 / -0.20 / +0 / +0 / 0`; F `1 / +0.05 / -0.20 / +0 / +0 / 0` (只有 H17 / H18) | | | | |
-| S6 floaty | N / F | N `1 / +0.06 / +0.09 / +0 / +0 / 0`; F `1 / +0.06 / +0.09 / +0 / +0 / 0` | | | | |
-| S7 事件 / 按键 / 传感器 | N / F | N `1 / +0.02 / -0.06 / +0 / +0 / 0`; F `1 / +0.04 / +0.15 / +0 / +0 / 0` (宿主无障碍服务运行中, 含 `auto.registerEvent` / `events.observeKey`; 只有 H17 / H18, H9 / H16 本轮未复现; 两种模式同一进程, 附录 C Q9) | | | | |
-| S8 JavaAdapter + loadDex | N / F | N `1 / +0.04 / -0.37 / +0 / +0 / 0`; F `1 / +0.04 / -0.45 / +0 / +0 / 0` (无额外 runtime 残留; 生成类数量留给 P4.4 看 hprof) | | | | |
-| S9 execScriptFile 重启 | N / F | N `1 / +0.08 / +0.01 / +0 / +0 / 0`; F `1 / +0.08 / +0.03 / +0 / +0 / 0` (无额外残留 (H6 未复现)) | | | | |
-| S10 http + websocket | N / F | N `1 / +0.08 / +0.07 / +0 / +0 / 0`; F `19 / +26.90 / +0.69 / +0 / +0 / 0` (F: 19/20 经 okhttp `RealWebSocket` 读线程局部变量钉住 (H19)) | | | | |
-| S11 device 接收器 | N / F | N `1 / +0.10 / +0.03 / +0 / +0 / 0`; F `1 / +0.09 / +0.04 / +0 / +0 / 0` (无额外残留 (H7 未复现)) | | | | |
-| S12 plugins 绑定 | N / F | N `20 / +53.47 / +0.34 / +0 / +0 / 0`; F `20 / +53.56 / +0.35 / +0 / +0 / 0` (H8: `LoadedApk$ServiceDispatcher.mConnection -> Plugin.pluginInstance -> ImGuiPluginConnection.runtime`, 每次约 2.7 MB) | | | | |
+| S1 空脚本 | N / F | N `1 / +0.04 / +0.03 / +0 / +0 / 0`; F `1 / +0.04 / +0.02 / +0 / +0 / 0` (单 runtime 钉住 (H17 最近一个 + H18 第一个, 预热里那次计入 retainedWarmups)) | N `0 / +0.11 / +0.07 / +0 / +0 / 0`; F `0 / +0.03 / +0.03 / +0 / +0 / 0` (AVD F 原生堆一次性台阶 +9.59 MB (P3 N1)) | | | |
+| S2 threads.start + pool | N / F | N `20 / +30.18 / +0.44 / +0 / +0 / 0`; F `20 / +30.21 / +0.88 / +44 / +44 / 0` (H1 (N, 第二遍链经 Looper.mQueue -> mIdleHandlers -> Loopers); F 另有 44 个池线程与 Rhino Context 存活 (H15)) | N `0 / +0.17 / +0.07 / +0 / +0 / 0`; F `0 / +0.08 / +0.04 / +0 / +0 / 0` | | | |
+| S3 timers 嵌套 | N / F | N `20 / +29.23 / +0.36 / +0 / +0 / 0`; F `20 / +29.32 / +0.39 / +0 / +0 / 0` (H1; F 偶发 stopErrors `TimerCallbackRejectedException`) | N `0 / +0.15 / +0.05 / +0 / +0 / 0`; F `0 / +0.07 / +0.05 / +0 / +0 / 0` (AVD F 原生堆一次性台阶 +9.82 MB (P3 N1)) | | | |
+| S4a captureScreen 连续 | N / F | N `1 / -0.05 / -0.11 / +0 / +0 / 0`; F `1 / +0.07 / +0.00 / +0 / +0 / 0` (只有 H17 / H18; 截屏线程与原生堆都回到基线, H5 本轮未复现; 门禁期间 `PROJECT_MEDIA` 为 `allow`, 见附录 C Q3) | N `0 / +0.05 / -0.04 / +0 / +0 / 0`; F `0 / +0.08 / -0.02 / +0 / +0 / 0` | | | |
+| S4b read + findImage | N / F | N `1 / +0.04 / -0.67 / +0 / +0 / 0`; F `1 / +0.04 / -2.47 / +0 / +0 / 0` | N `0 / +0.11 / -0.65 / +0 / +0 / 0`; F `0 / +0.04 / -2.43 / +0 / +0 / 0` | | | |
+| S4c copy / clip / resize | N / F | N `1 / +0.04 / -0.81 / +0 / +0 / 0`; F `1 / +0.04 / -0.31 / +0 / +0 / 0` | N `0 / +0.11 / -0.77 / +0 / +0 / 0`; F `0 / +0.04 / -0.19 / +0 / +0 / 0` | | | |
+| S4d matchTemplate + oneShot | N / F | N `1 / +0.04 / -1.29 / +0 / +0 / 0`; F `1 / +0.03 / -5.93 / +0 / +0 / 0` | N `0 / +0.13 / -1.25 / +0 / +0 / 0`; F `0 / +0.06 / -5.88 / +0 / +0 / 0` | | | |
+| S4e #372 / #200 复现 | N / F | N `20 / +29.59 / -5.80 / +0 / +0 / 0`; F `20 / +29.82 / -3.48 / +0 / +0 / 0` (H1; F 5 次中 4 次原生崩溃 (H20, `crash-XQ-AT72-5620-S4e-force-20261020.txt`), 表中为第 5 次的完整结果) | N `0 / +0.09 / -5.85 / +0 / +0 / 0`; F `0 / +0.06 / -3.30 / +0 / +0 / 0` (S4e F 另做 5 个进程 110 次强制停止, 0 次崩溃 (H20, `h20-XQ-AT72-5621-S4e-force-20261020.md`)) | | | |
+| S5 UI 脚本 + webview | N / F | N `1 / +0.06 / -0.20 / +0 / +0 / 0`; F `1 / +0.05 / -0.20 / +0 / +0 / 0` (只有 H17 / H18) | N `0 / +0.06 / -0.28 / +0 / +0 / 0`; F `0 / +0.04 / -0.32 / +0 / +0 / 0` | | | |
+| S6 floaty | N / F | N `1 / +0.06 / +0.09 / +0 / +0 / 0`; F `1 / +0.06 / +0.09 / +0 / +0 / 0` | N `0 / +0.12 / +0.00 / +0 / +0 / 0`; F `0 / +0.07 / +0.02 / +0 / +0 / 0` | | | |
+| S7 事件 / 按键 / 传感器 | N / F | N `1 / +0.02 / -0.06 / +0 / +0 / 0`; F `1 / +0.04 / +0.15 / +0 / +0 / 0` (宿主无障碍服务运行中, 含 `auto.registerEvent` / `events.observeKey`; 只有 H17 / H18, H9 / H16 本轮未复现; 两种模式同一进程, 附录 C Q9) | N `0 / +0.08 / -0.03 / +0 / +0 / 0`; F `0 / +0.03 / -0.03 / +0 / +0 / 0` (宿主无障碍服务运行中 (`accessibilityRunning: true`, 维护者开关一次, Q9 做法)) | | | |
+| S8 JavaAdapter + loadDex | N / F | N `1 / +0.04 / -0.37 / +0 / +0 / 0`; F `1 / +0.04 / -0.45 / +0 / +0 / 0` (无额外 runtime 残留; 生成类数量留给 P4.4 看 hprof) | N `0 / +0.10 / -0.41 / +0 / +0 / 0`; F `0 / +0.06 / -0.29 / +0 / +0 / 0` (AVD F 原生堆一次性台阶 +10.32 MB (P3 N1)) | | | |
+| S9 execScriptFile 重启 | N / F | N `1 / +0.08 / +0.01 / +0 / +0 / 0`; F `1 / +0.08 / +0.03 / +0 / +0 / 0` (无额外残留 (H6 未复现)) | N `0 / +0.14 / +0.01 / +0 / +0 / 0`; F `0 / +0.09 / +0.02 / +0 / +0 / 0` | | | |
+| S10 http + websocket | N / F | N `1 / +0.08 / +0.07 / +0 / +0 / 0`; F `19 / +26.90 / +0.69 / +0 / +0 / 0` (F: 19/20 经 okhttp `RealWebSocket` 读线程局部变量钉住 (H19)) | N `0 / +0.10 / +0.06 / +0 / +0 / 0`; F `0 / +0.10 / +0.19 / +0 / +0 / 0` | | | |
+| S11 device 接收器 | N / F | N `1 / +0.10 / +0.03 / +0 / +0 / 0`; F `1 / +0.09 / +0.04 / +0 / +0 / 0` (无额外残留 (H7 未复现)) | N `0 / +0.17 / +0.07 / +0 / +0 / 0`; F `0 / +0.10 / +0.03 / +0 / +0 / 0` | | | |
+| S12 plugins 绑定 | N / F | N `20 / +53.47 / +0.34 / +0 / +0 / 0`; F `20 / +53.56 / +0.35 / +0 / +0 / 0` (H8: `LoadedApk$ServiceDispatcher.mConnection -> Plugin.pluginInstance -> ImGuiPluginConnection.runtime`, 每次约 2.7 MB) | N `0 / +0.03 / -0.03 / +0 / +0 / 0`; F `0 / +0.02 / -0.02 / +0 / +0 / 0` (AVD F 原生堆一次性台阶 +9.83 MB (P3 N1)) | | | |
 
 设备: XQ-AT72 (API 31) 主表; G8441 (API 28), 23046RP50C (API 35), AVD API 24 各一份同结构表 (放在 evidence 报告中, 本表只记 XQ-AT72 与差异备注).
 
@@ -279,6 +282,12 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 - S4a (18:06-18:36 补跑): 四台两种模式都只有 H17 / H18 的单 runtime 残留 (AVD F 另有 1 个, 同 S4b-S4d F 的 H21), Java 堆 +0.16 MB 以内; 原生堆 XQ-AT72 / 23046RP50C 在 +-0.5 MB 内, G8441 +2.3 MB, AVD +4.5 MB (截屏场景阈值为 4 MB + 一帧, 未超). 23046RP50C 第一次跑正常模式时有 2/22 次 `requestScreenCapture` 返回 false (系统拒绝, 其中 1 次等待 89 s), 复跑 22 次全部成功, 表中为复跑结果; 复跑期间 (约 18:31) 维护者在几台手机上按过音量键, S4a 不监听按键, 判断无影响. 该机 `PROJECT_MEDIA` 原为 `ignore` (1 天前被拒的记录), 按拍板恢复为 `default`; 其余三台原本即为默认.
 - S7: XQ-AT72 的 S7 是开启宿主无障碍服务后的结果 (Q9); 其余三台的 S7 未启用无障碍部分 (按键与无障碍事件的覆盖以 XQ-AT72 为准, G8441 留给 P3.4).
 - 设备占用: 23046RP50C 在基线期间 2 次被其他会话重装宿主或测试 APK (16:53, 17:19), 第 3 次 (约 17:48) 实为 adb 断开, 当时的防护把读不到包信息误判为重装, 已改为单独报 "设备离线"; S6-S12 以 `--merge` 补跑合并, S12 F 于 18:24 补齐. `run_gate.py` 的设备占用防护: 开始前有其他 `am instrument` 就等待, 运行中宿主或测试 APK 被替换就停止并标记 `invalid`.
+
+P1 后 (P1.4, 2026-10-21, 宿主 debug versionCode 5679, 即 `4be14ab38` 的构建): 主表按 XQ-AT72 填写, 报告 `gate-XQ-AT72-5679-p1-20261021.md` / `.json`; 其余 `gate-G8441-5679-p1-20261021.*`, `gate-23046RP50C-5679-p1-20261021.*`, `gate-Android_SDK_built_for_x86-5679-p1-20261021.*`. 四台共同结论:
+
+- 残留 runtime: 128 个场景模式全部为 0, 预热中也没有 (修前每个场景至少 1 个). Java 堆增量 -0.04 至 +0.27 MB. 线程 / Context / 引擎增量全部为 0 (修前 S2 F 线程与 Context 各 +44).
+- 原生堆: XQ-AT72 与 23046RP50C 在 -5.9 至 +0.5 MB (图像场景为负); G8441 (低内存) +0.6 至 +2.9 MB, 全部在阈值内; AVD API 24 的 S1 / S3 / S8 / S12 F 各有一次约 +10 MB 的台阶 (第 7 至 19 次之间出现一次, 之后持平; 修前基线 AVD S12 F 的 +9.99 MB 也是同一现象), 编号 P3 N1, 留给 P3 判断是否为 x86 模拟器上 jemalloc 新开 arena 的一次性占用.
+- 过程中的中间报告: `gate-*-5621-p1-20261020.*` 为 `8dcba0d67` 的构建 (XQ-AT72 32/32, AVD 31/32, 23046RP50C 29/32: H21 的第二条路径, 已由 `f7c7ee309` 修复), 保留作 P1.3.7 的证据.
 
 ---
 
@@ -352,6 +361,7 @@ images.cancelPendingQuantizations -> console.onRuntimeExit -> CoreWebSocket.onEx
 | Q10 | WebSocket 在脚本结束时的处理是可见行为变化 (R1, P1.3.4): 未设置 exitOnClose 的连接原来在脚本结束后保持打开 (事件已无法派发, 读线程与连接一直存在), 现在断开; 设置了 exitOnClose 的连接原来会在任意脚本结束时被关闭, 现在只在所属脚本结束时关闭. 是否接受, 以及文档 `websocket` 页是否需要补一句 | P1.3 (已按默认倾向实施) | 接受 (changelog 已写, `ff16eab0d`); 文档在 P5.2 同步文档仓库时补 "脚本结束时未设置 exitOnClose 的连接会被断开" |
 | Q11 | 在脚本线程内首次初始化 `RhinoUtils.standardObjects` (惰性属性, 内部 `Context.enter` + `initStandardObjects`) 后, 该进程之后的脚本全部在 `ScriptRuntime.initEpilogue` 失败 (`TypeError: Cannot read property "getNotifier" from undefined`, `array-observe.min.js`); P1.3.3 的初版做法触发过 (2026-10-20 20:39, XQ-AT72), 已改用不触发它的做法, 原因未分析. 现有代码里 `getDeclarationScope` 等兜底路径同样可能在脚本线程首次初始化它 | P4.4 之前 | 列入 P4.4 排查 (与 Context / 标准对象的归属一并处理), 不阻塞 P1 |
 | Q12 | 新脚本模块层 (augment 路线图) 的 `UtilVersionCodesModule` 直接读 `VersionCodesInfoGenerated.list`, 开启新模块层时 `VersionCodesInfo` 不初始化, 进程级生成对象会钉住第一个脚本 (H18 复发) | P2 (新层默认开启之前) | 已协调: augment P2.3 会话 2026-10-21 改为读 `VersionCodesInfo.list` (该会话的提交); 新层默认开启前门禁在新层开关打开时补跑一次 S1 |
+| Q13 | 门禁没有语音场景: H23 由外部触发的语音会话暴露, 无法在门禁中稳定复现. 是否在 P4.1 增加 "speech 会话打开后脚本结束 (正常 / 强制停止)" 场景 (需要设备装有 3-Macaw Speech 或 3-Stone AI 语音插件, 不发声的识别会话) | P4.1 之前 | 增加, 插件未安装时跳过 (同 S12) |
 | Q5 | 第二期: Node / Bun / Lua / Python / QuickJS 插件引擎在宿主进程内的桥接对象 (`engine/NodeBridge*` 约 60 个文件) 的门禁场景 | P6.4 | 另开路线图, 复用本文门禁框架 |
 | Q6 | inrt debug 变体是否也默认包含 LeakCanary | P1.2 | 包含 (同一 gradle 属性) |
 | Q7 | CI 门禁是否接入 release 工作流作为硬门禁 (失败阻断发布) | P6.1 | 接入 tag 构建, 失败阻断 |
