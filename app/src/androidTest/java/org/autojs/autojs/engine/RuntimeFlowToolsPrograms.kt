@@ -14,9 +14,9 @@ internal object RuntimeFlowToolsPrograms {
         const root=await ui.inflate({type:'Column',padding:8,children:[
             {type:'Text',id:'signal',text:'Flow tools running'},
             {type:'Button',id:'target',text:'Flow target',contentDescription:'flow-tools-target'},
-            {type:'Row',id:'ancestor',children:[{type:'Text',text:'Flow leaf',contentDescription:'flow-tools-leaf'}]},
+            {type:'Row',id:'ancestor',clickable:true,children:[{type:'Text',text:'Flow leaf',contentDescription:'flow-tools-leaf'}]},
             {type:'Text',id:'plain',text:'Flow plain',contentDescription:'flow-tools-plain'},
-            {type:'Input',id:'field',text:'seed',contentDescription:'flow-tools-field',singleLine:true},
+            {type:'Input',id:'field',text:'seed',contentDescription:'flow-tools-field',singleLine:true,focusable:false},
             {type:'Checkbox',id:'check',text:'Flow toggle',contentDescription:'flow-tools-check',checked:false},
             {type:'Button',id:'popup',text:'Flow dismiss',contentDescription:'flow-tools-popup'},
             {type:'ScrollView',id:'list',height:160,contentDescription:'flow-tools-list',children:[{type:'Column',children:Array.from({length:12},(_,i)=>({type:'Text',text:'Flow row '+i,height:32,contentDescription:'flow-tools-row-'+i}))}]}
@@ -26,7 +26,9 @@ internal object RuntimeFlowToolsPrograms {
         const targetSelector={desc:'flow-tools-target'},fieldSelector={desc:'flow-tools-field'},listSelector={desc:'flow-tools-list'};
         flow.defaults({timeout:15000,interval:50});
         try{
-            const first=await flow.waitForVisible(targetSelector,{stableFor:50});
+            const samples=[];
+            const first=await flow.waitForVisible(targetSelector,{stableFor:50,snapshot:value=>{samples.push(value);if(samples.length>4)samples.shift();return value;}})
+                .catch(error=>{console.error('FLOW_TOOLS_SNAPSHOTS '+JSON.stringify(samples));throw error;});
             check(Number.isInteger(first.windowId)&&first.packageName===pkg,'action snapshot identity');
             let result=await flow.smartClick(targetSelector,{gestureFallback:false,verify:async()=>{await pause(1);return (await flow.findAny([targetSelector])).node;}});
             check(result.method==='node'&&result.verified.text==='Flow target','smart click and native callback reentry');
@@ -80,6 +82,7 @@ internal object RuntimeFlowToolsPrograms {
             await pause(30);check(clicks>=10&&climbs===1,'real view callbacks');
             if(EXERCISE_LAUNCH)check((await flow.launchAndWait(pkg,{bringToFront:true,timeout:5000})).launched===true,'actual host launch');
             return {checks:checks.length,labels:checks,clicks,climbs,collectionItems:collected.length,collectionCharacters:collected.join('').length,notification,toast:toastValue,packageName:pkg,channel};
-        }finally{await flow.dispose();await notifications.cancel(9401).catch(()=>{});await window.close();await root.dispose();}
+        }catch(error){console.error('FLOW_TOOLS_CHECKS '+JSON.stringify(checks));throw error;}
+        finally{await flow.dispose();await notifications.cancel(9401).catch(()=>{});await window.close();await root.dispose();}
     """.trimIndent().replace("EXERCISE_LAUNCH", launch.toString())
 }

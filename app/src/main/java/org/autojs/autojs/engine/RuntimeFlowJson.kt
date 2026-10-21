@@ -8,7 +8,7 @@ import org.json.JSONObject
 internal object RuntimeFlowJson {
     fun nullable(value: Any?): Any? = value?.takeUnless { it === JSONObject.NULL }
     fun encode(value: Any?): Any = when (value) {
-        null -> JSONObject.NULL
+        null, JSONObject.NULL -> JSONObject.NULL
         is RuntimeFlowNode -> JSONObject().put("__flowNode", RuntimeFlowQuery.snapshot(value.value))
         is Map<*, *> -> JSONObject().also { out -> value.forEach { (k, v) -> out.put(k.toString(), encode(v)) } }
         is Iterable<*> -> JSONArray().also { out -> value.forEach { out.put(encode(it)) } }

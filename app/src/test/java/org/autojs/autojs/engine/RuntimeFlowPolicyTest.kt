@@ -51,4 +51,8 @@ class RuntimeFlowPolicyTest {
         assertEquals(Long.MAX_VALUE, RuntimeFlowJson.millis(JSONObject("""{"__flowNumber":"Infinity"}"""), 5, "timeout"))
         assertThrows(IllegalArgumentException::class.java) { RuntimeFlowJson.millis(-1, 5, "timeout") }
     }
+    @Test fun alreadyEncodedNullCanPassThroughTheJobEnvelope() {
+        assertSame(JSONObject.NULL, RuntimeFlowJson.encode(RuntimeFlowJson.encode(null)))
+        assertEquals("[null]", RuntimeFlowJson.encode(RuntimeFlowJson.encode(listOf(null))).toString())
+    }
 }
