@@ -198,6 +198,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `提示` console 控件及控制台浮动窗口改为显示当前脚本日志, 全局日志可通过 globalconsole 控件或日志页面查看
 * `提示` 文件日志改用内置实现, 保留已文档化的配置选项及常用 PatternLayout 格式, 其他 Log4j API 不再提供
 * `提示` Node.js 的 pinyin/pinyin4j 和控制台窗口控制方法改为异步宿主调用, 脚本需使用 await 等待结果
+* `新增` Node.js, Bun 与 Worker 的 Flow within/scope 范围继承, 罗盘导航和结果投影, 以及 press/swipe/gesture/gestures 手势重载
 * `新增` Node.js, Bun 及 Worker 的 flow 异步链与条件/稳定性等待, 支持分支取消, 单步骤重试及宿主界面快照; Node.js, Bun 及 Worker 的 Flow 高级点击, 滚动, 输入, 列表采集与真实事件等待, 支持监听就绪, 快照校验和取消
 * `新增` Node.js/Bun/Worker: 邮件账户连接, 邮件操作, 附件与邮箱监听, 支持取消及 Worker 退出清理
 * `新增` 桌面快捷方式支持新建自动存档及升级前已有固定快捷方式的纳入, 支持备份导出/导入及批量恢复; 无法读取的图标支持逐项补选或批量使用默认图标, 已保存的图标不会被覆盖; 解冻后缺失的快捷方式在快捷方式备份页面中标出以便恢复, 首页不主动弹出提示, 已识别的主动移除默认不勾选; 同一脚本的多个快捷方式按原 ID 独立保存 (纳入已有固定快捷方式需要 Android 7.1+, 自动检测需要 Android 8+) (入口: 设置页面 > 配置 > 快捷方式备份)
@@ -395,6 +396,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` 无 Root 权限设备调用 shell 相关方法时可能出现假死的问题
 * `修复` dialogs.multiChoice 方法返回的多选结果被错误转换为字符串的问题 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修复` 脚本对话框在线程结束时关闭可能导致应用崩溃的问题
+* `修复` 停止带有 setInterval 定时器的脚本时偶尔显示 "Unable to schedule a timer callback because its looper is exiting" 错误的问题
 * `修复` 取消定时器或停止子线程后, 过期回调可能阻止脚本自动结束的问题
 * `修复` threads.start 创建的子线程全部结束后脚本偶尔不会自动结束的问题
 * `修复` 停止脚本时其子线程仍在处理图像可能导致应用崩溃的问题

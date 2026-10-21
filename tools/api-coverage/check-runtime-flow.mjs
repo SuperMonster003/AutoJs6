@@ -25,7 +25,13 @@ for (const name of names) {
   assert(types.includes(name + ':') || types.includes(name + '(') || types.includes(name + '<'), 'Missing type '+name);
   assert(docs.includes(name), 'Missing documentation '+name);
 }
-for (const name of ['sync','await','within','scope','press','swipe','gesture','gestures']) assert.equal(flow.Flow.prototype[name], undefined, name);
+for (const name of ['sync','await']) assert.equal(flow.Flow.prototype[name], undefined, name);
+const scopedActions = ['within','scope','press','swipe','gesture','gestures'];
+for (const name of scopedActions) {
+  assert.equal(typeof flow.Flow.prototype[name], 'function', name);
+  assert(types.includes(name + ':') || types.includes(name + '(') || types.includes(name + '<'), name + ' declaration');
+  assert(docs.includes(name), name + ' documentation');
+}
 const actions=['click','longClick','clickBounds','setText','appendText','clear','paste','copy','cut','select','focus','clearFocus','scrollForward','scrollBackward','scrollUp','scrollDown','scrollLeft','scrollRight','expand','collapse','dismiss','show','contextClick','imeEnter','performAction'];
 for(const name of actions){assert.equal(typeof flow.Flow.prototype[name],'function',name);assert(types.includes(name+':'),name+' declaration');assert(docs.includes(name),name+' docs');}
 assert.equal(names.length,52);
@@ -35,4 +41,4 @@ for (const method of ['flowProbe','flowForeground']) {
   assert(read(resolve(root, 'app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt')).includes('"'+method+'"'));
   assert(read(resolve(root, 'app/src/main/java/org/autojs/autojs/engine/BunAutomationBridge.kt')).includes('"'+method+'"'));
 }
-console.log(JSON.stringify({flowRegisteredRootNames:names.length,nodeActions:actions.length,mainBunWorkerFactory:true,eventReadiness:true,rhinoScopeAndSyncParity:false}));
+console.log(JSON.stringify({flowRegisteredRootNames:names.length,nodeActions:actions.length,scopeAndGestureMethods:scopedActions.length,mainBunWorkerFactory:true,eventReadiness:true,portableScopes:true,rhinoSyncParity:false}));

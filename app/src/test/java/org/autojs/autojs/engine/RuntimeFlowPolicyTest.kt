@@ -30,6 +30,11 @@ class RuntimeFlowPolicyTest {
         assertEquals(setOf("accessibility", "app.query", "app.launch"), caps("launchAndWait"))
         assertEquals(setOf("accessibility", "app.query"), caps("backToApp"))
     }
+    @Test fun flowGesturesRequireGesturePermissionWithoutKeyActions() {
+        for (name in RuntimeFlowGestures.names) assertEquals(setOf("accessibility", "accessibility.gesture"), caps("globalAction", "[\"$name\",[]]"))
+        assertEquals(setOf("accessibility", "keys"), caps("globalAction", "[\"notifications\",[]]"))
+        assertEquals(setOf("accessibility"), caps("globalAction", "[\"back\",[]]"))
+    }
     @Test fun flowGrantDoesNotImplicitlyGrantAccessibilityOrEvents() {
         assertEquals(listOf("flow.control"), Grants.validatePackagedCapabilities(listOf("flow.control")))
         assertTrue(BunAutomationBridge.nodeCapabilities(listOf(Grants.FLOW_CONTROL)).isEmpty())
