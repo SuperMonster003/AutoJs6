@@ -11,6 +11,7 @@ One probe script, started through RunIntentActivity in the installed debug host,
 - dumpHeap: writes an hprof next to the probe (debug builds always allow it), checks its size and deletes it;
 - watch: hands a short-lived object to LeakCanary (true when LeakCanary is on);
 - argument errors of collect / watch / dumpHeap reach the script as errors.
+With --sample, it runs the bundled sample "工具/内存诊断" instead (or the given copy of it) and checks its console lines.
 The probe writes its result to a file next to it (not to logcat: the error checks print stack traces, and ColorOS drops the
 log lines of a process over its quota). The pushed files are removed afterwards unless --keep is given. Output: one PASS / FAIL
 line per check with the key numbers. The screen must be on (RunIntentActivity starts an activity); the script never taps or
@@ -18,6 +19,8 @@ changes settings.
 """
 import argparse
 import json
+import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -31,6 +34,13 @@ LEAK_STEM = "aj6_mem_api_leak"
 LEAK_NAME = f"{LEAK_STEM}.js"
 PROBE_NAME = "aj6_mem_api_probe.js"
 RESULT = f"{DEVICE_DIR}/result.json"
+SAMPLE = pathlib.Path(__file__).resolve().parents[2] / "app/src/main/assets-app/sample/工具/内存诊断 [v6.8.0+].js"
+SAMPLE_NAME = "aj6_mem_sample.js"
+SAMPLE_BEFORE = "回收前: "
+SAMPLE_AFTER = "回收后: "
+SAMPLE_DONE = ("没有未回收的脚本运行时", "未回收: ")
+# A GlobalConsole logcat line ends with the console time, level and text: "... GlobalConsole: 16:02:37.529/D: text".
+CONSOLE_LINE = re.compile(r"GlobalConsole.*?: \d\d:\d\d:\d\d\.\d{3}/[A-Z]: (.*)")
 SNAPSHOT_FIELDS = [
     "javaHeapUsed", "javaHeapTotal", "javaHeapMax", "nativeHeapAllocated", "nativeHeapSize", "pss",
     "engines", "retainedRuntimes", "images", "threads", "allThreads", "contexts", "timestamp",
@@ -110,14 +120,38 @@ def report(ok, text):
     return ok
 
 
+def run_sample(serial, sample, wait):
+    """Runs the sample through RunIntentActivity and checks the lines it prints (GlobalConsole in logcat)."""
+    remote = f"{DEVICE_DIR}/{SAMPLE_NAME}"
+    adb(serial, "shell", "mkdir", "-p", DEVICE_DIR)
+    adb(serial, "push", str(sample), remote, check=True)
+    adb(serial, "logcat", "-c")
+    adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
+    lines = []
+    deadline = time.time() + wait
+    while time.time() < deadline and not any(line.startswith(SAMPLE_DONE) for line in lines):
+        time.sleep(1)
+        log = adb(serial, "logcat", "-d", "-s", "GlobalConsole:*").stdout
+        lines = [match.group(1) for match in CONSOLE_LINE.finditer(log)]
+    adb(serial, "shell", "rm", "-rf", DEVICE_DIR)
+    ok = report(any(line.startswith(SAMPLE_BEFORE) for line in lines) and any(line.startswith(SAMPLE_AFTER) for line in lines),
+                f"sample printed the readings before and after collect ({len(lines)} console lines)")
+    for line in lines:
+        if line.startswith((SAMPLE_BEFORE, SAMPLE_AFTER) + SAMPLE_DONE):
+            print(f"INFO {line}")
+    ok &= report(any(line.startswith(SAMPLE_DONE) for line in lines), "sample reached the retained list")
+    print("ALL PASS" if ok else "SOME FAILED")
+    return 0 if ok else 1
+
+
 def main():
-    import pathlib
     import tempfile
 
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--keep", action="store_true", help="keep the pushed scripts on the device")
     parser.add_argument("--wait", type=int, default=120, help="seconds to wait for the probe result")
+    parser.add_argument("--sample", nargs="?", const=SAMPLE, type=pathlib.Path, help="run the sample script instead of the probe")
     args = parser.parse_args()
     serial = args.serial
 
@@ -127,6 +161,10 @@ def main():
         sys.exit(f"{PACKAGE} is not installed on {serial}")
     debuggable = "DEBUGGABLE" in package
     print(f"host versionCode {version}, debuggable {debuggable}")
+    if args.sample:
+        if "mWakefulness=Awake" not in adb(serial, "shell", "dumpsys", "power").stdout:
+            sys.exit("Turn the screen on first")
+        return run_sample(serial, args.sample, args.wait)
     if not debuggable:
         sys.exit("The installed host must be the debug build (dumpHeap is checked with debug builds' rule)")
     if "mWakefulness=Awake" not in adb(serial, "shell", "dumpsys", "power").stdout:

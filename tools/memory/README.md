@@ -81,9 +81,12 @@ ROADMAP P2.2 / P2.3. 开发者选项与内存诊断页面都未导出, 与 `tool
 
 ```
 py -3.12 -I -u tools/memory/device_memory_api.py -s SERIAL [--keep] [--wait 120]
+py -3.12 -I -u -X utf8 tools/memory/device_memory_api.py -s SERIAL --sample [PATH]
 ```
 
 ROADMAP P5.1. 经 `RunIntentActivity` 在已安装的 debug 宿主中运行一个探针脚本: `memory.snapshot()` 的字段与类型 (T9) 及单次耗时; 第二个脚本把自身 `runtime` 存进静态 Java 表 (System properties) 后结束, `memory.collect(5000)` 后 `memory.retained()` 应列出它 (S2 修前的类比), 探针移除引用后 `memory.collect()` 应回收它 (修后的类比); `memory.dumpHeap()` 写出 hprof 并核对大小后删除 (debug 构建始终允许); `memory.watch()` 的返回值; 各参数错误能以脚本错误抛出. 探针把结果写到设备上的 `result.json` 而不是 logcat (参数错误会打印堆栈, ColorOS 会丢弃超出配额的日志行). 推送的文件默认在结束后删除. 屏幕须点亮, 脚本不点屏幕, 不改设置. 输出每项一行 PASS / FAIL 与关键数值.
+
+`--sample` (P5.2): 改为运行样例 "工具/内存诊断" (默认取 `app/src/main/assets-app/sample` 中的文件; 宿主须已含 memory 模块, debug 与 release 构建均可), 从 logcat 的 `GlobalConsole` 标签读取样例的输出, 核对回收前后两行读数与未回收列表都已打印, 并原样列出这几行. 样例最后打开控制台页面.
 
 ## static_audit.py: 源码静态审计
 
