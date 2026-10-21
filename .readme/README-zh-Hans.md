@@ -390,6 +390,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` dialogs.multiChoice 方法返回的多选结果被错误转换为字符串的问题 _[`issue #518`](http://issues.autojs6.com/518)_
 * `修复` 脚本对话框在线程结束时关闭可能导致应用崩溃的问题
 * `修复` 取消定时器或停止子线程后, 过期回调可能阻止脚本自动结束的问题
+* `修复` threads.start 创建的子线程全部结束后脚本偶尔不会自动结束的问题
 * `修复` 停止脚本时其子线程仍在处理图像可能导致应用崩溃的问题
 * `修复` floaty.window/rawWindow 的聚焦相关方法在脚本线程调用时可能出现线程异常的问题
 * `修复` console.setPosition/setSize/setGravity 等方法的设置结果受调用顺序或窗口显示时机影响的问题
