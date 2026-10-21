@@ -22,8 +22,16 @@ import java.util.concurrent.CountDownLatch
  */
 open class TimerThread(
     scriptRuntime: ScriptRuntime,
-    private val target: Runnable,
-) : ThreadCompat(target), ILooperThread {
+    target: Runnable,
+) : ThreadCompat(), ILooperThread {
+
+    // Cleared when run() ends: the thread object may stay referenced after it has ended (an unrecycled Message keeps its
+    // Looper and thus this thread), and must not keep the script's runnable with it (docs/memory/ROADMAP.md H21).
+    // This class runs the target itself, so it is not handed to Thread.
+    // zh-CN: run() 结束时清空: 线程结束后线程对象仍可能被引用 (未回收的 Message 持有其 Looper, 进而持有本线程), 不能连带脚本的 Runnable (docs/memory/ROADMAP.md H21).
+    // 本类自行运行该 Runnable, 因此不交给 Thread.
+    @Volatile
+    private var target: Runnable? = target
 
     private val mRunningLatch = CountDownLatch(1)
     private var mWeakRuntime = WeakReference(scriptRuntime)
@@ -46,6 +54,7 @@ open class TimerThread(
             // its MessageQueue and the idle handler of the script runtime reachable (docs/memory/ROADMAP.md H1).
             // zh-CN: 无论循环以何种方式结束, 都把本线程从进程级 Looper 表中移除; 残留的条目曾使该 Looper, 它的 MessageQueue 以及脚本运行时的 IdleHandler 一直可达 (docs/memory/ROADMAP.md H1).
             LooperHelper.quitForThread(this)
+            target = null
             // A thread ending while its script exits should be collected with the script; debug builds let LeakCanary check that
             // (docs/memory/ROADMAP.md T5). Threads ending earlier may still be referenced by the running script, so they are not watched.
             // zh-CN: 脚本结束过程中结束的线程应随脚本一起被回收, debug 构建交给 LeakCanary 核对 (docs/memory/ROADMAP.md T5). 更早结束的线程可能仍被运行中的脚本引用, 因此不监视.
@@ -68,7 +77,8 @@ open class TimerThread(
 
         val currentLooper = Looper.myLooper()
         setLooper(currentLooper)
-        currentLooper?.let { Handler(it).post(ReleasingRunnable(target)) }
+        val target = target
+        if (currentLooper != null && target != null) Handler(currentLooper).post(ReleasingRunnable(target))
 
         val exceptionHandler: (t: Throwable) -> Unit = { t ->
             runCatching {

@@ -24,11 +24,11 @@ public class ThreadCompat extends Thread {
     }
 
     public ThreadCompat(Runnable target) {
-        super(target);
+        super(releasing(target));
     }
 
     public ThreadCompat(ThreadGroup group, Runnable target) {
-        super(group, target);
+        super(group, releasing(target));
     }
 
     public ThreadCompat(String name) {
@@ -40,15 +40,48 @@ public class ThreadCompat extends Thread {
     }
 
     public ThreadCompat(Runnable target, String name) {
-        super(target, name);
+        super(releasing(target), name);
     }
 
     public ThreadCompat(ThreadGroup group, Runnable target, String name) {
-        super(group, target, name);
+        super(group, releasing(target), name);
     }
 
     public ThreadCompat(ThreadGroup group, Runnable target, String name, long stackSize) {
-        super(group, target, name, stackSize);
+        super(group, releasing(target), name, stackSize);
+    }
+
+    /**
+     * Hands the runnable to Thread through a holder which drops it once it has run. ART does not clear Thread.target when a
+     * thread terminates, so an ended thread that is still referenced, for example through the Looper of a Message that was
+     * never recycled, kept its runnable (a script execution) and the whole ScriptRuntime reachable (docs/memory/ROADMAP.md H21).
+     * zh-CN: 经由运行完即丢弃的持有者把 Runnable 交给 Thread. ART 在线程结束时不会清除 Thread.target, 因此仍被引用的已结束线程
+     * (例如经由一个未被回收的 Message 的 Looper) 曾让它的 Runnable (脚本执行) 及整个 ScriptRuntime 保持可达 (docs/memory/ROADMAP.md H21).
+     */
+    private static Runnable releasing(Runnable target) {
+        return target == null ? null : new ReleasingTarget(target);
+    }
+
+    private static final class ReleasingTarget implements Runnable {
+
+        private volatile Runnable mTarget;
+
+        ReleasingTarget(Runnable target) {
+            mTarget = target;
+        }
+
+        @Override
+        public void run() {
+            Runnable target = mTarget;
+            if (target == null) {
+                return;
+            }
+            try {
+                target.run();
+            } finally {
+                mTarget = null;
+            }
+        }
     }
 
     @Override
