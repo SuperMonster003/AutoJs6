@@ -7,8 +7,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * docs/settings/ROADMAP.md P6.3: the selection rules of the category step (T10, D2, appendix C Q26).
- * zh-CN: ROADMAP P6.3: 分类步骤的勾选规则 (T10, D2, 附录 C Q26).
+ * docs/settings/ROADMAP.md P6.3: the selection rules of the category step (T10, D2, appendix C Q28).
+ * zh-CN: ROADMAP P6.3: 分类步骤的勾选规则 (T10, D2, 附录 C Q28).
  */
 class SettingsCategorySelectionTest {
 

@@ -174,7 +174,7 @@ object MiscStateKeys : SettingsDomain {
 
     /**
      * The categories last chosen in the export wizard, without `credentials` (`SettingsCategoryPickerStep`, P6.3,
-     * appendix C Q27); none until the first export, when the wizard starts with the defaults of appendix A.1.
+     * appendix C Q28); none until the first export, when the wizard starts with the defaults of appendix A.1.
      */
     @JvmField
     val SETTINGS_EXPORT_CATEGORIES = StateKey.json(

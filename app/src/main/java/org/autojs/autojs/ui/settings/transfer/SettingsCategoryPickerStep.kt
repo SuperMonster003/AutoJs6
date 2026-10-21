@@ -33,12 +33,12 @@ import org.autojs.autojs6.databinding.SettingsCategoryPickerItemBinding
  * "Invert selection" at the bottom (as in IDEA). Ticking `credentials` asks once per wizard run (D2). The data
  * categories show a "Refine..." entry and stay disabled until their codecs and detail pages exist (P10). Every change
  * of the selection is published to the host at once, so it survives the recreation of the page; "Next" remembers it
- * without `credentials` ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], appendix C Q26).
+ * without `credentials` ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], appendix C Q28).
  *
  * zh-CN: 导出向导第 1 步 (ROADMAP T10, D2 / D6): 按页面顺序列出附录 A.1 的分类, 每项显示当前 [SettingsSnapshot] 中的条目数, 底部为
  * "全选" / "全不选" / "反选" (与 IDEA 一致). 勾选 `credentials` 时每次运行向导询问一次 (D2). 数据分类显示 "细化..." 入口, 在其编解码
  * 与细化页完成 (P10) 之前不可勾选. 勾选每次变化都立即写入宿主, 因此页面重建后仍保留; "下一步" 记住不含 `credentials` 的勾选
- * ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], 附录 C Q26).
+ * ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], 附录 C Q28).
  */
 class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.PICK_CATEGORIES) {
 

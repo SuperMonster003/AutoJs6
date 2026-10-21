@@ -386,7 +386,7 @@
   "key_$_seen_ace_fallback_notice": {"kind": "State", "category": "other", "store": "default", "note": "一次性提示已展示 (EditorEnginePreferences); P4.2 声明为 MiscStateKeys"},
   "key_$_seen_ace_large_file_notice": {"kind": "State", "category": "other", "store": "default", "note": "一次性提示已展示; P4.2 声明为 MiscStateKeys"},
   "key_$_seen_editor_switch_undo_notice": {"kind": "State", "category": "other", "store": "default", "note": "一次性提示已展示; P4.2 声明为 MiscStateKeys"},
-  "key_$_settings_transfer_export_categories": {"kind": "State", "category": "other", "store": "default", "note": "导出向导上次选择的分类 (不含凭据, SettingsCategoryPickerStep); P6.3 声明为 MiscStateKeys (附录 C Q27)"},
+  "key_$_settings_transfer_export_categories": {"kind": "State", "category": "other", "store": "default", "note": "导出向导上次选择的分类 (不含凭据, SettingsCategoryPickerStep); P6.3 声明为 MiscStateKeys (附录 C Q28)"},
   "key_$_suspended_plugin_$_": {"kind": "Setting", "category": "plugin_enable_state", "store": "plugin_center_enable_state", "note": "挂起标记, 前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.PLUGIN_SUSPENDED; 属于命名存储, 随整份计数"},
   "key_$_terminal_": {"kind": "Excluded", "store": "default", "note": "已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板)"},
   "key_dont_show_main_activity": {"kind": "Excluded", "store": "default", "note": "脚本 API settings 模块的别名字符串, 不是偏好键"},
