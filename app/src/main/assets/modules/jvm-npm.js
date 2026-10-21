@@ -20,13 +20,31 @@
 
 ( /* @ModuleIIFE */ () => {
 
-    const File = java.io.File;
-    const Scanner = java.util.Scanner;
-    const System = java.lang.System;
-    const Thread = java.lang.Thread;
-    const EncryptedScriptFileHeader = Packages.org.autojs.autojs.script.EncryptedScriptFileHeader;
-    const ScriptEncryption = Packages.org.autojs.autojs.engine.encryption.ScriptEncryption;
-    const StandardCharsets = java.nio.charset.StandardCharsets;
+    // Java classes, looked up on first use (roadmap P2.5, Q16): every script runs this module at start, and a lookup
+    // reflects the class for the script's own scope (0.8 - 7.5 ms each on a phone), while most scripts never load a
+    // module through it.
+    const J = (/* @IIFE */ (lookups) => {
+        const classes = {};
+        Object.keys(lookups).forEach((name) => {
+            Object.defineProperty(classes, name, {
+                get() {
+                    const value = lookups[name]();
+                    Object.defineProperty(classes, name, { value: value });
+                    return value;
+                },
+                configurable: true,
+            });
+        });
+        return classes;
+    })({
+        File: () => java.io.File,
+        Scanner: () => java.util.Scanner,
+        System: () => java.lang.System,
+        Thread: () => java.lang.Thread,
+        EncryptedScriptFileHeader: () => Packages.org.autojs.autojs.script.EncryptedScriptFileHeader,
+        ScriptEncryption: () => Packages.org.autojs.autojs.engine.encryption.ScriptEncryption,
+        StandardCharsets: () => java.nio.charset.StandardCharsets,
+    });
 
     let _ = {
         Module: (/* @IIFE */ () => {
@@ -78,7 +96,7 @@
                         if (body.startsWith('#!')) {
                             body = '//' + body;
                         }
-                        const dirname = core ? '' : String(new File(file).getParent() || '');
+                        const dirname = core ? '' : String(new J.File(file).getParent() || '');
                         const moduleRequire = module.require;
                         moduleRequire.resolve = function (id) {
                             return require.resolve(id, module);
@@ -132,7 +150,7 @@
                     if (!file) {
                         if (typeof NativeRequire.require === 'function') {
                             if (this.debug) {
-                                System.out.println([ 'Cannot resolve', id, 'defaulting to native' ].join(' '));
+                                J.System.out.println([ 'Cannot resolve', id, 'defaulting to native' ].join(' '));
                             }
                             let nativeRequired = NativeRequire.require(id);
                             if (nativeRequired) {
@@ -140,7 +158,7 @@
                             }
                         }
                         if (this.debug) {
-                            System.err.println('Cannot find module ' + id);
+                            J.System.err.println('Cannot find module ' + id);
                         }
                         throw new _.ModuleError('Cannot find module ' + id, 'MODULE_NOT_FOUND');
                     }
@@ -187,14 +205,14 @@
                 },
                 paths() {
                     let r = [
-                        System.getProperty('user.home') + '/.node_modules',
-                        System.getProperty('user.home') + '/.node_libraries',
+                        J.System.getProperty('user.home') + '/.node_modules',
+                        J.System.getProperty('user.home') + '/.node_libraries',
                     ];
 
                     if (this.NODE_PATH) {
                         r = r.concat(_.parsePaths(this.NODE_PATH));
                     } else {
-                        const { NODE_PATH } = System.getenv();
+                        const { NODE_PATH } = J.System.getenv();
                         if (NODE_PATH) {
                             r = r.concat(_.parsePaths(NODE_PATH));
                         }
@@ -253,21 +271,21 @@
             if (!parent || !parent.id) {
                 return require.root;
             }
-            return (/* pathParts = */ parent.id.split(/[\/|\\,]+/g).slice(0, -1)).join(File.separator);
+            return (/* pathParts = */ parent.id.split(/[\/|\\,]+/g).slice(0, -1)).join(J.File.separator);
         },
         readFile(filename, core) {
             try {
                 if (!core) {
                     const encryptedBytes = runtime.files.readBytes(filename);
-                    if (encryptedBytes.length >= EncryptedScriptFileHeader.BLOCK_SIZE
-                        && EncryptedScriptFileHeader.isValidFile(encryptedBytes)) {
-                        const clearText = ScriptEncryption.decrypt(
+                    if (encryptedBytes.length >= J.EncryptedScriptFileHeader.BLOCK_SIZE
+                        && J.EncryptedScriptFileHeader.isValidFile(encryptedBytes)) {
+                        const clearText = J.ScriptEncryption.decrypt(
                             encryptedBytes,
-                            EncryptedScriptFileHeader.BLOCK_SIZE,
+                            J.EncryptedScriptFileHeader.BLOCK_SIZE,
                             encryptedBytes.length,
                         );
                         try {
-                            return String(new java.lang.String(clearText, StandardCharsets.UTF_8));
+                            return String(new java.lang.String(clearText, J.StandardCharsets.UTF_8));
                         } finally {
                             for (let i = 0; i < clearText.length; i++) {
                                 clearText[i] = 0;
@@ -276,16 +294,16 @@
                     }
                 }
                 let input = core
-                    ? Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)
-                    : new File(filename);
+                    ? J.Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)
+                    : new J.File(filename);
                 // TODO: I think this is not very efficient
-                return new Scanner(input).useDelimiter('\\A').next();
+                return new J.Scanner(input).useDelimiter('\\A').next();
             } catch (e) {
                 throw new _.ModuleError(`Cannot read file [${filename}]: `, 'IO_ERROR', e);
             }
         },
         parsePaths: (paths) => paths && paths !== ''
-            ? paths.split(/* separator = */ System.getProperty('os.name').toLowerCase().includes('win') ? ';' : ':')
+            ? paths.split(/* separator = */ J.System.getProperty('os.name').toLowerCase().includes('win') ? ';' : ':')
             : [],
         normalizeName(fileName, ext) {
             if (this.hasKnownExtension(fileName)) {
@@ -302,19 +320,19 @@
         },
         resolveCoreModule(id) {
             const name = this.normalizeName(id);
-            if (Thread.currentThread().getContextClassLoader().getResource(name)) {
+            if (J.Thread.currentThread().getContextClassLoader().getResource(name)) {
                 return { path: name, core: true };
             }
         },
         resolveAsFile(id, root, ext) {
             let file;
-            if (!id.startsWith(File.separator)) {
-                file = new File([ root, this.normalizeName(id, ext) ].join(File.separator));
+            if (!id.startsWith(J.File.separator)) {
+                file = new J.File([ root, this.normalizeName(id, ext) ].join(J.File.separator));
                 if (!file.exists()) {
                     return;
                 }
             } else {
-                file = new File(this.normalizeName(id, ext));
+                file = new J.File(this.normalizeName(id, ext));
                 if (!file.exists()) {
                     return this.resolveAsDirectory(id);
                 }
@@ -322,8 +340,8 @@
             return file.getCanonicalPath();
         },
         resolveAsDirectory(id, root) {
-            const base = [ root, id ].join(File.separator);
-            const file = new File([ base, 'package.json' ].join(File.separator));
+            const base = [ root, id ].join(J.File.separator);
+            const file = new J.File([ base, 'package.json' ].join(J.File.separator));
             if (file.exists()) {
                 try {
                     const body = this.readFile(file.getCanonicalPath());
@@ -340,10 +358,10 @@
             return this.resolveAsFile('index.js', base);
         },
         resolveAsNodeModule(id, root) {
-            const base = [ root, 'node_modules' ].join(File.separator);
+            const base = [ root, 'node_modules' ].join(J.File.separator);
             return this.resolveAsFile(id, base)
                 || this.resolveAsDirectory(id, base)
-                || (root ? this.resolveAsNodeModule(id, new File(root).getParent()) : false);
+                || (root ? this.resolveAsNodeModule(id, new J.File(root).getParent()) : false);
         },
     };
 
