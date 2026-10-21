@@ -239,7 +239,7 @@ class UtilModule(private val runtime: ScriptRuntime?) {
     fun ensureType(o: Any?, type: Any?) {
         val function = "util.ensureType"
         val name = string(function, "type", type).lowercase()
-        if (name !in TYPES) throw rangeError(function, ScriptMessages.argumentType("type", TYPES.joinToString(" | ") { "'$it'" }, quote(type)))
+        if (name !in TYPES) throw rangeError(function, ScriptMessages.argumentType("type", TYPE_UNION, quote(type)))
         if (typeOf(o) != name) throw typeError(function, "o", name, o)
     }
 
@@ -371,6 +371,9 @@ class UtilModule(private val runtime: ScriptRuntime?) {
         const val NOT_FOR_AUTOJS6 = "This method is not designed for AutoJs6."
 
         val TYPES = listOf("object", "string", "undefined", "symbol", "bigint", "number", "function", "boolean")
+
+        /** [TYPES] for the RangeError message of [ensureType], joined once instead of on each failing call (roadmap P2.4). */
+        val TYPE_UNION = TYPES.joinToString(" | ") { "'$it'" }
 
         fun isJsArray(o: Any?) = o is Scriptable && o !== Scriptable.NOT_FOUND && o.className == "Array"
 
