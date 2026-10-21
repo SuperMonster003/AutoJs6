@@ -257,7 +257,8 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
   - d.ts `9a13928` (未推送): `aj6-int-memory.d.ts` (`Internal.Memory`, `Memory.Snapshot` / `RetainedRuntime` / `ExitKind`), index / init 引用 `memory` 与 `$memory`; API 覆盖冒烟用例补 memory 调用与两个 `@ts-expect-error`; `verify-api-coverage.mjs` 与 `verify-runtime-declarations.mjs` 通过; 版本 4.77.0, changelog 10 语言.
   - Ace `1f4e059` (未推送): 复制三份声明并同步 types 的 package.json 版本, `:app:generateAutoJs6LspDeclarations` 成功 (core 聚合含 Memory), `tools/ace-lsp/verify-api-coverage.mjs` 通过; 版本 2.39.0 (VERSION_BUILD 320), changelog 10 语言. 未跑 `aj6dts.bat -Publish` (本项不涉及 Android 类声明, 且宿主工作区有其他会话的未提交改动).
   - 样例 `3a3c955da`: `sample/工具/内存诊断 [v6.8.0+].js` (snapshot 与 `collect(3000)` 对比, 列出未回收的运行时); `device_memory_api.py --sample` 在 OPD2413 (宿主 5741) 通过: Java 堆 54.02 MB -> 12.79 MB, PSS 330.1 -> 289.0 MB, 未回收 0.
-- [ ] P5.3 (changelog) `feature` 条目: memory 模块 (zh-Hans 先行).
+- [x] P5.3 (changelog) `feature` 条目: memory 模块 (zh-Hans 先行).
+  - `2dfa17ff7` (2026-10-21): 6.8.0 `feature` 一条, 放在 "内存诊断" 页面 / 控制台警告 / LeakCanary 三条之后, 写明五个方法的用途, 正式版本中 dumpHeap 需开 "允许脚本导出 hprof" (默认关闭), 参阅样例与文档页, 关联 `issue #452`; 只重新生成 zh-Hans 相关的 4 个文件 (README.md, `.readme/README-zh-Hans.md`, `CHANGELOG-zh-Hans.md`, `CHANGELOG.md`). 当时 `lang_zh-Hans.json` 另有其他会话未提交的两条 fix / improvement, 本提交只含自己的条目 (在副本中按 HEAD 加本条生成, 用 `update-index` 暂存). `generate_markdown.py --check` 按预期因其他语言条目数不足失败 (如 zh-Hant-HK feature 183 对 163), 其他语言由维护者同步.
 
 ### P6 CI 与封版 (D10 / D12)
 
