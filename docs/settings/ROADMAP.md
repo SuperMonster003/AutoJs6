@@ -215,7 +215,7 @@ D1-D18 来自 2026-10-20 四轮选择题, D19-D22 来自同日附录 C 的拍板
 
 ### P13 插件契约预留 (D3)
 
-- [ ] P13.1 (宿主) manifest `plugins` 字段与 `plugins/<packageName>/` 目录读写能力 (空集合), `PluginSettingsProvider` 接口与注册表空实现, 导入时遇到未知插件目录计入 `TARGET_MISSING`. 证据: 单测.
+- [x] P13.1 (宿主) manifest `plugins` 字段与 `plugins/<packageName>/` 目录读写能力 (空集合), `PluginSettingsProvider` 接口与注册表空实现, 导入时遇到未知插件目录计入 `TARGET_MISSING`. 证据: 单测. 实际: 提交 `9012d9022`; 插件目录的文件约定为 `plugins/<包名>/settings.json` (与分类文件一样由 id 推出, manifest 不另列文件名), manifest 条目 `{ "id": "<包名>", "entries": N }` (P6.1 测试样例已用此形状; 附录 B 补写); `SettingsArchive` 新增 `PLUGIN_SETTINGS_FILE`, `isPackageName` (由 manifest 的宿主包名校验移来, 两处共用) 与 `pluginFile`; `SettingsArchiveManifest.plugins` 由普通对象改为 `PluginEntry(id, entries)` (计算属性 `file`), 读取时 id 须为包名, 条目数非负且 id 不重复, 否则 `INVALID_MANIFEST`, 未知字段照常忽略, 没有 `plugins` 字段的旧 manifest 读为空; `SettingsArchiveWriter.write` 新增 `plugins: List<PluginFile>` (包名, 条目数, 文本; 包名非法, 条目数为负或重复时在写入前拒绝), 在数据文件之后写各插件文件, 不写 `plugins/` 目录条目; `SettingsArchiveReader.plugin(包名)` 返回该文件的文本 (缺失为 `MISSING_FILE`); 新增 `core/pref/PluginSettingsProvider.kt` (`packageName`, `exportSettings(): Exported(text, entries)`, `importSettings(text): Imported(written, skipped)`, 失败抛 `IOException`, 调用方在主线程之外调用), `SettingsRegistry.pluginSettingsProviders` 为空列表, `pluginSettingsProvider(包名)` 为 null; `SettingsImportPlanner.plan` 新增 `plugins` (要导入的插件目录, 第一期即 manifest 的全部) 与 `providers` (默认取注册表), 插件已安装且有提供方时进入新字段 `ImportPlan.plugins` (包名, 去重), 否则整体跳过为 `TARGET_MISSING` (分类 `ImportPlan.PLUGINS` 即 `plugins/`, 不会与分类 id 相同; 存储为包名, 名称为空; 说明 `not installed` / `no settings provider`), 不影响设置分类的计划; `archive_inspect.py` 校验插件条目 (包名, 不重复, 条目数) 与 `plugins/<id>/settings.json` 存在且为 JSON 对象, `plugins/` 下其他文件判为多余 (目录条目除外), 打印内容不变 (11 份既有归档输出与旧版相同; 以 JVM 写出的样例核对: 两个插件 0 问题, 非对象, 多余文件, 缺文件, 非法 id, 重复 id 各报对应问题). 单测: 新增 `archive/SettingsArchivePluginsTest` 4 例 (两个插件与数据文件一同写读往返, 文件顺序, manifest 文本往返, 第一期空数组且没有 `plugins/`; 8 种错误的 `plugins` 为 `INVALID_MANIFEST`, 旧 manifest 无该字段读为空, 非法包名与重复插件在读写两侧拒绝; 注册表为空时已安装与未安装的插件目录都是 `TARGET_MISSING`; 有提供方且已安装的插件进入 `plan.plugins`, 去重, 没有提供方或未安装的整体跳过), `SettingsArchiveTest` 3 处改为 `PluginEntry`; `core.pref` 全部与 `ui.settings.transfer` 共 39 类 233 例 0 失败 (含 `SettingsRegistryGuardTest`), `inventory.py --check` 0 问题 (输出到 scratchpad, 仓库内清单未重写), `:app:assembleAppDebug` 通过 (子会话 settings-p10-13).
 - [ ] P13.2 (文档) 第二期契约草案 `docs/dev/plugin-settings-transfer-protocol-v1.md` (ContentProvider `call`, `exportSettings` / `importSettings`, JSON 载荷与 `formatVersion`; 不实现). 证据: 文档提交.
 
 ### P14 清理与门禁
@@ -296,7 +296,7 @@ autojs6-settings-20261020-153000.zip
   ...
   data/shortcuts.zip            (data_shortcuts 勾选时; 与独立导出字节一致)
   data/color-library.json       (data_color_library 勾选时; ColorLibraryJson 文档)
-  plugins/                      (第一期为空目录或不存在, D3)
+  plugins/<packageName>/settings.json   (官方插件的设置, D3 / P13.1; 第一期没有插件提供方, 因此不出现)
 ```
 
 `manifest.json`:
@@ -319,6 +319,8 @@ autojs6-settings-20261020-153000.zip
   "plugins": []
 }
 ```
+
+`plugins` 的每项为 `{ "id": "<包名>", "entries": N }` (P13.1), 对应文件 `plugins/<id>/settings.json`, 内容为插件导出的 JSON 文档 (第二期契约草案 `docs/dev/plugin-settings-transfer-protocol-v1.md`, P13.2), 宿主原样保存; `id` 须为包名 (application id) 且不重复, 条目数非负, 否则 `INVALID_MANIFEST`. 导入时插件未安装或本机没有其设置提供方的目录整体计 `TARGET_MISSING` (第一期没有提供方, 全部如此).
 
 `categories/<id>.json` (`stores` 的键为 `StoreId` 名称, 默认 SharedPreferences 为 `default`; 每个值带类型标签):
 
@@ -446,7 +448,7 @@ Q0-Q14 均已于 2026-10-20 由维护者拍板 (Q10 / Q12 / Q13 / Q14 在 P0 完
 | --- | --- |
 | 键声明 | `core/pref/SettingKey.kt`, `StateKey.kt`, `CacheKey.kt`, `KeyFamily.kt` (P3, 前缀键族), `SettingCategory.kt`, `SettingEffect.kt`, `DeploymentKind.kt`, `SettingsJson.kt`, `keys/NamedStores.kt` (P3, 命名存储登记), `keys/EditorKeyboardKeys.kt` (P3.2), `keys/ApkBuildKeys.kt` / `keys/WizardKeys.kt` (P3.3), `keys/AppearanceKeys.kt`, `GeneralKeys.kt`, `ExplorerKeys.kt`, `HistoryKeys.kt`, `EditorKeys.kt`, `TimedTaskKeys.kt`, `A11yKeys.kt`, `RunningKeys.kt`, `RecordKeys.kt`, `ExtensibilityKeys.kt`, `UpdatesKeys.kt`, `ConsoleKeys.kt`, `ConnectionKeys.kt`, `LayoutInspectorKeys.kt`, `DeveloperKeys.kt`, `PluginCenterKeys.kt`, `CredentialKeys.kt`, `DialogStateKeys.kt`, `MiscStateKeys.kt` |
 | 存储 | `core/pref/store/SettingsStore.kt`, `SharedPreferencesStore.kt`, `JsonFileStore.kt`, `StoreId.kt`, `SettingsStores.kt` |
-| 注册表 | `core/pref/SettingsRegistry.kt`, `SettingDescriptor.kt` |
+| 注册表 | `core/pref/SettingsRegistry.kt`, `SettingDescriptor.kt`, `PluginSettingsProvider.kt` (P13.1, 插件设置扩展点, 注册表为空) |
 | 快照与归档 | `core/pref/archive/SettingsArchive.kt` (P6.1, 结构, 命名与 `SettingsArchiveException`), `SettingsSnapshot.kt`, `SettingsSnapshotCodec.kt`, `SettingsArchiveManifest.kt`, `SettingsArchiveWriter.kt`, `SettingsArchiveReader.kt` (以上 P6.1 已落地), `SettingsKeyMigrations.kt` (P7.1 已落地), `SettingsDeviceKey.kt`, `SettingsSealedFile.kt`, `AndroidSettingsKeys.kt` (以上 P6.5 已落地, D23) |
 | 导入与备份 | `core/pref/archive/SettingsImportPlanner.kt`, `ImportPlan.kt`, `SettingsImportTargets.kt` (以上 P7.2 已落地), `SettingsImportApplier.kt`, `SettingsEffects.kt`, `AndroidSettingsEffects.kt` (以上 P7.4 已落地, 启动图标的组件切换在 `util/LauncherIconComponents.kt`), `SettingsBackupVault.kt` (P7.3 已落地), `SettingsAutoBackup.kt`, `SettingsPeriodicBackupWorker.kt`, `SettingsChangeBackupScheduler.kt`, `SettingsBackupRetention.kt` |
 | 部署项 | `core/pref/deploy/DeploymentItem.kt`, `DeploymentKind.kt` (同上), `DeploymentPlanner.kt`, `CreateWorkingDirectoryItem.kt`, `DownloadEditorFontItem.kt` |
@@ -454,7 +456,7 @@ Q0-Q14 均已于 2026-10-20 由维护者拍板 (Q10 / Q12 / Q13 / Q14 在 P0 完
 | 页面与向导 | `ui/settings/transfer/SettingsTransferActivity.kt`, `SettingsTransferFragment.kt`, `SettingsTransferPreference.kt`, `SettingsWizardState.kt`, `SettingsExportWizard.kt`, `SettingsImportWizard.kt`, `SettingsCategoryPickerStep.kt`, `SettingsWizardStep.kt` (P6.2, 宿主接口, 向导与步骤基类), `SettingsCategorySelection.kt` (P6.3, 勾选规则), `SettingsExporter.kt` / `SettingsTransferMessages.kt` (P6.4, 写入与提示), `DataDetailStep.kt`, `DeploymentConfirmStep.kt`, `DeploymentProgressDialog.kt`, `SettingsTransferResultStep.kt`, `res/layout/dialog_settings_category_picker.xml`, `res/layout/settings_category_picker_item.xml` (P6.3), `res/layout/dialog_deployment_progress.xml`, `res/xml/fragment_preferences.xml` (入口), `ui/wizard/SetupWizards.kt` (第三个 Kind) |
 | 脚本 API | `runtime/api/augment/settings/Settings.kt` |
 | 工具 | `tools/settings/inventory.py`, `archive_inspect.py` (P6.4, 数据文件校验 P10.1), `device_transfer_check.py` + `device/open_transfer.js` (P6.2 - P6.4, E3), `device_seal_check.py` + `device/seal_check.js` (P6.5, E3), `baseline/`, `classification.json` |
-| 单测 | `app/src/test/java/org/autojs/autojs/core/pref/` (`SettingKeyTest`, `SettingsRegistryGuardTest`, `SettingsSnapshotTest`, `archive/SettingsSnapshotCodecTest`, `archive/SettingsArchiveTest` (P6.1, 读写往返与读取方的基本用例), `archive/SettingsArchiveReaderTest` (P7.1, 导入侧校验与迁移表), `archive/SettingsSealedFileTest` (P6.5, 设备密钥与信封), `data/ShortcutDataCodecTest`, `data/ColorLibraryDataCodecTest` (P10.1, 与独立导出字节一致), `SettingsImportPlannerTest`, `SettingsBackupVaultTest`, `SettingsBackupRetentionTest`, `SettingsChangeDebounceTest`, `DeploymentPlannerTest`, `InMemorySettingsStore`) |
+| 单测 | `app/src/test/java/org/autojs/autojs/core/pref/` (`SettingKeyTest`, `SettingsRegistryGuardTest`, `SettingsSnapshotTest`, `archive/SettingsSnapshotCodecTest`, `archive/SettingsArchiveTest` (P6.1, 读写往返与读取方的基本用例), `archive/SettingsArchiveReaderTest` (P7.1, 导入侧校验与迁移表), `archive/SettingsSealedFileTest` (P6.5, 设备密钥与信封), `data/ShortcutDataCodecTest`, `data/ColorLibraryDataCodecTest` (P10.1, 与独立导出字节一致), `archive/SettingsArchivePluginsTest` (P13.1, 插件目录与 `TARGET_MISSING`), `SettingsImportPlannerTest`, `SettingsBackupVaultTest`, `SettingsBackupRetentionTest`, `SettingsChangeDebounceTest`, `DeploymentPlannerTest`, `InMemorySettingsStore`) |
 | 冒烟 | `docs/dev/smoke/settings-transfer/` |
 | 文档 | `docs/settings/ROADMAP.md` (本文), `inventory.md`, `defaults.md`, `archive-format-v1.md`, `docs/dev/plugin-settings-transfer-protocol-v1.md` (草案) |
 
