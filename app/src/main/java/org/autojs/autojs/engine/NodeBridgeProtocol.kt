@@ -2096,7 +2096,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 val filter = RuntimeFlowQuery.filter(args.getJSONObject(0))
                 val json = withBridgeRoot { root ->
                     DFS.search(root, filter, limit = 1, lifecycle = NodeLifecycle.default).firstOrNull()
-                        ?.useBridgeNode(root) { RuntimeFlowQuery.snapshot(it).toString() }
+                        ?.useBridgeNode(root) { if (it.refresh() && filter.filter(it)) RuntimeFlowQuery.snapshot(it).toString() else null }
                 }
                 NodeBridgeResponse.success(request.id, "{\"available\":true,\"value\":${json ?: "null"}}")
             }

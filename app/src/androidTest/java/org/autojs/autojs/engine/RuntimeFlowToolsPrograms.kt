@@ -27,7 +27,8 @@ internal object RuntimeFlowToolsPrograms {
         flow.defaults({timeout:15000,interval:50});
         try{
             const samples=[];
-            const first=await flow.waitForVisible(targetSelector,{stableFor:50,snapshot:value=>{samples.push(value);if(samples.length>4)samples.shift();return value;}})
+            // Coordinate assertions start after the entering window has actually settled.
+            const first=await flow.waitForVisible(targetSelector,{stableFor:500,snapshot:value=>{samples.push(value);if(samples.length>4)samples.shift();return value;}})
                 .catch(error=>{console.error('FLOW_TOOLS_SNAPSHOTS '+JSON.stringify(samples));throw error;});
             check(Number.isInteger(first.windowId)&&first.packageName===pkg,'action snapshot identity');
             let result=await flow.smartClick(targetSelector,{gestureFallback:false,verify:async()=>{await pause(1);return (await flow.findAny([targetSelector])).node;}});
