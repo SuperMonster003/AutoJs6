@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.network.GitHubTokenStore
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs6.BuildConfig
@@ -29,6 +30,7 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
+        // The JSON file store `JsonFileStores.PLUGIN_INDEX`, read and written with `SettingsJson` (settings P5.1).
         private const val CACHE_FILE_NAME = "autojs6_plugin_index_v11.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
@@ -644,7 +646,7 @@ class PluginIndexRepository {
             val atomic = AtomicFile(file)
             val stream = atomic.startWrite()
             try {
-                stream.write(root.toString().toByteArray(StandardCharsets.UTF_8))
+                stream.write(SettingsJson.stringify(root).toByteArray(StandardCharsets.UTF_8))
                 atomic.finishWrite(stream)
             } catch (failure: Throwable) {
                 atomic.failWrite(stream)
@@ -656,7 +658,7 @@ class PluginIndexRepository {
     }
 
     private fun parseCacheJson(json: String): CacheSnapshot {
-        val root = JSONObject(json)
+        val root = SettingsJson.parseObject(json)
         val languageTag = root.optString("languageTag")
             .takeIf { it.isNotBlank() && !it.equals("null", true) }
             ?.let(::normalizeLanguageTag)

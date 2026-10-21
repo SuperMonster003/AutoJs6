@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.keys.JsonFileStores
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.StoreId
 import org.junit.AfterClass
@@ -24,7 +25,9 @@ import java.io.File
  *   `prefix + ...` concatenations, and the few calls that need more are listed in [MANUAL_STORE_NAMES]. A registered
  *   store ([SettingsRegistry.stores], P3) agrees with its classification.json entry: an excluded one is Excluded and
  *   holds no declared keys, any other one holds declared keys of the classified category and kind, and every key in a
- *   named store belongs to a registered one.
+ *   named store belongs to a registered one. Likewise every source that names a JSON file under `filesDir` /
+ *   `noBackupFilesDir` (P5.1) is in classification.json (`jsonFileStores`, Cache or Excluded), and the JSON file names
+ *   in it are the stores it claims there ([JsonFileStores], excluded and without keys) or listed as names of other files.
  * - (c) every key has exactly one category, every category except the data ones has at least one entry, and only
  *   `credentials` holds sensitive entries.
  * - (e) every deployment kind in use has a registered implementation or is pending (P7.6).
@@ -71,7 +74,7 @@ class SettingsRegistryGuardTest {
         val classified = classification.section("namedStores")
         // Reading SettingsRegistry.stores registers the declared stores (NamedStores).
         val declared = SettingsRegistry.stores
-        val registeredIds = (declared + SettingsStores.registeredIds).filter { !it.isDefault }.associateBy { it.name }
+        val registeredIds = (declared + SettingsStores.registeredIds).filter { !it.isDefault && it.backend == StoreId.Backend.SHARED_PREFERENCES }.associateBy { it.name }
         val registered = registeredIds.keys
         val calls = storeCalls()
         val unresolved = calls.filter { it.names.isEmpty() }
@@ -90,6 +93,45 @@ class SettingsRegistryGuardTest {
         assertNone("classification.json named stores neither registered nor opened by a getSharedPreferences( call", stale.toList())
         assertNone("registered stores that disagree with classification.json (update one of them)", mismatched)
         assertNone("declared keys in a named store that NamedStores does not declare", undeclaredStores)
+    }
+
+    @Test
+    fun b_everyFilesDirJsonFileIsRegistered() {
+        val classified = classification.section("jsonFileStores")
+        // Reading SettingsRegistry.fileStores registers the declared JSON file stores (JsonFileStores, P5.1).
+        val declared = SettingsRegistry.fileStores
+        val declaredNames = declared.map { it.name }.toSet()
+        val found = jsonFileSources()
+        val unknown = (found.keys - classified.keys).map { "$it (${found.getValue(it).joinToString()})" }
+        val stale = classified.keys - found.keys
+        val problems = mutableListOf<String>()
+        val claims = mutableListOf<String>()
+        classified.forEach { (file, entry) ->
+            val kind = entry["kind"] as String
+            if (kind != SettingKind.CACHE.label && kind != SettingKind.EXCLUDED.label) problems.add("$file: classified $kind, a JSON file store holds no settings or states")
+            val stores = names(entry, "stores")
+            val others = names(entry, "otherJsonNames")
+            claims.addAll(stores)
+            stores.filter { it !in declaredNames }.forEach { problems.add("$file: $it is not declared in JsonFileStores") }
+            val literals = found[file] ?: return@forEach
+            literals.filter { name -> name !in others && stores.none { namesJsonFile(name, it) } }.forEach { problems.add("$file: \"$it\" names none of its stores (add the store, or the name to otherJsonNames)") }
+            stores.filter { store -> literals.none { namesJsonFile(it, store) } }.forEach { problems.add("$file: $it is not named in the file") }
+            others.filter { it !in literals }.forEach { problems.add("$file: otherJsonNames \"$it\" is not in the file") }
+        }
+        val claimedTwice = claims.groupingBy { it }.eachCount().filterValues { it > 1 }.keys
+        val unclaimed = declaredNames - claims.toSet()
+        val rows = registryRows()
+        declared.forEach { id ->
+            if (id.backend != StoreId.Backend.JSON_FILE || !id.excluded) problems.add("$id: a JSON file store is an excluded JSON_FILE id")
+            if (id !in SettingsStores.registeredIds) problems.add("$id: not registered in SettingsStores")
+            rows.filter { it.store == id.name }.forEach { problems.add("$id: declares ${it.name}") }
+        }
+        println("T5 b (filesDir JSON): source files ${found.size} (manual ${MANUAL_JSON_FILE_SOURCES.size}), JSON file stores ${declared.size}, classified ${kindCounts(classified, classified.keys)}, sources without a store ${classified.count { names(it.value, "stores").isEmpty() }}")
+        assertNone("source files naming JSON files under filesDir that classification.json does not list (classify them, then declare their stores in JsonFileStores)", unknown)
+        assertNone("classification.json JSON file stores whose source no longer names a JSON file under filesDir", stale.toList())
+        assertNone("JSON file stores claimed by more than one classification.json entry", claimedTwice.toList())
+        assertNone("JsonFileStores declarations that no classification.json entry claims", unclaimed.toList())
+        assertNone("JSON file store problems", problems)
     }
 
     @Test
@@ -271,6 +313,18 @@ class SettingsRegistryGuardTest {
             ("engine/NodeBridgeProtocol.kt" to "storagePreferencesName(storeName)") to listOf("autojs.node.storage.*.*.*"),
         )
 
+        /**
+         * Source files whose JSON files lie in a directory that another source passes in, so that they name no
+         * `filesDir` of their own: display path -> that source. Same cases as `MANUAL_JSON_FILE_SOURCES` in
+         * tools/settings/inventory.py.
+         */
+        private val MANUAL_JSON_FILE_SOURCES = mapOf(
+            "core/accessibility/codegen/store/ModelStore.kt" to "ui/settings/codegen/CodegenModelStoreFactory.kt",
+        )
+
+        private val FILES_DIR = Regex("""\b(?:filesDir|getFilesDir\(\)|noBackupFilesDir|getNoBackupFilesDir\(\))""")
+        private val JSON_LITERAL = Regex(""""([^"]*\.json)"""")
+
         private lateinit var root: File
         private lateinit var classification: Map<String, Any?>
         private lateinit var keyResources: Map<String, String>
@@ -325,6 +379,49 @@ class SettingsRegistryGuardTest {
                 StoreCall(file, line, arg, MANUAL_STORE_NAMES[file to arg] ?: listOfNotNull(resolveName(arg, file, text)))
             }.toList()
         }
+
+        private fun isCommentLine(line: String): Boolean = line.trim().let { it.startsWith("//") || it.startsWith("*") || it.startsWith("/*") }
+
+        /**
+         * Display path -> the JSON file names (string literals ending in `.json`, with `*` for templates) of every
+         * source that names `filesDir` / `noBackupFilesDir` and such a literal (the heuristic of inventory.py), and of
+         * [MANUAL_JSON_FILE_SOURCES].
+         */
+        private fun jsonFileSources(): Map<String, List<String>> = sources.mapNotNull { (file, text) ->
+            val lines = text.lines().filter { !isCommentLine(it) }
+            val inFilesDir = lines.any { FILES_DIR.containsMatchIn(it) } ||
+                MANUAL_JSON_FILE_SOURCES[file]?.let { owner -> sources[owner]?.lines()?.any { !isCommentLine(it) && FILES_DIR.containsMatchIn(it) } } == true
+            val names = lines.flatMap { line -> JSON_LITERAL.findAll(line).map { wildcard(it.groupValues[1]) }.toList() }.distinct()
+            if (inFilesDir && names.isNotEmpty()) file to names else null
+        }.toMap()
+
+        /** `${...}` and `$name` in a string literal become `*`, as in inventory.py. */
+        private fun wildcard(literal: String): String {
+            val out = StringBuilder()
+            var i = 0
+            while (i < literal.length) {
+                val next = literal.getOrNull(i + 1)
+                when {
+                    literal[i] == '$' && next == '{' -> i = literal.indexOf('}', i).let { if (it < 0) literal.length else it + 1 }.also { out.append('*') }
+                    literal[i] == '$' && next != null && (next.isLetter() || next == '_') -> {
+                        i++
+                        while (i < literal.length && (literal[i].isLetterOrDigit() || literal[i] == '_')) i++
+                        out.append('*')
+                    }
+                    else -> out.append(literal[i++])
+                }
+            }
+            return out.toString()
+        }
+
+        /**
+         * A JSON file name of the sources names a declared store when it is the store's name, its end after a `/`, or a
+         * suffix starting with `*` or `.` (`"$id.json"` is scanned as `*.json`, a temporary file suffix as `.json`).
+         */
+        private fun namesJsonFile(literal: String, store: String): Boolean =
+            store == literal || store.endsWith("/$literal") || (literal.startsWith("*") || literal.startsWith(".")) && store.endsWith(literal)
+
+        private fun names(entry: Map<String, Any?>, field: String): List<String> = (entry[field] as List<*>?).orEmpty().map { it as String }
 
         private fun firstArgument(text: String, start: Int): String {
             var depth = 0

@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -120,6 +121,81 @@ class SettingsJsonTest {
         assertEquals("[\"a\",\"b\"]", SettingsJson.stringify(linkedSetOf("a", "b")))
         assertEquals("[1,2]", SettingsJson.stringify(arrayOf(1, 2)))
         assertEquals("{}", SettingsJson.stringify(JSONObject()))
+    }
+
+    @Test
+    fun parseObjectReadsTheFilesThatOrgJsonWrote() {
+        // Android's JSONObject.toString escapes "/"; the file-based JSON stores read such files with parseObject (P5.1).
+        val text = """{"path":"\/sdcard\/Scripts","n":1,"l":3000000000,"d":2.5,"b":true,"z":null,"a":[1,"x",{"k":false}],"o":{},"q":"say \"hi\"\\"}"""
+        val obj = SettingsJson.parseObject(text)
+        assertEquals("/sdcard/Scripts", obj.getString("path"))
+        assertTyped(1, obj.get("n"))
+        assertTyped(3000000000L, obj.get("l"))
+        assertTyped(2.5, obj.get("d"))
+        assertTyped(true, obj.get("b"))
+        assertSame(JSONObject.NULL, obj.get("z"))
+        val array = obj.getJSONArray("a")
+        assertTyped(1, array.get(0))
+        assertEquals("x", array.getString(1))
+        assertFalse(array.getJSONObject(2).getBoolean("k"))
+        assertEquals(0, obj.getJSONObject("o").length())
+        assertEquals("say \"hi\"\\", obj.getString("q"))
+        // The values of org.json's own reader; written back, they read the same again.
+        assertEquals(SettingsJson.normalize(JSONObject(text)), SettingsJson.normalize(obj))
+        assertEquals(SettingsJson.normalize(obj), SettingsJson.normalize(SettingsJson.parseObject(SettingsJson.stringify(obj))))
+        listOf("[1]", "\"text\"", "null", "{\"a\":1,\"a\":2}", "{\"a\":1} x", "{a:1}", "").forEach { malformed ->
+            try {
+                SettingsJson.parseObject(malformed)
+                fail("parseObject should reject \"$malformed\"")
+            } catch (_: SettingsJson.SettingsJsonException) {
+                // expected
+            }
+        }
+    }
+
+    @Test
+    fun toOrgJsonIsTheInverseOfNormalize() {
+        val value = linkedMapOf<String, Any?>("a" to listOf(1, null, linkedMapOf("b" to 2.5)), "n" to null, "s" to "x", "l" to 3000000000L)
+        val obj = SettingsJson.toOrgJson(value) as JSONObject
+        assertSame(JSONObject.NULL, obj.get("n"))
+        assertSame(JSONObject.NULL, obj.getJSONArray("a").get(1))
+        assertTyped(2.5, obj.getJSONArray("a").getJSONObject(2).get("b"))
+        assertTyped(3000000000L, obj.get("l"))
+        assertEquals(value, SettingsJson.normalize(obj))
+        assertTrue(SettingsJson.toOrgJson(listOf(1)) is JSONArray)
+        assertSame(JSONObject.NULL, SettingsJson.toOrgJson(null))
+        assertEquals("x", SettingsJson.toOrgJson("x"))
+        try {
+            SettingsJson.toOrgJson(mapOf(1 to "a"))
+            fail("toOrgJson should reject keys that are not strings")
+        } catch (_: SettingsJson.SettingsJsonException) {
+            // expected
+        }
+    }
+
+    @Test
+    fun indentedTextIsLaidOutLikeAndroidOrgJson() {
+        val value = linkedMapOf("a" to 1, "b" to listOf(1, emptyList<Any>(), emptyMap<String, Any>()), "c" to emptyMap<String, Any>(), "d" to linkedMapOf("e" to "/"))
+        val expected = listOf(
+            "{",
+            "  \"a\": 1,",
+            "  \"b\": [",
+            "    1,",
+            "    [],",
+            "    {}",
+            "  ],",
+            "  \"c\": {},",
+            "  \"d\": {",
+            "    \"e\": \"/\"",
+            "  }",
+            "}",
+        ).joinToString("\n")
+        assertEquals(expected, SettingsJson.stringify(value, indent = 2))
+        assertEquals(SettingsJson.normalize(value), SettingsJson.parse(expected))
+        assertEquals("{}", SettingsJson.stringify(emptyMap<String, Any>(), indent = 2))
+        assertEquals(listOf("[", "    true", "]").joinToString("\n"), SettingsJson.stringify(listOf(true), indent = 4))
+        assertEquals("1", SettingsJson.stringify(1, indent = 2))
+        assertThrows(IllegalArgumentException::class.java) { SettingsJson.stringify(1, indent = -1) }
     }
 
     @Test

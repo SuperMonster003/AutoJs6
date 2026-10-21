@@ -118,13 +118,49 @@ object SettingsJson {
     }
 
     /**
+     * Parses one JSON document that must be an object into an org.json `JSONObject` ([toOrgJson] of [parse]). The
+     * file-based JSON stores whose code works on `JSONObject` read their files with it (P5.1), so a file reads the same
+     * on Android and in JVM tests; throws [SettingsJsonException] for malformed text and for a value other than an object.
+     * zh-CN: 把必须是对象的 JSON 文档解析为 org.json 的 `JSONObject` (即 [parse] 结果的 [toOrgJson]). 以 `JSONObject` 为模型的
+     * 文件型 JSON 存储用它读文件 (P5.1), 因此 Android 与 JVM 测试读到的内容一致; 文本格式错误或不是对象时抛 [SettingsJsonException].
+     */
+    @JvmStatic
+    fun parseObject(text: String): JSONObject = when (val value = parse(text)) {
+        is Map<*, *> -> toOrgJson(value) as JSONObject
+        else -> throw SettingsJsonException("Expected an object, got ${describeType(value)}")
+    }
+
+    /**
+     * Converts a plain value into org.json values, the inverse of [normalize]: maps become `JSONObject` (in key order),
+     * lists `JSONArray`, `null` becomes `JSONObject.NULL`, other values stay as they are.
+     * zh-CN: 把普通值转为 org.json 的值, 与 [normalize] 相反: Map 变为 `JSONObject` (按键顺序), List 变为 `JSONArray`, null 变为
+     * `JSONObject.NULL`, 其他值不变.
+     */
+    @JvmStatic
+    fun toOrgJson(value: Any?): Any = when (value) {
+        null -> JSONObject.NULL
+        is Map<*, *> -> JSONObject().also { obj ->
+            value.forEach { (k, v) -> obj.put(k as? String ?: throw SettingsJsonException("Object keys must be strings, got ${describeType(k)}"), toOrgJson(v)) }
+        }
+        is List<*> -> JSONArray().also { array -> value.forEach { array.put(toOrgJson(it)) } }
+        else -> value
+    }
+
+    /**
      * Writes a plain value (also accepting `JSONObject`, `JSONArray`, `JSONObject.NULL`, [Float], [Set] and arrays)
-     * as compact JSON text.
-     * zh-CN: 把普通值写为紧凑的 JSON 文本 (也接受 `JSONObject`, `JSONArray`, `JSONObject.NULL`, Float, Set 与数组).
+     * as JSON text: compact, or with [indent] > 0 laid out like Android's `JSONObject.toString(indent)` (every member on
+     * a line of its own, `": "` after keys, `{}` and `[]` for empty ones), which P5.1 keeps for the checkpoint files of
+     * `NodeLifecycleCheckpointStore`.
+     * zh-CN: 把普通值写为 JSON 文本 (也接受 `JSONObject`, `JSONArray`, `JSONObject.NULL`, Float, Set 与数组): 默认紧凑; [indent]
+     * 大于 0 时按 Android `JSONObject.toString(indent)` 的版式缩进 (每个成员一行, 键后为 `": "`, 空对象与空数组为 `{}` 与 `[]`),
+     * P5.1 以此保持 `NodeLifecycleCheckpointStore` 检查点文件的版式.
      */
     @JvmStatic
     @JvmOverloads
-    fun stringify(value: Any?, htmlSafe: Boolean = false): String = StringBuilder().also { write(value, htmlSafe, it) }.toString()
+    fun stringify(value: Any?, htmlSafe: Boolean = false, indent: Int = 0): String {
+        require(indent >= 0) { "Negative indent $indent" }
+        return StringBuilder().also { write(value, htmlSafe, indent, 0, it) }.toString()
+    }
 
     /**
      * Converts org.json values (`JSONObject`, `JSONArray`, `JSONObject.NULL`, `BigDecimal` and other numbers) into
@@ -285,7 +321,7 @@ object SettingsJson {
 
     // ------------------------------------------------------------------------------------------------- writing
 
-    private fun write(value: Any?, htmlSafe: Boolean, out: StringBuilder) {
+    private fun write(value: Any?, htmlSafe: Boolean, indent: Int, depth: Int, out: StringBuilder) {
         when {
             value == null || value === JSONObject.NULL -> out.append("null")
             value is Boolean -> out.append(value.toString())
@@ -295,34 +331,44 @@ object SettingsJson {
             value is Double -> out.append(value.also { checkFinite(it, it) }.toString())
             value is BigDecimal -> out.append(value.toString())
             value is Number -> out.append(value.toString())
-            value is JSONObject || value is JSONArray -> write(normalize(value), htmlSafe, out)
+            value is JSONObject || value is JSONArray -> write(normalize(value), htmlSafe, indent, depth, out)
             value is Map<*, *> -> {
                 out.append('{')
                 var first = true
                 value.forEach { (k, v) ->
                     if (!first) out.append(',')
                     first = false
+                    newline(indent, depth + 1, out)
                     quote(k as? String ?: throw SettingsJsonException("Object keys must be strings, got ${describeType(k)}"), htmlSafe, out)
-                    out.append(':')
-                    write(v, htmlSafe, out)
+                    out.append(if (indent > 0) ": " else ":")
+                    write(v, htmlSafe, indent, depth + 1, out)
                 }
+                if (!first) newline(indent, depth, out)
                 out.append('}')
             }
-            value is Iterable<*> -> writeArray(value.iterator(), htmlSafe, out)
-            value is Array<*> -> writeArray(value.iterator(), htmlSafe, out)
+            value is Iterable<*> -> writeArray(value.iterator(), htmlSafe, indent, depth, out)
+            value is Array<*> -> writeArray(value.iterator(), htmlSafe, indent, depth, out)
             else -> throw SettingsJsonException("Unsupported JSON value of ${describeType(value)}")
         }
     }
 
-    private fun writeArray(iterator: Iterator<*>, htmlSafe: Boolean, out: StringBuilder) {
+    private fun writeArray(iterator: Iterator<*>, htmlSafe: Boolean, indent: Int, depth: Int, out: StringBuilder) {
         out.append('[')
         var first = true
         iterator.forEach {
             if (!first) out.append(',')
             first = false
-            write(it, htmlSafe, out)
+            newline(indent, depth + 1, out)
+            write(it, htmlSafe, indent, depth + 1, out)
         }
+        if (!first) newline(indent, depth, out)
         out.append(']')
+    }
+
+    private fun newline(indent: Int, depth: Int, out: StringBuilder) {
+        if (indent == 0) return
+        out.append('\n')
+        repeat(indent * depth) { out.append(' ') }
     }
 
     private fun checkFinite(d: Double, original: Number): Double {

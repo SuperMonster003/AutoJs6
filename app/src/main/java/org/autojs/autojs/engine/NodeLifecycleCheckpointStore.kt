@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.util.Log
+import org.autojs.autojs.core.pref.SettingsJson
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -9,6 +10,10 @@ import java.io.File
 import java.security.MessageDigest
 import java.util.Locale
 
+/**
+ * Checkpoints of Node.js projects, the JSON file store `JsonFileStores.NODE_LIFECYCLE_CHECKPOINTS`, and stop request
+ * files; they are read and written with `SettingsJson`, the checkpoints indented by 2 as before (settings P5.1).
+ */
 object NodeLifecycleCheckpointStore {
 
     private const val TAG = "NodeLifecycleCheckpointStore"
@@ -221,7 +226,7 @@ object NodeLifecycleCheckpointStore {
         if (!file.isFile) {
             return null
         }
-        return runCatching { JSONObject(file.readText(Charsets.UTF_8)) }.getOrNull()
+        return runCatching { SettingsJson.parseObject(file.readText(Charsets.UTF_8)) }.getOrNull()
     }
 
     private fun checkpointFile(context: Context, scope: ProjectScope): File {
@@ -293,10 +298,11 @@ object NodeLifecycleCheckpointStore {
     private fun writeJsonAtomic(file: File, json: JSONObject) {
         file.parentFile?.mkdirs()
         val temp = File(file.parentFile, "${file.name}.tmp-${System.nanoTime()}")
+        val text = SettingsJson.stringify(json, indent = 2)
         runCatching {
-            temp.writeText(json.toString(2), Charsets.UTF_8)
+            temp.writeText(text, Charsets.UTF_8)
             if (!temp.renameTo(file)) {
-                file.writeText(json.toString(2), Charsets.UTF_8)
+                file.writeText(text, Charsets.UTF_8)
                 temp.delete()
             }
         }.onFailure {

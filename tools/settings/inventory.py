@@ -83,6 +83,12 @@ ROADMAP_JSON_STORES = (
     'PrivilegedBackupManager', 'BuildActivity', 'NodeDoctorReportGenerator',
 )
 
+# Sources whose JSON files lie in a directory that another source passes in, so that they name no `filesDir` of their
+# own (ROADMAP P5.1): display path -> that source. Same cases as MANUAL_JSON_FILE_SOURCES in SettingsRegistryGuardTest.
+MANUAL_JSON_FILE_SOURCES = {
+    'core/accessibility/codegen/store/ModelStore.kt': 'ui/settings/codegen/CodegenModelStoreFactory.kt',
+}
+
 # getSharedPreferences( arguments that no generic rule can resolve: (display path, argument) -> (name, how).
 MANUAL_STORE_NAMES = {
     ('runtime/api/augment/storages/Storages.kt', 'it'): (
@@ -795,8 +801,13 @@ def scan_pref_users(sources):
 
 def scan_json_files(sources):
     out = []
+    by_display = {f.display: f for f in sources}
     for f in sources:
         dir_lines = [i for i, line in enumerate(f.lines, 1) if FILES_DIR.search(line) and not f.is_comment_line(i)]
+        owner = by_display.get(MANUAL_JSON_FILE_SOURCES.get(f.display))
+        if not dir_lines and owner is not None and any(
+                FILES_DIR.search(line) and not owner.is_comment_line(i) for i, line in enumerate(owner.lines, 1)):
+            dir_lines = ['目录来自 ' + owner.display]
         if not dir_lines:
             continue
         names = []
@@ -812,6 +823,19 @@ def scan_json_files(sources):
     missing = [{'class': c, 'file': by_stem.get(c)} for c in ROADMAP_JSON_STORES if c not in detected]
     extra = [e['class'] for e in out if e['class'] not in ROADMAP_JSON_STORES]
     return out, missing, extra
+
+
+JSON_FILE_STORES_FILE = 'core/pref/keys/JsonFileStores.kt'
+JSON_FILE_STORE_DECLARATION = re.compile(r'\bval\s+(\w+)\s*=\s*excluded\(\s*"([^"]+)"')
+
+
+def scan_json_store_declarations(sources):
+    """The JSON file stores declared in JsonFileStores (ROADMAP P5.1): [{name, const, line}]."""
+    decl = next((f for f in sources if f.display == JSON_FILE_STORES_FILE), None)
+    if decl is None:
+        return []
+    return [{'name': m.group(2), 'const': m.group(1), 'line': i} for i, line in enumerate(decl.lines, 1)
+            for m in [JSON_FILE_STORE_DECLARATION.search(line)] if m and not decl.is_comment_line(i)]
 
 
 def scan_defaults(sources, resolver, key_values, literal_by_const):
@@ -1036,6 +1060,7 @@ def build(host, date):
         g['storeGuess'] = sorted(names)
 
     json_files, json_missing, json_extra = scan_json_files(sources)
+    json_declarations = scan_json_store_declarations(sources)
     literal_by_const = {}
     defaults = scan_defaults(sources, resolver, key_values, literal_by_const)
     for name, d in scan_declared_defaults(sources, resolver, res).items():
@@ -1064,6 +1089,7 @@ def build(host, date):
         'defaultPrefsBypassFiles': None,
         'prefUserFiles': None,
         'jsonFileStores': len(json_files),
+        'jsonFileStoresDeclared': len(json_declarations),
     }
     bypass = scan_default_bypass(sources)
     pref_users = scan_pref_users(sources)
@@ -1083,6 +1109,7 @@ def build(host, date):
         'prefUsers': pref_users,
         'jsonFileStores': json_files,
         'jsonFileStoresReconcile': {'roadmapNotDetected': json_missing, 'detectedNotInRoadmap': json_extra},
+        'jsonFileStoreDeclarations': json_declarations,
         'defaults': {k: defaults[k] for k in sorted(defaults)},
     }
 
@@ -1112,7 +1139,7 @@ def merge_classification(data, cls):
             if c is None:
                 problems.append(f'{cls_key}: {ident} 未分类')
                 continue
-            for field in ('kind', 'category', 'note', 'effect', 'store', 'deployment', 'storedAs'):
+            for field in ('kind', 'category', 'note', 'effect', 'store', 'deployment', 'storedAs', 'stores', 'otherJsonNames'):
                 if field in c:
                     item[field] = c[field]
             if c.get('kind') not in KINDS:
@@ -1126,6 +1153,19 @@ def merge_classification(data, cls):
         for ident in sorted(set(table) - seen):
             if not ident.startswith('_'):
                 problems.append(f'{cls_key}: {ident} 在扫描结果中不存在')
+    # JSON file stores (ROADMAP P5.1): the stores a source claims are declared in JsonFileStores, every declaration is
+    # claimed by exactly one source, and a JSON file store is a Cache or Excluded (it holds no settings or states).
+    declared = {d['name'] for d in data.get('jsonFileStoreDeclarations', [])}
+    claims = [s for c in cls.get('jsonFileStores', {}).values() for s in c.get('stores', [])]
+    for s in sorted(set(claims) - declared):
+        problems.append(f'jsonFileStores: {s} 未在 JsonFileStores 声明')
+    for s in sorted(declared - set(claims)):
+        problems.append(f'jsonFileStores: JsonFileStores 声明的 {s} 没有源文件认领')
+    for s in sorted({s for s in claims if claims.count(s) > 1}):
+        problems.append(f'jsonFileStores: {s} 被多个源文件认领')
+    for ident, c in cls.get('jsonFileStores', {}).items():
+        if c.get('kind') not in ('Cache', 'Excluded'):
+            problems.append(f'jsonFileStores: {ident} kind 应为 Cache 或 Excluded: {c.get("kind")}')
     # An extra default with "match" completes the scanned sources whose expression equals it (value, form, note);
     # one without "match" is appended as a source of its own.
     for name, extra in cls.get('extraDefaults', {}).items():
@@ -1246,6 +1286,7 @@ def render_inventory(data):
     w('| 绕过 `Pref` 读默认偏好的文件 | %d |' % s['defaultPrefsBypassFiles'])
     w('| 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | %d |' % s['prefUserFiles'])
     w('| filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | %d |' % s['jsonFileStores'])
+    w('| `JsonFileStores` 声明的 JSON 文件存储 (P5.1) | %d |' % s.get('jsonFileStoresDeclared', 0))
     w('')
     if 'categoryCounts' in data:
         kinds = {}
@@ -1303,14 +1344,20 @@ def render_inventory(data):
     w('')
     w('## 6. filesDir / noBackupFilesDir 下的 JSON 文件')
     w('')
-    w('启发式: 源文件在非注释行引用 `filesDir` / `noBackupFilesDir` 且含 `.json` 字面量. 与 ROADMAP 1.1 的 14 个对照见表后.')
+    w('启发式: 源文件在非注释行引用 `filesDir` / `noBackupFilesDir` 且含 `.json` 字面量; 目录由其他源文件传入的见 '
+      '`MANUAL_JSON_FILE_SOURCES`. 与 ROADMAP 1.1 的 14 个对照见表后. "登记" 列为源文件认领的 `JsonFileStores` 排除存储 '
+      '(P5.1; 名称为相对 `filesDir` 的路径, `../no_backup/` 即 `noBackupFilesDir`, `*` 为运行时拼出的部分).')
     w('')
-    w('| 源文件 | JSON 文件名 | 目录引用行 | kind | 分类 id | 备注 |')
-    w('| --- | --- | --- | --- | --- | --- |')
+    w('| 源文件 | JSON 文件名 | 目录引用行 | 登记 (`JsonFileStores`) | kind | 分类 id | 备注 |')
+    w('| --- | --- | --- | --- | --- | --- | --- |')
+    decl = {d['name']: d for d in data.get('jsonFileStoreDeclarations', [])}
     for j in data['jsonFileStores']:
         names = sorted({n['name'] for n in j['jsonNames']})
-        w('| %s | %s | %s | %s | %s | %s |' % (
-            j['file'], ', '.join(code(n) for n in names), ','.join(str(x) for x in j['dirLines'][:6]),
+        stores = j.get('stores')
+        registered = '无 (不是存储)' if stores == [] else ', '.join(
+            '%s `%s`' % (code(s), decl[s]['const']) if s in decl else code(s) for s in stores or [])
+        w('| %s | %s | %s | %s | %s | %s | %s |' % (
+            j['file'], ', '.join(code(n) for n in names), ','.join(str(x) for x in j['dirLines'][:6]), registered,
             j.get('kind', ''), code(j['category']) if j.get('category') else '', md_escape(j.get('note', ''))))
     rec = data['jsonFileStoresReconcile']
     w('')

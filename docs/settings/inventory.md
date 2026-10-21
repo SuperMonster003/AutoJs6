@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; kind / 分类 id / 备注来自 `tools/settings/classification.json`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.2 / P0.3).
 
-- 生成日期: 2026-10-21, 扫描基线: `master@c30622af6` (扫描范围内未提交文件 7 个)
+- 生成日期: 2026-10-21, 扫描基线: `master@b1114075b` (扫描范围内未提交文件 12 个)
 - 源码路径相对 `app/src/main/java/org/autojs/autojs/` (其他包保留 `com/...` 等前缀); 资源路径相对 `app/src/main/`.
 - 引用处只计非注释行; 超过 6 处时只列前 6 处, 完整列表见 JSON 基线.
 - kind: Setting (用户设置), State (记忆型状态, 归 `other`), Cache (缓存, 不可导出), ValueConstant (设置值常量, 列表项候选值或默认值别名), Excluded (不是偏好键或永久排除, 见 ROADMAP 附录 A.2).
@@ -20,7 +20,8 @@
 | 命名 SharedPreferences / 调用文件 / 已登记 `StoreId` | 29 / 9 / 29 |
 | 绕过 `Pref` 读默认偏好的文件 | 0 |
 | 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 41 |
-| filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 13 |
+| filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 14 |
+| `JsonFileStores` 声明的 JSON 文件存储 (P5.1) | 14 |
 
 kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, Excluded 29
 
@@ -443,7 +444,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `ace_action_history` | 登记 `NamedStores.ACE_ACTION_HISTORY` (core/pref/keys/NamedStores.kt:41) | core/pref/keys/EditorKeyboardKeys.kt:110 | State | `other` | Ace 动作历史 (P3.2 为 State); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
 | `ace_editor_font_ui_preferences` | 登记 `NamedStores.ACE_EDITOR_FONT_UI_PREFERENCES` (core/pref/keys/NamedStores.kt:37) | core/pref/keys/EditorKeyboardKeys.kt:58, core/pref/keys/EditorKeyboardKeys.kt:64, core/pref/keys/EditorKeyboardKeys.kt:71, core/pref/keys/EditorKeyboardKeys.kt:79 等 7 处 | Setting | `editor_keyboard` | 字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
 | `autojs.localstorage.*` | 排除登记 `NamedStores.SCRIPT_LOCAL_STORAGES` (core/pref/keys/NamedStores.kt:132); 人工: `.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`; 拼接 | core/storage/LocalStorage.java:28, runtime/api/augment/storages/Storages.kt:48, runtime/api/augment/storages/Storages.kt:61 | Excluded |  | 脚本自己的数据 (附录 A.2) |
-| `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:136); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3514) | engine/NodeBridgeProtocol.kt:3399 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
+| `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:136); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3526) | engine/NodeBridgeProtocol.kt:3411 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
 | `build_apk_config_profiles` | 登记 `NamedStores.BUILD_APK_CONFIG_PROFILES` (core/pref/keys/NamedStores.kt:48) | core/pref/keys/ApkBuildKeys.kt:26, core/pref/keys/ApkBuildKeys.kt:33 | Setting | `apk_build` | APK 构建配置档; P3.3 登记为 NamedStores, 键声明在 ApkBuildKeys |
 | `bun_host_capability_grants` | 登记 `NamedStores.BUN_HOST_CAPABILITY_GRANTS` (core/pref/keys/NamedStores.kt:121) | core/pref/keys/CredentialKeys.kt:55 | Setting | `credentials` | Bun 宿主能力授权, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
 | `device_id_prefs` | 排除登记 `NamedStores.DEVICE_ID_PREFS` (core/pref/keys/NamedStores.kt:128); 常量 SP_NAME (deviceid/DeviceIdProvider.kt:20) | deviceid/DeviceIdProvider.kt:33 | Excluded |  | 设备标识 (附录 A.2) |
@@ -464,7 +465,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `plugin_center_visibility_state` | 登记 `NamedStores.PLUGIN_CENTER_VISIBILITY_STATE` (core/pref/keys/NamedStores.kt:82) | core/plugin/center/PluginVisibilityStore.kt:23, core/pref/keys/PluginCenterKeys.kt:188, core/pref/keys/PluginCenterKeys.kt:194, core/pref/keys/PluginCenterKeys.kt:200 | Setting | `plugin_center` | 隐藏的插件; P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
 | `plugin_install_wizard` | 登记 `NamedStores.PLUGIN_INSTALL_WIZARD` (core/pref/keys/NamedStores.kt:56) | core/pref/keys/WizardKeys.kt:66, core/pref/keys/WizardKeys.kt:75, core/pref/keys/WizardKeys.kt:84 | Setting | `wizards` | 插件安装向导自定义配置档; 其中 `_last_profile_id` 是状态, 整份随 wizards; P3.3 登记为 NamedStores, 键声明在 WizardKeys |
 | `plugin_launcher_icons` | 登记 `NamedStores.PLUGIN_LAUNCHER_ICONS` (core/pref/keys/NamedStores.kt:86) | core/pref/keys/PluginCenterKeys.kt:215 | Setting | `plugin_center` | 插件启动图标显示状态 (PluginLauncherIconController); P3.1 登记为 NamedStores, 键声明在 PluginCenterKeys |
-| `privileged_edit_backups` | 排除登记 `NamedStores.PRIVILEGED_EDIT_BACKUPS` (core/pref/keys/NamedStores.kt:144); 常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30) | model/explorer/PrivilegedBackupManager.kt:38, model/explorer/PrivilegedBackupManager.kt:44, model/explorer/PrivilegedBackupManager.kt:87, model/explorer/PrivilegedBackupManager.kt:90 等 5 处 | Excluded |  | 指向本机文件的操作日志 (附录 A.2) |
+| `privileged_edit_backups` | 排除登记 `NamedStores.PRIVILEGED_EDIT_BACKUPS` (core/pref/keys/NamedStores.kt:144); 常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34) | model/explorer/PrivilegedBackupManager.kt:42, model/explorer/PrivilegedBackupManager.kt:48, model/explorer/PrivilegedBackupManager.kt:91, model/explorer/PrivilegedBackupManager.kt:94 等 5 处 | Excluded |  | 指向本机文件的操作日志 (附录 A.2) |
 | `runtime_task_intents` | 排除登记 `NamedStores.RUNTIME_TASK_INTENTS` (core/pref/keys/NamedStores.kt:148); 字面量 | engine/RuntimeTasksBridge.kt:155 | Excluded |  | 运行时状态 (附录 A.2) |
 | `three_stove_agent_trust_confirmation` | 登记 `NamedStores.THREE_STOVE_AGENT_TRUST_CONFIRMATION` (core/pref/keys/NamedStores.kt:117) | core/pref/keys/CredentialKeys.kt:49 | Setting | `credentials` | 3-Stove Agent 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
 
@@ -474,25 +475,26 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 
 ## 6. filesDir / noBackupFilesDir 下的 JSON 文件
 
-启发式: 源文件在非注释行引用 `filesDir` / `noBackupFilesDir` 且含 `.json` 字面量. 与 ROADMAP 1.1 的 14 个对照见表后.
+启发式: 源文件在非注释行引用 `filesDir` / `noBackupFilesDir` 且含 `.json` 字面量; 目录由其他源文件传入的见 `MANUAL_JSON_FILE_SOURCES`. 与 ROADMAP 1.1 的 14 个对照见表后. "登记" 列为源文件认领的 `JsonFileStores` 排除存储 (P5.1; 名称为相对 `filesDir` 的路径, `../no_backup/` 即 `noBackupFilesDir`, `*` 为运行时拼出的部分).
 
-| 源文件 | JSON 文件名 | 目录引用行 | kind | 分类 id | 备注 |
-| --- | --- | --- | --- | --- | --- |
-| core/plugin/center/InstalledPluginMetadataStore.kt | `autojs6_installed_plugin_metadata_v1.json` | 163 | Cache |  | 已安装插件元数据缓存 (附录 A.2) |
-| core/plugin/center/PluginIndexRepository.kt | `autojs6_plugin_index_v11.json`, `compat-matrix.json`, `plugins.generated.json`, `plugins.official.generated.json` | 470 | Cache |  | 插件索引缓存; 另外三个 .json 是索引仓库内的路径 |
-| core/plugin/python/PythonPrivateExecutionSnapshot.kt | `.json` | 501 | Excluded |  | 运行时快照, 进程结束即失效 (附录 A.2) |
-| engine/NodeLifecycleCheckpointStore.kt | `*.json` | 228,236 | Excluded |  | 运行时检查点 (附录 A.2) |
-| engine/NodeWorkManagerBridgeScheduler.kt | `*.json`, `.json` | 458 | Excluded |  | 运行时调度记录 (附录 A.2) |
-| engine/RuntimeWebLocalDownloads.kt | `runtime-web-downloads/*.json` | 270 | Cache |  | 可重新下载的资源 (附录 A.2) |
-| model/explorer/PrivilegedBackupManager.kt | `*.json` | 75,283,311 | Excluded |  | 指向本机文件的备份记录 (附录 A.2) |
-| model/explorer/PrivilegedEditSessions.kt | `session.json` | 298,310,316,336 | Excluded |  | 指向本机文件的编辑会话 (附录 A.2) |
-| model/explorer/PrivilegedFileOperationJournal.kt | `*.json` | 15,56 | Excluded |  | 指向本机文件的操作日志 (附录 A.2) |
-| ui/edit/editor/ace/font/FontCatalogRepository.kt | `catalog-v1.json`, `catalog-v1.sig.json` | 93 | Cache |  | 字体目录缓存与签名 (附录 A.2) |
-| ui/edit/editor/ace/font/FontStore.kt | `installed.json` | 26 | Cache |  | 已安装字体清单与字体文件 (附录 A.2) |
-| ui/project/BuildActivity.java | `.json` | 2035 | Excluded |  | `.json` 是 SAF 导出配置档的建议文件名, 不是内部存储 |
-| ui/settings/NodeDoctorReportGenerator.kt | `node-doctor-report.json` | 43 | Excluded |  | 诊断报告输出文件, 不是存储 |
+| 源文件 | JSON 文件名 | 目录引用行 | 登记 (`JsonFileStores`) | kind | 分类 id | 备注 |
+| --- | --- | --- | --- | --- | --- | --- |
+| core/accessibility/codegen/store/ModelStore.kt | `registry.json` | 目录来自 ui/settings/codegen/CodegenModelStoreFactory.kt | `../no_backup/codegen_models*/registry.json` `CODEGEN_MODEL_REGISTRY` | Cache |  | 布局代码生成模型的登记表 (及 .bak), 目录由 CodegenModelStoreFactory 传入, 启发式不命中 (MANUAL_JSON_FILE_SOURCES); 模型文件可重新下载 (附录 A.2) |
+| core/plugin/center/InstalledPluginMetadataStore.kt | `autojs6_installed_plugin_metadata_v1.json` | 163 | `plugin_center/autojs6_installed_plugin_metadata_v1.json` `INSTALLED_PLUGIN_METADATA` | Cache |  | 已安装插件元数据缓存 (附录 A.2) |
+| core/plugin/center/PluginIndexRepository.kt | `autojs6_plugin_index_v11.json`, `compat-matrix.json`, `plugins.generated.json`, `plugins.official.generated.json` | 472 | `plugin_center/autojs6_plugin_index_v11.json` `PLUGIN_INDEX` | Cache |  | 插件索引缓存; 另外三个 .json 是索引仓库内的路径 |
+| core/plugin/python/PythonPrivateExecutionSnapshot.kt | `.json` | 501 | `../no_backup/python-runtime-preview/host-capabilities-*.json` `PYTHON_EXECUTION_SNAPSHOTS` | Excluded |  | 运行时快照, 进程结束即失效 (附录 A.2) |
+| engine/NodeLifecycleCheckpointStore.kt | `*.json` | 233,241 | `nodejs/checkpoints/*.json` `NODE_LIFECYCLE_CHECKPOINTS` | Excluded |  | 运行时检查点 (附录 A.2) |
+| engine/NodeWorkManagerBridgeScheduler.kt | `*.json`, `.json` | 463 | `nodejs-work-manager/tasks/*.json` `NODE_WORK_MANAGER_TASKS` | Excluded |  | 运行时调度记录 (附录 A.2) |
+| engine/RuntimeWebLocalDownloads.kt | `runtime-web-downloads/*.json` | 274 | `runtime-web-downloads/*.json` `RUNTIME_WEB_DOWNLOADS` | Cache |  | 可重新下载的资源 (附录 A.2) |
+| model/explorer/PrivilegedBackupManager.kt | `*.json` | 79,287,315 | `privileged-edit-backups/*.json` `PRIVILEGED_EDIT_BACKUP_RECORDS` | Excluded |  | 指向本机文件的备份记录 (附录 A.2) |
+| model/explorer/PrivilegedEditSessions.kt | `session.json` | 301,313,319,339 | `privileged-edit-sessions/*/session.json` `PRIVILEGED_EDIT_SESSIONS` | Excluded |  | 指向本机文件的编辑会话 (附录 A.2) |
+| model/explorer/PrivilegedFileOperationJournal.kt | `*.json` | 19,60 | `privileged-file-operations/*.json` `PRIVILEGED_FILE_OPERATIONS` | Excluded |  | 指向本机文件的操作日志 (附录 A.2) |
+| ui/edit/editor/ace/font/FontCatalogRepository.kt | `catalog-v1.json`, `catalog-v1.sig.json` | 93 | `../no_backup/ace_fonts/catalog-v1.json` `FONT_CATALOG`, `../no_backup/ace_fonts/catalog-v1.sig.json` `FONT_CATALOG_SIGNATURE` | Cache |  | 字体目录缓存与签名 (附录 A.2) |
+| ui/edit/editor/ace/font/FontStore.kt | `installed.json` | 26 | `../no_backup/ace_fonts/fonts/*/installed.json` `INSTALLED_FONTS` | Cache |  | 已安装字体清单与字体文件 (附录 A.2) |
+| ui/project/BuildActivity.java | `.json` | 2035 | 无 (不是存储) | Excluded |  | `.json` 是 SAF 导出配置档的建议文件名, 不是内部存储 |
+| ui/settings/NodeDoctorReportGenerator.kt | `node-doctor-report.json` | 43 | `node-doctor/node-doctor-report.json` `NODE_DOCTOR_REPORT` | Excluded |  | 诊断报告输出文件 (供分享, 不读回), 不是存储 |
 
-- ROADMAP 列出但启发式未命中: `ModelStore` (core/accessibility/codegen/store/ModelStore.kt) (目录或 JSON 文件名在其他类中拼接, 归属以 ROADMAP 为准)
+- ROADMAP 列出但启发式未命中: 无 (目录或 JSON 文件名在其他类中拼接, 归属以 ROADMAP 为准)
 - 启发式命中但 ROADMAP 未列出: 无
 
 ## 7. 分类条目数 (回填 ROADMAP 附录 A)

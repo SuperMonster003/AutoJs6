@@ -30,9 +30,14 @@ object SettingsStores {
         fun onChanged(store: StoreId, name: String?)
     }
 
-    /** Opens stores of the app: SharedPreferences ids with [SharedPreferencesStore], JSON file ids under `filesDir`. */
+    /**
+     * Opens stores of the app: SharedPreferences ids with [SharedPreferencesStore], JSON file ids under `filesDir`. An
+     * excluded JSON file id (`JsonFileStores`, P5.1) is refused: the file has its owner's format, which a
+     * [JsonFileStore] would replace on its first write.
+     */
     object AndroidProvider : Provider {
         override fun open(id: StoreId): SettingsStore {
+            require(id.backend != StoreId.Backend.JSON_FILE || !id.excluded) { "$id is kept by its owner in its own format" }
             val context = GlobalAppContext.get()
             return when (id.backend) {
                 StoreId.Backend.SHARED_PREFERENCES -> SharedPreferencesStore.open(context, id)

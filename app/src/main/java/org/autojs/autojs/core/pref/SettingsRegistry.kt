@@ -14,6 +14,7 @@ import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
+import org.autojs.autojs.core.pref.keys.JsonFileStores
 import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.pref.keys.NamedStores
@@ -135,6 +136,15 @@ object SettingsRegistry {
     @JvmStatic
     val stores: List<StoreId>
         get() = NamedStores.ALL
+
+    /**
+     * Every declared JSON file store under `filesDir` ([JsonFileStores], P5.1): all of them are excluded caches or
+     * records of this device (appendix A.2); reading it registers them in `SettingsStores` (guard (b) of T5).
+     * zh-CN: 全部已声明的 `filesDir` 下 JSON 文件存储 (P5.1): 都是排除的缓存或本机记录 (附录 A.2); 读取时即登记到 `SettingsStores`.
+     */
+    @JvmStatic
+    val fileStores: List<StoreId>
+        get() = JsonFileStores.ALL
 
     /**
      * The declared key named [name] in [store], or null.

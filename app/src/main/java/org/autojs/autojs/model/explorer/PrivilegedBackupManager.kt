@@ -4,6 +4,7 @@ import android.content.Context
 import android.system.Os
 import android.system.OsConstants
 import android.util.AtomicFile
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs6.R
 import org.json.JSONObject
 import java.io.File
@@ -12,7 +13,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-/** Persistent catalog of this app's edit transactions, including failed and interrupted saves. */
+/**
+ * Persistent catalog of this app's edit transactions, including failed and interrupted saves. The records are the JSON
+ * file store `JsonFileStores.PRIVILEGED_EDIT_BACKUP_RECORDS`, read and written with `SettingsJson` (settings P5.1).
+ */
 object PrivilegedBackupManager {
     data class RetentionPolicy(val maxVersions: Int = 5, val maxBytes: Long = 64L * 1024 * 1024) {
         init { require(maxVersions in 1..50 && maxBytes in 1..1024L * 1024 * 1024) }
@@ -317,12 +321,12 @@ object PrivilegedBackupManager {
         return AtomicFile(File(root(context), "$id.json"))
     }
     private fun read(context: Context, id: String): JSONObject? = synchronized(stateLock) {
-        runCatching { recordFile(context, id).openRead().bufferedReader().use { JSONObject(it.readText()) } }.getOrNull()
+        runCatching { recordFile(context, id).openRead().bufferedReader().use { SettingsJson.parseObject(it.readText()) } }.getOrNull()
     }
     private fun write(context: Context, id: String, value: JSONObject) = synchronized(stateLock) {
         val atomic = recordFile(context, id)
         val stream = atomic.startWrite()
-        try { stream.write(value.toString().toByteArray(Charsets.UTF_8)); stream.fd.sync(); atomic.finishWrite(stream) }
+        try { stream.write(SettingsJson.stringify(value).toByteArray(Charsets.UTF_8)); stream.fd.sync(); atomic.finishWrite(stream) }
         catch (error: Exception) { atomic.failWrite(stream); throw error }
     }
     private fun update(context: Context, id: String, change: (JSONObject) -> Unit) = synchronized(stateLock) {

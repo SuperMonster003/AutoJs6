@@ -14,11 +14,16 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import org.autojs.autojs.core.pref.SettingsJson
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+/**
+ * Tasks that Node.js scripts schedule with WorkManager; their records are the JSON file store
+ * `JsonFileStores.NODE_WORK_MANAGER_TASKS`, read and written with `SettingsJson` (settings P5.1).
+ */
 object NodeWorkManagerBridgeScheduler {
 
     const val SCHEDULER_NAME = "androidx.work"
@@ -416,7 +421,7 @@ object NodeWorkManagerBridgeScheduler {
             .listFiles { file -> file.isFile && file.name.endsWith(".json") }
             .orEmpty()
             .mapNotNull { file ->
-                runCatching { JSONObject(file.readText(Charsets.UTF_8)) }
+                runCatching { SettingsJson.parseObject(file.readText(Charsets.UTF_8)) }
                     .onFailure { error -> Log.w(TAG, "Failed to read node work record ${file.name}: ${error.message}", error) }
                     .getOrNull()
             }
@@ -427,7 +432,7 @@ object NodeWorkManagerBridgeScheduler {
         if (!file.isFile) {
             return null
         }
-        return runCatching { JSONObject(file.readText(Charsets.UTF_8)) }.getOrNull()
+        return runCatching { SettingsJson.parseObject(file.readText(Charsets.UTF_8)) }.getOrNull()
     }
 
     private fun writeRecord(context: Context, record: JSONObject) {
@@ -436,7 +441,7 @@ object NodeWorkManagerBridgeScheduler {
         val target = recordFile(context, id)
         target.parentFile?.mkdirs()
         val temp = File(target.parentFile, "${target.name}.${android.os.Process.myPid()}.${System.nanoTime()}.tmp")
-        temp.writeText(record.toString(), Charsets.UTF_8)
+        temp.writeText(SettingsJson.stringify(record), Charsets.UTF_8)
         if (target.exists() && !target.delete()) {
             throw IllegalStateException("Failed to replace node work record: ${target.absolutePath}")
         }

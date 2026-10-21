@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "c30622af6",
+  "commit": "b1114075b",
   "branch": "master",
-  "dirtyScannedFiles": 7
+  "dirtyScannedFiles": 12
  },
  "summary": {
   "keyResources": 270,
@@ -44,7 +44,8 @@
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 0,
   "prefUserFiles": 41,
-  "jsonFileStores": 13
+  "jsonFileStores": 14,
+  "jsonFileStoresDeclared": 14
  },
  "keys": [
   {
@@ -9317,9 +9318,9 @@
    "calls": [
     {
      "file": "engine/NodeBridgeProtocol.kt",
-     "line": 3399,
+     "line": 3411,
      "arg": "storagePreferencesName(storeName)",
-     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3514)"
+     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3526)"
     }
    ],
    "files": [
@@ -9920,33 +9921,33 @@
    "calls": [
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 38,
+     "line": 42,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 44,
+     "line": 48,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 87,
+     "line": 91,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 90,
+     "line": 94,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 342,
+     "line": 346,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:30)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
     }
    ],
    "files": [
@@ -10064,6 +10065,24 @@
  ],
  "jsonFileStores": [
   {
+   "file": "core/accessibility/codegen/store/ModelStore.kt",
+   "class": "ModelStore",
+   "dirLines": [
+    "目录来自 ui/settings/codegen/CodegenModelStoreFactory.kt"
+   ],
+   "jsonNames": [
+    {
+     "name": "registry.json",
+     "line": 638
+    }
+   ],
+   "kind": "Cache",
+   "note": "布局代码生成模型的登记表 (及 .bak), 目录由 CodegenModelStoreFactory 传入, 启发式不命中 (MANUAL_JSON_FILE_SOURCES); 模型文件可重新下载 (附录 A.2)",
+   "stores": [
+    "../no_backup/codegen_models*/registry.json"
+   ]
+  },
+  {
    "file": "core/plugin/center/InstalledPluginMetadataStore.kt",
    "class": "InstalledPluginMetadataStore",
    "dirLines": [
@@ -10076,34 +10095,45 @@
     }
    ],
    "kind": "Cache",
-   "note": "已安装插件元数据缓存 (附录 A.2)"
+   "note": "已安装插件元数据缓存 (附录 A.2)",
+   "stores": [
+    "plugin_center/autojs6_installed_plugin_metadata_v1.json"
+   ]
   },
   {
    "file": "core/plugin/center/PluginIndexRepository.kt",
    "class": "PluginIndexRepository",
    "dirLines": [
-    470
+    472
    ],
    "jsonNames": [
     {
      "name": "autojs6_plugin_index_v11.json",
-     "line": 32
+     "line": 34
     },
     {
      "name": "plugins.official.generated.json",
-     "line": 37
+     "line": 39
     },
     {
      "name": "compat-matrix.json",
-     "line": 40
+     "line": 42
     },
     {
      "name": "plugins.generated.json",
-     "line": 44
+     "line": 46
     }
    ],
    "kind": "Cache",
-   "note": "插件索引缓存; 另外三个 .json 是索引仓库内的路径"
+   "note": "插件索引缓存; 另外三个 .json 是索引仓库内的路径",
+   "stores": [
+    "plugin_center/autojs6_plugin_index_v11.json"
+   ],
+   "otherJsonNames": [
+    "compat-matrix.json",
+    "plugins.generated.json",
+    "plugins.official.generated.json"
+   ]
   },
   {
    "file": "core/plugin/python/PythonPrivateExecutionSnapshot.kt",
@@ -10118,120 +10148,141 @@
     }
    ],
    "kind": "Excluded",
-   "note": "运行时快照, 进程结束即失效 (附录 A.2)"
+   "note": "运行时快照, 进程结束即失效 (附录 A.2)",
+   "stores": [
+    "../no_backup/python-runtime-preview/host-capabilities-*.json"
+   ]
   },
   {
    "file": "engine/NodeLifecycleCheckpointStore.kt",
    "class": "NodeLifecycleCheckpointStore",
    "dirLines": [
-    228,
-    236
+    233,
+    241
    ],
    "jsonNames": [
     {
      "name": "*.json",
-     "line": 228
+     "line": 233
     }
    ],
    "kind": "Excluded",
-   "note": "运行时检查点 (附录 A.2)"
+   "note": "运行时检查点 (附录 A.2)",
+   "stores": [
+    "nodejs/checkpoints/*.json"
+   ]
   },
   {
    "file": "engine/NodeWorkManagerBridgeScheduler.kt",
    "class": "NodeWorkManagerBridgeScheduler",
    "dirLines": [
-    458
+    463
    ],
    "jsonNames": [
     {
      "name": ".json",
-     "line": 416
+     "line": 421
     },
     {
      "name": "*.json",
-     "line": 455
+     "line": 460
     }
    ],
    "kind": "Excluded",
-   "note": "运行时调度记录 (附录 A.2)"
+   "note": "运行时调度记录 (附录 A.2)",
+   "stores": [
+    "nodejs-work-manager/tasks/*.json"
+   ]
   },
   {
    "file": "engine/RuntimeWebLocalDownloads.kt",
    "class": "RuntimeWebLocalDownloads",
    "dirLines": [
-    270
+    274
    ],
    "jsonNames": [
     {
      "name": "runtime-web-downloads/*.json",
-     "line": 270
+     "line": 274
     }
    ],
    "kind": "Cache",
-   "note": "可重新下载的资源 (附录 A.2)"
+   "note": "可重新下载的资源 (附录 A.2)",
+   "stores": [
+    "runtime-web-downloads/*.json"
+   ]
   },
   {
    "file": "model/explorer/PrivilegedBackupManager.kt",
    "class": "PrivilegedBackupManager",
    "dirLines": [
-    75,
-    283,
-    311
+    79,
+    287,
+    315
    ],
    "jsonNames": [
     {
      "name": "*.json",
-     "line": 317
+     "line": 321
     }
    ],
    "kind": "Excluded",
-   "note": "指向本机文件的备份记录 (附录 A.2)"
+   "note": "指向本机文件的备份记录 (附录 A.2)",
+   "stores": [
+    "privileged-edit-backups/*.json"
+   ]
   },
   {
    "file": "model/explorer/PrivilegedEditSessions.kt",
    "class": "PrivilegedEditSessions",
    "dirLines": [
-    298,
-    310,
-    316,
-    336
+    301,
+    313,
+    319,
+    339
    ],
    "jsonNames": [
     {
      "name": "session.json",
-     "line": 311
+     "line": 314
     },
     {
      "name": "session.json",
-     "line": 338
+     "line": 341
     },
     {
      "name": "session.json",
-     "line": 351
+     "line": 354
     },
     {
      "name": "session.json",
-     "line": 355
+     "line": 358
     }
    ],
    "kind": "Excluded",
-   "note": "指向本机文件的编辑会话 (附录 A.2)"
+   "note": "指向本机文件的编辑会话 (附录 A.2)",
+   "stores": [
+    "privileged-edit-sessions/*/session.json"
+   ]
   },
   {
    "file": "model/explorer/PrivilegedFileOperationJournal.kt",
    "class": "PrivilegedFileOperationJournal",
    "dirLines": [
-    15,
-    56
+    19,
+    60
    ],
    "jsonNames": [
     {
      "name": "*.json",
-     "line": 16
+     "line": 20
     }
    ],
    "kind": "Excluded",
-   "note": "指向本机文件的操作日志 (附录 A.2)"
+   "note": "指向本机文件的操作日志 (附录 A.2)",
+   "stores": [
+    "privileged-file-operations/*.json"
+   ]
   },
   {
    "file": "ui/edit/editor/ace/font/FontCatalogRepository.kt",
@@ -10250,7 +10301,11 @@
     }
    ],
    "kind": "Cache",
-   "note": "字体目录缓存与签名 (附录 A.2)"
+   "note": "字体目录缓存与签名 (附录 A.2)",
+   "stores": [
+    "../no_backup/ace_fonts/catalog-v1.json",
+    "../no_backup/ace_fonts/catalog-v1.sig.json"
+   ]
   },
   {
    "file": "ui/edit/editor/ace/font/FontStore.kt",
@@ -10265,7 +10320,10 @@
     }
    ],
    "kind": "Cache",
-   "note": "已安装字体清单与字体文件 (附录 A.2)"
+   "note": "已安装字体清单与字体文件 (附录 A.2)",
+   "stores": [
+    "../no_backup/ace_fonts/fonts/*/installed.json"
+   ]
   },
   {
    "file": "ui/project/BuildActivity.java",
@@ -10280,7 +10338,11 @@
     }
    ],
    "kind": "Excluded",
-   "note": "`.json` 是 SAF 导出配置档的建议文件名, 不是内部存储"
+   "note": "`.json` 是 SAF 导出配置档的建议文件名, 不是内部存储",
+   "stores": [],
+   "otherJsonNames": [
+    ".json"
+   ]
   },
   {
    "file": "ui/settings/NodeDoctorReportGenerator.kt",
@@ -10295,18 +10357,88 @@
     }
    ],
    "kind": "Excluded",
-   "note": "诊断报告输出文件, 不是存储"
+   "note": "诊断报告输出文件 (供分享, 不读回), 不是存储",
+   "stores": [
+    "node-doctor/node-doctor-report.json"
+   ]
   }
  ],
  "jsonFileStoresReconcile": {
-  "roadmapNotDetected": [
-   {
-    "class": "ModelStore",
-    "file": "core/accessibility/codegen/store/ModelStore.kt"
-   }
-  ],
+  "roadmapNotDetected": [],
   "detectedNotInRoadmap": []
  },
+ "jsonFileStoreDeclarations": [
+  {
+   "name": "../no_backup/ace_fonts/catalog-v1.json",
+   "const": "FONT_CATALOG",
+   "line": 32
+  },
+  {
+   "name": "../no_backup/ace_fonts/catalog-v1.sig.json",
+   "const": "FONT_CATALOG_SIGNATURE",
+   "line": 36
+  },
+  {
+   "name": "../no_backup/ace_fonts/fonts/*/installed.json",
+   "const": "INSTALLED_FONTS",
+   "line": 40
+  },
+  {
+   "name": "../no_backup/codegen_models*/registry.json",
+   "const": "CODEGEN_MODEL_REGISTRY",
+   "line": 47
+  },
+  {
+   "name": "plugin_center/autojs6_installed_plugin_metadata_v1.json",
+   "const": "INSTALLED_PLUGIN_METADATA",
+   "line": 51
+  },
+  {
+   "name": "plugin_center/autojs6_plugin_index_v11.json",
+   "const": "PLUGIN_INDEX",
+   "line": 55
+  },
+  {
+   "name": "runtime-web-downloads/*.json",
+   "const": "RUNTIME_WEB_DOWNLOADS",
+   "line": 59
+  },
+  {
+   "name": "nodejs/checkpoints/*.json",
+   "const": "NODE_LIFECYCLE_CHECKPOINTS",
+   "line": 66
+  },
+  {
+   "name": "nodejs-work-manager/tasks/*.json",
+   "const": "NODE_WORK_MANAGER_TASKS",
+   "line": 70
+  },
+  {
+   "name": "../no_backup/python-runtime-preview/host-capabilities-*.json",
+   "const": "PYTHON_EXECUTION_SNAPSHOTS",
+   "line": 74
+  },
+  {
+   "name": "privileged-edit-sessions/*/session.json",
+   "const": "PRIVILEGED_EDIT_SESSIONS",
+   "line": 78
+  },
+  {
+   "name": "privileged-file-operations/*.json",
+   "const": "PRIVILEGED_FILE_OPERATIONS",
+   "line": 82
+  },
+  {
+   "name": "privileged-edit-backups/*.json",
+   "const": "PRIVILEGED_EDIT_BACKUP_RECORDS",
+   "line": 86
+  },
+  {
+   "name": "node-doctor/node-doctor-report.json",
+   "const": "NODE_DOCTOR_REPORT",
+   "line": 90
+  }
+ ],
  "defaults": {
   "COLOR_FAVORITE_SORT": [
    {

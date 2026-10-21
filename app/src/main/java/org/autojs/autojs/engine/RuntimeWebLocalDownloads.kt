@@ -11,6 +11,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.AtomicFile
 import android.util.Base64
+import org.autojs.autojs.core.pref.SettingsJson
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -23,7 +24,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** Blob page streams and native data/content/SAF transfers, without a JavaScript interface. */
+/**
+ * Blob page streams and native data/content/SAF transfers, without a JavaScript interface. The download states are the
+ * JSON file store `JsonFileStores.RUNTIME_WEB_DOWNLOADS`, read and written with `SettingsJson` (settings P5.1).
+ */
 internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
     private val context = web.context.applicationContext
     private val pageJobs = LinkedHashSet<Job>()
@@ -56,7 +60,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
         active[id]?.let { return if (it.removed.get()) JSONObject.NULL else it.snapshot() }
         val file = metadata(context, id)
         if (!file.exists()) return JSONObject.NULL
-        val value = JSONObject(AtomicFile(file).openRead().bufferedReader().use { it.readText() })
+        val value = SettingsJson.parseObject(AtomicFile(file).openRead().bufferedReader().use { it.readText() })
         if (value.optString("status") == "running") {
             value.put("status", "failed").put("reason", 1000).put("error", "Download interrupted by process termination")
             File(context.cacheDir, "runtime-web-downloads/${uuid(id)}.part").delete()
@@ -270,7 +274,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
         private fun metadata(context: Context, id: String) = File(context.filesDir, "runtime-web-downloads/${uuid(id)}.json")
         private fun save(file: File, value: JSONObject) {
             check(file.parentFile!!.isDirectory || file.parentFile!!.mkdirs()); val atomic = AtomicFile(file); val stream = atomic.startWrite()
-            try { stream.write(value.toString().toByteArray()); atomic.finishWrite(stream) } catch (error: Throwable) { atomic.failWrite(stream); throw error }
+            try { stream.write(SettingsJson.stringify(value).toByteArray()); atomic.finishWrite(stream) } catch (error: Throwable) { atomic.failWrite(stream); throw error }
         }
         internal fun decodeData(payload: String, base64: Boolean): ByteArray {
             val raw = payload.toByteArray(Charsets.UTF_8); val bytes = java.io.ByteArrayOutputStream(); var i = 0

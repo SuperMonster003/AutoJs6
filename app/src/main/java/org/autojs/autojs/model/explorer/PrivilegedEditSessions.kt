@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.system.OsConstants
 import android.util.AtomicFile
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs6.R
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap
  * Durable editor documents whose bytes are private to this app. Each opening has its own baseline;
  * editing a second window must never silently rebase the first window onto someone else's save.
  * The provider is read-only. Only [save] may conditionally replace an authorized original.
+ * The session metadata is the JSON file store `JsonFileStores.PRIVILEGED_EDIT_SESSIONS`, read and written with
+ * `SettingsJson` (settings P5.1).
  */
 object PrivilegedEditSessions {
     private const val DIRECTORY = "privileged-edit-sessions"
@@ -348,14 +351,14 @@ object PrivilegedEditSessions {
     }
     private fun lock(key: String) = locks.getOrPut(key) { Any() }
     private fun readMetadata(directory: File): JSONObject = synchronized(lock("metadata:${directory.path}")) {
-        JSONObject(AtomicFile(File(directory, "session.json")).openRead().bufferedReader(Charsets.UTF_8).use { it.readText() })
+        SettingsJson.parseObject(AtomicFile(File(directory, "session.json")).openRead().bufferedReader(Charsets.UTF_8).use { it.readText() })
     }
 
     private fun writeMetadata(directory: File, metadata: JSONObject) = synchronized(lock("metadata:${directory.path}")) {
         val atomic = AtomicFile(File(directory, "session.json"))
         val output = atomic.startWrite()
         try {
-            output.write(metadata.toString().toByteArray(Charsets.UTF_8))
+            output.write(SettingsJson.stringify(metadata).toByteArray(Charsets.UTF_8))
             output.fd.sync()
             atomic.finishWrite(output)
         } catch (error: Exception) {
