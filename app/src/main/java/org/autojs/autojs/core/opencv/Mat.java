@@ -10,6 +10,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A {@link org.opencv.core.Mat} whose lifecycle is owned by AutoJs6.
@@ -29,7 +30,19 @@ import java.nio.ByteBuffer;
  */
 public class Mat extends org.opencv.core.Mat {
 
+    // Process-wide lifecycle counters for memory diagnostics (docs/memory/ROADMAP.md P3.1). They are only
+    // ever incremented and never change how a Mat behaves.
+    // zh-CN: 供内存诊断使用的进程级生命周期计数器 (docs/memory/ROADMAP.md P3.1). 只做递增, 从不改变 Mat 的行为.
+    private static final AtomicLong sCreated = new AtomicLong();
+    private static final AtomicLong sReleased = new AtomicLong();
+    private static final AtomicLong sFinalized = new AtomicLong();
+    private static final AtomicLong sFinalizedUnreleased = new AtomicLong();
+
     private volatile boolean mReleased;
+
+    {
+        sCreated.incrementAndGet();
+    }
 
     private static final Method nClone = findMethod("n_clone", Long.TYPE);
     private static final Method nOnes = findMethod("n_ones", Integer.TYPE, Integer.TYPE, Integer.TYPE);
@@ -177,6 +190,7 @@ public class Mat extends org.opencv.core.Mat {
                 if (!mReleased) {
                     super.release();
                     mReleased = true;
+                    sReleased.incrementAndGet();
                 }
             }
         }
@@ -207,7 +221,38 @@ public class Mat extends org.opencv.core.Mat {
         // Delete the native header (and drop our data reference) when the Java object is unreachable.
         // The header is private to this instance (see class comment), so this cannot double-free.
         // zh-CN: Java 对象不可达时删除原生头部 (并释放数据引用). 头部为本实例独占 (见类注释), 不会重复释放.
+        sFinalized.incrementAndGet();
+        if (!mReleased) {
+            sFinalizedUnreleased.incrementAndGet();
+        }
         super.finalize();
+    }
+
+    /**
+     * Instances created so far in this process (every constructor, {@link #clone()}, {@link #from(org.opencv.core.Mat)}
+     * when it wraps, {@link #ones(int, int, int)}).
+     * zh-CN: 本进程至今创建的实例数 (全部构造方法, {@link #clone()}, 需要包装时的 {@link #from(org.opencv.core.Mat)}, {@link #ones(int, int, int)}).
+     */
+    public static long getCreatedCount() {
+        return sCreated.get();
+    }
+
+    /** Instances whose {@link #release()} ran. zh-CN: 已执行 {@link #release()} 的实例数. */
+    public static long getReleasedCount() {
+        return sReleased.get();
+    }
+
+    /** Instances finalized (native header deleted). zh-CN: 已终结 (原生头部已删除) 的实例数. */
+    public static long getFinalizedCount() {
+        return sFinalized.get();
+    }
+
+    /**
+     * Instances neither released nor finalized: their pixel data (unless shared) is still held.
+     * zh-CN: 既未 release 也未终结的实例数: 其像素数据 (除非与他者共享) 仍被持有.
+     */
+    public static long getLiveCount() {
+        return sCreated.get() - sReleased.get() - sFinalizedUnreleased.get();
     }
 
 }

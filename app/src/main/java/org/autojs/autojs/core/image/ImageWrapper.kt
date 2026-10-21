@@ -25,6 +25,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
+import java.util.Collections
 import java.util.WeakHashMap
 
 /**
@@ -38,15 +39,40 @@ import java.util.WeakHashMap
  *   images produced by OpenCV based operations), NOT the BGR order of `Imgcodecs.imread`.
  * - zh-CN: [bitmap] 为 ARGB_8888 位图; [mat] 与 `Utils.bitmapToMat` 的通道顺序一致, 即 RGBA
  *   (OpenCV 操作产生的图像也可能是 RGB / 灰度), 而非 `Imgcodecs.imread` 的 BGR 顺序.
+ *
+ * Lifecycle (docs/memory/ROADMAP.md P3.2; zh-CN: 生命周期):
+ * - Every constructor (and so every factory: [ofBitmap], [ofMat], [ofImage], [clone], the images module) registers
+ *   the new image under its script runtime; [recycleAll] recycles the images still reachable when that runtime exits.
+ *   Images that became unreachable earlier are freed by the GC (bitmap pixels through the bitmap's native allocation
+ *   registry, the OpenCV data through the finalizer of [Mat]), so recycling returns memory early but is not needed
+ *   for correctness.
+ * - [recycle] frees everything the image holds: the bitmap, the mat and the BGR mat derived from it, and a media
+ *   image (with its plane) if one is kept. A media image passed to the constructor is copied and closed at once,
+ *   so an ImageWrapper never keeps an ImageReader buffer and cannot exhaust the reader.
+ * - [setOneShot] marks the image to be recycled after its next use by an images function (see [shoot]); [clone]
+ *   does not copy the mark.
+ * - [clone] always copies the pixels (a bitmap copy, or a mat clone when there is no bitmap); the copy belongs to the
+ *   same script runtime and is independent of the original, recycling either one leaves the other intact.
+ * - The image keeps only a weak reference to its runtime, so an image that escapes its script (for example into a
+ *   process-wide cache) cannot keep the whole runtime alive after the script has ended (roadmap H11). Such an image
+ *   was reachable when its runtime exited and has therefore been recycled by [recycleAll].
+ * - zh-CN: 每个构造方法 (因而每个工厂: [ofBitmap], [ofMat], [ofImage], [clone], images 模块) 都把新图像登记到其脚本运行时下;
+ *   该运行时退出时 [recycleAll] 回收仍可达的图像. 更早变为不可达的图像由 GC 释放 (位图像素经位图的原生分配登记, OpenCV 数据经 [Mat] 的 finalizer),
+ *   因此回收用于尽早归还内存, 并非正确性所必需.
+ *   [recycle] 释放图像持有的全部资源: 位图, mat 及由其派生的 BGR mat, 以及保留的 media image (连同其 plane). 传给构造方法的 media image 会被立即拷贝并关闭,
+ *   因此 ImageWrapper 从不保留 ImageReader 的缓冲区, 也不会耗尽 ImageReader.
+ *   [setOneShot] 标记图像在下一次被 images 函数使用后回收 (见 [shoot]); [clone] 不复制该标记.
+ *   [clone] 总是拷贝像素 (位图拷贝, 无位图时为 mat 克隆); 副本属于同一脚本运行时且与原图互相独立, 回收其中之一不影响另一个.
+ *   图像只弱引用其运行时, 逃逸出脚本的图像 (例如进入进程级缓存) 不会在脚本结束后钉住整个运行时 (路线图 H11); 这样的图像在运行时退出时可达, 因此已被 [recycleAll] 回收.
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 20, 2023.
 open class ImageWrapper : Shootable<ImageWrapper> {
 
-    private var mScriptRuntime: ScriptRuntime
+    private val mScriptRuntimeRef: WeakReference<ScriptRuntime>
 
     /** The runtime this image belongs to (used by the Auto.js 4 shaped `Images.concat(imgA, imgB, direction)`). */
     val scriptRuntime: ScriptRuntime
-        get() = mScriptRuntime
+        get() = mScriptRuntimeRef.get() ?: throw IllegalStateException("The script runtime of this image no longer exists")
 
     private var mMat: Mat? = null
     private var mBgrMat: Mat? = null
@@ -141,42 +167,42 @@ open class ImageWrapper : Shootable<ImageWrapper> {
     constructor(width: Int, height: Int) : this(currentScriptRuntime(), width, height)
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap) {
-        mScriptRuntime = scriptRuntime
+        mScriptRuntimeRef = WeakReference(scriptRuntime)
         mBitmap = bitmap
         mWidth = bitmap.width
         mHeight = bitmap.height
-        register(this)
+        register(this, scriptRuntime)
     }
 
     constructor(scriptRuntime: ScriptRuntime, mat: Mat) {
-        mScriptRuntime = scriptRuntime
+        mScriptRuntimeRef = WeakReference(scriptRuntime)
         mMat = mat
         mWidth = mat.cols()
         mHeight = mat.rows()
-        register(this)
+        register(this, scriptRuntime)
     }
 
     constructor(scriptRuntime: ScriptRuntime, mat: org.opencv.core.Mat) {
-        mScriptRuntime = scriptRuntime
+        mScriptRuntimeRef = WeakReference(scriptRuntime)
         // Never share the native header with the caller's Mat, whose finalizer would delete it under our feet.
         // zh-CN: 不与调用方的 Mat 共享原生头部, 否则其 finalizer 会在我们仍在使用时删除该头部.
         mMat = Mat.from(mat)
         mWidth = mat.cols()
         mHeight = mat.rows()
-        register(this)
+        register(this, scriptRuntime)
     }
 
     constructor(scriptRuntime: ScriptRuntime, bitmap: Bitmap, mat: Mat?) {
-        mScriptRuntime = scriptRuntime
+        mScriptRuntimeRef = WeakReference(scriptRuntime)
         mMat = mat
         mBitmap = bitmap
         mWidth = bitmap.width
         mHeight = bitmap.height
-        register(this)
+        register(this, scriptRuntime)
     }
 
     constructor(scriptRuntime: ScriptRuntime, mediaImage: Image) {
-        mScriptRuntime = scriptRuntime
+        mScriptRuntimeRef = WeakReference(scriptRuntime)
         mWidth = mediaImage.width
         mHeight = mediaImage.height
 
@@ -192,12 +218,12 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         // zh-CN: 解耦后不再保留 media 引用.
         mMediaImage = null
         mPlane = null
-        register(this)
+        register(this, scriptRuntime)
     }
 
     fun saveTo(path: String): Boolean {
         ensureNotRecycled()
-        val fullPath = path.toRuntimePath(mScriptRuntime, true)
+        val fullPath = path.toRuntimePath(scriptRuntime, true)
         val file = File(fullPath)
         val parentFile = file.parentFile
         if (parentFile != null && !parentFile.exists()) {
@@ -335,11 +361,15 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         check(!isRecycled) { str(R.string.error_image_has_been_recycled) }
     }
 
+    /**
+     * A deep copy that belongs to the same script runtime; the one-shot mark is not copied.
+     * zh-CN: 属于同一脚本运行时的深拷贝; 不复制一次性标记.
+     */
     fun clone(): ImageWrapper {
         ensureNotRecycled()
         return when (val bitmap = mBitmap) {
-            null -> ofMat(mScriptRuntime, mat.clone())
-            else -> ofBitmap(mScriptRuntime, bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, true))
+            null -> ofMat(scriptRuntime, mat.clone())
+            else -> ofBitmap(scriptRuntime, bitmap.copy(bitmap.config ?: Bitmap.Config.ARGB_8888, true))
         }
     }
 
@@ -352,9 +382,9 @@ open class ImageWrapper : Shootable<ImageWrapper> {
 
         private const val REGISTRY_PRUNE_INTERVAL = 256
 
-        private fun register(image: ImageWrapper) {
+        private fun register(image: ImageWrapper, scriptRuntime: ScriptRuntime) {
             synchronized(registry) {
-                val list = registry.getOrPut(image.mScriptRuntime) { ArrayList() }
+                val list = registry.getOrPut(scriptRuntime) { ArrayList() }
                 // Drop references to images already collected by the GC, so long-running capture loops
                 // do not accumulate stale entries.
                 // zh-CN: 定期清理已被 GC 回收的引用, 避免长时间截图循环累积无效条目.
@@ -383,6 +413,63 @@ open class ImageWrapper : Shootable<ImageWrapper> {
         fun recycleAll() {
             val lists = synchronized(registry) { registry.values.toList().also { registry.clear() } }
             lists.forEach { list -> list.forEach { it.get()?.recycle() } }
+        }
+
+        /**
+         * Images of every script runtime that are still reachable and not recycled (docs/memory/ROADMAP.md P3.1).
+         * zh-CN: 所有脚本运行时中仍可达且未回收的图像数 (docs/memory/ROADMAP.md P3.1).
+         */
+        @JvmStatic
+        fun liveCount(): Int = synchronized(registry) {
+            registry.values.sumOf { list -> list.count { it.get()?.mIsRecycled == false } }
+        }
+
+        /**
+         * Images of the given script runtime that are still reachable and not recycled.
+         * zh-CN: 指定脚本运行时中仍可达且未回收的图像数.
+         */
+        @JvmStatic
+        fun liveCount(scriptRuntime: ScriptRuntime): Int = synchronized(registry) {
+            registry[scriptRuntime]?.count { it.get()?.mIsRecycled == false } ?: 0
+        }
+
+        // Media images handed out by an ImageReader (see ScreenCapturer), held weakly and only counted, never closed here.
+        // zh-CN: ImageReader 交出的 media image (见 ScreenCapturer), 仅以弱引用记录并计数, 此处从不关闭它们.
+        private val mediaImages: MutableSet<Image> = Collections.newSetFromMap(WeakHashMap())
+
+        /**
+         * Records a media image just acquired from an ImageReader for [openMediaImageCount]; returns it unchanged.
+         * zh-CN: 记录刚从 ImageReader 取得的 media image, 供 [openMediaImageCount] 统计; 原样返回.
+         */
+        @JvmStatic
+        fun trackMediaImage(image: Image): Image = image.also { synchronized(mediaImages) { mediaImages.add(it) } }
+
+        /**
+         * Media images not closed yet: those acquired from an ImageReader and recorded by [trackMediaImage], plus the
+         * ones kept by live wrappers (none in practice, the constructor closes its media image). An ImageReader stops
+         * handing out frames once all of its maxImages images are open (issue #204), so this count must stay small.
+         * zh-CN: 尚未关闭的 media image 数: 经 [trackMediaImage] 记录的 ImageReader 图像, 加上存活的包装对象保留的图像 (构造方法会关闭传入的 media image, 实际为零).
+         * ImageReader 的 maxImages 个图像全部未关闭时将不再交出新帧 (issue #204), 因此该数应保持很小.
+         */
+        @JvmStatic
+        fun openMediaImageCount(): Int {
+            val acquired = synchronized(mediaImages) {
+                mediaImages.removeAll { !it.isOpen() }
+                mediaImages.size
+            }
+            val wrapped = synchronized(registry) {
+                registry.values.sumOf { list -> list.count { ref -> ref.get()?.let { !it.mIsRecycled && it.mMediaImage != null } == true } }
+            }
+            return acquired + wrapped
+        }
+
+        // Every accessor of a closed image throws; reading the timestamp touches no native state.
+        // zh-CN: 已关闭图像的每个访问器都会抛出异常; 读取时间戳不涉及原生状态.
+        private fun Image.isOpen() = try {
+            timestamp
+            true
+        } catch (_: IllegalStateException) {
+            false
         }
 
         @JvmStatic

@@ -14,10 +14,12 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import org.autojs.autojs.core.image.ImageWrapper;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException;
 import org.greenrobot.eventbus.EventBus;
@@ -33,6 +35,8 @@ import java.util.regex.Pattern;
  */
 // @Reference to Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
 public class ScreenCapturer {
+
+    private static final String TAG = ScreenCapturer.class.getSimpleName();
 
     private static final Pattern PATTERN_BUFFER_FORMAT_EXCEPTION = Pattern.compile("buffer format ([0-9a-zA-Z]+) doesn't match");
 
@@ -215,7 +219,7 @@ public class ScreenCapturer {
                 ImageReader imageReader = mImageReader;
                 if (mReleased || imageReader == null) return null;
                 Image img = imageReader.acquireLatestImage();
-                if (img != null) return img;
+                if (img != null) return ImageWrapper.trackMediaImage(img);
             } catch (UnsupportedOperationException ex) {
                 Integer pixelFormat = getPixelFormat(ex);
                 if (pixelFormat != null) {
@@ -366,6 +370,7 @@ public class ScreenCapturer {
             // acquireLatestImage may return null (no available frames/competition/switching).
             // zh-CN: acquireLatestImage 可能返回 null (无可用帧/竞争/切换中).
             if (img == null) return;
+            ImageWrapper.trackMediaImage(img);
             listener.onCaptureAvailable(img);
         } catch (IllegalStateException e) {
             // Ignore the current frame if ImageReader/VirtualDisplay is switching or closed.
@@ -569,6 +574,17 @@ public class ScreenCapturer {
         }
     }
 
+    /**
+     * Releases everything this capturer owns, in one go and in this order: the virtual display (the producer), the
+     * ImageReader (its consumer) and the last acquired image, the MediaProjection (callback, then the projection itself
+     * unless the system already stopped it), the display listener, the ImageReader callback thread and the EventBus
+     * subscription. Every step runs even if an earlier one throws, so a failing step cannot leave the callback thread
+     * or a listener behind (roadmap H5). The screen capture foreground service is shared by all scripts and is stopped
+     * by the owner of the consent request (Images.releaseScreenCapturer) once no capturer uses it any more.
+     * zh-CN: 一次性按以下顺序释放本采集器拥有的全部资源: 虚拟显示 (生产者), ImageReader (其消费者) 与最后取得的图像, MediaProjection
+     * (先回调, 再停止投影本身, 系统已停止时除外), 显示监听器, ImageReader 回调线程与 EventBus 订阅. 即使前一步抛出异常, 后续步骤也会执行,
+     * 因此失败的步骤不会遗留回调线程或监听器 (路线图 H5). 截屏前台服务由全部脚本共用, 由授权请求的持有方 (Images.releaseScreenCapturer) 在不再有采集器使用时停止.
+     */
     private boolean release(boolean stopMediaProjection) {
         final MediaProjection mediaProjection;
         final VirtualDisplay virtualDisplay;
@@ -597,51 +613,58 @@ public class ScreenCapturer {
             mEventBusRegistered = false;
         }
 
-        if (mediaProjection != null) {
-            try {
-                mediaProjection.unregisterCallback(mMediaProjectionCallback);
-            } catch (Throwable ignored) {
-                /* Ignored. */
-            }
-            if (stopMediaProjection) {
-                try {
-                    mediaProjection.stop();
-                } catch (Throwable ignored) {
-                    /* Ignored. */
-                }
-            }
-        }
-
         if (virtualDisplay != null) {
-            virtualDisplay.release();
+            releaseStep("virtual display", virtualDisplay::release);
         }
         if (imageReader != null) {
-            imageReader.close();
+            releaseStep("image reader", imageReader::close);
         }
         if (underUsingImage != null) {
-            underUsingImage.close();
+            releaseStep("image", underUsingImage::close);
+        }
+        if (mediaProjection != null) {
+            releaseStep("projection callback", () -> mediaProjection.unregisterCallback(mMediaProjectionCallback));
+            if (stopMediaProjection) {
+                releaseStep("media projection", mediaProjection::stop);
+            }
         }
         if (unregisterDisplayListener) {
-            mDisplayManager.unregisterDisplayListener(mDisplayListener);
+            releaseStep("display listener", () -> mDisplayManager.unregisterDisplayListener(mDisplayListener));
         }
-
-        mImageCallbackThread.quitSafely();
-
+        releaseStep("callback thread", mImageCallbackThread::quitSafely);
         if (unregisterEventBus) {
-            EventBus.getDefault().unregister(this);
+            releaseStep("event bus", () -> EventBus.getDefault().unregister(this));
         }
 
         return true;
+    }
+
+    private static void releaseStep(String what, Runnable step) {
+        try {
+            step.run();
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to release the " + what + " of the screen capturer", t);
+        }
     }
 
     public void setImageCaptureCallback(OnScreenCaptureAvailableListener onScreenCaptureAvailableListener) {
         mOnScreenCaptureAvailableListener = onScreenCaptureAvailableListener;
     }
 
+    /**
+     * Last resort only: while registered, the display listener and the EventBus subscription keep an unreleased capturer
+     * reachable, so this runs after a missed release only when registration itself failed. Script runtimes release their
+     * capturer on exit (Images.releaseScreenCapturer).
+     * zh-CN: 仅作兜底: 登记期间显示监听器与 EventBus 订阅使未释放的采集器保持可达, 因此只有登记本身失败时漏掉的释放才会走到这里.
+     * 脚本运行时在退出时释放其采集器 (Images.releaseScreenCapturer).
+     */
     @Override
     protected void finalize() throws Throwable {
         try {
-            release();
+            if (!mReleased) {
+                Log.w(TAG, "A screen capturer was finalized without being released");
+                release();
+            }
         } finally {
             super.finalize();
         }
