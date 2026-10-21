@@ -6,6 +6,7 @@ import android.os.SystemClock
 import android.util.SparseArray
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
@@ -138,7 +139,7 @@ class Timer {
             mPendingCallbacks.add(pending)
             if (!mHandler.postAtTime(pending, uptime)) {
                 mPendingCallbacks.remove(pending)
-                throw TimerCallbackRejectedException()
+                throw TimerCallbackRejectedException(if (isStopping()) ScriptInterruptedException() else null)
             }
             // Retain the historical high-water mark for callers, but never use it to decide
             // whether work remains: cancelled callbacks can leave this far in the future.
@@ -189,6 +190,23 @@ class Timer {
             return true
         }
         return false
+    }
+
+    // Whether the looper rejected a callback because the calling thread is being stopped. A stop (forceStop of the
+    // engine, interrupt of a TimerThread) first quits the looper of the thread from another thread, removing it from
+    // LooperHelper, and only then interrupts it, so a setInterval callback finishing in between and posting to its own
+    // looper sees neither an interrupt nor an exiting runtime. Such a rejection was reported as a script error with an
+    // error toast (ROADMAP Q32, about 1 in 20 forced stops in the memory gate). Posting to the looper of another thread
+    // that has ended remains an error of the script.
+    // zh-CN: Looper 拒绝回调是否因为调用线程正在被停止. 停止 (引擎的 forceStop, TimerThread 的 interrupt) 先由其他线程退出该线程的 Looper
+    // 并将其移出 LooperHelper, 之后才中断它, 因此在两者之间结束并向自身 Looper 投递的 setInterval 回调既看不到中断也看不到 runtime 正在退出.
+    // 这样的拒绝曾被当作脚本错误报告并弹出错误 Toast (路线图 Q32, 内存门禁中约每 20 次强制停止出现 1 次). 向已结束的其他线程的 Looper 投递仍是脚本的错误.
+    private fun isStopping(): Boolean {
+        val runtime = mRuntime.get() ?: return true
+        val current = Thread.currentThread()
+        return runtime.isExiting
+                || current.isInterrupted
+                || mLooper.thread === current && !LooperHelper.contains(current)
     }
 
     internal fun wakeForIdleCheck() {
