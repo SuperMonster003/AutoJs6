@@ -228,6 +228,7 @@ augment 目录下现有 90 个单元测试文件 485 个用例, 几乎都属于 
 
 ### P3 第二批: 重型模块
 
+- [ ] P3.0 (宿主) 附录 C Q17 共享设施 + global / legacy 迁移. 2026-10-21 起 (子会话 augment-p3-0). 顺序: 共享设施单独提交 (assign 模块形态, getter 代理原型, TODO 的 "未实现" 消息经 ScriptMessages, 盘点中发现的其余缺口), 剩余顶层模块的形态盘点写入本节, 再迁移 global 与 legacy; 验收同 P2.4 三项 + R1 + R2 计时. 进度见下方各小项.
 - [ ] P3.1 images / canvas / ocr (含 mlkit / paddle / rapid) / barcode / qrcode / yolo.
 - [ ] P3.2 dialogs / notice (含 channel) / toast / console / floaty / ui. console 迁移时改用新层的 Inspector (P2.3 备忘), 使 `console.log(o)` 与 `util.inspect(o)` 格式一致.
 - [ ] P3.3 automator / auto / selector / RootAutomator / events / keys / flow / toolkit.
