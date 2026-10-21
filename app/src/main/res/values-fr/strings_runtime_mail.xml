@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">Autoriser les comptes, la réception, les envois, les pièces jointes et la surveillance des boîtes avec le plugin mail.</string>
+    <string name="text_bun_mail_control_grant">Comptes et messages mail Bun</string>
+</resources>

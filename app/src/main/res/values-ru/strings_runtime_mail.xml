@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">Разрешить доступ к аккаунтам, отправку и получение писем, вложения и наблюдение за почтой через почтовый плагин.</string>
+    <string name="text_bun_mail_control_grant">Почтовые аккаунты и сообщения Bun</string>
+</resources>

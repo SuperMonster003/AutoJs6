@@ -32,6 +32,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
+    <uses-permission android:name="org.autojs.plugin.mail.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.plugin.epub.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.plugin.speech.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.plugin.nodejs.permission.RUNTIME" />
@@ -39,6 +40,10 @@
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
 
     <queries>
+        <intent>
+            <action android:name="org.autojs.plugin.MAIL_PACKAGED" />
+            <category android:name="mail" />
+        </intent>
         <intent>
             <action android:name="org.autojs.plugin.EPUB_PACKAGED" />
             <category android:name="epub" />

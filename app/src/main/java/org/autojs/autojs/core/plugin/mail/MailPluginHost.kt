@@ -38,42 +38,51 @@ object MailPluginHost {
 
     private const val LABEL = "Mail plugin"
 
-    private val host = AidlPluginHost(
-        action = ACTION_MAIL,
+    private val signedHost = createHost(ACTION_MAIL, MailActions.PLUGIN_PERMISSION)
+    private val packagedHost = createHost(MailActions.PACKAGED_SERVICE_ACTION, MailActions.PACKAGED_PERMISSION)
+
+    internal fun isPackaged(context: Context): Boolean =
+        context.packageName != "org.autojs.autojs6" ||
+            context.checkSelfPermission(MailActions.PLUGIN_PERMISSION) != PackageManager.PERMISSION_GRANTED
+
+    private fun hostFor(context: Context) = if (isPackaged(context)) packagedHost else signedHost
+
+    private fun createHost(action: String, permission: String) = AidlPluginHost(
+        action = action,
         category = MailActions.SERVICE_CATEGORY,
         tag = "MailPluginHost",
         moduleLabel = LABEL,
         proxyFactory = { binder -> IMailPlugin.Stub.asInterface(binder) },
         infoReader = { proxy -> validatePluginInfo(proxy.getInfo()) },
         defaultEnabled = PluginDefaultEnabledPolicy.isEnabledByDefault(MailIds.ENGINE),
-        preBindValidator = ::validateService,
+        preBindValidator = { context, service -> validateService(context, service, action, permission) },
     )
 
     suspend fun discover(context: Context, packageName: String? = null) = withContext(Dispatchers.IO) {
-        host.discover(context, packageName)
+        hostFor(context).discover(context, packageName)
     }
 
     suspend fun probe(context: Context, packageName: String): PluginInfo = withContext(Dispatchers.IO) {
-        host.probe(context, packageName)
+        hostFor(context).probe(context, packageName)
     }
 
-    fun queryServiceCount(context: Context): Int = host.queryServiceCount(context)
+    fun queryServiceCount(context: Context): Int = hostFor(context).queryServiceCount(context)
 
     suspend fun getCapabilities(context: Context): Bundle = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        host.call(context, target) { proxy -> proxy.getCapabilities() ?: Bundle() }
+        hostFor(context).call(context, target) { proxy -> proxy.getCapabilities() ?: Bundle() }
     }
 
     /** Provider preset table as JSON (`[]` when the plugin returns nothing). */
     suspend fun listProviders(context: Context): String = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        host.call(context, target) { proxy -> MailBundles.string(proxy.listProviders(), MailContract.KEY_PROVIDERS_JSON) ?: "[]" }
+        hostFor(context).call(context, target) { proxy -> MailBundles.string(proxy.listProviders(), MailContract.KEY_PROVIDERS_JSON) ?: "[]" }
     }
 
     /** Saved accounts without secrets as JSON (`[]` when the plugin returns nothing). */
     suspend fun listSavedAccounts(context: Context): String = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        host.call(context, target) { proxy -> MailBundles.string(proxy.listSavedAccounts(), MailContract.KEY_ACCOUNTS_JSON) ?: "[]" }
+        hostFor(context).call(context, target) { proxy -> MailBundles.string(proxy.listSavedAccounts(), MailContract.KEY_ACCOUNTS_JSON) ?: "[]" }
     }
 
     /**
@@ -83,7 +92,7 @@ object MailPluginHost {
      */
     suspend fun listTriggers(context: Context): String = withContext(Dispatchers.IO) {
         val target = selectOrThrow(context)
-        host.call(context, target) { proxy ->
+        hostFor(context).call(context, target) { proxy ->
             when {
                 !supportsBackgroundWatch(proxy.getCapabilities()) -> EMPTY_TRIGGERS
                 else -> MailBundles.string(proxy.listTriggers(), MailContract.KEY_TRIGGERS_JSON) ?: EMPTY_TRIGGERS
@@ -111,7 +120,7 @@ object MailPluginHost {
         account.validate()?.let { throw MailPluginException(it) }
         val target = selectOrThrow(context)
         val callback = MailSessionCallbackBinder(events)
-        val leased = host.callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
+        val leased = hostFor(context).callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
             proxy.openSession(MailBundles.accountToBundle(account, BuildConfig.VERSION_CODE.toLong()), callback)
                 ?: throw refusal(callback)
         }
@@ -139,7 +148,7 @@ object MailPluginHost {
     }
 
     private suspend fun selectOrThrow(context: Context): AidlPluginHost.Discovered {
-        return host.selectOrThrow(
+        return hostFor(context).selectOrThrow(
             context = context,
             engineId = null,
             engine = MailIds.ENGINE,
@@ -164,21 +173,21 @@ object MailPluginHost {
         }
     }
 
-    private fun validateService(context: Context, serviceInfo: ServiceInfo) {
+    private fun validateService(context: Context, serviceInfo: ServiceInfo, action: String, permission: String) {
         require(serviceInfo.exported && serviceInfo.enabled) {
             "Mail plugin service is not exported and enabled"
         }
-        require(serviceInfo.permission == MailActions.PLUGIN_PERMISSION) {
-            "Mail plugin service must require ${MailActions.PLUGIN_PERMISSION}"
+        require(serviceInfo.permission == permission) {
+            "Mail plugin service must require $permission"
         }
         val component = ComponentName(serviceInfo.packageName, serviceInfo.name)
-        require(component in queryContractServices(context, serviceInfo.packageName)) {
+        require(component in queryContractServices(context, serviceInfo.packageName, action)) {
             "Mail plugin service does not declare the required action and category"
         }
     }
 
-    private fun queryContractServices(context: Context, packageName: String): Set<ComponentName> {
-        val intent = Intent(MailActions.SERVICE_ACTION).apply {
+    private fun queryContractServices(context: Context, packageName: String, action: String): Set<ComponentName> {
+        val intent = Intent(action).apply {
             addCategory(MailActions.SERVICE_CATEGORY)
             addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             setPackage(packageName)

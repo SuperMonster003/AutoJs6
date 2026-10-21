@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">メールプラグインによるアカウントへのアクセス, メールの送受信, 添付ファイルの処理とメールボックスの監視を許可します.</string>
+    <string name="text_bun_mail_control_grant">Bun メールアカウントとメッセージ</string>
+</resources>

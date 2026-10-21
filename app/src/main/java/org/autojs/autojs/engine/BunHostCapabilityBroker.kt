@@ -84,9 +84,9 @@ internal class BunHostCapabilityBroker(
         val callId = request.getString(BunRuntimeContract.KEY_HOST_CALL_ID)
             ?.takeIf { it.isNotEmpty() && it.length <= MAX_CALL_ID_CHARS }
             ?: return
-        // Speech and EPUB stream fragments and events; these are not a finite script-call budget.
-        val isSpeech = request.getString(BunRuntimeContract.KEY_HOST_CAPABILITY) in setOf(BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL)
-        val outcome = if (!isSpeech && calls.incrementAndGet() > BunRuntimeContract.MAX_HOST_CALLS_PER_EXECUTION) {
+        // Speech, EPUB and mail stream fragments and events without a finite script-call budget.
+        val isStreaming = request.getString(BunRuntimeContract.KEY_HOST_CAPABILITY) in setOf(BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL)
+        val outcome = if (!isStreaming && calls.incrementAndGet() > BunRuntimeContract.MAX_HOST_CALLS_PER_EXECUTION) {
             val identity=Binder.clearCallingIdentity()
             try { synchronized(imageScopeLock) { imageProvider }?.let { it.closeShellProcesses(); it.closeEventResources(); it.closeDeviceDialogResources(); it.closeAndroidObjects(); it.closeJavaObjects() } } finally { Binder.restoreCallingIdentity(identity) }
             Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_TOO_MANY_REQUESTS, "Call limit per execution reached")
@@ -147,7 +147,7 @@ internal class BunHostCapabilityBroker(
         val outcome = when (capability) {
             BunHostCapabilityGrants.APP_CONTROL, BunHostCapabilityGrants.ACCESSIBILITY_CONTROL,
             BunHostCapabilityGrants.CLIPBOARD_CONTROL, BunHostCapabilityGrants.STORAGE_CONTROL,
-            BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL, BunHostCapabilityGrants.SHELL_CONTROL, BunHostCapabilityGrants.EVENTS_OBSERVE, BunHostCapabilityGrants.NOTIFICATIONS_POST, BunHostCapabilityGrants.DEVICE_CONTROL, BunHostCapabilityGrants.DEVICE_AUDIO, BunHostCapabilityGrants.DIALOGS_CONTROL, BunHostCapabilityGrants.ANDROID_OBJECTS, BunHostCapabilityGrants.TASKS_CONTROL, BunHostCapabilityGrants.JAVA_INTEROP, BunHostCapabilityGrants.TTS_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL, BunHostCapabilityGrants.SHELL_CONTROL, BunHostCapabilityGrants.EVENTS_OBSERVE, BunHostCapabilityGrants.NOTIFICATIONS_POST, BunHostCapabilityGrants.DEVICE_CONTROL, BunHostCapabilityGrants.DEVICE_AUDIO, BunHostCapabilityGrants.DIALOGS_CONTROL, BunHostCapabilityGrants.ANDROID_OBJECTS, BunHostCapabilityGrants.TASKS_CONTROL, BunHostCapabilityGrants.JAVA_INTEROP, BunHostCapabilityGrants.TTS_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.FILES_CONTROL -> {
                 try {
                     val (method, args) = parseMethodCall(request)

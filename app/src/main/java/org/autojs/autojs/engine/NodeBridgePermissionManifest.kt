@@ -62,6 +62,7 @@ object NodeBridgePermissionManifest {
     const val WORK_MANAGER = "work_manager"
     const val PACKAGE_MANAGER = "package_manager"
     const val PACKAGE_MANAGER_MUTATE = "package_manager.mutate"
+    const val MAIL = "mail"
     const val EPUB = "epub"
     const val SPEECH = "speech"
     const val TTS = "tts"
@@ -157,6 +158,7 @@ object NodeBridgePermissionManifest {
         WORK_MANAGER,
         PACKAGE_MANAGER,
         PACKAGE_MANAGER_MUTATE,
+        MAIL,
         EPUB,
         SPEECH,
         TTS,
@@ -558,6 +560,7 @@ object NodeBridgePermissionManifest {
                 "install", "update", "remove" -> listOf(PACKAGE_MANAGER, PACKAGE_MANAGER_MUTATE)
                 else -> listOf(PACKAGE_MANAGER)
             }
+            NodeBridgeModules.MAIL -> listOf(MAIL)
             NodeBridgeModules.EPUB -> listOf(EPUB)
             NodeBridgeModules.SPEECH -> listOf(SPEECH)
             NodeBridgeModules.TTS -> listOf(TTS)

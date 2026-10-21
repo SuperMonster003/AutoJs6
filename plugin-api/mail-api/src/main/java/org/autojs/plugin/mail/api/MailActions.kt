@@ -14,10 +14,15 @@ object MailActions {
     /** Action of the [IMailPlugin] service; always paired with [SERVICE_CATEGORY]. */
     const val SERVICE_ACTION = "org.autojs.plugin.MAIL"
 
+    /** Inline-credential sessions for independently signed applications; no saved accounts. */
+    const val PACKAGED_SERVICE_ACTION = "org.autojs.plugin.MAIL_PACKAGED"
+
+    const val PACKAGED_PERMISSION = "org.autojs.plugin.mail.permission.RUNTIME"
+
     /** Intent category of the mail service, so unrelated `org.autojs.plugin.*` services never match. */
     const val SERVICE_CATEGORY = "mail"
 
-    /** Signature permission every Binder entry point of the plugin requires from its caller. */
+    /** Signature permission required by the original host entries and saved-account access. */
     const val PLUGIN_PERMISSION = "org.autojs.permission.PLUGIN"
 
     /** Parameterless settings entry (accounts page), exported only behind [PLUGIN_PERMISSION]. */

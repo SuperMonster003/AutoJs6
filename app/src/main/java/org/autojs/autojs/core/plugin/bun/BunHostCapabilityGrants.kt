@@ -53,6 +53,7 @@ object BunHostCapabilityGrants {
     const val DEVICE_AUDIO = "device.audio"
     const val DIALOGS_CONTROL = "dialogs.control"
 
+    const val MAIL_CONTROL = "mail.control"
     const val EPUB_CONTROL = "epub.control"
     const val SPEECH_CONTROL = "speech.control"
     const val TTS_CONTROL = "tts.control"
@@ -188,7 +189,9 @@ object BunHostCapabilityGrants {
     fun isDialogsControlGranted(context: Context): Boolean = isGranted(context, DIALOGS_CONTROL, false)
     fun setDialogsControlGranted(context: Context, granted: Boolean) = setGranted(context, DIALOGS_CONTROL, granted)
 
+    fun isMailControlGranted(context: Context): Boolean = isGranted(context, MAIL_CONTROL, false)
     fun isEpubControlGranted(context: Context): Boolean = isGranted(context, EPUB_CONTROL, false)
+    fun setMailControlGranted(context: Context, granted: Boolean) = setGranted(context, MAIL_CONTROL, granted)
     fun setEpubControlGranted(context: Context, granted: Boolean) = setGranted(context, EPUB_CONTROL, granted)
 
     fun isSpeechControlGranted(context: Context): Boolean = isGranted(context, SPEECH_CONTROL, false)
@@ -263,6 +266,7 @@ object BunHostCapabilityGrants {
         if (isDevicePowerGranted(context)) add(DEVICE_POWER)
         if (isDeviceAudioGranted(context)) add(DEVICE_AUDIO)
         if (isDialogsControlGranted(context)) add(DIALOGS_CONTROL)
+        if (isMailControlGranted(context)) add(MAIL_CONTROL)
         if (isEpubControlGranted(context)) add(EPUB_CONTROL)
         if (isSpeechControlGranted(context)) add(SPEECH_CONTROL)
         if (isTtsControlGranted(context)) add(TTS_CONTROL)
@@ -274,7 +278,7 @@ object BunHostCapabilityGrants {
     }
 
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
-        val supported = setOf(EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
+        val supported = setOf(MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
             SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP)
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }

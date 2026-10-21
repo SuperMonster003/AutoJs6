@@ -40,7 +40,7 @@ internal class MailWatchRunner(
     private val options: MailJson.WatchOptions,
     private val reconnect: Boolean,
     private val generations: () -> Long,
-    private val controller: MailWatch.Controller,
+    private val controller: MailWatchTarget,
     private val decorate: (Any?) -> Any? = { it },
     private val convertError: (MailError) -> Any? = { it },
     private val onFinished: (MailWatchRunner) -> Unit = {},
@@ -60,9 +60,6 @@ internal class MailWatchRunner(
     private var lastError: MailError? = null
 
     private val sessionLost: (MailError?) -> Unit = { error -> onSessionLost(error) }
-
-    val watch: MailWatch
-        get() = controller.watch
 
     val isFinished: Boolean
         get() = finished.get()
@@ -127,7 +124,7 @@ internal class MailWatchRunner(
         openCount++
         controller.generation(opened.first.generation)
         val mode = runCatching { modeOf(opened.second.status()) }.getOrNull()
-        if (mode != null && mode != watch.mode) {
+        if (mode != null && mode != controller.currentMode) {
             if (openCount == 1) controller.initialMode(mode) else controller.mode(mode)
         }
     }

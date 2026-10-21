@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">允许通过邮件插件访问账户, 收发邮件, 处理附件及监听邮箱.</string>
+    <string name="text_bun_mail_control_grant">Bun 邮件账户与消息</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">السماح بالوصول إلى الحسابات وإرسال البريد واستقباله ومعالجة المرفقات ومراقبة البريد عبر إضافة البريد.</string>
+    <string name="text_bun_mail_control_grant">حسابات البريد والرسائل في Bun</string>
+</resources>
