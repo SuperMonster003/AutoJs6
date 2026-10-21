@@ -90,7 +90,13 @@ class RuntimeWebActionActivity : Activity() {
                 override fun attach(activity: Activity, state: Bundle?) {
                     if (!requested) {
                         requested = true
-                        activity.startActivityForResult(Intent().setClassName(plugin.PACKAGE_NAME, plugin.ACCESS_ACTIVITY), REQUEST)
+                        try {
+                            activity.startActivityForResult(Intent().setClassName(plugin.PACKAGE_NAME, plugin.ACCESS_ACTIVITY), REQUEST)
+                        } catch (_: android.content.ActivityNotFoundException) {
+                            close()
+                        } catch (_: SecurityException) {
+                            close()
+                        }
                     }
                 }
                 override fun result(code: Int, data: Intent?) = finish { complete(code == Activity.RESULT_OK) }
