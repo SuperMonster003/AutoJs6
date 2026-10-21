@@ -84,7 +84,7 @@ internal object RuntimeFlowToolsPrograms {
             await flow.wait(()=>clicks===18&&climbs===1,{timeout:3000,interval:30});check(clicks===18&&climbs===1,'real view callbacks');
             if(EXERCISE_LAUNCH)check((await flow.launchAndWait(pkg,{bringToFront:true,timeout:5000})).launched===true,'actual host launch');
             return {checks:checks.length,labels:checks,clicks,climbs,collectionItems:collected.length,collectionCharacters:collected.join('').length,notification,toast:toastValue,packageName:pkg,channel};
-        }catch(error){console.error('FLOW_TOOLS_CHECKS '+JSON.stringify(checks));throw error;}
+        }catch(error){console.error('FLOW_TOOLS_CHECKS '+JSON.stringify({checks,clicks,climbs}));throw error;}
         finally{await flow.dispose();await notifications.cancel(9401).catch(()=>{});try{await window.close();}finally{await root.dispose();}}
     """.trimIndent().replace("EXERCISE_LAUNCH", launch.toString())
 }
