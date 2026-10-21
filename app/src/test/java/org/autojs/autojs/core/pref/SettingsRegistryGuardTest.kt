@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.archive.SettingsEffects
 import org.autojs.autojs.core.pref.keys.JsonFileStores
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.StoreId
@@ -31,10 +32,13 @@ import java.io.File
  * - (c) every key has exactly one category, every category except the data ones has at least one entry, and only
  *   `credentials` holds sensitive entries.
  * - (e) every deployment kind in use has a registered implementation or is pending (P7.6).
+ * - (f) every `APPLY` key has an entry of the effect table `SettingsEffects` (T12, P7.4), and the table binds only
+ *   `APPLY` keys, each once.
  *
  * zh-CN: ROADMAP T5 守卫 (a) (b) (c) (e) (P1.3). 注册表与已登记存储为 "已迁移", `classification.json` (P0.3) 为 "待迁移" 的初始
  * 允许清单. 只有两边都没有的名称 (新的 `key_*` 资源, 新的 `getSharedPreferences(` 文件名, 新的部署项种类), 允许清单中失效的条目,
- * 以及声明与允许清单不一致时才失败; 每个测试输出待迁移计数.
+ * 以及声明与允许清单不一致时才失败; 每个测试输出待迁移计数. (f) 为 P7.4 加入的 T12 守卫: 每个 `APPLY` 键都有生效表 `SettingsEffects`
+ * 的入口, 生效表只绑定 `APPLY` 键且每个键只绑定一次.
  */
 class SettingsRegistryGuardTest {
 
@@ -198,6 +202,21 @@ class SettingsRegistryGuardTest {
         println("T5 e: deployment kinds in use ${used.size}, implemented ${used.size - pending.size}, pending implementation (P7.6) ${pending.size} $pending")
         // Until P7.6 every kind in use is pending; afterwards the implementations must cover all of them.
         assertTrue(SettingsRegistry.DEPLOYMENT_IMPLEMENTATIONS.isEmpty() || pending.isEmpty())
+    }
+
+    @Test
+    fun f_applyKeysHaveEffectEntries() {
+        val table = SettingsEffects.TABLE
+        val bound = table.values.flatten()
+        val applyRows = registryRows().filter { it.effect == SettingEffect.APPLY }
+        assertNone(
+            "APPLY keys without an entry of SettingsEffects (T12)",
+            applyRows.filter { row -> row.family || bound.none { it.store.name == row.store && it.name == row.name } }.map { "${it.store}:${it.name}" },
+        )
+        assertNone("SettingsEffects entries bound to keys that are not APPLY", bound.filter { (it as? SettingKey<*>)?.effect != SettingEffect.APPLY }.map { it.name })
+        assertNone("keys bound to two entries", bound.groupBy { it.store.name to it.name }.filterValues { it.size > 1 }.keys.map { "${it.first}:${it.second}" })
+        assertNone("entries without keys", SettingsEffects.Entry.values().filter { table[it].isNullOrEmpty() }.map { it.name })
+        println("T12: APPLY keys ${applyRows.size}, entries ${table.size}")
     }
 
     @Test
