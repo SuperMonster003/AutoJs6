@@ -48,6 +48,6 @@ object FmtBytesModule {
     fun loose(source: Any?, vararg args: Any?): String = format("fmt.bytes.loose", source, args, ByteUnits.Mode.LOOSE)
 
     private fun format(function: String, source: Any?, args: Array<out Any?>, mode: ByteUnits.Mode): String =
-        ByteUnits.string(ByteUnits.request(function, arrayOf(source, *args), mode))
+        ByteUnits.string(ByteUnits.request(function, source, args, mode))
 
 }

@@ -322,7 +322,7 @@ class PureLogicModulesTest {
                 "s13n.color('red') === s13n.color('#F00')" to "true",
                 "s13n.color('#FB663399') === s13n.color(0xFB663399)" to "true",
                 "s13n.color('red')" to "-65536",
-                "s13n.color(0xFF0000)" to "-65536",
+                "s13n.color(0xFF0000)" to "16711680",
                 "s13n.color(Color('orange')) === s13n.color('orange')" to "true",
                 "s13n.color(Color('orange').toHex()) === s13n.color('orange')" to "true",
                 "s13n.color('no-such-color')" to "throws RangeError",

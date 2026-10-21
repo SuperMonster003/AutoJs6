@@ -109,7 +109,7 @@ class MimeModuleDifferentialTest {
                 "Object.getOwnPropertyDescriptor(mime('text/plain'), 'type').writable",
                 js = "true",
                 kt = "false",
-                reason = "documented: the JsMime fields are READONLY (api/mime.md, the d.ts declares readonly fields); the obsolete module " +
+                reason = "documented: the JsMime fields are READONLY (api/mime.md; the d.ts class still declares plain public fields); the obsolete module " +
                         "assigned them with Object.assign, the current Kotlin module returned final Java fields",
             ),
             DifferentialCases.KnownDifference(

@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.Wrapper
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -43,17 +44,16 @@ internal object ByteUnits {
 
     private const val DEFAULT_FROM_UNIT = "B"
     private const val DEFAULT_FRACTION_DIGITS = 2.0
-    private const val DEFAULT_AUTO_CARRY_THRESHOLD = 1024.0
 
     private val BI_IEC = BigInteger.valueOf(IEC_DIV)
     private val BI_SI = BigInteger.valueOf(SI_DIV)
     private val POW_IEC = Array(UNITS.length + 1) { i -> BI_IEC.pow(i) }
     private val POW_SI = Array(UNITS.length + 1) { i -> BI_SI.pow(i) }
+    private val DEFAULT_THRESHOLD = BigDecimal.valueOf(IEC_DIV)
     private val MAX_SAFE = BigDecimal.valueOf(9_007_199_254_740_991L)
     private val MIN_SAFE = MAX_SAFE.negate()
 
     private val SOURCE_TEXT = Regex("^(\\d+(?:\\.\\d+)?)\\s*([A-Za-z]*)$")
-    private val IEC_INFIX = Regex("I(?=B$)")
     private val TRAILING_ZEROS = Regex("(\\.\\d*?)0+$")
 
     /** `cvt.bytes(...)` / `fmt.bytes(...)` (strict by `options.strict`), or the forced modes `.strict(...)` / `.loose(...)`. */
@@ -78,16 +78,18 @@ internal object ByteUnits {
      * `(source, toUnit, options | fractionDigits | useIecIdentifier)`, `(source, fromUnit, toUnit)` and
      * `(source, fromUnit, toUnit, options | fractionDigits | useIecIdentifier)` of `cvt.bytes` / `fmt.bytes`: the last
      * argument decides by its type, `options.fromUnit` / `options.toUnit` take precedence over the positional units, and
-     * a boolean is `useIecIdentifier` (only `fmt` reads it). Trailing `undefined` arguments count as omitted (T4; the
-     * generated rest parameter keeps them).
+     * a boolean is `useIecIdentifier` (only `fmt` reads it). [rest] holds the arguments after the source; trailing
+     * `undefined` arguments count as omitted (T4; the generated rest parameter keeps them). The arguments are read in
+     * place, without copying, which keeps the failing calls at the cost of Rhino's own errors (R2).
      */
-    fun request(function: String, all: Array<out Any?>, mode: Mode): Request {
-        val args = Array<Any?>(ScriptArgs.count(all, 1)) { all[it] }
-        if (args.isEmpty() || args.size > 4) throw ScriptArgs.arityError(function, 1, 4, args.size)
-        val source = args[0]
+    fun request(function: String, source: Any?, rest: Array<out Any?>, mode: Mode): Request {
+        var n = rest.size
+        while (n > 0 && Undefined.isUndefined(rest[n - 1])) n--
+        val size = n + 1
+        if (size > 4) throw ScriptArgs.arityError(function, 1, 4, size)
         val positional = mode == Mode.STRICT
-        if (args.size == 1) return Request(function, source, strict = positional)
-        val last = args.last()
+        if (n == 0) return Request(function, source, strict = positional)
+        val last = rest[n - 1]
         return when (kindOf(last)) {
             Kind.OPTIONS -> {
                 val options = last as Scriptable
@@ -95,8 +97,8 @@ internal object ByteUnits {
                 Request(
                     function = function,
                     source = source,
-                    fromUnit = option("fromUnit") ?: args.getOrNull(1).takeIf { args.size == 4 },
-                    toUnit = option("toUnit") ?: args.getOrNull(args.size - 2).takeIf { args.size >= 3 },
+                    fromUnit = option("fromUnit") ?: rest[0].takeIf { size == 4 },
+                    toUnit = option("toUnit") ?: if (size >= 3) rest[size - 3] else null,
                     fractionDigits = option("fractionDigits"),
                     autoCarryThreshold = option("autoCarryThreshold"),
                     strict = strictOf(function, mode, option("strict")),
@@ -105,22 +107,22 @@ internal object ByteUnits {
                     trimTrailingZero = option("trimTrailingZero"),
                 )
             }
-            Kind.STRING -> when (args.size) {
+            Kind.STRING -> when (size) {
                 2 -> Request(function, source, toUnit = last, strict = positional)
-                3 -> Request(function, source, fromUnit = args[1], toUnit = last, strict = positional)
+                3 -> Request(function, source, fromUnit = rest[0], toUnit = last, strict = positional)
                 else -> throw lastArgumentError(function, last, "number / boolean / Object")
             }
-            Kind.BOOLEAN -> when (args.size) {
+            Kind.BOOLEAN -> when (size) {
                 2 -> Request(function, source, useIecIdentifier = last, strict = positional)
-                3 -> Request(function, source, toUnit = args[1], useIecIdentifier = last, strict = positional)
-                else -> Request(function, source, fromUnit = args[1], toUnit = args[2], useIecIdentifier = last, strict = positional)
+                3 -> Request(function, source, toUnit = rest[0], useIecIdentifier = last, strict = positional)
+                else -> Request(function, source, fromUnit = rest[0], toUnit = rest[1], useIecIdentifier = last, strict = positional)
             }
-            Kind.NUMBER -> when (args.size) {
+            Kind.NUMBER -> when (size) {
                 2 -> Request(function, source, fractionDigits = last, strict = positional)
-                3 -> Request(function, source, toUnit = args[1], fractionDigits = last, strict = positional)
-                else -> Request(function, source, fromUnit = args[1], toUnit = args[2], fractionDigits = last, strict = positional)
+                3 -> Request(function, source, toUnit = rest[0], fractionDigits = last, strict = positional)
+                else -> Request(function, source, fromUnit = rest[0], toUnit = rest[1], fractionDigits = last, strict = positional)
             }
-            Kind.OTHER -> throw lastArgumentError(function, last, if (args.size == 4) "number / boolean / Object" else "string / number / boolean / Object")
+            Kind.OTHER -> throw lastArgumentError(function, last, if (size == 4) "number / boolean / Object" else "string / number / boolean / Object")
         }
     }
 
@@ -201,7 +203,12 @@ internal object ByteUnits {
         }
     }
 
+    /**
+     * Validates the source first, so that the most common failing call (a negative or malformed source) costs no more
+     * than its own check and error (R2).
+     */
     private fun resolve(r: Request): Resolved {
+        val (value, fromUnit) = sourceOf(r)
         val toUnitText = textOf(r.toUnit, AUTO)
         val toUnit = normalize(toUnitText, r.strict).ifEmpty { AUTO }
         val fractionDigits = numberOption(r.function, "fractionDigits", r.fractionDigits, DEFAULT_FRACTION_DIGITS).also {
@@ -211,10 +218,10 @@ internal object ByteUnits {
         if (!ScriptArgs.isNullish(r.autoCarryThreshold) && !toUnit.equals(AUTO, ignoreCase = true)) {
             throw typeError(r.function, ScriptMessages.argumentCannotBe("autoCarryThreshold", ScriptArgs.describe(r.autoCarryThreshold)))
         }
-        val threshold = numberOption(r.function, "autoCarryThreshold", r.autoCarryThreshold, DEFAULT_AUTO_CARRY_THRESHOLD).also {
+        val threshold = if (ScriptArgs.isNullish(r.autoCarryThreshold)) DEFAULT_THRESHOLD else numberOption(r.function, "autoCarryThreshold", r.autoCarryThreshold, 0.0).let {
             if (it <= 0) throw rangeError(r.function, ScriptMessages.argumentPositive("autoCarryThreshold", numberText(it)))
-        }.let { BigDecimal.valueOf(it) }
-        val (value, fromUnit) = sourceOf(r)
+            BigDecimal.valueOf(it)
+        }
         val coreRaw = fromUnit.removeSuffix("B")
         val iec = r.strict && coreRaw.endsWith("I")
         val core = if (iec) coreRaw.removeSuffix("I") else coreRaw
@@ -300,7 +307,12 @@ internal object ByteUnits {
         if (ScriptArgs.isNullish(value)) default else RhinoScriptRuntime.toString(if (value is Wrapper) value.unwrap() else value)
 
     /** Strict mode keeps the letters (`KiB`), loose mode upper-cases them and reads `KiB` as `KB`. */
-    private fun normalize(unit: String, strict: Boolean): String = if (strict) unit.trim() else unit.trim().uppercase().replace(IEC_INFIX, "")
+    private fun normalize(unit: String, strict: Boolean): String {
+        val trimmed = unit.trim()
+        if (strict) return trimmed
+        val upper = trimmed.uppercase()
+        return if (upper.endsWith("IB")) upper.substring(0, upper.length - 2) + "B" else upper
+    }
 
     /**
      * A finite number option (numbers and numeric strings, as other numeric parameters, T4). The documentation requires a

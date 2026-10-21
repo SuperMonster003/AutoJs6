@@ -28,15 +28,15 @@ import org.opencv.core.Point as OpencvPoint
  * Deviations of the current module fixed here (ROADMAP appendix E): `time` took a `TimeUnit` unit for an options object
  * and failed with ClassCastException (only plain objects are options now, as in the obsolete module); the second
  * coordinate of `point(x, y)` is truncated like the first one and like the obsolete module (the current module rounded
- * it); `bytes` returns an integer as documented (the target `B` ignored the fraction digits); a runtime-built string
- * (ConsString) is a string for `throwable`. Argument errors are TypeError / RangeError (D10), surplus arguments a
+ * it); `bytes` returns an integer as documented (the target `B` ignored the fraction digits). Argument errors are
+ * TypeError / RangeError (D10), surplus arguments a
  * TypeError (appendix C Q7). Color conversion needs `android.graphics.Color`, so on the JVM only the paths failing
  * before the conversion are covered (appendix E); the conversion goes through `ColorUtils` as in the current module, and
  * a `Color` object of the colors module is still the `augment` package's `ColorNativeObject` until colors migrate (P2.3).
  *
  * zh-CN: 新脚本模块层上的 s13n 模块 (P2.2): 把颜色, 可抛异常, 坐标点, 时间值与字节数标准化. 修正的现有模块偏差 (附录 E): time 把 TimeUnit 单位当作选项对象,
  * 以 ClassCastException 失败 (现在只有普通对象是选项, 与旧 JS 相同); point(x, y) 的第二个坐标与第一个一样截断取整 (与旧 JS 相同, 现有模块为四舍五入);
- * bytes 按文档返回整数 (目标单位 B 时原先忽略小数位数); 运行时拼接的字符串 (ConsString) 对 throwable 也是字符串. 参数错误为 TypeError / RangeError (D10),
+ * bytes 按文档返回整数 (目标单位 B 时原先忽略小数位数). 参数错误为 TypeError / RangeError (D10),
  * 多余参数为 TypeError (附录 C Q7). 颜色转换需要 android.graphics.Color, JVM 上只覆盖转换前就失败的路径 (附录 E); 转换与现有模块一样经 ColorUtils, colors 迁移
  * (P2.3) 之前 colors 模块的 Color 对象仍是 augment 包的 ColorNativeObject.
  */

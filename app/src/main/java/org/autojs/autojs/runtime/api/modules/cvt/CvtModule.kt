@@ -47,6 +47,6 @@ object CvtBytesModule {
     fun loose(source: Any?, vararg args: Any?): Any = convert("cvt.bytes.loose", source, args, ByteUnits.Mode.LOOSE)
 
     private fun convert(function: String, source: Any?, args: Array<out Any?>, mode: ByteUnits.Mode): Any =
-        ByteUnits.number(ByteUnits.request(function, arrayOf(source, *args), mode))
+        ByteUnits.number(ByteUnits.request(function, source, args, mode))
 
 }
