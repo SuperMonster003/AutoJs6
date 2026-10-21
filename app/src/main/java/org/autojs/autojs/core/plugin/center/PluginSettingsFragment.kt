@@ -109,6 +109,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunDeviceAudioGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDialogsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunAndroidObjectsGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunMailControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunEpubControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunSpeechControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTtsControlGrantPreference: ThemeColorSwitchPreference? = null
@@ -272,6 +273,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDeviceAudioGrantPreference = findPreference("plugin_bun_device_audio_grant")
         bunDialogsControlGrantPreference = findPreference("plugin_bun_dialogs_control_grant")
         bunAndroidObjectsGrantPreference = findPreference("plugin_bun_android_objects_grant")
+        bunMailControlGrantPreference = findPreference("plugin_bun_mail_control_grant")
         bunEpubControlGrantPreference = findPreference("plugin_bun_epub_control_grant")
         bunSpeechControlGrantPreference = findPreference("plugin_bun_speech_control_grant")
         bunTtsControlGrantPreference = findPreference("plugin_bun_tts_control_grant")
@@ -487,6 +489,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setAndroidObjectsGranted(requireContext(), value == true)
             true
         }
+        bunMailControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setMailControlGranted(requireContext(), value == true)
+            true
+        }
         bunEpubControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setEpubControlGranted(requireContext(), value == true)
             true
@@ -610,6 +616,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDeviceAudioGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceAudioGranted(requireContext())
         bunDialogsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDialogsControlGranted(requireContext())
         bunAndroidObjectsGrantPreference?.isChecked = BunHostCapabilityGrants.isAndroidObjectsGranted(requireContext())
+        bunMailControlGrantPreference?.isChecked = BunHostCapabilityGrants.isMailControlGranted(requireContext())
         bunEpubControlGrantPreference?.isChecked = BunHostCapabilityGrants.isEpubControlGranted(requireContext())
         bunSpeechControlGrantPreference?.isChecked = BunHostCapabilityGrants.isSpeechControlGranted(requireContext())
         bunTtsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTtsControlGranted(requireContext())

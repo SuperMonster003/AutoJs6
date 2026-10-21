@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">Allow access to mail accounts, sending and receiving, attachments and mailbox watches through the mail plugin.</string>
+    <string name="text_bun_mail_control_grant">Bun mail accounts and messages</string>
+</resources>

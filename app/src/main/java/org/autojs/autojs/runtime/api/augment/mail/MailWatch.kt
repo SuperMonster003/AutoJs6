@@ -183,35 +183,38 @@ class MailWatch internal constructor(
      * members are JVM-public and reachable through reflection, so every transition lives here.
      * zh-CN: 不暴露给 Rhino 的传输侧能力: Kotlin `internal` 成员在 JVM 上是 public 且可经反射到达, 因此每个状态变更都在这里.
      */
-    internal class Controller internal constructor(val watch: MailWatch) {
+    internal class Controller internal constructor(val watch: MailWatch) : MailWatchTarget {
 
         constructor(dispatcher: MailAsyncDispatcher, bridges: ScriptBridges, folder: String, initialMode: String?, onTerminal: (() -> Unit)? = null) :
             this(MailWatch(dispatcher, bridges, folder, initialMode, onTerminal))
 
-        val isClosed: Boolean
+        override val currentMode: String?
+            get() = watch.mode
+
+        override val isClosed: Boolean
             get() = watch.isClosed
 
         /** Binds `stop()`; runs [action] at once when the watch closed already. zh-CN: 绑定 `stop()`; 监听已关闭时立即运行 [action]. */
-        fun bindStop(action: () -> Unit): Controller = apply { watch.bindStop(action) }
+        override fun bindStop(action: () -> Unit): Controller = apply { watch.bindStop(action) }
 
-        fun generation(generation: Long): Controller = apply { watch.currentGeneration = generation }
+        override fun generation(generation: Long): Controller = apply { watch.currentGeneration = generation }
 
         /** The mode the plugin reported when the watch opened; no event. zh-CN: 监听打开时插件报告的模式; 不发事件. */
-        fun initialMode(mode: String?): Controller = apply { watch.currentMode = mode }
+        override fun initialMode(mode: String?): Controller = apply { watch.currentMode = mode }
 
-        fun message(plain: Any?, decorate: (Any?) -> Any? = { it }): Boolean = watch.message(plain, decorate)
+        override fun message(plain: Any?, decorate: (Any?) -> Any?): Boolean = watch.message(plain, decorate)
 
-        fun mode(mode: String): Boolean = watch.mode(mode)
+        override fun mode(mode: String): Boolean = watch.mode(mode)
 
-        fun resync(reason: String): Boolean = watch.resync(reason)
+        override fun resync(reason: String): Boolean = watch.resync(reason)
 
-        fun error(error: MailError, convert: (MailError) -> Any? = { it }): Boolean = watch.error(error, convert)
+        override fun error(error: MailError, convert: (MailError) -> Any?): Boolean = watch.error(error, convert)
 
-        fun close(reason: String): Boolean = watch.close(reason)
+        override fun close(reason: String): Boolean = watch.close(reason)
 
-        fun fail(error: MailError, reason: String, convert: (MailError) -> Any? = { it }): Boolean = watch.fail(error, convert, reason)
+        override fun fail(error: MailError, reason: String, convert: (MailError) -> Any?): Boolean = watch.fail(error, convert, reason)
 
-        fun cancelSilently(): Boolean = watch.cancelSilently()
+        override fun cancelSilently(): Boolean = watch.cancelSilently()
     }
 
     companion object {

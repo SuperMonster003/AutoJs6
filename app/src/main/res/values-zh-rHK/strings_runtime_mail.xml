@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">允許透過郵件插件存取帳戶, 收發郵件, 處理附件及監聽郵箱.</string>
+    <string name="text_bun_mail_control_grant">Bun 郵件帳戶與訊息</string>
+</resources>

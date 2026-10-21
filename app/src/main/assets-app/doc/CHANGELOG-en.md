@@ -14,6 +14,7 @@
 * `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
 * `Hint` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
 * `Hint` Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results
+* `Feature` Node.js/Bun/Worker: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup
 * `Feature` Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)
 * `Feature` Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)
 * `Feature` Permission wizard, for selecting permissions from the home drawer and requesting them in sequence, with built-in "Standard"/"Minimal"/"All" profiles and custom profiles; granted permissions can be hidden through the menu (entry: Setup wizard/the button in the home drawer's "Permissions" group heading)
@@ -323,6 +324,7 @@
 * `Fix` Node.js ESM imports fail when a host module exports a reserved name such as java.new
 * `Fix` Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization
 * `Fix` tts.engines lists installed engines even when initialization of the default engine fails
+* `Fix` Mail attachment download progress no longer resets to zero when debug output is enabled
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

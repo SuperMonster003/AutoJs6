@@ -205,6 +205,10 @@ object RemoteApkBuildRequestPreparer {
                 if("moe.shizuku.manager.permission.API_V23" in shellManifest.androidPermissions)remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + NodeJsPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
                 if (!shellManifest.enforced || org.autojs.autojs.engine.NodeBridgePermissionManifest.missingCapabilities(
+                        shellManifest.permissions, listOf(org.autojs.autojs.engine.NodeBridgePermissionManifest.MAIL)).isEmpty()) {
+                    remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.mail.api.MailActions.PACKAGED_PERMISSION).distinct())
+                }
+                if (!shellManifest.enforced || org.autojs.autojs.engine.NodeBridgePermissionManifest.missingCapabilities(
                         shellManifest.permissions, listOf(org.autojs.autojs.engine.NodeBridgePermissionManifest.EPUB)).isEmpty()) {
                     remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.epub.api.EpubActions.PACKAGED_PERMISSION).distinct())
                 }
@@ -223,6 +227,9 @@ object RemoteApkBuildRequestPreparer {
                 if ("notifications.post" in projectConfig.bunConfig?.hostCapabilities.orEmpty()) remoteConfig.setPermissions((remoteConfig.permissions + "android.permission.POST_NOTIFICATIONS").distinct())
                 if("shell.shizuku" in projectConfig.bunConfig?.hostCapabilities.orEmpty())remoteConfig.setPermissions((remoteConfig.permissions+"moe.shizuku.manager.permission.API_V23").distinct())
                 remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.bun.runtime.api.BunPluginActions.PACKAGED_RUNTIME_PERMISSION).distinct())
+                if (org.autojs.autojs.engine.NodeBridgePermissionManifest.MAIL in deviceCapabilities) {
+                    remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.mail.api.MailActions.PACKAGED_PERMISSION).distinct())
+                }
                 if (org.autojs.autojs.engine.NodeBridgePermissionManifest.EPUB in deviceCapabilities) {
                     remoteConfig.setPermissions((remoteConfig.permissions + org.autojs.plugin.epub.api.EpubActions.PACKAGED_PERMISSION).distinct())
                 }

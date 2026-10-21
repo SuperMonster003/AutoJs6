@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mail_control_grant">메일 플러그인을 통한 계정 접근, 메일 송수신, 첨부 파일 처리 및 메일함 감시를 허용합니다.</string>
+    <string name="text_bun_mail_control_grant">Bun 메일 계정 및 메시지</string>
+</resources>

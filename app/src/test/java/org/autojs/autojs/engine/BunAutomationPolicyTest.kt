@@ -24,7 +24,7 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(163,BunAutomationBridge.methods.values.sumOf{it.size})
+        assertEquals(169,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -39,6 +39,14 @@ class BunAutomationPolicyTest {
         assertEquals(listOf("sensors"),BunAutomationBridge.nodeCapabilities(listOf(Grants.SENSORS_CONTROL)))
         for (method in BunAutomationBridge.methods.getValue(Grants.SENSORS_CONTROL))
             assertEquals(listOf("sensors"),NodeBridgePermissionManifest.requiredCapabilitiesFor("sensors",method))
+    }
+
+    @Test fun mailGrantMapsOnlyToMailAndCoversEveryTransportMethod() {
+        assertEquals(listOf("mail"), BunAutomationBridge.nodeCapabilities(listOf(Grants.MAIL_CONTROL)))
+        assertEquals(RuntimeMailBridge.methods, BunAutomationBridge.methods[Grants.MAIL_CONTROL])
+        assertEquals(listOf("mail.control"), Grants.validatePackagedCapabilities(listOf("mail.control")))
+        for (method in RuntimeMailBridge.methods)
+            assertEquals(listOf("mail"), NodeBridgePermissionManifest.requiredCapabilitiesFor("mail", method))
     }
 
 }
