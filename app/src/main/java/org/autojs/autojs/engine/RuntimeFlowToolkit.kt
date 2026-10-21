@@ -116,6 +116,7 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
         service()
         return if (name == "clickBounds") {
             require(args.all { it is Number && it.toDouble().isFinite() && it.toDouble() in Int.MIN_VALUE.toDouble()..Int.MAX_VALUE.toDouble() }) { "clickBounds offsets must be finite coordinates" }
+            if (!node.value.refresh()) throw FlowError.InvalidTarget(name, reason = "stale")
             val x = (args.getOrNull(0) as? Number)?.toInt() ?: 0
             val y = (args.getOrNull(1) as? Number)?.toInt() ?: 0
             actions.tap(node.centerX() + x, node.centerY() + y)

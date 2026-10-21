@@ -43,21 +43,25 @@ internal class RuntimeFlowNodes(private val check: () -> Unit, private val rootP
         if (root.value.windowId != snapshot.getInt("windowId")) throw FlowError.InvalidTarget("target", reason = "window changed")
         val identity = listOf("packageName", "className", "id", "text", "desc", "depth", "indexInParent", "bounds")
         identity.forEach { require(snapshot.has(it)) { "Incomplete Flow node snapshot: $it" } }
+        fun matches(value: RuntimeFlowNode): Boolean {
+            val now = RuntimeFlowQuery.snapshot(value.value)
+            return identity.all { key -> if (key == "bounds") {
+                listOf("left", "top", "right", "bottom").all { coordinate ->
+                    now.getJSONObject(key).getInt(coordinate) == snapshot.getJSONObject(key).getInt(coordinate)
+                }
+            } else now.get(key).toString() == snapshot.get(key).toString() }
+        }
         val filter = object : org.autojs.autojs.core.automator.filter.Filter {
             override fun filter(node: UiNode<*>): Boolean {
                 check()
-                val value = node as RuntimeFlowNode
-                val now = RuntimeFlowQuery.snapshot(value.value)
-                return identity.all { key -> if (key == "bounds") {
-                    listOf("left", "top", "right", "bottom").all { coordinate ->
-                        now.getJSONObject(key).getInt(coordinate) == snapshot.getJSONObject(key).getInt(coordinate)
-                    }
-                } else now.get(key).toString() == snapshot.get(key).toString() }
+                return matches(node as RuntimeFlowNode)
             }
         }
-        val matches = DFS.search(root, filter, limit = 2, lifecycle = traversal)
-        if (matches.size != 1) throw FlowError.InvalidTarget("target", reason = if (matches.isEmpty()) "stale snapshot" else "ambiguous snapshot")
-        return matches.single()
+        val candidates = DFS.search(root, filter, limit = 2, lifecycle = traversal)
+        if (candidates.size != 1) throw FlowError.InvalidTarget("target", reason = if (candidates.isEmpty()) "stale snapshot" else "ambiguous snapshot")
+        return candidates.single().also {
+            if (!it.value.refresh() || !matches(it)) throw FlowError.InvalidTarget("target", reason = "stale snapshot")
+        }
     }
     override fun close() {
         val released = Collections.newSetFromMap(IdentityHashMap<Any, Boolean>())

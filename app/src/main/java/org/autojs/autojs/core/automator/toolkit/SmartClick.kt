@@ -104,6 +104,8 @@ class SmartClick<N : UiNode<N>> internal constructor(private val kit: Toolkit<N>
     }
 
     private fun tap(node: N, options: Options, step: String, root: N?, selector: String?): Outcome<N> {
+        // A cached accessibility rectangle can still describe an entering/moving window.
+        if (!kit.bindings.refresh(node)) throw FlowError.InvalidTarget(step, selector, "stale")
         val x = node.centerX() + options.offsetX + options.humanize.offsetX(kit.random)
         val y = node.centerY() + options.offsetY + options.humanize.offsetY(kit.random)
         if (kit.actions.tap(x, y)) return verify(Outcome(Method.GESTURE, node), options, step, root, selector)
