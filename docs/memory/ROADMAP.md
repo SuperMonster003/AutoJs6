@@ -254,7 +254,13 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 
 - [ ] P4.1 (宿主) `RuntimeResourceScope` (T6) 落地: `closeableManager` 并入; `ScriptRuntime.onExit()` 改为 "scope 逆序释放 + 未迁移模块保留原调用", 逐模块迁移 threads / timers / loopers / floaty / images / events / sensors / media / ui / shell / websocket / compose / mail / installer / epub / gallery / terminal / speech / ai / tts; 释放顺序与现有顺序一致 (附录 B 顺序表); 未回收项复查写入 `MemoryDiagnostics`. 证据: 门禁全矩阵不倒退, JVM 单测 (登记顺序, 释放异常隔离, 重复释放幂等).
 - [ ] P4.2 (宿主) 静态注册表规范化 (T7, 附录 B): `LooperHelper` (若 P1.1 未彻底), `FloatyService.windows`, `AccessibilityService` companion 总线按 owner id 清理并有计数, `AndroidClassLoader.mDexClassLoaders` 按脚本卸载或弱引用, `ScriptEngineService` 全局监听器 (`ProjectArchive` 等改为执行级监听器或成对注销), H7 / H8 清单中按脚本创建的接收器与绑定服务改经 scope 登记. 证据: 每项一条子项, 门禁场景与引用链.
-- [ ] P4.3 (测试) `StaticReferenceGuardTest` (T8) 进入全量 `:app:testAppDebugUnitTest`; 白名单与理由; 与 P0.6 的 `static_audit.py` 共用解析规则 (python 生成清单, Kotlin 测试校验). 证据: 测试类 + 全量单测 0 失败.
+- [x] P4.3 (测试) `StaticReferenceGuardTest` (T8) 进入全量 `:app:testAppDebugUnitTest`; 白名单与理由; 与 P0.6 的 `static_audit.py` 共用解析规则 (python 生成清单, Kotlin 测试校验). 证据: 测试类 + 全量单测 0 失败.
+  - 证据 (E0, JVM, 2026-10-21): `89397bcf8`. 测试类 `app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt` 8 例 (字段未登记, 注册调用文件未登记, 过期行, 理由与说明有效, ASCII, manual 行的声明仍在, 白名单生成列与扫描器逐行一致, 小样例上的规则), 扫描器 `StaticReferenceScanner.kt` (同目录, 全树 2728 个文件约 8 s). 全量 `:app:testAppDebugUnitTest` 5167 例 (26 跳过), 本类 8 例全过; 唯一失败是 augment 会话未提交的新测试 `runtime/api/modules/ScriptModuleShapesTest.proxyModuleObject` (其在途文件 `ScriptProxyObject.kt` 等, 与本条无关, 已登记看板). HEAD 与工作区的守卫行相同 (112 / 112, 他人在途改动不影响白名单).
+  - 白名单 `app/src/test/resources/memory/static-reference-whitelist.txt` 119 行, 格式 `kind | 路径 | 名称 | 明细 | 理由 | 说明`, 理由取值与登记方法写在文件头部: `field` 70 (process 35, table 14, weak 11, p4.2 8, page 1, exempt 1), `call` 42 (paired 20, process 11, p4.2 4, owner 3, page 2, exempt 2), `manual` 7 (附录 B.1 中扫描看不到的项: `AccessibilityService` 的 eventBus / keyBus / gestureBus (p4.2) 与 defaultBridge (owner), `ScriptEngineManager.mGlobalVariableMap` (process), `ScriptExecutionObserver.mScriptExecutionListeners` (p4.2, H6), `AndroidClassLoader.mDexClassLoaders` (p4.4)). 理由为 `p4.2` 的 16 行即 P4.2 的待处置清单, 处置后删行或改理由.
+  - 共用规则的方式: 两份实现 + 入库清单比对. Kotlin 测试自己扫描源码 (CI 与本机全量单测不需要 Python; 只读入库清单的话, 新增引用而忘了重新生成清单会漏过); 白名单前四列由 `py -3.12 -I tools/memory/static_audit.py --guard` 生成并入库 (保留已有理由, 新键写 `TODO`, `--check` 只检查是否过期), `scannerAgreesWithStaticAudit` 逐行比对两边的输出, 证明规则一致 (当前 112 行全同). 白名单放在测试资源文件而不是 T8 原文所说的测试类内, 因为生成列由 Python 维护. 命令与流程写在 `tools/memory/README.md`.
+  - 规则相对 P0.6: Kotlin 属性无类型声明时, 新增按带类型参数的集合工厂 (`mutableListOf<T>()` 等 8 个) 推断类型 (多出 2 个注册表: `ExplorerActionOutputPipeSessions.sessions`, `FloatingControllerManager.mWindows`); 曾考虑把类型含 Handler / Listener / Callback 等的单值可变属性纳入, 实测多出 112 项 (主线程 Handler, 线程池, 单例实例), 噪声过大未采用. 局限: 文本扫描, 只看类型声明与构造调用, 进程级单例的实例字段只能写 `manual` 行.
+  - 反例: 临时加 `runtime/StaticGuardProbe.kt` (`object` 内 `var lastRuntime: ScriptRuntime?` 与 `val listeners = mutableListOf<Runnable>()`), 守卫 8 例中 2 例失败: `everyProcessLevelFieldIsWhitelisted` 报 "runtime/StaticGuardProbe.kt:5  StaticGuardProbe.lastRuntime  (kotlin object; strong; ScriptRuntime; type ScriptRuntime?)" 与 ":6 StaticGuardProbe.listeners (kotlin object; registry; -; type MutableList<Runnable>)" 并给出登记命令, `scannerAgreesWithStaticAudit` 报这两行 "only in the scanner"; 探针随即删除.
+  - 新登记附录 C Q42 (Web.kt / RuntimeViewComponents 的 WebView 无门禁覆盖, 白名单先行标 p4.2).
 - [ ] P4.4 (宿主 / fork) H3 / H4: Rhino 侧 Context 计数在全部场景回零 (`withRhinoContext` 兜底路径配对 exit, 线程池线程退出时 exit, 主线程 Context 的归属); 生成类加载器按顶层作用域创建 (作用域回收即可卸载), `runtime.loadDex` / `loadJar` 的加载器随 runtime 释放; 确需改 fork 时按 D9 / T11 并在附录 D 记录. 证据: S8 两种模式转绿, Context 度量回零, hprof 中 `Class` 实例数不随次数增长.
 - [ ] P4.5 (审计) 非脚本路径的 UI 泄漏: LeakCanary 开启下人工走一遍主界面 (抽屉, 文件管理器, 编辑器 + 文档面板, 插件中心, 设置各页, 日志页, 任务列表), 每条 LeakCanary 报告一条子项修复 (H6 / H9 / H10 的 UI 侧); 证据: LeakCanary 文本 (复制自其界面) 与修后无报告的截图. 这一条由维护者或 Explore 子会话做, 不走门禁.
 
@@ -339,6 +345,8 @@ P3 后 (P3.5, 2026-10-21, 宿主 debug versionCode 5741, 构建见 P3.5): 主表
 
 ### B.1 进程级静态注册表
 
+P4.3 起本表与 B.2 的机器可校验版本是源码守卫白名单 `app/src/test/resources/memory/static-reference-whitelist.txt` (`StaticReferenceGuardTest`, 每行一个进程级字段 / 注册调用文件 / 本表中扫描看不到的项, 带理由); 理由为 `p4.2` 的行就是待 P4.2 处置的项, 处置后删行 (字段已改弱引用或已移除时重新运行 `static_audit.py --guard` 会自动删去) 或改理由 (例如按 owner id 清理并有门禁覆盖后改为 `owner`).
+
 | 注册表 | 键 / 值 | 现状 | 规范 (T7) 处置 | 阶段 |
 | --- | --- | --- | --- | --- |
 | `core/looper/LooperHelper.sLoopers` | Thread -> Looper (强) | 子线程不移除 (H1) | 线程退出 finally 移除 + 弱引用键; P1.1 已改为键值都弱引用 (`a2ee7eb03`) | P1.1 |
@@ -421,6 +429,7 @@ images.cancelPendingQuantizations -> console.onRuntimeExit -> CoreWebSocket.onEx
 | Q8 | `memory.dumpHeap` 在 release 非 debug 下是否允许 (隐私: hprof 含脚本变量) | P5.1 | 只在开发者选项 "允许脚本导出 hprof" 开启时允许 |
 | Q40 | (P5.1 登记) 按 T9 + Q8 实现为 "debug 构建始终允许 dumpHeap, release 构建看开关", 因此新开关 "允许脚本导出 hprof" 在 debug 构建中显示但不起作用 (摘要已注明 "debug 版本始终允许"). 可选: (a) 保持; (b) 开关只在 release 构建显示; (c) debug 构建也受开关控制 (与 release 一致, 但 debug 包的日常调试多一步) | P5.2 之前 (文档按 (a) 写) | (a) |
 | Q41 | (P5.1 登记, 协调 augment 路线图) `memory` 是 augment 设备表面基线 (`surface-XQ-AT72-5586.txt`) 之后新增的顶层模块: 已加在 `ScriptModuleLayer.ORDER` 末尾, `ScriptModuleOrderTest` 用 `ADDED_AFTER_BASELINE` 名单放行, `registrations.json` 只追加了它的条目 (未整体重新生成, 其他条目的行号漂移未处理). augment 路线图需在第三批迁移 (P4) 时把它列入, 并在下次重录表面基线时去掉名单 | augment P4 / 下次重录基线 | 由 augment 调度会话登记 |
+| Q42 | (P4.3 登记) 源码守卫白名单把两处没有门禁场景覆盖的 WebView 创建标为 `p4.2`: `runtime/api/augment/web/Web.kt` 的 `web.newInjectableWebView` (WebView 持有脚本全局作用域) 与 `engine/RuntimeViewComponents.kt` 的 `RuntimeWebView` (Node bridge UI 会话), 宿主都从不 `destroy()` (附录 B.2 H10 的后续). 选项: (a) 纳入 P4.1 / P4.2: 创建时经 RuntimeResourceScope 登记, runtime 结束时销毁未挂到界面上的 WebView, 并补门禁场景 (推荐, 白名单已按此先行标 `p4.2`, 未改代码); (b) 不在 P4 处理, 白名单改标 `page` / `owner` 并写明理由, 留给 P4.5 或第二期 (Q5 的 Node 桥接). 改选 (b) 的返工: 改白名单两行的理由 | P4.2 | (a), 已先行 (仅白名单标记) |
 
 ---
 
@@ -468,7 +477,8 @@ fork 位置 `D:/idea-projects/Rhino-For-AutoJs6` (基线 `90693268c`, 2026-10-20
 | `app/src/main/java/org/autojs/autojs/ui/settings/memory/` (`MemoryDiagnosticsActivity`, `MemoryDiagnosticsFragment`, `MemoryDiagnosticsPreference`, `MemoryDiagnosticsText`), `res/layout/activity_memory_diagnostics.xml` | 诊断页面与开发者选项入口 | P2.2 |
 | `app/src/test/java/org/autojs/autojs/runtime/memory/MemoryDiagnosticsCoreTest.kt` | 诊断核心的 JVM 单测 | P2.1 |
 | `app/src/main/java/org/autojs/autojs/runtime/resource/RuntimeResourceScope.kt` | 统一所有权 | P4.1 |
-| `app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt` | 源码守卫 | P4.3 |
+| `app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt`, `StaticReferenceScanner.kt` | 源码守卫与其扫描器 (`static_audit.py --guard` 规则的 Kotlin 移植) | P4.3 |
+| `app/src/test/resources/memory/static-reference-whitelist.txt` | 源码守卫白名单 (前四列由 `static_audit.py --guard` 生成, 理由手写) | P4.3 |
 | `app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt`, `MemoryScriptPlatform.kt` | 脚本 API `memory` 模块与其宿主平台接口 | P5.1 |
 | `app/src/test/java/org/autojs/autojs/runtime/api/augment/memory/MemoryModuleTest.kt` | 脚本 API 的 JVM 单测 | P5.1 |
 | `tools/memory/device_memory_api.py` | 脚本 API 真机核对 (`--sample` 运行样例) | P5.1 / P5.2 |
