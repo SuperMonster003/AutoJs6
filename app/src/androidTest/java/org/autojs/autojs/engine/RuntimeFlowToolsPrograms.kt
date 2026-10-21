@@ -77,12 +77,12 @@ internal object RuntimeFlowToolsPrograms {
             const toast=flow.waitForToast(async event=>{await flow.sleep(1);return event.text===marker;},15000);await toast.ready;
             await signal.set({text:'FLOW_TOAST '+marker});
             const toastValue=await toast;check(toastValue.text===marker&&toastValue.packageName!==pkg,'real external toast');
-            check(await flow.backToApp(pkg,{maxTimes:3,delay:300})===pkg,'back from owned Toast activity');
+            check(await flow.backToApp(pkg,{maxTimes:1,delay:1500,interval:50})===pkg,'back from owned Toast activity');
             await flow.waitForVisible(targetSelector,{timeout:10000,stableFor:20});
             await pause(30);check(clicks>=10&&climbs===1,'real view callbacks');
             if(EXERCISE_LAUNCH)check((await flow.launchAndWait(pkg,{bringToFront:true,timeout:5000})).launched===true,'actual host launch');
             return {checks:checks.length,labels:checks,clicks,climbs,collectionItems:collected.length,collectionCharacters:collected.join('').length,notification,toast:toastValue,packageName:pkg,channel};
         }catch(error){console.error('FLOW_TOOLS_CHECKS '+JSON.stringify(checks));throw error;}
-        finally{await flow.dispose();await notifications.cancel(9401).catch(()=>{});await window.close();await root.dispose();}
+        finally{await flow.dispose();await notifications.cancel(9401).catch(()=>{});try{await window.close();}finally{await root.dispose();}}
     """.trimIndent().replace("EXERCISE_LAUNCH", launch.toString())
 }

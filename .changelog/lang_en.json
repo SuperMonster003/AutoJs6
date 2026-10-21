@@ -177,6 +177,7 @@
         "Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events"
       ],
       "fix": [
+        "Bun UI event waits blocking other host calls and causing asynchronous Flow verification to time out",
         "Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions",
         "Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures",
         "Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules",

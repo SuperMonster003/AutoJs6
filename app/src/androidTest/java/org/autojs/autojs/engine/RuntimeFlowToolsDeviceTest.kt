@@ -56,7 +56,7 @@ class RuntimeFlowToolsDeviceTest {
     internal fun injectToast(marker: String) {
         require(marker.startsWith("EVENTS_FLOW_"))
         context.startActivity(Intent().setClassName(instrumentation.context.packageName, RuntimeEventsToastFixtureActivity::class.java.name)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("ownedText", marker))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra("ownedText", marker).putExtra("holdUntilBack", true))
     }
     private fun program(mode: String, body: String): String {
         if (mode == "bun") return "const flow=host.flow,ui=host.ui,notifications=host.notifications;" + body

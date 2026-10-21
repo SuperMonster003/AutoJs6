@@ -196,6 +196,7 @@
 * `新增` Node.js/Bun/Worker 的文字转语音接口, 支持引擎与音色查询, 朗读, 静音任务, 音频文件合成和任务事件
 * `新增` Node.js/Bun/Worker 的 speech 语音识别与模型管理接口, 支持 WAV/PCM, 听写与唤醒会话, 模型安装/导入, 语音合成和取消清理
 * `新增` Node.js/Bun/Worker: EPUB 书籍读取, 资源导出, 搜索及带事件的阅读器会话
+* `修复` Bun 界面事件等待阻塞其他宿主调用并导致 Flow 异步验证超时的问题
 * `修复` runtime.loadJar 方法无法动态加载较高 Java 版本编译的 class 文件的问题
 * `修复` Android 7.x 调用 runtime.loadDex 方法时可能损坏 DEX 缓存并导致类加载失败的问题
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题

@@ -177,6 +177,7 @@
         "Node.js/Bun/Worker: Lectura de EPUB, exportación de recursos, búsqueda y sesiones del lector con eventos"
       ],
       "fix": [
+        "Las esperas de eventos de interfaz de Bun bloqueaban otras llamadas al anfitrión y agotaban el tiempo de verificación asíncrona de Flow",
         "runtime.loadJar no podía cargar dinámicamente archivos class compilados con versiones superiores de Java",
         "En Android 7.x, runtime.loadDex podía dañar la caché DEX y provocar errores de carga de clases",
         "Comportamiento anómalo de algunos scripts debido a incompatibilidades en ámbitos, conversión de parámetros y tratamiento de resultados de Rhino y los módulos integrados",
