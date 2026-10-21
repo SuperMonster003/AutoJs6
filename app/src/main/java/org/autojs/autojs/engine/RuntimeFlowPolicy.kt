@@ -8,10 +8,12 @@ internal object RuntimeFlowPolicy {
     fun capabilities(method: String, argsJson: String): List<String> = buildList {
         add(NodeBridgePermissionManifest.ACCESSIBILITY)
         if (method != "start") return@buildList
-        val request = JSONArray(argsJson)
-        val operation = request.getString(2)
-        val args = request.getJSONArray(3)
-        val options = request.getJSONObject(4)
+        // The capability catalogue asks for a method's base requirements without call arguments.
+        // Malformed calls are rejected by the dispatcher before creating a tool job.
+        val request = runCatching { JSONArray(argsJson) }.getOrNull() ?: return@buildList
+        val operation = request.optString(2)
+        val args = request.optJSONArray(3) ?: return@buildList
+        val options = request.optJSONObject(4) ?: return@buildList
         fun smart(o: JSONObject) { if (o.opt("gestureFallback") != false) add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE) }
         when (operation) {
             "smartClick", "clickIfExists", "clickAny" -> smart(options)
@@ -24,11 +26,11 @@ internal object RuntimeFlowPolicy {
             "waitForToast" -> addAll(listOf(NodeBridgePermissionManifest.EVENTS, NodeBridgePermissionManifest.EVENTS_TOAST))
             "waitForNotification" -> addAll(listOf(NodeBridgePermissionManifest.EVENTS, NodeBridgePermissionManifest.EVENTS_NOTIFICATION))
             "nodeAction" -> {
-                val action = args.getString(1)
+                val action = args.optString(1)
                 if (action == "clickBounds") add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE)
-                if (action in setOf("copy", "cut", "paste") || action == "performAction" && args.getJSONArray(2).optInt(0) in setOf(16384, 32768, 65536)) add(NodeBridgePermissionManifest.CLIPBOARD)
+                if (action in setOf("copy", "cut", "paste") || action == "performAction" && args.optJSONArray(2)?.optInt(0) in setOf(16384, 32768, 65536)) add(NodeBridgePermissionManifest.CLIPBOARD)
             }
-            "globalAction" -> if (args.getString(0) !in setOf("back", "home", "recents")) add(NodeBridgePermissionManifest.KEYS)
+            "globalAction" -> if (args.optString(0) !in setOf("back", "home", "recents")) add(NodeBridgePermissionManifest.KEYS)
         }
     }.distinct()
 }

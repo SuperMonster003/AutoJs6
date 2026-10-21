@@ -34,10 +34,16 @@ class RuntimeFlowToolsDeviceTest {
         val component = context.packageName + "/org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
         try {
             prefs.edit().apply { keys.forEach { putBoolean(it, overrides[it] ?: true) } }.commit()
-            val others = saved.orEmpty().split(':').filter { it.isNotBlank() && it != "null" && it != component }
-            services(others.joinToString(":")); SystemClock.sleep(500); services((others + component).joinToString(":"))
-            assertTrue(AccessibilityService.waitForOperational(30000))
-            harness.withFixture { action() }
+            harness.withFixture {
+                val others = saved.orEmpty().split(':').filter { it.isNotBlank() && it != "null" && it != component }
+                for (attempt in 1..2) {
+                    if (AccessibilityService.registry.isOperational) break
+                    services(others.joinToString(":")); SystemClock.sleep(750); services((others + component).joinToString(":"))
+                    if (AccessibilityService.waitForOperational(30000)) break
+                }
+                assertTrue("Host accessibility service is operational with the fixture in front", AccessibilityService.registry.isOperational)
+                action()
+            }
         } finally {
             services(saved)
             shell(if (enabled == null) "settings delete secure accessibility_enabled" else "settings put secure accessibility_enabled $enabled")

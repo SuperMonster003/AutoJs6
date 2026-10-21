@@ -7,6 +7,10 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class RuntimeFlowPolicyTest {
+    @Test fun capabilityCatalogueCanInspectFlowMethodsWithoutCallArguments() {
+        for (method in RuntimeFlowBridge.methods) assertEquals(listOf("accessibility"), NodeBridgePermissionManifest.requiredCapabilitiesFor("flow", method))
+        assertNotNull(NodeCapabilityBrokerPolicy.declarationFor("flow", "start"))
+    }
     private fun caps(name: String, args: String = "[]", options: String = "{}") = NodeBridgePermissionManifest.requiredCapabilitiesFor("flow", "start",
         JSONArray().put("client").put("operation").put(name).put(JSONArray(args)).put(JSONObject(options)).put(10000).toString()).toSet()
 
