@@ -75,6 +75,9 @@ class RuntimeAiPackagedDeviceTest {
                 File(root, "project.json").writeText(config.toJson(false))
                 val built = RemoteApkBuildClient.buildBlocking(context, config, output, AtomicBoolean(false), RemoteApkBuildClient.ProgressListener {}, ApkBuilderTemplatePluginIds.PACKAGE_NAME)
                 assertTrue("APK Builder $mode: ${built.errors}", built.isSuccess)
+                val manifest = requireNotNull(context.packageManager.getPackageArchiveInfo(output.path, android.content.pm.PackageManager.GET_PERMISSIONS))
+                assertTrue("AI capability must reach the generated Android manifest",
+                    manifest.requestedPermissions.orEmpty().contains("org.autojs.permission.AI_RUNTIME"))
                 File(output.parentFile, output.name + ".json").writeText(JSONObject().put("packageName", packageName(mode))
                     .put("runtimeVersionCode", BuildConfig.VERSION_CODE).put("sha256", RuntimeWebMediaProof.sha256(output.readBytes())).toString(2))
             } finally { check(root.parentFile == context.cacheDir.canonicalFile); root.deleteRecursively() }
