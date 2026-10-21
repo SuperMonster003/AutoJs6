@@ -7,6 +7,7 @@ import android.util.SparseArray
 import org.autojs.autojs.concurrent.VolatileBox
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.mozilla.javascript.Callable
+import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
 import java.lang.ref.WeakReference
 import kotlin.math.max
@@ -164,14 +165,11 @@ class Timer {
     private fun callFunction(callback: Callable, thisArg: Any?, args: Array<*>) {
         val scriptRuntime = mRuntime.get()
             ?: throw IllegalStateException("call function after runtime released")
-        try {
+        runCallback({ mLooper == Looper.getMainLooper() }, { scriptRuntime.exit(it) }) {
             if (callback is Scriptable && callback.parentScope == null) {
                 callback.parentScope = scriptRuntime.topLevelScope
             }
             scriptRuntime.bridges.call(callback, thisArg, args)
-        } catch (e: Exception) {
-            if (mLooper != Looper.getMainLooper()) throw e
-            scriptRuntime.exit(e)
         }
     }
 
@@ -209,7 +207,7 @@ class Timer {
                 running = true
             }
             try {
-                callback.run()
+                runPosted(callback)
             } finally {
                 synchronized(this@Timer) {
                     mPendingCallbacks.remove(this)
@@ -236,6 +234,44 @@ class Timer {
 
         @JvmStatic
         fun getTimerId(n: Double) = (n.toLong() shr 32).toInt()
+
+        /**
+         * Runs a script callback of setTimeout / setInterval / setImmediate. A [ContinuationPending] ends the callback but is not
+         * its failure: a coroutine resumed in it (continuation.delay, or any Promise.await, as promise.js settles through
+         * setImmediate) suspended again, and the continuation is captured until it is resumed. It formerly exited the script on
+         * the main looper (UI mode) and cancelled the callback of setInterval elsewhere (docs/augment/ROADMAP.md Q23).
+         * Other exceptions exit the script on the main looper and propagate elsewhere, as before.
+         *
+         * zh-CN: 运行 setTimeout / setInterval / setImmediate 的脚本回调. ContinuationPending 会结束回调, 但不是回调的失败: 回调中恢复的协程
+         * (continuation.delay, 以及任何 Promise.await, 因为 promise.js 经 setImmediate 结算) 再次挂起, 协程已被捕获, 等待之后恢复. 原先它在主 Looper 上 (UI 模式)
+         * 会结束脚本, 在其他 Looper 上会使 setInterval 的回调被取消 (docs/augment/ROADMAP.md Q23). 其他异常照旧: 在主 Looper 上结束脚本, 其他情况继续抛出.
+         */
+        internal fun runCallback(isOnMainLooper: () -> Boolean, exit: (Throwable) -> Unit, call: () -> Unit) {
+            try {
+                call()
+            } catch (_: ContinuationPending) {
+                /* Suspended again, see above. */
+            } catch (e: Exception) {
+                if (!isOnMainLooper()) throw e
+                exit(e)
+            }
+        }
+
+        /**
+         * Runs a runnable posted through [postDelayed]. A [ContinuationPending] does not reach the looper, for the same reason as
+         * in [runCallback]: `Continuation.resumeWith` posts the resume when it is called on another thread, and a coroutine
+         * suspending again there formerly crashed the app on the main looper (docs/augment/ROADMAP.md Q23).
+         *
+         * zh-CN: 运行经 [postDelayed] 投递的 Runnable. 与 [runCallback] 同理, ContinuationPending 不会抛到 Looper: 在其他线程调用 `Continuation.resumeWith` 时
+         * 会投递恢复操作, 协程在其中再次挂起时, 原先会在主 Looper 上使应用崩溃 (docs/augment/ROADMAP.md Q23).
+         */
+        internal fun runPosted(r: Runnable) {
+            try {
+                r.run()
+            } catch (_: ContinuationPending) {
+                /* Suspended again, see above. */
+            }
+        }
 
         private fun currentOrPreparedLooper(): Looper {
             LooperHelper.prepare()

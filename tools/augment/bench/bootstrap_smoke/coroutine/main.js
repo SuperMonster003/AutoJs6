@@ -20,4 +20,17 @@ threads.start(function () {
     cont.resume('from thread');
 });
 console.log(MARK + ' create.await ' + cont.await());
+// Appendix C Q23: a coroutine resumed by a setInterval callback suspends again; the interval formerly was cancelled then.
+var next = null, ticks = 0, got = [];
+var interval = setInterval(function () {
+    var c = next;
+    next = null;
+    if (c) c.resume(++ticks);
+}, 50);
+for (var i = 0; i < 3; i++) {
+    next = continuation.create();
+    got.push(next.await());
+}
+clearInterval(interval);
+console.log(MARK + ' interval ' + got.join());
 console.log(MARK + ' done');
