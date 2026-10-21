@@ -27,8 +27,10 @@ internal object BindingGenerator {
         appendLine("import $RUNTIME_PACKAGE.ScriptFunctionSpec")
         appendLine("import $RUNTIME_PACKAGE.ScriptJavaClassSpec")
         appendLine("import $RUNTIME_PACKAGE.ScriptModuleBinding")
+        appendLine("import $RUNTIME_PACKAGE.ScriptModuleInstallation")
         appendLine("import $RUNTIME_PACKAGE.ScriptModuleSpec")
         appendLine("import org.mozilla.javascript.Context")
+        appendLine("import org.mozilla.javascript.Scriptable")
         appendLine("import org.mozilla.javascript.VarScope")
         appendLine()
         appendLine("/** Binding of script module ${lit(model.name)} declared by [$m] (${model.source}). */")
@@ -45,6 +47,18 @@ internal object BindingGenerator {
         appendSet(model)
         appendLine()
         appendLine("    override fun prototype(module: $m): Any? = ${model.prototype?.let { "module.${id(it.kotlinName)}${if (it.isFunction) "()" else ""}" } ?: "null"}")
+        model.install?.let {
+            appendLine()
+            appendLine("    override fun install(module: $m, installation: ScriptModuleInstallation) = module.${id(it.kotlinName)}(installation)")
+        }
+        model.proxyGet?.let {
+            appendLine()
+            appendLine("    override fun proxyGet(module: $m, members: Scriptable, name: String): Any? = module.${id(it.kotlinName)}(members, name)")
+        }
+        model.proxySet?.let {
+            appendLine()
+            appendLine("    override fun proxySet(module: $m, members: Scriptable, name: String, value: Any?) = module.${id(it.kotlinName)}(members, name, value)")
+        }
         // Messages name the member by its script path, as the module mounter does for Java exceptions (appendix C Q19):
         // `cvt.bytes.strict`, `util.inspect` for an invocable sub-module, `new Color`.
         model.functions.forEach { group ->
@@ -87,6 +101,11 @@ internal object BindingGenerator {
         appendLine("        javaClasses = ${list(model.javaClasses.map { j ->
             "ScriptJavaClassSpec(name = ${lit(j.name)}, type = ${j.type}::class.java, onModule = ${j.placement.onModule}, onGlobal = ${j.placement.onGlobal}, attributes = ${j.attributes})"
         }, "        ")},")
+        appendLine("        assign = ${model.assign},")
+        appendLine("        proxy = ${model.proxy},")
+        appendLine("        hasInstall = ${model.install != null},")
+        appendLine("        hasProxyGet = ${model.proxyGet != null},")
+        appendLine("        hasProxySet = ${model.proxySet != null},")
         appendLine("    )")
     }
 

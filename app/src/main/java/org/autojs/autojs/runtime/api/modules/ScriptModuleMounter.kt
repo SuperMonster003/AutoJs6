@@ -39,11 +39,21 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * classes, then sub-modules; P2.1 corrected the first ones, which came after the functions), global members in the
  * same order.
  *
+ * Shapes added in P3.0 (appendix C Q17): an assign module (`@ScriptModule(assign = true)`, global / legacy) has no
+ * module object, only global members, and its prototypes go on the global object at install; a [ScriptNameLookup]
+ * prototype becomes a [ScriptLookupPrototype] (the Java classes of global); a proxy module (`proxy = true`, ui /
+ * console) exposes a [ScriptProxyObject] reading from the members object; a `@ScriptInstall` function runs at install
+ * with a [ScriptModuleInstallation] (lazy names computed at run time, actions once the members are built, links to
+ * other modules); host code reaches sub-modules and instances by path ([moduleObject], [instance]).
+ *
  * zh-CN: 把注册表中的模块挂载到一个脚本运行时的全局对象上 (D4 / T3). 顶层模块按需挂载: 模块对象的每个名称 (名称, 别名, `$` 形式) 与它挂到全局对象上的
  * 每个成员都定义为带最终特性的惰性数据属性 (LazyDataSlot), Object.keys(global), hasOwnProperty, in 与属性描述符与急切挂载时相同, 首次读取其中任一个时
  * 构建模块对象 (此后所有名称指向同一对象). 全局 getter 是只创建 Kotlin 模块实例的访问器式属性. eager 模块在安装时构建. 子模块随父模块对象一起构建并挂载,
  * 顺序按其路径 (`父.名称`) 在 [order] 中的位置 (ScriptModuleLayer.ORDER, 附录 C Q8; 未列出的子模块按注册表顺序排在后面), 其全局成员随顶层模块一起安装. 模块对象内: 函数的别名共用一个函数对象, @ScriptPrototype 的原型 (列表即原型链) 在前, emitter = true 时事件发射器对象
- * 位于链尾, FUNCTIONAL 的 toString 附加隐藏标记 `__augmented_custom_to_string__`, 成员抛出的一切经 ScriptErrorMapper 处理.
+ * 位于链尾, FUNCTIONAL 的 toString 附加隐藏标记 `__augmented_custom_to_string__`, 成员抛出的一切经 ScriptErrorMapper 处理. P3.0 增加的形态 (附录 C Q17): assign 模块
+ * (global / legacy) 没有模块对象, 只有全局成员, 原型在安装时设到全局对象上; ScriptNameLookup 原型成为 ScriptLookupPrototype (global 的 Java 类); 代理模块 (ui / console)
+ * 对外是从成员对象读取的 ScriptProxyObject; @ScriptInstall 函数在安装时以 ScriptModuleInstallation 运行 (运行时计算的惰性名称, 成员构建后的动作, 与其他模块的关联);
+ * 宿主代码按路径取子模块对象与实例 ([moduleObject], [instance]).
  */
 class ScriptModuleMounter @JvmOverloads constructor(
     private val registry: ScriptModuleRegistry,
@@ -106,10 +116,17 @@ class ScriptModuleMounter @JvmOverloads constructor(
         registry.bindings.filter { it.spec.parent == null }.forEach(::install)
     }
 
+    /**
+     * Installs a top-level module: an assign module's prototypes go on the global object, the `@ScriptInstall` functions
+     * of the module and its sub-modules run, an eager module is built, then the global members and the names (none for
+     * an assign module) are defined.
+     */
     fun install(binding: ScriptModuleBinding<*>) {
         require(binding.spec.parent == null) { "${binding.spec.className} is a sub-module; install its top-level module" }
         val node = Node(binding, null)
         installed[binding.spec.name] = node
+        if (node.spec.assign) node.applyPrototypes(global, node.instance())
+        (listOf(node) + node.descendants()).forEach { it.runInstall() }
         if (node.spec.eager) node.moduleObject()
         node.installGlobalMembers()
         node.spec.names.forEach { name ->
@@ -122,11 +139,27 @@ class ScriptModuleMounter @JvmOverloads constructor(
         node.descendants().forEach { it.installGlobalMembers() }
     }
 
-    /** The module object of the installed top-level module [name], built if needed (for host code holding a module). */
-    fun moduleObject(name: String): ScriptableObject? = installed[name]?.moduleObject()
+    /**
+     * The module object of the installed module at [path] (`autojs`, or a sub-module as `ocr.mlkit`), built if needed,
+     * for host code holding a module; null when it is not installed or is an assign module (which has no module object).
+     */
+    fun moduleObject(path: String): ScriptableObject? = node(path)?.takeUnless { it.spec.assign }?.moduleObject()
+
+    /** The Kotlin instance of the installed module at [path], created if needed without building the module object. */
+    fun instance(path: String): Any? = node(path)?.instance()
 
     /** Whether the installed top-level module [name] has been built. */
     fun isBuilt(name: String): Boolean = installed[name]?.isBuilt == true
+
+    /** The debug console of the member error mapping, for [ScriptModuleInstallation]. */
+    internal val debugConsoleForHooks: ScriptErrorMapper.DebugConsole? get() = debugConsole
+
+    private fun node(path: String): Node? {
+        val parts = path.split('.')
+        var node = installed[parts[0]] ?: return null
+        for (part in parts.drop(1)) node = node.children.firstOrNull { it.spec.name == part } ?: return null
+        return node
+    }
 
     /** Extends the JavaScript built-in objects with the modules of this registry declaring `@ScriptModule(builtIn)`. */
     val builtIns: ScriptBuiltInExtender by lazy { ScriptBuiltInExtender(registry, runtime, scope, global, debugConsole) }
@@ -159,6 +192,7 @@ class ScriptModuleMounter @JvmOverloads constructor(
 
         private var building = false
         private val globalValues = HashMap<String, Any?>()
+        private var installation: ScriptModuleInstallation? = null
 
         val isBuilt get() = built != null
 
@@ -166,6 +200,15 @@ class ScriptModuleMounter @JvmOverloads constructor(
 
         fun instance(): Any = instance ?: synchronized(lock) {
             instance ?: guarded(path, topLevel) { binding.create(runtime) }.also { instance = it }
+        }
+
+        /** Runs the module's `@ScriptInstall` function with a new [ScriptModuleInstallation]. */
+        fun runInstall() {
+            if (!spec.hasInstall) return
+            val context = ScriptModuleInstallation(this@ScriptModuleMounter, path, topLevel, runtime, scope, global)
+            installation = context
+            val module = instance()
+            guarded(path, topLevel) { binding.install(module, context) }
         }
 
         /** The module object; building it builds the whole tree from the top-level module down. */
@@ -183,8 +226,10 @@ class ScriptModuleMounter @JvmOverloads constructor(
             building = true
             try {
                 val module = instance()
+                // For a proxy module this object holds the members and the proxy reads from it; an assign module's
+                // object only collects the global values (its prototypes went on the global object at install).
                 val obj = newModuleObject(module)
-                applyPrototypes(obj, module)
+                if (!spec.assign) applyPrototypes(obj, module)
                 spec.accessors.filter { !it.getter }.forEach { a ->
                     val value = guarded("$path.${a.name}", topLevel) { binding.get(module, a.id, scope) }
                     if (a.onModule) obj.defineProperty(a.name, value, a.attributes)
@@ -201,11 +246,23 @@ class ScriptModuleMounter @JvmOverloads constructor(
                     val childObject = child.build()
                     child.spec.names.forEach { name -> obj.defineProperty(name, childObject, child.spec.attributes) }
                 }
-                built = obj
-                return obj
+                installation?.builtActions?.forEach { action -> guarded(path, topLevel) { action(obj) } }
+                val exposed = if (spec.proxy) newProxyObject(module, obj) else obj
+                built = exposed
+                return exposed
             } finally {
                 building = false
             }
+        }
+
+        private fun newProxyObject(module: Any, members: ScriptableObject): ScriptProxyObject {
+            val getter = if (!spec.hasProxyGet) null else { m: Scriptable, name: String ->
+                guarded("$path.$name", topLevel) { binding.proxyGet(module, m, name) }
+            }
+            val setter = if (!spec.hasProxySet) null else { m: Scriptable, name: String, value: Any? ->
+                guarded("$path.$name", topLevel) { binding.proxySet(module, m, name, value) }
+            }
+            return ScriptProxyObject(scope, members, getter, setter)
         }
 
         private fun bindFunction(obj: ScriptableObject, module: Any, f: ScriptFunctionSpec) {
@@ -252,14 +309,23 @@ class ScriptModuleMounter @JvmOverloads constructor(
             }
         }
 
-        /** Module object -> declared prototypes (nearest first) -> emitter object -> the original prototype. */
-        private fun applyPrototypes(obj: ScriptableObject, module: Any) {
+        /**
+         * Module object (the global object for an assign module) -> declared prototypes (nearest first, a
+         * [ScriptNameLookup] as a [ScriptLookupPrototype]) -> emitter object -> the original prototype.
+         */
+        fun applyPrototypes(obj: ScriptableObject, module: Any) {
             val declared = guarded(path, topLevel) { binding.prototype(module) }
             val links = when {
                 declared == null -> emptyList()
                 declared is List<*> && declared !is Scriptable -> declared.filterNotNull()
                 else -> listOf(declared)
-            }.map { it as? Scriptable ?: RhinoScriptRuntime.toObject(scope, it) }.let { links ->
+            }.map { link ->
+                when (link) {
+                    is Scriptable -> link
+                    is ScriptNameLookup -> ScriptLookupPrototype(scope, link) { name, block -> guarded("$path.$name", topLevel, block) }
+                    else -> RhinoScriptRuntime.toObject(scope, link)
+                }
+            }.let { links ->
                 if (spec.emitter) links + emitterFactory.create(runtime, scope) else links
             }
             if (links.isEmpty()) return

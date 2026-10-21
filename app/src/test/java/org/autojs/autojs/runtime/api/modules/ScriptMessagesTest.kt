@@ -34,6 +34,8 @@ class ScriptMessagesTest {
         assertEquals("Argument \"pointA\" must have a length of 2, got 3", ScriptMessages.argumentLength("pointA", 2, 3))
         assertEquals("No integer lies within the range [1.2, 1.8]", ScriptMessages.rangeNoInteger("1.2", "1.8"))
         assertEquals("Unknown built-in object extension \"x\", expected one of Arrayx", ScriptMessages.unknownBuiltInExtension("x", "Arrayx"))
+        assertEquals("An operation is not implemented", ScriptMessages.notImplemented())
+        assertEquals("UI thread cannot be blocked. Try running sleep() in sub-thread or sub-script", ScriptMessages.resource(org.autojs.autojs6.R.string.error_function_called_in_ui_thread, "UI thread cannot be blocked. Try running %s() in sub-thread or sub-script", "sleep"))
     }
 
     @Test
@@ -53,6 +55,7 @@ class ScriptMessagesTest {
             strings.getValue("error_script_argument_must_have_length") to ScriptMessages.ARGUMENT_LENGTH,
             strings.getValue("error_script_range_has_no_integer") to ScriptMessages.RANGE_NO_INTEGER,
             strings.getValue("error_script_unknown_built_in_extension") to ScriptMessages.UNKNOWN_BUILT_IN_EXTENSION,
+            strings.getValue("error_an_operation_is_not_implemented") to ScriptMessages.NOT_IMPLEMENTED,
             plurals.getValue("error_method_only_accepts_n_arguments/one") to ScriptMessages.EXACTLY_ONE,
             plurals.getValue("error_method_only_accepts_n_arguments/other") to ScriptMessages.EXACTLY_OTHER,
             plurals.getValue("error_method_only_accepts_no_less_than_n_arguments/one") to ScriptMessages.NO_LESS_THAN_ONE,
@@ -62,7 +65,32 @@ class ScriptMessagesTest {
     }
 
     @Test
-    fun newMessagesExistInEveryLanguage() = checkEveryLanguage(*MESSAGE_STRINGS.filter { it.startsWith("error_script_") || it == "error_unknown_charset" }.toTypedArray())
+    fun newMessagesExistInEveryLanguage() = checkEveryLanguage(
+        *MESSAGE_STRINGS.filter { it.startsWith("error_script_") || it == "error_unknown_charset" || it == "error_an_operation_is_not_implemented" }.toTypedArray()
+    )
+
+    /**
+     * P3.0: every `ScriptMessages.resource(R.string.name, "fallback", ...)` in the sources of the script module layer
+     * names a resource whose default text is the fallback literal, present in every language with the same placeholders
+     * and ASCII punctuation (R4).
+     */
+    @Test
+    fun resourceFallbacksInModulesMatchTheDefaultResources() {
+        val default = resources(File(res, "values/strings.xml"))
+        // ScriptMessages.kt itself only shows the form in its documentation.
+        val calls = File("src/main/java/org/autojs/autojs/runtime/api/modules").walkTopDown().filter { it.isFile && it.extension == "kt" && it.name != "ScriptMessages.kt" }.flatMap { file ->
+            RESOURCE_CALL.findAll(file.readText()).map { Triple(file.name, it.groupValues[1], unescapeKotlin(it.groupValues[2])) }
+        }.toList()
+        val problems = calls.mapNotNull { (file, name, fallback) ->
+            when (val text = default[name]) {
+                null -> "$file: R.string.$name does not exist"
+                fallback -> null
+                else -> "$file: the fallback of R.string.$name differs from the default resource \"$text\""
+            }
+        }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
+        checkEveryLanguage(*calls.map { it.second }.distinct().toTypedArray())
+    }
 
     /** P1.3: the strings of the developer options entries follow the same rules. */
     @Test
@@ -164,6 +192,15 @@ class ScriptMessagesTest {
         }
     }
 
+    /** The value of a Kotlin string literal's body: a backslash escapes the next character (n and t are line feed and tab). */
+    private fun unescapeKotlin(body: String): String = Regex("""\\(.)""").replace(body) { m ->
+        when (val c = m.groupValues[1]) {
+            "n" -> 10.toChar().toString()
+            "t" -> 9.toChar().toString()
+            else -> c
+        }
+    }
+
     private fun placeholders(text: String) = Regex("%(\\d+\\$)?[sd]").findAll(text).map { it.value }.toList().sorted()
 
     /** `<string name="x">...</string>` entries of one file, with the Android escapes resolved. */
@@ -209,7 +246,12 @@ class ScriptMessagesTest {
             "error_script_argument_must_have_length",
             "error_script_range_has_no_integer",
             "error_script_unknown_built_in_extension",
+            // P3.0 (TODO of global).
+            "error_an_operation_is_not_implemented",
         )
+
+        /** `ScriptMessages.resource(R.string.<name>, "<fallback>"`: the resource name and the fallback literal. */
+        private val RESOURCE_CALL = Regex("""ScriptMessages\.resource\(\s*R\.string\.(\w+),\s*"((?:[^"\\]|\\.)*)"""")
         private val MESSAGE_PLURALS = listOf("error_method_only_accepts_n_arguments", "error_method_only_accepts_no_less_than_n_arguments")
 
         private const val FULL_WIDTH_PUNCTUATION = "\uFF0C\u3002\uFF1A\uFF1B\uFF01\uFF1F\uFF08\uFF09\u201C\u201D\u2018\u2019\u3001\u060C"

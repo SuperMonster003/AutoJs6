@@ -312,7 +312,7 @@ class ScriptModuleMounterTest {
         assertSame(overflow, ScriptErrorMapper.map(overflow, "m"))
         val mapped = ScriptErrorMapper.map(UnsupportedOperationException("u"), "mod.fn")
         assertTrue(mapped is ScriptCallException && mapped.method == "mod.fn" && mapped.wrappedException is UnsupportedOperationException)
-        assertEquals(listOf("eagerProbe", "numberProbe", "probe", "sample"), TestScriptModules.moduleNames)
+        assertEquals(listOf("assignProbe", "eagerProbe", "numberProbe", "plainProxy", "probe", "proxyProbe", "sample"), TestScriptModules.moduleNames)
     }
 
     /**

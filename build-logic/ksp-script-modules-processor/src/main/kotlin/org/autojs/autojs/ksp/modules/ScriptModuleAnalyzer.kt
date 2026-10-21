@@ -21,11 +21,14 @@ import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptConstruct
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
+import org.autojs.autojs.runtime.api.modules.ScriptInstall
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptJavaClass
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptProperty
 import org.autojs.autojs.runtime.api.modules.ScriptPrototype
+import org.autojs.autojs.runtime.api.modules.ScriptProxyGet
+import org.autojs.autojs.runtime.api.modules.ScriptProxySet
 
 /**
  * Turns a @ScriptModule class into a [ModuleModel], reporting every unsupported declaration as a compile error on the
@@ -48,8 +51,13 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         var construct: Overload? = null
         val accessors = mutableListOf<Accessor>()
         var prototype: Member? = null
+        var install: Member? = null
+        var proxyGet: Member? = null
+        var proxySet: Member? = null
         val scriptName = "${moduleAnnotation.string("name")}"
         val builtIn = moduleAnnotation.string("builtIn").ifEmpty { null }
+        val assign = moduleAnnotation.boolean("assign", false)
+        val proxy = moduleAnnotation.boolean("proxy", false)
 
         declaration.declarations.forEach { member ->
             when (member) {
@@ -68,6 +76,18 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
                         if (member.parameters.isNotEmpty()) error(member, "A @ScriptPrototype function takes no parameters")
                         prototype = Member(member.simpleName.asString(), isFunction = true)
                     }
+                    member.annotation(ScriptModuleNames.INSTALL)?.let {
+                        if (install != null) error(member, "At most one @ScriptInstall function per module")
+                        install = hookOf(member, "@ScriptInstall", listOf(INSTALLATION), returnsUnit = true)
+                    }
+                    member.annotation(ScriptModuleNames.PROXY_GET)?.let {
+                        if (proxyGet != null) error(member, "At most one @ScriptProxyGet function per module")
+                        proxyGet = hookOf(member, "@ScriptProxyGet", listOf(SCRIPTABLE, "kotlin.String"), returnsUnit = false)
+                    }
+                    member.annotation(ScriptModuleNames.PROXY_SET)?.let {
+                        if (proxySet != null) error(member, "At most one @ScriptProxySet function per module")
+                        proxySet = hookOf(member, "@ScriptProxySet", listOf(SCRIPTABLE, "kotlin.String", "kotlin.Any"), returnsUnit = true)
+                    }
                 }
                 is KSPropertyDeclaration -> {
                     member.annotation(ScriptModuleNames.GETTER)?.let { accessors += accessorOf(member, it, accessors.size, isGetter = true) ?: return@let }
@@ -80,7 +100,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             }
         }
 
-        val groups = functions
+        val declaredGroups = functions
             .groupBy { (function, annotation) -> annotation.string("name").ifEmpty { function.simpleName.asString() } }
             .entries
             .mapIndexed { id, (name, members) -> groupOf(id, name, scriptName, members, builtIn) }
@@ -91,7 +111,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             if ("PROTOTYPE" in a.builtIn) error(declaration, "$scriptName.${a.name}: a property cannot extend the prototype of a built-in object")
         }
 
-        val javaClasses = declaration.annotations(ScriptModuleNames.JAVA_CLASS).mapNotNull { annotation ->
+        val declaredJavaClasses = declaration.annotations(ScriptModuleNames.JAVA_CLASS).mapNotNull { annotation ->
             val type = annotation.type("type") ?: return@mapNotNull null.also { error(declaration, "@ScriptJavaClass needs a type") }
             JavaClassBinding(
                 name = annotation.string("name"),
@@ -101,12 +121,38 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             )
         }.toList()
 
-        checkDuplicateNames(declaration, groups, accessors, javaClasses)
-        checkDuplicateBuiltInNames(declaration, groups, accessors)
+        // The members of an assign module all go on the global object; they keep the default placement in the source.
+        val onGlobal = Placement(onModule = false, onGlobal = true)
+        if (assign) {
+            val placed = declaredGroups.map { it.name to it.placement } + accessors.map { it.name to it.placement } + declaredJavaClasses.map { it.name to it.placement }
+            placed.filter { (_, placement) -> placement.onGlobal }.forEach { (name, _) ->
+                error(declaration, "$scriptName.$name: every member of an assign module goes on the global object; leave global = NONE")
+            }
+        }
+        val groups = if (assign) declaredGroups.map { it.copy(placement = onGlobal) } else declaredGroups
+        val placedAccessors = if (assign) accessors.map { it.copy(placement = onGlobal) } else accessors
+        val javaClasses = if (assign) declaredJavaClasses.map { it.copy(placement = onGlobal) } else declaredJavaClasses
+
+        checkDuplicateNames(declaration, groups, placedAccessors, javaClasses)
+        checkDuplicateBuiltInNames(declaration, groups, placedAccessors)
 
         val parent = moduleAnnotation.type("parent")?.declaration?.qualifiedName?.asString()?.takeUnless { it == "kotlin.Unit" }
         if (parent == qualifiedName) error(declaration, "A script module cannot be its own parent")
         if (parent != null && moduleAnnotation.boolean("eager", false)) error(declaration, "A sub-module is built with its parent; eager applies to top-level modules only")
+        val parentDeclaration = moduleAnnotation.type("parent")?.declaration as? KSClassDeclaration
+        if (parent != null && parentDeclaration?.annotation(ScriptModuleNames.MODULE)?.boolean("assign", false) == true) {
+            error(declaration, "An assign module has no module object to hold the sub-module $scriptName")
+        }
+        if (assign) {
+            if (moduleAnnotation.strings("aliases").isNotEmpty()) error(declaration, "An assign module has no module object, so no aliases")
+            if (invoke != null || construct != null) error(declaration, "An assign module has no module object to invoke or construct")
+            if (parent != null) error(declaration, "An assign module is a top-level module")
+            if (moduleAnnotation.boolean("emitter", false)) error(declaration, "An assign module has no module object to carry an emitter")
+            if (builtIn != null) error(declaration, "An assign module cannot extend a built-in object")
+            if (proxy) error(declaration, "A module cannot be both assign and proxy")
+        }
+        if (proxy && (invoke != null || construct != null)) error(declaration, "A proxy module object cannot be invoked or constructed")
+        if (!proxy && (proxyGet != null || proxySet != null)) error(declaration, "@ScriptProxyGet / @ScriptProxySet need @ScriptModule(proxy = true)")
 
         return ModuleModel(
             qualifiedName = qualifiedName,
@@ -123,12 +169,39 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             functions = groups,
             invoke = invoke,
             construct = construct,
-            accessors = accessors,
+            accessors = placedAccessors,
             javaClasses = javaClasses,
             prototype = prototype,
             builtIn = builtIn,
             source = sourceOf(declaration),
+            assign = assign,
+            proxy = proxy,
+            install = install,
+            proxyGet = proxyGet,
+            proxySet = proxySet,
         ).takeUnless { failed }
+    }
+
+    /**
+     * A hook function (`@ScriptInstall`, `@ScriptProxyGet`, `@ScriptProxySet`): public, not suspend or generic, with
+     * exactly the parameter types [params] (qualified names; `kotlin.Any` stands for `Any?`) and a Unit result when
+     * [returnsUnit].
+     */
+    private fun hookOf(function: KSFunctionDeclaration, annotation: String, params: List<String>, returnsUnit: Boolean): Member? {
+        val display = "$annotation ${function.simpleName.asString()}"
+        when {
+            !function.isPublic() -> return error(function, "$display must be public")
+            Modifier.SUSPEND in function.modifiers -> return error(function, "$display cannot be suspend")
+            function.extensionReceiver != null -> return error(function, "$display cannot be an extension")
+            function.typeParameters.isNotEmpty() -> return error(function, "$display cannot be generic")
+        }
+        val actual = function.parameters.map { it.type.resolve().declaration.qualifiedName?.asString() }
+        if (actual != params || function.parameters.any { it.hasDefault || it.isVararg }) {
+            return error(function, "$display must take (${params.joinToString { it.substringAfterLast('.') }})")
+        }
+        val returnType = function.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: "kotlin.Unit"
+        if (returnsUnit && returnType != "kotlin.Unit") return error(function, "$display must return Unit")
+        return Member(function.simpleName.asString(), isFunction = true)
     }
 
     /**
@@ -352,6 +425,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         private const val SCRIPT_RUNTIME = "org.autojs.autojs.runtime.ScriptRuntime"
         private const val CONTEXT = "org.mozilla.javascript.Context"
         private const val VAR_SCOPE = "org.mozilla.javascript.VarScope"
+        private const val SCRIPTABLE = "org.mozilla.javascript.Scriptable"
+        private const val INSTALLATION = "org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation"
 
         private val UNSUPPORTED_KOTLIN = setOf("kotlin.Short", "kotlin.Byte", "kotlin.Char", "kotlin.Unit", "kotlin.Nothing", "kotlin.Array")
 
@@ -441,4 +516,7 @@ internal object ScriptModuleNames {
     val INVOKE = ScriptInvoke::class.qualifiedName!!
     val CONSTRUCT = ScriptConstruct::class.qualifiedName!!
     val PROTOTYPE = ScriptPrototype::class.qualifiedName!!
+    val INSTALL = ScriptInstall::class.qualifiedName!!
+    val PROXY_GET = ScriptProxyGet::class.qualifiedName!!
+    val PROXY_SET = ScriptProxySet::class.qualifiedName!!
 }

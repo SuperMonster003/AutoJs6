@@ -59,7 +59,7 @@ class ScriptModulesProcessor(
                 logger.error("Script module classes ${other.qualifiedName} and ${model.qualifiedName} would both generate ${model.bindingName}; rename one", symbol)
                 return@forEach
             }
-            modules.firstOrNull { it.parent == model.parent && it.names.intersect(model.names.toSet()).isNotEmpty() }?.let { other ->
+            modules.firstOrNull { it.parent == model.parent && (it.names.intersect(model.names.toSet()).isNotEmpty() || (it.parent == null && it.name == model.name)) }?.let { other ->
                 logger.error("Script modules ${other.qualifiedName} and ${model.qualifiedName} share a name on the same target", symbol)
                 return@forEach
             }

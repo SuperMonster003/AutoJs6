@@ -32,12 +32,21 @@ internal data class ModuleModel(
     /** The JavaScript built-in object the module extends (`@ScriptModule(builtIn)`), or null. */
     val builtIn: String?,
     val source: String,
+    /** No module object; the members go on the global object (`@ScriptModule(assign)`). */
+    val assign: Boolean = false,
+    /** The module object is a proxy without own properties (`@ScriptModule(proxy)`). */
+    val proxy: Boolean = false,
+    /** The `@ScriptInstall` function, run when the module is installed. */
+    val install: Member? = null,
+    /** The `@ScriptProxyGet` / `@ScriptProxySet` functions of a proxy module. */
+    val proxyGet: Member? = null,
+    val proxySet: Member? = null,
 ) {
     val bindingName: String get() = "${simpleName}Binding"
 
-    /** Names the module object is bound to, in declaration order. */
+    /** Names the module object is bound to, in declaration order; none for an assign module. */
     val names: List<String>
-        get() = (listOf(name) + aliases).flatMap { if (dollarPrefix) listOf(it, "\$$it") else listOf(it) }
+        get() = if (assign) emptyList() else (listOf(name) + aliases).flatMap { if (dollarPrefix) listOf(it, "\$$it") else listOf(it) }
 }
 
 /** Where a member is bound: on the module object, on the global object, or both. */

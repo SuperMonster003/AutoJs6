@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.VarScope
 
 /**
@@ -28,8 +29,20 @@ interface ScriptModuleBinding<M : Any> {
     /** Writes accessor [id] of [spec] if it is writable. */
     fun set(module: M, id: Int, value: Any?)
 
-    /** The prototype of the module object (a `List` is a chain, nearest first), or null to keep the default one. */
+    /**
+     * The prototype of the module object (a `List` is a chain, nearest first; a [ScriptNameLookup] resolves names), or
+     * null to keep the default one. For an assign module it is the prototype of the global object.
+     */
     fun prototype(module: M): Any?
+
+    /** Runs the module's `@ScriptInstall` function ([ScriptModuleSpec.hasInstall]). */
+    fun install(module: M, installation: ScriptModuleInstallation) {}
+
+    /** Reads [name] of a proxy module through its `@ScriptProxyGet` function ([ScriptModuleSpec.hasProxyGet]). */
+    fun proxyGet(module: M, members: Scriptable, name: String): Any? = Scriptable.NOT_FOUND
+
+    /** Writes [name] of a proxy module through its `@ScriptProxySet` function ([ScriptModuleSpec.hasProxySet]). */
+    fun proxySet(module: M, members: Scriptable, name: String, value: Any?) {}
 
     companion object {
         const val INVOKE = -1
@@ -51,8 +64,8 @@ interface ScriptModuleRegistry {
     /** Top-level modules sorted by name, then the sub-modules sorted by parent and name. */
     val bindings: List<ScriptModuleBinding<*>>
 
-    /** The top-level module bound to [name] (its name, an alias or a `$` form), or null. */
-    fun find(name: String): ScriptModuleBinding<*>? = bindings.firstOrNull { it.spec.parent == null && name in it.spec.names }
+    /** The top-level module bound to [name] (its name, an alias or a `$` form; an assign module by its name), or null. */
+    fun find(name: String): ScriptModuleBinding<*>? = bindings.firstOrNull { it.spec.parent == null && (it.spec.name == name || name in it.spec.names) }
 
     /** The sub-modules of the module declared by class [className]. */
     fun childrenOf(className: String): List<ScriptModuleBinding<*>> = bindings.filter { it.spec.parent == className }
@@ -89,9 +102,21 @@ class ScriptModuleSpec(
     val functions: List<ScriptFunctionSpec>,
     val accessors: List<ScriptAccessorSpec>,
     val javaClasses: List<ScriptJavaClassSpec>,
+    /** No module object: every member goes on the global object, the prototypes on the global object (`global`, `legacy`). */
+    val assign: Boolean = false,
+    /** The module object is a proxy without own properties that reads from the members object ([ScriptProxyObject]). */
+    val proxy: Boolean = false,
+    /** The module has a `@ScriptInstall` function. */
+    val hasInstall: Boolean = false,
+    /** The proxy module has a `@ScriptProxyGet` / `@ScriptProxySet` function. */
+    val hasProxyGet: Boolean = false,
+    val hasProxySet: Boolean = false,
 ) {
-    /** Every name the module object is bound to: the name and the aliases, each with its `$` form if [dollarPrefix]. */
-    val names: List<String> = (listOf(name) + aliases).flatMap { if (dollarPrefix) listOf(it, "\$$it") else listOf(it) }
+    /**
+     * Every name the module object is bound to: the name and the aliases, each with its `$` form if [dollarPrefix]; none
+     * for an assign module.
+     */
+    val names: List<String> = if (assign) emptyList() else (listOf(name) + aliases).flatMap { if (dollarPrefix) listOf(it, "\$$it") else listOf(it) }
 }
 
 class ScriptFunctionSpec(

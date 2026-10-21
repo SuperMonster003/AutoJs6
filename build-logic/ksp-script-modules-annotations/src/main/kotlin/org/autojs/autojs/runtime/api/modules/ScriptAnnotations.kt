@@ -36,6 +36,15 @@ import kotlin.reflect.KClass
  * @property builtIn the JavaScript built-in object (a global such as `Array`, `Math` or `Number`) that the "extend
  * JavaScript built-in objects" option and `jsox` extend with the members declaring [ScriptFunction.builtIn] /
  * [ScriptProperty.builtIn] (the current `JsBuildInObjectExtensible` of Arrayx / Mathx / Numberx); "" for none.
+ * @property assign the module has no module object (the current `Augmentable.assign` of global / legacy): every member
+ * is bound on the global object (members keep the default `global = NONE`), [ScriptPrototype] objects become the
+ * prototypes of the global object when the module is installed, and [name] is only the module's name in
+ * `ScriptModuleLayer.ORDER`, never a script name. An assign module has no aliases, no invoke / construct, no parent,
+ * no sub-modules, no emitter and no [builtIn].
+ * @property proxy the module object is a proxy without own properties (the current `AugmentableProxy.proxying` of ui /
+ * console): reading a name asks the [ScriptProxyGet] function, or without one looks the name up among the members
+ * (functions, properties, getters, Java classes, sub-modules and the prototypes); writing a name calls the
+ * [ScriptProxySet] function, or without one defines it on the proxy. A proxy module is not callable or constructible.
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
@@ -49,6 +58,8 @@ annotation class ScriptModule(
     val attributes: Int = ScriptAttributes.PERMANENT,
     val emitter: Boolean = false,
     val builtIn: String = "",
+    val assign: Boolean = false,
+    val proxy: Boolean = false,
 )
 
 /**
@@ -142,11 +153,45 @@ annotation class ScriptConstruct
  * Provides the prototype of the module object (a Java object such as `ScriptRuntime.util`, or a script object), read
  * once when the module object is built; the prototype's own prototype becomes the module object's original one. A
  * `List` value is a chain, nearest first (the current `augment(target, listOf(...))`, as colors with its color tables).
+ * A `ScriptNameLookup` value becomes an object without own properties that resolves names through it (the current
+ * `SimpleGetterProxy` prototypes: the Java classes of global, the constants of WebSocket). For an assign module
+ * ([ScriptModule.assign]) the chain goes on the global object, read when the module is installed.
  */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 @MustBeDocumented
 annotation class ScriptPrototype
+
+/**
+ * Runs when the module is installed on a runtime (before its names are defined and before an eager module is built),
+ * with the module instance created at that moment. The function takes one `ScriptModuleInstallation`, which defines
+ * further lazy names, registers actions run right after the module object is built and reaches other modules (for
+ * what the annotations cannot declare: names computed at run time as selector's, side effects at start-up as ui's,
+ * links between modules as `app.autojs`). At most one per module.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+@MustBeDocumented
+annotation class ScriptInstall
+
+/**
+ * Reads a name of a proxy module ([ScriptModule.proxy]): `fun get(members: Scriptable, name: String): Any?`, where
+ * `members` holds the module's members; returning `Scriptable.NOT_FOUND` makes the name undefined. Called for every
+ * name not defined on the proxy itself. At most one per module.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+@MustBeDocumented
+annotation class ScriptProxyGet
+
+/**
+ * Writes a name of a proxy module ([ScriptModule.proxy]): `fun set(members: Scriptable, name: String, value: Any?)`.
+ * At most one per module.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.BINARY)
+@MustBeDocumented
+annotation class ScriptProxySet
 
 /** Where a member is bound in addition to (or instead of) the module object. */
 enum class ScriptGlobal {

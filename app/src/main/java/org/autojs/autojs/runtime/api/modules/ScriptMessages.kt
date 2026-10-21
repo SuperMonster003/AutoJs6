@@ -81,6 +81,21 @@ object ScriptMessages {
     fun unknownBuiltInExtension(name: String, candidates: String): String =
         string(R.string.error_script_unknown_built_in_extension, UNKNOWN_BUILT_IN_EXTENSION, name, candidates)
 
+    /** "An operation is not implemented", the message of `TODO()` without a reason (P3.0, global). */
+    @JvmStatic
+    fun notImplemented(): String = string(R.string.error_an_operation_is_not_implemented, NOT_IMPLEMENTED)
+
+    /**
+     * Another message resource of the host, formatted like the messages above (P3.0: the modules of P3 reuse the
+     * messages of their current implementation). [fallback] is the text of the default `values/strings.xml`, used
+     * without an Android context; write it as a string literal right after the resource id, as in
+     * `ScriptMessages.resource(R.string.name, "Text with %s", arg)`, so that `ScriptMessagesTest` can find every such
+     * call in the sources of this package and compare the literal with the resource (and check the resource in every
+     * language).
+     */
+    @JvmStatic
+    fun resource(id: Int, fallback: String, vararg args: Any?): String = string(id, fallback, *args)
+
     private fun string(id: Int, fallback: String, vararg args: Any?): String {
         val texts = texts() ?: return format(Locale.ROOT, '0', fallback, args)
         return format(texts.locale, texts.zero, texts.string(id), args)
@@ -200,5 +215,6 @@ object ScriptMessages {
     internal const val ARGUMENT_LENGTH = "Argument \"%1\$s\" must have a length of %2\$d, got %3\$d"
     internal const val RANGE_NO_INTEGER = "No integer lies within the range [%1\$s, %2\$s]"
     internal const val UNKNOWN_BUILT_IN_EXTENSION = "Unknown built-in object extension \"%1\$s\", expected one of %2\$s"
+    internal const val NOT_IMPLEMENTED = "An operation is not implemented"
 
 }
