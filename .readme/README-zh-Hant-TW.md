@@ -362,7 +362,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * `新增` Node.js/Bun/Worker 的文字轉語音介面, 支援引擎與音色查詢, 朗讀, 靜音工作, 音訊檔案合成和工作事件
 * `新增` Node.js/Bun/Worker 的 speech 語音辨識與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理
 * `新增` Node.js/Bun/Worker: EPUB 書籍讀取, 資源匯出, 搜尋及含事件的閱讀器工作階段
-* `新增` Node.js, Bun 與 Worker 的 AI 文字生成, 串流結果, 模型目錄及持續工作階段, 支援取消與打包應用程式的 Android 存取授權
+* `新增` Node.js, Bun 與 Worker 的 AI 文字生成, 串流結果, 模型目錄及持續工作階段, 支援取消與 3-Stone AI 對打包應用程式的個別授權
 * `修復` Bun 介面事件等待阻塞其他宿主呼叫並導致 Flow 非同步驗證逾時的問題
 * `修復` runtime.loadJar 方法無法動態載入較高 Java 版本編譯的 class 檔案的問題
 * `修復` Android 7.x 呼叫 runtime.loadDex 方法時可能損壞 DEX 快取並導致類載入失敗的問題

@@ -178,7 +178,7 @@
 * `추가` Node.js/Bun/Worker의 음성 합성 API로 엔진과 음성 조회, 읽기, 무음, 오디오 파일 합성 및 작업 이벤트 지원
 * `추가` Node.js/Bun/Worker의 speech 음성 인식 및 모델 관리 API로 WAV/PCM, 받아쓰기와 호출어 세션, 모델 설치와 가져오기, 음성 합성 및 취소 시 정리 지원
 * `추가` Node.js/Bun/Worker: EPUB 도서 읽기, 리소스 내보내기, 검색 및 이벤트를 지원하는 리더 세션
-* `추가` Node.js, Bun 및 Worker의 AI 텍스트 생성, 스트리밍, 모델 목록 및 영구 세션, 취소와 패키지 앱의 Android 접근 권한 지원
+* `추가` Node.js, Bun 및 Worker의 AI 텍스트 생성, 스트리밍, 모델 목록 및 영구 세션, 취소와 3-Stone AI의 패키지 앱별 접근 승인 지원
 * `수정` Bun UI 이벤트 대기가 다른 호스트 호출을 차단하여 Flow 비동기 검증이 시간 초과되는 문제
 * `수정` runtime.loadJar가 높은 Java 버전으로 컴파일한 class 파일을 동적으로 불러오지 못하는 문제
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제

@@ -59,12 +59,21 @@ class RuntimeAiPackagedDeviceTest {
                             const before=await ai.hasAccess();
                             if(round===0||round===3){
                                 if(before)throw Error('Permission should be absent');
-                                if(round===0&&await ai.requestAccess())throw Error('Expected Android permission denial');
+                                if(round===0&&await ai.requestAccess())throw Error('Expected provider consent denial');
                                 const error=await ai.catalog().then(()=>null,e=>e);
                                 if(error?.code!=='PERMISSION_DENIED')throw Error('Unauthorized AI catalogue');
                                 await ai.close();await fetch(url+'/upload',{method:'POST',body:JSON.stringify({identity,mode:'$mode',round,before,denied:error.code})});
+                            }else if(round===4){
+                                if(!before)throw Error('Expected retained consent');
+                                const catalog=await ai.catalog();const local=catalog.targets.filter(t=>t.locality==='local'&&t.available);
+                                const target=local.find(t=>/E2B/i.test(t.displayName))||local[0];
+                                const stream=ai.stream('Write a long detailed story.',{target:target.id,backend:'cpu',maxTokens:512,timeout:120000});
+                                await stream.ready;await field.set({text:'AI core revoke ready $mode'});
+                                const error=await stream.result.then(()=>null,e=>e);
+                                const after=await ai.hasAccess();if(!error||after)throw Error('Revocation did not stop the request');
+                                await ai.close();await fetch(url+'/upload',{method:'POST',body:JSON.stringify({identity,mode:'$mode',round,before,after,revoked:error.code})});
                             }else{
-                                if(!before&&!await ai.requestAccess())throw Error('Android AI grant denied');
+                                if(!before&&!await ai.requestAccess())throw Error('AI provider consent denied');
                                 $run
                                 await fetch(url+'/upload',{method:'POST',body:JSON.stringify({identity,result,mode:'$mode',round,before})});
                             }
@@ -87,20 +96,45 @@ class RuntimeAiPackagedDeviceTest {
     @Test fun installedApplicationsEnforcePermissionAndKeepNativeCallsAcrossRelaunch() = harness.withFixture(setup = { it.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }) {
         RuntimeWebFixtureServer().use { server ->
             fun shell(command: String) = ParcelFileDescriptor.AutoCloseInputStream(harness.automation.executeShellCommand(command)).use { it.readBytes() }
+            val provider = "io.github.supermonster003.autojs6.plugin.threestoneai"
+            fun revoke(packageName: String) {
+                context.startActivity(Intent().setClassName(provider, "$provider.provider.RuntimeAccessManagementActivity")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                controls.await("AI access manager", 20000) {
+                    controls.find { it.viewIdResourceName == "$provider:id/ai_runtime_access_root" } != null
+                }
+                var row = controls.find { it.text?.toString() == packageName }
+                if (row != null) {
+                    while (row != null && !row!!.isClickable) row = row!!.parent
+                    assertTrue("AI access row is clickable", row?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true)
+                    controls.await("AI access removal dialog", 10000) {
+                        controls.find { it.packageName?.toString() == provider && it.viewIdResourceName == "android:id/button1" } != null
+                    }
+                    assertTrue(controls.find { it.packageName?.toString() == provider && it.viewIdResourceName == "android:id/button1" }
+                        ?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true)
+                    controls.await("AI grant removed", 10000) { controls.find { it.text?.toString() == packageName } == null }
+                }
+                harness.automation.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
+            }
             val proofs = JSONArray()
             for (mode in listOf("bun", "worker")) {
                 val pkg = packageName(mode)
                 try {
-                    for (round in 0..3) {
+                    for (round in listOf(0, 1, 2, 4, 3)) {
                         shell("am force-stop $pkg")
-                        if (round == 0 || round == 3) shell("pm revoke $pkg org.autojs.permission.AI_RUNTIME")
+                        if (round == 0 || round == 3) revoke(pkg)
                         context.startActivity(requireNotNull(context.packageManager.getLaunchIntentForPackage(pkg)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                         fun receipt() = server.uploads.map { JSONObject(it.toString(Charsets.UTF_8)) }.firstOrNull { it.optString("mode") == mode && it.optInt("round") == round }
+                        var revocationPerformed = false
                         fun wait(label: String, condition: () -> Boolean) = controls.await(label, 900000) {
                             controls.find { it.text?.toString()?.startsWith("AI core failure ") == true }?.let { fail(it.text.toString()) }
                             if (round <= 1) {
-                                val token = if (round == 0) "permission_deny_button" else "permission_allow_button"
-                                controls.find { it.viewIdResourceName?.endsWith(":id/$token") == true }?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                                val token = if (round == 0) "android:id/button2" else "android:id/button1"
+                                controls.find { it.packageName?.toString() == provider && it.viewIdResourceName == token }
+                                    ?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                            }
+                            if (round == 4 && !revocationPerformed && controls.labelled("AI core revoke ready $mode") != null) {
+                                revocationPerformed = true; revoke(pkg)
                             }
                             condition()
                         }
@@ -113,7 +147,10 @@ class RuntimeAiPackagedDeviceTest {
                         assertEquals(pkg, row.getJSONObject("identity").getString("packageName"))
                         assertEquals(BuildConfig.VERSION_CODE, row.getJSONObject("identity").getInt("runtimeVersionCode"))
                         if (round == 0 || round == 3) assertEquals("PERMISSION_DENIED", row.getString("denied"))
-                        else {
+                        else if (round == 4) {
+                            assertTrue(row.getBoolean("before")); assertFalse(row.getBoolean("after"))
+                            assertTrue(row.getString("revoked").isNotBlank()); assertTrue(revocationPerformed)
+                        } else {
                             assertEquals(round == 2, row.getBoolean("before"))
                             for (key in if (mode == "bun") listOf("main") else listOf("main", "worker")) {
                                 val result = row.getJSONObject("result").getJSONObject(key)

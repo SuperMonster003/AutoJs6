@@ -176,7 +176,7 @@
         "Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events",
         "Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup",
         "Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events",
-        "AI text generation, streaming, model catalog and persistent sessions for Node.js, Bun and Workers, with cancellation and Android authorization for packaged apps"
+        "AI text generation, streaming, model catalog and persistent sessions for Node.js, Bun and Workers, with cancellation and per-app consent in 3-Stone AI for packaged apps"
       ],
       "fix": [
         "Bun UI event waits blocking other host calls and causing asynchronous Flow verification to time out",

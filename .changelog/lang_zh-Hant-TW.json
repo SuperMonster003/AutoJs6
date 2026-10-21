@@ -176,7 +176,7 @@
         "Node.js/Bun/Worker 的文字轉語音介面, 支援引擎與音色查詢, 朗讀, 靜音工作, 音訊檔案合成和工作事件",
         "Node.js/Bun/Worker 的 speech 語音辨識與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理",
         "Node.js/Bun/Worker: EPUB 書籍讀取, 資源匯出, 搜尋及含事件的閱讀器工作階段",
-        "Node.js, Bun 與 Worker 的 AI 文字生成, 串流結果, 模型目錄及持續工作階段, 支援取消與打包應用程式的 Android 存取授權"
+        "Node.js, Bun 與 Worker 的 AI 文字生成, 串流結果, 模型目錄及持續工作階段, 支援取消與 3-Stone AI 對打包應用程式的個別授權"
       ],
       "fix": [
         "Bun 介面事件等待阻塞其他宿主呼叫並導致 Flow 非同步驗證逾時的問題",

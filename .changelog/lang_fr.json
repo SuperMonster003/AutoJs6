@@ -176,7 +176,7 @@
         "API de synthèse vocale pour Node.js, Bun et Workers avec requêtes des moteurs et voix, lecture, silence, fichiers audio et événements des tâches",
         "API speech de reconnaissance vocale et de gestion des modèles pour Node.js, Bun et Workers avec WAV/PCM, dictée et activation vocale, installation/importation, synthèse et annulation",
         "Node.js/Bun/Worker: Lecture EPUB, export des ressources, recherche et sessions du lecteur avec événements",
-        "Génération de texte IA, flux, catalogue de modèles et sessions persistantes pour Node.js, Bun et Workers, avec annulation et autorisation Android des applications générées"
+        "Génération de texte IA, flux, catalogue de modèles et sessions persistantes pour Node.js, Bun et Workers, avec annulation et consentement par application dans 3-Stone AI"
       ],
       "fix": [
         "Attentes des événements UI Bun bloquant les autres appels hôte et provoquant une expiration de la vérification asynchrone Flow",

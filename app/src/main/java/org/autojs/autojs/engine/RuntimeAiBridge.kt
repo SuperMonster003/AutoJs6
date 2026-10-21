@@ -87,8 +87,7 @@ internal class RuntimeAiBridge(private val context: Context) : Closeable {
                 if (hasAccess()) { task.finish("resolve", true); return }
                 Handler(Looper.getMainLooper()).post {
                     if (!task.isDone()) try {
-                        val action = RuntimeWebActionActivity.mediaPermissions(context, "3-Stone AI",
-                            arrayOf(ThreeStoneAiOfficialPlugin.RUNTIME_PERMISSION)) { task.finish("resolve", it) }
+                        val action = RuntimeWebActionActivity.aiAccess(context) { task.finish("resolve", it && hasAccess()) }
                         task.attach(object : AiPluginAskHandle {
                             override fun cancel(): Boolean { Handler(Looper.getMainLooper()).post { action.close() }; return true }
                             override fun close() { Handler(Looper.getMainLooper()).post { action.close() } }
@@ -303,10 +302,19 @@ internal class RuntimeAiBridge(private val context: Context) : Closeable {
         }
     }
 
-    private fun hasAccess() = context.packageName == HOST_PACKAGE ||
-        context.checkSelfPermission(ThreeStoneAiOfficialPlugin.RUNTIME_PERMISSION) == PackageManager.PERMISSION_GRANTED
+    private fun hasAccess(): Boolean {
+        if (context.packageName == HOST_PACKAGE) return true
+        if (!runCatching { org.autojs.autojs.core.plugin.center.PluginTrustManager.resolveTrustInfo(context,
+                ThreeStoneAiOfficialPlugin.PACKAGE_NAME).isOfficial }.getOrDefault(false)) return false
+        val identity = android.os.Binder.clearCallingIdentity()
+        return try {
+            context.contentResolver.call(android.net.Uri.parse("content://" + ThreeStoneAiOfficialPlugin.ACCESS_AUTHORITY),
+                "hasAccess", context.packageName, null)?.getBoolean("authorized", false) == true
+        } catch (_: Exception) { false }
+        finally { android.os.Binder.restoreCallingIdentity(identity) }
+    }
 
-    private fun requireAccess() { if (!hasAccess()) throw failure("PERMISSION_DENIED", "Call ai.requestAccess() to authorize this application's AI access") }
+    private fun requireAccess() { if (!hasAccess()) throw failure("PERMISSION_DENIED", "Call ai.requestAccess() to authorize this application in 3-Stone AI") }
 
     private fun portableInput(input: AiRequestInput): AiRequestInput {
         if (context.packageName == HOST_PACKAGE) return input

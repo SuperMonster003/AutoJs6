@@ -11,6 +11,8 @@ internal object ThreeStoneAiOfficialPlugin {
     const val PACKAGE_NAME = "io.github.supermonster003.autojs6.plugin.threestoneai"
     const val CLASS_NAME = "$PACKAGE_NAME.provider.ThreeStoneAiProviderService"
     const val RUNTIME_CLASS_NAME = "$PACKAGE_NAME.provider.ThreeStoneAiRuntimeService"
+    const val ACCESS_AUTHORITY = "$PACKAGE_NAME.runtime-access"
+    const val ACCESS_ACTIVITY = "$PACKAGE_NAME.provider.RuntimeAccessActivity"
     const val RUNTIME_PERMISSION = "org.autojs.permission.AI_RUNTIME"
     fun acceptsPermission(component: AiProviderComponent, permission: String?): Boolean =
         permission == org.autojs.plugin.ai.provider.api.AiProviderProtocol.PLUGIN_PERMISSION ||

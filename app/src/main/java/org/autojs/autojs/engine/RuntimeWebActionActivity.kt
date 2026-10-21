@@ -80,6 +80,24 @@ class RuntimeWebActionActivity : Activity() {
         internal fun chooseFiles(context: Context, options: JSONObject, complete: (Result<List<Uri>?>) -> Unit): Action =
             RuntimeWebFileChooser.create(context, options, complete)
 
+        internal fun aiAccess(context: Context, complete: (Boolean) -> Unit): Action {
+            val plugin = org.autojs.autojs.core.plugin.ai.ThreeStoneAiOfficialPlugin
+            require(org.autojs.autojs.core.plugin.center.PluginTrustManager.resolveTrustInfo(context, plugin.PACKAGE_NAME).isOfficial) {
+                "Install or update the official 3-Stone AI plugin to authorize this application"
+            }
+            return object : Action(context) {
+                private var requested = false
+                override fun attach(activity: Activity, state: Bundle?) {
+                    if (!requested) {
+                        requested = true
+                        activity.startActivityForResult(Intent().setClassName(plugin.PACKAGE_NAME, plugin.ACCESS_ACTIVITY), REQUEST)
+                    }
+                }
+                override fun result(code: Int, data: Intent?) = finish { complete(code == Activity.RESULT_OK) }
+                override fun close() = finish { complete(false) }
+            }.launch()
+        }
+
         internal fun mediaPermissions(context: Context, origin: String, permissions: Array<String>, complete: (Boolean) -> Unit): Action = object : Action(context) {
             private var requested = false
             override fun attach(activity: Activity, state: Bundle?) {
