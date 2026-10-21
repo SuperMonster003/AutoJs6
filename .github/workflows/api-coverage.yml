@@ -139,6 +139,7 @@ jobs:
           node tools/api-coverage/check-runtime-speech.mjs
           node tools/api-coverage/check-runtime-epub.mjs
           node tools/api-coverage/check-runtime-mail.mjs
+          node tools/api-coverage/check-runtime-flow.mjs
       - name: Check handwritten types and conditional extensions
         working-directory: AutoJs6-TypeScript-Declarations
         run: |
