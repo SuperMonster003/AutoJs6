@@ -178,6 +178,7 @@ class RuntimeLeakGateDeviceTest {
         // zh-CN: 需要无障碍服务的场景不使用 UiAutomation; 首次调用会建立连接, 因此放在首个采样之前.
         val meminfo = meminfoMode != "off" && !scenario.needsAccessibility && scenario.id != "S7"
         if (meminfo) GateNativeProbe.meminfo(instrumentation)
+        warmRenderPipeline()
         val start = GateMetrics.sample()
         val nativeStart = nativeSnapshot(meminfo, instances = true)
         var baseline = start
@@ -258,6 +259,23 @@ class RuntimeLeakGateDeviceTest {
             .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
         if (retainedRuns.isNotEmpty() || retainedWarmups.isNotEmpty()) report.put("heap", heapEvidence(scenario, mode))
         return report
+    }
+
+    /**
+     * The first window this process draws (a toast, an Activity, a floating window) initializes the render pipeline
+     * (hwui / EGL) once, which costs 3-22 MB of native heap in the gate reports. Below API 30 the process draws its
+     * text toasts itself, so the error toast that ScriptEngineService shows for a TimerCallbackRejectedException in a
+     * force-stopped run used to appear as a one-time native step in a measured run (ROADMAP appendix A, P3 N1). One
+     * toast before the first sample moves that cost out of the measurement; it changes nothing in the host.
+     * zh-CN: 本进程首次绘制窗口 (Toast, Activity, 悬浮窗) 时会一次性初始化渲染管线 (hwui / EGL), 门禁报告中为 3-22 MB 原生堆.
+     * API 30 以下文本 Toast 由本进程自行绘制, 因此强制停止的运行中 TimerCallbackRejectedException 触发 ScriptEngineService 弹出的错误 Toast,
+     * 曾在计数运行中表现为一次性原生台阶 (路线图附录 A, P3 N1). 在首个采样前弹一次 Toast, 把这部分开销移出度量; 不改变宿主的任何行为.
+     */
+    private fun warmRenderPipeline() {
+        if (renderPipelineWarmed) return
+        renderPipelineWarmed = true
+        instrumentation.runOnMainSync { Toast.makeText(context, RENDER_WARMUP_TEXT, Toast.LENGTH_SHORT).show() }
+        SystemClock.sleep(RENDER_WARMUP_MS)
     }
 
     /**
@@ -681,6 +699,11 @@ class RuntimeLeakGateDeviceTest {
         private const val START_TIMEOUT_MS = 30_000L
         private const val READY_TIMEOUT_MS = 20_000L
         private const val ACCESSIBILITY_PROMPT = "AutoJs6 内存门禁 S7: 请在系统无障碍设置中把 AutoJs6 关闭后重新开启"
+        private const val RENDER_WARMUP_TEXT = "AutoJs6 memory gate"
+        private const val RENDER_WARMUP_MS = 2_000L
+
+        @Volatile
+        private var renderPipelineWarmed = false
         private const val FORCE_END_TIMEOUT_MS = 30_000L
         private const val REDUCED_BUDGET_AFTER = 3
         private const val REDUCED_BUDGET_MS = 1_000L
@@ -695,7 +718,8 @@ class RuntimeLeakGateDeviceTest {
             "Native detail (ROADMAP P3.1): host counters of images, open media images and Mats after every run, the native " +
             "heap peak sampled every 20 ms inside each run, dumpsys meminfo of this process (through the UiAutomation shell) " +
             "and VMDebug instance counts at the start, after the warm-ups and at the end; images and open media images must " +
-            "return to the start and live Mats to the value after the warm-ups."
+            "return to the start and live Mats to the value after the warm-ups. One toast before the first sample of the " +
+            "process initializes the render pipeline (ROADMAP P3 N1)."
 
         // tools/sdk37/fixtures/DexProbe.java (org.autojs.sdk37.fixture.DexProbe.value() == "SDK37_DEX_OK"),
         // the same bytes as AndroidClassLoaderRawDexDeviceTest.
