@@ -561,6 +561,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(PACKAGE_MANAGER)
             }
             NodeBridgeModules.MAIL -> listOf(MAIL)
+            NodeBridgeModules.FLOW -> RuntimeFlowPolicy.capabilities(method, argsJson)
             NodeBridgeModules.EPUB -> listOf(EPUB)
             NodeBridgeModules.SPEECH -> listOf(SPEECH)
             NodeBridgeModules.TTS -> listOf(TTS)

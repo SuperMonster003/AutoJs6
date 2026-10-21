@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">Разрешить расширенную автоматизацию и ожидание событий. Для каждого инструмента также проверяются разрешения специальных возможностей, жестов, приложений и событий.</string>
+    <string name="text_bun_flow_control_grant">Инструменты Flow и ожидание событий Bun</string>
+</resources>

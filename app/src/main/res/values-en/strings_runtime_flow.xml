@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">Allow advanced automation and event waits. Accessibility, gesture, app and event grants are also checked for each tool.</string>
+    <string name="text_bun_flow_control_grant">Bun Flow tools and event waits</string>
+</resources>

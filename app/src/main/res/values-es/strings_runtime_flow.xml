@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">Permitir automatización avanzada y espera de eventos. Cada herramienta comprueba también los permisos de accesibilidad, gestos, aplicaciones y eventos.</string>
+    <string name="text_bun_flow_control_grant">Herramientas Flow y espera de eventos de Bun</string>
+</resources>

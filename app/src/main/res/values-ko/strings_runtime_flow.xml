@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">고급 자동화 및 이벤트 대기를 허용합니다. 각 도구에는 접근성, 제스처, 앱 및 이벤트 권한도 필요합니다.</string>
+    <string name="text_bun_flow_control_grant">Bun Flow 도구 및 이벤트 대기</string>
+</resources>

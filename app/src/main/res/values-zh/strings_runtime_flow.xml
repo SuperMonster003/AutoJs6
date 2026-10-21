@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_flow_control_grant">允许高级自动化工具和事件等待. 每个工具仍需对应的无障碍, 手势, 应用及事件授权.</string>
+    <string name="text_bun_flow_control_grant">Bun Flow 工具与事件等待</string>
+</resources>
