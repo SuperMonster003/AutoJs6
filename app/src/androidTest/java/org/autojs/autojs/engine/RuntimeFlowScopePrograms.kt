@@ -23,7 +23,8 @@ internal object RuntimeFlowScopePrograms {
             {type:'Row',id:'b',contentDescription:'flow-scope-b',children:[
                 {type:'Text',text:'Scope duplicate',contentDescription:'flow-scope-leaf-b'},
                 {type:'Button',id:'bb',text:'Scope B',contentDescription:'flow-scope-button-b'}]},
-            {type:'WebView',id:'pad',height:220,javaScriptEnabled:true,contentDescription:'flow-scope-pad',html}
+            {type:'Frame',height:220,contentDescription:'flow-scope-pad-frame',children:[
+                {type:'WebView',id:'pad',height:'match_parent',width:'match_parent',javaScriptEnabled:true,html}]}
         ]});
         const window=await ui.showLayout(root),aView=await root.findView('a'),ba=await root.findView('ba'),bb=await root.findView('bb'),pad=await root.findView('pad');
         let aClicks=0,bClicks=0;ba.on('click',()=>aClicks++);bb.on('click',()=>bClicks++);
@@ -68,7 +69,7 @@ internal object RuntimeFlowScopePrograms {
             await rejects(base.within(()=>42),'INVALID_TARGET');
             const cancelled=base.within(()=>false);cancelled.cancel();await rejects(cancelled,'CANCELLED');
             await flow.wait(async()=>await pad.evaluateJavascript('Array.isArray(window.events)'),{timeout:10000});
-            const bounds=(await flow.waitForVisible({desc:'flow-scope-pad'},{stableFor:500})).bounds;
+            const bounds=(await flow.waitForVisible({desc:'flow-scope-pad-frame'},{stableFor:500})).bounds;
             const x=Math.round((bounds.left+bounds.right)/2),y=Math.round((bounds.top+bounds.bottom)/2),dx=Math.max(20,Math.round((bounds.right-bounds.left)/5)),dy=Math.max(20,Math.round((bounds.bottom-bounds.top)/5));
             const p=[x,y+dy],q=[x,y-dy],flat=[...p,...q],pair=[p,q];
             async function gesture(name,args,moving=false,multi=false){
