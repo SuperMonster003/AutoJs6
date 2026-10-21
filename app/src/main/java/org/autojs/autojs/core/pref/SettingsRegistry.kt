@@ -12,6 +12,7 @@ import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
+import org.autojs.autojs.core.pref.keys.NamedStores
 import org.autojs.autojs.core.pref.keys.PluginCenterKeys
 import org.autojs.autojs.core.pref.keys.RecordKeys
 import org.autojs.autojs.core.pref.keys.RunningKeys
@@ -115,6 +116,15 @@ object SettingsRegistry {
     @JvmStatic
     val families: List<KeyFamily<*, *>>
         get() = DOMAINS.flatMap { it.families }
+
+    /**
+     * Every declared named store ([NamedStores], P3): the stores of the declared keys and the permanent exclusions of
+     * appendix A.2; reading it registers them in `SettingsStores` (guard (b) of T5).
+     * zh-CN: 全部已声明的命名存储 (P3): 键声明所在的存储与附录 A.2 的永久排除项; 读取时即登记到 `SettingsStores` (T5 守卫 (b)).
+     */
+    @JvmStatic
+    val stores: List<StoreId>
+        get() = NamedStores.ALL
 
     /**
      * The declared key named [name] in [store], or null.

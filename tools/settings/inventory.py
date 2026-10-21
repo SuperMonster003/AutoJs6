@@ -742,7 +742,37 @@ def scan_named_stores(sources, resolver):
             s['calls'].append({k: c[k] for k in ('file', 'line', 'arg', 'how')})
             if c['file'] not in s['files']:
                 s['files'].append(c['file'])
+    # Stores declared in NamedStores (ROADMAP P3): their readers go through the store layer, so a migrated store has no
+    # getSharedPreferences( call left; the declaration and the references to its constant stand for it.
+    for d in scan_store_declarations(sources):
+        s = stores.setdefault(d['name'], {'name': d['name'], 'calls': [], 'files': []})
+        s['declared'] = d
+        for r in d['refs']:
+            if r['file'] not in s['files']:
+                s['files'].append(r['file'])
     return calls, [stores[k] for k in sorted(stores)]
+
+
+NAMED_STORES_FILE = 'core/pref/keys/NamedStores.kt'
+STORE_DECLARATION = re.compile(r'\bval\s+(\w+)\s*=\s*(store|excluded)\(\s*"([^"]+)"')
+
+
+def scan_store_declarations(sources):
+    decl = next((f for f in sources if f.display == NAMED_STORES_FILE), None)
+    if decl is None:
+        return []
+    out = []
+    for i, line in enumerate(decl.lines, 1):
+        m = STORE_DECLARATION.search(line)
+        if not m or decl.is_comment_line(i):
+            continue
+        const, how, name = m.groups()
+        ref = re.compile(r'\bNamedStores\.' + re.escape(const) + r'\b')
+        refs = [{'file': f.display, 'line': j} for f in sources if f.display != NAMED_STORES_FILE
+                for j, text in enumerate(f.lines, 1) if ref.search(text) and not f.is_comment_line(j)]
+        out.append({'name': name, 'const': const, 'file': decl.display, 'line': i, 'excluded': how == 'excluded',
+                    'refs': refs})
+    return out
 
 
 def scan_default_bypass(sources):
@@ -1032,6 +1062,7 @@ def build(host, date):
         'literalKeyGroups': len(literal_groups),
         'namedStores': len([s for s in stores if s['name'] != '(未解析)']),
         'namedStoreCallFiles': len({c['file'] for c in calls}),
+        'namedStoresDeclared': len([s for s in stores if s.get('declared')]),
         'unresolvedStoreCalls': [c for c in calls if c['name'] is None],
         'defaultPrefsBypassFiles': None,
         'prefUserFiles': None,
@@ -1209,7 +1240,8 @@ def render_inventory(data):
         len(s['keysWithoutSourceRefs']), len(s['keysWithoutAnyRefs']),
         ', '.join(code(k) for k in s['keysWithoutAnyRefs']) or '无'))
     w('| 源码字面量键 (不对应 `key_*` 资源) | %d |' % s['literalKeyGroups'])
-    w('| 命名 SharedPreferences / 调用文件 | %d / %d |' % (s['namedStores'], s['namedStoreCallFiles']))
+    w('| 命名 SharedPreferences / 调用文件 / 已登记 `StoreId` | %d / %d / %d |' % (
+        s['namedStores'], s['namedStoreCallFiles'], s['namedStoresDeclared']))
     w('| 绕过 `Pref` 读默认偏好的文件 | %d |' % s['defaultPrefsBypassFiles'])
     w('| 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | %d |' % s['prefUserFiles'])
     w('| filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | %d |' % s['jsonFileStores'])
@@ -1254,8 +1286,13 @@ def render_inventory(data):
     w('| --- | --- | --- | --- | --- | --- |')
     for st in data['namedStores']:
         hows = sorted({c['how'] for c in st['calls']})
+        refs = st['calls']
+        d = st.get('declared')
+        if d:
+            hows.insert(0, '%s `NamedStores.%s` (%s:%d)' % ('排除登记' if d['excluded'] else '登记', d['const'], d['file'], d['line']))
+            refs = refs + d['refs']
         w('| %s | %s | %s | %s | %s | %s |' % (
-            code(st['name']), md_escape('; '.join(hows)), md_escape(refs_cell(st['calls'], 4)), st.get('kind', ''),
+            code(st['name']), md_escape('; '.join(hows)), md_escape(refs_cell(refs, 4)), st.get('kind', ''),
             code(st['category']) if st.get('category') else '', md_escape(st.get('note', ''))))
     w('')
     w('## 5. 绕过 `Pref` 读默认偏好的文件')

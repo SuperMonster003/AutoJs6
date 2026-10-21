@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.pref
 
 import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.StoreId
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -19,7 +20,10 @@ import java.io.File
  * - (a) every `key_*` string resource is registered (Setting / State / Cache / ValueConstant / Excluded) or pending.
  * - (b) every `getSharedPreferences(` file name in the sources is registered or pending (the store layer itself in
  *   `core/pref/store/` is exempt); names are resolved from literals, constants, string resources and
- *   `prefix + ...` concatenations, and the few calls that need more are listed in [MANUAL_STORE_NAMES].
+ *   `prefix + ...` concatenations, and the few calls that need more are listed in [MANUAL_STORE_NAMES]. A registered
+ *   store ([SettingsRegistry.stores], P3) agrees with its classification.json entry: an excluded one is Excluded and
+ *   holds no declared keys, any other one holds declared keys of the classified category and kind, and every key in a
+ *   named store belongs to a registered one.
  * - (c) every key has exactly one category, every category except the data ones has at least one entry, and only
  *   `credentials` holds sensitive entries.
  * - (e) every deployment kind in use has a registered implementation or is pending (P7.6).
@@ -64,19 +68,27 @@ class SettingsRegistryGuardTest {
     @Test
     fun b_everySharedPreferencesFileIsRegisteredOrPending() {
         val classified = classification.section("namedStores")
-        val registered = SettingsStores.registeredIds.filter { !it.isDefault }.map { it.name }.toSet()
+        // Reading SettingsRegistry.stores registers the declared stores (NamedStores).
+        val declared = SettingsRegistry.stores
+        val registeredIds = (declared + SettingsStores.registeredIds).filter { !it.isDefault }.associateBy { it.name }
+        val registered = registeredIds.keys
         val calls = storeCalls()
         val unresolved = calls.filter { it.names.isEmpty() }
         val unknown = calls.filter { it.names.isNotEmpty() }.flatMap { call ->
             call.names.filter { it !in registered && it !in classified }.map { "$it (${call.where})" }
         }
         val seen = calls.flatMap { it.names }.toSet()
-        val stale = classified.keys - seen
+        val stale = classified.keys - seen - registered
         val pending = classified.keys - registered
-        println("T5 b: getSharedPreferences( calls ${calls.size} in ${calls.map { it.file }.toSet().size} files, store names ${seen.size}, registered ${registered.size}, pending migration ${pending.size} ${kindCounts(classified, pending)}")
+        val rows = registryRows()
+        val mismatched = registeredIds.values.mapNotNull { id -> storeMismatch(id, classified[id.name], rows.filter { it.store == id.name }) }
+        val undeclaredStores = rows.filter { it.store != DEFAULT_STORE && it.store !in declared.map(StoreId::name) }.map { "${it.store}:${it.name}" }
+        println("T5 b: getSharedPreferences( calls ${calls.size} in ${calls.map { it.file }.toSet().size} files, store names ${seen.size}, registered ${registered.size} ${kindCounts(classified, registered)}, pending migration ${pending.size} ${kindCounts(classified, pending)}")
         assertNone("getSharedPreferences( calls whose file name cannot be resolved (register the store or add the call to MANUAL_STORE_NAMES)", unresolved.map { "${it.where}: ${it.arg}" })
         assertNone("SharedPreferences files neither registered in SettingsStores nor in classification.json", unknown)
-        assertNone("classification.json named stores that no getSharedPreferences( call opens", stale.toList())
+        assertNone("classification.json named stores neither registered nor opened by a getSharedPreferences( call", stale.toList())
+        assertNone("registered stores that disagree with classification.json (update one of them)", mismatched)
+        assertNone("declared keys in a named store that NamedStores does not declare", undeclaredStores)
     }
 
     @Test
@@ -182,6 +194,21 @@ class SettingsRegistryGuardTest {
             row.category != category -> "$name: declared in ${row.category}, classified in $category"
             row.deployment?.name != deployment -> "$name: declared deployment ${row.deployment}, classified $deployment"
             row.kind == SettingKind.SETTING && row.effect.name != effect -> "$name: declared effect ${row.effect}, classified $effect"
+            else -> null
+        }
+    }
+
+    /** Why a registered store [id] disagrees with its classification [entry], given the declared [rows] in it; null when it agrees. */
+    private fun storeMismatch(id: StoreId, entry: Map<String, Any?>?, rows: List<SettingDescriptor>): String? {
+        val kind = entry?.get("kind") as String? ?: return "${id.name}: registered but not in classification.json"
+        val category = entry["category"] as String?
+        return when {
+            id.excluded != (kind == SettingKind.EXCLUDED.label) -> "${id.name}: registered ${if (id.excluded) "excluded" else "as a store"}, classified $kind"
+            id.excluded -> if (rows.isNotEmpty()) "${id.name}: excluded but declares ${rows.size} keys" else null
+            rows.isEmpty() -> "${id.name}: registered without declared keys"
+            rows.none { it.category == category } -> "${id.name}: classified in $category, declared in ${rows.map { it.category }.toSet()}"
+            kind == SettingKind.STATE.label && rows.any { it.kind != SettingKind.STATE } -> "${id.name}: classified State, declares ${rows.map { it.kind.label }.toSet()}"
+            kind == SettingKind.SETTING.label && rows.none { it.kind == SettingKind.SETTING } -> "${id.name}: classified Setting, declares no Setting"
             else -> null
         }
     }

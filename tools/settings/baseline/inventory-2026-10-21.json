@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "be3674c91",
+  "commit": "6a75ed702",
   "branch": "master",
-  "dirtyScannedFiles": 14
+  "dirtyScannedFiles": 3
  },
  "summary": {
   "keyResources": 268,
@@ -49,6 +49,7 @@
   "literalKeyGroups": 89,
   "namedStores": 29,
   "namedStoreCallFiles": 34,
+  "namedStoresDeclared": 8,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 1,
   "prefUserFiles": 75,
@@ -8577,6 +8578,14 @@
    "files": [
     "external/widget/ScriptWidgets.java"
    ],
+   "declared": {
+    "name": "ScriptWidgets",
+    "const": "SCRIPT_WIDGETS",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 51,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "桌面小部件 id 由启动器分配, 仅本机有效 (附录 A.2)"
   },
@@ -8640,6 +8649,14 @@
     "core/storage/LocalStorage.java",
     "runtime/api/augment/storages/Storages.kt"
    ],
+   "declared": {
+    "name": "autojs.localstorage.*",
+    "const": "SCRIPT_LOCAL_STORAGES",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 31,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "脚本自己的数据 (附录 A.2)"
   },
@@ -8656,6 +8673,14 @@
    "files": [
     "engine/NodeBridgeProtocol.kt"
    ],
+   "declared": {
+    "name": "autojs.node.storage.*.*.*",
+    "const": "NODE_SCRIPT_STORAGES",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 35,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板)"
   },
@@ -8748,6 +8773,14 @@
    "files": [
     "deviceid/DeviceIdProvider.kt"
    ],
+   "declared": {
+    "name": "device_id_prefs",
+    "const": "DEVICE_ID_PREFS",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 27,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "设备标识 (附录 A.2)"
   },
@@ -8793,6 +8826,14 @@
    "files": [
     "core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt"
    ],
+   "declared": {
+    "name": "explorer_playback_history",
+    "const": "EXPLORER_PLAYBACK_HISTORY",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 55,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "媒体回放进度, 指向本机文件 (P3.5 永久排除)"
   },
@@ -8866,6 +8907,14 @@
    "files": [
     "engine/LuaHostStorage.kt"
    ],
+   "declared": {
+    "name": "lua-runtime-storage-v1-*",
+    "const": "LUA_SCRIPT_STORAGES",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 39,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "脚本自己的数据 (附录 A.2)"
   },
@@ -9187,6 +9236,14 @@
    "files": [
     "model/explorer/PrivilegedBackupManager.kt"
    ],
+   "declared": {
+    "name": "privileged_edit_backups",
+    "const": "PRIVILEGED_EDIT_BACKUPS",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 43,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "指向本机文件的操作日志 (附录 A.2)"
   },
@@ -9203,6 +9260,14 @@
    "files": [
     "engine/RuntimeTasksBridge.kt"
    ],
+   "declared": {
+    "name": "runtime_task_intents",
+    "const": "RUNTIME_TASK_INTENTS",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 47,
+    "excluded": true,
+    "refs": []
+   },
    "kind": "Excluded",
    "note": "运行时状态 (附录 A.2)"
   },
