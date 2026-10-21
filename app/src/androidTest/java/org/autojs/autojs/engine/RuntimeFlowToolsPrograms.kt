@@ -46,6 +46,8 @@ internal object RuntimeFlowToolsPrograms {
             const appended=await flow.of(text).appendText('!');check(appended.text==='portable text!','node append action');
             const cleared=await flow.of(appended).clear();check(cleared.text==='','node clear action');
             check((await flow.of(cleared).setText('restored')).text==='restored','node set text action');
+            const checkbox=await root.findView('check');await checkbox.set({checked:false});
+            await flow.wait({desc:'flow-tools-check',checked:false},{timeout:3000});
             result=await flow.toggle({desc:'flow-tools-check'},true,{click:{gestureFallback:false}});check(result.changed&&result.checked,'toggle changed');
             result=await flow.toggle({desc:'flow-tools-check'},true,{click:{gestureFallback:false}});check(!result.changed&&result.checked,'toggle unchanged');
             const clicked=flow.waitForEvent('view_clicked',{packageName:pkg,text:'Flow target'},5000);await clicked.ready;
@@ -79,7 +81,7 @@ internal object RuntimeFlowToolsPrograms {
             const toastValue=await toast;check(toastValue.text===marker&&toastValue.packageName!==pkg,'real external toast');
             check(await flow.backToApp(pkg,{maxTimes:1,delay:1500,interval:50})===pkg,'back from owned Toast activity');
             await flow.waitForVisible(targetSelector,{timeout:10000,stableFor:20});
-            await pause(30);check(clicks>=10&&climbs===1,'real view callbacks');
+            await flow.wait(()=>clicks===18&&climbs===1,{timeout:3000,interval:30});check(clicks===18&&climbs===1,'real view callbacks');
             if(EXERCISE_LAUNCH)check((await flow.launchAndWait(pkg,{bringToFront:true,timeout:5000})).launched===true,'actual host launch');
             return {checks:checks.length,labels:checks,clicks,climbs,collectionItems:collected.length,collectionCharacters:collected.join('').length,notification,toast:toastValue,packageName:pkg,channel};
         }catch(error){console.error('FLOW_TOOLS_CHECKS '+JSON.stringify(checks));throw error;}
