@@ -12,6 +12,10 @@
         <item quantity="other">方法僅可接受不多於 %d 個引數</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="other">%d 項</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">已停止執行 %d 個指令碼</item>
     </plurals>

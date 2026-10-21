@@ -12,6 +12,10 @@
         <item quantity="other">方法仅可接受不多于 %d 个参数</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="other">%d 项</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">已停止运行 %d 个脚本</item>
     </plurals>

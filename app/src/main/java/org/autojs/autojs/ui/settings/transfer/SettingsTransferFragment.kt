@@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
 import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
@@ -42,7 +43,7 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext())
         preference(preferenceScreen, R.string.settings_transfer_description).apply { isSelectable = false }
         laterVersion(preference(preferenceScreen, R.string.settings_transfer_import))
-        preference(preferenceScreen, R.string.settings_transfer_export) { startWizard(SettingsExportWizard.initialState()) }
+        preference(preferenceScreen, R.string.settings_transfer_export) { startWizard(exportState()) }
             .setSummary(R.string.settings_transfer_export_summary)
         laterVersion(preference(preferenceScreen, R.string.settings_transfer_reset))
         laterVersion(preference(preferenceScreen, R.string.settings_transfer_undo_import))
@@ -85,10 +86,12 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         val state = wizardState
         when {
             state != null -> startWizard(state)
-            startExport -> startWizard(SettingsExportWizard.initialState())
+            startExport -> startWizard(exportState())
         }
         startExport = false
     }
+
+    private fun exportState() = SettingsExportWizard.initialState(MiscStateKeys.SETTINGS_EXPORT_CATEGORIES.storedOrNull())
 
     private fun startWizard(state: SettingsWizardState) {
         if (wizardJob?.isActive == true) return

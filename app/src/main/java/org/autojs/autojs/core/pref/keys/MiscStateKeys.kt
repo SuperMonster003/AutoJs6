@@ -172,6 +172,15 @@ object MiscStateKeys : SettingsDomain {
         R.string.key_working_directory_history, SettingType.Json(SettingsJson.STRING_LIST, htmlSafe = true), SettingDefault.of(emptyList()),
     )
 
+    /**
+     * The categories last chosen in the export wizard, without `credentials` (`SettingsCategoryPickerStep`, P6.3,
+     * appendix C Q27); none until the first export, when the wizard starts with the defaults of appendix A.1.
+     */
+    @JvmField
+    val SETTINGS_EXPORT_CATEGORIES = StateKey.json(
+        name = "key_\$_settings_transfer_export_categories", type = SettingType.Json(SettingsJson.STRING_LIST), default = SettingDefault.None,
+    )
+
     // ---------------------------------------------------------------------- appearance, colors and floating windows (P4.2)
 
     /** The "keep screen on" choice before it was turned off, restored when it is turned on again (`ViewUtils`). */
@@ -294,6 +303,7 @@ object MiscStateKeys : SettingsDomain {
         CLIENT_SOCKET_NORMALLY_CLOSED, SERVER_SOCKET_NORMALLY_CLOSED, MCP_SERVER_NORMALLY_CLOSED, PC_SERVER_ADDRESS_HISTORY,
         LAST_UPDATES_CHECKED, LAST_NO_NEWER_UPDATES, LAST_UPDATES_POSTPONED, LAST_UPDATES_AUTO_CHECKED, PLUGIN_CENTER_LAST_ONLINE_CHECK_TS,
         POST_NOTIFICATIONS_PERMISSION_REQUEST_ATTEMPTED, SETUP_WIZARD_WELCOME_DONE, WORKING_DIRECTORY_INITIALIZED, WORKING_DIRECTORY_HISTORY,
+        SETTINGS_EXPORT_CATEGORIES,
         KEEP_SCREEN_ON_WHEN_IN_FOREGROUND_LAST_ENABLED, COLOR_SELECT_ACTIVITY_LEGACY_LAYOUT,
         COLOR_SELECT_CUSTOM_COLOR, COLOR_SELECT_LEGACY_SELECTED_INDEX, COLOR_SELECT_LIBRARY_ID, COLOR_SELECT_ITEM_ID,
         COLOR_SELECT_LIBRARY_NAME, COLOR_SELECT_ITEM_NAME,

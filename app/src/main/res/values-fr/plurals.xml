@@ -18,6 +18,11 @@
         <item quantity="other">La méthode n\'accepte pas plus de %d arguments</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="one">%d élément</item>
+        <item quantity="other">%d éléments</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script arrêté</item>
         <item quantity="many">%d scripts arrêtés</item>

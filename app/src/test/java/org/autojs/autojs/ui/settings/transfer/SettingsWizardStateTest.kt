@@ -66,10 +66,17 @@ class SettingsWizardStateTest {
 
     @Test
     fun exportStartsWithTheDefaultSelectionWithoutDataCategories() {
-        val state = SettingsExportWizard.initialState()
+        val state = SettingsExportWizard.initialState(null)
         assertEquals(Step.PICK_CATEGORIES, state.step)
         val expected = SettingCategory.ALL.filter { it.defaultSelected && !it.isData }.map { it.id }
         assertEquals(expected, state.selected)
         assertEquals(26, state.selected.size)
+    }
+
+    @Test
+    fun exportStartsWithTheRememberedSelection() {
+        val state = SettingsExportWizard.initialState(listOf("other", "credentials", "appearance"))
+        assertEquals(listOf("appearance", "other"), state.selected)
+        assertEquals(false, state.credentialsConfirmed)
     }
 }

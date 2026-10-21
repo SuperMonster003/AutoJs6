@@ -31,6 +31,15 @@
     </plurals>
 
     <!-- تم إيقاف %d سكربت -->
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="zero">لا عناصر</item>
+        <item quantity="one">عنصر واحد</item>
+        <item quantity="two">عنصران</item>
+        <item quantity="few">%d عناصر</item>
+        <item quantity="many">%d عنصرا</item>
+        <item quantity="other">%d عنصر</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="zero">لم يُوقَف أي سكربت</item>
         <item quantity="one">تم إيقاف سكربت واحد</item>

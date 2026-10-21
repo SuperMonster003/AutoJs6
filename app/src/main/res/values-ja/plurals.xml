@@ -12,6 +12,10 @@
         <item quantity="other">メソッドが受け付ける引数は最大 %d 個までです</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="other">%d 件</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">%d 個のスクリプトを停止しました</item>
     </plurals>

@@ -12,6 +12,10 @@
         <item quantity="other">메서드는 최대 %d개의 인자만 허용합니다</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="other">%d개 항목</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="other">%d개의 스크립트가 중지되었습니다</item>
     </plurals>

@@ -805,12 +805,16 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">セットアップウィザードのプロファイル</string>
+    <string name="settings_transfer_credentials_warning">認証情報と承認 (GitHub トークン, プラグインセンターの承認, MCP Server と 3-Stove Agent の信頼済みクライアント, Bun ホストの許可) はファイルに平文で書き込まれます. ファイルを手に入れた人は誰でもそれらを使用できるため, 安全に保管してください.</string>
+    <string name="settings_transfer_credentials_warning_title">認証情報をエクスポートしますか?</string>
     <string name="settings_transfer_description">設定はカテゴリごとに zip ファイルへエクスポートされ, この端末または別の端末でインポートできます.</string>
     <string name="settings_transfer_export">設定をエクスポート</string>
     <string name="settings_transfer_export_summary">カテゴリを選んで zip ファイルに保存します</string>
     <string name="settings_transfer_import">設定をインポート</string>
     <string name="settings_transfer_later_version">今後のバージョンで対応予定</string>
     <string name="settings_transfer_pick_export">エクスポートするカテゴリを選択してください</string>
+    <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">詳細...</string>
+    <string name="settings_transfer_refine_later">項目ごとの選択は今後のバージョンで対応予定です</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">既定の設定に戻す...</string>
     <string name="settings_transfer_summary">AutoJs6 の設定をカテゴリごとにエクスポート, インポート, バックアップします</string>
     <string name="settings_transfer_title">AutoJs6 の設定を管理</string>

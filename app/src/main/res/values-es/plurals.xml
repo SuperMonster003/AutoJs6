@@ -18,6 +18,11 @@
         <item quantity="other">El método solo acepta como máximo %d argumentos</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="one">%d elemento</item>
+        <item quantity="other">%d elementos</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script detenido</item>
         <item quantity="many">%d scripts detenidos</item>

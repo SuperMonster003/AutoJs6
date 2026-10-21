@@ -23,6 +23,13 @@
         <item quantity="other">Метод принимает не более %d аргумента</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="one">%d элемент</item>
+        <item quantity="few">%d элемента</item>
+        <item quantity="many">%d элементов</item>
+        <item quantity="other">%d элемента</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d скрипт остановлен</item>
         <item quantity="few">%d скрипта остановлено</item>

@@ -804,12 +804,16 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Profils des assistants de configuration</string>
+    <string name="settings_transfer_credentials_warning">Les identifiants et autorisations (le jeton GitHub, les autorisations du centre des plugins, les clients de confiance de MCP Server et de 3-Stove Agent, les droits de l\'hôte Bun) sont écrits dans le fichier en clair. Toute personne qui possède le fichier peut les utiliser, conservez-le donc en lieu sûr.</string>
+    <string name="settings_transfer_credentials_warning_title">Exporter les identifiants?</string>
     <string name="settings_transfer_description">Les paramètres sont exportés par catégorie dans un fichier zip, qui peut être importé sur cet appareil ou sur un autre.</string>
     <string name="settings_transfer_export">Exporter les paramètres</string>
     <string name="settings_transfer_export_summary">Choisir des catégories et les enregistrer dans un fichier zip</string>
     <string name="settings_transfer_import">Importer les paramètres</string>
     <string name="settings_transfer_later_version">Disponible dans une version ultérieure</string>
     <string name="settings_transfer_pick_export">Choisissez les catégories à exporter</string>
+    <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Affiner...</string>
+    <string name="settings_transfer_refine_later">La sélection élément par élément arrivera dans une version ultérieure</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurer les paramètres par défaut...</string>
     <string name="settings_transfer_summary">Exporter, importer et sauvegarder les paramètres d\'AutoJs6 par catégorie</string>
     <string name="settings_transfer_title">Gérer les paramètres d\'AutoJs6</string>

@@ -800,12 +800,16 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">设置向导配置档</string>
+    <string name="settings_transfer_credentials_warning">凭据与授权 (GitHub 令牌, 插件中心授权, MCP Server 与 3-Stove Agent 的已信任客户端, Bun 宿主授权) 将以明文写入文件. 拿到文件的人都可以使用它们, 请妥善保管导出的文件.</string>
+    <string name="settings_transfer_credentials_warning_title">导出凭据?</string>
     <string name="settings_transfer_description">设置按分类导出为 zip 文件, 可在本机或其他设备上导入.</string>
     <string name="settings_transfer_export">导出设置</string>
     <string name="settings_transfer_export_summary">选择分类并保存为 zip 文件</string>
     <string name="settings_transfer_import">导入设置</string>
     <string name="settings_transfer_later_version">后续版本提供</string>
     <string name="settings_transfer_pick_export">选择要导出的分类</string>
+    <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">细化...</string>
+    <string name="settings_transfer_refine_later">逐条选择将在后续版本提供</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">恢复默认设置...</string>
     <string name="settings_transfer_summary">按分类导出, 导入与备份 AutoJs6 的设置</string>
     <string name="settings_transfer_title">管理 AutoJs6 设置</string>

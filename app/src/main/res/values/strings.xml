@@ -799,12 +799,16 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Setup wizard profiles</string>
+    <string name="settings_transfer_credentials_warning">Credentials and authorizations (the GitHub token, the authorizations of the plugin center, the trusted clients of MCP Server and 3-Stove Agent, the grants of the Bun host) are written to the file in plain text. Anyone who has the file can use them, so keep it safe.</string>
+    <string name="settings_transfer_credentials_warning_title">Export credentials?</string>
     <string name="settings_transfer_description">Settings are exported by category into a zip file, which can be imported on this or another device.</string>
     <string name="settings_transfer_export">Export settings</string>
     <string name="settings_transfer_export_summary">Choose categories and save them to a zip file</string>
     <string name="settings_transfer_import">Import settings</string>
     <string name="settings_transfer_later_version">Available in a later version</string>
     <string name="settings_transfer_pick_export">Choose the categories to export</string>
+    <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Refine...</string>
+    <string name="settings_transfer_refine_later">Choosing single items comes in a later version</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restore default settings...</string>
     <string name="settings_transfer_summary">Export, import and back up the settings of AutoJs6 by category</string>
     <string name="settings_transfer_title">Manage AutoJs6 settings</string>

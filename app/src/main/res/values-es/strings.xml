@@ -804,12 +804,16 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Perfiles de los asistentes de configuración</string>
+    <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se escriben en el archivo como texto sin cifrar. Cualquiera que tenga el archivo puede usarlas, así que guárdelo en un lugar seguro.</string>
+    <string name="settings_transfer_credentials_warning_title">Exportar credenciales?</string>
     <string name="settings_transfer_description">La configuración se exporta por categorías a un archivo zip que se puede importar en este u otro dispositivo.</string>
     <string name="settings_transfer_export">Exportar configuración</string>
     <string name="settings_transfer_export_summary">Elegir categorías y guardarlas en un archivo zip</string>
     <string name="settings_transfer_import">Importar configuración</string>
     <string name="settings_transfer_later_version">Disponible en una versión posterior</string>
     <string name="settings_transfer_pick_export">Elija las categorías que desea exportar</string>
+    <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Detallar...</string>
+    <string name="settings_transfer_refine_later">La selección de elementos individuales llegará en una versión posterior</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurar la configuración predeterminada...</string>
     <string name="settings_transfer_summary">Exportar, importar y respaldar la configuración de AutoJs6 por categorías</string>
     <string name="settings_transfer_title">Administrar la configuración de AutoJs6</string>

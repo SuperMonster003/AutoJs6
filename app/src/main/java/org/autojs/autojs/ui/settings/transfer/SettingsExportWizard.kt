@@ -1,6 +1,5 @@
 package org.autojs.autojs.ui.settings.transfer
 
-import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs6.R
 
 /**
@@ -26,12 +25,16 @@ class SettingsExportWizard(host: SettingsWizardHost) : SettingsWizard(host) {
 
     companion object {
 
-        /** The state the wizard starts with: the default selection of appendix A.1. zh-CN: 向导的初始状态: 附录 A.1 的默认勾选. */
+        /**
+         * The state the wizard starts with: the [remembered] selection (`MiscStateKeys.SETTINGS_EXPORT_CATEGORIES`) or the
+         * default one of appendix A.1 ([SettingsCategorySelection.initial]).
+         * zh-CN: 向导的初始状态: 记住的勾选 (`MiscStateKeys.SETTINGS_EXPORT_CATEGORIES`) 或附录 A.1 的默认勾选.
+         */
         @JvmStatic
-        fun initialState(): SettingsWizardState = SettingsWizardState(
+        fun initialState(remembered: List<String>?): SettingsWizardState = SettingsWizardState(
             kind = SettingsWizardState.Kind.EXPORT,
             step = SettingsWizardState.Step.PICK_CATEGORIES,
-            selected = SettingCategory.ALL.filter { it.defaultSelected && !it.isData }.map { it.id },
+            selected = SettingsCategorySelection.initial(remembered),
         )
     }
 }

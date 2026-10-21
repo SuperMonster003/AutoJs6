@@ -15,6 +15,11 @@
         <item quantity="other">Method only accepts no more than %d arguments</item>
     </plurals>
 
+    <plurals name="settings_transfer_category_entries">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
     <plurals name="text_already_stop_n_scripts">
         <item quantity="one">%d script stopped</item>
         <item quantity="other">%d scripts stopped</item>

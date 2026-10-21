@@ -806,12 +806,16 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">ملفات تعريف معالجات الإعداد</string>
+    <string name="settings_transfer_credentials_warning">تُكتب بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) في الملف كنص عادي. يمكن لأي شخص يملك الملف استخدامها, لذا احتفظ به في مكان آمن.</string>
+    <string name="settings_transfer_credentials_warning_title">تصدير بيانات الاعتماد?</string>
     <string name="settings_transfer_description">تُصدَّر الإعدادات حسب الفئة إلى ملف zip يمكن استيراده على هذا الجهاز أو على جهاز آخر.</string>
     <string name="settings_transfer_export">تصدير الإعدادات</string>
     <string name="settings_transfer_export_summary">اختر الفئات واحفظها في ملف zip</string>
     <string name="settings_transfer_import">استيراد الإعدادات</string>
     <string name="settings_transfer_later_version">متاح في إصدار لاحق</string>
     <string name="settings_transfer_pick_export">اختر الفئات المراد تصديرها</string>
+    <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">تحديد العناصر...</string>
+    <string name="settings_transfer_refine_later">سيتوفر اختيار العناصر الفردية في إصدار لاحق</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">استعادة الإعدادات الافتراضية...</string>
     <string name="settings_transfer_summary">تصدير إعدادات AutoJs6 واستيرادها ونسخها احتياطيا حسب الفئة</string>
     <string name="settings_transfer_title">إدارة إعدادات AutoJs6</string>
