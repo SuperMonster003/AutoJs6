@@ -79,6 +79,18 @@ class RenderTest(unittest.TestCase):
         self.assertIn("LooperHelper.sLoopers (static)", text)
         self.assertIn("| S5 | N | no report |", text)
 
+    def test_native_detail(self):
+        detailed = report("S4f", "normal", "pass", 0)
+        detailed["metrics"]["native"] = {
+            "nativePeakMaxBytes": 2 * 1048576, "imagesLiveDelta": 0, "openMediaImages": 0, "matsLiveDelta": 1,
+            "meminfoDeltaKb": {"nativePssKb": 1024, "nativeHeapAllocKb": -512, "graphicsKb": 0, "unknownPssKb": 256},
+            "instanceDeltas": {"bitmap": 2, "cvMat": None, "accessibilityNode": 0},
+            "scriptStatsMax": {"frames": 200.0, "slowestCaptureMs": 812.0}}
+        self.assertEqual("+2.00 | +1.00/-0.50/+0.00/+0.25 | +0 / 0 / +1 | +2/-/+0", run_gate.native_cell(detailed))
+        self.assertEqual("frames 200, slowestCaptureMs 812", run_gate.stats_text(detailed))
+        self.assertEqual("-", run_gate.native_cell(report()))
+        self.assertIn("peak=+2.00MB images=+0 media=0 mats=+1", run_gate.summary_line(detailed))
+
 
 if __name__ == "__main__":
     unittest.main()

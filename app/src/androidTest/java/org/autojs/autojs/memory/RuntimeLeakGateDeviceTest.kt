@@ -32,6 +32,7 @@ import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.memory.scenarios.GateEnvironment
 import org.autojs.autojs.memory.scenarios.GateMode
+import org.autojs.autojs.memory.scenarios.GateNativeProbe
 import org.autojs.autojs.memory.scenarios.GateScenario
 import org.autojs.autojs.memory.scenarios.GateScenarios
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -49,6 +50,7 @@ import org.junit.runner.RunWith
 import java.io.File
 import java.lang.ref.WeakReference
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
@@ -68,7 +70,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * Arguments (all optional): memoryGateRunId, memoryGateModes (normal,force), memoryGateWarmups (2),
  * memoryGateIterations (20), memoryGatePollMs (10000), memoryGateForceDelayMs (1000),
- * memoryGateKeepHprof (false), memoryGateAnalyze (true), memoryGateCapture (off), memoryGateAccessibilityWaitMs (0).
+ * memoryGateKeepHprof (false), memoryGateAnalyze (true), memoryGateCapture (off), memoryGateAccessibilityWaitMs (0),
+ * memoryGateMeminfo (phases: dumpsys meminfo at the start, after the warm-ups and at the end; runs: after every run too; off).
  *
  * zh-CN: 运行时泄漏门禁 (docs/memory/ROADMAP.md D3, T1-T4). 对每个场景与模式, 在本进程内执行脚本 `预热 + 计数` 次, 只保留每次运行的引擎与
  * ScriptRuntime 的弱引用 (在 EngineLifecycleCallback.onEngineRemove 中取得), 强制回收并确认 runtime 全部消失, 再比较 T1 的六项度量.
@@ -101,6 +104,9 @@ class RuntimeLeakGateDeviceTest {
     private val analyzeHeap by lazy { arguments.getString("memoryGateAnalyze") != "false" }
     private val captureAllowed by lazy { arguments.getString("memoryGateCapture") == "on" }
     private val accessibilityWaitMs by lazy { integer("memoryGateAccessibilityWaitMs", 0, 0, 900_000).toLong() }
+    private val meminfoMode by lazy {
+        (arguments.getString("memoryGateMeminfo") ?: "phases").also { require(it in setOf("off", "phases", "runs")) { "memoryGateMeminfo must be off, phases or runs" } }
+    }
 
     @Before
     fun register() {
@@ -122,9 +128,11 @@ class RuntimeLeakGateDeviceTest {
     @Test fun s04cCopyClipResize() = gate("S4c")
     @Test fun s04dMatchTemplateOneShot() = gate("S4d")
     @Test fun s04eThreadedImages() = gate("S4e")
+    @Test fun s04fCaptureScreenNoRecycle() = gate("S4f")
     @Test fun s05UiWithWebView() = gate("S5")
     @Test fun s06Floaty() = gate("S6")
     @Test fun s07EventsKeysSensors() = gate("S7")
+    @Test fun s07bSelectorFindLoop() = gate("S7b")
     @Test fun s08JavaAdapterAndDex() = gate("S8")
     @Test fun s09ExecScriptFileChain() = gate("S9")
     @Test fun s10HttpAndWebSocket() = gate("S10")
@@ -158,26 +166,48 @@ class RuntimeLeakGateDeviceTest {
             .put("accessibilityEnabledInSettings", accessibilityEnabledInSettings())
             .put("keyguardLocked", context.getSystemService(KeyguardManager::class.java).isKeyguardLocked)
             .put("interactive", context.getSystemService(PowerManager::class.java).isInteractive))
+        if (scenario.needsAccessibility && !environment.accessibilityRunning) {
+            return report.put("status", "skipped").put("reasons", JSONArray().put("the host accessibility service is not bound to the test process " +
+                "(run with memoryGateAccessibilityWaitMs and turn the service off and on, ROADMAP appendix C Q9)"))
+        }
+        val warmups = scenario.warmups ?: this.warmups
+        val iterations = scenario.iterations ?: this.iterations
+        report.put("warmups", warmups).put("iterations", iterations)
+        // UiAutomation stays away from scenarios that need the accessibility service; its first call connects, so it
+        // happens before the first sample.
+        // zh-CN: 需要无障碍服务的场景不使用 UiAutomation; 首次调用会建立连接, 因此放在首个采样之前.
+        val meminfo = meminfoMode != "off" && !scenario.needsAccessibility && scenario.id != "S7"
+        if (meminfo) GateNativeProbe.meminfo(instrumentation)
         val start = GateMetrics.sample()
+        val nativeStart = nativeSnapshot(meminfo, instances = true)
         var baseline = start
+        var nativeBaseline = nativeStart
         val runs = mutableListOf<RunRecord>()
         val samples = JSONArray()
         var budget = pollMs
         var retainedWithinBudget = 0
         for (index in 0 until warmups + iterations) {
             val warmup = index < warmups
+            val sampler = GateNativeProbe.PeakSampler().apply { start() }
             val record = runOnce(scenario, environment, mode, index, warmup)
+            record.nativePeakBytes = sampler.stop()
             val references = record.runtimes + record.engines
             record.clearMs = GateMetrics.awaitCleared(references, budget)
             if (record.clearMs == null && ++retainedWithinBudget >= REDUCED_BUDGET_AFTER) budget = REDUCED_BUDGET_MS
             val sample = GateMetrics.sample()
-            if (index == warmups - 1) baseline = sample
-            samples.put(record.json().put("after", sample.json()))
+            val every = meminfoMode == "runs"
+            val native = if (index == warmups - 1) nativeSnapshot(meminfo, instances = true) else nativeSnapshot(meminfo && every, instances = every)
+            if (index == warmups - 1) {
+                baseline = sample
+                nativeBaseline = native
+            }
+            samples.put(record.json().put("after", sample.json()).put("native", native))
             runs += record
         }
         val measured = runs.filter { !it.warmup }
         GateMetrics.awaitCleared(measured.flatMap { it.runtimes + it.engines }, pollMs)
         val final = GateMetrics.sample()
+        val nativeFinal = nativeSnapshot(meminfo, instances = true)
         val retainedRuns = measured.filter { it.retained() }
         val retainedWarmups = runs.filter { it.warmup && it.retained() }
         val frameBytes = if (scenario.capture) context.resources.displayMetrics.let { it.widthPixels.toLong() * it.heightPixels * 4 } else 0L
@@ -196,6 +226,8 @@ class RuntimeLeakGateDeviceTest {
             .put("enginesBefore", start.engines)
             .put("notRemovedEngines", measured.sumOf { it.notRemoved })
             .put("scriptThreadNames", JSONArray(GateMetrics.liveThreads().filter(GateMetrics::isScriptThread).map { it.name }.distinct().take(20)))
+        val native = nativeMetrics(nativeStart, nativeBaseline, nativeFinal, measured)
+        metrics.put("native", native)
         val reasons = JSONArray()
         if (retainedRuns.isNotEmpty()) reasons.put("retained runtimes ${retainedRuns.size}/${measured.size}")
         if (metrics.getLong("javaHeapDeltaBytes") > JAVA_HEAP_LIMIT) reasons.put("java heap +${mb(metrics.getLong("javaHeapDeltaBytes"))} MB")
@@ -203,6 +235,9 @@ class RuntimeLeakGateDeviceTest {
         if (metrics.getInt("scriptThreadDelta") > 0) reasons.put("script threads +${metrics.getInt("scriptThreadDelta")}")
         if (final.rhinoContexts >= 0 && start.rhinoContexts >= 0 && final.rhinoContexts > start.rhinoContexts) reasons.put("rhino contexts +${final.rhinoContexts - start.rhinoContexts}")
         if (final.engines > start.engines) reasons.put("live engines ${final.engines} (before ${start.engines})")
+        if (native.getInt("imagesLiveDelta") > 0) reasons.put("images not recycled +${native.getInt("imagesLiveDelta")}")
+        if (native.getInt("openMediaImages") > 0) reasons.put("open media images ${native.getInt("openMediaImages")}")
+        if (native.getLong("matsLiveDelta") > 0) reasons.put("live mats +${native.getLong("matsLiveDelta")}")
         val errors = runs.flatMap { it.errors }.distinct()
         val stopErrors = runs.flatMap { it.stopErrors }.distinct()
         val unstarted = runs.count { !it.started }
@@ -217,10 +252,63 @@ class RuntimeLeakGateDeviceTest {
         }
         if (stopErrors.isNotEmpty()) report.put("stopErrors", JSONArray(stopErrors.take(5)))
         report.put("interruptedRuns", runs.count { it.interrupted > 0 })
+        thresholds.put("imagesLiveDelta", 0).put("openMediaImages", 0).put("matsLiveDelta", 0)
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
+            .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
         if (retainedRuns.isNotEmpty() || retainedWarmups.isNotEmpty()) report.put("heap", heapEvidence(scenario, mode))
         return report
+    }
+
+    /**
+     * Host counters after every run; dumpsys meminfo and instance counts only where asked (they take 0.1-1 s).
+     * zh-CN: 每次运行后的宿主计数器; dumpsys meminfo 与实例数只在需要时采集 (各需 0.1-1 s).
+     */
+    private fun nativeSnapshot(meminfo: Boolean, instances: Boolean): JSONObject {
+        val snapshot = GateNativeProbe.counters()
+        if (meminfo) GateNativeProbe.meminfo(instrumentation)?.let { snapshot.put("meminfo", it) }
+        if (instances) snapshot.put("instances", GateNativeProbe.instanceCounts())
+        return snapshot
+    }
+
+    /**
+     * Native detail of a scenario (ROADMAP P3.1): counters against the start (images, open media images) or the
+     * sample after the warm-ups (Mats, meminfo categories), instance count deltas, the largest native peak inside a
+     * measured run and the maximum of each script statistic.
+     * zh-CN: 场景的原生明细 (路线图 P3.1): 计数器相对开始 (图像, 未关闭的 media image) 或预热后的采样 (Mat, meminfo 分类) 的增量,
+     * 实例数增量, 计数运行内的最大原生峰值, 以及每项脚本统计的最大值.
+     */
+    private fun nativeMetrics(start: JSONObject, baseline: JSONObject, final: JSONObject, measured: List<RunRecord>): JSONObject {
+        val result = JSONObject()
+            .put("imagesLiveDelta", final.getInt("imagesLive") - start.getInt("imagesLive"))
+            .put("openMediaImages", final.getInt("openMediaImages"))
+            .put("matsLiveDelta", final.getLong("matsLive") - baseline.getLong("matsLive"))
+            .put("matsCreated", final.getLong("matsCreated") - baseline.getLong("matsCreated"))
+            .put("nativePeakMaxBytes", measured.maxOfOrNull { it.nativePeakBytes } ?: 0L)
+        val before = baseline.optJSONObject("meminfo")
+        val after = final.optJSONObject("meminfo")
+        if (before != null && after != null) {
+            val deltas = JSONObject()
+            after.keys().forEach { key -> if (key.endsWith("Kb") && before.has(key)) deltas.put(key, after.getLong(key) - before.getLong(key)) }
+            result.put("meminfoDeltaKb", deltas)
+        }
+        val first = start.optJSONObject("instances")
+        val last = final.optJSONObject("instances")
+        if (first != null && last != null) {
+            val deltas = JSONObject()
+            last.keys().forEach { key ->
+                val a = first.optLong(key, -1)
+                val b = last.optLong(key, -1)
+                deltas.put(key, if (a < 0 || b < 0) JSONObject.NULL else b - a)
+            }
+            result.put("instanceDeltas", deltas)
+        }
+        val stats = JSONObject()
+        measured.flatMap { it.stats.entries }.groupBy({ it.key }, { it.value }).forEach { (key, values) ->
+            stats.put(key, values.maxOf { it })
+        }
+        if (stats.length() > 0) result.put("scriptStatsMax", stats)
+        return result
     }
 
     private fun runOnce(scenario: GateScenario, environment: GateEnvironment, mode: GateMode, index: Int, warmup: Boolean): RunRecord {
@@ -259,6 +347,7 @@ class RuntimeLeakGateDeviceTest {
                 created = window.created(), notRemoved = window.notRemoved(), errors = errors.toList(),
                 stopErrors = outcome.stopErrors.toList(), interrupted = outcome.interrupted.get(),
                 runtimes = window.runtimeReferences(), engines = window.engineReferences(),
+                stats = outcome.stats.mapValues { (it.value as? Number)?.toDouble() ?: 0.0 },
             )
         } finally {
             tracker.window = null
@@ -273,7 +362,10 @@ class RuntimeLeakGateDeviceTest {
         val marker = "memory-gate-${scenario.id}-${mode.label}-$index-${UUID.randomUUID()}"
         val listener = object : SimpleScriptExecutionListener() {
             override fun onStart(execution: ScriptExecution) {
-                (execution.engine as? JavaScriptEngine)?.runtime?.putProperty(GateScenario.READY_PROPERTY, ready)
+                (execution.engine as? JavaScriptEngine)?.runtime?.apply {
+                    putProperty(GateScenario.READY_PROPERTY, ready)
+                    putProperty(GateScenario.STATS_PROPERTY, outcome.stats)
+                }
                 started.countDown()
             }
 
@@ -311,7 +403,7 @@ class RuntimeLeakGateDeviceTest {
     // region Scenario requirements and fixtures
 
     private fun skipReason(scenario: GateScenario): String? = when (scenario.id) {
-        "S4a" -> if (captureAllowed) null else "screen capture needs MediaProjection consent for every run; " +
+        "S4a", "S4f" -> if (captureAllowed) null else "screen capture needs MediaProjection consent for every run; " +
             "pass memoryGateCapture=on once the maintainer has agreed how consent is given"
         "S6" -> if (Settings.canDrawOverlays(context)) null else "the host has no overlay permission"
         "S12" -> pluginSkipReason()
@@ -356,7 +448,7 @@ class RuntimeLeakGateDeviceTest {
      */
     private fun accessibilityRunning(scenario: GateScenario): Boolean {
         fun bound() = runCatching { AccessibilityService.hasInstance() }.getOrDefault(false)
-        if (scenario.id != "S7" || accessibilityWaitMs <= 0 || bound()) return bound()
+        if ((scenario.id != "S7" && !scenario.needsAccessibility) || accessibilityWaitMs <= 0 || bound()) return bound()
         val deadline = SystemClock.elapsedRealtime() + accessibilityWaitMs
         while (SystemClock.elapsedRealtime() < deadline) {
             instrumentation.runOnMainSync { Toast.makeText(context, ACCESSIBILITY_PROMPT, Toast.LENGTH_LONG).show() }
@@ -531,6 +623,9 @@ class RuntimeLeakGateDeviceTest {
         val stopErrors = ConcurrentLinkedQueue<String>()
         val interrupted = java.util.concurrent.atomic.AtomicInteger()
         val stopping = AtomicBoolean(false)
+
+        /** Values the script reports through gateStat(name, value). zh-CN: 脚本经 gateStat(name, value) 报告的数值. */
+        val stats = ConcurrentHashMap<String, Any>()
     }
 
     private class RunRecord(
@@ -548,8 +643,10 @@ class RuntimeLeakGateDeviceTest {
         val interrupted: Int,
         val runtimes: List<WeakReference<*>>,
         val engines: List<WeakReference<*>>,
+        val stats: Map<String, Double>,
     ) {
         var clearMs: Long? = null
+        var nativePeakBytes = 0L
 
         fun retained() = runtimes.any { it.get() != null } || engines.any { it.get() != null }
 
@@ -567,6 +664,8 @@ class RuntimeLeakGateDeviceTest {
             .put("errors", JSONArray(errors))
             .put("stopErrors", JSONArray(stopErrors))
             .put("interrupted", interrupted)
+            .put("nativePeakBytes", nativePeakBytes)
+            .put("stats", JSONObject(stats))
     }
 
     // endregion
@@ -575,7 +674,7 @@ class RuntimeLeakGateDeviceTest {
         const val STATUS_KEY = "aj6mem_json"
         const val STATUS_CODE = 2
         const val LOG_TAG = "AJ6MEM"
-        private const val SCHEMA_VERSION = 1
+        private const val SCHEMA_VERSION = 2
         private const val LOG_CHUNK = 3000
         private const val JAVA_HEAP_LIMIT = 2L * 1024 * 1024
         private const val NATIVE_HEAP_LIMIT = 4L * 1024 * 1024
@@ -592,7 +691,11 @@ class RuntimeLeakGateDeviceTest {
             "reachable); a final collection decides 'retained'. Heap deltas compare the sample after the last warm-up " +
             "with the final sample; thread, Rhino context and engine deltas compare with the sample before the first run. " +
             "Force mode waits for gateReady() (and all expected engines), sleeps forceDelayMs and calls forceStop on every " +
-            "live engine of the run on the main thread. Measurements are the temporary test implementation of ROADMAP P0.2."
+            "live engine of the run on the main thread. Measurements are the temporary test implementation of ROADMAP P0.2. " +
+            "Native detail (ROADMAP P3.1): host counters of images, open media images and Mats after every run, the native " +
+            "heap peak sampled every 20 ms inside each run, dumpsys meminfo of this process (through the UiAutomation shell) " +
+            "and VMDebug instance counts at the start, after the warm-ups and at the end; images and open media images must " +
+            "return to the start and live Mats to the value after the warm-ups."
 
         // tools/sdk37/fixtures/DexProbe.java (org.autojs.sdk37.fixture.DexProbe.value() == "SDK37_DEX_OK"),
         // the same bytes as AndroidClassLoaderRawDexDeviceTest.

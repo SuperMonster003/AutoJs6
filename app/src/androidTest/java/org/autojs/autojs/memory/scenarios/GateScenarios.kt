@@ -45,6 +45,11 @@ class GateScenario(
     val expectedEngines: Int = 1,
     val normalTimeoutMs: Long = 60_000,
     val notes: String = "",
+    /** The scenario needs the host accessibility service bound to the test process (skipped otherwise). */
+    val needsAccessibility: Boolean = false,
+    /** Fixed warm-up / measured run counts for long scenarios, overriding the runner arguments. */
+    val warmups: Int? = null,
+    val iterations: Int? = null,
     private val body: (GateEnvironment, GateMode) -> String,
 ) {
     /**
@@ -64,8 +69,10 @@ class GateScenario(
 
     companion object {
         const val READY_PROPERTY = "memory.gate.ready"
+        const val STATS_PROPERTY = "memory.gate.stats"
         const val KEEP_ALIVE = "setInterval(function () {}, 1000);"
-        private const val PRELUDE = "function gateReady() { var flag = runtime.getProperty('$READY_PROPERTY'); if (flag) flag.set(true); }"
+        private const val PRELUDE = "function gateReady() { var flag = runtime.getProperty('$READY_PROPERTY'); if (flag) flag.set(true); }\n" +
+            "function gateStat(name, value) { var stats = runtime.getProperty('$STATS_PROPERTY'); if (stats) stats.put(String(name), java.lang.Double.valueOf(Number(value))); }"
     }
 }
 
@@ -189,6 +196,36 @@ object GateScenarios {
             """
         },
         GateScenario(
+            "S4f", "captureScreen x 200 without recycle (issue #204)", "H5 / H14 / issue #204", capture = true,
+            normalTimeoutMs = 900_000, warmups = 1, iterations = 3,
+            notes = "N: 200 frames per run, none recycled explicitly; the script fails when a single capture takes longer than 15 s " +
+                "or when more than one media Image is open after a capture; F: capture until stopped",
+        ) { _, _ ->
+            """
+            if (!images.requestScreenCapture()) throw new Error('memory gate: screen capture was not granted');
+            gateReady();
+            var Wrapper = Packages.org.autojs.autojs.core.image.ImageWrapper;
+            var frames = 0, nulls = 0, slowest = 0, maxOpen = 0, total = Date.now();
+            while (FORCE || frames < 200) {
+                var begun = Date.now();
+                var shot = images.captureScreen();
+                var took = Date.now() - begun;
+                frames++;
+                if (!shot) nulls++;
+                if (took > slowest) slowest = took;
+                var open = Wrapper.openMediaImageCount();
+                if (open > maxOpen) maxOpen = open;
+                gateStat('frames', frames);
+                gateStat('nullFrames', nulls);
+                gateStat('slowestCaptureMs', slowest);
+                gateStat('maxOpenMediaImages', maxOpen);
+                if (took > 15000) throw new Error('memory gate: captureScreen took ' + took + ' ms (issue #204)');
+                if (open > 1) throw new Error('memory gate: ' + open + ' media images are open after a capture');
+            }
+            gateStat('totalMs', Date.now() - total);
+            """
+        },
+        GateScenario(
             "S5", "ui script with button, text and webview", "H10 / H13", ui = true,
             notes = "N: the script finishes its Activity; the run ends at ScriptExecuteActivity.onDestroy",
         ) { _, _ ->
@@ -235,6 +272,29 @@ object GateScenarios {
             }
             gateReady();
             if (!FORCE) setTimeout(function () { exit(); }, 300);
+            """
+        },
+        GateScenario(
+            "S7b", "className(...).find() loop on the accessibility tree", "H14 (AccessibilityNodeInfo)", needsAccessibility = true,
+            notes = "needs the host accessibility service; N: 30 rounds of find / findOnce / children / parent; F: rounds until stopped",
+        ) { _, _ ->
+            """
+            var nodes = 0;
+            gateReady();
+            for (var round = 0; FORCE || round < 30; round++) {
+                var found = className('android.widget.FrameLayout').find();
+                nodes += found.size();
+                var first = className('android.widget.FrameLayout').findOnce();
+                if (first) {
+                    var children = first.children();
+                    nodes += children.size();
+                    if (first.parent()) nodes++;
+                }
+                var texts = className('android.widget.TextView').find();
+                nodes += texts.size();
+                gateStat('nodes', nodes);
+                if (FORCE) sleep(20);
+            }
             """
         },
         GateScenario("S8", "JavaAdapter / interface adapters x 100 + runtime.loadDex", "H3") { env, _ ->

@@ -34,9 +34,11 @@ SCENARIOS = {
     "S4c": "s04cCopyClipResize",
     "S4d": "s04dMatchTemplateOneShot",
     "S4e": "s04eThreadedImages",
+    "S4f": "s04fCaptureScreenNoRecycle",
     "S5": "s05UiWithWebView",
     "S6": "s06Floaty",
     "S7": "s07EventsKeysSensors",
+    "S7b": "s07bSelectorFindLoop",
     "S8": "s08JavaAdapterAndDex",
     "S9": "s09ExecScriptFileChain",
     "S10": "s10HttpAndWebSocket",
@@ -44,6 +46,7 @@ SCENARIOS = {
     "S12": "s12PluginBinding",
 }
 MODES = {"normal": "N", "force": "F"}
+CAPTURE_SCENARIOS = {"S4a", "S4f"}
 DEVICE_DIR = "/sdcard/Android/data/{package}/files/memory-gate"
 
 
@@ -132,9 +135,35 @@ def summary_line(report):
     if report.get("status") == "skipped":
         return f"{scenario:<4} {mode} SKIPPED {'; '.join(report.get('reasons') or [])}"
     m = report.get("metrics") or {}
+    native = m.get("native") or {}
+    extra = (f" peak={mb(native.get('nativePeakMaxBytes'))}MB images={delta(native.get('imagesLiveDelta'))} "
+             f"media={native.get('openMediaImages')} mats={delta(native.get('matsLiveDelta'))}") if native else ""
     return (f"{scenario:<4} {mode} {status:<5} retained={m.get('retained')}/{report.get('iterations')} "
             f"java={mb(m.get('javaHeapDeltaBytes'))}MB native={mb(m.get('nativeHeapDeltaBytes'))}MB "
-            f"threads={delta(m.get('scriptThreadDelta'))} contexts={delta(m.get('rhinoContextDelta'))} engines={m.get('engines')}")
+            f"threads={delta(m.get('scriptThreadDelta'))} contexts={delta(m.get('rhinoContextDelta'))} engines={m.get('engines')}{extra}")
+
+
+def kb(value):
+    return "-" if value is None else f"{value / 1024:+.2f}"
+
+
+def native_cell(report):
+    """Native detail (ROADMAP P3.1): peak in run MB / meminfo Native Pss, Heap Alloc, Graphics, Unknown MB /
+    images, open media images, Mats / instance deltas Bitmap, cv Mat, AccessibilityNodeInfo."""
+    native = (report.get("metrics") or {}).get("native")
+    if not native:
+        return "-"
+    mem = native.get("meminfoDeltaKb") or {}
+    inst = native.get("instanceDeltas") or {}
+    memory = "/".join(kb(mem.get(key)) for key in ("nativePssKb", "nativeHeapAllocKb", "graphicsKb", "unknownPssKb")) if mem else "-"
+    instances = "/".join("-" if inst.get(key) is None else f"{inst[key]:+d}" for key in ("bitmap", "cvMat", "accessibilityNode")) if inst else "-"
+    return (f"{mb(native.get('nativePeakMaxBytes'))} | {memory} | {delta(native.get('imagesLiveDelta'))} / "
+            f"{native.get('openMediaImages', '-')} / {delta(native.get('matsLiveDelta'))} | {instances}")
+
+
+def stats_text(report):
+    stats = ((report.get("metrics") or {}).get("native") or {}).get("scriptStatsMax") or {}
+    return ", ".join(f"{key} {value:g}" for key, value in stats.items())
 
 
 def leak_lines(report):
@@ -165,7 +194,7 @@ def markdown(meta, reports, failures):
         *([f"- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during {', '.join(meta['projectionAppOp']['allowedDuring'])}, "
            f"before `{meta['projectionAppOp'].get('before')}`, afterwards `{meta['projectionAppOp'].get('restoredTo')}`"]
           if meta.get("projectionAppOp") else []),
-        f"- Warm-ups {meta['warmups']}, iterations {meta['iterations']}, poll {meta['pollMs']} ms, force delay {meta['forceDelayMs']} ms, capture {meta['capture']}",
+        f"- Warm-ups {meta['warmups']}, iterations {meta['iterations']}, poll {meta['pollMs']} ms, force delay {meta['forceDelayMs']} ms, capture {meta['capture']}, meminfo {meta.get('meminfo', 'off')}",
         "- Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)",
         "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start",
         "",
@@ -181,6 +210,17 @@ def markdown(meta, reports, failures):
                        if re.search(r"Fatal signal|Abort message|FATAL EXCEPTION", l)), "")
         detail = f"; {signal[:160]}".replace("|", "/") if signal else ""
         lines.append(f"| {item['scenario']} | {MODES.get(item['mode'], '?')} | no report | - | instrumentation {item['outcome']}{detail} |")
+    detailed = [report for report in reports if (report.get("metrics") or {}).get("native")]
+    if detailed:
+        lines += ["", "## Native detail (ROADMAP P3.1)", "",
+                  "- Peak: largest rise of the native heap inside a measured run (sampled every 20 ms, before the after-run GC)",
+                  "- Meminfo: dumpsys meminfo deltas in MB from the end of the warm-ups to the end: Native Heap Pss / Native Heap Alloc / Graphics / Unknown Pss",
+                  "- Counters: images not recycled (vs start) / open media images at the end / live Mats (vs end of warm-ups)",
+                  "- Instances: VMDebug instance count deltas from the start: Bitmap / org.opencv.core.Mat / AccessibilityNodeInfo",
+                  "", "| Scenario | Mode | Peak MB | Meminfo MB | Counters | Instances | Script stats (max) |",
+                  "| --- | --- | --- | --- | --- | --- | --- |"]
+        for report in detailed:
+            lines.append(f"| {report.get('scenario')} | {MODES.get(report.get('mode'), '?')} | {native_cell(report)} | {stats_text(report) or '-'} |")
     leaks = [(report, leak_lines(report)) for report in reports if leak_lines(report)]
     if leaks:
         lines += ["", "## Shortest strong reference paths (shark, exited ScriptRuntime instances)", ""]
@@ -286,12 +326,14 @@ def main():
     parser.add_argument("--out", type=Path, default=ROOT / "docs" / "memory" / "evidence")
     parser.add_argument("--wake", action="store_true", help="Send KEYCODE_WAKEUP before each scenario (no taps)")
     parser.add_argument("--one-process", action="store_true",
-                        help="Run all selected modes of a scenario in one instrumentation process (S7 with the accessibility service)")
+                        help="Run all selected scenarios and modes in one instrumentation process (S7 / S7b with the accessibility service)")
     parser.add_argument("--a11y-wait", type=int, default=0,
                         help="Seconds S7 waits, showing a toast, for the maintainer to turn the host accessibility service off and on")
     parser.add_argument("--keep-process", action="store_true",
                         help="Skip am force-stop around scenarios; force-stop removes the host accessibility service from the enabled list")
     parser.add_argument("--merge", action="store_true", help="Replace only the rerun scenarios in an existing report of the same name")
+    parser.add_argument("--meminfo", choices=("off", "phases", "runs"), default="phases",
+                        help="dumpsys meminfo of the test process at the start, after the warm-ups and at the end (phases), after every run as well (runs), or never")
     args = parser.parse_args()
     if args.label and not re.fullmatch(r"[a-z0-9-]{1,32}", args.label):
         parser.error("--label must be lower-case letters, digits or '-'")
@@ -326,8 +368,10 @@ def main():
     stamp = package_stamp(device, args.package)
     interrupted = None
     projection = {"allowedDuring": []}
-    for scenario in args.scenarios:
-        for mode in ([",".join(modes)] if args.one_process else modes):
+    groups = [(list(args.scenarios), ",".join(modes))] if args.one_process else [([s], m) for s in args.scenarios for m in modes]
+    for group, mode in groups:
+            scenario = "+".join(group)
+            pairs = [(s, m) for s in group for m in mode.split(",")]
             if interrupted:
                 break
             waited = 0
@@ -344,20 +388,21 @@ def main():
             if not args.keep_process:
                 device.shell("am", "force-stop", args.package)
             device.call("logcat", "-c")
-            capture = scenario == "S4a" and args.capture == "on"
+            capture = args.capture == "on" and any(s in CAPTURE_SCENARIOS for s in group)
             if capture:
                 projection.setdefault("before", projection_mode(device, args.package))
                 set_projection(device, args.package, "allow")
                 projection["allowedDuring"].append(f"{scenario} {mode}")
             command = ["am", "instrument", "-w", "-r",
-                       "-e", "class", f"{TEST_CLASS}#{SCENARIOS[scenario]}",
+                       "-e", "class", ",".join(f"{TEST_CLASS}#{SCENARIOS[s]}" for s in group),
                        "-e", "memoryGateRunId", run_id, "-e", "memoryGateModes", mode,
                        "-e", "memoryGateWarmups", str(args.warmups), "-e", "memoryGateIterations", str(args.iterations),
                        "-e", "memoryGatePollMs", str(args.poll_ms), "-e", "memoryGateForceDelayMs", str(args.force_delay_ms),
                        "-e", "memoryGateKeepHprof", "true" if args.hprof else "false",
                        "-e", "memoryGateAnalyze", "false" if args.no_analyze else "true",
                        "-e", "memoryGateCapture", args.capture,
-                       "-e", "memoryGateAccessibilityWaitMs", str(args.a11y_wait * 1000), runner]
+                       "-e", "memoryGateAccessibilityWaitMs", str(args.a11y_wait * 1000),
+                       "-e", "memoryGateMeminfo", args.meminfo, runner]
             try:
                 result = device.shell(*command, timeout=args.timeout)
             finally:
@@ -366,30 +411,36 @@ def main():
                     projection["restoredTo"] = projection_mode(device, args.package)
             text = result["stdout"] + result["stderr"]
             outcome = "timeout" if result.get("timeout") else test_outcome(text)
-            found = [r for r in parse_reports(text) if r.get("scenario") == scenario and r.get("mode") in mode.split(",")]
-            if not found:
-                local = args.out / f".{run_id}-{scenario}-{mode}.json"
-                pulled = device.call("pull", f"{device_dir}/{run_id}-{scenario}-{mode}.json", str(local))
+            found = [r for r in parse_reports(text) if (r.get("scenario"), r.get("mode")) in pairs]
+            for s, m in pairs:
+                if any((r.get("scenario"), r.get("mode")) == (s, m) for r in found):
+                    continue
+                local = args.out / f".{run_id}-{s}-{m}.json"
+                pulled = device.call("pull", f"{device_dir}/{run_id}-{s}-{m}.json", str(local))
                 if pulled["exitCode"] == 0 and local.is_file():
-                    found = [json.loads(local.read_text(encoding="utf-8"))]
+                    found.append(json.loads(local.read_text(encoding="utf-8")))
                     local.unlink()
-            if not found:
+            if len(found) < len(pairs):
                 logcat = device.call("logcat", "-d", "-v", "raw", "-s", f"{LOG_TAG}:I", timeout=60)
-                found = [r for r in parse_logcat_reports(logcat["stdout"], run_id) if r.get("scenario") == scenario and r.get("mode") in mode.split(",")]
+                seen = {(r.get("scenario"), r.get("mode")) for r in found}
+                found += [r for r in parse_logcat_reports(logcat["stdout"], run_id)
+                          if (r.get("scenario"), r.get("mode")) in pairs and (r.get("scenario"), r.get("mode")) not in seen]
+            found.sort(key=lambda r: pairs.index((r.get("scenario"), r.get("mode"))))
             for report in found:
                 report["instrumentation"] = outcome
                 reports.append(report)
                 print(summary_line(report))
                 for line in leak_lines(report)[:3]:
                     print(f"     {line[:220]}")
-            if not found:
+            missing = [pair for pair in pairs if pair not in {(r.get("scenario"), r.get("mode")) for r in found}]
+            if missing:
                 # The next scenario clears logcat, so keep the crash buffer of a crashed process now.
                 crash = device.call("logcat", "-d", "-b", "crash", "-v", "brief", timeout=60)["stdout"] if outcome == "crashed" else ""
                 start = max(crash.rfind("Fatal signal"), crash.rfind("*** *** ***"), crash.rfind("FATAL EXCEPTION"))
                 crash = crash[max(0, start - 200):][:8000] if start >= 0 else crash[-6000:]
-                failures.append({"scenario": scenario, "mode": mode, "outcome": outcome,
-                                 "tail": text[-1500:], "crashLog": crash})
-                print(f"{scenario:<4} {MODES[mode]} NO REPORT (instrumentation {outcome})")
+                for s, m in missing:
+                    failures.append({"scenario": s, "mode": m, "outcome": outcome, "tail": text[-1500:], "crashLog": crash})
+                    print(f"{s:<4} {MODES[m]} NO REPORT (instrumentation {outcome})")
                 for line in [l for l in crash.splitlines() if re.search(r"Fatal signal|Abort message|FATAL EXCEPTION", l)][:2]:
                     print(f"     {line[:220]}")
             if args.hprof:
@@ -420,7 +471,7 @@ def main():
             "device": {k: identity.get(k) for k in ("serial", "manufacturer", "model", "sdk", "release", "abiList", "emulator")},
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
-            "capture": args.capture, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
+            "capture": args.capture, "meminfo": args.meminfo, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
             **({"projectionAppOp": projection} if projection["allowedDuring"] else {})}
     stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
     if args.merge and (args.out / f"{stem}.json").is_file():
