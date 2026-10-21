@@ -100,7 +100,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val window = service.getWindow(event.windowId)
             if (window?.isFocused != false) {
-                setLatestComponent(event.packageName, event.className)
+                setLatestComponent(event.packageName, event.className, window != null)
                 return false
             }
         }
@@ -191,7 +191,7 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             ?: mLatestExternalPackage
     }
 
-    private fun setLatestComponent(latestPackage: CharSequence?, latestClass: CharSequence?) {
+    private fun setLatestComponent(latestPackage: CharSequence?, latestClass: CharSequence?, windowKnown: Boolean) {
         if (latestPackage == null)
             return
         val latestPackageStr = latestPackage.toString()
@@ -199,14 +199,14 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         if (isPackageExists(latestPackageStr)) {
             mLatestPackage = latestPackage.toString()
             mLatestActivity = latestClassStr
-            accessibilityIdentity = accessibilityIdentity.observe(latestPackageStr, latestClassStr) { pkg, name ->
+            accessibilityIdentity = accessibilityIdentity.observe(latestPackageStr, latestClassStr, { pkg, name ->
                 try {
                     val component = ComponentName(pkg, name)
                     if (SDK_INT >= TIRAMISU) mPackageManager.getActivityInfo(component, PackageManager.ComponentInfoFlags.of(0))
                     else @Suppress("DEPRECATION") mPackageManager.getActivityInfo(component, 0)
                     true
                 } catch (_: PackageManager.NameNotFoundException) { false }
-            }
+            }, windowKnown)
             setLatestExternalComponent(latestPackageStr, latestClassStr)
         }
         Log.d(LOG_TAG, "setLatestComponent: $latestPackage/$latestClassStr $mLatestPackage/$mLatestActivity")
