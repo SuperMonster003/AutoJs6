@@ -30,7 +30,11 @@ internal object RuntimeFlowPolicy {
                 if (action == "clickBounds") add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE)
                 if (action in setOf("copy", "cut", "paste") || action == "performAction" && args.optJSONArray(2)?.optInt(0) in setOf(16384, 32768, 65536)) add(NodeBridgePermissionManifest.CLIPBOARD)
             }
-            "globalAction" -> if (args.optString(0) !in setOf("back", "home", "recents")) add(NodeBridgePermissionManifest.KEYS)
+            "globalAction" -> when (args.optString(0)) {
+                in RuntimeFlowGestures.names -> add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE)
+                "back", "home", "recents" -> Unit
+                else -> add(NodeBridgePermissionManifest.KEYS)
+            }
         }
     }.distinct()
 }

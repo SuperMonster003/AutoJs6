@@ -2,9 +2,12 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.content.Intent
+import android.accessibilityservice.GestureDescription
+import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.ViewConfiguration
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.window.WindowRootProvider
@@ -128,7 +131,11 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
         val o = RuntimeFlowOptions(options, if (name == "nodeAction" || name == "globalAction") "action" else name)
         fun arg(i: Int) = RuntimeFlowJson.nullable(args.opt(i))
         fun targets() = RuntimeFlowJson.list(arg(0)).also { require(it.isNotEmpty()) }
-        val root = o.raw("root")?.let { bindings.find(it, null) ?: throw FlowError.InvalidTarget(name, reason = "root missing") }
+        val root = o.raw("root")?.let {
+            val snapshot = (it as? JSONObject)?.optJSONObject("__flowNode")
+            if (snapshot != null) arena.reference(snapshot, movingRoot = true)
+            else bindings.find(it, null) ?: throw FlowError.InvalidTarget(name, reason = "root missing")
+        }
         val bounds = "Bounds" in name
         val value: Any? = when (name) {
             "smartClick", "smartClickBounds" -> smart(kit.smartClick.click(kit.locate(arg(0), root, name, o.locate()), o.click(bounds), name, root))
@@ -160,7 +167,10 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
                 val action = args.getString(1)
                 val values = RuntimeFlowJson.list(arg(2)).map(RuntimeFlowJson::plain)
                 require(values.size in (FlowActions.NODE_ACTIONS[action] ?: error("Unknown node action")))
-                val node = bindings.find(arg(0), null) ?: throw FlowError.InvalidTarget(action)
+                val many = arg(0) is JSONArray
+                val targets = if (many) RuntimeFlowJson.list(arg(0)) else listOf(arg(0))
+                if (targets.isEmpty()) throw FlowError.InvalidTarget(action)
+                val nodes = targets.map { bindings.find(it, null) ?: throw FlowError.InvalidTarget(action) }
                 val humanize = o.humanize()
                 kit.pause(humanize)
                 val effective = if (action == "clickBounds") {
@@ -168,15 +178,32 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
                     listOf(((values.getOrNull(0) as? Number)?.toDouble() ?: 0.0) + humanize.offsetX(kit.random),
                         ((values.getOrNull(1) as? Number)?.toDouble() ?: 0.0) + humanize.offsetY(kit.random))
                 } else values
-                if (!act(node, action, effective) && o.bool("strict", true)) throw FlowError.ActionFailed(action)
-                node.value.refresh()
-                node
+                var succeeded = true
+                for (node in nodes) {
+                    val performed = act(node, action, effective)
+                    if (!performed && o.bool("strict", true)) throw FlowError.ActionFailed(action)
+                    succeeded = performed && succeeded
+                    node.value.refresh()
+                }
+                if (!succeeded) false else if (many) nodes else nodes.single()
             }
             "globalAction" -> {
                 val action = args.getString(0)
-                val code = GLOBAL_ACTIONS[action] ?: error("Unsupported global action")
+                val strokes = if (action in RuntimeFlowGestures.names) {
+                    RuntimeFlowGestures.parse(action, RuntimeFlowJson.list(arg(1)).map(RuntimeFlowJson::plain), ViewConfiguration.getTapTimeout().toLong()).map { stroke ->
+                        val path = Path().apply {
+                            stroke.points.forEachIndexed { index, (x, y) ->
+                                if (index == 0) moveTo(x.toFloat(), y.toFloat()) else lineTo(x.toFloat(), y.toFloat())
+                            }
+                        }
+                        GestureDescription.StrokeDescription(path, stroke.start, stroke.duration)
+                    }.toTypedArray()
+                } else null
+                val code = if (strokes == null) GLOBAL_ACTIONS[action] ?: error("Unsupported global action") else null
                 kit.pause(o.humanize())
-                if (!service().performGlobalAction(code) && o.bool("strict", true)) throw FlowError.ActionFailed(action)
+                service()
+                val succeeded = if (strokes != null) gesture().gestures(*strokes) else service().performGlobalAction(code!!)
+                if (!succeeded && o.bool("strict", true)) throw FlowError.ActionFailed(action)
                 true
             }
             else -> throw IllegalArgumentException("Unknown Flow tool: $name")

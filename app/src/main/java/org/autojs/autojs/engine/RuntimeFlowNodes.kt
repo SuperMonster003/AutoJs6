@@ -36,21 +36,12 @@ internal class RuntimeFlowNodes(private val check: () -> Unit, private val rootP
         val root = scope ?: root() ?: return emptyList()
         return DFS.search(root, filter, limit = if (all) Int.MAX_VALUE else 1, lifecycle = traversal)
     }
-    fun reference(snapshot: JSONObject): RuntimeFlowNode {
+    fun reference(snapshot: JSONObject, movingRoot: Boolean = false): RuntimeFlowNode {
         check()
         val root = root() ?: throw FlowError.InvalidTarget("target", reason = "window missing")
         require(snapshot.has("windowId")) { "Obtain a fresh Flow snapshot from the matching host before acting" }
         if (root.value.windowId != snapshot.getInt("windowId")) throw FlowError.InvalidTarget("target", reason = "window changed")
-        val identity = listOf("packageName", "className", "id", "text", "desc", "depth", "indexInParent", "bounds")
-        identity.forEach { require(snapshot.has(it)) { "Incomplete Flow node snapshot: $it" } }
-        fun matches(value: RuntimeFlowNode): Boolean {
-            val now = RuntimeFlowQuery.snapshot(value.value)
-            return identity.all { key -> if (key == "bounds") {
-                listOf("left", "top", "right", "bottom").all { coordinate ->
-                    now.getJSONObject(key).getInt(coordinate) == snapshot.getJSONObject(key).getInt(coordinate)
-                }
-            } else now.get(key).toString() == snapshot.get(key).toString() }
-        }
+        fun matches(value: RuntimeFlowNode) = RuntimeFlowNodeIdentity.matches(snapshot, RuntimeFlowQuery.snapshot(value.value), movingRoot)
         val filter = object : org.autojs.autojs.core.automator.filter.Filter {
             override fun filter(node: UiNode<*>): Boolean {
                 check()

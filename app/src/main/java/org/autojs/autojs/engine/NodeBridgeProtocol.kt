@@ -2092,7 +2092,20 @@ class AndroidNodeBridgeCapabilityProvider(
             "clickText" -> dispatchAccessibilityClickText(request)
             "flowProbe" -> {
                 val args = request.argsArray()
-                require(args.length() == 1) { "flowProbe requires one selector" }
+                require(args.length() in 1..2) { "flowProbe requires a selector and optional scope" }
+                if (args.length() == 2) {
+                    val response = JSONObject().put("available", true)
+                    try {
+                        RuntimeFlowNodes({}, {
+                            WindowRootProvider.default.activeRoot(A11yWindowRootPolicy())?.let { UiObject.createRoot(it) }
+                        }).use { arena ->
+                            response.put("value", RuntimeFlowPick.json(RuntimeFlowPick(arena).probe(args.getJSONObject(0), args.getJSONObject(1))))
+                        }
+                    } catch (error: org.autojs.autojs.core.automator.flow.FlowError) {
+                        response.put("error", RuntimeFlowJson.error(error))
+                    }
+                    return NodeBridgeResponse.success(request.id, response.toString())
+                }
                 val filter = RuntimeFlowQuery.filter(args.getJSONObject(0))
                 val json = withBridgeRoot { root ->
                     DFS.search(root, filter, limit = 1, lifecycle = NodeLifecycle.default).firstOrNull()
