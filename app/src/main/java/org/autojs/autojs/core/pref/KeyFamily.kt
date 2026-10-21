@@ -46,14 +46,18 @@ class KeyFamily<T : Any, K : PrefKey<T>>(val prefix: String, private val factory
     /** The name of the member for [suffix]. */
     fun nameOf(suffix: String): String = prefix + suffix
 
-    /** The member for [suffix] (a non-empty part after [prefix]). */
+    /**
+     * The member for [suffix]. An empty suffix names the key [prefix] itself, which callers that build names from an
+     * empty run-time part always wrote (R2); a family of every name needs a non-empty one.
+     * zh-CN: [suffix] 对应的成员. 空后缀即名为 [prefix] 本身的键 (运行时部分为空的调用方原先就写这个名称, R2); 全名称键族需要非空后缀.
+     */
     fun key(suffix: String): K {
-        require(suffix.isNotEmpty()) { "A member of $prefix needs a suffix" }
+        require(suffix.isNotEmpty() || prefix.isNotEmpty()) { "A member of a family of every name needs a name" }
         return factory(nameOf(suffix))
     }
 
-    /** True when [name] is a member: it starts with [prefix] and has something after it. */
-    fun matches(name: String): Boolean = name.length > prefix.length && name.startsWith(prefix)
+    /** True when [name] is a member: a non-empty name that starts with [prefix]. */
+    fun matches(name: String): Boolean = name.isNotEmpty() && name.startsWith(prefix)
 
     /** The part of [name] after [prefix], or null when [name] is no member. */
     fun suffixOf(name: String): String? = if (matches(name)) name.substring(prefix.length) else null

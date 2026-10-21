@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-21, 扫描基线: `master@541c6b0f2`
+- 生成日期: 2026-10-21, 扫描基线: `master@8ea5c2d23`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -179,11 +179,11 @@
 | `key_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isNightModeEnabled = isNightModeYes(app)` | `运行时: 缺键时 Pref 初始化写入系统当前是否夜间` | core/pref/Pref.kt:59 |  |
 | `key_nodejs_inspector_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:38 |  |
 | `key_nodejs_inspector_enabled` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:117 |  |
-| `key_plugin_center_auto_check_updates` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_auto_check_updates, "pref_plugin_center_auto_check_updates")` | `true` | core/pref/keys/PluginCenterKeys.kt:32 |  |
+| `key_plugin_center_auto_check_updates` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_auto_check_updates, "pref_plugin_center_auto_check_updates")` | `true` | core/pref/keys/PluginCenterKeys.kt:56 |  |
 | `key_plugin_center_auto_check_updates` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_auto_check_updates"` | `true` | res/xml/fragment_plugin_center_preferences.xml:29 |  |
-| `key_plugin_center_show_official_plugins` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_show_official_plugins, "pref_plugin_center_show_official_plugins")` | `true` | core/pref/keys/PluginCenterKeys.kt:20 |  |
+| `key_plugin_center_show_official_plugins` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_show_official_plugins, "pref_plugin_center_show_official_plugins")` | `true` | core/pref/keys/PluginCenterKeys.kt:44 |  |
 | `key_plugin_center_show_official_plugins` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_show_official_plugins"` | `true` | res/xml/fragment_plugin_center_preferences.xml:9 |  |
-| `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_show_third_party_plugins, "pref_plugin_center_show_third_party_plugins")` | `true` | core/pref/keys/PluginCenterKeys.kt:26 |  |
+| `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_show_third_party_plugins, "pref_plugin_center_show_third_party_plugins")` | `true` | core/pref/keys/PluginCenterKeys.kt:50 |  |
 | `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_show_third_party_plugins"` | `true` | res/xml/fragment_plugin_center_preferences.xml:16 |  |
 | `key_record_toast` | Boolean | R.bool | `boolResource(R.bool.pref_record_toast, "pref_record_toast")` | `true` | core/pref/keys/RecordKeys.kt:30 |  |
 | `key_record_toast` | Boolean | R.bool | `app:defaultValue="@bool/pref_record_toast"` | `true` | res/xml/fragment_preferences.xml:298 |  |
@@ -238,11 +238,16 @@
 | `key_$_ace_semantic_typescript_enabled` | Boolean | 伴生常量 (人工) | `DEFAULT_SEMANTIC_LANGUAGES[typescript]` | `true` | ui/edit/editor/ace/AceEditorLspPreferences.kt:123 |  |
 | `key_$_codegen_model_current_debug_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/LayoutInspectorKeys.kt:57 |  |
 | `key_$_editor_engine_selection_mode` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/EditorKeys.kt:103 |  |
+| `key_$_plugin_mount_enabled_$_` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/PluginCenterKeys.kt:228 |  |
 | `key_$_plugin_mount_enabled_$_` | Boolean | 调用处字面量 (人工) | `Pref.getBoolean(enabledKey(packageName), false)` | `false` | core/plugin/center/PluginMountStore.kt:32 |  |
+| `key_$_plugin_mount_object_name_$_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/PluginCenterKeys.kt:234 |  |
 | `key_$_plugin_mount_object_name_$_` | String | 调用处字面量 (人工) | `Pref.getStringOrNull(objectNameKey(packageName))` | `null` | core/plugin/center/PluginMountStore.kt:43 | 缺省时用 defaultObjectName(packageName) |
-| `key_$_plugin_mount_packages` | StringSet | 调用处字面量 | `emptySet()` | `[]` | core/plugin/center/PluginMountStore.kt:128 |  |
+| `key_$_plugin_mount_packages` | StringSet | 调用处字面量 | `SettingDefault.of(emptySet())` | `[]` | core/pref/keys/PluginCenterKeys.kt:223 |  |
+| `key_$_plugin_mount_point_$_` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/PluginCenterKeys.kt:240 |  |
 | `key_$_plugin_mount_point_$_` | String | 调用处字面量 (人工) | `Pref.getStringOrNull(mountPointKey(packageName))` | `null` | core/plugin/center/PluginMountStore.kt:61 | null 与 "global" 都表示全局挂载点 |
+| `key_$_plugin_update_check_$_` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/PluginCenterKeys.kt:246 |  |
 | `key_$_plugin_update_check_$_` | Boolean | 调用处字面量 (人工) | `isEnabled(packageName, defaultEnabled = true)` | `true` | core/plugin/center/PluginUpdateCheckStore.kt:12 |  |
+| `key_$_plugin_variant_priority_$_` | Json | 调用处字面量 | `SettingDefault.of(emptyList())` | `[]` | core/pref/keys/PluginCenterKeys.kt:256 |  |
 | `key_$_plugin_variant_priority_$_` | Json (JSON 数组) | 调用处字面量 (人工) | `Pref.getStringOrNull(key).orEmpty()` | `[]` | core/plugin/center/PluginVariantPriorityStore.kt:15 |  |
 | `r8_compiler_explicit_component` | String | 声明 | `SettingDefault.None` | `null` | core/pref/keys/DeveloperKeys.kt:62 |  |
 | `r8_compiler_explicit_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:58 |  |

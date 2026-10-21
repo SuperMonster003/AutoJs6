@@ -11,7 +11,6 @@ import android.os.SystemClock
 import android.util.Base64
 import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.core.content.edit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +23,7 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.util.RootUtils
@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 /** Per-plugin launcher preference. Stored component overrides preserve the chosen icon variant. */
 object PluginLauncherIconController {
     private const val TAG = "PluginLauncherIcons"
-    private const val PREFS = "plugin_launcher_icons"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
     private val initialized = AtomicBoolean(false)
@@ -46,7 +45,8 @@ object PluginLauncherIconController {
     private data class Saved(val show: Boolean, val states: Map<String, Int>, val identity: Identity)
     private class PermissionRequired : IllegalStateException()
 
-    private fun preferences(context: Context) = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    /** The choice of [packageName] in the named store `plugin_launcher_icons` ([PluginCenterKeys.LAUNCHER_ICON], P3.1). */
+    private fun choice(packageName: String) = PluginCenterKeys.LAUNCHER_ICON.key(packageName)
 
     @Suppress("DEPRECATION")
     private fun identity(context: Context, packageName: String): Identity {
@@ -55,7 +55,7 @@ object PluginLauncherIconController {
     }
 
     private fun saved(context: Context, packageName: String): Saved? = runCatching {
-        val json = preferences(context).getString(packageName, null)?.let(::JSONObject) ?: return@runCatching null
+        val json = choice(packageName).storedText()?.let(::JSONObject) ?: return@runCatching null
         val id = Identity(json.getInt("uid"), json.getLong("firstInstallTime"))
         if (id != identity(context, packageName)) return@runCatching null
         val states = json.getJSONObject("states")
@@ -103,7 +103,7 @@ object PluginLauncherIconController {
                     }) { context.getString(R.string.error_plugin_launcher_icon_not_applied) }
                     val json = JSONObject().put("show", show).put("uid", id.uid).put("firstInstallTime", id.firstInstallTime)
                         .put("states", JSONObject(restore))
-                    preferences(context).edit(commit = true) { putString(packageName, json.toString()) }
+                    choice(packageName).setStoredText(json.toString(), commit = true)
                 }
                 Result(true)
             } catch (failure: CancellationException) {
@@ -211,12 +211,12 @@ object PluginLauncherIconController {
         }
         ContextCompat.registerReceiver(app, object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                val name = intent.data?.schemeSpecificPart ?: return
+                val name = intent.data?.schemeSpecificPart?.takeIf { it.isNotEmpty() } ?: return
                 if (intent.action == Intent.ACTION_PACKAGE_REMOVED && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    preferences(app).edit { remove(name) }
+                    choice(name).remove()
                 } else schedule(name)
             }
         }, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
-        scope.launch { preferences(app).all.keys.forEach(::schedule) }
+        scope.launch { PluginCenterKeys.LAUNCHER_ICON.storedNames().forEach(::schedule) }
     }
 }

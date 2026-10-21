@@ -183,7 +183,25 @@ class SettingsDomainsTest {
             "mcp_server_trust_confirmation:*" to "false",
             "three_stove_agent_trust_confirmation:*" to "false",
             "bun_host_capability_grants:*" to null,
-        )
+            // P3.1: the plugin center stores. The primary sort P0.4 recorded as its reader's parameter "defaultSortOrdinal",
+            // whose default is Sort.defaultPrimarySort().ordinal; ascending and secondary sorts fall back per column
+            // (Sort.defaultAscending, defaultSecondarySort()), the mechanism / source secondaries to the defaults of
+            // their columns; hidden titles and sources, launcher icon choices: getString(key, null); suspension:
+            // getBoolean(key, false).
+            "plugin_center_visibility_state:key_\$_plugin_center_hidden_title_" to null,
+            "plugin_center_visibility_state:key_\$_plugin_center_hidden_source_" to null,
+            "plugin_launcher_icons:*" to null,
+            "plugin_center_enable_state:key_\$_suspended_plugin_\$_" to "false",
+        ) + listOf("", "_official", "_third_party").flatMap { list ->
+            val base = "plugin_center_sort_state:key_\$_plugin_center_sort_state$list"
+            listOf(
+                base to "Sort.defaultPrimarySort().ordinal",
+                "${base}_ascending_" to null,
+                "${base}_secondary_" to null,
+                "${base}_mechanism_secondary" to "Sort.MECHANISM.defaultSecondarySort().ordinal",
+                "${base}_source_secondary" to "Sort.SOURCE.defaultSecondarySort().ordinal",
+            )
+        }
 
         private lateinit var resources: AutoCloseable
         private lateinit var baselineDefaults: Map<String, List<Map<String, Any?>>>

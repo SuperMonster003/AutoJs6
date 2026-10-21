@@ -21,6 +21,37 @@ object NamedStores {
 
     private fun excluded(name: String) = SettingsStores.register(StoreId(name, excluded = true))
 
+    // Plugin center (P3.1, `PluginCenterKeys`).
+    // zh-CN: 插件中心 (P3.1, `PluginCenterKeys`).
+
+    /** Filters of the plugin list (`PluginFilterStore`). */
+    @JvmField
+    val PLUGIN_CENTER_FILTER_STATE = store("plugin_center_filter_state")
+
+    /** Sort memory of the three plugin lists: `PluginSortStore`, `PluginSortStoreOfficial` and `PluginSortStoreThirdParty` share this one file. */
+    @JvmField
+    val PLUGIN_CENTER_SORT_STATE = store("plugin_center_sort_state")
+
+    /** Hidden plugins (`PluginVisibilityStore`). */
+    @JvmField
+    val PLUGIN_CENTER_VISIBILITY_STATE = store("plugin_center_visibility_state")
+
+    /** Launcher icon choice per plugin (`PluginLauncherIconController`). */
+    @JvmField
+    val PLUGIN_LAUNCHER_ICONS = store("plugin_launcher_icons")
+
+    /** Enable and suspension state per plugin (`PluginEnableStore`, its own category `plugin_enable_state`). */
+    @JvmField
+    val PLUGIN_CENTER_ENABLE_STATE = store("plugin_center_enable_state")
+
+    /** Last install and uninstall times per plugin (`PluginRecentStore`, states). */
+    @JvmField
+    val PLUGIN_CENTER_RECENT = store("plugin_center_recent")
+
+    /** Temporary pins of new or failed plugins (`PluginCenterAttentionStore`, states). */
+    @JvmField
+    val PLUGIN_CENTER_ATTENTION = store("plugin_center_attention")
+
     // Credentials and authorizations (P3.4, `CredentialKeys`): sensitive, never selected by default (D2).
     // zh-CN: 凭据与授权 (P3.4, `CredentialKeys`): 敏感项, 默认不勾选 (D2).
 
@@ -82,6 +113,8 @@ object NamedStores {
     /** Every declared named store, in declaration order. */
     @JvmField
     val ALL: List<StoreId> = listOf(
+        PLUGIN_CENTER_FILTER_STATE, PLUGIN_CENTER_SORT_STATE, PLUGIN_CENTER_VISIBILITY_STATE, PLUGIN_LAUNCHER_ICONS,
+        PLUGIN_CENTER_ENABLE_STATE, PLUGIN_CENTER_RECENT, PLUGIN_CENTER_ATTENTION,
         GITHUB_AUTH, PLUGIN_CENTER_AUTHORIZATION, MCP_SERVER_TRUST_CONFIRMATION, THREE_STOVE_AGENT_TRUST_CONFIRMATION,
         BUN_HOST_CAPABILITY_GRANTS,
         DEVICE_ID_PREFS, SCRIPT_LOCAL_STORAGES, NODE_SCRIPT_STORAGES, LUA_SCRIPT_STORAGES, PRIVILEGED_EDIT_BACKUPS,

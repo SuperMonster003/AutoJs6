@@ -1,16 +1,21 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import org.autojs.autojs.core.pref.keys.NamedStores
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 
+/**
+ * Enable and suspension state per plugin in the named store `plugin_center_enable_state`, the key families
+ * [PluginCenterKeys.PLUGIN_ENABLED] and [PluginCenterKeys.PLUGIN_SUSPENDED] of the category `plugin_enable_state`
+ * (docs/settings/ROADMAP.md P3.1, names unchanged); the store is opened by the settings layer with the application
+ * context, as before.
+ */
 object PluginEnableStore {
 
-    private const val SP_NAME = "plugin_center_enable_state"
-
     fun isEnabled(context: Context, packageName: String, defaultEnabled: Boolean = true): Boolean {
-        val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
-        val enabled = sp.getBoolean(key(packageName), defaultEnabled)
+        val enabled = key(packageName).storedOrNull() ?: defaultEnabled
         if (enabled && !PluginLocalNetworkPermission.isGranted(context, packageName)) {
             setEnabled(context, packageName, false)
             return false
@@ -20,12 +25,11 @@ object PluginEnableStore {
 
     /** The user's switch or a policy decision; it also clears a suspension. zh-CN: 用户开关或策略决定; 同时清除挂起. */
     fun setEnabled(context: Context, packageName: String, enabled: Boolean) {
-        val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
         val key = key(packageName)
         val allowed = enabled && PluginLocalNetworkPermission.isGranted(context, packageName)
-        val wasSuspended = sp.getBoolean(suspendedKey(packageName), false)
-        if (sp.contains(key) && sp.getBoolean(key, true) == allowed && !wasSuspended) return
-        write(sp, packageName, PluginEnableSuspension.onDecision(allowed))
+        val wasSuspended = suspendedKey(packageName).get()
+        if (key.isStored() && key.get() == allowed && !wasSuspended) return
+        write(packageName, PluginEnableSuspension.onDecision(allowed))
         PluginStateChangeRegistry.notifyChanged(packageName)
     }
 
@@ -38,7 +42,7 @@ object PluginEnableStore {
         val current = PluginEnableSuspension.State(isEnabled(context, packageName, defaultEnabled), isSuspended(context, packageName))
         val next = PluginEnableSuspension.onUnreachable(current)
         if (next == current) return
-        write(context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE), packageName, next)
+        write(packageName, next)
         PluginStateChangeRegistry.notifyChanged(packageName)
     }
 
@@ -48,25 +52,27 @@ object PluginEnableStore {
      * zh-CN: 发现重新连上插件后恢复被挂起的插件; 重新启用时返回 true. 调用方已检查授权与宿主版本.
      */
     fun restoreIfSuspended(context: Context, packageName: String): Boolean {
-        val sp = context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
-        val current = PluginEnableSuspension.State(sp.getBoolean(key(packageName), false), isSuspended(context, packageName))
+        val current = PluginEnableSuspension.State(key(packageName).storedOrNull() ?: false, isSuspended(context, packageName))
         val next = PluginEnableSuspension.onReachable(current, usable = PluginLocalNetworkPermission.isGranted(context, packageName))
         if (next == current) return false
-        write(sp, packageName, next)
+        write(packageName, next)
         PluginStateChangeRegistry.notifyChanged(packageName)
         return next.enabled
     }
 
-    fun isSuspended(context: Context, packageName: String): Boolean =
-        context.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE).getBoolean(suspendedKey(packageName), false)
+    @Suppress("UNUSED_PARAMETER")
+    fun isSuspended(context: Context, packageName: String): Boolean = suspendedKey(packageName).get()
 
-    private fun write(sp: SharedPreferences, packageName: String, state: PluginEnableSuspension.State) = sp.edit {
-        putBoolean(key(packageName), state.enabled)
-        if (state.suspended) putBoolean(suspendedKey(packageName), true) else remove(suspendedKey(packageName))
+    /** One write of both keys, as the single SharedPreferences edit before. */
+    private fun write(packageName: String, state: PluginEnableSuspension.State) = SettingsStores[NamedStores.PLUGIN_CENTER_ENABLE_STATE].edit {
+        this[key(packageName)] = state.enabled
+        if (state.suspended) this[suspendedKey(packageName)] = true else remove(suspendedKey(packageName).name)
     }
 
-    private fun key(packageName: String) = "key_\$_enabled_plugin_\$_$packageName"
+    /** `key_$_enabled_plugin_$_<package name>`. */
+    private fun key(packageName: String) = PluginCenterKeys.PLUGIN_ENABLED.key(packageName)
 
-    private fun suspendedKey(packageName: String) = "key_\$_suspended_plugin_\$_$packageName"
+    /** `key_$_suspended_plugin_$_<package name>`. */
+    private fun suspendedKey(packageName: String) = PluginCenterKeys.PLUGIN_SUSPENDED.key(packageName)
 
 }

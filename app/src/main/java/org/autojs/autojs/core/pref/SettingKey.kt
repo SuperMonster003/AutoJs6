@@ -144,6 +144,29 @@ sealed class PrefKey<T : Any>(
         settingsStore.remove(name, commit)
     }
 
+    /**
+     * The stored text of a [SettingType.Json] key as it is, or null when absent; a value of another type throws
+     * [ClassCastException] like `getString`. For readers that keep parsing the text themselves (with org.json, so that
+     * lenient inputs and the written text stay as they were, R1 / R2, P3).
+     * zh-CN: 原样返回 [SettingType.Json] 键存储的文本, 不存在时为 null; 其他类型的存储值与 `getString` 一样抛 [ClassCastException].
+     * 供仍自行解析文本的读取方使用 (仍用 org.json, 使宽松输入与写出的文本保持原样, R1 / R2, P3).
+     */
+    fun storedText(): String? {
+        check(type is SettingType.Json<*>) { "$name is not a Json key" }
+        return settingsStore.getString(name, null)
+    }
+
+    /**
+     * Writes [text] as the stored text of a [SettingType.Json] key without encoding it (null removes the key); for the
+     * writers of [storedText]. [commit] as in [set].
+     * zh-CN: 不经编码直接写入 [SettingType.Json] 键的文本 (null 即删除), 供 [storedText] 的写入方使用; [commit] 同 [set].
+     */
+    @JvmOverloads
+    fun setStoredText(text: String?, commit: Boolean = false) {
+        check(type is SettingType.Json<*>) { "$name is not a Json key" }
+        settingsStore.put(name, text, commit)
+    }
+
     override fun toString(): String = "${javaClass.simpleName}($name, ${type.tag}, $store)"
 }
 

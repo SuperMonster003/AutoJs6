@@ -88,6 +88,19 @@ object SettingsJson {
     }
 
     /**
+     * A JSON array of plain values (P3.1: the pins of the plugin center attention ledger).
+     * zh-CN: 普通值组成的 JSON 数组 (P3.1: 插件中心临时置顶记录).
+     */
+    @JvmField
+    val ARRAY: Codec<List<Any?>> = object : Codec<List<Any?>> {
+        override fun encode(value: List<Any?>): Any = ArrayList(value)
+        override fun decode(json: Any?): List<Any?> {
+            if (json !is List<*>) throw SettingsJsonException("Expected an array, got ${describeType(json)}")
+            return json
+        }
+    }
+
+    /**
      * Parses one JSON document into a plain value; throws [SettingsJsonException] for malformed text.
      * zh-CN: 把一个 JSON 文档解析为普通值; 文本格式错误时抛 [SettingsJsonException].
      */

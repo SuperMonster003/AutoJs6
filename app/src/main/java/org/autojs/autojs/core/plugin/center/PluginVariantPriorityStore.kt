@@ -1,18 +1,21 @@
 package org.autojs.autojs.core.plugin.center
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys
 import org.json.JSONArray
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 21, 2026.
+ *
+ * The variant priority per engine in the default preferences, the key family [PluginCenterKeys.VARIANT_PRIORITY]
+ * (docs/settings/ROADMAP.md P3.1, names unchanged); the JSON array text is still read and written with org.json here.
  */
 object PluginVariantPriorityStore {
 
-    private const val KEY_PREFIX = "key_\$_plugin_variant_priority_\$_"
+    private val family = PluginCenterKeys.VARIANT_PRIORITY
 
     fun getOrder(engine: String?): List<String> {
         val key = keyOf(engine) ?: return emptyList()
-        val text = Pref.getStringOrNull(key).orEmpty().trim()
+        val text = key.storedText().orEmpty().trim()
         if (text.isBlank()) return emptyList()
         return parseOrderText(text)
     }
@@ -21,12 +24,12 @@ object PluginVariantPriorityStore {
         val key = keyOf(engine) ?: return
         val normalized = packageNames.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
         if (normalized.isEmpty()) {
-            Pref.remove(key)
+            key.remove()
             return
         }
         val arr = JSONArray()
         normalized.forEach { arr.put(it) }
-        Pref.putString(key, arr.toString())
+        key.setStoredText(arr.toString())
     }
 
     fun <T> selectByPriority(
@@ -75,8 +78,8 @@ object PluginVariantPriorityStore {
         var bestScore = 0
         var bestKeyLength = 0
 
-        Pref.get().all.forEach { (key, value) ->
-            if (!key.startsWith(KEY_PREFIX)) return@forEach
+        family.settingsStore.all().forEach { (key, value) ->
+            if (!family.matches(key)) return@forEach
             val text = value as? String ?: return@forEach
             val order = parseOrderText(text)
             if (order.isEmpty()) return@forEach
@@ -97,10 +100,7 @@ object PluginVariantPriorityStore {
         return raw.replace(Regex("\\D"), "").toIntOrNull() ?: 0
     }
 
-    private fun keyOf(engine: String?): String? {
-        val normalized = normalizeKey(engine) ?: return null
-        return "$KEY_PREFIX$normalized"
-    }
+    private fun keyOf(engine: String?) = normalizeKey(engine)?.let(family::key)
 
     private fun parseOrderText(text: String): List<String> {
         val normalizedText = text.trim()

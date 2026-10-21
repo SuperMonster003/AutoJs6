@@ -122,6 +122,53 @@ function compareKey(id, k, oldRead) {
     });
 }
 
+var Registry = org.autojs.autojs.core.pref.SettingsRegistry;
+var NamedStores = Keys.NamedStores;
+
+function storeId(storeName) {
+    var all = NamedStores.ALL;
+    for (var i = 0; i < all.size(); i++) if (String(all.get(i).getName()) === storeName) return all.get(i);
+    throw new Error('store not declared: ' + storeName);
+}
+
+// The declared key of [name] in the store [id]: a key declared on its own, else the member of its key family.
+function declaredKeyOf(name, id) {
+    var k = Registry.find(name, id);
+    if (k) return k;
+    var family = Registry.findFamily(name, id);
+    return family ? family.key(family.suffixOf(name)) : null;
+}
+
+// Every raw entry of a named store (or the entries of the default store that [filter] accepts) is declared and reads
+// the same through its declared key as through the raw SharedPreferences: the old values stay readable (R1). Only
+// counts are printed.
+function compareStore(storeName, filter) {
+    check('stored-entries-' + storeName, function () {
+        var id = storeName === 'default' ? org.autojs.autojs.core.pref.store.StoreId.DEFAULT : storeId(storeName);
+        var names = prefs(storeName).getAll().keySet().toArray();
+        var compared = 0, undeclared = 0, differ = 0;
+        for (var i = 0; i < names.length; i++) {
+            var name = String(names[i]);
+            if (filter && !filter(name)) continue;
+            var k = declaredKeyOf(name, id);
+            if (!k) { undeclared++; continue; }
+            var tag = String(k.getType().getTag());
+            var raw = rawOf(storeName, name, tag === 'json' ? 'string' : tag);
+            var actual = tag === 'json' ? k.storedText() : k.storedOrNull();
+            if (tag === 'stringSet') {
+                var items = [];
+                var it = actual.iterator();
+                while (it.hasNext()) items.push(String(it.next()));
+                actual = items.sort();
+            }
+            if (!sameRaw(raw.v, tag === 'bool' ? actual === true || String(actual) === 'true' : (tag === 'int' || tag === 'float') ? Number(actual) : (tag === 'stringSet' ? actual : String(actual)))) differ++;
+            compared++;
+        }
+        info(storeName + ': ' + compared + ' entries compared, ' + undeclared + ' undeclared, ' + differ + ' differ');
+        return undeclared === 0 && differ === 0 || undeclared + ' undeclared, ' + differ + ' differ';
+    });
+}
+
 // ------------------------------------------------------------------------------------------------------- groups
 
 var GROUPS = {
@@ -179,6 +226,86 @@ var GROUPS = {
             });
         }
     },
+};
+
+// P3.1: the plugin center stores; the sort of all plugins, a hidden probe plugin and the automatic mount of the probe
+// are changed.
+GROUPS.plugin_center = function () {
+    var P = Keys.PluginCenterKeys;
+    var center = org.autojs.autojs.core.plugin.center;
+    var Sort = center.PluginCenterFragment.Sort;
+    var probe = 'org.autojs.settings.probe.plugin';
+    var families = [P.MOUNT_ENABLED, P.MOUNT_OBJECT_NAME, P.MOUNT_POINT, P.UPDATE_CHECK, P.VARIANT_PRIORITY];
+    if (AJ6_PHASE === 'change') {
+        ['plugin_center_filter_state', 'plugin_center_sort_state', 'plugin_center_visibility_state', 'plugin_launcher_icons',
+            'plugin_center_enable_state', 'plugin_center_recent', 'plugin_center_attention'].forEach(function (name) { compareStore(name); });
+        compareStore('default', function (name) {
+            return name === String(P.MOUNT_PACKAGES.getName()) || families.some(function (f) { return f.matches(name); });
+        });
+        check('plugin-center-readers', function () {
+            var sp = prefs('plugin_center_sort_state');
+            var lists = [[center.PluginSortStore.INSTANCE, P.SORT_ALL], [center.PluginSortStoreOfficial.INSTANCE, P.SORT_OFFICIAL], [center.PluginSortStoreThirdParty.INSTANCE, P.SORT_THIRD_PARTY]];
+            var bad = lists.filter(function (l) {
+                return !same(l[0].getSortOrdinal(context, Sort.Companion.defaultPrimarySort().ordinal()), sp.getInt(l[1].sort.getName(), Sort.Companion.defaultPrimarySort().ordinal()));
+            });
+            if (bad.length) return 'sort ordinal differs';
+            var hidden = prefs('plugin_center_visibility_state').getStringSet(P.HIDDEN_PACKAGES.getName(), new java.util.HashSet());
+            if (!same(center.PluginVisibilityStore.INSTANCE.hiddenCount(context), hidden.size())) return 'hidden count differs';
+            return true;
+        });
+        check('plugin-center-change', function () {
+            record('plugin_center_sort_state', P.SORT_ALL.sort.getName(), 'int');
+            record('plugin_center_visibility_state', P.HIDDEN_PACKAGES.getName(), 'stringSet');
+            record('plugin_center_visibility_state', P.HIDDEN_TITLE.nameOf(probe), 'string');
+            record('plugin_center_visibility_state', P.HIDDEN_SOURCE.nameOf(probe), 'string');
+            record('default', P.MOUNT_PACKAGES.getName(), 'stringSet');
+            record('default', P.MOUNT_ENABLED.nameOf(probe), 'bool');
+            // Scripts started before the restore apply the automatic mounts, which may switch the probe off.
+            record('plugin_center_enable_state', P.PLUGIN_ENABLED.nameOf(probe), 'bool');
+            var Store = center.PluginSortStore.INSTANCE;
+            var current = String(Store.getSort(context, Sort.Companion.defaultPrimarySort().ordinal()).name());
+            var sort = current === 'TITLE_ASC' ? Sort.PACKAGE_NAME_ASC : Sort.TITLE_ASC;
+            Store.setSort(context, sort);
+            center.PluginVisibilityStore.INSTANCE.hide(context, probe, 'Settings probe', null);
+            center.PluginMountStore.INSTANCE.setEnabled(probe, true);
+            state.expected.plugin_center = { sort: String(sort.name()), probe: probe };
+            return true;
+        });
+    } else {
+        var expected = state.expected.plugin_center;
+        check('plugin-center-sort-after-restart', function () {
+            return same(center.PluginSortStore.INSTANCE.getSort(context, Sort.Companion.defaultPrimarySort().ordinal()).name(), expected.sort) || 'sort lost';
+        });
+        check('plugin-center-hidden-after-restart', function () {
+            var V = center.PluginVisibilityStore.INSTANCE;
+            if (!V.isHidden(context, expected.probe)) return 'probe not hidden';
+            var list = V.listHidden(context);
+            for (var i = 0; i < list.size(); i++) {
+                if (String(list.get(i).getPackageName()) === expected.probe) return same(list.get(i).getTitle(), 'Settings probe') || 'title lost';
+            }
+            return 'probe not listed';
+        });
+        check('plugin-center-mount-after-restart', function () {
+            var M = center.PluginMountStore.INSTANCE;
+            if (!M.isEnabled(expected.probe)) return 'mount switch lost';
+            var configs = M.listEnabledConfigs();
+            for (var i = 0; i < configs.size(); i++) if (String(configs.get(i).getPackageName()) === expected.probe) return true;
+            return 'probe not tracked';
+        });
+    }
+};
+
+// P3.4: the credential stores are compared only (no change, no value printed).
+GROUPS.credentials = function () {
+    if (AJ6_PHASE !== 'change') return;
+    ['github_auth', 'plugin_center_authorization', 'mcp_server_trust_confirmation', 'three_stove_agent_trust_confirmation',
+        'bun_host_capability_grants'].forEach(function (name) { compareStore(name); });
+    check('credentials-readers', function () {
+        var token = org.autojs.autojs.network.GitHubTokenStore.getToken(context);
+        var raw = prefs('github_auth').getString('github_token', null);
+        // Compared as present / absent only: the token itself is never printed (R6).
+        return (token === null) === (raw === null || String(raw).trim() === '') || 'token presence differs';
+    });
 };
 
 info('phase ' + AJ6_PHASE + ', groups ' + AJ6_GROUPS.join(','));

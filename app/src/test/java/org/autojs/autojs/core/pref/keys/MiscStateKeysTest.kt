@@ -57,7 +57,8 @@ class MiscStateKeysTest : DomainKeysTestBase() {
 
     @Test
     fun pluginCenterSettingsPage() {
-        assertEquals(3, PluginCenterKeys.keys.size)
+        // The settings page keys; the named stores of the plugin center follow (P3.1, PluginCenterStoresTest).
+        assertEquals(PluginCenterKeys.keys.take(3), listOf(PluginCenterKeys.PLUGIN_CENTER_SHOW_OFFICIAL_PLUGINS, PluginCenterKeys.PLUGIN_CENTER_SHOW_THIRD_PARTY_PLUGINS, PluginCenterKeys.PLUGIN_CENTER_AUTO_CHECK_UPDATES))
         assertTrue(PluginOnlineSettingsStore.isOfficialEnabled())
         assertTrue(PluginOnlineSettingsStore.isThirdPartyEnabled())
         assertTrue(PluginOnlineSettingsStore.isAutoCheckUpdatesEnabled())

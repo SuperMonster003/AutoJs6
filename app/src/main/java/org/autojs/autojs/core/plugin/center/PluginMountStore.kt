@@ -1,19 +1,17 @@
 package org.autojs.autojs.core.plugin.center
 
-import androidx.core.content.edit
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.3-Codex (xhigh)) on Mar 21, 2026.
+ *
+ * Automatic mounts in the default preferences: the package list [PluginCenterKeys.MOUNT_PACKAGES] and the key families
+ * [PluginCenterKeys.MOUNT_ENABLED], [PluginCenterKeys.MOUNT_OBJECT_NAME] and [PluginCenterKeys.MOUNT_POINT] per
+ * package name (docs/settings/ROADMAP.md P3.1, names and value types unchanged).
  */
 object PluginMountStore {
 
     const val GLOBAL_MOUNT_POINT = "global"
-
-    private const val KEY_PACKAGES = "key_\$_plugin_mount_packages"
-    private const val KEY_ENABLED_PREFIX = "key_\$_plugin_mount_enabled_\$_"
-    private const val KEY_OBJECT_NAME_PREFIX = "key_\$_plugin_mount_object_name_\$_"
-    private const val KEY_MOUNT_POINT_PREFIX = "key_\$_plugin_mount_point_\$_"
 
     data class MountConfig(
         val packageName: String,
@@ -29,18 +27,18 @@ object PluginMountStore {
 
     fun isEnabled(packageName: String): Boolean {
         if (packageName.isBlank()) return false
-        return Pref.getBoolean(enabledKey(packageName), false)
+        return enabledKey(packageName).get()
     }
 
     fun setEnabled(packageName: String, enabled: Boolean) {
         if (packageName.isBlank()) return
         touchPackage(packageName)
-        Pref.putBoolean(enabledKey(packageName), enabled)
+        enabledKey(packageName).set(enabled)
     }
 
     fun getObjectName(packageName: String): String? {
         if (packageName.isBlank()) return null
-        return Pref.getStringOrNull(objectNameKey(packageName))
+        return objectNameKey(packageName).storedOrNull()
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
     }
@@ -50,15 +48,15 @@ object PluginMountStore {
         touchPackage(packageName)
         val value = objectName?.trim().orEmpty()
         if (value.isBlank()) {
-            Pref.remove(objectNameKey(packageName))
+            objectNameKey(packageName).remove()
         } else {
-            Pref.putString(objectNameKey(packageName), value)
+            objectNameKey(packageName).set(value)
         }
     }
 
     fun getMountPoint(packageName: String): String? {
         if (packageName.isBlank()) return null
-        return normalizeMountPoint(Pref.getStringOrNull(mountPointKey(packageName)))
+        return normalizeMountPoint(mountPointKey(packageName).storedOrNull())
     }
 
     fun setMountPoint(packageName: String, mountPoint: String?) {
@@ -66,9 +64,9 @@ object PluginMountStore {
         touchPackage(packageName)
         val normalized = normalizeMountPoint(mountPoint)
         if (normalized == null) {
-            Pref.remove(mountPointKey(packageName))
+            mountPointKey(packageName).remove()
         } else {
-            Pref.putString(mountPointKey(packageName), normalized)
+            mountPointKey(packageName).set(normalized)
         }
     }
 
@@ -120,17 +118,17 @@ object PluginMountStore {
     private fun touchPackage(packageName: String) {
         val set = allTrackedPackages().toMutableSet()
         if (set.add(packageName)) {
-            Pref.get().edit { putStringSet(KEY_PACKAGES, set) }
+            PluginCenterKeys.MOUNT_PACKAGES.set(set)
         }
     }
 
     private fun allTrackedPackages(): Set<String> {
-        return Pref.get().getStringSet(KEY_PACKAGES, emptySet())?.toSet().orEmpty()
+        return PluginCenterKeys.MOUNT_PACKAGES.get().toSet()
     }
 
-    private fun enabledKey(packageName: String) = "$KEY_ENABLED_PREFIX$packageName"
+    private fun enabledKey(packageName: String) = PluginCenterKeys.MOUNT_ENABLED.key(packageName)
 
-    private fun objectNameKey(packageName: String) = "$KEY_OBJECT_NAME_PREFIX$packageName"
+    private fun objectNameKey(packageName: String) = PluginCenterKeys.MOUNT_OBJECT_NAME.key(packageName)
 
-    private fun mountPointKey(packageName: String) = "$KEY_MOUNT_POINT_PREFIX$packageName"
+    private fun mountPointKey(packageName: String) = PluginCenterKeys.MOUNT_POINT.key(packageName)
 }

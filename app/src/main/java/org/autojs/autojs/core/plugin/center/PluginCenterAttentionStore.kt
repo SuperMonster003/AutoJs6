@@ -2,7 +2,12 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.util.Log
-import androidx.core.content.edit
+import org.autojs.autojs.core.pref.keys.NamedStores
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.ATTENTION_INITIALIZED_SOURCES
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.ATTENTION_KNOWN_FIRST_INSTALL_TIMES
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.ATTENTION_PINS
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -10,15 +15,13 @@ import java.util.UUID
 /**
  * Persists the [PluginCenterAttentionLedger] of this host, shared by the Plugin Center tab and page.
  * zh-CN: 持久化本宿主的 [PluginCenterAttentionLedger], 由插件中心标签页与独立页面共用.
+ *
+ * The ledger is the named store `plugin_center_attention`, three states of [org.autojs.autojs.core.pref.keys.PluginCenterKeys]
+ * (docs/settings/ROADMAP.md P3.1, names unchanged); the JSON texts are still written and parsed with org.json here.
  */
 internal object PluginCenterAttentionStore {
 
     private const val TAG = "PluginCenterAttention"
-    private const val SP = "plugin_center_attention"
-    private const val KEY_KNOWN = "known_first_install_times"
-    private const val KEY_INITIALIZED = "initialized_sources"
-    private const val KEY_PINS = "pins"
-
     private val processToken = UUID.randomUUID().toString()
 
     private var ledger: PluginCenterAttentionLedger? = null
@@ -72,13 +75,13 @@ internal object PluginCenterAttentionStore {
         persist(context, loaded)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun load(context: Context): PluginCenterAttentionLedger {
-        val prefs = context.getSharedPreferences(SP, Context.MODE_PRIVATE)
         return runCatching {
-            val known = JSONObject(prefs.getString(KEY_KNOWN, null) ?: "{}").let { json ->
+            val known = JSONObject(ATTENTION_KNOWN_FIRST_INSTALL_TIMES.storedText() ?: "{}").let { json ->
                 json.keys().asSequence().associateWith { json.getLong(it) }
             }
-            val pins = JSONArray(prefs.getString(KEY_PINS, null) ?: "[]").let { array ->
+            val pins = JSONArray(ATTENTION_PINS.storedText() ?: "[]").let { array ->
                 (0 until array.length()).map { index ->
                     val json = array.getJSONObject(index)
                     PluginCenterAttentionLedger.Pin(
@@ -89,7 +92,7 @@ internal object PluginCenterAttentionStore {
                     )
                 }
             }
-            PluginCenterAttentionLedger(processToken, known, prefs.getStringSet(KEY_INITIALIZED, null).orEmpty(), pins)
+            PluginCenterAttentionLedger(processToken, known, ATTENTION_INITIALIZED_SOURCES.storedOrNull().orEmpty(), pins)
         }.getOrElse { error ->
             // An unreadable record starts over: the next comparison only records what is installed.
             // zh-CN: 记录无法读取时重新开始: 下一次比对只记录已安装的包.
@@ -98,6 +101,7 @@ internal object PluginCenterAttentionStore {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun persist(context: Context, ledger: PluginCenterAttentionLedger) {
         val known = JSONObject().apply { ledger.knownFirstInstallTimes().forEach { (name, time) -> put(name, time) } }
         val pins = JSONArray().apply {
@@ -110,10 +114,11 @@ internal object PluginCenterAttentionStore {
                 })
             }
         }
-        context.getSharedPreferences(SP, Context.MODE_PRIVATE).edit {
-            putString(KEY_KNOWN, known.toString())
-            putStringSet(KEY_INITIALIZED, ledger.initializedSources())
-            putString(KEY_PINS, pins.toString())
+        // One write of the three states, as the single SharedPreferences edit before.
+        SettingsStores[NamedStores.PLUGIN_CENTER_ATTENTION].edit {
+            put(ATTENTION_KNOWN_FIRST_INSTALL_TIMES.name, known.toString())
+            this[ATTENTION_INITIALIZED_SOURCES] = ledger.initializedSources()
+            put(ATTENTION_PINS.name, pins.toString())
         }
     }
 }

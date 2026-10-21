@@ -2,17 +2,41 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.SharedPreferences
 import org.autojs.autojs.core.plugin.center.PluginCenterFragment.Sort
+import org.autojs.autojs.core.pref.InMemorySettingsStore
+import org.autojs.autojs.core.pref.keys.NamedStores
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.StoreId
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
+/**
+ * The three sort stores share the named store `plugin_center_sort_state` through the declared keys of
+ * `PluginCenterKeys` (docs/settings/ROADMAP.md P3.1); the stores of the settings layer are in memory here.
+ */
 class PluginSortStoreTest {
 
-    private val context = TestContext()
-    private val stores = listOf(
+    private val context: Context = ContextWrapper(null)
+    private val stores = LinkedHashMap<StoreId, InMemorySettingsStore>()
+
+    /** The shared sort store file. */
+    private val sortState: InMemorySettingsStore
+        get() = SettingsStores[NamedStores.PLUGIN_CENTER_SORT_STATE] as InMemorySettingsStore
+
+    @Before
+    fun installStores() {
+        SettingsStores.install { id -> stores.getOrPut(id) { InMemorySettingsStore(id.name) } }
+    }
+
+    @After
+    fun resetStores() {
+        SettingsStores.reset()
+    }
+    private val sortStores = listOf(
         Store(
             "key_\$_plugin_center_sort_state",
             { PluginSortStore.getSort(it) }, PluginSortStore::setSort,
@@ -38,12 +62,12 @@ class PluginSortStoreTest {
 
     @Test
     fun allLibrariesDefaultToStatusThenLastUpdateDescending() {
-        stores.forEach(::assertDefaults)
+        sortStores.forEach(::assertDefaults)
     }
 
     @Test
     fun customFieldsAndDirectionsAreRememberedAndResetForEachLibrary() {
-        stores.forEach { store ->
+        sortStores.forEach { store ->
             store.setSort(context, Sort.TITLE_ASC)
             store.setSecondary(context, Sort.TITLE_ASC, Sort.PACKAGE_SIZE_DESC)
             store.setAscending(context, Sort.TITLE_ASC, false)
@@ -53,7 +77,7 @@ class PluginSortStoreTest {
             assertEquals(Sort.PACKAGE_SIZE_DESC, store.getSecondary(context, Sort.TITLE_ASC))
             assertFalse(store.getAscending(context, Sort.TITLE_ASC))
             assertTrue(store.getAscending(context, Sort.PACKAGE_SIZE_DESC))
-            stores.filter { it != store }.forEach(::assertDefaults)
+            sortStores.filter { it != store }.forEach(::assertDefaults)
 
             store.clear(context)
             assertDefaults(store)
@@ -65,10 +89,10 @@ class PluginSortStoreTest {
 
     @Test
     fun existingPrimaryAndGroupingSecondaryPreferencesRemainReadable() {
-        stores.forEach { store ->
-            context.preferences.values[store.key] = 3 // MECHANISM, saved before status was added.
-            context.preferences.values[store.key + "_mechanism_secondary"] = 6 // PACKAGE_NAME_ASC.
-            context.preferences.values[store.key + "_source_secondary"] = 7 // AUTHOR_ASC.
+        sortStores.forEach { store ->
+            sortState.put(store.key, 3) // MECHANISM, saved before status was added.
+            sortState.put(store.key + "_mechanism_secondary", 6) // PACKAGE_NAME_ASC.
+            sortState.put(store.key + "_source_secondary", 7) // AUTHOR_ASC.
 
             assertEquals(Sort.MECHANISM, store.getSort(context))
             assertEquals(Sort.PACKAGE_NAME_ASC, store.getSecondary(context, Sort.MECHANISM))
@@ -82,10 +106,10 @@ class PluginSortStoreTest {
 
     @Test
     fun invalidOrDuplicateSecondaryFieldsFallBackToADifferentValidField() {
-        stores.forEach { store ->
-            context.preferences.values[store.key] = Int.MAX_VALUE
-            context.preferences.values[store.key + "_secondary_STATUS"] = Sort.STATUS.ordinal
-            context.preferences.values[store.key + "_mechanism_secondary"] = Int.MAX_VALUE
+        sortStores.forEach { store ->
+            sortState.put(store.key, Int.MAX_VALUE)
+            sortState.put(store.key + "_secondary_STATUS", Sort.STATUS.ordinal)
+            sortState.put(store.key + "_mechanism_secondary", Int.MAX_VALUE)
 
             assertDefaults(store)
             assertEquals(Sort.LAST_UPDATE_DESC, store.getSecondary(context, Sort.MECHANISM))
@@ -111,39 +135,4 @@ class PluginSortStoreTest {
         val setAscending: (Context, Sort, Boolean) -> Unit,
         val clear: (Context) -> Unit,
     )
-
-    private class TestContext : ContextWrapper(null) {
-        val preferences = MemoryPreferences()
-        override fun getApplicationContext(): Context = this
-        override fun getSharedPreferences(name: String?, mode: Int): SharedPreferences = preferences
-    }
-
-    private class MemoryPreferences : SharedPreferences {
-        val values = mutableMapOf<String, Any>()
-        override fun getAll(): MutableMap<String, *> = values.toMutableMap()
-        override fun getInt(key: String?, defValue: Int): Int = values[key] as? Int ?: defValue
-        override fun getBoolean(key: String?, defValue: Boolean): Boolean = values[key] as? Boolean ?: defValue
-        override fun contains(key: String?): Boolean = values.containsKey(key)
-        override fun getString(key: String?, defValue: String?): String? = error("Not used")
-        override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? = error("Not used")
-        override fun getLong(key: String?, defValue: Long): Long = error("Not used")
-        override fun getFloat(key: String?, defValue: Float): Float = error("Not used")
-        override fun registerOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) = Unit
-        override fun unregisterOnSharedPreferenceChangeListener(listener: SharedPreferences.OnSharedPreferenceChangeListener?) = Unit
-        override fun edit(): SharedPreferences.Editor = object : SharedPreferences.Editor {
-            private val pending = mutableMapOf<String, Any?>()
-            override fun putInt(key: String?, value: Int) = apply { pending[requireNotNull(key)] = value }
-            override fun putBoolean(key: String?, value: Boolean) = apply { pending[requireNotNull(key)] = value }
-            override fun remove(key: String?) = apply { pending[requireNotNull(key)] = null }
-            override fun apply() {
-                pending.forEach { (key, value) -> if (value == null) values.remove(key) else values[key] = value }
-            }
-            override fun commit(): Boolean { apply(); return true }
-            override fun clear(): SharedPreferences.Editor = error("Not used")
-            override fun putString(key: String?, value: String?): SharedPreferences.Editor = error("Not used")
-            override fun putStringSet(key: String?, values: MutableSet<String>?): SharedPreferences.Editor = error("Not used")
-            override fun putLong(key: String?, value: Long): SharedPreferences.Editor = error("Not used")
-            override fun putFloat(key: String?, value: Float): SharedPreferences.Editor = error("Not used")
-        }
-    }
 }

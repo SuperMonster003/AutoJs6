@@ -2,18 +2,24 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.core.content.edit
+import org.autojs.autojs.core.pref.keys.NamedStores
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.FILTER_ENABLED_STATE
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.FILTER_INSTALL_STATE
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.FILTER_LEGACY_ORDINAL
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.FILTER_MECHANISM_STATE
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.FILTER_SOURCE_STATE
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys.FILTER_UPDATABLE_ONLY
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.SharedPreferencesStore
+import org.autojs.autojs.core.pref.store.set
 import org.autojs.autojs6.R
 
+/**
+ * Filters of the plugin list in the named store `plugin_center_filter_state`, declared in [org.autojs.autojs.core.pref.keys.PluginCenterKeys]
+ * (docs/settings/ROADMAP.md P3.1, names unchanged). The [Context] parameters are kept for the callers; the store is
+ * opened by the settings layer with the application context, as before.
+ */
 object PluginFilterStore {
-
-    private const val SP_NAME = "plugin_center_filter_state"
-    private const val KEY_LEGACY_FILTER_ORDINAL = "key_\$_plugin_center_filter_state"
-    private const val KEY_INSTALL_STATE = "key_\$_plugin_center_filter_install_state"
-    private const val KEY_ENABLED_STATE = "key_\$_plugin_center_filter_enabled_state"
-    private const val KEY_MECHANISM_STATE = "key_\$_plugin_center_filter_mechanism_state"
-    private const val KEY_SOURCE_STATE = "key_\$_plugin_center_filter_source_state"
-    private const val KEY_UPDATABLE_ONLY = "key_\$_plugin_center_filter_updatable_only"
 
     data class FilterState(
         val installState: InstallState = InstallState.ALL,
@@ -69,65 +75,61 @@ object PluginFilterStore {
         }
     }
 
-    private fun sp(context: Context) = context.applicationContext.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+    private val store
+        get() = SettingsStores[NamedStores.PLUGIN_CENTER_FILTER_STATE]
+
+    /** The SharedPreferences of the store, for change listeners. */
+    private fun preferences(): SharedPreferences = (store as SharedPreferencesStore).preferences
 
     fun defaultFilterState(): FilterState = FilterState()
 
+    @Suppress("UNUSED_PARAMETER")
     fun getFilterState(context: Context): FilterState {
-        val pref = sp(context)
-        return if (hasModernFilterState(pref)) {
+        return if (hasModernFilterState()) {
             FilterState(
-                installState = InstallState.fromOrdinal(pref.getInt(KEY_INSTALL_STATE, InstallState.ALL.ordinal)),
-                enabledState = EnabledState.fromOrdinal(pref.getInt(KEY_ENABLED_STATE, EnabledState.ALL.ordinal)),
-                mechanismState = MechanismState.fromOrdinal(pref.getInt(KEY_MECHANISM_STATE, MechanismState.ALL.ordinal)),
-                sourceState = SourceState.fromOrdinal(pref.getInt(KEY_SOURCE_STATE, SourceState.ALL.ordinal)),
-                updatableOnly = pref.getBoolean(KEY_UPDATABLE_ONLY, false),
+                installState = InstallState.fromOrdinal(FILTER_INSTALL_STATE.get()),
+                enabledState = EnabledState.fromOrdinal(FILTER_ENABLED_STATE.get()),
+                mechanismState = MechanismState.fromOrdinal(FILTER_MECHANISM_STATE.get()),
+                sourceState = SourceState.fromOrdinal(FILTER_SOURCE_STATE.get()),
+                updatableOnly = FILTER_UPDATABLE_ONLY.get(),
             )
         } else {
-            legacyOrdinalToFilterState(pref.getInt(KEY_LEGACY_FILTER_ORDINAL, LEGACY_FILTER_ALL))
+            legacyOrdinalToFilterState(FILTER_LEGACY_ORDINAL.get())
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun setFilterState(context: Context, state: FilterState) {
-        val pref = sp(context)
-        pref.edit {
-            putInt(KEY_INSTALL_STATE, state.installState.ordinal)
-            putInt(KEY_ENABLED_STATE, state.enabledState.ordinal)
-            putInt(KEY_MECHANISM_STATE, state.mechanismState.ordinal)
-            putInt(KEY_SOURCE_STATE, state.sourceState.ordinal)
-            putBoolean(KEY_UPDATABLE_ONLY, state.updatableOnly)
-            remove(KEY_LEGACY_FILTER_ORDINAL)
+        store.edit {
+            this[FILTER_INSTALL_STATE] = state.installState.ordinal
+            this[FILTER_ENABLED_STATE] = state.enabledState.ordinal
+            this[FILTER_MECHANISM_STATE] = state.mechanismState.ordinal
+            this[FILTER_SOURCE_STATE] = state.sourceState.ordinal
+            this[FILTER_UPDATABLE_ONLY] = state.updatableOnly
+            remove(FILTER_LEGACY_ORDINAL.name)
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun clearAllFilterMemory(context: Context) {
-        val pref = sp(context)
-        pref.edit {
-            remove(KEY_LEGACY_FILTER_ORDINAL)
-            remove(KEY_INSTALL_STATE)
-            remove(KEY_ENABLED_STATE)
-            remove(KEY_MECHANISM_STATE)
-            remove(KEY_SOURCE_STATE)
-            remove(KEY_UPDATABLE_ONLY)
+        store.edit {
+            listOf(FILTER_LEGACY_ORDINAL, FILTER_INSTALL_STATE, FILTER_ENABLED_STATE, FILTER_MECHANISM_STATE, FILTER_SOURCE_STATE, FILTER_UPDATABLE_ONLY)
+                .forEach { remove(it.name) }
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun registerOnSharedPreferenceChangeListener(context: Context, onSharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener) {
-        val sp = sp(context)
-        sp.registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener)
+        preferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun unregisterOnSharedPreferenceChangeListener(context: Context, onSharedPreferenceChangeListener: SharedPreferences.OnSharedPreferenceChangeListener) {
-        val sp = sp(context)
-        sp.unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener)
+        preferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener)
     }
 
-    private fun hasModernFilterState(pref: SharedPreferences): Boolean =
-        pref.contains(KEY_INSTALL_STATE) ||
-                pref.contains(KEY_ENABLED_STATE) ||
-                pref.contains(KEY_MECHANISM_STATE) ||
-                pref.contains(KEY_SOURCE_STATE) ||
-                pref.contains(KEY_UPDATABLE_ONLY)
+    private fun hasModernFilterState(): Boolean =
+        listOf(FILTER_INSTALL_STATE, FILTER_ENABLED_STATE, FILTER_MECHANISM_STATE, FILTER_SOURCE_STATE, FILTER_UPDATABLE_ONLY).any { it.isStored() }
 
     private fun legacyOrdinalToFilterState(ordinal: Int): FilterState = when (ordinal) {
         LEGACY_FILTER_INSTALLED -> FilterState(installState = InstallState.INSTALLED)
