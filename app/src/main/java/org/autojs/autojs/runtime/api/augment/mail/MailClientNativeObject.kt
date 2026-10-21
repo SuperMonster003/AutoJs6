@@ -300,7 +300,7 @@ class MailClientNativeObject(
         if (debug == null && relay == null) return null
         return { progress ->
             debug?.invoke(progress)
-            relay?.invoke(progress)
+            if (progress.hasTransfer) relay?.invoke(progress)
         }
     }
 

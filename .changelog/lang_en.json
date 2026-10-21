@@ -323,7 +323,8 @@
         "FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority",
         "Node.js ESM imports fail when a host module exports a reserved name such as java.new",
         "Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization",
-        "tts.engines lists installed engines even when initialization of the default engine fails"
+        "tts.engines lists installed engines even when initialization of the default engine fails",
+        "Mail attachment download progress no longer resets to zero when debug output is enabled"
       ],
       "improvement": [
         "Deferred initialization of noncritical components to improve app startup speed",

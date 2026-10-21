@@ -508,6 +508,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new
 * `Correction` Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid
 * `Correction` tts.engines liste les moteurs installés même si le moteur par défaut ne peut pas démarrer
+* `Correction` La progression du téléchargement des pièces jointes mail ne revient plus à zéro lorsque la sortie de débogage est activée
 * `Amélioration` Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application
 * `Amélioration` Les dialogues d'autorisation ne s'ouvrent plus automatiquement au démarrage; l'absence d'autorisation de gestion de tous les fichiers est signalée sur l'accueil avec accès direct à son octroi
 * `Amélioration` Adaptation de l'application et des applications empaquetées à Android 17, avec indications améliorées sur l'accès au réseau local, la protection avancée et les restrictions audio en arrière-plan

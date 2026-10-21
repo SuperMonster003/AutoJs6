@@ -130,6 +130,16 @@ class MailJsonTest {
     }
 
     @Test
+    fun debugOnlyPacketsDoNotResetTheTransferCounterButExplicitZeroStillCounts() {
+        val debug = MailJson.decodeProgress("""{"id":"download","debug":["imap download complete"]}""")
+        assertFalse(debug.hasTransfer)
+        assertEquals(listOf("imap download complete"), debug.debug)
+        assertFalse(MailJson.decodeProgress("{}").hasTransfer)
+        assertTrue(MailJson.decodeProgress("""{"transferred":0}""").hasTransfer)
+        assertTrue(MailJson.decodeProgress("""{"transferred":98304,"debug":["done"]}""").hasTransfer)
+    }
+
+    @Test
     fun eventDecodesOptionalFieldsAndKeepsTheDocument() {
         val json = """{"type":"message","seq":3,"generation":9,"folder":"INBOX","message":{"uid":5},"mode":"idle","reason":null,"error":{"code":"TIMEOUT"}}"""
         val event = MailJson.decodeEvent(json)

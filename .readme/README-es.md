@@ -508,6 +508,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Corrección` Error de importación ESM en Node.js cuando el módulo anfitrión exporta un nombre reservado como java.new
 * `Corrección` Cierre prematuro de la actividad de inicio en aplicaciones Bun con páginas ocultas, que permite al sistema finalizar el proceso durante el arranque en frío
 * `Corrección` tts.engines enumera los motores instalados aunque falle la inicialización del motor predeterminado
+* `Corrección` El progreso de descarga de adjuntos mail ya no vuelve a cero al activar la salida de depuración
 * `Mejora` Inicialización diferida de componentes no esenciales para acelerar el inicio
 * `Mejora` Al iniciar ya no se muestran automáticamente solicitudes de permisos; si falta el acceso a todos los archivos, aparece un aviso en la página principal con autorización directa
 * `Mejora` Adaptación de la aplicación y aplicaciones empaquetadas a Android 17, con mejores avisos de acceso a red local, protección avanzada y restricciones de audio en segundo plano

@@ -508,6 +508,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Fix` Node.js ESM imports fail when a host module exports a reserved name such as java.new
 * `Fix` Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization
 * `Fix` tts.engines lists installed engines even when initialization of the default engine fails
+* `Fix` Mail attachment download progress no longer resets to zero when debug output is enabled
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
 * `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions

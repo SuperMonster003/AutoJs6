@@ -22,7 +22,7 @@ object MailJson {
     private const val FIELD_DEBUG = "debug"
 
     /** [debug] holds the redacted protocol trace lines of a `debug: true` account (decision D28). */
-    data class Progress(val id: String?, val transferred: Long, val total: Long?, val debug: List<String>? = null)
+    data class Progress(val id: String?, val transferred: Long, val total: Long?, val debug: List<String>? = null, val hasTransfer: Boolean = true)
 
     data class Event(
         val type: String,
@@ -89,11 +89,12 @@ object MailJson {
 
     fun decodeProgress(json: String?): Progress {
         val root = parseObject(json, "progress")
-        val transferred = optionalLong(root, MailContract.FIELD_TRANSFERRED) ?: 0L
+        val transferred = optionalLong(root, MailContract.FIELD_TRANSFERRED)
         val debug = root.get(FIELD_DEBUG)?.takeIf { it.isJsonArray }?.asJsonArray
             ?.mapNotNull { line -> line.takeIf { it.isJsonPrimitive }?.asString }
             ?.takeIf { it.isNotEmpty() }
-        return Progress(optionalString(root, MailContract.FIELD_ID), transferred.coerceAtLeast(0L), optionalLong(root, MailContract.FIELD_TOTAL)?.takeIf { it >= 0L }, debug)
+        return Progress(optionalString(root, MailContract.FIELD_ID), (transferred ?: 0L).coerceAtLeast(0L),
+            optionalLong(root, MailContract.FIELD_TOTAL)?.takeIf { it >= 0L }, debug, transferred != null)
     }
 
     fun decodeEvent(json: String?): Event {

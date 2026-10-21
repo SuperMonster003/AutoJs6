@@ -258,7 +258,7 @@ internal class RuntimeMailBridge(private val context: Context, private val cwd: 
 
         private fun progress(id: String, client: Client, value: MailJson.Progress, totalHint: Long? = null) {
             if (client.options.debug && !value.debug.isNullOrEmpty()) emit(id, "debug", value.debug)
-            emit(id, "progress", mapOf("transferred" to value.transferred, "total" to (value.total ?: totalHint)))
+            if (value.hasTransfer) emit(id, "progress", mapOf("transferred" to value.transferred, "total" to (value.total ?: totalHint)))
         }
 
         fun answer(id: String, token: String, accepted: Boolean): Boolean = synchronized(lock) {

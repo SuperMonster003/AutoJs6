@@ -323,7 +323,8 @@
         "URI FileProvider des applications générées utilisant l'autorité du modèle au lieu de celle du manifeste réel",
         "Échec des imports ESM Node.js lorsque le module hôte exporte un nom réservé tel que java.new",
         "Arrêt prématuré de la page de lancement des applications Bun masquées, exposant le processus à la récupération pendant le démarrage à froid",
-        "tts.engines liste les moteurs installés même si le moteur par défaut ne peut pas démarrer"
+        "tts.engines liste les moteurs installés même si le moteur par défaut ne peut pas démarrer",
+        "La progression du téléchargement des pièces jointes mail ne revient plus à zéro lorsque la sortie de débogage est activée"
       ],
       "improvement": [
         "Initialisation différée des composants non essentiels pour accélérer le démarrage de l'application",

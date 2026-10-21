@@ -323,7 +323,8 @@
         "URI FileProvider de aplicaciones generadas que usaban la autoridad de la plantilla en lugar de la del manifiesto real",
         "Error de importación ESM en Node.js cuando el módulo anfitrión exporta un nombre reservado como java.new",
         "Cierre prematuro de la actividad de inicio en aplicaciones Bun con páginas ocultas, que permite al sistema finalizar el proceso durante el arranque en frío",
-        "tts.engines enumera los motores instalados aunque falle la inicialización del motor predeterminado"
+        "tts.engines enumera los motores instalados aunque falle la inicialización del motor predeterminado",
+        "El progreso de descarga de adjuntos mail ya no vuelve a cero al activar la salida de depuración"
       ],
       "improvement": [
         "Inicialización diferida de componentes no esenciales para acelerar el inicio",
