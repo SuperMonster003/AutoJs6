@@ -11,6 +11,8 @@ import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
+import org.autojs.autojs.core.pref.keys.PluginCenterKeys
 import org.autojs.autojs.core.pref.keys.RecordKeys
 import org.autojs.autojs.core.pref.keys.RunningKeys
 import org.autojs.autojs.core.pref.keys.TimedTaskKeys
@@ -88,6 +90,8 @@ object SettingsRegistry {
         ConnectionKeys,
         LayoutInspectorKeys,
         DeveloperKeys,
+        PluginCenterKeys,
+        MiscStateKeys,
     )
 
     /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */

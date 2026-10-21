@@ -271,6 +271,10 @@
   "key_working_directory_initialized": {"kind": "State", "category": "other", "note": "首次确定工作目录的标记"}
  },
  "literalKeys": {
+  "...": {"kind": "State", "category": "other", "store": "default", "note": "代码编辑器查找 / 替换对话框的查找文本, 键名就是三个点 (FindOrReplaceDialogBuilder); P0 清单未识别, P2.6 声明为 MiscStateKeys (附录 C Q15)"},
+  "find_or_replace_using_regex": {"kind": "State", "category": "other", "store": "default", "note": "查找 / 替换对话框的正则开关 (FindOrReplaceDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15)"},
+  "org.autojs.autojs.engine.RootAutomatorEngine.touch_device": {"kind": "Cache", "store": "default", "note": "Root 自动化探测到的触摸设备 id, 本机才有效 (RootAutomatorEngine); P2.6 声明为 MiscStateKeys (附录 C Q15)"},
+  "org.autojs.autojs.ui.edit.debug.CodeEvaluateDialogBuilder.code": {"kind": "State", "category": "other", "store": "default", "note": "代码求值对话框的上次输入 (CodeEvaluateDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15)"},
   "key_$_ace_editor_font_name_sort_type_locked": {"kind": "Setting", "category": "editor_keyboard", "store": "ace_editor_font_ui_preferences", "note": "属于命名存储, 随整份计数"},
   "key_$_ace_editor_font_preview_excluded_features": {"kind": "Setting", "category": "editor_keyboard", "store": "ace_editor_font_ui_preferences", "note": "属于命名存储, 随整份计数"},
   "key_$_ace_editor_font_preview_excluded_types": {"kind": "Setting", "category": "editor_keyboard", "store": "ace_editor_font_ui_preferences", "note": "属于命名存储, 随整份计数"},

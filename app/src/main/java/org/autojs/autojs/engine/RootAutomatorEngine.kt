@@ -2,8 +2,8 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.util.Log
-import androidx.preference.PreferenceManager
 import org.autojs.autojs.core.inputevent.InputDevices
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
@@ -117,7 +117,6 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
 
         const val VERSION = 1
 
-        private val KEY_TOUCH_DEVICE = RootAutomatorEngine::class.java.name + ".touch_device"
         private val PID_PATTERN = Pattern.compile("\\d{2,}")
         private var sTouchDeviceId = -1
 
@@ -126,14 +125,13 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
 
         @JvmStatic
         fun getDeviceNameOrPath(context: Context?, deviceNameOrPath: String?): String? {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context!!)
             if (sTouchDeviceId < 0) {
-                val prefTouchDevice = getDefaultTouchDevice(context).also { setTouchDevice(it) }
+                val prefTouchDevice = getDefaultTouchDevice(context!!).also { setTouchDevice(it) }
                 if (prefTouchDevice < 0) {
                     return deviceNameOrPath
                 }
             }
-            prefs.edit().putInt(KEY_TOUCH_DEVICE, sTouchDeviceId).apply()
+            MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.set(sTouchDeviceId)
             return "/dev/input/event$sTouchDeviceId"
         }
 
@@ -155,12 +153,12 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
             else -> getDefaultTouchDevice(context)
         }
 
+        @Suppress("UNUSED_PARAMETER")
         private fun getDefaultTouchDevice(context: Context): Int {
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            var touchDeviceId = prefs.getInt(KEY_TOUCH_DEVICE, -1)
+            var touchDeviceId = MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.get()
             if (touchDeviceId < 0) {
                 touchDeviceId = InputDevices.touchDeviceId.also {
-                    prefs.edit().putInt(KEY_TOUCH_DEVICE, it).apply()
+                    MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.set(it)
                     setTouchDevice(it)
                 }
             }

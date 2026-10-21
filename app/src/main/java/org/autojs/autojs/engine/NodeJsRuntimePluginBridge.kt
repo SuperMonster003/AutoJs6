@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.os.Process
 import android.os.SystemClock
 import android.util.Log
-import androidx.preference.PreferenceManager
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs6.R
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.autojs.plugin.nodejs.api.INodeJsRuntimeCallback
@@ -74,8 +74,7 @@ object NodeJsRuntimePluginBridge {
         val firstOutputAt = java.util.concurrent.atomic.AtomicLong()
         val requestWithProvider = request.copy(
             executionId = request.executionId?.takeIf(String::isNotBlank) ?: UUID.randomUUID().toString(),
-            inspectorEnabled = request.inspectorEnabled ?: PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(context.getString(R.string.key_nodejs_inspector_enabled), false),
+            inspectorEnabled = request.inspectorEnabled ?: DeveloperKeys.NODEJS_INSPECTOR_ENABLED.get(),
         ).withHostModuleSourceProvider()
         val provider = requestWithProvider.moduleSourceProvider
         val executionId = requestWithProvider.executionId.orEmpty()

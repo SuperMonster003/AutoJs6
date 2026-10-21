@@ -1,10 +1,10 @@
 {
  "schema": "autojs6.settings-inventory/v1",
- "date": "2026-10-20",
+ "date": "2026-10-21",
  "git": {
-  "commit": "ed4674afe",
+  "commit": "520825d67",
   "branch": "master",
-  "dirtyScannedFiles": 27
+  "dirtyScannedFiles": 11
  },
  "summary": {
   "keyResources": 268,
@@ -46,11 +46,11 @@
    "key_dialog_log_entries_exported",
    "key_enable_observe_key"
   ],
-  "literalKeyGroups": 71,
+  "literalKeyGroups": 75,
   "namedStores": 29,
   "namedStoreCallFiles": 34,
   "unresolvedStoreCalls": [],
-  "defaultPrefsBypassFiles": 8,
+  "defaultPrefsBypassFiles": 1,
   "prefUserFiles": 78,
   "jsonFileStores": 13
  },
@@ -2347,10 +2347,6 @@
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
      "line": 45
-    },
-    {
-     "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
-     "line": 27
     }
    ],
    "kind": "Setting",
@@ -3795,7 +3791,7 @@
     },
     {
      "file": "inrt/Pref.kt",
-     "line": 45
+     "line": 40
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
@@ -5430,10 +5426,6 @@
     {
      "file": "core/pref/keys/DeveloperKeys.kt",
      "line": 34
-    },
-    {
-     "file": "engine/NodeJsRuntimePluginBridge.kt",
-     "line": 78
     }
    ],
    "kind": "Setting",
@@ -5448,11 +5440,11 @@
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
-     "line": 49
+     "line": 44
     },
     {
      "file": "inrt/Pref.kt",
-     "line": 75
+     "line": 70
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
@@ -5512,8 +5504,8 @@
      "line": 139
     },
     {
-     "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 25
+     "file": "core/pref/keys/PluginCenterKeys.kt",
+     "line": 33
     }
    ],
    "kind": "Setting",
@@ -5528,11 +5520,11 @@
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 44
+     "line": 33
     },
     {
      "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 49
+     "line": 38
     }
    ],
    "kind": "State",
@@ -5564,8 +5556,8 @@
      "line": 137
     },
     {
-     "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 13
+     "file": "core/pref/keys/PluginCenterKeys.kt",
+     "line": 21
     }
    ],
    "kind": "Setting",
@@ -5597,8 +5589,8 @@
      "line": 138
     },
     {
-     "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-     "line": 19
+     "file": "core/pref/keys/PluginCenterKeys.kt",
+     "line": 27
     }
    ],
    "kind": "Setting",
@@ -6075,11 +6067,11 @@
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
-     "line": 57
+     "line": 52
     },
     {
      "file": "inrt/Pref.kt",
-     "line": 76
+     "line": 71
     }
    ],
    "otherResRefs": [
@@ -6868,7 +6860,7 @@
     },
     {
      "file": "inrt/Pref.kt",
-     "line": 53
+     "line": 48
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
@@ -6999,6 +6991,40 @@
   }
  ],
  "literalKeys": [
+  {
+   "name": "...",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 24,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "代码编辑器查找 / 替换对话框的查找文本, 键名就是三个点 (FindOrReplaceDialogBuilder); P0 清单未识别, P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "find_or_replace_using_regex",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 27,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "查找 / 替换对话框的正则开关 (FindOrReplaceDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
+  },
   {
    "name": "key_$_ace_editor_font_name_sort_type_locked",
    "refs": [
@@ -7832,7 +7858,7 @@
    "refs": [
     {
      "file": "core/plugin/center/PluginSettingsFragment.kt",
-     "line": 1165,
+     "line": 1172,
      "const": "KEY_PLUGIN_HIDE_CONFIRM_PROMPT"
     }
    ],
@@ -8247,6 +8273,39 @@
    "kind": "Excluded",
    "note": "脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键",
    "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.engine.RootAutomatorEngine.touch_device",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 35,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "Cache",
+   "note": "Root 自动化探测到的触摸设备 id, 本机才有效 (RootAutomatorEngine); P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
+  },
+  {
+   "name": "org.autojs.autojs.ui.edit.debug.CodeEvaluateDialogBuilder.code",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 31,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "代码求值对话框的上次输入 (CodeEvaluateDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15)",
+   "store": "default"
   }
  ],
  "namedStores": [
@@ -8351,9 +8410,9 @@
    "calls": [
     {
      "file": "engine/NodeBridgeProtocol.kt",
-     "line": 3354,
+     "line": 3366,
      "arg": "storagePreferencesName(storeName)",
-     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3469)"
+     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3481)"
     }
    ],
    "files": [
@@ -8384,51 +8443,51 @@
    "calls": [
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 68,
+     "line": 69,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 71,
+     "line": 72,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 81,
+     "line": 82,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 84,
+     "line": 85,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 88,
+     "line": 89,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 91,
+     "line": 92,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 214,
+     "line": 218,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     },
     {
      "file": "core/plugin/bun/BunHostCapabilityGrants.kt",
-     "line": 217,
+     "line": 221,
      "arg": "SP_NAME",
-     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:62)"
+     "how": "常量 SP_NAME (core/plugin/bun/BunHostCapabilityGrants.kt:63)"
     }
    ],
    "files": [
@@ -8942,55 +9001,10 @@
    ]
   },
   {
-   "file": "engine/NodeJsRuntimePluginBridge.kt",
-   "lines": [
-    77
-   ]
-  },
-  {
-   "file": "engine/RootAutomatorEngine.kt",
-   "lines": [
-    129,
-    159
-   ]
-  },
-  {
-   "file": "inrt/Pref.kt",
-   "lines": [
-    25
-   ]
-  },
-  {
-   "file": "runtime/api/Shell.java",
-   "lines": [
-    144
-   ]
-  },
-  {
    "file": "ui/common/NotAskAgainDialog.java",
    "lines": [
     52,
     58
-   ]
-  },
-  {
-   "file": "ui/edit/FindOrReplaceDialogBuilder.kt",
-   "lines": [
-    74,
-    81,
-    85
-   ]
-  },
-  {
-   "file": "ui/edit/debug/CodeEvaluateDialogBuilder.java",
-   "lines": [
-    29
-   ]
-  },
-  {
-   "file": "ui/settings/codegen/CodegenModelStoreFactory.kt",
-   "lines": [
-    26
    ]
   }
  ],
@@ -10911,7 +10925,7 @@
     "form": "调用处字面量",
     "value": "true",
     "file": "inrt/Pref.kt",
-    "line": 45,
+    "line": 40,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -11065,7 +11079,7 @@
     "form": "调用处字面量",
     "value": "true",
     "file": "inrt/Pref.kt",
-    "line": 33,
+    "line": 28,
     "method": "getBoolean",
     "type": "Boolean"
    }
@@ -11308,7 +11322,7 @@
     "form": "调用处字面量",
     "value": "null",
     "file": "inrt/Pref.kt",
-    "line": 66,
+    "line": 61,
     "method": "getString",
     "type": "String"
    }
@@ -11698,15 +11712,6 @@
   ],
   "key_nodejs_inspector_enabled": [
    {
-    "expr": "false",
-    "form": "调用处字面量",
-    "value": "false",
-    "file": "engine/NodeJsRuntimePluginBridge.kt",
-    "line": 78,
-    "method": "getBoolean",
-    "type": "Boolean"
-   },
-   {
     "expr": "SettingDefault.of(false)",
     "form": "调用处字面量",
     "value": "false",
@@ -11731,7 +11736,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "inrt/Pref.kt",
-    "line": 49,
+    "line": 44,
     "method": "getBoolean",
     "type": "Boolean"
    }
@@ -11749,13 +11754,13 @@
   ],
   "key_plugin_center_auto_check_updates": [
    {
-    "expr": "R.bool.pref_plugin_center_auto_check_updates",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_plugin_center_auto_check_updates",
-    "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-    "line": 24,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_plugin_center_auto_check_updates, \"pref_plugin_center_auto_check_updates\")",
+    "file": "core/pref/keys/PluginCenterKeys.kt",
+    "line": 32,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11775,20 +11780,20 @@
     "form": "调用处字面量",
     "value": "0",
     "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-    "line": 44,
+    "line": 33,
     "method": "getLong",
     "type": "Long"
    }
   ],
   "key_plugin_center_show_official_plugins": [
    {
-    "expr": "R.bool.pref_plugin_center_show_official_plugins",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_plugin_center_show_official_plugins",
-    "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-    "line": 12,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_plugin_center_show_official_plugins, \"pref_plugin_center_show_official_plugins\")",
+    "file": "core/pref/keys/PluginCenterKeys.kt",
+    "line": 20,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11804,13 +11809,13 @@
   ],
   "key_plugin_center_show_third_party_plugins": [
    {
-    "expr": "R.bool.pref_plugin_center_show_third_party_plugins",
     "form": "R.bool",
-    "value": "true",
     "ref": "pref_plugin_center_show_third_party_plugins",
-    "file": "core/plugin/center/PluginOnlineSettingsStore.kt",
-    "line": 18,
-    "method": "getBoolean",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_plugin_center_show_third_party_plugins, \"pref_plugin_center_show_third_party_plugins\")",
+    "file": "core/pref/keys/PluginCenterKeys.kt",
+    "line": 26,
+    "method": "SettingKey.Bool",
     "type": "Boolean"
    },
    {
@@ -11988,7 +11993,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "inrt/Pref.kt",
-    "line": 57,
+    "line": 52,
     "method": "getBoolean",
     "type": "Boolean"
    }
@@ -12283,7 +12288,7 @@
     "form": "调用处字面量",
     "value": "true",
     "file": "inrt/Pref.kt",
-    "line": 53,
+    "line": 48,
     "method": "getBoolean",
     "type": "Boolean"
    },
@@ -12554,7 +12559,7 @@
   },
   "other": {
    "keys": 40,
-   "literalKeys": 8,
+   "literalKeys": 11,
    "stores": 3
   }
  },

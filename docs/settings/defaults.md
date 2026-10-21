@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; 人工补充的来源写在 `tools/settings/classification.json` 的 `extraDefaults`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.4, 红线 R2).
 
-- 生成日期: 2026-10-20, 扫描基线: `master@ed4674afe`
+- 生成日期: 2026-10-21, 扫描基线: `master@520825d67`
 - 来源形式: `R.bool` / `R.integer` / `R.string` (含 `default_key_*` 别名) / 伴生常量 / 调用处字面量 / XML 字面量 (设置页 `app:defaultValue`); "表达式" 表示运行时计算, 取值列写明依据.
 - 自动提取规则: `getBoolean` / `getInt` / `getLong` / `getFloat` / `getString` / `getStringSet` 等调用的第一个参数解析为键 (`R.string.key_*`, 常量或局部变量), 第二个参数经资源, 常量与局部变量求值; 设置页的 `app:defaultValue` 与 `app:itemDefaultKey` 单独成行. 人工补充行标 "(人工)".
 - 范围: kind 为 Setting 的 `key_*` 键与默认偏好中的字面量键; 命名存储整份作为条目, 其内部默认值不在本表.
@@ -116,7 +116,7 @@
 | `key_editor_theme_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_theme_mode"` | `key_editor_theme_mode_separate = separate_light_dark` | res/xml/fragment_code_editor_settings.xml:24 |  |
 | `key_editor_word_wrap_indent_style` | String (Enum) | R.string | `keyResource(R.string.default_key_editor_word_wrap_indent_style, "default_key_editor_word_wrap_indent_style")` | `key_editor_word_wrap_indent_style_continuation = continuation` | core/pref/keys/EditorKeys.kt:134 |  |
 | `key_editor_word_wrap_indent_style` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_editor_word_wrap_indent_style"` | `key_editor_word_wrap_indent_style_continuation = continuation` | res/xml/fragment_code_editor_settings.xml:104 |  |
-| `key_enable_a11y_service_with_root_access` | Boolean | 调用处字面量 | `true` | `true` | inrt/Pref.kt:45 |  |
+| `key_enable_a11y_service_with_root_access` | Boolean | 调用处字面量 | `true` | `true` | inrt/Pref.kt:40 |  |
 | `key_enable_a11y_service_with_root_access` | Boolean | R.bool | `boolResource(R.bool.pref_enable_a11y_service_with_root_access, "pref_enable_a11y_service_with_root_access")` | `true` | core/pref/keys/A11yKeys.kt:20 |  |
 | `key_enable_a11y_service_with_root_access` | Boolean | R.bool | `app:defaultValue="@bool/pref_enable_a11y_service_with_root_access"` | `true` | res/xml/fragment_preferences.xml:217 |  |
 | `key_enable_a11y_service_with_secure_settings` | Boolean | R.bool | `boolResource(R.bool.pref_enable_a11y_service_with_secure_settings, "pref_enable_a11y_service_with_secure_settings")` | `true` | core/pref/keys/A11yKeys.kt:26 |  |
@@ -177,14 +177,13 @@
 | `key_night_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_night_mode"` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | res/xml/fragment_preferences.xml:20 |  |
 | `key_night_mode_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:67 |  |
 | `key_night_mode_enabled` | Boolean | 表达式 (人工) | `ViewUtils.isNightModeEnabled = isNightModeYes(app)` | `运行时: 缺键时 Pref 初始化写入系统当前是否夜间` | core/pref/Pref.kt:59 |  |
-| `key_nodejs_inspector_enabled` | Boolean | 调用处字面量 | `false` | `false` | engine/NodeJsRuntimePluginBridge.kt:78 |  |
 | `key_nodejs_inspector_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:34 |  |
 | `key_nodejs_inspector_enabled` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:117 |  |
-| `key_plugin_center_auto_check_updates` | Boolean | R.bool | `R.bool.pref_plugin_center_auto_check_updates` | `true` | core/plugin/center/PluginOnlineSettingsStore.kt:24 |  |
+| `key_plugin_center_auto_check_updates` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_auto_check_updates, "pref_plugin_center_auto_check_updates")` | `true` | core/pref/keys/PluginCenterKeys.kt:32 |  |
 | `key_plugin_center_auto_check_updates` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_auto_check_updates"` | `true` | res/xml/fragment_plugin_center_preferences.xml:29 |  |
-| `key_plugin_center_show_official_plugins` | Boolean | R.bool | `R.bool.pref_plugin_center_show_official_plugins` | `true` | core/plugin/center/PluginOnlineSettingsStore.kt:12 |  |
+| `key_plugin_center_show_official_plugins` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_show_official_plugins, "pref_plugin_center_show_official_plugins")` | `true` | core/pref/keys/PluginCenterKeys.kt:20 |  |
 | `key_plugin_center_show_official_plugins` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_show_official_plugins"` | `true` | res/xml/fragment_plugin_center_preferences.xml:9 |  |
-| `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `R.bool.pref_plugin_center_show_third_party_plugins` | `true` | core/plugin/center/PluginOnlineSettingsStore.kt:18 |  |
+| `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `boolResource(R.bool.pref_plugin_center_show_third_party_plugins, "pref_plugin_center_show_third_party_plugins")` | `true` | core/pref/keys/PluginCenterKeys.kt:26 |  |
 | `key_plugin_center_show_third_party_plugins` | Boolean | R.bool | `app:defaultValue="@bool/pref_plugin_center_show_third_party_plugins"` | `true` | res/xml/fragment_plugin_center_preferences.xml:16 |  |
 | `key_record_toast` | Boolean | R.bool | `boolResource(R.bool.pref_record_toast, "pref_record_toast")` | `true` | core/pref/keys/RecordKeys.kt:30 |  |
 | `key_record_toast` | Boolean | R.bool | `app:defaultValue="@bool/pref_record_toast"` | `true` | res/xml/fragment_preferences.xml:298 |  |
@@ -218,7 +217,7 @@
 | `key_trash_max_total_bytes` | Long | 伴生常量 | `SettingDefault.of(DEFAULT_TRASH_MAX_TOTAL_BYTES) (经 常量 DEFAULT_TRASH_MAX_TOTAL_BYTES (core/pref/keys/HistoryKeys.kt:32))` | `524288000` | core/pref/keys/HistoryKeys.kt:57 |  |
 | `key_use_volume_control_record` | Boolean | R.bool | `boolResource(R.bool.pref_use_volume_control_record, "pref_use_volume_control_record")` | `true` | core/pref/keys/RecordKeys.kt:24 |  |
 | `key_use_volume_control_record` | Boolean | R.bool | `app:defaultValue="@bool/pref_use_volume_control_record"` | `true` | res/xml/fragment_preferences.xml:291 |  |
-| `key_use_volume_control_running` | Boolean | 调用处字面量 | `true` | `true` | inrt/Pref.kt:53 |  |
+| `key_use_volume_control_running` | Boolean | 调用处字面量 | `true` | `true` | inrt/Pref.kt:48 |  |
 | `key_use_volume_control_running` | Boolean | R.bool | `boolResource(R.bool.pref_use_volume_control_running, "pref_use_volume_control_running")` | `true` | core/pref/keys/RunningKeys.kt:31 |  |
 | `key_use_volume_control_running` | Boolean | R.bool | `app:defaultValue="@bool/pref_use_volume_control_running"` | `true` | res/xml/fragment_preferences.xml:256 |  |
 | `key_working_directory` | String | R.string | `stringResource(R.string.default_value_working_directory, "default_value_working_directory")` | `/Scripts` | core/pref/keys/ExplorerKeys.kt:43 |  |

@@ -7,9 +7,10 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.widget.CheckBox
 import androidx.appcompat.widget.AppCompatEditText
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
+import org.autojs.autojs.core.pref.keys.MiscStateKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.set
 import org.autojs.autojs.ui.edit.editor.engine.EditorSearchSyntaxException
 import org.autojs.autojs6.R
 import org.autojs.autojs6.databinding.DialogFindOrReplaceBinding
@@ -71,20 +72,15 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
     }
 
     private fun storeState() {
-        PreferenceManager.getDefaultSharedPreferences(getContext()).edit {
-            putString(KEY_KEYWORDS, mKeywordsEditText.text.toString())
-            putBoolean(KEY_USING_REGEX, mRegexCheckBox.isChecked)
+        SettingsStores.default.edit {
+            this[MiscStateKeys.FIND_OR_REPLACE_KEYWORDS] = mKeywordsEditText.text.toString()
+            this[MiscStateKeys.FIND_OR_REPLACE_USING_REGEX] = mRegexCheckBox.isChecked
         }
     }
 
     private fun restoreState() {
-        PreferenceManager.getDefaultSharedPreferences(getContext())
-            .getString(KEY_KEYWORDS, "")
-            .let { mKeywordsEditText.setText(it) }
-
-        PreferenceManager.getDefaultSharedPreferences(getContext())
-            .getBoolean(KEY_USING_REGEX, false)
-            .let { mRegexCheckBox.isChecked = it }
+        mKeywordsEditText.setText(MiscStateKeys.FIND_OR_REPLACE_KEYWORDS.get())
+        mRegexCheckBox.isChecked = MiscStateKeys.FIND_OR_REPLACE_USING_REGEX.get()
     }
 
     fun setUsingRegex(usingRegex: Boolean): FindOrReplaceDialogBuilder {
@@ -169,13 +165,6 @@ class FindOrReplaceDialogBuilder(context: Context, private val mEditorView: Edit
         mReplaceCheckBox.isChecked = replace || replaceAll
         mReplaceAllCheckBox.isChecked = replaceAll
         return this
-    }
-
-    companion object {
-
-        private const val KEY_KEYWORDS = "..."
-        private const val KEY_USING_REGEX = "find_or_replace_using_regex"
-
     }
 
 }

@@ -1,9 +1,9 @@
 package org.autojs.autojs.inrt
 
 import android.content.ComponentName
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import androidx.preference.PreferenceManager
+import org.autojs.autojs.core.pref.store.SettingsStore
+import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.project.ProjectConfig
 import org.autojs.autojs.project.LaunchConfig
 import org.autojs.autojs.app.GlobalAppContext
@@ -17,22 +17,17 @@ object Pref {
 
     private const val KEY_FIRST_USING = "key_first_using"
     private const val KEY_APPLIED_BUILD_ID = "key_inrt_applied_build_id"
-    private var sPreferences: SharedPreferences? = null
-
-    private val preferences: SharedPreferences
-        get() {
-            return sPreferences ?: run {
-                val pref = PreferenceManager.getDefaultSharedPreferences(GlobalAppContext.get())
-                sPreferences = pref
-                pref
-            }
-        }
+    // The default preferences through the settings store layer (docs/settings/ROADMAP.md P2.6, T13); keys, defaults and
+    // write times stay those of inrt.
+    // zh-CN: 经设置存储层访问默认偏好 (ROADMAP P2.6, T13); 键, 默认值与写入时机保持 inrt 原样.
+    private val store: SettingsStore
+        get() = SettingsStores.default
 
     val isFirstUsing: Boolean
         get() {
-            val firstUsing = preferences.getBoolean(KEY_FIRST_USING, true)
+            val firstUsing = store.getBoolean(KEY_FIRST_USING, true)
             if (firstUsing) {
-                preferences.edit().putBoolean(KEY_FIRST_USING, false).apply()
+                store.put(KEY_FIRST_USING, false)
             }
             return firstUsing
         }
@@ -42,19 +37,19 @@ object Pref {
     }
 
     fun shouldEnableAccessibilityServiceByRoot(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_enable_a11y_service_with_root_access), true)
+        return store.getBoolean(getString(R.string.key_enable_a11y_service_with_root_access), true)
     }
 
     fun shouldHideLogs(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_not_showing_main_activity), false)
+        return store.getBoolean(getString(R.string.key_not_showing_main_activity), false)
     }
 
     fun shouldStopAllScriptsWhenVolumeUp(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_use_volume_control_running), true)
+        return store.getBoolean(getString(R.string.key_use_volume_control_running), true)
     }
 
     fun shouldRunOnBoot(): Boolean {
-        return preferences.getBoolean(getString(R.string.key_run_on_boot_inrt), false)
+        return store.getBoolean(getString(R.string.key_run_on_boot_inrt), false)
     }
 
     @JvmStatic
@@ -63,7 +58,7 @@ object Pref {
         val projectConfig = ProjectConfig.fromAssets(context, ProjectConfig.configFileOfDir("project")) ?: return
         val launchConfig = projectConfig.launchConfig
         val buildId = projectConfig.buildInfo.buildId.orEmpty()
-        val appliedBuildId = preferences.getString(KEY_APPLIED_BUILD_ID, null)
+        val appliedBuildId = store.getString(KEY_APPLIED_BUILD_ID, null)
 
         val shouldApply = force || buildId != appliedBuildId
         updateLauncherVisibility(launchConfig)
@@ -71,11 +66,11 @@ object Pref {
             return
         }
 
-        preferences.edit()
-            .putBoolean(getString(R.string.key_not_showing_main_activity), !launchConfig.isLogsVisible)
-            .putBoolean(getString(R.string.key_run_on_boot_inrt), launchConfig.isRunOnBoot)
-            .putString(KEY_APPLIED_BUILD_ID, buildId)
-            .apply()
+        store.edit {
+            putBoolean(getString(R.string.key_not_showing_main_activity), !launchConfig.isLogsVisible)
+            putBoolean(getString(R.string.key_run_on_boot_inrt), launchConfig.isRunOnBoot)
+            putString(KEY_APPLIED_BUILD_ID, buildId)
+        }
 
     }
 

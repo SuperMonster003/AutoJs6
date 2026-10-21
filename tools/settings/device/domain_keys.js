@@ -468,6 +468,29 @@ var CALLERS = {
             return expect(Store.load(), 'KEYWORD', 'missing mode');
         });
     },
+    PluginCenterKeys: function () {
+        var P = Keys.PluginCenterKeys;
+        check('plugin-center-online-settings', function () {
+            var S = org.autojs.autojs.core.plugin.center.PluginOnlineSettingsStore.INSTANCE;
+            return same(S.isOfficialEnabled(), P.PLUGIN_CENTER_SHOW_OFFICIAL_PLUGINS.get())
+                && same(S.isThirdPartyEnabled(), P.PLUGIN_CENTER_SHOW_THIRD_PARTY_PLUGINS.get())
+                && same(S.isAutoCheckUpdatesEnabled(), P.PLUGIN_CENTER_AUTO_CHECK_UPDATES.get()) || 'online settings';
+        });
+    },
+    MiscStateKeys: function () {
+        // inrt/Pref reads the default preferences through the store layer now (T13); read-only calls only.
+        check('inrt-pref-through-the-store', function () {
+            var I = org.autojs.autojs.inrt.Pref.INSTANCE;
+            var pairs = [
+                [I.shouldEnableAccessibilityServiceByRoot(), sp.getBoolean(key('key_enable_a11y_service_with_root_access'), true)],
+                [I.shouldHideLogs(), sp.getBoolean(key('key_not_showing_main_activity'), false)],
+                [I.shouldStopAllScriptsWhenVolumeUp(), sp.getBoolean(key('key_use_volume_control_running'), true)],
+                [I.shouldRunOnBoot(), sp.getBoolean(key('key_run_on_boot_inrt'), false)],
+            ];
+            var bad = pairs.map(function (p, i) { return same(p[0], p[1]) ? null : String(i); }).filter(function (x) { return x; });
+            return bad.length === 0 || 'differs at ' + bad.join(' ');
+        });
+    },
     DeveloperKeys: function () {
         var D = Keys.DeveloperKeys;
         check('developer-deprecated-readers', function () {

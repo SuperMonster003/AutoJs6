@@ -677,6 +677,13 @@ def scan_sources(sources, res, key_values):
                     'name': name, 'file': f.display, 'line': i, 'const': const.group(1) if const else None,
                     'resource': key_values.get(name),
                 })
+            # Key declarations (P2.6) also name states and caches whose names do not start with "key_".
+            if f.display.startswith(DECLARATION_DIR):
+                for m in DECLARED_NAME.finditer(line):
+                    name = m.group(1).replace(chr(92) + '$', '$')
+                    if KEY_LITERAL_PREFIX.match(name):
+                        continue
+                    literals.append({'name': name, 'file': f.display, 'line': i, 'const': None, 'resource': key_values.get(name)})
     return refs, literals
 
 
@@ -809,6 +816,7 @@ DECLARATION = re.compile(r'\bSettingKey\.(Bool|Int|Long|Float|Str|StrSet|Enum|Js
 DECLARED_TYPES = {'Bool': 'Boolean', 'Int': 'Int', 'Long': 'Long', 'Float': 'Float', 'Str': 'String',
                   'StrSet': 'StringSet', 'Enum': 'String (Enum)', 'Json': 'Json'}
 DECLARATION_DIR = 'core/pref/keys/'
+DECLARED_NAME = re.compile(r'\bname\s*=\s*"((?:[^"\\]|\\.)*)"')
 RESOURCE_DEFAULT = re.compile(r'(bool|int|string|key)Resource\(\s*R\.(bool|integer|string)\.(\w+)\s*,')
 NAMED_ARG = re.compile(r'^(\w+)\s*=(?!=)\s*(.*)$', re.S)
 

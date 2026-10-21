@@ -2,11 +2,13 @@ package org.autojs.autojs.ui.settings.codegen
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
 import org.autojs.autojs.core.accessibility.codegen.model.ModelPackageReader
 import org.autojs.autojs.core.accessibility.codegen.store.CurrentModelSelection
 import org.autojs.autojs.core.accessibility.codegen.store.ModelCatalogRepository
 import org.autojs.autojs.core.accessibility.codegen.store.ModelStore
+import org.autojs.autojs.core.pref.keys.LayoutInspectorKeys
+import org.autojs.autojs.core.pref.store.SettingsStores
+import org.autojs.autojs.core.pref.store.SharedPreferencesStore
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.io.IOException
@@ -22,9 +24,10 @@ object CodegenModelStoreFactory {
             rootDirectory = configuration.modelDirectory(app.noBackupFilesDir),
             reader = ModelPackageReader(hostVersionCode = BuildConfig.VERSION_CODE, temporaryDirectory = app.cacheDir),
             verifiedCatalogs = { listOfNotNull(catalogRepository.loadBestAvailable(), catalogRepository.bootstrap()) },
+            // The selection must reach the disk before success is reported, so it commits on the preferences of the store.
             selection = SharedPreferencesCurrentModelSelection(
-                PreferenceManager.getDefaultSharedPreferences(app),
-                configuration.selectionPreferenceKey(app.getString(R.string.key_codegen_model_current)),
+                (SettingsStores.default as SharedPreferencesStore).preferences,
+                configuration.selectionPreferenceKey(LayoutInspectorKeys.CODEGEN_MODEL_CURRENT.name),
             ),
         )
     }

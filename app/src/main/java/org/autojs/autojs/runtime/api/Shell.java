@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import androidx.preference.PreferenceManager;
-
+import org.autojs.autojs.core.pref.store.SettingsStores;
+import org.autojs.autojs.core.pref.store.SharedPreferencesStore;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
 import org.autojs.autojs.runtime.api.shell.PipeShell;
@@ -141,7 +141,7 @@ public class Shell extends AbstractShell {
     protected void init(final String initialCommand) {
         Handler uiHandler = new Handler(mContext.getMainLooper());
         uiHandler.post(() -> {
-            TermSettings settings = new TermSettings(mContext.getResources(), PreferenceManager.getDefaultSharedPreferences(mContext));
+            TermSettings settings = new TermSettings(mContext.getResources(), ((SharedPreferencesStore) SettingsStores.getDefault()).getPreferences());
             try {
                 mTermSession = new MyShellTermSession(settings, initialCommand);
                 mTermSession.initializeEmulator(1024, 40);
