@@ -19,9 +19,12 @@ internal object RuntimeMailPrograms {
             const file=await java.new('java.io.File',[path]),owned=[];
             try{
                 const nio=await file.call('toPath');owned.push(nio);
-                const bytes=await java.callStatic('java.nio.file.Files','readAllBytes',[nio]);owned.push(bytes);
                 const digest=await java.callStatic('java.security.MessageDigest','getInstance',['SHA-256']);owned.push(digest);
-                const value=await digest.call('digest',[bytes],{parameterTypes:['byte[]']});owned.push(value);
+                const sink=await java.new('java.io.ByteArrayOutputStream');owned.push(sink);
+                const output=await java.new('java.security.DigestOutputStream',[sink,digest]);owned.push(output);
+                try{await java.callStatic('java.nio.file.Files','copy',[nio,output],{parameterTypes:['java.nio.file.Path','java.io.OutputStream']});}
+                finally{await output.call('close');}
+                const value=await digest.call('digest');owned.push(value);
                 const encoded=await java.callStatic('android.util.Base64','encodeToString',[value,2],{parameterTypes:['byte[]','int']});
                 return Buffer.from(encoded,'base64').toString('hex');
             }finally{for(const value of owned.reverse())await value?.release?.();await file.release();}

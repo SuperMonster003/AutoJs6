@@ -15,6 +15,8 @@ internal class RuntimeMailTokenServer : Closeable {
     private val sockets = CopyOnWriteArrayList<Socket>()
     private val pool = Executors.newCachedThreadPool { Thread(it, "runtime-mail-token-fixture").apply { isDaemon = true } }
     val attempts = AtomicInteger()
+    val accepted = AtomicInteger()
+    val rejected = AtomicInteger()
     val port get() = server.localPort
 
     init {
@@ -47,9 +49,13 @@ internal class RuntimeMailTokenServer : Closeable {
                     val encoded = if (auth.size == 2) auth[1] else { send("+ "); reader.readLine().orEmpty() }
                     val decoded = String(Base64.decode(encoded, Base64.DEFAULT), Charsets.UTF_8)
                     attempts.incrementAndGet()
-                    if (auth[0].equals("XOAUTH2", true) && decoded.contains("auth=Bearer valid-runtime-token"))
+                    if (auth[0].equals("XOAUTH2", true) && decoded.contains("auth=Bearer valid-runtime-token")) {
+                        accepted.incrementAndGet()
                         send(tag + " OK authenticated")
-                    else send(tag + " NO [AUTHENTICATIONFAILED] synthetic token expired")
+                    } else {
+                        rejected.incrementAndGet()
+                        send(tag + " NO [AUTHENTICATIONFAILED] synthetic token expired")
+                    }
                 }
                 "LIST", "LSUB" -> {
                     send("* LIST (\\HasNoChildren) \"/\" \"INBOX\"")

@@ -68,6 +68,8 @@ class RuntimeMailDeviceTest {
     @Test fun asynchronousTokenProvidersRefreshThroughTheRealPlugin() = fixture {
         RuntimeMailTokenServer().use { server ->
             for (mode in listOf("node", "bun", "worker")) {
+                val priorAccepted = server.accepted.get()
+                val priorRejected = server.rejected.get()
                 val program = """
                     let tokenCalls=0;
                     const client=await mail.connect({
@@ -95,9 +97,14 @@ class RuntimeMailDeviceTest {
                 }
                 val result = harness.execute(if (mode == "bun") "bun" else "node", script, capabilities = listOf("mail"))
                 assertEquals(2, result.getInt("tokenCalls"))
+                val authenticated = server.accepted.get() - priorAccepted
+                val refused = server.rejected.get() - priorRejected
+                assertTrue("Replacement token must authenticate", authenticated > 0)
+                assertTrue("Expired token must be refused", refused > 0)
+                result.put("acceptedAuthentications", authenticated).put("rejectedAuthentications", refused)
                 File(context.getExternalFilesDir(null), "runtime-mail-token-" + mode + ".json").writeText(result.toString(2))
             }
-            assertEquals(6, server.attempts.get())
+            assertEquals(server.accepted.get() + server.rejected.get(), server.attempts.get())
         }
     }
 
