@@ -28,4 +28,12 @@ class ActivityWindowIdentityTest {
         assertEquals("second.Main", foreground.observe("second", "second.Main", declared, windowKnown = false).activityName)
         assertEquals("toast", foreground.observe("toast", "android.widget.FrameLayout", declared, windowKnown = true).packageName)
     }
+    @Test fun freshlyBoundServicesCanUseTheVisibleWindowAndOwnFocusedActivity() {
+        assertEquals(ActivityWindowIdentity("app", ""), ActivityWindowIdentity().foreground("app"))
+        val owned = ActivityWindowIdentity("app", "app.Main")
+        assertEquals(owned, ActivityWindowIdentity().foreground("app", owned))
+        assertEquals(owned, ActivityWindowIdentity().foreground(null, owned))
+        assertEquals(ActivityWindowIdentity("other", ""), owned.foreground("other"))
+        assertEquals(owned, owned.foreground("app"))
+    }
 }

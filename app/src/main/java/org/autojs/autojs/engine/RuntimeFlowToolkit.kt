@@ -70,7 +70,7 @@ internal class RuntimeFlowToolkit(private val context: Context, private val work
                 else -> throw IllegalArgumentException("Unsupported portable resultType: $resultType")
             }
         }
-        override fun currentPackage(): String? { service(); return AutoJs.instance.infoProvider.accessibilityIdentity.packageName.takeIf { it.isNotEmpty() } }
+        override fun currentPackage(): String? { service(); return RuntimeFlowForeground.read().packageName.takeIf { it.isNotEmpty() } }
         override fun resolvePackage(app: Any?): String? {
             require(app is String && app.isNotBlank()) { "app must be a package, label or alias" }
             work.check()
