@@ -8,8 +8,46 @@ import org.junit.Assert.*
 import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.util.UUID
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 
 class RuntimeMailNativeTest {
+    @Test fun cancelledTokenRequestsLeaveNoUndrainableTerminalPackets() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        RuntimeMailBridge(context, context.cacheDir.path).use { bridge ->
+            fun call(method: String, vararg args: Any?): Any {
+                var response: NodeBridgeResponse? = null
+                bridge.dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), "mail", method,
+                    JSONArray(args.toList()).toString(), 5000)) { response = it }
+                assertTrue(response.toString(), response!!.ok)
+                return org.json.JSONTokener(response!!.resultJson!!).nextValue()
+            }
+            val ownerId = (call("open") as JSONObject).getString("id")
+            val id = (call("start", ownerId, "connect", JSONArray()
+                .put(JSONObject().put("address", "runtime@example.invalid").put("auth", "xoauth2"))
+                .put(true)) as JSONObject).getString("id")
+            val deadline = System.currentTimeMillis() + 5000
+            var requested = false
+            while (!requested && System.currentTimeMillis() < deadline) {
+                requested = (call("poll", ownerId, JSONArray().put(id)) as JSONArray).length() > 0
+                if (!requested) Thread.sleep(5)
+            }
+            assertTrue("Token request must be suspended before cancellation", requested)
+            // Observe actual completion, not a timing sleep: the terminal packet used to be queued in catch.
+            val ownersField = RuntimeMailBridge::class.java.getDeclaredField("owners").apply { isAccessible = true }
+            val owner = (ownersField.get(bridge) as Map<*, *>)[ownerId]!!
+            val lock = owner.javaClass.getDeclaredField("lock").apply { isAccessible = true }.get(owner)
+            val jobs = owner.javaClass.getDeclaredField("jobs").apply { isAccessible = true }.get(owner) as Map<*, *>
+            val job = synchronized(lock) { jobs[id] as Job }
+            assertEquals(true, call("cancel", ownerId, id))
+            withTimeout(5000) { job.join() }
+            assertEquals("Cancelled operations have no reader for terminal packets", 0,
+                (call("poll", ownerId, JSONArray().put(id)) as JSONArray).length())
+            assertEquals(true, call("close", ownerId))
+        }
+    }
+
     @Test fun invalidAccountsAndClosedClientHandlesRetainTheMailErrorCode() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         RuntimeMailBridge(context, context.cacheDir.path).use { bridge ->
