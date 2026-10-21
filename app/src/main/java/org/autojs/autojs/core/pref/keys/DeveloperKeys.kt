@@ -13,11 +13,11 @@ import org.autojs.autojs6.R
  * module layer of the Augment refactor with its debug printing, the Node.js inspector and LeakCanary of debug builds.
  * P3.6 (appendix C Q15) adds the explicitly selected dex and R8 compiler plugins, each a switch and the component it
  * names (`DexCompilerOptInStore` / `R8CompilerOptInStore`); an import skips a pair whose plugin is not installed
- * (`TARGET_MISSING`, P7.3).
+ * (`TARGET_MISSING`, P7.2).
  *
  * zh-CN: 开发者选项 (ROADMAP P2.5, 附录 A.1 `developer`, 默认不勾选): Augment 重构的新脚本模块层及其调试打印, Node.js inspector,
  * debug 构建的 LeakCanary. P3.6 (附录 C Q15) 加入显式选择的 dex 与 R8 编译器插件 (各为一个开关与其指向的组件); 导入时组件所属
- * 插件未安装则整组跳过 (`TARGET_MISSING`, P7.3).
+ * 插件未安装则整组跳过 (`TARGET_MISSING`, P7.2).
  */
 object DeveloperKeys : SettingsDomain {
 
