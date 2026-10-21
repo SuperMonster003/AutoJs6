@@ -247,7 +247,10 @@ H1 `LooperHelper.sLoopers` 永久钉住子线程所属的 ScriptRuntime:
 
 ### P5 脚本 API `memory` 模块 (D11 / T9)
 
-- [ ] P5.1 (宿主) `runtime/api/augment/memory/Memory.kt` (附录 C Q2 若改为新模块层则路径随之调整), 数据源复用 P2.1; JVM 单测 (形状, 参数校验, 非 debug 下 `dumpHeap` / `watch` 行为); 真机脚本验证: `memory.snapshot()` / `collect()` / `retained()` 在 S2 修前构建上能看到残留, 修后为空. 证据: 测试类 + 真机输出.
+- [x] P5.1 (宿主) `runtime/api/augment/memory/Memory.kt` (附录 C Q2 若改为新模块层则路径随之调整), 数据源复用 P2.1; JVM 单测 (形状, 参数校验, 非 debug 下 `dumpHeap` / `watch` 行为); 真机脚本验证: `memory.snapshot()` / `collect()` / `retained()` 在 S2 修前构建上能看到残留, 修后为空. 证据: 测试类 + 真机输出.
+  - 实现 (`715801d0a`, 2026-10-21): Q2 按默认倾向写旧 augment 包 (`Memory.kt` + 平台接口 `MemoryScriptPlatform.kt`, 测试用替身), 数据源为 `MemoryDiagnostics`. 形状按 T9 并与数据类字段一致: `snapshot()` 返回 `MemorySnapshot` 的全部 13 个字段 (T9 之外多 `allThreads`, 全部 number); `collect(timeout?)` 强制回收后最多等待 timeout 毫秒 (默认 10000, 范围 0-60000, 其他值抛错; 脚本被停止时立即中止, 不等满); `retained()` 的元素为 `{ id, name, source, endedAt, elapsedMs, exitKind }` (多 `name`; exitKind 为 normal / error / stopped, 按 Q21 不区分 forceStop 与 exit); `dumpHeap(path?)` 路径按脚本工作目录解析, 省略或为目录时文件名 `AutoJs6-heap-<yyyyMMdd-HHmmss>.hprof`, 返回绝对路径; 按 T9 + Q8: debug 构建始终允许, release 构建只在新开关 "允许脚本导出 hprof" 开启时允许 (否则抛错, 错误消息 10 种语言); `watch(obj, name?)` 交给 LeakCanary 并返回 true, release 构建或 LeakCanary 关闭时返回 false 且不做任何事, 包装的 Java 对象监视其本身. 新设置键 `key_memory_script_heap_dump` (开发者选项 > 内存诊断, 默认 false) 按 Q20 先例登记 (`DeveloperKeys.MEMORY_SCRIPT_HEAP_DUMP`, `classification.json`, `SettingsDomainsTest`), `SettingsRegistryGuardTest` 5/5, `SettingsDomainsTest` 3/3. `memory` 加在 `ScriptModuleLayer.ORDER` 末尾 (第 92 项), `ScriptModuleOrderTest` 增加 "设备表面基线 5586 之后新增的模块排在最后" 的名单, `registrations.json` 追加该模块与 5 个函数 (附录 C Q41).
+  - JVM (E2): `MemoryModuleTest` 15 例全过 (形状与字段顺序, 字段与 `MemorySnapshot` 声明一致的守卫, retained 描述与 exitKind, collect 的默认 / 自定义超时与提前返回, 停止时中止, 各参数错误, release + 开关关时 dumpHeap 拒绝且同一调用仅打开开关即成功, debug 构建放行与路径解析, watch 无 LeakCanary 时为空操作与有 LeakCanary 时的说明文字); 同批 `ScriptModuleOrderTest` 7, `ScriptModuleMounterTest` 15, `AugmentableKeysTest` 7, `MemoryDiagnosticsCoreTest` 7 全过.
+  - 真机 (E3, OPD2413 / Android 15 ColorOS, 宿主 debug versionCode 5741 = `715801d0a` 前的工作区构建, 含其他会话未提交的改动; `tools/memory/device_memory_api.py`, 7 项全过): snapshot 13 个字段全为 number, 单次约 7.3 ms (含 PSS), Java 堆 10.8 / 512 MB, 原生堆 15.6 MB, PSS 140.2 MB; S2 修前的类比 (修前构建已不存在): 第二个脚本把自身 `runtime` 存进 System properties 后结束, `collect(5000)` 等满 5025 ms, `retained()` 列出它 (exitKind normal, retainedRuntimes 1); 探针移除引用后 `collect()` 133 ms 返回, 列表为空 (retainedRuntimes 0); `dumpHeap('aj6-mem-api-check.hprof')` 54.6 MB / 2082 ms (debug 构建放行); `watch()` 返回 true (LeakCanary 开); 5 种参数错误均以脚本错误抛出, 例如 `Failed to call method "memory.collect". Argument timeout -1 (Number) for memory.collect must be a number of milliseconds from 0 to 60000.` 开发者选项新开关的位置只经清单工具核对 (`fragment_developer_options.xml` 13 个键), 未截图. ColorOS 坑: 参数错误打印的堆栈让宿主进程超过日志配额 (`LOGS OVER PROC QUOTA(300) ... DROPPED`), 结果行被丢弃, 脚本因此改为写 `result.json`.
 - [ ] P5.2 (文档) 文档仓库 `memory.md` + 生成 (`auto-generate-for-autojs6.bat`, 同步 Offline Docs 插件); d.ts 仓库 `memory.d.ts` + `aj6-int-*.d.ts` 同步 + Ace 插件 `:app:generateAutoJs6LspDeclarations`; 样例脚本 `sample/` 一个 "内存诊断" (`memory.collect()` 前后对比); 文档站 changelog 10 语言 JSON. 证据: 各仓库提交 hash.
 - [ ] P5.3 (changelog) `feature` 条目: memory 模块 (zh-Hans 先行).
 
@@ -385,6 +388,8 @@ images.cancelPendingQuantizations -> console.onRuntimeExit -> CoreWebSocket.onEx
 | Q6 | inrt debug 变体是否也默认包含 LeakCanary | P1.2 | 包含 (同一 gradle 属性) |
 | Q7 | CI 门禁是否接入 release 工作流作为硬门禁 (失败阻断发布) | P6.1 | 接入 tag 构建, 失败阻断 |
 | Q8 | `memory.dumpHeap` 在 release 非 debug 下是否允许 (隐私: hprof 含脚本变量) | P5.1 | 只在开发者选项 "允许脚本导出 hprof" 开启时允许 |
+| Q40 | (P5.1 登记) 按 T9 + Q8 实现为 "debug 构建始终允许 dumpHeap, release 构建看开关", 因此新开关 "允许脚本导出 hprof" 在 debug 构建中显示但不起作用 (摘要已注明 "debug 版本始终允许"). 可选: (a) 保持; (b) 开关只在 release 构建显示; (c) debug 构建也受开关控制 (与 release 一致, 但 debug 包的日常调试多一步) | P5.2 之前 (文档按 (a) 写) | (a) |
+| Q41 | (P5.1 登记, 协调 augment 路线图) `memory` 是 augment 设备表面基线 (`surface-XQ-AT72-5586.txt`) 之后新增的顶层模块: 已加在 `ScriptModuleLayer.ORDER` 末尾, `ScriptModuleOrderTest` 用 `ADDED_AFTER_BASELINE` 名单放行, `registrations.json` 只追加了它的条目 (未整体重新生成, 其他条目的行号漂移未处理). augment 路线图需在第三批迁移 (P4) 时把它列入, 并在下次重录表面基线时去掉名单 | augment P4 / 下次重录基线 | 由 augment 调度会话登记 |
 
 ---
 
@@ -433,5 +438,7 @@ fork 位置 `D:/idea-projects/Rhino-For-AutoJs6` (基线 `90693268c`, 2026-10-20
 | `app/src/test/java/org/autojs/autojs/runtime/memory/MemoryDiagnosticsCoreTest.kt` | 诊断核心的 JVM 单测 | P2.1 |
 | `app/src/main/java/org/autojs/autojs/runtime/resource/RuntimeResourceScope.kt` | 统一所有权 | P4.1 |
 | `app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt` | 源码守卫 | P4.3 |
-| `app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt` | 脚本 API | P5.1 |
+| `app/src/main/java/org/autojs/autojs/runtime/api/augment/memory/Memory.kt`, `MemoryScriptPlatform.kt` | 脚本 API `memory` 模块与其宿主平台接口 | P5.1 |
+| `app/src/test/java/org/autojs/autojs/runtime/api/augment/memory/MemoryModuleTest.kt` | 脚本 API 的 JVM 单测 | P5.1 |
+| `tools/memory/device_memory_api.py` | 脚本 API 真机核对 | P5.1 |
 | `.github/workflows/memory-gate.yml` | CI | P6.1 |
