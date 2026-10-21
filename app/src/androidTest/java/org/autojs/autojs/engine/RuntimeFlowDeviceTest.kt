@@ -99,7 +99,9 @@ class RuntimeFlowDeviceTest {
             for(const [entry,options] of [[cjs,{eval:true}],[new URL('data:text/javascript,'+encodeURIComponent(esm)),{}],[nested,{eval:true}]]){
                 const w=new Worker(entry,options);try{eq(await new Promise((resolve,reject)=>{w.once('message',resolve);w.once('error',reject);}),6,'Worker chain');}finally{await w.terminate();}
                 eq(flow.defaults().interval,200,'Parent defaults');eq(await flow.of(7),7,'Parent alive');
-            }return {modes:3,parent:true,pending:flow.pending};
+            }
+            await pause(10);eq(flow.pending,0,'Parent await continuations settled');
+            return {modes:3,parent:true,pending:flow.pending};
         """.trimIndent(), capabilities = listOf("accessibility"))
         assertEquals(3, result.getInt("modes"))
         File(context.getExternalFilesDir(null), "runtime-flow-worker-modes.json").writeText(result.toString(2))
