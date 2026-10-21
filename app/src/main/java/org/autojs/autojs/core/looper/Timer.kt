@@ -198,13 +198,24 @@ class Timer {
         onPendingCallbacksChanged?.invoke()
     }
 
-    private inner class PendingCallback(val callback: Runnable) : Runnable {
+    // Drops the callback once it starts (or turns out to be cancelled), like TimerThread.ReleasingRunnable: when the
+    // callback throws (exit() or a forced stop), Looper.loop does not recycle the dispatched Message, and another looper
+    // thread may still hold a stale reference to that pooled Message, which kept the script alive through
+    // Message.callback (ROADMAP H21, third path, S7 N on 23046RP50C and AVD API 24 in P3.5).
+    // zh-CN: 回调一开始运行 (或发现已取消) 就丢弃它, 同 TimerThread.ReleasingRunnable: 回调抛出时 (exit() 或强制停止) Looper.loop 不回收已分发的 Message,
+    // 另一个 Looper 线程可能仍持有该池化 Message 的陈旧引用, 曾经由 Message.callback 钉住脚本 (路线图 H21 第三条路径, P3.5 中 23046RP50C 与 AVD API 24 的 S7 N).
+    private inner class PendingCallback(callback: Runnable) : Runnable {
+        var callback: Runnable? = callback
+            private set
         var running = false
 
         override fun run() {
-            synchronized(this@Timer) {
-                if (this !in mPendingCallbacks) return
+            val callback = synchronized(this@Timer) {
+                val callback = this.callback
+                this.callback = null
+                if (callback == null || this !in mPendingCallbacks) return
                 running = true
+                callback
             }
             try {
                 runPosted(callback)
