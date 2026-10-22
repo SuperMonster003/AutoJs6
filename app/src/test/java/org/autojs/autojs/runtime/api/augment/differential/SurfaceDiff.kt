@@ -47,7 +47,8 @@ internal object SurfaceDiff {
      * Members of [target] and of its prototype chain below `Object.prototype` / `Function.prototype` (the
      * obsolete modules keep their methods on a constructor prototype, the Kotlin ones on the object itself).
      * Function intrinsics (`length`, `name`, `arguments`, `caller`, `prototype`), `constructor` and internal
-     * `__xxx__` names are left out; a member that cannot be read is typed `inaccessible`. A Java object in the chain
+     * `__xxx__` names are left out; a member that cannot be read (also a getter whose Android class cannot be initialized
+     * on the JVM) is typed `inaccessible`. A Java object in the chain
      * (util and mime use one as prototype) contributes its public members; it has no attributes, so they are
      * recorded as enumerable, writable and permanent.
      */
@@ -67,6 +68,9 @@ internal object SurfaceDiff {
                     val value = try {
                         owner.get(name, owner)
                     } catch (e: RuntimeException) {
+                        INACCESSIBLE
+                    } catch (e: LinkageError) {
+                        // An Android class behind a getter cannot be initialized on the JVM (NoClassDefFoundError).
                         INACCESSIBLE
                     }
                     val attributes = (owner as? ScriptableObject)?.getAttributes(name) ?: ScriptableObject.PERMANENT
