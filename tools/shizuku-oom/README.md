@@ -29,7 +29,9 @@ py -3.12 -I tools/shizuku-oom/zombie_probe.py -s SERIAL --mode force-stop --roun
 | `server-restart` | 跑脚本后 `sh <--start-sh>` 重启 Shizuku 服务端 (只适用于 adb 方式启动的 Shizuku), 统计旧服务; 再强停 | P0.3(c) |
 | `spawn-orphan` | 脚本 `shizuku.spawn('sleep 600')` 后常驻, 强停后另统计服务的子进程与本轮的 `sleep 600` | P0.3(e), P1.1 的修前基线; 能结束的子进程会被结束 |
 
-其他参数: `--report-dir` (默认 `docs/shizuku-oom/evidence`, 相对路径按仓库根目录解析), `--label` (报告名后缀, 例如 `v664`), `--expect accumulate` (负对照: 至少 80% 的轮次残留数比上一轮多 1 才算 PASS), `--kill-residue` (结束时结束运行期间新出现的用户服务进程, 负对照用; root 身份的服务进程结束不了), `--apk-a` / `--apk-b` (`update` 模式), `--start-sh` (默认 `/sdcard/Android/data/moe.shizuku.privileged.api/start.sh`), `--package`, `--no-wake`.
+其他参数: `--report-dir` (默认 `docs/shizuku-oom/evidence`, 相对路径按仓库根目录解析), `--label` (报告名后缀, 例如 `v664`), `--expect accumulate` (负对照: 至少 80% 的轮次残留数比上一轮多 1 才算 PASS), `--kill-residue` (结束时结束运行期间新出现的用户服务进程, 负对照用; root 身份的服务进程结束不了), `--apk-a` / `--apk-b` (`update` 模式), `--start-sh` (默认 `/sdcard/Android/data/moe.shizuku.privileged.api/start.sh`), `--package`, `--no-wake`, `--profile` (见下).
+
+`--profile` (P0.4 / P1.4 基线): 第 1 轮在结束宿主前给新服务进程做一次内存画像, 写进报告头部与 JSON 的 `profile`: `dumpsys meminfo <pid>` 的 PSS / RSS / Java 堆 / native / code 与 `.dex mmap` / `.art mmap` 两行, 线程数 (`/proc/<pid>/task`), 运行时解压到匿名内存的 dex (smaps 里 `extracted in memory` 的映射; 只有服务以 shell 身份运行时可读, root 身份记 `-`), 以及该进程的 `App attachBaseContext |` / `App onCreate |` 日志行数 (为 0 且启动器日志在缓冲区内, 说明宿主 `App` 没有在服务进程里运行).
 
 ## 输出
 

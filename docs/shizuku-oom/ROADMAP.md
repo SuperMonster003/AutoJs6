@@ -38,13 +38,13 @@
 - 宿主以 `daemon(false)`, `version(BuildConfig.VERSION_CODE + 5)`, 进程名后缀 `shizuku-service-for-<包名末段>` 绑定 (`WrappedShizuku.mUserServiceArgs`). 服务端按 `包名:类名` 保存一条 `UserServiceRecord`.
 - 服务端在以下情形移除记录并调用 `record.destroy()`: 宿主所有连接死亡且非 daemon (`ConnectionList.onCallbackDied`); 宿主 `unbindUserService(..., remove = true)`; 新绑定的 version 与记录不同 (替换); 包被移除 (`removeUserServicesForPackage`); 启动 30 秒内未收到 binder (`setStartingTimeout`).
 - `record.destroy()` 只在 `service != null && service.pingBinder()` 时向用户服务发 oneway `destroy` 事务 (code 16777114); 服务端自己不杀进程. 所以用户服务进程能否退出, 完全取决于宿主 `UserService.destroy()` 的实现 (1.1 的根因).
-- 启动器 `moe.shizuku.starter.ServiceStarter.main`: 创建服务实例 (`UserService.create` 会 `makeApplication`, 即运行宿主 `App.onCreate`), 经 provider 把 binder 交给服务端; 交付失败 (含记录已被移除, 服务端抛 "unable to find token") 时 `System.exit(1)`; 交付成功后对服务端 binder `linkToDeath` -> `System.exit(0)`; 然后 `Looper.loop()`. 因此 "宿主在服务启动完成前被杀" 与 "Shizuku 服务端重启" 两条路径由 Shizuku 自身覆盖, 其余全靠 `destroy()`.
+- 启动器 `moe.shizuku.starter.ServiceStarter.main`: 创建服务实例 (`UserService.create` 会 `makeApplication`, 即运行宿主 `App.onCreate`; P0.4 更正: 参数为 `(true, null)`, 只建默认 `android.app.Application` 且不调用 onCreate, 宿主 `App` 不在服务进程里运行, 见 1.5), 经 provider 把 binder 交给服务端; 交付失败 (含记录已被移除, 服务端抛 "unable to find token") 时 `System.exit(1)`; 交付成功后对服务端 binder `linkToDeath` -> `System.exit(0)`; 然后 `Looper.loop()`. 因此 "宿主在服务启动完成前被杀" 与 "Shizuku 服务端重启" 两条路径由 Shizuku 自身覆盖, 其余全靠 `destroy()`.
 
 ### 1.3 宿主侧现状
 
 - `core/shizuku/UserService.kt`: `destroy()` / `exit()` 已含退出代码 (1.1); `execCommand` 每次 `Runtime.exec("sh")` 跑完即 `destroy()`; `newShellProcess` 返回 `RemoteShellProcessHolder`, 它对宿主传来的 client token `linkToDeath` -> 结束子进程. 但 `destroy()` 退出前不清理仍存活的 holder 子进程与 pty 进程, 进程被 SIGKILL 后这些子进程成为孤儿 (待 P0.3(e) 实测).
-- `runtime/api/WrappedShizuku.kt`: 绑定是懒触发的 (`connectedService` / `getServiceOrNull` / 授权结果监听); `connectedService` 等 10 秒无服务时 `unbindUserService(remove = true)` 再重绑 (针对更新后旧记录); `onDestroy` 只在应用主动退出 (`IntentUtils.exit`) 时调用. 宿主侧没有向服务传递自身存活令牌的通道 (`newShellProcess` 的 client 只对该子进程有效).
-- `App.onCreate` 在用户服务进程里走 "主进程" 分支的大部分: `setUpDebugEnvironment`, `setUpLeakCanary`, `AutoJs.initInstance`, `AccessibilityCompanionSync.install`, `GlobalKeyObserver.initIfNeeded`, `setupDrawableImageLoader`, `TimedTaskScheduler.init`, `initDynamicBroadcastReceivers`, `Toaster.init`, `ThemeColorManager.init`, `setUpDefaultNightMode`, `scheduleDeferredMaintenance`; 只有 `getProcessNameCompat() == applicationInfo.processName` 守卫的几项被跳过. 这是单个用户服务进程 RES 约 115 MB 的来源 (P0.4 画像后确认). 已有 `:crash_report` 进程后缀分支可作瘦身分支的样板.
+- `runtime/api/WrappedShizuku.kt`: 绑定是懒触发的 (`connectedService` / `getServiceOrNull` / 授权结果监听; P0 更正: 开启 "音量键控制" 时宿主启动约 1.2 秒后即经 `InputEventObserver` 绑定, 见 1.5); `connectedService` 等 10 秒无服务时 `unbindUserService(remove = true)` 再重绑 (针对更新后旧记录); `onDestroy` 只在应用主动退出 (`IntentUtils.exit`) 时调用. 宿主侧没有向服务传递自身存活令牌的通道 (`newShellProcess` 的 client 只对该子进程有效).
+- (P0.4 实测不成立, 见 1.5: 宿主 `App` 不在用户服务进程里运行, 本条只是代码静态推断) `App.onCreate` 在用户服务进程里走 "主进程" 分支的大部分: `setUpDebugEnvironment`, `setUpLeakCanary`, `AutoJs.initInstance`, `AccessibilityCompanionSync.install`, `GlobalKeyObserver.initIfNeeded`, `setupDrawableImageLoader`, `TimedTaskScheduler.init`, `initDynamicBroadcastReceivers`, `Toaster.init`, `ThemeColorManager.init`, `setUpDefaultNightMode`, `scheduleDeferredMaintenance`; 只有 `getProcessNameCompat() == applicationInfo.processName` 守卫的几项被跳过. 这是单个用户服务进程 RES 约 115 MB 的来源 (P0.4 画像后确认). 已有 `:crash_report` 进程后缀分支可作瘦身分支的样板.
 
 ### 1.4 测试设备快照 (2026-10-22 20:15, 只读 `pm list packages` / `ps -A`)
 
@@ -58,6 +58,14 @@
 | 22120RN86C (bek749scrwv4wo8h) | 13 / 33 | 13.5.4 | 未运行 | - |
 
 当前构建 (含 6.7.0 修复) 在三台运行 Shizuku 的设备上各只有 1 个用户服务进程, 与 1.1 的修复一致.
+
+### 1.5 P0 实测更正与新发现 (2026-10-22, 子会话 shizuku-oom-p0)
+
+- 宿主 `App` 不在用户服务进程里运行 (更正 1.2 第 4 条, 1.3 第 3 条, T5): Shizuku-API `server-shared` 的 `UserService.create` 调用 `LoadedApk.makeApplication(true, null)`, `forceDefaultAppClass = true` 只建默认 `android.app.Application`, instrumentation 为 null 也不调用其 onCreate. 实测 G8441 服务进程的日志从启动器第一行 (`ShizukuServiceStarter: starting service`) 起没有 `App attachBaseContext |` / `App onCreate |`, 构造函数收到的是 `ContextImpl`; XQ-AT72 同样为 0 行 (附录 B.3). 因此 D6 / P1.4 "在 `App.onCreate` 加用户服务进程分支" 没有可跳过的初始化, 见附录 C Q2.
+- 用户服务进程的内存构成 (P0.4, 附录 B.3): XQ-AT72 (shell 身份) 上 HEAD debug 包的服务进程 RSS 约 210 MB, 其中约 83 MB 是宿主 APK 的 38 个 `classesN.dex` 被运行时 "extracted in memory" 到匿名内存 (adb 安装的 debug 包没有 oat 目录), 约 20 MB 是 boot image 的私有脏页 (app_process 不经 zygote 启动, 不能共享); G8441 (root 身份, Android 9) 上原有 debug 5835 的服务进程 RSS 约 65 MB, PSS 约 22 MB, `.dex mmap` 约 5 MB 且几乎全为干净页 (root 可读 oat).
+- 宿主启动即绑定用户服务 (更正 1.3 第 2 条): 开启 "音量键控制" 时 `App.onCreate` 的 `GlobalKeyObserver.initIfNeeded` 在 1200 ms 后调用 `InputEventObserver.ensureObservedAsync`, Shizuku 可用时进 `observeByShizuku`, 线程 "InputEventObserver-Shizuku" 循环执行 `WrappedShizuku.execCommand("getevent -t -c 1")`. G8441 日志: 宿主 `App onCreate` 后 1.26 秒即新建服务记录. 所以报告者场景 (Tasker 定时唤醒宿主) 即使脚本不用 Shizuku, 每次唤醒也会拉起用户服务.
+- 第二类残留 (P1.1 范围): 宿主被强停时, 用户服务正在执行的 `getevent -t -c 1` (`ProcessShell.execCommand` 的 `Runtime.exec("sh")` 及其子进程) 随服务死亡被 init 收养, 直到下一个实体输入事件才退出 (`input` 注入的事件不经 evdev, 不能让它退出). G8441 (root) 静置一晚累积 32 对 `sh` + `getevent`, RSS 合计约 115 MB (多为共享页). 探针把它记为 stray (不参与判定), shell 身份的会被探针结束.
+- 10 秒超时重绑 (P0.3(d)) 在 G8441 装包后首次启动时自然发生: 新装 APK 冷加载 dex, 第一个服务进程从启动到构造约 19 秒, 宿主 10 秒后 `unbindUserService(remove = true)` 再绑, 第二个进程启动; 两者同时构造完成后, 记录已被移除的旧进程交付 binder 失败, 启动器 `System.exit(1)` 退出, 新进程正常服务; Shizuku 30 秒后报旧记录 "is not started in 30000 ms". 结果: 无永久残留, 约 19 秒内两个服务进程 (各约 65 MB) 并存. 日志摘录在共享笔记 `shizuku-oom-p0-g8441-rebind.md`.
 
 ---
 
@@ -85,7 +93,7 @@
 | T2 | 残留定义: 宿主被结束后 3 秒, 用户服务进程数应为 0 (daemon(false) 的服务随宿主退出); 负对照预期每轮 +1. 启动脚本的方式复用 `tools/memory/run_gate.py` 已验证的宿主脚本启动途径 (子会话核对), 不自造 | P0.1 完成 |
 | T3 | 退出原因统一出口: `UserService.shutdown(reason)` 先结束登记的 `RemoteShellProcessHolder` 与在途 `execCommand` 进程 (`ProcessTree.terminate`), 再 `killProcess` + `exitProcess`; 打一行 `UserService exit: <reason>` (destroy / exit / host-died / no-host-attached), 探针用 logcat 核对原因 | P1.1 实现时 |
 | T4 | `attachHost` 的宿主令牌由 `WrappedShizuku` 持有一个进程级 `Binder` (静态, 与宿主进程同生命周期); `onServiceConnected` 后立即调用; 旧宿主连新服务与新宿主连旧服务都被 version 替换排除, 不需要兼容分支. 30 秒看门狗用服务进程主线程 Handler 实现, 附着后取消 | P1.2 实现时 |
-| T5 | 瘦身分支按进程名后缀前缀 `shizuku-service-for-` 判断 (常量从 `WrappedShizuku` 抽出, 打包应用 inrt 的后缀也以它开头); 分支里保留的初始化由子会话按 `UserService` 调用图确定 (至少: 字符串资源可用, `PrivilegedFileNative` 按请求加载, termexec 可加载), 其余全部跳过; 不改 `Application` 类 (Shizuku 固定用宿主的 `Application`) | P1.4 实现时 |
+| T5 | (P0.4 实测前提不成立, 待附录 C Q2 拍板) 瘦身分支按进程名后缀前缀 `shizuku-service-for-` 判断 (常量从 `WrappedShizuku` 抽出, 打包应用 inrt 的后缀也以它开头); 分支里保留的初始化由子会话按 `UserService` 调用图确定 (至少: 字符串资源可用, `PrivilegedFileNative` 按请求加载, termexec 可加载), 其余全部跳过; 不改 `Application` 类 (Shizuku 固定用宿主的 `Application`) | P1.4 实现时 |
 | T6 | 7 项回归清单 (P2.1): (1) `shizuku('id')` / `shizuku.execCommand`; (2) `shizuku.spawn` 常驻进程 + 脚本结束自动结束; (3) `new Shell({ adb: true })` 与 `pty: true`; (4) 文件管理器经 Shizuku 浏览受限目录并保存文本文件; (5) 无障碍服务用 Shizuku 自动启用; (6) 浮动按钮 "更多" 经 Shizuku 取 currentPackage / currentActivity; (7) KeyCode 经 Shizuku 发送键码 (issue #492); (8) 其余调用点各跑一次冒烟: RootAutomator 的 adb 模式, 指针位置工具, 插件中心启动器图标, AndroidIdReader, augment app 的 Shizuku 分支 (立项时 grep `WrappedShizuku.` 共 16 个文件, 子会话核对清单). (1)-(7) 在 XQ-AT72 (shell) 与 G8441 (root) 各跑一次, (8) 只在 XQ-AT72 | P2.1 开始前 |
 | T7 | JVM 单测: `UserService` 的退出逻辑抽成可注入 exit 钩子的 `UserServiceLifecycle` (或等价命名), 测 (a) 宿主令牌死亡 -> 先清理子进程再退出, (b) 30 秒无附着 -> 退出, (c) 附着后看门狗取消, (d) destroy 重入只退出一次 | P1.2 实现时 |
 
@@ -144,7 +152,7 @@
 | 报告者截图 (版本未知, 2025-12) | 未知 (11.3 GB, 8 核) | - | 22 | 约 2.5 GB (114-115 MB 每个) | issue #474 截图 |
 | v6.6.4 (修复前, P0.2) | XQ-AT72 | 10 | | | |
 | HEAD debug (P0.1) | XQ-AT72 | 20 | | | |
-| HEAD debug (P0.1) | G8441 | 10 | | | |
+| HEAD debug 5935 (P0.1) | G8441 (root) | 10 | 0/10 (每轮退出来源 destroy) | 0 (单个服务约 65.5 MB) | `probe-G8441-5935-force-stop-20261022` |
 | P1.2 后 | XQ-AT72 | 20 | | | |
 
 ### B.2 边界路径 (P0.3, HEAD 构建; P1 后复测同表追加列)
@@ -154,7 +162,7 @@
 | (a) bind-kill 0.2 / 0.5 / 1 / 2 s | 各 5 | | | |
 | (b) update (version 替换) | 3 | | | |
 | (c) server-restart | 3 | | | |
-| (d) 10 秒超时重绑 | - | | | |
+| (d) 10 秒超时重绑 | 1 (G8441 自然发生) | 0 | 旧进程: 交付 binder 失败, 启动器 `System.exit(1)` (`VM exiting with result code 1`); 新进程正常服务 | 代码审读 + G8441 装包后首次启动自然复现 (冷加载约 19 秒 > 10 秒): 无永久残留, 约 19 秒两个服务进程并存; 支持 P1.3 默认不改代码 (1.5) |
 | (e) spawn-orphan (sleep 600) | 5 | | | |
 
 ### B.3 用户服务进程内存画像 (P0.4 / P1.4)
@@ -170,7 +178,7 @@
 
 | 编号 | 问题与选项 | 影响条目 | 状态 |
 | --- | --- | --- | --- |
-| (无) | | | |
+| Q1 | 宿主启动即绑定与在途 getevent 孤儿 (1.5 第 3, 4 条) 怎么纳入 P1? A (推荐): P1.1 照原文清理在途 `execCommand` 进程, 验收追加 "开启音量键控制时 force-stop 20 轮 stray 为 0" (XQ-AT72 由探针核对, G8441 root 身份在 P2.1 复核), 不改绑定时机; 返工: 无. B: A 之外把 `InputEventObserver` 的 Shizuku 分支改为一个常驻 `newShellProcess` (client 令牌 linkToDeath, 宿主死即结束), 不再每个按键事件起一对 sh + getevent; 多改 `InputEventObserver` 并在 T6 加 "音量键控制" 1 项回归, 约多半个会话. C: 不处理, stray 只报告 | P1.1, P2.1, T6 | 需拍板 (不阻塞 P0, 未先行) |
 
 ## 附录 D 文件地图
 

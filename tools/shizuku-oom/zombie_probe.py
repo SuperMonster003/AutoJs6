@@ -27,8 +27,10 @@ Every round reads the logcat lines written since it began and records only how e
 sh / getevent / sleep processes that were reparented to init during the round, with their descendants (`stray`): the
 commands the service was still running when it died, e.g. the `getevent -t -c 1` loop the host keeps running through the
 service while volume key control is on. They are reported, killed when they run as shell, and do not decide the
-verdict. Full process lists,
-logcat text and the script output are not printed or stored; the report keeps per-round counts, RSS sums and the verdict.
+verdict. With --profile, round 1 also records a memory profile of its user service before the host is ended (P0.4):
+dumpsys meminfo totals, threads, dex extracted into anonymous memory and whether the host App ran in that process.
+Full process lists, logcat text and the script output are not printed or stored; the report keeps per-round counts, RSS
+sums and the verdict.
 
 Output: <report-dir>/probe-<model>-<versionCode>-<mode>-<yyyyMMdd>[-<label>].json and the same-named .md, one line per
 round on the terminal, PASS / FAIL at the end. With --expect accumulate (negative control, P0.2) PASS means the probe saw
@@ -320,6 +322,8 @@ class Probe:
             self.start_script(script)
             pid, rss, text = self.wait_new_service(before, mark)
             item["mark"] = text
+            if self.args.profile and index == 1 and pid is not None:
+                item["profile"] = self.profile(pid, rss)
         item["servicePid"] = pid
         item["serviceRssKb"] = rss
         children = []
@@ -436,6 +440,55 @@ class Probe:
         if pid is None:
             item["note"] = "no new user service process"
         return item
+
+    def profile(self, pid, rss):
+        """Memory profile of one user service process (P0.4 / P1.4 baseline), taken before the host is ended.
+
+        Values are KB from `dumpsys meminfo <pid>` (App Summary PSS, plus RSS where Android prints it), the thread count,
+        the dex the runtime had to extract into anonymous memory (smaps, readable only when the service runs as shell),
+        and how many `App attachBaseContext |` / `App onCreate |` lines this process logged (App.attachBaseContext and
+        WrappedShizuku.onCreate, which App.onCreate reaches through AutoJs.initInstance), which shows whether the host
+        Application ran in the service process at all.
+        zh-CN: 一个用户服务进程的内存画像 (P0.4 / P1.4 基线), 在结束宿主前采集. 数值单位 KB: `dumpsys meminfo <pid>` 的 App Summary
+        PSS (Android 打印 RSS 时一并记录), 线程数, 运行时被迫解压到匿名内存的 dex (smaps, 仅服务以 shell 身份运行时可读),
+        以及该进程打出的 `App attachBaseContext |` / `App onCreate |` 行数 (来自 App.attachBaseContext 与 App.onCreate 经
+        AutoJs.initInstance 调到的 WrappedShizuku.onCreate), 用于判断宿主 Application 是否在服务进程里运行过.
+        """
+        dump = self.dev.shell(f"dumpsys meminfo {pid}", timeout=120)
+
+        def summary(label):
+            found = re.search(rf"^\s*{label}:\s+(\d+)(?:[ \t]+(\d+))?", dump, re.M)
+            return (int(found[1]), int(found[2]) if found[2] else None) if found else (None, None)
+
+        def row(label):
+            found = re.search(rf"^\s*{re.escape(label)}\s+(\d+)\s+(\d+)", dump, re.M)
+            return {"pss": int(found[1]), "privateDirty": int(found[2])} if found else None
+
+        total = re.search(r"TOTAL PSS:\s+(\d+)", dump) or re.search(r"^\s*TOTAL:\s+(\d+)", dump, re.M)
+        total_rss = re.search(r"TOTAL RSS:\s+(\d+)", dump)
+        java, native, code = summary("Java Heap"), summary("Native Heap"), summary("Code")
+        threads = self.dev.shell(f"ls /proc/{pid}/task | wc -l").strip()
+        extracted = self.dev.shell(
+            "awk '/^[0-9a-f]+-[0-9a-f]+ /{x = index($0, \"extracted in memory\") > 0} "
+            f"x && /^Private_Dirty:/{{d += $2; n++}} END{{print n + 0, d + 0}}' /proc/{pid}/smaps 2>/dev/null || echo na").split()
+        lines = self.dev.shell(f"logcat -d -v brief --pid={pid}", timeout=120).splitlines()
+        user = next((r[2] for r in self.dev.processes() if r[0] == pid), None)
+        return {
+            "user": user,
+            "rssKb": int(total_rss[1]) if total_rss else rss,
+            "pssKb": int(total[1]) if total else None,
+            "javaHeapPssKb": java[0],
+            "nativeHeapPssKb": native[0],
+            "codePssKb": code[0],
+            "codeRssKb": code[1],
+            "dexMmap": row(".dex mmap"),
+            "artMmap": row(".art mmap"),
+            "threads": int(threads) if threads.isdigit() else None,
+            "extractedDexMaps": int(extracted[0]) if extracted[0].isdigit() else None,
+            "extractedDexKb": int(extracted[1]) if len(extracted) > 1 and extracted[1].isdigit() else None,
+            "appInitLines": sum(1 for line in lines if re.search(r"App (attachBaseContext|onCreate) \|", line)),
+            "starterLogged": any("ShizukuServiceStarter" in line for line in lines),
+        }
 
     # Helpers. zh-CN: 辅助.
 
@@ -557,6 +610,20 @@ def write_reports(meta, items, result, args):
         + (f" (强停使其被系统移出启用列表, 结束时补回 {meta['a11yRestored']} 项)" if meta.get("a11yRestored") else ""),
         "- 探针: `tools/shizuku-oom/zombie_probe.py` (ROADMAP P0.1); 残留 = 结束宿主后仍在运行的用户服务进程数, RSS 合计为这些进程的 RSS 之和; "
         "备注里的 stray = 本轮新出现且被 init 收养的 sh / getevent / sleep 及其后代 (服务死亡时仍在运行的命令), 只报告, 不参与判定",
+    ]
+    profile = next((i["profile"] for i in items if i.get("profile")), None)
+    if profile:
+        def size(kb):
+            return "-" if kb is None else mb(kb)
+        dex = profile.get("dexMmap") or {}
+        lines.append(
+            f"- 画像 (第 1 轮服务进程, 结束宿主前, 身份 {profile['user']}, 单位 MB): RSS {size(profile['rssKb'])}, PSS {size(profile['pssKb'])}, "
+            f"Java 堆 {size(profile['javaHeapPssKb'])}, native {size(profile['nativeHeapPssKb'])}, code {size(profile['codePssKb'])} "
+            f"(RSS {size(profile['codeRssKb'])}), .dex mmap PSS {size(dex.get('pss'))} / 私有脏页 {size(dex.get('privateDirty'))}, "
+            f"线程 {profile['threads']}, 解压到内存的 dex {profile['extractedDexMaps'] if profile['extractedDexMaps'] is not None else '-'} 个映射 "
+            f"{size(profile['extractedDexKb'])}, 该进程的 App attachBaseContext / onCreate 日志 {profile['appInitLines']} 行 "
+            f"(启动器日志{'在' if profile['starterLogged'] else '不在'}缓冲区内)")
+    lines += [
         "",
         "| 轮次 | 残留 | RSS 合计 MB | 退出来源 | 备注 |",
         "| --- | --- | --- | --- | --- |",
@@ -596,6 +663,8 @@ def main():
     parser.add_argument("--kill-residue", action="store_true",
                         help="at the end, kill user service processes that appeared during the run (negative control cleanup)")
     parser.add_argument("--no-wake", action="store_true", help="do not send KEYCODE_WAKEUP before the run")
+    parser.add_argument("--profile", action="store_true",
+                        help="profile the round 1 user service before the host is ended (meminfo, threads, extracted dex, App traces)")
     args = parser.parse_args()
     if args.mode == "update" and not (args.apk_a and args.apk_b):
         parser.error("update mode needs --apk-a and --apk-b")
