@@ -226,7 +226,7 @@ D1-D18 来自 2026-10-20 四轮选择题, D19-D22 来自同日附录 C 的拍板
 
 - [x] P14.1 (宿主) 删除全部 `@Deprecated` 旧入口 (T14), 守卫 (d) 启用. 证据: 守卫测试通过, `:app:assembleAppDebug` 通过. 备注 (附录 C Q23, 2026-10-22): `JsonSocketClientTool` 的 "IP 地址可能无效" 提示已改用固定键 `DialogStateKeys.IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT`, 旧版按调用栈 MD5 命名的键是残留, 由 P4.3 的运行时兜底归入 `other`, 不清理; `NotAskAgainDialog` 以调用栈 MD5 命名的构造 `Builder(Context)` 不是 `@Deprecated` 入口, 保留给将来的调用. 实际: 提交 `d2b944d93` (子会话 settings-p14, 2026-10-22); `core/pref` 下的 `@Deprecated` 共 45 个, 全部删除: `Pref` 44 个 (读写函数与键访问器, P2 起转发到 `core/pref/keys`), `PrefRxLongObserver.observeLong(keyRes, defaultValue)` 1 个; `Pref` 的回退存储改为 `SharedPreferencesStore.open(context, StoreId.DEFAULT)`, 不再经 `PreferenceManager`. 调用方都不在其他会话在改的文件里: main 3 个 (`runtime/api/Images.java`, `runtime/ScriptRuntime.kt`, `runtime/api/modules/ScriptModuleLayer.kt`), androidTest 2 个 (`ExplorerPathMenuInstrumentationTest`, `ExplorerActionHostSessionInstrumentationTest`), 单测 `ScriptModuleOrderTest` 的源码断言, 脚本 `sample/accessibility/smoke-legacy-api.js` 与 `tools/settings/device/domain_keys.js` (后者原本还引用 P5.2 删除的 `*Prefs`, 一并改为比较键的帮助函数与原始存储值); 注释里点名已删成员的改为 "原 `Pref.x`". 守卫 (d) 为 `SettingsRegistryGuardTest.d_defaultPreferencesOnlyThroughTheStoreLayer`: main 源码中 `getDefaultSharedPreferences` 调用方 1 个 (`core/pref/store/SharedPreferencesStore.kt`), 全部在允许范围 (存储层或 `PreferenceFragmentCompat` 子类); `core/pref` 下 `@Deprecated` 0 个. 验证: `:app:assembleAppDebug` 与 `:app:compileAppDebugAndroidTestKotlin` 通过, `SettingsRegistryGuardTest` + `core.pref.keys.*` + `ScriptModuleOrderTest` 共 18 个类 96 例 0 失败; `domain_keys.js` 的真机运行见 P14.3.
 - [x] P14.2 (文档) `docs/settings/archive-format-v1.md` (附录 B 的正式版), `inventory.md` / `defaults.md` 以 P0.2 工具重新生成, `.changelog` 10 种语言 (feature: 管理 AutoJs6 设置页面与导入 / 导出向导, 设置导入向导, 部署项, 恢复默认, 三类自动备份, 数据分类, 脚本 API; improvement: 设置存储层统一). 证据: 提交 hash. 实际 (子会话 settings-p14, 2026-10-22, 均未推送): 归档格式正式版 `docs/settings/archive-format-v1.md` 提交 `af01c8f18`, 按当日代码与 `tools/settings/archive_inspect.py` 核对, 含文件与 zip 结构, manifest 与分类文件字段, P6.5 加密信封与 P7.7 口令槽, P10 数据分类, P13 插件目录, 导入规则, 读取方错误码与校验工具; 与附录 B 草案的 10 处差别列在其附录 (以正式版为准). 核对中发现本机取不到设备密钥时导入与恢复默认都会失败, 登记为附录 C Q39 (按建议保持现状, 已先行). `inventory.md` / `defaults.md` 以 `tools/settings/inventory.py --date 2026-10-21` 重新生成, 提交 `0df3d4381`: `key_*` 277, 命名存储 30 (10 个文件, 全部登记), 绕过 `Pref` 的文件 0, `--check` 0 问题. changelog 提交 `d6a736021`: feature 已由 `0ba089408` (管理 AutoJs6 设置页面, 导出 / 导入向导, 凭据口令, 数据分类, 自动备份, 设置导入向导) 与 `512ac5068` (脚本 API) 的条目覆盖, 只补 improvement 一条 (设置存储层统一, 键名与存储文件不变); 只写 zh-Hans 及其生成文件, 其他 9 种语言由维护者同步 (Q31 先例).
-- [ ] P14.3 (验收) 全量 `:app:testAppDebugUnitTest` 0 失败; 附录 D 冒烟清单全部通过并记录机型; 附录 G 基线复测 (键数, 存储数, 守卫计数). 证据: 附录 D / G 更新.
+- [~] P14.3 (验收) 全量 `:app:testAppDebugUnitTest` 0 失败; 附录 D 冒烟清单全部通过并记录机型; 附录 G 基线复测 (键数, 存储数, 守卫计数). 证据: 附录 D / G 更新. 进度 (子会话 settings-p14, 2026-10-22 23:40, 流量暂停时停在此处): 全量单测 914 个类 / 5564 例, 跳过 26, 失败 0; 附录 G 复测列与结论已写; Q39 (`ae9d91576`), Q40 (`53f091525`), Q41 (不改代码) 已决并实施; 附录 D 的自动检查项与第 8 项已在 5935 上通过 (见附录 D 复测记录). 剩余: 第 1-5 项与第 9 项的向导在 5935 上由维护者操作 (OnePlus OPD2413 与 emulator-5650 已准备), 之后 `device_import_check.py` 核对与还原, 再勾选本条.
 
 ---
 
@@ -413,12 +413,14 @@ Q0-Q14 均已于 2026-10-20 由维护者拍板 (Q10 / Q12 / Q13 / Q14 在 P0 完
 | Q37 | P12.1: `settings.export` 的 `categories` 遇到无法导出的分类时如何处理 | 建议: 未知 id, 空数组, 只请求 `credentials` 时抛错且不写文件 (脚本写错 id 时立即发现); `credentials` 与其他分类一起请求时略去并记 `skipped` (`sensitive`, T15); 没有条目的数据分类与向导及自动备份一样不写入并记 `skipped` (`empty`; 读取数据失败时同样记 `empty`, 原因写入日志). 备选: 未知 id 也只记入 `skipped` (新 `reason: 'unknown'`) 而不抛错 (约 10 行 + 单测 + 文档与 d.ts 的 `reason` 类型); 只请求 `credentials` 时返回空结果而不写文件 (`path` 为 null, 约 10 行). 已按建议先行 | 已决 (2026-10-22 20:43, 维护者选: 保持现状, 推荐项, 已实施; P12 子会话 settings-p12 登记) |
 | Q38 | P12.1: `settings.export` / `settings.categories` 在 UI 线程调用时如何处理. 两者都要读取全部设置与数据 (快捷方式对账, 颜色库), `export` 还要写文件, 大归档或慢存储时可能造成界面卡顿或 ANR | 建议: 两者在 UI 线程调用时都抛错 (消息含函数名, 沿用 `error_function_called_in_ui_thread`), 文档标 `Non-UI`. 备选: 允许在 UI 线程同步执行 (删 2 处检查 + 设备检查 2 项 + 文档标签, 约 15 分钟); 或只拒绝 `export`, 允许 `categories` (约 10 分钟). 已按建议先行 | 已决 (2026-10-22 20:43, 维护者选: 保持现状, 推荐项, 已实施; P12 子会话 settings-p12 登记) |
 | Q39 | P14.2: 本机取不到设备密钥 (`Settings.Secure.ANDROID_ID` 为空) 时, 导入与恢复默认都会失败: 写入前的内部备份 (`SettingsBackupVault.backup`) 取全部分类, 含 `credentials`, `SettingsArchiveWriter` 要求设备密钥 (D23) 而抛 `IllegalArgumentException`; 失败发生在写入任何设置之前, 设置不变. 本路线图 E3 用过的真机与 AVD 都能取到 `ANDROID_ID` | 建议: 保持现状, 在 `archive-format-v1.md` 7.8 注明 (目前没有遇到取不到的设备; 改内部备份的内容范围会让这类设备上的撤销不回滚凭据). 备选: 没有设备密钥时内部备份略去 `credentials` (撤销不回滚凭据, 结果页提示), 约 10 行 + 1 个单测 + 文档, 约 30 分钟. 已按建议先行 | 已决 (2026-10-22 22:40, 维护者选: 没有设备密钥时内部备份略去 credentials; P14.2 子会话 settings-p14 登记). 实现 (settings-p14): `SettingsBackupVault.backup` 没有设备密钥时略去敏感分类 (`Backup.omitted`, 不以明文写凭据), 导入与恢复默认照常进行; 本次操作触及 `credentials` 时结果页提示内部备份未包含凭据, 撤销不会恢复凭据 (`SettingsTransferOutcome.backupWithoutCredentials`); `archive-format-v1.md` 7.8 已改写, 单测 `SettingsBackupVaultTest.withoutTheDeviceKeyTheCredentialsAreLeftOutAndNotUndone` |
+| Q40 | P14.3: 附录 G 的预期 "序列化方式只剩 `SettingsJson`" 未完全达成: `EditorKeys.ACE_LSP_FILE_TYPES` / `ACE_LSP_DECLARATION_GROUPS` (`Str` 设置) 存逗号拼接的列表, `MiscStateKeys.EXPLORER_VIEW_HISTORY` (状态键, 列表本身经 `SettingsJson`) 的每项是逗号拼接的页面状态 (`ExplorerViewStateStore`), `PluginCenterAttentionStore` 以 `JSONObject` 解析 `ATTENTION_KNOWN_FIRST_INSTALL_TIMES` (`Json` 状态键) 的文本. 读写都经 `SettingKey`, 存储格式与旧版本相同, 附录 D 第 8 项升级检查通过 | 建议: 保持现状, 附录 G 注明 (改格式要迁移已存的值, 并兼容旧版本导出的归档与降级后的读取, 收益只是格式统一). 备选: 4 处改用 `SettingsJson` (LSP 两键改为 `Json` 列表键并兼容读逗号文本, 页面状态改为 JSON 对象, 置顶记录改用 `SettingsJson.parse`), 约 1.5 小时 + 单测 + 归档迁移表 2 行. 已按建议先行 | 已决 (2026-10-22 22:40, 维护者选: 4 处改用 SettingsJson; 23:11 按 Q41 缩为 2 处, LSP 两键不改; P14.3 子会话 settings-p14 登记). 实现 (settings-p14, `53f091525`): 文件管理器历史 (`EXPLORER_VIEW_HISTORY`, 改为 `Json` 数组状态键) 的每页存为 JSON 对象 (`path`, `scrollPosition`, `directoriesCollapsed`, `filesCollapsed`), 读取仍接受旧的逗号文本; 置顶记录改经 `SettingsJson.parse` 读取, 存储文本不变; 两者在归档中的旧值都能直接读取, 不加迁移规则 (`archive-format-v1.md` 7.7); 单测 `ExplorerViewStateStoreTest`, `MiscStateKeysTest`, `PluginCenterStoresTest` 覆盖旧文本; 附录 D 第 8 项在 AVD API 24 (emulator-5652, 只读实例) 复测通过, 置顶记录以旧格式预置, 内容不变; 文件管理器历史不预置, 因为 `MainActivity` 在没有保存状态时创建 (含升级后首次启动) 都会清除它 |
+| Q41 | P14.3 / Q40: 2 个 LSP 设置键 `key_$_ace_lsp_file_types` 与 `key_$_ace_lsp_declaration_groups` 与已发布 Ace 插件的兼容. Ace 插件 (v2.0.2 与当前源码 `AceEditorLspPreferences` / `AceHostPreferences.defaultHostPreferences`) 在宿主进程内直接读写宿主默认偏好中的这两键并按逗号切分; 按 Q40 改存 JSON 文本后, 自定义过这两项 (或导入过含这两项的归档) 的用户在旧插件上 LSP 对任何文件都不启用, 声明组为空 | 建议: A 两键保持逗号文本, 视为宿主与 Ace 插件共用的存储接口, Q40 只改其余 2 处, 附录 G 注明. 备选: B 4 处都改, 同时改 Ace 插件兼容两种格式并发布新版 (旧版插件 <= 2.0.2 的用户升级插件前 LSP 失效); C 存储仍为逗号文本, 只把归档中的形式改为 JSON 列表 (新 `SettingType`, 迁移表 2 行, 约 1.5 小时). 未先行 (等答复期间 LSP 两键未改) | 已决 (2026-10-22 23:11, 维护者选: A 两键保持逗号文本, 推荐项; P14.3 子会话 settings-p14 登记). 实现: 不改代码, 附录 G 与 `archive-format-v1.md` 7.7 注明 |
 
 ---
 
 ## 附录 D 冒烟清单与设备矩阵 (P14.3)
 
-脚本位置: `docs/dev/smoke/settings-transfer/` (`run-settings-smoke.sh <serial>`, 经 adb 运行脚本改设置并调用 P12 的脚本 API 导出, 再用 `tools/settings/archive_inspect.py` 核对; 向导流程由维护者手工点击, 脚本只做前后快照比对). 输出只保留每项通过 / 失败与关键计数, 不打印凭据值.
+脚本位置: `tools/settings/device_*.py` 与 `tools/settings/device/*.js` (代替原计划的 `docs/dev/smoke/settings-transfer/run-settings-smoke.sh`): `device_import_check.py` 做第 1-6, 9-14 项的准备, 核对与还原, `device_auto_backup_check.py` 做第 7 与 15 项, `device_upgrade_check.py` 做第 8 项; `device_store_check.py` (各域读写与互通), `device_seal_check.py` (跨设备读凭据) 与 `device_script_export_check.py` (P12 的脚本 API) 作为补充. 脚本经 adb 运行脚本改设置, 导出的文件用 `tools/settings/archive_inspect.py` 核对; 向导流程由维护者手工点击, 脚本只做前后快照比对. 输出只保留每项通过 / 失败与关键计数, 不打印凭据值.
 
 1. 改主题色, 夜间模式, 编辑器字号, 插件中心排序各一项 -> 导出向导 (默认勾选) -> 恢复默认 (同一组分类) -> 导入向导 -> 四项恢复, 主题色与夜间模式未重启即生效.
 2. 导出时勾选 `credentials` 出现警告; 导入同一文件时不勾选 `credentials`, GitHub token 保持本机值.
@@ -444,6 +446,20 @@ Q0-Q14 均已于 2026-10-20 由维护者拍板 (Q10 / Q12 / Q13 / Q14 在 P0 完
 | Sony XQ-DQ72 (API 33) 或 Redmi (API 33) | 第二台真机 |
 | OnePlus OPD2413 (ColorOS, Android 15) | Q11 与权限弹窗差异, 第 11 项 |
 | API 24 AVD (CI 同款配方) | 第 9 项 |
+
+P14.3 复测记录 (2026-10-22, 子会话 settings-p14, 除第 8 项外都在 debug 5935 上):
+
+| 项 | 设备 | 结果 |
+| --- | --- | --- |
+| 补充: 各域读写与互通 | OnePlus OPD2413 (ColorOS, API 35), Redmi 22120RN86C (API 33) | `device_store_check.py domains` 两台各 535 项通过 (前两轮的失败来自检查脚本, 已由 `9d14c4088` 修正), `interop` 各 14 项, 浮动窗口位置各 9 项通过 |
+| 补充: 跨设备读凭据 | 同上两台互读 | `device_seal_check.py` 14 项通过: 读回本机凭据, 读对方的归档时凭据为 `LOCKED` |
+| 补充: 脚本导出 (P12) | 同上两台 | `device_script_export_check.py` 各 36 项通过 |
+| 第 7, 15 项 | 同上两台 | `device_auto_backup_check.py all`: Redmi 26 项通过 (首轮从 notify 阶段起读不到私有目录中的状态文件, 重跑通过); OnePlus 23 项通过, 只有 notify 阶段失败: 那一次实际运行的是上一阶段的脚本 (输出为 operation 的检查, 时间戳在 notify 开始之后), 原因未查明, 单独重跑 prepare / notify / restore 8 项通过, 失败通知 `0xBF5` 出现 |
+| 第 8 项 | AVD API 24 (只读实例) | `device_upgrade_check.py`, `4a16be478` -> debug 5935: Q40 之前在 emulator-5650 通过 (`91234d048`); Q40 之后在 emulator-5652 复测, 11 个文件 44 个值保持 (含以旧格式预置, 内容不变的置顶记录), 0 处不同, 升级后 `domains` 535, `interop` 14 项通过 |
+| 第 1-5 项, 第 9 项 (第 1 与 5 项) | OnePlus OPD2413, AVD API 24 (emulator-5650) | 5935 上待维护者操作向导 (两台已用 `device_import_check.py prepare` 准备好); 此前 P7.5 在 debug 5835 上于 XQ-AT72, Redmi 22120RN86C, AVD API 24 通过 |
+| 第 6 项 | XQ-AT72, Redmi 22120RN86C | P8.1 在 debug 5835 上通过, 本次未重做 |
+| 第 10-12 项 | XQ-AT72, Redmi 22120RN86C, AVD API 24 | P7.6 在 debug 5835 上通过, 本次未重做 |
+| 第 13, 14 项, 第 5 项的数据分类撤销 | OnePlus OPD2413 | P10.2 / P11.1 / P10.3 在 debug 5835 上通过, 本次未重做 |
 
 ---
 
@@ -480,17 +496,19 @@ Q0-Q14 均已于 2026-10-20 由维护者拍板 (Q10 / Q12 / Q13 / Q14 在 P0 完
 
 ## 附录 G 基线数据 (2026-10-20, `master@4a16be478`)
 
-| 指标 | 数值 | 来源 |
-| --- | --- | --- |
-| `key_*` 字符串资源 | 265 | `strings_donottranslate.xml` |
-| 出现在设置页 XML 的键 | 105 (39 + 40 + 11 + 9 + 5, 去重后) | 5 个 `fragment_*.xml` |
-| 只在代码中使用的键 | 162 | 上两项之差 |
-| 经 `Pref` 读写的源文件 | 122 | grep `Pref.` |
-| 绕过 `Pref` 读默认偏好的源文件 | 8 | grep `PreferenceManager.getDefaultSharedPreferences` |
-| 调用 `getSharedPreferences(` 的源文件 / 命名存储数 | 34 / 约 27 | grep |
-| `*Store` / `*Prefs` / `*Preferences` / `*Settings` / `*Config*` 类 | 约 80, 分布 40 个目录 | find |
-| 序列化方式 | `JSONObject` 11, Gson 1, 逗号拼接 5, `putStringSet` 7 | grep |
-| 文件型 JSON 存储 | 14 | grep `filesDir` + `.json` |
-| 单测环境 | JUnit4 (`libs.junit`), 无 Robolectric | `app/build.gradle.kts` |
+| 指标 | 数值 | 来源 | P14.3 复测 (2026-10-22, `master@e25e28f88`) |
+| --- | --- | --- | --- |
+| `key_*` 字符串资源 | 265 | `strings_donottranslate.xml` | 277 (`strings_donottranslate.xml` 275, `ace_editor_language_keys.xml` 2) |
+| 出现在设置页 XML 的键 | 105 (39 + 40 + 11 + 9 + 5, 去重后) | 5 个 `fragment_*.xml` | 101 (39 + 40 + 13 + 9 + 3) |
+| 只在代码中使用的键 | 162 | 上两项之差 | 176 |
+| 经 `Pref` 读写的源文件 | 122 | grep `Pref.` | 37 (其余改经 `SettingKey`) |
+| 绕过 `Pref` 读默认偏好的源文件 | 8 | grep `PreferenceManager.getDefaultSharedPreferences` | 0 (只剩存储层 `SharedPreferencesStore` / `StoreId`) |
+| 调用 `getSharedPreferences(` 的源文件 / 命名存储数 | 34 / 约 27 | grep | 12 / 30: 存储层 2 个文件, 其余 10 个文件是 9 个 Excluded 存储 (脚本存储, 设备 id, 运行时状态等, 不属于设置); 30 个全部登记 (Setting 17, State 3, Cache 1, Excluded 9) |
+| `*Store` / `*Prefs` / `*Preferences` / `*Settings` / `*Config*` 类 | 约 80, 分布 40 个目录 | find | 78 个文件, 39 个目录 (按文件名) |
+| 序列化方式 | `JSONObject` 11, Gson 1, 逗号拼接 5, `putStringSet` 7 | grep | 设置值按 `SettingKey` 类型读写, `Json` 键 7 个经 `SettingsJson`; 设置层外 `putStringSet` 0, Gson 不用于设置值; 文件管理器历史的每页 (JSON 对象) 与插件中心置顶记录也经 `SettingsJson` (附录 C Q40); 只剩 2 个 LSP `Str` 设置键沿用逗号拼接, 它们是宿主与 Ace 插件共用的存储接口 (附录 C Q41) |
+| 文件型 JSON 存储 | 14 | grep `filesDir` + `.json` | 14 (全部登记) |
+| 单测环境 | JUnit4 (`libs.junit`), 无 Robolectric | `app/build.gradle.kts` | 不变; 全量单测 914 个类 / 5564 例, 跳过 26, 失败 0 (含 Q39 / Q40 的改动) |
 
 P14.3 复测时在本表追加一列, 预期: 绕过文件 0, `getSharedPreferences(` 调用只剩 `SharedPreferencesStore`, 序列化方式只剩 `SettingsJson`, 守卫 "待迁移" 0.
+
+P14.3 复测结论 (子会话 settings-p14, 2026-10-22, 数字来自 `tools/settings/inventory.py` 与 grep): 绕过文件 0, 达成. `getSharedPreferences(` 在设置范围内只剩存储层; 另有 10 个文件属于 Excluded 存储 (附录 A.2 永久排除, 不经设置层), 与预期的差别是范围, 不是遗漏. 序列化方式: 设置值都按 `SettingKey` 类型读写, 文件管理器历史的每页与插件中心置顶记录在 Q40 后也经 `SettingsJson` (`53f091525`); 只有 2 个 LSP `Str` 设置键 (文件类型, 声明组) 沿用逗号拼接, 因为已发布的 Ace 插件直接读写这两键, 维护者定为宿主与插件共用的存储接口 (附录 C Q41), 除此之外达成 "只剩 `SettingsJson`". 守卫 a "待迁移" 13 全部是 Excluded 的 `key_*` (不声明), 需迁移的设置键 0; b 待迁移 0, d 1 / 1, e 2 / 2 (守卫测试输出).

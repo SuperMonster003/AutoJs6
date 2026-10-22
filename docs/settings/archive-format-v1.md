@@ -422,6 +422,8 @@
 
 `SettingsKeyMigrations.Rename(store, from, to, sinceVersionCode)`: 读取方在 `categories()` 中对每个分类文件, 按 `sinceVersionCode` 升序应用 `manifest.host.versionCode` 小于 `sinceVersionCode` 的规则. `to` 已存在时保留 `to` 并丢弃 `from`, 否则把 `from` 原位改名为 `to`. v1 的迁移表 `RENAMES` 为空.
 
+ROADMAP 附录 C Q40 改了两个 `other` 状态键的值形式, 不加迁移规则: 文件管理器历史 (`ExplorerView.explorer_history`) 的每页由逗号文本改为 JSON 对象, 读取方仍接受逗号文本; 插件中心置顶记录 (`known_first_install_times`) 改经 `SettingsJson` 解析, 存储的本来就是 JSON 对象文本. 2 个 LSP 设置键 (`key_$_ace_lsp_file_types`, `key_$_ace_lsp_declaration_groups`) 保持逗号文本, 它们是宿主与 Ace 插件共用的存储接口 (附录 C Q41).
+
 ### 7.8 内部备份与撤销
 
 - 每次导入或重置之前, 把全部设置分类 (含 `credentials`, 以设备密钥加密, 与 `other`) 及要导入的数据分类写入 `<filesDir>/settings-backups/auto-import-*.zip` 或 `auto-reset-*.zip` (1.1), 两种合计保留最新 5 个.
