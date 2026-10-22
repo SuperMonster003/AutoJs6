@@ -369,11 +369,11 @@ class ConsoleModule(private val runtime: ScriptRuntime) {
     /** A read of [name] tries `name`, `getName` and `isName` among [members], as the current module. */
     @ScriptProxyGet
     fun read(members: Scriptable, name: String): Any? {
+        // The name itself first, building the accessor names only when it is missing: every console.log goes through here.
+        ScriptProxyObject.member(members, name).let { if (it !== Scriptable.NOT_FOUND) return it }
         val capitalized = name.upperFirst()
-        listOf(name, "get$capitalized", "is$capitalized").forEach { key ->
-            ScriptProxyObject.member(members, key).let { if (it !== Scriptable.NOT_FOUND) return it }
-        }
-        return Scriptable.NOT_FOUND
+        ScriptProxyObject.member(members, "get$capitalized").let { if (it !== Scriptable.NOT_FOUND) return it }
+        return ScriptProxyObject.member(members, "is$capitalized")
     }
 
     /**
