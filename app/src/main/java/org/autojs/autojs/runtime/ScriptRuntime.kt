@@ -613,6 +613,18 @@ class ScriptRuntime private constructor(builder: Builder) {
      */
     fun extendJsBuiltIns() = ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }
 
+    /**
+     * Whether the new script module layer serves the top-level module [name] for this runtime and has not built it yet
+     * (roadmap P3.4): nothing of the script has reached the module, so host code that only acts for scripts using it (the
+     * engine events of `engines`) can skip this runtime instead of building the module.
+     * zh-CN: 新脚本模块层为本运行时提供顶层模块 [name] 且尚未构建 (P3.4): 脚本还没有用到该模块, 只为使用它的脚本工作的宿主代码 (engines 的引擎事件) 可跳过本运行时,
+     * 不必为此构建模块.
+     */
+    fun isScriptModulePending(name: String): Boolean {
+        val modules = scriptModules ?: return false
+        return name in ScriptModuleLayer.MIGRATED && !modules.isBuilt(name)
+    }
+
     @ScriptInterface
     fun requestPermissions(permissions: Array<String?>) {
         CorePermissions.getPermissionsNeedToRequest(mUiHandlerAppContext, permissions).takeIf { it.isNotEmpty() }?.let {

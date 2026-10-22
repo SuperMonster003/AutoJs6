@@ -330,6 +330,10 @@ public class ScriptEngineService {
             if (scriptEngine instanceof JavaScriptEngine jsEngine) {
                 try {
                     ScriptRuntime runtime = jsEngine.getRuntime();
+                    // A runtime whose engines module the new script module layer has not built has no listener (roadmap P3.4);
+                    // emitting would only build the module of every running script.
+                    // zh-CN: 新脚本模块层尚未构建 engines 模块的运行时没有监听器 (P3.4); 发送事件只会为每个运行中的脚本构建该模块.
+                    if (runtime.isScriptModulePending("engines")) continue;
                     Engines.emit(runtime, eventName, engine, args);
                 } catch (Exception e) {
                     Log.w(TAG, "Failed to emit engine event: " + eventName + ", engine=" + scriptEngine, e);
