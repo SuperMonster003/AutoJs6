@@ -12,6 +12,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
 /**
@@ -80,6 +82,23 @@ class ImagesModuleTest {
     @Test
     fun deviceOnlyCases() {
         DEVICE.add(SHAPE + DEVICE_ONLY + DEVICE_ERRORS)
+    }
+
+    /**
+     * Q28: the current functions take a color text of the paths and the orientation of the screen capture options only
+     * as a String, so a checked concatenated text (a ConsString) is passed as a String, the given objects left as they are.
+     */
+    @Test
+    fun concatenatedTextsArePassedAsStrings() {
+        val paths = rhino.evalKt("(function () { var s = '#FF'; s = s + '0000'; return [[1, 0, '#00FF00'], [5, 5, s]]; })()") as NativeArray
+        val passedPaths = ImagesCall("findMultiColors", "aj6-p31-missing.png", "#FF0000", paths).paths(2).args[2] as NativeArray
+        assertEquals(listOf<Any?>("#00FF00", "#FF0000"), passedPaths.map { (it as NativeArray)[2] })
+        assertTrue((paths[1] as NativeArray)[2] !is String)
+        val options = rhino.evalKt("(function () { var s = 'land'; s = s + 'scape'; return { orientation: s, width: 100 }; })()") as NativeObject
+        val passedOptions = ImagesCall("requestScreenCapture", options).screenCapture().args[0] as NativeObject
+        assertEquals("landscape", ScriptableObject.getProperty(passedOptions, "orientation"))
+        assertEquals(100, (ScriptableObject.getProperty(passedOptions, "width") as Number).toInt())
+        assertTrue(ScriptableObject.getProperty(options, "orientation") !is String)
     }
 
     private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
@@ -434,6 +453,8 @@ class ImagesModuleTest {
             // Q29: the documented integers of the feature detection method (the current module failed on them).
             "typeof images.detectAndComputeFeatures($IMG, { method: 2, maxFeatures: 50 })" to "\"object\"",
             "typeof images.matchFeatures($IMG, images.copy($IMG), { method: 1 })" to "\"object\"",
+            // Q28: a concatenated color text in the paths (the current module failed on it).
+            point("(function () { var s = '#FF'; s = s + '0000'; return images.findMultiColors($IMG, '#FF0000', [[5, 5, s]]); })()") to "[10,8]",
         )
 
         /**

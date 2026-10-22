@@ -213,17 +213,28 @@ internal class ImagesCall(private val name: String, vararg values: Any?) {
         if (y !in 0 until height) throw GlobalValues.rangeError(function, "y", "integer in 0..${height - 1}", args[yIndex])
     }
 
-    /** The paths of the multi-color functions: an array of `[dx, dy, color]` (the offsets read as integers, as before). */
+    /**
+     * The paths of the multi-color functions: an array of `[dx, dy, color]` (the offsets read as integers, as before).
+     * The current function takes a color text only as a String, so paths with a concatenated text (a ConsString) are
+     * passed as a copy with the text as a String.
+     */
     fun paths(index: Int) = array(index, "paths").also {
         val paths = args.getOrNull(index) as? NativeArray ?: return@also
+        var copy: Array<Any?>? = null
         for (i in 0 until paths.length.toInt()) {
             val param = "paths[$i]"
             val path = OptionFields.element(paths, i)
             if (path !is NativeArray) throw GlobalValues.typeError(function, param, "[dx, dy, color]", path)
             intOf(OptionFields.element(path, 0), "$param[0]")
             intOf(OptionFields.element(path, 1), "$param[1]")
-            ColorValues.toInt(OptionFields.element(path, 2), function, "$param[2]")
+            val color = OptionFields.element(path, 2)
+            ColorValues.toInt(color, function, "$param[2]")
+            if (color is CharSequence && color !is String) {
+                val elements = copy ?: Array(paths.length.toInt()) { OptionFields.element(paths, it) }.also { copy = it }
+                elements[i] = arrayLike(path, Array(path.length.toInt()) { OptionFields.element(path, it) }.also { it[2] = color.toString() })
+            }
         }
+        copy?.let { replace(index, arrayLike(paths, it)) }
     }
 
     /** A region: an array, an OpenCV Rect or an Android Rect ([nullable]: or nullish, the whole image), within the image at 0 ([bounds]). */
@@ -266,12 +277,7 @@ internal class ImagesCall(private val name: String, vararg values: Any?) {
             ImageFeatureMatching.FEATURE_MATCHING_METHOD_ORB -> "ORB"
             else -> return@also
         }
-        @Suppress("UNCHECKED_CAST")
-        (args as Array<Any?>)[index] = NativeObject().also { view ->
-            view.prototype = options
-            view.parentScope = options.parentScope
-            view.put("method", view, name)
-        }
+        replace(index, optionsView(options, "method", name))
     }
 
     fun sizeSource(index: Int) = source(index, "src", "ImageWrapper | Mat | Bitmap | string") { it is ImageWrapper || it is OpencvMat || it is Bitmap }
@@ -312,10 +318,17 @@ internal class ImagesCall(private val name: String, vararg values: Any?) {
     }
 
     /** `requestScreenCapture(Async)` takes `()`, `(landscape)`, `(options)` or `(width, height)`. */
+    /**
+     * The options of the screen capture functions (an orientation given as a concatenated text is passed as a String
+     * through a view: the current function ignores any other text) or a width and a height.
+     */
     fun screenCapture() = also {
         when (size) {
             1 -> check(0, "options", "boolean | Object") { isNullish(it) || it is Boolean || it is NativeObject }.also {
-                (args[0] as? NativeObject)?.let { ImageOptions.screenCapture(function, it) }
+                val options = args[0] as? NativeObject ?: return@also
+                ImageOptions.screenCapture(function, options)
+                val orientation = property(options, "orientation")
+                if (orientation is CharSequence && orientation !is String) replace(0, optionsView(options, "orientation", orientation.toString()))
             }
             2 -> int(0, "width").int(1, "height")
         }
@@ -374,6 +387,12 @@ internal class ImagesCall(private val name: String, vararg values: Any?) {
         if (value.isBlank()) throw GlobalValues.rangeError(function, param, expected, value)
     }
 
+    /** Passes [value] to the current function in place of the argument at [index]. */
+    private fun replace(index: Int, value: Any?) {
+        @Suppress("UNCHECKED_CAST")
+        (args as Array<Any?>)[index] = value
+    }
+
     companion object {
 
         /** The default of an omitted parameter. */
@@ -389,6 +408,22 @@ internal class ImagesCall(private val name: String, vararg values: Any?) {
 
         /** A property of a script object, `undefined` when it is missing. */
         private fun property(obj: NativeObject, name: String): Any? = ScriptableObject.getProperty(obj, name).let { if (it === Scriptable.NOT_FOUND) Undefined.instance else it }
+
+        /**
+         * A view of [options] whose own [name] is [value], the other fields read from the options through the prototype
+         * chain, as the current functions read them (`inquire`, `hasProp`).
+         */
+        private fun optionsView(options: NativeObject, name: String, value: Any?) = NativeObject().also { view ->
+            view.prototype = options
+            view.parentScope = options.parentScope
+            view.put(name, view, value)
+        }
+
+        /** A new array of [elements] with the prototype and the scope of [array]. */
+        private fun arrayLike(array: NativeArray, elements: Array<Any?>) = NativeArray(elements).also {
+            it.prototype = array.prototype
+            it.parentScope = array.parentScope
+        }
 
     }
 
