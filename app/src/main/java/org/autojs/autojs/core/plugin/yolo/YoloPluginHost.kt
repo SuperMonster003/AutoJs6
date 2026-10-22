@@ -243,14 +243,15 @@ object YoloPluginHost {
 
     /**
      * Opens a session on a dedicated binding. Model descriptors remain Host-owned only until the
-     * synchronous Binder call returns, then are closed before this function returns.
+     * synchronous Binder call returns, then are closed before this function returns. A session
+     * opened after the caller was cancelled (the script stopped) is closed again (Q59).
      */
     suspend fun openSession(
         context: Context,
         target: Target,
         modelArtifacts: List<ModelArtifactFile>,
         options: OpenSessionOptions = OpenSessionOptions(),
-    ): Session = withContext(Dispatchers.IO) {
+    ): Session = AidlPluginHost.withContextAbandoningLate(Dispatchers.IO, Session::close) {
         val appContext = context.applicationContext
         requireEnabledAndAuthorized(appContext, target.component.packageName)
         val current = inspectExact(appContext, target.component)

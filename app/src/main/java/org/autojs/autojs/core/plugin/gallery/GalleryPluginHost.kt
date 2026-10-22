@@ -8,6 +8,7 @@ import android.content.pm.ServiceInfo
 import android.media.MediaScannerConnection
 import android.os.Build
 import android.os.Bundle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -82,8 +83,11 @@ object GalleryPluginHost {
         }
     }
 
-    /** Opens the plugin's picker; the `result` event's items go through [GalleryPickPolicy.accept]. */
-    suspend fun openPicker(context: Context, options: GalleryPickerOptions, sink: GallerySessionSink): GallerySessionClient = withContext(Dispatchers.IO) {
+    /**
+     * Opens the plugin's picker; the `result` event's items go through [GalleryPickPolicy.accept].
+     * A picker opened after the caller was cancelled (the script stopped) is closed again (Q59).
+     */
+    suspend fun openPicker(context: Context, options: GalleryPickerOptions, sink: GallerySessionSink): GallerySessionClient = closingLate(finish = true) {
         val target = selectForCall(context)
         val peer = peerOf(target)
         requireFeature(peer, GalleryContract.FEATURE_PICKER)
@@ -92,8 +96,11 @@ object GalleryPluginHost {
         }
     }
 
-    /** Opens the plugin's viewer over the images at [paths] (1 to `MAX_VIEW_PAGES`), starting at [startIndex]. */
-    suspend fun openViewer(context: Context, paths: List<String>, startIndex: Int, sink: GallerySessionSink): GallerySessionClient = withContext(Dispatchers.IO) {
+    /**
+     * Opens the plugin's viewer over the images at [paths] (1 to `MAX_VIEW_PAGES`), starting at [startIndex].
+     * A viewer opened after the caller was cancelled ends its session and stays open, as at script exit (Q59).
+     */
+    suspend fun openViewer(context: Context, paths: List<String>, startIndex: Int, sink: GallerySessionSink): GallerySessionClient = closingLate(finish = false) {
         if (paths.isEmpty()) throw GalleryErrorMapper.failure(GalleryErrorCodes.INVALID_ARGUMENT, "at least one image is required")
         if (paths.size > GalleryContract.MAX_VIEW_PAGES) {
             throw GalleryErrorMapper.failure(GalleryErrorCodes.LIMIT_EXCEEDED, "the viewer opens at most ${GalleryContract.MAX_VIEW_PAGES} images, not ${paths.size}")
@@ -113,6 +120,7 @@ object GalleryPluginHost {
     /**
      * Opens the plugin's editor for the image at [path]; the output is staged by [GalleryOutput] and
      * published with [GalleryEditorClient.publish] once the session's `result` event arrived.
+     * An editor opened after the caller was cancelled is closed and its output discarded (Q59).
      */
     suspend fun openEditor(
         context: Context,
@@ -120,7 +128,7 @@ object GalleryPluginHost {
         output: GalleryOutputRequest,
         encode: GalleryEncodeOptions,
         sink: GallerySessionSink,
-    ): GalleryEditorClient = withContext(Dispatchers.IO) {
+    ): GalleryEditorClient = AidlPluginHost.withContextAbandoningLate(Dispatchers.IO, GalleryEditorClient::close) {
         val target = selectForCall(context)
         val peer = peerOf(target)
         requireFeature(peer, GalleryContract.FEATURE_EDITOR)
@@ -174,6 +182,10 @@ object GalleryPluginHost {
         runCatching { MediaScannerConnection.scanFile(context.applicationContext, arrayOf(written.path), arrayOf(written.mimeType), null) }
     }
 
+    /** Runs an opener on IO; a client it returns after the caller was cancelled is closed with [finish] (Q59). */
+    private suspend fun closingLate(finish: Boolean, open: suspend CoroutineScope.() -> GallerySessionClient): GallerySessionClient =
+        AidlPluginHost.withContextAbandoningLate(Dispatchers.IO, { client -> client.close(finish) }, open)
+
     private suspend fun openSession(
         context: Context,
         target: AidlPluginHost.Discovered,
@@ -184,7 +196,11 @@ object GalleryPluginHost {
         val bridge = GallerySessionBridge(sink)
         val callback = GalleryCallbackBinder(bridge)
         val leased = try {
-            withTimeout(GalleryContract.CALL_TIMEOUT_MS) {
+            // A session the plugin opens after the timeout or the end of the script is closed at once (Q59).
+            AidlPluginHost.withTimeoutAbandoningLate(
+                GalleryContract.CALL_TIMEOUT_MS,
+                { session: IGallerySession -> session.close(GalleryBundles.closeOptions(peer.contractVersion, finish = true)) },
+            ) {
                 host.callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false) { proxy ->
                     open(proxy, callback) ?: throw GalleryErrorMapper.failure(GalleryErrorCodes.INTERNAL, "the plugin opened no session")
                 }

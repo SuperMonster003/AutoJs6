@@ -17,8 +17,11 @@ import android.os.RemoteException
 import android.os.SystemClock.uptimeMillis
 import android.util.Log
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
@@ -30,6 +33,8 @@ import org.autojs.plugin.common.api.PluginInfo
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -529,6 +534,66 @@ class AidlPluginHost<I : IInterface>(
                 return
             }
             continuation.resume(binding) { _, _, _ -> lease.close() }
+        }
+
+        /**
+         * Runs the opening call [block] within [timeoutMs] like [withTimeout] without losing a [LeasedCall] that arrives too late
+         * (docs/memory/ROADMAP.md appendix C Q55 / Q59): [block] suspends while the dedicated binding connects, so once the timeout
+         * fires or the caller is cancelled (also when a stopped Rhino script interrupts its `runBlocking`, which cancels the
+         * coroutine), the prompt cancellation of kotlinx drops the call that the plugin still answers, and the binding would stay
+         * bound with the plugin session running until the plugin process ends. Such a call goes to [abandon] (it closes what the
+         * plugin opened), then its binding lease is closed even if [abandon] failed, and the cancellation goes on. A call returned
+         * in time belongs to the caller and is not touched.
+         * zh-CN: 在 [timeoutMs] 内像 [withTimeout] 一样运行打开调用 [block], 不丢失过迟到达的 [LeasedCall] (docs/memory/ROADMAP.md 附录 C Q55 / Q59):
+         * [block] 在专用绑定连接期间挂起, 因此超时或调用方被取消之后 (停止 Rhino 脚本中断其 `runBlocking` 时同样会取消协程), 插件仍然应答的调用会被
+         * kotlinx 的即时取消丢弃, 绑定将一直保持, 插件会话一直运行到插件进程结束. 这样的调用交给 [abandon] (关闭插件已打开的内容), 之后即使 [abandon]
+         * 失败也关闭其绑定租约, 然后继续抛出取消. 按时返回的调用归调用方所有, 不受影响.
+         */
+        suspend fun <T> withTimeoutAbandoningLate(
+            timeoutMs: Long,
+            abandon: (T) -> Unit,
+            block: suspend CoroutineScope.() -> LeasedCall<T>,
+        ): LeasedCall<T> = abandoningLate(
+            boundary = { scoped -> withTimeout(timeoutMs, scoped) },
+            release = { late ->
+                try {
+                    abandon(late.value)
+                } finally {
+                    late.bindingLease.close()
+                }
+            },
+            block = block,
+        )
+
+        /**
+         * Runs [block] in [context] like [withContext] and hands a result that arrives after the caller was cancelled (the script
+         * stopped while a plugin session was opening, Q59) to [abandon], which releases it; the result is otherwise dropped by
+         * the prompt cancellation of kotlinx at the boundary of [withContext]. A result returned in time is not touched.
+         * zh-CN: 像 [withContext] 一样在 [context] 中运行 [block], 调用方被取消之后到达的结果 (插件会话打开期间脚本已停止, Q59) 交给 [abandon] 释放;
+         * 否则该结果会在 [withContext] 的边界被 kotlinx 的即时取消丢弃. 按时返回的结果不受影响.
+         */
+        suspend fun <T> withContextAbandoningLate(
+            context: CoroutineContext,
+            abandon: (T) -> Unit,
+            block: suspend CoroutineScope.() -> T,
+        ): T = abandoningLate(
+            boundary = { scoped -> withContext(context, scoped) },
+            release = abandon,
+            block = block,
+        )
+
+        private suspend fun <R> abandoningLate(
+            boundary: suspend (suspend CoroutineScope.() -> R) -> R,
+            release: (R) -> Unit,
+            block: suspend CoroutineScope.() -> R,
+        ): R {
+            val arrived = AtomicReference<R?>()
+            try {
+                return boundary { block().also(arrived::set) }
+            } catch (e: CancellationException) {
+                arrived.getAndSet(null)?.let { late -> runCatching { release(late) } }
+                throw e
+            }
         }
     }
 

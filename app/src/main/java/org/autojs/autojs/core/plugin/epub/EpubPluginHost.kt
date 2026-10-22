@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Bundle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.plugin.AidlPluginHost
@@ -20,6 +21,7 @@ import org.autojs.plugin.epub.api.EpubContract
 import org.autojs.plugin.epub.api.EpubErrorCodes
 import org.autojs.plugin.epub.api.EpubIds
 import org.autojs.plugin.epub.api.IEpubPlugin
+import java.io.Closeable
 
 /**
  * Host wrapper for the EPUB Binder contract (plugin roadmap P5.1, decisions D10 and D29): the
@@ -86,9 +88,10 @@ object EpubPluginHost {
     /**
      * Opens the book at [path] for extraction (plugin roadmap P5.4, D5): the path is validated
      * and opened read-only here, the descriptor travels with the call and is closed right after,
-     * and the returned client owns the dedicated binding lease of the plugin service.
+     * and the returned client owns the dedicated binding lease of the plugin service. A book opened
+     * after the caller was cancelled (the script stopped) is closed again (Q59).
      */
-    suspend fun openBook(context: Context, path: String, displayName: String? = null): EpubBookClient = withContext(Dispatchers.IO) {
+    suspend fun openBook(context: Context, path: String, displayName: String? = null): EpubBookClient = closingLate {
         EpubSource.open(path).use { source ->
             val target = selectForCall(context)
             val peer = peerOf(target)
@@ -104,9 +107,10 @@ object EpubPluginHost {
      * Opens a reader session for the book at [path] and starts the plugin's reader Activity with
      * the session token (two-step launch, D12): events reach [sink] through the generation and
      * sequence checks of [EpubReaderBridge]; the returned client owns the lease and the bridge.
-     * When the Activity cannot be started the session is closed again with `finish`.
+     * When the Activity cannot be started the session is closed again with `finish`. A session opened
+     * after the caller was cancelled ends and leaves the reader open, as at script exit (Q59).
      */
-    suspend fun openReader(context: Context, path: String, options: EpubReaderOptions = EpubReaderOptions(), sink: EpubReaderSink): EpubReaderClient = withContext(Dispatchers.IO) {
+    suspend fun openReader(context: Context, path: String, options: EpubReaderOptions = EpubReaderOptions(), sink: EpubReaderSink): EpubReaderClient = closingLate {
         EpubSource.open(path).use { source ->
             val target = selectForCall(context)
             val peer = peerOf(target)
@@ -142,6 +146,10 @@ object EpubPluginHost {
             client
         }
     }
+
+    /** Runs an opener on IO; a client it returns after the caller was cancelled is closed (Q59). */
+    private suspend fun <C : Closeable> closingLate(open: suspend CoroutineScope.() -> C): C =
+        AidlPluginHost.withContextAbandoningLate(Dispatchers.IO, { client -> client.close() }, open)
 
     private suspend fun selectForCall(context: Context): AidlPluginHost.Discovered = try {
         selectOrThrow(context)

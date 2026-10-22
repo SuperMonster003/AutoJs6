@@ -62,7 +62,16 @@ internal object AutoJs4RuntimePluginClient {
     )
 
     /** Acceptance Bundle plus the runtime Binder so that callers can observe plugin death. */
-    internal data class Admission(val acceptance: Bundle, val binder: IBinder)
+    internal data class Admission(val acceptance: Bundle, val binder: IBinder) {
+
+        /**
+         * Cancels the admitted execution over the runtime Binder of its own dedicated binding, for an
+         * admission that answered after the caller gave up waiting (Q59); the caller closes the lease.
+         */
+        fun abandon(executionId: String) {
+            IAutoJs4RuntimePlugin.Stub.asInterface(binder).cancelScript(executionId)
+        }
+    }
 
     suspend fun select(context: Context): Selection {
         val appContext = context.applicationContext

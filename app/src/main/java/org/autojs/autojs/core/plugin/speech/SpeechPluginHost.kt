@@ -494,9 +494,9 @@ object SpeechPluginHost {
 
     /**
      * A call whose result keeps a dedicated binding lease (sessions, operations). A result the plugin answers after the
-     * timeout or after the caller is cancelled is passed to [abandon] and its binding released ([SpeechSessionOpening.lease], Q55).
+     * timeout or after the caller is cancelled is passed to [abandon] and its binding released ([AidlPluginHost.withTimeoutAbandoningLate], Q55).
      * zh-CN: 其结果持有专用绑定租约的调用 (会话, 操作). 插件在超时或调用方被取消之后才应答的结果交给 [abandon] 并释放其绑定
-     * ([SpeechSessionOpening.lease], Q55).
+     * ([AidlPluginHost.withTimeoutAbandoningLate], Q55).
      */
     private suspend fun <T> lease(
         context: Context,
@@ -504,7 +504,7 @@ object SpeechPluginHost {
         abandon: (T) -> Unit,
         block: (ISpeechPlugin) -> T,
     ): AidlPluginHost.LeasedCall<T> = try {
-        SpeechSessionOpening.lease(SpeechContract.CALL_TIMEOUT_MS, abandon) {
+        AidlPluginHost.withTimeoutAbandoningLate(SpeechContract.CALL_TIMEOUT_MS, abandon) {
             host(context).callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false, block = block)
         }
     } catch (e: TimeoutCancellationException) {

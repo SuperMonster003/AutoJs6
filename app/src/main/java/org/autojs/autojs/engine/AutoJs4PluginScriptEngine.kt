@@ -7,6 +7,7 @@ import android.os.IBinder
 import android.os.RemoteException
 import android.os.SystemClock
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.core.console.GlobalConsole
@@ -62,8 +63,14 @@ class AutoJs4PluginScriptEngine(
         val executionId = "autojs4-engine-$id-${UUID.randomUUID()}"
         val callback = EventCallback(executionId, selection.providerUid)
         val leased = try {
-            runRpc(ADMISSION_RPC_DEADLINE_MILLIS) {
-                AutoJs4RuntimePluginClient.runScript(appContext, selection, buildRequest(scriptSource, executionId), callback)
+            blockingRpc {
+                // An admission answering after the deadline is cancelled in the runtime and its binding released (Q59).
+                AidlPluginHost.withTimeoutAbandoningLate(
+                    ADMISSION_RPC_DEADLINE_MILLIS,
+                    { admission: AutoJs4RuntimePluginClient.Admission -> admission.abandon(executionId) },
+                ) {
+                    AutoJs4RuntimePluginClient.runScript(appContext, selection, buildRequest(scriptSource, executionId), callback)
+                }
             }
         } catch (error: RemoteException) {
             throw AutoJs4RuntimeExecutionException(appContext.getString(R.string.error_autojs4_runtime_exited_unexpectedly), error)
@@ -179,9 +186,11 @@ class AutoJs4PluginScriptEngine(
         }, "autojs4-cancel-${active.executionId}").apply { isDaemon = true }.start()
     }
 
-    private fun <T> runRpc(deadlineMillis: Long, block: suspend () -> T): T {
+    private fun <T> runRpc(deadlineMillis: Long, block: suspend () -> T): T = blockingRpc { withTimeout(deadlineMillis) { block() } }
+
+    private fun <T> blockingRpc(block: suspend CoroutineScope.() -> T): T {
         return try {
-            runBlocking { withTimeout(deadlineMillis) { block() } }
+            runBlocking(block = block)
         } catch (error: InterruptedException) {
             Thread.currentThread().interrupt()
             throw ScriptInterruptedException()

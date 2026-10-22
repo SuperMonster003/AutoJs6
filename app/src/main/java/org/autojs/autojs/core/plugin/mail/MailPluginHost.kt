@@ -114,18 +114,20 @@ object MailPluginHost {
 
     /**
      * Opens a session on a dedicated binding lease. The returned port owns the lease and the death
-     * recipient; [MailSessionClient] closes it and reopens through [sessionOpener].
+     * recipient; [MailSessionClient] closes it and reopens through [sessionOpener]. A port opened
+     * after the caller was cancelled (the script stopped) is closed again (Q59).
      */
-    suspend fun openSession(context: Context, account: MailAccountSpec, events: MailSessionEvents): MailSessionPort = withContext(Dispatchers.IO) {
-        account.validate()?.let { throw MailPluginException(it) }
-        val target = selectOrThrow(context)
-        val callback = MailSessionCallbackBinder(events)
-        val leased = hostFor(context).callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
-            proxy.openSession(MailBundles.accountToBundle(account, BuildConfig.VERSION_CODE.toLong()), callback)
-                ?: throw refusal(callback)
+    suspend fun openSession(context: Context, account: MailAccountSpec, events: MailSessionEvents): MailSessionPort =
+        AidlPluginHost.withContextAbandoningLate(Dispatchers.IO, MailSessionPort::close) {
+            account.validate()?.let { throw MailPluginException(it) }
+            val target = selectOrThrow(context)
+            val callback = MailSessionCallbackBinder(events)
+            val leased = hostFor(context).callWithDedicatedBindingLease(context, target, retryOnRemoteException = false) { proxy ->
+                proxy.openSession(MailBundles.accountToBundle(account, BuildConfig.VERSION_CODE.toLong()), callback)
+                    ?: throw refusal(callback)
+            }
+            BinderMailSessionPort(leased, events)
         }
-        BinderMailSessionPort(leased, events)
-    }
 
     /**
      * The error of a refused `openSession`: the plugin reports it through the oneway session

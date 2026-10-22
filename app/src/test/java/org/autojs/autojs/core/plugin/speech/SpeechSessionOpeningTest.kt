@@ -176,7 +176,7 @@ class SpeechSessionOpeningTest {
         val abandoned = ArrayList<Int>()
         val thrown = expectFailure {
             withContext(Dispatchers.IO) {
-                SpeechSessionOpening.lease(TIMEOUT_MS, { opId: Int -> abandoned += opId }) {
+                AidlPluginHost.withTimeoutAbandoningLate(TIMEOUT_MS, { opId: Int -> abandoned += opId }) {
                     delay(1)
                     Thread.sleep(LATE_MS)
                     AidlPluginHost.LeasedCall(7, bindingLease)
@@ -236,15 +236,15 @@ class SpeechSessionOpeningTest {
             }
         }
 
-    // openListen through SpeechSessionOpening.lease with the error mapping of SpeechPluginHost.lease(); the call suspends
+    // openListen through AidlPluginHost.withTimeoutAbandoningLate with the error mapping of SpeechPluginHost.lease(); the call suspends
     // before the plugin answers, as it does while the dedicated binding connects.
-    // zh-CN: 经 SpeechSessionOpening.lease 的 openListen, 错误映射同 SpeechPluginHost.lease(); 调用在插件应答前挂起, 正如专用绑定连接期间.
+    // zh-CN: 经 AidlPluginHost.withTimeoutAbandoningLate 的 openListen, 错误映射同 SpeechPluginHost.lease(); 调用在插件应答前挂起, 正如专用绑定连接期间.
     private suspend fun openListenWithin(plugin: FakePlugin, gate: SpeechEventGate, timeoutMs: Long): SpeechSessionProxy =
         SpeechSessionOpening.open(listOf(gate)) { opened ->
             withContext(Dispatchers.IO) {
                 val callback = forwarding<ISpeechSessionCallback>(gate)
                 val leased = try {
-                    SpeechSessionOpening.lease(timeoutMs, ISpeechSession::cancel) {
+                    AidlPluginHost.withTimeoutAbandoningLate(timeoutMs, ISpeechSession::cancel) {
                         delay(1)
                         AidlPluginHost.LeasedCall(SpeechSessionOpening.requireOpened(plugin.api.openSession(null, callback), "session"), bindingLease)
                     }
