@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.ThemeColorRecyclerView;
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
@@ -408,6 +409,17 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
         public void onBindChildViewHolder(@NonNull TaskViewHolder viewHolder, int parentPosition, int childPosition, @NonNull Task task) {
             viewHolder.bind(task);
         }
+
+        @Override
+        public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
+            super.onViewRecycled(holder);
+            // A recycled holder must not keep its task: a running task holds the script execution, and the recycled
+            // view pool lives as long as this view (docs/memory/ROADMAP.md H25).
+            // zh-CN: 被回收的 ViewHolder 不得继续持有任务: 运行中的任务持有脚本执行对象, 而回收池与本视图同寿 (docs/memory/ROADMAP.md H25).
+            if (holder instanceof TaskViewHolder taskViewHolder) {
+                taskViewHolder.unbind();
+            }
+        }
     }
 
     private class TaskViewHolder extends ChildViewHolder<Task> {
@@ -466,6 +478,10 @@ public class TaskListRecyclerView extends ThemeColorRecyclerView {
                     mTask.cancel();
                 }
             });
+        }
+
+        void unbind() {
+            mTask = null;
         }
 
         void onItemClick(View view) {

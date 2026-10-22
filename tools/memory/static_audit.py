@@ -247,6 +247,9 @@ def kotlin_statics(path, code, imports):
         if not match:
             continue
         name, declared, initializer, delegate = match[1], match[2], match[3], match[4]
+        if initializer is not None and not initializer.strip():
+            # `val x =` with the initializer on the next non-blank line (ROADMAP Q45: H29 was declared that way).
+            initializer = next((rest.strip() for rest in lines[number + 1:] if rest.strip()), "")
         type_text = declared or ""
         if not type_text:
             source = (initializer or delegate or "").strip()
@@ -336,17 +339,20 @@ GUARD_HEADER = """\
 # Reasons:
 #   process  process-level by design: holds the Application, process singletons or data that outlive every script
 #   table    constant, function or class table filled once; holds no script, Rhino or UI instance
-#   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds
+#   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds. For a
+#            weak-key map or registry the note also says "values do not reference the key": a WeakHashMap holds its
+#            values strongly, and a value that references its key keeps both forever (H29); such a map takes another
+#            reason (owner when its entries are removed as the key's owner ends)
 #   owner    entries are removed per runtime / owner id when the owner ends (gate scenario in the note)
 #   paired   (call) the release call is in the same file
-#   p4.2     to be normalized in ROADMAP P4.2 (T7): delete the line, or change the reason, when that is done
-#   p4.4     to be handled in ROADMAP P4.4 (Rhino class loaders)
 #   page     page / UI lifetime outside the script path, covered by the P4.5 LeakCanary audit
 #   exempt   a text scan false positive: not a process-level field, or not a registration (the note says why)
 """
 GUARD_SECTIONS = (("field", "# Process-level fields"), ("call", "# Registration calls"),
                   ("manual", "# Appendix B.1 entries the scan does not report (hand-written)"))
 GUARD_TODO = "TODO | describe what it holds and who releases it"
+# Required in the note of a weak-key map or registry whose reason is weak (ROADMAP Q45); StaticReferenceGuardTest checks it.
+WEAK_KEY_NOTE = "values do not reference the key"
 
 
 def guard_rows(statics, pairs):
@@ -391,10 +397,19 @@ def write_guard(rows, check):
     added = [key for key in sorted(keys) if key not in reasons]
     removed = [key for key in sorted(reasons) if key not in keys]
     todo = sum(1 for row in rows if reasons.get(row[:3], GUARD_TODO).startswith("TODO "))
+    details = {row[:3]: row[3] for row in rows}
+    for line in manual:
+        parts = line.split(" | ", 5)
+        if len(parts) == 6:
+            details[tuple(parts[:3])], reasons[tuple(parts[:3])] = parts[3], " | ".join(parts[4:])
+    unexplained = [key for key, detail in sorted(details.items()) if "weak-key" in detail
+                   and reasons.get(key, "").startswith("weak | ") and WEAK_KEY_NOTE not in reasons[key].lower()]
     for key in added:
         print("added (reason TODO): " + " | ".join(key))
     for key in removed:
         print("removed: " + " | ".join(key))
+    for key in unexplained:
+        print(f'weak-key note without "{WEAK_KEY_NOTE}": ' + " | ".join(key))
     print(f"{len(rows)} generated rows ({sum(1 for r in rows if r[0] == 'field')} fields, {sum(1 for r in rows if r[0] == 'call')} calls), "
           f"{len(manual)} manual; added {len(added)}, removed {len(removed)}, TODO {todo}")
     if check:

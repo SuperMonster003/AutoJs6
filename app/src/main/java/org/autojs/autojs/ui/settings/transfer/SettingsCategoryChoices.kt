@@ -1,0 +1,109 @@
+package org.autojs.autojs.ui.settings.transfer
+
+import org.autojs.autojs.core.pref.SettingCategory
+import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
+import org.autojs.autojs.core.pref.archive.SettingsResetPlanner
+
+/**
+ * One row of the category step (docs/settings/ROADMAP.md T10): a category, the number of its entries (null when the
+ * step has no count for it) and whether it can be ticked ([state]).
+ * zh-CN: 分类步骤的一行 (ROADMAP T10): 分类, 条目数 (该步骤没有计数时为 null), 以及能否勾选 ([state]).
+ */
+data class SettingsCategoryChoice @JvmOverloads constructor(val category: SettingCategory, val entries: Int?, val state: State = State.SELECTABLE) {
+
+    enum class State {
+        SELECTABLE,
+
+        /**
+         * Sealed for the key of another device (D23) without a password slot: this device cannot import it.
+         * zh-CN: 以其他设备的密钥加密 (D23) 且没有口令槽: 本机无法导入.
+         */
+        LOCKED,
+
+        /**
+         * Sealed for the key of another device with a password slot (D23 / T21): the row asks for the password, and the
+         * category can be ticked once it is entered (P7.7).
+         * zh-CN: 以其他设备的密钥加密, 带口令槽 (D23 / T21): 点击该行询问口令, 输入正确后可勾选 (P7.7).
+         */
+        PASSWORD,
+
+        /** `other` and the data categories, which a reset leaves as they are (D11, P8.1). zh-CN: 恢复默认不处理的 `other` 与数据分类. */
+        NOT_RESETTABLE,
+    }
+
+    val isSelectable: Boolean
+        get() = state == State.SELECTABLE
+}
+
+/**
+ * The rows of the category step per wizard (T10): the export lists every category with the entries of the current
+ * settings and data (P6.3, P10.2), the import only the categories the file has, with the entries its manifest counts,
+ * and disables the credentials this device cannot decrypt (P7.5, D23). Pure logic (R3).
+ *
+ * zh-CN: 各向导分类步骤的行 (T10): 导出列出全部分类及当前设置与数据的条目数 (P6.3, P10.2); 导入只列出文件中有的分类及其 manifest 记录的
+ * 条目数, 本机无法解密的凭据不可勾选 (P7.5, D23). 纯逻辑 (R3).
+ */
+object SettingsCategoryChoices {
+
+    /** The rows of the export wizard: [counts] are the entries per category id. zh-CN: 导出向导的行, [counts] 为各分类的条目数. */
+    @JvmStatic
+    @JvmOverloads
+    fun export(counts: Map<String, Int>, categories: List<SettingCategory> = SettingCategory.ALL): List<SettingsCategoryChoice> =
+        categories.map { SettingsCategoryChoice(it, counts[it.id] ?: 0) }
+
+    /**
+     * The rows of the import wizard for [manifest], in page order: the known categories the file holds; [locked] are
+     * the ids of the sealed categories this device cannot open now (`SettingsArchiveReader.isLocked`), [password] those
+     * of them a password opens (P7.7).
+     * zh-CN: 导入向导对 [manifest] 的行, 按页面顺序: 文件中有的已知分类; [locked] 为本机当前无法打开的加密分类 id, [password] 为其中
+     * 可以用口令打开的分类 (P7.7).
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun import(
+        manifest: SettingsArchiveManifest,
+        locked: Collection<String>,
+        categories: List<SettingCategory> = SettingCategory.ALL,
+        password: Collection<String> = emptyList(),
+    ): List<SettingsCategoryChoice> {
+        val entries = manifest.categories.associate { it.id to it.entries } + manifest.data.associate { it.id to it.entries }
+        return categories.filter { it.id in entries }.map {
+            when {
+                it.id in locked && it.id in password -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.PASSWORD)
+                it.id in locked -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LOCKED)
+                else -> SettingsCategoryChoice(it, entries[it.id])
+            }
+        }
+    }
+
+    /**
+     * The rows of "Restore default settings..." (D11, P8.1): every category with the entries of the current settings;
+     * `other` and the data categories cannot be ticked (`SettingsResetPlanner.resettable`).
+     * zh-CN: "恢复默认设置..." 的行 (D11, P8.1): 全部分类及当前设置的条目数; `other` 与数据分类不可勾选.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun reset(counts: Map<String, Int>, categories: List<SettingCategory> = SettingCategory.ALL): List<SettingsCategoryChoice> {
+        val resettable = SettingsResetPlanner.resettable(categories).toSet()
+        return categories.map {
+            when {
+                it in resettable -> SettingsCategoryChoice(it, counts[it.id] ?: 0)
+                it.isData -> SettingsCategoryChoice(it, null, SettingsCategoryChoice.State.NOT_RESETTABLE)
+                else -> SettingsCategoryChoice(it, counts[it.id] ?: 0, SettingsCategoryChoice.State.NOT_RESETTABLE)
+            }
+        }
+    }
+
+    /** The categories of [choices] that can be ticked, for `SettingsCategorySelection`. zh-CN: [choices] 中可勾选的分类. */
+    @JvmStatic
+    fun selectable(choices: List<SettingsCategoryChoice>): List<SettingCategory> = choices.filter { it.isSelectable }.map { it.category }
+
+    /**
+     * The selection the category step of the import starts with: the rows that can be ticked and are ticked by default
+     * (appendix A.1), so `credentials` and `other` are ticked by the user.
+     * zh-CN: 导入的分类步骤的初始勾选: 可勾选且默认勾选 (附录 A.1) 的行, 因此 `credentials` 与 `other` 需由用户勾选.
+     */
+    @JvmStatic
+    fun importSelection(choices: List<SettingsCategoryChoice>): List<String> =
+        choices.filter { it.isSelectable && it.category.defaultSelected }.map { it.category.id }
+}

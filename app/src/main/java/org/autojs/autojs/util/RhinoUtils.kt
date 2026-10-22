@@ -63,6 +63,8 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.math.BigInteger
 import java.util.IdentityHashMap
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.FutureTask
 import kotlin.math.floor
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
@@ -125,6 +127,12 @@ object RhinoUtils {
         putThreadLocal(STANDARD_OBJECTS_KEY, scope)
     }
 
+    /** Drops the standard objects [registerStandardObjects] put in this Context (the engine that registered them has ended). */
+    @JvmStatic
+    fun Context.unregisterStandardObjects() {
+        removeThreadLocal(STANDARD_OBJECTS_KEY)
+    }
+
     private fun Context.getRegisteredStandardObjects(): TopLevel? =
         getThreadLocal(STANDARD_OBJECTS_KEY) as? TopLevel
 
@@ -144,11 +152,27 @@ object RhinoUtils {
     val standardObjects: TopLevel by lazy {
         // Create a global singleton standard objects as a low-fidelity fallback.
         // zh-CN: 创建全局单例标准对象, 用作低保真兜底.
-        try {
-            val cx = Context.enter()
-            TopLevelScope().apply {
-                initStandardObjects(cx, false)
+        // Always in a Context of its own: never inside the Context of the script that asks first, so that nothing of that
+        // script (its engine binding, WrapFactory, interrupt state) takes part in it (docs/memory/ROADMAP.md appendix C Q11).
+        // zh-CN: 总在单独的 Context 中创建, 不在首次请求它的脚本的 Context 内创建, 使该脚本的任何状态 (引擎绑定, WrapFactory, 中断状态)
+        // 都不参与其中 (docs/memory/ROADMAP.md 附录 C Q11).
+        when (Context.getCurrentContext()) {
+            null -> createStandardObjects()
+            else -> FutureTask(::createStandardObjects).let { task ->
+                Thread(task, "RhinoStandardObjects").start()
+                try {
+                    task.get()
+                } catch (e: ExecutionException) {
+                    throw e.cause ?: e
+                }
             }
+        }
+    }
+
+    private fun createStandardObjects(): TopLevel {
+        val cx = Context.enter()
+        try {
+            return TopLevelScope().apply { initStandardObjects(cx, false) }
         } finally {
             Context.exit()
         }

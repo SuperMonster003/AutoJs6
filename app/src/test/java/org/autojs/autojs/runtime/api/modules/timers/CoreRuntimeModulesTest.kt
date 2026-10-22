@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.timers
 
+import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.engines.Engines
@@ -8,6 +9,7 @@ import org.autojs.autojs.runtime.api.augment.timers.Timers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -56,6 +58,24 @@ class CoreRuntimeModulesTest {
     fun installingBuildsNothing() {
         val global = rhino.ktScope.globalThis
         GLOBALS.forEach { assertTrue(it, LazyDataSlot.isPending(global, it)) }
+    }
+
+    /**
+     * The host skips the engine events of a runtime whose engines module was never built (no listener can exist), and
+     * emits them again once the script reached the module by any of its names.
+     */
+    @Test
+    fun enginesPendingUntilUsed() {
+        val side = DifferentialRhino()
+        side.use {
+            RuntimeModulesFixture.prepareHost(it.ktRuntime)
+            val mounter = RuntimeModulesFixture.mount(it, MODULES, newLayer = true) { name, _, _ -> throw AssertionError(name) }
+            RuntimeModulesFixture.setField(it.ktRuntime, ScriptRuntime::class.java, "scriptModules", mounter)
+            assertTrue(it.ktRuntime.isScriptModulePending("engines"))
+            it.evalKt("\$engines.listenerCount('start')")
+            assertFalse(it.ktRuntime.isScriptModulePending("engines"))
+            assertFalse(it.ktRuntime.isScriptModulePending("no-such-module"))
+        }
     }
 
     @Test

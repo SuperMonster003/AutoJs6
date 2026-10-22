@@ -50,6 +50,20 @@ class GateScenario(
     /** Fixed warm-up / measured run counts for long scenarios, overriding the runner arguments. */
     val warmups: Int? = null,
     val iterations: Int? = null,
+    /**
+     * Largest allowed growth of these VMDebug instance counts (GateNativeProbe keys) from the end of the warm-ups to the end;
+     * judged only where VMDebug is available (ROADMAP P4.4).
+     */
+    val instanceLimits: Map<String, Long> = emptyMap(),
+    /** Largest allowed growth of these host counters (GateNativeProbe.counters keys) from the end of the warm-ups to the end. */
+    val counterLimits: Map<String, Long> = emptyMap(),
+    /**
+     * Largest allowed median growth per measured run of these host counters: a leak grows them in every run, while a one-time
+     * step (code of the platform, LeakCanary or the host used for the first time in the process) does not move the median.
+     */
+    val perRunCounterLimits: Map<String, Long> = emptyMap(),
+    /** Script statistics (gateStat) that must stay 0 in every measured run: the script reports what it found wrong. */
+    val failingStats: List<String> = emptyList(),
     private val body: (GateEnvironment, GateMode) -> String,
 ) {
     /**
@@ -77,9 +91,10 @@ class GateScenario(
 }
 
 /**
- * Scenario matrix S1-S14 (docs/memory/ROADMAP.md T2; S4 is split into S4a-S4f as in appendix A; S13 / S14 were added by P4.1 / P4.2).
- * Scripts use ES5 syntax so that every Rhino language level accepts them.
- * zh-CN: 场景矩阵 S1-S14 (docs/memory/ROADMAP.md T2; S4 按附录 A 拆为 S4a-S4f; S13 / S14 由 P4.1 / P4.2 新增). 脚本使用 ES5 语法, 以便任何 Rhino 语言级别都能接受.
+ * Scenario matrix S1-S16 (docs/memory/ROADMAP.md T2; S4 is split into S4a-S4f as in appendix A; S13 / S14 were added by P4.1 / P4.2,
+ * S15 / S16 by P4.4). Scripts use ES5 syntax so that every Rhino language level accepts them.
+ * zh-CN: 场景矩阵 S1-S16 (docs/memory/ROADMAP.md T2; S4 按附录 A 拆为 S4a-S4f; S13 / S14 由 P4.1 / P4.2 新增, S15 / S16 由 P4.4 新增).
+ * 脚本使用 ES5 语法, 以便任何 Rhino 语言级别都能接受.
  */
 object GateScenarios {
 
@@ -297,13 +312,24 @@ object GateScenarios {
             }
             """
         },
-        GateScenario("S8", "JavaAdapter / interface adapters x 100 + runtime.loadDex", "H3") { env, _ ->
+        GateScenario(
+            "S8", "JavaAdapter / interface adapters x 100 + runtime.loadDex of a fresh copy", "H3",
+            notes = "since P4.4 every run loads its own copy of the DEX (a new path, as a script loading changing files would); " +
+                "DexClassLoader instances and the host's registered loaders must not grow, loaded classes not in most runs",
+            instanceLimits = mapOf("dexClassLoader" to 0L),
+            counterLimits = mapOf("hostDexLoaders" to 0L),
+            perRunCounterLimits = mapOf("loadedClasses" to 0L),
+        ) { env, _ ->
             """
             for (var i = 0; i < 100; i++) {
                 new java.lang.Runnable({ run: function () {} }).run();
                 new JavaAdapter(java.lang.Runnable, { run: function () {} }).run();
             }
-            runtime.loadDex(${q(env.dexFile)});
+            var dexSource = new java.io.File(${q(env.dexFile)});
+            var dexCopy = new java.io.File(dexSource.getParentFile(), 's8-' + java.lang.System.nanoTime() + '-' + dexSource.getName());
+            files.copy(dexSource.getPath(), dexCopy.getPath());
+            runtime.loadDex(dexCopy.getPath());
+            dexCopy.delete();
             var probe = Packages.org.autojs.sdk37.fixture.DexProbe.value();
             if (String(probe) !== 'SDK37_DEX_OK') throw new Error('memory gate: dex probe returned ' + probe);
             """
@@ -365,6 +391,53 @@ object GateScenarios {
             });
             session.on('error', function () { gateStat('errors', 1); });
             session.on('end', function () { if (guard !== null) clearTimeout(guard); });
+            """
+        },
+        GateScenario(
+            "S15", "web.newInjectableWebView not attached to a window when the script ends", "H10 / Q42",
+            notes = "the WebView is created on the main thread (ui.run) and loads a small page; the runtime destroys it at exit (P4.4)",
+            instanceLimits = mapOf("webView" to 0L),
+        ) { _, _ ->
+            """
+            var gateView = ui.run(function () {
+                var view = web.newInjectableWebView(context, null);
+                view.loadData('<html><body>memory gate</body></html>', 'text/html', 'utf-8');
+                return view;
+            });
+            gateStat('webViews', gateView ? 1 : 0);
+            gateReady();
+            sleep(300);
+            """
+        },
+        GateScenario(
+            "S16", "a UI script starting a UI script that ends first", "H27 (main thread Context)", ui = true, expectedEngines = 2,
+            normalTimeoutMs = 90_000,
+            notes = "both run on the main thread and share its Rhino Context; the outer one checks with memory.collect() that the " +
+                "ended inner runtime is reclaimed while it still runs (P4.4); F stops both",
+            failingStats = listOf("innerRetainedWhileOuterRuns"),
+        ) { _, _ ->
+            """
+            ui.layout(<frame><text text="memory gate outer"/></frame>);
+            // The outer Activity is the root of the task the runner started, so a plain NEW_TASK start of the same Activity would only
+            // bring that task to the front; MULTIPLE_TASK gives the inner script an Activity of its own (both still on the main
+            // thread). No XML literal in the inner source: the XML preprocessing of the outer script would rewrite it inside the string.
+            var innerConfig = new org.autojs.autojs.execution.ExecutionConfig();
+            innerConfig.setIntentFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            var inner = runtime.engines.execScript('memory-gate-inner', '"ui";\nsetTimeout(function () { activity.finish(); }, 200);', innerConfig);
+            threads.start(function () {
+                var engine = null;
+                for (var i = 0; i < 400 && !(engine = inner.getEngine()); i++) sleep(25);
+                if (!engine) return;
+                for (var j = 0; j < 800 && !engine.isDestroyed(); j++) sleep(25);
+                engine = null;
+                memory.collect();
+                var retained = memory.retained(), held = 0;
+                for (var k = 0; k < retained.length; k++) if (String(retained[k].name).indexOf('memory-gate-inner') >= 0) held++;
+                gateStat('innerChecks', 1);
+                gateStat('innerRetainedWhileOuterRuns', held);
+                // ui.post would wait on this thread's timer, which ends with the thread.
+                if (!FORCE) activity.runOnUiThread(function () { activity.finish(); });
+            });
             """
         },
         GateScenario(

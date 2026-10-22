@@ -678,6 +678,7 @@ class AidlPluginHost<I : IInterface>(
             Log.i(tag, "dedicated bindService: $component")
             appContext.bindService(intent, connection, bindFlags)
         } catch (error: SecurityException) {
+            lease.markRegistered()
             fail(
                 IllegalStateException(
                     "Dedicated bindService SecurityException: $component. " +
@@ -692,6 +693,7 @@ class AidlPluginHost<I : IInterface>(
             bound = try {
                 appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
             } catch (error: SecurityException) {
+                lease.markRegistered()
                 fail(
                     IllegalStateException(
                         "Dedicated bindService SecurityException: $component. " +
@@ -703,11 +705,14 @@ class AidlPluginHost<I : IInterface>(
                 return@suspendCancellableCoroutine
             }
         }
+        // A refused bind (false) stays registered with the context until unbindService, together with this connection,
+        // the continuation and its caller, so the lease releases it like a successful one (docs/memory/ROADMAP.md P4.5).
+        // zh-CN: 被拒绝的绑定 (false) 在 unbindService 之前一直登记在 Context 中, 连同此连接, 续体及其调用方,
+        // 因此与成功的绑定一样由租约释放 (docs/memory/ROADMAP.md P4.5).
+        lease.markRegistered()
         if (!bound) {
             fail(PluginBindRefusedException(serviceInfo.packageName, buildBindFailureMessage(appContext, serviceInfo, component)))
-            return@suspendCancellableCoroutine
         }
-        lease.markRegistered()
     }
 
     private fun invalidateService(serviceInfo: ServiceInfo, error: Throwable) {

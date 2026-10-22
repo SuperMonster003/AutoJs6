@@ -7,6 +7,7 @@ import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Kind
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Step
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -30,6 +31,7 @@ class SettingsWizardStateTest {
             unexportable = 1,
             failure = Failure.IO,
             failureDetail = "No space left on device",
+            refine = mapOf("data_shortcuts" to listOf("s1", "s3"), "data_color_library" to emptyList()),
         )
         assertEquals(state, SettingsWizardState.fromText(state.toText()))
         Step.entries.forEach { step ->
@@ -52,7 +54,7 @@ class SettingsWizardStateTest {
         assertNull(SettingsWizardState.fromText(null))
         assertNull(SettingsWizardState.fromText("{"))
         assertNull(SettingsWizardState.fromText("[]"))
-        assertNull(SettingsWizardState.fromText("""{"kind":"import","step":"pick_categories","selected":[]}"""))
+        assertNull(SettingsWizardState.fromText("""{"kind":"unknown","step":"pick_categories","selected":[]}"""))
         assertNull(SettingsWizardState.fromText("""{"kind":"export","step":"unknown","selected":[]}"""))
         assertNull(SettingsWizardState.fromText("""{"kind":"export","step":"done"}"""))
         assertNull(SettingsWizardState.fromText("""{"kind":"export","step":"done","selected":[1]}"""))
@@ -65,12 +67,21 @@ class SettingsWizardStateTest {
     }
 
     @Test
-    fun exportStartsWithTheDefaultSelectionWithoutDataCategories() {
+    fun dropsRefineEntriesOfTheWrongShape() {
+        val state = SettingsWizardState.fromText(
+            """{"kind":"import","step":"pick_categories","selected":[],"refine":{"data_shortcuts":["a",2,"b"],"data_color_library":"0","x":[]}}"""
+        )
+        assertEquals(mapOf("data_shortcuts" to listOf("a", "b"), "x" to emptyList<String>()), state?.refine)
+        assertEquals(emptyMap<String, List<String>>(), SettingsWizardState.fromText("""{"kind":"export","step":"done","selected":[]}""")?.refine)
+    }
+
+    @Test
+    fun exportStartsWithTheDefaultSelectionWithTheDataCategories() {
         val state = SettingsExportWizard.initialState(null)
         assertEquals(Step.PICK_CATEGORIES, state.step)
-        val expected = SettingCategory.ALL.filter { it.defaultSelected && !it.isData }.map { it.id }
+        val expected = SettingCategory.ALL.filter { it.defaultSelected }.map { it.id }
         assertEquals(expected, state.selected)
-        assertEquals(26, state.selected.size)
+        assertTrue(SettingCategory.DATA_SHORTCUTS.id in state.selected)
     }
 
     @Test

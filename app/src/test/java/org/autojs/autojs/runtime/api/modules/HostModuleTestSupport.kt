@@ -92,25 +92,43 @@ internal object HostModuleTestSupport {
     }
 
     /**
-     * Device cases of one test class, written to `build/script-modules-device/[name].json` (the format of
+     * Device cases of one test class, written to `[directory]/[name].json` (by default `build/script-modules-device`; the
+     * cases that need the local server of `tools/augment/device_net.py` go to `build/script-modules-device-net`; the format of
      * `DifferentialCases`: expected values in "kt") for `device_eval.py --new-modules on --strict-errors`; cases added
      * later replace earlier ones with the same expression, the file keeps the order of first addition.
      */
-    class DeviceCases(private val name: String, private val reason: String) {
+    class DeviceCases(private val name: String, private val reason: String, private val directory: String = "build/script-modules-device") {
 
         private val cases = LinkedHashMap<String, String>()
 
         @Synchronized
         fun add(entries: List<Pair<String, String>>) {
             entries.forEach { (expression, expected) -> cases[expression] = expected }
-            val dir = File("build/script-modules-device").apply { mkdirs() }
+            val dir = File(directory).apply { mkdirs() }
+            // An INFO case has no expected value: device_eval.py only prints the device result.
             val body = cases.entries.joinToString(",\n") { (expression, expected) ->
-                "  {\"expression\": ${json(expression)}, \"js\": null, \"kt\": ${json(expected)}, \"reason\": ${json(reason)}}"
+                val kt = if (expected == INFO) "null" else json(expected)
+                "  {\"expression\": ${json(expression)}, \"js\": null, \"kt\": $kt, \"reason\": ${json(reason)}}"
             }
             File(dir, "$name.json").writeText("[\n$body\n]\n", Charsets.UTF_8)
         }
 
+        companion object {
+            /** The expected value of a case whose result depends on the device (its TTS engine, its sensors): printed, not compared. */
+            const val INFO = "<info>"
+        }
+
     }
+
+    /**
+     * A device expression that settles the Promise [promise] on a worker thread (`threads.start`, whose timer runs the
+     * Promise callbacks; blocking the script thread with `wait()` would keep them from running) and returns [value] of the
+     * result `v`, "rejected" or "timeout" after 10 seconds.
+     */
+    fun settled(promise: String, value: String = "v"): String =
+        "(function () { var latch = new java.util.concurrent.CountDownLatch(1); var out = 'timeout'; " +
+            "threads.start(function () { ($promise).then(function (v) { out = $value; latch.countDown(); }, function (e) { out = 'rejected'; latch.countDown(); }); }); " +
+            "latch.await(10, java.util.concurrent.TimeUnit.SECONDS); return out; })()"
 
     fun json(value: String): String = buildString {
         append('"')

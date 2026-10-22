@@ -14,7 +14,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.core.view.isVisible
 import org.autojs.autojs.AutoJs
-import org.autojs.autojs.core.pref.keys.MiscStateKeys
+import org.autojs.autojs.core.pref.keys.FloatingKeys
 import org.autojs.autojs.model.script.Scripts
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
@@ -175,15 +175,15 @@ class FloatingControllerWindow(
     private fun savePosition(bridge: WindowBridge) {
         val screenWidth = bridge.screenWidth.takeIf { it > 0 } ?: return
         val screenHeight = bridge.screenHeight.takeIf { it > 0 } ?: return
-        MiscStateKeys.FLOATING_CONTROLLER_POSITION_X_PERCENT.set(bridge.x / screenWidth.toFloat(), true)
-        MiscStateKeys.FLOATING_CONTROLLER_POSITION_Y_PERCENT.set(bridge.y / screenHeight.toFloat(), true)
+        FloatingKeys.FLOATING_CONTROLLER_POSITION_X_PERCENT.set(bridge.x / screenWidth.toFloat(), true)
+        FloatingKeys.FLOATING_CONTROLLER_POSITION_Y_PERCENT.set(bridge.y / screenHeight.toFloat(), true)
     }
 
     private fun initialPosition(): Pair<Int, Int> {
         val screenWidth = ScreenMetrics.deviceScreenWidth
         val screenHeight = ScreenMetrics.deviceScreenHeight
-        val x = MiscStateKeys.FLOATING_CONTROLLER_POSITION_X_PERCENT.get().takeIf { it >= 0f }?.let { (it * screenWidth).roundToInt() } ?: (screenWidth / 10)
-        val y = MiscStateKeys.FLOATING_CONTROLLER_POSITION_Y_PERCENT.get().takeIf { it >= 0f }?.let { (it * screenHeight).roundToInt() } ?: (screenHeight / 2)
+        val x = FloatingKeys.FLOATING_CONTROLLER_POSITION_X_PERCENT.get().takeIf { it >= 0f }?.let { (it * screenWidth).roundToInt() } ?: (screenWidth / 10)
+        val y = FloatingKeys.FLOATING_CONTROLLER_POSITION_Y_PERCENT.get().takeIf { it >= 0f }?.let { (it * screenHeight).roundToInt() } ?: (screenHeight / 2)
         return x to y
     }
 

@@ -893,29 +893,38 @@ object NodeJsRuntimePluginHost {
     private fun startBind(entry: PooledConnection, binding: BindingAttempt) {
         val intent = Intent(runtimeAction()).setComponent(entry.component)
             .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-        val bound = try {
-            entry.appContext.bindService(intent, binding.connection, Context.BIND_AUTO_CREATE)
-        } catch (error: SecurityException) {
-            failWaiters(
-                entry,
-                binding,
-                NodeRuntimePluginUnavailableException(
-                    "bindService permission denied: ${entry.component}",
-                    error,
-                ),
-            )
-            return
-        }
-        if (!bound) {
-            failWaiters(
-                entry,
-                binding,
-                NodeRuntimePluginUnavailableException(
-                    "bindService failed: ${entry.component}",
-                    PluginBindRefusedException(entry.component.packageName, "bindService failed: ${entry.component}"),
-                ),
-            )
-            return
+        // A refused bind (false or SecurityException) stays registered with the context until unbindService, so it is
+        // released here, whether or not this attempt is still the active binding; it never becomes `registered` (H28 / Q46).
+        // zh-CN: 被拒绝的绑定 (false 或 SecurityException) 在 unbindService 之前一直登记在 Context 中, 因此在此释放,
+        // 不论这次尝试是否仍是当前绑定; 它不会被标记为 `registered` (H28 / Q46).
+        val outcome = NodeRuntimePluginBindCall.attempt(
+            bind = { entry.appContext.bindService(intent, binding.connection, Context.BIND_AUTO_CREATE) },
+            release = { postUnbind(entry.appContext, binding.connection) },
+        )
+        when (outcome) {
+            is NodeRuntimePluginBindCall.Outcome.Denied -> {
+                failWaiters(
+                    entry,
+                    binding,
+                    NodeRuntimePluginUnavailableException(
+                        "bindService permission denied: ${entry.component}",
+                        outcome.error,
+                    ),
+                )
+                return
+            }
+            NodeRuntimePluginBindCall.Outcome.Refused -> {
+                failWaiters(
+                    entry,
+                    binding,
+                    NodeRuntimePluginUnavailableException(
+                        "bindService failed: ${entry.component}",
+                        PluginBindRefusedException(entry.component.packageName, "bindService failed: ${entry.component}"),
+                    ),
+                )
+                return
+            }
+            NodeRuntimePluginBindCall.Outcome.Bound -> Unit
         }
         var staleConnectionToUnbind: ServiceConnection? = null
         var timeoutToPost: Runnable? = null

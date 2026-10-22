@@ -21,7 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger
 open class AndroidContextFactory(private val cacheDirectory: File) : ContextFactory() {
 
     private val mContextCount = AtomicInteger()
-    private val wrapFactory = WrapFactory()
+
+    /** The WrapFactory of a new Context (setupContext); an engine installs its own while it is bound (AutoJsContext). */
+    internal val wrapFactory = WrapFactory()
 
     /**
      * Rhino contexts entered through this factory and not yet released; read only, for the memory diagnostics
@@ -32,17 +34,21 @@ open class AndroidContextFactory(private val cacheDirectory: File) : ContextFact
         get() = mContextCount.get()
 
     init {
-        initApplicationClassLoader(createClassLoader(AndroidContextFactory::class.java.classLoader!!))
+        // The application class loader is created once per process and clears what earlier processes left in the cache directory.
+        // zh-CN: 应用类加载器每个进程创建一次, 清理之前进程留在缓存目录中的文件.
+        initApplicationClassLoader(AndroidClassLoader(AndroidContextFactory::class.java.classLoader!!, cacheDirectory))
     }
 
     /**
-     * Create a ClassLoader which is able to deal with bytecode
+     * Create a ClassLoader which is able to deal with bytecode. Rhino creates one for every generated class (JavaAdapter);
+     * it shares the cache directory and must not clear it (docs/memory/ROADMAP.md H26).
+     * zh-CN: 创建能处理字节码的类加载器. Rhino 为每个生成类 (JavaAdapter) 创建一个; 它与其他加载共用缓存目录, 不能清空该目录 (docs/memory/ROADMAP.md H26).
      *
      * @param parent the parent of the creation classloader
      * @return a new ClassLoader
      */
     final override fun createClassLoader(parent: ClassLoader): AndroidClassLoader {
-        return AndroidClassLoader(parent, cacheDirectory)
+        return AndroidClassLoader(parent, cacheDirectory, clearCacheOnInit = false)
     }
 
     override fun observeInstructionCount(cx: Context, instructionCount: Int) {

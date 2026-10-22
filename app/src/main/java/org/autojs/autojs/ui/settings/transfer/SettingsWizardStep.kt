@@ -29,8 +29,16 @@ interface SettingsWizardHost {
     fun requestDocument(fileName: String)
 
     /**
-     * The document created after [requestDocument], also when the result reaches a recreated page; null when canceled.
-     * zh-CN: [requestDocument] 之后创建的文档, 结果到达重建后的页面时同样可取得; 取消时为 null.
+     * Opens the system page that opens a settings file (SAF, T11: `application/zip`, `application/octet-stream`); its
+     * result reaches [awaitDocument].
+     * zh-CN: 打开系统的打开文档页面以选择设置文件 (SAF, T11: `application/zip`, `application/octet-stream`); 结果经 [awaitDocument] 取得.
+     */
+    fun requestOpenDocument()
+
+    /**
+     * The document created after [requestDocument] or opened after [requestOpenDocument], also when the result reaches
+     * a recreated page; null when canceled.
+     * zh-CN: [requestDocument] 之后创建或 [requestOpenDocument] 之后打开的文档, 结果到达重建后的页面时同样可取得; 取消时为 null.
      */
     suspend fun awaitDocument(): Uri?
 }
@@ -40,12 +48,13 @@ interface SettingsWizardHost {
  * step returns the state to go on with, whose [SettingsWizardState.step] names the step shown next ([next] /
  * [previous] follow the order of [steps]), or null to end the wizard. Every state passes through
  * [SettingsWizardHost.wizardState] before its step is shown, so a wizard cancelled by the recreation of the page (the
- * coroutine and its dialog end with the view) continues from there; only a wizard that ends by itself clears it.
+ * coroutine and its dialog end with the view) continues from there; only a wizard that ends by itself clears it,
+ * forgets its password ([SettingsPasswords], P7.7) and then calls [onFinished].
  *
  * zh-CN: 设置向导 (T10): 依次显示 [steps], 每一步是以 `WizardUi.showAndAwait` 等待的对话框. 步骤返回接下来使用的状态, 其
  * [SettingsWizardState.step] 指明下一个显示的步骤 ([next] / [previous] 按 [steps] 的顺序), 返回 null 则结束向导. 每个状态在显示
  * 对应步骤之前都先写入 [SettingsWizardHost.wizardState], 因此页面重建时被取消的向导 (协程与对话框随视图结束) 可以从该状态继续;
- * 只有向导自行结束时才清空它.
+ * 只有向导自行结束时才清空它, 忘记其口令 ([SettingsPasswords], P7.7), 随后调用 [onFinished].
  */
 abstract class SettingsWizard(val host: SettingsWizardHost) {
 
@@ -56,14 +65,22 @@ abstract class SettingsWizard(val host: SettingsWizardHost) {
 
     suspend fun run(initial: SettingsWizardState) {
         var state: SettingsWizardState? = initial
+        var last: SettingsWizardState = initial
         while (state != null) {
             val current: SettingsWizardState = state
+            last = current
             host.wizardState = current
             val step = steps.firstOrNull { it.id == current.step } ?: break
             state = step.run(this, current)
         }
+        // A step may have published a password meanwhile (P7.7).
+        listOfNotNull(host.wizardState, last).forEach { SettingsPasswords.forget(it.password) }
         host.wizardState = null
+        onFinished()
     }
+
+    /** Called once the wizard has ended by itself (not when the page is recreated). zh-CN: 向导自行结束后调用 (页面重建时不调用). */
+    open fun onFinished() = Unit
 
     /** [state] at the step after its own, or null after the last one. zh-CN: 下一步骤的状态, 已是最后一步时为 null. */
     fun next(state: SettingsWizardState): SettingsWizardState? =

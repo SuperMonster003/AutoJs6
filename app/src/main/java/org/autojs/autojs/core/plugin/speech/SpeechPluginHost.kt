@@ -217,7 +217,9 @@ object SpeechPluginHost {
 
     private suspend fun recognize(context: Context, input: SpeechAudioInput, request: SpeechRecognizeRequest): Map<String, Any?> {
         val target = selectForCall(context)
-        requireFeature(peerOf(target), SpeechContract.FEATURE_ASR)
+        val peer = peerOf(target)
+        requireFeature(peer, SpeechContract.FEATURE_ASR)
+        SpeechAudio.requireReadable(input.wav, peer.features, input.file.name)
         val answer = call(context, target, SpeechContract.FILE_CALL_TIMEOUT_MS, "recognizeFile") { proxy ->
             proxy.recognizeFile(input.descriptor, SpeechBundles.recognize(request, input.file.name))
         }
@@ -226,7 +228,9 @@ object SpeechPluginHost {
 
     private suspend fun detectVoice(context: Context, input: SpeechAudioInput, request: SpeechVadRequest): Map<String, Any?> {
         val target = selectForCall(context)
-        requireFeature(peerOf(target), SpeechContract.FEATURE_VAD)
+        val peer = peerOf(target)
+        requireFeature(peer, SpeechContract.FEATURE_VAD)
+        SpeechAudio.requireReadable(input.wav, peer.features, input.file.name)
         val answer = call(context, target, SpeechContract.FILE_CALL_TIMEOUT_MS, "detectVoice") { proxy ->
             proxy.detectVoice(input.descriptor, SpeechBundles.detectVoice(request, input.file.name))
         }

@@ -12,7 +12,52 @@ class OfflineDocsPluginPolicyTest {
     fun `disabled candidates are rejected before content inspection`() {
         assertEquals(
             OfflineDocsPluginLoadError.PLUGIN_DISABLED,
-            rejection(enabled = false, contractVersion = OfflineDocsPluginContract.VERSION + 1),
+            rejection(systemEnabled = false, contractVersion = OfflineDocsPluginContract.VERSION + 1),
+        )
+        assertEquals(
+            OfflineDocsPluginLoadError.PLUGIN_DISABLED,
+            rejection(centerEnabled = false, contractVersion = OfflineDocsPluginContract.VERSION + 1),
+        )
+    }
+
+    @Test
+    fun `the enable handshake passes a plugin whose saved switch is still off`() {
+        // PluginCenterFragment.enableAidlPlugin saves the switch as off until the handshake succeeds.
+        assertNull(rejection(check = OfflineDocsEligibilityCheck.ENABLE_HANDSHAKE, centerEnabled = false))
+        assertNull(rejection(check = OfflineDocsEligibilityCheck.ENABLE_HANDSHAKE))
+        assertEquals(
+            OfflineDocsPluginLoadError.PLUGIN_DISABLED,
+            rejection(check = OfflineDocsEligibilityCheck.LOAD, centerEnabled = false),
+        )
+    }
+
+    @Test
+    fun `the enable handshake still rejects a system-disabled or otherwise ineligible plugin`() {
+        val handshake = OfflineDocsEligibilityCheck.ENABLE_HANDSHAKE
+        assertEquals(
+            OfflineDocsPluginLoadError.PLUGIN_DISABLED,
+            rejection(check = handshake, systemEnabled = false, centerEnabled = false),
+        )
+        assertEquals(
+            OfflineDocsPluginLoadError.PLUGIN_DISABLED,
+            rejection(check = handshake, systemEnabled = false),
+        )
+        assertEquals(
+            OfflineDocsPluginLoadError.IN_PROCESS_TRUST_REQUIRED,
+            rejection(check = handshake, centerEnabled = false, authorizedState = PluginAuthorizedState.USER_GRANTED),
+        )
+        assertEquals(
+            OfflineDocsPluginLoadError.CONTRACT_VERSION_UNSUPPORTED,
+            rejection(check = handshake, centerEnabled = false, contractVersion = OfflineDocsPluginContract.VERSION + 1),
+        )
+        assertEquals(
+            OfflineDocsPluginLoadError.HOST_VERSION_TOO_LOW,
+            rejection(
+                check = handshake,
+                centerEnabled = false,
+                hostVersionCode = OfflineDocsPluginContract.REQUIRED_HOST_VERSION_CODE,
+                requiresHostVersion = OfflineDocsPluginContract.REQUIRED_HOST_VERSION_CODE + 1L,
+            ),
         )
     }
 
@@ -110,7 +155,9 @@ class OfflineDocsPluginPolicyTest {
     }
 
     private fun rejection(
-        enabled: Boolean = true,
+        check: OfflineDocsEligibilityCheck = OfflineDocsEligibilityCheck.LOAD,
+        systemEnabled: Boolean = true,
+        centerEnabled: Boolean = true,
         authorizedState: PluginAuthorizedState = PluginAuthorizedState.OFFICIAL,
         sameSignerAsHost: Boolean = false,
         contractVersion: Int = OfflineDocsPluginContract.VERSION,
@@ -125,7 +172,9 @@ class OfflineDocsPluginPolicyTest {
         requiresHostVersion: Long? = OfflineDocsPluginContract.REQUIRED_HOST_VERSION_CODE,
         maxHostVersion: Long? = null,
     ): OfflineDocsPluginLoadError? = OfflineDocsPluginPolicy.rejectionCode(
-        enabled = enabled,
+        check = check,
+        systemEnabled = systemEnabled,
+        centerEnabled = centerEnabled,
         authorizedState = authorizedState,
         sameSignerAsHost = sameSignerAsHost,
         contractVersion = contractVersion,

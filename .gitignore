@@ -98,6 +98,9 @@ CLAUDE.md
 !/tools/memory/
 !/tools/memory/**
 /tools/memory/__pycache__/
+!/tools/plugin-center/
+!/tools/plugin-center/**
+/tools/plugin-center/__pycache__/
 
 /gradle/wrappers/backup/
 

@@ -67,28 +67,31 @@ data class SettingCategory(
         @JvmField val CONNECTION = SettingCategory("connection", 21, titleRes = R.string.settings_transfer_category_connection)
         @JvmField val LAYOUT_INSPECTOR = SettingCategory("layout_inspector", 22, titleRes = R.string.settings_transfer_category_layout_inspector)
 
+        /** The remembered positions of the floating windows (appendix C Q18). */
+        @JvmField val FLOATING = SettingCategory("floating", 23, titleRes = R.string.settings_transfer_category_floating)
+
         /** Not selected by default: debugging switches should not travel to another device (appendix A.1). */
-        @JvmField val DEVELOPER = SettingCategory("developer", 23, defaultSelected = false, titleRes = R.string.settings_transfer_category_developer)
-        @JvmField val PLUGIN_CENTER = SettingCategory("plugin_center", 24, titleRes = R.string.settings_transfer_category_plugin_center)
-        @JvmField val PLUGIN_ENABLE_STATE = SettingCategory("plugin_enable_state", 25, titleRes = R.string.settings_transfer_category_plugin_enable_state)
-        @JvmField val APK_BUILD = SettingCategory("apk_build", 26, titleRes = R.string.settings_transfer_category_apk_build)
-        @JvmField val WIZARDS = SettingCategory("wizards", 27, titleRes = R.string.settings_transfer_category_wizards)
-        @JvmField val DATA_SHORTCUTS = SettingCategory("data_shortcuts", 28, kind = Kind.DATA, titleRes = R.string.settings_transfer_category_data_shortcuts)
-        @JvmField val DATA_COLOR_LIBRARY = SettingCategory("data_color_library", 29, kind = Kind.DATA, titleRes = R.string.settings_transfer_category_data_color_library)
+        @JvmField val DEVELOPER = SettingCategory("developer", 24, defaultSelected = false, titleRes = R.string.settings_transfer_category_developer)
+        @JvmField val PLUGIN_CENTER = SettingCategory("plugin_center", 25, titleRes = R.string.settings_transfer_category_plugin_center)
+        @JvmField val PLUGIN_ENABLE_STATE = SettingCategory("plugin_enable_state", 26, titleRes = R.string.settings_transfer_category_plugin_enable_state)
+        @JvmField val APK_BUILD = SettingCategory("apk_build", 27, titleRes = R.string.settings_transfer_category_apk_build)
+        @JvmField val WIZARDS = SettingCategory("wizards", 28, titleRes = R.string.settings_transfer_category_wizards)
+        @JvmField val DATA_SHORTCUTS = SettingCategory("data_shortcuts", 29, kind = Kind.DATA, titleRes = R.string.settings_transfer_category_data_shortcuts)
+        @JvmField val DATA_COLOR_LIBRARY = SettingCategory("data_color_library", 30, kind = Kind.DATA, titleRes = R.string.settings_transfer_category_data_color_library)
 
         /** "Credentials and authorizations" (D2): sensitive, never selected by default, left out of scripts and auto backups. */
-        @JvmField val CREDENTIALS = SettingCategory("credentials", 30, defaultSelected = false, sensitive = true, titleRes = R.string.settings_transfer_category_credentials)
+        @JvmField val CREDENTIALS = SettingCategory("credentials", 31, defaultSelected = false, sensitive = true, titleRes = R.string.settings_transfer_category_credentials)
 
         /** "Other (internal state)" (D7, T2): every `StateKey` and the unregistered keys found at run time. */
-        @JvmField val OTHER = SettingCategory("other", 31, defaultSelected = false, titleRes = R.string.settings_transfer_category_other)
+        @JvmField val OTHER = SettingCategory("other", 32, defaultSelected = false, titleRes = R.string.settings_transfer_category_other)
 
-        /** The 31 categories of appendix A.1 in page order. */
+        /** The 32 categories of appendix A.1 in page order. */
         @JvmField
         val ALL: List<SettingCategory> = listOf(
             APPEARANCE, GENERAL, EXPLORER, HISTORY, EDITOR_GENERAL, EDITOR_APPEARANCE, EDITOR_LOG, EDITOR_ASSISTANCE,
             EDITOR_SMART_HINT, EDITOR_GESTURES, EDITOR_GUTTER, EDITOR_PERFORMANCE, EDITOR_KEYBOARD, TIMED_TASK, A11Y,
-            RUNNING, RECORD, EXTENSIBILITY, UPDATES, CONSOLE, CONNECTION, LAYOUT_INSPECTOR, DEVELOPER, PLUGIN_CENTER,
-            PLUGIN_ENABLE_STATE, APK_BUILD, WIZARDS, DATA_SHORTCUTS, DATA_COLOR_LIBRARY, CREDENTIALS, OTHER,
+            RUNNING, RECORD, EXTENSIBILITY, UPDATES, CONSOLE, CONNECTION, LAYOUT_INSPECTOR, FLOATING, DEVELOPER,
+            PLUGIN_CENTER, PLUGIN_ENABLE_STATE, APK_BUILD, WIZARDS, DATA_SHORTCUTS, DATA_COLOR_LIBRARY, CREDENTIALS, OTHER,
         )
 
         private val byId: Map<String, SettingCategory> = ALL.associateBy { it.id }

@@ -21,11 +21,12 @@
 # Reasons:
 #   process  process-level by design: holds the Application, process singletons or data that outlive every script
 #   table    constant, function or class table filled once; holds no script, Rhino or UI instance
-#   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds
+#   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds. For a
+#            weak-key map or registry the note also says "values do not reference the key": a WeakHashMap holds its
+#            values strongly, and a value that references its key keeps both forever (H29); such a map takes another
+#            reason (owner when its entries are removed as the key's owner ends)
 #   owner    entries are removed per runtime / owner id when the owner ends (gate scenario in the note)
 #   paired   (call) the release call is in the same file
-#   p4.2     to be normalized in ROADMAP P4.2 (T7): delete the line, or change the reason, when that is done
-#   p4.4     to be handled in ROADMAP P4.4 (Rhino class loaders)
 #   page     page / UI lifetime outside the script path, covered by the P4.5 LeakCanary audit
 #   exempt   a text scan false positive: not a process-level field, or not a registration (the note says why)
 
@@ -42,9 +43,9 @@ field | core/automator/pick/PickResultType.kt | symbols | kotlin object; registr
 field | core/automator/selector/SelectorRegistry.kt | byName | kotlin object; registry; - | table | selector definitions by name, filled once
 field | core/automator/selector/SelectorRegistry.kt | entries | kotlin object; registry; - | table | selector definitions, filled once
 field | core/console/ConsoleImpl.kt | sShowingConsoles | kotlin object; registry; - | owner | consoles whose floating window is showing, removed when hidden; with exitOnClose the CONSOLE stage hides it (gate S14, registries count), without it the window stays for the user to read and close (by design) (B.1)
-field | core/image/ImageWrapper.kt | mediaImages | kotlin object; weak-key registry; - | weak | newSetFromMap(WeakHashMap) of acquired media Images; their count is gate item T1 (g)
-field | core/looper/LooperHelper.java | sLoopers | java static; weak-key registry; - | weak | Thread -> WeakReference<Looper>, keys and values weak since P1.1 (a2ee7eb03, H1)
-field | core/looper/TimerThread.kt | sTimerMap | kotlin object; weak-key registry; - | weak | WeakHashMap<Thread, WeakReference<Timer>> (B.1)
+field | core/image/ImageWrapper.kt | mediaImages | kotlin object; weak-key registry; - | weak | newSetFromMap(WeakHashMap) of acquired media Images; their count is gate item T1 (g); values do not reference the key (Boolean.TRUE)
+field | core/looper/LooperHelper.java | sLoopers | java static; weak-key registry; - | weak | Thread -> WeakReference<Looper>, keys and values weak since P1.1 (a2ee7eb03, H1); values do not reference the key (the Looper, which holds its thread, is held weakly)
+field | core/looper/TimerThread.kt | sTimerMap | kotlin object; weak-key registry; - | weak | WeakHashMap<Thread, WeakReference<Timer>> (B.1); values do not reference the key (the Timer is held weakly)
 field | core/plugin/barcode/BarcodePluginHost.kt | connectionPool | kotlin object; registry; - | process | pooled bindings to the Barcode plugin service, unbound when idle (unbindService in the same file)
 field | core/plugin/docs/OfflineDocsPluginStateMonitor.kt | appContext | kotlin object; strong; AndroidContext | process | Application context of a process-level plugin state monitor
 field | core/plugin/editor/AceEditorPluginStateMonitor.kt | appContext | kotlin object; strong; AndroidContext | process | Application context of a process-level plugin state monitor
@@ -60,7 +61,7 @@ field | core/record/accessibility/AccessibilityActionConverter.java | CONVERTER_
 field | core/ui/attribute/ViewAttributesFactory.kt | sViewAttributesCreators | kotlin object; strong collection; View | table | View class to attribute creator; holds classes, no View instance
 field | core/ui/inflater/AndroidAttributeSetters.kt | SPECIAL | kotlin object; strong collection; View | table | attribute name to setter function; holds no View instance
 field | core/ui/inflater/AndroidLayoutParamRules.kt | SPECIAL | kotlin object; strong collection; View | table | layout param attribute name to setter function; holds no View instance
-field | core/ui/inflater/AndroidLayoutParamRules.kt | gridCells | kotlin object; weak-key map; View | weak | WeakHashMap<View, GridCell>; the values hold no View
+field | core/ui/inflater/AndroidLayoutParamRules.kt | gridCells | kotlin object; weak-key map; View | weak | WeakHashMap<View, GridCell>; values do not reference the key (GridCell holds ints and floats only)
 field | core/web/WebSocket.kt | instances | kotlin object; registry; - | owner | WeakReference list of WebSockets; closed and cleared entries are pruned at the WEBSOCKETS stage (P1.3.4; gate S10, registries count) (B.1)
 field | engine/NodeBridgeEngineDispatchService.kt | registeredExecutions | kotlin object; registry; - | process | Node bridge dispatches by token, bounded (MAX_REGISTERED_DISPATCHES), removed when the execution ends
 field | engine/NodeBridgeUiProvider.kt | sessions | kotlin object; registry; - | process | Node bridge UI sessions by id, removed on close; closeAll clears them
@@ -69,18 +70,20 @@ field | engine/NodeJsRuntimePluginHost.kt | connectionPool | kotlin object; regi
 field | engine/NodeJsRuntimePluginHost.kt | executionRegistry | kotlin object; registry; - | process | reservations of Node.js executions, released when they end
 field | engine/NodeJsRuntimePluginHost.kt | observerContext | kotlin object; strong; AndroidContext | process | Application context of the package observer
 field | engine/RuntimeAgentProvider.kt | sessions | kotlin object; registry; - | owner | delegated clients hold only Application context and JVM run observers; dispose, Binder death and access revocation remove the entry and close its bridge
-field | engine/RuntimeViewAttributes.kt | declarations | kotlin object; weak-key map; View | weak | WeakHashMap<View, JSONObject>; the values are JSON
+field | engine/RuntimeViewAttributes.kt | declarations | kotlin object; weak-key map; View | weak | WeakHashMap<View, JSONObject>; values do not reference the key (JSON only)
 field | engine/RuntimeWebActionActivity.kt | actions | kotlin object; registry; - | owner | Node bridge web action sessions by request id, removed when the action ends or fails; hold no Rhino runtime (B.1)
 field | engine/RuntimeWebActionActivity.kt | captures | kotlin object; registry; - | owner | Node bridge captured files by uri, removed and deleted when granted, released or discarded (B.1)
 field | engine/RuntimeWebActionActivity.kt | grants | kotlin object; registry; - | owner | Node bridge permission grants by uri, removed when released (B.1)
 field | engine/RuntimeWebLocalDownloads.kt | active | kotlin object; registry; - | owner | Node bridge download jobs by id, removed with their file leases when the job ends (B.1)
 field | engine/RuntimeWebMediaService.kt | entries | kotlin object; registry; - | owner | Node bridge media sessions by id, removed by the session's Closeable or with their owner; all cleared when the service is destroyed (B.1)
-field | lang/ThreadCompat.java | interruptedThreads | java static; weak-key registry; - | weak | weak-key set of interrupted threads
+field | lang/ThreadCompat.java | interruptedThreads | java static; weak-key registry; - | weak | weak-key set of interrupted threads; values do not reference the key (Boolean.TRUE)
 field | model/explorer/PrivilegedExternalFiles.kt | sessions | kotlin object; registry; - | process | read-only file grants for external viewers, bounded (MAX_TOKENS), revoked on release
 field | model/script/Scripts.kt | globalAppContext | kotlin object; strong; AndroidContext | process | the Application context
-field | permission/LocalNetworkPermission.kt | pending | kotlin object; weak-key map; Activity | weak | WeakHashMap<FragmentActivity, PendingRequest>
+field | permission/LocalNetworkPermission.kt | pending | kotlin object; weak-key map; Activity | owner | WeakHashMap<FragmentActivity, PendingRequest>: the request's dialog and callbacks can reference the Activity, so values may reference the key; removed when the request completes and on the Activity's ON_DESTROY (PendingRequest.onDestroy, observer added with the request; Q45)
+field | permission/PostNotificationsPermission.kt | postNotificationsResultCallbackCache | kotlin object; weak-key map; Activity | owner | WeakHashMap<FragmentActivity, (Boolean) -> Unit>: the one-shot callback can capture its Activity, so values may reference the key; removed when delivered and on the Activity's ON_DESTROY by the observer of Permissions.registerRequestMultiplePermissionsLauncher (db65bfec4, H29; P4.5.1 LeakCanary settings walk)
 field | pio/PFiles.kt | sGlobalAppContext | kotlin object; strong; AndroidContext | process | the Application context
 field | runtime/ScriptRuntime.kt | applicationContext | kotlin object; strong; AndroidContext | process | the Application context
+field | runtime/api/Permissions.kt | requestMultiplePermissionsLauncherCache | kotlin object; weak-key map; Activity | owner | WeakHashMap<FragmentActivity, ActivityResultLauncher<Array<String>>>: the launcher's callback and result registry reference the Activity, so values reference the key; removed on the Activity's ON_DESTROY by the observer registered with the launcher (db65bfec4, H29; P4.5.1 LeakCanary settings walk)
 field | runtime/api/Plugins.kt | packages | kotlin object; registry; - | process | loaded plugin packages by package name, no runtime; script bindings are unbound by unbindAll at onExit (H8, B.1)
 field | runtime/api/ScreenMetrics.kt | stableSides | kotlin object; registry; - | process | cached screen sizes per rotation
 field | runtime/api/ScriptToast.kt | queue | kotlin object; registry; - | process | pending toasts: message text and owner id strings only, no runtime (B.1)
@@ -88,15 +91,15 @@ field | runtime/api/WrappedShizuku.kt | mServiceWaiters | kotlin object; registr
 field | runtime/api/augment/Augmentable.kt | FUNCTION_ASSIGNMENT_CACHE | kotlin object; registry; - | table | Java class to function declaration snapshots (reflection data)
 field | runtime/api/augment/Augmentable.kt | FUNCTION_METHOD_CACHE | kotlin object; registry; - | table | (class, name) to cached reflection Method
 field | runtime/api/augment/Augmentable.kt | globalContext | kotlin object; strong; AndroidContext | process | the Application context
-field | runtime/api/augment/shell/Shell.kt | runtimeDefaults | kotlin object; weak-key map; ScriptRuntime | weak | synchronizedMap(WeakHashMap<ScriptRuntime, RuntimeDefaults>) (B.1)
+field | runtime/api/augment/shell/Shell.kt | runtimeDefaults | kotlin object; weak-key map; ScriptRuntime | weak | synchronizedMap(WeakHashMap<ScriptRuntime, RuntimeDefaults>) (B.1); values do not reference the key (root / adb flags and a ShizukuCommandShell created without arguments)
 field | runtime/api/tts/TtsExecution.kt | cleanupQueue | kotlin object; registry; - | process | bounded cleanup queue of the process-wide TTS blocking call runner, drained by its worker
 field | storage/history/VersionHistoryEditorBridge.kt | registry | kotlin object; registry; - | weak | id to WeakReference<Callbacks>
 field | theme/app/ScriptThemeChanges.kt | appContext | kotlin object; strong; AndroidContext | process | the Application context
 field | theme/intelligent/DeviceStateMonitor.kt | context | kotlin object; strong; AndroidContext | process | the Application context
 field | theme/intelligent/IntelligentColorEngine.kt | appContext | kotlin object; strong; AndroidContext | process | the Application context
 field | theme/intelligent/NightModeState.kt | listeners | kotlin object; registry; - | process | night mode listeners of process-level owners (IntelligentColorEngine); removeListener in the same file
-field | ui/edit/theme/EditorDialogViewThemeApplier.kt | appliedPalettes | kotlin object; weak-key map; View | weak | WeakHashMap<View, Palette>
-field | ui/edit/theme/EditorDialogViewThemeApplier.kt | watchers | kotlin object; weak-key map; View | weak | WeakHashMap<View, HierarchyWatcher>
+field | ui/edit/theme/EditorDialogViewThemeApplier.kt | appliedPalettes | kotlin object; weak-key map; View | weak | WeakHashMap<View, Palette>; values do not reference the key (three color ints)
+field | ui/edit/theme/EditorDialogViewThemeApplier.kt | watchers | kotlin object; weak-key map; View | weak | WeakHashMap<View, HierarchyWatcher>; values do not reference the key once it is detached: the watcher holds the root through a WeakReference and drops its ViewTreeObserver in onViewDetachedFromWindow
 field | ui/enhancedfloaty/FloatyService.java | windows | java static; registry; - | owner | floaty windows; FloatyWindow.close leaves the registry first, floaty.closeAll at the FLOATY stage (gate S6 / S14, registries count) (B.1)
 field | ui/floating/controller/FloatingControllerManager.kt | mWindows | kotlin object; registry; - | page | floating controller windows by key, removed on close; closeAll clears them
 field | util/RhinoUtils.kt | arrayPrototype | kotlin object; strong; Scriptable | process | prototype of the process-level standard scope, belongs to no script (B.1)
@@ -135,11 +138,11 @@ call | engine/NodeEventObservers.kt | registerReceiver | released: yes; process 
 call | engine/NodeJsRuntimePluginHost.kt | bindService | released: yes; process | paired | unbindService in the same file
 call | engine/NodeJsRuntimePluginHost.kt | registerReceiver | released: no; process | process | process-level receiver of a process singleton, not created per script (H7; gate S11 green)
 call | engine/RuntimeAgentProvider.kt | registerReceiver | released: no; script | process | Application-context package-change receiver registered once by the ContentProvider, not per script; reconciles installation-bound consent and never captures a runtime or Activity
-call | engine/RuntimeViewComponents.kt | WebView( | released: no; script | p4.2 | RuntimeWebView of Node bridge UI sessions, never destroyed by the host and not covered by a gate scenario (B.2 H10 follow-up)
+call | engine/RuntimeViewComponents.kt | WebView( | released: no; script | paired | RuntimeWebView.release() in the same file stops and destroys it; RuntimeViewComponents.dispose calls it when a Node bridge UI view is disposed or its session closes (RuntimeUiInterop.dispose / close, NodeBridgeUiProvider tab switches); not owned by a Rhino runtime, so no RuntimeResourceScope and no Rhino gate scenario (appendix C Q42, Q5)
 call | external/receiver/DynamicBroadcastReceivers.kt | registerReceiver | released: yes; process | paired | unregisterReceiver when a registration is removed, same file
 call | runtime/api/Device.java | registerReceiver | released: no; script | exempt | registerReceiver(null, ...) only reads a sticky broadcast (H7)
 call | runtime/api/Plugins.kt | bindService | released: yes; script | paired | unbindService in unbindAll, called by ScriptRuntime.onExit (H8, P1.3.5)
-call | runtime/api/augment/web/Web.kt | WebView( | released: no; script | p4.2 | web.newInjectableWebView: a WebView holding the script global scope, never destroyed by the host and not covered by a gate scenario (B.2 H10 follow-up)
+call | runtime/api/augment/web/Web.kt | WebView( | released: no; script | owner | web.newInjectableWebView registers the WebView in the runtime's resource scope (WEB_VIEWS, core/web/InjectableWebView.kt destroyOnExitOf): destroyed on its own thread when the script ends unless it is attached to a window, whose UI lifecycle then owns it; gate S15 (appendix C Q42, P4.4)
 call | runtime/api/tts/AndroidTtsBackend.kt | bindService | released: no; script | paired | TextToSpeech constructor binds the engine; shutdown() in this file unbinds it, called at the TTS stage (B.2)
 call | theme/intelligent/DeviceStateMonitor.kt | registerReceiver | released: yes; page | paired | unregisterReceiver per fact in the same file
 call | theme/intelligent/IntelligentColorEngine.kt | registerReceiver | released: yes; page | paired | unregisterReceiver(timeReceiver) in the same file
@@ -158,4 +161,4 @@ manual | core/broadcast/Broadcast.java | sEventEmitters | java static; CopyOnWri
 manual | core/accessibility/AccessibilityService.kt | defaultBridge | kotlin object; AccessibilityBridge | owner | process-level default bridge; the tap written by each SimpleActionAutomator is revoked at onExit (H17, P1.3.2 6670730d4)
 manual | engine/ScriptEngineManager.java | mGlobalVariableMap | instance of a process singleton; Map<String, Object> | process | only "context" (the Application) (B.1)
 manual | execution/ScriptExecutionObserver.java | mScriptExecutionListeners | instance of ScriptEngineService; CopyOnWriteArraySet | process | global execution listeners of ScriptEngineService: installed once per process (guarded by a flag) or removed by their owner (paired); none per script, counted by the gate (registries) (H6, B.1)
-manual | rhino/AndroidClassLoader.kt | mDexClassLoaders | instance of the process-level class loader; ConcurrentHashMap | p4.4 | path -> DexClassLoader of runtime.loadDex / loadJar, never released per script (H3, B.1)
+manual | rhino/AndroidClassLoader.kt | mDexClassLoaders | instance of the process-level class loader; OwnedDexLoaders | owner | path -> DexClassLoader of runtime.loadDex / loadJar / loadAar with the scripts that loaded the path; removed when the last of them ends (CLASS_LOADERS stage, AndroidClassLoader.releaseOwner); gate S8 (H3, P4.4)

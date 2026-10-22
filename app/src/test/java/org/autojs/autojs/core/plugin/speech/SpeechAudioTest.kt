@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.speech
 
+import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
 import org.autojs.plugin.speech.api.SpeechLimits
 import org.junit.Assert.assertArrayEquals
@@ -26,6 +27,19 @@ class SpeechAudioTest {
         assertFalse(SpeechAudio.isWav("RIFF\u0000\u0000\u0000\u0000AVI LIST".toByteArray(Charsets.ISO_8859_1)))
         assertFalse(SpeechAudio.isWav("ID3\u0004\u0000\u0000\u0000\u0000WAVE".toByteArray(Charsets.ISO_8859_1)))
         assertFalse(SpeechAudio.isWav("RIFF".toByteArray(Charsets.ISO_8859_1)))
+    }
+
+    @Test
+    fun nonWavFilesNeedAPluginThatDecodesThem() {
+        // 3-Macaw Speech roadmap D84: a WAV goes to every plugin, anything else only to one with "audioDecode".
+        val wavOnly = setOf(SpeechContract.FEATURE_ASR, SpeechContract.FEATURE_VAD)
+        SpeechAudio.requireReadable(wav = true, features = wavOnly, name = "a.wav")
+        SpeechAudio.requireReadable(wav = true, features = emptySet(), name = "a.wav")
+        SpeechAudio.requireReadable(wav = false, features = wavOnly + SpeechContract.FEATURE_AUDIO_DECODE, name = "a.mp3")
+        val refused = assertThrows(SpeechPluginException::class.java) { SpeechAudio.requireReadable(wav = false, features = wavOnly, name = "a.mp3") }
+        assertEquals(SpeechErrorCodes.UNSUPPORTED_FORMAT, refused.code)
+        assertTrue(refused.message, refused.message!!.contains("a.mp3 is not a WAV file"))
+        assertTrue(refused.message, refused.message!!.contains("3-Macaw Speech 1.2.0"))
     }
 
     @Test

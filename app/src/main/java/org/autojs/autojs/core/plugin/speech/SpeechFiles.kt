@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.speech
 
 import android.os.ParcelFileDescriptor
+import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
 import org.autojs.plugin.speech.api.SpeechLimits
 import java.io.Closeable
@@ -26,6 +27,21 @@ object SpeechAudio {
     fun isWav(head: ByteArray): Boolean = head.size >= 12 &&
         head[0] == 'R'.code.toByte() && head[1] == 'I'.code.toByte() && head[2] == 'F'.code.toByte() && head[3] == 'F'.code.toByte() &&
         head[8] == 'W'.code.toByte() && head[9] == 'A'.code.toByte() && head[10] == 'V'.code.toByte() && head[11] == 'E'.code.toByte()
+
+    /**
+     * Fails with `UNSUPPORTED_FORMAT` when a file that is not a WAV goes to a plugin without
+     * [SpeechContract.FEATURE_AUDIO_DECODE] (3-Macaw Speech roadmap D84: 1.0.0 and 1.1.0 read WAV only).
+     * zh-CN: 非 WAV 文件要交给未声明 [SpeechContract.FEATURE_AUDIO_DECODE] 的插件时以 `UNSUPPORTED_FORMAT` 失败 (3-Macaw Speech 路线图 D84:
+     * 1.0.0 与 1.1.0 只读 WAV).
+     */
+    fun requireReadable(wav: Boolean, features: Set<String>, name: String) {
+        if (!wav && SpeechContract.FEATURE_AUDIO_DECODE !in features) {
+            throw SpeechErrorMapper.failure(
+                SpeechErrorCodes.UNSUPPORTED_FORMAT,
+                "$name is not a WAV file and the installed speech plugin reads WAV only; 3-Macaw Speech 1.2.0 or later also reads MP3, AAC, Ogg, FLAC and the audio of video files",
+            )
+        }
+    }
 
     /** Fails with `LIMIT_EXCEEDED` above the contract's file ceiling. zh-CN: 超过契约文件上限时以 `LIMIT_EXCEEDED` 失败. */
     fun requireInputSize(bytes: Long, label: String) {
@@ -72,14 +88,18 @@ object SpeechAudio {
 
 /**
  * One audio input opened read-only for `recognizeFile` / `detectVoice`: the host checks that the script's path is a
- * regular file within the size ceiling and starts with a WAV header before the plugin sees the descriptor. A temporary
- * file (script PCM wrapped into WAV) is deleted on [close].
- * zh-CN: 为 `recognizeFile` / `detectVoice` 以只读方式打开的一个音频输入: 插件看到描述符之前, 宿主先检查脚本路径是大小在上限内且以 WAV
- * 头开始的普通文件. 临时文件 (包裹成 WAV 的脚本 PCM) 在 [close] 时删除.
+ * regular file within the size ceiling and records whether it starts with a WAV header; once the plugin is chosen,
+ * [SpeechAudio.requireReadable] refuses a non-WAV file for a plugin that reads WAV only (3-Macaw Speech roadmap D84).
+ * A temporary file (script PCM wrapped into WAV) is deleted on [close].
+ * zh-CN: 为 `recognizeFile` / `detectVoice` 以只读方式打开的一个音频输入: 宿主先检查脚本路径是大小在上限内的普通文件, 并记录它是否以 WAV 头开始;
+ * 选定插件后, [SpeechAudio.requireReadable] 对只读 WAV 的插件拒绝非 WAV 文件 (3-Macaw Speech 路线图 D84). 临时文件 (包裹成 WAV 的脚本 PCM)
+ * 在 [close] 时删除.
  */
 class SpeechAudioInput private constructor(
     val file: File,
     val descriptor: ParcelFileDescriptor,
+    /** Whether the file starts with a RIFF / WAVE header. zh-CN: 文件是否以 RIFF / WAVE 头开始. */
+    val wav: Boolean,
     private val temporary: Boolean,
 ) : Closeable {
 
@@ -90,7 +110,7 @@ class SpeechAudioInput private constructor(
 
     companion object {
 
-        /** Opens the WAV file at [file]. zh-CN: 打开 [file] 处的 WAV 文件. */
+        /** Opens the audio file at [file]. zh-CN: 打开 [file] 处的音频文件. */
         fun open(file: File): SpeechAudioInput {
             if (!file.isFile) throw SpeechErrorMapper.failure(SpeechErrorCodes.IO_FAILED, "audio file not found: ${file.path}")
             if (!file.canRead()) throw SpeechErrorMapper.failure(SpeechErrorCodes.IO_FAILED, "audio file is not readable: ${file.path}")
@@ -101,10 +121,8 @@ class SpeechAudioInput private constructor(
             } catch (e: IOException) {
                 throw SpeechErrorMapper.failure(SpeechErrorCodes.IO_FAILED, "audio file cannot be read: ${e.message ?: file.path}", e)
             }
-            if (read < 12 || !SpeechAudio.isWav(head)) {
-                throw SpeechErrorMapper.failure(SpeechErrorCodes.UNSUPPORTED_FORMAT, "${file.name} is not a WAV file; contract version 1 reads WAV only")
-            }
-            return SpeechAudioInput(file, ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY), temporary = false)
+            val wav = read >= 12 && SpeechAudio.isWav(head)
+            return SpeechAudioInput(file, ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY), wav, temporary = false)
         }
 
         /** Wraps script PCM (mono PCM16 LE at [sampleRate]) into a temporary WAV under [directory]. zh-CN: 把脚本 PCM (单声道 PCM16 LE, [sampleRate]) 包裹为 [directory] 下的临时 WAV. */
@@ -120,7 +138,7 @@ class SpeechAudioInput private constructor(
                     SpeechAudio.writeWavHeader(out, sampleRate, pcm.size)
                     out.write(pcm)
                 }
-                return SpeechAudioInput(file, ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY), temporary = true)
+                return SpeechAudioInput(file, ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY), wav = true, temporary = true)
             } catch (t: Throwable) {
                 file.delete()
                 throw if (t is SpeechPluginException) t else SpeechErrorMapper.failure(SpeechErrorCodes.IO_FAILED, "cannot write the PCM input: ${t.message}", t)

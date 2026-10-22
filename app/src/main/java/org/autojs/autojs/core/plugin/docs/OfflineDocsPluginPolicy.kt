@@ -4,13 +4,29 @@ import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
 import org.autojs.autojs.core.plugin.center.PluginCapabilityResolver
 import org.autojs.plugin.offlinedocs.api.OfflineDocsPluginContract
 
+/** What a candidate is checked for. zh-CN: 候选包的检查用途. */
+internal enum class OfflineDocsEligibilityCheck {
+
+    /** Serving the content: every enable state must allow it. zh-CN: 提供内容: 各项启用状态都必须允许. */
+    LOAD,
+
+    /**
+     * The Plugin Center switch turning the plugin on: its saved state stays off until this handshake succeeds,
+     * so only the system enable state counts.
+     * zh-CN: 插件中心开关正在启用插件: 握手成功前已存状态保持关闭, 因此只看系统层面的启用状态.
+     */
+    ENABLE_HANDSHAKE,
+}
+
 internal object OfflineDocsPluginPolicy {
 
     private val contentVersionPattern = Regex("[A-Za-z0-9][A-Za-z0-9._+-]{0,127}")
     private val sha256Pattern = Regex("[0-9a-f]{64}")
 
     fun rejectionCode(
-        enabled: Boolean,
+        check: OfflineDocsEligibilityCheck,
+        systemEnabled: Boolean,
+        centerEnabled: Boolean,
         authorizedState: PluginAuthorizedState,
         sameSignerAsHost: Boolean,
         contractVersion: Int,
@@ -25,7 +41,9 @@ internal object OfflineDocsPluginPolicy {
         requiresHostVersion: Long?,
         maxHostVersion: Long?,
     ): OfflineDocsPluginLoadError? = when {
-        !enabled -> OfflineDocsPluginLoadError.PLUGIN_DISABLED
+        !systemEnabled -> OfflineDocsPluginLoadError.PLUGIN_DISABLED
+        !centerEnabled && check != OfflineDocsEligibilityCheck.ENABLE_HANDSHAKE ->
+            OfflineDocsPluginLoadError.PLUGIN_DISABLED
         !sameSignerAsHost && authorizedState != PluginAuthorizedState.OFFICIAL ->
             OfflineDocsPluginLoadError.IN_PROCESS_TRUST_REQUIRED
         contractVersion !in OfflineDocsPluginContract.MIN_SUPPORTED_VERSION..

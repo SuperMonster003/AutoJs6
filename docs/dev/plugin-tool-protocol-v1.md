@@ -369,8 +369,9 @@ Provider error codes map onto bridge categories: `INVALID_ARGUMENTS`, `UNKNOWN_T
 `invalid-request`, `BUSY` to `rate-limited`, `LIMIT_EXCEEDED` to `resource-limit`, `TIMEOUT` to `timeout`, `NOT_READY`
 to `unavailable`, everything else to `provider-failed`; the message keeps the code and the provider's text.
 
-The MCP Server default grant includes the three methods and both tokens; the 3-Stove Agent grant does not include
-them until its roadmap decides. `plugin_tools.cancel` is an ordinary bridge call: while a session's concurrency limit
+The MCP Server default grant includes the three methods and both tokens; the 3-Stove Agent grant includes the three
+methods and `plugin_tools` but not `plugin_tools.user_granted`, because Agent has no per-tool switch for the tools of
+USER_GRANTED providers yet (3-Macaw Speech roadmap D92). `plugin_tools.cancel` is an ordinary bridge call: while a session's concurrency limit
 is used up by running calls, a cancel waits for a slot like any other request.
 
 ## Script API `plugins.tools`

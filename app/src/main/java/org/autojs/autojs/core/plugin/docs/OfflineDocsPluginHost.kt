@@ -40,10 +40,16 @@ object OfflineDocsPluginHost {
         val contentSha256: String,
         val requiresHostVersion: Long?,
         val maxHostVersion: Long?,
-        val enabled: Boolean,
+        /** The package and its service are enabled in the system. zh-CN: 包及其服务在系统中处于启用状态. */
+        val systemEnabled: Boolean,
+        /** The saved Plugin Center switch. zh-CN: 插件中心已保存的开关状态. */
+        val centerEnabled: Boolean,
         val authorizedState: PluginAuthorizedState,
         val sameSignerAsHost: Boolean,
     ) {
+        val enabled: Boolean
+            get() = systemEnabled && centerEnabled
+
         val packageIdentity: String
             get() = buildString {
                 append(serviceInfo.packageName).append('-')
@@ -84,6 +90,12 @@ object OfflineDocsPluginHost {
     fun discover(
         context: Context,
         packageName: String = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME,
+    ): List<Discovered> = discover(context, packageName, OfflineDocsEligibilityCheck.LOAD)
+
+    private fun discover(
+        context: Context,
+        packageName: String,
+        check: OfflineDocsEligibilityCheck,
     ): List<Discovered> {
         if (packageName != OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME) return emptyList()
         return queryServices(context.packageManager).map { serviceInfo ->
@@ -93,7 +105,7 @@ object OfflineDocsPluginHost {
                         Discovered(
                             serviceInfo = serviceInfo,
                             candidate = candidate,
-                            error = candidateEligibilityError(candidate),
+                            error = candidateEligibilityError(candidate, check),
                         )
                     },
                     onFailure = { error ->
@@ -122,12 +134,29 @@ object OfflineDocsPluginHost {
     fun load(
         context: Context,
         packageName: String = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME,
+    ): LoadedPlugin = load(context, packageName, OfflineDocsEligibilityCheck.LOAD)
+
+    /**
+     * The Plugin Center enable handshake: the full load, with the saved switch (still off at this point) left out of
+     * the eligibility check. The loaded plugin is not handed out, so a switched-off plugin stays unavailable elsewhere.
+     * zh-CN: 插件中心启用握手: 完整加载, 但资格判定不看已保存的开关 (此时仍为关). 加载结果不对外提供, 因此关闭的插件在其他路径上仍不可用.
+     */
+    @Throws(OfflineDocsPluginLoadException::class)
+    fun probe(
+        context: Context,
+        packageName: String = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME,
+    ): String = load(context, packageName, OfflineDocsEligibilityCheck.ENABLE_HANDSHAKE).candidate.contentVersion
+
+    private fun load(
+        context: Context,
+        packageName: String,
+        check: OfflineDocsEligibilityCheck,
     ): LoadedPlugin {
         requireSupportedPackage(packageName)
         val verificationGeneration = verifiedContentCache.snapshotGeneration()
-        val candidate = selectCandidate(context)
+        val candidate = selectCandidate(context, check)
         // Resolve mutable package state once more before exposing its executable web content.
-        val currentCandidate = revalidateCandidate(context, candidate)
+        val currentCandidate = revalidateCandidate(context, candidate, check)
 
         val packageContext = try {
             context.createPackageContext(currentCandidate.serviceInfo.packageName, 0)
@@ -149,23 +178,17 @@ object OfflineDocsPluginHost {
             packageContext.assets,
             verificationGeneration,
         )
-        val revalidatedCandidate = revalidateCandidate(context, currentCandidate)
+        val revalidatedCandidate = revalidateCandidate(context, currentCandidate, check)
         ensureVerificationGenerationCurrent(verificationGeneration, currentCandidate)
         return LoadedPlugin(revalidatedCandidate, packageContext, verifiedInventory)
     }
-
-    @Throws(OfflineDocsPluginLoadException::class)
-    fun probe(
-        context: Context,
-        packageName: String = OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME,
-    ): String = load(context, packageName).candidate.contentVersion
 
     internal fun invalidateVerificationCache() {
         verifiedContentCache.invalidate()
     }
 
-    private fun revalidateCandidate(context: Context, candidate: Candidate): Candidate {
-        val current = discover(context)
+    private fun revalidateCandidate(context: Context, candidate: Candidate, check: OfflineDocsEligibilityCheck): Candidate {
+        val current = discover(context, OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME, check)
             .firstOrNull { discovered ->
                 discovered.serviceInfo.name == candidate.serviceInfo.name
             }
@@ -286,9 +309,9 @@ object OfflineDocsPluginHost {
         return output.toByteArray()
     }
 
-    private fun selectCandidate(context: Context): Candidate {
+    private fun selectCandidate(context: Context, check: OfflineDocsEligibilityCheck): Candidate {
         val discovered = try {
-            discover(context)
+            discover(context, OfflineDocsPluginContract.DEFAULT_PACKAGE_NAME, check)
         } catch (error: Exception) {
             throw loadException(
                 OfflineDocsPluginLoadError.DISCOVERY_FAILED,
@@ -387,17 +410,22 @@ object OfflineDocsPluginHost {
                 OfflineDocsPluginContract.META_DATA_MAX_HOST_VERSION,
                 "maximum host version",
             ),
-            enabled = applicationInfo.enabled && serviceInfo.enabled &&
-                    PluginEnableStore.isEnabled(context, packageName, true),
+            systemEnabled = applicationInfo.enabled && serviceInfo.enabled,
+            centerEnabled = PluginEnableStore.isEnabled(context, packageName, true),
             authorizedState = trustInfo.authorizedState,
             sameSignerAsHost = packageManager.checkSignatures(context.packageName, packageName) ==
                     PackageManager.SIGNATURE_MATCH,
         )
     }
 
-    private fun candidateEligibilityError(candidate: Candidate): OfflineDocsPluginLoadException? {
+    private fun candidateEligibilityError(
+        candidate: Candidate,
+        check: OfflineDocsEligibilityCheck,
+    ): OfflineDocsPluginLoadException? {
         val code = OfflineDocsPluginPolicy.rejectionCode(
-            enabled = candidate.enabled,
+            check = check,
+            systemEnabled = candidate.systemEnabled,
+            centerEnabled = candidate.centerEnabled,
             authorizedState = candidate.authorizedState,
             sameSignerAsHost = candidate.sameSignerAsHost,
             contractVersion = candidate.contractVersion,

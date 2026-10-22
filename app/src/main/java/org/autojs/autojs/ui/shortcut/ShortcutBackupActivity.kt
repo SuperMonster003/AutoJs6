@@ -62,6 +62,9 @@ class ShortcutBackupActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_COMPLETE_ICONS = "complete_shortcut_icons"
+
+        /** Shortcut ids to offer restoring at once, as after an import (the settings import wizard, docs/settings/ROADMAP.md P10.2). */
+        const val EXTRA_RESTORE_IDS = "restore_shortcut_ids"
     }
 }
 
@@ -143,7 +146,8 @@ class ShortcutBackupFragment : PreferenceFragmentCompat() {
         waiting = savedInstanceState?.getString("waiting")
         added = savedInstanceState?.getInt("added") ?: 0
         skipped = savedInstanceState?.getInt("skipped") ?: 0
-        pendingImportSelection = savedInstanceState?.getStringArrayList("importSelection")?.toSet()
+        pendingImportSelection = if (savedInstanceState != null) savedInstanceState.getStringArrayList("importSelection")?.toSet()
+            else requireActivity().intent.getStringArrayListExtra(ShortcutBackupActivity.EXTRA_RESTORE_IDS)?.toSet()
         pendingIconId = savedInstanceState?.getString("iconId")
         openMissingIcons = savedInstanceState?.getBoolean("openIcons")
             ?: requireActivity().intent.getBooleanExtra(ShortcutBackupActivity.EXTRA_COMPLETE_ICONS, false)

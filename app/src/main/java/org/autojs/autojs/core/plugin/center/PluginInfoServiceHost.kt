@@ -184,16 +184,20 @@ object PluginInfoServiceHost {
         val bound = try {
             appContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         } catch (error: RuntimeException) {
+            lease.markRegistered()
             fail(IllegalStateException("bindService failed with exception: $component", error))
             return@suspendCancellableCoroutine
         }
+        // The context registers the connection before asking the system, so a refused bind (false) stays registered,
+        // together with this continuation and the caller it resumes, until unbindService (docs/memory/ROADMAP.md P4.5).
+        // zh-CN: Context 在请求系统之前就登记了连接, 因此被拒绝的绑定 (false) 在 unbindService 之前一直处于登记状态,
+        // 连同此续体及其要恢复的调用方 (docs/memory/ROADMAP.md P4.5).
+        lease.markRegistered()
         if (!bound) {
             fail(
                 PluginBindRefusedException(serviceInfo.packageName, "bindService failed: $component at ${SystemClock.uptimeMillis()}")
             )
-            return@suspendCancellableCoroutine
         }
-        lease.markRegistered()
     }
 
     private data class InfoServiceBinding(

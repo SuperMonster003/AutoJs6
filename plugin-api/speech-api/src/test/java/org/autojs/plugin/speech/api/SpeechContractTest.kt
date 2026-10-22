@@ -116,7 +116,7 @@ class SpeechContractTest {
         assertEquals(setOf("mic", "external"), SpeechContract.SOURCES)
         assertEquals(setOf("asr", "tts", "kws", "vad"), SpeechContract.KINDS)
         assertEquals(setOf("catalog", "imported"), SpeechContract.MODEL_SOURCES)
-        assertEquals(setOf("asr", "asrStreaming", "vad", "kws", "tts", "ttsSystemEngine", "models"), SpeechContract.FEATURES)
+        assertEquals(setOf("asr", "asrStreaming", "vad", "kws", "tts", "ttsSystemEngine", "models", "audioDecode"), SpeechContract.FEATURES)
         assertEquals(setOf("wav"), SpeechContract.FORMATS)
         assertEquals(constants("EVENT_").values.toSet(), SpeechContract.EVENTS)
         assertEquals(constants("REASON_").values.toSet(), SpeechContract.REASONS)

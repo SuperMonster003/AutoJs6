@@ -13,10 +13,10 @@ import org.junit.Test
 
 /**
  * Key declaration model of docs/settings/ROADMAP.md P1.1 (T1 / T2): value types and their tags, default resolution,
- * Enum candidate checks, Json round trips, category rules and the 31 categories of appendix A.1.
+ * Enum candidate checks, Json round trips, category rules and the 32 categories of appendix A.1.
  *
  * zh-CN: ROADMAP P1.1 键声明模型的测试 (T1 / T2): 值类型与类型标签, 默认值解析, Enum 候选校验, Json 往返, 分类规则与附录 A.1
- * 的 31 个分类.
+ * 的 32 个分类.
  */
 class SettingKeyTest {
 
@@ -185,8 +185,8 @@ class SettingKeyTest {
     @Test
     fun categoriesFollowAppendixA() {
         val all = SettingCategory.ALL
-        assertEquals(31, all.size)
-        assertEquals((1..31).toList(), all.map { it.order })
+        assertEquals(32, all.size)
+        assertEquals((1..32).toList(), all.map { it.order })
         assertEquals(all.size, all.map { it.id }.toSet().size)
         assertEquals(listOf("developer", "credentials", "other"), all.filterNot { it.defaultSelected }.map { it.id })
         assertEquals(listOf("credentials"), all.filter { it.sensitive }.map { it.id })

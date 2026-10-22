@@ -7,18 +7,19 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import org.autojs.autojs.core.pref.archive.SettingsAutoBackup.Mechanism
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.store.SettingsStores
 import java.util.concurrent.TimeUnit
 
 /**
  * The change backup of the app (docs/settings/ROADMAP.md D22 / T20, P9.3): [SettingsChangeDebounce] on the changes of
  * [SettingsStores], scheduling [ChangeBackupWorker] as a unique one-time WorkManager work, which writes the backup through
- * [AndroidSettingsAutoBackup]. Nothing listens until [start]: the switch of the change backup (off by default, a
- * `general` setting) calls [start] and [stop] together with the pages, as does the app start when it is on.
+ * [AndroidSettingsAutoBackup]. Nothing listens until [start]: [AndroidSettingsAutoBackup.start] calls [start] and [stop]
+ * as the switch of the change backup (off by default, a `general` setting) goes, at the app start and whenever it changes.
  *
  * zh-CN: 应用的变更后备份 (ROADMAP D22 / T20, P9.3): 以 [SettingsChangeDebounce] 监听 [SettingsStores] 的变化, 把 [ChangeBackupWorker] 安排为唯一的
- * WorkManager 一次性任务, 由它经 [AndroidSettingsAutoBackup] 写备份. 调用 [start] 之前不监听: 变更后备份的开关 (默认关, `general` 分类的
- * 设置) 随页面接入时调用 [start] 与 [stop], 开关为开时应用启动也调用 [start].
+ * WorkManager 一次性任务, 由它经 [AndroidSettingsAutoBackup] 写备份. 调用 [start] 之前不监听: [AndroidSettingsAutoBackup.start] 在应用启动时以及
+ * 变更后备份的开关 (默认关, `general` 分类的设置) 变化时, 按开关调用 [start] 或 [stop].
  */
 object AndroidSettingsChangeBackup {
 
@@ -43,8 +44,14 @@ object AndroidSettingsChangeBackup {
         debounce(context).cancel()
     }
 
+    // The switches and the period take no change backup, and a backup due after the switch went off is dropped.
+    // zh-CN: 开关与周期的变化不触发变更后备份, 开关关闭后到期的备份被丢弃.
     private fun debounce(context: Context): SettingsChangeDebounce = synchronized(this) {
-        debounce ?: SettingsChangeDebounce(WorkScheduler(context.applicationContext)).also { debounce = it }
+        debounce ?: SettingsChangeDebounce(
+            WorkScheduler(context.applicationContext),
+            filter = SettingsChangeDebounce.Filter(ownKeys = GeneralKeys.SETTINGS_AUTO_BACKUP_KEYS),
+            enabled = { GeneralKeys.SETTINGS_AUTO_BACKUP_CHANGE.get() },
+        ).also { debounce = it }
     }
 
     /** Runs the change backup once the settings stayed unchanged. zh-CN: 设置不再变化后执行变更后备份. */

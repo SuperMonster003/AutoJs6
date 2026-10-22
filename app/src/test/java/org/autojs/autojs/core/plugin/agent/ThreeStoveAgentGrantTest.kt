@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.agent
 
 import org.autojs.autojs.core.plugin.hostbroker.HostCapabilityGrant
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -25,6 +26,7 @@ class ThreeStoveAgentGrantTest {
             clipboard.getText clipboard.setText clipboard.hasText device.info device.isScreenOn device.wakeUp
             media_projection.requestScreenCapture media_projection.stop image.captureScreen image.recycle
             shell.exec toast.toast toast.showToast
+            plugin_tools.list plugin_tools.invoke plugin_tools.cancel
         """.trim().split(Regex("\\s+")).toSet()
         assertEquals(expected, grant.allowedMethods)
         assertEquals(2, grant.maxConcurrentCalls)
@@ -43,6 +45,17 @@ class ThreeStoveAgentGrantTest {
         }
         assertFalse("files.delete" in grant.permissions)
         assertTrue(grant.evaluate("files", "read", listOf("java_interop"), 1) is HostCapabilityGrant.Decision.Denied)
+    }
+
+    @Test fun pluginToolsAreGrantedWithoutTheToolsOfUserGrantedProviders() {
+        for (method in listOf("list", "invoke", "cancel")) {
+            val result = grant.evaluate("plugin_tools", method, listOf(NodeBridgePermissionManifest.PLUGIN_TOOLS), 1)
+            assertTrue(method, result is HostCapabilityGrant.Decision.Allowed)
+        }
+        assertTrue(NodeBridgePermissionManifest.PLUGIN_TOOLS in grant.permissions)
+        assertFalse(NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED in grant.permissions)
+        val userGranted = grant.evaluate("plugin_tools", "list", listOf(NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED), 1)
+        assertEquals(HostCapabilityGrant.Reason.PERMISSION_NOT_GRANTED, (userGranted as HostCapabilityGrant.Decision.Denied).reason)
     }
 
     @Test fun onlyTheTwoPanelActionsReceiveTheKeysCapability() {

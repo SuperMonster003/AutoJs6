@@ -1,0 +1,112 @@
+{
+  "started": "2026-10-22T13:27:41+08:00",
+  "finished": "2026-10-22T13:29:45+08:00",
+  "device": {
+    "serial": "968e9f18",
+    "model": "23046RP50C",
+    "manufacturer": "Xiaomi",
+    "sdk": "35",
+    "release": "15",
+    "fingerprint": "Xiaomi/liuqin/liuqin:15/AQ3A.241006.001/OS2.0.9.0.VMYCNXM:user/release-keys",
+    "abiList": "arm64-v8a,armeabi-v7a,armeabi",
+    "buildType": "user",
+    "emulator": false,
+    "getconfPageSize": 4096,
+    "kernelPageSize": 4096,
+    "pageSizeReadErrors": []
+  },
+  "templateVersionCode": 5835,
+  "templateSha256": "514f8bbad0641f3e89937d434f37487a5632d6b8e1b5be9754fb4c2282ae0826",
+  "apkSha256": "e40272c4157016072db293fc529083333b29c3e91fc6e514d4f5988dc697d814",
+  "buildTools": "37.0.0",
+  "previous": "versionCode 5280",
+  "restored": "installed back (versionCode 5280)",
+  "runs": 10,
+  "settleSeconds": 3,
+  "pssToleranceMb": 4.0,
+  "threadTolerance": 2,
+  "verdict": "PASS",
+  "problems": [],
+  "results": [
+    {
+      "run": 1,
+      "ended": true,
+      "endSeconds": 4.7,
+      "pid": 28787,
+      "pssKb": 230191,
+      "threads": 87
+    },
+    {
+      "run": 2,
+      "ended": true,
+      "endSeconds": 4.7,
+      "pid": 29156,
+      "pssKb": 219624,
+      "threads": 85
+    },
+    {
+      "run": 3,
+      "ended": true,
+      "endSeconds": 4.8,
+      "pid": 29523,
+      "pssKb": 219988,
+      "threads": 85
+    },
+    {
+      "run": 4,
+      "ended": true,
+      "endSeconds": 4.8,
+      "pid": 30801,
+      "pssKb": 219427,
+      "threads": 87
+    },
+    {
+      "run": 5,
+      "ended": true,
+      "endSeconds": 4.7,
+      "pid": 31230,
+      "pssKb": 232168,
+      "threads": 85
+    },
+    {
+      "run": 6,
+      "ended": true,
+      "endSeconds": 4.6,
+      "pid": 31627,
+      "pssKb": 232255,
+      "threads": 84
+    },
+    {
+      "run": 7,
+      "ended": true,
+      "endSeconds": 5.0,
+      "pid": 32114,
+      "pssKb": 219262,
+      "threads": 85
+    },
+    {
+      "run": 8,
+      "ended": true,
+      "endSeconds": 5.0,
+      "pid": 32609,
+      "pssKb": 220811,
+      "threads": 84
+    },
+    {
+      "run": 9,
+      "ended": true,
+      "endSeconds": 5.1,
+      "pid": 684,
+      "pssKb": 220390,
+      "threads": 84
+    },
+    {
+      "run": 10,
+      "ended": true,
+      "endSeconds": 4.7,
+      "pid": 1689,
+      "pssKb": 220719,
+      "threads": 84
+    }
+  ]
+}

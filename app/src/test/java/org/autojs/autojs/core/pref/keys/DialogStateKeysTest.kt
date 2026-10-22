@@ -39,6 +39,8 @@ class DialogStateKeysTest : DomainKeysTestBase() {
         assertEquals("key_\$_plugin_abi_mismatch_enable_prompt", DialogStateKeys.PLUGIN_ABI_MISMATCH_ENABLE_PROMPT.name)
         assertEquals("key_\$_plugin_hide_confirm_prompt", DialogStateKeys.PLUGIN_HIDE_CONFIRM_PROMPT.name)
         assertEquals("editor.debug.long_click_hint", DialogStateKeys.EDITOR_DEBUG_LONG_CLICK_HINT.name)
+        // Appendix C Q23: a fixed name instead of the one made from the stack trace.
+        assertEquals("key_\$_ip_address_may_be_invalid_for_server_connection_prompt", DialogStateKeys.IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT.name)
         // AboutActivity and DrawerMenuToggleableItem built these names from their simple class names.
         assertEquals(AboutActivity::class.java.simpleName + ".start_feedback_activity", DialogStateKeys.ABOUT_START_FEEDBACK_ACTIVITY.name)
         assertEquals(DrawerMenuToggleableItem::class.java.simpleName + "\$", DialogStateKeys.DRAWER_TOGGLE_PROMPT.prefix)
@@ -51,7 +53,7 @@ class DialogStateKeysTest : DomainKeysTestBase() {
     @Test
     fun everyKeyIsAStateThatDefaultsToShown() {
         val keys = DialogStateKeys.keys + DialogStateKeys.families.map { it.template }
-        assertEquals(15, keys.size)
+        assertEquals(16, keys.size)
         keys.forEach {
             assertTrue(it.name, it is StateKey<*>)
             assertEquals(it.name, SettingKind.STATE, it.kind)

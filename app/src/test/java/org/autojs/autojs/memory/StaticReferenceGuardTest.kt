@@ -73,14 +73,35 @@ class StaticReferenceGuardTest {
 
     @Test
     fun everyLineHasAReasonAndANote() {
-        val problems = entries.mapNotNull { entry ->
-            when {
-                entry.reason !in REASONS.getValue(entry.kind) -> "reason \"${entry.reason}\" is not one of ${REASONS.getValue(entry.kind)}"
-                entry.note.isBlank() || entry.note.startsWith("TODO") -> "the note is missing"
-                else -> null
-            }?.let { "  line ${entry.number}: ${entry.key}: $it" }
-        }
+        val problems = lineProblems(entries)
         assertTrue("Whitelist lines without a valid reason ($WHITELIST_PATH; reasons are explained in its header):\n" + problems.joinToString("\n"), problems.isEmpty())
+    }
+
+    /**
+     * ROADMAP Q45: a WeakHashMap holds its values strongly, so the reason weak needs a note that the values do not
+     * reference the key (H29: a cached ActivityResultLauncher kept its Activity key alive).
+     * zh-CN: ROADMAP Q45: WeakHashMap 强引用其值, 因此理由 weak 须在说明中写明值不引用键 (H29: 缓存的 ActivityResultLauncher 使其键 Activity 无法回收).
+     */
+    @Test
+    fun lineRulesOnSamples() {
+        val samples = parseEntries(
+            listOf(
+                "# comment",
+                "field | a/A.kt | views | kotlin object; weak-key map; View | weak | WeakHashMap<View, Int>",
+                "field | a/A.kt | threads | java static; weak-key registry; - | weak | WeakHashMap<Thread, Int>; Values do not reference the key",
+                "field | a/A.kt | launchers | kotlin object; weak-key map; Activity | owner | removed on the Activity's ON_DESTROY",
+                "manual | a/B.kt | bus | kotlin object; WeakHashMap<Runnable, Unit>, weak-key | weak | keys are callbacks",
+                "field | a/A.kt | todo | kotlin object; strong; View | TODO | describe what it holds and who releases it",
+            ),
+        )
+        assertEquals(
+            listOf(
+                "  line 2: field | a/A.kt | views: a weak-key map with the reason weak needs \"$WEAK_KEY_NOTE\" in the note",
+                "  line 5: manual | a/B.kt | bus: a weak-key map with the reason weak needs \"$WEAK_KEY_NOTE\" in the note",
+                "  line 6: field | a/A.kt | todo: reason \"TODO\" is not one of ${REASONS.getValue("field")}",
+            ),
+            lineProblems(samples),
+        )
     }
 
     /** ROADMAP R5: ASCII punctuation only. zh-CN: ROADMAP R5: 只用 ASCII 标点. */
@@ -172,6 +193,29 @@ class StaticReferenceGuardTest {
             rows.map { it.generated },
         )
         assertEquals(listOf("Sample.Companion", "Sample.Companion", "Registry"), rows.map { it.owner })
+        // ROADMAP Q45: an initializer on the next non-blank line gives the type and the weak keys, as on one line.
+        val nextLine = """
+            package org.autojs.autojs.runtime
+            object Pending {
+                private val launchers =
+                    WeakHashMap<FragmentActivity, ActivityResultLauncher<Array<String>>>()
+                val callbacks: MutableMap<FragmentActivity, () -> Unit> =
+                    WeakHashMap()
+                private val windows =
+
+                    HashMap<String, FloatyWindow>()
+                val count =
+                    1 + 2
+            }
+        """.trimIndent()
+        assertEquals(
+            listOf(
+                "field | runtime/Pending.kt | callbacks | kotlin object; weak-key map; Activity",
+                "field | runtime/Pending.kt | launchers | kotlin object; weak-key map; Activity",
+                "field | runtime/Pending.kt | windows | kotlin object; registry; -",
+            ),
+            StaticReferenceScanner.scanText("runtime/Pending.kt", nextLine).map { it.generated },
+        )
         val calls = """
             package org.autojs.autojs.ui
             class Page(context: Context) : WebView(context) {
@@ -200,11 +244,14 @@ class StaticReferenceGuardTest {
         const val HOW_TO_REGISTER = "To register: run `$REGENERATE` in the repository root (it adds the line with the reason TODO to " +
             "$WHITELIST_PATH and keeps the other lines), then replace TODO with a reason from the file header and a note."
 
-        val FIELD_REASONS = setOf("process", "table", "weak", "owner", "p4.2", "p4.4", "page", "exempt")
+        /** Same text as `WEAK_KEY_NOTE` of static_audit.py. zh-CN: 与 static_audit.py 的 `WEAK_KEY_NOTE` 相同. */
+        const val WEAK_KEY_NOTE = "values do not reference the key"
+
+        val FIELD_REASONS = setOf("process", "table", "weak", "owner", "page", "exempt")
         val REASONS = mapOf(
             "field" to FIELD_REASONS,
             "manual" to FIELD_REASONS,
-            "call" to setOf("process", "owner", "paired", "p4.2", "p4.4", "page", "exempt"),
+            "call" to setOf("process", "owner", "paired", "page", "exempt"),
         )
 
         /** The unit tests run in the module directory; the fallback covers runs from the repository root. */
@@ -213,12 +260,22 @@ class StaticReferenceGuardTest {
 
         val rows by lazy { StaticReferenceScanner.scan(sourceRoot) }
 
-        val entries by lazy {
-            whitelistFile.readLines().withIndex().filter { (_, line) -> line.isNotBlank() && !line.startsWith("#") }.map { (index, line) ->
-                val parts = line.split(" | ", limit = 6)
-                check(parts.size == 6 && parts[0] in REASONS) { "Malformed line ${index + 1} of $WHITELIST_PATH: $line" }
-                Entry(index + 1, parts[0], parts[1], parts[2], parts[3], parts[4], parts[5])
-            }
+        val entries by lazy { parseEntries(whitelistFile.readLines()) }
+
+        fun parseEntries(lines: List<String>) = lines.withIndex().filter { (_, line) -> line.isNotBlank() && !line.startsWith("#") }.map { (index, line) ->
+            val parts = line.split(" | ", limit = 6)
+            check(parts.size == 6 && parts[0] in REASONS) { "Malformed line ${index + 1} of $WHITELIST_PATH: $line" }
+            Entry(index + 1, parts[0], parts[1], parts[2], parts[3], parts[4], parts[5])
+        }
+
+        fun lineProblems(entries: List<Entry>) = entries.mapNotNull { entry ->
+            when {
+                entry.reason !in REASONS.getValue(entry.kind) -> "reason \"${entry.reason}\" is not one of ${REASONS.getValue(entry.kind)}"
+                entry.note.isBlank() || entry.note.startsWith("TODO") -> "the note is missing"
+                entry.reason == "weak" && "weak-key" in entry.detail && !entry.note.contains(WEAK_KEY_NOTE, ignoreCase = true) ->
+                    "a weak-key map with the reason weak needs \"$WEAK_KEY_NOTE\" in the note"
+                else -> null
+            }?.let { "  line ${entry.number}: ${entry.key}: $it" }
         }
 
         val entryKeys by lazy { entries.mapTo(HashSet()) { it.key } }

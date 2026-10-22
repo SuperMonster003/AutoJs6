@@ -2,6 +2,7 @@ package com.bignerdranch.expandablerecyclerview;
 
 import android.app.Activity;
 import android.os.Bundle;
+import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -184,6 +185,25 @@ public abstract class ExpandableRecyclerAdapter<P extends Parent<C>, C, PVH exte
             CVH childViewHolder = (CVH) holder;
             childViewHolder.mChild = listItem.getChild();
             onBindChildViewHolder(childViewHolder, getNearestParentPosition(flatPosition), getChildPosition(flatPosition), listItem.getChild());
+        }
+    }
+
+    /**
+     * Implementation of Adapter.onViewRecycled(RecyclerView.ViewHolder) that drops the parent or child
+     * a recycled view holder was bound to, so that the recycled view pool does not keep removed items
+     * reachable until the holder is bound again. Subclasses overriding this must call through to super.
+     *
+     * @param holder The RecyclerView.ViewHolder that is being recycled
+     */
+    @Override
+    @CallSuper
+    @UiThread
+    public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        if (holder instanceof ParentViewHolder) {
+            ((ParentViewHolder<?, ?>) holder).mParent = null;
+        } else if (holder instanceof ChildViewHolder) {
+            ((ChildViewHolder<?>) holder).mChild = null;
         }
     }
 

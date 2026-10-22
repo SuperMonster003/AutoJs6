@@ -2,7 +2,7 @@
 
 由 `tools/settings/inventory.py` 生成, 不要手工编辑; kind / 分类 id / 备注来自 `tools/settings/classification.json`. 路线图见 [ROADMAP.md](ROADMAP.md) (P0.2 / P0.3).
 
-- 生成日期: 2026-10-21, 扫描基线: `master@7d759ab5b` (扫描范围内未提交文件 11 个)
+- 生成日期: 2026-10-21, 扫描基线: `master@f5045980f` (扫描范围内未提交文件 44 个)
 - 源码路径相对 `app/src/main/java/org/autojs/autojs/` (其他包保留 `com/...` 等前缀); 资源路径相对 `app/src/main/`.
 - 引用处只计非注释行; 超过 6 处时只列前 6 处, 完整列表见 JSON 基线.
 - kind: Setting (用户设置), State (记忆型状态, 归 `other`), Cache (缓存, 不可导出), ValueConstant (设置值常量, 列表项候选值或默认值别名), Excluded (不是偏好键或永久排除, 见 ROADMAP 附录 A.2).
@@ -11,19 +11,19 @@
 
 | 指标 | 数值 |
 | --- | --- |
-| `key_*` 字符串资源 | 270 (`strings_donottranslate.xml` 268, 其他文件 2: `key_ace_language_support_matrix`, `key_ace_semantic_languages`) |
+| `key_*` 字符串资源 | 277 (`strings_donottranslate.xml` 275, 其他文件 2: `key_ace_language_support_matrix`, `key_ace_semantic_languages`) |
 | 出现在设置页 XML 的 `key_*` 键 (各页之和去重) | 101 (preferences 39, code_editor_settings 40, developer_options 13, trash_and_version_history_settings 9, plugin_center_preferences 3) |
 | 设置页中不经字符串资源的字面量键 | 3 (developer_options 1, plugin_center_preferences 2) |
-| 不在设置页的 `key_*` 键 | 169 |
+| 不在设置页的 `key_*` 键 | 176 |
 | 源码 (`app/src/main/java`) 没有引用的键 | 5 (其中设置页, 数组与其他资源也没有引用的 0 个: 无) |
-| 源码字面量键 (不对应 `key_*` 资源) | 126 |
+| 源码字面量键 (不对应 `key_*` 资源) | 128 |
 | 命名 SharedPreferences / 调用文件 / 已登记 `StoreId` | 29 / 9 / 29 |
 | 绕过 `Pref` 读默认偏好的文件 | 0 |
 | 经 `Pref.` 读写的文件 (不含两个 `Pref.kt`) | 41 |
 | filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 14 |
 | `JsonFileStores` 声明的 JSON 文件存储 (P5.1) | 14 |
 
-kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, Excluded 29
+kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, Excluded 29
 
 ## 2. `key_*` 字符串资源
 
@@ -112,20 +112,20 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_client_mode_restore_on_launch` |  | core/pref/keys/ConnectionKeys.kt:48 | Setting | `connection` | 客户端模式管理器开关 |
 | `key_client_socket_normally_closed` |  | core/pref/keys/MiscStateKeys.kt:119 | State | `other` | 上次连接是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys |
 | `key_codegen_model_current` |  | core/pref/keys/LayoutInspectorKeys.kt:47 | Setting | `layout_inspector` | 代码生成当前模型 id (经 selectionPreferenceKey 派生实际键); 模型文件不导出, 本机缺该模型时的处理待 P7.2 计划器定 |
-| `key_color_select_activity_legacy_layout` |  | core/pref/keys/MiscStateKeys.kt:190 | State | `other` | ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13 (b) 已拍板, P4.2); P4.2 声明为 MiscStateKeys |
+| `key_color_select_activity_legacy_layout` |  | core/pref/keys/MiscStateKeys.kt:199 | State | `other` | ColorLibrariesActivity / ColorSelectActivity 打开前写入的界面模式, 不是用户设置 (Q13 (b) 已拍板, P4.2); P4.2 声明为 MiscStateKeys |
 | `key_console_element_time_format` |  | core/pref/keys/ConsoleKeys.kt:52 | Setting | `console` | ConsoleTimeSettings.CONSOLE_ELEMENT |
 | `key_console_element_time_visible` |  | core/pref/keys/ConsoleKeys.kt:49 | Setting | `console` | ConsoleTimeSettings.CONSOLE_ELEMENT |
 | `key_delete_permanently_also_clear_history` | 设置 > 回收站与版本历史 | core/pref/keys/HistoryKeys.kt:67 | Setting | `history` | 开关 |
-| `key_dialog_foreground_svc` |  | core/pref/keys/DialogStateKeys.kt:59 | State | `other` | 不再提示类键名, 源码与资源均无引用 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用 |
-| `key_dialog_layout_inspector_exit_tips` |  | core/pref/keys/DialogStateKeys.kt:67 | State | `other` | 不再提示类键名, 只在注释掉的代码中出现 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用 |
-| `key_dialog_log_entries_exported` |  | core/pref/keys/DialogStateKeys.kt:63 | State | `other` | 不再提示类键名, 源码与资源均无引用 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用 |
-| `key_dialog_num_of_log_entries_exceeds_limit_for_sending` |  | core/pref/keys/DialogStateKeys.kt:39 | State | `other` | NotAskAgainDialog 不再提示 (ConsoleImpl); P4.1 声明为 DialogStateKeys |
-| `key_dialog_selected_abi_is_unavailable` |  | core/pref/keys/DialogStateKeys.kt:43 | State | `other` | NotAskAgainDialog 不再提示 (BuildActivity); P4.1 声明为 DialogStateKeys |
-| `key_dialog_transparent_background_launcher_icon` |  | core/pref/keys/DialogStateKeys.kt:47 | State | `other` | NotAskAgainDialog 不再提示 (LauncherIconPreference); P4.1 声明为 DialogStateKeys |
+| `key_dialog_foreground_svc` |  | core/pref/keys/DialogStateKeys.kt:61 | State | `other` | 不再提示类键名, 源码与资源均无引用 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用 |
+| `key_dialog_layout_inspector_exit_tips` |  | core/pref/keys/DialogStateKeys.kt:69 | State | `other` | 不再提示类键名, 只在注释掉的代码中出现 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用 |
+| `key_dialog_log_entries_exported` |  | core/pref/keys/DialogStateKeys.kt:65 | State | `other` | 不再提示类键名, 源码与资源均无引用 (Q12); P4.1 声明为 DialogStateKeys, 只登记不使用 |
+| `key_dialog_num_of_log_entries_exceeds_limit_for_sending` |  | core/pref/keys/DialogStateKeys.kt:41 | State | `other` | NotAskAgainDialog 不再提示 (ConsoleImpl); P4.1 声明为 DialogStateKeys |
+| `key_dialog_selected_abi_is_unavailable` |  | core/pref/keys/DialogStateKeys.kt:45 | State | `other` | NotAskAgainDialog 不再提示 (BuildActivity); P4.1 声明为 DialogStateKeys |
+| `key_dialog_transparent_background_launcher_icon` |  | core/pref/keys/DialogStateKeys.kt:49 | State | `other` | NotAskAgainDialog 不再提示 (LauncherIconPreference); P4.1 声明为 DialogStateKeys |
 | `key_display_over_other_apps` | 其他资源 res/xml/fragment_preferences_inrt.xml:36 | inrt/SettingsActivity.kt:55 | Excluded |  | inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板) |
-| `key_documentation_source` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:48 | Setting | `general` | 列表项 |
-| `key_documentation_source_local` | 候选值 `keys_documentation_source` (`key_documentation_source`); 默认值 `default_key_documentation_source` | core/pref/keys/GeneralKeys.kt:26, util/DocsUtils.kt:24 | ValueConstant |  | 候选值, 默认值 |
-| `key_documentation_source_online` | 候选值 `keys_documentation_source` (`key_documentation_source`) | core/pref/keys/GeneralKeys.kt:27, ui/doc/DocumentationPageController.kt:273 | ValueConstant |  | 候选值 |
+| `key_documentation_source` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:55 | Setting | `general` | 列表项 |
+| `key_documentation_source_local` | 候选值 `keys_documentation_source` (`key_documentation_source`); 默认值 `default_key_documentation_source` | core/pref/keys/GeneralKeys.kt:27, util/DocsUtils.kt:24 | ValueConstant |  | 候选值, 默认值 |
+| `key_documentation_source_online` | 候选值 `keys_documentation_source` (`key_documentation_source`) | core/pref/keys/GeneralKeys.kt:28, ui/doc/DocumentationPageController.kt:273 | ValueConstant |  | 候选值 |
 | `key_drafts_max_days` | 回收站与版本历史设置 > 紧急草稿 | core/pref/keys/HistoryKeys.kt:60 | Setting | `history` | 保留策略 |
 | `key_drafts_max_total_bytes` | 回收站与版本历史设置 > 紧急草稿 | core/pref/keys/HistoryKeys.kt:63 | Setting | `history` | 保留策略 |
 | `key_editor_auto_show_log_bottom_sheet_on_run` | 设置 > 代码编辑器; 代码编辑器设置 > 日志 | core/pref/keys/EditorKeys.kt:177, ui/settings/EditorSettingActionRegistry.kt:36, ui/settings/PreferencesFragment.kt:65, ui/settings/PreferencesFragment.kt:73 | Setting | `editor_log` | 开关, 设置页与代码编辑器设置两处 |
@@ -166,7 +166,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_enable_a11y_service_with_root_access` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:85 | core/pref/keys/A11yKeys.kt:21, inrt/Pref.kt:40, runtime/api/augment/settings/Settings.kt:28 | Setting | `a11y` | 开关, 也是脚本 API settings 的 ROOT_ACCESSIBILITY_SERVICE |
 | `key_enable_a11y_service_with_secure_settings` | 设置 > 无障碍服务 | core/pref/keys/A11yKeys.kt:27 | Setting | `a11y` | 开关 |
 | `key_enable_a11y_service_with_shizuku` | 设置 > 无障碍服务 | core/pref/keys/A11yKeys.kt:33 | Setting | `a11y` | 开关 |
-| `key_enable_observe_key` |  | core/pref/keys/MiscStateKeys.kt:284 | State | `other` | 按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板); P4.2 声明为 MiscStateKeys, 只登记不使用 |
+| `key_enable_observe_key` |  | core/pref/keys/MiscStateKeys.kt:282 | State | `other` | 按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板); P4.2 声明为 MiscStateKeys, 只登记不使用 |
 | `key_explorer_file_default_prefix` |  | core/pref/keys/ExplorerKeys.kt:69 | Setting | `explorer` | 新文件默认前缀序号 (ScriptOperations) |
 | `key_explorer_playback_history` | 设置 > 文件管理器 | core/pref/keys/ExplorerKeys.kt:63 | Setting | `explorer` | 开关; 历史数据在命名存储 `explorer_playback_history` (永久排除) |
 | `key_extending_js_build_in_objects` | 设置 > 扩展性 | core/pref/keys/ExtensibilityKeys.kt:24 | Setting | `extensibility` | 开关 |
@@ -177,7 +177,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_floating_console_time_format` |  | core/pref/keys/ConsoleKeys.kt:58 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
 | `key_floating_console_time_visible` |  | core/pref/keys/ConsoleKeys.kt:55 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
 | `key_floating_menu_shown` |  | core/pref/keys/MiscStateKeys.kt:75 | State | `other` | 抽屉 "悬浮按钮" 开关的镜像, 按悬浮窗实际状态回写; P4.2 声明为 MiscStateKeys |
-| `key_foreground_service` | 其他资源 res/xml/fragment_preferences_inrt.xml:12 | core/pref/keys/GeneralKeys.kt:80, inrt/SettingsActivity.kt:52, runtime/api/augment/settings/Settings.kt:31 | Setting | `general` | 抽屉 "前台服务" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12) |
+| `key_foreground_service` | 其他资源 res/xml/fragment_preferences_inrt.xml:12 | core/pref/keys/GeneralKeys.kt:87, inrt/SettingsActivity.kt:52, runtime/api/augment/settings/Settings.kt:31 | Setting | `general` | 抽屉 "前台服务" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12) |
 | `key_gesture_observing` |  | core/pref/keys/A11yKeys.kt:41 | Setting | `a11y` | 开关 (手势观察) |
 | `key_github_token` | 开发者选项 > GitHub |  | Excluded |  | 动作条目, 令牌存于命名存储 `github_auth` (credentials) |
 | `key_global_console_element_time_format` |  | core/pref/keys/ConsoleKeys.kt:46 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
@@ -196,23 +196,23 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_keep_screen_on_when_in_foreground_all_pages` | 候选值 `keys_keep_screen_on_when_in_foreground` (`key_keep_screen_on_when_in_foreground`) | core/pref/keys/AppearanceKeys.kt:50, util/ViewUtils.kt:123, util/ViewUtils.kt:1298, util/ViewUtils.kt:1299 | ValueConstant |  | 候选值 |
 | `key_keep_screen_on_when_in_foreground_disabled` | 候选值 `keys_keep_screen_on_when_in_foreground` (`key_keep_screen_on_when_in_foreground`); 默认值 `default_key_keep_screen_on_when_in_foreground` | core/pref/keys/AppearanceKeys.kt:49, util/ViewUtils.kt:120, util/ViewUtils.kt:1293 | ValueConstant |  | 候选值, 默认值 |
 | `key_keep_screen_on_when_in_foreground_enabled` |  | core/pref/keys/AppearanceKeys.kt:105 | Setting | `appearance` | 与主键一起由 ViewUtils 写入的布尔镜像, 须与主键同进同出 |
-| `key_keep_screen_on_when_in_foreground_homepage_only` | 候选值 `keys_keep_screen_on_when_in_foreground` (`key_keep_screen_on_when_in_foreground`) | core/pref/keys/AppearanceKeys.kt:51, core/pref/keys/MiscStateKeys.kt:183, core/pref/keys/MiscStateKeys.kt:184, util/ViewUtils.kt:1304, util/ViewUtils.kt:1305 | ValueConstant |  | 候选值 |
-| `key_keep_screen_on_when_in_foreground_last_enabled` |  | core/pref/keys/MiscStateKeys.kt:180 | State | `other` | 抽屉开关恢复用的上次启用模式; P4.2 声明为 MiscStateKeys |
+| `key_keep_screen_on_when_in_foreground_homepage_only` | 候选值 `keys_keep_screen_on_when_in_foreground` (`key_keep_screen_on_when_in_foreground`) | core/pref/keys/AppearanceKeys.kt:51, core/pref/keys/MiscStateKeys.kt:192, core/pref/keys/MiscStateKeys.kt:193, util/ViewUtils.kt:1304, util/ViewUtils.kt:1305 | ValueConstant |  | 候选值 |
+| `key_keep_screen_on_when_in_foreground_last_enabled` |  | core/pref/keys/MiscStateKeys.kt:189 | State | `other` | 抽屉开关恢复用的上次启用模式; P4.2 声明为 MiscStateKeys |
 | `key_last_no_newer_updates` |  | core/pref/keys/MiscStateKeys.kt:143 | State | `other` | 时间戳; P4.2 声明为 MiscStateKeys |
 | `key_last_updates_auto_checked` |  | core/pref/keys/MiscStateKeys.kt:149 | State | `other` | 时间戳; P4.2 声明为 MiscStateKeys |
 | `key_last_updates_checked` |  | core/pref/keys/MiscStateKeys.kt:140 | State | `other` | 时间戳; P4.2 声明为 MiscStateKeys |
 | `key_last_updates_postponed` |  | core/pref/keys/MiscStateKeys.kt:146 | State | `other` | 时间戳; P4.2 声明为 MiscStateKeys |
-| `key_launcher_icon` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:74 | Setting | `general` | 列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY) |
-| `key_launcher_icon_adaptive` | 候选值 `keys_launcher_icon` (`key_launcher_icon`); 默认值 `default_key_launcher_icon` | core/pref/keys/GeneralKeys.kt:41, ui/settings/LauncherIconPreference.kt:57, ui/settings/LauncherIconPreference.kt:96, ui/settings/LauncherIconPreference.kt:218 | ValueConstant |  | 候选值, 默认值 |
-| `key_launcher_icon_transparent_background` | 候选值 `keys_launcher_icon` (`key_launcher_icon`) | core/pref/keys/GeneralKeys.kt:42, ui/settings/LauncherIconPreference.kt:56, ui/settings/LauncherIconPreference.kt:217 | ValueConstant |  | 候选值 |
-| `key_launcher_shortcuts` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:90 | Excluded |  | 动作条目 (启动器快捷方式对话框), 不持久化值 |
-| `key_layout_inspector_field_mode_introduced` |  | core/pref/keys/MiscStateKeys.kt:271 | State | `other` | 功能介绍已展示; P4.2 声明为 MiscStateKeys |
+| `key_launcher_icon` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:81 | Setting | `general` | 列表项, LauncherIconPreference.persistString; 生效需切换组件 (APPLY) |
+| `key_launcher_icon_adaptive` | 候选值 `keys_launcher_icon` (`key_launcher_icon`); 默认值 `default_key_launcher_icon` | core/pref/keys/GeneralKeys.kt:42, ui/settings/LauncherIconPreference.kt:54, ui/settings/LauncherIconPreference.kt:93, ui/settings/LauncherIconPreference.kt:157, util/LauncherIconComponents.kt:54 | ValueConstant |  | 候选值, 默认值 |
+| `key_launcher_icon_transparent_background` | 候选值 `keys_launcher_icon` (`key_launcher_icon`) | core/pref/keys/GeneralKeys.kt:43, ui/settings/LauncherIconPreference.kt:53, ui/settings/LauncherIconPreference.kt:156, util/LauncherIconComponents.kt:46 | ValueConstant |  | 候选值 |
+| `key_launcher_shortcuts` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:135 | Excluded |  | 动作条目 (启动器快捷方式对话框), 不持久化值 |
+| `key_layout_inspector_field_mode_introduced` |  | core/pref/keys/MiscStateKeys.kt:269 | State | `other` | 功能介绍已展示; P4.2 声明为 MiscStateKeys |
 | `key_layout_inspector_filter_profile_selected` |  | core/pref/keys/LayoutInspectorKeys.kt:31 | Setting | `layout_inspector` | 选中的筛选配置档 id |
 | `key_layout_inspector_filter_profiles` |  | core/pref/keys/LayoutInspectorKeys.kt:27 | Setting | `layout_inspector` | 筛选配置档 JSON |
 | `key_layout_inspector_node_copy_mode` |  | core/pref/keys/LayoutInspectorKeys.kt:35 | Setting | `layout_inspector` | 节点复制模式 |
-| `key_layout_inspector_query_history` |  | core/pref/keys/MiscStateKeys.kt:279 | State | `other` | 查询历史 JSON; P4.2 声明为 MiscStateKeys |
+| `key_layout_inspector_query_history` |  | core/pref/keys/MiscStateKeys.kt:277 | State | `other` | 查询历史 JSON; P4.2 声明为 MiscStateKeys |
 | `key_layout_inspector_query_mode` |  | core/pref/keys/LayoutInspectorKeys.kt:39 | Setting | `layout_inspector` | 查询模式 |
-| `key_layout_inspector_selector_mode_introduced` |  | core/pref/keys/MiscStateKeys.kt:274 | State | `other` | 功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1); P4.2 声明为 MiscStateKeys |
+| `key_layout_inspector_selector_mode_introduced` |  | core/pref/keys/MiscStateKeys.kt:272 | State | `other` | 功能介绍已展示; 资源值缺少 `$_` 中缀 (键名不得改, R1); P4.2 声明为 MiscStateKeys |
 | `key_leakcanary_enabled` | 开发者选项 > 内存诊断 | core/pref/keys/DeveloperKeys.kt:46, ui/settings/DeveloperOptionsFragment.kt:24 | Setting | `developer` | LeakCanary 开关 (开发者选项, 页面不可见, XML 默认 true); 来自内存路线图 P1 的新资源, 由调度会话决定登记 (附录 C Q15) |
 | `key_local_network_permission` | 其他资源 res/xml/fragment_preferences_inrt.xml:24 | inrt/SettingsActivity.kt:54 | Excluded |  | inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板) |
 | `key_log_activity_input_bar_visible` |  | core/pref/keys/ConsoleKeys.kt:30 | Setting | `console` | 日志页 (LogPageConsoleSettings) |
@@ -243,13 +243,13 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_plugin_center_show_third_party_plugins` | 插件中心设置 > 在线插件来源 | core/plugin/center/PluginCenterFragment.kt:138, core/pref/keys/PluginCenterKeys.kt:51 | Setting | `plugin_center` | 开关 |
 | `key_post_notifications_permission` | 其他资源 res/xml/fragment_preferences_inrt.xml:30 | inrt/SettingsActivity.kt:53 | Excluded |  | inrt 设置页的权限开关, 反映系统授权状态 (附录 A.2, Q13 已拍板) |
 | `key_post_notifications_permission_request_attempted` |  | core/pref/keys/MiscStateKeys.kt:159 | State | `other` | 是否已请求过通知权限; P4.2 声明为 MiscStateKeys |
-| `key_pref_bundle_default_item` |  | theme/preference/MaterialListPreference.kt:75, ui/settings/LauncherIconPreference.kt:217, ui/settings/NightModePreference.kt:54 | Excluded |  | MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2) |
-| `key_pref_bundle_disabled_items` |  | theme/preference/MaterialListPreference.kt:80, ui/settings/LauncherIconPreference.kt:218, ui/settings/NightModePreference.kt:55 | Excluded |  | MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2) |
+| `key_pref_bundle_default_item` |  | theme/preference/MaterialListPreference.kt:75, ui/settings/LauncherIconPreference.kt:156, ui/settings/NightModePreference.kt:54 | Excluded |  | MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2) |
+| `key_pref_bundle_disabled_items` |  | theme/preference/MaterialListPreference.kt:80, ui/settings/LauncherIconPreference.kt:157, ui/settings/NightModePreference.kt:55 | Excluded |  | MaterialListPreference 的 Bundle 参数名, 不是偏好键 (附录 A.2) |
 | `key_record_toast` | 设置 > 录制脚本 | core/pref/keys/RecordKeys.kt:30 | Setting | `record` | 开关 |
 | `key_release_history` | 设置 > 更新 | core/pref/keys/UpdatesKeys.kt:55 | Excluded |  | 动作条目 (发行历史) |
-| `key_restart_strategy` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:54 | Setting | `general` | 列表项 |
-| `key_restart_strategy_quick` | 候选值 `keys_restart_strategy` (`key_restart_strategy`); 默认值 `default_key_restart_strategy` | core/pref/keys/GeneralKeys.kt:31, core/pref/keys/GeneralKeys.kt:102 | ValueConstant |  | 候选值, 默认值 |
-| `key_restart_strategy_scheduled` | 候选值 `keys_restart_strategy` (`key_restart_strategy`) | core/pref/keys/GeneralKeys.kt:32 | ValueConstant |  | 候选值 |
+| `key_restart_strategy` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:61 | Setting | `general` | 列表项 |
+| `key_restart_strategy_quick` | 候选值 `keys_restart_strategy` (`key_restart_strategy`); 默认值 `default_key_restart_strategy` | core/pref/keys/GeneralKeys.kt:32, core/pref/keys/GeneralKeys.kt:147 | ValueConstant |  | 候选值, 默认值 |
+| `key_restart_strategy_scheduled` | 候选值 `keys_restart_strategy` (`key_restart_strategy`) | core/pref/keys/GeneralKeys.kt:33 | ValueConstant |  | 候选值 |
 | `key_rhino_java_primitive_wrap` | 设置 > 扩展性 | core/pref/keys/ExtensibilityKeys.kt:30 | Setting | `extensibility` | 开关 |
 | `key_root_manager_apps_cache` |  | core/pref/keys/RunningKeys.kt:59 | Cache |  | Root 管理器应用列表缓存 (附录 A.2) |
 | `key_root_manager_apps_custom` |  | core/pref/keys/RunningKeys.kt:55 | Setting | `running` | 用户追加的 Root 管理器包名 (StringSet) |
@@ -261,14 +261,14 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_root_record_out_file_type_binary` | 候选值 `keys_root_record_out_file_type` (`key_root_record_out_file_type`); 默认值 `default_key_root_record_out_file_type` | core/pref/keys/RecordKeys.kt:19, core/pref/keys/RecordKeys.kt:44 | ValueConstant |  | 候选值, 默认值 |
 | `key_root_record_out_file_type_js` | 候选值 `keys_root_record_out_file_type` (`key_root_record_out_file_type`) | core/pref/keys/RecordKeys.kt:20 | ValueConstant |  | 候选值 |
 | `key_run_on_boot_inrt` | 其他资源 res/xml/fragment_preferences_inrt.xml:66 | inrt/Pref.kt:52, inrt/Pref.kt:71 | Excluded |  | inrt 运行配置 (打包时由 launchConfig 写入; 附录 A.2, Q13 已拍板) |
-| `key_scheduled_restart_backend` |  | core/pref/keys/GeneralKeys.kt:60 | Setting | `general` | 计划重启后端 (ScheduledRestartSettingsDialogBuilder) |
-| `key_scheduled_restart_backend_alarm_manager` |  | core/pref/keys/GeneralKeys.kt:36, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:41, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:72, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:91 | ValueConstant |  | 候选值 |
-| `key_scheduled_restart_backend_work_manager` | 默认值 `default_key_scheduled_restart_backend` | core/pref/keys/GeneralKeys.kt:37, core/pref/keys/GeneralKeys.kt:107, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:90 | ValueConstant |  | 候选值, 默认值 |
-| `key_scheduled_restart_delay` |  | core/pref/keys/GeneralKeys.kt:67 | Setting | `general` | 计划重启延迟 |
+| `key_scheduled_restart_backend` |  | core/pref/keys/GeneralKeys.kt:67 | Setting | `general` | 计划重启后端 (ScheduledRestartSettingsDialogBuilder) |
+| `key_scheduled_restart_backend_alarm_manager` |  | core/pref/keys/GeneralKeys.kt:37, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:41, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:72, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:91 | ValueConstant |  | 候选值 |
+| `key_scheduled_restart_backend_work_manager` | 默认值 `default_key_scheduled_restart_backend` | core/pref/keys/GeneralKeys.kt:38, core/pref/keys/GeneralKeys.kt:152, ui/settings/ScheduledRestartSettingsDialogBuilder.kt:90 | ValueConstant |  | 候选值, 默认值 |
+| `key_scheduled_restart_delay` |  | core/pref/keys/GeneralKeys.kt:74 | Setting | `general` | 计划重启延迟 |
 | `key_screen_capture_request_delay` | 设置 > 脚本运行 | core/pref/keys/RunningKeys.kt:49 | Setting | `running` | 截图授权延迟 |
 | `key_script_module_debug_print` | 开发者选项 > 脚本模块 | core/pref/keys/DeveloperKeys.kt:30 | Setting | `developer` | 开关 |
 | `key_script_module_debug_print_disabled_modules` | 开发者选项 > 脚本模块 | core/pref/keys/DeveloperKeys.kt:34 | Setting | `developer` | StringSet |
-| `key_scripts_after_app_restart` |  | core/pref/keys/GeneralKeys.kt:92, util/IntentUtils.kt:440, util/IntentUtils.kt:478 | Excluded |  | 重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (附录 A.2, Q13 已拍板) |
+| `key_scripts_after_app_restart` |  | core/pref/keys/GeneralKeys.kt:137, util/IntentUtils.kt:440, util/IntentUtils.kt:478 | Excluded |  | 重启前写入, 重启后由 runAfterRestartIfNeeded 消费的一次性交接值 (附录 A.2, Q13 已拍板) |
 | `key_server_address` |  | core/pref/keys/ConnectionKeys.kt:25 | Setting | `connection` | 服务端地址 |
 | `key_server_mode_lan_discovery` |  | core/pref/keys/ConnectionKeys.kt:69 | Setting | `connection` | 服务端模式管理器开关 |
 | `key_server_mode_manager_clients_level` |  | core/pref/keys/MiscStateKeys.kt:113 | State | `other` | 管理器对话框展开级别; P4.2 声明为 MiscStateKeys |
@@ -278,15 +278,22 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_server_mode_notify_connection_changes` |  | core/pref/keys/ConnectionKeys.kt:62 | Setting | `connection` | 服务端模式管理器开关 |
 | `key_server_mode_restore_on_launch` |  | core/pref/keys/ConnectionKeys.kt:55 | Setting | `connection` | 服务端模式管理器开关 |
 | `key_server_socket_normally_closed` |  | core/pref/keys/MiscStateKeys.kt:123 | State | `other` | 上次是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys |
+| `key_settings_auto_backup_change` | 其他资源 res/xml/fragment_settings_auto_backup.xml:34 | core/pref/keys/GeneralKeys.kt:106 | Setting | `general` | "变更后备份" 开关, 默认关 ("管理 AutoJs6 设置" > 自动备份, T20); P9.3 声明为 GeneralKeys, 不触发变更后备份 (ownKeys) |
+| `key_settings_auto_backup_operation` | 其他资源 res/xml/fragment_settings_auto_backup.xml:41 | core/pref/keys/GeneralKeys.kt:113 | Setting | `general` | "操作后备份" 开关, 默认开 (T20); P9.1 声明为 GeneralKeys, 不触发变更后备份 (ownKeys) |
+| `key_settings_auto_backup_period` | 其他资源 res/xml/fragment_settings_auto_backup.xml:25 | core/pref/keys/GeneralKeys.kt:99 | Setting | `general` | 周期备份的周期, 列表项, 默认每周 (附录 C Q32); P9.2 声明为 GeneralKeys, 不触发变更后备份 (ownKeys) |
+| `key_settings_auto_backup_period_daily` | 候选值 `keys_settings_auto_backup_period` | core/pref/keys/GeneralKeys.kt:47, core/pref/keys/GeneralKeys.kt:164 | ValueConstant |  | 候选值 |
+| `key_settings_auto_backup_period_monthly` | 候选值 `keys_settings_auto_backup_period` | core/pref/keys/GeneralKeys.kt:49, core/pref/keys/GeneralKeys.kt:166 | ValueConstant |  | 候选值 |
+| `key_settings_auto_backup_period_weekly` | 候选值 `keys_settings_auto_backup_period`; 默认值 `default_key_settings_auto_backup_period` | core/pref/keys/GeneralKeys.kt:48, core/pref/keys/GeneralKeys.kt:165 | ValueConstant |  | 候选值, 默认值 |
+| `key_settings_auto_backup_periodic` | 其他资源 res/xml/fragment_settings_auto_backup.xml:18, res/xml/fragment_settings_auto_backup.xml:26 | core/pref/keys/GeneralKeys.kt:92 | Setting | `general` | "周期备份" 开关, 默认关 (T20); P9.2 声明为 GeneralKeys, 不触发变更后备份 (ownKeys) |
 | `key_setup_wizard_welcome_done` |  | core/pref/keys/MiscStateKeys.kt:163 | State | `other` | 欢迎向导已完成; P4.2 声明为 MiscStateKeys |
-| `key_setup_wizards` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:91, ui/settings/PreferencesFragment.kt:24 | Excluded |  | 动作条目 (打开设置向导) |
+| `key_setup_wizards` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:136, ui/settings/PreferencesFragment.kt:24 | Excluded |  | 动作条目 (打开设置向导) |
 | `key_stable_mode` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:92 | core/pref/keys/A11yKeys.kt:38, runtime/api/augment/settings/Settings.kt:27 | Setting | `a11y` | 开关, 也出现在无障碍服务管理器与脚本 API settings |
 | `key_theme_color` | 设置 > 外观 | core/pref/keys/AppearanceKeys.kt:133 | Excluded |  | 动作条目 (打开主题色选择), 值存于 `key_theme_color_primary` / `_primary_dark` / `_accent` |
 | `key_theme_color_accent` |  | core/pref/keys/AppearanceKeys.kt:93 | Setting | `appearance` | 主题色三项之一 |
 | `key_theme_color_primary` |  | core/pref/keys/AppearanceKeys.kt:81 | Setting | `appearance` | 主题色三项之一 |
 | `key_theme_color_primary_dark` |  | core/pref/keys/AppearanceKeys.kt:87 | Setting | `appearance` | 主题色三项之一 |
 | `key_timed_task_backend` | 设置 > 定时任务 | core/pref/keys/TimedTaskKeys.kt:28 | Setting | `timed_task` | 列表项 |
-| `key_timed_task_backend_alarm` | 候选值 `keys_timed_task_backend` (`key_timed_task_backend`); 默认值 `default_key_timed_task_backend` | core/pref/keys/DialogStateKeys.kt:55, core/pref/keys/TimedTaskKeys.kt:20, timing/TimedTaskScheduler.kt:33 | ValueConstant |  | 候选值, 默认值; 同一字符串还被 ExactAlarmPermissionHelper 用作 NotAskAgainDialog 的键 (默认偏好中的 Boolean 状态), P4.1 声明为 DialogStateKeys.TIMED_TASK_EXACT_ALARM_PROMPT (storedAs) |
+| `key_timed_task_backend_alarm` | 候选值 `keys_timed_task_backend` (`key_timed_task_backend`); 默认值 `default_key_timed_task_backend` | core/pref/keys/DialogStateKeys.kt:57, core/pref/keys/TimedTaskKeys.kt:20, timing/TimedTaskScheduler.kt:33 | ValueConstant |  | 候选值, 默认值; 同一字符串还被 ExactAlarmPermissionHelper 用作 NotAskAgainDialog 的键 (默认偏好中的 Boolean 状态), P4.1 声明为 DialogStateKeys.TIMED_TASK_EXACT_ALARM_PROMPT (storedAs) |
 | `key_timed_task_backend_job` | 候选值 `keys_timed_task_backend` (`key_timed_task_backend`) | core/pref/keys/TimedTaskKeys.kt:22, timing/TimedTaskScheduler.kt:35 | ValueConstant |  | 候选值 |
 | `key_timed_task_backend_work` | 候选值 `keys_timed_task_backend` (`key_timed_task_backend`) | core/pref/keys/TimedTaskKeys.kt:21, timing/TimedTaskScheduler.kt:34 | ValueConstant |  | 候选值 |
 | `key_trash_and_version_history_settings` | 设置 > 回收站与版本历史 | core/pref/keys/HistoryKeys.kt:75 | Excluded |  | 动作条目 (打开回收站与版本历史子页) |
@@ -295,7 +302,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_updates_checked_states_cleared` | 开发者选项 > 更新 | core/pref/keys/UpdatesKeys.kt:56 | Excluded |  | 动作条目 (开发者选项, 清除检查更新状态) |
 | `key_use_volume_control_record` | 设置 > 录制脚本 | core/pref/keys/RecordKeys.kt:25 | Setting | `record` | 开关 |
 | `key_use_volume_control_running` | 设置 > 脚本运行; 其他资源 res/xml/fragment_preferences_inrt.xml:60 | core/pref/keys/RunningKeys.kt:32, inrt/Pref.kt:48, runtime/api/augment/settings/Settings.kt:29 | Setting | `running` | 开关, 也是脚本 API settings 的 STOP_ALL_ON_VOLUME_UP |
-| `key_version_history_restore_does_not_auto_save_to_disk` |  | core/pref/keys/DialogStateKeys.kt:51 | State | `other` | VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1); P4.1 声明为 DialogStateKeys |
+| `key_version_history_restore_does_not_auto_save_to_disk` |  | core/pref/keys/DialogStateKeys.kt:53 | State | `other` | VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1); P4.1 声明为 DialogStateKeys |
 | `key_working_directory` |  | core/pref/keys/ExplorerKeys.kt:44 | Setting | `explorer`, deployment `CREATE_DIRECTORY` | 工作目录; 目标不存在时作为部署项创建 (D20 / Q1) |
 | `key_working_directory_history` |  | core/pref/keys/MiscStateKeys.kt:172 | State | `other` | 工作目录历史 (Gson LinkedHashSet); P4.2 声明为 MiscStateKeys |
 | `key_working_directory_initialized` |  | core/pref/keys/MiscStateKeys.kt:167 | State | `other` | 首次确定工作目录的标记; P4.2 声明为 MiscStateKeys |
@@ -307,27 +314,27 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | 键 | 存储 (推测) | 引用处 | kind | 分类 id | 备注 |
 | --- | --- | --- | --- | --- | --- |
 | `...` | default | core/pref/keys/MiscStateKeys.kt:36 | State | `other` | 代码编辑器查找 / 替换对话框的查找文本, 键名就是三个点 (FindOrReplaceDialogBuilder); P0 清单未识别, P2.6 声明为 MiscStateKeys (附录 C Q15) |
-| `AboutActivity.start_feedback_activity` | default | core/pref/keys/DialogStateKeys.kt:87 | State | `other` | 关于页 "反馈" 打开 GitHub issue 页前的不再提示, 名称为 AboutActivity 的简单类名加后缀; P0 清单未识别, P4.1 声明为 DialogStateKeys (附录 C Q22) |
+| `AboutActivity.start_feedback_activity` | default | core/pref/keys/DialogStateKeys.kt:89 | State | `other` | 关于页 "反馈" 打开 GitHub issue 页前的不再提示, 名称为 AboutActivity 的简单类名加后缀; P0 清单未识别, P4.1 声明为 DialogStateKeys (附录 C Q22) |
 | `COLOR_FAVORITE_SORT` | default | core/pref/keys/AppearanceKeys.kt:122 | Setting | `appearance` | 收藏颜色的排序方式, FavoriteSort 的键 (VirtualColorLibraryActivity); P0 清单未识别 (附录 C Q18), P4.2 声明为 AppearanceKeys |
 | `COLOR_HISTORY_MERGE_SIMILAR` | default | core/pref/keys/AppearanceKeys.kt:118 | Setting | `appearance` | 颜色历史列表的 "合并相似颜色" (ColorSelectBaseActivity); P3.6 声明为 AppearanceKeys (附录 C Q15) |
-| `DrawerMenuToggleableItem$` | default | core/pref/keys/DialogStateKeys.kt:97 | State | `other` | 前缀键族 (后接抽屉开关在当前语言下的标题): 抽屉开关提示的不再提示 (DrawerMenuToggleableItem.getPrompt), 切换语言后按新标题另记; P0 清单未识别, P4.1 声明为 DialogStateKeys.DRAWER_TOGGLE_PROMPT (附录 C Q22) |
-| `ExplorerView.explorer_current` | default | core/pref/keys/MiscStateKeys.kt:256 | State | `other` | 文件管理器的当前目录 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
-| `ExplorerView.explorer_history` | default | core/pref/keys/MiscStateKeys.kt:264 | State | `other` | 文件管理器的页面历史, JSON 字符串列表 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
-| `ExplorerView.explorer_root` | default | core/pref/keys/MiscStateKeys.kt:259 | State | `other` | 文件管理器的根目录 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
-| `ExplorerView.page_state` | default | core/pref/keys/MiscStateKeys.kt:252 | State | `other` | 文件管理器页面的滚动位置 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
-| `INTELLIGENT_COLOR_ACTIVE_SNAPSHOT` | default | core/pref/keys/MiscStateKeys.kt:220 | State | `other` | 智能配色的当前快照, JSON 对象文本 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
-| `INTELLIGENT_COLOR_RUNTIME_STATE` | default | core/pref/keys/MiscStateKeys.kt:223 | State | `other` | 智能配色的运行状态, JSON 对象文本 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
-| `INTELLIGENT_COLOR_SCRIPT_STATE` | default | core/pref/keys/MiscStateKeys.kt:226 | State | `other` | 脚本设置的智能配色状态名 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
-| `SELECTED_COLOR_LIBRARY_ID` | default | core/pref/keys/MiscStateKeys.kt:202 | State | `other` | 颜色选择页选中的颜色库 id (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
-| `SELECTED_COLOR_LIBRARY_ITEM_ID` | default | core/pref/keys/MiscStateKeys.kt:205 | State | `other` | 颜色选择页选中的颜色条目 id (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_ID); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
-| `SELECTED_COLOR_LIBRARY_ITEM_NAME` | default | core/pref/keys/MiscStateKeys.kt:212 | State | `other` | 选中的颜色条目名称缓存 (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_NAME); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
-| `SELECTED_COLOR_LIBRARY_NAME` | default | core/pref/keys/MiscStateKeys.kt:209 | State | `other` | 选中的用户库或智能库名称缓存, 供摘要显示 (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
+| `DrawerMenuToggleableItem$` | default | core/pref/keys/DialogStateKeys.kt:108 | State | `other` | 前缀键族 (后接抽屉开关在当前语言下的标题): 抽屉开关提示的不再提示 (DrawerMenuToggleableItem.getPrompt), 切换语言后按新标题另记; P0 清单未识别, P4.1 声明为 DialogStateKeys.DRAWER_TOGGLE_PROMPT (附录 C Q22) |
+| `ExplorerView.explorer_current` | default | core/pref/keys/MiscStateKeys.kt:254 | State | `other` | 文件管理器的当前目录 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
+| `ExplorerView.explorer_history` | default | core/pref/keys/MiscStateKeys.kt:262 | State | `other` | 文件管理器的页面历史, JSON 字符串列表 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
+| `ExplorerView.explorer_root` | default | core/pref/keys/MiscStateKeys.kt:257 | State | `other` | 文件管理器的根目录 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
+| `ExplorerView.page_state` | default | core/pref/keys/MiscStateKeys.kt:250 | State | `other` | 文件管理器页面的滚动位置 (ExplorerViewStateStore); P0 清单未识别 (附录 C Q24), P4.2 声明为 MiscStateKeys |
+| `INTELLIGENT_COLOR_ACTIVE_SNAPSHOT` | default | core/pref/keys/MiscStateKeys.kt:229 | State | `other` | 智能配色的当前快照, JSON 对象文本 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
+| `INTELLIGENT_COLOR_RUNTIME_STATE` | default | core/pref/keys/MiscStateKeys.kt:232 | State | `other` | 智能配色的运行状态, JSON 对象文本 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
+| `INTELLIGENT_COLOR_SCRIPT_STATE` | default | core/pref/keys/MiscStateKeys.kt:235 | State | `other` | 脚本设置的智能配色状态名 (IntelligentColorEngine); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
+| `SELECTED_COLOR_LIBRARY_ID` | default | core/pref/keys/MiscStateKeys.kt:211 | State | `other` | 颜色选择页选中的颜色库 id (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
+| `SELECTED_COLOR_LIBRARY_ITEM_ID` | default | core/pref/keys/MiscStateKeys.kt:214 | State | `other` | 颜色选择页选中的颜色条目 id (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_ID); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
+| `SELECTED_COLOR_LIBRARY_ITEM_NAME` | default | core/pref/keys/MiscStateKeys.kt:221 | State | `other` | 选中的颜色条目名称缓存 (ColorSelectBaseActivity.KEY_SELECTED_COLOR_ITEM_NAME); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
+| `SELECTED_COLOR_LIBRARY_NAME` | default | core/pref/keys/MiscStateKeys.kt:218 | State | `other` | 选中的用户库或智能库名称缓存, 供摘要显示 (ColorSelectBaseActivity); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
 | `THEME_COLOR_DERIVED_ACCENT_AND_DARK` | default | core/pref/keys/AppearanceKeys.kt:114 | Setting | `appearance` | 强调色与深色是否由主题色派生 (ThemeColorManager); P3.6 声明为 AppearanceKeys (附录 C Q15) |
-| `THEME_COLOR_SCRIPT_UNDO` | default | core/pref/keys/MiscStateKeys.kt:216 | State | `other` | 脚本改主题色前的撤销快照, JSON 对象文本 (ScriptThemeChanges); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
+| `THEME_COLOR_SCRIPT_UNDO` | default | core/pref/keys/MiscStateKeys.kt:225 | State | `other` | 脚本改主题色前的撤销快照, JSON 对象文本 (ScriptThemeChanges); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
 | `active_profile` | editor_symbols_config, build_apk_config_profiles | core/pref/keys/ApkBuildKeys.kt:25, core/pref/keys/EditorKeyboardKeys.kt:41 | Setting | `editor_keyboard` | 两份命名存储共用的键名: 当前符号配置档 (SymbolsConfigStore, editor_keyboard) 与当前 APK 构建配置档 (BuildConfigStore, apk_build); P3.2 / P3.3 声明为 EditorKeyboardKeys / ApkBuildKeys; 各随整份计数 |
 | `dex_compiler_experimental_component` | default | core/pref/keys/DeveloperKeys.kt:71 | Setting | `developer` | 选择的 dex 编译器组件; 导入时插件未安装则与开关一起跳过 (P7.3); P3.6 声明为 DeveloperKeys (附录 C Q15) |
 | `dex_compiler_experimental_enabled` | default | core/pref/keys/DeveloperKeys.kt:67 | Setting | `developer` | 开发者选项选择的实验性 dex 编译器插件开关 (DexCompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15) |
-| `editor.debug.long_click_hint` | default | core/pref/keys/DialogStateKeys.kt:83 | State | `other` | 代码编辑器 "启动调试器" 菜单的不再提示 (EditorMenu); P0 清单未识别, P4.1 声明为 DialogStateKeys (附录 C Q22) |
+| `editor.debug.long_click_hint` | default | core/pref/keys/DialogStateKeys.kt:85 | State | `other` | 代码编辑器 "启动调试器" 菜单的不再提示 (EditorMenu); P0 清单未识别, P4.1 声明为 DialogStateKeys (附录 C Q22) |
 | `exact_component` | jvm_source_provider_selection | core/pref/keys/PluginCenterKeys.kt:224 | Setting | `plugin_center` | Java 的 JVM 源码提供方组件 (JvmSourceProviderSelection, 原键只用于 Java); P3.3 声明为 PluginCenterKeys; 属于命名存储, 随整份计数 |
 | `exact_component_kotlin` | jvm_source_provider_selection | core/pref/keys/PluginCenterKeys.kt:230 | Setting | `plugin_center` | Kotlin 的 JVM 源码提供方组件; P3.3 声明为 PluginCenterKeys; 属于命名存储, 随整份计数 |
 | `find_or_replace_using_regex` | default | core/pref/keys/MiscStateKeys.kt:39 | State | `other` | 查找 / 替换对话框的正则开关 (FindOrReplaceDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15) |
@@ -350,14 +357,15 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_$_editor_engine_selection_mode` | default | core/pref/keys/EditorKeys.kt:103, ui/edit/editor/engine/EditorEnginePreferences.kt:15 | Setting | `editor_general` | 与 `key_editor_engine` 一起由 EditorEnginePreferences.persist 写入 |
 | `key_$_enabled_plugin_$_` | plugin_center_enable_state | core/pref/keys/PluginCenterKeys.kt:277 | Setting | `plugin_enable_state` | 前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.PLUGIN_ENABLED; 属于命名存储, 随整份计数 |
 | `key_$_ignored_plugin_$_` | key_$_ignored_updates | core/pref/keys/UpdatesKeys.kt:42 | Setting | `updates` | UpdateIgnoreStore 中每个插件忽略的版本, 前缀键族 (后接包名); P3.3 声明为 UpdatesKeys.IGNORED_PLUGIN_VERSIONS; 属于命名存储, 随整份计数 |
+| `key_$_ip_address_may_be_invalid_for_server_connection_prompt` | default | core/pref/keys/DialogStateKeys.kt:97 | State | `other` | 连接服务端时 "IP 地址可能无效" 的不再提示 (JsonSocketClientTool); 附录 C Q23 起用固定键, 声明为 DialogStateKeys; 旧版按调用栈 MD5 命名的键残留归 other (P14.1) |
 | `key_$_last_install_time_$_` | plugin_center_recent | core/pref/keys/PluginCenterKeys.kt:291 | State | `other` | 前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.LAST_INSTALL_TIME; 属于命名存储, 随整份计数 |
-| `key_$_last_orientation` | default | core/pref/keys/MiscStateKeys.kt:237 | State | `other` | CircularMenuWindow 悬浮按钮上次的屏幕方向; P4.2 声明为 MiscStateKeys |
+| `key_$_last_orientation` | default | core/pref/keys/MiscStateKeys.kt:242 | State | `other` | CircularMenuWindow 悬浮按钮上次的屏幕方向; P4.2 声明为 MiscStateKeys |
 | `key_$_last_uninstall_time_$_` | plugin_center_recent | core/pref/keys/PluginCenterKeys.kt:297 | State | `other` | 前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.LAST_UNINSTALL_TIME; 属于命名存储, 随整份计数 |
 | `key_$_permission_wizard_custom_profiles` | permission_wizard | core/pref/keys/WizardKeys.kt:58 | Setting | `wizards` | 向导的自定义配置档, JSON 数组文本 (WizardProfileCodec); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数 |
 | `key_$_permission_wizard_last_profile_id` | permission_wizard | core/pref/keys/WizardKeys.kt:59 | State | `other` | 上次选择的配置档 id, 状态 (附录 A wizards 备注); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数 |
 | `key_$_permission_wizard_show_done` | permission_wizard | core/pref/keys/WizardKeys.kt:60 | Setting | `wizards` | "显示已完成条目" 选项; P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数 |
-| `key_$_plugin_abi_mismatch_download_prompt` | default | core/pref/keys/DialogStateKeys.kt:71 | State | `other` | 不再提示 (PluginAbiCompatibilityPrompt); P4.1 声明为 DialogStateKeys |
-| `key_$_plugin_abi_mismatch_enable_prompt` | default | core/pref/keys/DialogStateKeys.kt:75 | State | `other` | 不再提示 (PluginAbiCompatibilityPrompt); P4.1 声明为 DialogStateKeys |
+| `key_$_plugin_abi_mismatch_download_prompt` | default | core/pref/keys/DialogStateKeys.kt:73 | State | `other` | 不再提示 (PluginAbiCompatibilityPrompt); P4.1 声明为 DialogStateKeys |
+| `key_$_plugin_abi_mismatch_enable_prompt` | default | core/pref/keys/DialogStateKeys.kt:77 | State | `other` | 不再提示 (PluginAbiCompatibilityPrompt); P4.1 声明为 DialogStateKeys |
 | `key_$_plugin_auth_$_` | plugin_center_authorization | core/pref/keys/CredentialKeys.kt:36 | Setting | `credentials` | 前缀键族: 后接 <包名>$_<签名指纹>; P3.4 声明为 CredentialKeys.PLUGIN_AUTHORIZATION, sensitive, 属于命名存储, 随整份计数 |
 | `key_$_plugin_center_filter_enabled_state` | plugin_center_filter_state | core/pref/keys/PluginCenterKeys.kt:75 | Setting | `plugin_center` | 属于命名存储, 随整份计数 |
 | `key_$_plugin_center_filter_install_state` | plugin_center_filter_state | core/pref/keys/PluginCenterKeys.kt:69 | Setting | `plugin_center` | 属于命名存储, 随整份计数 |
@@ -383,7 +391,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_$_plugin_center_sort_state_third_party_mechanism_secondary` | plugin_center_sort_state | core/pref/keys/PluginCenterKeys.kt:178 | Setting | `plugin_center` | 属于命名存储, 随整份计数 |
 | `key_$_plugin_center_sort_state_third_party_secondary_` | plugin_center_sort_state | core/pref/keys/PluginCenterKeys.kt:177 | Setting | `plugin_center` | 前缀键, 属于命名存储, 随整份计数 |
 | `key_$_plugin_center_sort_state_third_party_source_secondary` | plugin_center_sort_state | core/pref/keys/PluginCenterKeys.kt:179 | Setting | `plugin_center` | 属于命名存储, 随整份计数 |
-| `key_$_plugin_hide_confirm_prompt` | default | core/pref/keys/DialogStateKeys.kt:79 | State | `other` | 隐藏插件确认的不再提示 (PluginSettingsFragment); P4.1 声明为 DialogStateKeys |
+| `key_$_plugin_hide_confirm_prompt` | default | core/pref/keys/DialogStateKeys.kt:81 | State | `other` | 隐藏插件确认的不再提示 (PluginSettingsFragment); P4.1 声明为 DialogStateKeys |
 | `key_$_plugin_install_wizard_custom_profiles` | plugin_install_wizard | core/pref/keys/WizardKeys.kt:67 | Setting | `wizards` | 向导的自定义配置档, JSON 数组文本 (WizardProfileCodec); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数 |
 | `key_$_plugin_install_wizard_first_run_shown` | plugin_install_wizard | core/pref/keys/WizardKeys.kt:84 | Excluded |  | 插件安装向导的首次运行提示, 2d7c72b33 起不再读写, 旧安装中残留; 按已移除终端遗留键的先例排除 (附录 C Q13 / Q20), P3.3 在 WizardKeys 登记 |
 | `key_$_plugin_install_wizard_last_profile_id` | plugin_install_wizard | core/pref/keys/WizardKeys.kt:68 | State | `other` | 上次选择的配置档 id, 状态 (附录 A wizards 备注); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数 |
@@ -397,10 +405,11 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_$_seen_ace_fallback_notice` | default | core/pref/keys/MiscStateKeys.kt:62 | State | `other` | 一次性提示已展示 (EditorEnginePreferences); P4.2 声明为 MiscStateKeys |
 | `key_$_seen_ace_large_file_notice` | default | core/pref/keys/MiscStateKeys.kt:65 | State | `other` | 一次性提示已展示; P4.2 声明为 MiscStateKeys |
 | `key_$_seen_editor_switch_undo_notice` | default | core/pref/keys/MiscStateKeys.kt:59 | State | `other` | 一次性提示已展示; P4.2 声明为 MiscStateKeys |
+| `key_$_settings_transfer_export_categories` | default | core/pref/keys/MiscStateKeys.kt:181 | State | `other` | 导出向导上次选择的分类 (不含凭据, SettingsCategoryPickerStep); P6.3 声明为 MiscStateKeys (附录 C Q28) |
 | `key_$_suspended_plugin_$_` | plugin_center_enable_state | core/pref/keys/PluginCenterKeys.kt:283 | Setting | `plugin_enable_state` | 挂起标记, 前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.PLUGIN_SUSPENDED; 属于命名存储, 随整份计数 |
 | `key_$_terminal_` | default | core/plugin/terminal/TerminalLegacyCleanup.kt:26 | Excluded |  | 已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板) |
 | `key_dont_show_main_activity` | default | runtime/api/augment/settings/Settings.kt:43 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |
-| `key_down` | default | core/ui/nativeview/ViewPrototype.kt:111, core/ui/nativeview/ViewPrototype.kt:115, execution/ScriptExecuteActivity.kt:338, runtime/api/Events.java:362 | Excluded |  | 按键事件名, 不是偏好键 |
+| `key_down` | default | core/ui/nativeview/ViewPrototype.kt:111, core/ui/nativeview/ViewPrototype.kt:115, execution/ScriptExecuteActivity.kt:338, runtime/api/Events.java:403 | Excluded |  | 按键事件名, 不是偏好键 |
 | `key_enable_a11y_service_with_root_access` | default | runtime/api/augment/settings/Settings.kt:39 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
 | `key_enable_accessibility_service_by_root` | default | runtime/api/augment/settings/Settings.kt:38 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |
 | `key_first_using` | default | inrt/Pref.kt:18 | Excluded |  | inrt 打包应用运行时状态 (附录 A.2) |
@@ -408,24 +417,24 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `key_inrt_applied_build_id` | default | inrt/Pref.kt:19 | Excluded |  | inrt 打包应用运行时状态 (附录 A.2) |
 | `key_not_showing_main_activity` | default | runtime/api/augment/settings/Settings.kt:44 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
 | `key_stable_mode` | default | runtime/api/augment/settings/Settings.kt:36 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
-| `key_up` | default | core/ui/nativeview/ViewPrototype.kt:111, core/ui/nativeview/ViewPrototype.kt:117, runtime/api/Events.java:365 | Excluded |  | 按键事件名, 不是偏好键 |
+| `key_up` | default | core/ui/nativeview/ViewPrototype.kt:111, core/ui/nativeview/ViewPrototype.kt:117, runtime/api/Events.java:406 | Excluded |  | 按键事件名, 不是偏好键 |
 | `key_use_volume_control_running` | default | runtime/api/augment/settings/Settings.kt:41 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
 | `known_first_install_times` | plugin_center_attention | core/pref/keys/PluginCenterKeys.kt:304 | State | `other` | 已见过的包的首次安装时间, org.json 对象文本 (PluginCenterAttentionStore); P3.1 声明为 PluginCenterKeys 的 State; 属于命名存储, 随整份计数 |
 | `org.autojs.autojs.engine.RootAutomatorEngine.touch_device` | default | core/pref/keys/MiscStateKeys.kt:47 | Cache |  | Root 自动化探测到的触摸设备 id, 本机才有效 (RootAutomatorEngine); P2.6 声明为 MiscStateKeys (附录 C Q15) |
-| `org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR` | default | core/pref/keys/MiscStateKeys.kt:194 | State | `other` | 颜色选择页的自定义颜色 (ColorSelectBaseActivity.KEY_CUSTOM_COLOR); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
-| `org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX` | default | core/pref/keys/MiscStateKeys.kt:198 | State | `other` | 旧布局选中的颜色序号 (ColorSelectBaseActivity.KEY_LEGACY_SELECTED_COLOR_INDEX); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
+| `org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR` | default | core/pref/keys/MiscStateKeys.kt:203 | State | `other` | 颜色选择页的自定义颜色 (ColorSelectBaseActivity.KEY_CUSTOM_COLOR); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
+| `org.autojs.autojs.theme.app.ColorSettingRecyclerView.SELECTED_COLOR_INDEX` | default | core/pref/keys/MiscStateKeys.kt:207 | State | `other` | 旧布局选中的颜色序号 (ColorSelectBaseActivity.KEY_LEGACY_SELECTED_COLOR_INDEX); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
 | `org.autojs.autojs.ui.edit.debug.CodeEvaluateDialogBuilder.code` | default | core/pref/keys/MiscStateKeys.kt:43 | State | `other` | 代码求值对话框的上次输入 (CodeEvaluateDialogBuilder); P2.6 声明为 MiscStateKeys (附录 C Q15) |
-| `org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent` | default | core/pref/keys/MiscStateKeys.kt:230 | State | `other` | 悬浮按钮位置, 屏幕宽度的比例 (CircularMenuWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
-| `org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent` | default | core/pref/keys/MiscStateKeys.kt:233 | State | `other` | 悬浮按钮位置, 屏幕高度的比例 (CircularMenuWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
-| `org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent` | default | core/pref/keys/MiscStateKeys.kt:241 | State | `other` | 悬浮控制器位置, 屏幕宽度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
-| `org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent` | default | core/pref/keys/MiscStateKeys.kt:244 | State | `other` | 悬浮控制器位置, 屏幕高度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys |
+| `org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent` | default | core/pref/keys/FloatingKeys.kt:25 | Setting | `floating` | 悬浮按钮位置, 屏幕宽度的比例 (CircularMenuWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys |
+| `org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent` | default | core/pref/keys/FloatingKeys.kt:30 | Setting | `floating` | 悬浮按钮位置, 屏幕高度的比例 (CircularMenuWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys |
+| `org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent` | default | core/pref/keys/FloatingKeys.kt:36 | Setting | `floating` | 悬浮控制器位置, 屏幕宽度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys |
+| `org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent` | default | core/pref/keys/FloatingKeys.kt:41 | Setting | `floating` | 悬浮控制器位置, 屏幕高度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys |
 | `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_ascending` | default | core/pref/keys/ExplorerKeys.kt:89 | Setting | `explorer` | 文件管理器中目录是否升序 (ExplorerItemManager.SortConfig); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys |
 | `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_sort_type` | default | core/pref/keys/ExplorerKeys.kt:83 | Setting | `explorer` | 文件管理器中目录的排序类型 (ExplorerItemManager.SortConfig, 0x10 为按名称); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys |
 | `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_ascending` | default | core/pref/keys/ExplorerKeys.kt:86 | Setting | `explorer` | 文件管理器中文件是否升序 (ExplorerItemManager.SortConfig); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys |
 | `org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.file_sort_type` | default | core/pref/keys/ExplorerKeys.kt:80 | Setting | `explorer` | 文件管理器中文件的排序类型 (ExplorerItemManager.SortConfig, 0x10 为按名称); P0 清单未识别 (附录 C Q18), P4.2 声明为 ExplorerKeys |
 | `pins` | plugin_center_attention | core/pref/keys/PluginCenterKeys.kt:315 | State | `other` | 当前的临时置顶, org.json 数组文本 (PluginCenterAttentionStore); P3.1 声明为 PluginCenterKeys 的 State; 属于命名存储, 随整份计数 |
 | `profiles_json` | editor_symbols_config, build_apk_config_profiles | core/pref/keys/ApkBuildKeys.kt:32, core/pref/keys/EditorKeyboardKeys.kt:48 | Setting | `editor_keyboard` | 两份命名存储共用的键名: 符号配置档 (editor_keyboard) 与 APK 构建配置档 (apk_build), org.json 对象文本; P3.2 / P3.3 声明为 EditorKeyboardKeys / ApkBuildKeys; 各随整份计数 |
-| `prompt_$_` | default | core/pref/keys/DialogStateKeys.kt:91 | State | `other` | 前缀键族 (后接列表偏好的键): 列表偏好确认提示的不再提示 (MaterialListPreference.showPrompt); P0 清单未识别, P4.1 声明为 DialogStateKeys.LIST_PREFERENCE_PROMPT (附录 C Q22) |
+| `prompt_$_` | default | core/pref/keys/DialogStateKeys.kt:102 | State | `other` | 前缀键族 (后接列表偏好的键): 列表偏好确认提示的不再提示 (MaterialListPreference.showPrompt); P0 清单未识别, P4.1 声明为 DialogStateKeys.LIST_PREFERENCE_PROMPT (附录 C Q22) |
 | `r8_compiler_explicit_component` | default | core/pref/keys/DeveloperKeys.kt:79 | Setting | `developer` | 选择的 R8 编译器组件; 导入时插件未安装则与开关一起跳过 (P7.3); P3.6 声明为 DeveloperKeys (附录 C Q15) |
 | `r8_compiler_explicit_enabled` | default | core/pref/keys/DeveloperKeys.kt:75 | Setting | `developer` | 开发者选项显式选择的 R8 编译器插件开关 (R8CompilerOptInStore); P3.6 声明为 DeveloperKeys (附录 C Q15) |
 | `show_launcher_icons_for_new_plugins` | plugin_install_wizard | core/pref/keys/WizardKeys.kt:75 | Setting | `wizards` | 插件安装向导: 新安装的插件显示启动图标 (PluginInstallWizardProfileStore); P3.3 声明为 WizardKeys; 属于命名存储, 随整份计数 |
@@ -444,7 +453,7 @@ kind 统计 (`key_*` 资源): Setting 126, State 40, Cache 1, ValueConstant 74, 
 | `ace_action_history` | 登记 `NamedStores.ACE_ACTION_HISTORY` (core/pref/keys/NamedStores.kt:41) | core/pref/keys/EditorKeyboardKeys.kt:110 | State | `other` | Ace 动作历史 (P3.2 为 State); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
 | `ace_editor_font_ui_preferences` | 登记 `NamedStores.ACE_EDITOR_FONT_UI_PREFERENCES` (core/pref/keys/NamedStores.kt:37) | core/pref/keys/EditorKeyboardKeys.kt:58, core/pref/keys/EditorKeyboardKeys.kt:64, core/pref/keys/EditorKeyboardKeys.kt:71, core/pref/keys/EditorKeyboardKeys.kt:79 等 7 处 | Setting | `editor_keyboard` | 字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
 | `autojs.localstorage.*` | 排除登记 `NamedStores.SCRIPT_LOCAL_STORAGES` (core/pref/keys/NamedStores.kt:132); 人工: `.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`; 拼接 | core/storage/LocalStorage.java:28, runtime/api/augment/storages/Storages.kt:48, runtime/api/augment/storages/Storages.kt:61 | Excluded |  | 脚本自己的数据 (附录 A.2) |
-| `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:136); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3526) | engine/NodeBridgeProtocol.kt:3411 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
+| `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:136); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3551) | engine/NodeBridgeProtocol.kt:3436 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
 | `build_apk_config_profiles` | 登记 `NamedStores.BUILD_APK_CONFIG_PROFILES` (core/pref/keys/NamedStores.kt:48) | core/pref/keys/ApkBuildKeys.kt:26, core/pref/keys/ApkBuildKeys.kt:33 | Setting | `apk_build` | APK 构建配置档; P3.3 登记为 NamedStores, 键声明在 ApkBuildKeys |
 | `bun_host_capability_grants` | 登记 `NamedStores.BUN_HOST_CAPABILITY_GRANTS` (core/pref/keys/NamedStores.kt:121) | core/pref/keys/CredentialKeys.kt:55 | Setting | `credentials` | Bun 宿主能力授权, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |
 | `device_id_prefs` | 排除登记 `NamedStores.DEVICE_ID_PREFS` (core/pref/keys/NamedStores.kt:128); 常量 SP_NAME (deviceid/DeviceIdProvider.kt:20) | deviceid/DeviceIdProvider.kt:33 | Excluded |  | 设备标识 (附录 A.2) |
@@ -504,7 +513,7 @@ Setting 与 State 计入条目数; 默认偏好中的字面量键 (含前缀键,
 | 分类 id | `key_*` 键 | 字面量键 (默认偏好) | 命名存储 | 合计 | 部署项 |
 | --- | --- | --- | --- | --- | --- |
 | `appearance` | 9 | 3 | 0 | 12 |  |
-| `general` | 6 | 0 | 0 | 6 |  |
+| `general` | 10 | 0 | 0 | 10 |  |
 | `explorer` | 6 | 4 | 0 | 10 | `CREATE_DIRECTORY` (`key_working_directory`) |
 | `history` | 10 | 0 | 0 | 10 |  |
 | `editor_general` | 1 | 1 | 0 | 2 |  |
@@ -525,6 +534,7 @@ Setting 与 State 计入条目数; 默认偏好中的字面量键 (含前缀键,
 | `console` | 12 | 0 | 0 | 12 |  |
 | `connection` | 7 | 0 | 0 | 7 |  |
 | `layout_inspector` | 5 | 1 | 0 | 6 |  |
+| `floating` | 0 | 4 | 0 | 4 |  |
 | `developer` | 7 | 4 | 0 | 11 |  |
 | `plugin_center` | 3 | 6 | 5 | 14 |  |
 | `plugin_enable_state` | 0 | 0 | 1 | 1 |  |
@@ -533,4 +543,4 @@ Setting 与 State 计入条目数; 默认偏好中的字面量键 (含前缀键,
 | `data_shortcuts` | 0 | 0 | 0 | 数据 |  |
 | `data_color_library` | 0 | 0 | 0 | 数据 |  |
 | `credentials` | 0 | 0 | 5 | 5 |  |
-| `other` | 41 | 33 | 3 | 77 |  |
+| `other` | 41 | 31 | 3 | 75 |  |

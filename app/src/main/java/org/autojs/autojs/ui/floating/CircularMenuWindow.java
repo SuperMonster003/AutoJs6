@@ -5,6 +5,7 @@ import android.graphics.PixelFormat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import org.autojs.autojs.core.pref.keys.FloatingKeys;
 import org.autojs.autojs.core.pref.keys.MiscStateKeys;
 import org.autojs.autojs.runtime.api.ScreenMetrics;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
@@ -81,8 +82,8 @@ public class CircularMenuWindow extends FloatyWindow {
     }
 
     private void setInitialState() {
-        int x = (int) (ScreenMetrics.getDeviceScreenWidth() * MiscStateKeys.CIRCULAR_MENU_POSITION_X_PERCENT.get());
-        int y = (int) (ScreenMetrics.getDeviceScreenHeight() * MiscStateKeys.CIRCULAR_MENU_POSITION_Y_PERCENT.get());
+        int x = (int) (ScreenMetrics.getDeviceScreenWidth() * FloatingKeys.CIRCULAR_MENU_POSITION_X_PERCENT.get());
+        int y = (int) (ScreenMetrics.getDeviceScreenHeight() * FloatingKeys.CIRCULAR_MENU_POSITION_Y_PERCENT.get());
         mActionViewWindowBridge.updatePosition(x, y);
         keepToSide();
     }
@@ -218,9 +219,9 @@ public class CircularMenuWindow extends FloatyWindow {
     public void savePosition() {
         if (mActionViewWindowBridge != null) {
             int x = mActionViewWindowBridge.getX();
-            MiscStateKeys.CIRCULAR_MENU_POSITION_X_PERCENT.set(x / (float) ScreenMetrics.getDeviceScreenWidth(), true);
+            FloatingKeys.CIRCULAR_MENU_POSITION_X_PERCENT.set(x / (float) ScreenMetrics.getDeviceScreenWidth(), true);
             int y = mActionViewWindowBridge.getY();
-            MiscStateKeys.CIRCULAR_MENU_POSITION_Y_PERCENT.set(y / (float) ScreenMetrics.getDeviceScreenHeight(), true);
+            FloatingKeys.CIRCULAR_MENU_POSITION_Y_PERCENT.set(y / (float) ScreenMetrics.getDeviceScreenHeight(), true);
         }
     }
 

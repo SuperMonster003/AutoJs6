@@ -1,0 +1,148 @@
+name: Memory gate
+
+# Runtime leak gate (docs/memory/ROADMAP.md P6.1): S1-S12 in normal-exit mode on a disposable API 35 emulator, through
+# tools/memory/ci_gate.py, the same entry as a local run (tools/memory/README.md, "CI gate"). Force-stop mode stays
+# on the maintainer's phones: an emulator gains nothing from it and it doubles the run.
+on:
+  push:
+    tags: [ "v*" ]
+  # Only repository writers can dispatch.
+  workflow_dispatch:
+    inputs:
+      scenarios:
+        description: "Comma-separated scenarios without spaces, e.g. S4a,S6; empty runs S1-S12"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: memory-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      GRADLE_CI_TIMEOUT_SECONDS: '3600'
+      GRADLE_CI_MAX_LOG_BYTES: '33554432'
+      EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+      # Passed through the environment rather than interpolated into the script.
+      GATE_SCENARIOS: ${{ inputs.scenarios }}
+      # S4b / S4d / S4e need OpenCV and S12 loads 3-ImGui, neither shipped with the host APK; official plugins are trusted
+      # by their signing certificate and enabled by default, so installing them is enough.
+      OPENCV_PLUGIN_TAG: v1.1.4
+      OPENCV_PLUGIN_SHA256: 83bd7ee1bea18f19c6576292767be446d5b7e66ac386ec87636e534866001ded
+      IMGUI_PLUGIN_TAG: v1.9.3
+      IMGUI_PLUGIN_SHA256: d1918c197c1d87e57b0d9af573593670a56608473df265be6a5744efb363d893
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      # No Node.js step: the build does not need it (android.yml installs it only for the editor plugin host gate).
+      - name: Set up JDK 21 and Gradle dependency cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Download the official OpenCV and 3-ImGui plugins
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/memory-gate/plugins
+          # fetch REPOSITORY NAME TAG SHA256: the x86_64 APK of a public release, checked and saved as NAME.apk.
+          fetch() {
+            local dir
+            dir="$(mktemp -d)"
+            gh release download "$3" --repo "SuperMonster003/$1" --pattern "autojs6-plugin-$2-$3-x86_64-*.apk" --dir "$dir"
+            echo "$4  $(ls "$dir"/*.apk)" | sha256sum --check
+            mv "$dir"/*.apk "build/memory-gate/plugins/$2.apk"
+          }
+          fetch AutoJs6-Plugin-OpenCV opencv "$OPENCV_PLUGIN_TAG" "$OPENCV_PLUGIN_SHA256"
+          fetch AutoJs6-Plugin-ImGui imgui "$IMGUI_PLUGIN_TAG" "$IMGUI_PLUGIN_SHA256"
+
+      # The debug host and its test APK come from one build, so they share the debug key; ci_gate.py only installs them
+      # and runs no Gradle task in the emulator step (where the runner may regenerate ~/.android and its debug key).
+      - name: Build the debug host and its instrumentation APK
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          bash .github/scripts/run-gradle-ci.sh \
+            ./gradlew \
+            :app:assembleAppDebug \
+            :app:assembleAppDebugAndroidTest \
+            --no-daemon \
+            --build-cache \
+            --console=plain \
+            --stacktrace
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run S1-S12 in normal-exit mode
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          ram-size: 4096M
+          disk-size: 6000M
+          avd-name: AutoJs6_Memory_Gate_CI_35
+          emulator-options: ${{ env.EMULATOR_OPTIONS }}
+          # ci_gate.py installs the x86_64 host with -g (its runtime permissions) and the two plugins, allows the
+          # overlay app-op so that S6 runs, and calls run_gate.py with --mode normal --capture on --wake --hprof:
+          # - S4a / S4f: --capture on sets the PROJECT_MEDIA app-op to allow around each of their processes and restores
+          #   it afterwards, so screen capture needs no consent dialog.
+          # - S7 runs without the host accessibility service (keys and accessibility events are left out and recorded).
+          # - S7b is skipped: the service is never bound to the test process without the maintainer (README, S7 / S7b).
+          # - S12 runs with the downloaded 3-ImGui, so --allow-skip leaves it out (the script's default allows it for
+          #   local runs without the plugin). S13 (no speech plugin) is not part of S1-S12; it may only be skipped.
+          # Any other skip, a failure or a missing report fails the gate. After "System has crashed" or a lost adb the
+          # script reruns once what did not pass, merged into the same report; for a lost adb it first restarts the adb
+          # server and then, if needed, the emulator with --relaunch (the runner's own command line).
+          script: |
+            python3 -I -u tools/memory/ci_gate.py -s emulator-5554 --adb "$(command -v adb)" --plugin build/memory-gate/plugins/opencv.apk --plugin build/memory-gate/plugins/imgui.apk --scenarios "$GATE_SCENARIOS" --allow-skip S7b,S13 --label ci --restart-adb-server --relaunch "${ANDROID_HOME:-/usr/local/lib/android/sdk}/emulator/emulator -port 5554 -avd AutoJs6_Memory_Gate_CI_35 ${{ env.EMULATOR_OPTIONS }}"
+
+      - name: Upload the gate report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-gate-report
+          path: build/memory-gate/evidence/*.*
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # A job that reaches timeout-minutes ends as cancelled, which failure() alone would skip; attempt-1 exists only
+      # when the gate was rerun.
+      - name: Upload heap dumps, logcat and transcripts after a failure, a cancellation or a rerun
+        if: failure() || cancelled() || hashFiles('build/memory-gate/attempt-1/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-gate-diagnostics
+          path: |
+            build/memory-gate/evidence/hprof/
+            build/memory-gate/logcat.txt
+            build/memory-gate/run-gate-attempt-*.txt
+            build/memory-gate/attempt-1/
+            build/memory-gate/emulator-relaunch.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Gradle failure log
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-gate-gradle-failure-log
+          path: ${{ runner.temp }}/android-gradle-build.log
+          if-no-files-found: ignore
+          retention-days: 7

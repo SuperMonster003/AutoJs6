@@ -2,13 +2,13 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "7d759ab5b",
+  "commit": "f5045980f",
   "branch": "master",
-  "dirtyScannedFiles": 11
+  "dirtyScannedFiles": 44
  },
  "summary": {
-  "keyResources": 270,
-  "keyResourcesInStringsDonottranslate": 268,
+  "keyResources": 277,
+  "keyResourcesInStringsDonottranslate": 275,
   "keyResourcesElsewhere": [
    "key_ace_language_support_matrix",
    "key_ace_semantic_languages"
@@ -21,7 +21,7 @@
    "fragment_trash_and_version_history_settings.xml": 9,
    "fragment_plugin_center_preferences.xml": 3
   },
-  "keysOnlyInCode": 169,
+  "keysOnlyInCode": 176,
   "pageLiteralKeysPerPage": {
    "fragment_preferences.xml": 0,
    "fragment_code_editor_settings.xml": 0,
@@ -37,7 +37,7 @@
    "key_mail_settings"
   ],
   "keysWithoutAnyRefs": [],
-  "literalKeyGroups": 126,
+  "literalKeyGroups": 128,
   "namedStores": 29,
   "namedStoreCallFiles": 9,
   "namedStoresDeclared": 29,
@@ -52,7 +52,7 @@
    "name": "key_a11y_service",
    "value": "key_$_a11y_service",
    "file": "strings_donottranslate.xml",
-   "line": 81,
+   "line": 82,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -67,7 +67,7 @@
    "name": "key_a11y_service_manager_control_level",
    "value": "key_$_a11y_service_manager_control_level",
    "file": "strings_donottranslate.xml",
-   "line": 82,
+   "line": 83,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -82,7 +82,7 @@
    "name": "key_a11y_service_manager_settings_collapsed",
    "value": "key_$_a11y_service_manager_settings_collapsed",
    "file": "strings_donottranslate.xml",
-   "line": 83,
+   "line": 84,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -97,7 +97,7 @@
    "name": "key_a11y_service_manager_status_level",
    "value": "key_$_a11y_service_manager_status_level",
    "file": "strings_donottranslate.xml",
-   "line": 84,
+   "line": 85,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -112,12 +112,12 @@
    "name": "key_about_app_and_developer",
    "value": "key_$_about_app_and_developer",
    "file": "strings_donottranslate.xml",
-   "line": 85,
+   "line": 86,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 384,
+     "line": 389,
      "tag": "AboutAppAndDeveloperPreference",
      "categoryTitleRes": [
       "text_about"
@@ -134,12 +134,12 @@
    "name": "key_about_app_tips",
    "value": "key_$_about_app_tips",
    "file": "strings_donottranslate.xml",
-   "line": 86,
+   "line": 87,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 374,
+     "line": 379,
      "tag": "MaterialDialogPreference",
      "categoryTitleRes": [
       "text_about"
@@ -156,7 +156,7 @@
    "name": "key_ace_custom_scrollbar_enabled",
    "value": "key_$_ace_custom_scrollbar_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 87,
+   "line": 88,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -200,7 +200,7 @@
    "name": "key_ace_editor_font",
    "value": "key_$_ace_editor_font",
    "file": "strings_donottranslate.xml",
-   "line": 88,
+   "line": 89,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -253,7 +253,7 @@
    "name": "key_ace_editor_font_cascadia_code",
    "value": "cascadia_code",
    "file": "strings_donottranslate.xml",
-   "line": 89,
+   "line": 90,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -267,7 +267,7 @@
    "name": "key_ace_editor_font_fira_code",
    "value": "fira_code",
    "file": "strings_donottranslate.xml",
-   "line": 90,
+   "line": 91,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -281,7 +281,7 @@
    "name": "key_ace_editor_font_hack",
    "value": "hack",
    "file": "strings_donottranslate.xml",
-   "line": 91,
+   "line": 92,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -295,7 +295,7 @@
    "name": "key_ace_editor_font_ibm_plex_mono",
    "value": "ibm_plex_mono",
    "file": "strings_donottranslate.xml",
-   "line": 92,
+   "line": 93,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -309,7 +309,7 @@
    "name": "key_ace_editor_font_intel_one_mono",
    "value": "intel_one_mono",
    "file": "strings_donottranslate.xml",
-   "line": 93,
+   "line": 94,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -323,7 +323,7 @@
    "name": "key_ace_editor_font_iosevka",
    "value": "iosevka",
    "file": "strings_donottranslate.xml",
-   "line": 94,
+   "line": 95,
    "defaultOf": [
     "default_key_ace_editor_font"
    ],
@@ -340,7 +340,7 @@
    "name": "key_ace_editor_font_iosevka_slab",
    "value": "iosevka_slab",
    "file": "strings_donottranslate.xml",
-   "line": 95,
+   "line": 96,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -354,7 +354,7 @@
    "name": "key_ace_editor_font_jetbrains_mono",
    "value": "jetbrains_mono",
    "file": "strings_donottranslate.xml",
-   "line": 96,
+   "line": 97,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -368,7 +368,7 @@
    "name": "key_ace_editor_font_source_code_pro",
    "value": "source_code_pro",
    "file": "strings_donottranslate.xml",
-   "line": 97,
+   "line": 98,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -382,7 +382,7 @@
    "name": "key_ace_editor_font_system_monospace",
    "value": "system_monospace",
    "file": "strings_donottranslate.xml",
-   "line": 98,
+   "line": 99,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -396,7 +396,7 @@
    "name": "key_ace_font_ligatures_enabled",
    "value": "key_$_ace_font_ligatures_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 99,
+   "line": 100,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -440,7 +440,7 @@
    "name": "key_ace_font_styles_enabled",
    "value": "key_$_ace_font_styles_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 100,
+   "line": 101,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -484,7 +484,7 @@
    "name": "key_ace_highlight_indent_guides_enabled",
    "value": "key_$_ace_highlight_indent_guides_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 101,
+   "line": 102,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -528,7 +528,7 @@
    "name": "key_ace_indent_guides_enabled",
    "value": "key_$_ace_indent_guides_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 102,
+   "line": 103,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -572,7 +572,7 @@
    "name": "key_ace_inline_completion_preview_enabled",
    "value": "key_$_ace_inline_completion_preview_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 103,
+   "line": 104,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -652,7 +652,7 @@
    "name": "key_ace_line_numbers_enabled",
    "value": "key_$_ace_line_numbers_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 104,
+   "line": 105,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -692,7 +692,7 @@
    "name": "key_ace_lsp_declaration_groups",
    "value": "key_$_ace_lsp_declaration_groups",
    "file": "strings_donottranslate.xml",
-   "line": 105,
+   "line": 106,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -740,7 +740,7 @@
    "name": "key_ace_lsp_enabled",
    "value": "key_$_ace_lsp_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 106,
+   "line": 107,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -792,7 +792,7 @@
    "name": "key_ace_lsp_file_types",
    "value": "key_$_ace_lsp_file_types",
    "file": "strings_donottranslate.xml",
-   "line": 107,
+   "line": 108,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -840,7 +840,7 @@
    "name": "key_ace_print_margin_enabled",
    "value": "key_$_ace_print_margin_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 108,
+   "line": 109,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -884,7 +884,7 @@
    "name": "key_ace_scrollbar_auto_hide_enabled",
    "value": "key_$_ace_scrollbar_auto_hide_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 109,
+   "line": 110,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -964,7 +964,7 @@
    "name": "key_ace_smart_hint_arrow_overload_cycling",
    "value": "key_$_ace_smart_hint_arrow_overload_cycling",
    "file": "strings_donottranslate.xml",
-   "line": 110,
+   "line": 111,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1008,7 +1008,7 @@
    "name": "key_ace_smart_hint_completion_delay",
    "value": "key_$_ace_smart_hint_completion_delay",
    "file": "strings_donottranslate.xml",
-   "line": 111,
+   "line": 112,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1052,7 +1052,7 @@
    "name": "key_ace_smart_hint_completion_delay_0",
    "value": "0",
    "file": "strings_donottranslate.xml",
-   "line": 112,
+   "line": 113,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_delay",
@@ -1075,7 +1075,7 @@
    "name": "key_ace_smart_hint_completion_delay_100",
    "value": "100",
    "file": "strings_donottranslate.xml",
-   "line": 113,
+   "line": 114,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_delay",
@@ -1095,7 +1095,7 @@
    "name": "key_ace_smart_hint_completion_delay_250",
    "value": "250",
    "file": "strings_donottranslate.xml",
-   "line": 114,
+   "line": 115,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_delay",
@@ -1115,7 +1115,7 @@
    "name": "key_ace_smart_hint_completion_min_chars",
    "value": "key_$_ace_smart_hint_completion_min_chars",
    "file": "strings_donottranslate.xml",
-   "line": 115,
+   "line": 116,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1159,7 +1159,7 @@
    "name": "key_ace_smart_hint_completion_min_chars_1",
    "value": "1",
    "file": "strings_donottranslate.xml",
-   "line": 116,
+   "line": 117,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_min_chars",
@@ -1186,7 +1186,7 @@
    "name": "key_ace_smart_hint_completion_min_chars_2",
    "value": "2",
    "file": "strings_donottranslate.xml",
-   "line": 117,
+   "line": 118,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_min_chars",
@@ -1210,7 +1210,7 @@
    "name": "key_ace_smart_hint_completion_min_chars_3",
    "value": "3",
    "file": "strings_donottranslate.xml",
-   "line": 118,
+   "line": 119,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_min_chars",
@@ -1234,7 +1234,7 @@
    "name": "key_ace_smart_hint_completion_trigger",
    "value": "key_$_ace_smart_hint_completion_trigger",
    "file": "strings_donottranslate.xml",
-   "line": 119,
+   "line": 120,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1278,7 +1278,7 @@
    "name": "key_ace_smart_hint_completion_trigger_dot",
    "value": "dot",
    "file": "strings_donottranslate.xml",
-   "line": 120,
+   "line": 121,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_trigger",
@@ -1298,7 +1298,7 @@
    "name": "key_ace_smart_hint_completion_trigger_identifier",
    "value": "identifier",
    "file": "strings_donottranslate.xml",
-   "line": 121,
+   "line": 122,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_trigger",
@@ -1321,7 +1321,7 @@
    "name": "key_ace_smart_hint_completion_trigger_off",
    "value": "off",
    "file": "strings_donottranslate.xml",
-   "line": 122,
+   "line": 123,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_completion_trigger",
@@ -1341,7 +1341,7 @@
    "name": "key_ace_smart_hint_signature_trigger",
    "value": "key_$_ace_smart_hint_signature_trigger",
    "file": "strings_donottranslate.xml",
-   "line": 123,
+   "line": 124,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1385,7 +1385,7 @@
    "name": "key_ace_smart_hint_signature_trigger_cursor",
    "value": "cursor",
    "file": "strings_donottranslate.xml",
-   "line": 124,
+   "line": 125,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_signature_trigger",
@@ -1412,7 +1412,7 @@
    "name": "key_ace_smart_hint_signature_trigger_off",
    "value": "off",
    "file": "strings_donottranslate.xml",
-   "line": 125,
+   "line": 126,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_signature_trigger",
@@ -1432,7 +1432,7 @@
    "name": "key_ace_smart_hint_signature_trigger_typing",
    "value": "typing",
    "file": "strings_donottranslate.xml",
-   "line": 126,
+   "line": 127,
    "arrays": [
     {
      "array": "keys_ace_smart_hint_signature_trigger",
@@ -1456,7 +1456,7 @@
    "name": "key_ace_svg_gutter_icons_enabled",
    "value": "key_$_ace_svg_gutter_icons_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 127,
+   "line": 128,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1500,7 +1500,7 @@
    "name": "key_ace_symbol_highlight_enabled",
    "value": "key_$_ace_symbol_highlight_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 128,
+   "line": 129,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1544,7 +1544,7 @@
    "name": "key_ace_touch_magnifier_enabled",
    "value": "key_$_ace_touch_magnifier_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 129,
+   "line": 130,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1588,7 +1588,7 @@
    "name": "key_ace_whitespaces_in_selection_enabled",
    "value": "key_$_ace_whitespaces_in_selection_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 130,
+   "line": 131,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1632,7 +1632,7 @@
    "name": "key_ace_word_wrap_enabled",
    "value": "key_$_ace_word_wrap_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 131,
+   "line": 132,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -1680,7 +1680,7 @@
    "name": "key_ai_settings",
    "value": "key_$_ai_settings",
    "file": "strings_donottranslate.xml",
-   "line": 132,
+   "line": 133,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -1702,7 +1702,7 @@
    "name": "key_all_files_access",
    "value": "key_$_all_files_access",
    "file": "strings_donottranslate.xml",
-   "line": 133,
+   "line": 134,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -1726,7 +1726,7 @@
    "name": "key_app_language",
    "value": "key_$_app_language",
    "file": "strings_donottranslate.xml",
-   "line": 134,
+   "line": 135,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -1756,7 +1756,7 @@
    "name": "key_app_language_ar",
    "value": "key_$_app_language_ar",
    "file": "strings_donottranslate.xml",
-   "line": 135,
+   "line": 136,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1780,7 +1780,7 @@
    "name": "key_app_language_auto",
    "value": "key_$_app_language_auto",
    "file": "strings_donottranslate.xml",
-   "line": 136,
+   "line": 137,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1807,7 +1807,7 @@
    "name": "key_app_language_en",
    "value": "key_$_app_language_en",
    "file": "strings_donottranslate.xml",
-   "line": 137,
+   "line": 138,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1831,7 +1831,7 @@
    "name": "key_app_language_es",
    "value": "key_$_app_language_es",
    "file": "strings_donottranslate.xml",
-   "line": 138,
+   "line": 139,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1855,7 +1855,7 @@
    "name": "key_app_language_fr",
    "value": "key_$_app_language_fr",
    "file": "strings_donottranslate.xml",
-   "line": 139,
+   "line": 140,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1879,7 +1879,7 @@
    "name": "key_app_language_ja",
    "value": "key_$_app_language_ja",
    "file": "strings_donottranslate.xml",
-   "line": 140,
+   "line": 141,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1903,7 +1903,7 @@
    "name": "key_app_language_ko",
    "value": "key_$_app_language_ko",
    "file": "strings_donottranslate.xml",
-   "line": 141,
+   "line": 142,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1927,7 +1927,7 @@
    "name": "key_app_language_ru",
    "value": "key_$_app_language_ru",
    "file": "strings_donottranslate.xml",
-   "line": 142,
+   "line": 143,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1951,7 +1951,7 @@
    "name": "key_app_language_zh_hans",
    "value": "key_$_app_language_zh",
    "file": "strings_donottranslate.xml",
-   "line": 143,
+   "line": 144,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1975,7 +1975,7 @@
    "name": "key_app_language_zh_hant_hk",
    "value": "key_$_app_language_zh_hk",
    "file": "strings_donottranslate.xml",
-   "line": 144,
+   "line": 145,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -1999,7 +1999,7 @@
    "name": "key_app_language_zh_hant_tw",
    "value": "key_$_app_language_zh_tw",
    "file": "strings_donottranslate.xml",
-   "line": 145,
+   "line": 146,
    "arrays": [
     {
      "array": "keys_app_language",
@@ -2023,12 +2023,12 @@
    "name": "key_auto_check_for_updates",
    "value": "key_$_auto_check_for_updates",
    "file": "strings_donottranslate.xml",
-   "line": 146,
+   "line": 147,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 348,
+     "line": 353,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_updates"
@@ -2052,7 +2052,7 @@
    "name": "key_auto_night_mode_enabled",
    "value": "key_$_auto_night_mode_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 147,
+   "line": 148,
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginCenterFragment.kt",
@@ -2076,7 +2076,7 @@
    "name": "key_batch_rename_history_retention",
    "value": "key_$_batch_rename_history_retention",
    "file": "strings_donottranslate.xml",
-   "line": 148,
+   "line": 149,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
@@ -2091,12 +2091,12 @@
    "name": "key_change_working_dir",
    "value": "key_$_change_working_dir",
    "file": "strings_donottranslate.xml",
-   "line": 149,
+   "line": 150,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 103,
+     "line": 108,
      "tag": "WorkingDirectoryPreference",
      "categoryTitleRes": [
       "text_file_explorer"
@@ -2119,12 +2119,12 @@
    "name": "key_check_for_updates",
    "value": "key_$_check_for_updates",
    "file": "strings_donottranslate.xml",
-   "line": 151,
+   "line": 152,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 342,
+     "line": 347,
      "tag": "CheckForUpdatesPreference",
      "categoryTitleRes": [
       "text_updates"
@@ -2147,7 +2147,7 @@
    "name": "key_check_for_updates_while_ignoring_the_local_version",
    "value": "key_$_check_for_updates_while_ignoring_the_local_version",
    "file": "strings_donottranslate.xml",
-   "line": 152,
+   "line": 153,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -2175,12 +2175,12 @@
    "name": "key_clear_explorer_playback_history",
    "value": "key_$_clear_explorer_playback_history",
    "file": "strings_donottranslate.xml",
-   "line": 150,
+   "line": 151,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 134,
+     "line": 139,
      "tag": "ClearExplorerPlaybackHistoryPreference",
      "categoryTitleRes": [
       "text_file_explorer"
@@ -2203,7 +2203,7 @@
    "name": "key_client_mode_auto_reconnect",
    "value": "key_$_client_mode_auto_reconnect",
    "file": "strings_donottranslate.xml",
-   "line": 153,
+   "line": 154,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -2218,7 +2218,7 @@
    "name": "key_client_mode_manager_clients_level",
    "value": "key_$_client_mode_manager_clients_level",
    "file": "strings_donottranslate.xml",
-   "line": 154,
+   "line": 155,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -2233,7 +2233,7 @@
    "name": "key_client_mode_manager_control_level",
    "value": "key_$_client_mode_manager_control_level",
    "file": "strings_donottranslate.xml",
-   "line": 155,
+   "line": 156,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -2248,7 +2248,7 @@
    "name": "key_client_mode_manager_settings_collapsed",
    "value": "key_$_client_mode_manager_settings_collapsed",
    "file": "strings_donottranslate.xml",
-   "line": 156,
+   "line": 157,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -2263,7 +2263,7 @@
    "name": "key_client_mode_manager_status_level",
    "value": "key_$_client_mode_manager_status_level",
    "file": "strings_donottranslate.xml",
-   "line": 157,
+   "line": 158,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -2278,7 +2278,7 @@
    "name": "key_client_mode_reconnect_on_network_change",
    "value": "key_$_client_mode_reconnect_on_network_change",
    "file": "strings_donottranslate.xml",
-   "line": 158,
+   "line": 159,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -2293,7 +2293,7 @@
    "name": "key_client_mode_restore_on_launch",
    "value": "key_$_client_mode_restore_on_launch",
    "file": "strings_donottranslate.xml",
-   "line": 159,
+   "line": 160,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -2308,7 +2308,7 @@
    "name": "key_client_socket_normally_closed",
    "value": "key_$_client_socket_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 160,
+   "line": 161,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -2323,7 +2323,7 @@
    "name": "key_codegen_model_current",
    "value": "key_$_codegen_model_current",
    "file": "strings_donottranslate.xml",
-   "line": 161,
+   "line": 162,
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
@@ -2338,11 +2338,11 @@
    "name": "key_color_select_activity_legacy_layout",
    "value": "key_$_color_select_activity_legacy_layout",
    "file": "strings_donottranslate.xml",
-   "line": 162,
+   "line": 163,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 190
+     "line": 199
     }
    ],
    "kind": "State",
@@ -2353,7 +2353,7 @@
    "name": "key_console_element_time_format",
    "value": "key_$_console_element_time_format",
    "file": "strings_donottranslate.xml",
-   "line": 163,
+   "line": 164,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -2368,7 +2368,7 @@
    "name": "key_console_element_time_visible",
    "value": "key_$_console_element_time_visible",
    "file": "strings_donottranslate.xml",
-   "line": 164,
+   "line": 165,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -2383,12 +2383,12 @@
    "name": "key_delete_permanently_also_clear_history",
    "value": "key_$_delete_permanently_also_clear_history",
    "file": "strings_donottranslate.xml",
-   "line": 165,
+   "line": 166,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 152,
+     "line": 157,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_trash_and_version_history"
@@ -2412,11 +2412,11 @@
    "name": "key_dialog_foreground_svc",
    "value": "key_$_dialog_foreground_svc",
    "file": "strings_donottranslate.xml",
-   "line": 166,
+   "line": 167,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 59
+     "line": 61
     }
    ],
    "kind": "State",
@@ -2427,11 +2427,11 @@
    "name": "key_dialog_layout_inspector_exit_tips",
    "value": "key_$_dialog_layout_inspector_exit_tips",
    "file": "strings_donottranslate.xml",
-   "line": 167,
+   "line": 168,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 67
+     "line": 69
     }
    ],
    "kind": "State",
@@ -2442,11 +2442,11 @@
    "name": "key_dialog_log_entries_exported",
    "value": "key_$_dialog_log_entries_exported",
    "file": "strings_donottranslate.xml",
-   "line": 168,
+   "line": 169,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 63
+     "line": 65
     }
    ],
    "kind": "State",
@@ -2457,11 +2457,11 @@
    "name": "key_dialog_num_of_log_entries_exceeds_limit_for_sending",
    "value": "key_$_num_of_log_entries_exceeds_limit_for_sending",
    "file": "strings_donottranslate.xml",
-   "line": 169,
+   "line": 170,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 39
+     "line": 41
     }
    ],
    "kind": "State",
@@ -2472,11 +2472,11 @@
    "name": "key_dialog_selected_abi_is_unavailable",
    "value": "key_$_dialog_selected_abi_is_unavailable",
    "file": "strings_donottranslate.xml",
-   "line": 170,
+   "line": 171,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 43
+     "line": 45
     }
    ],
    "kind": "State",
@@ -2487,11 +2487,11 @@
    "name": "key_dialog_transparent_background_launcher_icon",
    "value": "key_$_dialog_transparent_background_launcher_icon",
    "file": "strings_donottranslate.xml",
-   "line": 171,
+   "line": 172,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 47
+     "line": 49
     }
    ],
    "kind": "State",
@@ -2502,7 +2502,7 @@
    "name": "key_display_over_other_apps",
    "value": "key_$_display_over_other_apps",
    "file": "strings_donottranslate.xml",
-   "line": 172,
+   "line": 173,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -2522,7 +2522,7 @@
    "name": "key_documentation_source",
    "value": "key_$_documentation_source",
    "file": "strings_donottranslate.xml",
-   "line": 173,
+   "line": 174,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -2540,7 +2540,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 48
+     "line": 55
     }
    ],
    "kind": "Setting",
@@ -2551,7 +2551,7 @@
    "name": "key_documentation_source_local",
    "value": "key_$_documentation_source_local",
    "file": "strings_donottranslate.xml",
-   "line": 174,
+   "line": 175,
    "arrays": [
     {
      "array": "keys_documentation_source",
@@ -2564,7 +2564,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 26
+     "line": 27
     },
     {
      "file": "util/DocsUtils.kt",
@@ -2578,7 +2578,7 @@
    "name": "key_documentation_source_online",
    "value": "key_$_documentation_source_online",
    "file": "strings_donottranslate.xml",
-   "line": 175,
+   "line": 176,
    "arrays": [
     {
      "array": "keys_documentation_source",
@@ -2588,7 +2588,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 27
+     "line": 28
     },
     {
      "file": "ui/doc/DocumentationPageController.kt",
@@ -2602,7 +2602,7 @@
    "name": "key_drafts_max_days",
    "value": "key_$_drafts_max_days",
    "file": "strings_donottranslate.xml",
-   "line": 176,
+   "line": 177,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -2631,7 +2631,7 @@
    "name": "key_drafts_max_total_bytes",
    "value": "key_$_drafts_max_total_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 177,
+   "line": 178,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -2660,12 +2660,12 @@
    "name": "key_editor_auto_show_log_bottom_sheet_on_run",
    "value": "key_$_editor_auto_show_log_bottom_sheet_on_run",
    "file": "strings_donottranslate.xml",
-   "line": 178,
+   "line": 179,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 174,
+     "line": 179,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_code_editor"
@@ -2713,7 +2713,7 @@
    "name": "key_editor_breakpoint_markers_enabled",
    "value": "key_$_editor_breakpoint_markers_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 179,
+   "line": 180,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -2753,7 +2753,7 @@
    "name": "key_editor_code_highlight_threshold_bytes",
    "value": "key_$_editor_code_highlight_threshold_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 180,
+   "line": 181,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -2790,12 +2790,12 @@
    "name": "key_editor_engine",
    "value": "key_$_editor_engine",
    "file": "strings_donottranslate.xml",
-   "line": 181,
+   "line": 182,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 165,
+     "line": 170,
      "tag": "EditorEnginePreference",
      "categoryTitleRes": [
       "text_code_editor"
@@ -2862,7 +2862,7 @@
    "name": "key_editor_engine_ace",
    "value": "ace",
    "file": "strings_donottranslate.xml",
-   "line": 182,
+   "line": 183,
    "arrays": [
     {
      "array": "keys_editor_engine",
@@ -2882,7 +2882,7 @@
    "name": "key_editor_engine_native",
    "value": "native",
    "file": "strings_donottranslate.xml",
-   "line": 183,
+   "line": 184,
    "arrays": [
     {
      "array": "keys_editor_engine",
@@ -2905,7 +2905,7 @@
    "name": "key_editor_fold_markers_enabled",
    "value": "key_$_editor_fold_markers_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 184,
+   "line": 185,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -2949,7 +2949,7 @@
    "name": "key_editor_fullscreen_mode",
    "value": "key_$_editor_fullscreen_mode",
    "file": "strings_donottranslate.xml",
-   "line": 185,
+   "line": 186,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -2986,7 +2986,7 @@
    "name": "key_editor_gutter_width_mode",
    "value": "key_$_editor_gutter_width_mode",
    "file": "strings_donottranslate.xml",
-   "line": 186,
+   "line": 187,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3030,7 +3030,7 @@
    "name": "key_editor_gutter_width_mode_dynamic",
    "value": "dynamic",
    "file": "strings_donottranslate.xml",
-   "line": 187,
+   "line": 188,
    "arrays": [
     {
      "array": "keys_editor_gutter_width_mode",
@@ -3053,7 +3053,7 @@
    "name": "key_editor_gutter_width_mode_fixed",
    "value": "fixed",
    "file": "strings_donottranslate.xml",
-   "line": 188,
+   "line": 189,
    "arrays": [
     {
      "array": "keys_editor_gutter_width_mode",
@@ -3073,7 +3073,7 @@
    "name": "key_editor_large_file_mode_threshold_bytes",
    "value": "key_$_editor_large_file_mode_threshold_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 189,
+   "line": 190,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3110,12 +3110,12 @@
    "name": "key_editor_log_button_behavior",
    "value": "key_$_editor_log_button_behavior",
    "file": "strings_donottranslate.xml",
-   "line": 190,
+   "line": 191,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 181,
+     "line": 186,
      "tag": "MaterialListPreference",
      "categoryTitleRes": [
       "text_code_editor"
@@ -3163,7 +3163,7 @@
    "name": "key_editor_log_button_behavior_bottom_sheet",
    "value": "key_$_editor_log_button_behavior_bottom_sheet",
    "file": "strings_donottranslate.xml",
-   "line": 191,
+   "line": 192,
    "arrays": [
     {
      "array": "keys_editor_log_button_behavior",
@@ -3186,7 +3186,7 @@
    "name": "key_editor_log_button_behavior_fullscreen_page",
    "value": "key_$_editor_log_button_behavior_fullscreen_page",
    "file": "strings_donottranslate.xml",
-   "line": 192,
+   "line": 193,
    "arrays": [
     {
      "array": "keys_editor_log_button_behavior",
@@ -3210,7 +3210,7 @@
    "name": "key_editor_log_panel_input_bar_visible",
    "value": "key_$_editor_log_panel_input_bar_visible",
    "file": "strings_donottranslate.xml",
-   "line": 193,
+   "line": 194,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3225,7 +3225,7 @@
    "name": "key_editor_log_panel_time_format",
    "value": "key_$_editor_log_panel_time_format",
    "file": "strings_donottranslate.xml",
-   "line": 194,
+   "line": 195,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3240,7 +3240,7 @@
    "name": "key_editor_log_panel_time_visible",
    "value": "key_$_editor_log_panel_time_visible",
    "file": "strings_donottranslate.xml",
-   "line": 195,
+   "line": 196,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3255,7 +3255,7 @@
    "name": "key_editor_log_panel_typescript_console_visible",
    "value": "key_$_editor_log_panel_typescript_console_visible",
    "file": "strings_donottranslate.xml",
-   "line": 196,
+   "line": 197,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3270,7 +3270,7 @@
    "name": "key_editor_pinch_to_zoom_change_text_size",
    "value": "key_$_editor_pinch_to_zoom_change_text_size",
    "file": "strings_donottranslate.xml",
-   "line": 197,
+   "line": 198,
    "arrays": [
     {
      "array": "keys_editor_pinch_to_zoom_strategy",
@@ -3297,7 +3297,7 @@
    "name": "key_editor_pinch_to_zoom_change_text_size_enabled",
    "value": "key_$_editor_pinch_to_zoom_change_text_size_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 198,
+   "line": 199,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3341,7 +3341,7 @@
    "name": "key_editor_pinch_to_zoom_disable",
    "value": "key_$_editor_pinch_to_zoom_disable",
    "file": "strings_donottranslate.xml",
-   "line": 199,
+   "line": 200,
    "arrays": [
     {
      "array": "keys_editor_pinch_to_zoom_strategy",
@@ -3369,7 +3369,7 @@
    "name": "key_editor_pinch_to_zoom_scale_view",
    "value": "key_$_editor_pinch_to_zoom_scale_view",
    "file": "strings_donottranslate.xml",
-   "line": 200,
+   "line": 201,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3387,7 +3387,7 @@
    "name": "key_editor_pinch_to_zoom_strategy",
    "value": "key_$_editor_pinch_to_zoom_strategy",
    "file": "strings_donottranslate.xml",
-   "line": 201,
+   "line": 202,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -3409,7 +3409,7 @@
    "name": "key_editor_shortcut_input_bar",
    "value": "key_$_editor_shortcut_input_bar",
    "file": "strings_donottranslate.xml",
-   "line": 202,
+   "line": 203,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3441,7 +3441,7 @@
    "name": "key_editor_text_size",
    "value": "key_$_editor_text_size",
    "file": "strings_donottranslate.xml",
-   "line": 203,
+   "line": 204,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3478,7 +3478,7 @@
    "name": "key_editor_theme",
    "value": "key_$_editor_theme",
    "file": "strings_donottranslate.xml",
-   "line": 204,
+   "line": 205,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3527,7 +3527,7 @@
    "name": "key_editor_theme_dark",
    "value": "key_$_editor_theme_dark",
    "file": "strings_donottranslate.xml",
-   "line": 205,
+   "line": 206,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3550,7 +3550,7 @@
    "name": "key_editor_theme_light",
    "value": "key_$_editor_theme_light",
    "file": "strings_donottranslate.xml",
-   "line": 206,
+   "line": 207,
    "sourceRefs": [
     {
      "file": "core/pref/keys/EditorKeys.kt",
@@ -3573,7 +3573,7 @@
    "name": "key_editor_theme_mode",
    "value": "key_$_editor_theme_mode",
    "file": "strings_donottranslate.xml",
-   "line": 207,
+   "line": 208,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3614,7 +3614,7 @@
    "name": "key_editor_theme_mode_separate",
    "value": "separate_light_dark",
    "file": "strings_donottranslate.xml",
-   "line": 208,
+   "line": 209,
    "arrays": [
     {
      "array": "keys_editor_theme_mode",
@@ -3637,7 +3637,7 @@
    "name": "key_editor_theme_mode_unified",
    "value": "unified_light_dark",
    "file": "strings_donottranslate.xml",
-   "line": 209,
+   "line": 210,
    "arrays": [
     {
      "array": "keys_editor_theme_mode",
@@ -3661,7 +3661,7 @@
    "name": "key_editor_word_wrap_indent_style",
    "value": "key_$_editor_word_wrap_indent_style",
    "file": "strings_donottranslate.xml",
-   "line": 210,
+   "line": 211,
    "pages": [
     {
      "page": "fragment_code_editor_settings.xml",
@@ -3709,7 +3709,7 @@
    "name": "key_editor_word_wrap_indent_style_classic",
    "value": "classic",
    "file": "strings_donottranslate.xml",
-   "line": 211,
+   "line": 212,
    "arrays": [
     {
      "array": "keys_editor_word_wrap_indent_style",
@@ -3729,7 +3729,7 @@
    "name": "key_editor_word_wrap_indent_style_continuation",
    "value": "continuation",
    "file": "strings_donottranslate.xml",
-   "line": 212,
+   "line": 213,
    "arrays": [
     {
      "array": "keys_editor_word_wrap_indent_style",
@@ -3752,12 +3752,12 @@
    "name": "key_enable_a11y_service_with_root_access",
    "value": "key_$_enable_a11y_service_with_root_access",
    "file": "strings_donottranslate.xml",
-   "line": 213,
+   "line": 214,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 217,
+     "line": 222,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_a11y_service"
@@ -3795,12 +3795,12 @@
    "name": "key_enable_a11y_service_with_secure_settings",
    "value": "key_$_enable_a11y_service_with_secure_settings",
    "file": "strings_donottranslate.xml",
-   "line": 214,
+   "line": 215,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 224,
+     "line": 229,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_a11y_service"
@@ -3824,12 +3824,12 @@
    "name": "key_enable_a11y_service_with_shizuku",
    "value": "key_$_enable_a11y_service_with_shizuku",
    "file": "strings_donottranslate.xml",
-   "line": 215,
+   "line": 216,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 231,
+     "line": 236,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_a11y_service"
@@ -3853,11 +3853,11 @@
    "name": "key_enable_observe_key",
    "value": "key_$_enable_observe_key",
    "file": "strings_donottranslate.xml",
-   "line": 216,
+   "line": 217,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 284
+     "line": 282
     }
    ],
    "kind": "State",
@@ -3868,7 +3868,7 @@
    "name": "key_explorer_file_default_prefix",
    "value": "key_$_explorer_file_default_prefix",
    "file": "strings_donottranslate.xml",
-   "line": 217,
+   "line": 218,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
@@ -3883,12 +3883,12 @@
    "name": "key_explorer_playback_history",
    "value": "key_$_explorer_playback_history",
    "file": "strings_donottranslate.xml",
-   "line": 218,
+   "line": 219,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 127,
+     "line": 132,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_file_explorer"
@@ -3912,12 +3912,12 @@
    "name": "key_extending_js_build_in_objects",
    "value": "key_$_extending_js_build_in_objects",
    "file": "strings_donottranslate.xml",
-   "line": 219,
+   "line": 220,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 320,
+     "line": 325,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_extensibility"
@@ -3941,12 +3941,12 @@
    "name": "key_file_extensions",
    "value": "key_$_file_extensions",
    "file": "strings_donottranslate.xml",
-   "line": 220,
+   "line": 221,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 118,
+     "line": 123,
      "tag": "FileExtensionsPreference",
      "categoryTitleRes": [
       "text_file_explorer"
@@ -3970,7 +3970,7 @@
    "name": "key_file_extensions_not_show",
    "value": "key_$_file_extensions_not_show",
    "file": "strings_donottranslate.xml",
-   "line": 221,
+   "line": 222,
    "arrays": [
     {
      "array": "keys_file_extensions",
@@ -3994,7 +3994,7 @@
    "name": "key_file_extensions_show_all",
    "value": "key_$_file_extensions_show_all",
    "file": "strings_donottranslate.xml",
-   "line": 222,
+   "line": 223,
    "arrays": [
     {
      "array": "keys_file_extensions",
@@ -4021,7 +4021,7 @@
    "name": "key_file_extensions_show_all_but_executable",
    "value": "key_$_file_extensions_show_all_but_executable",
    "file": "strings_donottranslate.xml",
-   "line": 223,
+   "line": 224,
    "arrays": [
     {
      "array": "keys_file_extensions",
@@ -4045,7 +4045,7 @@
    "name": "key_floating_console_time_format",
    "value": "key_$_floating_console_time_format",
    "file": "strings_donottranslate.xml",
-   "line": 224,
+   "line": 225,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -4060,7 +4060,7 @@
    "name": "key_floating_console_time_visible",
    "value": "key_$_floating_console_time_visible",
    "file": "strings_donottranslate.xml",
-   "line": 225,
+   "line": 226,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -4075,7 +4075,7 @@
    "name": "key_floating_menu_shown",
    "value": "key_$_floating_menu_shown",
    "file": "strings_donottranslate.xml",
-   "line": 226,
+   "line": 227,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -4090,11 +4090,11 @@
    "name": "key_foreground_service",
    "value": "key_$_foreground_service",
    "file": "strings_donottranslate.xml",
-   "line": 227,
+   "line": 228,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 80
+     "line": 87
     },
     {
      "file": "inrt/SettingsActivity.kt",
@@ -4120,7 +4120,7 @@
    "name": "key_gesture_observing",
    "value": "key_$_gesture_observing",
    "file": "strings_donottranslate.xml",
-   "line": 228,
+   "line": 229,
    "sourceRefs": [
     {
      "file": "core/pref/keys/A11yKeys.kt",
@@ -4135,7 +4135,7 @@
    "name": "key_github_token",
    "value": "key_$_github_token",
    "file": "strings_donottranslate.xml",
-   "line": 229,
+   "line": 230,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -4157,7 +4157,7 @@
    "name": "key_global_console_element_time_format",
    "value": "key_$_global_console_element_time_format",
    "file": "strings_donottranslate.xml",
-   "line": 230,
+   "line": 231,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -4172,7 +4172,7 @@
    "name": "key_global_console_element_time_visible",
    "value": "key_$_global_console_element_time_visible",
    "file": "strings_donottranslate.xml",
-   "line": 231,
+   "line": 232,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -4187,12 +4187,12 @@
    "name": "key_guard_mode",
    "value": "key_$_guard_mode",
    "file": "strings_donottranslate.xml",
-   "line": 232,
+   "line": 233,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 263,
+     "line": 268,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_script_running"
@@ -4216,12 +4216,12 @@
    "name": "key_hidden_files",
    "value": "key_$_hidden_files",
    "file": "strings_donottranslate.xml",
-   "line": 233,
+   "line": 234,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 109,
+     "line": 114,
      "tag": "HiddenFilesPreference",
      "categoryTitleRes": [
       "text_file_explorer"
@@ -4245,7 +4245,7 @@
    "name": "key_hidden_files_not_show",
    "value": "key_$_hidden_files_not_show",
    "file": "strings_donottranslate.xml",
-   "line": 234,
+   "line": 235,
    "arrays": [
     {
      "array": "keys_hidden_files",
@@ -4272,7 +4272,7 @@
    "name": "key_hidden_files_show",
    "value": "key_$_hidden_files_show",
    "file": "strings_donottranslate.xml",
-   "line": 235,
+   "line": 236,
    "arrays": [
     {
      "array": "keys_hidden_files",
@@ -4300,7 +4300,7 @@
    "name": "key_history_max_days",
    "value": "key_$_history_max_days",
    "file": "strings_donottranslate.xml",
-   "line": 236,
+   "line": 237,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -4329,7 +4329,7 @@
    "name": "key_history_max_file_size_to_track_bytes",
    "value": "key_$_history_max_file_size_to_track_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 237,
+   "line": 238,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -4358,7 +4358,7 @@
    "name": "key_history_max_total_bytes",
    "value": "key_$_history_max_total_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 238,
+   "line": 239,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -4387,7 +4387,7 @@
    "name": "key_history_max_total_bytes_per_file",
    "value": "key_$_history_max_total_bytes_per_file",
    "file": "strings_donottranslate.xml",
-   "line": 239,
+   "line": 240,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -4416,7 +4416,7 @@
    "name": "key_history_max_versions",
    "value": "key_$_history_max_versions",
    "file": "strings_donottranslate.xml",
-   "line": 240,
+   "line": 241,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -4445,7 +4445,7 @@
    "name": "key_ignored_updates",
    "value": "key_$_ignored_updates",
    "file": "strings_donottranslate.xml",
-   "line": 241,
+   "line": 242,
    "sourceRefs": [
     {
      "file": "core/pref/keys/UpdatesKeys.kt",
@@ -4467,7 +4467,7 @@
    "name": "key_keep_screen_on_when_in_foreground",
    "value": "key_$_keep_screen_on_when_in_foreground",
    "file": "strings_donottranslate.xml",
-   "line": 242,
+   "line": 243,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -4504,7 +4504,7 @@
    "name": "key_keep_screen_on_when_in_foreground_all_pages",
    "value": "key_$_keep_screen_on_when_in_foreground_all_pages",
    "file": "strings_donottranslate.xml",
-   "line": 243,
+   "line": 244,
    "arrays": [
     {
      "array": "keys_keep_screen_on_when_in_foreground",
@@ -4536,7 +4536,7 @@
    "name": "key_keep_screen_on_when_in_foreground_disabled",
    "value": "key_$_keep_screen_on_when_in_foreground_disabled",
    "file": "strings_donottranslate.xml",
-   "line": 244,
+   "line": 245,
    "arrays": [
     {
      "array": "keys_keep_screen_on_when_in_foreground",
@@ -4567,7 +4567,7 @@
    "name": "key_keep_screen_on_when_in_foreground_enabled",
    "value": "key_$_keep_screen_on_when_in_foreground_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 245,
+   "line": 246,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -4582,7 +4582,7 @@
    "name": "key_keep_screen_on_when_in_foreground_homepage_only",
    "value": "key_$_keep_screen_on_when_in_foreground_homepage_only",
    "file": "strings_donottranslate.xml",
-   "line": 246,
+   "line": 247,
    "arrays": [
     {
      "array": "keys_keep_screen_on_when_in_foreground",
@@ -4596,11 +4596,11 @@
     },
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 183
+     "line": 192
     },
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 184
+     "line": 193
     },
     {
      "file": "util/ViewUtils.kt",
@@ -4618,11 +4618,11 @@
    "name": "key_keep_screen_on_when_in_foreground_last_enabled",
    "value": "key_$_keep_screen_on_when_in_foreground_last_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 247,
+   "line": 248,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 180
+     "line": 189
     }
    ],
    "kind": "State",
@@ -4633,7 +4633,7 @@
    "name": "key_last_no_newer_updates",
    "value": "key_$_last_no_newer_updates",
    "file": "strings_donottranslate.xml",
-   "line": 248,
+   "line": 249,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -4648,7 +4648,7 @@
    "name": "key_last_updates_auto_checked",
    "value": "key_$_last_updates_auto_checked",
    "file": "strings_donottranslate.xml",
-   "line": 249,
+   "line": 250,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -4663,7 +4663,7 @@
    "name": "key_last_updates_checked",
    "value": "key_$_last_updates_checked",
    "file": "strings_donottranslate.xml",
-   "line": 250,
+   "line": 251,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -4678,7 +4678,7 @@
    "name": "key_last_updates_postponed",
    "value": "key_$_last_updates_postponed",
    "file": "strings_donottranslate.xml",
-   "line": 251,
+   "line": 252,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -4693,7 +4693,7 @@
    "name": "key_launcher_icon",
    "value": "key_$_launcher_icon",
    "file": "strings_donottranslate.xml",
-   "line": 252,
+   "line": 253,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -4711,7 +4711,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 74
+     "line": 81
     }
    ],
    "kind": "Setting",
@@ -4723,7 +4723,7 @@
    "name": "key_launcher_icon_adaptive",
    "value": "key_$_launcher_icon_adaptive",
    "file": "strings_donottranslate.xml",
-   "line": 253,
+   "line": 254,
    "arrays": [
     {
      "array": "keys_launcher_icon",
@@ -4736,19 +4736,23 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 41
+     "line": 42
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 57
+     "line": 54
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 96
+     "line": 93
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 218
+     "line": 157
+    },
+    {
+     "file": "util/LauncherIconComponents.kt",
+     "line": 54
     }
    ],
    "kind": "ValueConstant",
@@ -4758,7 +4762,7 @@
    "name": "key_launcher_icon_transparent_background",
    "value": "key_$_launcher_icon_transparent_background",
    "file": "strings_donottranslate.xml",
-   "line": 254,
+   "line": 255,
    "arrays": [
     {
      "array": "keys_launcher_icon",
@@ -4768,15 +4772,19 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 42
+     "line": 43
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 56
+     "line": 53
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 217
+     "line": 156
+    },
+    {
+     "file": "util/LauncherIconComponents.kt",
+     "line": 46
     }
    ],
    "kind": "ValueConstant",
@@ -4786,7 +4794,7 @@
    "name": "key_launcher_shortcuts",
    "value": "key_$_launcher_shortcuts",
    "file": "strings_donottranslate.xml",
-   "line": 255,
+   "line": 256,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -4804,7 +4812,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 90
+     "line": 135
     }
    ],
    "kind": "Excluded",
@@ -4814,11 +4822,11 @@
    "name": "key_layout_inspector_field_mode_introduced",
    "value": "key_$_layout_inspector_field_mode_introduced",
    "file": "strings_donottranslate.xml",
-   "line": 256,
+   "line": 257,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 271
+     "line": 269
     }
    ],
    "kind": "State",
@@ -4829,7 +4837,7 @@
    "name": "key_layout_inspector_filter_profile_selected",
    "value": "key_$_layout_inspector_filter_profile_selected",
    "file": "strings_donottranslate.xml",
-   "line": 257,
+   "line": 258,
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
@@ -4844,7 +4852,7 @@
    "name": "key_layout_inspector_filter_profiles",
    "value": "key_$_layout_inspector_filter_profiles",
    "file": "strings_donottranslate.xml",
-   "line": 258,
+   "line": 259,
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
@@ -4859,7 +4867,7 @@
    "name": "key_layout_inspector_node_copy_mode",
    "value": "key_$_layout_inspector_node_copy_mode",
    "file": "strings_donottranslate.xml",
-   "line": 259,
+   "line": 260,
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
@@ -4874,11 +4882,11 @@
    "name": "key_layout_inspector_query_history",
    "value": "key_$_layout_inspector_query_history",
    "file": "strings_donottranslate.xml",
-   "line": 260,
+   "line": 261,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 279
+     "line": 277
     }
    ],
    "kind": "State",
@@ -4889,7 +4897,7 @@
    "name": "key_layout_inspector_query_mode",
    "value": "key_$_layout_inspector_query_mode",
    "file": "strings_donottranslate.xml",
-   "line": 261,
+   "line": 262,
    "sourceRefs": [
     {
      "file": "core/pref/keys/LayoutInspectorKeys.kt",
@@ -4904,11 +4912,11 @@
    "name": "key_layout_inspector_selector_mode_introduced",
    "value": "key_layout_inspector_selector_mode_introduced",
    "file": "strings_donottranslate.xml",
-   "line": 262,
+   "line": 263,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 274
+     "line": 272
     }
    ],
    "kind": "State",
@@ -4919,7 +4927,7 @@
    "name": "key_leakcanary_enabled",
    "value": "key_$_leakcanary_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 263,
+   "line": 264,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -4952,7 +4960,7 @@
    "name": "key_local_network_permission",
    "value": "key_local_network_permission",
    "file": "strings_donottranslate.xml",
-   "line": 264,
+   "line": 265,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -4972,7 +4980,7 @@
    "name": "key_log_activity_input_bar_visible",
    "value": "key_$_log_activity_input_bar_visible",
    "file": "strings_donottranslate.xml",
-   "line": 265,
+   "line": 266,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -4987,7 +4995,7 @@
    "name": "key_log_activity_log_coloring",
    "value": "key_$_log_activity_log_coloring",
    "file": "strings_donottranslate.xml",
-   "line": 266,
+   "line": 267,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -5002,7 +5010,7 @@
    "name": "key_log_activity_text_size",
    "value": "key_$_log_activity_text_size",
    "file": "strings_donottranslate.xml",
-   "line": 267,
+   "line": 268,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -5017,7 +5025,7 @@
    "name": "key_log_activity_time_format",
    "value": "key_$_log_activity_time_format",
    "file": "strings_donottranslate.xml",
-   "line": 268,
+   "line": 269,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -5032,7 +5040,7 @@
    "name": "key_log_activity_time_visible",
    "value": "key_$_log_activity_time_visible",
    "file": "strings_donottranslate.xml",
-   "line": 269,
+   "line": 270,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -5047,7 +5055,7 @@
    "name": "key_log_activity_typescript_console_visible",
    "value": "key_$_log_activity_typescript_console_visible",
    "file": "strings_donottranslate.xml",
-   "line": 270,
+   "line": 271,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConsoleKeys.kt",
@@ -5062,7 +5070,7 @@
    "name": "key_mail_settings",
    "value": "key_$_mail_settings",
    "file": "strings_donottranslate.xml",
-   "line": 271,
+   "line": 272,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5084,12 +5092,12 @@
    "name": "key_manage_ignored_updates",
    "value": "key_$_manage_ignored_updates",
    "file": "strings_donottranslate.xml",
-   "line": 272,
+   "line": 273,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 355,
+     "line": 360,
      "tag": "ManageIgnoredUpdatesPreference",
      "categoryTitleRes": [
       "text_updates"
@@ -5112,7 +5120,7 @@
    "name": "key_mcp_server_normally_closed",
    "value": "key_$_mcp_server_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 273,
+   "line": 274,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -5127,7 +5135,7 @@
    "name": "key_memory_script_heap_dump",
    "value": "key_$_memory_script_heap_dump",
    "file": "strings_donottranslate.xml",
-   "line": 274,
+   "line": 275,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5156,7 +5164,7 @@
    "name": "key_memory_unreclaimed_warning",
    "value": "key_$_memory_unreclaimed_warning",
    "file": "strings_donottranslate.xml",
-   "line": 275,
+   "line": 276,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5189,7 +5197,7 @@
    "name": "key_new_script_module_layer",
    "value": "key_$_new_script_module_layer",
    "file": "strings_donottranslate.xml",
-   "line": 276,
+   "line": 277,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5218,7 +5226,7 @@
    "name": "key_night_mode",
    "value": "key_$_night_mode",
    "file": "strings_donottranslate.xml",
-   "line": 277,
+   "line": 278,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5256,7 +5264,7 @@
    "name": "key_night_mode_always_off",
    "value": "key_$_night_mode_always_off",
    "file": "strings_donottranslate.xml",
-   "line": 278,
+   "line": 279,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5284,7 +5292,7 @@
    "name": "key_night_mode_always_on",
    "value": "key_$_night_mode_always_on",
    "file": "strings_donottranslate.xml",
-   "line": 279,
+   "line": 280,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5308,7 +5316,7 @@
    "name": "key_night_mode_enabled",
    "value": "key_$_night_mode_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 280,
+   "line": 281,
    "sourceRefs": [
     {
      "file": "core/plugin/center/PluginCenterFragment.kt",
@@ -5332,7 +5340,7 @@
    "name": "key_night_mode_follow_system",
    "value": "key_$_night_mode_follow_system",
    "file": "strings_donottranslate.xml",
-   "line": 281,
+   "line": 282,
    "arrays": [
     {
      "array": "keys_night_mode",
@@ -5363,7 +5371,7 @@
    "name": "key_night_mode_null",
    "value": "key_$_night_mode_null",
    "file": "strings_donottranslate.xml",
-   "line": 282,
+   "line": 283,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -5381,7 +5389,7 @@
    "name": "key_nodejs_doctor_report",
    "value": "key_$_nodejs_doctor_report",
    "file": "strings_donottranslate.xml",
-   "line": 283,
+   "line": 284,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5409,7 +5417,7 @@
    "name": "key_nodejs_inspector_enabled",
    "value": "key_$_nodejs_inspector_enabled",
    "file": "strings_donottranslate.xml",
-   "line": 284,
+   "line": 285,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -5438,7 +5446,7 @@
    "name": "key_not_showing_main_activity",
    "value": "key_$_not_showing_main_activity",
    "file": "strings_donottranslate.xml",
-   "line": 285,
+   "line": 286,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -5466,7 +5474,7 @@
    "name": "key_pc_server_address_history",
    "value": "key_$_pc_server_address_histories",
    "file": "strings_donottranslate.xml",
-   "line": 286,
+   "line": 287,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -5481,7 +5489,7 @@
    "name": "key_plugin_center_auto_check_updates",
    "value": "key_$_plugin_center_auto_check_updates",
    "file": "strings_donottranslate.xml",
-   "line": 287,
+   "line": 288,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5514,7 +5522,7 @@
    "name": "key_plugin_center_last_online_check_ts",
    "value": "key_$_plugin_center_last_online_check_ts",
    "file": "strings_donottranslate.xml",
-   "line": 288,
+   "line": 289,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -5529,7 +5537,7 @@
    "name": "key_plugin_center_show_official_plugins",
    "value": "key_$_plugin_center_show_official_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 289,
+   "line": 290,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5562,7 +5570,7 @@
    "name": "key_plugin_center_show_third_party_plugins",
    "value": "key_$_plugin_center_show_third_party_plugins",
    "file": "strings_donottranslate.xml",
-   "line": 290,
+   "line": 291,
    "pages": [
     {
      "page": "fragment_plugin_center_preferences.xml",
@@ -5595,7 +5603,7 @@
    "name": "key_post_notifications_permission",
    "value": "key_$_post_notifications_permission",
    "file": "strings_donottranslate.xml",
-   "line": 291,
+   "line": 292,
    "sourceRefs": [
     {
      "file": "inrt/SettingsActivity.kt",
@@ -5615,7 +5623,7 @@
    "name": "key_post_notifications_permission_request_attempted",
    "value": "key_$_post_notifications_permission_request_attempted",
    "file": "strings_donottranslate.xml",
-   "line": 292,
+   "line": 293,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -5630,7 +5638,7 @@
    "name": "key_pref_bundle_default_item",
    "value": "key_$_pref_bundle_default_item",
    "file": "strings_donottranslate.xml",
-   "line": 293,
+   "line": 294,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
@@ -5638,7 +5646,7 @@
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 217
+     "line": 156
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5652,7 +5660,7 @@
    "name": "key_pref_bundle_disabled_items",
    "value": "key_$_pref_bundle_disabled_items",
    "file": "strings_donottranslate.xml",
-   "line": 294,
+   "line": 295,
    "sourceRefs": [
     {
      "file": "theme/preference/MaterialListPreference.kt",
@@ -5660,7 +5668,7 @@
     },
     {
      "file": "ui/settings/LauncherIconPreference.kt",
-     "line": 218
+     "line": 157
     },
     {
      "file": "ui/settings/NightModePreference.kt",
@@ -5674,12 +5682,12 @@
    "name": "key_record_toast",
    "value": "key_$_record_toast",
    "file": "strings_donottranslate.xml",
-   "line": 295,
+   "line": 296,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 298,
+     "line": 303,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_script_record"
@@ -5703,12 +5711,12 @@
    "name": "key_release_history",
    "value": "key_$_release_history",
    "file": "strings_donottranslate.xml",
-   "line": 296,
+   "line": 297,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 361,
+     "line": 366,
      "tag": "ReleaseHistoryPreference",
      "categoryTitleRes": [
       "text_updates"
@@ -5731,7 +5739,7 @@
    "name": "key_restart_strategy",
    "value": "key_$_restart_strategy",
    "file": "strings_donottranslate.xml",
-   "line": 297,
+   "line": 298,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -5749,7 +5757,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 54
+     "line": 61
     }
    ],
    "kind": "Setting",
@@ -5760,7 +5768,7 @@
    "name": "key_restart_strategy_quick",
    "value": "key_$_restart_strategy_quick",
    "file": "strings_donottranslate.xml",
-   "line": 298,
+   "line": 299,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5773,11 +5781,11 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 31
+     "line": 32
     },
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 102
+     "line": 147
     }
    ],
    "kind": "ValueConstant",
@@ -5787,7 +5795,7 @@
    "name": "key_restart_strategy_scheduled",
    "value": "key_$_restart_strategy_scheduled",
    "file": "strings_donottranslate.xml",
-   "line": 299,
+   "line": 300,
    "arrays": [
     {
      "array": "keys_restart_strategy",
@@ -5797,7 +5805,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 32
+     "line": 33
     }
    ],
    "kind": "ValueConstant",
@@ -5807,12 +5815,12 @@
    "name": "key_rhino_java_primitive_wrap",
    "value": "key_$_rhino_java_primitive_wrap",
    "file": "strings_donottranslate.xml",
-   "line": 300,
+   "line": 301,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 328,
+     "line": 333,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_extensibility"
@@ -5836,7 +5844,7 @@
    "name": "key_root_manager_apps_cache",
    "value": "root_manager_apps_cache",
    "file": "strings_donottranslate.xml",
-   "line": 301,
+   "line": 302,
    "sourceRefs": [
     {
      "file": "core/pref/keys/RunningKeys.kt",
@@ -5850,7 +5858,7 @@
    "name": "key_root_manager_apps_custom",
    "value": "root_manager_apps_custom",
    "file": "strings_donottranslate.xml",
-   "line": 302,
+   "line": 303,
    "sourceRefs": [
     {
      "file": "core/pref/keys/RunningKeys.kt",
@@ -5865,12 +5873,12 @@
    "name": "key_root_mode",
    "value": "key_$_root_mode",
    "file": "strings_donottranslate.xml",
-   "line": 303,
+   "line": 304,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 270,
+     "line": 275,
      "tag": "RootModePreference",
      "categoryTitleRes": [
       "text_script_running"
@@ -5894,7 +5902,7 @@
    "name": "key_root_mode_auto_detect",
    "value": "key_$_root_mode_auto_detect",
    "file": "strings_donottranslate.xml",
-   "line": 304,
+   "line": 305,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5921,7 +5929,7 @@
    "name": "key_root_mode_force_non_root",
    "value": "key_$_root_mode_force_non_root",
    "file": "strings_donottranslate.xml",
-   "line": 305,
+   "line": 306,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5945,7 +5953,7 @@
    "name": "key_root_mode_force_root",
    "value": "key_$_root_mode_force_root",
    "file": "strings_donottranslate.xml",
-   "line": 306,
+   "line": 307,
    "arrays": [
     {
      "array": "keys_root_mode",
@@ -5969,12 +5977,12 @@
    "name": "key_root_record_out_file_type",
    "value": "key_$_root_record_out_file_type",
    "file": "strings_donottranslate.xml",
-   "line": 307,
+   "line": 308,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 305,
+     "line": 310,
      "tag": "MaterialListPreference",
      "categoryTitleRes": [
       "text_script_record"
@@ -5998,7 +6006,7 @@
    "name": "key_root_record_out_file_type_binary",
    "value": "key_$_root_record_out_file_type_binary",
    "file": "strings_donottranslate.xml",
-   "line": 308,
+   "line": 309,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -6025,7 +6033,7 @@
    "name": "key_root_record_out_file_type_js",
    "value": "key_$_root_record_out_file_type_js",
    "file": "strings_donottranslate.xml",
-   "line": 309,
+   "line": 310,
    "arrays": [
     {
      "array": "keys_root_record_out_file_type",
@@ -6045,7 +6053,7 @@
    "name": "key_run_on_boot_inrt",
    "value": "key_$_run_on_boot_inrt",
    "file": "strings_donottranslate.xml",
-   "line": 310,
+   "line": 311,
    "sourceRefs": [
     {
      "file": "inrt/Pref.kt",
@@ -6069,11 +6077,11 @@
    "name": "key_scheduled_restart_backend",
    "value": "key_$_scheduled_restart_backend",
    "file": "strings_donottranslate.xml",
-   "line": 311,
+   "line": 312,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 60
+     "line": 67
     }
    ],
    "kind": "Setting",
@@ -6084,11 +6092,11 @@
    "name": "key_scheduled_restart_backend_alarm_manager",
    "value": "key_$_scheduled_restart_backend_alarm_manager",
    "file": "strings_donottranslate.xml",
-   "line": 312,
+   "line": 313,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 36
+     "line": 37
     },
     {
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
@@ -6110,18 +6118,18 @@
    "name": "key_scheduled_restart_backend_work_manager",
    "value": "key_$_scheduled_restart_backend_work_manager",
    "file": "strings_donottranslate.xml",
-   "line": 313,
+   "line": 314,
    "defaultOf": [
     "default_key_scheduled_restart_backend"
    ],
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 37
+     "line": 38
     },
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 107
+     "line": 152
     },
     {
      "file": "ui/settings/ScheduledRestartSettingsDialogBuilder.kt",
@@ -6135,11 +6143,11 @@
    "name": "key_scheduled_restart_delay",
    "value": "key_$_scheduled_restart_delay",
    "file": "strings_donottranslate.xml",
-   "line": 314,
+   "line": 315,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 67
+     "line": 74
     }
    ],
    "kind": "Setting",
@@ -6150,12 +6158,12 @@
    "name": "key_screen_capture_request_delay",
    "value": "key_$_screen_capture_request_delay_ms",
    "file": "strings_donottranslate.xml",
-   "line": 315,
+   "line": 316,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 279,
+     "line": 284,
      "tag": "ScreenCaptureRequestDelayPreference",
      "categoryTitleRes": [
       "text_script_running"
@@ -6179,7 +6187,7 @@
    "name": "key_script_module_debug_print",
    "value": "key_$_script_module_debug_print",
    "file": "strings_donottranslate.xml",
-   "line": 316,
+   "line": 317,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6208,7 +6216,7 @@
    "name": "key_script_module_debug_print_disabled_modules",
    "value": "key_$_script_module_debug_print_disabled_modules",
    "file": "strings_donottranslate.xml",
-   "line": 317,
+   "line": 318,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6237,11 +6245,11 @@
    "name": "key_scripts_after_app_restart",
    "value": "key_$_scripts_after_app_restart",
    "file": "strings_donottranslate.xml",
-   "line": 318,
+   "line": 319,
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 92
+     "line": 137
     },
     {
      "file": "util/IntentUtils.kt",
@@ -6259,7 +6267,7 @@
    "name": "key_server_address",
    "value": "key_$_server_address",
    "file": "strings_donottranslate.xml",
-   "line": 319,
+   "line": 320,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6274,7 +6282,7 @@
    "name": "key_server_mode_lan_discovery",
    "value": "key_$_server_mode_lan_discovery",
    "file": "strings_donottranslate.xml",
-   "line": 320,
+   "line": 321,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6289,7 +6297,7 @@
    "name": "key_server_mode_manager_clients_level",
    "value": "key_$_server_mode_manager_clients_level",
    "file": "strings_donottranslate.xml",
-   "line": 321,
+   "line": 322,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6304,7 +6312,7 @@
    "name": "key_server_mode_manager_control_level",
    "value": "key_$_server_mode_manager_control_level",
    "file": "strings_donottranslate.xml",
-   "line": 322,
+   "line": 323,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6319,7 +6327,7 @@
    "name": "key_server_mode_manager_settings_collapsed",
    "value": "key_$_server_mode_manager_settings_collapsed",
    "file": "strings_donottranslate.xml",
-   "line": 323,
+   "line": 324,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6334,7 +6342,7 @@
    "name": "key_server_mode_manager_status_level",
    "value": "key_$_server_mode_manager_status_level",
    "file": "strings_donottranslate.xml",
-   "line": 324,
+   "line": 325,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6349,7 +6357,7 @@
    "name": "key_server_mode_notify_connection_changes",
    "value": "key_$_server_mode_notify_connection_changes",
    "file": "strings_donottranslate.xml",
-   "line": 325,
+   "line": 326,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6364,7 +6372,7 @@
    "name": "key_server_mode_restore_on_launch",
    "value": "key_$_server_mode_restore_on_launch",
    "file": "strings_donottranslate.xml",
-   "line": 326,
+   "line": 327,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ConnectionKeys.kt",
@@ -6379,7 +6387,7 @@
    "name": "key_server_socket_normally_closed",
    "value": "key_$_server_socket_normally_closed",
    "file": "strings_donottranslate.xml",
-   "line": 327,
+   "line": 328,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6391,10 +6399,173 @@
    "note": "上次是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys"
   },
   {
+   "name": "key_settings_auto_backup_change",
+   "value": "key_$_settings_auto_backup_change",
+   "file": "strings_donottranslate.xml",
+   "line": 329,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 106
+    }
+   ],
+   "otherResRefs": [
+    {
+     "file": "res/xml/fragment_settings_auto_backup.xml",
+     "line": 34
+    }
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "\"变更后备份\" 开关, 默认关 (\"管理 AutoJs6 设置\" > 自动备份, T20); P9.3 声明为 GeneralKeys, 不触发变更后备份 (ownKeys)"
+  },
+  {
+   "name": "key_settings_auto_backup_operation",
+   "value": "key_$_settings_auto_backup_operation",
+   "file": "strings_donottranslate.xml",
+   "line": 330,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 113
+    }
+   ],
+   "otherResRefs": [
+    {
+     "file": "res/xml/fragment_settings_auto_backup.xml",
+     "line": 41
+    }
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "\"操作后备份\" 开关, 默认开 (T20); P9.1 声明为 GeneralKeys, 不触发变更后备份 (ownKeys)"
+  },
+  {
+   "name": "key_settings_auto_backup_period",
+   "value": "key_$_settings_auto_backup_period",
+   "file": "strings_donottranslate.xml",
+   "line": 331,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 99
+    }
+   ],
+   "otherResRefs": [
+    {
+     "file": "res/xml/fragment_settings_auto_backup.xml",
+     "line": 25
+    }
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "周期备份的周期, 列表项, 默认每周 (附录 C Q32); P9.2 声明为 GeneralKeys, 不触发变更后备份 (ownKeys)"
+  },
+  {
+   "name": "key_settings_auto_backup_period_daily",
+   "value": "key_$_settings_auto_backup_period_daily",
+   "file": "strings_donottranslate.xml",
+   "line": 332,
+   "arrays": [
+    {
+     "array": "keys_settings_auto_backup_period",
+     "owner": null
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 47
+    },
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 164
+    }
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
+  },
+  {
+   "name": "key_settings_auto_backup_period_monthly",
+   "value": "key_$_settings_auto_backup_period_monthly",
+   "file": "strings_donottranslate.xml",
+   "line": 333,
+   "arrays": [
+    {
+     "array": "keys_settings_auto_backup_period",
+     "owner": null
+    }
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 49
+    },
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 166
+    }
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值"
+  },
+  {
+   "name": "key_settings_auto_backup_period_weekly",
+   "value": "key_$_settings_auto_backup_period_weekly",
+   "file": "strings_donottranslate.xml",
+   "line": 334,
+   "arrays": [
+    {
+     "array": "keys_settings_auto_backup_period",
+     "owner": null
+    }
+   ],
+   "defaultOf": [
+    "default_key_settings_auto_backup_period"
+   ],
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 48
+    },
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 165
+    }
+   ],
+   "kind": "ValueConstant",
+   "note": "候选值, 默认值"
+  },
+  {
+   "name": "key_settings_auto_backup_periodic",
+   "value": "key_$_settings_auto_backup_periodic",
+   "file": "strings_donottranslate.xml",
+   "line": 335,
+   "sourceRefs": [
+    {
+     "file": "core/pref/keys/GeneralKeys.kt",
+     "line": 92
+    }
+   ],
+   "otherResRefs": [
+    {
+     "file": "res/xml/fragment_settings_auto_backup.xml",
+     "line": 18
+    },
+    {
+     "file": "res/xml/fragment_settings_auto_backup.xml",
+     "line": 26
+    }
+   ],
+   "kind": "Setting",
+   "category": "general",
+   "note": "\"周期备份\" 开关, 默认关 (T20); P9.2 声明为 GeneralKeys, 不触发变更后备份 (ownKeys)"
+  },
+  {
    "name": "key_setup_wizard_welcome_done",
    "value": "key_$_setup_wizard_welcome_done",
    "file": "strings_donottranslate.xml",
-   "line": 328,
+   "line": 336,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6409,12 +6580,12 @@
    "name": "key_setup_wizards",
    "value": "key_$_setup_wizards",
    "file": "strings_donottranslate.xml",
-   "line": 329,
+   "line": 337,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 91,
+     "line": 96,
      "tag": "MaterialPreference",
      "categoryTitleRes": [
       "text_config"
@@ -6427,7 +6598,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/GeneralKeys.kt",
-     "line": 91
+     "line": 136
     },
     {
      "file": "ui/settings/PreferencesFragment.kt",
@@ -6441,12 +6612,12 @@
    "name": "key_stable_mode",
    "value": "key_$_stable_mode",
    "file": "strings_donottranslate.xml",
-   "line": 330,
+   "line": 338,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 238,
+     "line": 243,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_a11y_service"
@@ -6480,7 +6651,7 @@
    "name": "key_theme_color",
    "value": "key_$_theme_color",
    "file": "strings_donottranslate.xml",
-   "line": 331,
+   "line": 339,
    "pages": [
     {
      "page": "fragment_preferences.xml",
@@ -6508,7 +6679,7 @@
    "name": "key_theme_color_accent",
    "value": "key_$_theme_color_accent",
    "file": "strings_donottranslate.xml",
-   "line": 332,
+   "line": 340,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6524,7 +6695,7 @@
    "name": "key_theme_color_primary",
    "value": "key_$_theme_color_primary",
    "file": "strings_donottranslate.xml",
-   "line": 333,
+   "line": 341,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6540,7 +6711,7 @@
    "name": "key_theme_color_primary_dark",
    "value": "key_$_theme_color_primary_dark",
    "file": "strings_donottranslate.xml",
-   "line": 334,
+   "line": 342,
    "sourceRefs": [
     {
      "file": "core/pref/keys/AppearanceKeys.kt",
@@ -6556,12 +6727,12 @@
    "name": "key_timed_task_backend",
    "value": "key_$_timed_task_backend",
    "file": "strings_donottranslate.xml",
-   "line": 335,
+   "line": 343,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 201,
+     "line": 206,
      "tag": "TimedTaskBackendPreference",
      "categoryTitleRes": [
       "text_timed_task"
@@ -6586,7 +6757,7 @@
    "name": "key_timed_task_backend_alarm",
    "value": "key_$_timed_task_backend_alarm",
    "file": "strings_donottranslate.xml",
-   "line": 336,
+   "line": 344,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6599,7 +6770,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 55
+     "line": 57
     },
     {
      "file": "core/pref/keys/TimedTaskKeys.kt",
@@ -6621,7 +6792,7 @@
    "name": "key_timed_task_backend_job",
    "value": "key_$_timed_task_backend_job",
    "file": "strings_donottranslate.xml",
-   "line": 337,
+   "line": 345,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6645,7 +6816,7 @@
    "name": "key_timed_task_backend_work",
    "value": "key_$_timed_task_backend_work",
    "file": "strings_donottranslate.xml",
-   "line": 338,
+   "line": 346,
    "arrays": [
     {
      "array": "keys_timed_task_backend",
@@ -6669,12 +6840,12 @@
    "name": "key_trash_and_version_history_settings",
    "value": "key_$_trash_and_version_history_settings",
    "file": "strings_donottranslate.xml",
-   "line": 339,
+   "line": 347,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 146,
+     "line": 151,
      "tag": "TrashAndVersionHistorySettingsPreference",
      "categoryTitleRes": [
       "text_trash_and_version_history"
@@ -6697,7 +6868,7 @@
    "name": "key_trash_max_days",
    "value": "key_$_trash_max_days",
    "file": "strings_donottranslate.xml",
-   "line": 340,
+   "line": 348,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6726,7 +6897,7 @@
    "name": "key_trash_max_total_bytes",
    "value": "key_$_trash_max_total_bytes",
    "file": "strings_donottranslate.xml",
-   "line": 341,
+   "line": 349,
    "pages": [
     {
      "page": "fragment_trash_and_version_history_settings.xml",
@@ -6755,7 +6926,7 @@
    "name": "key_updates_checked_states_cleared",
    "value": "key_$_updates_checked_states_cleared",
    "file": "strings_donottranslate.xml",
-   "line": 342,
+   "line": 350,
    "pages": [
     {
      "page": "fragment_developer_options.xml",
@@ -6783,12 +6954,12 @@
    "name": "key_use_volume_control_record",
    "value": "key_$_use_volume_control_record",
    "file": "strings_donottranslate.xml",
-   "line": 343,
+   "line": 351,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 291,
+     "line": 296,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_script_record"
@@ -6812,12 +6983,12 @@
    "name": "key_use_volume_control_running",
    "value": "key_$_use_volume_control_running",
    "file": "strings_donottranslate.xml",
-   "line": 344,
+   "line": 352,
    "pages": [
     {
      "page": "fragment_preferences.xml",
      "pageLabel": "设置",
-     "line": 256,
+     "line": 261,
      "tag": "ThemeColorSwitchPreference",
      "categoryTitleRes": [
       "text_script_running"
@@ -6855,11 +7026,11 @@
    "name": "key_version_history_restore_does_not_auto_save_to_disk",
    "value": "key_$_version_history_restore_does_not_auto_save_to_disk",
    "file": "strings_donottranslate.xml",
-   "line": 345,
+   "line": 353,
    "sourceRefs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 51
+     "line": 53
     }
    ],
    "kind": "State",
@@ -6870,7 +7041,7 @@
    "name": "key_working_directory",
    "value": "key_$_working_directory",
    "file": "strings_donottranslate.xml",
-   "line": 346,
+   "line": 354,
    "sourceRefs": [
     {
      "file": "core/pref/keys/ExplorerKeys.kt",
@@ -6886,7 +7057,7 @@
    "name": "key_working_directory_history",
    "value": "key_$_working_directory_histories",
    "file": "strings_donottranslate.xml",
-   "line": 347,
+   "line": 355,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6901,7 +7072,7 @@
    "name": "key_working_directory_initialized",
    "value": "key_$_working_directory_initialized",
    "file": "strings_donottranslate.xml",
-   "line": 348,
+   "line": 356,
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
@@ -6983,7 +7154,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 87,
+     "line": 89,
      "const": null
     }
    ],
@@ -7034,7 +7205,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 97,
+     "line": 108,
      "const": null
     }
    ],
@@ -7051,7 +7222,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 256,
+     "line": 254,
      "const": null
     }
    ],
@@ -7068,7 +7239,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 264,
+     "line": 262,
      "const": null
     }
    ],
@@ -7085,7 +7256,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 259,
+     "line": 257,
      "const": null
     }
    ],
@@ -7102,7 +7273,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 252,
+     "line": 250,
      "const": null
     }
    ],
@@ -7119,7 +7290,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 220,
+     "line": 229,
      "const": null
     }
    ],
@@ -7136,7 +7307,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 223,
+     "line": 232,
      "const": null
     }
    ],
@@ -7153,7 +7324,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 226,
+     "line": 235,
      "const": null
     }
    ],
@@ -7170,7 +7341,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 202,
+     "line": 211,
      "const": null
     }
    ],
@@ -7187,7 +7358,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 205,
+     "line": 214,
      "const": null
     }
    ],
@@ -7204,7 +7375,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 212,
+     "line": 221,
      "const": null
     }
    ],
@@ -7221,7 +7392,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 209,
+     "line": 218,
      "const": null
     }
    ],
@@ -7255,7 +7426,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 216,
+     "line": 225,
      "const": null
     }
    ],
@@ -7328,7 +7499,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 83,
+     "line": 85,
      "const": null
     }
    ],
@@ -7749,6 +7920,23 @@
    "store": "key_$_ignored_updates"
   },
   {
+   "name": "key_$_ip_address_may_be_invalid_for_server_connection_prompt",
+   "refs": [
+    {
+     "file": "core/pref/keys/DialogStateKeys.kt",
+     "line": 97,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "连接服务端时 \"IP 地址可能无效\" 的不再提示 (JsonSocketClientTool); 附录 C Q23 起用固定键, 声明为 DialogStateKeys; 旧版按调用栈 MD5 命名的键残留归 other (P14.1)",
+   "store": "default"
+  },
+  {
    "name": "key_$_last_install_time_$_",
    "refs": [
     {
@@ -7770,7 +7958,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 237,
+     "line": 242,
      "const": null
     }
    ],
@@ -7855,7 +8043,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 71,
+     "line": 73,
      "const": null
     }
    ],
@@ -7872,7 +8060,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 75,
+     "line": 77,
      "const": null
     }
    ],
@@ -8314,7 +8502,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 79,
+     "line": 81,
      "const": null
     }
    ],
@@ -8547,6 +8735,23 @@
    "store": "default"
   },
   {
+   "name": "key_$_settings_transfer_export_categories",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 181,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "导出向导上次选择的分类 (不含凭据, SettingsCategoryPickerStep); P6.3 声明为 MiscStateKeys (附录 C Q28)",
+   "store": "default"
+  },
+  {
    "name": "key_$_suspended_plugin_$_",
    "refs": [
     {
@@ -8615,7 +8820,7 @@
     },
     {
      "file": "runtime/api/Events.java",
-     "line": 362,
+     "line": 403,
      "const": null
     }
    ],
@@ -8753,7 +8958,7 @@
     },
     {
      "file": "runtime/api/Events.java",
-     "line": 365,
+     "line": 406,
      "const": null
     }
    ],
@@ -8818,7 +9023,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 194,
+     "line": 203,
      "const": null
     }
    ],
@@ -8835,7 +9040,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 198,
+     "line": 207,
      "const": null
     }
    ],
@@ -8868,68 +9073,68 @@
    "name": "org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent",
    "refs": [
     {
-     "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 230,
+     "file": "core/pref/keys/FloatingKeys.kt",
+     "line": 25,
      "const": null
     }
    ],
    "storeGuess": [
     "default"
    ],
-   "kind": "State",
-   "category": "other",
-   "note": "悬浮按钮位置, 屏幕宽度的比例 (CircularMenuWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "kind": "Setting",
+   "category": "floating",
+   "note": "悬浮按钮位置, 屏幕宽度的比例 (CircularMenuWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys",
    "store": "default"
   },
   {
    "name": "org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent",
    "refs": [
     {
-     "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 233,
+     "file": "core/pref/keys/FloatingKeys.kt",
+     "line": 30,
      "const": null
     }
    ],
    "storeGuess": [
     "default"
    ],
-   "kind": "State",
-   "category": "other",
-   "note": "悬浮按钮位置, 屏幕高度的比例 (CircularMenuWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "kind": "Setting",
+   "category": "floating",
+   "note": "悬浮按钮位置, 屏幕高度的比例 (CircularMenuWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys",
    "store": "default"
   },
   {
    "name": "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent",
    "refs": [
     {
-     "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 241,
+     "file": "core/pref/keys/FloatingKeys.kt",
+     "line": 36,
      "const": null
     }
    ],
    "storeGuess": [
     "default"
    ],
-   "kind": "State",
-   "category": "other",
-   "note": "悬浮控制器位置, 屏幕宽度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "kind": "Setting",
+   "category": "floating",
+   "note": "悬浮控制器位置, 屏幕宽度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys",
    "store": "default"
   },
   {
    "name": "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent",
    "refs": [
     {
-     "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 244,
+     "file": "core/pref/keys/FloatingKeys.kt",
+     "line": 41,
      "const": null
     }
    ],
    "storeGuess": [
     "default"
    ],
-   "kind": "State",
-   "category": "other",
-   "note": "悬浮控制器位置, 屏幕高度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别 (附录 C Q18), P4.2 声明为 MiscStateKeys",
+   "kind": "Setting",
+   "category": "floating",
+   "note": "悬浮控制器位置, 屏幕高度的比例, -1 为尚未放置 (FloatingControllerWindow); P0 清单未识别; 附录 C Q18 拍板为可勾选分类 floating, 声明为 FloatingKeys",
    "store": "default"
   },
   {
@@ -9044,7 +9249,7 @@
    "refs": [
     {
      "file": "core/pref/keys/DialogStateKeys.kt",
-     "line": 91,
+     "line": 102,
      "const": null
     }
    ],
@@ -9318,9 +9523,9 @@
    "calls": [
     {
      "file": "engine/NodeBridgeProtocol.kt",
-     "line": 3411,
+     "line": 3436,
      "arg": "storagePreferencesName(storeName)",
-     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3526)"
+     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3551)"
     }
    ],
    "files": [
@@ -11477,7 +11682,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_auto_check_for_updates\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 348,
+    "line": 353,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -11630,7 +11835,7 @@
     "value": "false",
     "expr": "app:defaultValue=\"false\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 152,
+    "line": 157,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -11643,7 +11848,7 @@
     "value": "key_$_documentation_source_local",
     "expr": "keyResource(R.string.default_key_documentation_source, \"default_key_documentation_source\")",
     "file": "core/pref/keys/GeneralKeys.kt",
-    "line": 47,
+    "line": 54,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    },
@@ -11700,7 +11905,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_editor_auto_show_log_bottom_sheet_on_run\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 174,
+    "line": 179,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    },
@@ -11766,7 +11971,7 @@
     "value": "native",
     "expr": "app:itemDefaultKey=\"@string/default_key_editor_engine\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 165,
+    "line": 170,
     "method": "EditorEnginePreference",
     "type": "String (Enum)"
    },
@@ -11879,7 +12084,7 @@
     "value": "key_$_editor_log_button_behavior_bottom_sheet",
     "expr": "app:itemDefaultKey=\"@string/default_key_editor_log_button_behavior\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 181,
+    "line": 186,
     "method": "MaterialListPreference",
     "type": "String (Enum)"
    },
@@ -12149,7 +12354,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_enable_a11y_service_with_root_access\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 217,
+    "line": 222,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12171,7 +12376,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_enable_a11y_service_with_secure_settings\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 224,
+    "line": 229,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12193,7 +12398,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_enable_a11y_service_with_shizuku\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 231,
+    "line": 236,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12226,7 +12431,7 @@
     "value": "false",
     "expr": "app:defaultValue=\"@bool/pref_explorer_playback_history\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 127,
+    "line": 132,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12248,7 +12453,7 @@
     "value": "false",
     "expr": "app:defaultValue=\"@bool/pref_extending_js_build_in_objects\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 320,
+    "line": 325,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12272,7 +12477,7 @@
     "value": "key_$_file_extensions_show_all",
     "expr": "app:itemDefaultKey=\"@string/default_key_file_extensions\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 118,
+    "line": 123,
     "method": "FileExtensionsPreference",
     "type": "String (Enum)"
    }
@@ -12335,7 +12540,7 @@
     "form": "调用处字面量",
     "value": "false",
     "file": "core/pref/keys/GeneralKeys.kt",
-    "line": 80,
+    "line": 87,
     "method": "SettingKey.Bool",
     "type": "Boolean"
    },
@@ -12420,7 +12625,7 @@
     "value": "false",
     "expr": "app:defaultValue=\"@bool/pref_guard_mode\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 263,
+    "line": 268,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -12444,7 +12649,7 @@
     "value": "key_$_hidden_files_not_show",
     "expr": "app:itemDefaultKey=\"@string/default_key_hidden_files\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 109,
+    "line": 114,
     "method": "HiddenFilesPreference",
     "type": "String (Enum)"
    }
@@ -12574,7 +12779,7 @@
     "value": "key_$_launcher_icon_adaptive",
     "expr": "keyResource(R.string.default_key_launcher_icon, \"default_key_launcher_icon\")",
     "file": "core/pref/keys/GeneralKeys.kt",
-    "line": 73,
+    "line": 80,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    },
@@ -12987,7 +13192,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_record_toast\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 298,
+    "line": 303,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -13000,7 +13205,7 @@
     "value": "key_$_restart_strategy_quick",
     "expr": "keyResource(R.string.default_key_restart_strategy, \"default_key_restart_strategy\")",
     "file": "core/pref/keys/GeneralKeys.kt",
-    "line": 53,
+    "line": 60,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    },
@@ -13033,7 +13238,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_rhino_java_primitive_wrap\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 328,
+    "line": 333,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -13068,7 +13273,7 @@
     "value": "key_$_root_mode_auto_detect",
     "expr": "app:itemDefaultKey=\"@string/default_key_root_mode\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 270,
+    "line": 275,
     "method": "RootModePreference",
     "type": "String (Enum)"
    }
@@ -13092,7 +13297,7 @@
     "value": "key_$_root_record_out_file_type_binary",
     "expr": "app:itemDefaultKey=\"@string/default_key_root_record_out_file_type\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 305,
+    "line": 310,
     "method": "MaterialListPreference",
     "type": "String (Enum)"
    }
@@ -13116,7 +13321,7 @@
     "value": "key_$_scheduled_restart_backend_work_manager",
     "expr": "keyResource(R.string.default_key_scheduled_restart_backend, \"default_key_scheduled_restart_backend\")",
     "file": "core/pref/keys/GeneralKeys.kt",
-    "line": 59,
+    "line": 66,
     "method": "SettingKey.Enum",
     "type": "String (Enum)"
    }
@@ -13128,7 +13333,7 @@
     "value": "300",
     "expr": "intResource(R.integer.scheduled_restart_start_delay_default_value, \"scheduled_restart_start_delay_default_value\")",
     "file": "core/pref/keys/GeneralKeys.kt",
-    "line": 66,
+    "line": 73,
     "method": "SettingKey.Int",
     "type": "Int"
    }
@@ -13236,6 +13441,55 @@
     "type": "Boolean"
    }
   ],
+  "key_settings_auto_backup_change": [
+   {
+    "form": "R.bool",
+    "ref": "pref_settings_auto_backup_change",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_settings_auto_backup_change, \"pref_settings_auto_backup_change\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 105,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "key_settings_auto_backup_operation": [
+   {
+    "form": "R.bool",
+    "ref": "pref_settings_auto_backup_operation",
+    "value": "true",
+    "expr": "boolResource(R.bool.pref_settings_auto_backup_operation, \"pref_settings_auto_backup_operation\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 112,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
+  "key_settings_auto_backup_period": [
+   {
+    "form": "R.string",
+    "ref": "default_key_settings_auto_backup_period",
+    "resolved": "key_settings_auto_backup_period_weekly",
+    "value": "key_$_settings_auto_backup_period_weekly",
+    "expr": "keyResource(R.string.default_key_settings_auto_backup_period, \"default_key_settings_auto_backup_period\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 98,
+    "method": "SettingKey.Enum",
+    "type": "String (Enum)"
+   }
+  ],
+  "key_settings_auto_backup_periodic": [
+   {
+    "form": "R.bool",
+    "ref": "pref_settings_auto_backup_periodic",
+    "value": "false",
+    "expr": "boolResource(R.bool.pref_settings_auto_backup_periodic, \"pref_settings_auto_backup_periodic\")",
+    "file": "core/pref/keys/GeneralKeys.kt",
+    "line": 91,
+    "method": "SettingKey.Bool",
+    "type": "Boolean"
+   }
+  ],
   "key_stable_mode": [
    {
     "form": "R.bool",
@@ -13253,7 +13507,7 @@
     "value": "false",
     "expr": "app:defaultValue=\"@bool/pref_stable_mode\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 238,
+    "line": 243,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -13319,7 +13573,7 @@
     "value": "key_$_timed_task_backend_alarm",
     "expr": "app:itemDefaultKey=\"@string/default_key_timed_task_backend\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 201,
+    "line": 206,
     "method": "TimedTaskBackendPreference",
     "type": "String (Enum)"
    }
@@ -13365,7 +13619,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_use_volume_control_record\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 291,
+    "line": 296,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -13396,7 +13650,7 @@
     "value": "true",
     "expr": "app:defaultValue=\"@bool/pref_use_volume_control_running\"",
     "file": "res/xml/fragment_preferences.xml",
-    "line": 256,
+    "line": 261,
     "method": "ThemeColorSwitchPreference",
     "type": "Boolean"
    }
@@ -13423,6 +13677,50 @@
     "ignoreForConflict": true,
     "note": "`default_value_working_directory` 按语言不同 (/Scripts, /脚本 等 10 种)",
     "manual": true
+   }
+  ],
+  "org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent": [
+   {
+    "expr": "SettingDefault.of(0f)",
+    "form": "调用处字面量",
+    "value": "0",
+    "file": "core/pref/keys/FloatingKeys.kt",
+    "line": 24,
+    "method": "SettingKey.Float",
+    "type": "Float"
+   }
+  ],
+  "org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent": [
+   {
+    "expr": "SettingDefault.of(1 - 0.618f)",
+    "form": "表达式",
+    "value": null,
+    "file": "core/pref/keys/FloatingKeys.kt",
+    "line": 29,
+    "method": "SettingKey.Float",
+    "type": "Float"
+   }
+  ],
+  "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent": [
+   {
+    "expr": "SettingDefault.of(-1f)",
+    "form": "调用处字面量",
+    "value": "-1",
+    "file": "core/pref/keys/FloatingKeys.kt",
+    "line": 35,
+    "method": "SettingKey.Float",
+    "type": "Float"
+   }
+  ],
+  "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent": [
+   {
+    "expr": "SettingDefault.of(-1f)",
+    "form": "调用处字面量",
+    "value": "-1",
+    "file": "core/pref/keys/FloatingKeys.kt",
+    "line": 40,
+    "method": "SettingKey.Float",
+    "type": "Float"
    }
   ],
   "org.autojs.autojs.ui.viewmodel.ExplorerItemManager$SortConfig.dir_ascending": [
@@ -13541,7 +13839,7 @@
    "stores": 0
   },
   "general": {
-   "keys": 6,
+   "keys": 10,
    "literalKeys": 0,
    "stores": 0
   },
@@ -13645,6 +13943,11 @@
    "literalKeys": 1,
    "stores": 0
   },
+  "floating": {
+   "keys": 0,
+   "literalKeys": 4,
+   "stores": 0
+  },
   "developer": {
    "keys": 7,
    "literalKeys": 4,
@@ -13687,7 +13990,7 @@
   },
   "other": {
    "keys": 41,
-   "literalKeys": 33,
+   "literalKeys": 31,
    "stores": 3
   }
  },

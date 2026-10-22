@@ -16,6 +16,7 @@ import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.ui.widget.CustomSnackbar
 import org.autojs.autojs.model.explorer.Explorers
 import org.autojs.autojs.theme.ThemeColorManager
+import org.autojs.autojs.ui.settings.transfer.SettingsImportWizard
 import org.autojs.autojs.ui.wizard.permission.PermissionWizardDialog
 import org.autojs.autojs.ui.wizard.permission.PermissionWizardEntry
 import org.autojs.autojs.ui.wizard.permission.PermissionWizardRunner
@@ -28,16 +29,17 @@ import org.autojs.autojs6.R
 /**
  * Entry of the setup wizards. After the first launch the home screen shows a welcome snackbar
  * instead of requesting anything, so the app is usable right away; its "Start wizard" action opens
- * a chooser of the permission wizard and the plugin install wizard, and the chosen wizards run one
- * after another. Later launches only remind of missing permissions of the "Minimal" profile.
+ * a chooser of the permission wizard, the plugin install wizard and the settings import wizard
+ * (docs/settings/ROADMAP.md P11.1), and the chosen wizards run one after another. Later launches
+ * only remind of missing permissions of the "Minimal" profile.
  *
  * zh-CN: 设置向导的入口. 首次启动后主页显示欢迎 Snackbar 而不主动申请任何内容, 使应用可立即使用;
- * 其 "开始向导" 操作打开权限申请向导与插件安装向导的选择对话框, 所选向导依次进行.
+ * 其 "开始向导" 操作打开权限申请向导, 插件安装向导与设置导入向导 (ROADMAP P11.1) 的选择对话框, 所选向导依次进行.
  * 之后的启动仅在缺少 "最小" 配置中的权限时给出提醒.
  */
 object SetupWizards {
 
-    enum class Kind { PERMISSIONS, PLUGINS }
+    enum class Kind { PERMISSIONS, PLUGINS, SETTINGS_IMPORT }
 
     /** Background of the AppCompat snackbar, against which action colors keep their contrast. */
     @ColorInt
@@ -110,13 +112,17 @@ object SetupWizards {
     private fun snackbarActionColor(): Int =
         ColorUtils.adjustColorForContrast(SNACKBAR_BACKGROUND, ThemeColorManager.colorPrimary, SNACKBAR_ACTION_MIN_CONTRAST)
 
-    /** Lets the user pick the wizards to run; both are ticked, and "Next" needs at least one. */
+    /** Lets the user pick the wizards to run; all are ticked, and "Next" needs at least one. */
     fun showChooser(activity: FragmentActivity) {
-        val kinds = listOf(Kind.PERMISSIONS, Kind.PLUGINS)
+        val kinds = listOf(Kind.PERMISSIONS, Kind.PLUGINS, Kind.SETTINGS_IMPORT)
         MaterialDialog.Builder(activity)
             .title(R.string.text_setup_wizards)
             .content(R.string.text_setup_wizards_hint)
-            .items(activity.getString(R.string.text_permission_wizard), activity.getString(R.string.text_plugin_install_wizard))
+            .items(
+                activity.getString(R.string.text_permission_wizard),
+                activity.getString(R.string.text_plugin_install_wizard),
+                activity.getString(R.string.settings_transfer_setup_wizard),
+            )
             .itemsCallbackMultiChoice(kinds.indices.toList().toTypedArray()) { dialog, which, _ ->
                 dialog.getActionButton(DialogAction.POSITIVE).isEnabled = which.isNotEmpty()
                 true
@@ -151,6 +157,7 @@ object SetupWizards {
                 next()
             }
             Kind.PLUGINS -> PluginInstallWizardDialog.show(activity, activity.lifecycleScope, isFollowed) { next() }
+            Kind.SETTINGS_IMPORT -> SettingsImportWizard.show(activity) { next() }
         }
     }
 

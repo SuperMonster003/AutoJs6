@@ -98,19 +98,17 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
 
     private val mMediator = OnActivityResultDelegate.Mediator()
 
-    private lateinit var mScriptEngine: ScriptEngine<*>
+    private var mScriptEngine: ScriptEngine<*>? = null
+    private var mEventEmitter: EventEmitter? = null
     private lateinit var mScriptExecution: ActivityScriptExecution
 
     @ScriptInterface
-    lateinit var eventEmitter: EventEmitter
-        private set
+    val eventEmitter: EventEmitter
+        get() = mEventEmitter ?: throw UninitializedPropertyAccessException("The event emitter is not created yet or already released")
 
     @ScriptInterface
     val emitter: EventEmitter?
-        get() = when {
-            ::eventEmitter.isInitialized -> eventEmitter
-            else -> null
-        }
+        get() = mEventEmitter
 
     // FIXME by Stardust on Mar 16, 2018.
     //  ! 如果 Activity 被回收则得不到改进.
@@ -198,7 +196,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         try {
             mScriptSource = source
             val engineCreateStartedAt = SystemClock.elapsedRealtime()
-            mScriptEngine = mScriptExecution.createEngine(this, source)
+            val engine = mScriptExecution.createEngine(this, source).also { mScriptEngine = it }
             mTypeScriptPreparationTiming?.let { timing ->
                 mTypeScriptPreparationTiming = null
                 TypeScriptExecutionPerformance.report(
@@ -208,10 +206,10 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
                     timing.dispatchMs,
                 )
             }
-            mRuntime = (mScriptEngine as JavaScriptEngine?)!!.runtime.also { runtime ->
-                eventEmitter = EventEmitter(runtime.bridges)
+            mRuntime = (engine as JavaScriptEngine?)!!.runtime.also { runtime ->
+                mEventEmitter = EventEmitter(runtime.bridges)
             }
-            runScript()
+            runScript(engine)
             emit("create", savedInstanceState)
             if (mIsResumed) {
                 emit("resume")
@@ -221,10 +219,10 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         }
     }
 
-    private fun runScript() {
+    private fun runScript(engine: ScriptEngine<*>) {
         try {
-            prepare()
-            doExecution()
+            prepare(engine)
+            doExecution(engine)
         } catch (pending: ContinuationPending) {
             pending.printStackTrace()
         } catch (e: Exception) {
@@ -237,15 +235,15 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         super.finish()
     }
 
-    private fun prepare() {
-        mScriptEngine.put("activity", this)
-        mScriptEngine.setTag("activity", this)
-        mScriptEngine.setTag(ScriptEngine.TAG_ENV_PATH, mScriptExecution.config.envPath)
-        mScriptEngine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, mScriptExecution.config.workingDirectory)
-        mScriptEngine.init()
+    private fun prepare(engine: ScriptEngine<*>) {
+        engine.put("activity", this)
+        engine.setTag("activity", this)
+        engine.setTag(ScriptEngine.TAG_ENV_PATH, mScriptExecution.config.envPath)
+        engine.setTag(ScriptEngine.TAG_WORKING_DIRECTORY, mScriptExecution.config.workingDirectory)
+        engine.init()
     }
 
-    private fun doExecution() {
+    private fun doExecution(engine: ScriptEngine<*>) {
         val executeCallback = object : ExecuteCallback {
             override fun onResult(r: Any?) {
                 mResult = r
@@ -256,19 +254,19 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
             }
         }
 
-        mScriptEngine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
+        engine.setTag(ScriptEngine.TAG_SOURCE, mScriptSource)
         mExecutionListener!!.onStart(mScriptExecution)
 
         if (!isInrt) {
-            (mScriptEngine as LoopBasedJavaScriptEngine).execute(mScriptSource, executeCallback)
+            (engine as LoopBasedJavaScriptEngine).execute(mScriptSource, executeCallback)
         } else {
-            (mScriptEngine as LoopBasedJavaScriptEngineWithDecryption).execute(mScriptSource, executeCallback)
+            (engine as LoopBasedJavaScriptEngineWithDecryption).execute(mScriptSource, executeCallback)
         }
     }
 
     override fun finish() {
-        if (::mScriptEngine.isInitialized) {
-            mScriptEngine.uncaughtException
+        mScriptEngine?.let { engine ->
+            engine.uncaughtException
                 ?.let { onException(it) }
                 ?: mExecutionListener?.onSuccess(mScriptExecution, mResult)
         }
@@ -283,18 +281,26 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
         mPreparationThread = null
         mRuntime?.loopers?.waitWhenIdle(false)
 
-        if (::mScriptEngine.isInitialized) {
+        mScriptEngine?.let { engine ->
             try {
-                mScriptEngine.put("activity", null)
-                mScriptEngine.setTag("activity", null)
-                mScriptEngine.destroy()
+                engine.put("activity", null)
+                engine.setTag("activity", null)
+                engine.destroy()
             } finally {
                 if (::mScriptExecution.isInitialized) {
-                    mScriptExecution.clearEngine(mScriptEngine)
+                    mScriptExecution.clearEngine(engine)
                 }
             }
         }
 
+        // destroy() has run ScriptRuntime.onExit, so the runtime has ended: WebView 111 (API 33) keeps the destroyed window
+        // through a JNI global reference, and these fields and the script's views (their event emitters reach the engine)
+        // made it keep the runtime too (docs/memory/ROADMAP.md appendix C Q48).
+        // zh-CN: destroy() 已执行 ScriptRuntime.onExit, runtime 已结束: WebView 111 (API 33) 以 JNI 全局引用保留已销毁的窗口,
+        // 这些字段与脚本的视图 (其事件发射器可达引擎) 曾使其连带保留 runtime (docs/memory/ROADMAP.md 附录 C Q48).
+        contentRoot?.removeAllViews()
+        mScriptEngine = null
+        mEventEmitter = null
         mRuntime = null
         mExecutionListener = null
         mScriptSource = null
@@ -313,7 +319,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     }
 
     override fun onPause() {
-        if (::eventEmitter.isInitialized) {
+        if (mEventEmitter != null) {
             emit("pause")
         }
         mIsResumed = false
@@ -323,7 +329,7 @@ class ScriptExecuteActivity : AppCompatActivity(), OnActivityResultDelegate.Dele
     override fun onResume() {
         super.onResume()
         mIsResumed = true
-        if (::eventEmitter.isInitialized) {
+        if (mEventEmitter != null) {
             emit("resume")
         }
     }

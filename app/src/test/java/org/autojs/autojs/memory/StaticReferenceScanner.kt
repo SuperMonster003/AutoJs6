@@ -321,13 +321,18 @@ object StaticReferenceScanner {
     private fun kotlinStatics(path: String, code: String, imports: Map<String, String>): List<Field> {
         val rows = ArrayList<Field>()
         val (scopesByLine, owners) = scopes(code)
-        code.split("\n").forEachIndexed { number, line ->
+        val lines = code.split("\n")
+        lines.forEachIndexed { number, line ->
             val scope = scopesByLine[number]
             if (scope != "top" && scope != "object") return@forEachIndexed
             val match = KOTLIN_PROPERTY.matcher(line.trim()).takeIf { it.find() } ?: return@forEachIndexed
             val name = match.group(1)!!
             val declared: String? = match.group(2)
-            val initializer: String? = match.group(3)
+            var initializer: String? = match.group(3)
+            if (initializer != null && initializer.isBlank()) {
+                // `val x =` with the initializer on the next non-blank line (ROADMAP Q45: H29 was declared that way).
+                initializer = lines.subList(number + 1, lines.size).firstOrNull { it.isNotBlank() }?.trim().orEmpty()
+            }
             val delegate: String? = match.group(4)
             var typeText = declared.orEmpty()
             if (typeText.isEmpty()) {

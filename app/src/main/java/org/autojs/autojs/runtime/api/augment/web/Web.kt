@@ -4,6 +4,7 @@ import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.web.InjectableWebClient
 import org.autojs.autojs.core.web.InjectableWebView
+import org.autojs.autojs.core.web.destroyOnExitOf
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.ArgumentGuards
@@ -51,7 +52,7 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         else -> Context.toString(url)
                     }
                     val contextForWebView = androidContext.jsUnwrapped() as? AndroidContext ?: globalContext
-                    InjectableWebView(contextForWebView, cx, scriptRuntime.topLevelScope.globalThis, niceUrl)
+                    InjectableWebView(contextForWebView, cx, scriptRuntime.topLevelScope.globalThis, niceUrl).destroyOnExitOf(scriptRuntime)
                 }
                 1 -> when {
                     args[0] is String -> {

@@ -70,8 +70,11 @@ open class TimerThread(
             sTimerMap[currentThread()] = WeakReference<Timer>(it)
         }
 
+        // Entered for the script's engine and exited when the loop ends; a thread without a Rhino engine enters none, so it
+        // exits none either (docs/memory/ROADMAP.md H4 / P4.4).
+        // zh-CN: 为脚本的引擎进入, 循环结束时退出; 没有 Rhino 引擎的线程不进入, 也就不退出 (docs/memory/ROADMAP.md H4 / P4.4).
         val engine = scriptRuntime.engines.myEngine() as? RhinoJavaScriptEngine
-        engine?.enterContext()
+        val entered = engine?.enterContext() != null
 
         notifyRunning()
 
@@ -93,7 +96,7 @@ open class TimerThread(
         runCatching { mTimer?.removeAllCallbacks() }.onFailure(exceptionHandler)
         runCatching { onExit() }.onFailure(exceptionHandler)
         mTimer = null
-        runCatching { Context.exit() }.onFailure(exceptionHandler)
+        if (entered) runCatching { Context.exit() }.onFailure(exceptionHandler)
         sTimerMap.remove(currentThread())
     }
 

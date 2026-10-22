@@ -1,5 +1,8 @@
 package org.autojs.autojs.runtime.api.modules
 
+import android.content.ContextWrapper
+import android.content.res.Resources
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -49,6 +52,35 @@ internal object RuntimeModulesFixture {
         val engine = allocate(RhinoJavaScriptEngine::class.java)
         setField(engine, ScriptEngine.AbstractScriptEngine::class.java, "mTags", ConcurrentHashMap<String, Any?>())
         setField(runtime.engines, ApiEngines::class.java, "mScriptEngine", engine)
+    }
+
+    /**
+     * Makes the application context answer string resources (`res:<id>`) and the package name, which the `autojs`
+     * properties read when the module object is built; the context of [DifferentialRhino] is allocated without its
+     * constructor and has no resources. [DifferentialRhino.close] restores the context it found.
+     */
+    fun installAppContext() {
+        GlobalAppContext::class.java.getDeclaredField("sApplicationContext").apply { isAccessible = true }.set(null, allocate(FixtureContext::class.java))
+    }
+
+    private class FixtureContext : ContextWrapper(null) {
+
+        override fun getPackageName() = "org.autojs.autojs.test"
+
+        override fun getResources(): Resources = RESOURCES
+
+        companion object {
+            val RESOURCES: Resources = DifferentialRhino.allocateWithoutConstructor(FixtureResources::class.java)
+        }
+
+    }
+
+    private class FixtureResources : Resources(null, null, null) {
+
+        override fun getString(id: Int): String = "res:$id"
+
+        override fun getString(id: Int, vararg formatArgs: Any?): String = "res:$id(${formatArgs.joinToString()})"
+
     }
 
     /**

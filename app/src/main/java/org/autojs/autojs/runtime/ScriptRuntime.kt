@@ -447,7 +447,16 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     internal lateinit var augmentedApp: ScriptableObject
 
-    internal lateinit var augmentedAutojs: ScriptableObject
+    /** The `autojs` module object of the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
+    private lateinit var legacyAugmentedAutojs: ScriptableObject
+
+    /**
+     * The `autojs` module object the host reads (`UI.kt` reads `R`): the new layer's when it serves the module (roadmap
+     * P3.4, built on demand), else the one of the old augment call.
+     * zh-CN: 宿主读取的 autojs 模块对象 (UI.kt 读取 R): 新层提供该模块时为新层的 (P3.4, 按需构建), 否则为原 augment 调用的.
+     */
+    internal val augmentedAutojs: ScriptableObject
+        get() = scriptModules?.moduleObject("autojs") ?: legacyAugmentedAutojs
 
     internal lateinit var augmentedOcrMLKit: ScriptableObject
 
@@ -604,6 +613,18 @@ class ScriptRuntime private constructor(builder: Builder) {
      */
     fun extendJsBuiltIns() = ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }
 
+    /**
+     * Whether the new script module layer serves the top-level module [name] for this runtime and has not built it yet
+     * (roadmap P3.4): nothing of the script has reached the module, so host code that only acts for scripts using it (the
+     * engine events of `engines`) can skip this runtime instead of building the module.
+     * zh-CN: 新脚本模块层为本运行时提供顶层模块 [name] 且尚未构建 (P3.4): 脚本还没有用到该模块, 只为使用它的脚本工作的宿主代码 (engines 的引擎事件) 可跳过本运行时,
+     * 不必为此构建模块.
+     */
+    fun isScriptModulePending(name: String): Boolean {
+        val modules = scriptModules ?: return false
+        return name in ScriptModuleLayer.MIGRATED && !modules.isBuilt(name)
+    }
+
     @ScriptInterface
     fun requestPermissions(permissions: Array<String?>) {
         CorePermissions.getPermissionsNeedToRequest(mUiHandlerAppContext, permissions).takeIf { it.isNotEmpty() }?.let {
@@ -651,12 +672,14 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     fun loadJarWithClasspath(program: String, vararg orderedClasspath: String) {
         try {
-            ScriptRuntimeJarClasspathRoute.dispatch(
-                programPath = program,
-                orderedClasspathPaths = orderedClasspath,
-                resolvePath = files::nonNullPath,
-            ) { programJar, classpathJars ->
-                sClassLoader.loadJarWithExperimentalCompilerClasspath(programJar, classpathJars)
+            ownLoads {
+                ScriptRuntimeJarClasspathRoute.dispatch(
+                    programPath = program,
+                    orderedClasspathPaths = orderedClasspath,
+                    resolvePath = files::nonNullPath,
+                ) { programJar, classpathJars ->
+                    sClassLoader.loadJarWithExperimentalCompilerClasspath(programJar, classpathJars)
+                }
             }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -771,7 +794,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                 compile = { spec ->
                     AndroidR8CompilerHost.runtimeDispatcher(applicationContext).compile(spec)
                 },
-                loadPublished = sClassLoader::loadR8CompilerDexZip,
+                loadPublished = { artifact -> ownLoads { sClassLoader.loadR8CompilerDexZip(artifact) } },
             )
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -902,6 +925,16 @@ class ScriptRuntime private constructor(builder: Builder) {
             val left = AccessibilityService.releaseOwner(ownerId)
             if (left > 0) Log.w(TAG, "$ownerId: released $left accessibility registration(s) its modules left behind")
         }
+
+        // The loaders of runtime.loadDex / loadJar / loadAar that no other running script has loaded are no longer searched,
+        // so they can be unloaded with their classes (docs/memory/ROADMAP.md H3 / P4.4). Last, after the closeables that may still
+        // use the classes.
+        // zh-CN: 其他运行中的脚本未加载过的 runtime.loadDex / loadJar / loadAar 加载器不再被搜索, 可与其中的类一起卸载 (docs/memory/ROADMAP.md H3 / P4.4).
+        // 放在最后, 在可能仍用到这些类的 closeables 之后.
+        scope.own(Stage.CLASS_LOADERS, "AndroidClassLoader.releaseOwner") {
+            val released = sClassLoader.releaseOwner(ownerId)
+            if (released > 0) Log.d(TAG, "$ownerId: released $released class loader(s) of runtime.loadDex / loadJar")
+        }
     }
 
     fun setScreenMetrics(width: Int, height: Int) {
@@ -919,6 +952,13 @@ class ScriptRuntime private constructor(builder: Builder) {
     fun createContinuation() = RhinoContinuation.create(this, topLevelScope)
 
     fun createContinuation(scope: Scriptable) = RhinoContinuation.create(this, scope)
+
+    /**
+     * Runs a load of runtime.loadDex / loadJar / loadAar for this script: the loaders it registers are released when the
+     * script ends ([Stage.CLASS_LOADERS], docs/memory/ROADMAP.md H3 / P4.4).
+     * zh-CN: 以本脚本的名义执行 runtime.loadDex / loadJar / loadAar 的加载: 期间登记的加载器在脚本结束时释放 ([Stage.CLASS_LOADERS], docs/memory/ROADMAP.md H3 / P4.4).
+     */
+    private fun <T> ownLoads(load: () -> T): T = sClassLoader.loadFor(ownerId, load)
 
     private fun doLoad(filter: FileFilter, vararg paths: String) {
         for (path in paths) {
@@ -943,7 +983,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     /** The compatibility load() multiplexer stays local; only explicit loadJar() may opt in. */
     private fun loadJarWithoutExperimentalCompiler(file: File) {
         try {
-            sClassLoader.loadJar(file)
+            ownLoads { sClassLoader.loadJar(file) }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
@@ -962,7 +1002,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadDex(file)
+                    ownLoads { classLoader.loadDex(file) }
                 }
             }
         } catch (e: IOException) {
@@ -983,7 +1023,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadJarWithExperimentalCompiler(file)
+                    ownLoads { classLoader.loadJarWithExperimentalCompiler(file) }
                 }
             }
         } catch (e: IOException) {
@@ -1004,7 +1044,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadAar(file)
+                    ownLoads { classLoader.loadAar(file) }
                 }
             }
         } catch (e: IOException) {
@@ -1022,7 +1062,9 @@ class ScriptRuntime private constructor(builder: Builder) {
         val modules = ScriptModuleLayer.mounterOrNull(this, target).also { scriptModules = it }
         ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }
 
-        augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
+        // With the new layer, app.autojs is defined by the app module when it is built (P3.4).
+        // zh-CN: 新层开启时, app.autojs 由 app 模块在构建时定义 (P3.4).
+        if (modules == null) augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }
 
     /**
@@ -1044,7 +1086,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             }
             "species" -> Species.augmentWithRuntime(target, this)
             "app" -> App(this).augment(target, app).also { augmentedApp = it }
-            "autojs" -> Autojs(this).augment(target).also { augmentedAutojs = it }.also { autojs ->
+            "autojs" -> Autojs(this).augment(target).also { legacyAugmentedAutojs = it }.also { autojs ->
                 AutojsVersion.augmentWithRuntime(autojs, this)
             }
             "shell" -> Shell(this).augment(target)

@@ -1,6 +1,6 @@
 # 内存门禁工具
 
-配合 `docs/memory/ROADMAP.md` 使用. 门禁本体是仪器测试 `app/src/androidTest/java/org/autojs/autojs/memory/RuntimeLeakGateDeviceTest.kt` (场景脚本在同目录 `scenarios/GateScenarios.kt`), 本目录是驱动与审计脚本. 脚本不安装 APK, 不点屏幕, 不改设置; 需要人工确认的对话框 (S4a 的截屏授权) 由维护者在手机上操作.
+配合 `docs/memory/ROADMAP.md` 使用. 门禁本体是仪器测试 `app/src/androidTest/java/org/autojs/autojs/memory/RuntimeLeakGateDeviceTest.kt` (场景脚本在同目录 `scenarios/GateScenarios.kt`), 本目录是驱动与审计脚本. 脚本不安装 APK, 不点屏幕, 不改设置 (只用于模拟器的 ci_gate.py 除外, 见下文); 需要人工确认的对话框 (S4a 的截屏授权) 由维护者在手机上操作.
 
 ## run_gate.py: 跑门禁并生成证据
 
@@ -39,6 +39,7 @@ S2   N FAIL  retained=20/20 java=+3.10MB native=+0.12MB threads=+0 contexts=+0 e
 - Meminfo: `--meminfo phases` (默认) 在场景开始, 预热结束与场景结束时取本进程的 `dumpsys meminfo <pid>` (经 UiAutomation 的 shell 身份在测试进程内执行, 时间点与六项度量的采样一致, 比驱动脚本在进程外取更准), 记录 Native Heap 的 Pss / Heap Alloc, App Summary 的 Graphics, Unknown 的 Pss 等, 表中为预热结束到场景结束的增量; `--meminfo runs` 每次运行后都取 (每次约 0.3-1 s, 用于定位原生台阶出现在哪一次); `off` 不取. 需要宿主无障碍服务的 S7 / S7b 不取 (不连接 UiAutomation, 以免影响服务绑定).
 - Counters / Instances: 宿主计数器每次运行后都读; `dalvik.system.VMDebug` 的实例计数 (Bitmap, `org.opencv.core.Mat`, AccessibilityNodeInfo 等, 会先触发一次 GC) 在开始, 预热结束与结束时读, 隐藏 API 不可用时记 `-`.
 - Script stats: 场景脚本经 `gateStat(name, value)` 报告的数值 (S4f 的帧数, 空帧数, 最慢一次截图耗时, 截图后最多同时打开的 media Image 数; S7b 的节点数), 表中为计数运行中的最大值.
+- Classes (ROADMAP P4.4): 预热结束到场景结束的增量: 已加载类数 (`Debug.getLoadedClassCount`, 公开 API, 各 API 级别都有; ART 卸载类加载器时一并减去其中的类) / VMDebug 的 `java.lang.Class` 可达实例数 (即 hprof 中的类记录数) / VMDebug 的 `DexClassLoader` / 宿主应用类加载器中由 `runtime.loadDex` 等登记的加载器数 (`AndroidClassLoader.mDexClassLoaders`, 经反射读取, 修前的宿主也能读) / VMDebug 的 `WebView`. 场景可声明其中某几项的上限 (`instanceLimits` / `counterLimits` 为预热结束到场景结束的增量, `perRunCounterLimits` 为每次计数运行增量的中位数, 超过即不通过; VMDebug 项只在 VMDebug 可用的 API 24 / 28 上判定), 也可声明必须为 0 的脚本统计 (`failingStats`; 正常结束模式下每次运行都必须报告该统计). 已加载类与 `Class` 实例会在某一次运行中出现一次性台阶 (进程内首次用到的平台, LeakCanary 或宿主代码, 实测 +17 至 +62 个, 出现在哪一次运行不固定), 因此只按中位数判定: 每次运行都多留类时中位数大于 0, 一次性台阶不影响中位数. P4.4 起: S8 判定 `DexClassLoader` 与宿主登记的加载器 +0, 已加载类每次运行增量的中位数为 0; S15 判定 `WebView` +0; S16 判定 `innerRetainedWhileOuterRuns` 为 0.
 
 其他参数: `--capture on` 运行 S4a 与 S4f, `--wake` 每个场景前发送 `KEYCODE_WAKEUP` (只点亮屏幕, 不点击), `--timeout` 单个场景与模式的上限秒数 (默认 1500), `--merge` 只替换同名报告中本次重跑的场景与模式 (补跑被打断的部分).
 
@@ -54,9 +55,31 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7,S7b --keep-proc
 
 设备占用防护 (ROADMAP R6): 每个场景开始前若设备上已有其他 `am instrument` 在运行就等待 (最长 10 分钟); 运行中宿主或测试 APK 被替换则停止并把该场景标为 `invalid`; 设备离线 (adb 断开) 时停止, 已读到的报告保留.
 
-场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S4f 连续 200 次 `captureScreen` 不显式回收 (issue #204 的 "卡住不返回"; 每个进程固定预热 1 + 计数 3, 单次截图超过 15 s 或截图后打开的 media Image 超过 1 个即脚本失败; 需 `--capture on`), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S7b `className(...).find()` / `findOnce` / `children` / `parent` 循环 (需宿主无障碍服务, 未绑定时跳过), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过), S13 `speech.listen({ source: 'external' })` 开着识别会话时结束 (只喂静音帧, 不发声不录音; 3-Macaw Speech 与 3-Stone AI 都未安装时跳过, ROADMAP 附录 C Q13), S14 控制台悬浮窗显示中结束 (`console.setExitOnClose(500)`, 未授悬浮窗权限时与 S6 一样跳过).
+场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S4f 连续 200 次 `captureScreen` 不显式回收 (issue #204 的 "卡住不返回"; 每个进程固定预热 1 + 计数 3, 单次截图超过 15 s 或截图后打开的 media Image 超过 1 个即脚本失败; 需 `--capture on`), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S7b `className(...).find()` / `findOnce` / `children` / `parent` 循环 (需宿主无障碍服务, 未绑定时跳过), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过), S13 `speech.listen({ source: 'external' })` 开着识别会话时结束 (只喂静音帧, 不发声不录音; 3-Macaw Speech 与 3-Stone AI 都未安装时跳过, ROADMAP 附录 C Q13), S14 控制台悬浮窗显示中结束 (`console.setExitOnClose(500)`, 未授悬浮窗权限时与 S6 一样跳过), S15 `web.newInjectableWebView` 在主线程 (`ui.run`) 创建且未挂到窗口上时脚本结束 (ROADMAP 附录 C Q42), S16 UI 脚本启动另一个 UI 脚本, 后者先结束 (两者共用主线程的 Rhino Context; 外层脚本在后者结束后用 `memory.collect()` 与 `memory.retained()` 检查它是否已被回收, 报告为 `innerRetainedWhileOuterRuns`; ROADMAP H27). P4.4 起 S8 每次运行加载 DEX 的一份新副本 (新路径, 与反复加载变化的文件的脚本相同), 以便看出按路径登记的加载器是否随脚本释放.
 
 度量自 P2.1 起全部取自宿主的 `org.autojs.autojs.runtime.memory.MemoryDiagnostics` (`GateMetrics.kt` 只做转接; Rhino Context 计数为 `AndroidContextFactory.activeContextCount`, 图像数为 `ImageWrapper.liveCount`), 与开发者选项 "内存诊断" 页面同源 (ROADMAP T3). 脚本线程按线程名标记计数 (`ScriptThread-` / `Spawn-` / `Pool-` / `Timer` / `ScreenCapturer` / `LooperThread`), Android 14 起框架自带的 `SurfaceSyncGroupTimer` 不计 (P1 起).
+
+## ci_gate.py: CI 门禁 (模拟器)
+
+```
+py -3.12 -I -u tools/memory/ci_gate.py -s SERIAL [--adb ADB] [--plugin APK]... [--scenarios S1,S2] [--allow-skip S7b,S13] [--label ci] [--out build/memory-gate/evidence] [--work build/memory-gate] [--relaunch "EMULATOR 命令"] [--restart-adb-server] [--no-retry]
+```
+
+`.github/workflows/memory-gate.yml` (ROADMAP P6.1, `workflow_dispatch` 与推送 `v*` 标签时运行) 只调用本脚本; 本机复现用同款 AVD (API 35, google_apis, x86_64, pixel_7, 内存 4096M), 步骤与 CI 相同. 本脚本会安装 APK 并修改设置, 所以只接受模拟器, 真机仍走 run_gate.py.
+
+1. 等待框架就绪: 开机完成, 开机动画停止, activity 与 package 服务应答, 并稳定 10 s.
+2. 准备: 按设备 ABI 从 `--apk-dir` (默认 `app/build/outputs/apk`, 依据同一次构建的 output-metadata.json) 选 debug 宿主, 以 `-t -g` 安装 (授予运行时权限), 再装测试 APK 与各个 `--plugin` (S4b / S4d / S4e 需要官方 OpenCV 插件, 宿主 APK 不含 OpenCV; S12 需要 3-ImGui; CI 从两个插件仓库的 Release 下载 x86_64 包并校验 sha256, 官方插件凭签名证书受信且默认启用, 装上即可); 核对已安装的 versionCode; 解锁, 关闭动画, 屏幕常亮, `appops set org.autojs.autojs6 SYSTEM_ALERT_WINDOW allow` (否则 S6 跳过).
+3. 以 `--mode normal --capture on --wake --hprof` 运行 run_gate.py (S4a / S4f 的截屏授权按上文用 PROJECT_MEDIA app-op 放行), logcat 全程写入 `<work>/logcat.txt`, 输出转录写入 `<work>/run-gate-attempt-N.txt`. 运行中每 30 s 探测一次 adb (超时 15 s), 连续 3 次无应答判定 adb 丢失并停止 run_gate.py (参照 3-Stove Agent 的 run_main_suite.py).
+4. 只有出现 "System has crashed", system_server 的 pid 变化或 adb 丢失时才重跑一次: adb 丢失时先重启 adb server (`--restart-adb-server`), 仍无应答再用 `--relaunch` 的命令重启模拟器; 重新准备后只重跑未通过的场景, 用 `--merge` 并入同一份报告, 第一次的报告复制到 `<work>/attempt-1`.
+5. 判定: 选中的场景 (默认 S1-S12, 强制停止模式不进 CI) 全部通过, 或因模拟器无法避免的原因跳过 (`--allow-skip`, 默认 S7b / S12 / S13: S7b 需维护者重新开启无障碍服务, 见上文; S12 未装 3-ImGui; S13 无语音插件; CI 装了 3-ImGui, 传 `--allow-skip S7b,S13`, S12 必须通过). 其他跳过, 失败或缺报告都判 FAIL, 以免权限丢失后静默通过. S7 不带无障碍服务运行, 按键与无障碍事件部分记录在报告中.
+
+输出 `CI_GATE_RESULT PASS|FAIL passed=N skipped=N (...) problems=N attempts=N versionCode=N` 与逐条 `CI_GATE_PROBLEM`; 在 GitHub Actions 中还把结果与报告表写入 job summary. 退出码: PASS 0, FAIL 1, 准备或运行出错 2 (`CI_GATE_ERROR`). `--restart-adb-server` 会断开本机所有设备, 只在 CI 上使用. 本机复现时把报告写进证据目录, 临时文件放在仓库外:
+
+```
+py -3.12 -I -u tools/memory/ci_gate.py -s emulator-5610 --adb ADB --plugin OPENCV_X86_64_APK --plugin IMGUI_X86_64_APK --allow-skip S7b,S13 --label ci-local --out docs/memory/evidence --work WORK_DIR --relaunch "EMULATOR -port 5610 -avd AutoJs6_Memory_Gate_CI_35 -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
+```
+
+纯函数 (APK 选择, 重跑范围, 判定) 的单测在 `test_ci_gate.py`.
 
 ## leakcanary_probe.py: LeakCanary 报告核对
 
@@ -88,6 +111,36 @@ ROADMAP P5.1. 经 `RunIntentActivity` 在已安装的 debug 宿主中运行一�
 
 `--sample` (P5.2): 改为运行样例 "工具/内存诊断" (默认取 `app/src/main/assets-app/sample` 中的文件; 宿主须已含 memory 模块, debug 与 release 构建均可), 从 logcat 的 `GlobalConsole` 标签读取样例的输出, 核对回收前后两行读数与未回收列表都已打印, 并原样列出这几行. 样例最后打开控制台页面.
 
+## ui_leak_walk.py: LeakCanary 主界面巡检
+
+```
+py -3.12 -I -u tools/memory/ui_leak_walk.py -s SERIAL [--pages drawer,explorer,...] [--reps 3] [--tag TAG] [--shots] [--analysis-wait 300] [--workdir /sdcard/Scripts] [--docs-plugin on|as-is] [--keep-dump-setting] [--list]
+```
+
+ROADMAP P4.5, 不走门禁. 经 adb 驱动宿主主界面 (维护者 2026-10-21 授权): 可导出的入口用 `am start`, 其余用 `uiautomator dump` 定位控件后 `input tap / keyevent / swipe`; 控件文字按 `app/src/main/res/values*/strings.xml` 的全部译文匹配, 与应用语言无关. `--list` 列出页面: 抽屉, 文件页 (进出 `<workdir>/aj6-ui-walk` 及其子目录, 行菜单), 打开文件, 编辑器 + 函数面板 + 手册对话框 + 文档面板, 文档页, 文档 Activity, 插件页 (详情对话框, 插件设置页), 插件中心, 日志页, 任务页 (运行一个 4 s 脚本, H25), 设置页及其各子页 (主题色, 快捷方式备份, 管理 AutoJs6 设置, 回收站保留策略, 编辑器全部设置, 代码生成模型, 发行历史, 关于, 开发者选项, 内存诊断). 每页进出 `--reps` 次后, 用 `run-as <包名> kill -USR1 <pid>` 让 ART 做两次 GC, 再按 LeakCanary 的日志 (`LeakCanary` 标签) 统计该页被监视的对象 (已销毁的 Activity / Fragment / View / 根视图 / Service 与已结束脚本的 runtime) 与残留数; 有残留时把应用切到后台, 让 LeakCanary 转储并分析堆, 分析结果计入该页.
+
+LeakCanary 自身的 "Dump heap automatically" 默认关闭 (P1.2), 脚本在巡检期间经 `run-as` 改应用的 SharedPreferences 打开它 (先停止应用), 结束时恢复原值 (`--keep-dump-setting` 不恢复); 离线文档插件在插件中心关闭时同样临时打开 (`--docs-plugin as-is` 不动), 使文档页与编辑器文档面板加载页面. 开发者选项中的 LeakCanary 开关须为开 (默认), 脚本按 `LeakCanarySetup` 的启动日志核对. 需要人工确认的系统对话框 (权限申请等) 不代点: 其他应用的窗口到前台时脚本打印要确认的内容并等待维护者处理. 屏幕须点亮并解锁.
+
+输出: 每页一行 PASS / LEAK / FAIL, 监视与残留的对象数, 每条泄漏一行摘要 (泄漏对象的类, 第一个可疑引用, 签名前 8 位). 完整分析文本 (与 LeakCanary 泄漏列表中显示的文本相同) 与每页的错误写入 `docs/memory/evidence/ui-walk-<机型>-<versionCode>[-<tag>]-<日期>.md`; `--shots` 另把每页结束时的截图与最后 LeakCanary 泄漏列表的截图 (`leakcanary-leaks.png`, 每组泄漏显示最近一次出现的时间; 宽 540) 存到同名目录. 退出码: 全部 PASS 为 0, 有 LEAK 或 FAIL 为 2.
+
+## plugin_center_heap_check.py: 插件标签页 Java 堆核对
+
+```
+py -3.12 -I -u tools/memory/plugin_center_heap_check.py -s SERIAL [--apk FILE] [--seconds 60] [--interval 2] [--max-growth-mb 64] [--max-tail-growth-mb 16] [--tab-index 2]
+```
+
+不走门禁 (2026-10-22 API 24 AVD 上打开插件标签页后 Java 堆数秒内涨到 512 MB 上限的复测). 原因: 插件中心按 Resources 解码的原尺寸保留已安装插件图标, res/mipmap 中 432 px 的 PNG 在 560 dpi 上放大为 1512 px (9 MB), 每个插件日夜各一份, 快照与完整发现又各一份, Android 8 之前位图像素计入 Java 堆; 修复见 `PluginInstalledIconResolver` / `PluginIconRasterPolicy`. 脚本停止宿主 (`--apk` 时先安装), 从启动图标别名启动, 记录主页的 Dalvik 堆, 点插件标签 (按 `text_plugins` 的全部译文在 `uiautomator dump` 中查找; API 24 主页始终不空闲, uiautomator 读不到窗口时改从 `dumpsys activity top` 取第 `--tab-index` 个标签), 之后每 `--interval` 秒读一次 `dumpsys meminfo`, 共 `--seconds` 秒. 只点这一个标签, 不改设置. 输出每项一行 PASS / FAIL: 进程存活 (pid 不变), 日志中无 OutOfMemoryError, 无 ANR, 打开后堆增长不超过 `--max-growth-mb`, 窗口最后三分之一内增长不超过 `--max-tail-growth-mb`. 全部 PASS 时退出码为 0.
+
+## inrt_smoke.py: 打包应用 (inrt) 冒烟
+
+```
+py -3.12 -I -u tools/memory/inrt_smoke.py -s SERIAL [--template app/build/outputs/apk/inrt/debug/inrt-v6.8.0-universal.apk] [--signing-properties sign.properties] [--sdk ANDROID_HOME] [--jdk JAVA_HOME] [--runs 10] [--timeout 120] [--settle 3] [--pss-tolerance-mb 4] [--thread-tolerance 2] [--label LABEL]
+```
+
+ROADMAP P6.3, 不走门禁. 先 `./gradlew :app:assembleInrtDebug` 生成 inrt 模板. 脚本按 `tools/sdk37/build_inrt_storage_fixtures.py` 的打包方式, 把 S2 (`threads.start` x 10 + `threads.pool`) 与 S5 (`ui.layout` 含按钮, 文本与 webview, 随后 `activity.finish()`) 的正常结束脚本合成一个 inrt 项目, 只替换模板的 `assets/project`, 对齐后用宿主自己的签名 (`sign.properties`, 密码经环境变量传给 apksigner) 签名, inrt 代码不改. 设备上已有的 inrt 应用先拉回本机, 结束后装回 (原本没有则卸载冒烟包). 每次运行: 强制停止, `am start -W` 启动, 等脚本的 exit 监听写入结束标记 (应用私有目录, `run-as` 读取), 再等 `--settle` 秒, 读进程的 `dumpsys meminfo` TOTAL PSS 与 `/proc/<pid>/status` 的线程数, 然后强制停止. 不点屏幕, 不改设置.
+
+判定: 每次都按时结束且读到数值; PSS 与线程数都不单调增长, 且 Theil-Sen 趋势 (两两斜率的中位数乘以次数减 1) 不超过 `--pss-tolerance-mb` / `--thread-tolerance`. 不用 "最后 3 次与最初 3 次的中位数之差": 新进程的 PSS 落在相距约 8 MB 的两个水平之一 (23046RP50C, 2026-10-22), 两端各 3 次就可能差一整级而并无趋势. 输出每次一行 (PSS, 线程) 与最终判定, 报告写入 `docs/memory/evidence/inrt-smoke-<机型>-<模板 versionCode>[-<label>]-<日期>.md` 与同名 `.json`. 退出码: PASS 为 0, FAIL 为 2.
+
 ## static_audit.py: 源码静态审计
 
 ```
@@ -95,6 +148,14 @@ py -3.12 -I tools/memory/static_audit.py [--out docs/memory/evidence] [--json]
 ```
 
 扫描 `app/src/main/java`, 输出 `static-audit-<yyyyMMdd>.md`: (a) 进程级字段 (Java `static`, Kotlin `object` / `companion object` / 顶层属性) 中类型为 ScriptRuntime / ScriptEngine / Scriptable / Rhino Context / Activity / View / Fragment / Dialog 的清单 (Android Context 单列备查); (c) 脚本相关包内或元素为线程 / Looper / 监听器 / 窗口 / 图像 / 引擎 / 类加载器的进程级注册表 (附录 B.1 候选); (b) `registerReceiver` / `bindService` / `.subscribe(` / 创建 WebView / `addIdleHandler` / `Looper.prepare` / `ThreadLocal` 的文件及同文件内对应释放调用的次数. 这是文本扫描 (先抹掉注释与字符串), 归属列按包路径猜测, 结论须人工复核后再写进附录 B; 也是 ROADMAP T8 源码守卫白名单的来源.
+
+### Q11 探针: 标准对象在脚本线程上首次创建 (ROADMAP 附录 C Q11, P4.4)
+
+```
+adb -s SERIAL shell am instrument -w -r -e class org.autojs.autojs.memory.RhinoStandardObjectsDeviceTest org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+`RhinoStandardObjectsDeviceTest` 在一个尚未创建 `RhinoUtils.standardObjects` 的进程中, 先由一个脚本在其线程上首次读取它, 再连续运行 3 个脚本 (observe polyfill, `util.inspect`, JSON, Promise, `util.versionCodes`), 任一失败即不通过; 进程里已有代码先创建了标准对象时跳过 (该情形无法再现). 每次单独起一个 instrumentation 进程运行, 运行前 `am force-stop org.autojs.autojs6`.
 
 ### 源码守卫白名单 (ROADMAP T8 / P4.3)
 

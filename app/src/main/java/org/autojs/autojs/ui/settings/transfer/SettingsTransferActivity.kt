@@ -10,10 +10,10 @@ import org.autojs.autojs6.databinding.ActivityPreferencesBinding
 
 /**
  * The page "Manage AutoJs6 settings" (docs/settings/ROADMAP.md D4 / T10), hosting [SettingsTransferFragment].
- * [EXTRA_WIZARD] opens a wizard right away ([WIZARD_EXPORT]).
+ * [EXTRA_WIZARD] opens a wizard right away ([WIZARD_EXPORT], [WIZARD_IMPORT]).
  *
  * zh-CN: "管理 AutoJs6 设置" 页面 (ROADMAP D4 / T10), 承载 [SettingsTransferFragment]. [EXTRA_WIZARD] 使页面打开后立即
- * 进入向导 ([WIZARD_EXPORT]).
+ * 进入向导 ([WIZARD_EXPORT], [WIZARD_IMPORT]).
  */
 class SettingsTransferActivity : BaseActivity() {
 
@@ -42,11 +42,16 @@ class SettingsTransferActivity : BaseActivity() {
 
         const val EXTRA_WIZARD = "wizard"
         const val WIZARD_EXPORT = "export"
+        const val WIZARD_IMPORT = "import"
+
+        @JvmStatic
+        @JvmOverloads
+        fun intent(context: Context, wizard: String? = null): Intent = Intent(context, SettingsTransferActivity::class.java).putExtra(EXTRA_WIZARD, wizard)
 
         @JvmStatic
         @JvmOverloads
         fun start(context: Context, wizard: String? = null) {
-            context.startActivity(Intent(context, SettingsTransferActivity::class.java).putExtra(EXTRA_WIZARD, wizard))
+            context.startActivity(intent(context, wizard))
         }
     }
 }

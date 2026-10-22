@@ -9,6 +9,7 @@ import android.os.SystemClock
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.opencv.Mat
 import org.json.JSONObject
+import org.mozilla.javascript.ContextFactory
 import java.lang.reflect.Method
 import java.util.concurrent.atomic.AtomicLong
 
@@ -29,6 +30,11 @@ internal object GateNativeProbe {
         "cvMat" to "org.opencv.core.Mat",
         "mediaImage" to "android.media.Image",
         "accessibilityNode" to "android.view.accessibility.AccessibilityNodeInfo",
+        // ROADMAP P4.4: every Class object (what an hprof lists as class records), the loaders of loaded DEX files, WebViews.
+        // zh-CN: ROADMAP P4.4: 全部 Class 对象 (即 hprof 中的类记录), 已加载 DEX 的加载器, WebView.
+        "javaClass" to "java.lang.Class",
+        "dexClassLoader" to "dalvik.system.DexClassLoader",
+        "webView" to "android.webkit.WebView",
     )
 
     private val countInstancesOfClasses: Method? by lazy {
@@ -56,6 +62,27 @@ internal object GateNativeProbe {
         .put("matsFinalized", Mat.getFinalizedCount())
         .put("nativeHeapSizeBytes", Debug.getNativeHeapSize())
         .put("nativeHeapFreeBytes", Debug.getNativeHeapFreeSize())
+        .put("loadedClasses", loadedClassCount())
+        .put("hostDexLoaders", hostDexLoaderCount())
+
+    /**
+     * Classes of every live class loader (ART drops those of unloaded loaders); public API, so unlike the VMDebug counts it is
+     * available on every API level (ROADMAP P4.4).
+     * zh-CN: 全部存活类加载器中的类数 (ART 会除去已卸载加载器的类); 公开 API, 因此与 VMDebug 计数不同, 各 API 级别都可读取 (ROADMAP P4.4).
+     */
+    @Suppress("DEPRECATION")
+    private fun loadedClassCount(): Long = runCatching { Debug.getLoadedClassCount().toLong() }.getOrDefault(-1L)
+
+    /**
+     * Loaders registered by runtime.loadDex / loadJar in the host's application class loader (AndroidClassLoader.mDexClassLoaders);
+     * read reflectively so that the probe also runs against hosts built before P4.4. -1 when unavailable.
+     * zh-CN: 宿主应用类加载器中由 runtime.loadDex / loadJar 登记的加载器数 (AndroidClassLoader.mDexClassLoaders); 经反射读取, 使探针也能用于 P4.4 之前构建的宿主. 不可用时为 -1.
+     */
+    private fun hostDexLoaderCount(): Long = runCatching {
+        val loader = ContextFactory.getGlobal().applicationClassLoader ?: return -1L
+        runCatching { loader.javaClass.getMethod("getDexClassLoaderCount").invoke(loader) as Int }.getOrNull()?.toLong()
+            ?: loader.javaClass.getDeclaredField("mDexClassLoaders").apply { isAccessible = true }.get(loader).let { (it as Map<*, *>).size.toLong() }
+    }.getOrDefault(-1L)
 
     /**
      * Reachable instances per class (VMDebug collects garbage first); -1 when the hidden API is not accessible.

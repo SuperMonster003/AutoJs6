@@ -126,7 +126,13 @@ object SpeechContract {
 
     /** Model management beyond listing: `installModel`, `importModel`, `removeModel`, `setDefaultModel`, `refreshCatalog`. */
     const val FEATURE_MODELS = "models"
-    val FEATURES: Set<String> = setOf(FEATURE_ASR, FEATURE_ASR_STREAMING, FEATURE_VAD, FEATURE_KWS, FEATURE_TTS, FEATURE_TTS_SYSTEM_ENGINE, FEATURE_MODELS)
+
+    /**
+     * Audio files beyond WAV for `recognizeFile` / `detectVoice` (MP3, AAC, Ogg, FLAC and the audio track of a video file;
+     * 3-Macaw Speech roadmap D84): the host hands a non-WAV file only to a plugin that declares it.
+     */
+    const val FEATURE_AUDIO_DECODE = "audioDecode"
+    val FEATURES: Set<String> = setOf(FEATURE_ASR, FEATURE_ASR_STREAMING, FEATURE_VAD, FEATURE_KWS, FEATURE_TTS, FEATURE_TTS_SYSTEM_ENGINE, FEATURE_MODELS, FEATURE_AUDIO_DECODE)
 
     // Output formats ([SpeechOptionKeys.FORMAT]).
 

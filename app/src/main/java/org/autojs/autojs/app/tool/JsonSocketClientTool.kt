@@ -14,6 +14,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.autojs.autojs.core.pref.keys.ConnectionKeys
+import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.pluginclient.DevPluginService
 import org.autojs.autojs.pluginclient.JsonSocketClient
@@ -652,7 +653,7 @@ class JsonSocketClientTool(context: Context) : AbstractJsonSocketTool(context) {
         val isPotentiallyInvalid = { POTENTIALLY_INVALID_IP_ADRESS_LIST_FOR_REMOTE_SERVER.any { input.matches(it) } }
 
         when {
-            !isInHistory() && isPotentiallyInvalid() -> NotAskAgainDialog.Builder(context)
+            !isInHistory() && isPotentiallyInvalid() -> NotAskAgainDialog.Builder(context, DialogStateKeys.IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT)
                 .title(R.string.text_prompt)
                 .content(context.getString(R.string.text_ip_address_may_be_invalid_for_server_connection, input))
                 .widgetThemeColor()

@@ -1,0 +1,187 @@
+package org.autojs.autojs.ui.settings.transfer
+
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.FragmentActivity
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
+import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Kind
+import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Step
+import org.autojs.autojs.ui.wizard.SetupWizards
+import org.autojs.autojs.ui.wizard.WizardUi.showAndAwait
+import org.autojs.autojs.util.DialogUtils.widgetThemeColor
+import org.autojs.autojs.util.ViewUtils
+import org.autojs.autojs6.R
+import java.io.File
+import java.util.UUID
+
+/**
+ * The import wizard (docs/settings/ROADMAP.md T10, D8 / D9 / D19, P7.5): choose the settings file (the system page
+ * "open document", T11) and see its summary (exported by, device, time, the warnings of a newer format and of another
+ * host package, appendix C Q26, credentials sealed for another device, D23), tick the categories it holds (the same
+ * step as the export, [SettingsCategoryPickerStep]), confirm the deployment items they need on this device
+ * ([DeploymentConfirmStep], T18, skipped without any), apply them ([SettingsImporter.importArchive]: internal backup,
+ * write, effects, deployment items) and read the result page. The chosen file is copied to the cache first and deleted
+ * when the wizard ends; a failure offers to choose another file.
+ *
+ * zh-CN: 导入向导 (ROADMAP T10, D8 / D9 / D19, P7.5): 选择设置文件 (系统 "打开文档" 页面, T11) 并查看摘要 (导出来源, 设备, 时间, 更高
+ * 格式与其他宿主包名的警告 (附录 C Q26), 以其他设备密钥加密的凭据 (D23)), 勾选文件中有的分类 (与导出相同的步骤
+ * [SettingsCategoryPickerStep]), 确认它们在本机需要的部署项 ([DeploymentConfirmStep], T18, 没有时跳过), 应用
+ * ([SettingsImporter.importArchive]: 内部备份, 写入, 生效, 部署项), 最后是结果页. 所选文件先复制到缓存, 向导结束时删除; 失败时可
+ * 重新选择文件.
+ */
+class SettingsImportWizard(host: SettingsWizardHost) : SettingsWizard(host) {
+
+    override val titleRes: Int = R.string.settings_transfer_import
+
+    override val steps: List<SettingsWizardStep> = listOf(
+        FileStep(),
+        SettingsCategoryPickerStep(),
+        DeploymentConfirmStep(),
+        SettingsApplyStep(R.string.settings_transfer_import_applying, SettingsImporter::importArchive),
+        SettingsResultStep(R.string.settings_transfer_import_done_title),
+        SettingsFailedStep(R.string.settings_transfer_import_failed_title) { anotherFile(it) },
+    )
+
+    override fun onFinished() {
+        SettingsImporter.clearCache(host.hostActivity)
+    }
+
+    /**
+     * Step 1: the system page that opens a document (requested once, so that a recreated page waits for its result),
+     * the copy of the file, then its summary; "Other file" chooses again.
+     * zh-CN: 第 1 步: 系统的打开文档页面 (只请求一次, 重建后的页面等待其结果), 复制文件, 然后显示摘要; "其他文件" 重新选择.
+     */
+    private class FileStep : SettingsWizardStep(Step.CHOOSE_FILE) {
+        override suspend fun run(wizard: SettingsWizard, state: SettingsWizardState): SettingsWizardState? {
+            val activity = wizard.host.hostActivity
+            var current = state
+            if (current.archive == null || !File(current.archive).isFile) {
+                if (!current.locationRequested) {
+                    current = current.copy(locationRequested = true, archive = null)
+                    wizard.host.wizardState = current
+                    try {
+                        wizard.host.requestOpenDocument()
+                    } catch (e: ActivityNotFoundException) {
+                        return failed(current, e)
+                    }
+                }
+                val uri = wizard.host.awaitDocument()
+                if (uri == null) {
+                    ViewUtils.showToast(activity, R.string.settings_transfer_import_canceled, true)
+                    return null
+                }
+                val progress = progress(wizard)
+                current = try {
+                    val (file, name) = withContext(Dispatchers.IO) { SettingsImporter.copyToCache(activity, uri) }
+                    current.copy(locationRequested = false, archive = file.path, fileName = name, selected = emptyList())
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    return failed(current, e)
+                } finally {
+                    progress.dismiss()
+                }
+                wizard.host.wizardState = current
+            }
+            val inspection = try {
+                withContext(Dispatchers.IO) { SettingsImporter.inspect(activity, current) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                return failed(current, e)
+            }
+            val action = dialog(wizard, current)
+                .content(SettingsTransferMessages.inspectionText(activity, inspection))
+                .neutralText(R.string.settings_transfer_import_other_file)
+                .neutralColorRes(R.color.dialog_button_default)
+                .showAndAwait()
+            return when (action) {
+                DialogAction.POSITIVE -> wizard.next(current.copy(selected = current.selected.ifEmpty { SettingsCategoryChoices.importSelection(inspection.choices) }))
+                DialogAction.NEUTRAL -> anotherFile(current)
+                else -> null
+            }
+        }
+
+        private fun progress(wizard: SettingsWizard): MaterialDialog = MaterialDialog.Builder(wizard.host.hostActivity)
+            .title(wizard.titleRes)
+            .content(R.string.settings_transfer_import_reading)
+            .progress(true, 0)
+            .widgetThemeColor()
+            .cancelable(false)
+            .show()
+
+        private fun failed(state: SettingsWizardState, e: Exception) =
+            state.copy(step = Step.FAILED, locationRequested = false, failure = Failure.of(e), failureDetail = e.message ?: e.javaClass.simpleName)
+    }
+
+    companion object {
+
+        /**
+         * The settings import wizard of the setup wizards ([SetupWizards], docs/settings/ROADMAP.md P11.1): a page that
+         * tells what it is for, where "Choose file" opens the page "Manage AutoJs6 settings" with this wizard
+         * ([SettingsTransferActivity.WIZARD_IMPORT]) and "Skip" ends it. [onFinished] runs once that page is closed, or
+         * once the first page is dismissed otherwise, so that the next setup wizard waits for the import.
+         * zh-CN: 设置向导 ([SetupWizards], ROADMAP P11.1) 中的设置导入向导: 首页说明用途, "选择文件" 打开 "管理 AutoJs6 设置" 页面并进入
+         * 本向导 ([SettingsTransferActivity.WIZARD_IMPORT]), "跳过" 结束. 该页面关闭后, 或首页以其他方式关闭后调用 [onFinished], 因此下一个
+         * 设置向导等待导入结束.
+         */
+        @JvmStatic
+        fun show(activity: FragmentActivity, onFinished: () -> Unit) {
+            var handedOver = false
+            MaterialDialog.Builder(activity)
+                .title(R.string.settings_transfer_setup_wizard)
+                .content(R.string.settings_transfer_setup_wizard_content)
+                .widgetThemeColor()
+                .canceledOnTouchOutside(false)
+                .negativeText(R.string.text_skip)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.settings_transfer_setup_wizard_choose)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { _, _ ->
+                    handedOver = true
+                    openImport(activity, onFinished)
+                }
+                .dismissListener { if (!handedOver) onFinished() }
+                .show()
+        }
+
+        private fun openImport(activity: FragmentActivity, onFinished: () -> Unit) {
+            var launcher: ActivityResultLauncher<Intent>? = null
+            launcher = activity.activityResultRegistry.register("settings_import_wizard_${UUID.randomUUID()}", ActivityResultContracts.StartActivityForResult()) {
+                launcher?.unregister()
+                onFinished()
+            }
+            try {
+                launcher.launch(SettingsTransferActivity.intent(activity, SettingsTransferActivity.WIZARD_IMPORT))
+            } catch (e: ActivityNotFoundException) {
+                launcher.unregister()
+                ViewUtils.showToast(activity, e.message ?: e.javaClass.simpleName, true)
+                onFinished()
+            }
+        }
+
+        /** The state the wizard starts with: step 1, nothing chosen. zh-CN: 向导的初始状态: 第 1 步, 尚未选择. */
+        @JvmStatic
+        fun initialState(): SettingsWizardState = SettingsWizardState(Kind.IMPORT, Step.CHOOSE_FILE)
+
+        /**
+         * [state] back at step 1 without a file, which requests a file again; the password of the file is forgotten (P7.7).
+         * zh-CN: 回到第 1 步且不带文件, 即重新选择文件; 忘记该文件的口令 (P7.7).
+         */
+        @JvmStatic
+        fun anotherFile(state: SettingsWizardState): SettingsWizardState {
+            SettingsPasswords.forget(state.password)
+            return state.copy(
+                step = Step.CHOOSE_FILE, locationRequested = false, archive = null, fileName = null, selected = emptyList(), deploy = null,
+                operation = null, outcome = null, failure = null, failureDetail = null, password = null,
+            )
+        }
+    }
+}

@@ -1,12 +1,7 @@
 package org.autojs.autojs.ui.settings
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.content.pm.ShortcutInfo
-import android.content.pm.ShortcutManager
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
@@ -16,10 +11,12 @@ import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.core.pref.keys.DialogStateKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
-import org.autojs.autojs.external.shortcut.ShortcutActivity
 import org.autojs.autojs.theme.preference.MaterialListPreference
 import org.autojs.autojs.ui.common.NotAskAgainDialog
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.LauncherIconComponents
+import org.autojs.autojs.util.LauncherIconComponents.ALIAS_ADAPTIVE
+import org.autojs.autojs.util.LauncherIconComponents.ALIAS_TRANSPARENT_BACKGROUND
 import org.autojs.autojs.util.ShortcutUtils
 import org.autojs.autojs.util.StringUtils.key
 import org.autojs.autojs.util.ViewUtils
@@ -49,10 +46,10 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
     }
 
     private fun syncValueWithCurrentComponent() {
-        val isComponentTransparent = isComponentEnabled(prefContext, ALIAS_TRANSPARENT_BACKGROUND)
-        val isBeforeAndroidO = Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-        val shouldBeTransparent = isComponentTransparent || isBeforeAndroidO
-        when (shouldBeTransparent) {
+        // Only an explicitly enabled transparent background alias counts: the manifest declares it disabled, so its
+        // default state is the adaptive icon (a fresh install showed "transparent background" before).
+        // zh-CN: 只有显式启用的透明背景别名才算: Manifest 中它默认禁用, 默认状态即自适应图标 (此前全新安装时显示为 "透明背景").
+        when (LauncherIconComponents.isTransparentBackground(prefContext)) {
             true -> R.string.key_launcher_icon_transparent_background
             else -> R.string.key_launcher_icon_adaptive
         }.also { resetIfNeeded(it) }
@@ -72,13 +69,13 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
         when (dialog.items?.get(dialog.selectedIndex)?.toString()) {
             prefContext.getString(R.string.entry_launcher_icon_adaptive) -> {
                 showPromptAboutShortcutsLost {
-                    switchComponent(prefContext, ALIAS_ADAPTIVE, ALIAS_TRANSPARENT_BACKGROUND)
+                    LauncherIconComponents.switchComponent(prefContext, ALIAS_ADAPTIVE, ALIAS_TRANSPARENT_BACKGROUND)
                 }
             }
             prefContext.getString(R.string.entry_launcher_icon_transparent_background) -> {
                 showPromptAboutTransparentBackground {
                     showPromptAboutShortcutsLost {
-                        switchComponent(prefContext, ALIAS_TRANSPARENT_BACKGROUND, ALIAS_ADAPTIVE)
+                        LauncherIconComponents.switchComponent(prefContext, ALIAS_TRANSPARENT_BACKGROUND, ALIAS_ADAPTIVE)
                     }
                 }
             }
@@ -152,65 +149,7 @@ class LauncherIconPreference : MaterialListPreference, SharedPreferences.OnShare
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = notifyChanged()
 
-    private fun switchComponent(ctx: Context, wantEnable: String, wantDisable: String) {
-        val pm = ctx.packageManager
-
-        pm.setComponentEnabledSetting(
-            ComponentName(ctx, wantEnable),
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP,
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ctx.getSystemService(ShortcutManager::class.java)?.let { sm ->
-                sm.pinnedShortcuts
-                    .filterNot { it.isDeclaredInManifest }
-                    .filterNot { Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && it.isImmutable }
-                    .mapNotNull { shortcutInfo ->
-                        ShortcutInfo.Builder(ctx, shortcutInfo.id).apply {
-                            shortcutInfo.intent?.let {
-                                it.component?.let { component ->
-                                    setActivity(ComponentName(component.packageName, component.className))
-                                } ?: run {
-                                    setActivity(ComponentName(ctx, ShortcutActivity::class.java))
-                                }
-                                setIntent(it)
-                            } ?: run {
-                                setActivity(ComponentName(ctx, ShortcutActivity::class.java))
-                                setIntent(Intent(ctx, ShortcutActivity::class.java))
-                            }
-                            (shortcutInfo.shortLabel ?: shortcutInfo.longLabel)?.let {
-                                setShortLabel(it)
-                            }
-                            (shortcutInfo.longLabel ?: shortcutInfo.shortLabel)?.let {
-                                setLongLabel(it)
-                            }
-                        }.build()
-                    }.takeUnless { it.isEmpty() }?.let { toUpdate ->
-                        sm.updateShortcuts(toUpdate)
-                    }
-            }
-        }
-
-        pm.setComponentEnabledSetting(
-            ComponentName(ctx, wantDisable),
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP,
-        )
-    }
-
-    @Suppress("SameParameterValue")
-    private fun isComponentEnabled(ctx: Context, className: String): Boolean {
-        val state = ctx.packageManager.getComponentEnabledSetting(
-            ComponentName(ctx, className)
-        )
-        return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
-                state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-    }
-
     companion object {
-
-        private const val ALIAS_ADAPTIVE = "org.autojs.autojs.launcher.AdaptiveIconAlias"
-        private const val ALIAS_TRANSPARENT_BACKGROUND = "org.autojs.autojs.launcher.TransparentBackgroundIconAlias"
 
         private fun createDefaultBundle(context: Context) = Bundle().apply {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {

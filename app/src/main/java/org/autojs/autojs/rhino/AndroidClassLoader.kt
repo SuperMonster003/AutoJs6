@@ -55,7 +55,8 @@ import kotlin.random.Random
  *
  * @param parent   the parent
  * @param cacheDir the cache directory
- * @param clearCacheOnInit internal benchmark seam; the production constructor always clears
+ * @param clearCacheOnInit true for the application class loader (the public constructor); false for the loaders of
+ *   generated classes, which share the cache directory with loads in progress (docs/memory/ROADMAP.md H26), and for benchmarks
  */
 class AndroidClassLoader internal constructor(
     private val parent: ClassLoader,
@@ -69,7 +70,15 @@ class AndroidClassLoader internal constructor(
         clearCacheOnInit = true,
     )
 
-    private val mDexClassLoaders = ConcurrentHashMap<String, DexClassLoader>()
+    // The loaders of runtime.loadDex / loadJar / loadAar by path, with the scripts that loaded each path: an entry is
+    // removed when the last of those scripts ends (docs/memory/ROADMAP.md H3 / P4.4).
+    // zh-CN: runtime.loadDex / loadJar / loadAar 按路径登记的加载器, 连同加载过各路径的脚本: 其中最后一个脚本结束时移除该项
+    // (docs/memory/ROADMAP.md H3 / P4.4).
+    private val mDexClassLoaders = OwnedDexLoaders<DexClassLoader>()
+
+    // The owner id of the script whose load runs on this thread (see loadFor); null outside a script.
+    // zh-CN: 本线程上正在进行的加载所属脚本的 owner id (见 loadFor); 脚本之外为 null.
+    private val mLoadingOwner = ThreadLocal<String>()
 
     // Ensure per-jar conversion is thread-safe.
     // zh-CN: 确保对同一个 jar 的转换过程线程安全.
@@ -88,6 +97,38 @@ class AndroidClassLoader internal constructor(
      * Might be thrown in any Rhino method that loads bytecode if the loading failed
      */
     class FatalLoadingException internal constructor(t: Throwable?) : RuntimeException("Failed to define class", t)
+
+    /**
+     * Runs [load] with every loader it registers owned by [owner], the owner id of a script runtime; [releaseOwner]
+     * releases them when that script ends (docs/memory/ROADMAP.md H3 / P4.4). Loads outside this call belong to the
+     * process and stay registered.
+     * zh-CN: 执行 [load], 期间登记的每个加载器都归 [owner] (脚本运行时的 owner id) 所有; 该脚本结束时由 [releaseOwner] 释放
+     * (docs/memory/ROADMAP.md H3 / P4.4). 不经本方法的加载归进程所有, 一直保留.
+     */
+    fun <T> loadFor(owner: String, load: () -> T): T {
+        val previous = mLoadingOwner.get()
+        mLoadingOwner.set(owner)
+        try {
+            return load()
+        } finally {
+            if (previous == null) mLoadingOwner.remove() else mLoadingOwner.set(previous)
+        }
+    }
+
+    /**
+     * Drops [owner] from the loaders it loaded: a loader no other running script has loaded is no longer searched by
+     * [loadClass], so it can be unloaded with its classes once the scripts that used them are gone. Classes already
+     * resolved keep working. Returns the number of loaders removed.
+     * zh-CN: 把 [owner] 从它加载过的加载器中移除: 没有其他运行中的脚本加载过的加载器不再被 [loadClass] 搜索, 用过它的脚本都回收后,
+     * 该加载器与其中的类即可卸载. 已解析的类不受影响. 返回移除的加载器数.
+     */
+    fun releaseOwner(owner: String): Int = mDexClassLoaders.releaseOwner(owner).size
+
+    /** Number of registered loaders, for the memory diagnostics. zh-CN: 已登记的加载器数, 供内存诊断使用. */
+    val dexClassLoaderCount: Int
+        get() = mDexClassLoaders.size
+
+    private fun register(path: String, loader: DexClassLoader) = mDexClassLoaders.put(path, loader, mLoadingOwner.get())
 
     @Throws(FileNotFoundException::class)
     fun loadDex(file: File): DexClassLoader {
@@ -121,7 +162,7 @@ class AndroidClassLoader internal constructor(
         }
 
         return DexClassLoader(safeDexFile.path, optimizationDirectory(), null, parent).also {
-            mDexClassLoaders[safeDexFile.path] = it
+            register(safeDexFile.path, it)
         }
     }
 
@@ -470,7 +511,7 @@ class AndroidClassLoader internal constructor(
         val (target, loader) = adoption
         try {
             throwIfInterrupted()
-            mDexClassLoaders[target.path] = loader
+            register(target.path, loader)
             throwIfInterrupted()
             return loader
         } catch (failure: Throwable) {
@@ -622,12 +663,14 @@ class AndroidClassLoader internal constructor(
     override fun defineClass(name: String, data: ByteArray): Class<*> {
         Log.d(TAG, "defineClass: name = $name data.length = ${data.size}")
         var classFile: File? = null
+        var dexFile: File? = null
         return try {
             classFile = generateTempFile(name)
             ZipFile(classFile).addStream(ByteArrayInputStream(data), ZipParameters().apply {
                 fileNameInZip = name.replace('.', '/') + ".class"
             })
-            dexJar(classFile, null).loadClass(name)
+            dexFile = generateTempFile("dex-" + classFile.path)
+            dexJar(classFile, dexFile).loadClass(name)
         } catch (e: IOException) {
             throw FatalLoadingException(e)
         } catch (e: ClassNotFoundException) {
@@ -642,6 +685,22 @@ class AndroidClassLoader internal constructor(
                     }
                 }
             }
+            // The class is loaded and its loader keeps the DEX open, so the files of a generated class are not needed any
+            // more. They used to be removed only when the next generated class loader cleared the whole cache directory,
+            // which also removed the files of loads still in progress on other threads (docs/memory/ROADMAP.md H26).
+            // zh-CN: 类已加载, 其加载器保持 DEX 打开, 生成类的文件不再需要. 以前它们只在下一个生成类加载器清空整个缓存目录时才被删除,
+            // 同时也删掉了其他线程上仍在进行的加载所用的文件 (docs/memory/ROADMAP.md H26).
+            dexFile?.let { deleteGeneratedDex(it) }
+        }
+    }
+
+    private fun deleteGeneratedDex(dexFile: File) {
+        val safeDexFile = File(cacheDir, "safe_${dexFile.name}")
+        val optimized = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            File(File(cacheDir, "optimized"), safeDexFile.nameWithoutExtension + ".dex")
+        } else null
+        for (file in listOfNotNull(dexFile, safeDexFile, optimized)) {
+            if (file.exists() && !file.delete()) Log.w(TAG, "Failed to delete generated DEX file: ${file.path}")
         }
     }
 
@@ -848,7 +907,7 @@ class AndroidClassLoader internal constructor(
         throwIfInterrupted()
         val loader = DexClassLoader(safeDexFile.path, optimizationDirectory(), null, parent)
         throwIfInterrupted()
-        mDexClassLoaders[safeDexFile.path] = loader
+        register(safeDexFile.path, loader)
         try {
             throwIfInterrupted()
         } catch (failure: Throwable) {
@@ -970,3 +1029,58 @@ class AndroidClassLoader internal constructor(
 }
 
 private fun ByteArray.toHex(): String = joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
+
+/**
+ * Loaders by path with the owners (script runtimes) that loaded each path (docs/memory/ROADMAP.md H3 / P4.4). An entry
+ * stays while at least one of its owners runs, so every script keeps seeing the classes as before while a script that
+ * loaded them is running; [releaseOwner] removes the entries whose last owner ended. A path also loaded without an owner
+ * (host code outside a script) is kept for the life of the process. [values] reads without locking (class lookups).
+ * zh-CN: 按路径登记的加载器, 连同加载过各路径的 owner (脚本运行时) (docs/memory/ROADMAP.md H3 / P4.4). 只要有一个 owner 仍在运行, 该项就保留,
+ * 因此加载过它的脚本运行期间, 各脚本仍像以前一样能看到这些类; [releaseOwner] 移除最后一个 owner 已结束的项. 也曾被不带 owner 加载 (脚本之外的宿主代码)
+ * 的路径在进程内一直保留. [values] 读取不加锁 (类查找).
+ */
+internal class OwnedDexLoaders<L : Any> {
+
+    private val loaders = ConcurrentHashMap<String, L>()
+
+    // Guarded by this.
+    // zh-CN: 由 this 保护.
+    private val owners = HashMap<String, MutableSet<String>>()
+    private val pinned = HashSet<String>()
+
+    val values: Collection<L>
+        get() = loaders.values
+
+    val size: Int
+        get() = loaders.size
+
+    /** Registers [loader] for [path] (replacing the loader of an earlier load of the same path) on behalf of [owner]. */
+    @Synchronized
+    fun put(path: String, loader: L, owner: String?) {
+        loaders[path] = loader
+        if (owner == null) pinned += path else owners.getOrPut(path) { LinkedHashSet() } += owner
+    }
+
+    /** Removes [loader] when its load failed after [put]; false if [path] has another loader by now. */
+    @Synchronized
+    fun remove(path: String, loader: L): Boolean = loaders.remove(path, loader)
+
+    /** Drops [owner] from every path; removes and returns the loaders that no running owner and no pin keeps. */
+    @Synchronized
+    fun releaseOwner(owner: String): List<L> {
+        val released = ArrayList<L>()
+        val iterator = owners.entries.iterator()
+        while (iterator.hasNext()) {
+            val (path, pathOwners) = iterator.next()
+            if (!pathOwners.remove(owner) || pathOwners.isNotEmpty()) continue
+            iterator.remove()
+            if (path !in pinned) loaders.remove(path)?.let(released::add)
+        }
+        return released
+    }
+
+    @Synchronized
+    fun owners(path: String): Set<String> = owners[path]?.toSet().orEmpty()
+
+    fun loader(path: String): L? = loaders[path]
+}

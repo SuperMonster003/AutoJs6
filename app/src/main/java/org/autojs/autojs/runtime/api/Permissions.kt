@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import org.autojs.autojs.permission.PostNotificationsPermission
 import org.autojs.autojs.permission.LocalNetworkPermission
 import org.autojs.autojs.util.IntentUtils.startSafely
@@ -89,6 +90,15 @@ class Permissions(private val context: Context) {
                 }
             }.also { launcher ->
                 requestMultiplePermissionsLauncherCache[activity] = launcher
+                // The launcher (its callback and the result registry) references the activity, and a WeakHashMap holds
+                // its values strongly, so the entries of an activity must go when it is destroyed (docs/memory/ROADMAP.md P4.5).
+                // zh-CN: launcher (其回调与结果注册表) 引用 Activity, 而 WeakHashMap 强引用其值, 因此 Activity 销毁时须移除其条目 (docs/memory/ROADMAP.md P4.5).
+                activity.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+                    if (event == Lifecycle.Event.ON_DESTROY) {
+                        requestMultiplePermissionsLauncherCache.remove(activity)
+                        PostNotificationsPermission.postNotificationsResultCallbackCache.remove(activity)
+                    }
+                })
             }
         }
 

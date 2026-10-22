@@ -23,16 +23,16 @@ class RuntimeResourceScopeTest {
     @Test
     fun stagesFollowAppendixB3() {
         // The order of ScriptRuntime.onExit before P4.1 (docs/memory/ROADMAP.md appendix B.3), with the owner sweep of P4.2 after the
-        // accessibility tap; changing it changes what scripts see.
-        // zh-CN: P4.1 之前 ScriptRuntime.onExit 的顺序 (docs/memory/ROADMAP.md 附录 B.3), 加上 P4.2 在 accessibility tap 之后的按 owner 清理;
-        // 改变它就改变了脚本可见的行为.
+        // accessibility tap, and the WebViews (after the exit event) and class loaders (last) of P4.4; changing it changes what scripts see.
+        // zh-CN: P4.1 之前 ScriptRuntime.onExit 的顺序 (docs/memory/ROADMAP.md 附录 B.3), 加上 P4.2 在 accessibility tap 之后的按 owner 清理,
+        // 以及 P4.4 的 WebView (exit 事件之后) 与类加载器 (最后); 改变它就改变了脚本可见的行为.
         assertEquals(
             listOf(
                 "IMAGE_QUANTIZATIONS", "CONSOLE", "WEBSOCKETS", "ACCESSIBILITY_EVENTS", "ACCESSIBILITY_PULSE", "ACCESSIBILITY_LISTENER",
-                "ROOT_MODE", "COMPOSE", "INTERRUPT_STATUS", "FLOATY", "EXIT_EVENT",
+                "ROOT_MODE", "COMPOSE", "INTERRUPT_STATUS", "FLOATY", "EXIT_EVENT", "WEB_VIEWS",
                 "MAIL", "INSTALLER", "EPUB", "GALLERY", "TERMINAL", "SPEECH", "AI", "TTS",
                 "THREADS", "IMAGES", "PLUGINS", "EVENTS", "MEDIA", "LOOPERS", "ACCESSIBILITY_TAP", "ACCESSIBILITY_OWNER", "SHELL",
-                "SCREEN_CAPTURER", "SCREEN_CAPTURE_SERVICE", "SENSORS", "TIMERS", "UI", "CLOSEABLES",
+                "SCREEN_CAPTURER", "SCREEN_CAPTURE_SERVICE", "SENSORS", "TIMERS", "UI", "CLOSEABLES", "CLASS_LOADERS",
             ),
             Stage.entries.map { it.name },
         )
