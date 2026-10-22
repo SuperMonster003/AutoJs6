@@ -197,7 +197,9 @@ function copyDirectory(from, to) {
     var n = 0;
     for (var i = 0; i < children.length; i++) {
         if (children[i].isFile()) {
-            java.nio.file.Files.copy(children[i].toPath(), new File(to, children[i].getName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            // files.copy rather than java.nio.file, which Android 7 does not have.
+            // zh-CN: 用 files.copy 而不是 Android 7 没有的 java.nio.file.
+            if (!files.copy(children[i].getPath(), new File(to, children[i].getName()).getPath())) throw new Error('not copied: ' + children[i].getName());
             n++;
         }
     }
@@ -400,6 +402,12 @@ function reset() {
         }
     });
     check('reset-cleared', left === 0, left + ' keys of ' + ids.join(',') + ' still stored');
+    // A reset that includes appearance clears the theme color too, so there is no other category to look at here.
+    // zh-CN: 恢复默认含外观分类时主题色也被清除, 此处不再检查其他分类.
+    if (ids.indexOf('appearance') >= 0) {
+        out('INFO reset-others-kept skipped: appearance is one of the reset categories');
+        return;
+    }
     var theme = stored(keys.AppearanceKeys.THEME_COLOR_PRIMARY);
     check('reset-others-kept', theme !== null, 'appearance ' + (theme === null ? 'cleared' : 'kept'));
 }

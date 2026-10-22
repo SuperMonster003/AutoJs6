@@ -35,6 +35,7 @@ status is 1 when a check fails or the script does not finish.
 import argparse
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -71,7 +72,8 @@ def marked_lines(serial, epoch):
 
 
 def run_script(serial, text, wait):
-    local = HERE / "__pycache__" / "aj6_settings_check.js"
+    # One local file per device: checks of two devices may run at the same time.
+    local = HERE / "__pycache__" / f"aj6_settings_check-{re.sub(r'[^A-Za-z0-9._-]', '_', serial)}.js"
     local.parent.mkdir(exist_ok=True)
     local.write_text(text, encoding="utf-8")
     remote = f"{DEVICE_DIR}/aj6_settings_check.js"

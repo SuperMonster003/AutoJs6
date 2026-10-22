@@ -22,7 +22,8 @@ PHASE is one of
            and checks it with archive_inspect.py: no credentials.
   plugins  checks the plugin state after b.zip (--expect flipped) or its undo (--expect original) and that the package
            that is not installed was not written (item 4).
-  reset    checks a reset to defaults of --categories (P8.1, item 6): their keys are gone, appearance stays.
+  reset    checks a reset to defaults of --categories (P8.1, item 6): their keys are gone, appearance stays (not
+           checked when appearance is one of them).
   deploy-prepare  after prepare: writes c.zip (P7.6, items 10 - 12), the explorer and editor appearance categories of
            this device whose working directory names a directory that does not exist and whose editor font is a
            catalog font that is not downloaded.

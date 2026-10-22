@@ -60,7 +60,9 @@ function raw(name) {
 
 function prefsText() {
     var f = new java.io.File(context.getApplicationInfo().dataDir, 'shared_prefs/' + context.getPackageName() + '_preferences.xml');
-    return f.isFile() ? String(new java.lang.String(java.nio.file.Files.readAllBytes(f.toPath()), 'UTF-8')) : '';
+    // files.read rather than java.nio.file, which Android 7 does not have.
+    // zh-CN: 用 files.read 而不是 Android 7 没有的 java.nio.file.
+    return f.isFile() ? String(files.read(f.getPath())) : '';
 }
 
 function waitForDisk(names) {

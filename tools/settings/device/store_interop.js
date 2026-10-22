@@ -37,7 +37,9 @@ function prefsFile(name) {
 }
 
 function fileText(file) {
-    return file.isFile() ? String(new java.lang.String(java.nio.file.Files.readAllBytes(file.toPath()), 'UTF-8')) : '';
+    // files.read rather than java.nio.file, which Android 7 does not have.
+    // zh-CN: 用 files.read 而不是 Android 7 没有的 java.nio.file.
+    return file.isFile() ? String(files.read(file.getPath())) : '';
 }
 
 var store = SettingsStores.getDefault();
