@@ -241,44 +241,57 @@ object SpeechPluginHost {
 
     /**
      * Opens a dictation session whose events reach [sink] through a [SpeechEventGate]; the returned proxy owns the
-     * dedicated binding (with the host's capabilities) until the session ends.
-     * zh-CN: 打开听写会话, 其事件经 [SpeechEventGate] 到达 [sink]; 返回的代理在会话结束前持有专用绑定 (带宿主能力).
+     * dedicated binding (with the host's capabilities) until the session ends. A failed open leaves the gate without
+     * [sink] ([SpeechSessionOpening]).
+     * zh-CN: 打开听写会话, 其事件经 [SpeechEventGate] 到达 [sink]; 返回的代理在会话结束前持有专用绑定 (带宿主能力). 打开失败时闸门不再持有
+     * [sink] ([SpeechSessionOpening]).
      */
-    suspend fun openSession(context: Context, request: SpeechListenRequest, sink: SpeechEventSink): SpeechSessionProxy = withContext(Dispatchers.IO) {
-        val target = selectForCall(context)
-        requireFeature(peerOf(target), if (request.isExternal) SpeechContract.FEATURE_ASR else SpeechContract.FEATURE_ASR_STREAMING)
+    suspend fun openSession(context: Context, request: SpeechListenRequest, sink: SpeechEventSink): SpeechSessionProxy {
         val gate = SpeechEventGate(sink)
-        val callback = SpeechSessionCallbackBinder(gate)
-        val leased = lease(context, target) { proxy ->
-            proxy.openSession(SpeechBundles.listen(request), callback) ?: throw SpeechErrorMapper.failure(SpeechErrorCodes.INTERNAL, "the plugin opened no session")
+        return SpeechSessionOpening.open(listOf(gate)) { opened ->
+            withContext(Dispatchers.IO) {
+                val target = selectForCall(context)
+                requireFeature(peerOf(target), if (request.isExternal) SpeechContract.FEATURE_ASR else SpeechContract.FEATURE_ASR_STREAMING)
+                val callback = SpeechSessionCallbackBinder(gate)
+                val leased = lease(context, target) { proxy ->
+                    SpeechSessionOpening.requireOpened(proxy.openSession(SpeechBundles.listen(request), callback), "session")
+                }
+                SpeechSessionProxy(leased, gate, request.isExternal).also(opened)
+            }
         }
-        SpeechSessionProxy(leased, gate, request.isExternal)
     }
 
     /**
      * Opens a wake session: hits reach [wakeSink], the dictation rounds of `thenListen` reach [listenSink] (required with
-     * `thenListen`).
-     * zh-CN: 打开唤醒会话: 命中到达 [wakeSink], `thenListen` 的听写轮次到达 [listenSink] (有 `thenListen` 时必需).
+     * `thenListen`). A failed open leaves both gates without their sinks ([SpeechSessionOpening]).
+     * zh-CN: 打开唤醒会话: 命中到达 [wakeSink], `thenListen` 的听写轮次到达 [listenSink] (有 `thenListen` 时必需). 打开失败时两个闸门都不再持有
+     * 各自的 sink ([SpeechSessionOpening]).
      */
     suspend fun openWakeSession(
         context: Context,
         request: SpeechWakeRequest,
         wakeSink: SpeechEventSink,
         listenSink: SpeechEventSink?,
-    ): SpeechWakeSessionProxy = withContext(Dispatchers.IO) {
-        val target = selectForCall(context)
-        val peer = peerOf(target)
-        requireFeature(peer, SpeechContract.FEATURE_KWS)
-        if (request.thenListen != null) requireFeature(peer, SpeechContract.FEATURE_ASR_STREAMING)
+    ): SpeechWakeSessionProxy {
         val gate = SpeechEventGate(wakeSink)
-        val listenGate = if (request.thenListen != null) SpeechEventGate(requireNotNull(listenSink) { "thenListen needs a listen sink" }) else null
-        val wakeCallback = SpeechWakeCallbackBinder(gate)
-        val listenCallback = listenGate?.let { SpeechSessionCallbackBinder(it, roundChannel = true) }
-        val leased = lease(context, target) { proxy ->
-            proxy.openWakeSession(SpeechBundles.wake(request), wakeCallback, listenCallback)
-                ?: throw SpeechErrorMapper.failure(SpeechErrorCodes.INTERNAL, "the plugin opened no wake session")
+        val listenGate = if (request.thenListen != null) listenSink?.let(::SpeechEventGate) else null
+        return SpeechSessionOpening.open(listOfNotNull(gate, listenGate)) { opened ->
+            withContext(Dispatchers.IO) {
+                val target = selectForCall(context)
+                val peer = peerOf(target)
+                requireFeature(peer, SpeechContract.FEATURE_KWS)
+                if (request.thenListen != null) {
+                    requireFeature(peer, SpeechContract.FEATURE_ASR_STREAMING)
+                    requireNotNull(listenGate) { "thenListen needs a listen sink" }
+                }
+                val wakeCallback = SpeechWakeCallbackBinder(gate)
+                val listenCallback = listenGate?.let { SpeechSessionCallbackBinder(it, roundChannel = true) }
+                val leased = lease(context, target) { proxy ->
+                    SpeechSessionOpening.requireOpened(proxy.openWakeSession(SpeechBundles.wake(request), wakeCallback, listenCallback), "wake session")
+                }
+                SpeechWakeSessionProxy(leased, gate, listenGate).also(opened)
+            }
         }
-        SpeechWakeSessionProxy(leased, gate, listenGate)
     }
 
     // ------------------------------------------------------------------ synthesis

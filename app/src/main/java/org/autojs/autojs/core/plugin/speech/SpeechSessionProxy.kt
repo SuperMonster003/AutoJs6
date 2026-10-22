@@ -13,6 +13,7 @@ import org.autojs.plugin.speech.api.SpeechLimits
 import org.autojs.plugin.speech.api.SpeechResultKeys
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * One session event as the host reads it off a callback (roadmap appendix B.3): [type] is one of
@@ -46,9 +47,11 @@ fun interface SpeechEventSink {
  */
 class SpeechEventGate(sink: SpeechEventSink) {
 
-    // Dropped once the channel has ended: the plugin process holds the callback Binder, and with it this gate, for as long as
-    // it keeps its reference, and the sink leads to the script runtime (docs/memory/ROADMAP.md H23).
-    // zh-CN: 通道结束后即丢弃: 插件进程持有回调 Binder (进而持有本闸门) 的时间由它自己决定, 而 sink 通向脚本运行时 (docs/memory/ROADMAP.md H23).
+    // Dropped once the channel has ended or the session failed to open: the plugin process holds the callback Binder, and with
+    // it this gate, for as long as it keeps its reference, and the sink leads to the script runtime (docs/memory/ROADMAP.md
+    // H23, H30).
+    // zh-CN: 通道结束或会话打开失败后即丢弃: 插件进程持有回调 Binder (进而持有本闸门) 的时间由它自己决定, 而 sink 通向脚本运行时
+    // (docs/memory/ROADMAP.md H23, H30).
     @Volatile
     private var sink: SpeechEventSink? = sink
 
@@ -87,6 +90,19 @@ class SpeechEventGate(sink: SpeechEventSink) {
         target.onEvent(SpeechEvent(SpeechContract.EVENT_END, linkedMapOf(SpeechResultKeys.REASON to reason)))
         sink = null
     }
+
+    /**
+     * Ends the channel without delivering anything: the session did not open, so the caller gets the failure as an
+     * exception and the sink must not see an `end` (docs/memory/ROADMAP.md H30).
+     * zh-CN: 不投递任何事件地结束通道: 会话没有打开, 调用方以异常得到失败, sink 不应收到 `end` (docs/memory/ROADMAP.md H30).
+     */
+    fun discard() {
+        synchronized(this) { isEnded = true }
+        sink = null
+    }
+
+    /** Whether the gate still leads to its sink (JVM tests). zh-CN: 闸门是否仍通向其 sink (JVM 测试用). */
+    internal val holdsSink: Boolean get() = sink != null
 
     private fun drop(): Boolean {
         synchronized(this) { droppedCount++ }
@@ -245,6 +261,16 @@ open class SpeechSessionProxy internal constructor(
         gate.closeLocally(SpeechContract.REASON_CANCELLED)
     }
 
+    /**
+     * The session opened but its opener failed afterwards (it was cancelled): the plugin session is cancelled and the
+     * binding released; the gates were discarded already, so no event is delivered.
+     * zh-CN: 会话已打开但打开方随后失败 (被取消): 取消插件会话并释放绑定; 闸门已被丢弃, 不投递任何事件.
+     */
+    internal fun abandon() {
+        if (!died.get()) runCatching { session.cancel() }
+        release()
+    }
+
     private fun onDied() {
         died.set(true)
         release()
@@ -286,4 +312,33 @@ class SpeechWakeSessionProxy internal constructor(
         super.close()
         listenGate?.closeLocally(SpeechContract.REASON_CANCELLED)
     }
+}
+
+/**
+ * Opening a session without leaking its gates (docs/memory/ROADMAP.md H30): the callback Binders reach the plugin process
+ * before it answers, and it may keep them after refusing (MODEL_MISSING and so on), so every failure discards the gates
+ * before the exception goes on. A session that opened before its opener failed (the script stopped meanwhile) is
+ * cancelled and its binding released.
+ * zh-CN: 打开会话而不泄漏其闸门 (docs/memory/ROADMAP.md H30): 回调 Binder 在插件作答之前就已到达插件进程, 插件拒绝 (MODEL_MISSING 等) 后仍可能
+ * 持有它们, 因此任何失败都先丢弃闸门再继续抛出异常. 打开方失败前会话已打开的 (其间脚本已停止), 取消该会话并释放绑定.
+ */
+internal object SpeechSessionOpening {
+
+    /**
+     * Runs [open] for the session behind [gates]; [open] hands the proxy to `opened` as soon as it exists.
+     * zh-CN: 为 [gates] 背后的会话运行 [open]; [open] 在代理建成后立即交给 `opened`.
+     */
+    suspend fun <P : SpeechSessionProxy> open(gates: List<SpeechEventGate>, open: suspend (opened: (P) -> Unit) -> P): P {
+        val opened = AtomicReference<P?>()
+        try {
+            return open { opened.set(it) }
+        } catch (t: Throwable) {
+            gates.forEach { it.discard() }
+            opened.get()?.abandon()
+            throw t
+        }
+    }
+
+    fun requireOpened(session: ISpeechSession?, what: String): ISpeechSession =
+        session ?: throw SpeechErrorMapper.failure(SpeechErrorCodes.INTERNAL, "the plugin opened no $what")
 }
