@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "android": "12",
+    "sdk": "31",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "shell"
+    },
+    "mode": "server-restart",
+    "rounds": 3,
+    "settleSec": 3.0,
+    "startResidue": 0,
+    "startHostAlive": false,
+    "startForceStops": 1,
+    "date": "20261022",
+    "startedAt": "2026-10-22 23:11:21",
+    "endedAt": "2026-10-22 23:12:02",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "servicePid": 7162,
+      "serviceRssKb": 212912,
+      "mark": "code=0 uid=2000",
+      "startShExit": 0,
+      "serverRestarted": true,
+      "residueAfterRestart": 0,
+      "exitSource": "exited",
+      "residueAfterStop": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "strayExec": 2,
+      "strayExecRssKb": 5100,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 2,
+      "servicePid": 8122,
+      "serviceRssKb": 213824,
+      "mark": "code=0 uid=2000",
+      "startShExit": 0,
+      "serverRestarted": true,
+      "residueAfterRestart": 0,
+      "exitSource": "exited",
+      "residueAfterStop": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "strayExec": 2,
+      "strayExecRssKb": 5104,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 3,
+      "servicePid": 8648,
+      "serviceRssKb": 213172,
+      "mark": "code=0 uid=2000",
+      "startShExit": 0,
+      "serverRestarted": true,
+      "residueAfterRestart": 0,
+      "exitSource": "exited",
+      "residueAfterStop": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "strayExec": 2,
+      "strayExecRssKb": 5100,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    }
+  ],
+  "verdict": "PASS",
+  "summary": "residue in 0/3 rounds; orphaned exec processes in 3/3 rounds"
+}

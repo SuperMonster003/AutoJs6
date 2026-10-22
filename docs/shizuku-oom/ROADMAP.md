@@ -118,7 +118,7 @@
 
 - [x] P0.1 探针脚本 `tools/shizuku-oom/zombie_probe.py` + `tools/shizuku-oom/README.md` (T1 / T2). 验收: 当前 HEAD 的 debug 构建在 XQ-AT72 跑 `--mode force-stop --rounds 20` 残留 0/20, G8441 跑 10 轮残留 0/10; 报告入 `docs/shizuku-oom/evidence/`, 数字入附录 B. 完成 (2026-10-22): XQ-AT72 HEAD debug 5935 20 轮残留 0/20 (`probe-XQ-AT72-5935-force-stop-20261022`), G8441 10 轮 0/10 (`probe-G8441-5935-force-stop-20261022`), 退出来源全部 destroy; 开启 "音量键控制" 的 XQ-AT72 每轮另有一对 getevent / sh 孤儿 (约 5 MB, 20/20 轮, 由 D10 / P1.1 / P1.5 处理).
 - [ ] P0.2 负对照 (D3): v6.6.4 发布包在 XQ-AT72 跑 `--mode force-stop --rounds 10`, 预期残留逐轮累加到约 10, 记录 RSS 合计; 测后装回原包. 验收: 报告显示堆积 (证明探针有效), 附录 B 有 "修复前" 列.
-- [ ] P0.3 边界路径探针 (HEAD 构建, XQ-AT72), 每条路径写残留数与 logcat 里的退出来源: (a) `bind-kill:0.2 / 0.5 / 1 / 2` 各 5 轮 (宿主在服务启动完成前后被杀); (b) `update`: 两个构建号不同的 debug 包先后覆盖安装, 旧服务应因 version 不同被替换并退出; (c) `server-restart`: 用 start.sh 重启 Shizuku 服务端, 旧用户服务应随服务端死亡退出; (d) 10 秒超时重绑路径: 代码审读 + 能构造则实测 (例如让服务启动变慢), 否则记 "未实测, 由 P1.2 覆盖"; (e) `spawn-orphan`: 脚本 `shizuku.spawn('sleep 600')` 后 force-stop 宿主, 检查 `sleep` / `sh` 是否残留 (预期现状残留, 作 P1.1 的修前基线). 验收: 5 条路径各有结论与数字 (附录 B).
+- [x] P0.3 边界路径探针 (HEAD 构建, XQ-AT72), 每条路径写残留数与 logcat 里的退出来源: (a) `bind-kill:0.2 / 0.5 / 1 / 2` 各 5 轮 (宿主在服务启动完成前后被杀); (b) `update`: 两个构建号不同的 debug 包先后覆盖安装, 旧服务应因 version 不同被替换并退出; (c) `server-restart`: 用 start.sh 重启 Shizuku 服务端, 旧用户服务应随服务端死亡退出; (d) 10 秒超时重绑路径: 代码审读 + 能构造则实测 (例如让服务启动变慢), 否则记 "未实测, 由 P1.2 覆盖"; (e) `spawn-orphan`: 脚本 `shizuku.spawn('sleep 600')` 后 force-stop 宿主, 检查 `sleep` / `sh` 是否残留 (预期现状残留, 作 P1.1 的修前基线). 验收: 5 条路径各有结论与数字 (附录 B). 完成 (2026-10-22, XQ-AT72 HEAD debug 5935 / 5936): (a) / (b) / (c) 用户服务残留均为 0, (d) 无永久残留, (e) 服务残留 0 但每轮留下 `sleep 600` 1 个 (修前基线, P1.1 对照); 详见附录 B.2.
 - [ ] P0.4 用户服务进程内存画像 (瘦身基线): `dumpsys meminfo <pid>` 的 PSS / Java 堆 / native / code, 线程数 (`/proc/<pid>/task`), logcat 里 `App.onCreate` 各项在该进程的执行痕迹 (哪些跑了); 写附录 B "瘦身前" 列. 验收: 数字齐全, 并列出建议跳过的初始化项供 P1.4 用.
 
 ### P1 修复与加固 (D5 / D10 / D11, 代码改动; 验证需 XQ-AT72)
@@ -164,11 +164,11 @@
 
 | 路径 | 轮数 | 残留 | logcat 退出来源 | 结论 |
 | --- | --- | --- | --- | --- |
-| (a) bind-kill 0.2 / 0.5 / 1 / 2 s | 各 5 | | | |
-| (b) update (version 替换) | 3 | | | |
-| (c) server-restart | 3 | | | |
+| (a) bind-kill 0.2 / 0.5 / 1 / 2 s | 各 5 | 0/20 | 0.2 / 0.5 / 1 s 共 15 轮均为 exited (宿主被杀时都未收到 `onServiceConnected`, 无 destroy 行); 2 s 为 destroy 3 / exited 2; 缓冲区内可见的 exited 为启动器交付 binder 失败后 `System.exit(1)` (`VM exiting with result code 1`) | 无残留: 服务交付 binder 前被杀走启动器退出, 交付后被杀走 destroy (`probe-XQ-AT72-5935-bind-kill-{0.2,0.5,1,2}-20261022`) |
+| (b) update (version 替换) | 3 | 0/3 (覆盖安装后 0, 强停后 0) | 旧服务 destroy (覆盖安装强停宿主, 连接死亡) | 无残留; 每轮另有 getevent / sh 两对 (安装与最后强停各一对, 见 D10) (`probe-XQ-AT72-5936-update-20261022`, 5935 -> 5936) |
+| (c) server-restart | 3 | 0/3 (重启服务端后 0, 强停后 0) | exited: 服务端死亡后启动器 `System.exit(0)` (`VM exiting with result code 0`) | 无残留 (`probe-XQ-AT72-5935-server-restart-20261022`) |
 | (d) 10 秒超时重绑 | 1 (G8441 自然发生) | 0 | 旧进程: 交付 binder 失败, 启动器 `System.exit(1)` (`VM exiting with result code 1`); 新进程正常服务 | 代码审读 + G8441 装包后首次启动自然复现 (冷加载约 19 秒 > 10 秒): 无永久残留, 约 19 秒两个服务进程并存; 支持 P1.3 默认不改代码 (1.5) |
-| (e) spawn-orphan (sleep 600) | 5 | | | |
+| (e) spawn-orphan (sleep 600) | 5 | 服务 0/5; 子进程每轮 3 个 (`sleep 600` 1 个, getevent / sh 一对), 约 8 MB | 服务 destroy; 它启动的子进程不随之结束, 被 init 收养 | 修前基线 FAIL (预期), 作 P1.1 对照; 探针以 shell 身份结束了这些子进程 (`probe-XQ-AT72-5935-spawn-orphan-20261022`) |
 
 ### B.3 用户服务进程内存画像 (P0.4 / P1.4)
 

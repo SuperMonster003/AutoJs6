@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "android": "12",
+    "sdk": "31",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "shell"
+    },
+    "mode": "spawn-orphan",
+    "rounds": 5,
+    "settleSec": 3.0,
+    "startResidue": 0,
+    "startHostAlive": false,
+    "startForceStops": 1,
+    "date": "20261022",
+    "startedAt": "2026-10-22 23:12:06",
+    "endedAt": "2026-10-22 23:12:59",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "mark": "spawned",
+      "servicePid": 9389,
+      "serviceRssKb": 213288,
+      "children": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "orphans": 3,
+      "orphanNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "sleep600": 1,
+      "orphansKilled": 3,
+      "strayExec": 3,
+      "strayExecRssKb": 8140,
+      "strayExecNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "strayExecKilled": 3
+    },
+    {
+      "round": 2,
+      "mark": "spawned",
+      "servicePid": 9674,
+      "serviceRssKb": 213116,
+      "children": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "orphans": 3,
+      "orphanNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "sleep600": 1,
+      "orphansKilled": 3,
+      "strayExec": 3,
+      "strayExecRssKb": 8160,
+      "strayExecNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "strayExecKilled": 3
+    },
+    {
+      "round": 3,
+      "mark": "spawned",
+      "servicePid": 9976,
+      "serviceRssKb": 213460,
+      "children": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "orphans": 3,
+      "orphanNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "sleep600": 1,
+      "orphansKilled": 3,
+      "strayExec": 3,
+      "strayExecRssKb": 8116,
+      "strayExecNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "strayExecKilled": 3
+    },
+    {
+      "round": 4,
+      "mark": "spawned",
+      "servicePid": 10241,
+      "serviceRssKb": 212980,
+      "children": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "orphans": 3,
+      "orphanNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "sleep600": 1,
+      "orphansKilled": 3,
+      "strayExec": 3,
+      "strayExecRssKb": 8236,
+      "strayExecNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "strayExecKilled": 3
+    },
+    {
+      "round": 5,
+      "mark": "spawned",
+      "servicePid": 10550,
+      "serviceRssKb": 212904,
+      "children": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "orphans": 3,
+      "orphanNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "sleep600": 1,
+      "orphansKilled": 3,
+      "strayExec": 3,
+      "strayExecRssKb": 8164,
+      "strayExecNames": [
+        "getevent",
+        "sh",
+        "sleep"
+      ],
+      "strayExecKilled": 3
+    }
+  ],
+  "verdict": "FAIL",
+  "summary": "service residue in 0/5 rounds, orphans in 5/5 rounds; orphaned exec processes in 5/5 rounds"
+}
