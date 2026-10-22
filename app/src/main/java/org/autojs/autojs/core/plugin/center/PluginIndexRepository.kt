@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
+import android.net.Uri
 import android.util.AtomicFile
 import android.util.Log
 import androidx.core.net.toUri
@@ -8,6 +9,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.Language
 import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.optArray
+import org.autojs.autojs.core.pref.optBoolean
+import org.autojs.autojs.core.pref.optLong
+import org.autojs.autojs.core.pref.optObject
+import org.autojs.autojs.core.pref.optString
+import org.autojs.autojs.core.pref.putOrRemove
 import org.autojs.autojs.network.GitHubTokenStore
 import org.autojs.autojs.util.AndroidUtils
 import org.autojs.autojs6.BuildConfig
@@ -30,7 +37,7 @@ class PluginIndexRepository {
 
     companion object {
         private const val TAG = "PluginIndexRepository"
-        // The JSON file store `JsonFileStores.PLUGIN_INDEX`, read and written with `SettingsJson` (settings P5.1).
+        // The JSON file store `JsonFileStores.PLUGIN_INDEX`, plain values of `SettingsJson` (settings P5.1 / P5.3, encodeCache / decodeCache).
         private const val CACHE_FILE_NAME = "autojs6_plugin_index_v11.json"
 
         private const val OFFICIAL_OWNER = "SuperMonster003"
@@ -66,6 +73,180 @@ class PluginIndexRepository {
         private var validatedGitHubApiAuthKey: String? = null
 
         private fun githubAuthKeyOf(token: String?): String = token?.let { "${it.length}:${it.hashCode()}" } ?: "anonymous"
+
+        private fun normalizeLanguageTag(tag: String?): String? {
+            return tag
+                ?.trim()
+                ?.replace('_', '-')
+                ?.lowercase()
+                ?.takeIf { it.isNotBlank() }
+        }
+
+        /**
+         * Writes the local cache as plain values of `SettingsJson` (settings P5.3), with the members and the member order
+         * the cache has always had: a member whose value is null is left out (org.json's `put` with null), except
+         * `languageTag` and `supportedAbis`, which are JSON nulls.
+         *
+         * zh-CN: 以 `SettingsJson` 普通值写出本地缓存 (设置 P5.3), 成员及其顺序与缓存一直以来的写法相同: 值为 null 的成员省略
+         * (即 org.json 的 `put` 传入 null), 只有 `languageTag` 与 `supportedAbis` 写为 JSON null.
+         */
+        internal fun encodeCache(snapshot: CacheSnapshot): String = SettingsJson.stringify(
+            linkedMapOf<String, Any?>(
+                "fetchedAtMs" to snapshot.fetchedAtMs.mapKeys { (source, _) -> source.name },
+                "languageTag" to snapshot.languageTag,
+                "items" to snapshot.entries.map { cacheItem(it) },
+                "fetchedSources" to snapshot.fetchedSources.map { it.name }.sorted(),
+            ),
+        )
+
+        /**
+         * Reads a local cache ([encodeCache]) into the entries that the index parser read from it before P5.3, which had
+         * no language for the cache (the cache keeps the texts of the language it was fetched in) and no release assets
+         * to look at (the cache keeps the selected APK of each release). A malformed cache throws
+         * [IllegalArgumentException] like a malformed index does; [uri] turns the icon addresses into [Uri]s.
+         *
+         * zh-CN: 把本地缓存 ([encodeCache]) 读为 P5.3 之前索引解析器从中读出的条目: 解析缓存时不带语言 (缓存保存的是获取时那种语言的
+         * 文本), 也没有发行版资源可看 (缓存保存的是每个发行版选定的 APK). 缓存格式错误时与索引格式错误一样抛
+         * [IllegalArgumentException]; [uri] 把图标地址转为 [Uri].
+         */
+        internal fun decodeCache(text: String, uri: (String) -> Uri? = { it.toUri() }): CacheSnapshot {
+            val root = SettingsJson.parseMap(text)
+            val items = root.optArray("items")
+                ?: throw IllegalArgumentException("Plugin index cache must contain an items array")
+            // A malformed cache must not masquerade as an authoritative empty source.
+            val objects = items.mapIndexed { i, item ->
+                val obj = cacheObject(item) ?: throw IllegalArgumentException("Plugin index cache item $i is not an object")
+                obj.also { require(it.optString("packageName").isNotBlank()) { "Plugin index cache item $i has no package name" } }
+            }
+            val entries = objects.map { cachedEntry(it, uri) }
+            val fetchedSources = root.optArray("fetchedSources")
+                ?.mapNotNullTo(linkedSetOf<PluginIndexSource>()) { name -> PluginIndexSource.entries.firstOrNull { it.name == name } }
+                ?.takeIf { it.isNotEmpty() }
+                ?: entries.mapTo(linkedSetOf()) { it.source }
+            return CacheSnapshot(
+                entries = entries,
+                fetchedSources = fetchedSources,
+                languageTag = root.optString("languageTag")
+                    .takeIf { it.isNotBlank() && !it.equals("null", true) }
+                    ?.let { normalizeLanguageTag(it) },
+                fetchedAtMs = root.optObject("fetchedAtMs")?.let { times ->
+                    PluginIndexSource.entries.mapNotNull { source ->
+                        times.optLong(source.name, 0L).takeIf { it > 0 }?.let { source to it }
+                    }.toMap()
+                }.orEmpty(),
+            )
+        }
+
+        private fun cacheItem(entry: PluginIndexEntry): Map<String, Any?> = LinkedHashMap<String, Any?>().apply {
+            put("packageName", entry.packageName)
+            putOrRemove("iconUrl", entry.iconUrl?.toString())
+            putOrRemove("nightIconUrl", entry.nightIconUrl?.toString())
+            put("forceIgnoreLocalIcon", entry.forceIgnoreLocalIcon)
+            putOrRemove("iconBackgroundColor", entry.iconBackgroundColor)
+            putOrRemove("nightIconBackgroundColor", entry.nightIconBackgroundColor)
+            put("title", entry.title)
+            putOrRemove("description", entry.description)
+            putOrRemove("instructionHardCoded", entry.instructionHardCoded)
+            putOrRemove("instructionMarkdownUrl", entry.instructionMarkdownUrl)
+            putOrRemove("author", entry.author)
+            put("collaborators", ArrayList(entry.collaborators))
+            putOrRemove("engine", entry.engine)
+            putOrRemove("variant", entry.variant)
+            putOrRemove("engineId", entry.engineId)
+            put("featured", entry.isFeatured)
+            put("supportedAbis", entry.supportedAbis?.let { ArrayList(it) })
+            put("tags", ArrayList(entry.tags))
+            putOrRemove("requiresHostVersion", entry.requiresHostVersion)
+            putOrRemove("nativePageAlignment", entry.nativePageAlignment)
+            putOrRemove("nativePageAlignmentSource", entry.nativePageAlignmentSource)
+            put("source", entry.source.name)
+            put("releases", entry.releases.map { cacheRelease(it) })
+        }
+
+        private fun cacheRelease(release: PluginIndexRelease): Map<String, Any?> = LinkedHashMap<String, Any?>().apply {
+            put("versionName", release.versionName)
+            put("versionCode", release.versionCode)
+            putOrRemove("versionDate", release.versionDate)
+            putOrRemove("apkUrl", release.apkUrl)
+            putOrRemove("apkSha256", release.apkSha256)
+            putOrRemove("apkSizeBytes", release.apkSizeBytes)
+            putOrRemove("changelogUrl", release.changelogUrl)
+            putOrRemove("changelogText", release.changelogText)
+            put("compatibilityMatrixMatched", release.compatibilityMatrixMatched)
+            putOrRemove("nativePageAlignment", release.nativePageAlignment)
+            putOrRemove("nativePageAlignmentSource", release.nativePageAlignmentSource)
+        }
+
+        // Each member is read as `parseIndexEntries` reads it with no language: the same defaults, trimming and checks.
+        private fun cachedEntry(item: Map<String, Any?>, uri: (String) -> Uri?): PluginIndexEntry {
+            val packageName = item.optString("packageName")
+            val releases = item.optArray("releases").orEmpty().mapNotNull { release -> cacheObject(release)?.let { cachedRelease(it) } }
+            val nativePageAlignment = PluginNativeAlignmentPolicy.parse(item["nativePageAlignment"])
+            val nativePageAlignmentSource = item.optString("nativePageAlignmentSource").takeIf { it in setOf("measured", "declared") }
+            // Unknown ABIs are unrestricted only after a measured absence of native code in the latest release (or in the
+            // entry when it has no release), like the index parser decides it; the cache has no release assets.
+            val latestRelease = releases.maxByOrNull { it.versionCode }
+            val hasNoNativeCode = if (latestRelease != null) {
+                latestRelease.nativePageAlignment == 0L && latestRelease.nativePageAlignmentSource == "measured"
+            } else {
+                nativePageAlignment == 0L && nativePageAlignmentSource == "measured"
+            }
+            return PluginIndexEntry(
+                packageName = packageName,
+                iconUrl = item.optString("iconUrl").takeIf { it.isNotBlank() }?.let(uri),
+                nightIconUrl = item.optString("nightIconUrl").takeIf { it.isNotBlank() }?.let(uri),
+                forceIgnoreLocalIcon = item.optBoolean("forceIgnoreLocalIcon", false),
+                iconBackgroundColor = PluginIconBackgroundPolicy.normalized(item.optString("iconBackgroundColor")),
+                nightIconBackgroundColor = PluginIconBackgroundPolicy.normalized(item.optString("nightIconBackgroundColor")),
+                title = item.optString("title").takeIf { it.isNotBlank() } ?: packageName,
+                description = cachedText(item, "description"),
+                instructionHardCoded = cachedText(item, "instructionHardCoded"),
+                instructionMarkdownUrl = cachedText(item, "instructionMarkdownUrl"),
+                author = cachedName(item, "author"),
+                collaborators = cachedStrings(item.optArray("collaborators")),
+                engine = cachedName(item, "engine"),
+                variant = cachedName(item, "variant"),
+                engineId = cachedName(item, "engineId"),
+                isFeatured = item.optBoolean("featured", true),
+                releases = releases,
+                supportedAbis = item["supportedAbis"]?.let { PluginAbiUtils.resolveSupportedAbisFromValue(it) }
+                    ?: emptyList<String>().takeIf { hasNoNativeCode },
+                tags = cachedStrings(item.optArray("tags")),
+                requiresHostVersion = item.optLong("requiresHostVersion", -1L).takeIf { it > 0 },
+                nativePageAlignment = nativePageAlignment,
+                nativePageAlignmentSource = nativePageAlignmentSource,
+                source = item.optString("source").let { name -> PluginIndexSource.entries.firstOrNull { it.name == name } }
+                    ?: PluginIndexSource.OFFICIAL,
+            )
+        }
+
+        private fun cachedRelease(release: Map<String, Any?>) = PluginIndexRelease(
+            versionName = release.optString("versionName", "0.0.0"),
+            versionCode = release.optLong("versionCode", 0L),
+            versionDate = release.optString("versionDate").takeIf { it.isNotBlank() },
+            apkUrl = release.optString("apkUrl").takeIf { it.isNotBlank() },
+            apkSha256 = release.optString("apkSha256").takeIf { it.isNotBlank() },
+            apkSizeBytes = release.optLong("apkSizeBytes", -1L).takeIf { it > 0 },
+            changelogUrl = release.optString("changelogUrl").takeIf { it.isNotBlank() },
+            changelogText = release.optString("changelogText").takeIf { it.isNotBlank() },
+            compatibilityMatrixMatched = release.optBoolean("compatibilityMatrixMatched", false),
+            nativePageAlignment = PluginNativeAlignmentPolicy.parse(release["nativePageAlignment"]),
+            nativePageAlignmentSource = release.optString("nativePageAlignmentSource").takeIf { it in setOf("measured", "declared") },
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        private fun cacheObject(value: Any?): Map<String, Any?>? = value as? Map<String, Any?>
+
+        // A localized text of the parser (`asJsonStringOrNull`): trimmed, and neither blank nor the text "null".
+        private fun cachedText(item: Map<String, Any?>, key: String): String? =
+            item.optString(key).trim().takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
+
+        private fun cachedName(item: Map<String, Any?>, key: String): String? =
+            item.optString(key).takeIf { it.isNotBlank() && !it.equals("null", true) }
+
+        // Android's `JSONArray.optString`: a JSON null is the text "null", another value its JSON text; blanks are dropped.
+        private fun cachedStrings(array: List<Any?>?): List<String> =
+            array.orEmpty().map { it as? String ?: SettingsJson.stringify(it) }.filter { it.isNotBlank() }
     }
 
     // Entries, source membership, locale and freshness always travel together.
@@ -571,7 +752,7 @@ class PluginIndexRepository {
     private fun readCacheSafely(file: File): CacheSnapshot? =
         runCatching {
             val text = AtomicFile(file).openRead().bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
-            parseCacheJson(text)
+            decodeCache(text)
         }.getOrNull()
 
     private fun writeCache(
@@ -582,71 +763,11 @@ class PluginIndexRepository {
         fetchedAtMs: Map<PluginIndexSource, Long>,
     ) {
         runCatching {
-            val root = JSONObject()
-            root.put("fetchedAtMs", JSONObject().apply { fetchedAtMs.forEach { (source, time) -> put(source.name, time) } })
-            root.put("languageTag", languageTag ?: JSONObject.NULL)
-            val items = JSONArray()
-            entries.forEach { entry ->
-                val obj = JSONObject()
-                obj.put("packageName", entry.packageName)
-                obj.put("iconUrl", entry.iconUrl?.toString())
-                obj.put("nightIconUrl", entry.nightIconUrl?.toString())
-                obj.put("forceIgnoreLocalIcon", entry.forceIgnoreLocalIcon)
-                obj.put("iconBackgroundColor", entry.iconBackgroundColor)
-                obj.put("nightIconBackgroundColor", entry.nightIconBackgroundColor)
-                obj.put("title", entry.title)
-                obj.put("description", entry.description)
-                obj.put("instructionHardCoded", entry.instructionHardCoded)
-                obj.put("instructionMarkdownUrl", entry.instructionMarkdownUrl)
-                obj.put("author", entry.author)
-                obj.put("collaborators", JSONArray(entry.collaborators))
-                obj.put("engine", entry.engine)
-                obj.put("variant", entry.variant)
-                obj.put("engineId", entry.engineId)
-                obj.put("featured", entry.isFeatured)
-                if (entry.supportedAbis == null) {
-                    obj.put("supportedAbis", JSONObject.NULL)
-                } else {
-                    obj.put("supportedAbis", JSONArray(entry.supportedAbis))
-                }
-                obj.put("tags", JSONArray(entry.tags))
-                obj.put("requiresHostVersion", entry.requiresHostVersion)
-                obj.put("nativePageAlignment", entry.nativePageAlignment)
-                obj.put("nativePageAlignmentSource", entry.nativePageAlignmentSource)
-                obj.put("source", entry.source.name)
-
-                val releaseArr = JSONArray()
-                entry.releases.forEach { release ->
-                    val rel = JSONObject()
-                    rel.put("versionName", release.versionName)
-                    rel.put("versionCode", release.versionCode)
-                    rel.put("versionDate", release.versionDate)
-                    rel.put("apkUrl", release.apkUrl)
-                    rel.put("apkSha256", release.apkSha256)
-                    rel.put("apkSizeBytes", release.apkSizeBytes)
-                    rel.put("changelogUrl", release.changelogUrl)
-                    rel.put("changelogText", release.changelogText)
-                    rel.put("compatibilityMatrixMatched", release.compatibilityMatrixMatched)
-                    rel.put("nativePageAlignment", release.nativePageAlignment)
-                    rel.put("nativePageAlignmentSource", release.nativePageAlignmentSource)
-                    releaseArr.put(rel)
-                }
-                obj.put("releases", releaseArr)
-                items.put(obj)
-            }
-            root.put("items", items)
-            root.put(
-                "fetchedSources",
-                JSONArray(
-                    fetchedSources
-                        .map { it.name }
-                        .sorted(),
-                ),
-            )
+            val text = encodeCache(CacheSnapshot(entries, fetchedSources, languageTag, fetchedAtMs))
             val atomic = AtomicFile(file)
             val stream = atomic.startWrite()
             try {
-                stream.write(SettingsJson.stringify(root).toByteArray(StandardCharsets.UTF_8))
+                stream.write(text.toByteArray(StandardCharsets.UTF_8))
                 atomic.finishWrite(stream)
             } catch (failure: Throwable) {
                 atomic.failWrite(stream)
@@ -655,40 +776,6 @@ class PluginIndexRepository {
         }.onFailure {
             Log.w(TAG, "Failed to write plugin index cache: ${it.message}")
         }
-    }
-
-    private fun parseCacheJson(json: String): CacheSnapshot {
-        val root = SettingsJson.parseObject(json)
-        val languageTag = root.optString("languageTag")
-            .takeIf { it.isNotBlank() && !it.equals("null", true) }
-            ?.let(::normalizeLanguageTag)
-        val list = parseIndexEntries(
-            root = root,
-            defaultSource = PluginIndexSource.OFFICIAL,
-            languageTag = null,
-        )
-        val fetchedSources = root.optJSONArray("fetchedSources")
-            ?.let { ja ->
-                buildSet {
-                    for (i in 0 until ja.length()) {
-                        val name = ja.optString(i).takeIf { it.isNotBlank() } ?: continue
-                        PluginIndexSource.entries.firstOrNull { it.name == name }?.let(::add)
-                    }
-                }
-            }
-            ?.takeIf { it.isNotEmpty() }
-            ?: list.mapTo(linkedSetOf()) { it.source }
-
-        return CacheSnapshot(
-            entries = list,
-            fetchedSources = fetchedSources,
-            languageTag = languageTag,
-            fetchedAtMs = root.optJSONObject("fetchedAtMs")?.let { times ->
-                PluginIndexSource.entries.mapNotNull { source ->
-                    times.optLong(source.name, 0L).takeIf { it > 0 }?.let { source to it }
-                }.toMap()
-            }.orEmpty(),
-        )
     }
 
     private fun parseIndexEntriesJson(
@@ -886,14 +973,6 @@ class PluginIndexRepository {
     private fun JSONArray.latestReleaseOrNull(): JSONObject? =
         (0 until length()).mapNotNull { optJSONObject(it) }.maxByOrNull { it.optLong("versionCode", 0L) }
 
-    private fun normalizeLanguageTag(tag: String?): String? {
-        return tag
-            ?.trim()
-            ?.replace('_', '-')
-            ?.lowercase()
-            ?.takeIf { it.isNotBlank() }
-    }
-
     private fun isSameLanguageTag(cached: String?, current: String?): Boolean {
         return normalizeLanguageTag(cached) == normalizeLanguageTag(current)
     }
@@ -911,7 +990,7 @@ class PluginIndexRepository {
         message: String,
     ) : IllegalStateException(message)
 
-    private data class CacheSnapshot(
+    internal data class CacheSnapshot(
         val entries: List<PluginIndexEntry>,
         val fetchedSources: Set<PluginIndexSource>,
         val languageTag: String?,
