@@ -192,6 +192,7 @@ class RuntimeLeakGateDeviceTest {
         var nativeBaseline = nativeStart
         var registriesBaseline = StaticRegistries.counts()
         val runs = mutableListOf<RunRecord>()
+        val runCounters = mutableListOf<JSONObject>()
         val samples = JSONArray()
         var budget = pollMs
         var retainedWithinBudget = 0
@@ -212,6 +213,7 @@ class RuntimeLeakGateDeviceTest {
                 registriesBaseline = StaticRegistries.counts()
             }
             samples.put(record.json().put("after", sample.json()).put("native", native))
+            if (!warmup) runCounters += native
             runs += record
         }
         val measured = runs.filter { !it.warmup }
@@ -279,6 +281,16 @@ class RuntimeLeakGateDeviceTest {
             if (after - before > limit) reasons.put("$key +${after - before} (vs end of warm-ups, limit +$limit)")
         }
         if (countersFromBaseline.length() > 0) native.put("counterDeltasFromBaseline", countersFromBaseline)
+        val perRun = JSONObject()
+        scenario.perRunCounterLimits.forEach { (key, limit) ->
+            val values = (listOf(nativeBaseline) + runCounters).map { it.optLong(key, -1) }
+            if (values.size < 2 || values.any { it < 0 }) return@forEach
+            val steps = values.zipWithNext { a, b -> b - a }.sorted()
+            val median = steps[steps.size / 2]
+            perRun.put(key, JSONObject().put("median", median).put("max", steps.last()).put("runsGrowing", steps.count { it > 0 }))
+            if (median > limit) reasons.put("$key grew in most runs: median +$median per run (limit +$limit)")
+        }
+        if (perRun.length() > 0) native.put("perRunCounterGrowth", perRun)
         scenario.failingStats.forEach { name ->
             // In normal mode every run must reach the check; a forced stop may come first.
             // zh-CN: 正常结束模式下每次运行都必须执行到检查; 强制停止可能先于检查发生.
@@ -305,6 +317,7 @@ class RuntimeLeakGateDeviceTest {
         if (judgesNodes) thresholds.put("accessibilityNodeDelta", ACCESSIBILITY_NODE_SLACK)
         scenario.instanceLimits.forEach { (key, limit) -> thresholds.put("${key}InstanceDelta", limit) }
         scenario.counterLimits.forEach { (key, limit) -> thresholds.put("${key}Delta", limit) }
+        scenario.perRunCounterLimits.forEach { (key, limit) -> thresholds.put("${key}MedianPerRun", limit) }
         scenario.failingStats.forEach { name -> thresholds.put("stat:$name", 0) }
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)

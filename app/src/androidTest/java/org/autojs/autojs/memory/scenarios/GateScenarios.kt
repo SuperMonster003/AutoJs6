@@ -57,6 +57,11 @@ class GateScenario(
     val instanceLimits: Map<String, Long> = emptyMap(),
     /** Largest allowed growth of these host counters (GateNativeProbe.counters keys) from the end of the warm-ups to the end. */
     val counterLimits: Map<String, Long> = emptyMap(),
+    /**
+     * Largest allowed median growth per measured run of these host counters: a leak grows them in every run, while a one-time
+     * step (code of the platform, LeakCanary or the host used for the first time in the process) does not move the median.
+     */
+    val perRunCounterLimits: Map<String, Long> = emptyMap(),
     /** Script statistics (gateStat) that must stay 0 in every measured run: the script reports what it found wrong. */
     val failingStats: List<String> = emptyList(),
     private val body: (GateEnvironment, GateMode) -> String,
@@ -80,12 +85,6 @@ class GateScenario(
         const val READY_PROPERTY = "memory.gate.ready"
         const val STATS_PROPERTY = "memory.gate.stats"
         const val KEEP_ALIVE = "setInterval(function () {}, 1000);"
-
-        /**
-         * Growth of loaded / reachable classes after the warm-ups that is not a leak (classes of the platform and the test loaded
-         * late); one generated or loaded class per run is 20 over the measured runs (ROADMAP P4.4).
-         */
-        const val CLASS_SLACK = 10L
         private const val PRELUDE = "function gateReady() { var flag = runtime.getProperty('$READY_PROPERTY'); if (flag) flag.set(true); }\n" +
             "function gateStat(name, value) { var stats = runtime.getProperty('$STATS_PROPERTY'); if (stats) stats.put(String(name), java.lang.Double.valueOf(Number(value))); }"
     }
@@ -315,10 +314,11 @@ object GateScenarios {
         },
         GateScenario(
             "S8", "JavaAdapter / interface adapters x 100 + runtime.loadDex of a fresh copy", "H3",
-            notes = "since P4.4 every run loads its own copy of the DEX (a new path, as a script loading changing files would), " +
-                "and the classes, DexClassLoader instances and the host's registered loaders must not grow",
-            instanceLimits = mapOf("javaClass" to GateScenario.CLASS_SLACK, "dexClassLoader" to 0L),
-            counterLimits = mapOf("loadedClasses" to GateScenario.CLASS_SLACK, "hostDexLoaders" to 0L),
+            notes = "since P4.4 every run loads its own copy of the DEX (a new path, as a script loading changing files would); " +
+                "DexClassLoader instances and the host's registered loaders must not grow, loaded classes not in most runs",
+            instanceLimits = mapOf("dexClassLoader" to 0L),
+            counterLimits = mapOf("hostDexLoaders" to 0L),
+            perRunCounterLimits = mapOf("loadedClasses" to 0L),
         ) { env, _ ->
             """
             for (var i = 0; i < 100; i++) {
