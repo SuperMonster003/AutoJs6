@@ -120,7 +120,7 @@ internal class RuntimeShellBridge(
             synchronized(lock){
                 if(closed || operation?.cancelled?.get()==true){created.close();throw IllegalStateException("Shell execution ended during process creation")}
                 processes[created.id]=created
-                created.resource=registry.register(NodeBridgeResourceType.SHELL_EXECUTION,created.id,mapOf("mode" to config.mode,"command" to command.take(80))){created.close()}
+                created.resource=registry.register(NodeBridgeResourceType.SHELL_EXECUTION,created.id,mapOf("mode" to config.mode,"command" to command.take(80)),resource=created){created.close()}
                 created.start(timeout.toLong())
             }
             return created

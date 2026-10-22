@@ -1,11 +1,13 @@
 package org.autojs.autojs.engine
 
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -104,6 +106,21 @@ class NodeBridgeResourceRegistryInstrumentationTest {
         assertEquals("1", diagnostics["embedded_script.bridge_resource.created_count"])
         assertEquals("1", diagnostics["embedded_script.bridge_resource.destroy_closed_count"])
         assertEquals("1", diagnostics["embedded_script.bridge_resource.leak_count"])
+    }
+
+    @Test
+    fun directRegistryHandsTheObjectsBehindResourcesToItsTracker() {
+        // memory-phase2 T6 (P1.2): the object behind a resource reaches the runtime scope for the weak check after the script ends.
+        val scope = RuntimeResourceScope("runtime@resource-tracked")
+        val registry = NodeBridgeResourceRegistry("resource-tracked", tracker = { resource, name -> scope.track(resource, name) })
+        val overlay = Any()
+        registry.register(NodeBridgeResourceType.OVERLAY_SESSION, id = "overlay-tracked-1", resource = overlay)
+        registry.register(NodeBridgeResourceType.WEBSOCKET_CONNECTION, id = "websocket-untracked-1")
+
+        val tracked = scope.trackedReferences()
+        assertEquals(listOf("node.overlay"), tracked.map { it.name })
+        assertSame(overlay, tracked.single().reference.get())
+        registry.closeAll("execution.destroy")
     }
 
     @Test

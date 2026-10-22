@@ -9,6 +9,7 @@ import android.os.RemoteException
 import android.os.TransactionTooLargeException
 import android.util.Log
 import org.autojs.autojs.runtime.memory.BridgeExecutionObserver
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityBroker
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -33,6 +34,7 @@ internal class NodeJsHostCapabilityBroker(
     launchSurface: String,
     console: org.autojs.autojs.core.console.ConsoleImpl? = null,
     agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
+    resources: RuntimeResourceScope? = null,
 ) {
 
     val id: String = request.executionId
@@ -64,6 +66,7 @@ internal class NodeJsHostCapabilityBroker(
         bridgeLimits = bridgeLimits,
         executionConsole = console,
         agentExecutionState = agentExecutionState,
+        resources = resources,
     )
     private val exported = ExportedBroker(id, this)
 
@@ -76,6 +79,10 @@ internal class NodeJsHostCapabilityBroker(
         // zh-CN: 仅供桥接泄漏门禁弱引用跟踪 (docs/memory-phase2/ROADMAP.md T1 (a)); 生产环境没有监听者.
         BridgeExecutionObserver.created("node", "broker", request.executionId, this)
         BridgeExecutionObserver.created("node", "provider", request.executionId, provider)
+        // Checked weakly after the script ends (docs/memory-phase2/ROADMAP.md T6); the runtime owns the end of the execution.
+        // zh-CN: 脚本结束后弱引用复查 (docs/memory-phase2/ROADMAP.md T6); 执行的收尾由运行时持有.
+        resources?.track(this, "node.broker")
+        resources?.track(provider, "node.provider")
     }
 
     fun getBrokerInfo(): Bundle {

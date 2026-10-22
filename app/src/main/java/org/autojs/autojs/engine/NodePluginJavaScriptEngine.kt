@@ -130,6 +130,7 @@ class NodePluginJavaScriptEngine(
                         text,
                     )
                 },
+                resources = runtime.resourceScope,
             )
         } finally {
             input.close()

@@ -157,6 +157,20 @@ class RuntimeResourceScope @JvmOverloads constructor(
             return true
         }
 
+        /**
+         * Releases now rather than in [close], for a resource whose owner ends before the runtime (one Node.js execution
+         * of the script, docs/memory-phase2/ROADMAP.md T6): the action runs once, on the calling thread, and what it throws
+         * reaches the caller. False if it was already released or dropped.
+         * zh-CN: 立即释放而不等 [close], 用于其所有者先于运行时结束的资源 (脚本的一次 Node.js 执行, docs/memory-phase2/ROADMAP.md T6):
+         * 动作只执行一次, 在调用线程上执行, 其抛出的异常交给调用方. 已释放或已撤销时返回 false.
+         */
+        fun releaseNow(): Boolean {
+            if (!done.compareAndSet(false, true)) return false
+            synchronized(lock) { forget(this) }
+            action.run()
+            return true
+        }
+
         internal fun release(failures: MutableList<Failure>) {
             if (!done.compareAndSet(false, true)) return
             try {

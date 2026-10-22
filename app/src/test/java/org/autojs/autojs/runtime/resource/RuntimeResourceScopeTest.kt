@@ -124,6 +124,59 @@ class RuntimeResourceScopeTest {
     }
 
     @Test
+    fun aRegistrationReleasedEarlyIsSkippedByClose() {
+        // One Node.js execution of a script (docs/memory-phase2/ROADMAP.md T6): the bridge releases it when the execution
+        // returns, and the runtime exit releases only the executions whose release never ran, in the PLUGINS stage.
+        // zh-CN: 脚本的一次 Node.js 执行 (docs/memory-phase2/ROADMAP.md T6): 执行返回时由桥接释放, 运行时结束时只释放从未释放过的执行, 在 PLUGINS 阶段.
+        val scope = scope()
+        val released = mutableListOf<String>()
+        scope.own(Stage.LOOPERS, "loopers") { released += "loopers" }
+        val returned = scope.own(Stage.PLUGINS, "node.execution:returned") { released += "returned" }
+        scope.own(Stage.PLUGINS, "node.execution:interrupted") { released += "interrupted" }
+        scope.own(Stage.THREADS, "threads") { released += "threads" }
+
+        assertTrue(returned.releaseNow())
+        assertFalse(returned.releaseNow())
+        assertFalse(returned.disown())
+        assertEquals(listOf("returned"), released)
+
+        assertTrue(scope.close().isEmpty())
+        assertEquals(listOf("returned", "threads", "interrupted", "loopers"), released)
+    }
+
+    @Test
+    fun anEarlyReleaseThrowsToItsCallerOnce() {
+        val scope = scope()
+        var runs = 0
+        val failure = IllegalStateException("broker")
+        val registration = scope.own(Stage.PLUGINS, "node.execution:failing") { runs++; throw failure }
+
+        val thrown = runCatching { registration.releaseNow() }.exceptionOrNull()
+
+        assertSame(failure, thrown)
+        assertTrue(registration.isDone)
+        assertTrue(scope.close().isEmpty())
+        assertEquals(1, runs)
+        assertTrue(warnings.isEmpty())
+    }
+
+    @Test
+    fun anExecutionStartedAfterThePluginsStageIsReleasedAtOnce() {
+        val scope = scope()
+        val released = mutableListOf<String>()
+        scope.own(Stage.TIMERS, "timers") {
+            // A thread of the script starting one more execution while the runtime exits.
+            // zh-CN: 运行时结束期间脚本的某个线程又开始一次执行.
+            val late = scope.own(Stage.PLUGINS, "node.execution:late") { released += "late" }
+            released += if (late.isDone) "late done" else "late pending"
+        }
+
+        scope.close()
+
+        assertEquals(listOf("late", "late done"), released)
+    }
+
+    @Test
     fun closeablesMayRemoveThemselvesWhileReleased() {
         val scope = scope()
         val closed = mutableListOf<Int>()

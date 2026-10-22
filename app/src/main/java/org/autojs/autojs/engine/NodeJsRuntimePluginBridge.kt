@@ -7,6 +7,7 @@ import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.pref.keys.DeveloperKeys
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs6.R
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.autojs.plugin.nodejs.api.INodeJsRuntimeCallback
@@ -76,6 +77,7 @@ object NodeJsRuntimePluginBridge {
         startupTimings: Map<String, Long> = emptyMap(),
         console: org.autojs.autojs.core.console.ConsoleImpl? = null,
         agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
+        resources: RuntimeResourceScope? = null,
     ): NodePluginScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         NodeJsRuntimePluginHost.prepareForExecution(context)
@@ -101,6 +103,16 @@ object NodeJsRuntimePluginBridge {
             return pluginCancellationResult(requestWithProvider, startedAt, "provider_registration")
         }
         var hostCapabilityBroker: NodeJsHostCapabilityBroker? = null
+        // The end of this execution belongs to the runtime of the script when there is one (docs/memory-phase2/ROADMAP.md T6):
+        // the finally below releases it as soon as the execution returns, and the runtime exit releases it (PLUGINS stage)
+        // only if that never happened. A runtime already past that stage releases it at once, so the execution does not start.
+        // zh-CN: 有脚本运行时的话, 本次执行的收尾归属于该运行时 (docs/memory-phase2/ROADMAP.md T6): 执行一返回就由下面的 finally 释放,
+        // 只有这一步从未发生时才由运行时结束 (PLUGINS 阶段) 释放. 运行时已过该阶段时立即释放, 执行也就不再开始.
+        val release = Runnable { finishExecution(hostCapabilityBroker, executionId, provider) }
+        val registration = resources?.own(RuntimeResourceScope.Stage.PLUGINS, "node.execution:$executionId", release)
+        if (registration?.isDone == true) {
+            return pluginCancellationResult(requestWithProvider, startedAt, "runtime_exited")
+        }
         return try {
             if (executionId in cancelledExecutionIds) {
                 return pluginCancellationResult(
@@ -116,6 +128,7 @@ object NodeJsRuntimePluginBridge {
                     launchSurface,
                     console,
                     agentExecutionState,
+                    resources,
                 ).also { hostCapabilityBroker = it }
                 val workspaceStartedAt = SystemClock.elapsedRealtime()
                 val workspaceTransport = try {
@@ -250,24 +263,36 @@ object NodeJsRuntimePluginBridge {
                 }
             }
         } finally {
-            hostCapabilityBroker?.destroy(
-                Bundle().apply {
-                    putString(
-                        NodeJsRuntimeContract.KEY_ERROR_MESSAGE,
-                        "Node.js runtime plugin host request finished.",
-                    )
-                },
-            )
-            val registeredProvider = synchronized(executionLifecycleLock) {
-                backendExecutionIds.remove(executionId)
-                activeExecutionIds.remove(executionId)
-                cancelledExecutionIds.remove(executionId)
-                activeModuleSourceProviders.remove(executionId)
-            }
-            cancelModuleSourceProvider(registeredProvider, "Node.js runtime plugin request finished.")
-            if (registeredProvider !== provider) {
-                cancelModuleSourceProvider(provider, "Node.js runtime plugin request finished.")
-            }
+            if (registration == null) release.run() else registration.releaseNow()
+        }
+    }
+
+    /**
+     * The end of one execution, in this order: the host capability broker, the execution tables, the module source provider.
+     * zh-CN: 一次执行的收尾, 按以下顺序: 宿主能力 broker, 执行表, 模块源 provider.
+     */
+    private fun finishExecution(
+        hostCapabilityBroker: NodeJsHostCapabilityBroker?,
+        executionId: String,
+        provider: INodeJsModuleSourceProvider?,
+    ) {
+        hostCapabilityBroker?.destroy(
+            Bundle().apply {
+                putString(
+                    NodeJsRuntimeContract.KEY_ERROR_MESSAGE,
+                    "Node.js runtime plugin host request finished.",
+                )
+            },
+        )
+        val registeredProvider = synchronized(executionLifecycleLock) {
+            backendExecutionIds.remove(executionId)
+            activeExecutionIds.remove(executionId)
+            cancelledExecutionIds.remove(executionId)
+            activeModuleSourceProviders.remove(executionId)
+        }
+        cancelModuleSourceProvider(registeredProvider, "Node.js runtime plugin request finished.")
+        if (registeredProvider !== provider) {
+            cancelModuleSourceProvider(provider, "Node.js runtime plugin request finished.")
         }
     }
 

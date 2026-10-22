@@ -85,6 +85,7 @@ import org.autojs.autojs.core.pref.optString
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.inrt.InrtToastVisibilityGuard
 import org.autojs.autojs.runtime.api.ScriptToast
+import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -933,6 +934,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val agentScriptRoots: List<File> = emptyList(),
     private val executionConsole: org.autojs.autojs.core.console.ConsoleImpl? = null,
     private val agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
+    resources: RuntimeResourceScope? = null,
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -1078,7 +1080,10 @@ class AndroidNodeBridgeCapabilityProvider(
     private val sensorManager by lazy {
         appContext.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     }
-    private val resourceRegistry = NodeBridgeResourceRegistry(engineInfo.id)
+    private val resourceRegistry = NodeBridgeResourceRegistry(
+        engineInfo.id,
+        tracker = resources?.let { scope -> { resource, name -> scope.track(resource, name) } },
+    )
     private val shellScopeLock=Any()
     private var shellScopeClosed=false
     private val shellBridge=lazy { RuntimeShellBridge(engineInfo.cwd.ifBlank { appContext.filesDir.path },resourceRegistry,
@@ -1651,6 +1656,7 @@ class AndroidNodeBridgeCapabilityProvider(
                         "module" to request.module,
                         "disclosureTitle" to session.disclosureTitle(),
                     ),
+                    resource = session,
                 ) { reason ->
                     mainHandler.post {
                         closeOverlaySession(id, reason, releaseResource = false)
@@ -2718,7 +2724,7 @@ class AndroidNodeBridgeCapabilityProvider(
         val id = "image-${UUID.randomUUID()}"
         val resource = resourceRegistry.register(NodeBridgeResourceType.IMAGE_HANDLE, id, mapOf(
             "source" to source, "width" to bitmap.width.toString(), "height" to bitmap.height.toString(),
-        )) { if (!bitmap.isRecycled) bitmap.recycle(); nativeMat?.release() }
+        ), resource = bitmap) { if (!bitmap.isRecycled) bitmap.recycle(); nativeMat?.release() }
         return ControlledImageHandle(id, bitmap, resource, nativeMat).also { imageHandles[id] = it }
     }
 

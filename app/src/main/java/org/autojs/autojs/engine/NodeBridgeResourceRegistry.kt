@@ -57,8 +57,14 @@ data class NodeBridgeResourceCleanupSummary(
         .toString()
 }
 
+/**
+ * [tracker] receives the objects behind the resources registered with one, for the weak check after the script ends
+ * (`RuntimeResourceScope.track`, docs/memory-phase2/ROADMAP.md T6).
+ * zh-CN: [tracker] 接收登记时附带的资源对象, 供脚本结束后的弱引用复查 (`RuntimeResourceScope.track`, docs/memory-phase2/ROADMAP.md T6).
+ */
 class NodeBridgeResourceRegistry(
     private val ownerExecutionId: String,
+    private val tracker: ((resource: Any, name: String) -> Unit)? = null,
     private val clock: () -> Long = { System.currentTimeMillis() },
 ) {
     private val active = ConcurrentHashMap<String, ResourceRecord>()
@@ -77,8 +83,10 @@ class NodeBridgeResourceRegistry(
         type: NodeBridgeResourceType,
         id: String = "${type.idPrefix}-${UUID.randomUUID()}",
         metadata: Map<String, String> = emptyMap(),
+        resource: Any? = null,
         close: (String) -> Unit = {},
     ): NodeBridgeResourceHandle {
+        resource?.let { tracker?.invoke(it, "node.${type.idPrefix}") }
         val record = ResourceRecord(
             id = id,
             type = type,
