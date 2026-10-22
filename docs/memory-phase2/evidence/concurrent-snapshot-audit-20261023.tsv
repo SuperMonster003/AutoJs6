@@ -1,0 +1,966 @@
+文件	行 (修复前, f39ddf4da)	调用	接收者	扫描分类	结论
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	232	firstOrNull	queryServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	235	firstOrNull	queryServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	277	singleOrNull	candidates.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	280	first	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	282	singleOrNull	list.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	301	first	list	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	327	firstOrNull	keys	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	340	singleOrNull	families	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	384	first	scopedInfoItems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	391	first	authorizedItems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	898	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	940	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	1055	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/AidlPluginHost.kt	1090	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/PluginBindRefusedException.kt	16	take	generateSequence()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentAttachRequestReceiver.kt	69	toList	extras.keySet()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelBroker.kt	130	singleOrNull	operations.keys	concurrent	安全: 带谓词的 singleOrNull 经迭代器 hasNext / next, 弱一致不抛
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelBroker.kt	323	firstOrNull	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelBroker.kt	449	toSet	submitted.results.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelBroker.kt	643	toSet	images	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelBroker.kt	746	toList	bundle.keySet()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelBroker.kt	760	toList	next.keySet()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentModelProtocol.kt	100	last	messages	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentPluginHost.kt	113	toSet	context.packageManager.queryIntentServices().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentPluginInspector.kt	44	toSet	pm.queryIntentServices().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentPluginInspector.kt	50	sorted	trust.fingerprintsSha256	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentPluginInspector.kt	66	single	services	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentRunRecord.kt	56	toList	observers	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentRunRecord.kt	98	toList	observers	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentRunRegistry.kt	23	toList	runs.values	concurrent	竞态, 已修 C36: 链路丢失回调取快照时, poller 线程 (70 / 73) 与 Binder 线程 (149 / 158) 同时移除
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentRunRegistry.kt	105	firstOrNull	owned	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/agent/ThreeStoveAgentScriptRoots.kt	37	sorted	roots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	29	toList	images	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	101	toList	tools	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	102	toList	messages	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	122	last	this.messages	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	302	toList	calls	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	364	toList	capabilityIds	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	365	toList	supportedControls	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	366	toList	declaredHttpsOrigins	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	367	toList	backendProfiles	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	377	toList	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginAskRunner.kt	383	singleOrNull	this.targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginImages.kt	62	toList	images	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginProviderFailureReason.kt	48	firstOrNull	entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiPluginTools.kt	27	toList	images	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderDiscovery.kt	117	sorted	signerSha256.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderDiscovery.kt	256	sortedWith	source.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderDiscovery.kt	297	sorted	it.signerSha256.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderHandshake.kt	517	singleOrNull	selected.evaluations	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderHandshake.kt	551	singleOrNull	completed.evaluations	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderHandshake.kt	860	toList	queue	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSelectionPolicy.kt	201	sorted	signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSelectionPolicy.kt	302	sortedWith	candidates.asSequence().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSelectionPolicy.kt	303	toList	candidates.asSequence().filter().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSelectionPolicy.kt	322	single	eligible	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSelectionPolicy.kt	437	sorted	it.signerSha256.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSession.kt	359	toMutableSet	request.options.requiredCapabilityIds	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSession.kt	536	toList	pending.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSession.kt	694	toList	pendingRemoteClosures	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSession.kt	1189	toList	pending.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionCoordinator.kt	990	singleOrNull	completed.evaluations	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionCoordinator.kt	1134	toList	queue	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	64	sorted	targetDeclaredHttpsOrigins.distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	179	sorted	pinned.declaredHttpsOrigins	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	180	sorted	pinned.supportedAbis	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	191	sorted	plan.targetCapabilityIds	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	233	sorted	vision.acceptedImageMimeTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	244	sorted	value.acceptedTextMimeTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderSessionPlanning.kt	245	sorted	value.acceptedSchemaMimeTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListing.kt	100	singleOrNull	this.targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListing.kt	118	singleOrNull	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListing.kt	266	first	pinnedProvider.signerSha256	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListingCoordinator.kt	261	toList	pinned.signerSha256	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListingCoordinator.kt	865	firstOrNull	pendingCallbackEvents	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListingCoordinator.kt	910	singleOrNull	completed.evaluations	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListingCoordinator.kt	1257	toList	values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AiProviderTargetListingCoordinator.kt	1288	toList	queue	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AndroidAiPluginAskRunner.kt	209	firstOrNull	Build.SUPPORTED_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AndroidAiPluginAskRunner.kt	446	singleOrNull	result.evaluations	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AndroidAiPluginAskRunner.kt	602	singleOrNull	catalog.targets	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AndroidAiPluginAskRunner.kt	1249	singleOrNull	result.evaluations	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AndroidAiPluginAskRunner.kt	1464	toList	pending	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ai/AndroidAiPluginAskRunner.kt	1490	toList	pending	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/autojs4/AutoJs4Comparison.kt	193	toList	captured	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/autojs4/AutoJs4RuntimePluginClient.kt	164	toSet	info.supportedAbis.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/autojs4/AutoJs4RuntimePluginClient.kt	241	toSet	PluginTrustManager.resolveTrustInfo().fingerprintsSha256	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	134	firstOrNull	queryBarcodeServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	137	firstOrNull	queryBarcodeServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	179	singleOrNull	candidates.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	182	first	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	184	singleOrNull	list.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	203	first	list	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	229	firstOrNull	keys	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	242	singleOrNull	families	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	285	first	infoItems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	289	first	authorizedItems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	587	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	629	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	732	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/barcode/BarcodePluginHost.kt	767	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameBundles.kt	110	sorted	bundle.keySet()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameExecutor.kt	108	toSet	pending.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameExecutor.kt	109	toSortedMap	pending.groupBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameExecutor.kt	167	toMutableList	record.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameExecutor.kt	174	toSet	pending.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameExecutor.kt	175	toSortedMap	pending.groupBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameExecutor.kt	237	takeLast	batchId	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameHostServices.kt	100	toList	directory.list()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameHostServices.kt	108	toHashSet	names	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameHostServices.kt	109	firstOrNull	names	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameJournalStore.kt	184	sortedWith	directory.listFiles().orEmpty().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameJournalStore.kt	211	sortedWith	owned	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameJournalStore.kt	212	drop	owned.sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameJournalStore.kt	275	first	BatchRenameSource.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameJournalStore.kt	279	first	BatchRenameBatchState.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameJournalStore.kt	282	first	BatchRenameEntryState.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameMetadataReader.kt	109	take	value.filter().trim()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenamePluginHost.kt	81	toList	info.capabilities.getStringArray()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptArguments.kt	57	toMap	listOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptArguments.kt	88	toMap	listOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptArguments.kt	113	sortedByDescending	BatchRenameValues.METADATA_VARIABLES	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptArguments.kt	134	toList	value.asJsonArray	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptArguments.kt	406	firstOrNull	BatchRenameSource.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptService.kt	102	firstOrNull	presets()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptService.kt	112	toMap	files.zip()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptService.kt	229	take	executor().journal.list()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameScriptService.kt	359	take	refused	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameTargetCollector.kt	92	sortedWith	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameTargetCollector.kt	101	sortedWith	directory.list()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameTargetCollector.kt	110	toList	items	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/batchrename/BatchRenameTargetCollector.kt	110	toList	parents.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/bun/BunHostCapabilityGrants.kt	296	toList	capabilities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/bun/BunRuntimePluginClient.kt	135	toSet	info.supportedAbis.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/bun/BunRuntimePluginClient.kt	159	toSet	runtimeInfo.getStringArray().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/bun/BunRuntimePluginClient.kt	160	toSet	selection.discovered.pluginInfo.supportedAbis.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/bun/BunRuntimePluginClient.kt	217	toSet	PluginTrustManager.resolveTrustInfo().fingerprintsSha256	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/ApkBuilderCompatibilityMatrixResolver.kt	148	toSet	normalizedSupportedAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/ApkBuilderCompatibilityMatrixResolver.kt	173	firstOrNull	artifacts	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/ApkBuilderCompatibilityMatrixResolver.kt	177	firstOrNull	artifacts	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/InstalledPluginRepository.kt	163	first	candidates	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/InstalledPluginRepository.kt	493	toList	pluginInfo.supportedAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/InstalledPluginRepository.kt	594	first	discoveries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/InstalledPluginRepository.kt	594	firstOrNull	discoveries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	87	toSet	values.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	211	toSet	ABI_ORDER	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	268	sortedWith	abis.distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	306	firstOrNull	SystemProperties.get().split().orEmpty().asSequence().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	312	firstOrNull	Build.SUPPORTED_ABIS.asSequence().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	322	firstOrNull	normalizedDeviceAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	327	firstOrNull	normalizedDeviceAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	335	toSet	normalizedDeviceAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginAbiUtils.kt	338	toSet	normalizedDeviceAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterActionPositionPolicy.kt	30	sortedBy	sortedItems.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterActionPositionPolicy.kt	32	toMutableList	sortedItems.filterNot()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	45	toMutableMap	known	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	46	toMutableSet	initializedSources	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	51	sortedBy	pins.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	55	toMap	known	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	57	toSet	initializedSources	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	59	toMap	pins	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	76	toList	observed.filter().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionLedger.kt	121	first	pins.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterAttentionPolicy.kt	40	sortedByDescending	hoisted	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	168	first	cells	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	256	firstOrNull	radioIdToSort.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	258	firstOrNull	radioIdToSort.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	272	firstOrNull	radioIdToSort.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	274	firstOrNull	radioIdToSort.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	390	first	options	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	394	firstOrNull	buttonIdToValue.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	396	firstOrNull	buttonIdToValue.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterDialogs.kt	454	first	cells	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterFragment.kt	550	sortedWith	filtered	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterFragment.kt	1046	first	vm.indexLoaded	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterFragment.kt	1049	firstOrNull	vm.items.value	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterFrameChunkedListSubmitter.kt	89	take	items	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterInstalledRefreshState.kt	40	toList	discovered	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterItemViewHolder.kt	114	firstOrNull	listOfNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterLegacyRefreshState.kt	27	toList	discovered	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterSortPolicy.kt	75	reversed	base	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterViewModel.kt	493	toHashSet	fromIndex.asSequence().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterViewModel.kt	688	singleOrNull	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterViewModel.kt	703	toList	merged.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterViewModel.kt	756	firstOrNull	index.releases	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterViewModel.kt	1080	firstOrNull	releases	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginCenterViewModel.kt	1090	firstOrNull	releases	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginDiscoveryEndpointPolicy.kt	12	first	actions	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginErrorMapper.kt	13	take	generateSequence()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginErrorMapper.kt	13	toList	generateSequence().take()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIconBackgroundPolicy.kt	22	drop	value	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	98	sorted	snapshot.fetchedSources.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	123	firstOrNull	PluginIndexSource.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	135	toMap	PluginIndexSource.entries.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	218	firstOrNull	PluginIndexSource.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	488	firstOrNull	targetEntry.releases	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	504	toMutableList	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	598	firstOrNull	assets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	601	firstOrNull	assets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	633	toList	dirs	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginIndexRepository.kt	714	take	err	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginInfoDialogManager.kt	82	firstOrNull	allItems	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginInfoDialogManager.kt	351	firstOrNull	listOfNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginInfoServiceHost.kt	64	firstOrNull	queryInfoServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginInfoServiceHost.kt	67	firstOrNull	queryInfoServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginInstructionActivity.kt	110	toList	fenceRegex.findAll().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountStore.kt	119	toMutableSet	allTrackedPackages()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountStore.kt	126	toSet	PluginCenterKeys.MOUNT_PACKAGES.get()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	71	firstOrNull	PluginMountStore.listEnabledConfigs()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	146	first	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	167	firstOrNull	ownerClass.methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	174	firstOrNull	ownerClass.fields	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	183	firstOrNull	ownerClass.methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	229	firstOrNull	class.java.declaredFields	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginMountValidator.kt	238	firstOrNull	class.java.methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginNativeAlignmentPolicy.kt	19	firstOrNull	releases	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginReleaseTargetPolicy.kt	22	sortedByDescending	releases.asSequence().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginReleaseTargetPolicy.kt	23	firstOrNull	releases.asSequence().filter().sortedByDescending()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginResourceResolver.kt	60	firstOrNull	ResType.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginSettingsFragment.kt	142	sortedByDescending	UpdateIgnoreStore.ignoredVersions()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginSettingsFragment.kt	147	toMutableList	UpdateIgnoreStore.ignoredVersions().sortedByDescending().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginTrustManager.kt	18	firstOrNull	PLUGIN_IDENTIFIERS	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginTrustManager.kt	37	firstOrNull	fingerprints	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginVariantPriorityActivity.kt	85	toMutableList	variants	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginVariantPriorityActivity.kt	94	sortedWith	source	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginVisibilityStore.kt	56	toMutableSet	hiddenPackages()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginVisibilityStore.kt	74	sortedBy	hiddenPackages()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginWakeManager.kt	31	firstOrNull	queryWakeActivities()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginWakeManager.kt	87	firstOrNull	declaredNames	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginWakeManager.kt	89	singleOrNull	declaredNames	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/PluginWakeManager.kt	90	singleOrNull	declaredNames	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/wizard/PluginInstallWizardAdapter.kt	53	toList	itemsByPackage.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/wizard/PluginInstallWizardAdapter.kt	77	toList	itemsByPackage.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/center/wizard/PluginInstallWizardLoader.kt	129	sortedWith	entriesByPackage.values.filter().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/compose/CallbackRegistry.kt	84	toList	commands.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/CallbackRegistry.kt	106	firstOrNull	op.args	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeFloatyOwners.kt	20	toList	backObservers	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposePackageSubscriptions.kt	20	toSet	watches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposePackageSubscriptions.kt	29	toSet	changes.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeSession.kt	137	toList	views	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeSession.kt	141	firstOrNull	next.nodes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeSession.kt	292	toList	events	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeSession.kt	353	toList	nativeFailures	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeSession.kt	426	toList	sessions	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeUiPluginHost.kt	112	single	services	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeUiPluginLoader.kt	39	firstOrNull	abis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeUiPluginLoader.kt	53	toSet	capabilities.getStringArrayList()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/compose/ComposeUiPluginLoader.kt	104	toSet	codeCache.keys.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/compose/TimerScriptUiDispatcher.kt	70	toList	ready	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/TreeReconciler.kt	51	toList	output.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/TreeReconciler.kt	117	toMutableList	a.children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/compose/TreeReconciler.kt	118	toSet	b.children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/AndroidDexCompilerArtifactStore.kt	87	toList	classpathInputs	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/AndroidDexCompilerArtifactStore.kt	160	drop	frozen	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/AndroidDexCompilerExperimentalTransport.kt	39	firstOrNull	queryExactAction()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/dex/AndroidDexCompilerExperimentalTransport.kt	78	toSet	PluginSignatureUtils.getSha256Fingerprints()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/dex/AndroidDexCompilerRuntime.kt	216	toList	orderedClasspath	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerExperimentalHarness.kt	181	toList	attempts	concurrent	竞态, 已修 C36: 工作线程拒绝回调取快照时, 提交线程 += (192) 与结束 -= (994)
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerExperimentalPolicy.kt	31	sorted	signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerExperimentalPolicy.kt	120	sortedWith	candidates.asSequence().filter().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerExperimentalPolicy.kt	126	firstOrNull	candidates.asSequence().filter().filter().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerLocalD8Plan.kt	117	toList	orderedLibraries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerOptInPolicy.kt	76	single	exactMatches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerRuntimeDiagnostics.kt	36	take	diagnostic.code	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerRuntimeDiagnostics.kt	38	take	allCodes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerRuntimeDiagnostics.kt	111	take	buildList().joinToString()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerRuntimeRequestFactory.kt	34	first	identities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerRuntimeRequestFactory.kt	35	first	identities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexCompilerSemanticCacheKey.kt	33	sorted	signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexIndexedZipValidator.kt	577	first	value	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexIndexedZipValidator.kt	577	last	value	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexIndexedZipValidator.kt	684	firstOrNull	items	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/dex/DexIndexedZipValidator.kt	840	firstOrNull	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/docs/OfflineDocsPluginHost.kt	192	firstOrNull	discover()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/docs/OfflineDocsPluginStateMonitor.kt	316	firstOrNull	discovered	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/editor/AceEditorPluginHost.kt	216	firstOrNull	catch()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/editor/AceEditorPluginStateMonitor.kt	210	firstOrNull	discovered	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/epub/EpubPluginHost.kt	214	toSet	capabilities.getStringArray().filterNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/epub/EpubPluginHost.kt	249	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/epub/EpubReaderLauncher.kt	38	singleOrNull	components	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionAvailabilityPolicy.kt	27	toSet	hostAbis.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionCatalogPolicy.kt	422	take	value.replace().trim().replace()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionHostFileInfoLoader.kt	58	take	ExplorerActionRegistry.matchingActionsForFile().filter().distinctBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionHostFileInfoLoader.kt	67	take	source.name	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	57	single	items	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	83	first	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	84	first	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	94	first	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	96	single	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	101	single	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	103	single	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	153	first	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	154	drop	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	165	first	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	166	first	targets	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	176	take	canonicalParent.path	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionLauncher.kt	259	take	item.name	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionMatchingPolicy.kt	18	single	targets	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionRegistry.kt	77	sortedWith	ExplorerActionPluginHost.discover()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionRegistry.kt	125	sortedWith	resolved.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionRegistry.kt	166	sortedWith	services.mapNotNull().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionRegistry.kt	318	take	item.name	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerActionRegistry.kt	360	take	error.message.replace().trim()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/ExplorerM3uPlaylistPolicy.kt	38	firstOrNull	players	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	134	toMutableList	page.children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	276	firstOrNull	locator	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	314	firstOrNull	locator	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	316	drop	locator	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	320	firstOrNull	current.filterIsInstance()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	329	firstOrNull	locator	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	331	drop	locator	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ArchiveExplorerProvider.kt	335	firstOrNull	current.filterIsInstance()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveInputSession.kt	198	drop	roots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveInputSession.kt	296	toMap	nodesById	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveInputSession.kt	297	toMap	childrenByParentId	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveInputSession.kt	344	sortedWith	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	248	firstOrNull	previous.filenameCharsetNames	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	545	toList	activeExtractions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	546	toList	activeMutations.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	892	take	value.replace().trim()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	978	take	value.replace().trim()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	1033	take	bundle.getString().replace().trim()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	1130	first	supportedNames	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveSessionConnection.kt	1156	take	bundle.getString().replace().trim()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/archive/ExplorerArchiveVolumeSource.kt	242	toList	return().asSequence().filter().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputCoordinator.kt	165	sorted	transaction.allowedOutputMimeTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputCoordinator.kt	196	singleOrNull	uri.pathSegments	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputGrantPolicy.kt	36	singleOrNull	byRole()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputGrantPolicy.kt	37	singleOrNull	byRole()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputPipeSessions.kt	100	take	transactionId	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputPipeSessions.kt	124	take	reason	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputPipeSessions.kt	148	take	pipeErrorMessage()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputPublisher.kt	314	take	tokenFactory().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputSessionPolicy.kt	35	single	pathSegments	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputTransactionStore.kt	120	sortedBy	journalRoot.listFiles().orEmpty().asSequence().filter().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputTransactionStore.kt	121	toList	journalRoot.listFiles().orEmpty().asSequence().filter().mapNotNull().sortedBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputTransactionStore.kt	264	sorted	pluginSigningDigests	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/output/ExplorerActionOutputTransactionStore.kt	279	sorted	allowedOutputMimeTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostInputAccess.kt	53	toSet	relatedFileSuffixes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostInputAccess.kt	103	sortedWith	directory.listFiles()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostInputAccess.kt	106	drop	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostInputAccess.kt	106	take	children.drop()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostInputAccess.kt	283	take	child.name	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	386	takeLast	outputTreeStore.list().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	394	toList	results.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	395	takeLast	results.values.toList()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	421	toList	transactionIds	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	618	takeLast	outputBatchStore.list().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	625	toList	records.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	626	takeLast	records.values.toList()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	640	toList	targetIds	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	641	toList	outputTransactionIds	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	651	toList	targetsById.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	659	toList	committedCreateOutputs.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	664	toList	targetsById.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	819	sortedWith	directory.listFiles()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	824	drop	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	824	take	children.drop()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	833	take	child.name	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	879	take	renameExecutor().journal.list().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1358	toList	outputs.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1401	take	transaction.target.path	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1592	take	record.targetPath	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1737	sortedByDescending	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1893	first	terminalOutputs.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1904	first	committedCreateOutputs.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionHostSession.kt	1936	toList	targetsById.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionOutputBatchStore.kt	99	sortedBy	root.listFiles().orEmpty().asSequence().filter().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionOutputBatchStore.kt	100	toList	root.listFiles().orEmpty().asSequence().filter().mapNotNull().sortedBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionOutputTargets.kt	126	take	displayName	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionOutputTargets.kt	169	take	originalStem	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionOutputTreeStore.kt	85	sortedBy	root.listFiles().orEmpty().asSequence().filter().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionOutputTreeStore.kt	86	toList	root.listFiles().orEmpty().asSequence().filter().mapNotNull().sortedBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionReplacementHistoryStore.kt	441	sortedBy	listRecordsLocked()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionReplacementHistoryStore.kt	449	sortedBy	listRecordsLocked()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionReplacementHistoryStore.kt	450	toMutableList	listRecordsLocked().sortedBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionReplacementHistoryStore.kt	475	sortedBy	listRecordsLocked()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionReplacementHistoryStore.kt	476	toMutableList	listRecordsLocked().sortedBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionReplacementHistoryStore.kt	667	toList	listFiles().orEmpty().asSequence().filter().mapNotNull().distinct().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionTargetTrashBatchStore.kt	267	toMutableList	record.items	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionTargetTrashBatchStore.kt	304	sortedByDescending	listRecordsLocked().filterNot().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionTargetTrashBatchStore.kt	305	take	listRecordsLocked().filterNot().filter().sortedByDescending()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionTargetTrashBatchStore.kt	473	sortedWith	records.asSequence().filterNot().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionTargetTrashBatchStore.kt	479	take	records.asSequence().filterNot().filter().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerActionTargetTrashBatchStore.kt	545	toList	listFiles().orEmpty().asSequence().filter().mapNotNull().distinct().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/explorer/session/ExplorerPlaybackHistoryStore.kt	26	toMutableList	entryKeys().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryActivityLauncher.kt	36	singleOrNull	components	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryFiles.kt	27	single	descriptors	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryFiles.kt	100	toList	kept.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryPluginHost.kt	136	single	sources.files	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryPluginHost.kt	140	single	sources.files	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryPluginHost.kt	157	single	sources.files	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryPluginHost.kt	160	single	sources.files	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryPluginHost.kt	289	toSet	capabilities.getStringArray().filterNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/gallery/GalleryPluginHost.kt	324	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/hostbroker/HostCapabilityBrokerCore.kt	358	take	<expr>()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/hostbroker/HostCapabilityBrokerCore.kt	364	toList	bundle.keySet()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/hostbroker/HostCapabilityDispatchQueue.kt	80	toList	pending.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/imagequant/ImageQuantPluginHost.kt	166	toSet	discover().asSequence().filter().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/imagequant/ImageQuantPluginHost.kt	413	toList	Build.SUPPORTED_32_BIT_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/imagequant/ImageQuantPluginHost.kt	414	toList	Build.SUPPORTED_64_BIT_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/imagequant/ImageQuantPluginPolicy.kt	44	toSet	ImageQuantPluginContract.SUPPORTED_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/imagequant/ImageQuantPluginPolicy.kt	59	toSet	value.split().map().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerBundles.kt	30	toSet	capabilities.getStringArray().orEmpty().filterNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerBundles.kt	31	toSet	capabilities.getStringArray().orEmpty().filterNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerErrorMapper.kt	46	take	text	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerErrorMapper.kt	49	take	systemMessage	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerJson.kt	108	single	results	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerJson.kt	179	take	source.displayName	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerJson.kt	216	take	displayName	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerPeer.kt	62	toSet	InstallerCapabilityKeys.FEATURES	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerPluginHost.kt	93	toList	InstallerBundles.peer().authorizers	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerPluginHost.kt	142	toSet	options.providedOptions	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerPluginHost.kt	319	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerSourceDeletion.kt	29	toSet	retained.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerSourceDeletion.kt	30	toSet	retained.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerSourceDeletion.kt	34	toMutableList	result.notes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerSourceDeletion.kt	85	single	results	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerSources.kt	77	take	file.name	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/installer/InstallerSources.kt	113	take	<expr>()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/installer/PackageInstallRouter.kt	59	firstOrNull	entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceArtifactStore.kt	238	take	cause.message	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceArtifactStore.kt	279	toList	directory.listFiles()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceArtifactStore.kt	309	toList	directory.listFiles()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceTransport.kt	37	firstOrNull	queryDedicatedServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceTransport.kt	74	toSet	PluginSignatureUtils.getSha256Fingerprints()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceTransport.kt	82	firstOrNull	JvmSourceLanguage.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/AndroidJvmSourceTransport.kt	392	toSet	callerPids	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmHostAppLaunchBridge.kt	24	toSet	allowedMethods	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourcePackageSnapshotPolicy.kt	51	singleOrNull	physicalFiles.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourcePackageSnapshotPolicy.kt	97	sortedBy	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceProviderAutoSelection.kt	68	singleOrNull	matching.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceProviderLifecyclePolicy.kt	23	sorted	current.signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceProviderPolicy.kt	56	sorted	signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceProviderPolicy.kt	126	singleOrNull	candidates.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceR1Policy.kt	72	toList	PACKAGE_KEYWORD.findAll()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceR1Policy.kt	73	toList	PACKAGE_DECLARATION.findAll()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceR1Policy.kt	77	singleOrNull	packageDeclarations	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceUserExperience.kt	214	single	exact	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/JvmSourceUserExperience.kt	238	singleOrNull	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/RemoteJvmSourceHost.kt	147	toList	actions	concurrent	竞态, 已修 C36: COW 列表, close 时其他线程的 onCancel 注册后自行移除, 只剩一项时 get(0) 越界
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/RemoteJvmSourceHost.kt	599	sorted	bridgeCallerPids	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/RemoteJvmSourceHost.kt	760	toSet	handshake.capabilities.isolationCapabilities	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/RemoteJvmSourceHost.kt	1010	toSet	bridgeCallerPids	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/jvm/RemoteJvmSourceHost.kt	1072	toList	diagnosticValues	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/lua/AndroidLuaRuntimeProviderTransport.kt	75	sortedWith	queryServices().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/lua/AndroidLuaRuntimeProviderTransport.kt	102	sortedWith	queryServices().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/lua/AndroidLuaRuntimeProviderTransport.kt	118	singleOrNull	descriptors.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimePluginHost.kt	207	sortedWith	descriptors	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimePluginHost.kt	266	single	matches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	308	sortedWith	candidates.asSequence().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	309	toList	candidates.asSequence().filter().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	328	single	eligible	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	357	toSet	candidate.descriptor.infoSupportedAbis	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	357	toSet	info.supportedAbis	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	373	sorted	info.capabilities.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/lua/LuaRuntimeProviderPolicy.kt	444	toList	values.toSortedSet()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/mail/MailFileNames.kt	30	take	base	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/mail/MailPluginHost.kt	205	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/mail/MailSessionClient.kt	276	toList	inflight.values	concurrent	竞态, 已修 C36: 会话失败取快照时, 调用完成路径 (233 / 242 / 249) 移除
+app/src/main/java/org/autojs/autojs/core/plugin/mail/MailTriggerFilter.kt	65	take	it	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/mail/MailTriggerFilter.kt	67	take	raw.map().filter().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/mail/MailTriggerReceiver.kt	52	toList	TimedTaskManager.getIntentTaskOfAction()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerBundles.kt	21	take	message	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerBundles.kt	42	take	bundle.getString()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerBundles.kt	50	take	bundle.getString()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerBundles.kt	52	take	bundle.getString()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerPluginHost.kt	171	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerPluginInspector.kt	44	toSet	pm.queryIntentServices().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/mcp/McpServerPluginInspector.kt	50	sorted	trust.fingerprintsSha256	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/nativealign/ElfDynamicInfo.kt	191	firstOrNull	<expr>()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/nativealign/ElfLoadAlignment.kt	22	take	prefix	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	97	toSet	queryOcrServiceCandidates().flatMap()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	152	firstOrNull	queryOcrServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	155	firstOrNull	queryOcrServices()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	286	singleOrNull	candidates.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	294	singleOrNull	list.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	346	firstOrNull	keys	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	359	singleOrNull	families	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	413	first	infoItems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	422	first	authorizedItems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	474	firstOrNull	failures	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	694	firstOrNull	shm.javaClass.methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	695	firstOrNull	shm.javaClass.methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	921	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	966	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	1073	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/ocr/OcrPluginHost.kt	1108	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/opencv/BundledOpenCvRuntime.kt	54	toSortedMap	record.sha256ByAbi	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/opencv/OpenCvPluginHost.kt	169	toSet	discover().asSequence().filter().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/opencv/OpenCvPluginHost.kt	389	toList	Build.SUPPORTED_32_BIT_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/opencv/OpenCvPluginHost.kt	390	toList	Build.SUPPORTED_64_BIT_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostCapabilityBroker.kt	304	toList	directory.list()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostCapabilityBroker.kt	321	sorted	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostCapabilityBroker.kt	1010	toSet	grantedCapabilities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostCapabilityBroker.kt	1571	toSet	expected	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostCapabilitySnapshot.kt	40	toList	Build.SUPPORTED_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostImages.kt	969	take	screenshotter	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostSelector.kt	446	toMap	listOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonHostSelector.kt	468	toList	bounded.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonLongRunningExecution.kt	213	take	label	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonLongRunningExecution.kt	305	firstOrNull	records.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonPrivateExecutionSnapshot.kt	594	sortedBy	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonPrivateExecutionSnapshot.kt	636	single	planned	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonPrivateExecutionSnapshot.kt	639	sortedBy	planned	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonPrivateExecutionSnapshot.kt	724	take	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeClient.kt	1143	firstOrNull	Build.SUPPORTED_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeProviderSelectionPolicy.kt	237	sorted	signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeProviderSelectionPolicy.kt	308	sortedWith	candidates.asSequence().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeProviderSelectionPolicy.kt	323	single	eligible	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeProviderSelectionPolicy.kt	426	sorted	it.signerSha256.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/python/PythonRuntimeResultPresenter.kt	140	last	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/quickjs/QuickJsRuntimePluginClient.kt	136	toSet	info.supportedAbis.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/quickjs/QuickJsRuntimePluginClient.kt	181	toSet	runtimeInfo.getStringArray().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/quickjs/QuickJsRuntimePluginClient.kt	182	toSet	selection.discovered.pluginInfo.supportedAbis.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/quickjs/QuickJsRuntimePluginClient.kt	259	toSet	PluginTrustManager.resolveTrustInfo().fingerprintsSha256	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/r8/AndroidR8CompilerTransport.kt	40	firstOrNull	queryExactAction()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/r8/AndroidR8CompilerTransport.kt	84	toSet	PluginSignatureUtils.getSha256Fingerprints()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerArtifactAdopter.kt	28	toList	R8ArtifactRole.values()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerArtifactAdopter.kt	28	toList	this.artifactFiles.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerArtifactExporter.kt	126	toSet	roles.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerDexZipValidator.kt	25	toList	zip.entries().asSequence()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerExplicitRuntimeRoute.kt	21	single	artifact.result.artifactIdentities	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerInputSnapshot.kt	82	toList	snapshots.asSequence().filter().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	166	sortedWith	root.listFiles().orEmpty().asSequence().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	167	toList	root.listFiles().orEmpty().asSequence().filter().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	192	sortedWith	root.listFiles().orEmpty().filter().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	196	toMutableList	root.listFiles().orEmpty().filter().mapNotNull().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	199	firstOrNull	generations	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	274	toSet	files.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerPersistentArtifactStore.kt	350	single	result.artifactIdentities	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerProtocolGate.kt	58	toList	R8ArtifactRole.values()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerSelectionPolicy.kt	25	sorted	signerSha256.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8CompilerSelectionPolicy.kt	135	single	exact	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8RetraceHostRequest.kt	64	single	summary.identities	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/r8/R8RetraceHostRequest.kt	67	single	summary.identities	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/screencolorpicker/ScreenColorPickerPluginHost.kt	139	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/settings/OfficialPluginSettingsProvider.kt	45	toSet	packageManager.getPackagesForUid().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechBundles.kt	136	sorted	bundle.keySet()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechBundles.kt	189	toList	value	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechBundles.kt	190	toList	value	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechPluginHost.kt	153	take	SpeechBundles.models()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechPluginHost.kt	396	firstOrNull	usable	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechPluginHost.kt	431	toSet	capabilities.getStringArray().filterNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechPluginHost.kt	439	sorted	peer.features	concurrent?	安全, 扫描误报: peer.features 是插件声明的列表, 不是 NodeAdvancedImages 的同名并发集合
+app/src/main/java/org/autojs/autojs/core/plugin/speech/SpeechPluginHost.kt	477	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/terminal/TerminalJson.kt	48	firstOrNull	env.entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/terminal/TerminalLegacyCleanup.kt	40	sorted	keys.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/terminal/TerminalPluginHost.kt	241	toSet	resolved.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/terminal/TerminalPluginInspector.kt	72	singleOrNull	resolved.mapNotNull().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/text/OpenccPluginCallRouter.kt	21	toList	reported.orEmpty().asSequence().map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/text/OpenccPluginCallRouter.kt	22	toList	fallback	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/text/OpenccPluginHost.kt	62	toMutableList	batch	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/text/OpenccPluginHost.kt	81	toMutableList	types	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolCatalogParser.kt	114	sorted	duplicated	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolCatalogParser.kt	199	toSet	outputs.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolInvocationPlanner.kt	67	take	problems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolRegistry.kt	110	sortedBy	PluginToolProviderHost.discoverWakingFailures()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolRegistry.kt	112	first	list	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolRegistry.kt	114	sortedBy	byPackage.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolRegistry.kt	210	sortedWith	services.mapNotNull().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	52	toMap	properties.entrySet().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	60	toMap	properties.entrySet().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	107	toSet	names	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	142	toSet	names	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	143	firstOrNull	names	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	173	toList	<expr>()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	185	first	problems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolSchema.kt	245	sorted	<expr>().takeIf()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolShortNames.kt	24	single	winners	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/tool/PluginToolShortNames.kt	27	sorted	winners.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	35	sortedBy	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	125	sortedBy	root.walkTopDown().onEnter().filter().map().filter().map().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	126	toList	root.walkTopDown().onEnter().filter().map().filter().map().filter().sortedBy()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	154	first	executable	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	267	sortedBy	output.modules	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	450	single	output.projectSources	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	480	take	output.diagnostics	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	500	first	paths	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	503	firstOrNull	paths	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptApkBuildCompiler.kt	603	take	md5()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationCacheKey.kt	27	sortedBy	prepared.sourceFiles	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	86	single	modules	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	134	toList	archive.entries().asSequence()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	286	sorted	descriptors.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	320	singleOrNull	descriptors	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	361	single	javaScript.sourcePaths	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	396	toSet	modules.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	403	toSet	modules.mapNotNull().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	470	sorted	prepared.rootPaths.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	482	toHashSet	expectedRootNames	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	605	sorted	parsedMappings.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationOutput.kt	697	sorted	sourcePaths	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilationPerformance.kt	393	drop	compilerPhaseStartedAtNanos	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilerPluginClient.kt	237	take	sha256()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilerPluginClient.kt	288	take	sha256()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilerPluginClient.kt	632	take	cacheKey	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilerPluginClient.kt	651	take	cacheKey	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptCompilerPluginClient.kt	745	single	TypeScriptSourceExtensions.forProfile()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptDependencyBoundaryPolicy.kt	71	firstOrNull	installLifecycleKeys.sorted()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptDependencyBoundaryPolicy.kt	71	sorted	installLifecycleKeys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorDefinitionTargetResolver.kt	53	firstOrNull	snapshot.sourceFiles	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorDependencySnapshotProvider.kt	95	toMap	descriptors.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorDependencySnapshotProvider.kt	107	firstOrNull	listOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorDependencySnapshotProvider.kt	144	last	foldedSegments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorProjectRenameTransaction.kt	91	firstOrNull	snapshot.sourceFiles	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorProjectRenameTransaction.kt	95	drop	activeSource.text	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorProjectRenameTransaction.kt	175	singleOrNull	plans	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptEditorProjectSnapshotProvider.kt	152	firstOrNull	sequenceOf().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptExecutionCompiler.kt	42	single	modules	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptExecutionCompiler.kt	259	firstOrNull	sequenceOf().filterNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptExecutionCompiler.kt	379	toList	typeScriptDiagnostics	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptNodeStackTraceFormatter.kt	7	single	TypeScriptSourceMapBindings	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	51	sorted	sources.asSequence().filter().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	52	toList	sources.asSequence().filter().map().sorted()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	246	toSortedMap	sourceOverlays	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	374	first	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	392	sorted	files.asSequence().map().filter().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	393	toList	files.asSequence().map().filter().map().distinct().sorted()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	487	last	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	496	take	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	499	take	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	666	firstOrNull	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptProjectArchive.kt	700	last	foldedSegments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	30	toMap	packageManifestSources	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	164	firstOrNull	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	195	firstOrNull	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	379	take	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	380	drop	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	388	take	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	389	drop	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRhinoDependencyResolver.kt	424	firstOrNull	args	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRuntimeStackTraceFormatter.kt	16	single	TypeScriptSourceMapBindings	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRuntimeStackTraceFormatter.kt	24	toList	rhinoError.scriptStack	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRuntimeStackTraceFormatter.kt	38	single	TypeScriptSourceMapBindings	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptRuntimeStackTraceFormatter.kt	71	toMutableList	frames.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	167	sorted	dependencyRoots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	168	first	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	169	sortedBy	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	184	first	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	187	first	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	190	first	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	193	first	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSingleFileArchive.kt	242	sortedBy	files	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	86	single	sourceMap.sources	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	119	single	exact	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	120	single	exact	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	138	single	suffixMatches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	153	single	basenameMatches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	163	toList	bindings	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	198	firstOrNull	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	200	lastOrNull	segments	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/typescript/TypeScriptSourceMap.kt	257	toList	sources	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/yolo/YoloPluginHost.kt	241	single	services	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/yolo/YoloPluginHost.kt	399	toSet	Build.SUPPORTED_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/core/plugin/yolo/YoloPluginHost.kt	438	single	exact	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/core/plugin/yolo/YoloPluginHost.kt	485	sorted	PluginSignatureUtils.getSha256Fingerprints()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/AutoJs4PluginScriptEngine.kt	148	take	config.arguments.entries.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/BunFilesBridge.kt	51	toList	file.list()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/BunHostCapabilityBroker.kt	64	toList	capabilities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/BunHostCapabilityBroker.kt	398	toList	Build.SUPPORTED_ABIS.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/BunHostCapabilityBroker.kt	404	toSet	request.keys().asSequence()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/BunPluginWorkspaceArchive.kt	97	sortedBy	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/LuaHostCapabilityBroker.kt	50	toSet	grantedCapabilities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/LuaHostStorage.kt	170	toSortedMap	preferences.all	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/LuaModuleSnapshot.kt	96	sortedBy	candidates.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt	194	sortedWith	packagesDir().listFiles().orEmpty().flatMap().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt	485	sortedBy	canonical.listFiles().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeAndroidPackageInstallManager.kt	490	sortedBy	result	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeAudioRecorder.kt	168	toList	entries.values	concurrent	竞态, 已修 C36: 进程级表, 通知停止 (主线程) 与脚本线程 release(id) (225)
+app/src/main/java/org/autojs/autojs/engine/NodeAudioRecorder.kt	200	toList	entries.values	concurrent	竞态, 已修 C36: 进程级表, onDestroy 与脚本线程 release(id) (225)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAccessibilityDiagnostics.kt	111	take	nodes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAccessibilityDiagnostics.kt	114	take	nodes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAccessibilityDiagnostics.kt	331	first	preparedActions.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAccessibilityDiagnostics.kt	346	firstOrNull	roots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAccessibilityDiagnostics.kt	439	sorted	roots.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAccessibilityDiagnostics.kt	585	singleOrNull	roots.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAgentBridge.kt	29	toList	roots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAgentBridge.kt	35	toList	roots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAgentBridge.kt	66	toSet	options.keys().asSequence()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeAgentBridge.kt	188	toList	executions	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeConsoleTail.kt	37	firstOrNull	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeConsoleTail.kt	38	lastOrNull	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeConsoleTail.kt	81	first	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeConsoleTail.kt	96	last	chosen	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeDeviceActions.kt	22	sortedBy	manager.getInstalledApplications()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeDeviceActions.kt	30	take	matches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeDeviceInfo.kt	71	toList	Build.SUPPORTED_ABIS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeDocsCatalog.kt	131	sortedWith	children().orEmpty().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeFileScope.kt	199	sortedWith	directory.listFiles()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeHostEnginesBridge.kt	25	sortedBy	snapshot()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeLimits.kt	121	toMutableMap	fields.mapValues()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	191	toSet	definedCapabilities	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	397	sorted	<expr>().map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	452	sorted	sources.flatMap().map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	467	sortedWith	values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	474	toSet	declaredAndroidPermissions	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	624	toSet	declaredCapabilities.map().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	685	sorted	permissions.filterNot()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	1009	firstOrNull	distinctProfiles	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	1028	sorted	distinctProfiles	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	1029	sorted	builtins.map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	1030	sorted	nativeAssets.map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePermissionManifest.kt	1031	sorted	filesystemRoots.map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginFamilyStatus.kt	59	sorted	methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	119	toList	operations.values	concurrent	竞态, 已修 C36: destroy 时 Binder 线程的结果到达 finish (458) 移除
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	179	firstOrNull	PluginToolRegistry.tools	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	197	firstOrNull	tool.outputs	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	217	toList	plan.outputs.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	322	sortedBy	directory.listFiles().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	379	toList	outputs	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	483	take	error.getString()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	500	take	problems	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	519	take	committed.conflicts	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	622	toList	tool.specialParameters.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	623	toList	tool.specialParameters.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgePluginToolsBridge.kt	624	toList	tool.specialParameters.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	1040	toList	javaHandles.keys	concurrent	竞态, 已修 C36: javaLock 内取快照, 资源登记表的释放回调 (4971) 在锁外移除
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	1061	toList	notificationHandles.values	concurrent	竞态, 已修 C36: synchronized(notificationHandles) 内取快照, 登记表的释放回调 (3889) 在锁外移除
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	2161	firstOrNull	DFS.search()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	2286	firstOrNull	root.findAccessibilityNodeInfosByText()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	2296	firstOrNull	root.findAccessibilityNodeInfosByText()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	2384	firstOrNull	DFS.search()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	3304	firstOrNull	MEDIAINFO_STREAM_KINDS	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	3537	sorted	prefs.all.keys	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	3900	toList	notificationHandles.filterKeys().values	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	5212	take	closeReason	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	5749	firstOrNull	applications	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	5766	firstOrNull	applications	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7012	firstOrNull	headers	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7131	toList	value.keys().asSequence().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7191	take	sha256()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7192	take	sanitize()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7426	take	sha256()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7917	firstOrNull	snapshots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7919	firstOrNull	snapshots	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7952	take	points.toList().chunked()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	7952	toList	points	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt	8969	toList	value.keys().asSequence().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt	83	sorted	NodeBridgeModules.supportedMethodsByModule().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt	509	sorted	NodeOpenccBridge.METHODS	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt	515	sorted	NodeBridgeModules.pinyinMethods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt	523	sorted	NodeBridgeModules.pinyin4jMethods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeProviderRegistry.kt	576	sorted	NodeBridgeModules.imageMethods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt	95	toSortedMap	metadata	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt	136	sortedWith	active.values.toTypedArray()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt	200	sortedWith	active.values	concurrent	竞态, 已修 C36: 诊断转储与 release / close (108 / 118 / 126 / 141) 并发
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeResourceRegistry.kt	218	toSortedMap	records.groupingBy().eachCount()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt	382	take	ScriptRuntime.getStackTrace()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeRhinoExecutionService.kt	567	take	args.joinToString()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeSampleCatalog.kt	77	sortedWith	children.filterNot().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeScreenText.kt	113	toList	operations	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeBridgeUiProvider.kt	457	toList	pendingPatches	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt	27	toMutableMap	NodeBridgeModules.supportedMethodsByModule	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt	38	toSortedMap	supportedMethods	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt	40	sorted	methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt	224	toList	rows	concurrent	安全: CLQ 只增, 裁剪只在 size > 上限 (64) 时 poll, 并发裁剪也到不了 0 行
+app/src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt	227	toList	rows	concurrent	安全: 同 224
+app/src/main/java/org/autojs/autojs/engine/NodeCapabilityBrokerPolicy.kt	228	lastOrNull	retained	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeDeviceControls.kt	57	toList	wakeLocks.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeDialogs.kt	37	toList	sessions.values	concurrent	安全, 扫描误报: NodeDialogs 实例的 sessions 是主线程上的 linkedMapOf (并发表是 NodeDialogActivity.sessions)
+app/src/main/java/org/autojs/autojs/engine/NodeDialogs.kt	43	toList	sessions.values	concurrent	安全, 扫描误报: 同 37
+app/src/main/java/org/autojs/autojs/engine/NodeDialogs.kt	90	toList	sessions.values	concurrent	安全, 扫描误报: 同 37
+app/src/main/java/org/autojs/autojs/engine/NodeDialogs.kt	96	toList	sessions.values	concurrent	安全, 扫描误报: 同 37
+app/src/main/java/org/autojs/autojs/engine/NodeImageOperations.kt	123	toList	pixels	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeIntentTaskSnapshots.kt	32	sortedBy	tasks.filter().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeIntentTaskSnapshots.kt	37	firstOrNull	tasks	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsEncryptedModuleSourceProvider.kt	615	take	<expr>()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeJsEncryptedModuleSourceProvider.kt	641	toList	activeWriteDescriptors	concurrent	竞态, 已修 C36: 写线程与期限 Runnable 移除 (575 / 586 / 620 / 626 / 632)
+app/src/main/java/org/autojs/autojs/engine/NodeJsEncryptedModuleSourceProvider.kt	643	take	reason	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsEncryptedModuleSourceProvider.kt	893	take	value.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsPluginWorkspaceArchiveTransport.kt	336	toSortedMap	entries	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsPluginWorkspaceArchiveTransport.kt	427	sortedBy	children	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsPluginWorkspaceArchiveTransport.kt	867	take	value.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginBridge.kt	408	sorted	typeScriptPrecompiledSourceNames	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginBridge.kt	454	toMutableMap	getStringArray().parseNativePayload()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginBridge.kt	562	toMap	this.mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	200	firstOrNull	discovery.candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	214	firstOrNull	discovery.candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	271	firstOrNull	discovery.candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	570	firstOrNull	queryAuthorizedRuntimeCandidates()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	614	sortedWith	ervices().asSequence().filter().filter().filter().filter().filter().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	620	toList	equence().filter().filter().filter().filter().filter().mapNotNull().sortedWith()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	770	toSet	runtimeInfo.getStringArray().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	778	toSet	runtimeInfo.getStringArray().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	954	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	979	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	1025	toList	entry.waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsRuntimePluginHost.kt	1255	toList	waiters	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	149	toMutableList	delegate.getStringArray().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	168	toList	activePipeWrites	concurrent	竞态, 已修 C36: cancel 时写线程完成后移除 (556)
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	176	toList	bindings.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	314	singleOrNull	output.modules	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	522	take	output.diagnostics	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	534	take	buildString()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeJsTypeScriptModuleSourceProvider.kt	600	take	message	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeLifecycleCheckpointStore.kt	318	take	sha256()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeMediaStore.kt	83	toSet	Collection.values()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeMediaStore.kt	383	firstOrNull	available	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeMediaStore.kt	411	firstOrNull	available	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeMediaStore.kt	513	firstOrNull	Collection.values()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeModuleSourceFileTransportSession.kt	151	sortedBy	requestDirectory.listFiles().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeModuleSourceFileTransportSession.kt	481	toList	activeSourceDescriptors	concurrent	竞态, 已修 C36: 传输线程移除 (412 / 420 / 472)
+app/src/main/java/org/autojs/autojs/engine/NodeModuleSourceFileTransportSession.kt	594	take	value.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeProfileSelectionDiagnostics.kt	63	sorted	manifest.permissions.map().filter().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeProfileSelectionDiagnostics.kt	92	sortedWith	distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	242	toList	launchSource.nodeProjectArgv	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	243	toMap	launchSource.nodeProjectEnv	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	474	sorted	normalizedRequest.env.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	491	firstOrNull	PROJECT_MAIN_KEYS.asSequence().mapNotNull()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	587	first	tokens	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	638	first	tokens	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	654	firstOrNull	packageScriptBinPackageCandidates()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	669	sorted	request.env.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	699	sorted	plan.env.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	728	sorted	request.env.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	755	sorted	request.env.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	787	sorted	request.env.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	895	toSortedMap	request.env	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	982	drop	tokens	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	994	first	tokens	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeProjectRunner.kt	999	drop	tokens	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeScreenTextCodec.kt	19	take	lines	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeTimedTaskSnapshots.kt	47	sortedBy	tasks.filter().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeTimedTaskSnapshots.kt	52	firstOrNull	tasks	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/NodeWorkManagerBridgeScheduler.kt	116	sortedBy	readRecords().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeWorkManagerBridgeScheduler.kt	353	takeLast	record.optArray().orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/NodeWorkManagerBridgeScheduler.kt	480	take	id.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RootAutomatorEngine.kt	85	toList	commands	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentAccessStore.kt	26	sorted	certificates.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentAccessStore.kt	34	sortedBy	prefs.all.keys.filter().mapNotNull().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentAccessStore.kt	41	toSet	ids	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentBridge.kt	96	toList	owners.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentBridge.kt	98	toList	actions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentBridge.kt	250	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeAgentBridge.kt	285	toList	handles.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAiBridge.kt	60	toList	owners.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAiBridge.kt	254	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeAiBridge.kt	296	toList	sessions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAiBridge.kt	296	toList	tasks.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeAndroidObjects.kt	79	toList	intent.categories	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	109	toList	sessions.values	concurrent	安全: 增删与快照都在主线程
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	178	firstOrNull	modifier.signatures	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	215	toList	nativeViews.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	232	toSet	next.nodes.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	253	firstOrNull	sessions.values	concurrent	安全: 带谓词的 firstOrNull 经迭代器, 且只在主线程
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	288	firstOrNull	tree.nodes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	290	firstOrNull	node.modifier	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeComposeBridge.kt	290	firstOrNull	node.modifier.firstOrNull().args	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeConsoleBridge.kt	34	firstOrNull	values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeCoordinateBridge.kt	24	firstOrNull	CoordinateScale.Axis.entries	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeEpubBridge.kt	63	toList	clients.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeEpubBridge.kt	215	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeEpubBridge.kt	287	toList	books.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeEpubBridge.kt	288	toList	readers.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeEpubBridge.kt	320	firstOrNull	EpubScriptValues.list()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowBridge.kt	65	toList	owners.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowBridge.kt	124	toList	answers.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowBridge.kt	146	toSet	RuntimeFlowJson.list().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowBridge.kt	180	toList	answers.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowEvents.kt	109	toSet	values.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowEvents.kt	121	toList	value.keys().asSequence().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowEvents.kt	128	toSet	flags	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowGestures.kt	27	drop	args	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowGestures.kt	28	take	args	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowGestures.kt	29	take	args	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowGestures.kt	37	drop	args	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowGestures.kt	46	drop	value	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowNodes.kt	53	single	candidates	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowPick.kt	27	firstOrNull	navigated()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowPick.kt	50	firstOrNull	type.arguments	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowQuery.kt	84	toSet	flags	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowToolkit.kt	37	firstOrNull	findAll()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowToolkit.kt	71	firstOrNull	listOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowToolkit.kt	84	firstOrNull	pm.getInstalledApplications()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeFlowToolkit.kt	188	single	nodes	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	16	sorted	type.methods.filter().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	17	sorted	type.methods.filterNot().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	18	sorted	type.fields.filter().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	19	sorted	type.fields.filterNot().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	20	sorted	type.fields.filterNot().map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	21	sorted	type.constructors.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	22	sorted	type.methods.map().distinct()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	102	drop	it.parameterTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	110	sortedBy	klass.methods.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	174	singleOrNull	best	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaInterop.kt	174	singleOrNull	best	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSession.kt	97	drop	it.parameterTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSession.kt	97	sorted	type.constructors.map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSession.kt	186	toList	archive.entries().asSequence().filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSession.kt	192	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSession.kt	270	toList	registrations.keys	concurrent	竞态, 已修 C36: close 时其他线程 closeRegistration (265)
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSubclassGenerator.kt	29	drop	points	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSubclassGenerator.kt	49	toList	it.methods	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeJavaSubclassGenerator.kt	59	sortedBy	selected	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeMailBridge.kt	68	toList	owners.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeMailBridge.kt	339	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeMailBridge.kt	438	toList	clients.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeMailBridge.kt	441	toList	watches.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeShellBridge.kt	123	take	command	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeShellBridge.kt	154	toList	processes.values	concurrent	竞态, 已修 C36: lock 内取快照, Entry.close (202) 在锁外移除
+app/src/main/java/org/autojs/autojs/engine/RuntimeSpeechBridge.kt	72	toList	clients.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeSpeechBridge.kt	156	firstOrNull	SpeechPluginHost.listModels()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeSpeechBridge.kt	308	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeSpeechBridge.kt	383	toList	sessions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeTasksBridge.kt	67	firstOrNull	sequenceOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeTasksBridge.kt	184	take	it	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeTtsBridge.kt	53	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeTtsBridge.kt	125	toList	session.pending.values	concurrent	竞态, 已修 C36: closeSession 时回调线程 cleanup (105) 移除
+app/src/main/java/org/autojs/autojs/engine/RuntimeTtsBridge.kt	129	toList	sessions.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	74	toList	subscribers.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	99	toList	subscribers.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	244	toList	record.disposeListeners	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	250	toList	records.values.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	256	toList	records.values.filter()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	256	toList	windows.values	concurrent	安全: 增删与快照都在主线程
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	323	last	stack	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeUiInterop.kt	327	last	stack	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewAttributes.kt	229	firstOrNull	else().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewAttributes.kt	318	toList	it	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewComponents.kt	76	toList	view.pages	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewComponents.kt	82	firstOrNull	descendants()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewComponents.kt	84	toList	descendants()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewComponents.kt	212	toList	evaluations.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeViewWidgets.kt	143	firstOrNull	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebAudioCapture.kt	87	singleOrNull	results	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	59	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	74	toList	historyRequests	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	110	toList	pending.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	111	toList	mediaPermissions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	136	toList	pickerActions	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	169	toList	backgroundMedia.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	171	toList	asyncEvaluations	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	172	toList	pending.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	173	toList	mediaPermissions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	229	toList	certificate.keyTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	281	toList	permission.resources	concurrent?	安全, 扫描误报: PermissionRequest.resources 是 String 数组
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	301	toList	permission.resources	concurrent?	安全, 扫描误报: 同 281
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	311	toList	pending.filterValues().keys	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	319	toList	params.acceptTypes	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	417	toList	pickerActions	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	474	toList	tasks.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	476	toList	pending.keys	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	477	toList	mediaPermissions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	478	toList	backgroundMedia.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	480	toList	actions.values	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCallbacks.kt	589	toList	historyRequests	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebCameraRecording.kt	57	firstOrNull	manager.cameraIdList	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	42	drop	value	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	48	firstOrNull	listOf()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	65	single	context.packageManager.getPackageInfo().providers.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	88	firstOrNull	<expr>()	call	安全: 接收者是函数返回的新集合, 数组或字符串
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	115	singleOrNull	types	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	118	firstOrNull	types	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	139	singleOrNull	results	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	164	single	it	unresolved	安全: 接收者是外部属性, 数组, 常量, 枚举 entries 或 lambda 参数, 均非并发
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebFileChooser.kt	176	single	uris	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebLocalDownloads.kt	41	toList	pageJobs	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebLocalDownloads.kt	135	last	header.split()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebLocalDownloads.kt	215	single	context.packageManager.getPackageInfo().providers.orEmpty()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebMediaService.kt	27	toList	entries.values	concurrent	竞态, 已修 C36: 进程级表, STOP 与会话 Closeable 在任意线程移除 (48 / 79 / 80)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebMediaService.kt	55	toList	entries.filterValues()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebPolicy.kt	44	toSet	<expr>().map()	new	安全: 接收者是新建集合 (map / filter / listOf 等的结果)
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebPolicy.kt	46	firstOrNull	navigation	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
+app/src/main/java/org/autojs/autojs/engine/RuntimeWebPolicy.kt	47	firstOrNull	resources	declared	安全: 接收者是本文件声明的非并发集合, 局部变量或参数
