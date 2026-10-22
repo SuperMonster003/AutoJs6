@@ -12,6 +12,10 @@ import android.provider.MediaStore
 import android.util.AtomicFile
 import android.util.Base64
 import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.optBoolean
+import org.autojs.autojs.core.pref.optLong
+import org.autojs.autojs.core.pref.optString
+import org.autojs.autojs.core.pref.putOrRemove
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -26,7 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Blob page streams and native data/content/SAF transfers, without a JavaScript interface. The download states are the
- * JSON file store `JsonFileStores.RUNTIME_WEB_DOWNLOADS`, read and written with `SettingsJson` (settings P5.1).
+ * JSON file store `JsonFileStores.RUNTIME_WEB_DOWNLOADS`: records of plain values of `SettingsJson` (settings P5.1 /
+ * P5.3), which become org.json objects only where [get] hands them to the page.
  */
 internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
     private val context = web.context.applicationContext
@@ -56,32 +61,33 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
         io.execute { job.begin() }
         return JSONObject().put("id", job.id).put("url", url).put("fileName", name)
     }
-    fun get(id: String): Any {
-        active[id]?.let { return if (it.removed.get()) JSONObject.NULL else it.snapshot() }
+    fun get(id: String): Any = state(id)?.let(SettingsJson::toOrgObject) ?: JSONObject.NULL
+    fun remove(id: String): Boolean {
+        active[id]?.let { it.remove(); return true }
+        val value = state(id) ?: return false
+        if (value.optBoolean("managed") && value["contentUri"] != null) context.contentResolver.delete(Uri.parse(value.optString("contentUri")), null, null)
+        AtomicFile(metadata(context, id)).delete(); return true
+    }
+    fun read(id: String, offset: Long, length: Int): JSONObject {
+        val value = state(id) ?: error("Unknown download")
+        check(value.optString("status") == "successful") { "The download is not complete" }
+        return requireNotNull(context.contentResolver.openInputStream(Uri.parse(value.optString("contentUri")))).use { RuntimeWebDownloads.readBytes(it, offset, length) }
+    }
+    /** The record of a download (a copy for an active job); a stored one that was still running is marked failed. Null when unknown or removed. */
+    private fun state(id: String): MutableMap<String, Any?>? {
+        active[id]?.let { return if (it.removed.get()) null else it.snapshot() }
         val file = metadata(context, id)
-        if (!file.exists()) return JSONObject.NULL
-        val value = SettingsJson.parseObject(AtomicFile(file).openRead().bufferedReader().use { it.readText() })
-        if (value.optString("status") == "running") {
-            value.put("status", "failed").put("reason", 1000).put("error", "Download interrupted by process termination")
+        if (!file.exists()) return null
+        val value = decode(AtomicFile(file).openRead().bufferedReader().use { it.readText() })
+        if (interrupted(value)) {
             File(context.cacheDir, "runtime-web-downloads/${uuid(id)}.part").delete()
-            if (value.optBoolean("pendingOwned") && value.has("pendingUri")) runCatching {
-                val uri = Uri.parse(value.getString("pendingUri"))
+            if (value.optBoolean("pendingOwned") && value.containsKey("pendingUri")) runCatching {
+                val uri = Uri.parse(value.optString("pendingUri"))
                 if (DocumentsContract.isDocumentUri(context, uri)) DocumentsContract.deleteDocument(context.contentResolver, uri) else context.contentResolver.delete(uri, null, null)
             }
             save(file, value)
         }
         return value
-    }
-    fun remove(id: String): Boolean {
-        active[id]?.let { it.remove(); return true }
-        val value = get(id) as? JSONObject ?: return false
-        if (value.optBoolean("managed") && !value.isNull("contentUri")) context.contentResolver.delete(Uri.parse(value.getString("contentUri")), null, null)
-        AtomicFile(metadata(context, id)).delete(); return true
-    }
-    fun read(id: String, offset: Long, length: Int): JSONObject {
-        val value = get(id) as? JSONObject ?: error("Unknown download")
-        check(value.getString("status") == "successful") { "The download is not complete" }
-        return requireNotNull(context.contentResolver.openInputStream(Uri.parse(value.getString("contentUri")))).use { RuntimeWebDownloads.readBytes(it, offset, length) }
     }
 
     private inner class Job(private val options: JSONObject, private val fileName: String) {
@@ -96,9 +102,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
         private val temporary = File(context.cacheDir, "runtime-web-downloads/${uuid(id)}.part")
         private val key = "__autojs6_download_${uuid(id).replace('-', '_')}"
         private val managed = !options.has("destinationUri") && !options.has("directoryUri")
-        private val value = JSONObject().put("id", id).put("url", url).put("fileName", fileName).put("status", "running").put("reason", 0)
-            .put("bytesDownloaded", 0L).put("totalBytes", -1L).put("mimeType", options.optString("mimeType", "application/octet-stream"))
-            .put("localUri", JSONObject.NULL).put("contentUri", JSONObject.NULL).put("managed", managed)
+        private val value = started(id, url, fileName, options.optString("mimeType", "application/octet-stream"), managed)
         private var output: FileOutputStream? = null
         @Volatile private var input: InputStream? = null
         private var published: Uri? = null
@@ -111,7 +115,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
             if (uri !in leases) { RuntimeWebFileAccess.acquire(context, uri); leases.add(uri) }
         }
         fun release() { leases.forEach { runCatching { RuntimeWebFileAccess.release(context, it) } }; leases.clear() }
-        fun snapshot() = synchronized(lock) { JSONObject(value.toString()) }
+        fun snapshot(): MutableMap<String, Any?> = synchronized(lock) { LinkedHashMap(value) }
         private fun persist() { save(metadata(context, id), value); lastSave = System.currentTimeMillis() }
         fun begin() {
             try {
@@ -127,9 +131,9 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
                         "data" -> {
                             val comma = url.indexOf(','); require(comma >= 5) { "Invalid data URL" }
                             val header = url.substring(5, comma)
-                            if (!options.has("mimeType")) synchronized(lock) { value.put("mimeType", header.substringBefore(';').ifBlank { "text/plain" }) }
+                            if (!options.has("mimeType")) synchronized(lock) { value["mimeType"] = header.substringBefore(';').ifBlank { "text/plain" } }
                             val bytes = decodeData(url.substring(comma + 1), header.split(';').last().equals("base64", true))
-                            synchronized(lock) { value.put("totalBytes", bytes.size) }; ByteArrayInputStream(bytes)
+                            synchronized(lock) { value["totalBytes"] = bytes.size }; ByteArrayInputStream(bytes)
                         }
                         "content" -> requireNotNull(context.contentResolver.openInputStream(Uri.parse(url)))
                         else -> {
@@ -139,8 +143,8 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
                                 require(responseCode in 200..299) { "Download HTTP $responseCode" }
                             }
                             synchronized(lock) {
-                                value.put("totalBytes", connection!!.contentLengthLong)
-                                if (!options.has("mimeType")) value.put("mimeType", connection!!.contentType ?: "application/octet-stream")
+                                value["totalBytes"] = connection!!.contentLengthLong
+                                if (!options.has("mimeType")) value["mimeType"] = connection!!.contentType ?: "application/octet-stream"
                             }
                             connection!!.inputStream
                         }
@@ -155,7 +159,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
         private fun write(bytes: ByteArray, size: Int = bytes.size) = synchronized(lock) {
             if (stopped.get()) return@synchronized
             requireNotNull(output).write(bytes, 0, size)
-            value.put("bytesDownloaded", value.getLong("bytesDownloaded") + size)
+            value["bytesDownloaded"] = value.optLong("bytesDownloaded") + size
             if (System.currentTimeMillis() - lastSave >= 200) persist()
         }
         private fun script(action: String) = "$pageScript(${JSONObject.quote(action)},${JSONObject.quote(key)},${JSONObject.quote(url)})"
@@ -173,8 +177,8 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
                         try {
                             synchronized(lock) {
                                 if (stopped.get()) return@execute
-                                if (!options.has("mimeType") && chunk.optString("mimeType").isNotEmpty()) value.put("mimeType", chunk.getString("mimeType"))
-                                if (chunk.has("totalBytes")) value.put("totalBytes", chunk.getLong("totalBytes"))
+                                if (!options.has("mimeType") && chunk.optString("mimeType").isNotEmpty()) value["mimeType"] = chunk.getString("mimeType")
+                                if (chunk.has("totalBytes")) value["totalBytes"] = chunk.getLong("totalBytes")
                             }
                             if (chunk.has("base64")) {
                                 require(chunk.getString("base64").length <= 43692) { "Page download chunk too large" }
@@ -191,7 +195,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
                 synchronized(lock) {
                     if (stopped.get()) return
                     output?.close(); output = null
-                    val mime = value.getString("mimeType").substringBefore(';')
+                    val mime = value.optString("mimeType").substringBefore(';')
                     val uri = when {
                         options.has("destinationUri") -> Uri.parse(options.getString("destinationUri"))
                         options.has("directoryUri") -> {
@@ -212,21 +216,20 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
                             androidx.core.content.FileProvider.getUriForFile(context, authority, file)
                         }
                     }
-                    published = uri; value.put("pendingUri", uri.toString()).put("pendingOwned", ownsOutput); persist(); destinationOpened = true
+                    published = uri; pending(value, uri.toString(), ownsOutput); persist(); destinationOpened = true
                     requireNotNull(context.contentResolver.openOutputStream(uri, "wt")).use { target -> temporary.inputStream().use { source ->
                         val bytes = ByteArray(32768)
                         while (true) { check(!stopped.get()) { "Download cancelled" }; val size = source.read(bytes); if (size < 0) break; target.write(bytes, 0, size) }
                     } }
                     if (managed && Build.VERSION.SDK_INT >= 29) context.contentResolver.update(uri, ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) }, null, null)
                     if (!stopped.compareAndSet(false, true)) return
-                    value.put("contentUri", uri.toString()).put("localUri", uri.toString()).put("status", "successful").put("totalBytes", value.getLong("bytesDownloaded"))
-                    value.remove("pendingUri"); value.remove("pendingOwned")
+                    completed(value, uri.toString())
                     persist()
                 }
                 cleanup(false)
             } catch (error: Throwable) {
                 if (!stopped.get()) fail(error) else {
-                    synchronized(lock) { value.put("status", "failed").put("reason", 1000).put("error", error.message); runCatching { if (!removed.get()) persist() } }
+                    synchronized(lock) { failed(value, error.message); runCatching { if (!removed.get()) persist() } }
                     cleanup(true)
                 }
             }
@@ -244,7 +247,7 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
                 try {
                     runCatching { input?.close() }; input = null
                     synchronized(lock) {
-                        value.put("status", "failed").put("reason", 1000).put("error", error.message ?: "Download failed")
+                        failed(value, error.message ?: "Download failed")
                         runCatching { if (!removed.get()) persist() }
                     }
                 } finally { cleanup(true) }
@@ -272,9 +275,29 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
         private val io = Executors.newCachedThreadPool { task -> Thread(task, "runtime-web-download").apply { isDaemon = true } }
         private fun uuid(id: String): String { require(id.startsWith("web:")); return UUID.fromString(id.removePrefix("web:")).toString() }
         private fun metadata(context: Context, id: String) = File(context.filesDir, "runtime-web-downloads/${uuid(id)}.json")
-        private fun save(file: File, value: JSONObject) {
+        private fun save(file: File, value: Map<String, Any?>) {
             check(file.parentFile!!.isDirectory || file.parentFile!!.mkdirs()); val atomic = AtomicFile(file); val stream = atomic.startWrite()
-            try { stream.write(SettingsJson.stringify(value).toByteArray()); atomic.finishWrite(stream) } catch (error: Throwable) { atomic.failWrite(stream); throw error }
+            try { stream.write(encode(value).toByteArray()); atomic.finishWrite(stream) } catch (error: Throwable) { atomic.failWrite(stream); throw error }
+        }
+        internal fun encode(record: Map<String, Any?>): String = SettingsJson.stringify(record)
+        internal fun decode(text: String): MutableMap<String, Any?> = SettingsJson.parseMap(text)
+        /** The record of a download that has just started; `localUri` and `contentUri` are JSON nulls until it succeeds. */
+        internal fun started(id: String, url: String, fileName: String, mimeType: String, managed: Boolean): MutableMap<String, Any?> = linkedMapOf<String, Any?>(
+            "id" to id, "url" to url, "fileName" to fileName, "status" to "running", "reason" to 0, "bytesDownloaded" to 0L, "totalBytes" to -1L,
+            "mimeType" to mimeType, "localUri" to null, "contentUri" to null, "managed" to managed,
+        )
+        /** The destination that the copy of the finished download goes to, removed again by a failure when the download [owned] it. */
+        internal fun pending(record: MutableMap<String, Any?>, uri: String, owned: Boolean) { record["pendingUri"] = uri; record["pendingOwned"] = owned }
+        internal fun completed(record: MutableMap<String, Any?>, uri: String) {
+            record["contentUri"] = uri; record["localUri"] = uri; record["status"] = "successful"; record["totalBytes"] = record.optLong("bytesDownloaded")
+            record.remove("pendingUri"); record.remove("pendingOwned")
+        }
+        /** A null [message] leaves `error` out (org.json's `put` with null removed the member). */
+        internal fun failed(record: MutableMap<String, Any?>, message: String?) { record["status"] = "failed"; record["reason"] = 1000; record.putOrRemove("error", message) }
+        /** Marks a stored download that was still running when its process ended as failed; true when it was running. */
+        internal fun interrupted(record: MutableMap<String, Any?>): Boolean {
+            if (record.optString("status") != "running") return false
+            failed(record, "Download interrupted by process termination"); return true
         }
         internal fun decodeData(payload: String, base64: Boolean): ByteArray {
             val raw = payload.toByteArray(Charsets.UTF_8); val bytes = java.io.ByteArrayOutputStream(); var i = 0
