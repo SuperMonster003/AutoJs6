@@ -303,13 +303,26 @@ class BridgeLeakGateDeviceTest {
         bindings.put("pluginConnectionsDelta", bindingDelta ?: JSONObject.NULL)
         bindings.put("probe", if (bindingDelta == null) "unavailable" else "available")
         metrics.put("bindings", bindings)
-        // T1 (d): bridge threads against the end of the warm-ups.
-        // zh-CN: T1 (d): 桥接线程相对预热结束时.
-        val newThreads = threadsFinal.groupingBy { it }.eachCount().flatMap { (name, count) ->
+        // T1 (d): bridge threads against the end of the warm-ups. Idle workers of a process-wide cached pool (POOLED_THREADS)
+        // expire on their own, so an excess made up only of those is judged once they had their keep-alive to expire (Q6).
+        // zh-CN: T1 (d): 桥接线程相对预热结束时. 进程级缓存线程池的空闲线程 (POOLED_THREADS) 会自行退出,
+        // zh-CN: 多出的只有这类线程时, 等过它们的空闲存活时间再判定 (Q6).
+        fun excessThreads(threads: List<String>) = threads.groupingBy { it }.eachCount().flatMap { (name, count) ->
             List((count - threadsBaseline.count { it == name }).coerceAtLeast(0)) { name }
         }
-        metrics.put("bridgeThreads", threadsFinal.size).put("bridgeThreadDelta", threadsFinal.size - threadsBaseline.size)
-            .put("bridgeThreadsNew", JSONArray(newThreads.distinct().take(20)))
+        var threadsJudged = threadsFinal
+        var newThreads = excessThreads(threadsJudged)
+        val pooledWaitBegun = SystemClock.elapsedRealtime()
+        while (newThreads.isNotEmpty() && newThreads.all { name -> POOLED_THREADS.any { name.contains(it) } } &&
+            SystemClock.elapsedRealtime() - pooledWaitBegun < POOLED_THREAD_WAIT_MS
+        ) {
+            SystemClock.sleep(1_000L)
+            threadsJudged = BridgeTracker.bridgeThreads()
+            newThreads = excessThreads(threadsJudged)
+        }
+        val pooledWaitMs = if (threadsJudged === threadsFinal) 0L else SystemClock.elapsedRealtime() - pooledWaitBegun
+        metrics.put("bridgeThreads", threadsJudged.size).put("bridgeThreadDelta", threadsJudged.size - threadsBaseline.size)
+            .put("bridgeThreadsNew", JSONArray(newThreads.distinct().take(20))).put("pooledThreadWaitMs", pooledWaitMs)
         // T1 (i), recorded only (R9).
         // zh-CN: T1 (i), 只记录 (R9).
         val pss = JSONObject().put("start", pssStart ?: JSONObject.NULL).put("afterSecondRun", pssSecond ?: JSONObject.NULL)
@@ -362,6 +375,7 @@ class BridgeLeakGateDeviceTest {
             .put("rhinoContextDelta", 0).put("engines", start.engines).put("imagesLiveDelta", 0).put("openMediaImages", 0)
             .put("matsLiveDelta", 0).put("registriesDelta", 0).put("bridgeRegistriesDelta", 0)
             .put("pooledRegistries", JSONArray(POOLED_REGISTRIES)).put("pluginConnectionsDelta", BINDING_SLACK).put("bridgeThreadDelta", 0)
+            .put("pooledThreads", JSONArray(POOLED_THREADS)).put("pooledThreadWaitMs", POOLED_THREAD_WAIT_MS)
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
             .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
@@ -799,6 +813,15 @@ class BridgeLeakGateDeviceTest {
 
         /** Host registries of pooled engines, which may keep one idle connection (T1 (h)). zh-CN: 带连接池的引擎的宿主注册表, 可保留 1 个空闲连接 (T1 (h)). */
         private val POOLED_REGISTRIES = listOf("NodeJsRuntimePluginHost.connectionPool")
+
+        /**
+         * Bridge threads of process-wide cached pools (`NodeJsRuntimePluginHost.binderCallExecutor`, 60 s keep-alive), whose idle
+         * workers expire on their own; an excess of only these is judged after up to [POOLED_THREAD_WAIT_MS] (T1 (d), Q6).
+         * zh-CN: 进程级缓存线程池的桥接线程 (`NodeJsRuntimePluginHost.binderCallExecutor`, 空闲存活 60 s), 空闲线程会自行退出;
+         * 多出的只有这类线程时最多等 [POOLED_THREAD_WAIT_MS] 再判定 (T1 (d), Q6).
+         */
+        private val POOLED_THREADS = listOf("AutoJs6-Node-Plugin-Rpc")
+        private const val POOLED_THREAD_WAIT_MS = 65_000L
         private val PLUGIN_PACKAGES = setOf(BridgeScenarios.NODE_PACKAGE)
         private val COLOR_OS_MANUFACTURERS = setOf("oppo", "oneplus", "realme")
 
@@ -811,7 +834,8 @@ class BridgeLeakGateDeviceTest {
             "run the runner collects and polls up to pollMs (1 s once 3 runs stayed reachable); a final collection decides 'retained'. " +
             "Heap deltas compare the sample after the last warm-up with the final sample; thread, Rhino context, engine and bridge " +
             "registry deltas compare with the sample before the first run (the plugin probe already bound the plugin), bridge " +
-            "threads with the end of the warm-ups. Bridge registries must return to the start except the Node connection pool, " +
+            "threads with the end of the warm-ups (idle workers of the host's cached binder-call pool get up to 65 s to expire " +
+            "first). Bridge registries must return to the start except the Node connection pool, " +
             "which may keep one idle connection; system-side connections of this process to the plugin packages " +
             "(LoadedApk.mServices, hidden_api_policy 1) may be one above the start. Plugin process PSS is recorded after the " +
             "second measured run and at the end, never judged (R9). Force mode waits for gateReady(), sleeps forceDelayMs and " +

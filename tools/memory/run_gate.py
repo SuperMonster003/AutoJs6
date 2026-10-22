@@ -323,7 +323,8 @@ def markdown(meta, reports, failures):
             "live engines / plugin PSS MB at the end (change since measured run 2)",
             "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), script threads, engines and bridge "
             "registries back to start (Node connection pool may keep 1), system connections <= start + 1, bridge threads back to "
-            "the end of the warm-ups; plugin PSS recorded only (R9)",
+            "the end of the warm-ups (idle workers of the cached binder-call pool get up to 65 s to expire first, Q6); plugin PSS "
+            "recorded only (R9)",
         ]
     else:
         cell_lines = [
