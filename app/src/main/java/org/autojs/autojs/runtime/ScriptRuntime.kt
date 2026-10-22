@@ -436,7 +436,16 @@ class ScriptRuntime private constructor(builder: Builder) {
         get() = bridges.isJavaPrimitiveWrap()
         set(b) = bridges.setJavaPrimitiveWrap(b)
 
-    internal lateinit var consoleProxyObject: ProxyObject
+    /** The `console` module object of the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
+    private lateinit var legacyConsoleProxyObject: ProxyObject
+
+    /**
+     * The `console` module object the setters of `console` return and `console.build` calls: the new layer's when it
+     * serves the module (roadmap P3.2, built on demand), else the one of the old augment call.
+     * zh-CN: console 各 setter 返回的, console.build 调用的 console 模块对象: 新层提供该模块时为新层的 (P3.2, 按需构建), 否则为原 augment 调用的.
+     */
+    internal val consoleProxyObject: ProxyObject
+        get() = scriptModules?.moduleObject("console") as? ProxyObject ?: legacyConsoleProxyObject
 
     /**
      * The mounter of the new script module layer for this runtime, or null when its switch was off when the runtime
@@ -1146,7 +1155,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             "fmt" -> Formatter.augmentWithRuntime(target, this).also { fmt ->
                 BytesFmt.augmentWithRuntime(fmt, this)
             }
-            "console" -> Console(this).proxying(target, console).also { consoleProxyObject = it }
+            "console" -> Console(this).proxying(target, console).also { legacyConsoleProxyObject = it }
             "plugins" -> Plugins(this).augment(target).also { PluginsTools(this).augment(it) }
             "Arrayx" -> Arrayx(this).augment(target)
             "Numberx" -> Numberx(this).augment(target)
