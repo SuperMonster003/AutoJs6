@@ -11,6 +11,7 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
 import java.lang.ref.WeakReference
+import java.util.concurrent.locks.LockSupport
 import kotlin.math.max
 
 /**
@@ -28,8 +29,38 @@ class Timer {
     private var mMaxCallbackMillisForAllThread: VolatileBox<Long>
     private var mRuntime: WeakReference<ScriptRuntime>
     private var mTimerId = 0
+    private var mPostOrder = 0L
+    private var mWaiters = 0
 
     internal var onPendingCallbacksChanged: (() -> Unit)? = null
+
+    // The due callbacks of this timer, run by its looper thread while it waits for a Promise instead of polling its looper
+    // (SettlementLatch, docs/augment/ROADMAP.md Q26). A callback taken here is removed from the looper first, and runs
+    // like the looper would run it.
+    // zh-CN: 本 timer 已到期的回调, 由其 Looper 线程在等待 Promise 而不轮询 Looper 时运行 (SettlementLatch, docs/augment/ROADMAP.md Q26).
+    // 在此取出的回调先从 Looper 中移除, 运行方式与 Looper 相同.
+    private val mCallbackQueue = object : SettlementLatch.CallbackQueue {
+
+        override fun takeDueCallback(): Runnable? = synchronized(this@Timer) {
+            val next = earliestPendingCallback()?.takeIf { it.uptime <= SystemClock.uptimeMillis() } ?: return null
+            mHandler.removeCallbacks(next)
+            next
+        }
+
+        override fun millisUntilNextCallback(): Long = synchronized(this@Timer) {
+            val next = earliestPendingCallback() ?: return -1L
+            max(next.uptime - SystemClock.uptimeMillis(), 1L)
+        }
+
+        override fun beginWait() {
+            synchronized(this@Timer) { mWaiters++ }
+        }
+
+        override fun endWait() {
+            synchronized(this@Timer) { mWaiters-- }
+        }
+
+    }
 
     constructor(scriptRuntime: ScriptRuntime, maxCallbackMillisForAllThread: VolatileBox<Long>, timerId: Int) : this(scriptRuntime, maxCallbackMillisForAllThread, currentOrPreparedLooper(), timerId)
 
@@ -135,12 +166,13 @@ class Timer {
     fun postDelayed(r: Runnable, interval: Long) {
         synchronized(this) {
             val uptime = interval + SystemClock.uptimeMillis()
-            val pending = PendingCallback(r)
+            val pending = PendingCallback(r, uptime, mPostOrder++)
             mPendingCallbacks.add(pending)
             if (!mHandler.postAtTime(pending, uptime)) {
                 mPendingCallbacks.remove(pending)
                 throw TimerCallbackRejectedException(if (isStopping()) ScriptInterruptedException() else null)
             }
+            if (mWaiters > 0) LockSupport.unpark(mLooper.thread)
             // Retain the historical high-water mark for callers, but never use it to decide
             // whether work remains: cancelled callbacks can leave this far in the future.
             synchronized(mMaxCallbackMillisForAllThread) {
@@ -152,6 +184,12 @@ class Timer {
     fun hasPendingCallbacks(): Boolean {
         return synchronized(this) { mPendingCallbacks.isNotEmpty() }
     }
+
+    /** The due callbacks of this timer for [SettlementLatch], or null when the current thread is not its looper thread. */
+    internal fun callbackQueueForCurrentThread(): SettlementLatch.CallbackQueue? = mCallbackQueue.takeIf { mLooper.thread === Thread.currentThread() }
+
+    // In the order of the looper: by due time, then in the order of posting.
+    private fun earliestPendingCallback(): PendingCallback? = mPendingCallbacks.filter { !it.running }.minWithOrNull(compareBy<PendingCallback>({ it.uptime }, { it.order }))
 
     fun removeAllCallbacks() {
         synchronized(this) {
@@ -222,7 +260,7 @@ class Timer {
     // Message.callback (ROADMAP H21, third path, S7 N on 23046RP50C and AVD API 24 in P3.5).
     // zh-CN: 回调一开始运行 (或发现已取消) 就丢弃它, 同 TimerThread.ReleasingRunnable: 回调抛出时 (exit() 或强制停止) Looper.loop 不回收已分发的 Message,
     // 另一个 Looper 线程可能仍持有该池化 Message 的陈旧引用, 曾经由 Message.callback 钉住脚本 (路线图 H21 第三条路径, P3.5 中 23046RP50C 与 AVD API 24 的 S7 N).
-    private inner class PendingCallback(callback: Runnable) : Runnable {
+    private inner class PendingCallback(callback: Runnable, val uptime: Long, val order: Long) : Runnable {
         var callback: Runnable? = callback
             private set
         var running = false

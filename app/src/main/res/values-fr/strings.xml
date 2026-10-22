@@ -520,6 +520,7 @@
     <string name="error_plugin_returned_invalid_variant">Le plugin %1$s a renvoyé une variante invalide : %2$s.</string>
     <string name="error_port_num_over_65535">Numéro de port supérieur à 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Le fichier de script principal du projet \"%1$s\" n\'existe pas</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise.prototype.wait() ne peut pas bloquer le thread d\'interface utilisateur tant que la Promise est en attente. Utilisez then(), await() dans une coroutine ou appelez wait() dans un thread secondaire</string>
     <string name="error_put_value_into_json">Impossible d\'insérer la valeur %s dans JSON</string>
     <string name="error_refresh_failed">Echec de l\'actualisation</string>
     <string name="error_regex_find_prev">Impossible de rechercher le précédent avec une expression régulière</string>

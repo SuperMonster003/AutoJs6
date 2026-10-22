@@ -517,6 +517,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s 外掛返回的 variant 無效: %2$s.</string>
     <string name="error_port_num_over_65535">埠號超過 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">專案主指令碼檔案 \"%1$s\" 不存在</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise 未結算時 Promise.prototype.wait() 不能阻塞 UI 執行緒. 可改用 then(), 在協程中使用 await(), 或在子執行緒中呼叫 wait()</string>
     <string name="error_put_value_into_json">無法將值 %s 存入 JSON</string>
     <string name="error_refresh_failed">刷新失敗</string>
     <string name="error_regex_find_prev">正則表示式不支援向前查詢</string>

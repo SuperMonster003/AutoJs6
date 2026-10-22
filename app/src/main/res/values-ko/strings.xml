@@ -522,6 +522,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
     <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">프로젝트 메인 스크립트 파일 \"%1$s\" 이 존재하지 않습니다</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise 가 아직 처리되지 않은 동안 Promise.prototype.wait() 는 UI 스레드를 차단할 수 없습니다. then() 을 사용하거나, 코루틴에서 await() 를 사용하거나, 하위 스레드에서 wait() 를 호출하십시오</string>
     <string name="error_put_value_into_json">가치 %s 를 JSON 에 넣을 수 없습니다</string>
     <string name="error_refresh_failed">새로고침에 실패했습니다</string>
     <string name="error_regex_find_prev">Regex 와 함께 이전을 찾을 수 없습니다</string>

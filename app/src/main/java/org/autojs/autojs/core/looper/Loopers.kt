@@ -109,6 +109,15 @@ class Loopers(val scriptRuntime: ScriptRuntime) {
         mWaitIds.get()?.remove(waitId)
     }
 
+    /**
+     * A latch for a Promise that the current thread waits for (`Promise.prototype.wait`): the thread runs the due callbacks
+     * of its timer while it waits, and the UI thread does not block (docs/augment/ROADMAP.md Q26).
+     *
+     * zh-CN: 当前线程等待 Promise 用的闩 (`Promise.prototype.wait`): 线程在等待期间运行自己 timer 上已到期的回调, UI 线程不阻塞
+     * (docs/augment/ROADMAP.md Q26).
+     */
+    fun newSettlementLatch() = SettlementLatch(mTimers.timerForCurrentThread?.callbackQueueForCurrentThread(), mayBlock = !isMainThread())
+
     fun addLooperQuitHandler(looperQuitHandler: LooperQuitHandler?) {
         val list: CopyOnWriteArrayList<LooperQuitHandler> = mLooperQuitHandlers.get()
             ?: CopyOnWriteArrayList<LooperQuitHandler>().also { mLooperQuitHandlers.set(it) }

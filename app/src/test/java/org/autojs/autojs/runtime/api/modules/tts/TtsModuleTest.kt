@@ -152,6 +152,9 @@ class TtsModuleTest {
             HostModuleTestSupport.settled("tts.voices({ offline: true })", "Array.isArray(v)") to DeviceCases.INFO,
             HostModuleTestSupport.settled("tts.isLanguageAvailable('en-US')", "typeof v") to DeviceCases.INFO,
             HostModuleTestSupport.settled("tts.silence(10)", "typeof v") to DeviceCases.INFO,
+            // wait() on the script thread for a Promise of toJsPromise, settled on a binder thread of the engine (appendix C Q26).
+            HostModuleTestSupport.waited("tts.engines()", "Array.isArray(v)") to "true",
+            HostModuleTestSupport.waited("tts.ready()", "typeof v") to DeviceCases.INFO,
             "(function () { var u = tts.silenceTask(10); return String(u.getClass().getSimpleName()); })()" to DeviceCases.INFO,
             "(function () { try { var r = tts.synthesize('ok', 'aj6-p35-tts.wav'); return typeof r; } catch (e) { return 'failed ' + e; } })()" to DeviceCases.INFO,
         )

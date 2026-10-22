@@ -520,6 +520,7 @@
     <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
     <string name="error_port_num_over_65535">Номер порта более 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Основной файл скрипта проекта \"%1$s\" не существует</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise.prototype.wait() не может блокировать поток пользовательского интерфейса, пока Promise не завершён. Используйте then(), await() в сопрограмме или вызовите wait() в подпотоке</string>
     <string name="error_put_value_into_json">Не удается поместить значение %s в JSON</string>
     <string name="error_refresh_failed">Не удалось обновить</string>
     <string name="error_regex_find_prev">Невозможно найти предыдущее значение с помощью regex</string>

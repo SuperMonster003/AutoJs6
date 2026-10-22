@@ -515,6 +515,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
     <string name="error_port_num_over_65535">Port number over 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Project main script file \"%1$s\" does not exist</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise.prototype.wait() cannot block the UI thread while the Promise is pending. Use then(), await() in a coroutine, or call wait() in a sub-thread</string>
     <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
     <string name="error_refresh_failed">Refresh failed</string>
     <string name="error_regex_find_prev">Cannot find previous with regex</string>

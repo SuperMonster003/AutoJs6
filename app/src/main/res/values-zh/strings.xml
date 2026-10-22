@@ -516,6 +516,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s 插件返回的 variant 无效: %2$s.</string>
     <string name="error_port_num_over_65535">端口号超过 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">项目主脚本文件 \"%1$s\" 不存在</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise 未结算时 Promise.prototype.wait() 不能阻塞 UI 线程. 可改用 then(), 在协程中使用 await(), 或在子线程中调用 wait()</string>
     <string name="error_put_value_into_json">无法将值 %s 存入 JSON</string>
     <string name="error_refresh_failed">刷新失败</string>
     <string name="error_regex_find_prev">正则表达式不支持向前查找</string>

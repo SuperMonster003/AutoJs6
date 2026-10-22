@@ -521,6 +521,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
     <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">プロジェクトのメインスクリプトファイル \"%1$s\" が存在しません</string>
+    <string name="error_promise_wait_blocks_ui_thread">Promise が未確定の間, Promise.prototype.wait() は UI スレッドをブロックできません. then() を使うか, コルーチン内で await() を使うか, サブスレッドで wait() を呼び出してください</string>
     <string name="error_put_value_into_json">\"値 %s を JSON に入れることができません\" というメッセージが表示されます</string>
     <string name="error_refresh_failed">更新に失敗しました</string>
     <string name="error_regex_find_prev">正規表現で前を見つけることができません</string>

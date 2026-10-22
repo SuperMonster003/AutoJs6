@@ -77,8 +77,11 @@ class ScriptMessagesTest {
     @Test
     fun resourceFallbacksInModulesMatchTheDefaultResources() {
         val default = resources(File(res, "values/strings.xml"))
-        // ScriptMessages.kt itself only shows the form in its documentation.
-        val calls = File("src/main/java/org/autojs/autojs/runtime/api/modules").walkTopDown().filter { it.isFile && it.extension == "kt" && it.name != "ScriptMessages.kt" }.flatMap { file ->
+        // ScriptMessages.kt itself only shows the form in its documentation. SettlementLatch (Promise.prototype.wait, appendix C Q26)
+        // lives with the loopers but raises its error through the same messages.
+        val sources = File("src/main/java/org/autojs/autojs/runtime/api/modules").walkTopDown().filter { it.isFile && it.extension == "kt" && it.name != "ScriptMessages.kt" } +
+            File("src/main/java/org/autojs/autojs/core/looper/SettlementLatch.kt")
+        val calls = sources.flatMap { file ->
             RESOURCE_CALL.findAll(file.readText()).map { Triple(file.name, it.groupValues[1], unescapeKotlin(it.groupValues[2])) }
         }.toList()
         val problems = calls.mapNotNull { (file, name, fallback) ->

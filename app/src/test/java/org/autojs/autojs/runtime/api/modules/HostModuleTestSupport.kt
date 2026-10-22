@@ -130,6 +130,14 @@ internal object HostModuleTestSupport {
             "threads.start(function () { ($promise).then(function (v) { out = $value; latch.countDown(); }, function (e) { out = 'rejected'; latch.countDown(); }); }); " +
             "latch.await(10, java.util.concurrent.TimeUnit.SECONDS); return out; })()"
 
+    /**
+     * A device expression that waits for the Promise [promise] with `wait()` on the script thread itself and returns
+     * [value] of the result `v`, or "rejected". The wait runs the callbacks of the timer of the thread, where the Promise
+     * callbacks may be queued (docs/augment/ROADMAP.md Q26: they kept `wait()` blocked for good before).
+     */
+    fun waited(promise: String, value: String = "v"): String =
+        "(function () { var v; try { v = ($promise).wait(); } catch (e) { return 'rejected'; } return $value; })()"
+
     fun json(value: String): String = buildString {
         append('"')
         value.forEach { c ->

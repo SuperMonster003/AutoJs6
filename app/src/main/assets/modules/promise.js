@@ -176,12 +176,14 @@
             return continuation.await(this);
         },
         wait() {
-            let disposable = threads.disposable();
+            // The callbacks below may be queued on the timer of this thread, which the latch runs while it waits:
+            // blocking the thread kept them from running (docs/augment/ROADMAP.md Q26).
+            let latch = runtime.loopers.newSettlementLatch();
             this
-                .then(result => disposable.setAndNotify({ result: result }))
-                .catch(error => disposable.setAndNotify({ error: error }));
+                .then(result => latch.settle({ result: result }))
+                .catch(error => latch.settle({ error: error }));
 
-            let resultObj = disposable.blockedGet();
+            let resultObj = latch.await();
             if (resultObj.error) {
                 throw resultObj.error;
             }

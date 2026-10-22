@@ -522,6 +522,7 @@
     <string name="error_plugin_returned_invalid_variant">أعاد المكوّن الإضافي %1$s variant غير صالح: %2$s.</string>
     <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">ملف البرنامج النصي الرئيسي للمشروع \"%1$s\" غير موجود</string>
+    <string name="error_promise_wait_blocks_ui_thread">لا يمكن لـ Promise.prototype.wait() حظر مؤشر ترابط واجهة المستخدم ما دام Promise معلقا. استخدم then(), أو await() داخل روتين مشترك, أو استدعِ wait() في خيط فرعي</string>
     <string name="error_put_value_into_json">لا يمكن وضع القيمة %s في JSON</string>
     <string name="error_refresh_failed">فشل التحديث</string>
     <string name="error_regex_find_prev">لا يمكن العثور على السابق مع Regex</string>
