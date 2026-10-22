@@ -6,6 +6,7 @@ import org.autojs.autojs.core.pref.SettingsRegistry
 import org.autojs.autojs.core.pref.archive.ImportPlan.SkipReason
 import org.autojs.autojs.core.pref.archive.SettingsArchiveException.Reason
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest.PluginEntry
+import org.autojs.autojs.core.pref.keys.DomainKeysTestBase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -23,7 +24,7 @@ import java.util.zip.ZipInputStream
  * zh-CN: ROADMAP P13.1: 设置归档的插件目录 (D3): manifest 的 `plugins` 与 `plugins/<包名>/settings.json` 的写读往返与校验,
  * 第一期为空的提供方注册表, 以及没有提供方的插件目录的导入计划 (`TARGET_MISSING`).
  */
-class SettingsArchivePluginsTest {
+class SettingsArchivePluginsTest : DomainKeysTestBase() {
 
     private val host = SettingsArchiveManifest.Host("org.autojs.autojs6", 5781, "6.8.0")
 
