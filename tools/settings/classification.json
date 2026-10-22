@@ -460,7 +460,8 @@
  "pageLiteralKeys": {
   "process_exit_history": {"kind": "Excluded", "note": "开发者选项动作条目 (进程退出历史)"},
   "plugin_center_hidden_plugin_management": {"kind": "Excluded", "note": "插件中心设置动作条目 (隐藏插件管理)"},
-  "plugin_center_auto_mount_management": {"kind": "Excluded", "note": "插件中心设置动作条目 (自动挂载管理)"}
+  "plugin_center_auto_mount_management": {"kind": "Excluded", "note": "插件中心设置动作条目 (自动挂载管理)"},
+  "agent_runtime_access": {"kind": "Excluded", "note": "插件中心设置动作条目 (Agent 运行时访问管理), 授权本身在同名命名存储, 不导出"}
  },
  "extraDefaults": {
   "key_ace_editor_font": [
