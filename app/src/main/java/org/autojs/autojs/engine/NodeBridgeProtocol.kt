@@ -1382,9 +1382,17 @@ class AndroidNodeBridgeCapabilityProvider(
         websocketDiagnostics.recordServiceDestroyClose(websocketSessions.size)
         ocrDiagnostics.recordServiceDestroyCancellation(ocrOperations.size)
         barcodeDiagnostics.recordServiceDestroyCancellation(barcodeOperations.size)
-        ocrOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
+        // The timeout runnables capture this provider and the callback; up to timeoutMs on the main queue otherwise (C5).
+        // zh-CN: 超时 Runnable 捕获本 provider 与回调, 不移除的话会在主线程队列里留到 timeoutMs (C5).
+        ocrOperations.values.forEach { operation ->
+            operation.timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+            operation.cancel("destroy:$destroyReason")
+        }
         ocrOperations.clear()
-        barcodeOperations.values.forEach { operation -> operation.cancel("destroy:$destroyReason") }
+        barcodeOperations.values.forEach { operation ->
+            operation.timeoutRunnable?.let { mainHandler.removeCallbacks(it) }
+            operation.cancel("destroy:$destroyReason")
+        }
         barcodeOperations.clear()
         databaseDestroyed.set(true)
         val closingWebSockets = websocketSessions.values.toList()
