@@ -46,6 +46,8 @@ SCENARIOS = {
     "S12": "s12PluginBinding",
     "S13": "s13SpeechSession",
     "S14": "s14ConsoleWindow",
+    "S15": "s15InjectableWebView",
+    "S16": "s16NestedUiScripts",
 }
 MODES = {"normal": "N", "force": "F"}
 CAPTURE_SCENARIOS = {"S4a", "S4f"}
@@ -166,6 +168,23 @@ def native_cell(report):
             f"{native.get('openMediaImages', '-')} / {delta(native.get('matsLiveDelta'))} | {instances}")
 
 
+def classes_cell(report):
+    """ROADMAP P4.4, against the end of the warm-ups: loaded classes / VMDebug Class objects / DexClassLoader /
+    host registered DEX loaders / WebView."""
+    native = (report.get("metrics") or {}).get("native") or {}
+    counters = native.get("counterDeltasFromBaseline") or {}
+    if not counters:
+        # Scenarios without counter limits: compute the counters from the raw snapshots.
+        base, final = report.get("nativeBaseline") or {}, report.get("nativeFinal") or {}
+        counters = {key: final[key] - base[key] for key in ("loadedClasses", "hostDexLoaders")
+                    if isinstance(base.get(key), int) and isinstance(final.get(key), int) and base[key] >= 0 and final[key] >= 0}
+    inst = native.get("instanceDeltasFromBaseline") or {}
+    values = [counters.get("loadedClasses"), inst.get("javaClass"), inst.get("dexClassLoader"), counters.get("hostDexLoaders"), inst.get("webView")]
+    if all(value is None for value in values):
+        return "-"
+    return " / ".join(delta(value) for value in values)
+
+
 def stats_text(report):
     stats = ((report.get("metrics") or {}).get("native") or {}).get("scriptStatsMax") or {}
     return ", ".join(f"{key} {value:g}" for key, value in stats.items())
@@ -223,10 +242,14 @@ def markdown(meta, reports, failures):
                   "- Counters: images not recycled (vs start) / open media images at the end / live Mats (vs end of warm-ups)",
                   "- Instances: VMDebug instance count deltas from the start: Bitmap / org.opencv.core.Mat / AccessibilityNodeInfo, "
                   "then AccessibilityNodeInfo against the end of the warm-ups (S7 / S7b fail above +50, ROADMAP P3.4)",
-                  "", "| Scenario | Mode | Peak MB | Meminfo MB | Counters | Instances | Script stats (max) |",
-                  "| --- | --- | --- | --- | --- | --- | --- |"]
+                  "- Classes (ROADMAP P4.4), from the end of the warm-ups to the end: loaded classes (Debug.getLoadedClassCount) / "
+                  "VMDebug java.lang.Class objects / VMDebug DexClassLoader / loaders registered by runtime.loadDex in the host / "
+                  "VMDebug WebView; `-` where unavailable (VMDebug only on API 24 / 28)",
+                  "", "| Scenario | Mode | Peak MB | Meminfo MB | Counters | Instances | Classes | Script stats (max) |",
+                  "| --- | --- | --- | --- | --- | --- | --- | --- |"]
         for report in detailed:
-            lines.append(f"| {report.get('scenario')} | {MODES.get(report.get('mode'), '?')} | {native_cell(report)} | {stats_text(report) or '-'} |")
+            lines.append(f"| {report.get('scenario')} | {MODES.get(report.get('mode'), '?')} | {native_cell(report)} | "
+                         f"{classes_cell(report)} | {stats_text(report) or '-'} |")
     leaks = [(report, leak_lines(report)) for report in reports if leak_lines(report)]
     if leaks:
         lines += ["", "## Shortest strong reference paths (shark, exited ScriptRuntime instances)", ""]

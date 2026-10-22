@@ -143,6 +143,8 @@ class RuntimeLeakGateDeviceTest {
     @Test fun s12PluginBinding() = gate("S12")
     @Test fun s13SpeechSession() = gate("S13")
     @Test fun s14ConsoleWindow() = gate("S14")
+    @Test fun s15InjectableWebView() = gate("S15")
+    @Test fun s16NestedUiScripts() = gate("S16")
 
     private fun gate(id: String) {
         val scenario = GateScenarios.byId(id)
@@ -261,6 +263,30 @@ class RuntimeLeakGateDeviceTest {
         if (judgesNodes && nodesDelta != null && nodesDelta.toLong() > ACCESSIBILITY_NODE_SLACK) {
             reasons.put("accessibility nodes +$nodesDelta (vs end of warm-ups)")
         }
+        // ROADMAP P4.4: classes, DEX loaders and WebViews of the scenarios that create them, against the end of the warm-ups.
+        // zh-CN: ROADMAP P4.4: 会创建类, DEX 加载器与 WebView 的场景, 相对预热结束时判定.
+        val instancesFromBaseline = native.optJSONObject("instanceDeltasFromBaseline")
+        scenario.instanceLimits.forEach { (key, limit) ->
+            val value = instancesFromBaseline?.opt(key) as? Number ?: return@forEach
+            if (value.toLong() > limit) reasons.put("$key instances +$value (vs end of warm-ups, limit +$limit)")
+        }
+        val countersFromBaseline = JSONObject()
+        scenario.counterLimits.forEach { (key, limit) ->
+            val before = nativeBaseline.optLong(key, -1)
+            val after = nativeFinal.optLong(key, -1)
+            if (before < 0 || after < 0) return@forEach
+            countersFromBaseline.put(key, after - before)
+            if (after - before > limit) reasons.put("$key +${after - before} (vs end of warm-ups, limit +$limit)")
+        }
+        if (countersFromBaseline.length() > 0) native.put("counterDeltasFromBaseline", countersFromBaseline)
+        scenario.failingStats.forEach { name ->
+            // In normal mode every run must reach the check; a forced stop may come first.
+            // zh-CN: 正常结束模式下每次运行都必须执行到检查; 强制停止可能先于检查发生.
+            val missing = measured.count { name !in it.stats }
+            if (mode == GateMode.NORMAL && missing > 0) reasons.put("script stat $name missing in $missing run(s)")
+            val worst = measured.mapNotNull { it.stats[name] }.maxOrNull() ?: return@forEach
+            if (worst > 0) reasons.put("script stat $name ${worst.toLong()}")
+        }
         val errors = runs.flatMap { it.errors }.distinct()
         val stopErrors = runs.flatMap { it.stopErrors }.distinct()
         val unstarted = runs.count { !it.started }
@@ -277,6 +303,9 @@ class RuntimeLeakGateDeviceTest {
         report.put("interruptedRuns", runs.count { it.interrupted > 0 })
         thresholds.put("imagesLiveDelta", 0).put("openMediaImages", 0).put("matsLiveDelta", 0).put("registriesDelta", 0)
         if (judgesNodes) thresholds.put("accessibilityNodeDelta", ACCESSIBILITY_NODE_SLACK)
+        scenario.instanceLimits.forEach { (key, limit) -> thresholds.put("${key}InstanceDelta", limit) }
+        scenario.counterLimits.forEach { (key, limit) -> thresholds.put("${key}Delta", limit) }
+        scenario.failingStats.forEach { name -> thresholds.put("stat:$name", 0) }
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
             .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
@@ -761,7 +790,9 @@ class RuntimeLeakGateDeviceTest {
             "heap peak sampled every 20 ms inside each run, dumpsys meminfo of this process (through the UiAutomation shell) " +
             "and VMDebug instance counts at the start, after the warm-ups and at the end; images and open media images must " +
             "return to the start and live Mats to the value after the warm-ups. One toast before the first sample of the " +
-            "process initializes the render pipeline (ROADMAP P3 N1)."
+            "process initializes the render pipeline (ROADMAP P3 N1). ROADMAP P4.4: scenarios may also limit the growth of " +
+            "VMDebug instance counts and host counters after the warm-ups (classes, DEX loaders, WebViews) and require " +
+            "script statistics to stay 0."
 
         // tools/sdk37/fixtures/DexProbe.java (org.autojs.sdk37.fixture.DexProbe.value() == "SDK37_DEX_OK"),
         // the same bytes as AndroidClassLoaderRawDexDeviceTest.

@@ -48,7 +48,7 @@ class ParseTest(unittest.TestCase):
     def test_scenario_list(self):
         self.assertEqual(["S1", "S4a"], run_gate.scenario_list("s1, S4A,S1"))
         with self.assertRaises(Exception):
-            run_gate.scenario_list("S13")
+            run_gate.scenario_list("S99")
 
 
 class MergeTest(unittest.TestCase):
@@ -90,6 +90,19 @@ class RenderTest(unittest.TestCase):
         self.assertEqual("frames 200, slowestCaptureMs 812", run_gate.stats_text(detailed))
         self.assertEqual("-", run_gate.native_cell(report()))
         self.assertIn("peak=+2.00MB images=+0 media=0 mats=+1", run_gate.summary_line(detailed))
+
+    def test_classes_cell(self):
+        judged = report("S8", "normal", "pass", 0)
+        judged["metrics"]["native"] = {"counterDeltasFromBaseline": {"loadedClasses": 3, "hostDexLoaders": 0},
+                                       "instanceDeltasFromBaseline": {"javaClass": 2, "dexClassLoader": 0, "webView": None}}
+        self.assertEqual("+3 / +2 / +0 / +0 / -", run_gate.classes_cell(judged))
+        # Scenarios without counter limits: the counters come from the raw snapshots, -1 meaning unavailable.
+        plain = report("S1", "normal", "pass", 0)
+        plain["metrics"]["native"] = {"instanceDeltasFromBaseline": {}}
+        plain["nativeBaseline"] = {"loadedClasses": 100, "hostDexLoaders": -1}
+        plain["nativeFinal"] = {"loadedClasses": 101, "hostDexLoaders": -1}
+        self.assertEqual("+1 / - / - / - / -", run_gate.classes_cell(plain))
+        self.assertEqual("-", run_gate.classes_cell(report()))
 
 
 if __name__ == "__main__":
