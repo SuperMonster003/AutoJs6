@@ -4,7 +4,10 @@ import android.app.Service
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
+import android.os.Parcel
 import android.os.ParcelFileDescriptor
+import android.os.RemoteException
+import android.os.TransactionTooLargeException
 import org.autojs.plugin.common.api.PluginInfo
 import org.json.JSONArray
 import org.json.JSONException
@@ -21,8 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger
  * its identity ([createPluginInfo]) and catalog ([createCatalogJson]) and implements its tools in [onCall]; the base class
  * answers the Binder transactions. It checks the contract version, refuses tools missing from the catalog, runs every
  * accepted call on a worker thread, forwards `cancel`, hands out the input descriptors and directory outputs by name, keeps
- * the result within PluginToolLimits, closes every descriptor and reports each call exactly once. The service is still
- * exported for PluginToolContract.SERVICE_ACTION in the manifest, guarded by the permission `org.autojs.permission.PLUGIN`.
+ * the result within PluginToolLimits, closes every descriptor and reports each call exactly once, also when the host cannot
+ * take the result (PluginToolErrorCodes.LIMIT_EXCEEDED instead of a lost report). The service is still exported for
+ * PluginToolContract.SERVICE_ACTION in the manifest, guarded by the permission `org.autojs.permission.PLUGIN`.
  *
  * Errors of [onCall]: a PluginToolException reports its code, an IllegalArgumentException reports
  * PluginToolErrorCodes.INVALID_ARGUMENTS, anything else PluginToolErrorCodes.FAILED; once the call was cancelled every
@@ -30,7 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * zh-CN: 插件工具提供者的可选基类. 子类声明身份 ([createPluginInfo]) 与目录 ([createCatalogJson]), 在 [onCall] 中实现工具; 基类负责
  * Binder 事务: 检查契约版本, 拒绝目录外的工具, 在工作线程上运行调用, 转发取消, 按名字提供输入描述符与目录输出, 检查结果限额, 关闭全部描述符,
- * 并保证每次调用只报告一次. 服务仍需在清单中为 PluginToolContract.SERVICE_ACTION 导出, 并以 `org.autojs.permission.PLUGIN` 权限保护.
+ * 并保证每次调用只报告一次 (宿主收不下结果时报告 LIMIT_EXCEEDED, 不会丢失报告). 服务仍需在清单中为 PluginToolContract.SERVICE_ACTION
+ * 导出, 并以 `org.autojs.permission.PLUGIN` 权限保护.
  */
 abstract class PluginToolProviderService : Service() {
 
@@ -225,10 +230,7 @@ abstract class PluginToolProviderService : Service() {
     }
 
     private fun deliver(call: PluginToolCall, result: PluginToolResult, callback: IPluginToolCallback) {
-        val bytes = result.json.toByteArray(Charsets.UTF_8).size + (result.text?.toByteArray(Charsets.UTF_8)?.size ?: 0)
-        if (bytes > PluginToolLimits.MAX_RESULT_BYTES) {
-            throw PluginToolException(PluginToolErrorCodes.LIMIT_EXCEEDED, "the result has $bytes bytes, more than ${PluginToolLimits.MAX_RESULT_BYTES}")
-        }
+        result.limitProblem()?.let { throw PluginToolException(PluginToolErrorCodes.LIMIT_EXCEEDED, it) }
         val outputs = result.outputs.filter { it.name in call.wantedOutputs }
         outputs.forEach { output ->
             val size = output.descriptor.statSize
@@ -248,10 +250,42 @@ abstract class PluginToolProviderService : Service() {
             }.toString())
         }
         try {
-            runCatching { callback.onResult(bundle, outputs.map { it.descriptor }.toTypedArray()) }
+            report(bundle, outputs.map { it.descriptor }.toTypedArray(), callback)
         } finally {
             result.closeOutputs()
         }
+    }
+
+    /**
+     * Sends the result. A oneway transaction the host's Binder buffer cannot take fails here and never reaches the host, so
+     * it is tried again while the buffer may still be busy with other reports, then becomes the error of the call
+     * (MCP roadmap D65); the host would otherwise wait for the timeout.
+     */
+    private fun report(bundle: Bundle, descriptors: Array<ParcelFileDescriptor>, callback: IPluginToolCallback) {
+        var failure: Exception? = null
+        for (delayMs in REPORT_RETRY_DELAYS_MS) {
+            if (delayMs > 0) Thread.sleep(delayMs)
+            try {
+                callback.onResult(bundle, descriptors)
+                return
+            } catch (e: RemoteException) {
+                failure = e
+            } catch (e: RuntimeException) {
+                failure = e
+                break
+            }
+        }
+        val parcel = Parcel.obtain()
+        val parcelBytes = try {
+            parcel.writeBundle(bundle)
+            parcel.dataSize()
+        } finally {
+            parcel.recycle()
+        }
+        throw PluginToolException(
+            if (failure is TransactionTooLargeException) PluginToolErrorCodes.LIMIT_EXCEEDED else PluginToolErrorCodes.FAILED,
+            "the host could not take the result of $parcelBytes Parcel bytes (${failure?.let(::describe)}); return less at a time",
+        )
     }
 
     private fun toolNames(): Set<String> {
@@ -274,4 +308,10 @@ abstract class PluginToolProviderService : Service() {
     }
 
     private fun describe(e: Throwable): String = e.message?.takeIf { it.isNotBlank() }?.let { "${e.javaClass.simpleName}: $it" } ?: e.javaClass.name
+
+    private companion object {
+
+        /** Waits before each try of a result report (MCP roadmap D65). */
+        val REPORT_RETRY_DELAYS_MS = longArrayOf(0L, 100L, 400L)
+    }
 }

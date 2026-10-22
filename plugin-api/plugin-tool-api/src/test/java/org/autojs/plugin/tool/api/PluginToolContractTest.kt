@@ -72,6 +72,8 @@ class PluginToolContractTest {
     @Test
     fun limitsMatchTheRoadmap() {
         assertEquals(256 * 1024, PluginToolLimits.MAX_CATALOG_BYTES)
+        assertEquals(512 * 1024, PluginToolLimits.MAX_RESULT_BYTES)
+        assertEquals(192 * 1024, PluginToolLimits.MAX_RESULT_CHARS)
         assertEquals(64, PluginToolLimits.MAX_TOOLS_PER_PLUGIN)
         assertEquals(8 * 1024 * 1024, PluginToolLimits.MAX_DESCRIPTOR_BYTES)
         assertEquals(512L * 1024 * 1024, PluginToolLimits.MAX_FILE_INPUT_BYTES)

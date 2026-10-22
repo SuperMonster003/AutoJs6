@@ -44,6 +44,14 @@ object PluginToolLimits {
     /** UTF-8 bytes of PluginToolResultKeys.RESULT_JSON and TEXT together. */
     const val MAX_RESULT_BYTES = 512 * 1024
 
+    /**
+     * UTF-16 units (`String.length`) of PluginToolResultKeys.RESULT_JSON and TEXT together, besides [MAX_RESULT_BYTES]. The
+     * result reaches the host in the oneway IPluginToolCallback.onResult, whose Parcel holds strings as UTF-16: two bytes a
+     * unit, about 384 KiB at the ceiling. A oneway transaction gets at most half of the receiver's Binder buffer (about
+     * 508 KiB), shared with the other oneway calls into the host (MCP roadmap D65).
+     */
+    const val MAX_RESULT_CHARS = 192 * 1024
+
     /** Bytes behind one image input or one output descriptor (the host's descriptor ceiling). */
     const val MAX_DESCRIPTOR_BYTES = 8 * 1024 * 1024
 

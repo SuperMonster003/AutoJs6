@@ -51,6 +51,19 @@ class PluginToolResult(
         }
     }
 
+    /** Why the JSON and the text break PluginToolLimits.MAX_RESULT_CHARS or MAX_RESULT_BYTES, or null when they fit. */
+    internal fun limitProblem(): String? {
+        val chars = json.length + (text?.length ?: 0)
+        if (chars > PluginToolLimits.MAX_RESULT_CHARS) {
+            return "the result has $chars UTF-16 units, more than ${PluginToolLimits.MAX_RESULT_CHARS}; return less at a time"
+        }
+        val bytes = json.toByteArray(Charsets.UTF_8).size + (text?.toByteArray(Charsets.UTF_8)?.size ?: 0)
+        if (bytes > PluginToolLimits.MAX_RESULT_BYTES) {
+            return "the result has $bytes bytes, more than ${PluginToolLimits.MAX_RESULT_BYTES}; return less at a time"
+        }
+        return null
+    }
+
     internal fun closeOutputs() {
         outputs.forEach { runCatching { it.descriptor.close() } }
     }

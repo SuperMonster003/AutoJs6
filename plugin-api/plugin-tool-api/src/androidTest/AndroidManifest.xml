@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Providers in a process of their own, so that results cross a real Binder boundary (PluginToolResultTransportTest). -->
+        <service
+            android:name="org.autojs.plugin.tool.api.TransportProviderService"
+            android:exported="false"
+            android:process=":provider" />
+        <service
+            android:name="org.autojs.plugin.tool.api.RawTransportProviderService"
+            android:exported="false"
+            android:process=":provider" />
+    </application>
+
+</manifest>

@@ -2,6 +2,7 @@ package org.autojs.plugin.tool.api
 
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.os.TransactionTooLargeException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.plugin.common.api.PluginInfo
 import org.json.JSONArray
@@ -23,7 +24,8 @@ import java.util.concurrent.TimeUnit
 /**
  * PluginToolProviderService (MCP roadmap D59) answers the contract on behalf of its subclass: version checks, unknown tools,
  * inputs, file and directory outputs, cancel, error mapping and limits. The provider runs in the test process, so the
- * Binder calls are direct; the host side of the same contract is covered by the host bridge tests.
+ * Binder calls are direct (PluginToolResultTransportTest crosses a process boundary); the host side of the same contract is
+ * covered by the host bridge tests.
  */
 @RunWith(AndroidJUnit4::class)
 class PluginToolProviderServiceTest {
@@ -154,6 +156,21 @@ class PluginToolProviderServiceTest {
     }
 
     @Test
+    fun reportsTheHostRefusesBecomeErrors() {
+        val tooLarge = RefusingCallback(TransactionTooLargeException())
+        assertTrue(provider.invoke(invokeRequest("echo", JSONObject().put("text", "hello")), emptyArray(), tooLarge).getBoolean(PluginToolAcceptKeys.ACCEPTED))
+        val error = tooLarge.error()
+        assertEquals(PluginToolErrorCodes.LIMIT_EXCEEDED, error.getString(PluginToolErrorKeys.CODE))
+        assertTrue(error.getString(PluginToolErrorKeys.MESSAGE), error.getString(PluginToolErrorKeys.MESSAGE)!!.contains("TransactionTooLargeException"))
+        assertEquals(3, tooLarge.attempts)
+
+        val broken = RefusingCallback(IllegalStateException("bad parcel"))
+        assertTrue(provider.invoke(invokeRequest("echo", JSONObject().put("text", "hello")), emptyArray(), broken).getBoolean(PluginToolAcceptKeys.ACCEPTED))
+        assertEquals(PluginToolErrorCodes.FAILED, broken.error().getString(PluginToolErrorKeys.CODE))
+        assertEquals(1, broken.attempts)
+    }
+
+    @Test
     fun javaSubclassesWork() {
         val java = JavaEchoProviderService()
         try {
@@ -245,6 +262,34 @@ class PluginToolProviderServiceTest {
         fun error(): Bundle {
             assertTrue("no report", done.await(10, TimeUnit.SECONDS))
             assertNull("unexpected result", result)
+            return error!!
+        }
+    }
+
+    /** Throws [failure] from every onResult, as a oneway report does when the host's Binder buffer refuses it. */
+    private class RefusingCallback(private val failure: Exception) : IPluginToolCallback.Stub() {
+        private val done = CountDownLatch(1)
+
+        @Volatile
+        var attempts = 0
+
+        @Volatile
+        private var error: Bundle? = null
+
+        override fun onProgress(update: Bundle?) = Unit
+
+        override fun onResult(result: Bundle?, outputs: Array<out ParcelFileDescriptor>?) {
+            attempts++
+            throw failure
+        }
+
+        override fun onError(error: Bundle?) {
+            this.error = error
+            done.countDown()
+        }
+
+        fun error(): Bundle {
+            assertTrue("no report", done.await(10, TimeUnit.SECONDS))
             return error!!
         }
     }
