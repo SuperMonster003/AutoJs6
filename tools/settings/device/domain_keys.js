@@ -12,6 +12,7 @@ var Pref = org.autojs.autojs.core.pref.Pref.INSTANCE;
 var Keys = org.autojs.autojs.core.pref.keys;
 var Registry = org.autojs.autojs.core.pref.SettingsRegistry;
 var SettingDefault = org.autojs.autojs.core.pref.SettingDefault;
+var Json = org.autojs.autojs.core.pref.SettingsJson;
 var MARK = 'AJ6SET';
 var sp = Pref.get();
 var res = context.getResources();
@@ -122,18 +123,43 @@ function oldDefault(k) {
     return { value: f() };
 }
 
-// The stored value read with the getter of the key type and the old default, like Pref.getXxx(key, default); the
-// default is turned into a JavaScript primitive first, since Rhino does not unbox a wrapped java.lang.Boolean.
+// The stored value read from the store of the key with the getter of its type and the old default, like
+// Pref.getXxx(key, default); the default is turned into a JavaScript primitive first, since Rhino does not unbox a
+// wrapped java.lang.Boolean. A key without a default (SettingDefault.None) reads null when absent, since its callers
+// supply the run-time default (storedOrNull() ?: ...); a Json key compares as canonical JSON text, since the key
+// returns the decoded value (P5.3). The named stores (P2.6) are read through the key, not through Pref.get().
+// zh-CN: 从键所在存储按其类型的读取方法与旧默认值读出存储值. 无默认值 (SettingDefault.None) 的键未存储时为 null, 运行时默认值
+// 由调用方给出 (storedOrNull() ?: ...); Json 键按规范化的 JSON 文本比较, 因为键返回解码后的值 (P5.3). 命名存储 (P2.6) 经键读取.
 function oldRead(k, def) {
     var name = k.getName();
-    switch (String(k.getType().getTag())) {
-        case 'bool': return sp.getBoolean(name, def !== null && String(def) === 'true');
-        case 'int': return sp.getInt(name, def === null ? 0 : Number(def));
-        case 'long': return sp.getLong(name, def === null ? 0 : Number(def));
-        case 'float': return sp.getFloat(name, def === null ? 0 : Number(def));
-        case 'stringSet': return sp.getStringSet(name, def);
-        default: return sp.getString(name, def === null ? null : String(def));
+    var store = k.getSettingsStore();
+    var tag = String(k.getType().getTag());
+    if (def === null && !store.contains(name)) return null;
+    switch (tag) {
+        case 'bool': return store.getBoolean(name, def !== null && String(def) === 'true');
+        case 'int': return store.getInt(name, Number(def));
+        case 'long': return store.getLong(name, Number(def));
+        case 'float': return Number(store.getFloat(name, Number(def)));
+        case 'stringSet': return store.getStringSet(name, def);
+        case 'json':
+            var text = store.getString(name, null);
+            return text === null ? jsonText(def) : jsonText(Json.parse(text));
+        default: return store.getString(name, def === null ? null : String(def));
     }
+}
+
+function jsonText(value) {
+    return value === null ? null : Json.stringify(value);
+}
+
+function readValue(k) {
+    if (k instanceof org.autojs.autojs.core.pref.SettingKey.Enum) return k.storedKeyOrDefault();
+    // A java.lang.Float may reach the script wrapped, whose String() is "0.0" rather than "0".
+    // zh-CN: java.lang.Float 可能以包装对象到达脚本, 其 String() 为 "0.0" 而不是 "0".
+    var value = k.getOrNull();
+    var tag = String(k.getType().getTag());
+    if (value === null) return null;
+    return tag === 'json' ? jsonText(value) : tag === 'float' ? Number(value) : value;
 }
 
 function checkDomain(domainName) {
@@ -158,8 +184,7 @@ function checkDomain(domainName) {
         });
         check(domainName + '-read-' + k.getName(), function () {
             var expected = oldRead(k, od.value);
-            var actual = k instanceof org.autojs.autojs.core.pref.SettingKey.Enum ? k.storedKeyOrDefault() : k.getOrNull();
-            return expect(actual, expected, 'stored ' + sp.getAll().get(k.getName()));
+            return expect(readValue(k), expected, 'stored ' + k.getSettingsStore().get(k.getName()));
         });
         compared++;
     }
