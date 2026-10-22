@@ -104,8 +104,28 @@ class SettingsBackupVaultTest : DomainKeysTestBase() {
             SettingsArchiveException.Reason.LOCKED,
             assertThrows(SettingsArchiveException::class.java) { SettingsArchiveReader({ backup.file.inputStream() }).category("credentials") }.reason,
         )
-        // A vault without the key refuses to back up credentials instead of writing them in plain text.
-        assertThrows(IllegalArgumentException::class.java) { SettingsBackupVault(File(folder.root, "no-key")).backup(Operation.IMPORT, everything(), host, device) }
+        assertEquals(emptyList<String>(), backup.omitted)
+    }
+
+    @Test
+    fun withoutTheDeviceKeyTheCredentialsAreLeftOutAndNotUndone() {
+        val token = CredentialKeys.GITHUB_TOKEN
+        store(token.store).edit { put(token.name, "ghp_secret") }
+        store.edit { put(AppearanceKeys.NIGHT_MODE_ENABLED.name, false) }
+        // No device key (ANDROID_ID unavailable, appendix C Q39): the backup leaves the credentials out, never in plain text.
+        val vault = SettingsBackupVault(File(folder.root, "no-key"), { now }, ZONE)
+        val backup = vault.backup(Operation.IMPORT, everything(), host, device)
+        assertEquals(listOf("credentials"), backup.omitted)
+        val manifest = SettingsArchiveReader({ backup.file.inputStream() }).manifest()
+        assertEquals(SettingCategory.ALL.filterNot { it.isData || it.sensitive }.map { it.id }, manifest.categories.map { it.id })
+        ZipFile(backup.file).use { zip -> assertNull(zip.getEntry("categories/credentials.json")) }
+        // The import changed both; the undo restores the appearance only.
+        store(token.store).edit { put(token.name, "ghp_imported") }
+        store.edit { put(AppearanceKeys.NIGHT_MODE_ENABLED.name, true) }
+        vault.record(LastOperation(Operation.IMPORT, now, backup.name, listOf("appearance", "credentials")))
+        val undo = vault.undoPlan(ImportEnvironment())!!
+        assertEquals(listOf("appearance"), undo.plan.categories)
+        assertEquals(listOf(AppearanceKeys.NIGHT_MODE_ENABLED.name to false), undo.plan.puts.map { it.name to it.value })
     }
 
     @Test

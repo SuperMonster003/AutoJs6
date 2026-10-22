@@ -896,6 +896,7 @@
     <string name="settings_transfer_reset_failed_title">Error al restaurar</string>
     <string name="settings_transfer_reset_summary">Restaurar los valores predeterminados de las categorías elegidas</string>
     <string name="settings_transfer_result_backup_failed">No se escribió la copia tras operaciones: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">La copia interna no incluye las credenciales: la clave del dispositivo no está disponible, así que deshacer esta operación no las restaura</string>
     <string name="settings_transfer_result_counts">Categorías: %1$d\nElementos escritos: %2$d\nElementos restablecidos: %3$d\nValores cambiados: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Las credenciales no se importaron: se cifraron en otro dispositivo</string>
     <string name="settings_transfer_result_data_failed">%1$s: no importado (%2$s)</string>

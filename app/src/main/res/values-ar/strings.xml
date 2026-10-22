@@ -898,6 +898,7 @@
     <string name="settings_transfer_reset_failed_title">فشلت الاستعادة</string>
     <string name="settings_transfer_reset_summary">استعادة القيم الافتراضية للفئات المختارة</string>
     <string name="settings_transfer_result_backup_failed">لم تتم كتابة النسخ الاحتياطي بعد العمليات: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">لا تتضمن النسخة الاحتياطية الداخلية بيانات الاعتماد: مفتاح الجهاز غير متاح, لذا لا يؤدي التراجع عن هذه العملية إلى استعادتها</string>
     <string name="settings_transfer_result_counts">الفئات: %1$d\nالعناصر المكتوبة: %2$d\nالعناصر المستعادة إلى الافتراضي: %3$d\nالقيم المتغيرة: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">لم يتم استيراد بيانات الاعتماد: تم تشفيرها على جهاز آخر</string>
     <string name="settings_transfer_result_data_failed">%1$s: لم يتم الاستيراد (%2$s)</string>

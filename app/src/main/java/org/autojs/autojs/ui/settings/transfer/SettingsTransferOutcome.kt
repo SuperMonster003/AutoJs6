@@ -18,8 +18,9 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
  * whether one of them needs the notification permission (appendix C Q13), whether a restart is needed (D10), the data
  * categories an undo leaves as they are ([dataNotUndone]: appendix C Q27 decided they are undone, which P10.3 does; the
  * result page tells about them only when there are any), whether the credentials of the file could not be decrypted
- * on this device ([credentialsLocked], D23), why the operation backup failed ([backupFailure], T20, P9.1; it does
- * not block), whether the launcher icon changed, which the result page switches once it is closed
+ * on this device ([credentialsLocked], D23), whether the internal backup left the touched credentials out for want of
+ * the device key, so the undo does not restore them ([backupWithoutCredentials], appendix C Q39), why the operation
+ * backup failed ([backupFailure], T20, P9.1; it does not block), whether the launcher icon changed, which the result page switches once it is closed
  * ([launcherIconPending]: switching it closes the task of the page), and whether the language was applied
  * ([languageChanged], the page is recreated in it when needed), what became of the deployment items ([deployments],
  * T18, P7.6), and what the import did to the data categories ([data], P10.2). Pure data (R3), kept in the wizard state
@@ -29,7 +30,8 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
  * 默认的条目 ([restored], `removes`), 存储值真正变化的个数 ([changed]), 按原因的跳过数 ([skips], D9: 只含出现过的原因, 按
  * [SkipReason] 的顺序), 失败的生效入口 ([failedEffects], T12) 以及其中是否有需要通知权限的 (附录 C Q13), 是否需要重启 (D10), 撤销
  * 未处理的数据分类 ([dataNotUndone]: 附录 C Q27 已定为也要撤销, 由 P10.3 实现; 结果页只在有这类分类时提示), 以及文件中的凭据能否在
- * 本机解密 ([credentialsLocked], D23), 操作后备份失败的原因 ([backupFailure], T20, P9.1; 不阻断), 以及启动图标是否变化, 由结果页在关闭后
+ * 本机解密 ([credentialsLocked], D23), 内部备份是否因取不到设备密钥而略去了触及的凭据, 撤销不恢复它们 ([backupWithoutCredentials], 附录 C
+ * Q39), 操作后备份失败的原因 ([backupFailure], T20, P9.1; 不阻断), 以及启动图标是否变化, 由结果页在关闭后
  * 切换 ([launcherIconPending]: 切换会关闭本页所在的任务), 是否应用了语言 ([languageChanged], 需要时以新语言重建本页), 以及各部署项的
  * 结果 ([deployments], T18, P7.6), 以及导入对各数据分类的处理 ([data], P10.2). 纯数据 (R3), 以 JSON 保存在向导状态中.
  */
@@ -44,6 +46,7 @@ data class SettingsTransferOutcome(
     val restartNeeded: Boolean = false,
     val dataNotUndone: List<String> = emptyList(),
     val credentialsLocked: Boolean = false,
+    val backupWithoutCredentials: Boolean = false,
     val backupFailure: String? = null,
     val launcherIconPending: Boolean = false,
     val languageChanged: Boolean = false,
@@ -121,6 +124,7 @@ data class SettingsTransferOutcome(
         "restartNeeded" to restartNeeded,
         "dataNotUndone" to dataNotUndone,
         "credentialsLocked" to credentialsLocked,
+        "backupWithoutCredentials" to backupWithoutCredentials,
         "backupFailure" to backupFailure,
         "launcherIconPending" to launcherIconPending,
         "languageChanged" to languageChanged,
@@ -133,11 +137,11 @@ data class SettingsTransferOutcome(
     companion object {
 
         /**
-         * The outcome of [plan], of which [changes] changed and [report] is what its effects did; [dataNotUndone] and
-         * [credentialsLocked] as the undo and the import know them, [data] the data categories the import handled
-         * (they count among the [SettingsTransferOutcome.categories]).
-         * zh-CN: [plan] 的结果: [changes] 为发生的变化, [report] 为生效报告; [dataNotUndone] 与 [credentialsLocked] 由撤销与导入给出, [data]
-         * 为导入处理的数据分类 (计入 [SettingsTransferOutcome.categories]).
+         * The outcome of [plan], of which [changes] changed and [report] is what its effects did; [dataNotUndone],
+         * [credentialsLocked] and [backupWithoutCredentials] as the undo, the import and the reset know them, [data]
+         * the data categories the import handled (they count among the [SettingsTransferOutcome.categories]).
+         * zh-CN: [plan] 的结果: [changes] 为发生的变化, [report] 为生效报告; [dataNotUndone], [credentialsLocked] 与
+         * [backupWithoutCredentials] 由撤销, 导入与恢复默认给出, [data] 为导入处理的数据分类 (计入 [SettingsTransferOutcome.categories]).
          */
         @JvmStatic
         @JvmOverloads
@@ -147,6 +151,7 @@ data class SettingsTransferOutcome(
             report: SettingsEffects.Report,
             dataNotUndone: List<String> = emptyList(),
             credentialsLocked: Boolean = false,
+            backupWithoutCredentials: Boolean = false,
             backupFailure: String? = null,
             launcherIconPending: Boolean = false,
             deployments: List<DeploymentResult> = emptyList(),
@@ -162,6 +167,7 @@ data class SettingsTransferOutcome(
             restartNeeded = report.restartNeeded,
             dataNotUndone = dataNotUndone,
             credentialsLocked = credentialsLocked,
+            backupWithoutCredentials = backupWithoutCredentials,
             backupFailure = backupFailure,
             launcherIconPending = launcherIconPending,
             languageChanged = SettingsEffects.Entry.LANGUAGE in report.applied,
@@ -205,6 +211,7 @@ data class SettingsTransferOutcome(
                 restartNeeded = root["restartNeeded"] == true,
                 dataNotUndone = (root["dataNotUndone"] as? List<*>).orEmpty().filterIsInstance<String>().filter(SettingsArchive::isCategoryId),
                 credentialsLocked = root["credentialsLocked"] == true,
+                backupWithoutCredentials = root["backupWithoutCredentials"] == true,
                 backupFailure = root["backupFailure"] as? String,
                 launcherIconPending = root["launcherIconPending"] == true,
                 languageChanged = root["languageChanged"] == true,

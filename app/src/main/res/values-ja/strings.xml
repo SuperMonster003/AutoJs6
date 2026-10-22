@@ -897,6 +897,7 @@
     <string name="settings_transfer_reset_failed_title">既定値に戻せませんでした</string>
     <string name="settings_transfer_reset_summary">選択したカテゴリを既定値に戻します</string>
     <string name="settings_transfer_result_backup_failed">操作後のバックアップを書き込めませんでした: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">内部バックアップに認証情報は含まれていません: デバイスキーを取得できないため, この操作を元に戻しても認証情報は復元されません</string>
     <string name="settings_transfer_result_counts">カテゴリ: %1$d\n書き込んだ項目: %2$d\n既定値に戻した項目: %3$d\n変更された値: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">認証情報はインポートされませんでした: 別のデバイスで暗号化されています</string>
     <string name="settings_transfer_result_data_failed">%1$s: インポートされませんでした (%2$s)</string>

@@ -891,6 +891,7 @@
     <string name="settings_transfer_reset_failed_title">Restore failed</string>
     <string name="settings_transfer_reset_summary">Restore the chosen categories to their default values</string>
     <string name="settings_transfer_result_backup_failed">The backup after operations was not written: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">The internal backup has no credentials: the device key is unavailable, so undoing this operation does not restore them</string>
     <string name="settings_transfer_result_counts">Categories: %1$d\nEntries written: %2$d\nEntries restored to defaults: %3$d\nValues changed: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Credentials were not imported: they were encrypted on another device</string>
     <string name="settings_transfer_result_data_failed">%1$s: not imported (%2$s)</string>

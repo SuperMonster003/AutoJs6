@@ -893,6 +893,7 @@
     <string name="settings_transfer_reset_failed_title">恢復預設失敗</string>
     <string name="settings_transfer_reset_summary">把選擇的分類恢復為預設值</string>
     <string name="settings_transfer_result_backup_failed">操作後備份未寫入: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">內部備份未包含憑據: 本機取不到裝置密鑰, 撤銷本次操作不會恢復憑據</string>
     <string name="settings_transfer_result_counts">分類: %1$d 個\n寫入條目: %2$d 項\n還原預設: %3$d 項\n實際變化: %4$d 項</string>
     <string name="settings_transfer_result_credentials_locked">憑證未匯入: 它們由其他裝置加密</string>
     <string name="settings_transfer_result_data_failed">%1$s: 未匯入 (%2$s)</string>

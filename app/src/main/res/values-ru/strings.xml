@@ -896,6 +896,7 @@
     <string name="settings_transfer_reset_failed_title">Не удалось восстановить</string>
     <string name="settings_transfer_reset_summary">Восстановить значения по умолчанию для выбранных категорий</string>
     <string name="settings_transfer_result_backup_failed">Резервная копия после операций не записана: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">Внутренняя резервная копия не содержит учетных данных: ключ устройства недоступен, поэтому отмена этой операции их не восстановит</string>
     <string name="settings_transfer_result_counts">Категории: %1$d\nЗаписано элементов: %2$d\nСброшено к значениям по умолчанию: %3$d\nИзменено значений: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Учетные данные не импортированы: они зашифрованы на другом устройстве</string>
     <string name="settings_transfer_result_data_failed">%1$s: не импортировано (%2$s)</string>

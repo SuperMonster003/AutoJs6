@@ -127,7 +127,8 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
         val changes = SettingsImportApplier.write(plan)
         val failure = EffectException(EffectException.Reason.NOTIFICATION_PERMISSION, "no permission")
         val report = SettingsEffects.run(changes, { entry -> SettingsEffects.Action { if (entry == SettingsEffects.Entry.NIGHT_MODE) throw failure } })
-        val outcome = SettingsTransferOutcome.of(plan, changes, report, credentialsLocked = inspection.locked.isNotEmpty())
+        // As on a device without its key (appendix C Q39), which the round trip below keeps.
+        val outcome = SettingsTransferOutcome.of(plan, changes, report, credentialsLocked = inspection.locked.isNotEmpty(), backupWithoutCredentials = true)
 
         assertEquals(mapOf(AppearanceKeys.THEME_COLOR_PRIMARY.name to 5, AppearanceKeys.NIGHT_MODE_ENABLED.name to true, ConsoleKeys.LOG_ACTIVITY_TIME_VISIBLE.name to true), store.all())
         assertEquals("token of this device", CredentialKeys.GITHUB_TOKEN.get())
@@ -140,6 +141,7 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
         assertEquals(listOf(SettingsEffects.Entry.NIGHT_MODE), outcome.failedEffects)
         assertTrue(outcome.notificationPermission)
         assertTrue(outcome.credentialsLocked)
+        assertTrue(outcome.backupWithoutCredentials)
         assertEquals(outcome, SettingsTransferOutcome.fromJson(outcome.toJson()))
     }
 

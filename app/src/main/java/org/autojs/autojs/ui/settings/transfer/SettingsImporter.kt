@@ -235,7 +235,7 @@ object SettingsImporter {
             val touched = data.filter { it.failure == null || it.added.isNotEmpty() }
             val added = touched.associate { it.id to it.added }
             vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.IMPORT, System.currentTimeMillis(), backup.name, categories, touched.map { it.id }, added))
-            Imported(plan, changes, inspection.locked.isNotEmpty(), data)
+            Imported(plan, changes, inspection.locked.isNotEmpty(), data, backup.omitted.any { it in categories })
         }
         val (plan, changes, locked) = imported
         val report = SettingsEffects.run(changes, actions(app))
@@ -243,7 +243,8 @@ object SettingsImporter {
         val backupFailure = afterOperation(app)
         return SettingsTransferOutcome.of(
             plan, changes, report,
-            credentialsLocked = locked, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report), deployments = deployments,
+            credentialsLocked = locked, backupWithoutCredentials = imported.backupWithoutCredentials,
+            backupFailure = backupFailure, launcherIconPending = launcherIconPending(report), deployments = deployments,
             data = imported.data.map { SettingsTransferOutcome.DataOutcome(it.id, it.entries, it.added.size, it.restorable, it.iconsMissing, it.failure) },
         )
     }
@@ -254,6 +255,7 @@ object SettingsImporter {
         val changes: List<SettingsEffects.Change>,
         val locked: Boolean,
         val data: List<SettingsDataImport.Result>,
+        val backupWithoutCredentials: Boolean,
     )
 
     /**
@@ -335,17 +337,20 @@ object SettingsImporter {
      */
     suspend fun reset(context: Context, state: SettingsWizardState): SettingsTransferOutcome {
         val app = context.applicationContext
-        val (plan, changes) = withContext(Dispatchers.IO) {
+        val (plan, changes, withoutCredentials) = withContext(Dispatchers.IO) {
             val plan = SettingsResetPlanner.plan(state.selected)
             val vault = vault(app)
             val backup = vault.backup(SettingsBackupVault.Operation.RESET, SettingsSnapshot.capture(SettingCategory.ALL), SettingsExporter.host(app), SettingsExporter.device())
             val changes = SettingsImportApplier.write(plan)
             vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.RESET, System.currentTimeMillis(), backup.name, plan.categories))
-            plan to changes
+            Triple(plan, changes, backup.omitted.any { it in plan.categories })
         }
         val report = SettingsEffects.run(changes, actions(app))
         val backupFailure = afterOperation(app)
-        return SettingsTransferOutcome.of(plan, changes, report, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report))
+        return SettingsTransferOutcome.of(
+            plan, changes, report,
+            backupWithoutCredentials = withoutCredentials, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report),
+        )
     }
 
     /**

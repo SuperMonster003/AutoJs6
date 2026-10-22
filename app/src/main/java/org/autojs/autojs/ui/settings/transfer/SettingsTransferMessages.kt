@@ -178,6 +178,7 @@ object SettingsTransferMessages {
         if (outcome.restartNeeded) append("\n\n").append(context.getString(R.string.settings_transfer_result_restart))
         if (outcome.launcherIconPending) append("\n\n").append(context.getString(R.string.settings_transfer_result_launcher_icon))
         if (outcome.credentialsLocked) append("\n\n").append(context.getString(R.string.settings_transfer_result_credentials_locked))
+        if (outcome.backupWithoutCredentials) append("\n\n").append(context.getString(R.string.settings_transfer_result_backup_without_credentials))
         if (outcome.dataNotUndone.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_result_data_not_undone))
         outcome.backupFailure?.let { append("\n\n").append(context.getString(R.string.settings_transfer_result_backup_failed, it)) }
     }

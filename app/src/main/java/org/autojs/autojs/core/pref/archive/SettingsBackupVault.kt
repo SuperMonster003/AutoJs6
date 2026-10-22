@@ -2,6 +2,7 @@ package org.autojs.autojs.core.pref.archive
 
 import org.autojs.autojs.core.pref.KeyFamily
 import org.autojs.autojs.core.pref.PrefKey
+import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.core.pref.SettingsRegistry
 import org.autojs.autojs.core.pref.store.SettingsStore
@@ -18,7 +19,7 @@ import java.util.Locale
 /**
  * The internal backups of imports and resets (docs/settings/ROADMAP.md T9, D8 / D11), in [directory]
  * (`filesDir/settings-backups/` in the app): before an import or a reset to defaults, every settings category,
- * credentials (sealed for the device [key], D23) and `other` included (private directory, R6 allows it), is written as `auto-import-<ts>.zip` or
+ * credentials (sealed for the device [key], D23; left out without it, appendix C Q39) and `other` included (private directory, R6 allows it), is written as `auto-import-<ts>.zip` or
  * `auto-reset-<ts>.zip`, and [KEEP] of them are kept together, the newest ones. Once the operation is done,
  * [LAST_OPERATION] records what it touched; "undo the last import" ([undoPlan]) imports the touched categories again
  * from its backup, through the same planner (T8) without deployment items, and writes no backup of its own (the
@@ -28,7 +29,7 @@ import java.util.Locale
  * the host and the clock come from the caller.
  *
  * zh-CN: 导入与恢复默认的内部备份 (ROADMAP T9, D8 / D11), 位于 [directory] (应用中为 `filesDir/settings-backups/`): 导入或恢复默认
- * 之前, 把全部设置分类 (含凭据与 `other`, 私有目录, R6 允许; 凭据以设备密钥 [key] 加密, D23) 写为 `auto-import-<ts>.zip` 或 `auto-reset-<ts>.zip`, 两种合计保留最新的
+ * 之前, 把全部设置分类 (含凭据与 `other`, 私有目录, R6 允许; 凭据以设备密钥 [key] 加密, D23, 没有密钥时略去, 附录 C Q39) 写为 `auto-import-<ts>.zip` 或 `auto-reset-<ts>.zip`, 两种合计保留最新的
  * [KEEP] 份. 操作完成后由 [LAST_OPERATION] 记录触及的分类; "撤销上次导入" ([undoPlan]) 以其备份对触及分类再做一次导入, 经同一计划器
  * (T8) 且没有部署项, 撤销本身不写内部备份 (T20 的操作后备份属于 P9). 导入时还备份要导入的数据分类 (T19), 并记录其中新增的条目
  * ([LastOperation.added]), 撤销时删除这些条目 (附录 C Q27, P10.3); P10.3 之前写入的记录没有这一项, 撤销结果列出其数据分类
@@ -61,8 +62,20 @@ class SettingsBackupVault @JvmOverloads constructor(
         }
     }
 
-    /** One backup file: the operation, its time as named (`yyyyMMdd-HHmmss`) and a counter of the same second. */
-    data class Backup(val file: File, val operation: Operation, val time: String, val sequence: Int) {
+    /**
+     * One backup file: the operation, its time as named (`yyyyMMdd-HHmmss`) and a counter of the same second; [omitted]
+     * are the sensitive categories [backup] left out for want of the device key (appendix C Q39; a listed backup does
+     * not know them).
+     * zh-CN: 一份备份文件: 操作, 文件名中的时间与同一秒内的序号; [omitted] 为 [backup] 因取不到设备密钥而略去的敏感分类 (附录 C Q39;
+     * 列出的备份不含这一项).
+     */
+    data class Backup @JvmOverloads constructor(
+        val file: File,
+        val operation: Operation,
+        val time: String,
+        val sequence: Int,
+        val omitted: List<String> = emptyList(),
+    ) {
         val name: String
             get() = file.name
     }
@@ -140,10 +153,11 @@ class SettingsBackupVault @JvmOverloads constructor(
 
     /**
      * Writes [snapshot] (every settings category: `SettingsSnapshot.capture(SettingCategory.ALL)`) and [data] as the
-     * backup of [operation], then keeps the newest [keep] backups ([prune]); returns the backup. A failed write leaves
-     * no partial file behind.
+     * backup of [operation], then keeps the newest [keep] backups ([prune]); returns the backup. Without the device key
+     * the sensitive categories (credentials) are left out ([Backup.omitted], appendix C Q39), so an undo does not restore
+     * them. A failed write leaves no partial file behind.
      * zh-CN: 把 [snapshot] (全部设置分类) 与 [data] 写为 [operation] 的备份, 然后只保留最新的 [keep] 份 ([prune]); 返回该备份.
-     * 写入失败不留下不完整的文件.
+     * 取不到设备密钥时略去敏感分类 (凭据, [Backup.omitted], 附录 C Q39), 撤销不恢复它们. 写入失败不留下不完整的文件.
      */
     @JvmOverloads
     fun backup(
@@ -159,9 +173,11 @@ class SettingsBackupVault @JvmOverloads constructor(
         val taken = backups().filter { it.time == time }.maxOfOrNull { it.sequence }
         val sequence = if (taken == null) 0 else taken + 1
         val file = File(directory, operation.prefix + time + (if (sequence == 0) "" else "-$sequence") + ".zip")
-        writeAtomically(file) { out -> SettingsArchiveWriter.write(out, snapshot, SettingsArchive.exportTime(now, zone), host, device, data, key = key) }
+        val omitted = if (key != null) emptyList() else snapshot.categories.map { it.id }.filter { SettingCategory.ofIdOrNull(it)?.sensitive == true }
+        val written = snapshot.copy(categories = snapshot.categories.filterNot { it.id in omitted })
+        writeAtomically(file) { out -> SettingsArchiveWriter.write(out, written, SettingsArchive.exportTime(now, zone), host, device, data, key = key) }
         prune()
-        return backupOf(file)!!
+        return backupOf(file)!!.copy(omitted = omitted)
     }
 
     /**

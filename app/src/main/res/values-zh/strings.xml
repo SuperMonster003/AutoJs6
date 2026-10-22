@@ -892,6 +892,7 @@
     <string name="settings_transfer_reset_failed_title">恢复默认失败</string>
     <string name="settings_transfer_reset_summary">把选择的分类恢复为默认值</string>
     <string name="settings_transfer_result_backup_failed">操作后备份未写入: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">内部备份未包含凭据: 本机取不到设备密钥, 撤销本次操作不会恢复凭据</string>
     <string name="settings_transfer_result_counts">分类: %1$d 个\n写入条目: %2$d 项\n恢复默认: %3$d 项\n实际变化: %4$d 项</string>
     <string name="settings_transfer_result_credentials_locked">凭据未导入: 它们由其他设备加密</string>
     <string name="settings_transfer_result_data_failed">%1$s: 未导入 (%2$s)</string>

@@ -896,6 +896,7 @@
     <string name="settings_transfer_reset_failed_title">Échec de la restauration</string>
     <string name="settings_transfer_reset_summary">Restaurer les valeurs par défaut des catégories choisies</string>
     <string name="settings_transfer_result_backup_failed">La sauvegarde après opération n\'a pas été écrite: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">La sauvegarde interne ne contient pas les identifiants: la clé de cet appareil est indisponible, donc annuler cette opération ne les restaure pas</string>
     <string name="settings_transfer_result_counts">Catégories: %1$d\nÉléments écrits: %2$d\nÉléments rétablis par défaut: %3$d\nValeurs modifiées: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Les identifiants n\'ont pas été importés: ils ont été chiffrés sur un autre appareil</string>
     <string name="settings_transfer_result_data_failed">%1$s: non importé (%2$s)</string>

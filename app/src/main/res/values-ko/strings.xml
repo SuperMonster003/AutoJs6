@@ -898,6 +898,7 @@
     <string name="settings_transfer_reset_failed_title">복원 실패</string>
     <string name="settings_transfer_reset_summary">선택한 카테고리를 기본값으로 복원합니다</string>
     <string name="settings_transfer_result_backup_failed">작업 후 백업을 쓰지 못했습니다: %1$s</string>
+    <string name="settings_transfer_result_backup_without_credentials">내부 백업에 자격 증명이 포함되지 않았습니다: 기기 키를 사용할 수 없으므로 이 작업을 취소해도 자격 증명은 복원되지 않습니다</string>
     <string name="settings_transfer_result_counts">카테고리: %1$d\n기록한 항목: %2$d\n기본값으로 복원한 항목: %3$d\n변경된 값: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">자격 증명을 가져오지 않았습니다: 다른 기기에서 암호화되었습니다</string>
     <string name="settings_transfer_result_data_failed">%1$s: 가져오지 않음 (%2$s)</string>
