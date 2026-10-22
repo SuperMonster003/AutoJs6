@@ -4,18 +4,18 @@ import org.autojs.autojs.core.pref.SettingCategory
 
 /**
  * The selection rules of the category step (docs/settings/ROADMAP.md T10, D2 / D6, appendix C Q28). Selections are
- * category ids in page order (appendix A.1) and only hold selectable categories: the data categories wait for their
- * codecs and detail pages (P10). Pure logic (R3).
+ * category ids in page order (appendix A.1) and only hold selectable categories; the data categories are selectable
+ * since their detail pages (P10.2). Pure logic (R3).
  *
- * zh-CN: 分类步骤的勾选规则 (ROADMAP T10, D2 / D6, 附录 C Q28). 勾选为按页面顺序 (附录 A.1) 排列的分类 id, 只含可选分类: 数据分类
- * 等待其编解码与细化页 (P10). 纯逻辑 (R3).
+ * zh-CN: 分类步骤的勾选规则 (ROADMAP T10, D2 / D6, 附录 C Q28). 勾选为按页面顺序 (附录 A.1) 排列的分类 id, 只含可选分类; 数据分类
+ * 自其细化页 (P10.2) 起可选. 纯逻辑 (R3).
  */
 object SettingsCategorySelection {
 
-    /** The categories that can be ticked now. zh-CN: 当前可勾选的分类. */
+    /** The categories that can be ticked; a wizard narrows them to its rows. zh-CN: 可勾选的分类; 各向导再按其行收窄. */
     @JvmStatic
     @JvmOverloads
-    fun selectable(categories: List<SettingCategory> = SettingCategory.ALL): List<SettingCategory> = categories.filterNot { it.isData }
+    fun selectable(categories: List<SettingCategory> = SettingCategory.ALL): List<SettingCategory> = categories.toList()
 
     /** [ids] in page order, without unknown or unselectable ones and duplicates. zh-CN: 按页面顺序整理, 去掉未知, 不可选与重复的 id. */
     @JvmStatic

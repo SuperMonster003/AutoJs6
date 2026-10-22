@@ -816,6 +816,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">플러그인 활성화 상태</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">%2$d개 항목 중 %1$d개 선택됨</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -870,7 +871,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">설정 파일을 읽는 중...</string>
     <string name="settings_transfer_import_summary">설정 파일과 가져올 카테고리를 선택합니다</string>
     <string name="settings_transfer_import_unknown_categories">이 버전이 인식하지 못하는 카테고리 (건너뜀): %1$d</string>
-    <string name="settings_transfer_later_version">이후 버전에서 제공됩니다</string>
     <string name="settings_transfer_locked_no_password">이 자격 증명은 비밀번호 없이 내보내졌으므로 내보낸 기기의 AutoJs6 에서만 가져올 수 있습니다</string>
     <string name="settings_transfer_password">비밀번호</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">비밀번호 확인 중...</string>
@@ -888,7 +888,7 @@
     <string name="settings_transfer_pick_import">가져올 카테고리를 선택하세요</string>
     <string name="settings_transfer_pick_reset">기본값으로 복원할 카테고리를 선택하세요</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">세부 선택...</string>
-    <string name="settings_transfer_refine_later">항목별 선택은 이후 버전에서 제공됩니다</string>
+    <string name="settings_transfer_refine_empty">이 카테고리에는 선택할 항목이 없습니다</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">기본 설정으로 복원...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">기본 설정으로 복원하는 중...</string>
     <string name="settings_transfer_reset_button">복원</string>
@@ -899,12 +899,16 @@
     <string name="settings_transfer_result_backup_failed">작업 후 백업을 쓰지 못했습니다: %1$s</string>
     <string name="settings_transfer_result_counts">카테고리: %1$d\n기록한 항목: %2$d\n기본값으로 복원한 항목: %3$d\n변경된 값: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">자격 증명을 가져오지 않았습니다: 다른 기기에서 암호화되었습니다</string>
+    <string name="settings_transfer_result_data_failed">%1$s: 가져오지 않음 (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: %2$d개 가져옴, 새 항목 %3$d개</string>
     <string name="settings_transfer_result_data_not_undone">이 버전에서는 아직 바로 가기와 색상 라이브러리 가져오기를 취소할 수 없습니다</string>
     <string name="settings_transfer_result_deployments">배포 성공: %1$d, 실패: %2$d</string>
     <string name="settings_transfer_result_effects_failed">바로 적용하지 못했습니다 (재시작 후 적용됩니다): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">이 페이지를 닫으면 런처 아이콘이 바뀝니다. 이때 AutoJs6 화면이 닫힐 수 있으니 새 아이콘으로 다시 여세요</string>
     <string name="settings_transfer_result_notification_permission">전경 서비스에는 알림을 보낼 권한이 필요합니다</string>
     <string name="settings_transfer_result_restart">일부 설정은 AutoJs6 를 재시작한 후 적용됩니다</string>
+    <string name="settings_transfer_result_restore_shortcuts">바로 가기 복원</string>
+    <string name="settings_transfer_result_shortcuts_restore">가져온 바로 가기 중 홈 화면에 없는 항목은 설정 > 구성 > 바로가기 백업 에서 복원할 수 있습니다</string>
     <string name="settings_transfer_result_skipped">건너뜀 (현재 값 유지):</string>
     <string name="settings_transfer_setup_wizard">설정 가져오기 마법사</string>
     <string name="settings_transfer_setup_wizard_choose">파일 선택</string>

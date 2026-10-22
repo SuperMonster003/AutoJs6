@@ -15,6 +15,7 @@ import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.core.pref.archive.SettingsArchiveException
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
 import org.autojs.autojs.core.pref.archive.SettingsArchiveReader
+import org.autojs.autojs.core.pref.archive.SettingsArchiveWriter
 import org.autojs.autojs.core.pref.archive.SettingsAutoBackup
 import org.autojs.autojs.core.pref.archive.SettingsBackupVault
 import org.autojs.autojs.core.pref.archive.SettingsDeviceKey
@@ -25,6 +26,8 @@ import org.autojs.autojs.core.pref.archive.SettingsPassword
 import org.autojs.autojs.core.pref.archive.SettingsResetPlanner
 import org.autojs.autojs.core.pref.archive.SettingsSealedFile
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.data.SettingsDataEntries
+import org.autojs.autojs.core.pref.data.SettingsDataImport
 import org.autojs.autojs.core.pref.deploy.AndroidDeployments
 import org.autojs.autojs.core.pref.deploy.DeploymentException
 import org.autojs.autojs.core.pref.deploy.DeploymentItem
@@ -40,13 +43,15 @@ import java.io.IOException
  * plain file and survives the recreation of the page), its manifest is inspected for step 1 ([inspect]: the warnings
  * of D9 / appendix C Q26, the categories sealed for another device, D23, and those unknown to this version), and the
  * import itself ([importArchive]) plans the selected categories (plus the unknown ones, which only count as
- * `NEWER_FORMAT`), backs up every category to the internal vault, writes the plan, records it and runs the effect
- * table. [undo] imports the touched categories again from that backup. Values are never logged (R6).
+ * `NEWER_FORMAT`), backs up every category to the internal vault, writes the plan, imports the chosen entries of the
+ * selected data categories (P10.2, [SettingsDataImport]), records it and runs the effect table. [undo] imports the
+ * touched categories again from that backup. Values are never logged (R6).
  *
  * zh-CN: 导入向导与 "撤销上次导入" 的实际工作 (ROADMAP P7.5, T8 / T9 / T12): 所选文档先复制到 [CACHE_DIRECTORY] (不超过
  * [SettingsArchive.MAX_BYTES], 之后的每次读取都是普通文件, 页面重建后仍可用), 第 1 步检查其 manifest ([inspect]: D9 / 附录 C Q26
  * 的警告, 以其他设备密钥加密的分类 (D23), 本版本不认识的分类); 导入本身 ([importArchive]) 为勾选的分类 (另加不认识的分类, 只计为
- * `NEWER_FORMAT`) 生成计划, 把全部分类备份到内部备份库, 写入计划, 记录本次操作并执行生效表. [undo] 以该备份再次导入触及的分类.
+ * `NEWER_FORMAT`) 生成计划, 把全部分类备份到内部备份库, 写入计划, 导入所选数据分类中选中的条目 (P10.2, [SettingsDataImport]), 记录本次
+ * 操作并执行生效表. [undo] 以该备份再次导入触及的分类.
  * 不记录任何值 (R6).
  */
 object SettingsImporter {
@@ -93,16 +98,39 @@ object SettingsImporter {
     }
 
     /**
-     * The plan of importing [selected] from the archive of [reader] (T8): the selected categories that can be ticked
-     * and the categories unknown to this version (counted as `NEWER_FORMAT`), with the plugin directories of the
-     * manifest (P13.1). Pure JVM (R3).
-     * zh-CN: 从 [reader] 的归档导入 [selected] 的计划 (T8): 可勾选的已选分类加上本版本不认识的分类 (计为 `NEWER_FORMAT`), 以及
-     * manifest 中的插件目录 (P13.1). 纯 JVM (R3).
+     * The plan of importing [selected] from the archive of [reader] (T8): the selected settings categories that can be
+     * ticked and the categories unknown to this version (counted as `NEWER_FORMAT`), with the plugin directories of the
+     * manifest (P13.1); the data categories are imported apart ([dataFiles]). Pure JVM (R3).
+     * zh-CN: 从 [reader] 的归档导入 [selected] 的计划 (T8): 可勾选的已选设置分类加上本版本不认识的分类 (计为 `NEWER_FORMAT`), 以及
+     * manifest 中的插件目录 (P13.1); 数据分类另行导入 ([dataFiles]). 纯 JVM (R3).
      */
     @JvmStatic
     fun plan(reader: SettingsArchiveReader, inspection: Inspection, selected: List<String>, environment: ImportEnvironment): ImportPlan {
-        val ids = SettingsCategorySelection.normalize(selected, SettingsCategoryChoices.selectable(inspection.choices)) + inspection.unknown
+        val ids = SettingsCategorySelection.normalize(selected, SettingsCategoryChoices.selectable(inspection.choices).filterNot { it.isData }) + inspection.unknown
         return SettingsImportPlanner.plan(reader.categories(ids, inspection.manifest), ids, environment, plugins = inspection.manifest.plugins)
+    }
+
+    /**
+     * The data files of the selected data categories of the archive of [reader], each with only the entries [refine]
+     * chose for it (all of them without a choice, P10.2); a category left without entries is not imported. [now] is
+     * the time the files are written again with. Pure JVM (R3).
+     * zh-CN: [reader] 归档中所选数据分类的数据文件, 每个只含 [refine] 为其选中的条目 (没有选择时为全部, P10.2); 没有剩下条目的分类不导入.
+     * [now] 为重新写出文件所用的时间. 纯 JVM (R3).
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun dataFiles(
+        reader: SettingsArchiveReader,
+        inspection: Inspection,
+        selected: List<String>,
+        refine: Map<String, List<String>> = emptyMap(),
+        now: Long = System.currentTimeMillis(),
+    ): List<SettingsArchiveWriter.DataFile> {
+        val ids = SettingsCategorySelection.normalize(selected, SettingsCategoryChoices.selectable(inspection.choices).filter { it.isData })
+        return inspection.manifest.data.filter { it.id in ids }.mapNotNull { entry ->
+            val file = SettingsArchiveWriter.DataFile(entry.id, entry.entries, entry.file.substringAfterLast('/'), reader.data(entry.file))
+            SettingsDataEntries.select(file, refine[entry.id], now)
+        }
     }
 
     /**
@@ -154,6 +182,18 @@ object SettingsImporter {
         inspect(reader(context, state), state.fileName.orEmpty(), context.packageName)
 
     /**
+     * The entries of the data category [id] of the copy [state] holds, for its detail page (P10.2); empty when the
+     * file has none. Runs on a background thread.
+     * zh-CN: [state] 中副本的数据分类 [id] 的条目, 供其细化页使用 (P10.2); 文件中没有该分类时为空. 在后台线程调用.
+     */
+    @JvmStatic
+    fun dataEntries(context: Context, state: SettingsWizardState, id: String): List<SettingsDataEntries.Entry> {
+        val reader = reader(context, state)
+        val entry = reader.manifest().data.firstOrNull { it.id == id } ?: return emptyList()
+        return SettingsDataEntries.entries(id, reader.data(entry.file))
+    }
+
+    /**
      * True when [password] opens the sealed category [id] of the copy [state] holds (P7.7,
      * [SettingsArchiveReader.checkPassword]); derives the slot key, so it runs on a background thread.
      * zh-CN: [password] 能打开 [state] 中副本的加密分类 [id] 时为 true (P7.7); 需要派生槽密钥, 因此在后台线程调用.
@@ -164,36 +204,50 @@ object SettingsImporter {
 
     /**
      * Imports [SettingsWizardState.selected] from the copy [state] holds (P7.5 step 4): plans on a background thread,
-     * backs up every category to the internal vault (T9), writes the plan (T8, one commit per store), records the
-     * operation, then runs the effect table on the calling thread, the main thread (T12), and the deployment items the
-     * user confirmed ([SettingsWizardState.deploy], T18, P7.6); the others are given up.
+     * backs up every category to the internal vault (T9), writes the plan (T8, one commit per store), imports the chosen
+     * data entries (P10.2; a data category that fails does not stop the others), records the operation, then runs the
+     * effect table on the calling thread, the main thread (T12), and the deployment items the user confirmed
+     * ([SettingsWizardState.deploy], T18, P7.6); the others are given up.
      * zh-CN: 从 [state] 中的副本导入所选分类 (P7.5 第 4 步): 在后台线程生成计划, 把全部分类备份到内部备份库 (T9), 写入计划 (T8, 每个
-     * 存储提交一次), 记录本次操作, 然后在调用线程 (主线程) 执行生效表 (T12), 再运行用户确认的部署项 ([SettingsWizardState.deploy], T18,
-     * P7.6); 其余部署项放弃.
+     * 存储提交一次), 导入选中的数据条目 (P10.2; 某个数据分类失败不影响其他分类), 记录本次操作, 然后在调用线程 (主线程) 执行生效表 (T12),
+     * 再运行用户确认的部署项 ([SettingsWizardState.deploy], T18, P7.6); 其余部署项放弃.
      */
     suspend fun importArchive(context: Context, state: SettingsWizardState): SettingsTransferOutcome {
         val app = context.applicationContext
         val device = AndroidDeployments(app)
-        val (plan, changes, locked) = withContext(Dispatchers.IO) {
+        val imported = withContext(Dispatchers.IO) {
             val reader = reader(app, state)
             val inspection = inspect(reader, state.fileName.orEmpty(), app.packageName)
             val environment = device.environment()
             val plan = DeploymentPlanner.decide(plan(reader, inspection, state.selected, environment), state.deploy.orEmpty(), environment)
+            val files = dataFiles(reader, inspection, state.selected, state.refine)
             val vault = vault(app)
             val backup = vault.backup(SettingsBackupVault.Operation.IMPORT, SettingsSnapshot.capture(SettingCategory.ALL), SettingsExporter.host(app), SettingsExporter.device())
             val changes = SettingsImportApplier.write(plan)
+            val data = files.map { SettingsDataImport.import(app, it, state.fileName) }
             val categories = plan.categories.filter { SettingCategory.ofIdOrNull(it) != null }
-            vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.IMPORT, System.currentTimeMillis(), backup.name, categories))
-            Triple(plan, changes, inspection.locked.isNotEmpty())
+            val touched = data.filter { it.failure == null || it.added.isNotEmpty() }.map { it.id }
+            vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.IMPORT, System.currentTimeMillis(), backup.name, categories, touched))
+            Imported(plan, changes, inspection.locked.isNotEmpty(), data)
         }
+        val (plan, changes, locked) = imported
         val report = SettingsEffects.run(changes, actions(app))
         val deployments = deploy(app, plan, device, state.operation)
         val backupFailure = afterOperation(app)
         return SettingsTransferOutcome.of(
             plan, changes, report,
             credentialsLocked = locked, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report), deployments = deployments,
+            data = imported.data.map { SettingsTransferOutcome.DataOutcome(it.id, it.entries, it.added.size, it.restorable, it.iconsMissing, it.failure) },
         )
     }
+
+    /** What the background part of [importArchive] did. */
+    private data class Imported(
+        val plan: ImportPlan,
+        val changes: List<SettingsEffects.Change>,
+        val locked: Boolean,
+        val data: List<SettingsDataImport.Result>,
+    )
 
     /**
      * Runs the deployment items of [plan] one after another (T18) and writes the key of each one that succeeds; a

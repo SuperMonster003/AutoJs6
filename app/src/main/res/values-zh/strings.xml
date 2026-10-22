@@ -810,6 +810,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">插件启用状态</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">已选 %1$d / %2$d 项</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -864,7 +865,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">正在读取设置文件...</string>
     <string name="settings_transfer_import_summary">选择设置文件与要导入的分类</string>
     <string name="settings_transfer_import_unknown_categories">本版本不认识的分类 (将跳过): %1$d 个</string>
-    <string name="settings_transfer_later_version">后续版本提供</string>
     <string name="settings_transfer_locked_no_password">这些凭据导出时未设密码, 只能在导出它们的设备上的 AutoJs6 中导入</string>
     <string name="settings_transfer_password">密码</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">正在校验密码...</string>
@@ -882,7 +882,7 @@
     <string name="settings_transfer_pick_import">选择要导入的分类</string>
     <string name="settings_transfer_pick_reset">选择要恢复默认的分类</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">细化...</string>
-    <string name="settings_transfer_refine_later">逐条选择将在后续版本提供</string>
+    <string name="settings_transfer_refine_empty">该分类没有可选择的条目</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">恢复默认设置...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">正在恢复默认设置...</string>
     <string name="settings_transfer_reset_button">恢复默认</string>
@@ -893,12 +893,16 @@
     <string name="settings_transfer_result_backup_failed">操作后备份未写入: %1$s</string>
     <string name="settings_transfer_result_counts">分类: %1$d 个\n写入条目: %2$d 项\n恢复默认: %3$d 项\n实际变化: %4$d 项</string>
     <string name="settings_transfer_result_credentials_locked">凭据未导入: 它们由其他设备加密</string>
+    <string name="settings_transfer_result_data_failed">%1$s: 未导入 (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: 导入 %2$d 项, 新增 %3$d 项</string>
     <string name="settings_transfer_result_data_not_undone">本版本尚未撤销快捷方式与颜色库的导入</string>
     <string name="settings_transfer_result_deployments">部署成功: %1$d 项, 失败: %2$d 项</string>
     <string name="settings_transfer_result_effects_failed">未能立即生效 (重启后生效): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">关闭本页后切换启动器图标, AutoJs6 可能随之退出界面, 请从新图标重新打开</string>
     <string name="settings_transfer_result_notification_permission">前台服务需要发送通知的权限</string>
     <string name="settings_transfer_result_restart">部分设置在 AutoJs6 重启后生效</string>
+    <string name="settings_transfer_result_restore_shortcuts">恢复快捷方式</string>
+    <string name="settings_transfer_result_shortcuts_restore">导入的快捷方式中不在桌面上的, 可在 设置 > 配置 > 快捷方式备份 中恢复</string>
     <string name="settings_transfer_result_skipped">已跳过 (保持当前值):</string>
     <string name="settings_transfer_setup_wizard">设置导入向导</string>
     <string name="settings_transfer_setup_wizard_choose">选择文件</string>

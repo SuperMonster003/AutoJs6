@@ -19,6 +19,8 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.archive.SettingsPassword
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.data.SettingsDataCapture
+import org.autojs.autojs.core.pref.data.SettingsDataEntries
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
@@ -40,16 +42,18 @@ import org.autojs.autojs6.databinding.SettingsCategoryPickerItemBinding
  * import lists only the categories of the file (P7.5) and disables the credentials sealed for another device (D23);
  * when they have a password slot, tapping the row asks for the password and ticks them once it opens them (P7.7, the
  * password stays in [SettingsPasswords]). Ticking `credentials` for an export asks once
- * per wizard run (D2). The data categories show a "Refine..." entry and stay disabled until their detail pages exist
- * (P10.2); a reset cannot tick `other` and the data categories (P8.1). Every change of the selection is published to
- * the host at once, so it survives the recreation of the page;
+ * per wizard run (D2). The data categories show a "Refine..." entry that opens their detail page (P10.2): their
+ * entries, all ticked at first ([SettingsWizardState.refine] keeps a choice of some of them; none unticks the
+ * category, some tick it); a reset cannot tick `other` and the data categories (P8.1). Every change of the selection
+ * is published to the host at once, so it survives the recreation of the page;
  * "Next" of the export remembers it without `credentials` ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], appendix C Q28).
  * The rows are loaded off the main thread; a file that cannot be read any more ends the step at the failure page.
  *
  * zh-CN: 导出, 导入与恢复默认向导的分类步骤 (ROADMAP T10, D2 / D6 / D11): 按页面顺序列出 [SettingsCategoryChoices] 的行, 每项显示条目数 (导出为当前
  * 设置, 导入为 manifest 的记录), 底部为 "全选" / "全不选" / "反选" (与 IDEA 一致). 导入只列出文件中的分类 (P7.5), 以其他设备密钥
  * 加密的凭据不可勾选 (D23); 带口令槽时点击该行询问口令, 口令正确后勾选 (P7.7, 口令保存在 [SettingsPasswords]). 导出时勾选 `credentials` 每次运行向导询问一次 (D2).
- * 数据分类显示 "细化..." 入口, 在其细化页完成 (P10.2) 之前不可勾选; 恢复默认不可勾选 `other` 与数据分类 (P8.1). 勾选每次变化都立即写入宿主,
+ * 数据分类显示 "细化..." 入口, 打开其细化页 (P10.2): 列出其条目, 初始全部勾选 ([SettingsWizardState.refine] 记录选中部分条目的情况;
+ * 一条都不选时取消勾选该分类, 选了条目时勾选该分类); 恢复默认不可勾选 `other` 与数据分类 (P8.1). 勾选每次变化都立即写入宿主,
  * 因此页面重建后仍保留; 导出的
  * "下一步" 记住不含 `credentials` 的勾选 ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], 附录 C Q28). 行在主线程之外加载; 文件已无法
  * 读取时本步骤转到失败页.
@@ -64,6 +68,9 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
         // The categories that can be ticked; null until the rows are loaded.
         var selectable: List<SettingCategory>? = null
         var loadFailure: Throwable? = null
+        // The entries of the data categories: captured with the rows for an export, read on demand for an import.
+        val dataEntries = mutableMapOf<String, List<SettingsDataEntries.Entry>>()
+        var refining = false
         wizard.host.wizardState = current
 
         lateinit var adapter: CategoryAdapter
@@ -101,9 +108,10 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
 
         // Loads the rows of the current state off the main thread and ticks [select] among them.
         suspend fun load(select: List<String>) {
-            withContext(Dispatchers.IO) { runCatching { rowsOf(activity, current) } }.onSuccess { loaded ->
+            withContext(Dispatchers.IO) { runCatching { rowsOf(activity, current) } }.onSuccess { (loaded, entries) ->
                 val categories = SettingsCategoryChoices.selectable(loaded)
                 selectable = categories
+                dataEntries.putAll(entries)
                 adapter.setRows(loaded)
                 publish(SettingsCategorySelection.normalize(select, categories))
                 binding.settingsCategoryPickerProgress.isVisible = false
@@ -125,10 +133,48 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
             }
         }
 
+        // The detail page of a data category (P10.2): the chosen entries are kept, and the category is ticked with them.
+        fun refine(category: SettingCategory) {
+            val categories = selectable ?: return
+            if (refining) return
+            refining = true
+            launch {
+                try {
+                    val entries = dataEntries[category.id] ?: withContext(Dispatchers.IO) {
+                        runCatching { SettingsImporter.dataEntries(activity, current, category.id) }
+                    }.getOrElse { e ->
+                        ViewUtils.showToast(activity, SettingsTransferMessages.failureText(activity, Failure.of(e), e.message ?: e.javaClass.simpleName), true)
+                        return@launch
+                    }.also { dataEntries[category.id] = it }
+                    if (entries.isEmpty()) {
+                        ViewUtils.showToast(activity, R.string.settings_transfer_refine_empty, true)
+                        return@launch
+                    }
+                    val chosen = chooseEntries(wizard, category, entries, current.refine[category.id]) ?: return@launch
+                    current = current.copy(
+                        refine = when (chosen.size) {
+                            0, entries.size -> current.refine - category.id
+                            else -> current.refine + (category.id to chosen)
+                        },
+                    )
+                    adapter.setRefine(current.refine)
+                    publish(
+                        when {
+                            chosen.isEmpty() -> current.selected - category.id
+                            category.id in current.selected -> current.selected
+                            else -> SettingsCategorySelection.toggled(current.selected, category.id, categories)
+                        },
+                    )
+                } finally {
+                    refining = false
+                }
+            }
+        }
+
         adapter = CategoryAdapter(
             activity,
             onToggle = { category -> selectable?.let { request(SettingsCategorySelection.toggled(current.selected, category.id, it)) } },
-            onRefine = { ViewUtils.showToast(activity, R.string.settings_transfer_refine_later, true) },
+            onRefine = { refine(it) },
             onLocked = { row ->
                 when (row.state) {
                     SettingsCategoryChoice.State.PASSWORD -> unlock(row.category)
@@ -137,6 +183,7 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
             },
         )
         adapter.setSelection(current.selected)
+        adapter.setRefine(current.refine)
         binding.settingsCategoryPickerHint.setText(
             when (state.kind) {
                 Kind.IMPORT -> R.string.settings_transfer_pick_import
@@ -247,12 +294,62 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
         }
     }
 
-    /** The rows of the wizard of [state]; runs on a background thread. zh-CN: [state] 所属向导的行; 在后台线程调用. */
-    private fun rowsOf(context: Context, state: SettingsWizardState): List<SettingsCategoryChoice> = when (state.kind) {
-        Kind.IMPORT -> SettingsImporter.inspect(context, state).choices
-        Kind.RESET -> SettingsCategoryChoices.reset(entryCounts())
-        else -> SettingsCategoryChoices.export(entryCounts())
+    /**
+     * Asks which of [entries] of the data category [category] to keep (P10.2), [chosen] ticked (all of them when null),
+     * with "Invert selection"; returns the ids of the ticked entries in page order, or null when the user cancels.
+     * zh-CN: 询问保留数据分类 [category] 的哪些条目 (P10.2), 初始勾选 [chosen] (为 null 时全部勾选), 提供 "反选"; 返回勾选条目的 id
+     * (按页面顺序), 用户取消时为 null.
+     */
+    private suspend fun chooseEntries(
+        wizard: SettingsWizard,
+        category: SettingCategory,
+        entries: List<SettingsDataEntries.Entry>,
+        chosen: List<String>?,
+    ): List<String>? {
+        var result: List<String>? = null
+        val ticked = entries.indices.filter { chosen == null || entries[it].id in chosen }
+        MaterialDialog.Builder(wizard.host.hostActivity)
+            .title(category.titleRes)
+            .items(entries.map { entry -> entry.detail?.let { "${entry.title}\n$it" } ?: entry.title })
+            .itemsCallbackMultiChoice(ticked.toTypedArray()) { _, _, _ -> true }
+            .widgetThemeColor()
+            .autoDismiss(false)
+            .canceledOnTouchOutside(false)
+            .neutralText(R.string.text_invert_selection)
+            .neutralColorRes(R.color.dialog_button_default)
+            .negativeText(R.string.dialog_button_cancel)
+            .negativeColorRes(R.color.dialog_button_default)
+            .positiveText(R.string.dialog_button_confirm)
+            .positiveColorRes(R.color.dialog_button_attraction)
+            .onNeutral { dialog, _ ->
+                val selected = dialog.selectedIndices.orEmpty().toSet()
+                dialog.setSelectedIndices(entries.indices.filterNot { it in selected }.toTypedArray())
+            }
+            .onNegative { dialog, _ -> dialog.dismiss() }
+            .onPositive { dialog, _ ->
+                val selected = dialog.selectedIndices.orEmpty().toSet()
+                result = entries.filterIndexed { index, _ -> index in selected }.map { it.id }
+                dialog.dismiss()
+            }
+            .showAndAwait()
+        return result
     }
+
+    /**
+     * The rows of the wizard of [state] and, for an export, the entries of the data categories now (P10.2); runs on a
+     * background thread.
+     * zh-CN: [state] 所属向导的行, 导出时另有数据分类当前的条目 (P10.2); 在后台线程调用.
+     */
+    private fun rowsOf(context: Context, state: SettingsWizardState): Pair<List<SettingsCategoryChoice>, Map<String, List<SettingsDataEntries.Entry>>> =
+        when (state.kind) {
+            Kind.IMPORT -> SettingsImporter.inspect(context, state).choices to emptyMap()
+            Kind.RESET -> SettingsCategoryChoices.reset(entryCounts()) to emptyMap()
+            else -> {
+                val entries = SettingsDataCapture.capture(context, SettingCategory.ALL.filter { it.isData }, System.currentTimeMillis())
+                    .associate { it.id to SettingsDataEntries.entries(it.id, it.bytes) }
+                SettingsCategoryChoices.export(entryCounts() + entries.mapValues { it.value.size }) to entries
+            }
+        }
 
     /** Entries per settings category in the current settings (the data categories are not in snapshots, T19). */
     private fun entryCounts(): Map<String, Int> =
@@ -271,10 +368,17 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
         private val refineColor = ColorUtils.adjustColorForContrast(context.getColor(R.color.window_background), ThemeColorManager.colorPrimary, 2.3)
         private var rows: List<SettingsCategoryChoice> = emptyList()
         private var selected: Set<String> = emptySet()
+        private var refine: Map<String, List<String>> = emptyMap()
 
         @SuppressLint("NotifyDataSetChanged")
         fun setSelection(ids: Collection<String>) {
             selected = ids.toSet()
+            notifyDataSetChanged()
+        }
+
+        @SuppressLint("NotifyDataSetChanged")
+        fun setRefine(refine: Map<String, List<String>>) {
+            this.refine = refine
             notifyDataSetChanged()
         }
 
@@ -301,7 +405,7 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
                     when (row.state) {
                         SettingsCategoryChoice.State.SELECTABLE -> onToggle(row.category)
                         SettingsCategoryChoice.State.LOCKED, SettingsCategoryChoice.State.PASSWORD -> onLocked(row)
-                        SettingsCategoryChoice.State.LATER_VERSION, SettingsCategoryChoice.State.NOT_RESETTABLE -> Unit
+                        SettingsCategoryChoice.State.NOT_RESETTABLE -> Unit
                     }
                 }
                 binding.settingsCategoryPickerItemRefine.setOnClickListener { row?.let { onRefine(it.category) } }
@@ -312,14 +416,18 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
                 this.row = row
                 val category = row.category
                 binding.settingsCategoryPickerItemTitle.setText(category.titleRes)
+                val refined = refine[category.id]
                 binding.settingsCategoryPickerItemSubtitle.text = when (row.state) {
-                    SettingsCategoryChoice.State.LATER_VERSION -> context.getString(R.string.settings_transfer_later_version)
                     SettingsCategoryChoice.State.LOCKED -> context.getString(R.string.settings_transfer_category_locked)
                     SettingsCategoryChoice.State.PASSWORD -> context.getString(R.string.settings_transfer_category_password)
                     SettingsCategoryChoice.State.NOT_RESETTABLE -> context.getString(R.string.settings_transfer_category_not_resettable)
-                    SettingsCategoryChoice.State.SELECTABLE -> row.entries?.let { context.resources.getQuantityString(R.plurals.settings_transfer_category_entries, it, it) }.orEmpty()
+                    SettingsCategoryChoice.State.SELECTABLE -> when {
+                        refined != null && row.entries != null -> context.getString(R.string.settings_transfer_category_refined, refined.size, row.entries)
+                        else -> row.entries?.let { context.resources.getQuantityString(R.plurals.settings_transfer_category_entries, it, it) }.orEmpty()
+                    }
                 }
-                binding.settingsCategoryPickerItemRefine.isVisible = row.state == SettingsCategoryChoice.State.LATER_VERSION
+                binding.settingsCategoryPickerItemRefine.isVisible =
+                    SettingsDataEntries.isRefinable(category) && row.isSelectable && (row.entries ?: 0) > 0
                 binding.settingsCategoryPickerItemCheckbox.apply {
                     isEnabled = row.isSelectable
                     isChecked = category.id in selected

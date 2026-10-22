@@ -816,6 +816,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">حالات تفعيل الإضافات</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">تم اختيار %1$d من %2$d عنصر</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -870,7 +871,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">جارٍ قراءة ملف الإعدادات...</string>
     <string name="settings_transfer_import_summary">اختر ملف إعدادات والفئات المراد استيرادها</string>
     <string name="settings_transfer_import_unknown_categories">فئات لا يعرفها هذا الإصدار (سيتم تخطيها): %1$d</string>
-    <string name="settings_transfer_later_version">متاح في إصدار لاحق</string>
     <string name="settings_transfer_locked_no_password">تم تصدير بيانات الاعتماد هذه دون كلمة مرور, لذا لا يمكن استيرادها إلا في AutoJs6 على الجهاز الذي صدّرها</string>
     <string name="settings_transfer_password">كلمة المرور</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">جارٍ التحقق من كلمة المرور...</string>
@@ -888,7 +888,7 @@
     <string name="settings_transfer_pick_import">اختر الفئات المراد استيرادها</string>
     <string name="settings_transfer_pick_reset">اختر الفئات المراد استعادة قيمها الافتراضية</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">تحديد العناصر...</string>
-    <string name="settings_transfer_refine_later">سيتوفر اختيار العناصر الفردية في إصدار لاحق</string>
+    <string name="settings_transfer_refine_empty">لا تحتوي هذه الفئة على عناصر للاختيار</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">استعادة الإعدادات الافتراضية...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">جارٍ استعادة الإعدادات الافتراضية...</string>
     <string name="settings_transfer_reset_button">استعادة</string>
@@ -899,12 +899,16 @@
     <string name="settings_transfer_result_backup_failed">لم تتم كتابة النسخ الاحتياطي بعد العمليات: %1$s</string>
     <string name="settings_transfer_result_counts">الفئات: %1$d\nالعناصر المكتوبة: %2$d\nالعناصر المستعادة إلى الافتراضي: %3$d\nالقيم المتغيرة: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">لم يتم استيراد بيانات الاعتماد: تم تشفيرها على جهاز آخر</string>
+    <string name="settings_transfer_result_data_failed">%1$s: لم يتم الاستيراد (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: تم استيراد %2$d, منها %3$d جديد</string>
     <string name="settings_transfer_result_data_not_undone">لا يتراجع هذا الإصدار بعد عن استيراد الاختصارات ومكتبات الألوان</string>
     <string name="settings_transfer_result_deployments">عمليات النشر الناجحة: %1$d, الفاشلة: %2$d</string>
     <string name="settings_transfer_result_effects_failed">لم يتم التطبيق بعد (سيتم التطبيق بعد إعادة البدء): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">تتغير أيقونة التشغيل عند إغلاق هذه الصفحة. قد يغادر AutoJs6 الشاشة عندها; افتحه مرة أخرى من أيقونته الجديدة.</string>
     <string name="settings_transfer_result_notification_permission">تحتاج خدمة المقدمة إلى إذن نشر الإشعارات</string>
     <string name="settings_transfer_result_restart">تسري بعض الإعدادات بعد إعادة بدء AutoJs6</string>
+    <string name="settings_transfer_result_restore_shortcuts">استعادة الاختصارات</string>
+    <string name="settings_transfer_result_shortcuts_restore">يمكن استعادة الاختصارات المستوردة غير الموجودة على الشاشة الرئيسية من إعدادات > تكوين > نسخ الاختصارات احتياطيا</string>
     <string name="settings_transfer_result_skipped">تم التخطي (مع الإبقاء على القيم الحالية):</string>
     <string name="settings_transfer_setup_wizard">معالج استيراد الإعدادات</string>
     <string name="settings_transfer_setup_wizard_choose">اختيار ملف</string>

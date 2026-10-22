@@ -14,9 +14,6 @@ data class SettingsCategoryChoice @JvmOverloads constructor(val category: Settin
     enum class State {
         SELECTABLE,
 
-        /** A data category, whose detail pages come in P10.2. zh-CN: 数据分类, 其细化页在 P10.2 提供. */
-        LATER_VERSION,
-
         /**
          * Sealed for the key of another device (D23) without a password slot: this device cannot import it.
          * zh-CN: 以其他设备的密钥加密 (D23) 且没有口令槽: 本机无法导入.
@@ -40,20 +37,19 @@ data class SettingsCategoryChoice @JvmOverloads constructor(val category: Settin
 
 /**
  * The rows of the category step per wizard (T10): the export lists every category with the entries of the current
- * settings (P6.3), the import only the categories the file has, with the entries its manifest counts, and disables the
- * credentials this device cannot decrypt (P7.5, D23); data categories wait for P10.2. Pure logic (R3).
+ * settings and data (P6.3, P10.2), the import only the categories the file has, with the entries its manifest counts,
+ * and disables the credentials this device cannot decrypt (P7.5, D23). Pure logic (R3).
  *
- * zh-CN: 各向导分类步骤的行 (T10): 导出列出全部分类及当前设置的条目数 (P6.3); 导入只列出文件中有的分类及其 manifest 记录的条目数, 本机
- * 无法解密的凭据不可勾选 (P7.5, D23); 数据分类等待 P10.2. 纯逻辑 (R3).
+ * zh-CN: 各向导分类步骤的行 (T10): 导出列出全部分类及当前设置与数据的条目数 (P6.3, P10.2); 导入只列出文件中有的分类及其 manifest 记录的
+ * 条目数, 本机无法解密的凭据不可勾选 (P7.5, D23). 纯逻辑 (R3).
  */
 object SettingsCategoryChoices {
 
     /** The rows of the export wizard: [counts] are the entries per category id. zh-CN: 导出向导的行, [counts] 为各分类的条目数. */
     @JvmStatic
     @JvmOverloads
-    fun export(counts: Map<String, Int>, categories: List<SettingCategory> = SettingCategory.ALL): List<SettingsCategoryChoice> = categories.map {
-        if (it.isData) SettingsCategoryChoice(it, null, SettingsCategoryChoice.State.LATER_VERSION) else SettingsCategoryChoice(it, counts[it.id] ?: 0)
-    }
+    fun export(counts: Map<String, Int>, categories: List<SettingCategory> = SettingCategory.ALL): List<SettingsCategoryChoice> =
+        categories.map { SettingsCategoryChoice(it, counts[it.id] ?: 0) }
 
     /**
      * The rows of the import wizard for [manifest], in page order: the known categories the file holds; [locked] are
@@ -73,7 +69,6 @@ object SettingsCategoryChoices {
         val entries = manifest.categories.associate { it.id to it.entries } + manifest.data.associate { it.id to it.entries }
         return categories.filter { it.id in entries }.map {
             when {
-                it.isData -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LATER_VERSION)
                 it.id in locked && it.id in password -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.PASSWORD)
                 it.id in locked -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LOCKED)
                 else -> SettingsCategoryChoice(it, entries[it.id])

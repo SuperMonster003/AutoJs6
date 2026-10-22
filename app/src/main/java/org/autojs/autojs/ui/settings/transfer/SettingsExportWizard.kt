@@ -135,7 +135,7 @@ class SettingsExportWizard(host: SettingsWizardHost) : SettingsWizard(host) {
                 .cancelable(false)
                 .show()
             return try {
-                val result = withContext(Dispatchers.IO) { SettingsExporter.export(activity, Uri.parse(document), state.selected, password = password) }
+                val result = withContext(Dispatchers.IO) { SettingsExporter.export(activity, Uri.parse(document), state.selected, password = password, refine = state.refine) }
                 state.copy(
                     step = Step.DONE,
                     fileName = result.fileName,

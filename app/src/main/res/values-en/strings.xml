@@ -811,6 +811,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Plugin enabled states</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">%1$d of %2$d entries chosen</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -865,7 +866,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">Reading the settings file...</string>
     <string name="settings_transfer_import_summary">Choose a settings file and the categories to import</string>
     <string name="settings_transfer_import_unknown_categories">Categories unknown to this version (skipped): %1$d</string>
-    <string name="settings_transfer_later_version">Available in a later version</string>
     <string name="settings_transfer_locked_no_password">These credentials were exported without a password, so only AutoJs6 on the device that exported them can import them</string>
     <string name="settings_transfer_password">Password</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">Checking the password...</string>
@@ -883,7 +883,7 @@
     <string name="settings_transfer_pick_import">Choose the categories to import</string>
     <string name="settings_transfer_pick_reset">Choose the categories to restore to their defaults</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Refine...</string>
-    <string name="settings_transfer_refine_later">Choosing single items comes in a later version</string>
+    <string name="settings_transfer_refine_empty">This category has no entries to choose</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restore default settings...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">Restoring the default settings...</string>
     <string name="settings_transfer_reset_button">Restore</string>
@@ -894,12 +894,16 @@
     <string name="settings_transfer_result_backup_failed">The backup after operations was not written: %1$s</string>
     <string name="settings_transfer_result_counts">Categories: %1$d\nEntries written: %2$d\nEntries restored to defaults: %3$d\nValues changed: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Credentials were not imported: they were encrypted on another device</string>
+    <string name="settings_transfer_result_data_failed">%1$s: not imported (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: %2$d imported, %3$d new</string>
     <string name="settings_transfer_result_data_not_undone">This version does not undo the import of shortcuts and color libraries yet</string>
     <string name="settings_transfer_result_deployments">Deployments succeeded: %1$d, failed: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Not applied yet (applied after a restart): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">The launcher icon changes when this page closes. AutoJs6 may leave the screen then; open it again from its new icon.</string>
     <string name="settings_transfer_result_notification_permission">The foreground service needs the permission to post notifications</string>
     <string name="settings_transfer_result_restart">Some settings take effect after AutoJs6 restarts</string>
+    <string name="settings_transfer_result_restore_shortcuts">Restore shortcuts</string>
+    <string name="settings_transfer_result_shortcuts_restore">Imported shortcuts that are not on the home screen can be restored in Settings > Config > Shortcut backup</string>
     <string name="settings_transfer_result_skipped">Skipped (current values kept):</string>
     <string name="settings_transfer_setup_wizard">Settings import wizard</string>
     <string name="settings_transfer_setup_wizard_choose">Choose file</string>

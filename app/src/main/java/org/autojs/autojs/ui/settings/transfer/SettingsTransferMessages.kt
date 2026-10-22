@@ -3,6 +3,7 @@ package org.autojs.autojs.ui.settings.transfer
 import android.content.Context
 import androidx.annotation.StringRes
 import org.autojs.autojs.core.pref.DeploymentKind
+import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.archive.ImportPlan.SkipReason
 import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
@@ -135,12 +136,24 @@ object SettingsTransferMessages {
     }
 
     /**
-     * The result page of an import or an undo (T10): the counts, the skips by reason, then what needs attention.
-     * zh-CN: 导入或撤销的结果页 (T10): 计数, 按原因的跳过数, 然后是需要注意的事项.
+     * The result page of an import or an undo (T10): the counts, what became of the data categories (P10.2), the skips
+     * by reason, then what needs attention.
+     * zh-CN: 导入或撤销的结果页 (T10): 计数, 数据分类的处理结果 (P10.2), 按原因的跳过数, 然后是需要注意的事项.
      */
     @JvmStatic
     fun outcomeText(context: Context, outcome: SettingsTransferOutcome): String = buildString {
         append(context.getString(R.string.settings_transfer_result_counts, outcome.categories, outcome.written, outcome.restored, outcome.changed))
+        outcome.data.forEachIndexed { index, data ->
+            val title = SettingCategory.ofIdOrNull(data.id)?.let { context.getString(it.titleRes) } ?: data.id
+            append(if (index == 0) "\n\n" else "\n")
+            append(
+                when (val failure = data.failure) {
+                    null -> context.getString(R.string.settings_transfer_result_data_imported, title, data.entries, data.added)
+                    else -> context.getString(R.string.settings_transfer_result_data_failed, title, failure)
+                }
+            )
+        }
+        if (outcome.restorableShortcuts.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_result_shortcuts_restore))
         if (outcome.skips.isNotEmpty()) {
             append("\n\n").append(context.getString(R.string.settings_transfer_result_skipped))
             outcome.skips.forEach { (reason, count) -> append("\n  ").append(context.getString(skipRes(reason), count)) }

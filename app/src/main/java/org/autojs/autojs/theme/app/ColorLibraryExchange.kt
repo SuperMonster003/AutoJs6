@@ -1,5 +1,6 @@
 package org.autojs.autojs.theme.app
 
+import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.theme.app.ColorEntities.ColorLibrary
 import org.autojs.autojs.theme.intelligent.IntelligentPresets
+import org.autojs.autojs.theme.library.ColorLibraryIds
 import org.autojs.autojs.theme.library.ColorLibraryJson
 import org.autojs.autojs.theme.library.ColorLibraryJson.ColorLibraryJsonException
 import org.autojs.autojs.theme.library.ColorLibraryJson.Reason
@@ -237,31 +239,11 @@ class ColorLibraryExchange(private val activity: AppCompatActivity, private val 
     }
 
     private fun importLibraries(libraries: List<ColorLibraryJson.Library>, fileName: String?) {
-        // Imported libraries never take the name of a preset, such as an exported preset snapshot would.
-        // zh-CN: 导入的库不使用预设库的名称 (例如导出的预设快照).
-        val presetNames = ColorLibrariesActivity.presetColorLibraries.map { activity.getString(it.nameRes) } +
-                IntelligentPresets.all(activity).map { it.name }
+        val presetNames = reservedNames(activity)
         activity.lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
-                    libraries.forEach { library ->
-                        when (library) {
-                            is ColorLibraryJson.PlainLibrary -> repository.createPlainLibrary(
-                                library.name,
-                                ColorLibrary.Kind.IMPORTED,
-                                origin = fileName,
-                                colors = library.colors.map { ColorLibraryRepository.NewColor(it.color, it.name) },
-                                reservedNames = presetNames,
-                            )
-                            is ColorLibraryJson.IntelligentLibrary -> {
-                                // Decoded groups use their file index as id; new groups need temporary negative ids.
-                                // zh-CN: 解码后的组以文件下标为 id; 新组需要临时的负数 id.
-                                val groups = library.groups.mapIndexed { index, group -> group.copy(id = -(index + 1L)) }
-                                val config = library.config.remapGroupIds(library.groups.zip(groups).associate { (old, new) -> old.id to new.id })
-                                repository.saveIntelligent(null, library.name, config, groups, ColorLibrary.Kind.IMPORTED, origin = fileName, reservedNames = presetNames)
-                            }
-                        }
-                    }
+                    libraries.forEach { importLibrary(repository, it, fileName, presetNames) }
                     libraries.size
                 }
             }
@@ -317,6 +299,41 @@ class ColorLibraryExchange(private val activity: AppCompatActivity, private val 
             }
             return output.toByteArray()
         }
+
+        /**
+         * The names imported libraries never take: those of the presets, such as an exported preset snapshot would
+         * have ([importLibrary]).
+         * zh-CN: 导入的库不使用的名称: 预设库的名称 (例如导出的预设快照会带有) ([importLibrary]).
+         */
+        @JvmStatic
+        fun reservedNames(context: Context): List<String> =
+            ColorLibrariesActivity.presetColorLibraries.map { context.getString(it.nameRes) } + IntelligentPresets.all(context).map { it.name }
+
+        /**
+         * Stores [library] as a new imported user library with the origin [fileName], its name made unique among the
+         * libraries and [reservedNames], the groups of an intelligent library with new ids; returns its row id. The
+         * import of this page and the settings import wizard (docs/settings/ROADMAP.md P10.2) use it.
+         * zh-CN: 把 [library] 保存为新的导入用户库, 来源为 [fileName], 名称在现有库名与 [reservedNames] 中去重, 智能库的组使用新的 id;
+         * 返回其行 id. 本页面的导入与设置导入向导 (ROADMAP P10.2) 使用它.
+         */
+        suspend fun importLibrary(repository: ColorLibraryRepository, library: ColorLibraryJson.Library, fileName: String?, reservedNames: Collection<String>): Long =
+            when (library) {
+                is ColorLibraryJson.PlainLibrary -> repository.createPlainLibrary(
+                    library.name,
+                    ColorLibrary.Kind.IMPORTED,
+                    origin = fileName,
+                    colors = library.colors.map { ColorLibraryRepository.NewColor(it.color, it.name) },
+                    reservedNames = reservedNames,
+                ).id
+                is ColorLibraryJson.IntelligentLibrary -> {
+                    // Decoded groups use their file index as id; new groups need temporary negative ids.
+                    // zh-CN: 解码后的组以文件下标为 id; 新组需要临时的负数 id.
+                    val groups = library.groups.mapIndexed { index, group -> group.copy(id = -(index + 1L)) }
+                    val config = library.config.remapGroupIds(library.groups.zip(groups).associate { (old, new) -> old.id to new.id })
+                    val saved = repository.saveIntelligent(null, library.name, config, groups, ColorLibrary.Kind.IMPORTED, origin = fileName, reservedNames = reservedNames)
+                    requireNotNull(ColorLibraryIds.userRowIdOf(saved.libraryId)) { "Not a user library: ${saved.libraryId}" }
+                }
+            }
 
     }
 

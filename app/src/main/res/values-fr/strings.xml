@@ -814,6 +814,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">États d\'activation des plugins</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">%1$d éléments sur %2$d choisis</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -868,7 +869,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">Lecture du fichier de paramètres...</string>
     <string name="settings_transfer_import_summary">Choisissez un fichier de paramètres et les catégories à importer</string>
     <string name="settings_transfer_import_unknown_categories">Catégories inconnues de cette version (ignorées): %1$d</string>
-    <string name="settings_transfer_later_version">Disponible dans une version ultérieure</string>
     <string name="settings_transfer_locked_no_password">Ces identifiants ont été exportés sans mot de passe, seul AutoJs6 sur l\'appareil qui les a exportés peut donc les importer</string>
     <string name="settings_transfer_password">Mot de passe</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">Vérification du mot de passe...</string>
@@ -886,7 +886,7 @@
     <string name="settings_transfer_pick_import">Choisissez les catégories à importer</string>
     <string name="settings_transfer_pick_reset">Choisissez les catégories à restaurer par défaut</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Affiner...</string>
-    <string name="settings_transfer_refine_later">La sélection élément par élément arrivera dans une version ultérieure</string>
+    <string name="settings_transfer_refine_empty">Cette catégorie n\'a aucun élément à choisir</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurer les paramètres par défaut...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">Restauration des paramètres par défaut...</string>
     <string name="settings_transfer_reset_button">Restaurer</string>
@@ -897,12 +897,16 @@
     <string name="settings_transfer_result_backup_failed">La sauvegarde après opération n\'a pas été écrite: %1$s</string>
     <string name="settings_transfer_result_counts">Catégories: %1$d\nÉléments écrits: %2$d\nÉléments rétablis par défaut: %3$d\nValeurs modifiées: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Les identifiants n\'ont pas été importés: ils ont été chiffrés sur un autre appareil</string>
+    <string name="settings_transfer_result_data_failed">%1$s: non importé (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: %2$d importés, %3$d nouveaux</string>
     <string name="settings_transfer_result_data_not_undone">Cette version n\'annule pas encore l\'importation des raccourcis et des bibliothèques de couleurs</string>
     <string name="settings_transfer_result_deployments">Déploiements réussis: %1$d, échoués: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Non appliqué pour l\'instant (appliqué après un redémarrage): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">L\'icône du lanceur change à la fermeture de cette page. AutoJs6 peut alors quitter l\'écran; rouvrez-le depuis sa nouvelle icône.</string>
     <string name="settings_transfer_result_notification_permission">Le service d\'avant-plan a besoin de l\'autorisation de publier des notifications</string>
     <string name="settings_transfer_result_restart">Certains paramètres prennent effet après le redémarrage de AutoJs6</string>
+    <string name="settings_transfer_result_restore_shortcuts">Restaurer les raccourcis</string>
+    <string name="settings_transfer_result_shortcuts_restore">Les raccourcis importés absents de l\'écran d\'accueil peuvent être restaurés dans Réglages > Configuration > Sauvegarde des raccourcis</string>
     <string name="settings_transfer_result_skipped">Ignorés (valeurs actuelles conservées):</string>
     <string name="settings_transfer_setup_wizard">Assistant d\'importation des paramètres</string>
     <string name="settings_transfer_setup_wizard_choose">Choisir un fichier</string>

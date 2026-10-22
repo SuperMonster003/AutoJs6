@@ -15,18 +15,18 @@ class SettingsCategorySelectionTest {
     private val credentials = SettingCategory.CREDENTIALS.id
 
     @Test
-    fun selectableLeavesOutTheDataCategories() {
-        val selectable = SettingsCategorySelection.selectable().map { it.id }
-        assertEquals(30, selectable.size)
-        assertFalse("data_shortcuts" in selectable)
-        assertFalse("data_color_library" in selectable)
-        assertEquals(SettingCategory.ALL.map { it.id }.filter { it in selectable }, selectable)
+    fun everyCategoryIsSelectableWithTheDataCategories() {
+        // The data categories can be ticked since their detail pages (P10.2).
+        val selectable = SettingsCategorySelection.selectable()
+        assertEquals(SettingCategory.ALL, selectable)
+        assertTrue(SettingCategory.DATA_SHORTCUTS in selectable && SettingCategory.DATA_COLOR_LIBRARY in selectable)
     }
 
     @Test
     fun startsWithTheDefaultsWhenNothingIsRemembered() {
         val initial = SettingsCategorySelection.initial(null)
-        assertEquals(27, initial.size)
+        assertEquals(SettingCategory.ALL.filter { it.defaultSelected }.map { it.id }, initial)
+        assertTrue("data_shortcuts" in initial && "data_color_library" in initial)
         assertFalse("developer" in initial)
         assertFalse(credentials in initial)
         assertFalse("other" in initial)
@@ -35,18 +35,18 @@ class SettingsCategorySelectionTest {
     @Test
     fun startsWithTheRememberedSelectionInPageOrderWithoutCredentials() {
         val remembered = listOf("other", credentials, "appearance", "data_shortcuts", "no_such_category", "appearance", "developer")
-        assertEquals(listOf("appearance", "developer", "other"), SettingsCategorySelection.initial(remembered))
+        assertEquals(listOf("appearance", "developer", "data_shortcuts", "other"), SettingsCategorySelection.initial(remembered))
         assertEquals(emptyList<String>(), SettingsCategorySelection.initial(emptyList()))
     }
 
     @Test
     fun bulkActionsCoverTheSelectableCategories() {
         val all = SettingsCategorySelection.all()
-        assertEquals(30, all.size)
+        assertEquals(SettingCategory.ALL.map { it.id }, all)
         assertTrue(credentials in all)
         val inverted = SettingsCategorySelection.inverted(listOf("appearance", "other", "data_shortcuts"))
-        assertEquals(28, inverted.size)
-        assertFalse("appearance" in inverted || "other" in inverted)
+        assertEquals(all.size - 3, inverted.size)
+        assertFalse("appearance" in inverted || "other" in inverted || "data_shortcuts" in inverted)
         assertEquals(all, SettingsCategorySelection.inverted(emptyList()))
         assertEquals(emptyList<String>(), SettingsCategorySelection.inverted(all))
     }
@@ -56,7 +56,8 @@ class SettingsCategorySelectionTest {
         val selected = SettingsCategorySelection.toggled(listOf("explorer", "other"), "appearance")
         assertEquals(listOf("appearance", "explorer", "other"), selected)
         assertEquals(listOf("appearance", "other"), SettingsCategorySelection.toggled(selected, "explorer"))
-        assertEquals(listOf("other"), SettingsCategorySelection.toggled(listOf("other"), "data_color_library"))
+        assertEquals(listOf("data_color_library", "other"), SettingsCategorySelection.toggled(listOf("other"), "data_color_library"))
+        assertEquals(listOf("other"), SettingsCategorySelection.toggled(listOf("other"), "no_such_category"))
     }
 
     @Test

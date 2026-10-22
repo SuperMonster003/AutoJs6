@@ -815,6 +815,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">プラグインの有効状態</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">%2$d 項目中 %1$d 項目を選択</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -869,7 +870,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">設定ファイルを読み込んでいます...</string>
     <string name="settings_transfer_import_summary">設定ファイルとインポートするカテゴリを選択します</string>
     <string name="settings_transfer_import_unknown_categories">このバージョンが認識しないカテゴリ (スキップ): %1$d</string>
-    <string name="settings_transfer_later_version">今後のバージョンで対応予定</string>
     <string name="settings_transfer_locked_no_password">これらの認証情報はパスワードなしでエクスポートされたため, エクスポートしたデバイスの AutoJs6 でのみインポートできます</string>
     <string name="settings_transfer_password">パスワード</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">パスワードを確認しています...</string>
@@ -887,7 +887,7 @@
     <string name="settings_transfer_pick_import">インポートするカテゴリを選択してください</string>
     <string name="settings_transfer_pick_reset">既定値に戻すカテゴリを選択してください</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">詳細...</string>
-    <string name="settings_transfer_refine_later">項目ごとの選択は今後のバージョンで対応予定です</string>
+    <string name="settings_transfer_refine_empty">このカテゴリには選択できる項目がありません</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">既定の設定に戻す...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">既定の設定に戻しています...</string>
     <string name="settings_transfer_reset_button">既定値に戻す</string>
@@ -898,12 +898,16 @@
     <string name="settings_transfer_result_backup_failed">操作後のバックアップを書き込めませんでした: %1$s</string>
     <string name="settings_transfer_result_counts">カテゴリ: %1$d\n書き込んだ項目: %2$d\n既定値に戻した項目: %3$d\n変更された値: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">認証情報はインポートされませんでした: 別のデバイスで暗号化されています</string>
+    <string name="settings_transfer_result_data_failed">%1$s: インポートされませんでした (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: %2$d 項目をインポート, うち %3$d 項目が新規</string>
     <string name="settings_transfer_result_data_not_undone">このバージョンでは, ショートカットとカラーライブラリのインポートはまだ元に戻せません</string>
     <string name="settings_transfer_result_deployments">デプロイ成功: %1$d, 失敗: %2$d</string>
     <string name="settings_transfer_result_effects_failed">すぐには適用できませんでした (再起動後に適用されます): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">このページを閉じるとランチャーアイコンが切り替わります. その際 AutoJs6 の画面が閉じることがあるため, 新しいアイコンから開き直してください</string>
     <string name="settings_transfer_result_notification_permission">フォアグラウンドサービスには通知を送信する権限が必要です</string>
     <string name="settings_transfer_result_restart">一部の設定は AutoJs6 の再起動後に有効になります</string>
+    <string name="settings_transfer_result_restore_shortcuts">ショートカットを復元</string>
+    <string name="settings_transfer_result_shortcuts_restore">インポートしたショートカットのうちホーム画面にないものは, 設定 > 設定 > ショートカットのバックアップ で復元できます</string>
     <string name="settings_transfer_result_skipped">スキップ (現在の値を保持):</string>
     <string name="settings_transfer_setup_wizard">設定インポートウィザード</string>
     <string name="settings_transfer_setup_wizard_choose">ファイルを選択</string>

@@ -1,6 +1,7 @@
 package org.autojs.autojs.ui.settings.transfer
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.StringRes
 import com.afollestad.materialdialogs.DialogAction
@@ -17,6 +18,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Step
+import org.autojs.autojs.ui.shortcut.ShortcutBackupActivity
 import org.autojs.autojs.ui.wizard.WizardUi.showAndAwait
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.IntentUtils
@@ -88,12 +90,15 @@ class SettingsApplyStep(
  * The result page of an import or an undo (T10): the counts, the skips by reason and what needs attention
  * ([SettingsTransferMessages.outcomeText]); "Restart" when a restart is needed or an effect failed (D10), "Post
  * notifications" when the foreground service lacks the permission (appendix C Q13), "Grant access" when a deployment
- * item lacked the storage access (T18). A changed launcher icon is switched once the page is closed
+ * item lacked the storage access (T18), "Restore shortcuts" when imported shortcuts can be restored to the desktop
+ * (P10.2: the page "Shortcut backup" offers them, then their missing icons; when both other buttons are taken, the
+ * text tells where to restore them). A changed launcher icon is switched once the page is closed
  * ([SettingsTransferOutcome.launcherIconPending]).
  *
  * zh-CN: 导入或撤销的结果页 (T10): 计数, 按原因的跳过数与需要注意的事项 ([SettingsTransferMessages.outcomeText]); 需要重启或有生效入口
- * 失败时提供 "重启" (D10), 前台服务缺少通知权限时提供 "发送通知" 权限入口 (附录 C Q13), 部署项缺少存储权限时提供 "授予权限" (T18).
- * 启动图标有变化时在本页关闭后切换
+ * 失败时提供 "重启" (D10), 前台服务缺少通知权限时提供 "发送通知" 权限入口 (附录 C Q13), 部署项缺少存储权限时提供 "授予权限" (T18),
+ * 导入的快捷方式可恢复到桌面时提供 "恢复快捷方式" (P10.2: "快捷方式备份" 页面列出它们, 然后补选缺失的图标; 另外两个按钮都被占用时由
+ * 文字说明恢复位置). 启动图标有变化时在本页关闭后切换
  * ([SettingsTransferOutcome.launcherIconPending]).
  */
 class SettingsResultStep(@param:StringRes private val titleRes: Int) : SettingsWizardStep(Step.RESULT) {
@@ -126,17 +131,38 @@ class SettingsResultStep(@param:StringRes private val titleRes: Int) : SettingsW
             storageAccess -> builder.negativeText(R.string.settings_transfer_grant_all_files_access).negativeColorRes(R.color.dialog_button_default)
             outcome.notificationPermission -> builder.negativeText(R.string.text_post_notifications_permission).negativeColorRes(R.color.dialog_button_default)
         }
+        val restore = when {
+            outcome.restorableShortcuts.isEmpty() -> null
+            !storageAccess && !outcome.notificationPermission -> DialogAction.NEGATIVE
+            !restart -> DialogAction.NEUTRAL
+            else -> null
+        }
+        when (restore) {
+            DialogAction.NEGATIVE -> builder.negativeText(R.string.settings_transfer_result_restore_shortcuts).negativeColorRes(R.color.dialog_button_default)
+            DialogAction.NEUTRAL -> builder.neutralText(R.string.settings_transfer_result_restore_shortcuts).neutralColorRes(R.color.dialog_button_default)
+            else -> Unit
+        }
         val action = builder.showAndAwait()
         if (outcome.launcherIconPending) {
             // Last: the system may close the task of this page once the alias it was started from is disabled.
             runCatching { LauncherIconComponents.applyStored(activity) }
         }
-        when (action) {
-            DialogAction.NEUTRAL -> if (restart) IntentUtils.App.restart(activity)
-            DialogAction.NEGATIVE -> if (storageAccess) AllFilesAccessPermission(activity).config() else NotificationUtils.launchSettings()
-            else -> Unit
+        when {
+            action == null -> Unit
+            action == restore -> restoreShortcuts(activity, outcome)
+            action == DialogAction.NEUTRAL -> if (restart) IntentUtils.App.restart(activity)
+            action == DialogAction.NEGATIVE -> if (storageAccess) AllFilesAccessPermission(activity).config() else NotificationUtils.launchSettings()
         }
         return null
+    }
+
+    /** Opens the page "Shortcut backup" on the imported shortcuts (P10.2). zh-CN: 打开 "快捷方式备份" 页面并列出导入的快捷方式. */
+    private fun restoreShortcuts(context: Context, outcome: SettingsTransferOutcome) {
+        context.startActivity(
+            Intent(context, ShortcutBackupActivity::class.java)
+                .putStringArrayListExtra(ShortcutBackupActivity.EXTRA_RESTORE_IDS, ArrayList(outcome.restorableShortcuts))
+                .putExtra(ShortcutBackupActivity.EXTRA_COMPLETE_ICONS, outcome.data.any { it.iconsMissing }),
+        )
     }
 }
 

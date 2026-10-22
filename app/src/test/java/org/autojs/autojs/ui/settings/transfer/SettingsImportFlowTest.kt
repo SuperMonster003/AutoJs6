@@ -14,12 +14,17 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects
 import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
 import org.autojs.autojs.core.pref.archive.SettingsImportApplier
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.data.ColorLibraryDataCodec
+import org.autojs.autojs.core.pref.data.ShortcutDataCodec
 import org.autojs.autojs.core.pref.deploy.DeploymentException
 import org.autojs.autojs.core.pref.deploy.DeploymentResult
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.core.pref.keys.DomainKeysTestBase
+import org.autojs.autojs.external.shortcut.ShortcutBackupEntry
+import org.autojs.autojs.external.shortcut.ShortcutBackupState
+import org.autojs.autojs.theme.library.ColorLibraryJson
 import org.autojs.autojs.ui.settings.transfer.SettingsCategoryChoice.State
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Kind
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Step
@@ -58,29 +63,31 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
         )
         val choices = SettingsCategoryChoices.import(manifest, locked = listOf("credentials"))
         assertEquals(listOf("appearance", "data_shortcuts", "credentials", "other"), choices.map { it.category.id })
-        assertEquals(listOf(State.SELECTABLE, State.LATER_VERSION, State.LOCKED, State.SELECTABLE), choices.map { it.state })
+        assertEquals(listOf(State.SELECTABLE, State.SELECTABLE, State.LOCKED, State.SELECTABLE), choices.map { it.state })
         assertEquals(listOf(2, 2, 1, 3), choices.map { it.entries })
-        // Ticked by default: appendix A.1, without credentials and other.
-        assertEquals(listOf("appearance"), SettingsCategoryChoices.importSelection(choices))
+        // Ticked by default: appendix A.1 with the data categories (P10.2), without credentials and other.
+        assertEquals(listOf("appearance", "data_shortcuts"), SettingsCategoryChoices.importSelection(choices))
         val selectable = SettingsCategoryChoices.selectable(choices)
-        assertEquals(listOf(SettingCategory.APPEARANCE, SettingCategory.OTHER), selectable)
-        assertEquals(listOf("appearance", "other"), SettingsCategorySelection.all(selectable))
-        assertEquals(listOf("other"), SettingsCategorySelection.inverted(listOf("appearance"), selectable))
-        assertEquals(listOf("appearance"), SettingsCategorySelection.normalize(listOf("credentials", "appearance", "data_shortcuts"), selectable))
+        assertEquals(listOf(SettingCategory.APPEARANCE, SettingCategory.DATA_SHORTCUTS, SettingCategory.OTHER), selectable)
+        assertEquals(listOf("appearance", "data_shortcuts", "other"), SettingsCategorySelection.all(selectable))
+        assertEquals(listOf("data_shortcuts", "other"), SettingsCategorySelection.inverted(listOf("appearance"), selectable))
+        assertEquals(listOf("appearance", "data_shortcuts"), SettingsCategorySelection.normalize(listOf("credentials", "appearance", "data_shortcuts"), selectable))
         // Unlocked credentials can be ticked, but are not ticked by default.
         val unlocked = SettingsCategoryChoices.import(manifest, locked = emptyList())
         assertEquals(State.SELECTABLE, unlocked.single { it.category == SettingCategory.CREDENTIALS }.state)
-        assertEquals(listOf("appearance"), SettingsCategoryChoices.importSelection(unlocked))
+        assertEquals(listOf("appearance", "data_shortcuts"), SettingsCategoryChoices.importSelection(unlocked))
     }
 
     @Test
-    fun theExportListsEveryCategoryWithTheDataCategoriesDisabled() {
-        val choices = SettingsCategoryChoices.export(mapOf("appearance" to 4))
+    fun theExportListsEveryCategoryAsSelectable() {
+        val choices = SettingsCategoryChoices.export(mapOf("appearance" to 4, "data_shortcuts" to 2))
         assertEquals(SettingCategory.ALL, choices.map { it.category })
         assertEquals(4, choices.first().entries)
         assertEquals(0, choices.single { it.category == SettingCategory.GENERAL }.entries)
-        assertEquals(SettingCategory.ALL.filter { it.isData }, choices.filter { it.state == State.LATER_VERSION }.map { it.category })
-        assertEquals(SettingCategory.ALL.filterNot { it.isData }, SettingsCategoryChoices.selectable(choices))
+        assertEquals(2, choices.single { it.category == SettingCategory.DATA_SHORTCUTS }.entries)
+        assertEquals(0, choices.single { it.category == SettingCategory.DATA_COLOR_LIBRARY }.entries)
+        assertTrue(choices.all { it.state == State.SELECTABLE })
+        assertEquals(SettingCategory.ALL, SettingsCategoryChoices.selectable(choices))
     }
 
     @Test
@@ -137,6 +144,40 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
     }
 
     @Test
+    fun theDataCategoriesAreImportedApartWithTheChosenEntries() {
+        val shortcuts = ShortcutDataCodec.encode(
+            ShortcutBackupState(
+                listOf(
+                    ShortcutBackupEntry("copy-1", "A", "Script A", "script", "/sdcard/scripts/a.js", icon = null),
+                    ShortcutBackupEntry("copy-2", "B", "Settings", "settings", icon = null),
+                ),
+            ),
+            TIME,
+        )
+        val colors = ColorLibraryDataCodec.encode(listOf(ColorLibraryJson.PlainLibrary("灰阶", emptyList()), ColorLibraryJson.PlainLibrary("品牌色", emptyList())), TIME)
+        val captured = SettingsSnapshot.capture(listOf(SettingCategory.APPEARANCE))
+        val exported = ByteArrayOutputStream().also {
+            SettingsArchiveWriter.write(it, captured, "2026-10-22T10:00:00+08:00", host, device, listOf(shortcuts, colors))
+        }.toByteArray()
+        val reader = SettingsArchiveReader({ ByteArrayInputStream(exported) }, key = KEY)
+        val inspection = SettingsImporter.inspect(reader, "a.zip", "org.autojs.autojs6.other")
+        assertEquals(listOf("appearance", "data_shortcuts", "data_color_library"), inspection.choices.map { it.category.id })
+        assertEquals(listOf(2, 2), inspection.choices.drop(1).map { it.entries })
+        val selected = listOf("appearance", "data_shortcuts", "data_color_library")
+
+        // The plan holds the settings categories only.
+        assertEquals(listOf("appearance"), SettingsImporter.plan(reader, inspection, selected, ImportEnvironment()).categories)
+        // No choice keeps every entry; a choice keeps its entries; a category without entries left is not imported.
+        assertEquals(listOf(shortcuts.bytes.toList(), colors.bytes.toList()), SettingsImporter.dataFiles(reader, inspection, selected).map { it.bytes.toList() })
+        val chosen = SettingsImporter.dataFiles(reader, inspection, selected, mapOf("data_shortcuts" to listOf("copy-2"), "data_color_library" to emptyList()), TIME)
+        assertEquals(listOf("data_shortcuts"), chosen.map { it.id })
+        assertEquals(listOf("copy-2"), ShortcutDataCodec.decode(chosen.single().bytes).entries.map { it.id })
+        assertEquals("shortcuts.zip", chosen.single().name)
+        // A data category that is not ticked is not imported.
+        assertEquals(listOf("data_color_library"), SettingsImporter.dataFiles(reader, inspection, listOf("data_color_library")).map { it.id })
+    }
+
+    @Test
     fun theOutcomeAndTheImportStateSurviveAsJson() {
         val outcome = SettingsTransferOutcome(
             categories = 3, written = 40, restored = 2, changed = 5,
@@ -150,7 +191,12 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
                 DeploymentResult(DeploymentKind.CREATE_DIRECTORY, "default", "key_\$_working_directory", "/storage/emulated/0/Projects"),
                 DeploymentResult(DeploymentKind.DOWNLOAD_EDITOR_FONT, "default", "key_\$_ace_editor_font", "JetBrains Mono", DeploymentException.Reason.NETWORK, "timeout"),
             ),
+            data = listOf(
+                SettingsTransferOutcome.DataOutcome("data_shortcuts", 3, 2, listOf("copy-1", "copy-3"), iconsMissing = true),
+                SettingsTransferOutcome.DataOutcome("data_color_library", 2, 1, failure = "No space left on device"),
+            ),
         )
+        assertEquals(listOf("copy-1", "copy-3"), outcome.restorableShortcuts)
         val state = SettingsImportWizard.initialState().copy(
             step = Step.RESULT, selected = listOf("appearance"), archive = "/data/cache/settings-import/import.zip",
             fileName = "a.zip", deploy = listOf("default:key_\$_working_directory"), operation = "0b2e", outcome = outcome,
@@ -161,12 +207,17 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
         val newer = outcome.toJson() + mapOf("skips" to mapOf("UNKNOWN_KEY" to 1, "SOMETHING_NEW" to 4), "failedEffects" to listOf("LANGUAGE", "NEW_ENTRY"))
         assertEquals(outcome.copy(skips = mapOf(SkipReason.UNKNOWN_KEY to 1)), SettingsTransferOutcome.fromJson(newer))
         assertNull(SettingsTransferOutcome.fromJson(mapOf("categories" to 1)))
+        // A data outcome without a valid category id is left out.
+        val unknownData = outcome.toJson() + mapOf("data" to (outcome.data.map { it.toJson() } + mapOf("id" to "../shortcuts", "entries" to 1, "added" to 1)))
+        assertEquals(outcome, SettingsTransferOutcome.fromJson(unknownData))
         assertEquals(SettingsWizardState(Kind.UNDO, Step.CONFIRM), SettingsUndoWizard.initialState())
         val another = SettingsImportWizard.anotherFile(state.copy(step = Step.FAILED, failure = SettingsWizardState.Failure.INVALID_FILE))
         assertEquals(SettingsWizardState(Kind.IMPORT, Step.CHOOSE_FILE), another)
     }
 
     private companion object {
+        /** 2026-10-20T15:30:00+08:00. */
+        const val TIME = 1_792_481_400_000L
         val KEY = SettingsDeviceKey.ofBytes(ByteArray(32) { (it * 7).toByte() })
         val OTHER_KEY = SettingsDeviceKey.ofBytes(ByteArray(32) { (it * 11 + 1).toByte() })
     }

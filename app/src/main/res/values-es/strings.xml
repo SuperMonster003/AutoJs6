@@ -814,6 +814,7 @@
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Estado de activación de plugins</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
+    <string name="settings_transfer_category_refined">%1$d de %2$d elementos elegidos</string>
     <string name="settings_transfer_category_running">@string/text_script_running</string>
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
@@ -868,7 +869,6 @@
     <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">Leyendo el archivo de configuración...</string>
     <string name="settings_transfer_import_summary">Elija un archivo de configuración y las categorías que desea importar</string>
     <string name="settings_transfer_import_unknown_categories">Categorías que esta versión no conoce (se omiten): %1$d</string>
-    <string name="settings_transfer_later_version">Disponible en una versión posterior</string>
     <string name="settings_transfer_locked_no_password">Estas credenciales se exportaron sin contraseña, por lo que solo AutoJs6 en el dispositivo que las exportó puede importarlas</string>
     <string name="settings_transfer_password">Contraseña</string>
     <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">Comprobando la contraseña...</string>
@@ -886,7 +886,7 @@
     <string name="settings_transfer_pick_import">Elija las categorías que desea importar</string>
     <string name="settings_transfer_pick_reset">Elija las categorías que desea restaurar</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Detallar...</string>
-    <string name="settings_transfer_refine_later">La selección de elementos individuales llegará en una versión posterior</string>
+    <string name="settings_transfer_refine_empty">Esta categoría no tiene elementos para elegir</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurar la configuración predeterminada...</string>
     <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">Restaurando la configuración predeterminada...</string>
     <string name="settings_transfer_reset_button">Restaurar</string>
@@ -897,12 +897,16 @@
     <string name="settings_transfer_result_backup_failed">No se escribió la copia tras operaciones: %1$s</string>
     <string name="settings_transfer_result_counts">Categorías: %1$d\nElementos escritos: %2$d\nElementos restablecidos: %3$d\nValores cambiados: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Las credenciales no se importaron: se cifraron en otro dispositivo</string>
+    <string name="settings_transfer_result_data_failed">%1$s: no importado (%2$s)</string>
+    <string name="settings_transfer_result_data_imported">%1$s: %2$d importados, %3$d nuevos</string>
     <string name="settings_transfer_result_data_not_undone">Esta versión aún no deshace la importación de accesos directos y bibliotecas de colores</string>
     <string name="settings_transfer_result_deployments">Despliegues correctos: %1$d, fallidos: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Todavía no aplicado (se aplica tras reiniciar): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">El icono del lanzador cambia al cerrar esta página. AutoJs6 puede salir de la pantalla; vuelva a abrirlo desde su nuevo icono.</string>
     <string name="settings_transfer_result_notification_permission">El servicio de primer plano necesita el permiso para publicar notificaciones</string>
     <string name="settings_transfer_result_restart">Algunas configuraciones surten efecto después de reiniciar AutoJs6</string>
+    <string name="settings_transfer_result_restore_shortcuts">Restaurar accesos directos</string>
+    <string name="settings_transfer_result_shortcuts_restore">Los accesos directos importados que no están en la pantalla de inicio se pueden restaurar en Configuración > Configuración > Copia de accesos directos</string>
     <string name="settings_transfer_result_skipped">Omitidos (se mantienen los valores actuales):</string>
     <string name="settings_transfer_setup_wizard">Asistente de importación de configuración</string>
     <string name="settings_transfer_setup_wizard_choose">Elegir archivo</string>

@@ -21,8 +21,9 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
  * on this device ([credentialsLocked], D23), why the operation backup failed ([backupFailure], T20, P9.1; it does
  * not block), whether the launcher icon changed, which the result page switches once it is closed
  * ([launcherIconPending]: switching it closes the task of the page), and whether the language was applied
- * ([languageChanged], the page is recreated in it when needed), and what became of the deployment items ([deployments],
- * T18, P7.6). Pure data (R3), kept in the wizard state as JSON.
+ * ([languageChanged], the page is recreated in it when needed), what became of the deployment items ([deployments],
+ * T18, P7.6), and what the import did to the data categories ([data], P10.2). Pure data (R3), kept in the wizard state
+ * as JSON.
  *
  * zh-CN: 一次导入或撤销的结果 (ROADMAP T10, P7.5), 即结果页显示的内容: 计划中的分类数, 写入的条目 ([written], 计划的 `puts`) 与恢复
  * 默认的条目 ([restored], `removes`), 存储值真正变化的个数 ([changed]), 按原因的跳过数 ([skips], D9: 只含出现过的原因, 按
@@ -30,7 +31,7 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
  * 未处理的数据分类 ([dataNotUndone]: 附录 C Q27 已定为也要撤销, 由 P10.3 实现; 结果页只在有这类分类时提示), 以及文件中的凭据能否在
  * 本机解密 ([credentialsLocked], D23), 操作后备份失败的原因 ([backupFailure], T20, P9.1; 不阻断), 以及启动图标是否变化, 由结果页在关闭后
  * 切换 ([launcherIconPending]: 切换会关闭本页所在的任务), 是否应用了语言 ([languageChanged], 需要时以新语言重建本页), 以及各部署项的
- * 结果 ([deployments], T18, P7.6). 纯数据 (R3), 以 JSON 保存在向导状态中.
+ * 结果 ([deployments], T18, P7.6), 以及导入对各数据分类的处理 ([data], P10.2). 纯数据 (R3), 以 JSON 保存在向导状态中.
  */
 data class SettingsTransferOutcome(
     val categories: Int,
@@ -47,7 +48,55 @@ data class SettingsTransferOutcome(
     val launcherIconPending: Boolean = false,
     val languageChanged: Boolean = false,
     val deployments: List<DeploymentResult> = emptyList(),
+    val data: List<DataOutcome> = emptyList(),
 ) {
+
+    /**
+     * What the import did to the data category [id] (P10.2): the [entries] it imported, [added] of them new to this
+     * device, the shortcuts the result page offers restoring to the desktop ([restorable]) and whether one of them
+     * lacks its icon ([iconsMissing]), or why it failed ([failure]).
+     * zh-CN: 导入对数据分类 [id] 的处理 (P10.2): 导入的条目数 [entries], 其中本机新增 [added] 项, 结果页提供恢复到桌面的快捷方式
+     * ([restorable]) 及其中是否有缺少图标的 ([iconsMissing]), 或失败原因 ([failure]).
+     */
+    data class DataOutcome @JvmOverloads constructor(
+        val id: String,
+        val entries: Int,
+        val added: Int,
+        val restorable: List<String> = emptyList(),
+        val iconsMissing: Boolean = false,
+        val failure: String? = null,
+    ) {
+
+        fun toJson(): Map<String, Any?> = linkedMapOf(
+            "id" to id,
+            "entries" to entries,
+            "added" to added,
+            "restorable" to restorable,
+            "iconsMissing" to iconsMissing,
+            "failure" to failure,
+        )
+
+        companion object {
+
+            /** The data outcome of [json], or null when it is none. zh-CN: [json] 对应的数据分类结果, 不是时为 null. */
+            @JvmStatic
+            fun fromJson(json: Any?): DataOutcome? {
+                val map = json as? Map<*, *> ?: return null
+                return DataOutcome(
+                    (map["id"] as? String)?.takeIf(SettingsArchive::isCategoryId) ?: return null,
+                    SettingsJson.toInt(map["entries"]) ?: return null,
+                    SettingsJson.toInt(map["added"]) ?: return null,
+                    (map["restorable"] as? List<*>).orEmpty().filterIsInstance<String>(),
+                    map["iconsMissing"] == true,
+                    map["failure"] as? String,
+                )
+            }
+        }
+    }
+
+    /** The shortcuts the result page offers restoring to the desktop. zh-CN: 结果页提供恢复到桌面的快捷方式. */
+    val restorableShortcuts: List<String>
+        get() = data.flatMap { it.restorable }
 
     /** The number of skipped entries. zh-CN: 跳过的条目总数. */
     val skipped: Int
@@ -70,14 +119,17 @@ data class SettingsTransferOutcome(
         "deployments" to deployments.map {
             linkedMapOf("kind" to it.kind.name, "store" to it.store, "name" to it.name, "target" to it.target, "failure" to it.failure?.name, "detail" to it.detail)
         },
+        "data" to data.map { it.toJson() },
     )
 
     companion object {
 
         /**
          * The outcome of [plan], of which [changes] changed and [report] is what its effects did; [dataNotUndone] and
-         * [credentialsLocked] as the undo and the import know them.
-         * zh-CN: [plan] 的结果: [changes] 为发生的变化, [report] 为生效报告; [dataNotUndone] 与 [credentialsLocked] 由撤销与导入给出.
+         * [credentialsLocked] as the undo and the import know them, [data] the data categories the import handled
+         * (they count among the [SettingsTransferOutcome.categories]).
+         * zh-CN: [plan] 的结果: [changes] 为发生的变化, [report] 为生效报告; [dataNotUndone] 与 [credentialsLocked] 由撤销与导入给出, [data]
+         * 为导入处理的数据分类 (计入 [SettingsTransferOutcome.categories]).
          */
         @JvmStatic
         @JvmOverloads
@@ -90,8 +142,9 @@ data class SettingsTransferOutcome(
             backupFailure: String? = null,
             launcherIconPending: Boolean = false,
             deployments: List<DeploymentResult> = emptyList(),
+            data: List<DataOutcome> = emptyList(),
         ) = SettingsTransferOutcome(
-            categories = plan.categories.size,
+            categories = plan.categories.size + data.size,
             written = plan.puts.size,
             restored = plan.removes.size,
             changed = changes.size,
@@ -105,6 +158,7 @@ data class SettingsTransferOutcome(
             launcherIconPending = launcherIconPending,
             languageChanged = SettingsEffects.Entry.LANGUAGE in report.applied,
             deployments = deployments,
+            data = data,
         )
 
         /**
@@ -147,6 +201,7 @@ data class SettingsTransferOutcome(
                 launcherIconPending = root["launcherIconPending"] == true,
                 languageChanged = root["languageChanged"] == true,
                 deployments = (root["deployments"] as? List<*>).orEmpty().mapNotNull(::deploymentOf),
+                data = (root["data"] as? List<*>).orEmpty().mapNotNull(DataOutcome::fromJson),
             )
         }
     }
