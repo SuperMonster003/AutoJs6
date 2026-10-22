@@ -16,7 +16,9 @@ oneway interface IPluginToolCallback {
     /**
      * The result (PluginToolResultKeys). outputs carries the binary outputs the tool declares, readable
      * descriptors in the order PluginToolResultKeys.OUTPUTS_JSON names them; the host reads each up to
-     * PluginToolLimits.MAX_DESCRIPTOR_BYTES and closes it.
+     * PluginToolLimits.MAX_DESCRIPTOR_BYTES and closes it. The call is oneway: keep RESULT_JSON and TEXT
+     * within PluginToolLimits.MAX_RESULT_CHARS, since a larger Parcel may fail in the provider with
+     * TransactionTooLargeException and never reach the host (MCP roadmap D65).
      */
     void onResult(in Bundle result, in ParcelFileDescriptor[] outputs);
 

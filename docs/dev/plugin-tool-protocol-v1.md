@@ -94,9 +94,13 @@ subclass implements `createPluginInfo()`, `createCatalogJson()` and `onCall(Plug
 - hands out the input descriptors by parameter name (`PluginToolInput`: `openStream`, `readBytes` with a limit) and the
   directory outputs (`PluginToolDirectoryOutput`: `createDirectory`, `openFile` returning null for `EXISTS`, `existing`);
 - reports `PluginToolResult` (JSON, text, file outputs from a descriptor, a file or bytes; outputs the caller does not
-  want are dropped) after checking `MAX_RESULT_BYTES` and `MAX_DESCRIPTOR_BYTES`, or the failure: the code of a
+  want are dropped) after checking `MAX_RESULT_CHARS`, `MAX_RESULT_BYTES` and `MAX_DESCRIPTOR_BYTES`, or the failure: the
+  code of a
   `PluginToolException`, `INVALID_ARGUMENTS` for an `IllegalArgumentException`, `FAILED` otherwise and `CANCELLED`
   for anything after a cancel;
+- reports a result the host cannot take as the failure instead of losing the report: `onResult` failing with
+  `TransactionTooLargeException` is tried twice more within 0.5 s, then becomes `LIMIT_EXCEEDED` (other failures
+  `FAILED`), with the Parcel size in the message (D65);
 - closes every input descriptor, directory output stream and output descriptor before the single report.
 
 The pilots implement the interface directly and do not need to migrate. The third-party sample repository
@@ -252,7 +256,14 @@ The provider owns and closes the input descriptors. Immediate answer (`PluginToo
 Result (`onResult`, `PluginToolResultKeys`): `invocationId`, `resultJson` (any JSON, an object
 matching `outputSchema` when declared), optional `text` (a short plain-text summary consumers may
 show), and `outputsJson`, a JSON array whose entry i describes `outputs[i]` as `{name, mimeType}`.
-`resultJson` and `text` together stay within 512 KiB. Each output descriptor is readable; the host
+`resultJson` and `text` together stay within 512 KiB UTF-8 and 192 Ki UTF-16 units
+(`PluginToolLimits.MAX_RESULT_CHARS`, D65). The second ceiling comes from the transport: `onResult` is a
+oneway transaction, its Parcel holds strings as UTF-16 (two bytes a unit), and a oneway transaction
+gets at most half of the host's Binder buffer (about 508 KiB), shared with the other oneway calls into
+the host. A larger result fails in the provider with `TransactionTooLargeException` (measured from
+about 254 Ki units, a Parcel of 520 KB, on API 24 and 31, and from about 248 Ki units, 508 KB, on
+API 37) and never reaches the host, which could only wait for the timeout; at the ceiling the Parcel
+is about 393 KB. Each output descriptor is readable; the host
 reads at most 8 MiB from it, closes it, and writes the bytes atomically to the working-directory path
 the caller gave for that output (D32). A provider may return a pipe or a file in its own cache.
 
@@ -313,7 +324,7 @@ the provider process dies, every running call of it fails on the host side.
 | title / description | 128 / 4096 characters |
 | schema depth / properties per object | 8 / 64 |
 | arguments | 64 KiB UTF-8 |
-| result (`resultJson` + `text`) | 512 KiB UTF-8 |
+| result (`resultJson` + `text`) | 512 KiB UTF-8 and 192 Ki UTF-16 units |
 | one image input or output descriptor | 8 MiB |
 | one file of a file or directory parameter | 512 MiB (opened read-only, no copy) |
 | image, file or directory parameters / outputs per tool | 8 / 8 |
@@ -360,8 +371,10 @@ Rules the bridge enforces before the provider sees a call:
   bridge answers `timeout` and calls `cancel` with reason `timeout`; `plugin_tools.cancel` answers the running call and
   calls `cancel` with reason `caller`; closing the session cancels with reason `host`. A provider process that dies
   during a call fails it at once. The call keeps a dedicated binding to the provider until it ends.
-- A result larger than 512 KiB, a result that is not JSON or does not match the declared output schema, and an output
-  above 8 MiB fail the call (`resource-limit` / `provider-failed`). Outputs are copied into a sibling temporary file
+- A result larger than 512 KiB UTF-8, a result that is not JSON or does not match the declared output schema, and an
+  output above 8 MiB fail the call (`resource-limit` / `provider-failed`). The host does not check the 192 Ki unit
+  ceiling, so results of providers that implement the interface directly keep arriving as before; a provider
+  whose report is refused by the transport and lost leaves the call to its timeout (D65). Outputs are copied into a sibling temporary file
   and renamed over the target. A directory output may name an existing directory (not a file); its files are staged
   and moved in as described under "Directory outputs".
 
