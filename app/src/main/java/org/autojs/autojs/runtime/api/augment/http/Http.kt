@@ -8,6 +8,8 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody.Companion.asResponseBody
+import okio.Buffer
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.http.MutableOkHttp
@@ -220,9 +222,12 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             return handleAsyncOperation(
                 scriptRuntime,
                 operation = {
-                    // Execute network call in background thread.
-                    // zh-CN: 在后台线程执行网络请求.
-                    prepared.call.execute()
+                    // Execute network call in background thread, and read the body there as well: the Promise settles on
+                    // the UI thread, where reading the body from the network threw NetworkOnMainThreadException
+                    // (docs/augment/ROADMAP.md Q25).
+                    // zh-CN: 在后台线程执行网络请求, 并在同一线程读完响应体: Promise 在 UI 线程结算, 在那里从网络读取响应体
+                    // 曾抛出 NetworkOnMainThreadException (docs/augment/ROADMAP.md Q25).
+                    bufferBody(prepared.call.execute())
                 },
                 uiMapper = { response ->
                     // Wrap response into Rhino object on UI thread with Rhino Context.
@@ -565,6 +570,18 @@ class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 cacheBody = cacheBody,
                 cacheThreshold = cacheThreshold,
             )
+        }
+
+        /**
+         * [response] with its body read into memory and the network connection released. The new body keeps the content
+         * type and the content length (-1 when unknown) of the original body, so that it reads the same way.
+         *
+         * zh-CN: 将 [response] 的响应体读入内存并释放网络连接. 新响应体保留原响应体的内容类型与内容长度 (未知时为 -1), 读取方式不变.
+         */
+        private fun bufferBody(response: Response): Response {
+            val body = response.body ?: return response
+            val buffer = body.use { Buffer().also { sink -> it.source().readAll(sink) } }
+            return response.newBuilder().body(buffer.asResponseBody(body.contentType(), body.contentLength())).build()
         }
 
         private fun wrapResponse(scriptRuntime: ScriptRuntime, response: Response, cacheBody: Boolean, cacheThreshold: Long): Any {

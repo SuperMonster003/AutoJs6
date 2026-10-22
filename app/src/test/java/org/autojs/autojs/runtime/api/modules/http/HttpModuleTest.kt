@@ -194,9 +194,12 @@ class HttpModuleTest {
             HostModuleTestSupport.settled("http.postAsync('$BASE/echo', { a: 1 })", "[v.statusCode, String(v.method)]") to "[200,\"POST\"]",
             HostModuleTestSupport.settled("http.postMultipartAsync('$BASE/echo', { f: 'v' })", "v.statusCode") to "200",
             HostModuleTestSupport.settled("http.requestAsync('$BASE/echo', { method: 'GET' })", "[v.statusCode, String(v.method)]") to "[200,\"GET\"]",
-            // Current behavior of both implementations: the Promise settles on the UI thread, so reading the body there
-            // is network I/O on the main thread.
-            HostModuleTestSupport.settled("http.getAsync('$BASE/echo')", "(function () { try { v.body.string(); return 'read'; } catch (e) { return String(e.javaException.getClass().getSimpleName()); } })()") to "\"NetworkOnMainThreadException\"",
+            // The Promise settles on the UI thread with the body already read on the request thread (appendix C Q25): reading
+            // it in then() formerly was network I/O on the main thread (NetworkOnMainThreadException).
+            HostModuleTestSupport.settled("http.getAsync('$BASE/echo')", "(function () { try { v.body.string(); return 'read'; } catch (e) { return String(e.javaException.getClass().getSimpleName()); } })()") to "\"read\"",
+            HostModuleTestSupport.settled("http.getAsync('$BASE/echo?x=2')", "(function (j) { return [j.method, j.query]; })(v.body.json())") to "[\"GET\",\"x=2\"]",
+            HostModuleTestSupport.settled("http.getAsync('$BASE/status/404')", "[v.statusCode, String(v.body.string())]") to "[404,\"nope\"]",
+            HostModuleTestSupport.waited("http.getAsync('$BASE/echo?x=3')", "[v.statusCode, v.body.json().query]") to "[200,\"x=3\"]",
             HostModuleTestSupport.settled("http.getAsync('$BASE/echo', null, function (res) { globalThis.aj6P35Got = res.statusCode; })", "[v.statusCode, globalThis.aj6P35Got]") to "[200,200]",
             HostModuleTestSupport.settled("http.getAsync('http://127.0.0.1:9/')", "'resolved'") to "\"rejected\"",
         )
