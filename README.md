@@ -198,6 +198,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `提示` console 控件及控制台浮动窗口改为显示当前脚本日志, 全局日志可通过 globalconsole 控件或日志页面查看
 * `提示` 文件日志改用内置实现, 保留已文档化的配置选项及常用 PatternLayout 格式, 其他 Log4j API 不再提供
 * `提示` Node.js 的 pinyin/pinyin4j 和控制台窗口控制方法改为异步宿主调用, 脚本需使用 await 等待结果
+* `新增` Node.js/Bun/Worker 的 ai.agent 任务控制与事件, 注册脚本上下文和结果回传, 以及打包应用的独立授权
 * `新增` Node.js, Bun 与 Worker 的 Flow within/scope 范围继承, 罗盘导航和结果投影, 以及 press/swipe/gesture/gestures 手势重载
 * `新增` Node.js, Bun 及 Worker 的 flow 异步链与条件/稳定性等待, 支持分支取消, 单步骤重试及宿主界面快照; Node.js, Bun 及 Worker 的 Flow 高级点击, 滚动, 输入, 列表采集与真实事件等待, 支持监听就绪, 快照校验和取消
 * `新增` Node.js/Bun/Worker: 邮件账户连接, 邮件操作, 附件与邮箱监听, 支持取消及 Worker 退出清理

@@ -14,6 +14,7 @@
 * `Astuce` Le composant console et la console flottante affichent désormais les journaux du script courant; les journaux globaux sont accessibles via le composant globalconsole ou la page des journaux
 * `Astuce` La journalisation dans des fichiers utilise désormais une implémentation intégrée, conservant les options documentées et les formats PatternLayout courants; les autres API Log4j ne sont plus disponibles
 * `Astuce` Les méthodes Node.js pinyin/pinyin4j et les contrôles de fenêtre de console appellent désormais l'hôte de façon asynchrone; les scripts doivent attendre leurs résultats avec await
+* `Fonctionnalité` Contrôle des tâches ai.agent, événements et contexte/résultats des scripts enregistrés pour Node.js, Bun et Workers, avec autorisation explicite des applications empaquetées
 * `Fonctionnalité` Flow within/scope pour Node.js, Bun et les Workers, avec racines de recherche héritées, navigation par boussole, projections typées et surcharges press/swipe/gesture/gestures
 * `Fonctionnalité` Chaînes asynchrones flow et attentes de condition/stabilité pour Node.js, Bun et Workers, avec annulation des branches, reprise des étapes et instantanés de l'interface hôte; Clics avancés, défilement, saisie, collecte de listes et attente des événements réels Flow pour Node.js, Bun et Workers, avec préparation des abonnements, validation des instantanés et annulation
 * `Fonctionnalité` Node.js/Bun/Worker: Connexions aux comptes mail, messages, pièces jointes et surveillance des boîtes, avec annulation et nettoyage des Workers

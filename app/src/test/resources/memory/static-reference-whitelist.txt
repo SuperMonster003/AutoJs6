@@ -68,6 +68,7 @@ field | engine/NodeDialogs.kt | sessions | kotlin object; registry; - | process 
 field | engine/NodeJsRuntimePluginHost.kt | connectionPool | kotlin object; registry; - | process | pooled bindings to the Node.js runtime plugin (unbindService in the same file)
 field | engine/NodeJsRuntimePluginHost.kt | executionRegistry | kotlin object; registry; - | process | reservations of Node.js executions, released when they end
 field | engine/NodeJsRuntimePluginHost.kt | observerContext | kotlin object; strong; AndroidContext | process | Application context of the package observer
+field | engine/RuntimeAgentProvider.kt | sessions | kotlin object; registry; - | owner | delegated clients hold only Application context and JVM run observers; dispose, Binder death and access revocation remove the entry and close its bridge
 field | engine/RuntimeViewAttributes.kt | declarations | kotlin object; weak-key map; View | weak | WeakHashMap<View, JSONObject>; the values are JSON
 field | engine/RuntimeWebActionActivity.kt | actions | kotlin object; registry; - | owner | Node bridge web action sessions by request id, removed when the action ends or fails; hold no Rhino runtime (B.1)
 field | engine/RuntimeWebActionActivity.kt | captures | kotlin object; registry; - | owner | Node bridge captured files by uri, removed and deleted when granted, released or discarded (B.1)
@@ -133,6 +134,7 @@ call | engine/NodeBridgeDeviceInfo.kt | registerReceiver | released: no; process
 call | engine/NodeEventObservers.kt | registerReceiver | released: yes; process | paired | unregisterReceiver in session.detach, same file
 call | engine/NodeJsRuntimePluginHost.kt | bindService | released: yes; process | paired | unbindService in the same file
 call | engine/NodeJsRuntimePluginHost.kt | registerReceiver | released: no; process | process | process-level receiver of a process singleton, not created per script (H7; gate S11 green)
+call | engine/RuntimeAgentProvider.kt | registerReceiver | released: no; script | process | Application-context package-change receiver registered once by the ContentProvider, not per script; reconciles installation-bound consent and never captures a runtime or Activity
 call | engine/RuntimeViewComponents.kt | WebView( | released: no; script | p4.2 | RuntimeWebView of Node bridge UI sessions, never destroyed by the host and not covered by a gate scenario (B.2 H10 follow-up)
 call | external/receiver/DynamicBroadcastReceivers.kt | registerReceiver | released: yes; process | paired | unregisterReceiver when a registration is removed, same file
 call | runtime/api/Device.java | registerReceiver | released: no; script | exempt | registerReceiver(null, ...) only reads a sticky broadcast (H7)

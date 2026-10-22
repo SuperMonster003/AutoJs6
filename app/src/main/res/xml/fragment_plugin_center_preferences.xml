@@ -59,4 +59,8 @@
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 
+    <org.autojs.autojs.theme.preference.MaterialPreference
+        app:layout="@layout/preference_custom" app:key="agent_runtime_access"
+        app:title="@string/agent_runtime_access_title" />
+
 </PreferenceScreen>

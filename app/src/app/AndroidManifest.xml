@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <permission android:name="org.autojs.permission.AGENT_RUNTIME"
+        android:protectionLevel="normal" android:label="@string/agent_runtime_access_title"
+        android:description="@string/agent_runtime_description" />
+    <application>
+        <provider android:name="org.autojs.autojs.engine.RuntimeAgentProvider"
+            android:authorities="org.autojs.autojs6.agent.runtime" android:exported="true"
+            android:permission="org.autojs.permission.AGENT_RUNTIME" />
+        <activity android:name="org.autojs.autojs.engine.RuntimeAgentAccessActivity"
+            android:exported="true" android:permission="org.autojs.permission.AGENT_RUNTIME" />
+        <activity android:name="org.autojs.autojs.engine.RuntimeAgentAccessManagementActivity" android:exported="false" />
+    </application>
+</manifest>

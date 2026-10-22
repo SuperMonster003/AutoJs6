@@ -64,6 +64,7 @@ object NodeBridgePermissionManifest {
     const val PACKAGE_MANAGER_MUTATE = "package_manager.mutate"
     const val MAIL = "mail"
     const val AI = "ai"
+    const val AI_AGENT = "ai.agent"
     const val EPUB = "epub"
     const val SPEECH = "speech"
     const val TTS = "tts"
@@ -161,6 +162,7 @@ object NodeBridgePermissionManifest {
         PACKAGE_MANAGER_MUTATE,
         MAIL,
         AI,
+        AI_AGENT,
         EPUB,
         SPEECH,
         TTS,
@@ -289,6 +291,7 @@ object NodeBridgePermissionManifest {
 
     private val androidPermissionsByCapability = linkedMapOf(
         AI to listOf("org.autojs.permission.AI_RUNTIME"),
+        AI_AGENT to listOf(RuntimeAgentRemote.PERMISSION),
         TASKS to listOf("android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.WAKE_LOCK", "android.permission.SCHEDULE_EXACT_ALARM"),
         DEVICE to listOf("android.permission.WAKE_LOCK", "android.permission.VIBRATE"),
         DEVICE_POWER to listOf("android.permission.WRITE_SETTINGS", "android.permission.WAKE_LOCK"),
@@ -566,6 +569,7 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.MAIL -> listOf(MAIL)
             NodeBridgeModules.FLOW -> RuntimeFlowPolicy.capabilities(method, argsJson)
             NodeBridgeModules.AI -> listOf(AI)
+            NodeBridgeModules.AI_AGENT -> listOf(AI_AGENT)
             NodeBridgeModules.EPUB -> listOf(EPUB)
             NodeBridgeModules.SPEECH -> listOf(SPEECH)
             NodeBridgeModules.TTS -> listOf(TTS)
@@ -657,6 +661,7 @@ object NodeBridgePermissionManifest {
             required == FILES_WRITE ||
             required == FILES_DELETE ||
             required == AGENT_EXEC ||
+            required == AI_AGENT ||
             required == PLUGIN_TOOLS_USER_GRANTED ||
             // M3.2: coordinate gestures are never implied by "accessibility".
             required == ACCESSIBILITY_GESTURE

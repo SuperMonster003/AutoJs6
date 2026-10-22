@@ -198,6 +198,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * `Sugerencia` El control console y la consola flotante muestran los registros del script actual; los registros globales se consultan mediante globalconsole o la página de registros
 * `Sugerencia` Los registros en archivos utilizan una implementación integrada que conserva las opciones documentadas y los formatos PatternLayout habituales; las demás API de Log4j dejan de estar disponibles
 * `Sugerencia` Node.js pinyin/pinyin4j y los controles de ventana de consola ahora llaman al host de forma asíncrona; los scripts deben esperar los resultados con await
+* `Nuevo` Control de tareas ai.agent, eventos y contexto/resultados de scripts registrados para Node.js, Bun y Workers, con autorización explícita para las aplicaciones empaquetadas
 * `Nuevo` Flow within/scope para Node.js, Bun y Workers, con raíces de búsqueda heredadas, navegación por brújula, proyecciones tipadas y sobrecargas press/swipe/gesture/gestures
 * `Nuevo` Cadenas asíncronas flow y esperas de condición/estabilidad para Node.js, Bun y Workers, con cancelación de ramas, reintentos por paso e instantáneas de la interfaz del anfitrión; Clics avanzados, desplazamiento, entrada, recopilación de listas y espera de eventos reales de Flow para Node.js, Bun y Workers, con suscripciones listas, validación de instantáneas y cancelación
 * `Nuevo` Node.js/Bun/Worker: Conexiones de correo, mensajes, adjuntos y vigilancia de buzones, con cancelación y limpieza de Workers

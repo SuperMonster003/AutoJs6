@@ -115,6 +115,7 @@ class NodePluginJavaScriptEngine(
                 }.orEmpty(),
                 stdinListener = input::onState,
                 console = runtime.console,
+                agentExecutionState = (getTag(org.autojs.autojs.execution.ExecutionConfig.tag) as? org.autojs.autojs.execution.ExecutionConfig)?.agentExecutionState,
                 outputListener = { type, text ->
                     printScriptOutput(
                         if (type == NodeJsRuntimeContract.EVENT_STDERR) {

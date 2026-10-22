@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agent_runtime_access_title">Agent アプリのアクセス</string>
+    <string name="agent_runtime_allow">許可</string>
+    <string name="agent_runtime_deny">拒否</string>
+    <string name="agent_runtime_description">このアプリが AutoJs6 の AI モデル, 登録済みスクリプトと端末の権限を使用して Agent タスクを実行することを許可します. タスクの確認ルールは引き続き適用されます.</string>
+    <string name="agent_runtime_empty">許可されたアプリはありません</string>
+    <string name="agent_runtime_request_app">%1$s (%2$s) が Agent タスクへのアクセスを要求しています.</string>
+    <string name="agent_runtime_revoke">アクセスを取り消す</string>
+    <string name="agent_runtime_revoke_message">%1$s (%2$s) のアクセスを取り消しますか? このアプリの実行中の Agent タスクは停止します.</string>
+    <string name="bun_agent_grant_summary">host.ai.agent のタスク制御, イベントと登録済みスクリプトの結果を許可</string>
+    <string name="bun_agent_grant_title">Agent タスク</string>
+</resources>

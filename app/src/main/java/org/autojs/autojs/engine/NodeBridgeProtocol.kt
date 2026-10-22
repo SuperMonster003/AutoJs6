@@ -699,6 +699,7 @@ object NodeBridgeModules {
     const val MAIL = "mail"
     const val FLOW = "flow"
     const val AI = "ai"
+    const val AI_AGENT = "aiAgent"
     const val EPUB = "epub"
     const val SPEECH = "speech"
     const val TTS = "tts"
@@ -875,6 +876,7 @@ object NodeBridgeModules {
         MAIL to RuntimeMailBridge.methods,
         FLOW to RuntimeFlowBridge.methods,
         AI to RuntimeAiBridge.methods,
+        AI_AGENT to RuntimeAgentBridge.methods,
         EPUB to RuntimeEpubBridge.methods,
         SPEECH to RuntimeSpeechBridge.methods,
         TTS to RuntimeTtsBridge.methods,
@@ -928,6 +930,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val permissionManifest: NodeBridgePermissionManifest.Manifest? = null,
     private val agentScriptRoots: List<File> = emptyList(),
     private val executionConsole: org.autojs.autojs.core.console.ConsoleImpl? = null,
+    private val agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
 ) : NodeBridgeCapabilityProvider {
 
     private val appContext = context.applicationContext
@@ -973,6 +976,10 @@ class AndroidNodeBridgeCapabilityProvider(
     private var mailScopeClosed = false
     private val mailBridge = lazy { RuntimeMailBridge(appContext, engineInfo.cwd) }
     internal fun closeMailClient(id: String) { if (mailBridge.isInitialized()) mailBridge.value.closeClient(id) }
+    private val aiAgentScopeLock = Any()
+    private var aiAgentScopeClosed = false
+    private val aiAgentBridge = lazy { RuntimeAgentBridge(appContext, engineInfo.cwd, executionState = { agentExecutionState }) }
+    internal fun closeAiAgentClient(id: String) { if (aiAgentBridge.isInitialized()) aiAgentBridge.value.closeClient(id) }
     private val aiScopeLock = Any()
     private var aiScopeClosed = false
     private val aiBridge = lazy { RuntimeAiBridge(appContext) }
@@ -1242,6 +1249,11 @@ class AndroidNodeBridgeCapabilityProvider(
                 if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Flow execution has ended")))
                 else bridge.dispatch(request, auditedCallback)
             }
+            request.module == NodeBridgeModules.AI_AGENT && request.method in RuntimeAgentBridge.methods -> {
+                val bridge = synchronized(aiAgentScopeLock) { if (aiAgentScopeClosed) null else aiAgentBridge.value }
+                if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Agent execution has ended")))
+                else bridge.dispatch(request, auditedCallback)
+            }
             request.module == NodeBridgeModules.AI && request.method in RuntimeAiBridge.methods -> {
                 val bridge = synchronized(aiScopeLock) { if (aiScopeClosed) null else aiBridge.value }
                 if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("AI execution has ended")))
@@ -1344,6 +1356,7 @@ class AndroidNodeBridgeCapabilityProvider(
         synchronized(mailScopeLock) { mailScopeClosed = true; if (mailBridge.isInitialized()) mailBridge.value.close() }
         synchronized(flowScopeLock) { flowScopeClosed = true; if (flowBridge.isInitialized()) flowBridge.value.close() }
         synchronized(aiScopeLock) { aiScopeClosed = true; if (aiBridge.isInitialized()) aiBridge.value.close() }
+        synchronized(aiAgentScopeLock) { aiAgentScopeClosed = true; if (aiAgentBridge.isInitialized()) aiAgentBridge.value.close() }
         synchronized(epubScopeLock) { epubScopeClosed = true; if (epubBridge.isInitialized()) epubBridge.value.close() }
         synchronized(speechScopeLock) { speechScopeClosed = true; if (speechBridge.isInitialized()) speechBridge.value.close() }
         synchronized(ttsScopeLock) { ttsScopeClosed = true; if (ttsBridge.isInitialized()) ttsBridge.value.close() }

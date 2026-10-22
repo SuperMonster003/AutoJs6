@@ -362,6 +362,11 @@
             app:summary="@string/summary_bun_mail_control_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_agent_control_grant" app:defaultValue="false"
+            app:layout="@layout/preference_custom" app:title="@string/bun_agent_grant_title"
+            app:summary="@string/bun_agent_grant_summary" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_ai_control_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"

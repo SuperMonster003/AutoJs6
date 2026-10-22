@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agent_runtime_access_title">Доступ приложений к Agent</string>
+    <string name="agent_runtime_allow">Разрешить</string>
+    <string name="agent_runtime_deny">Запретить</string>
+    <string name="agent_runtime_description">Разрешить этому приложению запускать задачи Agent через AutoJs6 с его моделями ИИ, зарегистрированными скриптами и разрешениями устройства. Правила подтверждения задач сохраняются.</string>
+    <string name="agent_runtime_empty">Нет авторизованных приложений</string>
+    <string name="agent_runtime_request_app">%1$s (%2$s) запрашивает доступ к задачам Agent.</string>
+    <string name="agent_runtime_revoke">Отозвать доступ</string>
+    <string name="agent_runtime_revoke_message">Отозвать доступ у %1$s (%2$s)? Его выполняемые задачи Agent будут остановлены.</string>
+    <string name="bun_agent_grant_summary">Разрешить управление задачами, события и результаты зарегистрированных скриптов host.ai.agent</string>
+    <string name="bun_agent_grant_title">Задачи Agent</string>
+</resources>

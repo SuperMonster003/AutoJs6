@@ -198,6 +198,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
 * `Hint` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
 * `Hint` Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results
+* `Feature` ai.agent task controls, events and registered-script context/results for Node.js, Bun and Workers, with explicit authorization for packaged applications
 * `Feature` Flow within/scope with inherited search roots, compass navigation and typed result projections, plus press/swipe/gesture/gestures overloads for Node.js, Bun and Workers
 * `Feature` Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots; Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
 * `Feature` Node.js/Bun/Worker: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup

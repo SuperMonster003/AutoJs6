@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agent_runtime_access_title">وصول التطبيقات إلى Agent</string>
+    <string name="agent_runtime_allow">السماح</string>
+    <string name="agent_runtime_deny">رفض</string>
+    <string name="agent_runtime_description">السماح لهذا التطبيق بتشغيل مهام Agent عبر AutoJs6 باستخدام نماذج الذكاء الاصطناعي والنصوص المسجلة وأذونات الجهاز. تظل قواعد تأكيد المهام سارية.</string>
+    <string name="agent_runtime_empty">لا توجد تطبيقات مصرح لها</string>
+    <string name="agent_runtime_request_app">يطلب %1$s (%2$s) الوصول إلى مهام Agent.</string>
+    <string name="agent_runtime_revoke">إلغاء الوصول</string>
+    <string name="agent_runtime_revoke_message">إلغاء وصول %1$s (%2$s)? ستتوقف مهام Agent الجارية لهذا التطبيق.</string>
+    <string name="bun_agent_grant_summary">السماح بالتحكم في مهام host.ai.agent والأحداث ونتائج النصوص المسجلة</string>
+    <string name="bun_agent_grant_title">مهام Agent</string>
+</resources>

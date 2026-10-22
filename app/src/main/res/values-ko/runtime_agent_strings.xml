@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agent_runtime_access_title">Agent 앱 접근</string>
+    <string name="agent_runtime_allow">허용</string>
+    <string name="agent_runtime_deny">거부</string>
+    <string name="agent_runtime_description">이 앱이 AutoJs6의 AI 모델, 등록된 스크립트와 기기 권한을 사용하여 Agent 작업을 실행하도록 허용합니다. 작업 확인 규칙은 계속 적용됩니다.</string>
+    <string name="agent_runtime_empty">허용된 앱이 없습니다</string>
+    <string name="agent_runtime_request_app">%1$s (%2$s)에서 Agent 작업 접근을 요청합니다.</string>
+    <string name="agent_runtime_revoke">접근 취소</string>
+    <string name="agent_runtime_revoke_message">%1$s (%2$s)의 접근을 취소할까요? 이 앱에서 실행 중인 Agent 작업이 중지됩니다.</string>
+    <string name="bun_agent_grant_summary">host.ai.agent 작업 제어, 이벤트와 등록된 스크립트 결과 허용</string>
+    <string name="bun_agent_grant_title">Agent 작업</string>
+</resources>

@@ -12,6 +12,7 @@
         "Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results"
       ],
       "feature": [
+        "ai.agent task controls, events and registered-script context/results for Node.js, Bun and Workers, with explicit authorization for packaged applications",
         "Flow within/scope with inherited search roots, compass navigation and typed result projections, plus press/swipe/gesture/gestures overloads for Node.js, Bun and Workers",
         "Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots; Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation",
         "Node.js/Bun/Worker: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup",

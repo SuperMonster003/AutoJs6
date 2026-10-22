@@ -104,6 +104,25 @@ class RuntimeWebActionActivity : Activity() {
             }.launch()
         }
 
+        internal fun agentAccess(context: Context, complete: (Boolean) -> Unit): Action {
+            require(org.autojs.autojs.core.plugin.center.PluginTrustManager.resolveTrustInfo(context, RuntimeAgentBridge.HOST).isOfficial) {
+                "Install or update the official AutoJs6 host to authorize Agent tasks"
+            }
+            return object : Action(context) {
+                private var requested = false
+                override fun attach(activity: Activity, state: Bundle?) {
+                    if (!requested) {
+                        requested = true
+                        try { activity.startActivityForResult(Intent().setClassName(RuntimeAgentBridge.HOST, RuntimeAgentRemote.ACCESS_ACTIVITY), REQUEST) }
+                        catch (_: android.content.ActivityNotFoundException) { close() }
+                        catch (_: SecurityException) { close() }
+                    }
+                }
+                override fun result(code: Int, data: Intent?) = finish { complete(code == Activity.RESULT_OK) }
+                override fun close() = finish { complete(false) }
+            }.launch()
+        }
+
         internal fun mediaPermissions(context: Context, origin: String, permissions: Array<String>, complete: (Boolean) -> Unit): Action = object : Action(context) {
             private var requested = false
             override fun attach(activity: Activity, state: Bundle?) {

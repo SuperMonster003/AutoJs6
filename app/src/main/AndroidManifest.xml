@@ -32,6 +32,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="org.autojs.permission.AI_RUNTIME" />
+    <uses-permission android:name="org.autojs.permission.AGENT_RUNTIME" />
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
     <uses-permission android:name="org.autojs.plugin.mail.permission.RUNTIME" />
     <uses-permission android:name="org.autojs.plugin.epub.permission.RUNTIME" />
@@ -41,6 +42,8 @@
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
 
     <queries>
+        <package android:name="org.autojs.autojs6" />
+        <provider android:authorities="org.autojs.autojs6.agent.runtime" />
         <intent>
             <action android:name="org.autojs.plugin.MAIL_PACKAGED" />
             <category android:name="mail" />

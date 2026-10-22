@@ -198,6 +198,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * `힌트` console 요소와 부동 콘솔은 현재 스크립트의 로그를 표시하며, 전역 로그는 globalconsole 요소 또는 로그 페이지에서 확인
 * `힌트` 파일 로그를 내장 구현으로 변경하며, 문서화된 설정과 일반적인 PatternLayout 형식을 유지하고 다른 Log4j API는 제공하지 않음
 * `힌트` Node.js pinyin/pinyin4j와 콘솔 창 제어는 비동기 호스트 호출로 변경되었으며, 스크립트는 await로 결과를 기다려야 함
+* `추가` Node.js/Bun/Worker의 ai.agent 작업 제어와 이벤트, 등록된 스크립트의 컨텍스트와 결과, 패키징된 앱의 명시적 승인
 * `추가` Node.js, Bun 및 Worker의 Flow within/scope 검색 범위 상속, 나침반 탐색 및 결과 투영과 press/swipe/gesture/gestures 오버로드
 * `추가` Node.js, Bun, Worker의 flow 비동기 체인 및 조건/안정성 대기, 분기 취소, 단계 재시도, 호스트 화면 스냅샷 지원; Node.js, Bun 및 Worker의 Flow 고급 클릭, 스크롤, 입력, 목록 수집 및 실제 이벤트 대기, 구독 준비, 스냅샷 검증 및 취소 지원
 * `추가` Node.js/Bun/Worker: 메일 계정 연결, 메시지 작업, 첨부 파일 및 메일함 감시, 취소와 Worker 종료 시 정리

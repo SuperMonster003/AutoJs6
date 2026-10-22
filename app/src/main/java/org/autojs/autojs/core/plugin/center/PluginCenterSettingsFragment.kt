@@ -20,6 +20,9 @@ class PluginCenterSettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.fragment_plugin_center_preferences, rootKey)
+        findPreference<MaterialPreference>("agent_runtime_access")?.setOnPreferenceClickListener {
+            startActivity(android.content.Intent(requireContext(), org.autojs.autojs.engine.RuntimeAgentAccessManagementActivity::class.java)); true
+        }
         autoMountManagePreference = findPreference(KEY_PLUGIN_CENTER_AUTO_MOUNT_MANAGEMENT)
         hiddenPluginManagePreference = findPreference(KEY_PLUGIN_CENTER_HIDDEN_PLUGIN_MANAGEMENT)
         autoMountManagePreference?.onPreferenceClickListener = Preference.OnPreferenceClickListener {

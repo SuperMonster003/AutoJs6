@@ -147,6 +147,10 @@ object NamedStores {
     @JvmField
     val RUNTIME_TASK_INTENTS = excluded("runtime_task_intents")
 
+    /** App-installation-bound Agent consent and task ownership must not be imported onto another device or install. */
+    @JvmField
+    val AGENT_RUNTIME_ACCESS = excluded("agent_runtime_access")
+
     /** Desktop widget ids assigned by the launcher of this device (`ScriptWidgets`). */
     @JvmField
     val SCRIPT_WIDGETS = excluded("ScriptWidgets")
@@ -165,6 +169,6 @@ object NamedStores {
         GITHUB_AUTH, PLUGIN_CENTER_AUTHORIZATION, MCP_SERVER_TRUST_CONFIRMATION, THREE_STOVE_AGENT_TRUST_CONFIRMATION,
         BUN_HOST_CAPABILITY_GRANTS,
         DEVICE_ID_PREFS, SCRIPT_LOCAL_STORAGES, NODE_SCRIPT_STORAGES, LUA_SCRIPT_STORAGES, PRIVILEGED_EDIT_BACKUPS,
-        RUNTIME_TASK_INTENTS, SCRIPT_WIDGETS, EXPLORER_PLAYBACK_HISTORY,
+        RUNTIME_TASK_INTENTS, AGENT_RUNTIME_ACCESS, SCRIPT_WIDGETS, EXPLORER_PLAYBACK_HISTORY,
     )
 }

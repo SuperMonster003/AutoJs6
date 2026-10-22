@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agent_runtime_access_title">Agent 應用程式授權</string>
+    <string name="agent_runtime_allow">允許</string>
+    <string name="agent_runtime_deny">拒絕</string>
+    <string name="agent_runtime_description">允許此應用程式透過 AutoJs6 執行 Agent 任務, 使用其 AI 模型, 已登記指令碼和裝置權限. 任務確認規則仍然適用.</string>
+    <string name="agent_runtime_empty">沒有已授權的應用程式</string>
+    <string name="agent_runtime_request_app">%1$s (%2$s) 要求存取 Agent 任務.</string>
+    <string name="agent_runtime_revoke">撤銷授權</string>
+    <string name="agent_runtime_revoke_message">撤銷 %1$s (%2$s) 的授權? 該應用程式正在執行的 Agent 任務將停止.</string>
+    <string name="bun_agent_grant_summary">允許 host.ai.agent 任務控制, 事件和已登記指令碼的結果回傳</string>
+    <string name="bun_agent_grant_title">Agent 任務</string>
+</resources>

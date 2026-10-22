@@ -406,6 +406,7 @@
   "ScriptWidgets": {"kind": "Excluded", "note": "桌面小部件 id 由启动器分配, 仅本机有效 (附录 A.2)"},
   "ace_action_history": {"kind": "State", "category": "other", "note": "Ace 动作历史 (P3.2 为 State); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys"},
   "ace_editor_font_ui_preferences": {"kind": "Setting", "category": "editor_keyboard", "note": "字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys"},
+  "agent_runtime_access": {"kind": "Excluded", "note": "Agent consent and run ownership bind the current package, UID, signer and installation; never import or export them as portable settings"},
   "autojs.localstorage.*": {"kind": "Excluded", "note": "脚本自己的数据 (附录 A.2)"},
   "autojs.node.storage.*.*.*": {"kind": "Excluded", "note": "Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板)"},
   "build_apk_config_profiles": {"kind": "Setting", "category": "apk_build", "note": "APK 构建配置档; P3.3 登记为 NamedStores, 键声明在 ApkBuildKeys"},

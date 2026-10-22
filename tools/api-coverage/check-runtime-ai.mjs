@@ -21,6 +21,6 @@ assert(docs);
 for(const name of [...names,'hasAccess','requestAccess','close']) {
   assert.equal(typeof ai[name],'function');assert(types.includes(name+'('),name+' declaration');assert(docs.includes(name),name+' documentation');
 }
-assert.equal(typeof ai,'function');assert.equal(ai.ask,ai);assert.equal(ai.agent,undefined);
+assert.equal(typeof ai,'function');assert.equal(ai.ask,ai);assert.equal(typeof ai.agent.run,'function');
 assert(types.includes('readonly result: Promise<Response>')&&types.includes('close(): Promise<void>'));
-console.log(JSON.stringify({registeredAiCoreNames:5,sessionMethods:4,runtimeHelpers:3,sharedMainBunWorkerFactory:true,agentParity:false}));
+console.log(JSON.stringify({registeredAiCoreNames:5,sessionMethods:4,runtimeHelpers:3,sharedMainBunWorkerFactory:true,agentPortableFacade:true,rhinoPrototypeParity:false}));

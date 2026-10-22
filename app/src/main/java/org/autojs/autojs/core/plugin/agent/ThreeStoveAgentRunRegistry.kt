@@ -84,6 +84,10 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
         return call { decode(it.respond(envelope(C.KEY_RUN_RESPONSE_JSON, response.deepCopy().apply { addProperty("runId", record.id) })))["accepted"].asBoolean }
     }
     fun cancel(record: ThreeStoveAgentRunRecord, reason: String) { if (!record.settled) cancelId(record.id, reason) }
+    /** Revocation only stops live tracked tasks; it must not reconnect to inspect historical IDs. */
+    fun cancelTracked(ids: Set<String>, reason: String) {
+        runs.values.filter { it.id in ids && !it.settled }.forEach { runCatching { cancel(it, reason) } }
+    }
     private fun cancelId(id: String, reason: String) = call { it.cancelRun(envelope(C.KEY_RUN_REF_JSON, JsonObject().apply { addProperty("runId", id); addProperty("reason", reason) })) }
     fun list(limit: Int, offset: Int): JsonObject { ensureConnection(); return call { decode(it.listRuns(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject().apply { addProperty("limit", limit); addProperty("offset", offset) }))) } }
     fun presets(): JsonObject { ensureConnection(); return call { decode(it.listPresets(envelope(C.KEY_RUN_REQUEST_JSON, JsonObject()))) } }
@@ -92,6 +96,13 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
         addProperty("state", status.state); addProperty("queuedCount", status.queuedCount)
         status.runningRunId?.let { addProperty("runningRunId", it) }
         status.errorCode?.let { addProperty("errorCode", it) }
+    }
+    /** Delegated applications see only their own active IDs and queue count; this never connects. */
+    fun status(visible: (String) -> Boolean): JsonObject = status().apply {
+        remove("runningRunId")
+        val owned = runs.values.filter { !it.settled && visible(it.id) }
+        addProperty("queuedCount", owned.count { it.state == "queued" })
+        owned.firstOrNull { it.state != "queued" }?.let { addProperty("runningRunId", it.id) }
     }
     // Local catalog metadata remains available without a plugin. Extra roots are optional;
     // their discovery must not reject the local query.

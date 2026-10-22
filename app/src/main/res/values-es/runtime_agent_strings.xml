@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="agent_runtime_access_title">Acceso de aplicaciones a Agent</string>
+    <string name="agent_runtime_allow">Permitir</string>
+    <string name="agent_runtime_deny">Denegar</string>
+    <string name="agent_runtime_description">Permitir que esta aplicación ejecute tareas Agent mediante AutoJs6 con sus modelos de IA, scripts registrados y permisos del dispositivo. Se mantienen las reglas de confirmación.</string>
+    <string name="agent_runtime_empty">No hay aplicaciones autorizadas</string>
+    <string name="agent_runtime_request_app">%1$s (%2$s) solicita acceso a las tareas Agent.</string>
+    <string name="agent_runtime_revoke">Revocar acceso</string>
+    <string name="agent_runtime_revoke_message">Revocar el acceso de %1$s (%2$s)? Se detendrán sus tareas Agent en curso.</string>
+    <string name="bun_agent_grant_summary">Permitir controles, eventos y resultados de scripts registrados de host.ai.agent</string>
+    <string name="bun_agent_grant_title">Tareas Agent</string>
+</resources>

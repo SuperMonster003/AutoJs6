@@ -22,7 +22,7 @@ class NamedStoresTest {
     fun permanentExclusionsKeepTheirNames() {
         val excluded = listOf(
             "device_id_prefs", "autojs.localstorage.*", "autojs.node.storage.*.*.*", "lua-runtime-storage-v1-*",
-            "privileged_edit_backups", "runtime_task_intents", "ScriptWidgets", "explorer_playback_history",
+            "privileged_edit_backups", "runtime_task_intents", "agent_runtime_access", "ScriptWidgets", "explorer_playback_history",
         )
         assertEquals(excluded, SettingsRegistry.stores.filter { it.excluded }.map { it.name })
         SettingsRegistry.stores.forEach { assertEquals(StoreId.Backend.SHARED_PREFERENCES, it.backend) }

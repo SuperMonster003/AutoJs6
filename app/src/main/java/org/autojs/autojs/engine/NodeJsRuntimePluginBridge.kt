@@ -67,6 +67,7 @@ object NodeJsRuntimePluginBridge {
         stdinListener: ((ready: Boolean) -> Unit)? = null,
         startupTimings: Map<String, Long> = emptyMap(),
         console: org.autojs.autojs.core.console.ConsoleImpl? = null,
+        agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
     ): NodePluginScriptResult {
         val startedAt = SystemClock.elapsedRealtime()
         NodeJsRuntimePluginHost.prepareForExecution(context)
@@ -106,6 +107,7 @@ object NodeJsRuntimePluginBridge {
                     requestWithProvider,
                     launchSurface,
                     console,
+                    agentExecutionState,
                 ).also { hostCapabilityBroker = it }
                 val workspaceStartedAt = SystemClock.elapsedRealtime()
                 val workspaceTransport = try {

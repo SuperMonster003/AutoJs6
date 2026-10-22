@@ -238,7 +238,8 @@ class BunPluginScriptEngine internal constructor(
         if (!supportsCapabilityBridge(selection)) return null
         val granted = BunHostCapabilityGrants.grantedBridgeCapabilities(appContext)
         if (granted.isEmpty()) return null
-        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd())
+        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd(),
+            (getTag(ExecutionConfig.tag) as? ExecutionConfig)?.agentExecutionState)
     }
 
     private fun supportsCapabilityBridge(selection: BunRuntimePluginClient.Selection): Boolean =
