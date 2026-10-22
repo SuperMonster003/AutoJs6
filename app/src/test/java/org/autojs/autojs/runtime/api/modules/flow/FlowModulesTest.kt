@@ -122,11 +122,18 @@ class FlowModulesTest {
             "flow.waitThenLongClick('a', 1, 2, 3)" to "throws TypeError",
             "clickWhenStable('a', -1)" to "throws RangeError",
             "clickBoundsWhenStable()" to "throws TypeError",
-            "clickWhenStableAfter('a')" to "throws TypeError",
-            "clickWhenStableAfter('a', 1, 2)" to "throws TypeError",
             "clickWhenStableAfter('a', 1, 2, -1)" to "throws RangeError",
             "clickBoundsWhenStableAfter('a', 1, 2, 3, NaN)" to "throws RangeError",
             "clickBoundsWhenStableAfter('a', 1, 2, 3, 4, 5)" to "throws TypeError",
+        )
+    )
+
+    /** JVM only: on a device the current module starts waiting for the target before it rejects these arguments. */
+    @Test
+    fun waitArgumentsAfterTheWaitStarts() = RuntimeModulesFixture.check(
+        rhino, listOf(
+            "clickWhenStableAfter('a')" to "throws TypeError",
+            "clickWhenStableAfter('a', 1, 2)" to "throws TypeError",
         )
     )
 
