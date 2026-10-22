@@ -1,4 +1,5 @@
-// Device side of the import wizard check (docs/settings/ROADMAP.md P7.5 / P7.4 / P8.1, appendix D items 1 - 6, E3).
+// Device side of the import wizard check (docs/settings/ROADMAP.md P7.5 / P7.4 / P8.1 / P7.7 / P10.2 / P10.3 / P11.1,
+// appendix D items 1 - 6, 13 and 14, E3).
 // Run by tools/settings/device_import_check.py, which sets AJ6_PHASE and the other AJ6_* variables:
 //   prepare  keeps every setting (an archive sealed with the device key) and the internal backups in the private
 //            directory of the app, sets the "A" values (theme color, night mode, editor text size, plugin sort, a test
@@ -10,14 +11,25 @@
 //   plugins  checks the flipped plugin state (AJ6_EXPECT "flipped" or "original") and that the missing package was
 //            not written;
 //   reset    checks a reset to defaults of AJ6_CATEGORIES (P8.1): their keys are gone, the other test values stay;
+//   keep     only the first part of prepare: keeps every setting and the internal backups, for the phases below;
+//   pbkdf2   times one PBKDF2 derivation of the password slot (P7.7, appendix C Q30), AJ6_ROUNDS warm runs;
+//   token    sets the test GitHub token AJ6_EXPECT ("A" or "B") and writes OUT/d.zip, the credentials sealed with the
+//            device key only (P7.7); token-verify checks which test token is stored; access checks how this device
+//            reads the credentials of AJ6_FILE (AJ6_EXPECT: DEVICE, PASSWORD, LOCKED, ...);
+//   data-prepare  adds three test shortcuts (one without an icon) and two test color libraries (P10.2, item 13);
+//            data-inspect checks the data of AJ6_FILE (2 test shortcuts, 1 test color library); data-delete deletes the
+//            test entries; data-verify checks them after the import (AJ6_EXPECT "imported") or its undo ("undone");
+//   welcome-reset  clears key_setup_wizard_welcome_done (P11.1, item 14); welcome-verify checks it is set again;
 //   restore  imports the kept archive back (every category, effects applied), puts the internal backups back and
-//            deletes the operation backups written since prepare and the private files.
+//            deletes the operation backups written since prepare, the test data, and the private files.
 // Lines carry counts and non-secret values only, never the token or other credentials (R6).
-// zh-CN: 导入向导真机检查的设备端 (ROADMAP P7.5 / P7.4 / P8.1, 附录 D 第 1 - 6 项, E3). 由 device_import_check.py 设置 AJ6_PHASE 等变量:
+// zh-CN: 导入向导真机检查的设备端 (ROADMAP P7.5 / P7.4 / P8.1 / P7.7 / P10.2 / P10.3 / P11.1, 附录 D 第 1 - 6, 13, 14 项, E3). 由 device_import_check.py 设置 AJ6_PHASE 等变量:
 // prepare 把全部设置 (以设备密钥加密的归档) 与内部备份保存到应用私有目录, 设置 "A" 值并写出 a.zip (默认分类加凭据) 与 b.zip
 // (插件启用状态: 翻转一个已安装插件并加入一个未安装的包), 再设置并应用 "B" 值; verify 核对值为 AJ6_EXPECT, 本进程已生效, 测试令牌仍为
-// "B", 并统计内部备份与操作后备份; plugins 核对插件状态; reset 核对恢复默认 (P8.1); restore 导入保存的归档还原全部设置, 放回内部备份,
-// 删除 prepare 之后写出的操作后备份与私有文件. 只输出计数与非机密的值, 不输出令牌等凭据 (R6).
+// "B", 并统计内部备份与操作后备份; plugins 核对插件状态; reset 核对恢复默认 (P8.1); keep 只做 prepare 的保存部分; pbkdf2 计时口令槽的
+// 一次派生 (P7.7, 附录 C Q30); token 设置测试令牌并写出只有设备槽的 d.zip, token-verify / access 核对令牌与凭据的读取方式; data-*
+// 准备, 核对与删除测试快捷方式与颜色库 (P10.2 / P10.3); welcome-* 清除并核对欢迎向导状态 (P11.1); restore 导入保存的归档还原全部设置,
+// 放回内部备份, 删除 prepare 之后写出的操作后备份, 测试数据与私有文件. 只输出计数与非机密的值, 不输出令牌等凭据 (R6).
 
 var MARK = 'AJ6SET';
 var RESULT_FILE = files.join(files.cwd(), 'aj6set-result.txt');
@@ -233,26 +245,47 @@ function readState() {
     return JSON.parse(String(files.read(STATE.getPath())));
 }
 
-function prepare() {
+function writeState(state) {
+    files.write(STATE.getPath(), JSON.stringify(state));
+}
+
+// Keeps every setting and the internal backups for restore; null (and a FAIL line) when a previous check was not
+// restored, whose kept files must not be overwritten.
+function keep() {
     if (ORIGINAL.isFile()) {
-        check('prepare', false, 'a previous check was not restored; run the restore phase first');
-        return;
+        check('keep', false, 'a previous check was not restored; run the restore phase first');
+        return null;
     }
     PRIVATE.mkdirs();
     var original = writeArchive(ORIGINAL, Category.ALL);
     var keptBackups = VAULT.isDirectory() ? copyDirectory(VAULT, VAULT_COPY) : 0;
     var plugin = installedPlugin();
-    var enabled = keys.PluginCenterKeys.PLUGIN_ENABLED;
-    var pluginKey = plugin ? enabled.key(plugin) : null;
-    var pluginNow = plugin ? bool(pluginKey.get()) : null;
-    files.write(STATE.getPath(), JSON.stringify({
+    var state = {
         preparedAt: java.lang.System.currentTimeMillis(),
         plugin: plugin,
-        pluginOriginal: pluginNow,
+        pluginOriginal: plugin ? bool(keys.PluginCenterKeys.PLUGIN_ENABLED.key(plugin).get()) : null,
         languageB: String(stored(keys.AppearanceKeys.APP_LANGUAGE) || ''),
         iconTransparent: Boolean(Packages.org.autojs.autojs.util.LauncherIconComponents.isTransparentBackground(context)),
-    }));
+    };
+    writeState(state);
     check('kept', true, original.getCategories().size() + ' categories, ' + keptBackups + ' internal backup files');
+    return state;
+}
+
+function kept() {
+    if (!ORIGINAL.isFile()) {
+        check(AJ6_PHASE, false, 'run the keep (or prepare) phase first');
+        return null;
+    }
+    return readState();
+}
+
+function prepare() {
+    var state = keep();
+    if (!state) return;
+    var plugin = state.plugin;
+    var enabled = keys.PluginCenterKeys.PLUGIN_ENABLED;
+    var pluginNow = state.pluginOriginal;
 
     setValues(VALUES.A, AJ6_LANGUAGE_A || null, AJ6_ICON_A || null, false);
     var outDir = new File(AJ6_OUT);
@@ -418,7 +451,7 @@ function deployPrepare() {
     state.deployFont = font;
     state.directoryBefore = String(stored(keys.ExplorerKeys.WORKING_DIRECTORY));
     state.fontBefore = String(stored(keys.EditorKeys.ACE_EDITOR_FONT));
-    files.write(STATE.getPath(), JSON.stringify(state));
+    writeState(state);
     check('c.zip', true, 'working directory ' + directory + ' (absent), editor font ' + (font || 'none: every catalog font is installed'));
 }
 
@@ -440,6 +473,262 @@ function deployVerify() {
         check('directory-kept', directoryKey === state.directoryBefore, 'key ' + (directoryKey === state.directoryBefore ? 'kept' : 'changed') + ', directory ' + (created ? 'exists' : 'absent'));
         check('font-kept', fontKey === state.fontBefore, 'key ' + (fontKey === state.fontBefore ? 'kept' : 'changed') + ', font ' + (fontInstalled ? 'installed' : 'not installed'));
     }
+}
+
+// Java strings for a Kotlin list compared by equality (a concatenated JavaScript string is not a java.lang.String).
+function strings(items) {
+    return list(items.map(function (it) {
+        return new java.lang.String(String(it));
+    }));
+}
+
+// P7.7, appendix C Q30: one PBKDF2-HMAC-SHA256 derivation with the iterations the export writes, which the export (a
+// password set) and the import (a password checked) each take once. The first run includes the class loading and the
+// JIT warm-up of this process; a debuggable build has no ahead-of-time compiled code, so its times are upper bounds.
+function pbkdf2() {
+    var Password = archive.SettingsPassword;
+    var iterations = Password.ITERATIONS;
+    var rounds = Number(AJ6_ROUNDS || 5);
+    var password = new java.lang.String('aj6-check-timing').getBytes('UTF-8');
+    var salt = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 16);
+    new java.security.SecureRandom().nextBytes(salt);
+    var times = [];
+    for (var i = 0; i <= rounds; i++) {
+        var start = java.lang.System.nanoTime();
+        Password.Companion.pbkdf2(password, salt, iterations, 32);
+        times.push(Math.round((java.lang.System.nanoTime() - start) / 1e6));
+    }
+    var warm = times.slice(1).sort(function (a, b) {
+        return a - b;
+    });
+    var debuggable = (context.getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) !== 0;
+    out('INFO pbkdf2 ' + iterations + ' iterations, ' + (debuggable ? 'debuggable' : 'release') + ' build, ' + android.os.Build.MODEL + ' (API ' + android.os.Build.VERSION.SDK_INT + ')');
+    check('pbkdf2', true, 'first ' + times[0] + ' ms, then median ' + warm[Math.floor(warm.length / 2)] + ' ms (min ' + warm[0] + ', max ' + warm[warm.length - 1] + ', ' + warm.length + ' runs)');
+    // For comparison: the "PBKDF2WithHmacSHA256" of the platform (Android 8+, native), which SettingsPassword does
+    // not use because of Android 7. Same password and salt, so the derived keys must be equal.
+    if (android.os.Build.VERSION.SDK_INT < 26) return;
+    var chars = new java.lang.String('aj6-check-timing').toCharArray();
+    var factory = javax.crypto.SecretKeyFactory.getInstance('PBKDF2WithHmacSHA256');
+    var platform = [];
+    var key = null;
+    for (var j = 0; j <= rounds; j++) {
+        var begin = java.lang.System.nanoTime();
+        key = factory.generateSecret(new javax.crypto.spec.PBEKeySpec(chars, salt, iterations, 256)).getEncoded();
+        platform.push(Math.round((java.lang.System.nanoTime() - begin) / 1e6));
+    }
+    var same = java.util.Arrays.equals(key, Password.Companion.pbkdf2(password, salt, iterations, 32));
+    var sorted = platform.slice(1).sort(function (a, b) {
+        return a - b;
+    });
+    check('pbkdf2-platform', same, 'SecretKeyFactory PBKDF2WithHmacSHA256: first ' + platform[0] + ' ms, then median ' + sorted[Math.floor(sorted.length / 2)] + ' ms, same key ' + same);
+}
+
+// P7.7: sets the test token of this device (AJ6_EXPECT "A" on the exporting device, "B" on the importing one) after
+// keep, and writes d.zip: the credentials sealed with the device key only (an archive of before P7.7, without a
+// password slot), which another device reads as LOCKED without asking for a password.
+function token() {
+    if (!kept()) return;
+    var value = {A: TOKEN_A, B: TOKEN_B}[AJ6_EXPECT];
+    put(keys.CredentialKeys.GITHUB_TOKEN, value);
+    var d = writeArchive(new File(new File(AJ6_OUT), 'd.zip'), list([Category.CREDENTIALS]));
+    check('token', tokenName() === AJ6_EXPECT, 'test token ' + tokenName() + ' set, d.zip with ' + d.getCategories().size() + ' category (device slot only)');
+}
+
+function tokenName() {
+    var token = stored(keys.CredentialKeys.GITHUB_TOKEN);
+    if (token === null) return 'absent';
+    return String(token) === TOKEN_A ? 'A' : String(token) === TOKEN_B ? 'B' : 'other';
+}
+
+function tokenVerify() {
+    check('token-' + AJ6_EXPECT, tokenName() === AJ6_EXPECT, 'the test token of this device is ' + tokenName());
+}
+
+// P7.7: how this device reads the credentials of AJ6_FILE (PLAIN, DEVICE, PASSWORD or LOCKED; AJ6_EXPECT).
+function access() {
+    var file = new File(AJ6_FILE);
+    var reader = readerOf(file);
+    var categories = reader.manifest().getCategories();
+    var found = false;
+    for (var i = 0; i < categories.size(); i++) {
+        if (String(categories.get(i).getId()) === 'credentials') found = true;
+    }
+    var now = found ? String(reader.access('credentials')) : 'none';
+    check('access', now === AJ6_EXPECT, file.getName() + ' credentials ' + now);
+}
+
+var DATA = pref.data;
+var TEST_PREFIX = 'aj6-check';
+
+function pngIcon(color) {
+    var bitmap = android.graphics.Bitmap.createBitmap(96, 96, android.graphics.Bitmap.Config.ARGB_8888);
+    // The int overload: Rhino would choose eraseColor(long) (a ColorLong, API 29+) for a number.
+    bitmap['eraseColor(int)'](color);
+    var bytes = new java.io.ByteArrayOutputStream();
+    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, bytes);
+    bitmap.recycle();
+    return bytes.toByteArray();
+}
+
+function shortcutRepository() {
+    return Packages.org.autojs.autojs.external.shortcut.ShortcutBackupRepository.Companion.get(context);
+}
+
+// The test shortcuts of the shortcut backup: id -> status.
+function testShortcuts() {
+    var entries = shortcutRepository().read().getEntries();
+    var found = {};
+    for (var i = 0; i < entries.size(); i++) {
+        var id = String(entries.get(i).getId());
+        if (id.indexOf(TEST_PREFIX + '-') === 0) found[id] = String(entries.get(i).getStatus());
+    }
+    return found;
+}
+
+// The test color libraries ({id, name}), found by their names; read from the database, the repository only suspends.
+function testLibraries() {
+    var db = Packages.org.autojs.autojs.theme.app.ColorHistoryDatabase.Companion.getInstance(context).getOpenHelper().getReadableDatabase();
+    var cursor = db.query("SELECT id, name FROM color_library WHERE name LIKE '" + TEST_PREFIX + "%'");
+    var found = [];
+    try {
+        while (cursor.moveToNext()) found.push({id: String(cursor.getLong(0)), name: String(cursor.getString(1))});
+    } finally {
+        cursor.close();
+    }
+    return found;
+}
+
+function names(libraries) {
+    return libraries.map(function (it) {
+        return it.name;
+    }).sort();
+}
+
+// P10.2 (appendix D item 13): three test shortcuts (the first one without an icon) and two plain test color libraries,
+// added the way an import adds them; restore deletes them again.
+function dataPrepare() {
+    var state = kept();
+    if (!state) return;
+    if (Object.keys(testShortcuts()).length || testLibraries().length) {
+        check('data-prepare', false, 'test entries of an earlier check are still there; run data-delete first');
+        return;
+    }
+    var shortcut = Packages.org.autojs.autojs.external.shortcut;
+    var Entry = shortcut.ShortcutBackupEntry;
+    var SAVED = shortcut['ShortcutBackupEntry$Status'].SAVED;
+    var specs = [['log', null], ['docs', pngIcon(0xFF3F51B5 | 0)], ['settings', pngIcon(0xFF009688 | 0)]];
+    var entries = specs.map(function (spec, i) {
+        var label = TEST_PREFIX + ' ' + (i + 1) + (spec[1] ? '' : ' no icon');
+        return new Entry(TEST_PREFIX + '-shortcut-' + (i + 1), label, label, spec[0], null, null, null, spec[1], SAVED, false, null, false);
+    });
+    var shortcuts = DATA.SettingsDataImport['import'](context, DATA.ShortcutDataCodec.encode(new shortcut.ShortcutBackupState(list(entries), null, null, null)), null);
+    var json = Packages.org.autojs.autojs.theme.library.ColorLibraryJson;
+    var libraries = [1, 2].map(function (n) {
+        var colors = list([new json.Color(0xFFE91E63 | 0, 'aj6 pink ' + n, 0, 0), new json.Color(0xFF4CAF50 | 0, 'aj6 green ' + n, 0, 0)]);
+        return new json.PlainLibrary(TEST_PREFIX + '-' + n, colors);
+    });
+    var colors = DATA.SettingsDataImport['import'](context, DATA.ColorLibraryDataCodec.encode(list(libraries), java.lang.System.currentTimeMillis()), 'aj6-check.zip');
+    state.dataShortcuts = Object.keys(testShortcuts()).sort();
+    state.dataLibraries = names(testLibraries());
+    writeState(state);
+    check('data-shortcuts', state.dataShortcuts.length === 3 && !shortcuts.getFailure(), state.dataShortcuts.join(', ') + (shortcuts.getFailure() ? ', ' + shortcuts.getFailure() : ''));
+    check('data-libraries', state.dataLibraries.length === 2 && !colors.getFailure(), state.dataLibraries.join(', ') + (colors.getFailure() ? ', ' + colors.getFailure() : ''));
+}
+
+// P10.2: the data of AJ6_FILE, the export of the maintainer: 2 test shortcuts and 1 test color library, nothing else.
+function dataInspect() {
+    var state = kept();
+    if (!state) return;
+    var reader = readerOf(new File(AJ6_FILE));
+    var data = reader.manifest().getData();
+    var found = {};
+    for (var i = 0; i < data.size(); i++) {
+        var entry = data.get(i);
+        var id = String(entry.getId());
+        var entries = DATA.SettingsDataEntries.entries(id, reader.data(entry.getFile()));
+        var items = [];
+        for (var j = 0; j < entries.size(); j++) items.push(String(id === 'data_shortcuts' ? entries.get(j).getId() : entries.get(j).getTitle()));
+        found[id] = {manifest: Number(entry.getEntries()), items: items};
+    }
+    var shortcuts = found.data_shortcuts || {manifest: 0, items: []};
+    var libraries = found.data_color_library || {manifest: 0, items: []};
+    var testShortcutIds = shortcuts.items.filter(function (it) {
+        return state.dataShortcuts.indexOf(it) >= 0;
+    });
+    var testLibraryNames = libraries.items.filter(function (it) {
+        return state.dataLibraries.indexOf(it) >= 0;
+    });
+    check('export-shortcuts', shortcuts.manifest === 2 && shortcuts.items.length === 2 && testShortcutIds.length === 2, 'manifest ' + shortcuts.manifest + ', file ' + shortcuts.items.length + ' (' + testShortcutIds.join(', ') + ')');
+    check('export-libraries', libraries.manifest === 1 && libraries.items.length === 1 && testLibraryNames.length === 1, 'manifest ' + libraries.manifest + ', file ' + libraries.items.length + ' (' + testLibraryNames.join(', ') + ')');
+    state.exportedShortcuts = testShortcutIds.sort();
+    state.exportedLibraries = testLibraryNames.sort();
+    writeState(state);
+}
+
+// Deletes the test shortcuts and color libraries, the way undoing an import does.
+function removeTestData() {
+    var shortcuts = DATA.SettingsDataImport.remove(context, 'data_shortcuts', strings(Object.keys(testShortcuts())));
+    var libraries = DATA.SettingsDataImport.remove(context, 'data_color_library', strings(testLibraries().map(function (it) {
+        return it.id;
+    })));
+    return {shortcuts: shortcuts, libraries: libraries, left: Object.keys(testShortcuts()).length + testLibraries().length};
+}
+
+function dataDelete() {
+    if (!kept()) return;
+    var removed = removeTestData();
+    check('data-deleted', removed.left === 0, removed.shortcuts.getRemoved() + ' test shortcuts and ' + removed.libraries.getRemoved() + ' test color libraries deleted, ' + removed.left + ' left');
+}
+
+// P10.2 / P10.3: AJ6_EXPECT "imported" (the exported test entries are back and the last operation records them as
+// added) or "undone" (they are gone again and the record is cleared).
+function dataVerify() {
+    var state = kept();
+    if (!state) return;
+    var shortcuts = testShortcuts();
+    var ids = Object.keys(shortcuts).sort();
+    var libraries = testLibraries();
+    var exportedShortcuts = state.exportedShortcuts || [];
+    var exportedLibraries = state.exportedLibraries || [];
+    var last = new File(VAULT, archive.SettingsBackupVault.LAST_OPERATION);
+    var statuses = ids.map(function (id) {
+        return id + ' ' + shortcuts[id];
+    }).join(', ');
+    if (AJ6_EXPECT === 'imported') {
+        check('shortcuts-imported', ids.join() === exportedShortcuts.join(), ids.length + ' test shortcuts (' + statuses + '), exported ' + exportedShortcuts.length);
+        check('libraries-imported', names(libraries).join() === exportedLibraries.join(), libraries.length + ' test color libraries (' + names(libraries).join(', ') + '), exported ' + exportedLibraries.length);
+        var record = last.isFile() ? JSON.parse(String(files.read(last.getPath()))) : {};
+        var added = record.added || {};
+        var addedShortcuts = (added.data_shortcuts || []).slice().sort();
+        var addedLibraries = (added.data_color_library || []).slice().sort();
+        var libraryIds = libraries.map(function (it) {
+            return it.id;
+        }).sort();
+        check('added-recorded', addedShortcuts.join() === ids.join() && addedLibraries.join() === libraryIds.join(), 'last operation ' + (record.operation || 'absent') + ': added ' + addedShortcuts.length + ' shortcuts, ' + addedLibraries.length + ' color libraries');
+    } else {
+        check('shortcuts-undone', ids.length === 0, ids.length + ' test shortcuts left' + (ids.length ? ' (' + statuses + ')' : ''));
+        check('libraries-undone', libraries.length === 0, libraries.length + ' test color libraries left');
+        check('record-cleared', !last.isFile(), 'last-operation.json ' + (last.isFile() ? 'present' : 'absent'));
+        var ops = operationBackups(state.preparedAt);
+        out('INFO operation backups since keep ' + ops.length);
+    }
+}
+
+// P11.1 (appendix D item 14): clears key_setup_wizard_welcome_done, the welcome then shows on the next start of the
+// home page; restore puts the kept value back.
+function welcomeReset() {
+    var state = kept();
+    if (!state) return;
+    var key = keys.MiscStateKeys.SETUP_WIZARD_WELCOME_DONE;
+    state.welcomeBefore = stored(key) === null ? null : bool(stored(key));
+    writeState(state);
+    key.remove(true);
+    check('welcome-reset', stored(key) === null, 'key_setup_wizard_welcome_done was ' + state.welcomeBefore + ', now absent');
+}
+
+function welcomeVerify() {
+    var now = stored(keys.MiscStateKeys.SETUP_WIZARD_WELCOME_DONE);
+    check('welcome-done', now !== null && bool(now), 'key_setup_wizard_welcome_done ' + now);
 }
 
 function restore() {
@@ -487,12 +776,24 @@ function restore() {
         if (made.isDirectory()) deleteDirectory(made);
     }
     if (state.deployFont) Packages.org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager.get(context).delete(state.deployFont);
+    // The test shortcuts and color libraries (P10.2), and the welcome state (P11.1).
+    var data = removeTestData();
+    if ('welcomeBefore' in state) {
+        var welcome = keys.MiscStateKeys.SETUP_WIZARD_WELCOME_DONE;
+        if (state.welcomeBefore === null) welcome.remove(true); else welcome.set(java.lang.Boolean.valueOf(state.welcomeBefore), true);
+    }
     deleteDirectory(PRIVATE);
-    check('restored', true, plan.getPuts().size() + ' written, ' + plan.getRemoves().size() + ' removed, ' + changes.size() + ' changed, ' + restored + ' internal backup files back, ' + ops.length + ' operation backups deleted');
+    check('restored', data.left === 0, plan.getPuts().size() + ' written, ' + plan.getRemoves().size() + ' removed, ' + changes.size() + ' changed, ' + restored + ' internal backup files back, ' + ops.length + ' operation backups deleted, ' + (data.shortcuts.getRemoved() + data.libraries.getRemoved()) + ' test data entries deleted (' + data.left + ' left)');
 }
 
 try {
-    ({prepare: prepare, verify: verify, plugins: plugins, reset: reset, restore: restore, 'deploy-prepare': deployPrepare, 'deploy-verify': deployVerify})[AJ6_PHASE]();
+    ({
+        prepare: prepare, keep: keep, verify: verify, plugins: plugins, reset: reset, restore: restore,
+        'deploy-prepare': deployPrepare, 'deploy-verify': deployVerify,
+        pbkdf2: pbkdf2, token: token, 'token-verify': tokenVerify, access: access,
+        'data-prepare': dataPrepare, 'data-inspect': dataInspect, 'data-delete': dataDelete, 'data-verify': dataVerify,
+        'welcome-reset': welcomeReset, 'welcome-verify': welcomeVerify,
+    })[AJ6_PHASE]();
 } catch (e) {
     check(AJ6_PHASE, false, 'threw ' + e + (e.lineNumber ? ' (line ' + e.lineNumber + ')' : ''));
 }
