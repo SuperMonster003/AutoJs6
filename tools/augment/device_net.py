@@ -50,7 +50,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Echo", "head")
         self.end_headers()
         if not head:
-            self.wfile.write(data)
+            try:
+                self.wfile.write(data)
+            except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+                pass  # The client gave up (a timeout case on /slow).
 
     def _route(self, head=False):
         url = urllib.parse.urlsplit(self.path)

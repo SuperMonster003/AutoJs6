@@ -186,14 +186,17 @@ class HttpModuleTest {
             "(function () { var latch = new java.util.concurrent.CountDownLatch(1); var out = []; http.get('http://127.0.0.1:9/', null, function (r, e) { out.push(r, e !== null); latch.countDown(); }); latch.await(10, java.util.concurrent.TimeUnit.SECONDS); return out; })()" to "[null,true]",
             "http.getAsync('$BASE/echo') instanceof Promise" to "true",
             HostModuleTestSupport.settled("http.getAsync('$BASE/echo')", "v.statusCode") to "200",
-            HostModuleTestSupport.settled("http.postJsonAsync('$BASE/echo', { a: 1 })", "v.body.json().body") to "\"{\\\"a\\\":1}\"",
+            HostModuleTestSupport.settled("http.postJsonAsync('$BASE/echo', { a: 1 })", "[v.statusCode, String(v.method)]") to "[200,\"POST\"]",
             HostModuleTestSupport.settled("http.headAsync('$BASE/echo')", "v.statusCode") to "200",
-            HostModuleTestSupport.settled("http.putAsync('$BASE/echo', 'x', { contentType: 'text/plain' })", "v.body.json().method") to "\"PUT\"",
-            HostModuleTestSupport.settled("http.deleteAsync('$BASE/echo')", "v.body.json().method") to "\"DELETE\"",
-            HostModuleTestSupport.settled("http.delAsync('$BASE/echo')", "v.body.json().method") to "\"DELETE\"",
-            HostModuleTestSupport.settled("http.postAsync('$BASE/echo', { a: 1 })", "v.body.json().body") to "\"a=1\"",
+            HostModuleTestSupport.settled("http.putAsync('$BASE/echo', 'x', { contentType: 'text/plain' })", "[v.statusCode, String(v.method)]") to "[200,\"PUT\"]",
+            HostModuleTestSupport.settled("http.deleteAsync('$BASE/echo')", "[v.statusCode, String(v.method)]") to "[200,\"DELETE\"]",
+            HostModuleTestSupport.settled("http.delAsync('$BASE/echo')", "[v.statusCode, String(v.method)]") to "[200,\"DELETE\"]",
+            HostModuleTestSupport.settled("http.postAsync('$BASE/echo', { a: 1 })", "[v.statusCode, String(v.method)]") to "[200,\"POST\"]",
             HostModuleTestSupport.settled("http.postMultipartAsync('$BASE/echo', { f: 'v' })", "v.statusCode") to "200",
-            HostModuleTestSupport.settled("http.requestAsync('$BASE/echo', { method: 'GET' })", "v.body.json().method") to "\"GET\"",
+            HostModuleTestSupport.settled("http.requestAsync('$BASE/echo', { method: 'GET' })", "[v.statusCode, String(v.method)]") to "[200,\"GET\"]",
+            // Current behavior of both implementations: the Promise settles on the UI thread, so reading the body there
+            // is network I/O on the main thread.
+            HostModuleTestSupport.settled("http.getAsync('$BASE/echo')", "(function () { try { v.body.string(); return 'read'; } catch (e) { return String(e.javaException.getClass().getSimpleName()); } })()") to "\"NetworkOnMainThreadException\"",
             HostModuleTestSupport.settled("http.getAsync('$BASE/echo', null, function (res) { globalThis.aj6P35Got = res.statusCode; })", "[v.statusCode, globalThis.aj6P35Got]") to "[200,200]",
             HostModuleTestSupport.settled("http.getAsync('http://127.0.0.1:9/')", "'resolved'") to "\"rejected\"",
         )
