@@ -373,23 +373,16 @@ object NodeJsRuntimePluginHost {
         val completion = CompletableFuture<Bundle>()
         val death = IBinder.DeathRecipient { completion.completeExceptionally(android.os.DeadObjectException()) }
         if (acquired.asynchronousExecution) acquired.binder.linkToDeath(death, 0)
+        // The plugin process may keep the exported callback long after this call; it is cleared below (C30).
+        val relay = NodeRuntimeCallbackRelay(
+            executionId,
+            completion.takeIf { acquired.asynchronousExecution },
+            callback,
+        )
         val future: Future<Bundle> = if (acquired.asynchronousExecution) {
-            val terminalCallback = object : INodeJsRuntimeCallback.Stub() {
-                override fun onEvent(event: Bundle) {
-                    if (event.getString(NodeJsRuntimeContract.KEY_EVENT_TYPE) == NodeJsRuntimeContract.EVENT_FINISHED) {
-                        val result = event.getBundle(NodeJsRuntimeContract.KEY_EVENT_RESULT)
-                        if (event.getString(NodeJsRuntimeContract.KEY_EXECUTION_ID) == executionId && result != null) {
-                            completion.complete(result)
-                        } else {
-                            completion.completeExceptionally(RemoteException("Invalid Node.js runtime completion."))
-                        }
-                    }
-                    callback?.onEvent(event)
-                }
-            }
             // Only the acknowledgement occupies an RPC thread. Completion may arrive before it.
             CompletableFuture.supplyAsync({
-                val ack = acquired.runtime.startScript(request, terminalCallback)
+                val ack = acquired.runtime.startScript(request, relay)
                     ?: throw RemoteException("Missing Node.js runtime acknowledgement.")
                 if (ack.getString(NodeJsRuntimeContract.KEY_EXECUTION_ID) != executionId) {
                     throw RemoteException("Invalid Node.js runtime acknowledgement.")
@@ -400,7 +393,7 @@ object NodeJsRuntimePluginHost {
                 else CompletableFuture.completedFuture(ack)
             }
         } else {
-            binderCallExecutor.submit<Bundle> { acquired.runtime.runScript(request, callback) ?: Bundle.EMPTY }
+            binderCallExecutor.submit<Bundle> { acquired.runtime.runScript(request, callback?.let { relay }) ?: Bundle.EMPTY }
         }
         val timeoutMs = request.getLong(NodeJsRuntimeContract.KEY_TIMEOUT_MS, 0L)
         return try {
@@ -447,6 +440,7 @@ object NodeJsRuntimePluginHost {
         } catch (error: ExecutionException) {
             throw (error.cause ?: error)
         } finally {
+            relay.clear()
             if (acquired.asynchronousExecution) acquired.binder.unlinkToDeath(death, 0)
         }
     }

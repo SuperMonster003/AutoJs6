@@ -386,7 +386,7 @@ object NodeJsRuntimePluginBridge {
             workerThreadsEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_WORKER_THREADS_ENABLED, it) }
             childProcessEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_CHILD_PROCESS_ENABLED, it) }
             javaInteropEnabled?.let { putBoolean(NodeJsRuntimeContract.KEY_JAVA_INTEROP_ENABLED, it) }
-            putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker)
+            putBinder(NodeJsRuntimeContract.KEY_HOST_CAPABILITY_BROKER, hostCapabilityBroker.binder)
             moduleSourceProvider?.let { provider ->
                 putBinder(NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER, provider.asBinder())
             }
