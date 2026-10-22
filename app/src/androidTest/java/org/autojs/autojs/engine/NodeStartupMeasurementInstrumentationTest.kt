@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
@@ -86,7 +87,7 @@ class NodeStartupMeasurementInstrumentationTest {
                 val deadline = SystemClock.elapsedRealtime() + 60000
                 var lastRun: JSONObject? = null
                 while (SystemClock.elapsedRealtime() < deadline) {
-                    val tasks = NodeWorkManagerBridgeScheduler.list(context, owner)
+                    val tasks = SettingsJson.toOrgJson(NodeWorkManagerBridgeScheduler.list(context, owner)) as JSONArray
                     val row = (0 until tasks.length()).map { tasks.getJSONObject(it) }.firstOrNull { it.optString("id") == id }
                     if (row?.optString("status") == "failed") fail(row.toString())
                     if (row?.optString("status") == "succeeded") { lastRun = row.getJSONObject("lastRun"); break }

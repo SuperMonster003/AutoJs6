@@ -80,6 +80,8 @@ import org.autojs.autojs.core.automator.search.DFS
 import org.autojs.autojs.core.plugin.mcp.McpHostCapabilityBroker
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
+import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.optString
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.inrt.InrtToastVisibilityGuard
 import org.autojs.autojs.runtime.api.ScriptToast
@@ -1021,7 +1023,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val databaseExecutor: ExecutorService = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "AutoJs6NodeDatabase").apply { isDaemon = true; databaseThread = this }
     }
-    private val workManagerTasks = ConcurrentHashMap<String, JSONObject>()
+    private val workManagerTasks = ConcurrentHashMap<String, Map<String, Any?>>()
     private val packageInstallManager by lazy {
         NodeAndroidPackageInstallManager(File(appContext.filesDir, "nodejs/package-manager-store"))
     }
@@ -4556,7 +4558,7 @@ class AndroidNodeBridgeCapabilityProvider(
             ?: return workManagerPolicyFailure(request, "work_manager.${request.method} requires a JSON task descriptor.")
         val ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo)
         val activeTasks = NodeWorkManagerBridgeScheduler.list(appContext, ownerKey)
-        if (activeTasks.length() >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
+        if (activeTasks.size >= ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER) {
             return workManagerPolicyFailure(
                 request,
                 "AutoJs6 work_manager exceeded ${ControlledWorkManagerPolicy.MAX_TASKS_PER_PROVIDER} registered tasks for this provider.",
@@ -4568,10 +4570,10 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         val id = "node-work-${UUID.randomUUID()}"
         val scheduled = NodeWorkManagerBridgeScheduler.schedule(appContext, parsed.value.toJson(id, engineInfo))
-        if (scheduled.errorMessage != null || scheduled.taskJson == null) {
+        if (scheduled.errorMessage != null || scheduled.task == null) {
             return workManagerPolicyFailure(request, scheduled.errorMessage ?: "work_manager provider failed to schedule task.")
         }
-        val task = scheduled.taskJson
+        val task = scheduled.task
         workManagerTasks[id] = task
         resourceRegistry.register(
             type = NodeBridgeResourceType.WORK_MANAGER_TASK,
@@ -4610,10 +4612,12 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun listWorkManagerTasks(request: NodeBridgeRequest): NodeBridgeResponse {
         return NodeBridgeResponse.success(
             request.id,
-            NodeWorkManagerBridgeScheduler.list(
-                appContext,
-                ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo),
-            ).toString(),
+            SettingsJson.stringify(
+                NodeWorkManagerBridgeScheduler.list(
+                    appContext,
+                    ownerKey = NodeWorkManagerBridgeScheduler.ownerKey(engineInfo),
+                ),
+            ),
         )
     }
 
@@ -4872,15 +4876,15 @@ class AndroidNodeBridgeCapabilityProvider(
                         reason = payload.optString("reason", "manual"),
                         checkpoint = checkpoint,
                     )
-                    NodeBridgeResponse.success(request.id, record.toString())
+                    NodeBridgeResponse.success(request.id, SettingsJson.stringify(record))
                 }
                 NodeLifecycleCheckpointStore.METHOD_READ_CHECKPOINT -> {
                     val record = NodeLifecycleCheckpointStore.readCheckpoint(appContext, engineInfo)
-                    NodeBridgeResponse.success(request.id, record?.toString() ?: "null")
+                    NodeBridgeResponse.success(request.id, record?.let { SettingsJson.stringify(it) } ?: "null")
                 }
                 NodeLifecycleCheckpointStore.METHOD_CLEAR_CHECKPOINT -> {
                     val result = NodeLifecycleCheckpointStore.clearCheckpoint(appContext, engineInfo)
-                    NodeBridgeResponse.success(request.id, result.toString())
+                    NodeBridgeResponse.success(request.id, SettingsJson.stringify(result))
                 }
                 else -> unavailable(request)
             }

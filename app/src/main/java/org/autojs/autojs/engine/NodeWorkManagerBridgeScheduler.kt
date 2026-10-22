@@ -15,14 +15,25 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import org.autojs.autojs.core.pref.SettingsJson
-import org.json.JSONArray
+import org.autojs.autojs.core.pref.optArray
+import org.autojs.autojs.core.pref.optBoolean
+import org.autojs.autojs.core.pref.optInt
+import org.autojs.autojs.core.pref.optLong
+import org.autojs.autojs.core.pref.optObject
+import org.autojs.autojs.core.pref.optString
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
  * Tasks that Node.js scripts schedule with WorkManager; their records are the JSON file store
- * `JsonFileStores.NODE_WORK_MANAGER_TASKS`, read and written with `SettingsJson` (settings P5.1).
+ * `JsonFileStores.NODE_WORK_MANAGER_TASKS`, read and written with `SettingsJson` (settings P5.1) and kept as maps of
+ * plain values of `SettingsJson` (settings P5.3). The task that the Node.js bridge schedules arrives as an org.json
+ * object and becomes plain values in [schedule]; the bridge writes the returned records to scripts as JSON text.
+ *
+ * zh-CN: Node.js 脚本通过 WorkManager 调度的任务; 其记录即 JSON 文件存储 `JsonFileStores.NODE_WORK_MANAGER_TASKS`, 以
+ * `SettingsJson` 读写 (设置 P5.1), 在内存中为 `SettingsJson` 普通值映射 (设置 P5.3). Node.js 桥调度的任务以 org.json 对象传入,
+ * 在 [schedule] 中转为普通值; 桥把返回的记录以 JSON 文本交给脚本.
  */
 object NodeWorkManagerBridgeScheduler {
 
@@ -52,25 +63,11 @@ object NodeWorkManagerBridgeScheduler {
 
     fun schedule(context: Context, task: JSONObject): ScheduleOutcome {
         val appContext = context.applicationContext
-        val id = task.optString("id").takeIf { it.isNotBlank() }
+        val source = SettingsJson.normalizeObject(task)
+        val id = source.optString("id").takeIf { it.isNotBlank() }
             ?: return ScheduleOutcome(errorMessage = "work_manager task is missing an id.")
-        val kind = task.optString("type")
-        val now = System.currentTimeMillis()
-        val record = JSONObject(task.toString()).apply {
-            put("schemaVersion", RECORD_SCHEMA_VERSION)
-            put("scheduler", SCHEDULER_NAME)
-            put("status", STATUS_ENQUEUED)
-            put("noImplicitRetry", true)
-            put("scheduledRunnerVersion", SCHEDULED_RUNNER_VERSION)
-            put("executionMode", NodeExecutionModePolicy.MODE_SCHEDULED)
-            put("launchSurface", NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER)
-            put("updatedAtEpochMs", now)
-            put("lastFailure", JSONObject.NULL)
-            put("runHistory", JSONArray())
-            put("workManagerUniqueName", uniqueName(id))
-            put("workManagerTag", taskTag(id))
-            put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
-        }
+        val kind = source.optString("type")
+        val record = scheduledRecord(source, id, System.currentTimeMillis(), androidPolicy())
         val constraints = buildConstraints(record)
             ?: return ScheduleOutcome(errorMessage = "work_manager idle constraint requires Android 6.0 or newer.")
 
@@ -80,7 +77,7 @@ object NodeWorkManagerBridgeScheduler {
                 ControlledWorkTaskKind.ONCE.wireName -> scheduleOnce(appContext, id, record, constraints)
                 else -> return ScheduleOutcome(errorMessage = "work_manager task type is unsupported: $kind.")
             }
-            ScheduleOutcome(taskJson = publicRecord(record))
+            ScheduleOutcome(task = publicRecord(record))
         }.getOrElse { error ->
             deleteRecord(appContext, id)
             ScheduleOutcome(errorMessage = "work_manager provider failed to enqueue $id: ${error.message ?: error.javaClass.name}.")
@@ -102,10 +99,10 @@ object NodeWorkManagerBridgeScheduler {
         if (record != null) {
             writeRecord(
                 appContext,
-                JSONObject(record.toString()).apply {
+                record.apply {
                     put("status", STATUS_CANCELLED)
                     put("updatedAtEpochMs", System.currentTimeMillis())
-                    put("lastFailure", JSONObject.NULL)
+                    put("lastFailure", null)
                 },
             )
         }
@@ -113,13 +110,11 @@ object NodeWorkManagerBridgeScheduler {
         return CancelOutcome()
     }
 
-    fun list(context: Context, ownerKey: String): JSONArray {
-        val result = JSONArray()
-        readRecords(context.applicationContext)
+    fun list(context: Context, ownerKey: String): List<Map<String, Any?>> {
+        return readRecords(context.applicationContext)
             .filter { ownerKey(it) == ownerKey }
             .sortedBy { it.optLong("createdAtEpochMs", 0L) }
-            .forEach { result.put(publicRecord(it)) }
-        return result
+            .map { publicRecord(it) }
     }
 
     fun cancelAllForOwner(context: Context, ownerKey: String) {
@@ -143,7 +138,7 @@ object NodeWorkManagerBridgeScheduler {
             record.put("runAttemptCount", nextAttempt)
             record.put("lastTrigger", "work_manager")
             record.put("lastExecutionId", runExecutionId(id, nextAttempt))
-            record.put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
+            record.put("androidPolicy", androidPolicy())
         } ?: return androidx.work.ListenableWorker.Result.failure()
 
         if (running.optString("status") == STATUS_CANCELLED) {
@@ -192,7 +187,7 @@ object NodeWorkManagerBridgeScheduler {
     private fun scheduleOnce(
         context: Context,
         id: String,
-        record: JSONObject,
+        record: MutableMap<String, Any?>,
         constraints: Constraints,
     ) {
         val request = OneTimeWorkRequestBuilder<NodeWorkManagerBridgeWorker>()
@@ -211,7 +206,7 @@ object NodeWorkManagerBridgeScheduler {
     private fun schedulePeriodic(
         context: Context,
         id: String,
-        record: JSONObject,
+        record: MutableMap<String, Any?>,
         constraints: Constraints,
     ) {
         val request = PeriodicWorkRequestBuilder<NodeWorkManagerBridgeWorker>(
@@ -234,8 +229,8 @@ object NodeWorkManagerBridgeScheduler {
         )
     }
 
-    private fun buildConstraints(record: JSONObject): Constraints? {
-        val source = record.optJSONObject("constraints") ?: JSONObject()
+    private fun buildConstraints(record: Map<String, Any?>): Constraints? {
+        val source = record.optObject("constraints") ?: emptyMap()
         if (source.optBoolean("idle", false) && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return null
         }
@@ -255,7 +250,7 @@ object NodeWorkManagerBridgeScheduler {
     private fun markFailed(
         context: Context,
         id: String,
-        record: JSONObject,
+        record: Map<String, Any?>,
         startedAt: Long,
         reason: String,
     ) {
@@ -268,7 +263,7 @@ object NodeWorkManagerBridgeScheduler {
     private fun markCompleted(
         context: Context,
         id: String,
-        record: JSONObject,
+        record: Map<String, Any?>,
         startedAt: Long,
         result: NodePluginScriptResult,
     ) {
@@ -295,8 +290,8 @@ object NodeWorkManagerBridgeScheduler {
     }
 
     private fun applyRunResult(
-        target: JSONObject,
-        original: JSONObject,
+        target: MutableMap<String, Any?>,
+        original: Map<String, Any?>,
         startedAt: Long,
         succeeded: Boolean,
         status: String,
@@ -307,71 +302,98 @@ object NodeWorkManagerBridgeScheduler {
         target.put("status", status)
         target.put("updatedAtEpochMs", finishedAt)
         target.put("lastRunStatus", if (succeeded) STATUS_SUCCEEDED else STATUS_FAILED)
-        target.put("lastFailure", failureReason ?: JSONObject.NULL)
-        target.put(
-            "lastRun",
-            scheduledRunRecord(
-                original = original,
-                startedAt = startedAt,
-                finishedAt = finishedAt,
-                succeeded = succeeded,
-                failureReason = failureReason,
-                result = result,
-            ),
+        target.put("lastFailure", failureReason)
+        val lastRun = scheduledRunRecord(
+            original = original,
+            startedAt = startedAt,
+            finishedAt = finishedAt,
+            succeeded = succeeded,
+            failureReason = failureReason,
+            result = result,
         )
-        appendRunHistory(target, target.getJSONObject("lastRun"))
+        target.put("lastRun", lastRun)
+        appendRunHistory(target, lastRun)
     }
 
     private fun scheduledRunRecord(
-        original: JSONObject,
+        original: Map<String, Any?>,
         startedAt: Long,
         finishedAt: Long,
         succeeded: Boolean,
         failureReason: String?,
         result: NodePluginScriptResult?,
-    ): JSONObject {
-        return JSONObject().apply {
-            put("startedAtEpochMs", startedAt)
-            put("finishedAtEpochMs", finishedAt)
-            put("elapsedMs", result?.elapsedMs ?: (finishedAt - startedAt).coerceAtLeast(0L))
-            put("succeeded", succeeded)
-            put("trigger", original.optString("lastTrigger").ifBlank { "work_manager" })
-            put("runnerVersion", original.optInt("scheduledRunnerVersion", SCHEDULED_RUNNER_VERSION))
-            put("attempt", original.optInt("runAttemptCount", 0))
-            put("executionId", original.optString("lastExecutionId"))
-            put("executionMode", NodeExecutionModePolicy.MODE_SCHEDULED)
-            put("launchSurface", NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER)
-            put("exitCode", result?.exitCode ?: JSONObject.NULL)
-            put("sourceName", result?.sourceName ?: entryPath(original))
-            put("errorCode", result?.errorCode ?: JSONObject.NULL)
-            put("errorName", result?.errorName ?: JSONObject.NULL)
-            put("errorMessage", failureReason ?: JSONObject.NULL)
-            put("timedOut", result?.timedOut ?: false)
-            put("stdout", result?.stdout.orEmpty().limitChars(RESULT_STDOUT_MAX_CHARS))
-            put("stderr", result?.stderr.orEmpty().limitChars(RESULT_STDERR_MAX_CHARS))
-            put("androidPolicy", NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
-            put("nativeValues", scheduledNativeValues(result))
-        }
+    ): MutableMap<String, Any?> {
+        // A missing exit code, error or failure reason is written as a JSON null, as before.
+        return linkedMapOf<String, Any?>(
+            "startedAtEpochMs" to startedAt,
+            "finishedAtEpochMs" to finishedAt,
+            "elapsedMs" to (result?.elapsedMs ?: (finishedAt - startedAt).coerceAtLeast(0L)),
+            "succeeded" to succeeded,
+            "trigger" to original.optString("lastTrigger").ifBlank { "work_manager" },
+            "runnerVersion" to original.optInt("scheduledRunnerVersion", SCHEDULED_RUNNER_VERSION),
+            "attempt" to original.optInt("runAttemptCount", 0),
+            "executionId" to original.optString("lastExecutionId"),
+            "executionMode" to NodeExecutionModePolicy.MODE_SCHEDULED,
+            "launchSurface" to NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
+            "exitCode" to result?.exitCode,
+            "sourceName" to (result?.sourceName ?: entryPath(original)),
+            "errorCode" to result?.errorCode,
+            "errorName" to result?.errorName,
+            "errorMessage" to failureReason,
+            "timedOut" to (result?.timedOut ?: false),
+            "stdout" to result?.stdout.orEmpty().limitChars(RESULT_STDOUT_MAX_CHARS),
+            "stderr" to result?.stderr.orEmpty().limitChars(RESULT_STDERR_MAX_CHARS),
+            "androidPolicy" to androidPolicy(),
+            "nativeValues" to scheduledNativeValues(result),
+        )
     }
 
-    private fun appendRunHistory(record: JSONObject, runRecord: JSONObject) {
-        val existing = record.optJSONArray("runHistory") ?: JSONArray()
-        val retained = JSONArray()
-        val start = (existing.length() - (RUN_HISTORY_MAX_ENTRIES - 1)).coerceAtLeast(0)
-        for (index in start until existing.length()) {
-            retained.put(existing.get(index))
-        }
-        retained.put(JSONObject(runRecord.toString()))
+    /** Appends [runRecord] to the run history of [record], which keeps the last [RUN_HISTORY_MAX_ENTRIES] runs. */
+    internal fun appendRunHistory(record: MutableMap<String, Any?>, runRecord: Map<String, Any?>) {
+        val retained = ArrayList<Any?>(record.optArray("runHistory").orEmpty().takeLast(RUN_HISTORY_MAX_ENTRIES - 1))
+        retained.add(LinkedHashMap(runRecord))
         record.put("runHistory", retained)
     }
 
-    private fun scheduledNativeValues(result: NodePluginScriptResult?): JSONObject {
+    /**
+     * The record of a task that [schedule] enqueues: the members of [task], then the scheduler members (a member that
+     * [task] has already is replaced in place); `lastFailure` is a JSON null and `runHistory` is empty.
+     * zh-CN: [schedule] 入队任务的记录: [task] 的成员, 其后为调度器成员 ([task] 已有的成员原位替换); `lastFailure` 为 JSON null,
+     * `runHistory` 为空.
+     */
+    internal fun scheduledRecord(task: Map<String, Any?>, id: String, now: Long, androidPolicy: Map<String, Any?>): MutableMap<String, Any?> {
+        return LinkedHashMap(task).apply {
+            put("schemaVersion", RECORD_SCHEMA_VERSION)
+            put("scheduler", SCHEDULER_NAME)
+            put("status", STATUS_ENQUEUED)
+            put("noImplicitRetry", true)
+            put("scheduledRunnerVersion", SCHEDULED_RUNNER_VERSION)
+            put("executionMode", NodeExecutionModePolicy.MODE_SCHEDULED)
+            put("launchSurface", NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER)
+            put("updatedAtEpochMs", now)
+            put("lastFailure", null)
+            put("runHistory", ArrayList<Any?>())
+            put("workManagerUniqueName", uniqueName(id))
+            put("workManagerTag", taskTag(id))
+            put("androidPolicy", androidPolicy)
+        }
+    }
+
+    internal fun encode(record: Map<String, Any?>): String = SettingsJson.stringify(record)
+
+    internal fun decode(text: String): MutableMap<String, Any?> = SettingsJson.parseMap(text)
+
+    private fun androidPolicy(): MutableMap<String, Any?> {
+        return SettingsJson.normalizeObject(NodeAndroidRuntimePolicy.workManagerQuotaDiagnostics())
+    }
+
+    private fun scheduledNativeValues(result: NodePluginScriptResult?): MutableMap<String, Any?> {
         val nativeValues = result?.nativeValues.orEmpty()
         val scheduledModeValues = NodeExecutionModePolicy.nativeValues(
             NodeExecutionModePolicy.MODE_SCHEDULED,
             NodeExecutionModePolicy.LAUNCH_SURFACE_SCHEDULED_RUNNER,
         )
-        return JSONObject().apply {
+        return linkedMapOf<String, Any?>().apply {
             nativeValues.filterKeys { it.startsWith("timing.") }.forEach { (key, value) -> put(key, value) }
             listOf(
                 "embedded_script.execution_mode",
@@ -387,7 +409,7 @@ object NodeWorkManagerBridgeScheduler {
         }
     }
 
-    private fun resolveEntry(record: JSONObject): EntryResolution {
+    private fun resolveEntry(record: Map<String, Any?>): EntryResolution {
         val cwd = record.optString("workingDirectory").takeIf { it.isNotBlank() }
             ?: return EntryResolution(errorMessage = "work_manager task is missing a working directory.")
         val entryPath = entryPath(record).takeIf { it.isNotBlank() }
@@ -409,39 +431,39 @@ object NodeWorkManagerBridgeScheduler {
         return EntryResolution(entryPath = entryPath, file = file, source = source)
     }
 
-    private fun updateRecord(context: Context, id: String, update: (JSONObject) -> Unit): JSONObject? {
+    private fun updateRecord(context: Context, id: String, update: (MutableMap<String, Any?>) -> Unit): MutableMap<String, Any?>? {
         val record = readRecord(context, id) ?: return null
         update(record)
         writeRecord(context, record)
         return record
     }
 
-    private fun readRecords(context: Context): List<JSONObject> {
+    private fun readRecords(context: Context): List<MutableMap<String, Any?>> {
         return taskRoot(context)
             .listFiles { file -> file.isFile && file.name.endsWith(".json") }
             .orEmpty()
             .mapNotNull { file ->
-                runCatching { SettingsJson.parseObject(file.readText(Charsets.UTF_8)) }
+                runCatching { decode(file.readText(Charsets.UTF_8)) }
                     .onFailure { error -> Log.w(TAG, "Failed to read node work record ${file.name}: ${error.message}", error) }
                     .getOrNull()
             }
     }
 
-    private fun readRecord(context: Context, id: String): JSONObject? {
+    private fun readRecord(context: Context, id: String): MutableMap<String, Any?>? {
         val file = recordFile(context, id)
         if (!file.isFile) {
             return null
         }
-        return runCatching { SettingsJson.parseObject(file.readText(Charsets.UTF_8)) }.getOrNull()
+        return runCatching { decode(file.readText(Charsets.UTF_8)) }.getOrNull()
     }
 
-    private fun writeRecord(context: Context, record: JSONObject) {
+    private fun writeRecord(context: Context, record: Map<String, Any?>) {
         val id = record.optString("id")
         require(id.isNotBlank()) { "Node work record id is required." }
         val target = recordFile(context, id)
         target.parentFile?.mkdirs()
         val temp = File(target.parentFile, "${target.name}.${android.os.Process.myPid()}.${System.nanoTime()}.tmp")
-        temp.writeText(SettingsJson.stringify(record), Charsets.UTF_8)
+        temp.writeText(encode(record), Charsets.UTF_8)
         if (target.exists() && !target.delete()) {
             throw IllegalStateException("Failed to replace node work record: ${target.absolutePath}")
         }
@@ -464,11 +486,11 @@ object NodeWorkManagerBridgeScheduler {
         mkdirs()
     }
 
-    private fun publicRecord(record: JSONObject): JSONObject {
-        return JSONObject(record.toString())
+    private fun publicRecord(record: Map<String, Any?>): Map<String, Any?> {
+        return decode(encode(record))
     }
 
-    private fun ownerKey(record: JSONObject): String {
+    private fun ownerKey(record: Map<String, Any?>): String {
         val packageName = record.optString("packageName").ifBlank { "unknown-package" }
         val cwd = record.optString("workingDirectory").ifBlank { "unknown-cwd" }
         val canonicalCwd = runCatching { File(cwd).canonicalFile.absolutePath }.getOrDefault(cwd)
@@ -481,7 +503,7 @@ object NodeWorkManagerBridgeScheduler {
 
     private fun runExecutionId(id: String, attempt: Int): String = "node-work-run-$id-$attempt"
 
-    private fun entryPath(record: JSONObject): String {
+    private fun entryPath(record: Map<String, Any?>): String {
         return when (record.optString("entryKind")) {
             "projectEntry" -> record.optString("entry")
             else -> record.optString("scriptPath")
@@ -496,7 +518,7 @@ object NodeWorkManagerBridgeScheduler {
     }
 
     data class ScheduleOutcome(
-        val taskJson: JSONObject? = null,
+        val task: Map<String, Any?>? = null,
         val errorMessage: String? = null,
     )
 

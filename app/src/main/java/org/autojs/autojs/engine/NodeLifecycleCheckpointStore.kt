@@ -3,16 +3,24 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.optInt
+import org.autojs.autojs.core.pref.optLong
+import org.autojs.autojs.core.pref.optString
 import org.json.JSONArray
 import org.json.JSONObject
-import org.json.JSONTokener
 import java.io.File
 import java.security.MessageDigest
 import java.util.Locale
 
 /**
  * Checkpoints of Node.js projects, the JSON file store `JsonFileStores.NODE_LIFECYCLE_CHECKPOINTS`, and stop request
- * files; they are read and written with `SettingsJson`, the checkpoints indented by 2 as before (settings P5.1).
+ * files; they are read and written with `SettingsJson`, the checkpoints indented by 2 as before (settings P5.1). The
+ * records are maps of plain values of `SettingsJson` (settings P5.3): the Node.js bridge writes the returned records
+ * to scripts as JSON text, and a checkpoint value that a script sends as org.json values becomes plain values here.
+ *
+ * zh-CN: Node.js 项目的检查点 (JSON 文件存储 `JsonFileStores.NODE_LIFECYCLE_CHECKPOINTS`) 与停止请求文件, 以 `SettingsJson`
+ * 读写, 检查点照旧缩进 2 格 (设置 P5.1). 记录为 `SettingsJson` 普通值映射 (设置 P5.3): Node.js 桥把返回的记录以 JSON 文本交给
+ * 脚本, 脚本以 org.json 值发来的检查点值在这里转为普通值.
  */
 object NodeLifecycleCheckpointStore {
 
@@ -27,6 +35,7 @@ object NodeLifecycleCheckpointStore {
     const val MAX_CHECKPOINT_BYTES = 64 * 1024
     const val STOP_POLL_INTERVAL_MS = 50L
     const val STOP_GRACE_MS = 1500L
+    private const val MAX_CHECKPOINT_DEPTH = 32
 
     fun runtimeModuleSource(
         context: Context,
@@ -37,28 +46,30 @@ object NodeLifecycleCheckpointStore {
     ): String {
         val scope = projectScope(context, engineInfo.cwd)
         val explicitLongRunningLifecycle = isExplicitLongRunningLifecycle(executionMode, launchSurface)
-        return JSONObject().apply {
-            put("schemaVersion", SCHEMA_VERSION)
-            put("executionId", engineInfo.id)
-            put("sourceName", engineInfo.sourceName)
-            put("packageName", scope.packageName)
-            put("workingDirectory", scope.workingDirectory)
-            put("projectKey", scope.projectKey)
-            put("executionMode", executionMode)
-            put("launchSurface", launchSurface)
-            put("checkpoint", JSONObject().apply {
-                put("enabled", explicitLongRunningLifecycle)
-                put("maxBytes", MAX_CHECKPOINT_BYTES)
-                put("automaticRestart", false)
-                put("restartPolicy", "never")
-            })
-            put("stop", JSONObject().apply {
-                put("enabled", stopRequestFile != null)
-                put("requestPath", stopRequestFile?.absolutePath ?: "")
-                put("pollIntervalMs", STOP_POLL_INTERVAL_MS)
-                put("graceMs", STOP_GRACE_MS)
-            })
-        }.toString()
+        return SettingsJson.stringify(
+            linkedMapOf<String, Any?>(
+                "schemaVersion" to SCHEMA_VERSION,
+                "executionId" to engineInfo.id,
+                "sourceName" to engineInfo.sourceName,
+                "packageName" to scope.packageName,
+                "workingDirectory" to scope.workingDirectory,
+                "projectKey" to scope.projectKey,
+                "executionMode" to executionMode,
+                "launchSurface" to launchSurface,
+                "checkpoint" to linkedMapOf<String, Any?>(
+                    "enabled" to explicitLongRunningLifecycle,
+                    "maxBytes" to MAX_CHECKPOINT_BYTES,
+                    "automaticRestart" to false,
+                    "restartPolicy" to "never",
+                ),
+                "stop" to linkedMapOf<String, Any?>(
+                    "enabled" to (stopRequestFile != null),
+                    "requestPath" to (stopRequestFile?.absolutePath ?: ""),
+                    "pollIntervalMs" to STOP_POLL_INTERVAL_MS,
+                    "graceMs" to STOP_GRACE_MS,
+                ),
+            ),
+        )
     }
 
     fun writeStopRequest(
@@ -69,15 +80,7 @@ object NodeLifecycleCheckpointStore {
         if (file == null) {
             return
         }
-        val now = System.currentTimeMillis()
-        val request = JSONObject().apply {
-            put("schemaVersion", SCHEMA_VERSION)
-            put("id", "stop-$executionId-$now")
-            put("executionId", executionId)
-            put("reason", reason)
-            put("requestedAtEpochMs", now)
-        }
-        writeJsonAtomic(file, request)
+        writeJsonAtomic(file, stopRequest(executionId, reason, System.currentTimeMillis()))
     }
 
     fun writeCheckpoint(
@@ -85,39 +88,12 @@ object NodeLifecycleCheckpointStore {
         engineInfo: NodeBridgeEngineInfo,
         reason: String,
         checkpoint: Any?,
-    ): JSONObject {
+    ): Map<String, Any?> {
         ensureInteractiveLifecycle(engineInfo, METHOD_CHECKPOINT)
-        val normalized = normalizeJsonValue(checkpoint)
-        val checkpointJson = jsonValueToString(normalized)
-        val checkpointBytes = checkpointJson.toByteArray(Charsets.UTF_8).size
-        if (checkpointBytes > MAX_CHECKPOINT_BYTES) {
-            throw NodeLifecycleCheckpointException(
-                NodeBridgeError.resourceLimit(
-                    message = "AutoJs6 lifecycle checkpoint exceeded $MAX_CHECKPOINT_BYTES bytes.",
-                    module = BRIDGE_MODULE_NAME,
-                    method = METHOD_CHECKPOINT,
-                ),
-            )
-        }
+        val (value, checkpointBytes) = checkedCheckpoint(checkpoint)
         val scope = projectScope(context, engineInfo.cwd)
         val now = System.currentTimeMillis()
-        val record = JSONObject().apply {
-            put("schemaVersion", SCHEMA_VERSION)
-            put("projectKey", scope.projectKey)
-            put("packageName", scope.packageName)
-            put("workingDirectory", scope.workingDirectory)
-            put("executionId", engineInfo.id)
-            put("sourceName", engineInfo.sourceName)
-            put("executionMode", engineInfo.executionMode)
-            put("launchSurface", engineInfo.launchSurface)
-            put("reason", reason.ifBlank { "manual" })
-            put("checkpointBytes", checkpointBytes)
-            put("createdAtEpochMs", readCheckpoint(context, scope)?.optLong("createdAtEpochMs")?.takeIf { it > 0L } ?: now)
-            put("updatedAtEpochMs", now)
-            put("automaticRestart", false)
-            put("restartPolicy", "never")
-            put("checkpoint", parseJsonValue(checkpointJson))
-        }
+        val record = checkpointRecord(scope, engineInfo, reason, value, checkpointBytes, readCheckpoint(context, scope), now)
         writeJsonAtomic(checkpointFile(context, scope), record)
         Log.i(
             TAG,
@@ -126,10 +102,10 @@ object NodeLifecycleCheckpointStore {
                 "executionMode=${engineInfo.executionMode} packageName=${scope.packageName} " +
                 "checkpointBytes=$checkpointBytes",
         )
-        return JSONObject(record.toString())
+        return record
     }
 
-    fun readCheckpoint(context: Context, engineInfo: NodeBridgeEngineInfo): JSONObject? {
+    fun readCheckpoint(context: Context, engineInfo: NodeBridgeEngineInfo): Map<String, Any?>? {
         ensureInteractiveLifecycle(engineInfo, METHOD_READ_CHECKPOINT)
         val scope = projectScope(context, engineInfo.cwd)
         val record = readCheckpoint(context, scope)
@@ -142,7 +118,7 @@ object NodeLifecycleCheckpointStore {
         return record
     }
 
-    fun clearCheckpoint(context: Context, engineInfo: NodeBridgeEngineInfo): JSONObject {
+    fun clearCheckpoint(context: Context, engineInfo: NodeBridgeEngineInfo): Map<String, Any?> {
         ensureInteractiveLifecycle(engineInfo, METHOD_CLEAR_CHECKPOINT)
         val scope = projectScope(context, engineInfo.cwd)
         val deleted = checkpointFile(context, scope).delete()
@@ -152,52 +128,152 @@ object NodeLifecycleCheckpointStore {
                 "deleted=$deleted launchSurface=${engineInfo.launchSurface} " +
                 "executionMode=${engineInfo.executionMode} packageName=${scope.packageName}",
         )
-        return JSONObject().apply {
-            put("schemaVersion", SCHEMA_VERSION)
-            put("projectKey", scope.projectKey)
-            put("deleted", deleted)
-            put("updatedAtEpochMs", System.currentTimeMillis())
-        }
+        return linkedMapOf<String, Any?>(
+            "schemaVersion" to SCHEMA_VERSION,
+            "projectKey" to scope.projectKey,
+            "deleted" to deleted,
+            "updatedAtEpochMs" to System.currentTimeMillis(),
+        )
     }
 
-    fun statusSnapshot(context: Context, workingDirectory: String?): JSONObject {
+    fun statusSnapshot(context: Context, workingDirectory: String?): Map<String, Any?> {
         val scope = projectScope(context, workingDirectory)
-        val record = readCheckpoint(context, scope)
-        return JSONObject().apply {
-            put("schemaVersion", SCHEMA_VERSION)
-            put("exists", record != null)
-            put("projectKey", scope.projectKey)
-            put("packageName", scope.packageName)
-            put("workingDirectory", scope.workingDirectory)
-            put("maxBytes", MAX_CHECKPOINT_BYTES)
-            put("automaticRestart", false)
-            put("restartPolicy", "never")
-            if (record != null) {
-                put("executionId", record.optString("executionId"))
-                put("sourceName", record.optString("sourceName"))
-                put("reason", record.optString("reason"))
-                put("checkpointBytes", record.optInt("checkpointBytes"))
-                put("createdAtEpochMs", record.optLong("createdAtEpochMs"))
-                put("updatedAtEpochMs", record.optLong("updatedAtEpochMs"))
-            }
-        }
+        return statusSnapshot(scope, readCheckpoint(context, scope))
     }
 
     fun nativeDiagnostics(context: Context, engineInfo: NodeBridgeEngineInfo): Map<String, String> {
         val scope = projectScope(context, engineInfo.cwd)
-        val record = readCheckpoint(context, scope)
-        val enabled = isExplicitLongRunningLifecycle(engineInfo)
-        return linkedMapOf(
-            "embedded_script.lifecycle_checkpoint.enabled" to enabled.toString(),
-            "embedded_script.lifecycle_checkpoint.project_key" to scope.projectKey,
-            "embedded_script.lifecycle_checkpoint.exists" to (record != null).toString(),
-            "embedded_script.lifecycle_checkpoint.max_bytes" to MAX_CHECKPOINT_BYTES.toString(),
-            "embedded_script.lifecycle_checkpoint.automatic_restart" to "false",
-            "embedded_script.lifecycle_checkpoint.restart_policy" to "never",
-            "embedded_script.lifecycle_checkpoint.bytes" to (record?.optInt("checkpointBytes") ?: 0).toString(),
-            "embedded_script.lifecycle_checkpoint.reason" to record?.optString("reason").orEmpty(),
-        )
+        return nativeDiagnostics(scope, isExplicitLongRunningLifecycle(engineInfo), readCheckpoint(context, scope))
     }
+
+    /** The text of a checkpoint or stop request file: indented by 2 like Android's `JSONObject.toString(2)`. */
+    internal fun encode(record: Map<String, Any?>): String = SettingsJson.stringify(record, indent = 2)
+
+    internal fun decode(text: String): MutableMap<String, Any?> = SettingsJson.parseMap(text)
+
+    internal fun stopRequest(executionId: String, reason: String, now: Long): MutableMap<String, Any?> = linkedMapOf<String, Any?>(
+        "schemaVersion" to SCHEMA_VERSION,
+        "id" to "stop-$executionId-$now",
+        "executionId" to executionId,
+        "reason" to reason,
+        "requestedAtEpochMs" to now,
+    )
+
+    /**
+     * The checkpoint value of a script as plain values ([normalizeCheckpointValue]) and the UTF-8 size of its JSON text,
+     * which may not exceed [MAX_CHECKPOINT_BYTES]. `SettingsJson` writes that text (settings P5.3), so the size can differ
+     * by a few bytes from the size of the text that Android's org.json wrote before: `/` is not escaped, an integral
+     * double is written as `1.0`, and U+2028 / U+2029 are escaped.
+     *
+     * zh-CN: 脚本检查点值的普通值形式及其 JSON 文本的 UTF-8 字节数 (不得超过 [MAX_CHECKPOINT_BYTES]). 文本由 `SettingsJson` 写出
+     * (设置 P5.3), 与以前 Android org.json 写出的文本相比字节数可能相差几个字节: 不转义 `/`, 整数值的 double 写为 `1.0`, 转义
+     * U+2028 / U+2029.
+     */
+    internal fun checkedCheckpoint(checkpoint: Any?): Pair<Any?, Int> {
+        val value = normalizeCheckpointValue(checkpoint)
+        val checkpointBytes = SettingsJson.stringify(value).toByteArray(Charsets.UTF_8).size
+        if (checkpointBytes > MAX_CHECKPOINT_BYTES) {
+            throw NodeLifecycleCheckpointException(
+                NodeBridgeError.resourceLimit(
+                    message = "AutoJs6 lifecycle checkpoint exceeded $MAX_CHECKPOINT_BYTES bytes.",
+                    module = BRIDGE_MODULE_NAME,
+                    method = METHOD_CHECKPOINT,
+                ),
+            )
+        }
+        return value to checkpointBytes
+    }
+
+    /**
+     * Converts a checkpoint value (org.json values from the bridge, or plain values) into plain values; nesting deeper than
+     * [MAX_CHECKPOINT_DEPTH], non-finite numbers and other values are rejected.
+     * zh-CN: 把检查点值 (桥传来的 org.json 值或普通值) 转为普通值; 拒绝嵌套超过 [MAX_CHECKPOINT_DEPTH] 层, 非有限数与其他值.
+     */
+    internal fun normalizeCheckpointValue(value: Any?, depth: Int = 0): Any? {
+        if (depth > MAX_CHECKPOINT_DEPTH) {
+            throw invalidCheckpoint("AutoJs6 lifecycle checkpoint exceeded maximum JSON nesting depth.")
+        }
+        return when (value) {
+            null, JSONObject.NULL -> null
+            is JSONObject -> LinkedHashMap<String, Any?>().apply {
+                value.keys().forEach { key -> put(key, normalizeCheckpointValue(value.opt(key), depth + 1)) }
+            }
+            is Map<*, *> -> LinkedHashMap<String, Any?>().apply {
+                value.forEach { (key, item) ->
+                    val name = key as? String ?: throw invalidCheckpoint("AutoJs6 lifecycle checkpoint must be JSON-serializable.")
+                    put(name, normalizeCheckpointValue(item, depth + 1))
+                }
+            }
+            is JSONArray -> (0 until value.length()).mapTo(ArrayList<Any?>()) { normalizeCheckpointValue(value.opt(it), depth + 1) }
+            is List<*> -> value.mapTo(ArrayList<Any?>()) { normalizeCheckpointValue(it, depth + 1) }
+            is String, is Boolean -> value
+            is Number -> {
+                if (!value.toDouble().isFinite()) {
+                    throw invalidCheckpoint("AutoJs6 lifecycle checkpoint numbers must be finite.")
+                }
+                SettingsJson.normalize(value)
+            }
+            else -> throw invalidCheckpoint("AutoJs6 lifecycle checkpoint must be JSON-serializable.")
+        }
+    }
+
+    /** The record of a checkpoint file; [previous] is the record it replaces, whose creation time it keeps. */
+    internal fun checkpointRecord(
+        scope: ProjectScope,
+        engineInfo: NodeBridgeEngineInfo,
+        reason: String,
+        checkpoint: Any?,
+        checkpointBytes: Int,
+        previous: Map<String, Any?>?,
+        now: Long,
+    ): MutableMap<String, Any?> = linkedMapOf<String, Any?>(
+        "schemaVersion" to SCHEMA_VERSION,
+        "projectKey" to scope.projectKey,
+        "packageName" to scope.packageName,
+        "workingDirectory" to scope.workingDirectory,
+        "executionId" to engineInfo.id,
+        "sourceName" to engineInfo.sourceName,
+        "executionMode" to engineInfo.executionMode,
+        "launchSurface" to engineInfo.launchSurface,
+        "reason" to reason.ifBlank { "manual" },
+        "checkpointBytes" to checkpointBytes,
+        "createdAtEpochMs" to (previous?.optLong("createdAtEpochMs")?.takeIf { it > 0L } ?: now),
+        "updatedAtEpochMs" to now,
+        "automaticRestart" to false,
+        "restartPolicy" to "never",
+        "checkpoint" to checkpoint,
+    )
+
+    internal fun statusSnapshot(scope: ProjectScope, record: Map<String, Any?>?): MutableMap<String, Any?> = linkedMapOf<String, Any?>(
+        "schemaVersion" to SCHEMA_VERSION,
+        "exists" to (record != null),
+        "projectKey" to scope.projectKey,
+        "packageName" to scope.packageName,
+        "workingDirectory" to scope.workingDirectory,
+        "maxBytes" to MAX_CHECKPOINT_BYTES,
+        "automaticRestart" to false,
+        "restartPolicy" to "never",
+    ).apply {
+        if (record != null) {
+            put("executionId", record.optString("executionId"))
+            put("sourceName", record.optString("sourceName"))
+            put("reason", record.optString("reason"))
+            put("checkpointBytes", record.optInt("checkpointBytes"))
+            put("createdAtEpochMs", record.optLong("createdAtEpochMs"))
+            put("updatedAtEpochMs", record.optLong("updatedAtEpochMs"))
+        }
+    }
+
+    internal fun nativeDiagnostics(scope: ProjectScope, enabled: Boolean, record: Map<String, Any?>?): Map<String, String> = linkedMapOf(
+        "embedded_script.lifecycle_checkpoint.enabled" to enabled.toString(),
+        "embedded_script.lifecycle_checkpoint.project_key" to scope.projectKey,
+        "embedded_script.lifecycle_checkpoint.exists" to (record != null).toString(),
+        "embedded_script.lifecycle_checkpoint.max_bytes" to MAX_CHECKPOINT_BYTES.toString(),
+        "embedded_script.lifecycle_checkpoint.automatic_restart" to "false",
+        "embedded_script.lifecycle_checkpoint.restart_policy" to "never",
+        "embedded_script.lifecycle_checkpoint.bytes" to (record?.optInt("checkpointBytes") ?: 0).toString(),
+        "embedded_script.lifecycle_checkpoint.reason" to record?.optString("reason").orEmpty(),
+    )
 
     private fun ensureInteractiveLifecycle(engineInfo: NodeBridgeEngineInfo, method: String) {
         if (isExplicitLongRunningLifecycle(engineInfo)) {
@@ -221,12 +297,12 @@ object NodeLifecycleCheckpointStore {
             NodeExecutionModePolicy.isInteractiveLongRunningLaunchSurface(launchSurface)
     }
 
-    private fun readCheckpoint(context: Context, scope: ProjectScope): JSONObject? {
+    private fun readCheckpoint(context: Context, scope: ProjectScope): MutableMap<String, Any?>? {
         val file = checkpointFile(context, scope)
         if (!file.isFile) {
             return null
         }
-        return runCatching { SettingsJson.parseObject(file.readText(Charsets.UTF_8)) }.getOrNull()
+        return runCatching { decode(file.readText(Charsets.UTF_8)) }.getOrNull()
     }
 
     private fun checkpointFile(context: Context, scope: ProjectScope): File {
@@ -243,35 +319,6 @@ object NodeLifecycleCheckpointStore {
         return ProjectScope(packageName, cwd, key)
     }
 
-    private fun normalizeJsonValue(value: Any?, depth: Int = 0): Any {
-        if (depth > 32) {
-            throw invalidCheckpoint("AutoJs6 lifecycle checkpoint exceeded maximum JSON nesting depth.")
-        }
-        return when (value) {
-            null, JSONObject.NULL -> JSONObject.NULL
-            is JSONObject -> JSONObject().apply {
-                val keys = value.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    put(key, normalizeJsonValue(value.opt(key), depth + 1))
-                }
-            }
-            is JSONArray -> JSONArray().apply {
-                for (index in 0 until value.length()) {
-                    put(normalizeJsonValue(value.opt(index), depth + 1))
-                }
-            }
-            is String, is Boolean -> value
-            is Number -> {
-                if (!value.toDouble().isFinite()) {
-                    throw invalidCheckpoint("AutoJs6 lifecycle checkpoint numbers must be finite.")
-                }
-                value
-            }
-            else -> throw invalidCheckpoint("AutoJs6 lifecycle checkpoint must be JSON-serializable.")
-        }
-    }
-
     private fun invalidCheckpoint(message: String): NodeLifecycleCheckpointException {
         return NodeLifecycleCheckpointException(
             NodeBridgeError.invalidRequest(
@@ -282,23 +329,10 @@ object NodeLifecycleCheckpointStore {
         )
     }
 
-    private fun parseJsonValue(json: String): Any {
-        return JSONTokener(json.trim().ifEmpty { "null" }).nextValue() ?: JSONObject.NULL
-    }
-
-    private fun jsonValueToString(value: Any?): String {
-        return when (value) {
-            null, JSONObject.NULL -> "null"
-            else -> JSONArray().put(value).toString().let { wrapped ->
-                wrapped.substring(1, wrapped.length - 1)
-            }
-        }
-    }
-
-    private fun writeJsonAtomic(file: File, json: JSONObject) {
+    private fun writeJsonAtomic(file: File, json: Map<String, Any?>) {
         file.parentFile?.mkdirs()
         val temp = File(file.parentFile, "${file.name}.tmp-${System.nanoTime()}")
-        val text = SettingsJson.stringify(json, indent = 2)
+        val text = encode(json)
         runCatching {
             temp.writeText(text, Charsets.UTF_8)
             if (!temp.renameTo(file)) {
@@ -316,7 +350,7 @@ object NodeLifecycleCheckpointStore {
         return digest.joinToString("") { "%02x".format(Locale.US, it.toInt() and 0xff) }
     }
 
-    private data class ProjectScope(
+    internal data class ProjectScope(
         val packageName: String,
         val workingDirectory: String,
         val projectKey: String,
