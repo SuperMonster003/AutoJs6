@@ -54,6 +54,7 @@ import java.net.URLConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Where image / file arguments are read and binary outputs are written; failures throw [SecurityException] with the
@@ -360,6 +361,30 @@ internal class NodeBridgePluginToolsBridge(
     /** A request error that answers the caller as is. */
     private class RequestProblem(val error: NodeBridgeError) : RuntimeException(error.message)
 
+    /**
+     * The callback exported to the tool provider for one call. The provider process keeps it reachable until it collects
+     * its proxy, so it reaches the call (and through it this bridge and the script session) only until the call has
+     * finished (docs/memory-phase2/ROADMAP.md C32).
+     * zh-CN: 一次调用导出给工具提供方的回调. 提供方进程回收其代理之前它一直可达, 因此只在调用结束之前指向该调用
+     * (以及经它到达的本桥接与脚本会话) (docs/memory-phase2/ROADMAP.md C32).
+     */
+    private class ExportedCallback(operation: Operation) : IPluginToolCallback.Stub() {
+        private val target = AtomicReference<Operation?>(operation)
+
+        fun clear() = target.set(null)
+
+        override fun onProgress(update: Bundle?) = Unit
+
+        override fun onResult(result: Bundle?, outputs: Array<out ParcelFileDescriptor>?) {
+            val descriptors = outputs?.toList().orEmpty()
+            target.get()?.onResult(result, descriptors) ?: descriptors.forEach { runCatching { it.close() } }
+        }
+
+        override fun onError(error: Bundle?) {
+            target.get()?.onError(error)
+        }
+    }
+
     /** One running call; it answers its caller exactly once. */
     private inner class Operation(
         val request: NodeBridgeRequest,
@@ -379,6 +404,7 @@ internal class NodeBridgePluginToolsBridge(
         @Volatile private var timeoutMs = 0L
         /** The cancel reason of a call that ended before the provider was bound; [attach] sends it once it has the proxy. */
         @Volatile private var pendingCancel: String? = null
+        private val exported = ExportedCallback(this)
 
         val isFinished: Boolean get() = finished.get()
 
@@ -428,6 +454,7 @@ internal class NodeBridgePluginToolsBridge(
          */
         fun finish(response: NodeBridgeResponse, cancelReason: String? = null): Boolean {
             if (!finished.compareAndSet(false, true)) return false
+            exported.clear()
             operations.remove(invocationId, this)
             mainHandler.removeCallbacks(timeout)
             // A successful result committed its directory outputs already; any other end drops what the plugin wrote.
@@ -444,20 +471,17 @@ internal class NodeBridgePluginToolsBridge(
             runCatching { lease?.close() }
         }
 
-        fun callback(): IPluginToolCallback = object : IPluginToolCallback.Stub() {
-            override fun onProgress(update: Bundle?) = Unit
+        fun callback(): IPluginToolCallback = exported
 
-            override fun onResult(result: Bundle?, outputs: Array<out ParcelFileDescriptor>?) {
-                val descriptors = outputs?.toList().orEmpty()
-                if (isFinished) return descriptors.forEach { runCatching { it.close() } }
-                scope.launch { complete(result ?: Bundle(), descriptors) }
-            }
+        fun onResult(result: Bundle?, descriptors: List<ParcelFileDescriptor>) {
+            if (isFinished) return descriptors.forEach { runCatching { it.close() } }
+            scope.launch { complete(result ?: Bundle(), descriptors) }
+        }
 
-            override fun onError(error: Bundle?) {
-                val code = error?.getString(PluginToolErrorKeys.CODE) ?: PluginToolErrorCodes.FAILED
-                val message = error?.getString(PluginToolErrorKeys.MESSAGE)?.take(PluginToolLimits.MAX_ERROR_MESSAGE_CHARS) ?: "no message"
-                finish(failure(request, pluginError(request, toolName, code, message)))
-            }
+        fun onError(error: Bundle?) {
+            val code = error?.getString(PluginToolErrorKeys.CODE) ?: PluginToolErrorCodes.FAILED
+            val message = error?.getString(PluginToolErrorKeys.MESSAGE)?.take(PluginToolLimits.MAX_ERROR_MESSAGE_CHARS) ?: "no message"
+            finish(failure(request, pluginError(request, toolName, code, message)))
         }
 
         private fun complete(result: Bundle, descriptors: List<ParcelFileDescriptor>) {
