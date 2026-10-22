@@ -101,6 +101,14 @@ LeakCanary 自身的 "Dump heap automatically" 默认关闭 (P1.2), 脚本在巡
 
 输出: 每页一行 PASS / LEAK / FAIL, 监视与残留的对象数, 每条泄漏一行摘要 (泄漏对象的类, 第一个可疑引用, 签名前 8 位). 完整分析文本 (与 LeakCanary 泄漏列表中显示的文本相同) 与每页的错误写入 `docs/memory/evidence/ui-walk-<机型>-<versionCode>[-<tag>]-<日期>.md`; `--shots` 另把每页结束时的截图与最后 LeakCanary 泄漏列表的截图 (`leakcanary-leaks.png`, 每组泄漏显示最近一次出现的时间; 宽 540) 存到同名目录. 退出码: 全部 PASS 为 0, 有 LEAK 或 FAIL 为 2.
 
+## plugin_center_heap_check.py: 插件标签页 Java 堆核对
+
+```
+py -3.12 -I -u tools/memory/plugin_center_heap_check.py -s SERIAL [--apk FILE] [--seconds 60] [--interval 2] [--max-growth-mb 64] [--max-tail-growth-mb 16] [--tab-index 2]
+```
+
+不走门禁 (2026-10-22 API 24 AVD 上打开插件标签页后 Java 堆数秒内涨到 512 MB 上限的复测). 原因: 插件中心按 Resources 解码的原尺寸保留已安装插件图标, res/mipmap 中 432 px 的 PNG 在 560 dpi 上放大为 1512 px (9 MB), 每个插件日夜各一份, 快照与完整发现又各一份, Android 8 之前位图像素计入 Java 堆; 修复见 `PluginInstalledIconResolver` / `PluginIconRasterPolicy`. 脚本停止宿主 (`--apk` 时先安装), 从启动图标别名启动, 记录主页的 Dalvik 堆, 点插件标签 (按 `text_plugins` 的全部译文在 `uiautomator dump` 中查找; API 24 主页始终不空闲, uiautomator 读不到窗口时改从 `dumpsys activity top` 取第 `--tab-index` 个标签), 之后每 `--interval` 秒读一次 `dumpsys meminfo`, 共 `--seconds` 秒. 只点这一个标签, 不改设置. 输出每项一行 PASS / FAIL: 进程存活 (pid 不变), 日志中无 OutOfMemoryError, 无 ANR, 打开后堆增长不超过 `--max-growth-mb`, 窗口最后三分之一内增长不超过 `--max-tail-growth-mb`. 全部 PASS 时退出码为 0.
+
 ## static_audit.py: 源码静态审计
 
 ```
