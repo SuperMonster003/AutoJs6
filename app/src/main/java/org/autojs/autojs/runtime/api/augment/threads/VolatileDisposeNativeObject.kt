@@ -5,6 +5,7 @@ import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
+import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -23,6 +24,9 @@ class VolatileDisposeNativeObject(private val declarationScope: VarScope? = null
 
     @Volatile
     private var value: Any? = null
+
+    // Guarded by the lock; a null value counts as set.
+    private var isSet = false
 
     private val lock = ReentrantLock()
     private val ready = lock.newCondition()
@@ -49,25 +53,25 @@ class VolatileDisposeNativeObject(private val declarationScope: VarScope? = null
         }
     }
 
+    /**
+     * Waits until a value is set (at once when it already is; a wakeup without one keeps waiting), or at most [timeoutMillis]
+     * when positive, and returns the value (null when none was set in time). An interrupt runs [onInterrupted] and otherwise
+     * ends the wait with a ScriptInterruptedException, as `sleep` does (docs/augment/ROADMAP.md appendix C Q52).
+     * zh-CN: 等待直至值被设置 (已设置则立即返回; 没有值的唤醒继续等待), timeoutMillis 为正时至多等待该时长, 返回该值 (未及时设置为 null).
+     * 中断时执行 onInterrupted, 否则与 sleep 一样以 ScriptInterruptedException 结束等待 (docs/augment/ROADMAP.md 附录 C Q52).
+     */
     private fun awaitValue(timeoutMillis: Long, onInterrupted: (() -> Unit)? = null): Any? = withLock {
-        when {
-            timeoutMillis <= 0L -> {
-                try {
-                    ready.await()
-                } catch (e: InterruptedException) {
-                    onInterrupted?.invoke() ?: throw RuntimeException(e)
+        try {
+            when {
+                timeoutMillis <= 0L -> while (!isSet) ready.await()
+                else -> {
+                    var nanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
+                    while (!isSet && nanos > 0L) nanos = ready.awaitNanos(nanos)
                 }
             }
-            else -> {
-                var nanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
-                while (nanos > 0L) {
-                    try {
-                        ready.awaitNanos(nanos).also { nanos = it }
-                    } catch (e: InterruptedException) {
-                        onInterrupted?.invoke() ?: throw RuntimeException(e)
-                    }
-                }
-            }
+        } catch (e: InterruptedException) {
+            onInterrupted?.invoke()
+            throw ScriptInterruptedException()
         }
         value
     }
@@ -110,6 +114,7 @@ class VolatileDisposeNativeObject(private val declarationScope: VarScope? = null
             val self = thisObj as VolatileDisposeNativeObject
             self.withLock {
                 self.value = value
+                self.isSet = true
                 self.ready.signalAll()
             }
             UNDEFINED
