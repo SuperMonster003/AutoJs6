@@ -42,8 +42,10 @@ import org.opencv.core.Size as OpencvSize
  */
 internal class ImagesCall(private val name: String, vararg values: Any?) {
 
-    /** The script name of the function, built only for an error message. */
-    val function get() = "images.$name"
+    /** The script name of the function, built once a check asks for it. */
+    val function: String get() = builtFunction ?: "images.$name".also { builtFunction = it }
+
+    private var builtFunction: String? = null
 
     /**
      * The vararg array is new on every call, so it is taken as it is when nothing is omitted (P3.1 R2: copying it

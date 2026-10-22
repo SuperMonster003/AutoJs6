@@ -72,6 +72,24 @@ class ColorsModulesTest {
         assertEquals(null, ColorValues.shortHexOf(0xFFFAEBD7.toInt()))
     }
 
+    /** `parse` without the hex code round trip gives the int of `hexOf` (fixed texts and random ones of hex code characters). */
+    @Test
+    fun parseGivesTheIntOfTheHexCode() {
+        fun viaHexCode(text: String) = ColorValues.hexOf(text, ColorValues.Alpha.AUTO)?.let { hex ->
+            hex.substring(1).toLong(16).let { if (hex.length == 7) (it or 0xFF000000L).toInt() else it.toInt() }
+        }
+        val texts = listOf(
+            "#CC5500", "#C50", "#c50", "#FFCC5500", "#DECC5500", "#80cc5500", "#00000000", "#ffffffff", "#FF000000", "#abcdef",
+            "red", "RED", "burnt-orange", "BURNT_ORANGE", "pansy", "-65536", "+16711680", "4294901760", "0", "99999999999999999999",
+            "#GGG", "#g_z", "#a-b", "#1234", "#12", "#12345", "#1234567", "#123456789", "#", "+", "-", "", " #FF0000", "#FF0000 ",
+            "#\uFF10\uFF11\uFF12", "#\u0663\u0663\u0663", "#\u0661\u0662\u0663\u0664\u0665\u0666", "#\uFF26\uFF26\uFF26", "#\u212A00", "\u0663",
+        )
+        val random = java.util.Random(31)
+        val alphabet = "#0123456789abcdefABCDEFgG_-+ \uFF10\u0663"
+        val fuzz = List(20000) { String(CharArray(random.nextInt(11)) { alphabet[random.nextInt(alphabet.length)] }) }
+        (texts + fuzz + fuzz.map { "#$it" }).forEach { text -> assertEquals(text, viaHexCode(text), ColorValues.parse(text)) }
+    }
+
     /** Skia's HSV conversions and androidx's HSL, luminance, contrast and blending, by known results. */
     @Test
     fun androidPortsGiveTheAndroidResults() {

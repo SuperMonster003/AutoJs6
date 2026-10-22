@@ -131,8 +131,34 @@ internal object ColorValues {
         return if (hex.length == 7) (value or 0xFF000000L).toInt() else value.toInt()
     }
 
-    /** [text] as a color int (`ColorUtils.toInt(String)`), or null when it is not a color. */
-    fun parse(text: String): Int? = hexOf(text, Alpha.AUTO)?.let(::parseHex)
+    /**
+     * [text] as a color int (`ColorUtils.toInt(String)`), or null when it is not a color: the int of [hexOf], with the
+     * round trip through a hex code left out (P3.1 R2: its regex matches made a successful `images.findColor` with a
+     * hex code about 70-105 us slower on the device than the current module, which parses the code itself).
+     */
+    fun parse(text: String): Int? = when {
+        text.startsWith('#') -> parseHexCode(text)
+        isDigits(text) -> text.toLongOrNull()?.toInt()
+        else -> colorOfName(text)
+    }
+
+    /**
+     * A hex code `#RGB`, `#RRGGBB` or `#AARRGGBB` as a color int, or null, read without a regex when it is ASCII; other
+     * text goes through [hexOf], whose `\d` and `\w` on Android (ICU) take non-ASCII digits as well.
+     */
+    private fun parseHexCode(text: String): Int? {
+        for (c in text) if (c.code >= 0x80) return hexOf(text, Alpha.AUTO)?.let(::parseHex)
+        if (text.length != 4 && text.length != 7 && text.length != 9) return null
+        // `#RGB` doubles each digit (`#C50` is `#CC5500`).
+        val short = text.length == 4
+        var value = 0L
+        for (i in 1 until text.length) {
+            val digit = Character.digit(text[i], 16)
+            if (digit < 0) return null
+            value = if (short) (value shl 8) or (digit * 0x11L) else (value shl 4) or digit.toLong()
+        }
+        return if (text.length == 9) value.toInt() else (value or 0xFF000000L).toInt()
+    }
 
     /** A script value unwrapped for color conversion (Java objects; script objects such as Color instances stay). */
     fun unwrap(value: Any?): Any? = if (value is Wrapper && value !is NativeArray && value !is NativeObject) value.unwrap() else value

@@ -34,6 +34,9 @@ internal object ImageRegions {
 
     private val PARTS = arrayOf("x", "y", "width", "height")
 
+    /** The names of the first n parts given as separate arguments, `(x, y)` for two, built once for the error messages. */
+    private val SEPARATE = Array(PARTS.size + 1) { n -> PARTS.take(n).joinToString(", ", "(", ")") }
+
     /** The smallest part of a region where -1 stands for the screen width or height. */
     private const val SCREEN = -1
 
@@ -56,7 +59,7 @@ internal object ImageRegions {
      */
     fun check(function: String, values: Array<out Any?>, image: Any?) {
         val parts = Array(PARTS.size) { i -> values.getOrNull(i)?.let { part(function, PARTS[i], it, SCREEN) } }
-        within(function, PARTS.take(values.size).joinToString(", ", "(", ")"), parts, size(image), screen = true, nonEmpty = false)
+        within(function, SEPARATE[minOf(values.size, PARTS.size)], parts, size(image), screen = true, nonEmpty = false)
     }
 
     /**
@@ -70,7 +73,7 @@ internal object ImageRegions {
             if (!OptionFields.isInt(number)) throw GlobalValues.rangeError(function, PARTS[i], "integer", value)
             number.toInt().also { if (it < (if (i < 2) 0 else 1)) throw GlobalValues.rangeError(function, PARTS[i], if (i < 2) NON_NEGATIVE else POSITIVE, value) }
         }
-        within(function, PARTS.joinToString(", ", "(", ")"), parts, size(image), screen = false, nonEmpty = true)
+        within(function, SEPARATE[PARTS.size], parts, size(image), screen = false, nonEmpty = true)
     }
 
     /**
