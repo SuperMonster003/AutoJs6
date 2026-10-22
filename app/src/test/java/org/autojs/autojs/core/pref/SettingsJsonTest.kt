@@ -124,29 +124,28 @@ class SettingsJsonTest {
     }
 
     @Test
-    fun parseObjectReadsTheFilesThatOrgJsonWrote() {
-        // Android's JSONObject.toString escapes "/"; the file-based JSON stores read such files with parseObject (P5.1).
+    fun parseMapReadsTheFilesThatOrgJsonWrote() {
+        // Android's JSONObject.toString escapes "/"; the file-based JSON stores read such files with parseMap (P5.1 / P5.3).
         val text = """{"path":"\/sdcard\/Scripts","n":1,"l":3000000000,"d":2.5,"b":true,"z":null,"a":[1,"x",{"k":false}],"o":{},"q":"say \"hi\"\\"}"""
-        val obj = SettingsJson.parseObject(text)
-        assertEquals("/sdcard/Scripts", obj.getString("path"))
-        assertTyped(1, obj.get("n"))
-        assertTyped(3000000000L, obj.get("l"))
-        assertTyped(2.5, obj.get("d"))
-        assertTyped(true, obj.get("b"))
-        assertSame(JSONObject.NULL, obj.get("z"))
-        val array = obj.getJSONArray("a")
-        assertTyped(1, array.get(0))
-        assertEquals("x", array.getString(1))
-        assertFalse(array.getJSONObject(2).getBoolean("k"))
-        assertEquals(0, obj.getJSONObject("o").length())
-        assertEquals("say \"hi\"\\", obj.getString("q"))
+        val map = SettingsJson.parseMap(text)
+        assertEquals(listOf("path", "n", "l", "d", "b", "z", "a", "o", "q"), map.keys.toList())
+        assertEquals("/sdcard/Scripts", map["path"])
+        assertTyped(1, map["n"])
+        assertTyped(3000000000L, map["l"])
+        assertTyped(2.5, map["d"])
+        assertTyped(true, map["b"])
+        assertTrue(map.containsKey("z"))
+        assertNull(map["z"])
+        assertEquals(listOf(1, "x", mapOf("k" to false)), map["a"])
+        assertEquals(emptyMap<String, Any?>(), map["o"])
+        assertEquals("say \"hi\"\\", map["q"])
         // The values of org.json's own reader; written back, they read the same again.
-        assertEquals(SettingsJson.normalize(JSONObject(text)), SettingsJson.normalize(obj))
-        assertEquals(SettingsJson.normalize(obj), SettingsJson.normalize(SettingsJson.parseObject(SettingsJson.stringify(obj))))
+        assertEquals(SettingsJson.normalize(JSONObject(text)), map)
+        assertEquals(map, SettingsJson.parseMap(SettingsJson.stringify(map)))
         listOf("[1]", "\"text\"", "null", "{\"a\":1,\"a\":2}", "{\"a\":1} x", "{a:1}", "").forEach { malformed ->
             try {
-                SettingsJson.parseObject(malformed)
-                fail("parseObject should reject \"$malformed\"")
+                SettingsJson.parseMap(malformed)
+                fail("parseMap should reject \"$malformed\"")
             } catch (_: SettingsJson.SettingsJsonException) {
                 // expected
             }
@@ -171,6 +170,71 @@ class SettingsJsonTest {
         } catch (_: SettingsJson.SettingsJsonException) {
             // expected
         }
+    }
+
+    @Test
+    fun parseMapGivesMutablePlainMaps() {
+        // P5.3: the file-based stores mutate the records they read, nested members included.
+        val map = SettingsJson.parseMap("""{"b": {"c": [1]}, "a": null}""")
+        assertEquals(listOf("b", "a"), map.keys.toList())
+        assertTrue(map.containsKey("a"))
+        map["d"] = 2
+        @Suppress("UNCHECKED_CAST")
+        ((map["b"] as MutableMap<String, Any?>)["c"] as MutableList<Any?>).add(2)
+        assertEquals("""{"b":{"c":[1,2]},"a":null,"d":2}""", SettingsJson.stringify(map))
+        assertThrows(SettingsJson.SettingsJsonException::class.java) { SettingsJson.parseMap("[1]") }
+        assertThrows(SettingsJson.SettingsJsonException::class.java) { SettingsJson.parseMap("null") }
+    }
+
+    @Test
+    fun orgJsonObjectsConvertToAndFromPlainMaps() {
+        val map = SettingsJson.normalizeObject(JSONObject().put("n", 1L).put("x", JSONObject.NULL).put("a", JSONArray().put("s")))
+        assertEquals(mapOf("n" to 1, "x" to null, "a" to listOf("s")), map)
+        map["m"] = 3
+        val back = SettingsJson.toOrgObject(map)
+        assertSame(JSONObject.NULL, back.get("x"))
+        assertEquals(3, back.getInt("m"))
+        assertEquals("s", back.getJSONArray("a").getString(0))
+    }
+
+    @Test
+    fun mapAccessorsReadLikeOrgJsonOpt() {
+        val map = SettingsJson.parseMap(
+            """{"s": "t", "i": 7, "l": 9007199254740993, "d": 2.5, "b": true, "bs": "TRUE", "ns": " 12", "fs": "3.9", "z": null, "o": {"k": 1}, "a": [1, "x"]}""",
+        )
+        assertEquals("t", map.optString("s"))
+        assertEquals("7", map.optString("i"))
+        assertEquals("2.5", map.optString("d"))
+        assertEquals("true", map.optString("b"))
+        assertEquals("""{"k":1}""", map.optString("o"))
+        assertEquals("", map.optString("z"))
+        assertEquals("f", map.optString("missing", "f"))
+        assertEquals(9007199254740993L, map.optLong("l"))
+        assertEquals(7L, map.optLong("i"))
+        assertEquals(2L, map.optLong("d"))
+        assertEquals(12L, map.optLong("ns"))
+        assertEquals(3L, map.optLong("fs"))
+        assertEquals(-1L, map.optLong("s", -1L))
+        assertEquals(7, map.optInt("i"))
+        assertEquals(3, map.optInt("fs"))
+        assertEquals(0, map.optInt("z"))
+        assertEquals(2.5, map.optDouble("d"), 0.0)
+        assertTrue(map.optDouble("s").isNaN())
+        assertTrue(map.optBoolean("b"))
+        assertTrue(map.optBoolean("bs"))
+        assertFalse(map.optBoolean("s"))
+        assertTrue(map.optBoolean("missing", true))
+        assertEquals(mapOf("k" to 1), map.optObject("o"))
+        assertNull(map.optObject("a"))
+        assertEquals(listOf(1, "x"), map.optArray("a"))
+        assertNull(map.optArray("o"))
+    }
+
+    @Test
+    fun putOrRemoveIsOrgJsonPut() {
+        val map = SettingsJson.parseMap("""{"a": 1, "b": 2}""")
+        map.putOrRemove("a", null).putOrRemove("c", "x")
+        assertEquals("""{"b":2,"c":"x"}""", SettingsJson.stringify(map))
     }
 
     @Test

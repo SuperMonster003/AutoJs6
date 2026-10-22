@@ -3,7 +3,6 @@ package org.autojs.autojs.model.explorer
 import android.content.ContextWrapper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,13 +14,13 @@ import java.util.UUID
 class PrivilegedFileOperationJournalDeviceTest {
     @Test
     fun uncertainResultsSurviveUntilTheUserCanSeeThem() = fixture { context ->
-        val receipt = PrivilegedFileOperationJournal.begin(context, JSONObject().put("operation", "move").put("source", "/source").put("destination", "/target"))
+        val receipt = PrivilegedFileOperationJournal.begin(context, mapOf("operation" to "move", "source" to "/source", "destination" to "/target"))
         assertTrue(PrivilegedFileOperationJournal.interrupted(context).isEmpty())
         PrivilegedFileOperationJournal.preserve(receipt, PrivilegedFileOperationException("OUTCOME_UNKNOWN", "connection ended"))
         val firstRead = PrivilegedFileOperationJournal.interrupted(context)
         assertEquals(1, firstRead.size)
-        assertEquals("OUTCOME_UNKNOWN", firstRead.single().second.getString("code"))
-        assertEquals("/source", firstRead.single().second.getString("source"))
+        assertEquals("OUTCOME_UNKNOWN", firstRead.single().second["code"])
+        assertEquals("/source", firstRead.single().second["source"])
         // Reading while the activity is detached must not acknowledge or erase the result.
         assertEquals(1, PrivilegedFileOperationJournal.interrupted(context).size)
         PrivilegedFileOperationJournal.finish(receipt)
@@ -30,11 +29,11 @@ class PrivilegedFileOperationJournalDeviceTest {
 
     @Test
     fun partialFailuresKeepExactRecoveryLocations() = fixture { context ->
-        val receipt = PrivilegedFileOperationJournal.begin(context, JSONObject().put("operation", "copy").put("source", "/source"))
+        val receipt = PrivilegedFileOperationJournal.begin(context, mapOf("operation" to "copy", "source" to "/source"))
         PrivilegedFileOperationJournal.preserve(receipt, PrivilegedFileOperationException("NO_SPACE", "storage full", true, listOf("/target/.autojs6-copy-test", "/target/output")))
         val result = PrivilegedFileOperationJournal.interrupted(context).single().second
-        assertEquals("NO_SPACE", result.getString("code"))
-        assertEquals(2, result.getJSONArray("recoveryPaths").length())
+        assertEquals("NO_SPACE", result["code"])
+        assertEquals(2, (result["recoveryPaths"] as List<*>).size)
         PrivilegedFileOperationJournal.finish(receipt)
     }
 

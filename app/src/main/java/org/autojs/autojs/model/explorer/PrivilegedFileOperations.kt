@@ -5,6 +5,7 @@ import android.os.ParcelFileDescriptor
 import android.system.Os
 import android.system.OsConstants
 import android.util.Base64
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.json.JSONObject
 import java.io.File
@@ -108,7 +109,7 @@ object PrivilegedFileOperations {
 
     private fun executePrepared(context: Context, mode: PrivilegedAccessMode, request: JSONObject, mutation: Boolean, timeoutMs: Long, contents: File? = null): JSONObject {
         // Editor sessions persist their own request, draft, and recovery paths before sending it.
-        val receipt = if (mutation && request.optString("operation") != "save") PrivilegedFileOperationJournal.begin(context, request) else null
+        val receipt = if (mutation && request.optString("operation") != "save") PrivilegedFileOperationJournal.begin(context, SettingsJson.normalizeObject(request)) else null
         var preserveReceipt = false
         return try {
             executeRequest(context, mode, request, mutation, timeoutMs, contents).also { result ->

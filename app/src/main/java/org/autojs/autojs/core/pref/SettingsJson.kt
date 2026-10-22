@@ -118,17 +118,37 @@ object SettingsJson {
     }
 
     /**
-     * Parses one JSON document that must be an object into an org.json `JSONObject` ([toOrgJson] of [parse]). The
-     * file-based JSON stores whose code works on `JSONObject` read their files with it (P5.1), so a file reads the same
-     * on Android and in JVM tests; throws [SettingsJsonException] for malformed text and for a value other than an object.
-     * zh-CN: 把必须是对象的 JSON 文档解析为 org.json 的 `JSONObject` (即 [parse] 结果的 [toOrgJson]). 以 `JSONObject` 为模型的
-     * 文件型 JSON 存储用它读文件 (P5.1), 因此 Android 与 JVM 测试读到的内容一致; 文本格式错误或不是对象时抛 [SettingsJsonException].
+     * Parses one JSON document that must be an object into a mutable map of plain values in document order (nested
+     * objects and arrays are mutable as well). The file-based JSON stores keep their records as such maps (P5.3) and
+     * read them with the accessors of `SettingsJsonMaps.kt`; throws [SettingsJsonException] for malformed text and for a
+     * value other than an object.
+     * zh-CN: 把必须是对象的 JSON 文档解析为按文档顺序的可变普通值映射 (嵌套的对象与数组同样可变). 文件型 JSON 存储以这样的映射
+     * 作为记录 (P5.3), 用 `SettingsJsonMaps.kt` 的访问函数读取; 文本格式错误或不是对象时抛 [SettingsJsonException].
      */
     @JvmStatic
-    fun parseObject(text: String): JSONObject = when (val value = parse(text)) {
-        is Map<*, *> -> toOrgJson(value) as JSONObject
-        else -> throw SettingsJsonException("Expected an object, got ${describeType(value)}")
+    fun parseMap(text: String): MutableMap<String, Any?> {
+        val value = parse(text)
+        if (value !is Map<*, *>) throw SettingsJsonException("Expected an object, got ${describeType(value)}")
+        @Suppress("UNCHECKED_CAST")
+        return value as MutableMap<String, Any?>
     }
+
+    /**
+     * [normalize] of an org.json object (a cross-process request or result, P5.3) as a mutable map of plain values.
+     * zh-CN: org.json 对象 (跨进程的请求或结果, P5.3) 的 [normalize], 结果为可变普通值映射.
+     */
+    @JvmStatic
+    fun normalizeObject(value: JSONObject): MutableMap<String, Any?> {
+        @Suppress("UNCHECKED_CAST")
+        return normalize(value) as MutableMap<String, Any?>
+    }
+
+    /**
+     * [toOrgJson] of a map, for the payloads that stay org.json objects at a process or script boundary (P5.3).
+     * zh-CN: Map 的 [toOrgJson], 用于在进程或脚本边界仍为 org.json 对象的载荷 (P5.3).
+     */
+    @JvmStatic
+    fun toOrgObject(value: Map<String, Any?>): JSONObject = toOrgJson(value) as JSONObject
 
     /**
      * Converts a plain value into org.json values, the inverse of [normalize]: maps become `JSONObject` (in key order),

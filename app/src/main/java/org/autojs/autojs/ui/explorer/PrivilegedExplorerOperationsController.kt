@@ -16,6 +16,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import org.autojs.autojs.core.pref.optArray
+import org.autojs.autojs.core.pref.optString
 import org.autojs.autojs.model.explorer.ExplorerItem
 import org.autojs.autojs.model.explorer.ExplorerPage
 import org.autojs.autojs.model.explorer.Explorers
@@ -424,7 +426,7 @@ internal class PrivilegedExplorerOperationsController(
                         val message = if (record.optString("code") in listOf("", "OUTCOME_UNKNOWN")) context.getString(R.string.text_explorer_privileged_outcome_unknown)
                             else record.optString("message")
                         val paths = listOf(record.optString("source"), record.optString("destination")).filter(String::isNotEmpty).toMutableList()
-                        record.optJSONArray("recoveryPaths")?.let { retained -> (0 until retained.length()).forEach { paths += retained.getString(it) } }
+                        record.optArray("recoveryPaths")?.forEach { retained -> if (retained is String) paths += retained }
                         message + "\n" + paths.joinToString("\n")
                     }
                     MaterialDialog.Builder(context).title(R.string.text_explorer_privileged_access)
