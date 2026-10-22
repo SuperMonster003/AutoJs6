@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "android": "12",
+    "sdk": "31",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "shell"
+    },
+    "mode": "volume-key",
+    "rounds": 5,
+    "settleSec": 3.0,
+    "startResidue": 0,
+    "startHostAlive": false,
+    "startForceStops": 1,
+    "date": "20261023",
+    "startedAt": "2026-10-23 06:35:30",
+    "endedAt": "2026-10-23 06:36:44",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "servicePid": 10508,
+      "serviceRssKb": 215508,
+      "mark": "beat 0",
+      "geteventUnderService": 1,
+      "children": [
+        "getevent"
+      ],
+      "keyInjection": "uhid",
+      "volumeKeyStopped": true,
+      "volumeKeyStopSec": 0.63,
+      "volumeKeySignal": "exit event",
+      "volumeStreamsRestored": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 2,
+      "servicePid": 10769,
+      "serviceRssKb": 215424,
+      "mark": "beat 0",
+      "geteventUnderService": 1,
+      "children": [
+        "getevent"
+      ],
+      "keyInjection": "uhid",
+      "volumeKeyStopped": true,
+      "volumeKeyStopSec": 0.63,
+      "volumeKeySignal": "exit event",
+      "volumeStreamsRestored": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 3,
+      "servicePid": 11015,
+      "serviceRssKb": 215792,
+      "mark": "beat 0",
+      "geteventUnderService": 1,
+      "children": [
+        "getevent"
+      ],
+      "keyInjection": "uhid",
+      "volumeKeyStopped": true,
+      "volumeKeyStopSec": 0.63,
+      "volumeKeySignal": "exit event",
+      "volumeStreamsRestored": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 4,
+      "servicePid": 11289,
+      "serviceRssKb": 215252,
+      "mark": "beat 0",
+      "geteventUnderService": 1,
+      "children": [
+        "getevent"
+      ],
+      "keyInjection": "uhid",
+      "volumeKeyStopped": true,
+      "volumeKeyStopSec": 0.63,
+      "volumeKeySignal": "exit event",
+      "volumeStreamsRestored": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 5,
+      "servicePid": 11528,
+      "serviceRssKb": 215044,
+      "mark": "beat 0",
+      "geteventUnderService": 1,
+      "children": [
+        "getevent"
+      ],
+      "keyInjection": "uhid",
+      "volumeKeyStopped": true,
+      "volumeKeyStopSec": 0.63,
+      "volumeKeySignal": "exit event",
+      "volumeStreamsRestored": 0,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    }
+  ],
+  "verdict": "PASS",
+  "summary": "volume key stopped the script in 5/5 rounds, residue in 0/5 rounds"
+}

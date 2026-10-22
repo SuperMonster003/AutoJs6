@@ -28,7 +28,7 @@ py -3.12 -I tools/shizuku-oom/zombie_probe.py -s SERIAL --mode force-stop --roun
 | `update` | 每轮先装 `--apk-a`, 跑脚本, 再覆盖安装 `--apk-b` (versionCode 不同, 绑定的 version 也不同), 统计旧服务; 再跑一次脚本, 最后强停 | P0.3(b) |
 | `server-restart` | 跑脚本后 `sh <--start-sh>` 重启 Shizuku 服务端 (只适用于 adb 方式启动的 Shizuku), 统计旧服务; 再强停 | P0.3(c) |
 | `spawn-orphan` | 脚本 `shizuku.spawn('sleep 600')` 后常驻, 强停后另统计服务的子进程与本轮的 `sleep 600` | P0.3(e), P1.1 的修前基线; 能结束的子进程会被结束 |
-| `volume-key` | 脚本每 500 ms 写一次心跳; 服务下出现常驻 `getevent` 后, 用 `sendevent` 向 `getevent -pl` 里带 `KEY_VOLUMEUP` 的节点写一次音量加键 (按下, SYN, 抬起, SYN), 等脚本停止 (标记为 `stopped` 或心跳停止 2.5 s, 最多 8 s), 把变化了的铃声 / 媒体 / 通知音量 (stream 2 / 3 / 5) 改回原值, 再强停 | T6 (9) / P1.5: 需开启 "运行时音量键控制"; 备注 `getevent` 为服务下的 getevent 数, `stopped` 为是否停止及用时 (信号: 标记或心跳); stray 参与判定 |
+| `volume-key` | 脚本每 500 ms 写一次心跳; 服务下出现常驻 `getevent` 后, 用 `sendevent` 向 `getevent -pl` 里带 `KEY_VOLUMEUP` 的节点写一次音量加键 (按下, SYN, 抬起, SYN); adb shell 不能写该节点时 (例如 Android 12 的 SELinux 拒绝 shell 写 `/dev/input`), 改用系统 `hid` 工具经 `/dev/uhid` 注册一个虚拟消费类控制设备并发送音量加 (报告里 `keyInjection` 为 `uhid`). 然后等脚本停止 (标记为 `stopped` 或心跳停止 2.5 s, 最多 8 s), 把变化了的铃声 / 媒体 / 通知音量 (stream 2 / 3 / 5) 改回原值, 再强停 | T6 (9) / P1.5: 需开启 "运行时音量键控制"; 备注 `getevent` 为服务下的 getevent 数, `stopped` 为是否停止及用时 (信号: 标记或心跳); stray 参与判定 |
 
 其他参数: `--stray-fails` (有 stray 的轮次判 FAIL), `--report-dir` (默认 `docs/shizuku-oom/evidence`, 相对路径按仓库根目录解析), `--label` (报告名后缀, 例如 `v664`), `--expect accumulate` (负对照: 至少 80% 的轮次残留数比上一轮多 1 才算 PASS), `--kill-residue` (结束时结束运行期间新出现的用户服务进程, 负对照用; root 身份的服务进程结束不了), `--apk-a` / `--apk-b` (`update` 模式), `--start-sh` (默认 `/sdcard/Android/data/moe.shizuku.privileged.api/start.sh`), `--package`, `--no-wake`, `--profile` (见下).
 
@@ -61,7 +61,7 @@ py -3.12 -I tools/shizuku-oom/regression.py -s SERIAL --label p1
 py -3.12 -I tools/shizuku-oom/regression.py -s SERIAL --items 1,2,3
 ```
 
-`regression.py` 按 ROADMAP T6 逐项检查 Shizuku 功能, 每项一行通过 / 失败与关键数值: (1) `shizuku('id')` / `shizuku.execCommand`, (2) `shizuku.spawn` 随脚本结束, (3) `new Shell({ adb: true })` 与 `pty: true`, (4) 文件管理器经 Shizuku 浏览与保存 (仪器测试), (5) 经 Shizuku 写入无障碍启用列表并等服务连上, (6) currentPackage / currentActivity 与 dumpsys 一致, 加浮动按钮 "更多" 的仪器测试, (7) KeyCode 经 Shizuku 发送音量减键 (`dumpsys audio` 音量日志里出现 `ADJUST_LOWER` 请求或音量变化即算送达; 静音或勿扰时音量不变), (8) 其余调用点冒烟 (RootAutomator 的 Shizuku 后端, 指针位置工具, 插件中心启动器图标命令, AndroidIdReader, app 模块的 Shizuku 分支; 默认只在 Shizuku 以 shell 身份运行时跑), (9) 一轮 `volume-key` 探针. 最后再强停一次宿主, 用户服务与 stray 都须为 0.
+`regression.py` 按 ROADMAP T6 逐项检查 Shizuku 功能, 每项一行通过 / 失败与关键数值: (1) `shizuku('id')` / `shizuku.execCommand`, (2) `shizuku.spawn` 随脚本结束, (3) `new Shell({ adb: true })` 与 `pty: true`, (4) 文件管理器经 Shizuku 浏览与保存 (仪器测试), (5) 经 Shizuku 写入无障碍启用列表并等服务连上, (6) currentPackage / currentActivity 与 dumpsys 一致, 加浮动按钮 "更多" 的仪器测试, (7) KeyCode 经 Shizuku 发送音量减键 (`dumpsys audio` 音量日志里出现 `ADJUST_LOWER` 请求或音量变化即算送达; 静音或勿扰时音量不变), (8) 其余调用点冒烟 (RootAutomator 的 Shizuku 后端; adb shell 不能写任何 `/dev/input` 节点且它如实报告时记为不适用, 指针位置工具, 插件中心启动器图标命令, AndroidIdReader, app 模块的 Shizuku 分支; 默认只在 Shizuku 以 shell 身份运行时跑), (9) 一轮 `volume-key` 探针. 最后再强停一次宿主, 用户服务与 stray 都须为 0.
 
 - 前提: 宿主已获 Shizuku 授权; (4) / (6) 需要同一构建的仪器测试包 `org.autojs.autojs6.test` (`:app:assembleAppDebugAndroidTest`), 先按上一节备份设备上原有的测试包, 测后装回. 脚本直接跑 `am instrument`, 不用 `connected*` 任务 (会卸载应用).
 - 会临时改动并在该项结束时还原: (5) 的无障碍启用列表与 `accessibility_enabled`, (7) 的音量与铃声模式 (最低音量减小切到振动时用音量加键改回), (8) 的 `pointer_location`. 仪器测试里被 assumption 跳过的用例 (例如只适用于 API 29+) 不算失败, 备注写明跳过原因. (8) 还会经 Shizuku 打开系统设置再强停它. `am instrument` 与强停使宿主被移出无障碍启用列表, 结束时补回宿主原有的条目.

@@ -22,7 +22,8 @@ Modes:
                    service's child processes (sh / sleep) still alive, then kills those it can (same uid as adb shell).
   volume-key       T6 (9) / P1.5: the script beats until stopped; once one getevent runs under the user service (volume key
                    control on), the probe writes a volume up key to the evdev node that reports KEY_VOLUMEUP (`sendevent`,
-                   as a real key press: the system volume panel shows and the volume may step), checks that the script
+                   or a virtual uhid device from the `hid` tool where adb shell may not write /dev/input; as a real key
+                   press: the system volume panel shows and the volume may step), checks that the script
                    stopped, puts back the ring / music / notification volumes it changed, then force-stops the host. Stray
                    exec processes fail the round.
 
@@ -69,6 +70,22 @@ SERVER_NAME = "shizuku_server"
 SPAWN_COMMAND = "sleep 600"
 STRAY_NAMES = ("sh", "getevent", "sleep")
 VOLUME_STREAMS = (2, 3, 5)
+# Commands for the system `hid` tool (uhid): a USB consumer control whose report bit 0 is Volume Increment, which the
+# kernel reports as KEY_VOLUMEUP on a new evdev node; the delay lets the observing getevent open that node first.
+# zh-CN: 系统 `hid` 工具 (uhid) 的命令: 一个 USB 消费类控制设备, 报告第 0 位为音量加, 内核在新的 evdev 节点上报告为 KEY_VOLUMEUP;
+# 延时让监听中的 getevent 先打开该节点.
+HID_VOLUME_UP = "\n".join(json.dumps(command) for command in (
+    {"id": 1, "command": "register", "name": "aj6-shizuku-oom volume key", "vid": 6353, "pid": 41000, "bus": "usb",
+     "descriptor": [0x05, 0x0C, 0x09, 0x01, 0xA1, 0x01, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x02, 0x09, 0xE9,
+                    0x09, 0xEA, 0x81, 0x02, 0x95, 0x06, 0x81, 0x03, 0xC0]},
+    {"id": 1, "command": "delay", "duration": 1500},
+    {"id": 1, "command": "report", "report": [1]},
+    {"id": 1, "command": "delay", "duration": 50},
+    {"id": 1, "command": "report", "report": [0]},
+    {"id": 1, "command": "delay", "duration": 500},
+)) + "\n"
+# From the volume up report to the end of the `hid` command. zh-CN: 从音量加报告到 `hid` 命令结束.
+HID_TAIL_SEC = 0.55
 LOGCAT_LINE = re.compile(r"^\d\d-\d\d \S+\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.*?)\s*: (.*)$")
 
 
@@ -142,6 +159,7 @@ class Probe:
         self.service_name = f"{args.package}:shizuku-service-for-{args.package.rsplit('.', 1)[-1]}"
         self.pre_sleeps = set()
         self._volume_device = None
+        self._evdev_writable = None
 
     # Processes. zh-CN: 进程.
 
@@ -427,8 +445,7 @@ class Probe:
         else:
             volumes = self.volumes()
             last = self.read_mark(mark)
-            sent = time.time()
-            self.dev.shell(f"sendevent {device} 1 115 1; sendevent {device} 0 0 0; sendevent {device} 1 115 0; sendevent {device} 0 0 0")
+            sent, item["keyInjection"] = self.send_volume_up(device)
             stopped, signal, stalled_since = None, None, None
             while time.time() < sent + 8:
                 current = self.read_mark(mark)
@@ -471,6 +488,23 @@ class Probe:
                     self._volume_device = current
                     break
         return self._volume_device
+
+    def send_volume_up(self, device):
+        """Sends one volume up key; returns (the time it went out, how). `sendevent` writes the evdev node when adb
+        shell may; otherwise (SELinux denies shell writes to /dev/input on e.g. Android 12) the `hid` tool adds a
+        virtual device for the key, which adb shell may do through /dev/uhid.
+        zh-CN: 发送一次音量加键, 返回 (发出时间, 方式). adb shell 可写 evdev 节点时用 `sendevent`; 否则 (例如 Android 12 的 SELinux 不允许
+        shell 写 /dev/input) 由 `hid` 工具为该按键添加一个虚拟设备, adb shell 可经 /dev/uhid 做到."""
+        if self._evdev_writable is None:
+            self._evdev_writable = self.dev.shell(f"test -w {device} && echo yes").strip() == "yes"
+        if self._evdev_writable:
+            sent = time.time()
+            self.dev.shell(f"sendevent {device} 1 115 1; sendevent {device} 0 0 0; sendevent {device} 1 115 0; sendevent {device} 0 0 0")
+            return sent, "sendevent"
+        commands = f"{DEVICE_DIR}/hid-volume-up.json"
+        self.dev.write(commands, HID_VOLUME_UP)
+        self.dev.shell(f"hid {commands} >/dev/null 2>&1", timeout=30)
+        return time.time() - HID_TAIL_SEC, "uhid"
 
     def volumes(self):
         """Stream volumes the sent key may change (ring, music, notification). zh-CN: 发送的按键可能改变的音量 (铃声, 媒体, 通知)."""

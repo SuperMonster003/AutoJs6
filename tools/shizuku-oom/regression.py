@@ -17,7 +17,7 @@ Runs the T6 items on one device through the host already installed there (a debu
      dumpsys audio volume log, or a changed stream volume; a muted phone changes none). Volumes and the ringer mode are
      put back afterwards.
   8  Other call sites, one smoke each (only where the server runs as shell, unless --items names it): RootAutomator on the
-     Shizuku backend, the pointer location tool, the plugin center launcher icon command (an empty state map, so no
+     Shizuku backend (n/a where adb shell may write no /dev/input node and it reports so), the pointer location tool, the plugin center launcher icon command (an empty state map, so no
      component changes), AndroidIdReader (`device.getAndroidId(true)` equals the adb value), and the app module's Shizuku
      branches (`app.startActivity({ shizuku: true })` opens Settings, `app.kill` ends it).
   9  Volume key control: one zombie_probe.py volume-key round (a getevent under the user service, a volume up key stops the
@@ -391,6 +391,9 @@ class Regression:
             note += f", ringer mode {ringer} -> {ringer_after}, {'put back' if ringer_back else 'NOT put back'}"
         return self.result("7", ok, note, volumeStreamsRestored=restored, ringerModeChanged=ringer_after != ringer)
 
+    def writable_input_nodes(self):
+        return self.dev.shell("for f in /dev/input/event*; do test -w $f && echo $f; done").split()
+
     def item8(self):
         parts, ok = [], True
 
@@ -400,7 +403,14 @@ class Regression:
             parts.append(f"{label} {'ok' if passed else 'FAIL'} ({detail})")
 
         _, out = self.run_js("rootautomator", JS_ROOT_AUTOMATOR)
-        check("RootAutomator", out.get("ok") is True, out.get("error") or "Shizuku backend, sendSync + exit")
+        error = out.get("error") or ""
+        if out.get("ok") is not True and "cannot access a writable input device" in error and not self.writable_input_nodes():
+            # SELinux may deny adb shell, the identity of a shell Shizuku server, writes to /dev/input (e.g. Android 12),
+            # so RootAutomator rightly refuses its Shizuku backend there. zh-CN: SELinux 可能不允许 adb shell (shell 身份
+            # Shizuku 服务端的身份) 写 /dev/input (例如 Android 12), 此时 RootAutomator 拒绝 Shizuku 后端是正确的.
+            parts.append("RootAutomator n/a (adb shell may write no /dev/input node here; the expected error)")
+        else:
+            check("RootAutomator", out.get("ok") is True, error or "Shizuku backend, sendSync + exit")
 
         pointer = self.dev.shell("settings get system pointer_location").strip()
         try:
