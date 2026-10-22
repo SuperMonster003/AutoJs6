@@ -1,6 +1,6 @@
 # 内存门禁工具
 
-配合 `docs/memory/ROADMAP.md` 使用. 门禁本体是仪器测试 `app/src/androidTest/java/org/autojs/autojs/memory/RuntimeLeakGateDeviceTest.kt` (场景脚本在同目录 `scenarios/GateScenarios.kt`), 本目录是驱动与审计脚本. 脚本不安装 APK, 不点屏幕, 不改设置; 需要人工确认的对话框 (S4a 的截屏授权) 由维护者在手机上操作.
+配合 `docs/memory/ROADMAP.md` 使用. 门禁本体是仪器测试 `app/src/androidTest/java/org/autojs/autojs/memory/RuntimeLeakGateDeviceTest.kt` (场景脚本在同目录 `scenarios/GateScenarios.kt`), 本目录是驱动与审计脚本. 脚本不安装 APK, 不点屏幕, 不改设置 (只用于模拟器的 ci_gate.py 除外, 见下文); 需要人工确认的对话框 (S4a 的截屏授权) 由维护者在手机上操作.
 
 ## run_gate.py: 跑门禁并生成证据
 
@@ -58,6 +58,28 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7,S7b --keep-proc
 场景表 (T2): S1 空脚本, S2 `threads.start` x 10 + `threads.pool`, S3 定时器嵌套, S4a 截屏 (需授权), S4b `images.read` + `findImage`, S4c `copy` / `clip` / `resize`, S4d `matchTemplate` + `oneShot`, S4e 多线程图像 (#372 / #200 的有限版本), S4f 连续 200 次 `captureScreen` 不显式回收 (issue #204 的 "卡住不返回"; 每个进程固定预热 1 + 计数 3, 单次截图超过 15 s 或截图后打开的 media Image 超过 1 个即脚本失败; 需 `--capture on`), S5 UI 脚本 + webview (经 `ScriptExecuteActivity`, 等 `onDestroy`), S6 `floaty.window` + `floaty.rawWindow`, S7 事件 / 按键 / 传感器 / 无障碍事件 (按键与无障碍部分需宿主无障碍服务, 未开启时只跑其余部分并在报告中记录), S7b `className(...).find()` / `findOnce` / `children` / `parent` 循环 (需宿主无障碍服务, 未绑定时跳过), S8 `JavaAdapter` + `runtime.loadDex`, S9 `engines.execScriptFile` 自我重启 3 层, S10 `http.get` + WebSocket (测试进程内的回环服务, 不需要网络), S11 `device.*` 读取 / 振动 / `keepScreenOn`, S12 `plugins.load` (3-ImGui, 未安装时跳过), S13 `speech.listen({ source: 'external' })` 开着识别会话时结束 (只喂静音帧, 不发声不录音; 3-Macaw Speech 与 3-Stone AI 都未安装时跳过, ROADMAP 附录 C Q13), S14 控制台悬浮窗显示中结束 (`console.setExitOnClose(500)`, 未授悬浮窗权限时与 S6 一样跳过), S15 `web.newInjectableWebView` 在主线程 (`ui.run`) 创建且未挂到窗口上时脚本结束 (ROADMAP 附录 C Q42), S16 UI 脚本启动另一个 UI 脚本, 后者先结束 (两者共用主线程的 Rhino Context; 外层脚本在后者结束后用 `memory.collect()` 与 `memory.retained()` 检查它是否已被回收, 报告为 `innerRetainedWhileOuterRuns`; ROADMAP H27). P4.4 起 S8 每次运行加载 DEX 的一份新副本 (新路径, 与反复加载变化的文件的脚本相同), 以便看出按路径登记的加载器是否随脚本释放.
 
 度量自 P2.1 起全部取自宿主的 `org.autojs.autojs.runtime.memory.MemoryDiagnostics` (`GateMetrics.kt` 只做转接; Rhino Context 计数为 `AndroidContextFactory.activeContextCount`, 图像数为 `ImageWrapper.liveCount`), 与开发者选项 "内存诊断" 页面同源 (ROADMAP T3). 脚本线程按线程名标记计数 (`ScriptThread-` / `Spawn-` / `Pool-` / `Timer` / `ScreenCapturer` / `LooperThread`), Android 14 起框架自带的 `SurfaceSyncGroupTimer` 不计 (P1 起).
+
+## ci_gate.py: CI 门禁 (模拟器)
+
+```
+py -3.12 -I -u tools/memory/ci_gate.py -s SERIAL [--adb ADB] [--plugin APK]... [--scenarios S1,S2] [--allow-skip S7b,S13] [--label ci] [--out build/memory-gate/evidence] [--work build/memory-gate] [--relaunch "EMULATOR 命令"] [--restart-adb-server] [--no-retry]
+```
+
+`.github/workflows/memory-gate.yml` (ROADMAP P6.1, `workflow_dispatch` 与推送 `v*` 标签时运行) 只调用本脚本; 本机复现用同款 AVD (API 35, google_apis, x86_64, pixel_7, 内存 4096M), 步骤与 CI 相同. 本脚本会安装 APK 并修改设置, 所以只接受模拟器, 真机仍走 run_gate.py.
+
+1. 等待框架就绪: 开机完成, 开机动画停止, activity 与 package 服务应答, 并稳定 10 s.
+2. 准备: 按设备 ABI 从 `--apk-dir` (默认 `app/build/outputs/apk`, 依据同一次构建的 output-metadata.json) 选 debug 宿主, 以 `-t -g` 安装 (授予运行时权限), 再装测试 APK 与各个 `--plugin` (S4b / S4d / S4e 需要官方 OpenCV 插件, 宿主 APK 不含 OpenCV; S12 需要 3-ImGui; CI 从两个插件仓库的 Release 下载 x86_64 包并校验 sha256, 官方插件凭签名证书受信且默认启用, 装上即可); 核对已安装的 versionCode; 解锁, 关闭动画, 屏幕常亮, `appops set org.autojs.autojs6 SYSTEM_ALERT_WINDOW allow` (否则 S6 跳过).
+3. 以 `--mode normal --capture on --wake --hprof` 运行 run_gate.py (S4a / S4f 的截屏授权按上文用 PROJECT_MEDIA app-op 放行), logcat 全程写入 `<work>/logcat.txt`, 输出转录写入 `<work>/run-gate-attempt-N.txt`. 运行中每 30 s 探测一次 adb (超时 15 s), 连续 3 次无应答判定 adb 丢失并停止 run_gate.py (参照 3-Stove Agent 的 run_main_suite.py).
+4. 只有出现 "System has crashed", system_server 的 pid 变化或 adb 丢失时才重跑一次: adb 丢失时先重启 adb server (`--restart-adb-server`), 仍无应答再用 `--relaunch` 的命令重启模拟器; 重新准备后只重跑未通过的场景, 用 `--merge` 并入同一份报告, 第一次的报告复制到 `<work>/attempt-1`.
+5. 判定: 选中的场景 (默认 S1-S12, 强制停止模式不进 CI) 全部通过, 或因模拟器无法避免的原因跳过 (`--allow-skip`, 默认 S7b / S12 / S13: S7b 需维护者重新开启无障碍服务, 见上文; S12 未装 3-ImGui; S13 无语音插件; CI 装了 3-ImGui, 传 `--allow-skip S7b,S13`, S12 必须通过). 其他跳过, 失败或缺报告都判 FAIL, 以免权限丢失后静默通过. S7 不带无障碍服务运行, 按键与无障碍事件部分记录在报告中.
+
+输出 `CI_GATE_RESULT PASS|FAIL passed=N skipped=N (...) problems=N attempts=N versionCode=N` 与逐条 `CI_GATE_PROBLEM`; 在 GitHub Actions 中还把结果与报告表写入 job summary. 退出码: PASS 0, FAIL 1, 准备或运行出错 2 (`CI_GATE_ERROR`). `--restart-adb-server` 会断开本机所有设备, 只在 CI 上使用. 本机复现时把报告写进证据目录, 临时文件放在仓库外:
+
+```
+py -3.12 -I -u tools/memory/ci_gate.py -s emulator-5610 --adb ADB --plugin OPENCV_X86_64_APK --plugin IMGUI_X86_64_APK --allow-skip S7b,S13 --label ci-local --out docs/memory/evidence --work WORK_DIR --relaunch "EMULATOR -port 5610 -avd AutoJs6_Memory_Gate_CI_35 -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
+```
+
+纯函数 (APK 选择, 重跑范围, 判定) 的单测在 `test_ci_gate.py`.
 
 ## leakcanary_probe.py: LeakCanary 报告核对
 
