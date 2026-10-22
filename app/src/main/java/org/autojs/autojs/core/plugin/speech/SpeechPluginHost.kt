@@ -24,6 +24,7 @@ import org.autojs.autojs6.R
 import org.autojs.plugin.common.api.PluginInfo
 import org.autojs.plugin.speech.api.ISpeechPlugin
 import org.autojs.plugin.speech.api.ISpeechProgressCallback
+import org.autojs.plugin.speech.api.ISpeechSession
 import org.autojs.plugin.speech.api.SpeechCapabilityKeys
 import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
@@ -253,7 +254,7 @@ object SpeechPluginHost {
                 val target = selectForCall(context)
                 requireFeature(peerOf(target), if (request.isExternal) SpeechContract.FEATURE_ASR else SpeechContract.FEATURE_ASR_STREAMING)
                 val callback = SpeechSessionCallbackBinder(gate)
-                val leased = lease(context, target) { proxy ->
+                val leased = lease(context, target, ISpeechSession::cancel) { proxy ->
                     SpeechSessionOpening.requireOpened(proxy.openSession(SpeechBundles.listen(request), callback), "session")
                 }
                 SpeechSessionProxy(leased, gate, request.isExternal).also(opened)
@@ -286,7 +287,7 @@ object SpeechPluginHost {
                 }
                 val wakeCallback = SpeechWakeCallbackBinder(gate)
                 val listenCallback = listenGate?.let { SpeechSessionCallbackBinder(it, roundChannel = true) }
-                val leased = lease(context, target) { proxy ->
+                val leased = lease(context, target, ISpeechSession::cancel) { proxy ->
                     SpeechSessionOpening.requireOpened(proxy.openWakeSession(SpeechBundles.wake(request), wakeCallback, listenCallback), "wake session")
                 }
                 SpeechWakeSessionProxy(leased, gate, listenGate).also(opened)
@@ -491,9 +492,19 @@ object SpeechPluginHost {
         throw SpeechErrorMapper.wrap(t, SpeechErrorMapper.Phase.CALL)
     }
 
-    /** A call whose result keeps a dedicated binding lease (sessions, operations). zh-CN: 其结果持有专用绑定租约的调用 (会话, 操作). */
-    private suspend fun <T> lease(context: Context, target: AidlPluginHost.Discovered, block: (ISpeechPlugin) -> T): AidlPluginHost.LeasedCall<T> = try {
-        withTimeout(SpeechContract.CALL_TIMEOUT_MS) {
+    /**
+     * A call whose result keeps a dedicated binding lease (sessions, operations). A result the plugin answers after the
+     * timeout or after the caller is cancelled is passed to [abandon] and its binding released ([SpeechSessionOpening.lease], Q55).
+     * zh-CN: 其结果持有专用绑定租约的调用 (会话, 操作). 插件在超时或调用方被取消之后才应答的结果交给 [abandon] 并释放其绑定
+     * ([SpeechSessionOpening.lease], Q55).
+     */
+    private suspend fun <T> lease(
+        context: Context,
+        target: AidlPluginHost.Discovered,
+        abandon: (T) -> Unit,
+        block: (ISpeechPlugin) -> T,
+    ): AidlPluginHost.LeasedCall<T> = try {
+        SpeechSessionOpening.lease(SpeechContract.CALL_TIMEOUT_MS, abandon) {
             host(context).callWithDedicatedBindingLease(context.applicationContext, target, retryOnRemoteException = false, block = block)
         }
     } catch (e: TimeoutCancellationException) {
@@ -524,7 +535,7 @@ object SpeechPluginHost {
         start: (ISpeechPlugin, ISpeechProgressCallback) -> Int,
     ): Bundle {
         val callback = SpeechProgressBinder(onProgress)
-        val leased = lease(context, target) { proxy -> Started(proxy, start(proxy, callback)) }
+        val leased = lease(context, target, { started -> started.proxy.cancelOperation(started.opId) }) { proxy -> Started(proxy, start(proxy, callback)) }
         val binder = leased.value.proxy.asBinder()
         val death = IBinder.DeathRecipient { callback.fail(SpeechErrorMapper.normalize(SpeechErrorCodes.SESSION_CLOSED, "speech plugin process died")) }
         try {

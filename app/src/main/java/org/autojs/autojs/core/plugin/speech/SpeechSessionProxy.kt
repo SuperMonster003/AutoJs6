@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.speech
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
+import kotlinx.coroutines.withTimeout
 import org.autojs.autojs.core.plugin.AidlPluginHost
 import org.autojs.plugin.speech.api.ISpeechSession
 import org.autojs.plugin.speech.api.ISpeechSessionCallback
@@ -14,6 +15,7 @@ import org.autojs.plugin.speech.api.SpeechResultKeys
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * One session event as the host reads it off a callback (roadmap appendix B.3): [type] is one of
@@ -318,9 +320,10 @@ class SpeechWakeSessionProxy internal constructor(
  * Opening a session without leaking its gates (docs/memory/ROADMAP.md H30): the callback Binders reach the plugin process
  * before it answers, and it may keep them after refusing (MODEL_MISSING and so on), so every failure discards the gates
  * before the exception goes on. A session that opened before its opener failed (the script stopped meanwhile) is
- * cancelled and its binding released.
+ * cancelled and its binding released, and so is an open call the plugin answers too late ([lease], Q55).
  * zh-CN: 打开会话而不泄漏其闸门 (docs/memory/ROADMAP.md H30): 回调 Binder 在插件作答之前就已到达插件进程, 插件拒绝 (MODEL_MISSING 等) 后仍可能
- * 持有它们, 因此任何失败都先丢弃闸门再继续抛出异常. 打开方失败前会话已打开的 (其间脚本已停止), 取消该会话并释放绑定.
+ * 持有它们, 因此任何失败都先丢弃闸门再继续抛出异常. 打开方失败前会话已打开的 (其间脚本已停止), 取消该会话并释放绑定; 插件过迟应答的打开调用同样处理
+ * ([lease], Q55).
  */
 internal object SpeechSessionOpening {
 
@@ -336,6 +339,30 @@ internal object SpeechSessionOpening {
             gates.forEach { it.discard() }
             opened.get()?.abandon()
             throw t
+        }
+    }
+
+    /**
+     * Runs the open call [call] (a session, or the start of an operation) within [timeoutMs] without losing a result that
+     * arrives too late (docs/memory/ROADMAP.md Q55): [call] suspends while the dedicated binding connects, so after the
+     * timeout or the cancellation of the caller `withTimeout` drops the value of a plugin call that still returns, and the
+     * binding would stay bound with the plugin session or operation running until the plugin process ends. Such a result
+     * goes to [abandon] (it cancels what the plugin opened) and its binding is released, then the cancellation goes on; a
+     * result returned in time belongs to the caller and is not touched.
+     * zh-CN: 在 [timeoutMs] 内运行打开调用 [call] (会话, 或操作的启动), 不丢失过迟到达的结果 (docs/memory/ROADMAP.md Q55): [call] 在专用绑定连接期间
+     * 挂起, 因此超时或调用方被取消之后, 仍然返回的插件调用的值会被 `withTimeout` 丢弃, 绑定将一直保持, 插件会话或操作一直运行到插件进程结束. 这样的结果
+     * 交给 [abandon] (取消插件已打开的内容) 并释放其绑定, 然后继续抛出取消; 按时返回的结果归调用方所有, 不受影响.
+     */
+    suspend fun <T> lease(timeoutMs: Long, abandon: (T) -> Unit, call: suspend () -> AidlPluginHost.LeasedCall<T>): AidlPluginHost.LeasedCall<T> {
+        val arrived = AtomicReference<AidlPluginHost.LeasedCall<T>?>()
+        try {
+            return withTimeout(timeoutMs) { call().also(arrived::set) }
+        } catch (e: CancellationException) {
+            arrived.get()?.let { late ->
+                runCatching { abandon(late.value) }
+                runCatching { late.bindingLease.close() }
+            }
+            throw e
         }
     }
 

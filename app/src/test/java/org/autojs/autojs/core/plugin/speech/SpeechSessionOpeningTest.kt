@@ -5,6 +5,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -29,11 +31,12 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * A refused or abandoned open leaves no gate leading to the script (docs/memory/ROADMAP.md H30, Q50): the fake plugin keeps
  * the callbacks it was handed, as the plugin process keeps the callback Binders, so a gate that still held its sink would
- * pin the script runtime. The open helpers follow `SpeechPluginHost.openSession` / `openWakeSession`; the Binder adapters
- * themselves need a device, so plain forwarding callbacks stand in for them.
+ * pin the script runtime. A session or an operation the plugin opens after the timeout or after the cancellation of the
+ * opener is cancelled and its binding released (Q55). The open helpers follow `SpeechPluginHost.openSession` /
+ * `openWakeSession`; the Binder adapters themselves need a device, so plain forwarding callbacks stand in for them.
  * zh-CN: 被拒绝或被放弃的打开不留下通向脚本的闸门 (docs/memory/ROADMAP.md H30, Q50): 假插件保留交给它的回调, 正如插件进程保留回调 Binder,
- * 因此仍持有 sink 的闸门会钉住脚本运行时. 打开辅助函数照搬 `SpeechPluginHost.openSession` / `openWakeSession`; Binder 适配器本身需要设备,
- * 由直接转发的回调代替.
+ * 因此仍持有 sink 的闸门会钉住脚本运行时. 插件在超时或打开者被取消之后才打开的会话或操作被取消, 其绑定被释放 (Q55). 打开辅助函数照搬
+ * `SpeechPluginHost.openSession` / `openWakeSession`; Binder 适配器本身需要设备, 由直接转发的回调代替.
  */
 class SpeechSessionOpeningTest {
 
@@ -131,6 +134,75 @@ class SpeechSessionOpeningTest {
     }
 
     @Test
+    fun aSessionOpenedAfterTheTimeoutIsCancelledAndReleased() = runBlocking {
+        val session = FakeSession()
+        val plugin = FakePlugin { Thread.sleep(LATE_MS); session.api }
+        val gate = SpeechEventGate(sink)
+        val thrown = expectFailure { openListenWithin(plugin, gate, TIMEOUT_MS) }
+        assertEquals("the script still gets TIMEOUT", SpeechErrorCodes.TIMEOUT, (thrown as SpeechPluginException).code)
+        assertEquals("the late plugin session is cancelled", 1, session.cancels.get())
+        assertEquals("its binding is released", 1, unbinds.get())
+        assertFalse(gate.holdsSink)
+        plugin.fire("onEnd")
+        assertTrue(received.isEmpty())
+    }
+
+    @Test
+    fun aSessionOpenedAfterTheOpenerIsCancelledIsCancelledAndReleased() = runBlocking {
+        val session = FakeSession()
+        lateinit var opener: Job
+        val plugin = FakePlugin { opener.cancel(); session.api }
+        val gate = SpeechEventGate(sink)
+        var failure: Throwable? = null
+        var proxy: SpeechSessionProxy? = null
+        opener = launch(Dispatchers.Default, CoroutineStart.LAZY) {
+            try {
+                proxy = openListenWithin(plugin, gate, LONG_TIMEOUT_MS)
+            } catch (t: Throwable) {
+                failure = t
+                throw t
+            }
+        }
+        opener.join()
+        assertNull(proxy)
+        assertTrue(failure is CancellationException)
+        assertEquals("the late plugin session is cancelled", 1, session.cancels.get())
+        assertEquals("its binding is released", 1, unbinds.get())
+        assertFalse(gate.holdsSink)
+    }
+
+    @Test
+    fun anOperationStartedAfterTheTimeoutIsCancelledAndReleased() = runBlocking {
+        val abandoned = ArrayList<Int>()
+        val thrown = expectFailure {
+            withContext(Dispatchers.IO) {
+                SpeechSessionOpening.lease(TIMEOUT_MS, { opId: Int -> abandoned += opId }) {
+                    delay(1)
+                    Thread.sleep(LATE_MS)
+                    AidlPluginHost.LeasedCall(7, bindingLease)
+                }
+            }
+        }
+        assertTrue(thrown is TimeoutCancellationException)
+        assertEquals("the late operation is cancelled in the plugin", listOf(7), abandoned)
+        assertEquals("its binding is released", 1, unbinds.get())
+    }
+
+    @Test
+    fun aSessionOpenedInTimeIsLeftToTheCaller() = runBlocking {
+        val session = FakeSession()
+        val plugin = FakePlugin { session.api }
+        val gate = SpeechEventGate(sink)
+        val proxy = openListenWithin(plugin, gate, LONG_TIMEOUT_MS)
+        assertFalse(proxy.isReleased)
+        assertTrue(gate.holdsSink)
+        assertEquals(0, session.cancels.get())
+        assertEquals(0, unbinds.get())
+        proxy.release()
+        assertEquals(1, unbinds.get())
+    }
+
+    @Test
     fun discardEndsTheChannelWithoutDelivering() {
         val gate = SpeechEventGate(sink)
         gate.discard()
@@ -161,6 +233,29 @@ class SpeechSessionOpeningTest {
                     SpeechSessionOpening.requireOpened(plugin.api.openWakeSession(null, wakeCallback, listenCallback), "wake session")
                 }
                 SpeechWakeSessionProxy(AidlPluginHost.LeasedCall(session, bindingLease), gate, listenGate).also(opened)
+            }
+        }
+
+    // openListen through SpeechSessionOpening.lease with the error mapping of SpeechPluginHost.lease(); the call suspends
+    // before the plugin answers, as it does while the dedicated binding connects.
+    // zh-CN: 经 SpeechSessionOpening.lease 的 openListen, 错误映射同 SpeechPluginHost.lease(); 调用在插件应答前挂起, 正如专用绑定连接期间.
+    private suspend fun openListenWithin(plugin: FakePlugin, gate: SpeechEventGate, timeoutMs: Long): SpeechSessionProxy =
+        SpeechSessionOpening.open(listOf(gate)) { opened ->
+            withContext(Dispatchers.IO) {
+                val callback = forwarding<ISpeechSessionCallback>(gate)
+                val leased = try {
+                    SpeechSessionOpening.lease(timeoutMs, ISpeechSession::cancel) {
+                        delay(1)
+                        AidlPluginHost.LeasedCall(SpeechSessionOpening.requireOpened(plugin.api.openSession(null, callback), "session"), bindingLease)
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    throw SpeechErrorMapper.failure(SpeechErrorCodes.TIMEOUT, "the speech plugin did not open the request within $timeoutMs ms", e)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    throw SpeechErrorMapper.wrap(t, SpeechErrorMapper.Phase.OPEN)
+                }
+                SpeechSessionProxy(leased, gate, external = false).also(opened)
             }
         }
 
@@ -227,6 +322,12 @@ class SpeechSessionOpeningTest {
     }
 
     private companion object {
+
+        const val TIMEOUT_MS = 50L
+        const val LONG_TIMEOUT_MS = 10_000L
+
+        /** How long a late plugin takes to answer, well past [TIMEOUT_MS]. zh-CN: 迟到的插件应答所用的时长, 远超 [TIMEOUT_MS]. */
+        const val LATE_MS = 300L
 
         inline fun <reified T> fake(crossinline handler: (name: String, args: Array<out Any?>) -> Any?): T =
             Proxy.newProxyInstance(T::class.java.classLoader, arrayOf(T::class.java)) { proxy, method, args ->
