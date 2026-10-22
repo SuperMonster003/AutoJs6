@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 class NodeBridgeUiActivity : Activity() {
 
@@ -298,32 +299,70 @@ class NodeBridgeUiDispatchService : Service() {
         private const val MAX_DRAIN_EVENTS = 64
         private const val MAX_BATCH_PATCHES = 64
 
-        fun dispatch(context: Context, request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        /** [pending] holds the receivers that may still call [callback]; the owner closes them when it is destroyed. */
+        fun dispatch(
+            context: Context,
+            request: NodeBridgeRequest,
+            pending: MutableSet<AutoCloseable>? = null,
+            callback: (NodeBridgeResponse) -> Unit,
+        ) {
             val appContext = context.applicationContext
-            val receiver = object : ResultReceiver(Handler(Looper.getMainLooper())) {
-                override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
-                    if (resultCode != RESULT_RESPONSE) {
-                        callback(request.processDead("Main-process UI bridge returned an unexpected result."))
-                        return
-                    }
-                    val responseJson = resultData?.getString(EXTRA_RESPONSE_JSON).orEmpty()
-                    callback(
-                        runCatching { NodeBridgeResponse.fromJson(responseJson) }
-                            .getOrElse { request.processDead("Main-process UI bridge returned a malformed response.") },
-                    )
-                }
-            }
+            val receiver = DispatchReceiver(request, callback, pending)
             val intent = Intent(appContext, NodeBridgeUiDispatchService::class.java).apply {
                 action = ACTION_DISPATCH
                 putExtra(EXTRA_REQUEST_JSON, request.toJson())
                 putExtra(EXTRA_RESULT_RECEIVER, receiver)
             }
             val component = runCatching { appContext.startService(intent) }.getOrElse { error ->
+                receiver.close()
                 callback(request.processDead(error.message ?: error.javaClass.name))
                 return
             }
             if (component == null) {
+                receiver.close()
                 callback(request.processDead("Failed to start main-process UI bridge service."))
+            }
+        }
+
+        // The receiver travels with the start intent through system_server, and its stub stays a JNI global root
+        // until that process collects the proxy. Hold the callback (and the provider it captures) only until the
+        // last result or the owner's destroy (C33).
+        // zh-CN: 接收器随启动 Intent 经过 system_server, 其存根在该进程回收代理之前一直是 JNI 全局根.
+        // zh-CN: 回调 (及其捕获的 provider) 只持有到最后一个结果或所有者 destroy 为止 (C33).
+        private class DispatchReceiver(
+            private val request: NodeBridgeRequest,
+            callback: (NodeBridgeResponse) -> Unit,
+            private val pending: MutableSet<AutoCloseable>?,
+        ) : ResultReceiver(Handler(Looper.getMainLooper())), AutoCloseable {
+            private val callback = AtomicReference<((NodeBridgeResponse) -> Unit)?>(callback)
+
+            init {
+                pending?.add(this)
+            }
+
+            override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+                val target = callback.get() ?: return
+                val response = if (resultCode != RESULT_RESPONSE) {
+                    request.processDead("Main-process UI bridge returned an unexpected result.")
+                } else {
+                    val responseJson = resultData?.getString(EXTRA_RESPONSE_JSON).orEmpty()
+                    runCatching { NodeBridgeResponse.fromJson(responseJson) }
+                        .getOrElse { request.processDead("Main-process UI bridge returned a malformed response.") }
+                }
+                if (!response.continuesStream()) close()
+                target(response)
+            }
+
+            // The showLayout acknowledgement of an event stream and every event before "close" are followed by more results.
+            // zh-CN: 事件流的 showLayout 确认, 以及 "close" 之前的每个事件, 后面都还有结果.
+            private fun NodeBridgeResponse.continuesStream(): Boolean = when {
+                event -> runCatching { JSONObject(resultJson.orEmpty()).optString("type") }.getOrDefault("") != "close"
+                else -> ok && request.events && request.method == "showLayout"
+            }
+
+            override fun close() {
+                callback.set(null)
+                pending?.remove(this)
             }
         }
 

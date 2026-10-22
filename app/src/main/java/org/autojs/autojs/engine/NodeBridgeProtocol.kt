@@ -1070,6 +1070,7 @@ class AndroidNodeBridgeCapabilityProvider(
         synchronized(imageLock) { requireNotNull(imageArgument(JSONArray().put(value), 0).bitmap.copy(Bitmap.Config.ARGB_8888, false)) }
     } }
     private val uiSessionIds = ConcurrentHashMap.newKeySet<String>()
+    private val uiDispatchReceivers = ConcurrentHashMap.newKeySet<AutoCloseable>()
     private val overlaySessionIds = ConcurrentHashMap.newKeySet<String>()
     private val overlaySessions = ConcurrentHashMap<String, ControlledOverlaySession>()
     private val overlayPermissionSettingsLaunches = AtomicInteger(0)
@@ -1364,6 +1365,9 @@ class AndroidNodeBridgeCapabilityProvider(
         synchronized(ttsScopeLock) { ttsScopeClosed = true; if (ttsBridge.isInitialized()) ttsBridge.value.close() }
         if (composeBridge.isInitialized()) composeBridge.value.close()
         if (uiInterop.isInitialized()) uiInterop.value.close()
+        // UI dispatch receivers stay JNI global roots until system_server collects their proxies; drop their callbacks (C33).
+        // zh-CN: UI 分发接收器在 system_server 回收代理之前一直是 JNI 全局根, 在此丢弃它们持有的回调 (C33).
+        uiDispatchReceivers.toList().forEach { it.close() }
         if (pluginToolsBridge.isInitialized()) pluginToolsBridge.value.destroy()
         accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)
@@ -1835,7 +1839,7 @@ class AndroidNodeBridgeCapabilityProvider(
             callback(NodeBridgeResponse.failure(request.id, uiSessionLimitError(request)))
             return
         }
-        NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+        NodeBridgeUiDispatchService.dispatch(appContext, request, uiDispatchReceivers) { response ->
             if (response.event) {
                 callback(response)
                 if (JSONObject(response.resultJson.orEmpty()).optString("type") == "close") {
@@ -1920,7 +1924,7 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             return
         }
-        NodeBridgeUiDispatchService.dispatch(appContext, request) { response ->
+        NodeBridgeUiDispatchService.dispatch(appContext, request, uiDispatchReceivers) { response ->
             val releaseReason = when {
                 releaseOnClose -> "ui.close"
                 request.method == "drainEvents" && response.hasTerminalUiCloseEvent(sessionId) -> "ui.terminal_close"
