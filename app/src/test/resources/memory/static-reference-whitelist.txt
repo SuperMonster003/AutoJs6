@@ -94,7 +94,7 @@ field | core/ui/inflater/AndroidAttributeSetters.kt | SPECIAL | kotlin object; s
 field | core/ui/inflater/AndroidLayoutParamRules.kt | SPECIAL | kotlin object; strong collection; View | table | layout param attribute name to setter function; holds no View instance
 field | core/ui/inflater/AndroidLayoutParamRules.kt | gridCells | kotlin object; weak-key map; View | weak | WeakHashMap<View, GridCell>; values do not reference the key (GridCell holds ints and floats only)
 field | core/web/WebSocket.kt | instances | kotlin object; registry; - | owner | WeakReference list of WebSockets; closed and cleared entries are pruned at the WEBSOCKETS stage (P1.3.4; gate S10, registries count) (B.1)
-field | engine/NodeAudioRecorder.kt | entries | kotlin object; registry; - | p1 | NodeAudioRecordingService.entries: id -> recording entry; removed on release or failure and cleared in onDestroy, P1 checks a forced stop (C3)
+field | engine/NodeAudioRecorder.kt | entries | kotlin object; registry; - | owner | NodeAudioRecordingService.entries: id -> recording entry; removed on release or failure and cleared in onDestroy (ND12, C3)
 field | engine/NodeBridgeEngineDispatchService.kt | registeredExecutions | kotlin object; registry; - | process | Node bridge dispatches by token, bounded (MAX_REGISTERED_DISPATCHES), removed when the execution ends
 field | engine/NodeBridgePluginFamilyStatus.kt | families | kotlin object; registry; - | table | constant list of the bridge plugin families
 field | engine/NodeBridgeProviderRegistry.kt | definitions | kotlin object; registry; - | table | constant list of the Node bridge provider definitions
@@ -103,14 +103,14 @@ field | engine/NodeBridgeUiProvider.kt | sessions | kotlin object; registry; - |
 field | engine/NodeCapabilityBrokerPolicy.kt | declarationsByKey | kotlin object; registry; - | table | the operation declarations indexed by key, built once (lazy)
 field | engine/NodeCapabilityBrokerPolicy.kt | operationDeclarations | kotlin object; registry; - | table | constant operation declarations of the capability broker, built once (lazy)
 field | engine/NodeDialogs.kt | sessions | kotlin object; registry; - | process | Node dialog sessions by id, removed when the dialog ends, cancelled per scope
-field | engine/NodeJsRuntimePluginBridge.kt | activeModuleSourceProviders | kotlin object; strong collection; Binder | p1 | execution id -> module source provider Binder of a running Node script; removed in the request's finally and in cancelScript, P1 checks a killed plugin process (C2)
+field | engine/NodeJsRuntimePluginBridge.kt | activeModuleSourceProviders | kotlin object; strong collection; Binder | owner | execution id -> module source provider Binder of a running Node script; removed in the request's finally (also reached on a forced stop and a dead plugin process) and in cancelScript (ND1 / ND4, C2)
 field | engine/NodeJsRuntimePluginHost.kt | connectionPool | kotlin object; registry; - | process | pooled bindings to the Node.js runtime plugin (unbindService in the same file)
 field | engine/NodeJsRuntimePluginHost.kt | executionRegistry | kotlin object; registry; - | process | reservations of Node.js executions, released when they end
 field | engine/NodeJsRuntimePluginHost.kt | observerContext | kotlin object; strong; AndroidContext | process | Application context of the package observer
 field | engine/NodeMediaStore.kt | COLUMNS | kotlin object; registry; - | table | constant column list of the media store queries
 field | engine/RuntimeAgentProvider.kt | sessions | kotlin object; strong collection; Binder | owner | delegated clients hold only Application context and JVM run observers; dispose, Binder death and access revocation remove the entry and close its bridge
-field | engine/RuntimeComposeBridge.kt | sessions | kotlin object; registry; - | p1 | RuntimeComposeActivity.sessions: id -> Session (Activity and view tree); removed by Session.close, P1 checks a forced stop and a destroyed Activity (C17)
-field | engine/RuntimeUiInterop.kt | windows | kotlin object; registry; - | p1 | RuntimeInteropActivity.windows: id -> Window (Activity and view tree); removed by Window.close, P1 checks a forced stop and a destroyed Activity (C17)
+field | engine/RuntimeComposeBridge.kt | sessions | kotlin object; registry; - | owner | RuntimeComposeActivity.sessions: id -> Session (Activity and view tree); removed by Session.close, called on close, on provider destroy and when the Activity is destroyed (ND6, C17)
+field | engine/RuntimeUiInterop.kt | windows | kotlin object; registry; - | owner | RuntimeInteropActivity.windows: id -> Window (Activity and view tree); removed by Window.close, called on close, on provider destroy and when the Activity is destroyed (ND7a-c, C17)
 field | engine/RuntimeViewAttributes.kt | declarations | kotlin object; weak-key map; View | weak | WeakHashMap<View, JSONObject>; values do not reference the key (JSON only)
 field | engine/RuntimeWebActionActivity.kt | actions | kotlin object; registry; - | owner | Node bridge web action sessions by request id, removed when the action ends or fails; hold no Rhino runtime (B.1)
 field | engine/RuntimeWebActionActivity.kt | captures | kotlin object; registry; - | owner | Node bridge captured files by uri, removed and deleted when granted, released or discarded (B.1)
