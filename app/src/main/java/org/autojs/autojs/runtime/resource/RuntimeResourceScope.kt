@@ -72,6 +72,12 @@ class RuntimeResourceScope @JvmOverloads constructor(
         /** `events.emit("exit")`. */
         EXIT_EVENT,
 
+        /**
+         * WebViews of `web.newInjectableWebView` not attached to a window: destroyed on their thread after the `exit` handlers,
+         * which may still use them (appendix C Q42, P4.4).
+         */
+        WEB_VIEWS,
+
         MAIL,
         INSTALLER,
         EPUB,
@@ -125,6 +131,9 @@ class RuntimeResourceScope @JvmOverloads constructor(
 
         /** Closeables added while the script runs (the former `CloseableManager`): databases, shell processes, sessions. */
         CLOSEABLES,
+
+        /** The loaders of `runtime.loadDex` / `loadJar` / `loadAar` this script registered (`AndroidClassLoader.releaseOwner`, H3 / P4.4). */
+        CLASS_LOADERS,
     }
 
     /**

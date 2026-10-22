@@ -24,8 +24,6 @@
 #   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds
 #   owner    entries are removed per runtime / owner id when the owner ends (gate scenario in the note)
 #   paired   (call) the release call is in the same file
-#   p4.2     to be normalized in ROADMAP P4.2 (T7): delete the line, or change the reason, when that is done
-#   p4.4     to be handled in ROADMAP P4.4 (Rhino class loaders)
 #   page     page / UI lifetime outside the script path, covered by the P4.5 LeakCanary audit
 #   exempt   a text scan false positive: not a process-level field, or not a registration (the note says why)
 
@@ -133,11 +131,11 @@ call | engine/NodeBridgeDeviceInfo.kt | registerReceiver | released: no; process
 call | engine/NodeEventObservers.kt | registerReceiver | released: yes; process | paired | unregisterReceiver in session.detach, same file
 call | engine/NodeJsRuntimePluginHost.kt | bindService | released: yes; process | paired | unbindService in the same file
 call | engine/NodeJsRuntimePluginHost.kt | registerReceiver | released: no; process | process | process-level receiver of a process singleton, not created per script (H7; gate S11 green)
-call | engine/RuntimeViewComponents.kt | WebView( | released: no; script | p4.2 | RuntimeWebView of Node bridge UI sessions, never destroyed by the host and not covered by a gate scenario (B.2 H10 follow-up)
+call | engine/RuntimeViewComponents.kt | WebView( | released: no; script | paired | RuntimeWebView.release() in the same file stops and destroys it; RuntimeViewComponents.dispose calls it when a Node bridge UI view is disposed or its session closes (RuntimeUiInterop.dispose / close, NodeBridgeUiProvider tab switches); not owned by a Rhino runtime, so no RuntimeResourceScope and no Rhino gate scenario (appendix C Q42, Q5)
 call | external/receiver/DynamicBroadcastReceivers.kt | registerReceiver | released: yes; process | paired | unregisterReceiver when a registration is removed, same file
 call | runtime/api/Device.java | registerReceiver | released: no; script | exempt | registerReceiver(null, ...) only reads a sticky broadcast (H7)
 call | runtime/api/Plugins.kt | bindService | released: yes; script | paired | unbindService in unbindAll, called by ScriptRuntime.onExit (H8, P1.3.5)
-call | runtime/api/augment/web/Web.kt | WebView( | released: no; script | p4.2 | web.newInjectableWebView: a WebView holding the script global scope, never destroyed by the host and not covered by a gate scenario (B.2 H10 follow-up)
+call | runtime/api/augment/web/Web.kt | WebView( | released: no; script | owner | web.newInjectableWebView registers the WebView in the runtime's resource scope (WEB_VIEWS, core/web/InjectableWebView.kt destroyOnExitOf): destroyed on its own thread when the script ends unless it is attached to a window, whose UI lifecycle then owns it; gate S15 (appendix C Q42, P4.4)
 call | runtime/api/tts/AndroidTtsBackend.kt | bindService | released: no; script | paired | TextToSpeech constructor binds the engine; shutdown() in this file unbinds it, called at the TTS stage (B.2)
 call | theme/intelligent/DeviceStateMonitor.kt | registerReceiver | released: yes; page | paired | unregisterReceiver per fact in the same file
 call | theme/intelligent/IntelligentColorEngine.kt | registerReceiver | released: yes; page | paired | unregisterReceiver(timeReceiver) in the same file
@@ -156,4 +154,4 @@ manual | core/broadcast/Broadcast.java | sEventEmitters | java static; CopyOnWri
 manual | core/accessibility/AccessibilityService.kt | defaultBridge | kotlin object; AccessibilityBridge | owner | process-level default bridge; the tap written by each SimpleActionAutomator is revoked at onExit (H17, P1.3.2 6670730d4)
 manual | engine/ScriptEngineManager.java | mGlobalVariableMap | instance of a process singleton; Map<String, Object> | process | only "context" (the Application) (B.1)
 manual | execution/ScriptExecutionObserver.java | mScriptExecutionListeners | instance of ScriptEngineService; CopyOnWriteArraySet | process | global execution listeners of ScriptEngineService: installed once per process (guarded by a flag) or removed by their owner (paired); none per script, counted by the gate (registries) (H6, B.1)
-manual | rhino/AndroidClassLoader.kt | mDexClassLoaders | instance of the process-level class loader; ConcurrentHashMap | p4.4 | path -> DexClassLoader of runtime.loadDex / loadJar, never released per script (H3, B.1)
+manual | rhino/AndroidClassLoader.kt | mDexClassLoaders | instance of the process-level class loader; OwnedDexLoaders | owner | path -> DexClassLoader of runtime.loadDex / loadJar / loadAar with the scripts that loaded the path; removed when the last of them ends (CLASS_LOADERS stage, AndroidClassLoader.releaseOwner); gate S8 (H3, P4.4)

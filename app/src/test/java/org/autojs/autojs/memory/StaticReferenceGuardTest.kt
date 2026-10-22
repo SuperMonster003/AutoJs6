@@ -200,11 +200,11 @@ class StaticReferenceGuardTest {
         const val HOW_TO_REGISTER = "To register: run `$REGENERATE` in the repository root (it adds the line with the reason TODO to " +
             "$WHITELIST_PATH and keeps the other lines), then replace TODO with a reason from the file header and a note."
 
-        val FIELD_REASONS = setOf("process", "table", "weak", "owner", "p4.2", "p4.4", "page", "exempt")
+        val FIELD_REASONS = setOf("process", "table", "weak", "owner", "page", "exempt")
         val REASONS = mapOf(
             "field" to FIELD_REASONS,
             "manual" to FIELD_REASONS,
-            "call" to setOf("process", "owner", "paired", "p4.2", "p4.4", "page", "exempt"),
+            "call" to setOf("process", "owner", "paired", "page", "exempt"),
         )
 
         /** The unit tests run in the module directory; the fallback covers runs from the repository root. */

@@ -339,8 +339,6 @@ GUARD_HEADER = """\
 #   weak     keys (WeakHashMap) or values (WeakReference) are weak; the note says what the strong side holds
 #   owner    entries are removed per runtime / owner id when the owner ends (gate scenario in the note)
 #   paired   (call) the release call is in the same file
-#   p4.2     to be normalized in ROADMAP P4.2 (T7): delete the line, or change the reason, when that is done
-#   p4.4     to be handled in ROADMAP P4.4 (Rhino class loaders)
 #   page     page / UI lifetime outside the script path, covered by the P4.5 LeakCanary audit
 #   exempt   a text scan false positive: not a process-level field, or not a registration (the note says why)
 """

@@ -66,6 +66,12 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
     private val mAssetLoader = AndroidRhinoAssetLoader(androidContext)
     private lateinit var mRequire: Require
     private var mMaterializedTypeScriptProject: TypeScriptMaterializedRhinoProject? = null
+
+    // The standard objects of this engine, installed with its WrapFactory whenever this engine is bound to its Context
+    // (AutoJsContext.bind); declared before context so that createScope sets it after its initializer ran.
+    // zh-CN: 本引擎的标准对象, 每当本引擎绑定到其 Context 时与 WrapFactory 一起安装 (AutoJsContext.bind); 声明在 context 之前, 使 createScope 在其初始化之后赋值.
+    private var mStandardObjects: TopLevelScope? = null
+
     val context: Context = enterContext()
     val scriptable: TopLevelScope = createScope(context)
 
@@ -175,6 +181,10 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         mMaterializedTypeScriptProject = null
         super.destroy()
         Log.d(TAG, "on destroy")
+        // Another engine of this thread may still use the Context (UI scripts on the main thread): bind it again instead of
+        // leaving this ended engine bound (docs/memory/ROADMAP.md H4 / P4.4).
+        // zh-CN: 本线程的另一个引擎可能仍在使用该 Context (主线程上的 UI 脚本): 重新绑定它, 而不是让已结束的本引擎留在绑定上 (docs/memory/ROADMAP.md H4 / P4.4).
+        (context as? AutoJsContext)?.release(this)
         Context.exit()
     }
 
@@ -285,6 +295,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
     protected fun createScope(context: Context) = TopLevelScope().apply {
         initStandardObjects(context, false)
         context.registerStandardObjects(this)
+        mStandardObjects = this
     }
 
     @SuppressLint("VisibleForTests")
@@ -298,14 +309,27 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         return enterContext.also { setupContext(it) }
     }
 
+    /**
+     * Prepares a Context entered for this engine. An [AutoJsContext] is bound to this engine until [destroy] releases it,
+     * so that a Context shared with other engines of the thread (the main thread of UI scripts) goes back to the engine
+     * still running afterwards (docs/memory/ROADMAP.md H4 / P4.4).
+     * zh-CN: 准备为本引擎进入的 Context. [AutoJsContext] 绑定到本引擎直到 [destroy] 释放, 使与本线程其他引擎共用的 Context (UI 脚本的主线程)
+     * 之后回到仍在运行的引擎 (docs/memory/ROADMAP.md H4 / P4.4).
+     */
     fun setupContext(context: Context) = context.apply {
         if (this is AutoJsContext) {
-            rhinoJavaScriptEngine = this@RhinoJavaScriptEngine
+            bind(this@RhinoJavaScriptEngine) { cx -> installBinding(cx) }
+        } else {
+            installBinding(this)
         }
         isInterpretedMode = true
         languageVersion = Context.VERSION_ES6
         locale = Locale.getDefault()
-        wrapFactory = mWrapFactory
+    }
+
+    private fun installBinding(context: Context) {
+        context.wrapFactory = mWrapFactory
+        mStandardObjects?.let { context.registerStandardObjects(it) }
     }
 
     private inner class WrapFactory : AndroidContextFactory.WrapFactory() {

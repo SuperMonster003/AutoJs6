@@ -129,11 +129,17 @@ public class VMBridge_custom extends VMBridge_jdk18 {
     private static class InterfaceAdapterWrapper {
 
         private final InterfaceAdapter mInterfaceAdapter;
-        private final Context mCallerContext;
+
+        // The WrapFactory of the script that created the proxy, taken when it was created. The proxy used to keep the creating
+        // thread's Context and read its WrapFactory at every call: on a thread shared by several scripts (the main thread) that is
+        // whatever engine was bound last, and the Context kept after the thread exited it (docs/memory/ROADMAP.md H4 / P4.4).
+        // zh-CN: 创建代理的脚本的 WrapFactory, 在创建时取得. 以前代理持有创建线程的 Context 并在每次调用时读取其 WrapFactory: 在多个脚本共用的线程 (主线程) 上
+        // 那是最后绑定的引擎, 且该线程退出 Context 后代理仍持有它 (docs/memory/ROADMAP.md H4 / P4.4).
+        private final WrapFactory mCallerWrapFactory;
 
         private InterfaceAdapterWrapper(InterfaceAdapter interfaceAdapter, Context callerContext) {
             mInterfaceAdapter = interfaceAdapter;
-            mCallerContext = callerContext;
+            mCallerWrapFactory = callerContext != null ? callerContext.getWrapFactory() : null;
         }
 
         public Object invoke(ContextFactory cf, Object target, VarScope topScope, Object thisObject, Method method, Object[] args) {
@@ -143,11 +149,14 @@ public class VMBridge_custom extends VMBridge_jdk18 {
 
         private Object call(ContextFactory cf, ContextAction<Object> action) {
             Context cx = Context.enter(null, cf);
-            // TODO null check
-            cx.setWrapFactory(mCallerContext.getWrapFactory());
+            // The Context may be entered already (the main thread of a running UI script): give its WrapFactory back afterwards.
+            // zh-CN: 该 Context 可能已被进入 (运行中 UI 脚本的主线程): 调用结束后还原其 WrapFactory.
+            WrapFactory previous = cx.getWrapFactory();
+            if (mCallerWrapFactory != null) cx.setWrapFactory(mCallerWrapFactory);
             try {
                 return action.run(cx);
             } finally {
+                cx.setWrapFactory(previous);
                 Context.exit();
             }
         }

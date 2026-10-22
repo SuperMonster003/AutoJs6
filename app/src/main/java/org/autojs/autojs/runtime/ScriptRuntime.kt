@@ -660,12 +660,14 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     fun loadJarWithClasspath(program: String, vararg orderedClasspath: String) {
         try {
-            ScriptRuntimeJarClasspathRoute.dispatch(
-                programPath = program,
-                orderedClasspathPaths = orderedClasspath,
-                resolvePath = files::nonNullPath,
-            ) { programJar, classpathJars ->
-                sClassLoader.loadJarWithExperimentalCompilerClasspath(programJar, classpathJars)
+            ownLoads {
+                ScriptRuntimeJarClasspathRoute.dispatch(
+                    programPath = program,
+                    orderedClasspathPaths = orderedClasspath,
+                    resolvePath = files::nonNullPath,
+                ) { programJar, classpathJars ->
+                    sClassLoader.loadJarWithExperimentalCompilerClasspath(programJar, classpathJars)
+                }
             }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -780,7 +782,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                 compile = { spec ->
                     AndroidR8CompilerHost.runtimeDispatcher(applicationContext).compile(spec)
                 },
-                loadPublished = sClassLoader::loadR8CompilerDexZip,
+                loadPublished = { artifact -> ownLoads { sClassLoader.loadR8CompilerDexZip(artifact) } },
             )
         } catch (e: IOException) {
             throw UncheckedIOException(e)
@@ -911,6 +913,16 @@ class ScriptRuntime private constructor(builder: Builder) {
             val left = AccessibilityService.releaseOwner(ownerId)
             if (left > 0) Log.w(TAG, "$ownerId: released $left accessibility registration(s) its modules left behind")
         }
+
+        // The loaders of runtime.loadDex / loadJar / loadAar that no other running script has loaded are no longer searched,
+        // so they can be unloaded with their classes (docs/memory/ROADMAP.md H3 / P4.4). Last, after the closeables that may still
+        // use the classes.
+        // zh-CN: 其他运行中的脚本未加载过的 runtime.loadDex / loadJar / loadAar 加载器不再被搜索, 可与其中的类一起卸载 (docs/memory/ROADMAP.md H3 / P4.4).
+        // 放在最后, 在可能仍用到这些类的 closeables 之后.
+        scope.own(Stage.CLASS_LOADERS, "AndroidClassLoader.releaseOwner") {
+            val released = sClassLoader.releaseOwner(ownerId)
+            if (released > 0) Log.d(TAG, "$ownerId: released $released class loader(s) of runtime.loadDex / loadJar")
+        }
     }
 
     fun setScreenMetrics(width: Int, height: Int) {
@@ -928,6 +940,13 @@ class ScriptRuntime private constructor(builder: Builder) {
     fun createContinuation() = RhinoContinuation.create(this, topLevelScope)
 
     fun createContinuation(scope: Scriptable) = RhinoContinuation.create(this, scope)
+
+    /**
+     * Runs a load of runtime.loadDex / loadJar / loadAar for this script: the loaders it registers are released when the
+     * script ends ([Stage.CLASS_LOADERS], docs/memory/ROADMAP.md H3 / P4.4).
+     * zh-CN: 以本脚本的名义执行 runtime.loadDex / loadJar / loadAar 的加载: 期间登记的加载器在脚本结束时释放 ([Stage.CLASS_LOADERS], docs/memory/ROADMAP.md H3 / P4.4).
+     */
+    private fun <T> ownLoads(load: () -> T): T = sClassLoader.loadFor(ownerId, load)
 
     private fun doLoad(filter: FileFilter, vararg paths: String) {
         for (path in paths) {
@@ -952,7 +971,7 @@ class ScriptRuntime private constructor(builder: Builder) {
     /** The compatibility load() multiplexer stays local; only explicit loadJar() may opt in. */
     private fun loadJarWithoutExperimentalCompiler(file: File) {
         try {
-            sClassLoader.loadJar(file)
+            ownLoads { sClassLoader.loadJar(file) }
         } catch (e: IOException) {
             throw UncheckedIOException(e)
         }
@@ -971,7 +990,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadDex(file)
+                    ownLoads { classLoader.loadDex(file) }
                 }
             }
         } catch (e: IOException) {
@@ -992,7 +1011,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadJarWithExperimentalCompiler(file)
+                    ownLoads { classLoader.loadJarWithExperimentalCompiler(file) }
                 }
             }
         } catch (e: IOException) {
@@ -1013,7 +1032,7 @@ class ScriptRuntime private constructor(builder: Builder) {
                         }
                     }
                 } else {
-                    classLoader.loadAar(file)
+                    ownLoads { classLoader.loadAar(file) }
                 }
             }
         } catch (e: IOException) {
