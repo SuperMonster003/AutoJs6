@@ -1,6 +1,6 @@
 # Runtime AI Agent coverage - 2026-10-22
 
-This batch extends the native `ai.agent` API to Node.js, Node.js Workers and Bun. Implementation and local checks are complete. Physical and packaged acceptance is still pending; this draft does not claim device acceptance or restoration.
+This batch extends the native `ai.agent` API to Node.js, Node.js Workers and Bun. Implementation, documentation, declarations and completion are synchronized. Xiaomi physical acceptance passes 58 cases, including 12 independently signed application launches and nine positive main/Worker results. The fresh original device state has been restored and verified. Redmi was not operated on.
 
 ## API and permissions
 
@@ -45,7 +45,15 @@ Fresh Xiaomi backups include 11 original APKs, settings, and private state for A
 
 Evidence is retained under `.bak/runtime-ai-agent-20261022`. Immutable APKs bind source commits, signatures and SHA-256 hashes. The accepted Runtime Kit and generated applications must be tied to the same frozen source and host identity. Build processes run serially with two logical processors, BelowNormal priority, one Gradle worker and in-process Kotlin compilation.
 
-Final device counts, packaged launches, screenshot review, restoration hashes and integration commits remain pending. No device acceptance or restoration is claimed in this local checkpoint.
+The accepted suites are host Agent 8, Node Runtime 34, Bun Runtime 13, Ace 1, APK production 1 and packaged application validation 1. Node main, Bun and Node Worker each complete 27 assertions against the actual local Gemma 4 E2B model, including terminal events, task history and cancellation. CJS/ESM/nested Worker cleanup, detached task ownership and registered Node/Bun/Worker context/result isolation are exercised; the registered result transports 9,000 UTF-16 code units of Unicode data.
+
+The two independently signed applications complete denial, first grant, retained grant after restart, active detached-task revocation, denial after revocation and regrant. Nine positive main/Worker program results complete real model calls. Both generated applications declare the normal Agent entry permission and omit microphone permission. Their DEX hashes match the retained Runtime Kit, and their signing certificates differ from the host's certificate. The Node/Worker application cannot access the Bun application's task history.
+
+All eight actual Ace screenshots were inspected for Node/Bun `run`, `join`, input event `requestId` and budget `maxSteps`. The completion documentation popups show the expected types and fit the viewport. The separate enclosing-call signature-help box retains its existing horizontal scrolling for long signatures. Preferences and rotation are restored by the Ace fixture.
+
+The first host attempt passed seven of eight cases. The Bun model response omitted completion evidence, so the unchanged native `EVIDENCE_MISSING` rule correctly downgraded it to `partial`. Test-only commit `eb2290f24cfd04c1298af669f7f8bb898e3d7fb3` clarifies that the produced greeting is the deliverable and must be included in `done.evidence`, and explicitly checks that evidence is present. The new test APK is `91df5304a1ed...`; the production host, native Agent and Runtime Kit are unchanged. The subsequent complete host suite passes eight of eight. The failed attempt remains in the evidence and is not included in the 58 accepted cases. There were 66 executed case attempts in total.
+
+Every admitted task carries the unique batch marker. All 36 task IDs, including the failed first attempt and cancelled tasks, were reconciled before restoration. `xiaomi/accepted-evidence.json`, `owned-agent-runs.json`, `ace-visual-review.json` and `finalization.json` retain the source/hash-bound results.
 
 ## Frozen local artifacts
 
@@ -81,12 +89,14 @@ The unchanged AI provider is 1.5.0 / build 299, source `687d52c3d7ffe1f28678ef4f
 
 Total: 6,360 cases, 6,333 passed and 27 skipped, zero failures/errors. Node's release-test configuration exposes `testReleaseUnitTest`; the initial debug task selection was corrected using the actual Gradle task list. All six plugin builds completed their configured lint, signature and artifact checks. Static 16 KB alignment checks do not claim 16 KB device execution.
 
-## Xiaomi handoff checkpoint
+## Xiaomi handoff and restoration
 
-The user explicitly requested waiting for the other session's entire work to finish. That session continued from the memory matrix to S7/S7b follow-ups and inrt smoke testing. This batch's pre-install checks rejected active external drivers, including gaps between instrumentation cases. After a quiet interval, the frozen cohort was installed. External testing restarted before the first API test could run, so the cohort was backed out to the fresh 13:58 handoff baseline (original host build 5781). All original APK hashes, settings, private snapshots, both model hashes and the originally enabled host accessibility service were verified after restoration. Physical API test count remains zero.
+The user initially requested waiting for the other session's entire work to finish. After a quiet interval, the frozen cohort was installed, but external testing restarted before the first API test. That preliminary installation was fully backed out to the 13:58 baseline (original host build 5781), with zero API tests. The actual device owner was subsequently monitored without further device operations; neither idle process gaps nor an `end_turn` acknowledgment was treated as release.
 
-The initial Xiaomi snapshot is retained separately under `xiaomi-before-external-20261022-*`. A provisional snapshot was refreshed after one driver ended, but further external testing began before installation. It contains 11 original APKs and the 12/13/17 private-file snapshots. The original host accessibility service is now enabled in that snapshot. A fresh handoff check is required after the actual device-owner session finishes. Idle process gaps are insufficient evidence of that completion. Restoration must apply the private snapshots before final verification and reactivation of originally enabled services.
+The user then explicitly released Xiaomi and requested stopping the scheduled monitor. Automation `xiaomi-ai-agent` was paused. A new backup was captured after that handoff, including all 11 original APKs, permissions/settings/volumes and AI/Agent/host private files. Earlier snapshots and the preliminary backout evidence remain under `xiaomi-before-external-20261022-*`.
+
+After final acceptance, all fixture files were removed or restored to their baseline contents, generated applications and the newly installed Bun test package were removed, and all 11 original APK hashes were verified. The temporary same-version/same-signer Node Debug restoration bridge retained the UID and was not used for runtime acceptance. Agent's 13, host's 17 and AI's 12 baseline private files were restored; both existing model binaries match their original SHA-256 values. Private restoration preceded final accessibility reactivation. The originally enabled host service is bound, and permissions, system settings, volumes and app-op modes match the new baseline. Original APK/private backups are retained.
 
 This batch has issued no Redmi device operations. Parallel sessions continue changing the primary host and documentation workspaces; these changes must be preserved during integration. Their current source or freshly rebuilt APKs are not the frozen artifacts above.
 
-All commits and artifacts are local. Nothing has been pushed, tagged or published. Temporary source worktrees remain necessary for pending physical-test fixes and have not yet been removed.
+All commits and artifacts are local. Nothing has been pushed, tagged or published. The accepted production source is the fixed artifact source in the table, independently of later documentation, test-only and parallel integration commits.
