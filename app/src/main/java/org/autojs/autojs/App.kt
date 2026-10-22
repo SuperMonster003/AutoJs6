@@ -27,6 +27,7 @@ import org.autojs.autojs.core.plugin.terminal.TerminalLegacyCleanup
 import org.autojs.autojs.core.plugin.explorer.output.ExplorerActionOutputCoordinator
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerStartupPrewarm
+import org.autojs.autojs.core.pref.archive.AndroidSettingsAutoBackup
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.ui.inflater.ImageLoader
 import org.autojs.autojs.core.ui.inflater.util.Drawables
@@ -381,6 +382,10 @@ class App : Application(), WorkManagerConfiguration.Provider {
                 .onFailure { Log.w(TAG, "Failed to recover Explorer Action output transactions.", it) }
             runCatching { TerminalLegacyCleanup.schedule(this) }
                 .onFailure { Log.w(TAG, "Failed to schedule the legacy terminal cleanup.", it) }
+            if (!AbstractAutoJs.isInrt) {
+                runCatching { AndroidSettingsAutoBackup.start(this) }
+                    .onFailure { Log.w(TAG, "Failed to start the automatic settings backups.", it) }
+            }
         }
         runCatching { HistoryCleanupScheduler.scheduleStartupCleanup(this) }
             .onFailure { Log.w(TAG, "Failed to schedule startup history cleanup.", it) }

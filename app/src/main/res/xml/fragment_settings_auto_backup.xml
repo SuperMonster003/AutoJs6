@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/settings_transfer_auto_backup">
+
+        <org.autojs.autojs.theme.preference.MaterialPreference
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:selectable="false"
+            app:singleLineTitle="false"
+            app:title="@string/settings_transfer_auto_backup_description" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_settings_auto_backup_periodic"
+            app:defaultValue="@bool/pref_settings_auto_backup_periodic"
+            app:title="@string/settings_transfer_auto_backup_periodic"
+            app:summary="@string/settings_transfer_auto_backup_periodic_summary" />
+
+        <org.autojs.autojs.theme.preference.MaterialListPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_settings_auto_backup_period"
+            app:dependency="@string/key_settings_auto_backup_periodic"
+            app:title="@string/settings_transfer_auto_backup_period"
+            app:itemKeys="@array/keys_settings_auto_backup_period"
+            app:itemValues="@array/values_settings_auto_backup_period"
+            app:itemDefaultKey="@string/default_key_settings_auto_backup_period" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_settings_auto_backup_change"
+            app:defaultValue="@bool/pref_settings_auto_backup_change"
+            app:title="@string/settings_transfer_auto_backup_change"
+            app:summary="@string/settings_transfer_auto_backup_change_summary" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
+            app:key="@string/key_settings_auto_backup_operation"
+            app:defaultValue="@bool/pref_settings_auto_backup_operation"
+            app:title="@string/settings_transfer_auto_backup_operation"
+            app:summary="@string/settings_transfer_auto_backup_operation_summary" />
+
+    </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
+
+</PreferenceScreen>

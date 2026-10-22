@@ -19,10 +19,30 @@ class GeneralKeysTest : DomainKeysTestBase() {
 
     @Test
     fun keysAndEffects() {
-        assertEquals(6, GeneralKeys.keys.size)
+        assertEquals(10, GeneralKeys.keys.size)
         assertEquals(SettingEffect.APPLY, GeneralKeys.LAUNCHER_ICON.effect)
         assertEquals(SettingEffect.APPLY, GeneralKeys.FOREGROUND_SERVICE.effect)
         assertEquals(SettingEffect.NONE, GeneralKeys.RESTART_STRATEGY.effect)
+        // AndroidSettingsAutoBackup follows the automatic backup keys from any source, so they have no effect of their own.
+        GeneralKeys.SETTINGS_AUTO_BACKUP_KEYS.forEach { assertEquals(it.name, SettingEffect.NONE, it.effect) }
+    }
+
+    @Test
+    fun automaticBackupSwitchesAndPeriod() {
+        // T20: the operation backup is on by default, the periodic and change backups off.
+        assertTrue(GeneralKeys.SETTINGS_AUTO_BACKUP_OPERATION.get())
+        assertFalse(GeneralKeys.SETTINGS_AUTO_BACKUP_PERIODIC.get())
+        assertFalse(GeneralKeys.SETTINGS_AUTO_BACKUP_CHANGE.get())
+        // Weekly by default (appendix C Q32).
+        assertEquals(key("key_settings_auto_backup_period_weekly"), GeneralKeys.SETTINGS_AUTO_BACKUP_PERIOD.get())
+        assertEquals(7, GeneralKeys.settingsAutoBackupPeriodDays)
+        GeneralKeys.SETTINGS_AUTO_BACKUP_PERIOD.set(key("key_settings_auto_backup_period_daily"))
+        assertEquals(1, GeneralKeys.settingsAutoBackupPeriodDays)
+        GeneralKeys.SETTINGS_AUTO_BACKUP_PERIOD.set(key("key_settings_auto_backup_period_monthly"))
+        assertEquals(30, GeneralKeys.settingsAutoBackupPeriodDays)
+        // A stored key out of the candidates counts as the default.
+        store.put(GeneralKeys.SETTINGS_AUTO_BACKUP_PERIOD.name, "key_\$_settings_auto_backup_period_removed")
+        assertEquals(7, GeneralKeys.settingsAutoBackupPeriodDays)
     }
 
     @Test

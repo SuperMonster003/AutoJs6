@@ -44,4 +44,7 @@
     <bool name="pref_server_mode_lan_discovery">true</bool>
     <bool name="pref_server_mode_notify_connection_changes">true</bool>
     <bool name="pref_server_mode_restore_on_launch">true</bool>
+    <bool name="pref_settings_auto_backup_change">false</bool>
+    <bool name="pref_settings_auto_backup_operation">true</bool>
+    <bool name="pref_settings_auto_backup_periodic">false</bool>
 </resources>

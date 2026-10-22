@@ -185,6 +185,12 @@ class SettingsDomainsTest {
             "org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent" to (1 - 0.618f).toString(),
             "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent" to "-1.0",
             "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent" to "-1.0",
+            // The automatic backups (P9, T20): the resources fragment_settings_auto_backup.xml shares, whose values
+            // (off, weekly, off, on) GeneralKeysTest reads.
+            "key_settings_auto_backup_periodic" to "R.bool.pref_settings_auto_backup_periodic",
+            "key_settings_auto_backup_period" to "R.string.default_key_settings_auto_backup_period",
+            "key_settings_auto_backup_change" to "R.bool.pref_settings_auto_backup_change",
+            "key_settings_auto_backup_operation" to "R.bool.pref_settings_auto_backup_operation",
         )
 
         /**

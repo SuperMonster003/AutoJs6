@@ -18,20 +18,18 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
-import org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
-import org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
 import org.autojs.autojs6.R
 
 /**
  * The preferences of "Manage AutoJs6 settings" (docs/settings/ROADMAP.md D4 / T10), written like `ShortcutBackupFragment`:
  * "Import settings" and "Export settings" on top, then "Restore default settings..." (P8.1) and "Undo last import"
- * (enabled while the last import or reset can be undone, its summary names it), then the three switches of the
- * automatic backup (D13 / D22), which say that they come in a later version (P9). The page hosts the wizards ([SettingsWizardHost])
- * and resumes a running one after it is recreated.
+ * (enabled while the last import or reset can be undone, its summary names it), then the automatic backup (D13 / D22,
+ * P9: `fragment_settings_auto_backup`, the switches of its three mechanisms and the period). The page hosts the wizards
+ * ([SettingsWizardHost]) and resumes a running one after it is recreated.
  *
  * zh-CN: "管理 AutoJs6 设置" 的偏好页 (ROADMAP D4 / T10), 写法同 `ShortcutBackupFragment`: 顶部为 "导入设置" 与 "导出设置",
- * 其下 "恢复默认设置..." (P8.1) 与 "撤销上次导入" (上次导入或恢复默认可撤销时可用, 摘要说明是哪次操作), 然后是自动备份的三个开关
- * (D13 / D22), 标明后续版本提供 (P9). 页面承载向导 ([SettingsWizardHost]), 重建后恢复运行中的向导.
+ * 其下 "恢复默认设置..." (P8.1) 与 "撤销上次导入" (上次导入或恢复默认可撤销时可用, 摘要说明是哪次操作), 然后是自动备份 (D13 / D22,
+ * P9: `fragment_settings_auto_backup`, 三种机制的开关与周期). 页面承载向导 ([SettingsWizardHost]), 重建后恢复运行中的向导.
  */
 class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost {
 
@@ -74,24 +72,8 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         undoPreference = preference(preferenceScreen, R.string.settings_transfer_undo_import) { startWizard(SettingsUndoWizard.initialState()) }.apply {
             isEnabled = false
         }
-        val autoBackup = ThemeColorPreferenceCategory(requireContext()).apply {
-            setTitle(R.string.settings_transfer_auto_backup)
-            isIconSpaceReserved = false
-            preferenceScreen.addPreference(this)
-        }
-        listOf(
-            R.string.settings_transfer_auto_backup_periodic,
-            R.string.settings_transfer_auto_backup_change,
-            R.string.settings_transfer_auto_backup_operation,
-        ).forEach { titleRes ->
-            laterVersion(ThemeColorSwitchPreference(requireContext()).apply {
-                setTitle(titleRes)
-                layoutResource = R.layout.preference_custom
-                isPersistent = false
-                isChecked = false
-                autoBackup.addPreference(this)
-            })
-        }
+        // The switches and the period are `general` settings, followed by AndroidSettingsAutoBackup wherever they change.
+        addPreferencesFromResource(R.xml.fragment_settings_auto_backup)
     }
 
     private fun preference(group: PreferenceGroup, titleRes: Int, action: (() -> Unit)? = null): Preference = MaterialPreference(requireContext()).apply {
@@ -101,11 +83,6 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         isPersistent = false
         if (action != null) setOnPreferenceClickListener { action(); true }
         group.addPreference(this)
-    }
-
-    private fun laterVersion(preference: Preference) = preference.apply {
-        setSummary(R.string.settings_transfer_later_version)
-        isEnabled = false
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

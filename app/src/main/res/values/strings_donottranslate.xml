@@ -40,6 +40,7 @@
     <string name="default_key_root_mode" translatable="false">@string/key_root_mode_auto_detect</string>
     <string name="default_key_root_record_out_file_type" translatable="false">@string/key_root_record_out_file_type_binary</string>
     <string name="default_key_scheduled_restart_backend" translatable="false">@string/key_scheduled_restart_backend_work_manager</string>
+    <string name="default_key_settings_auto_backup_period" translatable="false">@string/key_settings_auto_backup_period_weekly</string>
     <string name="default_key_timed_task_backend" translatable="false">@string/key_timed_task_backend_alarm</string>
     <string name="default_main_file_name" translatable="false">main.js</string>
     <string name="developer_full_name" translatable="false">SuperMonster003</string>
@@ -325,6 +326,13 @@
     <string name="key_server_mode_notify_connection_changes" translatable="false">key_$_server_mode_notify_connection_changes</string>
     <string name="key_server_mode_restore_on_launch" translatable="false">key_$_server_mode_restore_on_launch</string>
     <string name="key_server_socket_normally_closed" translatable="false">key_$_server_socket_normally_closed</string>
+    <string name="key_settings_auto_backup_change" translatable="false">key_$_settings_auto_backup_change</string>
+    <string name="key_settings_auto_backup_operation" translatable="false">key_$_settings_auto_backup_operation</string>
+    <string name="key_settings_auto_backup_period" translatable="false">key_$_settings_auto_backup_period</string>
+    <string name="key_settings_auto_backup_period_daily" translatable="false">key_$_settings_auto_backup_period_daily</string>
+    <string name="key_settings_auto_backup_period_monthly" translatable="false">key_$_settings_auto_backup_period_monthly</string>
+    <string name="key_settings_auto_backup_period_weekly" translatable="false">key_$_settings_auto_backup_period_weekly</string>
+    <string name="key_settings_auto_backup_periodic" translatable="false">key_$_settings_auto_backup_periodic</string>
     <string name="key_setup_wizard_welcome_done" translatable="false">key_$_setup_wizard_welcome_done</string>
     <string name="key_setup_wizards" translatable="false">key_$_setup_wizards</string>
     <string name="key_stable_mode" translatable="false">key_$_stable_mode</string>

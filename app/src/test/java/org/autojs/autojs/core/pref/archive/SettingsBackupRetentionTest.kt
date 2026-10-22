@@ -7,6 +7,7 @@ import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.core.pref.keys.DomainKeysTestBase
+import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -137,6 +138,28 @@ class SettingsBackupRetentionTest : DomainKeysTestBase() {
                 assertFalse(it, text.contains(it))
             }
         }
+    }
+
+    @Test
+    fun eachMechanismFollowsItsSwitch() {
+        // T20: the operation backup is on by default, the periodic and change backups off; AndroidSettingsAutoBackup.write
+        // returns Outcome.Off for a mechanism switched off.
+        assertEquals(listOf(false, false, true), Mechanism.values().map { AndroidSettingsAutoBackup.isOn(it) })
+        // No periodic work while its switch is off; then one every 7 days (weekly by default, Q32), 1 or 30.
+        assertEquals(null, SettingsPeriodicBackupWorker.repeatDays())
+        GeneralKeys.SETTINGS_AUTO_BACKUP_PERIODIC.set(true)
+        assertEquals(7L, SettingsPeriodicBackupWorker.repeatDays())
+        GeneralKeys.SETTINGS_AUTO_BACKUP_PERIOD.set(key("key_settings_auto_backup_period_daily"))
+        assertEquals(1L, SettingsPeriodicBackupWorker.repeatDays())
+        GeneralKeys.SETTINGS_AUTO_BACKUP_PERIOD.set(key("key_settings_auto_backup_period_monthly"))
+        assertEquals(30L, SettingsPeriodicBackupWorker.repeatDays())
+        GeneralKeys.SETTINGS_AUTO_BACKUP_CHANGE.set(true)
+        GeneralKeys.SETTINGS_AUTO_BACKUP_OPERATION.set(false)
+        assertEquals(listOf(true, true, false), Mechanism.values().map { AndroidSettingsAutoBackup.isOn(it) })
+        // The switches and the period take no change backup; another `general` setting does.
+        val filter = SettingsChangeDebounce.Filter(ownKeys = GeneralKeys.SETTINGS_AUTO_BACKUP_KEYS)
+        GeneralKeys.SETTINGS_AUTO_BACKUP_KEYS.forEach { assertFalse(it.name, filter.tracks(it.store, it.name)) }
+        assertTrue(filter.tracks(GeneralKeys.RESTART_STRATEGY.store, GeneralKeys.RESTART_STRATEGY.name))
     }
 
     @Test
