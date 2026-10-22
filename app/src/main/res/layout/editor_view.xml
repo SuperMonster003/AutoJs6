@@ -108,11 +108,21 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <FrameLayout
-                android:id="@+id/editor_container"
+            <!-- The editor, and the layout preview panel of "ui" scripts beside or below it (EditorUiPreviewController). -->
+            <LinearLayout
+                android:id="@+id/editor_split"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@+id/editor_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/font_preview_unavailable_hint"

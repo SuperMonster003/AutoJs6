@@ -15,6 +15,14 @@
         app:text="@string/text_log" />
 
     <org.autojs.autojs.ui.widget.ToolbarMenuItem
+        android:id="@+id/ui_preview"
+        android:layout_width="@dimen/toolbar_menu_item_width"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:icon="@drawable/ic_editor_ui_preview_off"
+        app:text="@string/text_preview" />
+
+    <org.autojs.autojs.ui.widget.ToolbarMenuItem
         android:id="@+id/run"
         android:layout_width="@dimen/toolbar_menu_item_width"
         android:layout_height="match_parent"

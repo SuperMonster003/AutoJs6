@@ -36,6 +36,14 @@ class UiPreviewFailuresTest {
     }
 
     @Test
+    fun startTagOffsetsListElementsInPreOrder() {
+        val offsets = UiPreviewFailures.startTagOffsets(xml)
+        assertEquals(listOf("<vertical", "<text", "<horizontal", "<button id=\"ok\"", "<button id=\"cancel\"").map(xml::indexOf), offsets)
+        assertEquals(offsets.take(2), UiPreviewFailures.startTagOffsets(xml, xml.indexOf("<horizontal")))
+        assertEquals(listOf(0, 11), UiPreviewFailures.startTagOffsets("<a b=\"<c>\"><d/></a>"))
+    }
+
+    @Test
     fun offsetsFollowLinesAndColumns() {
         assertEquals(0, UiPreviewFailures.offsetOf("ab\ncd", 1, 1))
         assertEquals(3, UiPreviewFailures.offsetOf("ab\ncd", 2, 1))

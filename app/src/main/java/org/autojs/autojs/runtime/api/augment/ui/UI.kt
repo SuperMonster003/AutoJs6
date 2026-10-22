@@ -855,8 +855,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             while (tmp.indexOf("{{", i + 1).also { i = it } >= 0) {
                 val j = tmp.indexOf("}}", i + 1)
                 if (j < 0) return tmp
+                val expression = tmp.slice(i + 2 until j)
                 val evaluated = try {
-                    evalInContext(scriptRuntime, tmp.slice(i + 2 until j), niceCtx)
+                    UiContentHost.attached(scriptRuntime)?.checkBinding(attrName, expression)?.let { throw it }
+                    evalInContext(scriptRuntime, expression, niceCtx)
                 } catch (e: Throwable) {
                     // A preview root may keep the raw text and report the failure instead of failing the inflation.
                     // zh-CN: 预览根容器可以保留原文并报告失败, 而不是让 inflate 失败.
@@ -903,7 +905,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
          * }
          * ```
          *
-         * @param scriptRuntime The script runtime whose top-level scope resolves names that ctx does not provide. (zh-CN: 脚本运行时, 其顶层作用域用于解析 ctx 未提供的名称.)
+         * @param scriptRuntime The script runtime whose top-level scope (or the [UiContentHost.bindingScope] of its host) resolves names that ctx does not provide. (zh-CN: 脚本运行时, 其顶层作用域 (或其承载的 [UiContentHost.bindingScope]) 用于解析 ctx 未提供的名称.)
          * @param expression The JavaScript expression to evaluate as a string. (zh-CN: 用于执行的表达式.)
          * @param ctx The context object in which the expression should be evaluated, like the object of a `with` statement. (zh-CN: 提供给参数 expression 的上下文对象, 相当于 `with` 语句的对象.)
          * @return The result of evaluating the expression. (zh-CN: 参数 expression 执行结果.)
@@ -917,7 +919,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             // 而 callFunction(func, Scriptable, ...) 会用 ctx 的声明作用域 (脚本顶层作用域) 取代 ctx,
             // 导致列表项模板中的 `{{name}}` 抛出 ReferenceError.
             // `with` 作用域可保持原有语义: 名称先在 ctx 上解析, 再回退到顶层作用域.
-            val withScope = newWithScope(ctx, scriptRuntime.topLevelScope)
+            val withScope = newWithScope(ctx, UiContentHost.attached(scriptRuntime)?.bindingScope ?: scriptRuntime.topLevelScope)
             val iife = object : BaseFunction() {
                 override fun call(cx: Context, nt: Any?, scope: VarScope, thisObj: Any?, args: Array<out Any?>): Any? {
                     return cx.evaluateString(scope, expression, "<eval>", 1, null)

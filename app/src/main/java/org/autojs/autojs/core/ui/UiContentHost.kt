@@ -12,6 +12,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.mozilla.javascript.VarScope
 
 /**
  * Where `ui.layout(...)` content goes: the script's [ScriptExecuteActivity] window, or an embedded /
@@ -76,6 +77,23 @@ interface UiContentHost {
      * instead and lets the inflation continue; false rethrows [error] (the script behavior).
      */
     fun onBindingFailed(attrName: String, rawValue: String, error: Throwable): Boolean = false
+
+    /**
+     * Called before the `{{ expression }}` [expression] of [attrName] is evaluated: a non-null result is handled as the
+     * error of the evaluation (see [onBindingFailed]) and [expression] is not evaluated; null evaluates it (the script
+     * behavior). The editor's layout preview, which never runs the script, rejects expressions that could do more
+     * than combine the script's literal declarations (3-Block Compose roadmap P11.10).
+     */
+    fun checkBinding(attrName: String, expression: String): Throwable? = null
+
+    /**
+     * The scope a `{{ expression }}` resolves the names its binding context does not provide in; null keeps the script's
+     * top-level scope. The editor's layout preview gives one with the standard objects only, so nothing of the runtime
+     * (`files`, `shell`, Java packages) is reachable from an expression, not even through the global object that Rhino
+     * passes as `this` to a function called without a receiver.
+     */
+    val bindingScope: VarScope?
+        get() = null
 
     /**
      * An attribute of a native Android XML layout had no effect and was skipped (host roadmap

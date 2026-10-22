@@ -153,6 +153,7 @@ import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardHelper
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView
 import org.autojs.autojs.ui.edit.keyboard.FunctionsKeyboardView.ClickCallback
 import org.autojs.autojs.ui.edit.keyboard.SymbolsConfigStore
+import org.autojs.autojs.ui.edit.preview.EditorUiPreviewController
 import org.autojs.autojs.ui.edit.theme.EditorChromePalette
 import org.autojs.autojs.ui.edit.theme.Theme
 import org.autojs.autojs.ui.edit.theme.Themes
@@ -518,6 +519,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             View.GONE
         }
         syncPrimaryMenuState()
+        mUiPreviewController.onDocumentChanged()
     }
 
     private fun syncEditorDocumentPath() {
@@ -639,6 +641,8 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mDocsWebView: EWebView = binding.docs
     private val mDocsPaneController =
         EditorDocumentationPaneController(context, binding.root, mDocsWebView)
+    private val mUiPreviewController =
+        EditorUiPreviewController(context, binding.editorSplit, binding.editorContainer, UiPreviewHost())
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
     private val mThemePreviewBar: View = binding.themePreviewBar
     private val mThemePreviewTitle: TextView = binding.themePreviewTitle
@@ -1263,6 +1267,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     override fun onConfigurationChanged(newConfig: Configuration) {
         resetStableDecorBaseline()
         super.onConfigurationChanged(newConfig)
+        mUiPreviewController.onConfigurationChanged(newConfig)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -1302,6 +1307,10 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     ) {
         if (oldWidth > 0 && width > 0 && width != oldWidth) {
             resetStableDecorBaseline()
+            // Android 11+ applies the insets of a rotation before the new layout, so the overlap was measured
+            // against the old geometry (the portrait bottom below the landscape window reads as a keyboard).
+            // zh-CN: Android 11+ 在新布局之前分发旋转的 insets, 重叠量按旧几何测得 (竖屏底边低于横屏窗口, 被当成软键盘).
+            requestApplyInsetsSoon()
         }
         super.onSizeChanged(width, height, oldWidth, oldHeight)
     }
@@ -2789,6 +2798,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         syncPrimaryMenuState()
         tryFinalizeCompletedSaveAsAdoption()
         scheduleCursorStatusAfterInitialLoad(preserveCurrentCursor)
+        mUiPreviewController.onTextLoaded()
     }
 
     private fun preservePendingPrivilegedDraft() {
@@ -3034,7 +3044,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
 
     private fun setUpFunctionsKeyboard() {
         mFunctionsKeyboardHelper = FunctionsKeyboardHelper.with(context as Activity)
-            .setContent(binding.editorContainer)
+            .setContent(binding.editorSplit)
             .setFunctionsView(mFunctionsKeyboard)
             .setEditView(editor.inputView)
             .apply {
@@ -5129,6 +5139,14 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
 
             editor.addTextChangeListener {
+                // The layout preview of a "ui" script follows once typing pauses.
+                // zh-CN: "ui" 脚本的布局预览在输入停顿后跟进.
+                if (!editor.isLoadingText && !mEditorLoading) {
+                    mUiPreviewController.onTextChanged()
+                }
+            }
+
+            editor.addTextChangeListener {
                 // Live refresh search stats in search mode (debounced).
                 // Behavior:
                 // - Immediately show ".../..." to indicate recounting.
@@ -5228,6 +5246,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             themeFontService.inputMethodBarForegroundColor(appliedTheme),
         )
         mDocsPaneController.applyPalette(colors.background, colors.foreground)
+        mUiPreviewController.applyPalette(colors.background, colors.foreground)
         syncThemePreviewWithAppliedTheme(appliedTheme)
         mFullscreenHintSnackbar?.let(::applyFullscreenHintPalette)
         showPendingFullscreenHint()
@@ -5286,6 +5305,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         val action = actionForToolbarItem(id)
         when (id) {
             R.id.action_log -> openEditorLogByPreference()
+            R.id.ui_preview -> mUiPreviewController.toggle()
             R.id.run -> when {
                 isScriptRunning() -> forceStop()
                 else -> runAndSaveFileIfNeeded()
@@ -5723,6 +5743,47 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             }
         }
     }
+
+    // region Layout preview of "ui" scripts (3-Block Compose roadmap P11.10, D59 / D71)
+
+    /** Whether the layout preview panel of a "ui" script is showing. */
+    val isUiPreviewShown: Boolean
+        get() = mUiPreviewController.isPaneShown
+
+    private inner class UiPreviewHost : EditorUiPreviewController.Host {
+
+        override fun previewSourceText(): String? =
+            if (mDestroyed || mEditorLoading || editor.isLoadingText) null else editor.textSnapshot
+
+        // The uri of a privileged edit session names that session only.
+        // zh-CN: 特权编辑会话的 uri 只代表该会话本身.
+        override fun previewDocumentKey(): String? {
+            val current = uri ?: return null
+            if (PrivilegedEditSessions.isSessionUri(context, current)) return null
+            return current.path.takeIf { current.scheme.equals("file", ignoreCase = true) } ?: current.toString()
+        }
+
+        override fun isPreviewableDocument(): Boolean =
+            !mLargeFileMode && temporaryScriptExtensionWithDot() == ".js"
+
+        override fun jumpToSource(line: Int, column: Int) {
+            editor.jumpTo(line, column)
+            editor.requestEditorFocus()
+            editor.ensureCursorVisibleIfPossible()
+        }
+
+        override fun onUiPreviewStateChanged(visible: Boolean, on: Boolean) {
+            mNormalToolbar.setUiPreviewState(visible, on)
+            (activity.supportFragmentManager.findFragmentById(R.id.toolbar_menu) as? NormalToolbarFragment)
+                ?.setUiPreviewState(visible, on)
+        }
+
+        override fun isDesignerAvailable(): Boolean = isThreeBlockComposeDesignerAvailable()
+
+        override fun openInDesigner() = openInThreeBlockComposeDesigner()
+    }
+
+    // endregion
 
     // region 3-Block Compose designer hand-over (plugin roadmap P8.4 / D39 / Q10)
 
@@ -7982,6 +8043,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         mAceFallbackInProgress.set(false)
         AceEditorPluginStateMonitor.removeListener(mAcePluginStateListener)
         mDocsPaneController.dispose()
+        mUiPreviewController.destroy()
         // Cancel loading before destroying editor resources.
         // zh-CN: 销毁前先取消加载, 再销毁编辑器相关资源.
         cancelLargeFileLoading()

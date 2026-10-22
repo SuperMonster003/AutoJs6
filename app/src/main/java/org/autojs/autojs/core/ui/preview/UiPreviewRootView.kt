@@ -44,10 +44,11 @@ class UiPreviewRootView(context: Context, private val listener: Listener) : Fram
             invalidate()
         }
 
+    private val highlightStrokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2f, context.resources.displayMetrics)
     private val highlightPaint = Paint().apply {
         style = Paint.Style.STROKE
         color = Color.rgb(229, 57, 53)
-        strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2f, context.resources.displayMetrics)
+        strokeWidth = highlightStrokeWidth
     }
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var downX = 0f
@@ -135,8 +136,16 @@ class UiPreviewRootView(context: Context, private val listener: Listener) : Fram
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
         highlightRect?.let { rect ->
+            // A root scaled down into a panel (the editor's preview, D74) keeps the frame as wide on screen.
+            // zh-CN: 缩小放进面板的根容器 (编辑器预览, D74) 在屏幕上保持同样的框线宽度.
+            highlightPaint.strokeWidth = highlightStrokeWidth / scaleX.coerceIn(MIN_STROKE_SCALE, 1f)
             val inset = highlightPaint.strokeWidth / 2
             canvas.drawRect(rect.left + inset, rect.top + inset, rect.right - inset, rect.bottom - inset, highlightPaint)
         }
+    }
+
+    private companion object {
+        /** Below this scale the frame grows no wider on the layout, so that it does not cover small views. */
+        const val MIN_STROKE_SCALE = 0.25f
     }
 }

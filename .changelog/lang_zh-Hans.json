@@ -52,6 +52,7 @@
         "ui 模式布局预览服务, 供 3-Block Compose 设计器在画布内以宿主真实布局器预览 XML 布局, Android 11 及以上嵌入显示, 更低版本提供快照 (需要 3-Block Compose 插件 1.6.0 及以上)",
         "3-Block Compose 设计器的交互预览 (Android 13 及以上) 在画布内真实运行 ui 模式脚本: 脚本的对话框显示在画布内, ui.statusBarColor / navigationBarColor / backgroundColor 以仿状态栏 / 导航栏色条与背景显示, 长时间占用主线程的脚本在设定时长 (默认 5 秒) 后停止并报告所在行; 设计器切到后台, 回到前台或按下画布上方的返回键时 ui.emitter 收到 pause / resume / back_pressed 事件, 返回键未被处理时结束运行; TSX 脚本先经 TypeScript Engine 插件编译后运行, 编译错误与运行时错误均按 TSX 源码报告行号 (需要 3-Block Compose 插件 1.7.0 及以上, 生命周期事件, 时长设置与 TSX 脚本需要 1.9.0 及以上)",
         "3-Block Compose 设计器的文件夹工程 (含 XML 布局文件) 可直接交给 AutoJs6 运行或导入: 运行时解压到缓存目录并以工程方式运行, 结束后自动清理; 导入时解压到脚本目录下的同名文件夹, 已存在时可选择覆盖或另存为新文件夹 (需要 3-Block Compose 插件 1.8.0 及以上)",
+        "代码编辑器打开 ui 模式脚本时可用工具栏 \"预览\" 开关在编辑器内预览布局 (竖屏位于下半区, 横屏位于右半区): 布局按整屏尺寸排布后等比缩小显示, 停止输入后自动刷新, 点击预览中的控件跳转到对应源码位置, 布局有误时在面板内说明原因并保留上一次的画面; 只预览布局, 不运行脚本, 开关状态按文件记住; 安装 3-Block Compose 插件 (1.2.0 及以上) 后面板右上角提供 \"在 3-Block Compose 设计器中打开\" 按钮",
         "compose.mount/floaty 方法, 用于挂载 UI 页面或创建悬浮窗 (悬浮窗同时支持 UI 与非 UI 脚本), 脚本停止时自动清理所属会话",
         "compose.dialog 方法, 用于创建可更新和关闭的对话框及模态底部弹层会话, 可在 UI 或普通脚本中使用",
         "XML <compose> 容器及 compose.attach 方法, 用于在 UI 页面或悬浮窗内嵌入 Compose 会话; compose.AndroidView 可承载现有 Android View",

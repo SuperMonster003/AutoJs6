@@ -49,9 +49,15 @@ object UiPreviewFailures {
      * [line] / [column]; -1 when no element starts before it. Comments, CDATA sections, processing
      * instructions and quoted attribute values are skipped so a `<` inside them is not counted.
      */
-    fun elementIndexBefore(xml: String, line: Int, column: Int): Int {
-        val limit = offsetOf(xml, line, column)
-        var count = 0
+    fun elementIndexBefore(xml: String, line: Int, column: Int): Int =
+        startTagOffsets(xml, offsetOf(xml, line, column)).size - 1
+
+    /**
+     * The offsets of the start tags in [xml] that begin before [limit], in document (pre-order) order: the offset of
+     * element `i` is at index `i` (editor preview, 3-Block Compose roadmap P11.10).
+     */
+    fun startTagOffsets(xml: String, limit: Int = xml.length): List<Int> {
+        val offsets = ArrayList<Int>()
         var i = 0
         while (i < limit && i < xml.length) {
             val ch = xml[i]
@@ -65,13 +71,13 @@ object UiPreviewFailures {
                 xml.startsWith("<!", i) -> i = skipTo(xml, i + 2, ">")
                 xml.startsWith("<?", i) -> i = skipTo(xml, i + 2, "?>")
                 i + 1 < xml.length && (xml[i + 1].isLetter() || xml[i + 1] == '_') -> {
-                    count++
+                    offsets.add(i)
                     i = skipTag(xml, i + 1)
                 }
                 else -> i++
             }
         }
-        return count - 1
+        return offsets
     }
 
     /** The 0-based char offset of a 1-based line / column; an unknown column means the start of the line. */

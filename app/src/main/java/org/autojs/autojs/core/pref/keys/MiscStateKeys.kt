@@ -64,6 +64,15 @@ object MiscStateKeys : SettingsDomain {
     @JvmField
     val SEEN_ACE_LARGE_FILE_NOTICE = StateKey.bool(name = "key_\$_seen_ace_large_file_notice", default = SettingDefault.of(false))
 
+    /**
+     * The files whose layout preview panel was left on, most recent first (`EditorUiPreviewController`, 3-Block Compose
+     * roadmap P11.10, D71); at most 100 paths.
+     */
+    @JvmField
+    val EDITOR_UI_PREVIEW_FILES = StateKey.json(
+        name = "key_\$_editor_ui_preview_files", type = SettingType.Json(SettingsJson.STRING_LIST, htmlSafe = true), default = SettingDefault.of(emptyList()),
+    )
+
     // ---------------------------------------------------------------------- drawer switches (P4.2)
 
     /** Mirror of the drawer switch "accessibility service", written back from the real state (`DrawerMenuToggleableItem.sync`). */
@@ -284,7 +293,7 @@ object MiscStateKeys : SettingsDomain {
     override val keys: List<PrefKey<*>> = listOf(
         FIND_OR_REPLACE_KEYWORDS, FIND_OR_REPLACE_USING_REGEX, CODE_EVALUATE_CODE, ROOT_AUTOMATOR_TOUCH_DEVICE,
         EDITOR_PINCH_TO_ZOOM_STRATEGY, ACE_LSP_FILE_TYPES_REVISION,
-        SEEN_EDITOR_SWITCH_UNDO_NOTICE, SEEN_ACE_FALLBACK_NOTICE, SEEN_ACE_LARGE_FILE_NOTICE,
+        SEEN_EDITOR_SWITCH_UNDO_NOTICE, SEEN_ACE_FALLBACK_NOTICE, SEEN_ACE_LARGE_FILE_NOTICE, EDITOR_UI_PREVIEW_FILES,
         A11Y_SERVICE, FLOATING_MENU_SHOWN,
         A11Y_SERVICE_MANAGER_STATUS_LEVEL, A11Y_SERVICE_MANAGER_CONTROL_LEVEL, A11Y_SERVICE_MANAGER_SETTINGS_COLLAPSED,
         CLIENT_MODE_MANAGER_STATUS_LEVEL, CLIENT_MODE_MANAGER_CONTROL_LEVEL, CLIENT_MODE_MANAGER_SETTINGS_COLLAPSED, CLIENT_MODE_MANAGER_CLIENTS_LEVEL,

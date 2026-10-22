@@ -344,6 +344,7 @@
   "key_$_codegen_model_current_debug_": {"kind": "Setting", "category": "layout_inspector", "store": "default", "note": "前缀键: debug 包代码生成模型的当前选择, 按目录配置名派生 (ModelCatalogConfiguration.selectionPreferenceKey); P3.6 声明为 LayoutInspectorKeys 的键族 (附录 C Q15)"},
   "key_$_dialog_terminal_tips": {"kind": "Excluded", "store": "default", "note": "已移除的宿主终端的旧键, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板)"},
   "key_$_editor_engine_selection_mode": {"kind": "Setting", "category": "editor_general", "store": "default", "note": "与 `key_editor_engine` 一起由 EditorEnginePreferences.persist 写入"},
+  "key_$_editor_ui_preview_files": {"kind": "State", "category": "other", "store": "default", "note": "编辑器布局预览面板保持开启的文件路径 (最近优先, 上限 100, EditorUiPreviewController); 3-Block Compose 路线图 P11.10 (D71)"},
   "key_$_enabled_plugin_$_": {"kind": "Setting", "category": "plugin_enable_state", "store": "plugin_center_enable_state", "note": "前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.PLUGIN_ENABLED; 属于命名存储, 随整份计数"},
   "key_$_ignored_plugin_$_": {"kind": "Setting", "category": "updates", "store": "key_$_ignored_updates", "note": "UpdateIgnoreStore 中每个插件忽略的版本, 前缀键族 (后接包名); P3.3 声明为 UpdatesKeys.IGNORED_PLUGIN_VERSIONS; 属于命名存储, 随整份计数"},
   "key_$_ip_address_may_be_invalid_for_server_connection_prompt": {"kind": "State", "category": "other", "store": "default", "note": "连接服务端时 \"IP 地址可能无效\" 的不再提示 (JsonSocketClientTool); 附录 C Q23 起用固定键, 声明为 DialogStateKeys; 旧版按调用栈 MD5 命名的键残留归 other (P14.1)"},

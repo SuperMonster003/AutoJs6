@@ -45,6 +45,8 @@ import org.autojs.plugin.ui.preview.IUiPreviewCallback
 import org.autojs.plugin.ui.preview.UiPreviewContract
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.TopLevel
+import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.json.JsonParser
 import java.io.File
 import java.lang.ref.WeakReference
@@ -52,13 +54,13 @@ import java.nio.ByteBuffer
 import java.util.Locale
 
 /**
- * One preview session: a themed root (embedded through [SurfaceControlViewHost] on API 30+, or offscreen for
- * snapshots), a preview runtime registered as a [UiPreviewScriptExecution], element tracking for bounds and
- * failure reports, taps and highlight. Every method runs on the main thread unless noted; the service
- * marshals Binder calls there.
+ * One preview session: a themed root (embedded through [SurfaceControlViewHost] on API 30+, offscreen for
+ * snapshots, or attached to a host view for the editor's preview panel, see [MODE_ATTACHED]), a preview runtime
+ * registered as a [UiPreviewScriptExecution], element tracking for bounds and failure reports, taps and highlight.
+ * Every method runs on the main thread unless noted; the service marshals Binder calls there.
  *
- * zh-CN: 一个预览会话: 带主题的根容器 (API 30+ 经 [SurfaceControlViewHost] 嵌入, 或离屏供快照), 注册为 [UiPreviewScriptExecution]
- * 的预览运行时, 供边界与失败报告的元素跟踪, 点击与高亮. 除特别说明外全部方法在主线程运行; 服务负责把 Binder 调用转到主线程.
+ * zh-CN: 一个预览会话: 带主题的根容器 (API 30+ 经 [SurfaceControlViewHost] 嵌入, 离屏供快照, 或挂到宿主视图里供编辑器预览面板使用, 见 [MODE_ATTACHED]),
+ * 注册为 [UiPreviewScriptExecution] 的预览运行时, 供边界与失败报告的元素跟踪, 点击与高亮. 除特别说明外全部方法在主线程运行; 服务负责把 Binder 调用转到主线程.
  */
 internal class UiPreviewSession(
     private val appContext: Context,
@@ -101,12 +103,16 @@ internal class UiPreviewSession(
         manager.getDisplay(params.displayId) ?: manager.getDisplay(Display.DEFAULT_DISPLAY)
     }
     private val isSnapshot = params.mode == UiPreviewContract.MODE_SNAPSHOT
+    private val isAttached = params.mode == MODE_ATTACHED
 
     override val inflaterContext: Context = themedContext()
     private val root = UiPreviewRootView(inflaterContext, this)
     override val contentParent: ViewGroup get() = root.contentFrame
     override val contentRoot: ViewGroup get() = root.contentFrame
     override val hostWindow: Window? get() = null
+
+    /** The root of an [MODE_ATTACHED] session, for the view that shows it. */
+    val rootView: View get() = root
 
     /** The dialogs of a run (contract v4). */
     val dialogLayer: UiPreviewDialogLayer get() = root.dialogLayer
@@ -121,6 +127,9 @@ internal class UiPreviewSession(
 
     private var viewHost: SurfaceControlViewHost? = null
     private var execution: UiPreviewScriptExecution? = null
+
+    /** Where the bindings of an [MODE_ATTACHED] session live: the standard objects only, see [bindingScope]. */
+    private var attachedTopLevel: TopLevel? = null
     private var tracking: UiPreviewTrackingDelegate? = null
 
     private val records = ArrayList<ViewRecord>()
@@ -165,7 +174,9 @@ internal class UiPreviewSession(
     fun create(): Bundle {
         val startedAt = SystemClock.elapsedRealtime()
         val result = Bundle().apply { putString(UiPreviewContract.KEY_SESSION_ID, id) }
-        if (!isSnapshot) {
+        // An attached root lives in the holder's window, whose layout passes (every keystroke of the editor) need no
+        // bounds report: the holder hit-tests and highlights through the session.
+        if (!isSnapshot && !isAttached) {
             if (Build.VERSION.SDK_INT < UiPreviewContract.MIN_API_EMBEDDED) {
                 throw UiPreviewRequestException(UiPreviewContract.ERROR_UNSUPPORTED_MODE, "the embedded mode needs API ${UiPreviewContract.MIN_API_EMBEDDED}")
             }
@@ -354,6 +365,7 @@ internal class UiPreviewSession(
         root.dialogLayer.clear()
         root.contentFrame.removeAllViews()
         records.clear()
+        attachedTopLevel = null
         if (notify) {
             runCatching {
                 callback.onSessionLost(id, Bundle().apply { putString(UiPreviewContract.KEY_REASON, reason) })
@@ -392,7 +404,16 @@ internal class UiPreviewSession(
         var failure: UiPreviewLayoutFailure? = null
         try {
             withRhinoContext(runtime) { cx ->
-                runtime.ui.bindingContext = parseBindings(cx, runtime, bindingsJson)
+                // The editor's panel previews text being typed: its expressions only see the literal declarations, which
+                // live with the standard objects in a scope of their own (see bindingScope and checkBinding).
+                // zh-CN: 编辑器面板预览的是正在输入的文本: 表达式只能看到字面量声明, 它们与标准对象一起放在独立的作用域里 (见 bindingScope 与 checkBinding).
+                val scope: VarScope = if (isAttached) {
+                    attachedTopLevel ?: cx.initSafeStandardObjects(TopLevel(), true).also { attachedTopLevel = it }
+                } else {
+                    runtime.topLevelScope
+                }
+                val bindings = parseBindings(cx, scope, bindingsJson)
+                runtime.ui.bindingContext = if (isAttached) UiPreviewBindingSandbox(bindings, scope) else bindings
                 runtime.ui.isAndroidLayout = androidLayout
                 records.clear()
                 // The inflater resolves project resources from the working directory, or from the layout's own file.
@@ -442,13 +463,13 @@ internal class UiPreviewSession(
         return LayoutResult(failure, lastElementCount, ArrayList(diagnostics), snapshot, width, height, elapsed)
     }
 
-    private fun parseBindings(cx: org.mozilla.javascript.Context, runtime: ScriptRuntime, bindingsJson: String?): Scriptable {
+    private fun parseBindings(cx: org.mozilla.javascript.Context, scope: VarScope, bindingsJson: String?): Scriptable {
         val text = bindingsJson?.takeIf { it.isNotBlank() } ?: "{}"
         val parsed = try {
             // The host's own JSON parser (RhinoUtils.js_json_parse uses it too): the 4-argument NativeJSON.parse of
             // this Rhino build requires a reviver.
             // zh-CN: 宿主自己的 JSON 解析器 (RhinoUtils.js_json_parse 也用它): 这个 Rhino 构建的四参数 NativeJSON.parse 要求 reviver 非空.
-            JsonParser(cx, runtime.topLevelScope).parseValue(text)
+            JsonParser(cx, scope).parseValue(text)
         } catch (e: Throwable) {
             throw UiPreviewRequestException(UiPreviewContract.ERROR_INVALID_REQUEST, "bindingsJson is not valid JSON: ${e.message}")
         }
@@ -526,10 +547,21 @@ internal class UiPreviewSession(
         diagnostics.add(UiPreviewDiagnostic(UiPreviewContract.ERROR_ATTRIBUTE_IGNORED, message, elementStack.lastOrNull() ?: -1, attrName, code))
     }
 
+    override val bindingScope: VarScope?
+        get() = attachedTopLevel.takeIf { isAttached }
+
+    /** An [MODE_ATTACHED] session evaluates only what [UiPreviewBindingGuard] allows, and nothing without its sandbox. */
+    override fun checkBinding(attrName: String, expression: String): Throwable? {
+        if (!isAttached) return null
+        val sandbox = runtime?.ui?.bindingContext as? UiPreviewBindingSandbox
+        val allowed = sandbox != null && attachedTopLevel != null && UiPreviewBindingGuard.allows(expression, sandbox::constant)
+        return if (allowed) null else UiPreviewBindingGuard.RejectedException(expression.trim())
+    }
+
     override fun onBindingFailed(attrName: String, rawValue: String, error: Throwable): Boolean {
         val diagnostic = UiPreviewDiagnostic(
             UiPreviewContract.ERROR_BINDING_FAILED,
-            UiPreviewFailures.messageOf(error),
+            bindingFailureMessageOf(error),
             elementStack.lastOrNull() ?: -1,
             attrName,
         )
@@ -546,6 +578,16 @@ internal class UiPreviewSession(
             }
         }
         return true
+    }
+
+    private fun bindingFailureMessageOf(error: Throwable): String {
+        generateSequence(error) { it.cause }.take(8).forEach { cause ->
+            when (cause) {
+                is UiPreviewBindingGuard.RejectedException -> return appContext.getString(R.string.text_editor_ui_preview_binding_not_evaluated, abbreviate(cause.expression))
+                is UiPreviewBindingSandbox.UnavailableNameException -> return appContext.getString(R.string.text_editor_ui_preview_name_unavailable, cause.name)
+            }
+        }
+        return UiPreviewFailures.messageOf(error)
     }
 
     override fun onEngineForceStop() {
@@ -571,9 +613,13 @@ internal class UiPreviewSession(
     }
 
     override fun replaceCreatedView(view: View): View? {
-        if (!isSnapshot) return null
-        val needsWindow = view is WebView || view is SurfaceView || view is TextureView || view is VideoView
-        return if (needsWindow) UiPreviewPlaceholderView(view.context, view.javaClass.simpleName) else null
+        val replaced = when {
+            isSnapshot -> view is WebView || view is SurfaceView || view is TextureView || view is VideoView
+            // The editor's panel shows a layout, not web pages or videos it would load while the script is typed.
+            isAttached -> view is WebView || view is VideoView
+            else -> false
+        }
+        return if (replaced) UiPreviewPlaceholderView(view.context, view.javaClass.simpleName) else null
     }
 
     override fun onViewCreated(view: View, elementIndex: Int, id: String?) {
@@ -717,7 +763,21 @@ internal class UiPreviewSession(
     }
 
     companion object {
+        /**
+         * The host's own mode for the editor's preview panel (3-Block Compose roadmap P11.10): the root is added to
+         * the panel's hierarchy in this process (any API level) and the callback is called directly. It is not part
+         * of [UiPreviewContract.MODES], so the service never creates such a session for a client.
+         */
+        const val MODE_ATTACHED = "attached"
+
         private const val TAG = "UiPreviewSession"
         private const val BOUNDS_DEBOUNCE_MS = 50L
+        private const val MAX_QUOTED_EXPRESSION = 40
+
+        /** An expression as a diagnostic quotes it: one line of at most [MAX_QUOTED_EXPRESSION] characters. */
+        private fun abbreviate(expression: String): String {
+            val line = expression.lineSequence().map { it.trim() }.filter { it.isNotEmpty() }.joinToString(" ")
+            return if (line.length <= MAX_QUOTED_EXPRESSION) line else line.take(MAX_QUOTED_EXPRESSION - 3) + "..."
+        }
     }
 }
