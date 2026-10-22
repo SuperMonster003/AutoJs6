@@ -14,15 +14,17 @@ an emulator is refused unless --allow-device is given.
 2. Every file of shared_prefs is read with run-as (snapshot "before", DIR/before.json); --new is installed over it
    (adb install -r) and started once; snapshot "after" (DIR/after.json).
 3. Every key of "before" must be in "after" with the same type and value (the two update check times, which every
-   start rewrites, with the same type); keys the new build adds are counted, not compared. Only the names of keys that differ are printed, never values (R6); the snapshots stay in DIR.
+   start rewrites, with the same type; the attention record of an old format in PLAN, which the new build may rewrite
+   in its own format, with the same content, appendix C Q40); keys the new build adds are counted, not compared. Only
+   the names of keys that differ are printed, never values (R6); the snapshots stay in DIR.
 4. device_store_check.py domains (every domain of core/pref/keys), lists-after and interop run on the new build.
 
 Output is one line per check (PASS / FAIL and counts); the exit status is 1 when a check fails.
 
 zh-CN: 旧版本升级的真机检查 (附录 D 第 8 项). 供只读模拟器实例使用 (关机即丢弃改动), 不还原原有数据; 非模拟器序列号需加
 --allow-device. 旧版本安装并启动一次后写入 PLAN 的值并记录 P1.4 的三个列表键, 读取 shared_prefs 全部文件作 "升级前" 快照;
-覆盖安装新版本并启动一次后作 "升级后" 快照, "升级前" 的每个键须以相同类型与值保留 (只打印不一致的键名); 最后在新版本上运行
-domains, lists-after 与 interop.
+覆盖安装新版本并启动一次后作 "升级后" 快照, "升级前" 的每个键须以相同类型与值保留 (新版本可能以新格式改写的旧格式置顶记录
+比较内容, 附录 C Q40; 只打印不一致的键名); 最后在新版本上运行 domains, lists-after 与 interop.
 """
 
 import argparse
@@ -61,11 +63,34 @@ PLAN = [
     {"store": "default", "name": "org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent", "type": "float",
      "value": 0.25},
     {"store": "default", "res": "key_script_module_debug_print_disabled_modules", "type": "stringSet", "value": ["console"]},
+    # An attention record written by org.json, a format that appendix C Q40 replaced. The file manager history, whose
+    # pages Q40 also changed, is not seeded: MainActivity clears the file manager state whenever it is created without
+    # a saved state (ExplorerViewStateLifecyclePolicy), the first start after an upgrade included, so an upgrade never
+    # reads it; unit tests cover its old text.
+    # zh-CN: org.json 写的置顶记录 (附录 C Q40 替换掉的格式). 文件管理器历史 (Q40 同样改了其页面格式) 不写入: MainActivity 在没有
+    # 保存状态时创建 (包括升级后的首次启动) 都会清除文件管理器状态 (ExplorerViewStateLifecyclePolicy), 升级不会读到它; 其旧格式
+    # 文本由单测覆盖.
+    {"store": "plugin_center_attention", "name": "known_first_install_times", "type": "string",
+     "value": "{\"org.example.aj6.upgrade\":1700000000000}"},
 ]
 
 # Times the app writes whenever it starts and checks for updates, the old build as well: only their type is compared.
 # zh-CN: 应用每次启动检查更新时都会改写的时间 (旧版本同样如此): 只比较类型.
 REWRITTEN_AT_START = {"key_$_last_updates_auto_checked", "key_$_last_updates_checked"}
+
+
+def same_content(key, old, new):
+    """True when the new build rewrote a text of an old format in PLAN with the same content (appendix C Q40)."""
+    if new is None or old[0] != "string" or new[0] != "string":
+        return False
+    try:
+        old_value, new_value = json.loads(old[1]), json.loads(new[1])
+    except ValueError:
+        return False
+    if key == "known_first_install_times":
+        # The plugin center may add the packages it sees. zh-CN: 插件中心可能补入它看到的包.
+        return isinstance(new_value, dict) and all(new_value.get(name) == time for name, time in old_value.items())
+    return False
 
 
 def install(serial, apk, downgrade):
@@ -99,18 +124,23 @@ def snapshot(serial):
 
 
 def compare(before, after):
-    kept, differ, added = 0, [], 0
+    kept, differ, added, rewritten = 0, [], 0, []
     for name, entries in before.items():
         now = after.get(name, {})
         for key, value in entries.items():
             if now.get(key) == value or (key in REWRITTEN_AT_START and now.get(key, [None])[0] == value[0]):
                 kept += 1
+            elif same_content(key, value, now.get(key)):
+                kept += 1
+                rewritten.append(f"{name}:{key}")
             else:
                 differ.append(f"{name}:{key} {'removed' if key not in now else 'changed'}")
         added += sum(1 for key in now if key not in entries)
     added += sum(len(entries) for name, entries in after.items() if name not in before)
     print(f"{'PASS' if not differ else 'FAIL'} upgrade keeps the stored settings: {kept} kept in {len(before)} files, "
           f"{len(differ)} differ, {added} added by the new build")
+    for line in rewritten:
+        print(f"INFO rewritten in the new format with the same content: {line}")
     for line in differ:
         print(f"INFO differs {line}")
     return len(differ)
@@ -137,7 +167,7 @@ def main():
     parser.add_argument("--new", type=pathlib.Path, required=True, help="APK of the new build")
     parser.add_argument("--out", type=pathlib.Path, required=True)
     parser.add_argument("--settle", type=int, default=15, help="seconds the app runs after each start")
-    parser.add_argument("--wait", type=int, default=120, help="seconds to wait for each script on the old build")
+    parser.add_argument("--wait", type=int, default=120, help="seconds to wait for each script on the old build and the first one on the new build")
     parser.add_argument("--allow-device", action="store_true", help="also run on a serial that is not an emulator")
     args = parser.parse_args()
     if not args.serial.startswith("emulator-") and not args.allow_device:
@@ -179,7 +209,8 @@ def main():
     failed += compare(before, after)
 
     domains = sorted(p.stem for p in KEYS_DIR.glob("*Keys.kt") if p.stem != "KeyDeclarations")
-    failed += store_check(args.serial, "domains", "--domains", ",".join(domains))
+    # The first script on the new build may wait for dex optimization as well. zh-CN: 新版本的第一个脚本同样可能等待 dex 优化.
+    failed += store_check(args.serial, "domains", "--domains", ",".join(domains), "--wait", str(args.wait))
     failed += store_check(args.serial, "lists-after", "--state", str(lists_state))
     failed += store_check(args.serial, "interop")
     print(f"upgrade: {'FAIL' if failed else 'PASS'} ({failed} failed)")

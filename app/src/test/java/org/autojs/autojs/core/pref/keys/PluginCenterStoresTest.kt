@@ -2,6 +2,8 @@ package org.autojs.autojs.core.pref.keys
 
 import android.content.Context
 import android.content.ContextWrapper
+import org.autojs.autojs.core.plugin.center.PluginCenterAttentionLedger
+import org.autojs.autojs.core.plugin.center.PluginCenterAttentionStore
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginFilterStore
 import org.autojs.autojs.core.plugin.center.PluginIndexSource
@@ -12,12 +14,14 @@ import org.autojs.autojs.core.plugin.center.PluginVariantPriorityStore
 import org.autojs.autojs.core.plugin.center.PluginVisibilityStore
 import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.SettingKind
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.core.pref.SettingsRegistry
 import org.autojs.autojs.core.pref.store.StoreId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -130,6 +134,23 @@ class PluginCenterStoresTest : DomainKeysTestBase() {
         assertEquals(emptyList<String>(), PluginVariantPriorityStore.getOrder("ocr"))
         PluginVariantPriorityStore.setOrder("ocr", emptyList())
         assertFalse(store.contains("key_\$_plugin_variant_priority_\$_ocr"))
+    }
+
+    @Test
+    fun attentionRecordReadsTheOrgJsonTextAndWritesTheSameShape() {
+        val attention = store(NamedStores.PLUGIN_CENTER_ATTENTION)
+        // As org.json wrote them before appendix C Q40.
+        attention.put("known_first_install_times", "{\"org.example.p\":1700000000000}")
+        attention.put("pins", "[{\"packageName\":\"org.example.p\",\"createdAt\":1700000000001,\"enableFailed\":true}]")
+        val ledger = PluginCenterAttentionStore.read("token")
+        assertEquals(mapOf("org.example.p" to 1700000000000L), ledger.knownFirstInstallTimes())
+        assertEquals(mapOf("org.example.p" to PluginCenterAttentionLedger.Pin("org.example.p", 1700000000001L, enableFailed = true)), ledger.pins())
+        PluginCenterAttentionStore.write(ledger)
+        assertEquals("{\"org.example.p\":1700000000000}", attention.getString("known_first_install_times", null))
+        assertEquals("[{\"packageName\":\"org.example.p\",\"createdAt\":1700000000001,\"enableFailed\":true}]", attention.getString("pins", null))
+        // A record of another shape is not read; the store then starts over.
+        attention.put("pins", "[{\"createdAt\":1}]")
+        assertThrows(SettingsJson.SettingsJsonException::class.java) { PluginCenterAttentionStore.read("token") }
     }
 
     @Test

@@ -183,8 +183,8 @@ class MiscStateKeysTest : DomainKeysTestBase() {
         store.edit { put(key("key_working_directory_history"), "not json") }
         assertThrows(SettingsJson.SettingsJsonException::class.java) { MiscStateKeys.linkedSet(MiscStateKeys.WORKING_DIRECTORY_HISTORY) }
         // A list keeps duplicates (Pref.getLinkedList).
-        store.edit { put(MiscStateKeys.EXPLORER_VIEW_HISTORY.name, "[\"/a,1,false,false\",\"/a,1,false,false\"]") }
-        assertEquals(listOf("/a,1,false,false", "/a,1,false,false"), MiscStateKeys.stringList(MiscStateKeys.EXPLORER_VIEW_HISTORY))
+        store.edit { put(key("key_pc_server_address_history"), "[\"192.168.1.2\",\"192.168.1.2\"]") }
+        assertEquals(listOf("192.168.1.2", "192.168.1.2"), MiscStateKeys.stringList(MiscStateKeys.PC_SERVER_ADDRESS_HISTORY))
     }
 
     @Test
@@ -207,10 +207,20 @@ class MiscStateKeysTest : DomainKeysTestBase() {
         ExplorerViewStateStore.saveExplorer("/sdcard/Scripts", "/sdcard", listOf(page))
         assertEquals(commits + 1, store.commitCount)
         assertEquals("/sdcard/Scripts", store.getString("ExplorerView.explorer_current", null))
-        assertEquals("[\"/sdcard/Scripts,a,12,true,false\"]", store.getString("ExplorerView.explorer_history", null))
+        // Page objects since appendix C Q40.
+        assertEquals(
+            "[{\"path\":\"/sdcard/Scripts,a\",\"scrollPosition\":12,\"directoriesCollapsed\":true,\"filesCollapsed\":false}]",
+            store.getString("ExplorerView.explorer_history", null),
+        )
         val restored = ExplorerViewStateStore.restoreExplorer()
         assertEquals("/sdcard", restored.rootPath)
         assertEquals(listOf(page), restored.history)
+        // The text of older versions (Pref.putLinkedList of "path,scroll,directories collapsed,files collapsed") is still read.
+        store.edit { put("ExplorerView.explorer_history", "[\"/sdcard/Scripts,a,12,true,false\",\"/sdcard,0,false,false\",\"broken\"]") }
+        assertEquals(
+            listOf(page, ExplorerStoredPageState("/sdcard", 0, directoriesCollapsed = false, filesCollapsed = false)),
+            ExplorerViewStateStore.restoreExplorer().history,
+        )
         assertNull(ExplorerViewStateStore.restorePageScroll())
         ExplorerViewStateStore.savePageScroll(40)
         assertEquals(40, ExplorerViewStateStore.restorePageScroll())

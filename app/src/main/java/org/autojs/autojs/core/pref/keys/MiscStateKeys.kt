@@ -265,10 +265,14 @@ object MiscStateKeys : SettingsDomain {
     @JvmField
     val EXPLORER_VIEW_ROOT = StateKey.str(name = "ExplorerView.explorer_root", default = SettingDefault.None)
 
-    /** Pages left behind ("path,scroll,directories collapsed,files collapsed"), a JSON list as `Pref.putLinkedList` wrote it. */
+    /**
+     * Pages left behind, a JSON array of page objects (`ExplorerViewStateStore`, appendix C Q40); items of older versions
+     * are the text "path,scroll,directories collapsed,files collapsed", which the store still reads.
+     * zh-CN: 留在身后的页面, 页面对象组成的 JSON 数组 (附录 C Q40); 旧版本的每项是逗号拼接的文本, 仍可读取.
+     */
     @JvmField
     val EXPLORER_VIEW_HISTORY = StateKey.json(
-        name = "ExplorerView.explorer_history", type = SettingType.Json(SettingsJson.STRING_LIST, htmlSafe = true), default = SettingDefault.of(emptyList()),
+        name = "ExplorerView.explorer_history", type = SettingType.Json(SettingsJson.ARRAY), default = SettingDefault.of(emptyList()),
     )
 
     // ---------------------------------------------------------------------- layout inspector and accessibility (P4.2)

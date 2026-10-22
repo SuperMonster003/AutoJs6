@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.explorer
 
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.set
@@ -47,7 +48,7 @@ internal object ExplorerViewStateStore {
         return ExplorerStoredViewState(
             currentPath = MiscStateKeys.EXPLORER_VIEW_CURRENT.storedOrNull(),
             rootPath = MiscStateKeys.EXPLORER_VIEW_ROOT.storedOrNull(),
-            history = MiscStateKeys.stringList(MiscStateKeys.EXPLORER_VIEW_HISTORY).mapNotNull(::decodePageState),
+            history = MiscStateKeys.EXPLORER_VIEW_HISTORY.get().mapNotNull(::decodePageState),
         )
     }
 
@@ -62,16 +63,32 @@ internal object ExplorerViewStateStore {
 
     fun prefKey(key: String): String = ExplorerView::class.java.simpleName + '.' + key
 
-    internal fun encodePageState(state: ExplorerStoredPageState): String {
-        return listOf(
-            state.path,
-            state.scrollPosition,
-            state.directoriesCollapsed,
-            state.filesCollapsed,
-        ).joinToString(",")
+    /**
+     * A page as a JSON object (docs/settings/ROADMAP.md appendix C Q40); [decodePageState] also reads the comma
+     * separated text ("path,scroll,directories collapsed,files collapsed") that older versions wrote.
+     * zh-CN: 以 JSON 对象表示的页面 (附录 C Q40); [decodePageState] 也读取旧版本写入的逗号拼接文本.
+     */
+    internal fun encodePageState(state: ExplorerStoredPageState): Map<String, Any?> = linkedMapOf(
+        "path" to state.path,
+        "scrollPosition" to state.scrollPosition,
+        "directoriesCollapsed" to state.directoriesCollapsed,
+        "filesCollapsed" to state.filesCollapsed,
+    )
+
+    internal fun decodePageState(value: Any?): ExplorerStoredPageState? = when (value) {
+        is Map<*, *> -> {
+            val path = value["path"] as? String
+            val scrollPosition = SettingsJson.toInt(value["scrollPosition"])
+            val directoriesCollapsed = value["directoriesCollapsed"] as? Boolean
+            val filesCollapsed = value["filesCollapsed"] as? Boolean
+            if (path.isNullOrEmpty() || scrollPosition == null || directoriesCollapsed == null || filesCollapsed == null) null
+            else ExplorerStoredPageState(path, scrollPosition, directoriesCollapsed, filesCollapsed)
+        }
+        is String -> decodeLegacyPageState(value)
+        else -> null
     }
 
-    internal fun decodePageState(value: String): ExplorerStoredPageState? {
+    private fun decodeLegacyPageState(value: String): ExplorerStoredPageState? {
         val fields = value.split(',')
         if (fields.size < PAGE_STATE_FIELD_COUNT) return null
         val path = fields.dropLast(PAGE_STATE_FIELD_COUNT - 1).joinToString(",")

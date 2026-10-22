@@ -2,14 +2,14 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.util.Log
+import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.SettingsJson.SettingsJsonException
 import org.autojs.autojs.core.pref.keys.NamedStores
 import org.autojs.autojs.core.pref.keys.PluginCenterKeys.ATTENTION_INITIALIZED_SOURCES
 import org.autojs.autojs.core.pref.keys.PluginCenterKeys.ATTENTION_KNOWN_FIRST_INSTALL_TIMES
 import org.autojs.autojs.core.pref.keys.PluginCenterKeys.ATTENTION_PINS
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.core.pref.store.set
-import org.json.JSONArray
-import org.json.JSONObject
 import java.util.UUID
 
 /**
@@ -17,7 +17,8 @@ import java.util.UUID
  * zh-CN: 持久化本宿主的 [PluginCenterAttentionLedger], 由插件中心标签页与独立页面共用.
  *
  * The ledger is the named store `plugin_center_attention`, three states of [org.autojs.autojs.core.pref.keys.PluginCenterKeys]
- * (docs/settings/ROADMAP.md P3.1, names unchanged); the JSON texts are still written and parsed with org.json here.
+ * (docs/settings/ROADMAP.md P3.1, names unchanged); the JSON texts are written and parsed with [SettingsJson] (appendix
+ * C Q40), in the same shape org.json wrote before.
  */
 internal object PluginCenterAttentionStore {
 
@@ -77,23 +78,7 @@ internal object PluginCenterAttentionStore {
 
     @Suppress("UNUSED_PARAMETER")
     private fun load(context: Context): PluginCenterAttentionLedger {
-        return runCatching {
-            val known = JSONObject(ATTENTION_KNOWN_FIRST_INSTALL_TIMES.storedText() ?: "{}").let { json ->
-                json.keys().asSequence().associateWith { json.getLong(it) }
-            }
-            val pins = JSONArray(ATTENTION_PINS.storedText() ?: "[]").let { array ->
-                (0 until array.length()).map { index ->
-                    val json = array.getJSONObject(index)
-                    PluginCenterAttentionLedger.Pin(
-                        packageName = json.getString("packageName"),
-                        createdAt = json.getLong("createdAt"),
-                        enableFailed = json.optBoolean("enableFailed"),
-                        seenIn = json.optString("seenIn").takeIf { it.isNotEmpty() },
-                    )
-                }
-            }
-            PluginCenterAttentionLedger(processToken, known, ATTENTION_INITIALIZED_SOURCES.storedOrNull().orEmpty(), pins)
-        }.getOrElse { error ->
+        return runCatching { read(processToken) }.getOrElse { error ->
             // An unreadable record starts over: the next comparison only records what is installed.
             // zh-CN: 记录无法读取时重新开始: 下一次比对只记录已安装的包.
             Log.w(TAG, "Cannot read the attention record", error)
@@ -102,23 +87,37 @@ internal object PluginCenterAttentionStore {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun persist(context: Context, ledger: PluginCenterAttentionLedger) {
-        val known = JSONObject().apply { ledger.knownFirstInstallTimes().forEach { (name, time) -> put(name, time) } }
-        val pins = JSONArray().apply {
-            ledger.pins().values.forEach { pin ->
-                put(JSONObject().apply {
-                    put("packageName", pin.packageName)
-                    put("createdAt", pin.createdAt)
-                    put("enableFailed", pin.enableFailed)
-                    pin.seenIn?.let { put("seenIn", it) }
-                })
-            }
+    private fun persist(context: Context, ledger: PluginCenterAttentionLedger) = write(ledger)
+
+    /**
+     * Reads the record; throws [SettingsJsonException] when a state is not the shape [write] gives it.
+     * zh-CN: 读取记录; 某个状态不是 [write] 写出的形状时抛 [SettingsJsonException].
+     */
+    internal fun read(processToken: String): PluginCenterAttentionLedger {
+        val known = ATTENTION_KNOWN_FIRST_INSTALL_TIMES.storedText()?.let { SettingsJson.OBJECT.decode(SettingsJson.parse(it)) }.orEmpty()
+            .mapValues { (name, time) -> SettingsJson.toLong(time) ?: throw SettingsJsonException("No first install time of $name") }
+        val pins = ATTENTION_PINS.storedText()?.let { SettingsJson.ARRAY.decode(SettingsJson.parse(it)) }.orEmpty().map { element ->
+            val json = SettingsJson.OBJECT.decode(element)
+            PluginCenterAttentionLedger.Pin(
+                packageName = json["packageName"] as? String ?: throw SettingsJsonException("A pin without its package name"),
+                createdAt = SettingsJson.toLong(json["createdAt"]) ?: throw SettingsJsonException("A pin without its creation time"),
+                enableFailed = json["enableFailed"] == true,
+                seenIn = (json["seenIn"] as? String)?.takeIf { it.isNotEmpty() },
+            )
+        }
+        return PluginCenterAttentionLedger(processToken, known, ATTENTION_INITIALIZED_SOURCES.storedOrNull().orEmpty(), pins)
+    }
+
+    internal fun write(ledger: PluginCenterAttentionLedger) {
+        val pins = ledger.pins().values.map { pin ->
+            linkedMapOf<String, Any?>("packageName" to pin.packageName, "createdAt" to pin.createdAt, "enableFailed" to pin.enableFailed)
+                .apply { pin.seenIn?.let { put("seenIn", it) } }
         }
         // One write of the three states, as the single SharedPreferences edit before.
         SettingsStores[NamedStores.PLUGIN_CENTER_ATTENTION].edit {
-            put(ATTENTION_KNOWN_FIRST_INSTALL_TIMES.name, known.toString())
+            this[ATTENTION_KNOWN_FIRST_INSTALL_TIMES] = ledger.knownFirstInstallTimes()
             this[ATTENTION_INITIALIZED_SOURCES] = ledger.initializedSources()
-            put(ATTENTION_PINS.name, pins.toString())
+            this[ATTENTION_PINS] = pins
         }
     }
 }
