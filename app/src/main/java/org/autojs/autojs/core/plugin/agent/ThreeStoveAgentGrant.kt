@@ -23,6 +23,8 @@ internal object ThreeStoveAgentGrant {
         "image" to listOf("captureScreen", "recycle"),
         "shell" to listOf("exec"),
         "toast" to listOf("toast", "showToast"),
+        // Self-described plugin tools (3-Macaw Speech roadmap D92): the catalog, a call and its cancellation.
+        "plugin_tools" to listOf("list", "invoke", "cancel"),
     ).flatMapTo(LinkedHashSet()) { (module, methods) -> methods.map { "$module.$it" } }
 
     fun default(): HostCapabilityGrant = HostCapabilityGrant(
@@ -30,8 +32,7 @@ internal object ThreeStoveAgentGrant {
         permissions = HostCapabilityGrant.DEFAULT_PERMISSIONS - setOf(
             NodeBridgePermissionManifest.FILES_DELETE,
             NodeBridgePermissionManifest.APP_ACTIVITY,
-            // Plugin tools stay out until the Agent roadmap decides (MCP roadmap P12 host item 4).
-            NodeBridgePermissionManifest.PLUGIN_TOOLS,
+            // Tools of USER_GRANTED providers need a per-tool switch in the consumer's settings, which Agent does not have yet (D92).
             NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED,
         ) + setOf(NodeBridgePermissionManifest.AGENT, NodeBridgePermissionManifest.AGENT_EXEC, NodeBridgePermissionManifest.OCR),
         maxConcurrentCalls = 2,

@@ -91,7 +91,7 @@ for the provider contract, the argument rules and the result schemas. Its tokens
 `plugin_tools.user_granted`; the second admits the tools of USER_GRANTED providers and is never implied by
 the first. A call also needs `screen_capture` for a `"screen"` image argument, `files` for path arguments
 and `files.write` for declared outputs. The MCP default grant includes the three methods and both tokens;
-`ThreeStoveAgentGrant` includes neither. `NodeCapabilityBrokerPolicy` allows 72 KiB of arguments for
+`ThreeStoveAgentGrant` includes the three methods and `plugin_tools` only. `NodeCapabilityBrokerPolicy` allows 72 KiB of arguments for
 `plugin_tools.invoke` (the contract's 64 KiB of tool arguments plus the name and options) within the
 96 KiB request grant. Binary outputs do not return through broker descriptors: the host writes them to the
 working-directory paths the request names, and the response lists their paths and sizes. The bridge
