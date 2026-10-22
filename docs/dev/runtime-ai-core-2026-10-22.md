@@ -1,6 +1,6 @@
 # Runtime AI core coverage, 2026-10-22
 
-Implementation, documentation/types/completion and local checks are complete. Redmi has completed final acceptance and restoration. Xiaomi is restored, but its final host/UI/package acceptance remains open: manual unlock is required and an intermittent provider failure still needs diagnosis. No push, tag or release.
+Implementation, documentation/types/completion and local checks are complete. Xiaomi has completed final AI 299 host, Ace and independently signed application acceptance, followed by restoration to its fresh snapshot. Redmi retains its earlier accepted AI 298 cohort; its AI 299 follow-up is deferred after an external host replacement. At the user's explicit request, Redmi's current state is preserved without further testing, cleanup or restoration. Complete two-device acceptance of AI 299 is not claimed. No push, tag or release.
 
 ## Scope and behavior
 
@@ -18,7 +18,9 @@ Consent is bound to package name, UID, first-install time and current signing ce
 
 Actual Redmi tests rejected the first custom dangerous-permission approach: MIUI closed its system dialog without granting access in both grouped and ungrouped candidates. Those results are excluded. The final design uses provider-owned explicit consent and does not depend on a `pm grant` test shortcut. A separate packaging defect that stripped the AI entry permission was corrected in both Node and Bun capability preparation.
 
-Xiaomi testing also exposed a service-destruction cleanup gap: a session could mark cleanup as scheduled, then executor shutdown could discard that queued action. The provider now lets destruction take over pending cleanup exactly once and keeps admission occupied until cleanup actually finishes. Four deterministic JVM regressions cover discarded work, late work, concurrent destruction and rejected scheduling. The deterministic cleanup defect is fixed, but it does not establish the cause of every generic provider error. Xiaomi still has a failed repeat after one successful run; its final host acceptance remains suspended.
+Xiaomi testing exposed two distinct lifecycle defects. AI 298 corrected a service-destruction cleanup gap: a session could mark cleanup as scheduled, then executor shutdown could discard that queued action. Destruction now takes over pending cleanup exactly once, and admission remains occupied until cleanup actually finishes. Four deterministic JVM regressions cover discarded work, late work, concurrent destruction and rejected scheduling.
+
+After manual unlock, stage-labelled tests and temporary native lifecycle tracing established the remaining failure. Cancellation and callback sealing completed promptly, but native conversation/engine cleanup continued for approximately 8-14 seconds. The next sequential chat reached the single-session limit before that cleanup released it and returned `PROVIDER_FAILED`. AI 299 permits at most one successor to wait behind a session that is already closing. The successor starts only after actual native resource release; its timeout, cancellation and owner-death handling remain active while waiting. Active sessions still reject concurrent inference, and cancelling a waiter does not release the previous session's resource barrier. This adds no inference retry or overlapping model execution. Five JVM regressions cover admission, deferred start, cancellation/timeout, release before readiness and stale release. Temporary diagnostic logging was removed from the final APK.
 
 ## Source and artifact identity
 
@@ -29,18 +31,20 @@ The host worktree starts at `cfc55eef63111b44fb64761902ac4a402a65abb4`. Mutable 
 | Host and Runtime Kit | 6.8.0 / 5835 | `43da3f16422fc474237da40df92c4afcf720d50d` |
 | Node.js Runtime | 1.31.0 / 291 | `42b2589504b5ed2d20e329dc86973bb1a1b76052` |
 | Bun Runtime | 0.20.0 / 293 | `68eaebf8042b93d5812e424016f6d71f2075bf17` |
-| 3-Stone AI | 1.5.0 / 298 | `b52cae72e13d8c111ff6b713c5f78fc065e3abfb` |
+| 3-Stone AI, final Xiaomi cohort | 1.5.0 / 299 | `687d52c3d7ffe1f28678ef4f8f746ed2cdce1510` |
 | Documentation | revision 163 | `ed35b12ef21fee08f28cbde864e51d4cf5c28eb6` |
 | TypeScript Declarations | 4.79.0 | `b01cbd5849cfd98d2fed94a751f90fd4baa5bfe8` |
 | Ace Editor | 2.41.0 / 326 | `83c5b1918a07ef7d6870e3c2ecdfaa5097adecdb` |
 | Offline Docs | 6.8.39 / 200 | `46b80cb63563d000d7c20bd26fa8d9df4fafc8bf` |
 | APK Builder Template | 1.2.25 / repository 110 / Android 583501 | `3e439bdf572f27ef1640b1acea8019be00a832d9` |
 
+Redmi's earlier accepted AI 298 cohort uses `b52cae72e13d8c111ff6b713c5f78fc065e3abfb`; it is not evidence for the AI 299 admission fix. That fix changes provider scheduling without changing the public API, so Documentation 163, declarations 4.79.0 and Ace 326 remain synchronized. Provider release notes and generated README/changelog files are updated in all ten languages.
+
 The retained arm64 kit identity is `autojs6-runtime-v6.8.0+5835-43da3f16422fc474237da40df92c4afcf720d50d-arm64-v8a`. Its directory is `AutoJs6-Plugin-APK-Builder-Template/.bak/runtime-ai-core-20261021/kit-5835`. Earlier 5832/5833 candidates and the 5834 consent verification remain separate evidence, not the final kit.
 
 ## Local verification
 
-The final host JVM suite passes 5,232 tests with 26 skipped and no failures. Plugin JVM suites pass Node 96, Bun 60, AI 502, Ace 187, Offline 2 and Builder 40. This is 6,119 passed and 26 skipped in total. The host's 45 legacy differential oracle files were staged only for JVM execution and archived before APK assembly.
+The final host JVM suite passes 5,232 tests with 26 skipped and no failures. Plugin JVM suites pass Node 96, Bun 60, AI 507, Ace 187, Offline 2 and Builder 40. This is 6,124 passed and 26 skipped in total. The host's 45 legacy differential oracle files were staged only for JVM execution and archived before APK assembly.
 
 Node local tests pass 143 modern cases and seven legacy standalone programs; Bun SDK tests pass 83. The AI/Worker focused reruns and actual NDK compiler syntax check pass after the terminal-acknowledgment correction. The AI coverage gate confirms five registered roots, four session methods and three runtime helpers, with shared Node/Bun factory sources and an explicit agent exclusion. The gate is included in API coverage CI.
 
@@ -50,21 +54,28 @@ Windows builds run serially behind an exclusive lock, with process affinity rest
 
 ## Physical and packaged verification
 
-Redmi `bek749scrwv4wo8h`, Android 13/API 33, passes 60 accepted physical cases. The final AI 298 follow-up repeats the affected provider, host and generated-application tests; 48 independent Node/Bun/Ace cases retain receipts from the identical unchanged APKs. Each receipt is checked against the exact component hashes on which that suite depends. All eight Redmi Ace screenshots were personally inspected.
+The accepted device cohorts must be distinguished by AI provider version. Counts include each logical case once; repeated host regressions are additional stability evidence, not extra case coverage.
 
-Two independently signed Bun and Node/Worker applications complete ten launches and six positive main/Worker program results: denied consent, first granted launch, force-stop/restart, revocation during a real stream and fresh denial after revocation. Positive results require nonempty generated text, observed chunks and token usage from the existing local Gemma E2B model. Each APK has an independent signer, the AI entry permission, no microphone permission and DEX hashes identical to retained Runtime Kit 5835. No online account is invoked and no model is downloaded.
+| Device and accepted provider | Physical cases | Packaged launches | Positive main/Worker program results | Ace screenshots inspected |
+|---|---:|---:|---:|---:|
+| Xiaomi `968e9f18`, Android 15/API 35, AI 299 | 60 | 10 | 6 | 8 |
+| Redmi `bek749scrwv4wo8h`, Android 13/API 33, earlier AI 298 | 60 | 10 | 6 | 8 |
 
-The final test project keeps its log Activity visible during cold runtime startup. A hidden-launch candidate lost foreground before the last Node UI launch; Android refused its background Activity start. That interrupted attempt is excluded. A separate host repeat lost the Node process to an explicitly logged Android low-memory kill and is also excluded. Tests use the direct fixture entry to reduce unrelated plugin activation. Stage labels identify catalog/chat/stream/session failures without changing public runtime behavior. The final host-test source is `1e726404312d1de011afc04b3325e523f780727b`; production host/kit source remains `43da3f16422fc474237da40df92c4afcf720d50d`.
+Xiaomi's final cohort passes provider discovery 4, Node 34, Bun 13, host 6, Ace 1, application production 1 and packaged lifecycle 1. The exact final AI 299 APK passes two consecutive six-case host runs in 41.992 and 42.588 seconds. Two earlier passing candidate runs are retained separately and excluded from final artifact acceptance. Independent Node/Bun tests ran with unchanged runtime APKs before the provider update; each receipt is checked against the exact component hashes on which that suite depends. All eight final Xiaomi Ace screenshots were personally inspected after unlock. `xiaomi-final/accepted-evidence.json` records the accepted cohort; the failed AI 297/298 and locked-device attempts under `xiaomi` remain excluded.
 
-Xiaomi `968e9f18`, Android 15/API 35, passes the independent Node 34, Bun 13 and final provider discovery four cases. Its AI host suite had a Worker `PROVIDER_FAILED` on AI 297. After the deterministic cleanup correction, AI 298 completed one six-case host run, but a repeat failed in Bun with the same generic category. A single passing run is not treated as resolution. The exact failure stage must be collected with the final diagnostic test APK after unlock. `xiaomi/acceptance-suspended.json` prevents accidental collection of the earlier pass as final acceptance.
+On each accepted cohort, two independently signed Bun and Node/Worker applications complete ten launches and six positive main/Worker program results: denied consent, first granted launch, force-stop/restart, revocation during a real stream and fresh denial after revocation. Positive results require nonempty generated text, observed chunks and token usage from the existing local Gemma E2B model. Each APK has an independent signer, the AI entry permission, no microphone permission and DEX hashes identical to retained Runtime Kit 5835. No online account is invoked and no model is downloaded. Xiaomi's actual production and packaged lifecycle tests pass in 16.752 and 110.188 seconds.
 
-Android reports a secure, showing keyguard on Xiaomi. Two Ace attempts failed before the test window acquired focus. Collapsing the status bar did not remove the secure keyguard. Manual unlock has been requested; no PIN is requested or bypass attempted. Final Ace screenshots, actual packaged application launches/consent/revocation, and a stable final host rerun remain pending. The earlier partial host results are not a final device acceptance claim. Both physical devices use native arm64 and 4 KiB pages.
+The earlier Redmi AI 298 acceptance repeats the affected provider, host and generated-application tests; 48 independent Node/Bun/Ace cases retain receipts from identical unchanged APKs. The subsequent AI 299 follow-up uses a new snapshot under `redmi-admission`. Provider discovery passes four cases, but the host run loses Node to an explicitly logged Android low-memory kill. Before retry, the APK guard detects an external replacement of the host with SHA-256 `972cf2402cf89f842c945c3926310ff8b982ccd78345b97274d9a5732aa9c6b6`. The external APK is independently backed up. The user then directs this session to finish Xiaomi and preserve Redmi. No further Redmi installation, test, cleanup or restoration is performed, and the partial AI 299 follow-up is not counted as acceptance.
 
-Active revocation on Redmi stops the request and leaves authorization false. The existing host runner exposes this provider terminal as `PROVIDER_FAILED`; subsequent unauthorized calls return `PERMISSION_DENIED`. No stronger cross-runtime error-code identity is claimed.
+The final test project keeps its log Activity visible during cold runtime startup. A hidden-launch candidate lost foreground before the last Node UI launch; Android refused its background Activity start. That interrupted attempt and earlier low-memory failures are excluded. Stage labels identify catalog/chat/stream/session failures without changing public runtime behavior. The final host-test source is `1e726404312d1de011afc04b3325e523f780727b`; production host/kit source remains `43da3f16422fc474237da40df92c4afcf720d50d`.
+
+Active revocation stops the request and leaves authorization false on both accepted cohorts. The existing host runner exposes this provider terminal as `PROVIDER_FAILED`; subsequent unauthorized calls return `PERMISSION_DENIED`. No stronger cross-runtime error-code identity is claimed. Both physical devices use native arm64 and 4 KiB pages.
 
 ## Restoration and boundaries
 
-Both devices are restored to their fresh snapshots. All eight original Redmi APKs and nine original Xiaomi APKs match their original SHA-256 values. Permission flags, settings, app ops, volumes and originally enabled accessibility bindings are verified. Owned test packages, generated applications and device files are removed. Original AI private settings, credentials and model catalogs match their baseline file hashes; both original model binaries on each device match the baseline catalog digests. Backups are retained. Xiaomi restoration is a safe return of a partially validated device, not proof of acceptance.
+Xiaomi is restored to the new `xiaomi-final` snapshot taken after manual unlock and before this continuation's installations. All nine original APKs match their baseline SHA-256 values. Permission flags, settings, app ops, volumes and original accessibility configuration are verified, including restoring the screen timeout from the temporary one-hour value to 120 seconds. Owned test packages, generated applications and device files are removed, while originally installed test packages and previous Ace evidence are preserved. All 12 original AI private settings/profile/credential/catalog files match their baseline hashes; both existing model binaries match the baseline catalog digests. No model file is replaced.
+
+Redmi's earlier `redmi-final` cohort completed restoration of eight original APKs, ten AI private files, both model binaries and settings. That historical restoration does not describe its current state after the new `redmi-admission` follow-up and external host installation. Current Redmi test components and files remain in place under the user's preservation instruction. A future handoff must inspect the then-current packages and another session's restoration needs before proceeding; the older baseline must not overwrite that external state. All original and takeover backups are retained.
 
 Xiaomi rejected downgrading the tested non-debuggable Node build 291 Release APK directly to its original debug build 244 APK. A separately recorded, same-version/same-signature debug build 291 APK was used only as a restoration bridge. The original build 244 APK was then restored and verified, with the application UID preserved throughout. Application data was not cleared, and the restoration bridge is not a tested runtime acceptance artifact.
 
