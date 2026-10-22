@@ -299,7 +299,17 @@ def leak_lines(report):
         lines.append(f"ignoring {alternate.get('ignoring')}: {leak.get('runtimes')} runtime(s), root {leak.get('gcRoot')}: {leak.get('summary')}")
     if (report.get("heap") or {}).get("error"):
         lines.append("heap evidence error: " + report["heap"]["error"])
+    # Terminated threads whose LooperHelper entries stayed (docs/memory-phase2/ROADMAP.md C34).
+    looper = looper_heap(report)
+    for leak in (looper.get("analysis") or {}).get("leaks") or []:
+        lines.append(f"LooperHelper thread: {leak.get('runtimes')} thread(s), root {leak.get('gcRoot')}: {leak.get('summary')}")
+    if looper.get("error"):
+        lines.append("looper heap evidence error: " + looper["error"])
     return lines
+
+
+def looper_heap(report):
+    return (((report.get("metrics") or {}).get("looperThreads") or {}).get("heap")) or {}
 
 
 def markdown(meta, reports, failures):
@@ -395,17 +405,23 @@ def markdown(meta, reports, failures):
                                                                      if bridge else "exited ScriptRuntime instances)"), ""]
         for report, entries in leaks:
             analysis = ((report.get("heap") or {}).get("analysis")) or {}
+            looper = (looper_heap(report).get("analysis") or {}).get("leaks")
             if "instances" in analysis:
                 found = ", ".join(f"{name} {count}" for name, count in analysis["instances"].items())
+            elif not analysis and looper_heap(report):
+                analysis, looper = looper_heap(report).get("analysis") or {}, None
+                found = f"{analysis.get('threadInstances', '?')} terminated LooperHelper thread(s)"
             else:
                 found = f"{analysis.get('exitedRuntimeInstances', '?')} exited runtimes"
+            dump = (report.get("heap") or looper_heap(report)).get("dumpMs", "?")
             lines.append(f"### {report.get('scenario')} {MODES.get(report.get('mode'), '?')}: {found} in the dump, "
-                         f"dump {report['heap'].get('dumpMs', '?')} ms, analysis {analysis.get('analysisMs', '?')} ms")
+                         f"dump {dump} ms, analysis {analysis.get('analysisMs', '?')} ms")
             lines.append("")
             for entry in entries:
                 lines.append(f"- {entry}")
             alternate = analysis.get("alternate") or {}
-            for title, group in (("", analysis.get("leaks")), (f" (second pass ignoring {alternate.get('ignoring')})", alternate.get("leaks"))):
+            for title, group in (("", analysis.get("leaks")), (f" (second pass ignoring {alternate.get('ignoring')})", alternate.get("leaks")),
+                                 (" (LooperHelper thread)", looper)):
                 for leak in group or []:
                     lines.append("")
                     lines.append("```")

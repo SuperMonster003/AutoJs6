@@ -279,7 +279,12 @@ class BridgeLeakGateDeviceTest {
         // Which threads keep the LooperHelper entries that did not return to the end of the warm-ups.
         // zh-CN: 未回到预热结束值的 LooperHelper 条目是哪些线程.
         if (registriesDelta.optInt("LooperHelper.loopers") != 0) {
-            metrics.put("looperThreads", JSONObject().put("baseline", JSONArray(looperThreadsBaseline)).put("final", JSONArray(looperThreads())))
+            val looper = JSONObject().put("baseline", JSONArray(looperThreadsBaseline)).put("final", JSONArray(looperThreads()))
+            // C34: what else keeps the terminated threads of the extra entries (the entries themselves are weak).
+            // zh-CN: C34: 多出的条目中已结束的线程还被谁持有 (条目本身是弱引用).
+            val terminated = terminatedLooperThreads()
+            if (terminated.isNotEmpty()) looper.put("heap", heapEvidence(scenario, mode, suffix = "loopers", threads = terminated))
+            metrics.put("looperThreads", looper)
         }
         // T1 (h) host side: back where they were before the first run; a pooled engine may keep one idle connection.
         // zh-CN: T1 (h) 宿主侧: 回到首次运行前的值; 带连接池的引擎可保留 1 个空闲连接.
@@ -453,10 +458,22 @@ class BridgeLeakGateDeviceTest {
      * zh-CN: LooperHelper 中每个条目的线程名, 状态与守护标志 (注册表差值的诊断).
      */
     private fun looperThreads(): List<String> = runCatching {
+        looperThreadKeys().map { "${it.name} ${it.state}${if (it.isDaemon) " daemon" else ""}" }.sorted()
+    }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
+
+    /**
+     * Names of the terminated threads still in LooperHelper. A function of its own, so that no frame of the gate keeps the threads after it returns.
+     * zh-CN: LooperHelper 中已结束线程的名称. 单独成函数, 返回后门禁的栈帧里不会留下这些线程.
+     */
+    private fun terminatedLooperThreads(): Set<String> = runCatching {
+        looperThreadKeys().filter { it.state == Thread.State.TERMINATED }.map { it.name }.toSet()
+    }.getOrDefault(emptySet())
+
+    private fun looperThreadKeys(): List<Thread> {
         val field = LooperHelper::class.java.getDeclaredField("sLoopers").apply { isAccessible = true }
         val loopers = field.get(null) as MutableMap<*, *>
-        synchronized(loopers) { loopers.keys.filterIsInstance<Thread>().map { "${it.name} ${it.state}${if (it.isDaemon) " daemon" else ""}" } }.sorted()
-    }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
+        return synchronized(loopers) { loopers.keys.filterIsInstance<Thread>() }
+    }
 
     private fun awaitCondition(timeoutMs: Long, condition: () -> Boolean): Boolean {
         val deadline = SystemClock.elapsedRealtime() + timeoutMs
@@ -566,7 +583,13 @@ class BridgeLeakGateDeviceTest {
 
     // region Heap evidence and output
 
-    private fun heapEvidence(scenario: BridgeScenario, mode: GateMode, suffix: String? = null, histogram: Boolean = false): JSONObject {
+    private fun heapEvidence(
+        scenario: BridgeScenario,
+        mode: GateMode,
+        suffix: String? = null,
+        histogram: Boolean = false,
+        threads: Set<String> = emptySet(),
+    ): JSONObject {
         val result = JSONObject()
         val hprof = File(outputDir(), "$runId-${scenario.id}-${mode.label}${suffix?.let { "-$it" }.orEmpty()}.hprof")
         try {
@@ -575,7 +598,9 @@ class BridgeLeakGateDeviceTest {
             Debug.dumpHprofData(hprof.path)
             result.put("dumpMs", SystemClock.elapsedRealtime() - dumpStarted).put("hprof", hprof.path)
             if (analyzeHeap) {
-                result.put("analysis", GateHeapPathAnalyzer.analyzeClasses(hprof, BridgeScenarios.NODE_HEAP_CLASSES))
+                result.put("analysis", if (threads.isNotEmpty()) GateHeapPathAnalyzer.analyzeThreads(hprof, threads) else {
+                    GateHeapPathAnalyzer.analyzeClasses(hprof, BridgeScenarios.NODE_HEAP_CLASSES)
+                })
                 if (histogram) result.put("histogram", GateHeapPathAnalyzer.histogram(hprof))
             } else {
                 result.put("analysis", JSONObject().put("skipped", "memoryGateAnalyze=false"))

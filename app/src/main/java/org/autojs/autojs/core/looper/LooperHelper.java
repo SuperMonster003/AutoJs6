@@ -64,6 +64,26 @@ public class LooperHelper {
         }
     }
 
+    /**
+     * Quits the looper of a thread which never loops it (the script thread of the Node.js engine runs its script once)
+     * and recycles every message still queued on it. quitSafely keeps the due messages for a loop which never comes, and
+     * a queued message keeps its target handler, the looper and the thread reachable through whatever still references
+     * that pooled Message instance, such as a stale local of a terminal session reader thread (docs/memory-phase2/ROADMAP.md C34).
+     * zh-CN: 退出一个从不循环的线程的 Looper (Node.js 引擎的脚本线程只运行一次脚本), 并回收其队列中剩余的全部消息.
+     * quitSafely 会为永远不会到来的循环保留已到期的消息, 而排队中的消息经仍引用该消息池实例的任何位置 (例如终端会话读线程的陈旧局部变量)
+     * 让其目标 Handler, Looper 与线程保持可达 (docs/memory-phase2/ROADMAP.md C34).
+     */
+    public static void discardForThread(Thread thread) {
+        Looper looper;
+        synchronized (sLoopers) {
+            WeakReference<Looper> ref = sLoopers.remove(thread);
+            looper = ref != null ? ref.get() : null;
+        }
+        if (looper != null && looper != Looper.getMainLooper()) {
+            looper.quit();
+        }
+    }
+
     public static boolean contains(Thread thread) {
         synchronized (sLoopers) {
             return sLoopers.containsKey(thread);

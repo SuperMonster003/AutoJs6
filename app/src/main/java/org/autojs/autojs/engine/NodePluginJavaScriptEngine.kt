@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.console.ConsoleImpl
+import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptNodeRuntimeProjectBuilder
@@ -30,6 +31,9 @@ class NodePluginJavaScriptEngine(
     @Volatile
     var lastPluginScriptResult: NodePluginScriptResult? = null
         private set
+
+    @Volatile
+    private var scriptThread: Thread? = null
 
     override fun doExecution(source: JavaScriptSource): Any? {
         val preparingAt = android.os.SystemClock.elapsedRealtime()
@@ -159,6 +163,22 @@ class NodePluginJavaScriptEngine(
             NodeJsRuntimePluginBridge.cancelScript(androidContext, executionId)
         }
         super.forceStop()
+    }
+
+    override fun init() {
+        scriptThread = Thread.currentThread()
+        super.init()
+    }
+
+    @Synchronized
+    override fun destroy() {
+        super.destroy()
+        // The runtime prologue prepared a looper on the script thread, and nothing loops it after the plugin returns:
+        // quit it and recycle what is still queued, which would otherwise keep the thread reachable (docs/memory-phase2/ROADMAP.md C34).
+        // zh-CN: 运行时序幕在脚本线程上准备了 Looper, 插件返回后不会有人再循环它: 退出它并回收队列中剩余的消息,
+        // 否则这些消息会让该线程保持可达 (docs/memory-phase2/ROADMAP.md C34).
+        scriptThread?.let(LooperHelper::discardForThread)
+        scriptThread = null
     }
 
     override fun toString(): String {

@@ -98,6 +98,35 @@ internal object GateHeapPathAnalyzer {
     }
 
     /**
+     * Paths to the threads named [names] (docs/memory-phase2/ROADMAP.md C34: LooperHelper entries of terminated script threads
+     * that did not return to the end of the warm-ups). The entries are weak on both sides, so the path is what else keeps the thread.
+     * zh-CN: 到名为 [names] 的线程的路径 (docs/memory-phase2/ROADMAP.md C34: 已结束脚本线程的 LooperHelper 条目未回到预热结束值).
+     * 条目的键与值都是弱引用, 所以路径就是另外持有该线程的引用.
+     */
+    fun analyzeThreads(hprof: File, names: Set<String>): JSONObject {
+        val started = SystemClock.elapsedRealtime()
+        val result = JSONObject().put("hprofBytes", hprof.length())
+        hprof.openHeapGraph().use { graph ->
+            val threads = graph.instances.filter { instance ->
+                instance instanceOf "java.lang.Thread" &&
+                    instance["java.lang.Thread", "name"]?.value?.readAsJavaString() in names
+            }.toList()
+            result.put("threadInstances", threads.size)
+            if (threads.isEmpty()) {
+                return result.put("analysisMs", SystemClock.elapsedRealtime() - started).put("leaks", JSONArray())
+            }
+            // The gate reads the thread out of the weak map just before the dump; skip what that left in the caller's locals.
+            // zh-CN: 门禁在转储前刚从弱引用表里读出过该线程; 跳过调用方局部变量里由此留下的引用.
+            val ownLocals = IgnoredReferenceMatcher(ReferencePattern.JavaLocalPattern(Thread.currentThread().name))
+            val primary = paths(hprof, graph, threads.map { it.objectId }.toSet(), AndroidReferenceMatchers.appDefaults + ownLocals)
+            result.put("leaks", primary.leaks).put("leakGroups", primary.groups).put("tracedObjects", primary.traced)
+                .put("unreachableObjects", primary.unreachable)
+            primary.error?.let { result.put("error", it) }
+        }
+        return result.put("analysisMs", SystemClock.elapsedRealtime() - started)
+    }
+
+    /**
      * Shallow bytes and instance count per class over the whole dump (app, zygote and image heaps), the [limit] largest first
      * (docs/memory-phase2/ROADMAP.md C31: what grows while a plugin connection is alive without a tracked object being retained).
      * zh-CN: 整个转储 (app, zygote 与 image 堆) 按类统计的浅大小与实例数, 取最大的 [limit] 个
