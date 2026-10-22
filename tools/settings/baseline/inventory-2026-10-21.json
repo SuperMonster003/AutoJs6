@@ -2,9 +2,9 @@
  "schema": "autojs6.settings-inventory/v1",
  "date": "2026-10-21",
  "git": {
-  "commit": "f5045980f",
+  "commit": "82a05c0c4",
   "branch": "master",
-  "dirtyScannedFiles": 44
+  "dirtyScannedFiles": 0
  },
  "summary": {
   "keyResources": 277,
@@ -27,7 +27,7 @@
    "fragment_code_editor_settings.xml": 0,
    "fragment_developer_options.xml": 1,
    "fragment_trash_and_version_history_settings.xml": 0,
-   "fragment_plugin_center_preferences.xml": 2
+   "fragment_plugin_center_preferences.xml": 3
   },
   "keysWithoutSourceRefs": [
    "key_about_app_and_developer",
@@ -37,13 +37,13 @@
    "key_mail_settings"
   ],
   "keysWithoutAnyRefs": [],
-  "literalKeyGroups": 128,
-  "namedStores": 29,
-  "namedStoreCallFiles": 9,
-  "namedStoresDeclared": 29,
+  "literalKeyGroups": 129,
+  "namedStores": 30,
+  "namedStoreCallFiles": 10,
+  "namedStoresDeclared": 30,
   "unresolvedStoreCalls": [],
   "defaultPrefsBypassFiles": 0,
-  "prefUserFiles": 41,
+  "prefUserFiles": 37,
   "jsonFileStores": 14,
   "jsonFileStoresDeclared": 14
  },
@@ -56,7 +56,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 71
+     "line": 80
     }
    ],
    "kind": "State",
@@ -71,7 +71,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 86
+     "line": 95
     }
    ],
    "kind": "State",
@@ -86,7 +86,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 89
+     "line": 98
     }
    ],
    "kind": "State",
@@ -101,7 +101,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 83
+     "line": 92
     }
    ],
    "kind": "State",
@@ -222,7 +222,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 922
+     "line": 926
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -714,7 +714,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 937
+     "line": 941
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -762,7 +762,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 936
+     "line": 940
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -814,7 +814,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 938
+     "line": 942
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -2222,7 +2222,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 101
+     "line": 110
     }
    ],
    "kind": "State",
@@ -2237,7 +2237,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 95
+     "line": 104
     }
    ],
    "kind": "State",
@@ -2252,7 +2252,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 98
+     "line": 107
     }
    ],
    "kind": "State",
@@ -2267,7 +2267,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 92
+     "line": 101
     }
    ],
    "kind": "State",
@@ -2312,7 +2312,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 119
+     "line": 128
     }
    ],
    "kind": "State",
@@ -2342,7 +2342,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 199
+     "line": 208
     }
    ],
    "kind": "State",
@@ -2824,7 +2824,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 928
+     "line": 932
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -2971,7 +2971,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 929
+     "line": 933
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -3200,7 +3200,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 275
+     "line": 276
     }
    ],
    "kind": "ValueConstant",
@@ -3319,7 +3319,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 935
+     "line": 939
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -3463,7 +3463,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 921
+     "line": 925
     },
     {
      "file": "ui/settings/EditorSettingActionRegistry.kt",
@@ -3500,7 +3500,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 923
+     "line": 927
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3535,7 +3535,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 925
+     "line": 929
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3558,7 +3558,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 924
+     "line": 928
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3595,7 +3595,7 @@
     },
     {
      "file": "ui/edit/EditorView.kt",
-     "line": 926
+     "line": 930
     },
     {
      "file": "ui/settings/CodeEditorSettingsFragment.kt",
@@ -3778,7 +3778,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 28
+     "line": 42
     }
    ],
    "otherResRefs": [
@@ -3857,7 +3857,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 282
+     "line": 291
     }
    ],
    "kind": "State",
@@ -4079,7 +4079,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 75
+     "line": 84
     }
    ],
    "kind": "State",
@@ -4102,7 +4102,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 31
+     "line": 45
     }
    ],
    "otherResRefs": [
@@ -4596,11 +4596,11 @@
     },
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 192
+     "line": 201
     },
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 193
+     "line": 202
     },
     {
      "file": "util/ViewUtils.kt",
@@ -4622,7 +4622,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 189
+     "line": 198
     }
    ],
    "kind": "State",
@@ -4637,7 +4637,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 143
+     "line": 152
     }
    ],
    "kind": "State",
@@ -4652,7 +4652,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 149
+     "line": 158
     }
    ],
    "kind": "State",
@@ -4667,7 +4667,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 140
+     "line": 149
     }
    ],
    "kind": "State",
@@ -4682,7 +4682,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 146
+     "line": 155
     }
    ],
    "kind": "State",
@@ -4826,7 +4826,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 269
+     "line": 278
     }
    ],
    "kind": "State",
@@ -4886,7 +4886,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 277
+     "line": 286
     }
    ],
    "kind": "State",
@@ -4916,7 +4916,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 272
+     "line": 281
     }
    ],
    "kind": "State",
@@ -5124,7 +5124,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 127
+     "line": 136
     }
    ],
    "kind": "State",
@@ -5458,7 +5458,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 30
+     "line": 44
     }
    ],
    "otherResRefs": [
@@ -5478,7 +5478,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 132
+     "line": 141
     }
    ],
    "kind": "State",
@@ -5526,7 +5526,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 153
+     "line": 162
     }
    ],
    "kind": "State",
@@ -5627,7 +5627,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 159
+     "line": 168
     }
    ],
    "kind": "State",
@@ -6301,7 +6301,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 113
+     "line": 122
     }
    ],
    "kind": "State",
@@ -6316,7 +6316,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 107
+     "line": 116
     }
    ],
    "kind": "State",
@@ -6331,7 +6331,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 110
+     "line": 119
     }
    ],
    "kind": "State",
@@ -6346,7 +6346,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 104
+     "line": 113
     }
    ],
    "kind": "State",
@@ -6391,7 +6391,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 123
+     "line": 132
     }
    ],
    "kind": "State",
@@ -6569,7 +6569,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 163
+     "line": 172
     }
    ],
    "kind": "State",
@@ -6634,7 +6634,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 27
+     "line": 41
     }
    ],
    "otherResRefs": [
@@ -7009,7 +7009,7 @@
     },
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 29
+     "line": 43
     }
    ],
    "otherResRefs": [
@@ -7061,7 +7061,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 172
+     "line": 181
     }
    ],
    "kind": "State",
@@ -7076,7 +7076,7 @@
    "sourceRefs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 167
+     "line": 176
     }
    ],
    "kind": "State",
@@ -7129,6 +7129,17 @@
    "literalKey": "plugin_center_auto_mount_management",
    "kind": "Excluded",
    "note": "插件中心设置动作条目 (自动挂载管理)"
+  },
+  {
+   "page": "fragment_plugin_center_preferences.xml",
+   "pageLabel": "插件中心设置",
+   "line": 62,
+   "tag": "MaterialPreference",
+   "categoryTitleRes": [],
+   "categoryTitles": [],
+   "literalKey": "agent_runtime_access",
+   "kind": "Excluded",
+   "note": "插件中心设置动作条目 (Agent 运行时访问管理), 授权本身在同名命名存储, 不导出"
   }
  ],
  "literalKeys": [
@@ -7222,7 +7233,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 254,
+     "line": 263,
      "const": null
     }
    ],
@@ -7239,7 +7250,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 262,
+     "line": 271,
      "const": null
     }
    ],
@@ -7256,7 +7267,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 257,
+     "line": 266,
      "const": null
     }
    ],
@@ -7273,7 +7284,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 250,
+     "line": 259,
      "const": null
     }
    ],
@@ -7290,7 +7301,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 229,
+     "line": 238,
      "const": null
     }
    ],
@@ -7307,7 +7318,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 232,
+     "line": 241,
      "const": null
     }
    ],
@@ -7324,7 +7335,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 235,
+     "line": 244,
      "const": null
     }
    ],
@@ -7341,7 +7352,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 211,
+     "line": 220,
      "const": null
     }
    ],
@@ -7358,7 +7369,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 214,
+     "line": 223,
      "const": null
     }
    ],
@@ -7375,7 +7386,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 221,
+     "line": 230,
      "const": null
     }
    ],
@@ -7392,7 +7403,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 218,
+     "line": 227,
      "const": null
     }
    ],
@@ -7426,7 +7437,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 225,
+     "line": 234,
      "const": null
     }
    ],
@@ -7886,6 +7897,23 @@
    "store": "default"
   },
   {
+   "name": "key_$_editor_ui_preview_files",
+   "refs": [
+    {
+     "file": "core/pref/keys/MiscStateKeys.kt",
+     "line": 73,
+     "const": null
+    }
+   ],
+   "storeGuess": [
+    "default"
+   ],
+   "kind": "State",
+   "category": "other",
+   "note": "编辑器布局预览面板保持开启的文件路径 (最近优先, 上限 100, EditorUiPreviewController); 3-Block Compose 路线图 P11.10 (D71)",
+   "store": "default"
+  },
+  {
    "name": "key_$_enabled_plugin_$_",
    "refs": [
     {
@@ -7958,7 +7986,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 242,
+     "line": 251,
      "const": null
     }
    ],
@@ -8739,7 +8767,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 181,
+     "line": 190,
      "const": null
     }
    ],
@@ -8789,7 +8817,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 43,
+     "line": 57,
      "const": null
     }
    ],
@@ -8815,7 +8843,7 @@
     },
     {
      "file": "execution/ScriptExecuteActivity.kt",
-     "line": 338,
+     "line": 344,
      "const": null
     },
     {
@@ -8836,7 +8864,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 39,
+     "line": 53,
      "const": null
     }
    ],
@@ -8852,7 +8880,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 38,
+     "line": 52,
      "const": null
     }
    ],
@@ -8884,7 +8912,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 46,
+     "line": 60,
      "const": null
     }
    ],
@@ -8916,7 +8944,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 44,
+     "line": 58,
      "const": null
     }
    ],
@@ -8932,7 +8960,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 36,
+     "line": 50,
      "const": null
     }
    ],
@@ -8974,7 +9002,7 @@
    "refs": [
     {
      "file": "runtime/api/augment/settings/Settings.kt",
-     "line": 41,
+     "line": 55,
      "const": null
     }
    ],
@@ -9023,7 +9051,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 203,
+     "line": 212,
      "const": null
     }
    ],
@@ -9040,7 +9068,7 @@
    "refs": [
     {
      "file": "core/pref/keys/MiscStateKeys.kt",
-     "line": 207,
+     "line": 216,
      "const": null
     }
    ],
@@ -9403,7 +9431,7 @@
     "name": "ScriptWidgets",
     "const": "SCRIPT_WIDGETS",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 152,
+    "line": 156,
     "excluded": true,
     "refs": []
    },
@@ -9482,6 +9510,30 @@
    "note": "字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys"
   },
   {
+   "name": "agent_runtime_access",
+   "calls": [
+    {
+     "file": "engine/RuntimeAgentAccessStore.kt",
+     "line": 17,
+     "arg": "\"agent_runtime_access\"",
+     "how": "字面量"
+    }
+   ],
+   "files": [
+    "engine/RuntimeAgentAccessStore.kt"
+   ],
+   "declared": {
+    "name": "agent_runtime_access",
+    "const": "AGENT_RUNTIME_ACCESS",
+    "file": "core/pref/keys/NamedStores.kt",
+    "line": 152,
+    "excluded": true,
+    "refs": []
+   },
+   "kind": "Excluded",
+   "note": "Agent consent and run ownership bind the current package, UID, signer and installation; never import or export them as portable settings"
+  },
+  {
    "name": "autojs.localstorage.*",
    "calls": [
     {
@@ -9523,9 +9575,9 @@
    "calls": [
     {
      "file": "engine/NodeBridgeProtocol.kt",
-     "line": 3436,
+     "line": 3451,
      "arg": "storagePreferencesName(storeName)",
-     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3551)"
+     "how": "函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3566)"
     }
    ],
    "files": [
@@ -9672,7 +9724,7 @@
     "name": "explorer_playback_history",
     "const": "EXPLORER_PLAYBACK_HISTORY",
     "file": "core/pref/keys/NamedStores.kt",
-    "line": 156,
+    "line": 160,
     "excluded": true,
     "refs": []
    },
@@ -10126,33 +10178,33 @@
    "calls": [
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 42,
+     "line": 47,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:39)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 48,
+     "line": 53,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:39)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 91,
+     "line": 89,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:39)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 94,
+     "line": 92,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:39)"
     },
     {
      "file": "model/explorer/PrivilegedBackupManager.kt",
-     "line": 346,
+     "line": 377,
      "arg": "PREFERENCES",
-     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:34)"
+     "how": "常量 PREFERENCES (model/explorer/PrivilegedBackupManager.kt:39)"
     }
    ],
    "files": [
@@ -10217,19 +10269,11 @@
    "note": "3-Stove Agent 签名信任确认, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys"
   }
  ],
- "defaultPrefsBypass": [
-  {
-   "file": "core/pref/Pref.kt",
-   "lines": [
-    55
-   ]
-  }
- ],
+ "defaultPrefsBypass": [],
  "prefUsers": [
   "core/plugin/center/PluginCenterFragment.kt",
   "core/plugin/center/PluginOnlineSettingsStore.kt",
   "core/plugin/terminal/TerminalLegacyCleanup.kt",
-  "core/pref/PrefRxLongObserver.kt",
   "core/pref/SettingKey.kt",
   "core/pref/SettingsJson.kt",
   "core/pref/keys/AppearanceKeys.kt",
@@ -10249,9 +10293,6 @@
   "inrt/SettingsActivity.kt",
   "inrt/SplashActivity.kt",
   "inrt/launch/AssetsProjectLauncher.kt",
-  "runtime/ScriptRuntime.kt",
-  "runtime/api/Images.java",
-  "runtime/api/modules/ScriptModuleLayer.kt",
   "runtime/memory/MemoryDiagnostics.kt",
   "theme/preference/MaterialListPreference.kt",
   "ui/doc/DocumentationPageController.kt",
@@ -10278,7 +10319,7 @@
    "jsonNames": [
     {
      "name": "registry.json",
-     "line": 638
+     "line": 537
     }
    ],
    "kind": "Cache",
@@ -10291,7 +10332,7 @@
    "file": "core/plugin/center/InstalledPluginMetadataStore.kt",
    "class": "InstalledPluginMetadataStore",
    "dirLines": [
-    163
+    215
    ],
    "jsonNames": [
     {
@@ -10309,24 +10350,24 @@
    "file": "core/plugin/center/PluginIndexRepository.kt",
    "class": "PluginIndexRepository",
    "dirLines": [
-    472
+    653
    ],
    "jsonNames": [
     {
      "name": "autojs6_plugin_index_v11.json",
-     "line": 34
+     "line": 41
     },
     {
      "name": "plugins.official.generated.json",
-     "line": 39
+     "line": 46
     },
     {
      "name": "compat-matrix.json",
-     "line": 42
+     "line": 49
     },
     {
      "name": "plugins.generated.json",
-     "line": 46
+     "line": 53
     }
    ],
    "kind": "Cache",
@@ -10362,13 +10403,13 @@
    "file": "engine/NodeLifecycleCheckpointStore.kt",
    "class": "NodeLifecycleCheckpointStore",
    "dirLines": [
-    233,
-    241
+    309,
+    317
    ],
    "jsonNames": [
     {
      "name": "*.json",
-     "line": 233
+     "line": 309
     }
    ],
    "kind": "Excluded",
@@ -10381,16 +10422,16 @@
    "file": "engine/NodeWorkManagerBridgeScheduler.kt",
    "class": "NodeWorkManagerBridgeScheduler",
    "dirLines": [
-    463
+    485
    ],
    "jsonNames": [
     {
      "name": ".json",
-     "line": 421
+     "line": 443
     },
     {
      "name": "*.json",
-     "line": 460
+     "line": 482
     }
    ],
    "kind": "Excluded",
@@ -10403,12 +10444,12 @@
    "file": "engine/RuntimeWebLocalDownloads.kt",
    "class": "RuntimeWebLocalDownloads",
    "dirLines": [
-    274
+    277
    ],
    "jsonNames": [
     {
      "name": "runtime-web-downloads/*.json",
-     "line": 274
+     "line": 277
     }
    ],
    "kind": "Cache",
@@ -10421,14 +10462,14 @@
    "file": "model/explorer/PrivilegedBackupManager.kt",
    "class": "PrivilegedBackupManager",
    "dirLines": [
-    79,
-    287,
-    315
+    77,
+    292,
+    320
    ],
    "jsonNames": [
     {
      "name": "*.json",
-     "line": 321
+     "line": 326
     }
    ],
    "kind": "Excluded",
@@ -10441,27 +10482,27 @@
    "file": "model/explorer/PrivilegedEditSessions.kt",
    "class": "PrivilegedEditSessions",
    "dirLines": [
-    301,
-    313,
-    319,
-    339
+    333,
+    345,
+    355,
+    375
    ],
    "jsonNames": [
     {
      "name": "session.json",
-     "line": 314
+     "line": 346
     },
     {
      "name": "session.json",
-     "line": 341
+     "line": 377
     },
     {
      "name": "session.json",
-     "line": 354
+     "line": 390
     },
     {
      "name": "session.json",
-     "line": 358
+     "line": 394
     }
    ],
    "kind": "Excluded",
@@ -10474,13 +10515,13 @@
    "file": "model/explorer/PrivilegedFileOperationJournal.kt",
    "class": "PrivilegedFileOperationJournal",
    "dirLines": [
-    19,
-    60
+    20,
+    59
    ],
    "jsonNames": [
     {
      "name": "*.json",
-     "line": 20
+     "line": 21
     }
    ],
    "kind": "Excluded",
@@ -10521,7 +10562,7 @@
    "jsonNames": [
     {
      "name": "installed.json",
-     "line": 468
+     "line": 437
     }
    ],
    "kind": "Cache",
@@ -13990,7 +14031,7 @@
   },
   "other": {
    "keys": 41,
-   "literalKeys": 31,
+   "literalKeys": 32,
    "stores": 3
   }
  },
