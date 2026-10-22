@@ -20,7 +20,7 @@
 | 阶段 | 目标 | 完成条件 | 预计会话数 |
 | --- | --- | --- | --- |
 | P0 复现, 负对照与边界探针 | 探针能检出堆积, 报告者场景在当前构建上残留为 0, 5 条边界路径与内存画像有数字 | P0.1-P0.4 全部有报告, 附录 B 填满 | 1 |
-| P1 修复与加固 | 子进程清理, 用户服务自守护, (可选) 进程瘦身 | P1.1 / P1.2 真机探针残留 0 并有 JVM 单测; P1.4 RSS 达标 | 1-2 |
+| P1 修复与加固 | 子进程清理, 用户服务自守护, getevent 常驻进程 (P1.5), 进程内存 (P1.4, 形态待 Q3) | P1.1 / P1.2 真机探针残留 0 并有 JVM 单测; P1.4 RSS 达标 | 1-2 |
 | P2 回归, changelog 与发布门 | 7 项 Shizuku 功能回归通过, changelog 条目, 6.8.0 发布门一行 | P2.1-P2.4 勾选, 本地提交 | 1 (可与 P1 同一会话) |
 
 ---
@@ -78,10 +78,12 @@
 | D3 | 负对照用 GitHub Release v6.6.4 APK (维护者签名, 修复前最后一个正式版) 跑同一探针, 证明探针能检出堆积; 测后装回原包 | Q3 |
 | D4 | 设备: XQ-AT72 (shell 身份, Android 12) 主测跑全部探针; G8441 (root 身份, Android 9) 复核 P0.1 与 P2.1; 按锁表排队 | Q4 |
 | D5 | 自守护: `IUserService` 新增 `attachHost(IBinder)`, 宿主连上后立即附着, 服务对其 `linkToDeath`, 宿主死亡即清理子进程并退出; 启动后 30 秒无宿主附着也退出; `version(VERSION_CODE + 5)` 改为 `+ 6` 让旧服务被替换 | Q5 |
-| D6 | 瘦身: `App.onCreate` 仿照 `:crash_report` 增加用户服务进程分支, 只做 `UserService` 需要的初始化; 验收 RSS 从约 115 MB 降到 40 MB 以下且 7 项回归通过; 降不到就登记实测值请维护者再定 | Q6 |
+| D6 | (已被 D11 取代: `App.onCreate` 分支与 40 MB 目标作废) 瘦身: `App.onCreate` 仿照 `:crash_report` 增加用户服务进程分支, 只做 `UserService` 需要的初始化; 验收 RSS 从约 115 MB 降到 40 MB 以下且 7 项回归通过; 降不到就登记实测值请维护者再定 | Q6 |
 | D7 | issue #474 的回复与关闭由维护者自行处理, 子会话不写回复草稿; 本文与证据是回复素材 | Q7 |
 | D8 | 第一批只发一个子会话做完 P0; P1 按 P0 结果发 | Q8 |
 | D9 | 列入 6.8.0 发布门 (`docs/dev/6.8.0-release-gate.md`): P0 + P1.1 / P1.2 完成并 P2.1 回归通过前不发 6.8.0; P1.4 瘦身不在门内 | Q9 |
+| D10 | 宿主启动即绑定与在途 getevent 孤儿: P1.1 清理在途 `execCommand` 进程, 验收加 "开启音量键控制时 force-stop 20 轮 stray 为 0"; 另新增 P1.5, 把 `InputEventObserver` 的 Shizuku 分支改为一个常驻 `newShellProcess` (client 令牌 linkToDeath, 宿主死即结束), T6 加 "音量键控制" 回归 | 附录 C Q1 (维护者选 B) |
+| D11 | P1.4 前提不成立 (宿主 `App` 不在用户服务进程运行): D6 的 "`App.onCreate` 分支" 与 40 MB 目标作废; P0.4 加 oat 实验 (`cmd package compile` 后重测, 量 v6.6.4 正式包), P1.4 的形态按数字另出题 (附录 C Q3) | 附录 C Q2 (维护者选 A) |
 
 ---
 
@@ -93,8 +95,8 @@
 | T2 | 残留定义: 宿主被结束后 3 秒, 用户服务进程数应为 0 (daemon(false) 的服务随宿主退出); 负对照预期每轮 +1. 启动脚本的方式复用 `tools/memory/run_gate.py` 已验证的宿主脚本启动途径 (子会话核对), 不自造 | P0.1 完成 |
 | T3 | 退出原因统一出口: `UserService.shutdown(reason)` 先结束登记的 `RemoteShellProcessHolder` 与在途 `execCommand` 进程 (`ProcessTree.terminate`), 再 `killProcess` + `exitProcess`; 打一行 `UserService exit: <reason>` (destroy / exit / host-died / no-host-attached), 探针用 logcat 核对原因 | P1.1 实现时 |
 | T4 | `attachHost` 的宿主令牌由 `WrappedShizuku` 持有一个进程级 `Binder` (静态, 与宿主进程同生命周期); `onServiceConnected` 后立即调用; 旧宿主连新服务与新宿主连旧服务都被 version 替换排除, 不需要兼容分支. 30 秒看门狗用服务进程主线程 Handler 实现, 附着后取消 | P1.2 实现时 |
-| T5 | (P0.4 实测前提不成立, 待附录 C Q2 拍板) 瘦身分支按进程名后缀前缀 `shizuku-service-for-` 判断 (常量从 `WrappedShizuku` 抽出, 打包应用 inrt 的后缀也以它开头); 分支里保留的初始化由子会话按 `UserService` 调用图确定 (至少: 字符串资源可用, `PrivilegedFileNative` 按请求加载, termexec 可加载), 其余全部跳过; 不改 `Application` 类 (Shizuku 固定用宿主的 `Application`) | P1.4 实现时 |
-| T6 | 7 项回归清单 (P2.1): (1) `shizuku('id')` / `shizuku.execCommand`; (2) `shizuku.spawn` 常驻进程 + 脚本结束自动结束; (3) `new Shell({ adb: true })` 与 `pty: true`; (4) 文件管理器经 Shizuku 浏览受限目录并保存文本文件; (5) 无障碍服务用 Shizuku 自动启用; (6) 浮动按钮 "更多" 经 Shizuku 取 currentPackage / currentActivity; (7) KeyCode 经 Shizuku 发送键码 (issue #492); (8) 其余调用点各跑一次冒烟: RootAutomator 的 adb 模式, 指针位置工具, 插件中心启动器图标, AndroidIdReader, augment app 的 Shizuku 分支 (立项时 grep `WrappedShizuku.` 共 16 个文件, 子会话核对清单). (1)-(7) 在 XQ-AT72 (shell) 与 G8441 (root) 各跑一次, (8) 只在 XQ-AT72 | P2.1 开始前 |
+| T5 | (作废, 见 D11) 瘦身分支按进程名后缀前缀 `shizuku-service-for-` 判断 (常量从 `WrappedShizuku` 抽出, 打包应用 inrt 的后缀也以它开头); 分支里保留的初始化由子会话按 `UserService` 调用图确定 (至少: 字符串资源可用, `PrivilegedFileNative` 按请求加载, termexec 可加载), 其余全部跳过; 不改 `Application` 类 (Shizuku 固定用宿主的 `Application`) | P1.4 实现时 |
+| T6 | 回归清单 (P2.1, 原 7 项, D10 加第 9 项): (1) `shizuku('id')` / `shizuku.execCommand`; (2) `shizuku.spawn` 常驻进程 + 脚本结束自动结束; (3) `new Shell({ adb: true })` 与 `pty: true`; (4) 文件管理器经 Shizuku 浏览受限目录并保存文本文件; (5) 无障碍服务用 Shizuku 自动启用; (6) 浮动按钮 "更多" 经 Shizuku 取 currentPackage / currentActivity; (7) KeyCode 经 Shizuku 发送键码 (issue #492); (8) 其余调用点各跑一次冒烟: RootAutomator 的 adb 模式, 指针位置工具, 插件中心启动器图标, AndroidIdReader, augment app 的 Shizuku 分支 (立项时 grep `WrappedShizuku.` 共 16 个文件, 子会话核对清单); (9) 音量键控制 (D10, P1.5 改动后: 开启后按音量键能停止脚本, 强停宿主后无 getevent 孤儿). (1)-(7) 与 (9) 在 XQ-AT72 (shell) 与 G8441 (root) 各跑一次, (8) 只在 XQ-AT72 | P2.1 开始前 |
 | T7 | JVM 单测: `UserService` 的退出逻辑抽成可注入 exit 钩子的 `UserServiceLifecycle` (或等价命名), 测 (a) 宿主令牌死亡 -> 先清理子进程再退出, (b) 30 秒无附着 -> 退出, (c) 附着后看门狗取消, (d) destroy 重入只退出一次 | P1.2 实现时 |
 
 ---
@@ -119,17 +121,18 @@
 - [ ] P0.3 边界路径探针 (HEAD 构建, XQ-AT72), 每条路径写残留数与 logcat 里的退出来源: (a) `bind-kill:0.2 / 0.5 / 1 / 2` 各 5 轮 (宿主在服务启动完成前后被杀); (b) `update`: 两个构建号不同的 debug 包先后覆盖安装, 旧服务应因 version 不同被替换并退出; (c) `server-restart`: 用 start.sh 重启 Shizuku 服务端, 旧用户服务应随服务端死亡退出; (d) 10 秒超时重绑路径: 代码审读 + 能构造则实测 (例如让服务启动变慢), 否则记 "未实测, 由 P1.2 覆盖"; (e) `spawn-orphan`: 脚本 `shizuku.spawn('sleep 600')` 后 force-stop 宿主, 检查 `sleep` / `sh` 是否残留 (预期现状残留, 作 P1.1 的修前基线). 验收: 5 条路径各有结论与数字 (附录 B).
 - [ ] P0.4 用户服务进程内存画像 (瘦身基线): `dumpsys meminfo <pid>` 的 PSS / Java 堆 / native / code, 线程数 (`/proc/<pid>/task`), logcat 里 `App.onCreate` 各项在该进程的执行痕迹 (哪些跑了); 写附录 B "瘦身前" 列. 验收: 数字齐全, 并列出建议跳过的初始化项供 P1.4 用.
 
-### P1 修复与加固 (D5 / D6, 代码改动; 验证需 XQ-AT72)
+### P1 修复与加固 (D5 / D10 / D11, 代码改动; 验证需 XQ-AT72)
 
-- [ ] P1.1 destroy / exit 前清理子进程 (T3): `UserService` 登记存活的 `RemoteShellProcessHolder` (holder destroy 时注销) 与在途 `execCommand` 进程, `shutdown(reason)` 统一出口. 验收: P0.3(e) 探针残留 0 (sleep / sh 均无), JVM 单测覆盖清理顺序.
+- [ ] P1.1 destroy / exit 前清理子进程 (T3): `UserService` 登记存活的 `RemoteShellProcessHolder` (holder destroy 时注销) 与在途 `execCommand` 进程, `shutdown(reason)` 统一出口. 验收: P0.3(e) 探针残留 0 (sleep / sh 均无); 开启 "音量键控制" 时 XQ-AT72 `force-stop` 20 轮探针 stray 为 0 (D10, G8441 root 身份在 P2.1 复核); JVM 单测覆盖清理顺序.
 - [ ] P1.2 用户服务自守护 (D5 / T4 / T7): AIDL `attachHost(IBinder)`, 宿主 `onServiceConnected` 后附着, 宿主死亡 -> `shutdown(host-died)`; 30 秒无附着 -> `shutdown(no-host-attached)`; `version(+ 6)`. 验收: JVM 单测 4 例通过; XQ-AT72 `force-stop` 20 轮与 `bind-kill` 各档残留 0, logcat 退出原因为 host-died 或 destroy (竞态任一即可); (d) 路径如 P0.3 能实测则残留 0.
 - [ ] P1.3 宿主侧 10 秒超时重绑 (`connectedService`): 按 P0.3(d) 结论处置; 默认不改代码 (P1.2 的看门狗已覆盖被提前移除记录的进程), 在附录 A 记理由.
-- [ ] P1.4 用户服务进程瘦身 (D6 / T5, 不在发布门内): `App.onCreate` 增加用户服务进程分支. 验收: XQ-AT72 上 `dumpsys meminfo` RSS < 40 MB (附录 B "瘦身后" 列), T6 七项回归通过; 达不到 40 MB 时登记实测值到附录 C 请维护者再定.
+- [ ] P1.4 用户服务进程内存 (D11, 不在发布门内): 原 "`App.onCreate` 增加用户服务进程分支, RSS < 40 MB" 作废 (宿主 `App` 不在该进程运行, 见 1.5). 形态按 P0.4 的 oat 实验数字由附录 C Q3 拍板后改写本条. 验收: 待 Q3.
+- [ ] P1.5 `InputEventObserver` 的 Shizuku 分支改为常驻进程 (D10): 不再每个按键事件经 `execCommand` 起一对 `sh` + `getevent -t -c 1`, 改为一个常驻 `newShellProcess` 持续读 `getevent -t` 的输出, 宿主侧 client 令牌 linkToDeath (宿主死即由 P1.1 的登记结束该进程); 关闭 "音量键控制" 或脚本引擎退出时结束. 验收: 开启 "音量键控制" 时音量键能停止脚本; XQ-AT72 `force-stop` 20 轮 stray 为 0; T6 (9) 通过.
 
 ### P2 回归, changelog 与发布门 (D7 / D9)
 
-- [ ] P2.1 T6 七项回归在 XQ-AT72 (shell) 与 G8441 (root) 各跑一遍, 结果表入 `docs/shizuku-oom/evidence/regression-<日期>.md`. 验收: (1)-(7) 的 14 格与 (8) 冒烟全部通过.
-- [ ] P2.2 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段加 `fix` 1 条 (用户服务进程随宿主退出并清理其启动的子进程, 引用 issue #474) 与 `improvement` 1 条 (用户服务进程不再初始化宿主主进程组件, 内存占用下降, 仅在 P1.4 完成时), 用 `.python/generate_markdown.py` 生成 zh-Hans 的 markdown; 其他语言由维护者同步. 验收: JSON 解析通过, 生成文件只含本条变化.
+- [ ] P2.1 T6 回归在 XQ-AT72 (shell) 与 G8441 (root) 各跑一遍, 结果表入 `docs/shizuku-oom/evidence/regression-<日期>.md`. 验收: (1)-(7) 与 (9) 的 16 格与 (8) 冒烟全部通过.
+- [ ] P2.2 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段加 `fix` 1 条 (用户服务进程随宿主退出并清理其启动的子进程, 引用 issue #474) 与 `improvement` 1 条 (内容按 Q3 拍板的 P1.4 形态, 仅在 P1.4 有改动时), 用 `.python/generate_markdown.py` 生成 zh-Hans 的 markdown; 其他语言由维护者同步. 验收: JSON 解析通过, 生成文件只含本条变化.
 - [ ] P2.3 发布门: `docs/dev/6.8.0-release-gate.md` 追加一行 (来源本文 D9, 复核方法 = P0.1 探针 + P2.1 回归, 证据 = evidence 报告). 验收: 该行存在且状态写明.
 - [ ] P2.4 收尾: 本文勾选与附录回填, 本地提交 (不推送), 看板 `../.claude/boards/shizuku-oom.md` 子会话结果区追加结论; issue 回复由维护者处理 (D7).
 
@@ -142,6 +145,8 @@
 | D1-D4 | 2026-10-22 第 1 轮 | 位置, 范围, 负对照, 设备 | 见第 2 节 |
 | D5-D8 | 2026-10-22 第 2 轮 | 自守护设计, 瘦身程度, issue 处理, 首批分配 | 见第 2 节 |
 | D9 | 2026-10-22 第 3 轮 | 6.8.0 发布门 | 列入 (P0 + P1.1 / P1.2 + P2.1) |
+| D10 | 2026-10-22 22:40 (附录 C Q1) | 启动即绑定与在途 getevent 孤儿 | 选 B: P1.1 清理在途进程 + stray 0 验收, 新增 P1.5, T6 加第 9 项 |
+| D11 | 2026-10-22 22:40 (附录 C Q2) | P1.4 前提不成立 | 选 A: P0.4 加 oat 实验与 v6.6.4 测量, D6 的 40 MB 目标作废, 形态待 Q3 |
 
 ## 附录 B 证据与数字 (P0 回填, 之后每阶段追加一列)
 
@@ -178,7 +183,8 @@
 
 | 编号 | 问题与选项 | 影响条目 | 状态 |
 | --- | --- | --- | --- |
-| Q1 | 宿主启动即绑定与在途 getevent 孤儿 (1.5 第 3, 4 条) 怎么纳入 P1? A (推荐): P1.1 照原文清理在途 `execCommand` 进程, 验收追加 "开启音量键控制时 force-stop 20 轮 stray 为 0" (XQ-AT72 由探针核对, G8441 root 身份在 P2.1 复核), 不改绑定时机; 返工: 无. B: A 之外把 `InputEventObserver` 的 Shizuku 分支改为一个常驻 `newShellProcess` (client 令牌 linkToDeath, 宿主死即结束), 不再每个按键事件起一对 sh + getevent; 多改 `InputEventObserver` 并在 T6 加 "音量键控制" 1 项回归, 约多半个会话. C: 不处理, stray 只报告 | P1.1, P2.1, T6 | 需拍板 (不阻塞 P0, 未先行) |
+| Q1 | 宿主启动即绑定与在途 getevent 孤儿 (1.5 第 3, 4 条) 怎么纳入 P1? A (推荐): P1.1 照原文清理在途 `execCommand` 进程, 验收追加 "开启音量键控制时 force-stop 20 轮 stray 为 0" (XQ-AT72 由探针核对, G8441 root 身份在 P2.1 复核), 不改绑定时机; 返工: 无. B: A 之外把 `InputEventObserver` 的 Shizuku 分支改为一个常驻 `newShellProcess` (client 令牌 linkToDeath, 宿主死即结束), 不再每个按键事件起一对 sh + getevent; 多改 `InputEventObserver` 并在 T6 加 "音量键控制" 1 项回归, 约多半个会话. C: 不处理, stray 只报告 | P1.1, P1.5, P2.1, T6 | 已决 (2026-10-22 22:40, 维护者选 B, 记为 D10) |
+| Q2 | P1.4 瘦身前提不成立 (1.5 第 1, 2 条): 宿主 `App` 不在用户服务进程运行, 体积来自 dex 解压进内存与 boot image 私有页. A (推荐): P0.4 加 oat 实验 (`cmd package compile` 后重测, 并量 v6.6.4 正式包) 再定 P1.4 形态, D6 的 40 MB 目标作废. B: 取消 P1.4 (返工: 删条目). C: 保留 40 MB 另找途径 (返工: 1-2 个会话) | D6, T5, P1.4, P2.2 | 已决 (2026-10-22 22:40, 维护者选 A, 记为 D11) |
 
 ## 附录 D 文件地图
 
@@ -191,7 +197,8 @@
 | `app/src/main/java/org/autojs/autojs/core/shizuku/UserService.kt` | shutdown 统一出口, 子进程登记, 看门狗 | P1.1 / P1.2 |
 | `app/src/main/java/org/autojs/autojs/core/shizuku/RemoteShellProcessHolder.kt` | 向 `UserService` 登记 / 注销 | P1.1 |
 | `app/src/main/java/org/autojs/autojs/runtime/api/WrappedShizuku.kt` | 宿主令牌, `attachHost` 调用, `version(+ 6)`, 后缀常量 | P1.2 / P1.4 |
-| `app/src/main/java/org/autojs/autojs/App.kt` | 用户服务进程分支 | P1.4 |
+| `app/src/main/java/org/autojs/autojs/core/inputevent/InputEventObserver.java` | Shizuku 分支改常驻 `newShellProcess` | P1.5 |
+| `app/src/main/java/org/autojs/autojs/App.kt` | (原 P1.4 用户服务进程分支, 已因 D11 作废) | - |
 | `app/src/test/java/org/autojs/autojs/core/shizuku/` | T7 单测 | P1.1 / P1.2 |
 | `.changelog/lang_zh-Hans.json` | changelog | P2.2 |
 | `docs/dev/6.8.0-release-gate.md` | 发布门一行 | P2.3 |
