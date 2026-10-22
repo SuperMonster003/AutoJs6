@@ -347,6 +347,9 @@ object NodeBridgeUiSessionStore {
 
     private val sessions = ConcurrentHashMap<String, NodeBridgeUiSession>()
 
+    /** Open sessions, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 未关闭的会话数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    internal fun sessionCount(): Int = sessions.size
+
     fun put(session: NodeBridgeUiSession) {
         sessions[session.id] = session
     }

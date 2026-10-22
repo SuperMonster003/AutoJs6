@@ -64,6 +64,9 @@ class RuntimeWebMediaService : Service() {
         private val entries = ConcurrentHashMap<String, Entry>()
         private val main = Handler(Looper.getMainLooper())
         private var instance: RuntimeWebMediaService? = null
+
+        /** Media sessions held, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 持有的媒体会话数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+        internal fun entryCount(): Int = entries.size
         internal fun acquire(context: Context, camera: Boolean, microphone: Boolean, ready: (Result<Unit>) -> Unit, stopped: () -> Unit): Closeable {
             val id = UUID.randomUUID().toString()
             val types = (if (camera) ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA else 0) or

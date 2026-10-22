@@ -64,6 +64,10 @@ object NodeJsRuntimePluginHost {
     private val executionRegistry = NodeRuntimePluginExecutionRegistry<AcquiredRuntime>()
     private val launchPrewarmInFlight = java.util.concurrent.atomic.AtomicBoolean()
 
+    /** Pooled connections and registered executions, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 连接池与执行注册表的大小, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    internal fun pooledConnectionCount(): Int = synchronized(poolLock) { connectionPool.size }
+    internal fun registeredExecutionCount(): Int = executionRegistry.size()
+
     /** Start one worker while the host prepares its engine, TypeScript output and workspace. */
     @JvmStatic
     fun prepareForExecution(context: Context) {

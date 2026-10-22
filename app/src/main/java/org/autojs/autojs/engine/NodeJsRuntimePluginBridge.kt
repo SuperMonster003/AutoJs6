@@ -33,6 +33,14 @@ object NodeJsRuntimePluginBridge {
     private val backendExecutionIds = ConcurrentHashMap.newKeySet<String>()
     private val executionLifecycleLock = Any()
 
+    /** Sizes of the execution tables above, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 上述执行表的大小, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    internal fun registryCounts(): Map<String, Int> = linkedMapOf(
+        "activeModuleSourceProviders" to activeModuleSourceProviders.size,
+        "activeExecutionIds" to activeExecutionIds.size,
+        "cancelledExecutionIds" to cancelledExecutionIds.size,
+        "backendExecutionIds" to backendExecutionIds.size,
+    )
+
     internal fun classifyPluginFailure(error: Throwable): FailureClassification {
         val fallbackSafe = when (error) {
             is NodeRuntimePluginUnavailableException,

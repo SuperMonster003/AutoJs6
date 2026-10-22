@@ -5,6 +5,16 @@ import org.autojs.autojs.core.broadcast.Broadcast
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.web.WebSocket
+import org.autojs.autojs.engine.NodeAudioRecordingService
+import org.autojs.autojs.engine.NodeBridgeEngineDispatchService
+import org.autojs.autojs.engine.NodeBridgeUiSessionStore
+import org.autojs.autojs.engine.NodeDialogActivity
+import org.autojs.autojs.engine.NodeJsRuntimePluginBridge
+import org.autojs.autojs.engine.NodeJsRuntimePluginHost
+import org.autojs.autojs.engine.RuntimeWebActionActivity
+import org.autojs.autojs.engine.RuntimeWebFileAccess
+import org.autojs.autojs.engine.RuntimeWebLocalDownloads
+import org.autojs.autojs.engine.RuntimeWebMediaService
 import org.autojs.autojs.engine.ScriptEngineService
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService
 
@@ -30,6 +40,31 @@ object StaticRegistries {
             counts["ScriptEngineService.lifecycleCallbacks"] = service.engineLifecycleCallbackCount
         }
         AccessibilityService.busCounts().forEach { (bus, count) -> counts["AccessibilityService.$bus"] = count }
+        return counts
+    }
+
+    /**
+     * Sizes of the process-wide tables of the plugin engine bridges (docs/memory-phase2/ROADMAP.md T1 (h)), kept apart from [counts]
+     * so that the first gate judges what it always did. Node only for now; the Bun / QuickJS pool and the Lua / Python leases join
+     * with their batches (P2 / P3).
+     * zh-CN: 插件引擎桥接的进程级表的大小 (docs/memory-phase2/ROADMAP.md T1 (h)), 与 [counts] 分开, 使第一期门禁的判定保持不变.
+     * 目前只含 Node; Bun / QuickJS 的连接池与 Lua / Python 的租约随各自批次 (P2 / P3) 加入.
+     */
+    fun bridgeCounts(): Map<String, Int> {
+        val counts = linkedMapOf(
+            "NodeJsRuntimePluginHost.connectionPool" to NodeJsRuntimePluginHost.pooledConnectionCount(),
+            "NodeJsRuntimePluginHost.executionRegistry" to NodeJsRuntimePluginHost.registeredExecutionCount(),
+        )
+        NodeJsRuntimePluginBridge.registryCounts().forEach { (name, count) -> counts["NodeJsRuntimePluginBridge.$name"] = count }
+        counts["NodeBridgeUiSessionStore.sessions"] = NodeBridgeUiSessionStore.sessionCount()
+        counts["NodeDialogActivity.sessions"] = NodeDialogActivity.sessions.size
+        counts["RuntimeWebActionActivity.actions"] = RuntimeWebActionActivity.actionCount()
+        counts["RuntimeWebFileAccess.grants"] = RuntimeWebFileAccess.grantCount()
+        counts["RuntimeWebFileAccess.captures"] = RuntimeWebFileAccess.captureCount()
+        counts["RuntimeWebLocalDownloads.active"] = RuntimeWebLocalDownloads.activeCount()
+        counts["RuntimeWebMediaService.entries"] = RuntimeWebMediaService.entryCount()
+        counts["NodeAudioRecordingService.entries"] = NodeAudioRecordingService.entryCount()
+        counts["NodeBridgeEngineDispatchService.registeredExecutions"] = NodeBridgeEngineDispatchService.registeredExecutionCount()
         return counts
     }
 }

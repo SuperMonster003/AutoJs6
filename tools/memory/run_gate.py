@@ -9,6 +9,13 @@ and prints one line per scenario with the verdict and the six T1 numbers.
 The runner never installs APKs, never taps the screen and never changes settings. Build and
 install the debug host and its test APK first (see tools/memory/README.md). Dialogs that need a
 person (screen capture consent for S4a) are confirmed by the maintainer on the phone.
+
+`--suite bridge` runs the bridge leak gate of docs/memory-phase2/ROADMAP.md (ND1-ND13, test class
+BridgeLeakGateDeviceTest) instead and writes to docs/memory-phase2/evidence. Around each of its
+instrumentation runs it changes two things and puts them back, also when a run fails or is
+interrupted: `settings put global hidden_api_policy 1` for the binding probe (ROADMAP D9), and
+`pm grant` of the permissions a scenario needs when the host lacks them (ND12 RECORD_AUDIO,
+ROADMAP D11; ND7c CAMERA, appendix C Q4), revoked afterwards.
 """
 import argparse
 import datetime
@@ -53,15 +60,44 @@ MODES = {"normal": "N", "force": "F"}
 CAPTURE_SCENARIOS = {"S4a", "S4f"}
 DEVICE_DIR = "/sdcard/Android/data/{package}/files/memory-gate"
 
+BRIDGE_TEST_CLASS = "org.autojs.autojs.memory.bridge.BridgeLeakGateDeviceTest"
+BRIDGE_SCENARIOS = {
+    "ND1": "nd01EmptyScript",
+    "ND2": "nd02HostCapabilities",
+    "ND3": "nd03Callbacks",
+    "ND4": "nd04PluginKilled",
+    "ND5": "nd05UiSession",
+    "ND6": "nd06Compose",
+    "ND7a": "nd07aWebPageAndAction",
+    "ND7b": "nd07bWebDownload",
+    "ND7c": "nd07cWebMedia",
+    "ND8": "nd08ScreenCapture",
+    "ND9": "nd09Overlay",
+    "ND10": "nd10Dialog",
+    "ND11": "nd11ImageHandles",
+    "ND12": "nd12AudioRecording",
+    "ND13": "nd13ColorOsRebind",
+}
+NODE_PLUGIN = "io.github.supermonster003.autojs6.plugin.nodejs"
+SUITES = {
+    "runtime": {"name": "memory-gate", "testClass": TEST_CLASS, "scenarios": SCENARIOS, "capture": CAPTURE_SCENARIOS,
+                "out": ROOT / "docs" / "memory" / "evidence", "grants": {}, "hiddenApi": False, "plugin": None},
+    # ROADMAP D11 grants RECORD_AUDIO for ND12; CAMERA for ND7c is appendix C Q4 (recommended, applied ahead).
+    "bridge": {"name": "bridge-gate", "testClass": BRIDGE_TEST_CLASS, "scenarios": BRIDGE_SCENARIOS, "capture": {"ND8"},
+               "out": ROOT / "docs" / "memory-phase2" / "evidence", "hiddenApi": True, "plugin": NODE_PLUGIN,
+               "grants": {"ND7c": ["android.permission.CAMERA"], "ND12": ["android.permission.RECORD_AUDIO"]}},
+}
 
-def scenario_list(text):
+
+def scenario_list(text, scenarios=None):
+    scenarios = SCENARIOS if scenarios is None else scenarios
     if not text:
-        return list(SCENARIOS)
+        return list(scenarios)
     chosen = []
     for item in text.split(","):
-        key = next((name for name in SCENARIOS if name.lower() == item.strip().lower()), None)
+        key = next((name for name in scenarios if name.lower() == item.strip().lower()), None)
         if key is None:
-            raise argparse.ArgumentTypeError(f"Unknown scenario {item!r}; known: {', '.join(SCENARIOS)}")
+            raise argparse.ArgumentTypeError(f"Unknown scenario {item!r}; known: {', '.join(scenarios)}")
         if key not in chosen:
             chosen.append(key)
     return chosen
@@ -124,11 +160,39 @@ def delta(value):
     return "-" if value is None else f"{value:+d}"
 
 
+def is_bridge(report):
+    return report.get("suite") == "bridge-gate"
+
+
+def bindings_text(metrics):
+    """Binding counts of docs/memory-phase2/ROADMAP.md T1 (h): host bridge registries against the start (h, summed) and
+    system-side connections of the host to the plugin packages (s; n/a when LoadedApk.mServices was unreadable)."""
+    registries = metrics.get("bridgeRegistriesDelta")
+    host = "-" if registries is None else delta(sum(registries.values()))
+    system = (metrics.get("bindings") or {}).get("pluginConnectionsDelta")
+    return f"h{host} " + ("s n/a" if system is None else f"s{delta(system)}")
+
+
+def pss_text(metrics):
+    """Plugin process PSS at the end in MB, with the change since the second measured run (T1 (i), recorded only)."""
+    pss = metrics.get("pluginPss") or {}
+    final = pss.get("final") if isinstance(pss.get("final"), dict) else {}
+    if final.get("totalPssKb") is None:
+        return "-"
+    change = pss.get("deltaKb")
+    return f"{final['totalPssKb'] / 1024:.1f}" + ("" if change is None else f" ({kb(change)})")
+
+
 def cell(report):
-    """Appendix A cell: retained / Java MB / native MB / threads / contexts / engines."""
+    """Appendix A cell: retained / Java MB / native MB / threads / contexts / engines. Bridge gate (docs/memory-phase2/ROADMAP.md
+    appendix A): retained / Java MB / native MB / script threads, bridge threads / bindings / engines / plugin PSS MB."""
     if report.get("status") == "skipped":
         return "skipped"
     m = report.get("metrics") or {}
+    if is_bridge(report):
+        return (f"{m.get('retained', '-')} / {mb(m.get('javaHeapDeltaBytes'))} / {mb(m.get('nativeHeapDeltaBytes'))} / "
+                f"{delta(m.get('scriptThreadDelta'))} b{delta(m.get('bridgeThreadDelta'))} / {bindings_text(m)} / "
+                f"{m.get('engines', '-')} / {pss_text(m)}")
     return (f"{m.get('retained', '-')} / {mb(m.get('javaHeapDeltaBytes'))} / {mb(m.get('nativeHeapDeltaBytes'))} / "
             f"{delta(m.get('scriptThreadDelta'))} / {delta(m.get('rhinoContextDelta'))} / {m.get('engines', '-')}")
 
@@ -142,6 +206,8 @@ def summary_line(report):
     native = m.get("native") or {}
     extra = (f" peak={mb(native.get('nativePeakMaxBytes'))}MB images={delta(native.get('imagesLiveDelta'))} "
              f"media={native.get('openMediaImages')} mats={delta(native.get('matsLiveDelta'))}") if native else ""
+    if is_bridge(report):
+        extra += f" bindings={bindings_text(m)} bridgeThreads={delta(m.get('bridgeThreadDelta'))} pss={pss_text(m)}"
     return (f"{scenario:<4} {mode} {status:<5} retained={m.get('retained')}/{report.get('iterations')} "
             f"java={mb(m.get('javaHeapDeltaBytes'))}MB native={mb(m.get('nativeHeapDeltaBytes'))}MB "
             f"threads={delta(m.get('scriptThreadDelta'))} contexts={delta(m.get('rhinoContextDelta'))} engines={m.get('engines')}{extra}")
@@ -149,6 +215,33 @@ def summary_line(report):
 
 def kb(value):
     return "-" if value is None else f"{value / 1024:+.2f}"
+
+
+def bridge_stats(report):
+    """Largest value of every gateStat the script printed, over all runs of the report."""
+    stats = {}
+    for sample in report.get("samples") or []:
+        for key, value in (sample.get("stats") or {}).items():
+            stats[key] = max(stats.get(key, value), value)
+    return ", ".join(f"{key} {value:g}" for key, value in stats.items())
+
+
+def bridge_cell(report):
+    """Bridge detail: registries above the start / system bindings start -> final / new bridge threads / plugin PSS MB
+    at the start, after measured run 2 and at the end."""
+    m = report.get("metrics") or {}
+    registries = ", ".join(f"{name.split('.', 1)[-1]} {delta(value)}" for name, value in (m.get("bridgeRegistriesDelta") or {}).items()) or "+0"
+    bindings = m.get("bindings") or {}
+
+    def connections(snapshot):
+        snapshot = snapshot or {}
+        return "n/a" if "pluginConnections" not in snapshot else f"{snapshot['pluginConnections']}/{snapshot.get('serviceConnections')}"
+
+    pss = m.get("pluginPss") or {}
+    phases = " / ".join("-" if not isinstance(pss.get(key), dict) else f"{pss[key].get('totalPssKb', 0) / 1024:.1f}"
+                        for key in ("start", "afterSecondRun", "final"))
+    threads = ", ".join(m.get("bridgeThreadsNew") or []).replace("|", "/") or "-"
+    return f"{registries} | {connections(bindings.get('start'))} -> {connections(bindings.get('final'))} | {threads} | {phases}"
 
 
 def native_cell(report):
@@ -198,8 +291,9 @@ def stats_text(report):
 def leak_lines(report):
     analysis = ((report.get("heap") or {}).get("analysis")) or {}
     lines = []
+    noun = "object(s)" if is_bridge(report) else "runtime(s)"
     for leak in analysis.get("leaks") or []:
-        lines.append(f"{leak.get('runtimes')} runtime(s), root {leak.get('gcRoot')}: {leak.get('summary')}")
+        lines.append(f"{leak.get('runtimes')} {noun}, root {leak.get('gcRoot')}: {leak.get('summary')}")
     alternate = analysis.get("alternate") or {}
     for leak in alternate.get("leaks") or []:
         lines.append(f"ignoring {alternate.get('ignoring')}: {leak.get('runtimes')} runtime(s), root {leak.get('gcRoot')}: {leak.get('summary')}")
@@ -210,11 +304,35 @@ def leak_lines(report):
 
 def markdown(meta, reports, failures):
     identity = meta["device"]
+    bridge = meta.get("suite") == "bridge-gate"
+    plugin = meta.get("plugin") or {}
+    if bridge:
+        cell_lines = [
+            "- Cell (docs/memory-phase2/ROADMAP.md appendix A): retained / Java heap MB / native heap MB / script threads, "
+            "b bridge threads / bindings: h host bridge registries vs start, s system connections to the plugin vs start / "
+            "live engines / plugin PSS MB at the end (change since measured run 2)",
+            "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), script threads, engines and bridge "
+            "registries back to start (Node connection pool may keep 1), system connections <= start + 1, bridge threads back to "
+            "the end of the warm-ups; plugin PSS recorded only (R9)",
+        ]
+    else:
+        cell_lines = [
+            "- Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)",
+            "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start",
+        ]
     lines = [
-        f"# Memory gate {identity.get('model')} ({meta['versionCode']}) {meta['date']}",
+        f"# {'Bridge' if bridge else 'Memory'} gate {identity.get('model')} ({meta['versionCode']}) {meta['date']}",
         "",
         f"- Device: {identity.get('manufacturer')} {identity.get('model')}, API {identity.get('sdk')}, serial {identity.get('serial')}",
         f"- Host: {meta['package']} versionCode {meta['versionCode']} ({meta.get('versionName')}), debuggable",
+        *([f"- Plugin: {plugin.get('package')} " + (f"versionCode {plugin.get('versionCode')} ({plugin.get('versionName')})"
+                                                     if plugin.get("versionCode") else "not installed")
+           + f", commit {meta.get('pluginCommit') or '-'}"] if bridge else []),
+        *([f"- hidden_api_policy (ROADMAP D9): 1 during each run, before `{meta['hiddenApiPolicy'].get('before')}`, "
+           f"afterwards `{meta['hiddenApiPolicy'].get('restoredTo')}`"] if meta.get("hiddenApiPolicy") else []),
+        *([f"- Granted for the run and revoked afterwards (ROADMAP D11 / Q4): " + "; ".join(
+            f"{g['scenario']} {g['permission'].rsplit('.', 1)[-1]} ({'revoked' if g.get('revoked') else 'kept: ' + str(g.get('error'))})"
+            for g in meta["grants"])] if meta.get("grants") else []),
         f"- Run: {meta['runId']}, label {meta.get('label') or '-'}, {meta['started']} -> {meta['finished']}",
         f"- Device state at start: {meta.get('deviceState')}",
         *([f"- Merged runs: " + "; ".join(f"{r.get('runId')} ({', '.join(r.get('scenarios') or ['all'])})"
@@ -224,8 +342,7 @@ def markdown(meta, reports, failures):
            f"before `{meta['projectionAppOp'].get('before')}`, afterwards `{meta['projectionAppOp'].get('restoredTo')}`"]
           if meta.get("projectionAppOp") else []),
         f"- Warm-ups {meta['warmups']}, iterations {meta['iterations']}, poll {meta['pollMs']} ms, force delay {meta['forceDelayMs']} ms, capture {meta['capture']}, meminfo {meta.get('meminfo', 'off')}",
-        "- Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)",
-        "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start",
+        *cell_lines,
         "",
         "| Scenario | Mode | Status | Cell | Reasons |",
         "| --- | --- | --- | --- | --- |",
@@ -239,6 +356,22 @@ def markdown(meta, reports, failures):
                        if re.search(r"Fatal signal|Abort message|FATAL EXCEPTION", l)), "")
         detail = f"; {signal[:160]}".replace("|", "/") if signal else ""
         lines.append(f"| {item['scenario']} | {MODES.get(item['mode'], '?')} | no report | - | instrumentation {item['outcome']}{detail} |")
+    bridged = [report for report in reports if is_bridge(report) and report.get("metrics")]
+    if bridged:
+        lines += ["", "## Bridge detail (docs/memory-phase2/ROADMAP.md T1 (d) / (h) / (i))", "",
+                  "- Registries: host bridge tables whose size differs from the start (StaticRegistries.bridgeCounts)",
+                  "- Bindings: connections of the host to the plugin / all bound service connections in LoadedApk.mServices, "
+                  "before the first run -> at the end (n/a: unreadable)",
+                  "- New threads: bridge threads alive at the end that were not alive at the end of the warm-ups",
+                  "- Plugin PSS MB: all processes of the plugin before the first run / after measured run 2 / at the end (recorded only, R9)",
+                  "- Script: largest value of each gateStat over all runs; ended by error: runs of an expected failure (ND4)",
+                  "", "| Scenario | Mode | Registries | Bindings | New threads | Plugin PSS MB | Script |",
+                  "| --- | --- | --- | --- | --- | --- | --- |"]
+        for report in bridged:
+            script = bridge_stats(report)
+            if "runsEndedByError" in report:
+                script = (script + "; " if script else "") + f"ended by error {report['runsEndedByError']}"
+            lines.append(f"| {report.get('scenario')} | {MODES.get(report.get('mode'), '?')} | {bridge_cell(report)} | {script or '-'} |")
     detailed = [report for report in reports if (report.get("metrics") or {}).get("native")]
     if detailed:
         lines += ["", "## Native detail (ROADMAP P3.1)", "",
@@ -258,11 +391,15 @@ def markdown(meta, reports, failures):
                          f"{classes_cell(report)} | {stats_text(report) or '-'} |")
     leaks = [(report, leak_lines(report)) for report in reports if leak_lines(report)]
     if leaks:
-        lines += ["", "## Shortest strong reference paths (shark, exited ScriptRuntime instances)", ""]
+        lines += ["", "## Shortest strong reference paths (shark, " + ("bridge session objects and exited ScriptRuntime instances)"
+                                                                     if bridge else "exited ScriptRuntime instances)"), ""]
         for report, entries in leaks:
             analysis = ((report.get("heap") or {}).get("analysis")) or {}
-            lines.append(f"### {report.get('scenario')} {MODES.get(report.get('mode'), '?')}: "
-                         f"{analysis.get('exitedRuntimeInstances', '?')} exited runtimes in the dump, "
+            if "instances" in analysis:
+                found = ", ".join(f"{name} {count}" for name, count in analysis["instances"].items())
+            else:
+                found = f"{analysis.get('exitedRuntimeInstances', '?')} exited runtimes"
+            lines.append(f"### {report.get('scenario')} {MODES.get(report.get('mode'), '?')}: {found} in the dump, "
                          f"dump {report['heap'].get('dumpMs', '?')} ms, analysis {analysis.get('analysisMs', '?')} ms")
             lines.append("")
             for entry in entries:
@@ -285,9 +422,10 @@ def write_evidence(path_json, meta, reports, failures):
     path_json.write_text(head[:-2] + ',\n  "results": [\n' + body + "\n  ]\n}\n", encoding="utf-8")
 
 
-def merge_evidence(previous, reports, failures, meta):
+def merge_evidence(previous, reports, failures, meta, scenarios=None):
     """Keep earlier results for scenario / mode pairs that this run did not produce (same device and versionCode)."""
-    order = [(s, m) for s in SCENARIOS for m in MODES]
+    scenarios = SCENARIOS if scenarios is None else scenarios
+    order = [(s, m) for s in scenarios for m in MODES]
     rerun = {(r.get("scenario"), r.get("mode")) for r in reports} | {(f["scenario"], f["mode"]) for f in failures}
     kept = [r for r in previous.get("results", []) if (r.get("scenario"), r.get("mode")) not in rerun]
     kept_failures = [f for f in previous.get("failures", []) if (f["scenario"], f["mode"]) not in rerun
@@ -296,10 +434,32 @@ def merge_evidence(previous, reports, failures, meta):
     runs = previous.get("mergedRuns") or [{"runId": previous.get("runId"), "started": previous.get("started"),
                                            "finished": previous.get("finished")}]
     meta = {**meta, "started": previous.get("started", meta["started"]), "deviceState": previous.get("deviceState"),
-            "scenarios": sorted({r.get("scenario") for r in merged}, key=list(SCENARIOS).index),
+            "scenarios": sorted({r.get("scenario") for r in merged}, key=list(scenarios).index),
             "mergedRuns": runs + [{"runId": meta["runId"], "started": meta["started"], "finished": meta["finished"],
-                                   "scenarios": sorted({s for s, _ in rerun}, key=list(SCENARIOS).index)}]}
+                                   "scenarios": sorted({s for s, _ in rerun}, key=list(scenarios).index)}]}
+    if previous.get("grants"):
+        meta["grants"] = previous["grants"] + (meta.get("grants") or [])
     return merged, kept_failures + failures, meta
+
+
+def global_setting(device, name):
+    """Value of a global setting, or None when it is unset."""
+    value = device.shell("settings", "get", "global", name)["stdout"].strip()
+    return None if value in ("", "null") else value
+
+
+def put_global_setting(device, name, value):
+    """Sets a global setting, or deletes it when value is None (ROADMAP D9 sets hidden_api_policy 1 for the binding probe)."""
+    command = ("delete", "global", name) if value is None else ("put", "global", name, value)
+    result = device.shell("settings", *command)
+    if result["exitCode"] != 0:
+        raise RuntimeError(f"settings {' '.join(command)} failed: {(result['stdout'] + result['stderr']).strip()}")
+
+
+def granted_permissions(device, package):
+    """Runtime permissions the package holds (`granted=true` lines of dumpsys package)."""
+    dump = device.shell("dumpsys", "package", package)["stdout"]
+    return set(re.findall(r"^\s*(android\.permission\.[A-Z_]+): granted=true", dump, re.MULTILINE))
 
 
 def projection_mode(device, package):
@@ -347,18 +507,21 @@ def main():
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--package", type=physical_device.package_name, default="org.autojs.autojs6")
-    parser.add_argument("--scenarios", type=scenario_list, default=list(SCENARIOS), help="Comma list, e.g. S1,S2 (default all)")
+    parser.add_argument("--suite", choices=tuple(SUITES), default="runtime",
+                        help="runtime: the first gate S1-S16 (docs/memory); bridge: the bridge gate ND1-ND13 (docs/memory-phase2)")
+    parser.add_argument("--scenarios", help="Comma list, e.g. S1,S2 or ND1,ND7a (default all of the suite)")
+    parser.add_argument("--plugin-commit", help="Commit of the installed Node plugin build, written to the bridge report header")
     parser.add_argument("--mode", choices=("normal", "force", "both"), default="both")
     parser.add_argument("--hprof", action="store_true", help="Keep heap dumps of failing scenarios and pull them to <out>/hprof")
     parser.add_argument("--no-analyze", action="store_true", help="Skip the on-device shark analysis (ROADMAP T4 fallback)")
-    parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a with the PROJECT_MEDIA app-op set to allow for its duration, then reset to default (ROADMAP Q3)")
+    parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a / S4f (bridge: ND8) with the PROJECT_MEDIA app-op set to allow for its duration, then reset to default (ROADMAP Q3)")
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--iterations", type=int, default=20)
     parser.add_argument("--poll-ms", type=int, default=10000)
     parser.add_argument("--force-delay-ms", type=int, default=1000)
     parser.add_argument("--timeout", type=int, default=1500, help="Seconds per scenario and mode")
     parser.add_argument("--label", default="", help="Inserted into the report name, e.g. baseline")
-    parser.add_argument("--out", type=Path, default=ROOT / "docs" / "memory" / "evidence")
+    parser.add_argument("--out", type=Path, help="Evidence directory (default docs/memory/evidence, bridge: docs/memory-phase2/evidence)")
     parser.add_argument("--wake", action="store_true", help="Send KEYCODE_WAKEUP before each scenario (no taps)")
     parser.add_argument("--one-process", action="store_true",
                         help="Run all selected scenarios and modes in one instrumentation process (S7 / S7b with the accessibility service)")
@@ -377,6 +540,14 @@ def main():
     # The test rejects memoryGateAccessibilityWaitMs above 900 s before showing any toast.
     if not 0 <= args.a11y_wait <= 900:
         parser.error("--a11y-wait must be between 0 and 900 seconds")
+    suite = SUITES[args.suite]
+    try:
+        args.scenarios = scenario_list(args.scenarios, suite["scenarios"])
+    except argparse.ArgumentTypeError as error:
+        parser.error(str(error))
+    if args.plugin_commit and not re.fullmatch(r"[0-9a-f]{4,40}(-dirty)?", args.plugin_commit):
+        parser.error("--plugin-commit must be a commit hash")
+    args.out = args.out or suite["out"]
 
     device = physical_device.Device(args.adb, args.serial)
     device.require_online()
@@ -406,6 +577,14 @@ def main():
     stamp = package_stamp(device, args.package)
     interrupted = None
     projection = {"allowedDuring": []}
+    hidden_api, grants = {}, []
+    plugin = None
+    if suite["plugin"]:
+        plugin_dump = device.shell("dumpsys", "package", suite["plugin"])["stdout"]
+        plugin_version = re.search(r"versionCode=(\d+)", plugin_dump)
+        plugin_name = re.search(r"versionName=(\S+)", plugin_dump)
+        plugin = {"package": suite["plugin"], "versionCode": int(plugin_version[1]) if plugin_version else None,
+                  "versionName": plugin_name[1] if plugin_name else None}
     groups = [(list(args.scenarios), ",".join(modes))] if args.one_process else [([s], m) for s in args.scenarios for m in modes]
     for group, mode in groups:
             scenario = "+".join(group)
@@ -426,13 +605,13 @@ def main():
             if not args.keep_process:
                 device.shell("am", "force-stop", args.package)
             device.call("logcat", "-c")
-            capture = args.capture == "on" and any(s in CAPTURE_SCENARIOS for s in group)
+            capture = args.capture == "on" and any(s in suite["capture"] for s in group)
             if capture:
                 projection.setdefault("before", projection_mode(device, args.package))
                 set_projection(device, args.package, "allow")
                 projection["allowedDuring"].append(f"{scenario} {mode}")
             command = ["am", "instrument", "-w", "-r",
-                       "-e", "class", ",".join(f"{TEST_CLASS}#{SCENARIOS[s]}" for s in group),
+                       "-e", "class", ",".join(f"{suite['testClass']}#{suite['scenarios'][s]}" for s in group),
                        "-e", "memoryGateRunId", run_id, "-e", "memoryGateModes", mode,
                        "-e", "memoryGateWarmups", str(args.warmups), "-e", "memoryGateIterations", str(args.iterations),
                        "-e", "memoryGatePollMs", str(args.poll_ms), "-e", "memoryGateForceDelayMs", str(args.force_delay_ms),
@@ -440,13 +619,38 @@ def main():
                        "-e", "memoryGateAnalyze", "false" if args.no_analyze else "true",
                        "-e", "memoryGateCapture", args.capture,
                        "-e", "memoryGateAccessibilityWaitMs", str(args.a11y_wait * 1000),
-                       "-e", "memoryGateMeminfo", args.meminfo, runner]
+                       "-e", "memoryGateMeminfo", args.meminfo,
+                       *(["-e", "memoryGatePluginCommit", args.plugin_commit] if args.plugin_commit else []), runner]
+            granted = []
             try:
+                if suite["hiddenApi"]:
+                    hidden_api.setdefault("before", global_setting(device, "hidden_api_policy"))
+                    put_global_setting(device, "hidden_api_policy", "1")
+                wanted = [(s, p) for s in group for p in suite["grants"].get(s, [])]
+                held = granted_permissions(device, args.package) if wanted else set()
+                for s, permission in wanted:
+                    if permission in held:
+                        continue
+                    answer = device.shell("pm", "grant", args.package, permission)
+                    if answer["exitCode"] != 0:
+                        raise RuntimeError(f"pm grant {permission} failed: {(answer['stdout'] + answer['stderr']).strip()}")
+                    granted.append({"scenario": s, "permission": permission})
+                    held.add(permission)
                 result = device.shell(*command, timeout=args.timeout)
             finally:
                 if capture:
                     set_projection(device, args.package, "default")
                     projection["restoredTo"] = projection_mode(device, args.package)
+                # pm revoke kills the host process, which the next scenario restarts anyway.
+                for grant in granted:
+                    revoked = device.shell("pm", "revoke", args.package, grant["permission"])
+                    grant["revoked"] = revoked["exitCode"] == 0
+                    if not grant["revoked"]:
+                        grant["error"] = (revoked["stdout"] + revoked["stderr"]).strip()[:200]
+                    grants.append(grant)
+                if suite["hiddenApi"] and "before" in hidden_api:
+                    put_global_setting(device, "hidden_api_policy", hidden_api["before"])
+                    hidden_api["restoredTo"] = global_setting(device, "hidden_api_policy")
             text = result["stdout"] + result["stderr"]
             outcome = "timeout" if result.get("timeout") else test_outcome(text)
             found = [r for r in parse_reports(text) if (r.get("scenario"), r.get("mode")) in pairs]
@@ -490,7 +694,8 @@ def main():
                         pulled = device.call("pull", hprof, str(target / Path(hprof).name), timeout=600)
                         if pulled["exitCode"] == 0:
                             device.shell("rm", "-f", hprof)
-                            report["heap"]["pulledTo"] = str((target / Path(hprof).name).relative_to(ROOT)).replace("\\", "/")
+                            local = target / Path(hprof).name
+                            report["heap"]["pulledTo"] = str(local.relative_to(ROOT) if local.is_relative_to(ROOT) else local).replace("\\", "/")
             current = package_stamp(device, args.package)
             if not current:
                 # dumpsys failed: the device left adb, which is not a reinstall; reports already read stay valid.
@@ -503,18 +708,20 @@ def main():
         print(f"Stopped: {interrupted}; scenarios after this point were not run", file=sys.stderr)
     if not args.keep_process:
         device.shell("am", "force-stop", args.package)
-    meta = {"suite": "memory-gate", "runId": run_id, "label": args.label, "started": started,
+    meta = {"suite": suite["name"], "runId": run_id, "label": args.label, "started": started,
             "finished": physical_device.utc_now(), "date": today, "package": args.package,
             "versionCode": int(version[1]), "versionName": version_name[1] if version_name else None,
             "device": {k: identity.get(k) for k in ("serial", "manufacturer", "model", "sdk", "release", "abiList", "emulator")},
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
             "capture": args.capture, "meminfo": args.meminfo, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
-            **({"projectionAppOp": projection} if projection["allowedDuring"] else {})}
+            **({"projectionAppOp": projection} if projection["allowedDuring"] else {}),
+            **({"plugin": plugin, "pluginCommit": args.plugin_commit} if plugin else {}),
+            **({"hiddenApiPolicy": hidden_api} if hidden_api else {}), **({"grants": grants} if grants else {})}
     stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
     if args.merge and (args.out / f"{stem}.json").is_file():
         reports, failures, meta = merge_evidence(json.loads((args.out / f"{stem}.json").read_text(encoding="utf-8")),
-                                                 reports, failures, meta)
+                                                 reports, failures, meta, suite["scenarios"])
     write_evidence(args.out / f"{stem}.json", meta, reports, failures)
     (args.out / f"{stem}.md").write_text(markdown(meta, reports, failures), encoding="utf-8")
     counts = {}

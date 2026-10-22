@@ -212,6 +212,9 @@ class NodeAudioRecordingService : Service() {
         private val entries = ConcurrentHashMap<String, Entry>()
         private val main = Handler(Looper.getMainLooper())
         @Volatile private var instance: NodeAudioRecordingService? = null
+
+        /** Recordings held, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 持有的录音数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+        internal fun entryCount(): Int = entries.size
         internal fun acquire(context: Context, id: String, onReady: (Result<Unit>) -> Unit, onStop: (String) -> Unit) {
             entries[id] = Entry(onReady, onStop)
             try {

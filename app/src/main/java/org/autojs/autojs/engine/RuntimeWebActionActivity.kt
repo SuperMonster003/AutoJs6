@@ -77,6 +77,9 @@ class RuntimeWebActionActivity : Activity() {
         private const val REQUEST = 4027
         private val actions = ConcurrentHashMap<String, Action>()
 
+        /** Pending actions, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 未完成的操作数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+        internal fun actionCount(): Int = actions.size
+
         internal fun chooseFiles(context: Context, options: JSONObject, complete: (Result<List<Uri>?>) -> Unit): Action =
             RuntimeWebFileChooser.create(context, options, complete)
 
@@ -165,6 +168,9 @@ internal object RuntimeWebFileAccess {
     private data class Grant(var users: Int = 0, var acquired: Int = 0)
     private val grants = HashMap<String, Grant>()
     private val captures = HashMap<String, java.io.File>()
+    /** Grants and captures held, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 持有的授权与拍摄文件数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    @Synchronized fun grantCount(): Int = grants.size
+    @Synchronized fun captureCount(): Int = captures.size
     @Synchronized fun capture(uri: Uri, file: java.io.File) { captures[uri.toString()] = file }
     @Synchronized fun isCapture(uri: Uri) = captures.containsKey(uri.toString())
     @Synchronized fun discardUnusedCapture(uri: Uri) { if (!grants.containsKey(uri.toString())) captures.remove(uri.toString())?.delete() }

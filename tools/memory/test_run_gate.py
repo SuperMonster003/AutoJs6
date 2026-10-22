@@ -106,5 +106,107 @@ class RenderTest(unittest.TestCase):
         self.assertEqual("+1 / - / - / - / -", run_gate.classes_cell(plain))
         self.assertEqual("-", run_gate.classes_cell(report()))
 
+
+def bridge_report(scenario="ND1", mode="normal", status="pass", retained=0):
+    result = report(scenario, mode, status, retained)
+    result["suite"] = "bridge-gate"
+    result["metrics"].update({
+        "javaHeapDeltaBytes": 524288, "nativeHeapDeltaBytes": 1048576, "rhinoContextDelta": 0, "bridgeThreadDelta": 0,
+        "bridgeRegistriesDelta": {"NodeJsRuntimePluginHost.connectionPool": 1},
+        "bindings": {"start": {"serviceConnections": 3, "pluginConnections": 0},
+                     "final": {"serviceConnections": 4, "pluginConnections": 1}, "pluginConnectionsDelta": 1},
+        "bridgeThreadsNew": [],
+        "pluginPss": {"start": {"totalPssKb": 40960}, "afterSecondRun": {"totalPssKb": 81408},
+                      "final": {"totalPssKb": 81920}, "deltaKb": 512}})
+    result["samples"] = [{"stats": {"pngBytes": 120.0}}, {"stats": {"pngBytes": 130.0, "deviceInfoKeys": 9.0}}]
+    if retained:
+        result["heap"] = {"dumpMs": 700, "analysis": {"instances": {"NodeJsHostCapabilityBroker": 2, "ScriptRuntime": 0},
+                                                      "analysisMs": 3000, "leaks": [
+            {"runtimes": 2, "gcRoot": "JNI_GLOBAL", "summary": "Binder.mOwner -> NodeJsHostCapabilityBroker",
+             "path": ["android.os.Binder.mOwner", "-> org.autojs.autojs.engine.NodeJsHostCapabilityBroker"]}]}}
+    return result
+
+
+class FakeDevice:
+    def __init__(self, outputs=None):
+        self.commands, self.outputs = [], outputs or {}
+
+    def shell(self, *args, timeout=30):
+        self.commands.append(args)
+        return {"exitCode": 0, "stdout": self.outputs.get(args[:2], ""), "stderr": ""}
+
+
+class BridgeSuiteTest(unittest.TestCase):
+    def test_scenarios_resolve_per_suite(self):
+        self.assertEqual(["ND7a", "ND1"], run_gate.scenario_list("nd7A, ND1", run_gate.BRIDGE_SCENARIOS))
+        self.assertEqual(list(run_gate.BRIDGE_SCENARIOS), run_gate.scenario_list(None, run_gate.BRIDGE_SCENARIOS))
+        with self.assertRaises(Exception):
+            run_gate.scenario_list("S1", run_gate.BRIDGE_SCENARIOS)
+        self.assertEqual(list(run_gate.SCENARIOS), run_gate.scenario_list(""))
+
+    def test_bridge_methods_exist_in_the_device_test(self):
+        source = (run_gate.ROOT / "app" / "src" / "androidTest" / "java" / "org" / "autojs" / "autojs" / "memory" / "bridge"
+                  / "BridgeLeakGateDeviceTest.kt").read_text(encoding="utf-8")
+        for scenario, method in run_gate.BRIDGE_SCENARIOS.items():
+            self.assertIn(f"fun {method}() = gate(\"{scenario}\")", source)
+        bridge = run_gate.SUITES["bridge"]
+        self.assertTrue(set(bridge["grants"]) | bridge["capture"] <= set(run_gate.BRIDGE_SCENARIOS))
+        self.assertEqual("docs/memory-phase2/evidence", bridge["out"].relative_to(run_gate.ROOT).as_posix())
+        self.assertEqual("docs/memory/evidence", run_gate.SUITES["runtime"]["out"].relative_to(run_gate.ROOT).as_posix())
+
+    def test_bridge_cell_and_summary(self):
+        self.assertEqual("0 / +0.50 / +1.00 / +0 b+0 / h+1 s+1 / 0 / 80.0 (+0.50)", run_gate.cell(bridge_report()))
+        unavailable = bridge_report()
+        unavailable["metrics"]["bindings"] = {"start": {"unavailable": "NoSuchFieldException"}, "final": {}, "pluginConnectionsDelta": None}
+        unavailable["metrics"]["pluginPss"] = {"start": None, "afterSecondRun": None, "final": None, "deltaKb": None}
+        self.assertEqual("0 / +0.50 / +1.00 / +0 b+0 / h+1 s n/a / 0 / -", run_gate.cell(unavailable))
+        self.assertIn("bindings=h+1 s+1 bridgeThreads=+0 pss=80.0 (+0.50)", run_gate.summary_line(bridge_report()))
+        self.assertEqual("connectionPool +1 | 0/3 -> 1/4 | - | 40.0 / 79.5 / 80.0", run_gate.bridge_cell(bridge_report()))
+        self.assertEqual("pngBytes 130, deviceInfoKeys 9", run_gate.bridge_stats(bridge_report()))
+        # The first gate's cell does not change.
+        self.assertEqual("20 / +3.00 / -1.00 / +0 / +1 / 0", run_gate.cell(report()))
+
+    def test_bridge_markdown(self):
+        meta = {"suite": "bridge-gate", "device": {"model": "23046RP50C", "manufacturer": "Xiaomi", "sdk": "34", "serial": "X"},
+                "versionCode": 5935, "versionName": "6.8.0", "package": "org.autojs.autojs6", "runId": "r", "label": "mp2-baseline",
+                "started": "a", "finished": "b", "date": "20261022", "deviceState": {}, "warmups": 2, "iterations": 20,
+                "pollMs": 10000, "forceDelayMs": 1000, "capture": "off",
+                "plugin": {"package": run_gate.NODE_PLUGIN, "versionCode": 292, "versionName": "1.32.0"}, "pluginCommit": "6d4e6bdb",
+                "hiddenApiPolicy": {"before": None, "restoredTo": None},
+                "grants": [{"scenario": "ND12", "permission": "android.permission.RECORD_AUDIO", "revoked": True}]}
+        ended = bridge_report("ND4", "force")
+        ended["runsEndedByError"] = 20
+        text = run_gate.markdown(meta, [bridge_report(), ended, bridge_report("ND2", "normal", "fail", 2)], [])
+        self.assertIn("# Bridge gate 23046RP50C (5935) 20261022", text)
+        self.assertIn(f"- Plugin: {run_gate.NODE_PLUGIN} versionCode 292 (1.32.0), commit 6d4e6bdb", text)
+        self.assertIn("before `None`, afterwards `None`", text)
+        self.assertIn("ND12 RECORD_AUDIO (revoked)", text)
+        self.assertIn("| ND1 | N | connectionPool +1 | 0/3 -> 1/4 | - | 40.0 / 79.5 / 80.0 | pngBytes 130, deviceInfoKeys 9 |", text)
+        self.assertIn("deviceInfoKeys 9; ended by error 20 |", text)
+        self.assertIn("### ND2 N: NodeJsHostCapabilityBroker 2, ScriptRuntime 0 in the dump", text)
+        self.assertIn("2 object(s), root JNI_GLOBAL", text)
+        self.assertNotIn("Rhino contexts / live engines (ROADMAP appendix A)", text)
+
+    def test_bridge_merge_keeps_suite_order(self):
+        previous = {"runId": "old", "started": "t0", "finished": "t1", "results": [bridge_report("ND10")],
+                    "grants": [{"scenario": "ND12", "permission": "android.permission.RECORD_AUDIO", "revoked": True}]}
+        merged, _, meta = run_gate.merge_evidence(previous, [bridge_report("ND7a")], [],
+                                                  {"runId": "new", "started": "t2", "finished": "t3"}, run_gate.BRIDGE_SCENARIOS)
+        self.assertEqual(["ND7a", "ND10"], [r["scenario"] for r in merged])
+        self.assertEqual(["ND7a", "ND10"], meta["scenarios"])
+        self.assertEqual(1, len(meta["grants"]))
+
+    def test_device_helpers(self):
+        dump = ("    runtime permissions:\n      android.permission.CAMERA: granted=false, flags=[ USER_SET ]\n"
+                "      android.permission.RECORD_AUDIO: granted=true, flags=[ USER_SET ]\n")
+        device = FakeDevice({("dumpsys", "package"): dump, ("settings", "get"): "null\n"})
+        self.assertEqual({"android.permission.RECORD_AUDIO"}, run_gate.granted_permissions(device, "org.autojs.autojs6"))
+        self.assertIsNone(run_gate.global_setting(device, "hidden_api_policy"))
+        run_gate.put_global_setting(device, "hidden_api_policy", "1")
+        run_gate.put_global_setting(device, "hidden_api_policy", None)
+        self.assertEqual([("settings", "put", "global", "hidden_api_policy", "1"), ("settings", "delete", "global", "hidden_api_policy")],
+                         device.commands[-2:])
+
+
 if __name__ == "__main__":
     unittest.main()

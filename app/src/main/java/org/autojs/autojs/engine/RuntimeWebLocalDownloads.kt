@@ -272,6 +272,9 @@ internal class RuntimeWebLocalDownloads(private val web: RuntimeWebView) {
     }
     companion object {
         private val active = ConcurrentHashMap<String, Job>()
+
+        /** Downloads in progress, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 进行中的下载数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+        internal fun activeCount(): Int = active.size
         private val io = Executors.newCachedThreadPool { task -> Thread(task, "runtime-web-download").apply { isDaemon = true } }
         private fun uuid(id: String): String { require(id.startsWith("web:")); return UUID.fromString(id.removePrefix("web:")).toString() }
         private fun metadata(context: Context, id: String) = File(context.filesDir, "runtime-web-downloads/${uuid(id)}.json")

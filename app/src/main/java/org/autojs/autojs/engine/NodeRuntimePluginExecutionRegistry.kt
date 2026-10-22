@@ -29,6 +29,9 @@ internal class NodeRuntimePluginExecutionRegistry<T : Any> {
     private val nextToken = AtomicLong(0L)
     private val registrations = LinkedHashMap<String, Registration<T>>()
 
+    /** Live registrations, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 存活的登记数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    fun size(): Int = synchronized(lock) { registrations.size }
+
     fun reserve(executionId: String): Reservation? {
         if (executionId.isBlank()) return null
         val reservation = Reservation(executionId, nextToken.incrementAndGet())

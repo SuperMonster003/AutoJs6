@@ -530,6 +530,9 @@ class NodeBridgeEngineDispatchService : Service() {
         private const val OUTCOME_EXCEPTION = "exception"
         private const val MAX_REGISTERED_DISPATCHES = 8
         private val registeredExecutions = ConcurrentHashMap<String, AgentOwnedScriptExecution>()
+
+        /** Registered dispatches, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h)). zh-CN: 已登记的分发数, 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h)). */
+        internal fun registeredExecutionCount(): Int = registeredExecutions.size
         private val registeredExecutor = ThreadPoolExecutor(2, 2, 0L, TimeUnit.MILLISECONDS,
             ArrayBlockingQueue(MAX_REGISTERED_DISPATCHES),
             { Thread(it, "AutoJs6AgentRegisteredScript").apply { isDaemon = true } }, ThreadPoolExecutor.AbortPolicy())

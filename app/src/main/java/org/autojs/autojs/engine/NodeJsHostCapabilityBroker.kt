@@ -7,6 +7,7 @@ import android.os.Process
 import android.os.RemoteException
 import android.os.TransactionTooLargeException
 import android.util.Log
+import org.autojs.autojs.runtime.memory.BridgeExecutionObserver
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityBroker
 import org.autojs.plugin.nodejs.api.INodeJsHostCapabilityCallback
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -50,6 +51,13 @@ internal class NodeJsHostCapabilityBroker(
         executionConsole = console,
         agentExecutionState = agentExecutionState,
     )
+
+    init {
+        // Weak tracking by the bridge leak gate only (docs/memory-phase2/ROADMAP.md T1 (a)); no listener in production.
+        // zh-CN: 仅供桥接泄漏门禁弱引用跟踪 (docs/memory-phase2/ROADMAP.md T1 (a)); 生产环境没有监听者.
+        BridgeExecutionObserver.created("node", "broker", request.executionId, this)
+        BridgeExecutionObserver.created("node", "provider", request.executionId, provider)
+    }
 
     override fun getBrokerInfo(): Bundle {
         return Bundle().apply {

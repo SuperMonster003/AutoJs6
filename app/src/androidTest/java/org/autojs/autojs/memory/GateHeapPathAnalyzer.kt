@@ -64,6 +64,39 @@ internal object GateHeapPathAnalyzer {
         return result.put("analysisMs", SystemClock.elapsedRealtime() - started)
     }
 
+    /**
+     * The same analysis for the objects the bridge gate tracks (docs/memory-phase2/ROADMAP.md T4): every instance of [classNames] in the
+     * dump, except ScriptRuntime, which keeps the `isExiting` filter. The bridge gate dumps only after the last run of its scenario
+     * ended, so every instance found belongs to a finished execution of this process.
+     * zh-CN: 对桥接门禁跟踪的对象做同样的分析 (docs/memory-phase2/ROADMAP.md T4): 转储中 [classNames] 的全部实例, ScriptRuntime 仍按 `isExiting` 过滤.
+     * 桥接门禁只在场景最后一次运行结束后转储, 因此找到的实例都属于本进程中已结束的执行.
+     */
+    fun analyzeClasses(hprof: File, classNames: List<String>): JSONObject {
+        val started = SystemClock.elapsedRealtime()
+        val result = JSONObject().put("hprofBytes", hprof.length())
+        hprof.openHeapGraph().use { graph ->
+            val counts = JSONObject()
+            val ids = mutableSetOf<Long>()
+            classNames.forEach { name ->
+                val instances = graph.findClassByName(name)?.instances?.toList().orEmpty()
+                val chosen = if (name != RUNTIME_CLASS) instances else {
+                    instances.filter { it[RUNTIME_CLASS, "isExiting"]?.value?.asBoolean == true }
+                }
+                counts.put(name.substringAfterLast('.'), chosen.size)
+                chosen.mapTo(ids) { it.objectId }
+            }
+            result.put("instances", counts)
+            if (ids.isEmpty()) {
+                return result.put("analysisMs", SystemClock.elapsedRealtime() - started).put("leaks", JSONArray())
+            }
+            val primary = paths(hprof, graph, ids, AndroidReferenceMatchers.appDefaults)
+            result.put("leaks", primary.leaks).put("leakGroups", primary.groups).put("tracedObjects", primary.traced)
+                .put("unreachableObjects", primary.unreachable)
+            primary.error?.let { result.put("error", it) }
+        }
+        return result.put("analysisMs", SystemClock.elapsedRealtime() - started)
+    }
+
     private class Paths(
         val leaks: JSONArray,
         val groups: Int,
