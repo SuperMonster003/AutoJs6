@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.ocr
 
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.runtime.api.augment.ocr.OcrMLKit
 import org.autojs.autojs.runtime.api.augment.ocr.OcrPaddle
 import org.autojs.autojs.runtime.api.augment.ocr.OcrRapid
@@ -25,15 +26,15 @@ class OcrMLKitModule(private val runtime: ScriptRuntime) {
 
     @ScriptInvoke
     fun invoke(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrMLKit.recognizeText(runtime, OcrArgs.recognition(MODULE, input, optionsOrRegion))
+        OcrMLKit.recognizeText(runtime, OcrArgs.recognition(MODULE, runtime, input, optionsOrRegion, OcrMode.MLKIT))
 
     @ScriptFunction
     fun recognizeText(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrMLKit.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", input, optionsOrRegion))
+        OcrMLKit.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", runtime, input, optionsOrRegion, OcrMode.MLKIT))
 
     @ScriptFunction
     fun detect(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrMLKit.detect(runtime, OcrArgs.recognition("$MODULE.detect", input, optionsOrRegion))
+        OcrMLKit.detect(runtime, OcrArgs.recognition("$MODULE.detect", runtime, input, optionsOrRegion, OcrMode.MLKIT))
 
     private companion object {
         const val MODULE = "ocr.mlkit"
@@ -47,15 +48,15 @@ class OcrPaddleModule(private val runtime: ScriptRuntime) {
 
     @ScriptInvoke
     fun invoke(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrPaddle.recognizeText(runtime, OcrArgs.recognition(MODULE, input, optionsOrRegion))
+        OcrPaddle.recognizeText(runtime, OcrArgs.recognition(MODULE, runtime, input, optionsOrRegion, OcrMode.PADDLE))
 
     @ScriptFunction
     fun recognizeText(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrPaddle.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", input, optionsOrRegion))
+        OcrPaddle.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", runtime, input, optionsOrRegion, OcrMode.PADDLE))
 
     @ScriptFunction
     fun detect(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrPaddle.detect(runtime, OcrArgs.recognition("$MODULE.detect", input, optionsOrRegion))
+        OcrPaddle.detect(runtime, OcrArgs.recognition("$MODULE.detect", runtime, input, optionsOrRegion, OcrMode.PADDLE))
 
     private companion object {
         const val MODULE = "ocr.paddle"
@@ -69,15 +70,15 @@ class OcrRapidModule(private val runtime: ScriptRuntime) {
 
     @ScriptInvoke
     fun invoke(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrRapid.recognizeText(runtime, OcrArgs.recognition(MODULE, input, optionsOrRegion))
+        OcrRapid.recognizeText(runtime, OcrArgs.recognition(MODULE, runtime, input, optionsOrRegion, OcrMode.RAPID))
 
     @ScriptFunction
     fun recognizeText(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrRapid.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", input, optionsOrRegion))
+        OcrRapid.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", runtime, input, optionsOrRegion, OcrMode.RAPID))
 
     @ScriptFunction
     fun detect(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        OcrRapid.detect(runtime, OcrArgs.recognition("$MODULE.detect", input, optionsOrRegion))
+        OcrRapid.detect(runtime, OcrArgs.recognition("$MODULE.detect", runtime, input, optionsOrRegion, OcrMode.RAPID))
 
     private companion object {
         const val MODULE = "ocr.rapid"

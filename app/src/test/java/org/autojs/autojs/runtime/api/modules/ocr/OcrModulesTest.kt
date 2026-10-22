@@ -232,6 +232,33 @@ class OcrModulesTest {
             "ocr.rapid($MISSING, {}, 1)" to TYPE,
             "ocr.rapid.recognizeText($MISSING, true)" to TYPE,
             "ocr.rapid.detect(' ')" to RANGE,
+            // The documented fields of the options (appendix C Q28): `ocr` checks those of all engines, an engine module its own.
+            "ocr($MISSING, { mode: 'xyz' })" to RANGE,
+            "ocr($MISSING, { mode: 5 })" to TYPE,
+            "ocr($MISSING, { mode: {} })" to TYPE,
+            "ocr($MISSING, { region: 5 })" to TYPE,
+            "ocr($MISSING, { region: [0, 'a'] })" to TYPE,
+            "ocr($MISSING, { region: [0, NaN] })" to RANGE,
+            "ocr($MISSING, { region: [-2, 0] })" to RANGE,
+            "ocr($MISSING, [0, 0, -5, 1])" to RANGE,
+            "ocr($MISSING, { useRaw: 'yes' })" to TYPE,
+            "ocr($MISSING, { raw: 1 })" to TYPE,
+            "ocr($MISSING, { imageQuality: NaN })" to RANGE,
+            "ocr($MISSING, { imageQuality: Infinity })" to RANGE,
+            "ocr($MISSING, { imageQuality: 'high' })" to TYPE,
+            "ocr($MISSING, { engineId: 5 })" to TYPE,
+            "ocr.recognizeText($MISSING, { cpuThreadNum: 'x' })" to TYPE,
+            "ocr.recognizeText($MISSING, { useWordSegmentation: 'no' })" to TYPE,
+            "ocr.detect($MISSING, { boxScoreThresh: NaN })" to RANGE,
+            "ocr.detect($MISSING, { detLongSize: 3e9 })" to RANGE,
+            "ocr.mlkit($MISSING, { profile: {} })" to TYPE,
+            "ocr.mlkit.detect($MISSING, { imageFormat: true })" to TYPE,
+            "ocr.paddle($MISSING, { useSlim: 1 })" to TYPE,
+            "ocr.paddle.detect($MISSING, { detLimitSideLen: -1e10 })" to RANGE,
+            "ocr.paddle.recognizeText($MISSING, { scoreThreshold: NaN })" to RANGE,
+            "ocr.rapid($MISSING, { maxSideLen: 'big' })" to TYPE,
+            "ocr.rapid.recognizeText($MISSING, { scoreThreshold: 'low' })" to TYPE,
+            "ocr.rapid.detect($MISSING, { region: {} })" to TYPE,
         )
 
         /** The current module captures the screen for these (no image first). */
@@ -246,6 +273,13 @@ class OcrModulesTest {
             "ocr.mlkit(true)" to TYPE,
             "ocr.paddle.recognizeText([0, 0, 1, 1], {})" to TYPE,
             "ocr.rapid.detect(5)" to TYPE,
+            "ocr({ mode: 'xyz' })" to RANGE,
+            "ocr({ region: [0, 0, 'w'] })" to TYPE,
+            "ocr.recognizeText({ useOpenCL: 'yes' })" to TYPE,
+            "ocr.detect([NaN, 0])" to RANGE,
+            "ocr.mlkit({ engine: 5 })" to TYPE,
+            "ocr.paddle.detect({ mergeLine: 0 })" to TYPE,
+            "ocr.rapid({ boxScoreThresh: NaN })" to RANGE,
         )
 
         private val DEVICE_ONLY = listOf(
@@ -263,6 +297,13 @@ class OcrModulesTest {
             recognized("ocr.paddle.detect($IMG, [0, 0, 160, 96])") to DeviceCases.INFO,
             recognized("ocr.rapid($PNG)") to DeviceCases.INFO,
             recognized("ocr.rapid.detect($IMG)") to DeviceCases.INFO,
+            // A region beyond the image given as an ImageWrapper; the fields another engine reads are not checked by an engine module.
+            "ocr.detect($IMG, [0, 0, 400, 96])" to RANGE,
+            "ocr($IMG, { region: [300, 0, 30, 10] })" to RANGE,
+            "ocr.paddle.detect($IMG, [0, 90, 10, 10])" to RANGE,
+            recognized("ocr.mlkit($IMG, { mode: 'xyz', cpuThreadNum: 'x', maxSideLen: 'big' })") to DeviceCases.INFO,
+            recognized("ocr.rapid.detect($IMG, { region: [0, 0, 320, 96], useSlim: 'x' })") to DeviceCases.INFO,
+            recognized("ocr.detect($IMG, { region: ['0', 0, 160.9, 96], imageQuality: 80.5 })") to DeviceCases.INFO,
         )
 
     }

@@ -79,7 +79,7 @@ class ImagesModuleTest {
 
     @Test
     fun deviceOnlyCases() {
-        DEVICE.add(SHAPE + DEVICE_ONLY)
+        DEVICE.add(SHAPE + DEVICE_ONLY + DEVICE_ERRORS)
     }
 
     private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
@@ -263,6 +263,91 @@ class ImagesModuleTest {
             "images.ncc($MISSING, $MISSING, 1)" to TYPE,
             "images.isEqual($MISSING, 5)" to TYPE,
             "images.getSimilarity($MISSING, $MISSING, 5)" to TYPE,
+            // Q28: the documented values of the arguments and the option fields (appendix C).
+            "images.inRange($MISSING, 'nocolor', '#000000')" to RANGE,
+            "images.inRange($MISSING, {}, 0)" to TYPE,
+            "images.interval($MISSING, [], 10)" to TYPE,
+            "images.threshold($MISSING, 100, 255, 'XYZ')" to RANGE,
+            "images.adaptiveThreshold($MISSING, 255, 'MEDIAN_C', 'BINARY', 3, 0)" to RANGE,
+            "images.adaptiveThreshold($MISSING, 255, 'MEAN_C', 'TRUNC', 3, 0)" to RANGE,
+            "images.adaptiveThreshold($MISSING, 255, 'MEAN_C', 'BINARY', 3.5e10, 0)" to RANGE,
+            "images.blur($MISSING, 3, 'a')" to TYPE,
+            "images.blur($MISSING, [3, 3, 3])" to RANGE,
+            "images.blur($MISSING, 3, null, 'NOWHERE')" to RANGE,
+            "images.medianBlur($MISSING, [3, 5])" to RANGE,
+            "images.gaussianBlur($MISSING, 3, 0, 0, 'NOWHERE')" to RANGE,
+            "images.cvtColor($MISSING, 'NOPE')" to RANGE,
+            "images.cvtColor($MISSING, 'BGR2GRAY', 'x')" to TYPE,
+            "images.findCircles($MISSING, { dp: 'x' })" to TYPE,
+            "images.findCircles($MISSING, { minRadius: Infinity })" to RANGE,
+            "images.findCircles($MISSING, { region: [0, 'a'] })" to TYPE,
+            "images.resize($MISSING, [0, 10])" to RANGE,
+            "images.resize($MISSING, [1, 2, 3])" to RANGE,
+            "images.resize($MISSING, [32, 24], 'BAD')" to RANGE,
+            "images.resize($MISSING, [32, 24], 9)" to RANGE,
+            "images.scale($MISSING, 0.5, 0.5, 'BAD')" to RANGE,
+            "images.concat($MISSING, $MISSING, 'LEFT')" to RANGE,
+            "images.concat($MISSING, $MISSING, 4)" to RANGE,
+            "images.flip($MISSING, 'diag')" to RANGE,
+            "images.flip($MISSING, [1])" to TYPE,
+            "images.flip($MISSING, { x: 'y' })" to TYPE,
+            "images.detectColor($MISSING, '#FF0000', 0, 0, 4, 'xyz')" to RANGE,
+            "images.detectColor($MISSING, 'nocolor', 0, 0)" to RANGE,
+            "images.detectColor($MISSING, '#FF0000', -1.5e10, 0)" to RANGE,
+            "images.detectMultiColors($MISSING, 0, 0, '#FF0000', [[0, 0]])" to TYPE,
+            "images.detectMultiColors($MISSING, 0, 0, '#FF0000', [5])" to TYPE,
+            "images.findMultiColors($MISSING, '#FF0000', [[0, 'a', '#FF0000']])" to TYPE,
+            "images.findMultiColors($MISSING, '#FF0000', [[0, 0, 'nocolor']])" to RANGE,
+            "images.findColor($MISSING, '#FF0000', { threshold: 4, similarity: 0.9 })" to TYPE,
+            "images.findColor($MISSING, '#FF0000', { threshold: '4' })" to TYPE,
+            "images.findColor($MISSING, '#FF0000', { similarity: NaN })" to RANGE,
+            "images.findColor($MISSING, '#FF0000', { region: [0, 'a'] })" to TYPE,
+            "images.findColor($MISSING, '#FF0000', { region: [-2, 0] })" to RANGE,
+            "images.findColor($MISSING, '#FF0000', { region: 5 })" to TYPE,
+            "images.findColorInRegion($MISSING, '#FF0000', 0, 0, 10, 10, 'x')" to TYPE,
+            "images.findPointsByColor($MISSING, '#FF0000', { threshold: {} })" to TYPE,
+            "images.findImage($MISSING, $MISSING, { scales: [] })" to RANGE,
+            "images.findImage($MISSING, $MISSING, { scale: -1 })" to RANGE,
+            "images.findImage($MISSING, $MISSING, { scales: [1, 'x'] })" to TYPE,
+            "images.findImage($MISSING, $MISSING, { level: 'x' })" to TYPE,
+            "images.findImage($MISSING, $MISSING, { threshold: 0.1, similarity: 0.9 })" to TYPE,
+            "images.findImageInRegion($MISSING, $MISSING, 0, 0, 10, 10, '0.9')" to TYPE,
+            "images.matchTemplate($MISSING, $MISSING, { max: NaN })" to RANGE,
+            "images.matchTemplate($MISSING, $MISSING, { useTransparentMask: 1 })" to TYPE,
+            "images.matchFeatures($MISSING, $MISSING, { matcher: 'nope' })" to RANGE,
+            "images.matchFeatures($MISSING, $MISSING, { matcher: 7 })" to RANGE,
+            "images.matchFeatures($MISSING, $MISSING, { threshold: 2 })" to RANGE,
+            "images.matchFeatures($MISSING, $MISSING, { ransacThreshold: 0 })" to RANGE,
+            "images.matchFeatures($MISSING, $MISSING, { drawMatches: 5 })" to TYPE,
+            "images.matchFeatures($MISSING, $MISSING, { method: 'SURF' })" to RANGE,
+            "images.detectAndComputeFeatures($MISSING, { method: 3 })" to RANGE,
+            "images.matchFeatures($MISSING, $MISSING, { method: 0 })" to RANGE,
+            "images.detectAndComputeFeatures($MISSING, { maxFeatures: -1 })" to RANGE,
+            "images.detectAndComputeFeatures($MISSING, { scale: 9 })" to RANGE,
+            "images.detectAndComputeFeatures($MISSING, { grayscale: 'yes' })" to TYPE,
+            "images.quantize($MISSING, { maxColors: 'x' })" to TYPE,
+            "images.quantize($MISSING, { minQuality: 90, maxQuality: 10 })" to RANGE,
+            "images.quantize($MISSING, { preserveAlpha: 1 })" to TYPE,
+            "images.quantize($MISSING, { maxPixels: 0 })" to RANGE,
+            "images.save($MISSING, 'aj6-p31-out.png', 'gif')" to RANGE,
+            "images.save($MISSING, 'aj6-p31-out.png', 'jpg', {})" to TYPE,
+            "images.save($MISSING, 'aj6-p31-out.png', 'png', { speed: 1.5e10 })" to RANGE,
+            "images.toBase64($MISSING, 'gif')" to RANGE,
+            "images.compress($MISSING, 'webp', { maxColors: 16 })" to TYPE,
+            "images.getSimilarity($MISSING, $MISSING, { metric: 'abc' })" to RANGE,
+            "images.getSimilarity($MISSING, $MISSING, { metric: null })" to TYPE,
+            "images.getSimilarity($MISSING, $MISSING, { type: 5 })" to TYPE,
+            "images.downsample($MISSING, 0, 10)" to RANGE,
+            "images.downsample($MISSING, 10, -1)" to RANGE,
+            "images.fromBytes(['a'])" to TYPE,
+            "images.fromBytes([1, NaN])" to RANGE,
+            "images.__buildRegion([0, 0, 100, 1], 64, 48)" to RANGE,
+            "images.__buildRegion(null, -1, 5)" to RANGE,
+            "images.__buildRegion([-1, 0], 64, 48)" to RANGE,
+            "images.clip($MISSING, -1, 0, 1, 1)" to RANGE,
+            "images.clip($MISSING, 0, 0, 0, 1)" to RANGE,
+            "images.clip($MISSING, [0, 0, 0, 5])" to RANGE,
+            "images.getMeanColor($MISSING, [0, 0, 'w'])" to TYPE,
         )
 
         /** Argument errors for which the current module requests a screen capture or rejects a promise (JVM only). */
@@ -279,6 +364,10 @@ class ImagesModuleTest {
             "images.requestScreenCaptureAsync(5)" to TYPE,
             "images.loadAsync(5)" to TYPE,
             "images.loadAsync('')" to RANGE,
+            "images.requestScreenCapture({ orientation: 'up' })" to RANGE,
+            "images.requestScreenCapture({ isAsync: 1 })" to TYPE,
+            "images.requestScreenCapture({ width: 'w' })" to TYPE,
+            "images.requestScreenCaptureAsync({ orientation: 3 })" to RANGE,
         )
 
         /** The functions on the generated image; both switch states must give these results (they call the same functions). */
@@ -329,6 +418,41 @@ class ImagesModuleTest {
             "images.matchTemplate($IMG, images.clip($IMG, 8, 6, 14, 14), { max: 1 }).points.length" to "1",
             "typeof images.detectAndComputeFeatures($IMG)" to "\"object\"",
             "images.downsample($IMG, 32, 24).width <= 64" to "true",
+            // Q28: names and values the argument checks accept (appendix C).
+            "images.threshold(images.grayscale($IMG), 100, 255, 'binary').width" to "64",
+            "images.threshold(images.grayscale($IMG), 100, 255, 'THRESH_BINARY_INV').width" to "64",
+            "images.resize($IMG, [32, 24], 'inter-linear').width" to "32",
+            "images.concat($IMG, $IMG, 'start').width" to "128",
+            "[images.blur($IMG, 3, [1, 1]).width, images.blur($IMG, [3, 3], 1).width, images.blur($IMG, 3, { x: 1, y: 1 }, 'REFLECT').width]" to "[64,64,64]",
+            "images.cvtColor($IMG, 'BGR2GRAY', 1).width" to "64",
+            "[images.detectColor($IMG, '#FF0000', 12, 10, 4, 'rgb+'), images.detectColor($IMG, '#FF0000', 12, 10, 4, 'hs')]" to "[true,true]",
+            point("images.findColor($IMG, '#FF0000', { region: [10, 8, null, undefined] })") to "[10,8]",
+            point("images.findImage($IMG, images.clip($IMG, 8, 6, 14, 14), { scales: [1], level: 0 })") to "[8,6]",
+            "typeof images.matchFeatures($IMG, images.copy($IMG), { matcher: 'BRUTEFORCE' })" to "\"object\"",
+            "images.getSimilarity($IMG, images.copy($IMG), { type: 'MSE' })" to "0",
+            "images.flip($IMG, { horizontal: true }).width" to "64",
+            // Q29: the documented integers of the feature detection method (the current module failed on them).
+            "typeof images.detectAndComputeFeatures($IMG, { method: 2, maxFeatures: 50 })" to "\"object\"",
+            "typeof images.matchFeatures($IMG, images.copy($IMG), { method: 1 })" to "\"object\"",
+        )
+
+        /**
+         * Argument errors that need the size of an image (Q28: a pixel, a region or a clip beyond it), on the generated
+         * image; the current module failed in Android or OpenCV with other errors for them.
+         */
+        private val DEVICE_ERRORS = listOf(
+            "images.pixel($IMG, 64, 0)" to RANGE,
+            "images.pixel($IMG, 0, -1)" to RANGE,
+            "images.clip($IMG, 60, 0, 10, 10)" to RANGE,
+            "images.clip($IMG, [0, 0, 65, 1])" to RANGE,
+            "images.getMeanColor($IMG, [60, 0, 10, 10])" to RANGE,
+            "images.findColor($IMG, '#FF0000', { region: [0, 40, 10, 10] })" to RANGE,
+            "images.findColorInRegion($IMG, '#FF0000', 60, 0, 10, 10)" to RANGE,
+            "images.findImage($IMG, images.clip($IMG, 0, 0, 4, 4), { region: [0, 0, 100] })" to RANGE,
+            "images.detectColor($IMG, '#FF0000', 99, 0)" to RANGE,
+            "images.detectMultiColors($IMG, 0, 48, '#FF0000', [])" to RANGE,
+            // WEBP lossless takes the quality 100 alone on Android 11+ (Images.saveInternal); older versions accept any.
+            "images.compress($IMG, device.sdkInt >= 30 ? 'webp_lossless' : 'gif', 60)" to RANGE,
         )
 
     }

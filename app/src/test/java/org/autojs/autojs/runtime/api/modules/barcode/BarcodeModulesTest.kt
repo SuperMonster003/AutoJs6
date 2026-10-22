@@ -137,6 +137,21 @@ class BarcodeModulesTest {
             "qrcode.detect($MISSING, [])" to TYPE,
             "qrcode.detectAll('')" to RANGE,
             "qrcode.detectAll($MISSING, {}, null)" to TYPE,
+            // The documented fields of the options (appendix C Q28).
+            "barcode($MISSING, { format: 'no_such_format' })" to RANGE,
+            "barcode($MISSING, { format: ['qr_code', true] })" to TYPE,
+            "barcode($MISSING, { format: [null] })" to TYPE,
+            "barcode($MISSING, { format: NaN })" to RANGE,
+            "barcode($MISSING, { format: 1e10 })" to RANGE,
+            "barcode($MISSING, { format: {} })" to TYPE,
+            "barcode($MISSING, { enableAllPotentialBarcodes: 'yes' })" to TYPE,
+            "barcode($MISSING, { isAll: 1 }, true)" to TYPE,
+            "barcode.recognizeText($MISSING, { format: ['ean_13', 'ean_14'] })" to RANGE,
+            "barcode.detectAll($MISSING, { format: 'x' })" to RANGE,
+            "barcode.recognizeTexts($MISSING, { enableAllPotentialBarcodes: 1 })" to TYPE,
+            "qrcode($MISSING, { enableAllPotentialQrCodes: 1 })" to TYPE,
+            "qrcode($MISSING, { isAll: 'yes' })" to TYPE,
+            "qrcode.detectAll($MISSING, { enableAllPotentialBarcodes: 0 })" to TYPE,
         )
 
         /** Argument errors for which the current modules capture the screen (JVM only). */
@@ -158,6 +173,10 @@ class BarcodeModulesTest {
             "qrcode(5)" to TYPE,
             "qrcode({}, 'all')" to TYPE,
             "qrcode.detectAll(true)" to TYPE,
+            "barcode({ format: 'x' })" to RANGE,
+            "barcode({ isAll: 'yes' })" to TYPE,
+            "barcode.detectAll({ format: [1, '2'] })" to RANGE,
+            "qrcode({ enableAllPotentialQrCodes: 'yes' }, true)" to TYPE,
         )
 
         private val DEVICE_ONLY = listOf(
@@ -178,6 +197,10 @@ class BarcodeModulesTest {
             outcome("qrcode.recognizeTexts($QR, null)") to INFO,
             outcome("(function () { var r = qrcode.detect($QR_PATH, { enableAllPotentialQrCodes: true }); return r && String(r.getRawValue()); })()") to INFO,
             outcome("qrcode.detectAll($QR).length") to INFO,
+            // Accepted: names in other cases and separators, numbers truncated, `isAll` of the list forms and `format` of qrcode ignored.
+            outcome("barcode($QR, { format: ['QR-Code', 'format_ean_13', 256.7] })") to INFO,
+            outcome("barcode.detectAll($QR, { isAll: 'x' }).length") to INFO,
+            outcome("qrcode($QR, { format: 'no_such_format' })") to INFO,
         )
 
     }

@@ -31,7 +31,7 @@ class OcrModule(private val runtime: ScriptRuntime) {
 
     @ScriptInvoke
     fun invoke(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        Ocr.recognizeText(runtime, OcrArgs.recognition(MODULE, input, optionsOrRegion))
+        Ocr.recognizeText(runtime, OcrArgs.recognition(MODULE, runtime, input, optionsOrRegion))
 
     @ScriptFunction(name = "toString", toStringRole = ScriptToString.LITERAL)
     fun toStringOf(): String = Ocr.toString(runtime, emptyArray())
@@ -44,11 +44,11 @@ class OcrModule(private val runtime: ScriptRuntime) {
 
     @ScriptFunction
     fun recognizeText(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        Ocr.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", input, optionsOrRegion))
+        Ocr.recognizeText(runtime, OcrArgs.recognition("$MODULE.recognizeText", runtime, input, optionsOrRegion))
 
     @ScriptFunction
     fun detect(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =
-        Ocr.detect(runtime, OcrArgs.recognition("$MODULE.detect", input, optionsOrRegion))
+        Ocr.detect(runtime, OcrArgs.recognition("$MODULE.detect", runtime, input, optionsOrRegion))
 
     @ScriptFunction
     fun summary(): String = Ocr.summary(runtime, emptyArray())
