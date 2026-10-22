@@ -384,7 +384,7 @@ class ConsoleModule(private val runtime: ScriptRuntime) {
     @ScriptProxySet
     fun write(members: Scriptable, name: String, value: Any?) {
         if (name == "constructor") return
-        val setterKey = if (SETTER_NAME.matches(name)) name else "set${name.upperFirst()}"
+        val setterKey = if (name.isAccessorOf("set")) name else "set${name.upperFirst()}"
         val setter = ScriptableObject.getProperty(members, setterKey)
         if (setter !is Callable) throw GlobalValues.typeError("console", "\"$name\"", "a property with a setter ($setterKey)", value)
         val args: Array<Any?> = if (value is NativeArray) value.toTypedArray() else arrayOf(value)
@@ -421,7 +421,7 @@ class ConsoleModule(private val runtime: ScriptRuntime) {
 
     /** The configurator setter named by a `console.build` key, as the current module looks it up. */
     private fun configuratorFunction(key: String): String? {
-        val names = listOf(if (SETTER_NAME.matches(key)) key else "set${key.upperFirst()}", if (GETTER_NAME.matches(key)) key else "is${key.upperFirst()}")
+        val names = listOf(if (key.isAccessorOf("set")) key else "set${key.upperFirst()}", if (key.isAccessorOf("is")) key else "is${key.upperFirst()}")
         val methods = CONFIGURATOR_METHODS ?: return names.find { ScriptableObject.getProperty(self, it) is Callable }
         return names.find { it in methods }
     }
@@ -496,9 +496,6 @@ class ConsoleModule(private val runtime: ScriptRuntime) {
         const val DEFAULT_LOG_BACKUP_SIZE = 5
         const val DEFAULT_LOG_LEVEL = "ALL"
 
-        val SETTER_NAME = Regex("^set[A-Z].*")
-        val GETTER_NAME = Regex("^is[A-Z].*")
-
         val TRACE_LEVELS = linkedMapOf(
             "verbose" to Log.VERBOSE,
             "debug" to Log.DEBUG,
@@ -525,6 +522,13 @@ class ConsoleModule(private val runtime: ScriptRuntime) {
 
         /** The first character upper-cased, as `StringUtils.uppercaseFirstChar` (whose class needs Android to load). */
         fun String.upperFirst() = replaceFirstChar { it.uppercaseChar() }
+
+        /**
+         * Whether the name is [prefix] followed by an upper-case letter (`setLogSize`, `isShowing`), as `^set[A-Z]` of the
+         * current module. A plain check: a regex creates a matcher on every call, which made the failing `console.build` call
+         * about 1.6 times the Rhino reference on a device (R2); a name with a line break names no method either way.
+         */
+        fun String.isAccessorOf(prefix: String) = length > prefix.length && startsWith(prefix) && this[prefix.length] in 'A'..'Z'
 
     }
 
