@@ -78,12 +78,15 @@ internal class NodeScreenRecording(
             encoder.start()
             draining = true
             videoThread = Thread({ drainVideo(encoder, outputMuxer) }, "ScreenRecording-AVC").also { it.start() }
+            // Assign before start(): the frame source owns a HandlerThread from construction, so a start() that
+            // throws must still leave it for close() below (C8).
+            // zh-CN: 先赋值再 start(): 帧源构造时就已启动 HandlerThread, start() 抛出时也要交给下面的 close() 关闭 (C8).
             if (audioSource != "none") {
-                audio = ScreenRecordingAudio(context, capturer, audioSource, id, originNs, outputMuxer,
-                    ::recordFailure, onNotificationStop).also { it.start() }
+                ScreenRecordingAudio(context, capturer, audioSource, id, originNs, outputMuxer,
+                    ::recordFailure, onNotificationStop).also { audio = it }.start()
             }
-            frames = ScreenRecordingFrames(context, capturer, checkNotNull(videoSurface), width, height, frameRate,
-                originNs, ::recordFailure).also { it.start() }
+            ScreenRecordingFrames(context, capturer, checkNotNull(videoSurface), width, height, frameRate,
+                originNs, ::recordFailure).also { frames = it }.start()
             await(videoReady)
             return status()
         } catch (error: Throwable) {
