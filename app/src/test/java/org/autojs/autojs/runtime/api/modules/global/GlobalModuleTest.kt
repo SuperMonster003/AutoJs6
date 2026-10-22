@@ -344,9 +344,10 @@ class GlobalModuleTest {
     fun deviceOnlyCases() {
         exportForDevice(
             listOf(
-                // The current ui module, mounted after global, binds its own global isUiThread (P3.2), so only the
-                // successful call is checked here.
+                // The global isUiThread is this module's (decision a of P3.2): the ui module on the new layer keeps
+                // ui.isUiThread only, so the surplus argument is checked here.
                 "isUiThread()" to "false",
+                "isUiThread(1)" to "throws TypeError",
                 "sleep(0)" to "undefined",
                 "sleep(null)" to "throws TypeError",
                 "sleep(1, 3)" to "undefined",

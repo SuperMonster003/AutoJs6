@@ -171,6 +171,9 @@ class ConsoleModuleTest {
             "typeof console.isShowing" to "\"function\"",
             // The bean property of ConsoleImpl#isShowing is found first, as through the current proxy.
             "typeof console.showing" to "\"boolean\"",
+            // Configurable, as the names the current proxy mounts.
+            "['console', '\$console'].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); " +
+                "return [d.writable, d.enumerable, d.configurable].join('/'); }, this).join()" to "\"true/true/true,true/true/true\"",
         )
 
         /** Each expression prints, then returns what was printed (`printed()`). */

@@ -12,6 +12,7 @@ import org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject
 import org.autojs.autojs.runtime.api.augment.console.Console
 import org.autojs.autojs.runtime.api.augment.flow.FlowJsErrors
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
+import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptModule
@@ -45,7 +46,8 @@ import org.mozilla.javascript.Wrapper
  * `ConsoleImpl` as prototype (so `isShowing`, `setGravity` and the other console methods stay reachable), a read of
  * `name` trying `name`, `getName` and `isName`, and a write of `name` calling `setName` with the value (an array
  * spread). The console itself, `console.assert`'s evaluation and `console.build`'s calls stay with the runtime's
- * `ConsoleImpl` and the current module's companion (to be moved out before P5.2).
+ * `ConsoleImpl` and the current module's companion (to be moved out before P5.2). `console` and `$console` are
+ * configurable, as the names the current proxy mounts (`Augmentable.mount` with no attributes).
  *
  * Messages are formatted with the new `util.format` (decision b of P3.2): `console.log(o)` prints what `util.inspect(o)`
  * returns, a first argument of string type is the format string of `util.format`; the differences to the current
@@ -56,12 +58,13 @@ import org.mozilla.javascript.Wrapper
  *
  * zh-CN: 新脚本模块层上的 console 模块 (P3.2), 与现有 augment/console/Console (AugmentableProxy.proxying) 一样是代理模块: 成员顺序同现有模块, 原型为运行时的
  * ConsoleImpl (isShowing, setGravity 等控制台方法仍可访问), 读取 name 时依次尝试 name, getName 与 isName, 写入 name 时以该值调用 setName (数组展开). 控制台本身,
- * console.assert 的求值与 console.build 的调用仍由运行时的 ConsoleImpl 与现有模块的伴生对象完成 (P5.2 前迁出). 消息用新的 util.format 格式化 (P3.2 决定 b):
+ * console.assert 的求值与 console.build 的调用仍由运行时的 ConsoleImpl 与现有模块的伴生对象完成 (P5.2 前迁出). console 与 $console 可配置, 同现有代理挂载的名称 (Augmentable.mount 不带特性).
+ * 消息用新的 util.format 格式化 (P3.2 决定 b):
  * console.log(o) 打印 util.inspect(o) 的结果, 第一个参数为字符串类型时是 util.format 的格式串; 与现有模块 Util.formatRhino 的差异列在附录 E. 参数按真实签名 (T4):
  * 类型不符为 TypeError, 不可用的值 (未知的等级单词, 小数超时, 尺寸为 NaN) 为 RangeError, 多余参数为 TypeError (附录 C Q7). 颜色为 s13n.color 的通用颜色; colors 模块的
  * Color 对象仍是 augment 包的 ColorNativeObject (Q20).
  */
-@ScriptModule(name = "console", proxy = true)
+@ScriptModule(name = "console", attributes = ScriptAttributes.EMPTY, proxy = true)
 class ConsoleModule(private val runtime: ScriptRuntime) {
 
     private val util = UtilModule(null)
