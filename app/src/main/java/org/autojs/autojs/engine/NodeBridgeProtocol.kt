@@ -1876,12 +1876,10 @@ class AndroidNodeBridgeCapabilityProvider(
                     metadata = mapOf("module" to request.module),
                 ) { reason ->
                     uiSessionIds.remove(sessionId)
-                    NodeBridgeUiDispatchService.dispatch(
-                        appContext,
-                        uiCloseRequest(sessionId, reason),
-                    ) {
-                        // Best-effort cleanup during execution destroy.
-                    }
+                    // The store lives in this process. Going through startService could fail or run after destroy and
+                    // leave the session in the static store (C7).
+                    // zh-CN: 会话存储就在本进程. 经 startService 关闭可能失败或晚于 destroy 执行, 会把会话留在静态存储里 (C7).
+                    NodeBridgeUiSessionStore.remove(sessionId)?.close(reason)
                 }
             }.getOrElse { error ->
                 NodeBridgeUiDispatchService.dispatch(appContext, uiCloseRequest(sessionId, "resource_register_failed")) {}
