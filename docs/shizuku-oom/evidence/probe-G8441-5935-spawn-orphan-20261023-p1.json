@@ -1,0 +1,146 @@
+{
+  "meta": {
+    "serial": "BH900ASK9E",
+    "model": "G8441",
+    "android": "9",
+    "sdk": "28",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "root"
+    },
+    "mode": "spawn-orphan",
+    "rounds": 5,
+    "settleSec": 3.0,
+    "startResidue": 0,
+    "startHostAlive": false,
+    "startForceStops": 1,
+    "date": "20261023",
+    "startedAt": "2026-10-23 00:55:00",
+    "endedAt": "2026-10-23 00:56:04",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "mark": "spawned",
+      "servicePid": 1004,
+      "serviceRssKb": 59884,
+      "children": [],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "exited",
+      "constructed": true,
+      "orphans": 0,
+      "orphanNames": [],
+      "sleep600": 0,
+      "orphansKilled": 0,
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 2,
+      "mark": "spawned",
+      "servicePid": 2211,
+      "serviceRssKb": 67172,
+      "children": [
+        "getevent",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "constructed": true,
+      "orphans": 0,
+      "orphanNames": [],
+      "sleep600": 0,
+      "orphansKilled": 0,
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 3,
+      "mark": "spawned",
+      "servicePid": 2409,
+      "serviceRssKb": 67160,
+      "children": [
+        "getevent",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "constructed": true,
+      "orphans": 0,
+      "orphanNames": [],
+      "sleep600": 0,
+      "orphansKilled": 0,
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 4,
+      "mark": "spawned",
+      "servicePid": 2690,
+      "serviceRssKb": 67160,
+      "children": [
+        "getevent",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "constructed": true,
+      "orphans": 0,
+      "orphanNames": [],
+      "sleep600": 0,
+      "orphansKilled": 0,
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    },
+    {
+      "round": 5,
+      "mark": "spawned",
+      "servicePid": 2873,
+      "serviceRssKb": 67176,
+      "children": [
+        "getevent",
+        "sleep"
+      ],
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "host-died",
+      "constructed": true,
+      "orphans": 0,
+      "orphanNames": [],
+      "sleep600": 0,
+      "orphansKilled": 0,
+      "strayExec": 0,
+      "strayExecRssKb": 0,
+      "strayExecNames": [],
+      "strayExecKilled": 0
+    }
+  ],
+  "verdict": "PASS",
+  "summary": "service residue in 0/5 rounds, orphans in 0/5 rounds"
+}

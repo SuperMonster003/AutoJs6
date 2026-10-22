@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "serial": "BH900ASK9E",
+    "model": "G8441",
+    "android": "9",
+    "sdk": "28",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "root"
+    },
+    "items": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "9"
+    ],
+    "label": "p1",
+    "date": "20261023",
+    "startedAt": "2026-10-23 01:20:44",
+    "endedAt": "2026-10-23 01:22:03",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "items": [
+    {
+      "item": "1",
+      "status": "PASS",
+      "note": "shizuku() code 0 uid 0, execCommand code 0 uid 0"
+    },
+    {
+      "item": "2",
+      "status": "PASS",
+      "note": "pid reported, sleep 600 running 1 while the script ran, 0 left 3 s after it ended"
+    },
+    {
+      "item": "3",
+      "status": "PASS",
+      "note": "adb code 0 uid 0, adb + pty code 0 uid 0"
+    },
+    {
+      "item": "4",
+      "status": "PASS",
+      "note": "3/4 tests pass, 1 skipped (Window inspection requires API 29)",
+      "tests": {
+        "PrivilegedExplorerDeviceTest#userServicePagesAStableSnapshotAndReleasesIt": "pass",
+        "PrivilegedExplorerDeviceTest#alreadyAuthorizedShizukuCanReadSystemWithoutChangingPermissions": "pass",
+        "PrivilegedEditSessionsDeviceTest#authorizedSessionWritesTheOriginalTwiceAndProviderCannotBypassSaveChecks": "pass",
+        "PrivilegedEditorSaveDeviceTest#editorWritesBackToAnUnreadableOriginalAndCanSaveAgain": "assumption"
+      }
+    },
+    {
+      "item": "5",
+      "status": "PASS",
+      "note": "enabled before False, connected after 211 ms, disconnected after the list was written back in 4 ms",
+      "settingsRestored": 0
+    },
+    {
+      "item": "6",
+      "status": "PASS",
+      "note": "currentPackage / currentActivity match dumpsys (com.sonymobile.home/com.sonymobile.home.HomeActivity); 3/3 tests pass",
+      "tests": {
+        "WrappedShizukuTopActivityInstrumentationTest#getTasksSignatureIsKnown": "pass",
+        "WrappedShizukuTopActivityInstrumentationTest#topActivityMatchesTheUserService": "pass",
+        "CircularMenuMoreDialogInstrumentationTest#rowsKeepTheirPositionsAfterTheMenuAppears": "pass"
+      }
+    },
+    {
+      "item": "7",
+      "status": "PASS",
+      "note": "VOLUME_DOWN: adjust requests 1, streams changed 0, put back 0",
+      "volumeStreamsRestored": 0,
+      "ringerModeChanged": false
+    },
+    {
+      "item": "9",
+      "status": "PASS",
+      "note": "getevent under the service 1, stopped after 0.34 s (exit event), residue 0, exit host-died, stray 0, volumes put back 0"
+    },
+    {
+      "item": "final",
+      "status": "PASS",
+      "note": "user service 0, stray 0"
+    }
+  ],
+  "verdict": "PASS"
+}

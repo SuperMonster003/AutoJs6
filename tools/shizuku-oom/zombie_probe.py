@@ -20,14 +20,20 @@ Modes:
                    old service after the new server is up; then force-stops the host.
   spawn-orphan     The script keeps `shizuku.spawn('sleep 600')` running; after the force-stop the probe also counts the
                    service's child processes (sh / sleep) still alive, then kills those it can (same uid as adb shell).
+  volume-key       T6 (9) / P1.5: the script beats until stopped; once one getevent runs under the user service (volume key
+                   control on), the probe writes a volume up key to the evdev node that reports KEY_VOLUMEUP (`sendevent`,
+                   as a real key press: the system volume panel shows and the volume may step), checks that the script
+                   stopped, puts back the ring / music / notification volumes it changed, then force-stops the host. Stray
+                   exec processes fail the round.
 
-Every round reads the logcat lines written since it began and records only how each user service process ended:
-`destroy` (it logged `UserService: destroy`, the transaction Shizuku sends when the host's connection dies), `exited`
-(gone without that line, e.g. the Shizuku starter's System.exit after the server died) or `alive`. It also counts the
+Every round reads the logcat lines written since it began and records only how each user service process ended: the
+reason it logged (`UserService: exit: <reason>`, since P1.1 / P1.2: destroy / exit / host-died / no-host-attached),
+else `destroy` (it logged `UserService: destroy`, the transaction Shizuku sends when the host's connection dies),
+`exited` (gone without either line, e.g. the Shizuku starter's System.exit after the server died) or `alive`. It also counts the
 sh / getevent / sleep processes that were reparented to init during the round, with their descendants (`stray`): the
 commands the service was still running when it died, e.g. the `getevent -t -c 1` loop the host keeps running through the
 service while volume key control is on. They are reported, killed when they run as shell, and do not decide the
-verdict. With --profile, round 1 also records a memory profile of its user service before the host is ended (P0.4):
+verdict unless --stray-fails (or volume-key mode). With --profile, round 1 also records a memory profile of its user service before the host is ended (P0.4):
 dumpsys meminfo totals, threads, dex extracted into anonymous memory and whether the host App ran in that process.
 Full process lists, logcat text and the script output are not printed or stored; the report keeps per-round counts, RSS
 sums and the verdict.
@@ -62,6 +68,7 @@ DEFAULT_START_SH = f"/sdcard/Android/data/{SHIZUKU_PACKAGE}/start.sh"
 SERVER_NAME = "shizuku_server"
 SPAWN_COMMAND = "sleep 600"
 STRAY_NAMES = ("sh", "getevent", "sleep")
+VOLUME_STREAMS = (2, 3, 5)
 LOGCAT_LINE = re.compile(r"^\d\d-\d\d \S+\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.*?)\s*: (.*)$")
 
 
@@ -134,6 +141,7 @@ class Probe:
         self.package = args.package
         self.service_name = f"{args.package}:shizuku-service-for-{args.package.rsplit('.', 1)[-1]}"
         self.pre_sleeps = set()
+        self._volume_device = None
 
     # Processes. zh-CN: 进程.
 
@@ -168,8 +176,19 @@ class Probe:
 
     # Script. zh-CN: 脚本.
 
-    def script_text(self, mark, spawn):
+    def script_text(self, mark, spawn, volume=False):
         write = f"files.write('{mark}', "
+        if volume:
+            # Beats until a volume up key stops it (the exit event writes "stopped"); ends itself after 120 s.
+            # zh-CN: 持续心跳, 直到音量加键停止它 (exit 事件写入 "stopped"); 120 秒后自行结束.
+            return "\n".join([
+                "var beats = 0, timedOut = false;",
+                "events.on('exit', function () { " + write + "timedOut ? 'timeout' : 'stopped'); });",
+                write + "'beat 0');",
+                "setInterval(function () { " + write + "'beat ' + (++beats)); }, 500);",
+                "setTimeout(function () { timedOut = true; exit(); }, 120000);",
+                "",
+            ])
         if spawn:
             return "\n".join([
                 f"var p = shizuku.spawn('{SPAWN_COMMAND}');",
@@ -185,11 +204,11 @@ class Probe:
             "",
         ])
 
-    def prepare_script(self, spawn=False):
+    def prepare_script(self, spawn=False, volume=False):
         token = secrets.token_hex(4)
         mark = f"{DEVICE_DIR}/mark-{token}.txt"
         script = f"{DEVICE_DIR}/probe-{token}.js"
-        self.dev.write(script, self.script_text(mark, spawn))
+        self.dev.write(script, self.script_text(mark, spawn, volume))
         return script, mark
 
     def start_command(self, script):
@@ -257,19 +276,25 @@ class Probe:
     # Logcat. zh-CN: 日志.
 
     def events(self, since, service_pids):
-        """Per service pid: constructed / destroy logged; host: onServiceConnected seen (tag WrappedShizuku)."""
-        seen = {pid: {"constructed": False, "destroy": False} for pid in service_pids}
+        """Per service pid: constructed / destroy / host attached / exit reason logged; host: onServiceConnected seen
+        (tag WrappedShizuku)."""
+        seen = {pid: {"constructed": False, "destroy": False, "attached": False, "exitReason": None} for pid in service_pids}
         connected = False
         for line in self.dev.logcat_since(since):
             found = LOGCAT_LINE.match(line)
             if not found:
                 continue
-            pid, tag, message = int(found[1]), found[4], found[5]
+            pid, tag, message = int(found[1]), found[4], found[5].strip()
             if pid in seen and tag == "UserService":
                 if message.startswith("constructor"):
                     seen[pid]["constructed"] = True
-                elif message.strip() == "destroy":
+                elif message == "destroy":
                     seen[pid]["destroy"] = True
+                elif message == "host attached":
+                    seen[pid]["attached"] = True
+                elif message.startswith("exit: "):
+                    # Since P1.1 / P1.2 the service names why it exits (ROADMAP T3). zh-CN: P1.1 / P1.2 起服务写明退出原因.
+                    seen[pid]["exitReason"] = message[len("exit: "):]
             elif pid not in seen and tag == "WrappedShizuku" and message.startswith("onServiceConnected"):
                 connected = True
         return seen, connected
@@ -279,7 +304,8 @@ class Probe:
             return "-"
         if alive:
             return "alive"
-        return "destroy" if seen.get(pid, {}).get("destroy") else "exited"
+        events = seen.get(pid, {})
+        return events.get("exitReason") or ("destroy" if events.get("destroy") else "exited")
 
     # Rounds. zh-CN: 轮次.
 
@@ -366,6 +392,103 @@ class Probe:
         if pid is None:
             item["note"] = item.get("note") or "no new user service process"
         return item
+
+    def round_volume_key(self, index):
+        """T6 (9) / P1.5: with volume key control on, the host observes keys through one long-lived getevent under the
+        user service; a volume up key sent to the evdev node stops the script, and the force-stop leaves no getevent.
+        zh-CN: T6 (9) / P1.5: 开启音量键控制时, 宿主经用户服务下的一个常驻 getevent 观察按键; 向 evdev 节点发送音量加键能停止脚本,
+        强停后不留 getevent."""
+        rows = self.dev.processes()
+        known = {r[0] for r in rows}
+        before = {r[0] for r in self.services(rows)}
+        since = self.dev.now()
+        script, mark = self.prepare_script(volume=True)
+        item = {"round": index}
+        self.start_script(script)
+        pid, rss, text = self.wait_new_service(before, mark)
+        item.update(servicePid=pid, serviceRssKb=rss, mark=text)
+        # GlobalKeyObserver starts the shell observer 1.2 s after the host created it. zh-CN: GlobalKeyObserver 创建 1.2 秒后启动 shell 监听.
+        getevent, children = [], []
+        deadline = time.time() + 15
+        while pid is not None and time.time() < deadline:
+            rows = self.dev.processes()
+            names = {r[0]: r[4].rsplit("/", 1)[-1] for r in rows}
+            children = [names.get(c, "?") for c in self.descendants(rows, pid)]
+            getevent = [c for c in children if c == "getevent"]
+            if getevent:
+                break
+            time.sleep(0.5)
+        item["geteventUnderService"] = len(getevent)
+        item["children"] = sorted(children)
+        device = self.volume_up_device()
+        if pid is None or not getevent or device is None:
+            item["note"] = "no new user service process" if pid is None else (
+                "no getevent under the service (is volume key control on?)" if not getevent else "no KEY_VOLUMEUP device")
+        else:
+            volumes = self.volumes()
+            last = self.read_mark(mark)
+            sent = time.time()
+            self.dev.shell(f"sendevent {device} 1 115 1; sendevent {device} 0 0 0; sendevent {device} 1 115 0; sendevent {device} 0 0 0")
+            stopped, signal, stalled_since = None, None, None
+            while time.time() < sent + 8:
+                current = self.read_mark(mark)
+                if current == "stopped":
+                    stopped, signal = time.time() - sent, "exit event"
+                    break
+                if current == last:
+                    stalled_since = stalled_since or time.time()
+                    if time.time() - stalled_since >= 2.5:
+                        stopped, signal = stalled_since - sent, "beats stopped"
+                        break
+                else:
+                    last, stalled_since = current, None
+                time.sleep(0.25)
+            item["volumeKeyStopped"] = stopped is not None
+            item["volumeKeyStopSec"] = round(max(stopped, 0), 2) if stopped is not None else None
+            item["volumeKeySignal"] = signal
+            time.sleep(1)
+            item["volumeStreamsRestored"] = self.restore_volumes(volumes)
+        self.force_stop()
+        rows, services = self.settle_and_count()
+        alive_pids = {r[0] for r in services}
+        item["residue"] = len(services)
+        item["residueRssKb"] = sum(r[3] for r in services)
+        item["hostAlive"] = self.host_alive(rows)
+        seen, _ = self.events(since, [pid] if pid else [])
+        item["exitSource"] = self.exit_source(pid, pid in alive_pids, seen)
+        self.strays(item, rows, known)
+        return item
+
+    def volume_up_device(self):
+        """The evdev node that reports KEY_VOLUMEUP (`getevent -pl`), looked up once."""
+        if self._volume_device is None:
+            current = None
+            for line in self.dev.shell("getevent -pl 2>/dev/null", timeout=30).splitlines():
+                found = re.match(r"add device \d+: (\S+)", line)
+                if found:
+                    current = found[1]
+                elif current and "KEY_VOLUMEUP" in line:
+                    self._volume_device = current
+                    break
+        return self._volume_device
+
+    def volumes(self):
+        """Stream volumes the sent key may change (ring, music, notification). zh-CN: 发送的按键可能改变的音量 (铃声, 媒体, 通知)."""
+        found = {}
+        for stream in VOLUME_STREAMS:
+            for command in ("cmd media_session volume", "media volume"):
+                value = re.search(r"volume is (\d+)", self.dev.shell(f"{command} --stream {stream} --get 2>/dev/null"))
+                if value:
+                    found[stream] = (command, int(value[1]))
+                    break
+        return found
+
+    def restore_volumes(self, before):
+        after = self.volumes()
+        changed = [(stream, command, value) for stream, (command, value) in before.items() if after.get(stream, (None, value))[1] != value]
+        for stream, command, value in changed:
+            self.dev.shell(f"{command} --stream {stream} --set {value} >/dev/null 2>&1")
+        return len(changed)
 
     def round_update(self, index):
         a, b = self.args.apk_a, self.args.apk_b
@@ -541,16 +664,25 @@ class Probe:
 
 
 def verdict(items, args):
-    # Stray exec processes are reported but do not decide the verdict (T2 counts user service processes).
-    # zh-CN: 孤儿命令进程只报告, 不参与判定 (T2 只计用户服务进程).
+    # Stray exec processes are reported but do not decide the verdict (T2 counts user service processes), unless
+    # --stray-fails (P1.1 / P1.5 acceptance) or volume-key mode asks for it.
+    # zh-CN: 孤儿命令进程只报告, 不参与判定 (T2 只计用户服务进程); --stray-fails (P1.1 / P1.5 验收) 或 volume-key 模式下参与判定.
     strays = sum(1 for i in items if i.get("strayExec"))
     stray_note = f"; orphaned exec processes in {strays}/{len(items)} rounds" if strays else ""
+    stray_fails = args.stray_fails or args.mode == "volume-key"
+    if args.mode == "volume-key":
+        stopped = sum(1 for i in items if i.get("volumeKeyStopped"))
+        bad = [i for i in items if i.get("residue") or i.get("servicePid") is None or not i.get("volumeKeyStopped")
+               or not i.get("geteventUnderService") or i.get("strayExec")]
+        return ("FAIL" if bad else "PASS"), (f"volume key stopped the script in {stopped}/{len(items)} rounds, "
+                                             f"residue in {sum(1 for i in items if i.get('residue'))}/{len(items)} rounds{stray_note}")
     if args.expect == "accumulate":
         steps = [b["residue"] - a["residue"] for a, b in zip([{"residue": args.start_residue}] + items, items)]
         grew = sum(1 for s in steps if s >= 1)
         ok = grew >= max(1, int(len(items) * 0.8 + 0.5))
         return ("PASS" if ok else "FAIL"), f"residue grew in {grew}/{len(items)} rounds (expect accumulate){stray_note}"
-    bad = [i for i in items if i.get("residue") or i.get("orphans") or i.get("sleep600") or i.get("servicePid") is None]
+    bad = [i for i in items if i.get("residue") or i.get("orphans") or i.get("sleep600") or i.get("servicePid") is None
+           or (stray_fails and i.get("strayExec"))]
     total = sum(1 for i in items if i.get("residue"))
     if args.mode == "spawn-orphan":
         orphaned = sum(1 for i in items if i.get("orphans") or i.get("sleep600"))
@@ -573,6 +705,12 @@ def round_note(item, mode):
         extra.append(f"after-restart {item.get('residueAfterRestart', '-')} after-stop {item.get('residueAfterStop', '-')}")
     if mode.startswith("bind-kill:"):
         extra.append(f"connected {'yes' if item.get('hostConnectedBeforeKill') else 'no'}")
+    if mode == "volume-key":
+        extra.append(f"getevent {item.get('geteventUnderService', '-')}")
+        if "volumeKeyStopped" in item:
+            extra.append(f"stopped {'yes' if item['volumeKeyStopped'] else 'no'}"
+                         + (f" {item['volumeKeyStopSec']} s ({item['volumeKeySignal']})" if item["volumeKeyStopped"] else ""))
+            extra.append(f"volume restored {item.get('volumeStreamsRestored', 0)}")
     if item.get("strayExec"):
         extra.append(f"stray {item['strayExec']} {'/'.join(item.get('strayExecNames') or [])} "
                      f"{mb(item.get('strayExecRssKb', 0))} MB killed {item.get('strayExecKilled', 0)}")
@@ -609,7 +747,8 @@ def write_reports(meta, items, result, args):
         f"- 时间 {meta['startedAt']} - {meta['endedAt']}; 宿主无障碍服务开启 {meta['a11yBefore']} -> {meta['a11yAfter']}"
         + (f" (强停使其被系统移出启用列表, 结束时补回 {meta['a11yRestored']} 项)" if meta.get("a11yRestored") else ""),
         "- 探针: `tools/shizuku-oom/zombie_probe.py` (ROADMAP P0.1); 残留 = 结束宿主后仍在运行的用户服务进程数, RSS 合计为这些进程的 RSS 之和; "
-        "备注里的 stray = 本轮新出现且被 init 收养的 sh / getevent / sleep 及其后代 (服务死亡时仍在运行的命令), 只报告, 不参与判定",
+        "备注里的 stray = 本轮新出现且被 init 收养的 sh / getevent / sleep 及其后代 (服务死亡时仍在运行的命令), "
+        + ("参与判定 (--stray-fails 或 volume-key 模式)" if args.stray_fails or args.mode == "volume-key" else "只报告, 不参与判定"),
     ]
     profile = next((i["profile"] for i in items if i.get("profile")), None)
     if profile:
@@ -637,12 +776,12 @@ def write_reports(meta, items, result, args):
 
 
 def mode_type(value):
-    if value in ("force-stop", "kill9", "update", "server-restart", "spawn-orphan"):
+    if value in ("force-stop", "kill9", "update", "server-restart", "spawn-orphan", "volume-key"):
         return value
     found = re.fullmatch(r"bind-kill:(\d+(?:\.\d+)?)", value)
     if found and float(found[1]) <= 30:
         return value
-    raise argparse.ArgumentTypeError("mode must be force-stop, kill9, bind-kill:<seconds <= 30>, update, server-restart or spawn-orphan")
+    raise argparse.ArgumentTypeError("mode must be force-stop, kill9, bind-kill:<seconds <= 30>, update, server-restart, spawn-orphan or volume-key")
 
 
 def main():
@@ -663,6 +802,8 @@ def main():
     parser.add_argument("--kill-residue", action="store_true",
                         help="at the end, kill user service processes that appeared during the run (negative control cleanup)")
     parser.add_argument("--no-wake", action="store_true", help="do not send KEYCODE_WAKEUP before the run")
+    parser.add_argument("--stray-fails", action="store_true",
+                        help="stray exec processes fail the round (P1.1 / P1.5 acceptance); always on in volume-key mode")
     parser.add_argument("--profile", action="store_true",
                         help="profile the round 1 user service before the host is ended (meminfo, threads, extracted dex, App traces)")
     args = parser.parse_args()
@@ -737,6 +878,8 @@ def main():
                 item = probe.round_update(index)
             elif args.mode == "server-restart":
                 item = probe.round_server_restart(index)
+            elif args.mode == "volume-key":
+                item = probe.round_volume_key(index)
             else:
                 item = probe.round_basic(index)
             items.append(item)

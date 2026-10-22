@@ -20,7 +20,7 @@
 | 阶段 | 目标 | 完成条件 | 预计会话数 |
 | --- | --- | --- | --- |
 | P0 复现, 负对照与边界探针 | 探针能检出堆积, 报告者场景在当前构建上残留为 0, 5 条边界路径与内存画像有数字 | P0.1-P0.4 全部有报告, 附录 B 填满 (2026-10-22 完成) | 1 |
-| P1 修复与加固 | 子进程清理, 用户服务自守护, getevent 常驻进程 (P1.5), 进程内存 (P1.4, 形态待 Q3) | P1.1 / P1.2 / P1.5 真机探针残留 0 (含 stray 0) 并有 JVM 单测; P1.4 按附录 C Q3 | 1-2 |
+| P1 修复与加固 | 子进程清理, 用户服务自守护, getevent 常驻进程 (P1.5); 进程内存 (P1.4) 已取消 (D12) | P1.1 / P1.2 / P1.5 真机探针残留 0 (含 stray 0) 并有 JVM 单测 | 1-2 |
 | P2 回归, changelog 与发布门 | T6 的 Shizuku 功能回归 (9 项) 通过, changelog 条目, 6.8.0 发布门一行 | P2.1-P2.4 勾选, 本地提交 | 1 (可与 P1 同一会话) |
 
 ---
@@ -124,16 +124,16 @@
 
 ### P1 修复与加固 (D5 / D10 / D11, 代码改动; 验证需 XQ-AT72)
 
-- [ ] P1.1 destroy / exit 前清理子进程 (T3): `UserService` 登记存活的 `RemoteShellProcessHolder` (holder destroy 时注销) 与在途 `execCommand` 进程, `shutdown(reason)` 统一出口. 验收: P0.3(e) 探针残留 0 (sleep / sh 均无); 开启 "音量键控制" 时 XQ-AT72 `force-stop` 20 轮探针 stray 为 0 (D10, G8441 root 身份在 P2.1 复核); JVM 单测覆盖清理顺序.
-- [ ] P1.2 用户服务自守护 (D5 / T4 / T7): AIDL `attachHost(IBinder)`, 宿主 `onServiceConnected` 后附着, 宿主死亡 -> `shutdown(host-died)`; 30 秒无附着 -> `shutdown(no-host-attached)`; `version(+ 6)`. 验收: JVM 单测 4 例通过; XQ-AT72 `force-stop` 20 轮与 `bind-kill` 各档残留 0, logcat 退出原因为 host-died 或 destroy (竞态任一即可); (d) 路径如 P0.3 能实测则残留 0.
-- [ ] P1.3 宿主侧 10 秒超时重绑 (`connectedService`): 按 P0.3(d) 结论处置; 默认不改代码 (P1.2 的看门狗已覆盖被提前移除记录的进程), 在附录 A 记理由.
-- [ ] P1.4 用户服务进程内存 (D11, 不在发布门内): 原 "`App.onCreate` 增加用户服务进程分支, RSS < 40 MB" 作废 (宿主 `App` 不在该进程运行, 见 1.5). 按 P0.4 的 oat 实验结果 (Q3) 决定: 宿主经 Shizuku 在安装 / 更新后触发一次 dexopt, 或只作文档提示, 或取消; Q3 拍板后改写本条. 验收: 待 Q3.
-- [ ] P1.5 `InputEventObserver` 的 Shizuku 分支改为常驻进程 (D10): 不再每个按键事件经 `execCommand` 起一对 `sh` + `getevent -t -c 1`, 改为一个常驻 `newShellProcess` 持续读 `getevent -t` 的输出, 宿主侧 client 令牌 linkToDeath (宿主死即由 P1.1 的登记结束该进程); 关闭 "音量键控制" 或脚本引擎退出时结束. 验收: 开启 "音量键控制" 时按键事件仍被观察到, 音量键能停止脚本; XQ-AT72 `force-stop` 20 轮 stray 为 0; T6 (9) 通过.
+- [ ] P1.1 destroy / exit 前清理子进程 (T3): `UserService` 登记存活的 `RemoteShellProcessHolder` (holder destroy 时注销) 与在途 `execCommand` 进程, `shutdown(reason)` 统一出口. 验收: P0.3(e) 探针残留 0 (sleep / sh 均无); 开启 "音量键控制" 时 XQ-AT72 `force-stop` 20 轮探针 stray 为 0 (D10, G8441 root 身份在 P2.1 复核); JVM 单测覆盖清理顺序. 进度 (2026-10-23, shizuku-oom-p1): 代码完成 (`UserService.shutdown`, `UserServiceLifecycle`, holder 登记 / 注销, `UserServiceLifecycleTest` 9 例); G8441 (root) 首轮 spawn-orphan 暴露竞争: 宿主死亡时 client 死亡回调, `onHostDied` 与 Shizuku 的 destroy 同时结束 holder, 原 `compareAndSet` 让后到的调用不等进程树结束就返回, 服务先退出, root 身份的 `sleep 600` 被留下; 改为 `UserServiceLifecycle.Once` (后到的调用等第一次结束完成) 并补单测后 spawn-orphan 5/5 PASS (子进程与 `sleep 600` 均 0), force-stop 20 轮 stray 0; 待 XQ-AT72.
+- [ ] P1.2 用户服务自守护 (D5 / T4 / T7): AIDL `attachHost(IBinder)`, 宿主 `onServiceConnected` 后附着, 宿主死亡 -> `shutdown(host-died)`; 30 秒无附着 -> `shutdown(no-host-attached)`; `version(+ 6)`. 验收: JVM 单测 4 例通过; XQ-AT72 `force-stop` 20 轮与 `bind-kill` 各档残留 0, logcat 退出原因为 host-died 或 destroy (竞态任一即可); (d) 路径如 P0.3 能实测则残留 0. 进度 (2026-10-23): 代码完成 (`attachHost`, 30 秒看门狗, `version` 5935 + 6); G8441 (root) force-stop 20 轮残留 0/20, 退出原因 host-died 18 / destroy 2; 待 XQ-AT72 (force-stop 20 轮, bind-kill 各档).
+- [x] P1.3 宿主侧 10 秒超时重绑 (`connectedService`): 按 P0.3(d) 结论处置; 默认不改代码 (P1.2 的看门狗已覆盖被提前移除记录的进程), 在附录 A 记理由. 完成 (2026-10-23): 不改代码, 理由见附录 A "P1.3 处置" 行.
+- [x] P1.4 用户服务进程内存 (D11 / D12, 不在发布门内): 已取消 (D12). 正式版安装时即 dexopt, 用户服务 RSS 约 130 / PSS 约 40 MB, 其中 20 MB 为宿主无法消除的 boot image 私有页; 只有安装时跳过 dexopt 的 adb debug 包是 RSS 210 / PSS 131 MB. 结论留在 1.5 与附录 B.3, 不改代码, P2.2 不写 improvement 条目.
+- [ ] P1.5 `InputEventObserver` 的 Shizuku 分支改为常驻进程 (D10): 不再每个按键事件经 `execCommand` 起一对 `sh` + `getevent -t -c 1`, 改为一个常驻 `newShellProcess` 持续读 `getevent -t` 的输出, 宿主侧 client 令牌 linkToDeath (宿主死即由 P1.1 的登记结束该进程); 关闭 "音量键控制" 或脚本引擎退出时结束. 验收: 开启 "音量键控制" 时按键事件仍被观察到, 音量键能停止脚本; XQ-AT72 `force-stop` 20 轮 stray 为 0; T6 (9) 通过. 进度 (2026-10-23): 代码完成 (`getevent -t` 经 pty 常驻, 因为输出到管道时块缓冲, 按键事件会滞留; 关闭 "音量键控制" 时不再启动); G8441 (root) volume-key 5/5 PASS (服务下 getevent 1, 音量加键 0.3-0.6 s 停止脚本, stray 0, 退出原因 host-died), T6 (9) 通过; 待 XQ-AT72.
 
 ### P2 回归, changelog 与发布门 (D7 / D9)
 
-- [ ] P2.1 T6 回归在 XQ-AT72 (shell) 与 G8441 (root) 各跑一遍, 结果表入 `docs/shizuku-oom/evidence/regression-<日期>.md`. 验收: (1)-(7) 与 (9) 的 16 格与 (8) 冒烟全部通过.
-- [ ] P2.2 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段加 `fix` 1 条 (用户服务进程随宿主退出并清理其启动的子进程, 引用 issue #474) 与 `improvement` 1 条 (内容按 Q3 拍板的 P1.4 形态, 仅在 P1.4 有改动时), 用 `.python/generate_markdown.py` 生成 zh-Hans 的 markdown; 其他语言由维护者同步. 验收: JSON 解析通过, 生成文件只含本条变化.
+- [ ] P2.1 T6 回归在 XQ-AT72 (shell) 与 G8441 (root) 各跑一遍, 结果表入 `docs/shizuku-oom/evidence/regression-<日期>.md`. 验收: (1)-(7) 与 (9) 的 16 格与 (8) 冒烟全部通过. 进度 (2026-10-23): 脚本 `tools/shizuku-oom/regression.py`; G8441 (root) (1)-(7) 与 (9) 8 格通过, 结束后用户服务与 stray 均 0 (`regression-20261023-p1`); (4) 的 `PrivilegedEditorSaveDeviceTest` 需 API 29, 在 Android 9 上被 assumption 跳过, 其余 3 例通过; (7) 该机静音加勿扰, 音量不变, 以 `dumpsys audio` 音量日志里的 `ADJUST_LOWER` 请求判定送达; 待 XQ-AT72 (全部 9 项).
+- [ ] P2.2 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段加 `fix` 1 条 (用户服务进程随宿主退出并清理其启动的子进程, 引用 issue #474) 与 `improvement` 1 条 (内容按 Q3 拍板的 P1.4 形态, 仅在 P1.4 有改动时), 用 `.python/generate_markdown.py` 生成 zh-Hans 的 markdown; 其他语言由维护者同步. 验收: JSON 解析通过, 生成文件只含本条变化. 进度 (2026-10-23): fix 1 条已加 (无 improvement, D12); 生成脚本没有按语言生成的选项, 用其渲染函数算出 zh-Hans 的 4 个产物 (`README.md`, `.readme/README-zh-Hans.md`, `app/src/main/assets-app/doc/CHANGELOG.md` 与 `CHANGELOG-zh-Hans.md`), 只把本条一行写入 (这些文件另有其他会话 JSON 已改但尚未生成的条目, 不代为生成).
 - [ ] P2.3 发布门: `docs/dev/6.8.0-release-gate.md` 追加一行 (来源本文 D9, 复核方法 = P0.1 探针 + P2.1 回归, 证据 = evidence 报告). 验收: 该行存在且状态写明.
 - [ ] P2.4 收尾: 本文勾选与附录回填, 本地提交 (不推送), 看板 `../.claude/boards/shizuku-oom.md` 子会话结果区追加结论; issue 回复由维护者处理 (D7).
 
@@ -148,6 +148,9 @@
 | D9 | 2026-10-22 第 3 轮 | 6.8.0 发布门 | 列入 (P0 + P1.1 / P1.2 + P2.1) |
 | D10 | 2026-10-22 22:40 (附录 C Q1) | 启动即绑定与在途 getevent 孤儿 | 选 B: P1.1 清理在途进程 + stray 0 验收, 新增 P1.5, T6 加第 9 项 |
 | D11 | 2026-10-22 22:40 (附录 C Q2) | P1.4 前提不成立 | 选 A: P0.4 加 oat 实验与 v6.6.4 测量, D6 的 40 MB 目标作废, 形态待 Q3 |
+| D12 | 2026-10-23 00:20 (附录 C Q3) | P1.4 的最终形态 | 选 A: 取消 P1.4 的代码改动, 结论留在 1.5 与 B.3, P2.2 不写 improvement 条目 |
+| D13 | 2026-10-23 00:20 (附录 C Q4) | 负对照里宿主崩溃 | 选 A: 保持现状, 接受 P0.2 结果, B.1 保留崩溃注记 |
+| P1.3 处置 | 2026-10-23 (子会话 shizuku-oom-p1) | 宿主侧 10 秒超时重绑 (`connectedService`) | 不改代码. 理由: (1) P0.3(d) 在 G8441 自然复现, 被移除记录的旧进程交付 binder 失败后由启动器 `System.exit(1)` 退出, 无永久残留 (B.2); (2) 若旧进程已交付 binder 但宿主已换绑新服务, 它收不到宿主附着, 由 P1.2 的 30 秒看门狗 (`no-host-attached`) 结束; 已附着的则随宿主死亡 (`host-died`) 结束; (3) 改为更长的等待会让首次冷加载慢于 10 秒的设备 (G8441 约 19 秒) 多等, 收益只是少一个短暂并存的进程 |
 
 ## 附录 B 证据与数字 (P0 回填, 之后每阶段追加一列)
 
@@ -160,16 +163,17 @@
 | HEAD debug 5935 (P0.1) | XQ-AT72 | 20 | 0/20 (每轮退出来源 destroy) | 0 (单个服务约 208 MB; 另每轮 getevent / sh 孤儿一对约 5 MB, 探针以 shell 身份结束) | `probe-XQ-AT72-5935-force-stop-20261022` |
 | HEAD debug 5935 (P0.1) | G8441 (root) | 10 | 0/10 (每轮退出来源 destroy) | 0 (单个服务约 65.5 MB) | `probe-G8441-5935-force-stop-20261022` |
 | P1.2 后 | XQ-AT72 | 20 | | | |
+| P1 后 debug 5935 (本会话构建) | G8441 (root) | 20 | 0/20 (退出原因 host-died 18 / destroy 2), stray 0 | 0 (单个服务约 67.6 MB) | `probe-G8441-5935-force-stop-20261023-p1` |
 
 ### B.2 边界路径 (P0.3, HEAD 构建; P1 后复测同表追加列)
 
-| 路径 | 轮数 | 残留 | logcat 退出来源 | 结论 |
-| --- | --- | --- | --- | --- |
-| (a) bind-kill 0.2 / 0.5 / 1 / 2 s | 各 5 | 0/20 | 0.2 / 0.5 / 1 s 共 15 轮均为 exited (宿主被杀时都未收到 `onServiceConnected`, 无 destroy 行); 2 s 为 destroy 3 / exited 2; 缓冲区内可见的 exited 为启动器交付 binder 失败后 `System.exit(1)` (`VM exiting with result code 1`) | 无残留: 服务交付 binder 前被杀走启动器退出, 交付后被杀走 destroy (`probe-XQ-AT72-5935-bind-kill-{0.2,0.5,1,2}-20261022`) |
-| (b) update (version 替换) | 3 | 0/3 (覆盖安装后 0, 强停后 0) | 旧服务 destroy (覆盖安装强停宿主, 连接死亡) | 无残留; 每轮另有 getevent / sh 两对 (安装与最后强停各一对, 见 D10) (`probe-XQ-AT72-5936-update-20261022`, 5935 -> 5936) |
-| (c) server-restart | 3 | 0/3 (重启服务端后 0, 强停后 0) | exited: 服务端死亡后启动器 `System.exit(0)` (`VM exiting with result code 0`) | 无残留 (`probe-XQ-AT72-5935-server-restart-20261022`) |
-| (d) 10 秒超时重绑 | 1 (G8441 自然发生) | 0 | 旧进程: 交付 binder 失败, 启动器 `System.exit(1)` (`VM exiting with result code 1`); 新进程正常服务 | 代码审读 + G8441 装包后首次启动自然复现 (冷加载约 19 秒 > 10 秒): 无永久残留, 约 19 秒两个服务进程并存; 支持 P1.3 默认不改代码 (1.5) |
-| (e) spawn-orphan (sleep 600) | 5 | 服务 0/5; 子进程每轮 3 个 (`sleep 600` 1 个, getevent / sh 一对), 约 8 MB | 服务 destroy; 它启动的子进程不随之结束, 被 init 收养 | 修前基线 FAIL (预期), 作 P1.1 对照; 探针以 shell 身份结束了这些子进程 (`probe-XQ-AT72-5935-spawn-orphan-20261022`) |
+| 路径 | 轮数 | 残留 | logcat 退出来源 | 结论 | P1 后 |
+| --- | --- | --- | --- | --- | --- |
+| (a) bind-kill 0.2 / 0.5 / 1 / 2 s | 各 5 | 0/20 | 0.2 / 0.5 / 1 s 共 15 轮均为 exited (宿主被杀时都未收到 `onServiceConnected`, 无 destroy 行); 2 s 为 destroy 3 / exited 2; 缓冲区内可见的 exited 为启动器交付 binder 失败后 `System.exit(1)` (`VM exiting with result code 1`) | 无残留: 服务交付 binder 前被杀走启动器退出, 交付后被杀走 destroy (`probe-XQ-AT72-5935-bind-kill-{0.2,0.5,1,2}-20261022`) | 待 XQ-AT72 |
+| (b) update (version 替换) | 3 | 0/3 (覆盖安装后 0, 强停后 0) | 旧服务 destroy (覆盖安装强停宿主, 连接死亡) | 无残留; 每轮另有 getevent / sh 两对 (安装与最后强停各一对, 见 D10) (`probe-XQ-AT72-5936-update-20261022`, 5935 -> 5936) | 不复测 (P1 验收不含) |
+| (c) server-restart | 3 | 0/3 (重启服务端后 0, 强停后 0) | exited: 服务端死亡后启动器 `System.exit(0)` (`VM exiting with result code 0`) | 无残留 (`probe-XQ-AT72-5935-server-restart-20261022`) | 不复测 (P1 验收不含; 会唤醒 inrt 进入崩溃循环) |
+| (d) 10 秒超时重绑 | 1 (G8441 自然发生) | 0 | 旧进程: 交付 binder 失败, 启动器 `System.exit(1)` (`VM exiting with result code 1`); 新进程正常服务 | 代码审读 + G8441 装包后首次启动自然复现 (冷加载约 19 秒 > 10 秒): 无永久残留, 约 19 秒两个服务进程并存; 支持 P1.3 默认不改代码 (1.5) | G8441 装 P1 构建后首次启动同样拉起多个服务进程, 未附着的由启动器退出 (spawn-orphan 第 1 轮记 exited), 无残留 |
+| (e) spawn-orphan (sleep 600) | 5 | 服务 0/5; 子进程每轮 3 个 (`sleep 600` 1 个, getevent / sh 一对), 约 8 MB | 服务 destroy; 它启动的子进程不随之结束, 被 init 收养 | 修前基线 FAIL (预期), 作 P1.1 对照; 探针以 shell 身份结束了这些子进程 (`probe-XQ-AT72-5935-spawn-orphan-20261022`) | G8441 (root): 5/5 PASS, 服务 0, 子进程与 `sleep 600` 均 0, 退出原因 host-died 4 / exited 1 (`probe-G8441-5935-spawn-orphan-20261023-p1`); XQ-AT72 待测 |
 
 ### B.3 用户服务进程内存画像 (P0.4 / P1.4)
 
@@ -181,7 +185,7 @@
 | HEAD debug 5935, `cmd package compile -m speed-profile -f` 后 (`verify`, vdex 80.7, shell 可读) | XQ-AT72 (shell) | 143.6 | 49.6 | 20.3 | 3.6 | 10.2 / 0.4 (解压 0) | 18 | 无 | `probe-XQ-AT72-5935-force-stop-20261022-oat-speed-profile` |
 | v6.6.4 正式版 3274, 安装时 dexopt (`verify`, reason install) | XQ-AT72 (shell) | 130.1 | 39.5 | 20.1 | 3.5 | 2.1 / 0.4 (解压 0) | 16 | 无 | `probe-XQ-AT72-3274-force-stop-20261022-v664` |
 | debug 5835 (参照, 只读测量) | G8441 (root) | 约 65 | 约 22 | - | - | 约 5 (几乎全为干净页) | - | 无 | 1.5; 5935 每轮服务 RSS 65.5 见 `probe-G8441-5935-force-stop-20261022` |
-| P1.4 后 | XQ-AT72 | 待 Q3 | | | | | | | |
+| P1.4 后 | - | 已取消 (D12), 不复测 | | | | | | | |
 
 ## 附录 C 待决事项
 
@@ -191,8 +195,8 @@
 | --- | --- | --- | --- |
 | Q1 | 宿主启动即绑定与在途 getevent 孤儿 (1.5 第 3, 4 条) 怎么纳入 P1? A (推荐): P1.1 照原文清理在途 `execCommand` 进程, 验收追加 "开启音量键控制时 force-stop 20 轮 stray 为 0" (XQ-AT72 由探针核对, G8441 root 身份在 P2.1 复核), 不改绑定时机; 返工: 无. B: A 之外把 `InputEventObserver` 的 Shizuku 分支改为一个常驻 `newShellProcess` (client 令牌 linkToDeath, 宿主死即结束), 不再每个按键事件起一对 sh + getevent; 多改 `InputEventObserver` 并在 T6 加 "音量键控制" 1 项回归, 约多半个会话. C: 不处理, stray 只报告 | P1.1, P1.5, P2.1, T6 | 已决 (2026-10-22 22:40, 维护者选 B, 记为 D10) |
 | Q2 | P1.4 瘦身前提不成立 (1.5 第 1, 2 条): 宿主 `App` 不在用户服务进程运行, 体积来自 dex 解压进内存与 boot image 私有页. A (推荐): P0.4 加 oat 实验 (`cmd package compile` 后重测, 并量 v6.6.4 正式包) 再定 P1.4 形态, D6 的 40 MB 目标作废. B: 取消 P1.4 (返工: 删条目). C: 保留 40 MB 另找途径 (返工: 1-2 个会话) | D6, T5, P1.4, P2.2 | 已决 (2026-10-22 22:40, 维护者选 A, 记为 D11) |
-| Q3 | P1.4 的最终形态 (D11; 数字见 1.5 与 B.3): 正式版安装时即 dexopt, 用户服务 RSS 约 130 / PSS 约 40 MB, 其中 20 MB 是 boot image 私有页 (app_process 不经 zygote, 宿主无法消除), 解压 dex 为 0; 只有安装时跳过 dexopt 的包 (实测为 Android 12 上 adb 安装的 debug 包) 是 RSS 210 / PSS 131 MB, 手动编译后 PSS 降到 50 MB. A (推荐): 取消 P1.4 的代码改动, 结论留在 1.5 与 B.3, P2.2 不写 improvement 条目; 内存: 正式版保持 RSS 约 130 / PSS 约 40 MB, adb 安装的 debug 包保持 210 / 131 MB; 返工: 无. B: 只作文档提示, A 之外在 `tools/shizuku-oom/README.md` 加一句给开发者的提示 (debug 包的用户服务约 210 MB, 可执行 `adb shell cmd package compile -m speed-profile -f org.autojs.autojs6`); 内存: 正式版不变, debug 包在开发者手动执行后降到 RSS 144 / PSS 50 MB (实测 143.6 / 49.6); 约 0.1 个会话. C: 宿主经 Shizuku 在安装 / 更新后检测到自身为 `run-from-apk` 时自动触发一次 dexopt (`cmd package compile -m verify`, 实测约 8 秒, vdex 约 80 MB 存储); 内存: 正式版不变 (安装时已 dexopt), debug 包自动降到约 144 / 50 MB; 约 0.5-1 个会话, 主要只惠及 debug 构建, 需处理与安装并发及失败回退, 进 changelog `improvement` | P1.4, P2.2 | 需拍板, P0 结束时由调度会话出题 (不阻塞 P1.1 / P1.2 / P1.3 / P1.5) |
-| Q4 | P0.2 负对照不是 "健康宿主被强停": v6.6.4 在 6.8.0 数据上启动即崩溃 (数据库 5 -> 3 降级), 每轮残留 +1 到 +3 (1.5). A (推荐, 已先行): 接受现结果, 堆积已证明探针有效且机制与报告者相同, B.1 注明崩溃; 返工: 无. B: 维护者提供一台没有 6.8.0 数据的设备 (或同意在某台测试机上备份后清空宿主数据, 测后还原) 再跑 10 轮, 预期每轮 +1; 约 20 分钟, 需维护者在手机上授权 Shizuku. C: 改用临时 AVD 装 Shizuku 与 v6.6.4 重跑; 约半个会话, Shizuku 授权同样要维护者点按 | P0.2, 附录 B.1 | 已按推荐先行待确认 |
+| Q3 | P1.4 的最终形态 (D11; 数字见 1.5 与 B.3): 正式版安装时即 dexopt, 用户服务 RSS 约 130 / PSS 约 40 MB, 其中 20 MB 是 boot image 私有页 (app_process 不经 zygote, 宿主无法消除), 解压 dex 为 0; 只有安装时跳过 dexopt 的包 (实测为 Android 12 上 adb 安装的 debug 包) 是 RSS 210 / PSS 131 MB, 手动编译后 PSS 降到 50 MB. A (推荐): 取消 P1.4 的代码改动, 结论留在 1.5 与 B.3, P2.2 不写 improvement 条目; 内存: 正式版保持 RSS 约 130 / PSS 约 40 MB, adb 安装的 debug 包保持 210 / 131 MB; 返工: 无. B: 只作文档提示, A 之外在 `tools/shizuku-oom/README.md` 加一句给开发者的提示 (debug 包的用户服务约 210 MB, 可执行 `adb shell cmd package compile -m speed-profile -f org.autojs.autojs6`); 内存: 正式版不变, debug 包在开发者手动执行后降到 RSS 144 / PSS 50 MB (实测 143.6 / 49.6); 约 0.1 个会话. C: 宿主经 Shizuku 在安装 / 更新后检测到自身为 `run-from-apk` 时自动触发一次 dexopt (`cmd package compile -m verify`, 实测约 8 秒, vdex 约 80 MB 存储); 内存: 正式版不变 (安装时已 dexopt), debug 包自动降到约 144 / 50 MB; 约 0.5-1 个会话, 主要只惠及 debug 构建, 需处理与安装并发及失败回退, 进 changelog `improvement` | P1.4, P2.2 | 已决 (2026-10-23 00:20, 维护者选 A, 记为 D12) |
+| Q4 | P0.2 负对照不是 "健康宿主被强停": v6.6.4 在 6.8.0 数据上启动即崩溃 (数据库 5 -> 3 降级), 每轮残留 +1 到 +3 (1.5). A (推荐, 已先行): 接受现结果, 堆积已证明探针有效且机制与报告者相同, B.1 注明崩溃; 返工: 无. B: 维护者提供一台没有 6.8.0 数据的设备 (或同意在某台测试机上备份后清空宿主数据, 测后还原) 再跑 10 轮, 预期每轮 +1; 约 20 分钟, 需维护者在手机上授权 Shizuku. C: 改用临时 AVD 装 Shizuku 与 v6.6.4 重跑; 约半个会话, Shizuku 授权同样要维护者点按 | P0.2, 附录 B.1 | 已决 (2026-10-23 00:20, 维护者选 A, 记为 D13) |
 
 ## 附录 D 文件地图
 
