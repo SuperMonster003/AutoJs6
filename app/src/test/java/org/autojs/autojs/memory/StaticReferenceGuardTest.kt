@@ -14,10 +14,15 @@ import java.io.File
  * `src/test/resources/memory/static-reference-whitelist.txt`. The generated columns of that file come from
  * `tools/memory/static_audit.py --guard`, which applies the same rules; [scannerAgreesWithStaticAudit] checks that the
  * script and the scanner give the same rows, so the two implementations cannot drift apart unnoticed.
+ * docs/memory-phase2/ROADMAP.md T7 / P4.1 extends it to the plugin engine bridges (`engine/` and `core/plugin/` as script
+ * packages, ServiceConnection and Binder interfaces as a category); their lines may carry the transitional reasons p1 / p2 / p3
+ * until the phase that checks them is done, with the suspect's C number in the note.
  * zh-CN: docs/memory/ROADMAP.md T8 / P4.3 的源码守卫. [StaticReferenceScanner] 在 `app/src/main/java` 中找到的每个进程级引用 (类型为脚本, Rhino,
  * UI 对象或 Android Context 且非弱引用的 Java 静态字段与 Kotlin object / companion object / 顶层属性, 进程级注册表, 注册接收器, 绑定服务, 添加
  * IdleHandler, 准备 Looper 或创建 WebView 的文件) 都须在 `src/test/resources/memory/static-reference-whitelist.txt` 中有一行并写明理由. 该文件的
  * 生成列来自按同一规则运行的 `tools/memory/static_audit.py --guard`; [scannerAgreesWithStaticAudit] 核对脚本与扫描器给出相同的行, 两份实现无法悄悄分叉.
+ * docs/memory-phase2/ROADMAP.md T7 / P4.1 把守卫扩到插件引擎桥接 (`engine/` 与 `core/plugin/` 算脚本包, ServiceConnection 与 Binder 接口单列类别);
+ * 这些行在负责核对的阶段完成之前可用过渡理由 p1 / p2 / p3, 说明中写疑点的 C 编号.
  */
 class StaticReferenceGuardTest {
 
@@ -79,8 +84,10 @@ class StaticReferenceGuardTest {
 
     /**
      * ROADMAP Q45: a WeakHashMap holds its values strongly, so the reason weak needs a note that the values do not
-     * reference the key (H29: a cached ActivityResultLauncher kept its Activity key alive).
+     * reference the key (H29: a cached ActivityResultLauncher kept its Activity key alive). A transitional reason p1 / p2 / p3
+     * names the suspect of docs/memory-phase2/ROADMAP.md 1.3 that its phase checks.
      * zh-CN: ROADMAP Q45: WeakHashMap 强引用其值, 因此理由 weak 须在说明中写明值不引用键 (H29: 缓存的 ActivityResultLauncher 使其键 Activity 无法回收).
+     * 过渡理由 p1 / p2 / p3 须写出该阶段要核对的 docs/memory-phase2/ROADMAP.md 1.3 疑点编号.
      */
     @Test
     fun lineRulesOnSamples() {
@@ -92,6 +99,8 @@ class StaticReferenceGuardTest {
                 "field | a/A.kt | launchers | kotlin object; weak-key map; Activity | owner | removed on the Activity's ON_DESTROY",
                 "manual | a/B.kt | bus | kotlin object; WeakHashMap<Runnable, Unit>, weak-key | weak | keys are callbacks",
                 "field | a/A.kt | todo | kotlin object; strong; View | TODO | describe what it holds and who releases it",
+                "field | engine/E.kt | sessions | kotlin object; registry; - | p1 | removed on close; forced stop to check (C17)",
+                "call | core/plugin/P.kt | bindService | released: no; script | p2 | the lease unbinds it",
             ),
         )
         assertEquals(
@@ -99,6 +108,7 @@ class StaticReferenceGuardTest {
                 "  line 2: field | a/A.kt | views: a weak-key map with the reason weak needs \"$WEAK_KEY_NOTE\" in the note",
                 "  line 5: manual | a/B.kt | bus: a weak-key map with the reason weak needs \"$WEAK_KEY_NOTE\" in the note",
                 "  line 6: field | a/A.kt | todo: reason \"TODO\" is not one of ${REASONS.getValue("field")}",
+                "  line 8: call | core/plugin/P.kt | bindService: the transitional reason p2 needs the suspect's C number in the note",
             ),
             lineProblems(samples),
         )
@@ -235,6 +245,24 @@ class StaticReferenceGuardTest {
             ),
             StaticReferenceScanner.scanText("ui/Page.kt", calls).map { it.generated },
         )
+        // docs/memory-phase2/ROADMAP.md T7: object bodies on their header line (C17 was declared that way), the Binder category
+        // (the AIDL interface names come from the .aidl files in a full scan) and the bridge directories as script packages.
+        val bridge = """
+            package org.autojs.autojs.engine
+            class Host : Activity() {
+                companion object { val sessions = ConcurrentHashMap<String, Session>(); private var connection: ServiceConnection? = null }
+            }
+            object Pool { private val providers = ConcurrentHashMap<String, INodeJsModuleSourceProvider>() }
+            object Ids { val active = ConcurrentHashMap.newKeySet<String>() }
+        """.trimIndent()
+        assertEquals(
+            listOf(
+                "field | engine/Host.kt | connection | kotlin object; strong; Binder",
+                "field | engine/Host.kt | providers | kotlin object; strong collection; Binder",
+                "field | engine/Host.kt | sessions | kotlin object; registry; -",
+            ),
+            StaticReferenceScanner.scanText("engine/Host.kt", bridge, StaticReferenceScanner.BINDER_TYPES + "INodeJsModuleSourceProvider").map { it.generated },
+        )
     }
 
     private companion object {
@@ -247,11 +275,15 @@ class StaticReferenceGuardTest {
         /** Same text as `WEAK_KEY_NOTE` of static_audit.py. zh-CN: 与 static_audit.py 的 `WEAK_KEY_NOTE` 相同. */
         const val WEAK_KEY_NOTE = "values do not reference the key"
 
-        val FIELD_REASONS = setOf("process", "table", "weak", "owner", "page", "exempt")
+        /** docs/memory-phase2/ROADMAP.md P4.1: until P1 / P2 / P3 has checked the suspect named in the note. zh-CN: 直到 P1 / P2 / P3 核对完说明中的疑点. */
+        val TRANSITIONAL_REASONS = setOf("p1", "p2", "p3")
+        val SUSPECT = Regex("\\bC\\d+\\b")
+
+        val FIELD_REASONS = setOf("process", "table", "weak", "owner", "page", "exempt") + TRANSITIONAL_REASONS
         val REASONS = mapOf(
             "field" to FIELD_REASONS,
             "manual" to FIELD_REASONS,
-            "call" to setOf("process", "owner", "paired", "page", "exempt"),
+            "call" to setOf("process", "owner", "paired", "page", "exempt") + TRANSITIONAL_REASONS,
         )
 
         /** The unit tests run in the module directory; the fallback covers runs from the repository root. */
@@ -274,6 +306,8 @@ class StaticReferenceGuardTest {
                 entry.note.isBlank() || entry.note.startsWith("TODO") -> "the note is missing"
                 entry.reason == "weak" && "weak-key" in entry.detail && !entry.note.contains(WEAK_KEY_NOTE, ignoreCase = true) ->
                     "a weak-key map with the reason weak needs \"$WEAK_KEY_NOTE\" in the note"
+                entry.reason in TRANSITIONAL_REASONS && !SUSPECT.containsMatchIn(entry.note) ->
+                    "the transitional reason ${entry.reason} needs the suspect's C number in the note"
                 else -> null
             }?.let { "  line ${entry.number}: ${entry.key}: $it" }
         }

@@ -370,14 +370,15 @@ def registry_rows(statics):
 
 GUARD_CALLS = ("registerReceiver", "bindService", "WebView(", "addIdleHandler", "Looper.prepare")
 GUARD_HEADER = """\
-# Static reference guard whitelist (docs/memory/ROADMAP.md T7 / T8, P4.3)
+# Static reference guard whitelist (docs/memory/ROADMAP.md T7 / T8, P4.3; docs/memory-phase2/ROADMAP.md T7, P4.1)
 #
 # Read by app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt (part of :app:testAppDebugUnitTest).
 # Every process-level reference the guard finds in app/src/main/java needs a line here with a reason:
 #   field   a Java static field or a Kotlin object / companion object / top-level property whose type mentions
-#           ScriptRuntime, ScriptEngine, a Rhino Scriptable or Context, Activity, View, Fragment, Dialog or an Android
-#           Context and is not a WeakReference / SoftReference; or a process-level map / set / list / array in a script
-#           package or typed with threads, loopers, listeners, windows, images, engines or class loaders
+#           ScriptRuntime, ScriptEngine, a Rhino Scriptable or Context, Activity, View, Fragment, Dialog, an Android
+#           Context, a ServiceConnection / Binder or an AIDL interface and is not a WeakReference / SoftReference; or a
+#           process-level map / set / list / array in a script package (engine/ and core/plugin/ included) or typed with
+#           threads, loopers, listeners, windows, images, engines or class loaders
 #           (sections (a) and (c) of tools/memory/static_audit.py)
 #   call    a file that calls registerReceiver / bindService / addIdleHandler / Looper.prepare or creates a WebView
 #   manual  an appendix B.1 entry the text scan does not report (instance fields of process singletons, event buses);
@@ -401,6 +402,10 @@ GUARD_HEADER = """\
 #   paired   (call) the release call is in the same file
 #   page     page / UI lifetime outside the script path, covered by the P4.5 LeakCanary audit
 #   exempt   a text scan false positive: not a process-level field, or not a registration (the note says why)
+#   p1 / p2 / p3
+#            transitional (docs/memory-phase2/ROADMAP.md P4.1): checked by phase P1 / P2 / P3 of that roadmap; the note
+#            names the suspect's C number of its section 1.3, and the phase replaces the reason with a final one once
+#            it has checked that suspect
 """
 GUARD_SECTIONS = (("field", "# Process-level fields"), ("call", "# Registration calls"),
                   ("manual", "# Appendix B.1 entries the scan does not report (hand-written)"))

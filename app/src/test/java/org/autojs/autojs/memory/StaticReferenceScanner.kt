@@ -11,10 +11,14 @@ import java.util.regex.Pattern
  * order of the Python script, regular expressions are copied from it. They are compiled with UNICODE_CHARACTER_CLASS and
  * UNIX_LINES so that `\w`, `\s`, `\b` and `.` behave like Python's `re` on text whose line breaks are `\n` (the files are
  * read with universal newlines, as Python does). [StaticReferenceGuardTest] checks that both give the same rows.
+ * docs/memory-phase2/ROADMAP.md T7 / P4.1 widened the rules to the plugin engine bridges: `engine/` and `core/plugin/` are
+ * script packages, ServiceConnection / IBinder / IInterface / DeathRecipient and the AIDL interfaces form the category
+ * Binder, and an object body that starts on its header line is read from that line too.
  * zh-CN: `tools/memory/static_audit.py --guard` 选取源码守卫白名单行的规则的 Kotlin 移植 (docs/memory/ROADMAP.md T8 / P4.3): (a) 与 (c) 节的进程级字段,
  * 以及 (b) 节中调用 registerReceiver / bindService / addIdleHandler / Looper.prepare 或创建 WebView 的文件. 函数名与顺序同 Python 脚本, 正则照搬;
  * 编译时加 UNICODE_CHARACTER_CLASS 与 UNIX_LINES, 使 `\w`, `\s`, `\b`, `.` 在以 `\n` 换行的文本上与 Python `re` 一致 (文件按通用换行读取, 同 Python).
- * [StaticReferenceGuardTest] 核对两边给出相同的行.
+ * [StaticReferenceGuardTest] 核对两边给出相同的行. docs/memory-phase2/ROADMAP.md T7 / P4.1 把规则扩到插件引擎桥接: `engine/` 与 `core/plugin/` 算脚本包,
+ * ServiceConnection / IBinder / IInterface / DeathRecipient 与 AIDL 接口归为 Binder 类别, 体从头部行开始的 object 也从该行读取.
  */
 object StaticReferenceScanner {
 
@@ -38,6 +42,9 @@ object StaticReferenceScanner {
         "TopLevelScope", "VarScope", "ImporterTopLevel", "NativeJavaObject", "IdScriptableObject",
     )
     private val ENGINE_TYPES = setOf("ScriptEngine", "JavaScriptEngine", "RhinoJavaScriptEngine", "LoopBasedJavaScriptEngine")
+
+    /** Binder proxies, stubs and service connections; [scan] adds the AIDL interface names. zh-CN: Binder 代理, 桩与服务连接; [scan] 另加 AIDL 接口名. */
+    val BINDER_TYPES = setOf("ServiceConnection", "IBinder", "Binder", "IInterface", "DeathRecipient")
     private val WEAK_WRAPPERS = setOf("WeakReference", "SoftReference")
     private val COLLECTIONS = setOf(
         "List", "MutableList", "ArrayList", "Set", "MutableSet", "HashSet", "LinkedHashSet", "Map", "MutableMap",
@@ -56,7 +63,7 @@ object StaticReferenceScanner {
     private val SCRIPT_PATHS = listOf(
         "runtime/", "execution/", "core/looper/", "core/image/", "core/ui/", "core/web/", "core/console/",
         "core/record/", "core/automator/", "core/accessibility/", "core/eventloop/", "core/floaty/", "rhino/",
-        "engine/Runtime", "core/opencv/", "core/pref/Pref",
+        "engine/", "core/opencv/", "core/pref/Pref", "core/plugin/",
     )
     private val PAGE_PATHS = listOf("ui/", "theme/")
     private val KOTLIN_FACTORIES = linkedMapOf(
@@ -98,6 +105,7 @@ object StaticReferenceScanner {
     private val FUN_HEADER = re("\\bfun\\b")
     private val IMPORT_OR_PACKAGE = re("^\\s*(?:import|package)\\b")
     private val WEBVIEW_DECLARATION = re("\\b(?:class|fun|constructor|interface)\\b|\\bis\\s+\\w*WebView|\\bas\\??\\s+\\w*WebView")
+    private val AIDL_INTERFACE = re("^\\s*(?:oneway\\s+)?interface\\s+(\\w+)", Pattern.MULTILINE)
 
     /** Display only (not part of the shared rules): the named class or object around a line. zh-CN: 仅用于显示 (不属于共用规则): 某行所在的具名类或对象. */
     private val NAMED_SCOPE = re("\\bcompanion\\s+object(?:\\s+(\\w+))?|\\b(?:class|interface|object)\\s+(\\w+)|\\benum\\s+(?!class\\b)(\\w+)")
@@ -211,7 +219,17 @@ object StaticReferenceScanner {
         return imports
     }
 
-    private fun categories(typeText: String, imports: Map<String, String>): Pair<List<String>, String>? {
+    /**
+     * Simple names of the interfaces declared in the `.aidl` files under [roots] (parcelables are left out), as `aidl_interfaces`.
+     * zh-CN: [roots] 下 `.aidl` 文件中声明的接口简单名 (不含 parcelable), 同 `aidl_interfaces`.
+     */
+    fun aidlInterfaces(roots: List<File>): Set<String> = roots.filter { it.isDirectory }.flatMap { root ->
+        root.walk().filter { it.isFile && it.extension == "aidl" && "build" !in it.relativeTo(root).invariantSeparatorsPath.split('/') }
+            .flatMap { file -> AIDL_INTERFACE.matcher(readSource(file)).let { matcher -> buildList { while (matcher.find()) add(matcher.group(1)!!) } } }
+            .toList()
+    }.toSet()
+
+    private fun categories(typeText: String, imports: Map<String, String>, binder: Set<String>): Pair<List<String>, String>? {
         val tokens = TOKEN.tokens(typeText)
         val simple = tokens.map(::simpleName)
         val found = sortedSetOf<String>()
@@ -227,6 +245,7 @@ object StaticReferenceScanner {
                 name == "Fragment" || name.endsWith("Fragment") -> found += "Fragment"
                 name == "Dialog" || name.endsWith("Dialog") -> found += "Dialog"
                 (name == "View" || name.endsWith("View") || name == "ViewGroup") && !name.endsWith("ViewModel") -> found += "View"
+                token.split('.').any { it in binder } -> found += "Binder"
             }
         }
         if (found.isEmpty()) return null
@@ -255,16 +274,32 @@ object StaticReferenceScanner {
         return holding
     }
 
+    /** Text of a block body from [start] (after its `{`) to its closing brace or the end of that line. zh-CN: 从 [start] (其 `{` 之后) 到配对的右花括号或该行末尾的块体文本. */
+    private fun inlineBody(code: String, start: Int): String {
+        var depth = 1
+        for (i in start until code.length) {
+            when (code[i]) {
+                '\n' -> return code.substring(start, i)
+                '{' -> depth++
+                '}' -> if (--depth == 0) return code.substring(start, i)
+            }
+        }
+        return code.substring(start)
+    }
+
     /**
-     * Scope of each line start, the brace tracking of `kotlin_statics`; the second list holds the named classes or objects
-     * around each line, for messages only.
-     * zh-CN: 每行行首所处的作用域, 即 `kotlin_statics` 的花括号跟踪; 第二个列表是每行外围的具名类或对象, 只用于提示信息.
+     * Scope of each line start, the brace tracking of `kotlin_statics`; [owners] holds the named classes or objects around
+     * each line, for messages only; [inline] holds the statements after the brace of an object header, with their line.
+     * zh-CN: 每行行首所处的作用域, 即 `kotlin_statics` 的花括号跟踪; [owners] 是每行外围的具名类或对象, 只用于提示信息; [inline] 是 object 头部行花括号之后的语句及其行号.
      */
-    private fun scopes(code: String): Pair<List<String>, List<String>> {
+    private class Scopes(val byLine: List<String>, val owners: List<String>, val inline: List<Pair<Int, String>>)
+
+    private fun scopes(code: String): Scopes {
         val stack = ArrayList<Pair<String, String?>>()
         var statementStart = 0
         val scopesByLine = arrayListOf("top")
         val ownersByLine = arrayListOf("")
+        val inline = ArrayList<Pair<Int, String>>()
         fun owner() = stack.mapNotNull { it.second }.joinToString(".")
         code.forEachIndexed { i, c ->
             when (c) {
@@ -282,6 +317,10 @@ object StaticReferenceScanner {
                         last?.takeIf { kind == "object" || kind == "class" || kind == "block" }
                     }
                     stack += kind to named
+                    if (kind == "object") {
+                        // Statements after the brace on the header line belong to the object body.
+                        inlineBody(code, i + 1).split(';').filter { it.isNotBlank() }.forEach { inline += (scopesByLine.size - 1) to it }
+                    }
                     statementStart = i + 1
                 }
                 '}' -> {
@@ -298,17 +337,17 @@ object StaticReferenceScanner {
                 }
             }
         }
-        return scopesByLine to ownersByLine
+        return Scopes(scopesByLine, ownersByLine, inline)
     }
 
-    private fun javaStatics(path: String, code: String, imports: Map<String, String>, owners: List<String>): List<Field> {
+    private fun javaStatics(path: String, code: String, imports: Map<String, String>, owners: List<String>, binder: Set<String>): List<Field> {
         val rows = ArrayList<Field>()
         val matcher = JAVA_STATIC.matcher(code)
         while (matcher.find()) {
             val typeText = matcher.group(1)!!
             val name = matcher.group(2)!!
             if (typeText in setOf("class", "interface", "enum", "final", "abstract", "void")) continue
-            val (found, holding) = categories(typeText, imports) ?: (emptyList<String>() to null)
+            val (found, holding) = categories(typeText, imports, binder) ?: (emptyList<String>() to null)
             val line = code.substring(0, matcher.start()).count { it == '\n' } + 1
             rows += Field(
                 path, line, "java static", name, normalizeSpaces(typeText), found,
@@ -318,15 +357,16 @@ object StaticReferenceScanner {
         return rows
     }
 
-    private fun kotlinStatics(path: String, code: String, imports: Map<String, String>): List<Field> {
+    private fun kotlinStatics(path: String, code: String, imports: Map<String, String>, binder: Set<String>): List<Field> {
         val rows = ArrayList<Field>()
-        val (scopesByLine, owners) = scopes(code)
+        val scopes = scopes(code)
         val lines = code.split("\n")
-        lines.forEachIndexed { number, line ->
-            val scope = scopesByLine[number]
-            if (scope != "top" && scope != "object") return@forEachIndexed
-            val match = KOTLIN_PROPERTY.matcher(line.trim()).takeIf { it.find() } ?: return@forEachIndexed
+        val declarations = lines.withIndex().filter { (number, _) -> scopes.byLine[number] == "top" || scopes.byLine[number] == "object" }
+            .map { (number, line) -> Triple(number, scopes.byLine[number], line) } + scopes.inline.map { (number, text) -> Triple(number, "object", text) }
+        declarations.forEach { (number, scope, line) ->
+            val match = KOTLIN_PROPERTY.matcher(line.trim()).takeIf { it.find() } ?: return@forEach
             val name = match.group(1)!!
+            if (rows.any { it.line == number + 1 && it.name == name }) return@forEach
             val declared: String? = match.group(2)
             var initializer: String? = match.group(3)
             if (initializer != null && initializer.isBlank()) {
@@ -345,12 +385,12 @@ object StaticReferenceScanner {
                     else -> ""
                 }
             }
-            if (typeText.isEmpty()) return@forEachIndexed
-            val (found, holding) = categories(typeText, imports) ?: (emptyList<String>() to null)
+            if (typeText.isEmpty()) return@forEach
+            val (found, holding) = categories(typeText, imports, binder) ?: (emptyList<String>() to null)
             rows += Field(
                 path, number + 1, "kotlin " + if (scope == "top") "top-level" else "object", name, normalizeSpaces(typeText), found,
                 weakInitializer(listOf(initializer, delegate).firstOrNull { !it.isNullOrEmpty() }, holding ?: containerKind(typeText)),
-                owners[number],
+                scopes.owners[number],
             )
         }
         return rows
@@ -373,26 +413,35 @@ object StaticReferenceScanner {
     /** Universal newlines, as Python's `read_text`. zh-CN: 通用换行, 同 Python 的 `read_text`. */
     private fun readSource(file: File) = file.readText(Charsets.UTF_8).replace("\r\n", "\n").replace('\r', '\n')
 
-    /** Rows for one source file given by its path under `org/autojs/autojs/`. zh-CN: 单个源文件 (以 `org/autojs/autojs/` 下的路径给出) 的行. */
-    fun scanText(path: String, text: String): List<Row> = rows(scanFile(path, text))
+    /**
+     * Rows for one source file given by its path under `org/autojs/autojs/`; [binder] are the Binder type names.
+     * zh-CN: 单个源文件 (以 `org/autojs/autojs/` 下的路径给出) 的行; [binder] 是 Binder 类型名.
+     */
+    fun scanText(path: String, text: String, binder: Set<String> = BINDER_TYPES): List<Row> = rows(scanFile(path, text, binder))
 
-    /** Rows of every Java and Kotlin file under [sourceRoot] (`app/src/main/java`). zh-CN: [sourceRoot] (`app/src/main/java`) 下全部 Java 与 Kotlin 文件的行. */
+    /**
+     * Rows of every Java and Kotlin file under [sourceRoot] (`app/src/main/java`); the AIDL interfaces come from `app/src/main/aidl`
+     * and `plugin-api`, the `AIDL_ROOTS` of static_audit.py.
+     * zh-CN: [sourceRoot] (`app/src/main/java`) 下全部 Java 与 Kotlin 文件的行; AIDL 接口取自 `app/src/main/aidl` 与 `plugin-api`, 即 static_audit.py 的 `AIDL_ROOTS`.
+     */
     fun scan(sourceRoot: File): List<Row> {
         val base = File(sourceRoot, "org/autojs/autojs")
+        val main = sourceRoot.absoluteFile.parentFile
+        val binder = BINDER_TYPES + aidlInterfaces(listOf(File(main, "aidl"), File(main.parentFile.parentFile.parentFile, "plugin-api")))
         val scans = sourceRoot.walk().filter { it.isFile && (it.extension == "kt" || it.extension == "java") }.map { file ->
             val relative = if (file.startsWith(base)) file.relativeTo(base) else file.relativeTo(sourceRoot)
-            scanFile(relative.invariantSeparatorsPath, readSource(file))
+            scanFile(relative.invariantSeparatorsPath, readSource(file), binder)
         }.toList()
         return rows(Scan(scans.flatMap { it.statics }, scans.flatMap { it.calls.toList() }))
     }
 
     private class Scan(val statics: List<Field>, val calls: List<Pair<String, Calls>>)
 
-    private fun scanFile(path: String, text: String): Scan {
+    private fun scanFile(path: String, text: String, binder: Set<String>): Scan {
         val kotlin = path.endsWith(".kt")
         val code = stripCode(text, kotlin)
         val imports = importsOf(text)
-        val statics = if (kotlin) kotlinStatics(path, code, imports) else javaStatics(path, code, imports, scopes(code).second)
+        val statics = if (kotlin) kotlinStatics(path, code, imports, binder) else javaStatics(path, code, imports, scopes(code).owners, binder)
         val lines = code.split("\n").filter { IMPORT_OR_PACKAGE.search(it) == null }
         val calls = GUARD_CALLS.mapNotNull { (name, register, release) ->
             val body = if (name == "WebView(") lines.filter { WEBVIEW_DECLARATION.search(it) == null }.joinToString("\n") else lines.joinToString("\n")

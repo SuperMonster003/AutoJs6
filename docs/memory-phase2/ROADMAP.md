@@ -1,6 +1,6 @@
 # 内存路线图第二期: 插件引擎桥接对象
 
-更新日期: 2026-10-22 (立项, P0.1; P0.5)
+更新日期: 2026-10-22 (立项, P0.1; P0.5; P4.1)
 
 本文是第一期 `docs/memory/ROADMAP.md` (宿主 Rhino 全形态, P0-P6 已于 2026-10-22 完成) 的续篇, 覆盖第一期 D2 明确排除的部分: Node / Bun / Lua / Python / QuickJS 五种插件引擎在宿主进程内的桥接对象 (第一期附录 C Q5, 去向 Q53). 它以 2026-10-22 维护者经三轮选择题确认的 11 项决策 (第 2 节) 为依据, 记录现状 (第 1 节), 派生技术决策 (第 3 节), 红线 (第 4 节), 阶段任务 (第 5 节) 与附录 (基线数据, 桥接注册表与配对清单, 待决事项, 插件仓库改动记录, 证据等级, 文件地图).
 
@@ -164,7 +164,8 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 
 ### P4 守卫与规范 (D8)
 
-- [ ] P4.1 (守卫) `StaticReferenceGuardTest` 与 `static_audit.py --guard` 扫描范围扩到桥接目录 (T7), 白名单新增行写理由, 进入全量单测 (`:app:testAppDebugUnitTest` 全部通过, 他人在途文件的失败另记). 可在 P0.5 之后随时做, 与 P1-P3 并行. 验收 (E1).
+- [x] P4.1 (守卫) `StaticReferenceGuardTest` 与 `static_audit.py --guard` 扫描范围扩到桥接目录 (T7), 白名单新增行写理由, 进入全量单测 (`:app:testAppDebugUnitTest` 全部通过, 他人在途文件的失败另记). 可在 P0.5 之后随时做, 与 P1-P3 并行. 验收 (E1).
+  - 证据 (2026-10-22, mp2-guard, E1): `StaticReferenceScanner` 同步 P0.5 的规则 (`engine/` 与 `core/plugin/` 算脚本包, 单行 object 体, Binder 类别, AIDL 接口取自 `app/src/main/aidl` 与 `plugin-api`); `StaticReferenceGuardTest` 加过渡理由 `p1` / `p2` / `p3` (说明须含 C 编号) 与桥接样例 (单行 `companion object`, `ServiceConnection`, AIDL 接口); 白名单头部说明同步. `--guard`: 159 个生成行 (116 字段, 43 调用) + 8 个手写行, 新增 41 行全部写了理由: `process` 18, `table` 9, `exempt` 5, `page` 4, `p1` 4 (C2 `NodeJsRuntimePluginBridge.activeModuleSourceProviders`, C3 `NodeAudioRecordingService.entries`, C17 `RuntimeComposeActivity.sessions` / `RuntimeInteropActivity.windows`), `p3` 1 (C12 `PythonLongRunningExecutionRegistry.records`); `PluginAutoWake.locks / wakeCounts` 按 C19 记 `process` 并在说明写 C19; 5 行 `exempt` 是扫描误报 (`AiProvider*` 的 3 行是无体 `object X : Y()` 之后的类体属性, `PluginToolRegistry.providers / tools` 是没有幕后字段的 getter). `--guard --check` 为 current; 按 HEAD 源码重算与工作区 (含他人在途的 `engine/` 改动) 生成行相同. 测试: 单类 `StaticReferenceGuardTest` 9/9 通过; 全量 `:app:testAppDebugUnitTest` 913 个类 5553 个用例, 0 失败 0 错误 (26 跳过), 无他人在途文件的失败. 过渡理由由对应阶段 (P1 / P2 / P3) 核对疑点后改成最终理由, P4.2 定稿时白名单应不再有 `p1` / `p2` / `p3`.
 - [ ] P4.2 (规范) T6 的规范定稿: `AGENTS.md` 补句 (本地), 本文附录 B 的 "处置" 列全部回填, 五家引擎的会话作用域在附录 F 有路径. 验收 (E0).
 - [ ] P4.3 (巡检) LeakCanary 巡检: 五个引擎各以 `leakcanary_probe.py` 的方式多次运行一个基础场景与一个专项场景 (经 `RunIntentActivity`, 不在 instrumentation 内), 无新报告; 诊断页面 (第一期 P2) 的 retained 列表在桥接脚本结束后为空. 验收 (E4).
 - [ ] P4.4 (诊断) Q1 已决 (2026-10-22, 维护者选 (a)): `MemoryDiagnostics` 加 "未回收桥接会话数" 与 retained 列表的引擎列 (按 T1 (a) 的会话对象类名识别), 脚本 API `memory.snapshot()` 加 `bridgeSessions` 字段 (每引擎的未回收会话数), 开发者选项 "内存诊断" 页面同步显示; 文档站与 d.ts 同步 (AGENTS.md "关联项目" 一节); 可与 P4.3 同一子会话. 验收 (E3): 桥接脚本结束后字段为 0, 测试中人为持有会话对象时非 0; JVM 单测覆盖字段.
