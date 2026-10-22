@@ -48,6 +48,7 @@ data class SettingsWizardState(
         EXPORT("export"),
         IMPORT("import"),
         UNDO("undo"),
+        RESET("reset"),
     }
 
     /** The steps of the wizards; each wizard shows the ones it lists, in its order. zh-CN: 各向导的步骤, 由向导按自己的顺序选用. */

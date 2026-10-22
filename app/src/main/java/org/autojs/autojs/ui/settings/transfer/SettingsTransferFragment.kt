@@ -24,14 +24,14 @@ import org.autojs.autojs6.R
 
 /**
  * The preferences of "Manage AutoJs6 settings" (docs/settings/ROADMAP.md D4 / T10), written like `ShortcutBackupFragment`:
- * "Import settings" and "Export settings" on top, then "Restore default settings..." and "Undo last import" (enabled
- * while the last import can be undone, its summary names it), then the three switches of the automatic backup (D13 /
- * D22). The entries that come in a later version (P8 / P9) say so. The page hosts the wizards ([SettingsWizardHost])
+ * "Import settings" and "Export settings" on top, then "Restore default settings..." (P8.1) and "Undo last import"
+ * (enabled while the last import or reset can be undone, its summary names it), then the three switches of the
+ * automatic backup (D13 / D22), which say that they come in a later version (P9). The page hosts the wizards ([SettingsWizardHost])
  * and resumes a running one after it is recreated.
  *
  * zh-CN: "管理 AutoJs6 设置" 的偏好页 (ROADMAP D4 / T10), 写法同 `ShortcutBackupFragment`: 顶部为 "导入设置" 与 "导出设置",
- * 其下 "恢复默认设置..." 与 "撤销上次导入" (上次导入可撤销时可用, 摘要说明是哪次导入), 然后是自动备份的三个开关 (D13 / D22).
- * 后续版本提供的入口 (P8 / P9) 标明这一点. 页面承载向导 ([SettingsWizardHost]), 重建后恢复运行中的向导.
+ * 其下 "恢复默认设置..." (P8.1) 与 "撤销上次导入" (上次导入或恢复默认可撤销时可用, 摘要说明是哪次操作), 然后是自动备份的三个开关
+ * (D13 / D22), 标明后续版本提供 (P9). 页面承载向导 ([SettingsWizardHost]), 重建后恢复运行中的向导.
  */
 class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost {
 
@@ -69,7 +69,8 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
             .setSummary(R.string.settings_transfer_import_summary)
         preference(preferenceScreen, R.string.settings_transfer_export) { startWizard(exportState()) }
             .setSummary(R.string.settings_transfer_export_summary)
-        laterVersion(preference(preferenceScreen, R.string.settings_transfer_reset))
+        preference(preferenceScreen, R.string.settings_transfer_reset) { startWizard(SettingsResetWizard.initialState()) }
+            .setSummary(R.string.settings_transfer_reset_summary)
         undoPreference = preference(preferenceScreen, R.string.settings_transfer_undo_import) { startWizard(SettingsUndoWizard.initialState()) }.apply {
             isEnabled = false
         }
@@ -153,6 +154,7 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
             SettingsWizardState.Kind.EXPORT -> SettingsExportWizard(this)
             SettingsWizardState.Kind.IMPORT -> SettingsImportWizard(this)
             SettingsWizardState.Kind.UNDO -> SettingsUndoWizard(this)
+            SettingsWizardState.Kind.RESET -> SettingsResetWizard(this)
         }
         wizardJob = viewLifecycleOwner.lifecycleScope.launch {
             wizard.run(state)

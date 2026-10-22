@@ -363,7 +363,7 @@ function reset() {
     ids.forEach(function (id) {
         for (var i = 0; i < registry.size(); i++) {
             var key = registry.get(i);
-            if (String(key.getCategory().getId()) === id && storeOf(key).contains(key.getName())) left++;
+            if (key.getCategory() && String(key.getCategory().getId()) === id && storeOf(key).contains(key.getName())) left++;
         }
     });
     check('reset-cleared', left === 0, left + ' keys of ' + ids.join(',') + ' still stored');

@@ -21,6 +21,7 @@ import org.autojs.autojs.core.pref.archive.SettingsDeviceKey
 import org.autojs.autojs.core.pref.archive.SettingsEffects
 import org.autojs.autojs.core.pref.archive.SettingsImportApplier
 import org.autojs.autojs.core.pref.archive.SettingsImportPlanner
+import org.autojs.autojs.core.pref.archive.SettingsResetPlanner
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
 import org.autojs.autojs.core.pref.deploy.AndroidDeployments
 import org.autojs.autojs.core.pref.deploy.DeploymentException
@@ -236,6 +237,29 @@ object SettingsImporter {
         val report = SettingsEffects.run(changes, actions(app))
         val backupFailure = afterOperation(app)
         return SettingsTransferOutcome.of(undo.plan, changes, report, dataNotUndone = undo.dataNotUndone, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report))
+    }
+
+    /**
+     * Restores the categories of [SettingsWizardState.selected] to their defaults (D11, P8.1): backs up every category
+     * to the internal vault ("auto-reset", T9), removes every stored name of the selected categories
+     * ([SettingsResetPlanner]), records the operation for "Undo last import", runs the effect table on the calling
+     * thread, the main thread, and writes the operation backup (T20).
+     * zh-CN: 把所选分类恢复为默认值 (D11, P8.1): 先把全部分类备份到内部备份库 ("auto-reset", T9), 删除所选分类的全部已存储名称
+     * ([SettingsResetPlanner]), 记录本次操作以便 "撤销上次导入", 在调用线程 (主线程) 执行生效表, 最后写操作后备份 (T20).
+     */
+    suspend fun reset(context: Context, state: SettingsWizardState): SettingsTransferOutcome {
+        val app = context.applicationContext
+        val (plan, changes) = withContext(Dispatchers.IO) {
+            val plan = SettingsResetPlanner.plan(state.selected)
+            val vault = vault(app)
+            val backup = vault.backup(SettingsBackupVault.Operation.RESET, SettingsSnapshot.capture(SettingCategory.ALL), SettingsExporter.host(app), SettingsExporter.device())
+            val changes = SettingsImportApplier.write(plan)
+            vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.RESET, System.currentTimeMillis(), backup.name, plan.categories))
+            plan to changes
+        }
+        val report = SettingsEffects.run(changes, actions(app))
+        val backupFailure = afterOperation(app)
+        return SettingsTransferOutcome.of(plan, changes, report, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report))
     }
 
     /**

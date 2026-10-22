@@ -797,6 +797,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Inspecteur de mise en page</string>
     <string name="settings_transfer_category_locked">Chiffré sur un autre appareil</string>
+    <string name="settings_transfer_category_not_resettable">Non restauré par défaut</string>
     <string name="settings_transfer_category_other">Autres (état interne)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">États d\'activation des plugins</string>
@@ -858,9 +859,16 @@
     <string name="settings_transfer_pick_deployments">Ces paramètres importés nécessitent d\'abord un déploiement sur cet appareil. Les éléments cochés sont déployés, les autres gardent leur valeur actuelle.</string>
     <string name="settings_transfer_pick_export">Choisissez les catégories à exporter</string>
     <string name="settings_transfer_pick_import">Choisissez les catégories à importer</string>
+    <string name="settings_transfer_pick_reset">Choisissez les catégories à restaurer par défaut</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Affiner...</string>
     <string name="settings_transfer_refine_later">La sélection élément par élément arrivera dans une version ultérieure</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurer les paramètres par défaut...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">Restauration des paramètres par défaut...</string>
+    <string name="settings_transfer_reset_button">Restaurer</string>
+    <string name="settings_transfer_reset_confirm">Les %1$d catégories choisies reprennent leurs valeurs par défaut. Tous les paramètres sont d\'abord sauvegardés; \"Annuler la dernière importation\" rétablit les valeurs.</string>
+    <string name="settings_transfer_reset_done_title">Paramètres par défaut restaurés</string>
+    <string name="settings_transfer_reset_failed_title">Échec de la restauration</string>
+    <string name="settings_transfer_reset_summary">Restaurer les valeurs par défaut des catégories choisies</string>
     <string name="settings_transfer_result_backup_failed">La sauvegarde après opération n\'a pas été écrite: %1$s</string>
     <string name="settings_transfer_result_counts">Catégories: %1$d\nÉléments écrits: %2$d\nÉléments rétablis par défaut: %3$d\nValeurs modifiées: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Les identifiants n\'ont pas été importés: ils ont été chiffrés sur un autre appareil</string>
@@ -885,6 +893,8 @@
     <string name="settings_transfer_undo_failed_title">Échec de l\'annulation</string>
     <string name="settings_transfer_undo_import">Annuler la dernière importation</string>
     <string name="settings_transfer_undo_none">Aucune importation à annuler</string>
+    <string name="settings_transfer_undo_reset_confirm">Les %1$d catégories restaurées par défaut le %2$s reprennent leurs valeurs d\'avant. Cette annulation est définitive.</string>
+    <string name="settings_transfer_undo_reset_summary">Restauration par défaut du %1$s, catégories: %2$d</string>
     <string name="settings_transfer_undo_summary">Importation du %1$s, catégories: %2$d</string>
     <string name="shortcut_backup_complete">Ajouts confirmés: %1$d; ignorés ou non confirmés: %2$d</string>
     <string name="shortcut_backup_complete_icons">Compléter les icônes</string>

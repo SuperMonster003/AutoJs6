@@ -30,20 +30,22 @@ import org.autojs.autojs6.databinding.DialogSettingsCategoryPickerBinding
 import org.autojs.autojs6.databinding.SettingsCategoryPickerItemBinding
 
 /**
- * The category step of the export and the import wizard (docs/settings/ROADMAP.md T10, D2 / D6): the rows of
+ * The category step of the export, the import and the reset wizard (docs/settings/ROADMAP.md T10, D2 / D6 / D11): the rows of
  * [SettingsCategoryChoices] in page order, each with the number of its entries (the current settings for the export,
  * the manifest for the import), and "Select all" / "Deselect all" / "Invert selection" at the bottom (as in IDEA). The
  * import lists only the categories of the file (P7.5) and disables the credentials sealed for another device (D23;
  * P7.7 asks for a password where this step tells that it comes later). Ticking `credentials` for an export asks once
  * per wizard run (D2). The data categories show a "Refine..." entry and stay disabled until their detail pages exist
- * (P10.2). Every change of the selection is published to the host at once, so it survives the recreation of the page;
+ * (P10.2); a reset cannot tick `other` and the data categories (P8.1). Every change of the selection is published to
+ * the host at once, so it survives the recreation of the page;
  * "Next" of the export remembers it without `credentials` ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], appendix C Q28).
  * The rows are loaded off the main thread; a file that cannot be read any more ends the step at the failure page.
  *
- * zh-CN: 导出与导入向导的分类步骤 (ROADMAP T10, D2 / D6): 按页面顺序列出 [SettingsCategoryChoices] 的行, 每项显示条目数 (导出为当前
+ * zh-CN: 导出, 导入与恢复默认向导的分类步骤 (ROADMAP T10, D2 / D6 / D11): 按页面顺序列出 [SettingsCategoryChoices] 的行, 每项显示条目数 (导出为当前
  * 设置, 导入为 manifest 的记录), 底部为 "全选" / "全不选" / "反选" (与 IDEA 一致). 导入只列出文件中的分类 (P7.5), 以其他设备密钥
  * 加密的凭据不可勾选 (D23; P7.7 在本步骤提示 "后续版本提供" 的位置询问口令). 导出时勾选 `credentials` 每次运行向导询问一次 (D2).
- * 数据分类显示 "细化..." 入口, 在其细化页完成 (P10.2) 之前不可勾选. 勾选每次变化都立即写入宿主, 因此页面重建后仍保留; 导出的
+ * 数据分类显示 "细化..." 入口, 在其细化页完成 (P10.2) 之前不可勾选; 恢复默认不可勾选 `other` 与数据分类 (P8.1). 勾选每次变化都立即写入宿主,
+ * 因此页面重建后仍保留; 导出的
  * "下一步" 记住不含 `credentials` 的勾选 ([MiscStateKeys.SETTINGS_EXPORT_CATEGORIES], 附录 C Q28). 行在主线程之外加载; 文件已无法
  * 读取时本步骤转到失败页.
  */
@@ -99,7 +101,13 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
             onLocked = { ViewUtils.showToast(activity, R.string.settings_transfer_locked_later, true) },
         )
         adapter.setSelection(current.selected)
-        binding.settingsCategoryPickerHint.setText(if (state.kind == Kind.IMPORT) R.string.settings_transfer_pick_import else R.string.settings_transfer_pick_export)
+        binding.settingsCategoryPickerHint.setText(
+            when (state.kind) {
+                Kind.IMPORT -> R.string.settings_transfer_pick_import
+                Kind.RESET -> R.string.settings_transfer_pick_reset
+                else -> R.string.settings_transfer_pick_export
+            }
+        )
         WizardUi.tintLoadingProgress(binding.settingsCategoryPickerProgress)
         binding.settingsCategoryPickerList.apply {
             layoutManager = LinearLayoutManager(activity)
@@ -155,6 +163,7 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
     /** The rows of the wizard of [state]; runs on a background thread. zh-CN: [state] 所属向导的行; 在后台线程调用. */
     private fun rowsOf(context: Context, state: SettingsWizardState): List<SettingsCategoryChoice> = when (state.kind) {
         Kind.IMPORT -> SettingsImporter.inspect(context, state).choices
+        Kind.RESET -> SettingsCategoryChoices.reset(entryCounts())
         else -> SettingsCategoryChoices.export(entryCounts())
     }
 
@@ -205,7 +214,7 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
                     when (row.state) {
                         SettingsCategoryChoice.State.SELECTABLE -> onToggle(row.category)
                         SettingsCategoryChoice.State.LOCKED -> onLocked(row.category)
-                        SettingsCategoryChoice.State.LATER_VERSION -> Unit
+                        SettingsCategoryChoice.State.LATER_VERSION, SettingsCategoryChoice.State.NOT_RESETTABLE -> Unit
                     }
                 }
                 binding.settingsCategoryPickerItemRefine.setOnClickListener { row?.let { onRefine(it.category) } }
@@ -219,14 +228,15 @@ class SettingsCategoryPickerStep : SettingsWizardStep(SettingsWizardState.Step.P
                 binding.settingsCategoryPickerItemSubtitle.text = when (row.state) {
                     SettingsCategoryChoice.State.LATER_VERSION -> context.getString(R.string.settings_transfer_later_version)
                     SettingsCategoryChoice.State.LOCKED -> context.getString(R.string.settings_transfer_category_locked)
+                    SettingsCategoryChoice.State.NOT_RESETTABLE -> context.getString(R.string.settings_transfer_category_not_resettable)
                     SettingsCategoryChoice.State.SELECTABLE -> row.entries?.let { context.resources.getQuantityString(R.plurals.settings_transfer_category_entries, it, it) }.orEmpty()
                 }
-                binding.settingsCategoryPickerItemRefine.isVisible = category.isData
+                binding.settingsCategoryPickerItemRefine.isVisible = row.state == SettingsCategoryChoice.State.LATER_VERSION
                 binding.settingsCategoryPickerItemCheckbox.apply {
                     isEnabled = row.isSelectable
                     isChecked = category.id in selected
                 }
-                binding.root.isClickable = row.state != SettingsCategoryChoice.State.LATER_VERSION
+                binding.root.isClickable = row.isSelectable || row.state == SettingsCategoryChoice.State.LOCKED
                 binding.root.alpha = if (row.isSelectable) 1f else 0.5f
             }
         }

@@ -793,6 +793,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">布局分析</string>
     <string name="settings_transfer_category_locked">由其他设备加密</string>
+    <string name="settings_transfer_category_not_resettable">不参与恢复默认</string>
     <string name="settings_transfer_category_other">其他 (内部状态)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">插件启用状态</string>
@@ -854,9 +855,16 @@
     <string name="settings_transfer_pick_deployments">以下导入的设置需要先在本机部署: 勾选的项将被部署, 未勾选的项保持当前值</string>
     <string name="settings_transfer_pick_export">选择要导出的分类</string>
     <string name="settings_transfer_pick_import">选择要导入的分类</string>
+    <string name="settings_transfer_pick_reset">选择要恢复默认的分类</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">细化...</string>
     <string name="settings_transfer_refine_later">逐条选择将在后续版本提供</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">恢复默认设置...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">正在恢复默认设置...</string>
+    <string name="settings_transfer_reset_button">恢复默认</string>
+    <string name="settings_transfer_reset_confirm">选择的 %1$d 个分类将恢复为默认值. 恢复前会先备份全部设置, 可用 \"撤销上次导入\" 恢复原值</string>
+    <string name="settings_transfer_reset_done_title">已恢复默认设置</string>
+    <string name="settings_transfer_reset_failed_title">恢复默认失败</string>
+    <string name="settings_transfer_reset_summary">把选择的分类恢复为默认值</string>
     <string name="settings_transfer_result_backup_failed">操作后备份未写入: %1$s</string>
     <string name="settings_transfer_result_counts">分类: %1$d 个\n写入条目: %2$d 项\n恢复默认: %3$d 项\n实际变化: %4$d 项</string>
     <string name="settings_transfer_result_credentials_locked">凭据未导入: 它们由其他设备加密</string>
@@ -881,6 +889,8 @@
     <string name="settings_transfer_undo_failed_title">撤销失败</string>
     <string name="settings_transfer_undo_import">撤销上次导入</string>
     <string name="settings_transfer_undo_none">没有可撤销的导入</string>
+    <string name="settings_transfer_undo_reset_confirm">%2$s 恢复默认的 %1$d 个分类将恢复为之前的值; 撤销后不能再次撤销</string>
+    <string name="settings_transfer_undo_reset_summary">%1$s 的恢复默认, 分类: %2$d 个</string>
     <string name="settings_transfer_undo_summary">%1$s 的导入, 分类: %2$d 个</string>
     <string name="shortcut_backup_complete">确认已添加: %1$d; 已跳过或未确认: %2$d</string>
     <string name="shortcut_backup_complete_icons">补全备份图标</string>

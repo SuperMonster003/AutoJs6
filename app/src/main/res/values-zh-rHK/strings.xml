@@ -794,6 +794,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">佈局分析</string>
     <string name="settings_transfer_category_locked">由其他裝置加密</string>
+    <string name="settings_transfer_category_not_resettable">不參與恢復預設</string>
     <string name="settings_transfer_category_other">其他 (內部狀態)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">插件啓用狀態</string>
@@ -855,9 +856,16 @@
     <string name="settings_transfer_pick_deployments">以下匯入的設定需要先在本機部署: 勾選的項目將被部署, 未勾選的項目保持目前的值</string>
     <string name="settings_transfer_pick_export">選擇要匯出的分類</string>
     <string name="settings_transfer_pick_import">選擇要匯入的分類</string>
+    <string name="settings_transfer_pick_reset">選擇要恢復預設的分類</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">細化...</string>
     <string name="settings_transfer_refine_later">逐條選擇將在後續版本提供</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">恢復預設設定...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">正在恢復預設設定...</string>
+    <string name="settings_transfer_reset_button">恢復預設</string>
+    <string name="settings_transfer_reset_confirm">選擇的 %1$d 個分類將恢復為預設值. 恢復前會先備份全部設定, 可用 \"撤銷上次匯入\" 恢復原值</string>
+    <string name="settings_transfer_reset_done_title">已恢復預設設定</string>
+    <string name="settings_transfer_reset_failed_title">恢復預設失敗</string>
+    <string name="settings_transfer_reset_summary">把選擇的分類恢復為預設值</string>
     <string name="settings_transfer_result_backup_failed">操作後備份未寫入: %1$s</string>
     <string name="settings_transfer_result_counts">分類: %1$d 個\n寫入條目: %2$d 項\n還原預設: %3$d 項\n實際變化: %4$d 項</string>
     <string name="settings_transfer_result_credentials_locked">憑據未匯入: 它們由其他裝置加密</string>
@@ -882,6 +890,8 @@
     <string name="settings_transfer_undo_failed_title">撤銷失敗</string>
     <string name="settings_transfer_undo_import">撤銷上次匯入</string>
     <string name="settings_transfer_undo_none">沒有可撤銷的匯入</string>
+    <string name="settings_transfer_undo_reset_confirm">%2$s 恢復預設的 %1$d 個分類將還原為之前的值; 撤銷後不能再次撤銷</string>
+    <string name="settings_transfer_undo_reset_summary">%1$s 的恢復預設, 分類: %2$d 個</string>
     <string name="settings_transfer_undo_summary">%1$s 的匯入, 分類: %2$d 個</string>
     <string name="shortcut_backup_complete">確認已新增: %1$d; 已略過或未確認: %2$d</string>
     <string name="shortcut_backup_complete_icons">補全備份圖示</string>

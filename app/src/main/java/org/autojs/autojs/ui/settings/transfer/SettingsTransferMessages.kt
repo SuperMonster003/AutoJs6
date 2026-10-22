@@ -163,9 +163,10 @@ object SettingsTransferMessages {
 
     /** The summary of "Undo last import": what it undoes, or that there is nothing. zh-CN: "撤销上次导入" 的摘要. */
     @JvmStatic
-    fun undoSummary(context: Context, last: SettingsBackupVault.LastOperation?): String = when (last) {
+    fun undoSummary(context: Context, last: SettingsBackupVault.LastOperation?): String = when (last?.operation) {
         null -> context.getString(R.string.settings_transfer_undo_none)
-        else -> context.getString(R.string.settings_transfer_undo_summary, timeText(last.time), last.categories.size)
+        SettingsBackupVault.Operation.IMPORT -> context.getString(R.string.settings_transfer_undo_summary, timeText(last.time), last.categories.size)
+        SettingsBackupVault.Operation.RESET -> context.getString(R.string.settings_transfer_undo_reset_summary, timeText(last.time), last.categories.size)
     }
 
     /**
@@ -175,7 +176,8 @@ object SettingsTransferMessages {
      */
     @JvmStatic
     fun undoConfirmText(context: Context, last: SettingsBackupVault.LastOperation): String = buildString {
-        append(context.getString(R.string.settings_transfer_undo_confirm, last.categories.size, timeText(last.time)))
+        val res = if (last.operation == SettingsBackupVault.Operation.RESET) R.string.settings_transfer_undo_reset_confirm else R.string.settings_transfer_undo_confirm
+        append(context.getString(res, last.categories.size, timeText(last.time)))
         if (last.data.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_result_data_not_undone))
     }
 

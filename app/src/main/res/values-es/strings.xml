@@ -797,6 +797,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Inspector de diseño</string>
     <string name="settings_transfer_category_locked">Cifrado en otro dispositivo</string>
+    <string name="settings_transfer_category_not_resettable">No se restaura</string>
     <string name="settings_transfer_category_other">Otros (estado interno)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Estado de activación de plugins</string>
@@ -858,9 +859,16 @@
     <string name="settings_transfer_pick_deployments">Estas configuraciones importadas necesitan primero un despliegue en este dispositivo. Los elementos marcados se despliegan; los demás conservan su valor actual.</string>
     <string name="settings_transfer_pick_export">Elija las categorías que desea exportar</string>
     <string name="settings_transfer_pick_import">Elija las categorías que desea importar</string>
+    <string name="settings_transfer_pick_reset">Elija las categorías que desea restaurar</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Detallar...</string>
     <string name="settings_transfer_refine_later">La selección de elementos individuales llegará en una versión posterior</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurar la configuración predeterminada...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">Restaurando la configuración predeterminada...</string>
+    <string name="settings_transfer_reset_button">Restaurar</string>
+    <string name="settings_transfer_reset_confirm">Las %1$d categorías elegidas recuperan sus valores predeterminados. Primero se hace una copia de toda la configuración; \"Deshacer la última importación\" devuelve los valores.</string>
+    <string name="settings_transfer_reset_done_title">Configuración predeterminada restaurada</string>
+    <string name="settings_transfer_reset_failed_title">Error al restaurar</string>
+    <string name="settings_transfer_reset_summary">Restaurar los valores predeterminados de las categorías elegidas</string>
     <string name="settings_transfer_result_backup_failed">No se escribió la copia tras operaciones: %1$s</string>
     <string name="settings_transfer_result_counts">Categorías: %1$d\nElementos escritos: %2$d\nElementos restablecidos: %3$d\nValores cambiados: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Las credenciales no se importaron: se cifraron en otro dispositivo</string>
@@ -885,6 +893,8 @@
     <string name="settings_transfer_undo_failed_title">Error al deshacer</string>
     <string name="settings_transfer_undo_import">Deshacer la última importación</string>
     <string name="settings_transfer_undo_none">No hay ninguna importación que deshacer</string>
+    <string name="settings_transfer_undo_reset_confirm">Las %1$d categorías restauradas el %2$s recuperan los valores que tenían antes. Esta acción no se puede deshacer.</string>
+    <string name="settings_transfer_undo_reset_summary">Restauración del %1$s, categorías: %2$d</string>
     <string name="settings_transfer_undo_summary">Importación del %1$s, categorías: %2$d</string>
     <string name="shortcut_backup_complete">Adiciones confirmadas: %1$d; omitidas o sin confirmar: %2$d</string>
     <string name="shortcut_backup_complete_icons">Completar iconos de la copia</string>

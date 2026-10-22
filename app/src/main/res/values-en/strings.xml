@@ -794,6 +794,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Layout inspector</string>
     <string name="settings_transfer_category_locked">Encrypted on another device</string>
+    <string name="settings_transfer_category_not_resettable">Not restored to defaults</string>
     <string name="settings_transfer_category_other">Other (internal state)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Plugin enabled states</string>
@@ -855,9 +856,16 @@
     <string name="settings_transfer_pick_deployments">These imported settings need something on this device first. Ticked items are deployed, unticked ones keep their current values.</string>
     <string name="settings_transfer_pick_export">Choose the categories to export</string>
     <string name="settings_transfer_pick_import">Choose the categories to import</string>
+    <string name="settings_transfer_pick_reset">Choose the categories to restore to their defaults</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Refine...</string>
     <string name="settings_transfer_refine_later">Choosing single items comes in a later version</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restore default settings...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">Restoring the default settings...</string>
+    <string name="settings_transfer_reset_button">Restore</string>
+    <string name="settings_transfer_reset_confirm">The %1$d chosen categories get their default values back. A backup of every setting is taken first; \"Undo last import\" brings the values back.</string>
+    <string name="settings_transfer_reset_done_title">Default settings restored</string>
+    <string name="settings_transfer_reset_failed_title">Restore failed</string>
+    <string name="settings_transfer_reset_summary">Restore the chosen categories to their default values</string>
     <string name="settings_transfer_result_backup_failed">The backup after operations was not written: %1$s</string>
     <string name="settings_transfer_result_counts">Categories: %1$d\nEntries written: %2$d\nEntries restored to defaults: %3$d\nValues changed: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Credentials were not imported: they were encrypted on another device</string>
@@ -882,6 +890,8 @@
     <string name="settings_transfer_undo_failed_title">Undo failed</string>
     <string name="settings_transfer_undo_import">Undo last import</string>
     <string name="settings_transfer_undo_none">There is no import to undo</string>
+    <string name="settings_transfer_undo_reset_confirm">The %1$d categories restored to their defaults at %2$s get back the values they had before. This undo cannot be undone.</string>
+    <string name="settings_transfer_undo_reset_summary">Restore to defaults of %1$s, categories: %2$d</string>
     <string name="settings_transfer_undo_summary">Import of %1$s, categories: %2$d</string>
     <string name="shortcut_backup_complete">Confirmed additions: %1$d; skipped or unconfirmed: %2$d</string>
     <string name="shortcut_backup_complete_icons">Complete backup icons</string>

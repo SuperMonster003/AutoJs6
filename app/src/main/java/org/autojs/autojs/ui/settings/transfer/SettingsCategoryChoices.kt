@@ -2,6 +2,7 @@ package org.autojs.autojs.ui.settings.transfer
 
 import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
+import org.autojs.autojs.core.pref.archive.SettingsResetPlanner
 
 /**
  * One row of the category step (docs/settings/ROADMAP.md T10): a category, the number of its entries (null when the
@@ -21,6 +22,9 @@ data class SettingsCategoryChoice @JvmOverloads constructor(val category: Settin
          * zh-CN: 以其他设备的密钥加密 (D23): 本机无法导入; P7.7 在此处询问口令.
          */
         LOCKED,
+
+        /** `other` and the data categories, which a reset leaves as they are (D11, P8.1). zh-CN: 恢复默认不处理的 `other` 与数据分类. */
+        NOT_RESETTABLE,
     }
 
     val isSelectable: Boolean
@@ -62,6 +66,24 @@ object SettingsCategoryChoices {
                 it.isData -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LATER_VERSION)
                 it.id in locked -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LOCKED)
                 else -> SettingsCategoryChoice(it, entries[it.id])
+            }
+        }
+    }
+
+    /**
+     * The rows of "Restore default settings..." (D11, P8.1): every category with the entries of the current settings;
+     * `other` and the data categories cannot be ticked (`SettingsResetPlanner.resettable`).
+     * zh-CN: "恢复默认设置..." 的行 (D11, P8.1): 全部分类及当前设置的条目数; `other` 与数据分类不可勾选.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun reset(counts: Map<String, Int>, categories: List<SettingCategory> = SettingCategory.ALL): List<SettingsCategoryChoice> {
+        val resettable = SettingsResetPlanner.resettable(categories).toSet()
+        return categories.map {
+            when {
+                it in resettable -> SettingsCategoryChoice(it, counts[it.id] ?: 0)
+                it.isData -> SettingsCategoryChoice(it, null, SettingsCategoryChoice.State.NOT_RESETTABLE)
+                else -> SettingsCategoryChoice(it, counts[it.id] ?: 0, SettingsCategoryChoice.State.NOT_RESETTABLE)
             }
         }
     }

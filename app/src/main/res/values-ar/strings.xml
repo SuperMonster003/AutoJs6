@@ -799,6 +799,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">فاحص التخطيط</string>
     <string name="settings_transfer_category_locked">مشفر على جهاز آخر</string>
+    <string name="settings_transfer_category_not_resettable">لا تتم استعادته</string>
     <string name="settings_transfer_category_other">أخرى (الحالة الداخلية)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">حالات تفعيل الإضافات</string>
@@ -860,9 +861,16 @@
     <string name="settings_transfer_pick_deployments">تحتاج هذه الإعدادات المستوردة أولا إلى نشر على هذا الجهاز. يتم نشر العناصر المحددة, وتحتفظ العناصر الأخرى بقيمها الحالية.</string>
     <string name="settings_transfer_pick_export">اختر الفئات المراد تصديرها</string>
     <string name="settings_transfer_pick_import">اختر الفئات المراد استيرادها</string>
+    <string name="settings_transfer_pick_reset">اختر الفئات المراد استعادة قيمها الافتراضية</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">تحديد العناصر...</string>
     <string name="settings_transfer_refine_later">سيتوفر اختيار العناصر الفردية في إصدار لاحق</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">استعادة الإعدادات الافتراضية...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">جارٍ استعادة الإعدادات الافتراضية...</string>
+    <string name="settings_transfer_reset_button">استعادة</string>
+    <string name="settings_transfer_reset_confirm">ستستعيد الفئات المختارة (%1$d) قيمها الافتراضية. يتم أولا نسخ جميع الإعدادات احتياطيا; يعيد \"التراجع عن آخر استيراد\" القيم.</string>
+    <string name="settings_transfer_reset_done_title">تمت استعادة الإعدادات الافتراضية</string>
+    <string name="settings_transfer_reset_failed_title">فشلت الاستعادة</string>
+    <string name="settings_transfer_reset_summary">استعادة القيم الافتراضية للفئات المختارة</string>
     <string name="settings_transfer_result_backup_failed">لم تتم كتابة النسخ الاحتياطي بعد العمليات: %1$s</string>
     <string name="settings_transfer_result_counts">الفئات: %1$d\nالعناصر المكتوبة: %2$d\nالعناصر المستعادة إلى الافتراضي: %3$d\nالقيم المتغيرة: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">لم يتم استيراد بيانات الاعتماد: تم تشفيرها على جهاز آخر</string>
@@ -887,6 +895,8 @@
     <string name="settings_transfer_undo_failed_title">فشل التراجع</string>
     <string name="settings_transfer_undo_import">التراجع عن آخر استيراد</string>
     <string name="settings_transfer_undo_none">لا يوجد استيراد للتراجع عنه</string>
+    <string name="settings_transfer_undo_reset_confirm">ستستعيد الفئات التي أعيدت إلى الافتراضي في %2$s (%1$d) قيمها السابقة. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="settings_transfer_undo_reset_summary">استعادة الافتراضي في %1$s, الفئات: %2$d</string>
     <string name="settings_transfer_undo_summary">استيراد %1$s, الفئات: %2$d</string>
     <string name="shortcut_backup_complete">الإضافات المؤكدة: %1$d; المتخطاة أو غير المؤكدة: %2$d</string>
     <string name="shortcut_backup_complete_icons">إكمال أيقونات النسخة</string>

@@ -798,6 +798,7 @@
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">レイアウトインスペクター</string>
     <string name="settings_transfer_category_locked">別のデバイスで暗号化</string>
+    <string name="settings_transfer_category_not_resettable">既定値に戻す対象外</string>
     <string name="settings_transfer_category_other">その他 (内部状態)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">プラグインの有効状態</string>
@@ -859,9 +860,16 @@
     <string name="settings_transfer_pick_deployments">インポートする次の設定は, 先にこのデバイスでのデプロイが必要です. チェックした項目はデプロイされ, チェックしない項目は現在の値のままです</string>
     <string name="settings_transfer_pick_export">エクスポートするカテゴリを選択してください</string>
     <string name="settings_transfer_pick_import">インポートするカテゴリを選択してください</string>
+    <string name="settings_transfer_pick_reset">既定値に戻すカテゴリを選択してください</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">詳細...</string>
     <string name="settings_transfer_refine_later">項目ごとの選択は今後のバージョンで対応予定です</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">既定の設定に戻す...</string>
+    <string name="settings_transfer_reset_applying" tools:ignore="TypographyEllipsis">既定の設定に戻しています...</string>
+    <string name="settings_transfer_reset_button">既定値に戻す</string>
+    <string name="settings_transfer_reset_confirm">選択した %1$d 個のカテゴリを既定値に戻します. 先にすべての設定をバックアップするため, \"前回のインポートを元に戻す\" で元の値に戻せます</string>
+    <string name="settings_transfer_reset_done_title">既定の設定に戻しました</string>
+    <string name="settings_transfer_reset_failed_title">既定値に戻せませんでした</string>
+    <string name="settings_transfer_reset_summary">選択したカテゴリを既定値に戻します</string>
     <string name="settings_transfer_result_backup_failed">操作後のバックアップを書き込めませんでした: %1$s</string>
     <string name="settings_transfer_result_counts">カテゴリ: %1$d\n書き込んだ項目: %2$d\n既定値に戻した項目: %3$d\n変更された値: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">認証情報はインポートされませんでした: 別のデバイスで暗号化されています</string>
@@ -886,6 +894,8 @@
     <string name="settings_transfer_undo_failed_title">元に戻せませんでした</string>
     <string name="settings_transfer_undo_import">前回のインポートを元に戻す</string>
     <string name="settings_transfer_undo_none">元に戻せるインポートはありません</string>
+    <string name="settings_transfer_undo_reset_confirm">%2$s に既定値へ戻した %1$d 個のカテゴリを以前の値に戻します. この操作は元に戻せません</string>
+    <string name="settings_transfer_undo_reset_summary">%1$s の既定値への復元, カテゴリ: %2$d</string>
     <string name="settings_transfer_undo_summary">%1$s のインポート, カテゴリ: %2$d</string>
     <string name="shortcut_backup_complete">確認済みの追加: %1$d; スキップまたは未確認: %2$d</string>
     <string name="shortcut_backup_complete_icons">バックアップのアイコンを補完</string>
