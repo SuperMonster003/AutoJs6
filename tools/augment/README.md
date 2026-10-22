@@ -75,6 +75,16 @@ JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/diffe
 
 新脚本模块层的 JVM 测试 (`app/src/test/java/org/autojs/autojs/runtime/api/modules/`) 把新模块的期望值导出到 `app/build/script-modules-device/*.json` (同一格式, 期望值在 `kt`). 复核新模块时打开开关并比较错误类型: `--cases app/build/script-modules-device --new-modules on --strict-errors` (`--new-modules` 与 device_bench.py 相同, 结束后恢复原值; `--strict-errors` 让两侧都抛出时也要求错误名一致). `--debug-print on|off` 同样临时设置新模块层调试打印的总开关 (附录 C Q4, 键 `key_$_script_module_debug_print`), `--console` 打印本次运行期间 logcat 中 `GlobalConsole` (脚本控制台) 与 `ScriptModules` 标签的行, 用于查看调试条目原文.
 
+设备结果取决于设备本身 (TTS 引擎, 传感器) 的用例在 JSON 中 `kt` 为 null, 只打印设备结果, 在开关两态之间人工比较. 等待 Promise 时不要在脚本线程上 `wait()` (Promise 回调排在被阻塞的线程上, 会一直等到超时), 用 `HostModuleTestSupport.settled` 的写法在 `threads.start` 的线程上结算. 用例都在同一个脚本中运行, 运行时间长时 logcat 的环形缓冲区可能装不下: 2026-10-22 XQ-AT72 的 ThermalHAL 每秒写约 310 行, 默认 256 KiB 只能保留约 7 秒, 结果全部丢失, 需先 `adb -s SERIAL logcat -G 16M`.
+
+## device_net.py: 需要网络对端的真机用例 (P3.5)
+
+```
+py -3.12 -I tools/augment/device_net.py -s SERIAL [--port 18735] [--cases DIR_OR_FILE ...] [device_eval.py 的其他参数]
+```
+
+在 PC 的 127.0.0.1:PORT 上启动 HTTP 与 WebSocket 服务, 用 `adb reverse` 把设备的 127.0.0.1:PORT 转到它, 以给定用例 (默认 `app/build/script-modules-device-net`, 由 `HttpModuleTest` 与 `WebModulesTest` 写出) 与其余参数 (如 `--new-modules on --strict-errors`) 运行 `device_eval.py`, 结束后撤销转发并停止服务. 端点: `/echo` (任何方法, 以 JSON 返回 method / path / query / contentType / body 与请求头 X-A, 响应头 X-Echo: head), `/status/404` (404, 正文 "nope"), `/slow` (3 秒后应答, 用于超时), `/ws` (WebSocket, 文本消息原样加 "echo:" 前缀返回, 应答 ping 与 close).
+
 ## device_developer_options.py: 打开开发者选项页并截图
 
 ```

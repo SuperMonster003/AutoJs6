@@ -120,6 +120,16 @@ internal object HostModuleTestSupport {
 
     }
 
+    /**
+     * A device expression that settles the Promise [promise] on a worker thread (`threads.start`, whose timer runs the
+     * Promise callbacks; blocking the script thread with `wait()` would keep them from running) and returns [value] of the
+     * result `v`, "rejected" or "timeout" after 10 seconds.
+     */
+    fun settled(promise: String, value: String = "v"): String =
+        "(function () { var latch = new java.util.concurrent.CountDownLatch(1); var out = 'timeout'; " +
+            "threads.start(function () { ($promise).then(function (v) { out = $value; latch.countDown(); }, function (e) { out = 'rejected'; latch.countDown(); }); }); " +
+            "latch.await(10, java.util.concurrent.TimeUnit.SECONDS); return out; })()"
+
     fun json(value: String): String = buildString {
         append('"')
         value.forEach { c ->

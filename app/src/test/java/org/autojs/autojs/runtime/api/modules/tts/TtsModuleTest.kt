@@ -147,8 +147,11 @@ class TtsModuleTest {
             "tts.speak('a'.repeat(4000), { autoSplit: false })" to "throws JavaException IllegalArgumentException",
             "tts.synthesize('a'.repeat(4000), 'aj6-p35-tts.wav')" to "throws JavaException IllegalArgumentException",
             "tts.silence(100000000)" to "throws JavaException IllegalArgumentException",
-            "(function () { try { return Array.isArray(tts.engines().wait()); } catch (e) { return 'rejected'; } })()" to DeviceCases.INFO,
-            "(function () { try { return tts.silence(10).wait(); } catch (e) { return 'rejected ' + e; } })()" to DeviceCases.INFO,
+            HostModuleTestSupport.settled("tts.engines()", "Array.isArray(v)") to DeviceCases.INFO,
+            HostModuleTestSupport.settled("tts.ready()", "typeof v") to DeviceCases.INFO,
+            HostModuleTestSupport.settled("tts.voices({ offline: true })", "Array.isArray(v)") to DeviceCases.INFO,
+            HostModuleTestSupport.settled("tts.isLanguageAvailable('en-US')", "typeof v") to DeviceCases.INFO,
+            HostModuleTestSupport.settled("tts.silence(10)", "typeof v") to DeviceCases.INFO,
             "(function () { var u = tts.silenceTask(10); return String(u.getClass().getSimpleName()); })()" to DeviceCases.INFO,
             "(function () { try { var r = tts.synthesize('ok', 'aj6-p35-tts.wav'); return typeof r; } catch (e) { return 'failed ' + e; } })()" to DeviceCases.INFO,
         )
