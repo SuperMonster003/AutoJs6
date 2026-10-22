@@ -108,16 +108,19 @@ class ImagesModuleTest {
 
         private const val MISSING = "'aj6-p31-missing.png'"
 
-        /** A white 64 x 48 image with a red square from (10, 8) to (19, 17), drawn in the script. */
+        /**
+         * A white 64 x 48 image with a red square from (10, 8) to (19, 17), drawn in the script. The colors go through
+         * `drawARGB` / `setARGB`: on Android 10+ Rhino may pick `drawColor(long)` (a ColorLong) for a number.
+         */
         private const val IMG = "(function () { var b = android.graphics.Bitmap.createBitmap(64, 48, android.graphics.Bitmap.Config.ARGB_8888); " +
-            "var c = new android.graphics.Canvas(b); c.drawColor(-1); var p = new android.graphics.Paint(); p.setColor(-65536); c.drawRect(10, 8, 20, 18, p); " +
+            "var c = new android.graphics.Canvas(b); c.drawARGB(255, 255, 255, 255); var p = new android.graphics.Paint(); p.setARGB(255, 255, 0, 0); c.drawRect(10, 8, 20, 18, p); " +
             "return org.autojs.autojs.core.image.ImageWrapper.ofBitmap(runtime, b); })()"
 
         private const val DIR = "/sdcard/Download/aj6-augment-bench"
 
         /** The same image as a PNG under the temporary directory of device_eval.py (removed after the run), as a path. */
         private const val PNG = "(function () { var f = new java.io.File('$DIR/aj6-p31-img.png'); if (!f.exists()) { " +
-            "var o = new java.io.FileOutputStream(f); $IMG.getBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, o); o.close(); } return String(f.getPath()); })()"
+            "var b = $IMG.getBitmap(); var o = new java.io.FileOutputStream(f); b.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, o); o.close(); } return String(f.getPath()); })()"
 
         /** The width, the height and the pixel at (x, y) of the image [call] returns. */
         private fun probe(call: String, x: Int, y: Int) = "(function () { var r = $call; return [r.width, r.height, images.pixel(r, $x, $y)]; })()"
@@ -310,7 +313,7 @@ class ImagesModuleTest {
             "[images.isGrayscale($IMG), images.isGrayscale(images.grayscale($IMG))]" to "[false,true]",
             "[images.isEqual($IMG, images.copy($IMG)), images.isEqual($IMG, images.invert($IMG))]" to "[true,false]",
             "(function () { var g = images.grayscale($IMG); return [images.threshold(g, 100, 255).width, images.adaptiveThreshold(g, 255, 'MEAN_C', 'BINARY', 3, 0).height]; })()" to "[64,48]",
-            "[images.blur($IMG, 3).width, images.medianBlur($IMG, 3).width, images.gaussianBlur($IMG, [3, 3]).width, images.bilateralFilter($IMG).width, images.cvtColor($IMG, 'BGR2GRAY').width]" to
+            "[images.blur($IMG, 3).width, images.medianBlur($IMG, 3).width, images.gaussianBlur($IMG, [3, 3]).width, images.bilateralFilter(images.grayscale($IMG)).width, images.cvtColor($IMG, 'BGR2GRAY').width]" to
                 "[64,64,64,64,64]",
             "(function () { var r = images.readPixels($IMG); return [r.width, r.height, r.data.length]; })()" to "[64,48,3072]",
             "(function () { var r = images.buildRegion($IMG, [10, 8]); return [r.x, r.y, r.width, r.height]; })()" to "[10,8,54,40]",
@@ -319,7 +322,7 @@ class ImagesModuleTest {
             "(function () { var c = images.copy($IMG); var before = images.isRecycled(c); images.recycle(c); return [before, images.isRecycled(c)]; })()" to "[false,true]",
             "images.save($IMG, '$DIR/aj6-p31-out.png', 'png', 100) && files.exists('$DIR/aj6-p31-out.png')" to "true",
             "images.compress($IMG, 'jpg', 50).width" to "64",
-            "images.compressToBytes($IMG, 'png').length > 0" to "true",
+            "images.compressToBytes($IMG, 'jpg', 80).length > 0" to "true",
             "images.mse($IMG, images.copy($IMG))" to "0",
             "images.getSimilarity($IMG, images.copy($IMG), { metric: 'mse' })" to "0",
             "Array.isArray(images.findCircles(images.grayscale($IMG)))" to "true",

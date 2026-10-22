@@ -145,16 +145,16 @@ class OcrModulesTest {
         /** The engine the JVM starts with and returns to after each selection case ([prepare]); the device returns to automatic. */
         private const val JVM_MODE = "'mlkit'"
 
-        /** A white 320 x 96 image with "AJ6 OCR 123" in black, drawn in the script. */
+        /** A white 320 x 96 image with "AJ6 OCR 123" in black, drawn in the script (colors as in `ImagesModuleTest`). */
         private const val IMG = "(function () { var b = android.graphics.Bitmap.createBitmap(320, 96, android.graphics.Bitmap.Config.ARGB_8888); " +
-            "var c = new android.graphics.Canvas(b); c.drawColor(-1); var p = new android.graphics.Paint(); p.setColor(-16777216); p.setTextSize(48); " +
+            "var c = new android.graphics.Canvas(b); c.drawARGB(255, 255, 255, 255); var p = new android.graphics.Paint(); p.setARGB(255, 0, 0, 0); p.setTextSize(48); " +
             "p.setAntiAlias(true); c.drawText('AJ6 OCR 123', 12, 64, p); return org.autojs.autojs.core.image.ImageWrapper.ofBitmap(runtime, b); })()"
 
         private const val DIR = "/sdcard/Download/aj6-augment-bench"
 
         /** The same image as a PNG under the temporary directory of device_eval.py (removed after the run), as a path. */
         private const val PNG = "(function () { var f = new java.io.File('$DIR/aj6-p31-ocr.png'); if (!f.exists()) { " +
-            "var o = new java.io.FileOutputStream(f); $IMG.getBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, o); o.close(); } return String(f.getPath()); })()"
+            "var b = $IMG.getBitmap(); var o = new java.io.FileOutputStream(f); b.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, o); o.close(); } return String(f.getPath()); })()"
 
         /** Whether [call] returns an array, its length and whether it found "123", or the error and its Java exception class. */
         private fun recognized(call: String) =
