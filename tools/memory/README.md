@@ -62,7 +62,7 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --scenarios S7,S7b --keep-proc
 ### --suite bridge: 桥接泄漏门禁 (docs/memory-phase2)
 
 ```
-py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --suite bridge [--scenarios ND1,ND7a] [--plugin-commit <插件提交>] [--capture on] [--label mp2-baseline]
+py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --suite bridge [--scenarios ND1,ND7a] [--plugin-commit <插件提交>] [--capture on] [--dump-after-last] [--label mp2-baseline]
 ```
 
 第二期 (`docs/memory-phase2/ROADMAP.md` T1-T4) 用同一套驱动跑插件引擎脚本. 门禁本体是 `app/src/androidTest/java/org/autojs/autojs/memory/bridge/BridgeLeakGateDeviceTest.kt` (场景脚本在同目录 `BridgeScenarios.kt`, 弱引用跟踪与绑定 / PSS 读取在 `BridgeTracker.kt`), 证据默认写到 `docs/memory-phase2/evidence/`, 报告头部记录插件包名, versionCode 与 `--plugin-commit`. 默认 `--suite runtime` 的行为与上文完全相同.
@@ -72,6 +72,8 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --suite bridge [--scenarios ND
 - 判定: 第一期的六项与原生, 注册表各项照旧; 另判宿主桥接注册表 (`StaticRegistries.bridgeCounts()`) 回到首次运行前 (Node 连接池可保留 1 个空闲连接), 系统侧到插件包的连接数 (经反射读 `LoadedApk.mServices`, 读不到记 `unavailable` 且不判定) 不超过开始时 + 1, 桥接线程 (`BridgeTracker.BRIDGE_THREAD_MARKERS`) 回到预热结束时. 插件进程 PSS 在首次运行前, 第 2 次计数运行后与结束时记录, 只记录不判定 (R9).
 - 设置与权限: 每个 instrumentation 进程前执行 `settings put global hidden_api_policy 1` (D9, 供绑定探针反射), 结束后 (包括失败, 超时与异常路径) 恢复为原值 (原来未设置则 `settings delete global hidden_api_policy`). 宿主缺少场景所需权限时运行前 `pm grant`, 运行后 `pm revoke` (ND12 RECORD_AUDIO, D11; ND7c CAMERA, 附录 C Q4); 原本已有的权限不动. 报告头部记录设置前后的值与授予 / 收回情况. 脚本被强行结束时需手动执行 `adb -s SERIAL shell settings delete global hidden_api_policy` 并检查上述权限.
 - 单元格 (第二期附录 A): `残留 / Java MB / 原生 MB / 脚本线程增量 b桥接线程增量 / h宿主注册表增量 s系统连接增量 / 存活引擎 / 插件 PSS MB (第 2 次计数运行后至结束的变化)`. 报告另有 "Bridge detail" 表 (注册表明细, 绑定前后, 新增线程, 三个时点的 PSS, 脚本 `gateStat` 最大值). 残留时 shark 分析 broker / provider / `NodePluginJavaScriptEngine` / 已退出的 `ScriptRuntime` 的最短强引用链.
+- `--dump-after-last` (ROADMAP C31): 每个场景最后一次运行后, 在门禁等待回收之前再转储一次堆, 报告 `heapAfterLast` 记录 broker / provider / 引擎 / `ScriptRuntime` 的实例数与引用链, 以及整份转储按类的浅大小前 15 名 (含 zygote 与 image 堆), Markdown 另起一节. 用于区分 "插件进程尚未回收代理而暂时钉住" 与真正的宿主侧增长; 配合 `--hprof` 时这份转储同样拉回 `<out>/hprof`.
+- `LooperHelper.loopers` 未回到预热结束时的值时, JSON 的 `metrics.looperThreads` 列出预热结束与结束时各条目的线程名与状态, 用于定位是哪个线程留下了 Looper.
 - 构建与安装同上 (宿主与测试 APK 来自同一次构建); Node 插件另行安装, 版本以设备上的 versionCode 为准.
 
 ## ci_gate.py: CI 门禁 (模拟器)

@@ -97,6 +97,33 @@ internal object GateHeapPathAnalyzer {
         return result.put("analysisMs", SystemClock.elapsedRealtime() - started)
     }
 
+    /**
+     * Shallow bytes and instance count per class over the whole dump (app, zygote and image heaps), the [limit] largest first
+     * (docs/memory-phase2/ROADMAP.md C31: what grows while a plugin connection is alive without a tracked object being retained).
+     * zh-CN: 整个转储 (app, zygote 与 image 堆) 按类统计的浅大小与实例数, 取最大的 [limit] 个
+     * (docs/memory-phase2/ROADMAP.md C31: 插件连接存活期间没有被跟踪对象残留时堆里增长的是什么).
+     */
+    fun histogram(hprof: File, limit: Int = 15): JSONObject {
+        val started = SystemClock.elapsedRealtime()
+        val sizes = HashMap<String, LongArray>()
+        fun add(className: String, bytes: Int) {
+            val entry = sizes.getOrPut(className) { LongArray(2) }
+            entry[0]++
+            entry[1] += bytes.toLong()
+        }
+        hprof.openHeapGraph().use { graph ->
+            graph.instances.forEach { add(it.instanceClassName, it.byteSize) }
+            graph.objectArrays.forEach { add(it.arrayClassName, it.byteSize) }
+            graph.primitiveArrays.forEach { add(it.arrayClassName, it.byteSize) }
+        }
+        val top = JSONArray()
+        sizes.entries.sortedByDescending { it.value[1] }.take(limit).forEach { (className, entry) ->
+            top.put(JSONObject().put("class", className).put("count", entry[0]).put("bytes", entry[1]))
+        }
+        return JSONObject().put("totalBytes", sizes.values.sumOf { it[1] }).put("top", top)
+            .put("analysisMs", SystemClock.elapsedRealtime() - started)
+    }
+
     private class Paths(
         val leaks: JSONArray,
         val groups: Int,

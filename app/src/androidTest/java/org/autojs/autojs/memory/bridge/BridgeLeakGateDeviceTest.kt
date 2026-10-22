@@ -23,6 +23,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
+import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -72,13 +73,16 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * Arguments (all optional): those of the first gate (memoryGateRunId, memoryGateModes, memoryGateWarmups, memoryGateIterations,
  * memoryGatePollMs, memoryGateForceDelayMs, memoryGateKeepHprof, memoryGateAnalyze, memoryGateCapture, memoryGateMeminfo) and
- * memoryGatePluginCommit (the commit of the installed plugin build, written to the report header).
+ * memoryGatePluginCommit (the commit of the installed plugin build, written to the report header) and memoryGateDumpAfterLast
+ * (`true`: one more heap dump right after the last run, before the gate waits for collection, with the bridge class paths and a
+ * class histogram; ROADMAP C31).
  *
  * zh-CN: 桥接泄漏门禁 (docs/memory-phase2/ROADMAP.md T1-T4): 把第一期门禁 (RuntimeLeakGateDeviceTest) 的方法用于插件引擎脚本. 对每个场景与模式,
  * 在本进程内执行脚本 `预热 + 计数` 次, 只保留弱引用: 每次运行的引擎与 ScriptRuntime (EngineLifecycleCallback), 以及 [BridgeExecutionObserver]
  * 报告的桥接宿主侧会话对象 (T1 (a)). 每次运行后强制回收并确认它们全部消失, 再比较第一期的度量, T1 (h) 的桥接注册表与系统侧绑定, 以及 T1 (d)
  * 的桥接线程. 插件进程 PSS 只记录 (T1 (i), R9). 有对象残留时转储堆并分析桥接类的最短强引用链 (T4). 结果输出与第一期相同.
  * 由 `tools/memory/run_gate.py --suite bridge` 驱动: 每个场景与模式各用一个进程, 为绑定探针设置 `hidden_api_policy 1` (D9), 并授予场景所需权限 (D11).
+ * memoryGateDumpAfterLast 为 `true` 时, 在最后一次运行后, 门禁等待回收之前再转储一次堆, 附桥接类引用链与类直方图 (ROADMAP C31).
  */
 @RunWith(AndroidJUnit4::class)
 class BridgeLeakGateDeviceTest {
@@ -107,6 +111,7 @@ class BridgeLeakGateDeviceTest {
     private val meminfoMode by lazy {
         (arguments.getString("memoryGateMeminfo") ?: "phases").also { require(it in setOf("off", "phases", "runs")) { "memoryGateMeminfo must be off, phases or runs" } }
     }
+    private val dumpAfterLast by lazy { arguments.getString("memoryGateDumpAfterLast") == "true" }
     private val pluginCommit by lazy {
         arguments.getString("memoryGatePluginCommit")?.also { require(it.matches(Regex("[0-9a-f]{4,40}(-dirty)?"))) { "memoryGatePluginCommit must be a commit hash" } }
     }
@@ -187,6 +192,7 @@ class BridgeLeakGateDeviceTest {
         var nativeBaseline = nativeStart
         var registriesBaseline = StaticRegistries.counts()
         var threadsBaseline = BridgeTracker.bridgeThreads()
+        var looperThreadsBaseline = looperThreads()
         var pssSecond: JSONObject? = null
         val runs = mutableListOf<RunRecord>()
         val samples = JSONArray()
@@ -208,6 +214,7 @@ class BridgeLeakGateDeviceTest {
                 nativeBaseline = native
                 registriesBaseline = StaticRegistries.counts()
                 threadsBaseline = BridgeTracker.bridgeThreads()
+                looperThreadsBaseline = looperThreads()
             }
             // T1 (i): the plugin PSS after the second measured run and after the last one (recorded only).
             // zh-CN: T1 (i): 第 2 次计数运行后与最后一次运行后的插件 PSS (只记录).
@@ -222,6 +229,9 @@ class BridgeLeakGateDeviceTest {
         scriptSkip?.let { reason ->
             return report.put("status", "skipped").put("reasons", JSONArray().put("script: $reason")).put("samples", samples)
         }
+        // C31: what the heap holds right after the last run, before the final wait gives the plugin process time to release its proxies.
+        // zh-CN: C31: 最后一次运行刚结束时堆里有什么; 之后的等待会给插件进程释放代理的时间.
+        val heapAfterLast = if (dumpAfterLast) heapEvidence(scenario, mode, suffix = "last", histogram = true) else null
         val measured = runs.filter { !it.warmup }
         GateMetrics.awaitCleared(measured.flatMap { it.references() }, pollMs)
         val final = GateMetrics.sample()
@@ -266,6 +276,11 @@ class BridgeLeakGateDeviceTest {
             if (delta != 0) registriesDelta.put(name, delta)
         }
         metrics.put("registries", JSONObject(registriesFinal)).put("registriesDelta", registriesDelta)
+        // Which threads keep the LooperHelper entries that did not return to the end of the warm-ups.
+        // zh-CN: 未回到预热结束值的 LooperHelper 条目是哪些线程.
+        if (registriesDelta.optInt("LooperHelper.loopers") != 0) {
+            metrics.put("looperThreads", JSONObject().put("baseline", JSONArray(looperThreadsBaseline)).put("final", JSONArray(looperThreads())))
+        }
         // T1 (h) host side: back where they were before the first run; a pooled engine may keep one idle connection.
         // zh-CN: T1 (h) 宿主侧: 回到首次运行前的值; 带连接池的引擎可保留 1 个空闲连接.
         val bridgeDelta = JSONObject()
@@ -345,6 +360,7 @@ class BridgeLeakGateDeviceTest {
         report.put("status", status).put("reasons", reasons).put("metrics", metrics).put("thresholds", thresholds)
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
             .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
+        heapAfterLast?.let { report.put("heapAfterLast", it) }
         if (retainedRuns.isNotEmpty() || retainedWarmups.isNotEmpty()) report.put("heap", heapEvidence(scenario, mode))
         return report
     }
@@ -431,6 +447,16 @@ class BridgeLeakGateDeviceTest {
         val config = ExecutionConfig().apply { workingDirectory = workDir }
         service.execute(StringScriptSource(marker, BridgeScenarios.nodeSource(scenario, mode, marker, fixturePng)), listener, config)
     }
+
+    /**
+     * Name, state and daemon flag of every thread with an entry in LooperHelper (diagnostics of the registry delta).
+     * zh-CN: LooperHelper 中每个条目的线程名, 状态与守护标志 (注册表差值的诊断).
+     */
+    private fun looperThreads(): List<String> = runCatching {
+        val field = LooperHelper::class.java.getDeclaredField("sLoopers").apply { isAccessible = true }
+        val loopers = field.get(null) as MutableMap<*, *>
+        synchronized(loopers) { loopers.keys.filterIsInstance<Thread>().map { "${it.name} ${it.state}${if (it.isDaemon) " daemon" else ""}" } }.sorted()
+    }.getOrElse { listOf("unavailable: ${it.javaClass.simpleName}") }
 
     private fun awaitCondition(timeoutMs: Long, condition: () -> Boolean): Boolean {
         val deadline = SystemClock.elapsedRealtime() + timeoutMs
@@ -540,9 +566,9 @@ class BridgeLeakGateDeviceTest {
 
     // region Heap evidence and output
 
-    private fun heapEvidence(scenario: BridgeScenario, mode: GateMode): JSONObject {
+    private fun heapEvidence(scenario: BridgeScenario, mode: GateMode, suffix: String? = null, histogram: Boolean = false): JSONObject {
         val result = JSONObject()
-        val hprof = File(outputDir(), "$runId-${scenario.id}-${mode.label}.hprof")
+        val hprof = File(outputDir(), "$runId-${scenario.id}-${mode.label}${suffix?.let { "-$it" }.orEmpty()}.hprof")
         try {
             GateMetrics.forceGc()
             val dumpStarted = SystemClock.elapsedRealtime()
@@ -550,6 +576,7 @@ class BridgeLeakGateDeviceTest {
             result.put("dumpMs", SystemClock.elapsedRealtime() - dumpStarted).put("hprof", hprof.path)
             if (analyzeHeap) {
                 result.put("analysis", GateHeapPathAnalyzer.analyzeClasses(hprof, BridgeScenarios.NODE_HEAP_CLASSES))
+                if (histogram) result.put("histogram", GateHeapPathAnalyzer.histogram(hprof))
             } else {
                 result.put("analysis", JSONObject().put("skipped", "memoryGateAnalyze=false"))
             }

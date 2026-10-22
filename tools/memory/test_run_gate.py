@@ -186,6 +186,15 @@ class BridgeSuiteTest(unittest.TestCase):
         self.assertIn("### ND2 N: NodeJsHostCapabilityBroker 2, ScriptRuntime 0 in the dump", text)
         self.assertIn("2 object(s), root JNI_GLOBAL", text)
         self.assertNotIn("Rhino contexts / live engines (ROADMAP appendix A)", text)
+        self.assertNotIn("Heap right after the last run", text)
+        dumped = bridge_report()
+        dumped["heapAfterLast"] = {"dumpMs": 900, "hprof": "/x/r-ND1-normal-last.hprof", "hprofKept": False,
+                                   "analysis": {"instances": {"NodeJsHostCapabilityBroker": 0, "ScriptRuntime": 0}, "leaks": []},
+                                   "histogram": {"totalBytes": 3 * 1048576,
+                                                 "top": [{"class": "byte[]", "count": 12, "bytes": 1048576}]}}
+        text = run_gate.markdown(meta, [dumped], [])
+        self.assertIn("### ND1 N: NodeJsHostCapabilityBroker 0, ScriptRuntime 0, 3.00 MB in the dump", text)
+        self.assertIn("- byte[]: 12 objects, 1.00 MB", text)
 
     def test_bridge_merge_keeps_suite_order(self):
         previous = {"runId": "old", "started": "t0", "finished": "t1", "results": [bridge_report("ND10")],

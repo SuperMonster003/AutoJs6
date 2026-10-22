@@ -412,6 +412,27 @@ def markdown(meta, reports, failures):
                     lines += [f"{leak.get('gcRoot')}{title}"] + [f"  {step}" for step in leak.get("path") or []]
                     lines.append("```")
             lines.append("")
+    after_last = [report for report in reports if report.get("heapAfterLast")]
+    if after_last:
+        lines += ["", "## Heap right after the last run (--dump-after-last, docs/memory-phase2/ROADMAP.md C31)", "",
+                  "Dumped before the gate waits for collection; bridge class instances, then the largest classes by shallow size "
+                  "over the whole dump (app, zygote and image heaps).", ""]
+        for report in after_last:
+            heap = report["heapAfterLast"]
+            analysis = heap.get("analysis") or {}
+            histogram = heap.get("histogram") or {}
+            found = ", ".join(f"{name} {count}" for name, count in (analysis.get("instances") or {}).items()) or "-"
+            total = histogram.get("totalBytes")
+            lines.append(f"### {report.get('scenario')} {MODES.get(report.get('mode'), '?')}: {found}"
+                         + (f", {total / 1048576:.2f} MB in the dump" if total is not None else ""))
+            lines.append("")
+            if heap.get("error"):
+                lines.append(f"- heap evidence error: {heap['error']}")
+            for leak in analysis.get("leaks") or []:
+                lines.append(f"- {leak.get('runtimes')} object(s), root {leak.get('gcRoot')}: {leak.get('summary')}")
+            for entry in (histogram.get("top") or [])[:10]:
+                lines.append(f"- {entry.get('class')}: {entry.get('count')} objects, {entry.get('bytes', 0) / 1048576:.2f} MB")
+            lines.append("")
     lines += ["", "Raw reports: the .json file with the same name (one report per line under `results`)."]
     return "\n".join(lines) + "\n"
 
@@ -514,6 +535,9 @@ def main():
     parser.add_argument("--mode", choices=("normal", "force", "both"), default="both")
     parser.add_argument("--hprof", action="store_true", help="Keep heap dumps of failing scenarios and pull them to <out>/hprof")
     parser.add_argument("--no-analyze", action="store_true", help="Skip the on-device shark analysis (ROADMAP T4 fallback)")
+    parser.add_argument("--dump-after-last", action="store_true",
+                        help="Bridge suite: one more heap dump right after the last run of every scenario, before the gate waits for "
+                             "collection, with the bridge class paths and a class histogram (docs/memory-phase2 C31); kept and pulled with --hprof")
     parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a / S4f (bridge: ND8) with the PROJECT_MEDIA app-op set to allow for its duration, then reset to default (ROADMAP Q3)")
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--iterations", type=int, default=20)
@@ -547,6 +571,8 @@ def main():
         parser.error(str(error))
     if args.plugin_commit and not re.fullmatch(r"[0-9a-f]{4,40}(-dirty)?", args.plugin_commit):
         parser.error("--plugin-commit must be a commit hash")
+    if args.dump_after_last and args.suite != "bridge":
+        parser.error("--dump-after-last needs --suite bridge")
     args.out = args.out or suite["out"]
 
     device = physical_device.Device(args.adb, args.serial)
@@ -620,7 +646,8 @@ def main():
                        "-e", "memoryGateCapture", args.capture,
                        "-e", "memoryGateAccessibilityWaitMs", str(args.a11y_wait * 1000),
                        "-e", "memoryGateMeminfo", args.meminfo,
-                       *(["-e", "memoryGatePluginCommit", args.plugin_commit] if args.plugin_commit else []), runner]
+                       *(["-e", "memoryGatePluginCommit", args.plugin_commit] if args.plugin_commit else []),
+                       *(["-e", "memoryGateDumpAfterLast", "true"] if args.dump_after_last else []), runner]
             granted = []
             try:
                 if suite["hiddenApi"]:
@@ -686,16 +713,16 @@ def main():
                 for line in [l for l in crash.splitlines() if re.search(r"Fatal signal|Abort message|FATAL EXCEPTION", l)][:2]:
                     print(f"     {line[:220]}")
             if args.hprof:
-                for report in found:
-                    hprof = (report.get("heap") or {}).get("hprof")
-                    if hprof and (report.get("heap") or {}).get("hprofKept"):
+                for report, key in [(report, key) for report in found for key in ("heapAfterLast", "heap")]:
+                    hprof = (report.get(key) or {}).get("hprof")
+                    if hprof and (report.get(key) or {}).get("hprofKept"):
                         target = args.out / "hprof"
                         target.mkdir(parents=True, exist_ok=True)
                         pulled = device.call("pull", hprof, str(target / Path(hprof).name), timeout=600)
                         if pulled["exitCode"] == 0:
                             device.shell("rm", "-f", hprof)
                             local = target / Path(hprof).name
-                            report["heap"]["pulledTo"] = str(local.relative_to(ROOT) if local.is_relative_to(ROOT) else local).replace("\\", "/")
+                            report[key]["pulledTo"] = str(local.relative_to(ROOT) if local.is_relative_to(ROOT) else local).replace("\\", "/")
             current = package_stamp(device, args.package)
             if not current:
                 # dumpsys failed: the device left adb, which is not a reinstall; reports already read stay valid.
