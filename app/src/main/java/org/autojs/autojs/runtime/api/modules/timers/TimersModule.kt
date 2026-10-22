@@ -11,6 +11,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptPrototype
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish
+import org.autojs.autojs.runtime.api.modules.tasks.TaskArgs
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Callable
@@ -20,7 +21,8 @@ import org.mozilla.javascript.NativeObject
  * The `timers` module on the new script module layer (roadmap P3.4): the module object's prototype is the runtime's Java
  * `Timers` (`ScriptRuntime.timers`), as with the current module, so `timers.setTimeout` and the other Java methods stay
  * readable on it; `setTimeout`, `setInterval`, `setImmediate`, their `clear` functions and the abandoned `loop` are
- * global names only, `keepAlive` is both, and the persistent task entries (6.8.0) are the ones of `workManager`.
+ * global names only, `keepAlive` is both, and the persistent task entries (6.8.0) are the ones of `workManager` (same
+ * implementation and argument rules, [TaskArgs]).
  *
  * Arguments follow the real signatures (T4) with the error model of the new layer: a callback that is not a function is
  * a TypeError, a delay or id without a number a TypeError and NaN or an infinite one a RangeError (D10, appendix C Q12;
@@ -102,16 +104,16 @@ class TimersModule(private val runtime: ScriptRuntime) {
     fun addIntentTask(options: NativeObject? = null): Any? = WorkManager.addIntentTask(runtime, optionsArgs(options))
 
     @ScriptFunction
-    fun getTimedTask(id: Any?): Any? = WorkManager.getTimedTask(runtime, arrayOf(id))
+    fun getTimedTask(id: Any?): Any? = WorkManager.getTimedTask(runtime, arrayOf(TaskArgs.id("timers.getTimedTask", id)))
 
     @ScriptFunction
-    fun getIntentTask(id: Any?): Any? = WorkManager.getIntentTask(runtime, arrayOf(id))
+    fun getIntentTask(id: Any?): Any? = WorkManager.getIntentTask(runtime, arrayOf(TaskArgs.id("timers.getIntentTask", id)))
 
     @ScriptFunction
-    fun removeIntentTask(id: Any?): Boolean? = WorkManager.removeIntentTask(runtime, arrayOf(id))
+    fun removeIntentTask(id: Any?): Boolean? = WorkManager.removeIntentTask(runtime, arrayOf(TaskArgs.id("timers.removeIntentTask", id)))
 
     @ScriptFunction
-    fun removeTimedTask(id: Any?): Boolean? = WorkManager.removeTimedTask(runtime, arrayOf(id))
+    fun removeTimedTask(id: Any?): Boolean? = WorkManager.removeTimedTask(runtime, arrayOf(TaskArgs.id("timers.removeTimedTask", id)))
 
     @ScriptFunction
     fun queryIntentTasks(options: NativeObject? = null): Any = WorkManager.queryIntentTasks(runtime, optionsArgs(options))
