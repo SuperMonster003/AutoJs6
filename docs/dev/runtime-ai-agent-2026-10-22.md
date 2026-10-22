@@ -35,7 +35,7 @@ UTF-8 JSON packets use bounded queues and chunking. Result acknowledgment retain
 - Agent coverage gate: nine roots, seven run methods and three helpers. CI invokes this gate.
 - Documentation generation and Offline verification passed with 169 modules and 7,348 search entries. Final Offline debug and release APKs have been rebuilt and their packaged provenance verified.
 
-The broader augment audit examined 1,361 explicit exports and 1,596 paths. Its remaining seven failures are the existing `memory`/`$memory` static Ace surface gaps. The host's complete multilingual changelog check also retains inherited gaps: 20 feature, 17 fix and seven improvement entries. The new Agent entry exists in every language and canonical generated output matches its sources. Neither inherited gate is reported as passing.
+For the frozen production source, the broader augment audit examined 1,361 explicit exports and 1,596 paths. Its remaining seven failures are the existing `memory`/`$memory` static Ace surface gaps. That source's complete multilingual changelog check also retains inherited gaps: 20 feature, 17 fix and seven improvement entries. The new Agent entry exists in every language and canonical generated output matches its sources. Neither inherited gate is reported as passing.
 
 ## Device scope and evidence
 
@@ -66,10 +66,10 @@ All APK builds and the Runtime Kit export are complete. Each APK has an immutabl
 | Bun Runtime | 0.21.0 / 296 | `8bf0350cd60d5dbca75e8a0dacd9f328e7a9afb8` | `19b38b6998ce6744` |
 | 3-Stove Agent | 1.3.0 / 426 | `56f2a0bd25837d29e893617ae4b06864e271f467` | `af165761bac64d0a` |
 | Ace Editor | 2.42.0 / 328 | `0cbcb3cbaa0db4f248e862d600cd4b3e94b2bacc` | `b22c58a313c86940` |
-| Offline Docs | 6.8.40 / 202 | `cd0d31b9159c1963bcebab0daf5a05a49e1f0fee` | `0e003ae0dfc0019b` |
+| Offline Docs | 6.8.40 / 203 | `be470badfd05afbeeb166ac20c53b492b84ea791` | `18ffd2ad052d7337` |
 | APK Builder Template | 1.2.26+autojs6-6.8.0 / 585001 | `46255752095efb717e699ee847213733e18634f1` | `f602a387af137dbb` |
 
-Builder's repository version is 1.2.26 / build 111, with per-host sequence 1 and Android versionCode 585001. Documentation revision 164 is committed at `12508b346bb2686dd0d8cd17b3992ada7c182a1f`; generated source provenance is `c4999573cda259001c21d3f6324bb2894778fd3b`. TypeScript Declarations 4.80.0 is committed at `c5995a3b47ba69263a55d4fa90f67a2e402d2ec0`.
+Builder's repository version is 1.2.26 / build 111, with per-host sequence 1 and Android versionCode 585001. Documentation revision 165 and its generated source provenance are committed at `6e32472102e7bab59f25f85685173f40e3920ec6`. This integrates the parallel committed class-loading and image-clone lifecycle notes; the original Agent documentation checkpoint was revision 164. Offline build 203 was regenerated from this clean merged source and passed both debug/release packaged-content verification. TypeScript Declarations 4.80.0 is committed at `c5995a3b47ba69263a55d4fa90f67a2e402d2ec0`.
 
 The retained arm64 Kit is `autojs6-runtime-v6.8.0+5850-28d7849da2575b1e2e70509b939da723c7de7eca-arm64-v8a`. It is stored in the Builder repository under `.bak/runtime-ai-agent-20261022/kit-5850`. Its template SHA-256 is `df0ce254b67fecdbc635841d835b9225676d2aafdbc27e18620a5bba09b0f0b4`. A first export with the default `local` source marker was rejected before packaging; the accepted export explicitly supplies its frozen source SHA.
 
@@ -100,3 +100,13 @@ After final acceptance, all fixture files were removed or restored to their base
 This batch has issued no Redmi device operations. Parallel sessions continue changing the primary host and documentation workspaces; these changes must be preserved during integration. Their current source or freshly rebuilt APKs are not the frozen artifacts above.
 
 All commits and artifacts are local. Nothing has been pushed, tagged or published. The accepted production source is the fixed artifact source in the table, independently of later documentation, test-only and parallel integration commits.
+
+## Source integration
+
+The isolated host merges the parallel committed memory, settings and related host work. The static-reference conflict retains both Agent ownership entries and the newer existing UI-resource release explanations. The main-source build counter is recalibrated to 4,283 with the existing offset 1,652 (versionCode 5,935); this is integration metadata, not the version of the physically accepted APK. Device acceptance and the retained Builder Kit remain bound to production source `28d7849d`, host 5,850. A future APK rebuilt from the integrated main source is a different artifact.
+
+Primary working drafts are preserved independently from the Git index. Documentation integration preserves the existing `api/flow.md` working-file state. Detailed parent commits, scoped paths and preservation checks are recorded in `integration-AutoJs6.json` and `integration-AutoJs6-Documentation.json` under the evidence directory.
+
+The merged host source `ec666d24ae7d886c680ad979c59665cd6ac86191` passes a focused JVM integration run: 145 cases across 27 classes, 144 passed and one skipped, zero failures/errors. It covers Agent, Node bridge and the static-reference guard. Main/test compilation and tests took 494.7 seconds with the two-processor/one-worker policy. The only working change during this build was this report; production and test inputs remained unchanged. The merged Agent API gate passes all nine roots, seven run methods and three helpers. These integration checks are reported separately from the complete frozen-source JVM totals and physical APK acceptance.
+
+The 15 owned Worker fixture directories are archived under the Node repository's `.bak/runtime-ai-agent-20261022/worker-tests`; the pre-existing `worker-host-tests` remains in place. Copied host signing/local inputs are removed after the last build. Immutable APKs, the accepted Kit, original device backups, screenshots, task ownership and JUnit records are retained in the evidence directories. Temporary source worktrees are removed after verified primary integration; completion is recorded in `active-state.json` and `final-summary.json`.
