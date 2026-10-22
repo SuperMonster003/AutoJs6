@@ -54,6 +54,7 @@ NONE_RETAINED = "All retained objects have been garbage collected"
 DUMP_TIME_RE = re.compile(r"^Heap dump timestamp: (\d+)")
 LEAK_COUNT_RE = re.compile(r"^(\d+) (APPLICATION|LIBRARY) LEAKS?")
 SETUP_RE = re.compile(r"LeakCanary has been set up as (enabled|disabled)")
+ADB_DOWN_RE = re.compile(r"daemon not running|cannot connect to daemon|could not read ok from ADB Server")
 
 
 def log(text=""):
@@ -98,9 +99,22 @@ class Device:
         self.width, self.height = self._size()
         self.shell(f"mkdir -p {DEVICE_DIR}")
 
-    def adb(self, *args, check=False, timeout=60):
-        return subprocess.run(["adb", "-s", self.serial, *args], capture_output=True, text=True, encoding="utf-8",
-                              errors="replace", check=check, timeout=timeout)
+    def adb(self, *args, check=False, timeout=60, attempts=12):
+        """Runs adb, waiting out a stalled adb server (it is shared with other sessions) for about four minutes."""
+        for attempt in range(attempts):
+            try:
+                result = subprocess.run(["adb", "-s", self.serial, *args], capture_output=True, text=True,
+                                        encoding="utf-8", errors="replace", timeout=timeout)
+            except subprocess.TimeoutExpired:
+                result = None
+            if result is not None and not ADB_DOWN_RE.search(result.stderr or ""):
+                if check and result.returncode != 0:
+                    raise subprocess.CalledProcessError(result.returncode, result.args, result.stdout, result.stderr)
+                return result
+            if attempt == 0:
+                log("      adb is not responding, waiting for it")
+            time.sleep(20)
+        raise WalkError("adb did not respond for about four minutes")
 
     def shell(self, command, timeout=60):
         return self.adb("shell", command, timeout=timeout).stdout
@@ -215,7 +229,7 @@ class Device:
     def screenshot(self, path, width=540):
         path.parent.mkdir(parents=True, exist_ok=True)
         data = subprocess.run(["adb", "-s", self.serial, "exec-out", "screencap", "-p"], capture_output=True,
-                              check=True).stdout
+                              check=True, timeout=60).stdout
         path.write_bytes(data)
         try:
             from PIL import Image
@@ -1060,12 +1074,19 @@ def main():
                 dev.screenshot(shots / "leakcanary-leaks.png")
             dev.back()
     finally:
+        restore = []
         if original != "true" and not args.keep_dump_setting:
-            app.set_dump_setting(original)
-            log(f"automatic heap dumps restored to {original} (the app was stopped for that)")
+            restore.append(("automatic heap dumps", lambda: app.set_dump_setting(original), original))
         if docs_changed:
-            app.set_plugin_enabled(OFFLINE_DOCS, docs_original)
-            log(f"Offline Documentation plugin switch restored to {docs_original}")
+            restore.append(("the Offline Documentation plugin switch",
+                            lambda: app.set_plugin_enabled(OFFLINE_DOCS, docs_original), docs_original))
+        for what, action, value in restore:
+            try:
+                restored = action()
+            except WalkError:
+                restored = False
+            log(f"{what} restored to {value} (the app was stopped for that)" if restored
+                else f"FAIL {what} could not be restored to {value}; restore it by hand")
         header = {
             "model": model, "sdk": sdk, "version": version_code, "time": time.strftime("%Y-%m-%d %H:%M"),
             "command": "py -3.12 -I -u tools/memory/ui_leak_walk.py " + " ".join(a for a in sys.argv[1:]),
