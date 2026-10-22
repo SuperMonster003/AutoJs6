@@ -4,12 +4,15 @@ import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.core.pref.archive.SettingsBackupVault.LastOperation
 import org.autojs.autojs.core.pref.archive.SettingsBackupVault.Operation
+import org.autojs.autojs.core.pref.data.ShortcutDataCodec
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.core.pref.keys.DomainKeysTestBase
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
+import org.autojs.autojs.external.shortcut.ShortcutBackupEntry
+import org.autojs.autojs.external.shortcut.ShortcutBackupState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -173,6 +176,39 @@ class SettingsBackupVaultTest : DomainKeysTestBase() {
         assertEquals(listOf("explorer"), plan.categories)
         assertEquals(listOf(ExplorerKeys.WORKING_DIRECTORY.name to "Scripts/Old"), plan.puts.map { it.name to it.value })
         assertEquals(emptyList<ImportPlan.Deployment>(), plan.deployments)
+    }
+
+    @Test
+    fun anImportBacksUpItsDataCategoriesAndRecordsTheEntriesItAdded() {
+        val vault = vault()
+        val shortcuts = ShortcutDataCodec.encode(ShortcutBackupState(listOf(ShortcutBackupEntry("copy-1", "A", "Script A", "script", "/sdcard/scripts/a.js", icon = null))), now)
+        val backup = vault.backup(Operation.IMPORT, everything(), host, device, listOf(shortcuts))
+        val reader = SettingsArchiveReader({ backup.file.inputStream() }, key = KEY)
+        val entry = reader.manifest().data.single()
+        assertEquals("data_shortcuts" to 1, entry.id to entry.entries)
+        assertEquals(shortcuts.bytes.toList(), reader.data(entry.file).toList())
+
+        val added = mapOf("data_shortcuts" to listOf("copy-2"), "data_color_library" to listOf("12", "13"))
+        val record = LastOperation(Operation.IMPORT, now, backup.name, listOf("appearance"), listOf("data_shortcuts", "data_color_library"), added)
+        vault.record(record)
+        assertEquals(record, vault.lastOperation())
+        val undo = vault.undoPlan(ImportEnvironment())!!
+        assertEquals(emptyList<String>(), undo.dataNotUndone)
+        assertEquals(added, undo.operation.added)
+        // A category without its added entries is not undone; an empty list is known, nothing was added.
+        assertEquals(listOf("data_color_library"), record.copy(added = mapOf("data_shortcuts" to emptyList())).dataNotUndone)
+
+        // A record written before P10.3 has no added entries: its data categories are not undone.
+        val file = File(vault.directory, SettingsBackupVault.LAST_OPERATION)
+        val old = "{\"operation\": \"import\", \"time\": 1, \"backup\": \"${backup.name}\", \"categories\": [\"appearance\"], \"data\": [\"data_shortcuts\"]}"
+        file.writeText(old)
+        assertNull(vault.lastOperation()!!.added)
+        assertEquals(listOf("data_shortcuts"), vault.undoPlan(ImportEnvironment())!!.dataNotUndone)
+        // Added entries of a category the record does not hold, or of the wrong shape, make the record unreadable.
+        listOf("{\"data_color_library\": []}", "{\"data_shortcuts\": \"copy-1\"}", "{\"data_shortcuts\": [1]}", "[]").forEach {
+            file.writeText(old.dropLast(1) + ", \"added\": $it}")
+            assertNull(it, vault.lastOperation())
+        }
     }
 
     private companion object {

@@ -899,13 +899,16 @@
     <string name="settings_transfer_result_credentials_locked">Las credenciales no se importaron: se cifraron en otro dispositivo</string>
     <string name="settings_transfer_result_data_failed">%1$s: no importado (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: %2$d importados, %3$d nuevos</string>
-    <string name="settings_transfer_result_data_not_undone">Esta versión aún no deshace la importación de accesos directos y bibliotecas de colores</string>
+    <string name="settings_transfer_result_data_not_undone">Los accesos directos y bibliotecas de colores importados por una versión anterior no se deshacen</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: no eliminado (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: %2$d eliminados</string>
     <string name="settings_transfer_result_deployments">Despliegues correctos: %1$d, fallidos: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Todavía no aplicado (se aplica tras reiniciar): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">El icono del lanzador cambia al cerrar esta página. AutoJs6 puede salir de la pantalla; vuelva a abrirlo desde su nuevo icono.</string>
     <string name="settings_transfer_result_notification_permission">El servicio de primer plano necesita el permiso para publicar notificaciones</string>
     <string name="settings_transfer_result_restart">Algunas configuraciones surten efecto después de reiniciar AutoJs6</string>
     <string name="settings_transfer_result_restore_shortcuts">Restaurar accesos directos</string>
+    <string name="settings_transfer_result_shortcuts_kept">Accesos directos conservados en la pantalla de inicio: %1$d</string>
     <string name="settings_transfer_result_shortcuts_restore">Los accesos directos importados que no están en la pantalla de inicio se pueden restaurar en Configuración > Configuración > Copia de accesos directos</string>
     <string name="settings_transfer_result_skipped">Omitidos (se mantienen los valores actuales):</string>
     <string name="settings_transfer_setup_wizard">Asistente de importación de configuración</string>

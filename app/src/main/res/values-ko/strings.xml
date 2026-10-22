@@ -901,13 +901,16 @@
     <string name="settings_transfer_result_credentials_locked">자격 증명을 가져오지 않았습니다: 다른 기기에서 암호화되었습니다</string>
     <string name="settings_transfer_result_data_failed">%1$s: 가져오지 않음 (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: %2$d개 가져옴, 새 항목 %3$d개</string>
-    <string name="settings_transfer_result_data_not_undone">이 버전에서는 아직 바로 가기와 색상 라이브러리 가져오기를 취소할 수 없습니다</string>
+    <string name="settings_transfer_result_data_not_undone">이전 버전에서 가져온 바로 가기와 색상 라이브러리는 취소되지 않습니다</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: 삭제하지 않음 (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: %2$d개 삭제됨</string>
     <string name="settings_transfer_result_deployments">배포 성공: %1$d, 실패: %2$d</string>
     <string name="settings_transfer_result_effects_failed">바로 적용하지 못했습니다 (재시작 후 적용됩니다): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">이 페이지를 닫으면 런처 아이콘이 바뀝니다. 이때 AutoJs6 화면이 닫힐 수 있으니 새 아이콘으로 다시 여세요</string>
     <string name="settings_transfer_result_notification_permission">전경 서비스에는 알림을 보낼 권한이 필요합니다</string>
     <string name="settings_transfer_result_restart">일부 설정은 AutoJs6 를 재시작한 후 적용됩니다</string>
     <string name="settings_transfer_result_restore_shortcuts">바로 가기 복원</string>
+    <string name="settings_transfer_result_shortcuts_kept">홈 화면에 있는 바로 가기는 유지됨: %1$d개</string>
     <string name="settings_transfer_result_shortcuts_restore">가져온 바로 가기 중 홈 화면에 없는 항목은 설정 > 구성 > 바로가기 백업 에서 복원할 수 있습니다</string>
     <string name="settings_transfer_result_skipped">건너뜀 (현재 값 유지):</string>
     <string name="settings_transfer_setup_wizard">설정 가져오기 마법사</string>

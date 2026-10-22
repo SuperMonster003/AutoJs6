@@ -26,6 +26,7 @@ import org.autojs.autojs.core.pref.archive.SettingsPassword
 import org.autojs.autojs.core.pref.archive.SettingsResetPlanner
 import org.autojs.autojs.core.pref.archive.SettingsSealedFile
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.data.SettingsDataCapture
 import org.autojs.autojs.core.pref.data.SettingsDataEntries
 import org.autojs.autojs.core.pref.data.SettingsDataImport
 import org.autojs.autojs.core.pref.deploy.AndroidDeployments
@@ -34,6 +35,8 @@ import org.autojs.autojs.core.pref.deploy.DeploymentItem
 import org.autojs.autojs.core.pref.deploy.DeploymentItems
 import org.autojs.autojs.core.pref.deploy.DeploymentPlanner
 import org.autojs.autojs.core.pref.deploy.DeploymentResult
+import org.autojs.autojs.theme.app.ColorSelectBaseActivity
+import org.autojs.autojs.theme.intelligent.IntelligentColorEngine
 import java.io.File
 import java.io.IOException
 
@@ -204,12 +207,14 @@ object SettingsImporter {
 
     /**
      * Imports [SettingsWizardState.selected] from the copy [state] holds (P7.5 step 4): plans on a background thread,
-     * backs up every category to the internal vault (T9), writes the plan (T8, one commit per store), imports the chosen
-     * data entries (P10.2; a data category that fails does not stop the others), records the operation, then runs the
+     * backs up every category to the internal vault (T9; the data categories to import as well, P10.3), writes the plan
+     * (T8, one commit per store), imports the chosen data entries (P10.2; a data category that fails does not stop the
+     * others), records the operation with the entries it added (P10.3), then runs the
      * effect table on the calling thread, the main thread (T12), and the deployment items the user confirmed
      * ([SettingsWizardState.deploy], T18, P7.6); the others are given up.
-     * zh-CN: 从 [state] 中的副本导入所选分类 (P7.5 第 4 步): 在后台线程生成计划, 把全部分类备份到内部备份库 (T9), 写入计划 (T8, 每个
-     * 存储提交一次), 导入选中的数据条目 (P10.2; 某个数据分类失败不影响其他分类), 记录本次操作, 然后在调用线程 (主线程) 执行生效表 (T12),
+     * zh-CN: 从 [state] 中的副本导入所选分类 (P7.5 第 4 步): 在后台线程生成计划, 把全部分类备份到内部备份库 (T9; 要导入的数据分类也备份,
+     * P10.3), 写入计划 (T8, 每个存储提交一次), 导入选中的数据条目 (P10.2; 某个数据分类失败不影响其他分类), 连同新增的条目记录本次操作
+     * (P10.3), 然后在调用线程 (主线程) 执行生效表 (T12),
      * 再运行用户确认的部署项 ([SettingsWizardState.deploy], T18, P7.6); 其余部署项放弃.
      */
     suspend fun importArchive(context: Context, state: SettingsWizardState): SettingsTransferOutcome {
@@ -222,12 +227,14 @@ object SettingsImporter {
             val plan = DeploymentPlanner.decide(plan(reader, inspection, state.selected, environment), state.deploy.orEmpty(), environment)
             val files = dataFiles(reader, inspection, state.selected, state.refine)
             val vault = vault(app)
-            val backup = vault.backup(SettingsBackupVault.Operation.IMPORT, SettingsSnapshot.capture(SettingCategory.ALL), SettingsExporter.host(app), SettingsExporter.device())
+            val snapshot = SettingsDataCapture.capture(app, files.mapNotNull { SettingCategory.ofIdOrNull(it.id) }, System.currentTimeMillis())
+            val backup = vault.backup(SettingsBackupVault.Operation.IMPORT, SettingsSnapshot.capture(SettingCategory.ALL), SettingsExporter.host(app), SettingsExporter.device(), snapshot)
             val changes = SettingsImportApplier.write(plan)
             val data = files.map { SettingsDataImport.import(app, it, state.fileName) }
             val categories = plan.categories.filter { SettingCategory.ofIdOrNull(it) != null }
-            val touched = data.filter { it.failure == null || it.added.isNotEmpty() }.map { it.id }
-            vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.IMPORT, System.currentTimeMillis(), backup.name, categories, touched))
+            val touched = data.filter { it.failure == null || it.added.isNotEmpty() }
+            val added = touched.associate { it.id to it.added }
+            vault.record(SettingsBackupVault.LastOperation(SettingsBackupVault.Operation.IMPORT, System.currentTimeMillis(), backup.name, categories, touched.map { it.id }, added))
             Imported(plan, changes, inspection.locked.isNotEmpty(), data)
         }
         val (plan, changes, locked) = imported
@@ -290,22 +297,32 @@ object SettingsImporter {
     }
 
     /**
-     * Undoes the last import (T9): imports its touched categories again from the backup taken before it, forgets it,
-     * then runs the effect table on the calling thread, the main thread.
-     * zh-CN: 撤销上次导入 (T9): 以导入前的备份再次导入触及的分类并忘记该操作, 然后在调用线程 (主线程) 执行生效表.
+     * Undoes the last import (T9): imports its touched categories again from the backup taken before it, deletes the
+     * entries it added to the data categories (P10.3, Q27), forgets it, then falls back from a deleted color library that
+     * held the current color and runs the effect table on the calling thread, the main thread.
+     * zh-CN: 撤销上次导入 (T9): 以导入前的备份再次导入触及的分类, 删除其在数据分类中新增的条目 (P10.3, Q27) 并忘记该操作, 然后在调用线程
+     * (主线程) 从持有当前颜色的已删除颜色库回退, 并执行生效表.
      */
     suspend fun undo(context: Context): SettingsTransferOutcome {
         val app = context.applicationContext
-        val (undo, changes) = withContext(Dispatchers.IO) {
+        val (undo, changes, removals) = withContext(Dispatchers.IO) {
             val vault = vault(app)
             val undo = vault.undoPlan(environment(app)) ?: throw IOException("There is no import to undo")
             val changes = SettingsImportApplier.write(undo.plan)
+            val removals = undo.operation.added.orEmpty().map { (id, ids) -> SettingsDataImport.remove(app, id, ids) }
             vault.clearLastOperation()
-            undo to changes
+            Triple(undo, changes, removals)
         }
+        // As the color library pages do after deleting a library.
+        if (removals.any { it.intelligentRemoved }) IntelligentColorEngine.deactivate()
+        if (removals.any { it.selectionRemoved || it.intelligentRemoved }) ColorSelectBaseActivity.fallBackToPaletteSelection(app)
         val report = SettingsEffects.run(changes, actions(app))
         val backupFailure = afterOperation(app)
-        return SettingsTransferOutcome.of(undo.plan, changes, report, dataNotUndone = undo.dataNotUndone, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report))
+        return SettingsTransferOutcome.of(
+            undo.plan, changes, report,
+            dataNotUndone = undo.dataNotUndone, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report),
+            data = removals.map { SettingsTransferOutcome.DataOutcome(it.id, it.ids.size, 0, failure = it.failure, removed = it.removed, kept = it.kept) },
+        )
     }
 
     /**

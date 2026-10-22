@@ -895,13 +895,16 @@
     <string name="settings_transfer_result_credentials_locked">凭据未导入: 它们由其他设备加密</string>
     <string name="settings_transfer_result_data_failed">%1$s: 未导入 (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: 导入 %2$d 项, 新增 %3$d 项</string>
-    <string name="settings_transfer_result_data_not_undone">本版本尚未撤销快捷方式与颜色库的导入</string>
+    <string name="settings_transfer_result_data_not_undone">由早期版本导入的快捷方式与颜色库不会撤销</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: 未删除 (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: 删除 %2$d 项</string>
     <string name="settings_transfer_result_deployments">部署成功: %1$d 项, 失败: %2$d 项</string>
     <string name="settings_transfer_result_effects_failed">未能立即生效 (重启后生效): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">关闭本页后切换启动器图标, AutoJs6 可能随之退出界面, 请从新图标重新打开</string>
     <string name="settings_transfer_result_notification_permission">前台服务需要发送通知的权限</string>
     <string name="settings_transfer_result_restart">部分设置在 AutoJs6 重启后生效</string>
     <string name="settings_transfer_result_restore_shortcuts">恢复快捷方式</string>
+    <string name="settings_transfer_result_shortcuts_kept">保留了桌面上的快捷方式: %1$d 项</string>
     <string name="settings_transfer_result_shortcuts_restore">导入的快捷方式中不在桌面上的, 可在 设置 > 配置 > 快捷方式备份 中恢复</string>
     <string name="settings_transfer_result_skipped">已跳过 (保持当前值):</string>
     <string name="settings_transfer_setup_wizard">设置导入向导</string>

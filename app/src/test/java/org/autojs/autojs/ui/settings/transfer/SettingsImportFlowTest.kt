@@ -194,6 +194,8 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
             data = listOf(
                 SettingsTransferOutcome.DataOutcome("data_shortcuts", 3, 2, listOf("copy-1", "copy-3"), iconsMissing = true),
                 SettingsTransferOutcome.DataOutcome("data_color_library", 2, 1, failure = "No space left on device"),
+                // As the undo gives it (P10.3).
+                SettingsTransferOutcome.DataOutcome("data_shortcuts", 3, 0, removed = 2, kept = 1),
             ),
         )
         assertEquals(listOf("copy-1", "copy-3"), outcome.restorableShortcuts)
@@ -207,6 +209,11 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
         val newer = outcome.toJson() + mapOf("skips" to mapOf("UNKNOWN_KEY" to 1, "SOMETHING_NEW" to 4), "failedEffects" to listOf("LANGUAGE", "NEW_ENTRY"))
         assertEquals(outcome.copy(skips = mapOf(SkipReason.UNKNOWN_KEY to 1)), SettingsTransferOutcome.fromJson(newer))
         assertNull(SettingsTransferOutcome.fromJson(mapOf("categories" to 1)))
+        // A data outcome of a version before P10.3 has no removals.
+        assertEquals(
+            SettingsTransferOutcome.DataOutcome("data_shortcuts", 1, 1),
+            SettingsTransferOutcome.DataOutcome.fromJson(mapOf("id" to "data_shortcuts", "entries" to 1, "added" to 1)),
+        )
         // A data outcome without a valid category id is left out.
         val unknownData = outcome.toJson() + mapOf("data" to (outcome.data.map { it.toJson() } + mapOf("id" to "../shortcuts", "entries" to 1, "added" to 1)))
         assertEquals(outcome, SettingsTransferOutcome.fromJson(unknownData))

@@ -896,13 +896,16 @@
     <string name="settings_transfer_result_credentials_locked">憑證未匯入: 它們由其他裝置加密</string>
     <string name="settings_transfer_result_data_failed">%1$s: 未匯入 (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: 匯入 %2$d 項, 新增 %3$d 項</string>
-    <string name="settings_transfer_result_data_not_undone">本版本尚未撤銷快捷方式與顏色庫的匯入</string>
+    <string name="settings_transfer_result_data_not_undone">由早期版本匯入的快捷方式與顏色庫不會撤銷</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: 未刪除 (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: 刪除 %2$d 項</string>
     <string name="settings_transfer_result_deployments">部署成功: %1$d 項, 失敗: %2$d 項</string>
     <string name="settings_transfer_result_effects_failed">未能立即生效 (重啟後生效): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">關閉本頁後切換啟動器圖示, AutoJs6 可能隨之退出介面, 請從新圖示重新開啟</string>
     <string name="settings_transfer_result_notification_permission">前臺服務需要傳送通知的權限</string>
     <string name="settings_transfer_result_restart">部分設定在 AutoJs6 重啟後生效</string>
     <string name="settings_transfer_result_restore_shortcuts">還原快捷方式</string>
+    <string name="settings_transfer_result_shortcuts_kept">保留了桌面上的快捷方式: %1$d 項</string>
     <string name="settings_transfer_result_shortcuts_restore">匯入的快捷方式中不在桌面上的, 可在 設定 > 配置 > 捷徑備份 中還原</string>
     <string name="settings_transfer_result_skipped">已略過 (保持目前的值):</string>
     <string name="settings_transfer_setup_wizard">設定匯入精靈</string>

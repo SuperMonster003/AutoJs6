@@ -22,16 +22,17 @@ import java.util.Locale
  * `auto-reset-<ts>.zip`, and [KEEP] of them are kept together, the newest ones. Once the operation is done,
  * [LAST_OPERATION] records what it touched; "undo the last import" ([undoPlan]) imports the touched categories again
  * from its backup, through the same planner (T8) without deployment items, and writes no backup of its own (the
- * operation backup of T20 is P9's). Data categories (T19) are recorded but not undone yet: appendix C Q27 decided that
- * they are, which P10.3 implements; until then the undo lists them ([Undo.dataNotUndone]). Pure JVM (R3):
- * the snapshot, the host and the clock come from the caller.
+ * operation backup of T20 is P9's). An import backs up the data categories it imports (T19) as well and records the
+ * entries it added to them ([LastOperation.added]), which the undo removes (appendix C Q27, P10.3); a record written
+ * before P10.3 has none, and the undo lists its data categories ([Undo.dataNotUndone]). Pure JVM (R3): the snapshot,
+ * the host and the clock come from the caller.
  *
  * zh-CN: 导入与恢复默认的内部备份 (ROADMAP T9, D8 / D11), 位于 [directory] (应用中为 `filesDir/settings-backups/`): 导入或恢复默认
  * 之前, 把全部设置分类 (含凭据与 `other`, 私有目录, R6 允许; 凭据以设备密钥 [key] 加密, D23) 写为 `auto-import-<ts>.zip` 或 `auto-reset-<ts>.zip`, 两种合计保留最新的
  * [KEEP] 份. 操作完成后由 [LAST_OPERATION] 记录触及的分类; "撤销上次导入" ([undoPlan]) 以其备份对触及分类再做一次导入, 经同一计划器
- * (T8) 且没有部署项, 撤销本身不写内部备份 (T20 的操作后备份属于 P9). 数据分类 (T19) 目前只记录不撤销: 附录 C Q27 已定为也要撤销,
- * 由 P10.3 实现, 在此之前撤销结果把它们列出 ([Undo.dataNotUndone]). 纯 JVM (R3): 快照,
- * 宿主与时钟由调用方提供.
+ * (T8) 且没有部署项, 撤销本身不写内部备份 (T20 的操作后备份属于 P9). 导入时还备份要导入的数据分类 (T19), 并记录其中新增的条目
+ * ([LastOperation.added]), 撤销时删除这些条目 (附录 C Q27, P10.3); P10.3 之前写入的记录没有这一项, 撤销结果列出其数据分类
+ * ([Undo.dataNotUndone]). 纯 JVM (R3): 快照, 宿主与时钟由调用方提供.
  */
 class SettingsBackupVault @JvmOverloads constructor(
     val directory: File,
@@ -67,9 +68,11 @@ class SettingsBackupVault @JvmOverloads constructor(
     }
 
     /**
-     * The record of the last import or reset ([LAST_OPERATION]): when it ran, the backup taken before it, and the
-     * settings and data categories it touched.
-     * zh-CN: 最近一次导入或恢复默认的记录: 运行时间, 之前生成的备份, 触及的设置分类与数据分类.
+     * The record of the last import or reset ([LAST_OPERATION]): when it ran, the backup taken before it, the settings
+     * and data categories it touched, and the entries it added to those data categories ([added], per category id:
+     * shortcut ids, or the row ids of the new color libraries, P10.3); a record written before P10.3 has no [added].
+     * zh-CN: 最近一次导入或恢复默认的记录: 运行时间, 之前生成的备份, 触及的设置分类与数据分类, 以及在这些数据分类中新增的条目 ([added],
+     * 按分类 id: 快捷方式 id 或新颜色库的行 id, P10.3); P10.3 之前写入的记录没有 [added].
      */
     data class LastOperation @JvmOverloads constructor(
         val operation: Operation,
@@ -77,7 +80,15 @@ class SettingsBackupVault @JvmOverloads constructor(
         val backup: String,
         val categories: List<String>,
         val data: List<String> = emptyList(),
+        val added: Map<String, List<String>>? = null,
     ) {
+
+        /**
+         * The touched data categories whose added entries are not known, so the undo leaves them as they are.
+         * zh-CN: 新增条目未知的触及数据分类, 撤销时保持原样.
+         */
+        val dataNotUndone: List<String>
+            get() = data.filterNot { added?.containsKey(it) == true }
 
         fun toJson(): Map<String, Any?> = linkedMapOf(
             "operation" to operation.label,
@@ -85,7 +96,7 @@ class SettingsBackupVault @JvmOverloads constructor(
             "backup" to backup,
             "categories" to categories,
             "data" to data,
-        )
+        ).apply { if (added != null) put("added", added) }
 
         companion object {
 
@@ -98,7 +109,14 @@ class SettingsBackupVault @JvmOverloads constructor(
                 val backup = (root["backup"] as? String)?.takeIf { BACKUP_NAME.matches(it) } ?: return null
                 val categories = strings(root["categories"]) ?: return null
                 val data = if (root["data"] == null) emptyList() else strings(root["data"]) ?: return null
-                return LastOperation(operation, time, backup, categories, data)
+                // Added entries of a category the record does not hold make it unreadable, as other broken fields do.
+                val added = root["added"]?.let { json ->
+                    (json as? Map<*, *> ?: return null).entries.associate { (id, ids) ->
+                        val category = (id as? String)?.takeIf { it in data } ?: return null
+                        category to ((ids as? List<*>)?.map { it as? String ?: return null } ?: return null)
+                    }
+                }
+                return LastOperation(operation, time, backup, categories, data, added)
             }
 
             private fun strings(json: Any?): List<String>? =
@@ -108,10 +126,11 @@ class SettingsBackupVault @JvmOverloads constructor(
 
     /**
      * What undoing the last operation does: the plan of importing its touched categories from its backup (no
-     * deployment items), and the data categories it touched that this version does not undo yet (Q27 decided they are
-     * undone, P10.3; the result page tells about them only when there are any).
-     * zh-CN: 撤销上次操作的内容: 以其备份导入触及分类的计划 (没有部署项), 以及本版本尚未撤销的触及数据分类 (Q27 已定为也要撤销, P10.3;
-     * 结果页只在有这类分类时提示).
+     * deployment items), and the touched data categories it leaves as they are ([LastOperation.dataNotUndone]: a record
+     * before P10.3; the result page tells about them only when there are any). The entries added to the other data
+     * categories ([LastOperation.added]) are removed by the caller, which knows their pages.
+     * zh-CN: 撤销上次操作的内容: 以其备份导入触及分类的计划 (没有部署项), 以及保持原样的触及数据分类 ([LastOperation.dataNotUndone]: P10.3
+     * 之前的记录; 结果页只在有这类分类时提示). 其他数据分类中新增的条目 ([LastOperation.added]) 由了解其页面的调用方删除.
      */
     data class Undo(val operation: LastOperation, val plan: ImportPlan, val dataNotUndone: List<String>)
 
@@ -209,7 +228,7 @@ class SettingsBackupVault @JvmOverloads constructor(
         val plan = SettingsImportPlanner.plan(
             reader.categories(ids, manifest), ids, environment, withDeployments = false, keys = keys, families = families, targets = targets, open = open,
         )
-        return Undo(last, plan, last.data)
+        return Undo(last, plan, last.dataNotUndone)
     }
 
     private fun backupOf(file: File): Backup? {

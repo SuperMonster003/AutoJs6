@@ -896,13 +896,16 @@
     <string name="settings_transfer_result_credentials_locked">Credentials were not imported: they were encrypted on another device</string>
     <string name="settings_transfer_result_data_failed">%1$s: not imported (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: %2$d imported, %3$d new</string>
-    <string name="settings_transfer_result_data_not_undone">This version does not undo the import of shortcuts and color libraries yet</string>
+    <string name="settings_transfer_result_data_not_undone">Shortcuts and color libraries imported by an earlier version are not undone</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: not removed (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: %2$d removed</string>
     <string name="settings_transfer_result_deployments">Deployments succeeded: %1$d, failed: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Not applied yet (applied after a restart): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">The launcher icon changes when this page closes. AutoJs6 may leave the screen then; open it again from its new icon.</string>
     <string name="settings_transfer_result_notification_permission">The foreground service needs the permission to post notifications</string>
     <string name="settings_transfer_result_restart">Some settings take effect after AutoJs6 restarts</string>
     <string name="settings_transfer_result_restore_shortcuts">Restore shortcuts</string>
+    <string name="settings_transfer_result_shortcuts_kept">Shortcuts kept on the home screen: %1$d</string>
     <string name="settings_transfer_result_shortcuts_restore">Imported shortcuts that are not on the home screen can be restored in Settings > Config > Shortcut backup</string>
     <string name="settings_transfer_result_skipped">Skipped (current values kept):</string>
     <string name="settings_transfer_setup_wizard">Settings import wizard</string>

@@ -281,6 +281,18 @@ internal class ShortcutBackupRepository private constructor(private val context:
     @Synchronized
     fun ignore(ids: Set<String>) = transform(ids) { it.copy(status = ShortcutBackupEntry.Status.REMOVED, requestToken = null, notified = true) }
 
+    /**
+     * Deletes the entries [ids] that are not on the desktop, for undoing the settings import that added them
+     * (docs/settings/ROADMAP.md P10.3); returns the deleted ids. Pinned ones stay: the desktop still has them.
+     */
+    @Synchronized
+    fun remove(ids: Set<String>): List<String> {
+        val state = runCatching { reconcile() }.getOrElse { read() }
+        val removed = state.entries.filter { it.id in ids && it.status != ShortcutBackupEntry.Status.PINNED }.map { it.id }
+        if (removed.isNotEmpty()) removed.toSet().let { gone -> save(state.copy(entries = state.entries.filterNot { it.id in gone })) }
+        return removed
+    }
+
     private fun update(id: String, change: (ShortcutBackupEntry) -> ShortcutBackupEntry) = transform(setOf(id), change)
 
     private fun transform(ids: Set<String>, change: (ShortcutBackupEntry) -> ShortcutBackupEntry) {

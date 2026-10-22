@@ -901,13 +901,16 @@
     <string name="settings_transfer_result_credentials_locked">لم يتم استيراد بيانات الاعتماد: تم تشفيرها على جهاز آخر</string>
     <string name="settings_transfer_result_data_failed">%1$s: لم يتم الاستيراد (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: تم استيراد %2$d, منها %3$d جديد</string>
-    <string name="settings_transfer_result_data_not_undone">لا يتراجع هذا الإصدار بعد عن استيراد الاختصارات ومكتبات الألوان</string>
+    <string name="settings_transfer_result_data_not_undone">لا يتم التراجع عن الاختصارات ومكتبات الألوان التي استوردها إصدار سابق</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: لم يتم الحذف (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: تم حذف %2$d</string>
     <string name="settings_transfer_result_deployments">عمليات النشر الناجحة: %1$d, الفاشلة: %2$d</string>
     <string name="settings_transfer_result_effects_failed">لم يتم التطبيق بعد (سيتم التطبيق بعد إعادة البدء): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">تتغير أيقونة التشغيل عند إغلاق هذه الصفحة. قد يغادر AutoJs6 الشاشة عندها; افتحه مرة أخرى من أيقونته الجديدة.</string>
     <string name="settings_transfer_result_notification_permission">تحتاج خدمة المقدمة إلى إذن نشر الإشعارات</string>
     <string name="settings_transfer_result_restart">تسري بعض الإعدادات بعد إعادة بدء AutoJs6</string>
     <string name="settings_transfer_result_restore_shortcuts">استعادة الاختصارات</string>
+    <string name="settings_transfer_result_shortcuts_kept">تم الإبقاء على الاختصارات الموجودة على الشاشة الرئيسية: %1$d</string>
     <string name="settings_transfer_result_shortcuts_restore">يمكن استعادة الاختصارات المستوردة غير الموجودة على الشاشة الرئيسية من إعدادات > تكوين > نسخ الاختصارات احتياطيا</string>
     <string name="settings_transfer_result_skipped">تم التخطي (مع الإبقاء على القيم الحالية):</string>
     <string name="settings_transfer_setup_wizard">معالج استيراد الإعدادات</string>

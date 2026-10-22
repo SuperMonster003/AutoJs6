@@ -148,10 +148,14 @@ object SettingsTransferMessages {
             append(if (index == 0) "\n\n" else "\n")
             append(
                 when (val failure = data.failure) {
-                    null -> context.getString(R.string.settings_transfer_result_data_imported, title, data.entries, data.added)
-                    else -> context.getString(R.string.settings_transfer_result_data_failed, title, failure)
+                    null -> when (val removed = data.removed) {
+                        null -> context.getString(R.string.settings_transfer_result_data_imported, title, data.entries, data.added)
+                        else -> context.getString(R.string.settings_transfer_result_data_removed, title, removed)
+                    }
+                    else -> context.getString(if (data.removed == null) R.string.settings_transfer_result_data_failed else R.string.settings_transfer_result_data_remove_failed, title, failure)
                 }
             )
+            if (data.kept > 0) append("\n  ").append(context.getString(R.string.settings_transfer_result_shortcuts_kept, data.kept))
         }
         if (outcome.restorableShortcuts.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_result_shortcuts_restore))
         if (outcome.skips.isNotEmpty()) {
@@ -182,20 +186,21 @@ object SettingsTransferMessages {
     @JvmStatic
     fun undoSummary(context: Context, last: SettingsBackupVault.LastOperation?): String = when (last?.operation) {
         null -> context.getString(R.string.settings_transfer_undo_none)
-        SettingsBackupVault.Operation.IMPORT -> context.getString(R.string.settings_transfer_undo_summary, timeText(last.time), last.categories.size)
+        SettingsBackupVault.Operation.IMPORT -> context.getString(R.string.settings_transfer_undo_summary, timeText(last.time), last.categories.size + last.data.size)
         SettingsBackupVault.Operation.RESET -> context.getString(R.string.settings_transfer_undo_reset_summary, timeText(last.time), last.categories.size)
     }
 
     /**
-     * The confirmation of "Undo last import"; until P10.3 it tells that the data categories of the import stay
-     * (appendix C Q27), only when the import touched any.
-     * zh-CN: "撤销上次导入" 的确认文字; 在 P10.3 之前, 只在导入触及数据分类时说明它们不会撤销 (附录 C Q27).
+     * The confirmation of "Undo last import"; it tells that the data categories of the import stay only when its
+     * record is from before P10.3 ([SettingsBackupVault.LastOperation.dataNotUndone], appendix C Q27).
+     * zh-CN: "撤销上次导入" 的确认文字; 只在其记录早于 P10.3 时说明数据分类不会撤销 ([SettingsBackupVault.LastOperation.dataNotUndone],
+     * 附录 C Q27).
      */
     @JvmStatic
     fun undoConfirmText(context: Context, last: SettingsBackupVault.LastOperation): String = buildString {
         val res = if (last.operation == SettingsBackupVault.Operation.RESET) R.string.settings_transfer_undo_reset_confirm else R.string.settings_transfer_undo_confirm
-        append(context.getString(res, last.categories.size, timeText(last.time)))
-        if (last.data.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_result_data_not_undone))
+        append(context.getString(res, last.categories.size + last.data.size - last.dataNotUndone.size, timeText(last.time)))
+        if (last.dataNotUndone.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_result_data_not_undone))
     }
 
     @JvmStatic

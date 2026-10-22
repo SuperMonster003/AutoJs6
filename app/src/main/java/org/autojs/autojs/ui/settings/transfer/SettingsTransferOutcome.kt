@@ -54,9 +54,11 @@ data class SettingsTransferOutcome(
     /**
      * What the import did to the data category [id] (P10.2): the [entries] it imported, [added] of them new to this
      * device, the shortcuts the result page offers restoring to the desktop ([restorable]) and whether one of them
-     * lacks its icon ([iconsMissing]), or why it failed ([failure]).
+     * lacks its icon ([iconsMissing]), or why it failed ([failure]). For the undo (P10.3) [entries] are the entries the
+     * import added, [removed] of them deleted and [kept] left on the desktop.
      * zh-CN: 导入对数据分类 [id] 的处理 (P10.2): 导入的条目数 [entries], 其中本机新增 [added] 项, 结果页提供恢复到桌面的快捷方式
-     * ([restorable]) 及其中是否有缺少图标的 ([iconsMissing]), 或失败原因 ([failure]).
+     * ([restorable]) 及其中是否有缺少图标的 ([iconsMissing]), 或失败原因 ([failure]). 撤销时 (P10.3) [entries] 为导入新增的条目数, 其中
+     * 删除 [removed] 项, [kept] 项因在桌面上而保留.
      */
     data class DataOutcome @JvmOverloads constructor(
         val id: String,
@@ -65,6 +67,8 @@ data class SettingsTransferOutcome(
         val restorable: List<String> = emptyList(),
         val iconsMissing: Boolean = false,
         val failure: String? = null,
+        val removed: Int? = null,
+        val kept: Int = 0,
     ) {
 
         fun toJson(): Map<String, Any?> = linkedMapOf(
@@ -74,6 +78,8 @@ data class SettingsTransferOutcome(
             "restorable" to restorable,
             "iconsMissing" to iconsMissing,
             "failure" to failure,
+            "removed" to removed,
+            "kept" to kept,
         )
 
         companion object {
@@ -89,6 +95,8 @@ data class SettingsTransferOutcome(
                     (map["restorable"] as? List<*>).orEmpty().filterIsInstance<String>(),
                     map["iconsMissing"] == true,
                     map["failure"] as? String,
+                    SettingsJson.toInt(map["removed"]),
+                    SettingsJson.toInt(map["kept"]) ?: 0,
                 )
             }
         }

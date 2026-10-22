@@ -899,13 +899,16 @@
     <string name="settings_transfer_result_credentials_locked">Учетные данные не импортированы: они зашифрованы на другом устройстве</string>
     <string name="settings_transfer_result_data_failed">%1$s: не импортировано (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: импортировано %2$d, новых %3$d</string>
-    <string name="settings_transfer_result_data_not_undone">Эта версия пока не отменяет импорт ярлыков и цветовых библиотек</string>
+    <string name="settings_transfer_result_data_not_undone">Ярлыки и цветовые библиотеки, импортированные более ранней версией, не отменяются</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: не удалено (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: удалено %2$d</string>
     <string name="settings_transfer_result_deployments">Развертывания выполнены: %1$d, с ошибкой: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Пока не применено (применится после перезапуска): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">Значок запуска сменится после закрытия этой страницы. AutoJs6 может при этом закрыться; откройте его снова по новому значку.</string>
     <string name="settings_transfer_result_notification_permission">Службе переднего плана нужно разрешение на отправку уведомлений</string>
     <string name="settings_transfer_result_restart">Некоторые настройки вступят в силу после перезапуска AutoJs6</string>
     <string name="settings_transfer_result_restore_shortcuts">Восстановить ярлыки</string>
+    <string name="settings_transfer_result_shortcuts_kept">Ярлыки на главном экране сохранены: %1$d</string>
     <string name="settings_transfer_result_shortcuts_restore">Импортированные ярлыки, которых нет на главном экране, можно восстановить в разделе Настройки > Конфигурация > Копия ярлыков</string>
     <string name="settings_transfer_result_skipped">Пропущено (текущие значения сохранены):</string>
     <string name="settings_transfer_setup_wizard">Мастер импорта настроек</string>

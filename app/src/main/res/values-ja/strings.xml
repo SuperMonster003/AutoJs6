@@ -900,13 +900,16 @@
     <string name="settings_transfer_result_credentials_locked">認証情報はインポートされませんでした: 別のデバイスで暗号化されています</string>
     <string name="settings_transfer_result_data_failed">%1$s: インポートされませんでした (%2$s)</string>
     <string name="settings_transfer_result_data_imported">%1$s: %2$d 項目をインポート, うち %3$d 項目が新規</string>
-    <string name="settings_transfer_result_data_not_undone">このバージョンでは, ショートカットとカラーライブラリのインポートはまだ元に戻せません</string>
+    <string name="settings_transfer_result_data_not_undone">以前のバージョンでインポートしたショートカットとカラーライブラリは元に戻されません</string>
+    <string name="settings_transfer_result_data_remove_failed">%1$s: 削除されませんでした (%2$s)</string>
+    <string name="settings_transfer_result_data_removed">%1$s: %2$d 項目を削除</string>
     <string name="settings_transfer_result_deployments">デプロイ成功: %1$d, 失敗: %2$d</string>
     <string name="settings_transfer_result_effects_failed">すぐには適用できませんでした (再起動後に適用されます): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">このページを閉じるとランチャーアイコンが切り替わります. その際 AutoJs6 の画面が閉じることがあるため, 新しいアイコンから開き直してください</string>
     <string name="settings_transfer_result_notification_permission">フォアグラウンドサービスには通知を送信する権限が必要です</string>
     <string name="settings_transfer_result_restart">一部の設定は AutoJs6 の再起動後に有効になります</string>
     <string name="settings_transfer_result_restore_shortcuts">ショートカットを復元</string>
+    <string name="settings_transfer_result_shortcuts_kept">ホーム画面にあるショートカットは残しました: %1$d 項目</string>
     <string name="settings_transfer_result_shortcuts_restore">インポートしたショートカットのうちホーム画面にないものは, 設定 > 設定 > ショートカットのバックアップ で復元できます</string>
     <string name="settings_transfer_result_skipped">スキップ (現在の値を保持):</string>
     <string name="settings_transfer_setup_wizard">設定インポートウィザード</string>
