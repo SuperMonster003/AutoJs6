@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.plugin.jvm
 
 import android.content.Context
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.script.JvmFileSource
 import org.autojs.autojs.script.JvmSourceKind
 import org.autojs.autojs.util.ViewUtils
@@ -144,7 +145,7 @@ internal class JvmSourceExecutionControl : Closeable {
 
     override fun close() {
         if (!cancelled.compareAndSet(false, true)) return
-        actions.toList().forEach { action ->
+        actions.concurrentSnapshot().forEach { action ->
             if (actions.remove(action)) runCatching(action)
         }
     }

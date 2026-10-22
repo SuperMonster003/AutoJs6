@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.plugin.dex
 
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.plugin.dexcompiler.api.DexCompileCancellation
 import org.autojs.plugin.dexcompiler.api.DexCompileError
 import org.autojs.plugin.dexcompiler.api.DexCompilerErrorCode
@@ -178,7 +179,7 @@ internal class DexCompilerExperimentalHarness(
     private val activeAttempt = AtomicReference<Attempt?>()
     private val lane = DexCompilerSerialExecutor(
         delegate = workerExecutor,
-        onRejected = { attempts.toList().forEach(Attempt::workerRejected) },
+        onRejected = { attempts.concurrentSnapshot().forEach(Attempt::workerRejected) },
         urgentCapacity = urgentControlCapacity,
         normalCapacity = normalControlCapacity,
     )

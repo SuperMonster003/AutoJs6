@@ -6,6 +6,7 @@ import android.os.Looper
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.core.plugin.hostbroker.HostCapabilityBrokerCore
 import org.autojs.plugin.three.stove.agent.api.ThreeStoveAgentContract as C
 import org.autojs.plugin.three.stove.agent.api.IThreeStoveAgentLink
@@ -20,7 +21,7 @@ internal class ThreeStoveAgentRunRegistry(private val controller: ThreeStoveAgen
     private val runs = ConcurrentHashMap<String, ThreeStoveAgentRunRecord>()
     private val poller = Executors.newSingleThreadScheduledExecutor { task -> Thread(task, "agent-run-observer").apply { isDaemon = true } }
     init { controller.observeLoss { code ->
-        val previous = runs.values.toList(); runs.clear()
+        val previous = runs.values.concurrentSnapshot(); runs.clear()
         previous.forEach { it.fail(code, "3-Stove Agent link was lost") }
     } }
     val available: Boolean get() = controller.status.value.state == "attached"

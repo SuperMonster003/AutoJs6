@@ -7,6 +7,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.plugin.mail.api.MailContract
 import org.autojs.plugin.mail.api.MailErrorCodes
 import java.util.UUID
@@ -273,7 +274,7 @@ class MailSessionClient(
 
     private fun failInflight(reason: MailError?) {
         val error = MailErrorMapper.normalize(MailErrorCodes.SESSION_CLOSED, reason?.message, reason?.retryable ?: true)
-        val pending = inflight.values.toList()
+        val pending = inflight.values.concurrentSnapshot()
         inflight.clear()
         pending.forEach { continuation ->
             if (continuation.isActive) continuation.resumeWithException(MailPluginException(error))
