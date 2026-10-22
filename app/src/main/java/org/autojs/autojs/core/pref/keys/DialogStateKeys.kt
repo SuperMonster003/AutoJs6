@@ -19,8 +19,9 @@ import org.autojs.autojs6.R
  * shown anywhere and are registered only.
  *
  * Dialogs that name no key get one made from the stack trace of the caller; such names change with the code, so they
- * cannot be declared and fall into the `other` category at run time (P4.3, appendix C Q23); [forName] gives the key of
- * such a name.
+ * cannot be declared and fall into the `other` category at run time (P4.3); [forName] gives the key of such a name.
+ * Every dialog names its key since appendix C Q23 ([IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT]); the names
+ * made from stack traces before stay in the stores as `other`.
  *
  * zh-CN: `NotAskAgainDialog` 的 "不再提示" 状态 (ROADMAP P4.1, T2): 对话框仍会显示时为 true (默认值), 用户勾选 "不再提示" 后为
  * false. 名称沿用调用方 (R1): `key_dialog_*` 资源与 `key_version_history_restore_does_not_auto_save_to_disk` (附录 C Q13 (a)),
@@ -28,7 +29,8 @@ import org.autojs.autojs6.R
  * (`DrawerMenuToggleableItem`, 附录 C Q22) 的两个键族. [TIMED_TASK_EXACT_ALARM_PROMPT] 的名称为
  * `key_timed_task_backend_alarm`, 它同时是 [TimedTaskKeys.TIMED_TASK_BACKEND] 的候选值: 同一字符串既是一个键的值, 又是另一个
  * 键的名称. 附录 C Q12 的 3 个对话框已不再显示, 只登记. 未指定键的对话框以调用栈生成键名, 名称随代码变化, 无法声明, 运行时
- * 归入 `other` 分类 (P4.3, 附录 C Q23); [forName] 给出这类名称的键.
+ * 归入 `other` 分类 (P4.3); [forName] 给出这类名称的键. 自附录 C Q23 起所有对话框都指定了键
+ * ([IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT]), 此前以调用栈生成的键名作为 `other` 留在存储中.
  */
 object DialogStateKeys : SettingsDomain {
 
@@ -86,6 +88,15 @@ object DialogStateKeys : SettingsDomain {
     @JvmField
     val ABOUT_START_FEEDBACK_ACTIVITY = StateKey.bool(name = "AboutActivity.start_feedback_activity", default = SettingDefault.of(true))
 
+    /**
+     * Connecting to a computer: the address may not be one of a computer (`JsonSocketClientTool`). Its name was made from
+     * the stack trace until appendix C Q23 gave it this one; a choice made under the old name is not carried over.
+     */
+    @JvmField
+    val IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT = StateKey.bool(
+        name = "key_\$_ip_address_may_be_invalid_for_server_connection_prompt", default = SettingDefault.of(true),
+    )
+
     /** The confirmation of a list preference, followed by the key of that preference (`MaterialListPreference.showPrompt`). */
     @JvmField
     val LIST_PREFERENCE_PROMPT = KeyFamily("prompt_\$_") { name ->
@@ -120,6 +131,7 @@ object DialogStateKeys : SettingsDomain {
         PLUGIN_HIDE_CONFIRM_PROMPT,
         EDITOR_DEBUG_LONG_CLICK_HINT,
         ABOUT_START_FEEDBACK_ACTIVITY,
+        IP_ADDRESS_MAY_BE_INVALID_FOR_SERVER_CONNECTION_PROMPT,
     )
 
     override val families: List<KeyFamily<*, *>> = listOf(LIST_PREFERENCE_PROMPT, DRAWER_TOGGLE_PROMPT)

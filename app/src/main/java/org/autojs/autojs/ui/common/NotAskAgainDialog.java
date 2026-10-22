@@ -27,8 +27,8 @@ public class NotAskAgainDialog extends MaterialDialog {
 
         /**
          * A dialog without a declared key: the key name is made from the stack trace of the caller, so it changes with
-         * the code (docs/settings/ROADMAP.md P4.1, appendix C Q23).
-         * zh-CN: 未声明键的对话框: 键名由调用方的调用栈生成, 随代码变化 (ROADMAP P4.1, 附录 C Q23).
+         * the code (docs/settings/ROADMAP.md P4.1). No caller uses it since appendix C Q23; it stays as the fallback.
+         * zh-CN: 未声明键的对话框: 键名由调用方的调用栈生成, 随代码变化 (ROADMAP P4.1). 自附录 C Q23 起已无调用方, 作为兜底保留.
          */
         public Builder(@NonNull Context context) {
             this(context, (StateKey<Boolean>) null);
