@@ -512,6 +512,24 @@ class AidlPluginHost<I : IInterface>(
             if (important) flags = flags or Context.BIND_IMPORTANT
             return flags or externalServiceFlag
         }
+
+        /**
+         * Hands a connected dedicated binding to the coroutine waiting for it, free of Android types for the JVM tests. The [lease] is
+         * closed whenever the binding does not reach that coroutine: it was cancelled before the binding arrived, or it
+         * is cancelled after this resume but before it runs again, when the prompt cancellation of kotlinx drops the value.
+         * The invokeOnCancellation handler of the waiter closes the lease in these cases too; closing it here keeps the hand-over
+         * correct without relying on that handler. Once delivered, the lease belongs to the caller (docs/memory/ROADMAP.md appendix C Q57).
+         * zh-CN: 把已连接的专用绑定交给等待它的协程, 不依赖 Android 类型, 供 JVM 测试使用. 绑定没有送达该协程时关闭 [lease]: 协程在绑定到达之前已被取消,
+         * 或在本次恢复之后, 再次运行之前被取消 (kotlinx 的即时取消丢弃该值). 等待方的 invokeOnCancellation 处理器在这些情况下同样会关闭租约,
+         * 这里关闭使交接本身不依赖该处理器. 送达之后租约归调用方 (docs/memory/ROADMAP.md 附录 C Q57).
+         */
+        internal fun <B> deliverDedicatedBinding(continuation: CancellableContinuation<B>, binding: B, lease: ServiceBindingLease) {
+            if (continuation.isCompleted) {
+                lease.close()
+                return
+            }
+            continuation.resume(binding) { _, _, _ -> lease.close() }
+        }
     }
 
     private fun buildBindFailureMessage(context: Context, serviceInfo: ServiceInfo, component: ComponentName, reason: String? = null): String {
@@ -638,11 +656,7 @@ class AidlPluginHost<I : IInterface>(
                 }
                 if (completionClaimed.compareAndSet(false, true)) {
                     timeoutRef.getAndSet(null)?.let(poolHandler::removeCallbacks)
-                    if (!continuation.isCompleted) {
-                        continuation.resume(DedicatedBinding(proxy, lease))
-                    } else {
-                        lease.close()
-                    }
+                    deliverDedicatedBinding(continuation, DedicatedBinding(proxy, lease), lease)
                 } else {
                     lease.close()
                 }
