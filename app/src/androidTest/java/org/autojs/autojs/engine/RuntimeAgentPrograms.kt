@@ -44,14 +44,16 @@ internal object RuntimeAgentPrograms {
         const confirmation=await run.confirm('missing',true).then(()=>null,e=>e);
         check(['SESSION_CLOSED','RUN_NOT_INTERACTIVE'].includes(confirmation?.code),'stale confirmation is refused');
         check(await run.cancel()===run,'terminal cancellation is harmless');
+        let cancellation=null;
         ${if (full) """
         const cancel=await assistant.run('Write a long detailed explanation of clouds in the final summary.');
         const initial=cancel.state;await cancel.cancel('runtime-fixture');const cancelled=await cancel.result;
         check(['cancelled','completed'].includes(cancelled.status),'native cancellation: '+cancelled.status);
         check(cancelled.status==='cancelled'||initial==='completed','cancelled while active');
+        cancellation={id:cancel.id,initial,status:cancelled.status};
         """.trimIndent() else ""}
         await agent.close();check(typeof(await agent.status()).state==='string','fresh client after close');await agent.close();
         return {checks,id:run.id,target:${JSONObject.quote(target)},status:result.status,summaryLength:result.summary.length,
-            usage:result.usage,events:{states,progress,steps,done},full:$full};
+            usage:result.usage,events:{states,progress,steps,done},cancellation,full:$full};
     """.trimIndent()
 }
