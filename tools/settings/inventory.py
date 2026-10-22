@@ -65,8 +65,8 @@ CATEGORIES = (
     'appearance', 'general', 'explorer', 'history', 'editor_general', 'editor_appearance', 'editor_log',
     'editor_assistance', 'editor_smart_hint', 'editor_gestures', 'editor_gutter', 'editor_performance',
     'editor_keyboard', 'timed_task', 'a11y', 'running', 'record', 'extensibility', 'updates', 'console', 'connection',
-    'layout_inspector', 'developer', 'plugin_center', 'plugin_enable_state', 'apk_build', 'wizards', 'data_shortcuts',
-    'data_color_library', 'credentials', 'other',
+    'layout_inspector', 'floating', 'developer', 'plugin_center', 'plugin_enable_state', 'apk_build', 'wizards',
+    'data_shortcuts', 'data_color_library', 'credentials', 'other',
 )
 
 # Data categories (D21 / T19) hold no keys; their entries are counted per item at run time.
