@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "serial": "BH900ASK9E",
+    "model": "G8441",
+    "android": "9",
+    "sdk": "28",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "root"
+    },
+    "mode": "force-stop",
+    "rounds": 10,
+    "settleSec": 3.0,
+    "startResidue": 0,
+    "startHostAlive": false,
+    "startForceStops": 2,
+    "date": "20261022",
+    "startedAt": "2026-10-22 21:16:43",
+    "endedAt": "2026-10-22 21:18:08",
+    "a11yBefore": true,
+    "a11yRestored": 1,
+    "a11yAfter": true
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "mark": "code=0 uid=0",
+      "servicePid": 8044,
+      "serviceRssKb": 67096,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 2,
+      "mark": "code=0 uid=0",
+      "servicePid": 8180,
+      "serviceRssKb": 67080,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 3,
+      "mark": "code=0 uid=0",
+      "servicePid": 8319,
+      "serviceRssKb": 67092,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 4,
+      "mark": "code=0 uid=0",
+      "servicePid": 8478,
+      "serviceRssKb": 67092,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 5,
+      "mark": "code=0 uid=0",
+      "servicePid": 8611,
+      "serviceRssKb": 67024,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 6,
+      "mark": "code=0 uid=0",
+      "servicePid": 8748,
+      "serviceRssKb": 67028,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 7,
+      "mark": "code=0 uid=0",
+      "servicePid": 8882,
+      "serviceRssKb": 67096,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 8,
+      "mark": "code=0 uid=0",
+      "servicePid": 9015,
+      "serviceRssKb": 67028,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 9,
+      "mark": "code=0 uid=0",
+      "servicePid": 9165,
+      "serviceRssKb": 67028,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    },
+    {
+      "round": 10,
+      "mark": "code=0 uid=0",
+      "servicePid": 9297,
+      "serviceRssKb": 67076,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true
+    }
+  ],
+  "verdict": "PASS",
+  "summary": "residue in 0/10 rounds"
+}
