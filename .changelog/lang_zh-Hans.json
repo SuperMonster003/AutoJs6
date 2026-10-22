@@ -284,6 +284,7 @@
         "runtime.loadDex/loadJar/loadAar 加载的 DEX 及其中的类在脚本结束后一直无法释放的问题 (加载器现随加载它的脚本释放: 加载过同一文件的脚本全部结束后, 其他脚本需自行加载才能使用其中的类)",
         "多个 UI 脚本同时运行时, 后启动的 UI 脚本结束后其内存要等其余 UI 脚本全部结束才能释放, 且期间其余 UI 脚本按已结束脚本的运行时包装控件的问题",
         "含 webview 控件的 UI 脚本结束后, 部分旧版 WebView (如 WebView 111) 仍持有已关闭的脚本页面, 使该脚本占用的内存一直无法释放的问题",
+        "speech.listen/wake 未能打开会话 (如未安装语音模型) 时, 脚本结束后其占用的内存一直无法释放的问题",
         "创建 JavaAdapter 时会清空整个类缓存目录, 使 runtime.loadJar 的转换缓存失效, 并可能删除同时进行的 loadJar/loadDex 正在使用的文件的问题",
         "通过外部 URI 或后台运行脚本时可能丢失原始路径或文件扩展名的问题 _[`issue #545`](http://issues.autojs6.com/545)_",
         "Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_",
