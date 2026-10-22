@@ -6,6 +6,13 @@ import androidx.annotation.StringRes
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.autojs.autojs.core.pref.deploy.DeploymentException
+import org.autojs.autojs.permission.AllFilesAccessPermission
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
@@ -49,6 +56,16 @@ class SettingsApplyStep(
             .widgetThemeColor()
             .cancelable(false)
             .show()
+        var deployments: DeploymentProgressDialog? = null
+        // The deployment items of P7.6 replace the plain progress dialog once they start.
+        val follower = CoroutineScope(currentCoroutineContext()).launch {
+            val run = SettingsOperations.deploymentsOf(id).filterNotNull().first()
+            progress.dismiss()
+            // Kept before following, which only ends with the cancellation of this coroutine.
+            val dialog = DeploymentProgressDialog(activity, wizard.titleRes, run)
+            deployments = dialog
+            dialog.follow()
+        }
         return try {
             val outcome = operation.await()
             SettingsOperations.forget(id)
@@ -60,20 +77,23 @@ class SettingsApplyStep(
             SettingsOperations.forget(id)
             current.copy(step = Step.FAILED, operation = null, failure = Failure.of(e), failureDetail = e.message ?: e.javaClass.simpleName)
         } finally {
+            follower.cancel()
             progress.dismiss()
+            deployments?.dismiss()
         }
     }
-
 }
 
 /**
  * The result page of an import or an undo (T10): the counts, the skips by reason and what needs attention
  * ([SettingsTransferMessages.outcomeText]); "Restart" when a restart is needed or an effect failed (D10), "Post
- * notifications" when the foreground service lacks the permission (appendix C Q13). A changed launcher icon is switched
- * once the page is closed ([SettingsTransferOutcome.launcherIconPending]).
+ * notifications" when the foreground service lacks the permission (appendix C Q13), "Grant access" when a deployment
+ * item lacked the storage access (T18). A changed launcher icon is switched once the page is closed
+ * ([SettingsTransferOutcome.launcherIconPending]).
  *
  * zh-CN: 导入或撤销的结果页 (T10): 计数, 按原因的跳过数与需要注意的事项 ([SettingsTransferMessages.outcomeText]); 需要重启或有生效入口
- * 失败时提供 "重启" (D10), 前台服务缺少通知权限时提供 "发送通知" 权限入口 (附录 C Q13). 启动图标有变化时在本页关闭后切换
+ * 失败时提供 "重启" (D10), 前台服务缺少通知权限时提供 "发送通知" 权限入口 (附录 C Q13), 部署项缺少存储权限时提供 "授予权限" (T18).
+ * 启动图标有变化时在本页关闭后切换
  * ([SettingsTransferOutcome.launcherIconPending]).
  */
 class SettingsResultStep(@param:StringRes private val titleRes: Int) : SettingsWizardStep(Step.RESULT) {
@@ -101,7 +121,11 @@ class SettingsResultStep(@param:StringRes private val titleRes: Int) : SettingsW
             .title(titleRes)
             .content(SettingsTransferMessages.outcomeText(activity, outcome))
         if (restart) builder.neutralText(R.string.text_restart).neutralColorRes(R.color.dialog_button_default)
-        if (outcome.notificationPermission) builder.negativeText(R.string.text_post_notifications_permission).negativeColorRes(R.color.dialog_button_default)
+        val storageAccess = outcome.deployments.any { it.failure == DeploymentException.Reason.PERMISSION }
+        when {
+            storageAccess -> builder.negativeText(R.string.settings_transfer_grant_all_files_access).negativeColorRes(R.color.dialog_button_default)
+            outcome.notificationPermission -> builder.negativeText(R.string.text_post_notifications_permission).negativeColorRes(R.color.dialog_button_default)
+        }
         val action = builder.showAndAwait()
         if (outcome.launcherIconPending) {
             // Last: the system may close the task of this page once the alias it was started from is disabled.
@@ -109,7 +133,7 @@ class SettingsResultStep(@param:StringRes private val titleRes: Int) : SettingsW
         }
         when (action) {
             DialogAction.NEUTRAL -> if (restart) IntentUtils.App.restart(activity)
-            DialogAction.NEGATIVE -> NotificationUtils.launchSettings()
+            DialogAction.NEGATIVE -> if (storageAccess) AllFilesAccessPermission(activity).config() else NotificationUtils.launchSettings()
             else -> Unit
         }
         return null

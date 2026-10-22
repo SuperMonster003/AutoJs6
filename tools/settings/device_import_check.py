@@ -23,6 +23,11 @@ PHASE is one of
   plugins  checks the plugin state after b.zip (--expect flipped) or its undo (--expect original) and that the package
            that is not installed was not written (item 4).
   reset    checks a reset to defaults of --categories (P8.1, item 6): their keys are gone, appearance stays.
+  deploy-prepare  after prepare: writes c.zip (P7.6, items 10 - 12), the explorer and editor appearance categories of
+           this device whose working directory names a directory that does not exist and whose editor font is a
+           catalog font that is not downloaded.
+  deploy-verify   checks the two deployment items after an import of c.zip: --expect deployed (directory created,
+           font downloaded, both keys written) or --expect declined (both keys kept); restore deletes them again.
   restore  imports the kept settings back, puts the internal backups back, deletes the operation backups written
            since prepare, the private files and /sdcard/Download/aj6-import-check.
   scan     indexes the files of /sdcard/Download/aj6-import-check in the media store (prepare does it too), so that
@@ -101,12 +106,12 @@ def inspect(local, expect_credentials):
     return failed + (not ok)
 
 
-def scan(serial, sdk):
+def scan(serial, sdk, names=("a.zip", "b.zip", "a-v2.zip")):
     """Indexes the test files, which the system file picker lists only once the media store knows them."""
     if sdk >= 29:
         base.adb(serial, "shell", "content", "call", "--uri", "content://media/", "--method", "scan_volume", "--arg", "external_primary")
     else:
-        for name in ("a.zip", "b.zip", "a-v2.zip"):
+        for name in names:
             base.adb(serial, "shell", "am", "broadcast", "-a", "android.intent.action.MEDIA_SCANNER_SCAN_FILE", "-d", f"file://{REMOTE_DIR}/{name}")
     print(f"INFO {serial} media store scanned for {REMOTE_DIR}")
 
@@ -127,7 +132,7 @@ def open_page(args, wizard):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("phase", choices=["prepare", "open", "page", "verify", "plugins", "reset", "restore", "scan", "screen"])
+    parser.add_argument("phase", choices=["prepare", "open", "page", "verify", "plugins", "reset", "deploy-prepare", "deploy-verify", "restore", "scan", "screen"])
     parser.add_argument("--out", type=pathlib.Path, required=True)
     parser.add_argument("--install", type=pathlib.Path)
     parser.add_argument("--wait", type=int, default=90)
@@ -175,8 +180,11 @@ def main():
             local = args.out / f"{args.serial}-{pathlib.PurePosixPath(newest).name}"
             if base.adb(args.serial, "pull", newest, str(local)).returncode == 0:
                 failed += inspect(local, expect_credentials=False)
-    elif args.phase in ("plugins", "reset"):
+    elif args.phase in ("plugins", "reset", "deploy-verify"):
         failed, _ = run_phase(args, args.phase)
+    elif args.phase == "deploy-prepare":
+        failed, _ = run_phase(args, args.phase)
+        scan(args.serial, int(sdk or 0), ("c.zip",))
     elif args.phase == "restore":
         failed, _ = run_phase(args, "restore")
         base.adb(args.serial, "shell", "rm", "-rf", REMOTE_DIR)

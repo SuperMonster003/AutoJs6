@@ -1,6 +1,9 @@
 package org.autojs.autojs.ui.settings.transfer
 
+import org.autojs.autojs.core.pref.DeploymentKind
 import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.deploy.DeploymentException
+import org.autojs.autojs.core.pref.deploy.DeploymentResult
 import org.autojs.autojs.core.pref.archive.ImportPlan
 import org.autojs.autojs.core.pref.archive.ImportPlan.SkipReason
 import org.autojs.autojs.core.pref.archive.SettingsArchive
@@ -18,15 +21,16 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
  * on this device ([credentialsLocked], D23), why the operation backup failed ([backupFailure], T20, P9.1; it does
  * not block), whether the launcher icon changed, which the result page switches once it is closed
  * ([launcherIconPending]: switching it closes the task of the page), and whether the language was applied
- * ([languageChanged], the page is recreated in it when needed). Pure data (R3), kept in the wizard state as JSON.
+ * ([languageChanged], the page is recreated in it when needed), and what became of the deployment items ([deployments],
+ * T18, P7.6). Pure data (R3), kept in the wizard state as JSON.
  *
  * zh-CN: 一次导入或撤销的结果 (ROADMAP T10, P7.5), 即结果页显示的内容: 计划中的分类数, 写入的条目 ([written], 计划的 `puts`) 与恢复
  * 默认的条目 ([restored], `removes`), 存储值真正变化的个数 ([changed]), 按原因的跳过数 ([skips], D9: 只含出现过的原因, 按
  * [SkipReason] 的顺序), 失败的生效入口 ([failedEffects], T12) 以及其中是否有需要通知权限的 (附录 C Q13), 是否需要重启 (D10), 撤销
  * 未处理的数据分类 ([dataNotUndone]: 附录 C Q27 已定为也要撤销, 由 P10.3 实现; 结果页只在有这类分类时提示), 以及文件中的凭据能否在
  * 本机解密 ([credentialsLocked], D23), 操作后备份失败的原因 ([backupFailure], T20, P9.1; 不阻断), 以及启动图标是否变化, 由结果页在关闭后
- * 切换 ([launcherIconPending]: 切换会关闭本页所在的任务), 以及是否应用了语言 ([languageChanged], 需要时以新语言重建本页). 纯数据 (R3),
- * 以 JSON 保存在向导状态中.
+ * 切换 ([launcherIconPending]: 切换会关闭本页所在的任务), 是否应用了语言 ([languageChanged], 需要时以新语言重建本页), 以及各部署项的
+ * 结果 ([deployments], T18, P7.6). 纯数据 (R3), 以 JSON 保存在向导状态中.
  */
 data class SettingsTransferOutcome(
     val categories: Int,
@@ -42,6 +46,7 @@ data class SettingsTransferOutcome(
     val backupFailure: String? = null,
     val launcherIconPending: Boolean = false,
     val languageChanged: Boolean = false,
+    val deployments: List<DeploymentResult> = emptyList(),
 ) {
 
     /** The number of skipped entries. zh-CN: 跳过的条目总数. */
@@ -62,6 +67,9 @@ data class SettingsTransferOutcome(
         "backupFailure" to backupFailure,
         "launcherIconPending" to launcherIconPending,
         "languageChanged" to languageChanged,
+        "deployments" to deployments.map {
+            linkedMapOf("kind" to it.kind.name, "store" to it.store, "name" to it.name, "target" to it.target, "failure" to it.failure?.name, "detail" to it.detail)
+        },
     )
 
     companion object {
@@ -81,6 +89,7 @@ data class SettingsTransferOutcome(
             credentialsLocked: Boolean = false,
             backupFailure: String? = null,
             launcherIconPending: Boolean = false,
+            deployments: List<DeploymentResult> = emptyList(),
         ) = SettingsTransferOutcome(
             categories = plan.categories.size,
             written = plan.puts.size,
@@ -95,6 +104,7 @@ data class SettingsTransferOutcome(
             backupFailure = backupFailure,
             launcherIconPending = launcherIconPending,
             languageChanged = SettingsEffects.Entry.LANGUAGE in report.applied,
+            deployments = deployments,
         )
 
         /**
@@ -102,6 +112,19 @@ data class SettingsTransferOutcome(
          * version) are left out.
          * zh-CN: JSON 文档 [json] 对应的结果, 不是结果时为 null; 未知的原因与入口 (更新的版本) 被略去.
          */
+        private fun deploymentOf(json: Any?): DeploymentResult? {
+            val map = json as? Map<*, *> ?: return null
+            val kind = DeploymentKind.entries.firstOrNull { it.name == map["kind"] } ?: return null
+            return DeploymentResult(
+                kind,
+                map["store"] as? String ?: return null,
+                map["name"] as? String ?: return null,
+                map["target"] as? String ?: return null,
+                DeploymentException.Reason.entries.firstOrNull { it.name == map["failure"] },
+                map["detail"] as? String,
+            )
+        }
+
         @JvmStatic
         fun fromJson(json: Any?): SettingsTransferOutcome? {
             val root = json as? Map<*, *> ?: return null
@@ -123,6 +146,7 @@ data class SettingsTransferOutcome(
                 backupFailure = root["backupFailure"] as? String,
                 launcherIconPending = root["launcherIconPending"] == true,
                 languageChanged = root["languageChanged"] == true,
+                deployments = (root["deployments"] as? List<*>).orEmpty().mapNotNull(::deploymentOf),
             )
         }
     }

@@ -807,6 +807,20 @@
     <string name="settings_transfer_category_wizards">Perfiles de los asistentes de configuración</string>
     <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se cifran con una clave de este dispositivo. Solo AutoJs6 en este dispositivo puede importarlas, no otro dispositivo ni tras un restablecimiento de fábrica. Este cifrado puede romperse sin conexión, así que guarde el archivo en un lugar seguro de todos modos.</string>
     <string name="settings_transfer_credentials_warning_title">Exportar credenciales?</string>
+    <string name="settings_transfer_deploy_cancel_rest">Cancelar el resto</string>
+    <string name="settings_transfer_deploy_cancelled">Cancelado</string>
+    <string name="settings_transfer_deploy_create_directory">Crear el directorio de trabajo</string>
+    <string name="settings_transfer_deploy_done">Completado</string>
+    <string name="settings_transfer_deploy_download_font">Descargar la fuente del editor</string>
+    <string name="settings_transfer_deploy_failed">Error</string>
+    <string name="settings_transfer_deploy_failure_io">No se puede crear el directorio; la configuración conserva su valor actual</string>
+    <string name="settings_transfer_deploy_failure_network">La descarga falló; la configuración conserva su valor actual</string>
+    <string name="settings_transfer_deploy_failure_permission">AutoJs6 no tiene \"Acceso a todos los archivos\"; la configuración conserva su valor actual</string>
+    <string name="settings_transfer_deploy_failure_unavailable">Esta versión no ofrece la fuente; la configuración conserva su valor actual</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">Instalar...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">Necesita \"Acceso a todos los archivos\"</string>
+    <string name="settings_transfer_deploy_running">En curso</string>
+    <string name="settings_transfer_deploy_waiting">En espera</string>
     <string name="settings_transfer_description">La configuración se exporta por categorías a un archivo zip que se puede importar en este u otro dispositivo.</string>
     <string name="settings_transfer_error_interrupted">AutoJs6 se cerró mientras se cambiaba la configuración. Revise la configuración o deshaga la última importación.</string>
     <string name="settings_transfer_error_invalid_file">Un archivo de categoría del archivo de configuración está dañado</string>
@@ -825,6 +839,7 @@
     <string name="settings_transfer_export_summary">Elegir categorías y guardarlas en un archivo zip</string>
     <string name="settings_transfer_export_unexportable">Se omitieron %1$d valores porque no se pueden escribir (como NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Escribiendo el archivo de configuración...</string>
+    <string name="settings_transfer_grant_all_files_access">Conceder acceso</string>
     <string name="settings_transfer_import">Importar configuración</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Importando la configuración...</string>
     <string name="settings_transfer_import_canceled">Importación cancelada, no se cambió ninguna configuración</string>
@@ -840,6 +855,7 @@
     <string name="settings_transfer_import_unknown_categories">Categorías que esta versión no conoce (se omiten): %1$d</string>
     <string name="settings_transfer_later_version">Disponible en una versión posterior</string>
     <string name="settings_transfer_locked_later">La importación de las credenciales de otro dispositivo con una contraseña llegará en una versión posterior</string>
+    <string name="settings_transfer_pick_deployments">Estas configuraciones importadas necesitan primero un despliegue en este dispositivo. Los elementos marcados se despliegan; los demás conservan su valor actual.</string>
     <string name="settings_transfer_pick_export">Elija las categorías que desea exportar</string>
     <string name="settings_transfer_pick_import">Elija las categorías que desea importar</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Detallar...</string>
@@ -849,6 +865,7 @@
     <string name="settings_transfer_result_counts">Categorías: %1$d\nElementos escritos: %2$d\nElementos restablecidos: %3$d\nValores cambiados: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Las credenciales no se importaron: se cifraron en otro dispositivo</string>
     <string name="settings_transfer_result_data_not_undone">Esta versión aún no deshace la importación de accesos directos y bibliotecas de colores</string>
+    <string name="settings_transfer_result_deployments">Despliegues correctos: %1$d, fallidos: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Todavía no aplicado (se aplica tras reiniciar): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">El icono del lanzador cambia al cerrar esta página. AutoJs6 puede salir de la pantalla; vuelva a abrirlo desde su nuevo icono.</string>
     <string name="settings_transfer_result_notification_permission">El servicio de primer plano necesita el permiso para publicar notificaciones</string>

@@ -2,11 +2,13 @@ package org.autojs.autojs.ui.settings.transfer
 
 import android.content.Context
 import androidx.annotation.StringRes
+import org.autojs.autojs.core.pref.DeploymentKind
 import org.autojs.autojs.core.pref.archive.ImportPlan.SkipReason
 import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
 import org.autojs.autojs.core.pref.archive.SettingsBackupVault
 import org.autojs.autojs.core.pref.archive.SettingsEffects
+import org.autojs.autojs.core.pref.deploy.DeploymentException
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
 import org.autojs.autojs6.R
 import java.text.DateFormat
@@ -69,6 +71,26 @@ object SettingsTransferMessages {
         SettingsEffects.Entry.FOREGROUND_SERVICE -> R.string.text_foreground_service
     }
 
+    /** The title of a deployment item (T18). zh-CN: 部署项的标题 (T18). */
+    @StringRes
+    @JvmStatic
+    fun deploymentRes(kind: DeploymentKind): Int = when (kind) {
+        DeploymentKind.CREATE_DIRECTORY -> R.string.settings_transfer_deploy_create_directory
+        DeploymentKind.DOWNLOAD_EDITOR_FONT -> R.string.settings_transfer_deploy_download_font
+    }
+
+    /** Why a deployment item failed (T18). zh-CN: 部署项失败的原因 (T18). */
+    @StringRes
+    @JvmStatic
+    fun deploymentFailureRes(reason: DeploymentException.Reason): Int = when (reason) {
+        DeploymentException.Reason.PERMISSION -> R.string.settings_transfer_deploy_failure_permission
+        DeploymentException.Reason.IO -> R.string.settings_transfer_deploy_failure_io
+        DeploymentException.Reason.NETWORK -> R.string.settings_transfer_deploy_failure_network
+        DeploymentException.Reason.UNAVAILABLE -> R.string.settings_transfer_deploy_failure_unavailable
+        DeploymentException.Reason.PREREQUISITE -> R.string.text_ace_editor_plugin_required
+        DeploymentException.Reason.CANCELLED -> R.string.settings_transfer_deploy_cancelled
+    }
+
     /**
      * The summary of a settings file (import step 1, T10): file, export time, host, device and counts, then the
      * warnings (newer format, another host package, appendix C Q26), the credentials sealed for another device (D23)
@@ -118,6 +140,14 @@ object SettingsTransferMessages {
         if (outcome.skips.isNotEmpty()) {
             append("\n\n").append(context.getString(R.string.settings_transfer_result_skipped))
             outcome.skips.forEach { (reason, count) -> append("\n  ").append(context.getString(skipRes(reason), count)) }
+        }
+        if (outcome.deployments.isNotEmpty()) {
+            val failed = outcome.deployments.filterNot { it.succeeded }
+            append("\n\n").append(context.getString(R.string.settings_transfer_result_deployments, outcome.deployments.size - failed.size, failed.size))
+            failed.forEach { result ->
+                append("\n  ").append(context.getString(deploymentRes(result.kind))).append(" (").append(result.target).append("): ")
+                append(context.getString(deploymentFailureRes(result.failure!!)))
+            }
         }
         if (outcome.failedEffects.isNotEmpty()) {
             val names = outcome.failedEffects.joinToString(", ") { context.getString(effectRes(it)) }

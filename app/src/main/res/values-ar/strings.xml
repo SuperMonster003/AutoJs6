@@ -809,6 +809,20 @@
     <string name="settings_transfer_category_wizards">ملفات تعريف معالجات الإعداد</string>
     <string name="settings_transfer_credentials_warning">تُشفَّر بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) بمفتاح هذا الجهاز قبل كتابتها في الملف. لا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز, وليس على جهاز آخر أو بعد إعادة ضبط المصنع. يمكن كسر هذا التشفير دون اتصال, لذا احتفظ بالملف في مكان آمن على أي حال.</string>
     <string name="settings_transfer_credentials_warning_title">تصدير بيانات الاعتماد?</string>
+    <string name="settings_transfer_deploy_cancel_rest">إلغاء الباقي</string>
+    <string name="settings_transfer_deploy_cancelled">تم الإلغاء</string>
+    <string name="settings_transfer_deploy_create_directory">إنشاء مجلد العمل</string>
+    <string name="settings_transfer_deploy_done">تم</string>
+    <string name="settings_transfer_deploy_download_font">تنزيل خط المحرر</string>
+    <string name="settings_transfer_deploy_failed">فشل</string>
+    <string name="settings_transfer_deploy_failure_io">لا يمكن إنشاء المجلد; يحتفظ الإعداد بقيمته الحالية</string>
+    <string name="settings_transfer_deploy_failure_network">فشل التنزيل; يحتفظ الإعداد بقيمته الحالية</string>
+    <string name="settings_transfer_deploy_failure_permission">يفتقر AutoJs6 إلى إذن \"الوصول إلى جميع الملفات\"; يحتفظ الإعداد بقيمته الحالية</string>
+    <string name="settings_transfer_deploy_failure_unavailable">لا يوفر هذا الإصدار الخط; يحتفظ الإعداد بقيمته الحالية</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">تثبيت...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">يتطلب إذن \"الوصول إلى جميع الملفات\"</string>
+    <string name="settings_transfer_deploy_running">قيد التنفيذ</string>
+    <string name="settings_transfer_deploy_waiting">في الانتظار</string>
     <string name="settings_transfer_description">تُصدَّر الإعدادات حسب الفئة إلى ملف zip يمكن استيراده على هذا الجهاز أو على جهاز آخر.</string>
     <string name="settings_transfer_error_interrupted">تم إغلاق AutoJs6 أثناء تغيير الإعدادات. تحقق من الإعدادات أو تراجع عن آخر استيراد.</string>
     <string name="settings_transfer_error_invalid_file">أحد ملفات الفئات في ملف الإعدادات تالف</string>
@@ -827,6 +841,7 @@
     <string name="settings_transfer_export_summary">اختر الفئات واحفظها في ملف zip</string>
     <string name="settings_transfer_export_unexportable">تم استبعاد %1$d من القيم لأنه لا يمكن كتابتها (مثل NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">جارٍ كتابة ملف الإعدادات...</string>
+    <string name="settings_transfer_grant_all_files_access">منح الإذن</string>
     <string name="settings_transfer_import">استيراد الإعدادات</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">جارٍ استيراد الإعدادات...</string>
     <string name="settings_transfer_import_canceled">تم إلغاء الاستيراد, ولم يتم تغيير أي إعداد</string>
@@ -842,6 +857,7 @@
     <string name="settings_transfer_import_unknown_categories">فئات لا يعرفها هذا الإصدار (سيتم تخطيها): %1$d</string>
     <string name="settings_transfer_later_version">متاح في إصدار لاحق</string>
     <string name="settings_transfer_locked_later">سيتوفر استيراد بيانات اعتماد جهاز آخر باستخدام كلمة مرور في إصدار لاحق</string>
+    <string name="settings_transfer_pick_deployments">تحتاج هذه الإعدادات المستوردة أولا إلى نشر على هذا الجهاز. يتم نشر العناصر المحددة, وتحتفظ العناصر الأخرى بقيمها الحالية.</string>
     <string name="settings_transfer_pick_export">اختر الفئات المراد تصديرها</string>
     <string name="settings_transfer_pick_import">اختر الفئات المراد استيرادها</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">تحديد العناصر...</string>
@@ -851,6 +867,7 @@
     <string name="settings_transfer_result_counts">الفئات: %1$d\nالعناصر المكتوبة: %2$d\nالعناصر المستعادة إلى الافتراضي: %3$d\nالقيم المتغيرة: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">لم يتم استيراد بيانات الاعتماد: تم تشفيرها على جهاز آخر</string>
     <string name="settings_transfer_result_data_not_undone">لا يتراجع هذا الإصدار بعد عن استيراد الاختصارات ومكتبات الألوان</string>
+    <string name="settings_transfer_result_deployments">عمليات النشر الناجحة: %1$d, الفاشلة: %2$d</string>
     <string name="settings_transfer_result_effects_failed">لم يتم التطبيق بعد (سيتم التطبيق بعد إعادة البدء): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">تتغير أيقونة التشغيل عند إغلاق هذه الصفحة. قد يغادر AutoJs6 الشاشة عندها; افتحه مرة أخرى من أيقونته الجديدة.</string>
     <string name="settings_transfer_result_notification_permission">تحتاج خدمة المقدمة إلى إذن نشر الإشعارات</string>

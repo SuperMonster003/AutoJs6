@@ -1,13 +1,10 @@
 package org.autojs.autojs.ui.settings.transfer
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.core.plugin.editor.AceEditorPluginHost
-import org.autojs.autojs.core.pref.DeploymentKind
 import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.archive.AndroidSettingsAutoBackup
 import org.autojs.autojs.core.pref.archive.AndroidSettingsEffects
@@ -25,10 +22,12 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects
 import org.autojs.autojs.core.pref.archive.SettingsImportApplier
 import org.autojs.autojs.core.pref.archive.SettingsImportPlanner
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFont
-import org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager
-import org.autojs.autojs.util.EnvironmentUtils
-import org.autojs.autojs.util.WorkingDirectoryPathPolicy
+import org.autojs.autojs.core.pref.deploy.AndroidDeployments
+import org.autojs.autojs.core.pref.deploy.DeploymentException
+import org.autojs.autojs.core.pref.deploy.DeploymentItem
+import org.autojs.autojs.core.pref.deploy.DeploymentItems
+import org.autojs.autojs.core.pref.deploy.DeploymentPlanner
+import org.autojs.autojs.core.pref.deploy.DeploymentResult
 import java.io.File
 import java.io.IOException
 
@@ -59,6 +58,9 @@ object SettingsImporter {
      * ([locked], D23) and the categories unknown to this version ([unknown]). Pure data (R3).
      * zh-CN: 第 1 步显示的设置文件信息: manifest 与 [warnings], 本机无法打开的加密分类 ([locked], D23), 本版本不认识的分类 ([unknown]).
      */
+    /** A deployment item of step 3 and what it shows. zh-CN: 第 3 步的一个部署项及其显示内容. */
+    data class PendingDeployment(val pending: DeploymentPlanner.Pending, val description: DeploymentItem.Description)
+
     data class Inspection(
         val fileName: String,
         val manifest: SettingsArchiveManifest,
@@ -147,18 +149,20 @@ object SettingsImporter {
     /**
      * Imports [SettingsWizardState.selected] from the copy [state] holds (P7.5 step 4): plans on a background thread,
      * backs up every category to the internal vault (T9), writes the plan (T8, one commit per store), records the
-     * operation, then runs the effect table on the calling thread, the main thread (T12). The deployment items of the
-     * plan are given up until P7.6 asks for them.
+     * operation, then runs the effect table on the calling thread, the main thread (T12), and the deployment items the
+     * user confirmed ([SettingsWizardState.deploy], T18, P7.6); the others are given up.
      * zh-CN: 从 [state] 中的副本导入所选分类 (P7.5 第 4 步): 在后台线程生成计划, 把全部分类备份到内部备份库 (T9), 写入计划 (T8, 每个
-     * 存储提交一次), 记录本次操作, 然后在调用线程 (主线程) 执行生效表 (T12). 在 P7.6 询问之前, 计划中的部署项一律放弃.
+     * 存储提交一次), 记录本次操作, 然后在调用线程 (主线程) 执行生效表 (T12), 再运行用户确认的部署项 ([SettingsWizardState.deploy], T18,
+     * P7.6); 其余部署项放弃.
      */
     suspend fun importArchive(context: Context, state: SettingsWizardState): SettingsTransferOutcome {
         val app = context.applicationContext
+        val device = AndroidDeployments(app)
         val (plan, changes, locked) = withContext(Dispatchers.IO) {
             val reader = reader(app, archiveOf(state))
             val inspection = inspect(reader, state.fileName.orEmpty(), app.packageName)
-            val planned = plan(reader, inspection, state.selected, environment(app))
-            val plan = planned.decline(planned.deployments)
+            val environment = device.environment()
+            val plan = DeploymentPlanner.decide(plan(reader, inspection, state.selected, environment), state.deploy.orEmpty(), environment)
             val vault = vault(app)
             val backup = vault.backup(SettingsBackupVault.Operation.IMPORT, SettingsSnapshot.capture(SettingCategory.ALL), SettingsExporter.host(app), SettingsExporter.device())
             val changes = SettingsImportApplier.write(plan)
@@ -167,8 +171,52 @@ object SettingsImporter {
             Triple(plan, changes, inspection.locked.isNotEmpty())
         }
         val report = SettingsEffects.run(changes, actions(app))
+        val deployments = deploy(app, plan, device, state.operation)
         val backupFailure = afterOperation(app)
-        return SettingsTransferOutcome.of(plan, changes, report, credentialsLocked = locked, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report))
+        return SettingsTransferOutcome.of(
+            plan, changes, report,
+            credentialsLocked = locked, backupFailure = backupFailure, launcherIconPending = launcherIconPending(report), deployments = deployments,
+        )
+    }
+
+    /**
+     * Runs the deployment items of [plan] one after another (T18) and writes the key of each one that succeeds; a
+     * failure does not stop the others, and the items not started yet when the user cancels the rest are given up.
+     * The progress goes to [SettingsOperations.deploymentsOf] of [operation].
+     * zh-CN: 依次运行 [plan] 中的部署项 (T18), 每项成功后写入其键; 某项失败不影响其他项, 用户取消其余项时尚未开始的项被放弃. 进度写入
+     * [operation] 的 [SettingsOperations.deploymentsOf].
+     */
+    private suspend fun deploy(context: Context, plan: ImportPlan, device: AndroidDeployments, operation: String?): List<DeploymentResult> {
+        if (plan.deployments.isEmpty()) return emptyList()
+        val items = plan.deployments.map { DeploymentItems.of(it, device) }
+        val descriptions = withContext(Dispatchers.IO) { items.map { it.describe() } }
+        val run = DeploymentRun(descriptions.map { DeploymentRun.Row(it.kind, it.target) })
+        operation?.let { SettingsOperations.deploymentsOf(it).value = run }
+        return items.mapIndexed { index, item ->
+            val deployment = item.deployment
+            fun result(failure: DeploymentException.Reason? = null, detail: String? = null) =
+                DeploymentResult(deployment.kind, deployment.store.name, deployment.name, descriptions[index].target, failure, detail)
+            if (run.cancelRequested) {
+                run.update(index, DeploymentRun.Status.CANCELLED)
+                return@mapIndexed result(DeploymentException.Reason.CANCELLED)
+            }
+            run.update(index, DeploymentRun.Status.RUNNING)
+            try {
+                item.run { fraction -> run.update(index, DeploymentRun.Status.RUNNING, fraction) }
+                val changes = withContext(Dispatchers.IO) { SettingsImportApplier.write(DeploymentPlanner.completed(plan, listOf(deployment))) }
+                SettingsEffects.run(changes, actions(context))
+                run.update(index, DeploymentRun.Status.DONE)
+                result()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: DeploymentException) {
+                run.update(index, if (e.reason == DeploymentException.Reason.CANCELLED) DeploymentRun.Status.CANCELLED else DeploymentRun.Status.FAILED)
+                result(e.reason, e.message)
+            } catch (e: Exception) {
+                run.update(index, DeploymentRun.Status.FAILED)
+                result(DeploymentException.Reason.IO, e.message ?: e.javaClass.simpleName)
+            }
+        }
     }
 
     /**
@@ -226,34 +274,25 @@ object SettingsImporter {
     }
 
     /**
-     * What an import plan needs to know about this device (T8): the installed packages, whether the Ace editor plugin
-     * is installed, whether a working directory exists and whether an editor font is installed (bundled or
-     * downloaded). Runs on a background thread.
-     * zh-CN: 导入计划需要的本机情况 (T8): 已安装的包, Ace 编辑器插件是否已安装, 工作目录是否存在, 编辑器字体是否已安装 (内置或已下载).
-     * 在后台线程调用.
+     * What an import plan needs to know about this device (T8, [AndroidDeployments.environment]); runs on a background
+     * thread.
+     * zh-CN: 导入计划需要的本机情况 (T8, [AndroidDeployments.environment]); 在后台线程调用.
      */
     @JvmStatic
-    fun environment(context: Context): ImportEnvironment {
-        val fonts by lazy { AceEditorFontManager.get(context).store }
-        return ImportEnvironment(installedPackages(context), AceEditorPluginHost.isAvailable(context)) { kind, value ->
-            val text = value as? String
-            when (kind) {
-                DeploymentKind.CREATE_DIRECTORY -> text != null &&
-                        File(WorkingDirectoryPathPolicy.resolveStored(text, EnvironmentUtils.externalStoragePath)).isDirectory
-                DeploymentKind.DOWNLOAD_EDITOR_FONT -> text != null &&
-                        (AceEditorFont.entries.any { it.preferenceValue == text } || fonts.installedFont(text) != null)
-            }
-        }
-    }
+    fun environment(context: Context): ImportEnvironment = AndroidDeployments(context).environment()
 
-    private fun installedPackages(context: Context): Set<String> {
-        val packages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.packageManager.getInstalledPackages(PackageManager.PackageInfoFlags.of(0))
-        } else {
-            @Suppress("DEPRECATION")
-            context.packageManager.getInstalledPackages(0)
-        }
-        return packages.mapTo(HashSet()) { it.packageName }
+    /**
+     * The deployment items the selection of [state] needs on this device (P7.6, step 3), each with what it shows;
+     * runs on a background thread.
+     * zh-CN: [state] 所选分类在本机需要的部署项 (P7.6, 第 3 步) 及其显示内容; 在后台线程调用.
+     */
+    @JvmStatic
+    fun pendingDeployments(context: Context, state: SettingsWizardState): List<PendingDeployment> {
+        val reader = reader(context, archiveOf(state))
+        val device = AndroidDeployments(context)
+        val environment = device.environment()
+        val plan = plan(reader, inspect(reader, state.fileName.orEmpty(), context.packageName), state.selected, environment)
+        return DeploymentPlanner.pending(plan, environment).map { PendingDeployment(it, DeploymentItems.of(it.deployment, device).describe()) }
     }
 
     private fun deviceKey(context: Context): SettingsDeviceKey? = try {

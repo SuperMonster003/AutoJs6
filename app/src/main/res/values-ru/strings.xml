@@ -807,6 +807,20 @@
     <string name="settings_transfer_category_wizards">Профили мастеров настройки</string>
     <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) шифруются ключом этого устройства. Импортировать их может только AutoJs6 на этом устройстве, но не другое устройство и не после сброса к заводским настройкам. Такое шифрование можно взломать офлайн, поэтому все равно храните файл в надежном месте.</string>
     <string name="settings_transfer_credentials_warning_title">Экспортировать учетные данные?</string>
+    <string name="settings_transfer_deploy_cancel_rest">Отменить остальные</string>
+    <string name="settings_transfer_deploy_cancelled">Отменено</string>
+    <string name="settings_transfer_deploy_create_directory">Создать рабочий каталог</string>
+    <string name="settings_transfer_deploy_done">Готово</string>
+    <string name="settings_transfer_deploy_download_font">Загрузить шрифт редактора</string>
+    <string name="settings_transfer_deploy_failed">Ошибка</string>
+    <string name="settings_transfer_deploy_failure_io">Не удается создать каталог; настройка сохраняет текущее значение</string>
+    <string name="settings_transfer_deploy_failure_network">Загрузка не удалась; настройка сохраняет текущее значение</string>
+    <string name="settings_transfer_deploy_failure_permission">У AutoJs6 нет \"Доступа ко всем файлам\"; настройка сохраняет текущее значение</string>
+    <string name="settings_transfer_deploy_failure_unavailable">Эта версия не предлагает шрифт; настройка сохраняет текущее значение</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">Установить...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">Требуется \"Доступ ко всем файлам\"</string>
+    <string name="settings_transfer_deploy_running">Выполняется</string>
+    <string name="settings_transfer_deploy_waiting">Ожидание</string>
     <string name="settings_transfer_description">Настройки экспортируются по категориям в zip-файл, который можно импортировать на этом или другом устройстве.</string>
     <string name="settings_transfer_error_interrupted">AutoJs6 был закрыт во время изменения настроек. Проверьте настройки или отмените последний импорт.</string>
     <string name="settings_transfer_error_invalid_file">Файл категории в файле настроек поврежден</string>
@@ -825,6 +839,7 @@
     <string name="settings_transfer_export_summary">Выбрать категории и сохранить их в zip-файл</string>
     <string name="settings_transfer_export_unexportable">Пропущено значений, которые нельзя записать (например, NaN): %1$d</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Запись файла настроек...</string>
+    <string name="settings_transfer_grant_all_files_access">Предоставить доступ</string>
     <string name="settings_transfer_import">Импорт настроек</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Импорт настроек...</string>
     <string name="settings_transfer_import_canceled">Импорт отменен, настройки не изменены</string>
@@ -840,6 +855,7 @@
     <string name="settings_transfer_import_unknown_categories">Категории, неизвестные этой версии (пропускаются): %1$d</string>
     <string name="settings_transfer_later_version">Будет доступно в следующей версии</string>
     <string name="settings_transfer_locked_later">Импорт учетных данных другого устройства по паролю появится в следующей версии</string>
+    <string name="settings_transfer_pick_deployments">Эти импортируемые настройки сначала требуют развертывания на этом устройстве. Отмеченные элементы будут развернуты, остальные сохранят текущие значения.</string>
     <string name="settings_transfer_pick_export">Выберите категории для экспорта</string>
     <string name="settings_transfer_pick_import">Выберите категории для импорта</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Уточнить...</string>
@@ -849,6 +865,7 @@
     <string name="settings_transfer_result_counts">Категории: %1$d\nЗаписано элементов: %2$d\nСброшено к значениям по умолчанию: %3$d\nИзменено значений: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Учетные данные не импортированы: они зашифрованы на другом устройстве</string>
     <string name="settings_transfer_result_data_not_undone">Эта версия пока не отменяет импорт ярлыков и цветовых библиотек</string>
+    <string name="settings_transfer_result_deployments">Развертывания выполнены: %1$d, с ошибкой: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Пока не применено (применится после перезапуска): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">Значок запуска сменится после закрытия этой страницы. AutoJs6 может при этом закрыться; откройте его снова по новому значку.</string>
     <string name="settings_transfer_result_notification_permission">Службе переднего плана нужно разрешение на отправку уведомлений</string>

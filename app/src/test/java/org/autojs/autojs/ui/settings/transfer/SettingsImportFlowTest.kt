@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.settings.transfer
 
+import org.autojs.autojs.core.pref.DeploymentKind
 import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.TypedValue
 import org.autojs.autojs.core.pref.archive.ImportEnvironment
@@ -13,6 +14,8 @@ import org.autojs.autojs.core.pref.archive.SettingsEffects
 import org.autojs.autojs.core.pref.archive.SettingsEffects.EffectException
 import org.autojs.autojs.core.pref.archive.SettingsImportApplier
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.deploy.DeploymentException
+import org.autojs.autojs.core.pref.deploy.DeploymentResult
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
 import org.autojs.autojs.core.pref.keys.ConsoleKeys
 import org.autojs.autojs.core.pref.keys.CredentialKeys
@@ -143,10 +146,14 @@ class SettingsImportFlowTest : DomainKeysTestBase() {
             dataNotUndone = listOf("data_shortcuts"),
             backupFailure = "Cannot create /sdcard/Scripts/backups/settings",
             launcherIconPending = true,
+            deployments = listOf(
+                DeploymentResult(DeploymentKind.CREATE_DIRECTORY, "default", "key_\$_working_directory", "/storage/emulated/0/Projects"),
+                DeploymentResult(DeploymentKind.DOWNLOAD_EDITOR_FONT, "default", "key_\$_ace_editor_font", "JetBrains Mono", DeploymentException.Reason.NETWORK, "timeout"),
+            ),
         )
         val state = SettingsImportWizard.initialState().copy(
             step = Step.RESULT, selected = listOf("appearance"), archive = "/data/cache/settings-import/import.zip",
-            fileName = "a.zip", operation = "0b2e", outcome = outcome,
+            fileName = "a.zip", deploy = listOf("default:key_\$_working_directory"), operation = "0b2e", outcome = outcome,
         )
         assertEquals(state, SettingsWizardState.fromText(state.toText()))
         assertEquals(Kind.IMPORT, SettingsWizardState.fromText(state.toText())!!.kind)

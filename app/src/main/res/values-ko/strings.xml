@@ -809,6 +809,20 @@
     <string name="settings_transfer_category_wizards">설정 마법사 프로필</string>
     <string name="settings_transfer_credentials_warning">자격 증명 및 권한 부여 (GitHub 토큰, 플러그인 센터 권한, MCP Server 와 3-Stove Agent 의 신뢰된 클라이언트, Bun 호스트 권한) 는 이 기기의 키로 암호화되어 파일에 기록됩니다. 이 기기의 AutoJs6 에서만 가져올 수 있으며, 다른 기기나 초기화 후에는 가져올 수 없습니다. 이 암호화는 오프라인에서 해독될 수 있으므로 파일을 계속 안전하게 보관하세요.</string>
     <string name="settings_transfer_credentials_warning_title">자격 증명을 내보내시겠습니까?</string>
+    <string name="settings_transfer_deploy_cancel_rest">나머지 취소</string>
+    <string name="settings_transfer_deploy_cancelled">취소됨</string>
+    <string name="settings_transfer_deploy_create_directory">작업 디렉터리 만들기</string>
+    <string name="settings_transfer_deploy_done">완료</string>
+    <string name="settings_transfer_deploy_download_font">편집기 글꼴 다운로드</string>
+    <string name="settings_transfer_deploy_failed">실패</string>
+    <string name="settings_transfer_deploy_failure_io">디렉터리를 만들 수 없어 이 설정은 현재 값을 유지합니다</string>
+    <string name="settings_transfer_deploy_failure_network">다운로드에 실패하여 이 설정은 현재 값을 유지합니다</string>
+    <string name="settings_transfer_deploy_failure_permission">AutoJs6 에 \"모든 파일에 액세스\" 권한이 없어 이 설정은 현재 값을 유지합니다</string>
+    <string name="settings_transfer_deploy_failure_unavailable">이 버전은 해당 글꼴을 제공하지 않아 이 설정은 현재 값을 유지합니다</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">설치...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">\"모든 파일에 액세스\" 권한이 필요합니다</string>
+    <string name="settings_transfer_deploy_running">진행 중</string>
+    <string name="settings_transfer_deploy_waiting">대기 중</string>
     <string name="settings_transfer_description">설정은 카테고리별로 zip 파일로 내보내지며, 이 기기 또는 다른 기기에서 가져올 수 있습니다.</string>
     <string name="settings_transfer_error_interrupted">설정을 변경하는 동안 AutoJs6 가 종료되었습니다. 설정을 확인하거나 마지막 가져오기를 취소하세요</string>
     <string name="settings_transfer_error_invalid_file">설정 파일의 카테고리 파일이 손상되었습니다</string>
@@ -827,6 +841,7 @@
     <string name="settings_transfer_export_summary">카테고리를 선택하여 zip 파일로 저장합니다</string>
     <string name="settings_transfer_export_unexportable">기록할 수 없는 값 %1$d개를 제외했습니다 (NaN 등)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">설정 파일을 쓰는 중...</string>
+    <string name="settings_transfer_grant_all_files_access">권한 부여</string>
     <string name="settings_transfer_import">설정 가져오기</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">설정을 가져오는 중...</string>
     <string name="settings_transfer_import_canceled">가져오기를 취소했습니다. 설정을 변경하지 않았습니다</string>
@@ -842,6 +857,7 @@
     <string name="settings_transfer_import_unknown_categories">이 버전이 인식하지 못하는 카테고리 (건너뜀): %1$d</string>
     <string name="settings_transfer_later_version">이후 버전에서 제공됩니다</string>
     <string name="settings_transfer_locked_later">다른 기기의 자격 증명을 비밀번호로 가져오는 기능은 이후 버전에서 제공됩니다</string>
+    <string name="settings_transfer_pick_deployments">가져오는 다음 설정은 먼저 이 기기에 배포해야 합니다. 선택한 항목은 배포되고, 선택하지 않은 항목은 현재 값을 유지합니다</string>
     <string name="settings_transfer_pick_export">내보낼 카테고리를 선택하세요</string>
     <string name="settings_transfer_pick_import">가져올 카테고리를 선택하세요</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">세부 선택...</string>
@@ -851,6 +867,7 @@
     <string name="settings_transfer_result_counts">카테고리: %1$d\n기록한 항목: %2$d\n기본값으로 복원한 항목: %3$d\n변경된 값: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">자격 증명을 가져오지 않았습니다: 다른 기기에서 암호화되었습니다</string>
     <string name="settings_transfer_result_data_not_undone">이 버전에서는 아직 바로 가기와 색상 라이브러리 가져오기를 취소할 수 없습니다</string>
+    <string name="settings_transfer_result_deployments">배포 성공: %1$d, 실패: %2$d</string>
     <string name="settings_transfer_result_effects_failed">바로 적용하지 못했습니다 (재시작 후 적용됩니다): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">이 페이지를 닫으면 런처 아이콘이 바뀝니다. 이때 AutoJs6 화면이 닫힐 수 있으니 새 아이콘으로 다시 여세요</string>
     <string name="settings_transfer_result_notification_permission">전경 서비스에는 알림을 보낼 권한이 필요합니다</string>

@@ -371,6 +371,77 @@ function reset() {
     check('reset-others-kept', theme !== null, 'appearance ' + (theme === null ? 'cleared' : 'kept'));
 }
 
+// P7.6: c.zip with the explorer and editor appearance categories of this device, whose working directory names a
+// directory that does not exist and whose editor font is a catalog font that is not downloaded (appendix D 10 - 12).
+function deployPrepare() {
+    var state = readState();
+    var directory = 'aj6-deploy-check-' + java.lang.System.currentTimeMillis();
+    var fonts = Packages.org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager.get(context);
+    var installer = new Packages.org.autojs.autojs.core.pref.deploy.AndroidEditorFontInstaller(context);
+    var catalog = fonts.catalog();
+    var font = null;
+    if (catalog) {
+        for (var i = 0; i < catalog.getFonts().size(); i++) {
+            var id = String(catalog.getFonts().get(i).getId());
+            if (!installer.isInstalled(id)) {
+                font = id;
+                break;
+            }
+        }
+    }
+    var snapshot = archive.SettingsSnapshot.capture(list([Category.EXPLORER, Category.EDITOR_APPEARANCE]));
+    var SnapshotCategory = archive['SettingsSnapshot$Category'];
+    var categories = [];
+    for (var c = 0; c < snapshot.getCategories().size(); c++) {
+        var category = snapshot.getCategories().get(c);
+        var storesMap = new java.util.LinkedHashMap();
+        var entries = new java.util.LinkedHashMap();
+        var defaults = category.getStores().get('default');
+        if (defaults) entries.putAll(defaults);
+        if (String(category.getId()) === 'explorer') {
+            entries.put(keys.ExplorerKeys.WORKING_DIRECTORY.getName(), new pref.TypedValue('string', directory));
+        } else if (font) {
+            entries.put(keys.EditorKeys.ACE_EDITOR_FONT.getName(), new pref.TypedValue('string', font));
+        }
+        // The other stores of the category as they are (a Java map is wrapped for JavaScript, so it is copied whole).
+        storesMap.putAll(category.getStores());
+        storesMap.put('default', entries);
+        categories.push(new SnapshotCategory(category.getId(), storesMap));
+    }
+    var stream = new java.io.FileOutputStream(new File(new File(AJ6_OUT), 'c.zip'));
+    try {
+        exporter.write(stream, new archive.SettingsSnapshot(list(categories)), java.lang.System.currentTimeMillis(), host(), exporter.device(), archive.SettingsArchive.MAX_BYTES, deviceKey());
+    } finally {
+        stream.close();
+    }
+    state.deployDirectory = directory;
+    state.deployFont = font;
+    state.directoryBefore = String(stored(keys.ExplorerKeys.WORKING_DIRECTORY));
+    state.fontBefore = String(stored(keys.EditorKeys.ACE_EDITOR_FONT));
+    files.write(STATE.getPath(), JSON.stringify(state));
+    check('c.zip', true, 'working directory ' + directory + ' (absent), editor font ' + (font || 'none: every catalog font is installed'));
+}
+
+// Checks the two deployment items after an import of c.zip: AJ6_EXPECT "deployed" (directory created and key
+// written, font downloaded and key written) or "declined" (both keys keep their values of before).
+function deployVerify() {
+    var state = readState();
+    var directoryKey = String(stored(keys.ExplorerKeys.WORKING_DIRECTORY));
+    var fontKey = String(stored(keys.EditorKeys.ACE_EDITOR_FONT));
+    var device = new Packages.org.autojs.autojs.core.pref.deploy.AndroidDeployments(context);
+    var created = device.directory(state.deployDirectory).isDirectory();
+    var installer = new Packages.org.autojs.autojs.core.pref.deploy.AndroidEditorFontInstaller(context);
+    var fontInstalled = state.deployFont ? installer.isInstalled(state.deployFont) : false;
+    out('INFO storage access ' + device.hasStorageAccess() + ', Ace editor plugin ' + device.hasAceEditorPlugin());
+    if (AJ6_EXPECT === 'deployed') {
+        check('directory-created', created && directoryKey === state.deployDirectory, 'key ' + (directoryKey === state.deployDirectory ? 'written' : 'not written') + ', directory ' + (created ? 'exists' : 'absent'));
+        if (state.deployFont) check('font-installed', fontInstalled && fontKey === state.deployFont, state.deployFont + ' ' + (fontInstalled ? 'installed' : 'not installed') + ', key ' + (fontKey === state.deployFont ? 'written' : 'not written'));
+    } else {
+        check('directory-kept', directoryKey === state.directoryBefore, 'key ' + (directoryKey === state.directoryBefore ? 'kept' : 'changed') + ', directory ' + (created ? 'exists' : 'absent'));
+        check('font-kept', fontKey === state.fontBefore, 'key ' + (fontKey === state.fontBefore ? 'kept' : 'changed') + ', font ' + (fontInstalled ? 'installed' : 'not installed'));
+    }
+}
+
 function restore() {
     if (!ORIGINAL.isFile()) {
         check('restore', false, 'nothing kept');
@@ -410,14 +481,20 @@ function restore() {
     ops.forEach(function (f) {
         f.delete();
     });
+    // A directory and a font that c.zip deployed (P7.6) are removed again.
+    if (state.deployDirectory) {
+        var made = new Packages.org.autojs.autojs.core.pref.deploy.AndroidDeployments(context).directory(state.deployDirectory);
+        if (made.isDirectory()) deleteDirectory(made);
+    }
+    if (state.deployFont) Packages.org.autojs.autojs.ui.edit.editor.ace.AceEditorFontManager.get(context).delete(state.deployFont);
     deleteDirectory(PRIVATE);
     check('restored', true, plan.getPuts().size() + ' written, ' + plan.getRemoves().size() + ' removed, ' + changes.size() + ' changed, ' + restored + ' internal backup files back, ' + ops.length + ' operation backups deleted');
 }
 
 try {
-    ({prepare: prepare, verify: verify, plugins: plugins, reset: reset, restore: restore})[AJ6_PHASE]();
+    ({prepare: prepare, verify: verify, plugins: plugins, reset: reset, restore: restore, 'deploy-prepare': deployPrepare, 'deploy-verify': deployVerify})[AJ6_PHASE]();
 } catch (e) {
-    check(AJ6_PHASE, false, 'threw ' + e);
+    check(AJ6_PHASE, false, 'threw ' + e + (e.lineNumber ? ' (line ' + e.lineNumber + ')' : ''));
 }
 out('done');
 files.write(RESULT_FILE, resultLines.join('\n'));

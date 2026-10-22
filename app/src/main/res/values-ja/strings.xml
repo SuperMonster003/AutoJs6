@@ -808,6 +808,20 @@
     <string name="settings_transfer_category_wizards">セットアップウィザードのプロファイル</string>
     <string name="settings_transfer_credentials_warning">認証情報と承認 (GitHub トークン, プラグインセンターの承認, MCP Server と 3-Stove Agent の信頼済みクライアント, Bun ホストの許可) はこのデバイスの鍵で暗号化してファイルに書き込まれます. インポートできるのはこのデバイスの AutoJs6 だけで, 別のデバイスや初期化後はインポートできません. この暗号化はオフラインで解読され得るため, ファイルは引き続き安全に保管してください.</string>
     <string name="settings_transfer_credentials_warning_title">認証情報をエクスポートしますか?</string>
+    <string name="settings_transfer_deploy_cancel_rest">残りを取り消す</string>
+    <string name="settings_transfer_deploy_cancelled">キャンセルしました</string>
+    <string name="settings_transfer_deploy_create_directory">作業ディレクトリを作成</string>
+    <string name="settings_transfer_deploy_done">完了</string>
+    <string name="settings_transfer_deploy_download_font">エディターのフォントをダウンロード</string>
+    <string name="settings_transfer_deploy_failed">失敗</string>
+    <string name="settings_transfer_deploy_failure_io">ディレクトリを作成できないため, この設定は現在の値のままです</string>
+    <string name="settings_transfer_deploy_failure_network">ダウンロードに失敗したため, この設定は現在の値のままです</string>
+    <string name="settings_transfer_deploy_failure_permission">AutoJs6 に \"全ファイルアクセス\" がないため, この設定は現在の値のままです</string>
+    <string name="settings_transfer_deploy_failure_unavailable">このバージョンではこのフォントを提供していないため, この設定は現在の値のままです</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">インストール...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">\"全ファイルアクセス\" が必要です</string>
+    <string name="settings_transfer_deploy_running">実行中</string>
+    <string name="settings_transfer_deploy_waiting">待機中</string>
     <string name="settings_transfer_description">設定はカテゴリごとに zip ファイルへエクスポートされ, この端末または別の端末でインポートできます.</string>
     <string name="settings_transfer_error_interrupted">設定の変更中に AutoJs6 が終了しました. 設定を確認するか, 前回のインポートを元に戻してください</string>
     <string name="settings_transfer_error_invalid_file">設定ファイル内のカテゴリファイルが壊れています</string>
@@ -826,6 +840,7 @@
     <string name="settings_transfer_export_summary">カテゴリを選んで zip ファイルに保存します</string>
     <string name="settings_transfer_export_unexportable">書き込めない値 %1$d 個を省きました (NaN など)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">設定ファイルを書き込んでいます...</string>
+    <string name="settings_transfer_grant_all_files_access">権限を付与</string>
     <string name="settings_transfer_import">設定をインポート</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">設定をインポートしています...</string>
     <string name="settings_transfer_import_canceled">インポートを取り消しました. 設定は変更されていません</string>
@@ -841,6 +856,7 @@
     <string name="settings_transfer_import_unknown_categories">このバージョンが認識しないカテゴリ (スキップ): %1$d</string>
     <string name="settings_transfer_later_version">今後のバージョンで対応予定</string>
     <string name="settings_transfer_locked_later">別のデバイスの認証情報をパスワードでインポートする機能は今後のバージョンで対応予定です</string>
+    <string name="settings_transfer_pick_deployments">インポートする次の設定は, 先にこのデバイスでのデプロイが必要です. チェックした項目はデプロイされ, チェックしない項目は現在の値のままです</string>
     <string name="settings_transfer_pick_export">エクスポートするカテゴリを選択してください</string>
     <string name="settings_transfer_pick_import">インポートするカテゴリを選択してください</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">詳細...</string>
@@ -850,6 +866,7 @@
     <string name="settings_transfer_result_counts">カテゴリ: %1$d\n書き込んだ項目: %2$d\n既定値に戻した項目: %3$d\n変更された値: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">認証情報はインポートされませんでした: 別のデバイスで暗号化されています</string>
     <string name="settings_transfer_result_data_not_undone">このバージョンでは, ショートカットとカラーライブラリのインポートはまだ元に戻せません</string>
+    <string name="settings_transfer_result_deployments">デプロイ成功: %1$d, 失敗: %2$d</string>
     <string name="settings_transfer_result_effects_failed">すぐには適用できませんでした (再起動後に適用されます): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">このページを閉じるとランチャーアイコンが切り替わります. その際 AutoJs6 の画面が閉じることがあるため, 新しいアイコンから開き直してください</string>
     <string name="settings_transfer_result_notification_permission">フォアグラウンドサービスには通知を送信する権限が必要です</string>

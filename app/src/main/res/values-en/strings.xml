@@ -804,6 +804,20 @@
     <string name="settings_transfer_category_wizards">Setup wizard profiles</string>
     <string name="settings_transfer_credentials_warning">Credentials and authorizations (the GitHub token, the authorizations of the plugin center, the trusted clients of MCP Server and 3-Stove Agent, the grants of the Bun host) are encrypted with a key of this device. Only AutoJs6 on this device can import them, not another device, and not after a factory reset. The encryption can be broken offline, so keep the file safe all the same.</string>
     <string name="settings_transfer_credentials_warning_title">Export credentials?</string>
+    <string name="settings_transfer_deploy_cancel_rest">Cancel the rest</string>
+    <string name="settings_transfer_deploy_cancelled">Cancelled</string>
+    <string name="settings_transfer_deploy_create_directory">Create the working directory</string>
+    <string name="settings_transfer_deploy_done">Done</string>
+    <string name="settings_transfer_deploy_download_font">Download the editor font</string>
+    <string name="settings_transfer_deploy_failed">Failed</string>
+    <string name="settings_transfer_deploy_failure_io">The directory cannot be created; the setting keeps its current value</string>
+    <string name="settings_transfer_deploy_failure_network">The download failed; the setting keeps its current value</string>
+    <string name="settings_transfer_deploy_failure_permission">AutoJs6 lacks \"All files access\"; the setting keeps its current value</string>
+    <string name="settings_transfer_deploy_failure_unavailable">This version does not offer the font; the setting keeps its current value</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">Install...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">Needs \"All files access\"</string>
+    <string name="settings_transfer_deploy_running">In progress</string>
+    <string name="settings_transfer_deploy_waiting">Waiting</string>
     <string name="settings_transfer_description">Settings are exported by category into a zip file, which can be imported on this or another device.</string>
     <string name="settings_transfer_error_interrupted">AutoJs6 was closed while the settings were being changed. Check the settings, or undo the last import.</string>
     <string name="settings_transfer_error_invalid_file">A category file in the settings file is damaged</string>
@@ -822,6 +836,7 @@
     <string name="settings_transfer_export_summary">Choose categories and save them to a zip file</string>
     <string name="settings_transfer_export_unexportable">%1$d values were left out because they cannot be written (such as NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Writing the settings file...</string>
+    <string name="settings_transfer_grant_all_files_access">Grant access</string>
     <string name="settings_transfer_import">Import settings</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Importing the settings...</string>
     <string name="settings_transfer_import_canceled">Import canceled, no setting was changed</string>
@@ -837,6 +852,7 @@
     <string name="settings_transfer_import_unknown_categories">Categories unknown to this version (skipped): %1$d</string>
     <string name="settings_transfer_later_version">Available in a later version</string>
     <string name="settings_transfer_locked_later">Importing the credentials of another device with a password comes in a later version</string>
+    <string name="settings_transfer_pick_deployments">These imported settings need something on this device first. Ticked items are deployed, unticked ones keep their current values.</string>
     <string name="settings_transfer_pick_export">Choose the categories to export</string>
     <string name="settings_transfer_pick_import">Choose the categories to import</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Refine...</string>
@@ -846,6 +862,7 @@
     <string name="settings_transfer_result_counts">Categories: %1$d\nEntries written: %2$d\nEntries restored to defaults: %3$d\nValues changed: %4$d</string>
     <string name="settings_transfer_result_credentials_locked">Credentials were not imported: they were encrypted on another device</string>
     <string name="settings_transfer_result_data_not_undone">This version does not undo the import of shortcuts and color libraries yet</string>
+    <string name="settings_transfer_result_deployments">Deployments succeeded: %1$d, failed: %2$d</string>
     <string name="settings_transfer_result_effects_failed">Not applied yet (applied after a restart): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">The launcher icon changes when this page closes. AutoJs6 may leave the screen then; open it again from its new icon.</string>
     <string name="settings_transfer_result_notification_permission">The foreground service needs the permission to post notifications</string>

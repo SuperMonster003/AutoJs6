@@ -13,16 +13,17 @@ import org.autojs.autojs.core.pref.archive.SettingsArchiveException
  * wizard (P6.4): the save location was requested ([locationRequested]) and chosen ([document], a content URI), and the
  * result of writing the archive ([fileName], [categories], [entries], [unexportable] values, or the [failure]). The
  * import wizard (P7.5) uses [locationRequested] for the system page that opens a document, [archive] for the local copy
- * of the chosen file and [fileName] for its name; the import, the undo and the reset (P8.1) keep the id of their running
- * apply in [operation] ([SettingsOperations]) and what it did in [outcome].
+ * of the chosen file and [fileName] for its name, [deploy] for the deployment items the user confirmed (P7.6, null
+ * before the confirmation); the import, the undo and the reset (P8.1) keep the id of their running apply in [operation]
+ * ([SettingsOperations]) and what it did in [outcome].
  *
  * zh-CN: 设置向导的状态 (ROADMAP T10): 运行的是哪个向导, 当前步骤, 以及到目前为止的全部选择. 纯数据 (R3): 页面把它作为 JSON
  * 文本 ([toText] / [fromText]) 保存在实例状态中, 因此 Activity 重建 (旋转屏幕, 进程被回收) 后向导停留在同一步骤, 选择不变.
  * 步骤在选择每次变化时都更新页面持有的状态, 而不只是在离开时. [selected] 为按页面顺序 (附录 A.1) 排列的分类 id. 其后的字段
  * 属于导出向导的后续步骤 (P6.4): 是否已请求 ([locationRequested]) 并选定保存位置 ([document], content URI), 以及写入归档的
  * 结果 ([fileName], [categories], [entries], [unexportable] 个值, 或 [failure]). 导入向导 (P7.5) 以 [locationRequested] 记录
- * 是否已打开系统的打开文档页面, [archive] 为所选文件的本地副本, [fileName] 为其文件名; 导入, 撤销与恢复默认 (P8.1) 把运行中的
- * 应用操作的 id 记在 [operation] ([SettingsOperations]), 其结果记在 [outcome].
+ * 是否已打开系统的打开文档页面, [archive] 为所选文件的本地副本, [fileName] 为其文件名, [deploy] 为用户确认的部署项 (P7.6, 确认之前
+ * 为 null); 导入, 撤销与恢复默认 (P8.1) 把运行中的应用操作的 id 记在 [operation] ([SettingsOperations]), 其结果记在 [outcome].
  */
 data class SettingsWizardState(
     val kind: Kind,
@@ -38,6 +39,7 @@ data class SettingsWizardState(
     val failure: Failure? = null,
     val failureDetail: String? = null,
     val archive: String? = null,
+    val deploy: List<String>? = null,
     val operation: String? = null,
     val outcome: SettingsTransferOutcome? = null,
 ) {
@@ -52,6 +54,7 @@ data class SettingsWizardState(
     enum class Step(val id: String) {
         CHOOSE_FILE("choose_file"),
         PICK_CATEGORIES("pick_categories"),
+        CONFIRM_DEPLOYMENTS("confirm_deployments"),
         CHOOSE_LOCATION("choose_location"),
         WRITE("write"),
         DONE("done"),
@@ -102,6 +105,7 @@ data class SettingsWizardState(
         "failure" to failure?.name,
         "failureDetail" to failureDetail,
         "archive" to archive,
+        "deploy" to deploy,
         "operation" to operation,
         "outcome" to outcome?.toJson(),
     )
@@ -135,6 +139,7 @@ data class SettingsWizardState(
                 failure = Failure.entries.firstOrNull { it.name == root["failure"] },
                 failureDetail = root["failureDetail"] as? String,
                 archive = root["archive"] as? String,
+                deploy = (root["deploy"] as? List<*>)?.filterIsInstance<String>(),
                 operation = root["operation"] as? String,
                 outcome = SettingsTransferOutcome.fromJson(root["outcome"]),
             )

@@ -31,7 +31,7 @@ import java.io.File
  *   in it are the stores it claims there ([JsonFileStores], excluded and without keys) or listed as names of other files.
  * - (c) every key has exactly one category, every category except the data ones has at least one entry, and only
  *   `credentials` holds sensitive entries.
- * - (e) every deployment kind in use has a registered implementation or is pending (P7.6).
+ * - (e) every deployment kind in use has a registered implementation (`DeploymentItems`, P7.6).
  * - (f) every `APPLY` key has an entry of the effect table `SettingsEffects` (T12, P7.4), and the table binds only
  *   `APPLY` keys, each once.
  *
@@ -199,9 +199,9 @@ class SettingsRegistryGuardTest {
         assertNone("classification.json deployment kinds that DeploymentKind does not define", classified.filter { it !in known })
         val used = declared + classified.map(DeploymentKind::valueOf)
         val pending = used - SettingsRegistry.DEPLOYMENT_IMPLEMENTATIONS
-        println("T5 e: deployment kinds in use ${used.size}, implemented ${used.size - pending.size}, pending implementation (P7.6) ${pending.size} $pending")
-        // Until P7.6 every kind in use is pending; afterwards the implementations must cover all of them.
-        assertTrue(SettingsRegistry.DEPLOYMENT_IMPLEMENTATIONS.isEmpty() || pending.isEmpty())
+        println("T5 e: deployment kinds in use ${used.size}, implemented ${used.size - pending.size}, pending implementation ${pending.size} $pending")
+        // Since P7.6 the implementations cover every kind in use.
+        assertTrue("deployment kinds without an implementation: $pending", pending.isEmpty())
     }
 
     @Test

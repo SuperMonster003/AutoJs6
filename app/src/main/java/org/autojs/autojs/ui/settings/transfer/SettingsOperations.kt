@@ -6,6 +6,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.UUID
 
 /**
@@ -26,6 +27,8 @@ object SettingsOperations {
 
     private val running = HashMap<String, Deferred<SettingsTransferOutcome>>()
 
+    private val deployments = HashMap<String, MutableStateFlow<DeploymentRun?>>()
+
     @JvmStatic
     fun newId(): String = UUID.randomUUID().toString()
 
@@ -42,5 +45,14 @@ object SettingsOperations {
     @JvmStatic
     fun forget(id: String) {
         running.remove(id)
+        deployments.remove(id)
     }
+
+    /**
+     * The deployment items the operation [id] runs (T18, P7.6), null until it starts them; the apply step shows them in
+     * [DeploymentProgressDialog].
+     * zh-CN: 操作 [id] 运行的部署项 (T18, P7.6), 开始运行之前为 null; 应用步骤以 [DeploymentProgressDialog] 显示.
+     */
+    @JvmStatic
+    fun deploymentsOf(id: String): MutableStateFlow<DeploymentRun?> = deployments.getOrPut(id) { MutableStateFlow(null) }
 }

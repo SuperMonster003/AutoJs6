@@ -804,6 +804,20 @@
     <string name="settings_transfer_category_wizards">設定精靈設定檔</string>
     <string name="settings_transfer_credentials_warning">憑證與授權 (GitHub 權杖, 外掛中心授權, MCP Server 與 3-Stove Agent 的已信任客戶端, Bun 宿主授權) 將以本機金鑰加密寫入檔案, 只能在本機的 AutoJs6 中匯入, 其他裝置或恢復原廠設定後無法匯入. 這種加密可被離線破解, 請仍然妥善保管匯出的檔案.</string>
     <string name="settings_transfer_credentials_warning_title">匯出憑證?</string>
+    <string name="settings_transfer_deploy_cancel_rest">取消其餘項目</string>
+    <string name="settings_transfer_deploy_cancelled">已取消</string>
+    <string name="settings_transfer_deploy_create_directory">建立工作目錄</string>
+    <string name="settings_transfer_deploy_done">已完成</string>
+    <string name="settings_transfer_deploy_download_font">下載編輯器字型</string>
+    <string name="settings_transfer_deploy_failed">失敗</string>
+    <string name="settings_transfer_deploy_failure_io">無法建立該目錄, 該設定保持目前的值</string>
+    <string name="settings_transfer_deploy_failure_network">下載失敗, 該設定保持目前的值</string>
+    <string name="settings_transfer_deploy_failure_permission">AutoJs6 缺少 \"所有檔案管理許可權\", 該設定保持目前的值</string>
+    <string name="settings_transfer_deploy_failure_unavailable">本版本不提供該字型, 該設定保持目前的值</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">安裝...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">需要 \"所有檔案管理許可權\"</string>
+    <string name="settings_transfer_deploy_running">進行中</string>
+    <string name="settings_transfer_deploy_waiting">等待中</string>
     <string name="settings_transfer_description">設定按分類匯出為 zip 檔案, 可在本機或其他裝置上匯入.</string>
     <string name="settings_transfer_error_interrupted">修改設定期間 AutoJs6 被關閉, 請檢查設定或撤銷上次匯入</string>
     <string name="settings_transfer_error_invalid_file">設定檔案中的分類檔案已損壞</string>
@@ -822,6 +836,7 @@
     <string name="settings_transfer_export_summary">選擇分類並儲存為 zip 檔案</string>
     <string name="settings_transfer_export_unexportable">略過了 %1$d 個無法寫入的值 (如 NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在寫入設定檔案...</string>
+    <string name="settings_transfer_grant_all_files_access">授予權限</string>
     <string name="settings_transfer_import">匯入設定</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">正在匯入設定...</string>
     <string name="settings_transfer_import_canceled">已取消匯入, 未修改任何設定</string>
@@ -837,6 +852,7 @@
     <string name="settings_transfer_import_unknown_categories">本版本不認識的分類 (將略過): %1$d 個</string>
     <string name="settings_transfer_later_version">後續版本提供</string>
     <string name="settings_transfer_locked_later">以密碼匯入其他裝置的憑證將在後續版本提供</string>
+    <string name="settings_transfer_pick_deployments">以下匯入的設定需要先在本機部署: 勾選的項目將被部署, 未勾選的項目保持目前的值</string>
     <string name="settings_transfer_pick_export">選擇要匯出的分類</string>
     <string name="settings_transfer_pick_import">選擇要匯入的分類</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">細化...</string>
@@ -846,6 +862,7 @@
     <string name="settings_transfer_result_counts">分類: %1$d 個\n寫入條目: %2$d 項\n還原預設: %3$d 項\n實際變化: %4$d 項</string>
     <string name="settings_transfer_result_credentials_locked">憑證未匯入: 它們由其他裝置加密</string>
     <string name="settings_transfer_result_data_not_undone">本版本尚未撤銷快捷方式與顏色庫的匯入</string>
+    <string name="settings_transfer_result_deployments">部署成功: %1$d 項, 失敗: %2$d 項</string>
     <string name="settings_transfer_result_effects_failed">未能立即生效 (重啟後生效): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">關閉本頁後切換啟動器圖示, AutoJs6 可能隨之退出介面, 請從新圖示重新開啟</string>
     <string name="settings_transfer_result_notification_permission">前臺服務需要傳送通知的權限</string>

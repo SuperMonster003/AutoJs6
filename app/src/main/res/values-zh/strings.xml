@@ -803,6 +803,20 @@
     <string name="settings_transfer_category_wizards">设置向导配置档</string>
     <string name="settings_transfer_credentials_warning">凭据与授权 (GitHub 令牌, 插件中心授权, MCP Server 与 3-Stove Agent 的已信任客户端, Bun 宿主授权) 将以本机密钥加密写入文件, 只能在本机的 AutoJs6 中导入, 其他设备或恢复出厂设置后无法导入. 这种加密可被离线破解, 请仍然妥善保管导出的文件.</string>
     <string name="settings_transfer_credentials_warning_title">导出凭据?</string>
+    <string name="settings_transfer_deploy_cancel_rest">取消其余项</string>
+    <string name="settings_transfer_deploy_cancelled">已取消</string>
+    <string name="settings_transfer_deploy_create_directory">创建工作目录</string>
+    <string name="settings_transfer_deploy_done">已完成</string>
+    <string name="settings_transfer_deploy_download_font">下载编辑器字体</string>
+    <string name="settings_transfer_deploy_failed">失败</string>
+    <string name="settings_transfer_deploy_failure_io">无法创建该目录, 该设置保持当前值</string>
+    <string name="settings_transfer_deploy_failure_network">下载失败, 该设置保持当前值</string>
+    <string name="settings_transfer_deploy_failure_permission">AutoJs6 缺少 \"所有文件管理权限\", 该设置保持当前值</string>
+    <string name="settings_transfer_deploy_failure_unavailable">本版本不提供该字体, 该设置保持当前值</string>
+    <string name="settings_transfer_deploy_install_ace" tools:ignore="TypographyEllipsis">安装...</string>
+    <string name="settings_transfer_deploy_needs_all_files_access">需要 \"所有文件管理权限\"</string>
+    <string name="settings_transfer_deploy_running">进行中</string>
+    <string name="settings_transfer_deploy_waiting">等待中</string>
     <string name="settings_transfer_description">设置按分类导出为 zip 文件, 可在本机或其他设备上导入.</string>
     <string name="settings_transfer_error_interrupted">修改设置期间 AutoJs6 被关闭, 请检查设置或撤销上次导入</string>
     <string name="settings_transfer_error_invalid_file">设置文件中的分类文件已损坏</string>
@@ -821,6 +835,7 @@
     <string name="settings_transfer_export_summary">选择分类并保存为 zip 文件</string>
     <string name="settings_transfer_export_unexportable">略过了 %1$d 个无法写入的值 (如 NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在写入设置文件...</string>
+    <string name="settings_transfer_grant_all_files_access">授予权限</string>
     <string name="settings_transfer_import">导入设置</string>
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">正在导入设置...</string>
     <string name="settings_transfer_import_canceled">已取消导入, 未修改任何设置</string>
@@ -836,6 +851,7 @@
     <string name="settings_transfer_import_unknown_categories">本版本不认识的分类 (将跳过): %1$d 个</string>
     <string name="settings_transfer_later_version">后续版本提供</string>
     <string name="settings_transfer_locked_later">以口令导入其他设备的凭据将在后续版本提供</string>
+    <string name="settings_transfer_pick_deployments">以下导入的设置需要先在本机部署: 勾选的项将被部署, 未勾选的项保持当前值</string>
     <string name="settings_transfer_pick_export">选择要导出的分类</string>
     <string name="settings_transfer_pick_import">选择要导入的分类</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">细化...</string>
@@ -845,6 +861,7 @@
     <string name="settings_transfer_result_counts">分类: %1$d 个\n写入条目: %2$d 项\n恢复默认: %3$d 项\n实际变化: %4$d 项</string>
     <string name="settings_transfer_result_credentials_locked">凭据未导入: 它们由其他设备加密</string>
     <string name="settings_transfer_result_data_not_undone">本版本尚未撤销快捷方式与颜色库的导入</string>
+    <string name="settings_transfer_result_deployments">部署成功: %1$d 项, 失败: %2$d 项</string>
     <string name="settings_transfer_result_effects_failed">未能立即生效 (重启后生效): %1$s</string>
     <string name="settings_transfer_result_launcher_icon">关闭本页后切换启动器图标, AutoJs6 可能随之退出界面, 请从新图标重新打开</string>
     <string name="settings_transfer_result_notification_permission">前台服务需要发送通知的权限</string>

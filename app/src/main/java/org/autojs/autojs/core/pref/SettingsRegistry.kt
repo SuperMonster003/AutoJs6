@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.pref
 
+import org.autojs.autojs.core.pref.deploy.DeploymentItems
 import org.autojs.autojs.core.pref.keys.A11yKeys
 import org.autojs.autojs.core.pref.keys.ApkBuildKeys
 import org.autojs.autojs.core.pref.keys.AppearanceKeys
@@ -75,7 +76,7 @@ interface SettingsDomain {
  *
  * [DOMAINS] grows from P2.1 on; every `key_*` resource, literal key and named store not declared yet is "pending
  * migration" and is allowed by `tools/settings/classification.json` in the guard tests (T5), and the count goes down
- * as P2 to P5 declare them. The deployment items of T18 are not implemented yet ([DEPLOYMENT_IMPLEMENTATIONS], P7.6).
+ * as P2 to P5 declare them. The deployment items of T18 are implemented in `core/pref/deploy` ([DEPLOYMENT_IMPLEMENTATIONS], P7.6).
  *
  * zh-CN: 全部键声明的注册表 (ROADMAP T4): 聚合各领域 `object`, [describe] 把它们转为 [SettingDescriptor] 行; 键在声明处写分类,
  * 注册表只做反向索引. [DOMAINS] 自 P2.1 起逐步填充; 尚未声明的 `key_*` 资源, 字面量键与命名存储为 "待迁移", 在守卫测试 (T5)
@@ -110,9 +111,9 @@ object SettingsRegistry {
         MiscStateKeys,
     )
 
-    /** Deployment kinds that have a registered implementation (T5 e); filled by P7.6. */
+    /** Deployment kinds that have a registered implementation (T5 e, T18): those of `DeploymentItems` (P7.6). */
     @JvmField
-    val DEPLOYMENT_IMPLEMENTATIONS: Set<DeploymentKind> = emptySet()
+    val DEPLOYMENT_IMPLEMENTATIONS: Set<DeploymentKind> = DeploymentItems.KINDS
 
     /**
      * The providers of the settings of official plugins (D3, P13.1): none in the first phase; the second phase gives one
