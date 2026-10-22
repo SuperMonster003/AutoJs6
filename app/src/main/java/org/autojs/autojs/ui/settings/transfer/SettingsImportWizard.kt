@@ -121,11 +121,17 @@ class SettingsImportWizard(host: SettingsWizardHost) : SettingsWizard(host) {
         @JvmStatic
         fun initialState(): SettingsWizardState = SettingsWizardState(Kind.IMPORT, Step.CHOOSE_FILE)
 
-        /** [state] back at step 1 without a file, which requests a file again. zh-CN: 回到第 1 步且不带文件, 即重新选择文件. */
+        /**
+         * [state] back at step 1 without a file, which requests a file again; the password of the file is forgotten (P7.7).
+         * zh-CN: 回到第 1 步且不带文件, 即重新选择文件; 忘记该文件的口令 (P7.7).
+         */
         @JvmStatic
-        fun anotherFile(state: SettingsWizardState): SettingsWizardState = state.copy(
-            step = Step.CHOOSE_FILE, locationRequested = false, archive = null, fileName = null, selected = emptyList(), deploy = null,
-            operation = null, outcome = null, failure = null, failureDetail = null,
-        )
+        fun anotherFile(state: SettingsWizardState): SettingsWizardState {
+            SettingsPasswords.forget(state.password)
+            return state.copy(
+                step = Step.CHOOSE_FILE, locationRequested = false, archive = null, fileName = null, selected = emptyList(), deploy = null,
+                operation = null, outcome = null, failure = null, failureDetail = null, password = null,
+            )
+        }
     }
 }

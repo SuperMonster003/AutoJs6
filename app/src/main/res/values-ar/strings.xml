@@ -801,6 +801,7 @@
     <string name="settings_transfer_category_locked">مشفر على جهاز آخر</string>
     <string name="settings_transfer_category_not_resettable">لا تتم استعادته</string>
     <string name="settings_transfer_category_other">أخرى (الحالة الداخلية)</string>
+    <string name="settings_transfer_category_password">محمي بكلمة مرور, اضغط لإدخالها</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">حالات تفعيل الإضافات</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -808,7 +809,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">ملفات تعريف معالجات الإعداد</string>
-    <string name="settings_transfer_credentials_warning">تُشفَّر بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) بمفتاح هذا الجهاز قبل كتابتها في الملف. لا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز, وليس على جهاز آخر أو بعد إعادة ضبط المصنع. يمكن كسر هذا التشفير دون اتصال, لذا احتفظ بالملف في مكان آمن على أي حال.</string>
+    <string name="settings_transfer_credentials_warning">تُشفَّر بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) بمفتاح هذا الجهاز قبل كتابتها في الملف. بدون كلمة مرور لا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز, وليس على جهاز آخر أو بعد إعادة ضبط المصنع. تتيح الصفحة التالية تعيين كلمة مرور لاستيرادها على أجهزة أخرى. يمكن كسر هذا التشفير دون اتصال, لذا احتفظ بالملف في مكان آمن على أي حال.</string>
     <string name="settings_transfer_credentials_warning_title">تصدير بيانات الاعتماد?</string>
     <string name="settings_transfer_deploy_cancel_rest">إلغاء الباقي</string>
     <string name="settings_transfer_deploy_cancelled">تم الإلغاء</string>
@@ -839,6 +840,7 @@
     <string name="settings_transfer_export_done_title">تم تصدير الإعدادات</string>
     <string name="settings_transfer_export_failed_title">فشل التصدير</string>
     <string name="settings_transfer_export_sealed">تم تشفير بيانات الاعتماد بمفتاح هذا الجهاز, ولا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز</string>
+    <string name="settings_transfer_export_sealed_password">تم تشفير بيانات الاعتماد بمفتاح هذا الجهاز وبكلمة المرور التي عيّنتها. على جهاز آخر, أدخل كلمة المرور لاستيرادها</string>
     <string name="settings_transfer_export_summary">اختر الفئات واحفظها في ملف zip</string>
     <string name="settings_transfer_export_unexportable">تم استبعاد %1$d من القيم لأنه لا يمكن كتابتها (مثل NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">جارٍ كتابة ملف الإعدادات...</string>
@@ -847,6 +849,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">جارٍ استيراد الإعدادات...</string>
     <string name="settings_transfer_import_canceled">تم إلغاء الاستيراد, ولم يتم تغيير أي إعداد</string>
     <string name="settings_transfer_import_credentials_locked">تم تشفير بيانات الاعتماد في هذا الملف على جهاز آخر أو بإصدار آخر من AutoJs6. لا يمكن لهذا الجهاز فك تشفيرها, لذا لا يمكن استيرادها.</string>
+    <string name="settings_transfer_import_credentials_password">بيانات الاعتماد في هذا الملف محمية بكلمة مرور. لاستيرادها, اضغط على \"بيانات الاعتماد والتفويضات\" في الصفحة التالية وأدخل كلمة المرور التي عُيّنت عند التصدير.</string>
     <string name="settings_transfer_import_done_title">تم استيراد الإعدادات</string>
     <string name="settings_transfer_import_failed_title">فشل الاستيراد</string>
     <string name="settings_transfer_import_file">الملف: %1$s\nوقت التصدير: %2$s\nصدّره: AutoJs6 %3$s (%4$d)\nالجهاز: %5$s (API %6$d)\nالفئات: %7$d\nالعناصر: %8$d</string>
@@ -857,7 +860,18 @@
     <string name="settings_transfer_import_summary">اختر ملف إعدادات والفئات المراد استيرادها</string>
     <string name="settings_transfer_import_unknown_categories">فئات لا يعرفها هذا الإصدار (سيتم تخطيها): %1$d</string>
     <string name="settings_transfer_later_version">متاح في إصدار لاحق</string>
-    <string name="settings_transfer_locked_later">سيتوفر استيراد بيانات اعتماد جهاز آخر باستخدام كلمة مرور في إصدار لاحق</string>
+    <string name="settings_transfer_locked_no_password">تم تصدير بيانات الاعتماد هذه دون كلمة مرور, لذا لا يمكن استيرادها إلا في AutoJs6 على الجهاز الذي صدّرها</string>
+    <string name="settings_transfer_password">كلمة المرور</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">جارٍ التحقق من كلمة المرور...</string>
+    <string name="settings_transfer_password_confirm">أعد إدخال كلمة المرور</string>
+    <string name="settings_transfer_password_enter_title">أدخل كلمة المرور</string>
+    <string name="settings_transfer_password_export_hint">عيّن كلمة مرور لتتمكن من استيراد بيانات الاعتماد على جهاز آخر أيضا, إذ ستُطلب كلمة المرور هذه عند الاستيراد. اترك الحقلين فارغين لاستيرادها على هذا الجهاز فقط. لا يمكن استعادة كلمة المرور, ويمكن كسر كلمة المرور البسيطة دون اتصال.</string>
+    <string name="settings_transfer_password_import_hint">أدخل كلمة المرور التي عُيّنت عند تصدير الملف</string>
+    <string name="settings_transfer_password_mismatch">كلمتا المرور غير متطابقتين</string>
+    <string name="settings_transfer_password_set_title">كلمة مرور بيانات الاعتماد</string>
+    <string name="settings_transfer_password_skip">تخطي بيانات الاعتماد</string>
+    <string name="settings_transfer_password_wrong">كلمة المرور هذه لا تفتح بيانات الاعتماد في الملف. أعد المحاولة, أو تخطَّ بيانات الاعتماد واستورد الفئات الأخرى.</string>
+    <string name="settings_transfer_password_wrong_title">كلمة مرور خاطئة</string>
     <string name="settings_transfer_pick_deployments">تحتاج هذه الإعدادات المستوردة أولا إلى نشر على هذا الجهاز. يتم نشر العناصر المحددة, وتحتفظ العناصر الأخرى بقيمها الحالية.</string>
     <string name="settings_transfer_pick_export">اختر الفئات المراد تصديرها</string>
     <string name="settings_transfer_pick_import">اختر الفئات المراد استيرادها</string>

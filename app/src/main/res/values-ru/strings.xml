@@ -799,6 +799,7 @@
     <string name="settings_transfer_category_locked">Зашифровано на другом устройстве</string>
     <string name="settings_transfer_category_not_resettable">Не восстанавливается</string>
     <string name="settings_transfer_category_other">Прочее (внутреннее состояние)</string>
+    <string name="settings_transfer_category_password">Защищено паролем, нажмите, чтобы ввести его</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Состояние включения плагинов</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -806,7 +807,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Профили мастеров настройки</string>
-    <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) шифруются ключом этого устройства. Импортировать их может только AutoJs6 на этом устройстве, но не другое устройство и не после сброса к заводским настройкам. Такое шифрование можно взломать офлайн, поэтому все равно храните файл в надежном месте.</string>
+    <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) шифруются ключом этого устройства. Без пароля импортировать их может только AutoJs6 на этом устройстве, но не другое устройство и не после сброса к заводским настройкам; на следующей странице можно задать пароль для импорта на других устройствах. Такое шифрование можно взломать офлайн, поэтому все равно храните файл в надежном месте.</string>
     <string name="settings_transfer_credentials_warning_title">Экспортировать учетные данные?</string>
     <string name="settings_transfer_deploy_cancel_rest">Отменить остальные</string>
     <string name="settings_transfer_deploy_cancelled">Отменено</string>
@@ -837,6 +838,7 @@
     <string name="settings_transfer_export_done_title">Настройки экспортированы</string>
     <string name="settings_transfer_export_failed_title">Не удалось экспортировать</string>
     <string name="settings_transfer_export_sealed">Учетные данные зашифрованы ключом этого устройства и могут быть импортированы только в AutoJs6 на этом устройстве</string>
+    <string name="settings_transfer_export_sealed_password">Учетные данные зашифрованы ключом этого устройства и заданным паролем. На другом устройстве введите пароль, чтобы импортировать их</string>
     <string name="settings_transfer_export_summary">Выбрать категории и сохранить их в zip-файл</string>
     <string name="settings_transfer_export_unexportable">Пропущено значений, которые нельзя записать (например, NaN): %1$d</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Запись файла настроек...</string>
@@ -845,6 +847,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Импорт настроек...</string>
     <string name="settings_transfer_import_canceled">Импорт отменен, настройки не изменены</string>
     <string name="settings_transfer_import_credentials_locked">Учетные данные в этом файле зашифрованы на другом устройстве или другой сборкой AutoJs6. Это устройство не может их расшифровать, поэтому их нельзя импортировать.</string>
+    <string name="settings_transfer_import_credentials_password">Учетные данные в этом файле защищены паролем. Чтобы импортировать их, нажмите \"Учетные данные и авторизации\" на следующей странице и введите пароль, заданный при экспорте.</string>
     <string name="settings_transfer_import_done_title">Настройки импортированы</string>
     <string name="settings_transfer_import_failed_title">Не удалось импортировать</string>
     <string name="settings_transfer_import_file">Файл: %1$s\nВремя экспорта: %2$s\nЭкспортировано: AutoJs6 %3$s (%4$d)\nУстройство: %5$s (API %6$d)\nКатегории: %7$d\nЭлементы: %8$d</string>
@@ -855,7 +858,18 @@
     <string name="settings_transfer_import_summary">Выберите файл настроек и категории для импорта</string>
     <string name="settings_transfer_import_unknown_categories">Категории, неизвестные этой версии (пропускаются): %1$d</string>
     <string name="settings_transfer_later_version">Будет доступно в следующей версии</string>
-    <string name="settings_transfer_locked_later">Импорт учетных данных другого устройства по паролю появится в следующей версии</string>
+    <string name="settings_transfer_locked_no_password">Эти учетные данные экспортированы без пароля, поэтому импортировать их может только AutoJs6 на устройстве, где они были экспортированы</string>
+    <string name="settings_transfer_password">Пароль</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">Проверка пароля...</string>
+    <string name="settings_transfer_password_confirm">Повторите пароль</string>
+    <string name="settings_transfer_password_enter_title">Введите пароль</string>
+    <string name="settings_transfer_password_export_hint">Задайте пароль, чтобы учетные данные можно было импортировать и на другом устройстве: при импорте будет запрошен этот пароль. Оставьте оба поля пустыми, чтобы импортировать их только на этом устройстве. Пароль невозможно восстановить, а простой пароль можно подобрать офлайн.</string>
+    <string name="settings_transfer_password_import_hint">Введите пароль, заданный при экспорте файла</string>
+    <string name="settings_transfer_password_mismatch">Пароли не совпадают</string>
+    <string name="settings_transfer_password_set_title">Пароль для учетных данных</string>
+    <string name="settings_transfer_password_skip">Пропустить учетные данные</string>
+    <string name="settings_transfer_password_wrong">Этот пароль не открывает учетные данные файла. Попробуйте еще раз или пропустите учетные данные и импортируйте остальные категории.</string>
+    <string name="settings_transfer_password_wrong_title">Неверный пароль</string>
     <string name="settings_transfer_pick_deployments">Эти импортируемые настройки сначала требуют развертывания на этом устройстве. Отмеченные элементы будут развернуты, остальные сохранят текущие значения.</string>
     <string name="settings_transfer_pick_export">Выберите категории для экспорта</string>
     <string name="settings_transfer_pick_import">Выберите категории для импорта</string>

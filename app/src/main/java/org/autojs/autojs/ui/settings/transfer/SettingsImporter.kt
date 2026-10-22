@@ -21,7 +21,9 @@ import org.autojs.autojs.core.pref.archive.SettingsDeviceKey
 import org.autojs.autojs.core.pref.archive.SettingsEffects
 import org.autojs.autojs.core.pref.archive.SettingsImportApplier
 import org.autojs.autojs.core.pref.archive.SettingsImportPlanner
+import org.autojs.autojs.core.pref.archive.SettingsPassword
 import org.autojs.autojs.core.pref.archive.SettingsResetPlanner
+import org.autojs.autojs.core.pref.archive.SettingsSealedFile
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
 import org.autojs.autojs.core.pref.deploy.AndroidDeployments
 import org.autojs.autojs.core.pref.deploy.DeploymentException
@@ -54,23 +56,26 @@ object SettingsImporter {
 
     private const val CACHE_FILE = "import.zip"
 
-    /**
-     * What step 1 shows of a settings file: its manifest and [warnings], the sealed categories this device cannot open
-     * ([locked], D23) and the categories unknown to this version ([unknown]). Pure data (R3).
-     * zh-CN: 第 1 步显示的设置文件信息: manifest 与 [warnings], 本机无法打开的加密分类 ([locked], D23), 本版本不认识的分类 ([unknown]).
-     */
     /** A deployment item of step 3 and what it shows. zh-CN: 第 3 步的一个部署项及其显示内容. */
     data class PendingDeployment(val pending: DeploymentPlanner.Pending, val description: DeploymentItem.Description)
 
-    data class Inspection(
+    /**
+     * What step 1 shows of a settings file: its manifest and [warnings], the sealed categories this device cannot open
+     * now ([locked], D23), those of them a password opens ([password], P7.7) and the categories unknown to this version
+     * ([unknown]). Pure data (R3).
+     * zh-CN: 第 1 步显示的设置文件信息: manifest 与 [warnings], 本机当前无法打开的加密分类 ([locked], D23), 其中可用口令打开的分类
+     * ([password], P7.7), 本版本不认识的分类 ([unknown]).
+     */
+    data class Inspection @JvmOverloads constructor(
         val fileName: String,
         val manifest: SettingsArchiveManifest,
         val warnings: Set<SettingsArchiveManifest.Warning>,
         val locked: List<String>,
         val unknown: List<String>,
+        val password: List<String> = emptyList(),
     ) {
         val choices: List<SettingsCategoryChoice>
-            get() = SettingsCategoryChoices.import(manifest, locked)
+            get() = SettingsCategoryChoices.import(manifest, locked, password = password)
     }
 
     /**
@@ -82,8 +87,9 @@ object SettingsImporter {
     fun inspect(reader: SettingsArchiveReader, fileName: String, hostPackageName: String): Inspection {
         val manifest = reader.manifest()
         val locked = manifest.categories.filter { it.sensitive && reader.isLocked(it.id) }.map { it.id }
+        val password = locked.filter { reader.access(it) == SettingsSealedFile.Access.PASSWORD }
         val unknown = manifest.categories.map { it.id }.filter { SettingCategory.ofIdOrNull(it) == null }
-        return Inspection(fileName, manifest, manifest.warnings(hostPackageName), locked, unknown)
+        return Inspection(fileName, manifest, manifest.warnings(hostPackageName), locked, unknown, password)
     }
 
     /**
@@ -145,7 +151,16 @@ object SettingsImporter {
     /** [inspect] of the copy [state] holds; runs on a background thread. zh-CN: 检查 [state] 中的副本; 在后台线程调用. */
     @JvmStatic
     fun inspect(context: Context, state: SettingsWizardState): Inspection =
-        inspect(reader(context, archiveOf(state)), state.fileName.orEmpty(), context.packageName)
+        inspect(reader(context, state), state.fileName.orEmpty(), context.packageName)
+
+    /**
+     * True when [password] opens the sealed category [id] of the copy [state] holds (P7.7,
+     * [SettingsArchiveReader.checkPassword]); derives the slot key, so it runs on a background thread.
+     * zh-CN: [password] 能打开 [state] 中副本的加密分类 [id] 时为 true (P7.7); 需要派生槽密钥, 因此在后台线程调用.
+     */
+    @JvmStatic
+    fun checkPassword(context: Context, state: SettingsWizardState, id: String, password: SettingsPassword): Boolean =
+        reader(context, archiveOf(state)).checkPassword(id, password)
 
     /**
      * Imports [SettingsWizardState.selected] from the copy [state] holds (P7.5 step 4): plans on a background thread,
@@ -160,7 +175,7 @@ object SettingsImporter {
         val app = context.applicationContext
         val device = AndroidDeployments(app)
         val (plan, changes, locked) = withContext(Dispatchers.IO) {
-            val reader = reader(app, archiveOf(state))
+            val reader = reader(app, state)
             val inspection = inspect(reader, state.fileName.orEmpty(), app.packageName)
             val environment = device.environment()
             val plan = DeploymentPlanner.decide(plan(reader, inspection, state.selected, environment), state.deploy.orEmpty(), environment)
@@ -312,7 +327,7 @@ object SettingsImporter {
      */
     @JvmStatic
     fun pendingDeployments(context: Context, state: SettingsWizardState): List<PendingDeployment> {
-        val reader = reader(context, archiveOf(state))
+        val reader = reader(context, state)
         val device = AndroidDeployments(context)
         val environment = device.environment()
         val plan = plan(reader, inspect(reader, state.fileName.orEmpty(), context.packageName), state.selected, environment)
@@ -325,7 +340,11 @@ object SettingsImporter {
         null
     }
 
-    private fun reader(context: Context, file: File) = SettingsArchiveReader({ file.inputStream() }, key = deviceKey(context))
+    private fun reader(context: Context, file: File, password: SettingsPassword? = null) =
+        SettingsArchiveReader({ file.inputStream() }, key = deviceKey(context), password = password)
+
+    /** The reader of the copy [state] holds, with the password the user entered (P7.7). zh-CN: [state] 中副本的读取方, 带用户输入的口令. */
+    private fun reader(context: Context, state: SettingsWizardState) = reader(context, archiveOf(state), SettingsPasswords.find(state.password))
 
     private fun vault(context: Context) = SettingsBackupVault(File(context.filesDir, SettingsBackupVault.DIRECTORY), key = deviceKey(context))
 

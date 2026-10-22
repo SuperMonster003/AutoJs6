@@ -795,6 +795,7 @@
     <string name="settings_transfer_category_locked">由其他设备加密</string>
     <string name="settings_transfer_category_not_resettable">不参与恢复默认</string>
     <string name="settings_transfer_category_other">其他 (内部状态)</string>
+    <string name="settings_transfer_category_password">受密码保护, 点击以输入密码</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">插件启用状态</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -802,7 +803,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">设置向导配置档</string>
-    <string name="settings_transfer_credentials_warning">凭据与授权 (GitHub 令牌, 插件中心授权, MCP Server 与 3-Stove Agent 的已信任客户端, Bun 宿主授权) 将以本机密钥加密写入文件, 只能在本机的 AutoJs6 中导入, 其他设备或恢复出厂设置后无法导入. 这种加密可被离线破解, 请仍然妥善保管导出的文件.</string>
+    <string name="settings_transfer_credentials_warning">凭据与授权 (GitHub 令牌, 插件中心授权, MCP Server 与 3-Stove Agent 的已信任客户端, Bun 宿主授权) 将以本机密钥加密写入文件. 不设密码时只能在本机的 AutoJs6 中导入, 其他设备或恢复出厂设置后无法导入; 下一页可设置密码, 以便在其他设备上导入. 这种加密可被离线破解, 请仍然妥善保管导出的文件.</string>
     <string name="settings_transfer_credentials_warning_title">导出凭据?</string>
     <string name="settings_transfer_deploy_cancel_rest">取消其余项</string>
     <string name="settings_transfer_deploy_cancelled">已取消</string>
@@ -833,6 +834,7 @@
     <string name="settings_transfer_export_done_title">设置已导出</string>
     <string name="settings_transfer_export_failed_title">导出失败</string>
     <string name="settings_transfer_export_sealed">凭据已用本机密钥加密, 只能在本机的 AutoJs6 中导入</string>
+    <string name="settings_transfer_export_sealed_password">凭据已用本机密钥与所设密码加密, 在其他设备上输入该密码即可导入</string>
     <string name="settings_transfer_export_summary">选择分类并保存为 zip 文件</string>
     <string name="settings_transfer_export_unexportable">略过了 %1$d 个无法写入的值 (如 NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在写入设置文件...</string>
@@ -841,6 +843,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">正在导入设置...</string>
     <string name="settings_transfer_import_canceled">已取消导入, 未修改任何设置</string>
     <string name="settings_transfer_import_credentials_locked">该文件中的凭据由其他设备或其他构建的 AutoJs6 加密, 本机无法解密, 因此不能导入</string>
+    <string name="settings_transfer_import_credentials_password">该文件中的凭据受密码保护. 如需导入, 请在下一页点击 \"凭据与授权\" 并输入导出时设置的密码.</string>
     <string name="settings_transfer_import_done_title">设置已导入</string>
     <string name="settings_transfer_import_failed_title">导入失败</string>
     <string name="settings_transfer_import_file">文件: %1$s\n导出时间: %2$s\n导出来源: AutoJs6 %3$s (%4$d)\n设备: %5$s (API %6$d)\n分类: %7$d 个\n条目: %8$d 项</string>
@@ -851,7 +854,18 @@
     <string name="settings_transfer_import_summary">选择设置文件与要导入的分类</string>
     <string name="settings_transfer_import_unknown_categories">本版本不认识的分类 (将跳过): %1$d 个</string>
     <string name="settings_transfer_later_version">后续版本提供</string>
-    <string name="settings_transfer_locked_later">以口令导入其他设备的凭据将在后续版本提供</string>
+    <string name="settings_transfer_locked_no_password">这些凭据导出时未设密码, 只能在导出它们的设备上的 AutoJs6 中导入</string>
+    <string name="settings_transfer_password">密码</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">正在校验密码...</string>
+    <string name="settings_transfer_password_confirm">再次输入密码</string>
+    <string name="settings_transfer_password_enter_title">输入密码</string>
+    <string name="settings_transfer_password_export_hint">设置密码后, 凭据也可以在其他设备上导入, 导入时需输入该密码. 两栏都留空则凭据只能在本机导入. 密码无法找回, 过于简单的密码可被离线破解.</string>
+    <string name="settings_transfer_password_import_hint">请输入导出该文件时设置的密码</string>
+    <string name="settings_transfer_password_mismatch">两次输入的密码不一致</string>
+    <string name="settings_transfer_password_set_title">凭据密码</string>
+    <string name="settings_transfer_password_skip">跳过凭据</string>
+    <string name="settings_transfer_password_wrong">该密码无法打开文件中的凭据. 可以重试, 也可以跳过凭据, 只导入其他分类.</string>
+    <string name="settings_transfer_password_wrong_title">密码错误</string>
     <string name="settings_transfer_pick_deployments">以下导入的设置需要先在本机部署: 勾选的项将被部署, 未勾选的项保持当前值</string>
     <string name="settings_transfer_pick_export">选择要导出的分类</string>
     <string name="settings_transfer_pick_import">选择要导入的分类</string>

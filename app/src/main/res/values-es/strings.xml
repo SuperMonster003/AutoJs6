@@ -799,6 +799,7 @@
     <string name="settings_transfer_category_locked">Cifrado en otro dispositivo</string>
     <string name="settings_transfer_category_not_resettable">No se restaura</string>
     <string name="settings_transfer_category_other">Otros (estado interno)</string>
+    <string name="settings_transfer_category_password">Protegido con una contraseña, toque para introducirla</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Estado de activación de plugins</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -806,7 +807,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Perfiles de los asistentes de configuración</string>
-    <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se cifran con una clave de este dispositivo. Solo AutoJs6 en este dispositivo puede importarlas, no otro dispositivo ni tras un restablecimiento de fábrica. Este cifrado puede romperse sin conexión, así que guarde el archivo en un lugar seguro de todos modos.</string>
+    <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se cifran con una clave de este dispositivo. Sin contraseña, solo AutoJs6 en este dispositivo puede importarlas, no otro dispositivo ni tras un restablecimiento de fábrica; la página siguiente permite establecer una contraseña para importarlas en otros dispositivos. Este cifrado puede romperse sin conexión, así que guarde el archivo en un lugar seguro de todos modos.</string>
     <string name="settings_transfer_credentials_warning_title">Exportar credenciales?</string>
     <string name="settings_transfer_deploy_cancel_rest">Cancelar el resto</string>
     <string name="settings_transfer_deploy_cancelled">Cancelado</string>
@@ -837,6 +838,7 @@
     <string name="settings_transfer_export_done_title">Configuración exportada</string>
     <string name="settings_transfer_export_failed_title">Error al exportar</string>
     <string name="settings_transfer_export_sealed">Las credenciales se cifran con una clave de este dispositivo y solo se pueden importar en AutoJs6 en este dispositivo</string>
+    <string name="settings_transfer_export_sealed_password">Las credenciales se cifran con una clave de este dispositivo y con la contraseña establecida. En otro dispositivo, introduzca la contraseña para importarlas</string>
     <string name="settings_transfer_export_summary">Elegir categorías y guardarlas en un archivo zip</string>
     <string name="settings_transfer_export_unexportable">Se omitieron %1$d valores porque no se pueden escribir (como NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Escribiendo el archivo de configuración...</string>
@@ -845,6 +847,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Importando la configuración...</string>
     <string name="settings_transfer_import_canceled">Importación cancelada, no se cambió ninguna configuración</string>
     <string name="settings_transfer_import_credentials_locked">Las credenciales de este archivo se cifraron en otro dispositivo o con otra compilación de AutoJs6. Este dispositivo no puede descifrarlas, por lo que no se pueden importar.</string>
+    <string name="settings_transfer_import_credentials_password">Las credenciales de este archivo están protegidas con una contraseña. Para importarlas, toque \"Credenciales y autorizaciones\" en la página siguiente e introduzca la contraseña establecida al exportar.</string>
     <string name="settings_transfer_import_done_title">Configuración importada</string>
     <string name="settings_transfer_import_failed_title">Error al importar</string>
     <string name="settings_transfer_import_file">Archivo: %1$s\nExportado el: %2$s\nExportado por: AutoJs6 %3$s (%4$d)\nDispositivo: %5$s (API %6$d)\nCategorías: %7$d\nElementos: %8$d</string>
@@ -855,7 +858,18 @@
     <string name="settings_transfer_import_summary">Elija un archivo de configuración y las categorías que desea importar</string>
     <string name="settings_transfer_import_unknown_categories">Categorías que esta versión no conoce (se omiten): %1$d</string>
     <string name="settings_transfer_later_version">Disponible en una versión posterior</string>
-    <string name="settings_transfer_locked_later">La importación de las credenciales de otro dispositivo con una contraseña llegará en una versión posterior</string>
+    <string name="settings_transfer_locked_no_password">Estas credenciales se exportaron sin contraseña, por lo que solo AutoJs6 en el dispositivo que las exportó puede importarlas</string>
+    <string name="settings_transfer_password">Contraseña</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">Comprobando la contraseña...</string>
+    <string name="settings_transfer_password_confirm">Repita la contraseña</string>
+    <string name="settings_transfer_password_enter_title">Introduzca la contraseña</string>
+    <string name="settings_transfer_password_export_hint">Establezca una contraseña para poder importar las credenciales también en otro dispositivo: se pedirá esta contraseña. Deje ambos campos vacíos para importarlas solo en este dispositivo. La contraseña no se puede recuperar, y una contraseña sencilla puede descifrarse sin conexión.</string>
+    <string name="settings_transfer_password_import_hint">Introduzca la contraseña establecida al exportar el archivo</string>
+    <string name="settings_transfer_password_mismatch">Las contraseñas no coinciden</string>
+    <string name="settings_transfer_password_set_title">Contraseña de las credenciales</string>
+    <string name="settings_transfer_password_skip">Omitir credenciales</string>
+    <string name="settings_transfer_password_wrong">Esta contraseña no abre las credenciales del archivo. Vuelva a intentarlo u omita las credenciales e importe las demás categorías.</string>
+    <string name="settings_transfer_password_wrong_title">Contraseña incorrecta</string>
     <string name="settings_transfer_pick_deployments">Estas configuraciones importadas necesitan primero un despliegue en este dispositivo. Los elementos marcados se despliegan; los demás conservan su valor actual.</string>
     <string name="settings_transfer_pick_export">Elija las categorías que desea exportar</string>
     <string name="settings_transfer_pick_import">Elija las categorías que desea importar</string>

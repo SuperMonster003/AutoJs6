@@ -18,10 +18,17 @@ data class SettingsCategoryChoice @JvmOverloads constructor(val category: Settin
         LATER_VERSION,
 
         /**
-         * Sealed for the key of another device (D23): this device cannot import it; P7.7 asks for the password here.
-         * zh-CN: 以其他设备的密钥加密 (D23): 本机无法导入; P7.7 在此处询问口令.
+         * Sealed for the key of another device (D23) without a password slot: this device cannot import it.
+         * zh-CN: 以其他设备的密钥加密 (D23) 且没有口令槽: 本机无法导入.
          */
         LOCKED,
+
+        /**
+         * Sealed for the key of another device with a password slot (D23 / T21): the row asks for the password, and the
+         * category can be ticked once it is entered (P7.7).
+         * zh-CN: 以其他设备的密钥加密, 带口令槽 (D23 / T21): 点击该行询问口令, 输入正确后可勾选 (P7.7).
+         */
+        PASSWORD,
 
         /** `other` and the data categories, which a reset leaves as they are (D11, P8.1). zh-CN: 恢复默认不处理的 `other` 与数据分类. */
         NOT_RESETTABLE,
@@ -50,8 +57,10 @@ object SettingsCategoryChoices {
 
     /**
      * The rows of the import wizard for [manifest], in page order: the known categories the file holds; [locked] are
-     * the ids of the sealed categories this device cannot open (`SettingsArchiveReader.isLocked`).
-     * zh-CN: 导入向导对 [manifest] 的行, 按页面顺序: 文件中有的已知分类; [locked] 为本机无法打开的加密分类 id.
+     * the ids of the sealed categories this device cannot open now (`SettingsArchiveReader.isLocked`), [password] those
+     * of them a password opens (P7.7).
+     * zh-CN: 导入向导对 [manifest] 的行, 按页面顺序: 文件中有的已知分类; [locked] 为本机当前无法打开的加密分类 id, [password] 为其中
+     * 可以用口令打开的分类 (P7.7).
      */
     @JvmStatic
     @JvmOverloads
@@ -59,11 +68,13 @@ object SettingsCategoryChoices {
         manifest: SettingsArchiveManifest,
         locked: Collection<String>,
         categories: List<SettingCategory> = SettingCategory.ALL,
+        password: Collection<String> = emptyList(),
     ): List<SettingsCategoryChoice> {
         val entries = manifest.categories.associate { it.id to it.entries } + manifest.data.associate { it.id to it.entries }
         return categories.filter { it.id in entries }.map {
             when {
                 it.isData -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LATER_VERSION)
+                it.id in locked && it.id in password -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.PASSWORD)
                 it.id in locked -> SettingsCategoryChoice(it, entries[it.id], SettingsCategoryChoice.State.LOCKED)
                 else -> SettingsCategoryChoice(it, entries[it.id])
             }

@@ -796,6 +796,7 @@
     <string name="settings_transfer_category_locked">由其他裝置加密</string>
     <string name="settings_transfer_category_not_resettable">不參與恢復預設</string>
     <string name="settings_transfer_category_other">其他 (內部狀態)</string>
+    <string name="settings_transfer_category_password">受密碼保護, 點按以輸入密碼</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">外掛啟用狀態</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -803,7 +804,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">設定精靈設定檔</string>
-    <string name="settings_transfer_credentials_warning">憑證與授權 (GitHub 權杖, 外掛中心授權, MCP Server 與 3-Stove Agent 的已信任客戶端, Bun 宿主授權) 將以本機金鑰加密寫入檔案, 只能在本機的 AutoJs6 中匯入, 其他裝置或恢復原廠設定後無法匯入. 這種加密可被離線破解, 請仍然妥善保管匯出的檔案.</string>
+    <string name="settings_transfer_credentials_warning">憑證與授權 (GitHub 權杖, 外掛中心授權, MCP Server 與 3-Stove Agent 的已信任客戶端, Bun 宿主授權) 將以本機金鑰加密寫入檔案. 不設密碼時只能在本機的 AutoJs6 中匯入, 其他裝置或恢復原廠設定後無法匯入; 下一頁可設定密碼, 以便在其他裝置上匯入. 這種加密可被離線破解, 請仍然妥善保管匯出的檔案.</string>
     <string name="settings_transfer_credentials_warning_title">匯出憑證?</string>
     <string name="settings_transfer_deploy_cancel_rest">取消其餘項目</string>
     <string name="settings_transfer_deploy_cancelled">已取消</string>
@@ -834,6 +835,7 @@
     <string name="settings_transfer_export_done_title">設定已匯出</string>
     <string name="settings_transfer_export_failed_title">匯出失敗</string>
     <string name="settings_transfer_export_sealed">憑證已用本機金鑰加密, 只能在本機的 AutoJs6 中匯入</string>
+    <string name="settings_transfer_export_sealed_password">憑證已用本機金鑰與所設密碼加密, 在其他裝置上輸入該密碼即可匯入</string>
     <string name="settings_transfer_export_summary">選擇分類並儲存為 zip 檔案</string>
     <string name="settings_transfer_export_unexportable">略過了 %1$d 個無法寫入的值 (如 NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在寫入設定檔案...</string>
@@ -842,6 +844,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">正在匯入設定...</string>
     <string name="settings_transfer_import_canceled">已取消匯入, 未修改任何設定</string>
     <string name="settings_transfer_import_credentials_locked">該檔案中的憑證由其他裝置或其他建置的 AutoJs6 加密, 本機無法解密, 因此不能匯入</string>
+    <string name="settings_transfer_import_credentials_password">該檔案中的憑證受密碼保護. 如需匯入, 請在下一頁點按 \"憑證與授權\" 並輸入匯出時設定的密碼.</string>
     <string name="settings_transfer_import_done_title">設定已匯入</string>
     <string name="settings_transfer_import_failed_title">匯入失敗</string>
     <string name="settings_transfer_import_file">檔案: %1$s\n匯出時間: %2$s\n匯出來源: AutoJs6 %3$s (%4$d)\n裝置: %5$s (API %6$d)\n分類: %7$d 個\n條目: %8$d 項</string>
@@ -852,7 +855,18 @@
     <string name="settings_transfer_import_summary">選擇設定檔案與要匯入的分類</string>
     <string name="settings_transfer_import_unknown_categories">本版本不認識的分類 (將略過): %1$d 個</string>
     <string name="settings_transfer_later_version">後續版本提供</string>
-    <string name="settings_transfer_locked_later">以密碼匯入其他裝置的憑證將在後續版本提供</string>
+    <string name="settings_transfer_locked_no_password">這些憑證匯出時未設密碼, 只能在匯出它們的裝置上的 AutoJs6 中匯入</string>
+    <string name="settings_transfer_password">密碼</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">正在驗證密碼...</string>
+    <string name="settings_transfer_password_confirm">再次輸入密碼</string>
+    <string name="settings_transfer_password_enter_title">輸入密碼</string>
+    <string name="settings_transfer_password_export_hint">設定密碼後, 憑證也可以在其他裝置上匯入, 匯入時需輸入該密碼. 兩欄都留空則憑證只能在本機匯入. 密碼無法找回, 過於簡單的密碼可被離線破解.</string>
+    <string name="settings_transfer_password_import_hint">請輸入匯出該檔案時設定的密碼</string>
+    <string name="settings_transfer_password_mismatch">兩次輸入的密碼不一致</string>
+    <string name="settings_transfer_password_set_title">憑證密碼</string>
+    <string name="settings_transfer_password_skip">略過憑證</string>
+    <string name="settings_transfer_password_wrong">該密碼無法開啟檔案中的憑證. 可以重試, 也可以略過憑證, 只匯入其他分類.</string>
+    <string name="settings_transfer_password_wrong_title">密碼錯誤</string>
     <string name="settings_transfer_pick_deployments">以下匯入的設定需要先在本機部署: 勾選的項目將被部署, 未勾選的項目保持目前的值</string>
     <string name="settings_transfer_pick_export">選擇要匯出的分類</string>
     <string name="settings_transfer_pick_import">選擇要匯入的分類</string>

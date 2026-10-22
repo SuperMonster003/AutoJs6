@@ -93,10 +93,11 @@ object SettingsTransferMessages {
 
     /**
      * The summary of a settings file (import step 1, T10): file, export time, host, device and counts, then the
-     * warnings (newer format, another host package, appendix C Q26), the credentials sealed for another device (D23)
-     * and the categories unknown to this version.
+     * warnings (newer format, another host package, appendix C Q26), the credentials sealed for another device (D23:
+     * how to enter their password, P7.7, or that this device cannot open them) and the categories unknown to this
+     * version.
      * zh-CN: 设置文件摘要 (导入第 1 步, T10): 文件, 导出时间, 宿主, 设备与计数, 然后是警告 (更高格式, 其他宿主包名, 附录 C Q26), 以其他
-     * 设备密钥加密的凭据 (D23), 以及本版本不认识的分类.
+     * 设备密钥加密的凭据 (D23: 如何输入其口令 (P7.7), 或本机无法打开), 以及本版本不认识的分类.
      */
     @JvmStatic
     fun inspectionText(context: Context, inspection: SettingsImporter.Inspection): String {
@@ -125,7 +126,10 @@ object SettingsTransferMessages {
                     }
                 )
             }
-            if (inspection.locked.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_import_credentials_locked))
+            when {
+                inspection.password.isNotEmpty() -> append("\n\n").append(context.getString(R.string.settings_transfer_import_credentials_password))
+                inspection.locked.isNotEmpty() -> append("\n\n").append(context.getString(R.string.settings_transfer_import_credentials_locked))
+            }
             if (inspection.unknown.isNotEmpty()) append("\n\n").append(context.getString(R.string.settings_transfer_import_unknown_categories, inspection.unknown.size))
         }
     }

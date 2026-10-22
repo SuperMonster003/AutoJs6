@@ -801,6 +801,7 @@
     <string name="settings_transfer_category_locked">다른 기기에서 암호화됨</string>
     <string name="settings_transfer_category_not_resettable">기본값 복원 대상이 아님</string>
     <string name="settings_transfer_category_other">기타 (내부 상태)</string>
+    <string name="settings_transfer_category_password">비밀번호로 보호됨, 탭하여 비밀번호 입력</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">플러그인 활성화 상태</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -808,7 +809,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">설정 마법사 프로필</string>
-    <string name="settings_transfer_credentials_warning">자격 증명 및 권한 부여 (GitHub 토큰, 플러그인 센터 권한, MCP Server 와 3-Stove Agent 의 신뢰된 클라이언트, Bun 호스트 권한) 는 이 기기의 키로 암호화되어 파일에 기록됩니다. 이 기기의 AutoJs6 에서만 가져올 수 있으며, 다른 기기나 초기화 후에는 가져올 수 없습니다. 이 암호화는 오프라인에서 해독될 수 있으므로 파일을 계속 안전하게 보관하세요.</string>
+    <string name="settings_transfer_credentials_warning">자격 증명 및 권한 부여 (GitHub 토큰, 플러그인 센터 권한, MCP Server 와 3-Stove Agent 의 신뢰된 클라이언트, Bun 호스트 권한) 는 이 기기의 키로 암호화되어 파일에 기록됩니다. 비밀번호를 설정하지 않으면 이 기기의 AutoJs6 에서만 가져올 수 있으며, 다른 기기나 초기화 후에는 가져올 수 없습니다. 다음 페이지에서 다른 기기에서 가져오기 위한 비밀번호를 설정할 수 있습니다. 이 암호화는 오프라인에서 해독될 수 있으므로 파일을 계속 안전하게 보관하세요.</string>
     <string name="settings_transfer_credentials_warning_title">자격 증명을 내보내시겠습니까?</string>
     <string name="settings_transfer_deploy_cancel_rest">나머지 취소</string>
     <string name="settings_transfer_deploy_cancelled">취소됨</string>
@@ -839,6 +840,7 @@
     <string name="settings_transfer_export_done_title">설정을 내보냈습니다</string>
     <string name="settings_transfer_export_failed_title">내보내기 실패</string>
     <string name="settings_transfer_export_sealed">자격 증명은 이 기기의 키로 암호화되어 이 기기의 AutoJs6 에서만 가져올 수 있습니다</string>
+    <string name="settings_transfer_export_sealed_password">자격 증명은 이 기기의 키와 설정한 비밀번호로 암호화되었습니다. 다른 기기에서는 비밀번호를 입력하면 가져올 수 있습니다</string>
     <string name="settings_transfer_export_summary">카테고리를 선택하여 zip 파일로 저장합니다</string>
     <string name="settings_transfer_export_unexportable">기록할 수 없는 값 %1$d개를 제외했습니다 (NaN 등)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">설정 파일을 쓰는 중...</string>
@@ -847,6 +849,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">설정을 가져오는 중...</string>
     <string name="settings_transfer_import_canceled">가져오기를 취소했습니다. 설정을 변경하지 않았습니다</string>
     <string name="settings_transfer_import_credentials_locked">이 파일의 자격 증명은 다른 기기 또는 다른 빌드의 AutoJs6 에서 암호화되어 이 기기에서 복호화할 수 없으므로 가져올 수 없습니다</string>
+    <string name="settings_transfer_import_credentials_password">이 파일의 자격 증명은 비밀번호로 보호되어 있습니다. 가져오려면 다음 페이지에서 \"자격 증명 및 권한 부여\" 를 탭하고 내보낼 때 설정한 비밀번호를 입력하세요.</string>
     <string name="settings_transfer_import_done_title">설정을 가져왔습니다</string>
     <string name="settings_transfer_import_failed_title">가져오기 실패</string>
     <string name="settings_transfer_import_file">파일: %1$s\n내보낸 시각: %2$s\n내보낸 앱: AutoJs6 %3$s (%4$d)\n기기: %5$s (API %6$d)\n카테고리: %7$d\n항목: %8$d</string>
@@ -857,7 +860,18 @@
     <string name="settings_transfer_import_summary">설정 파일과 가져올 카테고리를 선택합니다</string>
     <string name="settings_transfer_import_unknown_categories">이 버전이 인식하지 못하는 카테고리 (건너뜀): %1$d</string>
     <string name="settings_transfer_later_version">이후 버전에서 제공됩니다</string>
-    <string name="settings_transfer_locked_later">다른 기기의 자격 증명을 비밀번호로 가져오는 기능은 이후 버전에서 제공됩니다</string>
+    <string name="settings_transfer_locked_no_password">이 자격 증명은 비밀번호 없이 내보내졌으므로 내보낸 기기의 AutoJs6 에서만 가져올 수 있습니다</string>
+    <string name="settings_transfer_password">비밀번호</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">비밀번호 확인 중...</string>
+    <string name="settings_transfer_password_confirm">비밀번호 다시 입력</string>
+    <string name="settings_transfer_password_enter_title">비밀번호 입력</string>
+    <string name="settings_transfer_password_export_hint">비밀번호를 설정하면 다른 기기에서도 자격 증명을 가져올 수 있으며, 가져올 때 이 비밀번호를 입력해야 합니다. 두 칸을 모두 비워 두면 이 기기에서만 가져올 수 있습니다. 비밀번호는 복구할 수 없으며, 단순한 비밀번호는 오프라인에서 해독될 수 있습니다.</string>
+    <string name="settings_transfer_password_import_hint">파일을 내보낼 때 설정한 비밀번호를 입력하세요</string>
+    <string name="settings_transfer_password_mismatch">비밀번호가 일치하지 않습니다</string>
+    <string name="settings_transfer_password_set_title">자격 증명 비밀번호</string>
+    <string name="settings_transfer_password_skip">자격 증명 건너뛰기</string>
+    <string name="settings_transfer_password_wrong">이 비밀번호로는 파일의 자격 증명을 열 수 없습니다. 다시 시도하거나 자격 증명을 건너뛰고 다른 카테고리를 가져오세요.</string>
+    <string name="settings_transfer_password_wrong_title">비밀번호가 틀렸습니다</string>
     <string name="settings_transfer_pick_deployments">가져오는 다음 설정은 먼저 이 기기에 배포해야 합니다. 선택한 항목은 배포되고, 선택하지 않은 항목은 현재 값을 유지합니다</string>
     <string name="settings_transfer_pick_export">내보낼 카테고리를 선택하세요</string>
     <string name="settings_transfer_pick_import">가져올 카테고리를 선택하세요</string>

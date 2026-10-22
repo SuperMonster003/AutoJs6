@@ -794,6 +794,7 @@
     <string name="settings_transfer_category_locked">Encrypted on another device</string>
     <string name="settings_transfer_category_not_resettable">Not restored to defaults</string>
     <string name="settings_transfer_category_other">Other (internal state)</string>
+    <string name="settings_transfer_category_password">Protected by a password, tap to enter it</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Plugin enabled states</string>
     <string name="settings_transfer_category_record">@string/text_script_record</string>
@@ -801,7 +802,7 @@
     <string name="settings_transfer_category_timed_task">@string/text_timed_task</string>
     <string name="settings_transfer_category_updates">@string/text_updates</string>
     <string name="settings_transfer_category_wizards">Setup wizard profiles</string>
-    <string name="settings_transfer_credentials_warning">Credentials and authorizations (the GitHub token, the authorizations of the plugin center, the trusted clients of MCP Server and 3-Stove Agent, the grants of the Bun host) are encrypted with a key of this device. Only AutoJs6 on this device can import them, not another device, and not after a factory reset. The encryption can be broken offline, so keep the file safe all the same.</string>
+    <string name="settings_transfer_credentials_warning">Credentials and authorizations (the GitHub token, the authorizations of the plugin center, the trusted clients of MCP Server and 3-Stove Agent, the grants of the Bun host) are encrypted with a key of this device. Without a password, only AutoJs6 on this device can import them, not another device, and not after a factory reset; the next page lets you set a password for importing them elsewhere. The encryption can be broken offline, so keep the file safe all the same.</string>
     <string name="settings_transfer_credentials_warning_title">Export credentials?</string>
     <string name="settings_transfer_deploy_cancel_rest">Cancel the rest</string>
     <string name="settings_transfer_deploy_cancelled">Cancelled</string>
@@ -832,6 +833,7 @@
     <string name="settings_transfer_export_done_title">Settings exported</string>
     <string name="settings_transfer_export_failed_title">Export failed</string>
     <string name="settings_transfer_export_sealed">Credentials are encrypted with a key of this device and can only be imported by AutoJs6 on this device</string>
+    <string name="settings_transfer_export_sealed_password">Credentials are encrypted with a key of this device and with the password you set. On another device, enter the password to import them</string>
     <string name="settings_transfer_export_summary">Choose categories and save them to a zip file</string>
     <string name="settings_transfer_export_unexportable">%1$d values were left out because they cannot be written (such as NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Writing the settings file...</string>
@@ -840,6 +842,7 @@
     <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Importing the settings...</string>
     <string name="settings_transfer_import_canceled">Import canceled, no setting was changed</string>
     <string name="settings_transfer_import_credentials_locked">The credentials in this file were encrypted on another device or by another build of AutoJs6. This device cannot decrypt them, so they cannot be imported.</string>
+    <string name="settings_transfer_import_credentials_password">The credentials in this file are protected by a password. To import them, tap \"Credentials and authorizations\" on the next page and enter the password set when exporting.</string>
     <string name="settings_transfer_import_done_title">Settings imported</string>
     <string name="settings_transfer_import_failed_title">Import failed</string>
     <string name="settings_transfer_import_file">File: %1$s\nExported at: %2$s\nExported by: AutoJs6 %3$s (%4$d)\nDevice: %5$s (API %6$d)\nCategories: %7$d\nEntries: %8$d</string>
@@ -850,7 +853,18 @@
     <string name="settings_transfer_import_summary">Choose a settings file and the categories to import</string>
     <string name="settings_transfer_import_unknown_categories">Categories unknown to this version (skipped): %1$d</string>
     <string name="settings_transfer_later_version">Available in a later version</string>
-    <string name="settings_transfer_locked_later">Importing the credentials of another device with a password comes in a later version</string>
+    <string name="settings_transfer_locked_no_password">These credentials were exported without a password, so only AutoJs6 on the device that exported them can import them</string>
+    <string name="settings_transfer_password">Password</string>
+    <string name="settings_transfer_password_checking" tools:ignore="TypographyEllipsis">Checking the password...</string>
+    <string name="settings_transfer_password_confirm">Repeat the password</string>
+    <string name="settings_transfer_password_enter_title">Enter the password</string>
+    <string name="settings_transfer_password_export_hint">Set a password to import the credentials on another device as well: it asks for this password. Leave both fields empty to import them only on this device. The password cannot be recovered, and a simple one can be cracked offline.</string>
+    <string name="settings_transfer_password_import_hint">Enter the password set when the file was exported</string>
+    <string name="settings_transfer_password_mismatch">The passwords do not match</string>
+    <string name="settings_transfer_password_set_title">Password for credentials</string>
+    <string name="settings_transfer_password_skip">Skip credentials</string>
+    <string name="settings_transfer_password_wrong">This password does not open the credentials of the file. Try again, or skip the credentials and import the other categories.</string>
+    <string name="settings_transfer_password_wrong_title">Wrong password</string>
     <string name="settings_transfer_pick_deployments">These imported settings need something on this device first. Ticked items are deployed, unticked ones keep their current values.</string>
     <string name="settings_transfer_pick_export">Choose the categories to export</string>
     <string name="settings_transfer_pick_import">Choose the categories to import</string>
