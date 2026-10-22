@@ -1,10 +1,18 @@
 package org.autojs.autojs.engine
 
+import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONObject
+import java.util.UUID
 
 internal object RuntimeAgentPrograms {
     val capabilities = listOf("ai.agent", "ui")
     val grants = listOf("agent.control", "ui.layout")
+    private val testRunId by lazy {
+        UUID.fromString(InstrumentationRegistry.getArguments().getString("runtimeAgentTestId")
+            ?: UUID.randomUUID().toString()).toString()
+    }
+    val goalPrefix get() = "[runtime-ai-agent:$testRunId] "
+    fun goal(text: String) = goalPrefix + text
 
     fun exercise(target: String, full: Boolean = true): String = """
         let checks=0;const check=(value,label)=>{checks++;if(!value)throw Error(label);};
@@ -25,14 +33,14 @@ internal object RuntimeAgentPrograms {
         check(assistant.options.budget.maxSteps===4,'assistant snapshot');
         const wider=await assistant.run('invalid',{budget:{maxSteps:5}}).then(()=>null,e=>e);
         check(wider?.code==='INVALID_REQUEST','assistant budget cannot widen');
-        const run=await assistant.run('The task is to greet the user. Finish with a brief summary saying OK.',{budget:{maxSteps:3}});
+        const run=await assistant.run(${JSONObject.quote(goal("The task is to greet the user. Finish with a brief summary saying OK."))},{budget:{maxSteps:3}});
         check(typeof run.id==='string'&&run.goal.length>0&&run.startedAt>0&&!run.detached,'run metadata');
         let states=0,progress=0,steps=0,done=0,once=0;
         const removed=()=>{throw Error('Removed listener ran');};run.on('progress',removed).off('progress',removed);
         run.on('state',()=>states++).on('progress',()=>progress++).on('step',()=>steps++).once('done',()=>{done++;once++;});
         const observed=await agent.get(run.id);check(observed===run,'live get reuses facade');
         const result=await run.join(120000);
-        check(result.status==='completed','local Agent completion: '+JSON.stringify({status:result.status,error:result.error,usage:result.usage}));
+        check(result.status==='completed','local Agent completion: '+JSON.stringify({id:run.id,status:result.status,error:result.error,usage:result.usage}));
         check(typeof result.summary==='string'&&result.summary.length>0,'real final summary');
         check(result.usage?.modelCalls>0,'real model call');
         check(done===1&&once===1&&run.state==='completed'&&run.error===null,'terminal lifecycle');
@@ -46,14 +54,14 @@ internal object RuntimeAgentPrograms {
         check(await run.cancel()===run,'terminal cancellation is harmless');
         let cancellation=null;
         ${if (full) """
-        const cancel=await assistant.run('Write a long detailed explanation of clouds in the final summary.');
+        const cancel=await assistant.run(${JSONObject.quote(goal("Write a long detailed explanation of clouds in the final summary."))});
         const initial=cancel.state;await cancel.cancel('runtime-fixture');const cancelled=await cancel.result;
         check(['cancelled','completed'].includes(cancelled.status),'native cancellation: '+cancelled.status);
         check(cancelled.status==='cancelled'||initial==='completed','cancelled while active');
         cancellation={id:cancel.id,initial,status:cancelled.status};
         """.trimIndent() else ""}
         await agent.close();check(typeof(await agent.status()).state==='string','fresh client after close');await agent.close();
-        return {checks,id:run.id,target:${JSONObject.quote(target)},status:result.status,summaryLength:result.summary.length,
+        return {checks,id:run.id,goalPrefix:${JSONObject.quote(goalPrefix)},target:${JSONObject.quote(target)},status:result.status,summaryLength:result.summary.length,
             usage:result.usage,events:{states,progress,steps,done},cancellation,full:$full};
     """.trimIndent()
 }

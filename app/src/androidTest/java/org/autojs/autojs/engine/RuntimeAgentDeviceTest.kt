@@ -97,7 +97,7 @@ class RuntimeAgentDeviceTest {
             assertEquals(false, call("cancel", JSONArray().put(a).put(status)))
             val options = JSONObject().put("target", target).put("tools", JSONArray()).put("memory", false).put("plan", false)
                 .put("locale", "en").put("detached", true).put("budget", JSONObject().put("maxDurationMs", 120000))
-            val task = start("run", JSONArray().put("Write a long detailed explanation of clouds in the final summary.").put(JSONObject()).put(options))
+            val task = start("run", JSONArray().put(RuntimeAgentPrograms.goal("Write a long detailed explanation of clouds in the final summary.")).put(JSONObject()).put(options))
             val created = receive(task); assertEquals(created.toString(), "resolve", created.getString("type"))
             val info = created.getJSONObject("value"); val id = info.getString("id")
             assertFalse("Task must still be active at the cancellation checkpoint", info.getString("state") in setOf("completed", "partial", "failed", "blocked", "cancelled"))
@@ -166,7 +166,7 @@ class RuntimeAgentDeviceTest {
             const proofs=[];
             try {
                 for(const detached of [false,true]){
-                    const body="const run=await ai.agent.run('Write a long detailed explanation of clouds in the final summary.',{target:"+JSON.stringify(target)+",tools:[],memory:false,plan:false,locale:'en',detached:"+detached+",budget:{maxSteps:4,maxModelCalls:6,maxDurationMs:120000,maxTotalTokens:8192}});parentPort.postMessage({id:run.id,state:run.state});setInterval(()=>{},1000);";
+                    const body="const run=await ai.agent.run('${RuntimeAgentPrograms.goalPrefix}Write a long detailed explanation of clouds in the final summary.',{target:"+JSON.stringify(target)+",tools:[],memory:false,plan:false,locale:'en',detached:"+detached+",budget:{maxSteps:4,maxModelCalls:6,maxDurationMs:120000,maxTotalTokens:8192}});parentPort.postMessage({id:run.id,state:run.state});setInterval(()=>{},1000);";
                     const cjs="const {parentPort}=require('node:worker_threads'),ai=require('ai');(async()=>{"+body+"})().catch(e=>{throw e;});";
                     const esm="import {parentPort} from 'node:worker_threads';import ai from 'autojs6:ai';"+body;
                     const nested="const {parentPort,Worker}=require('node:worker_threads');const w=new Worker("+JSON.stringify(cjs)+",{eval:true});w.on('message',v=>parentPort.postMessage(v));w.on('error',e=>{throw e;});";

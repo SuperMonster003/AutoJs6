@@ -69,7 +69,7 @@ class RuntimeAgentPackagedDeviceTest {
                                 await agent.close();await fetch(url+'/upload',{method:'POST',body:JSON.stringify({identity,mode:'$mode',round,before,denied:error.code})});
                             }else if(round===4){
                                 if(!before)throw Error('Expected retained consent');
-                                const run=await agent.run('Propose a one-step plan and wait for my review before saying OK.',{
+                                const run=await agent.run(${JSONObject.quote(RuntimeAgentPrograms.goal("Propose a one-step plan and wait for my review before saying OK."))},{
                                     target:${JSONObject.quote(target)},tools:[],memory:false,plan:true,locale:'en',interaction:'script',detached:true,
                                     budget:{maxSteps:4,maxModelCalls:6,maxDurationMs:180000,maxTotalTokens:8192}});
                                 await field.set({text:'Agent revoke ready $mode '+run.id});
