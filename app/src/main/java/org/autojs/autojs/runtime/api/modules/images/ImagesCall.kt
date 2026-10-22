@@ -30,11 +30,16 @@ import org.opencv.core.Size as OpencvSize
  * (augment/images/Images) 读取之前进行 (D10). 其他类型为 TypeError, 不可用的取值 (空白路径, NaN) 为 RangeError, 消息来自 ScriptMessages (R4). 可选参数可以是
  * null / undefined (取默认值, 同现有模块). 检查未涉及的部分 (颜色, 区域的各分量, OpenCV 常量名, 选项对象的字段) 照旧由现有函数读取 (P5.2 前迁出).
  */
-internal class ImagesCall(name: String, vararg values: Any?) {
+internal class ImagesCall(private val name: String, vararg values: Any?) {
 
-    val function = "images.$name"
+    /** The script name of the function, built only for an error message. */
+    val function get() = "images.$name"
 
-    val args: Array<Any?> = values.takeWhile { it !== ABSENT }.toTypedArray()
+    /**
+     * The vararg array is new on every call, so it is taken as it is when nothing is omitted (P3.1 R2: copying it
+     * through a list made a successful `images.getSize` about 5 us slower than the current module).
+     */
+    val args: Array<out Any?> = values.indexOfFirst { it === ABSENT }.let { if (it < 0) values else values.copyOf(it) }
 
     val size get() = args.size
 
