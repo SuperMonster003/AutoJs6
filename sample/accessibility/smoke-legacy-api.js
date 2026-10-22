@@ -344,13 +344,13 @@ auto.stateListener({
 });
 
 function canRestartServiceUnattended() {
-    const Pref = Packages.org.autojs.autojs.core.pref.Pref.INSTANCE;
+    const A11yKeys = Packages.org.autojs.autojs.core.pref.keys.A11yKeys;
     const RootUtils = Packages.org.autojs.autojs.util.RootUtils;
     const SecureSettings = Packages.org.autojs.autojs.util.SettingsUtils.SecureSettings;
     const WrappedShizuku = Packages.org.autojs.autojs.runtime.api.WrappedShizuku.INSTANCE;
-    return Boolean(Pref.shouldStartA11yServiceWithRoot() && RootUtils.isRootAvailable()
-        || Pref.shouldStartA11yServiceWithSecureSettings() && SecureSettings.isGranted(context)
-        || Pref.shouldStartA11yServiceWithShizuku() && WrappedShizuku.isOperational());
+    return Boolean(A11yKeys.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS.get() && RootUtils.isRootAvailable()
+        || A11yKeys.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS.get() && SecureSettings.isGranted(context)
+        || A11yKeys.ENABLE_A11Y_SERVICE_WITH_SHIZUKU.get() && WrappedShizuku.isOperational());
 }
 
 if (canRestartServiceUnattended()) {

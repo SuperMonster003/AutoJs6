@@ -4,6 +4,9 @@
 // ..." and "AJ6SET done". Every key a check writes is restored to its stored value (or removed) at the end.
 // zh-CN: ROADMAP P2 的真机检查 (E3): AJ6_DOMAINS 中各领域的键声明在本机资源与运行时取值下读到旧代码所读的值, 迁移后的调用方
 // 照常工作. 检查写过的每个键结束时恢复为原存储值 (或删除).
+// P14.1 removed the deprecated Pref readers and P5.2 the old *Prefs objects; the "*-readers" checks now compare the
+// key helpers with the raw stored values instead.
+// zh-CN: P14.1 删除了 Pref 的旧读取入口, P5.2 删除了旧的 *Prefs 对象; "*-readers" 检查改为比较键的帮助函数与原始存储值.
 
 var Pref = org.autojs.autojs.core.pref.Pref.INSTANCE;
 var Keys = org.autojs.autojs.core.pref.keys;
@@ -202,7 +205,7 @@ var CALLERS = {
         });
         check('appearance-keep-screen-on', function () {
             var expected = sp.getString(A.KEEP_SCREEN_ON_WHEN_IN_FOREGROUND.getName(), key('key_keep_screen_on_when_in_foreground_disabled'));
-            if (!same(Pref.getKeyKeepScreenOnWhenInForeground(), expected)) return 'deprecated Pref getter ' + Pref.getKeyKeepScreenOnWhenInForeground();
+            if (!same(A.getKeepScreenOnWhenInForegroundKey(), expected)) return 'stored key ' + A.getKeepScreenOnWhenInForegroundKey();
             return expect(ViewUtils.isKeepScreenOnWhenInForegroundDisabled(), same(expected, key('key_keep_screen_on_when_in_foreground_disabled')), 'disabled');
         });
     },
@@ -212,17 +215,17 @@ var CALLERS = {
         check('general-restart-strategy', function () {
             touch(G.RESTART_STRATEGY);
             G.RESTART_STRATEGY.set(key('key_restart_strategy_scheduled'), true);
-            if (Pref.isQuickRestartEnabled() || G.isQuickRestartEnabled()) return 'scheduled is quick';
+            if (G.isQuickRestartEnabled()) return 'scheduled is quick';
             G.RESTART_STRATEGY.setStoredKey('key_$_restart_strategy_removed', true);
-            if (Pref.isQuickRestartEnabled()) return 'unknown key is quick';
+            if (G.isQuickRestartEnabled()) return 'unknown key is quick';
             G.RESTART_STRATEGY.remove(true);
-            return Pref.isQuickRestartEnabled() && G.isQuickRestartEnabled() || 'default is not quick';
+            return G.isQuickRestartEnabled() || 'default is not quick';
         });
         check('general-scheduled-restart', function () {
             touch(G.SCHEDULED_RESTART_BACKEND);
             touch(G.SCHEDULED_RESTART_DELAY);
             G.SCHEDULED_RESTART_BACKEND.set(key('key_scheduled_restart_backend_alarm_manager'), true);
-            if (Pref.isScheduledRestartPreferredWorkManager()) return 'alarm manager is work manager';
+            if (G.isScheduledRestartPreferredWorkManager()) return 'alarm manager is work manager';
             G.SCHEDULED_RESTART_BACKEND.remove(true);
             if (!G.isScheduledRestartPreferredWorkManager()) return 'default is not work manager';
             G.SCHEDULED_RESTART_DELAY.set(java.lang.Integer.valueOf(1200), true);
@@ -246,16 +249,16 @@ var CALLERS = {
             touch(E.HIDDEN_FILES);
             var show = key('key_hidden_files_show');
             var expected = same(sp.getString(E.HIDDEN_FILES.getName(), key('key_hidden_files_not_show')), show);
-            if (!same(Pref.isHiddenFilesShown(), expected) || !same(E.isHiddenFilesShown(), expected)) return 'stored reading';
+            if (!same(E.isHiddenFilesShown(), expected)) return 'stored reading';
             E.HIDDEN_FILES.set(show, true);
-            if (!Pref.isHiddenFilesShown()) return 'show';
+            if (!E.isHiddenFilesShown()) return 'show';
             E.HIDDEN_FILES.setStoredKey('key_$_hidden_files_removed', true);
             return !E.isHiddenFilesShown() || 'unknown key shows hidden files';
         });
         check('explorer-file-extensions', function () {
             touch(E.FILE_EXTENSIONS);
             var states = function () {
-                return [Pref.isFileExtensionsShownForAll(), Pref.isFileExtensionsShownForAllButExecutable(), Pref.isFileExtensionsHidden()].join(',');
+                return [E.isFileExtensionsShownForAll(), E.isFileExtensionsShownForAllButExecutable(), E.isFileExtensionsHidden()].join(',');
             };
             E.FILE_EXTENSIONS.remove(true);
             if (states() !== 'true,false,false') return 'default ' + states();
@@ -273,27 +276,26 @@ var CALLERS = {
         check('explorer-batch-rename-retention', function () {
             touch(E.BATCH_RENAME_HISTORY_RETENTION);
             E.setBatchRenameHistoryRetention(50);
-            if (!same(org.autojs.autojs.core.plugin.batchrename.BatchRenameHistoryPrefs.INSTANCE.retention(), 50)) return 'deprecated reader';
+            if (!same(sp.getInt(E.BATCH_RENAME_HISTORY_RETENTION.getName(), 0), 50) || !same(E.batchRenameHistoryRetention(), 50)) return 'retention 50';
             sp.edit().putInt(E.BATCH_RENAME_HISTORY_RETENTION.getName(), 33).commit();
             return expect(E.batchRenameHistoryRetention(), 20, 'not a choice');
         });
     },
     HistoryKeys: function () {
         var H = Keys.HistoryKeys;
-        var HistoryPrefs = org.autojs.autojs.storage.history.HistoryPrefs.INSTANCE;
         var Retention = org.autojs.autojs.ui.settings.RetentionLimitSettings.INSTANCE;
-        check('history-deprecated-readers', function () {
+        check('history-readers', function () {
             var pairs = [
-                [HistoryPrefs.maxFileSizeToTrackBytes(), sp.getLong(H.HISTORY_MAX_FILE_SIZE_TO_TRACK_BYTES.getName(), 20 * 1024 * 1024)],
-                [HistoryPrefs.historyMaxDays(), sp.getInt(H.HISTORY_MAX_DAYS.getName(), 30)],
-                [HistoryPrefs.historyMaxVersions(), sp.getInt(H.HISTORY_MAX_VERSIONS.getName(), 50)],
-                [HistoryPrefs.historyMaxTotalBytesPerFile(), sp.getLong(H.HISTORY_MAX_TOTAL_BYTES_PER_FILE.getName(), 200 * 1024 * 1024)],
-                [HistoryPrefs.historyMaxTotalBytes(), sp.getLong(H.HISTORY_MAX_TOTAL_BYTES.getName(), 2 * 1024 * 1024 * 1024)],
-                [HistoryPrefs.trashMaxDays(), sp.getInt(H.TRASH_MAX_DAYS.getName(), 30)],
-                [HistoryPrefs.trashMaxTotalBytes(), sp.getLong(H.TRASH_MAX_TOTAL_BYTES.getName(), 500 * 1024 * 1024)],
-                [HistoryPrefs.draftsMaxDays(), sp.getInt(H.DRAFTS_MAX_DAYS.getName(), 7)],
-                [HistoryPrefs.draftsMaxTotalBytes(), sp.getLong(H.DRAFTS_MAX_TOTAL_BYTES.getName(), 200 * 1024 * 1024)],
-                [HistoryPrefs.deletePermanentlyAlsoClearHistory(), sp.getBoolean(H.DELETE_PERMANENTLY_ALSO_CLEAR_HISTORY.getName(), false)],
+                [H.HISTORY_MAX_FILE_SIZE_TO_TRACK_BYTES.get(), sp.getLong(H.HISTORY_MAX_FILE_SIZE_TO_TRACK_BYTES.getName(), 20 * 1024 * 1024)],
+                [H.HISTORY_MAX_DAYS.get(), sp.getInt(H.HISTORY_MAX_DAYS.getName(), 30)],
+                [H.HISTORY_MAX_VERSIONS.get(), sp.getInt(H.HISTORY_MAX_VERSIONS.getName(), 50)],
+                [H.HISTORY_MAX_TOTAL_BYTES_PER_FILE.get(), sp.getLong(H.HISTORY_MAX_TOTAL_BYTES_PER_FILE.getName(), 200 * 1024 * 1024)],
+                [H.HISTORY_MAX_TOTAL_BYTES.get(), sp.getLong(H.HISTORY_MAX_TOTAL_BYTES.getName(), 2 * 1024 * 1024 * 1024)],
+                [H.TRASH_MAX_DAYS.get(), sp.getInt(H.TRASH_MAX_DAYS.getName(), 30)],
+                [H.TRASH_MAX_TOTAL_BYTES.get(), sp.getLong(H.TRASH_MAX_TOTAL_BYTES.getName(), 500 * 1024 * 1024)],
+                [H.DRAFTS_MAX_DAYS.get(), sp.getInt(H.DRAFTS_MAX_DAYS.getName(), 7)],
+                [H.DRAFTS_MAX_TOTAL_BYTES.get(), sp.getLong(H.DRAFTS_MAX_TOTAL_BYTES.getName(), 200 * 1024 * 1024)],
+                [H.DELETE_PERMANENTLY_ALSO_CLEAR_HISTORY.get(), sp.getBoolean(H.DELETE_PERMANENTLY_ALSO_CLEAR_HISTORY.getName(), false)],
             ];
             var bad = pairs.map(function (p, i) { return same(p[0], p[1]) ? null : i + ': ' + p[0] + ' != ' + p[1]; }).filter(function (x) { return x; });
             return bad.length === 0 || bad.join('; ');
@@ -321,20 +323,21 @@ var CALLERS = {
             touch(K.EDITOR_TEXT_SIZE);
             var stored = sp.contains(K.EDITOR_TEXT_SIZE.getName());
             if (!stored && !same(K.EDITOR_TEXT_SIZE.get(), 14)) return 'default ' + K.EDITOR_TEXT_SIZE.get();
-            if (!same(Pref.getEditorTextSize(99), stored ? sp.getInt(K.EDITOR_TEXT_SIZE.getName(), 0) : 99)) return 'deprecated getter';
-            Pref.setEditorTextSize(17);
-            return expect(sp.getInt(K.EDITOR_TEXT_SIZE.getName(), 0), 17, 'deprecated setter');
+            var storedSize = K.EDITOR_TEXT_SIZE.storedOrNull();
+            if (!same(storedSize === null ? 99 : storedSize, stored ? sp.getInt(K.EDITOR_TEXT_SIZE.getName(), 0) : 99)) return 'stored reading';
+            K.EDITOR_TEXT_SIZE.set(java.lang.Integer.valueOf(17), true);
+            return expect(sp.getInt(K.EDITOR_TEXT_SIZE.getName(), 0), 17, 'write');
         });
         check('editor-thresholds', function () {
             touch(K.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES);
             touch(K.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES);
             K.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(java.lang.Integer.valueOf(-5), true);
             var def = res.getInteger(res.getIdentifier('editor_code_highlight_threshold_default_value', 'integer', pkg));
-            if (!same(Pref.getCodeHighlightThresholdChars(), def)) return 'below -1 is not the default';
+            if (!same(K.getCodeHighlightThresholdChars(), def)) return 'below -1 is not the default';
             K.EDITOR_CODE_HIGHLIGHT_THRESHOLD_BYTES.set(java.lang.Integer.valueOf(-1), true);
             if (!K.isCodeHighlightEnabledForLength(1 << 30)) return 'no threshold is not always';
             K.EDITOR_LARGE_FILE_MODE_THRESHOLD_BYTES.set(java.lang.Integer.valueOf(0), true);
-            return Pref.shouldEnableLargeFileModeForSize(1) || 'zero is not always large file mode';
+            return K.shouldEnableLargeFileModeForSize(1) || 'zero is not always large file mode';
         });
         check('editor-display-preferences', function () {
             touch(K.EDITOR_GUTTER_WIDTH_MODE);
@@ -347,7 +350,7 @@ var CALLERS = {
         check('editor-theme-and-font', function () {
             var unified = same(sp.getString(K.EDITOR_THEME_MODE.getName(), 'separate_light_dark'), 'unified_light_dark');
             if (!same(Themes.isSeparateLightDarkMode(), !unified)) return 'theme mode';
-            if (!same(Pref.getCurrentTheme(), sp.getString(K.EDITOR_THEME.getName(), null))) return 'current theme';
+            if (!same(K.EDITOR_THEME.getOrNull(), sp.getString(K.EDITOR_THEME.getName(), null))) return 'current theme';
             var id = Font.getId();
             return /^[a-z0-9][a-z0-9_]{0,63}$/.test(String(id)) || 'font id ' + id;
         });
@@ -368,15 +371,9 @@ var CALLERS = {
     },
     A11yKeys: function () {
         var A = Keys.A11yKeys;
-        check('a11y-deprecated-readers', function () {
-            var pairs = [
-                [Pref.shouldStartA11yServiceWithRoot(), A.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS],
-                [Pref.shouldStartA11yServiceWithSecureSettings(), A.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS],
-                [Pref.shouldStartA11yServiceWithShizuku(), A.ENABLE_A11Y_SERVICE_WITH_SHIZUKU],
-                [Pref.isStableModeEnabled(), A.STABLE_MODE],
-                [Pref.isGestureObservingEnabled(), A.GESTURE_OBSERVING],
-            ];
-            var bad = pairs.filter(function (p) { return !same(p[0], p[1].get()); }).map(function (p) { return String(p[1].getName()); });
+        check('a11y-readers', function () {
+            var keys = [A.ENABLE_A11Y_SERVICE_WITH_ROOT_ACCESS, A.ENABLE_A11Y_SERVICE_WITH_SECURE_SETTINGS, A.ENABLE_A11Y_SERVICE_WITH_SHIZUKU, A.STABLE_MODE, A.GESTURE_OBSERVING];
+            var bad = keys.filter(function (k) { return !same(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true')); }).map(function (k) { return String(k.getName()); });
             return bad.length === 0 || bad.join(' ');
         });
         // Appendix C Q10 (2) / (3): a missing switch reads the default of its declaration through the script API.
@@ -395,25 +392,28 @@ var CALLERS = {
     },
     RunningKeys: function () {
         var R = Keys.RunningKeys;
-        check('running-deprecated-readers', function () {
-            if (!same(Pref.isGuardModeEnabled(), R.GUARD_MODE.get())) return 'guard mode';
-            if (!same(Pref.isUseVolumeControlRunningEnabled(), R.USE_VOLUME_CONTROL_RUNNING.get())) return 'volume key';
-            if (!same(Pref.getRootMode(), R.getRootMode())) return 'root mode';
+        check('running-readers', function () {
+            var bools = [R.GUARD_MODE, R.USE_VOLUME_CONTROL_RUNNING];
+            var bad = bools.filter(function (k) { return !same(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true')); });
+            if (bad.length) return 'stored reading ' + bad.map(function (k) { return String(k.getName()); }).join(' ');
+            if (R.getRootMode() === null) return 'root mode';
             var delay = sp.getInt(R.SCREEN_CAPTURE_REQUEST_DELAY.getName(), 350);
-            return expect(Pref.getScreenCaptureRequestDelay(), Math.min(2000, Math.max(0, delay)), 'screen capture delay');
+            return expect(R.getScreenCaptureRequestDelay(), Math.min(2000, Math.max(0, delay)), 'screen capture delay');
         });
     },
     RecordKeys: function () {
         var R = Keys.RecordKeys;
-        check('record-deprecated-readers', function () {
+        check('record-readers', function () {
             var binary = same(sp.getString(R.ROOT_RECORD_OUT_FILE_TYPE.getName(), key('key_root_record_out_file_type_binary')), key('key_root_record_out_file_type_binary'));
-            if (!same(Pref.rootRecordGeneratesBinary(), binary)) return 'root record';
-            return same(Pref.isRecordToastEnabled(), R.RECORD_TOAST.get()) && same(Pref.isUseVolumeControlRecordEnabled(), R.USE_VOLUME_CONTROL_RECORD.get()) || 'toast / volume key';
+            if (!same(R.rootRecordGeneratesBinary(), binary)) return 'root record';
+            var bools = [R.RECORD_TOAST, R.USE_VOLUME_CONTROL_RECORD];
+            return bools.every(function (k) { return same(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true')); }) || 'toast / volume key';
         });
     },
     ExtensibilityKeys: function () {
-        check('extensibility-deprecated-readers', function () {
-            return expect(Pref.isExtendingJsBuildInObjectsEnabled(), Keys.ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get(), 'extending');
+        check('extensibility-readers', function () {
+            var k = Keys.ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS;
+            return expect(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true'), 'extending');
         });
     },
     UpdatesKeys: function () {
@@ -441,20 +441,13 @@ var CALLERS = {
     },
     ConnectionKeys: function () {
         var C = Keys.ConnectionKeys;
-        check('connection-deprecated-readers', function () {
-            var D = org.autojs.autojs.pluginclient.DevPluginPrefs.INSTANCE;
-            var pairs = [
-                [D.isClientAutoReconnectEnabled(), C.CLIENT_MODE_AUTO_RECONNECT],
-                [D.isClientReconnectOnNetworkChangeEnabled(), C.CLIENT_MODE_RECONNECT_ON_NETWORK_CHANGE],
-                [D.isClientRestoreOnLaunchEnabled(), C.CLIENT_MODE_RESTORE_ON_LAUNCH],
-                [D.isServerRestoreOnLaunchEnabled(), C.SERVER_MODE_RESTORE_ON_LAUNCH],
-                [D.isServerNotifyConnectionChangesEnabled(), C.SERVER_MODE_NOTIFY_CONNECTION_CHANGES],
-                [D.isServerLanDiscoveryEnabled(), C.SERVER_MODE_LAN_DISCOVERY],
-            ];
-            var bad = pairs.filter(function (p) { return !same(p[0], p[1].get()); }).map(function (p) { return String(p[1].getName()); });
+        check('connection-readers', function () {
+            var keys = [C.CLIENT_MODE_AUTO_RECONNECT, C.CLIENT_MODE_RECONNECT_ON_NETWORK_CHANGE, C.CLIENT_MODE_RESTORE_ON_LAUNCH,
+                C.SERVER_MODE_RESTORE_ON_LAUNCH, C.SERVER_MODE_NOTIFY_CONNECTION_CHANGES, C.SERVER_MODE_LAN_DISCOVERY];
+            var bad = keys.filter(function (k) { return !same(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true')); }).map(function (k) { return String(k.getName()); });
             if (bad.length) return bad.join(' ');
             var gateway = org.autojs.autojs.util.NetworkUtils.INSTANCE.getGatewayAddress();
-            return expect(Pref.getServerAddress(), sp.getString(C.SERVER_ADDRESS.getName(), gateway), 'server address');
+            return expect(C.SERVER_ADDRESS.get(), sp.getString(C.SERVER_ADDRESS.getName(), gateway), 'server address');
         });
     },
     LayoutInspectorKeys: function () {
@@ -493,10 +486,12 @@ var CALLERS = {
     },
     DeveloperKeys: function () {
         var D = Keys.DeveloperKeys;
-        check('developer-deprecated-readers', function () {
-            if (!same(Pref.isNewScriptModuleLayerEnabled(), D.NEW_SCRIPT_MODULE_LAYER.get())) return 'module layer';
-            if (!same(Pref.isScriptModuleDebugPrintEnabled(), D.SCRIPT_MODULE_DEBUG_PRINT.get())) return 'debug print';
-            return expect(Pref.getScriptModuleDebugPrintDisabledModules().size(), D.getScriptModuleDebugPrintDisabledModules().size(), 'disabled modules');
+        check('developer-readers', function () {
+            var bools = [D.NEW_SCRIPT_MODULE_LAYER, D.SCRIPT_MODULE_DEBUG_PRINT];
+            var bad = bools.filter(function (k) { return !same(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true')); });
+            if (bad.length) return 'stored reading ' + bad.map(function (k) { return String(k.getName()); }).join(' ');
+            var raw = sp.getStringSet(D.SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES.getName(), null);
+            return expect(D.getScriptModuleDebugPrintDisabledModules().size(), raw === null ? 0 : raw.size(), 'disabled modules');
         });
     },
 };

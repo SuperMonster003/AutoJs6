@@ -97,7 +97,7 @@ object ExplorerKeys : SettingsDomain {
             // Entries of the page that hold no value.
             excludedNames(R.string.key_change_working_dir, R.string.key_clear_explorer_playback_history)
 
-    /** `Pref.isHiddenFilesShown`: only the "show" key shows hidden files (R2). */
+    /** The former `Pref.isHiddenFilesShown`: only the "show" key shows hidden files (R2). */
     @JvmStatic
     val isHiddenFilesShown: Boolean
         get() = HIDDEN_FILES.storedKeyOrDefault() == keyOf(R.string.key_hidden_files_show)

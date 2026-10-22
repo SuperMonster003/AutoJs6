@@ -15,6 +15,7 @@ import android.widget.Button
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.model.explorer.Explorer
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.model.explorer.ExplorerFileProvider
@@ -136,13 +137,13 @@ class ExplorerPathMenuInstrumentationTest {
         withNode(R.id.explorer_menu_hidden) { assertFalse(it.isChecked) }
         click(R.id.explorer_menu_hidden)
         awaitMain("Showing hidden files should update both the setting and the loaded directory") {
-            Pref.isHiddenFilesShown && !explorer.isRefreshing && listedFilePaths() == setOf(visible.path, hidden.path)
+            ExplorerKeys.isHiddenFilesShown && !explorer.isRefreshing && listedFilePaths() == setOf(visible.path, hidden.path)
         }
         withNode(R.id.explorer_menu_hidden) { assertTrue(it.isChecked) }
 
         click(R.id.explorer_menu_hidden)
         awaitMain("Hiding dot files again should remove them from the current listing") {
-            !Pref.isHiddenFilesShown && !explorer.isRefreshing && listedFilePaths() == setOf(visible.path)
+            !ExplorerKeys.isHiddenFilesShown && !explorer.isRefreshing && listedFilePaths() == setOf(visible.path)
         }
     }
 

@@ -133,8 +133,8 @@ object AppearanceKeys : SettingsDomain {
             excludedNames(R.string.key_theme_color)
 
     /**
-     * The stored keep-screen-on key as it is, else the default key (`Pref.keyKeepScreenOnWhenInForeground`).
-     * zh-CN: 原样返回存储的前台常亮键, 不存在时为默认键 (`Pref.keyKeepScreenOnWhenInForeground`).
+     * The stored keep-screen-on key as it is, else the default key (the former `Pref.keyKeepScreenOnWhenInForeground`).
+     * zh-CN: 原样返回存储的前台常亮键, 不存在时为默认键 (原 `Pref.keyKeepScreenOnWhenInForeground`).
      */
     @JvmStatic
     val keepScreenOnWhenInForegroundKey: String

@@ -138,7 +138,7 @@ object GeneralKeys : SettingsDomain {
     )
 
     /**
-     * True when the restart strategy is "quick" (`Pref.isQuickRestartEnabled`); a stored key out of the candidates
+     * True when the restart strategy is "quick" (the former `Pref.isQuickRestartEnabled`); a stored key out of the candidates
      * is not "quick" (R2).
      * zh-CN: 重启策略为 "快速" 时为 true; 候选项之外的存储值不算 "快速" (R2).
      */
@@ -146,7 +146,7 @@ object GeneralKeys : SettingsDomain {
     val isQuickRestartEnabled: Boolean
         get() = RESTART_STRATEGY.storedKeyOrDefault() == keyOf(R.string.key_restart_strategy_quick)
 
-    /** True when scheduled restarts use WorkManager (`Pref.isScheduledRestartPreferredWorkManager`). */
+    /** True when scheduled restarts use WorkManager (the former `Pref.isScheduledRestartPreferredWorkManager`). */
     @JvmStatic
     val isScheduledRestartPreferredWorkManager: Boolean
         get() = SCHEDULED_RESTART_BACKEND.storedKeyOrDefault() == keyOf(R.string.key_scheduled_restart_backend_work_manager)

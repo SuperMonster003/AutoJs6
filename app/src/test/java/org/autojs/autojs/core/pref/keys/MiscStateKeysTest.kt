@@ -163,7 +163,7 @@ class MiscStateKeysTest : DomainKeysTestBase() {
         MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_CHECKED)
         MiscStateKeys.markNow(MiscStateKeys.LAST_UPDATES_POSTPONED)
         assertTrue(store.getLong(key("key_last_updates_checked"), -1) >= before)
-        // Pref.clearUpdatesCheckedStates removed the four in one edit.
+        // The four go in one edit, as the former Pref.clearUpdatesCheckedStates did.
         val commits = store.commitCount
         MiscStateKeys.clearUpdatesCheckedStates()
         assertEquals(commits + 1, store.commitCount)

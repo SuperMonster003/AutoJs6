@@ -36,7 +36,7 @@ object RunningKeys : SettingsDomain {
     @JvmField
     val GUARD_MODE = SettingKey.Bool(R.string.key_guard_mode, RUNNING, boolResource(R.bool.pref_guard_mode, "pref_guard_mode"))
 
-    /** Read through `RootUtils.RootMode.getRootMode` (`Pref.rootMode`). */
+    /** Read through `RootUtils.RootMode.getRootMode` (the former `Pref.rootMode`). */
     @JvmField
     val ROOT_MODE = SettingKey.Enum(
         R.string.key_root_mode, RUNNING, keyChoices(*ROOT_MODE_VALUES),
@@ -65,9 +65,9 @@ object RunningKeys : SettingsDomain {
     override val names: List<RegisteredName> = valueConstants(*ROOT_MODE_VALUES)
 
     /**
-     * The root mode of the settings (`Pref.rootMode`; `RootUtils` may override it for the current run). The stored
+     * The root mode of the settings (the former `Pref.rootMode`; `RootUtils` may override it for the current run). The stored
      * key goes to `RootMode.getRootMode` as it is, as before (R2).
-     * zh-CN: 设置中的 Root 模式 (`Pref.rootMode`; `RootUtils` 可在本次运行中覆盖). 存储的键原样交给 `RootMode.getRootMode` (R2).
+     * zh-CN: 设置中的 Root 模式 (原 `Pref.rootMode`; `RootUtils` 可在本次运行中覆盖). 存储的键原样交给 `RootMode.getRootMode` (R2).
      */
     @JvmStatic
     var rootMode: RootUtils.RootMode
@@ -76,7 +76,7 @@ object RunningKeys : SettingsDomain {
 
     /**
      * The delay before a screen capture request, coerced into the minimum and maximum resources
-     * (`Pref.screenCaptureRequestDelay`); 350 ms covers the fade-out of the permission dialog on most ROMs.
+     * (the former `Pref.screenCaptureRequestDelay`); 350 ms covers the fade-out of the permission dialog on most ROMs.
      * zh-CN: 截图请求前的延迟, 限制在最小值与最大值资源之间; 默认 350 ms 通常可覆盖多数 ROM 授权弹窗的渐隐动画.
      */
     @JvmStatic

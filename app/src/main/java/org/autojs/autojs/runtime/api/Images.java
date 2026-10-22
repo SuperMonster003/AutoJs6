@@ -32,7 +32,7 @@ import org.autojs.autojs.core.image.capture.ScreenCapturerForegroundService;
 import org.autojs.autojs.core.opencv.Mat;
 import org.autojs.autojs.core.opencv.OpenCVHelper;
 import org.autojs.autojs.core.pref.Language;
-import org.autojs.autojs.core.pref.Pref;
+import org.autojs.autojs.core.pref.keys.RunningKeys;
 import org.autojs.autojs.core.ui.inflater.util.Drawables;
 import org.autojs.autojs.rhino.extension.AnyExtensions;
 import org.autojs.autojs.pio.UncheckedIOException;
@@ -366,7 +366,7 @@ public class Images {
                         return;
                     }
 
-                    int delayMs = Pref.getScreenCaptureRequestDelay();
+                    int delayMs = RunningKeys.getScreenCaptureRequestDelay();
                     if (delayMs < mScreenCaptureRequestDelayMin) delayMs = mScreenCaptureRequestDelayMin;
                     if (delayMs > mScreenCaptureRequestDelayMax) delayMs = mScreenCaptureRequestDelayMax;
 

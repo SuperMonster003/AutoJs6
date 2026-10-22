@@ -10,6 +10,7 @@ import androidx.core.os.BundleCompat
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.model.explorer.ExplorerDirPage
 import org.autojs.autojs.storage.history.HistoryDatabase
 import org.autojs.autojs.storage.history.TrashBlobStore
@@ -2608,7 +2609,7 @@ class ExplorerActionHostSessionInstrumentationTest {
     @Test
     fun playbackHistoryRequiresOptInAndCompletionClearsProgress() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val previousEnabled = Pref.isExplorerPlaybackHistoryEnabled
+        val previousEnabled = ExplorerKeys.EXPLORER_PLAYBACK_HISTORY.get()
         val testRoot = File(context.cacheDir, "explorer-action-v12-history-${System.nanoTime()}")
         assertTrue(testRoot.mkdirs())
         val selected = File(testRoot, "episode01.mkv").apply { writeText("video") }
@@ -2751,7 +2752,7 @@ class ExplorerActionHostSessionInstrumentationTest {
     @Test
     fun playbackHistoryKeepsOnlyTheMostRecentlyOpenedVideo() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val previousEnabled = Pref.isExplorerPlaybackHistoryEnabled
+        val previousEnabled = ExplorerKeys.EXPLORER_PLAYBACK_HISTORY.get()
         val testRoot = File(context.cacheDir, "explorer-action-v12-single-history-${System.nanoTime()}")
         assertTrue(testRoot.mkdirs())
         val selected = File(testRoot, "episode01.mkv").apply { writeText("first") }

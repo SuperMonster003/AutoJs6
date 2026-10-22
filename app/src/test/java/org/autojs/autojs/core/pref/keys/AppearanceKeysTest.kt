@@ -10,10 +10,10 @@ import org.junit.Test
 
 /**
  * [AppearanceKeys] (docs/settings/ROADMAP.md P2.1): the readings that `Language`, `ThemeColor`, `ViewUtils`, the night
- * mode switches and the deprecated `Pref.keyKeepScreenOnWhenInForeground` forward to.
+ * mode switches and the former `Pref.keyKeepScreenOnWhenInForeground` (removed in P14.1) forward to.
  *
- * zh-CN: [AppearanceKeys] (ROADMAP P2.1): `Language`, `ThemeColor`, `ViewUtils`, 夜间模式开关与已弃用的
- * `Pref.keyKeepScreenOnWhenInForeground` 所转发的读法.
+ * zh-CN: [AppearanceKeys] (ROADMAP P2.1): `Language`, `ThemeColor`, `ViewUtils`, 夜间模式开关与原
+ * `Pref.keyKeepScreenOnWhenInForeground` (P14.1 已删除) 所转发的读法.
  */
 class AppearanceKeysTest : DomainKeysTestBase() {
 

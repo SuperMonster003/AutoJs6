@@ -87,7 +87,7 @@ object DeveloperKeys : SettingsDomain {
     // The doctor report entry of the developer options holds no value.
     override val names: List<RegisteredName> = excludedNames(R.string.key_nodejs_doctor_report)
 
-    /** `Pref.scriptModuleDebugPrintDisabledModules`. */
+    /** The modules left out of the debug printing (the former `Pref.scriptModuleDebugPrintDisabledModules`). */
     @JvmStatic
     var scriptModuleDebugPrintDisabledModules: Set<String>
         get() = SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES.storedOrNull()?.toSet() ?: emptySet()

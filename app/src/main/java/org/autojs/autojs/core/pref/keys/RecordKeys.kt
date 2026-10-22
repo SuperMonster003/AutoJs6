@@ -39,7 +39,7 @@ object RecordKeys : SettingsDomain {
 
     override val names: List<RegisteredName> = valueConstants(*ROOT_RECORD_OUT_FILE_TYPE_VALUES)
 
-    /** `Pref.rootRecordGeneratesBinary`: only the "binary" key generates a binary file (R2). */
+    /** The former `Pref.rootRecordGeneratesBinary`: only the "binary" key generates a binary file (R2). */
     @JvmStatic
     fun rootRecordGeneratesBinary(): Boolean = ROOT_RECORD_OUT_FILE_TYPE.storedKeyOrDefault() == keyOf(R.string.key_root_record_out_file_type_binary)
 }

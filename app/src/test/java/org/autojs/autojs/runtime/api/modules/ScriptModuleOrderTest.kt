@@ -64,7 +64,7 @@ class ScriptModuleOrderTest {
         assertEquals(topLevel, labels)
         assertTrue("augment() must walk ScriptModuleLayer.ORDER", source.contains("ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }"))
         assertTrue("the built-in objects must be extended through the layer", source.contains("ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }"))
-        assertTrue("initEpilogue() must use extendJsBuiltIns()", source.contains("if (Pref.isExtendingJsBuildInObjectsEnabled) extendJsBuiltIns()"))
+        assertTrue("initEpilogue() must use extendJsBuiltIns()", source.contains("if (ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get()) extendJsBuiltIns()"))
         val engine = File(JAVASCRIPT_ENGINE).readText()
         assertTrue("the execution mode jsox must use extendJsBuiltIns()", engine.contains("mRuntime.extendJsBuiltIns();") && !engine.contains("Jsox."))
     }

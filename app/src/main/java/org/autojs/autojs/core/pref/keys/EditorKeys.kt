@@ -365,9 +365,9 @@ object EditorKeys : SettingsDomain {
     // zh-CN: 原 Pref 阈值读取与 EditorThresholdSettings 的读取函数 (T17).
 
     /**
-     * The code highlight threshold as `Pref.codeHighlightThresholdChars` read it: values below [NO_THRESHOLD] fall
+     * The code highlight threshold as the former `Pref.codeHighlightThresholdChars` read it: values below [NO_THRESHOLD] fall
      * back to the default, other negative values are not possible.
-     * zh-CN: 代码高亮阈值, 读法同 `Pref.codeHighlightThresholdChars`: 小于 [NO_THRESHOLD] 的值回退为默认值.
+     * zh-CN: 代码高亮阈值, 读法同原 `Pref.codeHighlightThresholdChars`: 小于 [NO_THRESHOLD] 的值回退为默认值.
      */
     @JvmStatic
     val codeHighlightThresholdChars: Int

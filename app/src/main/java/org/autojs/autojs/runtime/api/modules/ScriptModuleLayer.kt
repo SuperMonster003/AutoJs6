@@ -1,13 +1,13 @@
 package org.autojs.autojs.runtime.api.modules
 
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.mozilla.javascript.ScriptableObject
 
 /**
  * Entry of the new script module layer for `ScriptRuntime` (roadmap D8 / T8). The switch
- * ([Pref.isNewScriptModuleLayerEnabled], off by default, in the developer options since P1.3) is read once per runtime
+ * ([DeveloperKeys.NEW_SCRIPT_MODULE_LAYER], off by default, in the developer options since P1.3) is read once per runtime
  * in `initPrologue`. [ORDER] decides where every module is mounted (appendix C Q8): `ScriptRuntime.augment()` walks
  * its top-level modules in order, and each one comes either from the `augment` package (its old augment call) or,
  * when the switch is on and the module is migrated ([MIGRATED]), from the generated registry. Either way the order of
@@ -67,7 +67,7 @@ object ScriptModuleLayer {
 
     @JvmStatic
     val isEnabled: Boolean
-        get() = Pref.isNewScriptModuleLayerEnabled
+        get() = DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()
 
     /**
      * A mounter of the host registry for [runtime]'s [global] object, or null when the switch is off.
@@ -80,7 +80,7 @@ object ScriptModuleLayer {
     @JvmStatic
     fun mounterOrNull(runtime: ScriptRuntime, global: ScriptableObject): ScriptModuleMounter? {
         if (!isEnabled) return null
-        val excluded = if (Pref.isScriptModuleDebugPrintEnabled) Pref.scriptModuleDebugPrintDisabledModules else null
+        val excluded = if (DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.get()) DeveloperKeys.scriptModuleDebugPrintDisabledModules else null
         ScriptErrorMapper.debugPrinting = excluded?.let { ScriptErrorMapper.DebugPrinting { module -> ScriptModuleDebugSettings.prints(module, true, it) } } ?: noDebugPrinting
         return ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ORDER)
     }

@@ -10,10 +10,10 @@ import org.junit.Test
 /**
  * [GeneralKeys] (docs/settings/ROADMAP.md P2.1): the readings that `DocsUtils`, the restart entries of `IntentUtils`,
  * the scheduled restart dialog, `LauncherIconPreference`, the drawer switch of the foreground service and the
- * deprecated `Pref.isQuickRestartEnabled` / `Pref.isScheduledRestartPreferredWorkManager` forward to.
+ * former `Pref.isQuickRestartEnabled` / `Pref.isScheduledRestartPreferredWorkManager` (removed in P14.1) forward to.
  *
  * zh-CN: [GeneralKeys] (ROADMAP P2.1): `DocsUtils`, `IntentUtils` 的重启入口, 计划重启对话框, `LauncherIconPreference`, 前台
- * 服务抽屉开关, 以及已弃用的 `Pref.isQuickRestartEnabled` / `Pref.isScheduledRestartPreferredWorkManager` 所转发的读法.
+ * 服务抽屉开关, 以及原 `Pref.isQuickRestartEnabled` / `Pref.isScheduledRestartPreferredWorkManager` (P14.1 已删除) 所转发的读法.
  */
 class GeneralKeysTest : DomainKeysTestBase() {
 

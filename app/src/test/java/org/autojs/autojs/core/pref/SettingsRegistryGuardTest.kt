@@ -13,7 +13,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * Guard tests T5 (a) (b) (c) (e) of docs/settings/ROADMAP.md (P1.3). The registry ([SettingsRegistry.describe]) and
+ * Guard tests T5 (a) - (f) of docs/settings/ROADMAP.md (P1.3, (d) since P14.1). The registry ([SettingsRegistry.describe]) and
  * the registered stores ([SettingsStores.registeredIds]) are what is migrated; `tools/settings/classification.json`
  * (P0.3) is the initial allow list of what is still "pending migration". A test fails only for names that are in
  * neither (a new `key_*` resource, a new `getSharedPreferences(` file name, a new deployment kind), for stale
@@ -31,11 +31,14 @@ import java.io.File
  *   in it are the stores it claims there ([JsonFileStores], excluded and without keys) or listed as names of other files.
  * - (c) every key has exactly one category, every category except the data ones has at least one entry, and only
  *   `credentials` holds sensitive entries.
+ * - (d) only the store layer (`core/pref/store/`) and `PreferenceFragmentCompat` subclasses read
+ *   `PreferenceManager.getDefaultSharedPreferences`, and `core/pref` keeps no `@Deprecated` entries (T14, P14.1).
  * - (e) every deployment kind in use has a registered implementation (`DeploymentItems`, P7.6).
  * - (f) every `APPLY` key has an entry of the effect table `SettingsEffects` (T12, P7.4), and the table binds only
  *   `APPLY` keys, each once.
  *
- * zh-CN: ROADMAP T5 守卫 (a) (b) (c) (e) (P1.3). 注册表与已登记存储为 "已迁移", `classification.json` (P0.3) 为 "待迁移" 的初始
+ * zh-CN: ROADMAP T5 守卫 (a) - (f) (P1.3, (d) 自 P14.1 起: 默认 SharedPreferences 只经存储层或 PreferenceFragmentCompat 子类读取,
+ * core/pref 中没有 @Deprecated 入口). 注册表与已登记存储为 "已迁移", `classification.json` (P0.3) 为 "待迁移" 的初始
  * 允许清单. 只有两边都没有的名称 (新的 `key_*` 资源, 新的 `getSharedPreferences(` 文件名, 新的部署项种类), 允许清单中失效的条目,
  * 以及声明与允许清单不一致时才失败; 每个测试输出待迁移计数. (f) 为 P7.4 加入的 T12 守卫: 每个 `APPLY` 键都有生效表 `SettingsEffects`
  * 的入口, 生效表只绑定 `APPLY` 键且每个键只绑定一次.
@@ -220,6 +223,21 @@ class SettingsRegistryGuardTest {
     }
 
     @Test
+    fun d_defaultPreferencesOnlyThroughTheStoreLayer() {
+        val callers = sources.filter { (_, text) -> text.lines().any { !isCommentLine(it) && "getDefaultSharedPreferences" in it } }.keys
+        val allowed = callers.filter { it.startsWith("core/pref/store/") || PREFERENCE_FRAGMENT.containsMatchIn(sources.getValue(it)) }
+        println("T5 d: getDefaultSharedPreferences callers ${callers.size}, in the store layer or PreferenceFragmentCompat subclasses ${allowed.size}")
+        assertNone("sources reading the default SharedPreferences outside the store layer (use SettingsStores.default or a declared key)", (callers - allowed.toSet()).toList())
+        // The deprecated entries of core/pref went away in P14.1 (T14); new ones point callers at code that is gone soon.
+        assertNone(
+            "@Deprecated entries in core/pref (T14 removed them; migrate the callers instead)",
+            sources.filterKeys { it.startsWith("core/pref/") }.flatMap { (file, text) ->
+                text.lines().withIndex().filter { (_, line) -> !isCommentLine(line) && "@Deprecated" in line }.map { "$file:${it.index + 1}" }
+            },
+        )
+    }
+
+    @Test
     fun describeTurnsDeclarationsIntoRows() {
         val domain = object : SettingsDomain {
             override val keys = listOf<PrefKey<*>>(
@@ -340,6 +358,9 @@ class SettingsRegistryGuardTest {
         private val MANUAL_JSON_FILE_SOURCES = mapOf(
             "core/accessibility/codegen/store/ModelStore.kt" to "ui/settings/codegen/CodegenModelStoreFactory.kt",
         )
+
+        /** A class declaration that extends `PreferenceFragmentCompat`, the other place guard (d) allows. */
+        private val PREFERENCE_FRAGMENT = Regex("""(?::\s*|\bextends\s+)PreferenceFragmentCompat\b""")
 
         private val FILES_DIR = Regex("""\b(?:filesDir|getFilesDir\(\)|noBackupFilesDir|getNoBackupFilesDir\(\))""")
         private val JSON_LITERAL = Regex(""""([^"]*\.json)"""")

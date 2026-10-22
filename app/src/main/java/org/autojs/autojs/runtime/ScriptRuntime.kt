@@ -22,7 +22,7 @@ import org.autojs.autojs.core.plugin.center.PluginAutoMountManager
 import org.autojs.autojs.core.plugin.r8.AndroidR8CompilerHost
 import org.autojs.autojs.core.plugin.r8.R8CompilerExplicitRuntimeRoute
 import org.autojs.autojs.core.plugin.r8.R8RetraceExplicitRuntimeRoute
-import org.autojs.autojs.core.pref.Pref
+import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
@@ -610,7 +610,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             callFunction(this, function, topLevelScope, thisObj, args)
         }.install()
 
-        if (Pref.isExtendingJsBuildInObjectsEnabled) extendJsBuiltIns()
+        if (ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get()) extendJsBuiltIns()
 
         // @Hint by Stardust (https://github.com/hyb1996) on Feb 27, 2018
         //  ! 重定向 require 以支持相对路径和 npm 模块.
