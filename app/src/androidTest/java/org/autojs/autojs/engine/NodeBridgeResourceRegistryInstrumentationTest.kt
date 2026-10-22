@@ -293,13 +293,17 @@ class NodeBridgeResourceRegistryInstrumentationTest {
             waitUntil { provider.nativeDiagnostics()["embedded_script.bridge_resource.active_count"] == "1" },
         )
         provider.destroy(NodeBridgeError.processDead("test service destroy"))
+        // Since the host shell streams (9d8c48c7d), destroy has the shell bridge close its processes before the
+        // registry sweep, so the resource is released as "shell.closed" and is not counted by the sweep.
         var diagnostics = provider.nativeDiagnostics()
         assertEquals("0", diagnostics["embedded_script.bridge_resource.active_count"])
-        assertEquals("1", diagnostics["embedded_script.bridge_resource.destroy_closed_count"])
-        assertEquals("1", diagnostics["embedded_script.bridge_resource.leak_count"])
+        assertEquals("0", diagnostics["embedded_script.shell.active_handle_count"])
 
+        // The pending exec loses its process, so it reports the closed execution instead of an exit code.
         assertTrue("Timed out waiting for shell callback after destroy", latch.await(5, TimeUnit.SECONDS))
-        assertTrue(checkNotNull(response).toString(), checkNotNull(response).ok)
+        val closed = checkNotNull(response)
+        assertFalse(closed.toString(), closed.ok)
+        assertEquals(closed.toString(), NodeRuntimeErrorCodes.BRIDGE_PROCESS_DEAD, closed.error?.code)
         diagnostics = provider.nativeDiagnostics()
         assertEquals("0", diagnostics["embedded_script.shell_active_command_count"])
         assertEquals("1", diagnostics["embedded_script.bridge_resource.created_count"])

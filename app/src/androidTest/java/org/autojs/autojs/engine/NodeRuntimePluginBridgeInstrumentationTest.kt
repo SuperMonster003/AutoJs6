@@ -7,6 +7,7 @@ import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
+import org.json.JSONArray
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -521,8 +522,15 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         assertEquals("true", result.nativeValues["embedded_script.bridge_live_enabled"])
         assertEquals("0", result.nativeValues["embedded_script.bridge_live_dispatch_failed_count"])
         assertEquals("done", result.nativeValues["embedded_script.bridge_live_dispatch_status"])
-        // toast + setText + getText + put + get + exec + getAppName = 7 dispatches
-        assertEquals("7", result.nativeValues["embedded_script.bridge_live_dispatch_count"])
+        // toast + setText + getText + put + get + getAppName are one dispatch each. Since the host shell
+        // streams (9d8c48c7d), shell.exec is spawn + closeInput + drain polls up to the exit event, and the
+        // number of polls depends on how fast the command exits, so the drains are counted from the responses.
+        val dispatchCount = result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.toIntOrNull()
+        val responses = JSONArray(result.nativeValues["embedded_script.bridge_live_responses_json"] ?: "[]")
+        val drainCount = (0 until responses.length()).count { responses.optJSONObject(it)?.opt("result") is JSONArray }
+        assertEquals("Every dispatch must be retained: $responses", dispatchCount, responses.length())
+        assertTrue("shell.exec must drain at least once: $responses", drainCount >= 1)
+        assertEquals("Dispatches besides the shell drains: $responses", 8, checkNotNull(dispatchCount) - drainCount)
     }
     /**
      * M3.2: coordinate swipe reaches AccessibilityService.dispatchGesture
