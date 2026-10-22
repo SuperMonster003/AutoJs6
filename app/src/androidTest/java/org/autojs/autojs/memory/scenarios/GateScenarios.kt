@@ -379,18 +379,27 @@ object GateScenarios {
         },
         GateScenario(
             "S13", "speech.listen session open when the script ends", "H23",
-            notes = "external source, 200 ms of silence fed after ready, no microphone; N cancels the session, F stops the script with it open",
+            notes = "external source, 200 ms of silence fed after ready, no microphone; N cancels the session, F stops the script with it open; " +
+                "without an ASR model the plugin refuses the open with MODEL_MISSING, counted as stat refused (Q56), other failures still fail",
         ) { _, _ ->
             """
-            var session = speech.listen({ source: 'external' });
-            var guard = FORCE ? null : setTimeout(function () { session.cancel(); }, 10000);
-            session.on('ready', function () {
-                gateStat('ready', 1);
-                session.feed(new Int16Array(3200));
-                if (!FORCE) session.cancel();
-            });
-            session.on('error', function () { gateStat('errors', 1); });
-            session.on('end', function () { if (guard !== null) clearTimeout(guard); });
+            var session = null;
+            try {
+                session = speech.listen({ source: 'external' });
+            } catch (e) {
+                if (!(e instanceof speech.SpeechError) || e.code !== 'MODEL_MISSING') throw e;
+                gateStat('refused', 1);
+            }
+            if (session !== null) {
+                var guard = FORCE ? null : setTimeout(function () { session.cancel(); }, 10000);
+                session.on('ready', function () {
+                    gateStat('ready', 1);
+                    session.feed(new Int16Array(3200));
+                    if (!FORCE) session.cancel();
+                });
+                session.on('error', function () { gateStat('errors', 1); });
+                session.on('end', function () { if (guard !== null) clearTimeout(guard); });
+            }
             """
         },
         GateScenario(
