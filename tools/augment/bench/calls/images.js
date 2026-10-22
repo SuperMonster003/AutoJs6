@@ -14,9 +14,12 @@ time("ok images.isRecycled", () => { try { images.isRecycled(img); } catch (e) {
 time("ok images.clip", () => { try { images.clip(img, 0, 0, 8, 8).recycle(); } catch (e) { } });
 time("ok images.findColor", () => { try { images.findColor(img, "#ff0000"); } catch (e) { } });
 time("ok ocr.mode", () => { try { ocr.mode; } catch (e) { } });
+// Q28: the option fields and the region are checked before the current function reads them.
+time("ok images.findColor-options", () => { try { images.findColor(img, "#ff0000", { region: [0, 0, 32, 32], threshold: 4 }); } catch (e) { } });
 time("fail images.pixel-arity", () => { try { images.pixel(img); } catch (e) { } });
 time("fail images.read-range", () => { try { images.read(""); } catch (e) { } });
 time("fail images.clip-arity", () => { try { images.clip(img, 0, 0); } catch (e) { } });
+time("fail images.threshold-range", () => { try { images.threshold(img, 100, 255, "XYZ"); } catch (e) { } });
 time("fail canvas-range", () => { try { new Canvas(-1, 1); } catch (e) { } });
 time("fail ocr.tap-arity", () => { try { ocr.tap(); } catch (e) { } });
 time("fail ocr.tap-type", () => { try { ocr.tap(5); } catch (e) { } });
