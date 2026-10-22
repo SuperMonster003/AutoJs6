@@ -458,11 +458,28 @@ class ScriptRuntime private constructor(builder: Builder) {
     internal val augmentedAutojs: ScriptableObject
         get() = scriptModules?.moduleObject("autojs") ?: legacyAugmentedAutojs
 
-    internal lateinit var augmentedOcrMLKit: ScriptableObject
+    /** The engine module objects of `ocr` from the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
+    private lateinit var legacyAugmentedOcrMLKit: ScriptableObject
 
-    internal lateinit var augmentedOcrPaddle: ScriptableObject
+    private lateinit var legacyAugmentedOcrPaddle: ScriptableObject
 
-    internal lateinit var augmentedOcrRapid: ScriptableObject
+    private lateinit var legacyAugmentedOcrRapid: ScriptableObject
+
+    /**
+     * The engine module objects `ocr.mlkit` / `ocr.paddle` / `ocr.rapid` that `ocr.tap`, the `ocr.mode` setter and
+     * `options.mode` accept as modes: the new layer's when it serves `ocr` (roadmap P3.1, built on demand), else those of
+     * the old augment call.
+     * zh-CN: ocr.tap, ocr.mode 的 setter 与 options.mode 作为模式接受的引擎模块对象 ocr.mlkit / ocr.paddle / ocr.rapid: 新层提供 ocr 时为新层的 (P3.1,
+     * 按需构建), 否则为原 augment 调用的.
+     */
+    internal val augmentedOcrMLKit: ScriptableObject
+        get() = scriptModules?.moduleObject("ocr.mlkit") ?: legacyAugmentedOcrMLKit
+
+    internal val augmentedOcrPaddle: ScriptableObject
+        get() = scriptModules?.moduleObject("ocr.paddle") ?: legacyAugmentedOcrPaddle
+
+    internal val augmentedOcrRapid: ScriptableObject
+        get() = scriptModules?.moduleObject("ocr.rapid") ?: legacyAugmentedOcrRapid
 
     private val rhinoRequireFunction by lazy { topLevelScope.prop("require") as BaseFunction }
 
@@ -1100,9 +1117,9 @@ class ScriptRuntime private constructor(builder: Builder) {
             "Canvas" -> Canvas(this).augment(target)
             "images" -> Images(this).augment(target)
             "ocr" -> Ocr(this).augment(target).also { ocr ->
-                OcrMLKit(this).augment(ocr).also { augmentedOcrMLKit = it }
-                OcrPaddle(this).augment(ocr).also { augmentedOcrPaddle = it }
-                OcrRapid(this).augment(ocr).also { augmentedOcrRapid = it }
+                OcrMLKit(this).augment(ocr).also { legacyAugmentedOcrMLKit = it }
+                OcrPaddle(this).augment(ocr).also { legacyAugmentedOcrPaddle = it }
+                OcrRapid(this).augment(ocr).also { legacyAugmentedOcrRapid = it }
             }
             "barcode" -> Barcode(this).augment(target)
             "qrcode" -> QrCode(this).augment(target)
