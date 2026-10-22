@@ -77,7 +77,7 @@
 
 ### 2.5 关联路线图
 
-- augment 重构 (`docs/augment/ROADMAP.md`, 看板 `.claude/boards/augment.md`, 当前 P3): T10 (P5 起 `extract_exports.py` 与 dts 生成器改读 KSP 产出的 `script-modules.json`), D6 (同一份元数据供 d.ts 与文档), P5.3 (文档 / d.ts 同步 + 附录 C Q3 的桥接覆盖报告). 本主题接管其中的覆盖产出 (D4): 覆盖矩阵, 桥接覆盖报告, 文档 / d.ts / Ace 偏差同步; augment 只保留 `script-modules.json` 的产出与 T10 的改读. 需要维护者在 augment 看板登记这一范围调整 (附录 C 维护者待办).
+- augment 重构 (`docs/augment/ROADMAP.md`, 看板 `.claude/boards/augment.md`, 当前 P3): T10 (P5 起 `extract_exports.py` 与 dts 生成器改读 KSP 产出的 `script-modules.json`), D6 (同一份元数据供 d.ts 与文档), P5.3 (文档 / d.ts 同步 + 附录 C Q3 的桥接覆盖报告). 本主题接管其中的覆盖产出 (D4): 覆盖矩阵, 桥接覆盖报告, 文档 / d.ts / Ace 偏差同步, 以及 Q3 的另一项 "NodeJs Runtime 插件 d.ts 生成 (`node-types.gradle.kts`) 改读 `script-modules.json` 参数规格" (并入 P2.4); augment 只保留 `script-modules.json` 的产出与 T10 的改读. 2026-10-23 已按维护者指示通知 augment 调度会话登记这一范围调整.
 - TS 声明仓库 `docs/ROADMAP.md` (2026-07-27): Phase 0 的三项矩阵任务与 Phase 7 的 "WebStorm 补全看到新 globals" 未勾; 本主题 P0.2 完成后把矩阵任务标为被取代 (D7).
 - Node 插件 ROADMAP "五. 明确不做的事" 与 `docs/HOST-API.md` "八. 明确不可用 (denied)"; Bun ROADMAP "边界与非目标". 三者是附录 D 排除白名单草案的来源 (D12).
 
@@ -139,7 +139,7 @@
 - [ ] P2.1 94 项仅提及条目补为标题级 (mail 47, flow 25, tts 7, 全局 11: clickBoundsWait / clickBoundsWhenStable / clickWait / clickWhenStable / toasterror / toastinfo / toastlog / toastverbose / toastwarn / waitAsync / waitForGone, Mathx 2, automator 1, util 1), 每项独立标题 + 签名 + 至少一个示例 (D3); 全小写 toast 别名与 Mathx 别名可在正式条目下用 "别名" 小节并让 `policy.json` 识别别名标题. 验收: documentation.json 的 mention 为 0; 文档生成器跑通, Offline Docs 随之更新 (不 bump 版本).
 - [ ] P2.2 参数个数不一致项修复 (P0.3 清单): d.ts 补重载或修参数可选性, 文档签名同步, Ace 重新导入声明 (`import-autojs6-dts.mjs` + 索引生成). 宿主侧发现 `ensureArguments*` 与实际用法矛盾的, 登记为宿主修复项 (本主题只记不改, 交 augment 主题或维护者). 验收: `check.py` arity 列失败为 0, 警告逐条有结论.
 - [ ] P2.3 返回对象成员补齐 (P0.4 清单): 文档在产生该对象的页面下设对象小节 (或独立页, 沿用现有 UiObject / ImageWrapper 页的做法), d.ts 补成员, Ace 索引更新. 验收: 返回对象成员的名称级门禁失败为 0.
-- [ ] P2.4 类型级比对 (D9 第二步). 当 augment 主题为某模块产出 `script-modules.json` 参数规格后, `verify-surfaces.mjs` 对该模块比对参数 / 返回类型, 矩阵该模块行标 `ksp`; 不一致项修 d.ts 与文档. 每接入一批模块记一行 (模块名, 日期, 不一致数). 验收 (阶段性): 每批接入模块的类型比对失败为 0; 全部模块接入后本条目勾选. 此条目的节奏由 augment 看板 P5 进度决定, 调度会话跟踪.
+- [ ] P2.4 类型级比对 (D9 第二步). 当 augment 主题为某模块产出 `script-modules.json` 参数规格后, `verify-surfaces.mjs` 对该模块比对参数 / 返回类型, 矩阵该模块行标 `ksp`; 不一致项修 d.ts 与文档. 同一批模块接入时, Node 插件的 d.ts 生成 (`node-types.gradle.kts`) 改读 `script-modules.json` 的参数规格 (augment 附录 C Q3 原第二项, 按 D4 移交), 使 autojs6-node 的 d.ts 与宿主签名一致, 差异由 P0.6 的 Ace 运行时门禁与 TS 仓库 `sync-runtime-declarations.mjs` 校验. 每接入一批模块记一行 (模块名, 日期, 不一致数). 验收 (阶段性): 每批接入模块的类型比对失败为 0; 全部模块接入后本条目勾选. 此条目的节奏由 augment 看板 P5 进度决定, 调度会话跟踪.
 - [ ] P2.5 文档 "运行时支持" 表全量插入 (约 170 页), 文档生成器全量运行, `check.py --docs-support` 接入 CI. 验收: 全部模块页有标记块且与矩阵一致; 文档仓库 markdown 检查通过.
 - [ ] P2.6 阶段收尾: bump TS 声明 (minor), Ace (minor, 重新捆绑声明), 文档 changelog (zh-Hans) 与 Offline Docs 版本; 登记到看板 "已完成批次摘要". 不推送.
 
