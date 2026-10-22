@@ -18,9 +18,9 @@
 | --- | --- | --- | --- |
 | P0 门禁骨架与 Node 基线 | 第二期门禁能抓到桥接对象残留, Node 的 13 个场景在三台门禁设备上有修前基线, 桥接目录的静态审计报告 | 测试类与 `run_gate.py --suite bridge` 跑通, 附录 A "修前" 列填满, 附录 B 初稿 | 2 (门禁 + 基线 1, 审计 1, 可并行) |
 | P1 Node 修复与会话登记 | 基线报出的 Node 桥接残留逐个清零, Node 桥接会话对象登记到 RuntimeResourceScope | 附录 A Node 行 "残留" 全部为 0, 绑定计数回到场景前 | 2-3 |
-| P2 Bun + QuickJS | 两家各 4 个基础场景的基线与修复, `AidlPluginHost` 连接池与租约核对 | 附录 A BN / QJ 行全部通过 | 1-2 |
+| P2 Bun + QuickJS | 两家各 4 个基础场景与各 1 个 ColorOS 被拒专场 (Q2) 的基线与修复, `AidlPluginHost` 连接池与租约核对 | 附录 A BN / QJ 行全部通过 | 1-2 |
 | P3 Lua + Python | 两家各 4 个基础场景的基线与修复, 专用绑定传输核对 | 附录 A LU / PY 行全部通过 | 2 |
-| P4 守卫与规范 | 源码守卫与静态审计覆盖桥接目录, 非 Node 引擎的执行作用域规范, LeakCanary 巡检 | 守卫进入全量单测且白名单行有理由, 五个引擎巡检无报告 | 1-2 |
+| P4 守卫与规范 | 源码守卫与静态审计覆盖桥接目录, 非 Node 引擎的执行作用域规范, LeakCanary 巡检, 诊断页面与 memory API 展示桥接会话 (Q1) | 守卫进入全量单测且白名单行有理由, 五个引擎巡检无报告, bridgeSessions 字段上线 | 1-2 |
 | P5 CI 与收尾 | `memory-gate.yml` 的 bridge 套件, 全设备终表, 本文收尾 | CI 本机同款跑通一次, 附录 A 终表, 第一期 Q53 行回填 | 1-2 |
 
 P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读源码); P1 依赖 P0 的基线; P2 与 P3 都只依赖 P0 的骨架, 可以与 P1 并行, 但门禁设备只有两台真机, 默认按 D2 的顺序串行; P4 的守卫部分 (P4.1) 可在 P0 之后随时做; P5 最后.
@@ -89,7 +89,7 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 | D3 | 不进 6.8.0 发布门 | 6.8.0 按第一期 P6.3 发布; 本期修复若在 6.8.0 发布前合入 master, changelog 按事实记在 6.8.0 但不作发布门条件 (R8 要求不使第一期门禁倒退); 发布后合入的记入下一版 (6.8.1 或 6.9.0, 届时由维护者定); P0 基线若发现每次执行残留递增的线性泄漏, 登记待决问是否提前修, 不自动阻断 |
 | D4 | 门禁设备 = 23046RP50C (API 35, 主机) + OPD2413 (API 35, ColorOS, 绑定被拒 / 唤醒专场) + AVD API 35 x86_64 (CI 同款配方) | XQ-AT72 / G8441 / AVD API 24 留给 memory 主题; Node / Bun / Python 插件只有 arm64 + x86_64, 所以不用 x86 的 API 24 镜像; 两期子会话共用设备占用登记表 (T10), 不同时占用同一台 |
 | D5 | 判定 = engine + 会话对象弱引用 + 绑定计数 | 每次执行跟踪 engine 实例与宿主侧会话对象 (broker / session / binding / Execution, Node 另含 `ScriptRuntime`), 结束后弱引用全部被清; 第一期 T1 其余各项沿用; 新增 (h) 绑定计数 (T1); 插件进程 PSS 只记录不判定 |
-| D6 | 场景 = 每引擎 4 个基础 + Node 8 个专项 + ColorOS 被拒 1 个 | 共 29 个场景, 每个分正常结束与强制停止两种模式 (T2); 子会话读代码后可增补, 增补写附录 A 并在本表下方登记 |
+| D6 | 场景 = 每引擎 4 个基础 + Node 8 个专项 + ColorOS 被拒 3 个 (ND13, 及 Q2 已决后的 BN5 / QJ5) | 共 31 个场景, 每个分正常结束与强制停止两种模式 (T2); 子会话读代码后可增补, 增补写附录 A 并在本表下方登记 |
 | D7 | 允许改插件仓库并本地提交, 门禁用本地构建 | 五个插件仓库 (`../AutoJs6-Plugin-{NodeJs,Bun,Lua,Python,QuickJS}-Runtime`) 可改, 只本地提交, 推送与发版由维护者逐次指示; 门禁装插件仓库本地构建 (T5), 报告记录插件 versionCode 与提交 hash; 每处改动记附录 D; 宿主侧能绕过的先绕 |
 | D8 | 守卫扩范围 + 会话登记规范 + CI 手动输入 | (1) `static_audit.py` 与 `StaticReferenceGuardTest` 扫描范围扩到桥接目录; (2) Node 桥接会话对象接 `RuntimeResourceScope`, 其余四家用等价的执行作用域 (T6); (3) `memory-gate.yml` 加 `suite` 输入跑 bridge 套件, 下载五个插件 x86_64 包校验 sha256, tag 推送时不跑 (T8) |
 | D9 | 绑定计数的系统侧探针经 `hidden_api_policy` 临时放行 | `run_gate.py --suite bridge` 在每个第二期进程前 `settings put global hidden_api_policy 1`, 结束 (含失败 / 中断路径) 后 `settings delete global hidden_api_policy`; 与第一期 `--capture` 的 PROJECT_MEDIA 做法同款; 宿主侧注册表计数照做, 系统表作交叉验证 |
@@ -107,7 +107,7 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 | 编号 | 决策 | 推翻点 |
 | --- | --- | --- |
 | T1 | 判定: 每个场景预热 2 次不计, 再执行 N = 20 次 (与第一期 T1 相同的回收轮询与阈值). (a) 残留: 本次执行创建的 engine 实例, 宿主侧会话对象 (按引擎: Node `NodeJsHostCapabilityBroker` + `AndroidNodeBridgeCapabilityProvider` + `ScriptRuntime`; Bun `BunHostCapabilityBroker` + callback; QuickJS engine; Lua `BinderConnection` + `SessionHostBroker` + `BinderRemoteSession`; Python `Execution` + binding + broker) 的弱引用在 "GC 3 次 + `runFinalization` + 最长 10 s 轮询" 内全部被清, 残留数必须为 0; 会话对象的弱引用经测试侧挂点取得 (P0.2 决定: 引擎回调, 或宿主侧新增的 debug 可见的 `BridgeExecutionObserver`, 不改生产行为); (b) Java 堆 <= 2 MB, (c) 原生堆 <= 4 MB (截屏类放宽一帧), (d) 线程数 (名含第一期清单外再加桥接线程名前缀, P0.2 盘点后写进附录 F), (e) Rhino Context 计数 (只对 Node), (f) 存活引擎数回到 0, (g) 图像 / WebView / 类加载器计数回到场景前 (沿用 `GateNativeProbe`), 全部沿用第一期; 新增 (h) 绑定计数: 宿主侧桥接注册表计数 (`StaticRegistries` 扩展: `NodeJsRuntimePluginHost.connectionPool / executionRegistry`, `AidlPluginHost.connectionPool`, Lua / Python 专用绑定租约数, `NodeBridgeUiProvider.sessions`, `NodeDialogs.sessions`, `RuntimeWeb*` 三表, `NodeAudioRecordingService.entries`, `RuntimeWebMediaService.entries`, `PythonRuntimeExecutionQueue.queue`) 回到场景前, 池化引擎允许保留 1 个空闲连接 (Node 池不解绑, `AidlPluginHost` 30 s 后解绑, 场景结束前不等它); 系统侧 `LoadedApk.mServices` 中指向插件组件的连接数 (反射, D9) 回到场景前, 读取失败时记 `bindingProbe: unavailable` 并只用宿主侧计数; (i) 插件进程 PSS (`dumpsys meminfo <插件包>`) 第 20 次减第 2 次只记录. (a)-(h) 任一失败即场景失败 | P0.4 第一次基线之后 (阈值可按噪声调整, (a) 的 0 残留与 (h) 的回到场景前不放宽) |
-| T2 | 场景矩阵 (id 前缀按引擎: ND Node, BN Bun, QJ QuickJS, LU Lua, PY Python; 每个场景两种模式: 正常结束 N, 强制停止 F 在脚本运行 1 s 后 `forceStop`). 基础场景 X1-X4 五家都做: X1 空脚本 (打印一行后结束, 绑定建立与释放的最小路径, 噪声基线); X2 宿主能力调用 (经该引擎的 broker 调用 2-3 个宿主能力, 至少一次带图像或文件数据的往返, 例如 device 信息 + toast + 读一张小图, 由各批次按 broker 能力表选定并写进附录 A 行备注); X3 回调型 (注册宿主推送的回调: 定时器 / 事件监听 / 选择器等待 / 输入对话框, 各引擎取其支持的一种; N 模式等 3 次回调后自行结束, F 模式在回调在途时强制停止); X4 插件进程被杀 (脚本运行中 sleep 2 s 期间, 测试进程经 `UiAutomation.executeShellCommand("am force-stop <插件包名>")` 杀掉插件进程, 宿主走 binderDied / onBindingDied, 执行以异常结束; F 模式在杀后 1 s 再 `forceStop`). Node 专项: ND5 UI 会话 (`NodeBridgeUiProvider` / `NodeBridgeUiActivity` 显示布局后 finish); ND6 Compose (`RuntimeComposeBridge` / `RuntimeComposeActivity` 渲染后关闭); ND7 Web 运行时 (`RuntimeWebView` 加载本地页 + 一次 action (`RuntimeWebActionActivity`) + 一次本地下载 (`RuntimeWebLocalDownloads`) + 一次媒体会话 (`RuntimeWebMediaService`) 后关闭, 实现时可拆为 ND7a-c); ND8 截屏 (`NodeScreenCaptureSession` 截 5 帧后释放, `--capture on` 放行 PROJECT_MEDIA); ND9 悬浮窗 (`ControlledOverlaySession` 显示后关闭, 悬浮窗权限同第一期 S6); ND10 对话框 (`NodeDialogs` 弹出后程序化关闭); ND11 图像句柄 (`imageHandles` 创建 20 个句柄含一次 OCR 输入, 一半释放一半不释放, 验证执行结束时回收); ND12 音频录制 (`NodeAudioRecordingService` 录 1 s 后停止, D11); ND13 ColorOS 绑定被拒循环 (OPD2413 专场: 每次运行前 `am force-stop` Node 插件, 让首次 `bindService` 被拒再由 `PluginAutoWake` 重绑, 第一期 Q46 的复核方法; 其他设备跳过并记录). 共 29 个场景 | P0.3 (Node), P2.1 (BN / QJ), P3.1 (LU / PY) |
+| T2 | 场景矩阵 (id 前缀按引擎: ND Node, BN Bun, QJ QuickJS, LU Lua, PY Python; 每个场景两种模式: 正常结束 N, 强制停止 F 在脚本运行 1 s 后 `forceStop`). 基础场景 X1-X4 五家都做: X1 空脚本 (打印一行后结束, 绑定建立与释放的最小路径, 噪声基线); X2 宿主能力调用 (经该引擎的 broker 调用 2-3 个宿主能力, 至少一次带图像或文件数据的往返, 例如 device 信息 + toast + 读一张小图, 由各批次按 broker 能力表选定并写进附录 A 行备注); X3 回调型 (注册宿主推送的回调: 定时器 / 事件监听 / 选择器等待 / 输入对话框, 各引擎取其支持的一种; N 模式等 3 次回调后自行结束, F 模式在回调在途时强制停止); X4 插件进程被杀 (脚本运行中 sleep 2 s 期间, 测试进程经 `UiAutomation.executeShellCommand("am force-stop <插件包名>")` 杀掉插件进程, 宿主走 binderDied / onBindingDied, 执行以异常结束; F 模式在杀后 1 s 再 `forceStop`). Node 专项: ND5 UI 会话 (`NodeBridgeUiProvider` / `NodeBridgeUiActivity` 显示布局后 finish); ND6 Compose (`RuntimeComposeBridge` / `RuntimeComposeActivity` 渲染后关闭); ND7 Web 运行时 (`RuntimeWebView` 加载本地页 + 一次 action (`RuntimeWebActionActivity`) + 一次本地下载 (`RuntimeWebLocalDownloads`) + 一次媒体会话 (`RuntimeWebMediaService`) 后关闭, 实现时可拆为 ND7a-c); ND8 截屏 (`NodeScreenCaptureSession` 截 5 帧后释放, `--capture on` 放行 PROJECT_MEDIA); ND9 悬浮窗 (`ControlledOverlaySession` 显示后关闭, 悬浮窗权限同第一期 S6); ND10 对话框 (`NodeDialogs` 弹出后程序化关闭); ND11 图像句柄 (`imageHandles` 创建 20 个句柄含一次 OCR 输入, 一半释放一半不释放, 验证执行结束时回收); ND12 音频录制 (`NodeAudioRecordingService` 录 1 s 后停止, D11); ND13 ColorOS 绑定被拒循环 (OPD2413 专场: 每次运行前 `am force-stop` Node 插件, 让首次 `bindService` 被拒再由 `PluginAutoWake` 重绑, 第一期 Q46 的复核方法; 其他设备跳过并记录); BN5 / QJ5 ColorOS 绑定被拒循环 (Q2 已决 2026-10-22: 与 ND13 同法, 覆盖 AidlPluginHost 的池与专用租约, OPD2413 专场, 每次运行前 am force-stop 对应插件, 其他设备跳过并记录). 共 31 个场景 | P0.3 (Node), P2.1 (BN / QJ), P3.1 (LU / PY) |
 | T3 | 执行方式: 新测试类 `app/src/androidTest/java/org/autojs/autojs/memory/bridge/BridgeLeakGateDeviceTest.kt` (与第一期同结构, 每个场景一个 `@Test`, 用 `AutoJs.instance.scriptEngineService.execute(...)` 同进程启动), 场景脚本 `memory/bridge/BridgeScenarios.kt` (JS 源首行引擎指令, Lua / Python 用对应 ScriptSource), 跟踪器 `BridgeTracker` (弱引用集合 + 绑定计数); 复用 `GateMetrics` / `GateHeapPathAnalyzer` / `GateNativeProbe` (抽公共部分时只加不改第一期行为). 驱动: `tools/memory/run_gate.py --suite bridge` (默认 `runtime` 即第一期; 场景表, 测试类, hprof 查找类名列表, `--capture` / D9 / D11 的放行步骤按 suite 切换; `--out` 默认按 suite 指向 `docs/memory-phase2/evidence`), 报告名 `gate-<model>-<versionCode>-<label>-<yyyyMMdd>.md` / `.json`, 标签如 `mp2-baseline`, `mp2-p1`; 插件 versionCode 与提交 hash 写进报告头 | P0.2 |
 | T4 | hprof: 同第一期 T4 (失败时设备端 shark 解析), 查找对象改为 T1 (a) 的类名列表, 已结束的会话以 `BridgeTracker` 记录的执行 id 识别 (对象上若无 id 字段, 以 "测试进程内本场景创建的实例" 为准) | P0.2 |
 | T5 | 插件安装 (D7): 每批次开始时在该引擎插件仓库构建调试包 (该仓库惯例任务, 沿用仓库签名配置), 以 `adb install -r` 覆盖设备上的发布版 (签名不同时先卸载), 模拟器装 x86_64 变体; 报告记录插件 versionCode 与仓库提交 hash; 测试机上不必装回发布版 (记忆 `test-devices-plugin-install-authorized`); 插件未安装 / 未启用时场景跳过并记录 (与第一期 S12 相同) | P0.3 |
@@ -147,7 +147,7 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 
 ### P2 Bun + QuickJS (D2)
 
-- [ ] P2.1 (测试 + 基线) BN1-BN4 / QJ1-QJ4 场景 (T2), 两家插件按 T5 安装, 三台设备修前基线填附录 A; 附录 C Q2 (ColorOS 被拒循环是否扩展到 `AidlPluginHost`) 在本条开始前拍板.
+- [ ] P2.1 (测试 + 基线) BN1-BN5 / QJ1-QJ5 场景 (T2; BN5 / QJ5 为 OPD2413 专场, Q2 已决), 两家插件按 T5 安装, 三台设备修前基线填附录 A.
 - [ ] P2.2 (修复 + 结构) 残留清零; `AidlPluginHost` 连接池与专用租约核对 (C10); `BridgeExecutionScope` 落地并由两家引擎使用 (T6); R8 回归.
 - [ ] P2.3 (基线) 附录 A "P2 后" 列, 1.3 的 C10 / C13 / C14 处置.
 
@@ -161,7 +161,8 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 
 - [ ] P4.1 (守卫) `StaticReferenceGuardTest` 与 `static_audit.py --guard` 扫描范围扩到桥接目录 (T7), 白名单新增行写理由, 进入全量单测 (`:app:testAppDebugUnitTest` 全部通过, 他人在途文件的失败另记). 可在 P0.5 之后随时做, 与 P1-P3 并行. 验收 (E1).
 - [ ] P4.2 (规范) T6 的规范定稿: `AGENTS.md` 补句 (本地), 本文附录 B 的 "处置" 列全部回填, 五家引擎的会话作用域在附录 F 有路径. 验收 (E0).
-- [ ] P4.3 (巡检) LeakCanary 巡检: 五个引擎各以 `leakcanary_probe.py` 的方式多次运行一个基础场景与一个专项场景 (经 `RunIntentActivity`, 不在 instrumentation 内), 无新报告; 诊断页面 (第一期 P2) 的 retained 列表在桥接脚本结束后为空. 验收 (E4). 附录 C Q1 (诊断页面与 `memory` API 是否展示桥接会话) 在本条之前拍板.
+- [ ] P4.3 (巡检) LeakCanary 巡检: 五个引擎各以 `leakcanary_probe.py` 的方式多次运行一个基础场景与一个专项场景 (经 `RunIntentActivity`, 不在 instrumentation 内), 无新报告; 诊断页面 (第一期 P2) 的 retained 列表在桥接脚本结束后为空. 验收 (E4).
+- [ ] P4.4 (诊断) Q1 已决 (2026-10-22, 维护者选 (a)): `MemoryDiagnostics` 加 "未回收桥接会话数" 与 retained 列表的引擎列 (按 T1 (a) 的会话对象类名识别), 脚本 API `memory.snapshot()` 加 `bridgeSessions` 字段 (每引擎的未回收会话数), 开发者选项 "内存诊断" 页面同步显示; 文档站与 d.ts 同步 (AGENTS.md "关联项目" 一节); 可与 P4.3 同一子会话. 验收 (E3): 桥接脚本结束后字段为 0, 测试中人为持有会话对象时非 0; JVM 单测覆盖字段.
 
 ### P5 CI 与收尾 (D8 / D1)
 
@@ -190,8 +191,8 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 | ND11 图像句柄 | | | | | | | |
 | ND12 音频录制 | | | | | | | |
 | ND13 ColorOS 被拒循环 | (跳过) | | (跳过) | | | | |
-| BN1-BN4 | (P2.1) | | | | | | |
-| QJ1-QJ4 | (P2.1) | | | | | | |
+| BN1-BN5 (BN5 仅 OPD2413) | (P2.1) | | | | | | |
+| QJ1-QJ5 (QJ5 仅 OPD2413) | (P2.1) | | | | | | |
 | LU1-LU4 | (P3.1) | | | | | | |
 | PY1-PY4 | (P3.1) | | | | | | |
 
@@ -214,7 +215,7 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 | 登记 | 释放 | 文件 | 门禁场景 | 处置 |
 | --- | --- | --- | --- | --- |
 | `bindService` (Node 池) | `unbindService` (`retireEntry` / `postUnbind`) | `NodeJsRuntimePluginHost.kt`, `NodeRuntimePluginBindCall.kt` | ND1 / ND4 / ND13 | |
-| `bindService` (`AidlPluginHost` 池与租约) | 空闲 30 s 解绑 / 租约 close | `core/plugin/AidlPluginHost.kt` | BN1 / QJ1 / BN4 / QJ4 | |
+| `bindService` (`AidlPluginHost` 池与租约) | 空闲 30 s 解绑 / 租约 close | `core/plugin/AidlPluginHost.kt` | BN1 / QJ1 / BN4 / QJ4 / BN5 / QJ5 | |
 | `bindService` (Lua 专用) | `ExactComponentBinderLease.close` -> `unbindService` | `AndroidLuaRuntimeProviderTransport.kt` | LU1 / LU4 | |
 | `bindService` (Python 专用) | `Transport.Binding.close` -> `unbindService` | `PythonRuntimeOfficialTransport.kt` | PY1 / PY4 | |
 | `WebView(` | `RuntimeWebView.release()` | `RuntimeViewComponents.kt` | ND7 | 第一期 Q42: `paired` |
@@ -232,8 +233,8 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 
 | 编号 | 问题 | 需要拍板的阶段 | 状态 / 默认倾向 |
 | --- | --- | --- | --- |
-| Q1 | 诊断页面 (第一期 P2) 与脚本 API `memory` (第一期 P5) 是否展示桥接会话: (a) P4 时在 `MemoryDiagnostics` 加 "未回收桥接会话数" 与 retained 列表的引擎列, `memory.snapshot()` 加 `bridgeSessions` 字段并同步文档与 d.ts (推荐, 未先行, 约 1 个子会话); (b) 不加, 只在门禁与 LeakCanary 可见. 改选 (b) 无返工 | P4.3 之前 | 未拍板 |
-| Q2 | ND13 的 ColorOS 绑定被拒循环是否也给 `AidlPluginHost` (Bun / QuickJS) 各加一个 OPD2413 专场场景: (a) P2.1 时各加一个 (推荐, 未先行, 每台多约 10 分钟); (b) 只做 Node. 改选 (b) 无返工 | P2.1 之前 | 未拍板 |
+| Q1 | 诊断页面 (第一期 P2) 与脚本 API `memory` (第一期 P5) 是否展示桥接会话: (a) P4 时在 `MemoryDiagnostics` 加 "未回收桥接会话数" 与 retained 列表的引擎列, `memory.snapshot()` 加 `bridgeSessions` 字段并同步文档与 d.ts (推荐, 未先行, 约 1 个子会话); (b) 不加, 只在门禁与 LeakCanary 可见. 改选 (b) 无返工 | P4.3 之前 | 已决 (2026-10-22 21:10, 维护者选 (a)): 落为 P4.4 |
+| Q2 | ND13 的 ColorOS 绑定被拒循环是否也给 `AidlPluginHost` (Bun / QuickJS) 各加一个 OPD2413 专场场景: (a) P2.1 时各加一个 (推荐, 未先行, 每台多约 10 分钟); (b) 只做 Node. 改选 (b) 无返工 | P2.1 之前 | 已决 (2026-10-22 21:10, 维护者选 (a)): BN5 / QJ5 进 T2 与 P2.1 |
 | Q3 | P0.4 基线若发现线性泄漏 (每次执行残留递增) 且 6.8.0 尚未发布: 是否提前修 (D3 规定登记后问, 不自动阻断). 选项届时由 P0 子会话按实测数据登记 | P0.4 之后 | 未发生 |
 
 ---
@@ -266,6 +267,7 @@ P0 的两个子会话可并行 (门禁 + 基线不碰守卫文件, 审计只读�
 | `tools/memory/static_audit.py` | 扫描范围扩展 | P0.5 / P4.1 |
 | `app/src/main/java/org/autojs/autojs/core/plugin/scope/BridgeExecutionScope.kt` 与 JVM 单测 | 非 Node 引擎的执行作用域 | P2.2 |
 | `app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt`, `StaticReferenceScanner.kt`, `app/src/test/resources/memory/static-reference-whitelist.txt` | 守卫扩范围 | P4.1 |
+| `app/src/main/java/org/autojs/autojs/runtime/memory/MemoryDiagnostics.kt`, 脚本 API `memory` 模块, 文档站与 d.ts | 桥接会话展示 (Q1 / P4.4) | P4.4 |
 | `.github/workflows/memory-gate.yml`, `tools/memory/ci_gate.py`, `test_ci_gate.py` | CI bridge 套件 | P5.1 |
 | `../AutoJs6-Plugin-{NodeJs,Bun,Lua,Python,QuickJS}-Runtime` | 插件仓库 (本地提交, 见附录 D) | P1-P3 |
 | `../.claude/boards/memory-phase2.md` | 看板 | P0.1 |
