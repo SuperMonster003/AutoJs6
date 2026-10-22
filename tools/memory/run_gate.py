@@ -10,8 +10,9 @@ The runner never installs APKs, never taps the screen and never changes settings
 install the debug host and its test APK first (see tools/memory/README.md). Dialogs that need a
 person (screen capture consent for S4a) are confirmed by the maintainer on the phone.
 
-`--suite bridge` runs the bridge leak gate of docs/memory-phase2/ROADMAP.md (ND1-ND13, test class
-BridgeLeakGateDeviceTest) instead and writes to docs/memory-phase2/evidence. Around each of its
+`--suite bridge` runs the bridge leak gate of docs/memory-phase2/ROADMAP.md (Node ND1-ND13, Bun
+BN1-BN5, QuickJS QJ1-QJ5, test class BridgeLeakGateDeviceTest) instead and writes to
+docs/memory-phase2/evidence. Around each of its
 instrumentation runs it changes two things and puts them back, also when a run fails or is
 interrupted: `settings put global hidden_api_policy 1` for the binding probe (ROADMAP D9), and
 `pm grant` of the permissions a scenario needs when the host lacks them (ND12 RECORD_AUDIO,
@@ -77,16 +78,55 @@ BRIDGE_SCENARIOS = {
     "ND11": "nd11ImageHandles",
     "ND12": "nd12AudioRecording",
     "ND13": "nd13ColorOsRebind",
+    "BN1": "bn01EmptyScript",
+    "BN2": "bn02HostCapabilities",
+    "BN3": "bn03Callbacks",
+    "BN4": "bn04PluginKilled",
+    "BN5": "bn05ColorOsRebind",
+    "QJ1": "qj01EmptyScript",
+    "QJ2": "qj02FileSourceAndOutput",
+    "QJ3": "qj03OutputCallbacks",
+    "QJ4": "qj04PluginKilled",
+    "QJ5": "qj05ColorOsRebind",
 }
 NODE_PLUGIN = "io.github.supermonster003.autojs6.plugin.nodejs"
+BUN_PLUGIN = "io.github.supermonster003.autojs6.plugin.bun.runtime"
+QUICKJS_PLUGIN = "io.github.supermonster003.autojs6.plugin.quickjs.runtime"
+# Engine of a bridge scenario by its prefix (docs/memory-phase2/ROADMAP.md T2), and the plugin package of each engine.
+BRIDGE_ENGINES = {"ND": "node", "BN": "bun", "QJ": "quickjs"}
+BRIDGE_PLUGINS = {"node": NODE_PLUGIN, "bun": BUN_PLUGIN, "quickjs": QUICKJS_PLUGIN}
 SUITES = {
     "runtime": {"name": "memory-gate", "testClass": TEST_CLASS, "scenarios": SCENARIOS, "capture": CAPTURE_SCENARIOS,
-                "out": ROOT / "docs" / "memory" / "evidence", "grants": {}, "hiddenApi": False, "plugin": None},
+                "out": ROOT / "docs" / "memory" / "evidence", "grants": {}, "hiddenApi": False, "plugins": None},
     # ROADMAP D11 grants RECORD_AUDIO for ND12; CAMERA for ND7c is appendix C Q4 (recommended, applied ahead).
     "bridge": {"name": "bridge-gate", "testClass": BRIDGE_TEST_CLASS, "scenarios": BRIDGE_SCENARIOS, "capture": {"ND8"},
-               "out": ROOT / "docs" / "memory-phase2" / "evidence", "hiddenApi": True, "plugin": NODE_PLUGIN,
+               "out": ROOT / "docs" / "memory-phase2" / "evidence", "hiddenApi": True, "plugins": BRIDGE_PLUGINS,
                "grants": {"ND7c": ["android.permission.CAMERA"], "ND12": ["android.permission.RECORD_AUDIO"]}},
 }
+
+
+def bridge_engine(scenario):
+    """Engine of a bridge scenario (node, bun or quickjs), or None for the first gate."""
+    return BRIDGE_ENGINES.get(scenario[:2])
+
+
+def plugin_commits(text, engines):
+    """--plugin-commit: one hash for every engine of the run, or `engine=hash` pairs separated by commas
+    (e.g. bun=fb879f3,quickjs=0bcee52). Returns {engine: hash}; raises ValueError on an unknown engine or a bad hash."""
+    if not text:
+        return {}
+    pattern = r"[0-9a-f]{4,40}(-dirty)?"
+    if "=" not in text:
+        if not re.fullmatch(pattern, text):
+            raise ValueError("--plugin-commit must be a commit hash or engine=hash pairs")
+        return {engine: text for engine in engines}
+    commits = {}
+    for item in text.split(","):
+        engine, _, commit = item.strip().partition("=")
+        if engine not in BRIDGE_PLUGINS or not re.fullmatch(pattern, commit):
+            raise ValueError(f"--plugin-commit: bad item {item!r}; use engine=hash with engine one of {', '.join(BRIDGE_PLUGINS)}")
+        commits[engine] = commit
+    return commits
 
 
 def scenario_list(text, scenarios=None):
@@ -244,6 +284,21 @@ def bridge_cell(report):
     return f"{registries} | {connections(bindings.get('start'))} -> {connections(bindings.get('final'))} | {threads} | {phases}"
 
 
+def session_text(report):
+    """Bun / QuickJS session objects counted through VMDebug (docs/memory-phase2/ROADMAP.md P2.1): reachable instances above
+    the start at the end, and the longest wait after a run until they were back at the start; empty for Node."""
+    sessions = (report.get("metrics") or {}).get("sessionInstances")
+    if not sessions:
+        return ""
+    final = sessions.get("final") or {}
+    if final and all(value < 0 for value in final.values()):
+        return "session n/a"
+    retained = sessions.get("retained") or {}
+    text = "session " + (", ".join(f"{kind.split('.', 1)[-1]} {delta(count)}" for kind, count in retained.items()) or "+0")
+    cleared = [sample["sessionClearedMs"] for sample in report.get("samples") or [] if sample.get("sessionClearedMs") is not None]
+    return text + (f", cleared <= {max(cleared)} ms" if cleared else "")
+
+
 def native_cell(report):
     """Native detail (ROADMAP P3.1): peak in run MB / meminfo Native Pss, Heap Alloc, Graphics, Unknown MB /
     images, open media images, Mats / instance deltas Bitmap, cv Mat, AccessibilityNodeInfo."""
@@ -315,14 +370,16 @@ def looper_heap(report):
 def markdown(meta, reports, failures):
     identity = meta["device"]
     bridge = meta.get("suite") == "bridge-gate"
-    plugin = meta.get("plugin") or {}
+    # Reports before P2.1 name one Node plugin as `plugin` with `pluginCommit`.
+    plugins = meta.get("plugins") or ([{**meta["plugin"], "commit": meta.get("pluginCommit")}] if meta.get("plugin") else [])
     if bridge:
         cell_lines = [
             "- Cell (docs/memory-phase2/ROADMAP.md appendix A): retained / Java heap MB / native heap MB / script threads, "
             "b bridge threads / bindings: h host bridge registries vs start, s system connections to the plugin vs start / "
             "live engines / plugin PSS MB at the end (change since measured run 2)",
             "- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), script threads, engines and bridge "
-            "registries back to start (Node connection pool may keep 1), system connections <= start + 1, bridge threads back to "
+            "registries back to start (the connection pools of the Node, Bun and QuickJS clients may keep 1), Bun / QuickJS "
+            "session objects back to start, system connections <= start + 1, bridge threads back to "
             "the end of the warm-ups (idle workers of the cached binder-call pool get up to 65 s to expire first, Q6); plugin PSS "
             "recorded only (R9)",
         ]
@@ -336,9 +393,9 @@ def markdown(meta, reports, failures):
         "",
         f"- Device: {identity.get('manufacturer')} {identity.get('model')}, API {identity.get('sdk')}, serial {identity.get('serial')}",
         f"- Host: {meta['package']} versionCode {meta['versionCode']} ({meta.get('versionName')}), debuggable",
-        *([f"- Plugin: {plugin.get('package')} " + (f"versionCode {plugin.get('versionCode')} ({plugin.get('versionName')})"
-                                                     if plugin.get("versionCode") else "not installed")
-           + f", commit {meta.get('pluginCommit') or '-'}"] if bridge else []),
+        *[f"- Plugin: {plugin.get('package')} " + (f"versionCode {plugin.get('versionCode')} ({plugin.get('versionName')})"
+                                                    if plugin.get("versionCode") else "not installed")
+          + f", commit {plugin.get('commit') or '-'}" for plugin in (plugins if bridge else [])],
         *([f"- hidden_api_policy (ROADMAP D9): 1 during each run, before `{meta['hiddenApiPolicy'].get('before')}`, "
            f"afterwards `{meta['hiddenApiPolicy'].get('restoredTo')}`"] if meta.get("hiddenApiPolicy") else []),
         *([f"- Granted for the run and revoked afterwards (ROADMAP D11 / Q4): " + "; ".join(
@@ -370,18 +427,23 @@ def markdown(meta, reports, failures):
     bridged = [report for report in reports if is_bridge(report) and report.get("metrics")]
     if bridged:
         lines += ["", "## Bridge detail (docs/memory-phase2/ROADMAP.md T1 (d) / (h) / (i))", "",
-                  "- Registries: host bridge tables whose size differs from the start (StaticRegistries.bridgeCounts)",
+                  "- Registries: host bridge tables whose size differs from the start (StaticRegistries.bridgeCounts, and the "
+                  "AidlPluginHost connection pools of the Bun and QuickJS clients)",
                   "- Bindings: connections of the host to the plugin / all bound service connections in LoadedApk.mServices, "
                   "before the first run -> at the end (n/a: unreadable)",
                   "- New threads: bridge threads alive at the end that were not alive at the end of the warm-ups",
                   "- Plugin PSS MB: all processes of the plugin before the first run / after measured run 2 / at the end (recorded only, R9)",
-                  "- Script: largest value of each gateStat over all runs; ended by error: runs of an expected failure (ND4)",
+                  "- Script: largest value of each gateStat over all runs; ended by error: runs of an expected failure (ND4 / BN4 / QJ4); "
+                  "session: Bun / QuickJS session objects above the start at the end (VMDebug counts), and the longest wait "
+                  "after a run until they were back",
                   "", "| Scenario | Mode | Registries | Bindings | New threads | Plugin PSS MB | Script |",
                   "| --- | --- | --- | --- | --- | --- | --- |"]
         for report in bridged:
             script = bridge_stats(report)
             if "runsEndedByError" in report:
                 script = (script + "; " if script else "") + f"ended by error {report['runsEndedByError']}"
+            if session_text(report):
+                script = (script + "; " if script else "") + session_text(report)
             lines.append(f"| {report.get('scenario')} | {MODES.get(report.get('mode'), '?')} | {bridge_cell(report)} | {script or '-'} |")
     detailed = [report for report in reports if (report.get("metrics") or {}).get("native")]
     if detailed:
@@ -477,6 +539,14 @@ def merge_evidence(previous, reports, failures, meta, scenarios=None):
                                    "scenarios": sorted({s for s, _ in rerun}, key=list(scenarios).index)}]}
     if previous.get("grants"):
         meta["grants"] = previous["grants"] + (meta.get("grants") or [])
+    earlier = previous.get("plugins") or ([{"engine": "node", **previous["plugin"], "commit": previous.get("pluginCommit")}]
+                                          if previous.get("plugin") else [])
+    if earlier:
+        # Plugins of this run replace the earlier entries of the same package; the rest stay, in engine order.
+        packages = {plugin.get("package"): plugin for plugin in earlier}
+        packages.update({plugin.get("package"): plugin for plugin in meta.get("plugins") or []})
+        order = list(BRIDGE_PLUGINS.values())
+        meta["plugins"] = sorted(packages.values(), key=lambda p: order.index(p["package"]) if p.get("package") in order else len(order))
     return merged, kept_failures + failures, meta
 
 
@@ -546,9 +616,11 @@ def main():
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--package", type=physical_device.package_name, default="org.autojs.autojs6")
     parser.add_argument("--suite", choices=tuple(SUITES), default="runtime",
-                        help="runtime: the first gate S1-S16 (docs/memory); bridge: the bridge gate ND1-ND13 (docs/memory-phase2)")
+                        help="runtime: the first gate S1-S16 (docs/memory); bridge: the bridge gate ND1-ND13 / BN1-BN5 / QJ1-QJ5 (docs/memory-phase2)")
     parser.add_argument("--scenarios", help="Comma list, e.g. S1,S2 or ND1,ND7a (default all of the suite)")
-    parser.add_argument("--plugin-commit", help="Commit of the installed Node plugin build, written to the bridge report header")
+    parser.add_argument("--plugin-commit",
+                        help="Commit of the installed plugin builds, written to the bridge report header: one hash for every engine "
+                             "of the run, or engine=hash pairs, e.g. bun=fb879f3,quickjs=0bcee52 (engines node, bun, quickjs)")
     parser.add_argument("--mode", choices=("normal", "force", "both"), default="both")
     parser.add_argument("--hprof", action="store_true", help="Keep heap dumps of failing scenarios and pull them to <out>/hprof")
     parser.add_argument("--no-analyze", action="store_true", help="Skip the on-device shark analysis (ROADMAP T4 fallback)")
@@ -586,8 +658,11 @@ def main():
         args.scenarios = scenario_list(args.scenarios, suite["scenarios"])
     except argparse.ArgumentTypeError as error:
         parser.error(str(error))
-    if args.plugin_commit and not re.fullmatch(r"[0-9a-f]{4,40}(-dirty)?", args.plugin_commit):
-        parser.error("--plugin-commit must be a commit hash")
+    engines = list(dict.fromkeys(bridge_engine(s) for s in args.scenarios)) if suite["plugins"] else []
+    try:
+        commits = plugin_commits(args.plugin_commit, engines)
+    except ValueError as error:
+        parser.error(str(error))
     if args.dump_after_last and args.suite != "bridge":
         parser.error("--dump-after-last needs --suite bridge")
     args.out = args.out or suite["out"]
@@ -621,17 +696,21 @@ def main():
     interrupted = None
     projection = {"allowedDuring": []}
     hidden_api, grants = {}, []
-    plugin = None
-    if suite["plugin"]:
-        plugin_dump = device.shell("dumpsys", "package", suite["plugin"])["stdout"]
+    plugins = []
+    for engine in engines:
+        plugin_dump = device.shell("dumpsys", "package", suite["plugins"][engine])["stdout"]
         plugin_version = re.search(r"versionCode=(\d+)", plugin_dump)
         plugin_name = re.search(r"versionName=(\S+)", plugin_dump)
-        plugin = {"package": suite["plugin"], "versionCode": int(plugin_version[1]) if plugin_version else None,
-                  "versionName": plugin_name[1] if plugin_name else None}
+        plugins.append({"engine": engine, "package": suite["plugins"][engine],
+                        "versionCode": int(plugin_version[1]) if plugin_version else None,
+                        "versionName": plugin_name[1] if plugin_name else None, "commit": commits.get(engine)})
     groups = [(list(args.scenarios), ",".join(modes))] if args.one_process else [([s], m) for s in args.scenarios for m in modes]
     for group, mode in groups:
             scenario = "+".join(group)
             pairs = [(s, m) for s in group for m in mode.split(",")]
+            # The device test reads one plugin commit per process: pass it when every scenario of the group shares it.
+            group_commits = {commits.get(bridge_engine(s)) for s in group}
+            group_commit = next(iter(group_commits)) if len(group_commits) == 1 else None
             if interrupted:
                 break
             waited = 0
@@ -663,7 +742,7 @@ def main():
                        "-e", "memoryGateCapture", args.capture,
                        "-e", "memoryGateAccessibilityWaitMs", str(args.a11y_wait * 1000),
                        "-e", "memoryGateMeminfo", args.meminfo,
-                       *(["-e", "memoryGatePluginCommit", args.plugin_commit] if args.plugin_commit else []),
+                       *(["-e", "memoryGatePluginCommit", group_commit] if group_commit else []),
                        *(["-e", "memoryGateDumpAfterLast", "true"] if args.dump_after_last else []), runner]
             granted = []
             try:
@@ -760,7 +839,7 @@ def main():
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
             "capture": args.capture, "meminfo": args.meminfo, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
             **({"projectionAppOp": projection} if projection["allowedDuring"] else {}),
-            **({"plugin": plugin, "pluginCommit": args.plugin_commit} if plugin else {}),
+            **({"plugins": plugins} if plugins else {}),
             **({"hiddenApiPolicy": hidden_api} if hidden_api else {}), **({"grants": grants} if grants else {})}
     stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
     if args.merge and (args.out / f"{stem}.json").is_file():

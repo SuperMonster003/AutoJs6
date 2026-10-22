@@ -54,13 +54,47 @@ internal class BridgeTracker : ScriptEngineManager.EngineLifecycleCallback, Brid
         val BRIDGE_THREAD_MARKERS = listOf(
             "AutoJs6Node", "AutoJs6-Node", "node-console-input", "runtime-web", "web-display-capture", "host-capability",
             "AutoJs6BridgeScreenshot", "AutoJs6ScreenText", "autojs-java-bridge", "BunHostCall", "python-runtime",
+            "autojs-bun-", "autojs-quickjs-",
+        )
+
+        /**
+         * Connection pools of the AidlPluginHost clients (P2.1), read through reflection until StaticRegistries reports them (P2.2).
+         * zh-CN: AidlPluginHost 客户端的连接池 (P2.1), 在 StaticRegistries 报告它们之前 (P2.2) 经反射读取.
+         */
+        private val AIDL_POOLS = linkedMapOf(
+            "BunRuntimePluginClient.connectionPool" to "org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient",
+            "QuickJsRuntimePluginClient.connectionPool" to "org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimePluginClient",
         )
 
         fun bridgeThreads(): List<String> =
             GateMetrics.liveThreads().map { it.name }.filter { name -> BRIDGE_THREAD_MARKERS.any { name.contains(it) } }
 
         /** Host-side registries of T1 (h). zh-CN: T1 (h) 的宿主侧注册表. */
-        fun hostRegistries(): Map<String, Int> = StaticRegistries.bridgeCounts()
+        fun hostRegistries(): Map<String, Int> {
+            val counts = LinkedHashMap(StaticRegistries.bridgeCounts())
+            AIDL_POOLS.forEach { (name, client) -> if (name !in counts) aidlPoolSize(client)?.let { counts[name] = it } }
+            return counts
+        }
+
+        /** Size of `connectionPool` of the AidlPluginHost held by the client object [client], or null. */
+        private fun aidlPoolSize(client: String): Int? = runCatching {
+            val type = Class.forName(client)
+            val host = type.getDeclaredField("host").apply { isAccessible = true }.get(null)!!
+            val lock = field(host, host.javaClass, "poolLock")!!
+            val pool = field(host, host.javaClass, "connectionPool") as Map<*, *>
+            synchronized(lock) { pool.size }
+        }.getOrNull()
+
+        /**
+         * Reachable instances of the session classes (kind -> class name) through VMDebug, which collects garbage first;
+         * -1 for a kind that cannot be counted.
+         * zh-CN: 经 VMDebug 计数的会话类 (类别 -> 类名) 可达实例数, VMDebug 会先回收垃圾; 无法计数的类别为 -1.
+         */
+        fun sessionInstances(classes: Map<String, String>): Map<String, Long> {
+            if (classes.isEmpty()) return emptyMap()
+            val counts = GateNativeProbe.instanceCounts(classes)
+            return classes.keys.associateWith { counts.optLong(it, -1L) }
+        }
 
         /**
          * System-side binding count of T1 (h): the connections of this process in `LoadedApk.mServices` whose active component
@@ -97,14 +131,17 @@ internal class BridgeTracker : ScriptEngineManager.EngineLifecycleCallback, Brid
 
         /**
          * PSS of every process of [packageName] (T1 (i), recorded only), read through the UiAutomation shell; null when no process runs.
+         * With [uid], the processes of that uid count too (the bun child processes of the Bun plugin).
          * zh-CN: [packageName] 全部进程的 PSS (T1 (i), 只记录), 经 UiAutomation shell 读取; 没有进程时为 null.
+         * 给出 [uid] 时, 该 uid 的进程也计入 (Bun 插件的 bun 子进程).
          */
-        fun pluginPss(instrumentation: Instrumentation, packageName: String): JSONObject? {
-            val processes = shell(instrumentation, "ps -A -o PID,NAME").orEmpty().lines().mapNotNull { line ->
+        fun pluginPss(instrumentation: Instrumentation, packageName: String, uid: Int? = null): JSONObject? {
+            val processes = shell(instrumentation, "ps -A -o PID,UID,NAME").orEmpty().lines().mapNotNull { line ->
                 val parts = line.trim().split(Regex("\\s+"))
                 val pid = parts.getOrNull(0)?.toIntOrNull() ?: return@mapNotNull null
-                val name = parts.getOrNull(1) ?: return@mapNotNull null
-                if (name == packageName || name.startsWith("$packageName:")) pid to name else null
+                val processUid = parts.getOrNull(1)?.toIntOrNull()
+                val name = parts.getOrNull(2) ?: return@mapNotNull null
+                if (name == packageName || name.startsWith("$packageName:") || (uid != null && processUid == uid)) pid to name else null
             }
             if (processes.isEmpty()) return null
             val detail = JSONArray()

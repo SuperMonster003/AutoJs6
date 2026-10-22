@@ -196,6 +196,56 @@ class BridgeSuiteTest(unittest.TestCase):
         self.assertIn("### ND1 N: NodeJsHostCapabilityBroker 0, ScriptRuntime 0, 3.00 MB in the dump", text)
         self.assertIn("- byte[]: 12 objects, 1.00 MB", text)
 
+    def test_bridge_markdown_lists_every_plugin_and_the_session_counts(self):
+        meta = {"suite": "bridge-gate", "device": {"model": "23046RP50C"}, "versionCode": 5935, "package": "org.autojs.autojs6",
+                "runId": "r", "started": "a", "finished": "b", "date": "20261023", "warmups": 2, "iterations": 20, "pollMs": 10000,
+                "forceDelayMs": 1000, "capture": "off",
+                "plugins": [{"engine": "bun", "package": run_gate.BUN_PLUGIN, "versionCode": 296, "versionName": "0.21.0", "commit": "fb879f3"},
+                            {"engine": "quickjs", "package": run_gate.QUICKJS_PLUGIN, "versionCode": None, "versionName": None, "commit": None}]}
+        bun = bridge_report("BN2")
+        bun["metrics"]["sessionInstances"] = {"start": {"bun.broker": 0, "bun.callback": 0}, "final": {"bun.broker": 2, "bun.callback": 0},
+                                              "retained": {"bun.broker": 2}, "unavailable": []}
+        bun["samples"][0]["sessionClearedMs"] = 400
+        bun["samples"][1]["sessionClearedMs"] = None
+        unavailable = bridge_report("QJ1")
+        unavailable["metrics"]["sessionInstances"] = {"start": {"quickjs.callback": -1}, "final": {"quickjs.callback": -1}, "retained": {},
+                                                      "unavailable": ["quickjs.callback"]}
+        text = run_gate.markdown(meta, [bun, unavailable, bridge_report("QJ2")], [])
+        self.assertIn(f"- Plugin: {run_gate.BUN_PLUGIN} versionCode 296 (0.21.0), commit fb879f3", text)
+        self.assertIn(f"- Plugin: {run_gate.QUICKJS_PLUGIN} not installed, commit -", text)
+        self.assertIn("| BN2 | N | connectionPool +1 | 0/3 -> 1/4 | - | 40.0 / 79.5 / 80.0 | "
+                      "pngBytes 130, deviceInfoKeys 9; session broker +2, cleared <= 400 ms |", text)
+        self.assertIn("deviceInfoKeys 9; session n/a |", text)
+        self.assertIn("| QJ2 | N | connectionPool +1 | 0/3 -> 1/4 | - | 40.0 / 79.5 / 80.0 | pngBytes 130, deviceInfoKeys 9 |", text)
+
+    def test_bridge_engines_and_plugin_commits(self):
+        self.assertEqual(["node", "bun", "quickjs", None], [run_gate.bridge_engine(s) for s in ("ND7a", "BN1", "QJ5", "S1")])
+        self.assertEqual({"bun": "fb879f3", "quickjs": "fb879f3"}, run_gate.plugin_commits("fb879f3", ["bun", "quickjs"]))
+        self.assertEqual({"bun": "fb879f3", "quickjs": "0bcee52-dirty"},
+                         run_gate.plugin_commits("bun=fb879f3, quickjs=0bcee52-dirty", ["bun"]))
+        self.assertEqual({}, run_gate.plugin_commits(None, ["node"]))
+        for bad in ("main", "deno=fb879f3", "bun=", "bun=XYZ1"):
+            with self.assertRaises(ValueError):
+                run_gate.plugin_commits(bad, ["bun"])
+        self.assertEqual(set(run_gate.BRIDGE_ENGINES.values()), set(run_gate.BRIDGE_PLUGINS))
+        self.assertTrue(all(run_gate.bridge_engine(s) for s in run_gate.BRIDGE_SCENARIOS))
+
+    def test_bridge_merge_keeps_the_plugins_of_earlier_runs(self):
+        old_node = {"package": run_gate.NODE_PLUGIN, "versionCode": 292, "versionName": "1.32.0"}
+        previous = {"runId": "old", "started": "t0", "finished": "t1", "results": [bridge_report("ND1")],
+                    "plugin": old_node, "pluginCommit": "6d4e6bdb"}
+        quickjs = {"engine": "quickjs", "package": run_gate.QUICKJS_PLUGIN, "versionCode": 42, "versionName": "1.0.4", "commit": "0bcee52"}
+        _, _, meta = run_gate.merge_evidence(previous, [bridge_report("QJ1")], [],
+                                             {"runId": "new", "started": "t2", "finished": "t3", "plugins": [quickjs]},
+                                             run_gate.BRIDGE_SCENARIOS)
+        self.assertEqual([{"engine": "node", **old_node, "commit": "6d4e6bdb"}, quickjs], meta["plugins"])
+        bun = {"engine": "bun", "package": run_gate.BUN_PLUGIN, "versionCode": 297, "versionName": "0.21.0", "commit": "abc1234"}
+        _, _, again = run_gate.merge_evidence({**previous, "plugins": meta["plugins"]}, [bridge_report("BN1")], [],
+                                              {"runId": "next", "started": "t4", "finished": "t5", "plugins": [bun, {**quickjs, "versionCode": 43}]},
+                                              run_gate.BRIDGE_SCENARIOS)
+        self.assertEqual([run_gate.NODE_PLUGIN, run_gate.BUN_PLUGIN, run_gate.QUICKJS_PLUGIN], [p["package"] for p in again["plugins"]])
+        self.assertEqual(43, again["plugins"][2]["versionCode"])
+
     def test_bridge_merge_keeps_suite_order(self):
         previous = {"runId": "old", "started": "t0", "finished": "t1", "results": [bridge_report("ND10")],
                     "grants": [{"scenario": "ND12", "permission": "android.permission.RECORD_AUDIO", "revoked": True}]}

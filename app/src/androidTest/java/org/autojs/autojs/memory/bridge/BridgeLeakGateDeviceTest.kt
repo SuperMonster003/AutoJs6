@@ -25,7 +25,10 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimePluginClient
+import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.NodeJsRuntimePluginHost
 import org.autojs.autojs.execution.ExecutionConfig
@@ -38,6 +41,7 @@ import org.autojs.autojs.memory.scenarios.GateNativeProbe
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.memory.BridgeExecutionObserver
 import org.autojs.autojs.runtime.memory.StaticRegistries
+import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.script.StringScriptSource
 import org.json.JSONArray
 import org.json.JSONObject
@@ -143,10 +147,20 @@ class BridgeLeakGateDeviceTest {
     @Test fun nd11ImageHandles() = gate("ND11")
     @Test fun nd12AudioRecording() = gate("ND12")
     @Test fun nd13ColorOsRebind() = gate("ND13")
+    @Test fun bn01EmptyScript() = gate("BN1")
+    @Test fun bn02HostCapabilities() = gate("BN2")
+    @Test fun bn03Callbacks() = gate("BN3")
+    @Test fun bn04PluginKilled() = gate("BN4")
+    @Test fun bn05ColorOsRebind() = gate("BN5")
+    @Test fun qj01EmptyScript() = gate("QJ1")
+    @Test fun qj02FileSourceAndOutput() = gate("QJ2")
+    @Test fun qj03OutputCallbacks() = gate("QJ3")
+    @Test fun qj04PluginKilled() = gate("QJ4")
+    @Test fun qj05ColorOsRebind() = gate("QJ5")
 
     private fun gate(id: String) {
         val scenario = BridgeScenarios.byId(id)
-        val reports = modes.map { mode -> runScenario(scenario, mode).also(::emit) }
+        val reports = withBunGrants(scenario.bunGrants) { modes.map { mode -> runScenario(scenario, mode).also(::emit) } }
         val skipped = reports.filter { it.optString("status") == "skipped" }
         assumeFalse("Skipped: " + skipped.joinToString("; ") { texts(it.optJSONArray("reasons")) },
             skipped.size == reports.size)
@@ -156,6 +170,21 @@ class BridgeLeakGateDeviceTest {
                 "${report.optString("scenario")} ${report.optString("mode")} ${report.optString("status")}: " +
                     texts(report.optJSONArray("reasons"))
             })
+        }
+    }
+
+    /**
+     * Turns the Bun host capability grants of a scenario on for [block] and restores the stored values afterwards.
+     * zh-CN: 在 [block] 期间打开场景所需的 Bun 宿主能力授权, 结束后还原原有的存储值.
+     */
+    private fun <T> withBunGrants(grants: List<String>, block: () -> T): T {
+        val keys = grants.map { CredentialKeys.BUN_HOST_CAPABILITY_GRANT.key(it) }
+        val stored = keys.map { it.storedOrNull() }
+        keys.forEach { it.set(true, commit = true) }
+        try {
+            return block()
+        } finally {
+            keys.forEachIndexed { index, key -> stored[index]?.let { key.set(it, commit = true) } ?: key.remove(commit = true) }
         }
     }
 
@@ -175,19 +204,29 @@ class BridgeLeakGateDeviceTest {
         // zh-CN: Node 脚本在工作目录的 package.json 中声明桥接能力 (NodeBridgePermissionManifest).
         val workDir = File(context.filesDir, "memory-gate-bridge/${scenario.id}").apply {
             mkdirs()
+            if (scenario.engine != BridgeEngine.NODE) return@apply
             val manifest = JSONObject().put("autojs6", JSONObject().put("node", JSONObject().put("permissions", JSONArray(scenario.capabilities))))
             File(this, "package.json").writeText(manifest.toString())
         }.path
+        val pluginPackage = scenario.engine.pluginPackage
+        val pluginPackages = setOf(pluginPackage)
+        // The bun child processes of the Bun plugin run under its uid with names of their own.
+        // zh-CN: Bun 插件的 bun 子进程以插件的 uid 运行, 进程名各不相同.
+        val pluginUid = if (scenario.engine != BridgeEngine.BUN) null else {
+            runCatching { context.packageManager.getApplicationInfo(pluginPackage, 0).uid }.getOrNull()
+        }
+        val sessionClasses = scenario.engine.sessionClasses
         val meminfo = meminfoMode != "off"
         // The first UiAutomation call connects it, so it happens before the first sample.
         // zh-CN: UiAutomation 首次调用会建立连接, 因此放在首个采样之前.
         BridgeTracker.shell(instrumentation, "true")
         warmRenderPipeline()
-        val pssStart = BridgeTracker.pluginPss(instrumentation, BridgeScenarios.NODE_PACKAGE)
+        val pssStart = BridgeTracker.pluginPss(instrumentation, pluginPackage, pluginUid)
         val start = GateMetrics.sample()
         val nativeStart = nativeSnapshot(meminfo, instances = true)
         val bridgeStart = BridgeTracker.hostRegistries()
-        val bindingsStart = BridgeTracker.systemBindings(context, PLUGIN_PACKAGES)
+        val bindingsStart = BridgeTracker.systemBindings(context, pluginPackages)
+        val sessionStart = BridgeTracker.sessionInstances(sessionClasses)
         var baseline = start
         var nativeBaseline = nativeStart
         var registriesBaseline = StaticRegistries.counts()
@@ -205,7 +244,14 @@ class BridgeLeakGateDeviceTest {
             val record = runOnce(scenario, mode, index, warmup, workDir)
             record.nativePeakBytes = sampler.stop()
             record.clearMs = GateMetrics.awaitCleared(record.references(), budget)
-            if (record.clearMs == null && ++retainedWithinBudget >= REDUCED_BUDGET_AFTER) budget = REDUCED_BUDGET_MS
+            if (sessionClasses.isNotEmpty()) {
+                val waitBegun = SystemClock.elapsedRealtime()
+                val counts = awaitSessionCounts(sessionClasses, sessionStart, budget)
+                record.sessionCounts = counts
+                record.sessionClearMs = if (sessionExcess(counts, sessionStart).isEmpty()) SystemClock.elapsedRealtime() - waitBegun else null
+            }
+            val clearedInBudget = record.clearMs != null && (sessionClasses.isEmpty() || record.sessionClearMs != null)
+            if (!clearedInBudget && ++retainedWithinBudget >= REDUCED_BUDGET_AFTER) budget = REDUCED_BUDGET_MS
             val sample = GateMetrics.sample()
             val every = meminfoMode == "runs"
             val native = if (index == warmups - 1) nativeSnapshot(meminfo, instances = true) else nativeSnapshot(meminfo && every, instances = every)
@@ -218,10 +264,10 @@ class BridgeLeakGateDeviceTest {
             }
             // T1 (i): the plugin PSS after the second measured run and after the last one (recorded only).
             // zh-CN: T1 (i): 第 2 次计数运行后与最后一次运行后的插件 PSS (只记录).
-            if (index == warmups + 1) pssSecond = BridgeTracker.pluginPss(instrumentation, BridgeScenarios.NODE_PACKAGE)
+            if (index == warmups + 1) pssSecond = BridgeTracker.pluginPss(instrumentation, pluginPackage, pluginUid)
             samples.put(record.json().put("after", sample.json()).put("native", native)
                 .put("bridge", JSONObject(BridgeTracker.hostRegistries()))
-                .put("bindings", BridgeTracker.systemBindings(context, PLUGIN_PACKAGES)))
+                .put("bindings", BridgeTracker.systemBindings(context, pluginPackages)))
             runs += record
             record.skip?.let { scriptSkip = it }
             if (scriptSkip != null) break
@@ -234,21 +280,27 @@ class BridgeLeakGateDeviceTest {
         val heapAfterLast = if (dumpAfterLast) heapEvidence(scenario, mode, suffix = "last", histogram = true) else null
         val measured = runs.filter { !it.warmup }
         GateMetrics.awaitCleared(measured.flatMap { it.references() }, pollMs)
+        // T1 (a) for engines without BridgeExecutionObserver reports: reachable session instances against the start.
+        // zh-CN: T1 (a), 用于没有 BridgeExecutionObserver 报告的引擎: 可达会话实例数相对开始时.
+        val sessionFinal = if (sessionClasses.isEmpty()) emptyMap() else awaitSessionCounts(sessionClasses, sessionStart, pollMs)
+        val sessionRetained = sessionExcess(sessionFinal, sessionStart)
         val final = GateMetrics.sample()
         val nativeFinal = nativeSnapshot(meminfo, instances = true)
         val registriesFinal = StaticRegistries.counts()
         val bridgeFinal = BridgeTracker.hostRegistries()
-        val bindingsFinal = BridgeTracker.systemBindings(context, PLUGIN_PACKAGES)
+        val bindingsFinal = BridgeTracker.systemBindings(context, pluginPackages)
         val threadsFinal = BridgeTracker.bridgeThreads()
-        val pssFinal = BridgeTracker.pluginPss(instrumentation, BridgeScenarios.NODE_PACKAGE)
+        val pssFinal = BridgeTracker.pluginPss(instrumentation, pluginPackage, pluginUid)
         val retainedRuns = measured.filter { it.retained() }
         val retainedWarmups = runs.filter { it.warmup && it.retained() }
         val frameBytes = if (scenario.capture) context.resources.displayMetrics.let { it.widthPixels.toLong() * it.heightPixels * 4 } else 0L
 
+        val retainedObjects = retainedObjects(retainedRuns + retainedWarmups)
+        sessionRetained.forEach { (kind, count) -> retainedObjects.put(kind, maxOf(retainedObjects.optLong(kind), count)) }
         val metrics = JSONObject()
-            .put("retained", retainedRuns.size)
+            .put("retained", maxOf(retainedRuns.size.toLong(), sessionRetained.values.maxOrNull() ?: 0L))
             .put("retainedWarmups", retainedWarmups.size)
-            .put("retainedObjects", retainedObjects(retainedRuns + retainedWarmups))
+            .put("retainedObjects", retainedObjects)
             .put("javaHeapDeltaBytes", final.javaHeapBytes - baseline.javaHeapBytes)
             .put("nativeHeapDeltaBytes", final.nativeHeapBytes - baseline.nativeHeapBytes)
             .put("scriptThreadDelta", final.scriptThreads - start.scriptThreads)
@@ -268,6 +320,11 @@ class BridgeLeakGateDeviceTest {
         meminfoDelta(nativeBaseline.optJSONObject("meminfo"), nativeFinal.optJSONObject("meminfo"))?.let { native.put("meminfoDeltaKb", it) }
         instanceDeltas(nativeBaseline.optJSONObject("instances"), nativeFinal.optJSONObject("instances"))?.let { native.put("instanceDeltasFromBaseline", it) }
         metrics.put("native", native)
+        if (sessionClasses.isNotEmpty()) {
+            val unavailable = (sessionStart.filterValues { it < 0 }.keys + sessionFinal.filterValues { it < 0 }.keys).distinct()
+            metrics.put("sessionInstances", JSONObject().put("start", JSONObject(sessionStart)).put("final", JSONObject(sessionFinal))
+                .put("retained", JSONObject(sessionRetained)).put("unavailable", JSONArray(unavailable)))
+        }
         // First gate registries (T7 of the first roadmap): back where they were at the end of the warm-ups.
         // zh-CN: 第一期注册表 (第一期路线图 T7): 回到预热结束时的值.
         val registriesDelta = JSONObject()
@@ -334,6 +391,9 @@ class BridgeLeakGateDeviceTest {
 
         val reasons = JSONArray()
         if (retainedRuns.isNotEmpty()) reasons.put("retained runs ${retainedRuns.size}/${measured.size} (" + retainedObjectsText(retainedRuns) + ")")
+        if (sessionRetained.isNotEmpty()) {
+            reasons.put("retained session instances vs start: " + sessionRetained.entries.joinToString(", ") { "${it.key} ${it.value}" })
+        }
         if (metrics.getLong("javaHeapDeltaBytes") > JAVA_HEAP_LIMIT) reasons.put("java heap +${mb(metrics.getLong("javaHeapDeltaBytes"))} MB")
         if (metrics.getLong("nativeHeapDeltaBytes") > NATIVE_HEAP_LIMIT + frameBytes) reasons.put("native heap +${mb(metrics.getLong("nativeHeapDeltaBytes"))} MB")
         if (metrics.getInt("scriptThreadDelta") > 0) reasons.put("script threads +${metrics.getInt("scriptThreadDelta")}")
@@ -355,7 +415,13 @@ class BridgeLeakGateDeviceTest {
         val scriptErrors = runs.flatMap { it.scriptErrors }.distinct()
         val unstarted = runs.count { !it.started }
         val timedOut = runs.count { it.forcedCleanup }
-        val unexpected = if (scenario.expectsFailure) emptyList() else errors
+        // A failing Node script ends its engine with an exception; Bun and QuickJS jobs may only print AJ6MEM_ERROR.
+        // zh-CN: 失败的 Node 脚本以异常结束引擎; Bun 与 QuickJS 的任务可能只打印 AJ6MEM_ERROR.
+        val unexpected = when {
+            scenario.expectsFailure -> emptyList()
+            scenario.engine == BridgeEngine.NODE -> errors
+            else -> (errors + scriptErrors).distinct()
+        }
         if (unexpected.isNotEmpty()) reasons.put("script errors: " + (scriptErrors.ifEmpty { unexpected }).take(3).joinToString(" | "))
         if (unstarted > 0) reasons.put("runs not started in time $unstarted")
         if (timedOut > 0) reasons.put("runs that did not end in time $timedOut")
@@ -380,23 +446,28 @@ class BridgeLeakGateDeviceTest {
             .put("start", start.json()).put("baseline", baseline.json()).put("final", final.json()).put("samples", samples)
             .put("nativeStart", nativeStart).put("nativeBaseline", nativeBaseline).put("nativeFinal", nativeFinal)
         heapAfterLast?.let { report.put("heapAfterLast", it) }
-        if (retainedRuns.isNotEmpty() || retainedWarmups.isNotEmpty()) report.put("heap", heapEvidence(scenario, mode))
+        if (retainedRuns.isNotEmpty() || retainedWarmups.isNotEmpty() || sessionRetained.isNotEmpty()) report.put("heap", heapEvidence(scenario, mode))
         return report
     }
 
     private fun runOnce(scenario: BridgeScenario, mode: GateMode, index: Int, warmup: Boolean, workDir: String): RunRecord {
         if (scenario.forceStopPluginBeforeRun) {
-            BridgeTracker.shell(instrumentation, "am force-stop ${BridgeScenarios.NODE_PACKAGE}")
+            BridgeTracker.shell(instrumentation, "am force-stop ${scenario.engine.pluginPackage}")
             SystemClock.sleep(PLUGIN_STOP_SETTLE_MS)
         }
         val window = BridgeWindow()
         tracker.window = window
         val begun = SystemClock.elapsedRealtime()
         val started = CountDownLatch(1)
-        val outcome = RunOutcome()
+        val marker = "memory-gate-${scenario.id}-${mode.label}-$index-${UUID.randomUUID()}"
+        // Bun and QuickJS print to the global console, shared by every execution; their gate lines carry the marker.
+        // zh-CN: Bun 与 QuickJS 输出到所有执行共用的全局控制台; 其门禁行带有标记.
+        val globalOutput = scenario.engine != BridgeEngine.NODE
+        val outcome = RunOutcome(if (globalOutput) marker else null)
         val errors = outcome.errors
         try {
-            launch(scenario, mode, index, started, outcome, workDir)
+            if (globalOutput) AutoJs.instance.globalConsole.addLogListener(outcome)
+            launch(scenario, mode, marker, started, outcome, workDir)
             val startedInTime = started.await(START_TIMEOUT_MS, TimeUnit.MILLISECONDS)
             var forceTriggered = false
             var readyReached = false
@@ -407,7 +478,7 @@ class BridgeLeakGateDeviceTest {
                 } || outcome.ready.get()
                 val endedEarly = outcome.skip != null || (window.created() >= scenario.expectedEngines && window.allRemoved())
                 if (scenario.killPluginOnReady && readyReached) {
-                    BridgeTracker.shell(instrumentation, "am force-stop ${BridgeScenarios.NODE_PACKAGE}")
+                    BridgeTracker.shell(instrumentation, "am force-stop ${scenario.engine.pluginPackage}")
                     pluginKilled = true
                 }
                 if (mode == GateMode.FORCE && !endedEarly) {
@@ -438,13 +509,13 @@ class BridgeLeakGateDeviceTest {
                 executionIds = window.executionIds(), stats = outcome.stats.toMap(),
             )
         } finally {
+            if (globalOutput) AutoJs.instance.globalConsole.removeLogListener(outcome)
             tracker.window = null
         }
     }
 
     /** Kept in its own frame so that no local of the test method references the execution. */
-    private fun launch(scenario: BridgeScenario, mode: GateMode, index: Int, started: CountDownLatch, outcome: RunOutcome, workDir: String) {
-        val marker = "memory-gate-${scenario.id}-${mode.label}-$index-${UUID.randomUUID()}"
+    private fun launch(scenario: BridgeScenario, mode: GateMode, marker: String, started: CountDownLatch, outcome: RunOutcome, workDir: String) {
         val listener = object : SimpleScriptExecutionListener() {
             override fun onStart(execution: ScriptExecution) {
                 // The console keeps listeners as weak references; the run's outcome holds this one.
@@ -464,8 +535,30 @@ class BridgeLeakGateDeviceTest {
             }
         }
         val config = ExecutionConfig().apply { workingDirectory = workDir }
-        service.execute(StringScriptSource(marker, BridgeScenarios.nodeSource(scenario, mode, marker, fixturePng)), listener, config)
+        val text = BridgeScenarios.source(scenario, mode, marker, fixturePng)
+        val source = scenario.sourceFile?.let { name -> JavaScriptFileSource(File(workDir, name).apply { writeText(text) }) }
+        service.execute(source ?: StringScriptSource(marker, text), listener, config)
     }
+
+    /**
+     * Counts the session instances until none exceeds [start] or [budgetMs] passes; returns the last counts.
+     * zh-CN: 计数会话实例, 直到没有一类超过 [start] 或超过 [budgetMs]; 返回最后一次的计数.
+     */
+    private fun awaitSessionCounts(classes: Map<String, String>, start: Map<String, Long>, budgetMs: Long): Map<String, Long> {
+        val deadline = SystemClock.elapsedRealtime() + budgetMs
+        while (true) {
+            val counts = BridgeTracker.sessionInstances(classes)
+            if (sessionExcess(counts, start).isEmpty() || SystemClock.elapsedRealtime() >= deadline) return counts
+            SystemClock.sleep(SESSION_POLL_MS)
+        }
+    }
+
+    /** Kinds counted above [start] (kinds that cannot be counted are left out). zh-CN: 计数高于 [start] 的类别 (无法计数的类别除外). */
+    private fun sessionExcess(counts: Map<String, Long>, start: Map<String, Long>): Map<String, Long> =
+        counts.mapNotNull { (kind, count) ->
+            val before = start[kind] ?: 0L
+            if (count < 0 || before < 0 || count <= before) null else kind to count - before
+        }.toMap()
 
     /**
      * Name, state and daemon flag of every thread with an entry in LooperHelper (diagnostics of the registry delta).
@@ -556,18 +649,18 @@ class BridgeLeakGateDeviceTest {
         if (scenario.capture && !captureAllowed) return "screen capture needs memoryGateCapture=on (run_gate.py --capture on allows PROJECT_MEDIA)"
         if (scenario.needsOverlay && !Settings.canDrawOverlays(context)) return "the host has no overlay permission"
         scenario.permissions.firstOrNull { !granted(it) }?.let { return "the host lacks $it (run_gate.py --suite bridge grants it, ROADMAP D11)" }
-        return pluginSkipReason()
+        return pluginSkipReason(scenario.engine)
     }
 
     private fun granted(permission: String) = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
     /**
-     * The Node plugin must be installed, enabled, authorized and answer a probe; the probe binds the plugin, so it runs before
-     * the first sample.
-     * zh-CN: Node 插件须已安装, 已启用, 已授权并能响应探测; 探测会绑定插件, 因此在首个采样之前进行.
+     * The plugin of [engine] must be installed, enabled, authorized and answer a probe (Bun and QuickJS: prewarm); the probe
+     * binds the plugin, so it runs before the first sample.
+     * zh-CN: [engine] 的插件须已安装, 已启用, 已授权并能响应探测 (Bun 与 QuickJS 为预热); 探测会绑定插件, 因此在首个采样之前进行.
      */
-    private fun pluginSkipReason(): String? {
-        val name = BridgeScenarios.NODE_PACKAGE
+    private fun pluginSkipReason(engine: BridgeEngine): String? {
+        val name = engine.pluginPackage
         try {
             context.packageManager.getPackageInfo(name, 0)
         } catch (_: Exception) {
@@ -575,11 +668,19 @@ class BridgeLeakGateDeviceTest {
         }
         if (!PluginEnableStore.isEnabled(context, name, defaultEnabled = true)) return "plugin $name is disabled in Plugin Center"
         if (!PluginTrustManager.isAuthorized(context, name)) return "plugin $name is not authorized"
-        val probe = runCatching { runBlocking { NodeJsRuntimePluginHost.probe(context) } }
-        return probe.exceptionOrNull()?.let { "the Node plugin did not answer the probe: " + (it.javaClass.simpleName + ": " + it.message).take(300) }
+        val probe = runCatching {
+            runBlocking {
+                when (engine) {
+                    BridgeEngine.NODE -> NodeJsRuntimePluginHost.probe(context)
+                    BridgeEngine.BUN -> BunRuntimePluginClient.prewarm(context, BunRuntimePluginClient.select(context))
+                    BridgeEngine.QUICKJS -> QuickJsRuntimePluginClient.prewarm(context, QuickJsRuntimePluginClient.select(context))
+                }
+            }
+        }
+        return probe.exceptionOrNull()?.let { "the $engine plugin did not answer the probe: " + (it.javaClass.simpleName + ": " + it.message).take(300) }
     }
 
-    /** A 64x64 PNG as Base64, the image of the round trips in ND2 / ND11. zh-CN: 64x64 的 PNG (Base64), 用于 ND2 / ND11 的往返. */
+    /** A 64x64 PNG as Base64, the image of the round trips in ND2 / ND11 / BN2 and the data of QJ2. zh-CN: 64x64 的 PNG (Base64), 用于 ND2 / ND11 / BN2 的往返与 QJ2 的数据. */
     private val fixturePng: String by lazy {
         val bitmap = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -613,7 +714,7 @@ class BridgeLeakGateDeviceTest {
             result.put("dumpMs", SystemClock.elapsedRealtime() - dumpStarted).put("hprof", hprof.path)
             if (analyzeHeap) {
                 result.put("analysis", if (threads.isNotEmpty()) GateHeapPathAnalyzer.analyzeThreads(hprof, threads) else {
-                    GateHeapPathAnalyzer.analyzeClasses(hprof, BridgeScenarios.NODE_HEAP_CLASSES)
+                    GateHeapPathAnalyzer.analyzeClasses(hprof, scenario.engine.heapClasses)
                 })
                 if (histogram) result.put("histogram", GateHeapPathAnalyzer.histogram(hprof))
             } else {
@@ -653,7 +754,8 @@ class BridgeLeakGateDeviceTest {
                 .put("lowRam", activityManager.isLowRamDevice).put("memoryClassMb", activityManager.memoryClass)
                 .put("largeMemoryClassMb", activityManager.largeMemoryClass).put("process64Bit", Process.is64Bit()))
             .put("host", packageJson(context.packageName))
-            .put("plugin", packageJson(BridgeScenarios.NODE_PACKAGE).put("commit", pluginCommit ?: JSONObject.NULL))
+            .put("engine", scenario.engine.name.lowercase())
+            .put("plugin", packageJson(scenario.engine.pluginPackage).put("commit", pluginCommit ?: JSONObject.NULL))
             .put("pid", Process.myPid())
             .put("recordedWallMs", System.currentTimeMillis())
             .put("methodology", METHODOLOGY)
@@ -699,10 +801,12 @@ class BridgeLeakGateDeviceTest {
 
     /**
      * What one run reports: listener callbacks, and the gate lines the script prints (gateReady / gateStat / gateSkip / errors),
-     * read from the host console as a weakly held [ConsoleImpl.LogListener].
+     * read from the host console as a weakly held [ConsoleImpl.LogListener]. With [marker] (Bun and QuickJS, which print to the
+     * global console) only lines that start with it count, and error lines printed after the stop count as stop errors.
      * zh-CN: 一次运行的结果: 监听器回调, 以及脚本打印的门禁行 (gateReady / gateStat / gateSkip / 错误), 作为被弱引用的 [ConsoleImpl.LogListener] 从宿主控制台读取.
+     * 给出 [marker] 时 (Bun 与 QuickJS, 输出到全局控制台) 只读取以它开头的行, 停止之后打印的错误行算作停止错误.
      */
-    private class RunOutcome : ConsoleImpl.LogListener {
+    private class RunOutcome(private val marker: String?) : ConsoleImpl.LogListener {
         val errors = ConcurrentLinkedQueue<String>()
         val stopErrors = ConcurrentLinkedQueue<String>()
         val scriptErrors = ConcurrentLinkedQueue<String>()
@@ -717,6 +821,7 @@ class BridgeLeakGateDeviceTest {
         override fun onNewLog(logEntry: ConsoleImpl.LogEntry) {
             logEntry.content.toString().lineSequence().forEach { raw ->
                 val line = raw.trim()
+                if (marker != null && !line.startsWith(marker)) return@forEach
                 when {
                     line.endsWith(BridgeScenarios.READY_LINE) -> ready.set(true)
                     BridgeScenarios.STAT_PREFIX in line -> {
@@ -724,7 +829,10 @@ class BridgeLeakGateDeviceTest {
                         parts.getOrNull(1)?.toDoubleOrNull()?.let { stats[parts[0]] = it }
                     }
                     BridgeScenarios.SKIP_PREFIX in line -> skip = line.substringAfter(BridgeScenarios.SKIP_PREFIX).take(300)
-                    BridgeScenarios.ERROR_PREFIX in line -> scriptErrors += line.substringAfter(BridgeScenarios.ERROR_PREFIX).take(300)
+                    BridgeScenarios.ERROR_PREFIX in line -> {
+                        val text = line.substringAfter(BridgeScenarios.ERROR_PREFIX).take(300)
+                        if (marker != null && stopping.get()) stopErrors += text else scriptErrors += text
+                    }
                 }
             }
         }
@@ -758,6 +866,10 @@ class BridgeLeakGateDeviceTest {
         var clearMs: Long? = null
         var nativePeakBytes = 0L
 
+        /** Session instances after the run (engines without observer reports). zh-CN: 运行后的会话实例数 (没有观察者报告的引擎). */
+        var sessionCounts: Map<String, Long>? = null
+        var sessionClearMs: Long? = null
+
         fun references(): List<WeakReference<*>> = runtimes + engines + sessions.values.flatten()
 
         fun reachable(): Map<String, Int> = (mapOf("engine" to engines, "runtime" to runtimes) + sessions)
@@ -780,6 +892,7 @@ class BridgeLeakGateDeviceTest {
             .put("sessions", JSONObject(sessions.mapValues { it.value.size }))
             .put("executionIds", executionIds.size)
             .put("clearedMs", clearMs ?: JSONObject.NULL)
+            .apply { sessionCounts?.let { put("sessionInstances", JSONObject(it)).put("sessionClearedMs", sessionClearMs ?: JSONObject.NULL) } }
             .put("reachable", JSONObject(reachable()))
             .put("errors", JSONArray(errors))
             .put("stopErrors", JSONArray(stopErrors))
@@ -805,6 +918,7 @@ class BridgeLeakGateDeviceTest {
         private const val REDUCED_BUDGET_AFTER = 3
         private const val REDUCED_BUDGET_MS = 1_000L
         private const val PLUGIN_STOP_SETTLE_MS = 500L
+        private const val SESSION_POLL_MS = 200L
         private const val RENDER_WARMUP_TEXT = "AutoJs6 memory gate"
         private const val RENDER_WARMUP_MS = 2_000L
 
@@ -812,7 +926,9 @@ class BridgeLeakGateDeviceTest {
         private const val BINDING_SLACK = 1
 
         /** Host registries of pooled engines, which may keep one idle connection (T1 (h)). zh-CN: 带连接池的引擎的宿主注册表, 可保留 1 个空闲连接 (T1 (h)). */
-        private val POOLED_REGISTRIES = listOf("NodeJsRuntimePluginHost.connectionPool")
+        private val POOLED_REGISTRIES = listOf(
+            "NodeJsRuntimePluginHost.connectionPool", "BunRuntimePluginClient.connectionPool", "QuickJsRuntimePluginClient.connectionPool",
+        )
 
         /**
          * Bridge threads of process-wide cached pools (`NodeJsRuntimePluginHost.binderCallExecutor`, 60 s keep-alive), whose idle
@@ -822,7 +938,6 @@ class BridgeLeakGateDeviceTest {
          */
         private val POOLED_THREADS = listOf("AutoJs6-Node-Plugin-Rpc")
         private const val POOLED_THREAD_WAIT_MS = 65_000L
-        private val PLUGIN_PACKAGES = setOf(BridgeScenarios.NODE_PACKAGE)
         private val COLOR_OS_MANUFACTURERS = setOf("oppo", "oneplus", "realme")
 
         @Volatile
@@ -835,10 +950,13 @@ class BridgeLeakGateDeviceTest {
             "Heap deltas compare the sample after the last warm-up with the final sample; thread, Rhino context, engine and bridge " +
             "registry deltas compare with the sample before the first run (the plugin probe already bound the plugin), bridge " +
             "threads with the end of the warm-ups (idle workers of the host's cached binder-call pool get up to 65 s to expire " +
-            "first). Bridge registries must return to the start except the Node connection pool, " +
-            "which may keep one idle connection; system-side connections of this process to the plugin packages " +
+            "first). Bridge registries must return to the start except the connection pools of the Node, Bun and QuickJS clients, " +
+            "which may keep one idle connection each; system-side connections of this process to the plugin package of the scenario " +
             "(LoadedApk.mServices, hidden_api_policy 1) may be one above the start. Plugin process PSS is recorded after the " +
-            "second measured run and at the end, never judged (R9). Force mode waits for gateReady(), sleeps forceDelayMs and " +
-            "calls forceStop on every live engine of the run on the main thread."
+            "second measured run and at the end, never judged (R9); for Bun it includes the bun child processes (same uid). " +
+            "Bun and QuickJS report no session objects yet, so their host-side session classes (broker, output callback, " +
+            "automation bridge, call executor, provider) are counted through VMDebug.countInstancesOfClasses after every run and " +
+            "must return to the count before the first run; their gate lines are read from the global console by a per-run marker. " +
+            "Force mode waits for gateReady(), sleeps forceDelayMs and calls forceStop on every live engine of the run on the main thread."
     }
 }

@@ -3,10 +3,66 @@ package org.autojs.autojs.memory.bridge
 import org.autojs.autojs.memory.scenarios.GateMode
 
 /**
+ * The plugin engine of a scenario (docs/memory-phase2/ROADMAP.md T2): its plugin package, the classes the heap analysis looks for
+ * after a retained run (T4), and the host-side session classes counted after every run (T1 (a)).
+ * zh-CN: 场景所用的插件引擎 (docs/memory-phase2/ROADMAP.md T2): 插件包名, 有残留时堆分析查找的类 (T4), 以及每次运行后计数的宿主侧会话类 (T1 (a)).
+ */
+internal enum class BridgeEngine(
+    val pluginPackage: String,
+    val heapClasses: List<String>,
+    /**
+     * Session classes (kind -> class name) whose reachable instances VMDebug counts after every run, for engines that do not
+     * report their session objects to BridgeExecutionObserver (Bun and QuickJS before P2.2). Node reports its broker and
+     * provider, so it counts nothing.
+     * zh-CN: 会话类 (类别 -> 类名), 每次运行后经 VMDebug 计数其可达实例; 用于不向 BridgeExecutionObserver 报告会话对象的引擎
+     * (P2.2 之前的 Bun 与 QuickJS). Node 会报告 broker 与 provider, 因此不计数.
+     */
+    val sessionClasses: Map<String, String>,
+) {
+    NODE(
+        "io.github.supermonster003.autojs6.plugin.nodejs",
+        listOf(
+            "org.autojs.autojs.engine.NodeJsHostCapabilityBroker",
+            "org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider",
+            "org.autojs.autojs.engine.NodePluginJavaScriptEngine",
+            "org.autojs.autojs.runtime.ScriptRuntime",
+        ),
+        emptyMap(),
+    ),
+    BUN(
+        "io.github.supermonster003.autojs6.plugin.bun.runtime",
+        listOf(
+            "org.autojs.autojs.engine.BunHostCapabilityBroker",
+            "org.autojs.autojs.engine.BunPluginScriptEngine\$OutputCallback",
+            "org.autojs.autojs.engine.BunAutomationBridge",
+            "org.autojs.autojs.engine.BunHostCallExecutor",
+            "org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider",
+            "org.autojs.autojs.engine.BunPluginScriptEngine",
+        ),
+        linkedMapOf(
+            "bun.broker" to "org.autojs.autojs.engine.BunHostCapabilityBroker",
+            "bun.callback" to "org.autojs.autojs.engine.BunPluginScriptEngine\$OutputCallback",
+            "bun.automation" to "org.autojs.autojs.engine.BunAutomationBridge",
+            "bun.callExecutor" to "org.autojs.autojs.engine.BunHostCallExecutor",
+            "bun.provider" to "org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider",
+        ),
+    ),
+    QUICKJS(
+        "io.github.supermonster003.autojs6.plugin.quickjs.runtime",
+        listOf(
+            "org.autojs.autojs.engine.QuickJsPluginScriptEngine\$OutputCallback",
+            "org.autojs.autojs.engine.QuickJsPluginScriptEngine",
+        ),
+        linkedMapOf("quickjs.callback" to "org.autojs.autojs.engine.QuickJsPluginScriptEngine\$OutputCallback"),
+    ),
+}
+
+/**
  * One scenario of the bridge leak gate (docs/memory-phase2/ROADMAP.md T2): a script for a plugin engine plus what the runner
- * does around it. [body] runs inside an async function after the prelude of [BridgeScenarios.nodeSource].
+ * does around it. [body] runs after the prelude of [BridgeScenarios.source]: inside an async function for Node and Bun, at the
+ * top level inside try for QuickJS.
  * zh-CN: 桥接泄漏门禁的一个场景 (docs/memory-phase2/ROADMAP.md T2): 插件引擎脚本, 以及运行器在其前后要做的事. [body] 在
- * [BridgeScenarios.nodeSource] 的前导代码之后, 于一个 async 函数中运行.
+ * [BridgeScenarios.source] 的前导代码之后运行: Node 与 Bun 在一个 async 函数中, QuickJS 在顶层的 try 中.
  */
 internal class BridgeScenario(
     val id: String,
@@ -15,6 +71,7 @@ internal class BridgeScenario(
     val hypotheses: String,
     val body: String,
     val notes: String = "",
+    val engine: BridgeEngine = BridgeEngine.NODE,
     val expectedEngines: Int = 1,
     val normalTimeoutMs: Long = 60_000,
     /** The runner kills the plugin process once the script reports gateReady (T2 X4), in both modes. zh-CN: 脚本报告 gateReady 后运行器杀掉插件进程 (T2 X4), 两种模式都是. */
@@ -32,11 +89,22 @@ internal class BridgeScenario(
     val expectsFailure: Boolean = false,
     /** Bridge capabilities declared in package.json (autojs6.node.permissions). zh-CN: 在 package.json 中声明的桥接能力 (autojs6.node.permissions). */
     val capabilities: List<String> = emptyList(),
+    /**
+     * Bun host capability grants the runner turns on for the scenario and restores afterwards (off by default, such as sensors.control).
+     * zh-CN: 运行器为该场景打开并在结束后还原的 Bun 宿主能力授权 (默认关闭的, 如 sensors.control).
+     */
+    val bunGrants: List<String> = emptyList(),
+    /**
+     * File name of the script in the working directory; the runner writes the source there and runs a JavaScriptFileSource
+     * instead of a string source.
+     * zh-CN: 脚本在工作目录中的文件名; 运行器把源码写到该文件, 以 JavaScriptFileSource 代替字符串源运行.
+     */
+    val sourceFile: String? = null,
+    /** Size of the GATE_DATA string literal in KiB (QuickJS only). zh-CN: GATE_DATA 字符串字面量的大小, 单位 KiB (仅 QuickJS). */
+    val sourceDataKb: Int = 0,
 )
 
 internal object BridgeScenarios {
-
-    const val NODE_PACKAGE = "io.github.supermonster003.autojs6.plugin.nodejs"
 
     const val READY_LINE = "AJ6MEM_READY"
     const val STAT_PREFIX = "AJ6MEM_STAT "
@@ -44,15 +112,16 @@ internal object BridgeScenarios {
     const val ERROR_PREFIX = "AJ6MEM_ERROR "
 
     /**
-     * Classes the heap analysis looks for after a retained run (T4).
-     * zh-CN: 有残留时堆分析查找的类 (T4).
+     * The source of a run for the engine of [scenario]. Bun and QuickJS print to the global console, which every execution
+     * shares, so their gate lines start with [marker] and the runner keeps only those.
+     * zh-CN: 按 [scenario] 的引擎生成一次运行的源码. Bun 与 QuickJS 输出到所有执行共用的全局控制台, 因此其门禁行以 [marker] 开头,
+     * 运行器只读取这些行.
      */
-    val NODE_HEAP_CLASSES = listOf(
-        "org.autojs.autojs.engine.NodeJsHostCapabilityBroker",
-        "org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider",
-        "org.autojs.autojs.engine.NodePluginJavaScriptEngine",
-        "org.autojs.autojs.runtime.ScriptRuntime",
-    )
+    fun source(scenario: BridgeScenario, mode: GateMode, marker: String, png: String): String = when (scenario.engine) {
+        BridgeEngine.NODE -> nodeSource(scenario, mode, marker, png)
+        BridgeEngine.BUN -> bunSource(scenario, mode, marker, png)
+        BridgeEngine.QUICKJS -> quickJsSource(scenario, mode, marker, png)
+    }
 
     /**
      * The Node source of a run: the engine directive, the gate helpers and [body] in an async function whose rejection prints
@@ -83,6 +152,74 @@ internal object BridgeScenarios {
         |    process.exitCode = 1;
         |});
         |""".trimMargin()
+
+    /**
+     * The Bun source of a run: as [nodeSource], with marked gate lines and gateHost(), which returns the host client of
+     * AUTOJS6_HOST_CLIENT_MODULE (null when the plugin does not provide one).
+     * zh-CN: 一次运行的 Bun 源码: 同 [nodeSource], 门禁行带标记; gateHost() 返回 AUTOJS6_HOST_CLIENT_MODULE 的宿主客户端 (插件未提供时为 null).
+     */
+    fun bunSource(scenario: BridgeScenario, mode: GateMode, marker: String, png: String): String = """
+        |"bun";
+        |const GATE_MODE = "${mode.label}";
+        |const GATE_MARKER = "$marker";
+        |const GATE_PNG = "$png";
+        |function gateReady() { console.log(GATE_MARKER + " $READY_LINE"); }
+        |function gateStat(name, value) { console.log(GATE_MARKER + " $STAT_PREFIX" + name + " " + value); }
+        |function gateSkip(reason) { console.log(GATE_MARKER + " $SKIP_PREFIX" + reason); }
+        |function gateSleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
+        |async function gateHost() {
+        |    const module = process.env.AUTOJS6_HOST_CLIENT_MODULE;
+        |    if (!module) return null;
+        |    const { createHostClient } = await import(module);
+        |    return await createHostClient();
+        |}
+        |async function gateHold() {
+        |    if (GATE_MODE !== "force") return;
+        |    gateReady();
+        |    setInterval(() => {}, 1000);
+        |    await new Promise(() => {});
+        |}
+        |(async () => {
+        |${scenario.body.trimIndent()}
+        |})().catch((e) => {
+        |    console.error(GATE_MARKER + " $ERROR_PREFIX" + String((e && e.stack) || e).split("\n").slice(0, 4).join(" | "));
+        |    process.exitCode = 1;
+        |});
+        |""".trimMargin()
+
+    /**
+     * The QuickJS source of a run. The plugin has console and print only (no timers, no host API), so gateBusy waits by spinning
+     * (the interrupt handler stops it on forceStop) and gateHold of F spins until the stop. [body] runs at the top level inside
+     * try (a module when the source name ends with .mjs); GATE_DATA holds [BridgeScenario.sourceDataKb] KiB of text.
+     * zh-CN: 一次运行的 QuickJS 源码. 插件只有 console 与 print (没有定时器与宿主 API), 因此 gateBusy 以空转等待 (forceStop 时由中断处理器停止),
+     * F 的 gateHold 空转直到被停止. [body] 在顶层的 try 中运行 (源名以 .mjs 结尾时为模块); GATE_DATA 为 [BridgeScenario.sourceDataKb] KiB 的文本.
+     */
+    fun quickJsSource(scenario: BridgeScenario, mode: GateMode, marker: String, png: String): String {
+        val data = if (scenario.sourceDataKb <= 0) "" else png.repeat(scenario.sourceDataKb * 1024 / png.length + 1).take(scenario.sourceDataKb * 1024)
+        return """
+            |"quickjs";
+            |const GATE_MODE = "${mode.label}";
+            |const GATE_MARKER = "$marker";
+            |const GATE_PNG = "$png";
+            |const GATE_DATA = "$data";
+            |function gateReady() { console.log(GATE_MARKER + " $READY_LINE"); }
+            |function gateStat(name, value) { console.log(GATE_MARKER + " $STAT_PREFIX" + name + " " + value); }
+            |function gateSkip(reason) { console.log(GATE_MARKER + " $SKIP_PREFIX" + reason); }
+            |function gateError(e) { console.error(GATE_MARKER + " $ERROR_PREFIX" + String((e && e.stack) || e).split("\n").slice(0, 4).join(" | ")); }
+            |function gateBusy(ms) { const end = Date.now() + ms; while (Date.now() < end) {} }
+            |function gateHold() {
+            |    if (GATE_MODE !== "force") return;
+            |    gateReady();
+            |    for (;;) gateBusy(1000);
+            |}
+            |try {
+            |${scenario.body.trimIndent()}
+            |} catch (e) {
+            |    gateError(e);
+            |    throw e;
+            |}
+            |""".trimMargin()
+    }
 
     private val all = listOf(
         BridgeScenario(
@@ -318,6 +455,151 @@ internal object BridgeScenarios {
                 const device = require("device");
                 await device.info();
                 await gateHold();
+            """,
+        ),
+        BridgeScenario(
+            "BN1", "Empty script", "C13",
+            notes = "X1: one line, then the script ends; the payload file, the output callback and the broker of one execution",
+            engine = BridgeEngine.BUN,
+            body = """
+                console.log(GATE_MARKER + " memory gate");
+                await gateHold();
+            """,
+        ),
+        BridgeScenario(
+            "BN2", "Host capabilities through the host client", "C13",
+            notes = "X2: device.info + toast + a 64x64 PNG round trip (images.fromBase64 -> readPixels 4x4 -> toBytes png -> recycle) " +
+                "through the host client of AUTOJS6_HOST_CLIENT_MODULE",
+            engine = BridgeEngine.BUN,
+            body = """
+                const host = await gateHost();
+                if (!host) { gateSkip("AUTOJS6_HOST_CLIENT_MODULE is not set"); return; }
+                const info = await host.device.info();
+                gateStat("deviceInfoKeys", Object.keys(info || {}).length);
+                await host.toast("memory gate BN2");
+                const image = await host.images.fromBase64(GATE_PNG);
+                try {
+                    const pixels = await host.images.readPixels(image, { region: [0, 0, 4, 4] });
+                    gateStat("pixels", (pixels && pixels.data && pixels.data.length) || 0);
+                    const bytes = await host.images.toBytes(image, "png");
+                    gateStat("pngBytes", (bytes && (bytes.byteLength || bytes.length)) || 0);
+                    await gateHold();
+                } finally {
+                    await host.images.recycle(image);
+                }
+            """,
+        ),
+        BridgeScenario(
+            "BN3", "Sensor callbacks", "C13",
+            notes = "X3: accelerometer subscription of the host client (sensors.control granted by the runner, off by default); " +
+                "N waits for 3 events (5 s at most), F stops while the subscription is open",
+            engine = BridgeEngine.BUN,
+            bunGrants = listOf("sensors.control"),
+            body = """
+                const host = await gateHost();
+                if (!host) { gateSkip("AUTOJS6_HOST_CLIENT_MODULE is not set"); return; }
+                if (!host.hasCapability("sensors.control")) { gateSkip("sensors.control is not granted"); return; }
+                let count = 0;
+                let done;
+                const three = new Promise((resolve) => { done = resolve; });
+                const subscription = host.sensors.subscribe("accelerometer", () => { if (++count >= 3) done(); }, { samplingIntervalMs: 50, drainIntervalMs: 200 });
+                try {
+                    await subscription.ready;
+                    await Promise.race([three, gateSleep(5000)]);
+                    gateStat("sensorEvents", count);
+                    await gateHold();
+                } finally {
+                    await subscription.close();
+                }
+            """,
+        ),
+        BridgeScenario(
+            "BN4", "Plugin process killed", "C13 C16",
+            notes = "X4: device.info, then the runner force-stops the Bun plugin package once the script is ready; the run ends " +
+                "with an exception (expected); F stops forceDelayMs after the kill",
+            engine = BridgeEngine.BUN,
+            normalTimeoutMs = 90_000, killPluginOnReady = true, expectsFailure = true,
+            body = """
+                const host = await gateHost();
+                if (host) await host.device.info();
+                gateReady();
+                await gateSleep(5000);
+            """,
+        ),
+        BridgeScenario(
+            "BN5", "ColorOS bind refusal loop", "C13 C16",
+            notes = "OPD2413 only: the runner force-stops the Bun plugin before every run, so the first bindService is refused and " +
+                "PluginAutoWake binds again (as ND13); other devices skip and record",
+            engine = BridgeEngine.BUN,
+            colorOsOnly = true, forceStopPluginBeforeRun = true, normalTimeoutMs = 90_000,
+            body = """
+                const host = await gateHost();
+                if (host) await host.device.info();
+                await gateHold();
+            """,
+        ),
+        BridgeScenario(
+            "QJ1", "Empty script", "C14",
+            notes = "X1: one line, then the script ends; the smallest bind / release path of QuickJS",
+            engine = BridgeEngine.QUICKJS,
+            body = """
+                console.log(GATE_MARKER + " memory gate");
+                gateHold();
+            """,
+        ),
+        BridgeScenario(
+            "QJ2", "File source and output", "C14",
+            notes = "X2: QuickJS has no host capabilities, so a 64 KiB .quickjs.mjs file source (host snapshot + descriptor, module " +
+                "with top-level await) and chunked stdout / stderr stand in for the data round trip",
+            engine = BridgeEngine.QUICKJS,
+            sourceFile = "aj6mem-qj2.quickjs.mjs", sourceDataKb = 64,
+            body = """
+                let checksum = 0;
+                for (let i = 0; i < GATE_DATA.length; i += 7) checksum = (checksum * 31 + GATE_DATA.charCodeAt(i)) % 1000003;
+                await Promise.resolve();
+                gateStat("sourceDataChars", GATE_DATA.length);
+                gateStat("checksum", checksum);
+                for (let i = 0; i < 4; i++) console.log(GATE_MARKER + " chunk " + i + " " + GATE_DATA.substring(i * 1024, (i + 1) * 1024));
+                console.error(GATE_MARKER + " stderr " + GATE_DATA.substring(0, 512));
+                gateHold();
+            """,
+        ),
+        BridgeScenario(
+            "QJ3", "Output callbacks from Promise jobs", "C14",
+            notes = "X3: three Promise jobs, each spinning 300 ms and printing one line (one output event each); F keeps a job " +
+                "printing a line every 100 ms, so the stop lands while output events are in flight",
+            engine = BridgeEngine.QUICKJS,
+            body = """
+                let ticks = 0;
+                const tick = () => { gateBusy(300); ticks++; console.log(GATE_MARKER + " tick " + ticks); };
+                Promise.resolve().then(tick).then(tick).then(tick).then(() => {
+                    gateStat("ticks", ticks);
+                    if (GATE_MODE !== "force") return;
+                    gateReady();
+                    for (let i = 0; ; i++) { gateBusy(100); console.log(GATE_MARKER + " flight " + i); }
+                }).catch(gateError);
+            """,
+        ),
+        BridgeScenario(
+            "QJ4", "Plugin process killed", "C14 C16",
+            notes = "X4: the runner force-stops the QuickJS plugin package once the script is ready; the run ends with an exception " +
+                "(expected); F stops forceDelayMs after the kill",
+            engine = BridgeEngine.QUICKJS,
+            normalTimeoutMs = 90_000, killPluginOnReady = true, expectsFailure = true,
+            body = """
+                gateReady();
+                gateBusy(5000);
+            """,
+        ),
+        BridgeScenario(
+            "QJ5", "ColorOS bind refusal loop", "C14 C16",
+            notes = "OPD2413 only: the runner force-stops the QuickJS plugin before every run, so the first bindService is refused " +
+                "and PluginAutoWake binds again (as ND13); other devices skip and record",
+            engine = BridgeEngine.QUICKJS,
+            colorOsOnly = true, forceStopPluginBeforeRun = true, normalTimeoutMs = 90_000,
+            body = """
+                console.log(GATE_MARKER + " memory gate");
+                gateHold();
             """,
         ),
     )

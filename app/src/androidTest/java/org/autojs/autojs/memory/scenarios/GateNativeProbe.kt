@@ -85,12 +85,13 @@ internal object GateNativeProbe {
     }.getOrDefault(-1L)
 
     /**
-     * Reachable instances per class (VMDebug collects garbage first); -1 when the hidden API is not accessible.
-     * zh-CN: 每个类的可达实例数 (VMDebug 会先回收垃圾); 隐藏 API 不可用时为 -1.
+     * Reachable instances per class of [names] (key -> class name; VMDebug collects garbage first); -1 when the hidden API is
+     * not accessible or the class is missing.
+     * zh-CN: [names] (键 -> 类名) 中每个类的可达实例数 (VMDebug 会先回收垃圾); 隐藏 API 不可用或类不存在时为 -1.
      */
-    fun instanceCounts(): JSONObject {
+    fun instanceCounts(names: Map<String, String> = INSTANCE_CLASSES): JSONObject {
         val result = JSONObject()
-        val classes = INSTANCE_CLASSES.mapValues { (_, name) -> runCatching { Class.forName(name) }.getOrNull() }
+        val classes = names.mapValues { (_, name) -> runCatching { Class.forName(name) }.getOrNull() }
         val present = classes.filterValues { it != null }.mapValues { it.value!! }
         val bulk = countInstancesOfClasses?.let { method ->
             runCatching { method.invoke(null, present.values.toTypedArray(), true) as LongArray }.getOrNull()
