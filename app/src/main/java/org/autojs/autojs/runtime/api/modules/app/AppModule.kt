@@ -84,7 +84,7 @@ class AppModule(private val runtime: ScriptRuntime) {
     }
 
     @ScriptFunction(global = ScriptGlobal.ALSO)
-    fun sendEmail(options: Any? = null) {
+    fun sendEmail(options: Any?) {
         App.sendEmail(runtime, arrayOf(options))
     }
 
