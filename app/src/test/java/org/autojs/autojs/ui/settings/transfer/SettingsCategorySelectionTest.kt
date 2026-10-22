@@ -17,7 +17,7 @@ class SettingsCategorySelectionTest {
     @Test
     fun selectableLeavesOutTheDataCategories() {
         val selectable = SettingsCategorySelection.selectable().map { it.id }
-        assertEquals(29, selectable.size)
+        assertEquals(30, selectable.size)
         assertFalse("data_shortcuts" in selectable)
         assertFalse("data_color_library" in selectable)
         assertEquals(SettingCategory.ALL.map { it.id }.filter { it in selectable }, selectable)
@@ -26,7 +26,7 @@ class SettingsCategorySelectionTest {
     @Test
     fun startsWithTheDefaultsWhenNothingIsRemembered() {
         val initial = SettingsCategorySelection.initial(null)
-        assertEquals(26, initial.size)
+        assertEquals(27, initial.size)
         assertFalse("developer" in initial)
         assertFalse(credentials in initial)
         assertFalse("other" in initial)
@@ -42,10 +42,10 @@ class SettingsCategorySelectionTest {
     @Test
     fun bulkActionsCoverTheSelectableCategories() {
         val all = SettingsCategorySelection.all()
-        assertEquals(29, all.size)
+        assertEquals(30, all.size)
         assertTrue(credentials in all)
         val inverted = SettingsCategorySelection.inverted(listOf("appearance", "other", "data_shortcuts"))
-        assertEquals(27, inverted.size)
+        assertEquals(28, inverted.size)
         assertFalse("appearance" in inverted || "other" in inverted)
         assertEquals(all, SettingsCategorySelection.inverted(emptyList()))
         assertEquals(emptyList<String>(), SettingsCategorySelection.inverted(all))

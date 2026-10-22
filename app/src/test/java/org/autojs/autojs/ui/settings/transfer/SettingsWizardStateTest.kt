@@ -70,7 +70,7 @@ class SettingsWizardStateTest {
         assertEquals(Step.PICK_CATEGORIES, state.step)
         val expected = SettingCategory.ALL.filter { it.defaultSelected && !it.isData }.map { it.id }
         assertEquals(expected, state.selected)
-        assertEquals(26, state.selected.size)
+        assertEquals(27, state.selected.size)
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.autojs.autojs.core.pref.keys.EditorKeyboardKeys
 import org.autojs.autojs.core.pref.keys.EditorKeys
 import org.autojs.autojs.core.pref.keys.ExplorerKeys
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
+import org.autojs.autojs.core.pref.keys.FloatingKeys
 import org.autojs.autojs.core.pref.keys.GeneralKeys
 import org.autojs.autojs.core.pref.keys.HistoryKeys
 import org.autojs.autojs.core.pref.keys.JsonFileStores
@@ -102,6 +103,7 @@ object SettingsRegistry {
         ConsoleKeys,
         ConnectionKeys,
         LayoutInspectorKeys,
+        FloatingKeys,
         DeveloperKeys,
         PluginCenterKeys,
         ApkBuildKeys,

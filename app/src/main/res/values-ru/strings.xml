@@ -793,6 +793,7 @@
     <string name="settings_transfer_category_editor_smart_hint">Редактор кода > Умные подсказки</string>
     <string name="settings_transfer_category_explorer">@string/text_file_explorer</string>
     <string name="settings_transfer_category_extensibility">@string/text_extensibility</string>
+    <string name="settings_transfer_category_floating">Плавающие окна</string>
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Инспектор макета</string>

@@ -234,23 +234,12 @@ object MiscStateKeys : SettingsDomain {
     @JvmField
     val INTELLIGENT_COLOR_SCRIPT_STATE = StateKey.str(name = "INTELLIGENT_COLOR_SCRIPT_STATE", default = SettingDefault.None)
 
-    /** Position of the floating button as fractions of the screen (`CircularMenuWindow`, Q18). */
-    @JvmField
-    val CIRCULAR_MENU_POSITION_X_PERCENT = StateKey.float(name = "org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent", default = SettingDefault.of(0f))
-
-    @JvmField
-    val CIRCULAR_MENU_POSITION_Y_PERCENT = StateKey.float(name = "org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent", default = SettingDefault.of(1 - 0.618f))
-
-    /** The screen orientation the floating button was last placed in (`CircularMenuWindow`). */
+    /**
+     * The screen orientation the floating button was last placed in (`CircularMenuWindow`); its position is a setting
+     * (`FloatingKeys`, appendix C Q18).
+     */
     @JvmField
     val CIRCULAR_MENU_LAST_ORIENTATION = StateKey.int(name = "key_\$_last_orientation", default = SettingDefault.of(Configuration.ORIENTATION_PORTRAIT))
-
-    /** Position of the floating controller as fractions of the screen (`FloatingControllerWindow`, Q18); -1 when not placed yet. */
-    @JvmField
-    val FLOATING_CONTROLLER_POSITION_X_PERCENT = StateKey.float(name = "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent", default = SettingDefault.of(-1f))
-
-    @JvmField
-    val FLOATING_CONTROLLER_POSITION_Y_PERCENT = StateKey.float(name = "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent", default = SettingDefault.of(-1f))
 
     // ---------------------------------------------------------------------- the file manager (P4.2)
     // The names are the simple name of `ExplorerView` with a suffix (`ExplorerViewStateStore.prefKey`, appendix C Q24).
@@ -308,8 +297,7 @@ object MiscStateKeys : SettingsDomain {
         COLOR_SELECT_CUSTOM_COLOR, COLOR_SELECT_LEGACY_SELECTED_INDEX, COLOR_SELECT_LIBRARY_ID, COLOR_SELECT_ITEM_ID,
         COLOR_SELECT_LIBRARY_NAME, COLOR_SELECT_ITEM_NAME,
         THEME_COLOR_SCRIPT_UNDO, INTELLIGENT_COLOR_ACTIVE_SNAPSHOT, INTELLIGENT_COLOR_RUNTIME_STATE, INTELLIGENT_COLOR_SCRIPT_STATE,
-        CIRCULAR_MENU_POSITION_X_PERCENT, CIRCULAR_MENU_POSITION_Y_PERCENT, CIRCULAR_MENU_LAST_ORIENTATION,
-        FLOATING_CONTROLLER_POSITION_X_PERCENT, FLOATING_CONTROLLER_POSITION_Y_PERCENT,
+        CIRCULAR_MENU_LAST_ORIENTATION,
         EXPLORER_VIEW_PAGE_STATE, EXPLORER_VIEW_CURRENT, EXPLORER_VIEW_ROOT, EXPLORER_VIEW_HISTORY,
         LAYOUT_INSPECTOR_FIELD_MODE_INTRODUCED, LAYOUT_INSPECTOR_SELECTOR_MODE_INTRODUCED, LAYOUT_INSPECTOR_QUERY_HISTORY,
         ENABLE_OBSERVE_KEY,

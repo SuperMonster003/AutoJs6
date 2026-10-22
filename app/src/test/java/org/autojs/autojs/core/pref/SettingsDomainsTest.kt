@@ -180,6 +180,11 @@ class SettingsDomainsTest {
             "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.dir_sort_type" to "16",
             "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.file_ascending" to "true",
             "org.autojs.autojs.ui.viewmodel.ExplorerItemManager\$SortConfig.dir_ascending" to "true",
+            // States of P4.2 that appendix C Q18 made settings (`floating`); the defaults are those of the old readers.
+            "org.autojs.autojs.ui.floating.CircularMenuWindow.position.x_percent" to "0.0",
+            "org.autojs.autojs.ui.floating.CircularMenuWindow.position.y_percent" to (1 - 0.618f).toString(),
+            "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.x_percent" to "-1.0",
+            "org.autojs.autojs.ui.floating.controller.FloatingControllerWindow.position.y_percent" to "-1.0",
         )
 
         /**
