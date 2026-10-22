@@ -109,6 +109,16 @@ py -3.12 -I -u tools/memory/plugin_center_heap_check.py -s SERIAL [--apk FILE] [
 
 不走门禁 (2026-10-22 API 24 AVD 上打开插件标签页后 Java 堆数秒内涨到 512 MB 上限的复测). 原因: 插件中心按 Resources 解码的原尺寸保留已安装插件图标, res/mipmap 中 432 px 的 PNG 在 560 dpi 上放大为 1512 px (9 MB), 每个插件日夜各一份, 快照与完整发现又各一份, Android 8 之前位图像素计入 Java 堆; 修复见 `PluginInstalledIconResolver` / `PluginIconRasterPolicy`. 脚本停止宿主 (`--apk` 时先安装), 从启动图标别名启动, 记录主页的 Dalvik 堆, 点插件标签 (按 `text_plugins` 的全部译文在 `uiautomator dump` 中查找; API 24 主页始终不空闲, uiautomator 读不到窗口时改从 `dumpsys activity top` 取第 `--tab-index` 个标签), 之后每 `--interval` 秒读一次 `dumpsys meminfo`, 共 `--seconds` 秒. 只点这一个标签, 不改设置. 输出每项一行 PASS / FAIL: 进程存活 (pid 不变), 日志中无 OutOfMemoryError, 无 ANR, 打开后堆增长不超过 `--max-growth-mb`, 窗口最后三分之一内增长不超过 `--max-tail-growth-mb`. 全部 PASS 时退出码为 0.
 
+## inrt_smoke.py: 打包应用 (inrt) 冒烟
+
+```
+py -3.12 -I -u tools/memory/inrt_smoke.py -s SERIAL [--template app/build/outputs/apk/inrt/debug/inrt-v6.8.0-universal.apk] [--signing-properties sign.properties] [--sdk ANDROID_HOME] [--jdk JAVA_HOME] [--runs 10] [--timeout 120] [--settle 3] [--pss-tolerance-mb 4] [--thread-tolerance 2] [--label LABEL]
+```
+
+ROADMAP P6.3, 不走门禁. 先 `./gradlew :app:assembleInrtDebug` 生成 inrt 模板. 脚本按 `tools/sdk37/build_inrt_storage_fixtures.py` 的打包方式, 把 S2 (`threads.start` x 10 + `threads.pool`) 与 S5 (`ui.layout` 含按钮, 文本与 webview, 随后 `activity.finish()`) 的正常结束脚本合成一个 inrt 项目, 只替换模板的 `assets/project`, 对齐后用宿主自己的签名 (`sign.properties`, 密码经环境变量传给 apksigner) 签名, inrt 代码不改. 设备上已有的 inrt 应用先拉回本机, 结束后装回 (原本没有则卸载冒烟包). 每次运行: 强制停止, `am start -W` 启动, 等脚本的 exit 监听写入结束标记 (应用私有目录, `run-as` 读取), 再等 `--settle` 秒, 读进程的 `dumpsys meminfo` TOTAL PSS 与 `/proc/<pid>/status` 的线程数, 然后强制停止. 不点屏幕, 不改设置.
+
+判定: 每次都按时结束且读到数值; PSS 与线程数都不单调增长, 且 Theil-Sen 趋势 (两两斜率的中位数乘以次数减 1) 不超过 `--pss-tolerance-mb` / `--thread-tolerance`. 不用 "最后 3 次与最初 3 次的中位数之差": 新进程的 PSS 落在相距约 8 MB 的两个水平之一 (23046RP50C, 2026-10-22), 两端各 3 次就可能差一整级而并无趋势. 输出每次一行 (PSS, 线程) 与最终判定, 报告写入 `docs/memory/evidence/inrt-smoke-<机型>-<模板 versionCode>[-<label>]-<日期>.md` 与同名 `.json`. 退出码: PASS 为 0, FAIL 为 2.
+
 ## static_audit.py: 源码静态审计
 
 ```
