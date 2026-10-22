@@ -3,10 +3,9 @@ package org.autojs.autojs.network.download;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.internal.MDButton;
@@ -58,7 +57,6 @@ public class DownloadManager {
     private static DownloadManager sInstance;
 
     private final int mRetryCount = 3;
-    private final Handler mHandler;
     private final DownloadApi mDownloadApi;
     private final OkHttpClient mOkHttpClient;
 
@@ -91,7 +89,6 @@ public class DownloadManager {
     }
 
     public DownloadManager() {
-        mHandler = new Handler(Looper.getMainLooper());
         mOkHttpClient = getOkHttpClient();
         Retrofit mRetrofit = new Retrofit.Builder()
                 .baseUrl(UpdateChecker.URL_BASE_GITHUB_RAW)
@@ -281,7 +278,8 @@ public class DownloadManager {
      * zh-CN: 通过 Observable.create() 精简结构, 不再使用 PublishSubject<File>.
      */
     @SuppressLint("CheckResult")
-    private Observable<File> download(String url, String path) {
+    @VisibleForTesting
+    Observable<File> download(String url, String path) {
         return Observable.create(emitter -> {
 
             DownloadTask task = new DownloadTask(url, path);
@@ -356,6 +354,11 @@ public class DownloadManager {
         }
     }
 
+    @VisibleForTesting
+    boolean hasActiveTask(String url) {
+        return mActiveTasks.containsKey(url);
+    }
+
     private class DownloadTask {
 
         private final String mUrl;
@@ -405,7 +408,7 @@ public class DownloadManager {
 
         public void start(ResponseBody body) {
             PFiles.ensureDir(mPath);
-            mHandler.post(this::activeProgressDialogButton);
+            AndroidSchedulers.mainThread().scheduleDirect(this::activeProgressDialogButton);
             startImpl(body);
         }
 
@@ -476,6 +479,13 @@ public class DownloadManager {
             if (pd != null && !pd.isDisposed()) {
                 pd.dispose();
             }
+
+            // The disposed progress observer no longer removes this task, and it still holds the emitter and through it
+            // the caller (an Activity), so leave the active tasks here and drop the observers (docs/memory/ROADMAP.md Q54).
+            // zh-CN: 已 dispose 的进度观察者不会再移除本任务, 但仍持有 emitter 并经它持有调用方 (Activity), 因此在这里离开活动任务表并丢弃观察者 (docs/memory/ROADMAP.md Q54).
+            mActiveTasks.remove(mUrl, this);
+            mNetworkDisposable = null;
+            mProgressDisposable = null;
 
             cancelOkHttpCallsByUrl(mUrl);
 

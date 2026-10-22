@@ -17,12 +17,21 @@ import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
 import java.io.IOException
+import java.lang.ref.WeakReference
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.util.concurrent.Executors
 
-class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val host: String?, val serverPort: Int) : JsonSocket(service) {
+class JsonSocketClient(service: DevPluginService?, context: Context, val host: String?, val serverPort: Int) : JsonSocket(service) {
+
+    // The service keeps the connected client for the whole process, so the client keeps no strong reference to
+    // the Activity that started the connection (docs/memory/ROADMAP.md Q54).
+    // zh-CN: 服务在整个进程内保留已连接的客户端, 因此客户端不强引用发起连接的 Activity (docs/memory/ROADMAP.md Q54).
+    private val connectionContext = ConnectionContext(context)
+
+    private val ctx: Context
+        get() = connectionContext.app
 
     private val jsonSocketExecutor = Executors.newSingleThreadExecutor()
 
@@ -271,7 +280,7 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
      * zh-CN: 上下文为存活的 Activity 时以对话框展示握手问题, 否则以 toast 展示. 连接发起后 Activity 可能已重建 (切换语言/暗色模式).
      */
     private fun showHelloProblem(msg: String, linkify: Boolean, toastFallback: String = msg) {
-        val activity = ctx as? Activity
+        val activity = connectionContext.activity
         if (activity == null || activity.isFinishing || activity.isDestroyed) {
             ViewUtils.showToast(ctx, toastFallback, true)
             return
@@ -474,5 +483,21 @@ class JsonSocketClient(service: DevPluginService?, private val ctx: Context, val
             set(state) = MiscStateKeys.CLIENT_SOCKET_NORMALLY_CLOSED.set(state)
 
     }
+
+}
+
+/**
+ * Context of a client connection: the application context for strings and toasts, and the Activity that started
+ * the connection, held weakly, for the handshake problem dialog (docs/memory/ROADMAP.md Q54).
+ * zh-CN: 客户端连接的上下文: 字符串与 toast 使用 application context, 发起连接的 Activity 只以弱引用保留, 供握手问题对话框使用 (docs/memory/ROADMAP.md Q54).
+ */
+internal class ConnectionContext(context: Context) {
+
+    val app: Context = context.applicationContext ?: context
+
+    private val activityRef = (context as? Activity)?.let { WeakReference(it) }
+
+    val activity: Activity?
+        get() = activityRef?.get()
 
 }
