@@ -3,8 +3,10 @@
 Scans app/src/main/java (Java and Kotlin) and reports:
 
 (a) process-lifetime fields (Java `static`, Kotlin `object` / `companion object` / top-level
-    properties) whose declared type mentions ScriptRuntime, ScriptEngine, a Rhino Scriptable or
-    scope, the Rhino Context, Activity, View, Fragment or Dialog (Android Context is listed
+    properties, also when the object body is on the header line) whose declared type mentions
+    ScriptRuntime, ScriptEngine, a Rhino Scriptable or scope, the Rhino Context, Activity, View,
+    Fragment, Dialog, a ServiceConnection or a Binder interface (IBinder, IInterface, DeathRecipient
+    and the AIDL interfaces of app/src/main/aidl and plugin-api; Android Context is listed
     separately for information), marked as weak when wrapped in WeakReference / SoftReference;
 (b) files that call registerReceiver / bindService / .subscribe( / create a WebView /
     addIdleHandler / Looper.prepare / ThreadLocal, with the count of the matching release calls
@@ -22,8 +24,15 @@ create a WebView. Reasons already written for a key are kept, new keys get the r
 app/src/test/java/org/autojs/autojs/memory/StaticReferenceScanner.kt implements the same rules and
 StaticReferenceGuardTest checks that both give the same rows.
 
+--bridge (docs/memory-phase2/ROADMAP.md P0.5 / T7) writes static-audit-bridge-<date>.md to
+docs/memory-phase2/evidence instead: every process-lifetime field of the plugin engine bridges (engine/
+and core/plugin/, grouped by engine) with its line, and the registration / release lines of
+bindService, registerReceiver, linkToDeath, WebView, WindowManager.addView, Handler, HandlerThread and
+ThreadLocal in those files.
+
 Usage: py -3.12 -I tools/memory/static_audit.py [--out docs/memory/evidence] [--json]
        py -3.12 -I tools/memory/static_audit.py --guard [--check]
+       py -3.12 -I tools/memory/static_audit.py --bridge [--out docs/memory-phase2/evidence]
 """
 import argparse
 import datetime
@@ -39,6 +48,10 @@ WHITELIST = ROOT / "app" / "src" / "test" / "resources" / "memory" / "static-ref
 RHINO_SCOPE_TYPES = {"Scriptable", "ScriptableObject", "NativeObject", "NativeArray", "NativeFunction", "BaseFunction",
                      "TopLevelScope", "VarScope", "ImporterTopLevel", "NativeJavaObject", "IdScriptableObject"}
 ENGINE_TYPES = {"ScriptEngine", "JavaScriptEngine", "RhinoJavaScriptEngine", "LoopBasedJavaScriptEngine"}
+# Binder proxies, stubs and service connections (docs/memory-phase2/ROADMAP.md T7 (a)); AIDL interface names are added
+# from the .aidl files of the host and of plugin-api.
+BINDER_TYPES = {"ServiceConnection", "IBinder", "Binder", "IInterface", "DeathRecipient"}
+AIDL_ROOTS = (ROOT / "app" / "src" / "main" / "aidl", ROOT / "plugin-api")
 WEAK_WRAPPERS = {"WeakReference", "SoftReference"}
 COLLECTIONS = {"List", "MutableList", "ArrayList", "Set", "MutableSet", "HashSet", "LinkedHashSet", "Map", "MutableMap",
                "HashMap", "LinkedHashMap", "ConcurrentHashMap", "CopyOnWriteArrayList", "CopyOnWriteArraySet",
@@ -53,10 +66,25 @@ PAIRS = [
     ("Looper.prepare", r"\bLooper\.prepare\s*\(", r"\.quit(?:Safely)?\s*\(|\bquitForThread\s*\("),
     ("ThreadLocal", r"\bThreadLocal\s*(?:<[^>;]*>)?\s*(?:\(|\.withInitial)|:\s*ThreadLocal\s*<", r"\.remove\s*\(\s*\)"),
 ]
+# engine/ and core/plugin/ hold the plugin engine bridges (docs/memory-phase2/ROADMAP.md T7; engine/Runtime before).
 SCRIPT_PATHS = ("runtime/", "execution/", "core/looper/", "core/image/", "core/ui/", "core/web/", "core/console/",
                 "core/record/", "core/automator/", "core/accessibility/", "core/eventloop/", "core/floaty/", "rhino/",
-                "engine/Runtime", "core/opencv/", "core/pref/Pref")
+                "engine/", "core/opencv/", "core/pref/Pref", "core/plugin/")
 PAGE_PATHS = ("ui/", "theme/")
+
+
+def aidl_interfaces():
+    """Simple names of the interfaces declared in .aidl files (parcelables are left out)."""
+    names = set()
+    for root in AIDL_ROOTS:
+        for file in sorted(root.rglob("*.aidl")) if root.is_dir() else []:
+            if "build" in file.relative_to(root).parts:
+                continue
+            names.update(re.findall(r"^\s*(?:oneway\s+)?interface\s+(\w+)", file.read_text(encoding="utf-8", errors="replace"), re.MULTILINE))
+    return names
+
+
+BINDER_INTERFACES = BINDER_TYPES | aidl_interfaces()
 
 
 def strip_code(text, kotlin):
@@ -146,6 +174,8 @@ def categories(type_text, imports):
             found.add("Dialog")
         elif (name == "View" or name.endswith("View") or name == "ViewGroup") and not name.endswith("ViewModel"):
             found.add("View")
+        elif any(part in BINDER_INTERFACES for part in token.split(".")):
+            found.add("Binder")
     if not found:
         return None, None
     if any(name in WEAK_WRAPPERS for name in simple):
@@ -200,8 +230,27 @@ def weak_initializer(initializer, holding):
     return holding
 
 
-def kotlin_statics(path, code, imports):
-    """Properties declared at top level or directly in an `object` / `companion object` body."""
+def inline_body(code, start):
+    """Text of a block body from `start` (after its `{`) to its closing brace or the end of that line."""
+    depth = 1
+    for i in range(start, len(code)):
+        if code[i] == "\n":
+            return code[start:i]
+        if code[i] == "{":
+            depth += 1
+        elif code[i] == "}":
+            depth -= 1
+            if not depth:
+                return code[start:i]
+    return code[start:]
+
+
+def kotlin_statics(path, code, imports, untyped=None):
+    """Properties declared at top level or directly in an `object` / `companion object` body.
+
+    An object body that starts on its header line (`companion object { val x = ... }`) is read from that line too
+    (docs/memory-phase2/ROADMAP.md T7). Declarations without a type the scan can infer go to `untyped` when given.
+    """
     rows = []
     stack = []
     statement_start = 0
@@ -212,11 +261,14 @@ def kotlin_statics(path, code, imports):
     # One pass over the characters records the scope kind in effect at each line start. The kind of a
     # block comes from the text between the previous brace or semicolon and its opening brace.
     scopes_by_line = ["top"]
+    inline = []
     for i, c in enumerate(code):
         if c == "{":
             header = code[max(statement_start, i - 300):i]
             if re.search(r"\bcompanion\s+object\b", header) or re.search(r"(?:^|[\s;])object\s+\w+", header):
                 stack.append("object")
+                # Statements after the brace on the header line belong to the object body.
+                inline += [(len(scopes_by_line) - 1, part) for part in inline_body(code, i + 1).split(";") if part.strip()]
             elif re.search(r"\b(?:class|interface)\s+\w+", header):
                 stack.append("class")
             elif re.search(r"\bfun\b", header):
@@ -239,12 +291,11 @@ def kotlin_statics(path, code, imports):
             statement_start = i + 1
         elif c == "\n":
             scopes_by_line.append(stack[-1] if stack else "top")
-    for number, line in enumerate(lines):
-        scope = scopes_by_line[number]
-        if scope not in ("top", "object"):
-            continue
+    declarations = [(number, scopes_by_line[number], line) for number, line in enumerate(lines)
+                    if scopes_by_line[number] in ("top", "object")] + [(number, "object", text) for number, text in inline]
+    for number, scope, line in declarations:
         match = property_pattern.match(line.strip())
-        if not match:
+        if not match or any(row["line"] == number + 1 and row["name"] == match[1] for row in rows):
             continue
         name, declared, initializer, delegate = match[1], match[2], match[3], match[4]
         if initializer is not None and not initializer.strip():
@@ -257,6 +308,9 @@ def kotlin_statics(path, code, imports):
             factory = re.match(r"(?:lazy\s*\{\s*)?(" + "|".join(KOTLIN_FACTORIES) + r")\s*(<.*>)\s*\(", source)
             type_text = inferred[1] if inferred else KOTLIN_FACTORIES[factory[1]] + factory[2] if factory else ""
         if not type_text:
+            if untyped is not None:
+                untyped.append({"file": path, "line": number + 1, "holder": "kotlin " + ("top-level" if scope == "top" else "object"),
+                                "name": name, "initializer": " ".join((initializer or delegate or "").split())[:120]})
             continue
         found, holding = categories(type_text, imports)
         rows.append({"file": path, "line": number + 1, "holder": "kotlin " + ("top-level" if scope == "top" else "object"),
@@ -429,6 +483,14 @@ def git_head():
         return "?"
 
 
+def git_dirty(paths):
+    try:
+        out = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "--", *paths], capture_output=True, text=True, timeout=30).stdout
+    except OSError:
+        return []
+    return [line[3:] for line in out.splitlines() if line.strip()]
+
+
 def markdown(date, head, files, statics, pairs):
     strong = [row for row in statics if row["categories"] and row["holding"] != "weak" and row["categories"] != ["AndroidContext"]]
     weak = [row for row in statics if row["categories"] and row["holding"] == "weak"]
@@ -488,24 +550,230 @@ def markdown(date, head, files, statics, pairs):
     return "\n".join(lines) + "\n"
 
 
+# --bridge (docs/memory-phase2/ROADMAP.md P0.5): engine groups by path prefix, first match wins; core/plugin/<file> is the shared base.
+BRIDGE_GROUPS = (
+    ("Node", ("engine/Node", "engine/Runtime", "engine/ScreenRecording")),
+    ("Bun", ("engine/Bun", "core/plugin/bun/")),
+    ("QuickJS", ("engine/QuickJs", "core/plugin/quickjs/")),
+    ("Lua", ("engine/Lua", "core/plugin/lua/")),
+    ("Python", ("engine/Python", "core/plugin/python/")),
+    ("Shared plugin base (AidlPluginHost, leases, wake, host broker)", ("core/plugin/hostbroker/", "core/plugin/*")),
+    ("Other engine/ (Rhino, AutoJs4, JVM, agent, modules)", ("engine/",)),
+    ("Other core/plugin/ (plugin hosts outside the five runtimes)", ("core/plugin/",)),
+)
+BRIDGE_PAIRS = [
+    ("bindService", r"(?<!fun )\bbindService(?:Waking)?\s*\(", r"\bunbindService\s*\("),
+    ("registerReceiver", r"\bregisterReceiver\s*\(", r"\bunregisterReceiver\s*\("),
+    ("linkToDeath", r"\.linkToDeath\s*\(", r"\.unlinkToDeath\s*\("),
+    ("WebView(", PAIRS[3][1], r"(?:\.|(?<![\w.]))destroy\s*\(\s*\)"),
+    ("WindowManager.addView", r"\b\w*(?:[wW]indowManager|[mM]anager|wm)\s*\.\s*addView\s*\(", r"\.removeView(?:Immediate)?\s*\("),
+    ("Handler(", r"(?<![\w.])Handler\s*\(", r"\.removeCallbacks(?:AndMessages)?\s*\(|\.removeMessages\s*\("),
+    ("postDelayed(", r"\.postDelayed\s*\(", r"\.removeCallbacks(?:AndMessages)?\s*\("),
+    ("HandlerThread(", r"(?<![\w.])HandlerThread\s*\(", r"\.quit(?:Safely)?\s*\("),
+    ("ThreadLocal", PAIRS[6][1], PAIRS[6][2]),
+]
+
+
+def bridge_group(path):
+    for title, prefixes in BRIDGE_GROUPS:
+        for prefix in prefixes:
+            if prefix.endswith("*") and path.startswith(prefix[:-1]) and "/" not in path[len(prefix) - 1:]:
+                return title
+            if not prefix.endswith("*") and path.startswith(prefix):
+                return title
+    return None
+
+
+def line_numbers(lines, pattern, skip=None):
+    return [number + 1 for number, line in enumerate(lines)
+            if not re.search(r"^\s*(?:import|package)\b", line) and not (skip and re.search(skip, line)) and re.search(pattern, line)]
+
+
+def compact(numbers, limit=12):
+    text = ", ".join(str(n) for n in numbers[:limit])
+    return text + (f", ... ({len(numbers)})" if len(numbers) > limit else "") if numbers else "-"
+
+
+def whitelist_reasons():
+    reasons = {}
+    for line in (WHITELIST.read_text(encoding="utf-8") if WHITELIST.exists() else "").splitlines():
+        parts = line.split(" | ", 5)
+        if line.strip() and not line.startswith("#") and len(parts) == 6:
+            reasons[tuple(parts[:3])] = parts[4]
+    return reasons
+
+
+def bridge_audit():
+    """Fields and registration lines of every Java / Kotlin file under engine/ and core/plugin/, with the file's group."""
+    files, statics, untyped, pairs, sticky_reads = [], [], [], [], []
+    base = SOURCE / "org" / "autojs" / "autojs"
+    for file in sorted(p for p in base.rglob("*") if p.suffix in (".kt", ".java")):
+        relative = file.relative_to(base).as_posix()
+        group = bridge_group(relative)
+        if not group:
+            continue
+        files.append(relative)
+        text = file.read_text(encoding="utf-8", errors="replace")
+        kotlin = file.suffix == ".kt"
+        code = strip_code(text, kotlin)
+        lines = code.split("\n")
+        imports = imports_of(text)
+        found = kotlin_statics(relative, code, imports, untyped) if kotlin else java_statics(relative, code, imports)
+        for row in found:
+            line = lines[row["line"] - 1]
+            row["mutable"] = bool(re.search(r"\bvar\s+" + row["name"] + r"\b", line)) if kotlin else \
+                not re.search(r"\bfinal\b[^;=]*\b" + row["name"] + r"\b", line)
+        statics += found
+        # registerReceiver(null, filter) only reads a sticky broadcast; nothing is registered.
+        sticky = {code.count("\n", 0, m.start()) + 1 for m in re.finditer(r"\bregisterReceiver\s*\(\s*null\s*,", code)}
+        for name, register, release in BRIDGE_PAIRS:
+            skip = r"\b(?:class|fun|constructor|interface)\b|\bis\s+\w*WebView|\bas\??\s+\w*WebView" if name == "WebView(" else None
+            registered = line_numbers(lines, register, skip)
+            if name == "registerReceiver":
+                sticky_reads.extend((relative, n) for n in registered if n in sticky)
+                registered = [n for n in registered if n not in sticky]
+            if registered:
+                pairs.append({"file": relative, "group": group, "kind": name, "registrations": registered,
+                              "releases": line_numbers(lines, release)})
+    for row in untyped:
+        line = strip_code((base / row["file"]).read_text(encoding="utf-8", errors="replace"), row["file"].endswith(".kt")).split("\n")[row["line"] - 1]
+        row["mutable"] = bool(re.search(r"\bvar\s+" + row["name"] + r"\b", line))
+    return files, statics, untyped, pairs, sticky_reads
+
+
+def constant_like(row):
+    """An immutable value of a string, number, regex or class type: nothing a script execution can leave behind."""
+    tokens = {token.split(".")[-1] for token in re.findall(r"[A-Za-z_][\w.]*", row["type"])}
+    return (not row["mutable"] and not row["categories"] and row["holding"] == "value"
+            and tokens <= CONSTANT_TOKENS | {"Regex", "Pattern", "Duration", "TimeUnit", "Locale", "BigInteger", "Uri",
+                                             "MediaType", "Gson", "Json", "Charsets", "Mutex", "Semaphore"})
+
+
+# Initializers of untyped object-level declarations that hold nothing a script execution creates: literals, immutable
+# collection factories, comparators, regexes and references to other constants.
+LITERAL_INITIALIZER = re.compile(r"""^(?:"|'|-?\d|0x|true\b|false\b|null\b|(?!mutable)\w+Of\s*\(|empty\w*\s*\(|compareBy|Regex\s*\(|"""
+                                 r"[A-Z][\w.]*\.[A-Z][A-Z0-9_]*\s*$|[A-Z][A-Z0-9_]*\s*$|[A-Z][A-Z0-9_]*\s*[-+*/]|"
+                                 r"\w+\.(?:inWholeMilliseconds|toLong|toInt)\b)")
+
+
+def bridge_markdown(date, head, files, statics, untyped, pairs, sticky_reads, guard):
+    literal = sum(1 for r in untyped if not r["mutable"] and LITERAL_INITIALIZER.match(r["initializer"]))
+    untyped = [r for r in untyped if r["mutable"] or not LITERAL_INITIALIZER.match(r["initializer"])]
+    selected = {(row[1], row[2].split("#")[0]) for row in guard if row[0] == "field"}
+    reasons = whitelist_reasons()
+    reported = [row for row in statics if not constant_like(row)]
+    dirty = git_dirty([str(SOURCE / "org" / "autojs" / "autojs" / p) for p in ("engine", "core/plugin")])
+    worktree = f" plus uncommitted edits in {len(dirty)} files of the scanned directories (line numbers follow that working tree)" if dirty else ""
+    lines = [
+        f"# Static audit of the plugin engine bridges {date}",
+        "",
+        f"Generated by `py -3.12 -I tools/memory/static_audit.py --bridge` at `{head}`{worktree} (docs/memory-phase2/ROADMAP.md P0.5 / T7): "
+        f"{len(files)} Java / Kotlin files under `engine/` and `core/plugin/` of `app/src/main/java/org/autojs/autojs/`, grouped by "
+        "engine. Same text scan as `static_audit.py` (comments and strings blanked; object bodies on their header line are read "
+        "too). Every row needs a human review before it becomes an appendix B decision; dispositions are left to P1-P3.",
+        "",
+        "Columns: `Mutable` is `var` / a non-final Java static. `Holding` is the scan's guess (`registry`: map / set / list / "
+        "array / cache; `value`: a single reference). `Guard` is what `StaticReferenceGuardTest` does with the field: the "
+        "whitelist reason when it is listed, `new` when the guard rules select it and the whitelist does not list it yet, `-` "
+        "when the guard rules do not select it (strings / numbers only, or a single value without a script, UI or Binder type). "
+        "Immutable values of string, number, regex or class types are left out; declarations whose type the scan cannot infer "
+        f"are listed separately per engine, except {literal} immutable ones initialized with a literal, an immutable collection "
+        "factory (`setOf` / `listOf` / `mapOf` / ...), a comparator, a regex or another constant.",
+        "",
+        "Registration lines count text matches per line (receivers named `*windowManager` / `*manager` / `wm` for "
+        "`WindowManager.addView`; `bindServiceWaking` counts as `bindService`); `Paired` only says that a release call is in "
+        "the same file, not that every path reaches it.",
+        "",
+        "## Summary",
+        "",
+        "| Engine | Files | Fields (reported / constants left out) | Guard: listed / new / not selected | Untyped declarations | Files with registration calls |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    def guard(row):
+        key = ("field", row["file"], row["name"])
+        if key in reasons:
+            return reasons[key]
+        return "new" if (row["file"], row["name"]) in selected else "-"
+    for title, _ in BRIDGE_GROUPS:
+        group_files = [f for f in files if bridge_group(f) == title]
+        rows = [r for r in reported if bridge_group(r["file"]) == title]
+        constants = sum(1 for r in statics if bridge_group(r["file"]) == title and constant_like(r))
+        marks = [guard(r) for r in rows]
+        listed = sum(1 for m in marks if m not in ("new", "-"))
+        lines.append(f"| {title} | {len(group_files)} | {len(rows)} / {constants} | {listed} / {marks.count('new')} / {marks.count('-')} | "
+                     f"{sum(1 for r in untyped if bridge_group(r['file']) == title)} | "
+                     f"{len({p['file'] for p in pairs if p['group'] == title})} |")
+    lines += ["", "Registration calls over all groups:", ""]
+    for name, _, _ in BRIDGE_PAIRS:
+        rows = [p for p in pairs if p["kind"] == name]
+        lines.append(f"- `{name}`: {len(rows)} files, {sum(len(p['registrations']) for p in rows)} lines, "
+                     f"{sum(1 for p in rows if not p['releases'])} files without a release call in the same file")
+    lines.append(f"- `registerReceiver(null, ...)` sticky broadcast reads, left out above (nothing is registered): "
+                 + (", ".join(f"`{path}:{line}`" for path, line in sorted(sticky_reads)) or "none"))
+    for title, _ in BRIDGE_GROUPS:
+        rows = sorted((r for r in reported if bridge_group(r["file"]) == title), key=lambda r: (r["file"], r["line"]))
+        lines += ["", f"## {title}", "", "### Process-lifetime fields", ""]
+        if rows:
+            lines += ["| File:line | Holder | Name | Type | Mutable | Holding | Category | Guard |",
+                      "| --- | --- | --- | --- | --- | --- | --- | --- |"]
+            for row in rows:
+                inferred = " (inferred)" if row.get("inferred") else ""
+                lines.append(f"| `{row['file']}:{row['line']}` | {row['holder']} | `{row['name']}` | `{row['type']}`{inferred} | "
+                             f"{'var' if row['mutable'] else 'val'} | {row['holding']} | {', '.join(row['categories']) or '-'} | {guard(row)} |")
+        else:
+            lines.append("(none)")
+        loose = sorted((r for r in untyped if bridge_group(r["file"]) == title), key=lambda r: (r["file"], r["line"]))
+        if loose:
+            lines += ["", "Declarations whose type the scan cannot infer:", "",
+                      "| File:line | Holder | Name | Mutable | Initializer (first 120 characters) |", "| --- | --- | --- | --- | --- |"]
+            for row in loose:
+                lines.append(f"| `{row['file']}:{row['line']}` | {row['holder']} | `{row['name']}` | {'var' if row['mutable'] else 'val'} | "
+                             f"`{row['initializer'].replace('|', '/')}` |")
+        group_pairs = sorted((p for p in pairs if p["group"] == title), key=lambda p: (p["file"], [n for n, _, _ in BRIDGE_PAIRS].index(p["kind"])))
+        lines += ["", "### Registration and release lines", ""]
+        if group_pairs:
+            lines += ["| File | Call | Registration lines | Release lines (same file) | Paired |", "| --- | --- | --- | --- | --- |"]
+            for p in group_pairs:
+                lines.append(f"| `{p['file']}` | `{p['kind']}` | {compact(p['registrations'])} | {compact(p['releases'])} | "
+                             f"{'yes' if p['releases'] else '**no**'} |")
+        else:
+            lines.append("(none)")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--out", type=Path, default=ROOT / "docs" / "memory" / "evidence")
+    parser.add_argument("--out", type=Path, help="Report directory (docs/memory/evidence; docs/memory-phase2/evidence with --bridge)")
     parser.add_argument("--json", action="store_true", help="Also write static-audit-<date>.json")
     parser.add_argument("--date", default=datetime.date.today().strftime("%Y%m%d"))
     parser.add_argument("--guard", action="store_true", help="Update the source guard whitelist instead of writing the report")
     parser.add_argument("--check", action="store_true", help="With --guard: write nothing, exit 1 when the whitelist is out of date")
+    parser.add_argument("--bridge", action="store_true", help="Write static-audit-bridge-<date>.md for engine/ and core/plugin/ "
+                                                              "(default --out docs/memory-phase2/evidence)")
     args = parser.parse_args()
     files, statics, pairs = audit()
     if args.guard:
         WHITELIST.parent.mkdir(parents=True, exist_ok=True)
         return write_guard(guard_rows(statics, pairs), args.check)
-    args.out.mkdir(parents=True, exist_ok=True)
+    if args.bridge:
+        out = args.out or ROOT / "docs" / "memory-phase2" / "evidence"
+        out.mkdir(parents=True, exist_ok=True)
+        bridge_files, bridge_statics, untyped, bridge_pairs, sticky_reads = bridge_audit()
+        report = out / f"static-audit-bridge-{args.date}.md"
+        report.write_text(bridge_markdown(args.date, git_head(), bridge_files, bridge_statics, untyped, bridge_pairs,
+                                          sticky_reads, guard_rows(statics, pairs)), encoding="utf-8", newline="\n")
+        print(f"{len(bridge_files)} files; fields {len(bridge_statics)} ({sum(1 for r in bridge_statics if constant_like(r))} constants), "
+              f"untyped {sum(1 for r in untyped if r['mutable'] or not LITERAL_INITIALIZER.match(r['initializer']))} "
+              f"of {len(untyped)} (the rest have literal initializers), registration files {len({p['file'] for p in bridge_pairs})}")
+        print(f"Report: {report.relative_to(ROOT) if report.is_relative_to(ROOT) else report}")
+        return 0
+    out = args.out or ROOT / "docs" / "memory" / "evidence"
+    out.mkdir(parents=True, exist_ok=True)
     head = git_head()
-    report = args.out / f"static-audit-{args.date}.md"
+    report = out / f"static-audit-{args.date}.md"
     report.write_text(markdown(args.date, head, files, statics, pairs), encoding="utf-8")
     if args.json:
-        (args.out / f"static-audit-{args.date}.json").write_text(json.dumps(
+        (out / f"static-audit-{args.date}.json").write_text(json.dumps(
             {"head": head, "files": len(files), "statics": [r for r in statics if r["categories"]],
              "registries": registry_rows(statics), "pairs": pairs}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     strong = [row for row in statics if row["categories"] and row["holding"] != "weak" and row["categories"] != ["AndroidContext"]]
