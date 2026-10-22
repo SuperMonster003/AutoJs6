@@ -1,0 +1,112 @@
+{
+  "started": "2026-10-22T17:31:39+08:00",
+  "finished": "2026-10-22T17:33:07+08:00",
+  "device": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "manufacturer": "Sony",
+    "sdk": "31",
+    "release": "12",
+    "fingerprint": "Sony/XQ-AT72_CN/XQ-AT72:12/58.2.A.10.44A/058002A0100044A0891821322:user/release-keys",
+    "abiList": "arm64-v8a,armeabi-v7a,armeabi",
+    "buildType": "user",
+    "emulator": false,
+    "getconfPageSize": 4096,
+    "kernelPageSize": 4096,
+    "pageSizeReadErrors": []
+  },
+  "templateVersionCode": 5835,
+  "templateSha256": "514f8bbad0641f3e89937d434f37487a5632d6b8e1b5be9754fb4c2282ae0826",
+  "apkSha256": "e9c1603287eb0e993640a45bcc893157d9e756b16206e401f1a36e097492c195",
+  "buildTools": "37.0.0",
+  "previous": "versionCode 5280",
+  "restored": "installed back (versionCode 5280)",
+  "runs": 10,
+  "settleSeconds": 3,
+  "pssToleranceMb": 4.0,
+  "threadTolerance": 2,
+  "verdict": "PASS",
+  "problems": [],
+  "results": [
+    {
+      "run": 1,
+      "ended": true,
+      "endSeconds": 3.7,
+      "pid": 20747,
+      "pssKb": 194339,
+      "threads": 76
+    },
+    {
+      "run": 2,
+      "ended": true,
+      "endSeconds": 3.6,
+      "pid": 21112,
+      "pssKb": 191715,
+      "threads": 75
+    },
+    {
+      "run": 3,
+      "ended": true,
+      "endSeconds": 3.6,
+      "pid": 21469,
+      "pssKb": 189302,
+      "threads": 76
+    },
+    {
+      "run": 4,
+      "ended": true,
+      "endSeconds": 3.6,
+      "pid": 21797,
+      "pssKb": 190594,
+      "threads": 76
+    },
+    {
+      "run": 5,
+      "ended": true,
+      "endSeconds": 3.0,
+      "pid": 22125,
+      "pssKb": 189421,
+      "threads": 76
+    },
+    {
+      "run": 6,
+      "ended": true,
+      "endSeconds": 3.6,
+      "pid": 22448,
+      "pssKb": 190196,
+      "threads": 75
+    },
+    {
+      "run": 7,
+      "ended": true,
+      "endSeconds": 3.0,
+      "pid": 22772,
+      "pssKb": 189624,
+      "threads": 75
+    },
+    {
+      "run": 8,
+      "ended": true,
+      "endSeconds": 3.0,
+      "pid": 23138,
+      "pssKb": 190386,
+      "threads": 75
+    },
+    {
+      "run": 9,
+      "ended": true,
+      "endSeconds": 3.0,
+      "pid": 23458,
+      "pssKb": 188676,
+      "threads": 75
+    },
+    {
+      "run": 10,
+      "ended": true,
+      "endSeconds": 3.0,
+      "pid": 23787,
+      "pssKb": 190106,
+      "threads": 75
+    }
+  ]
+}
