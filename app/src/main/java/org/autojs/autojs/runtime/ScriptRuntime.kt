@@ -447,7 +447,16 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     internal lateinit var augmentedApp: ScriptableObject
 
-    internal lateinit var augmentedAutojs: ScriptableObject
+    /** The `autojs` module object of the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
+    private lateinit var legacyAugmentedAutojs: ScriptableObject
+
+    /**
+     * The `autojs` module object the host reads (`UI.kt` reads `R`): the new layer's when it serves the module (roadmap
+     * P3.4, built on demand), else the one of the old augment call.
+     * zh-CN: 宿主读取的 autojs 模块对象 (UI.kt 读取 R): 新层提供该模块时为新层的 (P3.4, 按需构建), 否则为原 augment 调用的.
+     */
+    internal val augmentedAutojs: ScriptableObject
+        get() = scriptModules?.moduleObject("autojs") ?: legacyAugmentedAutojs
 
     internal lateinit var augmentedOcrMLKit: ScriptableObject
 
@@ -1022,7 +1031,9 @@ class ScriptRuntime private constructor(builder: Builder) {
         val modules = ScriptModuleLayer.mounterOrNull(this, target).also { scriptModules = it }
         ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }
 
-        augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
+        // With the new layer, app.autojs is defined by the app module when it is built (P3.4).
+        // zh-CN: 新层开启时, app.autojs 由 app 模块在构建时定义 (P3.4).
+        if (modules == null) augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
     }
 
     /**
@@ -1044,7 +1055,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             }
             "species" -> Species.augmentWithRuntime(target, this)
             "app" -> App(this).augment(target, app).also { augmentedApp = it }
-            "autojs" -> Autojs(this).augment(target).also { augmentedAutojs = it }.also { autojs ->
+            "autojs" -> Autojs(this).augment(target).also { legacyAugmentedAutojs = it }.also { autojs ->
                 AutojsVersion.augmentWithRuntime(autojs, this)
             }
             "shell" -> Shell(this).augment(target)
