@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Base64
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.core.tts.TtsTextChunker
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.runtime.api.tts.*
@@ -122,7 +123,7 @@ internal class RuntimeTtsBridge(private val context: Context, private val cwd: S
 
     fun closeSession(id: String): Boolean {
         val session = synchronized(sessions) { sessions.remove(id) } ?: return false
-        session.pending.values.toList().forEach { it() }
+        session.pending.values.concurrentSnapshot().forEach { it() }
         session.service.close(); session.client.close(); return true
     }
     override fun close() {

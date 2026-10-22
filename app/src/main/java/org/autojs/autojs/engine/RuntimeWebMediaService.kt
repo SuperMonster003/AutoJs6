@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs6.R
 import java.io.Closeable
 import java.util.UUID
@@ -24,7 +25,7 @@ class RuntimeWebMediaService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         instance = this
         if (intent?.action == STOP) {
-            val active = entries.values.toList(); entries.clear()
+            val active = entries.values.concurrentSnapshot(); entries.clear()
             active.forEach { it.stopped() }; stopIfIdle()
             return START_NOT_STICKY
         }

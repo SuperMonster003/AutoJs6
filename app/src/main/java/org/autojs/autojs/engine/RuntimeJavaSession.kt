@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import android.os.Looper
 import dalvik.system.DexClassLoader
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.rhino.ClassFileDexer
 import org.json.JSONArray
 import org.json.JSONObject
@@ -267,7 +268,7 @@ internal class RuntimeJavaSession(
         if(registrations.values.none { it.client==registration.client })events.remove(registration.client)?.clear()
     }
     override fun close() {
-        closed=true;registrations.keys.toList().forEach(::closeRegistration);executor.shutdownNow()
+        closed=true;registrations.keys.concurrentSnapshot().forEach(::closeRegistration);executor.shutdownNow()
         if(active.get()==0)cleanup()
     }
     private fun cleanup() = synchronized(loaderLock) {

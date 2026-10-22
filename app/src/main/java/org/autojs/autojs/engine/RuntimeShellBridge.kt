@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.util.Base64
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.shell.ProcessTree
 import org.autojs.autojs.runtime.api.shell.ShellLauncher
@@ -151,7 +152,7 @@ internal class RuntimeShellBridge(
             }
         }finally{entry.close()}
     }
-    override fun close(){val copy=synchronized(lock){if(closed)return;closed=true;processes.values.toList()};copy.forEach{it.close()};timers.shutdownNow()}
+    override fun close(){val copy=synchronized(lock){if(closed)return;closed=true;processes.values.concurrentSnapshot()};copy.forEach{it.close()};timers.shutdownNow()}
 
     companion object { private val permissionCodes=java.util.concurrent.atomic.AtomicInteger(26000) }
 
