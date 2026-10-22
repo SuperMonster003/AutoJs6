@@ -895,6 +895,9 @@
     <string name="settings_transfer_result_notification_permission">전경 서비스에는 알림을 보낼 권한이 필요합니다</string>
     <string name="settings_transfer_result_restart">일부 설정은 AutoJs6 를 재시작한 후 적용됩니다</string>
     <string name="settings_transfer_result_skipped">건너뜀 (현재 값 유지):</string>
+    <string name="settings_transfer_setup_wizard">설정 가져오기 마법사</string>
+    <string name="settings_transfer_setup_wizard_choose">파일 선택</string>
+    <string name="settings_transfer_setup_wizard_content">이전에 AutoJs6 의 설정을 내보낸 적이 있다면 (다른 기기에서 또는 다시 설치하기 전에), 그 설정 파일을 선택하여 가져올 수 있습니다. 가져올 카테고리를 선택할 수 있으며, 필요하면 가져오기를 취소할 수도 있습니다. 파일이 없으면 이 마법사를 건너뛰세요. 나중에 설정 > 구성 > AutoJs6 설정 관리 에서도 가져올 수 있습니다.</string>
     <string name="settings_transfer_skip_declined">취소한 배포 항목: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">잘못된 값: %1$d</string>
     <string name="settings_transfer_skip_newer_format">최신 버전의 항목: %1$d</string>

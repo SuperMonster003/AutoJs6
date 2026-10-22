@@ -893,6 +893,9 @@
     <string name="settings_transfer_result_notification_permission">Службе переднего плана нужно разрешение на отправку уведомлений</string>
     <string name="settings_transfer_result_restart">Некоторые настройки вступят в силу после перезапуска AutoJs6</string>
     <string name="settings_transfer_result_skipped">Пропущено (текущие значения сохранены):</string>
+    <string name="settings_transfer_setup_wizard">Мастер импорта настроек</string>
+    <string name="settings_transfer_setup_wizard_choose">Выбрать файл</string>
+    <string name="settings_transfer_setup_wizard_content">Если настройки AutoJs6 уже экспортировались раньше, на другом устройстве или перед переустановкой, выберите этот файл настроек, чтобы импортировать их: можно отметить категории для импорта, а при необходимости отменить импорт. Если такого файла нет, пропустите этот мастер. Импорт также доступен в разделе Настройки > Конфигурация > Управление настройками AutoJs6.</string>
     <string name="settings_transfer_skip_declined">Отклоненные развертывания: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">Недопустимые значения: %1$d</string>
     <string name="settings_transfer_skip_newer_format">Из более новой версии: %1$d</string>

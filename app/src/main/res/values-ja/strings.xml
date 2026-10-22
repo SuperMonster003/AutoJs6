@@ -894,6 +894,9 @@
     <string name="settings_transfer_result_notification_permission">フォアグラウンドサービスには通知を送信する権限が必要です</string>
     <string name="settings_transfer_result_restart">一部の設定は AutoJs6 の再起動後に有効になります</string>
     <string name="settings_transfer_result_skipped">スキップ (現在の値を保持):</string>
+    <string name="settings_transfer_setup_wizard">設定インポートウィザード</string>
+    <string name="settings_transfer_setup_wizard_choose">ファイルを選択</string>
+    <string name="settings_transfer_setup_wizard_content">以前に AutoJs6 の設定をエクスポートした場合 (別のデバイスや再インストール前など), その設定ファイルを選択してインポートできます. インポートするカテゴリを選択でき, 必要ならインポートを元に戻すこともできます. ファイルがない場合はこのウィザードをスキップしてください. 後から 設定 > 設定 > AutoJs6 の設定を管理 でもインポートできます.</string>
     <string name="settings_transfer_skip_declined">見送ったデプロイ項目: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">無効な値: %1$d</string>
     <string name="settings_transfer_skip_newer_format">新しいバージョンの項目: %1$d</string>

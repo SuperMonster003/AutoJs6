@@ -46,8 +46,12 @@ class SettingsTransferActivity : BaseActivity() {
 
         @JvmStatic
         @JvmOverloads
+        fun intent(context: Context, wizard: String? = null): Intent = Intent(context, SettingsTransferActivity::class.java).putExtra(EXTRA_WIZARD, wizard)
+
+        @JvmStatic
+        @JvmOverloads
         fun start(context: Context, wizard: String? = null) {
-            context.startActivity(Intent(context, SettingsTransferActivity::class.java).putExtra(EXTRA_WIZARD, wizard))
+            context.startActivity(intent(context, wizard))
         }
     }
 }

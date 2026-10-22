@@ -890,6 +890,9 @@
     <string name="settings_transfer_result_notification_permission">前台服務需要發送通知的權限</string>
     <string name="settings_transfer_result_restart">部分設定在 AutoJs6 重啓後生效</string>
     <string name="settings_transfer_result_skipped">已略過 (保持目前的值):</string>
+    <string name="settings_transfer_setup_wizard">設定匯入精靈</string>
+    <string name="settings_transfer_setup_wizard_choose">選擇檔案</string>
+    <string name="settings_transfer_setup_wizard_content">如果之前匯出過 AutoJs6 的設定 (在其他裝置上, 或重新安裝之前), 可在此選擇該設定檔案匯入: 可勾選要匯入的分類, 需要時還可撤銷匯入. 沒有設定檔案時跳過本精靈即可. 之後也可以在 設置 > 配置 > 管理 AutoJs6 設定 中匯入.</string>
     <string name="settings_transfer_skip_declined">放棄的部署項目: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">無效的值: %1$d</string>
     <string name="settings_transfer_skip_newer_format">來自更新的版本: %1$d</string>

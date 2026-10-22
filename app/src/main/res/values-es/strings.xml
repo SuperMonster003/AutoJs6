@@ -893,6 +893,9 @@
     <string name="settings_transfer_result_notification_permission">El servicio de primer plano necesita el permiso para publicar notificaciones</string>
     <string name="settings_transfer_result_restart">Algunas configuraciones surten efecto después de reiniciar AutoJs6</string>
     <string name="settings_transfer_result_skipped">Omitidos (se mantienen los valores actuales):</string>
+    <string name="settings_transfer_setup_wizard">Asistente de importación de configuración</string>
+    <string name="settings_transfer_setup_wizard_choose">Elegir archivo</string>
+    <string name="settings_transfer_setup_wizard_content">Si la configuración de AutoJs6 se exportó antes, en otro dispositivo o antes de reinstalar, elija ese archivo de configuración para importarla: puede marcar las categorías que desea importar y deshacer la importación si es necesario. Si no tiene ese archivo, omita este asistente. La importación también está disponible en Configuración > Configuración > Administrar la configuración de AutoJs6.</string>
     <string name="settings_transfer_skip_declined">Despliegues rechazados: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">Valores no válidos: %1$d</string>
     <string name="settings_transfer_skip_newer_format">De una versión más reciente: %1$d</string>

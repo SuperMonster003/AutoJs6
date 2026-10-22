@@ -893,6 +893,9 @@
     <string name="settings_transfer_result_notification_permission">Le service d\'avant-plan a besoin de l\'autorisation de publier des notifications</string>
     <string name="settings_transfer_result_restart">Certains paramètres prennent effet après le redémarrage de AutoJs6</string>
     <string name="settings_transfer_result_skipped">Ignorés (valeurs actuelles conservées):</string>
+    <string name="settings_transfer_setup_wizard">Assistant d\'importation des paramètres</string>
+    <string name="settings_transfer_setup_wizard_choose">Choisir un fichier</string>
+    <string name="settings_transfer_setup_wizard_content">Si les paramètres d\'AutoJs6 ont déjà été exportés, sur un autre appareil ou avant une réinstallation, choisissez ce fichier de paramètres pour les importer: vous pouvez cocher les catégories à importer et annuler l\'importation si nécessaire. Sans ce fichier, ignorez cet assistant. L\'importation est aussi disponible dans Réglages > Configuration > Gérer les paramètres d\'AutoJs6.</string>
     <string name="settings_transfer_skip_declined">Déploiements refusés: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">Valeurs non valides: %1$d</string>
     <string name="settings_transfer_skip_newer_format">D\'une version plus récente: %1$d</string>

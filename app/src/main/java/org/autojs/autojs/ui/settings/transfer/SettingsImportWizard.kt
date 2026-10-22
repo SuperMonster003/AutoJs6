@@ -1,6 +1,10 @@
 package org.autojs.autojs.ui.settings.transfer
 
 import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.FragmentActivity
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.CancellationException
@@ -9,11 +13,13 @@ import kotlinx.coroutines.withContext
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Kind
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Step
+import org.autojs.autojs.ui.wizard.SetupWizards
 import org.autojs.autojs.ui.wizard.WizardUi.showAndAwait
 import org.autojs.autojs.util.DialogUtils.widgetThemeColor
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import java.io.File
+import java.util.UUID
 
 /**
  * The import wizard (docs/settings/ROADMAP.md T10, D8 / D9 / D19, P7.5): choose the settings file (the system page
@@ -116,6 +122,50 @@ class SettingsImportWizard(host: SettingsWizardHost) : SettingsWizard(host) {
     }
 
     companion object {
+
+        /**
+         * The settings import wizard of the setup wizards ([SetupWizards], docs/settings/ROADMAP.md P11.1): a page that
+         * tells what it is for, where "Choose file" opens the page "Manage AutoJs6 settings" with this wizard
+         * ([SettingsTransferActivity.WIZARD_IMPORT]) and "Skip" ends it. [onFinished] runs once that page is closed, or
+         * once the first page is dismissed otherwise, so that the next setup wizard waits for the import.
+         * zh-CN: 设置向导 ([SetupWizards], ROADMAP P11.1) 中的设置导入向导: 首页说明用途, "选择文件" 打开 "管理 AutoJs6 设置" 页面并进入
+         * 本向导 ([SettingsTransferActivity.WIZARD_IMPORT]), "跳过" 结束. 该页面关闭后, 或首页以其他方式关闭后调用 [onFinished], 因此下一个
+         * 设置向导等待导入结束.
+         */
+        @JvmStatic
+        fun show(activity: FragmentActivity, onFinished: () -> Unit) {
+            var handedOver = false
+            MaterialDialog.Builder(activity)
+                .title(R.string.settings_transfer_setup_wizard)
+                .content(R.string.settings_transfer_setup_wizard_content)
+                .widgetThemeColor()
+                .canceledOnTouchOutside(false)
+                .negativeText(R.string.text_skip)
+                .negativeColorRes(R.color.dialog_button_default)
+                .positiveText(R.string.settings_transfer_setup_wizard_choose)
+                .positiveColorRes(R.color.dialog_button_attraction)
+                .onPositive { _, _ ->
+                    handedOver = true
+                    openImport(activity, onFinished)
+                }
+                .dismissListener { if (!handedOver) onFinished() }
+                .show()
+        }
+
+        private fun openImport(activity: FragmentActivity, onFinished: () -> Unit) {
+            var launcher: ActivityResultLauncher<Intent>? = null
+            launcher = activity.activityResultRegistry.register("settings_import_wizard_${UUID.randomUUID()}", ActivityResultContracts.StartActivityForResult()) {
+                launcher?.unregister()
+                onFinished()
+            }
+            try {
+                launcher.launch(SettingsTransferActivity.intent(activity, SettingsTransferActivity.WIZARD_IMPORT))
+            } catch (e: ActivityNotFoundException) {
+                launcher.unregister()
+                ViewUtils.showToast(activity, e.message ?: e.javaClass.simpleName, true)
+                onFinished()
+            }
+        }
 
         /** The state the wizard starts with: step 1, nothing chosen. zh-CN: 向导的初始状态: 第 1 步, 尚未选择. */
         @JvmStatic

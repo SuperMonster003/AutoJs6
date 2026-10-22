@@ -888,6 +888,9 @@
     <string name="settings_transfer_result_notification_permission">The foreground service needs the permission to post notifications</string>
     <string name="settings_transfer_result_restart">Some settings take effect after AutoJs6 restarts</string>
     <string name="settings_transfer_result_skipped">Skipped (current values kept):</string>
+    <string name="settings_transfer_setup_wizard">Settings import wizard</string>
+    <string name="settings_transfer_setup_wizard_choose">Choose file</string>
+    <string name="settings_transfer_setup_wizard_content">If the settings of AutoJs6 were exported before, on another device or before reinstalling, choose that settings file to import them: tick the categories to import, and undo the import later if needed. Without such a file, skip this wizard. The import is also available in Settings > Config > Manage AutoJs6 settings.</string>
     <string name="settings_transfer_skip_declined">Deployments declined: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">Invalid values: %1$d</string>
     <string name="settings_transfer_skip_newer_format">From a newer version: %1$d</string>

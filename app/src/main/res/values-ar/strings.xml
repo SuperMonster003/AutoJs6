@@ -895,6 +895,9 @@
     <string name="settings_transfer_result_notification_permission">تحتاج خدمة المقدمة إلى إذن نشر الإشعارات</string>
     <string name="settings_transfer_result_restart">تسري بعض الإعدادات بعد إعادة بدء AutoJs6</string>
     <string name="settings_transfer_result_skipped">تم التخطي (مع الإبقاء على القيم الحالية):</string>
+    <string name="settings_transfer_setup_wizard">معالج استيراد الإعدادات</string>
+    <string name="settings_transfer_setup_wizard_choose">اختيار ملف</string>
+    <string name="settings_transfer_setup_wizard_content">إذا سبق تصدير إعدادات AutoJs6 على جهاز آخر أو قبل إعادة التثبيت, فاختر ملف الإعدادات ذلك لاستيرادها: يمكنك تحديد الفئات المراد استيرادها والتراجع عن الاستيراد عند الحاجة. إذا لم يكن لديك هذا الملف, فتخطَّ هذا المعالج. يتوفر الاستيراد أيضا في إعدادات > تكوين > إدارة إعدادات AutoJs6.</string>
     <string name="settings_transfer_skip_declined">عمليات النشر المرفوضة: %1$d</string>
     <string name="settings_transfer_skip_invalid_value">قيم غير صالحة: %1$d</string>
     <string name="settings_transfer_skip_newer_format">من إصدار أحدث: %1$d</string>
