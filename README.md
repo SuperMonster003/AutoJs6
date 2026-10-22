@@ -261,6 +261,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` yolo 模块, 用于通过 YOLO 插件加载模型并进行目标检测 (参阅 项目文档 > [YOLO](https://docs.autojs6.com/#/yolo))
 * `新增` tts 模块, 用于文本转语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))
 * `新增` settings 模块, 用于读取及修改应用设置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))
+* `新增` settings.export/categories 方法, 用于在脚本中将应用设置按分类导出为 zip 文件 (与 "管理 AutoJs6 设置" 页面导出的文件相同, 不含凭据) 及列出分类与条目数 (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))
 * `新增` work_manager 模块, 用于管理定时任务及广播任务 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Work Manager](https://docs.autojs6.com/#/workManager))
 * `新增` power_manager 模块, 用于查询及申请忽略电池优化 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Power Manager](https://docs.autojs6.com/#/powerManager))
 * `新增` pangu 全局对象, 用于中西文混排的间距处理及检查 (参阅 项目文档 > [文本间距](https://docs.autojs6.com/#/pangu))
