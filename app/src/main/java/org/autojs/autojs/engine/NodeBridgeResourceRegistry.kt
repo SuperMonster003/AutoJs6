@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.util.Log
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs6.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
@@ -196,7 +197,7 @@ class NodeBridgeResourceRegistry(
 
     private fun dumpActiveResources(): JSONArray {
         val dump = JSONArray()
-        active.values
+        active.values.concurrentSnapshot()
             .sortedWith(compareBy<ResourceRecord> { it.type.name }.thenBy { it.createdAtEpochMs })
             .forEach { record ->
                 dump.put(

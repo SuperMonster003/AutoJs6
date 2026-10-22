@@ -8,6 +8,7 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.system.StructStat
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
@@ -638,7 +639,7 @@ internal class NodeJsEncryptedModuleSourceProvider(
     }
 
     private fun closeActivePipes(reason: String) {
-        activeWriteDescriptors.toList().forEach { descriptor ->
+        activeWriteDescriptors.concurrentSnapshot().forEach { descriptor ->
             runCatching {
                 descriptor.closeWithError(reason.take(PIPE_ERROR_MAX_CHARS))
             }

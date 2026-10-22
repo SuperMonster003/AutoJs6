@@ -21,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.autojs.autojs.core.plugin.ServiceBindingLease
 import org.autojs.autojs.core.plugin.center.PluginAuthorizedState
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.core.plugin.tool.PluginToolCatalogParser
 import org.autojs.autojs.core.plugin.tool.PluginToolDefinition
 import org.autojs.autojs.core.plugin.tool.PluginToolInput
@@ -116,7 +117,7 @@ internal class NodeBridgePluginToolsBridge(
     /** Stops every running call (the provider is told with reason `host`). */
     fun destroy() {
         if (!destroyed.compareAndSet(false, true)) return
-        operations.values.toList().forEach { operation ->
+        operations.values.concurrentSnapshot().forEach { operation ->
             operation.finish(
                 failure(operation.request, NodeBridgeError.processDead("AutoJs6 plugin_tools session closed while ${operation.toolName} was running.")),
                 cancelReason = PluginToolValues.CANCEL_REASON_HOST,

@@ -3,6 +3,7 @@ package org.autojs.autojs.engine
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.plugin.nodejs.api.INodeJsModuleSourceProvider
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -478,7 +479,7 @@ internal class NodeModuleSourceFileTransportSession(
     }
 
     private fun closeActiveSourceDescriptors() {
-        activeSourceDescriptors.toList().forEach { descriptor ->
+        activeSourceDescriptors.concurrentSnapshot().forEach { descriptor ->
             runCatching { descriptor.close() }
             activeSourceDescriptors -= descriptor
         }

@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.runBlocking
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilationOutput
 import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerException
 import org.autojs.autojs.core.plugin.typescript.TypeScriptCompilerPluginClient
@@ -165,7 +166,7 @@ internal class NodeJsTypeScriptModuleSourceProvider(
     override fun cancel(reason: String?) {
         if (!cancelled.compareAndSet(false, true)) return
         encryptedDelegate.cancel(reason)
-        activePipeWrites.toList().forEach { descriptor -> runCatching { descriptor.close() } }
+        activePipeWrites.concurrentSnapshot().forEach { descriptor -> runCatching { descriptor.close() } }
         synchronized(compilationLock) {
             overlays.values.forEach { bytes -> bytes.fill(0) }
             overlays.clear()

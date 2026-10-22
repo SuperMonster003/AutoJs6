@@ -18,6 +18,7 @@ import android.os.Looper
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs6.R
 import org.json.JSONObject
 import java.io.File
@@ -165,7 +166,7 @@ class NodeAudioRecordingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         instance = this
         if (intent?.action == ACTION_STOP) {
-            entries.values.toList().forEach { it.onStop("notification-stop") }
+            entries.values.concurrentSnapshot().forEach { it.onStop("notification-stop") }
             stopIfIdle()
             return START_NOT_STICKY
         }
@@ -197,7 +198,7 @@ class NodeAudioRecordingService : Service() {
     private fun stopIfIdle() { if (entries.isEmpty()) { stopForeground(STOP_FOREGROUND_REMOVE); stopSelf() } }
     override fun onDestroy() {
         instance = null
-        val remaining = entries.values.toList()
+        val remaining = entries.values.concurrentSnapshot()
         entries.clear()
         remaining.forEach { it.onStop("service-destroyed") }
         super.onDestroy()

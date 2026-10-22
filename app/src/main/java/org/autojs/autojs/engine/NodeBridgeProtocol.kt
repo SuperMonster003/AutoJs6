@@ -77,6 +77,7 @@ import org.autojs.autojs.core.automator.bridge.BridgeNode
 import org.autojs.autojs.core.automator.bridge.BridgeNodeActions
 import org.autojs.autojs.core.automator.bridge.BridgeSelector
 import org.autojs.autojs.core.automator.search.DFS
+import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.core.plugin.mcp.McpHostCapabilityBroker
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
@@ -1037,7 +1038,7 @@ class AndroidNodeBridgeCapabilityProvider(
     internal fun closeJavaObjects() = synchronized(javaLock) {
         javaClosed = true
         if(javaSessionDelegate.isInitialized())javaSession.close()
-        javaHandles.keys.toList().forEach { resourceRegistry.close(it, "java.execution.finished") }
+        javaHandles.keys.concurrentSnapshot().forEach { resourceRegistry.close(it, "java.execution.finished") }
         javaHandles.clear()
     }
     internal fun releaseJavaResult(json: String?) {
@@ -1058,7 +1059,7 @@ class AndroidNodeBridgeCapabilityProvider(
         eventObservers.closeAll()
         synchronized(notificationHandles) {
             notificationsClosed.set(true)
-            notificationHandles.values.toList().forEach { it.close("execution-ended") }
+            notificationHandles.values.concurrentSnapshot().forEach { it.close("execution-ended") }
         }
     }
     private val notificationIdCounter = AtomicInteger(1_000_000)
