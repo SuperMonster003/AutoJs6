@@ -1,0 +1,416 @@
+{
+  "meta": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "android": "12",
+    "sdk": "31",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "shell"
+    },
+    "mode": "force-stop",
+    "rounds": 20,
+    "settleSec": 3.0,
+    "startResidue": 0,
+    "startHostAlive": false,
+    "startForceStops": 1,
+    "date": "20261022",
+    "startedAt": "2026-10-22 23:03:56",
+    "endedAt": "2026-10-22 23:07:29",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "mark": "code=0 uid=2000",
+      "profile": {
+        "user": "shell",
+        "rssKb": 214880,
+        "pssKb": 134358,
+        "javaHeapPssKb": 20936,
+        "nativeHeapPssKb": 4868,
+        "codePssKb": 98808,
+        "codeRssKb": 184772,
+        "dexMmap": {
+          "pss": 85595,
+          "privateDirty": 84876
+        },
+        "artMmap": {
+          "pss": 20014,
+          "privateDirty": 20012
+        },
+        "threads": 18,
+        "extractedDexMaps": 38,
+        "extractedDexKb": 84512,
+        "appInitLines": 0,
+        "starterLogged": true
+      },
+      "servicePid": 29506,
+      "serviceRssKb": 212624,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5028,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 2,
+      "mark": "code=0 uid=2000",
+      "servicePid": 29694,
+      "serviceRssKb": 213108,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5092,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 3,
+      "mark": "code=0 uid=2000",
+      "servicePid": 29864,
+      "serviceRssKb": 212816,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5128,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 4,
+      "mark": "code=0 uid=2000",
+      "servicePid": 30043,
+      "serviceRssKb": 212872,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5120,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 5,
+      "mark": "code=0 uid=2000",
+      "servicePid": 30212,
+      "serviceRssKb": 212608,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5092,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 6,
+      "mark": "code=0 uid=2000",
+      "servicePid": 30381,
+      "serviceRssKb": 214012,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 4956,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 7,
+      "mark": "code=0 uid=2000",
+      "servicePid": 30571,
+      "serviceRssKb": 213956,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5044,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 8,
+      "mark": "code=0 uid=2000",
+      "servicePid": 30758,
+      "serviceRssKb": 212800,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 4988,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 9,
+      "mark": "code=0 uid=2000",
+      "servicePid": 30954,
+      "serviceRssKb": 213180,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5076,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 10,
+      "mark": "code=0 uid=2000",
+      "servicePid": 31144,
+      "serviceRssKb": 213228,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5100,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 11,
+      "mark": "code=0 uid=2000",
+      "servicePid": 31324,
+      "serviceRssKb": 212784,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5040,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 12,
+      "mark": "code=0 uid=2000",
+      "servicePid": 31503,
+      "serviceRssKb": 212852,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5152,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 13,
+      "mark": "code=0 uid=2000",
+      "servicePid": 31670,
+      "serviceRssKb": 213568,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5120,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 14,
+      "mark": "code=0 uid=2000",
+      "servicePid": 31830,
+      "serviceRssKb": 212732,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5164,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 15,
+      "mark": "code=0 uid=2000",
+      "servicePid": 31988,
+      "serviceRssKb": 214012,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5068,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 16,
+      "mark": "code=0 uid=2000",
+      "servicePid": 32141,
+      "serviceRssKb": 213056,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5112,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 17,
+      "mark": "code=0 uid=2000",
+      "servicePid": 32329,
+      "serviceRssKb": 213076,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5076,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 18,
+      "mark": "code=0 uid=2000",
+      "servicePid": 32492,
+      "serviceRssKb": 212880,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5140,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 19,
+      "mark": "code=0 uid=2000",
+      "servicePid": 32666,
+      "serviceRssKb": 213356,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5144,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    },
+    {
+      "round": 20,
+      "mark": "code=0 uid=2000",
+      "servicePid": 595,
+      "serviceRssKb": 212876,
+      "residue": 0,
+      "residueRssKb": 0,
+      "hostAlive": false,
+      "exitSource": "destroy",
+      "constructed": true,
+      "strayExec": 2,
+      "strayExecRssKb": 5080,
+      "strayExecNames": [
+        "getevent",
+        "sh"
+      ],
+      "strayExecKilled": 2
+    }
+  ],
+  "verdict": "PASS",
+  "summary": "residue in 0/20 rounds; orphaned exec processes in 20/20 rounds"
+}

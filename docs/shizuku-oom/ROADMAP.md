@@ -116,7 +116,7 @@
 
 ### P0 复现, 负对照与边界探针 (D3 / D4, 设备 XQ-AT72; P0.1 另在 G8441 复核)
 
-- [ ] P0.1 探针脚本 `tools/shizuku-oom/zombie_probe.py` + `tools/shizuku-oom/README.md` (T1 / T2). 验收: 当前 HEAD 的 debug 构建在 XQ-AT72 跑 `--mode force-stop --rounds 20` 残留 0/20, G8441 跑 10 轮残留 0/10; 报告入 `docs/shizuku-oom/evidence/`, 数字入附录 B.
+- [x] P0.1 探针脚本 `tools/shizuku-oom/zombie_probe.py` + `tools/shizuku-oom/README.md` (T1 / T2). 验收: 当前 HEAD 的 debug 构建在 XQ-AT72 跑 `--mode force-stop --rounds 20` 残留 0/20, G8441 跑 10 轮残留 0/10; 报告入 `docs/shizuku-oom/evidence/`, 数字入附录 B. 完成 (2026-10-22): XQ-AT72 HEAD debug 5935 20 轮残留 0/20 (`probe-XQ-AT72-5935-force-stop-20261022`), G8441 10 轮 0/10 (`probe-G8441-5935-force-stop-20261022`), 退出来源全部 destroy; 开启 "音量键控制" 的 XQ-AT72 每轮另有一对 getevent / sh 孤儿 (约 5 MB, 20/20 轮, 由 D10 / P1.1 / P1.5 处理).
 - [ ] P0.2 负对照 (D3): v6.6.4 发布包在 XQ-AT72 跑 `--mode force-stop --rounds 10`, 预期残留逐轮累加到约 10, 记录 RSS 合计; 测后装回原包. 验收: 报告显示堆积 (证明探针有效), 附录 B 有 "修复前" 列.
 - [ ] P0.3 边界路径探针 (HEAD 构建, XQ-AT72), 每条路径写残留数与 logcat 里的退出来源: (a) `bind-kill:0.2 / 0.5 / 1 / 2` 各 5 轮 (宿主在服务启动完成前后被杀); (b) `update`: 两个构建号不同的 debug 包先后覆盖安装, 旧服务应因 version 不同被替换并退出; (c) `server-restart`: 用 start.sh 重启 Shizuku 服务端, 旧用户服务应随服务端死亡退出; (d) 10 秒超时重绑路径: 代码审读 + 能构造则实测 (例如让服务启动变慢), 否则记 "未实测, 由 P1.2 覆盖"; (e) `spawn-orphan`: 脚本 `shizuku.spawn('sleep 600')` 后 force-stop 宿主, 检查 `sleep` / `sh` 是否残留 (预期现状残留, 作 P1.1 的修前基线). 验收: 5 条路径各有结论与数字 (附录 B).
 - [ ] P0.4 用户服务进程内存画像 (瘦身基线): `dumpsys meminfo <pid>` 的 PSS / Java 堆 / native / code, 线程数 (`/proc/<pid>/task`), logcat 里 `App.onCreate` 各项在该进程的执行痕迹 (哪些跑了); 写附录 B "瘦身前" 列. 验收: 数字齐全, 并列出建议跳过的初始化项供 P1.4 用.
@@ -156,7 +156,7 @@
 | --- | --- | --- | --- | --- | --- |
 | 报告者截图 (版本未知, 2025-12) | 未知 (11.3 GB, 8 核) | - | 22 | 约 2.5 GB (114-115 MB 每个) | issue #474 截图 |
 | v6.6.4 (修复前, P0.2) | XQ-AT72 | 10 | | | |
-| HEAD debug (P0.1) | XQ-AT72 | 20 | | | |
+| HEAD debug 5935 (P0.1) | XQ-AT72 | 20 | 0/20 (每轮退出来源 destroy) | 0 (单个服务约 208 MB; 另每轮 getevent / sh 孤儿一对约 5 MB, 探针以 shell 身份结束) | `probe-XQ-AT72-5935-force-stop-20261022` |
 | HEAD debug 5935 (P0.1) | G8441 (root) | 10 | 0/10 (每轮退出来源 destroy) | 0 (单个服务约 65.5 MB) | `probe-G8441-5935-force-stop-20261022` |
 | P1.2 后 | XQ-AT72 | 20 | | | |
 
