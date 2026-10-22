@@ -1,7 +1,8 @@
 package org.autojs.autojs.ui.edit.editor.ace.font
 
 import android.content.Context
-import com.google.gson.Gson
+import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.putOrRemove
 import java.io.File
 import java.io.FileInputStream
 import java.io.RandomAccessFile
@@ -16,7 +17,6 @@ class FontStore(
     private val fontsDirectory = File(rootDirectory, FONTS_DIRECTORY_NAME)
     private val partsDirectory = File(rootDirectory, PARTS_DIRECTORY_NAME)
     private val storeLockFile = FontIo.storeLockFile(rootDirectory)
-    private val gson = Gson()
     private val verificationCache = ConcurrentHashMap<String, VerifiedFileStamp>()
 
     init {
@@ -251,35 +251,13 @@ class FontStore(
         val metadata = File(directory, METADATA_FILE_NAME)
         FontIo.recoverBackup(metadata)
         if (!metadata.isFile || metadata.length() > MAX_METADATA_BYTES) return null
-        return runCatching {
-            val dto = gson.fromJson(metadata.readText(Charsets.UTF_8), InstalledFontDto::class.java)
-            val sha = dto.sha256.lowercase()
-            if (dto.formatVersion != METADATA_FORMAT_VERSION ||
-                !AceFontIds.validId.matches(dto.fontId) || !AceFontIds.validSha256.matches(sha) ||
-                dto.sizeBytes !in FontFileVerifier.WOFF2_HEADER_SIZE..FontFileVerifier.MAX_FONT_BYTES
-            ) return@runCatching null
-            InstalledFont(
-                fontId = dto.fontId,
-                version = dto.version,
-                sha256 = sha,
-                sizeBytes = dto.sizeBytes,
-                file = File(directory, "$sha.woff2"),
-                installedAtMillis = dto.installedAtMillis,
-            )
-        }.getOrNull()
+        val text = runCatching { metadata.readText(Charsets.UTF_8) }.getOrNull() ?: return null
+        return decodeMetadata(text, directory)
     }
 
     private fun writeMetadata(directory: File, installed: InstalledFont) {
-        val dto = InstalledFontDto(
-            formatVersion = METADATA_FORMAT_VERSION,
-            fontId = installed.fontId,
-            version = installed.version,
-            sha256 = installed.sha256,
-            sizeBytes = installed.sizeBytes,
-            installedAtMillis = installed.installedAtMillis,
-        )
         FontIo.writeAndReplace(File(directory, METADATA_FILE_NAME)) { output ->
-            output.write(gson.toJson(dto).toByteArray(Charsets.UTF_8))
+            output.write(encodeMetadata(installed).toByteArray(Charsets.UTF_8))
         }
     }
 
@@ -446,15 +424,6 @@ class FontStore(
         }
     }
 
-    private data class InstalledFontDto(
-        val formatVersion: Int = METADATA_FORMAT_VERSION,
-        val fontId: String = "",
-        val version: String? = null,
-        val sha256: String = "",
-        val sizeBytes: Long = 0,
-        val installedAtMillis: Long = 0,
-    )
-
     private data class VerifiedFileStamp(
         val length: Long,
         val lastModified: Long,
@@ -473,5 +442,73 @@ class FontStore(
         private val INSTALLED_FONT_FILE = Regex("[0-9a-f]{64}\\.woff2")
         private val PARTS_LOCK = Any()
         private val ACTIVE_PART_LEASES = hashMapOf<String, PartLease>()
+
+        /**
+         * Encodes the metadata of an installed font (`installed.json`) with [SettingsJson] (docs/settings/ROADMAP.md
+         * P5.3), byte for byte as `Gson().toJson` wrote the former DTO on Android: Gson takes the members from
+         * `Class.getDeclaredFields`, which ART returns sorted by name (the dex format sorts the fields of a class), so the
+         * members are in name order rather than in declaration order; a null [InstalledFont.version] is omitted and
+         * strings are escaped HTML-safe like Gson's default.
+         * zh-CN: 以 SettingsJson 编码已安装字体的元数据 (ROADMAP P5.3), 与 Android 上 `Gson().toJson` 写出原 DTO 的结果逐字节相同:
+         * Gson 按 `Class.getDeclaredFields` 取成员, ART 按名称排序返回 (dex 格式对类的字段排序), 因此成员按名称排序, 而不是声明
+         * 顺序; version 为 null 时省略, 字符串按 Gson 默认的 HTML 安全方式转义.
+         */
+        internal fun encodeMetadata(installed: InstalledFont): String = SettingsJson.stringify(
+            linkedMapOf<String, Any?>(
+                "fontId" to installed.fontId,
+                "formatVersion" to METADATA_FORMAT_VERSION,
+                "installedAtMillis" to installed.installedAtMillis,
+                "sha256" to installed.sha256,
+                "sizeBytes" to installed.sizeBytes,
+            ).putOrRemove("version", installed.version),
+            htmlSafe = true,
+        )
+
+        /**
+         * Decodes the metadata of an installed font in [directory] ([encodeMetadata], and every file that Gson wrote);
+         * null for malformed text and for an invalid record. Members are read as Gson read them into the former DTO: a
+         * missing member (or a null number) gives the DTO default (`formatVersion` 1, `sizeBytes` and
+         * `installedAtMillis` 0), unknown members are ignored and a member of another type makes the record unreadable.
+         * Unlike Gson, the text must be strict JSON without duplicate keys, and a number written as a string or a string
+         * written as a number is no longer accepted; Gson never wrote either.
+         * zh-CN: 解码 [directory] 中已安装字体的元数据 ([encodeMetadata] 以及 Gson 写出的全部文件); 文本格式错误或记录无效时返回
+         * null. 成员按 Gson 读入原 DTO 的方式读取: 缺少成员 (或数字为 null) 时取 DTO 的默认值 (formatVersion 为 1, sizeBytes 与
+         * installedAtMillis 为 0), 忽略未知成员, 成员类型不符时记录不可读. 与 Gson 不同, 文本须为没有重复键的严格 JSON, 也不再
+         * 接受写成字符串的数字或写成数字的字符串; Gson 从未写出这两种形式.
+         */
+        internal fun decodeMetadata(text: String, directory: File): InstalledFont? = runCatching {
+            val raw = SettingsJson.parseMap(text)
+            val formatVersion = metadataLong(raw, "formatVersion") ?: METADATA_FORMAT_VERSION.toLong()
+            val fontId = metadataString(raw, "fontId")
+            val version = metadataString(raw, "version")
+            val sha = metadataString(raw, "sha256")?.lowercase()
+            val sizeBytes = metadataLong(raw, "sizeBytes") ?: 0L
+            val installedAtMillis = metadataLong(raw, "installedAtMillis") ?: 0L
+            if (formatVersion != METADATA_FORMAT_VERSION.toLong() ||
+                fontId == null || !AceFontIds.validId.matches(fontId) || sha == null || !AceFontIds.validSha256.matches(sha) ||
+                sizeBytes !in FontFileVerifier.WOFF2_HEADER_SIZE..FontFileVerifier.MAX_FONT_BYTES
+            ) return@runCatching null
+            InstalledFont(
+                fontId = fontId,
+                version = version,
+                sha256 = sha,
+                sizeBytes = sizeBytes,
+                file = File(directory, "$sha.woff2"),
+                installedAtMillis = installedAtMillis,
+            )
+        }.getOrNull()
+
+        // A string member: null when missing or null, like Gson; another type fails.
+        private fun metadataString(raw: Map<String, Any?>, key: String): String? {
+            val value = raw[key]
+            require(value == null || value is String) { "Invalid $key" }
+            return value as String?
+        }
+
+        // A number member: null when missing or null; Gson's nextLong also took an integral fraction such as 1.0.
+        private fun metadataLong(raw: Map<String, Any?>, key: String): Long? {
+            val value = raw[key] ?: return null
+            return requireNotNull((value as? Number)?.let(SettingsJson::toLong)) { "Invalid $key" }
+        }
     }
 }

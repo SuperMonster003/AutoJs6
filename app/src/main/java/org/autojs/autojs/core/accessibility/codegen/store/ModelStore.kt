@@ -1,8 +1,5 @@
 package org.autojs.autojs.core.accessibility.codegen.store
 
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import org.autojs.autojs.core.accessibility.codegen.model.ModelBinaryMetadata
 import org.autojs.autojs.core.accessibility.codegen.model.ModelDatasetMetadata
 import org.autojs.autojs.core.accessibility.codegen.model.ModelManifest
@@ -12,10 +9,7 @@ import org.autojs.autojs.core.accessibility.codegen.model.ModelPackage
 import org.autojs.autojs.core.accessibility.codegen.model.ModelPackageReader
 import org.autojs.autojs.core.accessibility.codegen.model.ModelTrainingMetadata
 import org.autojs.autojs.core.accessibility.codegen.model.Rejected
-import org.autojs.autojs.core.accessibility.codegen.store.ModelCatalogJson.array
-import org.autojs.autojs.core.accessibility.codegen.store.ModelCatalogJson.integer
-import org.autojs.autojs.core.accessibility.codegen.store.ModelCatalogJson.obj
-import org.autojs.autojs.core.accessibility.codegen.store.ModelCatalogJson.string
+import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.ui.edit.editor.ace.font.FontIo
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
@@ -25,9 +19,11 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InterruptedIOException
 import java.io.RandomAccessFile
+import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
 import java.nio.channels.OverlappingFileLockException
+import java.nio.charset.CodingErrorAction
 import java.security.MessageDigest
 import java.time.OffsetDateTime
 import java.util.Collections
@@ -104,7 +100,6 @@ class ModelStore(
     val rootDirectory: File = rootDirectory.canonicalFile
     private val registryFile = File(this.rootDirectory, REGISTRY_FILE)
     private val stagingDirectory = File(this.rootDirectory, STAGING_DIRECTORY)
-    private val gson = GsonBuilder().serializeNulls().create()
 
     /** Fault injection at the durable write boundary, before replacing the previous registry. */
     internal var beforeRegistryCommit: () -> Unit = {}
@@ -339,8 +334,8 @@ class ModelStore(
         require(staging.file.isFile) { "Staging package is missing" }
     }
 
-    private data class SelectionChange(val previousKey: String?, val nextKey: String?)
-    private data class Registry(val models: List<InstalledModel>, val selectionChange: SelectionChange? = null)
+    internal data class SelectionChange(val previousKey: String?, val nextKey: String?)
+    internal data class Registry(val models: List<InstalledModel>, val selectionChange: SelectionChange? = null)
 
     private fun loadAndReconcileLocked(): Registry {
         val registry = readRegistryLocked()
@@ -391,56 +386,14 @@ class ModelStore(
                 }
                 output.toByteArray()
             }
-            val raw = ModelCatalogJson.parse(bytes, MAX_REGISTRY_BYTES)
-            require(integer(raw["format"]) == 1L) { "Unsupported registry format" }
-            val models = array(raw["models"], maximum = MAX_MODELS).map { element ->
-                val record = obj(element)
-                val manifest = readManifest(obj(record["manifest"]))
-                val digest = string(record["sha256"], 64).also { require(SHA256.matches(it)) { "Invalid model digest" } }
-                require(string(record["modelId"], 64) == manifest.modelId && integer(record["versionCode"]).toInt() == manifest.versionCode &&
-                    string(record["versionName"], 256) == manifest.versionName && integer(record["featureSchemaVersion"]).toInt() == manifest.featureSchemaVersion) { "Registry manifest identity mismatch" }
-                InstalledModel(manifest, digest, integer(record["size"], 1, MAX_PACKAGE_BYTES),
-                    ModelSource.valueOf(string(record["source"], 16)), string(record["origin"]), integer(record["installedAt"], 0, Long.MAX_VALUE))
-            }
-            require(models.map { it.key }.toSet().size == models.size && models.map { it.sha256 }.toSet().size == models.size) { "Duplicate registry model" }
-            val change = raw["selectionChange"]?.takeUnless { it.isJsonNull }?.let { element ->
-                val change = obj(element)
-                require(change.has("previousKey") && change.has("nextKey")) { "Incomplete selection change" }
-                val previous = change["previousKey"]?.takeUnless { it.isJsonNull }?.let { string(it, 90).also(::validateKey) }
-                val next = change["nextKey"]?.takeUnless { it.isJsonNull }?.let { string(it, 90).also(::validateKey) }
-                require(next == null || models.any { it.key == next }) { "Invalid selection change" }
-                SelectionChange(previous, next)
-            }
-            return Registry(models, change)
+            return decodeRegistry(bytes)
         } catch (failure: Exception) {
             throw ModelStoreException("Model registry is unreadable; installed packages were preserved", failure)
         }
     }
 
     private fun writeRegistryLocked(registry: Registry) {
-        require(registry.models.size <= MAX_MODELS) { "Too many installed models" }
-        val raw = JsonObject().apply {
-            addProperty("format", 1)
-            add("models", JsonArray().apply {
-                registry.models.sortedBy { it.key }.forEach { model -> add(JsonObject().apply {
-                    addProperty("modelId", model.modelId)
-                    addProperty("versionCode", model.versionCode)
-                    addProperty("versionName", model.manifest.versionName)
-                    addProperty("featureSchemaVersion", model.manifest.featureSchemaVersion)
-                    addProperty("sha256", model.sha256)
-                    addProperty("size", model.sizeBytes)
-                    addProperty("source", model.source.name)
-                    addProperty("origin", model.origin)
-                    addProperty("installedAt", model.installedAtMillis)
-                    add("manifest", gson.toJsonTree(model.manifest))
-                }) }
-            })
-            registry.selectionChange?.let { change -> add("selectionChange", JsonObject().apply {
-                addProperty("previousKey", change.previousKey)
-                addProperty("nextKey", change.nextKey)
-            }) }
-        }
-        val bytes = gson.toJson(raw).toByteArray(Charsets.UTF_8)
+        val bytes = encodeRegistry(registry)
         if (bytes.size > MAX_REGISTRY_BYTES) throw ModelStoreException("Model registry exceeds its size limit")
         requireSafePath(registryFile)
         requireSafePath(File(rootDirectory, "$REGISTRY_FILE.bak"))
@@ -448,47 +401,6 @@ class ModelStore(
             output.write(bytes)
             beforeRegistryCommit()
         }
-    }
-
-    /** Decode durable display metadata without applying today's host/schema compatibility. */
-    private fun readManifest(raw: JsonObject): ModelManifest {
-        val modelId = string(raw["modelId"], 64).also(::validateModelId)
-        require(integer(raw["format"]) == 1L) { "Unsupported manifest format" }
-        val names = obj(raw["displayName"])
-        require(names.size() in 1..128 && names.has("en")) { "Missing display name" }
-        val displayNames = names.keySet().associateWith { language ->
-            require(Regex("[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*").matches(language)) { "Invalid language" }
-            string(names[language], 256)
-        }
-        require(string(raw["kind"]) == "ranker" && string(raw["algorithm"]) == "catboost-oblivious") { "Unsupported model kind" }
-        val featureHash = string(raw["featureNamesHash"], 16).also { require(Regex("[0-9a-f]{16}").matches(it)) }
-        val model = obj(raw["model"])
-        require(string(model["file"]) == "model.bin") { "Invalid model file" }
-        val binary = ModelBinaryMetadata("model.bin", integer(model["size"], 32, ModelPackageReader.MAX_MODEL_BYTES.toLong()),
-            string(model["sha256"], 64).also { require(SHA256.matches(it)) }, integer(model["trees"], 1, 4096).toInt(),
-            integer(model["depth"], 1, 8).toInt(), integer(model["features"], 1, 65535).toInt())
-        val dataset = obj(raw["dataset"])
-        val metrics = obj(raw["metrics"])
-        val training = obj(raw["training"])
-        fun timestamp(value: com.google.gson.JsonElement?) = string(value, 64).also { OffsetDateTime.parse(it) }
-        return ModelManifest(1, modelId, Collections.unmodifiableMap(displayNames), integer(raw["versionCode"]).toInt(),
-            string(raw["versionName"], 256), "ranker", "catboost-oblivious", integer(raw["featureSchemaVersion"]).toInt(), featureHash, binary,
-            ModelDatasetMetadata(string(dataset["datasetId"]), integer(dataset["groups"]).toInt(), timestamp(dataset["createdAt"])),
-            ModelMetrics(readMetrics(obj(metrics["test"])), readMetrics(obj(metrics["realTest"]))),
-            ModelTrainingMetadata(string(training["catboostVersion"]), string(training["pythonVersion"]),
-                string(training["hostCommit"], 40).also { require(Regex("[0-9a-f]{40}").matches(it)) }, timestamp(training["trainedAt"])),
-            integer(raw["minHostVersionCode"]).toInt(), string(raw["license"], 256), string(raw["publisher"], 256))
-    }
-
-    private fun readMetrics(raw: JsonObject): ModelMetricSummary {
-        val groups = integer(raw["groups"], 0).toInt()
-        fun metric(name: String): Double? {
-            val value = requireNotNull(raw[name]) { "Missing metric" }
-            if (groups == 0) { require(value.isJsonNull); return null }
-            require(value.isJsonPrimitive && value.asJsonPrimitive.isNumber)
-            return value.asDouble.also { require(it.isFinite() && it in 0.0..1.0) }
-        }
-        return ModelMetricSummary(metric("top1Survival"), metric("ruleTop1Survival"), metric("regret"), groups)
     }
 
     private fun cleanupOrphansLocked(records: List<InstalledModel>) {
@@ -590,19 +502,6 @@ class ModelStore(
         }
     }
 
-    private fun validateModelId(id: String) {
-        require(MODEL_ID.matches(id) && !isReservedRootName(id) && !id.endsWith('.') &&
-            !WINDOWS_DEVICE.matches(id.substringBefore('.'))) { "Invalid or reserved model id" }
-    }
-
-    private fun isReservedRootName(name: String): Boolean = name in RESERVED_ROOT_NAMES || name.startsWith("catalog-debug-")
-
-    private fun validateKey(key: String) {
-        val match = requireNotNull(KEY.matchEntire(key)) { "Invalid model key" }
-        validateModelId(match.groupValues[1])
-        require(match.groupValues[2].toIntOrNull()?.let { it > 0 } == true) { "Invalid model version" }
-    }
-
     private fun digest(input: InputStream): Pair<String, Long> = copyBounded(input, null)
 
     private fun copyBounded(input: InputStream, output: FileOutputStream?): Pair<String, Long> {
@@ -648,5 +547,247 @@ class ModelStore(
         private val WINDOWS_DEVICE = Regex("con|prn|aux|nul|com[1-9]|lpt[1-9]")
         private val ACTIVE_LEASES_LOCK = Any()
         private val ACTIVE_LEASES = hashSetOf<String>()
+        private const val MAX_JSON_DEPTH = 32
+
+        /**
+         * Encodes the registry (`registry.json`) with [SettingsJson] (docs/settings/ROADMAP.md P5.3), byte for byte as the
+         * former `GsonBuilder().serializeNulls()` code wrote it on Android: the record members in the order the code added
+         * them, models sorted by key, JSON nulls kept, strings escaped HTML-safe like Gson's default, and the members of
+         * every manifest object in name order, because Gson took them from `Class.getDeclaredFields`, which ART returns
+         * sorted by name (the dex format sorts the fields of a class), not in declaration order.
+         * zh-CN: 以 SettingsJson 编码登记表 (ROADMAP P5.3), 与 Android 上原 `GsonBuilder().serializeNulls()` 代码写出的结果逐字节相同:
+         * 记录成员按原代码添加的顺序, 模型按键排序, 保留 JSON null, 字符串按 Gson 默认的 HTML 安全方式转义; 清单各对象的成员按名称
+         * 排序, 因为 Gson 按 `Class.getDeclaredFields` 取成员, ART 按名称排序返回 (dex 格式对类的字段排序), 而不是声明顺序.
+         */
+        internal fun encodeRegistry(registry: Registry): ByteArray {
+            require(registry.models.size <= MAX_MODELS) { "Too many installed models" }
+            val raw = linkedMapOf<String, Any?>(
+                "format" to 1,
+                "models" to registry.models.sortedBy { it.key }.map { model ->
+                    linkedMapOf<String, Any?>(
+                        "modelId" to model.modelId,
+                        "versionCode" to model.versionCode,
+                        "versionName" to model.manifest.versionName,
+                        "featureSchemaVersion" to model.manifest.featureSchemaVersion,
+                        "sha256" to model.sha256,
+                        "size" to model.sizeBytes,
+                        "source" to model.source.name,
+                        "origin" to model.origin,
+                        "installedAt" to model.installedAtMillis,
+                        "manifest" to encodeManifest(model.manifest),
+                    )
+                },
+            )
+            registry.selectionChange?.let { change ->
+                raw["selectionChange"] = linkedMapOf<String, Any?>("previousKey" to change.previousKey, "nextKey" to change.nextKey)
+            }
+            return SettingsJson.stringify(raw, htmlSafe = true).toByteArray(Charsets.UTF_8)
+        }
+
+        /**
+         * Decodes the registry bytes ([encodeRegistry], and every file that Gson wrote) with the rules of the former
+         * `ModelCatalogJson.parse` reader: at most [MAX_REGISTRY_BYTES], strict UTF-8, one strict JSON object without
+         * duplicate keys or non-finite numbers, values nested less than 32 deep, then the same record validation. Both
+         * readers skip one leading byte order mark. The strict scan rejects what [SettingsJson] alone would accept beyond
+         * the strict Gson reader (`\'` and raw control characters in strings, control characters between tokens, and
+         * comments between tokens on Android) and bounds the nesting before the recursive parser runs. Throws for any
+         * failure; the caller reports the registry as unreadable.
+         * zh-CN: 按原 `ModelCatalogJson.parse` 的规则解码登记表字节 ([encodeRegistry] 以及 Gson 写出的全部文件): 不超过
+         * [MAX_REGISTRY_BYTES], 严格 UTF-8, 恰好一个严格 JSON 对象 (无重复键, 无非有限数字), 嵌套深度小于 32, 然后做相同的记录校验.
+         * 两者都跳过开头的一个字节顺序标记. 严格扫描先拒绝 SettingsJson 单独会接受而严格 Gson 读取器不接受的内容 (字符串中的 `\'`
+         * 与未转义控制字符, 记号之间的控制字符, 以及 Android 上记号之间的注释), 并在递归解析之前限制嵌套深度. 任何失败都抛异常, 由
+         * 调用方报告登记表不可读.
+         */
+        internal fun decodeRegistry(bytes: ByteArray): Registry {
+            require(bytes.size <= MAX_REGISTRY_BYTES) { "Registry exceeds its size limit" }
+            val text = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString()
+            requireStrictJson(text)
+            val raw = SettingsJson.parseMap(text).also { requireDepth(it, 0) }
+            require(integer(raw["format"]) == 1L) { "Unsupported registry format" }
+            val models = array(raw["models"], maximum = MAX_MODELS).map { element ->
+                val record = obj(element)
+                val manifest = readManifest(obj(record["manifest"]))
+                val digest = string(record["sha256"], 64).also { require(SHA256.matches(it)) { "Invalid model digest" } }
+                require(string(record["modelId"], 64) == manifest.modelId && integer(record["versionCode"]).toInt() == manifest.versionCode &&
+                    string(record["versionName"], 256) == manifest.versionName && integer(record["featureSchemaVersion"]).toInt() == manifest.featureSchemaVersion) { "Registry manifest identity mismatch" }
+                InstalledModel(manifest, digest, integer(record["size"], 1, MAX_PACKAGE_BYTES),
+                    ModelSource.valueOf(string(record["source"], 16)), string(record["origin"]), integer(record["installedAt"], 0, Long.MAX_VALUE))
+            }
+            require(models.map { it.key }.toSet().size == models.size && models.map { it.sha256 }.toSet().size == models.size) { "Duplicate registry model" }
+            val change = raw["selectionChange"]?.let { element ->
+                val change = obj(element)
+                require(change.containsKey("previousKey") && change.containsKey("nextKey")) { "Incomplete selection change" }
+                val previous = change["previousKey"]?.let { string(it, 90).also(::validateKey) }
+                val next = change["nextKey"]?.let { string(it, 90).also(::validateKey) }
+                require(next == null || models.any { it.key == next }) { "Invalid selection change" }
+                SelectionChange(previous, next)
+            }
+            return Registry(models, change)
+        }
+
+        // Every member of each manifest object in name order (see encodeRegistry), JSON nulls included.
+        private fun encodeManifest(manifest: ModelManifest): Map<String, Any?> = linkedMapOf<String, Any?>(
+            "algorithm" to manifest.algorithm,
+            "dataset" to manifest.dataset.let {
+                linkedMapOf<String, Any?>("createdAt" to it.createdAt, "datasetId" to it.datasetId, "groups" to it.groups)
+            },
+            "displayName" to LinkedHashMap(manifest.displayName),
+            "featureNamesHash" to manifest.featureNamesHash,
+            "featureSchemaVersion" to manifest.featureSchemaVersion,
+            "format" to manifest.format,
+            "kind" to manifest.kind,
+            "license" to manifest.license,
+            "metrics" to linkedMapOf<String, Any?>("realTest" to encodeMetrics(manifest.metrics.realTest), "test" to encodeMetrics(manifest.metrics.test)),
+            "minHostVersionCode" to manifest.minHostVersionCode,
+            "model" to manifest.model.let {
+                linkedMapOf<String, Any?>("depth" to it.depth, "features" to it.features, "file" to it.file, "sha256" to it.sha256, "size" to it.size, "trees" to it.trees)
+            },
+            "modelId" to manifest.modelId,
+            "publisher" to manifest.publisher,
+            "training" to manifest.training.let {
+                linkedMapOf<String, Any?>("catboostVersion" to it.catboostVersion, "hostCommit" to it.hostCommit, "pythonVersion" to it.pythonVersion, "trainedAt" to it.trainedAt)
+            },
+            "versionCode" to manifest.versionCode,
+            "versionName" to manifest.versionName,
+        )
+
+        private fun encodeMetrics(metrics: ModelMetricSummary): Map<String, Any?> = linkedMapOf<String, Any?>(
+            "groups" to metrics.groups,
+            "regret" to metrics.regret,
+            "ruleTop1Survival" to metrics.ruleTop1Survival,
+            "top1Survival" to metrics.top1Survival,
+        )
+
+        /** Decode durable display metadata without applying today's host/schema compatibility. */
+        private fun readManifest(raw: Map<String, Any?>): ModelManifest {
+            val modelId = string(raw["modelId"], 64).also(::validateModelId)
+            require(integer(raw["format"]) == 1L) { "Unsupported manifest format" }
+            val names = obj(raw["displayName"])
+            require(names.size in 1..128 && names.containsKey("en")) { "Missing display name" }
+            val displayNames = names.keys.associateWith { language ->
+                require(Regex("[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*").matches(language)) { "Invalid language" }
+                string(names[language], 256)
+            }
+            require(string(raw["kind"]) == "ranker" && string(raw["algorithm"]) == "catboost-oblivious") { "Unsupported model kind" }
+            val featureHash = string(raw["featureNamesHash"], 16).also { require(Regex("[0-9a-f]{16}").matches(it)) }
+            val model = obj(raw["model"])
+            require(string(model["file"]) == "model.bin") { "Invalid model file" }
+            val binary = ModelBinaryMetadata("model.bin", integer(model["size"], 32, ModelPackageReader.MAX_MODEL_BYTES.toLong()),
+                string(model["sha256"], 64).also { require(SHA256.matches(it)) }, integer(model["trees"], 1, 4096).toInt(),
+                integer(model["depth"], 1, 8).toInt(), integer(model["features"], 1, 65535).toInt())
+            val dataset = obj(raw["dataset"])
+            val metrics = obj(raw["metrics"])
+            val training = obj(raw["training"])
+            fun timestamp(value: Any?) = string(value, 64).also { OffsetDateTime.parse(it) }
+            return ModelManifest(1, modelId, Collections.unmodifiableMap(displayNames), integer(raw["versionCode"]).toInt(),
+                string(raw["versionName"], 256), "ranker", "catboost-oblivious", integer(raw["featureSchemaVersion"]).toInt(), featureHash, binary,
+                ModelDatasetMetadata(string(dataset["datasetId"]), integer(dataset["groups"]).toInt(), timestamp(dataset["createdAt"])),
+                ModelMetrics(readMetrics(obj(metrics["test"])), readMetrics(obj(metrics["realTest"]))),
+                ModelTrainingMetadata(string(training["catboostVersion"]), string(training["pythonVersion"]),
+                    string(training["hostCommit"], 40).also { require(Regex("[0-9a-f]{40}").matches(it)) }, timestamp(training["trainedAt"])),
+                integer(raw["minHostVersionCode"]).toInt(), string(raw["license"], 256), string(raw["publisher"], 256))
+        }
+
+        private fun readMetrics(raw: Map<String, Any?>): ModelMetricSummary {
+            val groups = integer(raw["groups"], 0).toInt()
+            fun metric(name: String): Double? {
+                require(raw.containsKey(name)) { "Missing metric" }
+                val value = raw[name]
+                if (groups == 0) { require(value == null); return null }
+                require(value is Number)
+                return value.toDouble().also { require(it.isFinite() && it in 0.0..1.0) }
+            }
+            return ModelMetricSummary(metric("top1Survival"), metric("ruleTop1Survival"), metric("regret"), groups)
+        }
+
+        private fun validateModelId(id: String) {
+            require(MODEL_ID.matches(id) && !isReservedRootName(id) && !id.endsWith('.') &&
+                !WINDOWS_DEVICE.matches(id.substringBefore('.'))) { "Invalid or reserved model id" }
+        }
+
+        private fun isReservedRootName(name: String): Boolean = name in RESERVED_ROOT_NAMES || name.startsWith("catalog-debug-")
+
+        private fun validateKey(key: String) {
+            val match = requireNotNull(KEY.matchEntire(key)) { "Invalid model key" }
+            validateModelId(match.groupValues[1])
+            require(match.groupValues[2].toIntOrNull()?.let { it > 0 } == true) { "Invalid model version" }
+        }
+
+        // The bounded plain-value checks of ModelCatalogJson (obj / string / integer / array) for SettingsJson values.
+        private fun obj(value: Any?): Map<String, Any?> {
+            require(value is Map<*, *>) { "Expected an object" }
+            @Suppress("UNCHECKED_CAST")
+            return value as Map<String, Any?>
+        }
+
+        private fun string(value: Any?, maxLength: Int = 1024): String {
+            require(value is String) { "Expected a string" }
+            return value.also { require(it.isNotBlank() && it.length <= maxLength && it.none(Char::isISOControl)) { "Invalid bounded string" } }
+        }
+
+        // SettingsJson reads a lexical integer within Long as Int or Long; a fraction, an exponent or a larger value is a Double.
+        private fun integer(value: Any?, minimum: Long = 1, maximum: Long = Int.MAX_VALUE.toLong()): Long {
+            require(value is Number) { "Expected an integer" }
+            require(value is Int || value is Long) { "Expected a lexical integer" }
+            return value.toLong().also { require(it in minimum..maximum) { "Integer is out of range" } }
+        }
+
+        private fun array(value: Any?, minimum: Int = 0, maximum: Int = 4096): List<*> {
+            require(value is List<*>) { "Expected an array" }
+            return value.also { require(it.size in minimum..maximum) { "Array length is out of range" } }
+        }
+
+        // Values nested 32 or more deep (the root is at depth 0) were rejected by ModelCatalogJson.
+        private fun requireDepth(value: Any?, depth: Int) {
+            require(depth < MAX_JSON_DEPTH) { "Registry JSON is nested too deeply" }
+            when (value) {
+                is Map<*, *> -> value.values.forEach { requireDepth(it, depth + 1) }
+                is List<*> -> value.forEach { requireDepth(it, depth + 1) }
+            }
+        }
+
+        // Lexical rules of the strict Gson reader that SettingsJson does not enforce, plus a nesting bound for its parser.
+        // A leading byte order mark passes the scan (it is above the control characters); both readers skip it.
+        private fun requireStrictJson(text: String) {
+            var nesting = 0
+            var index = 0
+            while (index < text.length) {
+                val c = text[index++]
+                when {
+                    c == '"' -> index = skipString(text, index)
+                    c == '{' || c == '[' -> require(++nesting <= MAX_JSON_DEPTH) { "Registry JSON is nested too deeply" }
+                    c == '}' || c == ']' -> nesting--
+                    c == '/' || c == '#' -> throw IllegalArgumentException("Comments are not allowed")
+                    c < ' ' -> require(c == '\t' || c == '\n' || c == '\r') { "Unexpected control character" }
+                }
+            }
+        }
+
+        // Returns the index after the closing quote of the string whose content starts at [start].
+        private fun skipString(text: String, start: Int): Int {
+            var index = start
+            while (index < text.length) {
+                val c = text[index++]
+                when {
+                    c == '"' -> return index
+                    c < ' ' -> throw IllegalArgumentException("Unescaped control character in a string")
+                    c == '\\' -> {
+                        require(index < text.length) { "Unterminated string" }
+                        when (text[index++]) {
+                            '"', '\\', '/', 'b', 'f', 'n', 'r', 't' -> Unit
+                            'u' -> {
+                                require(index + 4 <= text.length && (index until index + 4).all { text[it] in HEX_DIGITS }) { "Malformed unicode escape" }
+                                index += 4
+                            }
+                            else -> throw IllegalArgumentException("Invalid escape sequence")
+                        }
+                    }
+                }
+            }
+            throw IllegalArgumentException("Unterminated string")
+        }
+
+        private const val HEX_DIGITS = "0123456789abcdefABCDEF"
     }
 }

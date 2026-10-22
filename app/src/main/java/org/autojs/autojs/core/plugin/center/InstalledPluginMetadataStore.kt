@@ -2,8 +2,8 @@ package org.autojs.autojs.core.plugin.center
 
 import android.content.Context
 import android.util.Log
-import androidx.annotation.Keep
-import com.google.gson.Gson
+import org.autojs.autojs.core.pref.SettingsJson
+import org.autojs.autojs.core.pref.putOrRemove
 import java.io.File
 
 /**
@@ -20,7 +20,6 @@ object InstalledPluginMetadataStore {
     private const val CACHE_DIR_NAME = "plugin_center"
     private const val CACHE_FILE_NAME = "autojs6_installed_plugin_metadata_v1.json"
 
-    private val gson = Gson()
     private val lock = Any()
 
     @Volatile
@@ -107,38 +106,79 @@ object InstalledPluginMetadataStore {
         return merged
     }
 
-    fun toJson(entries: Collection<Entry>): String {
-        val payload = CachePayload(entries = entries.map { it.toRaw() })
-        return gson.toJson(payload)
-    }
+    /**
+     * Writes the cache with [SettingsJson] (docs/settings/ROADMAP.md P5.3), byte for byte as `Gson().toJson` wrote the
+     * former payload classes on Android: null members are omitted, strings are escaped HTML-safe like Gson's default,
+     * and the members of each entry are in name order, because Gson took them from `Class.getDeclaredFields`, which ART
+     * returns sorted by name (the dex format sorts the fields of a class), not in declaration order.
+     *
+     * zh-CN: 以 SettingsJson 写缓存 (ROADMAP P5.3), 与 Android 上 `Gson().toJson` 写出原载体类的结果逐字节相同: 省略为 null 的
+     * 成员, 字符串按 Gson 默认的 HTML 安全方式转义; 每个条目的成员按名称排序, 因为 Gson 按 `Class.getDeclaredFields` 取成员,
+     * ART 按名称排序返回 (dex 格式对类的字段排序), 而不是声明顺序.
+     */
+    fun toJson(entries: Collection<Entry>): String =
+        SettingsJson.stringify(linkedMapOf<String, Any?>("entries" to entries.map(::encodeEntry)), htmlSafe = true)
 
-    fun parseJson(json: String): Map<String, Entry> {
-        val payload = runCatching { gson.fromJson(json, CachePayload::class.java) }.getOrNull() ?: return emptyMap()
-        return payload.entries
-            .orEmpty()
-            .mapNotNull { it?.toEntryOrNull() }
-            .associateBy { it.packageName }
-    }
+    /**
+     * Reads the cache ([toJson], and every file that Gson wrote); malformed content gives an empty map. Members are read
+     * as Gson read them into the former payload classes: a missing or null member stays null, unknown members are ignored,
+     * null entries and entries without a package name are skipped, null ABIs are dropped, and a member of another type
+     * makes the whole cache unreadable. Unlike Gson, the text must be strict JSON without duplicate keys, and a number
+     * written as a string or a string written as a number or boolean is no longer accepted; Gson never wrote either.
+     *
+     * zh-CN: 读取缓存 ([toJson] 以及 Gson 写出的全部文件); 内容损坏时返回空映射. 成员按 Gson 读入原载体类的方式读取: 缺少或为
+     * null 的成员保持 null, 忽略未知成员, 跳过为 null 或没有包名的条目, 丢弃为 null 的 ABI, 成员类型不符时整个缓存不可读. 与 Gson
+     * 不同, 文本须为没有重复键的严格 JSON, 也不再接受写成字符串的数字或写成数字, 布尔值的字符串; Gson 从未写出这些形式.
+     */
+    fun parseJson(json: String): Map<String, Entry> = runCatching {
+        val entries = SettingsJson.parseMap(json)["entries"] ?: return@runCatching emptyList<Entry>()
+        require(entries is List<*>) { "Invalid entries" }
+        entries.mapNotNull { element ->
+            if (element == null) return@mapNotNull null
+            require(element is Map<*, *>) { "Invalid entry" }
+            @Suppress("UNCHECKED_CAST")
+            decodeEntry(element as Map<String, Any?>)
+        }
+    }.getOrElse { emptyList() }.associateBy { it.packageName }
 
-    private fun Entry.toRaw() = RawEntry(
-        packageName = packageName,
-        versionCode = versionCode,
-        lastUpdateTime = lastUpdateTime,
-        languageTag = languageTag,
-        title = title,
-        description = description,
-        author = author,
-        instruction = instruction,
-        versionDate = versionDate,
-        requiresHostVersion = requiresHostVersion,
-        supportedAbis = supportedAbis,
-        nativePageAlignment = nativePageAlignment,
-        engine = engine,
-        variant = variant,
-        engineId = engineId,
-    )
+    // Members in name order (see toJson); putOrRemove omits null members like Gson's default.
+    private fun encodeEntry(entry: Entry): Map<String, Any?> = linkedMapOf<String, Any?>()
+        .putOrRemove("author", entry.author)
+        .putOrRemove("description", entry.description)
+        .putOrRemove("engine", entry.engine)
+        .putOrRemove("engineId", entry.engineId)
+        .putOrRemove("instruction", entry.instruction)
+        .putOrRemove("languageTag", entry.languageTag)
+        .putOrRemove("lastUpdateTime", entry.lastUpdateTime)
+        .putOrRemove("nativePageAlignment", entry.nativePageAlignment)
+        .putOrRemove("packageName", entry.packageName)
+        .putOrRemove("requiresHostVersion", entry.requiresHostVersion)
+        .putOrRemove("supportedAbis", entry.supportedAbis)
+        .putOrRemove("title", entry.title)
+        .putOrRemove("variant", entry.variant)
+        .putOrRemove("versionCode", entry.versionCode)
+        .putOrRemove("versionDate", entry.versionDate)
 
-    private fun RawEntry.toEntryOrNull(): Entry? {
+    private fun decodeEntry(raw: Map<String, Any?>): Entry? {
+        // Every member is checked before an entry is skipped: Gson failed the whole cache on a member of another type.
+        val packageName = raw.stringMember("packageName")
+        val versionCode = raw.longMember("versionCode")
+        val lastUpdateTime = raw.longMember("lastUpdateTime")
+        val languageTag = raw.stringMember("languageTag")
+        val title = raw.stringMember("title")
+        val description = raw.stringMember("description")
+        val author = raw.stringMember("author")
+        val instruction = raw.stringMember("instruction")
+        val versionDate = raw.stringMember("versionDate")
+        val requiresHostVersion = raw.longMember("requiresHostVersion")
+        val supportedAbis = raw["supportedAbis"]?.let { abis ->
+            require(abis is List<*>) { "Invalid supportedAbis" }
+            abis.mapNotNull { abi -> abi?.let { requireNotNull(it as? String) { "Invalid supportedAbis" } } }
+        }
+        val engine = raw.stringMember("engine")
+        val variant = raw.stringMember("variant")
+        val engineId = raw.stringMember("engineId")
+        val nativePageAlignment = raw.longMember("nativePageAlignment")
         val validPackageName = packageName?.takeIf { it.isNotBlank() } ?: return null
         return Entry(
             packageName = validPackageName,
@@ -151,7 +191,7 @@ object InstalledPluginMetadataStore {
             instruction = instruction,
             versionDate = versionDate,
             requiresHostVersion = requiresHostVersion,
-            supportedAbis = supportedAbis?.filterNotNull(),
+            supportedAbis = supportedAbis,
             nativePageAlignment = PluginNativeAlignmentPolicy.parse(nativePageAlignment),
             engine = engine,
             variant = variant,
@@ -159,37 +199,21 @@ object InstalledPluginMetadataStore {
         )
     }
 
+    // A string member, null when missing or null; another type fails like Gson's type mismatch.
+    private fun Map<String, Any?>.stringMember(key: String): String? {
+        val value = this[key] ?: return null
+        return requireNotNull(value as? String) { "Invalid $key" }
+    }
+
+    // A number member, null when missing or null; Gson's nextLong also took an integral fraction such as 1.0.
+    private fun Map<String, Any?>.longMember(key: String): Long? {
+        val value = this[key] ?: return null
+        return requireNotNull((value as? Number)?.let(SettingsJson::toLong)) { "Invalid $key" }
+    }
+
     private fun resolveCacheFile(context: Context): File {
         val dir = File(context.filesDir, CACHE_DIR_NAME).apply { mkdirs() }
         return File(dir, CACHE_FILE_NAME)
     }
-
-    // Gson-facing payload classes stay fully nullable to survive malformed cache files,
-    // and are kept from minification because they are populated reflectively.
-    // zh-CN: 面向 Gson 的载体类全部可空以容忍损坏的缓存文件, 且因反射填充而不可被混淆.
-
-    @Keep
-    private class CachePayload(
-        val entries: List<RawEntry?>? = null,
-    )
-
-    @Keep
-    private class RawEntry(
-        val packageName: String? = null,
-        val versionCode: Long? = null,
-        val lastUpdateTime: Long? = null,
-        val languageTag: String? = null,
-        val title: String? = null,
-        val description: String? = null,
-        val author: String? = null,
-        val instruction: String? = null,
-        val versionDate: String? = null,
-        val requiresHostVersion: Long? = null,
-        val supportedAbis: List<String?>? = null,
-        val engine: String? = null,
-        val variant: String? = null,
-        val engineId: String? = null,
-        val nativePageAlignment: Long? = null,
-    )
 
 }

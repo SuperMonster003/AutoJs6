@@ -35,18 +35,18 @@ object JsonFileStores {
     @JvmField
     val FONT_CATALOG_SIGNATURE = excluded("../no_backup/ace_fonts/catalog-v1.sig.json")
 
-    /** The metadata of one downloaded font, next to its font files (`FontStore`, Gson). */
+    /** The metadata of one downloaded font, next to its font files (`FontStore`). */
     @JvmField
     val INSTALLED_FONTS = excluded("../no_backup/ace_fonts/fonts/*/installed.json")
 
     /**
-     * The registry of downloaded layout code generation models and its backup `registry.json.bak` (`ModelStore`, Gson);
+     * The registry of downloaded layout code generation models and its backup `registry.json.bak` (`ModelStore`);
      * `*` is empty in release builds and `-debug-<profile>` in debug builds (`ModelCatalogConfiguration.modelDirectory`).
      */
     @JvmField
     val CODEGEN_MODEL_REGISTRY = excluded("../no_backup/codegen_models*/registry.json")
 
-    /** The metadata of installed plugins (`InstalledPluginMetadataStore`, Gson). */
+    /** The metadata of installed plugins (`InstalledPluginMetadataStore`). */
     @JvmField
     val INSTALLED_PLUGIN_METADATA = excluded("plugin_center/autojs6_installed_plugin_metadata_v1.json")
 
