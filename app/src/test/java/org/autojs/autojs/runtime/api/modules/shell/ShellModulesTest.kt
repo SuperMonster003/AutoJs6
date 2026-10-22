@@ -118,9 +118,11 @@ class ShellModulesTest {
             "[typeof plugins.extend.exclude, typeof plugins.extend.registerModule]" to "[\"function\",\"function\"]",
             "(plugins.extend('Mathx'), typeof Math.sum)" to "\"function\"",
             "(plugins.extend('number'), typeof Number.prototype.clamp)" to "\"function\"",
-            "(plugins.extendAllBut('Arrayx'), typeof [].distinct)" to "\"undefined\"",
+            // A device whose option "extend JavaScript built-in objects" is on has Arrayx before the script starts (P3.4 (5)):
+            // these two compare with the state before the call (on the JVM, and on most devices, no `distinct` before).
+            "(function () { var before = typeof [].distinct; plugins.extendAllBut('Arrayx'); return typeof [].distinct === before; })()" to "true",
             // Exclusions stay for the script (the current registry): extendAll keeps Arrayx out, extend names it explicitly.
-            "(plugins.extendAll(), typeof [].distinct)" to "\"undefined\"",
+            "(function () { var before = typeof [].distinct; plugins.extendAll(); return typeof [].distinct === before; })()" to "true",
             "(plugins.extend('Arrayx'), typeof [].distinct)" to "\"function\"",
             "(plugins.extend.registerModule({ Barx: { extendJsBuildInObjects: function () { globalThis.__aj6p34 = 1; } } }), plugins.extend('Barx'), globalThis.__aj6p34)" to "1",
             "plugins()" to "throws TypeError",
