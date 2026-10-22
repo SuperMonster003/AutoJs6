@@ -269,30 +269,35 @@ object NodeJsRuntimePluginBridge {
 
     /**
      * The end of one execution, in this order: the host capability broker, the execution tables, the module source provider.
+     * The tables and the provider are released even when destroying the broker throws (C35).
      * zh-CN: 一次执行的收尾, 按以下顺序: 宿主能力 broker, 执行表, 模块源 provider.
+     * zh-CN: 即使销毁 broker 时抛出异常, 执行表与 provider 也照常释放 (C35).
      */
     private fun finishExecution(
         hostCapabilityBroker: NodeJsHostCapabilityBroker?,
         executionId: String,
         provider: INodeJsModuleSourceProvider?,
     ) {
-        hostCapabilityBroker?.destroy(
-            Bundle().apply {
-                putString(
-                    NodeJsRuntimeContract.KEY_ERROR_MESSAGE,
-                    "Node.js runtime plugin host request finished.",
-                )
-            },
-        )
-        val registeredProvider = synchronized(executionLifecycleLock) {
-            backendExecutionIds.remove(executionId)
-            activeExecutionIds.remove(executionId)
-            cancelledExecutionIds.remove(executionId)
-            activeModuleSourceProviders.remove(executionId)
-        }
-        cancelModuleSourceProvider(registeredProvider, "Node.js runtime plugin request finished.")
-        if (registeredProvider !== provider) {
-            cancelModuleSourceProvider(provider, "Node.js runtime plugin request finished.")
+        try {
+            hostCapabilityBroker?.destroy(
+                Bundle().apply {
+                    putString(
+                        NodeJsRuntimeContract.KEY_ERROR_MESSAGE,
+                        "Node.js runtime plugin host request finished.",
+                    )
+                },
+            )
+        } finally {
+            val registeredProvider = synchronized(executionLifecycleLock) {
+                backendExecutionIds.remove(executionId)
+                activeExecutionIds.remove(executionId)
+                cancelledExecutionIds.remove(executionId)
+                activeModuleSourceProviders.remove(executionId)
+            }
+            cancelModuleSourceProvider(registeredProvider, "Node.js runtime plugin request finished.")
+            if (registeredProvider !== provider) {
+                cancelModuleSourceProvider(provider, "Node.js runtime plugin request finished.")
+            }
         }
     }
 

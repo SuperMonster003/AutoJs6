@@ -131,7 +131,9 @@ class NodeBridgeResourceRegistry(
         // Set before the snapshot: register() either lands in it or sees the flag.
         // zh-CN: 在取快照之前设置: register() 要么进入快照, 要么看到该标志.
         if (closedReason == null) closedReason = reason
-        val records = active.values.sortedWith(compareBy<ResourceRecord> { it.type.name }.thenBy { it.createdAtEpochMs })
+        // Copied through toArray(): toList() / sortedWith() of a concurrent map that loses its only entry meanwhile throw (C35).
+        // zh-CN: 经 toArray() 复制: 并发表的唯一一项在此期间被移除时, toList() / sortedWith() 会抛出异常 (C35).
+        val records = active.values.toTypedArray().sortedWith(compareBy<ResourceRecord> { it.type.name }.thenBy { it.createdAtEpochMs })
         val activeTypeCounts = typeCounts(records)
         var closedByDestroy = 0
         records.forEach { record ->

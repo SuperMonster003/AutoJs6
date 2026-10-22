@@ -1372,7 +1372,9 @@ class AndroidNodeBridgeCapabilityProvider(
         if (uiInterop.isInitialized()) uiInterop.value.close()
         // UI dispatch receivers stay JNI global roots until system_server collects their proxies; drop their callbacks (C33).
         // zh-CN: UI 分发接收器在 system_server 回收代理之前一直是 JNI 全局根, 在此丢弃它们持有的回调 (C33).
-        uiDispatchReceivers.toList().forEach { it.close() }
+        // A receiver also removes itself on the main thread, so walk the concurrent set instead of copying it (C35).
+        // zh-CN: 接收器也会在主线程上移除自己, 因此直接遍历该并发集合而不是复制它 (C35).
+        uiDispatchReceivers.forEach { it.close() }
         if (pluginToolsBridge.isInitialized()) pluginToolsBridge.value.destroy()
         accessibilityDiagnostics.clearNodeRefs()
         imageDestroyed.set(true)
@@ -1404,7 +1406,9 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         barcodeOperations.clear()
         databaseDestroyed.set(true)
-        val closingWebSockets = websocketSessions.values.toList()
+        // Copied through toArray(), which tolerates sessions removing themselves meanwhile (C35).
+        // zh-CN: 经 toArray() 复制, 可容忍会话在此期间移除自己 (C35).
+        val closingWebSockets = ArrayList(websocketSessions.values)
         synchronized(sensorLock) {
             sensorsDestroyed = true
             synchronized(imageLock) { resourceRegistry.closeAll(destroyReason) }
@@ -1793,9 +1797,12 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun closeOverlaySessions(reason: String): Int {
-        val ids = overlaySessions.keys.toList()
+        // Walk the map itself: an overlay closing on the main thread removes its id meanwhile, and toList() of a map that
+        // held one entry then throws NoSuchElementException, which stopped destroy() before the execution was released (C35).
+        // zh-CN: 直接遍历该表: 在主线程上关闭的浮窗会同时移除自己的 id, 此时对原有一项的表调用 toList() 会抛出
+        // zh-CN: NoSuchElementException, destroy() 因而在本次执行释放之前中止 (C35).
         var closedCount = 0
-        ids.forEach { id ->
+        overlaySessions.keys.forEach { id ->
             if (closeOverlaySession(id, reason, releaseResource = true)) {
                 closedCount += 1
             }
