@@ -1,5 +1,7 @@
 package org.autojs.autojs.ui.settings.transfer
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -10,8 +12,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceGroup
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
@@ -20,14 +24,14 @@ import org.autojs.autojs6.R
 
 /**
  * The preferences of "Manage AutoJs6 settings" (docs/settings/ROADMAP.md D4 / T10), written like `ShortcutBackupFragment`:
- * "Import settings" and "Export settings" on top, then "Restore default settings..." and "Undo last import", then the
- * three switches of the automatic backup (D13 / D22). Only the export works so far; the other entries show that they
- * come in a later version (P7 - P9). The page hosts the wizards ([SettingsWizardHost]) and resumes a running one after
- * it is recreated.
+ * "Import settings" and "Export settings" on top, then "Restore default settings..." and "Undo last import" (enabled
+ * while the last import can be undone, its summary names it), then the three switches of the automatic backup (D13 /
+ * D22). The entries that come in a later version (P8 / P9) say so. The page hosts the wizards ([SettingsWizardHost])
+ * and resumes a running one after it is recreated.
  *
  * zh-CN: "管理 AutoJs6 设置" 的偏好页 (ROADMAP D4 / T10), 写法同 `ShortcutBackupFragment`: 顶部为 "导入设置" 与 "导出设置",
- * 其下 "恢复默认设置..." 与 "撤销上次导入", 然后是自动备份的三个开关 (D13 / D22). 目前只有导出可用, 其他入口标明后续版本提供
- * (P7 - P9). 页面承载向导 ([SettingsWizardHost]), 重建后恢复运行中的向导.
+ * 其下 "恢复默认设置..." 与 "撤销上次导入" (上次导入可撤销时可用, 摘要说明是哪次导入), 然后是自动备份的三个开关 (D13 / D22).
+ * 后续版本提供的入口 (P8 / P9) 标明这一点. 页面承载向导 ([SettingsWizardHost]), 重建后恢复运行中的向导.
  */
 class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost {
 
@@ -37,7 +41,8 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
     override var wizardState: SettingsWizardState? = null
 
     private var wizardJob: Job? = null
-    private var startExport = false
+    private var startWizard: String? = null
+    private lateinit var undoPreference: Preference
 
     // A new page instance gets the result of a request made by the one before it (rotation, process death).
     // zh-CN: 新的页面实例接收前一个实例发出的请求的结果 (旋转屏幕, 进程被回收).
@@ -47,17 +52,27 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         document.complete(uri)
     }
 
+    private val openDocument = registerForActivityResult(OpenSettingsFile()) { uri ->
+        document.complete(uri)
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         wizardState = SettingsWizardState.fromText(savedInstanceState?.getString(STATE_WIZARD))
-        startExport = savedInstanceState == null &&
-                requireActivity().intent.getStringExtra(SettingsTransferActivity.EXTRA_WIZARD) == SettingsTransferActivity.WIZARD_EXPORT
+        if (savedInstanceState == null) {
+            startWizard = requireActivity().intent.getStringExtra(SettingsTransferActivity.EXTRA_WIZARD)
+            // No wizard runs yet: a copy left by an import that ended with its process is stale.
+            SettingsImporter.clearCache(requireContext())
+        }
         preferenceScreen = preferenceManager.createPreferenceScreen(requireContext())
         preference(preferenceScreen, R.string.settings_transfer_description).apply { isSelectable = false }
-        laterVersion(preference(preferenceScreen, R.string.settings_transfer_import))
+        preference(preferenceScreen, R.string.settings_transfer_import) { startWizard(SettingsImportWizard.initialState()) }
+            .setSummary(R.string.settings_transfer_import_summary)
         preference(preferenceScreen, R.string.settings_transfer_export) { startWizard(exportState()) }
             .setSummary(R.string.settings_transfer_export_summary)
         laterVersion(preference(preferenceScreen, R.string.settings_transfer_reset))
-        laterVersion(preference(preferenceScreen, R.string.settings_transfer_undo_import))
+        undoPreference = preference(preferenceScreen, R.string.settings_transfer_undo_import) { startWizard(SettingsUndoWizard.initialState()) }.apply {
+            isEnabled = false
+        }
         val autoBackup = ThemeColorPreferenceCategory(requireContext()).apply {
             setTitle(R.string.settings_transfer_auto_backup)
             isIconSpaceReserved = false
@@ -97,14 +112,35 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         val state = wizardState
         when {
             state != null -> startWizard(state)
-            startExport -> startWizard(exportState())
+            startWizard == SettingsTransferActivity.WIZARD_EXPORT -> startWizard(exportState())
+            startWizard == SettingsTransferActivity.WIZARD_IMPORT -> startWizard(SettingsImportWizard.initialState())
         }
-        startExport = false
+        startWizard = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshUndo()
+    }
+
+    /** "Undo last import" names the last import and is enabled while its backup is there. */
+    private fun refreshUndo() {
+        val context = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            val last = withContext(Dispatchers.IO) { SettingsImporter.lastOperation(context) }
+            undoPreference.isEnabled = last != null
+            undoPreference.summary = SettingsTransferMessages.undoSummary(context, last)
+        }
     }
 
     override fun requestDocument(fileName: String) {
         document = CompletableDeferred()
         createDocument.launch(fileName)
+    }
+
+    override fun requestOpenDocument() {
+        document = CompletableDeferred()
+        openDocument.launch(arrayOf("application/zip", "application/octet-stream"))
     }
 
     override suspend fun awaitDocument(): Uri? = document.await()
@@ -115,8 +151,13 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         if (wizardJob?.isActive == true) return
         val wizard = when (state.kind) {
             SettingsWizardState.Kind.EXPORT -> SettingsExportWizard(this)
+            SettingsWizardState.Kind.IMPORT -> SettingsImportWizard(this)
+            SettingsWizardState.Kind.UNDO -> SettingsUndoWizard(this)
         }
-        wizardJob = viewLifecycleOwner.lifecycleScope.launch { wizard.run(state) }
+        wizardJob = viewLifecycleOwner.lifecycleScope.launch {
+            wizard.run(state)
+            refreshUndo()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -124,7 +165,21 @@ class SettingsTransferFragment : PreferenceFragmentCompat(), SettingsWizardHost 
         super.onSaveInstanceState(outState)
     }
 
+    /**
+     * "Open document" that also shows the internal storage, which the picker of Android 7 hides (its "Downloads" lists
+     * only what the download manager fetched, not the files of the Download folder).
+     * zh-CN: 同时显示内部存储的 "打开文档": Android 7 的选择器默认隐藏内部存储 (其 "下载" 只列出下载管理器下载的文件, 不含 Download
+     * 目录中的文件).
+     */
+    private class OpenSettingsFile : ActivityResultContracts.OpenDocument() {
+        override fun createIntent(context: Context, input: Array<String>): Intent =
+            super.createIntent(context, input).putExtra(EXTRA_SHOW_ADVANCED, true)
+    }
+
     private companion object {
         const val STATE_WIZARD = "settings_wizard_state"
+
+        /** `DocumentsContract.EXTRA_SHOW_ADVANCED`, not in the public SDK. */
+        const val EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED"
     }
 }

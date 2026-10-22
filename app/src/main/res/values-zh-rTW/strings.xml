@@ -793,6 +793,7 @@
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">佈局分析</string>
+    <string name="settings_transfer_category_locked">由其他裝置加密</string>
     <string name="settings_transfer_category_other">其他 (內部狀態)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">外掛啟用狀態</string>
@@ -804,6 +805,7 @@
     <string name="settings_transfer_credentials_warning">憑證與授權 (GitHub 權杖, 外掛中心授權, MCP Server 與 3-Stove Agent 的已信任客戶端, Bun 宿主授權) 將以本機金鑰加密寫入檔案, 只能在本機的 AutoJs6 中匯入, 其他裝置或恢復原廠設定後無法匯入. 這種加密可被離線破解, 請仍然妥善保管匯出的檔案.</string>
     <string name="settings_transfer_credentials_warning_title">匯出憑證?</string>
     <string name="settings_transfer_description">設定按分類匯出為 zip 檔案, 可在本機或其他裝置上匯入.</string>
+    <string name="settings_transfer_error_interrupted">修改設定期間 AutoJs6 被關閉, 請檢查設定或撤銷上次匯入</string>
     <string name="settings_transfer_error_invalid_file">設定檔案中的分類檔案已損壞</string>
     <string name="settings_transfer_error_invalid_manifest">設定檔案的 manifest.json 已損壞或格式不符</string>
     <string name="settings_transfer_error_io">無法存取檔案: %1$s</string>
@@ -821,14 +823,49 @@
     <string name="settings_transfer_export_unexportable">略過了 %1$d 個無法寫入的值 (如 NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">正在寫入設定檔案...</string>
     <string name="settings_transfer_import">匯入設定</string>
+    <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">正在匯入設定...</string>
+    <string name="settings_transfer_import_canceled">已取消匯入, 未修改任何設定</string>
+    <string name="settings_transfer_import_credentials_locked">該檔案中的憑證由其他裝置或其他建置的 AutoJs6 加密, 本機無法解密, 因此不能匯入</string>
+    <string name="settings_transfer_import_done_title">設定已匯入</string>
+    <string name="settings_transfer_import_failed_title">匯入失敗</string>
+    <string name="settings_transfer_import_file">檔案: %1$s\n匯出時間: %2$s\n匯出來源: AutoJs6 %3$s (%4$d)\n裝置: %5$s (API %6$d)\n分類: %7$d 個\n條目: %8$d 項</string>
+    <string name="settings_transfer_import_newer_format">該檔案的格式版本 %1$d 高於本機 AutoJs6 支援的版本 %2$d; 可以繼續匯入, 本版本不認識的條目將被略過</string>
+    <string name="settings_transfer_import_other_file">其他檔案</string>
+    <string name="settings_transfer_import_other_host">該檔案由 %1$s 匯出, 不是本應用程式 (%2$s); 可以繼續匯入, 鍵名相同的條目照常匯入, 其餘條目將被略過</string>
+    <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">正在讀取設定檔案...</string>
+    <string name="settings_transfer_import_summary">選擇設定檔案與要匯入的分類</string>
+    <string name="settings_transfer_import_unknown_categories">本版本不認識的分類 (將略過): %1$d 個</string>
     <string name="settings_transfer_later_version">後續版本提供</string>
+    <string name="settings_transfer_locked_later">以密碼匯入其他裝置的憑證將在後續版本提供</string>
     <string name="settings_transfer_pick_export">選擇要匯出的分類</string>
+    <string name="settings_transfer_pick_import">選擇要匯入的分類</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">細化...</string>
     <string name="settings_transfer_refine_later">逐條選擇將在後續版本提供</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">恢復預設設定...</string>
+    <string name="settings_transfer_result_backup_failed">操作後備份未寫入: %1$s</string>
+    <string name="settings_transfer_result_counts">分類: %1$d 個\n寫入條目: %2$d 項\n還原預設: %3$d 項\n實際變化: %4$d 項</string>
+    <string name="settings_transfer_result_credentials_locked">憑證未匯入: 它們由其他裝置加密</string>
+    <string name="settings_transfer_result_data_not_undone">本版本尚未撤銷快捷方式與顏色庫的匯入</string>
+    <string name="settings_transfer_result_effects_failed">未能立即生效 (重啟後生效): %1$s</string>
+    <string name="settings_transfer_result_launcher_icon">關閉本頁後切換啟動器圖示, AutoJs6 可能隨之退出介面, 請從新圖示重新開啟</string>
+    <string name="settings_transfer_result_notification_permission">前臺服務需要傳送通知的權限</string>
+    <string name="settings_transfer_result_restart">部分設定在 AutoJs6 重啟後生效</string>
+    <string name="settings_transfer_result_skipped">已略過 (保持目前的值):</string>
+    <string name="settings_transfer_skip_declined">放棄的部署項目: %1$d</string>
+    <string name="settings_transfer_skip_invalid_value">無效的值: %1$d</string>
+    <string name="settings_transfer_skip_newer_format">來自更新的版本: %1$d</string>
+    <string name="settings_transfer_skip_target_missing">外掛未安裝: %1$d</string>
+    <string name="settings_transfer_skip_type_mismatch">類型不符: %1$d</string>
+    <string name="settings_transfer_skip_unknown_key">未知條目: %1$d</string>
     <string name="settings_transfer_summary">按分類匯出, 匯入與備份 AutoJs6 的設定</string>
     <string name="settings_transfer_title">管理 AutoJs6 設定</string>
+    <string name="settings_transfer_undo_applying" tools:ignore="TypographyEllipsis">正在撤銷上次匯入...</string>
+    <string name="settings_transfer_undo_confirm">%2$s 匯入時修改的 %1$d 個分類將還原為匯入之前的值; 撤銷後不能再次撤銷</string>
+    <string name="settings_transfer_undo_done_title">已撤銷上次匯入</string>
+    <string name="settings_transfer_undo_failed_title">撤銷失敗</string>
     <string name="settings_transfer_undo_import">撤銷上次匯入</string>
+    <string name="settings_transfer_undo_none">沒有可撤銷的匯入</string>
+    <string name="settings_transfer_undo_summary">%1$s 的匯入, 分類: %2$d 個</string>
     <string name="shortcut_backup_complete">確認已新增: %1$d; 已略過或未確認: %2$d</string>
     <string name="shortcut_backup_complete_icons">補全備份圖示</string>
     <string name="shortcut_backup_count">已存檔的捷徑: %1$d</string>

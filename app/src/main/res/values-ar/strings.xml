@@ -798,6 +798,7 @@
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">فاحص التخطيط</string>
+    <string name="settings_transfer_category_locked">مشفر على جهاز آخر</string>
     <string name="settings_transfer_category_other">أخرى (الحالة الداخلية)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">حالات تفعيل الإضافات</string>
@@ -809,6 +810,7 @@
     <string name="settings_transfer_credentials_warning">تُشفَّر بيانات الاعتماد والتفويضات (رمز GitHub, وتفويضات مركز الإضافات, والعملاء الموثوق بهم لـ MCP Server و 3-Stove Agent, وأذونات مضيف Bun) بمفتاح هذا الجهاز قبل كتابتها في الملف. لا يمكن استيرادها إلا في AutoJs6 على هذا الجهاز, وليس على جهاز آخر أو بعد إعادة ضبط المصنع. يمكن كسر هذا التشفير دون اتصال, لذا احتفظ بالملف في مكان آمن على أي حال.</string>
     <string name="settings_transfer_credentials_warning_title">تصدير بيانات الاعتماد?</string>
     <string name="settings_transfer_description">تُصدَّر الإعدادات حسب الفئة إلى ملف zip يمكن استيراده على هذا الجهاز أو على جهاز آخر.</string>
+    <string name="settings_transfer_error_interrupted">تم إغلاق AutoJs6 أثناء تغيير الإعدادات. تحقق من الإعدادات أو تراجع عن آخر استيراد.</string>
     <string name="settings_transfer_error_invalid_file">أحد ملفات الفئات في ملف الإعدادات تالف</string>
     <string name="settings_transfer_error_invalid_manifest">ملف manifest.json في ملف الإعدادات تالف أو بتنسيق آخر</string>
     <string name="settings_transfer_error_io">تعذر الوصول إلى الملف: %1$s</string>
@@ -826,14 +828,49 @@
     <string name="settings_transfer_export_unexportable">تم استبعاد %1$d من القيم لأنه لا يمكن كتابتها (مثل NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">جارٍ كتابة ملف الإعدادات...</string>
     <string name="settings_transfer_import">استيراد الإعدادات</string>
+    <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">جارٍ استيراد الإعدادات...</string>
+    <string name="settings_transfer_import_canceled">تم إلغاء الاستيراد, ولم يتم تغيير أي إعداد</string>
+    <string name="settings_transfer_import_credentials_locked">تم تشفير بيانات الاعتماد في هذا الملف على جهاز آخر أو بإصدار آخر من AutoJs6. لا يمكن لهذا الجهاز فك تشفيرها, لذا لا يمكن استيرادها.</string>
+    <string name="settings_transfer_import_done_title">تم استيراد الإعدادات</string>
+    <string name="settings_transfer_import_failed_title">فشل الاستيراد</string>
+    <string name="settings_transfer_import_file">الملف: %1$s\nوقت التصدير: %2$s\nصدّره: AutoJs6 %3$s (%4$d)\nالجهاز: %5$s (API %6$d)\nالفئات: %7$d\nالعناصر: %8$d</string>
+    <string name="settings_transfer_import_newer_format">إصدار تنسيق الملف %1$d أحدث من الإصدار %2$d الذي يدعمه AutoJs6 هذا. يمكنك المتابعة: سيتم تخطي العناصر التي لا يعرفها هذا الإصدار.</string>
+    <string name="settings_transfer_import_other_file">ملف آخر</string>
+    <string name="settings_transfer_import_other_host">تم تصدير الملف بواسطة %1$s وليس بواسطة هذا التطبيق (%2$s). يمكنك المتابعة: يتم استيراد العناصر ذات الأسماء نفسها ويتم تخطي العناصر الأخرى.</string>
+    <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">جارٍ قراءة ملف الإعدادات...</string>
+    <string name="settings_transfer_import_summary">اختر ملف إعدادات والفئات المراد استيرادها</string>
+    <string name="settings_transfer_import_unknown_categories">فئات لا يعرفها هذا الإصدار (سيتم تخطيها): %1$d</string>
     <string name="settings_transfer_later_version">متاح في إصدار لاحق</string>
+    <string name="settings_transfer_locked_later">سيتوفر استيراد بيانات اعتماد جهاز آخر باستخدام كلمة مرور في إصدار لاحق</string>
     <string name="settings_transfer_pick_export">اختر الفئات المراد تصديرها</string>
+    <string name="settings_transfer_pick_import">اختر الفئات المراد استيرادها</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">تحديد العناصر...</string>
     <string name="settings_transfer_refine_later">سيتوفر اختيار العناصر الفردية في إصدار لاحق</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">استعادة الإعدادات الافتراضية...</string>
+    <string name="settings_transfer_result_backup_failed">لم تتم كتابة النسخ الاحتياطي بعد العمليات: %1$s</string>
+    <string name="settings_transfer_result_counts">الفئات: %1$d\nالعناصر المكتوبة: %2$d\nالعناصر المستعادة إلى الافتراضي: %3$d\nالقيم المتغيرة: %4$d</string>
+    <string name="settings_transfer_result_credentials_locked">لم يتم استيراد بيانات الاعتماد: تم تشفيرها على جهاز آخر</string>
+    <string name="settings_transfer_result_data_not_undone">لا يتراجع هذا الإصدار بعد عن استيراد الاختصارات ومكتبات الألوان</string>
+    <string name="settings_transfer_result_effects_failed">لم يتم التطبيق بعد (سيتم التطبيق بعد إعادة البدء): %1$s</string>
+    <string name="settings_transfer_result_launcher_icon">تتغير أيقونة التشغيل عند إغلاق هذه الصفحة. قد يغادر AutoJs6 الشاشة عندها; افتحه مرة أخرى من أيقونته الجديدة.</string>
+    <string name="settings_transfer_result_notification_permission">تحتاج خدمة المقدمة إلى إذن نشر الإشعارات</string>
+    <string name="settings_transfer_result_restart">تسري بعض الإعدادات بعد إعادة بدء AutoJs6</string>
+    <string name="settings_transfer_result_skipped">تم التخطي (مع الإبقاء على القيم الحالية):</string>
+    <string name="settings_transfer_skip_declined">عمليات النشر المرفوضة: %1$d</string>
+    <string name="settings_transfer_skip_invalid_value">قيم غير صالحة: %1$d</string>
+    <string name="settings_transfer_skip_newer_format">من إصدار أحدث: %1$d</string>
+    <string name="settings_transfer_skip_target_missing">إضافات غير مثبتة: %1$d</string>
+    <string name="settings_transfer_skip_type_mismatch">أنواع غير مطابقة: %1$d</string>
+    <string name="settings_transfer_skip_unknown_key">عناصر غير معروفة: %1$d</string>
     <string name="settings_transfer_summary">تصدير إعدادات AutoJs6 واستيرادها ونسخها احتياطيا حسب الفئة</string>
     <string name="settings_transfer_title">إدارة إعدادات AutoJs6</string>
+    <string name="settings_transfer_undo_applying" tools:ignore="TypographyEllipsis">جارٍ التراجع عن آخر استيراد...</string>
+    <string name="settings_transfer_undo_confirm">ستستعيد الفئات التي غيّرها استيراد %2$s (%1$d) القيم التي كانت عليها قبله. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="settings_transfer_undo_done_title">تم التراجع عن آخر استيراد</string>
+    <string name="settings_transfer_undo_failed_title">فشل التراجع</string>
     <string name="settings_transfer_undo_import">التراجع عن آخر استيراد</string>
+    <string name="settings_transfer_undo_none">لا يوجد استيراد للتراجع عنه</string>
+    <string name="settings_transfer_undo_summary">استيراد %1$s, الفئات: %2$d</string>
     <string name="shortcut_backup_complete">الإضافات المؤكدة: %1$d; المتخطاة أو غير المؤكدة: %2$d</string>
     <string name="shortcut_backup_complete_icons">إكمال أيقونات النسخة</string>
     <string name="shortcut_backup_count">الاختصارات المحفوظة: %1$d</string>

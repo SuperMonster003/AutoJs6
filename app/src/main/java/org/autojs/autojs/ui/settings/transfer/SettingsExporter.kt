@@ -93,7 +93,9 @@ object SettingsExporter {
     @JvmStatic
     fun device() = SettingsArchiveManifest.Device(Build.MODEL.orEmpty(), Build.VERSION.SDK_INT)
 
-    private fun displayName(context: Context, uri: Uri): String? = runCatching {
+    /** The display name of the document [uri], or null. zh-CN: 文档 [uri] 的显示名称, 没有时为 null. */
+    @JvmStatic
+    fun displayName(context: Context, uri: Uri): String? = runCatching {
         context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) cursor.getString(0) else null
         }

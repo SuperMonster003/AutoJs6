@@ -796,6 +796,7 @@
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Инспектор макета</string>
+    <string name="settings_transfer_category_locked">Зашифровано на другом устройстве</string>
     <string name="settings_transfer_category_other">Прочее (внутреннее состояние)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Состояние включения плагинов</string>
@@ -807,6 +808,7 @@
     <string name="settings_transfer_credentials_warning">Учетные данные и авторизации (токен GitHub, авторизации центра плагинов, доверенные клиенты MCP Server и 3-Stove Agent, разрешения хоста Bun) шифруются ключом этого устройства. Импортировать их может только AutoJs6 на этом устройстве, но не другое устройство и не после сброса к заводским настройкам. Такое шифрование можно взломать офлайн, поэтому все равно храните файл в надежном месте.</string>
     <string name="settings_transfer_credentials_warning_title">Экспортировать учетные данные?</string>
     <string name="settings_transfer_description">Настройки экспортируются по категориям в zip-файл, который можно импортировать на этом или другом устройстве.</string>
+    <string name="settings_transfer_error_interrupted">AutoJs6 был закрыт во время изменения настроек. Проверьте настройки или отмените последний импорт.</string>
     <string name="settings_transfer_error_invalid_file">Файл категории в файле настроек поврежден</string>
     <string name="settings_transfer_error_invalid_manifest">Файл manifest.json в файле настроек поврежден или имеет другой формат</string>
     <string name="settings_transfer_error_io">Нет доступа к файлу: %1$s</string>
@@ -824,14 +826,49 @@
     <string name="settings_transfer_export_unexportable">Пропущено значений, которые нельзя записать (например, NaN): %1$d</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Запись файла настроек...</string>
     <string name="settings_transfer_import">Импорт настроек</string>
+    <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Импорт настроек...</string>
+    <string name="settings_transfer_import_canceled">Импорт отменен, настройки не изменены</string>
+    <string name="settings_transfer_import_credentials_locked">Учетные данные в этом файле зашифрованы на другом устройстве или другой сборкой AutoJs6. Это устройство не может их расшифровать, поэтому их нельзя импортировать.</string>
+    <string name="settings_transfer_import_done_title">Настройки импортированы</string>
+    <string name="settings_transfer_import_failed_title">Не удалось импортировать</string>
+    <string name="settings_transfer_import_file">Файл: %1$s\nВремя экспорта: %2$s\nЭкспортировано: AutoJs6 %3$s (%4$d)\nУстройство: %5$s (API %6$d)\nКатегории: %7$d\nЭлементы: %8$d</string>
+    <string name="settings_transfer_import_newer_format">Версия формата файла %1$d новее версии %2$d, которую поддерживает этот AutoJs6. Можно продолжить: элементы, неизвестные этой версии, будут пропущены.</string>
+    <string name="settings_transfer_import_other_file">Другой файл</string>
+    <string name="settings_transfer_import_other_host">Файл экспортирован приложением %1$s, а не этим приложением (%2$s). Можно продолжить: элементы с теми же именами будут импортированы, остальные пропущены.</string>
+    <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">Чтение файла настроек...</string>
+    <string name="settings_transfer_import_summary">Выберите файл настроек и категории для импорта</string>
+    <string name="settings_transfer_import_unknown_categories">Категории, неизвестные этой версии (пропускаются): %1$d</string>
     <string name="settings_transfer_later_version">Будет доступно в следующей версии</string>
+    <string name="settings_transfer_locked_later">Импорт учетных данных другого устройства по паролю появится в следующей версии</string>
     <string name="settings_transfer_pick_export">Выберите категории для экспорта</string>
+    <string name="settings_transfer_pick_import">Выберите категории для импорта</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Уточнить...</string>
     <string name="settings_transfer_refine_later">Выбор отдельных элементов появится в следующей версии</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Восстановить настройки по умолчанию...</string>
+    <string name="settings_transfer_result_backup_failed">Резервная копия после операций не записана: %1$s</string>
+    <string name="settings_transfer_result_counts">Категории: %1$d\nЗаписано элементов: %2$d\nСброшено к значениям по умолчанию: %3$d\nИзменено значений: %4$d</string>
+    <string name="settings_transfer_result_credentials_locked">Учетные данные не импортированы: они зашифрованы на другом устройстве</string>
+    <string name="settings_transfer_result_data_not_undone">Эта версия пока не отменяет импорт ярлыков и цветовых библиотек</string>
+    <string name="settings_transfer_result_effects_failed">Пока не применено (применится после перезапуска): %1$s</string>
+    <string name="settings_transfer_result_launcher_icon">Значок запуска сменится после закрытия этой страницы. AutoJs6 может при этом закрыться; откройте его снова по новому значку.</string>
+    <string name="settings_transfer_result_notification_permission">Службе переднего плана нужно разрешение на отправку уведомлений</string>
+    <string name="settings_transfer_result_restart">Некоторые настройки вступят в силу после перезапуска AutoJs6</string>
+    <string name="settings_transfer_result_skipped">Пропущено (текущие значения сохранены):</string>
+    <string name="settings_transfer_skip_declined">Отклоненные развертывания: %1$d</string>
+    <string name="settings_transfer_skip_invalid_value">Недопустимые значения: %1$d</string>
+    <string name="settings_transfer_skip_newer_format">Из более новой версии: %1$d</string>
+    <string name="settings_transfer_skip_target_missing">Плагины не установлены: %1$d</string>
+    <string name="settings_transfer_skip_type_mismatch">Неверный тип: %1$d</string>
+    <string name="settings_transfer_skip_unknown_key">Неизвестные элементы: %1$d</string>
     <string name="settings_transfer_summary">Экспорт, импорт и резервное копирование настроек AutoJs6 по категориям</string>
     <string name="settings_transfer_title">Управление настройками AutoJs6</string>
+    <string name="settings_transfer_undo_applying" tools:ignore="TypographyEllipsis">Отмена последнего импорта...</string>
+    <string name="settings_transfer_undo_confirm">Категории, измененные импортом %2$s (%1$d), получат значения, которые были до него. Эту отмену нельзя отменить.</string>
+    <string name="settings_transfer_undo_done_title">Последний импорт отменен</string>
+    <string name="settings_transfer_undo_failed_title">Не удалось отменить</string>
     <string name="settings_transfer_undo_import">Отменить последний импорт</string>
+    <string name="settings_transfer_undo_none">Нет импорта для отмены</string>
+    <string name="settings_transfer_undo_summary">Импорт %1$s, категорий: %2$d</string>
     <string name="shortcut_backup_complete">Подтверждено: %1$d; пропущено или не подтверждено: %2$d</string>
     <string name="shortcut_backup_complete_icons">Дополнить значки копии</string>
     <string name="shortcut_backup_count">Сохранено ярлыков: %1$d</string>

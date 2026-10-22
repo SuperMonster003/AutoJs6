@@ -797,6 +797,7 @@
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">レイアウトインスペクター</string>
+    <string name="settings_transfer_category_locked">別のデバイスで暗号化</string>
     <string name="settings_transfer_category_other">その他 (内部状態)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">プラグインの有効状態</string>
@@ -808,6 +809,7 @@
     <string name="settings_transfer_credentials_warning">認証情報と承認 (GitHub トークン, プラグインセンターの承認, MCP Server と 3-Stove Agent の信頼済みクライアント, Bun ホストの許可) はこのデバイスの鍵で暗号化してファイルに書き込まれます. インポートできるのはこのデバイスの AutoJs6 だけで, 別のデバイスや初期化後はインポートできません. この暗号化はオフラインで解読され得るため, ファイルは引き続き安全に保管してください.</string>
     <string name="settings_transfer_credentials_warning_title">認証情報をエクスポートしますか?</string>
     <string name="settings_transfer_description">設定はカテゴリごとに zip ファイルへエクスポートされ, この端末または別の端末でインポートできます.</string>
+    <string name="settings_transfer_error_interrupted">設定の変更中に AutoJs6 が終了しました. 設定を確認するか, 前回のインポートを元に戻してください</string>
     <string name="settings_transfer_error_invalid_file">設定ファイル内のカテゴリファイルが壊れています</string>
     <string name="settings_transfer_error_invalid_manifest">設定ファイルの manifest.json が壊れているか, 別の形式です</string>
     <string name="settings_transfer_error_io">ファイルにアクセスできません: %1$s</string>
@@ -825,14 +827,49 @@
     <string name="settings_transfer_export_unexportable">書き込めない値 %1$d 個を省きました (NaN など)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">設定ファイルを書き込んでいます...</string>
     <string name="settings_transfer_import">設定をインポート</string>
+    <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">設定をインポートしています...</string>
+    <string name="settings_transfer_import_canceled">インポートを取り消しました. 設定は変更されていません</string>
+    <string name="settings_transfer_import_credentials_locked">このファイルの認証情報は別のデバイスまたは別ビルドの AutoJs6 で暗号化されているため, このデバイスでは復号できず, インポートできません</string>
+    <string name="settings_transfer_import_done_title">設定をインポートしました</string>
+    <string name="settings_transfer_import_failed_title">インポートに失敗しました</string>
+    <string name="settings_transfer_import_file">ファイル: %1$s\nエクスポート日時: %2$s\nエクスポート元: AutoJs6 %3$s (%4$d)\nデバイス: %5$s (API %6$d)\nカテゴリ: %7$d\n項目: %8$d</string>
+    <string name="settings_transfer_import_newer_format">このファイルの形式バージョン %1$d は, この AutoJs6 が対応するバージョン %2$d より新しいです. 続行できますが, このバージョンが認識しない項目はスキップされます</string>
+    <string name="settings_transfer_import_other_file">別のファイル</string>
+    <string name="settings_transfer_import_other_host">このファイルはこのアプリ (%2$s) ではなく %1$s でエクスポートされました. 続行できます: 同じ名前の項目はインポートされ, それ以外はスキップされます</string>
+    <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">設定ファイルを読み込んでいます...</string>
+    <string name="settings_transfer_import_summary">設定ファイルとインポートするカテゴリを選択します</string>
+    <string name="settings_transfer_import_unknown_categories">このバージョンが認識しないカテゴリ (スキップ): %1$d</string>
     <string name="settings_transfer_later_version">今後のバージョンで対応予定</string>
+    <string name="settings_transfer_locked_later">別のデバイスの認証情報をパスワードでインポートする機能は今後のバージョンで対応予定です</string>
     <string name="settings_transfer_pick_export">エクスポートするカテゴリを選択してください</string>
+    <string name="settings_transfer_pick_import">インポートするカテゴリを選択してください</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">詳細...</string>
     <string name="settings_transfer_refine_later">項目ごとの選択は今後のバージョンで対応予定です</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">既定の設定に戻す...</string>
+    <string name="settings_transfer_result_backup_failed">操作後のバックアップを書き込めませんでした: %1$s</string>
+    <string name="settings_transfer_result_counts">カテゴリ: %1$d\n書き込んだ項目: %2$d\n既定値に戻した項目: %3$d\n変更された値: %4$d</string>
+    <string name="settings_transfer_result_credentials_locked">認証情報はインポートされませんでした: 別のデバイスで暗号化されています</string>
+    <string name="settings_transfer_result_data_not_undone">このバージョンでは, ショートカットとカラーライブラリのインポートはまだ元に戻せません</string>
+    <string name="settings_transfer_result_effects_failed">すぐには適用できませんでした (再起動後に適用されます): %1$s</string>
+    <string name="settings_transfer_result_launcher_icon">このページを閉じるとランチャーアイコンが切り替わります. その際 AutoJs6 の画面が閉じることがあるため, 新しいアイコンから開き直してください</string>
+    <string name="settings_transfer_result_notification_permission">フォアグラウンドサービスには通知を送信する権限が必要です</string>
+    <string name="settings_transfer_result_restart">一部の設定は AutoJs6 の再起動後に有効になります</string>
+    <string name="settings_transfer_result_skipped">スキップ (現在の値を保持):</string>
+    <string name="settings_transfer_skip_declined">見送ったデプロイ項目: %1$d</string>
+    <string name="settings_transfer_skip_invalid_value">無効な値: %1$d</string>
+    <string name="settings_transfer_skip_newer_format">新しいバージョンの項目: %1$d</string>
+    <string name="settings_transfer_skip_target_missing">未インストールのプラグイン: %1$d</string>
+    <string name="settings_transfer_skip_type_mismatch">型の不一致: %1$d</string>
+    <string name="settings_transfer_skip_unknown_key">不明な項目: %1$d</string>
     <string name="settings_transfer_summary">AutoJs6 の設定をカテゴリごとにエクスポート, インポート, バックアップします</string>
     <string name="settings_transfer_title">AutoJs6 の設定を管理</string>
+    <string name="settings_transfer_undo_applying" tools:ignore="TypographyEllipsis">前回のインポートを元に戻しています...</string>
+    <string name="settings_transfer_undo_confirm">%2$s のインポートで変更された %1$d 個のカテゴリをインポート前の値に戻します. この操作は元に戻せません</string>
+    <string name="settings_transfer_undo_done_title">前回のインポートを元に戻しました</string>
+    <string name="settings_transfer_undo_failed_title">元に戻せませんでした</string>
     <string name="settings_transfer_undo_import">前回のインポートを元に戻す</string>
+    <string name="settings_transfer_undo_none">元に戻せるインポートはありません</string>
+    <string name="settings_transfer_undo_summary">%1$s のインポート, カテゴリ: %2$d</string>
     <string name="shortcut_backup_complete">確認済みの追加: %1$d; スキップまたは未確認: %2$d</string>
     <string name="shortcut_backup_complete_icons">バックアップのアイコンを補完</string>
     <string name="shortcut_backup_count">保存済みショートカット: %1$d</string>

@@ -796,6 +796,7 @@
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Inspecteur de mise en page</string>
+    <string name="settings_transfer_category_locked">Chiffré sur un autre appareil</string>
     <string name="settings_transfer_category_other">Autres (état interne)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">États d\'activation des plugins</string>
@@ -807,6 +808,7 @@
     <string name="settings_transfer_credentials_warning">Les identifiants et autorisations (le jeton GitHub, les autorisations du centre des plugins, les clients de confiance de MCP Server et de 3-Stove Agent, les droits de l\'hôte Bun) sont chiffrés avec une clé de cet appareil. Seul AutoJs6 sur cet appareil peut les importer, pas un autre appareil ni après une réinitialisation d\'usine. Ce chiffrement peut être cassé hors ligne, conservez donc tout de même le fichier en lieu sûr.</string>
     <string name="settings_transfer_credentials_warning_title">Exporter les identifiants?</string>
     <string name="settings_transfer_description">Les paramètres sont exportés par catégorie dans un fichier zip, qui peut être importé sur cet appareil ou sur un autre.</string>
+    <string name="settings_transfer_error_interrupted">AutoJs6 a été fermé pendant la modification des paramètres. Vérifiez les paramètres ou annulez la dernière importation.</string>
     <string name="settings_transfer_error_invalid_file">Un fichier de catégorie du fichier de paramètres est endommagé</string>
     <string name="settings_transfer_error_invalid_manifest">Le manifest.json du fichier de paramètres est endommagé ou d\'un autre format</string>
     <string name="settings_transfer_error_io">Impossible d\'accéder au fichier: %1$s</string>
@@ -824,14 +826,49 @@
     <string name="settings_transfer_export_unexportable">%1$d valeurs ont été ignorées car elles ne peuvent pas être écrites (comme NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Écriture du fichier de paramètres...</string>
     <string name="settings_transfer_import">Importer les paramètres</string>
+    <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Importation des paramètres...</string>
+    <string name="settings_transfer_import_canceled">Importation annulée, aucun paramètre n\'a été modifié</string>
+    <string name="settings_transfer_import_credentials_locked">Les identifiants de ce fichier ont été chiffrés sur un autre appareil ou par une autre version de AutoJs6. Cet appareil ne peut pas les déchiffrer, ils ne peuvent donc pas être importés.</string>
+    <string name="settings_transfer_import_done_title">Paramètres importés</string>
+    <string name="settings_transfer_import_failed_title">Échec de l\'importation</string>
+    <string name="settings_transfer_import_file">Fichier: %1$s\nExporté le: %2$s\nExporté par: AutoJs6 %3$s (%4$d)\nAppareil: %5$s (API %6$d)\nCatégories: %7$d\nÉléments: %8$d</string>
+    <string name="settings_transfer_import_newer_format">Le fichier utilise la version de format %1$d, plus récente que la version %2$d de cet AutoJs6. Vous pouvez continuer: les éléments inconnus de cette version sont ignorés.</string>
+    <string name="settings_transfer_import_other_file">Autre fichier</string>
+    <string name="settings_transfer_import_other_host">Le fichier a été exporté par %1$s, et non par cette application (%2$s). Vous pouvez continuer: les éléments de même nom sont importés, les autres sont ignorés.</string>
+    <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">Lecture du fichier de paramètres...</string>
+    <string name="settings_transfer_import_summary">Choisissez un fichier de paramètres et les catégories à importer</string>
+    <string name="settings_transfer_import_unknown_categories">Catégories inconnues de cette version (ignorées): %1$d</string>
     <string name="settings_transfer_later_version">Disponible dans une version ultérieure</string>
+    <string name="settings_transfer_locked_later">L\'importation des identifiants d\'un autre appareil avec un mot de passe arrivera dans une version ultérieure</string>
     <string name="settings_transfer_pick_export">Choisissez les catégories à exporter</string>
+    <string name="settings_transfer_pick_import">Choisissez les catégories à importer</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Affiner...</string>
     <string name="settings_transfer_refine_later">La sélection élément par élément arrivera dans une version ultérieure</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurer les paramètres par défaut...</string>
+    <string name="settings_transfer_result_backup_failed">La sauvegarde après opération n\'a pas été écrite: %1$s</string>
+    <string name="settings_transfer_result_counts">Catégories: %1$d\nÉléments écrits: %2$d\nÉléments rétablis par défaut: %3$d\nValeurs modifiées: %4$d</string>
+    <string name="settings_transfer_result_credentials_locked">Les identifiants n\'ont pas été importés: ils ont été chiffrés sur un autre appareil</string>
+    <string name="settings_transfer_result_data_not_undone">Cette version n\'annule pas encore l\'importation des raccourcis et des bibliothèques de couleurs</string>
+    <string name="settings_transfer_result_effects_failed">Non appliqué pour l\'instant (appliqué après un redémarrage): %1$s</string>
+    <string name="settings_transfer_result_launcher_icon">L\'icône du lanceur change à la fermeture de cette page. AutoJs6 peut alors quitter l\'écran; rouvrez-le depuis sa nouvelle icône.</string>
+    <string name="settings_transfer_result_notification_permission">Le service d\'avant-plan a besoin de l\'autorisation de publier des notifications</string>
+    <string name="settings_transfer_result_restart">Certains paramètres prennent effet après le redémarrage de AutoJs6</string>
+    <string name="settings_transfer_result_skipped">Ignorés (valeurs actuelles conservées):</string>
+    <string name="settings_transfer_skip_declined">Déploiements refusés: %1$d</string>
+    <string name="settings_transfer_skip_invalid_value">Valeurs non valides: %1$d</string>
+    <string name="settings_transfer_skip_newer_format">D\'une version plus récente: %1$d</string>
+    <string name="settings_transfer_skip_target_missing">Plugins non installés: %1$d</string>
+    <string name="settings_transfer_skip_type_mismatch">Types incorrects: %1$d</string>
+    <string name="settings_transfer_skip_unknown_key">Éléments inconnus: %1$d</string>
     <string name="settings_transfer_summary">Exporter, importer et sauvegarder les paramètres d\'AutoJs6 par catégorie</string>
     <string name="settings_transfer_title">Gérer les paramètres d\'AutoJs6</string>
+    <string name="settings_transfer_undo_applying" tools:ignore="TypographyEllipsis">Annulation de la dernière importation...</string>
+    <string name="settings_transfer_undo_confirm">Les %1$d catégories modifiées par l\'importation du %2$s reprennent les valeurs qu\'elles avaient avant. Cette annulation est définitive.</string>
+    <string name="settings_transfer_undo_done_title">Dernière importation annulée</string>
+    <string name="settings_transfer_undo_failed_title">Échec de l\'annulation</string>
     <string name="settings_transfer_undo_import">Annuler la dernière importation</string>
+    <string name="settings_transfer_undo_none">Aucune importation à annuler</string>
+    <string name="settings_transfer_undo_summary">Importation du %1$s, catégories: %2$d</string>
     <string name="shortcut_backup_complete">Ajouts confirmés: %1$d; ignorés ou non confirmés: %2$d</string>
     <string name="shortcut_backup_complete_icons">Compléter les icônes</string>
     <string name="shortcut_backup_count">Raccourcis enregistrés: %1$d</string>

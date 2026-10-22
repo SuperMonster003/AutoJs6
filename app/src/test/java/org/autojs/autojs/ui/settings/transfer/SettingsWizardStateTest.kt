@@ -52,7 +52,7 @@ class SettingsWizardStateTest {
         assertNull(SettingsWizardState.fromText(null))
         assertNull(SettingsWizardState.fromText("{"))
         assertNull(SettingsWizardState.fromText("[]"))
-        assertNull(SettingsWizardState.fromText("""{"kind":"import","step":"pick_categories","selected":[]}"""))
+        assertNull(SettingsWizardState.fromText("""{"kind":"unknown","step":"pick_categories","selected":[]}"""))
         assertNull(SettingsWizardState.fromText("""{"kind":"export","step":"unknown","selected":[]}"""))
         assertNull(SettingsWizardState.fromText("""{"kind":"export","step":"done"}"""))
         assertNull(SettingsWizardState.fromText("""{"kind":"export","step":"done","selected":[1]}"""))

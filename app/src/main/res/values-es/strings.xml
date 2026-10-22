@@ -796,6 +796,7 @@
     <string name="settings_transfer_category_general">@string/text_config</string>
     <string name="settings_transfer_category_history">@string/text_trash_and_version_history</string>
     <string name="settings_transfer_category_layout_inspector">Inspector de diseño</string>
+    <string name="settings_transfer_category_locked">Cifrado en otro dispositivo</string>
     <string name="settings_transfer_category_other">Otros (estado interno)</string>
     <string name="settings_transfer_category_plugin_center">@string/text_plugin_center</string>
     <string name="settings_transfer_category_plugin_enable_state">Estado de activación de plugins</string>
@@ -807,6 +808,7 @@
     <string name="settings_transfer_credentials_warning">Las credenciales y autorizaciones (el token de GitHub, las autorizaciones del centro de plugins, los clientes de confianza de MCP Server y 3-Stove Agent, los permisos del host de Bun) se cifran con una clave de este dispositivo. Solo AutoJs6 en este dispositivo puede importarlas, no otro dispositivo ni tras un restablecimiento de fábrica. Este cifrado puede romperse sin conexión, así que guarde el archivo en un lugar seguro de todos modos.</string>
     <string name="settings_transfer_credentials_warning_title">Exportar credenciales?</string>
     <string name="settings_transfer_description">La configuración se exporta por categorías a un archivo zip que se puede importar en este u otro dispositivo.</string>
+    <string name="settings_transfer_error_interrupted">AutoJs6 se cerró mientras se cambiaba la configuración. Revise la configuración o deshaga la última importación.</string>
     <string name="settings_transfer_error_invalid_file">Un archivo de categoría del archivo de configuración está dañado</string>
     <string name="settings_transfer_error_invalid_manifest">El manifest.json del archivo de configuración está dañado o tiene otro formato</string>
     <string name="settings_transfer_error_io">No se puede acceder al archivo: %1$s</string>
@@ -824,14 +826,49 @@
     <string name="settings_transfer_export_unexportable">Se omitieron %1$d valores porque no se pueden escribir (como NaN)</string>
     <string name="settings_transfer_export_writing" tools:ignore="TypographyEllipsis">Escribiendo el archivo de configuración...</string>
     <string name="settings_transfer_import">Importar configuración</string>
+    <string name="settings_transfer_import_applying" tools:ignore="TypographyEllipsis">Importando la configuración...</string>
+    <string name="settings_transfer_import_canceled">Importación cancelada, no se cambió ninguna configuración</string>
+    <string name="settings_transfer_import_credentials_locked">Las credenciales de este archivo se cifraron en otro dispositivo o con otra compilación de AutoJs6. Este dispositivo no puede descifrarlas, por lo que no se pueden importar.</string>
+    <string name="settings_transfer_import_done_title">Configuración importada</string>
+    <string name="settings_transfer_import_failed_title">Error al importar</string>
+    <string name="settings_transfer_import_file">Archivo: %1$s\nExportado el: %2$s\nExportado por: AutoJs6 %3$s (%4$d)\nDispositivo: %5$s (API %6$d)\nCategorías: %7$d\nElementos: %8$d</string>
+    <string name="settings_transfer_import_newer_format">El archivo usa la versión de formato %1$d, más reciente que la versión %2$d de este AutoJs6. Puede continuar: los elementos que esta versión no conoce se omiten.</string>
+    <string name="settings_transfer_import_other_file">Otro archivo</string>
+    <string name="settings_transfer_import_other_host">El archivo fue exportado por %1$s, no por esta aplicación (%2$s). Puede continuar: los elementos con el mismo nombre se importan y los demás se omiten.</string>
+    <string name="settings_transfer_import_reading" tools:ignore="TypographyEllipsis">Leyendo el archivo de configuración...</string>
+    <string name="settings_transfer_import_summary">Elija un archivo de configuración y las categorías que desea importar</string>
+    <string name="settings_transfer_import_unknown_categories">Categorías que esta versión no conoce (se omiten): %1$d</string>
     <string name="settings_transfer_later_version">Disponible en una versión posterior</string>
+    <string name="settings_transfer_locked_later">La importación de las credenciales de otro dispositivo con una contraseña llegará en una versión posterior</string>
     <string name="settings_transfer_pick_export">Elija las categorías que desea exportar</string>
+    <string name="settings_transfer_pick_import">Elija las categorías que desea importar</string>
     <string name="settings_transfer_refine" tools:ignore="TypographyEllipsis">Detallar...</string>
     <string name="settings_transfer_refine_later">La selección de elementos individuales llegará en una versión posterior</string>
     <string name="settings_transfer_reset" tools:ignore="TypographyEllipsis">Restaurar la configuración predeterminada...</string>
+    <string name="settings_transfer_result_backup_failed">No se escribió la copia tras operaciones: %1$s</string>
+    <string name="settings_transfer_result_counts">Categorías: %1$d\nElementos escritos: %2$d\nElementos restablecidos: %3$d\nValores cambiados: %4$d</string>
+    <string name="settings_transfer_result_credentials_locked">Las credenciales no se importaron: se cifraron en otro dispositivo</string>
+    <string name="settings_transfer_result_data_not_undone">Esta versión aún no deshace la importación de accesos directos y bibliotecas de colores</string>
+    <string name="settings_transfer_result_effects_failed">Todavía no aplicado (se aplica tras reiniciar): %1$s</string>
+    <string name="settings_transfer_result_launcher_icon">El icono del lanzador cambia al cerrar esta página. AutoJs6 puede salir de la pantalla; vuelva a abrirlo desde su nuevo icono.</string>
+    <string name="settings_transfer_result_notification_permission">El servicio de primer plano necesita el permiso para publicar notificaciones</string>
+    <string name="settings_transfer_result_restart">Algunas configuraciones surten efecto después de reiniciar AutoJs6</string>
+    <string name="settings_transfer_result_skipped">Omitidos (se mantienen los valores actuales):</string>
+    <string name="settings_transfer_skip_declined">Despliegues rechazados: %1$d</string>
+    <string name="settings_transfer_skip_invalid_value">Valores no válidos: %1$d</string>
+    <string name="settings_transfer_skip_newer_format">De una versión más reciente: %1$d</string>
+    <string name="settings_transfer_skip_target_missing">Plugins no instalados: %1$d</string>
+    <string name="settings_transfer_skip_type_mismatch">Tipos incorrectos: %1$d</string>
+    <string name="settings_transfer_skip_unknown_key">Elementos desconocidos: %1$d</string>
     <string name="settings_transfer_summary">Exportar, importar y respaldar la configuración de AutoJs6 por categorías</string>
     <string name="settings_transfer_title">Administrar la configuración de AutoJs6</string>
+    <string name="settings_transfer_undo_applying" tools:ignore="TypographyEllipsis">Deshaciendo la última importación...</string>
+    <string name="settings_transfer_undo_confirm">Las %1$d categorías que cambió la importación del %2$s recuperan los valores que tenían antes. Esta acción no se puede deshacer.</string>
+    <string name="settings_transfer_undo_done_title">Última importación deshecha</string>
+    <string name="settings_transfer_undo_failed_title">Error al deshacer</string>
     <string name="settings_transfer_undo_import">Deshacer la última importación</string>
+    <string name="settings_transfer_undo_none">No hay ninguna importación que deshacer</string>
+    <string name="settings_transfer_undo_summary">Importación del %1$s, categorías: %2$d</string>
     <string name="shortcut_backup_complete">Adiciones confirmadas: %1$d; omitidas o sin confirmar: %2$d</string>
     <string name="shortcut_backup_complete_icons">Completar iconos de la copia</string>
     <string name="shortcut_backup_count">Accesos guardados: %1$d</string>
