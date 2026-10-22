@@ -86,6 +86,27 @@ class NodeBridgeResourceRegistryInstrumentationTest {
     }
 
     @Test
+    fun directRegistryClosesResourcesRegisteredAfterDestroy() {
+        val closed = mutableListOf<String>()
+        val registry = NodeBridgeResourceRegistry("resource-late")
+        registry.closeAll("execution.destroy")
+
+        // memory-phase2 C6: an overlay posted before destroy registers afterwards and must not stay active.
+        val late = registry.register(NodeBridgeResourceType.OVERLAY_SESSION, id = "overlay-late-1") { reason ->
+            closed += "overlay:$reason"
+        }
+        assertEquals(listOf("overlay:execution.destroy"), closed)
+        assertEquals(0, registry.activeCount())
+        assertFalse(late.close("overlay.close"))
+        assertEquals(listOf("overlay:execution.destroy"), closed)
+
+        val diagnostics = registry.nativeDiagnostics()
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.created_count"])
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.destroy_closed_count"])
+        assertEquals("1", diagnostics["embedded_script.bridge_resource.leak_count"])
+    }
+
+    @Test
     fun androidProviderCleansJavaHandlesOnDestroyAndDoesNotLeakToNextExecution() {
         val provider = AndroidNodeBridgeCapabilityProvider(
             context,

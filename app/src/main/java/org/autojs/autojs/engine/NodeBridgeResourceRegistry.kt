@@ -70,6 +70,8 @@ class NodeBridgeResourceRegistry(
     private val maxActiveCount = AtomicInteger(0)
     @Volatile
     private var lastCleanupSummary: NodeBridgeResourceCleanupSummary? = null
+    @Volatile
+    private var closedReason: String? = null
 
     fun register(
         type: NodeBridgeResourceType,
@@ -90,6 +92,16 @@ class NodeBridgeResourceRegistry(
         }
         createdCount.incrementAndGet()
         recordMaxActive(active.size)
+        // A resource registered after closeAll() (e.g. an overlay posted before destroy) would stay here with its
+        // close callback and the provider it captures, so close it at once (C6).
+        // zh-CN: closeAll() 之后登记的资源 (例如 destroy 前已 post 的浮窗) 会连同关闭回调及其捕获的 provider 一直留在这里, 因此立即关闭 (C6).
+        closedReason?.let { reason ->
+            if (active.remove(id, record)) {
+                leakCount.incrementAndGet()
+                closeRecord(record, reason, fromDestroy = true)
+                Log.w(TAG, "Closed AutoJs6 Node bridge resource registered after destroy: ${type.name} $id")
+            }
+        }
         return NodeBridgeResourceHandle(this, id, type)
     }
 
@@ -108,6 +120,9 @@ class NodeBridgeResourceRegistry(
     }
 
     fun closeAll(reason: String = "destroy"): NodeBridgeResourceCleanupSummary {
+        // Set before the snapshot: register() either lands in it or sees the flag.
+        // zh-CN: 在取快照之前设置: register() 要么进入快照, 要么看到该标志.
+        if (closedReason == null) closedReason = reason
         val records = active.values.sortedWith(compareBy<ResourceRecord> { it.type.name }.thenBy { it.createdAtEpochMs })
         val activeTypeCounts = typeCounts(records)
         var closedByDestroy = 0
