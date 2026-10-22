@@ -210,7 +210,8 @@ class NoticeModulesTest {
             "notice.channel.create('$CHANNEL-v', { lockscreenVisibility: 'no_override' })" to "\"$CHANNEL-v\"",
             "notice.channel.remove('$CHANNEL-v')" to "true",
             "notice.channel.remove('$CHANNEL')" to "true",
-            "notice.channel.contains('$CHANNEL')" to "false",
+            // Not the same expression as the check after create: device cases are keyed by their expression.
+            "!notice.channel.contains('$CHANNEL')" to "true",
         )
 
         /** Sends a notification with [expression] and cancels it at once; the value is the notification id. */

@@ -91,8 +91,10 @@ class DialogsModuleTest {
         private val GLOBALS = listOf("rawInput", "prompt", "alert", "confirm", "input", "select")
 
         private val SURFACE = listOf(
-            "[typeof dialogs, dialogs === \$dialogs, typeof rawInput, typeof prompt, typeof alert, typeof confirm, typeof input, typeof select]" to
-                "[\"object\",true,\"function\",\"function\",\"function\",\"function\",\"undefined\",\"undefined\"]",
+            // On a device the global input and select of other modules exist; neither is the dialogs function.
+            "[typeof dialogs, dialogs === \$dialogs, typeof rawInput, typeof prompt, typeof alert, typeof confirm, " +
+                "typeof input === 'undefined' || input !== dialogs.input, typeof select === 'undefined' || select !== dialogs.select]" to
+                "[\"object\",true,\"function\",\"function\",\"function\",\"function\",true,true]",
             "Object.keys(dialogs).join()" to "\"build,rawInput,input,prompt,alert,confirm,select,singleChoice,multiChoice\"",
         )
 

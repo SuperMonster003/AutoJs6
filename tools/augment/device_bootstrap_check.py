@@ -1,18 +1,20 @@
 """ROADMAP P2.5: probe and smoke tests of the startup objects on a device.
 
     py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --probe [--save FILE] [--compare FILE]
-    py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --smoke coroutine listener images automator ui
+    py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --smoke coroutine listener suspend images automator ui
 
 --probe runs bench/bootstrap_probe.js (surface and behavior of __exitIfError__, __asGlobal__, continuation.await /
 delay, ResultAdapter and the lazily installed polyfills) and prints one line per item; --save writes the items to a JSON
 file, --compare prints the items that differ from a saved run (for example the build before P2.5).
 
---smoke runs bench/bootstrap_smoke: "coroutine", "listener" and "ui" are projects with the continuation feature, started
-through ProjectLauncher as the app starts a project; "listener" (appendix C Q23) suspends in a back_pressed listener of
-ui.emitter and in a click listener of its own full-screen view: this script sends KEYCODE_BACK and taps the middle of the
-screen, no dialog is involved; "ui" shows dialogs.confirm and waits for a tap on the phone (up to --ui-wait seconds);
-"images" runs images.loadAsync (ResultAdapter.promise); "automator" runs automator.captureScreen (ResultAdapter.wait),
-skipped when the AutoJs6 accessibility service is off. Only the marked console lines are printed.
+--smoke runs bench/bootstrap_smoke: "coroutine", "listener", "suspend" and "ui" are projects with the continuation
+feature, started through ProjectLauncher as the app starts a project; "listener" (appendix C Q23) suspends in a
+back_pressed listener of ui.emitter and in a click listener of its own full-screen view: this script sends KEYCODE_BACK
+and taps the middle of the screen, no dialog is involved; "suspend" (P3.2, appendix C Q23 in UI mode) suspends again
+after each kind of resume and dismisses its own dialog, no tap is needed; "ui" shows dialogs.confirm and waits for a tap
+on the phone (up to --ui-wait seconds); "images" runs images.loadAsync (ResultAdapter.promise); "automator" runs
+automator.captureScreen (ResultAdapter.wait), skipped when the AutoJs6 accessibility service is off. Only the marked
+console lines are printed.
 
 Scripts start through RunIntentActivity; results are read from the GlobalConsole lines of logcat written since the
 start (logcat is never cleared). The device directory /sdcard/Download/aj6-augment-bench/p25 is removed afterwards.
@@ -116,7 +118,7 @@ def accessibility_on(serial):
 
 def smoke(args, name):
     root = BENCH / "bootstrap_smoke"
-    if name in ("coroutine", "listener", "ui"):
+    if name in ("coroutine", "listener", "suspend", "ui"):
         for file in (root / name).iterdir():
             push(args.serial, file, f"{DEVICE_DIR}/{name}/{file.name}")
         launcher = (root / "launch_project.js").read_text(encoding="utf-8").replace("PROJECT_DIR", f"{DEVICE_DIR}/{name}")
@@ -131,7 +133,8 @@ def smoke(args, name):
     if name == "automator" and not accessibility_on(args.serial):
         print("automator: skipped, the AutoJs6 accessibility service is off")
         return False
-    mark = {"coroutine": "AJ6P25C", "listener": "AJ6P25L", "ui": "AJ6P25U", "images": "AJ6P25I", "automator": "AJ6P25A"}[name]
+    mark = {"coroutine": "AJ6P25C", "listener": "AJ6P25L", "suspend": "AJ6P32S", "ui": "AJ6P25U", "images": "AJ6P25I",
+            "automator": "AJ6P25A"}[name]
     wait = args.ui_wait if name == "ui" else args.wait
     notice = "ui: tap OK or CANCEL on the AutoJs6 dialog on the phone" if name == "ui" else None
     steps = ()
@@ -152,7 +155,7 @@ def main():
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--save", help="write the probe items to this JSON file")
     parser.add_argument("--compare", help="compare the probe items with this JSON file")
-    parser.add_argument("--smoke", nargs="*", default=[], choices=["coroutine", "listener", "ui", "images", "automator"])
+    parser.add_argument("--smoke", nargs="*", default=[], choices=["coroutine", "listener", "suspend", "ui", "images", "automator"])
     parser.add_argument("--wait", type=int, default=60, help="seconds to wait for a script")
     parser.add_argument("--ui-wait", type=int, default=180, help="seconds to wait for the tap in the ui smoke")
     args = parser.parse_args()
