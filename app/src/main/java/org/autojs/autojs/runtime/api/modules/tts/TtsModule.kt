@@ -20,7 +20,10 @@ import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.runtime.api.tts.normalizeTtsEngineName
 import org.autojs.autojs.runtime.api.tts.normalizeTtsLanguageTag
 import org.autojs.autojs.util.RhinoUtils
+import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
@@ -217,9 +220,16 @@ class TtsModule(private val runtime: ScriptRuntime) {
     private fun options(cx: Context, scope: VarScope, function: String, value: Any?): JsonObject =
         if (ScriptArgs.isNullish(value)) JsonObject() else json(cx, scope, function, "options", value)
 
-    /** [value] as a JSON object through `JSON.stringify`, as the current module serialized it. */
+    /**
+     * [value] as a JSON object through `JSON.stringify`, as the current module serialized it. Values that cannot serialize
+     * to an object (primitives, functions, arrays) are refused before serializing, with the same TypeError (R2: the
+     * failing call does no JSON work).
+     */
     private fun json(cx: Context, scope: VarScope, function: String, param: String, value: Any?): JsonObject {
-        val serialized = if (ScriptArgs.isNullish(value)) Undefined.instance else RhinoUtils.js_json_stringify(value)
+        if (value !is Scriptable || value is Callable || value is NativeArray) {
+            throw UtilValues.typeError(function, ScriptMessages.argumentType(param, "Object (JSON)", ScriptArgs.describe(value)))
+        }
+        val serialized = RhinoUtils.js_json_stringify(value)
         val parsed = if (Undefined.isUndefined(serialized)) null else runCatching { JsonParser.parseString(RhinoScriptRuntime.toString(serialized)) }.getOrNull()
         if (parsed == null || !parsed.isJsonObject) throw UtilValues.typeError(function, ScriptMessages.argumentType(param, "Object (JSON)", ScriptArgs.describe(value)))
         return parsed.asJsonObject

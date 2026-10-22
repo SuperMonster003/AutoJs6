@@ -144,6 +144,14 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.flush()
 
 
+class Server(ThreadingHTTPServer):
+    daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        if not isinstance(sys.exc_info()[1], (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+            super().handle_error(request, client_address)
+
+
 def adb(serial, *args):
     return subprocess.run(["adb", "-s", serial, *args], capture_output=True, text=True, encoding="utf-8", errors="replace")
 
@@ -155,8 +163,7 @@ def main():
     parser.add_argument("--cases", nargs="*", type=pathlib.Path, default=[DEFAULT_CASES])
     args, rest = parser.parse_known_args()
 
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    server.daemon_threads = True
+    server = Server(("127.0.0.1", args.port), Handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     reverse = adb(args.serial, "reverse", f"tcp:{args.port}", f"tcp:{args.port}")
     if reverse.returncode != 0:
