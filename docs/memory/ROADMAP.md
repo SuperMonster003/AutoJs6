@@ -412,6 +412,18 @@ P4.4 (2026-10-22, G8441 与 AVD API 24, 宿主 debug 5835 修前 / 修后, 只�
 - S15 修前修后都 PASS (`0 / +0.11 / +0.83 / +0 / +0 / 0`, G8441 N 修后; WebView +0).
 - S16 修前 N FAIL (每次运行内层 runtime 在外层运行期间未回收, 20/20), 修后两种模式 PASS (0/20).
 
+P6.2 冒烟 (不作门禁, 2026-10-22, 宿主 debug 5835, 即 `099a98ba5` 的工作区构建, 与终表同一份 APK; S2 + S5 两种模式, `--wake`; 测后各机装回原包):
+
+| 设备 | API | WebView | S2 | S5 | 报告 |
+| --- | --- | --- | --- | --- | --- |
+| XQ-DQ72 (QV770340J7) | 33 | 155.0.8059.43 | N `0 / +0.15 / -0.05 / +0 / +0 / 0`; F `0 / +0.15 / -0.01 / +0 / +0 / 0` | N `0 / +0.17 / -0.22 / +0 / +0 / 0`; F `0 / +0.13 / -0.23 / +0 / +0 / 0` | `gate-XQ-DQ72-5835-p6-smoke-20261022` |
+| 22120RN86C (bek749scrwv4wo8h) | 33 | 111.0.5563.116 | N `0 / +0.15 / -0.79 / +0 / +0 / 0`; F `0 / +0.18 / -0.19 / +0 / +0 / 0` | N `20 / +59.03 / +17.64 / +0 / +0 / 0` (FAIL); F `20 / +59.00 / +17.86 / +0 / +0 / 0` (FAIL) | `gate-22120RN86C-5835-p6-smoke-20261022` |
+| OPD2413 (63751f63, ColorOS) | 35 | 136.0.7103.125 | N `0 / +0.31 / -0.26 / +0 / +0 / 0`; F `0 / +0.10 / +0.01 / +0 / +0 / 0` | N `0 / +0.14 / +0.73 / +0 / +0 / 0`; F `0 / +0.12 / -0.40 / -2 / +0 / 0` | `gate-OPD2413-5835-p6-smoke-20261022` |
+
+- XQ-DQ72 本次没有出现 debug 宿主的 ART JIT ANR / SIGABRT (该机已知的系统缺陷, 出现时不计失败).
+- 22120RN86C 的 S5 两种模式 20/20 残留 (每次约 3 MB Java 堆): 最短强引用链 `JNI_GLOBAL -> L1.p -> l30.b -> PhoneWindow.mContext -> ScriptExecuteActivity.mScriptEngine -> LoopBasedJavaScriptEngine.mRuntime -> ScriptRuntime`. `L1` / `l30` 是该机 WebView 实现 (`com.google.android.webview` 111.0.5563.116, 2023-03 的版本, `/product/app/WebViewGoogle64`) 的 classes.dex 中的混淆类, 宿主 APK 中没有; 其余设备的 WebView 为 126-155, S5 都通过. 即旧版 WebView 以 JNI 全局引用留住已销毁的 Activity 窗口, 再经 Activity 的 `mScriptEngine` 钉住 runtime. 按 R3 记为已知待修, 附录 C Q48, 负责阶段 P6.4 (或第二期); 不影响门禁设备的终表.
+- OPD2413 S5 F 的线程 -2: 结束时比开始时少两个脚本线程 (减少而非增长), 不计失败.
+
 ---
 
 ## 附录 B 静态注册表与配对清单 (P0.6 生成初稿, P4.2 回填处置)
@@ -510,6 +522,8 @@ images.cancelPendingQuantizations -> console.onRuntimeExit -> CoreWebSocket.onEx
 | Q44 | (P4.4 登记) `runtime.loadDex` / `loadJar` / `loadAar` 的加载器随脚本释放后, 其中的类对其他脚本的可见性 (R1 可见行为变化): 修前加载过的 DEX 在进程内对所有脚本永久可见 (之后的脚本不加载也能用 `Packages.x.Y`), 加载器与其类因此永不释放 (H3, 每加载一个新路径多留一个 `DexClassLoader`). 现按路径记录加载过它的脚本, 其中仍有一个在运行时对所有脚本可见 (与修前相同), 最后一个结束时移除, 之后的脚本要用就自己再加载 (同一文件重复加载照旧). 已载入的类不受影响. 选项: (a) 保持现实现 (推荐, 已先行: changelog 已写; 文档 `runtime` 页的 loadDex / loadJar 在下次文档同步时补一句 "加载器在加载它的脚本全部结束后释放"); (b) 由 `engines.execScript*` 启动的子脚本继承父脚本的加载, 父脚本先结束时保留到子脚本结束; (c) 回到进程级永久可见 (撤销 H3 的 loadDex 部分, 白名单该行改 `process`). 改选的返工: (b) 约半天 (执行配置传递 owner 集合, 补 JVM 单测与一个门禁场景); (c) 改回 3 处登记与 changelog 一条 | P6 之前 (文档同步) | 已决 (2026-10-22 11:18, 维护者选 (a)): 保持 P4.4 `e27f01c2d` 的实现; 文档 `runtime` 页的 loadDex / loadJar / loadAar 各补一句 (文档仓库 `010e681`, 未生成) |
 | Q45 | (P4.5 登记) 源码守卫 (P4.3) 没有发现 H29 的两个静态 WeakHashMap: 两处声明的初始化表达式都写在下一行 (`val x =` 换行 `WeakHashMap<...>()`), `static_audit.py` 与 `StaticReferenceScanner` 只在同一行里推断类型, 于是跳过; 另外理由为 `weak` 的 "weak-key map" 没有要求说明值不引用键 (H29 正是值引用键). 选项: (a) 扫描支持换行的初始化表达式, weak-key map 的说明须写明值不引用键 (推荐, 未实施; 约半天, 白名单可能新增若干行, 需逐个给理由) (b) 维持现状, 由 P4.5 巡检兜底 | P6 之前 | (a), 未先行 |
 | Q46 | (P6.4 登记) H28 的剩余部分: `engine/NodeJsRuntimePluginHost.kt` 的 `startBind` 在 `bindService` 返回 false 或抛出 `SecurityException` 时只让等待者失败并返回, 这次尝试未记为已登记, 之后也不会 `unbindService`; `Context.bindService` 在向系统请求之前已把连接登记到 `LoadedApk.mServices`, 所以每次被拒都留下一个 `BindingAttempt.connection` (ColorOS 拒绝绑定休眠的插件时随重试累积, 无上限; 等待者已带异常恢复, 不钉住调用方 runtime, 每次残留很小). `AidlPluginHost` / `OcrPluginHost` / `BarcodePluginHost` 的连接池每个组件复用同一个连接, 有上限, 不在此列. 选项: (a) 6.8.0 之前按 `8517e5c21` 的做法修: `bindService` 之后不论结果都把这次尝试记为已登记, 失败时解绑 (推荐, 未先行: p6c 不改代码; 约 1 小时, 含一个 JVM 单测); (b) 登记不改, 留给第二期 (Q5 的 Node 桥接). 改选 (b) 无返工 | P6.3 发布门之前 | (a), 未先行 |
+| Q47 | (P6.3 登记) 6.8.0 发布门的文件位置: 宿主仓库此前没有 6.8.0 发布门文件 (`docs/` 中的 "发布门" 都是其他路线图的阶段门禁), 6.8.0 的发布前提只写在 MCP Server 插件 `ROADMAP.md` 的 D43 (P11 + P12 宿主侧 + OpenCC 试点). 选项: (a) 宿主新建 `docs/dev/6.8.0-release-gate.md`, 写入内存门禁条目并引用 D43 (推荐, 已先行: P6.3); (b) 把条目写进 MCP Server 插件 `ROADMAP.md` 的 D43 (插件仓库, 需另行提交); (c) 只写在本文 P6.3. 改选 (b) / (c) 约 10 分钟 (移动一段并改附录 F 一行) | P6.3 | (a), 已先行 |
+| Q48 | (P6.2 登记) 22120RN86C (API 33, WebView 111.0.5563.116) 冒烟 S5 两种模式 20/20 残留: 旧版 WebView 实现以 JNI 全局引用 (`L1.p -> l30.b`, WebView APK 的混淆类) 留住已销毁的 `ScriptExecuteActivity` 窗口, 再经其 `mScriptEngine` 钉住 runtime, 每次约 3 MB; WebView 126-155 的设备都通过 (附录 A 冒烟表). 选项: (a) 宿主缓解: `ScriptExecuteActivity.onDestroy` 在 runtime 结束后释放 `mScriptEngine` / `mRuntime` 等对脚本的引用, 使被 WebView 留住的只剩 Activity 本身 (推荐, 未先行: P6.2 不改宿主代码; 约 1 小时, 含 22120RN86C 上 S5 复跑; 可再评估 WebView 以 `MutableContextWrapper` 创建, 改动更大) (b) 记为平台问题 (旧 WebView), 不改 | P6.4 或第二期 | (a), 未先行 |
 
 ---
 
