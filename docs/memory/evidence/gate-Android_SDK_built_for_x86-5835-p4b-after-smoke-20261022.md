@@ -2,9 +2,9 @@
 
 - Device: Google Android SDK built for x86, API 24, serial emulator-5580
 - Host: org.autojs.autojs6 versionCode 5835 (6.8.0), debuggable
-- Run: Android_SDK_built_for_x86-5835-20261022095506, label p4b-after-smoke, 2026-10-22T01:55:06.551804+00:00 -> 2026-10-22T02:00:59.632025+00:00
+- Run: Android_SDK_built_for_x86-5835-20261022100930, label p4b-after-smoke, 2026-10-22T01:55:06.551804+00:00 -> 2026-10-22T02:11:26.270273+00:00
 - Device state at start: {'batteryLevel': 100, 'powered': ['AC'], 'wakefulness': 'Awake'}
-- Stopped early: the device went offline after S10 normal
+- Merged runs: Android_SDK_built_for_x86-5835-20261022095506 (all); Android_SDK_built_for_x86-5835-20261022100930 (S10, S11, S14)
 - Warm-ups 2, iterations 5, poll 10000 ms, force delay 1000 ms, capture off, meminfo phases
 - Cell: retained / Java heap MB / native heap MB / script threads / Rhino contexts / live engines (ROADMAP appendix A)
 - Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), threads and contexts back to start, engines back to start
@@ -27,7 +27,12 @@
 | S7 events / key observer / sensors / accessibility events | F | pass | 0 / +0.02 / -0.07 / +0 / +0 / 0 |  |
 | S9 engines.execScriptFile restarting itself 3 levels | N | pass | 0 / +0.05 / -0.01 / +0 / +0 / 0 |  |
 | S9 engines.execScriptFile restarting itself 3 levels | F | pass | 0 / +0.03 / -0.04 / +0 / +0 / 0 |  |
-| S10 http.get + WebSocket on a loopback server | N | pass | 0 / +0.05 / -0.08 / +0 / +0 / 0 |  |
+| S10 http.get + WebSocket on a loopback server | N | pass | 0 / +0.05 / -0.11 / +0 / +0 / 0 |  |
+| S10 http.get + WebSocket on a loopback server | F | pass | 0 / +0.02 / +0.23 / +0 / +0 / 0 |  |
+| S11 device.* reads, vibrate and keepScreenOn | N | pass | 0 / +0.02 / +0.06 / +0 / +0 / 0 |  |
+| S11 device.* reads, vibrate and keepScreenOn | F | pass | 0 / +0.02 / +0.01 / +0 / +0 / 0 |  |
+| S14 console.show with exitOnClose, then the script ends | N | pass | 0 / +0.03 / +0.66 / +0 / +0 / 0 |  |
+| S14 console.show with exitOnClose, then the script ends | F | pass | 0 / +0.02 / +0.57 / +0 / +0 / 0 |  |
 
 ## Native detail (ROADMAP P3.1)
 
@@ -55,6 +60,11 @@
 | S7 | F | +0.43 | - | +0 / 0 / +0 | +0/+0/+0 (nodes +0 vs warm-ups) | +1 / +1 / +0 / +0 / +0 | - |
 | S9 | N | +0.40 | +0.02/-0.01/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes +0 vs warm-ups) | +17 / +17 / +0 / +0 / +0 | - |
 | S9 | F | +0.91 | -0.08/-0.04/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes +0 vs warm-ups) | +0 / +0 / +0 / +0 / +0 | - |
-| S10 | N | +0.48 | +0.18/-0.08/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes +0 vs warm-ups) | +1 / +1 / +0 / +0 / +0 | - |
+| S10 | N | +0.42 | +0.07/-0.11/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes +0 vs warm-ups) | +1 / +1 / +0 / +0 / +0 | - |
+| S10 | F | +0.39 | +0.21/+0.23/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes +0 vs warm-ups) | +63 / +63 / +0 / +0 / +0 | - |
+| S11 | N | +0.36 | +0.14/+0.06/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes -2 vs warm-ups) | +1 / +1 / +0 / +0 / +0 | - |
+| S11 | F | +0.31 | +0.10/+0.01/+0.00/+0.00 | +0 / 0 / +0 | +0/+0/-2 (nodes +0 vs warm-ups) | +1 / +1 / +0 / +0 / +0 | - |
+| S14 | N | +0.53 | +1.04/+0.66/+0.00/+0.00 | +0 / 0 / +0 | +4/+0/+0 (nodes +0 vs warm-ups) | +18 / +18 / +0 / +0 / +0 | - |
+| S14 | F | +0.48 | +0.88/+0.57/+0.00/+0.00 | +0 / 0 / +0 | +4/+0/+0 (nodes +0 vs warm-ups) | +1 / +1 / +0 / +0 / +0 | - |
 
 Raw reports: the .json file with the same name (one report per line under `results`).
