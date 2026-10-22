@@ -27,10 +27,11 @@ object SettingsDataCapture {
 
     /**
      * The data files of the data categories among [categories], [time] being the export time of the archive; call it
-     * off the main thread. A category that cannot be read is left out and logged, so that the settings are backed up
-     * all the same; the shortcuts are read as stored while the device is locked.
-     * zh-CN: [categories] 中数据分类的数据文件, [time] 为归档的导出时间; 不在主线程调用. 无法读取的分类会被略过并记录日志, 设置照常备份;
-     * 设备锁定时快捷方式按已存储的状态读取.
+     * off the main thread. A category without entries is left out, as the export wizard does (a color library document
+     * without libraries cannot be imported). A category that cannot be read is left out and logged, so that the
+     * settings are backed up all the same; the shortcuts are read as stored while the device is locked.
+     * zh-CN: [categories] 中数据分类的数据文件, [time] 为归档的导出时间; 不在主线程调用. 没有条目的分类与导出向导一样略去 (没有颜色库的文档
+     * 无法导入). 无法读取的分类会被略过并记录日志, 设置照常备份; 设备锁定时快捷方式按已存储的状态读取.
      */
     @JvmStatic
     fun capture(context: Context, categories: Collection<SettingCategory>, time: Long): List<SettingsArchiveWriter.DataFile> {
@@ -38,7 +39,7 @@ object SettingsDataCapture {
         return listOfNotNull(
             SettingCategory.DATA_SHORTCUTS.takeIf { it in categories }?.let { category -> read(category) { shortcuts(app, time) } },
             SettingCategory.DATA_COLOR_LIBRARY.takeIf { it in categories }?.let { category -> read(category) { colorLibraries(app, time) } },
-        )
+        ).filter { it.entries > 0 }
     }
 
     private fun read(category: SettingCategory, read: () -> SettingsArchiveWriter.DataFile) = runCatching(read)
