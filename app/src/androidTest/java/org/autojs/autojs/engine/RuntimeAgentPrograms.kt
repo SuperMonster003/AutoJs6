@@ -33,7 +33,7 @@ internal object RuntimeAgentPrograms {
         check(assistant.options.budget.maxSteps===4,'assistant snapshot');
         const wider=await assistant.run('invalid',{budget:{maxSteps:5}}).then(()=>null,e=>e);
         check(wider?.code==='INVALID_REQUEST','assistant budget cannot widen');
-        const run=await assistant.run(${JSONObject.quote(goal("The task is to greet the user. Finish with a brief summary saying OK."))},{budget:{maxSteps:3}});
+        const run=await assistant.run(${JSONObject.quote(goal("Reply with the word OK as your greeting. The greeting is the entire requested deliverable. Include the produced greeting in done.evidence."))},{budget:{maxSteps:3}});
         check(typeof run.id==='string'&&run.goal.length>0&&run.startedAt>0&&!run.detached,'run metadata');
         let states=0,progress=0,steps=0,done=0,once=0;
         const removed=()=>{throw Error('Removed listener ran');};run.on('progress',removed).off('progress',removed);
@@ -42,6 +42,7 @@ internal object RuntimeAgentPrograms {
         const result=await run.join(120000);
         check(result.status==='completed','local Agent completion: '+JSON.stringify({id:run.id,status:result.status,error:result.error,usage:result.usage}));
         check(typeof result.summary==='string'&&result.summary.length>0,'real final summary');
+        check(Array.isArray(result.evidence)&&result.evidence.length>0,'native completion evidence');
         check(result.usage?.modelCalls>0,'real model call');
         check(done===1&&once===1&&run.state==='completed'&&run.error===null,'terminal lifecycle');
         check((await run.result).id===run.id,'shared result');
