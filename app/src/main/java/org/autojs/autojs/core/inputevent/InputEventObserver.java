@@ -8,11 +8,14 @@ import android.text.TextUtils;
 
 import org.autojs.autojs6.R;
 import org.autojs.autojs.core.record.inputevent.EventFormatException;
-import org.autojs.autojs.runtime.api.AbstractShell;
 import org.autojs.autojs.runtime.api.Shell;
 import org.autojs.autojs.runtime.api.WrappedShizuku;
 import org.autojs.autojs.util.RootUtils;
 
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,14 +28,14 @@ import java.util.regex.Pattern;
 public class InputEventObserver {
 
     private static InputEventObserver sGlobal;
-    private static final int SHIZUKU_GETEVENT_BATCH_SIZE = 1;
-    private static final long SHIZUKU_RETRY_DELAY = 120;
+    private static final String SHIZUKU_PIPE_COMMAND = "while getevent -t -c 1; do :; done";
+    private static final long SHIZUKU_RESTART_DELAY = 1000;
 
     private final CopyOnWriteArrayList<InputEventListener> mInputEventListeners = new CopyOnWriteArrayList<>();
     private final Context mContext;
     private Shell mShell;
     private Thread mShizukuObserverThread;
-    private volatile boolean mShizukuObserverRunning;
+    private volatile ShizukuGeteventReader mShizukuReader;
 
     public InputEventObserver(Context context) {
         mContext = context;
@@ -136,41 +139,105 @@ public class InputEventObserver {
         if (!WrappedShizuku.INSTANCE.isOperational()) {
             return false;
         }
-        mShizukuObserverRunning = true;
-        mShizukuObserverThread = new Thread(() -> {
-            while (mShizukuObserverRunning && !Thread.currentThread().isInterrupted()) {
+        ShizukuGeteventReader reader = new ShizukuGeteventReader();
+        mShizukuReader = reader;
+        mShizukuObserverThread = new Thread(reader, "InputEventObserver-Shizuku");
+        mShizukuObserverThread.start();
+        return true;
+    }
+
+    /**
+     * Reads `getevent -t` from one long-lived process in the Shizuku user service (docs/shizuku-oom/ROADMAP.md P1.5),
+     * instead of one `getevent -c 1` command per event, whose last command was left to init with its shell whenever the
+     * host was killed. The process runs on a pseudo-terminal: getevent buffers its output in blocks when it writes to a
+     * pipe. Without a pseudo-terminal in the service, a long-lived shell loops `getevent -c 1`, which flushes as it exits.
+     * The process ends with {@link #stop()}, and with the host process.
+     * zh-CN: 从 Shizuku 用户服务中的一个常驻进程读取 `getevent -t` (docs/shizuku-oom/ROADMAP.md P1.5), 取代每个事件一条 `getevent -c 1` 命令
+     * (宿主被杀时, 最后一条命令连同其 shell 被留给 init). 进程运行在伪终端上: getevent 写入管道时按块缓冲输出. 服务中没有伪终端时, 由一个常驻
+     * shell 循环执行 `getevent -c 1`, 它退出时会刷新输出. 进程随 {@link #stop()} 结束, 也随宿主进程结束.
+     */
+    private final class ShizukuGeteventReader implements Runnable {
+
+        private volatile boolean mRunning = true;
+        private volatile Process mProcess;
+        private boolean mPtyUnavailable;
+
+        @Override
+        public void run() {
+            while (mRunning && !Thread.currentThread().isInterrupted()) {
                 try {
-                    AbstractShell.Result result = WrappedShizuku.INSTANCE.execCommand(mContext, "getevent -t -c " + SHIZUKU_GETEVENT_BATCH_SIZE);
-                    if (result != null && result.code == 0) {
-                        String output = result.result;
-                        if (!TextUtils.isEmpty(output)) {
-                            for (String line : output.split("\\r?\\n")) {
-                                onInputEvent(line);
-                            }
-                        }
+                    read(start());
+                } catch (IllegalStateException e) {
+                    String message = e.getMessage();
+                    if (!mPtyUnavailable && message != null && message.contains("pseudo-terminal")) {
+                        mPtyUnavailable = true;
                         continue;
                     }
-                    if (!WrappedShizuku.INSTANCE.isOperational() && RootUtils.isRootAvailable()) {
-                        mShizukuObserverRunning = false;
-                        observeByRoot();
-                        return;
-                    }
-                    Thread.sleep(SHIZUKU_RETRY_DELAY);
+                } catch (Throwable ignored) {
+                    /* Ignored. */
+                }
+                if (!mRunning) {
+                    return;
+                }
+                if (!WrappedShizuku.INSTANCE.isOperational() && RootUtils.isRootAvailable()) {
+                    mRunning = false;
+                    observeByRoot();
+                    return;
+                }
+                try {
+                    Thread.sleep(SHIZUKU_RESTART_DELAY);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return;
-                } catch (Throwable ignored) {
-                    try {
-                        Thread.sleep(SHIZUKU_RETRY_DELAY);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
                 }
             }
-        }, "InputEventObserver-Shizuku");
-        mShizukuObserverThread.start();
-        return true;
+        }
+
+        private Process start() {
+            if (mPtyUnavailable) {
+                return WrappedShizuku.INSTANCE.newProcess(new String[]{"sh", "-c", SHIZUKU_PIPE_COMMAND}, null, null, false);
+            }
+            return WrappedShizuku.INSTANCE.newProcess(new String[]{"getevent", "-t"}, null, null, true);
+        }
+
+        private void read(Process process) throws IOException {
+            mProcess = process;
+            try {
+                // stop() may have run before mProcess was set.
+                // zh-CN: stop() 可能在设置 mProcess 之前已执行.
+                if (!mRunning) {
+                    return;
+                }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while (mRunning && (line = reader.readLine()) != null) {
+                    onInputEvent(line);
+                }
+            } finally {
+                mProcess = null;
+                process.destroy();
+                closeQuietly(process.getInputStream());
+                closeQuietly(process.getOutputStream());
+                closeQuietly(process.getErrorStream());
+            }
+        }
+
+        void stop() {
+            mRunning = false;
+            Process process = mProcess;
+            if (process != null) {
+                process.destroy();
+            }
+        }
+
+    }
+
+    private static void closeQuietly(Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (IOException ignored) {
+            /* Ignored. */
+        }
     }
 
     private boolean isObserved() {
@@ -221,8 +288,16 @@ public class InputEventObserver {
         return mInputEventListeners.remove(listener);
     }
 
+    public boolean hasListeners() {
+        return !mInputEventListeners.isEmpty();
+    }
+
     public void recycle() {
-        mShizukuObserverRunning = false;
+        ShizukuGeteventReader shizukuReader = mShizukuReader;
+        if (shizukuReader != null) {
+            shizukuReader.stop();
+            mShizukuReader = null;
+        }
         Thread shizukuObserverThread = mShizukuObserverThread;
         if (shizukuObserverThread != null) {
             shizukuObserverThread.interrupt();

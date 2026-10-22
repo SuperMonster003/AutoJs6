@@ -3,7 +3,9 @@ package org.autojs.autojs.core.shizuku
 import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.Process
 import android.os.ParcelFileDescriptor
 import android.os.RemoteException
@@ -22,6 +24,7 @@ import java.io.InputStream
 import org.json.JSONObject
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
+import org.autojs.autojs.runtime.api.shell.ProcessTree
 import org.autojs.autojs.runtime.api.shell.PtyProcess
 import kotlin.system.exitProcess
 
@@ -29,6 +32,11 @@ class UserService : IUserService.Stub {
 
     private var mContext: Context? = null
     private val explorerDirectories = PrivilegedExplorerDirectoryService()
+    private val lifecycle = UserServiceLifecycle(MainThreadScheduler, ::exitProcessFor)
+
+    init {
+        lifecycle.start()
+    }
 
     @Suppress("DEPRECATION")
     private val currentActivity: ComponentName?
@@ -65,33 +73,45 @@ class UserService : IUserService.Stub {
      * Reserved destroy method
      */
     override fun destroy() {
-        Log.i("UserService", "destroy")
-
-        // Ensure the user service process terminates when Shizuku server requests destroy.
-        // zh-CN: 确保 Shizuku server 请求 destroy 时, user service 进程能够真正退出.
-        runCatching {
-            Process.killProcess(Process.myPid())
-        }
-
-        // Fallback to exit the process if killProcess doesn't stop it immediately.
-        // zh-CN: 如果 killProcess 未能立刻终止, 则使用 exitProcess 作为兜底退出.
-        runCatching {
-            exitProcess(0)
-        }
+        Log.i(TAG, "destroy")
+        lifecycle.shutdown(UserServiceLifecycle.REASON_DESTROY)
     }
 
     // Exit method defined by user.
     // zh-CN: 用户定义的退出方法.
     override fun exit() {
-        destroy()
+        lifecycle.shutdown(UserServiceLifecycle.REASON_EXIT)
+    }
+
+    override fun attachHost(host: IBinder?) {
+        if (host == null || !lifecycle.attachHost(host)) return
+        try {
+            host.linkToDeath({ lifecycle.onHostDied(host) }, 0)
+            Log.i(TAG, "host attached")
+        } catch (_: RemoteException) {
+            // The host died before its death could be linked.
+            // zh-CN: 宿主在关联其死亡之前已死亡.
+            lifecycle.onHostDied(host)
+        }
     }
 
     @Throws(RemoteException::class)
     override fun execCommand(command: String): String {
         return try {
-            ProcessShell
-                .execCommand(command.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray(), ProcessShell.getShellProcess())
-                .toJson()
+            val process = ProcessShell.getShellProcess()
+            // A command still running when the service exits (getevent waiting for a key, for example) ends with it.
+            // zh-CN: 服务退出时仍在运行的命令 (例如等待按键的 getevent) 随之结束.
+            val child = UserServiceLifecycle.Child { ProcessTree.terminate(process) }
+            if (!lifecycle.register(child)) {
+                return AbstractShell.Result(1, IllegalStateException(SHUTTING_DOWN_MESSAGE)).toJson()
+            }
+            try {
+                ProcessShell
+                    .execCommand(command.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray(), process)
+                    .toJson()
+            } finally {
+                lifecycle.unregister(child)
+            }
         } catch (e: Exception) {
             AbstractShell.Result(1, e).toJson()
         }
@@ -117,7 +137,11 @@ class UserService : IUserService.Stub {
                 environment().putAll(variables)
             }.start()
         }
-        return RemoteShellProcessHolder(process, client)
+        val holder = RemoteShellProcessHolder(process, client, lifecycle::unregister)
+        // A holder registered after the shutdown began has been destroyed by register().
+        // zh-CN: 退出开始后登记的 holder 已由 register() 销毁.
+        check(lifecycle.register(holder)) { SHUTTING_DOWN_MESSAGE }
+        return holder
     }
 
     override fun currentPackage() = currentActivity?.packageName ?: ""
@@ -196,6 +220,46 @@ class UserService : IUserService.Stub {
             throw IllegalStateException(result.stderr.ifBlank { "File operation process exited before reporting its result" })
         }
         return result.stdout.toString(Charsets.UTF_8)
+    }
+
+    private fun exitProcessFor(reason: String) {
+        // The probe (tools/shizuku-oom/zombie_probe.py) reads the reason from this line.
+        // zh-CN: 探针 (tools/shizuku-oom/zombie_probe.py) 从这一行读取退出原因.
+        Log.i(TAG, "exit: $reason")
+        runCatching { Process.killProcess(Process.myPid()) }
+        // Fallback to exit the process if killProcess doesn't stop it immediately.
+        // zh-CN: 如果 killProcess 未能立刻终止, 则使用 exitProcess 作为兜底退出.
+        runCatching { exitProcess(0) }
+    }
+
+    /**
+     * The attach watchdog runs on the looper Shizuku's service starter loops on after it created the service.
+     * zh-CN: 附着看门狗运行在 Shizuku 服务启动器创建服务后进入循环的 Looper 上.
+     */
+    private object MainThreadScheduler : UserServiceLifecycle.Scheduler {
+        override fun schedule(delayMillis: Long, action: Runnable): UserServiceLifecycle.Cancellable {
+            val looper = Looper.getMainLooper() ?: Looper.myLooper()
+            if (looper == null) {
+                val thread = Thread({
+                    try {
+                        Thread.sleep(delayMillis)
+                        action.run()
+                    } catch (_: InterruptedException) {
+                        // Cancelled.
+                        // zh-CN: 已取消.
+                    }
+                }, "UserService-Watchdog").apply { isDaemon = true; start() }
+                return UserServiceLifecycle.Cancellable { thread.interrupt() }
+            }
+            val handler = Handler(looper)
+            handler.postDelayed(action, delayMillis)
+            return UserServiceLifecycle.Cancellable { handler.removeCallbacks(action) }
+        }
+    }
+
+    private companion object {
+        const val TAG = "UserService"
+        const val SHUTTING_DOWN_MESSAGE = "The Shizuku user service is exiting"
     }
 
 }

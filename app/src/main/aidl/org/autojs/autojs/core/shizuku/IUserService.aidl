@@ -28,4 +28,8 @@ interface IUserService {
     // A long-lived process with piped streams, or on a pseudo-terminal with pty; it ends when the host process (client) dies.
     IRemoteShellProcess newShellProcess(in String[] command, in String[] env, String dir, boolean pty, IBinder client) = 31;
 
+    // The host process token: the service ends what it started and exits once every attached host died,
+    // and exits 30 s after it started when no host attached (docs/shizuku-oom/ROADMAP.md D5).
+    oneway void attachHost(IBinder host) = 41;
+
 }

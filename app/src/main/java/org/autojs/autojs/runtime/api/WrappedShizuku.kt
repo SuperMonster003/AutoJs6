@@ -54,11 +54,17 @@ object WrappedShizuku {
 
     private val mServiceWaiters = CopyOnWriteArrayList<CountDownLatch>()
 
+    // Lives as long as this process: the user service exits once it dies (docs/shizuku-oom/ROADMAP.md D5 / T4).
+    // zh-CN: 与本进程同生命周期: 它死亡后用户服务随之退出 (docs/shizuku-oom/ROADMAP.md D5 / T4).
+    private val mHostToken = Binder()
+
     private val mUserServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName, binder: IBinder?) {
             Log.d(TAG, "onServiceConnected: ${componentName.className}")
             if (binder?.pingBinder() == true) {
-                service = IUserService.Stub.asInterface(binder)
+                service = IUserService.Stub.asInterface(binder).also { userService ->
+                    runCatching { userService.attachHost(mHostToken) }.onFailure { Log.w(TAG, "attachHost failed", it) }
+                }
 
                 // Wake all waiters when binder is ready.
                 // zh-CN: 当 binder 就绪时, 唤醒所有等待者.
@@ -81,8 +87,9 @@ object WrappedShizuku {
         Shizuku.UserServiceArgs(ComponentName(pkg, UserService::class.java.name))
             .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
             // Recreate an older user process when its AIDL implementation changes after an update.
-            // The extra revision also replaces a service from an earlier build with the same versionCode.
-            .version(BuildConfig.VERSION_CODE + 5)
+            // The extra revision also replaces a service from an earlier build with the same versionCode
+            // (+ 6: attachHost, docs/shizuku-oom/ROADMAP.md D5).
+            .version(BuildConfig.VERSION_CODE + 6)
             .daemon(false)
     }
 

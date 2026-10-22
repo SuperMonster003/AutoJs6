@@ -22,6 +22,10 @@ public class TouchObserver implements InputEventObserver.InputEventListener {
 
     public void observe() {
         mInputEventObserver.addListener(this);
+        // The global observer runs only while a volume control setting is on or a listener asks for it
+        // (docs/shizuku-oom/ROADMAP.md P1.5).
+        // zh-CN: 全局观察器只在音量键控制设置开启或有监听者需要时运行 (docs/shizuku-oom/ROADMAP.md P1.5).
+        mInputEventObserver.ensureObservedAsync();
     }
 
     public void stop() {

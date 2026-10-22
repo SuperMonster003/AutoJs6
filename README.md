@@ -526,6 +526,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` 插件中心关闭 Offline Docs 插件后无法再次启用, 提示 "Failed to enable the plugin" 的问题
 * `修复` Shizuku 权限请求监听器在销毁后未正确注销的问题
 * `修复` AutoJs6 更新后首次使用 Shizuku 相关功能时, 因 Shizuku 仍保留旧版服务记录而报告无法使用 Shizuku 服务的问题
+* `修复` AutoJs6 被强制停止或结束后, Shizuku 用户服务启动的命令 (如音量键控制的按键监听及 shizuku.spawn 启动的进程) 仍在后台运行并逐次累积的问题 _[`issue #474`](http://issues.autojs6.com/474)_
 * `修复` 后台安装 APK 时无法继续确认安装的问题
 * `修复` APK 打包取消时可能误报构建失败的问题
 * `修复` APK 打包产物的签名证书一致性校验及 Android 9-11 签名识别异常

@@ -131,6 +131,7 @@ field | runtime/api/Permissions.kt | requestMultiplePermissionsLauncherCache | k
 field | runtime/api/Plugins.kt | packages | kotlin object; registry; - | process | loaded plugin packages by package name, no runtime; script bindings are unbound by unbindAll at onExit (H8, B.1)
 field | runtime/api/ScreenMetrics.kt | stableSides | kotlin object; registry; - | process | cached screen sizes per rotation
 field | runtime/api/ScriptToast.kt | queue | kotlin object; registry; - | process | pending toasts: message text and owner id strings only, no runtime (B.1)
+field | runtime/api/WrappedShizuku.kt | mHostToken | kotlin object; strong; Binder | process | an empty Binder that stands for this process; the Shizuku user service exits once it dies (docs/shizuku-oom/ROADMAP.md D5), so it must live as long as the process
 field | runtime/api/WrappedShizuku.kt | mServiceWaiters | kotlin object; registry; - | process | latches of threads waiting for the Shizuku binder, removed after the wait
 field | runtime/api/WrappedShizuku.kt | mUserServiceConnection | kotlin object; strong; Binder | process | the one ServiceConnection of the Shizuku user service; bindUserService binds it, unbindUserService unbinds it
 field | runtime/api/WrappedShizuku.kt | service | kotlin object; strong; Binder | process | the Shizuku IUserService proxy; set in onServiceConnected, cleared on disconnect or an invalid binder
