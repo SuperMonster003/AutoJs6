@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "serial": "QV710AF65F",
+    "model": "XQ-AT72",
+    "android": "12",
+    "sdk": "31",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "shell"
+    },
+    "items": [
+      "9",
+      "10",
+      "11"
+    ],
+    "label": "p3",
+    "date": "20261023",
+    "startedAt": "2026-10-23 10:30:16",
+    "endedAt": "2026-10-23 10:31:18",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "items": [
+    {
+      "item": "9",
+      "status": "PASS",
+      "note": "getevent under the service 1, stopped after 0.63 s (exit event), residue 0, exit host-died, stray 0, volumes put back 0"
+    },
+    {
+      "item": "10",
+      "status": "PASS",
+      "note": "getevent while off 0, after turning on 1 in 2.0 s (observer created then True), volume up stopped the script True (0.62 s, uhid), after turning off 0 in 0.1 s, settings [True, True] put back",
+      "geteventWhileOff": 0,
+      "onSec": 2.0,
+      "geteventAfterOn": 1,
+      "createdOnTurnOn": true,
+      "keyInjection": "uhid",
+      "volumeKeyStopped": true,
+      "volumeKeyStopSec": 0.62,
+      "volumeKeySignal": "exit event",
+      "volumeStreamsRestored": 0,
+      "offSec": 0.1,
+      "geteventAfterOff": 0,
+      "settingsRestored": true
+    },
+    {
+      "item": "11",
+      "status": "PASS",
+      "note": "baseline 1, recording 0: 2 (0.2 s), stopped 0: 1 (0.1 s), recording 1: 2 (0.2 s), stopped 1: 1 (0.2 s), main thread per step up to 529 ms",
+      "baseline": 1,
+      "steps": [
+        {
+          "state": "recording 0",
+          "getevent": 2,
+          "sec": 0.2
+        },
+        {
+          "state": "stopped 0",
+          "getevent": 1,
+          "sec": 0.1
+        },
+        {
+          "state": "recording 1",
+          "getevent": 2,
+          "sec": 0.2
+        },
+        {
+          "state": "stopped 1",
+          "getevent": 1,
+          "sec": 0.2
+        }
+      ],
+      "recorderStates": [
+        1,
+        3,
+        1,
+        3
+      ],
+      "mainThreadMs": [
+        529,
+        55,
+        522,
+        93
+      ]
+    },
+    {
+      "item": "final",
+      "status": "PASS",
+      "note": "user service 0, stray 0"
+    }
+  ],
+  "verdict": "PASS"
+}

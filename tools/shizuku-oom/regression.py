@@ -202,24 +202,33 @@ out.after = read();
 """
 
 # Starts and discards (stops without the result dialog) ROUNDS recordings on the main thread; after each step it writes
-# the state file and waits for the runner's acknowledgement. zh-CN: 在主线程上开始并丢弃 (不弹结果对话框的停止) ROUNDS 次录制;
-# 每一步写入状态文件后等待运行端确认.
+# the state file and waits for the runner's acknowledgement. Starting a recording resolves the touch device on the main
+# thread, which runs a command through the Shizuku user service while no device is cached; right after the host starts,
+# that waits for the service (10 s, and 10 s more after a rebind), so a step may take up to 30 s and its time is recorded.
+# zh-CN: 在主线程上开始并丢弃 (不弹结果对话框的停止) ROUNDS 次录制; 每一步写入状态文件后等待运行端确认. 开始录制时在主线程上
+# 解析触摸屏设备, 未缓存设备时经 Shizuku 用户服务执行命令; 宿主刚启动时要等待服务 (10 秒, 重绑后再 10 秒), 所以每步最多等 30 秒,
+# 并记录耗时.
 JS_RECORD = r"""
 var recorder = org.autojs.autojs.core.record.GlobalActionRecorder.getSingleton(context);
 var handler = new android.os.Handler(android.os.Looper.getMainLooper());
+out.mainMs = [];
 function onMain(f) {
-    var done = false, error = null;
+    var done = false, error = null, t0 = Date.now();
     handler.post(new java.lang.Runnable({ run: function () { try { f(); } catch (e) { error = String(e); } done = true; } }));
-    var t0 = Date.now();
-    while (!done && Date.now() - t0 < 10000) sleep(50);
+    while (!done && Date.now() - t0 < 30000) sleep(50);
     if (error) throw error;
-    if (!done) throw 'the main thread did not run the step within 10 s';
+    if (!done) throw 'the main thread did not run the step within 30 s';
+    out.mainMs.push(Date.now() - t0);
 }
 function step(state) {
     files.write(MARK + '.state', state);
     var t0 = Date.now();
     while (!files.exists(MARK + '.ack-' + state.replace(' ', '-')) && Date.now() - t0 < 30000) sleep(200);
 }
+// The host may have just started: wait for the user service, then let the runner take the baseline.
+// zh-CN: 宿主可能刚启动: 先等待用户服务, 再由运行端记录基线.
+org.autojs.autojs.runtime.api.WrappedShizuku.INSTANCE.execCommand(context, 'true');
+step('ready');
 out.states = [];
 for (var i = 0; i < ROUNDS; i++) {
     onMain(function () { recorder.start(); });
@@ -563,28 +572,46 @@ class Regression:
         return self.result("10", ok, note, **values)
 
     def item11(self, rounds=2):
-        baseline = self.probe.getevent_under_services()
         mark = self.start_js("record", JS_RECORD, constants={"ROUNDS": rounds})
-        steps, failure = [], None
+        steps, failure, baseline = [], None, None
+
+        def reached(state):
+            deadline = time.time() + self.args.wait
+            while time.time() < deadline and self.probe.read_mark(f"{mark}.state") != state and self.probe.read_mark(mark) is None:
+                time.sleep(0.5)
+            return self.probe.read_mark(f"{mark}.state") == state
+
+        # Other observers of the host (volume control) start with it, so the baseline is the count once it holds still.
+        # zh-CN: 宿主的其他观察器 (音量键控制) 随宿主启动, 所以基线取计数稳定后的值.
+        if reached("ready"):
+            baseline = self.probe.getevent_under_services()
+            for _ in range(5):
+                time.sleep(self.args.settle)
+                count = self.probe.getevent_under_services()
+                if count == baseline:
+                    break
+                baseline = count
+            self.dev.shell(f"touch {mark}.ack-ready")
+        else:
+            failure = "the script did not reach 'ready'"
         for i in range(rounds):
+            if failure:
+                break
             for state, wanted in ((f"recording {i}", lambda n: n == baseline + 1), (f"stopped {i}", lambda n: n == baseline)):
-                deadline = time.time() + self.args.wait
-                while time.time() < deadline and self.probe.read_mark(f"{mark}.state") != state and self.probe.read_mark(mark) is None:
-                    time.sleep(0.5)
-                if self.probe.read_mark(f"{mark}.state") != state:
+                if not reached(state):
                     failure = failure or f"the script did not reach '{state}'"
                     break
                 sec, count = self.wait_getevent(wanted, 10)
                 steps.append({"state": state, "getevent": count, "sec": sec})
                 self.dev.shell(f"touch {mark}.ack-{state.replace(' ', '-')}")
-            if failure:
-                break
         out = self.wait_json(mark, self.args.wait, "record")
         ok = (not failure and not out.get("error") and len(steps) == 2 * rounds and all(s["sec"] is not None for s in steps)
               and out.get("states") == [1, 3] * rounds)
         note = out.get("error") or failure or (
-            f"baseline {baseline}, " + ", ".join(f"{s['state']}: {s['getevent']} ({s['sec']} s)" for s in steps))
-        return self.result("11", ok, note, baseline=baseline, steps=steps, recorderStates=out.get("states"))
+            f"baseline {baseline}, " + ", ".join(f"{s['state']}: {s['getevent']} ({s['sec']} s)" for s in steps)
+            + f", main thread per step up to {max(out.get('mainMs') or [0])} ms")
+        return self.result("11", ok, note, baseline=baseline, steps=steps, recorderStates=out.get("states"),
+                           mainThreadMs=out.get("mainMs"))
 
 
 def items_type(value):
