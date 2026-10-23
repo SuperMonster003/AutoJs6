@@ -3,9 +3,12 @@ package org.autojs.autojs.runtime.api.modules.timers
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
+import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.augment.engines.Engines
 import org.autojs.autojs.runtime.api.augment.threads.Threads
 import org.autojs.autojs.runtime.api.augment.timers.Timers
+import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -181,6 +184,60 @@ class CoreRuntimeModulesTest {
         )
     )
 
+    /**
+     * Every member of the obsolete `__engines__.js` and `__timers__.js` (P3.6) exists on the new layer with the same type:
+     * the module objects are compared by [SurfaceDiff] (members only the new layer has are additions), and the names the
+     * obsolete timers module put on the global scope (the six timer functions by `__asGlobal__`, the abandoned `loop`) are
+     * global functions here. The obsolete factories run against stub runtime members: the engines factory only reads the
+     * arguments of the execution config at load time, and `timers` is the Java Timers of the runtime, the prototype of both
+     * timers objects.
+     */
+    @Test
+    fun obsoleteMembersExistOnTheNewModules() {
+        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+        host.setRuntimeProperty("engines", rhino.evalJs(ENGINES_STUB))
+        host.setRuntimeProperty("timers", rhino.ktRuntime.timers)
+        rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (name) { scope[name] = function () {}; }); }")
+        val before = host.global.allIds.toSet()
+        listOf("engines", "timers").forEach { name ->
+            val report = SurfaceDiff.compare(SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
+            assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
+        }
+        val globals = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        assertEquals(OBSOLETE_TIMER_GLOBALS.sorted(), globals.sorted())
+        globals.forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
+    }
+
+    /**
+     * Timers on the new layer and on the current module (P3.4) convert the same arguments alike: the calls that pass the
+     * conversion reach the host on both sides (the Java Timers of the fixture is allocated without its constructor, so
+     * both fail there the same way, or clear nothing), and the argument errors of the new layer (TypeError / RangeError,
+     * D10, appendix C Q7 / Q12) are the known differences of appendix E (P3.4), as are the nullish interval or timeout of
+     * `setIntervalExt` (taken as omitted, as documented) and the shared `keepAlive` function object.
+     */
+    @Test
+    fun timersGiveTheSameResultsAsTheCurrentModule() {
+        val expressions = TIMER_RESULTS + TIMER_KNOWN.keys
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, TIMER_KNOWN, prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }) {
+            RuntimeModulesFixture.mount(it, listOf("timers"), newLayer = false) { _, global, runtime -> Timers(runtime).augment(global, runtime.timers) }
+        }
+        assertEquals(expressions.size, compared)
+    }
+
+    /**
+     * Appendix C Q75 (P3.6): with the callback alone, the generated binding of `setTimeout` / `setInterval` (a defaulted
+     * delay before the vararg rest, a single overload) read `args[1]` whatever the count and threw
+     * ArrayIndexOutOfBoundsException before the host was called. The binding now takes the defaulted delay by count, so
+     * both reach the host of the fixture as the current module does (the delay defaults as documented; device cases below).
+     */
+    @Test
+    fun callbackOnlyGivesTheSameResultsAsTheCurrentModule() {
+        val compared = HostModuleTestSupport.assertSameResults(rhino, CALLBACK_ONLY, emptyMap(), prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }) {
+            RuntimeModulesFixture.mount(it, listOf("timers"), newLayer = false) { _, global, runtime -> Timers(runtime).augment(global, runtime.timers) }
+        }
+        assertEquals(CALLBACK_ONLY.size, compared)
+    }
+
     /** Behaviour that needs the host: written for the device only. */
     @Test
     fun deviceOnlyCases() = RuntimeModulesFixture.exportForDevice(
@@ -188,6 +245,8 @@ class CoreRuntimeModulesTest {
         listOf(
             "typeof setTimeout(function () {}, 10)" to "\"number\"",
             "clearTimeout(setTimeout(function () {}, 60000))" to "true",
+            "(function () { var d = threads.disposable(); threads.start(function () { setTimeout(function () { d.setAndNotify('t'); }); }); return d.blockedGet(500); })()" to "\"t\"",
+            "(function () { var d = threads.disposable(); threads.start(function () { var id = setInterval(function () { clearInterval(id); d.setAndNotify('i'); }); }); return d.blockedGet(500); })()" to "\"i\"",
             "clearInterval(setInterval(function () {}, 60000))" to "true",
             "clearImmediate(setImmediate(function () {}))" to "true",
             "clearTimeout(-12345)" to "false",
@@ -245,6 +304,60 @@ class CoreRuntimeModulesTest {
         val GLOBALS = listOf(
             "setTimeout", "setInterval", "setImmediate", "clearTimeout", "clearInterval", "clearImmediate", "loop", "keepAlive", "timers", "\$timers",
             "sync", "threads", "\$threads", "continuation", "\$continuation", "engines", "\$engines",
+        )
+
+        /** `scriptRuntime.engines` for the obsolete engines factory: at load time it only reads the execution config arguments. */
+        const val ENGINES_STUB = "({ myEngine: function () { return { setExecArgv: function () {}, getTag: function () { return { arguments: new java.util.HashMap() }; } }; } })"
+
+        val OBSOLETE_TIMER_GLOBALS = listOf("setTimeout", "clearTimeout", "setInterval", "clearInterval", "setImmediate", "clearImmediate", "loop")
+
+        /** Arguments both sides accept (the host call then fails alike, or clears nothing). */
+        val TIMER_RESULTS = listOf(
+            "typeof timers.setTimeout",
+            "typeof timers.setIntervalExt",
+            "setTimeout(function () {}, 10)",
+            "setTimeout(function () {}, '10')",
+            "setTimeout(function () {}, 10.7, 'a', 'b')",
+            "setTimeout(function () {}, null)",
+            "setTimeout(function () {}, undefined, 1)",
+            "setInterval(function () {}, '5')",
+            "setImmediate(function () {}, 1, 2)",
+            "clearTimeout(1)",
+            "clearInterval('2')",
+            "clearImmediate(3.5)",
+            "timers.setIntervalExt(function () {})",
+            "timers.setIntervalExt(function () {}, '10', 20)",
+            "timers.setIntervalExt(function () {}, 10, function () {}, function () {})",
+            "keepAlive()",
+            "keepAlive(-5)",
+            "timers.keepAlive('20')",
+        )
+
+        /** The callback alone ([callbackOnlyGivesTheSameResultsAsTheCurrentModule], appendix C Q75). */
+        val CALLBACK_ONLY = listOf("setTimeout(function () {})", "setInterval(function () {})")
+
+        /** Expression to (new result, reason): the differences of appendix E (P3.4) and the error model of the new layer. */
+        val TIMER_KNOWN = mapOf(
+            "setTimeout()" to ("throws TypeError" to "argument count (D10, appendix C Q7)"),
+            "setTimeout(1)" to ("throws TypeError" to "callback not a function (D10)"),
+            "setTimeout(null, 1)" to ("throws TypeError" to "callback not a function (D10)"),
+            "setTimeout(function () {}, 'a')" to ("throws TypeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "setTimeout(function () {}, NaN)" to ("throws RangeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "setTimeout(function () {}, Infinity)" to ("throws RangeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "setInterval(null)" to ("throws TypeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "setInterval(function () {}, {})" to ("throws TypeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "setImmediate('f')" to ("throws TypeError" to "callback not a function (D10)"),
+            "clearTimeout(null)" to ("throws TypeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "clearTimeout(1, 2)" to ("throws TypeError" to "argument count (D10, appendix C Q7)"),
+            "clearImmediate(NaN)" to ("throws RangeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "timers.setIntervalExt(function () {}, 'x')" to ("throws TypeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "timers.setIntervalExt(function () {}, NaN)" to ("throws RangeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "keepAlive('x')" to ("throws TypeError" to "appendix E P3.4 timers (D10, Q12)"),
+            "keepAlive(Infinity)" to ("throws RangeError" to "appendix E P3.4 timers (D10, Q12)"),
+            // Nullish taken as omitted (appendix E P3.4): the call reaches the host, as an accepted call does above.
+            "timers.setIntervalExt(function () {}, null)" to ("throws JavaException NullPointerException" to "appendix E P3.4 timers"),
+            "timers.setIntervalExt(function () {}, 100, null, function () {})" to ("throws JavaException NullPointerException" to "appendix E P3.4 timers"),
+            "timers.keepAlive === keepAlive" to ("true" to "appendix E P3.4 timers"),
         )
     }
 

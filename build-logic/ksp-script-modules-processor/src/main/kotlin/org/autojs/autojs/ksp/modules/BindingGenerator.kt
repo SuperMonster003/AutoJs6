@@ -160,12 +160,13 @@ internal object BindingGenerator {
         val minRequired = overloads.minOf { it.required }
         val finiteMax = overloads.mapNotNull { it.max }.maxOrNull() ?: -1
         val varargs = overloads.filter { it.vararg }
-        val limit = maxOf(finiteMax, varargs.maxOfOrNull { it.required } ?: -1)
+        // A vararg overload takes its defaulted parameters by count like the others; past them the rest begins.
+        val limit = maxOf(finiteMax, varargs.maxOfOrNull { maxOf(it.required, it.positional - 1) } ?: -1)
         val maxLabel = if (varargs.isNotEmpty()) -1 else finiteMax
         overloads.forEach { appendLine("    // ${it.signature} -> ${it.returnType}  (${it.source})") }
         appendLine("    private fun $functionName(module: $m, cx: Context, scope: VarScope, args: Array<out Any?>): Any? {")
         appendLine("        val n = ScriptArgs.count(args, $minRequired)")
-        if (overloads.size == 1 && overloads[0].vararg) {
+        if (overloads.size == 1 && overloads[0].vararg && overloads[0].positional == overloads[0].required) {
             appendLine("        return if (n >= $minRequired) ${result(overloads[0], null, display, constructor)} else throw ScriptArgs.arityError(${lit(display)}, $minRequired, -1, n)")
             appendLine("    }")
             return

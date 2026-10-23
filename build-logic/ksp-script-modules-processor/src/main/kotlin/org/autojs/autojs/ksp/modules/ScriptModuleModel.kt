@@ -88,6 +88,9 @@ internal data class Overload(
     val required: Int get() = scriptParams.count { !it.optional && !it.vararg }
     val vararg: Boolean get() = scriptParams.any { it.vararg }
 
+    /** Script parameters taken positionally, defaulted ones included (all but a vararg). */
+    val positional: Int get() = scriptParams.count { !it.vararg }
+
     /** Largest argument count taken positionally, or null when a vararg takes the rest. */
     val max: Int? get() = if (vararg) null else scriptParams.size
 
