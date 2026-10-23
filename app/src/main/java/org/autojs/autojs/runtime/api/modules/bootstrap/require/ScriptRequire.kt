@@ -185,6 +185,9 @@ internal class ScriptRequire(
             // `Module.prototype` exists from the start, as for a script function, for `instanceof` from Kotlin.
             // zh-CN: Module.prototype 从一开始就存在 (同脚本函数), 供 Kotlin 侧做 instanceof 判断.
             setupDefaultPrototype(scope)
+            // `arity` configurable as for a script function (a BaseFunction has it PERMANENT).
+            // zh-CN: arity 同脚本函数可配置 (BaseFunction 的 arity 为 PERMANENT).
+            setAttributes("arity", ScriptableObject.READONLY or ScriptableObject.DONTENUM)
         }
 
         override fun getFunctionName() = "Module"

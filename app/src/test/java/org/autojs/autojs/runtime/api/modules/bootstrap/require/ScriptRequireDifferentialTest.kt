@@ -165,6 +165,7 @@ class ScriptRequireDifferentialTest {
         "Object.keys(Module).join()",
         "['require', '_load', 'runMain'].map(function (k) { var d = Object.getOwnPropertyDescriptor(Module, k); return [k, Module[k].name, Module[k].length, d.writable, d.enumerable, d.configurable].join(); }).join(';')",
         "[typeof Module.prototype, Module.prototype.constructor === Module, Object.keys(Module.prototype).length]",
+        "[Module, require, Module._load, Module.runMain, require.resolve, require.paths, new Module('x').require].map(function (f) { return ['name', 'length', 'arity', 'prototype'].map(function (k) { var d = Object.getOwnPropertyDescriptor(f, k); return d ? [k, d.writable, d.enumerable, d.configurable].join(':') : k + ':none'; }).join(' '); }).join(';')",
         "(function () { var m = new Module('x'); return [Object.keys(m).join(), Object.getOwnPropertyNames(m).join(), m.require.name, m.require.length, m instanceof Module, m.exports === m._exports, JSON.stringify(m.exports), m.id, m.filename, m.loaded, m.core === undefined, m.parent === undefined, m.children.length]; })()",
         "(function () { var p = new Module('p'); var c = new Module('c', p, true); return [p.children.length, p.children[0] === c, c.parent === p, c.core]; })()",
         "(function () { var m = new Module('m'); var d = Object.getOwnPropertyDescriptor(m, 'exports'); m.exports = 5; return [typeof d.get, typeof d.set, d.enumerable, d.configurable, m._exports]; })()",
