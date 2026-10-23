@@ -128,7 +128,8 @@
   - 2026-10-23 完成 (db-downgrade-p2, 提交 `01eb74e66`): `storage/database/RoomDowngrade.kt`, 三个 `createBuilder` 改经 `RoomDowngrade.databaseBuilder`, `MIGRATION_*` 未改; Gradle 任务 `package<Variant>RoomSchemaAssets` 把 `app/schemas` 打包为 assets `db-schemas/` (APK 内 6 个 json), 排在 KSP 之后; `:app:assembleAppDebug` 通过 (构建号 5935), 既有 `HistoryDatabaseMigrationTest` (3) 与 `ColorHistoryDatabaseMigrationTest` (1) 在 AVD API 35 上通过. 与 T3 / T4 原文的差异及理由见附录 A 之后的 "P2 实施处置". 兜底待接入: `DatabaseRecovery` (P1.2) 尚未提交, 接入点见 "P2 实施处置" 第 5 条.
 - [ ] P2.2 androidTest: 用 SQLite 直接建 "未来 schema" (版本 +1, 多一列 + 多一表) 后用当前 builder 打开: 不抛, 行保留, 共有列值一致, 多余表按 T3 处置, 再次打开不再迁移 (identity hash 已更新); 三库各一例 + 迁移失败兜底一例 (需 P1.2). 验收: AVD 通过.
   - 2026-10-23 进度 (db-downgrade-p2, 提交 `5788e957e`): `app/src/androidTest/.../storage/database/RoomDowngradeTest.kt` 4 例在临时 AVD `dbdowngrade_api35` (API 35, x86_64) 上通过: History v4 -> 3 (revision 多一列 + 一个索引, 13 列保留 12), ColorHistory v3 -> 2 (color_library 多一列; 父表重建不级联删子表, AUTOINCREMENT 序号 100 保持, 新行 id 101), KeyStore v2 -> 1 (7 列保留 6), KeyStore 缺必需列 (旧表改名为 `_downgrade_kept_KeyStore_v2` 保留 1 行, 新表为空可写); 每例核对 `user_version` = 代码版本, identity hash = 快照值, 多出的表 `future_table` 与其索引保留, 无 `_downgrade_new_` 残留, 再次打开不迁移. 剩迁移失败兜底一例, 待 P1.2 `DatabaseRecovery` 提交后接入.
-- [ ] P2.3 AVD 核对: 三库构造未来 schema 后启动宿主, 打开抽屉, 版本历史页, 回收站, 颜色选择页, 密钥库页不崩; 手动触发 `HistoryCleanupWorker` 一次不崩 (子会话核对触发方法). 报告入 evidence, 附录 B.3.
+- [x] P2.3 AVD 核对: 三库构造未来 schema 后启动宿主, 打开抽屉, 版本历史页, 回收站, 颜色选择页, 密钥库页不崩; 手动触发 `HistoryCleanupWorker` 一次不崩 (子会话核对触发方法). 报告入 evidence, 附录 B.3.
+  - 2026-10-23 完成 (db-downgrade-p2): `tools/db-downgrade-room/room_pages.py` 在宿主停止时写入三库未来文件, 从桌面入口启动后由 `RoomDowngradePagesDeviceTest` (instrumentation 参数 `autojs.dbDowngrade.pages=true`) 打开 6 个页面并以 `OneTimeWorkRequest` 触发 `HistoryCleanupWorker` 一次 (worker 出错时返回 retry, 因此断言状态为 SUCCEEDED). 临时 AVD `dbdowngrade_api35` 上 28 / 28 项通过, 结果见附录 B.3, 报告 `evidence/roundtrip-dbdowngrade_api35-5935-20261023-room.md`.
 
 ### P3 脚本 sqlite 模块 onDowngrade (D6, T5, R6; 代码 + 文档 + d.ts; 与 P1 / P2 文件不重叠, 可并行或之后)
 
@@ -192,7 +193,15 @@
 
 ### B.3 Room 三库 (P2.3)
 
-待填: 三库未来 schema 打开结果, 页面核对清单与结果, `HistoryCleanupWorker` 触发结果.
+2026-10-23, 临时 AVD `dbdowngrade_api35` (API 35, x86_64), versionCode 5935, `room_pages.py` 28 / 28 项通过 (报告 `evidence/roundtrip-dbdowngrade_api35-5935-20261023-room.md`).
+
+| 库 | 未来文件 | 打开后 | 标记行 | 多出的表 |
+| --- | --- | --- | --- | --- |
+| History | v4, `revision` 多一列 | v3, identity hash = 快照, 重建 1 次, `revision` 12 列 | `file_entry` 1/1, `revision` 2/2 (已固定), `trash_item` 1/1 | `room_future_extra` 保留 1 行 |
+| ColorHistory | v3, `color_library` 多一列 | v2, 同上, `color_library` 9 列 | `palette_history` 1/1, `color_library` 1/1, `color_library_color` 1/1 | 同上 |
+| KeyStore | v2, `KeyStore` 多一列 | v1, 同上, `KeyStore` 6 列 | `KeyStore` 1/1 (指向存在的文件) | 同上 |
+
+页面与任务: 从桌面入口启动后存活; 抽屉, 版本历史页, 回收站, 颜色库页, 颜色选择页 (旧版布局), 密钥库页均进入 RESUMED; `HistoryCleanupWorker` 单次运行 SUCCEEDED (首次运行即成功, 未重试). logcat: FATAL EXCEPTION 0, CrashHandler 未捕获异常 0, am_crash 0, Room 打开错误 0, 移到一旁的表 0, `_downgrade_` 残留表 0.
 
 ## 附录 C. 待决事项
 
@@ -217,6 +226,7 @@
 | `app/schemas/` | Room 导出 schema, 复制进 assets | P2.1 |
 | `app/src/main/java/org/autojs/autojs/storage/database/RoomDowngrade.kt` | Room 通用降级 (包装 open helper, 动态 Migration, 按快照重建) | P2.1 |
 | `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradeTest.kt` | Room 三库降级用例 | P2.2 |
+| `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradePagesDeviceTest.kt`, `tools/db-downgrade-room/room_pages.py` | Room 三库未来文件的页面与 `HistoryCleanupWorker` 核对 (instrumentation 参数 `autojs.dbDowngrade.pages=true`) | P2.3 |
 | `app/src/main/java/org/autojs/autojs/core/database/Database.java` | 脚本 sqlite 模块底层 helper 与 `DatabaseCallback` | P3.1 |
 | `app/src/main/java/org/autojs/autojs/runtime/api/augment/sqlite/SQLite.kt` | 脚本 `sqlite.open` 选项解析 | P3.1 |
 | `tools/db-downgrade/roundtrip.py`, `README.md` | 往返脚本 | P0.3 |
