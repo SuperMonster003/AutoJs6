@@ -309,6 +309,10 @@ class AutomatorModulesTest {
         )
     )
 
+    /**
+     * Refusals of the new layer (appendix C Q65 (2)), run on the device with the switch on only: the current module refuses
+     * them as well before any action (only the error name differs), and a case it let through would touch the screen there.
+     */
     private fun checkFields(cases: List<Pair<String, String>>) {
         RuntimeModulesFixture.check(rhino, cases)
         RuntimeModulesFixture.exportForDevice(EXPORT_FIELDS, cases)

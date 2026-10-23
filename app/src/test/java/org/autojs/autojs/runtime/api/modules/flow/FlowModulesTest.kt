@@ -47,7 +47,10 @@ class FlowModulesTest {
         RuntimeModulesFixture.exportForDevice(EXPORT, cases)
     }
 
-    /** Refusals of the new layer only (appendix C Q65 (2)): the current parser may start the wait first, so the device runs them with the switch on. */
+    /**
+     * Refusals of the new layer (appendix C Q65 (2)), run on the device with the switch on only: the current parsers refuse
+     * them as well before any wait (only the error name differs), and a case they let through would start one there.
+     */
     private fun checkFields(cases: List<Pair<String, String>>) {
         RuntimeModulesFixture.check(rhino, cases)
         RuntimeModulesFixture.exportForDevice(EXPORT_FIELDS, cases)
