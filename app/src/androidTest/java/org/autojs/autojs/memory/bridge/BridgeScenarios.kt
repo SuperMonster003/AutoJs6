@@ -11,11 +11,13 @@ internal enum class BridgeEngine(
     val pluginPackage: String,
     val heapClasses: List<String>,
     /**
-     * Session classes (kind -> class name) whose reachable instances VMDebug counts after every run, for engines that do not
-     * report their session objects to BridgeExecutionObserver (Bun and QuickJS before P2.2). Node reports its broker and
-     * provider, so it counts nothing.
-     * zh-CN: 会话类 (类别 -> 类名), 每次运行后经 VMDebug 计数其可达实例; 用于不向 BridgeExecutionObserver 报告会话对象的引擎
-     * (P2.2 之前的 Bun 与 QuickJS). Node 会报告 broker 与 provider, 因此不计数.
+     * Session classes (kind -> class name) whose reachable instances VMDebug counts after every run, for engines whose session
+     * objects BridgeExecutionObserver does not see in full: since P2.2 the BridgeExecutionScope of Bun and QuickJS reports their
+     * broker and output callback (T6), while the automation bridge, the call executor and the provider of Bun are seen only through
+     * this count. Node reports its broker and provider, so it counts nothing.
+     * zh-CN: 会话类 (类别 -> 类名), 每次运行后经 VMDebug 计数其可达实例; 用于 BridgeExecutionObserver 看不全会话对象的引擎: P2.2 起 Bun 与
+     * QuickJS 的 BridgeExecutionScope 报告其 broker 与输出回调 (T6), Bun 的 automation bridge, call executor 与 provider 仍只经此计数.
+     * Node 会报告 broker 与 provider, 因此不计数.
      */
     val sessionClasses: Map<String, String>,
 ) {

@@ -954,9 +954,10 @@ class BridgeLeakGateDeviceTest {
             "which may keep one idle connection each; system-side connections of this process to the plugin package of the scenario " +
             "(LoadedApk.mServices, hidden_api_policy 1) may be one above the start. Plugin process PSS is recorded after the " +
             "second measured run and at the end, never judged (R9); for Bun it includes the bun child processes (same uid). " +
-            "Bun and QuickJS report no session objects yet, so their host-side session classes (broker, output callback, " +
-            "automation bridge, call executor, provider) are counted through VMDebug.countInstancesOfClasses after every run and " +
-            "must return to the count before the first run; their gate lines are read from the global console by a per-run marker. " +
+            "Bun and QuickJS report their broker and output callback through BridgeExecutionScope (T6, since P2.2); in addition " +
+            "their host-side session classes (broker, output callback, automation bridge, call executor, provider) are counted " +
+            "through VMDebug.countInstancesOfClasses after every run and must return to the count before the first run; their gate " +
+            "lines are read from the global console by a per-run marker. " +
             "Force mode waits for gateReady(), sleeps forceDelayMs and calls forceStop on every live engine of the run on the main thread."
     }
 }

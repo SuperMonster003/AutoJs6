@@ -16,6 +16,7 @@ import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
 import org.autojs.autojs.core.plugin.bun.BunRuntimeBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimeCleanupBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
+import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.project.ProjectConfig
@@ -84,6 +85,25 @@ class BunPluginScriptEngine internal constructor(
         val callback = OutputCallback(executionId, selection.providerUid, executionConsole)
         var payloadFile: File? = null
         val broker = createCapabilityBroker(selection, executionId, executionConsole)
+        // Released in the order of the former finally: broker, callback, console, then a payload not unlinked yet.
+        // zh-CN: 按原 finally 的顺序释放: broker, callback, console, 最后是尚未删除的 payload.
+        val scope = BridgeExecutionScope("bun", executionId).apply {
+            broker?.let {
+                own(BridgeExecutionScope.Stage.BROKER, "broker", it::close)
+                track(it, "broker")
+            }
+            own(BridgeExecutionScope.Stage.CALLBACKS, "callback", callback::close)
+            track(callback, "callback")
+            own(BridgeExecutionScope.Stage.CONSOLE, "console") {
+                executionConsole.onRuntimeExit()
+                if (executionConsole.configurator.isExitOnClose) executionConsole.hideDelayed()
+            }
+            own(BridgeExecutionScope.Stage.FILES, "payload") {
+                payloadFile?.takeIf(File::exists)?.let { stale ->
+                    if (!stale.delete()) Log.w(TAG, "Unable to delete stale Bun payload: ${stale.name}")
+                }
+            }
+        }
         try {
             val payload = createPayload(scriptSource, selection, executionId, timeoutMillis)
             broker?.attachTo(payload.request)
@@ -138,14 +158,8 @@ class BunPluginScriptEngine internal constructor(
                 return result.getInt(BunRuntimeContract.KEY_EXIT_CODE, 0)
             }
         } finally {
-            broker?.close()
-            callback.close()
-            executionConsole.onRuntimeExit()
-            if (executionConsole.configurator.isExitOnClose) executionConsole.hideDelayed()
+            scope.close()
             activeExecutionId.compareAndSet(executionId, null)
-            payloadFile?.takeIf(File::exists)?.let { stale ->
-                if (!stale.delete()) Log.w(TAG, "Unable to delete stale Bun payload: ${stale.name}")
-            }
         }
     }
 

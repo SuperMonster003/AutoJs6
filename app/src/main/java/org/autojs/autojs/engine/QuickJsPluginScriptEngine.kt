@@ -12,6 +12,7 @@ import org.autojs.autojs.core.plugin.quickjs.QuickJsBinderCallFailure
 import org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimeBinderCallLane
 import org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimeCleanupBinderCallLane
 import org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimePluginClient
+import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -72,6 +73,17 @@ class QuickJsPluginScriptEngine(
         val limits = executionLimits()
         val callback = OutputCallback(executionId, selection.providerUid)
         var sourceFile: File? = null
+        // Released in the order of the former finally: the callback, then a source snapshot not unlinked yet.
+        // zh-CN: 按原 finally 的顺序释放: 先 callback, 再尚未删除的源码快照.
+        val scope = BridgeExecutionScope("quickjs", executionId).apply {
+            own(BridgeExecutionScope.Stage.CALLBACKS, "callback", callback::close)
+            track(callback, "callback")
+            own(BridgeExecutionScope.Stage.FILES, "source") {
+                sourceFile?.takeIf(File::exists)?.let { stale ->
+                    if (!stale.delete()) Log.w(TAG, "Unable to delete stale QuickJS source snapshot: ${stale.name}")
+                }
+            }
+        }
         try {
             val snapshot = createSourceSnapshot(scriptSource)
             sourceFile = snapshot
@@ -112,11 +124,8 @@ class QuickJsPluginScriptEngine(
                 return result.getInt(QuickJsRuntimeContract.KEY_EXIT_CODE, 0)
             }
         } finally {
-            callback.close()
+            scope.close()
             activeExecutionId.compareAndSet(executionId, null)
-            sourceFile?.takeIf(File::exists)?.let { stale ->
-                if (!stale.delete()) Log.w(TAG, "Unable to delete stale QuickJS source snapshot: ${stale.name}")
-            }
         }
     }
 
