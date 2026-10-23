@@ -6,7 +6,11 @@ import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.augment.automator.EventWaitArguments
 import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
+import org.autojs.autojs.runtime.api.augment.automator.RootAutomatorNativeObject
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
+import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
+import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.auto.AutoOptions
 import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
@@ -18,7 +22,11 @@ import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.ScriptableObject
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import org.autojs.autojs.core.inputevent.RootAutomator as CoreRootAutomator
+import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 /**
  * Roadmap P3.3, second group: `auto`, `automator` and `RootAutomator` on the new script module layer. The surface of
@@ -63,6 +71,69 @@ class AutomatorModulesTest {
         assertEquals(expected, actual)
     }
 
+    /**
+     * Every member of the obsolete `__automator__.js` and `__RootAutomator__.js` (P3.6) exists on the new layer with the same
+     * type. `automator` (the methods of its constructor's prototype) is compared by [ObsoleteMembers]; `auto`, which the
+     * obsolete module put on the global scope, by its own properties without calling the getters, which need the
+     * accessibility service on both sides (as [autoSurfaceMatchesTheCurrentModule]): an obsolete getter is one of the new
+     * getters, any other member a property of the same type, also one the new object inherits (the obsolete prototypes had
+     * their own `toString`, returning `'automator'` and `'auto'`; the new objects inherit `Object.prototype.toString`). The names the module put on the global scope (twelve automator functions and seven
+     * SimpleActionAutomator actions by `__asGlobal__`, and `auto`) are globals of the same type here. The factory runs
+     * against stub runtime members (`automator` and `accessibilityBridge` are only kept at load time; `context` is the
+     * global the module passed to AccessibilityTool, which then takes the application context of the fixture).
+     *
+     * Neither module can build a RootAutomator on the JVM (root or Shizuku is looked for first, and the Java RootAutomator
+     * starts a root shell), so its instance members are compared by name: the 17 members the obsolete constructor bound,
+     * parsed from its source, are functions of a RootAutomatorNativeObject of the new layer read through its own `get` (which
+     * binds the members of the Java RootAutomator, as on a device), both objects made without their constructors.
+     *
+     * zh-CN: 旧 __automator__.js 与 __RootAutomator__.js 的每个成员 (P3.6) 都以相同类型存在于新层. automator (其构造器原型上的方法) 用 ObsoleteMembers 比较;
+     * 旧模块放到全局的 auto 按自有属性比较, 不调用 getter (两侧都需要无障碍服务, 同 autoSurfaceMatchesTheCurrentModule): 旧 getter 须为新层的 getter, 其他
+     * 成员须为同类型属性, 继承来的也可以 (旧原型有自己的 toString, 返回 'automator' 与 'auto'; 新对象继承 Object.prototype.toString). 旧模块放到全局的名称 (__asGlobal__ 放的 12 个 automator 函数与 7 个 SimpleActionAutomator 动作, 以及 auto) 在此为同类型的全局.
+     * 工厂函数以 stub 运行时成员加载 (automator 与 accessibilityBridge 加载时只被保存; context 是旧模块传给 AccessibilityTool 的全局, 随后取夹具的应用上下文).
+     * 两个模块在 JVM 上都无法构造 RootAutomator (先查找 root 或 Shizuku, Java RootAutomator 会启动 root shell), 所以实例成员按名称比较: 从旧构造器源码解析出
+     * 它绑定的 17 个成员, 须为新层 RootAutomatorNativeObject 经自身 get 读到的函数 (与真机一样绑定 Java RootAutomator 的成员), 两个对象都不经构造器创建.
+     */
+    @Test
+    fun obsoleteMembersExistOnTheNewModules() {
+        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+        rhino.evalJs(OBSOLETE_STUBS)
+        host.setRuntimeProperty("automator", rhino.evalJs("({})"))
+        host.setRuntimeProperty("accessibilityBridge", rhino.evalJs("({})"))
+        val before = host.global.allIds.toSet()
+        val automator = host.load("automator")
+        val problems = ObsoleteMembers.problems(automator, rhino.jsScope.globalThis, rhino.evalKt("automator"), rhino.ktScope.globalThis)
+        assertTrue("automator:\n" + problems.joinToString("\n"), problems.isEmpty())
+
+        val jsAuto = memberKinds(rhino.evalJs("$MEMBER_KINDS(global.auto, [])"))
+        val ktAuto = memberKinds(rhino.evalKt("$MEMBER_KINDS(auto, $AUTO_GETTER_NAMES)"))
+        val autoMismatches = jsAuto.filter { (name, kind) -> ktAuto[name] != kind && !(ktAuto[name] == null && rhino.evalKt("typeof auto['$name']") == kind) }
+            .map { (name, kind) -> "$name: js $kind, kt ${ktAuto[name]}" }
+        assertTrue("auto:\n" + autoMismatches.joinToString("\n"), jsAuto.isNotEmpty() && autoMismatches.isEmpty())
+
+        val globals = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        assertEquals(OBSOLETE_GLOBALS.sorted(), globals.sorted())
+        globals.forEach { assertEquals(it, ObsoleteMembers.typeOf(host.global, it), ObsoleteMembers.typeOf(rhino.ktScope.globalThis, it)) }
+
+        val constructorProblems = ObsoleteMembers.problems(host.load("RootAutomator"), rhino.jsScope.globalThis, rhino.evalKt("RootAutomator"), rhino.ktScope.globalThis)
+        assertTrue("RootAutomator:\n" + constructorProblems.joinToString("\n"), constructorProblems.isEmpty())
+        val bound = File(ObsoleteModuleHost.OBSOLETE_DIR, "__RootAutomator__.js").readText()
+            .substringAfter("this.__ra__ = ").substringAfter("[").substringBefore("].forEach")
+            .split(",").map { it.trim().removeSurrounding("'") }.filter { it.isNotEmpty() }
+        assertEquals(bound.toString(), 17, bound.size)
+        val instance = RuntimeModulesFixture.allocate(RootAutomatorNativeObject::class.java)
+        RuntimeModulesFixture.setField(instance, RootAutomatorNativeObject::class.java, "scriptRuntime", rhino.ktRuntime)
+        RuntimeModulesFixture.setField(
+            instance, RootAutomatorNativeObject::class.java, "mRootAutomatorObject",
+            RhinoScriptRuntime.toObject(rhino.ktRuntime.topLevelScope, RuntimeModulesFixture.allocate(CoreRootAutomator::class.java)),
+        )
+        // Read from a script, as on a device: the bound functions take the scope of the running call.
+        // zh-CN: 与真机一样从脚本读取: 绑定函数取正在执行的调用的作用域.
+        ScriptableObject.putProperty(rhino.ktScope.globalThis, "rootAutomatorOfTest", instance)
+        val types = rhino.evalKt("[${bound.joinToString { "'$it'" }}].map(function (name) { return name + ':' + typeof rootAutomatorOfTest[name]; }).join()")
+        assertEquals(bound.joinToString(",") { "$it:function" }, types.toString())
+    }
+
     @Test
     fun installingBuildsNothing() {
         val global = rhino.ktScope.globalThis
@@ -70,8 +141,10 @@ class AutomatorModulesTest {
     }
 
     @Test
-    fun automatorArguments() = RuntimeModulesFixture.check(
-        rhino, listOf(
+    fun automatorArguments() = RuntimeModulesFixture.check(rhino, automatorArgumentCases)
+
+    private val automatorArgumentCases
+        get() = listOf(
             "click()" to "throws TypeError",
             "click(null)" to "throws TypeError",
             "click(1, 'a')" to "throws TypeError",
@@ -127,15 +200,16 @@ class AutomatorModulesTest {
             "click.name" to "\"click\"",
             "automator.headsetHook === automator.headsethook" to "true",
         )
-    )
 
     /**
      * Points, point lists, strokes and indexes (appendix C Q65 (2)): what the current module refused, as a TypeError or
      * RangeError. The current module may act on some of them first, so the device runs them with the switch on.
      */
     @Test
-    fun pointArguments() = checkFields(
-        listOf(
+    fun pointArguments() = checkFields(pointArgumentCases)
+
+    private val pointArgumentCases
+        get() = listOf(
             "click([1])" to "throws TypeError",
             "click([])" to "throws TypeError",
             "click([1, 2147483648])" to "throws RangeError",
@@ -184,12 +258,13 @@ class AutomatorModulesTest {
             "automator.waitForService(Infinity)" to "throws RangeError",
             "automator.waitForService(1e20)" to "throws RangeError",
         )
-    )
 
     /** The options of the synchronous toolkit and the event waits (appendix C Q65 (2)), as [pointArguments]. */
     @Test
-    fun toolkitOptionFields() = checkFields(
-        listOf(
+    fun toolkitOptionFields() = checkFields(toolkitOptionFieldCases)
+
+    private val toolkitOptionFieldCases
+        get() = listOf(
             "smartClick('aj6-none', { nope: 1 })" to "throws TypeError",
             "clickAny([])" to "throws TypeError",
             "dismissPopups(['aj6-none'], { watch: true, onDismissed: 1 })" to "throws TypeError",
@@ -205,15 +280,16 @@ class AutomatorModulesTest {
             "waitForToast({ text: 1 })" to "throws TypeError",
             "waitForNotification({ nope: 1 })" to "throws TypeError",
         )
-    )
 
     /**
      * The fields of the options of `auto` and the selector of `auto.explain` (appendix C Q66 (2)), as [pointArguments]: the
      * current parsers refuse them as well, and a case they let through would register a listener or read the windows there.
      */
     @Test
-    fun autoOptionFields() = checkFields(
-        listOf(
+    fun autoOptionFields() = checkFields(autoOptionFieldCases)
+
+    private val autoOptionFieldCases
+        get() = listOf(
             "auto.registerEvent('a', function () {}, { distinct: 'x' })" to "throws RangeError",
             "auto.registerEvent('a', function () {}, { distinct: 1 })" to "throws TypeError",
             "auto.registerEvent('a', function () {}, { within: -1 })" to "throws RangeError",
@@ -239,7 +315,6 @@ class AutomatorModulesTest {
             "auto.explain({ nope: 1 })" to "throws TypeError",
             "auto.explain({ depth: NaN })" to "throws RangeError",
         )
-    )
 
     /** JVM only (they register or read on a device): what the current parsers accept passes the checks of [autoOptionFields]. */
     @Test
@@ -275,20 +350,37 @@ class AutomatorModulesTest {
      * lenient point list forms included (appendix C Q65 (2)); without the service the host then fails otherwise.
      */
     @Test
-    fun acceptedArguments() = RuntimeModulesFixture.check(
-        rhino, listOf(
+    fun acceptedArguments() = RuntimeModulesFixture.check(rhino, acceptedArgumentCases.map(::passes))
+
+    private val acceptedArgumentCases
+        get() = listOf(
             "click('10', '20')", "click([1, 'a'])", "click({ x: '1', y: 2 })", "click(1, 2, '3', 4)",
             "press([[1, 2], 100])", "press(1, '2', 3)",
             "swipe('1', '2', 3, 4, '5')", "swipe(100, [[1, 2], [3]])", "swipe(100, [['1', 2], [3, 4]])", "swipe(100, [1, Infinity], [3, 4])",
             "gesture('100', [1, 2], [3])", "gesture(100, [[[1, 2], [3, 4]]])", "gestures([0, 100, [1, 2], [3, 4, 5]])",
             "scrollDown('1')", "input('1', 'a')",
-        ).map(::passes)
-    )
+        )
+
+    /**
+     * Issue #275 (`click("文本", 1)` failed: the parameter types of `automator.click` / `longClick` were restricted wrongly).
+     * A text with the index of its match is a form of its own, told from a point by its first argument, so the argument
+     * checks refuse none of these with a TypeError or RangeError, as [acceptedArguments]. JVM only: on a device they act;
+     * the device cases of [exportsDeviceCases] call them when the accessibility service is running, and both modules reach
+     * the host alike here ([resultsAgreeWithTheCurrentModules]).
+     *
+     * zh-CN: issue #275 (`click("文本", 1)` 失效: automator.click / longClick 的参数类型限制有误). 文本加匹配序号是独立的形式, 以第一个参数与坐标区分, 参数检查
+     * 不以 TypeError 或 RangeError 拒绝这些调用. 只在 JVM 检查: 真机上会执行动作; exportsDeviceCases 的设备用例在无障碍服务运行时调用它们, 此处两个模块
+     * 同样到达宿主 (resultsAgreeWithTheCurrentModules).
+     */
+    @Test
+    fun textWithIndexIsAccepted() = RuntimeModulesFixture.check(rhino, ISSUE_275.map(::passes))
 
     /** JVM only: under the current module some of these change the mode, start the service or wait for it on a device. */
     @Test
-    fun autoArguments() = RuntimeModulesFixture.check(
-        rhino, listOf(
+    fun autoArguments() = RuntimeModulesFixture.check(rhino, autoArgumentCases)
+
+    private val autoArgumentCases
+        get() = listOf(
             "typeof auto" to "\"function\"",
             "\$auto === auto" to "true",
             "auto(1)" to "throws TypeError",
@@ -328,23 +420,48 @@ class AutomatorModulesTest {
             "auto.wait(null)" to "throws TypeError",
             "auto.wait(function () {}, NaN)" to "throws RangeError",
         )
-    )
 
     /** `RootAutomator` checks its argument before root or Shizuku is looked for; on a device with Shizuku the current module constructs. */
     @Test
-    fun rootAutomatorArguments() = RuntimeModulesFixture.check(
-        rhino, listOf(
+    fun rootAutomatorArguments() = RuntimeModulesFixture.check(rhino, rootAutomatorArgumentCases)
+
+    private val rootAutomatorArgumentCases
+        get() = listOf(
             "new RootAutomator('x')" to "throws TypeError",
             "new RootAutomator({})" to "throws TypeError",
             "new RootAutomator(-1)" to "throws RangeError",
             "new RootAutomator(NaN)" to "throws RangeError",
             "new RootAutomator(true, 1)" to "throws TypeError",
         )
-    )
+
+    /**
+     * Roadmap P3.6, evidence A: every expression of the cases above (argument and field checks, the accepted forms and
+     * issue #275) gives the result of the current module, with error names compared loosely ([CurrentModuleResults]); the
+     * differences that remain are registered in appendix E (P3.3) and listed in [KNOWN], but for the one in
+     * [UNREGISTERED], which this test found. Both sides are built in the test body, which the timeout runs on a thread of
+     * its own.
+     *
+     * zh-CN: P3.6 A 类证据: 上述用例 (参数与字段检查, 接受的形式与 issue #275) 的每个表达式都得到现有模块的结果, 错误名宽松比较 (CurrentModuleResults);
+     * 余下的差异登记在附录 E (P3.3) 并列入 KNOWN, 本测试发现的未登记差异列入 UNREGISTERED. 两侧都在测试体内构造, 因为超时设置让测试体在独立线程运行.
+     */
+    @Test(timeout = 600_000)
+    fun resultsAgreeWithTheCurrentModules() {
+        val expressions = (automatorArgumentCases + pointArgumentCases + toolkitOptionFieldCases + autoOptionFieldCases + autoArgumentCases + rootAutomatorArgumentCases)
+            .map { it.first } + acceptedArgumentCases + ISSUE_275
+        val summary = newSide(newLayer = true).use { new ->
+            newSide(newLayer = false).use { current -> CurrentModuleResults.assertAgree(new, current, expressions.distinct(), KNOWN) }
+        }
+        println("P3.6 A automator: $summary")
+    }
 
     /**
      * Cases for the device, in both states of the switch: what does not depend on the accessibility service, root or
-     * Shizuku, and the argument errors that the current module also rejects before it acts.
+     * Shizuku, and the argument errors that the current module also rejects before it acts. The last two are issue #275
+     * (`click("文本", 1)`): with the service running the text form looks for a text no window has and returns false; without
+     * it they return false before the call, which would open the accessibility settings and wait.
+     *
+     * zh-CN: 最后两条是 issue #275 (`click("文本", 1)`): 服务运行时以文本形式查找任何窗口都没有的文本, 返回 false; 服务未运行时在调用前返回 false
+     * (否则会打开无障碍设置并等待).
      */
     @Test
     fun exportsDeviceCases() = RuntimeModulesFixture.exportForDevice(
@@ -373,6 +490,8 @@ class AutomatorModulesTest {
             "typeof auto.stats" to "\"object\"",
             "typeof automator.isServiceRunning()" to "\"boolean\"",
             "auto.wait(function () { return true; }) instanceof flow.Flow" to "true",
+            ISSUE_275_ON_DEVICE.format("click") to "false",
+            ISSUE_275_ON_DEVICE.format("longClick") to "false",
         )
     )
 
@@ -384,6 +503,10 @@ class AutomatorModulesTest {
         RuntimeModulesFixture.check(rhino, cases)
         RuntimeModulesFixture.exportForDevice(EXPORT_FIELDS, cases)
     }
+
+    /** The `name:kind` list of [MEMBER_KINDS] as a map. */
+    private fun memberKinds(list: Any?): Map<String, String> = list.toString().split(",").filter { it.isNotEmpty() }
+        .associate { it.substringBefore(':') to it.substringAfter(':') }
 
     /** [expression] is not refused by a TypeError or RangeError (whatever the host does after the checks). */
     private fun passes(expression: String) =
@@ -438,6 +561,112 @@ class AutomatorModulesTest {
             "launchAndWait", "backUntil", "backToApp", "toggle", "retry",
             "auto", "\$auto", "automator", "\$automator", "RootAutomator", "\$RootAutomator",
         )
+
+        /** Issue #275: a text with the index of its match (also the forms the current module coerces). */
+        val ISSUE_275 = listOf(
+            "click('文本', 1)", "longClick('文本', 1)", "click('文本', 0)", "longClick('文本', -1)", "click('文本', '1')",
+            "automator.click('文本', 1)", "automator.longClick('文本', 1)",
+        )
+
+        /** Issue #275 on a device, `%s` being `click` or `longClick`; the text is on no screen. */
+        const val ISSUE_275_ON_DEVICE = "(function () { var t = 'aj6-p36-' + 'issue275-absent'; return automator.isServiceRunning() ? %s(t, 1) : false; })()"
+
+        /** Globals of the old `init.js` the obsolete automator module needs at load time. */
+        val OBSOLETE_STUBS = """
+            global.__asGlobal__ = function (o, names, scope) {
+                names.forEach(function (name) { scope[name] = function () { return o[name].apply(o, arguments); }; });
+            };
+            global.context = null;
+        """.trimIndent()
+
+        /**
+         * `name:kind` of the members of an object and its prototypes below `Object.prototype` / `Function.prototype`
+         * (`accessor`, or `typeof` of the value), without calling a getter; the names of the second argument are taken as
+         * accessors without reading them.
+         */
+        val MEMBER_KINDS = """
+            (function (o, getters) {
+                var out = [], seen = Object.create(null);
+                for (var p = o; p !== null && p !== Object.prototype && p !== Function.prototype; p = Object.getPrototypeOf(p)) {
+                    Object.getOwnPropertyNames(p).forEach(function (k) {
+                        if (seen[k] || ['length', 'name', 'arity', 'arguments', 'caller', 'prototype', 'constructor'].indexOf(k) >= 0 || /^__.*__${'$'}/.test(k)) return;
+                        seen[k] = true;
+                        if (getters.indexOf(k) >= 0) return out.push(k + ':accessor');
+                        var d = Object.getOwnPropertyDescriptor(p, k);
+                        out.push(k + ':' + (d.get || d.set ? 'accessor' : typeof d.value));
+                    });
+                }
+                return out.join(',');
+            })
+        """.trimIndent()
+
+        val AUTO_GETTER_NAMES = AUTO_GETTERS.joinToString(", ", "[", "]") { "'$it'" }
+
+        /** The names `__automator__.js` put on the global scope. */
+        val OBSOLETE_GLOBALS = listOf(
+            "click", "longClick", "press", "swipe", "gesture", "gestures", "gestureAsync", "gesturesAsync", "scrollDown", "scrollUp",
+            "input", "setText", "back", "home", "powerDialog", "notifications", "quickSettings", "recents", "splitScreen", "auto",
+        )
+
+        /**
+         * Differences found by P3.6 that appendix E does not register (reported, the product left as it is):
+         * `auto.explain('a', 1)` is refused before the accessibility service is started, while the current module starts the
+         * service first (on a device without it, the settings open) and then refuses the root.
+         *
+         * zh-CN: P3.6 发现, 未在附录 E 登记, 已报告 (产品不改): auto.explain('a', 1) 在启动无障碍服务之前被拒绝, 现有模块先启动服务 (未开服务的真机上会
+         * 打开设置页), 再拒绝 root.
+         */
+        val UNREGISTERED = mapOf(
+            "auto.explain('a', 1)" to ("throws TypeError" to "unregistered (P3.6)"),
+        )
+
+        /**
+         * Differences from the current modules registered in appendix E of docs/augment/ROADMAP.md (P3.3): expression to
+         * the new result and the line of the row. On the JVM the current module reaches the host (NullPointerException,
+         * UninitializedPropertyAccessException) or fails in its old parser (IndexOutOfBoundsException).
+         *
+         * zh-CN: 已在 docs/augment/ROADMAP.md 附录 E (P3.3) 登记的与现有模块的差异: 表达式到新层结果与该行行号. JVM 上现有模块到达宿主
+         * (NullPointerException, UninitializedPropertyAccessException) 或在旧解析中失败 (IndexOutOfBoundsException).
+         */
+        val KNOWN = mapOf(
+            // docs/augment/ROADMAP.md L1119: an alias and a global function are the module's function object.
+            "automator.click === click" to ("true" to "E L1119"),
+            "automator.headsetHook === automator.headsethook" to ("true" to "E L1119"),
+            // docs/augment/ROADMAP.md L1122: the argument is a timeout handed to the host.
+            "automator.waitForService('a')" to ("throws TypeError" to "E L1122"),
+            "automator.waitForService(NaN)" to ("throws RangeError" to "E L1122"),
+            "auto.waitFor('a')" to ("throws TypeError" to "E L1122"),
+            "auto.waitFor(NaN)" to ("throws RangeError" to "E L1122"),
+            // docs/augment/ROADMAP.md L1125: a null or undefined text or index.
+            "click(null)" to ("throws TypeError" to "E L1125"),
+            "longClick(undefined)" to ("throws TypeError" to "E L1125"),
+            "scrollUp(null)" to ("throws TypeError" to "E L1125"),
+            "input(1, null)" to ("throws TypeError" to "E L1125"),
+            "setText(null)" to ("throws TypeError" to "E L1125"),
+            // docs/augment/ROADMAP.md L1126: gestures.
+            "gesture(-1, [1, 2])" to ("throws RangeError" to "E L1126"),
+            "gestures()" to ("throws TypeError" to "E L1126"),
+            "gesturesAsync([1], [2], 3)" to ("throws TypeError" to "E L1126"),
+            // docs/augment/ROADMAP.md L1137 (Q65 (2)): the elements of point lists and strokes.
+            "click([1])" to ("throws TypeError" to "E L1137"),
+            "click([])" to ("throws TypeError" to "E L1137"),
+            "click({ x: 'a', y: 1 })" to ("throws TypeError" to "E L1137"),
+            "press([1])" to ("throws TypeError" to "E L1137"),
+            "press(100, [1])" to ("throws TypeError" to "E L1137"),
+            "swipe(100, [1, 2])" to ("throws TypeError" to "E L1137"),
+            "swipe(100, [[1, 2]])" to ("throws TypeError" to "E L1137"),
+            "gestures([100])" to ("throws TypeError" to "E L1137"),
+            "gestures([0, 100])" to ("throws TypeError" to "E L1137"),
+            "gestures([100, [1]])" to ("throws TypeError" to "E L1137"),
+            "gestures([100, [1, 2], 'a'])" to ("throws TypeError" to "E L1137"),
+            "gestures(['a', [1, 2]])" to ("throws TypeError" to "E L1137"),
+            "gestures([100, [1, 2]], [1, 'a', [1, 2]])" to ("throws TypeError" to "E L1137"),
+            // docs/augment/ROADMAP.md L1138 (Q65 (2)): coordinates, indexes and durations out of range.
+            "gestures([-1, 100, [1, 2]])" to ("throws RangeError" to "E L1138"),
+            "gestures([100, [1, 2147483648]])" to ("throws RangeError" to "E L1138"),
+            "automator.waitForService(Infinity)" to ("throws RangeError" to "E L1138"),
+            "automator.waitForService(1e20)" to ("throws RangeError" to "E L1138"),
+        ) + UNREGISTERED
     }
 
 }
