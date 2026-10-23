@@ -469,8 +469,8 @@ class PythonRuntimeRealPluginExecutionMatrixDiagnosticTest {
             lateinit var sourceFileDescriptor: java.io.FileDescriptor
             ParcelFileDescriptor.open(sourceFile, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
                 sourceFileDescriptor = descriptor.fileDescriptor
-                bound.provider.openSession(
-                    PythonRuntimeCodec.encodeExecutionRequest(request),
+                bound.provider.openSessionForNegotiatedProtocol(
+                    request,
                     arrayOf(descriptor),
                     admissionCallback,
                     executionCallback,

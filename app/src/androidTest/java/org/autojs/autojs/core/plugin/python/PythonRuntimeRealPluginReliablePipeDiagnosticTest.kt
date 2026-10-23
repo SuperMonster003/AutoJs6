@@ -361,8 +361,8 @@ class PythonRuntimeRealPluginReliablePipeDiagnosticTest {
         var output: ParcelFileDescriptor.AutoCloseOutputStream? = null
         try {
             dispatchLedger += request.requestId
-            bound.provider.openSession(
-                PythonRuntimeCodec.encodeExecutionRequest(request),
+            bound.provider.openSessionForNegotiatedProtocol(
+                request,
                 arrayOf(sourceReader),
                 admissionCallback,
                 executionCallback,
@@ -563,8 +563,8 @@ class PythonRuntimeRealPluginReliablePipeDiagnosticTest {
         var output: ParcelFileDescriptor.AutoCloseOutputStream? = null
         try {
             dispatchLedger += request.requestId
-            bound.provider.openSession(
-                PythonRuntimeCodec.encodeExecutionRequest(request),
+            bound.provider.openSessionForNegotiatedProtocol(
+                request,
                 arrayOf(sourceReader),
                 admissionCallback,
                 executionCallback,

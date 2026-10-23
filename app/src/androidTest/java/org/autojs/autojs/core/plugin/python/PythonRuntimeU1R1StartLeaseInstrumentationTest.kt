@@ -210,8 +210,8 @@ class PythonRuntimeU1R1StartLeaseInstrumentationTest {
             sourceOutput.write(neverRunSource)
             sourceOutput.flush()
             try {
-                bound.provider.openSession(
-                    PythonRuntimeCodec.encodeExecutionRequest(neverRunRequest),
+                bound.provider.openSessionForNegotiatedProtocol(
+                    neverRunRequest,
                     arrayOf(sourceReader),
                     admissionCallback,
                     executionCallback,
@@ -503,8 +503,8 @@ class PythonRuntimeU1R1StartLeaseInstrumentationTest {
             val descriptor = ParcelFileDescriptor.open(sourceFile, ParcelFileDescriptor.MODE_READ_ONLY)
             val localFileDescriptor = descriptor.fileDescriptor
             descriptor.use {
-                bound.provider.openSession(
-                    PythonRuntimeCodec.encodeExecutionRequest(request),
+                bound.provider.openSessionForNegotiatedProtocol(
+                    request,
                     arrayOf(it),
                     admissionCallback,
                     executionCallback,

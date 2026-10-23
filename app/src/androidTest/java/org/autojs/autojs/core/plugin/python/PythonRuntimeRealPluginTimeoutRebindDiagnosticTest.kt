@@ -359,8 +359,8 @@ class PythonRuntimeRealPluginTimeoutRebindDiagnosticTest {
             capabilities = PythonRuntimeCodec.decodeCapabilities(bound.provider.capabilities),
         ) { descriptor ->
             dispatchLedger += request.requestId
-            bound.provider.openSession(
-                PythonRuntimeCodec.encodeExecutionRequest(request),
+            bound.provider.openSessionForNegotiatedProtocol(
+                request,
                 arrayOf(descriptor),
                 admissionCallback,
                 executionCallback,
@@ -551,8 +551,8 @@ class PythonRuntimeRealPluginTimeoutRebindDiagnosticTest {
             capabilities = PythonRuntimeCodec.decodeCapabilities(bound.provider.capabilities),
         ) { descriptor ->
             dispatchLedger += request.requestId
-            bound.provider.openSession(
-                PythonRuntimeCodec.encodeExecutionRequest(request),
+            bound.provider.openSessionForNegotiatedProtocol(
+                request,
                 arrayOf(descriptor),
                 admissionCallback,
                 executionCallback,

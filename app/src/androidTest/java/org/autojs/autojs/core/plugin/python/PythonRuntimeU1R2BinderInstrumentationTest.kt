@@ -98,7 +98,7 @@ class PythonRuntimeU1R2BinderInstrumentationTest {
                     import sys
                     from autojs6 import result
 
-                    sys.stdout.write('$STDOUT_JSON_LOOKALIKE_ESCAPED\\n')
+                    sys.stdout.write('$STDOUT_JSON_LOOKALIKE_ESCAPED\n')
                     sys.stdout.flush()
                     reply = input("$PROMPT_TEXT")
                     result.set({"reply": reply, "stdoutIsResult": False})
@@ -498,8 +498,8 @@ class PythonRuntimeU1R2BinderInstrumentationTest {
         sourceFile.writeBytes(source)
         try {
             ParcelFileDescriptor.open(sourceFile, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
-                bound.provider.openSession(
-                    PythonRuntimeCodec.encodeExecutionRequest(request),
+                bound.provider.openSessionForNegotiatedProtocol(
+                    request,
                     arrayOf(descriptor),
                     admissionCallback,
                     executionCallback,
@@ -568,7 +568,11 @@ class PythonRuntimeU1R2BinderInstrumentationTest {
         val capabilities = PythonRuntimeCodec.decodeCapabilities(bound.provider.capabilities)
         PythonRuntimeValidation.validateCapabilitiesAgainstInfo(capabilities, info)
         val protocolVersion = PythonRuntimeNegotiation.requireNegotiated(info)
-        assertEquals(PythonProtocolVersion(1, 4), protocolVersion)
+        assertEquals(
+            "Real plugin does not negotiate the newest protocol of this Host",
+            PythonRuntimeNegotiation.HOST_MAX,
+            protocolVersion,
+        )
         assertEquals(REAL_PROVIDER_ID, info.providerId)
         assertEquals(PythonImplementation.CPYTHON, info.implementation)
         assertEquals(PythonIsolationMode.DEDICATED_PLUGIN_PROCESS, info.isolationMode)
