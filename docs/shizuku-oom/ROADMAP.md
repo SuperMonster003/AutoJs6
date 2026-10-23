@@ -149,7 +149,7 @@
 
 - [ ] P3.1 "音量键控制" 开关在宿主运行中从关改开时即创建 `GlobalKeyObserver` (不再要求重启宿主): `initIfNeeded` 在两项设置都关闭时登记一次性的设置监听, 任一项打开即创建单例 (此时不再等 1.2 秒的冷启动延迟); 改关时由单例自己的监听停止 shell 兜底监听 (与 P1.5 的启停一致). 验收: XQ-AT72 上宿主启动时两项开关为关, 打开后不重启即可用音量键停止脚本 (`regression.py` 新增 (10)), 关闭后服务下的 getevent 进程结束; JVM 单测覆盖创建条件. (进度 2026-10-23: 代码 (`VolumeControlSettings`, `GlobalKeyObserver.initIfNeeded`) 与 `VolumeControlSettingsTest` 7 例已完成并本地提交, `:app:assembleAppDebug` 通过; 待 XQ-AT72 跑 (10).)
 - [ ] P3.2 `TouchRecorder(Context)` 自建的 `InputEventObserver` 在录制开始时启动, 录制停止时回收 (结束其 getevent 进程, 不再等宿主死亡); 复用同一 `TouchRecorder` 的下一次录制重新启动. `TouchRecorder` 由 `GlobalActionRecorder` 进程级单例持有, 不归属任何 `ScriptRuntime`, 不登记 `RuntimeResourceScope`. 验收: 录制一次并结束后服务下无 getevent, `ps -A` 无残留 getevent / sh (`regression.py` 新增 (11)); `StaticReferenceGuardTest` 通过; 不改录制功能的行为. (进度 2026-10-23: 代码已完成并本地提交, `StaticReferenceGuardTest` / `UserServiceLifecycleTest` 通过; 待 XQ-AT72 跑 (11).)
-- [ ] P3.3 Q5 补跑 (D14): 在 `../COMMON_AGENTS.md` 可用测试设备里找 Shizuku 以 shell 身份运行且 shell 能写 `/dev/input` 的设备 (先只读检查 `getenforce` 与 `ls -l /dev/input`, 以 shell 身份 `test -w` 试探; 不改 SELinux, 不 root), 按锁表登记后装当前 HEAD 的 debug 构建跑 `regression.py --items 8`, 结果入 `evidence/` 并回填附录 B; 测后装回原包. 没有任何设备满足时不绕过, 登记待决 Q8 (选项: 回到 Q5 的 A / 维护者另备设备) 并汇报.
+- [x] P3.3 Q5 补跑 (D14): 在 `../COMMON_AGENTS.md` 可用测试设备里找 Shizuku 以 shell 身份运行且 shell 能写 `/dev/input` 的设备 (先只读检查 `getenforce` 与 `ls -l /dev/input`, 以 shell 身份 `test -w` 试探; 不改 SELinux, 不 root), 按锁表登记后装当前 HEAD 的 debug 构建跑 `regression.py --items 8`, 结果入 `evidence/` 并回填附录 B; 测后装回原包. 没有任何设备满足时不绕过, 登记待决 Q8 (选项: 回到 Q5 的 A / 维护者另备设备) 并汇报. (2026-10-23 完成: 6 台真机都不满足 (附录 B.4), 改用临时 AVD (Android 9, Shizuku 以 shell 身份, shell 可写 2 个节点) 补跑: (8) FAIL, 根因是 `InputDevices.touchDeviceId` 经 Shizuku 读 `/proc/bus/input/devices`, 而 shell 身份读不了它, 触摸屏节点为空; 预设节点缓存的对照为 PASS. 6.7.0 起即有的缺陷, 登记 Q8.)
 - [x] P3.4 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段 fix 为 P3.1 / P3.2 各加 1 条 (或按 AGENTS.md 粒度合并), 只生成 zh-Hans 的 markdown 且只写入本条; 该文件有他人未提交改动, 只暂存自己的 hunk. (2026-10-23 完成: 两条独立的 fix 紧接 issue #474 那条; 不带 issue 引用, 两处都不是 #474 报告的现象. 只重渲染 zh-Hans 的 CHANGELOG-zh-Hans.md / CHANGELOG.md / README-zh-Hans.md / README.md, 其他 9 种语言未写入, 待维护者同步翻译.)
 - [ ] P3.5 回归与收尾: XQ-AT72 跑 `zombie_probe.py --mode force-stop --rounds 20` 与 `regression.py` 的 (9) 及新用例 (10) / (11), 全部 0 残留 / PASS; G8441 只在改动触及 root 路径时复跑; 本文勾选与附录回填, 发布门行按需更新 (只追加自己的 hunk), 本地提交, 看板追加结论.
 
@@ -206,6 +206,30 @@
 | debug 5835 (参照, 只读测量) | G8441 (root) | 约 65 | 约 22 | - | - | 约 5 (几乎全为干净页) | - | 无 | 1.5; 5935 每轮服务 RSS 65.5 见 `probe-G8441-5935-force-stop-20261022` |
 | P1.4 后 | - | 已取消 (D12), 不复测 | | | | | | | |
 
+### B.4 T6 (8) RootAutomator 补跑 (P3.3, D14)
+
+设备普查 (2026-10-23, 只读; `test -w` 以 shell 身份经 adb 执行, 与 Shizuku shell 身份的 SELinux 域相同):
+
+| 设备 | Android | Shizuku 服务端身份 | shell 可写的 `/dev/input` 节点 | 结论 |
+| --- | --- | --- | --- | --- |
+| XQ-AT72 (QV710AF65F) | 12 | shell | 0 | 不满足 (Q5) |
+| QV770340J7 | 13 | - | - | 离线 |
+| G8441 (BH900ASK9E) | 9 | root | 10 | 不满足 (root 身份走 Root 路径) |
+| 968e9f18 | 15 | shell | 0 | 不满足 |
+| bek749scrwv4wo8h | 13 | 未运行 | 0 | 不满足 |
+| 63751f63 | 15 | 未运行 | 0 | 不满足 |
+| 临时 AVD (API 29, Android 10) | 10 | - | 0 | 不满足, 已删除 |
+| 临时 AVD `shizukuoom_p33_api28` (Android 9 AOSP userdebug, x86_64) | 9 | shell (Shizuku 13.5.4, adb 启动) | 2 (`event0` Power Button, `event1` qwerty2 多点触控) | 满足, 用于补跑 |
+
+补跑 (HEAD debug 5935, x86_64):
+
+| 运行 | 预置 | (8) 结果 | 结束后残留 | 报告 |
+| --- | --- | --- | --- | --- |
+| p3-avd | 无 (缓存 `ROOT_AUTOMATOR_TOUCH_DEVICE` 为默认 -1) | FAIL: RootAutomator 报 "Shizuku is available but cannot access a writable input device"; 指针位置, 启动器图标命令, AndroidIdReader, 应用 Shizuku 分支 4 项 ok | 用户服务 0, stray 0 | `regression-20261023-p3-avd` |
+| p3-avd-control | 缓存设为 1 (`event1`), 测后还原为 -1 | PASS: RootAutomator ok (Shizuku 后端, sendSync + exit), 其余 4 项 ok | 用户服务 0, stray 0 | `regression-20261023-p3-avd-control` |
+
+根因: `RootAutomator` 的设备路径经 `RootAutomatorEngine.getDeviceNameOrPath` / `InputDevices.touchDeviceId` 解析, 后者经 Root 或 Shizuku 执行 `cat /proc/bus/input/devices` 按 `InputDevice` 名称找 `eventN`. shell 身份读不了该文件 (6 台真机与 AVD 均为 Permission denied), 而 `getevent -pl` 在这些设备上都能列出节点与名称; 解析结果为空时 `canUseShizukuBackend` 直接判定不可用. 该路径自 6.6.0 (读取 `/proc`) / 6.7.0 (`62235ba07` 加入 Shizuku 后端) 未改, 与本主题的改动无关. 处理方式见附录 C Q8.
+
 ## 附录 C 待决事项
 
 格式: `| 编号 | 问题与选项 (标出推荐项与是否已先行) | 影响条目 | 状态 |`. 立项时的 9 项已全部拍板 (附录 A); 子会话在此登记新事项, 不自行采用默认值 (不阻塞的按推荐项先行并标明).
@@ -219,6 +243,7 @@
 | Q5 | T6 (8) 的 RootAutomator 冒烟在 XQ-AT72 上不可测: 该机 (Android 12) SELinux 不允许 shell 身份写任何 `/dev/input` 节点, RootAutomator 的 Shizuku 后端 (自 6.7.0 未改, P1 未触及) 如实报告 "cannot access a writable input device"; G8441 为 root 身份, 不跑 (8). A (推荐, 已先行): 记为不适用, P2.1 视为通过 ((8) 其余 4 个调用点已通过); 返工: 无. B: 另找一台 Shizuku 以 shell 身份运行且 shell 可写 `/dev/input` 的设备 (多为 Android 9-11 的非 root 机) 补跑 `regression.py --items 8`; 约 20 分钟, 需维护者在手机上授权 Shizuku | P2.1, 发布门 | 已决 (2026-10-23 06:50, 维护者选 B, 记为 D14, 由 P3.3 执行) |
 | Q6 | (调度会话出题) P1 附带发现两处 (1.5 末条) 怎么处理: 宿主启动后才打开 "音量键控制" 时无人创建 `GlobalKeyObserver` (要重启宿主); `TouchRecorder(Context)` 自建的 `InputEventObserver` 自 6.6.0 起从不回收. A (推荐): 只记录. B: 本主题新增 P3 修掉. C: 转 memory 主题 | 新增 P3.1 / P3.2 / P3.4 / P3.5, changelog fix | 已决 (2026-10-23 06:50, 维护者选 B, 记为 D15) |
 | Q7 | (调度会话出题) P0 附带发现 `org.autojs.autojs6.inrt` 被 Shizuku 服务端重启唤醒后数据库 4 -> 3 降级崩溃循环 (1.5). A (推荐): 不处理只记录. B: 卸掉 XQ-AT72 上的 inrt. C: 立项排查降级崩溃 | 本主题只记录 | 已决 (2026-10-23 06:50, 维护者选 C, 记为 D16; 新主题 db-downgrade 由维护者立项) |
+| Q8 | (shizuku-oom-p3 登记) P3.3 补跑结果 (附录 B.4): 真机都不满足, 临时 AVD (Android 9, Shizuku shell 身份, shell 可写触摸屏节点) 上 (8) 仍 FAIL. 原因不在 Shizuku 后端: `InputDevices.touchDeviceId` 读不到 `/proc/bus/input/devices` (shell 身份 Permission denied), 触摸屏节点为空; 预设节点缓存后 (8) PASS. 所以 6.7.0 起 RootAutomator 的 Shizuku 后端只在缓存已有节点号 (例如曾经用 Root 解析过) 时可用, 只用 Shizuku 的用户 (Android 9 及以下, 或 SELinux 放开 `/dev/input` 的机型) 实例化总是失败. A (推荐, 未先行: 新增条目与源码改动需拍板, 同 Q6): 本主题新增 P3.6, `/proc` 读不到时改用 `getevent -pl` 按设备名找节点 (只改 `InputDevices.touchDeviceId` 的解析, JVM 单测覆盖输出解析; 验收: AVD 不预设缓存跑 (8) PASS, XQ-AT72 仍如实报告不可写, G8441 Root 路径不变), changelog fix 1 条; 约 0.5 个会话, 本会话的 AVD (已授权 Shizuku) 保留到拍板, 可直接复测. B: 只记录, P3.3 以对照实验为结论 (后端可用, 节点解析为既有缺陷), 修复转后续版本或独立主题; 返工: 无, 选 B 后删除 AVD. C: 维护者另备真机: 修复前真机结果与 AVD 相同 (FAIL), 只在 A 之后作为补充覆盖才有意义; 约 20 分钟, 需维护者在手机上授权 Shizuku | P3.3, (新) P3.6, 发布门, changelog | 待决 (2026-10-23) |
 
 ## 附录 D 文件地图
 

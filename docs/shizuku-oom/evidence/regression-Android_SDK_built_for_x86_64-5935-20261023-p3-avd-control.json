@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "serial": "emulator-5656",
+    "model": "Android_SDK_built_for_x86_64",
+    "android": "9",
+    "sdk": "28",
+    "host": {
+      "versionCode": 5935,
+      "versionName": "6.8.0",
+      "debuggable": true,
+      "shizukuPermission": true
+    },
+    "shizuku": {
+      "version": "13.5.4.r1049.0e53409",
+      "serverUser": "shell"
+    },
+    "items": [
+      "8"
+    ],
+    "label": "p3-avd-control",
+    "date": "20261023",
+    "startedAt": "2026-10-23 09:51:21",
+    "endedAt": "2026-10-23 09:51:32",
+    "a11yBefore": false,
+    "a11yRestored": 0,
+    "a11yAfter": false
+  },
+  "items": [
+    {
+      "item": "8",
+      "status": "PASS",
+      "note": "RootAutomator ok (Shizuku backend, sendSync + exit); pointer location ok (on 1, off 0); launcher icon command ok (code 0, empty state map); AndroidIdReader ok (equals the adb value); app Shizuku branches ok (startActivity top com.android.settings, kill True, process gone True)"
+    },
+    {
+      "item": "final",
+      "status": "PASS",
+      "note": "user service 0, stray 0"
+    }
+  ],
+  "verdict": "PASS"
+}
