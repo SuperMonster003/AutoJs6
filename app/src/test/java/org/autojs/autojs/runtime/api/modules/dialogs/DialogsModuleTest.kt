@@ -6,11 +6,13 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mozilla.javascript.Context
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.ScriptableObject
 
@@ -77,6 +79,26 @@ class DialogsModuleTest {
     }
 
     @Test
+    fun multiChoiceResultsBecomeJsArrays() {
+        // Issues #322 / #518: the indices multiChoice returned reached the script as a Java array. Showing the dialog needs Android,
+        // so the conversion of the current module that the new layer calls (`Dialogs.toJsArrayIfNeeded`) is given what the dialog
+        // returns: an int[] (empty when dismissed), the same wrapped as a callback receives it, or a list.
+        val convert = Dialogs.Companion::class.java.getDeclaredMethod("toJsArrayIfNeeded", Any::class.java).apply { isAccessible = true }
+        val results = mapOf<String, () -> Any?>(
+            "int[]" to { intArrayOf(0, 2) },
+            "empty" to { intArrayOf() },
+            "wrapped" to { Context.javaToJS(intArrayOf(1), rhino.ktScope) },
+            "list" to { arrayListOf(0, 2) },
+            "null" to { null },
+        )
+        val function = RhinoUtils.newBaseFunction(rhino.ktScope, RESULT, { args ->
+            convert.invoke(Dialogs.Companion, results.getValue(args[0].toString()).invoke())
+        }, RhinoUtils.NOT_CONSTRUCTABLE)
+        ScriptableObject.putProperty(rhino.ktScope.globalThis, RESULT, function)
+        HostModuleTestSupport.check(rhino, MULTI_CHOICE_RESULTS)
+    }
+
+    @Test
     fun deviceOnlyCases() {
         DEVICE.add(DEVICE_ONLY)
     }
@@ -89,6 +111,17 @@ class DialogsModuleTest {
         private const val RANGE = "throws RangeError"
 
         private val GLOBALS = listOf("rawInput", "prompt", "alert", "confirm", "input", "select")
+
+        /** The global through which the JVM case reads a converted multiChoice result. */
+        private const val RESULT = "__multiChoiceResult__"
+
+        private val MULTI_CHOICE_RESULTS = listOf(
+            "(function () { var r = $RESULT('int[]'); return [Array.isArray(r), JSON.stringify(r), r[1] + 1]; })()" to "[true,\"[0,2]\",3]",
+            "(function () { var r = $RESULT('empty'); return [Array.isArray(r), r.length]; })()" to "[true,0]",
+            "(function () { var r = $RESULT('wrapped'); return [Array.isArray(r), JSON.stringify(r)]; })()" to "[true,\"[1]\"]",
+            "(function () { var r = $RESULT('list'); return [Array.isArray(r), JSON.stringify(r), r.indexOf(2)]; })()" to "[true,\"[0,2]\",1]",
+            "$RESULT('null')" to "null",
+        )
 
         private val SURFACE = listOf(
             // On a device the global input and select of other modules exist; neither is the dialogs function.
@@ -173,6 +206,10 @@ class DialogsModuleTest {
             "dialogs.build({ checkBoxPrompt: 'p', checkBoxChecked: true, inputHint: 'h', inputPrefill: 'p', inputSingleLine: true }) !== null" to "true",
             "dialogs.build({ positive: 'OK', positiveColor: 'red', titleColor: '#FF0000', stubborn: false, keepScreenOn: false }) !== null" to "true",
             "dialogs.build({ preset: true, title: 'aj6-p32' }) !== null" to "true",
+            // Issue #364: the custom view (layout XML as a string, or an inflated view) reaches the dialog.
+            "dialogs.build({ customView: '<frame><text text=\"aj6\"/></frame>' }).getCustomView() !== null" to "true",
+            "(function () { var v = ui.run(function () { return ui.inflate('<frame/>'); }); " +
+                "return dialogs.build({ customView: v, wrapInScrollView: false }).getCustomView() !== null; })()" to "true",
             "(function () { if (!floaty.hasPermission()) return 'no permission'; var d = dialogs.build({ title: 'aj6-p32' }); d.show(); d.dismiss(); return 'shown'; })()" to DeviceCases.INFO,
         )
 

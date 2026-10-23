@@ -161,6 +161,14 @@ class OcrModulesTest {
             "(function () { try { var r = $call; return [Array.isArray(r), r.length, JSON.stringify(r).indexOf('123') >= 0]; } " +
                 "catch (e) { var j = e.javaException; return [String(e.name), j ? String(j.getClass().getSimpleName()) : null]; } })()"
 
+        /**
+         * Issue #274 (`ocr.detect` returned a Java list): true when [call] returns a JS array; a Java exception (no OCR plugin
+         * or model on the device) also gives true, as there is no result to check, while a JS error is thrown on.
+         */
+        private fun jsArray(call: String) =
+            "(function () { var r; try { r = $call; } catch (e) { if (e.javaException) return true; throw e; } " +
+                "return Array.isArray(r) && Object.prototype.toString.call(r) === '[object Array]' && typeof r.filter === 'function'; })()"
+
         /** The key order of the module objects and the own names on the prototype chain of `ocr`. */
         private val LAYOUT = listOf(
             "Object.keys(ocr).join()",
@@ -304,6 +312,13 @@ class OcrModulesTest {
             recognized("ocr.mlkit($IMG, { mode: 'xyz', cpuThreadNum: 'x', maxSideLen: 'big' })") to DeviceCases.INFO,
             recognized("ocr.rapid.detect($IMG, { region: [0, 0, 320, 96], useSlim: 'x' })") to DeviceCases.INFO,
             recognized("ocr.detect($IMG, { region: ['0', 0, 160.9, 96], imageQuality: 80.5 })") to DeviceCases.INFO,
+            // Issue #274: the results are JS arrays, whichever engine recognizes.
+            jsArray("ocr.detect($IMG)") to "true",
+            jsArray("ocr.detect($PNG)") to "true",
+            jsArray("ocr.recognizeText($IMG)") to "true",
+            jsArray("ocr.mlkit.detect($IMG)") to "true",
+            jsArray("ocr.paddle.detect($IMG)") to "true",
+            jsArray("ocr.rapid.detect($IMG)") to "true",
         )
 
     }

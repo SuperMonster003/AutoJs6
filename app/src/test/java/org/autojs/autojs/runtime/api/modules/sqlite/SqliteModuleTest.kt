@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.sqlite.SQLite
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -54,6 +55,20 @@ class SqliteModuleTest {
     fun argumentErrors() {
         HostModuleTestSupport.check(rhino, ERRORS)
         DEVICE.add(ERRORS)
+    }
+
+    /**
+     * The argument errors against the current module (P3.6): the shape is the same, every error is a known difference of
+     * appendix E (P3.5) (the current module threw IllegalArgumentException, handed the value to Android, or opened a
+     * database named by blanks); the comparison fails if the current module ever gives the new result.
+     */
+    @Test
+    fun argumentErrorsDifferFromTheCurrentModuleAsKnown() {
+        val errors = ERRORS.drop(1)
+        val known = errors.associate { (expression, expected) -> expression to (expected to "appendix E P3.5 sqlite (D10, Q7)") }
+        val expressions = listOf("[typeof sqlite, typeof sqlite.open]") + errors.map { it.first }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, known) { SQLite(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        assertEquals(expressions.size, compared)
     }
 
     @Test

@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.ScriptableObject
@@ -43,6 +44,18 @@ class CanvasModuleTest {
     fun argumentErrors() {
         HostModuleTestSupport.check(rhino, ERRORS)
         DEVICE.add(ERRORS)
+    }
+
+    /**
+     * The argument errors against the current module (P3.6): every one is a known difference of appendix E (P3.1), the
+     * current module threw WrappedIllegalArgumentException / IllegalArgumentException or failed in `Bitmap.createBitmap`
+     * (not available on the JVM); the comparison fails if the current module ever gives the new result.
+     */
+    @Test
+    fun argumentErrorsDifferFromTheCurrentModuleAsKnown() {
+        val known = ERRORS.associate { (expression, expected) -> expression to (expected to "appendix E P3.1 Canvas (D10, Q7)") }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, ERRORS.map { it.first }, known) { Canvas(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        assertEquals(ERRORS.size, compared)
     }
 
     @Test

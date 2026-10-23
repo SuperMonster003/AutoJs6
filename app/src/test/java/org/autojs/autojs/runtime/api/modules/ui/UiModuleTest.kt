@@ -259,6 +259,15 @@ class UiModuleTest {
             "ui.run(function () { return ui.inflate('<frame/>') !== null; })" to "true",
             "typeof __autojs6Tsx('frame', null)" to "\"object\"",
             "ui.run(function () { return ui.inflate(__autojs6Tsx('frame', null)) !== null; })" to "true",
+            // 6.6.2: the views ui.inflate returned had lost the members of the view prototype (attr, on, click).
+            "ui.run(function () { var v = ui.inflate('<frame/>'); return [typeof v.attr, typeof v.on, typeof v.once, typeof v.click, typeof v.longClick].join(); })" to
+                "\"function,function,function,function,function\"",
+            "ui.run(function () { var v = ui.inflate(__autojs6Tsx('frame', null)); return [typeof v.attr, typeof v.on, typeof v.click].join(); })" to
+                "\"function,function,function\"",
+            // Issue #399: setOnTouchListener on an inflated view; the listener runs for a dispatched event (on('touch') emits later, so the Java listener is set).
+            "ui.run(function () { var v = ui.inflate('<frame/>'); var got = []; v.setOnTouchListener(function (view, e) { got.push(e.getAction()); return true; }); " +
+                "var e = android.view.MotionEvent.obtain(0, 0, 0, 1, 1, 0); var handled = v.dispatchTouchEvent(e); e.recycle(); " +
+                "return [typeof v.setOnTouchListener, handled, got.join()].join(); })" to "\"function,true,0\"",
             // Color names are resolved as the current module resolves them (ColorUtils, Color.parseColor needs Android).
             "ui.statusBarColor('aj6-no-such-color')" to RANGE,
             "ui.backgroundColor('#GG0000')" to RANGE,

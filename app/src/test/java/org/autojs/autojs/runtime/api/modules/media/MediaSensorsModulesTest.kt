@@ -76,6 +76,16 @@ class MediaSensorsModulesTest {
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 
+    /**
+     * Calls reach the same Java objects on both layers (P3.6): member types, the public field, and the errors of Rhino's
+     * Java method resolution (no matching overload) or of the host give the same results as on the current modules.
+     */
+    @Test
+    fun callsGiveTheSameResultsAsTheCurrentModules() {
+        val compared = HostModuleTestSupport.assertSameResults(rhino, CALLS, emptyMap(), ::prepare, ::mountCurrent)
+        assertEquals(CALLS.size, compared)
+    }
+
     @Test
     fun deviceOnlyCases() {
         DEVICE.add(DEVICE_ONLY)
@@ -84,6 +94,17 @@ class MediaSensorsModulesTest {
     companion object {
 
         private val DEVICE = DeviceCases("MediaSensorsModulesTest", "new script module layer (P3.5)")
+
+        private val CALLS = listOf(
+            "[typeof media.playMusic, typeof media.scanFile, typeof media.isMusicPlaying, typeof media.stopMusic]",
+            "[typeof sensors.register, typeof sensors.unregister, typeof sensors.on, typeof sensors.delay]",
+            "sensors.ignoresUnsupportedSensor",
+            "media.playMusic()",
+            "media.scanFile()",
+            "media.musicSeekTo('x')",
+            "sensors.register()",
+            "sensors.unregister()",
+        )
 
         private val DEVICE_ONLY = listOf(
             "[typeof media, typeof \$media, media === \$media, Object.keys(media).length]" to "[\"object\",\"object\",true,0]",

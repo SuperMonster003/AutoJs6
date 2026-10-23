@@ -102,6 +102,21 @@ class WebModulesTest {
         DEVICE.add(ERRORS)
     }
 
+    /**
+     * The constants and the argument errors against the current modules (P3.6): the constants give the same results, the
+     * errors are known differences (D10 / Q7; appendix E P3.5 lists `newWebSocket(url, 5)` / `(url, [])`; the current
+     * modules threw IllegalArgumentException or failed in the Android classes); the comparison fails if the current
+     * modules ever give the new result. The `length` row (appendix C Q9) and the message row are left out.
+     */
+    @Test
+    fun constantsAndErrorsAgainstTheCurrentModules() {
+        val errors = ERRORS.drop(1).dropLast(1)
+        val known = errors.associate { (expression, expected) -> expression to (expected to "appendix E P3.5 web (D10, Q7)") }
+        val expressions = CONSTANTS.map { it.first } + errors.map { it.first }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, known, ::prepare, ::mountCurrent)
+        assertEquals(expressions.size, compared)
+    }
+
     @Test
     fun deviceOnlyCases() {
         DEVICE.add(DEVICE_ONLY)

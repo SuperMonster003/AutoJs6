@@ -1,6 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.notice
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
+import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.augment.notice.Channel
 import org.autojs.autojs.runtime.api.augment.notice.Notice
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
@@ -95,6 +97,27 @@ class NoticeModulesTest {
         assertNull(config.defaultTitle)
         assertEquals(true, config.useDynamicDefaultNotificationId)
         assertNull(config.defaultVibrationPatternForChannel)
+    }
+
+    /**
+     * Every member of the obsolete `__notice__.js` (P3.6) exists on the new layer with the same type, on `notice` and on
+     * `notice.channel` ([SurfaceDiff]; members only the new layer has are additions). The obsolete module only asked the
+     * application context for the NotificationManager when loaded, so a stand-in `context` answers null.
+     */
+    @Test
+    fun obsoleteMembersExistOnTheNewModules() {
+        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+        rhino.evalJs("global.context = { getSystemService: function () { return null; } }")
+        val obsolete = host.load("notice") as ScriptableObject
+        listOf(
+            "notice" to (obsolete to "notice"),
+            "notice.channel" to (ScriptableObject.getProperty(obsolete, "channel") to "notice.channel"),
+        ).forEach { (name, sides) ->
+            val (js, kt) = sides
+            val report = SurfaceDiff.compare(SurfaceDiff.surface(js, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt(kt), rhino.ktScope.globalThis))
+            assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
+        }
+        assertEquals("function", rhino.evalKt("typeof notice"))
     }
 
     @Test

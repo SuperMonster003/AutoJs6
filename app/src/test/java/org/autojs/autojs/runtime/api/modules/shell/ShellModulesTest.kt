@@ -1,9 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.shell
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
+import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.augment.plugins.Plugins
 import org.autojs.autojs.runtime.api.augment.plugins.PluginsTools
 import org.autojs.autojs.runtime.api.augment.shell.Shell
+import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -139,6 +142,48 @@ class ShellModulesTest {
         )
     )
 
+    /**
+     * Every member of the obsolete `__shell__.js`, `__plugins__.js` and `__shizuku__.js` (P3.6) exists on the new layer with
+     * the same type ([SurfaceDiff]; members only the new layer has are additions), and the names the obsolete shell module
+     * put on the global scope (the key and input shortcuts) are global functions here. The obsolete shizuku was a function
+     * with `runtime.shizuku` as its prototype and no member of its own (loaded here on an empty stand-in prototype); the
+     * members of `runtime.shizuku` are checked on the device ([deviceOnlyCases]).
+     */
+    @Test
+    fun obsoleteMembersExistOnTheNewModules() {
+        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+        host.setRuntimeProperty("shizuku", rhino.evalJs("({})"))
+        val before = host.global.allIds.toSet()
+        listOf("shell", "plugins", "shizuku").forEach { name ->
+            val js = SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis)
+            val report = SurfaceDiff.compare(js, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
+            assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
+            if (name == "shizuku") assertTrue(js.keys.toString(), js.isEmpty())
+        }
+        // The obsolete shell and shizuku were callable; plugins was a plain object (callable on the new layer, an addition).
+        listOf("shell", "shizuku").forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
+        val globals = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        assertEquals(GLOBALS.filter { it.first().isUpperCase() }.sorted(), globals.sorted())
+        globals.forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
+    }
+
+    /**
+     * `shell.getCommand` on the new layer and on the current module (P3.4) gives the same command lines: the new layer only
+     * normalizes the arguments (string or array command, the withRoot / arguments overloads) before the current code builds
+     * the line. The argument errors of the new layer (TypeError, D10) and the trailing `undefined` taken as omitted (T4)
+     * are the known differences of appendix E (P3.4).
+     */
+    @Test
+    fun getCommandGivesTheSameResultsAsTheCurrentModule() {
+        val expressions = COMMAND_RESULTS + COMMAND_KNOWN.keys
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, COMMAND_KNOWN, prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }) {
+            RuntimeModulesFixture.mount(it, listOf("shell"), newLayer = false) { _, global, runtime -> Shell(runtime).augment(global) }
+        }
+        assertEquals(expressions.size, compared)
+        // A command built by concatenation (a ConsString in Rhino) is a string as documented.
+        HostModuleTestSupport.check(rhino, listOf("(function () { var s = 's'; return shell.getCommand('l' + s); })()" to "\"ls\""))
+    }
+
     /** Behaviour that needs Android (commands, processes, Shizuku): written for the device only; no key events are sent. */
     @Test
     fun deviceOnlyCases() = RuntimeModulesFixture.exportForDevice(
@@ -161,6 +206,8 @@ class ShellModulesTest {
             "Object.keys(shizuku.state).join()" to "\"isInstalled,hasService,isRunning,hasPermission,isOperational\"",
             "typeof shizuku.currentPackage()" to "\"string\"",
             "typeof shizuku.isOperational" to "\"function\"",
+            // The obsolete __shizuku__.js had runtime.shizuku as its prototype; its members are reachable on the new module.
+            "(function () { var p = runtime.shizuku, missing = []; for (var k in p) { if (typeof p[k] === 'function' && typeof shizuku[k] !== 'function') missing.push(k); } return missing.join(); })()" to "\"\"",
         )
     )
 
@@ -182,6 +229,42 @@ class ShellModulesTest {
         val GLOBALS = listOf(
             "Menu", "Home", "Back", "Up", "Down", "Left", "Right", "OK", "VolumeUp", "VolumeDown", "Power", "Camera", "Text", "Input", "Tap",
             "Screencap", "KeyCode", "SetScreenMetrics", "Swipe", "shell", "\$shell", "plugins", "\$plugins",
+        )
+
+        /** Forms both sides accept: the command line comes from the same code once the arguments are normalized. */
+        val COMMAND_RESULTS = listOf(
+            "shell.getCommand('ls')",
+            "shell.getCommand('ls', true)",
+            "shell.getCommand('ls', false)",
+            "shell.getCommand('ls', 1)",
+            "shell.getCommand('ls', 0)",
+            "shell.getCommand(['a', 'b'])",
+            "shell.getCommand(['a', 1, true])",
+            "shell.getCommand(['a', 'b'], true)",
+            "shell.getCommand('ls', '-l')",
+            "shell.getCommand('ls', 'a=1|verbose')",
+            "shell.getCommand('ls', '-l', false)",
+            "shell.getCommand('ls', { all: true })",
+            "shell.getCommand('ls', { a: 1 }, true)",
+            "shell.getCommand('ls', { dryRun: 'x y', n: -1, '--colorMode': 'auto', x: false })",
+            "shell.getCommand('ls', { root: true, exit: true })",
+            "shell.getCommand('ls', { root: false }, true)",
+            "shell.getCommand('ls', { adb: true })",
+            "shell.getCommand('ls', {}, null)",
+            "shell.getCommand('ls', {}, undefined)",
+            "(function () { var s = 's'; return shell.getCommand('l' + s); })()",
+            "shell.getCommand(new java.lang.String('ls'))",
+            "shell.getCommand('ls', new java.lang.String('-l'))",
+        )
+
+        /** Expression to (new result, reason): the differences of appendix E (P3.4) for shell. */
+        val COMMAND_KNOWN = mapOf(
+            "shell.getCommand('ls', undefined)" to ("\"ls\"" to "appendix E P3.4 shell / shizuku (T4)"),
+            "shell.getCommand()" to ("throws TypeError" to "argument count (D10, appendix C Q7)"),
+            "shell.getCommand(1)" to ("throws TypeError" to "appendix E P3.4 shell / shizuku (D10)"),
+            "shell.getCommand('ls', null)" to ("throws TypeError" to "appendix E P3.4 shell / shizuku (D10)"),
+            "shell.getCommand('ls', [])" to ("throws TypeError" to "appendix E P3.4 shell / shizuku (D10)"),
+            "shell.getCommand('ls', 1, true)" to ("throws TypeError" to "appendix E P3.4 shell / shizuku (D10)"),
         )
     }
 

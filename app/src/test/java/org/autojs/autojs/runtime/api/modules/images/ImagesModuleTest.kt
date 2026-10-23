@@ -85,6 +85,25 @@ class ImagesModuleTest {
     }
 
     /**
+     * 6.7.0 fixed a similarity of 1 read as a percentage. The new layer passes options and regions on, so the conversions of
+     * the current module are checked: a similarity becomes the color threshold `round(255 * (1 - similarity))` (1 is an exact
+     * match), a threshold stays as given, and a region component is a fraction of the screen only below 1 (1 is one pixel).
+     * The device runs findColor with these values on the generated image ([DEVICE_ONLY]).
+     */
+    @Test
+    fun similarityOfOneIsNotAPercentage() {
+        val companion = Images.Companion::class.java
+        val threshold = companion.getDeclaredMethod("parseThreshold", Any::class.java, Double::class.javaObjectType).apply { isAccessible = true }
+        listOf("({ similarity: 1 })" to 0.0, "({ similarity: 0 })" to 255.0, "({ similarity: 0.98 })" to 5.0, "({ threshold: 1 })" to 1.0, "({})" to 4.0).forEach { (options, expected) ->
+            assertEquals(options, expected, threshold.invoke(Images.Companion, rhino.evalKt(options), null) as Double, 0.0)
+        }
+        val metric = companion.getDeclaredMethod("parseScreenMetric", Double::class.javaPrimitiveType, Int::class.javaPrimitiveType).apply { isAccessible = true }
+        listOf(1.0 to 1, 0.5 to 540, 0.0 to 0, -1.0 to 1080, 1.5 to 2).forEach { (reference, expected) ->
+            assertEquals("$reference", expected, metric.invoke(Images.Companion, reference, 1080))
+        }
+    }
+
+    /**
      * Q28: the current functions take a color text of the paths and the orientation of the screen capture options only
      * as a String, so a checked concatenated text (a ConsString) is passed as a String, the given objects left as they are.
      */
@@ -455,6 +474,13 @@ class ImagesModuleTest {
             "typeof images.matchFeatures($IMG, images.copy($IMG), { method: 1 })" to "\"object\"",
             // Q28: a concatenated color text in the paths (the current module failed on it).
             point("(function () { var s = '#FF'; s = s + '0000'; return images.findMultiColors($IMG, '#FF0000', [[5, 5, s]]); })()") to "[10,8]",
+            // 6.7.0: a similarity of 1 is an exact match (it was read as a percentage); region components of 1 are pixels.
+            point("images.findColor($IMG, '#FF0000', { similarity: 1 })") to "[10,8]",
+            point("images.findColor($IMG, '#FE0000', { similarity: 1 })") to "null",
+            point("images.findColor($IMG, '#FE0000', { similarity: 0.98 })") to "[10,8]",
+            point("images.findColor($IMG, '#FF0000', { region: [10, 8, 1, 1] })") to "[10,8]",
+            point("images.findColor($IMG, '#FF0000', { region: [1, 1] })") to "[10,8]",
+            point("images.findColorInRegion($IMG, '#FF0000', 10, 8, 1, 1)") to "[10,8]",
         )
 
         /**
