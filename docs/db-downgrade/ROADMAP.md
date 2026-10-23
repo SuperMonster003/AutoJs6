@@ -111,9 +111,9 @@
 
 ### P0 取证与修前复现 (D5 / D8; 设备 XQ-AT72 只读, 临时 AVD API 35)
 
-- [ ] P0.1 XQ-AT72 只读取证 (不装包, 不卸载, 不清数据): `dumpsys dropbox --print` 里 `data_app_crash` 的 inrt 条目 (异常类, 消息, 栈顶, 时间跨度), `dumpsys package org.autojs.autojs6.inrt` (versionCode, 安装与更新时间, provider / receiver / service 清单), `dumpsys activity processes` / `dumpsys jobscheduler` / `dumpsys alarm` 里 inrt 的拉起来源, `logcat -b events` 的 `am_proc_start` caller (若未轮转); 宿主 "每轮最多 3 次" 的停止条件 (系统 bad-process 限制还是拉起方放弃); inrt 数据库版本 4 的来源 (哪个构建写的). 验收: 附录 B.1 有异常与消息, 拉起方 (预期 `ShizukuProvider` 的 provider 调用), 次数与时间跨度; dropbox 已轮转的项记 "已轮转", 以 P0.2 的 AVD 复现为准.
-- [ ] P0.2 临时 AVD (API 35) 修前基线: 当前 HEAD 的宿主 debug 包与 inrt debug 包 (子会话核对 Gradle 任务名, inrt flavor 见 `app/build.gradle.kts`) 各装一次, 用 T6 `make-future` 构造未来数据后启动, 记崩溃异常, 系统重启次数 (`am_proc_start` / `am_crash`) 与停止条件; 装 Shizuku (R5) 并经 adb 启动服务端, 授权对话框由维护者点按, 重启服务端 3 次, 记每次拉起 inrt 的次数与崩溃次数. 验收: 附录 B.2 "修前" 列有宿主与 inrt 的异常, 重启次数, 唤醒循环次数 (预期崩溃, 即 `check` 为 FAIL).
-- [ ] P0.3 往返脚本 `tools/db-downgrade/roundtrip.py` + `tools/db-downgrade/README.md` (T6, R4). 验收: P0.2 的数字由脚本产生, 报告入 `docs/db-downgrade/evidence/` (修前 FAIL 是预期结果).
+- [x] P0.1 XQ-AT72 只读取证 (不装包, 不卸载, 不清数据): `dumpsys dropbox --print` 里 `data_app_crash` 的 inrt 条目 (异常类, 消息, 栈顶, 时间跨度), `dumpsys package org.autojs.autojs6.inrt` (versionCode, 安装与更新时间, provider / receiver / service 清单), `dumpsys activity processes` / `dumpsys jobscheduler` / `dumpsys alarm` 里 inrt 的拉起来源, `logcat -b events` 的 `am_proc_start` caller (若未轮转); 宿主 "每轮最多 3 次" 的停止条件 (系统 bad-process 限制还是拉起方放弃); inrt 数据库版本 4 的来源 (哪个构建写的). 验收: 附录 B.1 有异常与消息, 拉起方 (预期 `ShizukuProvider` 的 provider 调用), 次数与时间跨度; dropbox 已轮转的项记 "已轮转", 以 P0.2 的 AVD 复现为准.
+- [x] P0.2 临时 AVD (API 35) 修前基线: 当前 HEAD 的宿主 debug 包与 inrt debug 包 (子会话核对 Gradle 任务名, inrt flavor 见 `app/build.gradle.kts`) 各装一次, 用 T6 `make-future` 构造未来数据后启动, 记崩溃异常, 系统重启次数 (`am_proc_start` / `am_crash`) 与停止条件; 装 Shizuku (R5) 并经 adb 启动服务端, 授权对话框由维护者点按, 重启服务端 3 次, 记每次拉起 inrt 的次数与崩溃次数. 验收: 附录 B.2 "修前" 列有宿主与 inrt 的异常, 重启次数, 唤醒循环次数 (预期崩溃, 即 `check` 为 FAIL).
+- [x] P0.3 往返脚本 `tools/db-downgrade/roundtrip.py` + `tools/db-downgrade/README.md` (T6, R4). 验收: P0.2 的数字由脚本产生, 报告入 `docs/db-downgrade/evidence/` (修前 FAIL 是预期结果).
 
 ### P1 两张任务表 + 兜底 (D2 / D3, T1 / T2 / T7 / T8 / T9; 代码; 验证临时 AVD API 24 与 35)
 
@@ -169,27 +169,38 @@
 5. T4 兜底: 不在 `getInstance` 主动触发 `writableDatabase` (同样是主线程 IO), 改为在 `RoomDowngrade` 包装的 open helper 的 `writableDatabase` / `readableDatabase` 处 (后台线程) 经 `DatabaseRecovery` 处理. `DatabaseRecovery` 提交后接入, 并补 P2.2 的兜底一例.
 6. T3 打包: Gradle 任务 `package<Variant>RoomSchemaAssets` 经 variant API 加为生成的 assets 目录, 只复制不改 `room.schemaLocation`; `mustRunAfter` 对应的 KSP 任务, 新版本的快照在同一次构建内打包.
 
+### P0 / P1 实施处置 (2026-10-23, db-downgrade-p0-p1)
+
+1. T6 崩溃计数: 6.7.0 起的 `CrashHandler` 自行 `exitProcess(1)`, 系统不写 am_crash (附录 B.1), 所以 `check` / `wake` 除 `am_crash` 外, 还按 `CrashHandler` / `AndroidRuntime` 日志里 "Uncaught Exception" / "FATAL EXCEPTION" 的进程数计崩溃 (只计本包本次启动的 pid), 并要求进程启动不超过 1 次, 观察期末进程存活.
+2. T6 唤醒: Shizuku 13.6.0 在 AVD 上没有生成 `start.sh`, `wake` 在它不存在时直接执行 APK 里的 `lib/<abi>/libshizuku.so` (`start.sh` 执行的也是它); 不需要授权, 服务端重启时会调用所有声明了 Shizuku 权限的包的 `ShizukuProvider`. 修前每次启动到退出 5-15 s, 一轮约 60 s 才平息, 修前基线的观察窗口取 90 s.
+3. T6 备份命名: 伴随文件跟在备份名之后 (`<库>.bak-<版本>-<时间>-wal`), 与 SQLite 的命名方式一致, 备份可直接打开.
+4. P0.2 的 AVD 用 `dbdowngrade_p01_api35` (P2 子会话同时在用 `dbdowngrade_api35`, 加 `_p01_` 区分).
+
 ## 附录 B. 证据
 
 ### B.1 XQ-AT72 取证 (P0.1)
 
 | 项 | 结果 |
 | --- | --- |
-| inrt 崩溃异常与消息 | 待填 |
-| 拉起方 (provider / receiver / service / job) | 待填 |
-| 崩溃次数与时间跨度 | 待填 (shizuku-oom P0 记 123 次) |
-| 宿主每轮 3 次的停止条件 | 待填 |
-| inrt 数据库版本 4 的来源 | 待填 |
+| inrt 崩溃异常与消息 | XQ-AT72 的 dropbox 没有 inrt 条目: 全部 75 条记录最早为 2026-10-20 15:34:59, 不是已轮转, 而是从未写入 (原因见 "停止条件" 一行). 异常以 AVD 复现为准: `RuntimeException: Unable to create application org.autojs.autojs.App`, Caused by `SQLiteException: Can't downgrade database from version 6 to 5`, 栈顶 `SQLiteOpenHelper.onDowngrade` (XQ-AT72 上是 IntentTask 4 -> 3). 宿主 6.6.4 的同类崩溃在 XQ-AT72 dropbox 里有 30 条: `ExceptionInInitializerError`, Caused by `Can't downgrade database from version 5 to 3`, 经 `Database.<init>` <- `TimedTaskManager.<clinit>` <- `TimedTaskScheduler.init` <- `App.onCreate` |
+| 拉起方 (provider / receiver / service / job) | XQ-AT72: events 缓冲区从 10-23 16:11 起, 已没有 inrt 的 `am_proc_start` (已轮转); jobscheduler 0 条, alarm 0 条, 无 bad process. 清单: provider authority 7 个 (含 `org.autojs.autojs6.inrt.shizuku`), receiver 47 条, service 5 条. AVD API 35 复现 (Shizuku 13.6.0): 服务端每次重启先经 `ShizukuProvider` (content provider) 拉起 1 次; 进程死后, 待投递的启动类广播逐个再拉起 (`InrtBootCompletedReceiver` x2, `AudioCompatibilityProbeReceiver`, `StaticBroadcastReceiver`, `BootCompletedReceiver`, `RescheduleReceiver`, `JobBootReceiver`); 约 50 s 后 WorkManager `SystemJobService` 再拉起 1 次 |
+| 崩溃次数与时间跨度 | XQ-AT72: 无记录 (dropbox 未写入, events 已轮转), 以 shizuku-oom P0 记的 123 次为准. AVD API 35: 服务端每次重启 inrt 崩溃 9 / 1 / 8 次 (3 轮共 18 次, 均为降级), 每次从启动到退出 5-15 s, 一轮约 60 s 后平息; 宿主同轮 7 / 8 / 8 次 |
+| 宿主每轮 3 次的停止条件 | 系统的 bad-process 限制 (推断). 6.6.4 的 `CrashHandler` 把异常交给 Bugly 处理器再交给系统, XQ-AT72 dropbox 有 30 条 data_app_crash (v3274, 2026-10-22 23:17:13 - 23:29:16, 按每轮 3 次即 10 轮); 系统在 60 s 内第二次崩溃时把进程标为 bad process, 之后不再为后台请求拉起. 6.7.0 Alpha11 (`e61289c86a`, 移除 Bugly) 起, `CrashHandler.mSystemHandler` 改为 lazy, 第一次崩溃时才取默认处理器, 而这时默认处理器已是 `CrashHandler` 自身. 结果: 主线程崩溃递归 5 次后 `exitProcess(1)`, 系统没有 am_crash 与 dropbox 记录, 也不计崩溃次数, 每个待投递的广播, provider 调用与 job 都会再拉起一次 (inrt 5280 的 123 次; AVD 上 am_crash 恒为 0, 日志里只有 FATAL EXCEPTION). 已登记附录 C Q9 |
+| inrt 数据库版本 4 的来源 | IntentTask 版本 4 从构建 5282 (`6ad80448f6`, 2026-09-21, "收到邮件" 意图任务) 开始. inrt 5280 首装 2026-09-14 18:07:47, 最后更新 2026-10-22 17:33:09 (即装回 5280 的时间); 两者之间装过 >= 5282 的 inrt 构建, 库被写成 4. 具体是哪个构建, 只读取证无法确定 (不能 run-as 读库) |
+
+报告: `evidence/roundtrip-XQ-AT72-5280-20261023-forensics.md` (inrt), `evidence/roundtrip-XQ-AT72-5835-20261023-forensics.md` (宿主).
 
 ### B.2 往返结果 (修前 / 修后)
 
 | 场景 | 修前 (P0.2) | 修后 AVD API 24 (P1.4) | 修后 AVD API 35 (P1.4) | 真机 (P4.1) |
 | --- | --- | --- | --- | --- |
-| 宿主 TimedTask / IntentTask 版本 +1 数据启动 | 待填 | 待填 | 待填 | 待填 |
-| inrt 同上 | 待填 | 待填 | 待填 | 待填 |
-| Shizuku 服务端重启 3 次唤醒 inrt | 待填 | - | 待填 | - |
+| 宿主 TimedTask / IntentTask 版本 +1 数据启动 | FAIL (5935): 桌面启动后 60 s 内启动 8 次 (重启 7 次, 均为广播拉起), 崩溃 8 次全是降级 (6 -> 5), am_crash 0; 31 s 后不再拉起; 库文件版本不变 (6 / 5), 标记行保留 | 待填 | 待填 | 待填 |
+| inrt 同上 | FAIL (5835): 60 s 内启动 8 次 (重启 7 次, 启动类广播), 崩溃 8 次全是降级, am_crash 0; 15 s 后不再拉起 | 待填 | 待填 | 待填 |
+| Shizuku 服务端重启 3 次唤醒 inrt | FAIL: 每轮 (90 s) inrt 拉起并崩溃 9 / 1 / 8 次 (provider 1 次 + 启动类广播 + job), 宿主同轮 7 / 8 / 8 次; am_crash 均为 0 | - | 待填 | - |
 | 打开失败兜底 (`inject-fail`) | - | 待填 | 待填 | 待填 |
 | 自动还原 (`restore-check`) | - | 待填 | 待填 | 待填 |
+
+修前报告 (AVD `dbdowngrade_p01_api35`, Android 15): `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-before-fix.md` (宿主), `evidence/roundtrip-dbdowngrade_p01_api35-5835-20261023-before-fix.md` (inrt 与唤醒). 修前构建是当前 HEAD 的 debug 包 (宿主 x86_64 5935, inrt universal 5835), 两张任务表的代码版本与 HEAD 相同 (TimedTask 5, IntentTask 4).
 
 ### B.3 Room 三库 (P2.3)
 
@@ -209,6 +220,7 @@
 
 - (立项时无)
 - [已按推荐先行待确认] Q8 Room 降级时某张表缺少本版本必需的列 (NOT NULL 且无默认值), 或与快照没有共有列, 其行无法搬进新表, 如何处置 | 选项: A 旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 留在库文件里, 新表为空 (推荐, 已先行; 满足 R3, 代价是库文件保留旧数据的体积, 之后装回较新版本也不会自动搬回) / B 按 T3 原文清空该表只记日志 (数据丢失, 与 R3 冲突) / C 该表重建失败即整库走兜底备份 (其他表也变空) | 影响: P2.1, P2.2 | 改选返工: B 约 10 行 + 改 1 个用例; C 约 20 行 + 改 1 个用例, 依赖 P1.2 | 来源: db-downgrade-p2 (附录 A "P2 实施处置" 第 3 条)
+- [需拍板] Q9 `CrashHandler` 从不把异常交给系统 (6.7.0 Alpha11 移除 Bugly 后 `mSystemHandler` 取到的是自身, 见附录 B.1 "停止条件"), 主线程崩溃以 `exitProcess(1)` 结束, 系统不记崩溃也不限制重启; P1 / P2 只消除降级这一种启动期崩溃, 其他启动期崩溃仍会被每个待投递的广播, provider 调用与 job 各拉起一次. 是否修 | 选项: A 另立条目修: 在 `setDefaultUncaughtExceptionHandler` 之前取得系统处理器并传给 `CrashHandler`, 主线程崩溃时照旧打开崩溃报告页 (独立进程 `:crash_report`) 后交给系统, 恢复 am_crash / dropbox 记录与系统的 bad-process 限制 (后台拉起在 60 s 内第二次崩溃后停止) (推荐, 未先行: 改的是全局崩溃路径, 前台崩溃会多出系统的 "应用已停止" 处理, 且不在本批文件范围内) / B 不修, 只靠 P1 / P2 消除降级崩溃 / C 修 A 之外再加跨进程的启动崩溃计数 (例如连续 3 次启动期崩溃后跳过非必要初始化) | 影响: 新条目 (`tool/CrashHandler.kt`, `App.kt`), 不影响 P1 / P2 | 改选返工: A 约 20 行 + 手测前台 / 后台崩溃各一次; C 另加约 60 行与用例 | 来源: db-downgrade-p0-p1 (P0.1 / P0.2)
 
 ## 附录 D. 文件地图
 
