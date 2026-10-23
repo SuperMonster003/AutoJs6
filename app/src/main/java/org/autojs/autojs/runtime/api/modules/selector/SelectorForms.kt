@@ -4,8 +4,6 @@ import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.filter.BooleanFilter
 import org.autojs.autojs.core.automator.pick.Compass
-import org.autojs.autojs.core.automator.pick.CompassParser
-import org.autojs.autojs.core.automator.pick.CompassSyntaxException
 import org.autojs.autojs.core.automator.pick.Invoker
 import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.core.automator.selector.SelectorArgType
@@ -27,15 +25,18 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * script module layer (roadmap P3.3, appendix C Q66 (2), Q67), made before the current readers (`Picker.Builder`,
  * `Detector`, `UiObject.compass`) take the same values. They use the readers' own tables (the selector registry and its
  * map parser, the result type symbols, the method lookup of `Invoker`, the compass syntax), so what those accept is
- * accepted here and nothing is copied. What they refused is a TypeError (a value of another type, a condition that is no
- * property of `UiSelector` or takes no value of that kind, a selector method given without calling it) or a RangeError (a
- * value a condition refuses, a result type that is no symbol or method of `UiObject`, a plural result type of `detect`, a
- * compass that does not parse), D10, and now before the search: the readers checked result type methods and compasses
- * only once a node was found (appendix E "P3.3").
+ * accepted here. Where the readers refuse a value by throwing (a value a condition refuses, a compass that does not
+ * parse, a result type argument that does not convert), [SelectorChecks] tells it first with copies of what they do,
+ * so that no Java exception is thrown on the way (Q69 (2), roadmap R2). What they refused is a TypeError (a value of
+ * another type, a condition that is no property of `UiSelector` or takes no value of that kind, a selector method given
+ * without calling it) or a RangeError (a value a condition refuses, a result type that is no symbol or method of
+ * `UiObject`, a plural result type of `detect`, a compass that does not parse), D10, and now before the search: the
+ * readers checked result type methods and compasses only once a node was found (appendix E "P3.3").
  *
  * zh-CN: 新脚本模块层上 pickup, detect, auto.explain, flow 与自动化工具集的选择器形式检查 (P3.3, 附录 C Q66 (2), Q67), 在现有读取方 (Picker.Builder,
  * Detector, UiObject.compass) 读取同一值之前进行. 检查使用读取方自己的表 (选择器注册表及其 map 解析器, 结果类型符号, Invoker 的方法查找, 罗盘语法), 所以它们接受的
- * 这里同样接受, 不复制任何一份. 它们拒绝的值为 TypeError (其他类型, 不是 UiSelector 属性或不接受该种类值的条件, 未调用的选择器方法) 或 RangeError (条件拒绝的值,
+ * 这里同样接受. 读取方以抛出异常拒绝的值 (条件拒绝的值, 无法解析的罗盘, 无法转换的结果类型参数) 由 [SelectorChecks] 用复制的做法先行判定, 途中不抛 Java 异常
+ * (Q69 (2), R2). 它们拒绝的值为 TypeError (其他类型, 不是 UiSelector 属性或不接受该种类值的条件, 未调用的选择器方法) 或 RangeError (条件拒绝的值,
  * 不是 UiObject 结果类型符号或方法的结果类型, detect 的复数结果类型, 无法解析的罗盘), D10, 且提前到搜索之前: 现有读取方只在找到节点后才检查结果类型方法与罗盘 (附录 E "P3.3").
  */
 internal object SelectorForms {
@@ -44,6 +45,7 @@ internal object SelectorForms {
     private const val PICKUP_RESULT = "PickupResult"
     private const val DETECT_RESULT = "DetectResult"
     private const val COMPASS = "DetectCompass"
+    private const val ACTION = "action"
 
     /** The script functions of a map selector stand for filters; the parse only needs one that is no null. */
     private val NO_FILTER = BooleanFilter.BooleanSupplier { false }
@@ -73,21 +75,44 @@ internal object SelectorForms {
         }
     }
 
-    /** The conditions of an object selector, each parsed alone by the map parser so that the refusal names its key. */
+    /**
+     * The conditions of an object selector, each checked alone so that the refusal names its key: as the map parser
+     * would apply it ([SelectorChecks.condition], appendix C Q69 (2)), and parsed by the map parser only when a pattern
+     * is left to compile.
+     */
     private fun conditions(function: String, param: String, map: Map<*, *>) {
         for ((key, value) in map.entries) {
             if (key !is String) continue
             val where = "$param.$key"
             // The parser refuses every key the registry lacks; asking first spares an exception (appendix C Q69).
-            if (SelectorRegistry.entry(key) == null) throw GlobalValues.cannotBe(function, where, "given (not a condition of UiSelector)")
-            try {
-                PARSER.parse(java.util.Collections.singletonMap(key, value), UiSelector())
-            } catch (e: SelectorMapException) {
-                throw GlobalValues.typeError(function, where, accepted(SelectorRegistry.entry(key)!!), value)
-            } catch (e: IllegalArgumentException) {
-                throw rejected(function, where, value, e)
+            val entry = SelectorRegistry.entry(key) ?: throw GlobalValues.cannotBe(function, where, "given (not a condition of UiSelector)")
+            when (val verdict = SelectorChecks.condition(entry, mapArguments(key, value), lenient = value is List<*>)) {
+                SelectorChecks.Verdict.Accepted -> Unit
+                SelectorChecks.Verdict.NoOverload -> throw GlobalValues.typeError(function, where, accepted(entry), value)
+                is SelectorChecks.Verdict.Rejected -> throw rejected(function, where, value, verdict.reason)
+                SelectorChecks.Verdict.Unsure -> try {
+                    PARSER.parse(java.util.Collections.singletonMap(key, value), UiSelector())
+                } catch (e: SelectorMapException) {
+                    throw GlobalValues.typeError(function, where, accepted(entry), value)
+                } catch (e: IllegalArgumentException) {
+                    throw rejected(function, where, value, e)
+                }
             }
         }
+    }
+
+    /**
+     * The arguments `SelectorMapParser.apply` (core/automator/selector/SelectorMapParser.kt) gives the condition [key] for
+     * [value]: none for null (an `action` of null is no condition at all), the elements of an array, or the value, script
+     * functions standing for filters, and no null actions.
+     */
+    private fun mapArguments(key: String, value: Any?): List<Any?> {
+        val args = when (value) {
+            null -> emptyList()
+            is List<*> -> value.toList()
+            else -> listOf(value)
+        }.map { if (it is Callable) NO_FILTER else it }
+        return if (key == ACTION) args.filterNotNull() else args
     }
 
     /** The values the overloads of a condition take: a single argument, `null` (none), or an array of the arguments. */
@@ -112,7 +137,11 @@ internal object SelectorForms {
 
     /** A value a condition took but refused (NaN for an integer, an unknown algorithm, a pattern that does not compile). */
     fun rejected(function: String, param: String, value: Any?, cause: IllegalArgumentException): RuntimeException {
-        val reason = cause.message?.lineSequence()?.firstOrNull()?.takeIf { it.isNotBlank() } ?: cause.javaClass.simpleName
+        return rejected(function, param, value, cause.message?.lineSequence()?.firstOrNull()?.takeIf { it.isNotBlank() } ?: cause.javaClass.simpleName)
+    }
+
+    /** A value a condition takes but refuses, for [reason] ([SelectorChecks.Verdict.Rejected]). */
+    fun rejected(function: String, param: String, value: Any?, reason: String): RuntimeException {
         return RhinoScriptRuntime.rangeError(ScriptMessages.failedToCall(function, ScriptMessages.argumentCannotBe(param, "${show(value)} ($reason)")))
     }
 
@@ -144,6 +173,9 @@ internal object SelectorForms {
     /** Whether `Invoker` finds a method [name] (or its getter) of `UiObject` that takes [arguments] as it converts them. */
     private fun invocable(name: String, arguments: List<Any?>): Boolean {
         if (name.isEmpty()) return true
+        // The conversion of Invoker.Interceptor throws for NaN in an integer parameter; telling it first spares the exception (Q69 (2)).
+        // zh-CN: Invoker.Interceptor 的转换在整数参数为 NaN 时抛出; 先行判定以免异常 (Q69 (2)).
+        if (SelectorChecks.interceptorThrows(name, arguments)) return false
         val interceptor = try {
             Invoker.Interceptor(name, arguments.toTypedArray())
         } catch (e: IllegalArgumentException) {
@@ -166,16 +198,13 @@ internal object SelectorForms {
         else -> !type.isPrimitive && (arg == null || type.isInstance(arg))
     }
 
-    /** A compass as `UiObject.compass` reads it once a node is found (Q67): `%` passes the node on, anything else must parse. */
+    /**
+     * A compass as `UiObject.compass` reads it once a node is found (Q67): `%` passes the node on, anything else must
+     * parse ([SelectorChecks.compassParses], Q69 (2)).
+     */
     fun compass(function: String, param: String, value: Any?) {
         if (value !is CharSequence || value == Compass.PASS_ON) return
-        val parses = Compass.isCompass(value) && try {
-            CompassParser.parse(value)
-            true
-        } catch (e: CompassSyntaxException) {
-            false
-        }
-        if (!parses) throw GlobalValues.rangeError(function, param, COMPASS, value)
+        if (!SelectorChecks.compassParses(value)) throw GlobalValues.rangeError(function, param, COMPASS, value)
     }
 
 }

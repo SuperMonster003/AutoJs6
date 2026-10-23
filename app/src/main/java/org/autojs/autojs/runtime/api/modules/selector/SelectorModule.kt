@@ -76,11 +76,11 @@ class SelectorModule(private val runtime: ScriptRuntime) {
             0 -> Unit
             1 -> when {
                 tail[0] is Callable -> callback = tail[0]
-                UiObject.isCompass(tail[0]) -> compass = tail[0]
+                SelectorChecks.isCompass(tail[0]) -> compass = tail[0]
                 else -> resultType = tail[0]
             }
             2 -> when {
-                tail[1] is Callable && UiObject.isCompass(tail[0]) -> { compass = tail[0]; callback = tail[1] }
+                tail[1] is Callable && SelectorChecks.isCompass(tail[0]) -> { compass = tail[0]; callback = tail[1] }
                 tail[1] is Callable -> { resultType = tail[0]; callback = tail[1] }
                 else -> { compass = tail[0]; resultType = tail[1] }
             }
@@ -106,11 +106,11 @@ class SelectorModule(private val runtime: ScriptRuntime) {
         when (a.size) {
             2 -> when {
                 a[1] is Callable -> callback = a[1]
-                UiObject.isCompass(a[1]) -> compass = a[1]
+                SelectorChecks.isCompass(a[1]) -> compass = a[1]
                 else -> resultType = a[1]
             }
             3 -> when {
-                a[2] is Callable && UiObject.isCompass(a[1]) -> { compass = a[1]; callback = a[2] }
+                a[2] is Callable && SelectorChecks.isCompass(a[1]) -> { compass = a[1]; callback = a[2] }
                 a[2] is Callable -> { resultType = a[1]; callback = a[2] }
                 else -> { compass = a[1]; resultType = a[2] }
             }
@@ -158,13 +158,21 @@ class SelectorModule(private val runtime: ScriptRuntime) {
                     else -> unwrapped
                 }
             }
+            // A value the condition takes but refuses (Q68): NaN for an integer, an unknown algorithm, a pattern that does not
+            // compile; told before applying it where SelectorChecks can (Q69 (2)), else by what applying it throws.
+            // zh-CN: 条件接受了类型却拒绝的值 (Q68): 整数处的 NaN, 未知的算法, 无法编译的正则; SelectorChecks 能判定的在施加前判定 (Q69 (2)), 其余看施加时的异常.
+            val param = if (args.size == 1) "arguments[0]" else "arguments"
+            val value = if (args.size == 1) args[0] else args.toList()
+            when (val verdict = SelectorChecks.condition(SelectorRegistry.entry(name)!!, conditionArgs, lenient = false)) {
+                SelectorChecks.Verdict.NoOverload -> throw noOverload(name, args)
+                is SelectorChecks.Verdict.Rejected -> throw SelectorForms.rejected(name, param, value, verdict.reason)
+                else -> Unit
+            }
             val outcome = reported(name, args) {
                 try {
                     SelectorRegistry.apply(selector, name, conditionArgs)
                 } catch (e: IllegalArgumentException) {
-                    // A value the condition took but refused (Q68): NaN for an integer, an unknown algorithm, a pattern that does not compile.
-                    // zh-CN: 条件接受了类型却拒绝的值 (Q68): 整数处的 NaN, 未知的算法, 无法编译的正则.
-                    throw if (args.size == 1) SelectorForms.rejected(name, "arguments[0]", args[0], e) else SelectorForms.rejected(name, "arguments", args.toList(), e)
+                    throw SelectorForms.rejected(name, param, value, e)
                 }
             }
             if (outcome != SelectorRegistry.Outcome.APPLIED) throw noOverload(name, args)

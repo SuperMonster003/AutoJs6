@@ -18,6 +18,7 @@ import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.ScriptableObject.READONLY
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.random.Random
 
 /**
  * Roadmap P3.3, third group: `selector` on the new script module layer, with `automator` and `flow` mounted before it
@@ -81,11 +82,12 @@ class SelectorModulesTest {
     /**
      * The selector forms, compasses and result types the current readers refuse (appendix C Q66 (2), Q67) and the values a
      * condition refuses (Q68), run on the device with the switch on only: the current module refuses them as well, but
-     * only once a node is found, or after a console warning.
+     * only once a node is found, or after a console warning. Most are told by [SelectorChecks] without an exception
+     * (Q69 (2)); the last case has the regex engine of the device (ICU) refuse every pattern the check refuses.
      */
     @Test
-    fun selectorForms() = RuntimeModulesFixture.check(
-        rhino, listOf(
+    fun selectorForms() {
+        val cases = listOf(
             "pickup(undefined)" to "throws TypeError",
             "pickup(true)" to "throws TypeError",
             "pickup({ nope: 1 })" to "throws TypeError",
@@ -108,8 +110,37 @@ class SelectorModulesTest {
             "existsAll({ nope: 1 })" to "throws TypeError",
             "depth(NaN)" to "throws RangeError",
             "textMatches('[')" to "throws RangeError",
-        ).also { RuntimeModulesFixture.exportForDevice(EXPORT_FORMS, it) }
-    )
+            "pickup({ depth: [NaN] })" to "throws RangeError",
+            "pickup({ textMatch: '(' })" to "throws RangeError",
+            "pickup({ textMatches: '(?i)(' })" to "throws RangeError",
+            "pickup('aj6-none', ['setTextSelection', 1, NaN])" to "throws RangeError",
+            "pickup('aj6-none', 'c2147483648')" to "throws RangeError",
+            "detect(null, 's', 'w')" to "throws RangeError",
+            "textMatch('a|*')" to "throws RangeError",
+            "indexInParent(NaN)" to "throws RangeError",
+            "[${refusedPatterns().joinToString { "'${it.replace("\\", "\\\\")}'" }}].filter(function (p) {" +
+                    " try { java.util.regex.Pattern.compile(p); return true; } catch (e) { return false; } }).join(' ')" to "\"\"",
+        )
+        RuntimeModulesFixture.check(rhino, cases)
+        // The message of an unknown algorithm is a string resource, which the JVM has not: on the device only.
+        RuntimeModulesFixture.exportForDevice(EXPORT_FORMS, cases + listOf("pickup({ algorithm: 'x' })" to "throws RangeError", "algorithm('x')" to "throws RangeError"))
+    }
+
+    /**
+     * Patterns [SelectorChecks.patternRefusal] refuses, up to [REFUSED_PER_KIND] of each description, from random strings
+     * of the characters the check looks at (no `/`, so no literal form).
+     */
+    private fun refusedPatterns(): List<String> {
+        val random = Random(69)
+        val byKind = LinkedHashMap<String, MutableSet<String>>()
+        repeat(50_000) {
+            val s = buildString { repeat(1 + random.nextInt(8)) { append(PATTERN_ALPHABET[random.nextInt(PATTERN_ALPHABET.length)]) } }
+            val refusal = SelectorChecks.patternRefusal(s) ?: return@repeat
+            byKind.getOrPut(refusal.substringBefore(" near index")) { LinkedHashSet() }.takeIf { it.size < REFUSED_PER_KIND }?.add(s)
+        }
+        assertEquals(7, byKind.size)
+        return byKind.values.flatten()
+    }
 
     /** JVM only (they search on a device): what the current readers accept passes the checks of [selectorForms]. */
     @Test
@@ -118,15 +149,18 @@ class SelectorModulesTest {
             "null", "'a'", "'a' + 'b'", "/a/", "1", "1.5", "selector().text('a')", "[]", "['a', null, /b/, [1.5, ['c']]]",
             "({ text: 'a', textMatches: /a/, depth: 2, clickable: true, filter: function () { return true; }, action: null })",
             "[{ desc: 'b', boundsInside: [0, 0, '100', 100] }, 'c']",
+            "({ textMatch: 'a(b)c', textMatches: '(?i)a', depth: [2], algorithm: 'dfs', indexInParent: Infinity })",
         ).forEach { SelectorForms.selector("pickup", "selector", unwrapped(it)) }
         listOf(
             "'w'", "''", "'widgets'", "'?'", "'@'", "'text'", "'bounds'", "'click'", "'parent'", "1", "[]", "[1]",
-            "['child', 0]", "['setText', 'a']", "['compass', 'p']", "['scrollTo', 1, 2]", "['#']", "['txt']",
+            "['child', 0]", "['setText', 'a']", "['compass', 'p']", "['scrollTo', 1, 2]", "['#']", "['txt']", "['setTextSelection', 1, Infinity]",
         ).forEach { SelectorForms.resultType("pickup", "resultType", unwrapped(it), null, single = false) }
         listOf("'w'", "'text'", "['child', 0]", "'@'").forEach { SelectorForms.resultType("detect", "resultType", unwrapped(it), "%", single = true) }
         listOf("'?'", "'w'", "['child', 0]", "'widgets'").forEach { SelectorForms.resultType("pickup", "resultType", unwrapped(it), "p2", single = false) }
-        listOf("'%'", "'p'", "'p2'", "'pp'", "'c0'", "'c-1'", "'c0>1'", "'s1'", "'s<1'", "'s>-1'", "'k'", "'k2'", "'p2c1'", "null", "undefined")
-            .forEach { SelectorForms.compass("pickup", "compass", unwrapped(it)) }
+        listOf(
+            "'%'", "'p'", "'p2'", "'pp'", "'c0'", "'c-1'", "'c0>1'", "'s1'", "'s<1'", "'s>-1'", "'k'", "'k2'", "'p2c1'", "null", "undefined",
+            "''", "'p0'", "'k0'", "'c2147483647'", "'c-2147483648'",
+        ).forEach { SelectorForms.compass("pickup", "compass", unwrapped(it)) }
     }
 
     private fun unwrapped(source: String): Any? = RhinoUtils.unwrap(rhino.evalKt(source))
@@ -178,6 +212,8 @@ class SelectorModulesTest {
     private companion object {
         const val EXPORT = "SelectorModulesTest"
         const val EXPORT_FORMS = "SelectorFormsTest"
+        const val PATTERN_ALPHABET = "[]()*+?|\\a{}^-:=!<>.QEcpdx"
+        const val REFUSED_PER_KIND = 40
         val MODULES = listOf("automator", "flow", "selector")
         val JAVA_OBJECT_MEMBERS = listOf("equals", "hashCode", "toString")
         val AUTOMATOR_NAMES = listOf("click", "longClick", "scrollDown", "scrollUp", "setText")

@@ -141,6 +141,7 @@ field | runtime/api/augment/Augmentable.kt | globalContext | kotlin object; stro
 field | runtime/api/augment/settings/SettingsScriptExport.kt | DEFAULT_CATEGORIES | kotlin object; registry; - | table | the SettingCategory constants selected by default (settings.export without categories), filtered once from SettingCategory.ALL (settings P12.1)
 field | runtime/api/augment/shell/Shell.kt | runtimeDefaults | kotlin object; weak-key map; ScriptRuntime | weak | synchronizedMap(WeakHashMap<ScriptRuntime, RuntimeDefaults>) (B.1); values do not reference the key (root / adb flags and a ShizukuCommandShell created without arguments)
 field | runtime/api/modules/notice/NoticeModule.kt | PRESETS | kotlin object; registry; - | table | preset key to (Config property reference, value kind) of notice.config, built once (augment P3.2)
+field | runtime/api/modules/selector/SelectorForms.kt | METHODS | kotlin object; registry; - | table | public methods of UiObject by name (the set getMethod looks in), built once on first use (augment P3.3, appendix C Q69)
 field | runtime/api/tts/TtsExecution.kt | cleanupQueue | kotlin object; registry; - | process | bounded cleanup queue of the process-wide TTS blocking call runner, drained by its worker
 field | storage/history/VersionHistoryEditorBridge.kt | registry | kotlin object; registry; - | weak | id to WeakReference<Callbacks>
 field | theme/app/ScriptThemeChanges.kt | appContext | kotlin object; strong; AndroidContext | process | the Application context

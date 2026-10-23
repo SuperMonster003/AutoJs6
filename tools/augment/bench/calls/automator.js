@@ -28,3 +28,20 @@ time("fail flow.defaults-key", () => { try { flow.defaults(benchUnknownKey); } c
 time("fail flow.wait-option", () => { try { flow.wait("aj6-none", benchUnknownCompare); } catch (e) { } });
 time("fail smartClick-option", () => { try { smartClick("aj6-none", benchUnknownKey); } catch (e) { } });
 time("fail waitForEvent-type", () => { try { waitForEvent("nope"); } catch (e) { } });
+// Appendix C Q69 (2): selector forms the new layer refuses before any search, without a Java exception. With the switch
+// off the current module refuses them only once a node is found (or after console warnings), so they are timed with the
+// switch on only (the "off" columns show "-"). "ok textMatches" compiles its pattern in both states.
+let benchNewLayer = org.autojs.autojs.core.pref.Pref.INSTANCE.getBoolean("key_$_new_script_module_layer", false);
+let benchDepthNaN = { depth: NaN }, benchPattern = { textMatches: "[" }, benchChildNaN = ["child", NaN];
+time("ok textMatches", () => { try { textMatches("a"); } catch (e) { } });
+if (benchNewLayer) {
+    time("fail pickup-result-type", () => { try { pickup("aj6-none", "nope"); } catch (e) { } });
+    time("fail pickup-result-argument", () => { try { pickup("aj6-none", benchChildNaN); } catch (e) { } });
+    time("fail pickup-compass", () => { try { pickup("aj6-none", "c"); } catch (e) { } });
+    time("fail detect-compass", () => { try { detect(null, "c", "w"); } catch (e) { } });
+    time("fail pickup-condition-key", () => { try { pickup(benchUnknownKey); } catch (e) { } });
+    time("fail pickup-condition-value", () => { try { pickup(benchDepthNaN); } catch (e) { } });
+    time("fail pickup-condition-pattern", () => { try { pickup(benchPattern); } catch (e) { } });
+    time("fail depth-value", () => { try { depth(NaN); } catch (e) { } });
+    time("fail textMatches-pattern", () => { try { textMatches("["); } catch (e) { } });
+}
