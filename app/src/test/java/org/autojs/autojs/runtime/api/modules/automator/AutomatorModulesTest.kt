@@ -4,9 +4,12 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.augment.automator.Automator
+import org.autojs.autojs.runtime.api.augment.automator.EventWaitArguments
 import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.auto.AutoOptions
+import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -14,6 +17,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
+import org.mozilla.javascript.NativeObject
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -202,6 +206,69 @@ class AutomatorModulesTest {
             "waitForNotification({ nope: 1 })" to "throws TypeError",
         )
     )
+
+    /**
+     * The fields of the options of `auto` and the selector of `auto.explain` (appendix C Q66 (2)), as [pointArguments]: the
+     * current parsers refuse them as well, and a case they let through would register a listener or read the windows there.
+     */
+    @Test
+    fun autoOptionFields() = checkFields(
+        listOf(
+            "auto.registerEvent('a', function () {}, { distinct: 'x' })" to "throws RangeError",
+            "auto.registerEvent('a', function () {}, { distinct: 1 })" to "throws TypeError",
+            "auto.registerEvent('a', function () {}, { within: -1 })" to "throws RangeError",
+            "auto.registerEvents(['a'], function () {}, { debounce: -5 })" to "throws RangeError",
+            "auto.setWindowFilter({ nope: 1 })" to "throws TypeError",
+            "auto.setWindowFilter({ type: 'x' })" to "throws RangeError",
+            "auto.setWindowFilter({ type: [1] })" to "throws TypeError",
+            "auto.findWindows({ packageName: 1 })" to "throws TypeError",
+            "auto.findWindows({ title: /a{,2}/ })" to "throws RangeError",
+            "auto.findWindows({ active: 1 })" to "throws TypeError",
+            "auto.findWindowRoots({ displayId: 1.5 })" to "throws RangeError",
+            "auto.findWindowRoots({ layer: 'a' })" to "throws TypeError",
+            "auto.dump({ nope: 1 })" to "throws TypeError",
+            "auto.dump('x')" to "throws RangeError",
+            "auto.dump({ format: 1 })" to "throws TypeError",
+            "auto.dump({ maxDepth: NaN })" to "throws RangeError",
+            "auto.dump({ properties: ['nope'] })" to "throws RangeError",
+            "auto.dump({ properties: [1] })" to "throws TypeError",
+            "auto.dump({ visibleOnly: 1 })" to "throws TypeError",
+            "auto.dump({ maxNodes: 0 })" to "throws RangeError",
+            "auto.dump({ indent: true })" to "throws TypeError",
+            "auto.dump({ root: 1 })" to "throws TypeError",
+            "auto.explain({ nope: 1 })" to "throws TypeError",
+            "auto.explain({ depth: NaN })" to "throws RangeError",
+        )
+    )
+
+    /** JVM only (they register or read on a device): what the current parsers accept passes the checks of [autoOptionFields]. */
+    @Test
+    fun acceptedAutoOptions() {
+        listOf("({ distinct: 'window', within: '5', debounce: NaN })", "({ distinct: true, within: -0.5 })", "({ distinct: function () {}, nope: 1 })")
+            .forEach { AutoOptions.event("auto.registerEvent", rhino.evalKt(it)) }
+        listOf(
+            "({ type: ['application', 'TYPE_SYSTEM'], packageName: /a/, title: 'b', displayId: 0, id: 1, layer: -1, active: true, focused: null })",
+            "({ type: 'input_method', packageName: 'a' + 'b' })",
+        ).forEach { AutoOptions.windowFilter("auto.findWindows", "options", rhino.evalKt(it) as NativeObject) }
+        listOf(
+            "'XML'", "({ format: 'json', maxDepth: 2, properties: ['text', 'desc'], visibleOnly: false, maxNodes: 1, indent: 2 })",
+            "({ properties: 'text', indent: '  ', root: null, format: undefined })",
+        ).forEach { AutoOptions.dump("auto.dump", rhino.evalKt(it)) }
+    }
+
+    /**
+     * The event type names: normalized as the current parser normalizes them, without its regular expression, and accepted
+     * when the result names an `AccessibilityEvent.TYPE_*` field, as `getField` found it.
+     */
+    @Test
+    fun eventTypeNames() {
+        listOf(
+            "windowStateChanged", "window_state_changed", "TYPE_WINDOW_STATE_CHANGED", "  viewClicked\t", "typeViewClicked",
+            "a1B", "aBC", "aBcD", "ABc", "x9Y", "type_", "TYPE_TYPE_X", "", "_a_B", "a-B", "aZz",
+        ).forEach { assertEquals(it, EventWaitArguments.normalizeTypeName(it), ToolkitArgs.normalizeTypeName(it)) }
+        listOf("windowStateChanged", "window_state_changed", "TYPE_WINDOW_STATE_CHANGED", " viewClicked ", "typeViewClicked", "notificationStateChanged")
+            .forEach { ToolkitArgs.eventArgs("waitForEvent", arrayOf(it)) }
+    }
 
     /**
      * JVM only (they act on a device): what the current module accepts passes the new checks, numeric strings and the

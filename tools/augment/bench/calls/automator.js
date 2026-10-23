@@ -4,8 +4,11 @@
 // (reads of a constant and the service state, new selectors); the "fail" cases fail with an argument error before any
 // action in both states, compared with the "ref" cases of the prelude. Global selector functions whose arguments match no
 // overload are left out: the current module warns twice in the console for each of them. The option fields (appendix C
-// Q65 (2)) are read by the current parsers before any wait or action in both states; targets never match a node.
+// Q65 (2)) are read by the current parsers before any wait or action in both states; targets never match a node. The
+// options objects of the "fail" cases are created once, outside the timed calls: an object literal costs about 10 us on
+// XQ-AT72 (P3.3), which the Rhino reference `undefined.x` does not have.
 let benchFlowTimeout = flow.defaults().timeout;
+let benchUnknownKey = { nope: 1 }, benchUnknownCompare = { compare: "nope" };
 time("ok keys.home", () => { try { u = keys.home; } catch (e) { } });
 time("ok auto.isRunning", () => { try { auto.isRunning(); } catch (e) { } });
 time("ok selector", () => { try { selector(); } catch (e) { } });
@@ -21,7 +24,7 @@ time("fail pickup-type", () => { try { pickup("a", 1, "w", null); } catch (e) { 
 time("fail detect-arity", () => { try { detect(); } catch (e) { } });
 time("fail events.__asEmitter__-type", () => { try { events.__asEmitter__(1); } catch (e) { } });
 time("ok flow.defaults-options", () => { try { flow.defaults({ timeout: benchFlowTimeout }); } catch (e) { } });
-time("fail flow.defaults-key", () => { try { flow.defaults({ nope: 1 }); } catch (e) { } });
-time("fail flow.wait-option", () => { try { flow.wait("aj6-none", { compare: "nope" }); } catch (e) { } });
-time("fail smartClick-option", () => { try { smartClick("aj6-none", { nope: 1 }); } catch (e) { } });
+time("fail flow.defaults-key", () => { try { flow.defaults(benchUnknownKey); } catch (e) { } });
+time("fail flow.wait-option", () => { try { flow.wait("aj6-none", benchUnknownCompare); } catch (e) { } });
+time("fail smartClick-option", () => { try { smartClick("aj6-none", benchUnknownKey); } catch (e) { } });
 time("fail waitForEvent-type", () => { try { waitForEvent("nope"); } catch (e) { } });

@@ -4,6 +4,7 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.runtime.api.augment.flow.FlowCondition
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
+import org.autojs.autojs.runtime.api.modules.selector.SelectorForms
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
@@ -36,10 +37,10 @@ internal class FlowOptions(
 ) {
 
     /** Every key of the options is one of [keys] (the current parsers refuse a typo rather than ignore it). */
-    fun keys(keys: Collection<String>) = also {
+    fun keys(keys: Words) = also {
         (options as? ScriptableObject)?.ids?.forEach { id ->
             val key = id.toString()
-            if (key !in keys) throw GlobalValues.cannotBe(function, field(key), "given (accepted: ${keys.joinToString(", ")})")
+            if (key !in keys.set) throw GlobalValues.cannotBe(function, field(key), keys.given)
         }
     }
 
@@ -87,15 +88,28 @@ internal class FlowOptions(
     /** `root`: a `UiObject`. */
     fun root() = read("root") { value, where -> if (RhinoUtils.unwrap(value) !is UiObject) throw GlobalValues.typeError(function, where, "UiObject", value) }
 
-    /** `resultType` of a pickup: a string or an array. */
-    fun resultType() = read("resultType") { value, where -> if (value !is CharSequence && value !is List<*>) throw GlobalValues.typeError(function, where, "string | Array", value) }
+    /** `compass` of a selector condition: a string that parses (Q67). */
+    fun compass() = read("compass") { value, where ->
+        if (value !is CharSequence) throw GlobalValues.typeError(function, where, "string", value)
+        SelectorForms.compass(function, where, value)
+    }
+
+    /**
+     * `resultType` of a pickup: a string or an array, a result type for the `compass` of the same options ([single]: the
+     * result of one node, `collectList`, without a compass). Q66 (2).
+     */
+    fun resultType(single: Boolean = false) = read("resultType") { value, where ->
+        if (value !is CharSequence && value !is List<*>) throw GlobalValues.typeError(function, where, "string | Array", value)
+        val compass = if (single) null else raw("compass") as? CharSequence
+        SelectorForms.resultType(function, where, if (value is CharSequence) value.toString() else value, compass, single)
+    }
 
     /** One of [names] ([ignoreCase] as the current parser compares them), or with [orFunction] a function. */
-    fun named(name: String, names: List<String>, ignoreCase: Boolean = false, orFunction: Boolean = false) = read(name) { value, where ->
+    fun named(name: String, names: Words, ignoreCase: Boolean = false, orFunction: Boolean = false) = read(name) { value, where ->
         when {
             orFunction && value is Callable -> Unit
-            value is CharSequence -> if (names.none { it.equals(value.toString(), ignoreCase) }) {
-                throw GlobalValues.rangeError(function, where, names.joinToString(" | ") { "\"$it\"" }, value)
+            value is CharSequence -> value.toString().let { s ->
+                if (names.set.none { it.equals(s, ignoreCase) }) throw GlobalValues.rangeError(function, where, names.quoted, value)
             }
             else -> throw GlobalValues.typeError(function, where, if (orFunction) "string | function" else "string", value)
         }
@@ -104,10 +118,14 @@ internal class FlowOptions(
     /** A target of a tool (a `UiObject`, a selector form or a function, located when the tool runs): `container`. */
     fun target(name: String) = read(name) { value, where -> FlowArgs.target(function, where, value) }
 
-    /** The condition of a smart click's `verify`: a selector form, a `UiObject` or a function. */
+    /** The condition of a smart click's `verify`: a selector form (checked as `pickup` reads it), a `UiObject` or a function. */
     fun verify() = read("verify") { value, where ->
         val v = RhinoUtils.unwrap(value)
-        if (v !is UiObject && v !is Callable && !FlowCondition.isSelectorForm(v)) throw GlobalValues.typeError(function, where, "UiObject | selector | function", value)
+        when {
+            v is UiObject || v is Callable -> Unit
+            FlowCondition.isSelectorForm(v) -> SelectorForms.selector(function, where, v)
+            else -> throw GlobalValues.typeError(function, where, "UiObject | selector | function", value)
+        }
     }
 
     /** A nested options object (`click` of `dismissPopups` / `toggle`), null when it is missing. */
@@ -143,9 +161,19 @@ internal class FlowOptions(
 
     private fun field(name: String) = "$param.$name"
 
+    /**
+     * The accepted keys of an options object or the accepted names of a field, with the texts of a refusal joined once
+     * (joined on each refused call, they took up to 7 % of its time on the device, R2).
+     */
+    class Words(words: Collection<String>) {
+        val set: Set<String> = LinkedHashSet(words)
+        val given = "given (accepted: ${words.joinToString(", ")})"
+        val quoted = words.joinToString(" | ") { "\"$it\"" }
+    }
+
     companion object {
 
-        private val HUMANIZE_KEYS = listOf("offset", "delay")
+        private val HUMANIZE_KEYS = Words(listOf("offset", "delay"))
 
         /**
          * A `humanize` value (`flow.defaults` and the tools): `true` / `false`, or an object with `offset` (pixels, a

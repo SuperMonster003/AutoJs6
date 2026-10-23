@@ -9,6 +9,7 @@ import org.autojs.autojs.runtime.api.augment.selector.Selector
 import org.autojs.autojs.runtime.api.augment.selector.SelectorGlobals
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
+import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -77,6 +78,59 @@ class SelectorModulesTest {
         )
     )
 
+    /**
+     * The selector forms, compasses and result types the current readers refuse (appendix C Q66 (2), Q67) and the values a
+     * condition refuses (Q68), run on the device with the switch on only: the current module refuses them as well, but
+     * only once a node is found, or after a console warning.
+     */
+    @Test
+    fun selectorForms() = RuntimeModulesFixture.check(
+        rhino, listOf(
+            "pickup(undefined)" to "throws TypeError",
+            "pickup(true)" to "throws TypeError",
+            "pickup({ nope: 1 })" to "throws TypeError",
+            "pickup({ clickable: 'x' })" to "throws TypeError",
+            "pickup(['aj6-none', { nope: 1 }])" to "throws TypeError",
+            "pickup([[true]])" to "throws TypeError",
+            "pickup(selector().text)" to "throws TypeError",
+            "pickup({ depth: NaN })" to "throws RangeError",
+            "pickup({ textMatches: '[' })" to "throws RangeError",
+            "pickup('aj6-none', 'nope')" to "throws RangeError",
+            "pickup('aj6-none', ['click', 1])" to "throws RangeError",
+            "pickup('aj6-none', ['child', NaN])" to "throws RangeError",
+            "pickup('aj6-none', ['child', '0'])" to "throws RangeError",
+            "pickup('aj6-none', 'p', '@')" to "throws TypeError",
+            "pickup('aj6-none', 'c')" to "throws RangeError",
+            "pickup('aj6-none', 'x2', 'w')" to "throws RangeError",
+            "detect(null, 'widgets')" to "throws RangeError",
+            "detect(null, ['#'])" to "throws RangeError",
+            "detect(null, 'c', 'w')" to "throws RangeError",
+            "existsAll({ nope: 1 })" to "throws TypeError",
+            "depth(NaN)" to "throws RangeError",
+            "textMatches('[')" to "throws RangeError",
+        ).also { RuntimeModulesFixture.exportForDevice(EXPORT_FORMS, it) }
+    )
+
+    /** JVM only (they search on a device): what the current readers accept passes the checks of [selectorForms]. */
+    @Test
+    fun acceptedSelectorForms() {
+        listOf(
+            "null", "'a'", "'a' + 'b'", "/a/", "1", "1.5", "selector().text('a')", "[]", "['a', null, /b/, [1.5, ['c']]]",
+            "({ text: 'a', textMatches: /a/, depth: 2, clickable: true, filter: function () { return true; }, action: null })",
+            "[{ desc: 'b', boundsInside: [0, 0, '100', 100] }, 'c']",
+        ).forEach { SelectorForms.selector("pickup", "selector", unwrapped(it)) }
+        listOf(
+            "'w'", "''", "'widgets'", "'?'", "'@'", "'text'", "'bounds'", "'click'", "'parent'", "1", "[]", "[1]",
+            "['child', 0]", "['setText', 'a']", "['compass', 'p']", "['scrollTo', 1, 2]", "['#']", "['txt']",
+        ).forEach { SelectorForms.resultType("pickup", "resultType", unwrapped(it), null, single = false) }
+        listOf("'w'", "'text'", "['child', 0]", "'@'").forEach { SelectorForms.resultType("detect", "resultType", unwrapped(it), "%", single = true) }
+        listOf("'?'", "'w'", "['child', 0]", "'widgets'").forEach { SelectorForms.resultType("pickup", "resultType", unwrapped(it), "p2", single = false) }
+        listOf("'%'", "'p'", "'p2'", "'pp'", "'c0'", "'c-1'", "'c0>1'", "'s1'", "'s<1'", "'s>-1'", "'k'", "'k2'", "'p2c1'", "null", "undefined")
+            .forEach { SelectorForms.compass("pickup", "compass", unwrapped(it)) }
+    }
+
+    private fun unwrapped(source: String): Any? = RhinoUtils.unwrap(rhino.evalKt(source))
+
     /** Cases that hold in both states of the switch on a device (the current module throws for the same arguments). */
     @Test
     fun exportsDeviceCases() = listOf(
@@ -123,6 +177,7 @@ class SelectorModulesTest {
 
     private companion object {
         const val EXPORT = "SelectorModulesTest"
+        const val EXPORT_FORMS = "SelectorFormsTest"
         val MODULES = listOf("automator", "flow", "selector")
         val JAVA_OBJECT_MEMBERS = listOf("equals", "hashCode", "toString")
         val AUTOMATOR_NAMES = listOf("click", "longClick", "scrollDown", "scrollUp", "setText")

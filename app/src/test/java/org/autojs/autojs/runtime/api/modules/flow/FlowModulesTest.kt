@@ -242,6 +242,30 @@ class FlowModulesTest {
         )
     )
 
+    /**
+     * The selector forms of conditions and targets and the compass and result type of their scope (appendix C Q66 (2), Q67):
+     * what `pickup` refuses, now before the wait or the tool instead of while it polls or once a node is found.
+     */
+    @Test
+    fun selectorForms() = checkFields(
+        listOf(
+            "flow.wait({ nope: 1 })" to "throws TypeError",
+            "flow.wait(['aj6-none', { nope: 1 }])" to "throws TypeError",
+            "flow.wait({ depth: NaN })" to "throws RangeError",
+            "flow.wait('aj6-none', { compass: 'c' })" to "throws RangeError",
+            "flow.wait('aj6-none', { compass: 'x2' })" to "throws RangeError",
+            "flow.wait('aj6-none', { resultType: 'nope' })" to "throws RangeError",
+            "flow.wait('aj6-none', { compass: 'p', resultType: '@' })" to "throws TypeError",
+            "flow.whenPresent({ nope: 1 }, function () {})" to "throws TypeError",
+            "flow.repeatUntil(function () {}, 'aj6-none', { compass: 'c' })" to "throws RangeError",
+            "flow.smartClick({ nope: 1 })" to "throws TypeError",
+            "flow.smartClick('aj6-none', { verify: { nope: 1 } })" to "throws TypeError",
+            "flow.clickAny(['aj6-none', { textMatches: '[' }])" to "throws RangeError",
+            "flow.collectList(null, 'aj6-none', { resultType: 'widgets' })" to "throws RangeError",
+            "flow.collectList(null, 'aj6-none', { resultType: ['click', 1] })" to "throws RangeError",
+        )
+    )
+
     @Test
     fun flowArguments() = check(
         listOf(

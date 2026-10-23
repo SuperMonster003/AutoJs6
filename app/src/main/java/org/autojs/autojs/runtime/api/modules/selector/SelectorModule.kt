@@ -25,6 +25,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.EcmaError
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
@@ -40,14 +41,14 @@ import java.lang.reflect.InvocationTargetException
  * Arguments follow the documented forms (T4): an argument count or a root, widget, compass or callback of a type that no
  * form of `pickup` / `detect` accepts is a TypeError, and so is a call of a global selector function whose arguments match
  * no condition or method overload (D10; the current module threw IllegalArgumentException after a console warning). The
- * selector given to `pickup` and the result types are still read by the current parsers (outside appendix C Q65, see Q66;
- * appendix E "P3.3").
+ * selector, compass and result type of `pickup` / `detect` are checked as the current readers read them ([SelectorForms],
+ * appendix C Q66 (2), Q67), and a value a condition refuses is a RangeError without the console warnings (Q68).
  *
  * zh-CN: 新脚本模块层上的 selector 模块 (P3.3): 可调用 (selector() 返回新的 UiSelector); pickup, detect, existsAll 与 existsOne 只在全局对象上;
  * SelectorGlobals.names 中的选择器条件, 查询与节点动作作为全局函数 (text('a'), findOne(3000), scrollForward()), 每次从新的选择器开始. 同现有模块, install 钩子只定义
  * 全局对象上尚未存在的名称 (所以 click, setText 等仍是 automator 的), 模块名称只读. 参数按文档形式 (T4): pickup / detect 的任何形式都不接受的参数个数或 root,
  * widget, compass, callback 类型为 TypeError; 全局选择器函数的参数与任何条件或方法重载都不匹配时也为 TypeError (D10; 现有模块在控制台警告后抛 IllegalArgumentException).
- * 传给 pickup 的选择器与结果类型仍由现有解析器读取 (不在附录 C Q65 的范围内, 见 Q66; 附录 E "P3.3").
+ * pickup / detect 的选择器, 罗盘与结果类型按现有读取方的读法检查 ([SelectorForms], 附录 C Q66 (2), Q67); 条件拒绝的值为 RangeError, 不再输出控制台警告 (Q68).
  */
 @ScriptModule(name = "selector", attributes = ScriptAttributes.PERMANENT or ScriptAttributes.READONLY)
 class SelectorModule(private val runtime: ScriptRuntime) {
@@ -87,6 +88,9 @@ class SelectorModule(private val runtime: ScriptRuntime) {
         }
         compass("pickup", compass)
         callback("pickup", callback)
+        SelectorForms.selector("pickup", "selector", selector)
+        SelectorForms.compass("pickup", "compass", compass)
+        SelectorForms.resultType("pickup", "resultType", resultType, compass as? CharSequence, single = false)
         return UiSelector.pickup(runtime, if (root) a[0] as? UiObject else null, selector, compass as? CharSequence, resultType, callback as? Callable)
     }
 
@@ -114,6 +118,8 @@ class SelectorModule(private val runtime: ScriptRuntime) {
         }
         compass("detect", compass)
         callback("detect", callback)
+        SelectorForms.compass("detect", "compass", compass)
+        SelectorForms.resultType("detect", "resultType", resultType, compass as? CharSequence, single = true)
         return UiObject.detect(runtime, a[0] as? UiObject, compass as? CharSequence, resultType, callback as? Callable)
     }
 
@@ -152,7 +158,15 @@ class SelectorModule(private val runtime: ScriptRuntime) {
                     else -> unwrapped
                 }
             }
-            val outcome = reported(name, args) { SelectorRegistry.apply(selector, name, conditionArgs) }
+            val outcome = reported(name, args) {
+                try {
+                    SelectorRegistry.apply(selector, name, conditionArgs)
+                } catch (e: IllegalArgumentException) {
+                    // A value the condition took but refused (Q68): NaN for an integer, an unknown algorithm, a pattern that does not compile.
+                    // zh-CN: 条件接受了类型却拒绝的值 (Q68): 整数处的 NaN, 未知的算法, 无法编译的正则.
+                    throw if (args.size == 1) SelectorForms.rejected(name, "arguments[0]", args[0], e) else SelectorForms.rejected(name, "arguments", args.toList(), e)
+                }
+            }
             if (outcome != SelectorRegistry.Outcome.APPLIED) throw noOverload(name, args)
             return selector
         }
@@ -166,11 +180,14 @@ class SelectorModule(private val runtime: ScriptRuntime) {
         }
     }
 
-    /** Runs [block], warning in the console of what fails there with the arguments of the call, as the current module did. */
+    /**
+     * Runs [block], warning in the console of what fails there with the arguments of the call, as the current module did;
+     * an argument error (a script error, D10) is thrown without the warnings, as those of the other modules.
+     */
     private inline fun <T> reported(name: String, args: Array<out Any?>, block: () -> T): T = try {
         block()
     } catch (e: Throwable) {
-        if (ScriptInterruptedException.causedByInterrupt(e)) throw e
+        if (e is EcmaError || ScriptInterruptedException.causedByInterrupt(e)) throw e
         runtime.console.warn("${e.message}\n${e.stackTraceToString()}")
         runtime.console.warn("method: $name, arguments: [${args.joinToString(",") { coerceString(it) }}]")
         throw e

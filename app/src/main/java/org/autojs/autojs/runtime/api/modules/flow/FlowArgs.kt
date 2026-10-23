@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.flow.FlowNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish
+import org.autojs.autojs.runtime.api.modules.selector.SelectorForms
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
@@ -74,7 +75,7 @@ internal object FlowArgs {
     /** `defaults(options?)`: the keys of the flow defaults; nothing is written when one of them is refused. */
     fun defaultsArgs(function: String, options: Any?) {
         optionsArg(function, "options", options)
-        val o = FlowOptions(function, options as? Scriptable).keys(FlowArguments.DEFAULT_KEYS)
+        val o = FlowOptions(function, options as? Scriptable).keys(DEFAULT_KEYS)
         o.limit("timeout")
         o.millis("interval")
         o.millis("stableFor")
@@ -105,19 +106,25 @@ internal object FlowArgs {
 
     /**
      * The condition of a wait: a selector form (a string, a regular expression, a selector, an object or an array of
-     * selector fields, a number), a `UiObject`, a function, a flow or another thenable.
+     * selector fields, a number), a `UiObject`, a function, a flow or another thenable, told apart in the order of the
+     * current parser; a selector form is checked as `pickup` reads it (Q66 (2)).
      */
     fun cond(function: String, param: String, value: Any?) {
         val v = RhinoUtils.unwrap(value)
-        val ok = v is FlowNativeObject || v is UiObject || v is Callable || v is Scriptable && isThenable(v) || FlowCondition.isSelectorForm(v)
-        if (!ok) throw GlobalValues.typeError(function, param, "selector | UiObject | function | Flow | Promise", value)
+        when {
+            v is FlowNativeObject || v is UiObject || v is Callable || v is Scriptable && isThenable(v) -> Unit
+            FlowCondition.isSelectorForm(v) -> SelectorForms.selector(function, param, v)
+            else -> throw GlobalValues.typeError(function, param, "selector | UiObject | function | Flow | Promise", value)
+        }
     }
 
-    /** A target of a tool, located when the tool runs: a selector form, a `UiObject` or a function. */
+    /** A target of a tool, located when the tool runs: a selector form (checked as `pickup` reads it), a `UiObject` or a function. */
     fun target(function: String, param: String, value: Any?) {
         val v = RhinoUtils.unwrap(value)
-        if (v !is UiObject && v !is Callable && v !is Function0<*> && !FlowCondition.isSelectorForm(v)) {
-            throw GlobalValues.typeError(function, param, "selector | UiObject | function", value)
+        when {
+            v is UiObject || v is Callable || v is Function0<*> -> Unit
+            FlowCondition.isSelectorForm(v) -> SelectorForms.selector(function, param, v)
+            else -> throw GlobalValues.typeError(function, param, "selector | UiObject | function", value)
         }
     }
 
@@ -126,7 +133,7 @@ internal object FlowArgs {
     /** `root`, `compass` and `resultType`: the scope of a selector condition. */
     fun scope(o: FlowOptions) {
         o.root()
-        o.string("compass")
+        o.compass()
         o.resultType()
     }
 
@@ -215,12 +222,14 @@ internal object FlowArgs {
 
     private val NUMBER_NAMES = arrayOf("timeout", "interval", "delayMin", "delayMax")
 
-    private val COMPARE_NAMES = listOf("fingerprint", "bounds", "content")
+    private val COMPARE_NAMES = FlowOptions.Words(listOf("fingerprint", "bounds", "content"))
 
-    private val MISSING_NAMES = listOf("reset", "fail")
+    private val MISSING_NAMES = FlowOptions.Words(listOf("reset", "fail"))
 
-    private val WHEN_PRESENT_KEYS = listOf("timeout", "interval", "times", "root", "compass", "resultType", "recoverService")
+    private val WHEN_PRESENT_KEYS = FlowOptions.Words(listOf("timeout", "interval", "times", "root", "compass", "resultType", "recoverService"))
 
-    private val REPEAT_UNTIL_KEYS = listOf("timeout", "interval", "maxAttempts", "retryOn", "root", "compass", "resultType")
+    private val REPEAT_UNTIL_KEYS = FlowOptions.Words(listOf("timeout", "interval", "maxAttempts", "retryOn", "root", "compass", "resultType"))
+
+    private val DEFAULT_KEYS = FlowOptions.Words(FlowArguments.DEFAULT_KEYS)
 
 }

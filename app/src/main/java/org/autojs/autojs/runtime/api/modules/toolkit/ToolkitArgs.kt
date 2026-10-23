@@ -181,7 +181,7 @@ internal object ToolkitArgs {
                 o.named("direction", DIRECTIONS, ignoreCase = true)
                 o.count("maxSteps")
                 o.named("method", METHODS, ignoreCase = true)
-                o.resultType()
+                o.resultType(single = true)
                 o.count("maxItems", positive = true)
                 o.millis("settle")
                 o.millis("gestureDuration")
@@ -228,7 +228,7 @@ internal object ToolkitArgs {
 
     /** The nested `click` of `dismissPopups` / `toggle`: its own `humanize`, else the outer one. */
     private fun nestedClick(o: FlowOptions) {
-        val inner = o.nested("click")?.keys(ToolkitArguments.CLICK_KEYS.sorted()) ?: return run { o.humanize() }
+        val inner = o.nested("click")?.keys(CLICK_KEYS) ?: return run { o.humanize() }
         if (inner.raw("humanize") != null) inner.humanize() else o.humanize()
         click(inner)
     }
@@ -267,7 +267,7 @@ internal object ToolkitArgs {
             null, is org.mozilla.javascript.Undefined -> Unit
             is Number -> millis(function, "quietFor", a)
             is NativeObject -> {
-                val o = FlowOptions(function, a).keys(EventWaitArguments.IDLE_KEYS)
+                val o = FlowOptions(function, a).keys(IDLE_KEYS)
                 o.raw(EventWaitArguments.KEY_QUIET_FOR)?.let { millis(function, "options.quietFor", it) }
                 o.raw(EventWaitArguments.KEY_TIMEOUT)?.let { millis(function, "options.timeout", it) }
                 o.raw(EventWaitArguments.KEY_EVENT_TYPES)?.let { resolve(function, typeNames(function, "options.eventTypes", it)) }
@@ -287,7 +287,7 @@ internal object ToolkitArgs {
             when {
                 isNullish(a) -> Unit
                 a is Number && !timeout -> millis(function, "timeout", a).also { timeout = true }
-                a !is Number && !filter -> filter(function, "filter", a, EventWaitArguments.EVENT_FILTER_KEYS, "function | Object").also { filter = true }
+                a !is Number && !filter -> filter(function, "filter", a, EVENT_FILTER_KEYS, "function | Object").also { filter = true }
                 else -> {
                     val expected = listOfNotNull("number".takeUnless { timeout }, "function | Object".takeUnless { filter }).joinToString(" | ")
                     throw GlobalValues.typeError(function, "argument $i", expected.ifEmpty { "undefined" }, a)
@@ -298,12 +298,12 @@ internal object ToolkitArgs {
     }
 
     /** `waitForToast(filter?, timeout?)`, or `(timeout)` alone: a substring, a regular expression, a function or `{ packageName?, text? }`. */
-    fun toastArgs(function: String, args: Array<out Any?>) = textAndTimeoutArgs(function, args, EventWaitArguments.TOAST_FILTER_KEYS)
+    fun toastArgs(function: String, args: Array<out Any?>) = textAndTimeoutArgs(function, args, TOAST_FILTER_KEYS)
 
     /** `waitForNotification(filter?, timeout?)`, or `(timeout)` alone: as [toastArgs], the object `{ packageName?, title?, text? }`. */
-    fun notificationArgs(function: String, args: Array<out Any?>) = textAndTimeoutArgs(function, args, EventWaitArguments.NOTIFICATION_FILTER_KEYS)
+    fun notificationArgs(function: String, args: Array<out Any?>) = textAndTimeoutArgs(function, args, NOTIFICATION_FILTER_KEYS)
 
-    private fun textAndTimeoutArgs(function: String, args: Array<out Any?>, keys: Set<String>) {
+    private fun textAndTimeoutArgs(function: String, args: Array<out Any?>, keys: FlowOptions.Words) {
         atMost(function, args, 2)
         val first = args.getOrNull(0)
         if (first is Number) {
@@ -320,12 +320,12 @@ internal object ToolkitArgs {
     }
 
     /** A filter of the current parser: a function, or an object of [keys] whose values are strings or regular expressions. */
-    private fun filter(function: String, param: String, value: Any?, keys: Set<String>, expected: String) {
+    private fun filter(function: String, param: String, value: Any?, keys: FlowOptions.Words, expected: String) {
         when (value) {
             is Callable -> Unit
             is NativeObject -> {
                 val o = FlowOptions(function, value, param).keys(keys)
-                for (key in keys) {
+                for (key in keys.set) {
                     when (val v = o.raw(key)) {
                         null, is CharSequence -> Unit
                         is NativeRegExp -> regex(function, "$param.$key", v)
@@ -357,13 +357,32 @@ internal object ToolkitArgs {
         else -> throw GlobalValues.typeError(function, param, "string | Array", value)
     }
 
-    /** Each name is an `AccessibilityEvent.TYPE_*` constant (looked up as `AccessibilityService.eventTypeOf` does for the current wait). */
+    /**
+     * Each name is an `AccessibilityEvent.TYPE_*` constant, the field `AccessibilityService.eventTypeOf` looks up for the
+     * current wait (one of the public fields, read once, rather than a `getField` that throws for every refused name).
+     */
     private fun resolve(function: String, names: List<Pair<String, Any>>?) = names?.forEach { (param, name) ->
-        try {
-            AccessibilityEvent::class.java.getField("TYPE_${EventWaitArguments.normalizeTypeName(name.toString())}")
-        } catch (_: NoSuchFieldException) {
-            throw GlobalValues.rangeError(function, param, "event type name", name)
+        if (normalizeTypeName(name.toString()) !in EVENT_TYPES) throw GlobalValues.rangeError(function, param, "event type name", name)
+    }
+
+    /**
+     * `EventWaitArguments.normalizeTypeName` without its regular expression `([a-z0-9])([A-Z])`: trimmed, `_` before an
+     * ASCII capital that follows an ASCII lowercase letter or digit, upper-cased, without a leading `TYPE_`.
+     */
+    internal fun normalizeTypeName(name: String): String {
+        val trimmed = name.trim()
+        val out = StringBuilder(trimmed.length + 8)
+        for (i in trimmed.indices) {
+            val c = trimmed[i]
+            if (i > 0 && c in 'A'..'Z' && trimmed[i - 1].let { it in 'a'..'z' || it in '0'..'9' }) out.append('_')
+            out.append(c)
         }
+        return out.toString().uppercase().removePrefix("TYPE_")
+    }
+
+    /** The public fields of `AccessibilityEvent` named `TYPE_*`, without the prefix. */
+    private val EVENT_TYPES: Set<String> by lazy {
+        AccessibilityEvent::class.java.fields.mapNotNullTo(HashSet()) { field -> field.name.takeIf { it.startsWith("TYPE_") }?.removePrefix("TYPE_") }
     }
 
     private fun atMost(function: String, args: Array<out Any?>, max: Int) {
@@ -381,11 +400,21 @@ internal object ToolkitArgs {
     }
 
     private class Options(keys: Set<String>, val shorthandKey: String? = null) {
-        val keys: List<String> = keys.sorted()
+        val keys = FlowOptions.Words(keys.sorted())
     }
 
-    private val DIRECTIONS = listOf("up", "down", "left", "right")
+    private val CLICK_KEYS = FlowOptions.Words(ToolkitArguments.CLICK_KEYS.sorted())
 
-    private val METHODS = listOf("action", "gesture")
+    private val IDLE_KEYS = FlowOptions.Words(EventWaitArguments.IDLE_KEYS)
+
+    private val EVENT_FILTER_KEYS = FlowOptions.Words(EventWaitArguments.EVENT_FILTER_KEYS)
+
+    private val TOAST_FILTER_KEYS = FlowOptions.Words(EventWaitArguments.TOAST_FILTER_KEYS)
+
+    private val NOTIFICATION_FILTER_KEYS = FlowOptions.Words(EventWaitArguments.NOTIFICATION_FILTER_KEYS)
+
+    private val DIRECTIONS = FlowOptions.Words(listOf("up", "down", "left", "right"))
+
+    private val METHODS = FlowOptions.Words(listOf("action", "gesture"))
 
 }
