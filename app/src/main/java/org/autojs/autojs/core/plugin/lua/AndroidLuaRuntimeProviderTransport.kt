@@ -382,15 +382,21 @@ private class ExactComponentBinderLease(
         check(Looper.myLooper() != Looper.getMainLooper()) {
             "Synchronous Lua runtime binding must not block the Android main thread"
         }
-        val didBind = PluginAutoWake.bindServiceWaking(
-            context,
-            Intent().setComponent(expectedComponent),
-            this,
-            Context.BIND_AUTO_CREATE,
-        )
+        val didBind = try {
+            PluginAutoWake.bindServiceWaking(
+                context,
+                Intent().setComponent(expectedComponent),
+                this,
+                Context.BIND_AUTO_CREATE,
+            )
+        } finally {
+            // bindService registers the connection before the system answers, so a refused or failed binding is
+            // unbound by close() as well (docs/memory-phase2/ROADMAP.md C11).
+            // zh-CN: bindService 在系统应答之前就登记了连接, 因此被拒绝或失败的绑定也由 close() 解绑 (docs/memory-phase2/ROADMAP.md C11).
+            registered.set(true)
+            unbindIfClosed()
+        }
         if (!didBind) throw IllegalStateException("Unable to bind exact Lua runtime component $expectedComponent")
-        registered.set(true)
-        unbindIfClosed()
         if (!completion.await(timeoutMillis, TimeUnit.MILLISECONDS)) {
             close()
             throw IllegalStateException("Timed out binding exact Lua runtime component $expectedComponent")
