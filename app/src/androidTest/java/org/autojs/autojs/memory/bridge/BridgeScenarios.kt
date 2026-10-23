@@ -77,7 +77,7 @@ internal enum class BridgeEngine(
         "io.github.supermonster003.autojs6.plugin.python.runtime",
         listOf(
             "org.autojs.autojs.core.plugin.python.PythonHostCapabilityBroker",
-            "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution\$openSession\$executionCallback\$1",
+            "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution\$openSession\$executionHandler\$1",
             "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution",
             "org.autojs.autojs.core.plugin.python.PythonRuntimeOfficialTransport\$Binding",
             "org.autojs.autojs.core.plugin.python.PythonRuntimeClient",
@@ -85,7 +85,7 @@ internal enum class BridgeEngine(
         ),
         linkedMapOf(
             "python.broker" to "org.autojs.autojs.core.plugin.python.PythonHostCapabilityBroker",
-            "python.callback" to "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution\$openSession\$executionCallback\$1",
+            "python.callback" to "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution\$openSession\$executionHandler\$1",
             "python.execution" to "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution",
             "python.binding" to "org.autojs.autojs.core.plugin.python.PythonRuntimeOfficialTransport\$Binding",
         ),

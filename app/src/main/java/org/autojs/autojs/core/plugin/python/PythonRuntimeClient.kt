@@ -8,6 +8,7 @@ import android.os.RemoteException
 import android.util.Log
 import org.autojs.autojs.core.console.GlobalConsole
 import org.autojs.autojs.core.plugin.center.PluginStateChangeRegistry
+import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.autojs.script.PythonFileSource
 import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs6.BuildConfig
@@ -176,6 +177,17 @@ internal class PythonRuntimeClient(
                 ).also(executionSnapshot::set)
             } finally {
                 stdinSnapshot?.fill(0)
+            }
+            // Released in the order of the former finally (docs/memory-phase2/ROADMAP.md T6): the broker, the callbacks the plugin
+            // keeps (C42), the session with the binding that waits for its process to retire, then the live output and the
+            // snapshot, which do not depend on each other and now follow the stage order of the other engines.
+            // zh-CN: 按原 finally 的顺序释放 (docs/memory-phase2/ROADMAP.md T6): broker, 插件持有的回调 (C42), 会话及等待其进程退役的绑定,
+            // 然后是实时输出与快照; 后两者互不依赖, 现按其他引擎的阶段顺序释放.
+            val scope = BridgeExecutionScope("python", requestId.toString()).apply {
+                own(BridgeExecutionScope.Stage.FILES, "snapshot") { executionSnapshot.getAndSet(null)?.close() }
+                own(BridgeExecutionScope.Stage.CONSOLE, "output", ::finishLiveOutput)
+                own(BridgeExecutionScope.Stage.CALLBACKS, "session", ::releaseSessionAndBinding)
+                own(BridgeExecutionScope.Stage.BROKER, "broker", ::closeHostCapabilityBroker)
             }
             try {
                 checkExecutionActive()
@@ -381,7 +393,7 @@ internal class PythonRuntimeClient(
                     )
                 reservation.set(reserved)
                 checkExecutionActive()
-                openSession(provider, pinned, reserved, snapshot)
+                openSession(provider, pinned, reserved, snapshot, scope)
                 awaitTerminal(request)
                 checkExecutionActive()
                 failure.get()?.let { throw it }
@@ -403,26 +415,27 @@ internal class PythonRuntimeClient(
                 }
                 throw error
             } finally {
-                closeHostCapabilityBroker()
-                val ownedBinding = binding.get()
-                val ownedSession = reservation.getAndSet(null)?.let(registry::release)
-                ownedSession?.let { session -> runCatching { session.close() } }
-                if (ownedSession != null && remoteStartDispatched.get()) {
-                    // Session close retires this CPython generation. Keep the binding alive until
-                    // Binder death so the next FIFO owner cannot race a RETIRING provider.
-                    if (ownedBinding?.awaitRemoteProcessExit(PROCESS_RETIREMENT_WAIT_MILLIS) == false) {
-                        globalConsole.println(
-                            Log.WARN,
-                            "Python Runtime process retirement confirmation timed out; " +
-                                "provider admission remains fail-closed",
-                        )
-                    }
-                }
-                binding.compareAndSet(ownedBinding, null)
-                ownedBinding?.close()
-                executionSnapshot.getAndSet(null)?.close()
-                runCatching { finishLiveOutput() }
+                scope.close()
             }
+        }
+
+        private fun releaseSessionAndBinding() {
+            val ownedBinding = binding.get()
+            val ownedSession = reservation.getAndSet(null)?.let(registry::release)
+            ownedSession?.let { session -> runCatching { session.close() } }
+            if (ownedSession != null && remoteStartDispatched.get()) {
+                // Session close retires this CPython generation. Keep the binding alive until
+                // Binder death so the next FIFO owner cannot race a RETIRING provider.
+                if (ownedBinding?.awaitRemoteProcessExit(PROCESS_RETIREMENT_WAIT_MILLIS) == false) {
+                    globalConsole.println(
+                        Log.WARN,
+                        "Python Runtime process retirement confirmation timed out; " +
+                            "provider admission remains fail-closed",
+                    )
+                }
+            }
+            binding.compareAndSet(ownedBinding, null)
+            ownedBinding?.close()
         }
 
         fun cancel() {
@@ -482,6 +495,7 @@ internal class PythonRuntimeClient(
             pinned: PythonRuntimeProviderPinnedIdentity,
             reserved: PythonRuntimeDispatchRegistry.Reservation,
             snapshot: PythonPrivateExecutionSnapshot,
+            scope: BridgeExecutionScope,
         ) {
             val sessionRef = AtomicReference<IPythonExecutionSession?>()
             val broker = if (pinned.negotiatedProtocolVersion >= HOST_CAPABILITY_BROKER_PROTOCOL) {
@@ -513,6 +527,7 @@ internal class PythonRuntimeClient(
                     check(hostCapabilityBroker.compareAndSet(null, created)) {
                         "Python Runtime host capability broker was already installed"
                     }
+                    scope.track(created, "broker")
                 }
             } else {
                 null
@@ -549,7 +564,7 @@ internal class PythonRuntimeClient(
                 }
             }
 
-            val executionCallback = object : IPythonExecutionCallback.Stub() {
+            val executionHandler = object : IPythonExecutionCallback.Default() {
                 override fun onStarted(metadata: ByteArray?) = fromPinnedProvider {
                     val decoded = PythonRuntimeCodec.decodeSessionStarted(
                         requireNotNull(metadata) { "Python Runtime started metadata is null" },
@@ -657,7 +672,7 @@ internal class PythonRuntimeClient(
                     }.onHeartbeat(decoded.elapsedMillis)
                 }
             }
-            val admissionCallback = object : IPythonSessionOpenCallback.Stub() {
+            val admissionHandler = object : IPythonSessionOpenCallback.Default() {
                 override fun onOpened(session: IPythonExecutionSession?) {
                     if (!PythonRuntimeProviderCallbackCallerPolicy.isExpectedUid(pinned, Binder.getCallingUid())) {
                         session?.let { untrusted -> runCatching { untrusted.close() } }
@@ -719,6 +734,18 @@ internal class PythonRuntimeClient(
                     finishFailure(decoded.toHostException())
                 }
             }
+            // The plugin keeps these Binders until it collects its proxies, also when no session starts and its process does not
+            // retire; once the execution ends they let go of it (docs/memory-phase2/ROADMAP.md C42).
+            // zh-CN: 插件在回收代理之前一直持有这些 Binder, 没有会话启动, 其进程也不退役时同样如此; 执行结束后它们放开本执行
+            // (docs/memory-phase2/ROADMAP.md C42).
+            val executionCallback = ExportedExecutionCallback(executionHandler)
+            val admissionCallback = ExportedSessionOpenCallback(admissionHandler)
+            scope.own(BridgeExecutionScope.Stage.CALLBACKS, "callbacks") {
+                executionCallback.clear()
+                admissionCallback.clear()
+            }
+            scope.track(executionHandler, "callback")
+            scope.track(admissionHandler, "admission")
 
             try {
                 val descriptors = snapshot.openReadOnlyDescriptors()
@@ -741,7 +768,7 @@ internal class PythonRuntimeClient(
                                 provider.openSessionWithHostCapabilities(
                                     encodedRequest,
                                     descriptors,
-                                    broker,
+                                    broker.binder,
                                     admissionCallback,
                                     executionCallback,
                                 )
@@ -1196,6 +1223,74 @@ internal class PythonRuntimeClient(
 
     private fun reportPythonFailure(source: PythonFileSource, error: PythonExecutionError) {
         globalConsole.write(Log.ERROR, PythonRuntimeFailurePresentationPolicy.messageFor(source, error))
+    }
+
+    /**
+     * Forwards to the execution callback until cleared; afterwards only closes the descriptors of a late result.
+     * zh-CN: 清空之前转发到执行回调; 之后只关闭迟到结果所附的描述符.
+     */
+    private class ExportedExecutionCallback(callback: IPythonExecutionCallback) : IPythonExecutionCallback.Stub() {
+
+        private val target = AtomicReference<IPythonExecutionCallback?>(callback)
+
+        fun clear() {
+            target.set(null)
+        }
+
+        override fun onStarted(metadata: ByteArray?) {
+            target.get()?.onStarted(metadata)
+        }
+
+        override fun onStdout(chunk: ByteArray?) {
+            target.get()?.onStdout(chunk)
+        }
+
+        override fun onStderr(chunk: ByteArray?) {
+            target.get()?.onStderr(chunk)
+        }
+
+        override fun onResult(result: ByteArray?, descriptors: Array<out ParcelFileDescriptor?>?) {
+            target.get()?.onResult(result, descriptors)
+                ?: descriptors?.forEach { descriptor -> runCatching { descriptor?.close() } }
+        }
+
+        override fun onFailed(error: ByteArray?) {
+            target.get()?.onFailed(error)
+        }
+
+        override fun onCancelled(cancellation: ByteArray?) {
+            target.get()?.onCancelled(cancellation)
+        }
+
+        override fun onInputPrompt(prompt: ByteArray?) {
+            target.get()?.onInputPrompt(prompt)
+        }
+
+        override fun onHeartbeat(heartbeat: ByteArray?) {
+            target.get()?.onHeartbeat(heartbeat)
+        }
+    }
+
+    /**
+     * Forwards to the admission callback until cleared; afterwards closes a late session, as a late admission is closed while the
+     * execution runs.
+     * zh-CN: 清空之前转发到准入回调; 之后关闭迟到的会话, 与执行期间关闭迟到的准入一致.
+     */
+    private class ExportedSessionOpenCallback(callback: IPythonSessionOpenCallback) : IPythonSessionOpenCallback.Stub() {
+
+        private val target = AtomicReference<IPythonSessionOpenCallback?>(callback)
+
+        fun clear() {
+            target.set(null)
+        }
+
+        override fun onOpened(session: IPythonExecutionSession?) {
+            target.get()?.onOpened(session) ?: session?.let { late -> runCatching { late.close() } }
+        }
+
+        override fun onRejected(error: ByteArray?) {
+            target.get()?.onRejected(error)
+        }
     }
 
     companion object {

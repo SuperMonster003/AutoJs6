@@ -56,6 +56,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.round
 
 internal object PythonHostCapabilities {
@@ -1940,6 +1941,13 @@ internal class PythonHostCapabilityDispatcher(
     }
 }
 
+/**
+ * The host capability broker of one execution. The plugin gets [binder], which forwards here until [close] and then lets go of
+ * this broker, its dispatcher and the execution its violation callback reaches: the plugin process keeps that Binder until it
+ * collects its proxy (docs/memory-phase2/ROADMAP.md C42).
+ * zh-CN: 一次执行的宿主能力 broker. 插件拿到的是 [binder], 它在 [close] 之前转发到这里, 之后放开本 broker, 其分发器与违规回调所及的执行:
+ * 插件进程在回收代理之前一直持有该 Binder (docs/memory-phase2/ROADMAP.md C42).
+ */
 internal class PythonHostCapabilityBroker(
     context: Context,
     executionId: String,
@@ -1963,15 +1971,19 @@ internal class PythonHostCapabilityBroker(
         globalConsole,
         interactiveInputController,
     ),
-) : IPythonHostCapabilityBroker.Stub(), AutoCloseable {
+) : AutoCloseable {
     private val closed = AtomicBoolean(false)
+    private val exported = ExportedHostCapabilityBroker(this)
     private val dispatcher = PythonHostCapabilityDispatcher(
         executionId = executionId,
         grantedCapabilities = PythonHostCapabilities.ENABLED,
         actions = actions,
     )
 
-    override fun dispatch(request: ByteArray?): ByteArray {
+    val binder: IPythonHostCapabilityBroker
+        get() = exported
+
+    fun dispatch(request: ByteArray?): ByteArray {
         val callingUid = Binder.getCallingUid()
         if (callingUid != expectedPluginUid) {
             val error = SecurityException(
@@ -1994,8 +2006,26 @@ internal class PythonHostCapabilityBroker(
     }
 
     override fun close() {
+        exported.clear()
         if (closed.compareAndSet(false, true)) dispatcher.close()
     }
+}
+
+/**
+ * Forwards to [PythonHostCapabilityBroker] until cleared; afterwards a call fails, which the plugin reports to the script as an
+ * unavailable broker.
+ * zh-CN: 清空之前转发到 [PythonHostCapabilityBroker]; 之后的调用失败, 插件将其作为 broker 不可用报告给脚本.
+ */
+private class ExportedHostCapabilityBroker(broker: PythonHostCapabilityBroker) : IPythonHostCapabilityBroker.Stub() {
+
+    private val target = AtomicReference<PythonHostCapabilityBroker?>(broker)
+
+    fun clear() {
+        target.set(null)
+    }
+
+    override fun dispatch(request: ByteArray?): ByteArray =
+        target.get()?.dispatch(request) ?: throw IllegalStateException("Python host capability broker is closed")
 }
 
 private class PythonHostCapabilityTimeoutException(cause: Throwable) : RuntimeException(cause)
