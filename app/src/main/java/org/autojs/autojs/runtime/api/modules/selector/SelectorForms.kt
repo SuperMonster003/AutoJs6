@@ -53,6 +53,12 @@ internal object SelectorForms {
     private val PLURAL = setOf(PickResultType.WidgetCollection, PickResultType.Widgets, PickResultType.Contents, PickResultType.Points)
 
     /**
+     * The public methods of `UiObject` by name, the set `Invoker` looks up with `getMethod`; a lookup here throws nothing
+     * for a name that is no method (appendix C Q69).
+     */
+    private val METHODS: Map<String, List<java.lang.reflect.Method>> by lazy { UiObject::class.java.methods.groupBy { it.name } }
+
+    /**
      * A selector form as `Picker.Builder.setSelector` reads it: nullish (no condition), a string, a `RegExp`, a
      * `UiSelector`, a number, an object of conditions, or an array of these (null elements skipped).
      */
@@ -72,11 +78,12 @@ internal object SelectorForms {
         for ((key, value) in map.entries) {
             if (key !is String) continue
             val where = "$param.$key"
+            // The parser refuses every key the registry lacks; asking first spares an exception (appendix C Q69).
+            if (SelectorRegistry.entry(key) == null) throw GlobalValues.cannotBe(function, where, "given (not a condition of UiSelector)")
             try {
                 PARSER.parse(java.util.Collections.singletonMap(key, value), UiSelector())
             } catch (e: SelectorMapException) {
-                val entry = SelectorRegistry.entry(key) ?: throw GlobalValues.cannotBe(function, where, "given (not a condition of UiSelector)")
-                throw GlobalValues.typeError(function, where, accepted(entry), value)
+                throw GlobalValues.typeError(function, where, accepted(SelectorRegistry.entry(key)!!), value)
             } catch (e: IllegalArgumentException) {
                 throw rejected(function, where, value, e)
             }
@@ -143,12 +150,11 @@ internal object SelectorForms {
             return false
         }
         return listOf(name, "get${name.replaceFirstChar { it.uppercase() }}").any { candidate ->
-            val method = try {
-                UiObject::class.java.getMethod(candidate, *interceptor.classes)
-            } catch (e: NoSuchMethodException) {
-                return@any false
+            METHODS[candidate].orEmpty().any { method ->
+                method.parameterTypes.contentEquals(interceptor.classes) &&
+                        method.parameterCount == interceptor.args.size &&
+                        method.parameterTypes.indices.all { fits(method.parameterTypes[it], interceptor.args[it]) }
             }
-            method.parameterCount == interceptor.args.size && method.parameterTypes.indices.all { fits(method.parameterTypes[it], interceptor.args[it]) }
         }
     }
 
