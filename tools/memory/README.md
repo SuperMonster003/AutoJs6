@@ -79,16 +79,16 @@ py -3.12 -I -u tools/memory/run_gate.py -s SERIAL --suite bridge [--scenarios ND
 ## ci_gate.py: CI 门禁 (模拟器)
 
 ```
-py -3.12 -I -u tools/memory/ci_gate.py -s SERIAL [--adb ADB] [--plugin APK]... [--scenarios S1,S2] [--allow-skip S7b,S13] [--label ci] [--out build/memory-gate/evidence] [--work build/memory-gate] [--relaunch "EMULATOR 命令"] [--restart-adb-server] [--no-retry]
+py -3.12 -I -u tools/memory/ci_gate.py -s SERIAL [--adb ADB] [--suite runtime|bridge] [--plugin APK]... [--scenarios S1,S2] [--allow-skip S7b,S13] [--label ci] [--out build/memory-gate/evidence] [--work build/memory-gate] [--relaunch "EMULATOR 命令"] [--restart-adb-server] [--no-retry]
 ```
 
-`.github/workflows/memory-gate.yml` (ROADMAP P6.1, `workflow_dispatch` 与推送 `v*` 标签时运行) 只调用本脚本; 本机复现用同款 AVD (API 35, google_apis, x86_64, pixel_7, 内存 4096M), 步骤与 CI 相同. 本脚本会安装 APK 并修改设置, 所以只接受模拟器, 真机仍走 run_gate.py.
+`.github/workflows/memory-gate.yml` (ROADMAP P6.1, `workflow_dispatch` 与推送 `v*` 标签时运行) 只调用本脚本; 手动运行时输入 `suite` 选 runtime (默认, S1-S12) 或 bridge (第二期插件引擎桥接门禁, docs/memory-phase2 P5.1), 推送标签只跑 runtime; 本机复现用同款 AVD (API 35, google_apis, x86_64, pixel_7, 内存 4096M), 步骤与 CI 相同. 本脚本会安装 APK 并修改设置, 所以只接受模拟器, 真机仍走 run_gate.py.
 
 1. 等待框架就绪: 开机完成, 开机动画停止, activity 与 package 服务应答, 并稳定 10 s.
-2. 准备: 按设备 ABI 从 `--apk-dir` (默认 `app/build/outputs/apk`, 依据同一次构建的 output-metadata.json) 选 debug 宿主, 以 `-t -g` 安装 (授予运行时权限), 再装测试 APK 与各个 `--plugin` (S4b / S4d / S4e 需要官方 OpenCV 插件, 宿主 APK 不含 OpenCV; S12 需要 3-ImGui; CI 从两个插件仓库的 Release 下载 x86_64 包并校验 sha256, 官方插件凭签名证书受信且默认启用, 装上即可); 核对已安装的 versionCode; 解锁, 关闭动画, 屏幕常亮, `appops set org.autojs.autojs6 SYSTEM_ALERT_WINDOW allow` (否则 S6 跳过).
-3. 以 `--mode normal --capture on --wake --hprof` 运行 run_gate.py (S4a / S4f 的截屏授权按上文用 PROJECT_MEDIA app-op 放行), logcat 全程写入 `<work>/logcat.txt`, 输出转录写入 `<work>/run-gate-attempt-N.txt`. 运行中每 30 s 探测一次 adb (超时 15 s), 连续 3 次无应答判定 adb 丢失并停止 run_gate.py (参照 3-Stove Agent 的 run_main_suite.py).
+2. 准备: 按设备 ABI 从 `--apk-dir` (默认 `app/build/outputs/apk`, 依据同一次构建的 output-metadata.json) 选 debug 宿主, 以 `-t -g` 安装 (授予运行时权限), 再装测试 APK 与各个 `--plugin` (S4b / S4d / S4e 需要官方 OpenCV 插件, 宿主 APK 不含 OpenCV; S12 需要 3-ImGui; CI 从两个插件仓库的 Release 下载 x86_64 包并校验 sha256, 官方插件凭签名证书受信且默认启用, 装上即可); bridge 套件需要五个运行时插件 (Node / Bun / QuickJS / Lua / Python) 与 3-Block Compose (ND6), CI 从各插件仓库的 Release 下载 (Bun 无 x86_64 分包, 用 universal 包; Lua 只有预发布版; 3-Block Compose 是单一 APK), tag 与 sha256 固定在 workflow 的 env 里; 必须通过的场景所需插件未安装时直接报错退出, 不进入运行; 核对已安装的 versionCode (bridge 还在 `CI_GATE_PREPARED` 行列出各插件的 versionCode); 解锁, 关闭动画, 屏幕常亮, `appops set org.autojs.autojs6 SYSTEM_ALERT_WINDOW allow` (否则 S6 / ND9 跳过).
+3. 以 `--suite SUITE --mode normal --capture on --wake --hprof` 运行 run_gate.py (S4a / S4f / ND8 的截屏授权按上文用 PROJECT_MEDIA app-op 放行), logcat 全程写入 `<work>/logcat.txt`, 输出转录写入 `<work>/run-gate-attempt-N.txt`. 运行中每 30 s 探测一次 adb (超时 15 s), 连续 3 次无应答判定 adb 丢失并停止 run_gate.py (参照 3-Stove Agent 的 run_main_suite.py).
 4. 只有出现 "System has crashed", system_server 的 pid 变化或 adb 丢失时才重跑一次: adb 丢失时先重启 adb server (`--restart-adb-server`), 仍无应答再用 `--relaunch` 的命令重启模拟器; 重新准备后只重跑未通过的场景, 用 `--merge` 并入同一份报告, 第一次的报告复制到 `<work>/attempt-1`.
-5. 判定: 选中的场景 (默认 S1-S12, 强制停止模式不进 CI) 全部通过, 或因模拟器无法避免的原因跳过 (`--allow-skip`, 默认 S7b / S12 / S13: S7b 需维护者重新开启无障碍服务, 见上文; S12 未装 3-ImGui; S13 无语音插件; CI 装了 3-ImGui, 传 `--allow-skip S7b,S13`, S12 必须通过). 其他跳过, 失败或缺报告都判 FAIL, 以免权限丢失后静默通过. S7 不带无障碍服务运行, 按键与无障碍事件部分记录在报告中.
+5. 判定: 选中的场景 (默认 S1-S12, 强制停止模式不进 CI) 全部通过, 或因模拟器无法避免的原因跳过 (`--allow-skip`, 默认 S7b / S12 / S13: S7b 需维护者重新开启无障碍服务, 见上文; S12 未装 3-ImGui; S13 无语音插件; CI 装了 3-ImGui, 传 `--allow-skip S7b,S13`, S12 必须通过; bridge 默认 ND13 / BN5 / QJ5 / LU5 / PY5 / ND6: 前五个只在 ColorOS (OPD2413) 上运行, ND6 未装 3-Block Compose; CI 装了 3-Block Compose, 传 `--allow-skip ND13,BN5,QJ5,LU5,PY5`, ND6 必须通过). 其他跳过, 失败或缺报告都判 FAIL, 以免权限丢失后静默通过. S7 不带无障碍服务运行, 按键与无障碍事件部分记录在报告中.
 
 输出 `CI_GATE_RESULT PASS|FAIL passed=N skipped=N (...) problems=N attempts=N versionCode=N` 与逐条 `CI_GATE_PROBLEM`; 在 GitHub Actions 中还把结果与报告表写入 job summary. 退出码: PASS 0, FAIL 1, 准备或运行出错 2 (`CI_GATE_ERROR`). `--restart-adb-server` 会断开本机所有设备, 只在 CI 上使用. 本机复现时把报告写进证据目录, 临时文件放在仓库外:
 
@@ -96,7 +96,13 @@ py -3.12 -I -u tools/memory/ci_gate.py -s SERIAL [--adb ADB] [--plugin APK]... [
 py -3.12 -I -u tools/memory/ci_gate.py -s emulator-5610 --adb ADB --plugin OPENCV_X86_64_APK --plugin IMGUI_X86_64_APK --allow-skip S7b,S13 --label ci-local --out docs/memory/evidence --work WORK_DIR --relaunch "EMULATOR -port 5610 -avd AutoJs6_Memory_Gate_CI_35 -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
 ```
 
-纯函数 (APK 选择, 重跑范围, 判定) 的单测在 `test_ci_gate.py`.
+bridge 套件的本机复现 (默认 label `mp2-ci`, 本机用 `mp2-ci-local`; 插件 APK 用 workflow env 里固定的 Release 包):
+
+```
+py -3.12 -I -u tools/memory/ci_gate.py -s emulator-5654 --adb ADB --suite bridge --plugin NODEJS_APK --plugin BUN_APK --plugin QUICKJS_APK --plugin LUA_APK --plugin PYTHON_APK --plugin BLOCK_COMPOSE_APK --allow-skip ND13,BN5,QJ5,LU5,PY5 --label mp2-ci-local --out docs/memory-phase2/evidence --work WORK_DIR --relaunch "EMULATOR -port 5654 -avd AVD_NAME -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim"
+```
+
+纯函数 (APK 选择, 重跑范围, 判定, bridge 所需插件) 的单测在 `test_ci_gate.py`, 同时核对 workflow 为每个所需插件固定了 tag 与 sha256, 且两个套件的 `--allow-skip` 不超出本脚本的默认值.
 
 ## leakcanary_probe.py: LeakCanary 报告核对
 

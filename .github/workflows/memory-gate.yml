@@ -1,16 +1,25 @@
 name: Memory gate
+run-name: Memory gate (${{ inputs.suite || 'runtime' }})
 
 # Runtime leak gate (docs/memory/ROADMAP.md P6.1): S1-S12 in normal-exit mode on a disposable API 35 emulator, through
 # tools/memory/ci_gate.py, the same entry as a local run (tools/memory/README.md, "CI gate"). Force-stop mode stays
 # on the maintainer's phones: an emulator gains nothing from it and it doubles the run.
+# The suite input `bridge` runs the plugin engine bridge gate instead (docs/memory-phase2/ROADMAP.md P5.1 / T8): every
+# Node / Bun / QuickJS / Lua / Python scenario in normal-exit mode with the latest public plugin releases. Tag pushes
+# have no inputs and run the runtime suite only.
 on:
   push:
     tags: [ "v*" ]
   # Only repository writers can dispatch.
   workflow_dispatch:
     inputs:
+      suite:
+        description: "runtime: S1-S12 of the first gate (docs/memory); bridge: the plugin engine bridge gate (docs/memory-phase2)"
+        type: choice
+        options: [ runtime, bridge ]
+        default: runtime
       scenarios:
-        description: "Comma-separated scenarios without spaces, e.g. S4a,S6; empty runs S1-S12"
+        description: "Comma-separated scenarios of the suite without spaces, e.g. S4a,S6 or ND1,BN2; empty runs S1-S12 (bridge: all)"
         required: false
         default: ""
 
@@ -18,25 +27,47 @@ permissions:
   contents: read
 
 concurrency:
-  group: memory-gate-${{ github.ref }}
+  group: memory-gate-${{ github.ref }}-${{ inputs.suite || 'runtime' }}
   cancel-in-progress: true
 
 jobs:
   gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    # The bridge suite runs 35 scenarios; a full run took about 30 minutes on a local AVD.
+    timeout-minutes: ${{ inputs.suite == 'bridge' && 210 || 150 }}
     env:
       GRADLE_CI_TIMEOUT_SECONDS: '3600'
       GRADLE_CI_MAX_LOG_BYTES: '33554432'
       EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
       # Passed through the environment rather than interpolated into the script.
+      GATE_SUITE: ${{ inputs.suite || 'runtime' }}
       GATE_SCENARIOS: ${{ inputs.scenarios }}
+      # Skips the emulator cannot avoid (ci_gate.py): S7b needs the maintainer to turn the accessibility service on and
+      # S13 a speech plugin; ND13 / BN5 / QJ5 / LU5 / PY5 run on ColorOS only. S12 and ND6 must pass with their plugins.
+      GATE_ALLOW_SKIP: ${{ inputs.suite == 'bridge' && 'ND13,BN5,QJ5,LU5,PY5' || 'S7b,S13' }}
       # S4b / S4d / S4e need OpenCV and S12 loads 3-ImGui, neither shipped with the host APK; official plugins are trusted
       # by their signing certificate and enabled by default, so installing them is enough.
       OPENCV_PLUGIN_TAG: v1.1.4
       OPENCV_PLUGIN_SHA256: 83bd7ee1bea18f19c6576292767be446d5b7e66ac386ec87636e534866001ded
       IMGUI_PLUGIN_TAG: v1.9.3
       IMGUI_PLUGIN_SHA256: d1918c197c1d87e57b0d9af573593670a56608473df265be6a5744efb363d893
+      # The bridge suite: the five runtime plugins and 3-Block Compose (ND6), latest releases as of 2026-10-23. Bun
+      # v0.2.5 has no x86_64 split, so it takes the universal APK (arm64-v8a + x86_64); Lua has only pre-releases.
+      # Until the next Node and Bun releases are pinned here the suite fails (docs/memory-phase2 ROADMAP Q13): its
+      # scenarios use plugin APIs newer than Node v1.6.0 (ND2 / ND6 / ND7a-c / ND8 / ND11) and Bun v0.2.5 (BN2 / BN3).
+      # The Lua x86_64 split passes LU1-LU4 since the host accepts split APKs (C40).
+      NODEJS_PLUGIN_TAG: v1.6.0
+      NODEJS_PLUGIN_SHA256: a644b31e5088f47d8d87d5c50b7620d6eb645e6e85ca6bc37117e09024d6e8ef
+      BUN_PLUGIN_TAG: v0.2.5
+      BUN_PLUGIN_SHA256: 12692195af2511fbf8e77ed8d459460dfb04f547e0a830367da242469d4e6182
+      QUICKJS_PLUGIN_TAG: v1.0.3
+      QUICKJS_PLUGIN_SHA256: 8866d5f0d670768f85ec627f1d55fe74084029d6ca7d8966b4d44d183e12586e
+      LUA_PLUGIN_TAG: v0.1.2-rc.2
+      LUA_PLUGIN_SHA256: f8cec0ccc2a43fc516677d212bda64d81958527c121d49382c912a4d181c5641
+      PYTHON_PLUGIN_TAG: v0.5.4
+      PYTHON_PLUGIN_SHA256: be38b26f767c305d12e0824467950c8d3448be38dfd918f71f160930ebd013ad
+      BLOCK_COMPOSE_PLUGIN_TAG: v1.9.0
+      BLOCK_COMPOSE_PLUGIN_SHA256: cbdc53ad78237a5ed2ebec6096e0d256f61418b0414952a94bfc050ea3a223ea
 
     steps:
       - name: Checkout sources
@@ -50,22 +81,33 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Download the official OpenCV and 3-ImGui plugins
+      # The gate step installs every APK in build/memory-gate/plugins, so this step fetches only the suite's plugins.
+      - name: Download the official plugins of the suite
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p build/memory-gate/plugins
-          # fetch REPOSITORY NAME TAG SHA256: the x86_64 APK of a public release, checked and saved as NAME.apk.
+          # fetch REPOSITORY NAME TAG SHA256 [VARIANT]: the APK of a public release named autojs6-plugin-NAME-TAG-VARIANT*
+          # (VARIANT x86_64- by default, empty for a single APK), checked and saved as NAME.apk.
           fetch() {
             local dir
             dir="$(mktemp -d)"
-            gh release download "$3" --repo "SuperMonster003/$1" --pattern "autojs6-plugin-$2-$3-x86_64-*.apk" --dir "$dir"
+            gh release download "$3" --repo "SuperMonster003/$1" --pattern "autojs6-plugin-$2-$3-${5-x86_64-}*.apk" --dir "$dir"
             echo "$4  $(ls "$dir"/*.apk)" | sha256sum --check
             mv "$dir"/*.apk "build/memory-gate/plugins/$2.apk"
           }
-          fetch AutoJs6-Plugin-OpenCV opencv "$OPENCV_PLUGIN_TAG" "$OPENCV_PLUGIN_SHA256"
-          fetch AutoJs6-Plugin-ImGui imgui "$IMGUI_PLUGIN_TAG" "$IMGUI_PLUGIN_SHA256"
+          if [ "$GATE_SUITE" = bridge ]; then
+            fetch AutoJs6-Plugin-NodeJs-Runtime nodejs-runtime "$NODEJS_PLUGIN_TAG" "$NODEJS_PLUGIN_SHA256"
+            fetch AutoJs6-Plugin-Bun-Runtime bun-runtime "$BUN_PLUGIN_TAG" "$BUN_PLUGIN_SHA256" universal-
+            fetch AutoJs6-Plugin-QuickJS-Runtime quickjs-runtime "$QUICKJS_PLUGIN_TAG" "$QUICKJS_PLUGIN_SHA256"
+            fetch AutoJs6-Plugin-Lua-Runtime lua-runtime "$LUA_PLUGIN_TAG" "$LUA_PLUGIN_SHA256"
+            fetch AutoJs6-Plugin-Python-Runtime python-runtime "$PYTHON_PLUGIN_TAG" "$PYTHON_PLUGIN_SHA256"
+            fetch AutoJs6-Plugin-Three-Block-Compose three-block-compose "$BLOCK_COMPOSE_PLUGIN_TAG" "$BLOCK_COMPOSE_PLUGIN_SHA256" ""
+          else
+            fetch AutoJs6-Plugin-OpenCV opencv "$OPENCV_PLUGIN_TAG" "$OPENCV_PLUGIN_SHA256"
+            fetch AutoJs6-Plugin-ImGui imgui "$IMGUI_PLUGIN_TAG" "$IMGUI_PLUGIN_SHA256"
+          fi
 
       # The debug host and its test APK come from one build, so they share the debug key; ci_gate.py only installs them
       # and runs no Gradle task in the emulator step (where the runner may regenerate ~/.android and its debug key).
@@ -88,7 +130,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run S1-S12 in normal-exit mode
+      - name: Run the suite in normal-exit mode
         uses: reactivecircus/android-emulator-runner@v2.38.0
         with:
           api-level: 35
@@ -99,19 +141,23 @@ jobs:
           disk-size: 6000M
           avd-name: AutoJs6_Memory_Gate_CI_35
           emulator-options: ${{ env.EMULATOR_OPTIONS }}
-          # ci_gate.py installs the x86_64 host with -g (its runtime permissions) and the two plugins, allows the
-          # overlay app-op so that S6 runs, and calls run_gate.py with --mode normal --capture on --wake --hprof:
-          # - S4a / S4f: --capture on sets the PROJECT_MEDIA app-op to allow around each of their processes and restores
-          #   it afterwards, so screen capture needs no consent dialog.
+          # ci_gate.py installs the x86_64 host with -g (its runtime permissions) and the downloaded plugins, allows the
+          # overlay app-op so that S6 / ND9 run, and calls run_gate.py with --suite --mode normal --capture on --wake --hprof:
+          # - S4a / S4f / ND8: --capture on sets the PROJECT_MEDIA app-op to allow around each of their processes and
+          #   restores it afterwards, so screen capture needs no consent dialog.
           # - S7 runs without the host accessibility service (keys and accessibility events are left out and recorded).
           # - S7b is skipped: the service is never bound to the test process without the maintainer (README, S7 / S7b).
-          # - S12 runs with the downloaded 3-ImGui, so --allow-skip leaves it out (the script's default allows it for
-          #   local runs without the plugin). S13 (no speech plugin) is not part of S1-S12; it may only be skipped.
+          # - S12 runs with the downloaded 3-ImGui and ND6 with 3-Block Compose, so --allow-skip leaves them out (the
+          #   script's defaults allow them for local runs without the plugins). S13 (no speech plugin) is not part of
+          #   S1-S12; it may only be skipped.
+          # - Bridge suite: ci_gate.py stops before the run when one of the five runtime plugins is not installed; around
+          #   each process run_gate.py sets hidden_api_policy for the binding probe and restores it (ROADMAP D9).
           # Any other skip, a failure or a missing report fails the gate. After "System has crashed" or a lost adb the
           # script reruns once what did not pass, merged into the same report; for a lost adb it first restarts the adb
-          # server and then, if needed, the emulator with --relaunch (the runner's own command line).
+          # server and then, if needed, the emulator with --relaunch (the runner's own command line). Each line of the
+          # script runs on its own (sh -c), so the plugin list is built inline.
           script: |
-            python3 -I -u tools/memory/ci_gate.py -s emulator-5554 --adb "$(command -v adb)" --plugin build/memory-gate/plugins/opencv.apk --plugin build/memory-gate/plugins/imgui.apk --scenarios "$GATE_SCENARIOS" --allow-skip S7b,S13 --label ci --restart-adb-server --relaunch "${ANDROID_HOME:-/usr/local/lib/android/sdk}/emulator/emulator -port 5554 -avd AutoJs6_Memory_Gate_CI_35 ${{ env.EMULATOR_OPTIONS }}"
+            python3 -I -u tools/memory/ci_gate.py -s emulator-5554 --adb "$(command -v adb)" --suite "$GATE_SUITE" $(printf ' --plugin %s' build/memory-gate/plugins/*.apk) --scenarios "$GATE_SCENARIOS" --allow-skip "$GATE_ALLOW_SKIP" --restart-adb-server --relaunch "${ANDROID_HOME:-/usr/local/lib/android/sdk}/emulator/emulator -port 5554 -avd AutoJs6_Memory_Gate_CI_35 ${{ env.EMULATOR_OPTIONS }}"
 
       - name: Upload the gate report
         if: always()

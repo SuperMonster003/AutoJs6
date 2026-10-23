@@ -1,14 +1,16 @@
-"""CI entry of the runtime leak gate (docs/memory/ROADMAP.md P6.1): prepare a disposable emulator, run
-tools/memory/run_gate.py on it in normal-exit mode and rerun once after a system crash or a lost adb.
+"""CI entry of the runtime leak gate (docs/memory/ROADMAP.md P6.1) and, with --suite bridge, of the bridge leak gate
+(docs/memory-phase2/ROADMAP.md P5.1): prepare a disposable emulator, run tools/memory/run_gate.py on it in
+normal-exit mode and rerun once after a system crash or a lost adb.
 
 .github/workflows/memory-gate.yml only calls this script, and a local run on an AVD of the same recipe (API 35,
 google_apis, x86_64, pixel_7) takes the same steps:
 
 1. Wait until the framework answers (boot completed, boot animation stopped, activity and package services up).
 2. Prepare: install the debug host for the device ABI with its runtime permissions, its test APK and the --plugin
-   APKs (the official OpenCV plugin for S4b / S4d / S4e); unlock, animations off, stay awake, overlay app-op allowed
-   (S6 is skipped without it).
-3. Run run_gate.py (--mode normal --capture on --wake --hprof) with the logcat of the whole run kept in --work. An adb
+   APKs (the official OpenCV plugin for S4b / S4d / S4e; for the bridge suite the five runtime plugins and 3-Block
+   Compose, each checked as installed before the run); unlock, animations off, stay awake, overlay app-op allowed
+   (S6 and ND9 are skipped without it).
+3. Run run_gate.py (--suite --mode normal --capture on --wake --hprof) with the logcat of the whole run kept in --work. An adb
    probe every 30 s stops it once adb is gone; a new system_server pid or "System has crashed" marks a framework
    restart.
 4. After a system crash or a lost adb (and only then) recover adb (--restart-adb-server, then --relaunch), prepare
@@ -51,6 +53,18 @@ UNAVOIDABLE_SKIPS = {
     "S12": "the official plugin 3-ImGui is not installed",
     "S13": "no speech plugin (3-Macaw Speech or 3-Stone AI) is installed",
 }
+# --suite bridge (docs/memory-phase2/ROADMAP.md T8): every bridge scenario. The ColorOS rebind scenarios report skipped
+# on any other system, ND6 without the official 3-Block Compose plugin (AVD column of appendix C Q5).
+BRIDGE_CI_SCENARIOS = list(run_gate.BRIDGE_SCENARIOS)
+BRIDGE_UNAVOIDABLE_SKIPS = {
+    **{s: "runs on ColorOS only (OPD2413), which no emulator has" for s in ("ND13", "BN5", "QJ5", "LU5", "PY5")},
+    "ND6": "the official plugin 3-Block Compose is not installed",
+}
+BLOCK_COMPOSE_PLUGIN = "io.github.supermonster003.autojs6.plugin.three.block.compose"
+SUITES = {
+    "runtime": {"scenarios": CI_SCENARIOS, "skips": UNAVOIDABLE_SKIPS, "label": "ci", "title": "Memory gate"},
+    "bridge": {"scenarios": BRIDGE_CI_SCENARIOS, "skips": BRIDGE_UNAVOIDABLE_SKIPS, "label": "mp2-ci", "title": "Bridge gate"},
+}
 # Printed by am instrument when system_server died under the test ("INSTRUMENTATION_ABORTED: System has crashed.").
 SYSTEM_CRASH = re.compile(r"System has crashed")
 EVIDENCE_LINE = re.compile(r"; evidence (.+)\.md/\.json\s*$")
@@ -74,6 +88,19 @@ def host_apk_name(metadata, abis):
         if element.get("type") in ("UNIVERSAL", "SINGLE"):
             return element["outputFile"], element.get("versionCode")
     raise RuntimeError(f"No host APK for ABIs {abis} in output-metadata.json")
+
+
+def needed_plugins(scenarios, allowed_skips):
+    """Plugin packages a bridge run needs installed, by name: the runtime plugin of every engine with a scenario that
+    may not be skipped, and 3-Block Compose for ND6 unless ND6 may be skipped."""
+    needed = {}
+    for scenario in scenarios:
+        engine = run_gate.bridge_engine(scenario)
+        if engine and scenario not in allowed_skips:
+            needed[engine] = run_gate.BRIDGE_PLUGINS[engine]
+            if scenario == "ND6":
+                needed["block-compose"] = BLOCK_COMPOSE_PLUGIN
+    return needed
 
 
 def normal_results(evidence):
@@ -118,8 +145,9 @@ def kill(process):
 
 
 class Gate:
-    def __init__(self, args):
+    def __init__(self, args, scenarios):
         self.args = args
+        self.scenarios = scenarios
         self.device = physical_device.Device(args.adb, args.serial)
         self.work = args.work.resolve()
         self.work.mkdir(parents=True, exist_ok=True)
@@ -180,6 +208,14 @@ class Gate:
         installed = re.search(r"versionCode=(\d+)", self.device.shell("dumpsys", "package", PACKAGE)["stdout"])
         if not installed or (version_code is not None and int(installed[1]) != int(version_code)):
             raise RuntimeError(f"The installed host has versionCode {installed and installed[1]}, the APK {version_code}")
+        # A missing runtime plugin would only skip its engine's scenarios; name it before the run instead.
+        plugins = {}
+        if self.args.suite == "bridge":
+            for name, package in needed_plugins(self.scenarios, self.args.allow_skip).items():
+                found = re.search(r"versionCode=(\d+)", self.device.shell("dumpsys", "package", package)["stdout"])
+                if not found:
+                    raise RuntimeError(f"The bridge suite needs the {name} plugin {package}; pass its x86_64 APK with --plugin")
+                plugins[name] = int(found[1])
         # What reactivecircus/android-emulator-runner does after the boot (unlock, no animations), repeated here so
         # that a local AVD and a relaunched emulator match; the screen stays on for S4a / S4f / S5.
         self.device.shell("input", "keyevent", "82")
@@ -190,7 +226,8 @@ class Gate:
         overlay = re.search(r"SYSTEM_ALERT_WINDOW: (\w+)", self.device.shell("appops", "get", PACKAGE, "SYSTEM_ALERT_WINDOW")["stdout"])
         print(f"CI_GATE_PREPARED model={identity.get('model')} sdk={identity.get('sdk')} abi={abis[:1]} host={host_name} "
               f"versionCode={installed[1]} test={test_name} plugins={[p.name for p in self.args.plugin]} "
-              f"overlay={overlay[1] if overlay else '?'}")
+              f"overlay={overlay[1] if overlay else '?'}"
+              + (f" pluginVersions={','.join(f'{name}:{code}' for name, code in plugins.items())}" if plugins else ""))
 
     def start_logcat(self, attempt):
         path = self.work / "logcat.txt"
@@ -216,7 +253,7 @@ class Gate:
     def run_gate(self, scenarios, merge, attempt):
         """Returns (exit code, evidence stem or None, system crashed, adb lost)."""
         command = [sys.executable, "-I", "-u", str(Path(run_gate.__file__).resolve()), "-s", self.args.serial,
-                   "--adb", self.args.adb, "--mode", "normal", "--scenarios", ",".join(scenarios), "--capture", "on",
+                   "--adb", self.args.adb, "--suite", self.args.suite, "--mode", "normal", "--scenarios", ",".join(scenarios), "--capture", "on",
                    "--wake", "--hprof", "--out", str(self.args.out)]
         command += ["--label", self.args.label] if self.args.label else []
         command += ["--merge"] if merge else []
@@ -328,7 +365,7 @@ class Gate:
             print(f"CI_GATE_PROBLEM {problem}")
         target = os.environ.get("GITHUB_STEP_SUMMARY")
         if target:
-            lines = [f"## Memory gate: {result}", "",
+            lines = [f"## {SUITES[self.args.suite]['title']}: {result}", "",
                      f"- passed {len(passed)}, skipped {len(skipped)} ({', '.join(skipped) or '-'}), attempts {attempts}",
                      *[f"- {problem}" for problem in problems], ""]
             with open(target, "a", encoding="utf-8") as sink:
@@ -344,11 +381,15 @@ def main():
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--apk-dir", type=Path, default=ROOT / "app" / "build" / "outputs" / "apk",
                         help="Holds app/debug and androidTest/app/debug with their output-metadata.json (one build)")
+    parser.add_argument("--suite", choices=tuple(SUITES), default="runtime",
+                        help="runtime: the first gate (docs/memory); bridge: the plugin engine bridge gate (docs/memory-phase2)")
     parser.add_argument("--plugin", type=Path, action="append", default=[], help="Extra APK to install, e.g. the OpenCV plugin")
-    parser.add_argument("--scenarios", default="", help=f"Comma list; empty runs {CI_SCENARIOS[0]}-{CI_SCENARIOS[-1]}")
-    parser.add_argument("--allow-skip", default=",".join(UNAVOIDABLE_SKIPS),
-                        help="Scenarios that may report skipped; any other skip fails the gate")
-    parser.add_argument("--label", default="ci")
+    parser.add_argument("--scenarios", default="",
+                        help=f"Comma list; empty runs {CI_SCENARIOS[0]}-{CI_SCENARIOS[-1]} (bridge: all its scenarios)")
+    parser.add_argument("--allow-skip",
+                        help="Scenarios that may report skipped; any other skip fails the gate (default "
+                             + "; bridge: ".join(",".join(suite["skips"]) for suite in SUITES.values()) + ")")
+    parser.add_argument("--label", help="Report label (default ci; bridge: mp2-ci)")
     parser.add_argument("--out", type=Path, default=ROOT / "build" / "memory-gate" / "evidence")
     parser.add_argument("--work", type=Path, default=ROOT / "build" / "memory-gate",
                         help="Logcat, run_gate.py transcripts and the first attempt's report of a rerun")
@@ -358,11 +399,14 @@ def main():
     parser.add_argument("--relaunch", metavar="COMMAND",
                         help="Emulator command line that starts this AVD again (same port) when adb stays lost")
     args = parser.parse_args()
-    scenarios = run_gate.scenario_list(args.scenarios) if args.scenarios.strip() else list(CI_SCENARIOS)
-    args.allow_skip = set(run_gate.scenario_list(args.allow_skip)) if args.allow_skip.strip() else set()
+    suite, known = SUITES[args.suite], run_gate.SUITES[args.suite]["scenarios"]
+    scenarios = run_gate.scenario_list(args.scenarios, known) if args.scenarios.strip() else list(suite["scenarios"])
+    args.allow_skip = ",".join(suite["skips"]) if args.allow_skip is None else args.allow_skip
+    args.allow_skip = set(run_gate.scenario_list(args.allow_skip, known)) if args.allow_skip.strip() else set()
+    args.label = suite["label"] if args.label is None else args.label
     args.out = args.out.resolve()
 
-    gate = Gate(args)
+    gate = Gate(args, scenarios)
     gate.wait_for_framework()
     gate.prepare()
     gate.start_logcat(1)
