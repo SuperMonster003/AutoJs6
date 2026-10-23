@@ -484,12 +484,44 @@ if (apkBuilderIncludeBuiltInTemplate.get()) {
 }
 
 ksp {
-    // Room schema snapshots (HistoryDatabase has exportSchema = true) for migration regression tests.
-    // zh-CN: Room schema 快照 (HistoryDatabase 已开启 exportSchema), 用于迁移回归测试.
+    // Room schema snapshots (every Room database has exportSchema = true) for migration regression tests and RoomDowngrade.
+    // zh-CN: Room schema 快照 (各 Room 库均已开启 exportSchema), 用于迁移回归测试与 RoomDowngrade.
     arg("room.schemaLocation", "$projectDir/schemas")
     // Source locations in the generated autojs6/script-modules.json are written relative to the repository root.
     // zh-CN: 生成的 autojs6/script-modules.json 中的源码位置相对于仓库根目录.
     arg("scriptModules.projectDir", rootDir.path)
+}
+
+// Packages the committed snapshots as assets "db-schemas/<database class>/<version>.json". RoomDowngrade rebuilds the
+// tables of a file written by a newer build from the snapshot of the code version (docs/db-downgrade/ROADMAP.md T3).
+// zh-CN: 把已提交的快照打包为 assets "db-schemas/<数据库类全名>/<版本>.json". RoomDowngrade 按代码版本的快照重建较新构建写过的库 (docs/db-downgrade/ROADMAP.md T3).
+abstract class PackageRoomSchemasTask : DefaultTask() {
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val schemaDirectory: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun copySchemas() {
+        val target = outputDirectory.get().asFile.resolve("db-schemas")
+        target.deleteRecursively()
+        schemaDirectory.get().asFile.copyRecursively(target)
+    }
+}
+
+androidComponents {
+    onVariants { variant ->
+        val packageRoomSchemas = tasks.register<PackageRoomSchemasTask>("package${variant.name.asGradleTaskNamePart()}RoomSchemaAssets") {
+            schemaDirectory.set(layout.projectDirectory.dir("schemas"))
+            // KSP writes the snapshot of a new version into the same directory.
+            // zh-CN: KSP 把新版本的快照写进同一目录.
+            mustRunAfter(tasks.matching { it.name == "ksp${variant.name.asGradleTaskNamePart()}Kotlin" })
+        }
+        variant.sources.assets?.addGeneratedSourceDirectory(packageRoomSchemas, PackageRoomSchemasTask::outputDirectory)
+    }
 }
 
 // The unit test compilation sees the main script module registry (generated.ScriptModules) on its classpath, so its

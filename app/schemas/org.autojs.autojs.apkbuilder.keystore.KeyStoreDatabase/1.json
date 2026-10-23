@@ -1,0 +1,61 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "46ed6c4fe132a89ef9fc828d80df3715",
+    "entities": [
+      {
+        "tableName": "KeyStore",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`absolutePath` TEXT NOT NULL, `filename` TEXT NOT NULL, `password` TEXT NOT NULL, `alias` TEXT NOT NULL, `alias_password` TEXT NOT NULL, `verified` INTEGER NOT NULL, PRIMARY KEY(`absolutePath`))",
+        "fields": [
+          {
+            "fieldPath": "absolutePath",
+            "columnName": "absolutePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filename",
+            "columnName": "filename",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "password",
+            "columnName": "password",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alias",
+            "columnName": "alias",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "aliasPassword",
+            "columnName": "alias_password",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "verified",
+            "columnName": "verified",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "absolutePath"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '46ed6c4fe132a89ef9fc828d80df3715')"
+    ]
+  }
+}

@@ -2,10 +2,10 @@ package org.autojs.autojs.theme.app
 
 import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import org.autojs.autojs.storage.database.RoomDowngrade
 import org.autojs.autojs.theme.library.ColorLibraryDao
 
 @Database(
@@ -86,7 +86,7 @@ abstract class ColorHistoryDatabase : RoomDatabase() {
          * zh-CN: 注册了全部迁移的 builder. 供 [getInstance] 与迁移测试 (使用不同名称的临时数据库文件) 共用.
          */
         internal fun createBuilder(applicationContext: Context, name: String): RoomDatabase.Builder<ColorHistoryDatabase> {
-            return Room.databaseBuilder(applicationContext, ColorHistoryDatabase::class.java, name).apply {
+            return RoomDowngrade.databaseBuilder(applicationContext, ColorHistoryDatabase::class.java, name).apply {
                 addMigrations(MIGRATION_1_2)
             }
         }

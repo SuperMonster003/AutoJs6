@@ -2,10 +2,10 @@ package org.autojs.autojs.storage.history
 
 import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import org.autojs.autojs.storage.database.RoomDowngrade
 
 /**
  * Created by JetBrains AI Assistant (GPT-5.2) on Feb 3, 2026.
@@ -72,7 +72,7 @@ abstract class HistoryDatabase : RoomDatabase() {
          * zh-CN: 注册了全部迁移的 builder. 供 [getInstance] 与迁移测试 (使用不同名称的临时数据库文件) 共用.
          */
         internal fun createBuilder(applicationContext: Context, name: String): RoomDatabase.Builder<HistoryDatabase> {
-            return Room.databaseBuilder(applicationContext, HistoryDatabase::class.java, name).apply {
+            return RoomDowngrade.databaseBuilder(applicationContext, HistoryDatabase::class.java, name).apply {
                 addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             }
         }
