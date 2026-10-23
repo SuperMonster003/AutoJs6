@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.core.inputevent.InputDevices
 import org.autojs.autojs.core.pref.keys.MiscStateKeys
 import org.autojs.autojs.pio.PFiles
@@ -154,15 +155,22 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
         }
 
         @Suppress("UNUSED_PARAMETER")
-        private fun getDefaultTouchDevice(context: Context): Int {
-            var touchDeviceId = MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.get()
-            if (touchDeviceId < 0) {
-                touchDeviceId = InputDevices.touchDeviceId.also {
+        private fun getDefaultTouchDevice(context: Context) = getCachedOrResolvedTouchDevice { InputDevices.touchDeviceId }
+
+        // Only a resolved node is cached, so a failed lookup is tried again next time (docs/shizuku-oom/ROADMAP.md D17).
+        // zh-CN: 只缓存解析成功的节点, 解析失败时下次重试 (docs/shizuku-oom/ROADMAP.md D17).
+        @VisibleForTesting
+        internal fun getCachedOrResolvedTouchDevice(resolve: () -> Int): Int {
+            val cached = MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.get()
+            if (cached >= 0) {
+                return cached
+            }
+            return resolve().also {
+                if (it >= 0) {
                     MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.set(it)
                     setTouchDevice(it)
                 }
             }
-            return touchDeviceId
         }
 
     }

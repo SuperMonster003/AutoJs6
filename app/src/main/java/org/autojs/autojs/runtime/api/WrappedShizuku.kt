@@ -10,6 +10,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.DeadObjectException
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.Display
 import androidx.annotation.VisibleForTesting
@@ -288,7 +289,7 @@ object WrappedShizuku {
             onCreate()
             bindUserServiceIfNeeded()
             initializeShizukuServiceAndWait(SERVICE_BIND_TIMEOUT_MILLIS)
-            if (service == null) {
+            if (service == null && !isMainThread()) {
                 // Right after AutoJs6 is updated, Shizuku may keep a service record of the old APK whose process exits at
                 // once; new binds wait on it until Shizuku gives up (30 s). Removing the record lets a fresh bind start.
                 // zh-CN: AutoJs6 刚更新时, Shizuku 可能保留旧 APK 的服务记录, 其进程会立即退出; 新的绑定会一直等它, 直到 Shizuku 放弃 (30 秒).
@@ -360,8 +361,19 @@ object WrappedShizuku {
         }
     }
 
+    private fun isMainThread() = Looper.myLooper() == Looper.getMainLooper()
+
     private fun initializeShizukuServiceAndWait(@Suppress("SameParameterValue") timeout: Long) {
         if (service?.asBinder()?.pingBinder() == true) {
+            return
+        }
+
+        // Shizuku posts onServiceConnected() to the main looper, so waiting on the main thread always runs out the timeout.
+        // Callers there fail at once instead, while the bind started before goes on (docs/shizuku-oom/ROADMAP.md D18).
+        // zh-CN: Shizuku 把 onServiceConnected() 投递到主线程 Looper, 在主线程等待必然等满超时. 因此主线程调用方立即失败,
+        // 之前发起的绑定继续进行 (docs/shizuku-oom/ROADMAP.md D18).
+        if (isMainThread()) {
+            Log.w(TAG, "User service is not connected yet, not waiting for it on the main thread")
             return
         }
 

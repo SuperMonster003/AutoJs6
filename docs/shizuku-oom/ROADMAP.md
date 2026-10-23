@@ -22,7 +22,7 @@
 | P0 复现, 负对照与边界探针 | 探针能检出堆积, 报告者场景在当前构建上残留为 0, 5 条边界路径与内存画像有数字 | P0.1-P0.4 全部有报告, 附录 B 填满 (2026-10-22 完成) | 1 |
 | P1 修复与加固 | 子进程清理, 用户服务自守护, getevent 常驻进程 (P1.5); 进程内存 (P1.4) 已取消 (D12) | P1.1 / P1.2 / P1.5 真机探针残留 0 (含 stray 0) 并有 JVM 单测 (2026-10-23 完成) | 1-2 |
 | P2 回归, changelog 与发布门 | T6 的 Shizuku 功能回归 (9 项) 通过, changelog 条目, 6.8.0 发布门一行 | P2.1-P2.4 勾选, 本地提交 (2026-10-23 完成, 与 P1 同一会话; Q5 已决为 D14, 补跑在 P3.3) | 1 (可与 P1 同一会话) |
-| P3 附带发现与 T6 (8) 补跑 (D14 / D15) | "音量键控制" 开关运行中改开即生效, `TouchRecorder` 自建的观察器随录制结束回收, 另一台设备补跑 T6 (8) 的 RootAutomator 冒烟 | P3.1-P3.5 勾选, 本地提交; P3.3 无合适设备时登记 Q8 (2026-10-23 完成; (8) 在 AVD 补跑仍失败, 原因为既有的节点解析缺陷, Q8 待决) | 1 |
+| P3 附带发现与 T6 (8) 补跑 (D14 / D15 / D17 / D18) | "音量键控制" 开关运行中改开即生效, `TouchRecorder` 自建的观察器随录制结束回收, 另一台设备补跑 T6 (8) 的 RootAutomator 冒烟; P3.6 修触摸屏节点解析 (`getevent -pl` 回退) 与主线程等待用户服务 | P3.1-P3.5 勾选, 本地提交; P3.3 无合适设备时登记 Q8 (2026-10-23 完成; (8) 在 AVD 补跑仍失败, 原因为既有的节点解析缺陷, Q8 已决为 D17 / D18); P3.6 AVD 不预设缓存 (8) PASS, 主线程不阻塞超过 1 s, XQ-AT72 无回归 | 1 (P3.6 与 P3.1-P3.5 同一会话) |
 
 ---
 
@@ -93,6 +93,8 @@
 | D14 | T6 (8) 的 RootAutomator 冒烟换一台 "Shizuku 以 shell 身份运行且 shell 可写 `/dev/input`" 的设备补跑 (P3.3); 不改 SELinux, 不 root; 没有合适设备时不绕过, 登记待决 | 附录 C Q5 (维护者选 B, 非推荐项) |
 | D15 | P1 的两处附带发现 (1.5 末条) 在本主题修掉: P3.1 "音量键控制" 运行中改开即创建 `GlobalKeyObserver`, P3.2 `TouchRecorder` 自建的 `InputEventObserver` 随录制结束回收; changelog 各加 fix (P3.4) | 附录 C Q6 (维护者选 B, 非推荐项) |
 | D16 | inrt 数据库降级崩溃循环 (1.5) 转独立主题 db-downgrade (维护者另开 `/dispatch db-downgrade`), 本主题只记录不处理; XQ-AT72 上的 inrt 包保留作复现样本 | 附录 C Q7 (维护者选 C, 非推荐项) |
+| D17 | 触摸屏节点解析: `/proc/bus/input/devices` 读不到 (Shizuku 以 shell 身份运行) 时改用 `getevent -pl` 按设备名找节点, 解析成功即缓存, 失败不缓存 (P3.6) | 附录 C Q8 (维护者选 A) |
+| D18 | 主线程上不等待 Shizuku 用户服务: 解析移出主线程, 或用户服务未连上时不阻塞等待, 失败快速返回并提示 (P3.6) | 附录 C Q8b (与 Q8 同源, 维护者选 A) |
 
 ---
 
@@ -145,13 +147,14 @@
 - [x] P2.3 发布门: `docs/dev/6.8.0-release-gate.md` 追加一行 (来源本文 D9, 复核方法 = P0.1 探针 + P2.1 回归, 证据 = evidence 报告). 验收: 该行存在且状态写明. 完成 (2026-10-23): 状态为 "已满足 (2026-10-23, 宿主 debug 5935 + P1)", 剩余为发布候选复核.
 - [x] P2.4 收尾: 本文勾选与附录回填, 本地提交 (不推送), 看板 `../.claude/boards/shizuku-oom.md` 子会话结果区追加结论; issue 回复由维护者处理 (D7). 完成 (2026-10-23, shizuku-oom-p1): 提交 `7512f559e` (代码与 changelog), `4d67b9074` (回归脚本与 G8441 证据), 以及其后一笔 XQ-AT72 证据与本文回填 (hash 见看板).
 
-### P3 附带发现与 T6 (8) 补跑 (D14 / D15 / D16; 子会话 shizuku-oom-p3, 2026-10-23)
+### P3 附带发现与 T6 (8) 补跑 (D14 / D15 / D16 / D17 / D18; 子会话 shizuku-oom-p3, 2026-10-23)
 
 - [x] P3.1 "音量键控制" 开关在宿主运行中从关改开时即创建 `GlobalKeyObserver` (不再要求重启宿主): `initIfNeeded` 在两项设置都关闭时登记一次性的设置监听, 任一项打开即创建单例 (此时不再等 1.2 秒的冷启动延迟); 改关时由单例自己的监听停止 shell 兜底监听 (与 P1.5 的启停一致). 验收: XQ-AT72 上宿主启动时两项开关为关, 打开后不重启即可用音量键停止脚本 (`regression.py` 新增 (10)), 关闭后服务下的 getevent 进程结束; JVM 单测覆盖创建条件. (进度 2026-10-23: 代码 (`VolumeControlSettings`, `GlobalKeyObserver.initIfNeeded`) 与 `VolumeControlSettingsTest` 7 例已完成并本地提交, `:app:assembleAppDebug` 通过. 2026-10-23 验收: XQ-AT72 (10) PASS, 两项都关时冷启动服务下 getevent 0, 打开 "运行时音量键控制" 后 2.0 s 出现 1 个 (日志确认由开关触发创建单例), 音量加键 (uhid) 0.62 s 停止脚本, 关闭后 0.1 s 内回到 0; 附录 B.5.)
 - [x] P3.2 `TouchRecorder(Context)` 自建的 `InputEventObserver` 在录制开始时启动, 录制停止时回收 (结束其 getevent 进程, 不再等宿主死亡); 复用同一 `TouchRecorder` 的下一次录制重新启动. `TouchRecorder` 由 `GlobalActionRecorder` 进程级单例持有, 不归属任何 `ScriptRuntime`, 不登记 `RuntimeResourceScope`. 验收: 录制一次并结束后服务下无 getevent, `ps -A` 无残留 getevent / sh (`regression.py` 新增 (11)); `StaticReferenceGuardTest` 通过; 不改录制功能的行为. (进度 2026-10-23: 代码已完成并本地提交, `StaticReferenceGuardTest` / `UserServiceLifecycleTest` 通过. 2026-10-23 验收: XQ-AT72 (11) PASS, 两轮录制中服务下 getevent 为基线 + 1 (1 -> 2, 基线是音量键控制自己的那个), 丢弃录制后 0.1-0.2 s 回到 1, 结束后用户服务 0, stray 0; 附录 B.5.)
 - [x] P3.3 Q5 补跑 (D14): 在 `../COMMON_AGENTS.md` 可用测试设备里找 Shizuku 以 shell 身份运行且 shell 能写 `/dev/input` 的设备 (先只读检查 `getenforce` 与 `ls -l /dev/input`, 以 shell 身份 `test -w` 试探; 不改 SELinux, 不 root), 按锁表登记后装当前 HEAD 的 debug 构建跑 `regression.py --items 8`, 结果入 `evidence/` 并回填附录 B; 测后装回原包. 没有任何设备满足时不绕过, 登记待决 Q8 (选项: 回到 Q5 的 A / 维护者另备设备) 并汇报. (2026-10-23 完成: 6 台真机都不满足 (附录 B.4), 改用临时 AVD (Android 9, Shizuku 以 shell 身份, shell 可写 2 个节点) 补跑: (8) FAIL, 根因是 `InputDevices.touchDeviceId` 经 Shizuku 读 `/proc/bus/input/devices`, 而 shell 身份读不了它, 触摸屏节点为空; 预设节点缓存的对照为 PASS. 6.7.0 起即有的缺陷, 登记 Q8.)
 - [x] P3.4 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段 fix 为 P3.1 / P3.2 各加 1 条 (或按 AGENTS.md 粒度合并), 只生成 zh-Hans 的 markdown 且只写入本条; 该文件有他人未提交改动, 只暂存自己的 hunk. (2026-10-23 完成: 两条独立的 fix 紧接 issue #474 那条; 不带 issue 引用, 两处都不是 #474 报告的现象. 只重渲染 zh-Hans 的 CHANGELOG-zh-Hans.md / CHANGELOG.md / README-zh-Hans.md / README.md, 其他 9 种语言未写入, 待维护者同步翻译.)
 - [x] P3.5 回归与收尾: XQ-AT72 跑 `zombie_probe.py --mode force-stop --rounds 20` 与 `regression.py` 的 (9) 及新用例 (10) / (11), 全部 0 残留 / PASS; G8441 只在改动触及 root 路径时复跑; 本文勾选与附录回填, 发布门行按需更新 (只追加自己的 hunk), 本地提交, 看板追加结论. (2026-10-23 完成: XQ-AT72 装本主题 P3 构建 debug 5935, force-stop 20 轮残留 0/20 (host-died 20, stray 0), (9) / (10) / (11) 全部 PASS (附录 B.1 / B.5); 测后装回原包 5835 (md5 d4994f77). G8441 不复跑: P3.1 只改单例的创建时机, P3.2 只在录制停止时调用已有的 `InputEventObserver.recycle`, Root `Shell` 路径的代码未改, 且 G8441 的 Shizuku 为 root 身份, 观察器走 Shizuku 分支, 复跑也覆盖不到 Root `Shell`. AVD 预检时 (11) 暴露两处脚本问题并已修正: 宿主刚启动时开始录制在主线程上等待用户服务超过 10 s (见 Q8), 基线在音量键控制的观察器启动前取到; 现在脚本先等用户服务, 取稳定后的基线, 主线程每步最多等 30 s 并记录耗时.)
+- [ ] P3.6 触摸屏节点解析与主线程等待 (D17 / D18, Q8 / Q8b): `InputDevices.touchDeviceId` 读不到 `/proc/bus/input/devices` 时改用 `getevent -pl` 按设备名找节点, 解析成功即缓存, 两者都失败时返回不可用且不缓存; 主线程上不等待 Shizuku 用户服务 (未连上时快速失败并提示, 不再等 10 s + 重绑 10 s). 验收: JVM 单测覆盖解析三种情况 (`/proc` 成功; `/proc` 被拒 + `getevent -pl` 成功; 两者都失败); AVD `shizukuoom_p33_api28` 清掉预设缓存后不预设复跑 `regression.py --items 8` PASS; 宿主启动后立即开始录制时主线程不阻塞超过 1 s (`regression.py` 新用例); changelog zh-Hans 6.8.0 段 fix 1 条; XQ-AT72 复跑 T6 (9) / (10) / (11) 与 force-stop 20 轮无回归; 发布门 Shizuku 行与附录 B.4 追加结果; 完成后删除临时 AVD. (进度 2026-10-23: 代码 (`InputDevices.touchDeviceId` 的 `getevent -pl` 回退, `RootAutomatorEngine` 只缓存解析成功的节点, `WrappedShizuku` 主线程上不等待也不重绑) 与 `InputDevicesTouchDeviceTest` 4 例已完成, `:app:assembleAppDebug` 通过; `regression.py` 新增 (12). 实现中的两处发现: Shizuku 13.1.5 的 `ShizukuServiceConnection.connected` 把 `onServiceConnected` 投递到主线程, 所以主线程上等待用户服务连上必然等满超时, 只能不等; 经用户服务执行命令时 `AbstractShell.Result` 在标准错误非空时把退出码 0 改为 1, 而 `getevent -p` 总会为 `/dev/input/mice` 输出一行错误, 所以按标准输出是否为空判断 (AVD 首跑因按退出码判断而 (8) / (12) FAIL, 改后 PASS). AVD 验收: 缓存为 -1 时 (8) PASS (节点 event1 由 `getevent -pl` 解析并缓存), (12) PASS (用户服务未连上时主线程每步 [462, 23] ms, 之后在非主线程 443 ms 解析出 event1); 附录 B.4.)
 
 ---
 
@@ -169,6 +172,8 @@
 | D14 | 2026-10-23 06:50 (附录 C Q5) | T6 (8) RootAutomator 在 XQ-AT72 不可测 | 选 B: 换机补跑 (P3.3) |
 | D15 | 2026-10-23 06:50 (附录 C Q6) | P1 的两处附带发现 | 选 B: 本主题新增 P3.1 / P3.2 修掉 |
 | D16 | 2026-10-23 06:50 (附录 C Q7) | inrt 数据库降级崩溃循环 | 选 C: 转独立主题 db-downgrade, 本主题只在 1.5 记录 |
+| D17 | 2026-10-23 10:45 (附录 C Q8) | RootAutomator 的 Shizuku 后端找不到触摸屏节点 | 选 A: 新增 P3.6, `/proc` 读不到时改用 `getevent -pl`, 成功即缓存 |
+| D18 | 2026-10-23 10:45 (附录 C Q8b) | 开始录制时主线程等待用户服务 (ANR 风险) | 选 A: 并入 P3.6, 主线程上不阻塞等待, 失败快速返回并提示 |
 | P1.3 处置 | 2026-10-23 (子会话 shizuku-oom-p1) | 宿主侧 10 秒超时重绑 (`connectedService`) | 不改代码. 理由: (1) P0.3(d) 在 G8441 自然复现, 被移除记录的旧进程交付 binder 失败后由启动器 `System.exit(1)` 退出, 无永久残留 (B.2); (2) 若旧进程已交付 binder 但宿主已换绑新服务, 它收不到宿主附着, 由 P1.2 的 30 秒看门狗 (`no-host-attached`) 结束; 已附着的则随宿主死亡 (`host-died`) 结束; (3) 改为更长的等待会让首次冷加载慢于 10 秒的设备 (G8441 约 19 秒) 多等, 收益只是少一个短暂并存的进程 |
 
 ## 附录 B 证据与数字 (P0 回填, 之后每阶段追加一列)
@@ -231,6 +236,13 @@
 
 根因: `RootAutomator` 的设备路径经 `RootAutomatorEngine.getDeviceNameOrPath` / `InputDevices.touchDeviceId` 解析, 后者经 Root 或 Shizuku 执行 `cat /proc/bus/input/devices` 按 `InputDevice` 名称找 `eventN`. shell 身份读不了该文件 (6 台真机与 AVD 均为 Permission denied), 而 `getevent -pl` 在这些设备上都能列出节点与名称; 解析结果为空时 `canUseShizukuBackend` 直接判定不可用. 该路径自 6.6.0 (读取 `/proc`) / 6.7.0 (`62235ba07` 加入 Shizuku 后端) 未改, 与本主题的改动无关. 处理方式见附录 C Q8.
 
+P3.6 复跑 (D17 / D18, debug 5935 含 P3.6 改动; 报告 `regression-20261023-p3-6-avd`):
+
+| 运行 | 预置 | 结果 | 结束后残留 |
+| --- | --- | --- | --- |
+| p3-6-avd (8) | 无 (运行前核对缓存为 -1) | PASS: RootAutomator ok (Shizuku 后端, sendSync + exit), 节点 event1 由 `getevent -pl` 解析并写入缓存; 其余 4 项 ok | 用户服务 0, stray 0 |
+| p3-6-avd (12) | 缓存临时设为 -1, 测后还原 | PASS: 强停后冷启动, 用户服务未连上时 `recorder.start` / `discard` 在主线程上各 462 / 23 ms (上限 1000 ms, 修复前为 10 s + 重绑 10 s), 录制状态 RECORDING -> STOPPED; 用户服务连上后在非主线程 443 ms 解析出 event1 并缓存 | 同上 |
+
 ### B.5 T6 (9) / (10) / (11) (P3.5, debug 5935 含 `61dc4f7cf`)
 
 报告 `regression-20261023-p3` (两列). AVD 一列是预检, 不在验收要求内; 两台的两项音量键设置原本都为开, 脚本在 (10) 中临时改关并还原.
@@ -255,7 +267,7 @@
 | Q5 | T6 (8) 的 RootAutomator 冒烟在 XQ-AT72 上不可测: 该机 (Android 12) SELinux 不允许 shell 身份写任何 `/dev/input` 节点, RootAutomator 的 Shizuku 后端 (自 6.7.0 未改, P1 未触及) 如实报告 "cannot access a writable input device"; G8441 为 root 身份, 不跑 (8). A (推荐, 已先行): 记为不适用, P2.1 视为通过 ((8) 其余 4 个调用点已通过); 返工: 无. B: 另找一台 Shizuku 以 shell 身份运行且 shell 可写 `/dev/input` 的设备 (多为 Android 9-11 的非 root 机) 补跑 `regression.py --items 8`; 约 20 分钟, 需维护者在手机上授权 Shizuku | P2.1, 发布门 | 已决 (2026-10-23 06:50, 维护者选 B, 记为 D14, 由 P3.3 执行) |
 | Q6 | (调度会话出题) P1 附带发现两处 (1.5 末条) 怎么处理: 宿主启动后才打开 "音量键控制" 时无人创建 `GlobalKeyObserver` (要重启宿主); `TouchRecorder(Context)` 自建的 `InputEventObserver` 自 6.6.0 起从不回收. A (推荐): 只记录. B: 本主题新增 P3 修掉. C: 转 memory 主题 | 新增 P3.1 / P3.2 / P3.4 / P3.5, changelog fix | 已决 (2026-10-23 06:50, 维护者选 B, 记为 D15) |
 | Q7 | (调度会话出题) P0 附带发现 `org.autojs.autojs6.inrt` 被 Shizuku 服务端重启唤醒后数据库 4 -> 3 降级崩溃循环 (1.5). A (推荐): 不处理只记录. B: 卸掉 XQ-AT72 上的 inrt. C: 立项排查降级崩溃 | 本主题只记录 | 已决 (2026-10-23 06:50, 维护者选 C, 记为 D16; 新主题 db-downgrade 由维护者立项) |
-| Q8 | (shizuku-oom-p3 登记) P3.3 补跑结果 (附录 B.4): 真机都不满足, 临时 AVD (Android 9, Shizuku shell 身份, shell 可写触摸屏节点) 上 (8) 仍 FAIL. 原因不在 Shizuku 后端: `InputDevices.touchDeviceId` 读不到 `/proc/bus/input/devices` (shell 身份 Permission denied), 触摸屏节点为空; 预设节点缓存后 (8) PASS. 所以 6.7.0 起 RootAutomator 的 Shizuku 后端只在缓存已有节点号 (例如曾经用 Root 解析过) 时可用, 只用 Shizuku 的用户 (Android 9 及以下, 或 SELinux 放开 `/dev/input` 的机型) 实例化总是失败. 同一缺陷的另一面: 解析失败不写缓存, 所以每次开始录制 (`InputEventToAutoFileRecorder` / `InputEventToRootAutomatorRecorder` 的构造函数) 都在主线程上经 Shizuku 再执行一次该命令, 宿主刚启动, 用户服务未连上时主线程等待 10 s (重绑后再 10 s); AVD 上 (11) 首跑即因此超过 10 s (`tools/shizuku-oom/README.md` (11)), 用户可能遇到 ANR. A (推荐, 未先行: 新增条目与源码改动需拍板, 同 Q6): 本主题新增 P3.6, `/proc` 读不到时改用 `getevent -pl` 按设备名找节点 (只改 `InputDevices.touchDeviceId` 的解析, 解析成功即缓存, 之后开始录制不再在主线程上执行命令; JVM 单测覆盖输出解析; 验收: AVD 不预设缓存跑 (8) PASS, XQ-AT72 仍如实报告不可写, G8441 Root 路径不变), changelog fix 1 条; 约 0.5 个会话, 本会话的 AVD (已授权 Shizuku) 保留到拍板, 可直接复测. B: 只记录, P3.3 以对照实验为结论 (后端可用, 节点解析为既有缺陷), 修复转后续版本或独立主题; 返工: 无, 选 B 后删除 AVD. C: 维护者另备真机: 修复前真机结果与 AVD 相同 (FAIL), 只在 A 之后作为补充覆盖才有意义; 约 20 分钟, 需维护者在手机上授权 Shizuku | P3.3, (新) P3.6, 发布门, changelog | 待决 (2026-10-23) |
+| Q8 | (shizuku-oom-p3 登记) P3.3 补跑结果 (附录 B.4): 真机都不满足, 临时 AVD (Android 9, Shizuku shell 身份, shell 可写触摸屏节点) 上 (8) 仍 FAIL. 原因不在 Shizuku 后端: `InputDevices.touchDeviceId` 读不到 `/proc/bus/input/devices` (shell 身份 Permission denied), 触摸屏节点为空; 预设节点缓存后 (8) PASS. 所以 6.7.0 起 RootAutomator 的 Shizuku 后端只在缓存已有节点号 (例如曾经用 Root 解析过) 时可用, 只用 Shizuku 的用户 (Android 9 及以下, 或 SELinux 放开 `/dev/input` 的机型) 实例化总是失败. 同一缺陷的另一面: 解析失败不写缓存, 所以每次开始录制 (`InputEventToAutoFileRecorder` / `InputEventToRootAutomatorRecorder` 的构造函数) 都在主线程上经 Shizuku 再执行一次该命令, 宿主刚启动, 用户服务未连上时主线程等待 10 s (重绑后再 10 s); AVD 上 (11) 首跑即因此超过 10 s (`tools/shizuku-oom/README.md` (11)), 用户可能遇到 ANR. A (推荐, 未先行: 新增条目与源码改动需拍板, 同 Q6): 本主题新增 P3.6, `/proc` 读不到时改用 `getevent -pl` 按设备名找节点 (只改 `InputDevices.touchDeviceId` 的解析, 解析成功即缓存, 之后开始录制不再在主线程上执行命令; JVM 单测覆盖输出解析; 验收: AVD 不预设缓存跑 (8) PASS, XQ-AT72 仍如实报告不可写, G8441 Root 路径不变), changelog fix 1 条; 约 0.5 个会话, 本会话的 AVD (已授权 Shizuku) 保留到拍板, 可直接复测. B: 只记录, P3.3 以对照实验为结论 (后端可用, 节点解析为既有缺陷), 修复转后续版本或独立主题; 返工: 无, 选 B 后删除 AVD. C: 维护者另备真机: 修复前真机结果与 AVD 相同 (FAIL), 只在 A 之后作为补充覆盖才有意义; 约 20 分钟, 需维护者在手机上授权 Shizuku | P3.3, (新) P3.6, 发布门, changelog | 已决 (2026-10-23 10:45, 维护者选 A, 记为 D17; 同源的 Q8b (主线程等待用户服务的 ANR 风险) 也选 A, 记为 D18, 并入 P3.6) |
 
 ## 附录 D 文件地图
 
@@ -278,3 +290,8 @@
 | `app/src/main/java/org/autojs/autojs/event/GlobalKeyObserver.java` | `initIfNeeded` 在两项都关闭时登记订阅 | P3.1 |
 | `app/src/main/java/org/autojs/autojs/core/record/inputevent/TouchRecorder.java` | 自建观察器随录制开始 / 结束启停 | P3.2 |
 | `tools/shizuku-oom/regression.py` (10) / (11) | 运行中开启音量键控制, 录制后回收 getevent | P3.1 / P3.2 |
+| `app/src/main/java/org/autojs/autojs/core/inputevent/InputDevices.kt` | 触摸屏节点解析: `/proc` 读不到时用 `getevent -pl`, 按标准输出判断 | P3.6 (D17) |
+| `app/src/main/java/org/autojs/autojs/engine/RootAutomatorEngine.kt` | 只缓存解析成功的触摸屏节点 | P3.6 (D17) |
+| `app/src/main/java/org/autojs/autojs/runtime/api/WrappedShizuku.kt` | 主线程上不等待用户服务, 也不重绑 | P3.6 (D18) |
+| `app/src/test/java/org/autojs/autojs/core/inputevent/InputDevicesTouchDeviceTest.kt` | 解析三种情况与缓存 | P3.6 |
+| `tools/shizuku-oom/regression.py` (12) | 冷启动后立即录制的主线程耗时, 用户服务连上后解析并缓存节点 | P3.6 |

@@ -27,6 +27,10 @@ Runs the T6 items on one device through the host already installed there (a debu
      host, and a volume up key stops a script; turning both off ends it. The original settings are put back.
  11  Recording (P3.2): two recordings through GlobalActionRecorder (started and discarded on the main thread, no dialog)
      each add one getevent under the user service while recording, and it ends when the recording stops.
+ 12  Recording right after a cold start (P3.6, D17 / D18): with the touch screen node cache cleared, starting and discarding
+     a recording on the main thread before the user service connects takes no more than 1 s per step; off the main thread,
+     once the service is up, the node resolves (getevent -pl where /proc/bus/input/devices is denied) and is cached. The
+     original cache value is put back.
 
 After the items the host is force-stopped once more and the user service processes and stray sh / getevent / sleep
 processes (new since the start, reparented to init) are counted; both must be 0.
@@ -34,7 +38,7 @@ processes (new since the start, reparented to init) are counted; both must be 0.
 Scripts start through RunIntentActivity like zombie_probe.py; the instrumented items run `am instrument` against the test
 package already installed (org.autojs.autojs6.test, built by :app:assembleAppDebugAndroidTest; back up the original one
 first). `am instrument` and the force-stops make Android drop the host from enabled_accessibility_services; entries the
-host had before are put back at the end, and items 5, 7, 8 and 10 put back the settings and volumes they change. The script
+host had before are put back at the end, and items 5, 7, 8, 10 and 12 put back the settings and volumes they change. The script
 never taps the screen. Temporary files live in /sdcard/Download/aj6-shizuku-oom/ and are removed at the end.
 
 Output: <report-dir>/regression-<model>-<versionCode>-<yyyyMMdd>[-<label>].json, and regression-<yyyyMMdd>[-<label>].md
@@ -61,7 +65,7 @@ TEST_PACKAGE = "org.autojs.autojs6.test"
 RUNNER = "androidx.test.runner.AndroidJUnitRunner"
 USHER = "org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
 SETTINGS_PACKAGE = "com.android.settings"
-ITEMS = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
+ITEMS = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12")
 SERVER_UIDS = {"shell": 2000, "root": 0}
 # GlobalKeyObserver's log line when a volume control setting turned on creates it (P3.1). zh-CN: 打开设置时创建观察器的日志.
 CREATED_ON_TURN_ON = "volume control turned on, creating the observer"
@@ -238,6 +242,50 @@ for (var i = 0; i < ROUNDS; i++) {
     out.states.push(Number(recorder.getState()));
     step('stopped ' + i);
 }
+"""
+
+# The cached touch screen node (MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE, -1 for none); when VALUE is given, written
+# with commit first. zh-CN: 缓存的触摸屏节点 (无缓存为 -1); 给出 VALUE 时先以 commit 写入.
+JS_TOUCH_DEVICE_CACHE = r"""
+var m = org.autojs.autojs.core.pref.keys.MiscStateKeys;
+var k = m.ROOT_AUTOMATOR_TOUCH_DEVICE || m.INSTANCE.ROOT_AUTOMATOR_TOUCH_DEVICE;
+out.before = Number(k.get());
+if (VALUE !== null) k.getSettingsStore().put(k.getName(), java.lang.Integer.valueOf(VALUE), true);
+out.after = Number(k.get());
+"""
+
+# Right after a cold start, before the user service connects: starts and discards a recording on the main thread, which
+# resolves the touch screen node there (D18: no wait for the service). Then, off the main thread, waits for the service
+# and resolves the node again (D17: getevent -pl where /proc/bus/input/devices is denied; a resolved node is cached).
+# zh-CN: 冷启动后用户服务连上之前, 在主线程上开始并丢弃一次录制, 其间在主线程上解析触摸屏节点 (D18: 不等待用户服务);
+# 之后在非主线程上等待用户服务并再次解析 (D17: /proc 被拒时用 getevent -pl; 解析成功即缓存).
+JS_RECORD_COLD = r"""
+var shizukuApi = org.autojs.autojs.runtime.api.WrappedShizuku.INSTANCE;
+var m = org.autojs.autojs.core.pref.keys.MiscStateKeys;
+var k = m.ROOT_AUTOMATOR_TOUCH_DEVICE || m.INSTANCE.ROOT_AUTOMATOR_TOUCH_DEVICE;
+var recorder = org.autojs.autojs.core.record.GlobalActionRecorder.getSingleton(context);
+var handler = new android.os.Handler(android.os.Looper.getMainLooper());
+out.mainMs = [];
+function onMain(f) {
+    var done = false, error = null, t0 = Date.now();
+    handler.post(new java.lang.Runnable({ run: function () { try { f(); } catch (e) { error = String(e); } done = true; } }));
+    while (!done && Date.now() - t0 < 30000) sleep(20);
+    if (error) throw error;
+    if (!done) throw 'the main thread did not run the step within 30 s';
+    out.mainMs.push(Date.now() - t0);
+}
+out.serviceAtStart = shizukuApi.hasService();
+out.cachedAtStart = Number(k.get());
+onMain(function () { recorder.start(); });
+out.states = [Number(recorder.getState())];
+onMain(function () { recorder.discard(); });
+out.states.push(Number(recorder.getState()));
+out.serviceAfterMain = shizukuApi.hasService();
+shizukuApi.execCommand(context, 'true');
+var t0 = Date.now();
+out.resolved = Number(org.autojs.autojs.engine.RootAutomatorEngine.Companion.getTouchDeviceId(context));
+out.resolveMs = Date.now() - t0;
+out.cached = Number(k.get());
 """
 
 
@@ -613,13 +661,40 @@ class Regression:
         return self.result("11", ok, note, baseline=baseline, steps=steps, recorderStates=out.get("states"),
                            mainThreadMs=out.get("mainMs"))
 
+    def touch_device_cache(self, value=None):
+        """The cached touch screen node before the write of [value]. zh-CN: 写入 [value] 前缓存的触摸屏节点."""
+        _, out = self.run_js("touch-device", JS_TOUCH_DEVICE_CACHE, constants={"VALUE": value})
+        if out.get("error") or (value is not None and out.get("after") != value):
+            raise ProbeError(f"touch device cache: {out.get('error') or out.get('after')}")
+        return out["before"]
+
+    def item12(self):
+        original = self.touch_device_cache(-1)
+        try:
+            self.probe.force_stop()
+            time.sleep(self.args.settle)
+            _, out = self.run_js("record-cold", JS_RECORD_COLD)
+        finally:
+            self.touch_device_cache(original)
+            self.probe.force_stop()
+        main_ms = max(out.get("mainMs") or [0])
+        ok = (not out.get("error") and len(out.get("mainMs") or []) == 2 and main_ms <= 1000 and out.get("states") == [1, 3]
+              and out.get("resolved", -1) >= 0 and out.get("cached") == out.get("resolved"))
+        note = out.get("error") or (
+            f"cold start, user service connected {out.get('serviceAtStart')} at the start / {out.get('serviceAfterMain')} after "
+            f"the main thread steps, main thread per step {out.get('mainMs')} ms (limit 1000), then off the main thread node "
+            f"event{out.get('resolved')} in {out.get('resolveMs')} ms, cached {out.get('cached')}, cache {original} put back")
+        return self.result("12", ok, note, mainThreadMs=out.get("mainMs"), serviceAtStart=out.get("serviceAtStart"),
+                           resolved=out.get("resolved"), resolveMs=out.get("resolveMs"), cached=out.get("cached"),
+                           cacheRestored=original)
+
 
 def items_type(value):
     if value == "all":
         return None
     chosen = [v.strip() for v in value.split(",") if v.strip()]
     if not chosen or any(v not in ITEMS for v in chosen):
-        raise argparse.ArgumentTypeError("--items takes 'all' or a comma-separated list of 1-11")
+        raise argparse.ArgumentTypeError("--items takes 'all' or a comma-separated list of 1-12")
     return chosen
 
 
@@ -667,7 +742,7 @@ def write_summary(out_dir, date, label):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("--items", type=items_type, default=None, help="'all' (default: 1-11, item 8 only for a shell server) or e.g. 1,2,3")
+    parser.add_argument("--items", type=items_type, default=None, help="'all' (default: 1-12, item 8 only for a shell server) or e.g. 1,2,3")
     parser.add_argument("--report-dir", default="docs/shizuku-oom/evidence", help="relative paths are resolved against the repository root")
     parser.add_argument("--label", help="suffix of the report names, e.g. p1")
     parser.add_argument("--package", default="org.autojs.autojs6")
