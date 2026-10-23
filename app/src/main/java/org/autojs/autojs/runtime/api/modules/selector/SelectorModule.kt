@@ -40,13 +40,14 @@ import java.lang.reflect.InvocationTargetException
  * Arguments follow the documented forms (T4): an argument count or a root, widget, compass or callback of a type that no
  * form of `pickup` / `detect` accepts is a TypeError, and so is a call of a global selector function whose arguments match
  * no condition or method overload (D10; the current module threw IllegalArgumentException after a console warning). The
- * selector given to `pickup` and the result types are still read by the current parsers (appendix C Q65, appendix E "P3.3").
+ * selector given to `pickup` and the result types are still read by the current parsers (outside appendix C Q65, see Q66;
+ * appendix E "P3.3").
  *
  * zh-CN: 新脚本模块层上的 selector 模块 (P3.3): 可调用 (selector() 返回新的 UiSelector); pickup, detect, existsAll 与 existsOne 只在全局对象上;
  * SelectorGlobals.names 中的选择器条件, 查询与节点动作作为全局函数 (text('a'), findOne(3000), scrollForward()), 每次从新的选择器开始. 同现有模块, install 钩子只定义
  * 全局对象上尚未存在的名称 (所以 click, setText 等仍是 automator 的), 模块名称只读. 参数按文档形式 (T4): pickup / detect 的任何形式都不接受的参数个数或 root,
  * widget, compass, callback 类型为 TypeError; 全局选择器函数的参数与任何条件或方法重载都不匹配时也为 TypeError (D10; 现有模块在控制台警告后抛 IllegalArgumentException).
- * 传给 pickup 的选择器与结果类型仍由现有解析器读取 (附录 C Q65, 附录 E "P3.3").
+ * 传给 pickup 的选择器与结果类型仍由现有解析器读取 (不在附录 C Q65 的范围内, 见 Q66; 附录 E "P3.3").
  */
 @ScriptModule(name = "selector", attributes = ScriptAttributes.PERMANENT or ScriptAttributes.READONLY)
 class SelectorModule(private val runtime: ScriptRuntime) {

@@ -38,12 +38,12 @@ import org.mozilla.javascript.Wrapper
  * Arguments follow the real signatures (T4): a count or a top-level type the documented signatures do not accept is a
  * TypeError, an unknown mode or flag a RangeError (D10; the current module threw IllegalArgumentException). The fields of
  * the options of `registerEvent`, `setWindowFilter`, `findWindows` and `dump` are still checked by the current parsers
- * (appendix C Q65, appendix E "P3.3").
+ * (outside appendix C Q65, see Q66; appendix E "P3.3").
  *
  * zh-CN: 新脚本模块层上的 auto 模块 (P3.3): 无障碍服务 (可调用, auto(mode?, forceRestart?)), 其状态, 事件, 窗口与诊断, 以及 auto.wait (flow 的异步等待, D1),
  * 另有现有模块的 8 个 getter. 实际工作仍由现有模块的函数完成 (augment/automator/Auto, P5.2 迁出). 参数按真实签名 (T4): 文档签名不接受的个数或顶层类型为 TypeError,
  * 未知的模式或标志为 RangeError (D10; 现有模块抛 IllegalArgumentException). registerEvent, setWindowFilter, findWindows 与 dump 的选项字段仍由现有解析器检查
- * (附录 C Q65, 附录 E "P3.3").
+ * (不在附录 C Q65 的范围内, 见 Q66; 附录 E "P3.3").
  */
 @ScriptModule(name = "auto")
 class AutoModule(private val runtime: ScriptRuntime) {

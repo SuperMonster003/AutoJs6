@@ -125,6 +125,99 @@ class AutomatorModulesTest {
         )
     )
 
+    /**
+     * Points, point lists, strokes and indexes (appendix C Q65 (2)): what the current module refused, as a TypeError or
+     * RangeError. The current module may act on some of them first, so the device runs them with the switch on.
+     */
+    @Test
+    fun pointArguments() = checkFields(
+        listOf(
+            "click([1])" to "throws TypeError",
+            "click([])" to "throws TypeError",
+            "click([1, 2147483648])" to "throws RangeError",
+            "click([1, NaN])" to "throws RangeError",
+            "click({ x: 1 })" to "throws TypeError",
+            "click({ x: 'a', y: 1 })" to "throws TypeError",
+            "click({ x: 1, y: Infinity })" to "throws RangeError",
+            "click(1, 2147483648)" to "throws RangeError",
+            "click('a', 2147483648)" to "throws RangeError",
+            "click(1, 2, 3, Infinity)" to "throws RangeError",
+            "longClick({ x: NaN, y: 1 })" to "throws RangeError",
+            "press([1])" to "throws TypeError",
+            "press([1, 'a'])" to "throws TypeError",
+            "press([1, 2], 2147483648)" to "throws RangeError",
+            "press(100, [1])" to "throws TypeError",
+            "press(100, [1, null])" to "throws TypeError",
+            "press(1, 2, 'a')" to "throws TypeError",
+            "press([[1, null], 100])" to "throws TypeError",
+            "swipe(100, [1, 2, 3])" to "throws TypeError",
+            "swipe(100, [1, 2])" to "throws TypeError",
+            "swipe(100, [[1, 2]])" to "throws TypeError",
+            "swipe(100, [[1, 2], []])" to "throws TypeError",
+            "swipe(100, [[1, 2], [3, 4, 5]])" to "throws TypeError",
+            "swipe(100, [[1, 2], 'a'])" to "throws TypeError",
+            "swipe(100, [[1, NaN], [3, 4]])" to "throws RangeError",
+            "swipe(100, [1, 'a'], [3, 4])" to "throws TypeError",
+            "swipe([1, 2], [3, 4], 2147483648)" to "throws RangeError",
+            "swipe(1, 2, 3, 4, 'a')" to "throws TypeError",
+            "gesture(100, [1, 2, 3])" to "throws TypeError",
+            "gesture(100, [[1, 2], [3, 'a']])" to "throws TypeError",
+            "gesture(100, [1, 2], [])" to "throws TypeError",
+            "gesture(Infinity, [1, 2])" to "throws RangeError",
+            "gesture(100, 1, 2, 3)" to "throws TypeError",
+            "gestureAsync(100, [1, 2], 3)" to "throws TypeError",
+            "gestures([100])" to "throws TypeError",
+            "gestures([0, 100])" to "throws TypeError",
+            "gestures([100, [1]])" to "throws TypeError",
+            "gestures([-1, 100, [1, 2]])" to "throws RangeError",
+            "gestures([100, [1, 2], 'a'])" to "throws TypeError",
+            "gestures([100, [1, 2147483648]])" to "throws RangeError",
+            "gestures(['a', [1, 2]])" to "throws TypeError",
+            "gestures([100, [1, 2]], [1, 'a', [1, 2]])" to "throws TypeError",
+            "scrollDown(2147483648)" to "throws RangeError",
+            "scrollUp('a', 2147483648)" to "throws RangeError",
+            "input(2147483648, 'a')" to "throws RangeError",
+            "automator.waitForService(Infinity)" to "throws RangeError",
+            "automator.waitForService(1e20)" to "throws RangeError",
+        )
+    )
+
+    /** The options of the synchronous toolkit and the event waits (appendix C Q65 (2)), as [pointArguments]. */
+    @Test
+    fun toolkitOptionFields() = checkFields(
+        listOf(
+            "smartClick('aj6-none', { nope: 1 })" to "throws TypeError",
+            "clickAny([])" to "throws TypeError",
+            "dismissPopups(['aj6-none'], { watch: true, onDismissed: 1 })" to "throws TypeError",
+            "dismissPopups(['aj6-none'], { onError: function () {} })" to "throws TypeError",
+            "backUntil('aj6-none', { interval: 0 })" to "throws RangeError",
+            "retry(function () {}, { backoff: 0.5 })" to "throws RangeError",
+            "retry(function () {}, 1.5)" to "throws RangeError",
+            "launchAndWait('aj6.none', { nope: 1 })" to "throws TypeError",
+            "collectList(null, 'aj6-none', { direction: 'x' })" to "throws RangeError",
+            "toggle('aj6-none', true, { click: 1 })" to "throws TypeError",
+            "waitForIdle({ eventTypes: 'nope' })" to "throws RangeError",
+            "waitForEvent('click', { text: 1 })" to "throws TypeError",
+            "waitForToast({ text: 1 })" to "throws TypeError",
+            "waitForNotification({ nope: 1 })" to "throws TypeError",
+        )
+    )
+
+    /**
+     * JVM only (they act on a device): what the current module accepts passes the new checks, numeric strings and the
+     * lenient point list forms included (appendix C Q65 (2)); without the service the host then fails otherwise.
+     */
+    @Test
+    fun acceptedArguments() = RuntimeModulesFixture.check(
+        rhino, listOf(
+            "click('10', '20')", "click([1, 'a'])", "click({ x: '1', y: 2 })", "click(1, 2, '3', 4)",
+            "press([[1, 2], 100])", "press(1, '2', 3)",
+            "swipe('1', '2', 3, 4, '5')", "swipe(100, [[1, 2], [3]])", "swipe(100, [['1', 2], [3, 4]])", "swipe(100, [1, Infinity], [3, 4])",
+            "gesture('100', [1, 2], [3])", "gesture(100, [[[1, 2], [3, 4]]])", "gestures([0, 100, [1, 2], [3, 4, 5]])",
+            "scrollDown('1')", "input('1', 'a')",
+        ).map(::passes)
+    )
+
     /** JVM only: under the current module some of these change the mode, start the service or wait for it on a device. */
     @Test
     fun autoArguments() = RuntimeModulesFixture.check(
@@ -216,6 +309,15 @@ class AutomatorModulesTest {
         )
     )
 
+    private fun checkFields(cases: List<Pair<String, String>>) {
+        RuntimeModulesFixture.check(rhino, cases)
+        RuntimeModulesFixture.exportForDevice(EXPORT_FIELDS, cases)
+    }
+
+    /** [expression] is not refused by a TypeError or RangeError (whatever the host does after the checks). */
+    private fun passes(expression: String) =
+        "(function () { try { $expression; } catch (e) { if (e instanceof TypeError || e instanceof RangeError) return e.name + ': ' + e.message; } return 'passed'; })()" to "\"passed\""
+
     private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
         val runtime = side.ktRuntime
         RuntimeModulesFixture.prepareHost(runtime)
@@ -236,6 +338,7 @@ class AutomatorModulesTest {
 
     private companion object {
         const val EXPORT = "AutomatorModulesTest"
+        const val EXPORT_FIELDS = "AutomatorFieldsTest"
         val MODULES = listOf("auto", "automator", "RootAutomator")
         val AUTO_NAMES = listOf("auto", "\$auto")
         val AUTO_GETTERS = listOf("service", "services", "windows", "root", "rootInActiveWindow", "windowRoots", "stats", "state")

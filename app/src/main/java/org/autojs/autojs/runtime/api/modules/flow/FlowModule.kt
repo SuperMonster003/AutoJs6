@@ -26,16 +26,18 @@ import org.mozilla.javascript.ScriptableObject
  * `any`, `defaults` / `trace` / `cancelAll` and the getters `Flow` / `pending` / `workers`. The executor, the steps and the
  * returned flow objects are the current ones (`augment/flow`, to be moved out by P5.2).
  *
- * Arguments are checked before the current parser runs ([FlowArgs], [ToolkitArgs]): a count or a top-level shape the
- * documented signatures do not accept is a TypeError, a timeout, interval or delay that is NaN or negative a RangeError
- * (D10; the current module threw IllegalArgumentException). The fields of an options object and the grammar of a
- * condition or target are still checked by the current parser (appendix C Q65, appendix E "P3.3").
+ * Arguments are checked before the current parser reads them again ([FlowArgs], [FlowOptions], [ToolkitArgs]; appendix C
+ * Q65 (2)): the count and the shape of every argument, the fields of the options objects and the kind of a condition or
+ * target, accepting what the current parser accepts. A shape, type, key or field it does not accept is a TypeError, a
+ * number out of its range (NaN, negative, infinite where a limit is needed) or a name outside the documented ones a
+ * RangeError (D10; the current parser threw IllegalArgumentException).
  *
  * zh-CN: 新脚本模块层上的 flow 模块 (P3.3): 现有模块的异步链式等待 (可调用, 同 flow.wait), 名称, 别名与全局入口相同 (waitAsync, waitThenClick / clickWait,
  * waitForStable 等等待形式由安装钩子按现有模块的顺序定义, 另有同步全局 wait 上的 wait.async), 另有工具起点, 事件驱动等待, of / all / race / any,
  * defaults / trace / cancelAll 与 getter Flow / pending / workers. 执行器, 步骤与返回的 Flow 对象沿用现有实现 (augment/flow, 由 P5.2 迁出).
- * 参数在现有解析器之前检查 (FlowArgs, ToolkitArgs): 文档签名不接受的个数或顶层形态为 TypeError, NaN 或负数的超时, 间隔与延迟为 RangeError (D10; 现有模块抛
- * IllegalArgumentException). 选项对象的字段与条件或目标的语法仍由现有解析器检查 (附录 C Q65, 附录 E "P3.3").
+ * 参数在现有解析器再次读取之前检查 (FlowArgs, FlowOptions, ToolkitArgs; 附录 C Q65 (2)): 个数与各参数的形态, 选项对象的字段, 条件或目标的种类, 现有解析器接受的
+ * 这里同样接受. 它不接受的形态, 类型, 键或字段为 TypeError, 越界的数值 (NaN, 负数, 需要上限处的无穷) 或文档以外的名称为 RangeError (D10; 现有解析器抛
+ * IllegalArgumentException).
  */
 @ScriptModule(name = "flow")
 class FlowModule(private val runtime: ScriptRuntime) {
@@ -74,13 +76,13 @@ class FlowModule(private val runtime: ScriptRuntime) {
 
     @ScriptFunction
     fun whenPresent(cond: Any, handler: Callable, options: Any? = null): Any {
-        FlowArgs.optionsArg("flow.whenPresent", "options", options)
+        FlowArgs.whenPresentArgs("flow.whenPresent", cond, options)
         return api.whenPresent(null, if (isNullish(options)) arrayOf(cond, handler) else arrayOf(cond, handler, options))
     }
 
     @ScriptFunction
     fun repeatUntil(action: Callable, cond: Any, options: Any? = null): Any {
-        FlowArgs.optionsArg("flow.repeatUntil", "options", options)
+        FlowArgs.repeatUntilArgs("flow.repeatUntil", cond, options)
         return api.repeatUntil(null, if (isNullish(options)) arrayOf(action, cond) else arrayOf(action, cond, options))
     }
 
@@ -152,7 +154,7 @@ class FlowModule(private val runtime: ScriptRuntime) {
 
     @ScriptFunction
     fun defaults(options: Any? = null): Any {
-        FlowArgs.optionsArg("flow.defaults", "options", options)
+        FlowArgs.defaultsArgs("flow.defaults", options)
         return api.defaults(if (isNullish(options)) emptyArray() else arrayOf(options))
     }
 
@@ -200,13 +202,13 @@ class FlowModule(private val runtime: ScriptRuntime) {
 
     @ScriptFunction
     fun waitForToast(vararg args: Any?): Any {
-        ToolkitArgs.textAndTimeoutArgs("flow.waitForToast", args)
+        ToolkitArgs.toastArgs("flow.waitForToast", args)
         return api.eventWait(null, "waitForToast", args)
     }
 
     @ScriptFunction
     fun waitForNotification(vararg args: Any?): Any {
-        ToolkitArgs.textAndTimeoutArgs("flow.waitForNotification", args)
+        ToolkitArgs.notificationArgs("flow.waitForNotification", args)
         return api.eventWait(null, "waitForNotification", args)
     }
 

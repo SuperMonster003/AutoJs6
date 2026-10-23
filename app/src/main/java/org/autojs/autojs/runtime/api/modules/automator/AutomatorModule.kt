@@ -16,16 +16,17 @@ import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
  * 39 of them also global, as with the current module. The work is still done by the current module's functions
  * (`augment/automator/Automator`, `augment/toolkit`, P5.2); a toolkit failure still throws the script's `FlowError` object.
  *
- * Arguments are checked before (T4, D10): a call that matches none of the documented forms, a missing target or an argument
- * of another top-level type is a TypeError, a coordinate, index or duration that is NaN (or a negative duration) a
- * RangeError ([AutomatorArgs], [ToolkitArgs]; the current module threw IllegalArgumentException). The elements of point lists,
- * target objects and the fields of options are still checked by the current module (appendix C Q65, appendix E "P3.3").
+ * Arguments are checked before (T4, D10, appendix C Q65 (2)), accepting what the current module accepts: a call that matches
+ * none of the documented forms, a missing target, an argument, element of a point list or stroke, field of a point object
+ * or of the toolkit options of another type is a TypeError, a coordinate, index or duration that is NaN, infinite, out of
+ * its integer range (or a negative duration) a RangeError ([AutomatorArgs], [ToolkitArgs]; the current module threw
+ * IllegalArgumentException).
  *
  * zh-CN: 新脚本模块层上的 automator 模块 (P3.3): 无障碍服务的动作 (click, longClick, press, swipe, 手势, scrollDown / scrollUp, input / setText, 全局动作
  * back, home, recents 等) 与同步自动化工具集 (smartClick, clickIfExists, waitForIdle, retry 等), 其中 39 个同时为全局函数, 同现有模块. 实际工作仍由现有模块
- * 完成 (augment/automator/Automator, augment/toolkit, P5.2 迁出); 工具集失败时仍抛出脚本的 FlowError 对象. 参数先行检查 (T4, D10): 不符合任何文档形式的调用,
- * 缺少目标或顶层类型不符为 TypeError, 坐标, 索引或时长为 NaN (或时长为负) 为 RangeError (AutomatorArgs, ToolkitArgs; 现有模块抛 IllegalArgumentException).
- * 点列表的元素, 目标对象与选项字段仍由现有模块检查 (附录 C Q65, 附录 E "P3.3").
+ * 完成 (augment/automator/Automator, augment/toolkit, P5.2 迁出); 工具集失败时仍抛出脚本的 FlowError 对象. 参数先行检查 (T4, D10, 附录 C Q65 (2)), 现有
+ * 模块接受的这里同样接受: 不符合任何文档形式的调用, 缺少目标, 参数, 点列表或笔画的元素, 点对象或工具集选项的字段类型不符为 TypeError, 坐标, 索引或时长为
+ * NaN, 无穷, 超出整数范围 (或时长为负) 为 RangeError (AutomatorArgs, ToolkitArgs; 现有模块抛 IllegalArgumentException).
  */
 @ScriptModule(name = "automator")
 class AutomatorModule(private val runtime: ScriptRuntime) {
@@ -187,13 +188,13 @@ class AutomatorModule(private val runtime: ScriptRuntime) {
 
     @ScriptFunction(global = ScriptGlobal.ALSO)
     fun waitForToast(vararg args: Any?): Any? {
-        ToolkitArgs.textAndTimeoutArgs("automator.waitForToast", args)
+        ToolkitArgs.toastArgs("automator.waitForToast", args)
         return Automator.waitForToast(runtime, args)
     }
 
     @ScriptFunction(global = ScriptGlobal.ALSO)
     fun waitForNotification(vararg args: Any?): Any? {
-        ToolkitArgs.textAndTimeoutArgs("automator.waitForNotification", args)
+        ToolkitArgs.notificationArgs("automator.waitForNotification", args)
         return Automator.waitForNotification(runtime, args)
     }
 

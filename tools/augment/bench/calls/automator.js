@@ -3,7 +3,9 @@
 // it off the current augment modules. "ok" cases neither touch the screen nor wait for a node or the accessibility service
 // (reads of a constant and the service state, new selectors); the "fail" cases fail with an argument error before any
 // action in both states, compared with the "ref" cases of the prelude. Global selector functions whose arguments match no
-// overload are left out: the current module warns twice in the console for each of them.
+// overload are left out: the current module warns twice in the console for each of them. The option fields (appendix C
+// Q65 (2)) are read by the current parsers before any wait or action in both states; targets never match a node.
+let benchFlowTimeout = flow.defaults().timeout;
 time("ok keys.home", () => { try { u = keys.home; } catch (e) { } });
 time("ok auto.isRunning", () => { try { auto.isRunning(); } catch (e) { } });
 time("ok selector", () => { try { selector(); } catch (e) { } });
@@ -18,3 +20,8 @@ time("fail flow.wait-arity", () => { try { flow.wait(); } catch (e) { } });
 time("fail pickup-type", () => { try { pickup("a", 1, "w", null); } catch (e) { } });
 time("fail detect-arity", () => { try { detect(); } catch (e) { } });
 time("fail events.__asEmitter__-type", () => { try { events.__asEmitter__(1); } catch (e) { } });
+time("ok flow.defaults-options", () => { try { flow.defaults({ timeout: benchFlowTimeout }); } catch (e) { } });
+time("fail flow.defaults-key", () => { try { flow.defaults({ nope: 1 }); } catch (e) { } });
+time("fail flow.wait-option", () => { try { flow.wait("aj6-none", { compare: "nope" }); } catch (e) { } });
+time("fail smartClick-option", () => { try { smartClick("aj6-none", { nope: 1 }); } catch (e) { } });
+time("fail waitForEvent-type", () => { try { waitForEvent("nope"); } catch (e) { } });

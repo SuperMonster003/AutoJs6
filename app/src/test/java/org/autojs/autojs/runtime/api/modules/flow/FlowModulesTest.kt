@@ -47,6 +47,12 @@ class FlowModulesTest {
         RuntimeModulesFixture.exportForDevice(EXPORT, cases)
     }
 
+    /** Refusals of the new layer only (appendix C Q65 (2)): the current parser may start the wait first, so the device runs them with the switch on. */
+    private fun checkFields(cases: List<Pair<String, String>>) {
+        RuntimeModulesFixture.check(rhino, cases)
+        RuntimeModulesFixture.exportForDevice(EXPORT_FIELDS, cases)
+    }
+
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
@@ -134,6 +140,102 @@ class FlowModulesTest {
         rhino, listOf(
             "clickWhenStableAfter('a')" to "throws TypeError",
             "clickWhenStableAfter('a', 1, 2)" to "throws TypeError",
+            "clickWhenStableAfter('a', { timeout: 1 })" to "throws TypeError",
+        )
+    )
+
+    /**
+     * The fields of the options of the waits, `whenPresent`, `repeatUntil` and `defaults`, and the kinds of conditions
+     * (appendix C Q65 (2)): what the current parser refused, as a TypeError or RangeError before it runs.
+     */
+    @Test
+    fun optionFields() = checkFields(
+        listOf(
+            "flow.wait('a', { timeout: -1 })" to "throws RangeError",
+            "flow.wait('a', { timeout: 'x' })" to "throws TypeError",
+            "flow.wait('a', { interval: Infinity })" to "throws RangeError",
+            "flow.wait('a', { times: NaN })" to "throws RangeError",
+            "flow.wait('a', { stableFor: -1 })" to "throws RangeError",
+            "flow.wait('a', { snapshot: 1 })" to "throws TypeError",
+            "flow.wait('a', { snapshot: function () {}, compare: 'bounds' })" to "throws TypeError",
+            "flow.wait('a', { compare: 'nope' })" to "throws RangeError",
+            "flow.wait('a', { compare: 1 })" to "throws TypeError",
+            "flow.wait('a', { missing: 'skip' })" to "throws RangeError",
+            "flow.wait('a', { delay: [] })" to "throws TypeError",
+            "flow.wait('a', { delay: [1, 2, 3] })" to "throws TypeError",
+            "flow.wait('a', { delay: -1 })" to "throws RangeError",
+            "flow.wait('a', { delay: [1, 'x'] })" to "throws RangeError",
+            "flow.wait('a', { delay: [1, {}] })" to "throws TypeError",
+            "flow.wait('a', { root: 1 })" to "throws TypeError",
+            "flow.wait('a', { compass: 1 })" to "throws TypeError",
+            "flow.wait('a', { resultType: 1 })" to "throws TypeError",
+            "clickWhenStableAfter('a', 1, 2, { delay: NaN })" to "throws RangeError",
+            "flow.wait(true)" to "throws TypeError",
+            "flow.whenPresent(true, function () {})" to "throws TypeError",
+            "flow.whenPresent('a', function () {}, { nope: 1 })" to "throws TypeError",
+            "flow.whenPresent('a', function () {}, { times: -1 })" to "throws RangeError",
+            "flow.repeatUntil(function () {}, true)" to "throws TypeError",
+            "flow.repeatUntil(function () {}, 'a', { timeout: Infinity })" to "throws RangeError",
+            "flow.repeatUntil(function () {}, 'a', { maxAttempts: 1.5 })" to "throws RangeError",
+            "flow.repeatUntil(function () {}, 'a', { retryOn: 1 })" to "throws TypeError",
+            "flow.defaults({ nope: 1 })" to "throws TypeError",
+            "flow.defaults({ timeout: -1 })" to "throws RangeError",
+            "flow.defaults({ stableFor: 'x' })" to "throws TypeError",
+            "flow.defaults({ humanize: 1 })" to "throws TypeError",
+            "flow.defaults({ humanize: { nope: 1 } })" to "throws TypeError",
+            "flow.defaults({ humanize: { offset: [1] } })" to "throws TypeError",
+            "flow.defaults({ humanize: { offset: -1 } })" to "throws RangeError",
+            "flow.defaults({ humanize: { delay: [5, 1] } })" to "throws RangeError",
+        )
+    )
+
+    /** The fields of the toolkit options, the targets, and the filters and types of the event waits (appendix C Q65 (2)). */
+    @Test
+    fun toolkitOptionFields() = checkFields(
+        listOf(
+            "flow.smartClick('aj6-none', { nope: 1 })" to "throws TypeError",
+            "flow.smartClick('aj6-none', { timeout: NaN })" to "throws RangeError",
+            "flow.smartClick('aj6-none', { offset: [1, 2, 3] })" to "throws TypeError",
+            "flow.smartClick('aj6-none', { offset: 2147483648 })" to "throws RangeError",
+            "flow.smartClick('aj6-none', { maxClimb: -1 })" to "throws RangeError",
+            "flow.smartClick('aj6-none', { verify: true })" to "throws TypeError",
+            "flow.smartClick('aj6-none', { verifyTimeout: -1 })" to "throws RangeError",
+            "flow.smartClick('aj6-none', { root: {} })" to "throws TypeError",
+            "flow.smartClick('aj6-none', { humanize: { delay: 'x' } })" to "throws TypeError",
+            "flow.smartClick(true)" to "throws TypeError",
+            "flow.smartClick('aj6-none', 1)" to "throws TypeError",
+            "flow.smartClickBounds('aj6-none', { maxClimb: 1 })" to "throws TypeError",
+            "flow.clickIfExists('aj6-none', -1)" to "throws RangeError",
+            "flow.clickAny([])" to "throws TypeError",
+            "flow.clickAny(['aj6-none', null])" to "throws TypeError",
+            "flow.clickAny(['aj6-none', true])" to "throws TypeError",
+            "flow.findAny(['aj6-none'], { verify: 'a' })" to "throws TypeError",
+            "flow.scrollUntil('aj6-none', { direction: 'x' })" to "throws RangeError",
+            "flow.scrollUntil('aj6-none', { method: 1 })" to "throws TypeError",
+            "flow.scrollUntil('aj6-none', { maxSteps: -1 })" to "throws RangeError",
+            "flow.scrollUntil('aj6-none', { container: true })" to "throws TypeError",
+            "flow.typeInto('aj6-none', 'b', { verifyTimeout: 'x' })" to "throws TypeError",
+            "flow.dismissPopups(['aj6-none'], { watch: true })" to "throws TypeError",
+            "flow.dismissPopups(['aj6-none'], { onDismissed: function () {} })" to "throws TypeError",
+            "flow.dismissPopups(['aj6-none'], { maxRounds: 0 })" to "throws RangeError",
+            "flow.dismissPopups(['aj6-none'], { click: 1 })" to "throws TypeError",
+            "flow.dismissPopups(['aj6-none'], { click: { nope: 1 } })" to "throws TypeError",
+            "flow.collectList(null, 'aj6-none', { maxItems: 0 })" to "throws RangeError",
+            "flow.collectList(null, 'aj6-none', { resultType: 1 })" to "throws TypeError",
+            "flow.launchAndWait('aj6.none', { timeout: -1 })" to "throws RangeError",
+            "flow.backUntil('aj6-none', { interval: 0 })" to "throws RangeError",
+            "flow.backUntil('aj6-none', { maxTimes: 1.5 })" to "throws RangeError",
+            "flow.toggle('aj6-none', true, { click: { verify: true } })" to "throws TypeError",
+            "flow.waitForIdle({ nope: 1 })" to "throws TypeError",
+            "flow.waitForIdle({ quietFor: -1 })" to "throws RangeError",
+            "flow.waitForIdle({ eventTypes: ['nope'] })" to "throws RangeError",
+            "flow.waitForIdle({ eventTypes: [1] })" to "throws TypeError",
+            "flow.waitForEvent('nope')" to "throws RangeError",
+            "flow.waitForEvent(['click', 1])" to "throws TypeError",
+            "flow.waitForEvent('click', { nope: 1 })" to "throws TypeError",
+            "flow.waitForEvent('click', { text: 1 })" to "throws TypeError",
+            "flow.waitForToast({ title: 'a' })" to "throws TypeError",
+            "flow.waitForNotification({ title: 1 })" to "throws TypeError",
         )
     )
 
@@ -214,7 +316,7 @@ class FlowModulesTest {
             "typeof flow.cancelAll()" to "\"number\"",
             "typeof flow.trace()" to "\"boolean\"",
             "typeof flow.defaults().timeout" to "\"number\"",
-            "flow.defaults({ nope: 1 })" to "throws JavaException IllegalArgumentException",
+            "flow.wait(function () { return true; }, { timeout: '5', compare: 'bounds', missing: 'reset', delay: [0, '1'] }) instanceof flow.Flow" to "true",
             "flow.sleep(1, 2) instanceof flow.Flow" to "true",
             "flow.all(flow.of(1), flow.of(2)) instanceof flow.Flow" to "true",
             "flow.waitForIdle({ quietFor: 1, timeout: 1 }) instanceof flow.Flow" to "true",
@@ -246,6 +348,7 @@ class FlowModulesTest {
 
     private companion object {
         const val EXPORT = "FlowModulesTest"
+        const val EXPORT_FIELDS = "FlowOptionFieldsTest"
         val MODULES = listOf("global", "flow", "events", "keys")
         val PATHS = listOf("flow", "events", "keys")
         val GLOBALS = listOf(
