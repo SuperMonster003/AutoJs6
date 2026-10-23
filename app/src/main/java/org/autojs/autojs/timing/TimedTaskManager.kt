@@ -6,6 +6,7 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import org.autojs.autojs.App.Companion.app
 import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.storage.database.DatabaseRecovery
 import org.autojs.autojs.storage.database.IntentTaskDatabase
 import org.autojs.autojs.storage.database.ModelChange
 import org.autojs.autojs.storage.database.TimedTaskDatabase
@@ -21,8 +22,12 @@ import org.autojs.autojs.util.Observers
 object TimedTaskManager {
 
     private val globalAppContext by lazy { GlobalAppContext.get() }
-    private val mTimedTaskDatabase by lazy { TimedTaskDatabase(globalAppContext) }
-    private val mIntentTaskDatabase by lazy { IntentTaskDatabase(globalAppContext) }
+    private val mTimedTaskDatabase by lazy {
+        DatabaseRecovery.openOrRecover(globalAppContext, TimedTaskDatabase.FILE_NAME, TimedTaskDatabase.VERSION) { TimedTaskDatabase(globalAppContext) }
+    }
+    private val mIntentTaskDatabase by lazy {
+        DatabaseRecovery.openOrRecover(globalAppContext, IntentTaskDatabase.FILE_NAME, IntentTaskDatabase.VERSION) { IntentTaskDatabase(globalAppContext) }
+    }
 
     @JvmStatic
     val allTasks: Flowable<TimedTask>

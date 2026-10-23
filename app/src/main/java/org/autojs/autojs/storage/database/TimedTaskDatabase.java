@@ -5,13 +5,26 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import org.autojs.autojs.timing.TimedTask;
 
+/**
+ * Schema changes of this table are limited to ADD COLUMN with a DEFAULT (or nullable): no type changes, no dropped
+ * columns, no table rebuilds. That keeps the no-op {@code onDowngrade} safe, as ADD COLUMN appends: an older build
+ * still finds the leading columns at their positions and the later ones by name, and leaves the newer ones alone.
+ * {@code onUpgrade} stays idempotent through {@link SQLiteSchemaUtils#addColumnIfMissing}.
+ * A destructive migration needs a decision first (docs/db-downgrade/ROADMAP.md, T8).
+ * zh-CN: 本表的 schema 变更只做带 DEFAULT (或可为空) 的 ADD COLUMN: 不改列类型, 不删列, 不重建表. 这样无操作的
+ * {@code onDowngrade} 才是安全的: ADD COLUMN 把列加在末尾, 旧构建仍能按位置找到前面的列, 按列名找到后加的列, 不碰较新的列.
+ * {@code onUpgrade} 经 {@link SQLiteSchemaUtils#addColumnIfMissing} 保持幂等. 需要破坏性迁移时先登记待决
+ * (docs/db-downgrade/ROADMAP.md, T8).
+ */
 public class TimedTaskDatabase extends Database<TimedTask> {
 
-    private static final int VERSION = 5;
+    public static final int VERSION = 5;
     private static final String NAME = "TimedTaskDatabase";
+    public static final String FILE_NAME = NAME + ".db";
 
     public TimedTaskDatabase(Context context) {
         super(new SQLHelper(context), TimedTask.TABLE);
@@ -78,7 +91,7 @@ public class TimedTaskDatabase extends Database<TimedTask> {
     private static class SQLHelper extends SQLiteOpenHelper {
 
         public SQLHelper(Context context) {
-            super(context, NAME + ".db", null, VERSION);
+            super(context, FILE_NAME, null, VERSION);
         }
 
         @Override
@@ -118,12 +131,18 @@ public class TimedTaskDatabase extends Database<TimedTask> {
             }
         }
 
+        /**
+         * A file written by a newer build keeps its rows and extra columns (see the class comment);
+         * SQLiteOpenHelper then sets {@code user_version} to {@link #VERSION}.
+         * zh-CN: 较新构建写过的文件保留其行与多出的列 (见类注释); 随后 SQLiteOpenHelper 把 {@code user_version} 设为 {@link #VERSION}.
+         */
+        @Override
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.w(NAME, FILE_NAME + ": downgrade " + oldVersion + " -> " + newVersion + ", keeping data");
+        }
+
         private void addColumn(SQLiteDatabase db, String name, String type) {
-            try {
-                db.execSQL("ALTER TABLE `" + TimedTask.TABLE + "` ADD COLUMN `" + name + "` " + type + ";");
-            } catch (Exception ignored) {
-                /* Ignored. */
-            }
+            SQLiteSchemaUtils.addColumnIfMissing(db, TimedTask.TABLE, name, type);
         }
     }
 

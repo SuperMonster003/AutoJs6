@@ -5,13 +5,22 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import org.autojs.autojs.timing.IntentTask;
 
+/**
+ * Schema changes of this table follow the same rule as {@link TimedTaskDatabase}: ADD COLUMN with a DEFAULT
+ * (or nullable) only, so the no-op {@code onDowngrade} keeps the data and {@code onUpgrade} stays idempotent
+ * (docs/db-downgrade/ROADMAP.md, T8).
+ * zh-CN: 本表的 schema 变更与 {@link TimedTaskDatabase} 同一约定: 只做带 DEFAULT (或可为空) 的 ADD COLUMN,
+ * 这样无操作的 {@code onDowngrade} 保留数据, {@code onUpgrade} 保持幂等 (docs/db-downgrade/ROADMAP.md, T8).
+ */
 public class IntentTaskDatabase extends Database<IntentTask> {
 
-    private static final int VERSION = 4;
+    public static final int VERSION = 4;
     private static final String NAME = "IntentTaskDatabase";
+    public static final String FILE_NAME = NAME + ".db";
 
     public IntentTaskDatabase(Context context) {
         super(new SQLHelper(context), IntentTask.TABLE);
@@ -54,7 +63,7 @@ public class IntentTaskDatabase extends Database<IntentTask> {
     private static class SQLHelper extends SQLiteOpenHelper {
 
         public SQLHelper(Context context) {
-            super(context, NAME + ".db", null, VERSION);
+            super(context, FILE_NAME, null, VERSION);
         }
 
         @Override
@@ -74,16 +83,24 @@ public class IntentTaskDatabase extends Database<IntentTask> {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             if (oldVersion < 2) {
-                db.execSQL("ALTER TABLE " + IntentTask.TABLE + "\n" +
-                        "ADD local INT");
+                SQLiteSchemaUtils.addColumnIfMissing(db, IntentTask.TABLE, "local", "INT");
             }
             if (oldVersion < 3) {
-                db.execSQL("ALTER TABLE " + IntentTask.TABLE + " ADD source_kind TEXT");
-                db.execSQL("ALTER TABLE " + IntentTask.TABLE + " ADD project_root TEXT");
+                SQLiteSchemaUtils.addColumnIfMissing(db, IntentTask.TABLE, "source_kind", "TEXT");
+                SQLiteSchemaUtils.addColumnIfMissing(db, IntentTask.TABLE, "project_root", "TEXT");
             }
             if (oldVersion < 4) {
-                db.execSQL("ALTER TABLE " + IntentTask.TABLE + " ADD extras TEXT");
+                SQLiteSchemaUtils.addColumnIfMissing(db, IntentTask.TABLE, "extras", "TEXT");
             }
+        }
+
+        /**
+         * Same as {@code TimedTaskDatabase.SQLHelper#onDowngrade}: rows and extra columns are kept.
+         * zh-CN: 与 {@code TimedTaskDatabase.SQLHelper#onDowngrade} 相同: 保留行与多出的列.
+         */
+        @Override
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.w(NAME, FILE_NAME + ": downgrade " + oldVersion + " -> " + newVersion + ", keeping data");
         }
     }
 }
