@@ -124,8 +124,10 @@
 
 ### P2 Room 三库通用降级 (D4, T3 / T4; 代码; 可与 P1 并行, 文件不重叠; 兜底复用 P1.2 的 `DatabaseRecovery`, 它尚未提交时先只做迁移, 兜底在它提交后接入并在结果区写明)
 
-- [ ] P2.1 schema 打包与工具类: `KeyStoreDatabase` exportSchema = true (生成 `1.json`), Gradle 复制 `app/schemas` 到 assets (T3), `RoomDowngrade` 读 `user_version` / 动态 Migration / 按 schema 重建保留共有列, 三个 builder 接入 (T4). 验收: 编译通过, 既有 `MIGRATION_*` 与迁移测试不变.
+- [x] P2.1 schema 打包与工具类: `KeyStoreDatabase` exportSchema = true (生成 `1.json`), Gradle 复制 `app/schemas` 到 assets (T3), `RoomDowngrade` 读 `user_version` / 动态 Migration / 按 schema 重建保留共有列, 三个 builder 接入 (T4). 验收: 编译通过, 既有 `MIGRATION_*` 与迁移测试不变.
+  - 2026-10-23 完成 (db-downgrade-p2, 提交 `01eb74e66`): `storage/database/RoomDowngrade.kt`, 三个 `createBuilder` 改经 `RoomDowngrade.databaseBuilder`, `MIGRATION_*` 未改; Gradle 任务 `package<Variant>RoomSchemaAssets` 把 `app/schemas` 打包为 assets `db-schemas/` (APK 内 6 个 json), 排在 KSP 之后; `:app:assembleAppDebug` 通过 (构建号 5935), 既有 `HistoryDatabaseMigrationTest` (3) 与 `ColorHistoryDatabaseMigrationTest` (1) 在 AVD API 35 上通过. 与 T3 / T4 原文的差异及理由见附录 A 之后的 "P2 实施处置". 兜底待接入: `DatabaseRecovery` (P1.2) 尚未提交, 接入点见 "P2 实施处置" 第 5 条.
 - [ ] P2.2 androidTest: 用 SQLite 直接建 "未来 schema" (版本 +1, 多一列 + 多一表) 后用当前 builder 打开: 不抛, 行保留, 共有列值一致, 多余表按 T3 处置, 再次打开不再迁移 (identity hash 已更新); 三库各一例 + 迁移失败兜底一例 (需 P1.2). 验收: AVD 通过.
+  - 2026-10-23 进度 (db-downgrade-p2, 提交 `5788e957e`): `app/src/androidTest/.../storage/database/RoomDowngradeTest.kt` 4 例在临时 AVD `dbdowngrade_api35` (API 35, x86_64) 上通过: History v4 -> 3 (revision 多一列 + 一个索引, 13 列保留 12), ColorHistory v3 -> 2 (color_library 多一列; 父表重建不级联删子表, AUTOINCREMENT 序号 100 保持, 新行 id 101), KeyStore v2 -> 1 (7 列保留 6), KeyStore 缺必需列 (旧表改名为 `_downgrade_kept_KeyStore_v2` 保留 1 行, 新表为空可写); 每例核对 `user_version` = 代码版本, identity hash = 快照值, 多出的表 `future_table` 与其索引保留, 无 `_downgrade_new_` 残留, 再次打开不迁移. 剩迁移失败兜底一例, 待 P1.2 `DatabaseRecovery` 提交后接入.
 - [ ] P2.3 AVD 核对: 三库构造未来 schema 后启动宿主, 打开抽屉, 版本历史页, 回收站, 颜色选择页, 密钥库页不崩; 手动触发 `HistoryCleanupWorker` 一次不崩 (子会话核对触发方法). 报告入 evidence, 附录 B.3.
 
 ### P3 脚本 sqlite 模块 onDowngrade (D6, T5, R6; 代码 + 文档 + d.ts; 与 P1 / P2 文件不重叠, 可并行或之后)
@@ -156,6 +158,15 @@
 | Q7 | XQ-AT72 样本 | A 只读取证, 不复现唤醒 (推荐) / B 取证 + AVD 装 Shizuku 复现唤醒循环并在修后证明不循环 / C 不取证 | B (非推荐) | D8 |
 
 条目实施中的处置理由由子会话追加到本表之后.
+
+### P2 实施处置 (2026-10-23, db-downgrade-p2, 推翻点 P2.1 之前)
+
+1. T3 读文件版本: 不在 build 前用只读连接读 `user_version`, 改由包装的 open helper 在 `onDowngrade` 回调里得到文件版本 (Room 在后台线程首次打开库时触发). 理由: `DrawerFragment`, `TrashActivity`, `VersionHistoryActivity` 与 `KeyStoreRepository` 在主线程取实例, 预读会在主线程做磁盘 IO; 也省去额外连接与 WAL 文件的处理. 三个库都不允许主线程查询, DAO 调用本来就在后台线程.
+2. T3 注册时机: `Migration(文件版本, 代码版本)` 在回调中经 `builder.addMigrations` 注册, 依赖 Room 2.8.1 的 builder 与已构建的库共用迁移容器. framework helper 打开失败会重试一次, 注册按 (文件版本, 代码版本) 去重. 将来 Room 若改为复制容器, 打开会抛 "migration required" 而走兜底, `RoomDowngradeTest` 会失败提示.
+3. T3 缺必需列: 原文 "该表只能清空并记日志" 改为旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 保留 (名字被占时加 `_2`, `_3` ...), 新表为空, 以满足 R3 (不删用户数据); 与快照没有共有列的表同样处理. 登记为附录 C Q8.
+4. T3 补充: 重建期间临时打开 `legacy_alter_table` (改名时不重写其他表的外键引用, 也不重新检查视图), 外键约束此时未开启 (Room 在迁移之后才执行 `foreign_keys = ON`), 父表重建不级联删除子表; AUTOINCREMENT 表的 `sqlite_sequence` 不回退; NOT NULL 且有默认值的列用 `COALESCE` 补默认值; 插入违反约束时整个迁移回滚, 文件不变, 交给兜底. 快照含 FTS 表时报错 (三库目前都没有).
+5. T4 兜底: 不在 `getInstance` 主动触发 `writableDatabase` (同样是主线程 IO), 改为在 `RoomDowngrade` 包装的 open helper 的 `writableDatabase` / `readableDatabase` 处 (后台线程) 经 `DatabaseRecovery` 处理. `DatabaseRecovery` 提交后接入, 并补 P2.2 的兜底一例.
+6. T3 打包: Gradle 任务 `package<Variant>RoomSchemaAssets` 经 variant API 加为生成的 assets 目录, 只复制不改 `room.schemaLocation`; `mustRunAfter` 对应的 KSP 任务, 新版本的快照在同一次构建内打包.
 
 ## 附录 B. 证据
 
@@ -188,6 +199,7 @@
 格式: `- [状态] 编号 问题 | 选项: A (推荐) / B | 影响: 条目 | 改选返工: ... | 来源`. 状态: 需拍板 / 已按推荐先行待确认 / 已决 (日期, 维护者选: ...) / 暂缓.
 
 - (立项时无)
+- [已按推荐先行待确认] Q8 Room 降级时某张表缺少本版本必需的列 (NOT NULL 且无默认值), 或与快照没有共有列, 其行无法搬进新表, 如何处置 | 选项: A 旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 留在库文件里, 新表为空 (推荐, 已先行; 满足 R3, 代价是库文件保留旧数据的体积, 之后装回较新版本也不会自动搬回) / B 按 T3 原文清空该表只记日志 (数据丢失, 与 R3 冲突) / C 该表重建失败即整库走兜底备份 (其他表也变空) | 影响: P2.1, P2.2 | 改选返工: B 约 10 行 + 改 1 个用例; C 约 20 行 + 改 1 个用例, 依赖 P1.2 | 来源: db-downgrade-p2 (附录 A "P2 实施处置" 第 3 条)
 
 ## 附录 D. 文件地图
 
@@ -203,6 +215,8 @@
 | `app/src/main/java/org/autojs/autojs/theme/app/ColorHistoryDatabase.kt` | Room, version 2 | P2 |
 | `app/src/main/java/org/autojs/autojs/apkbuilder/keystore/KeyStoreDatabase.kt` | Room, version 1, exportSchema 改 true | P2 |
 | `app/schemas/` | Room 导出 schema, 复制进 assets | P2.1 |
+| `app/src/main/java/org/autojs/autojs/storage/database/RoomDowngrade.kt` | Room 通用降级 (包装 open helper, 动态 Migration, 按快照重建) | P2.1 |
+| `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradeTest.kt` | Room 三库降级用例 | P2.2 |
 | `app/src/main/java/org/autojs/autojs/core/database/Database.java` | 脚本 sqlite 模块底层 helper 与 `DatabaseCallback` | P3.1 |
 | `app/src/main/java/org/autojs/autojs/runtime/api/augment/sqlite/SQLite.kt` | 脚本 `sqlite.open` 选项解析 | P3.1 |
 | `tools/db-downgrade/roundtrip.py`, `README.md` | 往返脚本 | P0.3 |
