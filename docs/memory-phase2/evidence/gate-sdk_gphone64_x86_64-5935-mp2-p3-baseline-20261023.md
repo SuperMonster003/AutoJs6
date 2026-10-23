@@ -1,0 +1,92 @@
+# Bridge gate sdk_gphone64_x86_64 (5935) 20261023
+
+- Device: Google sdk_gphone64_x86_64, API 35, serial emulator-5660
+- Host: org.autojs.autojs6 versionCode 5935 (6.8.0), debuggable
+- Plugin: io.github.supermonster003.autojs6.plugin.lua.runtime versionCode 102 (0.1.3-rc.2), commit db96216
+- Plugin: io.github.supermonster003.autojs6.plugin.python.runtime versionCode 135 (0.5.5), commit 5514e82
+- hidden_api_policy (ROADMAP D9): 1 during each run, before `None`, afterwards `None`
+- Run: sdk_gphone64_x86_64-5935-20261023140851, label mp2-p3-baseline, 2026-10-23T06:00:43.149675+00:00 -> 2026-10-23T06:19:30.928693+00:00
+- Device state at start: {'batteryLevel': 100, 'powered': ['AC'], 'wakefulness': 'Awake'}
+- Merged runs: sdk_gphone64_x86_64-5935-20261023140043 (all); sdk_gphone64_x86_64-5935-20261023140851 (LU1, LU2, LU3, LU4, LU5)
+- Warm-ups 2, iterations 20, poll 10000 ms, force delay 1000 ms, capture off, meminfo phases
+- Cell (docs/memory-phase2/ROADMAP.md appendix A): retained / Java heap MB / native heap MB / script threads, b bridge threads / bindings: h host bridge registries vs start, s system connections to the plugin vs start / live engines / plugin PSS MB at the end (change since measured run 2)
+- Thresholds (T1): retained 0, Java <= 2 MB, native <= 4 MB (+1 frame for capture), script threads, engines and bridge registries back to start (the connection pools of the Node, Bun and QuickJS clients may keep 1), Bun / QuickJS session objects back to start, system connections <= start + 1, bridge threads back to the end of the warm-ups (idle workers of the cached binder-call pool get up to 65 s to expire first, Q6); plugin PSS recorded only (R9)
+
+| Scenario | Mode | Status | Cell | Reasons |
+| --- | --- | --- | --- | --- |
+| LU1 Empty script | N | fail | 2 / +0.10 / +0.03 / +0 b+0 / h+0 s+0 / 0 / 23.1 (+0.92) | retained session instances vs start: lua.broker 2, lua.callback 2, lua.provider 2 |
+| LU1 Empty script | F | fail | 2 / +0.12 / +0.01 / +0 b+0 / h+0 s+0 / 0 / 23.8 (+0.60) | retained session instances vs start: lua.broker 2, lua.callback 2, lua.provider 2 |
+| LU2 Host capabilities and module snapshot | N | fail | 1 / +0.15 / +0.04 / +0 b+0 / h+0 s+0 / 0 / 23.3 (+0.46) | retained session instances vs start: lua.broker 1, lua.callback 1, lua.provider 1 |
+| LU2 Host capabilities and module snapshot | F | fail | 1 / +0.15 / +0.03 / +0 b+0 / h+0 s+0 / 0 / 23.4 (-0.07) | retained session instances vs start: lua.broker 1, lua.callback 1, lua.provider 1 |
+| LU3 Output callbacks | N | fail | 1 / +0.15 / +0.04 / +0 b+0 / h+0 s+0 / 0 / 24.0 (+0.10) | retained session instances vs start: lua.broker 1, lua.callback 1, lua.provider 1 |
+| LU3 Output callbacks | F | fail | 1 / +0.16 / +0.02 / +0 b+0 / h+0 s+0 / 0 / 23.8 (-0.66) | retained session instances vs start: lua.broker 1, lua.callback 1, lua.provider 1 |
+| LU4 Plugin process killed | N | pass | 0 / +0.19 / +0.00 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| LU4 Plugin process killed | F | pass | 0 / +0.18 / +0.00 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| LU5 ColorOS bind refusal loop | N | skipped | skipped | LU5 runs on ColorOS only (OPD2413); this device is Google sdk_gphone64_x86_64 |
+| LU5 ColorOS bind refusal loop | F | skipped | skipped | LU5 runs on ColorOS only (OPD2413); this device is Google sdk_gphone64_x86_64 |
+| PY1 Empty script | N | pass | 0 / +0.12 / +0.01 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY1 Empty script | F | pass | 0 / +0.13 / -0.02 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY2 Host capabilities and file round trip | N | pass | 0 / +0.14 / -0.02 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY2 Host capabilities and file round trip | F | pass | 0 / +0.14 / -0.02 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY3 Output callbacks | N | pass | 0 / +0.14 / -0.02 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY3 Output callbacks | F | pass | 0 / +0.17 / -0.02 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY4 Plugin process killed | N | pass | 0 / +0.17 / -0.00 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY4 Plugin process killed | F | pass | 0 / +0.15 / -0.03 / +0 b+0 / h+0 s+0 / 0 / - |  |
+| PY5 ColorOS bind refusal loop | N | skipped | skipped | PY5 runs on ColorOS only (OPD2413); this device is Google sdk_gphone64_x86_64 |
+| PY5 ColorOS bind refusal loop | F | skipped | skipped | PY5 runs on ColorOS only (OPD2413); this device is Google sdk_gphone64_x86_64 |
+
+## Bridge detail (docs/memory-phase2/ROADMAP.md T1 (d) / (h) / (i))
+
+- Registries: host bridge tables whose size differs from the start (StaticRegistries.bridgeCounts, and the AidlPluginHost connection pools of the Bun and QuickJS clients)
+- Bindings: connections of the host to the plugin / all bound service connections in LoadedApk.mServices, before the first run -> at the end (n/a: unreadable)
+- New threads: bridge threads alive at the end that were not alive at the end of the warm-ups
+- Plugin PSS MB: all processes of the plugin before the first run / after measured run 2 / at the end (recorded only, R9)
+- Script: largest value of each gateStat over all runs; ended by error: runs of an expected failure (ND4 / BN4 / QJ4); session: Bun / QuickJS session objects above the start at the end (VMDebug counts), and the longest wait after a run until they were back
+
+| Scenario | Mode | Registries | Bindings | New threads | Plugin PSS MB | Script |
+| --- | --- | --- | --- | --- | --- | --- |
+| LU1 | N | +0 | 0/0 -> 0/0 | - | 23.2 / 22.1 / 23.1 | session broker +2, callback +2, provider +2 |
+| LU1 | F | +0 | 0/0 -> 0/0 | - | 22.9 / 23.2 / 23.8 | session broker +2, callback +2, provider +2 |
+| LU2 | N | +0 | 0/0 -> 0/0 | - | 23.7 / 22.8 / 23.3 | sdkInt 35, checksum 685052; session broker +1, callback +1, provider +1 |
+| LU2 | F | +0 | 0/0 -> 0/0 | - | 23.4 / 23.4 / 23.4 | sdkInt 35, checksum 685052; session broker +1, callback +1, provider +1 |
+| LU3 | N | +0 | 0/0 -> 0/0 | - | 23.5 / 23.9 / 24.0 | ticks 3; session broker +1, callback +1, provider +1 |
+| LU3 | F | +0 | 0/0 -> 0/0 | - | 24.1 / 24.4 / 23.8 | ticks 3; session broker +1, callback +1, provider +1 |
+| LU4 | N | +0 | 0/0 -> 0/0 | - | 23.9 / - / - | ended by error 22; session +0, cleared <= 7 ms |
+| LU4 | F | +0 | 0/0 -> 0/0 | - | 23.2 / - / - | ended by error 22; session +0, cleared <= 10 ms |
+| PY1 | N | +0 | 0/0 -> 0/0 | - | - / - / - | session +0, cleared <= 8 ms |
+| PY1 | F | +0 | 0/0 -> 0/0 | - | - / - / - | session +0, cleared <= 10 ms |
+| PY2 | N | +0 | 0/0 -> 0/0 | - | - / - / - | battery 100; session +0, cleared <= 9 ms |
+| PY2 | F | +0 | 0/0 -> 0/0 | - | - / - / - | battery 100; session +0, cleared <= 12 ms |
+| PY3 | N | +0 | 0/0 -> 0/0 | - | - / - / - | ticks 3; session +0, cleared <= 8 ms |
+| PY3 | F | +0 | 0/0 -> 0/0 | - | - / - / - | ticks 3; session +0, cleared <= 8 ms |
+| PY4 | N | +0 | 0/0 -> 0/0 | - | - / - / - | ended by error 22; session +0, cleared <= 8 ms |
+| PY4 | F | +0 | 0/0 -> 0/0 | - | - / - / - | ended by error 22; session +0, cleared <= 14 ms |
+
+## Native detail (ROADMAP P3.1)
+
+- Peak: largest rise of the native heap inside a measured run (sampled every 20 ms, before the after-run GC)
+- Meminfo: dumpsys meminfo deltas in MB from the end of the warm-ups to the end: Native Heap Pss / Native Heap Alloc / Graphics / Unknown Pss
+- Counters: images not recycled (vs start) / open media images at the end / live Mats (vs end of warm-ups)
+- Instances: VMDebug instance count deltas from the start: Bitmap / org.opencv.core.Mat / AccessibilityNodeInfo, then AccessibilityNodeInfo against the end of the warm-ups (S7 / S7b fail above +50, ROADMAP P3.4)
+- Classes (ROADMAP P4.4), from the end of the warm-ups to the end: loaded classes (Debug.getLoadedClassCount; S8 fails when they grow in most measured runs, one-time steps do not count) / VMDebug java.lang.Class objects / VMDebug DexClassLoader / loaders registered by runtime.loadDex in the host / VMDebug WebView; `-` where unavailable (VMDebug only on API 24 / 28)
+
+| Scenario | Mode | Peak MB | Meminfo MB | Counters | Instances | Classes | Script stats (max) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| LU1 | N | +0.75 | +0.46/+0.04/+0.00/+0.01 | +0 / 0 / +0 | - | +0 / +0 / +0 / +0 / +0 | - |
+| LU1 | F | +0.75 | +0.51/+0.01/+0.00/+0.01 | +0 / 0 / +0 | - | +0 / +0 / +0 / +0 / +0 | - |
+| LU2 | N | +0.95 | +0.48/+0.04/+0.00/+0.01 | +0 / 0 / +0 | - | +0 / +0 / +0 / +0 / +0 | - |
+| LU2 | F | +0.95 | +0.29/+0.03/+0.00/+0.01 | +0 / 0 / +0 | - | +0 / +0 / +0 / +0 / +0 | - |
+| LU3 | N | +0.76 | +0.37/+0.04/+0.00/+0.00 | +0 / 0 / +0 | - | +0 / +0 / +0 / +0 / +0 | - |
+| LU3 | F | +0.78 | +0.24/+0.02/+0.00/+0.01 | +0 / 0 / +0 | - | +0 / +0 / +0 / +0 / +0 | - |
+| LU4 | N | +0.88 | +0.17/+0.00/+0.00/+0.01 | +0 / 0 / +0 | - | +71 / +71 / +0 / +0 / +0 | - |
+| LU4 | F | +0.89 | +0.28/+0.01/+0.00/+0.00 | +0 / 0 / +0 | - | +65 / +33 / +0 / +0 / +0 | - |
+| PY1 | N | +0.10 | +0.11/+0.01/+0.00/+0.00 | +0 / 0 / +0 | - | +19 / +19 / +0 / +0 / +0 | - |
+| PY1 | F | +0.11 | +0.32/-0.03/+0.00/+0.01 | +0 / 0 / +0 | - | +49 / +49 / +0 / +0 / +0 | - |
+| PY2 | N | +0.12 | +0.03/-0.02/+0.00/+0.01 | +0 / 0 / +0 | - | +66 / +66 / +0 / +0 / +0 | - |
+| PY2 | F | +0.12 | +0.36/-0.01/+0.00/+0.01 | +0 / 0 / +0 | - | +49 / +49 / +0 / +0 / +0 | - |
+| PY3 | N | +0.11 | +0.03/-0.02/+0.00/+0.01 | +0 / 0 / +0 | - | +49 / +49 / +0 / +0 / +0 | - |
+| PY3 | F | +0.10 | +0.23/-0.02/+0.00/+0.01 | +0 / 0 / +0 | - | +50 / +50 / +0 / +0 / +0 | - |
+| PY4 | N | +0.14 | +0.02/+0.00/+0.00/+0.02 | +0 / 0 / +0 | - | +72 / +72 / +0 / +0 / +0 | - |
+| PY4 | F | +0.14 | +0.40/-0.02/+0.00/+0.04 | +0 / 0 / +0 | - | +49 / +49 / +0 / +0 / +0 | - |
+
+Raw reports: the .json file with the same name (one report per line under `results`).
