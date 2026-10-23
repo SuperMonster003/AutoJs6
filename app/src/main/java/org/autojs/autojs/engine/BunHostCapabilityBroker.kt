@@ -434,6 +434,10 @@ internal class BunHostCapabilityBroker(
         if (toasts.incrementAndGet() > MAX_TOAST_CALLS_PER_EXECUTION) {
             return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED, "ui.toast allows $MAX_TOAST_CALLS_PER_EXECUTION calls per run")
         }
+        // The Runnable keeps what it shows, not the broker (C13).
+        // zh-CN: Runnable 只保留要显示的内容, 不保留 broker (C13).
+        val closed = closed
+        val appContext = appContext
         val posted = mainHandler.post {
             if (!closed.get()) Toast.makeText(appContext, text, duration).show()
         }
