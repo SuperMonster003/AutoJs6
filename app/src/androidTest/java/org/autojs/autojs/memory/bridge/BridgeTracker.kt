@@ -54,7 +54,7 @@ internal class BridgeTracker : ScriptEngineManager.EngineLifecycleCallback, Brid
         val BRIDGE_THREAD_MARKERS = listOf(
             "AutoJs6Node", "AutoJs6-Node", "node-console-input", "runtime-web", "web-display-capture", "host-capability",
             "AutoJs6BridgeScreenshot", "AutoJs6ScreenText", "autojs-java-bridge", "BunHostCall", "python-runtime",
-            "autojs-bun-", "autojs-quickjs-",
+            "autojs-bun-", "autojs-quickjs-", "autojs-lua-",
         )
 
         fun bridgeThreads(): List<String> =

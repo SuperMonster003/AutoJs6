@@ -19,6 +19,9 @@ internal object PythonRuntimeExecutionCoordinator {
 
     @Throws(InterruptedException::class)
     fun acquire(): PythonRuntimeExecutionQueue.Lease = queue.acquire()
+
+    /** For the memory gate (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    fun snapshot(): PythonRuntimeExecutionQueue.Snapshot = queue.snapshot()
 }
 
 /** Fair, bounded and interruptible single-owner queue with no Android dependencies. */

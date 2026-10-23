@@ -276,6 +276,10 @@ internal object PythonLongRunningExecutionRegistry {
         return records.isEmpty()
     }
 
+    /** For the memory gate (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    @Synchronized
+    fun recordCount(): Int = records.size
+
     @Synchronized
     fun markRunning(token: String) {
         records[token]?.phase = Phase.RUNNING

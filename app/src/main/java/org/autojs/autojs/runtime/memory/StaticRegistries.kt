@@ -5,6 +5,9 @@ import org.autojs.autojs.core.broadcast.Broadcast
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
+import org.autojs.autojs.core.plugin.lua.LuaRuntimeBinderCallLane
+import org.autojs.autojs.core.plugin.python.PythonLongRunningExecutionRegistry
+import org.autojs.autojs.core.plugin.python.PythonRuntimeExecutionCoordinator
 import org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimePluginClient
 import org.autojs.autojs.core.web.WebSocket
 import org.autojs.autojs.engine.NodeAudioRecordingService
@@ -47,10 +50,10 @@ object StaticRegistries {
 
     /**
      * Sizes of the process-wide tables of the plugin engine bridges (docs/memory-phase2/ROADMAP.md T1 (h)), kept apart from [counts]
-     * so that the first gate judges what it always did. Node, and the Bun / QuickJS connection pools (P2.2); the Lua / Python leases
-     * join with their batch (P3).
+     * so that the first gate judges what it always did. Node, the Bun / QuickJS connection pools (P2.2), the Lua Binder call lane
+     * and the Python admission queue and long-running registry (P3).
      * zh-CN: 插件引擎桥接的进程级表的大小 (docs/memory-phase2/ROADMAP.md T1 (h)), 与 [counts] 分开, 使第一期门禁的判定保持不变.
-     * 包含 Node 以及 Bun / QuickJS 的连接池 (P2.2); Lua / Python 的租约随其批次 (P3) 加入.
+     * 包含 Node, Bun / QuickJS 的连接池 (P2.2), Lua 的 Binder 调用通道, 以及 Python 的准入队列与长时运行登记表 (P3).
      */
     fun bridgeCounts(): Map<String, Int> {
         val counts = linkedMapOf(
@@ -69,6 +72,12 @@ object StaticRegistries {
         counts["NodeBridgeEngineDispatchService.registeredExecutions"] = NodeBridgeEngineDispatchService.registeredExecutionCount()
         counts["BunRuntimePluginClient.connectionPool"] = BunRuntimePluginClient.pooledConnectionCount()
         counts["QuickJsRuntimePluginClient.connectionPool"] = QuickJsRuntimePluginClient.pooledConnectionCount()
+        counts["LuaRuntimeBinderCallLane.inFlight"] = LuaRuntimeBinderCallLane.inFlightCalls()
+        PythonRuntimeExecutionCoordinator.snapshot().let { queue ->
+            counts["PythonRuntimeExecutionCoordinator.active"] = if (queue.active) 1 else 0
+            counts["PythonRuntimeExecutionCoordinator.pending"] = queue.pendingExecutions
+        }
+        counts["PythonLongRunningExecutionRegistry.records"] = PythonLongRunningExecutionRegistry.recordCount()
         return counts
     }
 }

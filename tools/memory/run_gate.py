@@ -88,13 +88,25 @@ BRIDGE_SCENARIOS = {
     "QJ3": "qj03OutputCallbacks",
     "QJ4": "qj04PluginKilled",
     "QJ5": "qj05ColorOsRebind",
+    "LU1": "lu01EmptyScript",
+    "LU2": "lu02HostCapabilities",
+    "LU3": "lu03OutputCallbacks",
+    "LU4": "lu04PluginKilled",
+    "LU5": "lu05ColorOsRebind",
+    "PY1": "py01EmptyScript",
+    "PY2": "py02HostCapabilities",
+    "PY3": "py03OutputCallbacks",
+    "PY4": "py04PluginKilled",
+    "PY5": "py05ColorOsRebind",
 }
 NODE_PLUGIN = "io.github.supermonster003.autojs6.plugin.nodejs"
 BUN_PLUGIN = "io.github.supermonster003.autojs6.plugin.bun.runtime"
 QUICKJS_PLUGIN = "io.github.supermonster003.autojs6.plugin.quickjs.runtime"
+LUA_PLUGIN = "io.github.supermonster003.autojs6.plugin.lua.runtime"
+PYTHON_PLUGIN = "io.github.supermonster003.autojs6.plugin.python.runtime"
 # Engine of a bridge scenario by its prefix (docs/memory-phase2/ROADMAP.md T2), and the plugin package of each engine.
-BRIDGE_ENGINES = {"ND": "node", "BN": "bun", "QJ": "quickjs"}
-BRIDGE_PLUGINS = {"node": NODE_PLUGIN, "bun": BUN_PLUGIN, "quickjs": QUICKJS_PLUGIN}
+BRIDGE_ENGINES = {"ND": "node", "BN": "bun", "QJ": "quickjs", "LU": "lua", "PY": "python"}
+BRIDGE_PLUGINS = {"node": NODE_PLUGIN, "bun": BUN_PLUGIN, "quickjs": QUICKJS_PLUGIN, "lua": LUA_PLUGIN, "python": PYTHON_PLUGIN}
 SUITES = {
     "runtime": {"name": "memory-gate", "testClass": TEST_CLASS, "scenarios": SCENARIOS, "capture": CAPTURE_SCENARIOS,
                 "out": ROOT / "docs" / "memory" / "evidence", "grants": {}, "hiddenApi": False, "plugins": None},
@@ -106,7 +118,7 @@ SUITES = {
 
 
 def bridge_engine(scenario):
-    """Engine of a bridge scenario (node, bun or quickjs), or None for the first gate."""
+    """Engine of a bridge scenario (node, bun, quickjs, lua or python), or None for the first gate."""
     return BRIDGE_ENGINES.get(scenario[:2])
 
 
@@ -620,7 +632,7 @@ def main():
     parser.add_argument("--scenarios", help="Comma list, e.g. S1,S2 or ND1,ND7a (default all of the suite)")
     parser.add_argument("--plugin-commit",
                         help="Commit of the installed plugin builds, written to the bridge report header: one hash for every engine "
-                             "of the run, or engine=hash pairs, e.g. bun=fb879f3,quickjs=0bcee52 (engines node, bun, quickjs)")
+                             "of the run, or engine=hash pairs, e.g. bun=fb879f3,quickjs=0bcee52 (engines node, bun, quickjs, lua, python)")
     parser.add_argument("--mode", choices=("normal", "force", "both"), default="both")
     parser.add_argument("--hprof", action="store_true", help="Keep heap dumps of failing scenarios and pull them to <out>/hprof")
     parser.add_argument("--no-analyze", action="store_true", help="Skip the on-device shark analysis (ROADMAP T4 fallback)")

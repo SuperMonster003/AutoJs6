@@ -27,6 +27,9 @@ import org.autojs.autojs.core.looper.LooperHelper
 import org.autojs.autojs.core.plugin.center.PluginEnableStore
 import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
 import org.autojs.autojs.core.plugin.center.PluginTrustManager
+import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostException
+import org.autojs.autojs.core.plugin.lua.LuaRuntimePluginHostFactory
+import org.autojs.autojs.core.plugin.python.PythonRuntimeOfficialTransport
 import org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimePluginClient
 import org.autojs.autojs.core.pref.keys.CredentialKeys
 import org.autojs.autojs.engine.JavaScriptEngine
@@ -42,6 +45,9 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.memory.BridgeExecutionObserver
 import org.autojs.autojs.runtime.memory.StaticRegistries
 import org.autojs.autojs.script.JavaScriptFileSource
+import org.autojs.autojs.script.LuaFileSource
+import org.autojs.autojs.script.PythonFileSource
+import org.autojs.autojs.script.PythonRuntimeChannelPolicy
 import org.autojs.autojs.script.StringScriptSource
 import org.json.JSONArray
 import org.json.JSONObject
@@ -157,6 +163,16 @@ class BridgeLeakGateDeviceTest {
     @Test fun qj03OutputCallbacks() = gate("QJ3")
     @Test fun qj04PluginKilled() = gate("QJ4")
     @Test fun qj05ColorOsRebind() = gate("QJ5")
+    @Test fun lu01EmptyScript() = gate("LU1")
+    @Test fun lu02HostCapabilities() = gate("LU2")
+    @Test fun lu03OutputCallbacks() = gate("LU3")
+    @Test fun lu04PluginKilled() = gate("LU4")
+    @Test fun lu05ColorOsRebind() = gate("LU5")
+    @Test fun py01EmptyScript() = gate("PY1")
+    @Test fun py02HostCapabilities() = gate("PY2")
+    @Test fun py03OutputCallbacks() = gate("PY3")
+    @Test fun py04PluginKilled() = gate("PY4")
+    @Test fun py05ColorOsRebind() = gate("PY5")
 
     private fun gate(id: String) {
         val scenario = BridgeScenarios.byId(id)
@@ -536,8 +552,18 @@ class BridgeLeakGateDeviceTest {
         }
         val config = ExecutionConfig().apply { workingDirectory = workDir }
         val text = BridgeScenarios.source(scenario, mode, marker, fixturePng)
-        val source = scenario.sourceFile?.let { name -> JavaScriptFileSource(File(workDir, name).apply { writeText(text) }) }
-        service.execute(source ?: StringScriptSource(marker, text), listener, config)
+        val file = BridgeScenarios.sourceFileName(scenario)?.let { name -> File(workDir, name).apply { writeText(text) } }
+        if (scenario.luaModules.isNotEmpty() && file != null) {
+            val modules = File(workDir, "${file.nameWithoutExtension}.modules").apply { mkdirs() }
+            scenario.luaModules.forEach { (name, source) -> File(modules, "$name.lua").writeText(source) }
+        }
+        val source = when {
+            file == null -> StringScriptSource(marker, text)
+            scenario.engine == BridgeEngine.LUA -> LuaFileSource(file)
+            scenario.engine == BridgeEngine.PYTHON -> PythonFileSource(file)
+            else -> JavaScriptFileSource(file)
+        }
+        service.execute(source, listener, config)
     }
 
     /**
@@ -674,10 +700,20 @@ class BridgeLeakGateDeviceTest {
                     BridgeEngine.NODE -> NodeJsRuntimePluginHost.probe(context)
                     BridgeEngine.BUN -> BunRuntimePluginClient.prewarm(context, BunRuntimePluginClient.select(context))
                     BridgeEngine.QUICKJS -> QuickJsRuntimePluginClient.prewarm(context, QuickJsRuntimePluginClient.select(context))
+                    BridgeEngine.LUA -> LuaRuntimePluginHostFactory.create(context).prepare()
+                    BridgeEngine.PYTHON -> {
+                        check(PythonRuntimeChannelPolicy.isEnabledForCurrentBuild) { "the Python channel is off in this build" }
+                        checkNotNull(PythonRuntimeOfficialTransport(context).inspect()) { "no official Python provider" }
+                    }
                 }
             }
         }
-        return probe.exceptionOrNull()?.let { "the $engine plugin did not answer the probe: " + (it.javaClass.simpleName + ": " + it.message).take(300) }
+        return probe.exceptionOrNull()?.let { failure ->
+            // The Lua host names why each provider was rejected. zh-CN: Lua 宿主会给出每个提供方被拒绝的原因.
+            val rejections = (failure as? LuaRuntimeHostException)?.evaluations?.takeIf { it.isNotEmpty() }
+                ?.joinToString(prefix = " (rejected: ", postfix = ")") { "${it.component.packageName} ${it.rejection}" }.orEmpty()
+            "the $engine plugin did not answer the probe: " + (failure.javaClass.simpleName + ": " + failure.message + rejections).take(300)
+        }
     }
 
     /** A 64x64 PNG as Base64, the image of the round trips in ND2 / ND11 / BN2 and the data of QJ2. zh-CN: 64x64 的 PNG (Base64), 用于 ND2 / ND11 / BN2 的往返与 QJ2 的数据. */
@@ -958,6 +994,10 @@ class BridgeLeakGateDeviceTest {
             "their host-side session classes (broker, output callback, automation bridge, call executor, provider) are counted " +
             "through VMDebug.countInstancesOfClasses after every run and must return to the count before the first run; their gate " +
             "lines are read from the global console by a per-run marker. " +
+            "Lua and Python (P3) run .lua / .py file sources from the working directory (Lua modules in <entry>.modules/); their " +
+            "session classes (Lua: host broker, execution callback, remote session, acquired provider; Python: broker, execution " +
+            "callback, execution, binding) are counted the same way and their gate lines come from the global console by marker. " +
+            "The Python plugin retires its process after every session, so its PSS is often absent at the end. " +
             "Force mode waits for gateReady(), sleeps forceDelayMs and calls forceStop on every live engine of the run on the main thread."
     }
 }

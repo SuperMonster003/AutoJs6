@@ -95,6 +95,9 @@ internal class LuaBoundedBinderCallLane(
         poisoned.set(true)
     }
 
+    /** Calls holding the lane (0 or 1), for the memory gate (docs/memory-phase2/ROADMAP.md T1 (h)). */
+    fun inFlightCalls(): Int = if (active.get() == null) 0 else 1
+
     private fun workerLoop() {
         while (true) {
             val call = pending.getAndSet(null)
@@ -273,4 +276,6 @@ internal object LuaRuntimeBinderCallLane {
     ): T = lane.call(operationName, timeoutMillis, onAbandoned, lateResultDisposer, operation)
 
     fun poison() = lane.poison()
+
+    fun inFlightCalls(): Int = lane.inFlightCalls()
 }

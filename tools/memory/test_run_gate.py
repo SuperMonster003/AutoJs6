@@ -219,7 +219,9 @@ class BridgeSuiteTest(unittest.TestCase):
         self.assertIn("| QJ2 | N | connectionPool +1 | 0/3 -> 1/4 | - | 40.0 / 79.5 / 80.0 | pngBytes 130, deviceInfoKeys 9 |", text)
 
     def test_bridge_engines_and_plugin_commits(self):
-        self.assertEqual(["node", "bun", "quickjs", None], [run_gate.bridge_engine(s) for s in ("ND7a", "BN1", "QJ5", "S1")])
+        self.assertEqual(["node", "bun", "quickjs", "lua", "python", None],
+                         [run_gate.bridge_engine(s) for s in ("ND7a", "BN1", "QJ5", "LU2", "PY5", "S1")])
+        self.assertEqual({"lua": "db96216", "python": "5514e82"}, run_gate.plugin_commits("lua=db96216,python=5514e82", ["lua"]))
         self.assertEqual({"bun": "fb879f3", "quickjs": "fb879f3"}, run_gate.plugin_commits("fb879f3", ["bun", "quickjs"]))
         self.assertEqual({"bun": "fb879f3", "quickjs": "0bcee52-dirty"},
                          run_gate.plugin_commits("bun=fb879f3, quickjs=0bcee52-dirty", ["bun"]))

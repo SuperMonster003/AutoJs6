@@ -57,14 +57,47 @@ internal enum class BridgeEngine(
         ),
         linkedMapOf("quickjs.callback" to "org.autojs.autojs.engine.QuickJsPluginScriptEngine\$OutputCallback"),
     ),
+    LUA(
+        "io.github.supermonster003.autojs6.plugin.lua.runtime",
+        listOf(
+            "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$SessionHostBroker",
+            "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$executionCallback\$1",
+            "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderRemoteSession",
+            "org.autojs.autojs.core.plugin.lua.LuaRuntimeAcquiredProvider",
+            "org.autojs.autojs.engine.LuaPluginScriptEngine",
+        ),
+        linkedMapOf(
+            "lua.broker" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$SessionHostBroker",
+            "lua.callback" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$executionCallback\$1",
+            "lua.session" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderRemoteSession",
+            "lua.provider" to "org.autojs.autojs.core.plugin.lua.LuaRuntimeAcquiredProvider",
+        ),
+    ),
+    PYTHON(
+        "io.github.supermonster003.autojs6.plugin.python.runtime",
+        listOf(
+            "org.autojs.autojs.core.plugin.python.PythonHostCapabilityBroker",
+            "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution\$openSession\$executionCallback\$1",
+            "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution",
+            "org.autojs.autojs.core.plugin.python.PythonRuntimeOfficialTransport\$Binding",
+            "org.autojs.autojs.core.plugin.python.PythonRuntimeClient",
+            "org.autojs.autojs.engine.PythonPluginScriptEngine",
+        ),
+        linkedMapOf(
+            "python.broker" to "org.autojs.autojs.core.plugin.python.PythonHostCapabilityBroker",
+            "python.callback" to "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution\$openSession\$executionCallback\$1",
+            "python.execution" to "org.autojs.autojs.core.plugin.python.PythonRuntimeClient\$Execution",
+            "python.binding" to "org.autojs.autojs.core.plugin.python.PythonRuntimeOfficialTransport\$Binding",
+        ),
+    ),
 }
 
 /**
  * One scenario of the bridge leak gate (docs/memory-phase2/ROADMAP.md T2): a script for a plugin engine plus what the runner
  * does around it. [body] runs after the prelude of [BridgeScenarios.source]: inside an async function for Node and Bun, at the
- * top level inside try for QuickJS.
+ * top level inside try for QuickJS and Python, at the top level for Lua.
  * zh-CN: 桥接泄漏门禁的一个场景 (docs/memory-phase2/ROADMAP.md T2): 插件引擎脚本, 以及运行器在其前后要做的事. [body] 在
- * [BridgeScenarios.source] 的前导代码之后运行: Node 与 Bun 在一个 async 函数中, QuickJS 在顶层的 try 中.
+ * [BridgeScenarios.source] 的前导代码之后运行: Node 与 Bun 在一个 async 函数中, QuickJS 与 Python 在顶层的 try 中, Lua 在顶层.
  */
 internal class BridgeScenario(
     val id: String,
@@ -104,6 +137,11 @@ internal class BridgeScenario(
     val sourceFile: String? = null,
     /** Size of the GATE_DATA string literal in KiB (QuickJS only). zh-CN: GATE_DATA 字符串字面量的大小, 单位 KiB (仅 QuickJS). */
     val sourceDataKb: Int = 0,
+    /**
+     * Lua modules (name -> source) the runner writes to `<entry>.modules/`, from where the host snapshots them for require.
+     * zh-CN: Lua 模块 (名称 -> 源码), 运行器写到 `<入口>.modules/`, 宿主从那里为 require 生成快照.
+     */
+    val luaModules: Map<String, String> = emptyMap(),
 )
 
 internal object BridgeScenarios {
@@ -123,6 +161,18 @@ internal object BridgeScenarios {
         BridgeEngine.NODE -> nodeSource(scenario, mode, marker, png)
         BridgeEngine.BUN -> bunSource(scenario, mode, marker, png)
         BridgeEngine.QUICKJS -> quickJsSource(scenario, mode, marker, png)
+        BridgeEngine.LUA -> luaSource(scenario, mode, marker, png)
+        BridgeEngine.PYTHON -> pythonSource(scenario, mode, marker, png)
+    }
+
+    /**
+     * File name of the script in the working directory: Lua and Python accept file sources only.
+     * zh-CN: 脚本在工作目录中的文件名: Lua 与 Python 只接受文件源.
+     */
+    fun sourceFileName(scenario: BridgeScenario): String? = scenario.sourceFile ?: when (scenario.engine) {
+        BridgeEngine.LUA -> "aj6mem-${scenario.id.lowercase()}.lua"
+        BridgeEngine.PYTHON -> "aj6mem_${scenario.id.lowercase()}.py"
+        else -> null
     }
 
     /**
@@ -222,6 +272,60 @@ internal object BridgeScenarios {
             |}
             |""".trimMargin()
     }
+
+    /**
+     * The Lua source of a run: the gate helpers and [body] at the top level. Lua has no pcall in the plugin, so an error ends
+     * the execution with an exception (onException) instead of an AJ6MEM_ERROR line; there are no timers either, so gateBusy
+     * spins on autojs.now (the count hook keeps the loop cancellable).
+     * zh-CN: 一次运行的 Lua 源码: 门禁辅助函数, 以及放在顶层的 [body]. 插件中的 Lua 没有 pcall, 错误以异常 (onException) 结束执行,
+     * 而不是打印 AJ6MEM_ERROR 行; 也没有定时器, 因此 gateBusy 以 autojs.now 自旋 (计数钩子使循环可被取消).
+     */
+    fun luaSource(scenario: BridgeScenario, mode: GateMode, marker: String, png: String): String = """
+        |local autojs = require("autojs")
+        |local GATE_MODE = "${mode.label}"
+        |local GATE_MARKER = "$marker"
+        |local GATE_PNG = "$png"
+        |local function gateReady() autojs.console.log(GATE_MARKER .. " $READY_LINE") end
+        |local function gateStat(name, value) autojs.console.log(GATE_MARKER .. " $STAT_PREFIX" .. name .. " " .. tostring(value)) end
+        |local function gateSkip(reason) autojs.console.log(GATE_MARKER .. " $SKIP_PREFIX" .. reason) end
+        |local function gateBusy(ms)
+        |    local finish = autojs.now() + ms
+        |    while autojs.now() < finish do end
+        |end
+        |local function gateHold()
+        |    if GATE_MODE ~= "force" then return end
+        |    gateReady()
+        |    while true do gateBusy(1000) end
+        |end
+        |${scenario.body.trimIndent()}
+        |""".trimMargin()
+
+    /**
+     * The Python source of a run: the gate helpers and [body] inside try, whose Exception prints an AJ6MEM_ERROR line and
+     * is raised again. Every gate line is flushed, so it reaches the global console as its own output chunk.
+     * zh-CN: 一次运行的 Python 源码: 门禁辅助函数, 以及放在 try 中的 [body]; 捕获的 Exception 打印 AJ6MEM_ERROR 行后重新抛出.
+     * 每个门禁行都会刷新, 因此作为单独的输出块到达全局控制台.
+     */
+    fun pythonSource(scenario: BridgeScenario, mode: GateMode, marker: String, png: String): String = """
+        |import time
+        |from autojs6 import device, files, toast
+        |GATE_MODE = "${mode.label}"
+        |GATE_MARKER = "$marker"
+        |GATE_PNG = "$png"
+        |def gate_ready(): print(GATE_MARKER + " $READY_LINE", flush=True)
+        |def gate_stat(name, value): print(GATE_MARKER + " $STAT_PREFIX" + name + " " + str(value), flush=True)
+        |def gate_skip(reason): print(GATE_MARKER + " $SKIP_PREFIX" + reason, flush=True)
+        |def gate_error(e): print(GATE_MARKER + " $ERROR_PREFIX" + " | ".join((type(e).__name__ + ": " + str(e)).splitlines()[:4]), flush=True)
+        |def gate_hold():
+        |    if GATE_MODE != "force": return
+        |    gate_ready()
+        |    while True: time.sleep(1)
+        |try:
+        |${scenario.body.trimIndent().prependIndent("    ")}
+        |except Exception as e:
+        |    gate_error(e)
+        |    raise
+        |""".trimMargin()
 
     private val all = listOf(
         BridgeScenario(
@@ -602,6 +706,161 @@ internal object BridgeScenarios {
             body = """
                 console.log(GATE_MARKER + " memory gate");
                 gateHold();
+            """,
+        ),
+        BridgeScenario(
+            "LU1", "Empty script", "C11 C14",
+            notes = "X1: one line from a .lua file source, then the script ends; the smallest bind / lease / release path of Lua",
+            engine = BridgeEngine.LUA,
+            body = """
+                autojs.console.log(GATE_MARKER .. " memory gate")
+                gateHold()
+            """,
+        ),
+        BridgeScenario(
+            "LU2", "Host capabilities and module snapshot", "C11 C13",
+            notes = "X2: device.info + storage put / get / remove + ui.toast through the host broker, and require of a module " +
+                "file in <entry>.modules/ (module snapshot) as the data round trip",
+            engine = BridgeEngine.LUA,
+            luaModules = mapOf(
+                "aj6mem_helper" to """
+                    local M = {}
+                    function M.checksum(text)
+                        local sum = 0
+                        for i = 1, #text, 7 do sum = (sum * 31 + text:byte(i)) % 1000003 end
+                        return sum
+                    end
+                    return M
+                """.trimIndent(),
+            ),
+            body = """
+                local helper = require("aj6mem_helper")
+                local info = autojs.device.info()
+                gateStat("sdkInt", info.sdkInt)
+                autojs.storage.put("aj6mem", GATE_PNG:sub(1, 64))
+                gateStat("stored", autojs.storage.get("aj6mem") ~= nil)
+                autojs.storage.remove("aj6mem")
+                autojs.ui.toast("memory gate")
+                gateStat("checksum", helper.checksum(GATE_PNG))
+                gateHold()
+            """,
+        ),
+        BridgeScenario(
+            "LU3", "Output callbacks", "C11",
+            notes = "X3: Lua has no timers or host-pushed callbacks, so the output callback stands in: three ticks spinning 300 ms, " +
+                "each printing one line (one output event each); F keeps printing a line every 100 ms, so the stop lands while " +
+                "output events are in flight",
+            engine = BridgeEngine.LUA,
+            body = """
+                local ticks = 0
+                for _ = 1, 3 do
+                    gateBusy(300)
+                    ticks = ticks + 1
+                    autojs.console.log(GATE_MARKER .. " tick " .. ticks)
+                end
+                gateStat("ticks", ticks)
+                if GATE_MODE == "force" then
+                    gateReady()
+                    local i = 0
+                    while true do
+                        gateBusy(100)
+                        autojs.console.log(GATE_MARKER .. " flight " .. i)
+                        i = i + 1
+                    end
+                end
+            """,
+        ),
+        BridgeScenario(
+            "LU4", "Plugin process killed", "C11",
+            notes = "X4: device.info, then the runner force-stops the Lua plugin package once the script is ready; the run ends " +
+                "with an exception (expected); F stops forceDelayMs after the kill",
+            engine = BridgeEngine.LUA,
+            normalTimeoutMs = 90_000, killPluginOnReady = true, expectsFailure = true,
+            body = """
+                autojs.device.info()
+                gateReady()
+                gateBusy(5000)
+            """,
+        ),
+        BridgeScenario(
+            "LU5", "ColorOS bind refusal loop", "C11 C16",
+            notes = "OPD2413 only: the runner force-stops the Lua plugin before every run, so the first bindService is refused and " +
+                "PluginAutoWake binds again (as ND13); other devices skip and record",
+            engine = BridgeEngine.LUA,
+            colorOsOnly = true, forceStopPluginBeforeRun = true, normalTimeoutMs = 90_000,
+            body = """
+                autojs.device.info()
+                gateHold()
+            """,
+        ),
+        BridgeScenario(
+            "PY1", "Empty script", "C12",
+            notes = "X1: one line from a .py file source, then the script ends; the smallest admission / bind / retirement path " +
+                "of Python",
+            engine = BridgeEngine.PYTHON,
+            body = """
+                print(GATE_MARKER + " memory gate", flush=True)
+                gate_hold()
+            """,
+        ),
+        BridgeScenario(
+            "PY2", "Host capabilities and file round trip", "C9 C12 C13",
+            notes = "X2: device.info + files.write_text / read_text of 8 KiB in the script directory + toast through the host " +
+                "broker",
+            engine = BridgeEngine.PYTHON,
+            body = """
+                info = device.info()
+                gate_stat("battery", info["battery"]["percent"])
+                data = (GATE_PNG * (8192 // len(GATE_PNG) + 1))[:8192]
+                files.write_text("aj6mem_py2.txt", data)
+                gate_stat("roundTrip", files.read_text("aj6mem_py2.txt") == data)
+                toast("memory gate")
+                gate_hold()
+            """,
+        ),
+        BridgeScenario(
+            "PY3", "Output callbacks", "C12",
+            notes = "X3: the Python gate has no host-pushed callback without a foreground grant, so the output callback stands " +
+                "in: three ticks 300 ms apart, each printing one line (one output event each); F keeps printing a line every " +
+                "100 ms, so the stop lands while output events are in flight",
+            engine = BridgeEngine.PYTHON,
+            body = """
+                ticks = 0
+                for _ in range(3):
+                    time.sleep(0.3)
+                    ticks += 1
+                    print(GATE_MARKER + " tick " + str(ticks), flush=True)
+                gate_stat("ticks", ticks)
+                if GATE_MODE == "force":
+                    gate_ready()
+                    i = 0
+                    while True:
+                        time.sleep(0.1)
+                        print(GATE_MARKER + " flight " + str(i), flush=True)
+                        i += 1
+            """,
+        ),
+        BridgeScenario(
+            "PY4", "Plugin process killed", "C12",
+            notes = "X4: device.info, then the runner force-stops the Python plugin package once the script is ready; the run " +
+                "ends with an exception (expected); F stops forceDelayMs after the kill",
+            engine = BridgeEngine.PYTHON,
+            normalTimeoutMs = 90_000, killPluginOnReady = true, expectsFailure = true,
+            body = """
+                device.info()
+                gate_ready()
+                time.sleep(5)
+            """,
+        ),
+        BridgeScenario(
+            "PY5", "ColorOS bind refusal loop", "C12 C16",
+            notes = "OPD2413 only: the runner force-stops the Python plugin before every run, so the first bindService is refused " +
+                "and PluginAutoWake binds again (as ND13); other devices skip and record",
+            engine = BridgeEngine.PYTHON,
+            colorOsOnly = true, forceStopPluginBeforeRun = true, normalTimeoutMs = 90_000,
+            body = """
+                device.info()
+                gate_hold()
             """,
         ),
     )
