@@ -9,7 +9,8 @@ given objects (paths from global, as "Array.prototype"), as lines prefixed with 
 --global-classes also records the Java class names of global (the fields of augment/global/Classes.kt), which the
 global object resolves through its prototype without own properties: one "@lookup.<name>" line each with `in`, own
 property, `typeof` of the bare name, and `typeof` / String of the value read from global (surface_compare.py
---only @lookup compares them).
+--only @lookup compares them). logcat is cleared before each script starts and polled through its last lines, as in
+device_bench.py.
 """
 import argparse
 import json
@@ -20,6 +21,9 @@ import sys
 import time
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+from device_bench import clear_log, console_lines  # noqa: E402
 CLASSES_KT = HERE.parents[1] / "app/src/main/java/org/autojs/autojs/runtime/api/augment/global/Classes.kt"
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
@@ -38,11 +42,6 @@ def adb(serial, *args, check=False, text=True):
                           encoding="utf-8" if text else None, errors="replace" if text else None, check=check)
 
 
-def console_lines(serial):
-    out = adb(serial, "logcat", "-d").stdout
-    return [re.sub(r"^.*GlobalConsole: ", "", l).rstrip() for l in out.splitlines() if "GlobalConsole:" in l]
-
-
 def set_pref(serial, key, value, label):
     """Sets the boolean preference [key] through Pref.putBooleanSync in a small script and returns its previous value."""
     lines = [
@@ -57,6 +56,7 @@ def set_pref(serial, key, value, label):
     remote = f"{DEVICE_DIR}/aj6_switch.js"
     adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(serial, "push", str(local), remote, check=True)
+    clear_log(serial)
     before_lines = set(console_lines(serial))
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
     deadline = time.time() + 30
@@ -83,6 +83,7 @@ def global_class_names():
 
 
 def run_snapshot(serial, roots, lookup_names):
+    clear_log(serial)
     before = set(console_lines(serial))
     adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(serial, "shell", "rm", "-f", f"{DEVICE_DIR}/surface.json")

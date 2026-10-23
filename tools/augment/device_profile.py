@@ -50,6 +50,7 @@ def profile(s, expression, seconds):
     remote = f"{db.DEVICE_DIR}/aj6_profile.js"
     db.adb(s, "shell", "mkdir", "-p", db.DEVICE_DIR, check=True)
     db.adb(s, "push", str(local), remote, check=True)
+    db.clear_log(s)
     before = set(db.console_lines(s))
     db.adb(s, "shell", "am", "start", "-n", f"{db.PACKAGE}/{db.RUN_ACTIVITY}", "-e", "path", remote, check=True)
     time.sleep(3)

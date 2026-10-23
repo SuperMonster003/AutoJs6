@@ -7,8 +7,10 @@ The failing call benchmark (bench/error_path.js) runs --runs times and prints mi
 --calls runs bench/calls_prelude.js followed by bench/calls/NAME.js (the success and failing calls of one module group,
 next to Rhino reference cases) --runs times each and prints min / median / max per case; --skip-init skips the startup
 timing.
-GlobalConsole lines are polled from logcat every half second and accumulated, so a logcat clear by another
-process in the middle of a run only loses lines that were never seen. logcat is never cleared here.
+GlobalConsole lines are polled from logcat every half second and accumulated. logcat is cleared before each script
+starts (the lines of the previous script have been collected by then), and each poll reads only the last LOG_TAIL
+lines: the thermal HAL of XQ-AT72 writes about 860 lines a second, so a full `logcat -d` of its buffer took about 40 s
+and dropped lines (ROADMAP P3.3 / P3.6).
 """
 import argparse
 import pathlib
@@ -39,13 +41,22 @@ def adb(serial, *args, check=False):
                           errors="replace", check=check)
 
 
+# The logcat lines read per poll; at 860 lines a second this is about a minute of output between two polls.
+LOG_TAIL = 50000
+
+
+def clear_log(serial):
+    adb(serial, "logcat", "-c")
+
+
 def console_lines(serial):
-    out = adb(serial, "logcat", "-d").stdout
+    out = adb(serial, "logcat", "-d", "-t", str(LOG_TAIL)).stdout
     return [re.sub(r"^.*GlobalConsole: ", "", l).rstrip() for l in out.splitlines() if "GlobalConsole:" in l]
 
 
 def run_script(serial, remote, wait):
-    """Starts the script and returns the new GlobalConsole lines until the end mark or the timeout."""
+    """Clears logcat, starts the script and returns its GlobalConsole lines until the end mark or the timeout."""
+    clear_log(serial)
     before = set(console_lines(serial))
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
     deadline = time.time() + wait

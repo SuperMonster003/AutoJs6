@@ -16,7 +16,8 @@ afterwards; with --strict-errors two failures only agree when their error names 
 tests write their cases to app/build/script-modules-device/ (expected values in "kt"), for example:
 py -3.12 -I tools/augment/device_eval.py -s SERIAL --cases app/build/script-modules-device --new-modules on --strict-errors
 --debug-print sets the master switch of the new layer's debug printing (appendix C Q4) the same way, and --console
-prints the console (GlobalConsole) and ScriptModules logcat lines written while the cases ran.
+prints the console (GlobalConsole) and ScriptModules logcat lines written while the cases ran. logcat is cleared
+before each script starts and polled through its last lines, as in device_bench.py.
 """
 import argparse
 import json
@@ -28,6 +29,9 @@ import time
 import urllib.parse
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+from device_bench import clear_log, console_lines  # noqa: E402
 HOST = HERE.parents[1]
 DEFAULT_CASES = HOST / "app" / "build" / "augment-differential"
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
@@ -64,24 +68,28 @@ def adb(serial, *args, check=False):
                           errors="replace", check=check)
 
 
-def console_lines(serial):
-    out = adb(serial, "logcat", "-d").stdout
-    return [re.sub(r"^.*GlobalConsole: ", "", l).rstrip() for l in out.splitlines() if "GlobalConsole:" in l]
-
-
 def run_script(serial, remote, count, wait):
-    """Starts the script and collects the AJ6EVAL lines (logcat is polled, never cleared)."""
+    """Clears logcat, starts the script and collects the AJ6EVAL lines until the end mark, the host's line for the
+    end of the script (an error no script can catch ends it before the end mark) or the timeout."""
+    clear_log(serial)
     before = set(console_lines(serial))
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
     results = {}
     deadline = time.time() + wait
+    # Every translation of text_execution_finished starts with "[<path>] ", the path ending with the file name.
+    finished = "/" + remote.rsplit("/", 1)[-1] + "] "
     done = False
     while time.time() < deadline and not done:
         time.sleep(0.5)
         for line in console_lines(serial):
+            if line in before:
+                continue
+            if "/V: [" in line and finished in line:
+                done = True
+                continue
             # Console lines carry a "HH:mm:ss.SSS/D: " prefix before the message.
             start = line.find(MARK + " ")
-            if line in before or start < 0:
+            if start < 0:
                 continue
             rest = line[start + len(MARK) + 1:]
             if rest == "done":
@@ -114,6 +122,7 @@ def set_pref(serial, key, value, label):
     remote = f"{DEVICE_DIR}/aj6_switch.js"
     adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(serial, "push", str(local), remote, check=True)
+    clear_log(serial)
     before_lines = set(console_lines(serial))
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
     deadline = time.time() + 30

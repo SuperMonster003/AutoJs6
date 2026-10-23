@@ -1,6 +1,6 @@
 # Augment 重构工具
 
-配合 `docs/augment/ROADMAP.md` 使用. 这些工具都只读宿主源码或已安装的宿主, 不修改设备上的宿主数据; 真机脚本通过 `RunIntentActivity` 启动, 结果从 logcat 的 `GlobalConsole` 行读取 (轮询累积, 从不清空 logcat).
+配合 `docs/augment/ROADMAP.md` 使用. 这些工具都只读宿主源码或已安装的宿主, 不修改设备上的宿主数据; 真机脚本通过 `RunIntentActivity` 启动, 结果从 logcat 的 `GlobalConsole` 行读取 (每个脚本启动前 `logcat -c`, 每次轮询只读最后 50000 行 (`device_bench.LOG_TAIL`) 并累积; XQ-AT72 的 thermal HAL 每秒约 860 行, 全量 `logcat -d` 曾需约 40 s 且丢行).
 
 ## device_bench.py: 真机计时
 
@@ -71,7 +71,7 @@ py -3.12 -I tools/augment/surface_compare.py BEFORE.txt AFTER.txt [--only NAME .
 py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep] [--new-modules on|off] [--strict-errors]
 ```
 
-JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`) 运行时把已记录的偏差与 JVM 上只能跳过的表达式导出到 `app/build/augment-differential/<测试类>.json`. 本脚本把这些表达式合成一个脚本在设备上运行, 按 `DifferentialRhino.render` 的规则渲染结果, 与 JVM 上记录的 Kotlin 值比对 (两侧都抛出时视为一致, JVM 构造不出 Kotlin 的错误消息); 跳过的表达式没有期望值, 只打印设备结果. 输出只有不一致的条目与汇总行. 先运行差分测试生成 JSON; 设备上的临时目录 `/sdcard/Download/aj6-augment-bench` 用完即删 (`--keep` 保留).
+JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/`) 运行时把已记录的偏差与 JVM 上只能跳过的表达式导出到 `app/build/augment-differential/<测试类>.json`. 本脚本把这些表达式合成一个脚本在设备上运行, 按 `DifferentialRhino.render` 的规则渲染结果, 与 JVM 上记录的 Kotlin 值比对 (两侧都抛出时视为一致, JVM 构造不出 Kotlin 的错误消息); 跳过的表达式没有期望值, 只打印设备结果. 收到结束标记, 宿主的 "[<路径>] ..." 脚本结束行 (脚本捕获不到的错误, 如旧实现经反射抛出的 InvocationTargetException 或 java.lang.Error, 会在结束标记之前结束脚本) 或等到 `--wait` 秒时停止读取. 输出只有不一致的条目与汇总行. 先运行差分测试生成 JSON; 设备上的临时目录 `/sdcard/Download/aj6-augment-bench` 用完即删 (`--keep` 保留).
 
 新脚本模块层的 JVM 测试 (`app/src/test/java/org/autojs/autojs/runtime/api/modules/`) 把新模块的期望值导出到 `app/build/script-modules-device/*.json` (同一格式, 期望值在 `kt`). 复核新模块时打开开关并比较错误类型: `--cases app/build/script-modules-device --new-modules on --strict-errors` (`--new-modules` 与 device_bench.py 相同, 结束后恢复原值; `--strict-errors` 让两侧都抛出时也要求错误名一致). `--debug-print on|off` 同样临时设置新模块层调试打印的总开关 (附录 C Q4, 键 `key_$_script_module_debug_print`), `--console` 打印本次运行期间 logcat 中 `GlobalConsole` (脚本控制台) 与 `ScriptModules` 标签的行, 用于查看调试条目原文.
 
