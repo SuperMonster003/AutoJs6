@@ -59,9 +59,8 @@ class LuaRuntimeProviderSelectionPolicyTest {
         assertEquals(
             LuaRuntimeProviderRejection.INFO_RUNTIME_ABI_MISMATCH,
             rejection(
-                runtimeInfo = runtimeInfo(
-                    supportedAbis = listOf("arm64-v8a", "x86_64"),
-                ),
+                descriptor = descriptor(infoSupportedAbis = listOf("arm64-v8a", "x86_64")),
+                runtimeInfo = runtimeInfo(supportedAbis = listOf("arm64-v8a")),
             ),
         )
 
@@ -70,6 +69,48 @@ class LuaRuntimeProviderSelectionPolicyTest {
                 descriptor = descriptor(infoSupportedAbis = listOf("x86_64", "arm64-v8a")),
                 runtimeInfo = runtimeInfo(supportedAbis = listOf("arm64-v8a", "x86_64")),
             ) is LuaRuntimeProviderSelectionResult.Selected,
+        )
+    }
+
+    /** INFO lists the ABIs packed in the installed APK, a subset of the build's ABIs (docs/memory-phase2/ROADMAP.md C40). */
+    @Test
+    fun infoAbisMayBeASubsetOfRuntimeAbisThatTheDeviceSupports() {
+        val buildAbis = listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+        val device = environment(supportedProcessAbis = listOf("arm64-v8a", "armeabi-v7a", "armeabi"))
+
+        // Universal APK installed as is.
+        assertTrue(
+            select(
+                descriptor = descriptor(infoSupportedAbis = buildAbis.reversed()),
+                runtimeInfo = runtimeInfo(supportedAbis = buildAbis),
+                environment = device,
+            ) is LuaRuntimeProviderSelectionResult.Selected,
+        )
+        // Single-ABI split APK, or a universal APK whose foreign ABIs the installer stripped.
+        assertTrue(
+            select(
+                descriptor = descriptor(infoSupportedAbis = listOf("arm64-v8a")),
+                runtimeInfo = runtimeInfo(supportedAbis = buildAbis),
+                environment = device,
+            ) is LuaRuntimeProviderSelectionResult.Selected,
+        )
+        // A split APK for another device packs no ABI this device can load.
+        assertEquals(
+            LuaRuntimeProviderRejection.INFO_ABI_UNSUPPORTED,
+            rejection(
+                descriptor = descriptor(infoSupportedAbis = listOf("x86_64")),
+                runtimeInfo = runtimeInfo(supportedAbis = buildAbis),
+                environment = device,
+            ),
+        )
+        // INFO claims an ABI the runtime was not built for.
+        assertEquals(
+            LuaRuntimeProviderRejection.INFO_RUNTIME_ABI_MISMATCH,
+            rejection(
+                descriptor = descriptor(infoSupportedAbis = listOf("arm64-v8a", "riscv64")),
+                runtimeInfo = runtimeInfo(supportedAbis = buildAbis),
+                environment = device,
+            ),
         )
     }
 
@@ -134,8 +175,8 @@ class LuaRuntimeProviderSelectionPolicyTest {
         assertEquals(
             LuaRuntimeProviderRejection.ABI_UNSUPPORTED,
             rejection(
-                descriptor = descriptor(infoSupportedAbis = listOf("x86_64")),
-                runtimeInfo = runtimeInfo(processAbi = "x86_64"),
+                descriptor = descriptor(infoSupportedAbis = listOf("arm64-v8a", "x86_64")),
+                runtimeInfo = runtimeInfo(processAbi = "x86_64", supportedAbis = listOf("arm64-v8a", "x86_64")),
                 environment = environment(supportedProcessAbis = listOf("arm64-v8a")),
             ),
         )

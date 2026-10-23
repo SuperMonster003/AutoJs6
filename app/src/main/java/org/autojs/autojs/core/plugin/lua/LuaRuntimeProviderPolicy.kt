@@ -153,6 +153,7 @@ internal enum class LuaRuntimeProviderRejection {
     INFO_ABI_INVENTORY_INVALID,
     INFO_RUNTIME_VERSION_MISMATCH,
     INFO_RUNTIME_ABI_MISMATCH,
+    INFO_ABI_UNSUPPORTED,
     NOT_EXPORTED,
     DISABLED,
     WRONG_PERMISSION,
@@ -354,8 +355,16 @@ internal object LuaRuntimeProviderSelectionPolicy {
         if (info.providerVersionCode != candidate.descriptor.infoVersionCode) {
             return EvaluationResult(LuaRuntimeProviderRejection.INFO_RUNTIME_VERSION_MISMATCH, null)
         }
-        if (info.supportedAbis.toSet() != candidate.descriptor.infoSupportedAbis.toSet()) {
+        // INFO reports the ABIs packed in the installed APK, runtime information every ABI of the build: a split APK, or
+        // a universal APK whose foreign ABIs the installer stripped (ColorOS), packs only some (docs/memory-phase2/ROADMAP.md C40).
+        // zh-CN: INFO 报告已安装 APK 中打包的 ABI, 运行时信息报告该构建的全部 ABI: 拆分包或被安装器剥离了其他 ABI 的通用包 (ColorOS)
+        // 只含其中一部分 (docs/memory-phase2/ROADMAP.md C40).
+        val infoAbis = candidate.descriptor.infoSupportedAbis
+        if (!info.supportedAbis.containsAll(infoAbis)) {
             return EvaluationResult(LuaRuntimeProviderRejection.INFO_RUNTIME_ABI_MISMATCH, null)
+        }
+        if (infoAbis.none { it in environment.supportedProcessAbis }) {
+            return EvaluationResult(LuaRuntimeProviderRejection.INFO_ABI_UNSUPPORTED, null)
         }
         if (info.minHostVersionCode?.let { environment.hostVersionCode < it } == true ||
             info.maxHostVersionCode?.let { environment.hostVersionCode > it } == true

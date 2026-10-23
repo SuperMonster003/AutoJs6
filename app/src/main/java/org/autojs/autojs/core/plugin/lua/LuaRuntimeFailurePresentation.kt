@@ -37,6 +37,7 @@ internal enum class LuaRuntimeFailurePresentation {
             LuaRuntimeProviderRejection.INFO_ABI_INVENTORY_INVALID,
             LuaRuntimeProviderRejection.INFO_RUNTIME_VERSION_MISMATCH,
             LuaRuntimeProviderRejection.INFO_RUNTIME_ABI_MISMATCH,
+            LuaRuntimeProviderRejection.INFO_ABI_UNSUPPORTED,
             LuaRuntimeProviderRejection.INVALID_RUNTIME_INFO,
             LuaRuntimeProviderRejection.HOST_VERSION_UNSUPPORTED,
             LuaRuntimeProviderRejection.PROTOCOL_UNSUPPORTED,
