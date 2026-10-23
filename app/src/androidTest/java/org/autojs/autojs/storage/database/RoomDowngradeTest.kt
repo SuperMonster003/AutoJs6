@@ -2,6 +2,7 @@ package org.autojs.autojs.storage.database
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import androidx.core.app.NotificationManagerCompat
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -26,10 +27,12 @@ import org.junit.runner.RunWith
  * identity hash, `user_version` one above the code version), then opened through the production builder.
  * Room must open it without throwing, keep the rows and the values of the shared columns, keep the extra table,
  * store the identity hash of the code version, and open it again without another migration.
+ * A file whose rebuild fails is kept by [DatabaseRecovery] as a backup and replaced by an empty database.
  *
  * zh-CN: [RoomDowngrade] 的降级回归 (docs/db-downgrade/ROADMAP.md P2.2): 用原生 SQL 写出 "未来" 库文件 (打包的 schema
  * 快照中的表, 多一列, 多一张表与索引, 别的 identity hash, `user_version` 比代码版本高 1), 再经生产 builder 打开.
  * Room 应打开而不抛异常, 保留行与共有列的值, 保留多出的表, 写入代码版本的 identity hash, 再次打开时不再迁移.
+ * 重建失败的文件由 [DatabaseRecovery] 留作备份, 改用空库.
  *
  * Created by Claude (Opus 5.5) on Oct 23, 2026.
  */
@@ -39,16 +42,20 @@ class RoomDowngradeTest {
     private val context: Context
         get() = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private val names = listOf(HISTORY_DB, COLOR_DB, KEYSTORE_DB)
+    private val names = listOf(HISTORY_DB, COLOR_DB, KEYSTORE_DB, FALLBACK_DB)
 
     @Before
-    fun deleteBefore() {
-        names.forEach { context.deleteDatabase(it) }
-    }
+    fun deleteBefore() = deleteAll()
 
     @After
     fun deleteAfter() {
-        names.forEach { context.deleteDatabase(it) }
+        deleteAll()
+        NotificationManagerCompat.from(context).cancel(DatabaseRecovery.NOTIFICATION_TAG_PREFIX + FALLBACK_DB.removeSuffix(".db"), DatabaseRecovery.NOTIFICATION_ID)
+    }
+
+    private fun deleteAll() = names.forEach { name ->
+        DatabaseRecovery.backupsOf(context.getDatabasePath(name)).forEach { context.deleteDatabase(it.file.name) }
+        context.deleteDatabase(name)
     }
 
     @Test
@@ -180,6 +187,49 @@ class RoomDowngradeTest {
         }
     }
 
+    @Test
+    fun fileThatStillCannotOpenIsBackedUpAndReplacedByEmptyDatabase() {
+        val schema = createFuture(FALLBACK_DB, HistoryDatabase::class.java) { db ->
+            // The newer version made sha256 nullable and stored a NULL, which this version cannot hold,
+            // so the rebuild fails and rolls back.
+            // zh-CN: 较新版本把 sha256 改为可空并写入了 NULL, 本版本无法容纳, 因此重建失败并回滚.
+            db.execSQL("DROP TABLE revision")
+            db.execSQL(
+                "CREATE TABLE revision (revId TEXT NOT NULL, fileId TEXT NOT NULL, op TEXT NOT NULL, createdAt INTEGER NOT NULL, " +
+                        "logicalPathAtThatTime TEXT NOT NULL, encoding TEXT NOT NULL, hadBom INTEGER NOT NULL, sizeBytes INTEGER NOT NULL, " +
+                        "sha256 TEXT, blobRelPath TEXT NOT NULL, label TEXT, pinned INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(revId))"
+            )
+            db.execSQL(
+                "INSERT INTO revision VALUES ('rev-1', 'file-1', 'SAVE_PRE', 1200, '/storage/emulated/0/a.js', 'UTF-8', 0, 42, NULL, 'history/blob/file-1/rev-1', NULL, 1)"
+            )
+        }
+        val file = context.getDatabasePath(FALLBACK_DB)
+
+        open(HistoryDatabase.createBuilder(context, FALLBACK_DB)) { _, db ->
+            assertEquals(schema.version, count(db, "PRAGMA user_version"))
+            assertEquals(0, count(db, "SELECT COUNT(*) FROM revision"))
+            db.execSQL(
+                "INSERT INTO file_entry (fileId, logicalPath, createdAt, lastSeenAt, latestFingerprint) VALUES ('file-2', '/storage/emulated/0/b.js', 1, 1, 'fp-2')"
+            )
+        }
+        val backup = DatabaseRecovery.backupsOf(file).single()
+        assertEquals(schema.version + 1, backup.version)
+        SQLiteDatabase.openDatabase(backup.file.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            assertEquals(schema.version + 1, db.version)
+            db.rawQuery("SELECT COUNT(*) FROM revision WHERE revId = 'rev-1' AND sha256 IS NULL", null).use {
+                assertTrue(it.moveToFirst())
+                assertEquals(1, it.getInt(0))
+            }
+        }
+
+        // The backup is newer than the code, so the next open neither restores it nor backs up again.
+        // zh-CN: 备份比代码新, 因此下次打开既不还原它, 也不再次备份.
+        open(HistoryDatabase.createBuilder(context, FALLBACK_DB)) { _, db ->
+            assertEquals(1, count(db, "SELECT COUNT(*) FROM file_entry WHERE fileId = 'file-2'"))
+        }
+        assertEquals(listOf(backup.file), DatabaseRecovery.backupsOf(file).map { it.file })
+    }
+
     private class SchemaInfo(val version: Int, val identityHash: String, val columns: Map<String, Set<String>>)
 
     /**
@@ -264,5 +314,6 @@ class RoomDowngradeTest {
         const val HISTORY_DB = "room-downgrade-test-history.db"
         const val COLOR_DB = "room-downgrade-test-color.db"
         const val KEYSTORE_DB = "room-downgrade-test-keystore"
+        const val FALLBACK_DB = "room-downgrade-test-fallback.db"
     }
 }

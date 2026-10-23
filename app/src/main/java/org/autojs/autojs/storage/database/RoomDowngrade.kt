@@ -25,7 +25,8 @@ import org.json.JSONObject
  * A table missing a column this version requires (NOT NULL, no default), or sharing no column with the snapshot,
  * cannot keep its rows: it is renamed aside as `_downgrade_kept_<table>_v<file version>` instead of being dropped,
  * and the new table starts empty.
- * Any failure rolls the transaction back and leaves the file unchanged.
+ * Any failure rolls the transaction back and leaves the file unchanged; the first open goes through
+ * [DatabaseRecovery], which then keeps the file as a backup and continues with an empty database.
  *
  * The file version comes from SQLiteOpenHelper while Room opens the database on a background thread
  * (none of these databases allows main thread queries), so building the database does no disk IO.
@@ -39,7 +40,8 @@ import org.json.JSONObject
  * 迁移按为代码版本打包的 schema 快照 (assets `db-schemas/<类全名>/<版本>.json`, 构建时从 `app/schemas` 复制) 重建
  * 每张表: 按记录的 `createSql` 建表, 复制文件与快照共有的列, 删除旧表, 新表改名, 重建索引. 快照未声明的表原样保留
  * (Room 只校验声明的实体). 某张表缺少本版本必需的列 (NOT NULL 且无默认值), 或与快照没有共有列时, 其行无法保留: 旧表改名为
- * `_downgrade_kept_<表名>_v<文件版本>` 而不删除, 新表为空. 任何失败都会回滚事务, 文件保持不变.
+ * `_downgrade_kept_<表名>_v<文件版本>` 而不删除, 新表为空. 任何失败都会回滚事务, 文件保持不变; 首次打开经过 [DatabaseRecovery],
+ * 此时由它把文件留作备份并改用空库.
  * 文件版本由 SQLiteOpenHelper 在 Room 于后台线程打开库时给出 (这几个库都不允许主线程查询), 因此构建库时没有磁盘 IO.
  * 构建后再注册迁移依赖 builder 与构建出的库共用同一个迁移容器 (Room 2.8.1 如此), 由 `RoomDowngradeTest` 覆盖.
  *
@@ -80,7 +82,7 @@ object RoomDowngrade {
 
         override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
             val callback = DowngradeCallback(configuration.callback, register)
-            return delegate.create(
+            val helper = delegate.create(
                 SupportSQLiteOpenHelper.Configuration(
                     configuration.context,
                     configuration.name,
@@ -89,6 +91,50 @@ object RoomDowngrade {
                     configuration.allowDataLossOnRecovery,
                 )
             )
+            return RecoveringOpenHelper(configuration.context, helper, configuration.callback.version)
+        }
+    }
+
+    /**
+     * Sends the first open of [delegate] through [DatabaseRecovery.openOrRecover], so that a file Room still cannot open
+     * (the rebuild failed and rolled back, the identity check failed, the file is not a database) is moved aside as a
+     * backup and an empty database is created instead of failing every query. Later calls go to [delegate] directly,
+     * since Room asks for the database on every query. The open happens on Room's background thread, like the downgrade.
+     * zh-CN: 让 [delegate] 的首次打开经过 [DatabaseRecovery.openOrRecover]: Room 仍无法打开的文件 (重建失败并回滚,
+     * identity 校验失败, 文件不是数据库) 改名为备份, 改用新建的空库, 而不是每次查询都失败. 之后的调用直接交给 [delegate],
+     * 因为 Room 每次查询都会取库. 打开与降级一样发生在 Room 的后台线程.
+     */
+    private class RecoveringOpenHelper(
+        private val context: Context,
+        private val delegate: SupportSQLiteOpenHelper,
+        private val codeVersion: Int,
+    ) : SupportSQLiteOpenHelper by delegate {
+
+        @Volatile
+        private var opened = false
+
+        override val writableDatabase: SupportSQLiteDatabase
+            get() = database { delegate.writableDatabase }
+
+        override val readableDatabase: SupportSQLiteDatabase
+            get() = database { delegate.readableDatabase }
+
+        private fun database(get: () -> SupportSQLiteDatabase): SupportSQLiteDatabase {
+            if (opened) return get()
+            // An in-memory database has no file to back up.
+            // zh-CN: 内存库没有可备份的文件.
+            val name = delegate.databaseName ?: return get()
+            synchronized(this) {
+                if (opened) return get()
+                return DatabaseRecovery.openOrRecover(context, name, codeVersion, onFailure = { delegate.close() }, open = get).also { opened = true }
+            }
+        }
+
+        override fun close() {
+            synchronized(this) {
+                opened = false
+                delegate.close()
+            }
         }
     }
 
