@@ -4,7 +4,7 @@
 
 The device needs the debug Host, its androidTest package and the real Python Runtime plugin installed (this runner
 never installs, uninstalls or clears anything). Every class guards itself with its own opt-in argument: by default all
-seven arguments are passed and each test must pass; with --disabled none is passed and each test must fail fast on its
+nine arguments are passed and each test must pass; with --disabled none is passed and each test must fail fast on its
 opt-in guard instead of binding the plugin. Output: PASS / FAIL per test with its duration and, for a failure, the
 first line of the reported stack; then a summary. Exit code 0 only when every selected test met the expectation.
 """
@@ -25,6 +25,8 @@ RUNNER = "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
 DIAGNOSTICS = {
     "PythonRuntimeU1R1StartLeaseInstrumentationTest": ("autojs.python.u1r1.startLease.enabled", 1),
     "PythonRuntimeU1R2BinderInstrumentationTest": ("autojs.python.u1r2.binder.enabled", 2),
+    "PythonRuntimeRealPluginDiagnosticTest": ("autojs.python.r2.real.enabled", 1),
+    "PythonRuntimeRealPluginCancelRebindDiagnosticTest": ("autojs.python.r2.cancelRebind.enabled", 1),
     "PythonRuntimeRealPluginExecutionMatrixDiagnosticTest": ("autojs.python.r2.execution.matrix.enabled", 4),
     "PythonRuntimeRealPluginTimeoutRebindDiagnosticTest": ("autojs.python.r2.timeoutRebind.enabled", 1),
     "PythonRuntimeRealPluginReliablePipeDiagnosticTest": ("autojs.python.r2.reliablePipe.enabled", 1),
@@ -94,7 +96,7 @@ def main():
         # The stack field holds the exception line; later frames arrive as unprefixed lines and are not kept.
         detail = entry.get("stack", "").strip()[:220]
         if args.disabled:
-            ok = code in (-2, -3, -4) and seconds <= FAST_FAIL_SECONDS and (code != -2 or "explicit opt-in" in detail)
+            ok = code in (-2, -3, -4) and seconds <= FAST_FAIL_SECONDS and (code != -2 or "opt-in" in detail)
         else:
             ok = code == 0
         met += ok

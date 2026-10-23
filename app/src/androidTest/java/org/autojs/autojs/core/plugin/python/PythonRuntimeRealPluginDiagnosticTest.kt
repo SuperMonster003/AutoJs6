@@ -320,8 +320,8 @@ class PythonRuntimeRealPluginDiagnosticTest {
         sourceFile.writeBytes(source)
         try {
             ParcelFileDescriptor.open(sourceFile, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
-                bound.provider.openSession(
-                    PythonRuntimeCodec.encodeExecutionRequest(request),
+                bound.provider.openSessionForNegotiatedProtocol(
+                    request,
                     arrayOf(descriptor),
                     admissionCallback,
                     executionCallback,
