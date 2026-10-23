@@ -108,6 +108,7 @@ Module 对象 (`new Module(id, parent, core)`, 脚本仍可自行构造):
 - 与关态 `new Function` 的区别只在源名:
   - 关态错误的文件名为 `file:///android_asset/modules/jvm-npm.js#109(Function)`, 新实现为模块路径.
   - 行号两者相同 (JVM 实测, 源码第 3 行的错误两者都报第 3 行).
+  - 模块源码有语法错误时两态都抛 SyntaxError, 不进缓存. 新实现的 `compileFunction` 抛出的是 EvaluatorException (在脚本中会成为 InternalError), 改为与 `new Function` 相同的 SyntaxError (消息以 `TypeError: ` 开头时为 TypeError), 带模块路径, 行号与列号 (G8441 smoke 发现, 2026-10-23).
 - 首行 `#!` 改为注释, 同关态.
 - 读取:
   - 加密脚本 (以 `EncryptedScriptFileHeader` 开头) 解密后执行, 明文字节用后清零, 同关态.

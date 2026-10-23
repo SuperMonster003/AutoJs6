@@ -77,6 +77,7 @@ class ScriptRequireDifferentialTest {
         write("shebang.js", "#!/usr/bin/env node\nvar line; try { null.x; } catch (e) { line = e.lineNumber; } module.exports = 'sb ' + line;")
         write("empty.js", "")
         write("Up.JS", "module.exports = 'upper';")
+        write("syntax.js", "var a = 1;\nvar b = {;")
         write("err3.js", "var a = 1;\nvar b = 2;\nnull.boom;")
         write("lines.js", "\nmodule.exports = [new Error('x').lineNumber, (function () { try { null.x; } catch (e) { return e.lineNumber; } })()];")
         write("badpkg/package.json", "{bad")
@@ -212,6 +213,7 @@ class ScriptRequireDifferentialTest {
         "attempt(function () { return require(); })",
         "attempt(function () { return require(1); })",
         "(function () { try { require('./err3'); } catch (e) { return [e.name, e.message, e.lineNumber, require.resolve('./err3') in require.cache]; } })()",
+        "(function () { try { require('./syntax'); } catch (e) { return [e.name, e.message, e.lineNumber, e instanceof SyntaxError, require.resolve('./syntax') in require.cache]; } })()",
         "require('./lines')",
         "(function () { try { require('./broken.json'); } catch (e) { return [e.name, e.message]; } })()",
         "(function () { try { require('./badpkg'); } catch (e) { return [e.name, e.message, e.code, e instanceof Error, e.cause.name]; } })()",

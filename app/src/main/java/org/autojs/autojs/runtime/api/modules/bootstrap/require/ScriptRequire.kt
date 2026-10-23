@@ -17,6 +17,7 @@ import org.mozilla.javascript.BoundFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.EcmaError
+import org.mozilla.javascript.EvaluatorException
 import org.mozilla.javascript.JavaScriptException
 import org.mozilla.javascript.LambdaFunction
 import org.mozilla.javascript.LazyDataSlot
@@ -261,7 +262,18 @@ internal class ScriptRequire(
         RhinoScriptRuntime.setObjectProp(moduleRequire, "extensions", extensions, cx, scope)
         // The header shares the first line with the source, so that line numbers are those of the file.
         // zh-CN: 函数头与源码第一行同行, 因此行号与文件一致.
-        return cx.compileFunction(scope, "$WRAPPER_HEAD$body\n}", file, 1, null)
+        return try {
+            cx.compileFunction(scope, "$WRAPPER_HEAD$body\n}", file, 1, null)
+        } catch (e: EvaluatorException) {
+            // A SyntaxError (or TypeError) as from `new Function` in jvm-npm, not the InternalError of a Java exception.
+            // zh-CN: 同 jvm-npm 中 new Function 的 SyntaxError (或 TypeError), 而不是 Java 异常的 InternalError.
+            val details = e.details()
+            val typeError = details.startsWith(TYPE_ERROR_PREFIX)
+            throw RhinoScriptRuntime.constructError(
+                if (typeError) "TypeError" else "SyntaxError", if (typeError) details.substring(TYPE_ERROR_PREFIX.length) else details,
+                e.sourceName(), e.lineNumber(), e.lineSource(), e.columnNumber(),
+            )
+        }
     }
 
     private fun loadJson(cx: Context, file: String): Any? {
@@ -436,6 +448,7 @@ internal class ScriptRequire(
         private const val NODE_PROTOCOL = "node:"
         private const val EXPORTS_FIELD = "_exports"
         private const val WRAPPER_HEAD = "function (exports, require, module, __filename, __dirname) {"
+        private const val TYPE_ERROR_PREFIX = "TypeError: "
 
         private const val RUNNER_NAME = "<require>"
 
