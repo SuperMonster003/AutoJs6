@@ -61,7 +61,12 @@ object DatabaseRecovery {
 
     private val COMPANION_SUFFIXES = listOf("-journal", "-wal", "-shm")
 
-    private val BACKUP_NAME = Regex("""^(.+?\.db)\.bak-(\d+)-(\d{14})$""")
+    // Any database name, with or without `.db` (Room's `keystore-database` has none).
+    // zh-CN: 任意库名, 带不带 `.db` 都可以 (Room 的 `keystore-database` 不带).
+    private val BACKUP_NAME = Regex("""^(.+)\.bak-(\d+)-(\d{14})$""")
+
+    // Tables that a new, empty database already has rows in. zh-CN: 新建的空库里就已经有行的表.
+    private val INTERNAL_TABLES = listOf("android_metadata", "room_master_table")
 
     private val SQLITE_MAGIC = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
 
@@ -195,17 +200,17 @@ object DatabaseRecovery {
     }
 
     /**
-     * Whether no table other than the SQLite and Android internal ones has a row. A file that cannot be read counts as
-     * having rows, so it is never replaced.
-     * zh-CN: 除 SQLite 与 Android 内部表外的所有表是否都没有行. 读不了的文件算作有行, 因此不会被替换.
+     * Whether no table other than the SQLite, Android and Room internal ones has a row. A file that cannot be read counts
+     * as having rows, so it is never replaced.
+     * zh-CN: 除 SQLite, Android 与 Room 内部表外的所有表是否都没有行. 读不了的文件算作有行, 因此不会被替换.
      */
     private fun hasNoRows(file: File): Boolean = runCatching {
         SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
             val tables = db.rawQuery(
-                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\' AND name <> 'android_metadata'",
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\'",
                 null,
             ).use { cursor -> List(cursor.count) { cursor.moveToPosition(it); cursor.getString(0) } }
-            tables.none { table ->
+            tables.filter { it !in INTERNAL_TABLES }.none { table ->
                 db.rawQuery("SELECT EXISTS (SELECT 1 FROM `${table.replace("`", "``")}`)", null).use { it.moveToFirst() && it.getInt(0) != 0 }
             }
         }
