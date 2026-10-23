@@ -1,6 +1,6 @@
 # Shizuku 用户服务进程残留与 OOM 加固路线图 (issue #474)
 
-更新日期: 2026-10-22 (立项; 同日 P0 完成, Q1 / Q2 拍板为 D10 / D11)
+更新日期: 2026-10-23 (P3 立项: Q5 / Q6 / Q7 拍板为 D14 / D15 / D16; 2026-10-22 立项, 同日 P0 完成, Q1 / Q2 拍板为 D10 / D11)
 
 本文是 GitHub issue #474 "shizuku-service-autojs6 僵尸进程导致 oom" 的可执行状态表. 它记录立项时查明的事实 (第 1 节), 维护者 2026-10-22 经三轮选择题确认的 9 项决策 (第 2 节), 派生技术决策 (第 3 节), 红线 (第 4 节), 阶段任务 (第 5 节) 与附录 (决策记录, 证据数字, 待决事项, 文件地图). 内存路线图 `docs/memory/ROADMAP.md` 附录 C Q4 决定该 issue 不纳入内存路线图, Q52 决定单独立项, 位置即本文.
 
@@ -21,7 +21,8 @@
 | --- | --- | --- | --- |
 | P0 复现, 负对照与边界探针 | 探针能检出堆积, 报告者场景在当前构建上残留为 0, 5 条边界路径与内存画像有数字 | P0.1-P0.4 全部有报告, 附录 B 填满 (2026-10-22 完成) | 1 |
 | P1 修复与加固 | 子进程清理, 用户服务自守护, getevent 常驻进程 (P1.5); 进程内存 (P1.4) 已取消 (D12) | P1.1 / P1.2 / P1.5 真机探针残留 0 (含 stray 0) 并有 JVM 单测 (2026-10-23 完成) | 1-2 |
-| P2 回归, changelog 与发布门 | T6 的 Shizuku 功能回归 (9 项) 通过, changelog 条目, 6.8.0 发布门一行 | P2.1-P2.4 勾选, 本地提交 (2026-10-23 完成, 与 P1 同一会话; Q5 待确认) | 1 (可与 P1 同一会话) |
+| P2 回归, changelog 与发布门 | T6 的 Shizuku 功能回归 (9 项) 通过, changelog 条目, 6.8.0 发布门一行 | P2.1-P2.4 勾选, 本地提交 (2026-10-23 完成, 与 P1 同一会话; Q5 已决为 D14, 补跑在 P3.3) | 1 (可与 P1 同一会话) |
+| P3 附带发现与 T6 (8) 补跑 (D14 / D15) | "音量键控制" 开关运行中改开即生效, `TouchRecorder` 自建的观察器随录制结束回收, 另一台设备补跑 T6 (8) 的 RootAutomator 冒烟 | P3.1-P3.5 勾选, 本地提交; P3.3 无合适设备时登记 Q8 | 1 |
 
 ---
 
@@ -67,6 +68,8 @@
 - 第二类残留 (P1.1 范围): 宿主被强停时, 用户服务正在执行的 `getevent -t -c 1` (`ProcessShell.execCommand` 的 `Runtime.exec("sh")` 及其子进程) 随服务死亡被 init 收养, 直到下一个实体输入事件才退出 (`input` 注入的事件不经 evdev, 不能让它退出). G8441 (root) 静置一晚累积 32 对 `sh` + `getevent`, RSS 合计约 115 MB (多为共享页). 探针把它记为 stray (不参与判定), shell 身份的会被探针结束.
 - 10 秒超时重绑 (P0.3(d)) 在 G8441 装包后首次启动时自然发生: 新装 APK 冷加载 dex, 第一个服务进程从启动到构造约 19 秒, 宿主 10 秒后 `unbindUserService(remove = true)` 再绑, 第二个进程启动; 两者同时构造完成后, 记录已被移除的旧进程交付 binder 失败, 启动器 `System.exit(1)` 退出, 新进程正常服务; Shizuku 30 秒后报旧记录 "is not started in 30000 ms". 结果: 无永久残留, 约 19 秒内两个服务进程 (各约 65 MB) 并存. 日志摘录在共享笔记 `shizuku-oom-p0-g8441-rebind.md`.
 - 负对照里宿主崩溃 (P0.2, 附录 C Q4): v6.6.4 覆盖装在 6.8.0 的数据上, 宿主初始化时抛 `SQLiteException: Can't downgrade database from version 5 to 3` 崩溃, 系统随即重启宿主 (每轮最多 3 次, 之后不再重启, 直到探针强停). v6.6.4 在宿主进程初始化 (`handleBindApplication`) 期间同步调用 `WrappedShizuku.execCommand` 等待用户服务 (日志 "Unable to use Shizuku service", 5 秒), 所以每个宿主进程都拉起一个服务, 崩溃与强停后都不退出: 每轮残留 +1 到 +3, 测试脚本的标记文件一轮也没写出. 堆积机制与报告者相同 (服务不随宿主死亡退出), 堆积速度等于宿主进程的启动次数. 没有在干净数据上重跑 (需要清宿主数据).
+- 打包应用的降级崩溃循环 (P0.3(c) 附带发现, 附录 C Q7, D16 不在本主题处理): XQ-AT72 上他人安装的 `org.autojs.autojs6.inrt` 在 Shizuku 服务端重启后被唤醒, 初始化时数据库 4 -> 3 降级崩溃, 系统反复重启 (P0 期间 123 次, `am force-stop` 止住). 与上一条的宿主崩溃同类 (旧版本装在新版本数据上). 维护者另立主题 db-downgrade 排查; 该机上的 inrt 包保留作复现样本, 不要卸载. 摘录在共享笔记 `shizuku-oom-p0-xq-at72-findings.md`.
+- P1 附带发现, 修前即有 (附录 C Q6, D15 在 P3 修复): (1) 宿主启动时 "音量键控制" (运行与录制两项) 都关闭, `App.onCreate` 的 `GlobalKeyObserver.initIfNeeded` 不创建单例, 设置变化的监听又挂在单例上, 之后打开开关无人响应, 只有悬浮按钮菜单 (`CircularMenu`) 会创建单例, 否则要重启宿主; (2) `TouchRecorder(Context)` 在构造时自建 `InputEventObserver` 并立即 `observe()`, 而 `GlobalActionRecorder` 单例复用该 `TouchRecorder`, 所以自第一次录制起, 它的 getevent 进程 (Shizuku 或 Root) 一直运行到宿主死亡 (自 6.6.0; P1.1 之后由用户服务在宿主死亡时结束).
 
 ---
 
@@ -85,6 +88,11 @@
 | D9 | 列入 6.8.0 发布门 (`docs/dev/6.8.0-release-gate.md`): P0 + P1.1 / P1.2 完成并 P2.1 回归通过前不发 6.8.0; P1.4 瘦身不在门内 | Q9 |
 | D10 | 宿主启动即绑定与在途 getevent 孤儿: P1.1 清理在途 `execCommand` 进程, 验收加 "开启音量键控制时 force-stop 20 轮 stray 为 0"; 另新增 P1.5, 把 `InputEventObserver` 的 Shizuku 分支改为一个常驻 `newShellProcess` (client 令牌 linkToDeath, 宿主死即结束), T6 加 "音量键控制" 回归 | 附录 C Q1 (维护者选 B) |
 | D11 | P1.4 前提不成立 (宿主 `App` 不在用户服务进程运行): D6 的 "`App.onCreate` 分支" 与 40 MB 目标作废; P0.4 加 oat 实验 (`cmd package compile` 后重测, 量 v6.6.4 正式包), P1.4 的形态按数字另出题 (附录 C Q3) | 附录 C Q2 (维护者选 A) |
+| D12 | P1.4 取消代码改动, 结论留在 1.5 与 B.3, P2.2 不写 improvement 条目 | 附录 C Q3 (维护者选 A) |
+| D13 | 负对照接受 v6.6.4 在 6.8.0 数据上崩溃的结果, B.1 保留崩溃注记 | 附录 C Q4 (维护者选 A) |
+| D14 | T6 (8) 的 RootAutomator 冒烟换一台 "Shizuku 以 shell 身份运行且 shell 可写 `/dev/input`" 的设备补跑 (P3.3); 不改 SELinux, 不 root; 没有合适设备时不绕过, 登记待决 | 附录 C Q5 (维护者选 B, 非推荐项) |
+| D15 | P1 的两处附带发现 (1.5 末条) 在本主题修掉: P3.1 "音量键控制" 运行中改开即创建 `GlobalKeyObserver`, P3.2 `TouchRecorder` 自建的 `InputEventObserver` 随录制结束回收; changelog 各加 fix (P3.4) | 附录 C Q6 (维护者选 B, 非推荐项) |
+| D16 | inrt 数据库降级崩溃循环 (1.5) 转独立主题 db-downgrade (维护者另开 `/dispatch db-downgrade`), 本主题只记录不处理; XQ-AT72 上的 inrt 包保留作复现样本 | 附录 C Q7 (维护者选 C, 非推荐项) |
 
 ---
 
@@ -137,6 +145,14 @@
 - [x] P2.3 发布门: `docs/dev/6.8.0-release-gate.md` 追加一行 (来源本文 D9, 复核方法 = P0.1 探针 + P2.1 回归, 证据 = evidence 报告). 验收: 该行存在且状态写明. 完成 (2026-10-23): 状态为 "已满足 (2026-10-23, 宿主 debug 5935 + P1)", 剩余为发布候选复核.
 - [x] P2.4 收尾: 本文勾选与附录回填, 本地提交 (不推送), 看板 `../.claude/boards/shizuku-oom.md` 子会话结果区追加结论; issue 回复由维护者处理 (D7). 完成 (2026-10-23, shizuku-oom-p1): 提交 `7512f559e` (代码与 changelog), `4d67b9074` (回归脚本与 G8441 证据), 以及其后一笔 XQ-AT72 证据与本文回填 (hash 见看板).
 
+### P3 附带发现与 T6 (8) 补跑 (D14 / D15 / D16; 子会话 shizuku-oom-p3, 2026-10-23)
+
+- [ ] P3.1 "音量键控制" 开关在宿主运行中从关改开时即创建 `GlobalKeyObserver` (不再要求重启宿主): `initIfNeeded` 在两项设置都关闭时登记一次性的设置监听, 任一项打开即创建单例 (此时不再等 1.2 秒的冷启动延迟); 改关时由单例自己的监听停止 shell 兜底监听 (与 P1.5 的启停一致). 验收: XQ-AT72 上宿主启动时两项开关为关, 打开后不重启即可用音量键停止脚本 (`regression.py` 新增 (10)), 关闭后服务下的 getevent 进程结束; JVM 单测覆盖创建条件. (进度 2026-10-23: 代码 (`VolumeControlSettings`, `GlobalKeyObserver.initIfNeeded`) 与 `VolumeControlSettingsTest` 7 例已完成并本地提交, `:app:assembleAppDebug` 通过; 待 XQ-AT72 跑 (10).)
+- [ ] P3.2 `TouchRecorder(Context)` 自建的 `InputEventObserver` 在录制开始时启动, 录制停止时回收 (结束其 getevent 进程, 不再等宿主死亡); 复用同一 `TouchRecorder` 的下一次录制重新启动. `TouchRecorder` 由 `GlobalActionRecorder` 进程级单例持有, 不归属任何 `ScriptRuntime`, 不登记 `RuntimeResourceScope`. 验收: 录制一次并结束后服务下无 getevent, `ps -A` 无残留 getevent / sh (`regression.py` 新增 (11)); `StaticReferenceGuardTest` 通过; 不改录制功能的行为. (进度 2026-10-23: 代码已完成并本地提交, `StaticReferenceGuardTest` / `UserServiceLifecycleTest` 通过; 待 XQ-AT72 跑 (11).)
+- [ ] P3.3 Q5 补跑 (D14): 在 `../COMMON_AGENTS.md` 可用测试设备里找 Shizuku 以 shell 身份运行且 shell 能写 `/dev/input` 的设备 (先只读检查 `getenforce` 与 `ls -l /dev/input`, 以 shell 身份 `test -w` 试探; 不改 SELinux, 不 root), 按锁表登记后装当前 HEAD 的 debug 构建跑 `regression.py --items 8`, 结果入 `evidence/` 并回填附录 B; 测后装回原包. 没有任何设备满足时不绕过, 登记待决 Q8 (选项: 回到 Q5 的 A / 维护者另备设备) 并汇报.
+- [x] P3.4 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段 fix 为 P3.1 / P3.2 各加 1 条 (或按 AGENTS.md 粒度合并), 只生成 zh-Hans 的 markdown 且只写入本条; 该文件有他人未提交改动, 只暂存自己的 hunk. (2026-10-23 完成: 两条独立的 fix 紧接 issue #474 那条; 不带 issue 引用, 两处都不是 #474 报告的现象. 只重渲染 zh-Hans 的 CHANGELOG-zh-Hans.md / CHANGELOG.md / README-zh-Hans.md / README.md, 其他 9 种语言未写入, 待维护者同步翻译.)
+- [ ] P3.5 回归与收尾: XQ-AT72 跑 `zombie_probe.py --mode force-stop --rounds 20` 与 `regression.py` 的 (9) 及新用例 (10) / (11), 全部 0 残留 / PASS; G8441 只在改动触及 root 路径时复跑; 本文勾选与附录回填, 发布门行按需更新 (只追加自己的 hunk), 本地提交, 看板追加结论.
+
 ---
 
 ## 附录 A 决策记录
@@ -150,6 +166,9 @@
 | D11 | 2026-10-22 22:40 (附录 C Q2) | P1.4 前提不成立 | 选 A: P0.4 加 oat 实验与 v6.6.4 测量, D6 的 40 MB 目标作废, 形态待 Q3 |
 | D12 | 2026-10-23 00:20 (附录 C Q3) | P1.4 的最终形态 | 选 A: 取消 P1.4 的代码改动, 结论留在 1.5 与 B.3, P2.2 不写 improvement 条目 |
 | D13 | 2026-10-23 00:20 (附录 C Q4) | 负对照里宿主崩溃 | 选 A: 保持现状, 接受 P0.2 结果, B.1 保留崩溃注记 |
+| D14 | 2026-10-23 06:50 (附录 C Q5) | T6 (8) RootAutomator 在 XQ-AT72 不可测 | 选 B: 换机补跑 (P3.3) |
+| D15 | 2026-10-23 06:50 (附录 C Q6) | P1 的两处附带发现 | 选 B: 本主题新增 P3.1 / P3.2 修掉 |
+| D16 | 2026-10-23 06:50 (附录 C Q7) | inrt 数据库降级崩溃循环 | 选 C: 转独立主题 db-downgrade, 本主题只在 1.5 记录 |
 | P1.3 处置 | 2026-10-23 (子会话 shizuku-oom-p1) | 宿主侧 10 秒超时重绑 (`connectedService`) | 不改代码. 理由: (1) P0.3(d) 在 G8441 自然复现, 被移除记录的旧进程交付 binder 失败后由启动器 `System.exit(1)` 退出, 无永久残留 (B.2); (2) 若旧进程已交付 binder 但宿主已换绑新服务, 它收不到宿主附着, 由 P1.2 的 30 秒看门狗 (`no-host-attached`) 结束; 已附着的则随宿主死亡 (`host-died`) 结束; (3) 改为更长的等待会让首次冷加载慢于 10 秒的设备 (G8441 约 19 秒) 多等, 收益只是少一个短暂并存的进程 |
 
 ## 附录 B 证据与数字 (P0 回填, 之后每阶段追加一列)
@@ -197,7 +216,9 @@
 | Q2 | P1.4 瘦身前提不成立 (1.5 第 1, 2 条): 宿主 `App` 不在用户服务进程运行, 体积来自 dex 解压进内存与 boot image 私有页. A (推荐): P0.4 加 oat 实验 (`cmd package compile` 后重测, 并量 v6.6.4 正式包) 再定 P1.4 形态, D6 的 40 MB 目标作废. B: 取消 P1.4 (返工: 删条目). C: 保留 40 MB 另找途径 (返工: 1-2 个会话) | D6, T5, P1.4, P2.2 | 已决 (2026-10-22 22:40, 维护者选 A, 记为 D11) |
 | Q3 | P1.4 的最终形态 (D11; 数字见 1.5 与 B.3): 正式版安装时即 dexopt, 用户服务 RSS 约 130 / PSS 约 40 MB, 其中 20 MB 是 boot image 私有页 (app_process 不经 zygote, 宿主无法消除), 解压 dex 为 0; 只有安装时跳过 dexopt 的包 (实测为 Android 12 上 adb 安装的 debug 包) 是 RSS 210 / PSS 131 MB, 手动编译后 PSS 降到 50 MB. A (推荐): 取消 P1.4 的代码改动, 结论留在 1.5 与 B.3, P2.2 不写 improvement 条目; 内存: 正式版保持 RSS 约 130 / PSS 约 40 MB, adb 安装的 debug 包保持 210 / 131 MB; 返工: 无. B: 只作文档提示, A 之外在 `tools/shizuku-oom/README.md` 加一句给开发者的提示 (debug 包的用户服务约 210 MB, 可执行 `adb shell cmd package compile -m speed-profile -f org.autojs.autojs6`); 内存: 正式版不变, debug 包在开发者手动执行后降到 RSS 144 / PSS 50 MB (实测 143.6 / 49.6); 约 0.1 个会话. C: 宿主经 Shizuku 在安装 / 更新后检测到自身为 `run-from-apk` 时自动触发一次 dexopt (`cmd package compile -m verify`, 实测约 8 秒, vdex 约 80 MB 存储); 内存: 正式版不变 (安装时已 dexopt), debug 包自动降到约 144 / 50 MB; 约 0.5-1 个会话, 主要只惠及 debug 构建, 需处理与安装并发及失败回退, 进 changelog `improvement` | P1.4, P2.2 | 已决 (2026-10-23 00:20, 维护者选 A, 记为 D12) |
 | Q4 | P0.2 负对照不是 "健康宿主被强停": v6.6.4 在 6.8.0 数据上启动即崩溃 (数据库 5 -> 3 降级), 每轮残留 +1 到 +3 (1.5). A (推荐, 已先行): 接受现结果, 堆积已证明探针有效且机制与报告者相同, B.1 注明崩溃; 返工: 无. B: 维护者提供一台没有 6.8.0 数据的设备 (或同意在某台测试机上备份后清空宿主数据, 测后还原) 再跑 10 轮, 预期每轮 +1; 约 20 分钟, 需维护者在手机上授权 Shizuku. C: 改用临时 AVD 装 Shizuku 与 v6.6.4 重跑; 约半个会话, Shizuku 授权同样要维护者点按 | P0.2, 附录 B.1 | 已决 (2026-10-23 00:20, 维护者选 A, 记为 D13) |
-| Q5 | T6 (8) 的 RootAutomator 冒烟在 XQ-AT72 上不可测: 该机 (Android 12) SELinux 不允许 shell 身份写任何 `/dev/input` 节点, RootAutomator 的 Shizuku 后端 (自 6.7.0 未改, P1 未触及) 如实报告 "cannot access a writable input device"; G8441 为 root 身份, 不跑 (8). A (推荐, 已先行): 记为不适用, P2.1 视为通过 ((8) 其余 4 个调用点已通过); 返工: 无. B: 另找一台 Shizuku 以 shell 身份运行且 shell 可写 `/dev/input` 的设备 (多为 Android 9-11 的非 root 机) 补跑 `regression.py --items 8`; 约 20 分钟, 需维护者在手机上授权 Shizuku | P2.1, 发布门 | 已按推荐先行待确认 (2026-10-23, shizuku-oom-p1) |
+| Q5 | T6 (8) 的 RootAutomator 冒烟在 XQ-AT72 上不可测: 该机 (Android 12) SELinux 不允许 shell 身份写任何 `/dev/input` 节点, RootAutomator 的 Shizuku 后端 (自 6.7.0 未改, P1 未触及) 如实报告 "cannot access a writable input device"; G8441 为 root 身份, 不跑 (8). A (推荐, 已先行): 记为不适用, P2.1 视为通过 ((8) 其余 4 个调用点已通过); 返工: 无. B: 另找一台 Shizuku 以 shell 身份运行且 shell 可写 `/dev/input` 的设备 (多为 Android 9-11 的非 root 机) 补跑 `regression.py --items 8`; 约 20 分钟, 需维护者在手机上授权 Shizuku | P2.1, 发布门 | 已决 (2026-10-23 06:50, 维护者选 B, 记为 D14, 由 P3.3 执行) |
+| Q6 | (调度会话出题) P1 附带发现两处 (1.5 末条) 怎么处理: 宿主启动后才打开 "音量键控制" 时无人创建 `GlobalKeyObserver` (要重启宿主); `TouchRecorder(Context)` 自建的 `InputEventObserver` 自 6.6.0 起从不回收. A (推荐): 只记录. B: 本主题新增 P3 修掉. C: 转 memory 主题 | 新增 P3.1 / P3.2 / P3.4 / P3.5, changelog fix | 已决 (2026-10-23 06:50, 维护者选 B, 记为 D15) |
+| Q7 | (调度会话出题) P0 附带发现 `org.autojs.autojs6.inrt` 被 Shizuku 服务端重启唤醒后数据库 4 -> 3 降级崩溃循环 (1.5). A (推荐): 不处理只记录. B: 卸掉 XQ-AT72 上的 inrt. C: 立项排查降级崩溃 | 本主题只记录 | 已决 (2026-10-23 06:50, 维护者选 C, 记为 D16; 新主题 db-downgrade 由维护者立项) |
 
 ## 附录 D 文件地图
 
@@ -216,3 +237,7 @@
 | `.changelog/lang_zh-Hans.json` | changelog | P2.2 |
 | `docs/dev/6.8.0-release-gate.md` | 发布门一行 | P2.3 |
 | `docs/memory/ROADMAP.md` 附录 C Q4 / Q52 | 去向指向本文 | 立项 |
+| `app/src/main/java/org/autojs/autojs/event/VolumeControlSettings.kt` | 两项音量键设置的读取与监听, 一次性 "开启即创建" 订阅 | P3.1 |
+| `app/src/main/java/org/autojs/autojs/event/GlobalKeyObserver.java` | `initIfNeeded` 在两项都关闭时登记订阅 | P3.1 |
+| `app/src/main/java/org/autojs/autojs/core/record/inputevent/TouchRecorder.java` | 自建观察器随录制开始 / 结束启停 | P3.2 |
+| `tools/shizuku-oom/regression.py` (10) / (11) | 运行中开启音量键控制, 录制后回收 getevent | P3.1 / P3.2 |

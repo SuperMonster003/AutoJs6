@@ -443,28 +443,7 @@ class Probe:
             item["note"] = "no new user service process" if pid is None else (
                 "no getevent under the service (is volume key control on?)" if not getevent else "no KEY_VOLUMEUP device")
         else:
-            volumes = self.volumes()
-            last = self.read_mark(mark)
-            sent, item["keyInjection"] = self.send_volume_up(device)
-            stopped, signal, stalled_since = None, None, None
-            while time.time() < sent + 8:
-                current = self.read_mark(mark)
-                if current == "stopped":
-                    stopped, signal = time.time() - sent, "exit event"
-                    break
-                if current == last:
-                    stalled_since = stalled_since or time.time()
-                    if time.time() - stalled_since >= 2.5:
-                        stopped, signal = stalled_since - sent, "beats stopped"
-                        break
-                else:
-                    last, stalled_since = current, None
-                time.sleep(0.25)
-            item["volumeKeyStopped"] = stopped is not None
-            item["volumeKeyStopSec"] = round(max(stopped, 0), 2) if stopped is not None else None
-            item["volumeKeySignal"] = signal
-            time.sleep(1)
-            item["volumeStreamsRestored"] = self.restore_volumes(volumes)
+            item.update(self.stop_by_volume_up(device, mark))
         self.force_stop()
         rows, services = self.settle_and_count()
         alive_pids = {r[0] for r in services}
@@ -475,6 +454,43 @@ class Probe:
         item["exitSource"] = self.exit_source(pid, pid in alive_pids, seen)
         self.strays(item, rows, known)
         return item
+
+    def getevent_under_services(self, rows=None):
+        """getevent processes under the user service processes (the shell observers of InputEventObserver).
+        zh-CN: 用户服务进程下的 getevent 进程数 (InputEventObserver 的 shell 监听)."""
+        rows = rows or self.dev.processes()
+        names = {r[0]: r[4].rsplit("/", 1)[-1] for r in rows}
+        return sum(1 for s in self.services(rows) for c in self.descendants(rows, s[0]) if names.get(c) == "getevent")
+
+    def stop_by_volume_up(self, device, mark):
+        """Sends one volume up key to [device] and waits for the heartbeat script of [mark] to stop (its mark turns
+        "stopped", or the beats stall for 2.5 s; at most 8 s), then puts changed volumes back.
+        zh-CN: 向 [device] 发送一次音量加键, 等 [mark] 的心跳脚本停止 (标记变为 "stopped" 或心跳停止 2.5 秒, 最多 8 秒), 再把变化了的音量改回."""
+        volumes = self.volumes()
+        last = self.read_mark(mark)
+        sent, injection = self.send_volume_up(device)
+        stopped, signal, stalled_since = None, None, None
+        while time.time() < sent + 8:
+            current = self.read_mark(mark)
+            if current == "stopped":
+                stopped, signal = time.time() - sent, "exit event"
+                break
+            if current == last:
+                stalled_since = stalled_since or time.time()
+                if time.time() - stalled_since >= 2.5:
+                    stopped, signal = stalled_since - sent, "beats stopped"
+                    break
+            else:
+                last, stalled_since = current, None
+            time.sleep(0.25)
+        time.sleep(1)
+        return {
+            "keyInjection": injection,
+            "volumeKeyStopped": stopped is not None,
+            "volumeKeyStopSec": round(max(stopped, 0), 2) if stopped is not None else None,
+            "volumeKeySignal": signal,
+            "volumeStreamsRestored": self.restore_volumes(volumes),
+        }
 
     def volume_up_device(self):
         """The evdev node that reports KEY_VOLUMEUP (`getevent -pl`), looked up once."""

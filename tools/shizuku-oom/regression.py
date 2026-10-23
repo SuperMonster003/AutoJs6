@@ -22,6 +22,11 @@ Runs the T6 items on one device through the host already installed there (a debu
      branches (`app.startActivity({ shizuku: true })` opens Settings, `app.kill` ends it).
   9  Volume key control: one zombie_probe.py volume-key round (a getevent under the user service, a volume up key stops the
      script, the force-stop leaves no user service and no stray command).
+ 10  Volume key control turned on while the host runs (P3.1): with both volume control settings off the host starts with
+     no getevent under the user service; turning "Volume control while running" on starts one without restarting the
+     host, and a volume up key stops a script; turning both off ends it. The original settings are put back.
+ 11  Recording (P3.2): two recordings through GlobalActionRecorder (started and discarded on the main thread, no dialog)
+     each add one getevent under the user service while recording, and it ends when the recording stops.
 
 After the items the host is force-stopped once more and the user service processes and stray sh / getevent / sleep
 processes (new since the start, reparented to init) are counted; both must be 0.
@@ -29,7 +34,7 @@ processes (new since the start, reparented to init) are counted; both must be 0.
 Scripts start through RunIntentActivity like zombie_probe.py; the instrumented items run `am instrument` against the test
 package already installed (org.autojs.autojs6.test, built by :app:assembleAppDebugAndroidTest; back up the original one
 first). `am instrument` and the force-stops make Android drop the host from enabled_accessibility_services; entries the
-host had before are put back at the end, and items 5, 7 and 8 put back the settings and volumes they change. The script
+host had before are put back at the end, and items 5, 7, 8 and 10 put back the settings and volumes they change. The script
 never taps the screen. Temporary files live in /sdcard/Download/aj6-shizuku-oom/ and are removed at the end.
 
 Output: <report-dir>/regression-<model>-<versionCode>-<yyyyMMdd>[-<label>].json, and regression-<yyyyMMdd>[-<label>].md
@@ -56,8 +61,10 @@ TEST_PACKAGE = "org.autojs.autojs6.test"
 RUNNER = "androidx.test.runner.AndroidJUnitRunner"
 USHER = "org.autojs.autojs.core.accessibility.AccessibilityServiceUsher"
 SETTINGS_PACKAGE = "com.android.settings"
-ITEMS = ("1", "2", "3", "4", "5", "6", "7", "8", "9")
+ITEMS = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")
 SERVER_UIDS = {"shell": 2000, "root": 0}
+# GlobalKeyObserver's log line when a volume control setting turned on creates it (P3.1). zh-CN: 打开设置时创建观察器的日志.
+CREATED_ON_TURN_ON = "volume control turned on, creating the observer"
 
 FILE_MANAGER_TESTS = (
     "org.autojs.autojs.model.explorer.PrivilegedExplorerDeviceTest#alreadyAuthorizedShizukuCanReadSystemWithoutChangingPermissions",
@@ -182,6 +189,48 @@ sleep(1500);
 out.topAfter = String(shizuku.currentPackage());
 """
 
+# Reads the two volume control settings ("while running", "while recording") and, when VALUES is given, writes them with
+# commit (a force-stop right after an apply may lose it). zh-CN: 读取两项音量键控制设置, 给出 VALUES 时以 commit 写入
+# (apply 后立即强停可能丢失写入).
+JS_VOLUME_SETTINGS = r"""
+var keys = [org.autojs.autojs.core.pref.keys.RunningKeys.USE_VOLUME_CONTROL_RUNNING,
+    org.autojs.autojs.core.pref.keys.RecordKeys.USE_VOLUME_CONTROL_RECORD];
+function read() { return keys.map(function (k) { return String(k.get()) == 'true'; }); }
+out.before = read();
+if (VALUES) keys.forEach(function (k, i) { k.getSettingsStore().put(k.getName(), VALUES[i], true); });
+out.after = read();
+"""
+
+# Starts and discards (stops without the result dialog) ROUNDS recordings on the main thread; after each step it writes
+# the state file and waits for the runner's acknowledgement. zh-CN: 在主线程上开始并丢弃 (不弹结果对话框的停止) ROUNDS 次录制;
+# 每一步写入状态文件后等待运行端确认.
+JS_RECORD = r"""
+var recorder = org.autojs.autojs.core.record.GlobalActionRecorder.getSingleton(context);
+var handler = new android.os.Handler(android.os.Looper.getMainLooper());
+function onMain(f) {
+    var done = false, error = null;
+    handler.post(new java.lang.Runnable({ run: function () { try { f(); } catch (e) { error = String(e); } done = true; } }));
+    var t0 = Date.now();
+    while (!done && Date.now() - t0 < 10000) sleep(50);
+    if (error) throw error;
+    if (!done) throw 'the main thread did not run the step within 10 s';
+}
+function step(state) {
+    files.write(MARK + '.state', state);
+    var t0 = Date.now();
+    while (!files.exists(MARK + '.ack-' + state.replace(' ', '-')) && Date.now() - t0 < 30000) sleep(200);
+}
+out.states = [];
+for (var i = 0; i < ROUNDS; i++) {
+    onMain(function () { recorder.start(); });
+    out.states.push(Number(recorder.getState()));
+    step('recording ' + i);
+    onMain(function () { recorder.discard(); });
+    out.states.push(Number(recorder.getState()));
+    step('stopped ' + i);
+}
+"""
+
 
 class Regression:
 
@@ -195,13 +244,17 @@ class Regression:
 
     # Helpers. zh-CN: 辅助方法.
 
-    def run_js(self, name, body, wait=None, constants=None):
+    def start_js(self, name, body, constants=None):
         token = secrets.token_hex(4)
         mark = f"{DEVICE_DIR}/reg-{name}-{token}.json"
         script = f"{DEVICE_DIR}/reg-{name}-{token}.js"
         head = [f"var MARK = {json.dumps(mark)};"] + [f"var {k} = {json.dumps(v)};" for k, v in (constants or {}).items()]
         self.dev.write(script, "\n".join(head) + PRELUDE + body + EPILOGUE)
         self.probe.start_script(script)
+        return mark
+
+    def run_js(self, name, body, wait=None, constants=None):
+        mark = self.start_js(name, body, constants)
         return mark, self.wait_json(mark, wait or self.args.wait, name)
 
     def wait_json(self, mark, wait, name):
@@ -274,6 +327,25 @@ class Regression:
             return None, None
         pkg, act = found[1], found[2]
         return pkg, pkg + act if act.startswith(".") else act
+
+    def wait_getevent(self, wanted, wait):
+        """Waits until wanted(getevent count under the user service) holds; returns (seconds or None, last count).
+        zh-CN: 等到用户服务下的 getevent 数满足 wanted; 返回 (用时秒数或 None, 最后的计数)."""
+        start = time.time()
+        while True:
+            count = self.probe.getevent_under_services()
+            if wanted(count):
+                return round(time.time() - start, 1), count
+            if time.time() - start >= wait:
+                return None, count
+            time.sleep(0.5)
+
+    def volume_settings(self, values=None):
+        """The two volume control settings (running, recording) before the write of [values]. zh-CN: 写入 [values] 前的两项设置."""
+        _, out = self.run_js("volume-settings", JS_VOLUME_SETTINGS, constants={"VALUES": values})
+        if out.get("error") or (values is not None and out.get("after") != values):
+            raise ProbeError(f"volume control settings: {out.get('error') or out.get('after')}")
+        return out["before"]
 
     def secure(self, name):
         return self.dev.shell(f"settings get secure {name}").strip()
@@ -449,13 +521,78 @@ class Regression:
                                       f"volumes put back {round_.get('volumeStreamsRestored')}")
         return self.result("9", ok, note)
 
+    def item10(self):
+        original = self.volume_settings([False, False])
+        values = {}
+        try:
+            # A cold start with both settings off. zh-CN: 两项设置都关闭时冷启动宿主.
+            self.probe.force_stop()
+            time.sleep(self.args.settle)
+            script, mark = self.probe.prepare_script(volume=True)
+            self.probe.start_script(script)
+            deadline = time.time() + self.args.wait
+            while self.probe.read_mark(mark) is None and time.time() < deadline:
+                time.sleep(0.5)
+            if self.probe.read_mark(mark) is None:
+                raise ProbeError("the heartbeat script did not start")
+            # Longer than the 1.2 s delay of GlobalKeyObserver after a cold start. zh-CN: 长于冷启动后 GlobalKeyObserver 的 1.2 秒延迟.
+            time.sleep(4)
+            values["geteventWhileOff"] = self.probe.getevent_under_services()
+            since = self.dev.now()
+            self.volume_settings([True, False])
+            values["onSec"], values["geteventAfterOn"] = self.wait_getevent(lambda n: n >= 1, 15)
+            # The floating button creates the observer at start too; then its own listener starts the getevent.
+            # zh-CN: 悬浮按钮也会在启动时创建观察器, 此时由它自己的监听启动 getevent.
+            values["createdOnTurnOn"] = any(CREATED_ON_TURN_ON in line for line in self.dev.logcat_since(since))
+            device = self.probe.volume_up_device()
+            if values["onSec"] is not None and device is not None:
+                values.update(self.probe.stop_by_volume_up(device, mark))
+            self.volume_settings([False, False])
+            values["offSec"], values["geteventAfterOff"] = self.wait_getevent(lambda n: n == 0, 10)
+        finally:
+            self.volume_settings(original)
+            values["settingsRestored"] = True
+            self.probe.force_stop()
+        ok = (values.get("geteventWhileOff") == 0 and values.get("onSec") is not None
+              and values.get("volumeKeyStopped") is True and values.get("offSec") is not None)
+        note = (f"getevent while off {values.get('geteventWhileOff')}, after turning on {values.get('geteventAfterOn')} "
+                f"in {values.get('onSec')} s (observer created then {values.get('createdOnTurnOn')}), "
+                f"volume up stopped the script {values.get('volumeKeyStopped')} "
+                f"({values.get('volumeKeyStopSec')} s, {values.get('keyInjection')}), after turning off "
+                f"{values.get('geteventAfterOff')} in {values.get('offSec')} s, settings {original} put back")
+        return self.result("10", ok, note, **values)
+
+    def item11(self, rounds=2):
+        baseline = self.probe.getevent_under_services()
+        mark = self.start_js("record", JS_RECORD, constants={"ROUNDS": rounds})
+        steps, failure = [], None
+        for i in range(rounds):
+            for state, wanted in ((f"recording {i}", lambda n: n == baseline + 1), (f"stopped {i}", lambda n: n == baseline)):
+                deadline = time.time() + self.args.wait
+                while time.time() < deadline and self.probe.read_mark(f"{mark}.state") != state and self.probe.read_mark(mark) is None:
+                    time.sleep(0.5)
+                if self.probe.read_mark(f"{mark}.state") != state:
+                    failure = failure or f"the script did not reach '{state}'"
+                    break
+                sec, count = self.wait_getevent(wanted, 10)
+                steps.append({"state": state, "getevent": count, "sec": sec})
+                self.dev.shell(f"touch {mark}.ack-{state.replace(' ', '-')}")
+            if failure:
+                break
+        out = self.wait_json(mark, self.args.wait, "record")
+        ok = (not failure and not out.get("error") and len(steps) == 2 * rounds and all(s["sec"] is not None for s in steps)
+              and out.get("states") == [1, 3] * rounds)
+        note = out.get("error") or failure or (
+            f"baseline {baseline}, " + ", ".join(f"{s['state']}: {s['getevent']} ({s['sec']} s)" for s in steps))
+        return self.result("11", ok, note, baseline=baseline, steps=steps, recorderStates=out.get("states"))
+
 
 def items_type(value):
     if value == "all":
         return None
     chosen = [v.strip() for v in value.split(",") if v.strip()]
     if not chosen or any(v not in ITEMS for v in chosen):
-        raise argparse.ArgumentTypeError("--items takes 'all' or a comma-separated list of 1-9")
+        raise argparse.ArgumentTypeError("--items takes 'all' or a comma-separated list of 1-11")
     return chosen
 
 
@@ -503,7 +640,7 @@ def write_summary(out_dir, date, label):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("--items", type=items_type, default=None, help="'all' (default: 1-9, item 8 only for a shell server) or e.g. 1,2,3")
+    parser.add_argument("--items", type=items_type, default=None, help="'all' (default: 1-11, item 8 only for a shell server) or e.g. 1,2,3")
     parser.add_argument("--report-dir", default="docs/shizuku-oom/evidence", help="relative paths are resolved against the repository root")
     parser.add_argument("--label", help="suffix of the report names, e.g. p1")
     parser.add_argument("--package", default="org.autojs.autojs6")

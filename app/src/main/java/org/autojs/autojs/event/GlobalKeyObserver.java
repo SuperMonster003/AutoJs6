@@ -9,11 +9,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService;
 import org.autojs.autojs.core.accessibility.OnKeyListener;
 import org.autojs.autojs.core.inputevent.InputEventObserver;
 import org.autojs.autojs.core.inputevent.ShellKeyObserver;
-import org.autojs.autojs.core.pref.keys.RecordKeys;
 import org.autojs.autojs.core.pref.keys.RunningKeys;
-import org.autojs.autojs.core.pref.store.SettingsStore;
-
-import kotlin.Unit;
 
 /**
  * Created by Stardust on Aug 14, 2017.
@@ -28,6 +24,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     private static final String LOG_TAG = "GlobalKeyObserver";
     private static final long SHELL_OBSERVER_START_DELAY_MILLIS = 1_200L;
     private static GlobalKeyObserver sSingleton;
+    private static AutoCloseable sPendingInit;
     private final EventDispatcher<OnVolumeDownListener> mVolumeDownEventDispatcher;
     private final InputEventObserver mInputEventObserver;
     private final ShellKeyObserver mShellKeyObserver;
@@ -35,7 +32,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     private boolean mVolumeDownFromShell, mVolumeDownFromAccessibility;
     private boolean mVolumeUpFromShell, mVolumeUpFromAccessibility;
 
-    private GlobalKeyObserver(Context applicationContext) {
+    private GlobalKeyObserver(Context applicationContext, long shellObserverDelayMillis) {
         mVolumeDownEventDispatcher = new EventDispatcher<>();
         AccessibilityService.Companion.getStickOnKeyObserver().addListener(this);
         mShellKeyObserver = new ShellKeyObserver();
@@ -46,9 +43,9 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
         // zh-CN: 上方已立即监听无障碍按键事件. 仅将 shell 兜底监听延迟到 Rhino 冷启动之后,
         // 避免 getevent/Root 探测与脚本引擎初始化争抢资源.
         new Handler(applicationContext.getMainLooper()).postDelayed(() -> {
-            updateShellObserver();
             listenVolumeControlSettings();
-        }, SHELL_OBSERVER_START_DELAY_MILLIS);
+            updateShellObserver();
+        }, shellObserverDelayMillis);
     }
 
     /**
@@ -58,7 +55,7 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
      * (events.observeTouch) 在用 (docs/shizuku-oom/ROADMAP.md P1.5).
      */
     private synchronized void updateShellObserver() {
-        if (isVolumeControlEnabled()) {
+        if (VolumeControlSettings.isEnabled()) {
             if (!mShellObserving) {
                 mShellObserving = true;
                 mInputEventObserver.addListener(mShellKeyObserver);
@@ -74,40 +71,56 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
     }
 
     private void listenVolumeControlSettings() {
-        SettingsStore runningStore = RunningKeys.USE_VOLUME_CONTROL_RUNNING.getSettingsStore();
-        SettingsStore recordStore = RecordKeys.USE_VOLUME_CONTROL_RECORD.getSettingsStore();
-        // The singleton lives as long as the process, so the subscriptions are never closed.
+        // The singleton lives as long as the process, so the subscription is never closed.
         // zh-CN: 单例与进程同生命周期, 订阅无需关闭.
-        runningStore.listen(this::onSettingChanged);
-        if (recordStore != runningStore) {
-            recordStore.listen(this::onSettingChanged);
-        }
+        VolumeControlSettings.listen(this::updateShellObserver);
     }
 
-    private Unit onSettingChanged(String key) {
-        if (key == null || key.equals(RunningKeys.USE_VOLUME_CONTROL_RUNNING.getName()) || key.equals(RecordKeys.USE_VOLUME_CONTROL_RECORD.getName())) {
-            updateShellObserver();
+    /**
+     * Creates the singleton when a volume control setting is on; otherwise turning one on later creates it, without
+     * restarting the app (docs/shizuku-oom/ROADMAP.md P3.1).
+     * zh-CN: 音量键控制设置开启时创建单例; 否则在之后打开某项设置时创建, 无需重启应用 (docs/shizuku-oom/ROADMAP.md P3.1).
+     */
+    public static synchronized void initIfNeeded(Context applicationContext) {
+        if (sSingleton != null || sPendingInit != null) {
+            return;
         }
-        return Unit.INSTANCE;
-    }
-
-    public static void initIfNeeded(Context applicationContext) {
-        if (isVolumeControlEnabled()) makeSureSingletonInitialized(applicationContext);
+        if (VolumeControlSettings.isEnabled()) {
+            makeSureSingletonInitialized(applicationContext, SHELL_OBSERVER_START_DELAY_MILLIS);
+            return;
+        }
+        // The cold start is long over when a setting is turned on, so the shell fallback starts without delay.
+        // zh-CN: 设置被打开时冷启动早已结束, shell 兜底监听无需延迟.
+        AutoCloseable pendingInit = VolumeControlSettings.whenEnabled(() -> {
+            Log.d(LOG_TAG, "volume control turned on, creating the observer");
+            makeSureSingletonInitialized(applicationContext, 0L);
+        });
+        if (sSingleton == null) {
+            sPendingInit = pendingInit;
+        }
     }
 
     public static void init(Context applicationContext) {
-        makeSureSingletonInitialized(applicationContext);
+        makeSureSingletonInitialized(applicationContext, SHELL_OBSERVER_START_DELAY_MILLIS);
     }
 
     public static GlobalKeyObserver getSingleton(Context applicationContext) {
-        makeSureSingletonInitialized(applicationContext);
-        return sSingleton;
+        return makeSureSingletonInitialized(applicationContext, SHELL_OBSERVER_START_DELAY_MILLIS);
     }
 
-    private static void makeSureSingletonInitialized(Context applicationContext) {
+    private static synchronized GlobalKeyObserver makeSureSingletonInitialized(Context applicationContext, long shellObserverDelayMillis) {
         if (sSingleton == null) {
-            sSingleton = new GlobalKeyObserver(applicationContext);
+            sSingleton = new GlobalKeyObserver(applicationContext, shellObserverDelayMillis);
         }
+        if (sPendingInit != null) {
+            try {
+                sPendingInit.close();
+            } catch (Exception ignored) {
+                /* Closing a settings subscription does not throw. */
+            }
+            sPendingInit = null;
+        }
+        return sSingleton;
     }
 
     public void onVolumeUp() {
@@ -174,9 +187,5 @@ public class GlobalKeyObserver implements OnKeyListener, ShellKeyObserver.KeyLis
             mVolumeDownFromShell = true;
             onVolumeDown();
         }
-    }
-
-    private static boolean isVolumeControlEnabled() {
-        return RunningKeys.USE_VOLUME_CONTROL_RUNNING.get() || RecordKeys.USE_VOLUME_CONTROL_RECORD.get();
     }
 }
