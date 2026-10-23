@@ -83,20 +83,26 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
                 binding,
                 Context.BIND_AUTO_CREATE or if (important) Context.BIND_IMPORTANT else 0,
             )
-        } catch (error: SecurityException) {
-            throw PythonRuntimeHostException(
-                PythonRuntimeHostError.PROVIDER_UNTRUSTED,
-                "Official Python Runtime binding was denied",
-                error,
-            )
-        } catch (error: RuntimeException) {
-            throw PythonRuntimeHostException(
-                PythonRuntimeHostError.BIND_FAILED,
-                "Official Python Runtime binding failed",
-                error,
-            )
+        } catch (error: Throwable) {
+            // Also when the wake retry is interrupted: an earlier refused attempt has registered the connection.
+            // zh-CN: 唤醒重试被中断时也是如此: 之前被拒绝的那次尝试已经登记了连接.
+            binding.abandon()
+            throw when (error) {
+                is SecurityException -> PythonRuntimeHostException(
+                    PythonRuntimeHostError.PROVIDER_UNTRUSTED,
+                    "Official Python Runtime binding was denied",
+                    error,
+                )
+                is RuntimeException -> PythonRuntimeHostException(
+                    PythonRuntimeHostError.BIND_FAILED,
+                    "Official Python Runtime binding failed",
+                    error,
+                )
+                else -> error
+            }
         }
         if (!didBind) {
+            binding.abandon()
             throw PythonRuntimeHostException(
                 PythonRuntimeHostError.BIND_FAILED,
                 "Official Python Runtime did not accept the explicit binding",
@@ -235,6 +241,16 @@ internal class PythonRuntimeOfficialTransport(context: Context) {
         internal fun markBound() {
             bound.set(true)
             unbindIfClosed()
+        }
+
+        /**
+         * Releases a binding the system refused or that threw: bindService registers the connection before the system answers,
+         * so it is unbound even then (docs/memory-phase2/ROADMAP.md C12).
+         * zh-CN: 释放被系统拒绝或抛出异常的绑定: bindService 在系统应答之前就登记了连接, 因此这时也要解绑 (docs/memory-phase2/ROADMAP.md C12).
+         */
+        internal fun abandon() {
+            markBound()
+            close()
         }
 
         internal fun await(timeoutMillis: Long): Boolean =
