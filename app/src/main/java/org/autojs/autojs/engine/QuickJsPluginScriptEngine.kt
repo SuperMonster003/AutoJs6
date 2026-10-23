@@ -90,7 +90,7 @@ class QuickJsPluginScriptEngine(
                             selection = selection,
                             request = buildRequest(scriptSource, executionId, limits),
                             source = descriptor,
-                            callback = callback,
+                            callback = callback.binder,
                         )
                     }
                 } catch (error: QuickJsRpcTimeoutException) {
@@ -164,17 +164,28 @@ class QuickJsPluginScriptEngine(
         }
     }
 
+    /**
+     * The output of one execution. The plugin gets [binder], which forwards here until [close] and then lets go of this
+     * callback and the engine: the plugin process keeps that Binder until it collects its proxy (docs/memory-phase2/ROADMAP.md C38).
+     * zh-CN: 一次执行的输出. 插件拿到的是 [binder], 它在 [close] 之前转发到这里, 之后放开本回调与引擎: 插件进程在回收代理之前一直持有该 Binder
+     * (docs/memory-phase2/ROADMAP.md C38).
+     */
     private inner class OutputCallback(
         private val executionId: String,
         private val expectedProviderUid: Int,
-    ) : IQuickJsRuntimeCallback.Stub() {
+    ) {
         private val closed = AtomicBoolean(false)
         private val acceptedOutputBytes = AtomicLong(0L)
         private val lastSequence = AtomicLong(-1L)
         private val terminal = CountDownLatch(1)
+        private val exported = ExportedCallback(this)
+
+        val binder: IQuickJsRuntimeCallback
+            get() = exported
 
         fun close() {
             closed.set(true)
+            exported.clear()
             terminal.countDown()
         }
 
@@ -189,7 +200,7 @@ class QuickJsPluginScriptEngine(
             }
         }
 
-        override fun onEvent(event: Bundle?) {
+        fun onEvent(event: Bundle?) {
             if (closed.get() || Binder.getCallingUid() != expectedProviderUid) return
             if (
                 event?.getInt(QuickJsRuntimeContract.KEY_PROTOCOL_VERSION, -1) !=
@@ -242,6 +253,19 @@ class QuickJsPluginScriptEngine(
                 if (acceptedOutputBytes.compareAndSet(current, current + byteCount)) return true
             }
             return false
+        }
+    }
+
+    private class ExportedCallback(callback: OutputCallback) : IQuickJsRuntimeCallback.Stub() {
+
+        private val target = AtomicReference<OutputCallback?>(callback)
+
+        fun clear() {
+            target.set(null)
+        }
+
+        override fun onEvent(event: Bundle?) {
+            target.get()?.onEvent(event)
         }
     }
 
