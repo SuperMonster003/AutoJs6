@@ -81,6 +81,9 @@
     <string name="content_way_of_output_for_recorded_script">回収したスクリプトの出力方法を選択する</string>
     <string name="crash_feedback">デバッグログをコピーするか, 直接終了する</string>
     <string name="current_available_abi_options">現在利用可能な \"abi\" オプション一覧</string>
+    <string name="database_recovery_notification_content">%1$s を開けなかったため, %2$s として保存しました. 現在は空のデータベースを使用しています. データベースバージョン %3$d 以降に対応したバージョンをインストールすると, その間にデータが追加されていなければ, バックアップが自動的に復元されます.</string>
+    <string name="database_recovery_notification_content_unreadable">%1$s を開けなかったため, %2$s として保存しました. 現在は空のデータベースを使用しています.</string>
+    <string name="database_recovery_notification_title">データベースを開けません</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">スクリプトからの通知</string>

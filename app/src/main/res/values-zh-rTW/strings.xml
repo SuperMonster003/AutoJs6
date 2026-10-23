@@ -77,6 +77,9 @@
     <string name="content_way_of_output_for_recorded_script">選擇一個已錄製指令碼的輸出方式</string>
     <string name="crash_feedback">可複製除錯資訊到剪貼簿或直接退出應用</string>
     <string name="current_available_abi_options">當前可用的 \"abi\" 選項</string>
+    <string name="database_recovery_notification_content">%1$s 無法開啟, 已保留為 %2$s. 目前使用空資料庫. 安裝支援資料庫版本 %3$d 或更高的版本後, 若期間沒有新增資料, 備份會自動還原.</string>
+    <string name="database_recovery_notification_content_unreadable">%1$s 無法開啟, 已保留為 %2$s. 目前使用空資料庫.</string>
+    <string name="database_recovery_notification_title">資料庫無法開啟</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">來自指令碼的通知</string>

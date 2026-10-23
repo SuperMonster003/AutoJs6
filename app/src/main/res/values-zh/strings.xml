@@ -76,6 +76,9 @@
     <string name="content_way_of_output_for_recorded_script">选择一个已录制脚本的输出方式</string>
     <string name="crash_feedback">可复制调试信息到剪贴板或直接退出应用</string>
     <string name="current_available_abi_options">当前可用的 \"abi\" 选项</string>
+    <string name="database_recovery_notification_content">%1$s 无法打开, 已保留为 %2$s. 目前使用空数据库. 安装支持数据库版本 %3$d 或更高的版本后, 若期间没有新增数据, 备份会自动还原.</string>
+    <string name="database_recovery_notification_content_unreadable">%1$s 无法打开, 已保留为 %2$s. 目前使用空数据库.</string>
+    <string name="database_recovery_notification_title">数据库无法打开</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">来自脚本的通知</string>

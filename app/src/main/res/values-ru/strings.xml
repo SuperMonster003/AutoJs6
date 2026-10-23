@@ -80,6 +80,9 @@
     <string name="content_way_of_output_for_recorded_script">Выберите способ вывода для переработанных сценариев</string>
     <string name="crash_feedback">Скопируйте журнал отладки или выйдите напрямую</string>
     <string name="current_available_abi_options">Текущий доступный список параметров \"abi\"</string>
+    <string name="database_recovery_notification_content">Не удалось открыть %1$s, файл сохранён как %2$s. Сейчас используется пустая база данных. Резервная копия будет восстановлена автоматически после установки версии, поддерживающей базу данных версии %3$d или новее, если за это время не было добавлено данных.</string>
+    <string name="database_recovery_notification_content_unreadable">Не удалось открыть %1$s, файл сохранён как %2$s. Сейчас используется пустая база данных.</string>
+    <string name="database_recovery_notification_title">Не удалось открыть базу данных</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">Уведомление из сценария</string>

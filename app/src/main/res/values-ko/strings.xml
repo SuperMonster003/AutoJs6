@@ -82,6 +82,9 @@
     <string name="content_way_of_output_for_recorded_script">재설계된 스크립트의 출력 방법 선택</string>
     <string name="crash_feedback">디버깅 로그를 복사하거나 직접 종료하십시오</string>
     <string name="current_available_abi_options">현재 사용 가능한 \"abi\" 옵션 목록</string>
+    <string name="database_recovery_notification_content">%1$s을(를) 열 수 없어 %2$s(으)로 보관했습니다. 지금은 빈 데이터베이스를 사용합니다. 데이터베이스 버전 %3$d 이상을 지원하는 버전을 설치하면, 그동안 추가된 데이터가 없는 경우 백업이 자동으로 복원됩니다.</string>
+    <string name="database_recovery_notification_content_unreadable">%1$s을(를) 열 수 없어 %2$s(으)로 보관했습니다. 지금은 빈 데이터베이스를 사용합니다.</string>
+    <string name="database_recovery_notification_title">데이터베이스를 열 수 없음</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">스크립트의 알림</string>

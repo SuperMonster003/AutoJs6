@@ -80,6 +80,9 @@
     <string name="content_way_of_output_for_recorded_script">Seleccione una forma de salida para el script recortado</string>
     <string name="crash_feedback">Copiar el registro de depuración o salir directamente</string>
     <string name="current_available_abi_options">Lista actual de opciones de \"abi\" disponibles</string>
+    <string name="database_recovery_notification_content">No se pudo abrir %1$s y se conservó como %2$s. Por ahora se usa una base de datos vacía. La copia se restaura automáticamente al instalar una versión compatible con la versión %3$d o posterior de la base de datos, siempre que no se hayan añadido datos mientras tanto.</string>
+    <string name="database_recovery_notification_content_unreadable">No se pudo abrir %1$s y se conservó como %2$s. Por ahora se usa una base de datos vacía.</string>
+    <string name="database_recovery_notification_title">No se pudo abrir la base de datos</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">Notificación de script</string>

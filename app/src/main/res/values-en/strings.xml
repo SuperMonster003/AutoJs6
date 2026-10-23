@@ -77,6 +77,9 @@
     <string name="content_way_of_output_for_recorded_script">Select a way of output for recorded script</string>
     <string name="crash_feedback">Copy debugging log or exit directly</string>
     <string name="current_available_abi_options">Current available \"abi\" options</string>
+    <string name="database_recovery_notification_content">%1$s could not be opened and has been kept as %2$s. An empty database is used for now. The backup is restored automatically after installing a version that supports database version %3$d or later, provided no data has been added in the meantime.</string>
+    <string name="database_recovery_notification_content_unreadable">%1$s could not be opened and has been kept as %2$s. An empty database is used for now.</string>
+    <string name="database_recovery_notification_title">Database could not be opened</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">Notification from script</string>

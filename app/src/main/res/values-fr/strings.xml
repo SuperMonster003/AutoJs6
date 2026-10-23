@@ -80,6 +80,9 @@
     <string name="content_way_of_output_for_recorded_script">Sélectionnez un mode de sortie pour le script enregistré</string>
     <string name="crash_feedback">Copier le journal de débogage ou quitter directement.</string>
     <string name="current_available_abi_options">Liste actuelle des options \"abi\" disponibles</string>
+    <string name="database_recovery_notification_content">Impossible d\'ouvrir %1$s, conservé sous le nom %2$s. Une base de données vide est utilisée pour le moment. La sauvegarde est restaurée automatiquement après l\'installation d\'une version prenant en charge la version %3$d ou ultérieure de la base de données, si aucune donnée n\'a été ajoutée entre-temps.</string>
+    <string name="database_recovery_notification_content_unreadable">Impossible d\'ouvrir %1$s, conservé sous le nom %2$s. Une base de données vide est utilisée pour le moment.</string>
+    <string name="database_recovery_notification_title">Impossible d\'ouvrir la base de données</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">Notification à partir d\'un script</string>

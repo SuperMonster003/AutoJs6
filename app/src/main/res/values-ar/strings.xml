@@ -82,6 +82,9 @@
     <string name="content_way_of_output_for_recorded_script">اختر طريقة إخراج للنصوص المعاد تصميمها</string>
     <string name="crash_feedback">نسخ سجل الأخطاء أو الخروج مباشرة</string>
     <string name="current_available_abi_options">القائمة الحالية لخيارات \"abi\" المتاحة</string>
+    <string name="database_recovery_notification_content">تعذر فتح %1$s, وتم الاحتفاظ به باسم %2$s. يتم استخدام قاعدة بيانات فارغة حاليا. تتم استعادة النسخة الاحتياطية تلقائيا بعد تثبيت إصدار يدعم الإصدار %3$d أو أحدث من قاعدة البيانات, ما لم تتم إضافة بيانات في هذه الأثناء.</string>
+    <string name="database_recovery_notification_content_unreadable">تعذر فتح %1$s, وتم الاحتفاظ به باسم %2$s. يتم استخدام قاعدة بيانات فارغة حاليا.</string>
+    <string name="database_recovery_notification_title">تعذر فتح قاعدة البيانات</string>
     <string name="default_script_notification_channel_description">@string/default_script_notification_content</string>
     <string name="default_script_notification_channel_name">@string/default_script_notification_title</string>
     <string name="default_script_notification_content">إعلام من البرنامج النصي</string>
