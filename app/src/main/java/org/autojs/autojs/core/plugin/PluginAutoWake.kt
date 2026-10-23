@@ -190,22 +190,46 @@ object PluginAutoWake {
     /**
      * `bindService` for code that waits on a worker thread: when the system refuses to bind [intent] (an explicit
      * component of a plugin), wakes the plugin and binds again (see [retryRefusedBindBlocking]); on the main thread it
-     * only binds once. Returns whether the binding was registered, like `bindService`.
+     * only binds once. Returns true when the binding holds [connection], which the caller then unbinds. Unlike
+     * `bindService`, a binding the system refused or that threw (an interrupted wake retry included) has already been
+     * unbound: `bindService` registers [connection] before the system answers (docs/memory-phase2/ROADMAP.md C43).
      * zh-CN: 供在工作线程上等待的代码使用的 `bindService`: 系统拒绝绑定 [intent] (插件的显式组件) 时唤醒插件并重新绑定 (见
-     * [retryRefusedBindBlocking]); 在主线程上只绑定一次. 与 `bindService` 一样返回绑定是否已登记.
+     * [retryRefusedBindBlocking]); 在主线程上只绑定一次. 绑定持有 [connection] 时返回 true, 之后由调用方解绑. 与 `bindService` 不同,
+     * 被系统拒绝或抛出异常 (包括唤醒重试被中断) 的绑定已经解绑: `bindService` 在系统应答之前就登记了 [connection]
+     * (docs/memory-phase2/ROADMAP.md C43).
      */
-    fun bindServiceWaking(context: Context, intent: Intent, connection: ServiceConnection, flags: Int): Boolean {
-        val packageName = intent.component?.packageName ?: intent.`package` ?: return context.bindService(intent, connection, flags)
-        return try {
-            retryRefusedBindBlocking(context, packageName) {
-                if (!context.bindService(intent, connection, flags)) {
-                    throw PluginBindRefusedException(packageName, "bindService failed: ${intent.component ?: packageName}")
+    fun bindServiceWaking(context: Context, intent: Intent, connection: ServiceConnection, flags: Int): Boolean =
+        unbindUnlessBound({ context.unbindService(connection) }) {
+            val packageName = intent.component?.packageName ?: intent.`package`
+            if (packageName == null) {
+                context.bindService(intent, connection, flags)
+            } else try {
+                retryRefusedBindBlocking(context, packageName) {
+                    if (!context.bindService(intent, connection, flags)) {
+                        throw PluginBindRefusedException(packageName, "bindService failed: ${intent.component ?: packageName}")
+                    }
+                    true
                 }
-                true
+            } catch (_: PluginBindRefusedException) {
+                false
             }
-        } catch (_: PluginBindRefusedException) {
-            false
         }
+
+    /**
+     * Runs [bind] and, unless it returned true, also when it threw, [unbind]. Unbinding a connection that `bindService`
+     * never registered throws IllegalArgumentException, which is ignored like any other failure to unbind.
+     * zh-CN: 执行 [bind], 除非它返回 true, 否则 (包括抛出异常时) 执行 [unbind]. 解绑 `bindService` 从未登记的连接会抛出
+     * IllegalArgumentException, 与其他解绑失败一样被忽略.
+     */
+    @VisibleForTesting
+    internal fun unbindUnlessBound(unbind: () -> Unit, bind: () -> Boolean): Boolean {
+        var bound = false
+        try {
+            bound = bind()
+        } finally {
+            if (!bound) runCatching { unbind() }
+        }
+        return bound
     }
 
     private fun mayWake(context: Context, packageName: String, defaultEnabled: Boolean, mode: Mode): Boolean = when (mode) {

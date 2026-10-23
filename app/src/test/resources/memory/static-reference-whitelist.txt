@@ -165,7 +165,7 @@ call | core/looper/Loopers.kt | addIdleHandler | released: yes; script | paired 
 call | core/media/ScriptMusicPlayer.kt | bindService | released: yes; process | paired | unbindService(this) in the same file
 call | core/media/ScriptMusicService.kt | registerReceiver | released: yes; process | paired | unregisterReceiver(noisyReceiver) in the same file
 call | core/plugin/AidlPluginHost.kt | bindService | released: yes; script | paired | unbindService in the same file
-call | core/plugin/PluginAutoWake.kt | bindService | released: no; script | exempt | bindServiceWaking only retries the caller's binding after waking the plugin; the caller unbinds it (Plugins.unbindAll at the PLUGINS stage, plugin host sessions) (B.2)
+call | core/plugin/PluginAutoWake.kt | bindService | released: yes; script | paired | bindServiceWaking unbinds a binding the system refused or that threw (docs/memory-phase2/ROADMAP.md C43); a binding that holds the connection is unbound by the caller (Plugins.unbindAll at the PLUGINS stage, plugin host sessions) (B.2)
 call | core/plugin/agent/ThreeStoveAgentConnectionOwner.kt | registerReceiver | released: no; script | process | process-level receiver of a process singleton, not created per script (H7; gate S11 green)
 call | core/plugin/barcode/BarcodePluginHost.kt | bindService | released: yes; script | paired | unbindService of idle pooled connections in the same file
 call | core/plugin/center/PluginCenterFragment.kt | registerReceiver | released: yes; script | paired | unregisterReceiver in the same file (fragment lifecycle)
