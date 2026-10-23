@@ -117,10 +117,14 @@
 
 ### P1 两张任务表 + 兜底 (D2 / D3, T1 / T2 / T7 / T8 / T9; 代码; 验证临时 AVD API 24 与 35)
 
-- [ ] P1.1 `TimedTaskDatabase` / `IntentTaskDatabase`: `onDowngrade` 无操作 (日志), `onUpgrade` 改用 `addColumnIfMissing` (T1), 类注释写明 T8 约定. 验收: 编译通过; P1.3 的往返与幂等用例通过.
-- [ ] P1.2 兜底 (T2 / T7 / T9): `DatabaseRecovery` 备份 / 还原 / 轮换, `TimedTaskManager` 两个 lazy 经它打开, 宿主通知 (字符串资源按 `AGENTS.md`), inrt 只日志. 验收: `inject-fail` 时宿主与 inrt 启动不崩, 出现 `.bak`, 宿主有通知; `restore-check` 还原且行数一致.
-- [ ] P1.3 androidTest (`app/src/androidTest`, 与既有迁移测试同目录惯例): 降级往返 (写版本 +1 且多一列的库文件, 用当前 helper 打开, 行与列值保留, 文件版本变为代码版本), 幂等升级 (3 -> 5 -> 3 -> 5 不抛, 列不重复), 兜底 (目录占位 -> 备份 + 空库), 还原 (备份存在且版本满足 -> 还原; 版本不满足 -> 不还原). 验收: AVD 上只跑本主题测试类通过 (子会话核对 Gradle 任务与过滤参数).
-- [ ] P1.4 AVD 验收 (API 24 与 35): `check` 宿主与 inrt 均 PASS (崩溃 0, 重启 0, 行数保留), API 35 上 Shizuku 重启服务端 3 次 inrt 均正常启动 (对照 P0.2); 报告入 evidence, 附录 B.2 "修后" 列.
+- [x] P1.1 `TimedTaskDatabase` / `IntentTaskDatabase`: `onDowngrade` 无操作 (日志), `onUpgrade` 改用 `addColumnIfMissing` (T1), 类注释写明 T8 约定. 验收: 编译通过; P1.3 的往返与幂等用例通过.
+  - 2026-10-23 完成 (db-downgrade-p0-p1, 提交 `64a62c53e`): `storage/database/SQLiteSchemaUtils.java` (`hasColumn` 用 `PRAGMA table_info`, `addColumnIfMissing`), 两表 `onUpgrade` 改用它, `onDowngrade` 记日志 `<库>: downgrade <old> -> <new>, keeping data` 后返回; `VERSION` / `FILE_NAME` 改为 public 供兜底使用; 类注释写 T8. T8 源码守卫不做, 理由见附录 A 之后的 "P0 / P1 实施处置" 第 9 条. `:app:assembleAppDebug` 通过 (构建号 5935).
+- [x] P1.2 兜底 (T2 / T7 / T9): `DatabaseRecovery` 备份 / 还原 / 轮换, `TimedTaskManager` 两个 lazy 经它打开, 宿主通知 (字符串资源按 `AGENTS.md`), inrt 只日志. 验收: `inject-fail` 时宿主与 inrt 启动不崩, 出现 `.bak`, 宿主有通知; `restore-check` 还原且行数一致.
+  - 2026-10-23 完成 (db-downgrade-p0-p1, 提交 `b7206e176` `DatabaseRecovery` 与 11 种语言的 3 条字符串, `64a62c53e` `TimedTaskManager` 接入, `e87b22a80` 按 P2 交接补齐 Room 库名与 `room_master_table`): 与 T2 原文的差异 (不用 SharedPreferences, 还原只看最新一份, 安装时间条件, `onFailure` 参数) 见 "P0 / P1 实施处置" 第 5-8, 10 条. `inject-fail` / `restore-check` 在 AVD API 24 与 35 上宿主与 inrt 均 PASS (附录 B.2).
+- [x] P1.3 androidTest (`app/src/androidTest`, 与既有迁移测试同目录惯例): 降级往返 (写版本 +1 且多一列的库文件, 用当前 helper 打开, 行与列值保留, 文件版本变为代码版本), 幂等升级 (3 -> 5 -> 3 -> 5 不抛, 列不重复), 兜底 (目录占位 -> 备份 + 空库), 还原 (备份存在且版本满足 -> 还原; 版本不满足 -> 不还原). 验收: AVD 上只跑本主题测试类通过 (子会话核对 Gradle 任务与过滤参数).
+  - 2026-10-23 完成 (db-downgrade-p0-p1, 提交 `d48f482c2`): `app/src/androidTest/.../storage/database/TaskDatabaseRecoveryTest.kt` 11 例在临时 AVD `dbdowngrade_p01_api24` (API 24) 与 `dbdowngrade_p01_api35` (API 35) 上均通过: 两表各一例降级往返 (版本 +1, 多一列一表, 行与值保留, 版本变为代码版本), 两表各一例幂等升级 (TimedTask 3 -> 5 -> 3 -> 5, IntentTask 2 -> 4 -> 2 -> 4), 目录占位兜底, 轮换 3 份, 还原条件 (安装时间, 版本), 只替换空库, 只看最新可读备份, Room 库名不带 `.db`, `openOrRecover` 装后还原. 库文件经 `ContextWrapper` 放在 `cacheDir/db-downgrade-test`, 不碰被测应用自己的任务库. 构建: `:app:assembleAppDebug :app:assembleAppDebugAndroidTest`, 运行: `adb shell am instrument -w -r -e class org.autojs.autojs.storage.database.TaskDatabaseRecoveryTest org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner`.
+- [x] P1.4 AVD 验收 (API 24 与 35): `check` 宿主与 inrt 均 PASS (崩溃 0, 重启 0, 行数保留), API 35 上 Shizuku 重启服务端 3 次 inrt 均正常启动 (对照 P0.2); 报告入 evidence, 附录 B.2 "修后" 列.
+  - 2026-10-23 完成 (db-downgrade-p0-p1): 临时 AVD `dbdowngrade_p01_api24` (Android 7.0) 与 `dbdowngrade_p01_api35` (Android 15) 上, 宿主 5935 与 inrt 5835 的 `suite` (`make-future`, `check`, `inject-fail`, `restore-check`, 每步观察 30 s) 全部 PASS: 启动 1 次, 重启 0, 崩溃 0, 两表降回代码版本 (6 -> 5, 5 -> 4) 且标记行与未来列 / 表保留; inrt 用 `--start broadcast` (理由见 "P0 / P1 实施处置" 第 11 条 (e)). API 35 上 Shizuku 服务端重启 3 轮 (连续 3 轮, 只有第 1 轮是版本 +1 数据, 之后库已是代码版本) 加 2 轮 (每轮之前重新 `make-future`), 共 5 轮: inrt 与宿主每轮都只由 `ShizukuProvider` 拉起 1 次, 崩溃 0, 90 s 末存活 (修前每轮 9 / 1 / 8 次与 7 / 8 / 8 次). 数字见附录 B.2, 报告 `evidence/roundtrip-dbdowngrade_p01_api24-5935-20261023-after-fix.md` 与 `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-after-fix.md`. 构建: 修后 APK 含 `b7206e176` 与 `64a62c53e` (suite 用); 唤醒时宿主为含 `e87b22a80` 的构建 (只改 Room 库名与 `room_master_table` 判定, 不影响两张任务表).
 
 ### P2 Room 三库通用降级 (D4, T3 / T4; 代码; 可与 P1 并行, 文件不重叠; 兜底复用 P1.2 的 `DatabaseRecovery`, 它尚未提交时先只做迁移, 兜底在它提交后接入并在结果区写明)
 
@@ -176,6 +180,14 @@
 2. T6 唤醒: Shizuku 13.6.0 在 AVD 上没有生成 `start.sh`, `wake` 在它不存在时直接执行 APK 里的 `lib/<abi>/libshizuku.so` (`start.sh` 执行的也是它); 不需要授权, 服务端重启时会调用所有声明了 Shizuku 权限的包的 `ShizukuProvider`. 修前每次启动到退出 5-15 s, 一轮约 60 s 才平息, 修前基线的观察窗口取 90 s.
 3. T6 备份命名: 伴随文件跟在备份名之后 (`<库>.bak-<版本>-<时间>-wal`), 与 SQLite 的命名方式一致, 备份可直接打开.
 4. P0.2 的 AVD 用 `dbdowngrade_p01_api35` (P2 子会话同时在用 `dbdowngrade_api35`, 加 `_p01_` 区分).
+5. T2 记录方式: 不用 SharedPreferences, 改为扫描文件名 (`<库>.bak-<文件版本>-<yyyyMMddHHmmss>`). 理由: 兜底发生在启动期, 之后若有其他崩溃以 `exitProcess(1)` 结束 (Q9), `apply` 的写入可能丢失; 记录也可能与磁盘上的文件不一致 (用户手动删改). 文件名本身就带库名, 版本与时间.
+6. T2 / D3 还原条件: 只看最新一份可读的备份 (文件版本 > 0, SQLite 文件头有效), 不会用较旧的备份覆盖较新的备份; 安装时间取 `lastUpdateTime`, 须不早于备份秒数 + 1 s (备份名只精确到秒, 防止同一构建在同一秒内备份后立即还原, 形成循环); 当前库打不开时算作有行, 不替换; 还原后备份即改回原名, 不再计入轮换.
+7. T9 通知: 用前台服务的通知渠道 (`AppForegroundService`, 应用自身提示所用的唯一渠道, 与 `AndroidSettingsAutoBackup` 相同), tag `db-recovery:<库名>`, 无点按动作; 文件版本读不到 (0) 时用不提还原条件的文案 (`database_recovery_notification_content_unreadable`); API 33+ 没有 `POST_NOTIFICATIONS` 时跳过. inrt 只记日志.
+8. T2 接口: `openOrRecover` 增加 `onFailure` 参数, 在移动文件之前执行, 供 Room (P2) 关闭 helper; 第二次打开仍失败时直接抛出.
+9. T8 源码守卫: 不做. 理由: 只涉及两个类, 约定已写进两个类的注释与 T8; JVM 单测要编译整个 app 单测源集, 成本高, 且共享工作区里他人在改的单测可能编译不过, 守卫会被无关失败拖累.
+10. P2 接入后的两处缺口 (db-downgrade-p2 交接笔记): 备份名正则不再要求 `.db` 结尾 (`keystore-database` 的备份可轮换与还原), "当前库没有行" 不计 `room_master_table` (Room 新建空库就有 identity 行). 用例 `restoreHandlesRoomDatabaseWithoutDbSuffix`.
+11. T6 脚本修正: (a) debug 包有两个 LAUNCHER 入口, `monkey` 可能选中 LeakCanary 的 "Leaks" 入口, 各次运行的启动路径因此不一致; 改为 `cmd package query-activities` 取本应用入口并排除它, 取不到时才用 `monkey`; (b) 通知在强停前读取 (API 35 的 `am force-stop` 会清掉本包通知); (c) 新装 debug 包在 API 35 首启做 ART 校验, `App.onCreate` 超过 10 s, 修后验收用 `--observe 30`; (d) `restore-check` 的重装偶尔卡住 (API 24 上一次 300 s 超时), 改为 180 s 超时重试一次, 且任何一步失败都先放回数据; (e) 直接构建的 inrt debug 包是没有项目的模板, 从桌面入口启动时 `SplashActivity` 因 `ProjectConfig.fromAssets` 返回 null 抛 NPE (`getLaunchConfig`), 与降级无关, 修前被 `App.onCreate` 的降级崩溃遮住 (修后首轮: API 35 / 24 各记到 1 次, 并被广播再拉起 1 / 2 次); 打包出的应用有 `project.json`, 不受影响. inrt 修后验收改用 `--start broadcast` (向 `ProfileInstallReceiver` 发它忽略的 action, 只拉起进程走完 `App.onCreate`, 与真实循环里后台组件拉起相同), 唤醒本来就不经界面.
+12. 修后包与修前包 versionCode 相同 (5935 / inrt 5835): VERSION_BUILD 未变, 两者只差 P1 的提交. API 24 用临时 AVD `dbdowngrade_p01_api24`.
 
 ## 附录 B. 证据
 
@@ -195,13 +207,15 @@
 
 | 场景 | 修前 (P0.2) | 修后 AVD API 24 (P1.4) | 修后 AVD API 35 (P1.4) | 真机 (P4.1) |
 | --- | --- | --- | --- | --- |
-| 宿主 TimedTask / IntentTask 版本 +1 数据启动 | FAIL (5935): 桌面启动后 60 s 内启动 8 次 (重启 7 次, 均为广播拉起), 崩溃 8 次全是降级 (6 -> 5), am_crash 0; 31 s 后不再拉起; 库文件版本不变 (6 / 5), 标记行保留 | 待填 | 待填 | 待填 |
-| inrt 同上 | FAIL (5835): 60 s 内启动 8 次 (重启 7 次, 启动类广播), 崩溃 8 次全是降级, am_crash 0; 15 s 后不再拉起 | 待填 | 待填 | 待填 |
-| Shizuku 服务端重启 3 次唤醒 inrt | FAIL: 每轮 (90 s) inrt 拉起并崩溃 9 / 1 / 8 次 (provider 1 次 + 启动类广播 + job), 宿主同轮 7 / 8 / 8 次; am_crash 均为 0 | - | 待填 | - |
-| 打开失败兜底 (`inject-fail`) | - | 待填 | 待填 | 待填 |
-| 自动还原 (`restore-check`) | - | 待填 | 待填 | 待填 |
+| 宿主 TimedTask / IntentTask 版本 +1 数据启动 | FAIL (5935): 桌面启动后 60 s 内启动 8 次 (重启 7 次, 均为广播拉起), 崩溃 8 次全是降级 (6 -> 5), am_crash 0; 31 s 后不再拉起; 库文件版本不变 (6 / 5), 标记行保留 | PASS (5935): 桌面入口启动 1 次, 重启 0, 崩溃 0 (am_crash 0, 日志 0), 30 s 末存活; 版本 6 -> 5 / 5 -> 4, 标记行 3/3 与 2/2, 未来列与表保留 | PASS (5935): 同左 | 待填 |
+| inrt 同上 | FAIL (5835): 60 s 内启动 8 次 (重启 7 次, 启动类广播), 崩溃 8 次全是降级, am_crash 0; 15 s 后不再拉起 | PASS (5835): 广播拉起 1 次 (`--start broadcast`, 见 "P0 / P1 实施处置" 第 11 条 (e)), 重启 0, 崩溃 0, 30 s 末存活; 版本与行同上 | PASS (5835): 同左 | 待填 |
+| Shizuku 服务端重启 3 次唤醒 inrt | FAIL: 每轮 (90 s) inrt 拉起并崩溃 9 / 1 / 8 次 (provider 1 次 + 启动类广播 + job), 宿主同轮 7 / 8 / 8 次; am_crash 均为 0 | - | PASS: 共 5 轮 (连续 3 轮, 再 2 轮每轮先 `make-future`, 即 3 轮带版本 +1 数据), inrt 与宿主每轮各由 `ShizukuProvider` 拉起 1 次, 崩溃 0 (am_crash 0, 日志 0), 90 s 末存活; 下一轮 `make-future` 读到 5 / 4, 即唤醒时已降回代码版本 | - |
+| 打开失败兜底 (`inject-fail`) | - | PASS (宿主与 inrt): 不崩溃, 启动 1 次; 两库各新增一份 `<库>.bak-0-<时间>` (目录占位读不到版本, 记 0), 新库为代码版本 (5 / 4) 且为空; `DatabaseRecovery` W 日志 79 行 (含栈帧); 宿主两条 `db-recovery:<库名>` 通知, inrt 只记日志 | PASS (宿主与 inrt): 同左, W 日志 85 行 | 待填 |
+| 自动还原 (`restore-check`) | - | PASS (宿主与 inrt): (a) 不重装不还原; (b) 重装后还原, 备份 0 份, 标记行 3/3 与 2/2, 版本 5 / 4; (c) 备份版本高于代码版本, 重装后不还原; 结束后数据放回 | PASS (宿主与 inrt): 同左 | 待填 |
 
 修前报告 (AVD `dbdowngrade_p01_api35`, Android 15): `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-before-fix.md` (宿主), `evidence/roundtrip-dbdowngrade_p01_api35-5835-20261023-before-fix.md` (inrt 与唤醒). 修前构建是当前 HEAD 的 debug 包 (宿主 x86_64 5935, inrt universal 5835), 两张任务表的代码版本与 HEAD 相同 (TimedTask 5, IntentTask 4).
+
+修后报告: `evidence/roundtrip-dbdowngrade_p01_api24-5935-20261023-after-fix.md` (AVD `dbdowngrade_p01_api24`, Android 7.0, 宿主与 inrt), `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-after-fix.md` (AVD `dbdowngrade_p01_api35`, Android 15, 宿主, inrt 与唤醒). 修后包与修前包 versionCode 相同, 只差 P1 的提交 ("P0 / P1 实施处置" 第 12 条).
 
 ### B.3 Room 三库 (P2.3)
 
@@ -231,6 +245,9 @@
 | `app/src/main/java/org/autojs/autojs/storage/database/IntentTaskDatabase.java` | 意图任务表, VERSION 4 | P1.1 |
 | `app/src/main/java/org/autojs/autojs/storage/database/Database.java` | 两表基类, 构造即打开 | P1 (只读) |
 | `app/src/main/java/org/autojs/autojs/timing/TimedTaskManager.kt` | 两库的 lazy 打开点, 兜底接入处 | P1.2 |
+| `app/src/main/java/org/autojs/autojs/storage/database/SQLiteSchemaUtils.java` | `hasColumn` / `addColumnIfMissing` (T1) | P1.1 |
+| `app/src/main/java/org/autojs/autojs/storage/database/DatabaseRecovery.kt` | 打开失败兜底: 备份, 空库, 轮换, 还原, 宿主通知 (T2 / T7 / T9); Room 经 `RoomDowngrade` 接入 | P1.2 |
+| `app/src/androidTest/java/org/autojs/autojs/storage/database/TaskDatabaseRecoveryTest.kt` | 两表降级 / 幂等升级与兜底 / 还原用例 | P1.3 |
 | `app/src/main/java/org/autojs/autojs/App.kt` | 崩溃发生处 (`TimedTaskScheduler.init`, `initDynamicBroadcastReceivers`) | P0 / P1 (只读) |
 | `app/src/main/java/org/autojs/autojs/tool/CrashHandler.kt` | 主线程异常处理, 无循环防护 | P0 (只读) |
 | `app/src/main/java/org/autojs/autojs/storage/history/HistoryDatabase.kt` | Room, version 3 | P2 |

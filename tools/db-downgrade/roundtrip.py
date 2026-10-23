@@ -11,7 +11,8 @@ Subcommands (all but forensics need a debuggable build, for run-as):
   make-future    Pulls both databases (with -wal / -shm / -journal) and, on the PC with Python sqlite3, seeds marker
                  rows, adds a column and a table and sets user_version to the code version + 1; pushes the single file
                  back and removes the device's -wal / -shm / -journal. The device needs no sqlite3.
-  check          Starts the app from its launcher, observes --observe seconds, force-stops it and reads the databases.
+  check          Starts the app (--start: its launcher activity, or an explicit broadcast that only starts the process),
+                 observes --observe seconds, force-stops it and reads the databases.
                  PASS: alive at the end, no crash and no second process start logged, user_version equals the code
                  version, all marker rows there, the future column and table kept.
   inject-fail    Moves each database aside, puts a directory of the same name in its place and starts the app. PASS: no
@@ -60,6 +61,12 @@ BACKUP_PATTERN = re.compile(r"^(?P<file>.+?\.db)\.bak-(?P<version>\d+)-(?P<time>
 RECOVERY_LOG_TAG = "DatabaseRecovery"
 NOTICE_TAG_PREFIX = "db-recovery:"
 DOWNGRADE_TEXT = "Can't downgrade database"
+# --start broadcast: an exported receiver every build has (permission DUMP, which the shell holds) and an action it
+# ignores, so only the process starts (App.onCreate), as when a provider or a broadcast starts it in the background.
+# zh-CN: --start broadcast: 每个构建都有的导出接收器 (权限 DUMP, shell 持有) 与它忽略的 action, 只拉起进程 (App.onCreate),
+# 与后台被 provider 或广播拉起时相同.
+START_RECEIVER = "androidx.profileinstaller.ProfileInstallReceiver"
+START_ACTION = "org.autojs.autojs6.dbdowngrade.START"
 SHIZUKU_PACKAGE = "moe.shizuku.privileged.api"
 DEFAULT_START_SH = f"/sdcard/Android/data/{SHIZUKU_PACKAGE}/start.sh"
 SERVER_NAME = "shizuku_server"
@@ -200,9 +207,11 @@ class Device:
 
 class App:
 
-    def __init__(self, dev, package):
+    def __init__(self, dev, package, start_mode="launcher"):
         self.dev = dev
         self.package = package
+        self.start_mode = start_mode
+        self._launcher = None
 
     def run_as(self, command, timeout=60):
         return self.dev.adb("shell", f"run-as {self.package} sh -c {quote(command)}", timeout=timeout)
@@ -220,8 +229,28 @@ class App:
     def installed(self):
         return f"package:{self.package}" in self.dev.shell(f"pm list packages {self.package}").split()
 
+    def launcher(self):
+        """The launcher activity of the app itself: debug builds add LeakCanary's "Leaks" icon, which monkey may pick instead."""
+        if self._launcher is None:
+            out = self.dev.shell(f"cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER {self.package}")
+            components = re.findall(rf"^\s*({re.escape(self.package)}/\S+)\s*$", out, re.M)
+            self._launcher = next((c for c in components if "leakcanary" not in c.lower()), "")
+        return self._launcher
+
     def start(self):
-        self.dev.adb("shell", f"monkey -p {self.package} -c android.intent.category.LAUNCHER 1", timeout=60)
+        if self.start_mode == "broadcast":
+            # 0x20: FLAG_INCLUDE_STOPPED_PACKAGES, the app is force-stopped before every start.
+            # zh-CN: 0x20: FLAG_INCLUDE_STOPPED_PACKAGES, 每次启动前应用都已被强停.
+            self.dev.adb("shell", f"am broadcast -f 0x20 -n {self.package}/{START_RECEIVER} -a {START_ACTION}", timeout=60)
+        elif self.launcher():
+            self.dev.adb("shell", f"am start -n {self.launcher()} -a android.intent.action.MAIN -c android.intent.category.LAUNCHER", timeout=60)
+        else:
+            self.dev.adb("shell", f"monkey -p {self.package} -c android.intent.category.LAUNCHER 1", timeout=60)
+
+    def start_text(self):
+        if self.start_mode == "broadcast":
+            return f"显式广播 ({START_RECEIVER.rsplit('.', 1)[-1]}, 只拉起进程)"
+        return f"桌面入口 ({self.launcher() or 'monkey'})"
 
     def stop(self):
         self.dev.adb("shell", f"am force-stop {self.package}")
@@ -410,7 +439,7 @@ class Context:
     def __init__(self, args):
         self.args = args
         self.dev = Device(args.serial)
-        self.app = App(self.dev, args.package)
+        self.app = App(self.dev, args.package, args.start)
         self.versions = code_versions(args.code_version)
         self.items = []
 
@@ -484,8 +513,9 @@ def make_future(ctx):
     return ctx.report("make-future")
 
 
-def observe_start(ctx, observe):
-    """Starts the app, waits, force-stops it; returns (event summary, alive at the end)."""
+def observe_start(ctx, observe, probe=None):
+    """Starts the app, waits, calls [probe] while the app still runs (force-stop clears its notifications on newer
+    Android versions), force-stops it; returns (event summary, alive at the end, start time, probe result)."""
     app = ctx.app
     app.stop()
     time.sleep(1)
@@ -493,11 +523,12 @@ def observe_start(ctx, observe):
     app.start()
     time.sleep(observe)
     alive = app.alive()
+    probed = probe() if probe else None
     app.stop()
     time.sleep(1)
     summary = summarize_events(ctx.dev.events(since), app.package)
     attach_logs(summary, ctx.dev.crash_logs(since))
-    return summary, alive, since
+    return summary, alive, since, probed
 
 
 def attach_logs(summary, logs):
@@ -542,9 +573,9 @@ def check_items(ctx, summary, alive, expect_markers=True, expect_future=True):
 
 def check(ctx):
     ctx.require_debuggable()
-    summary, alive, _ = observe_start(ctx, ctx.args.observe)
+    summary, alive, _, _ = observe_start(ctx, ctx.args.observe)
     check_items(ctx, summary, alive, expect_future=not ctx.args.no_future)
-    return ctx.report("check", [f"启动方式: launcher (monkey), 观察 {ctx.args.observe} s 后强停"])
+    return ctx.report("check", [f"启动方式: {ctx.app.start_text()}, 观察 {ctx.args.observe} s 后强停"])
 
 
 def inject_fail(ctx):
@@ -565,7 +596,8 @@ def inject_fail(ctx):
                               + [f"mkdir databases/{db.file}"]))
         ctx.item(f"{db.file} injected", app.kind(db.file) == "dir", f"databases/{db.file} is a {app.kind(db.file)}")
     since = dev.now()
-    summary, alive, _ = observe_start(ctx, ctx.args.observe)
+    host = app.package == DEFAULT_PACKAGE
+    summary, alive, _, tags = observe_start(ctx, ctx.args.observe, app.notices if host else None)
     ctx.item("process", alive, "alive" if alive else "not running at the end")
     ctx.item("crashes", no_crash(summary), f"{crash_text(summary)}, process starts {summary['starts']}")
     ctx.item("recovery log", dev.log_count(since, RECOVERY_LOG_TAG) >= len(DATABASES), f"{RECOVERY_LOG_TAG} W lines {dev.log_count(since, RECOVERY_LOG_TAG)}")
@@ -576,8 +608,7 @@ def inject_fail(ctx):
         ok = len(new) == 1 and info is not None and info["version"] == ctx.versions[db.key] and info["rows"] == 0
         ctx.item(f"{db.file} recovered", ok, f"new backups {', '.join(new) or 'none'}; new database "
                  + (f"user_version {info['version']}, rows {info['rows']}" if info else "missing"))
-    if app.package == DEFAULT_PACKAGE:
-        tags = app.notices()
+    if host:
         ctx.item("notification", all(NOTICE_TAG_PREFIX + db.file.removesuffix(".db") in tags for db in DATABASES), f"tags {', '.join(tags) or 'none'}")
     # Put the kept files back and drop what the injection produced (the empty databases and the empty directories).
     # zh-CN: 放回保留的文件, 去掉注入产生的内容 (空库与空目录).
@@ -593,7 +624,7 @@ def inject_fail(ctx):
     restored = read_databases(app)
     ctx.item("kept files back", all(restored[db.key] is not None and restored[db.key]["markers"] == db.seed for db in DATABASES),
              ", ".join(f"{db.file} markers {restored[db.key]['markers'] if restored[db.key] else 'missing'}" for db in DATABASES))
-    return ctx.report("inject-fail", [f"注入: databases/<库文件> 换成同名目录, 观察 {ctx.args.observe} s"])
+    return ctx.report("inject-fail", [f"注入: databases/<库文件> 换成同名目录; 启动方式: {app.start_text()}, 观察 {ctx.args.observe} s"])
 
 
 def rename_to_backup(app, db, version, stamp):
@@ -624,51 +655,69 @@ def restore_check(ctx):
         raise RoundTripError("restore-check needs the marker rows (run make-future and check first)")
 
     def install():
-        code, out, err = dev.adb("install", "-r", "-t", ctx.args.apk, timeout=300)
+        # A streamed install occasionally hangs on an emulator (once on API 24, 300 s): retry once.
+        # zh-CN: 模拟器上的流式安装偶尔会卡住 (API 24 上出现过一次, 300 s): 重试一次.
+        for attempt in range(2):
+            try:
+                code, out, err = dev.adb("install", "-r", "-t", ctx.args.apk, timeout=180)
+                break
+            except subprocess.TimeoutExpired:
+                if attempt:
+                    raise
         if code != 0 or "Success" not in out:
             raise RoundTripError(f"install failed: {(out + err).strip()[-200:]}")
 
     def run(observe):
-        summary, alive, _ = observe_start(ctx, observe)
+        summary, alive, _, _ = observe_start(ctx, observe)
         return summary, alive, read_databases(app)
 
-    # (a) A backup the running build made itself is not restored until another install.
-    # zh-CN: (a) 本构建自己留下的备份, 在再次安装之前不还原.
-    stamp = dev.stamp()
-    backups = {db.file: rename_to_backup(app, db, ctx.versions[db.key], stamp) for db in DATABASES}
-    summary, alive, databases = run(ctx.args.observe)
-    ok = alive and no_crash(summary) and all(backups[db.file] in app.entries() and databases[db.key]["markers"] == 0 for db in DATABASES)
-    ctx.item("(a) no reinstall", ok, f"alive {alive}, am_crash {summary['crashes']}; "
-             + ", ".join(f"{db.file} backup kept {backups[db.file] in app.entries()}, markers {databases[db.key]['markers']}" for db in DATABASES))
-    # (b) After a reinstall, a backup no newer than the code version replaces the empty database.
-    # zh-CN: (b) 重新安装后, 文件版本不高于代码版本的备份取代空库.
-    time.sleep(1)
-    install()
-    summary, alive, databases = run(ctx.args.observe)
-    ok = alive and no_crash(summary) and all(not app.backups(db.file) and databases[db.key]["markers"] == db.seed
-                                                   and databases[db.key]["version"] == ctx.versions[db.key] for db in DATABASES)
-    ctx.item("(b) reinstalled, version satisfied", ok, f"alive {alive}, am_crash {summary['crashes']}; "
-             + ", ".join(f"{db.file} backups left {len(app.backups(db.file))}, markers {databases[db.key]['markers']}/{db.seed}, "
-                         f"user_version {databases[db.key]['version']}" for db in DATABASES))
-    # (c) A backup newer than the code version stays where it is.
-    # zh-CN: (c) 文件版本高于代码版本的备份保持不动.
-    app.stop()
-    stamp = dev.stamp()
-    backups = {db.file: rename_to_backup(app, db, ctx.versions[db.key] + 1, stamp) for db in DATABASES}
-    time.sleep(1)
-    install()
-    summary, alive, databases = run(ctx.args.observe)
-    ok = alive and no_crash(summary) and all(backups[db.file] in app.entries() and databases[db.key]["markers"] == 0 for db in DATABASES)
-    ctx.item("(c) reinstalled, backup newer than code", ok, f"alive {alive}, am_crash {summary['crashes']}; "
-             + ", ".join(f"{db.file} backup kept {backups[db.file] in app.entries()}, markers {databases[db.key]['markers']}" for db in DATABASES))
-    # Put the data back by hand for the next steps. zh-CN: 手工放回数据, 供后续步骤使用.
-    app.stop()
-    for db in DATABASES:
-        rename_from_backup(app, db, backups[db.file])
+    def put_back(current):
+        """Renames the backups still present back to the database names, so a failed step does not leave the data aside."""
+        app.stop()
+        entries = app.entries()
+        for db in DATABASES:
+            if current.get(db.file) in entries:
+                rename_from_backup(app, db, current[db.file])
+
+    backups = {}
+    try:
+        # (a) A backup the running build made itself is not restored until another install.
+        # zh-CN: (a) 本构建自己留下的备份, 在再次安装之前不还原.
+        stamp = dev.stamp()
+        backups = {db.file: rename_to_backup(app, db, ctx.versions[db.key], stamp) for db in DATABASES}
+        summary, alive, databases = run(ctx.args.observe)
+        ok = alive and no_crash(summary) and all(backups[db.file] in app.entries() and databases[db.key]["markers"] == 0 for db in DATABASES)
+        ctx.item("(a) no reinstall", ok, f"alive {alive}, am_crash {summary['crashes']}; "
+                 + ", ".join(f"{db.file} backup kept {backups[db.file] in app.entries()}, markers {databases[db.key]['markers']}" for db in DATABASES))
+        # (b) After a reinstall, a backup no newer than the code version replaces the empty database.
+        # zh-CN: (b) 重新安装后, 文件版本不高于代码版本的备份取代空库.
+        time.sleep(1)
+        install()
+        summary, alive, databases = run(ctx.args.observe)
+        ok = alive and no_crash(summary) and all(not app.backups(db.file) and databases[db.key]["markers"] == db.seed
+                                                       and databases[db.key]["version"] == ctx.versions[db.key] for db in DATABASES)
+        ctx.item("(b) reinstalled, version satisfied", ok, f"alive {alive}, am_crash {summary['crashes']}; "
+                 + ", ".join(f"{db.file} backups left {len(app.backups(db.file))}, markers {databases[db.key]['markers']}/{db.seed}, "
+                             f"user_version {databases[db.key]['version']}" for db in DATABASES))
+        # (c) A backup newer than the code version stays where it is.
+        # zh-CN: (c) 文件版本高于代码版本的备份保持不动.
+        app.stop()
+        stamp = dev.stamp()
+        backups = {db.file: rename_to_backup(app, db, ctx.versions[db.key] + 1, stamp) for db in DATABASES}
+        time.sleep(1)
+        install()
+        summary, alive, databases = run(ctx.args.observe)
+        ok = alive and no_crash(summary) and all(backups[db.file] in app.entries() and databases[db.key]["markers"] == 0 for db in DATABASES)
+        ctx.item("(c) reinstalled, backup newer than code", ok, f"alive {alive}, am_crash {summary['crashes']}; "
+                 + ", ".join(f"{db.file} backup kept {backups[db.file] in app.entries()}, markers {databases[db.key]['markers']}" for db in DATABASES))
+    finally:
+        # Put the data back by hand for the next steps, also after a failed step.
+        # zh-CN: 手工放回数据, 供后续步骤使用; 某步失败时也放回.
+        put_back(backups)
     final = read_databases(app)
     ctx.item("data back", all(final[db.key] and final[db.key]["markers"] == db.seed for db in DATABASES),
              ", ".join(f"{db.file} markers {final[db.key]['markers'] if final[db.key] else 'missing'}" for db in DATABASES))
-    return ctx.report("restore-check", [f"APK: {Path(ctx.args.apk).name}; 每步观察 {ctx.args.observe} s"])
+    return ctx.report("restore-check", [f"APK: {Path(ctx.args.apk).name}; 启动方式: {app.start_text()}, 每步观察 {ctx.args.observe} s"])
 
 
 def shizuku_starter(dev, start_sh):
@@ -835,6 +884,8 @@ def main():
     parser.add_argument("--package", default=DEFAULT_PACKAGE, help="org.autojs.autojs6 (host) or org.autojs.autojs6.inrt")
     parser.add_argument("--report-dir", default="docs/db-downgrade/evidence", help="relative paths start at the repository root")
     parser.add_argument("--label", default="", help="report name suffix, e.g. before-fix")
+    parser.add_argument("--start", choices=("launcher", "broadcast"), default="launcher",
+                        help="how check / inject-fail / restore-check start the app (default launcher; broadcast for an inrt build without a project)")
     parser.add_argument("--observe", type=float, default=10.0, help="seconds to watch the app after a start (default 10)")
     parser.add_argument("--bump", type=int, default=1, help="make-future: file version = code version + this (default 1)")
     parser.add_argument("--code-version", action="append", help="override the version read from the source, e.g. timed=6")
