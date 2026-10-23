@@ -46,6 +46,7 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 import org.mozilla.javascript.VarScope
+import org.mozilla.javascript.commonjs.module.ModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.Require
 import org.mozilla.javascript.commonjs.module.provider.MultiModuleScriptProvider
 import org.mozilla.javascript.commonjs.module.provider.SoftCachingModuleScriptProvider
@@ -65,6 +66,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
     private val mWrapFactory = WrapFactory()
     private val mAssetLoader = AndroidRhinoAssetLoader(androidContext)
     private lateinit var mRequire: Require
+    private lateinit var mModuleScriptProvider: ModuleScriptProvider
     private var mMaterializedTypeScriptProject: TypeScriptMaterializedRhinoProject? = null
 
     // The standard objects of this engine, installed with its WrapFactory whenever this engine is bound to its Context
@@ -283,6 +285,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
                 SoftCachingModuleScriptProvider(provider),
             )
         )
+        mModuleScriptProvider = moduleScriptProvider
         mRequire = TypeScriptRhinoCommonJsRequire(
             context = context,
             nativeScope = scope,
@@ -291,6 +294,17 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         )
         mRequire.install(scope)
     }
+
+    /**
+     * Whether the engine's `require` can supply the non-relative module [id] (an asset module or a path under one, an
+     * existing absolute path, a dependency of the TypeScript project), without running it: the named module source of the
+     * Kotlin `require` (roadmap P3.7) asks before it loads, instead of catching the error of a missing module.
+     * zh-CN: 引擎的 require 能否提供非相对 id 的模块 [id] (资产模块或其下的路径, 存在的绝对路径, TypeScript 项目的依赖), 不执行模块: Kotlin require 的命名模块源
+     * (ROADMAP P3.7) 先询问再加载, 而不是捕获找不到模块的错误.
+     */
+    internal fun canRequireNamedModule(cx: Context, id: String): Boolean =
+        mMaterializedTypeScriptProject?.resolveCommonJsDependency(id, null) != null ||
+            mModuleScriptProvider.getModuleScript(cx, id, null, null, null) != null
 
     protected fun createScope(context: Context) = TopLevelScope().apply {
         initStandardObjects(context, false)

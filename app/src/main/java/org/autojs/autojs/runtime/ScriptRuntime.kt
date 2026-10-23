@@ -23,6 +23,7 @@ import org.autojs.autojs.core.plugin.r8.AndroidR8CompilerHost
 import org.autojs.autojs.core.plugin.r8.R8CompilerExplicitRuntimeRoute
 import org.autojs.autojs.core.plugin.r8.R8RetraceExplicitRuntimeRoute
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
+import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
@@ -199,12 +200,16 @@ import org.autojs.autojs.runtime.api.augment.util.Java as UtilJava
 import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
 import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
+import org.mozilla.javascript.Context as RhinoContext
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
 import org.autojs.autojs.runtime.api.modules.bootstrap.ContinuationPrototype
 import org.autojs.autojs.runtime.api.modules.bootstrap.InternalGlobals
 import org.autojs.autojs.runtime.api.modules.bootstrap.ResultAdapterFunction
 import org.autojs.autojs.runtime.api.modules.bootstrap.ScriptPolyfills
+import org.autojs.autojs.runtime.api.modules.bootstrap.require.AssetModuleSource
+import org.autojs.autojs.runtime.api.modules.bootstrap.require.ScriptModuleSources
+import org.autojs.autojs.runtime.api.modules.bootstrap.require.ScriptRequire
 import org.autojs.autojs.script.JavaScriptSource
 
 /**
@@ -540,7 +545,27 @@ class ScriptRuntime private constructor(builder: Builder) {
      */
     internal val js_ResultAdapter: BaseFunction by lazy { ResultAdapterFunction(topLevelScope, topLevelScope.globalThis, isMainThread()) }
     internal val js_UiExt by lazy { rhinoRequire("ui-ext") as BaseFunction }
-    internal val js_Module by lazy { rhinoRequire("jvm-npm") as ScriptableObject }
+    internal val js_Module by lazy { if (scriptModules != null) scriptRequire.module else rhinoRequire(JVM_NPM) as ScriptableObject }
+
+    /**
+     * The Kotlin `require` and `Module` of roadmap P3.7, for the runtimes with the new script module layer (the others load
+     * `jvm-npm.js`): Node core modules and the ids that the local lookup misses come from the engine's Rhino `require`,
+     * whose modules are those of the global getters, and `jvm-npm` is this `Module`.
+     * zh-CN: ROADMAP P3.7 的 Kotlin `require` 与 `Module`, 用于启用新脚本模块层的运行时 (其他运行时加载 `jvm-npm.js`): Node 核心模块与本地解析未命中的 id
+     * 来自引擎的 Rhino require, 模块实例与全局 getter 相同; `jvm-npm` 即本 `Module`.
+     */
+    private val scriptRequire by lazy {
+        ScriptRequire(
+            scope = topLevelScope,
+            host = object : ScriptRequire.Host {
+                override fun cwd() = files.cwd()
+                override fun exists(path: String) = files.exists(path)
+                override fun readBytes(path: String) = files.readBytes(path)
+            },
+            sources = ScriptModuleSources(listOf(AssetModuleSource(::canRequireNamedModule, ::requireNamedModule))),
+            nativeRequire = ::rhinoRequire,
+        )
+    }
 
     internal val js_mod_axios by lazy { rhinoRequire("axios") as BaseFunction }
     internal val js_mod_cheerio by lazy { rhinoRequire("cheerio") as ScriptableObject }
@@ -625,8 +650,17 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! 重定向 require 以支持相对路径和 npm 模块.
         //  ! en-US (translated by SuperMonster003 on Jul 27, 2024):
         //  ! Redirect the "require" method to support relative paths and npm modules.
-        topLevelScope.defineProp("Module", js_Module, PERMANENT)
-        topLevelScope.defineProp("require", js_Module.prop("require"), PERMANENT)
+        if (scriptModules != null) {
+            // Roadmap P3.7: the Kotlin require replaces jvm-npm.js, created when a script first reads require or Module. The
+            // native require is taken before it is replaced, so that the global getters (axios, ...) keep loading through it.
+            // zh-CN: ROADMAP P3.7: Kotlin require 取代 jvm-npm.js, 脚本首次读取 require 或 Module 时创建. 原生 require 在被替换之前取得,
+            // 使全局 getter (axios 等) 仍经它加载.
+            rhinoRequireFunction
+            ScriptRequire.mount(topLevelScope.globalThis as ScriptableObject) { scriptRequire }
+        } else {
+            topLevelScope.defineProp("Module", js_Module, PERMANENT)
+            topLevelScope.defineProp("require", js_Module.prop("require"), PERMANENT)
+        }
 
         PluginAutoMountManager.apply(this)
     }
@@ -1209,6 +1243,14 @@ class ScriptRuntime private constructor(builder: Builder) {
         return callFunction(this, rhinoRequireFunction, topLevelScope, topLevelScope.globalThis, arrayOf(id))
     }
 
+    /** Whether [scriptRequire] can take the named module [id] from the engine's Rhino `require`, without running it. */
+    private fun canRequireNamedModule(id: String): Boolean = isJvmNpm(id) ||
+        (engines.myEngine() as? RhinoJavaScriptEngine)?.canRequireNamedModule(RhinoContext.getCurrentContext(), id) == true
+
+    private fun requireNamedModule(id: String): Any? = if (isJvmNpm(id)) scriptRequire.module else rhinoRequire(id)
+
+    private fun isJvmNpm(id: String) = id == JVM_NPM || id == "$JVM_NPM.js"
+
     class Builder {
 
         lateinit var shellSupplier: Supplier<AbstractShell>
@@ -1247,6 +1289,8 @@ class ScriptRuntime private constructor(builder: Builder) {
     companion object {
 
         private val TAG = ScriptRuntime::class.java.simpleName
+
+        private const val JVM_NPM = "jvm-npm"
 
         private var sApplicationContext: WeakReference<Context>? = null
 

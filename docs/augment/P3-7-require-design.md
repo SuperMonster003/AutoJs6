@@ -113,11 +113,12 @@ Module 对象 (`new Module(id, parent, core)`, 脚本仍可自行构造):
   - 加密脚本 (以 `EncryptedScriptFileHeader` 开头) 解密后执行, 明文字节用后清零, 同关态.
   - 文件按 UTF-8 一次读入.
   - 关态先 `readBytes` 判断加密, 再用 Scanner 重读; 空文件时 Scanner 抛 NoSuchElementException, 被包装成 IO_ERROR (Q81 修复项 3).
-- continuation:
-  - 关态 require 链中有 `bind` 产生的 BoundFunction, Rhino 解释器不内联它, 链上因此有 Java 帧, 模块顶层代码中捕获 continuation 本来就会失败.
-  - 新实现由 Kotlin 调用模块函数, 结果相同.
+- continuation (实现时更正, 2026-10-23):
+  - 关态从脚本到模块函数体全是脚本函数: 本 Rhino fork 的解释器原地调用 `bind` 产生的 BoundFunction 与 `Function.prototype.call`, 链上没有 Java 帧, 模块 (包括它 require 的模块) 顶层可以捕获 continuation, 恢复后加载照常完成. 原先 "关态本来就会失败" 的判断有误, 是差分用例发现的.
+  - 新实现若由 Kotlin 调用模块函数, 链上有 Java 帧, 捕获会抛 IllegalStateException. 因此 `require`, `Module._load`, `Module.runMain` 与 `module.require` 的目标函数改为每个运行时编译一次的脚本函数 (源名 `<require>`), 只把解析, 缓存查询, 读取与编译等步骤交给 Kotlin, 这些步骤都在模块执行前返回; `_load` 失败时以 `finally` 删除缓存, 错误原样穿过. 名称, length 与特性仍同 jvm-npm.
+  - 这些脚本函数会出现在错误的脚本栈中 (关态为 jvm-npm.js 的帧). 解析与参数错误 (MODULE_NOT_FOUND, D10 的 TypeError 等) 的源名与行号取调用 require 的脚本位置, 跳过 `<require>` 帧.
   - 模块导出的函数之后被主脚本调用时不受影响.
-  - JVM 用例会固定两态一致.
+  - JVM 用例固定两态一致 (两层模块各捕获一次再恢复).
 - 循环依赖: a 引用 b, b 再引用 a 时, b 拿到 a 当时的 `exports`. 若 a 之后替换 `module.exports`, b 仍持有旧对象. 同 Node 与关态.
 
 ## (c) 与 Rhino Require / ModuleScriptProvider 的关系
@@ -294,7 +295,7 @@ JVM (主):
   - 错误: 非字符串与空串为 TypeError; 找不到为 Q83 的形态; PARSE_ERROR / IO_ERROR 带 code 与 cause; 模块错误的源名与行号.
   - runMain / `require.main` / `process.mainModule`, root 的读写, 带 parent 的 resolve.
   - 内置名与 http 交给原生, 本地未命中再交给命名源, `require('jvm-npm')`.
-  - 模块顶层捕获 continuation 时两态同样失败.
+  - 模块顶层 (包括被 require 的模块) 捕获 continuation 后恢复, 两态结果相同.
 - #564: issue 的三文件, 与全局同名的 `const log` / `let toast` 在两态都通过; 原生 Require 路径上的 `const log` 回归用例 (见 (e)).
 - 挂载:
   - 开态 `Module` / `require` 是 LazyDataSlot, 特性 PERMANENT, `Object.keys(global)` 顺序不变.
