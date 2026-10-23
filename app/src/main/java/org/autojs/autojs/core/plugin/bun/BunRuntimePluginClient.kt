@@ -35,6 +35,8 @@ internal object BunRuntimePluginClient {
         preBindValidator = ::validateServiceForNewCall,
     )
 
+    internal fun pooledConnectionCount(): Int = host.pooledConnectionCount()
+
     internal class Selection internal constructor(
         internal val discovered: AidlPluginHost.Discovered,
         internal val identity: ProviderIdentity,

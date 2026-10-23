@@ -86,6 +86,12 @@ class AidlPluginHost<I : IInterface>(
     private val poolLock = Any()
     private val connectionPool = LinkedHashMap<ComponentName, PooledConnection>()
 
+    /**
+     * Pooled connections, bound or binding, for the bridge leak gate (docs/memory-phase2/ROADMAP.md T1 (h), C10).
+     * zh-CN: 池中的连接数 (已绑定或绑定中), 供桥接泄漏门禁使用 (docs/memory-phase2/ROADMAP.md T1 (h), C10).
+     */
+    fun pooledConnectionCount(): Int = synchronized(poolLock) { connectionPool.size }
+
     data class Discovered(
         val serviceInfo: ServiceInfo,
         val pluginInfo: PluginInfo?,

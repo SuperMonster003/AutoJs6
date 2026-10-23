@@ -57,33 +57,14 @@ internal class BridgeTracker : ScriptEngineManager.EngineLifecycleCallback, Brid
             "autojs-bun-", "autojs-quickjs-",
         )
 
-        /**
-         * Connection pools of the AidlPluginHost clients (P2.1), read through reflection until StaticRegistries reports them (P2.2).
-         * zh-CN: AidlPluginHost 客户端的连接池 (P2.1), 在 StaticRegistries 报告它们之前 (P2.2) 经反射读取.
-         */
-        private val AIDL_POOLS = linkedMapOf(
-            "BunRuntimePluginClient.connectionPool" to "org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient",
-            "QuickJsRuntimePluginClient.connectionPool" to "org.autojs.autojs.core.plugin.quickjs.QuickJsRuntimePluginClient",
-        )
-
         fun bridgeThreads(): List<String> =
             GateMetrics.liveThreads().map { it.name }.filter { name -> BRIDGE_THREAD_MARKERS.any { name.contains(it) } }
 
-        /** Host-side registries of T1 (h). zh-CN: T1 (h) 的宿主侧注册表. */
-        fun hostRegistries(): Map<String, Int> {
-            val counts = LinkedHashMap(StaticRegistries.bridgeCounts())
-            AIDL_POOLS.forEach { (name, client) -> if (name !in counts) aidlPoolSize(client)?.let { counts[name] = it } }
-            return counts
-        }
-
-        /** Size of `connectionPool` of the AidlPluginHost held by the client object [client], or null. */
-        private fun aidlPoolSize(client: String): Int? = runCatching {
-            val type = Class.forName(client)
-            val host = type.getDeclaredField("host").apply { isAccessible = true }.get(null)!!
-            val lock = field(host, host.javaClass, "poolLock")!!
-            val pool = field(host, host.javaClass, "connectionPool") as Map<*, *>
-            synchronized(lock) { pool.size }
-        }.getOrNull()
+        /**
+         * Host-side registries of T1 (h), the AidlPluginHost pools of Bun / QuickJS included (P2.2).
+         * zh-CN: T1 (h) 的宿主侧注册表, 含 Bun / QuickJS 的 AidlPluginHost 连接池 (P2.2).
+         */
+        fun hostRegistries(): Map<String, Int> = StaticRegistries.bridgeCounts()
 
         /**
          * Reachable instances of the session classes (kind -> class name) through VMDebug, which collects garbage first;
