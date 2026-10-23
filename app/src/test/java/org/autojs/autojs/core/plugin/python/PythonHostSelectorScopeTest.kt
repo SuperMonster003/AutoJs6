@@ -53,8 +53,14 @@ class PythonHostSelectorScopeTest {
         val stale = HashSet<String>()
         val clicked = ArrayList<String>()
         val texts = ArrayList<Pair<String, String>>()
+        var failCapture: String? = null
 
         override fun activeRoot(): FakeUiNode? = root
+
+        override fun capture(node: FakeUiNode): PythonHostSelectorValues {
+            check(node.name != failCapture) { "Unable to read ${node.name}" }
+            return PythonHostSelectorValues.of(node)
+        }
 
         override fun refresh(node: FakeUiNode): Boolean = node.name !in stale
 
@@ -149,6 +155,25 @@ class PythonHostSelectorScopeTest {
         assertTrue(other.find("b1").isRecycled)
         assertFalse(other.find("b1x").isRecycled)
         assertFalse(other.find("b").isRecycled)
+    }
+
+    @Test
+    fun snapshotReleasesTheNodeWhoseCaptureFails() {
+        val root = tree()
+        val platform = Platform(root).apply { failCapture = "b" }
+        try {
+            scope(platform, recycling).snapshot(maxNodes = 64, maxDepth = 16)
+            fail("Expected the capture failure to propagate")
+        } catch (_: IllegalStateException) {
+        }
+        // root and a were retained and then let go, b failed while being read, a0 and a1 were still pending,
+        // b0, b1 and b1x were never obtained (docs/memory-phase2/ROADMAP.md C44).
+        // zh-CN: root 与 a 先被保留后被放开, b 在读取时失败, a0 与 a1 仍在待处理队列中, b0, b1 与 b1x 从未取得
+        // (docs/memory-phase2/ROADMAP.md C44).
+        assertEquals(
+            listOf("root", "a", "a0", "a1", "b"),
+            root.descendantsAndSelf().filter { it.isRecycled }.map { it.name },
+        )
     }
 
     @Test

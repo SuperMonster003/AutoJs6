@@ -264,30 +264,38 @@ internal class PythonHostSelectorScope<N : UiNode<N>>(
         try {
             while (pending.isNotEmpty() && captured.size < maxNodes) {
                 val current = pending.removeFirst()
-                val values = platform.capture(current.node)
-                val nodeId = nextNodeId()
-                val publicNode = values.toPublicNode(nodeId, current.parentId, current.depth)
-                val candidate = PythonHostSelectorSnapshot(
-                    generation = generation,
-                    truncated = false,
-                    nodes = captured + publicNode,
-                )
-                if (candidate.encodedSize() > PythonHostSelectorPolicy.MAX_SNAPSHOT_VALUE_BYTES) {
-                    release(current.node)
-                    truncated = true
-                    break
-                }
-
-                retain(nodeId, current.node)
-                captured += publicNode
-                if (current.depth < maxDepth) {
-                    for (index in 0 until values.childCount) {
-                        current.node.child(index)?.let { child ->
-                            pending.add(PendingNode(child, nodeId, current.depth + 1))
-                        }
+                // Released here unless retained, also when reading it throws: it is neither pending nor retained any more
+                // (docs/memory-phase2/ROADMAP.md C44).
+                // zh-CN: 未被保留时在此释放, 读取它抛出异常时也一样: 它已不在待处理队列中, 也未被保留 (docs/memory-phase2/ROADMAP.md C44).
+                var retained = false
+                try {
+                    val values = platform.capture(current.node)
+                    val nodeId = nextNodeId()
+                    val publicNode = values.toPublicNode(nodeId, current.parentId, current.depth)
+                    val candidate = PythonHostSelectorSnapshot(
+                        generation = generation,
+                        truncated = false,
+                        nodes = captured + publicNode,
+                    )
+                    if (candidate.encodedSize() > PythonHostSelectorPolicy.MAX_SNAPSHOT_VALUE_BYTES) {
+                        truncated = true
+                        break
                     }
-                } else if (values.childCount > 0) {
-                    truncated = true
+
+                    retain(nodeId, current.node)
+                    retained = true
+                    captured += publicNode
+                    if (current.depth < maxDepth) {
+                        for (index in 0 until values.childCount) {
+                            current.node.child(index)?.let { child ->
+                                pending.add(PendingNode(child, nodeId, current.depth + 1))
+                            }
+                        }
+                    } else if (values.childCount > 0) {
+                        truncated = true
+                    }
+                } finally {
+                    if (!retained) release(current.node)
                 }
             }
             if (pending.isNotEmpty()) truncated = true
