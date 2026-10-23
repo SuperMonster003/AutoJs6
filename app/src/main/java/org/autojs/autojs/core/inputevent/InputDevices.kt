@@ -43,7 +43,10 @@ object InputDevices {
     val touchDeviceId: Int
         get() {
             val deviceName = touchDeviceName ?: return -1
-            return resolveTouchDeviceId(deviceName, ::execPrivileged)
+            // Without root, the check may take hundreds of milliseconds (it starts a shell), so it runs once per lookup.
+            // zh-CN: 没有 root 时该检查可能耗时数百毫秒 (会启动 shell), 因此每次解析只检查一次.
+            val rootAvailable = RootUtils.isRootAvailable()
+            return resolveTouchDeviceId(deviceName) { execPrivileged(it, rootAvailable) }
         }
 
     /**
@@ -64,9 +67,9 @@ object InputDevices {
     // while still listing every other node.
     // zh-CN: 以 root 或经 Shizuku 运行 [cmd] 的标准输出; 两者都没有输出时为 null. 不检查退出码: 标准错误有内容时结果会把
     // 退出码 0 改为 1, 而 `getevent -p` 会为 /dev/input/mice 输出错误, 同时仍列出其他全部节点.
-    private fun execPrivileged(cmd: String): String? {
+    private fun execPrivileged(cmd: String, rootAvailable: Boolean): String? {
         try {
-            if (RootUtils.isRootAvailable()) {
+            if (rootAvailable) {
                 val result = ProcessShell.execCommand(cmd, true)
                 if (!result.result.isNullOrBlank()) return result.result
             }

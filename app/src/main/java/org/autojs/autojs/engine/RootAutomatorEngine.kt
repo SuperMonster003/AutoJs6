@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import org.autojs.autojs.core.inputevent.InputDevices
@@ -18,6 +19,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.regex.Pattern
+import kotlin.concurrent.thread
 
 /**
  * Created by Stardust on Aug 1, 2017.
@@ -152,6 +154,45 @@ class RootAutomatorEngine @JvmOverloads constructor(private val mContext: Contex
         fun getTouchDeviceId(context: Context) = when (sTouchDeviceId >= 0) {
             true -> sTouchDeviceId
             else -> getDefaultTouchDevice(context)
+        }
+
+        /**
+         * The touch screen node for a recorder. On the main thread only a known node is returned, and an unknown one is
+         * looked up off the main thread for later recordings, as the lookup runs commands as root or through Shizuku
+         * (docs/shizuku-oom/ROADMAP.md D18). Recorders also take the node from the first touch event.
+         * zh-CN: 供录制器使用的触摸屏节点. 主线程上只返回已知的节点, 未知时在主线程之外解析供之后的录制使用, 因为解析要以 root
+         * 或经 Shizuku 执行命令 (docs/shizuku-oom/ROADMAP.md D18). 录制器也会从第一个触摸事件取得节点.
+         */
+        @JvmStatic
+        fun getTouchDeviceIdForRecorder(context: Context) = getTouchDeviceIdForRecorder(
+            onMainThread = Looper.myLooper() == Looper.getMainLooper(),
+            resolve = { getTouchDeviceId(context) },
+            runInBackground = { job -> thread(name = "TouchDeviceLookup", isDaemon = true) { job() } },
+        )
+
+        @Volatile
+        private var sLookingUpTouchDevice = false
+
+        @VisibleForTesting
+        internal fun getTouchDeviceIdForRecorder(onMainThread: Boolean, resolve: () -> Int, runInBackground: (() -> Unit) -> Unit): Int {
+            if (!onMainThread) {
+                return resolve()
+            }
+            val known = if (sTouchDeviceId >= 0) sTouchDeviceId else MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.get()
+            if (known >= 0) {
+                return known
+            }
+            if (!sLookingUpTouchDevice) {
+                sLookingUpTouchDevice = true
+                runInBackground {
+                    try {
+                        resolve()
+                    } finally {
+                        sLookingUpTouchDevice = false
+                    }
+                }
+            }
+            return -1
         }
 
         @Suppress("UNUSED_PARAMETER")

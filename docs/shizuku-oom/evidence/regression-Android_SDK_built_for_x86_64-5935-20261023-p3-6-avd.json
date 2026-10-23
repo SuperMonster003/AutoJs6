@@ -20,8 +20,8 @@
     ],
     "label": "p3-6-avd",
     "date": "20261023",
-    "startedAt": "2026-10-23 10:59:57",
-    "endedAt": "2026-10-23 11:00:21",
+    "startedAt": "2026-10-23 13:20:26",
+    "endedAt": "2026-10-23 13:20:50",
     "a11yBefore": false,
     "a11yRestored": 0,
     "a11yAfter": false
@@ -35,14 +35,14 @@
     {
       "item": "12",
       "status": "PASS",
-      "note": "cold start, user service connected False at the start / True after the main thread steps, main thread per step [462, 23] ms (limit 1000), then off the main thread node event1 in 443 ms, cached 1, cache 1 put back",
+      "note": "cold start, user service connected False at the start / False after the main thread steps, main thread per step [60, 50] ms (limit 1000), then off the main thread node event1 in 259 ms, cached 1, cache 1 put back",
       "mainThreadMs": [
-        462,
-        23
+        60,
+        50
       ],
       "serviceAtStart": false,
       "resolved": 1,
-      "resolveMs": 443,
+      "resolveMs": 259,
       "cached": 1,
       "cacheRestored": 1
     },

@@ -154,7 +154,7 @@
 - [x] P3.3 Q5 补跑 (D14): 在 `../COMMON_AGENTS.md` 可用测试设备里找 Shizuku 以 shell 身份运行且 shell 能写 `/dev/input` 的设备 (先只读检查 `getenforce` 与 `ls -l /dev/input`, 以 shell 身份 `test -w` 试探; 不改 SELinux, 不 root), 按锁表登记后装当前 HEAD 的 debug 构建跑 `regression.py --items 8`, 结果入 `evidence/` 并回填附录 B; 测后装回原包. 没有任何设备满足时不绕过, 登记待决 Q8 (选项: 回到 Q5 的 A / 维护者另备设备) 并汇报. (2026-10-23 完成: 6 台真机都不满足 (附录 B.4), 改用临时 AVD (Android 9, Shizuku 以 shell 身份, shell 可写 2 个节点) 补跑: (8) FAIL, 根因是 `InputDevices.touchDeviceId` 经 Shizuku 读 `/proc/bus/input/devices`, 而 shell 身份读不了它, 触摸屏节点为空; 预设节点缓存的对照为 PASS. 6.7.0 起即有的缺陷, 登记 Q8.)
 - [x] P3.4 changelog: `.changelog/lang_zh-Hans.json` 6.8.0 段 fix 为 P3.1 / P3.2 各加 1 条 (或按 AGENTS.md 粒度合并), 只生成 zh-Hans 的 markdown 且只写入本条; 该文件有他人未提交改动, 只暂存自己的 hunk. (2026-10-23 完成: 两条独立的 fix 紧接 issue #474 那条; 不带 issue 引用, 两处都不是 #474 报告的现象. 只重渲染 zh-Hans 的 CHANGELOG-zh-Hans.md / CHANGELOG.md / README-zh-Hans.md / README.md, 其他 9 种语言未写入, 待维护者同步翻译.)
 - [x] P3.5 回归与收尾: XQ-AT72 跑 `zombie_probe.py --mode force-stop --rounds 20` 与 `regression.py` 的 (9) 及新用例 (10) / (11), 全部 0 残留 / PASS; G8441 只在改动触及 root 路径时复跑; 本文勾选与附录回填, 发布门行按需更新 (只追加自己的 hunk), 本地提交, 看板追加结论. (2026-10-23 完成: XQ-AT72 装本主题 P3 构建 debug 5935, force-stop 20 轮残留 0/20 (host-died 20, stray 0), (9) / (10) / (11) 全部 PASS (附录 B.1 / B.5); 测后装回原包 5835 (md5 d4994f77). G8441 不复跑: P3.1 只改单例的创建时机, P3.2 只在录制停止时调用已有的 `InputEventObserver.recycle`, Root `Shell` 路径的代码未改, 且 G8441 的 Shizuku 为 root 身份, 观察器走 Shizuku 分支, 复跑也覆盖不到 Root `Shell`. AVD 预检时 (11) 暴露两处脚本问题并已修正: 宿主刚启动时开始录制在主线程上等待用户服务超过 10 s (见 Q8), 基线在音量键控制的观察器启动前取到; 现在脚本先等用户服务, 取稳定后的基线, 主线程每步最多等 30 s 并记录耗时.)
-- [ ] P3.6 触摸屏节点解析与主线程等待 (D17 / D18, Q8 / Q8b): `InputDevices.touchDeviceId` 读不到 `/proc/bus/input/devices` 时改用 `getevent -pl` 按设备名找节点, 解析成功即缓存, 两者都失败时返回不可用且不缓存; 主线程上不等待 Shizuku 用户服务 (未连上时快速失败并提示, 不再等 10 s + 重绑 10 s). 验收: JVM 单测覆盖解析三种情况 (`/proc` 成功; `/proc` 被拒 + `getevent -pl` 成功; 两者都失败); AVD `shizukuoom_p33_api28` 清掉预设缓存后不预设复跑 `regression.py --items 8` PASS; 宿主启动后立即开始录制时主线程不阻塞超过 1 s (`regression.py` 新用例); changelog zh-Hans 6.8.0 段 fix 1 条; XQ-AT72 复跑 T6 (9) / (10) / (11) 与 force-stop 20 轮无回归; 发布门 Shizuku 行与附录 B.4 追加结果; 完成后删除临时 AVD. (进度 2026-10-23: 代码 (`InputDevices.touchDeviceId` 的 `getevent -pl` 回退, `RootAutomatorEngine` 只缓存解析成功的节点, `WrappedShizuku` 主线程上不等待也不重绑) 与 `InputDevicesTouchDeviceTest` 4 例已完成, `:app:assembleAppDebug` 通过; `regression.py` 新增 (12). 实现中的两处发现: Shizuku 13.1.5 的 `ShizukuServiceConnection.connected` 把 `onServiceConnected` 投递到主线程, 所以主线程上等待用户服务连上必然等满超时, 只能不等; 经用户服务执行命令时 `AbstractShell.Result` 在标准错误非空时把退出码 0 改为 1, 而 `getevent -p` 总会为 `/dev/input/mice` 输出一行错误, 所以按标准输出是否为空判断 (AVD 首跑因按退出码判断而 (8) / (12) FAIL, 改后 PASS). AVD 验收: 缓存为 -1 时 (8) PASS (节点 event1 由 `getevent -pl` 解析并缓存), (12) PASS (用户服务未连上时主线程每步 [462, 23] ms, 之后在非主线程 443 ms 解析出 event1); 附录 B.4.)
+- [x] P3.6 触摸屏节点解析与主线程等待 (D17 / D18, Q8 / Q8b): `InputDevices.touchDeviceId` 读不到 `/proc/bus/input/devices` 时改用 `getevent -pl` 按设备名找节点, 解析成功即缓存, 两者都失败时返回不可用且不缓存; 主线程上不等待 Shizuku 用户服务 (未连上时快速失败并提示, 不再等 10 s + 重绑 10 s), 录制器在主线程上也不解析节点 (缓存为空时在后台解析). 验收: JVM 单测覆盖解析三种情况 (`/proc` 成功; `/proc` 被拒 + `getevent -pl` 成功; 两者都失败); AVD `shizukuoom_p33_api28` 清掉预设缓存后不预设复跑 `regression.py --items 8` PASS; 宿主启动后立即开始录制时主线程不阻塞超过 1 s (`regression.py` 新用例); changelog zh-Hans 6.8.0 段 fix 1 条; XQ-AT72 复跑 T6 (9) / (10) / (11) 与 force-stop 20 轮无回归; 发布门 Shizuku 行与附录 B.4 追加结果; 完成后删除临时 AVD. (进度 2026-10-23: 代码 (`InputDevices.touchDeviceId` 的 `getevent -pl` 回退且每次解析只判断一次 Root, `RootAutomatorEngine` 只缓存解析成功的节点并新增 `getTouchDeviceIdForRecorder` 供两个录制器使用, `WrappedShizuku` 主线程上不等待也不重绑) 与 `InputDevicesTouchDeviceTest` 6 例已完成, `StaticReferenceGuardTest` 与 `:app:assembleAppDebug` 通过; `regression.py` 新增 (12). 实现中的三处发现: (a) Shizuku 13.1.5 的 `ShizukuServiceConnection.connected` 把 `onServiceConnected` 投递到主线程, 所以主线程上等待用户服务连上必然等满超时, 只能不等; (b) 经用户服务执行命令时 `AbstractShell.Result` 在标准错误非空时把退出码 0 改为 1, 而 `getevent -p` 总会为 `/dev/input/mice` 输出一行错误, 所以按标准输出是否为空判断 (AVD 首跑因按退出码判断而 (8) / (12) FAIL, 改后 PASS); (c) 第一版 (`33f1dfc96`) 在 XQ-AT72 上 (12) 为 1041 ms: 用户服务已连上时录制器在主线程上解析节点, 两条命令只要 26 / 32 ms, 但无 Root 时 `RootUtils.isRootAvailable` 每次约 443 ms (会启动 shell) 且每条命令各判断一次, 因此改为每次解析判断一次, 录制器在主线程上只取已知节点 (录制器本来也会从第一个触摸事件取得节点). AVD 验收 (最终构建): 缓存为 -1 时 (8) PASS (节点 event1 由 `getevent -pl` 解析并缓存), (12) PASS (主线程每步 60 / 50 ms, 节点在非主线程解析并缓存); 附录 B.4. 完成 2026-10-23: XQ-AT72 装最终构建 (arm64) 复跑, force-stop 20 轮残留 0/20 (host-died 20, stray 0), (9) / (10) / (11) / (12) 全部 PASS, (12) 在用户服务已连上时主线程每步 63 / 32 ms (第一版为 1041 ms), 节点 event4 在非主线程解析 (592 ms); 测后装回原包 5835 (md5 d4994f77). 临时 AVD 已删除.)
 
 ---
 
@@ -236,12 +236,22 @@
 
 根因: `RootAutomator` 的设备路径经 `RootAutomatorEngine.getDeviceNameOrPath` / `InputDevices.touchDeviceId` 解析, 后者经 Root 或 Shizuku 执行 `cat /proc/bus/input/devices` 按 `InputDevice` 名称找 `eventN`. shell 身份读不了该文件 (6 台真机与 AVD 均为 Permission denied), 而 `getevent -pl` 在这些设备上都能列出节点与名称; 解析结果为空时 `canUseShizukuBackend` 直接判定不可用. 该路径自 6.6.0 (读取 `/proc`) / 6.7.0 (`62235ba07` 加入 Shizuku 后端) 未改, 与本主题的改动无关. 处理方式见附录 C Q8.
 
-P3.6 复跑 (D17 / D18, debug 5935 含 P3.6 改动; 报告 `regression-20261023-p3-6-avd`):
+P3.6 复跑 (D17 / D18, debug 5935 含 P3.6 的最终改动; 报告 `regression-20261023-p3-6-avd`):
 
 | 运行 | 预置 | 结果 | 结束后残留 |
 | --- | --- | --- | --- |
 | p3-6-avd (8) | 无 (运行前核对缓存为 -1) | PASS: RootAutomator ok (Shizuku 后端, sendSync + exit), 节点 event1 由 `getevent -pl` 解析并写入缓存; 其余 4 项 ok | 用户服务 0, stray 0 |
-| p3-6-avd (12) | 缓存临时设为 -1, 测后还原 | PASS: 强停后冷启动, 用户服务未连上时 `recorder.start` / `discard` 在主线程上各 462 / 23 ms (上限 1000 ms, 修复前为 10 s + 重绑 10 s), 录制状态 RECORDING -> STOPPED; 用户服务连上后在非主线程 443 ms 解析出 event1 并缓存 | 同上 |
+| p3-6-avd (12) | 缓存临时设为 -1, 测后还原 | PASS: 强停后冷启动, 用户服务未连上时 `recorder.start` / `discard` 在主线程上各 60 / 50 ms (上限 1000 ms; 修复前为 10 s + 重绑 10 s), 录制状态 RECORDING -> STOPPED; 节点在非主线程解析出 event1 并缓存 (259 ms) | 同上 |
+
+XQ-AT72 复跑 (shell 身份, 最终构建 arm64; 报告 `probe-XQ-AT72-5935-force-stop-20261023-p3-6` 与 `regression-20261023-p3-6`):
+
+| 运行 | 结果 | 结束后残留 |
+| --- | --- | --- |
+| force-stop 20 轮 | PASS: 残留 0/20, host-died 20, stray 0 | - |
+| p3-6 (9) / (10) / (11) | PASS: (9) 0.63 s 结束; (10) 开 3.5 s / 音量加 0.62 s / 关 0.1 s; (11) 主线程每步最多 110 ms | 用户服务 0, stray 0 |
+| p3-6 (12) | PASS: 强停后冷启动, 用户服务已连上时 `recorder.start` / `discard` 在主线程上各 63 / 32 ms; 节点在非主线程解析出 event4 并缓存 (592 ms), 原缓存 4 测后还原 | 同上 |
+
+第一版 P3.6 构建 (`33f1dfc96`, 录制器仍在主线程上解析节点) 在 AVD 上 (12) 为 462 / 23 ms, 但在 XQ-AT72 上用户服务已连上时为 1041 ms, 超出上限 (原因见 P3.6 进度), 两份数字均已被最终构建的报告取代.
 
 ### B.5 T6 (9) / (10) / (11) (P3.5, debug 5935 含 `61dc4f7cf`)
 
@@ -290,8 +300,9 @@ P3.6 复跑 (D17 / D18, debug 5935 含 P3.6 改动; 报告 `regression-20261023-
 | `app/src/main/java/org/autojs/autojs/event/GlobalKeyObserver.java` | `initIfNeeded` 在两项都关闭时登记订阅 | P3.1 |
 | `app/src/main/java/org/autojs/autojs/core/record/inputevent/TouchRecorder.java` | 自建观察器随录制开始 / 结束启停 | P3.2 |
 | `tools/shizuku-oom/regression.py` (10) / (11) | 运行中开启音量键控制, 录制后回收 getevent | P3.1 / P3.2 |
-| `app/src/main/java/org/autojs/autojs/core/inputevent/InputDevices.kt` | 触摸屏节点解析: `/proc` 读不到时用 `getevent -pl`, 按标准输出判断 | P3.6 (D17) |
-| `app/src/main/java/org/autojs/autojs/engine/RootAutomatorEngine.kt` | 只缓存解析成功的触摸屏节点 | P3.6 (D17) |
+| `app/src/main/java/org/autojs/autojs/core/inputevent/InputDevices.kt` | 触摸屏节点解析: `/proc` 读不到时用 `getevent -pl`, 按标准输出判断, 每次解析只判断一次 Root | P3.6 (D17 / D18) |
+| `app/src/main/java/org/autojs/autojs/engine/RootAutomatorEngine.kt` | 只缓存解析成功的触摸屏节点; `getTouchDeviceIdForRecorder` 在主线程上只取已知节点, 未知时后台解析 | P3.6 (D17 / D18) |
+| `app/src/main/java/org/autojs/autojs/core/record/inputevent/InputEventToAutoFileRecorder.kt`, `InputEventToRootAutomatorRecorder.java` | 构造时改用 `getTouchDeviceIdForRecorder` | P3.6 (D18) |
 | `app/src/main/java/org/autojs/autojs/runtime/api/WrappedShizuku.kt` | 主线程上不等待用户服务, 也不重绑 | P3.6 (D18) |
-| `app/src/test/java/org/autojs/autojs/core/inputevent/InputDevicesTouchDeviceTest.kt` | 解析三种情况与缓存 | P3.6 |
+| `app/src/test/java/org/autojs/autojs/core/inputevent/InputDevicesTouchDeviceTest.kt` | 解析三种情况与缓存, 录制器在主线程上不解析 | P3.6 |
 | `tools/shizuku-oom/regression.py` (12) | 冷启动后立即录制的主线程耗时, 用户服务连上后解析并缓存节点 | P3.6 |

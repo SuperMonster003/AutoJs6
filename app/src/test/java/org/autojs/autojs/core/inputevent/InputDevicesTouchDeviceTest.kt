@@ -9,10 +9,11 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**
- * Touch screen node lookup of docs/shizuku-oom/ROADMAP.md D17 / P3.6: /proc/bus/input/devices first, `getevent -pl` when
- * the former is denied, and only a resolved node is cached.
+ * Touch screen node lookup of docs/shizuku-oom/ROADMAP.md D17 / D18 / P3.6: /proc/bus/input/devices first, `getevent -pl`
+ * when the former is denied, only a resolved node is cached, and a recorder on the main thread does not wait for the lookup.
  *
- * zh-CN: ROADMAP D17 / P3.6 的触摸屏节点解析: 先读 /proc/bus/input/devices, 被拒时改用 `getevent -pl`, 只缓存解析成功的节点.
+ * zh-CN: ROADMAP D17 / D18 / P3.6 的触摸屏节点解析: 先读 /proc/bus/input/devices, 被拒时改用 `getevent -pl`, 只缓存解析成功的节点,
+ * 主线程上的录制器不等待解析.
  */
 class InputDevicesTouchDeviceTest : DomainKeysTestBase() {
 
@@ -65,6 +66,31 @@ class InputDevicesTouchDeviceTest : DomainKeysTestBase() {
         assertEquals(1, resolveAndCache(exec(null, GETEVENT_DEVICES)))
         assertEquals(4, commands.size)
         assertEquals(1, MiscStateKeys.ROOT_AUTOMATOR_TOUCH_DEVICE.get())
+    }
+
+    @Test
+    fun recorderOnMainThreadLooksUpInBackground() {
+        val jobs = mutableListOf<() -> Unit>()
+        val resolve = { resolveAndCache(exec(null, GETEVENT_DEVICES)) }
+        assertEquals(-1, RootAutomatorEngine.getTouchDeviceIdForRecorder(true, resolve) { jobs += it })
+        assertEquals(-1, RootAutomatorEngine.getTouchDeviceIdForRecorder(true, resolve) { jobs += it })
+        assertEquals(0, commands.size)
+        assertEquals(1, jobs.size)
+
+        // The background lookup caches the node for the next recording.
+        // zh-CN: 后台解析缓存节点, 供下一次录制使用.
+        jobs.single()()
+        assertEquals(2, commands.size)
+        assertEquals(1, RootAutomatorEngine.getTouchDeviceIdForRecorder(true, resolve) { jobs += it })
+        assertEquals(1, jobs.size)
+        assertEquals(2, commands.size)
+    }
+
+    @Test
+    fun recorderOffMainThreadResolvesDirectly() {
+        val resolve = { resolveAndCache(exec(null, GETEVENT_DEVICES)) }
+        assertEquals(1, RootAutomatorEngine.getTouchDeviceIdForRecorder(false, resolve) { throw AssertionError("no background job") })
+        assertEquals(2, commands.size)
     }
 
     @Test

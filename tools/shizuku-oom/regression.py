@@ -28,7 +28,8 @@ Runs the T6 items on one device through the host already installed there (a debu
  11  Recording (P3.2): two recordings through GlobalActionRecorder (started and discarded on the main thread, no dialog)
      each add one getevent under the user service while recording, and it ends when the recording stops.
  12  Recording right after a cold start (P3.6, D17 / D18): with the touch screen node cache cleared, starting and discarding
-     a recording on the main thread before the user service connects takes no more than 1 s per step; off the main thread,
+     a recording on the main thread at once, whether or not the user service is connected yet, takes no more than 1 s per
+     step (the main thread neither waits for the service nor looks the node up); off the main thread,
      once the service is up, the node resolves (getevent -pl where /proc/bus/input/devices is denied) and is cached. The
      original cache value is put back.
 

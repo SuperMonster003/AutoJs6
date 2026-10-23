@@ -29,7 +29,7 @@ public class InputEventToRootAutomatorRecorder extends InputEventRecorder {
     public InputEventToRootAutomatorRecorder(@NonNull Context context) {
         Context applicationContext = context.getApplicationContext();
         mTouchCoordinateMapper = new TouchCoordinateMapper(applicationContext);
-        updateTouchDevice(RootAutomatorEngine.getTouchDeviceId(applicationContext));
+        updateTouchDevice(RootAutomatorEngine.getTouchDeviceIdForRecorder(applicationContext));
         mCode.append("var ra = new RootAutomator();\n")
                 .append("ra.setScreenMetrics(")
                 .append(ScreenMetrics.getDeviceScreenWidth()).append(", ")

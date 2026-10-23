@@ -34,7 +34,7 @@ class InputEventToAutoFileRecorder(context: Context) : InputEventRecorder() {
                 it.deleteOnExit()
                 mDataOutputStream = DataOutputStream(FileOutputStream(it))
             }
-            updateTouchDevice(RootAutomatorEngine.getTouchDeviceId(context.applicationContext))
+            updateTouchDevice(RootAutomatorEngine.getTouchDeviceIdForRecorder(context.applicationContext))
             writeFileHeader()
         } catch (e: IOException) {
             throw UncheckedIOException(e)
