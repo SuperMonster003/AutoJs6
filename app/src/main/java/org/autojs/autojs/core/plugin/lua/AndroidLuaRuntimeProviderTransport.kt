@@ -68,9 +68,16 @@ internal class AndroidLuaRuntimeProviderTransport(
             "Lua runtime discovery timeout is outside the host limit"
         }
         val deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis)
+        // INFO is the action of every AutoJs6 plugin, so only the packages that declare the Lua runtime action are read:
+        // otherwise discovery binds the INFO service of each installed plugin and fails once more than
+        // MAX_DISCOVERED_SERVICES plugins are installed (docs/memory-phase2/ROADMAP.md C39).
+        // zh-CN: INFO 是所有 AutoJs6 插件共用的动作, 因此只读取声明了 Lua 运行时动作的包: 否则发现过程会绑定每个已安装插件的 INFO 服务,
+        // 并在已安装插件多于 MAX_DISCOVERED_SERVICES 个时失败 (docs/memory-phase2/ROADMAP.md C39).
+        val runtimePackages = queryServices(Intent(runtimeAction)).mapTo(HashSet()) { it.packageName }
         // MATCH_DISABLED_COMPONENTS lets us observe manifest defaults plus component overrides;
         // dormant services are not discovery candidates.
         val infoServices = queryServices(Intent(LuaPluginActions.INFO))
+            .filter { it.packageName in runtimePackages }
             .filter(::isServiceEffectivelyEnabled)
             .sortedWith(compareBy<ServiceInfo>({ it.packageName }, { it.name }))
         require(infoServices.size <= MAX_DISCOVERED_SERVICES) { "Too many Lua plugin INFO services were discovered" }
