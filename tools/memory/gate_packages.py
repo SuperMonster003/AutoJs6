@@ -92,7 +92,7 @@ def main():
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--dir", type=Path, help="Backup directory (backup / restore)")
     parser.add_argument("--allow-uninstall", default="", help="Comma list of packages that may be uninstalled on a signature mismatch")
-    args = parser.parse_args()
+    args = parser.parse_intermixed_args()
     allow_uninstall = {item.strip() for item in args.allow_uninstall.split(",") if item.strip()}
     device = physical_device.Device(args.adb, args.serial)
     device.require_online()
