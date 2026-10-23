@@ -103,7 +103,7 @@ class BunPluginScriptEngine internal constructor(
                             selection = selection,
                             request = payload.request,
                             source = descriptor,
-                            callback = callback,
+                            callback = callback.binder,
                         )
                     }
                 } catch (error: BunRpcTimeoutException) {
@@ -282,17 +282,28 @@ class BunPluginScriptEngine internal constructor(
         putBundle(BunRuntimeContract.KEY_ENVIRONMENT, Bundle())
     }
 
+    /**
+     * The output of one execution. The plugin gets [binder], which forwards here until [close] and then lets go of this
+     * callback and its console: the plugin process keeps that Binder until it collects its proxy (docs/memory-phase2/ROADMAP.md C37).
+     * zh-CN: 一次执行的输出. 插件拿到的是 [binder], 它在 [close] 之前转发到这里, 之后放开本回调及其 console: 插件进程在回收代理之前一直持有该 Binder
+     * (docs/memory-phase2/ROADMAP.md C37).
+     */
     internal class OutputCallback(
         private val executionId: String,
         private val expectedProviderUid: Int,
         private val executionConsole: ConsoleImpl,
-    ) : IBunRuntimeCallback.Stub() {
+    ) {
         private val closed = AtomicBoolean(false)
         private val acceptedOutputBytes = AtomicLong(0L)
         private val finished = CountDownLatch(1)
+        private val exported = ExportedCallback(this)
+
+        val binder: IBunRuntimeCallback
+            get() = exported
 
         fun close() {
             closed.set(true)
+            exported.clear()
         }
 
         /** Does not mistake a local close/cancellation for the plugin's completed output delivery. */
@@ -308,7 +319,7 @@ class BunPluginScriptEngine internal constructor(
             }
         }
 
-        override fun onEvent(event: Bundle?) {
+        fun onEvent(event: Bundle?) {
             if (closed.get() || Binder.getCallingUid() != expectedProviderUid) return
             if (event?.getInt(BunRuntimeContract.KEY_PROTOCOL_VERSION, -1) != BunRuntimeContract.PROTOCOL_VERSION) return
             if (event.getString(BunRuntimeContract.KEY_EXECUTION_ID) != executionId) return
@@ -342,6 +353,19 @@ class BunPluginScriptEngine internal constructor(
                 if (acceptedOutputBytes.compareAndSet(current, current + byteCount)) return true
             }
             return false
+        }
+    }
+
+    private class ExportedCallback(callback: OutputCallback) : IBunRuntimeCallback.Stub() {
+
+        private val target = AtomicReference<OutputCallback?>(callback)
+
+        fun clear() {
+            target.set(null)
+        }
+
+        override fun onEvent(event: Bundle?) {
+            target.get()?.onEvent(event)
         }
     }
 

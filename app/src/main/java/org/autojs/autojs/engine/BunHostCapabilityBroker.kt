@@ -5,6 +5,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.os.RemoteException
 import android.widget.Toast
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Host side of the Bun capability bridge (plugin ROADMAP M7, dynamic calls): one Binder object per execution,
@@ -30,6 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * another UID, for another execution or after [close] are ignored rather than failed. Capability groups are
  * explicitly granted and dispatched here; this is not a generic route into the Node host API registry.
  * Payloads are JSON strings on both sides, so the plugin never interprets them.
+ *
+ * The plugin process holds the exported Binder ([binder]) until it collects its proxy, so the exported side lets go
+ * of the broker in [close] (docs/memory-phase2/ROADMAP.md C37).
+ * zh-CN: 插件进程在回收代理之前一直持有导出的 Binder ([binder]), 因此导出端在 [close] 时放开 broker (docs/memory-phase2/ROADMAP.md C37).
  */
 internal class BunHostCapabilityBroker(
     context: Context,
@@ -39,7 +45,8 @@ internal class BunHostCapabilityBroker(
     consoleProvider: () -> ConsoleImpl,
     private val workingDirectory: String? = null,
     private val agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
-) : IBunHostCapabilityBroker.Stub() {
+) {
+    private val exported = ExportedBroker(this)
     private val appContext = context.applicationContext ?: context
     private val mainHandler = Handler(Looper.getMainLooper())
     private val closed = AtomicBoolean(false)
@@ -65,13 +72,14 @@ internal class BunHostCapabilityBroker(
 
     fun attachTo(request: Bundle) {
         request.putInt(BunRuntimeContract.KEY_HOST_CAPABILITY_BRIDGE_VERSION, BunRuntimeContract.HOST_CAPABILITY_BRIDGE_VERSION)
-        request.putBinder(BunRuntimeContract.KEY_HOST_CAPABILITY_BROKER, this)
+        request.putBinder(BunRuntimeContract.KEY_HOST_CAPABILITY_BROKER, exported)
         request.putStringArrayList(BunRuntimeContract.KEY_HOST_CAPABILITIES, ArrayList(capabilities))
     }
 
     /** After this no call is answered; the plugin fails its pending calls itself when the run ends. */
     fun close() {
         if (!closed.compareAndSet(false, true)) return
+        exported.clear()
         callExecutor.close()
         automation.close()
         synchronized(captureLock) { captureAttempt = null; captureId = null }
@@ -79,7 +87,11 @@ internal class BunHostCapabilityBroker(
         provider?.destroy(NodeBridgeError.processDead("Bun execution finished"))
     }
 
-    override fun invoke(request: Bundle?, callback: IBunHostCapabilityCallback?) {
+    /** The exported Binder handed to the plugin. */
+    val binder: IBinder
+        get() = exported
+
+    fun invoke(request: Bundle?, callback: IBunHostCapabilityCallback?) {
         if (closed.get() || Binder.getCallingUid() != expectedCallerUid) return
         if (request == null || callback == null) return
         if (request.getInt(BunRuntimeContract.KEY_HOST_CAPABILITY_BRIDGE_VERSION, -1) != BunRuntimeContract.HOST_CAPABILITY_BRIDGE_VERSION) return
@@ -427,6 +439,23 @@ internal class BunHostCapabilityBroker(
         }
         if (!posted) return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Host UI lane is unavailable")
         return Outcome.Success("{\"shown\":true}")
+    }
+
+    /**
+     * The exported side of a broker: forwards to it until [clear], then ignores every call, as a closed broker does.
+     * zh-CN: broker 的导出端: [clear] 之前转发给 broker, 之后与已关闭的 broker 一样忽略所有调用.
+     */
+    private class ExportedBroker(broker: BunHostCapabilityBroker) : IBunHostCapabilityBroker.Stub() {
+
+        private val target = AtomicReference<BunHostCapabilityBroker?>(broker)
+
+        fun clear() {
+            target.set(null)
+        }
+
+        override fun invoke(request: Bundle?, callback: IBunHostCapabilityCallback?) {
+            target.get()?.invoke(request, callback)
+        }
     }
 
     private sealed interface Outcome {
