@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostCapabilities
 import org.autojs.autojs.core.plugin.lua.LuaRuntimePluginHostFactory
+import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.LuaScriptSource
@@ -109,8 +110,16 @@ class LuaPluginScriptEngine internal constructor(
                     val request = executionRequest(snapshot, connection, arguments, modules)
                     val observer = LuaEngineExecutionObserver(request, connection.runtimeInfo, outputSink)
                     var session: LuaEngineRemoteSession? = null
+                    // Released in the order of the former finally, after the backend revokes the broker and lets go of the
+                    // callback it exported (docs/memory-phase2/ROADMAP.md C41): the observer, then the session.
+                    // zh-CN: 后端先撤销 broker 并放开它导出的回调 (docs/memory-phase2/ROADMAP.md C41), 其后按原 finally 的顺序释放:
+                    // 先观察者, 再会话.
+                    val scope = BridgeExecutionScope("lua", request.requestId.toString()).apply {
+                        own(BridgeExecutionScope.Stage.CALLBACKS, "session") { session?.close() }
+                        own(BridgeExecutionScope.Stage.CALLBACKS, "observer", observer::close)
+                    }
                     try {
-                        val createdSession = connection.createExecution(request, snapshot, modules, observer)
+                        val createdSession = connection.createExecution(request, snapshot, modules, observer, scope)
                         session = createdSession
                         synchronized(lifecycleLock) {
                             check(currentSession.compareAndSet(null, createdSession)) {
@@ -136,9 +145,8 @@ class LuaPluginScriptEngine internal constructor(
                         Thread.currentThread().interrupt()
                         throw ScriptInterruptedException(interrupted)
                     } finally {
-                        observer.close()
                         currentSession.compareAndSet(session, null)
-                        runCatching { session?.close() }
+                        scope.close()
                     }
                 } finally {
                     currentConnection.compareAndSet(connection, null)

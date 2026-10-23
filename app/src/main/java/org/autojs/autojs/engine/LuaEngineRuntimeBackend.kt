@@ -8,6 +8,7 @@ import org.autojs.autojs.core.plugin.lua.LuaRuntimeBinderCallLane
 import org.autojs.autojs.core.plugin.lua.LuaRuntimePluginHost
 import org.autojs.autojs.core.plugin.lua.LuaRuntimePreparedProvider
 import org.autojs.autojs.core.plugin.lua.LuaRuntimeProviderCallbackCallerPolicy
+import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.plugin.lua.runtime.api.ILuaExecutionCallback
 import org.autojs.plugin.lua.runtime.api.ILuaExecutionSession
 import org.autojs.plugin.lua.runtime.api.ILuaHostCapabilityBroker
@@ -42,6 +43,7 @@ internal interface LuaEngineRuntimeConnection : Closeable {
         source: LuaSourceSnapshot,
         modules: LuaModuleSnapshot,
         observer: LuaEngineExecutionObserver,
+        scope: BridgeExecutionScope,
     ): LuaEngineRemoteSession
 }
 
@@ -105,6 +107,7 @@ internal class BinderLuaEngineRuntimeBackend(
             source: LuaSourceSnapshot,
             modules: LuaModuleSnapshot,
             observer: LuaEngineExecutionObserver,
+            scope: BridgeExecutionScope,
         ): LuaEngineRemoteSession {
             require(acquired.pinnedIdentity.grantedCapabilities.containsAll(request.requiredCapabilities)) {
                 "Lua execution requirements exceed the pinned host capability grant"
@@ -116,7 +119,13 @@ internal class BinderLuaEngineRuntimeBackend(
                 revoked.set(true)
                 broker.close()
             }
-            val callback = executionCallback(observer, sessionRef, revoked, revokeBroker)
+            val callback = ExecutionCallback(observer, sessionRef, revoked, revokeBroker)
+            // The broker is revoked before the session closes, as the close of the session does itself.
+            // zh-CN: broker 在会话关闭之前撤销, 与会话自身的 close 一致.
+            scope.own(BridgeExecutionScope.Stage.BROKER, "broker") { revokeBroker() }
+            scope.track(broker, "broker")
+            scope.own(BridgeExecutionScope.Stage.CALLBACKS, "callback", callback::close)
+            scope.track(callback, "callback")
             val provider = acquired.provider
             val providerBinder = provider.asBinder()
                 ?: throw IllegalStateException("Lua runtime provider returned a null Binder")
@@ -147,8 +156,8 @@ internal class BinderLuaEngineRuntimeBackend(
                         provider.createExecution(
                             LuaRuntimeCodec.encodeExecutionRequest(request),
                             descriptor,
-                            callback,
-                            broker,
+                            callback.binder,
+                            broker.binder,
                         )
                     }
                 } ?: throw IllegalStateException("Lua runtime provider returned a null execution session")
@@ -177,7 +186,7 @@ internal class BinderLuaEngineRuntimeBackend(
                     sessionDeathRecipient = sessionDeathRecipient,
                     revoked = revoked,
                     closeHostBroker = broker::close,
-                )
+                ).also { scope.track(it, "session") }
             } catch (error: Throwable) {
                 revoked.set(true)
                 broker.close()
@@ -201,19 +210,34 @@ internal class BinderLuaEngineRuntimeBackend(
             acquired.close()
         }
 
-        private fun executionCallback(
-            observer: LuaEngineExecutionObserver,
-            sessionRef: AtomicReference<ILuaExecutionSession?>,
-            revoked: AtomicBoolean,
-            revokeBroker: () -> Unit,
-        ) = object : ILuaExecutionCallback.Stub() {
+        /**
+         * The callback of one execution. The plugin gets [binder], which forwards here until [close] and then lets go of this
+         * callback, its observer and the session: the plugin process keeps that Binder until it collects its proxy
+         * (docs/memory-phase2/ROADMAP.md C41).
+         * zh-CN: 一次执行的回调. 插件拿到的是 [binder], 它在 [close] 之前转发到这里, 之后放开本回调, 其观察者与会话: 插件进程在回收代理之前一直持有该 Binder
+         * (docs/memory-phase2/ROADMAP.md C41).
+         */
+        private inner class ExecutionCallback(
+            private val observer: LuaEngineExecutionObserver,
+            private val sessionRef: AtomicReference<ILuaExecutionSession?>,
+            private val revoked: AtomicBoolean,
+            private val revokeBroker: () -> Unit,
+        ) {
+            private val exported = ExportedExecutionCallback(this)
 
-            override fun onStarted(metadata: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
+            val binder: ILuaExecutionCallback
+                get() = exported
+
+            fun close() {
+                exported.clear()
+            }
+
+            fun onStarted(metadata: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
                 observer.onStarted(requireNotNull(metadata) { "Lua started metadata is null" })
             }
 
-            override fun onOutput(output: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
+            fun onOutput(output: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
                 if (!observer.onOutput(requireNotNull(output) { "Lua output payload is null" })) return@fromPinnedUid
                 val session = sessionRef.get()
@@ -225,7 +249,7 @@ internal class BinderLuaEngineRuntimeBackend(
                 }
             }
 
-            override fun onCompleted(result: ByteArray?, descriptors: Array<out ParcelFileDescriptor?>?) {
+            fun onCompleted(result: ByteArray?, descriptors: Array<out ParcelFileDescriptor?>?) {
                 closeDescriptors(descriptors) { count ->
                     fromPinnedUid(observer, revokeBroker) {
                         if (revoked.get()) return@fromPinnedUid
@@ -238,7 +262,7 @@ internal class BinderLuaEngineRuntimeBackend(
                 }
             }
 
-            override fun onFailed(error: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
+            fun onFailed(error: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
                 try {
                     observer.onFailed(requireNotNull(error) { "Lua error payload is null" })
@@ -247,7 +271,7 @@ internal class BinderLuaEngineRuntimeBackend(
                 }
             }
 
-            override fun onCancelled(cancellation: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
+            fun onCancelled(cancellation: ByteArray?) = fromPinnedUid(observer, revokeBroker) {
                 if (revoked.get()) return@fromPinnedUid
                 try {
                     observer.onCancelled(requireNotNull(cancellation) { "Lua cancellation payload is null" })
@@ -265,13 +289,24 @@ internal class BinderLuaEngineRuntimeBackend(
             revoked: AtomicBoolean,
         ) = SessionHostBroker(request, storagePrincipal, modules, observer, revoked)
 
+        /**
+         * The host capability broker of one execution. The plugin gets [binder], which forwards here until [close] and then lets
+         * go of this broker, its dispatcher and observer (docs/memory-phase2/ROADMAP.md C41).
+         * zh-CN: 一次执行的宿主能力 broker. 插件拿到的是 [binder], 它在 [close] 之前转发到这里, 之后放开本 broker, 其分发器与观察者
+         * (docs/memory-phase2/ROADMAP.md C41).
+         */
         private inner class SessionHostBroker(
             private val request: LuaExecutionRequest,
             storagePrincipal: LuaStoragePrincipal?,
             modules: LuaModuleSnapshot,
             private val observer: LuaEngineExecutionObserver,
             private val revoked: AtomicBoolean,
-        ) : ILuaHostCapabilityBroker.Stub() {
+        ) {
+            private val exported = ExportedHostBroker(this)
+
+            val binder: ILuaHostCapabilityBroker
+                get() = exported
+
             private val dispatcher = LuaHostCapabilityDispatcher(
                 executionId = request.requestId,
                 grantedCapabilities = request.requiredCapabilities,
@@ -281,7 +316,7 @@ internal class BinderLuaEngineRuntimeBackend(
                 toastSink = toastSink,
             )
 
-            override fun invoke(
+            fun invoke(
                 encodedRequest: ByteArray?,
                 descriptors: Array<out ParcelFileDescriptor?>?,
                 callback: ILuaHostCapabilityCallback?,
@@ -315,12 +350,67 @@ internal class BinderLuaEngineRuntimeBackend(
             }
 
             fun close() {
+                exported.clear()
                 dispatcher.close()
             }
 
             private fun closeForViolation() {
                 revoked.set(true)
                 dispatcher.close()
+            }
+        }
+
+        /**
+         * Forwards to [ExecutionCallback] until cleared; afterwards only closes the descriptors of a late result.
+         * zh-CN: 清空之前转发到 [ExecutionCallback]; 之后只关闭迟到结果所附的描述符.
+         */
+        private class ExportedExecutionCallback(callback: ExecutionCallback) : ILuaExecutionCallback.Stub() {
+
+            private val target = AtomicReference<ExecutionCallback?>(callback)
+
+            fun clear() {
+                target.set(null)
+            }
+
+            override fun onStarted(metadata: ByteArray?) {
+                target.get()?.onStarted(metadata)
+            }
+
+            override fun onOutput(output: ByteArray?) {
+                target.get()?.onOutput(output)
+            }
+
+            override fun onCompleted(result: ByteArray?, descriptors: Array<out ParcelFileDescriptor?>?) {
+                target.get()?.onCompleted(result, descriptors) ?: closeQuietly(descriptors)
+            }
+
+            override fun onFailed(error: ByteArray?) {
+                target.get()?.onFailed(error)
+            }
+
+            override fun onCancelled(cancellation: ByteArray?) {
+                target.get()?.onCancelled(cancellation)
+            }
+        }
+
+        /**
+         * Forwards to [SessionHostBroker] until cleared; afterwards a call is ignored as by a revoked broker.
+         * zh-CN: 清空之前转发到 [SessionHostBroker]; 之后的调用与已撤销的 broker 一样被忽略.
+         */
+        private class ExportedHostBroker(broker: SessionHostBroker) : ILuaHostCapabilityBroker.Stub() {
+
+            private val target = AtomicReference<SessionHostBroker?>(broker)
+
+            fun clear() {
+                target.set(null)
+            }
+
+            override fun invoke(
+                encodedRequest: ByteArray?,
+                descriptors: Array<out ParcelFileDescriptor?>?,
+                callback: ILuaHostCapabilityCallback?,
+            ) {
+                target.get()?.invoke(encodedRequest, descriptors, callback) ?: closeQuietly(descriptors)
             }
         }
 
@@ -363,6 +453,10 @@ internal class BinderLuaEngineRuntimeBackend(
 
         private companion object {
             const val CREATE_EXECUTION_TIMEOUT_MILLIS = 15_000L
+
+            fun closeQuietly(descriptors: Array<out ParcelFileDescriptor?>?) {
+                descriptors?.forEach { descriptor -> runCatching { descriptor?.close() } }
+            }
         }
     }
 

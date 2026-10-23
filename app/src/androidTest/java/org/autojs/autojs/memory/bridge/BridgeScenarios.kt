@@ -61,14 +61,14 @@ internal enum class BridgeEngine(
         "io.github.supermonster003.autojs6.plugin.lua.runtime",
         listOf(
             "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$SessionHostBroker",
-            "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$executionCallback\$1",
+            "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$ExecutionCallback",
             "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderRemoteSession",
             "org.autojs.autojs.core.plugin.lua.LuaRuntimeAcquiredProvider",
             "org.autojs.autojs.engine.LuaPluginScriptEngine",
         ),
         linkedMapOf(
             "lua.broker" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$SessionHostBroker",
-            "lua.callback" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$executionCallback\$1",
+            "lua.callback" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderConnection\$ExecutionCallback",
             "lua.session" to "org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend\$BinderRemoteSession",
             "lua.provider" to "org.autojs.autojs.core.plugin.lua.LuaRuntimeAcquiredProvider",
         ),

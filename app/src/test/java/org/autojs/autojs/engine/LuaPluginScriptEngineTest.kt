@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.autojs.autojs.core.plugin.lua.LuaRuntimeHostCapabilities
+import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.script.LuaFileSource
@@ -58,6 +59,7 @@ class LuaPluginScriptEngineTest {
         assertEquals(128, backend.lastSession?.grantedCredits)
         assertEquals(1, backend.lastSession?.startCount)
         assertEquals(1, backend.lastSession?.closeCount)
+        assertEquals(true, backend.lastScope?.isClosed)
         assertEquals(1, backend.connectionCloseCount)
         assertEquals(listOf("from-fake"), backend.outputs)
         assertEquals(LuaValue.MapValue(emptyMap()), backend.lastRequest?.arguments)
@@ -499,6 +501,7 @@ class LuaPluginScriptEngineTest {
         var lastRequest: LuaExecutionRequest? = null
         var lastModules: LuaModuleSnapshot? = null
         var lastSession: FakeSession? = null
+        var lastScope: BridgeExecutionScope? = null
 
         override fun prepare(): LuaEnginePreparedRuntime {
             prepareCount++
@@ -532,9 +535,11 @@ class LuaPluginScriptEngineTest {
                     source: LuaSourceSnapshot,
                     modules: LuaModuleSnapshot,
                     observer: LuaEngineExecutionObserver,
+                    scope: BridgeExecutionScope,
                 ): LuaEngineRemoteSession {
                     createCount++
                     lastRequest = request
+                    lastScope = scope
                     lastModules = modules
                     assertEquals(source.lengthBytes, request.sourceLengthBytes)
                     if (mode == Mode.BLOCK_CREATE) {
