@@ -9,7 +9,7 @@ import org.autojs.autojs.core.automator.selector.SelectorArgType
 import org.autojs.autojs.core.automator.selector.SelectorEntry
 import org.autojs.autojs.core.automator.selector.SelectorParam
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
-import org.autojs.autojs.util.StringUtils.str
+import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs6.R
 
 /**
@@ -107,7 +107,8 @@ internal object SelectorChecks {
             val name = args[0].toString()
             return when {
                 name.equals("BFS", true) || name.equals("DFS", true) -> Verdict.Accepted
-                else -> Verdict.Rejected { str(R.string.error_unknown_algorithm_selector_param, name) }
+                // The message of str(R.string.error_unknown_algorithm_selector_param, name), through the cached texts of the module layer.
+                else -> Verdict.Rejected { ScriptMessages.resource(R.string.error_unknown_algorithm_selector_param, "Unknown algorithm selector param: %s", name) }
             }
         }
         var verdict: Verdict = Verdict.Accepted

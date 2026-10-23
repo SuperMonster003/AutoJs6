@@ -116,7 +116,8 @@ class SelectorChecksTest {
             // AppFilter(String) looks the name up in the package manager, which the JVM has not.
             if (entry.name == "currentApp" && args.any { it is CharSequence }) continue
             val verdict = SelectorChecks.condition(entry, args, lenient)
-            // The message of an unknown algorithm is a string resource, which the JVM has not (see conditionBoundaries).
+            // UiSelector.useAlgorithm reads its message from the string resources, which the JVM has not; the check has the
+            // fallback of the default resource (conditionBoundaries, ScriptMessagesTest).
             if (entry.name == "algorithm" && verdict is Verdict.Rejected) continue
             val outcome = runCatching { SelectorRegistry.apply(UiSelector(null as AccessibilityBridge?), entry.name, args, lenient) }
             val agrees = when (verdict) {
@@ -143,8 +144,8 @@ class SelectorChecksTest {
         assertTrue(verdict("depth", "2") is Verdict.NoOverload)
         assertTrue(verdict("depth") is Verdict.NoOverload)
         assertTrue(verdict("algorithm", "Dfs") is Verdict.Accepted)
-        assertTrue(verdict("algorithm", "") is Verdict.Rejected)
-        assertTrue(verdict("algorithm", "bfs ") is Verdict.Rejected)
+        assertEquals("Unknown algorithm selector param: ", (verdict("algorithm", "") as Verdict.Rejected).reason)
+        assertEquals("Unknown algorithm selector param: bfs ", (verdict("algorithm", "bfs ") as Verdict.Rejected).reason)
         assertTrue(verdict("algorithm", 1.0) is Verdict.NoOverload)
         assertTrue(verdict("textMatches", "") is Verdict.Unsure)
         assertTrue(verdict("textMatches", "[") is Verdict.Rejected)

@@ -16,6 +16,7 @@ import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeJavaMethod
+import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.regexp.NativeRegExp
 import java.math.BigInteger
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
@@ -55,10 +56,37 @@ internal object SelectorForms {
     private val PLURAL = setOf(PickResultType.WidgetCollection, PickResultType.Widgets, PickResultType.Contents, PickResultType.Points)
 
     /**
-     * The public methods of `UiObject` by name, the set `Invoker` looks up with `getMethod`; a lookup here throws nothing
-     * for a name that is no method (appendix C Q69).
+     * The parameter types of the public methods of `UiObject` by name, the set `Invoker` looks up with `getMethod`; a
+     * lookup here throws nothing for a name that is no method (appendix C Q69).
      */
-    private val METHODS: Map<String, List<java.lang.reflect.Method>> by lazy { UiObject::class.java.methods.groupBy { it.name } }
+    private val METHODS: Map<String, List<Array<Class<*>>>> by lazy { UiObject::class.java.methods.groupBy({ it.name }, { it.parameterTypes }) }
+
+    /**
+     * [METHODS] by the names with an ASCII first character that `Invoker` finds them with: a method by its own name, a
+     * getter `getX...` also by the names it makes `getX...` of (`"get${name.replaceFirstChar { it.uppercase() }}"`),
+     * `X...` and, for a letter, `x...`. A result type then takes one lookup, no getter name built (Q69 (2), R2).
+     */
+    private val INVOKED: Map<String, List<Array<Class<*>>>> by lazy {
+        val invoked = HashMap<String, MutableList<Array<Class<*>>>>()
+        for ((name, types) in METHODS) {
+            invoked.getOrPut(name) { ArrayList() } += types
+            val first = name.getOrNull(3)
+            if (!name.startsWith("get") || first == null || first.code >= 0x80 || first in 'a'..'z') continue
+            val rest = name.substring(4)
+            invoked.getOrPut("$first$rest") { ArrayList() } += types
+            if (first in 'A'..'Z') invoked.getOrPut("${first.lowercaseChar()}$rest") { ArrayList() } += types
+        }
+        invoked
+    }
+
+    /**
+     * The parameter types of the methods `Invoker` tries for a result type method [name] (not empty): `name`, then
+     * `getName` (core/automator/pick/Invoker.kt).
+     */
+    internal fun invoked(name: String): List<Array<Class<*>>> = when {
+        name[0].code < 0x80 -> INVOKED[name].orEmpty()
+        else -> METHODS[name].orEmpty() + METHODS["get${name.replaceFirstChar { it.uppercase() }}"].orEmpty()
+    }
 
     /**
      * A selector form as `Picker.Builder.setSelector` reads it: nullish (no condition), a string, a `RegExp`, a
@@ -81,22 +109,31 @@ internal object SelectorForms {
      * is left to compile.
      */
     private fun conditions(function: String, param: String, map: Map<*, *>) {
-        for ((key, value) in map.entries) {
-            if (key !is String) continue
-            val where = "$param.$key"
-            // The parser refuses every key the registry lacks; asking first spares an exception (appendix C Q69).
-            val entry = SelectorRegistry.entry(key) ?: throw GlobalValues.cannotBe(function, where, "given (not a condition of UiSelector)")
-            when (val verdict = SelectorChecks.condition(entry, mapArguments(key, value), lenient = value is List<*>)) {
-                SelectorChecks.Verdict.Accepted -> Unit
-                SelectorChecks.Verdict.NoOverload -> throw GlobalValues.typeError(function, where, accepted(entry), value)
-                is SelectorChecks.Verdict.Rejected -> throw rejected(function, where, value, verdict.reason)
-                SelectorChecks.Verdict.Unsure -> try {
-                    PARSER.parse(java.util.Collections.singletonMap(key, value), UiSelector())
-                } catch (e: SelectorMapException) {
-                    throw GlobalValues.typeError(function, where, accepted(entry), value)
-                } catch (e: IllegalArgumentException) {
-                    throw rejected(function, where, value, e)
-                }
+        // A script object in the order of its entries (NativeObject.EntrySet: getIds, then get for each), without the entry objects (R2).
+        // zh-CN: 脚本对象按其条目的顺序读取 (NativeObject.EntrySet: getIds 后逐个 get), 不创建条目对象 (R2).
+        if (map is NativeObject) {
+            for (id in map.ids) {
+                val value = map[id]
+                if (id is String) condition(function, param, id, value)
+            }
+        } else {
+            for ((key, value) in map.entries) if (key is String) condition(function, param, key, value)
+        }
+    }
+
+    private fun condition(function: String, param: String, key: String, value: Any?) {
+        // The parser refuses every key the registry lacks; asking first spares an exception (appendix C Q69).
+        val entry = SelectorRegistry.entry(key) ?: throw GlobalValues.cannotBe(function, "$param.$key", "given (not a condition of UiSelector)")
+        when (val verdict = SelectorChecks.condition(entry, mapArguments(key, value), lenient = value is List<*>)) {
+            SelectorChecks.Verdict.Accepted -> Unit
+            SelectorChecks.Verdict.NoOverload -> throw GlobalValues.typeError(function, "$param.$key", accepted(entry), value)
+            is SelectorChecks.Verdict.Rejected -> throw rejected(function, "$param.$key", value, verdict.reason)
+            SelectorChecks.Verdict.Unsure -> try {
+                PARSER.parse(java.util.Collections.singletonMap(key, value), UiSelector())
+            } catch (e: SelectorMapException) {
+                throw GlobalValues.typeError(function, "$param.$key", accepted(entry), value)
+            } catch (e: IllegalArgumentException) {
+                throw rejected(function, "$param.$key", value, e)
             }
         }
     }
@@ -106,13 +143,10 @@ internal object SelectorForms {
      * [value]: none for null (an `action` of null is no condition at all), the elements of an array, or the value, script
      * functions standing for filters, and no null actions.
      */
-    private fun mapArguments(key: String, value: Any?): List<Any?> {
-        val args = when (value) {
-            null -> emptyList()
-            is List<*> -> value.toList()
-            else -> listOf(value)
-        }.map { if (it is Callable) NO_FILTER else it }
-        return if (key == ACTION) args.filterNotNull() else args
+    private fun mapArguments(key: String, value: Any?): List<Any?> = when (value) {
+        null -> emptyList()
+        is List<*> -> value.map { if (it is Callable) NO_FILTER else it }.let { if (key == ACTION) it.filterNotNull() else it }
+        else -> listOf(if (value is Callable) NO_FILTER else value)
     }
 
     /** The values the overloads of a condition take: a single argument, `null` (none), or an array of the arguments. */
@@ -154,10 +188,6 @@ internal object SelectorForms {
      */
     fun resultType(function: String, param: String, value: Any?, compass: CharSequence?, single: Boolean) {
         when (val type = PickResultType.of(value)) {
-            PickResultType.Selector -> if (compass != null && compass != Compass.PASS_ON) {
-                throw GlobalValues.cannotBe(function, param, "${UtilValues.quote(value)} with compass ${UtilValues.quote(compass)}")
-            }
-            in PLURAL -> if (single) throw GlobalValues.rangeError(function, param, DETECT_RESULT, value)
             is PickResultType.Invocation -> {
                 // A one-element array whose head is no method falls back to the array form of the symbol (`["#"]`), not for one node.
                 // zh-CN: 首项不是方法的单元素数组回退到符号的数组形式 (["#"]), 单个节点时没有这一形式.
@@ -166,6 +196,10 @@ internal object SelectorForms {
                     throw GlobalValues.rangeError(function, param, if (single) DETECT_RESULT else PICKUP_RESULT, value)
                 }
             }
+            PickResultType.Selector -> if (compass != null && compass != Compass.PASS_ON) {
+                throw GlobalValues.cannotBe(function, param, "${UtilValues.quote(value)} with compass ${UtilValues.quote(compass)}")
+            }
+            in PLURAL -> if (single) throw GlobalValues.rangeError(function, param, DETECT_RESULT, value)
             else -> Unit
         }
     }
@@ -173,6 +207,10 @@ internal object SelectorForms {
     /** Whether `Invoker` finds a method [name] (or its getter) of `UiObject` that takes [arguments] as it converts them. */
     private fun invocable(name: String, arguments: List<Any?>): Boolean {
         if (name.isEmpty()) return true
+        // A name that finds no method is refused before converting anything (R2).
+        // zh-CN: 找不到方法的名称在任何转换之前即被拒绝 (R2).
+        val candidates = invoked(name)
+        if (candidates.isEmpty()) return false
         // The conversion of Invoker.Interceptor throws for NaN in an integer parameter; telling it first spares the exception (Q69 (2)).
         // zh-CN: Invoker.Interceptor 的转换在整数参数为 NaN 时抛出; 先行判定以免异常 (Q69 (2)).
         if (SelectorChecks.interceptorThrows(name, arguments)) return false
@@ -181,12 +219,10 @@ internal object SelectorForms {
         } catch (e: IllegalArgumentException) {
             return false
         }
-        return listOf(name, "get${name.replaceFirstChar { it.uppercase() }}").any { candidate ->
-            METHODS[candidate].orEmpty().any { method ->
-                method.parameterTypes.contentEquals(interceptor.classes) &&
-                        method.parameterCount == interceptor.args.size &&
-                        method.parameterTypes.indices.all { fits(method.parameterTypes[it], interceptor.args[it]) }
-            }
+        return candidates.any { types ->
+            types.contentEquals(interceptor.classes) &&
+                    types.size == interceptor.args.size &&
+                    types.indices.all { fits(types[it], interceptor.args[it]) }
         }
     }
 

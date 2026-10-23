@@ -60,31 +60,32 @@ class SelectorModule(private val runtime: ScriptRuntime) {
     @ScriptFunction(global = ScriptGlobal.ONLY)
     fun pickup(vararg args: Any?): Any? {
         if (args.size > 5) throw ScriptArgs.arityError("pickup", 0, 5, args.size)
-        val a = args.map { RhinoUtils.unwrap(it) }
+        val a = Array(args.size) { RhinoUtils.unwrap(args[it]) }
         if (a.isEmpty()) return UiSelector.pickup(runtime, null, null, null, UiObject.RESULT_TYPE_WIDGET, null)
         // A UiObject first is the root from two arguments on, and the first of five arguments always is (the current forms).
         // zh-CN: 两个参数起, 首个参数为 UiObject 时它是 root; 五个参数时首个参数总是 root (同现有各形式).
         val root = a.size == 5 || a.size >= 2 && a[0] is UiObject
-        val rest = if (root) a.drop(1) else a
         if (root) root("pickup", "root", a[0])
-        val selector = rest.getOrNull(0)
+        // The selector, then the arguments after it (indices, sparing copies of the arguments: R2).
+        // zh-CN: 选择器及其后的参数 (用下标而不复制参数: R2).
+        val at = if (root) 1 else 0
+        val selector = a[at]
         var compass: Any? = UiObject.COMPASS_PASS_ON
         var resultType: Any? = UiObject.RESULT_TYPE_WIDGET
         var callback: Any? = null
-        val tail = rest.drop(1)
-        when (tail.size) {
+        when (a.size - at - 1) {
             0 -> Unit
             1 -> when {
-                tail[0] is Callable -> callback = tail[0]
-                SelectorChecks.isCompass(tail[0]) -> compass = tail[0]
-                else -> resultType = tail[0]
+                a[at + 1] is Callable -> callback = a[at + 1]
+                SelectorChecks.isCompass(a[at + 1]) -> compass = a[at + 1]
+                else -> resultType = a[at + 1]
             }
             2 -> when {
-                tail[1] is Callable && SelectorChecks.isCompass(tail[0]) -> { compass = tail[0]; callback = tail[1] }
-                tail[1] is Callable -> { resultType = tail[0]; callback = tail[1] }
-                else -> { compass = tail[0]; resultType = tail[1] }
+                a[at + 2] is Callable && SelectorChecks.isCompass(a[at + 1]) -> { compass = a[at + 1]; callback = a[at + 2] }
+                a[at + 2] is Callable -> { resultType = a[at + 1]; callback = a[at + 2] }
+                else -> { compass = a[at + 1]; resultType = a[at + 2] }
             }
-            else -> { compass = tail[0]; resultType = tail[1]; callback = tail[2] }
+            else -> { compass = a[at + 1]; resultType = a[at + 2]; callback = a[at + 3] }
         }
         compass("pickup", compass)
         callback("pickup", callback)
@@ -98,7 +99,7 @@ class SelectorModule(private val runtime: ScriptRuntime) {
     @ScriptFunction(global = ScriptGlobal.ONLY)
     fun detect(vararg args: Any?): Any? {
         if (args.size !in 2..4) throw ScriptArgs.arityError("detect", 2, 4, args.size)
-        val a = args.map { RhinoUtils.unwrap(it) }
+        val a = Array(args.size) { RhinoUtils.unwrap(args[it]) }
         root("detect", "w", a[0])
         var compass: Any? = UiObject.COMPASS_PASS_ON
         var resultType: Any? = UiObject.RESULT_TYPE_WIDGET

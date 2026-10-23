@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.selector
 
+import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.automator.Automator
@@ -161,6 +162,27 @@ class SelectorModulesTest {
             "'%'", "'p'", "'p2'", "'pp'", "'c0'", "'c-1'", "'c0>1'", "'s1'", "'s<1'", "'s>-1'", "'k'", "'k2'", "'p2c1'", "null", "undefined",
             "''", "'p0'", "'k0'", "'c2147483647'", "'c-2147483648'",
         ).forEach { SelectorForms.compass("pickup", "compass", unwrapped(it)) }
+    }
+
+    /**
+     * Q69 (2): a result type method finds through [SelectorForms.invoked] the methods `Invoker` tries, `name` then
+     * `getName`, for the names of every method of `UiObject` and their getter forms, and for first characters other than
+     * ASCII whose uppercase is (dotless i, long s) or is not.
+     */
+    @Test
+    fun invokedMethodsAreThoseInvokerTries() {
+        val methods = UiObject::class.java.methods
+        fun tried(name: String) = listOf(name, "get${name.replaceFirstChar { it.uppercase() }}").flatMap { n ->
+            methods.filter { it.name == n }.map { it.parameterTypes.toList() }
+        }.toSet()
+        val names = methods.flatMap { m ->
+            val rest = m.name.removePrefix("get")
+            listOf(m.name, rest, rest.replaceFirstChar { it.lowercase() }, rest.replaceFirstChar { it.uppercase() }, "get${m.name}", m.name.uppercase(), m.name.drop(1))
+        } + listOf("nope", "_", "\$x", "1", "getget") + listOf(0x131, 0x17F, 0xDF, 0xE9, 0xD1).flatMap { listOf(Char(it) + "d", Char(it) + "ize", Char(it) + "ext") }
+        val wrong = names.filter { it.isNotEmpty() }.distinct().filter { name -> SelectorForms.invoked(name).map { it.toList() }.toSet() != tried(name) }
+        assertEquals(emptyList<String>(), wrong.take(20))
+        listOf("text", "Text", "getText", "child", "Child").forEach { assertTrue(it, SelectorForms.invoked(it).isNotEmpty()) }
+        listOf("nope", "tEXT", "gettext").forEach { assertTrue(it, SelectorForms.invoked(it).isEmpty()) }
     }
 
     private fun unwrapped(source: String): Any? = RhinoUtils.unwrap(rhino.evalKt(source))
