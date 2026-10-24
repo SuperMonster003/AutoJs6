@@ -51,7 +51,9 @@ class AugmentDelegatingModulesTest {
 
     /**
      * A module: [calls] give the same results as the current module; [checked] (call to the error name on the new
-     * layer) are the argument errors the new layer raises itself (D10), which the current module also rejects.
+     * layer) are the argument errors the new layer raises itself (D10), which the current module also rejects;
+     * [accepted] are calls the current module accepts although their values look unusual (JSON of toJSON / wrapper
+     * objects, concatenated strings, Java objects), which the new layer's checks let through as well.
      */
     private class Case(
         val name: String,
@@ -59,6 +61,7 @@ class AugmentDelegatingModulesTest {
         val calls: List<String>,
         val prepare: (DifferentialRhino) -> Unit = {},
         val checked: List<Pair<String, String>> = emptyList(),
+        val accepted: List<String> = emptyList(),
     )
 
     @Test
@@ -113,6 +116,33 @@ class AugmentDelegatingModulesTest {
         }
         assertTrue("Results differ from the current modules ($compared compared):\n" + failures.joinToString("\n"), failures.isEmpty())
         assertTrue("$compared calls compared", compared >= 40)
+    }
+
+    @Test
+    fun acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules() {
+        // What the current module accepts stays accepted (D10): on the JVM both sides then fail at the same step behind
+        // the argument checks (the plugin host or the service cannot run there), or give the same value.
+        // zh-CN: 现有模块接受的照旧接受 (D10): 在 JVM 上两侧随后在参数检查之后的同一步失败 (插件宿主或服务在此无法运行), 或得到相同的值.
+        var compared = 0
+        val failures = CASES.filter { it.accepted.isNotEmpty() }.flatMap { case ->
+            val new = withNew(case) { rhino -> case.accepted.map { rhino.render(DifferentialRhino.Side.KT, it) } }
+            val current = DifferentialRhino().use { side ->
+                case.prepare(side)
+                case.mountCurrent(side)
+                case.accepted.map { side.render(DifferentialRhino.Side.KT, it) }
+            }
+            case.accepted.indices.mapNotNull { i ->
+                compared++
+                val (now, next) = reached(current[i]) to reached(new[i])
+                when {
+                    now in ARGUMENT_ERRORS -> "${case.accepted[i]}\n    current rejects it: ${current[i]}"
+                    now != next -> "${case.accepted[i]}\n    current ${current[i]}\n    new     ${new[i]}"
+                    else -> null
+                }
+            }
+        }
+        assertTrue("Accepted calls differ ($compared compared):\n" + failures.joinToString("\n"), failures.isEmpty())
+        assertTrue("$compared calls compared", compared >= 25)
     }
 
     /**
@@ -215,6 +245,18 @@ class AugmentDelegatingModulesTest {
         private const val T = "TypeError"
         private const val R = "RangeError"
 
+        /** The error names of argument checks: an accepted call must not end in one of them. */
+        private val ARGUMENT_ERRORS = setOf("WrappedIllegalArgumentException", "IllegalArgumentException", "InternalError", T, R)
+
+        private val REACHED = Regex("^(?:throws(?:[(]java[)])?|unavailable[(]jvm[)]) (?:JavaException )?([^ ]+)")
+
+        /**
+         * Where a call ended: the simple name of the Java exception or the error it failed with, or its value. A plugin
+         * host class fails to initialize on the JVM: ExceptionInInitializerError the first time, NoClassDefFoundError after.
+         */
+        private fun reached(rendered: DifferentialRhino.Rendered) = (REACHED.find(rendered.key)?.groupValues?.get(1) ?: rendered.key)
+            .replace("ExceptionInInitializerError", "NoClassDefFoundError")
+
         private fun typeErrors(vararg calls: String) = calls.map { it to T }
 
         private fun rangeErrors(vararg calls: String) = calls.map { it to R }
@@ -222,16 +264,25 @@ class AugmentDelegatingModulesTest {
         private val CASES = listOf(
             Case("ai", { Ai(it.ktRuntime, ScriptRuntimeFields.ai(it.ktRuntime)).augment(global(it)) }, emptyList(), service(AiService::class.java, "ai"),
                 typeErrors("ai()", "ai.ask()", "ai.ask(1)", "ai.ask({})", "ai.ask({ messages: 1 })", "ai.ask('a', 1)", "ai.ask('a', {}, 1)", "ai.chat()", "ai.stream(1)",
-                    "ai.session(1)", "ai.session({ system: 1 })", "ai.session(1, 2)", "ai.catalog(1, 2)", "ai.catalog([])") +
-                    rangeErrors("ai.ask([])", "ai.ask({ messages: [] })", "ai.session({ system: '' })")),
+                    "ai.session(1)", "ai.session({ system: 1 })", "ai.session(1, 2)", "ai.catalog(1, 2)", "ai.catalog([])", "ai.ask(null)", "ai.ask(function () {})",
+                    "ai.ask(Object.create({ role: 'user', content: 'x' }))", "ai.ask({ messages: null })", "ai.ask('x', { toJSON: function () { return [] } })", "ai.ask('x', new Date(0))",
+                    "ai.ask('x', new java.util.HashMap())", "ai.catalog(new String('x'))", "ai.session({ system: null })") +
+                    rangeErrors("ai.ask([])", "ai.ask({ messages: [] })", "ai.session({ system: '' })", "ai.session({ system: new java.lang.String('') })"),
+                accepted = listOf("ai.ask(new String('x'))", "ai.ask(new Date(0))", "ai.ask({ toJSON: function () { return 'x' } })", "ai.ask({ messages: function () {}, role: 'user', content: 'x' })",
+                    "ai.ask([1])", "ai.ask(new java.lang.String('x'))", "ai.chat({ role: 'user', content: 'x' })", "ai.session({ system: function () {} })", "ai.session({ system: new String('s') })",
+                    "ai.session(Object.create({ system: 1 }))", "ai.catalog({})")),
             Case("opencc", { OpenCC.augmentWithRuntime(global(it), it.ktRuntime) }, listOf("typeof opencc.s2t"), checked =
                 typeErrors("opencc()", "opencc('a')", "opencc.convert('a')", "opencc.convert('a', 1)", "opencc.convert(null, 's2t')", "opencc.s2t()", "opencc.s2t('a', 'b')", "opencc.s2t(null)") +
-                    rangeErrors("opencc.convert('a', 'nope')", "opencc('a', 'nope')")),
+                    typeErrors("opencc.convert('a', new String('s2t'))") + rangeErrors("opencc.convert('a', 'nope')", "opencc('a', 'nope')"),
+                accepted = listOf("(function () { var t = 's2'; t += 't'; return opencc.convert('a', t) })()", "opencc.convert('a', new java.lang.String('s2t'))", "opencc.convert(1, 's2t')",
+                    "opencc.convert({}, 's2t')", "(function () { var t = 'a'; t += 'b'; return opencc.s2t(t) })()")),
             Case("pinyin", { Pinyin.augmentWithRuntime(global(it), it.ktRuntime) },
                 listOf("typeof pinyin.STYLE_TONE", "pinyin.compact([['a', 'b'], ['c']])", "pinyin.convert('')", "pinyin('', { mode: 'nope' })", "pinyin.convert(null, 1)"), checked =
                 typeErrors("pinyin()", "pinyin.convert()", "pinyin.compare('a')", "pinyin.compact()", "pinyin.compact(1)", "pinyin.compact([1])", "pinyin.compact([[null]])", "pinyin.simple()",
                     "pinyin.fromCodePoint()", "pinyin.fromCodePoint('x')", "pinyin.fromPhrase()", "pinyin.fromPhrase(null)", "pinyin('a', { customDictionary: 1 })", "pinyin('a', { customDictionary: { a: 1 } })") +
-                    rangeErrors("pinyin.fromCodePoint(1e20)", "pinyin('a', { mode: 'nope' })", "pinyin.convert('a', { style: 99 })")),
+                    rangeErrors("pinyin.fromCodePoint(1e20)", "pinyin('a', { mode: 'nope' })", "pinyin.convert('a', { style: 99 })", "pinyin('a', { mode: new java.lang.String('nope') })",
+                        "(function () { var m = 'no'; m += 'pe'; return pinyin('a', { style: m }) })()"),
+                accepted = listOf("pinyin.fromCodePoint(new java.lang.Integer(65))", "pinyin('a', { mode: undefined })", "pinyin.fromCodePoint('65')")),
             Case("pinyin4j", { Pinyin4j.augmentWithRuntime(global(it), it.ktRuntime) }, listOf("pinyin4j.of('')", "pinyin4j('', { tone: 'nope' })", "pinyin4j.readings(null, { romanization: 'x' })"), checked =
                 typeErrors("pinyin4j()", "pinyin4j.of()", "pinyin4j.readings()", "pinyin4j.as()", "pinyin4j.as('a', 'b')") +
                     rangeErrors("pinyin4j.of('a', { tone: 'nope' })", "pinyin4j('a', { case: 'x' })", "pinyin4j.of('a', { v: 'x' })", "pinyin4j.readings('a', { romanization: 'x' })",
@@ -241,7 +292,9 @@ class AugmentDelegatingModulesTest {
                     "mediainfo.get('/a', 'General', 'x', 1)", "mediainfo.get('/a', 'General', 'x', { streamNumber: 'x' })", "mediainfo.get('/a', 'General', 'x', { infoKind: 1 })",
                     "mediainfo.countGet('a')", "mediainfo.countGet('/a', null)", "mediainfo.snapshot()", "mediainfo.snapshot('/a', 1)", "mediainfo.capabilities(1)") +
                     rangeErrors("mediainfo('')", "mediainfo.read(' ')", "mediainfo.get('/a', 'General', 'x', { streamNumber: -1 })", "mediainfo.get('/a', 'General', 'x', { streamNumber: 1.5 })",
-                        "mediainfo.get('/a', 'General', 'x', { infoKind: 'nope' })")),
+                        "mediainfo.get('/a', 'General', 'x', { infoKind: 'nope' })", "mediainfo.get('/a', 'General', 'x', { streamNumber: new java.lang.Integer(-1) })"),
+                accepted = listOf("mediainfo.get('/a', 'General', 'x', { streamNumber: new java.lang.Integer(1) })", "mediainfo.get('/a', 'General', 'x', { infoKind: new java.lang.String('TEXT') })",
+                    "mediainfo.get('/a', 'General', 'x', { streamNumber: undefined, infoKind: null })")),
             Case("mail", { Mail(it.ktRuntime, ScriptRuntimeFields.mail(it.ktRuntime)).augment(global(it)) }, listOf("mail.connect()", "mail.connect(1)", "mail.setDefault()", "mail.close(1)", "mail.connectAsync()"), service(MailService::class.java, "mail")),
             Case("installer", { Installer(it.ktRuntime, ScriptRuntimeFields.installer(it.ktRuntime)).augment(global(it)) }, listOf("installer.install()", "installer.session()", "installer.inspect()", "installer.uninstall()"), service(InstallerService::class.java, "installer")),
             Case("epub", { Epub(it.ktRuntime, ScriptRuntimeFields.epub(it.ktRuntime)).augment(global(it)) }, listOf("epub.open()", "epub.metadata()", "epub.toc(1, 2)", "epub.read()"), service(EpubService::class.java, "epub")),
@@ -254,8 +307,11 @@ class AugmentDelegatingModulesTest {
                 { side -> ScriptRuntimeFields.setCompose(side.ktRuntime, Compose(side.ktRuntime, NoPluginPlatform())) }),
             Case("memory", { Memory(it.ktRuntime).augment(global(it)) }, emptyList(), checked =
                 typeErrors("memory.snapshot(1)", "memory.retained(1)", "memory.collect(1, 2)", "memory.collect('1')", "memory.collect(NaN)", "memory.dumpHeap(1, 2)", "memory.dumpHeap(1)",
-                    "memory.watch()", "memory.watch(1)", "memory.watch('a')", "memory.watch(null)", "memory.watch({}, 1)") +
-                    rangeErrors("memory.collect(-1)", "memory.collect(1e9)", "memory.dumpHeap(' ')")),
+                    "memory.watch()", "memory.watch(1)", "memory.watch('a')", "memory.watch(null)", "memory.watch({}, 1)",
+                    "memory.watch(new java.lang.String('a'))") +
+                    rangeErrors("memory.collect(-1)", "memory.collect(1e9)", "memory.dumpHeap(' ')", "memory.dumpHeap(new java.lang.String(' '))", "memory.collect(new java.lang.Integer(-1))"),
+                accepted = listOf("memory.collect(new java.lang.Integer(5))", "memory.watch(new java.lang.StringBuilder('a'))", "memory.watch({}, new java.lang.String('n'))",
+                    "memory.dumpHeap(new java.lang.String('a'))")),
         )
 
         private fun settled(promise: String) = HostModuleTestSupport.settled(promise, "typeof v")
