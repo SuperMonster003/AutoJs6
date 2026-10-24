@@ -184,8 +184,10 @@ internal object GlobalValues {
         }
         val value = number(name, "num", args[0])
         if (!value.isFinite()) throw rangeError(name, "num", "finite number", value)
-        var base = args.getOrNull(1)
-        var modeArg = args.getOrNull(2)
+        // A text built at run time (a ConsString) is a mode shortcut or a ratio as a literal is: the current functions
+        // unwrapped their arguments first.
+        var base = args.getOrNull(1).let { if (it is CharSequence) it.toString() else it }
+        var modeArg = args.getOrNull(2).let { if (it is CharSequence) it.toString() else it }
         if (base is Boolean || base == "auto") {
             if (!isNullish(modeArg)) throw cannotBe(name, "isRatio", "given with a mode shortcut as the base")
             modeArg = base

@@ -19,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mozilla.javascript.ConsString
 import org.mozilla.javascript.EcmaError
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.ScriptableObject
@@ -321,12 +322,15 @@ class GlobalModuleTest {
             arrayOf<Any?>(Double.NaN), arrayOf<Any?>(Double.POSITIVE_INFINITY), arrayOf<Any?>("abc"), arrayOf<Any?>(null), arrayOf<Any?>(360.0, 0.0), arrayOf<Any?>(360.0, 1.5),
             arrayOf<Any?>(360.0, "x"), arrayOf<Any?>(0.5, true, true), arrayOf<Any?>(0.5, null, "x"), arrayOf<Any?>(0.5, "16:9", false), arrayOf<Any?>(0.5, "16:x"), arrayOf<Any?>(0.5, "1:2:3"),
             arrayOf<Any?>(0.5, -1.0, true), arrayOf<Any?>(0.5, Any(), true),
+            arrayOf<Any?>(360.0, ConsString("au", "to")), arrayOf<Any?>(0.5, null, ConsString("au", "to")), arrayOf<Any?>(0.5, ConsString("16", ":9")),
         )
         val mismatches = mutableListOf<String>()
         GlobalValues.Axis.entries.forEach { axis ->
             val currentAxis = CurrentCoordinateScale.Axis.valueOf(axis.name)
             argLists.forEach { args ->
-                val current = runCatching { CurrentCoordinateScale.convert(currentAxis, 1080, 2340, Scale(), args) }
+                // The current functions unwrapped their arguments (a ConsString to a String) before CoordinateScale.
+                val unwrapped = args.map { if (it is ConsString) it.toString() else it }.toTypedArray()
+                val current = runCatching { CurrentCoordinateScale.convert(currentAxis, 1080, 2340, Scale(), unwrapped) }
                 val actual = runCatching { GlobalValues.convert(axis, 1080, 2340, Scale(), args) }
                 val label = "${axis.functionName}(${args.joinToString()})"
                 when {
@@ -397,6 +401,7 @@ class GlobalModuleTest {
                 "cX(360) === Math.round(cX() / 2)" to "true",
                 "cY(0.25) === Math.round(cY() * 0.25)" to "true",
                 "cYx(0.5, '1:2') === cX()" to "true",
+                "[cYx(100, 'au' + String('to')) === cYx(100, 'auto'), cX(0.5, 'au' + String('to')) === cX(0.5)]" to "[true,true]",
                 "cX(NaN)" to "throws RangeError",
                 "cX('a')" to "throws TypeError",
                 "cX(1, 0)" to "throws RangeError",
