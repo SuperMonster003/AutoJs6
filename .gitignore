@@ -107,6 +107,9 @@ CLAUDE.md
 !/tools/db-downgrade/
 !/tools/db-downgrade/**
 /tools/db-downgrade/__pycache__/
+!/tools/rhino/
+!/tools/rhino/**
+/tools/rhino/__pycache__/
 
 /gradle/wrappers/backup/
 

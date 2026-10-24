@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/22 - 部分功能插件化, 谨慎升级
+###### 2026/10/24 - 部分功能插件化, 谨慎升级
 
 * `提示` 部分内置功能改由独立插件提供 (如 OCR, 条码识别, OpenCV, OpenCC, 拼音, MediaInfo, 终端及离线项目文档), 使用前需在插件中心安装并启用对应插件
 * `提示` 打包应用的目标 SDK 版本由 29 调整为 37, 共享存储及本地网络访问需按系统要求授权
@@ -81,6 +81,7 @@
 * `新增` settings.export/categories 方法, 用于在脚本中将应用设置按分类导出为 zip 文件 (与 "管理 AutoJs6 设置" 页面导出的文件相同, 不含凭据) 及列出分类与条目数 (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))
 * `新增` work_manager 模块, 用于管理定时任务及广播任务 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Work Manager](https://docs.autojs6.com/#/workManager))
 * `新增` power_manager 模块, 用于查询及申请忽略电池优化 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [Power Manager](https://docs.autojs6.com/#/powerManager))
+* `新增` sqlite 模块的数据库回调 (DatabaseCallback) 支持 onDowngrade 方法, 用于在请求的版本低于现有数据库版本时处理降级; 未实现时降级不执行任何操作, 现有的表与数据保持不变, 不再抛出异常 (参阅 项目文档 > [SQLite](https://docs.autojs6.com/#/sqlite))
 * `新增` pangu 全局对象, 用于中西文混排的间距处理及检查 (参阅 项目文档 > [文本间距](https://docs.autojs6.com/#/pangu))
 * `新增` device.pageSize 属性 (getter), 用于获取系统内存页大小
 * `新增` device.getMarketName 方法, 用于获取设备的市场名称 _[`issue #513`](http://issues.autojs6.com/513)_
@@ -209,6 +210,7 @@
 * `修复` Rhino 引擎及内置模块的作用域, 参数转换与返回值处理不兼容导致部分脚本行为异常的问题
 * `修复` Object.fromEntries 使用数字或数字字符串作为键时, 生成的属性无法正常访问且控制台显示不完整的问题 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
 * `修复` Object.defineProperty 方法修改不可配置 (configurable 为 false) 的可枚举属性时, 描述符未指定 enumerable (如只传 `{ value: 1 }`) 也会抛出 TypeError 的问题
+* `修复` 循环体中的 const 声明每轮不重新赋值的问题 (如 for/while 循环体中的 `const item = list[i]` 始终为首轮的值)
 * `修复` 正则表达式在 Android 7.x 上使用 Unicode 属性转义 (如 `\p{L}`) 时抛出 UnsupportedOperationException 的问题
 * `修复` 部分本地化的脚本错误消息丢失参数或触发 MessageFormat 异常的问题
 * `修复` Proxy 包装函数及部分 JavaScript 回调可能无法传入内置模块, 或出现参数嵌套与重载歧义的问题
@@ -288,6 +290,9 @@
 * `修复` runtime.loadDex/loadJar/loadAar 加载的 DEX 及其中的类在脚本结束后一直无法释放的问题 (加载器现随加载它的脚本释放: 加载过同一文件的脚本全部结束后, 其他脚本需自行加载才能使用其中的类)
 * `修复` 多个 UI 脚本同时运行时, 后启动的 UI 脚本结束后其内存要等其余 UI 脚本全部结束才能释放, 且期间其余 UI 脚本按已结束脚本的运行时包装控件的问题
 * `修复` 含 webview 控件的 UI 脚本结束后, 部分旧版 WebView (如 WebView 111) 仍持有已关闭的脚本页面, 使该脚本占用的内存一直无法释放的问题
+* `修复` speech.listen/wake 未能打开会话 (如未安装语音模型) 时, 脚本结束后其占用的内存一直无法释放的问题
+* `修复` speech.listen/wake 等调用在等待语音插件时超时或脚本结束后, 插件随后才打开的会话或任务不会被取消, 并一直占用与插件的连接的问题
+* `修复` gallery.pick/view/edit, yolo.load, mail.connect, epub.open/read 等调用在等待插件打开会话时超时或脚本结束后, 以及 AutoJs4 运行时插件超过受理时限后, 插件随后才打开的会话或受理的脚本不会被关闭, 并一直占用与插件的连接的问题
 * `修复` 创建 JavaAdapter 时会清空整个类缓存目录, 使 runtime.loadJar 的转换缓存失效, 并可能删除同时进行的 loadJar/loadDex 正在使用的文件的问题
 * `修复` 通过外部 URI 或后台运行脚本时可能丢失原始路径或文件扩展名的问题 _[`issue #545`](http://issues.autojs6.com/545)_
 * `修复` Tasker 无法正常调用并运行脚本的问题 _[`issue #501`](http://issues.autojs6.com/501)_
@@ -313,6 +318,7 @@
 * `修复` 版本历史清理时可能误删尚未完成记录的新快照的问题
 * `修复` 回收站恢复失败时仍提示操作完成的问题
 * `修复` 回收站恢复目录时可能将异常归档条目写入目标目录之外的问题
+* `修复` 版本历史/回收站/颜色库/密钥库的数据由较新版本的 AutoJs6 写入后, 当前版本无法打开对应数据库的问题 (保留两个版本共有的数据; 无法保留时将该数据库备份后以空库继续, 之后装回不低于该数据版本的 AutoJs6 时自动还原)
 * `修复` 代码编辑器在页面重建后可能丢失光标, 选区或未保存内容的问题
 * `修复` 代码编辑器及日志页面显示软键盘或输入栏时, 内容区域可能被遮挡或压缩的问题
 * `修复` 代码编辑器内的对话框在编辑器主题与应用日夜模式深浅不一致时, "更多" 菜单的背景与文字颜色相近而难以辨认的问题
@@ -351,12 +357,12 @@
 * `修复` 打包应用或宿主缺少运行时组件时, shell 原生库可能缺失或使用错误 ABI 导致应用崩溃的问题
 * `修复` APK 打包时同名但内容不同的原生库被静默保留其中一份的问题 (现改为终止打包并列出来源)
 * `修复` 打包的 UI 脚本启动时偶发显示空白页面后退出的问题
-* `修复` VSCode 插件保存项目时已删除文件仍残留在设备或缓存目录中的问题 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
-* `修复` VSCode 插件接收项目归档时可能因日志处理导致内存不足的问题 _[`issue #523`](http://issues.autojs6.com/523)_
-* `修复` VSCode 插件的失效连接阻塞日志发送, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_
 * `修复` 设置页面 "使用 '音量加' 键控制脚本运行" 开关在应用启动后由关闭改为开启时, 若未显示过浮动按钮, 需重启应用才能用音量加键停止脚本的问题
 * `修复` 录制脚本结束后, 录制所用的输入事件监听进程 (经 Shizuku 或 Root 运行的 getevent) 仍在后台运行直到应用退出的问题
 * `修复` 仅具备 Shizuku 权限 (无 Root) 时 RootAutomator 因无法识别触摸屏设备而创建失败, 以及 AutoJs6 启动后立即开始录制脚本时界面无响应 10 秒以上的问题
+* `修复` VSCode 插件保存项目时已删除文件仍残留在设备或缓存目录中的问题 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `修复` VSCode 插件接收项目归档时可能因日志处理导致内存不足的问题 _[`issue #523`](http://issues.autojs6.com/523)_
+* `修复` VSCode 插件的失效连接阻塞日志发送, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_
 * `修复` VSCode 插件连接失败时在已销毁页面显示对话框可能出现异常的问题
 * `修复` 客户端模式成功连接过的地址未写入历史记录的问题
 * `修复` 检查更新时未按设备 ABI 优先级选择安装包的问题
@@ -381,6 +387,8 @@
 * `修复` 进度对话框句柄更新后仍返回旧值及取消后窗口未及时关闭的问题
 * `修复` 每日和每周任务跨夏令时转换后本地执行时刻发生偏移的问题
 * `修复` IntentTask 本地与外部接收器冲突及更新或删除后的注册残留问题
+* `修复` AutoJs6 及打包应用安装到较新版本留下的数据上 (如降级安装) 时启动即崩溃并被反复重启的问题 (定时任务与意图任务的数据库降级时保留原有数据; 仍无法打开时将其备份后以空库继续启动, AutoJs6 同时发送通知, 之后装回不低于该数据版本的版本时自动还原)
+* `修复` AutoJs6 及打包应用发生未捕获异常后未交由系统处理, 导致系统缺少崩溃记录, 且启动时即崩溃的进程被后台组件反复拉起而不受系统限制的问题
 * `修复` 打包应用的 FileProvider URI 辅助接口使用模板标识而非实际清单标识的问题
 * `修复` Node.js 宿主模块包含 java.new 等保留字成员时 ESM 导入失败的问题
 * `修复` Bun 打包应用隐藏启动页和日志页时, 启动 Activity 过早结束导致冷启动初始化期间进程被系统回收的问题
@@ -398,8 +406,8 @@
 * `优化` 插件化打包模板 (APK Builder Template 插件), 打包时校验插件签名, 宿主版本及模板兼容性
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization 相关功能
 * `优化` 插件化 OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
-* `优化` 官方插件的主题色, 夜间模式及语言支持跟随宿主设置
 * `优化` 应用设置统一由同一套键声明与存储层读写, 设置页面, 脚本 settings 模块及设置导入/导出使用相同的默认值与分类; 已有设置的键名及存储文件保持不变, 升级后无需迁移
+* `优化` 官方插件的主题色, 夜间模式及语言支持跟随宿主设置
 * `优化` 插件中心完善在线安装与更新, 变体选择, 插件设置, 使用说明及发行历史显示
 * `优化` 插件中心列表图标按安装状态响应短按/长按: 已安装时打开系统应用详情/独立启动页面 (无启动页面时提示), 未安装时打开插件详情/启动安装
 * `优化` 首页插件标签页 FAB 菜单优先显示安装向导, 官方插件库, 第三方插件库及插件中心, URL/本地文件安装及管理操作收纳至 "更多"
@@ -412,7 +420,8 @@
 * `优化` 主页插件标签页浮动按钮支持长按进入插件中心
 * `优化` 插件信息对话框分别显示插件支持的 ABI 及当前安装包的 ABI
 * `优化` 缓存 Rhino 运行时初始化数据以提升脚本启动效率, 并提升大型数组打印效率及低版本安卓系统的 Java 反射兼容性
-* `优化` Rhino 引擎同步上游, 支持 new.target, 并改进作用域, TypedArray 与调试器兼容性
+* `优化` Rhino 引擎同步上游, 支持 new.target, for...of/for...in 循环头部的 const 声明及 Uint8Array 的 Base64/Hex 转换方法 (如 Uint8Array.fromBase64 及 toHex 方法), 并改进作用域, TypedArray 与调试器兼容性
+* `优化` 为 const 声明的变量重新赋值时, 非严格模式下同样抛出 TypeError (与 ECMAScript 规范及 Node.js 一致), 不再静默忽略
 * `优化` ArrayBuffer, DataView, TypedArray, 正则表达式及解构等 28 条引擎错误消息补齐 9 种语言的翻译
 * `优化` runtime.loadJar 方法支持借助 DEX Compiler 插件加载 JAR 文件, 并提供编译诊断与失败回退 (实验性, 默认关闭)
 * `优化` 定时任务, 广播任务, 快捷方式及 Tasker 支持执行 TypeScript 脚本 (需要 TypeScript Engine 插件)
@@ -500,6 +509,7 @@
 * `依赖` 升级 AndroidX SavedState 版本 1.2.1 -> 1.3.2
 * `依赖` 升级 AndroidX Emoji2 版本 1.3.0 -> 1.4.0
 * `依赖` 升级 AndroidX Window 版本 1.0.0 -> 1.5.0
+* `依赖` 升级 Rhino 版本 2.0.0-SNAPSHOT (上游快照 2025/12/22 -> 2026/10/23)
 * `依赖` 移除 Android Annotations 版本 4.8.0
 * `依赖` 移除 Android dx 版本 1.14
 * `依赖` 移除 AndroidX AppCompat (Legacy) 版本 1.0.2
