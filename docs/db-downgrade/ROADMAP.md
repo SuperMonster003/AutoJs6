@@ -1,6 +1,6 @@
 # 数据库降级崩溃循环路线图 (db-downgrade)
 
-更新日期: 2026-10-23 (立项: 两轮 7 题拍板 D2-D8)
+更新日期: 2026-10-24 (P4 完成, 18 / 18 条全部勾选; 立项 2026-10-23: 两轮 7 题拍板 D2-D8)
 
 本文是主题 db-downgrade 的可执行状态表: 旧版本宿主或打包应用 (`org.autojs.autojs6.inrt`) 装在新版本数据上时, `SQLiteOpenHelper` 默认的 `onDowngrade` 抛 `SQLiteException: Can't downgrade database from version X to Y`, 异常发生在 `App.onCreate`, 进程启动即崩溃, 再被系统或其他组件反复拉起形成崩溃循环. 它记录立项时查明的事实 (第 1 节), 维护者 2026-10-23 经两轮选择题确认的决策 (第 2 节), 派生技术决策 (第 3 节), 红线 (第 4 节), 阶段任务 (第 5 节) 与附录 (决策记录, 证据, 待决事项, 文件地图). 来源: `docs/shizuku-oom/ROADMAP.md` 1.5 与附录 C Q4 / Q7 (D16 把本题转为独立主题).
 
@@ -23,9 +23,11 @@
 | P1 两张任务表 + 兜底 | `TimedTaskDatabase` / `IntentTaskDatabase` 无操作降级, 幂等升级; 打开失败改名备份后空库继续, 条件满足时自动还原; 会结束进程的崩溃交回系统处理器 (P1.5, D10) | P1.1-P1.5 勾选, AVD API 24 与 35 往返 PASS, androidTest 通过, 崩溃有 am_crash 且连续拉起受系统限制 | 1 (与 P0 同一会话) + 0.5 (P1.5) |
 | P2 Room 三库通用降级 | `HistoryDatabase` / `ColorHistoryDatabase` / `KeyStoreDatabase` 对 "未来 schema" 的数据保留共有列打开, 失败兜底; 某表无法保留其行时整库走兜底 (P2.4, D9) | P2.1-P2.4 勾选, androidTest 通过, AVD 页面核对不崩 | 1 (可与 P1 并行) + 0.5 (P2.4) |
 | P3 脚本 sqlite 模块 | `DatabaseCallback` 新增 onDowngrade, 默认无操作降级; 文档与 d.ts 同步 | P3.1-P3.2 勾选 | 0.5 |
-| P4 真机复核, changelog 与发布门 | 一台真机往返 PASS; changelog zh-Hans 条目; 6.8.0 发布门一行; 本文回填 | P4.1-P4.4 勾选, 本地提交 | 0.5 (P1 / P2 / P3 之后) |
+| P4 真机复核, changelog 与发布门 | 两台真机 (Q10 = C: OPD2413 与 G8441) 往返 PASS; changelog zh-Hans 条目; 6.8.0 发布门一行; 本文回填 | P4.1-P4.4 勾选, 本地提交 | 0.5 (P1 / P2 / P3 之后) |
 
 共 18 条: P0 3 条, P1 5 条, P2 4 条, P3 2 条, P4 4 条 (立项 16 条; 2026-10-23 20:30 维护者拍板 Q8 / Q9 后新增 P2.4 与 P1.5).
+
+进度 (2026-10-24): 18 / 18 条全部完成. P0 / P1.1-P1.4 db-downgrade-p0-p1, P2.1-P2.3 db-downgrade-p2, P3 db-downgrade-p3, P1.5 / P2.4 db-downgrade-q8-q9, P4 db-downgrade-p4; 宿主均只本地提交, 推送由维护者决定 (R1).
 
 ---
 
@@ -153,10 +155,14 @@
 
 ### P4 真机复核, changelog 与发布门 (D5 / D7; 需 P1 与 P2 完成; 真机 G8441 或 OPD2413, 按锁表)
 
-- [ ] P4.1 真机复核: 用各库版本 +1 的临时测试构建 (不提交) 先装并写数据, 再装当前构建, `check` PASS; 备份原包, 测后装回. 验收: 报告入 evidence, 附录 B.2 真机行.
-- [ ] P4.2 changelog `.changelog/lang_zh-Hans.json` 6.8.0 段: fix (宿主与打包应用在旧版本装到新版本数据上时启动崩溃并反复重启的问题; 任务数据库无法打开时改为备份后继续启动) 与 feature (sqlite 模块 onDowngrade 回调), 按 `AGENTS.md` 更新日志规则, 只追加自己的 hunk, 只生成 zh-Hans; 其他语言由维护者同步.
-- [ ] P4.3 发布门 `docs/dev/6.8.0-release-gate.md` 加一行 (条目: 数据库降级不崩溃不循环; 来源: db-downgrade; 复核: AVD 往返 + 真机; 证据: evidence 文件名; 状态), 只追加自己的 hunk.
-- [ ] P4.4 本文回填: 附录 B 数字, 附录 A 补充, 第 5 节勾选与证据, 附录 D 文件地图.
+- [x] P4.1 真机复核: 用各库版本 +1 的临时测试构建 (不提交) 先装并写数据, 再装当前构建, `check` PASS; 备份原包, 测后装回. 验收: 报告入 evidence, 附录 B.2 真机行.
+  - 2026-10-24 完成 (db-downgrade-p4, 提交 `0ea501734`; Q10 = C 两台都做): OPD2413 (Android 15, ColorOS) 与 G8441 (Android 9), 隔离克隆 `E:/.cache/aj6dbp4` (HEAD `58456280b`) 的 debug 宿主 arm64-v8a 5935 与 inrt universal 5935. 每台: `roundtrip.py suite` (宿主 `--apk`, inrt `--start broadcast`, `--observe 30`), `room_pages.py` 28 / 28, 以及临时构建 (两张任务表 6 / 5, Room 4 / 3 / 2, 空迁移, 只在克隆里改) 先写库: `roundtrip.py future-build` (宿主与 inrt: 临时构建启动无崩溃并把两表升到 6 / 5, 当前构建 `check` PASS, 降回 5 / 4, 标记行与未来列 / 表保留) 与 `room_pages.py --future-apk` 41 / 41. 全部 PASS: 启动 1 次, 重启 0, 崩溃 0 (am_crash 0, 日志 0). 各有一节先 FAIL 后修脚本或复跑通过 (日志轮转 2 处, 一次 run-as 瞬时读空, G8441 临时构建阶段密钥库页超时), 见 "P4 实施处置" 第 3-5 条. 测前测后经新脚本 `tools/db-downgrade/device_state.py` 保存并放回现装包与 `databases/`, md5 核对一致 (OPD2413 宿主 9df7400a / 测试包 803cf70c, 新装的 inrt 已卸载; G8441 宿主 5e836c4d / 测试包 59d4aaf6 / inrt 5280 e1bf0814). 报告 `evidence/roundtrip-OPD2413-5935-20261024-real.md`, `-room.md`, `evidence/roundtrip-G8441-5935-20261024-real.md`, `-room.md`; 数字见附录 B.2.
+- [x] P4.2 changelog `.changelog/lang_zh-Hans.json` 6.8.0 段: fix (宿主与打包应用在旧版本装到新版本数据上时启动崩溃并反复重启的问题; 任务数据库无法打开时改为备份后继续启动) 与 feature (sqlite 模块 onDowngrade 回调), 按 `AGENTS.md` 更新日志规则, 只追加自己的 hunk, 只生成 zh-Hans; 其他语言由维护者同步.
+  - 2026-10-24 完成 (db-downgrade-p4, 提交 `b6a755fc2`, 只含本主题 4 行, 其他会话的 10 + / 4 - 留在工作区未暂存): feature 1 条 (sqlite 模块的 DatabaseCallback 支持 onDowngrade, 未实现时保留数据不再抛出), fix 3 条 (启动崩溃与反复重启; 版本历史 / 回收站 / 颜色库 / 密钥库; 未捕获异常交给系统), 原文见 "P4 实施处置" 第 6 条. 派生文件 (`README.md`, `.readme/README-zh-Hans.md`, `app/src/main/assets-app/doc/CHANGELOG*.md`) 有其他会话未提交的改动, 未重新生成, 留给维护者; 其他语言由维护者同步.
+- [x] P4.3 发布门 `docs/dev/6.8.0-release-gate.md` 加一行 (条目: 数据库降级不崩溃不循环; 来源: db-downgrade; 复核: AVD 往返 + 真机; 证据: evidence 文件名; 状态), 只追加自己的 hunk.
+  - 2026-10-24 完成 (db-downgrade-p4, 提交 `ca618ec3c`): 条目 "数据库降级不崩溃不循环 (宿主与打包应用: 任务表, Room 三库, sqlite 模块, CrashHandler 交回系统)", 状态 "已满足 (2026-10-24, debug 5935)", 剩余: 用发布候选复核.
+- [x] P4.4 本文回填: 附录 B 数字, 附录 A 补充, 第 5 节勾选与证据, 附录 D 文件地图.
+  - 2026-10-24 完成 (db-downgrade-p4): 第 0 节进度, 第 5 节 P4, 附录 A 的 Q10 行与 "P4 实施处置", 附录 B.2 真机列与两行新场景, 附录 C Q10, 附录 D 补文件.
 
 ---
 
@@ -174,6 +180,7 @@
 | Q7 | XQ-AT72 样本 | A 只读取证, 不复现唤醒 (推荐) / B 取证 + AVD 装 Shizuku 复现唤醒循环并在修后证明不循环 / C 不取证 | B (非推荐) | D8 |
 | Q8 (2026-10-23 20:30) | Room 降级时某张表缺本版本必需的列或与快照没有共有列 | A 旧表改名保留, 新表为空 (推荐, P2 已先行) / B 清空该表只记日志 / C 该表重建失败即整库走兜底 | C (非推荐) | D9 (P2.4) |
 | Q9 (2026-10-23 20:30) | `CrashHandler` 不把异常交给系统 | A 修: 取得系统处理器, 报告页后交给系统 (推荐) / B 不修 / C A 之外再加跨进程启动崩溃计数 | A | D10 (P1.5) |
+| Q10 (2026-10-24 13:30) | P4.1 真机复核用哪台 | A OPD2413 (推荐) / B G8441 / C 两台都做 / D 暂不做真机 | C (非推荐; 先 OPD2413 再排队 G8441) | P4.1 两台真机; 15:5x G8441 排队超 2 小时时维护者选 "继续等" |
 
 条目实施中的处置理由由子会话追加到本表之后.
 
@@ -221,6 +228,16 @@
 7. d.ts: 两个仓库的 `aj6-int-sqlite.d.ts` 相同, `JavaScriptDatabaseCallback` 加可选 `onDowngrade?`. `aj6dts.bat -Publish` 以宿主隔离克隆 (HEAD `e03d82e0f`, 不含共享工作区他人未提交的文件) 为输入重新生成 `aj6-main-app.d.ts` 等; `aj6dts.properties` 里的声明仓库路径 `D:/webstorm-projects/...` 不存在, 用 `-DeclarationsOutput` / `-ApiRoots` 覆盖. 版本: d.ts 4.83.0, Ace 2.45.0 (VERSION_BUILD 331), 10 种语言 changelog.
 8. 推送: 宿主不推送 (R1). 文档仓库惯例推送, 但 origin 之前还有他人未推送的 `63e04f9`; 离线文档插件惯例推送; d.ts 与 Ace 惯例只本地 (各积压 50 余笔). 按 R6 "不确定时只提交", 四个关联仓库都只本地提交, 推送由维护者决定.
 
+### P4 实施处置 (2026-10-24, db-downgrade-p4)
+
+1. 构建: 隔离克隆 `E:/.cache/aj6dbp4` (HEAD `58456280b`, 补 sign.properties / app/sm003.jks / local.properties / assets/modules/obsolete), 守护进程带 `-Daj6.session=dbp4`, Kotlin in-process. 首次 `-Xmx4g` 在 `compileAppDebugKotlin` 时堆内存不足, 守护进程退出, 改 `-Xmx10g` 后 8 分钟通过. inrt 单独一次 `:app:assembleInrtDebug` (请求 inrt 任务时 ABI 分包关闭). 产物 md5: 宿主 arm64-v8a 7b9c3734, 测试包 6198b311, inrt universal 9bfb2626; 临时构建宿主 c674ec17, inrt b3603797.
+2. 临时构建 (P4.1 原文): T6 写的是 "正式签名包不能 run-as 时改用临时构建", 两台真机现装的都是 debuggable 构建, 所以 PC 端造未来数据 (`suite`) 与临时构建写库两条路都做了. 临时构建只在克隆里改: `TimedTaskDatabase.VERSION` 6, `IntentTaskDatabase.VERSION` 5, Room 三库 `version` 各 +1 并在 builder 加空的 `Migration(旧, 新)` (实体不变, KSP 在克隆的 `app/schemas` 生成 History 4.json 等, 随 APK 打包). 新子命令 `roundtrip.py future-build`: 在代码版本下补标记行, 未来列与未来表, 装临时构建并启动 (它自己的 helper 把版本升到 6 / 5), 再装被测构建按 `check` 核对. `room_pages.py --future-apk`: 写代码版本的文件 (标记行, 多出的表, 正确的 identity hash, 没有未来列; 有未来列时临时构建的 Room 校验会失败), 临时构建在各页面打开并经空迁移升到 4 / 3 / 2, 被测构建再按快照降回. 做法写在 `tools/db-downgrade/README.md` "真机复核".
+3. 日志轮转: 两台的 logcat main 缓冲都只有 256 KiB. OPD2413 `room_pages.py` 首跑 27 / 28, History 已正确降到 v3 而它的重建日志 (抽屉打开时写的) 在页面测试期间被轮转; G8441 宿主 `inject-fail` 的 "DatabaseRecovery W 日志" 为 0, 而兜底本身完成. 两个脚本都改为从启动前开始把日志持续写到本地文件再统计 (`roundtrip.py`: CrashHandler / AndroidRuntime 的 E 与 DatabaseRecovery 的 W; `room_pages.py`: main / system / crash 与 events), 不改设备的缓冲设置; 复跑分别为 28 / 28 与 W 日志 77 行. 这也意味着旧做法在小缓冲的手机上可能少计崩溃日志; OPD2413 的 `roundtrip.py` 各节在改之前运行, 那里的 "崩溃 0" 另由 events 的 `am_crash` (D10 之后崩溃交给系统, 必有记录) 与 "启动 1 次, 观察期末存活" 支撑.
+4. OPD2413 inrt `restore-check` 首跑只有末项 "data back" FAIL: 那一次 run-as 没有列出两个库文件, 随即复读两库都在 (标记行 3/3, 2/2); `roundtrip.py` 改为判失败前再读一次, 复跑 PASS. G8441 `room_pages.py --future-apk` 首跑 40 / 41: 临时构建阶段的密钥库页 4000 ms 内未 resumed (Android 9 较慢), 临时构建仍把密钥库升到 v2, 被测构建阶段全过; 复跑 41 / 41. 两份报告保留首跑的小节, 末尾 "说明" 写明原因.
+5. 设备处置: 新脚本 `tools/db-downgrade/device_state.py` (`save` 拉取全部 APK 记 md5, 经 run-as 把 `databases/` 存成 tar; `restore` 先在被测构建停止时放回 `databases/`, 再 `install -r -d` 装回并核对 md5). 顺序不能反: G8441 现装 inrt 5280 (IntentTask v3, 与 XQ-AT72 样本同一代), 先装回 5280 而库已被 5935 升到 v4 时, 5280 会在启动时崩溃 (正是本主题的缺陷), 而包被替换后它可能随即被拉起. G8441 的 inrt 装 5935 后先经广播拉起一次, 让库正常升到 v4 再跑 suite (否则 `make-future` 会把 v3 结构的文件标为 v5, 无操作降级之后缺 v4 的列). 装回 5280 后 20 s 内无启动无崩溃. ColorOS 上新装的 inrt 弹 "来自电脑" 安装确认页 (`adb install` 阻塞, 第一次 100 s 超时), 维护者点按后装上; 替换安装 (宿主, 测试包, inrt 重装) 都没有弹页. 宿主的 `POST_NOTIFICATIONS` 两台测前即已授予 (G8441 为 Android 9, 无此权限), 未改; `room_pages.py` 写的 `files/aj6-db-downgrade-room.bks` 与 `/data/local/tmp/aj6-db-downgrade` 测后手工删除.
+6. changelog (`b6a755fc2`, zh-Hans 6.8.0 段, 插在相关条目旁): feature "sqlite 模块的数据库回调 (DatabaseCallback) 支持 onDowngrade 方法, 用于在请求的版本低于现有数据库版本时处理降级; 未实现时降级不执行任何操作, 现有的表与数据保持不变, 不再抛出异常 (参阅 项目文档 > [SQLite](https://docs.autojs6.com/#/sqlite))" (power_manager 条之后); fix "AutoJs6 及打包应用安装到较新版本留下的数据上 (如降级安装) 时启动即崩溃并被反复重启的问题 (定时任务与意图任务的数据库降级时保留原有数据; 仍无法打开时将其备份后以空库继续启动, AutoJs6 同时发送通知, 之后装回不低于该数据版本的版本时自动还原)" 与 "AutoJs6 及打包应用发生未捕获异常后未交由系统处理, 导致系统缺少崩溃记录, 且启动时即崩溃的进程被后台组件反复拉起而不受系统限制的问题" ("IntentTask 本地与外部接收器冲突..." 条之后); fix "版本历史/回收站/颜色库/密钥库的数据由较新版本的 AutoJs6 写入后, 当前版本无法打开对应数据库的问题 (保留两个版本共有的数据; 无法保留时将该数据库备份后以空库继续, 之后装回不低于该数据版本的 AutoJs6 时自动还原)" ("回收站恢复目录..." 条之后). 暂存方式: 以 HEAD 版本为底只插入这 4 行后写入索引 (`git apply --unidiff-zero` 会按新侧行号插错位置, 不可用). `released_date` 未改 (他人的在途 hunk 也在该段).
+7. 排队与 Gradle: G8441 13:37 登记排队, augment-p4-3 / p4-2 / p4-1 依次在 14:20-16:04 使用, 15:5x 超 2 小时时维护者选 "继续等", 16:58 开始, 17:20 释放. "CPU 满载问题排查" 会话 15:36 结束了 augment 共用的守护进程 17600 (堆满后持续 Full GC), 并认为本会话 13:38 的构建落在它上面; 本会话随后的构建都在自己的守护进程 (`-Daj6.session=dbp4`, `-Xmx10g`) 上完成.
+
 ## 附录 B. 证据
 
 ### B.1 XQ-AT72 取证 (P0.1)
@@ -240,13 +257,17 @@
 
 | 场景 | 修前 (P0.2) | 修后 AVD API 24 (P1.4) | 修后 AVD API 35 (P1.4) | 真机 (P4.1) |
 | --- | --- | --- | --- | --- |
-| 宿主 TimedTask / IntentTask 版本 +1 数据启动 | FAIL (5935): 桌面启动后 60 s 内启动 8 次 (重启 7 次, 均为广播拉起), 崩溃 8 次全是降级 (6 -> 5), am_crash 0; 31 s 后不再拉起; 库文件版本不变 (6 / 5), 标记行保留 | PASS (5935): 桌面入口启动 1 次, 重启 0, 崩溃 0 (am_crash 0, 日志 0), 30 s 末存活; 版本 6 -> 5 / 5 -> 4, 标记行 3/3 与 2/2, 未来列与表保留 | PASS (5935): 同左 | 待填 |
-| inrt 同上 | FAIL (5835): 60 s 内启动 8 次 (重启 7 次, 启动类广播), 崩溃 8 次全是降级, am_crash 0; 15 s 后不再拉起 | PASS (5835): 广播拉起 1 次 (`--start broadcast`, 见 "P0 / P1 实施处置" 第 11 条 (e)), 重启 0, 崩溃 0, 30 s 末存活; 版本与行同上 | PASS (5835): 同左 | 待填 |
+| 宿主 TimedTask / IntentTask 版本 +1 数据启动 | FAIL (5935): 桌面启动后 60 s 内启动 8 次 (重启 7 次, 均为广播拉起), 崩溃 8 次全是降级 (6 -> 5), am_crash 0; 31 s 后不再拉起; 库文件版本不变 (6 / 5), 标记行保留 | PASS (5935): 桌面入口启动 1 次, 重启 0, 崩溃 0 (am_crash 0, 日志 0), 30 s 末存活; 版本 6 -> 5 / 5 -> 4, 标记行 3/3 与 2/2, 未来列与表保留 | PASS (5935): 同左 | PASS (5935, OPD2413 Android 15 与 G8441 Android 9): 桌面入口启动 1 次, 重启 0, 崩溃 0 (am_crash 0, 日志 0), 30 s 末存活; 版本 6 -> 5 / 5 -> 4, 标记行 3/3 与 2/2, 未来列与表保留 |
+| inrt 同上 | FAIL (5835): 60 s 内启动 8 次 (重启 7 次, 启动类广播), 崩溃 8 次全是降级, am_crash 0; 15 s 后不再拉起 | PASS (5835): 广播拉起 1 次 (`--start broadcast`, 见 "P0 / P1 实施处置" 第 11 条 (e)), 重启 0, 崩溃 0, 30 s 末存活; 版本与行同上 | PASS (5835): 同左 | PASS (5935, 两台): 广播拉起 1 次, 重启 0, 崩溃 0, 30 s 末存活; 版本与行同上 (G8441 原装 inrt 5280, 库先由 5935 正常升到 v4) |
 | Shizuku 服务端重启 3 次唤醒 inrt | FAIL: 每轮 (90 s) inrt 拉起并崩溃 9 / 1 / 8 次 (provider 1 次 + 启动类广播 + job), 宿主同轮 7 / 8 / 8 次; am_crash 均为 0 | - | PASS: 共 5 轮 (连续 3 轮, 再 2 轮每轮先 `make-future`, 即 3 轮带版本 +1 数据), inrt 与宿主每轮各由 `ShizukuProvider` 拉起 1 次, 崩溃 0 (am_crash 0, 日志 0), 90 s 末存活; 下一轮 `make-future` 读到 5 / 4, 即唤醒时已降回代码版本 | - |
-| 打开失败兜底 (`inject-fail`) | - | PASS (宿主与 inrt): 不崩溃, 启动 1 次; 两库各新增一份 `<库>.bak-0-<时间>` (目录占位读不到版本, 记 0), 新库为代码版本 (5 / 4) 且为空; `DatabaseRecovery` W 日志 79 行 (含栈帧); 宿主两条 `db-recovery:<库名>` 通知, inrt 只记日志 | PASS (宿主与 inrt): 同左, W 日志 85 行 | 待填 |
-| 自动还原 (`restore-check`) | - | PASS (宿主与 inrt): (a) 不重装不还原; (b) 重装后还原, 备份 0 份, 标记行 3/3 与 2/2, 版本 5 / 4; (c) 备份版本高于代码版本, 重装后不还原; 结束后数据放回 | PASS (宿主与 inrt): 同左 | 待填 |
+| 打开失败兜底 (`inject-fail`) | - | PASS (宿主与 inrt): 不崩溃, 启动 1 次; 两库各新增一份 `<库>.bak-0-<时间>` (目录占位读不到版本, 记 0), 新库为代码版本 (5 / 4) 且为空; `DatabaseRecovery` W 日志 79 行 (含栈帧); 宿主两条 `db-recovery:<库名>` 通知, inrt 只记日志 | PASS (宿主与 inrt): 同左, W 日志 85 行 | PASS (宿主与 inrt, 两台): 同左, 两库各一份 `.bak-0-<时间>`, 新库 5 / 4 且为空, 宿主两条通知; W 日志 OPD2413 85 / 85 行, G8441 77 / 77 行 (G8441 宿主首跑因日志轮转计为 0, 改为持续抓取后复跑, 见 "P4 实施处置" 第 3 条) |
+| 自动还原 (`restore-check`) | - | PASS (宿主与 inrt): (a) 不重装不还原; (b) 重装后还原, 备份 0 份, 标记行 3/3 与 2/2, 版本 5 / 4; (c) 备份版本高于代码版本, 重装后不还原; 结束后数据放回 | PASS (宿主与 inrt): 同左 | PASS (宿主与 inrt, 两台): (a) 不还原, (b) 重装后还原, 备份 0 份, 标记行 3/3 与 2/2, (c) 不还原; 数据放回 (OPD2413 inrt 首跑末项一次读空, 复跑 PASS) |
+| 版本 +1 临时构建先写库 (`future-build`, P4.1) | - | - | - | PASS (宿主与 inrt, 两台): 临时构建启动 1 次无崩溃, 两表升到 6 / 5 且标记行齐全; 装回当前构建后启动 1 次, 重启 0, 崩溃 0, 降回 5 / 4, 标记行与未来列 / 表保留 |
+| Room 三库 (`room_pages.py`, P4.1) | - | - | 见 B.3 (28 / 28) | PASS (两台): 未来文件 28 / 28 (OPD2413 首跑 27 / 28 为日志轮转); 临时构建往返 (临时构建把 3 / 2 / 1 升到 4 / 3 / 2, 当前构建按快照降回, 三库各重建 1 次, identity hash 与标记行一致, 页面与 `HistoryCleanupWorker` 通过, 崩溃 0) 41 / 41 (G8441 首跑 40 / 41 为临时构建阶段密钥库页超时) |
 
 修前报告 (AVD `dbdowngrade_p01_api35`, Android 15): `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-before-fix.md` (宿主), `evidence/roundtrip-dbdowngrade_p01_api35-5835-20261023-before-fix.md` (inrt 与唤醒). 修前构建是当前 HEAD 的 debug 包 (宿主 x86_64 5935, inrt universal 5835), 两张任务表的代码版本与 HEAD 相同 (TimedTask 5, IntentTask 4).
+
+真机报告 (P4.1, 2026-10-24, debug 5935, 隔离克隆 `58456280b`): `evidence/roundtrip-OPD2413-5935-20261024-real.md` 与 `roundtrip-OPD2413-5935-20261024-room.md` (OPD2413, Android 15 / ColorOS), `evidence/roundtrip-G8441-5935-20261024-real.md` 与 `roundtrip-G8441-5935-20261024-room.md` (G8441, Android 9); 首跑失败的小节保留, 原因写在各报告末尾 "说明".
 
 修后报告: `evidence/roundtrip-dbdowngrade_p01_api24-5935-20261023-after-fix.md` (AVD `dbdowngrade_p01_api24`, Android 7.0, 宿主与 inrt), `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-after-fix.md` (AVD `dbdowngrade_p01_api35`, Android 15, 宿主, inrt 与唤醒). 修后包与修前包 versionCode 相同, 只差 P1 的提交 ("P0 / P1 实施处置" 第 12 条).
 
@@ -284,6 +305,7 @@
 - (立项时无)
 - [已决 (2026-10-23 20:30, 维护者选 C, 非推荐项; 落为 D9, 实施见 P2.4)] Q8 Room 降级时某张表缺少本版本必需的列 (NOT NULL 且无默认值), 或与快照没有共有列, 其行无法搬进新表, 如何处置 | 选项: A 旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 留在库文件里, 新表为空 (推荐, 已先行; 满足 R3, 代价是库文件保留旧数据的体积, 之后装回较新版本也不会自动搬回) / B 按 T3 原文清空该表只记日志 (数据丢失, 与 R3 冲突) / C 该表重建失败即整库走兜底备份 (其他表也变空) | 影响: P2.1, P2.2 | 改选返工: B 约 10 行 + 改 1 个用例; C 约 20 行 + 改 1 个用例, 依赖 P1.2 | 来源: db-downgrade-p2 (附录 A "P2 实施处置" 第 3 条)
 - [已决 (2026-10-23 20:30, 维护者选 A; 落为 D10, 实施见 P1.5)] Q9 `CrashHandler` 从不把异常交给系统 (6.7.0 Alpha11 移除 Bugly 后 `mSystemHandler` 取到的是自身, 见附录 B.1 "停止条件"), 主线程崩溃以 `exitProcess(1)` 结束, 系统不记崩溃也不限制重启; P1 / P2 只消除降级这一种启动期崩溃, 其他启动期崩溃仍会被每个待投递的广播, provider 调用与 job 各拉起一次. 是否修 | 选项: A 另立条目修: 在 `setDefaultUncaughtExceptionHandler` 之前取得系统处理器并传给 `CrashHandler`, 主线程崩溃时照旧打开崩溃报告页 (独立进程 `:crash_report`) 后交给系统, 恢复 am_crash / dropbox 记录与系统的 bad-process 限制 (后台拉起在 60 s 内第二次崩溃后停止) (推荐, 未先行: 改的是全局崩溃路径, 前台崩溃会多出系统的 "应用已停止" 处理, 且不在本批文件范围内) / B 不修, 只靠 P1 / P2 消除降级崩溃 / C 修 A 之外再加跨进程的启动崩溃计数 (例如连续 3 次启动期崩溃后跳过非必要初始化) | 影响: 新条目 (`tool/CrashHandler.kt`, `App.kt`), 不影响 P1 / P2 | 改选返工: A 约 20 行 + 手测前台 / 后台崩溃各一次; C 另加约 60 行与用例 | 来源: db-downgrade-p0-p1 (P0.1 / P0.2)
+- [已决 (2026-10-24 13:30, 维护者选 C, 非推荐项; 落到 P4.1, 实施见 "P4 实施处置")] Q10 P4.1 真机复核用哪台 | 选项: A OPD2413 (推荐; 63751f63, API 35 ColorOS, 当时空闲) / B G8441 (BH900ASK9E, API 28; 当时有三个 augment 会话排队) / C 两台都做 (多约 30 分钟 + 一次排队, 附录 B.2 两台) / D 暂不做真机 (以 AVD 结果作数) | 影响: P4.1, P4.3 发布门行的复核说明 | 来源: 调度会话第三轮. 2026-10-24 15:5x G8441 排队超 2 小时, 维护者选 "继续等" (另两项: 只做 OPD2413 / 放弃 G8441 改日补)
 
 ## 附录 D. 文件地图
 
@@ -310,7 +332,9 @@
 | `app/src/main/java/org/autojs/autojs/runtime/api/augment/sqlite/SQLite.kt` | 脚本 `sqlite.open` 选项解析 (P3.1 未改, 见 "P3 实施处置" 第 1 条) | P3.1 |
 | `app/src/test/java/org/autojs/autojs/runtime/api/modules/sqlite/SqliteModuleTest.kt` | 新层 sqlite 的 JVM 用例与导出的设备用例 (降级一条改为期望保留数据, 加 onDowngrade 两条) | P3.1 |
 | `tools/db-downgrade/sqlite_ondowngrade.py`, `sqlite_ondowngrade_probe.js` | 脚本 sqlite onDowngrade 设备用例 (RunIntentActivity, 5 例) | P3.1 |
-| `tools/db-downgrade/roundtrip.py`, `README.md` | 往返脚本 | P0.3 |
-| `docs/db-downgrade/evidence/` | 报告 | 各阶段 |
+| `tools/db-downgrade/roundtrip.py`, `README.md` | 往返脚本; `future-build` 子命令 (版本 +1 的临时构建先写库, 再装被测构建核对), 崩溃与兜底日志从启动前持续抓取; README "真机复核" 一节含临时构建的改法 | P0.3, P4.1 |
+| `tools/db-downgrade/device_state.py` | 真机测前测后保存并放回现装包 (md5) 与 `databases/` (先放回库, 再 `install -r -d`) | P4.1 |
+| `tools/db-downgrade-room/room_pages.py` 的 `--future-apk` | Room 三库由临时构建经空迁移升级, 再由被测构建按快照降级的页面核对; logcat 从启动起持续抓取 | P4.1 |
+| `docs/db-downgrade/evidence/` | 报告; P4.1 真机: `roundtrip-OPD2413-5935-20261024-real.md`, `roundtrip-OPD2413-5935-20261024-room.md`, `roundtrip-G8441-5935-20261024-real.md`, `roundtrip-G8441-5935-20261024-room.md` | 各阶段 |
 | `.changelog/lang_zh-Hans.json`, `docs/dev/6.8.0-release-gate.md` | changelog 与发布门 (只追加自己的 hunk) | P4 |
 | `D:/idea-projects/AutoJs6-Documentation/api/sqlite.md` (与 `api/progress.md`, 生成物), `AutoJs6-Plugin-Offline-Docs` (同步), `AutoJs6-TypeScript-Declarations/declarations/autojs6/aj6-int-sqlite.d.ts`, `AutoJs6-Plugin-Ace-Editor/app/src/main/assets/editor/ace-builds-1.44.0/autojs6/types/autojs6/aj6-int-sqlite.d.ts` | 文档与声明; `declarations/autojs6-node/sqlite.d.ts` 是 Node.js 的异步数据库接口, 没有 version 与回调, P3.2 不涉及 | P3.2 |
