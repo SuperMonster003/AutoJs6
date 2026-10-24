@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">モジュール \'%1$s\' が見つかりません: 提供元のプラグイン \"%2$s\" が無効になっています. AutoJs6 > プラグインセンター でプラグインを有効にしてください.</string>
+    <string name="error_script_module_plugin_incompatible">モジュール \'%1$s\' が見つかりません: インストールされているプラグイン \"%2$s\" はこのバージョンの AutoJs6 では読み込めません. AutoJs6 またはプラグインを更新してください.</string>
+    <string name="error_script_module_plugin_library_disabled">モジュール \'%1$s\' が見つかりません: ライブラリ \"%3$s\" がプラグイン \"%2$s\" でオフになっています. AutoJs6 > プラグインセンター > %2$s でオンにしてください.</string>
+    <string name="error_script_module_plugin_not_authorized">モジュール \'%1$s\' が見つかりません: 提供元のプラグイン \"%2$s\" が承認されていません. AutoJs6 > プラグインセンター でプラグインを承認してください.</string>
+    <string name="error_script_module_plugin_not_installed">モジュール \'%1$s\' が見つかりません: 公式プラグイン \"%2$s\" が提供していますが, インストールされていません. AutoJs6 > プラグインセンター でプラグインをインストールしてください.</string>
+</resources>

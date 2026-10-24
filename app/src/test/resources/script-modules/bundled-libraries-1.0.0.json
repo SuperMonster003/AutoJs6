@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "moduleRoot": "modules",
+  "groups": [
+    { "id": "libraries" },
+    { "id": "node-shims" }
+  ],
+  "libraries": [
+    {
+      "id": "axios",
+      "group": "libraries",
+      "license": "MIT",
+      "modules": { "axios": "axios.js" },
+      "files": ["axios.js", "axios/"]
+    },
+    {
+      "id": "cheerio",
+      "group": "libraries",
+      "license": "MIT",
+      "modules": { "cheerio": "cheerio.js" },
+      "files": ["cheerio.js"]
+    },
+    {
+      "id": "dayjs",
+      "group": "libraries",
+      "license": "MIT",
+      "modules": { "dayjs": "dayjs.js" },
+      "files": ["dayjs.js", "dayjs/"]
+    },
+    {
+      "id": "i18n",
+      "group": "libraries",
+      "license": "MIT",
+      "modules": { "i18n": "i18n.js", "banana-i18n": "banana-i18n.js" },
+      "files": ["i18n.js", "banana-i18n.js"]
+    },
+    {
+      "id": "pangu",
+      "group": "libraries",
+      "version": "10.1.0",
+      "license": "MIT",
+      "modules": { "pangu": "pangu.js" },
+      "files": ["pangu.js", "pangu.min.js", "pangu.LICENSE.txt"]
+    },
+    {
+      "id": "lodash",
+      "group": "libraries",
+      "version": "4.17.15",
+      "license": "MIT",
+      "modules": { "lodash": "lodash.js" },
+      "files": ["lodash.js"]
+    },
+    {
+      "id": "buffer",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "buffer": "buffer.js" },
+      "files": ["buffer.js"]
+    },
+    {
+      "id": "events",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "events": "events.js" },
+      "files": ["events.js"]
+    },
+    {
+      "id": "fs",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "fs": "fs.js" },
+      "files": ["fs.js"]
+    },
+    {
+      "id": "os",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "os": "os.js" },
+      "files": ["os.js"]
+    },
+    {
+      "id": "path",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "path": "path.js" },
+      "files": ["path.js"]
+    },
+    {
+      "id": "process",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "process": "process.js" },
+      "files": ["process.js"]
+    },
+    {
+      "id": "nodejs",
+      "group": "node-shims",
+      "license": "MPL-2.0",
+      "modules": { "nodejs": "nodejs.js" },
+      "files": ["nodejs.js"]
+    }
+  ]
+}

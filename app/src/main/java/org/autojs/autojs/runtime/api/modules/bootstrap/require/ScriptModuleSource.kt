@@ -1,10 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.bootstrap.require
 
+import org.autojs.autojs.engine.module.ScriptModuleUnavailableException
+
 /**
  * Named modules (roadmap T11, P3.7): Node core module names and library names, consulted before the local lookup (core
- * names) or after it misses (everything else). P3.7 provides the asset source, P4.3 adds the plugin source.
+ * names) or after it misses (everything else). P3.7 provides the asset source; the plugin modules of P4.3 reach it
+ * through the same source, as a provider of the engine's Rhino `Require` (`PluginModuleScriptProvider`, design
+ * `docs/augment/P4-3-bundled-libraries-design.md` (b)), so that they share its module cache with the global getters.
  *
- * zh-CN: 命名模块 (ROADMAP T11, P3.7): Node 核心模块名与库名, 本地解析之前 (核心名) 或未命中之后 (其余) 查询. P3.7 提供资产源, P4.3 加插件源.
+ * zh-CN: 命名模块 (ROADMAP T11, P3.7): Node 核心模块名与库名, 本地解析之前 (核心名) 或未命中之后 (其余) 查询. P3.7 提供资产源; P4.3 的插件模块作为引擎
+ * Rhino Require 的 provider (`PluginModuleScriptProvider`, 设计 P4-3 (b)) 经同一个源到达, 从而与全局 getter 共用模块缓存.
  */
 internal interface ScriptModuleSource {
 
@@ -13,7 +18,8 @@ internal interface ScriptModuleSource {
 
     /**
      * Exports of the named module [id], or [ABSENT] when this source does not know [id]. Throws an Error with install
-     * guidance when it knows [id] but cannot provide it now (plugin not installed or disabled).
+     * guidance when it knows [id] but cannot provide it now (plugin not installed or disabled): a
+     * `ScriptModuleUnavailableException`, which `ScriptRequire` moves to the position of the calling script.
      */
     fun require(id: String): Any?
 
@@ -66,8 +72,20 @@ internal class AssetModuleSource(
 
     override fun require(id: String): Any? = when {
         id.startsWith("./") || id.startsWith("../") -> ScriptModuleSource.ABSENT
-        canLoad(id) -> load(id)
+        loadable(id) -> load(id)
         else -> ScriptModuleSource.ABSENT
+    }
+
+    /**
+     * Whether the providers can supply [id]. A plugin module that cannot be loaded now (design P4-3 (d)) is still taken
+     * from the engine's `Require` when this script loaded it before the switch, as with jvm-npm; otherwise its `Require`
+     * throws the same guidance error.
+     * zh-CN: provider 能否提供 [id]. 当前不能加载的插件模块 (设计 P4-3 (d)) 若本脚本在开关之前已加载, 仍从引擎的 Require 取得, 同 jvm-npm; 否则 Require 抛出同样的指引错误.
+     */
+    private fun loadable(id: String): Boolean = try {
+        canLoad(id)
+    } catch (_: ScriptModuleUnavailableException) {
+        true
     }
 
     companion object {

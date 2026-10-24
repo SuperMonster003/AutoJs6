@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">Module \'%1$s\' introuvable : le plugin \"%2$s\" qui le fournit est désactivé. Activez le plugin dans AutoJs6 > Centre des plugins.</string>
+    <string name="error_script_module_plugin_incompatible">Module \'%1$s\' introuvable : cette version d\'AutoJs6 ne peut pas lire le plugin installé \"%2$s\". Mettez à jour AutoJs6 ou le plugin.</string>
+    <string name="error_script_module_plugin_library_disabled">Module \'%1$s\' introuvable : la bibliothèque \"%3$s\" est désactivée dans le plugin \"%2$s\". Activez-la dans AutoJs6 > Centre des plugins > %2$s.</string>
+    <string name="error_script_module_plugin_not_authorized">Module \'%1$s\' introuvable : le plugin \"%2$s\" qui le fournit n\'est pas autorisé. Autorisez le plugin dans AutoJs6 > Centre des plugins.</string>
+    <string name="error_script_module_plugin_not_installed">Module \'%1$s\' introuvable : il est fourni par le plugin officiel \"%2$s\", qui n\'est pas installé. Installez le plugin dans AutoJs6 > Centre des plugins.</string>
+</resources>

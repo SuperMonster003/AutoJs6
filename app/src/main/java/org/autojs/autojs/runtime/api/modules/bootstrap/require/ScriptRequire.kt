@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.bootstrap.require
 
 import org.autojs.autojs.engine.encryption.ScriptEncryption
+import org.autojs.autojs.engine.module.ScriptModuleUnavailableException
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.bootstrap.BootstrapCalls.callMethod
@@ -225,7 +226,7 @@ internal class ScriptRequire(
         if (id.isEmpty()) throw notFound(cx, request, null)
         val normalized = ScriptModuleResolver.normalizeName(id)
         if (sources.isCore(id) && !host.exists(normalized)) {
-            val exports = sources.require(normalized)
+            val exports = namedModule(cx, normalized)
             if (exports !== ScriptModuleSource.ABSENT) return exports
         }
         if (id.startsWith("http://") || id.startsWith("https://")) return nativeRequire(id)
@@ -234,7 +235,7 @@ internal class ScriptRequire(
             is Resolved.FileModule -> resolved.path to false
             is Resolved.ResourceModule -> resolved.name to true
             null -> {
-                val exports = sources.require(id)
+                val exports = namedModule(cx, id)
                 if (exports !== ScriptModuleSource.ABSENT && RhinoScriptRuntime.toBoolean(exports)) return exports
                 throw notFound(cx, request, base)
             }
@@ -387,6 +388,24 @@ internal class ScriptRequire(
     private fun scriptValueOf(cx: Context, t: Throwable): Any? {
         val throwable = t as? RhinoException ?: WrappedException(t)
         return ScriptableObject.getProperty(RhinoScriptRuntime.newCatchScope(throwable, null, "e", cx, scope), "e")
+    }
+
+    /**
+     * The named module [id] of [sources]. A plugin module that cannot be loaded now (design P4-3 (d)) gives its guidance
+     * error at the position of the calling script, as the other errors of this `require` (the provider builds it at the
+     * innermost frame, the runner's own here).
+     * zh-CN: [sources] 中的命名模块 [id]. 当前不能加载的插件模块 (设计 P4-3 (d)) 的指引错误放在调用脚本的位置, 同本 require 的其他错误 (provider 在最内层帧构造它,
+     * 在这里即 RUNNER 自身).
+     */
+    private fun namedModule(cx: Context, id: String): Any? = try {
+        sources.require(id)
+    } catch (e: ScriptModuleUnavailableException) {
+        val error = ScriptModuleUnavailableException.errorObject(cx, scope, e.text, e.libraryId, e.reason)
+        val line = IntArray(1)
+        val sourceName = callerPosition(cx, line)
+        ScriptableObject.putProperty(error, "fileName", sourceName)
+        ScriptableObject.putProperty(error, "lineNumber", line[0])
+        throw JavaScriptException(error, sourceName, line[0])
     }
 
     /** The Q83 error for [id] seen from [base]. */

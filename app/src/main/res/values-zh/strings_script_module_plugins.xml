@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">找不到模块 \'%1$s\': 提供它的插件 \"%2$s\" 已被禁用. 请在 AutoJs6 > 插件中心 启用该插件.</string>
+    <string name="error_script_module_plugin_incompatible">找不到模块 \'%1$s\': 当前版本的 AutoJs6 无法读取已安装的插件 \"%2$s\". 请更新 AutoJs6 或该插件.</string>
+    <string name="error_script_module_plugin_library_disabled">找不到模块 \'%1$s\': 库 \"%3$s\" 已在插件 \"%2$s\" 中关闭. 请在 AutoJs6 > 插件中心 > %2$s 中开启.</string>
+    <string name="error_script_module_plugin_not_authorized">找不到模块 \'%1$s\': 提供它的插件 \"%2$s\" 未获授权. 请在 AutoJs6 > 插件中心 授权该插件.</string>
+    <string name="error_script_module_plugin_not_installed">找不到模块 \'%1$s\': 它由官方插件 \"%2$s\" 提供, 该插件尚未安装. 请在 AutoJs6 > 插件中心 安装该插件.</string>
+</resources>

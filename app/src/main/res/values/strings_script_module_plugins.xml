@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">Cannot find module \'%1$s\': the plugin \"%2$s\" that provides it is disabled. Enable the plugin in AutoJs6 > Plugin center.</string>
+    <string name="error_script_module_plugin_incompatible">Cannot find module \'%1$s\': the installed plugin \"%2$s\" cannot be read by this version of AutoJs6. Update AutoJs6 or the plugin.</string>
+    <string name="error_script_module_plugin_library_disabled">Cannot find module \'%1$s\': the library \"%3$s\" is switched off in the plugin \"%2$s\". Switch it on in AutoJs6 > Plugin center > %2$s.</string>
+    <string name="error_script_module_plugin_not_authorized">Cannot find module \'%1$s\': the plugin \"%2$s\" that provides it is not authorized. Authorize the plugin in AutoJs6 > Plugin center.</string>
+    <string name="error_script_module_plugin_not_installed">Cannot find module \'%1$s\': it is provided by the official plugin \"%2$s\", which is not installed. Install the plugin in AutoJs6 > Plugin center.</string>
+</resources>

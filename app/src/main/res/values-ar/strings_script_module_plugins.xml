@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">تعذر العثور على الوحدة \'%1$s\': الاضافة \"%2$s\" التي توفرها معطلة. فعل الاضافة من AutoJs6 > مركز الاضافات.</string>
+    <string name="error_script_module_plugin_incompatible">تعذر العثور على الوحدة \'%1$s\': لا يستطيع هذا الاصدار من AutoJs6 قراءة الاضافة المثبتة \"%2$s\". حدث AutoJs6 او الاضافة.</string>
+    <string name="error_script_module_plugin_library_disabled">تعذر العثور على الوحدة \'%1$s\': المكتبة \"%3$s\" موقوفة في الاضافة \"%2$s\". شغلها من AutoJs6 > مركز الاضافات > %2$s.</string>
+    <string name="error_script_module_plugin_not_authorized">تعذر العثور على الوحدة \'%1$s\': الاضافة \"%2$s\" التي توفرها غير مصرح بها. امنح الاذن للاضافة من AutoJs6 > مركز الاضافات.</string>
+    <string name="error_script_module_plugin_not_installed">تعذر العثور على الوحدة \'%1$s\': توفرها الاضافة الرسمية \"%2$s\" وهي غير مثبتة. ثبت الاضافة من AutoJs6 > مركز الاضافات.</string>
+</resources>

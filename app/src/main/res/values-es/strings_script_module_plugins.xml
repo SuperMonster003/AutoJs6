@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">No se encuentra el módulo \'%1$s\': el plugin \"%2$s\" que lo proporciona está desactivado. Active el plugin en AutoJs6 > Centro de plugins.</string>
+    <string name="error_script_module_plugin_incompatible">No se encuentra el módulo \'%1$s\': esta versión de AutoJs6 no puede leer el plugin instalado \"%2$s\". Actualice AutoJs6 o el plugin.</string>
+    <string name="error_script_module_plugin_library_disabled">No se encuentra el módulo \'%1$s\': la biblioteca \"%3$s\" está desactivada en el plugin \"%2$s\". Actívela en AutoJs6 > Centro de plugins > %2$s.</string>
+    <string name="error_script_module_plugin_not_authorized">No se encuentra el módulo \'%1$s\': el plugin \"%2$s\" que lo proporciona no está autorizado. Autorice el plugin en AutoJs6 > Centro de plugins.</string>
+    <string name="error_script_module_plugin_not_installed">No se encuentra el módulo \'%1$s\': lo proporciona el plugin oficial \"%2$s\", que no está instalado. Instale el plugin en AutoJs6 > Centro de plugins.</string>
+</resources>

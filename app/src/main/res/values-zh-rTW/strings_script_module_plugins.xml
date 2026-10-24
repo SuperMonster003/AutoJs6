@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">找不到模組 \'%1$s\': 提供它的外掛 \"%2$s\" 已停用. 請在 AutoJs6 > 外掛中心 啟用該外掛.</string>
+    <string name="error_script_module_plugin_incompatible">找不到模組 \'%1$s\': 目前版本的 AutoJs6 無法讀取已安裝的外掛 \"%2$s\". 請更新 AutoJs6 或該外掛.</string>
+    <string name="error_script_module_plugin_library_disabled">找不到模組 \'%1$s\': 函式庫 \"%3$s\" 已在外掛 \"%2$s\" 中關閉. 請在 AutoJs6 > 外掛中心 > %2$s 中開啟.</string>
+    <string name="error_script_module_plugin_not_authorized">找不到模組 \'%1$s\': 提供它的外掛 \"%2$s\" 未獲授權. 請在 AutoJs6 > 外掛中心 授權該外掛.</string>
+    <string name="error_script_module_plugin_not_installed">找不到模組 \'%1$s\': 它由官方外掛 \"%2$s\" 提供, 該外掛尚未安裝. 請在 AutoJs6 > 外掛中心 安裝該外掛.</string>
+</resources>

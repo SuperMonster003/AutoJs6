@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_script_module_plugin_disabled">Не удается найти модуль \'%1$s\': плагин \"%2$s\", который его предоставляет, отключен. Включите плагин в AutoJs6 > Центр плагинов.</string>
+    <string name="error_script_module_plugin_incompatible">Не удается найти модуль \'%1$s\': эта версия AutoJs6 не может прочитать установленный плагин \"%2$s\". Обновите AutoJs6 или плагин.</string>
+    <string name="error_script_module_plugin_library_disabled">Не удается найти модуль \'%1$s\': библиотека \"%3$s\" отключена в плагине \"%2$s\". Включите ее в AutoJs6 > Центр плагинов > %2$s.</string>
+    <string name="error_script_module_plugin_not_authorized">Не удается найти модуль \'%1$s\': плагин \"%2$s\", который его предоставляет, не авторизован. Авторизуйте плагин в AutoJs6 > Центр плагинов.</string>
+    <string name="error_script_module_plugin_not_installed">Не удается найти модуль \'%1$s\': его предоставляет официальный плагин \"%2$s\", который не установлен. Установите плагин в AutoJs6 > Центр плагинов.</string>
+</resources>

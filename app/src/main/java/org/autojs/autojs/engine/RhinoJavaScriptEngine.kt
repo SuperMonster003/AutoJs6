@@ -5,6 +5,7 @@ import android.graphics.Paint
 import android.os.Build
 import android.util.Log
 import android.view.View
+import org.autojs.autojs.core.plugin.scriptmodule.ScriptModulePlugins
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptMaterializedRhinoProject
@@ -13,6 +14,7 @@ import org.autojs.autojs.core.plugin.typescript.TypeScriptSourceMapBindings
 import org.autojs.autojs.core.ui.ViewExtras
 import org.autojs.autojs.engine.module.AndroidRhinoAssetLoader
 import org.autojs.autojs.engine.module.AssetAndUrlModuleSourceProvider
+import org.autojs.autojs.engine.module.PluginModuleScriptProvider
 import org.autojs.autojs.engine.module.ProcessWideAssetModuleScriptProvider
 import org.autojs.autojs.engine.module.ProcessWideRhinoAssetCache
 import org.autojs.autojs.pio.PFiles
@@ -279,9 +281,12 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         val provider = AssetAndUrlModuleSourceProvider(
             androidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
         )
+        // The plugin modules (roadmap T11 / P4.3) come after the APK assets, which win while they still have the files.
+        // zh-CN: 插件模块 (ROADMAP T11 / P4.3) 位于 APK 资产之后, 资产中仍有文件时以资产为准.
         val moduleScriptProvider = MultiModuleScriptProvider(
             listOf(
                 ProcessWideAssetModuleScriptProvider(androidContext, MODULES_ROOT_PATH),
+                PluginModuleScriptProvider(ScriptModulePlugins.access(androidContext), scope),
                 SoftCachingModuleScriptProvider(provider),
             )
         )
