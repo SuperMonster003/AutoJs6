@@ -10,8 +10,17 @@ restore the original permission flags; revocation kills the host process.
 Worker and Bun APKs. Only numeric media evidence is retained. Preserve original
 APKs, permission flags, volume and rotation before running these device suites.
 
-`extract_exports.py` reads the actual `ScriptRuntime` mounts and explicit
-`Augmentable` assignments. `check.py` compares those names with the associated
+`extract_exports.py` reads `script-modules.json`, the metadata the KSP processor
+of the script module layer writes (`app/build/generated/ksp/appDebug/resources/autojs6/`,
+built by `gradlew :app:kspAppDebugKotlin`; `--metadata` picks another file):
+modules and their aliases, functions with aliases and placement, getters,
+properties and Java classes. Names defined by `@ScriptInstall` hooks come from the
+module's `installs` list, or until the processor writes it, from the Kotlin
+registrations of the current `augment` package (rows marked `"metadata": "kotlin"`).
+Without the file (no KSP build) it falls back to the `ScriptRuntime` mounts and
+explicit `Augmentable` assignments and warns; `--source ksp|kotlin` forces one,
+and `--compare-kotlin` writes the differences of the two sources (augment roadmap
+T10). `check.py` compares those names with the associated
 documentation pages, resolves their real TypeScript symbols, and queries the
 plugin's actual semantic and static completion providers.
 
@@ -113,7 +122,10 @@ python -m unittest discover -s tools/api-coverage -p "test_*.py"
 
 The tests cover nested expressions, comments and strings, aliases, ignored
 exports, global assignment, unknown registration forms and scoped document
-lookup. Newly unparsed registration expressions fail the full gate instead of
+lookup; `test_script_modules.py` covers the `script-modules.json` reader
+(placements, aliases, install hooks and their Kotlin fallback, the automatic
+source) and, with a KSP build present, that every Kotlin registration is still
+exported. Newly unparsed registration expressions fail the full gate instead of
 silently reducing its denominator. `policy.json` contains narrowly named
 internal/standard exceptions, explanations for dynamic registrations, page
 mappings and selected returned-object probes. Public API gaps must be fixed at

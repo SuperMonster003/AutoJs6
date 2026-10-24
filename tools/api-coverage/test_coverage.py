@@ -3,7 +3,7 @@ import tempfile
 import unittest
 
 from check import documentation_rows, public_queries
-from extract_exports import end_group, entries, extract, function_assignment_is_supported, initializer_tail_is_supported, mail_forwarded_names, masked
+from extract_exports import end_group, entries, extract_kotlin, function_assignment_is_supported, initializer_tail_is_supported, mail_forwarded_names, masked
 
 
 class RegistrationTests(unittest.TestCase):
@@ -37,7 +37,10 @@ class RegistrationTests(unittest.TestCase):
     def test_mail_forwarding_constants_cannot_hide_unparsed_suffixes(self):
         import re
         host = Path(__file__).resolve().parents[2]
-        source = masked((host / 'app/src/main/java/org/autojs/autojs/runtime/api/augment/mail/Mail.kt').read_text(encoding='utf-8'))
+        mail = host / 'app/src/main/java/org/autojs/autojs/runtime/api/augment/mail/Mail.kt'
+        if not mail.is_file():
+            self.skipTest('the augment package is gone (augment roadmap P5.2)')
+        source = masked(mail.read_text(encoding='utf-8'))
         start = source.index('listOf<Pair<Any, Any?>>(') + len('listOf<Pair<Any, Any?>>')
         end = end_group(source, start)
         limit = source.index('@RhinoRuntimeFunctionInterface', end)
@@ -72,7 +75,7 @@ class RegistrationTests(unittest.TestCase):
                     Sample(this).augment(target)
                 }
             ''', encoding="utf-8")
-            result = extract(root)
+            result = extract_kotlin(root)
             self.assertEqual({"sample.newMethod", "sample.camelCase", "sample.camelcase", "sample.aliasA", "sample.aliasB", "globalOnly", "aliasA", "aliasB"}, {item["api"] for item in result["records"]})
             self.assertEqual(["sample", "$sample", "legacy"], result["modules"][0]["aliases"])
             self.assertEqual(1, len(result["unresolved"]))
@@ -82,7 +85,7 @@ class RegistrationTests(unittest.TestCase):
             # name inventory merely because the route parser cannot handle it.
             runtime_file = java / "ScriptRuntime.kt"
             runtime_file.write_text(runtime_file.read_text(encoding="utf-8").replace("Sample(this)", "Sample(\nthis\n)"), encoding="utf-8")
-            self.assertTrue(any(item.get("reason") == "Unrecognized runtime mount syntax" for item in extract(root)["unresolved"]))
+            self.assertTrue(any(item.get("reason") == "Unrecognized runtime mount syntax" for item in extract_kotlin(root)["unresolved"]))
 
     def test_inline_nested_mounts_keep_the_returned_parent_and_ignore_string_examples(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -103,12 +106,12 @@ class RegistrationTests(unittest.TestCase):
             '''
             runtime_file = java / 'ScriptRuntime.kt'
             runtime_file.write_text(runtime, encoding='utf-8')
-            result = extract(root)
+            result = extract_kotlin(root)
             self.assertEqual([], result['unresolved'])
             self.assertEqual({'speech.list', 'speech.models.list', 'speech.models.tools.list'},
                              {row['api'] for row in result['records']})
             runtime_file.write_text(runtime.replace('augment(it)', 'augment(makeTarget())'), encoding='utf-8')
-            self.assertTrue(any(row.get('reason') == 'Unrecognized runtime mount syntax' for row in extract(root)['unresolved']))
+            self.assertTrue(any(row.get('reason') == 'Unrecognized runtime mount syntax' for row in extract_kotlin(root)['unresolved']))
 
 
 class CoverageTests(unittest.TestCase):

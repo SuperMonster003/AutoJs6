@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
-"""Extract explicit Rhino Augmentable exports without treating JVM helpers as APIs.
+"""Extract explicit Rhino script module exports without treating JVM helpers as APIs.
 
-This is deliberately a registration parser, not a Kotlin compiler. Unknown
-registration expressions are returned for review and rejected by the gate.
-Java prototypes, generated catalogues and returned objects require separate
-contract probes; they must not be silently counted as complete here.
+The source of truth is script-modules.json, the metadata the KSP processor of
+the script module layer writes (augment roadmap T2 / T10): module names and
+aliases, functions with their aliases and placement, getters, properties and
+Java classes. Names that a module's @ScriptInstall hook defines at run time are
+read from the module's "installs" list; until the processor writes that list,
+they come from the Kotlin registrations of the current augment package and are
+marked with metadata "kotlin". Without script-modules.json (no KSP build, e.g.
+the coverage CI job) the Kotlin registration parser is used for everything.
+
+The Kotlin path is deliberately a registration parser, not a Kotlin compiler.
+Unknown registration expressions are returned for review and rejected by the
+gate. Java prototypes, generated catalogues and returned objects require
+separate contract probes; they must not be silently counted as complete here.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 import re
+import sys
+
+DEFAULT_METADATA = 'app/build/generated/ksp/appDebug/resources/autojs6/script-modules.json'
+METADATA_INPUTS = ['app/src/main/java/org/autojs/autojs/runtime/api/modules', 'build-logic/ksp-script-modules-processor/src']
+COMPARED_FIELDS = ['module', 'ownerModule', 'member', 'kind']
 
 FUNCTION_NAME = r'(?:\w+)?::`?\w+`?\.name(?:\.lowercase\(\))?'
 STRING_NAME = r'"(?:\\.|[^"\\])*"'
@@ -135,7 +150,7 @@ def entries(s, start, end):
     if s[prev:end].strip():
         yield (prev, s[prev:end].strip())
 
-def extract(host):
+def extract_kotlin(host):
     HOST = Path(host).resolve()
     BASE = HOST / 'app/src/main/java/org/autojs/autojs/runtime/api/augment'
     runtime = (HOST / 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt').read_text(encoding='utf-8')
@@ -301,12 +316,152 @@ def extract(host):
             record['source'] = Path(record['source']).relative_to(HOST).as_posix()
     return result
 
+
+def split_source(location):
+    """`path:line` of script-modules.json as (path, line); line is None without one."""
+    path, _, line = (location or '').rpartition(':')
+    return (path, int(line)) if path and line.isdigit() else (location, None)
+
+
+def placements(path, member):
+    """The objects a member lands on: its module unless global ONLY or built-in only, and the global object for ALSO / ONLY."""
+    placement = member.get('global', 'NONE')
+    locations = [path] if placement != 'ONLY' and not member.get('builtInOnly', False) else []
+    if placement in ('ALSO', 'ONLY') and '' not in locations:
+        locations.append('')
+    return locations
+
+
+def metadata_is_stale(host, metadata):
+    """True when a module or processor source is newer than the metadata file (a KSP build is due)."""
+    built = metadata.stat().st_mtime
+    for root in METADATA_INPUTS:
+        for directory, _, files in os.walk(host / root):
+            if any(name.endswith('.kt') and os.path.getmtime(os.path.join(directory, name)) > built for name in files):
+                return True
+    return False
+
+
+def extract_ksp(host, metadata):
+    """Exports declared in script-modules.json, in the shape of extract_kotlin (records, modules, unresolved)."""
+    HOST = Path(host).resolve()
+    meta = json.loads(Path(metadata).read_text(encoding='utf-8'))
+    if meta.get('format') != 1:
+        raise ValueError(f'Unsupported script-modules.json format: {meta.get("format")}')
+    by_class = {m['class']: m for m in meta['modules']}
+
+    def module_path(m):
+        if m['parent']:
+            return module_path(by_class[m['parent']]) + '.' + m['name']
+        return '' if m['assign'] else m['name']
+
+    records, modules, unresolved, fallback = [], [], [], []
+    for m in meta['modules']:
+        path = module_path(m)
+        source, line = split_source(m['source'])
+        modules.append({'module': path, 'class': m['class'], 'source': source, 'line': line,
+                        'operation': 'assign' if m['assign'] else 'proxy' if m['proxy'] else 'mount',
+                        'target': module_path(by_class[m['parent']]) if m['parent'] else 'global',
+                        'aliases': [] if m['assign'] else m['names'], 'callable': m['invoke'] is not None,
+                        'constructable': m['construct'] is not None, 'metadata': 'ksp'})
+        members = []
+        for f in m['functions']:
+            overload = f['overloads'][0]
+            for name in [f['name']] + f['aliases']:
+                members.append((f, name, overload['kotlinName'], 'Functions', '@ScriptFunction', overload['source']))
+        for a in m['accessors']:
+            kind = 'Properties' if a['kind'] == 'property' else 'GettersAndSetters' if a['writable'] else 'Getters'
+            members.append((a, a['name'], a['name'], kind, '@ScriptProperty' if a['kind'] == 'property' else '@ScriptGetter', a['source']))
+        for j in m['javaClasses']:
+            members.append((j, j['name'], j['type'], 'JavaClasses', '@ScriptJavaClass', m['source']))
+        # The "installs" list declares the names a @ScriptInstall hook defines: {name, kind: function | getter |
+        # property, global, source}. Hooks without it fall back to the Kotlin registrations below.
+        for i in m.get('installs', []):
+            kind = {'function': 'Functions', 'getter': 'Getters', 'property': 'Properties'}[i['kind']]
+            members.append((i, i['name'], i['name'], kind, '@ScriptInstall', i.get('source') or m['source']))
+        if m['install'] and 'installs' not in m:
+            fallback.append(path)
+        for member, name, implementation, kind, registration, location in members:
+            member_source, member_line = split_source(location)
+            for loc in placements(path, member):
+                records.append({'api': loc + '.' + name if loc else name, 'module': loc, 'ownerModule': path, 'member': name,
+                                'implementation': implementation, 'kind': kind, 'registration': registration,
+                                'source': member_source, 'line': member_line, 'metadata': 'ksp'})
+    # A name exported by several modules (isObject: global and species) belongs to the module that is not an assign
+    # module: assign modules are mounted first, so the other one wins at run time.
+    unique = {}
+    for record in records:
+        kept = unique.get(record['api'])
+        if kept is None or (record['ownerModule'] and not kept['ownerModule']):
+            unique[record['api']] = record
+    if fallback:
+        try:
+            kotlin = extract_kotlin(HOST)
+        except (OSError, ValueError, KeyError, StopIteration) as error:
+            kotlin = {'records': [], 'unresolved': [{'reason': f'Kotlin registrations unavailable: {error}'}]}
+        for record in kotlin['records']:
+            if record['ownerModule'] in fallback and record['api'] not in unique:
+                unique[record['api']] = dict(record, metadata='kotlin')
+        # Mount and source errors (no module) mean the fallback itself is incomplete.
+        unresolved += [item for item in kotlin['unresolved'] if item.get('module', fallback[0]) in fallback]
+    return {'scope': 'Modules, functions with their aliases, getters, properties and Java classes declared in script-modules.json (KSP), placed on their module and / or the global object; names defined by @ScriptInstall hooks from the module "installs" list, else from the Kotlin registrations (metadata kotlin). Excludes inherited Java prototype members, returned objects, nested dynamic objects, generated Compose catalogue, JSOX built-in extensions, overload semantics.',
+            'dataSource': {'kind': 'ksp', 'file': Path(metadata).resolve().relative_to(HOST).as_posix() if Path(metadata).resolve().is_relative_to(HOST) else str(metadata),
+                           'format': meta['format'], 'installFallback': fallback},
+            'modules': modules, 'records': sorted(unique.values(), key=lambda x: x['api']), 'unresolved': unresolved}
+
+
+def extract(host, metadata=None, source='auto'):
+    """Exports of `source` ksp (script-modules.json), kotlin (registration parser), or auto: ksp when the file exists."""
+    HOST = Path(host).resolve()
+    metadata = Path(metadata) if metadata else HOST / DEFAULT_METADATA
+    if source == 'ksp' or (source == 'auto' and metadata.is_file()):
+        if not metadata.is_file():
+            raise FileNotFoundError(f'{metadata} not found; build it with gradlew :app:kspAppDebugKotlin')
+        if metadata_is_stale(HOST, metadata):
+            print(f'warning: {metadata} is older than the module sources; run gradlew :app:kspAppDebugKotlin', file=sys.stderr)
+        return extract_ksp(HOST, metadata)
+    if source == 'auto':
+        print(f'warning: {metadata} not found, reading the Kotlin registrations (run gradlew :app:kspAppDebugKotlin)', file=sys.stderr)
+    result = extract_kotlin(HOST)
+    for item in result['records'] + result['modules']:
+        item['metadata'] = 'kotlin'
+    result['dataSource'] = {'kind': 'kotlin'}
+    return result
+
+
+def compare(ksp, kotlin):
+    """Differences of the two sources by api (COMPARED_FIELDS) and by module (aliases, callable)."""
+    a = {r['api']: r for r in ksp['records']}
+    b = {r['api']: r for r in kotlin['records']}
+    pick = lambda r: {field: r[field] for field in COMPARED_FIELDS}
+    modules_a = {m['module']: m for m in ksp['modules']}
+    modules_b = {m['module']: m for m in kotlin['modules']}
+    return {
+        'records': {'ksp': len(a), 'kotlin': len(b), 'kspFromKotlin': sum(r.get('metadata') == 'kotlin' for r in a.values())},
+        'onlyKsp': [pick(a[api]) | {'api': api} for api in sorted(set(a) - set(b))],
+        'onlyKotlin': [pick(b[api]) | {'api': api, 'registration': b[api]['registration']} for api in sorted(set(b) - set(a))],
+        'changed': [{'api': api, 'ksp': pick(a[api]), 'kotlin': pick(b[api])} for api in sorted(set(a) & set(b)) if pick(a[api]) != pick(b[api])],
+        'modules': {'ksp': len(ksp['modules']), 'kotlin': len(kotlin['modules']),
+                    'onlyKsp': sorted(set(modules_a) - set(modules_b)), 'onlyKotlin': sorted(set(modules_b) - set(modules_a)),
+                    'changed': [{'module': name, 'ksp': {k: modules_a[name][k] for k in ['aliases', 'callable']}, 'kotlin': {k: modules_b[name][k] for k in ['aliases', 'callable']}}
+                                for name in sorted(set(modules_a) & set(modules_b))
+                                if (modules_a[name]['aliases'], modules_a[name]['callable']) != (modules_b[name]['aliases'], modules_b[name]['callable'])]},
+        'unresolved': {'ksp': ksp['unresolved'], 'kotlin': kotlin['unresolved']},
+    }
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--host', type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument('--metadata', type=Path, help=f'script-modules.json (default: <host>/{DEFAULT_METADATA})')
+    parser.add_argument('--source', choices=['auto', 'ksp', 'kotlin'], default='auto', help='auto reads script-modules.json when it exists')
+    parser.add_argument('--compare-kotlin', action='store_true', help='Write the differences between script-modules.json and the Kotlin registrations')
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
-    result = extract(args.host)
+    if args.compare_kotlin:
+        result = compare(extract(args.host, args.metadata, 'ksp'), extract(args.host, source='kotlin'))
+    else:
+        result = extract(args.host, args.metadata, args.source)
     serialized = json.dumps(result, ensure_ascii=False, indent=2) + '\n'
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
