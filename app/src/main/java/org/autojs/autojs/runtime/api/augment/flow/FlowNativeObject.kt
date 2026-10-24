@@ -17,6 +17,7 @@ import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.toJsPromise
 import org.autojs.autojs.runtime.api.augment.toolkit.RuntimeToolkit
 import org.autojs.autojs.runtime.api.augment.toolkit.ToolkitApi
+import org.autojs.autojs.runtime.api.modules.promise.PromiseSuspension
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException
@@ -26,6 +27,7 @@ import org.autojs.autojs6.R
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Scriptable
@@ -334,9 +336,13 @@ internal class FlowApi(val executor: FlowExecutor) {
         }
     }
 
-    /** The continuation-mode wait of the Promise polyfill (`promise.await()`). zh-CN: Promise polyfill 的协程模式等待 (`promise.await()`). */
+    /**
+     * The continuation-mode wait of `promise.await()`, suspending from Kotlin: calling the script `await` of the Promise
+     * opened a new top frame that cannot be captured (docs/augment/ROADMAP.md Q97).
+     * zh-CN: `promise.await()` 的协程模式等待, 由 Kotlin 直接挂起: 调用 Promise 的脚本 await 会开一个无法捕获的新顶层帧 (docs/augment/ROADMAP.md Q97).
+     */
     fun await(self: FlowNativeObject): Any? = RhinoUtils.withRhinoContext(scriptRuntime) { cx ->
-        ScriptableObject.callMethod(cx, toPromise(self), "await", emptyArray())
+        PromiseSuspension.await(cx, scriptRuntime.topLevelScope, toPromise(self))
     }
 
     /** A polyfill Promise settled with this node, on the calling script thread. zh-CN: 以本节点结算的 polyfill Promise, 在调用方脚本线程上结算. */
@@ -486,6 +492,10 @@ internal class FlowPrototype(private val executor: FlowExecutor) {
         inline fun <R> guarded(block: () -> R): R = try {
             block()
         } catch (e: RhinoException) {
+            throw e
+        } catch (e: ContinuationPending) {
+            // await() suspending its coroutine is not a failure (docs/augment/ROADMAP.md Q97).
+            // zh-CN: await() 挂起所在协程不是失败 (docs/augment/ROADMAP.md Q97).
             throw e
         } catch (e: ScriptInterruptedException) {
             throw e
