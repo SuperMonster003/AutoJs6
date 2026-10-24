@@ -12,12 +12,13 @@ microseconds per operation. The rejected await of --scenarios shows an error toa
 behavior of popException); no tap is needed.
 
 --new-modules sets the hidden switch of the new script module layer for the run (as device_bench.py) and restores it.
-Scripts start through RunIntentActivity, results are read from the GlobalConsole lines of logcat (cleared before each
-script). The device directory /sdcard/Download/aj6-augment-bench/p42 is removed afterwards.
+Scripts start through RunIntentActivity, results are read from the GlobalConsole lines of logcat (those logged since
+each script started, as logcat -c does not always clear the buffer). The device directory /sdcard/Download/aj6-augment-bench/p42 is removed afterwards.
 """
 
 import argparse
 import pathlib
+import re
 import sys
 import time
 
@@ -52,15 +53,28 @@ def launch_project(serial, project_dir, name):
     return remote
 
 
+def console_lines_since(serial, since):
+    """The GlobalConsole lines logged since the device time [since] (MM-DD hh:mm:ss.mmm, as logcat -t takes it)."""
+    out = adb(serial, "shell", f"logcat -d -t '{since}'").stdout
+    return [re.sub(r"^.*GlobalConsole: ", "", l).rstrip() for l in out.splitlines() if "GlobalConsole:" in l]
+
+
 def watch(serial, remote, done, wait):
-    """Starts [remote] after clearing logcat; returns the GlobalConsole lines once [done](lines) holds or after [wait] s."""
+    """Starts [remote]; returns its GlobalConsole lines once [done](lines) holds or after [wait] s.
+
+    logcat -c does not always clear the buffer (G8441, 2026-10-24: the lines of the previous run were still there, so
+    the end line of that run ended the watch at once), so only the lines logged since the start are read: after a second
+    without output of this tool, the device time rounded down to the second is later than any earlier line.
+    """
     device_bench.clear_log(serial)
+    time.sleep(1.0)
+    since = adb(serial, "shell", "date '+%m-%d %H:%M:%S.000'").stdout.strip()
     adb(serial, "shell", "am", "start", "-n", f"{device_bench.PACKAGE}/{device_bench.RUN_ACTIVITY}", "-e", "path", remote, check=True)
     deadline = time.time() + wait
     lines = []
     while time.time() < deadline:
         time.sleep(0.5)
-        lines = device_bench.console_lines(serial)
+        lines = console_lines_since(serial, since)
         if done(lines):
             return lines, True
     return lines, False
@@ -78,6 +92,9 @@ def sample(args):
     ok = done and all(found) and order == sorted(order)
     errors = [l for l in lines if "Error" in l or "Exception" in l]
     print(f"sample helloworld: {'PASS' if ok else 'FAIL'} ({sum(1 for f in found if f)}/{len(SAMPLE_LINES)} lines in order, {elapsed:.1f} s)")
+    for want, line in zip(SAMPLE_LINES, found):
+        if line is None:
+            print(f"  missing line: {want}")
     for line in errors[:3]:
         print(f"  error line: {line[:160]}")
     return ok
