@@ -1,10 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.pinyin
 
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
 import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCustomDictionary
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinMode
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinStyle
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
@@ -15,6 +17,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.autojs.autojs.util.RhinoUtils
+import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.plugin.pinyin.api.PinyinCustomDictionaryContract
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -107,9 +110,7 @@ class PinyinModule {
     private fun checkOptions(function: String, options: NativeObject) {
         // Read as the current module reads them (inquire: getProp, nullish values skipped).
         // zh-CN: 读取方式同现有模块 (inquire: getProp, 跳过 nullish 值).
-        listOf("mode" to PinyinOptions::parseMode, "style" to PinyinOptions::parseStyle).forEach { (key, parse) ->
-            options.inquire(key)?.let { value -> AugmentMembers.values(function) { parse(value) } }
-        }
+        CHOICES.forEach { choice -> options.inquire(choice.label)?.let { value -> choice.rejection(value)?.let { throw UtilValues.rangeError(function, it) } } }
         if (!options.has(CUSTOM_DICTIONARY, options)) return
         val dictionary = options.get(CUSTOM_DICTIONARY, options)
         if (ScriptArgs.isNullish(dictionary)) return
@@ -133,7 +134,34 @@ class PinyinModule {
 
     private fun matrixError(cause: String) = UtilValues.typeError(FUNCTION_COMPACT, cause)
 
+    /**
+     * A `mode` / `style` option as `PinyinOptions.parseMode` / `parseStyle` of the current module accept it (an enum
+     * constant, a number equal to a constant's value, a name of a constant in any case), checked without their
+     * IllegalArgumentException, which would make the failure path a Java exception more expensive (R2).
+     *
+     * zh-CN: 同现有模块 PinyinOptions.parseMode / parseStyle 的接受范围 (枚举常量, 等于常量值的数值, 不区分大小写的常量名) 判定 mode / style 选项, 不经它们的
+     * IllegalArgumentException (否则失败路径多一个 Java 异常, R2).
+     */
+    private class Choice(val label: String, private val type: Class<*>, private val names: List<String>, private val values: List<Int>) {
+
+        /** The message of the current parser for a [value] it rejects, null when it accepts it. */
+        fun rejection(value: Any): String? {
+            val unwrapped = value.jsUnwrapped()
+            return when {
+                unwrapped.isJsNullish() || type.isInstance(unwrapped) -> null
+                unwrapped is Number -> unwrapped.toDouble().let { number -> "Invalid $label constant: $unwrapped".takeUnless { values.any { it.toDouble() == number } } }
+                else -> "Invalid $label name: $unwrapped".takeUnless { coerceString(unwrapped, "").uppercase() in names }
+            }
+        }
+
+    }
+
     private companion object {
+        val CHOICES = listOf(
+            Choice("mode", PinyinMode::class.java, PinyinMode.entries.map { it.name }, PinyinMode.entries.map { it.value }),
+            Choice("style", PinyinStyle::class.java, PinyinStyle.entries.map { it.name }, PinyinStyle.entries.map { it.value }),
+        )
+
         const val MODULE = "pinyin"
         const val FUNCTION_CONVERT = "pinyin.convert"
         const val FUNCTION_COMPACT = "pinyin.compact"

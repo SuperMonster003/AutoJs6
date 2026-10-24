@@ -1,8 +1,11 @@
 package org.autojs.autojs.runtime.api.modules.ai
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
+import com.google.gson.JsonNull
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.ai.Ai
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
@@ -16,6 +19,8 @@ import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Context
+import org.mozilla.javascript.NativeArray
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 
 /**
@@ -118,9 +123,29 @@ class AiModule(private val runtime: ScriptRuntime) {
 
     /** The JSON of [value] unwrapped as by the current module's argument guard (a TypeError when it has none, as for a function or undefined). */
     private fun json(function: String, param: String, value: Any?): JsonElement {
-        val serialized = RhinoUtils.js_json_stringify(RhinoUtils.unwrap(value))
+        val unwrapped = RhinoUtils.unwrap(value)
+        direct(unwrapped)?.let { return it }
+        val serialized = RhinoUtils.js_json_stringify(unwrapped)
         val parsed = if (serialized is Undefined) null else runCatching { JsonParser.parseString(Context.toString(serialized)) }.getOrNull()
         return parsed ?: throw UtilValues.typeError(function, ScriptMessages.argumentType(param, "JSON value", ScriptArgs.describe(value)))
+    }
+
+    /**
+     * The JSON of an unwrapped [value] that `JSON.stringify` writes without reading it further, null for any other value:
+     * a primitive (no toJSON is looked up for a primitive; a number that is not finite is null) and an empty array without
+     * toJSON. These skip serializing and parsing, which would make the failure path of a prompt or options of the wrong
+     * type slower than R2 allows; only the kind of the JSON is used for them.
+     *
+     * zh-CN: JSON.stringify 无需再读取即可写出的值 (已解包) 的 JSON, 其他值为 null: 原始值 (原始值不查 toJSON; 非有限数值为 null) 与没有 toJSON 的空数组.
+     * 它们跳过序列化与解析 (否则类型不对的 prompt 或选项的失败路径慢于 R2 的要求); 对它们只用到 JSON 的种类.
+     */
+    private fun direct(value: Any?): JsonElement? = when (value) {
+        null -> JsonNull.INSTANCE
+        is String -> JsonPrimitive(value)
+        is Boolean -> JsonPrimitive(value)
+        is Double -> if (value.isFinite()) JsonPrimitive(value) else JsonNull.INSTANCE
+        is NativeArray -> JsonArray().takeIf { value.length == 0L && !ScriptableObject.hasProperty(value, "toJSON") }
+        else -> null
     }
 
     private companion object {
