@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.selector
 
-import org.autojs.autojs.core.automator.filter.JsRegexUtils
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
@@ -61,9 +60,6 @@ internal object SelectorChecks {
      * `SelectorRegistry.stringFamily` (`StringMatcher.matches` / `StringMatcher.match` with a string).
      */
     private val PATTERN_CONDITIONS: Set<String> = SelectorRegistry.names.filterTo(HashSet()) { it.endsWith("Matches") || it.endsWith("Match") }
-
-    /** The escapes after which a pattern is no longer scanned (they take more than one character, or quote). */
-    private const val OPAQUE_ESCAPES = "QEcpPNxuk"
 
     /**
      * [args] of [entry] as `SelectorEntry.resolve` resolves them, and as the overload it finds builds the condition:
@@ -128,68 +124,14 @@ internal object SelectorChecks {
     }
 
     /**
-     * Why [input] does not compile as `JsRegexUtils.compileJsOrPlainRegex` compiles it, for the common slips only, or null
-     * when it is not refused here (it may still not compile). A refusal holds for the engines of both the JVM and Android
-     * (ICU): a quantifier with nothing to repeat at the start or after `(` / `|`, a trailing backslash, a `[` without a
-     * `]` after it, a `)` without its `(` and a `(` without its `)`. The parentheses are only counted before the first
-     * `[`, and nothing is refused after an escape that takes more than one character or a group construct other than
-     * `(?:`, `(?=`, `(?!`, `(?<` and `(?>` (comments, quotes and flags differ between the engines). The descriptions are
-     * those of `java.util.regex.PatternSyntaxException`.
+     * Why [input] does not compile as `JsRegexUtils.compileJsOrPlainRegex` compiles it, or null when it is not refused
+     * here (it may still not compile): the full syntax check of [SelectorPatterns] (appendix C Q70 (2)), which refuses
+     * only what the engines of both the JVM and Android (ICU) refuse and leaves the rest to compiling.
      *
-     * zh-CN: [input] 按 JsRegexUtils.compileJsOrPlainRegex 的方式无法编译的原因 (只覆盖常见笔误); 此处不拒绝时为 null (仍可能无法编译). 拒绝对 JVM 与
-     * Android (ICU) 两种引擎都成立: 开头或 ( / | 之后没有可重复内容的量词, 结尾的反斜杠, 之后没有 ] 的 [, 没有对应 ( 的 ) 与没有对应 ) 的 (. 括号只在首个 [
-     * 之前计数; 遇到占用多个字符的转义, 或 (?:, (?=, (?!, (?<, (?> 以外的组构造 (注释, 引用与标志在两种引擎间有差异) 后不再拒绝. 描述沿用
-     * java.util.regex.PatternSyntaxException 的写法.
+     * zh-CN: [input] 按 JsRegexUtils.compileJsOrPlainRegex 的方式无法编译的原因; 此处不拒绝时为 null (仍可能无法编译). 由 [SelectorPatterns] 做完整的语法检查
+     * (附录 C Q70 (2)), 只拒绝 JVM 与 Android (ICU) 两种引擎都拒绝的写法, 其余交给编译判定.
      */
-    fun patternRefusal(input: String): String? {
-        // JsRegexUtils.compileJsOrPlainRegex compiles the source of a literal (`/source/flags`), any other string as it is.
-        val pattern = JsRegexUtils.parseJsRegexLiteral(input)?.first ?: input
-        val n = pattern.length
-        if (n == 0) return null
-        if (pattern[0] == '*' || pattern[0] == '+' || pattern[0] == '?') return dangling(pattern, 0)
-        var lastOpen = -1
-        var closedAfter = false
-        var depth = 0
-        var i = 0
-        while (i < n) {
-            when (pattern[i]) {
-                '\\' -> {
-                    if (i + 1 == n) return "Unescaped trailing backslash near index $n"
-                    if (pattern[i + 1] in OPAQUE_ESCAPES) return null
-                    i += 2
-                    continue
-                }
-                '[' -> {
-                    lastOpen = i
-                    closedAfter = false
-                }
-                ']' -> if (lastOpen >= 0) closedAfter = true
-                // Before the first `[`, nothing is in a character class.
-                '(' -> if (lastOpen < 0) {
-                    when (pattern.getOrNull(i + 1)) {
-                        '*', '+' -> return dangling(pattern, i + 1)
-                        '?' -> if (pattern.getOrNull(i + 2).let { it == null || it !in ":=!<>" }) return null
-                    }
-                    depth++
-                }
-                // The index is that of the character before, as `java.util.regex.Pattern` reports it.
-                ')' -> if (lastOpen < 0 && --depth < 0) return if (i > 0) "Unmatched closing ')' near index ${i - 1}" else "Unmatched closing ')'"
-                '|' -> if (lastOpen < 0) {
-                    when (pattern.getOrNull(i + 1)) {
-                        '*', '+', '?' -> return dangling(pattern, i + 1)
-                    }
-                }
-            }
-            i++
-        }
-        return when {
-            lastOpen >= 0 -> if (closedAfter) null else "Unclosed character class near index ${n - 1}"
-            depth > 0 -> "Unclosed group near index $n"
-            else -> null
-        }
-    }
-
-    private fun dangling(pattern: String, index: Int) = "Dangling meta character '${pattern[index]}' near index $index"
+    fun patternRefusal(input: String): String? = SelectorPatterns.refusal(input)
 
     /**
      * Whether [value] is a compass string as `Compass.isCompass` tells it: [Compass.PASS_ON], the empty string or the
