@@ -128,7 +128,7 @@ class AutoModule(private val runtime: ScriptRuntime) {
     }
 
     /** `auto.wait(cond, ...)`: the asynchronous wait of `flow.wait` (D1); not the service wait [waitFor]. */
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun wait(vararg args: Any?): Any {
         FlowArgs.waitArgs("auto.wait", args, withDelay = false)
         return FlowExecutor.of(runtime).api.wait(null, WaitKind.WAIT, "auto.wait", args)

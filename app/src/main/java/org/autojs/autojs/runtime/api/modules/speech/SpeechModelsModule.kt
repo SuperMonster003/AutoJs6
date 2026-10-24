@@ -22,28 +22,28 @@ class SpeechModelsModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { SpeechModels(runtime, ScriptRuntimeFields.speech(runtime)) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun list(vararg args: Any?): Any? = impl.list(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun install(vararg args: Any?): Any? = impl.install(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun installAsync(vararg args: Any?): Any? = impl.installAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun importFile(vararg args: Any?): Any? = impl.importFile(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun remove(vararg args: Any?): Any? = impl.remove(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2])
     fun setDefault(vararg args: Any?): Any? = impl.setDefault(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun getDefault(vararg args: Any?): Any? = impl.getDefault(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun refreshCatalog(vararg args: Any?): Any? = impl.refreshCatalog(runtime, args)
 
 }

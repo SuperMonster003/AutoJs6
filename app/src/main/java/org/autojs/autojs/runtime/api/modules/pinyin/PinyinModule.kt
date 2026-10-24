@@ -11,6 +11,7 @@ import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
@@ -53,7 +54,16 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 @ScriptModule(name = "pinyin")
 class PinyinModule {
 
-    @ScriptInstall
+    @ScriptInstall(
+        names = [
+            ScriptInstallNames(
+                names = [
+                    "STYLE_NORMAL", "STYLE_TONE", "STYLE_TONE2", "STYLE_TO3NE", "STYLE_INITIALS", "STYLE_FIRST_LETTER",
+                    "MODE_NORMAL", "MODE_SURNAME", "MODE_PLACENAME", "MODE_PLACE_NAME",
+                ],
+            ),
+        ],
+    )
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(Pinyin, it) }
 
     @ScriptInvoke

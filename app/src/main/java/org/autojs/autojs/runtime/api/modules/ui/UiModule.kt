@@ -125,7 +125,7 @@ class UiModule(private val runtime: ScriptRuntime) {
     @ScriptFunction
     fun isUiThread(): Boolean = RhinoUtils.isUiThread()
 
-    @ScriptFunction(name = "__autojs6Tsx", global = ScriptGlobal.ALSO)
+    @ScriptFunction(name = "__autojs6Tsx", global = ScriptGlobal.ALSO, arity = [2, -1])
     fun tsx(vararg args: Any?): Any = TypeScriptTsxRuntime.create(args, TypeScriptTsxRuntime.messageResolver(GlobalAppContext.get()), runtime.composeForTsx())
 
     @ScriptFunction

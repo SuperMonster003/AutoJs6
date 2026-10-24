@@ -6,6 +6,8 @@ import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallKind
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
@@ -27,19 +29,45 @@ class MailModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { Mail(runtime, ScriptRuntimeFields.mail(runtime)) }
 
-    @ScriptInstall
+    @ScriptInstall(
+        names = [
+            ScriptInstallNames(["MailError", "providers", "accounts"]),
+            // The client methods of the default client (appendix A.3 of the mail roadmap), by the counts the client checks.
+            // zh-CN: 默认客户端的方法 (邮件路线图附录 A.3), 按客户端检查的参数个数分组.
+            ScriptInstallNames(["test", "testAsync"], kind = ScriptInstallKind.FUNCTION, arity = [0]),
+            ScriptInstallNames(
+                names = ["folder", "folderStatus", "folderStatusAsync", "createFolder", "createFolderAsync", "deleteFolder", "deleteFolderAsync"],
+                kind = ScriptInstallKind.FUNCTION,
+                arity = [1],
+            ),
+            ScriptInstallNames(["renameFolder", "renameFolderAsync"], kind = ScriptInstallKind.FUNCTION, arity = [2]),
+            ScriptInstallNames(["folders", "foldersAsync", "fetch", "fetchAsync", "expunge", "expungeAsync"], kind = ScriptInstallKind.FUNCTION, arity = [0, 1]),
+            ScriptInstallNames(
+                names = [
+                    "send", "sendAsync", "search", "searchAsync", "get", "getAsync", "fetchBody", "fetchBodyAsync", "markRead",
+                    "markReadAsync", "markUnread", "markUnreadAsync", "flag", "flagAsync", "unflag", "unflagAsync", "delete", "deleteAsync",
+                ],
+                kind = ScriptInstallKind.FUNCTION,
+                arity = [1, 2],
+            ),
+            ScriptInstallNames(["download", "downloadAsync", "raw", "rawAsync"], kind = ScriptInstallKind.FUNCTION, arity = [1, 3]),
+            ScriptInstallNames(["move", "moveAsync", "copy", "copyAsync", "append", "appendAsync"], kind = ScriptInstallKind.FUNCTION, arity = [2, 3]),
+            ScriptInstallNames(["setFlags", "setFlagsAsync"], kind = ScriptInstallKind.FUNCTION, arity = [2, 4]),
+            ScriptInstallNames(["watch"], kind = ScriptInstallKind.FUNCTION, arity = [0, 2]),
+        ],
+    )
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun connect(vararg args: Any?): Any? = impl.connect(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun connectAsync(vararg args: Any?): Any? = impl.connectAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun setDefault(vararg args: Any?): Any? = impl.setDefault(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun close(vararg args: Any?): Any? = impl.close(runtime, args)
 
     @ScriptGetter(name = "default")

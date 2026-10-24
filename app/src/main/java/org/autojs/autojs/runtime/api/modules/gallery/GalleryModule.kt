@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.gallery.Gallery
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
@@ -25,37 +26,37 @@ class GalleryModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { Gallery(runtime, ScriptRuntimeFields.gallery(runtime)) }
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["GalleryError"])])
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun pick(vararg args: Any?): Any? = impl.pick(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun pickAsync(vararg args: Any?): Any? = impl.pickAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun view(vararg args: Any?): Any? = impl.view(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun viewAsync(vararg args: Any?): Any? = impl.viewAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun edit(vararg args: Any?): Any? = impl.edit(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun editAsync(vararg args: Any?): Any? = impl.editAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun convert(vararg args: Any?): Any? = impl.convert(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun convertAsync(vararg args: Any?): Any? = impl.convertAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailableAsync(vararg args: Any?): Any? = impl.isAvailableAsync(runtime, args)
 
 }

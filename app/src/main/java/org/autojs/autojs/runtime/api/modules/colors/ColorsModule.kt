@@ -447,7 +447,7 @@ class ColorsModule(private val runtime: ScriptRuntime?) {
     fun luminance(color: Any?): Double = ColorValues.luminance(int(color, "colors.luminance"))
 
     /** A Color instance, as `Color(...)`: no argument (black), a color, `(red, green, blue)` or `(red, green, blue, alpha)`. */
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 4])
     fun build(vararg args: Any?): Any = ColorModule.newColor(this, "colors.build", args)
 
     /** `hex(#RRGGBB), rgba(r,g,b/a), int(...)`, the alpha as a fraction with one or two decimals. */

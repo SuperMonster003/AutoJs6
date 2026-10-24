@@ -5,9 +5,11 @@ import android.net.Uri
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
 import org.autojs.autojs.runtime.api.augment.app.App
+import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptProperty
@@ -49,7 +51,7 @@ class AppModule(private val runtime: ScriptRuntime) {
     val prototype: Any
         get() = runtime.app
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["autojs"], attributes = ScriptAttributes.EMPTY)])
     fun install(installation: ScriptModuleInstallation) {
         installation.onBuilt { members ->
             installation.defineLazy("autojs", ScriptableObject.EMPTY, members) { installation.moduleObject("autojs") }

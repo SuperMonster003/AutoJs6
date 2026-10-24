@@ -30,10 +30,10 @@ class ColorModule(runtime: ScriptRuntime?) {
 
     private val colors = ColorsModule(runtime)
 
-    @ScriptInvoke
+    @ScriptInvoke(arity = [0, 4])
     fun invoke(vararg args: Any?): Any = newColor(colors, "Color", args)
 
-    @ScriptConstruct
+    @ScriptConstruct(arity = [0, 4])
     fun construct(vararg args: Any?): Any = newColor(colors, "new Color", args)
 
     @ScriptPrototype

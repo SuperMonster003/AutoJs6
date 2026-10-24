@@ -48,7 +48,7 @@ class NoticeModule(private val runtime: ScriptRuntime) {
 
     private val legacy by lazy { Notice(runtime) }
 
-    @ScriptInvoke
+    @ScriptInvoke(arity = [0, 3])
     fun invoke(vararg args: Any?): Int {
         if (args.size > 3) throw ScriptArgs.arityError(MODULE, 0, 3, args.size)
         if (args.isEmpty()) return legacy.invoke()

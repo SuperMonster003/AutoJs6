@@ -57,7 +57,7 @@ class SelectorModule(private val runtime: ScriptRuntime) {
     fun invoke(): Scriptable = Context.javaToJS(runtime.selector(), runtime.topLevelScope) as Scriptable
 
     /** `pickup(root?, selector?, compass?, resultType?, callback?)` in the forms of the current module, told apart by the types of the arguments. */
-    @ScriptFunction(global = ScriptGlobal.ONLY)
+    @ScriptFunction(global = ScriptGlobal.ONLY, arity = [0, 5])
     fun pickup(vararg args: Any?): Any? {
         if (args.size > 5) throw ScriptArgs.arityError("pickup", 0, 5, args.size)
         val a = Array(args.size) { RhinoUtils.unwrap(args[it]) }
@@ -96,7 +96,7 @@ class SelectorModule(private val runtime: ScriptRuntime) {
     }
 
     /** `detect(widget, compass?, resultType?, callback?)` in the forms of the current module. */
-    @ScriptFunction(global = ScriptGlobal.ONLY)
+    @ScriptFunction(global = ScriptGlobal.ONLY, arity = [2, 4])
     fun detect(vararg args: Any?): Any? {
         if (args.size !in 2..4) throw ScriptArgs.arityError("detect", 2, 4, args.size)
         val a = Array(args.size) { RhinoUtils.unwrap(args[it]) }
@@ -137,7 +137,7 @@ class SelectorModule(private val runtime: ScriptRuntime) {
      *
      * zh-CN: 定义 SelectorGlobals.names 中全局对象上尚未存在 (也不是所有 Java 对象都有的成员) 的全局选择器函数, 顺序照旧, 各自为惰性函数, 同现有模块创建时的定义.
      */
-    @ScriptInstall
+    @ScriptInstall(computed = "the global selector functions: SelectorGlobals.names not on the global object yet, nor members of every Java object, nor SelectorGlobals.excluded")
     fun install(installation: ScriptModuleInstallation) {
         val global = installation.global
         SelectorGlobals.names.filter { it !in JAVA_OBJECT_MEMBERS && it !in SelectorGlobals.excluded && !global.hasProp(it) }.forEach { name ->

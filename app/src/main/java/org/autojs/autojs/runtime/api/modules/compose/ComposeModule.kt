@@ -5,7 +5,10 @@ import org.autojs.autojs.runtime.api.augment.compose.Compose
 import org.autojs.autojs.runtime.api.augment.compose.ComposeJsErrors
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
+import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallKind
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
@@ -37,13 +40,24 @@ class ComposeModule(private val runtime: ScriptRuntime) {
     // zh-CN: 已持有实例的运行时沿用之 (测试给出带自己平台的实例).
     private val compose = ScriptRuntimeFields.compose(runtime) ?: Compose(runtime).also { ScriptRuntimeFields.setCompose(runtime, it) }
 
-    @ScriptInstall
+    @ScriptInstall(
+        names = [
+            ScriptInstallNames(["ComposeError"], global = ScriptGlobal.ALSO),
+            ScriptInstallNames(["isAvailable", "modifier", "ref"], kind = ScriptInstallKind.FUNCTION, arity = [0]),
+            ScriptInstallNames(["state", "batch"], kind = ScriptInstallKind.FUNCTION, arity = [1]),
+            ScriptInstallNames(["createElement"], kind = ScriptInstallKind.FUNCTION, arity = [1, -1]),
+            ScriptInstallNames(["mount", "floaty", "dialog", "post"], kind = ScriptInstallKind.FUNCTION, arity = [1, 2]),
+            ScriptInstallNames(["memo", "attach"], kind = ScriptInstallKind.FUNCTION, arity = [2, 3]),
+            ScriptInstallNames(["theme"], kind = ScriptInstallKind.FUNCTION, arity = [0, 1]),
+        ],
+        computed = "the component functions of the Compose catalog (ComposeUiV2.interopCatalog, NODE components)",
+    )
     fun install(installation: ScriptModuleInstallation) {
         installation.defineLazy(COMPOSE_ERROR, ScriptableObject.PERMANENT) { ComposeJsErrors.constructor(runtime.topLevelScope) }
         installation.onBuilt { AugmentMembers.defineProperties(compose, it) }
     }
 
-    @ScriptInvoke
+    @ScriptInvoke(arity = [1, 2])
     fun invoke(vararg args: Any?): Any? = compose.invoke(*args)
 
     @ScriptGetter

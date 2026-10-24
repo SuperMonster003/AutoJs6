@@ -8,6 +8,7 @@ import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
@@ -43,7 +44,7 @@ class MediainfoModule(private val runtime: ScriptRuntime) {
     /** The current module: its data properties, and how its calls fail. */
     private val current by lazy { Mediainfo(runtime) }
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["SNAPSHOT_SCHEMA_V1", "SNAPSHOT_SCHEMA_V2"])])
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(current, it) }
 
     @ScriptInvoke

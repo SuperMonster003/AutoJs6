@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.epub.Epub
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
@@ -25,67 +26,67 @@ class EpubModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { Epub(runtime, ScriptRuntimeFields.epub(runtime)) }
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["EpubError"])])
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun open(vararg args: Any?): Any? = impl.open(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun openAsync(vararg args: Any?): Any? = impl.openAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun metadata(vararg args: Any?): Any? = impl.metadata(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun metadataAsync(vararg args: Any?): Any? = impl.metadataAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun toc(vararg args: Any?): Any? = impl.toc(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun tocAsync(vararg args: Any?): Any? = impl.tocAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun readingOrder(vararg args: Any?): Any? = impl.readingOrder(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun readingOrderAsync(vararg args: Any?): Any? = impl.readingOrderAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 3])
     fun text(vararg args: Any?): Any? = impl.text(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 3])
     fun textAsync(vararg args: Any?): Any? = impl.textAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 3])
     fun cover(vararg args: Any?): Any? = impl.cover(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 3])
     fun coverAsync(vararg args: Any?): Any? = impl.coverAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 3])
     fun search(vararg args: Any?): Any? = impl.search(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 3])
     fun searchAsync(vararg args: Any?): Any? = impl.searchAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun annotations(vararg args: Any?): Any? = impl.annotations(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun annotationsAsync(vararg args: Any?): Any? = impl.annotationsAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun read(vararg args: Any?): Any? = impl.read(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun readAsync(vararg args: Any?): Any? = impl.readAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailableAsync(vararg args: Any?): Any? = impl.isAvailableAsync(runtime, args)
 
 }

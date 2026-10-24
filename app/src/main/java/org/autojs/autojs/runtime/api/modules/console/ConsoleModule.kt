@@ -237,10 +237,10 @@ class ConsoleModule(private val runtime: ScriptRuntime) {
      * array (the first six elements, a nullish element or a missing one leaving the console's color), from one color for
      * all levels, or from 2 to 6 colors in level order; without colors the console gets an empty color list.
      */
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 6])
     fun setContentTextColor(vararg colors: Any?): ProxyObject = self.also { console.setContentTextColors(contentTextColors("console.setContentTextColor", colors)) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 6])
     fun setContentTextColors(vararg colors: Any?): ProxyObject = self.also { console.setContentTextColors(contentTextColors("console.setContentTextColors", colors)) }
 
     @ScriptFunction

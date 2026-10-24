@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
@@ -26,46 +27,46 @@ class InstallerModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { Installer(runtime, ScriptRuntimeFields.installer(runtime)) }
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["InstallerError", "authorizer"])])
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun install(vararg args: Any?): Any? = impl.install(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun installAsync(vararg args: Any?): Any? = impl.installAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun session(vararg args: Any?): Any? = impl.session(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun uninstall(vararg args: Any?): Any? = impl.uninstall(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun uninstallAsync(vararg args: Any?): Any? = impl.uninstallAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun inspect(vararg args: Any?): Any? = impl.inspect(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun inspectAsync(vararg args: Any?): Any? = impl.inspectAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isDefault(vararg args: Any?): Any? = impl.isDefault(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 2])
     fun setDefault(vararg args: Any?): Any? = impl.setDefault(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 2])
     fun setDefaultAsync(vararg args: Any?): Any? = impl.setDefaultAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun users(vararg args: Any?): Any? = impl.users(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun usersAsync(vararg args: Any?): Any? = impl.usersAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
     @ScriptGetter(name = "status")

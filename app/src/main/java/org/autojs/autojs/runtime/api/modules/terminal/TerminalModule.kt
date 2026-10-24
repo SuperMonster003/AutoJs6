@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.terminal.Terminal
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
@@ -25,61 +26,61 @@ class TerminalModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { Terminal(runtime, ScriptRuntimeFields.terminal(runtime)) }
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["TerminalError", "npm"])])
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun open(vararg args: Any?): Any? = impl.open(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun openAsync(vararg args: Any?): Any? = impl.openAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun sessions(vararg args: Any?): Any? = impl.sessions(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun sessionsAsync(vararg args: Any?): Any? = impl.sessionsAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun session(vararg args: Any?): Any? = impl.session(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun close(vararg args: Any?): Any? = impl.close(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun closeAsync(vararg args: Any?): Any? = impl.closeAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun closeAll(vararg args: Any?): Any? = impl.closeAll(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun closeAllAsync(vararg args: Any?): Any? = impl.closeAllAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun show(vararg args: Any?): Any? = impl.show(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun showAsync(vararg args: Any?): Any? = impl.showAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun state(vararg args: Any?): Any? = impl.state(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailableAsync(vararg args: Any?): Any? = impl.isAvailableAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun exec(vararg args: Any?): Any? = impl.exec(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun execAsync(vararg args: Any?): Any? = impl.execAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun env(vararg args: Any?): Any? = impl.env(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun envAsync(vararg args: Any?): Any? = impl.envAsync(runtime, args)
 
 }

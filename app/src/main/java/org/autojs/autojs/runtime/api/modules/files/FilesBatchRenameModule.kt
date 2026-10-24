@@ -36,55 +36,55 @@ class FilesBatchRenameModule(private val runtime: ScriptRuntime) {
         get() = Context.getCurrentContext()?.let { BatchRenameJsErrors.constructor(it, runtime.topLevelScope) } ?: BatchRenameJsErrors.constructor(runtime)
 
     /** `files.batchRename(paths, options)`: plans and applies in one step. */
-    @ScriptInvoke
+    @ScriptInvoke(arity = [2])
     fun invoke(vararg args: Any?): Any? = impl.invoke(*args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2])
     fun plan(vararg args: Any?): Any? = impl.plan(runtime, args)
 
-    @ScriptFunction(name = "apply")
+    @ScriptFunction(name = "apply", arity = [1, 2])
     fun applyPlan(vararg args: Any?): Any? = impl.applyPlan(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun undo(vararg args: Any?): Any? = impl.undo(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun history(vararg args: Any?): Any? = impl.history(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2])
     fun planAsync(vararg args: Any?): Any = impl.planAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun applyAsync(vararg args: Any?): Any = impl.applyAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun undoAsync(vararg args: Any?): Any = impl.undoAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun presets(vararg args: Any?): Any? = impl.presets(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun presetsAsync(vararg args: Any?): Any = impl.presetsAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun importPresets(vararg args: Any?): Any? = impl.importPresets(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun importPresetsAsync(vararg args: Any?): Any = impl.importPresetsAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2])
     fun preview(vararg args: Any?): Any? = impl.preview(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2])
     fun previewAsync(vararg args: Any?): Any = impl.previewAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1])
     fun deleteHistory(vararg args: Any?): Any? = impl.deleteHistory(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun clearHistory(vararg args: Any?): Any? = impl.clearHistory(runtime, args)
 
 }

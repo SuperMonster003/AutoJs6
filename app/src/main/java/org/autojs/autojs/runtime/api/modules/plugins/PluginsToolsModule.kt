@@ -44,7 +44,7 @@ class PluginsToolsModule(private val runtime: ScriptRuntime) {
         return impl.call(runtime, arrayOf(text, args, options))
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 3])
     fun callAsync(vararg args: Any?): Any = impl.callAsync(runtime, args)
 
 }

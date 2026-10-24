@@ -9,7 +9,10 @@ import org.autojs.autojs.runtime.api.augment.flow.WaitKind
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
+import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallKind
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
@@ -52,7 +55,25 @@ class FlowModule(private val runtime: ScriptRuntime) {
      * zh-CN: 全局形式与同步全局 wait 上的 wait.async(...) (D1). 全局形式为独立的惰性函数 (名称同现有模块, clickWait 即 waitThenClick), 因其顺序与模块成员不同而在此定义;
      * 读取全局 wait 只解析该槽.
      */
-    @ScriptInstall
+    @ScriptInstall(
+        names = [
+            ScriptInstallNames(
+                names = [
+                    "waitAsync", "waitThenClick", "clickWait", "waitThenClickBounds", "clickBoundsWait",
+                    "waitForStable", "waitForStableThenClick", "clickWhenStable", "waitForStableThenClickBounds", "clickBoundsWhenStable",
+                    "waitForVisible", "waitForHidden", "waitForGone",
+                ],
+                kind = ScriptInstallKind.FUNCTION,
+                global = ScriptGlobal.ONLY,
+                arity = [1, 5],
+            ),
+            ScriptInstallNames(["clickWhenStableAfter", "clickBoundsWhenStableAfter"], kind = ScriptInstallKind.FUNCTION, global = ScriptGlobal.ONLY, arity = [2, 7]),
+            ScriptInstallNames(
+                ["async"], kind = ScriptInstallKind.FUNCTION, attributes = ScriptAttributes.READONLY or ScriptAttributes.DONTENUM or ScriptAttributes.PERMANENT,
+                target = "wait", arity = [1, 5],
+            ),
+        ],
+    )
     fun install(installation: ScriptModuleInstallation) {
         globalForms().forEach { (name, function, call) ->
             installation.defineLazy(name, ScriptAttributes.PERMANENT) { installation.function(function, 0) { _, _, _, args -> call(args) } }
@@ -62,16 +83,16 @@ class FlowModule(private val runtime: ScriptRuntime) {
         wait.defineProperty("async", async, ScriptAttributes.READONLY or ScriptAttributes.DONTENUM or ScriptAttributes.PERMANENT)
     }
 
-    @ScriptInvoke
+    @ScriptInvoke(arity = [1, 5])
     fun invoke(vararg args: Any?): Any = wait(*args)
 
-    @ScriptFunction(aliases = ["waitAsync"])
+    @ScriptFunction(aliases = ["waitAsync"], arity = [1, 5])
     fun wait(vararg args: Any?): Any = waitOf(WaitKind.WAIT, "flow.wait", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitUntil(vararg args: Any?): Any = waitOf(WaitKind.UNTIL, "flow.waitUntil", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitWhile(vararg args: Any?): Any = waitOf(WaitKind.WHILE, "flow.waitWhile", args)
 
     @ScriptFunction
@@ -86,46 +107,46 @@ class FlowModule(private val runtime: ScriptRuntime) {
         return api.repeatUntil(null, if (isNullish(options)) arrayOf(action, cond) else arrayOf(action, cond, options))
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitForStable(vararg args: Any?): Any = waitOf(WaitKind.STABLE, "flow.waitForStable", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitForVisible(vararg args: Any?): Any = waitOf(WaitKind.VISIBLE, "flow.waitForVisible", args)
 
-    @ScriptFunction(aliases = ["waitForGone"])
+    @ScriptFunction(aliases = ["waitForGone"], arity = [1, 5])
     fun waitForHidden(vararg args: Any?): Any = waitOf(WaitKind.HIDDEN, "flow.waitForHidden", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitForActivity(vararg args: Any?): Any {
         FlowArgs.nativeWaitArgs("flow.waitForActivity", args)
         return api.wait(null, WaitKind.ACTIVITY, "flow.waitForActivity", args)
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitForPackage(vararg args: Any?): Any {
         FlowArgs.nativeWaitArgs("flow.waitForPackage", args)
         return api.wait(null, WaitKind.PACKAGE, "flow.waitForPackage", args)
     }
 
-    @ScriptFunction(aliases = ["clickWait"])
+    @ScriptFunction(aliases = ["clickWait"], arity = [1, 5])
     fun waitThenClick(vararg args: Any?): Any = waitThen(WaitKind.WAIT, "flow.waitThenClick", args, "click", after = false)
 
-    @ScriptFunction(aliases = ["clickBoundsWait"])
+    @ScriptFunction(aliases = ["clickBoundsWait"], arity = [1, 5])
     fun waitThenClickBounds(vararg args: Any?): Any = waitThen(WaitKind.WAIT, "flow.waitThenClickBounds", args, "clickBounds", after = false)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 5])
     fun waitThenLongClick(vararg args: Any?): Any = waitThen(WaitKind.WAIT, "flow.waitThenLongClick", args, "longClick", after = false)
 
-    @ScriptFunction(aliases = ["clickWhenStable"])
+    @ScriptFunction(aliases = ["clickWhenStable"], arity = [1, 5])
     fun waitForStableThenClick(vararg args: Any?): Any = waitThen(WaitKind.STABLE, "flow.waitForStableThenClick", args, "click", after = false)
 
-    @ScriptFunction(aliases = ["clickBoundsWhenStable"])
+    @ScriptFunction(aliases = ["clickBoundsWhenStable"], arity = [1, 5])
     fun waitForStableThenClickBounds(vararg args: Any?): Any = waitThen(WaitKind.STABLE, "flow.waitForStableThenClickBounds", args, "clickBounds", after = false)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 7])
     fun clickWhenStableAfter(vararg args: Any?): Any = waitThen(WaitKind.STABLE, "flow.clickWhenStableAfter", args, "click", after = true)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 7])
     fun clickBoundsWhenStableAfter(vararg args: Any?): Any = waitThen(WaitKind.STABLE, "flow.clickBoundsWhenStableAfter", args, "clickBounds", after = true)
 
     @ScriptFunction(aliases = ["delay"])
@@ -164,76 +185,76 @@ class FlowModule(private val runtime: ScriptRuntime) {
     // Toolkit roots (P4.2 of the flow roadmap): the target is the first argument, waited for by the flow defaults.
     // zh-CN: 工具起点: 目标为首个参数, 按 flow 默认值等待.
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun smartClick(vararg args: Any?): Any = tool("smartClick", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun smartClickBounds(vararg args: Any?): Any = tool("smartClickBounds", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun clickIfExists(vararg args: Any?): Any = tool("clickIfExists", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun clickBoundsIfExists(vararg args: Any?): Any = tool("clickBoundsIfExists", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun clickAny(vararg args: Any?): Any = tool("clickAny", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun clickBoundsAny(vararg args: Any?): Any = tool("clickBoundsAny", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun findAny(vararg args: Any?): Any = tool("findAny", args)
 
     // Event-driven waits: `{ quietFor, elapsed, events }`, the event, the toast or the notification; a timeout rejects with a FlowError.
     // zh-CN: 事件驱动等待: resolve 为 { quietFor, elapsed, events }, 事件, toast 或通知; 超时以 FlowError reject.
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun waitForIdle(vararg args: Any?): Any {
         ToolkitArgs.idleArgs("flow.waitForIdle", args)
         return api.eventWait(null, "waitForIdle", args)
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 3])
     fun waitForEvent(vararg args: Any?): Any {
         ToolkitArgs.eventArgs("flow.waitForEvent", args)
         return api.eventWait(null, "waitForEvent", args)
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 2])
     fun waitForToast(vararg args: Any?): Any {
         ToolkitArgs.toastArgs("flow.waitForToast", args)
         return api.eventWait(null, "waitForToast", args)
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 2])
     fun waitForNotification(vararg args: Any?): Any {
         ToolkitArgs.notificationArgs("flow.waitForNotification", args)
         return api.eventWait(null, "waitForNotification", args)
     }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun scrollUntil(vararg args: Any?): Any = tool("scrollUntil", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 5])
     fun typeInto(vararg args: Any?): Any = tool("typeInto", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun dismissPopups(vararg args: Any?): Any = tool("dismissPopups", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 5])
     fun collectList(vararg args: Any?): Any = tool("collectList", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun launchAndWait(vararg args: Any?): Any = tool("launchAndWait", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun backUntil(vararg args: Any?): Any = tool("backUntil", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun backToApp(vararg args: Any?): Any = tool("backToApp", args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 5])
     fun toggle(vararg args: Any?): Any = tool("toggle", args)
 
     @ScriptGetter(name = "Flow")

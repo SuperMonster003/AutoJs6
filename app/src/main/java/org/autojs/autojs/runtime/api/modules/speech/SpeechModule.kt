@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.speech.Speech
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInstall
+import org.autojs.autojs.runtime.api.modules.ScriptInstallNames
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
@@ -25,37 +26,37 @@ class SpeechModule(private val runtime: ScriptRuntime) {
 
     private val impl by lazy { Speech(runtime, ScriptRuntimeFields.speech(runtime), ScriptRuntimeFields.tts(runtime)) }
 
-    @ScriptInstall
+    @ScriptInstall(names = [ScriptInstallNames(["SpeechError"])])
     fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0])
     fun capabilities(vararg args: Any?): Any? = impl.capabilities(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [0, 1])
     fun listen(vararg args: Any?): Any? = impl.listen(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun recognize(vararg args: Any?): Any? = impl.recognize(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun recognizeAsync(vararg args: Any?): Any? = impl.recognizeAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun detectVoice(vararg args: Any?): Any? = impl.detectVoice(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun wake(vararg args: Any?): Any? = impl.wake(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 3])
     fun synthesize(vararg args: Any?): Any? = impl.synthesize(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [2, 3])
     fun synthesizeAsync(vararg args: Any?): Any? = impl.synthesizeAsync(runtime, args)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun speak(vararg args: Any?): Any? = impl.speak(runtime, args)
 
 }

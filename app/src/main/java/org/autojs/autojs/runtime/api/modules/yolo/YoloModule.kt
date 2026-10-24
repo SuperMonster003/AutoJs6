@@ -20,7 +20,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptModule
 @ScriptModule(name = "yolo")
 class YoloModule(private val runtime: ScriptRuntime) {
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 2])
     fun load(vararg args: Any?): YoloDetectorNativeObject = Yolo.load(runtime, args)
 
 }
