@@ -11,6 +11,7 @@ import org.mozilla.javascript.Callable
 import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
 import java.lang.ref.WeakReference
+import java.util.TreeSet
 import java.util.concurrent.locks.LockSupport
 import kotlin.math.max
 
@@ -25,7 +26,11 @@ class Timer {
     private var mCallbackMaxId = 0
     private var mHandler: Handler
     private var mHandlerCallbacks = SparseArray<Runnable>()
-    private val mPendingCallbacks = HashSet<PendingCallback>()
+    // In the order of the looper (due time, then posting order), so the earliest one is found without scanning them all:
+    // a scan per callback made a wait() with hundreds of queued Promise reactions quadratic (docs/augment/ROADMAP.md Q105).
+    // zh-CN: 按 Looper 的顺序 (到期时间, 再按投递顺序) 排列, 无需逐个扫描即可找到最早的回调: 每取一个回调扫描一遍时, 排着几百个 Promise 反应的
+    // wait() 是平方级 (docs/augment/ROADMAP.md Q105).
+    private val mPendingCallbacks = TreeSet<PendingCallback>(compareBy<PendingCallback>({ it.uptime }, { it.order }))
     private var mMaxCallbackMillisForAllThread: VolatileBox<Long>
     private var mRuntime: WeakReference<ScriptRuntime>
     private var mTimerId = 0
@@ -188,8 +193,10 @@ class Timer {
     /** The due callbacks of this timer for [SettlementLatch], or null when the current thread is not its looper thread. */
     internal fun callbackQueueForCurrentThread(): SettlementLatch.CallbackQueue? = mCallbackQueue.takeIf { mLooper.thread === Thread.currentThread() }
 
-    // In the order of the looper: by due time, then in the order of posting.
-    private fun earliestPendingCallback(): PendingCallback? = mPendingCallbacks.filter { !it.running }.minWithOrNull(compareBy<PendingCallback>({ it.uptime }, { it.order }))
+    // In the order of the looper: by due time, then in the order of posting (the order of the set). Running callbacks are
+    // only those a wait() inside a callback runs in turn, so few are skipped.
+    // zh-CN: 按 Looper 的顺序: 到期时间, 再按投递顺序 (即集合的顺序). 正在运行的回调只有回调内的 wait() 依次运行的那几个, 跳过的很少.
+    private fun earliestPendingCallback(): PendingCallback? = mPendingCallbacks.firstOrNull { !it.running }
 
     fun removeAllCallbacks() {
         synchronized(this) {
