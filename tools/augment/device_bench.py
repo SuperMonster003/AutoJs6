@@ -86,15 +86,28 @@ def push_script(serial, name):
     return f"{DEVICE_DIR}/{name}"
 
 
+def pref_value_js(key):
+    """JS expression of the value scripts get for the boolean preference [key] (`pref` is Pref.INSTANCE).
+
+    The switch of the new script module layer is on by default since ROADMAP P5.1, so when it is not stored its value
+    comes from its declaration (DeveloperKeys, settings ROADMAP P2.5; earlier builds fall back to false, their default);
+    reading it with the default false would restore an untouched device to off. Other keys default to false.
+    """
+    if key != SWITCH_KEY:
+        return f"pref.getBoolean('{key}', false)"
+    return ("(function () { try { return String(org.autojs.autojs.core.pref.keys.DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()) === 'true'; }"
+            f" catch (e) {{ return pref.getBoolean('{key}', false); }} }})()")
+
+
 def set_new_modules(serial, value):
     """Sets the hidden switch of the new script module layer (ROADMAP T8) and returns its previous value."""
     script = HERE / "__pycache__" / "aj6_switch.js"
     script.parent.mkdir(exist_ok=True)
     lines = [
         "var pref = org.autojs.autojs.core.pref.Pref.INSTANCE;",
-        f"var before = pref.getBoolean('{SWITCH_KEY}', false);",
+        f"var before = {pref_value_js(SWITCH_KEY)};",
         f"pref.putBooleanSync('{SWITCH_KEY}', {'true' if value else 'false'});",
-        f"console.log('{SWITCH_MARK} ' + before + ' ' + pref.getBoolean('{SWITCH_KEY}', false));",
+        f"console.log('{SWITCH_MARK} ' + before + ' ' + {pref_value_js(SWITCH_KEY)});",
     ]
     script.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
     adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)

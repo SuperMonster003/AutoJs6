@@ -31,7 +31,7 @@ time("fail waitForEvent-type", () => { try { waitForEvent("nope"); } catch (e) {
 // Appendix C Q69 (2): selector forms the new layer refuses before any search, without a Java exception. With the switch
 // off the current module refuses them only once a node is found (or after console warnings), so they are timed with the
 // switch on only (the "off" columns show "-"). "ok textMatches" compiles its pattern in both states.
-let benchNewLayer = org.autojs.autojs.core.pref.Pref.INSTANCE.getBoolean("key_$_new_script_module_layer", false);
+let benchNewLayer = String(org.autojs.autojs.core.pref.keys.DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()) === "true";
 let benchDepthNaN = { depth: NaN }, benchPattern = { textMatches: "[" }, benchChildNaN = ["child", NaN], benchRange = { textMatches: "[z-a]" };
 time("ok textMatches", () => { try { textMatches("a"); } catch (e) { } });
 if (benchNewLayer) {

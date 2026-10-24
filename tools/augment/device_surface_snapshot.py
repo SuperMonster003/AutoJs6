@@ -23,7 +23,7 @@ import time
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from device_bench import clear_log, console_lines  # noqa: E402
+from device_bench import clear_log, console_lines, pref_value_js  # noqa: E402
 CLASSES_KT = HERE.parents[1] / "app/src/main/java/org/autojs/autojs/runtime/api/augment/global/Classes.kt"
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
@@ -46,9 +46,9 @@ def set_pref(serial, key, value, label):
     """Sets the boolean preference [key] through Pref.putBooleanSync in a small script and returns its previous value."""
     lines = [
         "var pref = org.autojs.autojs.core.pref.Pref.INSTANCE;",
-        f"var before = pref.getBoolean('{key}', false);",
+        f"var before = {pref_value_js(key)};",
         f"pref.putBooleanSync('{key}', {'true' if value else 'false'});",
-        f"console.log('{SWITCH_MARK} ' + before + ' ' + pref.getBoolean('{key}', false));",
+        f"console.log('{SWITCH_MARK} ' + before + ' ' + {pref_value_js(key)});",
     ]
     local = HERE / "__pycache__" / "aj6_switch.js"
     local.parent.mkdir(exist_ok=True)

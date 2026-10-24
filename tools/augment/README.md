@@ -17,7 +17,7 @@ py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] 
 
 脚本是否结束按控制台的结束行判断, 应用语言为中文 (含 "运行结束" 与 "用时 N 秒") 或英文 ("finished in N seconds") 都可识别 (`device_surface_snapshot.py` 同). 数值随设备状态变化很大 (P1.2 与 P1.4 在同一台 XQ-AT72 上相差 4-6 倍, Rhino 自身的错误同比例变化, 见 ROADMAP 附录 A), 比较开关开 / 关或前后版本时在同一状态下交替运行, 并看与同一次运行中 Rhino 参照项的比值.
 
-`--new-modules on|off` 在计时前用一个小脚本设置新脚本模块层的隐藏开关 (ROADMAP T8, 偏好设置键 `key_$_new_script_module_layer`, 经 `Pref.putBooleanSync` 写入), 结束后恢复原值; 开关只影响之后启动的脚本.
+`--new-modules on|off` 在计时前用一个小脚本设置新脚本模块层的隐藏开关 (ROADMAP T8, 偏好设置键 `key_$_new_script_module_layer`, 经 `Pref.putBooleanSync` 写入), 结束后恢复原值; 开关只影响之后启动的脚本. 原值是脚本实际得到的值: P5.1 起开关默认开, 未存储时按其声明 (`DeveloperKeys.NEW_SCRIPT_MODULE_LAYER`) 读为开 (`device_bench.pref_value_js`, 早于设置层 P2.5 的构建按关), 恢复时写入该值.
 
 `--calls NAME ...` (P2.1 起) 把 `bench/calls_prelude.js` 与 `bench/calls/NAME.js` 合成一个脚本运行 `--runs` 次, 给出每项的最小 / 中位 / 最大值 (微秒, 计时规则同 `error_path.js`). 前导部分带有 Rhino 参照项 (`ref` 开头: 空循环, `undefined.x`, 桥接 Java 异常, `Math.max`), 每个模块组的成功与失败调用写在自己的 `bench/calls/<组>.js` 中 (如 `jsox.js`), 各 P2 / P3 会话只新增自己的文件, 不改共享脚本. `--skip-init` 跳过启动计时, 只测调用.
 
@@ -153,3 +153,22 @@ py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --local-first
 ```
 
 宿主须是去掉 `assets/modules` 中 14 个库模块文件的构建 (设计 `docs/augment/P4-3-bundled-libraries-design.md` (g), 附录 C Q102), `--plugin-apk` 是 AutoJs6-Plugin-Bundled-Libraries 的 debug 包. 在同一宿主进程中依次经过 未安装 (先卸载插件), 已安装并启用 (`adb install`), 插件中心关闭 (脚本经 `PluginEnableStore` 关闭再打开), 插件页关闭 axios 与 buffer (经插件 debug 构建的 `DebugLibrarySwitchReceiver` 切换对应的 activity-alias, 之后打开; Android 9 起 shell 不能 `pm disable` 非 test-only 应用的组件), 卸载后. 每一态以脚本模块层开关关与开各运行一次 `bench/plugin_modules_smoke/main.js` (13 个库共 15 个 require 项, axios / cheerio / dayjs / i18n / pangu 的全局 getter, `require('axios') === axios`, 指引错误的消息与位置), 两态输出须一致并符合该态的预期 (错误为 `code` = MODULE_NOT_FOUND, `library`, `reason`; 位置只登记). `--local-first` 用常规构建 (资产还在), 未安装插件时全部模块照常加载. 结束时恢复开关, 卸载插件, 删除 `/sdcard/Download/aj6-augment-bench/p43`. 插件状态的变化由宿主的包广播与插件中心监听器生效, 不点按屏幕.
+
+## device_matrix.py: 附录 B 一台设备的真机矩阵 (P5.1)
+
+```
+py -3.12 -I -u tools/augment/device_matrix.py -s SERIAL --out DIR --items --backup ORIG --install APK --test-apk TEST_APK
+py -3.12 -I -u tools/augment/device_matrix.py -s SERIAL --out DIR [--items ITEM ...] [--cases DIR ...]
+py -3.12 -I -u tools/augment/device_matrix.py -s SERIAL --out DIR --items --restore ORIG
+```
+
+依次运行各项, 每项一行通过 / 失败与关键数字, 各步骤的日志留在 DIR. `--backup` 拉取设备上的宿主与测试包, 记录 md5 与新层开关的存储值 (未存储 / true / false), `--install` / `--test-apk` 再以 `install -r -d -t` 装上被测构建 (保留数据); `--restore` 装回备份并核对 md5, 恢复开关的存储值, 删除设备上的 bench 目录. 项目:
+
+- `default`: 删除开关的存储值, 核对脚本取得的是声明的默认值 (P5.1 起为开), 且 `base64.encode()` 为新层参数检查的 TypeError (D10).
+- `eval-default`: 每个用例文件 (默认 `app/build/script-modules-device`) 一个脚本, 默认态 `device_eval.py --strict-errors`.
+- `eval-off`: 同一批文件, 开关关且不加 `--strict-errors`, 只差错误名的两个失败不计 (D10); 差异写入 `DIR/eval-off-differences.txt`, 供对照附录 E. 结束脚本的用例 (附录 E P3.6: `wait.async`, `util.morseCode('#')` 等) 之后的用例另起脚本重跑; 旧模块会操作设备的用例 (`OFF_SKIPPED`: 开启指针位置, 使宿主崩溃的广播, 会弹出对话框的 dialogs) 不跑; 运行期间关闭 "扩展 JavaScript 内置对象" (附录 E P3.6), 结束后恢复.
+- `surface`: 两态的表面快照与对照 (`surface_compare.py --allow-length`), `KNOWN_SURFACE` 中已登记的差异 (auto.stats 计时值, console 的全局函数名, files.batchRename.apply, @lookup.Image) 单独计数, 其余为失败.
+- `bootstrap`: `device_bootstrap_check.py --probe` 两态对照, 以及默认态的 `--smoke coroutine listener suspend images automator`.
+- `instrumented`: `tools/rhino/device_rhino_check.py` 的插桩用例加 `EXTRA_CLASSES` (须是同一构建的测试包).
+
+各工具把临时脚本写在 `tools/augment/__pycache__`, 多台设备同时运行时各用一份 `tools/augment` 与 `tools/rhino` 的副本 (`surface` 还读 `augment/global/Classes.kt`). 不点按屏幕; 需要无障碍服务的用例 (automator) 在服务未开启时跳过.
