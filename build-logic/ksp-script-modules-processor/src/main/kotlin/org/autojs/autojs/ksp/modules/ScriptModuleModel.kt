@@ -41,6 +41,10 @@ internal data class ModuleModel(
     /** The `@ScriptProxyGet` / `@ScriptProxySet` functions of a proxy module. */
     val proxyGet: Member? = null,
     val proxySet: Member? = null,
+    /** The names the `@ScriptInstall` function declares it defines (metadata only). */
+    val installs: List<InstallName> = emptyList(),
+    /** Where the names the `@ScriptInstall` function computes at run time come from, or null. */
+    val installsComputed: String? = null,
 ) {
     val bindingName: String get() = "${simpleName}Binding"
 
@@ -83,6 +87,8 @@ internal data class Overload(
     val returnType: String,
     val returnsUnit: Boolean,
     val source: String,
+    /** The declared argument counts of a single-vararg overload (metadata only), or null. */
+    val arity: Arity? = null,
 ) {
     val scriptParams: List<Param> get() = params.filter { it.kind.injected == null }
     val required: Int get() = scriptParams.count { !it.optional && !it.vararg }
@@ -163,3 +169,20 @@ internal data class JavaClassBinding(
 )
 
 internal data class Member(val kotlinName: String, val isFunction: Boolean)
+
+/** Argument counts declared by `arity`: from [min] to [max], null for no upper limit. */
+internal data class Arity(val min: Int, val max: Int?)
+
+/**
+ * A name a `@ScriptInstall` function defines: [kind] `function`, `getter` or `property`, its placement, [target], the
+ * name of the object on the global object it goes on instead (or null), and the [arity] of a function (or null).
+ */
+internal data class InstallName(
+    val name: String,
+    val kind: String,
+    val placement: Placement,
+    val attributes: Int,
+    val target: String?,
+    val arity: Arity?,
+    val source: String,
+)

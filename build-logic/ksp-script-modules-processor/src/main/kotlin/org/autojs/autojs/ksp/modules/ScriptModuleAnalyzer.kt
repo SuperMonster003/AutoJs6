@@ -52,6 +52,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         val accessors = mutableListOf<Accessor>()
         var prototype: Member? = null
         var install: Member? = null
+        var installs = emptyList<InstallName>()
+        var installsComputed: String? = null
         var proxyGet: Member? = null
         var proxySet: Member? = null
         val scriptName = "${moduleAnnotation.string("name")}"
@@ -65,11 +67,11 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
                     member.annotation(ScriptModuleNames.FUNCTION)?.let { functions += member to it }
                     member.annotation(ScriptModuleNames.INVOKE)?.let {
                         if (invoke != null) error(member, "At most one @ScriptInvoke function per module")
-                        invoke = overloadOf(member, "$scriptName()")
+                        invoke = overloadOf(member, "$scriptName()", it)
                     }
                     member.annotation(ScriptModuleNames.CONSTRUCT)?.let {
                         if (construct != null) error(member, "At most one @ScriptConstruct function per module")
-                        construct = overloadOf(member, "new $scriptName()")
+                        construct = overloadOf(member, "new $scriptName()", it)
                     }
                     member.annotation(ScriptModuleNames.GETTER)?.let { accessors += accessorOf(member, it, accessors.size, isGetter = true) ?: return@let }
                     member.annotation(ScriptModuleNames.PROTOTYPE)?.let {
@@ -79,6 +81,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
                     member.annotation(ScriptModuleNames.INSTALL)?.let {
                         if (install != null) error(member, "At most one @ScriptInstall function per module")
                         install = hookOf(member, "@ScriptInstall", listOf(INSTALLATION), returnsUnit = true)
+                        installs = installNamesOf(member, it)
+                        installsComputed = it.string("computed").ifBlank { null }
                     }
                     member.annotation(ScriptModuleNames.PROXY_GET)?.let {
                         if (proxyGet != null) error(member, "At most one @ScriptProxyGet function per module")
@@ -124,7 +128,8 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         // The members of an assign module all go on the global object; they keep the default placement in the source.
         val onGlobal = Placement(onModule = false, onGlobal = true)
         if (assign) {
-            val placed = declaredGroups.map { it.name to it.placement } + accessors.map { it.name to it.placement } + declaredJavaClasses.map { it.name to it.placement }
+            val placed = declaredGroups.map { it.name to it.placement } + accessors.map { it.name to it.placement } + declaredJavaClasses.map { it.name to it.placement } +
+                installs.filter { it.target == null }.map { it.name to it.placement }
             placed.filter { (_, placement) -> placement.onGlobal }.forEach { (name, _) ->
                 error(declaration, "$scriptName.$name: every member of an assign module goes on the global object; leave global = NONE")
             }
@@ -132,8 +137,9 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         val groups = if (assign) declaredGroups.map { it.copy(placement = onGlobal) } else declaredGroups
         val placedAccessors = if (assign) accessors.map { it.copy(placement = onGlobal) } else accessors
         val javaClasses = if (assign) declaredJavaClasses.map { it.copy(placement = onGlobal) } else declaredJavaClasses
+        val placedInstalls = if (assign) installs.map { if (it.target == null) it.copy(placement = onGlobal) else it } else installs
 
-        checkDuplicateNames(declaration, groups, placedAccessors, javaClasses)
+        checkDuplicateNames(declaration, groups, placedAccessors, javaClasses, placedInstalls)
         checkDuplicateBuiltInNames(declaration, groups, placedAccessors)
 
         val parent = moduleAnnotation.type("parent")?.declaration?.qualifiedName?.asString()?.takeUnless { it == "kotlin.Unit" }
@@ -179,7 +185,50 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             install = install,
             proxyGet = proxyGet,
             proxySet = proxySet,
+            installs = placedInstalls,
+            installsComputed = installsComputed,
         ).takeUnless { failed }
+    }
+
+    /**
+     * The names a `@ScriptInstall` function declares (`names`, grouped by kind and placement); a group on a `target`
+     * object of the global object has no global placement of its own.
+     */
+    private fun installNamesOf(function: KSFunctionDeclaration, annotation: KSAnnotation): List<InstallName> {
+        val source = sourceOf(function)
+        return annotation.nested("names").flatMap { group ->
+            val names = group.strings("names")
+            val target = group.string("target").ifEmpty { null }
+            if (names.isEmpty()) error(function, "@ScriptInstallNames needs at least one name")
+            if (target != null && group.enumEntry("global", "NONE") != "NONE") error(function, "@ScriptInstallNames on target $target: the names go on that object; leave global = NONE")
+            val kind = group.enumEntry("kind", "PROPERTY")
+            if (kind != "FUNCTION" && group.ints("arity").isNotEmpty()) error(function, "@ScriptInstallNames ${names.firstOrNull()}: arity applies to FUNCTION names")
+            val arity = arityOf(function, "@ScriptInstallNames ${names.firstOrNull()}", group.ints("arity"))
+            names.map { InstallName(it, kind.lowercase(), group.placement(), group.int("attributes", PERMANENT), target, arity, source) }
+        }
+    }
+
+    /**
+     * The `arity` an overload declares ([ScriptFunction.arity]): only for one whose script parameters are a single
+     * vararg, `[n]` or `[min, max]` with `0 <= min <= max`, max -1 for no upper limit.
+     */
+    private fun arityOf(function: KSFunctionDeclaration, display: String, annotation: KSAnnotation, params: List<Param>): Arity? {
+        val values = annotation.ints("arity")
+        if (values.isEmpty()) return null
+        val script = params.filter { it.kind.injected == null }
+        if (script.size != 1 || !script[0].vararg) return error(function, "$display: arity applies to an overload whose only script parameter is a vararg")
+        return arityOf(function, display, values)
+    }
+
+    /** Declared argument counts: `[n]` or `[min, max]` with `0 <= min <= max`, max -1 for no upper limit; empty for none. */
+    private fun arityOf(function: KSFunctionDeclaration, display: String, values: List<Int>): Arity? {
+        if (values.isEmpty()) return null
+        val min = values[0]
+        val max = values.getOrElse(1) { min }
+        if (values.size > 2 || min < 0 || max < -1 || max in 0 until min) {
+            return error(function, "$display: arity is [n] or [min, max] with 0 <= min <= max, or max -1 for no upper limit")
+        }
+        return Arity(min, max.takeIf { it >= 0 })
     }
 
     /**
@@ -255,7 +304,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         if (toStringRole == "FUNCTIONAL" && !placement.onModule) {
             error(first, "$moduleName.$name: a FUNCTIONAL toString must be bound on the module object")
         }
-        val overloads = members.mapNotNull { (function, _) -> overloadOf(function, "$moduleName.$name") }
+        val overloads = members.mapNotNull { (function, annotation) -> overloadOf(function, "$moduleName.$name", annotation) }
         if (overloads.size != members.size) return null
         if ("PROTOTYPE" in builtIn && overloads.any { it.required < 1 }) {
             error(first, "$moduleName.$name: a function extending a built-in prototype takes the receiver as its first, required parameter")
@@ -264,7 +313,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         return FunctionGroup(id, name, aliases, placement, attributes, toStringRole, overloads, builtIn, builtInOnly)
     }
 
-    private fun overloadOf(function: KSFunctionDeclaration, display: String): Overload? {
+    private fun overloadOf(function: KSFunctionDeclaration, display: String, annotation: KSAnnotation): Overload? {
         when {
             !function.isPublic() -> return error(function, "$display: a script function must be public")
             Modifier.SUSPEND in function.modifiers -> return error(function, "$display: a script function cannot be suspend")
@@ -292,6 +341,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
             returnType = returnType?.let(::render) ?: "kotlin.Unit",
             returnsUnit = returnsUnit,
             source = sourceOf(function),
+            arity = arityOf(function, display, annotation, params),
         )
     }
 
@@ -381,7 +431,7 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         return if (p.kind == ParamKind.TYPED) p.rawClass else p.kind.guard ?: "any"
     }
 
-    private fun checkDuplicateNames(declaration: KSClassDeclaration, groups: List<FunctionGroup>, accessors: List<Accessor>, javaClasses: List<JavaClassBinding>) {
+    private fun checkDuplicateNames(declaration: KSClassDeclaration, groups: List<FunctionGroup>, accessors: List<Accessor>, javaClasses: List<JavaClassBinding>, installs: List<InstallName>) {
         val onModule = mutableMapOf<String, Int>()
         val onGlobal = mutableMapOf<String, Int>()
         fun count(names: List<String>, placement: Placement) {
@@ -393,7 +443,9 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         groups.forEach { count(listOf(it.name) + it.aliases, it.placement) }
         accessors.forEach { count(listOf(it.name), it.placement) }
         javaClasses.forEach { count(listOf(it.name), it.placement) }
-        val duplicates = (onModule.filterValues { it > 1 }.keys + onGlobal.filterValues { it > 1 }.keys).sorted()
+        installs.filter { it.target == null }.forEach { count(listOf(it.name), it.placement) }
+        val onTargets = installs.filter { it.target != null }.groupingBy { "${it.target}.${it.name}" }.eachCount()
+        val duplicates = (onModule.filterValues { it > 1 }.keys + onGlobal.filterValues { it > 1 }.keys + onTargets.filterValues { it > 1 }.keys).sorted()
         if (duplicates.isNotEmpty()) error(declaration, "Duplicate script member names: ${duplicates.joinToString()}")
     }
 
@@ -474,6 +526,17 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
         fun KSAnnotation.int(name: String, default: Int): Int = (value(name) as? Number)?.toInt() ?: default
 
         fun KSAnnotation.strings(name: String): List<String> = (value(name) as? List<*>)?.map { it.toString() } ?: emptyList()
+
+        /** An `IntArray` argument (a list, or an array depending on the KSP version). */
+        fun KSAnnotation.ints(name: String): List<Int> = when (val raw = value(name)) {
+            is List<*> -> raw.map { (it as Number).toInt() }
+            is IntArray -> raw.toList()
+            is Array<*> -> raw.map { (it as Number).toInt() }
+            else -> emptyList()
+        }
+
+        /** An array argument of annotations (as `@ScriptInstall(names)`). */
+        fun KSAnnotation.nested(name: String): List<KSAnnotation> = (value(name) as? List<*>)?.filterIsInstance<KSAnnotation>() ?: emptyList()
 
         fun KSAnnotation.type(name: String): KSType? = value(name) as? KSType
 

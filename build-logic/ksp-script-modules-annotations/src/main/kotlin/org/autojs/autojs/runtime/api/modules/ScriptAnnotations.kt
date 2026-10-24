@@ -81,6 +81,11 @@ annotation class ScriptModule(
  * @property builtIn where the function is also bound when the module's [ScriptModule.builtIn] object is extended.
  * @property builtInOnly bind the function only there, neither on the module object nor on the global object (the
  * current `AS_IGNORED` flag of `Math.maxi` / `Math.mini`).
+ * @property arity for an overload whose only script parameter is a vararg (`vararg args: Any?`) that the function body
+ * counts itself: the argument counts of its real signatures, `[n]` for exactly n, `[min, max]` (max -1: no upper
+ * limit), as its argument check enforces them (`ensureArguments*` of the current module, the checks of the module).
+ * Metadata only (`arity` of the overload in script-modules.json, appendix C Q112): the call and the function `length`
+ * do not change. Empty: not declared (a true variadic function, as `console.log`).
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
@@ -93,6 +98,7 @@ annotation class ScriptFunction(
     val toStringRole: ScriptToString = ScriptToString.NONE,
     val builtIn: Array<ScriptBuiltIn> = [],
     val builtInOnly: Boolean = false,
+    val arity: IntArray = [],
 )
 
 /**
@@ -137,17 +143,21 @@ annotation class ScriptJavaClass(
 /**
  * Makes the module object callable (`mime('text/plain')`, `util.inspect(o)`); the annotated function takes the call
  * arguments with the same conversion rules as [ScriptFunction]. At most one per module; overloads are not supported.
+ * [arity] as [ScriptFunction.arity].
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 @MustBeDocumented
-annotation class ScriptInvoke
+annotation class ScriptInvoke(val arity: IntArray = [])
 
-/** Makes the module object a constructor (`new Canvas(...)`); the annotated function returns the new object. */
+/**
+ * Makes the module object a constructor (`new Canvas(...)`); the annotated function returns the new object. [arity] as
+ * [ScriptFunction.arity].
+ */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 @MustBeDocumented
-annotation class ScriptConstruct
+annotation class ScriptConstruct(val arity: IntArray = [])
 
 /**
  * Provides the prototype of the module object (a Java object such as `ScriptRuntime.util`, or a script object), read
@@ -168,11 +178,54 @@ annotation class ScriptPrototype
  * further lazy names, registers actions run right after the module object is built and reaches other modules (for
  * what the annotations cannot declare: names computed at run time as selector's, side effects at start-up as ui's,
  * links between modules as `app.autojs`). At most one per module.
+ *
+ * The names the hook defines are declared here for the metadata (`installs` of the module in script-modules.json, read
+ * by the d.ts and documentation tools; appendix C Q110), as the annotations declare the other members; the host's tests
+ * check them against what the hook defines. Nothing reads them at run time.
+ *
+ * @property names the names the hook defines, grouped by kind and placement.
+ * @property computed for a hook that also defines names computed at run time, which cannot be listed: where they come
+ * from (as the global selector functions of selector); "" for none.
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)
 @MustBeDocumented
-annotation class ScriptInstall
+annotation class ScriptInstall(
+    val names: Array<ScriptInstallNames> = [],
+    val computed: String = "",
+)
+
+/**
+ * Names a [ScriptInstall] hook defines, of one [kind] and placement: on the module object, on the global object, or
+ * both ([global]), or with [target] on the object bound to that name on the global object (as `wait.async`).
+ *
+ * @property attributes Rhino attributes ([ScriptAttributes]) the names are defined with.
+ * @property arity for [ScriptInstallKind.FUNCTION] names: the argument counts the functions check, as
+ * [ScriptFunction.arity] (metadata only, appendix C Q127); empty: not declared.
+ */
+@Target()
+@Retention(AnnotationRetention.BINARY)
+@MustBeDocumented
+annotation class ScriptInstallNames(
+    val names: Array<String>,
+    val kind: ScriptInstallKind = ScriptInstallKind.PROPERTY,
+    val global: ScriptGlobal = ScriptGlobal.NONE,
+    val attributes: Int = ScriptAttributes.PERMANENT,
+    val target: String = "",
+    val arity: IntArray = [],
+)
+
+/** What a name defined by a [ScriptInstall] hook holds. */
+enum class ScriptInstallKind {
+    /** A data property whose value is a script function to call. */
+    FUNCTION,
+
+    /** An accessor property. */
+    GETTER,
+
+    /** A data property holding any other value (an error constructor, an object, a constant). */
+    PROPERTY,
+}
 
 /**
  * Reads a name of a proxy module ([ScriptModule.proxy]): `fun get(members: Scriptable, name: String): Any?`, where

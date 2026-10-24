@@ -3,10 +3,13 @@ package org.autojs.autojs.ksp.modules
 /**
  * Writes `autojs6/script-modules.json`: names, aliases, placement, attributes, parameter specs, return types and source
  * locations of every module of the compilation (roadmap T2 / T10: the single metadata source for the d.ts and
- * documentation tools). Keys are written in a fixed order so that the file diffs cleanly.
+ * documentation tools), with the names install hooks define (`installs`, `installsComputed`; appendix C Q110) and the
+ * declared argument counts of raw vararg overloads and of install functions (`arity`; Q112 / Q127). Keys are written in
+ * a fixed order so that the file diffs cleanly.
  *
  * zh-CN: 写出 `autojs6/script-modules.json`: 本次编译全部模块的名称, 别名, 挂载位置, 属性特性, 参数规格, 返回类型与源码位置
- * (T2 / T10: d.ts 与文档工具的唯一元数据来源). 键按固定顺序写出, 便于 diff.
+ * (T2 / T10: d.ts 与文档工具的唯一元数据来源), 以及 install 钩子定义的名称 (installs, installsComputed; 附录 C Q110) 与原始值 vararg 重载及
+ * install 函数声明的参数个数 (arity; Q112 / Q127). 键按固定顺序写出, 便于 diff.
  */
 internal object MetadataWriter {
 
@@ -34,6 +37,7 @@ internal object MetadataWriter {
         "assign" to m.assign,
         "proxy" to m.proxy,
         "install" to m.install?.kotlinName,
+        "installsComputed" to m.installsComputed,
         "proxyGet" to m.proxyGet?.kotlinName,
         "proxySet" to m.proxySet?.kotlinName,
         "class" to m.qualifiedName,
@@ -72,6 +76,18 @@ internal object MetadataWriter {
         "javaClasses" to m.javaClasses.map { j ->
             linkedMapOf("name" to j.name, "type" to j.type, "global" to j.placement.label, "attributes" to j.attributes)
         },
+        // The names the @ScriptInstall function declares (appendix C Q110); empty for a module without one.
+        "installs" to m.installs.map { i ->
+            linkedMapOf(
+                "name" to i.name,
+                "kind" to i.kind,
+                "global" to i.placement.label,
+                "attributes" to i.attributes,
+                "target" to i.target,
+                "arity" to i.arity?.let { linkedMapOf("min" to it.min, "max" to it.max) },
+                "source" to i.source,
+            )
+        },
     )
 
     private fun overload(o: Overload): Map<String, Any?> = linkedMapOf(
@@ -86,6 +102,8 @@ internal object MetadataWriter {
             )
         },
         "injected" to o.params.mapNotNull { it.kind.injected },
+        // Declared argument counts of a single-vararg overload (appendix C Q112); max null for no upper limit.
+        "arity" to o.arity?.let { linkedMapOf("min" to it.min, "max" to it.max) },
         "returns" to o.returnType,
         "source" to o.source,
     )
