@@ -32,7 +32,7 @@ time("fail waitForEvent-type", () => { try { waitForEvent("nope"); } catch (e) {
 // off the current module refuses them only once a node is found (or after console warnings), so they are timed with the
 // switch on only (the "off" columns show "-"). "ok textMatches" compiles its pattern in both states.
 let benchNewLayer = org.autojs.autojs.core.pref.Pref.INSTANCE.getBoolean("key_$_new_script_module_layer", false);
-let benchDepthNaN = { depth: NaN }, benchPattern = { textMatches: "[" }, benchChildNaN = ["child", NaN];
+let benchDepthNaN = { depth: NaN }, benchPattern = { textMatches: "[" }, benchChildNaN = ["child", NaN], benchRange = { textMatches: "[z-a]" };
 time("ok textMatches", () => { try { textMatches("a"); } catch (e) { } });
 if (benchNewLayer) {
     time("fail pickup-result-type", () => { try { pickup("aj6-none", "nope"); } catch (e) { } });
@@ -44,4 +44,8 @@ if (benchNewLayer) {
     time("fail pickup-condition-pattern", () => { try { pickup(benchPattern); } catch (e) { } });
     time("fail depth-value", () => { try { depth(NaN); } catch (e) { } });
     time("fail textMatches-pattern", () => { try { textMatches("["); } catch (e) { } });
+    // Appendix C Q70 (2): patterns the full syntax check refuses (before Q70 they were compiled by the core, about 2x).
+    time("fail pickup-condition-range", () => { try { pickup(benchRange); } catch (e) { } });
+    time("fail textMatches-interval", () => { try { textMatches("a{2,1}"); } catch (e) { } });
+    time("fail textMatches-property", () => { try { textMatches("\\p{NoSuch}"); } catch (e) { } });
 }

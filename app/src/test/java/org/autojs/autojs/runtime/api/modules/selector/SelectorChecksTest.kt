@@ -96,13 +96,14 @@ class SelectorChecksTest {
     fun patternRefusalCases() {
         listOf(
             "*a", "+", "?a", "a(*b)", "a(+b)", "a|*", "a|+", "a|?", "a\\", "\\", "[a", "a[b]c[d", "a)", ")", "a(b))", "(a", "((a)", "\\((",
-            "/a(/i", "/[/", "(?:a", "(?=a))",
+            "/a(/i", "/[/", "(?:a", "(?=a))", "(?i)(", "\\p{L}(",
         ).forEach { s ->
             val e = runCatching { JsRegexUtils.compileJsOrPlainRegex(s) }.exceptionOrNull() as PatternSyntaxException
             assertEquals(s, described(e), SelectorChecks.patternRefusal(s))
         }
-        // Compiling or left to compiling. zh-CN: 能编译, 或交给编译判定.
-        listOf("", "a", "[(]", "[a]]", "[]a]", "(?i)(", "(?#[)", "\\Q(", "\\x", "a{", "/a/i", "(?<n>a)", "x[(]](", "\\p{L}(").forEach {
+        // Compiling or left to compiling; since Q70 (2) the full syntax is checked (SelectorPatternsTest).
+        // zh-CN: 能编译, 或交给编译判定; Q70 (2) 起检查完整语法 (见 SelectorPatternsTest).
+        listOf("", "a", "[(]", "[a]]", "[]a]", "(?#[)", "\\Q(", "/a/i", "(?<n>a)").forEach {
             assertNull(it, SelectorChecks.patternRefusal(it))
         }
     }

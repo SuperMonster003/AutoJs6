@@ -119,6 +119,11 @@ class SelectorModulesTest {
             "detect(null, 's', 'w')" to "throws RangeError",
             "textMatch('a|*')" to "throws RangeError",
             "indexInParent(NaN)" to "throws RangeError",
+            // Q70 (2): refused by the full syntax check of SelectorPatterns. zh-CN: Q70 (2): 由 SelectorPatterns 的完整语法检查拒绝.
+            "pickup({ textMatches: '[z-a]' })" to "throws RangeError",
+            "textMatches('a{2,1}')" to "throws RangeError",
+            "pickup({ textMatch: '(?<1a>x)' })" to "throws RangeError",
+            "textMatches('(?<a>x)\\\\k<b>')" to "throws RangeError",
             "[${refusedPatterns().joinToString { "'${it.replace("\\", "\\\\")}'" }}].filter(function (p) {" +
                     " try { java.util.regex.Pattern.compile(p); return true; } catch (e) { return false; } }).join(' ')" to "\"\"",
         )
@@ -139,7 +144,8 @@ class SelectorModulesTest {
             val refusal = SelectorChecks.patternRefusal(s) ?: return@repeat
             byKind.getOrPut(refusal.substringBefore(" near index")) { LinkedHashSet() }.takeIf { it.size < REFUSED_PER_KIND }?.add(s)
         }
-        assertEquals(7, byKind.size)
+        // The kinds of refusal random strings of these characters reach (seven before Q70 (2)).
+        assertEquals(19, byKind.size)
         return byKind.values.flatten()
     }
 
