@@ -201,6 +201,7 @@ import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
 import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
 import org.mozilla.javascript.Context as RhinoContext
+import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
 import org.autojs.autojs.runtime.api.modules.bootstrap.ContinuationPrototype
@@ -1239,7 +1240,18 @@ class ScriptRuntime private constructor(builder: Builder) {
         InternalGlobals.install(topLevelScope, global)
     }
 
+    /**
+     * The engine's Rhino `require`. While a script runs it is called directly, so that its errors reach the script as they
+     * are (as with jvm-npm's native require), not as the InternalError of [callFunction]: the guidance error of a Bundled
+     * Libraries module that cannot be loaded keeps its `code` / `library` / `reason` (roadmap P4.3, design (d)).
+     * zh-CN: 引擎的 Rhino require. 脚本运行时直接调用, 使其错误原样到达脚本 (同 jvm-npm 的原生 require), 而不是 [callFunction] 的 InternalError:
+     * Bundled Libraries 模块无法加载时的指引错误保留 code / library / reason (ROADMAP P4.3, 设计 (d)).
+     */
     private fun rhinoRequire(id: String): Any? {
+        val cx = RhinoContext.getCurrentContext()
+        if (cx != null && RhinoScriptRuntime.hasTopCall(cx)) {
+            return rhinoRequireFunction.call(cx, topLevelScope, topLevelScope.globalThis, arrayOf(id))
+        }
         return callFunction(this, rhinoRequireFunction, topLevelScope, topLevelScope.globalThis, arrayOf(id))
     }
 
