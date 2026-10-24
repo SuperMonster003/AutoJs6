@@ -231,6 +231,16 @@ public class Database extends SQLiteOpenHelper implements Closeable {
         }
     }
 
+    // Without a callback (or when the script object has no onDowngrade) the downgrade does nothing and keeps the data,
+    // instead of SQLiteOpenHelper's default exception; the helper then sets the requested version (roadmap db-downgrade D6).
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        mDatabase = db;
+        if (mCallback != null) {
+            mCallback.onDowngrade(this, oldVersion, newVersion);
+        }
+    }
+
     public Object query(String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
         return wrapCursor(mDatabase.query(table, columns, selection, selectionArgs, groupBy, having, orderBy));
     }
@@ -350,6 +360,8 @@ public class Database extends SQLiteOpenHelper implements Closeable {
         void onOpen(Database database);
 
         void onUpgrade(Database database, int oldVersion, int newVersion);
+
+        void onDowngrade(Database database, int oldVersion, int newVersion);
 
     }
 

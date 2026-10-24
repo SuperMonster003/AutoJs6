@@ -116,7 +116,14 @@ class SqliteModuleTest {
             "(function () { var events = []; var db = sqlite.open('aj6-p35-callback.db', undefined, { onOpen: function () { events.push('open'); } }); db.close(); return events; })()" to "[\"open\"]",
             "(function () { var events = []; var db = sqlite.open('aj6-p35-callback.db', { version: 3 }, { onUpgrade: function (d, from, to) { events.push(from + '->' + to); } }); db.close(); return events; })()" to "[\"1->3\"]",
             withDatabase("sqlite('aj6-p35-sqlite.db', { version: 2, readOnly: true })", "typeof db.isReadOnly()") to "\"boolean\"",
-            "sqlite('aj6-p35-sqlite.db', { version: 1 })" to "throws JavaException SQLiteException",
+            // A lower version keeps the data (db-downgrade D6; before, Android's default onDowngrade threw SQLiteException).
+            withDatabase("sqlite('aj6-p35-sqlite.db', { version: 1 })", "[db.getVersion(), db.query('t', null, null, null, null, null, null).all().length]") to "[1,1]",
+            "(function () { var events = []; sqlite.open('aj6-p35-downgrade.db', { version: 3 }).close(); " +
+                "var db = sqlite.open('aj6-p35-downgrade.db', { version: 2 }, { onDowngrade: function (d, from, to) { events.push(from + '->' + to, d.getVersion()); }, onUpgrade: function () { events.push('upgrade'); }, onOpen: function () { events.push('open'); } }); " +
+                "events.push(db.getVersion()); db.close(); return events; })()" to "[\"3->2\",3,\"open\",2]",
+            "(function () { sqlite.open('aj6-p35-downgrade.db', { version: 3 }).close(); var error = null; " +
+                "try { sqlite.open('aj6-p35-downgrade.db', { version: 2 }, { onDowngrade: function () { throw new Error('kept'); } }).close(); } catch (e) { error = /kept/.test(String(e)); } " +
+                "var db = sqlite.open('aj6-p35-downgrade.db', { version: 3 }); try { return [error, db.getVersion()]; } finally { db.close(); } })()" to "[true,3]",
         )
 
     }
