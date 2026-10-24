@@ -27,12 +27,13 @@ import org.junit.runner.RunWith
  * identity hash, `user_version` one above the code version), then opened through the production builder.
  * Room must open it without throwing, keep the rows and the values of the shared columns, keep the extra table,
  * store the identity hash of the code version, and open it again without another migration.
- * A file whose rebuild fails is kept by [DatabaseRecovery] as a backup and replaced by an empty database.
+ * A file whose rebuild fails, including one with a table that cannot keep its rows (roadmap D9), is kept by
+ * [DatabaseRecovery] as a backup and replaced by an empty database.
  *
  * zh-CN: [RoomDowngrade] 的降级回归 (docs/db-downgrade/ROADMAP.md P2.2): 用原生 SQL 写出 "未来" 库文件 (打包的 schema
  * 快照中的表, 多一列, 多一张表与索引, 别的 identity hash, `user_version` 比代码版本高 1), 再经生产 builder 打开.
  * Room 应打开而不抛异常, 保留行与共有列的值, 保留多出的表, 写入代码版本的 identity hash, 再次打开时不再迁移.
- * 重建失败的文件由 [DatabaseRecovery] 留作备份, 改用空库.
+ * 重建失败的文件 (包括含有无法保留其行的表的文件, 路线图 D9) 由 [DatabaseRecovery] 留作备份, 改用空库.
  *
  * Created by Claude (Opus 5.5) on Oct 23, 2026.
  */
@@ -50,7 +51,9 @@ class RoomDowngradeTest {
     @After
     fun deleteAfter() {
         deleteAll()
-        NotificationManagerCompat.from(context).cancel(DatabaseRecovery.NOTIFICATION_TAG_PREFIX + FALLBACK_DB.removeSuffix(".db"), DatabaseRecovery.NOTIFICATION_ID)
+        listOf(KEYSTORE_DB, FALLBACK_DB).forEach {
+            NotificationManagerCompat.from(context).cancel(DatabaseRecovery.NOTIFICATION_TAG_PREFIX + it.removeSuffix(".db"), DatabaseRecovery.NOTIFICATION_ID)
+        }
     }
 
     private fun deleteAll() = names.forEach { name ->
@@ -165,7 +168,7 @@ class RoomDowngradeTest {
     }
 
     @Test
-    fun tableMissingRequiredColumnIsKeptAsideAndStartsEmpty() {
+    fun tableMissingRequiredColumnSendsWholeFileToRecovery() {
         val schema = createFuture(KEYSTORE_DB, KeyStoreDatabase::class.java) { db ->
             // The newer version dropped alias_password (NOT NULL without default in this version).
             // zh-CN: 较新版本删掉了 alias_password (本版本中为 NOT NULL 且无默认值).
@@ -175,16 +178,44 @@ class RoomDowngradeTest {
                         "verified INTEGER NOT NULL, PRIMARY KEY(absolutePath))"
             )
             db.execSQL("INSERT INTO KeyStore VALUES ('/storage/emulated/0/a.bks', 'a.bks', 'p', 'key0', 1)")
+            createFutureTable(db)
         }
+        val file = context.getDatabasePath(KEYSTORE_DB)
 
+        // The table cannot keep its rows, so the whole file goes to DatabaseRecovery (D9) instead of a half-kept database.
+        // zh-CN: 该表无法保留其行, 因此整个文件交给 DatabaseRecovery (D9), 而不是只保留一部分的库.
         open(KeyStoreDatabase.createBuilder(context, KEYSTORE_DB)) { room, db ->
             assertEquals(schema.version, count(db, "PRAGMA user_version"))
             assertTrue(runBlocking { room.keyStoreDao().getAll() }.isEmpty())
-            val kept = "_downgrade_kept_KeyStore_v${schema.version + 1}"
-            assertEquals(1, count(db, "SELECT COUNT(*) FROM `$kept` WHERE absolutePath = '/storage/emulated/0/a.bks'"))
+            assertTrue(columnsOf(db, "future_table").isEmpty())
+            assertEquals(0, count(db, "SELECT COUNT(*) FROM sqlite_master WHERE name LIKE '\\_downgrade\\_%' ESCAPE '\\'"))
             runBlocking { room.keyStoreDao().upsert(KeyStore("/storage/emulated/0/b.bks", "b.bks")) }
             assertEquals(1, runBlocking { room.keyStoreDao().getAll() }.size)
         }
+        val backup = DatabaseRecovery.backupsOf(file).single()
+        assertEquals(schema.version + 1, backup.version)
+        SQLiteDatabase.openDatabase(backup.file.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            assertEquals(schema.version + 1, db.version)
+            db.rawQuery("SELECT COUNT(*) FROM KeyStore WHERE absolutePath = '/storage/emulated/0/a.bks' AND alias = 'key0'", null).use {
+                assertTrue(it.moveToFirst())
+                assertEquals(1, it.getInt(0))
+            }
+            db.rawQuery("SELECT identity_hash FROM room_master_table WHERE id = 42", null).use {
+                assertTrue(it.moveToFirst())
+                assertEquals("future-identity-hash", it.getString(0))
+            }
+            db.rawQuery("SELECT COUNT(*) FROM future_table WHERE payload = 'kept'", null).use {
+                assertTrue(it.moveToFirst())
+                assertEquals(1, it.getInt(0))
+            }
+        }
+
+        // The backup is newer than the code, so the next open neither restores it nor backs up again.
+        // zh-CN: 备份比代码新, 因此下次打开既不还原它, 也不再次备份.
+        open(KeyStoreDatabase.createBuilder(context, KEYSTORE_DB)) { room, _ ->
+            assertEquals(listOf("/storage/emulated/0/b.bks"), runBlocking { room.keyStoreDao().getAll() }.map { it.absolutePath })
+        }
+        assertEquals(listOf(backup.file), DatabaseRecovery.backupsOf(file).map { it.file })
     }
 
     @Test

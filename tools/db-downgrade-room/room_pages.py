@@ -319,10 +319,10 @@ def scan_logs(dev, dbs, result):
     for db in dbs:
         rebuilt = sum(1 for line in lines if "RoomDowngrade" in line and f"/{db.file}: file version {db.version + 1} is newer than {db.version}" in line)
         result.add(f"{db.key} rebuild", rebuilt == 1, f"{rebuilt} rebuild(s) logged")
-    # Every future table holds the required columns, so no table should be set aside.
-    # zh-CN: 每张未来表都含必需列, 因此不应有表被移到一旁.
-    kept_aside = sum(1 for line in lines if "RoomDowngrade" in line and "rows kept in _downgrade_kept_" in line)
-    result.add("tables kept aside", kept_aside == 0, f"{kept_aside} table(s)")
+    # Every future table holds the required columns, so no database should be backed up and replaced (roadmap D9).
+    # zh-CN: 每张未来表都含必需列, 因此不应有库被备份并换成空库 (路线图 D9).
+    recovered = sum(1 for line in lines if "DatabaseRecovery" in line and ": cannot open, kept as " in line)
+    result.add("databases sent to recovery", recovered == 0, f"{recovered} database(s)")
 
 
 def verify(dev, dbs, result):
