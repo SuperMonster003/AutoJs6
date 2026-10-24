@@ -1,0 +1,21 @@
+Python Runtime opt-in real-plugin diagnostics (tools/python/run_opt_in_diagnostics.py), mp2-final 2026-10-24
+Device: Xiaomi 23046RP50C (968e9f18), API 35
+Host: org.autojs.autojs6 debug 5935 from isolated clone of b6a755fc2 (includes 6ecb633cc and 2272847a7), test APK from the same build
+Plugin: io.github.supermonster003.autojs6.plugin.python.runtime debug 135 (0.5.5), commit 5514e82
+Command: py -3.12 -I tools/python/run_opt_in_diagnostics.py -s 968e9f18 (all nine opt-in arguments passed)
+
+PASS PythonRuntimeU1R1StartLeaseInstrumentationTest#openedButNeverStartedSessionExpiresAndNextExecutionSucceeds: ok, 7.5 s
+PASS PythonRuntimeU1R2BinderInstrumentationTest#interactivePromptReplyStreamsBeforeTerminalAndKeepsStdoutOutOfResult: ok, 1.7 s
+PASS PythonRuntimeU1R2BinderInstrumentationTest#oversizedArtifactPublishesNoPartialResultThenNextExactBindSucceeds: ok, 3.3 s
+PASS PythonRuntimeRealPluginDiagnosticTest#realPluginMetadataActionNullBindAndCpythonPfdExecution: ok, 4.7 s
+PASS PythonRuntimeRealPluginCancelRebindDiagnosticTest#cancelAfterStartedKillsOldBinderThenExactRebindRunsFiniteRequestOnce: ok, 2.9 s
+PASS PythonRuntimeRealPluginExecutionMatrixDiagnosticTest#systemExitReturnsBoundedExitCode: ok, 1.7 s
+PASS PythonRuntimeRealPluginExecutionMatrixDiagnosticTest#runtimeExceptionReturnsStructuredProjectTraceback: ok, 1.7 s
+PASS PythonRuntimeRealPluginExecutionMatrixDiagnosticTest#syntaxErrorReturnsStructuredProjectTraceback: ok, 1.7 s
+PASS PythonRuntimeRealPluginExecutionMatrixDiagnosticTest#outputLimitFailsAfterDeliveringOnlyBudgetedChunks: ok, 1.6 s
+PASS PythonRuntimeRealPluginTimeoutRebindDiagnosticTest#providerTimeoutFailsBeforeOldBinderDeathThenExactRebindRunsFiniteRequest: ok, 9.1 s
+PASS PythonRuntimeRealPluginReliablePipeDiagnosticTest#producerErrorRejectsBeforeCpythonThenExactRebindExecutesFiniteSource: ok, 2.1 s
+PASS PythonRuntimeRealPluginStagingTimeoutDiagnosticTest#stagingDeadlineFailsBeforeOldBinderDeathThenExactRebindRunsFiniteReliablePipeOnce: ok, 6.1 s
+PASS PythonRuntimeRealPluginBlockingRetirementDiagnosticTest#nativePbkdf2TimesOutBeforeBinderDeathThenExactRebindRunsFiniteRequestOnce: ok, 6.1 s
+PASS PythonRuntimeRealPluginBlockingRetirementDiagnosticTest#blockingOsReadTimesOutBeforeBinderDeathThenExactRebindRunsFiniteRequestOnce: ok, 6.1 s
+PASS summary: enabled, 14 / 14 as expected, 58 s
