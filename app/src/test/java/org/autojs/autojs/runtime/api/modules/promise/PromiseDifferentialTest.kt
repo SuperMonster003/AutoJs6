@@ -8,13 +8,16 @@ import org.junit.Test
 /**
  * The global Promise of both switch states run side by side (roadmap P4.2, appendix C Q95): each scenario runs in a
  * fresh [PromiseHarness] with `assets/modules/promise.js` and with [PromiseConstructor] (through the global `setImmediate`
- * and posting its jobs itself), and the logs must be the same, except for the instance properties that Q96 dropped.
+ * and posting its jobs itself), and the logs must be the same, except for the differences of appendix E "P4.2" ([KNOWN]:
+ * the instance properties that Q96 dropped, receivers that are not instances, the surface of the functions it hands out).
  * The scenarios are the 23 of docs/augment/P4-2-promise-eval.md §4.1 (A order, B errors, C surface, K coroutines, W wait,
  * T threads) and the D ones of the implementation (replaced `_immediateFn` / `setImmediate` / `_unhandledRejectionFn`,
- * receivers that are not instances, thenables that misbehave, many queued reactions and `wait()`).
+ * receivers that are not instances, thenables that misbehave, not-a-function messages, many queued reactions and
+ * `wait()`, the functions it hands out and error positions).
  *
  * zh-CN: 开关两态的全局 Promise 并排运行 (ROADMAP P4.2, 附录 C Q95): 每个场景在新的 [PromiseHarness] 中分别以 promise.js 与 [PromiseConstructor]
- * (经全局 setImmediate, 以及自行投递任务) 运行, 日志必须相同, Q96 去掉的实例属性除外. 场景为评估文档 §4.1 的 23 个与实施时新增的 D 组.
+ * (经全局 setImmediate, 以及自行投递任务) 运行, 日志必须相同, 附录 E "P4.2" 的差异除外 ([KNOWN]: Q96 去掉的实例属性, 非实例接收者, 交出的函数的表面).
+ * 场景为评估文档 §4.1 的 23 个与实施时新增的 D 组.
  */
 class PromiseDifferentialTest {
 
@@ -70,6 +73,9 @@ class PromiseDifferentialTest {
             // Settling what is not an instance does nothing; the module wrote `_state` on it and failed in `_.finale`.
             "D6-not-an-instance" to "then via catch null function ; rejected undefined ; catch undefined ; primitive undefined ; derived undefined ; adopted rejected undefined",
             "D9-constructor-replaced" to "Sub noop 0 ; sub 1 ; plain object ctor 2 ; chained",
+            // Resolving functions have no prototype; the constructor cannot be applied to an instance (the module set it up
+            // again); its TypeError is at the script line (the module's at line 0).
+            "D13-functions-and-positions" to "resolver prototype undefined undefined ; reapply TypeError: Promises must be constructed via new ; new 1 at line 5 ; call at line 6 ; kept 1 ; wait threw w at line 0",
         )
 
         /** Results of the module that the evaluation recorded (docs/augment/P4-2-promise-eval.md §2). */
@@ -286,6 +292,15 @@ class PromiseDifferentialTest {
                 try { Promise.allSettled.call(undefined, []); } catch (e) { log('allSettled ' + e.name); }
                 Promise._immediateFn = 1;
                 try { Promise.resolve(1).then(() => 0); } catch (e) { log('immediateFn 1 ' + e.message); }
+            """,
+            "D13-functions-and-positions" to """
+                new Promise((res, rej) => log('resolver prototype ' + typeof res.prototype + ' ' + typeof rej.prototype));
+                var p = Promise.resolve(1);
+                try { Reflect.apply(Promise, p, [function (r) { r(2); }]); log('reapplied'); } catch (e) { log('reapply ' + e.name + ': ' + e.message); }
+                p.then(v => log('kept ' + v));
+                try { new Promise(1); } catch (e) { log('new 1 at line ' + e.lineNumber); }
+                try { Promise.call(p, () => 0); } catch (e) { log('call at line ' + e.lineNumber); }
+                try { Promise.reject(new Error('w')).wait(); } catch (e) { log('wait threw ' + e.message + ' at line ' + e.lineNumber); }
             """,
             "D11-many-reactions-and-wait" to """
                 var n = 0;
