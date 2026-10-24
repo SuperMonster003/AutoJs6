@@ -100,6 +100,8 @@ class PromiseConstructor(scope: VarScope, private val poster: ReactionPoster? = 
         proto.defineProperty("await", method(scope, "await", 0) { cx, s, thisObj, _ -> PromiseSuspension.await(cx, s, sloppyThis(thisObj)) }, EMPTY)
         proto.defineProperty("wait", method(scope, "wait", 0) { cx, s, thisObj, _ -> PromiseSuspension.wait(cx, s, sloppyThis(thisObj)) }, EMPTY)
         setPrototypeProperty(proto)
+        // The module's function has a configurable arity, as every JavaScript function; a BaseFunction's is permanent.
+        setAttributes("arity", DONTENUM or READONLY)
     }
 
     override fun getFunctionName() = "Promise"

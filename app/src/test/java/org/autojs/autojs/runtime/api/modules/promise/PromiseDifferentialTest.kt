@@ -4,6 +4,7 @@ import org.autojs.autojs.runtime.api.modules.promise.PromiseHarness.Impl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.mozilla.javascript.NativeObject
 
 /**
  * The global Promise of both switch states run side by side (roadmap P4.2, appendix C Q95): each scenario runs in a
@@ -55,6 +56,23 @@ class PromiseDifferentialTest {
                 log('rejected');
                 log('got ' + kotlinAwait(Promise.reject(new Error('no'))));
             """))
+        }
+    }
+
+    @Test
+    fun instancesAreNativeObjectsInBothStates() {
+        // Kotlin callers of the old augment package take a Promise as a NativeObject (RhinoUtils.handleAsyncOperation for
+        // images.loadAsync and the http Async functions, images.requestScreenCaptureAsync): with the switch on by default
+        // (P5.1), images.loadAsync threw a ClassCastException.
+        // zh-CN: 旧 augment 包的 Kotlin 调用方把 Promise 当作 NativeObject (images.loadAsync 与 http 的 Async 函数所用的
+        // RhinoUtils.handleAsyncOperation, images.requestScreenCaptureAsync): 开关默认开启 (P5.1) 后 images.loadAsync 曾抛 ClassCastException.
+        Impl.entries.forEach { impl ->
+            PromiseHarness(impl).use { harness ->
+                listOf("new Promise(function () {})", "Promise.resolve(1)", "Promise.resolve(1).then(function (v) { return v; })", "Promise.all([])").forEach { source ->
+                    val value = harness.eval(source)
+                    assertTrue("$impl $source: ${value?.javaClass?.name}", value is NativeObject)
+                }
+            }
         }
     }
 
@@ -301,6 +319,13 @@ class PromiseDifferentialTest {
                 try { new Promise(1); } catch (e) { log('new 1 at line ' + e.lineNumber); }
                 try { Promise.call(p, () => 0); } catch (e) { log('call at line ' + e.lineNumber); }
                 try { Promise.reject(new Error('w')).wait(); } catch (e) { log('wait threw ' + e.message + ' at line ' + e.lineNumber); }
+            """,
+            "D14-constructor-property-attributes" to """
+                // As the surface snapshot sees them (arity is Rhino's own, not standard).
+                log(['name', 'length', 'arity', 'prototype'].map(function (k) {
+                    var d = Object.getOwnPropertyDescriptor(Promise, k);
+                    return k + ' ' + (d.writable ? 'W' : '-') + (d.enumerable ? 'E' : '-') + (d.configurable ? 'C' : '-');
+                }).join(', '));
             """,
             "D11-many-reactions-and-wait" to """
                 var n = 0;
