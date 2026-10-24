@@ -43,7 +43,8 @@ def script_for(expression, run_ms):
     )
 
 
-def profile(s, expression, seconds):
+def profile(s, expression, seconds, quiet=False):
+    """Prints (unless quiet) and returns (us per iteration or None, [(share %, interpreted symbol), ...])."""
     local = HERE / "__pycache__" / "aj6_profile.js"
     local.parent.mkdir(exist_ok=True)
     local.write_text(script_for(expression, (seconds + 6) * 1000), encoding="utf-8")
@@ -57,7 +58,7 @@ def profile(s, expression, seconds):
     record = db.adb(s, "shell", f"simpleperf record --app {db.PACKAGE} -e cpu-clock -f 4000 -g --duration {seconds} -o {PERF_DATA}")
     if "Samples recorded" not in record.stdout + record.stderr:
         print(f"{expression}: simpleperf failed: {(record.stdout + record.stderr).strip()[-300:]}")
-        return
+        return None, []
     per_call = None
     deadline = time.time() + 15
     while time.time() < deadline and per_call is None:
@@ -71,12 +72,14 @@ def profile(s, expression, seconds):
         m = FRAME_RE.match(line)
         if m and ".dex" in m.group(3) and m.group(4).startswith(PACKAGES):
             interpreted.append((float(m.group(1)), m.group(4)))
-    print(f"{expression}: {per_call or 'no timing line'}")
-    if not interpreted:
-        print("  interpreted frames of the module layer / Rhino: none")
-    for share, symbol in interpreted:
-        print(f"  interpreted {share:5.1f}%  {symbol}")
     db.adb(s, "shell", "rm", "-f", PERF_DATA)
+    if not quiet:
+        print(f"{expression}: {per_call or 'no timing line'}")
+        if not interpreted:
+            print("  interpreted frames of the module layer / Rhino: none")
+        for share, symbol in interpreted:
+            print(f"  interpreted {share:5.1f}%  {symbol}")
+    return (float(per_call.split()[0]) if per_call else None), interpreted
 
 
 def main():

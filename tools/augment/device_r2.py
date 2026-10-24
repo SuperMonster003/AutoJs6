@@ -1,7 +1,7 @@
 """One timing round of ROADMAP appendix A for red line R2, in one command (P2.4).
 
 Usage: py -3.12 -I tools/augment/device_r2.py -s SERIAL [--restart] [--warmup 100] [--rounds 2] [--runs 5]
-    [--errors] [--calls NAME ...] [--init]
+    [--errors] [--calls NAME ...] [--init] [--verify [--verify-retries 2]]
 
 Steps: optionally force-stop the host (--restart, a new process), warm it up with --warmup startup timing scripts
 (alternating the switch of the new script module layer off / on every 20), then --rounds times "off, on": with the
@@ -13,6 +13,14 @@ Printed per case: the median per state and round (us; startup steps in ms), and 
 Rhino reference of the same script runs: argument errors to `undefined.x`, Java exceptions to a Java exception thrown
 through Rhino's own bridge, `e.stack` reads to the same read after `undefined.x`. The switch is restored to its
 previous value at the end.
+
+--verify (ROADMAP appendix C Q76, for judging R2 on XQ-AT72): every script (error_path first, then each calls file,
+then the startup timing) gets all its rounds in a process checked before and after with device_profile: base64.encode()
+with the switch on must take <= 225 us per iteration and no ScriptMessages frame may run interpreted with more than
+5 % of the samples. The debug host sometimes leaves those methods in the ART interpreter, which adds 30-50 us to every
+failing call of the new layer. A script whose check fails is measured again in a new process (force-stop, the same
+warm-up, then error_path once), at most --verify-retries times; discarded timings are printed as "NAME (discarded N)",
+followed by the checks of every attempt. Implies --restart.
 """
 import argparse
 import pathlib
@@ -24,9 +32,13 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import device_bench as db  # noqa: E402
+import device_profile as dp  # noqa: E402
 
 CALL_OR_ERROR_RE = re.compile(r"AJ6BENCH (?:call|error) (.+) ([\d.]+) us$")
 STARTUP_STEPS = ["runtime-init-prologue", "runtime-init-epilogue"]
+VERIFY_EXPRESSION = "base64.encode()"
+VERIFY_LIMIT_US = 225.0
+VERIFY_INTERPRETED_PERCENT = 5.0
 
 
 def pcy(s):
@@ -70,6 +82,23 @@ def startup(s, script, runs):
     return samples
 
 
+def check(s):
+    """Profiles base64.encode() with the switch on; returns (clean, text) (appendix C Q76)."""
+    previous = db.set_new_modules(s, True)
+    try:
+        us, interpreted = dp.profile(s, VERIFY_EXPRESSION, 5, quiet=True)
+    finally:
+        db.set_new_modules(s, previous)
+    messages = max([share for share, symbol in interpreted if ".ScriptMessages." in symbol] or [0.0])
+    clean = us is not None and us <= VERIFY_LIMIT_US and messages <= VERIFY_INTERPRETED_PERCENT
+    return clean, ("no timing" if us is None else f"{us:.1f} us") + f", ScriptMessages interpreted {messages:.1f}%"
+
+
+def process_of(s):
+    out = db.adb(s, "shell", "pid=$(pidof " + db.PACKAGE + "); echo $pid $(cat /proc/$pid/cpuset)").stdout
+    return out.strip() or "not running"
+
+
 def reference_of(group, label):
     """The Rhino reference case a failing case is compared with, or None for a case that is not a failing call."""
     if group == "error_path":
@@ -93,46 +122,75 @@ def main():
     parser.add_argument("--errors", action="store_true", help="bench/error_path.js")
     parser.add_argument("--calls", nargs="*", default=[], help="bench/calls/NAME.js")
     parser.add_argument("--init", action="store_true", help="startup timing (prologue / epilogue)")
+    parser.add_argument("--verify", action="store_true", help="check the process around every script (Q76)")
+    parser.add_argument("--verify-retries", type=int, default=2, help="new processes per script after a failed check")
     args = parser.parse_args()
     missing = [n for n in args.calls if not (db.HERE / "bench" / "calls" / f"{n}.js").is_file()]
     if missing:
         sys.exit(f"no such call benchmark: {', '.join(missing)}")
     s = args.serial
-    if args.restart:
+    if args.restart or args.verify:
         db.adb(s, "shell", "am", "force-stop", db.PACKAGE)
         time.sleep(1)
     init_script = db.push_script(s, "aj6_init_timing.js")
-    previous = None
+    previous = db.set_new_modules(s, False)
     # results[(group, label)][(round, state)] = median
     results = {}
-    try:
+    checks = []
+
+    def warm_up():
         state = False
         for start in range(0, args.warmup, 20):
-            first = db.set_new_modules(s, state)
-            previous = first if previous is None else previous
+            db.set_new_modules(s, state)
             startup(s, init_script, min(20, args.warmup - start))
             state = not state
         print(f"warm-up: {args.warmup} scripts; host PCY {pcy(s)}")
-        scripts = ([("error_path", db.push_script(s, "error_path.js"))] if args.errors else []) + [(n, push_calls(s, n)) for n in args.calls]
+
+    def measure(scripts, tag=""):
+        """scripts: [(group, remote, row name)]; --rounds times "off, on" over all of them."""
         for r in range(1, args.rounds + 1):
             for on in (False, True):
-                before = db.set_new_modules(s, on)
-                previous = before if previous is None else previous
+                db.set_new_modules(s, on)
                 key = (r, "on" if on else "off")
-                for group, remote in scripts:
-                    for label, vals in sample(s, remote, args.runs).items():
-                        results.setdefault((group, label), {})[key] = (statistics.median(vals), len(vals))
-                if args.init:
-                    for label, vals in startup(s, init_script, args.runs).items():
-                        results.setdefault(("startup ms", label), {})[key] = (statistics.median(vals), len(vals))
-                print(f"round {r} {key[1]} done; host PCY {pcy(s)}")
+                for group, remote, into in scripts:
+                    runs = startup(s, remote, args.runs) if group == "startup ms" else sample(s, remote, args.runs)
+                    for label, vals in runs.items():
+                        results.setdefault((into, label), {})[key] = (statistics.median(vals), len(vals))
+                print(f"{tag}round {r} {key[1]} done; host PCY {pcy(s)}")
+
+    try:
+        warm_up()
+        error_path = db.push_script(s, "error_path.js") if args.errors or args.verify else None
+        scripts = ([("error_path", error_path)] if args.errors else []) + [(n, push_calls(s, n)) for n in args.calls]
+        scripts += [("startup ms", init_script)] if args.init else []
+        if not args.verify:
+            measure([(group, remote, group) for group, remote in scripts])
+        for group, remote in scripts if args.verify else []:
+            for attempt in range(1, args.verify_retries + 2):
+                process = process_of(s)
+                clean, before = check(s)
+                after = "-"
+                if clean:
+                    into = group if attempt == 1 else f"{group} (attempt {attempt})"
+                    measure([(group, remote, into)], f"{into}: ")
+                    clean, after = check(s)
+                    if not clean:
+                        for key in [k for k in results if k[0] == into]:
+                            results[(f"{group} (discarded {attempt})", key[1])] = results.pop(key)
+                checks.append((group, attempt, process, before, after, "clean" if clean else "not clean"))
+                if clean or attempt > args.verify_retries:
+                    break
+                db.adb(s, "shell", "am", "force-stop", db.PACKAGE)
+                time.sleep(1)
+                warm_up()
+                db.set_new_modules(s, True)
+                sample(s, error_path, 1)
     finally:
-        if previous is not None:
-            db.set_new_modules(s, previous)
+        db.set_new_modules(s, previous)
     columns = [(r, st) for r in range(1, args.rounds + 1) for st in ("off", "on")]
     print("case | " + " | ".join(f"r{r} {st}" for r, st in columns))
     for (group, label), cells in results.items():
-        ref = reference_of(group, label)
+        ref = reference_of(group.split(" (")[0], label)
         parts = []
         for col in columns:
             if col not in cells:
@@ -145,6 +203,10 @@ def main():
                 text += f" ({value / base[0]:.2f})"
             parts.append(text)
         print(f"{group}: {label} | " + " | ".join(parts))
+    if checks:
+        print("verify: script | attempt | process (pid cpuset) | base64.encode() before | after | result")
+        for row in checks:
+            print("verify: " + " | ".join(str(x) for x in row))
 
 
 if __name__ == "__main__":

@@ -29,6 +29,12 @@ py -3.12 -I tools/augment/device_r2.py -s SERIAL --restart [--warmup 100] [--rou
 
 `--restart` 先 force-stop 宿主 (新进程), 再以启动计时脚本暖机 `--warmup` 次 (每 20 次切换一次新模块层开关), 然后 `--rounds` 轮 "关, 开": 每种状态下 `bench/error_path.js` (`--errors`), `bench/calls/<组>.js` (`--calls`) 与启动计时 (`--init`) 各跑 `--runs` 次. 前后打印宿主进程的调度组 (PCY), 中途变化则数据不可比 (R2). 输出每项在各轮各状态的中位数 (us, 启动计时为 ms), 开关开的失败调用后附对同次运行中 Rhino 参照项的比值 (参数错误对 `undefined.x`, Java 异常对经 Rhino 桥接抛出的 Java 异常, 读 `e.stack` 对 `undefined.x` 后读 `e.stack`), 即 R2 的判定值; 结束时恢复开关原值. 收到的次数少于 `--runs` 时 (logcat 丢行) 标出 n. 注意: force-stop 会让系统把宿主的无障碍服务移出已启用列表 (G8441 上 2026-10-22 实测, 宿主之外一个插件的无障碍服务也随之解除绑定), 测前开着宿主无障碍的设备, 测后由维护者在手机上重新开启.
 
+在 XQ-AT72 上判定 R2 时加 `--verify` (ROADMAP 附录 C Q76, 隐含 `--restart`): 可调试构建的宿主有时让新层的 `ScriptMessages` 方法停在 ART 解释执行 (P2.4 待决 (a) 的状态), 新层每个失败调用多约 30-50 us, 比值从 0.87-1.20 升到 1.13-1.45; 新进程加 `--warmup 100` 也排除不了, 触发条件未查明 (附录 A "P3.6"). `--verify` 下每个脚本 (先 error_path, 再各调用文件, 最后启动计时) 单独跑完全部轮次, 前后各用 device_profile 剖析一次开关开的 `base64.encode()`: 每次 <= 225 us 且 `ScriptMessages` 解释帧 <= 5% 才算干净. 不干净时换新进程 (force-stop, 同样暖机, 再开态跑一次 error_path) 重测该脚本, 至多 `--verify-retries` 次 (默认 2). 作废的计时也打印, 行名为 "<脚本> (discarded N)", 重测的为 "<脚本> (attempt N)"; 末尾 `verify:` 表列出每次尝试所在进程 (pid 与 cpuset) 与前后核验数值. 判定只用干净的行. 每个脚本多两次剖析 (各约 15 s), 需要设备上有 simpleperf (G8441 没有, 只在 XQ-AT72 上用).
+
+```
+py -3.12 -I -u tools/augment/device_r2.py -s QV710AF65F --verify --warmup 100 --rounds 2 --runs 5 --errors --calls pure jsox --init
+```
+
 ## device_profile.py: 采样确认调用路径已 JIT (P2.4)
 
 ```
