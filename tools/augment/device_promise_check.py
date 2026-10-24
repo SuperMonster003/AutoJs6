@@ -1,4 +1,4 @@
-"""ROADMAP P4.2: the global Promise on a device (promise.js and the prototypes of the two routes).
+"""ROADMAP P4.2 / Q95: the global Promise on a device (promise.js with the switch off, PromiseConstructor with it on).
 
     py -3.12 -I tools/augment/device_promise_check.py -s SERIAL [--new-modules on|off] [--sample] [--scenarios] [--bench]
 
@@ -7,7 +7,8 @@ and checks its console lines in order ("Hello, Continuation!", "1 秒后...", "2
 --scenarios runs bench/promise_smoke/scenarios (a project with the continuation feature: order of reactions against the
 timers, thenable adoption, await in its forms, callbacks settled on other threads, Flow await(), wait(), the unhandled
 rejection warning) and prints its "AJ6P42" lines; --bench runs bench/promise_smoke/bench (a project with the continuation
-feature: queued reactions are awaited, so the looper runs them) and prints microseconds per operation. The rejected await of --scenarios shows an error toast (existing
+feature: queued reactions are awaited, so the looper runs them; "queued+wait" runs them by one wait(), Q105) and prints
+microseconds per operation. The rejected await of --scenarios shows an error toast (existing
 behavior of popException); no tap is needed.
 
 --new-modules sets the hidden switch of the new script module layer for the run (as device_bench.py) and restores it.

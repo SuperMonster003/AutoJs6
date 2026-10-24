@@ -1,7 +1,8 @@
 // ROADMAP P4.2: cost of the global Promise on the device, in a project with the continuation feature. Each case queues
 // `n` operations, then awaits a Promise settled after them: the script suspends and its looper runs the queued reactions
-// in order (wait() is not used for this, as SettlementLatch scans all pending callbacks for each one it takes). Prints
-// "AJ6P42B <case> <us per operation>", the median of 7 runs after 3 warm-up runs.
+// in order (wait() is not used for this, as the timer scanned all pending callbacks for each one that wait() took, until
+// Q105). "queued+wait" measures that case: `n` queued reactions run by one wait(). Prints "AJ6P42B <case> <us per
+// operation>", the median of 7 runs after 3 warm-up runs.
 var MARK = 'AJ6P42B';
 var sink = 0;
 var fin = 0;
@@ -14,6 +15,7 @@ var cases = [
     ['all10', 60, function (n) { for (var i = 0; i < n; i++) Promise.all([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (x) { return Promise.resolve(x); })).then(function (a) { sink += a.length; fin++; }); }],
     ['wait-resolved', 300, function (n) { for (var i = 0; i < n; i++) { sink += Promise.resolve(i).wait(); fin++; } }],
     ['await-resolved', 300, function (n) { for (var i = 0; i < n; i++) { sink += Promise.resolve(i).await(); fin++; } }],
+    ['queued+wait', 300, function (n) { for (var i = 0; i < n; i++) Promise.resolve(i).then(function () { fin++; }); sink += Promise.resolve(0).wait(); }],
 ];
 
 // Waits (suspended, so the looper runs the queued reactions) until all `n` operations of the case finished.
