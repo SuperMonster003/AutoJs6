@@ -14,7 +14,9 @@ import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
 import org.autojs.autojs.runtime.api.augment.memory.Memory
 import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
+import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions
 import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4j
+import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4jOptions
 import org.autojs.autojs.runtime.api.augment.speech.Speech
 import org.autojs.autojs.runtime.api.augment.speech.SpeechModels
 import org.autojs.autojs.runtime.api.augment.terminal.Terminal
@@ -27,9 +29,11 @@ import org.autojs.autojs.runtime.api.speech.SpeechService
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.core.plugin.compose.ScriptUiDispatcher
+import org.autojs.plugin.pinyin4j.api.Pinyin4jRomanizationSystems
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.mozilla.javascript.Context
 import org.mozilla.javascript.ScriptableObject
 import java.util.concurrent.Executor
 
@@ -194,6 +198,54 @@ class AugmentDelegatingModulesTest {
         DEVICE.add(SHAPES)
     }
 
+    @Test
+    fun optionNamesFollowTheCurrentParsers() {
+        // The pinyin / pinyin4j option checks repeat the names the current parsers accept, so that a rejected name costs
+        // no Java exception (R2). The parsers are the oracle: the new layer gives a RangeError with the parser's message
+        // exactly when the parser rejects the value, and lets every other value through.
+        // zh-CN: pinyin / pinyin4j 的选项检查复制了现有解析器接受的名称, 使拒绝的名称不产生 Java 异常 (R2). 以解析器为准: 解析器拒绝某值时, 新层给出带同样
+        // 消息的 RangeError, 其余的值一律放行.
+        var compared = 0
+        val failures = mutableListOf<String>()
+        fun compare(rhino: DifferentialRhino, call: String, rejection: String?) {
+            compared++
+            val result = Context.toString(rhino.evalKt("(function () { try { $call; return 'accepted'; } catch (e) { return e.name + ': ' + e.message; } })()"))
+            val ok = if (rejection == null) !result.startsWith("RangeError") else result.startsWith("RangeError") && rejection in result
+            if (!ok) failures += "$call\n    current ${rejection ?: "accepted"}\n    new     $result"
+        }
+        fun js(value: String) = "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
+        fun rejection(parse: () -> Any?) = runCatching { parse() }.exceptionOrNull()?.let { it as IllegalArgumentException; it.message!! }
+
+        withNew(CASES.first { it.name == "pinyin4j" }) { rhino ->
+            val words = PINYIN4J_NAMES + listOf("", "  ", "x", "nope", "HANYU-PINYIN", "wade giles", "with tone", "u :", "ü", "Ü ")
+            val candidates = (words + words.map { " ${it.lowercase()} " }).distinct()
+            candidates.forEach { c ->
+                compare(rhino, "pinyin4j.of('a', { tone: ${js(c)} })", rejection { Pinyin4jOptions.normalizeToneType(c, Pinyin4jOptions.DEFAULT_OF_TONE_TYPE) })
+                compare(rhino, "pinyin4j.of('a', { case: ${js(c)} })", rejection { Pinyin4jOptions.normalizeCaseType(c) })
+                compare(rhino, "pinyin4j.of('a', { v: ${js(c)} })", rejection { Pinyin4jOptions.normalizeVCharType(c, Pinyin4jOptions.DEFAULT_OF_TONE_TYPE) })
+                compare(rhino, "pinyin4j.readings('a', { romanization: ${js(c)} })", rejection { Pinyin4jOptions.normalizeRomanization(c) })
+                // A romanization other than HANYU with an explicit case (the message of the current module's compatibility check).
+                // zh-CN: HANYU 以外的拼音方案加上明确的 case (消息同现有模块的兼容性检查).
+                compare(rhino, "pinyin4j.readings('a', { system: ${js(c)}, case: 'up' })", rejection {
+                    require(Pinyin4jOptions.normalizeRomanization(c) == Pinyin4jRomanizationSystems.HANYU) { "Pinyin4j case options are only supported with HANYU romanization" }
+                })
+            }
+        }
+        withNew(CASES.first { it.name == "pinyin" }) { rhino ->
+            val names = PinyinOptions.PinyinMode.entries.map { it.name } + PinyinOptions.PinyinStyle.entries.map { it.name } + listOf("", "x", "tone 2", "place-name")
+            val strings = (names + names.map { it.lowercase() } + names.map { " $it" }).distinct()
+            val numbers = listOf("-1" to -1.0, "-0" to -0.0, "0" to 0.0, "1" to 1.0, "1.5" to 1.5, "2" to 2.0, "3" to 3.0, "4" to 4.0, "5" to 5.0, "6" to 6.0, "99" to 99.0,
+                "NaN" to Double.NaN, "Infinity" to Double.POSITIVE_INFINITY)
+            listOf("mode" to PinyinOptions::parseMode, "style" to PinyinOptions::parseStyle).forEach { (key, parse) ->
+                strings.forEach { c -> compare(rhino, "pinyin('a', { $key: ${js(c)} })", rejection { parse(c) }) }
+                numbers.forEach { (source, n) -> compare(rhino, "pinyin.convert('a', { $key: $source })", rejection { parse(n) }) }
+                compare(rhino, "pinyin('a', { $key: true })", rejection { parse(true) })
+            }
+        }
+        assertTrue("Option checks differ from the current parsers ($compared compared):\n" + failures.joinToString("\n"), failures.isEmpty())
+        assertTrue("$compared calls compared", compared >= 400)
+    }
+
     private fun <T> withNew(case: Case, block: (DifferentialRhino) -> T): T = DifferentialRhino().use { rhino ->
         case.prepare(rhino)
         rhino.mountNewModules(case.name)
@@ -257,6 +309,15 @@ class AugmentDelegatingModulesTest {
         private fun reached(rendered: DifferentialRhino.Rendered) = (REACHED.find(rendered.key)?.groupValues?.get(1) ?: rendered.key)
             .replace("ExceptionInInitializerError", "NoClassDefFoundError")
 
+        /** The names the normalizers of `Pinyin4jOptions` accept (all four, so that each option also meets the names of the others). */
+        private val PINYIN4J_NAMES = listOf(
+            "HANYU", "HANYU_PINYIN", "PINYIN", "TONGYONG", "TONGYONG_PINYIN", "WADE", "WADE_GILES", "WADEGILES", "WADE_GILES_PINYIN", "MPS2",
+            "MANDARIN_PHONETIC_SYMBOLS_2", "YALE", "YALE_PINYIN", "GWOYEU", "GWOYEU_ROMATZYH", "GR",
+            "LOWERCASE", "LOW", "L", "0", "UPPERCASE", "UP", "U", "1",
+            "WITH_TONE_NUMBER", "WITH_NUMBER", "NUMBER", "NUM", "WITHOUT_TONE", "NO_TONE", "NO", "FALSE", "WITH_TONE_MARK", "WITH_MARK", "MARK", "TRUE",
+            "WITH_U_AND_COLON", "U_AND_COLON", "U_COLON", "U:", "WITH_V", "V", "WITH_U_UNICODE", "U_UNICODE", "UNICODE", "Ü",
+        )
+
         private fun typeErrors(vararg calls: String) = calls.map { it to T }
 
         private fun rangeErrors(vararg calls: String) = calls.map { it to R }
@@ -266,11 +327,15 @@ class AugmentDelegatingModulesTest {
                 typeErrors("ai()", "ai.ask()", "ai.ask(1)", "ai.ask({})", "ai.ask({ messages: 1 })", "ai.ask('a', 1)", "ai.ask('a', {}, 1)", "ai.chat()", "ai.stream(1)",
                     "ai.session(1)", "ai.session({ system: 1 })", "ai.session(1, 2)", "ai.catalog(1, 2)", "ai.catalog([])", "ai.ask(null)", "ai.ask(function () {})",
                     "ai.ask(Object.create({ role: 'user', content: 'x' }))", "ai.ask({ messages: null })", "ai.ask('x', { toJSON: function () { return [] } })", "ai.ask('x', new Date(0))",
-                    "ai.ask('x', new java.util.HashMap())", "ai.catalog(new String('x'))", "ai.session({ system: null })") +
+                    "ai.ask('x', new java.util.HashMap())", "ai.catalog(new String('x'))", "ai.session({ system: null })",
+                    "ai.ask(NaN)", "ai.ask(true)", "ai.ask(-Infinity)", "ai.session([])", "ai.ask('x', [])", "ai.catalog(false)",
+                    "(function () { Number.prototype.toJSON = function () { return 'x' }; try { return ai.ask(1) } finally { delete Number.prototype.toJSON } })()") +
                     rangeErrors("ai.ask([])", "ai.ask({ messages: [] })", "ai.session({ system: '' })", "ai.session({ system: new java.lang.String('') })"),
                 accepted = listOf("ai.ask(new String('x'))", "ai.ask(new Date(0))", "ai.ask({ toJSON: function () { return 'x' } })", "ai.ask({ messages: function () {}, role: 'user', content: 'x' })",
                     "ai.ask([1])", "ai.ask(new java.lang.String('x'))", "ai.chat({ role: 'user', content: 'x' })", "ai.session({ system: function () {} })", "ai.session({ system: new String('s') })",
-                    "ai.session(Object.create({ system: 1 }))", "ai.catalog({})")),
+                    "ai.session(Object.create({ system: 1 }))", "ai.catalog({})",
+                    "(function () { Array.prototype.toJSON = function () { return 'x' }; try { return ai.ask([]) } finally { delete Array.prototype.toJSON } })()",
+                    "(function () { var a = []; a.toJSON = function () { return {} }; return ai.catalog(a) })()")),
             Case("opencc", { OpenCC.augmentWithRuntime(global(it), it.ktRuntime) }, listOf("typeof opencc.s2t"), checked =
                 typeErrors("opencc()", "opencc('a')", "opencc.convert('a')", "opencc.convert('a', 1)", "opencc.convert(null, 's2t')", "opencc.s2t()", "opencc.s2t('a', 'b')", "opencc.s2t(null)") +
                     typeErrors("opencc.convert('a', new String('s2t'))") + rangeErrors("opencc.convert('a', 'nope')", "opencc('a', 'nope')"),
