@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.SystemClock
 import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.pref.keys.DeveloperKeys
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.execution.ExecutionConfig
@@ -60,10 +61,14 @@ class ImagesResizeRhinoInstrumentationTest {
 
             val result = JSONObject(marker.readText())
             assertTrue("The scalar size call was not rejected by the script API", result.getBoolean("caught"))
-            assertTrue(
-                result.getString("message"),
-                result.getString("message").contains("images.resize(image, [width, height], interpolation?)"),
-            )
+            val message = result.getString("message")
+            if (DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()) {
+                // The new script module layer (on by default since docs/augment/ROADMAP.md P5.1) rejects the size as a
+                // TypeError naming the function and the argument (D10), in the language of the app.
+                assertTrue(message, message.startsWith("TypeError") && message.contains("\"images.resize\"") && message.contains("\"size\""))
+            } else {
+                assertTrue(message, message.contains("images.resize(image, [width, height], interpolation?)"))
+            }
             assertEquals(7, result.getInt("width"))
             assertEquals(5, result.getInt("height"))
             assertTrue("The script did not continue after catching the resize error", result.getBoolean("continued"))
