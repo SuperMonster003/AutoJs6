@@ -127,3 +127,12 @@ py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --smoke coroutine 
 `--smoke` 运行 `bench/bootstrap_smoke/`: `coroutine` 与 `ui` 是启用 continuation 特性的项目, 经 `ProjectLauncher` 按应用运行项目的方式启动 (`project.json` 的 `useFeatures` 生效); `ui` 显示 `dialogs.confirm` 并等待在手机上点按 (`--ui-wait` 秒), 需要维护者操作; 恢复后再次挂起是附录 C Q23 的回归: `coroutine` 由 setInterval 回调连续恢复三次 (原先第二次挂起后定时器被取消, 脚本卡住), `ui` 在对话框之前先由其他线程恢复一次再 `continuation.delay` (原先应用崩溃), `dialogs.confirm().await()` 是由 delay 的定时器恢复后的再次挂起 (原先脚本被结束); `listener` (附录 C Q23 的后续) 在 `ui.emitter` 的 back_pressed 监听器与自身全屏视图的 click 监听器中挂起, 脚本以 adb 发送 KEYCODE_BACK 并点按屏幕中央 (不涉及对话框), 原先挂起会抛出 "Cannot capture continuation ..." 并结束脚本; `suspend` (P3.2, 附录 C Q23 的 UI 模式情形, 无需点按) 在 UI 模式下依次由 continuation.delay 的定时器, 定时器中结算的 Promise, setInterval 回调与其他线程恢复后再次挂起, 并在 delay 之后等待自己关闭的对话框的 dismiss 事件 (非 UI 模式的 setInterval 与跨线程两种情形在 `coroutine` 中), 每行末尾为 true 即该情形通过; `images` 运行 `images.loadAsync` (经 `ResultAdapter.promise`); `automator` 运行 `automator.captureScreen` (经 `ResultAdapter.wait`, 需要 AutoJs6 无障碍服务与 Android 11+, 服务未开启时跳过). 只打印带标记的控制台行. 设备上的临时目录 `/sdcard/Download/aj6-augment-bench/p25` 用完即删.
 
 `device_bench.py --calls bootstrap` (`bench/calls/bootstrap.js`) 计时数组 push / pop 与 splice (在读取 observe 名称之前与之后各一次), `__exitIfError__`, `structuredClone` 与 `ResultAdapter.promise`.
+
+## device_plugin_modules_check.py: Bundled Libraries 插件的四态 (P4.3)
+
+```
+py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --plugin-apk PLUGIN.apk [--wait 60]
+py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --local-first
+```
+
+宿主须是去掉 `assets/modules` 中 14 个库模块文件的构建 (设计 `docs/augment/P4-3-bundled-libraries-design.md` (g), 附录 C Q102), `--plugin-apk` 是 AutoJs6-Plugin-Bundled-Libraries 的 debug 包. 在同一宿主进程中依次经过 未安装 (先卸载插件), 已安装并启用 (`adb install`), 插件中心关闭 (脚本经 `PluginEnableStore` 关闭再打开), 插件页关闭 axios 与 buffer (经插件 debug 构建的 `DebugLibrarySwitchReceiver` 切换对应的 activity-alias, 之后打开; Android 9 起 shell 不能 `pm disable` 非 test-only 应用的组件), 卸载后. 每一态以脚本模块层开关关与开各运行一次 `bench/plugin_modules_smoke/main.js` (13 个库共 15 个 require 项, axios / cheerio / dayjs / i18n / pangu 的全局 getter, `require('axios') === axios`, 指引错误的消息与位置), 两态输出须一致并符合该态的预期 (错误为 `code` = MODULE_NOT_FOUND, `library`, `reason`; 位置只登记). `--local-first` 用常规构建 (资产还在), 未安装插件时全部模块照常加载. 结束时恢复开关, 卸载插件, 删除 `/sdcard/Download/aj6-augment-bench/p43`. 插件状态的变化由宿主的包广播与插件中心监听器生效, 不点按屏幕.

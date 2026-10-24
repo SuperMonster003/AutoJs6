@@ -121,7 +121,7 @@ JVM:
 - `StaticReferenceGuardTest`: 进程级快照与编译缓存 (软引用) 及接收器如需登记, 白名单写明理由.
 - 隔离克隆 `E:/.cache/aj6p43`: 全量 `:app:testAppDebugUnitTest` 0 失败, `:app:assembleAppDebug`.
 
-真机 (G8441, Q102 推荐项): 克隆构建一个去掉表 (0) 资产的 debug 包, 插件 debug 包安装 / 启用 / 插件级禁用 / 单库禁用 / 卸载, 两态各跑 `device_require_check.py` 的扩展项 (`--plugin-states`), 13 个名称各一条 smoke; 正式构建 (资产在) 跑一次确认本地优先. XQ-AT72: require 路径 R2 一次与 prologue.
+真机 (G8441, Q102 推荐项): 克隆构建一个去掉表 (0) 资产的 debug 包, 插件 debug 包安装 / 启用 / 插件级禁用 / 单库禁用 / 卸载, 两态各跑 `device_plugin_modules_check.py` (新脚本, 复用 `device_require_check.py` 的 `run_marked`; 原计划的 `--plugin-states` 扩展项因状态切换与预期表较长而独立成文件), 13 个名称各一条 smoke; 正式构建 (资产在) 跑一次确认本地优先. XQ-AT72: require 路径 R2 一次与 prologue.
 
 ## 已拍板 (附录 C Q100-Q103, 2026-10-24 维护者均选 (1))
 
