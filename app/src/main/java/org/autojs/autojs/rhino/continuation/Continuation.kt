@@ -10,7 +10,9 @@ import org.mozilla.javascript.ContinuationPending
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.VarScope
 
-class Continuation(val context: AutoJsContext, val scope: VarScope, private val mTimer: Timer) {
+class Continuation internal constructor(val context: AutoJsContext, val scope: VarScope, private val post: (Runnable) -> Unit) {
+
+    constructor(context: AutoJsContext, scope: VarScope, timer: Timer) : this(context, scope, { r -> timer.postDelayed(r, 0) })
 
     private val mThread: Thread = Thread.currentThread()
 
@@ -62,17 +64,27 @@ class Continuation(val context: AutoJsContext, val scope: VarScope, private val 
         }
     }
 
+    /**
+     * Resumes the coroutine with [result]. On another thread the coroutine may not have suspended yet (a thread started
+     * before `await()`), so the resume is posted to the timer of the coroutine's thread and takes [pending] there, after
+     * the script has suspended (docs/augment/ROADMAP.md Q98); it formerly took [pending] on the calling thread and threw
+     * when that thread came first. A resume without any suspension still fails, on the timer then.
+     * zh-CN: 以 [result] 恢复协程. 在其他线程上调用时协程可能尚未挂起 (在 await() 之前启动的线程), 因此恢复操作投递到协程所在线程的 timer, 在脚本挂起之后
+     * 再于该处取 [pending] (docs/augment/ROADMAP.md Q98); 原先在调用线程上先取 [pending], 该线程先到时即抛出. 始终没有挂起的恢复仍会失败, 此时在 timer 上.
+     */
     fun resumeWith(result: Result) {
+        if (mThread == Thread.currentThread()) {
+            resume(result)
+        } else {
+            post(Runnable { resume(result) })
+        }
+    }
+
+    private fun resume(result: Result) {
         val continuation = pending?.continuation ?: throw IllegalStateException(
             str(R.string.error_continuation_resume_called_without_suspend)
         )
-        if (mThread == Thread.currentThread()) {
-            context.resumeContinuation(continuation, scope, Result.handle(result))
-        } else {
-            mTimer.postDelayed({
-                context.resumeContinuation(continuation, scope, Result.handle(result))
-            }, 0)
-        }
+        context.resumeContinuation(continuation, scope, Result.handle(result))
     }
 
     companion object {
