@@ -20,10 +20,12 @@
 | 阶段 | 目标 | 完成条件 | 预计会话数 |
 | --- | --- | --- | --- |
 | P0 取证与修前复现 | XQ-AT72 上 inrt 崩溃循环的拉起方与次数有证据; 临时 AVD 上宿主与 inrt 的修前崩溃与重启次数有数字; 往返脚本可用 | P0.1-P0.3 勾选, 附录 B.1 / B.2 "修前" 列填满 | 1 (与 P1 同一会话) |
-| P1 两张任务表 + 兜底 | `TimedTaskDatabase` / `IntentTaskDatabase` 无操作降级, 幂等升级; 打开失败改名备份后空库继续, 条件满足时自动还原 | P1.1-P1.4 勾选, AVD API 24 与 35 往返 PASS, androidTest 通过 | 1 (与 P0 同一会话) |
-| P2 Room 三库通用降级 | `HistoryDatabase` / `ColorHistoryDatabase` / `KeyStoreDatabase` 对 "未来 schema" 的数据保留共有列打开, 失败兜底 | P2.1-P2.3 勾选, androidTest 通过, AVD 页面核对不崩 | 1 (可与 P1 并行) |
+| P1 两张任务表 + 兜底 | `TimedTaskDatabase` / `IntentTaskDatabase` 无操作降级, 幂等升级; 打开失败改名备份后空库继续, 条件满足时自动还原; 会结束进程的崩溃交回系统处理器 (P1.5, D10) | P1.1-P1.5 勾选, AVD API 24 与 35 往返 PASS, androidTest 通过, 崩溃有 am_crash 且连续拉起受系统限制 | 1 (与 P0 同一会话) + 0.5 (P1.5) |
+| P2 Room 三库通用降级 | `HistoryDatabase` / `ColorHistoryDatabase` / `KeyStoreDatabase` 对 "未来 schema" 的数据保留共有列打开, 失败兜底; 某表无法保留其行时整库走兜底 (P2.4, D9) | P2.1-P2.4 勾选, androidTest 通过, AVD 页面核对不崩 | 1 (可与 P1 并行) + 0.5 (P2.4) |
 | P3 脚本 sqlite 模块 | `DatabaseCallback` 新增 onDowngrade, 默认无操作降级; 文档与 d.ts 同步 | P3.1-P3.2 勾选 | 0.5 |
 | P4 真机复核, changelog 与发布门 | 一台真机往返 PASS; changelog zh-Hans 条目; 6.8.0 发布门一行; 本文回填 | P4.1-P4.4 勾选, 本地提交 | 0.5 (P1 / P2 / P3 之后) |
+
+共 18 条: P0 3 条, P1 5 条, P2 4 条, P3 2 条, P4 4 条 (立项 16 条; 2026-10-23 20:30 维护者拍板 Q8 / Q9 后新增 P2.4 与 P1.5).
 
 ---
 
@@ -76,6 +78,8 @@
 | D6 | 脚本 sqlite 模块: `DatabaseCallback` 新增 onDowngrade 回调, 脚本未提供时默认无操作降级 (不抛); 同步文档与 d.ts | Q5 (维护者选 B, 非推荐项; 推荐项为只改文档) |
 | D7 | 修复进 6.8.0: changelog zh-Hans 6.8.0 段加条目, `docs/dev/6.8.0-release-gate.md` 加一行 | Q6 (维护者选 A, 推荐项) |
 | D8 | 复现样本处置: XQ-AT72 只读取证 (dropbox, dumpsys, events), 并在临时 AVD 上装 Shizuku 复现 "服务端重启唤醒 inrt 崩溃循环", 修后在同一场景证明不循环 | Q7 (维护者选 B, 非推荐项; 推荐项为只取证不复现唤醒) |
+| D9 | Room 通用降级时某张表缺本版本必需的列 (NOT NULL 且无默认值) 或与快照没有共有列, 其行无法搬进新表: 这次打开失败, 整库走兜底 (D3 / T2: 改名备份 + 空库继续 + 装回 >= 文件版本的构建时自动还原), 不再把旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 保留 (P2.4) | Q8 (2026-10-23 20:30 维护者选 C, 非推荐项; 推荐项 A 为旧表改名保留, 已先行后撤回) |
+| D10 | `CrashHandler` 把会结束进程的崩溃交回系统处理器: 安装前取得当时的默认处理器, 主线程崩溃照旧打开崩溃报告页后交给它, 不再自行 `exitProcess`; 恢复 am_crash / dropbox 记录与系统的 bad-process 限制 (P1.5) | Q9 (2026-10-23 20:30 维护者选 A, 推荐项) |
 
 ---
 
@@ -85,7 +89,7 @@
 | --- | --- | --- |
 | T1 | 幂等升级工具 `storage/database/SQLiteSchemaUtils` (或等价命名): `hasColumn(db, table, column)` 用 `PRAGMA table_info`, `addColumnIfMissing(db, table, column, definition)`; 两张表的 `onUpgrade` 全部改用它, 现有 `addColumn` 的 try / catch 不再作为幂等手段; `onDowngrade` 覆盖为记日志 `<name>: downgrade <old> -> <new>, keeping data` 后返回 (helper 随后 `setVersion`) | P1.1 实现时 |
 | T2 | 兜底入口 `storage/database/DatabaseRecovery` (或等价命名): `openOrRecover(context, name, open: () -> T): T`; 捕获打开异常后关闭 helper, 把 `<name>.db` 及 `-journal` / `-wal` / `-shm` 一并改名 (`.bak-<文件版本>-<yyyyMMddHHmmss>`, 文件版本读不到时记 0), 在 SharedPreferences 记录 (库名, 备份文件名, 文件版本), 重新打开; 打开前先检查还原条件 (D3) 并把备份改回原名. `TimedTaskManager` 的两个 lazy 改为经它打开. 不改 `Database` 基类的构造语义 | P1.2 实现时 |
-| T3 | Room 工具 `storage/database/RoomDowngrade` (或等价命名): 用 `SQLiteDatabase.openDatabase(path, null, OPEN_READONLY)` 读 `user_version` (文件不存在即跳过); 高于代码版本时 `addMigrations(Migration(文件版本, 代码版本))`, 迁移体对 schema json 里的每张表: 按 `createSql` 建临时表, `INSERT INTO 新表 SELECT 共有列 FROM 旧表` (共有列 = schema 列与 `PRAGMA table_info` 交集, 新表非空且无默认值的列不在交集时该表只能清空并记日志), 删旧表改名, 重建索引; schema 里没有的表保留不动 (Room 只校验声明的实体); Room 迁移后自行更新 identity hash. schema json 由 Gradle 任务从 `app/schemas` 复制到 assets `db-schemas/<类全名>/<版本>.json` (只复制, 不改 `room.schemaLocation`) | P2.1 实现时 |
+| T3 | Room 工具 `storage/database/RoomDowngrade` (或等价命名): 用 `SQLiteDatabase.openDatabase(path, null, OPEN_READONLY)` 读 `user_version` (文件不存在即跳过); 高于代码版本时 `addMigrations(Migration(文件版本, 代码版本))`, 迁移体对 schema json 里的每张表: 按 `createSql` 建临时表, `INSERT INTO 新表 SELECT 共有列 FROM 旧表` (共有列 = schema 列与 `PRAGMA table_info` 交集, 新表非空且无默认值的列不在交集时该表只能清空并记日志; 已由 D9 取代: 这时整库走兜底), 删旧表改名, 重建索引; schema 里没有的表保留不动 (Room 只校验声明的实体); Room 迁移后自行更新 identity hash. schema json 由 Gradle 任务从 `app/schemas` 复制到 assets `db-schemas/<类全名>/<版本>.json` (只复制, 不改 `room.schemaLocation`) | P2.1 实现时 |
 | T4 | Room 接入: 三个 `createBuilder` / `getInstance` 经 `RoomDowngrade.builder(...)` 取 builder; 兜底在 `getInstance` 里主动触发一次 `openHelper.writableDatabase`, 失败即按 T2 备份后重建实例 (调用线程由子会话核对, 不在主线程做额外 IO 的改为后台首次打开). 既有 `MIGRATION_*` 与 androidTest 不改 | P2.1 实现时 |
 | T5 | 脚本 sqlite: `DatabaseCallback` 加 `onDowngrade(db, oldVersion, newVersion)`; `core/database/Database.java` 覆盖 `onDowngrade`: 回调存在即调用, 否则无操作返回; `SQLite.kt` 的 open 选项解析该回调, 位置与 onUpgrade 并列; 既有回调的顺序与行为不变 (R6) | P3.1 实现时 |
 | T6 | 往返脚本 `tools/db-downgrade/roundtrip.py` (py -3.12 -I), 参数 `--serial`, `--package` (宿主 / inrt 包名), `--report-dir`, 子命令: `make-future` (对 debug 包用 `run-as` 拉出库文件, 在 PC 端用 Python sqlite3 把 `user_version` +1 并加一列与一张表, 删 `-journal` / `-wal` 后推回; 不依赖设备上的 sqlite3), `check` (启动应用, 等 10 秒, 核对进程存活, logcat `am_crash` / `FATAL EXCEPTION` 计数 0, 任务表行数与 `user_version` 等于代码版本), `inject-fail` (把库路径换成同名目录, 预期走兜底: 启动不崩, 出现 `.bak` 文件), `restore-check` (装回版本满足的构建后备份被还原且行数一致), `wake` (重启 Shizuku 服务端 N 次, 统计 `am_proc_start` 与崩溃次数). 正式签名包不能 `run-as`, 真机复核 (P4.1) 改用 "各库版本 +1 的临时测试构建" 先写数据再装当前构建. 输出 md 只含每项通过 / 失败与关键数值 | P0.3 完成 |
@@ -125,6 +129,8 @@
   - 2026-10-23 完成 (db-downgrade-p0-p1, 提交 `d48f482c2`): `app/src/androidTest/.../storage/database/TaskDatabaseRecoveryTest.kt` 11 例在临时 AVD `dbdowngrade_p01_api24` (API 24) 与 `dbdowngrade_p01_api35` (API 35) 上均通过: 两表各一例降级往返 (版本 +1, 多一列一表, 行与值保留, 版本变为代码版本), 两表各一例幂等升级 (TimedTask 3 -> 5 -> 3 -> 5, IntentTask 2 -> 4 -> 2 -> 4), 目录占位兜底, 轮换 3 份, 还原条件 (安装时间, 版本), 只替换空库, 只看最新可读备份, Room 库名不带 `.db`, `openOrRecover` 装后还原. 库文件经 `ContextWrapper` 放在 `cacheDir/db-downgrade-test`, 不碰被测应用自己的任务库. 构建: `:app:assembleAppDebug :app:assembleAppDebugAndroidTest`, 运行: `adb shell am instrument -w -r -e class org.autojs.autojs.storage.database.TaskDatabaseRecoveryTest org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner`.
 - [x] P1.4 AVD 验收 (API 24 与 35): `check` 宿主与 inrt 均 PASS (崩溃 0, 重启 0, 行数保留), API 35 上 Shizuku 重启服务端 3 次 inrt 均正常启动 (对照 P0.2); 报告入 evidence, 附录 B.2 "修后" 列.
   - 2026-10-23 完成 (db-downgrade-p0-p1): 临时 AVD `dbdowngrade_p01_api24` (Android 7.0) 与 `dbdowngrade_p01_api35` (Android 15) 上, 宿主 5935 与 inrt 5835 的 `suite` (`make-future`, `check`, `inject-fail`, `restore-check`, 每步观察 30 s) 全部 PASS: 启动 1 次, 重启 0, 崩溃 0, 两表降回代码版本 (6 -> 5, 5 -> 4) 且标记行与未来列 / 表保留; inrt 用 `--start broadcast` (理由见 "P0 / P1 实施处置" 第 11 条 (e)). API 35 上 Shizuku 服务端重启 3 轮 (连续 3 轮, 只有第 1 轮是版本 +1 数据, 之后库已是代码版本) 加 2 轮 (每轮之前重新 `make-future`), 共 5 轮: inrt 与宿主每轮都只由 `ShizukuProvider` 拉起 1 次, 崩溃 0, 90 s 末存活 (修前每轮 9 / 1 / 8 次与 7 / 8 / 8 次). 数字见附录 B.2, 报告 `evidence/roundtrip-dbdowngrade_p01_api24-5935-20261023-after-fix.md` 与 `evidence/roundtrip-dbdowngrade_p01_api35-5935-20261023-after-fix.md`. 构建: 修后 APK 含 `b7206e176` 与 `64a62c53e` (suite 用); 唤醒时宿主为含 `e87b22a80` 的构建 (只改 Room 库名与 `room_master_table` 判定, 不影响两张任务表).
+- [x] P1.5 `CrashHandler` 交回系统 (Q9 = A, D10; 2026-10-23 拍板后新增): `tool/CrashHandler.kt` 在 `Thread.setDefaultUncaughtExceptionHandler` 之前取得当时的默认处理器 (系统的处理器) 并传给 `CrashHandler` (宿主与 inrt 共用 `App.setUpDebugEnvironment`), 主线程崩溃照旧打开崩溃报告页 (独立进程 `:crash_report`) 后把异常交给系统处理器, 不再自行 `exitProcess`; 非主线程路径保持现有语义 (吞掉异常, 同一消息累计 5 次以上或累计 20 次以上时报告并结束进程), 其结束进程的分支有同样缺口, 一并改为交给系统. 验收 (临时 AVD; 崩溃注入只放在临时测试构建里, 不提交): 宿主与 inrt 各一次前台崩溃: 崩溃报告页弹出, `logcat -b events` 有 am_crash, `dumpsys dropbox --print` 有 data_app_crash 条目, 进程结束; 各一次后台拉起崩溃 (`roundtrip.py --start broadcast` 同款广播): am_crash 有记录, 连续拉起时系统施加限制 (实测拉起次数与系统日志的 bad process 行); 报告入 evidence, 附录 B.1 补 "修后" 行.
+  - 2026-10-24 完成 (db-downgrade-q8-q9, 提交 `f860761a9`): `CrashHandler` 构造函数改为私有, 由 `CrashHandler.install(errorReportClass)` 取当时的默认处理器 (已是 `CrashHandler` 时取它保存的那个, 不会链到自身) 后安装; 会结束进程的两条路径 (主线程崩溃; 非主线程同一消息超过 4 次或累计超过 20 次) 都经 `reportAndHandOver`: `popException` 与崩溃报告页 (`runCatching`, 报告失败也照样移交) 后调用系统处理器, 只在没有系统处理器或它返回时才 `exitProcess(1)`; 非主线程其余情况照旧吞掉. `App.setUpDebugEnvironment` 改调 `install` (宿主与 inrt 共用). 脚本 `tools/db-downgrade/crash_handover.py` (`foreground` / `background`, 临时崩溃注入的代码在 README "崩溃移交" 一节). 临时 AVD `dbdowngrade_q89_api35` (API 35) 上修后全部 PASS: 前台宿主 (注入) 与 inrt (模板包 `SplashActivity` NPE) 各一次: 报告页 2-6 s 内 resumed, `am_crash` 1, dropbox `data_app_crash` +1, 崩溃的进程结束; 重复崩溃时系统另显示 "Application Error" 对话框, 进程在对话框关闭时结束 (不点按, 约 5 分钟自行关闭); 后台每 5 s 一条广播共 12 条: 宿主与 inrt 都只拉起 2 次, 2 次 `am_crash`, 第 2 次即 "crashed too many times" + `am_proc_bad`, 之后 0 次. 修前对照 (HEAD 的 `CrashHandler` + 同一注入): 前台 `am_crash` 0 / dropbox 0, 后台 60 s 内 5 次启动全部崩溃, `am_crash` 0, 无 bad, 窗口末尾仍在被拉起. 数字见附录 B.1, 报告 `evidence/roundtrip-dbdowngrade_q89_api35-5935-20261024-crash-handover.md` 与 `...-crash-handover-before-fix.md`, 实施处置见 "P1.5 / P2.4 实施处置".
 
 ### P2 Room 三库通用降级 (D4, T3 / T4; 代码; 可与 P1 并行, 文件不重叠; 兜底复用 P1.2 的 `DatabaseRecovery`, 它尚未提交时先只做迁移, 兜底在它提交后接入并在结果区写明)
 
@@ -135,6 +141,8 @@
   - 2026-10-23 完成 (db-downgrade-p2): 兜底接入 `RoomDowngrade` 的 open helper (首次打开经 `DatabaseRecovery.openOrRecover`), 补第 5 例 `fileThatStillCannotOpenIsBackedUpAndReplacedByEmptyDatabase`: History v4 的 `revision.sha256` 可空且有 NULL 行, 重建违反 NOT NULL 而回滚 (framework helper 重试一次, 共两次), 文件改名为 `<库名>.bak-4-<时间>` (备份仍为 v4, 原行保留), 新空库 v3 可写; 再次打开既不还原较新的备份, 也不再次备份. 临时 AVD `dbdowngrade_api35` 上 5 例与既有迁移测试 4 例共 9 例通过, P2.3 页面核对复跑仍为 28 / 28.
 - [x] P2.3 AVD 核对: 三库构造未来 schema 后启动宿主, 打开抽屉, 版本历史页, 回收站, 颜色选择页, 密钥库页不崩; 手动触发 `HistoryCleanupWorker` 一次不崩 (子会话核对触发方法). 报告入 evidence, 附录 B.3.
   - 2026-10-23 完成 (db-downgrade-p2): `tools/db-downgrade-room/room_pages.py` 在宿主停止时写入三库未来文件, 从桌面入口启动后由 `RoomDowngradePagesDeviceTest` (instrumentation 参数 `autojs.dbDowngrade.pages=true`) 打开 6 个页面并以 `OneTimeWorkRequest` 触发 `HistoryCleanupWorker` 一次 (worker 出错时返回 retry, 因此断言状态为 SUCCEEDED). 临时 AVD `dbdowngrade_api35` 上 28 / 28 项通过, 结果见附录 B.3, 报告 `evidence/roundtrip-dbdowngrade_api35-5935-20261023-room.md`.
+- [x] P2.4 表无法保留其行时整库兜底 (Q8 = C, D9; 2026-10-23 拍板后新增): `RoomDowngrade` 重建时某张表缺本版本必需的列 (NOT NULL 且无默认值) 或与快照没有共有列, 抛出带表名与原因的异常 (事务回滚, 文件不变), 由首次打开的 `DatabaseRecovery.openOrRecover` 接住: 改名备份 + 空库继续 + 装回 >= 文件版本的构建时自动还原; 删除旧表改名保留 (`_downgrade_kept_*`) 的代码路径; P2.2 的 "缺必需列" 用例改为预期整库兜底 (备份文件存在且内容原样, 新库为代码版本且可写, 再开不重复备份). 验收: 临时 AVD API 35 上本主题 androidTest 全部通过, `tools/db-downgrade-room/room_pages.py` 复跑 28 / 28, 崩溃 0; 报告入 evidence.
+  - 2026-10-24 完成 (db-downgrade-q8-q9, 提交 `a5e0b2b01`): `rebuildTable` 在建新表之前 `check` 共有列非空与必需列齐全, 失败消息形如 `KeyStore (file version 2) lacks required column(s) alias_password, its rows cannot be kept`; 删除 `KEPT_TABLE_PREFIX`, `freeTableName`, `indicesOf` 与改名分支 (`sqlite_sequence` 恢复不再有条件). 首次打开路径不变: framework helper 重试一次后抛出原异常, `RecoveringOpenHelper` 经 `openOrRecover` 关闭 helper, 备份为 `<库名>.bak-<文件版本>-<时间>`, 新建空库. 用例改名为 `tableMissingRequiredColumnSendsWholeFileToRecovery` (KeyStore v2 缺 `alias_password`, 另加 `future_table`): 新库 v1 可写且无 `future_table` 与 `_downgrade_*` 表, 备份为 v2, 原行, `future_table` 与 identity hash 原样, 再开不还原不重复备份. `room_pages.py` 的 "tables kept aside" 改为 "databases sent to recovery" (应为 0), 项数仍 28. 临时 AVD `dbdowngrade_q89_api35` (API 35, x86_64) 上: androidTest 4 个类 20 例 OK (`RoomDowngradeTest` 5, `TaskDatabaseRecoveryTest` 11, `HistoryDatabaseMigrationTest` 2, `ColorHistoryDatabaseMigrationTest` 2); 页面核对首跑 27 / 28 (回收站页被 LeakCanary 申请通知权限的 Activity 盖住, 无崩溃), 授予 `POST_NOTIFICATIONS` 后复跑 28 / 28, FATAL EXCEPTION / am_crash 0. 报告 `evidence/roundtrip-dbdowngrade_q89_api35-5935-20261024-room.md` (含 androidTest 一节).
 
 ### P3 脚本 sqlite 模块 onDowngrade (D6, T5, R6; 代码 + 文档 + d.ts; 与 P1 / P2 文件不重叠, 可并行或之后)
 
@@ -164,6 +172,8 @@
 | Q5 | 脚本 sqlite 模块 | A 只改文档说明 (推荐) / B 加 onDowngrade 回调, 默认无操作降级, 同步文档与 d.ts | B (非推荐) | D6 |
 | Q6 | 发布 | A 进 6.8.0 并加发布门行 (推荐) / B 下个版本 | A | D7 |
 | Q7 | XQ-AT72 样本 | A 只读取证, 不复现唤醒 (推荐) / B 取证 + AVD 装 Shizuku 复现唤醒循环并在修后证明不循环 / C 不取证 | B (非推荐) | D8 |
+| Q8 (2026-10-23 20:30) | Room 降级时某张表缺本版本必需的列或与快照没有共有列 | A 旧表改名保留, 新表为空 (推荐, P2 已先行) / B 清空该表只记日志 / C 该表重建失败即整库走兜底 | C (非推荐) | D9 (P2.4) |
+| Q9 (2026-10-23 20:30) | `CrashHandler` 不把异常交给系统 | A 修: 取得系统处理器, 报告页后交给系统 (推荐) / B 不修 / C A 之外再加跨进程启动崩溃计数 | A | D10 (P1.5) |
 
 条目实施中的处置理由由子会话追加到本表之后.
 
@@ -171,7 +181,7 @@
 
 1. T3 读文件版本: 不在 build 前用只读连接读 `user_version`, 改由包装的 open helper 在 `onDowngrade` 回调里得到文件版本 (Room 在后台线程首次打开库时触发). 理由: `DrawerFragment`, `TrashActivity`, `VersionHistoryActivity` 与 `KeyStoreRepository` 在主线程取实例, 预读会在主线程做磁盘 IO; 也省去额外连接与 WAL 文件的处理. 三个库都不允许主线程查询, DAO 调用本来就在后台线程.
 2. T3 注册时机: `Migration(文件版本, 代码版本)` 在回调中经 `builder.addMigrations` 注册, 依赖 Room 2.8.1 的 builder 与已构建的库共用迁移容器. framework helper 打开失败会重试一次, 注册按 (文件版本, 代码版本) 去重. 将来 Room 若改为复制容器, 打开会抛 "migration required" 而走兜底, `RoomDowngradeTest` 会失败提示.
-3. T3 缺必需列: 原文 "该表只能清空并记日志" 改为旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 保留 (名字被占时加 `_2`, `_3` ...), 新表为空, 以满足 R3 (不删用户数据); 与快照没有共有列的表同样处理. 登记为附录 C Q8.
+3. T3 缺必需列: 原文 "该表只能清空并记日志" 改为旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 保留 (名字被占时加 `_2`, `_3` ...), 新表为空, 以满足 R3 (不删用户数据); 与快照没有共有列的表同样处理. 登记为附录 C Q8. 2026-10-24 更新 (db-downgrade-q8-q9, P2.4): 维护者选 Q8 = C (D9), 改名保留的做法已撤回, 代码已删除; 这类表现在使迁移抛出 `IllegalStateException` (消息含表名, 文件版本与缺少的列), 事务回滚, 首次打开经 `DatabaseRecovery` 把整个文件改名备份并改用空库, 装回 >= 文件版本的构建时自动还原; 同样满足 R3 (备份即原文件).
 4. T3 补充: 重建期间临时打开 `legacy_alter_table` (改名时不重写其他表的外键引用, 也不重新检查视图), 外键约束此时未开启 (Room 在迁移之后才执行 `foreign_keys = ON`), 父表重建不级联删除子表; AUTOINCREMENT 表的 `sqlite_sequence` 不回退; NOT NULL 且有默认值的列用 `COALESCE` 补默认值; 插入违反约束时整个迁移回滚, 文件不变, 交给兜底. 快照含 FTS 表时报错 (三库目前都没有).
 5. T4 兜底: 不在 `getInstance` 主动触发 `writableDatabase` (同样是主线程 IO), 改为在 `RoomDowngrade` 包装的 open helper 的 `writableDatabase` / `readableDatabase` 处 (后台线程) 经 `DatabaseRecovery` 处理. 已接入: 只有首次打开 (以及 `close` 之后的再次打开) 经过 `openOrRecover`, 之后直接交给 framework helper, 因为 Room 每次查询都会取 `writableDatabase`; 打开失败时先关闭 helper 再移走文件; 内存库不经过兜底. 接入时发现 `DatabaseRecovery` 两处对 Room 库不生效, 已告知 db-downgrade-p0-p1 (P1.2 文件, P2 不改): (a) 备份名的正则要求库名以 `.db` 结尾, `KeyStoreDatabase` 的库名 `keystore-database` 的备份因此既不清理也不还原; (b) "当前库没有行" 未排除 `room_master_table`, Room 库兜底后的新空库总有这一行, 备份因此不会自动还原.
 6. T3 打包: Gradle 任务 `package<Variant>RoomSchemaAssets` 经 variant API 加为生成的 assets 目录, 只复制不改 `room.schemaLocation`; `mustRunAfter` 对应的 KSP 任务, 新版本的快照在同一次构建内打包.
@@ -190,6 +200,15 @@
 10. P2 接入后的两处缺口 (db-downgrade-p2 交接笔记): 备份名正则不再要求 `.db` 结尾 (`keystore-database` 的备份可轮换与还原), "当前库没有行" 不计 `room_master_table` (Room 新建空库就有 identity 行). 用例 `restoreHandlesRoomDatabaseWithoutDbSuffix`.
 11. T6 脚本修正: (a) debug 包有两个 LAUNCHER 入口, `monkey` 可能选中 LeakCanary 的 "Leaks" 入口, 各次运行的启动路径因此不一致; 改为 `cmd package query-activities` 取本应用入口并排除它, 取不到时才用 `monkey`; (b) 通知在强停前读取 (API 35 的 `am force-stop` 会清掉本包通知); (c) 新装 debug 包在 API 35 首启做 ART 校验, `App.onCreate` 超过 10 s, 修后验收用 `--observe 30`; (d) `restore-check` 的重装偶尔卡住 (API 24 上一次 300 s 超时), 改为 180 s 超时重试一次, 且任何一步失败都先放回数据; (e) 直接构建的 inrt debug 包是没有项目的模板, 从桌面入口启动时 `SplashActivity` 因 `ProjectConfig.fromAssets` 返回 null 抛 NPE (`getLaunchConfig`), 与降级无关, 修前被 `App.onCreate` 的降级崩溃遮住 (修后首轮: API 35 / 24 各记到 1 次, 并被广播再拉起 1 / 2 次); 打包出的应用有 `project.json`, 不受影响. inrt 修后验收改用 `--start broadcast` (向 `ProfileInstallReceiver` 发它忽略的 action, 只拉起进程走完 `App.onCreate`, 与真实循环里后台组件拉起相同), 唤醒本来就不经界面.
 12. 修后包与修前包 versionCode 相同 (5935 / inrt 5835): VERSION_BUILD 未变, 两者只差 P1 的提交. API 24 用临时 AVD `dbdowngrade_p01_api24`.
+
+### P1.5 / P2.4 实施处置 (2026-10-24, db-downgrade-q8-q9)
+
+1. 构建与设备: 共享工作区里有其他会话未提交的改动, 构建在隔离副本 `E:/.cache/aj6dbq89` (HEAD `2f0663ba8` + 本会话文件) 中进行: A 修后不带注入 (androidTest 与页面核对), B 修后 + 临时崩溃注入 (宿主与 inrt), C HEAD 的 `CrashHandler` / `App.kt` + 同一注入 (修前对照); 注入只在副本里, 不提交, 代码写在 `tools/db-downgrade/README.md` "崩溃移交" 一节. 只用临时 AVD `dbdowngrade_q89_api35` (API 35), 按 D5 / 任务说明没有另做 API 24.
+2. D10 的安装方式: 不在 `App` 里先取再传, 而是 `CrashHandler.install` 内取当前默认处理器; 当前已是 `CrashHandler` 时沿用它保存的系统处理器, 重复安装不会形成自身链. 系统处理器 (`RuntimeInit$KillApplicationHandler`) 调 `handleApplicationCrash` 后结束进程, 不返回; 只有它为 null 或返回时才 `exitProcess(1)`.
+3. D10 的报告顺序: 主线程崩溃先停无障碍服务 (同旧), 再 `popException` 与崩溃报告页, 最后移交; 两步报告包在 `runCatching` 里, 失败只记日志, 移交照常进行 (报告页在独立进程 `:crash_report`, 系统处理崩溃时只结束本进程顶部的 Activity, 不影响它). 6.7.0 Alpha11 之前的主线程崩溃在 release 包里经 Bugly 回调打开报告页再交给系统, 现在的顺序与之相同.
+4. D10 的系统行为 (AVD API 35 实测): 前台首次崩溃没有系统对话框, 进程立即结束; 2 分钟内再次前台崩溃时系统显示 "Application Error" 对话框 (与报告页同时在前台), 进程等对话框关闭才结束 (约 5 分钟自行关闭); 后台 60 s 内第二次崩溃即标为 bad, 之后后台广播不再拉起, 前台启动或 provider 调用 (如 Shizuku 服务端重启) 会清除标记 (provider 清除已实测). 按 AOSP 的 `ProcessList.startProcessLocked`, 只有带 `FLAG_FROM_BACKGROUND` 的启动 (广播) 检查 bad 标记, service / job 的拉起不检查 (未实测): 前台用例里崩溃后 WorkManager (`SystemJobService`) 各拉起 1 次, 因注入只在 Activity 恢复后触发而没有再崩溃.
+5. `crash_handover.py` 的几处修正 (首跑发现): (a) 强停后系统可能在 0.1 s 内为 `JobRescheduleService` 重新拉起宿主, 桌面入口随后复用该进程, 所以事件窗口从强停之前开始, 注入标记也在强停之前放好; (b) 崩溃后 job 拉起的新主进程不算 "进程未结束", 只要求崩溃的那个 pid 结束; (c) 修前构建上 `am broadcast` 不返回 (接收进程自行退出, 系统一再重投), 每条广播最多等一个间隔; (d) "启动次数 < 广播次数" 在修前也成立 (每次启动 10 s 左右), 改为 "有 bad 标记且之后没有启动". 被这些问题影响的报告小节已删除重跑.
+6. P2.4 页面核对首跑 27 / 28: 回收站页被 LeakCanary 的 `RequestPermissionActivity` (debug 包申请通知权限) 盖住, 授予 `POST_NOTIFICATIONS` 后 28 / 28; 报告保留两节并写明原因.
 
 ### P3 实施处置 (2026-10-24, db-downgrade-p3)
 
@@ -212,6 +231,7 @@
 | 拉起方 (provider / receiver / service / job) | XQ-AT72: events 缓冲区从 10-23 16:11 起, 已没有 inrt 的 `am_proc_start` (已轮转); jobscheduler 0 条, alarm 0 条, 无 bad process. 清单: provider authority 7 个 (含 `org.autojs.autojs6.inrt.shizuku`), receiver 47 条, service 5 条. AVD API 35 复现 (Shizuku 13.6.0): 服务端每次重启先经 `ShizukuProvider` (content provider) 拉起 1 次; 进程死后, 待投递的启动类广播逐个再拉起 (`InrtBootCompletedReceiver` x2, `AudioCompatibilityProbeReceiver`, `StaticBroadcastReceiver`, `BootCompletedReceiver`, `RescheduleReceiver`, `JobBootReceiver`); 约 50 s 后 WorkManager `SystemJobService` 再拉起 1 次 |
 | 崩溃次数与时间跨度 | XQ-AT72: 无记录 (dropbox 未写入, events 已轮转), 以 shizuku-oom P0 记的 123 次为准. AVD API 35: 服务端每次重启 inrt 崩溃 9 / 1 / 8 次 (3 轮共 18 次, 均为降级), 每次从启动到退出 5-15 s, 一轮约 60 s 后平息; 宿主同轮 7 / 8 / 8 次 |
 | 宿主每轮 3 次的停止条件 | 系统的 bad-process 限制 (推断). 6.6.4 的 `CrashHandler` 把异常交给 Bugly 处理器再交给系统, XQ-AT72 dropbox 有 30 条 data_app_crash (v3274, 2026-10-22 23:17:13 - 23:29:16, 按每轮 3 次即 10 轮); 系统在 60 s 内第二次崩溃时把进程标为 bad process, 之后不再为后台请求拉起. 6.7.0 Alpha11 (`e61289c86a`, 移除 Bugly) 起, `CrashHandler.mSystemHandler` 改为 lazy, 第一次崩溃时才取默认处理器, 而这时默认处理器已是 `CrashHandler` 自身. 结果: 主线程崩溃递归 5 次后 `exitProcess(1)`, 系统没有 am_crash 与 dropbox 记录, 也不计崩溃次数, 每个待投递的广播, provider 调用与 job 都会再拉起一次 (inrt 5280 的 123 次; AVD 上 am_crash 恒为 0, 日志里只有 FATAL EXCEPTION). 已登记附录 C Q9 |
+| 修后 (P1.5, 2026-10-24, AVD `dbdowngrade_q89_api35` API 35, 宿主与 inrt 5935 带临时崩溃注入) | 前台崩溃: 宿主与 inrt 各 1 次, `am_crash` 1, dropbox `data_app_crash` +1, 崩溃报告页 resumed, 崩溃的进程结束 (修前对照: `am_crash` 0, dropbox 0). 后台 `App.onCreate` 崩溃, 每 5 s 一条显式广播共 12 条: 宿主与 inrt 都只拉起 2 次 (`ProfileInstallReceiver` 1, 待投递的 `InrtBootCompletedReceiver` 1), 第 2 次崩溃时系统日志 `Process <包名> has crashed too many times, killing! Reason: crashed quickly`, events `am_process_crashed_too_much` 1 与 `am_proc_bad` 1, 之后 10 条广播 0 次拉起 (API 35 静默跳过, 没有 "process is bad" 日志行); 修前对照: 60 s 内 5 次启动全部崩溃, `am_crash` 0, 无 bad, 12 条 `am broadcast` 都未返回 (系统一再重投), 窗口末尾仍在被拉起. bad 标记会被前台启动或 provider 调用清除, 所以 Shizuku 服务端每次重启仍会经 `ShizukuProvider` 拉起 1 次, 之后的启动类广播才被拦下 |
 | inrt 数据库版本 4 的来源 | IntentTask 版本 4 从构建 5282 (`6ad80448f6`, 2026-09-21, "收到邮件" 意图任务) 开始. inrt 5280 首装 2026-09-14 18:07:47, 最后更新 2026-10-22 17:33:09 (即装回 5280 的时间); 两者之间装过 >= 5282 的 inrt 构建, 库被写成 4. 具体是哪个构建, 只读取证无法确定 (不能 run-as 读库) |
 
 报告: `evidence/roundtrip-XQ-AT72-5280-20261023-forensics.md` (inrt), `evidence/roundtrip-XQ-AT72-5835-20261023-forensics.md` (宿主).
@@ -262,8 +282,8 @@
 格式: `- [状态] 编号 问题 | 选项: A (推荐) / B | 影响: 条目 | 改选返工: ... | 来源`. 状态: 需拍板 / 已按推荐先行待确认 / 已决 (日期, 维护者选: ...) / 暂缓.
 
 - (立项时无)
-- [已按推荐先行待确认] Q8 Room 降级时某张表缺少本版本必需的列 (NOT NULL 且无默认值), 或与快照没有共有列, 其行无法搬进新表, 如何处置 | 选项: A 旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 留在库文件里, 新表为空 (推荐, 已先行; 满足 R3, 代价是库文件保留旧数据的体积, 之后装回较新版本也不会自动搬回) / B 按 T3 原文清空该表只记日志 (数据丢失, 与 R3 冲突) / C 该表重建失败即整库走兜底备份 (其他表也变空) | 影响: P2.1, P2.2 | 改选返工: B 约 10 行 + 改 1 个用例; C 约 20 行 + 改 1 个用例, 依赖 P1.2 | 来源: db-downgrade-p2 (附录 A "P2 实施处置" 第 3 条)
-- [需拍板] Q9 `CrashHandler` 从不把异常交给系统 (6.7.0 Alpha11 移除 Bugly 后 `mSystemHandler` 取到的是自身, 见附录 B.1 "停止条件"), 主线程崩溃以 `exitProcess(1)` 结束, 系统不记崩溃也不限制重启; P1 / P2 只消除降级这一种启动期崩溃, 其他启动期崩溃仍会被每个待投递的广播, provider 调用与 job 各拉起一次. 是否修 | 选项: A 另立条目修: 在 `setDefaultUncaughtExceptionHandler` 之前取得系统处理器并传给 `CrashHandler`, 主线程崩溃时照旧打开崩溃报告页 (独立进程 `:crash_report`) 后交给系统, 恢复 am_crash / dropbox 记录与系统的 bad-process 限制 (后台拉起在 60 s 内第二次崩溃后停止) (推荐, 未先行: 改的是全局崩溃路径, 前台崩溃会多出系统的 "应用已停止" 处理, 且不在本批文件范围内) / B 不修, 只靠 P1 / P2 消除降级崩溃 / C 修 A 之外再加跨进程的启动崩溃计数 (例如连续 3 次启动期崩溃后跳过非必要初始化) | 影响: 新条目 (`tool/CrashHandler.kt`, `App.kt`), 不影响 P1 / P2 | 改选返工: A 约 20 行 + 手测前台 / 后台崩溃各一次; C 另加约 60 行与用例 | 来源: db-downgrade-p0-p1 (P0.1 / P0.2)
+- [已决 (2026-10-23 20:30, 维护者选 C, 非推荐项; 落为 D9, 实施见 P2.4)] Q8 Room 降级时某张表缺少本版本必需的列 (NOT NULL 且无默认值), 或与快照没有共有列, 其行无法搬进新表, 如何处置 | 选项: A 旧表改名为 `_downgrade_kept_<表名>_v<文件版本>` 留在库文件里, 新表为空 (推荐, 已先行; 满足 R3, 代价是库文件保留旧数据的体积, 之后装回较新版本也不会自动搬回) / B 按 T3 原文清空该表只记日志 (数据丢失, 与 R3 冲突) / C 该表重建失败即整库走兜底备份 (其他表也变空) | 影响: P2.1, P2.2 | 改选返工: B 约 10 行 + 改 1 个用例; C 约 20 行 + 改 1 个用例, 依赖 P1.2 | 来源: db-downgrade-p2 (附录 A "P2 实施处置" 第 3 条)
+- [已决 (2026-10-23 20:30, 维护者选 A; 落为 D10, 实施见 P1.5)] Q9 `CrashHandler` 从不把异常交给系统 (6.7.0 Alpha11 移除 Bugly 后 `mSystemHandler` 取到的是自身, 见附录 B.1 "停止条件"), 主线程崩溃以 `exitProcess(1)` 结束, 系统不记崩溃也不限制重启; P1 / P2 只消除降级这一种启动期崩溃, 其他启动期崩溃仍会被每个待投递的广播, provider 调用与 job 各拉起一次. 是否修 | 选项: A 另立条目修: 在 `setDefaultUncaughtExceptionHandler` 之前取得系统处理器并传给 `CrashHandler`, 主线程崩溃时照旧打开崩溃报告页 (独立进程 `:crash_report`) 后交给系统, 恢复 am_crash / dropbox 记录与系统的 bad-process 限制 (后台拉起在 60 s 内第二次崩溃后停止) (推荐, 未先行: 改的是全局崩溃路径, 前台崩溃会多出系统的 "应用已停止" 处理, 且不在本批文件范围内) / B 不修, 只靠 P1 / P2 消除降级崩溃 / C 修 A 之外再加跨进程的启动崩溃计数 (例如连续 3 次启动期崩溃后跳过非必要初始化) | 影响: 新条目 (`tool/CrashHandler.kt`, `App.kt`), 不影响 P1 / P2 | 改选返工: A 约 20 行 + 手测前台 / 后台崩溃各一次; C 另加约 60 行与用例 | 来源: db-downgrade-p0-p1 (P0.1 / P0.2)
 
 ## 附录 D. 文件地图
 
@@ -276,14 +296,15 @@
 | `app/src/main/java/org/autojs/autojs/storage/database/SQLiteSchemaUtils.java` | `hasColumn` / `addColumnIfMissing` (T1) | P1.1 |
 | `app/src/main/java/org/autojs/autojs/storage/database/DatabaseRecovery.kt` | 打开失败兜底: 备份, 空库, 轮换, 还原, 宿主通知 (T2 / T7 / T9); Room 经 `RoomDowngrade` 接入 | P1.2 |
 | `app/src/androidTest/java/org/autojs/autojs/storage/database/TaskDatabaseRecoveryTest.kt` | 两表降级 / 幂等升级与兜底 / 还原用例 | P1.3 |
-| `app/src/main/java/org/autojs/autojs/App.kt` | 崩溃发生处 (`TimedTaskScheduler.init`, `initDynamicBroadcastReceivers`) | P0 / P1 (只读) |
-| `app/src/main/java/org/autojs/autojs/tool/CrashHandler.kt` | 主线程异常处理, 无循环防护 | P0 (只读) |
+| `app/src/main/java/org/autojs/autojs/App.kt` | 崩溃发生处 (`TimedTaskScheduler.init`, `initDynamicBroadcastReceivers`); `setUpDebugEnvironment` 经 `CrashHandler.install` 安装处理器 | P0 / P1 (只读), P1.5 |
+| `app/src/main/java/org/autojs/autojs/tool/CrashHandler.kt` | 未捕获异常处理: 崩溃报告页后把会结束进程的崩溃交给安装前的默认处理器 (D10) | P0 (只读), P1.5 |
+| `tools/db-downgrade/crash_handover.py` (README "崩溃移交" 一节含临时崩溃注入) | 前台崩溃 (报告页, am_crash, dropbox, 进程结束) 与后台连续拉起崩溃 (am_crash, bad process, 拉起次数) 的核对 | P1.5 |
 | `app/src/main/java/org/autojs/autojs/storage/history/HistoryDatabase.kt` | Room, version 3 | P2 |
 | `app/src/main/java/org/autojs/autojs/theme/app/ColorHistoryDatabase.kt` | Room, version 2 | P2 |
 | `app/src/main/java/org/autojs/autojs/apkbuilder/keystore/KeyStoreDatabase.kt` | Room, version 1, exportSchema 改 true | P2 |
 | `app/schemas/` | Room 导出 schema, 复制进 assets | P2.1 |
-| `app/src/main/java/org/autojs/autojs/storage/database/RoomDowngrade.kt` | Room 通用降级 (包装 open helper, 动态 Migration, 按快照重建) | P2.1 |
-| `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradeTest.kt` | Room 三库降级用例 | P2.2 |
+| `app/src/main/java/org/autojs/autojs/storage/database/RoomDowngrade.kt` | Room 通用降级 (包装 open helper, 动态 Migration, 按快照重建; 表无法保留其行时抛出, 整库兜底) | P2.1, P2.4 |
+| `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradeTest.kt` | Room 三库降级用例 (含缺必需列整库兜底) | P2.2, P2.4 |
 | `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradePagesDeviceTest.kt`, `tools/db-downgrade-room/room_pages.py` | Room 三库未来文件的页面与 `HistoryCleanupWorker` 核对 (instrumentation 参数 `autojs.dbDowngrade.pages=true`) | P2.3 |
 | `app/src/main/java/org/autojs/autojs/core/database/Database.java` | 脚本 sqlite 模块底层 helper 与 `DatabaseCallback` | P3.1 |
 | `app/src/main/java/org/autojs/autojs/runtime/api/augment/sqlite/SQLite.kt` | 脚本 `sqlite.open` 选项解析 (P3.1 未改, 见 "P3 实施处置" 第 1 条) | P3.1 |
