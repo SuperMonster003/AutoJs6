@@ -148,6 +148,14 @@ class ScriptModuleMounter @JvmOverloads constructor(
     /** The Kotlin instance of the installed module at [path], created if needed without building the module object. */
     fun instance(path: String): Any? = node(path)?.instance()
 
+    /**
+     * The value that the installed module at [path] binds to the global name [name] (its own function, whatever a script
+     * assigned to that name since), building the module if needed; null when it binds no such name. Host code reads it to
+     * tell whether a script replaced the global (the global Promise posts its jobs to the timer directly while
+     * `setImmediate` is the timers module's own, roadmap P4.2).
+     */
+    fun globalValue(path: String, name: String): Any? = node(path)?.let { it.moduleObject(); it.globalValue(name) }
+
     /** Whether the installed top-level module [name] has been built. */
     fun isBuilt(name: String): Boolean = installed[name]?.isBuilt == true
 
@@ -195,6 +203,9 @@ class ScriptModuleMounter @JvmOverloads constructor(
         private var installation: ScriptModuleInstallation? = null
 
         val isBuilt get() = built != null
+
+        /** The value of the global member [name] of this module once it is built ([moduleObject]). */
+        fun globalValue(name: String): Any? = globalValues[name]
 
         fun descendants(): List<Node> = children.flatMap { listOf(it) + it.descendants() }
 

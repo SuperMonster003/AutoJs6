@@ -211,6 +211,8 @@ import org.autojs.autojs.runtime.api.modules.bootstrap.ScriptPolyfills
 import org.autojs.autojs.runtime.api.modules.bootstrap.require.AssetModuleSource
 import org.autojs.autojs.runtime.api.modules.bootstrap.require.ScriptModuleSources
 import org.autojs.autojs.runtime.api.modules.bootstrap.require.ScriptRequire
+import org.autojs.autojs.runtime.api.modules.promise.PromiseConstructor
+import org.autojs.autojs.runtime.api.modules.promise.TimerReactionPoster
 import org.autojs.autojs.script.JavaScriptSource
 
 /**
@@ -532,10 +534,19 @@ class ScriptRuntime private constructor(builder: Builder) {
      * AutoJs6/示例代码/协程/协程HelloWorld.js
      */
     /**
-     * Substitution of Promise.
-     * zh-CN: Promise 的替代方案.
+     * Substitution of Promise: with the new script module layer, the Kotlin [PromiseConstructor] (roadmap P4.2, appendix C
+     * Q95), whose reactions go straight to the timer while the global `setImmediate` is the timers module's own; without it,
+     * `assets/modules/promise.js` (until P5.2). Created on first use, in `RhinoJavaScriptEngine.init` after the modules are
+     * mounted.
+     * zh-CN: Promise 的替代方案: 启用新脚本模块层时为 Kotlin 的 [PromiseConstructor] (ROADMAP P4.2, 附录 C Q95), 全局 setImmediate 仍是 timers 模块
+     * 自己的函数时反应直接投递到 timer; 否则为 `assets/modules/promise.js` (直到 P5.2). 首次使用时创建, 即 `RhinoJavaScriptEngine.init` 中模块挂载之后.
      */
-    internal val js_Promise by lazy { rhinoRequire("promise") as BaseFunction }
+    internal val js_Promise: BaseFunction by lazy {
+        when (val modules = scriptModules) {
+            null -> rhinoRequire("promise") as BaseFunction
+            else -> PromiseConstructor(topLevelScope, TimerReactionPoster(this) { modules.globalValue("timers", "setImmediate") })
+        }
+    }
 
     /**
      * The global `ResultAdapter`, in Kotlin since roadmap P2.5 (formerly `assets/modules/result-adapter.js`); the name stays
