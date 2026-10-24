@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules.opencc
 
 import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
 import org.autojs.autojs.runtime.api.augment.opencc.OpenccConversionPlan
+import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
@@ -21,11 +22,14 @@ import java.util.Locale
  * arguments are checked here first (D10, IllegalArgumentException in the current module): a nullish text is a TypeError
  * (the current module cannot convert it to a string), a type that is neither a string nor an enum constant a TypeError
  * and an unknown type name a RangeError. The conversion itself is the current module's.
+ * Once the arguments are accepted, a failure of the current module (the plugin not installed or disabled among them)
+ * is rethrown as the current augment layer does (`AugmentMembers.asCurrent`): the same InternalError in both states.
  *
  * zh-CN: 新脚本模块层上的 opencc (P4.1): opencc(s, type) 与 opencc.convert(s, type), 以及现有 augment/opencc/OpenCC 的 32 个具名转换 (经 OpenCC 插件转换,
  * 转换类型与 OpenccConversionPlan 的转换链). 参数按真实签名 (T4): 缺少或多余参数为生成层的 TypeError; 参数先在此检查 (D10, 现有模块均为
  * IllegalArgumentException): nullish 文本为 TypeError (现有模块无法将其转为字符串), 既非字符串也非枚举常量的 type 为 TypeError, 未知的类型名为
  * RangeError. 转换本身由现有模块完成.
+ * 参数通过检查后, 现有模块的失败 (含插件未安装或未启用) 按现有 augment 层的方式重新抛出 (AugmentMembers.asCurrent), 两态为同一个 InternalError.
  */
 @ScriptModule(name = "opencc")
 class OpenccModule {
@@ -37,100 +41,100 @@ class OpenccModule {
     fun convert(s: Any?, type: Any?): String = convert(FUNCTION_CONVERT, s, type)
 
     @ScriptFunction
-    fun hk2s(s: Any?): String = OpenCC.hk2s(arrayOf(text("opencc.hk2s", s)))
+    fun hk2s(s: Any?): String = named("hk2s", text("opencc.hk2s", s)) { OpenCC.hk2s(it) }
 
     @ScriptFunction
-    fun hk2t(s: Any?): String = OpenCC.hk2t(arrayOf(text("opencc.hk2t", s)))
+    fun hk2t(s: Any?): String = named("hk2t", text("opencc.hk2t", s)) { OpenCC.hk2t(it) }
 
     @ScriptFunction
-    fun jp2t(s: Any?): String = OpenCC.jp2t(arrayOf(text("opencc.jp2t", s)))
+    fun jp2t(s: Any?): String = named("jp2t", text("opencc.jp2t", s)) { OpenCC.jp2t(it) }
 
     @ScriptFunction
-    fun s2hk(s: Any?): String = OpenCC.s2hk(arrayOf(text("opencc.s2hk", s)))
+    fun s2hk(s: Any?): String = named("s2hk", text("opencc.s2hk", s)) { OpenCC.s2hk(it) }
 
     @ScriptFunction
-    fun s2t(s: Any?): String = OpenCC.s2t(arrayOf(text("opencc.s2t", s)))
+    fun s2t(s: Any?): String = named("s2t", text("opencc.s2t", s)) { OpenCC.s2t(it) }
 
     @ScriptFunction
-    fun s2tw(s: Any?): String = OpenCC.s2tw(arrayOf(text("opencc.s2tw", s)))
+    fun s2tw(s: Any?): String = named("s2tw", text("opencc.s2tw", s)) { OpenCC.s2tw(it) }
 
     @ScriptFunction
-    fun s2twp(s: Any?): String = OpenCC.s2twp(arrayOf(text("opencc.s2twp", s)))
+    fun s2twp(s: Any?): String = named("s2twp", text("opencc.s2twp", s)) { OpenCC.s2twp(it) }
 
     @ScriptFunction
-    fun t2hk(s: Any?): String = OpenCC.t2hk(arrayOf(text("opencc.t2hk", s)))
+    fun t2hk(s: Any?): String = named("t2hk", text("opencc.t2hk", s)) { OpenCC.t2hk(it) }
 
     @ScriptFunction
-    fun t2s(s: Any?): String = OpenCC.t2s(arrayOf(text("opencc.t2s", s)))
+    fun t2s(s: Any?): String = named("t2s", text("opencc.t2s", s)) { OpenCC.t2s(it) }
 
     @ScriptFunction
-    fun t2tw(s: Any?): String = OpenCC.t2tw(arrayOf(text("opencc.t2tw", s)))
+    fun t2tw(s: Any?): String = named("t2tw", text("opencc.t2tw", s)) { OpenCC.t2tw(it) }
 
     @ScriptFunction
-    fun t2jp(s: Any?): String = OpenCC.t2jp(arrayOf(text("opencc.t2jp", s)))
+    fun t2jp(s: Any?): String = named("t2jp", text("opencc.t2jp", s)) { OpenCC.t2jp(it) }
 
     @ScriptFunction
-    fun tw2s(s: Any?): String = OpenCC.tw2s(arrayOf(text("opencc.tw2s", s)))
+    fun tw2s(s: Any?): String = named("tw2s", text("opencc.tw2s", s)) { OpenCC.tw2s(it) }
 
     @ScriptFunction
-    fun tw2t(s: Any?): String = OpenCC.tw2t(arrayOf(text("opencc.tw2t", s)))
+    fun tw2t(s: Any?): String = named("tw2t", text("opencc.tw2t", s)) { OpenCC.tw2t(it) }
 
     @ScriptFunction
-    fun tw2sp(s: Any?): String = OpenCC.tw2sp(arrayOf(text("opencc.tw2sp", s)))
+    fun tw2sp(s: Any?): String = named("tw2sp", text("opencc.tw2sp", s)) { OpenCC.tw2sp(it) }
 
     @ScriptFunction
-    fun s2twi(s: Any?): String = OpenCC.s2twi(arrayOf(text("opencc.s2twi", s)))
+    fun s2twi(s: Any?): String = named("s2twi", text("opencc.s2twi", s)) { OpenCC.s2twi(it) }
 
     @ScriptFunction
-    fun twi2s(s: Any?): String = OpenCC.twi2s(arrayOf(text("opencc.twi2s", s)))
+    fun twi2s(s: Any?): String = named("twi2s", text("opencc.twi2s", s)) { OpenCC.twi2s(it) }
 
     @ScriptFunction
-    fun s2jp(s: Any?): String = OpenCC.s2jp(arrayOf(text("opencc.s2jp", s)))
+    fun s2jp(s: Any?): String = named("s2jp", text("opencc.s2jp", s)) { OpenCC.s2jp(it) }
 
     @ScriptFunction
-    fun t2twi(s: Any?): String = OpenCC.t2twi(arrayOf(text("opencc.t2twi", s)))
+    fun t2twi(s: Any?): String = named("t2twi", text("opencc.t2twi", s)) { OpenCC.t2twi(it) }
 
     @ScriptFunction
-    fun hk2tw(s: Any?): String = OpenCC.hk2tw(arrayOf(text("opencc.hk2tw", s)))
+    fun hk2tw(s: Any?): String = named("hk2tw", text("opencc.hk2tw", s)) { OpenCC.hk2tw(it) }
 
     @ScriptFunction
-    fun hk2twi(s: Any?): String = OpenCC.hk2twi(arrayOf(text("opencc.hk2twi", s)))
+    fun hk2twi(s: Any?): String = named("hk2twi", text("opencc.hk2twi", s)) { OpenCC.hk2twi(it) }
 
     @ScriptFunction
-    fun hk2jp(s: Any?): String = OpenCC.hk2jp(arrayOf(text("opencc.hk2jp", s)))
+    fun hk2jp(s: Any?): String = named("hk2jp", text("opencc.hk2jp", s)) { OpenCC.hk2jp(it) }
 
     @ScriptFunction
-    fun tw2hk(s: Any?): String = OpenCC.tw2hk(arrayOf(text("opencc.tw2hk", s)))
+    fun tw2hk(s: Any?): String = named("tw2hk", text("opencc.tw2hk", s)) { OpenCC.tw2hk(it) }
 
     @ScriptFunction
-    fun tw2twi(s: Any?): String = OpenCC.tw2twi(arrayOf(text("opencc.tw2twi", s)))
+    fun tw2twi(s: Any?): String = named("tw2twi", text("opencc.tw2twi", s)) { OpenCC.tw2twi(it) }
 
     @ScriptFunction
-    fun tw2jp(s: Any?): String = OpenCC.tw2jp(arrayOf(text("opencc.tw2jp", s)))
+    fun tw2jp(s: Any?): String = named("tw2jp", text("opencc.tw2jp", s)) { OpenCC.tw2jp(it) }
 
     @ScriptFunction
-    fun twi2t(s: Any?): String = OpenCC.twi2t(arrayOf(text("opencc.twi2t", s)))
+    fun twi2t(s: Any?): String = named("twi2t", text("opencc.twi2t", s)) { OpenCC.twi2t(it) }
 
     @ScriptFunction
-    fun twi2hk(s: Any?): String = OpenCC.twi2hk(arrayOf(text("opencc.twi2hk", s)))
+    fun twi2hk(s: Any?): String = named("twi2hk", text("opencc.twi2hk", s)) { OpenCC.twi2hk(it) }
 
     @ScriptFunction
-    fun twi2tw(s: Any?): String = OpenCC.twi2tw(arrayOf(text("opencc.twi2tw", s)))
+    fun twi2tw(s: Any?): String = named("twi2tw", text("opencc.twi2tw", s)) { OpenCC.twi2tw(it) }
 
     @ScriptFunction
-    fun twi2jp(s: Any?): String = OpenCC.twi2jp(arrayOf(text("opencc.twi2jp", s)))
+    fun twi2jp(s: Any?): String = named("twi2jp", text("opencc.twi2jp", s)) { OpenCC.twi2jp(it) }
 
     @ScriptFunction
-    fun jp2s(s: Any?): String = OpenCC.jp2s(arrayOf(text("opencc.jp2s", s)))
+    fun jp2s(s: Any?): String = named("jp2s", text("opencc.jp2s", s)) { OpenCC.jp2s(it) }
 
     @ScriptFunction
-    fun jp2hk(s: Any?): String = OpenCC.jp2hk(arrayOf(text("opencc.jp2hk", s)))
+    fun jp2hk(s: Any?): String = named("jp2hk", text("opencc.jp2hk", s)) { OpenCC.jp2hk(it) }
 
     @ScriptFunction
-    fun jp2tw(s: Any?): String = OpenCC.jp2tw(arrayOf(text("opencc.jp2tw", s)))
+    fun jp2tw(s: Any?): String = named("jp2tw", text("opencc.jp2tw", s)) { OpenCC.jp2tw(it) }
 
     @ScriptFunction
-    fun jp2twi(s: Any?): String = OpenCC.jp2twi(arrayOf(text("opencc.jp2twi", s)))
+    fun jp2twi(s: Any?): String = named("jp2twi", text("opencc.jp2twi", s)) { OpenCC.jp2twi(it) }
 
     private fun convert(function: String, s: Any?, type: Any?): String {
         text(function, s)
@@ -144,8 +148,11 @@ class OpenccModule {
         if (name.uppercase(Locale.ROOT) !in OpenccConversionTypes.ALL && OpenccConversionPlan.chainFor(name) == null) {
             throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("type", UtilValues.quote(type)))
         }
-        return OpenCC.convert(arrayOf(s, type))
+        return AugmentMembers.asCurrent(OpenCC, if (function == MODULE) null else "convert") { OpenCC.convert(arrayOf(s, type)) }
     }
+
+    /** The named conversion [function] of the current module, failing as there once [text] is checked. */
+    private fun named(function: String, text: Any, convert: (Array<Any?>) -> String): String = AugmentMembers.asCurrent(OpenCC, function) { convert(arrayOf(text)) }
 
     private fun text(function: String, s: Any?): Any {
         if (ScriptArgs.isNullish(s)) throw UtilValues.typeError(function, ScriptMessages.argumentType("s", "string", ScriptArgs.describe(s)))

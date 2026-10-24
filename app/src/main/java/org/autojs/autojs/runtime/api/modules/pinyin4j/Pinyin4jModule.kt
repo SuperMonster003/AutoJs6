@@ -22,11 +22,14 @@ import org.mozilla.javascript.NativeObject
  * other options that are not an object are ignored); what it rejects is checked here first (D10, IllegalArgumentException
  * in the current module): an unknown romanization system, case, tone or v char type name is a RangeError, and so are
  * case / tone / v options given for a romanization other than HANYU in `readings` (same messages as the current module).
+ * Once the arguments are accepted, a failure of the current module (the plugin not installed or disabled among them)
+ * is rethrown as the current augment layer does (`AugmentMembers.asCurrent`): the same InternalError in both states.
  *
  * zh-CN: 新脚本模块层上的 pinyin4j (P4.1): pinyin4j(s, options?) 与现有 augment/pinyin4j/Pinyin4j 的 of / readings / as (经 pinyin4j 插件).
  * 参数按真实签名 (T4): 缺少或多余参数为生成层的 TypeError. 现有模块接受的照旧接受 (nullish 文本即 "", of 的字符串选项即分隔符, 其他不是对象的选项被忽略);
  * 它拒绝的在此先行检查 (D10, 现有模块均为 IllegalArgumentException): 未知的拼音方案, 大小写, 声调或 v 字符类型名为 RangeError, readings 中对 HANYU 以外的
  * 拼音方案给出 case / tone / v 选项同样为 RangeError (消息同现有模块).
+ * 参数通过检查后, 现有模块的失败 (含插件未安装或未启用) 按现有 augment 层的方式重新抛出 (AugmentMembers.asCurrent), 两态为同一个 InternalError.
  */
 @ScriptModule(name = "pinyin4j")
 class Pinyin4jModule {
@@ -50,17 +53,17 @@ class Pinyin4jModule {
                 if (romanization == Pinyin4jRomanizationSystems.HANYU) formatting(options, Pinyin4jOptions.DEFAULT_READINGS_TONE_TYPE)
             }
         }
-        return Pinyin4j.readings(arrayOf(s, options))
+        return AugmentMembers.asCurrent(Pinyin4j, "readings") { Pinyin4j.readings(arrayOf(s, options)) }
     }
 
     @ScriptFunction(name = "as")
-    fun asTone(s: Any?): Any = Pinyin4j.`as`(arrayOf(s))
+    fun asTone(s: Any?): Any = AugmentMembers.asCurrent(Pinyin4j, "as") { Pinyin4j.`as`(arrayOf(s)) }
 
     private fun of(function: String, s: Any?, options: Any?): Any {
         // The current module reads the options only for a text that is not empty.
         // zh-CN: 现有模块只在文本非空时读取选项.
         if (options is NativeObject && !isEmptyText(s)) AugmentMembers.values(function) { formatting(options, Pinyin4jOptions.DEFAULT_OF_TONE_TYPE) }
-        return Pinyin4j.of(arrayOf(s, options))
+        return AugmentMembers.asCurrent(Pinyin4j, if (function == MODULE) null else "of") { Pinyin4j.of(arrayOf(s, options)) }
     }
 
     /** The case, tone and v char types of [options], normalized as the current module does (an unknown name throws). */

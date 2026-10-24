@@ -36,6 +36,8 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * of string keys and arrays of string arrays a TypeError and one with too many entries a RangeError; `compact` needs a
  * two-dimensional array of strings (TypeError); `fromCodePoint` needs a number (TypeError) that is a finite 32-bit
  * integer after truncation (RangeError); `fromPhrase` needs a text that is not nullish (TypeError).
+ * Once the arguments are accepted, a failure of the current module (the plugin not installed or disabled among them)
+ * is rethrown as the current augment layer does (`AugmentMembers.asCurrent`): the same InternalError in both states.
  *
  * zh-CN: 新脚本模块层上的 pinyin (P4.1): pinyin(hans, options?) 与现有 augment/pinyin/Pinyin 的函数 (convert, simple, compare, compact,
  * fromCodePoint, fromPhrase, 经拼音插件), STYLE_* / MODE_* 常量照原值. 参数按真实签名 (T4): 缺少或多余参数为生成层的 TypeError. 现有模块接受的照旧接受
@@ -43,6 +45,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * style 名称或常量为 RangeError, customDictionary 不是以字符串为键, 以字符串数组的数组为值的普通对象为 TypeError, 条目过多为 RangeError; compact
  * 需要字符串的二维数组 (TypeError); fromCodePoint 需要数值 (TypeError), 截断后为有限的 32 位整数 (RangeError); fromPhrase 需要非 nullish 的文本
  * (TypeError).
+ * 参数通过检查后, 现有模块的失败 (含插件未安装或未启用) 按现有 augment 层的方式重新抛出 (AugmentMembers.asCurrent), 两态为同一个 InternalError.
  */
 @ScriptModule(name = "pinyin")
 class PinyinModule {
@@ -57,10 +60,10 @@ class PinyinModule {
     fun convert(hans: Any?, options: Any? = null): Any = convert(FUNCTION_CONVERT, hans, options)
 
     @ScriptFunction
-    fun simple(str: Any?, enableNumericTone: Any? = null, enableSegment: Any? = null): Any = Pinyin.simple(arrayOf(str, enableNumericTone, enableSegment))
+    fun simple(str: Any?, enableNumericTone: Any? = null, enableSegment: Any? = null): Any = AugmentMembers.asCurrent(Pinyin, "simple") { Pinyin.simple(arrayOf(str, enableNumericTone, enableSegment)) }
 
     @ScriptFunction
-    fun compare(hanA: Any?, hanB: Any?): Any = Pinyin.compare(arrayOf(hanA, hanB))
+    fun compare(hanA: Any?, hanB: Any?): Any = AugmentMembers.asCurrent(Pinyin, "compare") { Pinyin.compare(arrayOf(hanA, hanB)) }
 
     @ScriptFunction
     fun compact(matrix: Any?): Any {
@@ -73,7 +76,7 @@ class PinyinModule {
                 if (ScriptArgs.isNullish(item) || item === Scriptable.NOT_FOUND) throw matrixError(ScriptMessages.argumentType("matrix[$i][$j]", "string", ScriptArgs.describe(item)))
             }
         }
-        return Pinyin.compact(arrayOf(matrix))
+        return AugmentMembers.asCurrent(Pinyin, "compact") { Pinyin.compact(arrayOf(matrix)) }
     }
 
     @ScriptFunction
@@ -85,20 +88,20 @@ class PinyinModule {
         if (!(truncated >= Int.MIN_VALUE && truncated <= Int.MAX_VALUE)) {
             throw UtilValues.rangeError(FUNCTION_FROM_CODE_POINT, ScriptMessages.argumentInteger("codePoint", 32, UtilValues.quote(codePoint)))
         }
-        return Pinyin.fromCodePoint(arrayOf(codePoint))
+        return AugmentMembers.asCurrent(Pinyin, "fromCodePoint") { Pinyin.fromCodePoint(arrayOf(codePoint)) }
     }
 
     @ScriptFunction
     fun fromPhrase(phrase: Any?): Any {
         if (ScriptArgs.isNullish(phrase)) throw UtilValues.typeError(FUNCTION_FROM_PHRASE, ScriptMessages.argumentType("phrase", "string", ScriptArgs.describe(phrase)))
-        return Pinyin.fromPhrase(arrayOf(phrase))
+        return AugmentMembers.asCurrent(Pinyin, "fromPhrase") { Pinyin.fromPhrase(arrayOf(phrase)) }
     }
 
     private fun convert(function: String, hans: Any?, options: Any?): Any {
         // The current module reads the options only for a text that is not empty.
         // zh-CN: 现有模块只在文本非空时读取选项.
         if (options is NativeObject && !isEmptyText(hans)) checkOptions(function, options)
-        return Pinyin.convert(arrayOf(hans, options))
+        return AugmentMembers.asCurrent(Pinyin, if (function == MODULE) null else "convert") { Pinyin.convert(arrayOf(hans, options)) }
     }
 
     private fun checkOptions(function: String, options: NativeObject) {

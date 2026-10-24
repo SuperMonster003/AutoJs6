@@ -30,12 +30,15 @@ import org.mozilla.javascript.Undefined
  * object (`messages` an array) is a TypeError and an empty message array a RangeError; options whose JSON is not an
  * object are a TypeError; the `system` option of `session` must be a string (TypeError) that is not empty (RangeError).
  * The request itself stays the current module's.
+ * Once the arguments are accepted, a failure of the current module (the plugin not installed or disabled among them)
+ * is rethrown as the current augment layer does (`AugmentMembers.asCurrent`): the same InternalError in both states.
  *
  * zh-CN: 新脚本模块层上的 ai (P4.1): ai(prompt, options?) 即 ai.ask(prompt, options?), 另有现有 augment/ai/Ai 的 chat / stream / session / catalog
  * 与 getter agent (请求经 AiService, 结果为 Promise / AiStream / 现有 agent 对象, 首次读取时构建). 参数按真实签名 (T4): 缺少或多余参数为生成层的
  * TypeError. 现有模块拒绝的参数形状在此先行检查, 与现有模块一样读取值的 JSON (D10, 现有模块均为 IllegalArgumentException): 没有 JSON 的值 (函数,
  * undefined) 为 TypeError; JSON 既不是字符串, 消息数组, 消息对象 (role 与 content) 也不是请求对象 (messages 为数组) 的 prompt 为 TypeError, 空的消息
  * 数组为 RangeError; JSON 不是对象的选项为 TypeError; session 的 system 选项须为字符串 (TypeError) 且非空 (RangeError). 请求本身仍由现有模块完成.
+ * 参数通过检查后, 现有模块的失败 (含插件未安装或未启用) 按现有 augment 层的方式重新抛出 (AugmentMembers.asCurrent), 两态为同一个 InternalError.
  */
 @ScriptModule(name = "ai")
 class AiModule(private val runtime: ScriptRuntime) {
@@ -45,25 +48,25 @@ class AiModule(private val runtime: ScriptRuntime) {
     @ScriptInvoke
     fun invoke(prompt: Any?, options: Any? = null): Any {
         checkRequest(MODULE, prompt, options)
-        return ai.ask(runtime, arrayOf(prompt, options))
+        return AugmentMembers.asCurrent(ai, null) { ai.ask(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
     fun ask(prompt: Any?, options: Any? = null): Any {
         checkRequest(FUNCTION_ASK, prompt, options)
-        return ai.ask(runtime, arrayOf(prompt, options))
+        return AugmentMembers.asCurrent(ai, "ask") { ai.ask(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
     fun chat(prompt: Any?, options: Any? = null): Any {
         checkRequest(FUNCTION_CHAT, prompt, options)
-        return ai.chat(runtime, arrayOf(prompt, options))
+        return AugmentMembers.asCurrent(ai, "chat") { ai.chat(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
     fun stream(prompt: Any?, options: Any? = null): Any {
         checkRequest(FUNCTION_STREAM, prompt, options)
-        return ai.stream(runtime, arrayOf(prompt, options))
+        return AugmentMembers.asCurrent(ai, "stream") { ai.stream(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
@@ -74,13 +77,13 @@ class AiModule(private val runtime: ScriptRuntime) {
             }
             if (system.asString.isEmpty()) throw UtilValues.rangeError(FUNCTION_SESSION, ScriptMessages.argumentCannotBe("options.$SYSTEM", "\"\""))
         }
-        return ai.session(runtime, arrayOf(options))
+        return AugmentMembers.asCurrent(ai, "session") { ai.session(runtime, arrayOf(options)) }
     }
 
     @ScriptFunction
     fun catalog(options: Any? = null): Any {
         checkOptions(FUNCTION_CATALOG, options)
-        return ai.catalog(runtime, arrayOf(options))
+        return AugmentMembers.asCurrent(ai, "catalog") { ai.catalog(runtime, arrayOf(options)) }
     }
 
     @ScriptGetter
