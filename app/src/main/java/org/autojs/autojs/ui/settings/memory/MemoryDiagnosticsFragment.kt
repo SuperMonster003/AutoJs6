@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.runtime.memory.MemoryDiagnostics
 import org.autojs.autojs.runtime.memory.MemorySnapshot
+import org.autojs.autojs.runtime.memory.RetainedBridgeSession
 import org.autojs.autojs.runtime.memory.RetainedRuntime
 import org.autojs.autojs.theme.preference.MaterialPreference
 import org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory
@@ -37,10 +38,13 @@ import java.util.Locale
 
 /**
  * The list of the memory diagnostics page (docs/memory/ROADMAP.md T10): the snapshot values refreshed every 2 s, the finished but
- * unreclaimed runtimes (script name, exit kind, time since it ended), and the actions "Force GC and check again", "Export heap dump"
- * (SAF CreateDocument) and "Copy diagnostics text". Everything is read from [MemoryDiagnostics].
- * zh-CN: 内存诊断页面的列表 (docs/memory/ROADMAP.md T10): 每 2 s 刷新的快照各项, 已结束未回收的 runtime (脚本名, 结束方式, 已过时长), 以及
- * "强制 GC 并复查", "导出堆转储" (SAF CreateDocument), "复制诊断文本" 三个操作. 数据全部取自 [MemoryDiagnostics].
+ * unreclaimed runtimes (script name, engine, exit kind, time since it ended), the finished but unreclaimed bridge sessions of plugin
+ * engines (engine, time since it ended, execution id, session objects still reachable; docs/memory-phase2/ROADMAP.md P4.4), and the
+ * actions "Force GC and check again", "Export heap dump" (SAF CreateDocument) and "Copy diagnostics text". Everything is read from
+ * [MemoryDiagnostics].
+ * zh-CN: 内存诊断页面的列表 (docs/memory/ROADMAP.md T10): 每 2 s 刷新的快照各项, 已结束未回收的 runtime (脚本名, 引擎, 结束方式, 已过时长),
+ * 已结束未回收的插件引擎桥接会话 (引擎, 已过时长, 执行 id, 仍可达的会话对象; docs/memory-phase2/ROADMAP.md P4.4), 以及 "强制 GC 并复查",
+ * "导出堆转储" (SAF CreateDocument), "复制诊断文本" 三个操作. 数据全部取自 [MemoryDiagnostics].
  */
 class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
 
@@ -49,16 +53,19 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
     private lateinit var pss: Preference
     private lateinit var engines: Preference
     private lateinit var retainedRuntimes: Preference
+    private lateinit var bridgeSessions: Preference
     private lateinit var images: Preference
     private lateinit var threads: Preference
     private lateinit var contexts: Preference
     private var leakCanary: Preference? = null
     private lateinit var updatedAt: Preference
     private lateinit var retainedCategory: PreferenceGroup
+    private lateinit var bridgeCategory: PreferenceGroup
     private lateinit var forceGc: Preference
     private lateinit var exportHeapDump: Preference
 
     private var shownRetainedIds: List<Int>? = null
+    private var shownBridgeSessions: List<String>? = null
     private var isCollecting = false
     private var isExporting = false
 
@@ -77,6 +84,7 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
         pss = row(snapshot, R.string.text_memory_pss)
         engines = row(snapshot, R.string.text_memory_engines)
         retainedRuntimes = row(snapshot, R.string.text_memory_retained_runtimes)
+        bridgeSessions = row(snapshot, R.string.text_memory_bridge_sessions)
         images = row(snapshot, R.string.text_memory_images)
         threads = row(snapshot, R.string.text_memory_threads)
         contexts = row(snapshot, R.string.text_memory_rhino_contexts)
@@ -84,6 +92,7 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
         updatedAt = row(snapshot, R.string.text_memory_updated_at)
 
         retainedCategory = category(screen, R.string.text_memory_retained_runtimes)
+        bridgeCategory = category(screen, R.string.text_memory_bridge_sessions)
 
         val actions = category(screen, R.string.text_operation)
         forceGc = action(actions, R.string.text_memory_force_gc, R.string.summary_memory_force_gc) { collect() }
@@ -111,10 +120,19 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private class Reading(val snapshot: MemorySnapshot, val retained: List<RetainedRuntime>, val leakCanary: String?)
+    private class Reading(
+        val snapshot: MemorySnapshot,
+        val retained: List<RetainedRuntime>,
+        val bridge: List<RetainedBridgeSession>,
+        val leakCanary: String?,
+    )
 
-    private fun read(context: Context, snapshot: MemorySnapshot = MemoryDiagnostics.snapshot()) =
-        Reading(snapshot, MemoryDiagnostics.retained(), MemoryDiagnostics.describeLeakCanary(context))
+    private fun read(context: Context, snapshot: MemorySnapshot = MemoryDiagnostics.snapshot()) = Reading(
+        snapshot,
+        MemoryDiagnostics.retained(),
+        MemoryDiagnostics.retainedBridgeSessions(),
+        MemoryDiagnostics.describeLeakCanary(context),
+    )
 
     private fun show(reading: Reading) {
         val context = context ?: return
@@ -124,12 +142,14 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
         pss.summary = MemoryDiagnosticsText.bytes(s.pss)
         engines.summary = MemoryDiagnosticsText.count(s.engines)
         retainedRuntimes.summary = MemoryDiagnosticsText.count(s.retainedRuntimes)
+        bridgeSessions.summary = MemoryDiagnosticsText.bridgeSessions(s)
         images.summary = MemoryDiagnosticsText.count(s.images)
         threads.summary = MemoryDiagnosticsText.threads(context, s)
         contexts.summary = MemoryDiagnosticsText.count(s.contexts)
         leakCanary?.summary = reading.leakCanary ?: "-"
         updatedAt.summary = getString(R.string.text_memory_updated_at_value, MemoryDiagnosticsText.time(s.timestamp), MemoryDiagnosticsText.seconds(REFRESH_INTERVAL_MS))
         showRetained(context, reading.retained)
+        showBridgeSessions(context, reading.bridge)
     }
 
     private fun showRetained(context: Context, retained: List<RetainedRuntime>) {
@@ -144,6 +164,21 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
         }
         retained.forEachIndexed { index, runtime ->
             retainedCategory.getPreference(index).summary = MemoryDiagnosticsText.retained(context, runtime)
+        }
+    }
+
+    private fun showBridgeSessions(context: Context, bridge: List<RetainedBridgeSession>) {
+        val keys = bridge.map { "${it.engine}:${it.executionId}" }
+        if (keys != shownBridgeSessions) {
+            shownBridgeSessions = keys
+            bridgeCategory.removeAll()
+            if (bridge.isEmpty()) {
+                row(bridgeCategory, R.string.text_none)
+            }
+            bridge.forEach { row(bridgeCategory, 0).title = MemoryDiagnosticsText.engineName(it.engine) }
+        }
+        bridge.forEachIndexed { index, session ->
+            bridgeCategory.getPreference(index).summary = MemoryDiagnosticsText.bridgeSession(context, session)
         }
     }
 
@@ -201,7 +236,7 @@ class MemoryDiagnosticsFragment : PreferenceFragmentCompat() {
         val context = requireContext()
         viewLifecycleOwner.lifecycleScope.launch {
             val reading = withContext(Dispatchers.Default) { read(context) }
-            ClipboardUtils.setClip(context, MemoryDiagnosticsText.report(context, reading.snapshot, reading.retained, reading.leakCanary))
+            ClipboardUtils.setClip(context, MemoryDiagnosticsText.report(context, reading.snapshot, reading.retained, reading.bridge, reading.leakCanary))
             ViewUtils.showToast(context, R.string.text_already_copied_to_clip)
             show(reading)
         }

@@ -2312,6 +2312,8 @@
     <string name="text_manage_key_store">Управление хранилищем ключей</string>
     <string name="text_maximize">Развернуть</string>
     <string name="text_mcp_server">Сервер MCP</string>
+    <string name="text_memory_bridge_session_summary">Завершен %1$s назад, выполнение %2$s\nЕще достижимы: %3$s</string>
+    <string name="text_memory_bridge_sessions">Завершенные, но не освобожденные сеансы моста</string>
     <string name="text_memory_copy_report">Копировать текст диагностики</string>
     <string name="text_memory_diagnostics">Диагностика памяти</string>
     <string name="text_memory_engines">Активные движки скриптов</string>
@@ -2335,7 +2337,7 @@
     <string name="text_memory_native_heap_value">Выделено %1$s / всего %2$s</string>
     <string name="text_memory_pss">PSS процесса</string>
     <string name="text_memory_retained_runtimes">Завершенные, но не освобожденные среды выполнения</string>
-    <string name="text_memory_retained_summary">%1$s, завершен %2$s назад, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, завершен %3$s назад, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">Активные контексты Rhino</string>
     <string name="text_memory_runtime_not_reclaimed">Среда выполнения скрипта %1$s не освобождена после его завершения, см. Параметры разработчика > Диагностика памяти</string>
     <string name="text_memory_script_heap_dump">Разрешить скриптам экспорт hprof</string>

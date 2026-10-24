@@ -2309,6 +2309,8 @@
     <string name="text_manage_key_store">管理密钥库</string>
     <string name="text_maximize">最大化</string>
     <string name="text_mcp_server">MCP 服务器</string>
+    <string name="text_memory_bridge_session_summary">已结束 %1$s, 执行 %2$s\n仍可达: %3$s</string>
+    <string name="text_memory_bridge_sessions">已结束未回收的桥接会话</string>
     <string name="text_memory_copy_report">复制诊断文本</string>
     <string name="text_memory_diagnostics">内存诊断</string>
     <string name="text_memory_engines">存活的脚本引擎</string>
@@ -2332,7 +2334,7 @@
     <string name="text_memory_native_heap_value">已分配 %1$s / 总计 %2$s</string>
     <string name="text_memory_pss">进程 PSS</string>
     <string name="text_memory_retained_runtimes">已结束未回收的 runtime</string>
-    <string name="text_memory_retained_summary">%1$s, 已结束 %2$s, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, 已结束 %3$s, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">活动的 Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">脚本 %1$s 结束后 runtime 未被回收, 见 开发者选项 > 内存诊断</string>
     <string name="text_memory_script_heap_dump">允许脚本导出 hprof</string>

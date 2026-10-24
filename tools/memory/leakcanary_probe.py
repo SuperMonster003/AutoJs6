@@ -7,13 +7,23 @@ docs/memory/ROADMAP.md P1.2 / T5: LeakCanary does not dump the heap while instru
 cannot show its reports. This script starts the scenario through RunIntentActivity (outside instrumentation) --runs
 times, then waits up to --wait seconds for LeakCanary to dump and analyze the heap. LeakCanary watches the engine and the
 runtime of every finished script (LeakCanarySetup.watchEngine) and dumps the heap once objects stay retained.
-It pushes one script file and starts it; it does not tap the screen or change settings.
+It pushes the script files (a bridge scenario removes its directory afterwards) and starts the entry; it does not tap the
+screen or change settings.
+
+Scenarios: S1 / S2 are Rhino scripts (the normal mode of app/src/androidTest/.../GateScenarios.kt). ND / BN / QJ / LU / PY are
+plugin engine scripts after the bridge scenarios of BridgeScenarios.kt (docs/memory-phase2/ROADMAP.md P4.3): an empty script
+and one that uses host capabilities (output callbacks for QuickJS), each in its own directory (Node declares its
+capabilities in package.json there). Debug builds hand the session objects of every finished plugin engine execution to
+LeakCanary (MemoryDiagnostics, P4.4), and their watch descriptions start with the engine name, so "bridge objects" counts
+those. A bridge scenario whose plugin is not installed is skipped (exit code 3).
 
 Output: one line per run, then the number of watched and retained objects LeakCanary logged, whether an analysis
-appeared, its number of application leaks and whether the leak traces mention --expect. --out writes the analysis text
-(the text LeakCanary shows in its leak list) to a file. The exit code is 0 when the result matches --expect-leaks
-(yes: an analysis with application leaks mentioning --expect; no: no application leak in --wait seconds), and 2 when
-leaks are expected but LeakCanary's automatic heap dumps are off (the default since P1.2; Leaks app > About).
+appeared, its number of application leaks and whether the leak traces mention --expect; for bridge scenarios also the
+watched bridge objects and the script output lines in logcat. --out writes the analysis text (the text LeakCanary shows
+in its leak list) to a file. The exit code is 0 when the result matches --expect-leaks (yes: an analysis with application
+leaks mentioning --expect; no: no application leak in --wait seconds, and for bridge scenarios also no retained object,
+at least one watched bridge object and every run printed its line without an error), and 2 when leaks are expected but
+LeakCanary's automatic heap dumps are off (the default since P1.2; Leaks app > About).
 """
 import argparse
 import pathlib
@@ -26,6 +36,7 @@ import time
 DEVICE_DIR = "/sdcard/Download/aj6-memory-probe"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
+PLUGIN_PREFIX = "io.github.supermonster003.autojs6.plugin."
 
 # Ordinary-script versions of the gate scenarios (the normal mode of app/src/androidTest/.../GateScenarios.kt).
 SCENARIOS = {
@@ -43,7 +54,92 @@ SCENARIOS = {
     ),
 }
 
-WATCH_RE = re.compile(r"Watching instance of (\S+)")
+# Plugin engine scenarios: engine (as in the watch descriptions and memory.snapshot().bridgeSessions), plugin package
+# suffix, files of the scenario directory (the first one is the entry). Every run prints one line starting with
+# "mp2-p4 <id>"; a failure prints "mp2-p4 <id> error".
+BRIDGE_SCENARIOS = {
+    "ND1": ("node", "nodejs", {
+        "main.js": '"nodejs";\nconsole.log("mp2-p4 ND1");\n',
+    }),
+    "ND2": ("node", "nodejs", {
+        "main.js": (
+            '"nodejs";\n'
+            "(async () => {\n"
+            '    const device = require("device");\n'
+            '    const toast = require("toast");\n'
+            "    const info = await device.info();\n"
+            '    await toast.showToast("mp2-p4 ND2");\n'
+            '    console.log("mp2-p4 ND2 " + Object.keys(info || {}).length);\n'
+            '})().catch((e) => { console.error("mp2-p4 ND2 error " + e); process.exitCode = 1; });\n'
+        ),
+        "package.json": '{"autojs6":{"node":{"permissions":["device","toast"]}}}\n',
+    }),
+    "BN1": ("bun", "bun.runtime", {
+        "main.js": '"bun";\nconsole.log("mp2-p4 BN1");\n',
+    }),
+    "BN2": ("bun", "bun.runtime", {
+        "main.js": (
+            '"bun";\n'
+            "(async () => {\n"
+            "    const unix = process.env.AUTOJS6_HOST_BRIDGE_SOCKET;\n"
+            '    if (!unix) throw new Error("AUTOJS6_HOST_BRIDGE_SOCKET is not set");\n'
+            "    const call = async (id, body) => {\n"
+            '        const response = await fetch("http://autojs6/v1/" + id, { unix, method: "POST", body: JSON.stringify(body) });\n'
+            "        const reply = await response.json();\n"
+            '        if (!reply.ok) throw new Error(id + " " + response.status + " " + (reply.error && reply.error.code));\n'
+            "        return reply.result;\n"
+            "    };\n"
+            '    const info = await call("device.info", {});\n'
+            '    await call("ui.toast", { text: "mp2-p4 BN2" });\n'
+            '    console.log("mp2-p4 BN2 " + Object.keys(info || {}).length);\n'
+            '})().catch((e) => { console.error("mp2-p4 BN2 error " + e); process.exitCode = 1; });\n'
+        ),
+    }),
+    "QJ1": ("quickjs", "quickjs.runtime", {
+        "main.js": '"quickjs";\nconsole.log("mp2-p4 QJ1");\n',
+    }),
+    "QJ3": ("quickjs", "quickjs.runtime", {
+        "main.js": (
+            '"quickjs";\n'
+            "function busy(ms) { const end = Date.now() + ms; while (Date.now() < end) {} }\n"
+            "let ticks = 0;\n"
+            "const tick = () => { busy(300); ticks++; console.log(\"mp2-p4 QJ3 tick \" + ticks); };\n"
+            "Promise.resolve().then(tick).then(tick).then(tick)\n"
+            '    .then(() => console.log("mp2-p4 QJ3 " + ticks))\n'
+            '    .catch((e) => console.error("mp2-p4 QJ3 error " + e));\n'
+        ),
+    }),
+    "LU1": ("lua", "lua.runtime", {
+        "main.lua": 'local autojs = require("autojs")\nautojs.console.log("mp2-p4 LU1")\n',
+    }),
+    "LU2": ("lua", "lua.runtime", {
+        "main.lua": (
+            'local autojs = require("autojs")\n'
+            "local info = autojs.device.info()\n"
+            'autojs.storage.put("mp2p4", "x")\n'
+            'local stored = autojs.storage.get("mp2p4") ~= nil\n'
+            'autojs.storage.remove("mp2p4")\n'
+            'autojs.ui.toast("mp2-p4 LU2")\n'
+            'autojs.console.log("mp2-p4 LU2 " .. tostring(info.sdkInt) .. " " .. tostring(stored))\n'
+        ),
+    }),
+    "PY1": ("python", "python.runtime", {
+        "main.py": 'print("mp2-p4 PY1", flush=True)\n',
+    }),
+    "PY2": ("python", "python.runtime", {
+        "main.py": (
+            "from autojs6 import device, files, toast\n"
+            "info = device.info()\n"
+            'data = "x" * 8192\n'
+            'files.write_text("mp2p4_py2.txt", data)\n'
+            'same = files.read_text("mp2p4_py2.txt") == data\n'
+            'toast("mp2-p4 PY2")\n'
+            'print("mp2-p4 PY2 " + str(info["battery"]["percent"]) + " " + str(same), flush=True)\n'
+        ),
+    }),
+}
+
+WATCH_RE = re.compile(r"Watching instance of (\S+)(?: \((.*)\))? with key")
 RETAINED_RE = re.compile(r"(\d+) retained objects?|Found (\d+) objects? retained")
 LEAKS_RE = re.compile(r"^(\d+) APPLICATION LEAKS?")
 DUMP_TIME_RE = re.compile(r"^Heap dump timestamp: (\d+)")
@@ -62,6 +158,15 @@ def leakcanary_lines(serial, since, seen):
         if "LeakCanary" in line and line not in seen:
             seen[line] = re.sub(r"^.*?[VDIWEF]/LeakCanary\(\s*\d+\):\s?", "", line).rstrip()
     return list(seen.values())
+
+
+def output_lines(serial, since, marker, seen):
+    """Script output lines containing [marker] since [since], accumulated in [seen] like [leakcanary_lines]."""
+    out = adb(serial, "logcat", "-d", "-v", "time", "-T", since).stdout
+    for line in out.splitlines():
+        if marker in line and "LeakCanary" not in line:
+            seen.add(line)
+    return seen
 
 
 def analysis_blocks(lines):
@@ -93,10 +198,21 @@ def analysis_block(lines, since_epoch_ms):
     return fresh[-1] if fresh else None
 
 
+def push_files(serial, remote_dir, files):
+    """Pushes [files] (name -> text) into [remote_dir] and returns the remote path of the first one (the entry)."""
+    adb(serial, "shell", "mkdir", "-p", remote_dir)
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, text in files.items():
+            local = pathlib.Path(tmp) / name
+            local.write_bytes(text.encode("utf-8"))
+            adb(serial, "push", str(local), f"{remote_dir}/{name}", check=True)
+    return f"{remote_dir}/{next(iter(files))}"
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("-s", "--serial", required=True)
-    ap.add_argument("--scenario", default="S2", choices=sorted(SCENARIOS))
+    ap.add_argument("--scenario", default="S2", choices=sorted(SCENARIOS) + sorted(BRIDGE_SCENARIOS))
     ap.add_argument("--runs", type=int, default=6)
     ap.add_argument("--interval", type=float, default=3.0, help="seconds between two runs")
     ap.add_argument("--wait", type=float, default=300.0, help="seconds to wait for the analysis after the last run")
@@ -105,15 +221,20 @@ def main():
     ap.add_argument("--out", help="file for the analysis text")
     args = ap.parse_args()
 
+    bridge = BRIDGE_SCENARIOS.get(args.scenario)
+    if bridge:
+        engine, plugin, files = bridge
+        if not adb(args.serial, "shell", "pm", "path", PLUGIN_PREFIX + plugin).stdout.strip():
+            print(f"SKIP: plugin {PLUGIN_PREFIX + plugin} is not installed")
+            return 3
+
     # One shell argument: adb joins the arguments with spaces, which would split the format at its space.
     since = adb(args.serial, "shell", "date '+%m-%d %H:%M:%S.000'").stdout.strip()
     since_epoch_ms = int(adb(args.serial, "shell", "date +%s").stdout.strip()) * 1000
-    remote = f"{DEVICE_DIR}/memory_probe_{args.scenario}.js"
-    local = pathlib.Path(tempfile.gettempdir()) / f"memory_probe_{args.scenario}.js"
-    local.write_text(SCENARIOS[args.scenario], encoding="utf-8")
-    adb(args.serial, "shell", "mkdir", "-p", DEVICE_DIR)
-    adb(args.serial, "push", str(local), remote, check=True)
-    local.unlink()
+    if bridge:
+        remote = push_files(args.serial, f"{DEVICE_DIR}/{args.scenario.lower()}", files)
+    else:
+        remote = push_files(args.serial, DEVICE_DIR, {f"memory_probe_{args.scenario}.js": SCENARIOS[args.scenario]})
 
     for i in range(args.runs):
         result = adb(args.serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote)
@@ -132,10 +253,25 @@ def main():
             break
         time.sleep(5)
 
-    watched = [m.group(1) for l in lines for m in [WATCH_RE.search(l)] if m]
+    watches = [(m.group(1), m.group(2) or "") for l in lines for m in [WATCH_RE.search(l)] if m]
     retained = [int(next(g for g in m.groups() if g)) for l in lines for m in [RETAINED_RE.search(l)] if m]
-    print(f"watched {len(watched)} object(s): {', '.join(sorted(set(watched))) or '-'}")
-    print(f"max retained reported: {max(retained) if retained else 0}")
+    print(f"watched {len(watches)} object(s): {', '.join(sorted({c for c, _ in watches})) or '-'}")
+    max_retained = max(retained) if retained else 0
+    print(f"max retained reported: {max_retained}")
+    bridge_ok = True
+    if bridge:
+        bridge_watches = [c for c, d in watches if d.startswith(engine + " ")]
+        classes = ", ".join(sorted({c.rsplit(".", 1)[-1] for c in bridge_watches})) or "-"
+        print(f"watched {engine} bridge objects: {len(bridge_watches)} ({classes})")
+        marker = f"mp2-p4 {args.scenario}"
+        printed = output_lines(args.serial, since, marker, set())
+        errors = [l for l in printed if f"{marker} error" in l]
+        finals = [l for l in printed if re.search(re.escape(marker) + r"(\s|$)", l) and " tick " not in l and l not in errors]
+        print(f"script output lines: {len(finals)} / {args.runs} runs, errors {len(errors)}")
+        for line in errors[:3]:
+            print(f"  error: {line[line.find(marker):][:200]}")
+        bridge_ok = max_retained == 0 and len(bridge_watches) > 0 and len(finals) >= args.runs and not errors
+        adb(args.serial, "shell", "rm", "-rf", remote.rsplit("/", 1)[0])
     leaks = 0
     mentions = False
     if block:
@@ -160,7 +296,7 @@ def main():
         # zh-CN: 自动转储关闭时只计数残留对象, 不做分析.
         print("INCONCLUSIVE: turn on automatic heap dumps in the Leaks app, or dump from its notification, to get an analysis")
         return 2
-    passed = (leaks > 0 and mentions) if args.expect_leaks == "yes" else (leaks == 0)
+    passed = (leaks > 0 and mentions) if args.expect_leaks == "yes" else (leaks == 0 and bridge_ok)
     print("PASS" if passed else "FAIL")
     return 0 if passed else 1
 

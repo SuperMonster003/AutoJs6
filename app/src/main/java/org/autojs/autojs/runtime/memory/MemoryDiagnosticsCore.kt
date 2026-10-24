@@ -70,14 +70,15 @@ interface MemoryClock {
 }
 
 /**
- * The memory diagnostics without Android (docs/memory/ROADMAP.md P2.1): snapshots, forced collection, and the registry of
- * finished script runtimes. A finished runtime is held by a weak reference only and leaves the registry once the GC reclaims
- * it, so the registry itself never keeps a script alive. [MemoryDiagnostics] is the process-wide instance; the memory gate
- * (T3), the developer options page (T10) and the script API (T9) all read it.
+ * The memory diagnostics without Android (docs/memory/ROADMAP.md P2.1): snapshots, forced collection, and the registries of
+ * finished script runtimes and of finished plugin engine executions (bridge sessions, docs/memory-phase2/ROADMAP.md P4.4). Both are
+ * held by weak references only and leave their registry once the GC reclaims them, so the registries themselves never keep a
+ * script alive. [MemoryDiagnostics] is the process-wide instance; the memory gate (T3), the developer options page (T10) and the
+ * script API (T9) all read it.
  *
- * zh-CN: 不依赖 Android 的内存诊断 (docs/memory/ROADMAP.md P2.1): 快照, 强制回收, 以及已结束脚本 runtime 的登记表. 已结束的 runtime
- * 只以弱引用登记, 被 GC 回收后自动出列, 因此登记表本身不会让脚本存活. [MemoryDiagnostics] 是进程级实例; 内存门禁 (T3), 开发者选项页面
- * (T10) 与脚本 API (T9) 都从它读取.
+ * zh-CN: 不依赖 Android 的内存诊断 (docs/memory/ROADMAP.md P2.1): 快照, 强制回收, 以及已结束脚本 runtime 与已结束插件引擎执行 (桥接会话,
+ * docs/memory-phase2/ROADMAP.md P4.4) 的登记表. 两者都只以弱引用登记, 被 GC 回收后自动出列, 因此登记表本身不会让脚本存活.
+ * [MemoryDiagnostics] 是进程级实例; 内存门禁 (T3), 开发者选项页面 (T10) 与脚本 API (T9) 都从它读取.
  */
 open class MemoryDiagnosticsCore internal constructor(
     private val probes: MemoryProbes,
@@ -93,9 +94,27 @@ open class MemoryDiagnosticsCore internal constructor(
         val endedAt: Long,
         val endedElapsed: Long,
         val exitKind: ExitKind,
+        val engine: String,
         var checked: Boolean,
     ) : WeakReference<Any>(runtime, queue) {
-        fun describe(now: Long) = RetainedRuntime(id, name, source, endedAt, now - endedElapsed, exitKind)
+        fun describe(now: Long) = RetainedRuntime(id, name, source, endedAt, now - endedElapsed, exitKind, engine)
+    }
+
+    // A finished plugin engine execution (P4.4): its session objects, held weakly; it leaves the registry once all are reclaimed.
+    // zh-CN: 已结束的插件引擎执行 (P4.4): 其会话对象, 以弱引用持有; 全部被回收后出列.
+    private class BridgeSession(
+        val engine: String,
+        val executionId: String,
+        val endedAt: Long,
+        val endedElapsed: Long,
+        val objects: List<BridgeObject>,
+    ) {
+        fun alive() = objects.filter { it.get() != null }
+        fun describe(now: Long) = RetainedBridgeSession(engine, executionId, endedAt, now - endedElapsed, alive().map { it.className })
+    }
+
+    private class BridgeObject(referent: Any) : WeakReference<Any>(referent) {
+        val className: String = referent.javaClass.name.substringAfterLast('.')
     }
 
     // The resources a finished runtime tracked in its resource scope (roadmap P4.1), checked with the runtime but kept apart from
@@ -118,6 +137,10 @@ open class MemoryDiagnosticsCore internal constructor(
     // zh-CN: 由 lock 保护; 按脚本结束的先后排列.
     private val ended = LinkedHashSet<Ended>()
 
+    // Guarded by lock; in the order the executions ended.
+    // zh-CN: 由 lock 保护; 按执行结束的先后排列.
+    private val bridgeSessions = ArrayList<BridgeSession>()
+
     // Guarded by lock: resources waiting for the unreclaimed check, and the latest findings (at most MAX_UNRELEASED).
     // zh-CN: 由 lock 保护: 等待未回收检查的资源, 以及最近的检查结果 (最多 MAX_UNRELEASED 条).
     private val pendingResources = ArrayList<Resources>()
@@ -126,8 +149,9 @@ open class MemoryDiagnosticsCore internal constructor(
     /**
      * Registers a finished script runtime by a weak reference. With [check] false the runtime is never reported by [checkEnded].
      * [resources] are the objects the runtime tracked in its resource scope (held weakly); [checkEnded] reports those still alive.
+     * [engine] is [ENGINE_NODE] for the runtime of a Node.js script.
      * zh-CN: 以弱引用登记已结束的脚本 runtime. [check] 为 false 时 [checkEnded] 不会报告它. [resources] 是该 runtime 在资源作用域中跟踪的对象
-     * (弱引用), [checkEnded] 报告其中仍存活的.
+     * (弱引用), [checkEnded] 报告其中仍存活的. Node.js 脚本的 runtime 其 [engine] 为 [ENGINE_NODE].
      */
     fun track(
         runtime: Any,
@@ -137,12 +161,26 @@ open class MemoryDiagnosticsCore internal constructor(
         exitKind: ExitKind,
         check: Boolean = true,
         resources: List<TrackedResource> = emptyList(),
+        engine: String = ENGINE_RHINO,
     ) {
         synchronized(lock) {
             prune()
             val endedElapsed = clock.elapsedRealtime()
-            ended.add(Ended(runtime, queue, id, name, source, clock.currentTimeMillis(), endedElapsed, exitKind, !check))
+            ended.add(Ended(runtime, queue, id, name, source, clock.currentTimeMillis(), endedElapsed, exitKind, engine, !check))
             if (check && resources.isNotEmpty()) pendingResources += Resources(id, name, source, endedElapsed, resources)
+        }
+    }
+
+    /**
+     * Registers a finished plugin engine execution of [engine] by weak references to its session [objects] (P4.4,
+     * [BridgeExecutionObserver.ended]); an execution without objects is not registered.
+     * zh-CN: 以会话对象 [objects] 的弱引用登记 [engine] 的一次已结束插件引擎执行 (P4.4, [BridgeExecutionObserver.ended]); 没有对象的执行不登记.
+     */
+    fun trackBridgeSession(engine: String, executionId: String, objects: List<Any>) {
+        if (objects.isEmpty()) return
+        synchronized(lock) {
+            prune()
+            bridgeSessions += BridgeSession(engine, executionId, clock.currentTimeMillis(), clock.elapsedRealtime(), objects.map(::BridgeObject))
         }
     }
 
@@ -176,6 +214,38 @@ open class MemoryDiagnosticsCore internal constructor(
         ended.size
     }
 
+    /**
+     * Finished plugin engine executions with a session object still reachable, earliest first. As with [retained], an execution that
+     * has just ended is listed until the next GC; [collect] tells the ones that something still holds.
+     * zh-CN: 仍有会话对象可达的已结束插件引擎执行, 先结束的在前. 与 [retained] 一样, 刚结束的执行会列出直到下一次 GC; [collect] 之后剩下的才是仍被持有的.
+     */
+    fun retainedBridgeSessions(): List<RetainedBridgeSession> {
+        val now = clock.elapsedRealtime()
+        return synchronized(lock) {
+            prune()
+            bridgeSessions.map { it.describe(now) }
+        }
+    }
+
+    fun bridgeSessionCount(): Int = synchronized(lock) {
+        prune()
+        bridgeSessions.size
+    }
+
+    /**
+     * [retainedBridgeSessions] counted per engine: every engine of [BRIDGE_ENGINES] in that order, 0 included, then any other engine.
+     * zh-CN: 按引擎统计的 [retainedBridgeSessions]: 先按顺序列出 [BRIDGE_ENGINES] 的每个引擎 (含 0), 再列其他引擎.
+     */
+    fun bridgeSessionCounts(): Map<String, Int> {
+        val counts = LinkedHashMap<String, Int>()
+        BRIDGE_ENGINES.forEach { counts[it] = 0 }
+        synchronized(lock) {
+            prune()
+            bridgeSessions.forEach { counts[it.engine] = (counts[it.engine] ?: 0) + 1 }
+        }
+        return counts
+    }
+
     fun liveThreads(): List<Thread> = probes.liveThreads()
 
     /**
@@ -199,6 +269,7 @@ open class MemoryDiagnosticsCore internal constructor(
             pss = if (includePss) probes.pss() else -1,
             engines = probes.engines(),
             retainedRuntimes = retainedCount(),
+            bridgeSessions = bridgeSessionCounts(),
             images = probes.images(),
             threads = threads.count(::isScriptThread),
             allThreads = threads.size,
@@ -239,12 +310,22 @@ open class MemoryDiagnosticsCore internal constructor(
     }
 
     /**
-     * Forces garbage collection and waits up to [timeoutMs] for every finished runtime to be reclaimed, then returns a new snapshot.
-     * zh-CN: 强制回收并最多等待 [timeoutMs] 让全部已结束的 runtime 被回收, 然后返回新的快照.
+     * Forces garbage collection and waits up to [timeoutMs] for every finished runtime and bridge session to be reclaimed, then
+     * returns a new snapshot.
+     * zh-CN: 强制回收并最多等待 [timeoutMs] 让全部已结束的 runtime 与桥接会话被回收, 然后返回新的快照.
      */
     fun collect(timeoutMs: Long = COLLECT_TIMEOUT_MS): MemorySnapshot {
-        awaitCleared(timeoutMs) { retainedCount() == 0 }
+        awaitCleared(timeoutMs, ::isCleared)
         return snapshot()
+    }
+
+    /**
+     * Whether no finished runtime and no bridge session is reachable any more: what [collect] waits for.
+     * zh-CN: 是否已没有可达的已结束 runtime 与桥接会话, 即 [collect] 等待的条件.
+     */
+    fun isCleared(): Boolean = synchronized(lock) {
+        prune()
+        ended.isEmpty() && bridgeSessions.isEmpty()
     }
 
     /**
@@ -297,9 +378,26 @@ open class MemoryDiagnosticsCore internal constructor(
             (reference as? Ended)?.let(ended::remove)
         }
         ended.removeAll { it.get() == null }
+        bridgeSessions.removeAll { it.alive().isEmpty() }
     }
 
     companion object {
+
+        /** [RetainedRuntime.engine] of a Rhino script. zh-CN: Rhino 脚本的 [RetainedRuntime.engine]. */
+        const val ENGINE_RHINO = "rhino"
+
+        /**
+         * [RetainedRuntime.engine] of a Node.js script, and the engine of the Node.js bridge sessions.
+         * zh-CN: Node.js 脚本的 [RetainedRuntime.engine], 也是 Node.js 桥接会话的引擎.
+         */
+        const val ENGINE_NODE = "node"
+
+        /**
+         * The plugin engine families of the bridge sessions ([BridgeExecutionObserver]), in the order of [MemorySnapshot.bridgeSessions].
+         * zh-CN: 桥接会话的插件引擎类别 ([BridgeExecutionObserver]), 顺序同 [MemorySnapshot.bridgeSessions].
+         */
+        @JvmField
+        val BRIDGE_ENGINES = listOf(ENGINE_NODE, "bun", "quickjs", "lua", "python")
 
         const val GC_ROUNDS = 3
         const val POLL_INTERVAL_MS = 100L

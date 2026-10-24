@@ -1,0 +1,70 @@
+Device check of the bridge session diagnostics (memory phase 2, ROADMAP P4.4): memory.snapshot().bridgeSessions, MemoryDiagnostics.retainedBridgeSessions() and the memory diagnostics page, host debug 5935 built 2026-10-23 from the isolated clone at the work tree's 271aec8e5 (C40 / C43 included) plus the P4.4 changes (later committed to the work tree), 2026-10-24 11:10-11:13.
+Commands: py -3.12 -I -u tools/memory/device_bridge_sessions.py -s <serial> [--engines ...] and --final; py -3.12 -I -u tools/memory/device_memory_api.py -s <serial> (PASS / FAIL lines only)
+
+For each engine: an empty script ends and memory.collect(10000).bridgeSessions[engine] is 0; a second run whose session objects a
+BridgeExecutionObserver listener keeps on purpose gives bridgeSessions[engine] 1 and one listed session with its objects; after the
+listener drops them the count and the list are 0 again. The same checks ran on 2026-10-23 with the build without C40 (Lua through
+the 102 universal package on 23046RP50C; with --shots, the page screenshots showed the 'Finished but unreclaimed bridge sessions'
+line and the engine rows while a session was held, and no session afterwards).
+
+## 23046RP50C (Redmi) API 35, plugins Node.js 292, Bun 118, QuickJS 15, Lua 78 (released split package), Python 111
+== all engines 11:11:41
+host versionCode 5935, debuggable True
+PASS node plain run: ended after 612 ms, retained right after ['node'], bridgeSessions.node after collect 0
+PASS node held run: 2 object(s) held ([broker, provider]), bridgeSessions.node 1, listed 1 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker), retained []
+PASS node released: bridgeSessions.node 0, listed sessions 0
+PASS bun plain run: ended after 613 ms, retained right after [], bridgeSessions.bun after collect 0
+PASS bun held run: 2 object(s) held ([broker, callback]), bridgeSessions.bun 1, listed 1 (BunHostCapabilityBroker, BunPluginScriptEngine$OutputCallback), retained []
+PASS bun released: bridgeSessions.bun 0, listed sessions 0
+PASS quickjs plain run: ended after 107 ms, retained right after [], bridgeSessions.quickjs after collect 0
+PASS quickjs held run: 1 object(s) held ([callback]), bridgeSessions.quickjs 1, listed 1 (QuickJsPluginScriptEngine$OutputCallback), retained []
+PASS quickjs released: bridgeSessions.quickjs 0, listed sessions 0
+PASS lua plain run: ended after 407 ms, retained right after [], bridgeSessions.lua after collect 0
+PASS lua held run: 3 object(s) held ([broker, callback, session]), bridgeSessions.lua 1, listed 1 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession), retained []
+PASS lua released: bridgeSessions.lua 0, listed sessions 0
+PASS python plain run: ended after 507 ms, retained right after [], bridgeSessions.python after collect 0
+PASS python held run: 3 object(s) held ([broker, callback, admission]), bridgeSessions.python 1, listed 1 (PythonHostCapabilityBroker, PythonRuntimeClient$Execution$openSession$admissionHandler$1, PythonRuntimeClient$Execution$openSession$executionHandler$1), retained []
+PASS python released: bridgeSessions.python 0, listed sessions 0
+ALL PASS
+exit 0
+== memory api 11:12:57
+PASS snapshot fields 14 in T9 order, non-numbers [], 10.6 ms per call
+PASS snapshot values: Java heap 23.4 / 512 MB, native 26.1 MB, PSS 259.4 MB, engines 1, threads 3 / 57, contexts 1, images 0
+PASS bridgeSessions engines ['node', 'bun', 'quickjs', 'lua', 'python'], non-numbers [], values [0, 0, 0, 0, 0]
+PASS held runtime listed after collect(5000): 1 (aj6_mem_api_leak, exitKind normal, engine rhino, retainedRuntimes 1, collect took 5117 ms, leak script ended after 100 ms)
+PASS released runtime reclaimed by collect(): listed 0, retainedRuntimes 0 [], collect took 168 ms
+PASS dumpHeap: 64.0 MB in 2167 ms, deleted True
+PASS argument errors thrown: 5 / 5, missing []
+ALL PASS
+exit 0
+== final 11:13:07
+host versionCode 5935, debuggable True
+PASS final collect: retainedRuntimes 0 [], bridgeSessions {'node': 0, 'bun': 0, 'quickjs': 0, 'lua': 0, 'python': 0}, listed sessions 0
+ALL PASS
+exit 0
+
+## OPD2413 (OnePlus, ColorOS) API 35, plugins Node.js 247, Lua 78 (installed for this check), Python 89 (other signer, SKIP)
+== node sessions (page in front) 11:10:46
+host versionCode 5935, debuggable True
+PASS node plain run: ended after 305 ms, retained right after ['node'], bridgeSessions.node after collect 0
+PASS node held run: 2 object(s) held ([broker, provider]), bridgeSessions.node 1, listed 1 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker), retained []
+PASS node released: bridgeSessions.node 0, listed sessions 0
+ALL PASS
+exit 0
+== lua sessions (page in front) 11:11:00
+host versionCode 5935, debuggable True
+PASS lua plain run: ended after 210 ms, retained right after [], bridgeSessions.lua after collect 0
+PASS lua held run: 3 object(s) held ([broker, callback, session]), bridgeSessions.lua 1, listed 1 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession), retained []
+PASS lua released: bridgeSessions.lua 0, listed sessions 0
+ALL PASS
+exit 0
+== python sessions (page in front) 11:11:14
+host versionCode 5935, debuggable True
+SKIP python: the plugin refused to run the script, no bridge object was created (PYTHON_RUNTIME_PROVIDER_UNTRUSTED: Official Python Runtime signer differs from the host)
+ALL PASS
+exit 0
+== final (page in front) 11:11:25
+host versionCode 5935, debuggable True
+PASS final collect: retainedRuntimes 0 [], bridgeSessions {'node': 0, 'bun': 0, 'quickjs': 0, 'lua': 0, 'python': 0}, listed sessions 0
+ALL PASS
+exit 0

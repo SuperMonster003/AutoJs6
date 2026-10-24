@@ -4,7 +4,8 @@ Usage:
   py -3.12 -I -u tools/memory/device_memory_api.py -s SERIAL [--keep]
 
 One probe script, started through RunIntentActivity in the installed debug host, checks on the device:
-- snapshot: the 13 fields of T9 (plus allThreads) are all numbers, the heaps and PSS are positive, and the time a call takes;
+- snapshot: the 13 fields of T9 (plus allThreads) are all numbers, bridgeSessions (docs/memory-phase2/ROADMAP.md P4.4) holds a
+  number for each plugin engine, the heaps and PSS are positive, and the time a call takes;
 - retained / collect: a second script stores its own `runtime` in a static Java map (System properties) and ends; after
   `memory.collect(5000)` it must be listed by `memory.retained()` (with its exit kind), and once the probe removes it from the map,
   `memory.collect()` must reclaim it (the analogue of the S2 scenario before and after the H1 fix);
@@ -39,12 +40,14 @@ SAMPLE_NAME = "aj6_mem_sample.js"
 SAMPLE_BEFORE = "回收前: "
 SAMPLE_AFTER = "回收后: "
 SAMPLE_DONE = ("没有未回收的脚本运行时", "未回收: ")
+SAMPLE_BRIDGE = ("没有未回收的桥接会话", "未回收的桥接会话: ")
 # A GlobalConsole logcat line ends with the console time, level and text: "... GlobalConsole: 16:02:37.529/D: text".
 CONSOLE_LINE = re.compile(r"GlobalConsole.*?: \d\d:\d\d:\d\d\.\d{3}/[A-Z]: (.*)")
 SNAPSHOT_FIELDS = [
     "javaHeapUsed", "javaHeapTotal", "javaHeapMax", "nativeHeapAllocated", "nativeHeapSize", "pss",
-    "engines", "retainedRuntimes", "images", "threads", "allThreads", "contexts", "timestamp",
+    "engines", "retainedRuntimes", "bridgeSessions", "images", "threads", "allThreads", "contexts", "timestamp",
 ]
+BRIDGE_ENGINES = ["node", "bun", "quickjs", "lua", "python"]
 
 LEAK_LINES = [
     f"java.lang.System.getProperties().put('{LEAK_PROPERTY}', runtime);",
@@ -59,7 +62,8 @@ def probe_lines(leak_remote):
         "var t0 = Date.now(); var s = memory.snapshot(); for (var i = 0; i < 4; i++) memory.snapshot();",
         "result.snapshotMs = (Date.now() - t0) / 5;",
         "result.snapshot = s;",
-        "result.types = Object.keys(s).filter(function (k) { return typeof s[k] !== 'number'; });",
+        "result.types = Object.keys(s).filter(function (k) { return k != 'bridgeSessions' && typeof s[k] !== 'number'; });",
+        "result.bridgeTypes = Object.keys(s.bridgeSessions).filter(function (k) { return typeof s.bridgeSessions[k] !== 'number'; });",
         "var baseEngines = s.engines;",
         f"(function () {{ engines.execScriptFile('{leak_remote}'); }})();",
         "var waited = 0;",
@@ -129,7 +133,7 @@ def run_sample(serial, sample, wait):
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
     lines = []
     deadline = time.time() + wait
-    while time.time() < deadline and not any(line.startswith(SAMPLE_DONE) for line in lines):
+    while time.time() < deadline and not any(line.startswith(SAMPLE_BRIDGE) for line in lines):
         time.sleep(1)
         log = adb(serial, "logcat", "-d", "-s", "GlobalConsole:*").stdout
         lines = [match.group(1) for match in CONSOLE_LINE.finditer(log)]
@@ -137,9 +141,10 @@ def run_sample(serial, sample, wait):
     ok = report(any(line.startswith(SAMPLE_BEFORE) for line in lines) and any(line.startswith(SAMPLE_AFTER) for line in lines),
                 f"sample printed the readings before and after collect ({len(lines)} console lines)")
     for line in lines:
-        if line.startswith((SAMPLE_BEFORE, SAMPLE_AFTER) + SAMPLE_DONE):
+        if line.startswith((SAMPLE_BEFORE, SAMPLE_AFTER) + SAMPLE_DONE + SAMPLE_BRIDGE):
             print(f"INFO {line}")
     ok &= report(any(line.startswith(SAMPLE_DONE) for line in lines), "sample reached the retained list")
+    ok &= report(any(line.startswith(SAMPLE_BRIDGE) for line in lines), "sample reached the bridge session counts")
     print("ALL PASS" if ok else "SOME FAILED")
     return 0 if ok else 1
 
@@ -191,9 +196,12 @@ def main():
                  f"snapshot values: Java heap {snapshot['javaHeapUsed'] / mb:.1f} / {snapshot['javaHeapMax'] / mb:.0f} MB, native "
                  f"{snapshot['nativeHeapAllocated'] / mb:.1f} MB, PSS {snapshot['pss'] / mb:.1f} MB, engines {snapshot['engines']}, "
                  f"threads {snapshot['threads']} / {snapshot['allThreads']}, contexts {snapshot['contexts']}, images {snapshot['images']}")
+    bridge = snapshot["bridgeSessions"]
+    ok &= report(list(bridge) == BRIDGE_ENGINES and not result["bridgeTypes"],
+                 f"bridgeSessions engines {list(bridge)}, non-numbers {result['bridgeTypes']}, values {list(bridge.values())}")
     listed = result["leakListed"]
-    ok &= report(len(listed) == 1 and listed[0]["exitKind"] == "normal",
-                 f"held runtime listed after collect(5000): {len(listed)} ({listed[0]['name'] + ', exitKind ' + listed[0]['exitKind'] if listed else '-'}, "
+    ok &= report(len(listed) == 1 and listed[0]["exitKind"] == "normal" and listed[0].get("engine") == "rhino",
+                 f"held runtime listed after collect(5000): {len(listed)} ({listed[0]['name'] + ', exitKind ' + listed[0]['exitKind'] + ', engine ' + str(listed[0].get('engine')) if listed else '-'}, "
                  f"retainedRuntimes {result['retainedHeld']}, collect took {result['collectHeldMs']} ms, leak script ended after "
                  f"{result['leakEndedAfterMs']} ms)")
     ok &= report(result["leakAfter"] == 0,

@@ -167,14 +167,20 @@ internal class NodeJsHostCapabilityBroker(
     fun destroy(reason: Bundle?) {
         if (destroyed.compareAndSet(false, true)) {
             exported.clear()
-            provider.destroy(
-                NodeBridgeError.processDead(
-                    reason
-                        ?.getString(NodeJsRuntimeContract.KEY_ERROR_MESSAGE)
-                        ?.takeIf { it.isNotBlank() }
-                        ?: "AutoJs6 host capability broker destroyed.",
-                ),
-            )
+            try {
+                provider.destroy(
+                    NodeBridgeError.processDead(
+                        reason
+                            ?.getString(NodeJsRuntimeContract.KEY_ERROR_MESSAGE)
+                            ?.takeIf { it.isNotBlank() }
+                            ?: "AutoJs6 host capability broker destroyed.",
+                    ),
+                )
+            } finally {
+                // The session objects of the execution, for the memory diagnostics (docs/memory-phase2/ROADMAP.md P4.4).
+                // zh-CN: 本次执行的会话对象, 供内存诊断使用 (docs/memory-phase2/ROADMAP.md P4.4).
+                BridgeExecutionObserver.ended("node", id, listOf(this, provider))
+            }
         }
     }
 

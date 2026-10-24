@@ -8,6 +8,7 @@ import kotlinx.coroutines.Job
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.pref.Pref
 import org.autojs.autojs.engine.JavaScriptEngine
+import org.autojs.autojs.engine.NodePluginJavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.engine.ScriptEngineManager
 import org.autojs.autojs.engine.ScriptEngineService
@@ -30,11 +31,15 @@ import java.util.concurrent.TimeUnit
  * memory gate, the developer options page and the script API. [install] hooks it into the engine service, after which every finished
  * Rhino runtime is tracked by a weak reference (with its id, source, end time and [ExitKind]), and 10 s after a script ends its runtime
  * is collected once and reported to the global console if it is still reachable (the developer options switch
- * "Warn in the console when a finished script is not reclaimed").
+ * "Warn in the console when a finished script is not reclaimed"). It also listens to [BridgeExecutionObserver.ended], so the session
+ * objects of every finished plugin engine execution are tracked as a bridge session (docs/memory-phase2/ROADMAP.md P4.4) and, in
+ * debug builds, watched by LeakCanary.
  *
  * zh-CN: 进程级内存诊断 (docs/memory/ROADMAP.md P2.1 / P2.3): 为内存门禁, 开发者选项页面与脚本 API 提供 [snapshot], [collect], [retained]
  * 与 [dumpHeap]. [install] 把它挂到引擎服务上, 之后每个已结束的 Rhino runtime 以弱引用登记 (含 id, 来源, 结束时间与 [ExitKind]); 脚本结束
- * 10 s 后对其 runtime 回收一次, 仍可达时向全局控制台报告 (开发者选项开关 "脚本结束后未回收时在控制台警告").
+ * 10 s 后对其 runtime 回收一次, 仍可达时向全局控制台报告 (开发者选项开关 "脚本结束后未回收时在控制台警告"). 它还监听
+ * [BridgeExecutionObserver.ended], 因此每次已结束插件引擎执行的会话对象都作为桥接会话登记 (docs/memory-phase2/ROADMAP.md P4.4), 在 debug
+ * 构建中还交给 LeakCanary 观察.
  */
 object MemoryDiagnostics : MemoryDiagnosticsCore(AndroidMemoryProbes, AndroidMemoryClock) {
 
@@ -63,14 +68,16 @@ object MemoryDiagnostics : MemoryDiagnosticsCore(AndroidMemoryProbes, AndroidMem
 
     /**
      * Hooks the diagnostics into [service] (called once by its constructor): the engine lifecycle callback tracks finished runtimes,
-     * the execution listener remembers errors and interruptions for [ExitKind]. LeakCanary keeps its own hook in the engine service.
-     * zh-CN: 把诊断挂到 [service] 上 (由其构造函数调用一次): 引擎生命周期回调登记已结束的 runtime, 执行监听器记下错误与中断以得到 [ExitKind].
-     * LeakCanary 在引擎服务中保留自己的挂点.
+     * the execution listener remembers errors and interruptions for [ExitKind], the [BridgeExecutionObserver] end listener tracks
+     * finished bridge sessions. LeakCanary keeps its own hook in the engine service.
+     * zh-CN: 把诊断挂到 [service] 上 (由其构造函数调用一次): 引擎生命周期回调登记已结束的 runtime, 执行监听器记下错误与中断以得到 [ExitKind],
+     * [BridgeExecutionObserver] 的结束监听者登记已结束的桥接会话. LeakCanary 在引擎服务中保留自己的挂点.
      */
     @JvmStatic
     fun install(service: ScriptEngineService) {
         if (installed) return
         installed = true
+        BridgeExecutionObserver.endListener = BridgeExecutionObserver.EndListener(::onBridgeExecutionEnded)
         service.registerEngineLifecycleCallback(object : ScriptEngineManager.EngineLifecycleCallback {
             override fun onEngineCreate(engine: ScriptEngine<out ScriptSource>) = Unit
             override fun onEngineRemove(engine: ScriptEngine<out ScriptSource>) = onEngineRemoved(engine)
@@ -118,8 +125,14 @@ object MemoryDiagnostics : MemoryDiagnosticsCore(AndroidMemoryProbes, AndroidMem
         val path = runCatching { source?.elegantPath }.getOrNull() ?: name
         val warn = isUnreclaimedWarningEnabled()
         val resources = runCatching { runtime.resourceScope.trackedReferences() }.getOrDefault(emptyList())
-        track(runtime, engine.id, name, path, exitKindOf(engine, runtime), check = warn, resources = resources)
+        val engineName = if (engine is NodePluginJavaScriptEngine) ENGINE_NODE else ENGINE_RHINO
+        track(runtime, engine.id, name, path, exitKindOf(engine, runtime), check = warn, resources = resources, engine = engineName)
         if (warn) scheduleCheck()
+    }
+
+    private fun onBridgeExecutionEnded(engine: String, executionId: String, objects: List<Any>) {
+        trackBridgeSession(engine, executionId, objects)
+        objects.forEach { LeakCanarySetup.watch(it, "$engine ${it.javaClass.simpleName} of the finished execution $executionId") }
     }
 
     override fun onUnreleased(resource: UnreleasedResource) {

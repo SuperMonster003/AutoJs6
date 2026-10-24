@@ -14,9 +14,10 @@ import java.util.concurrent.TimeUnit
 /**
  * JVM tests of the execution scope of the plugin engines other than Node.js (docs/memory-phase2/ROADMAP.md T6): the release order
  * (the stages of a Node.js execution end, reverse registration within a stage), isolation of failing releases, one release from
- * repeated and concurrent closes, registrations made late or dropped early, and weak tracking.
+ * repeated and concurrent closes, registrations made late or dropped early, weak tracking, and the report of the tracked objects
+ * still reachable when the scope closes (P4.4).
  * zh-CN: Node.js 以外的插件引擎执行作用域的 JVM 测试 (docs/memory-phase2/ROADMAP.md T6): 释放顺序 (Node.js 执行结束的阶段, 阶段内按登记逆序),
- * 释放失败的隔离, 重复与并发关闭只释放一次, 迟到的登记与提前撤销的登记, 以及弱引用跟踪.
+ * 释放失败的隔离, 重复与并发关闭只释放一次, 迟到的登记与提前撤销的登记, 弱引用跟踪, 以及关闭时报告仍可达的跟踪对象 (P4.4).
  */
 class BridgeExecutionScopeTest {
 
@@ -27,6 +28,7 @@ class BridgeExecutionScopeTest {
     @After
     fun resetObserver() {
         BridgeExecutionObserver.listener = null
+        BridgeExecutionObserver.endListener = null
     }
 
     @Test
@@ -178,5 +180,30 @@ class BridgeExecutionScopeTest {
         assertEquals(listOf("bun/broker/bun-engine-1-test", "bun/callback/bun-engine-1-test"), reported)
         assertEquals(listOf("broker"), scope.trackedReferences().map { it.name })
         assertSame(kept, scope.trackedReferences().single().reference.get())
+    }
+
+    @Test
+    fun closeReportsTheTrackedObjectsStillReachableOnceAfterTheReleases() {
+        val scope = scope()
+        val events = mutableListOf<String>()
+        val ended = mutableListOf<List<Any>>()
+        BridgeExecutionObserver.endListener = BridgeExecutionObserver.EndListener { engine, executionId, objects ->
+            events += "ended $engine/$executionId"
+            ended += objects
+        }
+        val broker = Any()
+        val callback = Any()
+        scope.track(broker, "broker")
+        scope.track(callback, "callback")
+        scope.own(Stage.BROKER, "broker") { events += "broker released" }
+
+        scope.close()
+        scope.close()
+
+        assertEquals(listOf("broker released", "ended bun/bun-engine-1-test"), events)
+        assertEquals(1, ended.size)
+        assertEquals(2, ended.single().size)
+        assertSame(broker, ended.single()[0])
+        assertSame(callback, ended.single()[1])
     }
 }

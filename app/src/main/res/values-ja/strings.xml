@@ -2313,6 +2313,8 @@
     <string name="text_manage_key_store">キーストアを管理</string>
     <string name="text_maximize">最大化</string>
     <string name="text_mcp_server">MCP サーバー</string>
+    <string name="text_memory_bridge_session_summary">終了から %1$s, 実行 %2$s\nまだ到達可能: %3$s</string>
+    <string name="text_memory_bridge_sessions">終了したが未回収のブリッジセッション</string>
     <string name="text_memory_copy_report">診断テキストをコピー</string>
     <string name="text_memory_diagnostics">メモリ診断</string>
     <string name="text_memory_engines">稼働中のスクリプトエンジン</string>
@@ -2336,7 +2338,7 @@
     <string name="text_memory_native_heap_value">割り当て %1$s / 合計 %2$s</string>
     <string name="text_memory_pss">プロセスの PSS</string>
     <string name="text_memory_retained_runtimes">終了したが未回収のランタイム</string>
-    <string name="text_memory_retained_summary">%1$s, 終了から %2$s, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, 終了から %3$s, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">アクティブな Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">スクリプト %1$s の終了後もランタイムが回収されていません. デベロッパーオプション > メモリ診断 を参照してください</string>
     <string name="text_memory_script_heap_dump">スクリプトによる hprof のエクスポートを許可</string>

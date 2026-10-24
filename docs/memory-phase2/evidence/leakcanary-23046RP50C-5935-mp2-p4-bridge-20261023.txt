@@ -1,0 +1,173 @@
+LeakCanary check of the plugin engine bridges (memory phase 2, ROADMAP P4.3), 23046RP50C (Redmi) API 35, host debug 5935 built 2026-10-23 20:50 from the isolated clone at d48f482c2 plus the P4.4 changes (later committed to the work tree), plugins Node.js 292, Bun 118 (0.2.5), QuickJS 15, Lua 102 (0.1.3-rc.2 universal, official key; the released 78 split package is refused by a host without C40), Python 111, 2026-10-23 21:46-22:05.
+Command (per scenario): py -3.12 -I -u tools/memory/leakcanary_probe.py -s 968e9f18 --scenario <ND1|ND2|BN1|BN2|QJ1|QJ3|LU1|LU2|PY1|PY2> --runs 6 --interval 4 --wait 60 --expect-leaks no; then py -3.12 -I -u tools/memory/device_bridge_sessions.py -s 968e9f18 --final --shots <dir>
+
+Each scenario starts the entry 6 times through RunIntentActivity (not inside instrumentation). LeakCanary's automatic dump stays off, so a retained
+bridge object would show as a retained count above 0 and, after the 5 s watch delay, as a heap analysis; neither happened. The first BN2 run used
+AUTOJS6_HOST_CLIENT_MODULE, which only Bun Runtime 0.3.0 (unreleased) provides; the installed 0.2.5 offers the raw AUTOJS6_HOST_BRIDGE_SOCKET, so the
+scenario was switched to fetch(url, { unix }) and run again (the broker was created and released in both runs). The final check reads
+memory.collect() after all scenarios: retainedRuntimes 0 and every engine's bridgeSessions 0, and the Memory diagnostics page lists no session.
+
+== ND1 21:46:39
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider, org.autojs.autojs.engine.NodeJsHostCapabilityBroker, org.autojs.autojs.engine.NodePluginJavaScriptEngine, org.autojs.autojs.external.open.RunIntentActivity, org.autojs.autojs.runtime.ScriptRuntime
+max retained reported: 0
+watched node bridge objects: 12 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== ND2 21:48:07
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider, org.autojs.autojs.engine.NodeJsHostCapabilityBroker, org.autojs.autojs.engine.NodePluginJavaScriptEngine, org.autojs.autojs.external.open.RunIntentActivity, org.autojs.autojs.runtime.ScriptRuntime
+max retained reported: 0
+watched node bridge objects: 12 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== BN1 21:49:34
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 30 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.BunHostCapabilityBroker, org.autojs.autojs.engine.BunPluginScriptEngine, org.autojs.autojs.engine.BunPluginScriptEngine$OutputCallback, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched bun bridge objects: 12 (BunHostCapabilityBroker, BunPluginScriptEngine$OutputCallback)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== BN2 21:51:02
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 30 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.BunHostCapabilityBroker, org.autojs.autojs.engine.BunPluginScriptEngine, org.autojs.autojs.engine.BunPluginScriptEngine$OutputCallback, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched bun bridge objects: 12 (BunHostCapabilityBroker, BunPluginScriptEngine$OutputCallback)
+script output lines: 0 / 6 runs, errors 6
+  error: mp2-p4 BN2 error Error: AUTOJS6_HOST_CLIENT_MODULE is not set
+  error: mp2-p4 BN2 error Error: AUTOJS6_HOST_CLIENT_MODULE is not set
+  error: mp2-p4 BN2 error Error: AUTOJS6_HOST_CLIENT_MODULE is not set
+analysis: none within 60 s
+FAIL
+exit 1
+== BN2 (rerun 22:03, scenario switched to AUTOJS6_HOST_BRIDGE_SOCKET)
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 30 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.BunHostCapabilityBroker, org.autojs.autojs.engine.BunPluginScriptEngine, org.autojs.autojs.engine.BunPluginScriptEngine$OutputCallback, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched bun bridge objects: 12 (BunHostCapabilityBroker, BunPluginScriptEngine$OutputCallback)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== QJ1 21:52:30
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 24 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.QuickJsPluginScriptEngine, org.autojs.autojs.engine.QuickJsPluginScriptEngine$OutputCallback, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched quickjs bridge objects: 6 (QuickJsPluginScriptEngine$OutputCallback)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== QJ3 21:53:57
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 24 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.QuickJsPluginScriptEngine, org.autojs.autojs.engine.QuickJsPluginScriptEngine$OutputCallback, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched quickjs bridge objects: 6 (QuickJsPluginScriptEngine$OutputCallback)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== LU1 21:55:25
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderRemoteSession, org.autojs.autojs.engine.LuaPluginScriptEngine, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched lua bridge objects: 18 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== LU2 21:56:52
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderRemoteSession, org.autojs.autojs.engine.LuaPluginScriptEngine, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched lua bridge objects: 18 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== PY1 21:58:20
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.core.plugin.python.PythonHostCapabilityBroker, org.autojs.autojs.core.plugin.python.PythonRuntimeClient$Execution$openSession$admissionHandler$1, org.autojs.autojs.core.plugin.python.PythonRuntimeClient$Execution$openSession$executionHandler$1, org.autojs.autojs.engine.PythonPluginScriptEngine, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched python bridge objects: 18 (PythonHostCapabilityBroker, PythonRuntimeClient$Execution$openSession$admissionHandler$1, PythonRuntimeClient$Execution$openSession$executionHandler$1)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== PY2 21:59:47
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.core.plugin.python.PythonHostCapabilityBroker, org.autojs.autojs.core.plugin.python.PythonRuntimeClient$Execution$openSession$admissionHandler$1, org.autojs.autojs.core.plugin.python.PythonRuntimeClient$Execution$openSession$executionHandler$1, org.autojs.autojs.engine.PythonPluginScriptEngine, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched python bridge objects: 18 (PythonHostCapabilityBroker, PythonRuntimeClient$Execution$openSession$admissionHandler$1, PythonRuntimeClient$Execution$openSession$executionHandler$1)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== final 22:01:14
+host versionCode 5935, debuggable True
+PASS final collect: retainedRuntimes 0 [], bridgeSessions {'node': 0, 'bun': 0, 'quickjs': 0, 'lua': 0, 'python': 0}, listed sessions 0
+PASS screenshot final page: bridge-sessions-final-page-968e9f18-20261023-220120.png (not kept)
+PASS screenshot final actions: bridge-sessions-final-actions-968e9f18-20261023-220125.png (not kept)
+ALL PASS
+exit 0

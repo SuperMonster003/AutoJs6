@@ -24,14 +24,16 @@ import java.util.Locale
 /**
  * The `memory` module (docs/memory/ROADMAP.md D11 / T9 / P5.1): read-only memory diagnostics for scripts, read from the data source
  * of the memory gate and the developer options page ([org.autojs.autojs.runtime.memory.MemoryDiagnostics]). [snapshot] reads the
- * heaps and counters, [collect] forces garbage collection and waits for finished runtimes to be reclaimed, [retained] lists the
- * finished runtimes still reachable, [dumpHeap] writes an hprof file (debug builds, or with the developer option "Allow scripts to
- * export hprof" on, appendix C Q8) and [watch] hands an object to LeakCanary (debug builds with LeakCanary on, otherwise nothing
- * happens). Nothing here releases the resources of a script.
+ * heaps and counters (the finished plugin engine executions not reclaimed yet among them, per engine: `bridgeSessions`,
+ * docs/memory-phase2/ROADMAP.md P4.4), [collect] forces garbage collection and waits for finished runtimes and bridge sessions to be
+ * reclaimed, [retained] lists the finished runtimes still reachable, [dumpHeap] writes an hprof file (debug builds, or with the
+ * developer option "Allow scripts to export hprof" on, appendix C Q8) and [watch] hands an object to LeakCanary (debug builds with
+ * LeakCanary on, otherwise nothing happens). Nothing here releases the resources of a script.
  *
  * zh-CN: `memory` 模块 (docs/memory/ROADMAP.md D11 / T9 / P5.1): 供脚本使用的只读内存诊断, 数据源与内存门禁及开发者选项页面相同. [snapshot]
- * 读取堆与计数, [collect] 强制回收并等待已结束的 runtime 被回收, [retained] 列出仍可达的已结束 runtime, [dumpHeap] 写出 hprof 文件 (debug 构建,
- * 或开发者选项 "允许脚本导出 hprof" 开启时, 附录 C Q8), [watch] 把对象交给 LeakCanary (debug 构建且 LeakCanary 开启时, 否则什么也不做).
+ * 读取堆与计数 (其中含按引擎统计的未回收的已结束插件引擎执行数 `bridgeSessions`, docs/memory-phase2/ROADMAP.md P4.4), [collect] 强制回收并等待已结束的
+ * runtime 与桥接会话被回收, [retained] 列出仍可达的已结束 runtime, [dumpHeap] 写出 hprof 文件 (debug 构建, 或开发者选项 "允许脚本导出 hprof"
+ * 开启时, 附录 C Q8), [watch] 把对象交给 LeakCanary (debug 构建且 LeakCanary 开启时, 否则什么也不做).
  * 这里不会释放任何脚本的资源.
  */
 @Suppress("unused", "UNUSED_PARAMETER")
@@ -57,24 +59,25 @@ class Memory internal constructor(
      * zh-CN: `memory.snapshot()`: 当前读数, 不先回收垃圾.
      */
     @RhinoRuntimeFunctionInterface
-    fun snapshot(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Map<String, Double> = ensureArgumentsIsEmpty(args) {
+    fun snapshot(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Map<String, Any> = ensureArgumentsIsEmpty(args) {
         snapshotOf(platform.diagnostics.snapshot())
     }
 
     /**
      * `memory.collect(timeout?)`: forced garbage collection, then up to [timeout][COLLECT_TIMEOUT_MS] milliseconds of waiting for every
-     * finished runtime to be reclaimed (it returns earlier once none is left, and stops when the script is stopped); returns a new snapshot.
-     * zh-CN: `memory.collect(timeout?)`: 强制回收垃圾, 再最多等待 timeout 毫秒让已结束的 runtime 全部被回收 (全部回收即提前返回, 脚本被停止时中止);
+     * finished runtime and bridge session to be reclaimed (it returns earlier once none is left, and stops when the script is stopped);
+     * returns a new snapshot.
+     * zh-CN: `memory.collect(timeout?)`: 强制回收垃圾, 再最多等待 timeout 毫秒让已结束的 runtime 与桥接会话全部被回收 (全部回收即提前返回, 脚本被停止时中止);
      * 返回新的快照.
      */
     @RhinoRuntimeFunctionInterface
-    fun collect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Map<String, Double> = ensureArgumentsAtMost(args, 1) { argList ->
+    fun collect(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Map<String, Any> = ensureArgumentsAtMost(args, 1) { argList ->
         val (timeout) = argList
         val timeoutMs = timeoutOf(timeout)
         val diagnostics = platform.diagnostics
         diagnostics.awaitCleared(timeoutMs) {
             platform.checkInterrupted()
-            diagnostics.retainedCount() == 0
+            diagnostics.isCleared()
         }
         snapshotOf(diagnostics.snapshot())
     }
@@ -163,11 +166,13 @@ class Memory internal constructor(
         fun heapDumpFileName(timeMillis: Long) = "AutoJs6-heap-${SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(Date(timeMillis))}.hprof"
 
         /**
-         * The script object of a snapshot: every field of [MemorySnapshot] as a number, in its declaration order.
-         * zh-CN: 快照的脚本对象: [MemorySnapshot] 的每个字段都是 number, 顺序与声明一致.
+         * The script object of a snapshot: every field of [MemorySnapshot] in its declaration order, as a number, except `bridgeSessions`:
+         * an object with a number per engine (node, bun, quickjs, lua, python).
+         * zh-CN: 快照的脚本对象: [MemorySnapshot] 的每个字段, 顺序与声明一致, 都是 number, 只有 `bridgeSessions` 是每个引擎 (node, bun, quickjs, lua, python)
+         * 对应一个 number 的对象.
          */
         @JvmStatic
-        fun snapshotOf(snapshot: MemorySnapshot): Map<String, Double> = with(snapshot) {
+        fun snapshotOf(snapshot: MemorySnapshot): Map<String, Any> = with(snapshot) {
             linkedMapOf(
                 "javaHeapUsed" to javaHeapUsed.toDouble(),
                 "javaHeapTotal" to javaHeapTotal.toDouble(),
@@ -177,6 +182,7 @@ class Memory internal constructor(
                 "pss" to pss.toDouble(),
                 "engines" to engines.toDouble(),
                 "retainedRuntimes" to retainedRuntimes.toDouble(),
+                "bridgeSessions" to bridgeSessions.entries.associateTo(LinkedHashMap()) { (engine, count) -> engine to count.toDouble() },
                 "images" to images.toDouble(),
                 "threads" to threads.toDouble(),
                 "allThreads" to allThreads.toDouble(),
@@ -186,8 +192,9 @@ class Memory internal constructor(
         }
 
         /**
-         * The script object of a retained runtime: every field of [RetainedRuntime], `exitKind` as "normal", "error" or "stopped".
-         * zh-CN: 未回收 runtime 的脚本对象: [RetainedRuntime] 的每个字段, `exitKind` 为 "normal", "error" 或 "stopped".
+         * The script object of a retained runtime: every field of [RetainedRuntime], `exitKind` as "normal", "error" or "stopped",
+         * `engine` as "rhino" or "node".
+         * zh-CN: 未回收 runtime 的脚本对象: [RetainedRuntime] 的每个字段, `exitKind` 为 "normal", "error" 或 "stopped", `engine` 为 "rhino" 或 "node".
          */
         @JvmStatic
         fun retainedOf(runtime: RetainedRuntime): Map<String, Any> = with(runtime) {
@@ -198,6 +205,7 @@ class Memory internal constructor(
                 "endedAt" to endedAt.toDouble(),
                 "elapsedMs" to elapsedMs.toDouble(),
                 "exitKind" to exitKind.id,
+                "engine" to engine,
             )
         }
     }

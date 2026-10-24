@@ -23,8 +23,13 @@
         console.log('没有未回收的脚本运行时');
     }
     retained.forEach((r) => {
-        console.log('未回收: ' + r.name + ' (' + r.exitKind + '), 已结束 ' + Math.round(r.elapsedMs / 1000) + ' 秒');
+        console.log('未回收: ' + r.name + ' (' + r.engine + ', ' + r.exitKind + '), 已结束 ' + Math.round(r.elapsedMs / 1000) + ' 秒');
     });
+
+    /* Node.js, Bun, QuickJS, Lua 与 Python 等插件引擎已结束但未回收的桥接会话数. */
+    let bridge = Object.keys(after.bridgeSessions).filter((engine) => after.bridgeSessions[engine] > 0);
+    console.log(bridge.length === 0 ? '没有未回收的桥接会话'
+        : '未回收的桥接会话: ' + bridge.map((engine) => engine + ' ' + after.bridgeSessions[engine]).join(', '));
 
     console.launch();
 })();

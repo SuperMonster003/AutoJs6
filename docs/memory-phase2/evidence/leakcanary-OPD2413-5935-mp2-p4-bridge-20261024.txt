@@ -1,0 +1,94 @@
+LeakCanary check of the plugin engine bridges (memory phase 2, ROADMAP P4.3), OPD2413 (OnePlus, ColorOS) API 35, host debug 5935 built 2026-10-23 from the isolated clone at the work tree's 271aec8e5 (C40 / C43 included) plus the P4.4 changes (later committed to the work tree), plugins Node.js 247, Python 89, Lua 78 (released arm64 split package, installed for this check and removed afterwards); 2026-10-24 10:53-11:11.
+Command (per scenario): py -3.12 -I -u tools/memory/leakcanary_probe.py -s 63751f63 --scenario <LU1|LU2|ND1|ND2> --runs 6 --interval 4 --wait 60 --expect-leaks no; then py -3.12 -I -u tools/memory/device_bridge_sessions.py -s 63751f63 --engines <node|lua|python> and --final
+
+Bun and QuickJS are not installed on this device. Python 89 is signed with another key than the debug host, so the host refuses it
+(PYTHON_RUNTIME_PROVIDER_UNTRUSTED, reported as SKIP). Lua runs here because the host includes C40 (the released 78 split package is
+accepted); the 2026-10-23 evening attempt waited for the ColorOS install confirmation and was postponed. LeakCanary's automatic dump stays
+off, so a retained bridge object would show as a retained count above 0 and, after the 5 s watch delay, as a heap analysis; neither happened.
+The first device_bridge_sessions.py runs after leakcanary_probe.py (lua at 10:56, node at 11:03 and 11:05) reported 'no probe result':
+once RunIntentActivity finished, the host (no foreground service) became a cached process and the cached apps freezer stopped it
+(curProcState 19, /sys/fs/cgroup/uid_10432/pid_13228/cgroup.freeze 1; no GC line from the process between 11:05:57 and 11:08:46, and
+the stalled probe resumed as soon as another script brought the host to the front). The script now opens the memory diagnostics page
+first and keeps it in front; the runs below are with that version (lua also passed once at 10:59 before the change, by timing).
+
+== LU1 10:53:41
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 43 object(s): androidx.lifecycle.ReportFragment, androidx.work.impl.background.systemjob.SystemJobService, com.evernote.android.job.JobRescheduleService, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderRemoteSession, org.autojs.autojs.engine.LuaPluginScriptEngine, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched lua bridge objects: 18 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+automatic heap dump: off (Leaks app > About > Dump heap automatically, off by default since P1.2)
+PASS
+exit 0
+== LU2 10:55:15
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, org.autojs.autojs.engine.BinderLuaEngineRuntimeBackend$BinderRemoteSession, org.autojs.autojs.engine.LuaPluginScriptEngine, org.autojs.autojs.external.open.RunIntentActivity
+max retained reported: 0
+watched lua bridge objects: 18 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession)
+script output lines: 8 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== ND1 11:00:25
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider, org.autojs.autojs.engine.NodeJsHostCapabilityBroker, org.autojs.autojs.engine.NodePluginJavaScriptEngine, org.autojs.autojs.external.open.RunIntentActivity, org.autojs.autojs.runtime.ScriptRuntime
+max retained reported: 0
+watched node bridge objects: 12 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker)
+script output lines: 6 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== ND2 11:01:52
+run 1/6 started
+run 2/6 started
+run 3/6 started
+run 4/6 started
+run 5/6 started
+run 6/6 started
+watched 36 object(s): androidx.lifecycle.ReportFragment, org.autojs.autojs.engine.AndroidNodeBridgeCapabilityProvider, org.autojs.autojs.engine.NodeJsHostCapabilityBroker, org.autojs.autojs.engine.NodePluginJavaScriptEngine, org.autojs.autojs.external.open.RunIntentActivity, org.autojs.autojs.runtime.ScriptRuntime
+max retained reported: 0
+watched node bridge objects: 12 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker)
+script output lines: 8 / 6 runs, errors 0
+analysis: none within 60 s
+PASS
+exit 0
+== node sessions (page in front) 11:10:46
+host versionCode 5935, debuggable True
+PASS node plain run: ended after 305 ms, retained right after ['node'], bridgeSessions.node after collect 0
+PASS node held run: 2 object(s) held ([broker, provider]), bridgeSessions.node 1, listed 1 (AndroidNodeBridgeCapabilityProvider, NodeJsHostCapabilityBroker), retained []
+PASS node released: bridgeSessions.node 0, listed sessions 0
+ALL PASS
+exit 0
+== lua sessions (page in front) 11:11:00
+host versionCode 5935, debuggable True
+PASS lua plain run: ended after 210 ms, retained right after [], bridgeSessions.lua after collect 0
+PASS lua held run: 3 object(s) held ([broker, callback, session]), bridgeSessions.lua 1, listed 1 (BinderLuaEngineRuntimeBackend$BinderConnection$ExecutionCallback, BinderLuaEngineRuntimeBackend$BinderConnection$SessionHostBroker, BinderLuaEngineRuntimeBackend$BinderRemoteSession), retained []
+PASS lua released: bridgeSessions.lua 0, listed sessions 0
+ALL PASS
+exit 0
+== python sessions (page in front) 11:11:14
+host versionCode 5935, debuggable True
+SKIP python: the plugin refused to run the script, no bridge object was created (PYTHON_RUNTIME_PROVIDER_UNTRUSTED: Official Python Runtime signer differs from the host)
+ALL PASS
+exit 0
+== final (page in front) 11:11:25
+host versionCode 5935, debuggable True
+PASS final collect: retainedRuntimes 0 [], bridgeSessions {'node': 0, 'bun': 0, 'quickjs': 0, 'lua': 0, 'python': 0}, listed sessions 0
+ALL PASS
+exit 0

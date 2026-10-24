@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import org.autojs.autojs.runtime.memory.ExitKind
 import org.autojs.autojs.runtime.memory.MemorySnapshot
+import org.autojs.autojs.runtime.memory.RetainedBridgeSession
 import org.autojs.autojs.runtime.memory.RetainedRuntime
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
@@ -56,14 +57,50 @@ internal object MemoryDiagnosticsText {
     fun threads(context: Context, s: MemorySnapshot) =
         context.getString(R.string.text_memory_threads_value, count(s.threads), count(s.allThreads))
 
-    fun retained(context: Context, r: RetainedRuntime) =
-        context.getString(R.string.text_memory_retained_summary, exitKind(context, r.exitKind), duration(r.elapsedMs), count(r.id), r.source)
+    /**
+     * The name of an engine of [RetainedRuntime.engine] or [RetainedBridgeSession.engine] (docs/memory-phase2/ROADMAP.md P4.4).
+     * zh-CN: [RetainedRuntime.engine] 或 [RetainedBridgeSession.engine] 中引擎的名称 (docs/memory-phase2/ROADMAP.md P4.4).
+     */
+    fun engineName(engine: String): String = when (engine) {
+        "rhino" -> "Rhino"
+        "node" -> "Node.js"
+        "bun" -> "Bun"
+        "quickjs" -> "QuickJS"
+        "lua" -> "Lua"
+        "python" -> "Python"
+        else -> engine
+    }
+
+    fun retained(context: Context, r: RetainedRuntime) = context.getString(
+        R.string.text_memory_retained_summary, engineName(r.engine), exitKind(context, r.exitKind), duration(r.elapsedMs), count(r.id), r.source,
+    )
 
     /**
-     * The text of "Copy diagnostics text": app and device, every snapshot value, LeakCanary in debug builds, the unreclaimed runtimes.
-     * zh-CN: "复制诊断文本" 的内容: 应用与设备, 快照各项, debug 构建中的 LeakCanary 状态, 未回收的 runtime 列表.
+     * The total of [MemorySnapshot.bridgeSessions], followed by the engines with any, e.g. "2 (Lua 1, Python 1)".
+     * zh-CN: [MemorySnapshot.bridgeSessions] 的总数, 后接有未回收会话的引擎, 例如 "2 (Lua 1, Python 1)".
      */
-    fun report(context: Context, s: MemorySnapshot, retained: List<RetainedRuntime>, leakCanary: String?): String = buildString {
+    fun bridgeSessions(s: MemorySnapshot): String {
+        val engines = s.bridgeSessions.filterValues { it > 0 }.map { (engine, n) -> "${engineName(engine)} $n" }
+        val total = count(s.bridgeSessions.values.sum())
+        return if (engines.isEmpty()) total else "$total (${engines.joinToString(", ")})"
+    }
+
+    fun bridgeSession(context: Context, b: RetainedBridgeSession) = context.getString(
+        R.string.text_memory_bridge_session_summary, duration(b.elapsedMs), b.executionId, b.objects.joinToString(", "),
+    )
+
+    /**
+     * The text of "Copy diagnostics text": app and device, every snapshot value, LeakCanary in debug builds, the unreclaimed runtimes
+     * and bridge sessions.
+     * zh-CN: "复制诊断文本" 的内容: 应用与设备, 快照各项, debug 构建中的 LeakCanary 状态, 未回收的 runtime 与桥接会话列表.
+     */
+    fun report(
+        context: Context,
+        s: MemorySnapshot,
+        retained: List<RetainedRuntime>,
+        bridge: List<RetainedBridgeSession>,
+        leakCanary: String?,
+    ): String = buildString {
         appendLine("${context.getString(R.string.app_name)} ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}), ${context.getString(R.string.text_memory_diagnostics)}")
         appendLine("${Build.MANUFACTURER} ${Build.MODEL}, Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
         appendLine(SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT).format(Date(s.timestamp)))
@@ -73,6 +110,7 @@ internal object MemoryDiagnosticsText {
         line(context, R.string.text_memory_pss, bytes(s.pss))
         line(context, R.string.text_memory_engines, count(s.engines))
         line(context, R.string.text_memory_retained_runtimes, count(s.retainedRuntimes))
+        line(context, R.string.text_memory_bridge_sessions, bridgeSessions(s))
         line(context, R.string.text_memory_images, count(s.images))
         line(context, R.string.text_memory_threads, threads(context, s))
         line(context, R.string.text_memory_rhino_contexts, count(s.contexts))
@@ -84,6 +122,14 @@ internal object MemoryDiagnosticsText {
         }
         retained.forEach { r ->
             appendLine("- ${r.name}: ${retained(context, r).replace('\n', ' ')}")
+        }
+        appendLine()
+        appendLine("${context.getString(R.string.text_memory_bridge_sessions)}:")
+        if (bridge.isEmpty()) {
+            appendLine("- ${context.getString(R.string.text_none)}")
+        }
+        bridge.forEach { b ->
+            appendLine("- ${engineName(b.engine)}: ${bridgeSession(context, b).replace('\n', ' ')}")
         }
     }
 

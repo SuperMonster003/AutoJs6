@@ -22,6 +22,12 @@ data class MemorySnapshot(
     val engines: Int,
     /** Finished script runtimes the GC has not reclaimed yet ([MemoryDiagnosticsCore.retained]). zh-CN: 已结束但尚未被回收的脚本 runtime 数. */
     val retainedRuntimes: Int,
+    /**
+     * Finished plugin engine executions with a session object the GC has not reclaimed yet, per engine (docs/memory-phase2/ROADMAP.md
+     * P4.4, [MemoryDiagnosticsCore.retainedBridgeSessions]); every engine of [MemoryDiagnosticsCore.BRIDGE_ENGINES] is listed, 0 included.
+     * zh-CN: 会话对象尚未被回收的已结束插件引擎执行数, 按引擎计 (docs/memory-phase2/ROADMAP.md P4.4); [MemoryDiagnosticsCore.BRIDGE_ENGINES] 的每个引擎都列出, 含 0.
+     */
+    val bridgeSessions: Map<String, Int>,
     /** Script images neither recycled nor collected (`ImageWrapper` registry). zh-CN: 既未回收也未被 GC 的脚本图像数. */
     val images: Int,
     /** Threads created for scripts, told by their names ([MemoryDiagnosticsCore.isScriptThread]). zh-CN: 为脚本创建的线程数, 按线程名判断. */
@@ -62,6 +68,23 @@ data class RetainedRuntime(
     val endedAt: Long,
     val elapsedMs: Long,
     val exitKind: ExitKind,
+    /** [MemoryDiagnosticsCore.ENGINE_RHINO], or [MemoryDiagnosticsCore.ENGINE_NODE] for a Node.js script (docs/memory-phase2/ROADMAP.md P4.4). */
+    val engine: String,
+)
+
+/**
+ * A finished plugin engine execution with a session object still reachable (docs/memory-phase2/ROADMAP.md P4.4, T1 (a)). [engine] is
+ * the engine family of the execution (one of [MemoryDiagnosticsCore.BRIDGE_ENGINES]), [elapsedMs] the time since it ended, [objects]
+ * the class names of its session objects not reclaimed yet (the classes of T1 (a), without the package).
+ * zh-CN: 仍有会话对象可达的已结束插件引擎执行 (docs/memory-phase2/ROADMAP.md P4.4, T1 (a)). [engine] 为执行所属的引擎类别 ([MemoryDiagnosticsCore.BRIDGE_ENGINES]
+ * 之一), [elapsedMs] 为结束后经过的时间, [objects] 为尚未被回收的会话对象的类名 (即 T1 (a) 的类, 不含包名).
+ */
+data class RetainedBridgeSession(
+    val engine: String,
+    val executionId: String,
+    val endedAt: Long,
+    val elapsedMs: Long,
+    val objects: List<String>,
 )
 
 /**

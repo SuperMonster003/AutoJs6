@@ -22,11 +22,13 @@ import java.io.File
 import java.lang.reflect.Modifier
 
 /**
- * JVM tests of the `memory` module (docs/memory/ROADMAP.md P5.1 / T9): the shape of every result, argument checks, the refusal of
- * `memory.dumpHeap` in release builds while "Allow scripts to export hprof" is off (appendix C Q8), and `memory.watch` doing nothing
- * without LeakCanary. The module runs in real Rhino on a fake platform over a [MemoryDiagnosticsCore] with fake probes and clock.
- * zh-CN: `memory` 模块的 JVM 测试 (docs/memory/ROADMAP.md P5.1 / T9): 各返回值的形状, 参数校验, release 构建在 "允许脚本导出 hprof" 关闭时拒绝
- * `memory.dumpHeap` (附录 C Q8), 以及没有 LeakCanary 时 `memory.watch` 什么也不做. 模块运行在真实 Rhino 中, 平台为替身, 诊断核心使用替身探针与时钟.
+ * JVM tests of the `memory` module (docs/memory/ROADMAP.md P5.1 / T9): the shape of every result (the `bridgeSessions` of a snapshot
+ * included, docs/memory-phase2/ROADMAP.md P4.4), argument checks, the refusal of `memory.dumpHeap` in release builds while "Allow scripts
+ * to export hprof" is off (appendix C Q8), and `memory.watch` doing nothing without LeakCanary. The module runs in real Rhino on a fake
+ * platform over a [MemoryDiagnosticsCore] with fake probes and clock.
+ * zh-CN: `memory` 模块的 JVM 测试 (docs/memory/ROADMAP.md P5.1 / T9): 各返回值的形状 (含快照的 `bridgeSessions`, docs/memory-phase2/ROADMAP.md P4.4),
+ * 参数校验, release 构建在 "允许脚本导出 hprof" 关闭时拒绝 `memory.dumpHeap` (附录 C Q8), 以及没有 LeakCanary 时 `memory.watch` 什么也不做.
+ * 模块运行在真实 Rhino 中, 平台为替身, 诊断核心使用替身探针与时钟.
  */
 class MemoryModuleTest {
 
@@ -68,15 +70,17 @@ class MemoryModuleTest {
         val fields = MemorySnapshot::class.java.declaredFields.filter { !Modifier.isStatic(it.modifiers) }.map { it.name }
         val expected = listOf(
             "javaHeapUsed", "javaHeapTotal", "javaHeapMax", "nativeHeapAllocated", "nativeHeapSize", "pss",
-            "engines", "retainedRuntimes", "images", "threads", "allThreads", "contexts", "timestamp",
+            "engines", "retainedRuntimes", "bridgeSessions", "images", "threads", "allThreads", "contexts", "timestamp",
         )
         // A field added to MemorySnapshot must reach the module (and its documentation) too.
         assertEquals(expected.sorted(), fields.sorted())
         assertEquals(json(expected), eval("Object.keys(memory.snapshot())"))
-        assertEquals("true", eval("(function (s) { return Object.keys(s).every(function (k) { return typeof s[k] === 'number'; }); })(memory.snapshot())"))
+        // Every field is a number, but bridgeSessions: a number per engine.
+        assertEquals("true", eval("(function (s) { return Object.keys(s).every(function (k) { return k === 'bridgeSessions' || typeof s[k] === 'number'; }); })(memory.snapshot())"))
         assertEquals(
             "{\"javaHeapUsed\":11,\"javaHeapTotal\":12,\"javaHeapMax\":13,\"nativeHeapAllocated\":21,\"nativeHeapSize\":22,\"pss\":31," +
-                    "\"engines\":2,\"retainedRuntimes\":0,\"images\":5,\"threads\":1,\"allThreads\":2,\"contexts\":3,\"timestamp\":${EPOCH + 5_000L}}",
+                    "\"engines\":2,\"retainedRuntimes\":0,\"bridgeSessions\":{\"node\":0,\"bun\":0,\"quickjs\":0,\"lua\":0,\"python\":0}," +
+                    "\"images\":5,\"threads\":1,\"allThreads\":2,\"contexts\":3,\"timestamp\":${EPOCH + 5_000L}}",
             eval("memory.snapshot()"),
         )
         assertEquals(0, probes.gcCalls)
@@ -91,11 +95,32 @@ class MemoryModuleTest {
         core.track(runtime, 7, "leaky.js", "/sdcard/Scripts/leaky.js", ExitKind.STOPPED)
         clock.now += 1_234L
         assertEquals(
-            "[{\"id\":7,\"name\":\"leaky.js\",\"source\":\"/sdcard/Scripts/leaky.js\",\"endedAt\":${EPOCH + 5_000L},\"elapsedMs\":1234,\"exitKind\":\"stopped\"}]",
+            "[{\"id\":7,\"name\":\"leaky.js\",\"source\":\"/sdcard/Scripts/leaky.js\",\"endedAt\":${EPOCH + 5_000L},\"elapsedMs\":1234,\"exitKind\":\"stopped\",\"engine\":\"rhino\"}]",
             eval("memory.retained()"),
         )
         assertEquals("1", eval("memory.snapshot().retainedRuntimes"))
         assertThrows("memory.retained(0)")
+    }
+
+    @Test
+    fun bridgeSessionsCountTheFinishedExecutionsStillReachablePerEngine() {
+        assertEquals("[\"node\",\"bun\",\"quickjs\",\"lua\",\"python\"]", eval("Object.keys(memory.snapshot().bridgeSessions)"))
+        core.trackBridgeSession("lua", "lua-1", listOf(Any().also(held::add)))
+        core.trackBridgeSession("lua", "lua-2", listOf(Any().also(held::add)))
+        core.trackBridgeSession("python", "py-1", listOf(Any().also(held::add)))
+        assertEquals("{\"node\":0,\"bun\":0,\"quickjs\":0,\"lua\":2,\"python\":1}", eval("memory.snapshot().bridgeSessions"))
+        assertEquals("true", eval("(function (b) { return Object.keys(b).every(function (k) { return typeof b[k] === 'number'; }); })(memory.snapshot().bridgeSessions)"))
+        assertEquals("0", eval("memory.snapshot().retainedRuntimes"))
+        // collect() waits for held bridge sessions as for held runtimes.
+        val before = clock.now
+        assertEquals("2", eval("memory.collect(500).bridgeSessions.lua"))
+        assertTrue(clock.now - before in 500L..500L + MemoryDiagnosticsCore.POLL_INTERVAL_MS)
+    }
+
+    @Test
+    fun retainedNamesTheEngineOfARuntime() {
+        core.track(Any().also(held::add), 1, "n.js", "n.js", ExitKind.NORMAL, engine = MemoryDiagnosticsCore.ENGINE_NODE)
+        assertEquals("[\"node\"]", eval("memory.retained().map(function (r) { return r.engine; })"))
     }
 
     @Test

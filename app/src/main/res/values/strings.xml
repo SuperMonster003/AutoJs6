@@ -2308,6 +2308,8 @@
     <string name="text_manage_key_store">Manage Keystore</string>
     <string name="text_maximize">Maximize</string>
     <string name="text_mcp_server">MCP Server</string>
+    <string name="text_memory_bridge_session_summary">Ended %1$s ago, execution %2$s\nStill reachable: %3$s</string>
+    <string name="text_memory_bridge_sessions">Finished but unreclaimed bridge sessions</string>
     <string name="text_memory_copy_report">Copy diagnostics text</string>
     <string name="text_memory_diagnostics">Memory diagnostics</string>
     <string name="text_memory_engines">Live script engines</string>
@@ -2331,7 +2333,7 @@
     <string name="text_memory_native_heap_value">Allocated %1$s / total %2$s</string>
     <string name="text_memory_pss">Process PSS</string>
     <string name="text_memory_retained_runtimes">Finished but unreclaimed runtimes</string>
-    <string name="text_memory_retained_summary">%1$s, ended %2$s ago, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, ended %3$s ago, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">Active Rhino contexts</string>
     <string name="text_memory_runtime_not_reclaimed">The runtime of script %1$s was not reclaimed after it ended, see Developer options > Memory diagnostics</string>
     <string name="text_memory_script_heap_dump">Allow scripts to export hprof</string>

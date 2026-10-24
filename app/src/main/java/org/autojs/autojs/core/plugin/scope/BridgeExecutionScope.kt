@@ -18,7 +18,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * - [own]: a strong reference to a release action, run by [close]; [Registration.disown] drops it earlier. A registration made
  *   after its stage has been released is released at once.
  * - [track]: a weak reference only, never released by the scope; reported to [BridgeExecutionObserver] for the bridge leak gate
- *   (T1 (a)), and listed by [trackedReferences] while not reclaimed.
+ *   (T1 (a)), and listed by [trackedReferences] while not reclaimed. Those still reachable when [close] ends are reported to
+ *   [BridgeExecutionObserver.ended] for the memory diagnostics (P4.4).
  *
  * zh-CN: Node.js 以外的插件引擎一次执行的桥接对象 (docs/memory-phase2/ROADMAP.md T6; Node.js 的执行改由其脚本运行时的 `RuntimeResourceScope` 持有).
  * 引擎每次执行创建一个作用域, 在执行的 `finally` 中关闭它, 每种结束方式都会走到这里: 正常结束, `forceStop` (它在插件中取消运行, runScript 随之返回),
@@ -27,6 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * - [own]: 强引用一个释放动作, 由 [close] 执行; [Registration.disown] 可提前撤销. 在其阶段已释放之后才登记的项会立即释放.
  * - [track]: 只持弱引用, 作用域从不释放它; 报告给 [BridgeExecutionObserver] 供桥接泄漏门禁使用 (T1 (a)), 未回收前由 [trackedReferences] 列出.
+ *   [close] 结束时仍可达的, 报告给 [BridgeExecutionObserver.ended] 供内存诊断使用 (P4.4).
  */
 class BridgeExecutionScope @JvmOverloads constructor(
     val engine: String,
@@ -154,8 +156,9 @@ class BridgeExecutionScope @JvmOverloads constructor(
     /**
      * Releases every registration, stage by stage in the order of [Stage], each stage in the reverse order of registration.
      * Runs once; later and concurrent calls return an empty list at once. Returns the releases that threw (each also logged).
+     * Then reports the [track]ed objects still reachable to [BridgeExecutionObserver.ended].
      * zh-CN: 按 [Stage] 的顺序逐阶段释放全部登记, 每个阶段内按登记的逆序. 只执行一次, 之后及并发的调用立即返回空列表.
-     * 返回抛出异常的释放 (每项也已记日志).
+     * 返回抛出异常的释放 (每项也已记日志). 之后把仍可达的 [track] 对象报告给 [BridgeExecutionObserver.ended].
      */
     fun close(): List<Failure> {
         synchronized(lock) {
@@ -174,6 +177,7 @@ class BridgeExecutionScope @JvmOverloads constructor(
             releasing = null
             closed = true
         }
+        BridgeExecutionObserver.ended(engine, executionId, trackedReferences().mapNotNull { it.reference.get() })
         return failures
     }
 

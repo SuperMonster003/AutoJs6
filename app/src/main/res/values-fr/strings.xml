@@ -2312,6 +2312,8 @@
     <string name="text_manage_key_store">Gérer le magasin de clés</string>
     <string name="text_maximize">Agrandir</string>
     <string name="text_mcp_server">Serveur MCP</string>
+    <string name="text_memory_bridge_session_summary">Terminée il y a %1$s, exécution %2$s\nEncore accessibles: %3$s</string>
+    <string name="text_memory_bridge_sessions">Sessions de pont terminées mais non libérées</string>
     <string name="text_memory_copy_report">Copier le texte du diagnostic</string>
     <string name="text_memory_diagnostics">Diagnostic de la mémoire</string>
     <string name="text_memory_engines">Moteurs de script actifs</string>
@@ -2335,7 +2337,7 @@
     <string name="text_memory_native_heap_value">Alloué %1$s / total %2$s</string>
     <string name="text_memory_pss">PSS du processus</string>
     <string name="text_memory_retained_runtimes">Environnements d\'exécution terminés mais non libérés</string>
-    <string name="text_memory_retained_summary">%1$s, terminé il y a %2$s, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, terminé il y a %3$s, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">Contextes Rhino actifs</string>
     <string name="text_memory_runtime_not_reclaimed">L\'environnement d\'exécution du script %1$s n\'a pas été libéré après sa fin, voir Les options du développeur > Diagnostic de la mémoire</string>
     <string name="text_memory_script_heap_dump">Autoriser les scripts à exporter un hprof</string>

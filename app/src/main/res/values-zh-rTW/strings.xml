@@ -2309,6 +2309,8 @@
     <string name="text_manage_key_store">管理密鑰庫</string>
     <string name="text_maximize">最大化</string>
     <string name="text_mcp_server">MCP 伺服器</string>
+    <string name="text_memory_bridge_session_summary">已結束 %1$s, 執行 %2$s\n仍可達: %3$s</string>
+    <string name="text_memory_bridge_sessions">已結束未回收的橋接會話</string>
     <string name="text_memory_copy_report">複製診斷文字</string>
     <string name="text_memory_diagnostics">記憶體診斷</string>
     <string name="text_memory_engines">存活的指令碼引擎</string>
@@ -2332,7 +2334,7 @@
     <string name="text_memory_native_heap_value">已配置 %1$s / 總計 %2$s</string>
     <string name="text_memory_pss">程序 PSS</string>
     <string name="text_memory_retained_runtimes">已結束未回收的 runtime</string>
-    <string name="text_memory_retained_summary">%1$s, 已結束 %2$s, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, 已結束 %3$s, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">作用中的 Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">指令碼 %1$s 結束後 runtime 未被回收, 見 開發者選項 > 記憶體診斷</string>
     <string name="text_memory_script_heap_dump">允許指令碼匯出 hprof</string>

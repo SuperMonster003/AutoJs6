@@ -2314,6 +2314,8 @@
     <string name="text_manage_key_store">إدارة مخزن المفاتيح</string>
     <string name="text_maximize">تكبير</string>
     <string name="text_mcp_server">خادم MCP</string>
+    <string name="text_memory_bridge_session_summary">انتهت منذ %1$s, التنفيذ %2$s\nلا تزال قابلة للوصول: %3$s</string>
+    <string name="text_memory_bridge_sessions">جلسات الجسر المنتهية غير المحررة</string>
     <string name="text_memory_copy_report">نسخ نص التشخيص</string>
     <string name="text_memory_diagnostics">تشخيص الذاكرة</string>
     <string name="text_memory_engines">محركات البرامج النصية النشطة</string>
@@ -2337,7 +2339,7 @@
     <string name="text_memory_native_heap_value">المخصص %1$s / الإجمالي %2$s</string>
     <string name="text_memory_pss">PSS للعملية</string>
     <string name="text_memory_retained_runtimes">بيئات التشغيل المنتهية غير المحررة</string>
-    <string name="text_memory_retained_summary">%1$s, انتهى منذ %2$s, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, انتهى منذ %3$s, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">سياقات Rhino النشطة</string>
     <string name="text_memory_runtime_not_reclaimed">لم يتم تحرير بيئة تشغيل البرنامج النصي %1$s بعد انتهائه, راجع خيارات للمطور > تشخيص الذاكرة</string>
     <string name="text_memory_script_heap_dump">السماح للبرامج النصية بتصدير hprof</string>

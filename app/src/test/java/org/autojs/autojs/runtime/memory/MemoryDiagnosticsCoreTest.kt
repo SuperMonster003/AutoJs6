@@ -10,8 +10,10 @@ import org.junit.Test
 
 /**
  * JVM tests of the memory diagnostics core (docs/memory/ROADMAP.md P2.1 / P2.3): registration and dequeuing of finished runtimes,
- * the snapshot fields, the collect timeout and the unreclaimed runtime check.
- * zh-CN: 内存诊断核心的 JVM 测试 (docs/memory/ROADMAP.md P2.1 / P2.3): 已结束 runtime 的登记与出列, 快照字段, collect 超时与未回收检查.
+ * the snapshot fields, the collect timeout and the unreclaimed runtime check; the bridge sessions of plugin engines and the engine
+ * column (docs/memory-phase2/ROADMAP.md P4.4).
+ * zh-CN: 内存诊断核心的 JVM 测试 (docs/memory/ROADMAP.md P2.1 / P2.3): 已结束 runtime 的登记与出列, 快照字段, collect 超时与未回收检查;
+ * 插件引擎的桥接会话与引擎列 (docs/memory-phase2/ROADMAP.md P4.4).
  */
 class MemoryDiagnosticsCoreTest {
 
@@ -56,6 +58,10 @@ class MemoryDiagnosticsCoreTest {
         override fun sleep(ms: Long) = Thread.sleep(ms)
     }
 
+    // Stand-ins for the session objects of T1 (a).
+    private class FakeBroker
+    private class FakeCallback
+
     @Test
     fun trackedRuntimeIsListedWithItsDescription() {
         val clock = FakeClock(now = 1_000L)
@@ -73,8 +79,19 @@ class MemoryDiagnosticsCoreTest {
             assertEquals(EPOCH + 1_000L, endedAt)
             assertEquals(2_500L, elapsedMs)
             assertEquals(ExitKind.STOPPED, exitKind)
+            assertEquals(MemoryDiagnosticsCore.ENGINE_RHINO, engine)
         }
         assertEquals(1, core.retainedCount())
+        assertNotNull(runtime)
+    }
+
+    @Test
+    fun trackedNodeRuntimeCarriesItsEngine() {
+        val core = MemoryDiagnosticsCore(FakeProbes(), FakeClock())
+        val runtime = Any()
+        core.track(runtime, id = 3, name = "n.js", source = "n.js", exitKind = ExitKind.NORMAL, engine = MemoryDiagnosticsCore.ENGINE_NODE)
+
+        assertEquals(listOf(MemoryDiagnosticsCore.ENGINE_NODE), core.retained().map { it.engine })
         assertNotNull(runtime)
     }
 
@@ -107,22 +124,114 @@ class MemoryDiagnosticsCoreTest {
         val core = MemoryDiagnosticsCore(probes, clock)
         val runtime = Any()
         core.track(runtime, id = 1, name = "a", source = "a", exitKind = ExitKind.NORMAL)
+        val session = FakeBroker()
+        core.trackBridgeSession("lua", "lua-1", listOf(session))
 
         val snapshot = core.snapshot()
         assertEquals(
             MemorySnapshot(
                 javaHeapUsed = 11L, javaHeapTotal = 12L, javaHeapMax = 13L,
                 nativeHeapAllocated = 21L, nativeHeapSize = 22L, pss = 31L,
-                engines = 2, retainedRuntimes = 1, images = 5, threads = 3, allThreads = 6, contexts = 3,
+                engines = 2, retainedRuntimes = 1,
+                bridgeSessions = mapOf("node" to 0, "bun" to 0, "quickjs" to 0, "lua" to 1, "python" to 0),
+                images = 5, threads = 3, allThreads = 6, contexts = 3,
                 timestamp = EPOCH + 42L,
             ),
             snapshot,
         )
+        assertEquals(MemoryDiagnosticsCore.BRIDGE_ENGINES, snapshot.bridgeSessions.keys.toList())
         assertEquals(1, probes.pssCalls)
         assertEquals(-1L, core.snapshot(includePss = false).pss)
         assertEquals(1, probes.pssCalls)
         assertEquals("snapshot() must not collect garbage", 0, probes.gcCalls)
         assertNotNull(runtime)
+        assertNotNull(session)
+    }
+
+    @Test
+    fun bridgeSessionIsListedWithItsObjects() {
+        val clock = FakeClock(now = 1_000L)
+        val core = MemoryDiagnosticsCore(FakeProbes(), clock)
+        val broker = FakeBroker()
+        val callback = FakeCallback()
+        core.trackBridgeSession("python", "py-7", listOf(broker, callback))
+        clock.now += 3_000L
+
+        with(core.retainedBridgeSessions().single()) {
+            assertEquals("python", engine)
+            assertEquals("py-7", executionId)
+            assertEquals(EPOCH + 1_000L, endedAt)
+            assertEquals(3_000L, elapsedMs)
+            assertEquals(listOf(FakeBroker::class.java, FakeCallback::class.java).map { it.name.substringAfterLast('.') }, objects)
+        }
+        assertEquals(1, core.bridgeSessionCount())
+        assertEquals("finished runtimes and bridge sessions are counted apart", 0, core.retainedCount())
+        assertNotNull(broker)
+        assertNotNull(callback)
+    }
+
+    @Test
+    fun bridgeSessionsAreCountedPerEngine() {
+        val core = MemoryDiagnosticsCore(FakeProbes(), FakeClock())
+        val held = List(4) { FakeBroker() }
+        core.trackBridgeSession("python", "py-1", listOf(held[0]))
+        core.trackBridgeSession("node", "node-1", listOf(held[1]))
+        core.trackBridgeSession("python", "py-2", listOf(held[2]))
+        core.trackBridgeSession("future", "f-1", listOf(held[3]))
+        core.trackBridgeSession("bun", "bun-1", emptyList())
+
+        assertEquals(
+            listOf("node" to 1, "bun" to 0, "quickjs" to 0, "lua" to 0, "python" to 2, "future" to 1),
+            core.bridgeSessionCounts().toList(),
+        )
+        assertEquals(listOf("py-1", "node-1", "py-2", "f-1"), core.retainedBridgeSessions().map { it.executionId })
+        assertNotNull(held)
+    }
+
+    @Test
+    fun reclaimedBridgeSessionLeavesTheRegistry() {
+        val core = MemoryDiagnosticsCore(FakeProbes(realGc = true), RealClock)
+        val kept = FakeBroker()
+        trackBridgeSessionWithReclaimableCallback(core, kept)
+        trackUnreachableBridgeSession(core)
+        assertEquals(2, core.bridgeSessionCount())
+
+        val elapsed = core.awaitCleared(10_000L) {
+            core.bridgeSessionCount() == 1 && core.retainedBridgeSessions().single().objects.size == 1
+        }
+
+        assertNotNull("the unreachable session objects were not reclaimed within 10 s", elapsed)
+        with(core.retainedBridgeSessions().single()) {
+            assertEquals("lua-1", executionId)
+            assertEquals(listOf(FakeBroker::class.java.name.substringAfterLast('.')), objects)
+        }
+        assertFalse(core.isCleared())
+        assertNotNull(kept)
+    }
+
+    // Separate frames, so that no local variable of the test keeps the session objects reachable.
+    private fun trackBridgeSessionWithReclaimableCallback(core: MemoryDiagnosticsCore, kept: Any) {
+        core.trackBridgeSession("lua", "lua-1", listOf(kept, FakeCallback()))
+    }
+
+    private fun trackUnreachableBridgeSession(core: MemoryDiagnosticsCore) {
+        core.trackBridgeSession("quickjs", "qjs-1", listOf(FakeBroker(), FakeCallback()))
+    }
+
+    @Test
+    fun collectWaitsForBridgeSessionsToo() {
+        val clock = FakeClock()
+        val core = MemoryDiagnosticsCore(FakeProbes(), clock)
+        val pinned = FakeBroker()
+        core.trackBridgeSession("bun", "bun-1", listOf(pinned))
+        assertFalse(core.isCleared())
+
+        val snapshot = core.collect(timeoutMs = 2_000L)
+
+        assertEquals(2_000L, clock.now)
+        assertEquals(1, snapshot.bridgeSessions["bun"])
+        assertEquals(0, snapshot.retainedRuntimes)
+        assertNotNull(pinned)
     }
 
     @Test

@@ -2314,6 +2314,8 @@
     <string name="text_manage_key_store">키 저장소 관리</string>
     <string name="text_maximize">최대화</string>
     <string name="text_mcp_server">MCP 서버</string>
+    <string name="text_memory_bridge_session_summary">종료 후 %1$s, 실행 %2$s\n아직 도달 가능: %3$s</string>
+    <string name="text_memory_bridge_sessions">종료되었지만 회수되지 않은 브리지 세션</string>
     <string name="text_memory_copy_report">진단 텍스트 복사</string>
     <string name="text_memory_diagnostics">메모리 진단</string>
     <string name="text_memory_engines">실행 중인 스크립트 엔진</string>
@@ -2337,7 +2339,7 @@
     <string name="text_memory_native_heap_value">할당 %1$s / 전체 %2$s</string>
     <string name="text_memory_pss">프로세스 PSS</string>
     <string name="text_memory_retained_runtimes">종료되었지만 회수되지 않은 런타임</string>
-    <string name="text_memory_retained_summary">%1$s, 종료 후 %2$s, id %3$s\n%4$s</string>
+    <string name="text_memory_retained_summary">%1$s, %2$s, 종료 후 %3$s, id %4$s\n%5$s</string>
     <string name="text_memory_rhino_contexts">활성 Rhino Context</string>
     <string name="text_memory_runtime_not_reclaimed">스크립트 %1$s 가 종료된 후 런타임이 회수되지 않았습니다. 개발자 옵션 > 메모리 진단 을 참고하세요</string>
     <string name="text_memory_script_heap_dump">스크립트의 hprof 내보내기 허용</string>
