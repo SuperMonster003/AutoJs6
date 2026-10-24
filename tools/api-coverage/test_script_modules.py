@@ -99,9 +99,10 @@ class ScriptModulesTests(unittest.TestCase):
     def test_install_hooks_read_their_installs_list_or_the_kotlin_registrations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            declared = module('declared', install='install', installs=[
+            declared = module('declared', install='install', installsComputed='names of a registry', installs=[
                 {'name': 'MODE_NORMAL', 'kind': 'property', 'global': 'NONE'},
                 {'name': 'waitAsync', 'kind': 'function', 'global': 'ONLY', 'source': SOURCE + ':9'},
+                {'name': 'async', 'kind': 'function', 'global': 'NONE', 'attributes': 7, 'target': 'wait', 'source': SOURCE + ':9'},
             ])
             legacy = module('pinyin', install='install', functions=[function('convert', 5)])
             kotlin = {'Pinyin': '''class Pinyin : Augmentable() {
@@ -113,6 +114,9 @@ class ScriptModulesTests(unittest.TestCase):
             records = {r['api']: r for r in result['records']}
             self.assertEqual(('Properties', '@ScriptInstall', 'ksp'), (records['declared.MODE_NORMAL']['kind'], records['declared.MODE_NORMAL']['registration'], records['declared.MODE_NORMAL']['metadata']))
             self.assertEqual(('', 9), (records['waitAsync']['module'], records['waitAsync']['line']))
+            self.assertEqual(('', 'declared', 'async', 'Functions'), tuple(records['wait.async'][k] for k in ('module', 'ownerModule', 'member', 'kind')))
+            self.assertNotIn('declared.async', records)
+            self.assertEqual([{'module': 'declared', 'computed': 'names of a registry'}], result['dataSource']['installComputed'])
             self.assertEqual('ksp', records['pinyin.convert']['metadata'])
             self.assertEqual(('kotlin', 'selfAssignmentProperties'), (records['pinyin.STYLE_TONE']['metadata'], records['pinyin.STYLE_TONE']['registration']))
             self.assertEqual(['pinyin'], result['dataSource']['installFallback'])

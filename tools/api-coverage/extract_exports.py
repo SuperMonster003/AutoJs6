@@ -5,10 +5,12 @@ The source of truth is script-modules.json, the metadata the KSP processor of
 the script module layer writes (augment roadmap T2 / T10): module names and
 aliases, functions with their aliases and placement, getters, properties and
 Java classes. Names that a module's @ScriptInstall hook defines at run time are
-read from the module's "installs" list; until the processor writes that list,
-they come from the Kotlin registrations of the current augment package and are
-marked with metadata "kotlin". Without script-modules.json (no KSP build, e.g.
-the coverage CI job) the Kotlin registration parser is used for everything.
+read from the module's "installs" list (metadata written before the processor
+had that list falls back to the Kotlin registrations of the current augment
+package, marked with metadata "kotlin"); names a hook computes at run time are
+only described there ("installsComputed"). Without script-modules.json (no KSP
+build, e.g. the coverage CI job) the Kotlin registration parser is used for
+everything.
 
 The Kotlin path is deliberately a registration parser, not a Kotlin compiler.
 Unknown registration expressions are returned for review and rejected by the
@@ -355,7 +357,7 @@ def extract_ksp(host, metadata):
             return module_path(by_class[m['parent']]) + '.' + m['name']
         return '' if m['assign'] else m['name']
 
-    records, modules, unresolved, fallback = [], [], [], []
+    records, modules, unresolved, fallback, computed = [], [], [], [], []
     for m in meta['modules']:
         path = module_path(m)
         source, line = split_source(m['source'])
@@ -375,14 +377,23 @@ def extract_ksp(host, metadata):
         for j in m['javaClasses']:
             members.append((j, j['name'], j['type'], 'JavaClasses', '@ScriptJavaClass', m['source']))
         # The "installs" list declares the names a @ScriptInstall hook defines: {name, kind: function | getter |
-        # property, global, source}. Hooks without it fall back to the Kotlin registrations below.
+        # property, global, attributes, target, source}; a name with a target goes on the object bound to that name on
+        # the global object (wait.async), reached from the global object (module ""). Names the hook computes at run time
+        # are only described ("installsComputed"). Metadata without the list falls back to the Kotlin registrations below.
         for i in m.get('installs', []):
             kind = {'function': 'Functions', 'getter': 'Getters', 'property': 'Properties'}[i['kind']]
             members.append((i, i['name'], i['name'], kind, '@ScriptInstall', i.get('source') or m['source']))
+        if m.get('installsComputed'):
+            computed.append({'module': path, 'computed': m['installsComputed']})
         if m['install'] and 'installs' not in m:
             fallback.append(path)
         for member, name, implementation, kind, registration, location in members:
             member_source, member_line = split_source(location)
+            if member.get('target'):
+                records.append({'api': member['target'] + '.' + name, 'module': '', 'ownerModule': path, 'member': name,
+                                'implementation': implementation, 'kind': kind, 'registration': registration,
+                                'source': member_source, 'line': member_line, 'metadata': 'ksp'})
+                continue
             for loc in placements(path, member):
                 records.append({'api': loc + '.' + name if loc else name, 'module': loc, 'ownerModule': path, 'member': name,
                                 'implementation': implementation, 'kind': kind, 'registration': registration,
@@ -404,9 +415,9 @@ def extract_ksp(host, metadata):
                 unique[record['api']] = dict(record, metadata='kotlin')
         # Mount and source errors (no module) mean the fallback itself is incomplete.
         unresolved += [item for item in kotlin['unresolved'] if item.get('module', fallback[0]) in fallback]
-    return {'scope': 'Modules, functions with their aliases, getters, properties and Java classes declared in script-modules.json (KSP), placed on their module and / or the global object; names defined by @ScriptInstall hooks from the module "installs" list, else from the Kotlin registrations (metadata kotlin). Excludes inherited Java prototype members, returned objects, nested dynamic objects, generated Compose catalogue, JSOX built-in extensions, overload semantics.',
+    return {'scope': 'Modules, functions with their aliases, getters, properties and Java classes declared in script-modules.json (KSP), placed on their module and / or the global object; names defined by @ScriptInstall hooks from the module "installs" list (without one, from the Kotlin registrations, metadata kotlin). Excludes inherited Java prototype members, returned objects, nested dynamic objects, names install hooks compute at run time (dataSource installComputed: the global selector functions, the Compose catalogue), JSOX built-in extensions, overload semantics.',
             'dataSource': {'kind': 'ksp', 'file': Path(metadata).resolve().relative_to(HOST).as_posix() if Path(metadata).resolve().is_relative_to(HOST) else str(metadata),
-                           'format': meta['format'], 'installFallback': fallback},
+                           'format': meta['format'], 'installFallback': fallback, 'installComputed': computed},
             'modules': modules, 'records': sorted(unique.values(), key=lambda x: x['api']), 'unresolved': unresolved}
 
 
