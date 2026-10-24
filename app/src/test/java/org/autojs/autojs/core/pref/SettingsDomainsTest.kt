@@ -50,6 +50,12 @@ class SettingsDomainsTest {
                 checked++
                 return@forEach
             }
+            if (baselineName in DEFAULTS_CHANGED_AFTER_P0) {
+                val expected = DEFAULTS_CHANGED_AFTER_P0[baselineName]
+                if (key.defaultText != expected) problems.add("$baselineName: default ${key.defaultText}, expected $expected (changed after P0)")
+                checked++
+                return@forEach
+            }
             if (baselineName in KEYS_AFTER_P0) {
                 val expected = KEYS_AFTER_P0[baselineName]
                 if (key.defaultText != expected) problems.add("$baselineName: default ${key.defaultText}, expected $expected (added after P0)")
@@ -191,6 +197,17 @@ class SettingsDomainsTest {
             "key_settings_auto_backup_period" to "R.string.default_key_settings_auto_backup_period",
             "key_settings_auto_backup_change" to "R.bool.pref_settings_auto_backup_change",
             "key_settings_auto_backup_operation" to "R.bool.pref_settings_auto_backup_operation",
+        )
+
+        /**
+         * Settings whose default a decision of another roadmap changed after the P0 baseline (R2 holds for the settings
+         * roadmap itself): resource name -> the new default text.
+         * zh-CN: P0 基线之后由其他路线图的决定改了默认值的设置 (R2 约束的是设置层路线图本身): 资源名 -> 新的默认值文本.
+         */
+        private val DEFAULTS_CHANGED_AFTER_P0: Map<String, String?> = mapOf(
+            // docs/augment/ROADMAP.md P5.1 (D8): the new script module layer is on by default, fragment_developer_options.xml
+            // app:defaultValue="true"; the old augment package and this switch go in P5.2.
+            "key_new_script_module_layer" to "true",
         )
 
         /**

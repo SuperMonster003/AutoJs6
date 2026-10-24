@@ -1027,7 +1027,7 @@
     <string name="summary_memory_force_gc">Run garbage collection 3 times with finalization, wait up to 10 s for finished runtimes to be reclaimed, then refresh</string>
     <string name="summary_memory_script_heap_dump">Let memory.dumpHeap write heap dumps in release builds (always allowed in debug builds). A heap dump holds everything in the heap, the variables of every script included</string>
     <string name="summary_memory_unreclaimed_warning">10 s after a script ends, collect garbage once; if its runtime is still not reclaimed, print a warning to the global console</string>
-    <string name="summary_new_script_module_layer">Mount the migrated script modules (currently base64) from the new module layer. Takes effect for scripts started afterwards</string>
+    <string name="summary_new_script_module_layer">Scripts use the new script module implementation (on by default). Turn it off to use the old implementation, which will be removed in a later version. Takes effect for scripts started afterwards</string>
     <string name="summary_nodejs_doctor_report">Generate a privacy-redacted Node runtime diagnostic report for bug reports</string>
     <string name="summary_nodejs_inspector_enabled">Allow scripts to use local debugging and profiling. Connect desktop DevTools through ADB port forwarding.</string>
     <string name="summary_not_showing_main_activity">Run script directly without showing main activity</string>

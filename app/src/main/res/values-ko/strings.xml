@@ -1034,7 +1034,7 @@
     <string name="summary_memory_force_gc">가비지 컬렉션과 finalization 을 3 회 실행하고, 종료된 런타임이 회수될 때까지 최대 10 초 기다린 후 새로 고칩니다</string>
     <string name="summary_memory_script_heap_dump">release 빌드에서 memory.dumpHeap 이 힙 덤프를 기록하도록 허용합니다 (debug 빌드에서는 항상 허용). 힙 덤프에는 힙의 모든 데이터 (모든 스크립트의 변수 포함) 가 들어 있습니다</string>
     <string name="summary_memory_unreclaimed_warning">스크립트가 종료되고 10 초 후 가비지 컬렉션을 한 번 실행하고, 런타임이 여전히 회수되지 않았으면 전역 콘솔에 경고를 출력합니다</string>
-    <string name="summary_new_script_module_layer">마이그레이션된 스크립트 모듈 (현재 base64) 을 새 모듈 계층에서 마운트합니다. 이후에 시작하는 스크립트에 적용됩니다</string>
+    <string name="summary_new_script_module_layer">스크립트가 새 스크립트 모듈 구현을 사용합니다 (기본값: 켜짐). 끄면 이전 구현을 사용하며, 이전 구현은 이후 버전에서 제거됩니다. 이후에 시작하는 스크립트에 적용됩니다</string>
     <string name="summary_nodejs_doctor_report">버그 보고용으로 개인정보가 제거된 Node 런타임 진단 보고서 생성</string>
     <string name="summary_nodejs_inspector_enabled">스크립트의 로컬 디버깅 및 프로파일링을 허용합니다. PC DevTools는 ADB 포트 전달로 연결합니다.</string>
     <string name="summary_not_showing_main_activity">주요 활동을 표시하지 않고 직접 스크립트를 실행하십시오</string>

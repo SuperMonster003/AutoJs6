@@ -7,13 +7,13 @@ import org.mozilla.javascript.ScriptableObject
 
 /**
  * Entry of the new script module layer for `ScriptRuntime` (roadmap D8 / T8). The switch
- * ([DeveloperKeys.NEW_SCRIPT_MODULE_LAYER], off by default, in the developer options since P1.3) is read once per runtime
+ * ([DeveloperKeys.NEW_SCRIPT_MODULE_LAYER], on by default since P5.1, in the developer options since P1.3) is read once per runtime
  * in `initPrologue`. [ORDER] decides where every module is mounted (appendix C Q8): `ScriptRuntime.augment()` walks
  * its top-level modules in order, and each one comes either from the `augment` package (its old augment call) or,
  * when the switch is on and the module is migrated ([MIGRATED]), from the generated registry. Either way the order of
  * `Object.keys(global)` stays the one of the old `augment()`.
  *
- * zh-CN: 新脚本模块层在 ScriptRuntime 中的入口 (D8 / T8). 开关 (默认关, P1.3 起位于开发者选项) 在 initPrologue 中每个运行时读取一次. [ORDER] 决定每个模块的
+ * zh-CN: 新脚本模块层在 ScriptRuntime 中的入口 (D8 / T8). 开关 (P5.1 起默认开, P1.3 起位于开发者选项) 在 initPrologue 中每个运行时读取一次. [ORDER] 决定每个模块的
  * 挂载位置 (附录 C Q8): `ScriptRuntime.augment()` 按序遍历其中的顶层模块, 每个模块或来自 augment 包 (原 augment 调用), 或在开关打开且模块已迁移
  * ([MIGRATED]) 时来自生成的注册表; 两种情况下 Object.keys(global) 的顺序都与原 augment() 相同.
  */

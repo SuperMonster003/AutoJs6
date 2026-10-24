@@ -1029,7 +1029,7 @@
     <string name="summary_memory_force_gc">執行 3 次垃圾回收與 finalization, 最長等待 10 秒讓已結束的 runtime 被回收, 然後重新整理</string>
     <string name="summary_memory_script_heap_dump">允許 memory.dumpHeap 在 release 版本中寫出堆積傾印 (debug 版本始終允許). 堆積傾印包含堆積中的全部資料 (含所有指令碼的變數)</string>
     <string name="summary_memory_unreclaimed_warning">指令碼結束 10 秒後執行一次垃圾回收, 若其 runtime 仍未被回收, 則向全域控制台輸出一則警告</string>
-    <string name="summary_new_script_module_layer">從新的模組層掛載已遷移的指令碼模組 (目前為 base64). 對之後啟動的指令碼生效</string>
+    <string name="summary_new_script_module_layer">指令碼使用新的指令碼模組實作 (預設開啟). 關閉後改用舊實作, 舊實作將在後續版本中移除. 對之後啟動的指令碼生效</string>
     <string name="summary_nodejs_doctor_report">產生已隱去隱私資訊的 Node 執行階段診斷報告, 用於提交錯誤報告</string>
     <string name="summary_nodejs_inspector_enabled">允許腳本進行本機偵錯和效能分析. 桌面 DevTools 透過 ADB 連接埠轉送連接.</string>
     <string name="summary_not_showing_main_activity">啟動應用後直接執行指令碼</string>

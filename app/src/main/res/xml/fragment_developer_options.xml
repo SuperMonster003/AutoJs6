@@ -9,7 +9,7 @@
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="@string/key_new_script_module_layer"
             app:layout="@layout/preference_custom"
-            app:defaultValue="false"
+            app:defaultValue="true"
             app:summary="@string/summary_new_script_module_layer"
             app:title="@string/text_new_script_module_layer" />
 

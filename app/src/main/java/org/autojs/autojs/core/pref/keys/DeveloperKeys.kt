@@ -21,9 +21,12 @@ import org.autojs.autojs6.R
  */
 object DeveloperKeys : SettingsDomain {
 
-    /** Scripts started while it is on mount the migrated modules from the new layer (docs/augment/ROADMAP.md T8). */
+    /**
+     * Scripts started while it is on mount the migrated modules from the new layer (docs/augment/ROADMAP.md T8); on by
+     * default since P5.1 (D8), off falls back to the old augment package until P5.2 removes it together with this switch.
+     */
     @JvmField
-    val NEW_SCRIPT_MODULE_LAYER = SettingKey.Bool(R.string.key_new_script_module_layer, DEVELOPER, SettingDefault.of(false))
+    val NEW_SCRIPT_MODULE_LAYER = SettingKey.Bool(R.string.key_new_script_module_layer, DEVELOPER, SettingDefault.of(true))
 
     /** Master switch of the debug printing of the new module layer (docs/augment/ROADMAP.md T5). */
     @JvmField

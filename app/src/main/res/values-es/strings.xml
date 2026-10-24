@@ -1032,7 +1032,7 @@
     <string name="summary_memory_force_gc">Ejecutar 3 veces la recolección de basura y la finalización, esperar hasta 10 s a que se liberen los entornos de ejecución finalizados y luego actualizar</string>
     <string name="summary_memory_script_heap_dump">Permitir que memory.dumpHeap escriba volcados del heap en las compilaciones release (siempre permitido en las compilaciones debug). Un volcado del heap contiene todos los datos del heap, incluidas las variables de todos los scripts</string>
     <string name="summary_memory_unreclaimed_warning">10 s después de que termine un script, ejecutar una vez la recolección de basura; si su entorno de ejecución sigue sin liberarse, mostrar una advertencia en la consola global</string>
-    <string name="summary_new_script_module_layer">Monta los módulos de script migrados (actualmente base64) desde la nueva capa de módulos. Se aplica a los scripts iniciados después</string>
+    <string name="summary_new_script_module_layer">Los scripts usan la nueva implementación de módulos de script (activada de forma predeterminada). Desactívela para usar la implementación anterior, que se eliminará en una versión posterior. Se aplica a los scripts iniciados después</string>
     <string name="summary_nodejs_doctor_report">Generar un informe de diagnóstico del entorno de ejecución de Node con datos privados eliminados para informar errores</string>
     <string name="summary_nodejs_inspector_enabled">Permitir depuración local y análisis de rendimiento. Conecta DevTools del ordenador mediante reenvío de puertos ADB.</string>
     <string name="summary_not_showing_main_activity">Ejecutar el script directamente sin mostrar la actividad principal</string>
