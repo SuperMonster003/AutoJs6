@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.pinyin
 
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
+import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
 import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCustomDictionary
 import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions
@@ -13,6 +14,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.plugin.pinyin.api.PinyinCustomDictionaryContract
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -76,7 +78,8 @@ class PinyinModule {
 
     @ScriptFunction
     fun fromCodePoint(codePoint: Any?): Any? {
-        val number = if (codePoint is Symbol || ScriptArgs.isNullish(codePoint)) Double.NaN else RhinoScriptRuntime.toNumber(codePoint)
+        val raw = RhinoUtils.unwrap(codePoint)
+        val number = if (raw is Symbol || ScriptArgs.isNullish(raw)) Double.NaN else RhinoScriptRuntime.toNumber(raw)
         if (number.isNaN()) throw UtilValues.typeError(FUNCTION_FROM_CODE_POINT, ScriptMessages.argumentType("codePoint", "number", ScriptArgs.describe(codePoint)))
         val truncated = if (number > 0.0) kotlin.math.floor(number) else kotlin.math.ceil(number)
         if (!(truncated >= Int.MIN_VALUE && truncated <= Int.MAX_VALUE)) {
@@ -99,9 +102,10 @@ class PinyinModule {
     }
 
     private fun checkOptions(function: String, options: NativeObject) {
+        // Read as the current module reads them (inquire: getProp, nullish values skipped).
+        // zh-CN: 读取方式同现有模块 (inquire: getProp, 跳过 nullish 值).
         listOf("mode" to PinyinOptions::parseMode, "style" to PinyinOptions::parseStyle).forEach { (key, parse) ->
-            val value = ScriptableObject.getProperty(options, key)
-            if (value !== Scriptable.NOT_FOUND && value != null) AugmentMembers.values(function) { parse(value) }
+            options.inquire(key)?.let { value -> AugmentMembers.values(function) { parse(value) } }
         }
         if (!options.has(CUSTOM_DICTIONARY, options)) return
         val dictionary = options.get(CUSTOM_DICTIONARY, options)

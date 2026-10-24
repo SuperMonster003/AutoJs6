@@ -8,8 +8,8 @@ import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.plugin.opencc.api.OpenccConversionTypes
-import org.mozilla.javascript.Wrapper
 import java.util.Locale
 
 /**
@@ -37,112 +37,114 @@ class OpenccModule {
     fun convert(s: Any?, type: Any?): String = convert(FUNCTION_CONVERT, s, type)
 
     @ScriptFunction
-    fun hk2s(s: Any?): String = OpenCC.hk2sRhino(text("opencc.hk2s", s))
+    fun hk2s(s: Any?): String = OpenCC.hk2s(arrayOf(text("opencc.hk2s", s)))
 
     @ScriptFunction
-    fun hk2t(s: Any?): String = OpenCC.hk2tRhino(text("opencc.hk2t", s))
+    fun hk2t(s: Any?): String = OpenCC.hk2t(arrayOf(text("opencc.hk2t", s)))
 
     @ScriptFunction
-    fun jp2t(s: Any?): String = OpenCC.jp2tRhino(text("opencc.jp2t", s))
+    fun jp2t(s: Any?): String = OpenCC.jp2t(arrayOf(text("opencc.jp2t", s)))
 
     @ScriptFunction
-    fun s2hk(s: Any?): String = OpenCC.s2hkRhino(text("opencc.s2hk", s))
+    fun s2hk(s: Any?): String = OpenCC.s2hk(arrayOf(text("opencc.s2hk", s)))
 
     @ScriptFunction
-    fun s2t(s: Any?): String = OpenCC.s2tRhino(text("opencc.s2t", s))
+    fun s2t(s: Any?): String = OpenCC.s2t(arrayOf(text("opencc.s2t", s)))
 
     @ScriptFunction
-    fun s2tw(s: Any?): String = OpenCC.s2twRhino(text("opencc.s2tw", s))
+    fun s2tw(s: Any?): String = OpenCC.s2tw(arrayOf(text("opencc.s2tw", s)))
 
     @ScriptFunction
-    fun s2twp(s: Any?): String = OpenCC.s2twpRhino(text("opencc.s2twp", s))
+    fun s2twp(s: Any?): String = OpenCC.s2twp(arrayOf(text("opencc.s2twp", s)))
 
     @ScriptFunction
-    fun t2hk(s: Any?): String = OpenCC.t2hkRhino(text("opencc.t2hk", s))
+    fun t2hk(s: Any?): String = OpenCC.t2hk(arrayOf(text("opencc.t2hk", s)))
 
     @ScriptFunction
-    fun t2s(s: Any?): String = OpenCC.t2sRhino(text("opencc.t2s", s))
+    fun t2s(s: Any?): String = OpenCC.t2s(arrayOf(text("opencc.t2s", s)))
 
     @ScriptFunction
-    fun t2tw(s: Any?): String = OpenCC.t2twRhino(text("opencc.t2tw", s))
+    fun t2tw(s: Any?): String = OpenCC.t2tw(arrayOf(text("opencc.t2tw", s)))
 
     @ScriptFunction
-    fun t2jp(s: Any?): String = OpenCC.t2jpRhino(text("opencc.t2jp", s))
+    fun t2jp(s: Any?): String = OpenCC.t2jp(arrayOf(text("opencc.t2jp", s)))
 
     @ScriptFunction
-    fun tw2s(s: Any?): String = OpenCC.tw2sRhino(text("opencc.tw2s", s))
+    fun tw2s(s: Any?): String = OpenCC.tw2s(arrayOf(text("opencc.tw2s", s)))
 
     @ScriptFunction
-    fun tw2t(s: Any?): String = OpenCC.tw2tRhino(text("opencc.tw2t", s))
+    fun tw2t(s: Any?): String = OpenCC.tw2t(arrayOf(text("opencc.tw2t", s)))
 
     @ScriptFunction
-    fun tw2sp(s: Any?): String = OpenCC.tw2spRhino(text("opencc.tw2sp", s))
+    fun tw2sp(s: Any?): String = OpenCC.tw2sp(arrayOf(text("opencc.tw2sp", s)))
 
     @ScriptFunction
-    fun s2twi(s: Any?): String = OpenCC.s2twiRhino(text("opencc.s2twi", s))
+    fun s2twi(s: Any?): String = OpenCC.s2twi(arrayOf(text("opencc.s2twi", s)))
 
     @ScriptFunction
-    fun twi2s(s: Any?): String = OpenCC.twi2sRhino(text("opencc.twi2s", s))
+    fun twi2s(s: Any?): String = OpenCC.twi2s(arrayOf(text("opencc.twi2s", s)))
 
     @ScriptFunction
-    fun s2jp(s: Any?): String = OpenCC.s2jpRhino(text("opencc.s2jp", s))
+    fun s2jp(s: Any?): String = OpenCC.s2jp(arrayOf(text("opencc.s2jp", s)))
 
     @ScriptFunction
-    fun t2twi(s: Any?): String = OpenCC.t2twiRhino(text("opencc.t2twi", s))
+    fun t2twi(s: Any?): String = OpenCC.t2twi(arrayOf(text("opencc.t2twi", s)))
 
     @ScriptFunction
-    fun hk2tw(s: Any?): String = OpenCC.hk2twRhino(text("opencc.hk2tw", s))
+    fun hk2tw(s: Any?): String = OpenCC.hk2tw(arrayOf(text("opencc.hk2tw", s)))
 
     @ScriptFunction
-    fun hk2twi(s: Any?): String = OpenCC.hk2twiRhino(text("opencc.hk2twi", s))
+    fun hk2twi(s: Any?): String = OpenCC.hk2twi(arrayOf(text("opencc.hk2twi", s)))
 
     @ScriptFunction
-    fun hk2jp(s: Any?): String = OpenCC.hk2jpRhino(text("opencc.hk2jp", s))
+    fun hk2jp(s: Any?): String = OpenCC.hk2jp(arrayOf(text("opencc.hk2jp", s)))
 
     @ScriptFunction
-    fun tw2hk(s: Any?): String = OpenCC.tw2hkRhino(text("opencc.tw2hk", s))
+    fun tw2hk(s: Any?): String = OpenCC.tw2hk(arrayOf(text("opencc.tw2hk", s)))
 
     @ScriptFunction
-    fun tw2twi(s: Any?): String = OpenCC.tw2twiRhino(text("opencc.tw2twi", s))
+    fun tw2twi(s: Any?): String = OpenCC.tw2twi(arrayOf(text("opencc.tw2twi", s)))
 
     @ScriptFunction
-    fun tw2jp(s: Any?): String = OpenCC.tw2jpRhino(text("opencc.tw2jp", s))
+    fun tw2jp(s: Any?): String = OpenCC.tw2jp(arrayOf(text("opencc.tw2jp", s)))
 
     @ScriptFunction
-    fun twi2t(s: Any?): String = OpenCC.twi2tRhino(text("opencc.twi2t", s))
+    fun twi2t(s: Any?): String = OpenCC.twi2t(arrayOf(text("opencc.twi2t", s)))
 
     @ScriptFunction
-    fun twi2hk(s: Any?): String = OpenCC.twi2hkRhino(text("opencc.twi2hk", s))
+    fun twi2hk(s: Any?): String = OpenCC.twi2hk(arrayOf(text("opencc.twi2hk", s)))
 
     @ScriptFunction
-    fun twi2tw(s: Any?): String = OpenCC.twi2twRhino(text("opencc.twi2tw", s))
+    fun twi2tw(s: Any?): String = OpenCC.twi2tw(arrayOf(text("opencc.twi2tw", s)))
 
     @ScriptFunction
-    fun twi2jp(s: Any?): String = OpenCC.twi2jpRhino(text("opencc.twi2jp", s))
+    fun twi2jp(s: Any?): String = OpenCC.twi2jp(arrayOf(text("opencc.twi2jp", s)))
 
     @ScriptFunction
-    fun jp2s(s: Any?): String = OpenCC.jp2sRhino(text("opencc.jp2s", s))
+    fun jp2s(s: Any?): String = OpenCC.jp2s(arrayOf(text("opencc.jp2s", s)))
 
     @ScriptFunction
-    fun jp2hk(s: Any?): String = OpenCC.jp2hkRhino(text("opencc.jp2hk", s))
+    fun jp2hk(s: Any?): String = OpenCC.jp2hk(arrayOf(text("opencc.jp2hk", s)))
 
     @ScriptFunction
-    fun jp2tw(s: Any?): String = OpenCC.jp2twRhino(text("opencc.jp2tw", s))
+    fun jp2tw(s: Any?): String = OpenCC.jp2tw(arrayOf(text("opencc.jp2tw", s)))
 
     @ScriptFunction
-    fun jp2twi(s: Any?): String = OpenCC.jp2twiRhino(text("opencc.jp2twi", s))
+    fun jp2twi(s: Any?): String = OpenCC.jp2twi(arrayOf(text("opencc.jp2twi", s)))
 
     private fun convert(function: String, s: Any?, type: Any?): String {
         text(function, s)
-        val name = when (val raw = (type as? Wrapper)?.unwrap() ?: type) {
-            is CharSequence -> raw.toString()
+        // The type as the current module reads it: unwrapped by its argument guard (a concatenated string is a String).
+        // zh-CN: 与现有模块读取的 type 相同: 经其参数守卫解包 (拼接出的字符串即为 String).
+        val name = when (val raw = RhinoUtils.unwrap(type)) {
+            is String -> raw
             is Enum<*> -> raw.name
             else -> throw UtilValues.typeError(function, ScriptMessages.argumentType("type", "string", ScriptArgs.describe(type)))
         }.lowercase(Locale.ROOT)
         if (name.uppercase(Locale.ROOT) !in OpenccConversionTypes.ALL && OpenccConversionPlan.chainFor(name) == null) {
             throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("type", UtilValues.quote(type)))
         }
-        return OpenCC.convertRhino(s, type)
+        return OpenCC.convert(arrayOf(s, type))
     }
 
     private fun text(function: String, s: Any?): Any {

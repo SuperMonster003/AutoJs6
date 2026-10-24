@@ -1,5 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.mediainfo
 
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
+import org.autojs.autojs.rhino.extension.ScriptableExtensions.getProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
@@ -13,8 +15,6 @@ import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * `mediainfo` on the new script module layer (roadmap P4.1): `mediainfo(path)` and read / snapshot / capabilities / get /
@@ -62,8 +62,10 @@ class MediainfoModule(private val runtime: ScriptRuntime) {
         checkText(FUNCTION_GET, "streamKind", streamKind)
         checkText(FUNCTION_GET, "parameter", parameter)
         if (checkOptions(FUNCTION_GET, options)) {
-            val streamNumber = ScriptableObject.getProperty(options as NativeObject, "streamNumber").takeUnless { it === Scriptable.NOT_FOUND || ScriptArgs.isNullish(it) }
-            val infoKind = ScriptableObject.getProperty(options, "infoKind").takeUnless { it === Scriptable.NOT_FOUND || ScriptArgs.isNullish(it) }
+            // Read as the current module reads them (getProp unwraps Java objects).
+            // zh-CN: 读取方式同现有模块 (getProp 解包 Java 对象).
+            val streamNumber = (options as NativeObject).getProp("streamNumber").takeUnless { it.isJsNullish() }
+            val infoKind = options.getProp("infoKind").takeUnless { it.isJsNullish() }
             if (streamNumber != null && streamNumber !is Number) throw UtilValues.typeError(FUNCTION_GET, ScriptMessages.argumentType("options.streamNumber", "number", ScriptArgs.describe(streamNumber)))
             if (infoKind != null && infoKind !is String) throw UtilValues.typeError(FUNCTION_GET, ScriptMessages.argumentType("options.infoKind", "string", ScriptArgs.describe(infoKind)))
             AugmentMembers.values(FUNCTION_GET) { Mediainfo.queryOptions(options) }

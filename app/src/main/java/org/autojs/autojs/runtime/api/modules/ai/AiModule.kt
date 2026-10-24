@@ -1,5 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.ai
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.ai.Ai
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
@@ -11,10 +14,8 @@ import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptRuntimeFields
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
-import org.mozilla.javascript.Callable
-import org.mozilla.javascript.NativeArray
-import org.mozilla.javascript.Scriptable
-import org.mozilla.javascript.ScriptableObject
+import org.autojs.autojs.util.RhinoUtils
+import org.mozilla.javascript.Context
 import org.mozilla.javascript.Undefined
 
 /**
@@ -23,17 +24,18 @@ import org.mozilla.javascript.Undefined
  * as Promises / AiStream / the current agent object, built on first read).
  *
  * Arguments follow the real signatures (T4): a missing or surplus argument is a TypeError of the generated layer. The
- * argument shapes the current module rejects are checked here first (D10, IllegalArgumentException in the current
- * module): a prompt that is not a string, a message array, a message object (`role` and `content`) or a request object
- * (`messages` an array) is a TypeError and an empty message array a RangeError; options that are not an object are a
- * TypeError; the `system` option of `session` must be a string (TypeError) that is not empty (RangeError). The JSON
- * conversion of the values and the request itself stay the current module's.
+ * argument shapes the current module rejects are checked here first, on the JSON of the values as the current module
+ * reads them (D10, IllegalArgumentException in the current module): a value without JSON (a function, undefined) is a
+ * TypeError; a prompt whose JSON is not a string, a message array, a message object (`role` and `content`) or a request
+ * object (`messages` an array) is a TypeError and an empty message array a RangeError; options whose JSON is not an
+ * object are a TypeError; the `system` option of `session` must be a string (TypeError) that is not empty (RangeError).
+ * The request itself stays the current module's.
  *
  * zh-CN: 新脚本模块层上的 ai (P4.1): ai(prompt, options?) 即 ai.ask(prompt, options?), 另有现有 augment/ai/Ai 的 chat / stream / session / catalog
  * 与 getter agent (请求经 AiService, 结果为 Promise / AiStream / 现有 agent 对象, 首次读取时构建). 参数按真实签名 (T4): 缺少或多余参数为生成层的
- * TypeError. 现有模块拒绝的参数形状在此先行检查 (D10, 现有模块均为 IllegalArgumentException): prompt 既不是字符串, 消息数组, 消息对象 (role 与 content)
- * 也不是请求对象 (messages 为数组) 为 TypeError, 空的消息数组为 RangeError; 不是对象的选项为 TypeError; session 的 system 选项须为字符串 (TypeError)
- * 且非空 (RangeError). 值的 JSON 转换与请求本身仍由现有模块完成.
+ * TypeError. 现有模块拒绝的参数形状在此先行检查, 与现有模块一样读取值的 JSON (D10, 现有模块均为 IllegalArgumentException): 没有 JSON 的值 (函数,
+ * undefined) 为 TypeError; JSON 既不是字符串, 消息数组, 消息对象 (role 与 content) 也不是请求对象 (messages 为数组) 的 prompt 为 TypeError, 空的消息
+ * 数组为 RangeError; JSON 不是对象的选项为 TypeError; session 的 system 选项须为字符串 (TypeError) 且非空 (RangeError). 请求本身仍由现有模块完成.
  */
 @ScriptModule(name = "ai")
 class AiModule(private val runtime: ScriptRuntime) {
@@ -66,12 +68,11 @@ class AiModule(private val runtime: ScriptRuntime) {
 
     @ScriptFunction
     fun session(options: Any? = null): Any {
-        if (checkOptions(FUNCTION_SESSION, options)) {
-            val system = ScriptableObject.getProperty(options as Scriptable, SYSTEM)
-            if (system !== Scriptable.NOT_FOUND && !ScriptArgs.isNullish(system)) {
-                if (system !is CharSequence) throw UtilValues.typeError(FUNCTION_SESSION, ScriptMessages.argumentType("options.$SYSTEM", "string", ScriptArgs.describe(system)))
-                if (system.isEmpty()) throw UtilValues.rangeError(FUNCTION_SESSION, ScriptMessages.argumentCannotBe("options.$SYSTEM", UtilValues.quote(system)))
+        checkOptions(FUNCTION_SESSION, options)?.get(SYSTEM)?.let { system ->
+            if (!system.isJsonPrimitive || !system.asJsonPrimitive.isString) {
+                throw UtilValues.typeError(FUNCTION_SESSION, ScriptMessages.argumentType("options.$SYSTEM", "string", system.toString()))
             }
+            if (system.asString.isEmpty()) throw UtilValues.rangeError(FUNCTION_SESSION, ScriptMessages.argumentCannotBe("options.$SYSTEM", "\"\""))
         }
         return ai.session(runtime, arrayOf(options))
     }
@@ -85,35 +86,39 @@ class AiModule(private val runtime: ScriptRuntime) {
     @ScriptGetter
     fun agent(): Any? = AugmentMembers.getter(ai, "agent")
 
+    // The checks read the JSON of the values, as the current module does (`JSON.stringify`: own enumerable properties,
+    // toJSON, primitive wrappers), in its order: the prompt is serialized, then the options are checked, then the shape.
+    // zh-CN: 检查读取值的 JSON, 同现有模块 (JSON.stringify: 自有可枚举属性, toJSON, 原始值包装对象), 顺序也相同: 先序列化 prompt, 再检查选项, 再判断形状.
     private fun checkRequest(function: String, prompt: Any?, options: Any?) {
+        val request = json(function, "prompt", prompt)
+        checkOptions(function, options)
         when {
-            prompt is CharSequence -> Unit
-            prompt is NativeArray -> if (prompt.length == 0L) throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("prompt", "[]"))
-            isObject(prompt) -> {
-                val request = prompt as Scriptable
-                val messages = ScriptableObject.getProperty(request, MESSAGES)
-                when {
-                    messages !== Scriptable.NOT_FOUND && messages !is Undefined -> {
-                        if (messages !is NativeArray) throw UtilValues.typeError(function, ScriptMessages.argumentType("prompt.$MESSAGES", "Array", ScriptArgs.describe(messages)))
-                        if (messages.length == 0L) throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("prompt.$MESSAGES", "[]"))
-                    }
-                    ScriptableObject.hasProperty(request, "role") && ScriptableObject.hasProperty(request, "content") -> Unit
-                    else -> throw UtilValues.typeError(function, ScriptMessages.argumentType("prompt", PROMPT_TYPES, ScriptArgs.describe(prompt)))
-                }
+            request.isJsonPrimitive && request.asJsonPrimitive.isString -> Unit
+            request.isJsonArray -> if (request.asJsonArray.isEmpty) throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("prompt", "[]"))
+            request.isJsonObject && request.asJsonObject.has(MESSAGES) -> {
+                val messages = request.asJsonObject.get(MESSAGES)
+                if (!messages.isJsonArray) throw UtilValues.typeError(function, ScriptMessages.argumentType("prompt.$MESSAGES", "Array", messages.toString()))
+                if (messages.asJsonArray.isEmpty) throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("prompt.$MESSAGES", "[]"))
             }
+            request.isJsonObject && request.asJsonObject.has("role") && request.asJsonObject.has("content") -> Unit
             else -> throw UtilValues.typeError(function, ScriptMessages.argumentType("prompt", PROMPT_TYPES, ScriptArgs.describe(prompt)))
         }
-        checkOptions(function, options)
     }
 
-    /** Whether [options] is given; options that are given must be an object. */
-    private fun checkOptions(function: String, options: Any?): Boolean {
-        if (ScriptArgs.isNullish(options)) return false
-        if (!isObject(options)) throw UtilValues.typeError(function, ScriptMessages.argumentType("options", "Object", ScriptArgs.describe(options)))
-        return true
+    /** The JSON of [options], null when they are not given; options that are given must be an object. */
+    private fun checkOptions(function: String, options: Any?): JsonObject? {
+        if (ScriptArgs.isNullish(options)) return null
+        val value = json(function, "options", options)
+        if (!value.isJsonObject) throw UtilValues.typeError(function, ScriptMessages.argumentType("options", "Object", ScriptArgs.describe(options)))
+        return value.asJsonObject
     }
 
-    private fun isObject(value: Any?) = value is Scriptable && value !is NativeArray && value !is Callable
+    /** The JSON of [value] unwrapped as by the current module's argument guard (a TypeError when it has none, as for a function or undefined). */
+    private fun json(function: String, param: String, value: Any?): JsonElement {
+        val serialized = RhinoUtils.js_json_stringify(RhinoUtils.unwrap(value))
+        val parsed = if (serialized is Undefined) null else runCatching { JsonParser.parseString(Context.toString(serialized)) }.getOrNull()
+        return parsed ?: throw UtilValues.typeError(function, ScriptMessages.argumentType(param, "JSON value", ScriptArgs.describe(value)))
+    }
 
     private companion object {
         const val MODULE = "ai"
