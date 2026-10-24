@@ -17,6 +17,11 @@ Steps:
   5. Force-stops the host, pulls the databases and checks: user_version and identity hash of the code version, all marker
      rows there, the future column gone, the future table kept, no table left by the rebuild.
 
+With --future-apk (a temporary build whose three Room versions are one above the code version, not committed) step 1
+writes code version files instead (marker rows and the extra table, the right identity hash, no future column), the
+temporary build is installed and runs the pages first, so that Room itself migrates the files up; then --apk is
+installed and steps 2-5 run as above (ROADMAP P4.1). Installs then go without -g.
+
 Needs a debuggable host (run-as) and its androidTest APK installed (or --apk / --test-apk). Report:
 <report-dir>/roundtrip-<AVD name or model>-<versionCode>-<yyyyMMdd>-room.md, one section appended per run, PASS / FAIL with
 counts and versions only (ROADMAP R4).
@@ -88,6 +93,40 @@ class Device:
     def name(self):
         return self.prop("ro.boot.qemu.avd_name") or self.prop("ro.product.model").replace(" ", "_") or self.serial
 
+    def start_capture(self):
+        """Streams logcat to local files from now on. A 256 KiB main buffer (ColorOS) drops the first rebuild lines while the
+        pages run, so the scan reads the stream instead of logcat -d.
+        zh-CN: 从现在起把 logcat 持续写到本地文件. main 缓冲只有 256 KiB (ColorOS) 时, 页面运行期间最早的重建日志会被轮转掉,
+        所以统计读取这份记录而不是 logcat -d."""
+        self.stop_capture()
+        self.capture_dir = tempfile.mkdtemp(prefix="room-pages-logcat-")
+        self.captures = []
+        for name, buffers in (("main", "main,system,crash"), ("events", "events")):
+            stream = open(Path(self.capture_dir) / f"{name}.txt", "wb")
+            process = subprocess.Popen(["adb", "-s", self.serial, "logcat", "-b", buffers, "-v", "brief"], stdout=stream, stderr=subprocess.DEVNULL)
+            self.captures.append((name, process, stream))
+
+    def stop_capture(self):
+        """Stops the stream; returns {"main": text, "events": text}, or None when nothing was captured."""
+        captures = getattr(self, "captures", None)
+        if not captures:
+            return None
+        time.sleep(2)
+        texts = {}
+        for name, process, stream in captures:
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+            stream.close()
+            path = Path(self.capture_dir) / f"{name}.txt"
+            texts[name] = path.read_bytes().decode("utf-8", "replace").replace("\r\n", "\n")
+            path.unlink()
+        Path(self.capture_dir).rmdir()
+        self.captures = []
+        return texts
+
     def pid(self):
         return self.shell(f"pidof {self.package}").strip()
 
@@ -144,7 +183,9 @@ class Database:
         entity = next(entity for entity in self.schema["entities"] if entity["tableName"] == table)
         return {field["columnName"] for field in entity["fields"]}
 
-    def build_future(self, path):
+    def build_future(self, path, future=True):
+        """The snapshot's tables with marker rows and the extra table; [future] adds the future column, a foreign identity
+        hash and user_version + 1, otherwise the file is what the code version itself would have written."""
         with sqlite3.connect(path) as db:
             for entity in self.schema["entities"]:
                 db.execute(entity["createSql"].replace("${TABLE_NAME}", entity["tableName"]))
@@ -154,13 +195,14 @@ class Database:
                 names = ", ".join(row)
                 marks = ", ".join("?" for _ in row)
                 db.execute(f"INSERT INTO `{table}` ({names}) VALUES ({marks})", list(row.values()))
-            db.execute(f"ALTER TABLE `{self.widened}` ADD COLUMN {FUTURE_COLUMN} TEXT NOT NULL DEFAULT 'future'")
+            if future:
+                db.execute(f"ALTER TABLE `{self.widened}` ADD COLUMN {FUTURE_COLUMN} TEXT NOT NULL DEFAULT 'future'")
             db.execute(f"CREATE TABLE {FUTURE_TABLE} (id INTEGER PRIMARY KEY NOT NULL, payload TEXT NOT NULL)")
             db.execute(f"CREATE INDEX index_{FUTURE_TABLE}_payload ON {FUTURE_TABLE} (payload)")
             db.execute(f"INSERT INTO {FUTURE_TABLE} (id, payload) VALUES (1, 'kept')")
             db.execute("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-            db.execute("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, ?)", (FUTURE_IDENTITY,))
-            db.execute(f"PRAGMA user_version = {self.version + 1}")
+            db.execute("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, ?)", (FUTURE_IDENTITY if future else self.identity,))
+            db.execute(f"PRAGMA user_version = {self.version + 1 if future else self.version}")
         db.close()
 
     def marker_counts(self):
@@ -231,7 +273,7 @@ class Result:
         return all(passed for _, passed, _ in self.items)
 
 
-def prepare(dev, dbs, result):
+def prepare(dev, dbs, result, future=True):
     dev.adb("shell", f"am force-stop {dev.package}")
     stamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     names = dev.entries()
@@ -245,15 +287,47 @@ def prepare(dev, dbs, result):
     with tempfile.TemporaryDirectory() as folder:
         for db in dbs:
             local = Path(folder) / db.file
-            db.build_future(local)
+            db.build_future(local, future)
             dev.push(local, db.file)
-    versions = ", ".join(f"{db.key} {db.version + 1} -> {db.version}" for db in dbs)
-    result.add("future files written", True, f"{versions}; {moved} existing file(s) renamed aside")
+    if future:
+        versions = ", ".join(f"{db.key} {db.version + 1} -> {db.version}" for db in dbs)
+        result.add("future files written", True, f"{versions}; {moved} existing file(s) renamed aside")
+    else:
+        versions = ", ".join(f"{db.key} {db.version}" for db in dbs)
+        result.add("code version files written", True, f"{versions}, marker rows and extra table; {moved} existing file(s) renamed aside")
 
 
-def launch(dev, observe, result):
+def install(dev, apk):
+    code, out, err = dev.adb("install", "-r", "-t", apk, timeout=300)
+    if code != 0 or "Success" not in out:
+        raise CheckError(f"Unable to install {Path(apk).name}: {(out + err).strip()[-200:]}")
+
+
+def written_by_temporary_build(dev, dbs, result):
+    """After the temporary build opened the code version files: user_version above the code version, marker rows kept."""
+    dev.adb("shell", f"am force-stop {dev.package}")
+    names = dev.entries()
+    with tempfile.TemporaryDirectory() as folder:
+        for db in dbs:
+            for name in [db.file] + [db.file + suffix for suffix in COMPANIONS]:
+                if name in names:
+                    dev.pull(name, Path(folder) / name)
+            if db.file not in names:
+                result.add(f"temporary build {db.key}", False, "missing")
+                continue
+            with sqlite3.connect(Path(folder) / db.file) as conn:
+                version = conn.execute("PRAGMA user_version").fetchone()[0]
+                markers = {table: count_markers(conn, db, table) for table in db.marker_counts()}
+            conn.close()
+            result.add(f"temporary build {db.key}", version > db.version and markers == db.marker_counts(),
+                       f"user_version {version} (code {db.version}), markers "
+                       + ", ".join(f"{table} {markers.get(table, 0)}/{count}" for table, count in db.marker_counts().items()))
+
+
+def launch(dev, observe, result, prefix=""):
     dev.adb("logcat", "-c")
     dev.adb("logcat", "-b", "events", "-c")
+    dev.start_capture()
     # Debug builds also show the LeakCanary launcher, so resolve-activity answers the chooser.
     # zh-CN: debug 构建还有 LeakCanary 的启动入口, resolve-activity 会返回选择器.
     _, out, _ = dev.adb("shell", f"cmd package query-activities --brief --components -a android.intent.action.MAIN "
@@ -265,7 +339,7 @@ def launch(dev, observe, result):
     dev.adb("shell", f"am start -W -n {component}", timeout=60)
     time.sleep(observe)
     pid = dev.pid()
-    result.add("host start from launcher", bool(pid), f"alive after {observe:g} s" if pid else f"not running after {observe:g} s")
+    result.add(f"{prefix}host start from launcher", bool(pid), f"alive after {observe:g} s" if pid else f"not running after {observe:g} s")
 
 
 def parse_instrumentation(text):
@@ -285,7 +359,7 @@ def parse_instrumentation(text):
     return tests, crashed
 
 
-def run_pages(dev, result):
+def run_pages(dev, result, prefix=""):
     test_package = f"{dev.package}.test"
     _, out, _ = dev.adb(
         "shell", f"am instrument -w -r -e class {PAGES_TEST} -e {PAGES_ARGUMENT} true {test_package}/{RUNNER}", timeout=600,
@@ -298,20 +372,30 @@ def run_pages(dev, result):
         detail = outcome.get(code, f"code {code}")
         if code != 0 and stack:
             detail += f" ({stack[:160]})"
-        result.add(f"instrumentation {name}", code == 0, detail)
-    result.add("instrumentation process", not crashed, "process crashed" if crashed else "no crash")
+        result.add(f"{prefix}instrumentation {name}", code == 0, detail)
+    result.add(f"{prefix}instrumentation process", not crashed, "process crashed" if crashed else "no crash")
 
 
-def scan_logs(dev, dbs, result):
-    _, main, _ = dev.adb("logcat", "-d", "-b", "main,system,crash", "-v", "brief", timeout=120)
-    _, events, _ = dev.adb("logcat", "-d", "-b", "events", "-v", "brief", timeout=120)
+def scan_crashes(dev, result, prefix=""):
+    """Crashes of the host since launch() cleared the buffers; returns the main / system / crash lines."""
+    captured = dev.stop_capture()
+    if captured:
+        main, events = captured["main"], captured["events"]
+    else:
+        _, main, _ = dev.adb("logcat", "-d", "-b", "main,system,crash", "-v", "brief", timeout=120)
+        _, events, _ = dev.adb("logcat", "-d", "-b", "events", "-v", "brief", timeout=120)
     lines = main.splitlines()
     fatal = sum(1 for i, line in enumerate(lines) if "FATAL EXCEPTION" in line
                 and any(f"Process: {dev.package}," in next_line for next_line in lines[i + 1:i + 3]))
     uncaught = sum(1 for line in lines if "CrashHandler" in line and "Uncaught Exception" in line)
     crashes = sum(1 for line in events.splitlines() if "am_crash" in line and f",{dev.package}," in line)
-    result.add("crashes in logcat", fatal == 0 and uncaught == 0 and crashes == 0,
+    result.add(f"{prefix}crashes in logcat", fatal == 0 and uncaught == 0 and crashes == 0,
                f"FATAL EXCEPTION {fatal}, CrashHandler uncaught {uncaught}, am_crash {crashes}")
+    return lines
+
+
+def scan_logs(dev, dbs, result):
+    lines = scan_crashes(dev, result)
     room_errors = re.compile(r"A migration from \d+ to \d+ was required|Migration didn't properly handle|Can't downgrade database|"
                              r"Room cannot verify the data integrity")
     errors = sum(1 for line in lines if room_errors.search(line))
@@ -375,7 +459,8 @@ def write_report(dev, args, result, started):
     if not path.exists():
         lines += [f"# Room 三库降级页面核对 ({dev.name()}, versionCode {dev.version_code()})", "",
                   "由 `tools/db-downgrade-room/room_pages.py` 生成 (docs/db-downgrade/ROADMAP.md P2.3). 只含通过 / 失败与关键数值.", ""]
-    lines += [f"## {started:%Y-%m-%d %H:%M} {dev.serial}, API {dev.prop('ro.build.version.sdk')}, {dev.package}: "
+    mode = f", temporary build {Path(args.future_apk).name} first" if args.future_apk else ""
+    lines += [f"## {started:%Y-%m-%d %H:%M} {dev.serial}, API {dev.prop('ro.build.version.sdk')}, {dev.package}{mode}: "
               f"{'PASS' if result.passed else 'FAIL'}", "", "| 项 | 结果 | 数值 |", "| --- | --- | --- |"]
     lines += [f"| {name} | {'PASS' if passed else 'FAIL'} | {detail.replace('|', '/')} |" for name, passed, detail in result.items]
     with path.open("a", encoding="utf-8", newline="\n") as stream:
@@ -389,6 +474,8 @@ def main():
     parser.add_argument("--package", default=DEFAULT_PACKAGE)
     parser.add_argument("--apk", help="host APK to install first (debuggable)")
     parser.add_argument("--test-apk", help="androidTest APK to install first")
+    parser.add_argument("--future-apk", help="a temporary build whose Room versions are above the code version (not committed): "
+                                             "it opens code version files first, --apk (required) is installed after it")
     parser.add_argument("--observe", type=float, default=10.0, help="seconds to watch the host after the launcher start (default 10)")
     parser.add_argument("--report-dir", default="docs/db-downgrade/evidence", help="relative paths start at the repository root")
     args = parser.parse_args()
@@ -397,15 +484,34 @@ def main():
     result = Result()
     started = datetime.datetime.now()
     try:
-        for apk in (args.apk, args.test_apk):
-            if apk:
-                code, out, err = dev.adb("install", "-r", "-g", apk, timeout=300)
-                if code != 0:
-                    raise CheckError(f"Unable to install {Path(apk).name}: {(out + err).strip()[-200:]}")
-        if dev.run_as("id")[0] != 0:
-            raise CheckError(f"{dev.package} is not installed or not debuggable (run-as failed)")
-        dbs = databases(dev.package)
-        prepare(dev, dbs, result)
+        if args.future_apk:
+            # The files a newer build really wrote: the temporary build opens code version files on every page and
+            # migrates them up, then the build under test opens what it left (ROADMAP P4.1).
+            # zh-CN: 较新构建真实写出的文件: 临时构建在各页面打开代码版本的文件并升级, 之后被测构建打开它留下的文件 (ROADMAP P4.1).
+            if not args.apk:
+                raise CheckError("--future-apk needs --apk (the build under test)")
+            if args.test_apk:
+                install(dev, args.test_apk)
+            if dev.run_as("id")[0] != 0:
+                raise CheckError(f"{dev.package} is not installed or not debuggable (run-as failed)")
+            dbs = databases(dev.package)
+            prepare(dev, dbs, result, future=False)
+            install(dev, args.future_apk)
+            launch(dev, args.observe, result, "temporary build: ")
+            run_pages(dev, result, "temporary build: ")
+            scan_crashes(dev, result, "temporary build: ")
+            written_by_temporary_build(dev, dbs, result)
+            install(dev, args.apk)
+        else:
+            for apk in (args.apk, args.test_apk):
+                if apk:
+                    code, out, err = dev.adb("install", "-r", "-g", apk, timeout=300)
+                    if code != 0:
+                        raise CheckError(f"Unable to install {Path(apk).name}: {(out + err).strip()[-200:]}")
+            if dev.run_as("id")[0] != 0:
+                raise CheckError(f"{dev.package} is not installed or not debuggable (run-as failed)")
+            dbs = databases(dev.package)
+            prepare(dev, dbs, result)
         launch(dev, args.observe, result)
         run_pages(dev, result)
         scan_logs(dev, dbs, result)
@@ -413,6 +519,7 @@ def main():
     except (CheckError, subprocess.TimeoutExpired) as e:
         result.add("run", False, str(e)[:200])
     finally:
+        dev.stop_capture()
         dev.adb("shell", f"rm -rf {DEVICE_TMP}")
     path = write_report(dev, args, result, started)
     print(f"{'PASS' if result.passed else 'FAIL'}: {sum(1 for item in result.items if item[1])}/{len(result.items)} item(s), report {path.relative_to(ROOT) if path.is_relative_to(ROOT) else path}")

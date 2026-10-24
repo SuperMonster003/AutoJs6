@@ -24,6 +24,11 @@ Subcommands (all but forensics need a debuggable build, for run-as):
   wake           Restarts an adb-started Shizuku server --rounds times; every round counts the process starts and the
                  crashes of each --package in --observe seconds, then force-stops it (before the fix the loop does not
                  end by itself).
+  future-build   Needs --future-apk, a temporary build whose database versions are above the code version (not
+                 committed), and --apk, the build under test. Seeds the marker rows, the future column and table at the
+                 code version, installs --future-apk and starts it (its own helpers raise user_version), then installs
+                 --apk and checks as check does. PASS: the temporary build started without a crash and left versions
+                 above the code version with all marker rows, and check passes.
   suite          make-future, check, inject-fail and restore-check in a row.
   forensics      Read only, for a device whose app must stay as it is (XQ-AT72): dropbox crash entries, package facts,
                  bad processes, jobs, alarms and process starts in the event log, as counts and first lines.
@@ -177,11 +182,38 @@ class Device:
     def events(self, since):
         return self.adb("shell", f"logcat -d -b events -T {quote(since)}", timeout=90)[1].splitlines()
 
-    def log_count(self, since, tag, level="W"):
-        out = self.adb("shell", f"logcat -d -s {tag}:{level} -T {quote(since)}", timeout=90)[1]
+    def start_stream(self, since):
+        """Streams the crash and recovery log lines from [since] to a local file. The main buffer of a phone can be 256 KiB
+        (G8441, OPD2413), so the lines written while App.onCreate runs are gone by the end of a 30 s observation and
+        logcat -d would undercount; observe_start reads this stream instead.
+        zh-CN: 从 [since] 起把崩溃与兜底日志行持续写到本地文件. 手机的 main 缓冲可能只有 256 KiB (G8441, OPD2413), App.onCreate
+        期间写的日志在 30 s 观察期结束时已被轮转掉, logcat -d 会少计; observe_start 改读这份记录."""
+        folder = Path(tempfile.mkdtemp(prefix="roundtrip-logcat-"))
+        stream = open(folder / "log.txt", "wb")
+        process = subprocess.Popen(["adb", "-s", self.serial, "shell", f"logcat -v brief -T {quote(since)} -s CrashHandler:E AndroidRuntime:E {RECOVERY_LOG_TAG}:W"],
+                                   stdout=stream, stderr=subprocess.DEVNULL)
+        return folder, stream, process
+
+    @staticmethod
+    def stop_stream(handle):
+        folder, stream, process = handle
+        time.sleep(2)
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+        stream.close()
+        text = (folder / "log.txt").read_bytes().decode("utf-8", "replace").replace("\r\n", "\n")
+        (folder / "log.txt").unlink()
+        folder.rmdir()
+        return text
+
+    def log_count(self, since, tag, level="W", text=None):
+        out = text if text is not None else self.adb("shell", f"logcat -d -s {tag}:{level} -T {quote(since)}", timeout=90)[1]
         return sum(1 for line in out.splitlines() if f" {tag}" in line or f"/{tag}" in line)
 
-    def crash_logs(self, since):
+    def crash_logs(self, since, text=None):
         """{pid: logged a downgrade error} of the processes that logged an uncaught exception.
 
         Since 6.7.0 (Bugly removed) CrashHandler resolves its "system handler" lazily, after it has become the default
@@ -191,7 +223,7 @@ class Device:
         exitProcess(1) 结束: 没有 am_crash, 没有 dropbox 条目, 也不受 bad-process 限制. 用 CrashHandler 与 AndroidRuntime 的
         日志行同时覆盖两种情况.
         """
-        out = self.adb("shell", f"logcat -d -v brief -s CrashHandler:E AndroidRuntime:E -T {quote(since)}", timeout=90)[1]
+        out = text if text is not None else self.adb("shell", f"logcat -d -v brief -s CrashHandler:E AndroidRuntime:E -T {quote(since)}", timeout=90)[1]
         crashed, downgrade = set(), set()
         for line in out.splitlines():
             match = re.match(r"^[EF]/(CrashHandler|AndroidRuntime)\(\s*(\d+)\): (.*)$", line)
@@ -442,6 +474,7 @@ class Context:
         self.app = App(self.dev, args.package, args.start)
         self.versions = code_versions(args.code_version)
         self.items = []
+        self.log_text = None
 
     def item(self, name, ok, values):
         self.items.append((name, ok, values))
@@ -520,14 +553,16 @@ def observe_start(ctx, observe, probe=None):
     app.stop()
     time.sleep(1)
     since = ctx.dev.now()
+    stream = ctx.dev.start_stream(since)
     app.start()
     time.sleep(observe)
     alive = app.alive()
     probed = probe() if probe else None
     app.stop()
     time.sleep(1)
+    ctx.log_text = ctx.dev.stop_stream(stream)
     summary = summarize_events(ctx.dev.events(since), app.package)
-    attach_logs(summary, ctx.dev.crash_logs(since))
+    attach_logs(summary, ctx.dev.crash_logs(since, ctx.log_text))
     return summary, alive, since, probed
 
 
@@ -600,7 +635,8 @@ def inject_fail(ctx):
     summary, alive, _, tags = observe_start(ctx, ctx.args.observe, app.notices if host else None)
     ctx.item("process", alive, "alive" if alive else "not running at the end")
     ctx.item("crashes", no_crash(summary), f"{crash_text(summary)}, process starts {summary['starts']}")
-    ctx.item("recovery log", dev.log_count(since, RECOVERY_LOG_TAG) >= len(DATABASES), f"{RECOVERY_LOG_TAG} W lines {dev.log_count(since, RECOVERY_LOG_TAG)}")
+    recovery_lines = dev.log_count(since, RECOVERY_LOG_TAG, text=ctx.log_text)
+    ctx.item("recovery log", recovery_lines >= len(DATABASES), f"{RECOVERY_LOG_TAG} W lines {recovery_lines}")
     databases = read_databases(app)
     for db in DATABASES:
         new = sorted(set(app.backups(db.file)) - before[db.file])
@@ -643,6 +679,20 @@ def rename_from_backup(app, db, backup):
     app.run_as(" ; ".join(commands))
 
 
+def install(dev, apk):
+    # A streamed install occasionally hangs on an emulator (once on API 24, 300 s): retry once.
+    # zh-CN: 模拟器上的流式安装偶尔会卡住 (API 24 上出现过一次, 300 s): 重试一次.
+    for attempt in range(2):
+        try:
+            code, out, err = dev.adb("install", "-r", "-t", apk, timeout=180)
+            break
+        except subprocess.TimeoutExpired:
+            if attempt:
+                raise
+    if code != 0 or "Success" not in out:
+        raise RoundTripError(f"install failed: {(out + err).strip()[-200:]}")
+
+
 def restore_check(ctx):
     ctx.require_debuggable()
     if not ctx.args.apk:
@@ -653,19 +703,6 @@ def restore_check(ctx):
     start = read_databases(app)
     if any(start[db.key] is None or start[db.key]["markers"] != db.seed for db in DATABASES):
         raise RoundTripError("restore-check needs the marker rows (run make-future and check first)")
-
-    def install():
-        # A streamed install occasionally hangs on an emulator (once on API 24, 300 s): retry once.
-        # zh-CN: 模拟器上的流式安装偶尔会卡住 (API 24 上出现过一次, 300 s): 重试一次.
-        for attempt in range(2):
-            try:
-                code, out, err = dev.adb("install", "-r", "-t", ctx.args.apk, timeout=180)
-                break
-            except subprocess.TimeoutExpired:
-                if attempt:
-                    raise
-        if code != 0 or "Success" not in out:
-            raise RoundTripError(f"install failed: {(out + err).strip()[-200:]}")
 
     def run(observe):
         summary, alive, _, _ = observe_start(ctx, observe)
@@ -692,7 +729,7 @@ def restore_check(ctx):
         # (b) After a reinstall, a backup no newer than the code version replaces the empty database.
         # zh-CN: (b) 重新安装后, 文件版本不高于代码版本的备份取代空库.
         time.sleep(1)
-        install()
+        install(dev, ctx.args.apk)
         summary, alive, databases = run(ctx.args.observe)
         ok = alive and no_crash(summary) and all(not app.backups(db.file) and databases[db.key]["markers"] == db.seed
                                                        and databases[db.key]["version"] == ctx.versions[db.key] for db in DATABASES)
@@ -705,7 +742,7 @@ def restore_check(ctx):
         stamp = dev.stamp()
         backups = {db.file: rename_to_backup(app, db, ctx.versions[db.key] + 1, stamp) for db in DATABASES}
         time.sleep(1)
-        install()
+        install(dev, ctx.args.apk)
         summary, alive, databases = run(ctx.args.observe)
         ok = alive and no_crash(summary) and all(backups[db.file] in app.entries() and databases[db.key]["markers"] == 0 for db in DATABASES)
         ctx.item("(c) reinstalled, backup newer than code", ok, f"alive {alive}, am_crash {summary['crashes']}; "
@@ -715,6 +752,11 @@ def restore_check(ctx):
         # zh-CN: 手工放回数据, 供后续步骤使用; 某步失败时也放回.
         put_back(backups)
     final = read_databases(app)
+    if any(final[db.key] is None for db in DATABASES):
+        # run-as listed nothing once on ColorOS (OPD2413) although both files were back; read again before failing.
+        # zh-CN: ColorOS (OPD2413) 上 run-as 有一次什么也没列出, 而两个文件其实已放回; 判失败前再读一次.
+        time.sleep(3)
+        final = read_databases(app)
     ctx.item("data back", all(final[db.key] and final[db.key]["markers"] == db.seed for db in DATABASES),
              ", ".join(f"{db.file} markers {final[db.key]['markers'] if final[db.key] else 'missing'}" for db in DATABASES))
     return ctx.report("restore-check", [f"APK: {Path(ctx.args.apk).name}; 启动方式: {app.start_text()}, 每步观察 {ctx.args.observe} s"])
@@ -776,6 +818,42 @@ def wake(ctx):
             "合计: " + "; ".join(f"{package} am_proc_start {value['starts']}, 崩溃 (am_crash + logged) {value['crashes']} ({value['rounds']} 轮)"
                                 for package, value in totals.items())]
     return ctx.report("wake", meta)
+
+
+def future_build(ctx):
+    """The data a newer build really wrote (ROADMAP P4.1, T6): a temporary build with higher database versions runs
+    first, then the build under test opens what it left."""
+    if not ctx.args.apk or not ctx.args.future_apk:
+        raise RoundTripError("future-build needs --future-apk (the temporary build) and --apk (the build under test)")
+    ctx.require_debuggable()
+    app = ctx.app
+    app.stop()
+    app.ensure_databases()
+    # Marker rows, the future column and the future table at the code version; the temporary build raises the version.
+    # zh-CN: 在代码版本下补标记行, 未来列与未来表; 版本由临时构建自己升高.
+    with tempfile.TemporaryDirectory() as folder:
+        for db in DATABASES:
+            local = app.pull_set(db.file, folder)
+            if local is None:
+                raise RoundTripError(f"{db.file} is missing")
+            make_future_file(local, db, ctx.versions[db.key])
+            app.push(local, db.file)
+            app.remove_companions(db.file)
+    install(ctx.dev, ctx.args.future_apk)
+    summary, alive, _, _ = observe_start(ctx, ctx.args.observe)
+    ctx.item("temporary build start", alive and no_crash(summary),
+             f"versionCode {app.version()[0]}, alive {alive}, {crash_text(summary)}, am_proc_start {summary['starts']}")
+    written = read_databases(app)
+    for db in DATABASES:
+        info = written[db.key]
+        ok = info is not None and info["version"] > ctx.versions[db.key] and info["markers"] == db.seed and info["futureColumn"] and info["futureTable"]
+        ctx.item(f"{db.file} written by the temporary build", ok,
+                 f"user_version {info['version']} (code {ctx.versions[db.key]}), markers {info['markers']}/{db.seed}" if info else "missing")
+    install(ctx.dev, ctx.args.apk)
+    summary, alive, _, _ = observe_start(ctx, ctx.args.observe)
+    check_items(ctx, summary, alive)
+    return ctx.report("future-build", [f"临时构建 {Path(ctx.args.future_apk).name} 先运行并写库, 再安装被测构建 {Path(ctx.args.apk).name}; "
+                                       f"启动方式: {app.start_text()}, 每步观察 {ctx.args.observe} s"])
 
 
 def suite(ctx):
@@ -879,7 +957,7 @@ def forensics(ctx):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("make-future", "check", "inject-fail", "restore-check", "wake", "suite", "forensics"))
+    parser.add_argument("command", choices=("make-future", "check", "inject-fail", "restore-check", "future-build", "wake", "suite", "forensics"))
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--package", default=DEFAULT_PACKAGE, help="org.autojs.autojs6 (host) or org.autojs.autojs6.inrt")
     parser.add_argument("--report-dir", default="docs/db-downgrade/evidence", help="relative paths start at the repository root")
@@ -890,7 +968,8 @@ def main():
     parser.add_argument("--bump", type=int, default=1, help="make-future: file version = code version + this (default 1)")
     parser.add_argument("--code-version", action="append", help="override the version read from the source, e.g. timed=6")
     parser.add_argument("--no-future", action="store_true", help="check: do not require the future column and table")
-    parser.add_argument("--apk", help="restore-check / suite: the installed build's APK, reinstalled as a later install")
+    parser.add_argument("--apk", help="restore-check / suite: the installed build's APK, reinstalled as a later install; future-build: the build under test")
+    parser.add_argument("--future-apk", help="future-build: a temporary build whose database versions are above the code version")
     parser.add_argument("--rounds", type=int, default=3, help="wake: Shizuku server restarts (default 3)")
     parser.add_argument("--wake-package", action="append", help="wake: packages to count (default --package)")
     parser.add_argument("--start-sh", default=DEFAULT_START_SH, help="wake: Shizuku start script on the device")
@@ -898,7 +977,7 @@ def main():
     ctx = Context(args)
     try:
         passed = {"make-future": make_future, "check": check, "inject-fail": inject_fail, "restore-check": restore_check,
-                  "wake": wake, "suite": suite, "forensics": forensics}[args.command](ctx)
+                  "future-build": future_build, "wake": wake, "suite": suite, "forensics": forensics}[args.command](ctx)
     except (RoundTripError, subprocess.TimeoutExpired) as error:
         print(f"ERROR: {error}")
         return 2
