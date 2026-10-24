@@ -27,6 +27,7 @@ import subprocess
 import sys
 import time
 import urllib.parse
+import uuid
 
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -57,9 +58,9 @@ function aj6Render(source) {
     }
 }
 for (var i = 0; i < AJ6_CASES.length; i++) {
-    console.log('AJ6EVAL ' + i + ' ' + encodeURIComponent(aj6Render(AJ6_CASES[i])));
+    console.log('AJ6EVAL ' + AJ6_RUN + ' ' + i + ' ' + encodeURIComponent(aj6Render(AJ6_CASES[i])));
 }
-console.log('AJ6EVAL done');
+console.log('AJ6EVAL ' + AJ6_RUN + ' done');
 """
 
 
@@ -68,9 +69,12 @@ def adb(serial, *args, check=False):
                           errors="replace", check=check)
 
 
-def run_script(serial, remote, count, wait):
-    """Clears logcat, starts the script and collects the AJ6EVAL lines until the end mark, the host's line for the
-    end of the script (an error no script can catch ends it before the end mark) or the timeout."""
+def run_script(serial, remote, count, wait, run):
+    """Clears logcat, starts the script and collects the AJ6EVAL lines of [run] until the end mark, the host's line
+    for the end of the script (an error no script can catch ends it before the end mark) or the timeout.
+
+    Each run has its own id and file name: a script of an earlier run still blocked on a case (one the timeout gave
+    up on) can print its remaining results later, and before 2026-10-24 they were taken for results of this run."""
     clear_log(serial)
     before = set(console_lines(serial))
     adb(serial, "shell", "am", "start", "-n", f"{PACKAGE}/{RUN_ACTIVITY}", "-e", "path", remote, check=True)
@@ -91,7 +95,9 @@ def run_script(serial, remote, count, wait):
             start = line.find(MARK + " ")
             if start < 0:
                 continue
-            rest = line[start + len(MARK) + 1:]
+            owner, _, rest = line[start + len(MARK) + 1:].partition(" ")
+            if owner != run:
+                continue
             if rest == "done":
                 done = True
                 continue
@@ -187,11 +193,13 @@ def main():
     cases = load_cases(args.cases)
     if not cases:
         sys.exit("no cases found; run the differential tests first (:app:testAppDebugUnitTest)")
-    script = "var AJ6_CASES = " + json.dumps([entry["expression"] for _, entry in cases], ensure_ascii=True) + ";\n" + RENDER_JS
+    run = uuid.uuid4().hex[:8]
+    script = (f"var AJ6_RUN = '{run}';\nvar AJ6_CASES = " + json.dumps([entry["expression"] for _, entry in cases], ensure_ascii=True)
+              + ";\n" + RENDER_JS)
     local = HERE / "__pycache__" / "aj6_device_eval.js"
     local.parent.mkdir(exist_ok=True)
     local.write_text(script, encoding="utf-8")
-    remote = f"{DEVICE_DIR}/aj6_device_eval.js"
+    remote = f"{DEVICE_DIR}/aj6_device_eval_{run}.js"
     adb(args.serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(args.serial, "push", str(local), remote, check=True)
     wanted = args.new_modules == "on"
@@ -200,7 +208,7 @@ def main():
     previous_debug = set_pref(args.serial, DEBUG_PRINT_KEY, wanted_debug, "debug printing") if args.debug_print else None
     started = device_epoch(args.serial)
     try:
-        results = run_script(args.serial, remote, len(cases), args.wait)
+        results = run_script(args.serial, remote, len(cases), args.wait, run)
         if args.console:
             print("--- console ---")
             for line in console_since(args.serial, started):
