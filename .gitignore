@@ -104,6 +104,9 @@ CLAUDE.md
 !/tools/db-downgrade-room/
 !/tools/db-downgrade-room/**
 /tools/db-downgrade-room/__pycache__/
+!/tools/db-downgrade/
+!/tools/db-downgrade/**
+/tools/db-downgrade/__pycache__/
 
 /gradle/wrappers/backup/
 

@@ -173,8 +173,7 @@ class App : Application(), WorkManagerConfiguration.Provider {
                     .build(),
             )
         }
-        val crashHandler = CrashHandler(CrashReportActivity::class.java)
-        Thread.setDefaultUncaughtExceptionHandler(crashHandler)
+        CrashHandler.install(CrashReportActivity::class.java)
     }
 
     private fun setUpLeakCanary() {

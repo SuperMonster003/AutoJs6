@@ -24,7 +24,46 @@ py -3.12 -I tools/db-downgrade/roundtrip.py <子命令> -s SERIAL [--package org
 
 ## 崩溃计数
 
-6.7.0 起的 `CrashHandler` 不把异常交给系统, 主线程崩溃后自行 `exitProcess(1)`, 系统不写 `am_crash` 与 dropbox (ROADMAP 附录 B.1, Q9). 所以 "无崩溃" 同时要求: events 里本包 `am_crash` 为 0; 本次观察期间 `CrashHandler` / `AndroidRuntime` 的 E 日志里没有本包进程打出 "Uncaught Exception" 或 "FATAL EXCEPTION". 报告分别列出两者 (`am_crash N`, `logged N`) 及其中的降级崩溃数.
+6.7.0 Alpha11 到 P1.5 之前的 `CrashHandler` 不把异常交给系统, 主线程崩溃后自行 `exitProcess(1)`, 系统不写 `am_crash` 与 dropbox (ROADMAP 附录 B.1, Q9; P1.5 / D10 已修). 所以 "无崩溃" 同时要求: events 里本包 `am_crash` 为 0; 本次观察期间 `CrashHandler` / `AndroidRuntime` 的 E 日志里没有本包进程打出 "Uncaught Exception" 或 "FATAL EXCEPTION". 报告分别列出两者 (`am_crash N`, `logged N`) 及其中的降级崩溃数.
+
+## 崩溃移交 (`crash_handover.py`, P1.5)
+
+```
+py -3.12 -I tools/db-downgrade/crash_handover.py foreground|background -s SERIAL [--package org.autojs.autojs6.inrt] [--label before-fix]
+```
+
+核对 `CrashHandler` 把会结束进程的崩溃交给系统处理器 (D10): 系统记 `am_crash` 与 dropbox `data_app_crash`, 一分钟内第二次崩溃的进程被标为 bad, 之后不再为后台广播拉起. 需要带下面临时崩溃注入的 debuggable 构建 (只在隔离副本里改, 不提交), 放在 `App.onCreate` 主进程分支的 `setUpDebugEnvironment()` 之后:
+
+```kotlin
+if (getProcessNameCompat() == applicationInfo.processName) {
+    if (java.io.File(filesDir, "db-downgrade-crash-startup").exists()) {
+        throw IllegalStateException("db-downgrade P1.5 injected startup crash")
+    }
+    if (java.io.File(filesDir, "db-downgrade-crash-foreground").exists()) {
+        registerActivityLifecycleCallbacks(object : android.app.Application.ActivityLifecycleCallbacks {
+            private var armed = true
+            override fun onActivityResumed(activity: android.app.Activity) {
+                if (!armed) return
+                armed = false
+                android.os.Handler(mainLooper).postDelayed({ throw IllegalStateException("db-downgrade P1.5 injected foreground crash") }, 3000)
+            }
+            override fun onActivityCreated(activity: android.app.Activity, savedInstanceState: android.os.Bundle?) = Unit
+            override fun onActivityStarted(activity: android.app.Activity) = Unit
+            override fun onActivityPaused(activity: android.app.Activity) = Unit
+            override fun onActivityStopped(activity: android.app.Activity) = Unit
+            override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) = Unit
+            override fun onActivityDestroyed(activity: android.app.Activity) = Unit
+        })
+    }
+}
+```
+
+| 子命令 | 做什么 | PASS 条件 |
+| --- | --- | --- |
+| `foreground` | 经 `run-as` 放 `files/db-downgrade-crash-foreground`, 从桌面入口启动, 观察 `--observe` 秒 (默认 30), 每秒查一次 `CrashReportActivity` 是否处于 resumed; 直接构建的 inrt 包在 `SplashActivity` 先因 NPE 崩溃 (见下文 "注意"), 同样是前台主线程崩溃 | 本包进程打出 1 次未捕获异常; 崩溃报告页 resumed (`:crash_report` 进程); `am_crash` 与日志数一致且不少于 1; dropbox 新增本包 `data_app_crash` 条目; 崩溃的进程已结束 (之后 WorkManager 的 job 等可能拉起新的主进程, 不计; 短时间内重复崩溃时系统弹出 "Application Error" 对话框, 进程等它关闭才结束, 脚本等它自行超时关闭, `--dialog-wait` 默认 330 s, 不点按) |
+| `background` | 若 `dumpsys activity processes` 里本包是 bad process, 先经 provider (`content://<包名>.shizuku`, 系统不算后台启动) 拉起一次清除标记并强停; 再放 `files/db-downgrade-crash-startup`, 每 `--interval` 秒 (默认 5) 发一次 `roundtrip.py --start broadcast` 同款显式广播, 共 `--observe` 秒 (默认 60) | 每次启动都崩溃且都有 `am_crash`; 系统日志有 "crashed too many times" (或 `am_process_crashed_too_much`); 有 `am_proc_bad` 或结束时仍列为 bad; bad 标记之后没有再启动 (系统不再为后台广播拉起 bad 进程, API 35 跳过时不写日志). 报告另列每条广播是否在 `--interval` 秒内完成: 修前接收进程自行退出, 系统一再重投同一条广播, `am broadcast` 不返回 |
+
+两个子命令结束时都删掉注入标记并强停. 未含 P1.5 的构建两项都 FAIL (没有 `am_crash` 与 dropbox 条目, 每个广播都拉起一次), 用 `--label before-fix` 记作对照. 报告 `<report-dir>/roundtrip-<AVD 名或型号>-<versionCode>-<yyyyMMdd>-<label>.md` (label 默认 `crash-handover`), 只含次数与第一个异常的首行 (R4).
 
 ## 标记行
 
