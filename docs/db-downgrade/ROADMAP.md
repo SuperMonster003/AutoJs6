@@ -138,8 +138,10 @@
 
 ### P3 脚本 sqlite 模块 onDowngrade (D6, T5, R6; 代码 + 文档 + d.ts; 与 P1 / P2 文件不重叠, 可并行或之后)
 
-- [ ] P3.1 `core/database/Database.java` + `DatabaseCallback` 加 onDowngrade, `SQLite.kt` 解析回调, 默认无操作降级. 验收: 脚本用 version 2 建库再用 version 1 打开不抛且可查询; 提供 onDowngrade 时被调用且参数正确; 用例脚本与结果入 evidence (或 androidTest).
-- [ ] P3.2 文档 `AutoJs6-Documentation/api/sqlite.md` (第 60 行附近说明与回调表) 与两处 d.ts 同步, 按 `AGENTS.md` 关联项目流程 (生成脚本, 版本号). 验收: 关联仓库各有提交; 推送按各自惯例 (R6).
+- [x] P3.1 `core/database/Database.java` + `DatabaseCallback` 加 onDowngrade, `SQLite.kt` 解析回调, 默认无操作降级. 验收: 脚本用 version 2 建库再用 version 1 打开不抛且可查询; 提供 onDowngrade 时被调用且参数正确; 用例脚本与结果入 evidence (或 androidTest).
+  - 2026-10-24 db-downgrade-p3, 提交 `e03d82e0f`: `Database.onDowngrade` 有回调即调用, 否则无操作 (helper 随后设为请求的版本); `SQLite.kt` 不需要改 (附录 A "P3 实施处置" 第 1 条). 临时 AVD `dbdowngrade_p3_api24` (Android 7.0) 与 `dbdowngrade_p3_api35` (Android 15), 隔离克隆 debug 5935: `tools/db-downgrade/sqlite_ondowngrade.py` 5 / 5 PASS (无回调 2 -> 1 版本 1 行 2; 回调无 onDowngrade 同左; onDowngrade 收到 (Database, 3, 2), 在事务内且先于 onOpen, 写入的行保留; onDowngrade 抛出时 sqlite.open 抛出, 版本与行回滚; readOnly 同无回调), `SqliteModuleTest` JVM 5 例 0 失败, 其设备用例 `device_eval.py --new-modules on` 两台各 25 / 25 一致. 证据见附录 B.4.
+- [x] P3.2 文档 `AutoJs6-Documentation/api/sqlite.md` (第 60 行附近说明与回调表) 与两处 d.ts 同步, 按 `AGENTS.md` 关联项目流程 (生成脚本, 版本号). 验收: 关联仓库各有提交; 推送按各自惯例 (R6).
+  - 2026-10-24 db-downgrade-p3, 均只本地提交 (附录 A "P3 实施处置" 第 8 条): 文档 `e083ccb` (sqlite.md 第 60 行说明, DatabaseCallback 说明与示例, 新增 `DatabaseCallback#onDowngrade` 一节, progress.md, 全量生成) 与 `16134b9` (versionCode 168); 离线文档插件 `e5ef6df` (`auto-generate-for-autojs6.bat --verify-offline` 同步, 插件单测与 debug / release APK 检查通过, VERSION_BUILD 206, provenance 指向 `e083ccb`); d.ts `44f6825` (4.83.0, `aj6-int-sqlite.d.ts` 加 `onDowngrade?`, `aj6dts.bat -Publish` 重新生成 aj6-main-app / aj6-resources, 10 种语言 changelog, `npm test` 通过); Ace `cc70b55` (2.45.0, VERSION_BUILD 331, 同步 aj6-int 与生成的声明, `:app:generateAutoJs6LspDeclarations`).
 
 ### P4 真机复核, changelog 与发布门 (D5 / D7; 需 P1 与 P2 完成; 真机 G8441 或 OPD2413, 按锁表)
 
@@ -189,6 +191,17 @@
 11. T6 脚本修正: (a) debug 包有两个 LAUNCHER 入口, `monkey` 可能选中 LeakCanary 的 "Leaks" 入口, 各次运行的启动路径因此不一致; 改为 `cmd package query-activities` 取本应用入口并排除它, 取不到时才用 `monkey`; (b) 通知在强停前读取 (API 35 的 `am force-stop` 会清掉本包通知); (c) 新装 debug 包在 API 35 首启做 ART 校验, `App.onCreate` 超过 10 s, 修后验收用 `--observe 30`; (d) `restore-check` 的重装偶尔卡住 (API 24 上一次 300 s 超时), 改为 180 s 超时重试一次, 且任何一步失败都先放回数据; (e) 直接构建的 inrt debug 包是没有项目的模板, 从桌面入口启动时 `SplashActivity` 因 `ProjectConfig.fromAssets` 返回 null 抛 NPE (`getLaunchConfig`), 与降级无关, 修前被 `App.onCreate` 的降级崩溃遮住 (修后首轮: API 35 / 24 各记到 1 次, 并被广播再拉起 1 / 2 次); 打包出的应用有 `project.json`, 不受影响. inrt 修后验收改用 `--start broadcast` (向 `ProfileInstallReceiver` 发它忽略的 action, 只拉起进程走完 `App.onCreate`, 与真实循环里后台组件拉起相同), 唤醒本来就不经界面.
 12. 修后包与修前包 versionCode 相同 (5935 / inrt 5835): VERSION_BUILD 未变, 两者只差 P1 的提交. API 24 用临时 AVD `dbdowngrade_p01_api24`.
 
+### P3 实施处置 (2026-10-24, db-downgrade-p3)
+
+1. T5 "`SQLite.kt` 解析该回调": `SQLite.kt` 不需要改. 回调对象经 `jsTryToJava<DatabaseCallback>()` 整体适配为接口 (Rhino `InterfaceAdapter`), 接口新增的方法自动对应对象上的同名函数; 对象没有该方法时, 适配器只报一条 Rhino 警告 (宿主未设 ErrorReporter, 不输出) 并返回 null. 所以 "未提供回调" 与 "回调对象没有 onDowngrade" 都是无操作降级 (附录 B.4 前两例). 新脚本模块层的 `SqliteModule` 交给同一个 `SQLite.open`, 新层开关两态行为相同.
+2. `DatabaseCallback.onDowngrade` 与其他 4 个方法一样是抽象方法, 不用 Java 默认方法: Rhino 的接口代理不执行默认方法体 (缺方法时直接返回 null), 默认方法没有额外作用. 仓库内没有其他实现类.
+3. 降级在 Android 管理的事务内: 回调抛出时回滚, 版本与数据不变, `sqlite.open` 抛出 (消息前缀 `Failed to call method "sqlite.open".`); 文档写明需要旧行为 (拒绝降级) 时在回调中抛出. readOnly 不影响 (Android 先取可写连接).
+4. 验收用设备脚本 (`tools/db-downgrade/sqlite_ondowngrade.py` + `sqlite_ondowngrade_probe.js`), 不另写 androidTest: `Database` 依赖 `ScriptRuntime` (路径解析, closeableManager), 回调须经 Rhino 接口适配, 脚本层才覆盖真实路径. 探针放在宿主私有目录 (经 run-as), 但 `RunIntentActivity` 的 `PathChecker` 运行任何路径前都要求存储权限, 临时 AVD 上经 adb 授予 (API 35 `appops`, API 24 `pm grant`), 脚本先检查. 另改 `SqliteModuleTest` 的设备用例: 原 "version 1 打开 v2 库抛 SQLiteException" 改为期望 `[1,1]`, 加 onDowngrade 参数顺序与抛出回滚两条; augment 的 `device_eval.py` 用例文件随之更新 (旧构建配新用例文件会在这条上不一致).
+5. `tools/db-downgrade/` 被 `.gitignore` 的 `/tools/*` 忽略且没有放行行 (P0.3 的文件是强制添加的), 本条同样 `git add -f`, 不改共享的 `.gitignore`; `tools/db-downgrade/README.md` 当时由 db-downgrade-q8-q9 在改, 本条未改它, 用法写在脚本 docstring.
+6. 文档: 共享文档工作区有其他会话未提交的 memory 文档, 全量生成与离线同步改在文档仓库的隔离克隆中进行, 生成物拷回后只提交本条路径. 全量生成同时刷新了 `63e04f9` (speech punctuation, 改了 Markdown 未重新生成) 的 speech / changelog 页, 一并提交并同步进离线插件 (提交说明已写明). DatabaseCallback 的说明由 "对象应实现 4 个方法" 改为 "可只实现需要的方法, 未实现的在触发时被忽略" (依据同第 1 条).
+7. d.ts: 两个仓库的 `aj6-int-sqlite.d.ts` 相同, `JavaScriptDatabaseCallback` 加可选 `onDowngrade?`. `aj6dts.bat -Publish` 以宿主隔离克隆 (HEAD `e03d82e0f`, 不含共享工作区他人未提交的文件) 为输入重新生成 `aj6-main-app.d.ts` 等; `aj6dts.properties` 里的声明仓库路径 `D:/webstorm-projects/...` 不存在, 用 `-DeclarationsOutput` / `-ApiRoots` 覆盖. 版本: d.ts 4.83.0, Ace 2.45.0 (VERSION_BUILD 331), 10 种语言 changelog.
+8. 推送: 宿主不推送 (R1). 文档仓库惯例推送, 但 origin 之前还有他人未推送的 `63e04f9`; 离线文档插件惯例推送; d.ts 与 Ace 惯例只本地 (各积压 50 余笔). 按 R6 "不确定时只提交", 四个关联仓库都只本地提交, 推送由维护者决定.
+
 ## 附录 B. 证据
 
 ### B.1 XQ-AT72 取证 (P0.1)
@@ -229,6 +242,21 @@
 
 页面与任务: 从桌面入口启动后存活; 抽屉, 版本历史页, 回收站, 颜色库页, 颜色选择页 (旧版布局), 密钥库页均进入 RESUMED; `HistoryCleanupWorker` 单次运行 SUCCEEDED (首次运行即成功, 未重试). logcat: FATAL EXCEPTION 0, CrashHandler 未捕获异常 0, am_crash 0, Room 打开错误 0, 移到一旁的表 0, `_downgrade_` 残留表 0.
 
+### B.4 脚本 sqlite 模块 (P3.1)
+
+2026-10-24, 隔离克隆 (HEAD `2f0663ba8` + P3.1 的两个文件, 即提交 `e03d82e0f` 的代码) 的 debug x86_64 5935 (md5 e0acdf85), 临时 AVD `dbdowngrade_p3_api24` (Android 7.0) 与 `dbdowngrade_p3_api35` (Android 15). `sqlite_ondowngrade.py` 经 `RunIntentActivity` 运行探针 (宿主存储权限经 adb 授予, 无点按), 两台结果相同:
+
+| 用例 | 结果 | 数值 |
+| --- | --- | --- |
+| 无回调, v2 库以 version 1 打开 | PASS | 不抛, 版本 1, 行 2; 再以 version 2 打开时 onUpgrade 1 -> 2 |
+| 回调对象没有 onDowngrade (只有 onCreate / onOpen) | PASS | 不抛, 版本 1, 行 2, 事件只有 open |
+| onDowngrade 回调 (v3 库以 version 2 打开) | PASS | 事件 downgrade 3->2 然后 open (无 onCreate / onUpgrade); 3 个参数, 类型 number / number, database 为 `core.database.Database`; 回调内版本仍为 3 且 `inTransaction()` 为 true, onOpen 内为 2; 回调插入的行保留 (行 3) |
+| onDowngrade 抛出 | PASS | sqlite.open 抛出 (消息 `Failed to call method "sqlite.open". <回调的消息>`), 之后版本仍为 2, 行 2 (回调抛出前插入的行已回滚) |
+| readOnly: true, v2 库以 version 1 打开 | PASS | 版本 1, 行 2 |
+| `SqliteModuleTest` 设备用例 (`device_eval.py --strict-errors`) | PASS | 新层开: 两台各 25 / 25 一致; 新层关 (API 35): 9 条开库用例一致, 16 条参数错误不同, 均为 augment 附录 E P3.5 已记录的差异 |
+
+修前的行为 (Android 默认 `onDowngrade` 抛 `SQLiteException: Can't downgrade database from version 2 to 1`) 由改动前的 `SqliteModuleTest` 设备用例 "`sqlite('aj6-p35-sqlite.db', { version: 1 })` 抛 `JavaException SQLiteException`" 记录 (augment P3.5 真机验收, XQ-AT72 一致), 本条把它改为期望 `[1,1]`. 报告: `evidence/roundtrip-dbdowngrade_p3_api24-5935-20261024-sqlite.md`, `evidence/roundtrip-dbdowngrade_p3_api35-5935-20261024-sqlite.md`.
+
 ## 附录 C. 待决事项
 
 格式: `- [状态] 编号 问题 | 选项: A (推荐) / B | 影响: 条目 | 改选返工: ... | 来源`. 状态: 需拍板 / 已按推荐先行待确认 / 已决 (日期, 维护者选: ...) / 暂缓.
@@ -258,8 +286,10 @@
 | `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradeTest.kt` | Room 三库降级用例 | P2.2 |
 | `app/src/androidTest/java/org/autojs/autojs/storage/database/RoomDowngradePagesDeviceTest.kt`, `tools/db-downgrade-room/room_pages.py` | Room 三库未来文件的页面与 `HistoryCleanupWorker` 核对 (instrumentation 参数 `autojs.dbDowngrade.pages=true`) | P2.3 |
 | `app/src/main/java/org/autojs/autojs/core/database/Database.java` | 脚本 sqlite 模块底层 helper 与 `DatabaseCallback` | P3.1 |
-| `app/src/main/java/org/autojs/autojs/runtime/api/augment/sqlite/SQLite.kt` | 脚本 `sqlite.open` 选项解析 | P3.1 |
+| `app/src/main/java/org/autojs/autojs/runtime/api/augment/sqlite/SQLite.kt` | 脚本 `sqlite.open` 选项解析 (P3.1 未改, 见 "P3 实施处置" 第 1 条) | P3.1 |
+| `app/src/test/java/org/autojs/autojs/runtime/api/modules/sqlite/SqliteModuleTest.kt` | 新层 sqlite 的 JVM 用例与导出的设备用例 (降级一条改为期望保留数据, 加 onDowngrade 两条) | P3.1 |
+| `tools/db-downgrade/sqlite_ondowngrade.py`, `sqlite_ondowngrade_probe.js` | 脚本 sqlite onDowngrade 设备用例 (RunIntentActivity, 5 例) | P3.1 |
 | `tools/db-downgrade/roundtrip.py`, `README.md` | 往返脚本 | P0.3 |
 | `docs/db-downgrade/evidence/` | 报告 | 各阶段 |
 | `.changelog/lang_zh-Hans.json`, `docs/dev/6.8.0-release-gate.md` | changelog 与发布门 (只追加自己的 hunk) | P4 |
-| `D:/idea-projects/AutoJs6-Documentation/api/sqlite.md`, `AutoJs6-TypeScript-Declarations/declarations/autojs6/aj6-int-sqlite.d.ts`, `declarations/autojs6-node/sqlite.d.ts` | 文档与声明 | P3.2 |
+| `D:/idea-projects/AutoJs6-Documentation/api/sqlite.md` (与 `api/progress.md`, 生成物), `AutoJs6-Plugin-Offline-Docs` (同步), `AutoJs6-TypeScript-Declarations/declarations/autojs6/aj6-int-sqlite.d.ts`, `AutoJs6-Plugin-Ace-Editor/app/src/main/assets/editor/ace-builds-1.44.0/autojs6/types/autojs6/aj6-int-sqlite.d.ts` | 文档与声明; `declarations/autojs6-node/sqlite.d.ts` 是 Node.js 的异步数据库接口, 没有 version 与回调, P3.2 不涉及 | P3.2 |
