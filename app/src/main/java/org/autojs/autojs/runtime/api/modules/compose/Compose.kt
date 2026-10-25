@@ -1,10 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.compose
 
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.core.plugin.compose.ComposeUiError
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.ui.TypeScriptTsxFragment
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.plugin.compose.api.*
@@ -24,7 +22,7 @@ class Compose internal constructor(
     private val runtime: ScriptRuntime,
     internal val platform: ComposeScriptPlatform,
     internal val values: ComposeScriptValues = ComposeScriptValues(platform::resolveImage),
-) : Augmentable(runtime), Invokable, Closeable {
+) : ArgumentGuards(), Closeable {
     constructor(runtime: ScriptRuntime) : this(runtime, AndroidComposeScriptPlatform(runtime))
     internal val scope = runtime.topLevelScope
     private val origin = Thread.currentThread()
@@ -46,24 +44,11 @@ class Compose internal constructor(
 
     init { ComposeJsErrors.installLocalizer(scope, platform::errorMessage) }
 
-    override val keys = listOf(AugmentableKey("compose"))
-    override val scriptErrorPassThroughInvoke = true
-    override val globalAssignmentProperties: List<Pair<Any, Any?>> by lazy {
-        listOf("ComposeError" to ComposeJsErrors.constructor(scope))
-    }
-    override val selfAssignmentGetters: List<Any> by lazy {
-        listOf(
-            "version" to Supplier { versionValue() },
-            "sessions" to Supplier { sessionsValue() },
-        )
-    }
-
     /** The value of the `compose.version` getter: the version of the Compose UI plugin, null without it. */
     internal fun versionValue(): Any? = guarded { RhinoUtils.toJsValue(scope, platform.version()) }
 
     /** The value of the `compose.sessions` getter: the mounted sessions that are not closed. */
     internal fun sessionsValue(): Any? = guarded { RhinoUtils.toJsValue(scope, live.filterNot { it.isClosed }.map { it.js }) }
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
 
     /**
      * The data properties the `compose` script module defines on its module object, in their order (its install hook
@@ -104,7 +89,7 @@ class Compose internal constructor(
         } + ("ComposeError" to ComposeJsErrors.constructor(scope))
     }
 
-    override fun invoke(vararg args: Any?): Any? = guarded { mount(args).js }
+    fun invoke(vararg args: Any?): Any? = guarded { mount(args).js }
 
     internal fun isTsxType(type: Any?): Boolean = type is Function ||
         type is String && (type.startsWith("compose:") || org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog.component(type) != null)

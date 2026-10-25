@@ -49,8 +49,9 @@ class ComposeScriptApiTest {
         scope = TopLevelScope().apply { initStandardObjects(context, false) }
         with(RhinoUtils) { context.registerStandardObjects(scope) }
         platform = Platform()
-        compose = Compose(RhinoTestRuntime.create(scope), platform)
-        compose.augment(scope.globalThis)
+        val runtime = RhinoTestRuntime.create(scope)
+        compose = Compose(runtime, platform)
+        mountCompose(runtime, compose)
     }
 
     @After

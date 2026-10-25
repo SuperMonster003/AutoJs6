@@ -3,9 +3,8 @@ package org.autojs.autojs.runtime.api.modules.speech
 import com.google.gson.JsonPrimitive
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.speech.SpeechPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.speech.SpeechScriptArguments
 import org.autojs.autojs.runtime.api.speech.SpeechScriptValues
 import org.autojs.autojs.runtime.api.speech.SpeechService
@@ -34,28 +33,7 @@ class Speech internal constructor(
     private val scriptRuntime: ScriptRuntime,
     private val service: SpeechService,
     private val tts: TtsService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("speech"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::isAvailable.name,
-        ::capabilities.name,
-        ::listen.name,
-        ::recognize.name,
-        ::recognizeAsync.name,
-        ::detectVoice.name,
-        ::wake.name,
-        ::synthesize.name,
-        ::synthesizeAsync.name,
-        ::speak.name,
-    )
-
-    /** `SpeechError` instances thrown by these functions reach the script unwrapped. zh-CN: 这些函数抛出的 `SpeechError` 实例不经包装到达脚本. */
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+) : ArgumentGuards() {
 
     /**
      * The data properties the `speech` script module defines on its module object, in their order (its install hook

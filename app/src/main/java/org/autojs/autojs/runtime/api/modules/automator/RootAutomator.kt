@@ -1,0 +1,24 @@
+package org.autojs.autojs.runtime.api.modules.automator
+
+import org.autojs.autojs.rhino.ArgumentGuards
+import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.WrappedShizuku
+import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
+import org.autojs.autojs.util.RootUtils
+import org.mozilla.javascript.Scriptable
+
+@Suppress("unused")
+class RootAutomator(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
+
+    fun construct(vararg args: Any?): Scriptable = ensureArgumentsAtMost(args, 1) {
+        if (!RootUtils.isRootAvailable() && !WrappedShizuku.isOperational()) {
+            throw RuntimeException("RootAutomator must be instantiated with root access or shizuku access")
+        }
+        when (it.size) {
+            0 -> RootAutomatorNativeObject(scriptRuntime)
+            1 -> RootAutomatorNativeObject(scriptRuntime, it[0])
+            else -> throw WrappedIllegalArgumentException("Invalid arguments length ${it.size} for RootAutomator constructor")
+        }
+    }
+
+}

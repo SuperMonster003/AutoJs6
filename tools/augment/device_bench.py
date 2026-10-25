@@ -1,8 +1,7 @@
 """Runs the Augment timing scripts on a device through RunIntentActivity and prints the timing lines.
 
-Usage: py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-compile] [--skip-calls] [--skip-errors]
-    [--new-modules on|off] [--calls NAME ...] [--skip-init]
---new-modules sets the hidden switch of the new script module layer (ROADMAP T8) for the run and restores it afterwards.
+Usage: py -3.12 -I tools/augment/device_bench.py -s SERIAL [--runs 5] [--skip-calls] [--skip-errors] [--calls NAME ...]
+    [--skip-init]
 The failing call benchmark (bench/error_path.js) runs --runs times and prints min / median / max per case.
 --calls runs bench/calls_prelude.js followed by bench/calls/NAME.js (the success and failing calls of one module group,
 next to Rhino reference cases) --runs times each and prints min / median / max per case; --skip-init skips the startup
@@ -20,13 +19,10 @@ import sys
 import time
 
 HERE = pathlib.Path(__file__).resolve().parent
-HOST = HERE.parents[1]
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
 
-SWITCH_KEY = "key_$_new_script_module_layer"
-SWITCH_MARK = "AJ6SWITCH"
 TIMING_RE = re.compile(r"(runtime-init-prologue|script-init|runtime-init-epilogue): (\d+)")
 # The end line of a script run in the app language: "... 用时 N 秒" (Chinese) or "... finished in N seconds" (English).
 TOTAL_RE = re.compile(r"用时 ([\d.]+) 秒|finished in ([\d.]+) seconds")
@@ -87,63 +83,23 @@ def push_script(serial, name):
 
 
 def pref_value_js(key):
-    """JS expression of the value scripts get for the boolean preference [key] (`pref` is Pref.INSTANCE).
-
-    The switch of the new script module layer is on by default since ROADMAP P5.1, so when it is not stored its value
-    comes from its declaration (DeveloperKeys, settings ROADMAP P2.5; earlier builds fall back to false, their default);
-    reading it with the default false would restore an untouched device to off. Other keys default to false.
-    """
-    if key != SWITCH_KEY:
-        return f"pref.getBoolean('{key}', false)"
-    return ("(function () { try { return String(org.autojs.autojs.core.pref.keys.DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()) === 'true'; }"
-            f" catch (e) {{ return pref.getBoolean('{key}', false); }} }})()")
-
-
-def set_new_modules(serial, value):
-    """Sets the hidden switch of the new script module layer (ROADMAP T8) and returns its previous value."""
-    script = HERE / "__pycache__" / "aj6_switch.js"
-    script.parent.mkdir(exist_ok=True)
-    lines = [
-        "var pref = org.autojs.autojs.core.pref.Pref.INSTANCE;",
-        f"var before = {pref_value_js(SWITCH_KEY)};",
-        f"pref.putBooleanSync('{SWITCH_KEY}', {'true' if value else 'false'});",
-        f"console.log('{SWITCH_MARK} ' + before + ' ' + {pref_value_js(SWITCH_KEY)});",
-    ]
-    script.write_text(chr(10).join(lines) + chr(10), encoding="utf-8")
-    adb(serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
-    adb(serial, "push", str(script), f"{DEVICE_DIR}/aj6_switch.js", check=True)
-    for line in run_script(serial, f"{DEVICE_DIR}/aj6_switch.js", 30):
-        start = line.find(SWITCH_MARK + " ")
-        if start >= 0:
-            before, after = line[start + len(SWITCH_MARK) + 1:].split()[:2]
-            if after != ("true" if value else "false"):
-                sys.exit(f"the switch did not change: {line}")
-            print(f"new script module layer: {before} -> {after}")
-            return before == "true"
-    sys.exit("no switch output from the device")
+    """JS expression of the value scripts get for the boolean preference [key] (`pref` is Pref.INSTANCE), false when not stored."""
+    return f"pref.getBoolean('{key}', false)"
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--runs", type=int, default=5)
-    parser.add_argument("--skip-compile", action="store_true", help="skip the obsolete JS compile timing")
     parser.add_argument("--skip-calls", action="store_true", help="skip the per-call overhead benchmark")
     parser.add_argument("--skip-errors", action="store_true", help="skip the failing call (error path) benchmark")
-    parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     parser.add_argument("--calls", nargs="*", default=[], help="module call benchmarks to run (bench/calls/NAME.js)")
     parser.add_argument("--skip-init", action="store_true", help="skip the startup timing")
     args = parser.parse_args()
     missing = [n for n in args.calls if not (HERE / "bench" / "calls" / f"{n}.js").is_file()]
     if missing:
         sys.exit(f"no such call benchmark: {', '.join(missing)} (bench/calls/NAME.js)")
-    s = args.serial
-    previous = set_new_modules(s, args.new_modules == "on") if args.new_modules else None
-    try:
-        bench(args)
-    finally:
-        if previous is not None and previous != (args.new_modules == "on"):
-            set_new_modules(s, previous)
+    bench(args)
 
 
 def bench_calls(s, name, runs):
@@ -196,15 +152,6 @@ def bench(args):
         vals = sorted(r[k] for r in rows if k in r)
         if vals:
             print(f"{k}: min={vals[0]} median={vals[len(vals) // 2]} max={vals[-1]} n={len(vals)}")
-
-    if not args.skip_compile:
-        print("--- obsolete JS module compile timing ---")
-        obsolete = HOST / "app/src/main/assets/modules/obsolete"
-        adb(s, "shell", "rm", "-rf", f"{DEVICE_DIR}/obsolete")
-        adb(s, "push", str(obsolete), f"{DEVICE_DIR}/obsolete", check=True)
-        for l in run_script(s, push_script(s, "obsolete_compile_timing.js"), 120):
-            if "AJ6BENCH" in l or TIMING_RE.search(l) or TOTAL_RE.search(l):
-                print(l)
 
     if not args.skip_calls:
         print("--- per-call overhead ---")

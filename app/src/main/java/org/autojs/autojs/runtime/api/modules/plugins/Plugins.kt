@@ -6,9 +6,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.runtime.api.modules.jsox.Jsox
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -78,7 +75,7 @@ internal class LegacyPluginExtensionRegistry(
 }
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Plugins(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Plugins(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     private val mExtensionRegistry = LegacyPluginExtensionRegistry()
 
@@ -106,17 +103,7 @@ class Plugins(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
         UNDEFINED
     }, NOT_CONSTRUCTABLE)
 
-    override val selfAssignmentProperties = listOf(
-        "extend" to mExtendFunction,
-        "extendAll" to mExtendAllFunction,
-        "extendAllBut" to mExtendAllButFunction,
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::load.name,
-    )
-
-    override fun invoke(vararg args: Any?): Any? = ensureArgumentsOnlyOne(args) { o ->
+    fun invoke(vararg args: Any?): Any? = ensureArgumentsOnlyOne(args) { o ->
         load(scriptRuntime, arrayOf(o))
     }
 
@@ -142,7 +129,7 @@ class Plugins(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
     private fun performExtension(action: LegacyPluginExtensionRegistry.Action) {
         when (action) {
             is LegacyPluginExtensionRegistry.Action.Preset -> {
-                Jsox.extendRhinoWithRuntime(scriptRuntime, action.name)
+                check(scriptRuntime.extendJsBuiltIn(action.name)) { "No built-in extension module ${action.name}" }
             }
             is LegacyPluginExtensionRegistry.Action.Registered -> {
                 val value = action.value

@@ -1,15 +1,14 @@
 package org.autojs.autojs.runtime.api.modules.zip
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.mozilla.javascript.ScriptableObject
 import java.io.File
 
 /**
@@ -47,14 +46,10 @@ class ZipModuleTest {
         side.evalKt("globalThis.files = { cwd: function () { return ${HostModuleTestSupport.json(cwd.path)}; } };")
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        Zip(side.ktRuntime).augment(side.ktScope.globalThis as ScriptableObject)
-    }
-
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "zip", { prepare(it, temp.newFolder()) }, ::mountCurrent)
-        HostModuleTestSupport.assertSameSurface(rhino, "zip.open('handle.zip')", { prepare(it, temp.newFolder()) }, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "zip")
+        HostModuleTestSupport.assertSameSurface(rhino, "zip.open('handle.zip')")
     }
 
     /** The same expressions on the current module: equal results, except the argument errors with their new types. */
@@ -62,7 +57,7 @@ class ZipModuleTest {
     fun resultsMatchTheCurrentModule() {
         // The current module cannot touch files on the JVM (its paths go through StringUtils, which needs Android), so
         // only the cases without files are compared here; the device checks the rest against the same values.
-        val compared = HostModuleTestSupport.assertSameResults(rhino, RESULTS.map { it.first }, KNOWN, { prepare(it, temp.newFolder()) }, ::mountCurrent)
+        val compared = HostModuleTestSupport.assertSameResults(rhino, RESULTS.map { it.first }, KNOWN)
         assertTrue("compared $compared", compared >= 7)
         HostModuleTestSupport.check(rhino, RESULTS)
         DEVICE.add(RESULTS)

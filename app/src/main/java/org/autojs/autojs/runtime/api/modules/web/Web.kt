@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.web
 
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.web.InjectableWebClient
@@ -10,7 +11,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
@@ -21,17 +21,7 @@ import org.autojs.autojs.core.web.WebSocket as CoreWebSocket
 import org.mozilla.javascript.NativeObject
 import kotlin.reflect.KClass
 
-class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::newInjectableWebView.name to AS_GLOBAL,
-        ::newInjectableWebClient.name to AS_GLOBAL,
-        ::newWebSocket.name to AS_GLOBAL,
-    )
-
-    override val selfAssignmentJavaClasses = listOf<Pair<String, KClass<*>>>(
-        "ByteString" to ByteString::class,
-    )
+class Web(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 
@@ -51,7 +41,7 @@ class Web(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                         url.isJsNullish() -> null
                         else -> Context.toString(url)
                     }
-                    val contextForWebView = androidContext.jsUnwrapped() as? AndroidContext ?: globalContext
+                    val contextForWebView = androidContext.jsUnwrapped() as? AndroidContext ?: GlobalAppContext.get()
                     InjectableWebView(contextForWebView, cx, scriptRuntime.topLevelScope.globalThis, niceUrl).destroyOnExitOf(scriptRuntime)
                 }
                 1 -> when {

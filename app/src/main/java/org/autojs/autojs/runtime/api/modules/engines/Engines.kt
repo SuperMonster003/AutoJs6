@@ -12,8 +12,6 @@ import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.AsEmitter
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.script.ScriptSource
 import org.autojs.autojs.util.RhinoUtils.callFunction
@@ -29,18 +27,7 @@ import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
 
 @Suppress("unused")
-class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitter {
-
-    override val selfAssignmentFunctions = listOf(
-        ::all.name,
-        ::myEngine.name,
-        ::getEngines.name,
-        ::stopAll.name,
-        ::stopAllAndToast.name,
-        ::execScript.name,
-        ::execScriptFile.name,
-        ::execAutoFile.name,
-    )
+class Engines(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     init {
         setEngineExecArgv()
@@ -56,7 +43,7 @@ class Engines(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunt
                     // Maps and lists (the mail trigger's event document) become plain objects and arrays;
                     // other values keep their Java identity as before.
                     // zh-CN: Map 与 List (邮件触发的事件文档) 转为普通对象与数组; 其他值保持原来的 Java 身份.
-                    put(execArgv, entry.key, toJsValue(scriptRuntime.topLevelScope, entry.value))
+                    execArgv.put(entry.key, execArgv, toJsValue(scriptRuntime.topLevelScope, entry.value))
                 }
                 scriptRuntime.engines.myEngine().setExecArgv(execArgv)
             }

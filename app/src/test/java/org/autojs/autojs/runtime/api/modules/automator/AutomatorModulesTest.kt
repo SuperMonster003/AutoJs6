@@ -2,19 +2,12 @@ package org.autojs.autojs.runtime.api.modules.automator
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.automator.Auto
-import org.autojs.autojs.runtime.api.augment.automator.Automator
-import org.autojs.autojs.runtime.api.augment.automator.EventWaitArguments
-import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
-import org.autojs.autojs.runtime.api.augment.automator.RootAutomatorNativeObject
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.auto.AutoOptions
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
@@ -25,7 +18,6 @@ import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import org.autojs.autojs.core.inputevent.RootAutomator as CoreRootAutomator
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
@@ -49,7 +41,7 @@ class AutomatorModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -61,7 +53,7 @@ class AutomatorModulesTest {
     fun surfaceMatchesTheCurrentModules() {
         val globals = GLOBALS - AUTO_NAMES
         val actual = RuntimeModulesFixture.describe(rhino, globals, PATHS)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, globals, PATHS) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
     }
 
@@ -69,7 +61,7 @@ class AutomatorModulesTest {
     @Test
     fun autoSurfaceMatchesTheCurrentModule() {
         val actual = rhino.evalKt(DESCRIBE_AUTO).toString()
-        val expected = ScriptModuleExpectations.obsolete("describe: auto") { newSide(newLayer = false).use { it.evalKt(DESCRIBE_AUTO).toString() } }
+        val expected = ScriptModuleExpectations.obsolete("describe: auto")
         assertEquals(expected, actual)
     }
 
@@ -98,42 +90,24 @@ class AutomatorModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
-        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope) }
-        val before by lazy {
-            rhino.evalJs(OBSOLETE_STUBS)
-            host.setRuntimeProperty("automator", rhino.evalJs("({})"))
-            host.setRuntimeProperty("accessibilityBridge", rhino.evalJs("({})"))
-            host.global.allIds.toSet()
-        }
-        val automator = ScriptModuleExpectations.obsoleteSurface("surface: automator") {
-            before
-            SurfaceDiff.surface(host.load("automator"), rhino.jsScope.globalThis)
-        }
+        val automator = ScriptModuleExpectations.obsoleteSurface("surface: automator")
         val problems = ObsoleteMembers.problems(automator, rhino.evalKt("automator"), rhino.ktScope.globalThis)
         assertTrue("automator:\n" + problems.joinToString("\n"), problems.isEmpty())
 
-        val jsAuto = memberKinds(ScriptModuleExpectations.obsolete("member kinds: auto") { rhino.evalJs("$MEMBER_KINDS(global.auto, [])").toString() })
+        val jsAuto = memberKinds(ScriptModuleExpectations.obsolete("member kinds: auto"))
         val ktAuto = memberKinds(rhino.evalKt("$MEMBER_KINDS(auto, $AUTO_GETTER_NAMES)"))
         val autoMismatches = jsAuto.filter { (name, kind) -> ktAuto[name] != kind && !(ktAuto[name] == null && rhino.evalKt("typeof auto['$name']") == kind) }
             .map { (name, kind) -> "$name: js $kind, kt ${ktAuto[name]}" }
         assertTrue("auto:\n" + autoMismatches.joinToString("\n"), jsAuto.isNotEmpty() && autoMismatches.isEmpty())
 
-        val globals = ScriptModuleExpectations.obsolete("globals") {
-            host.global.allIds.filterIsInstance<String>().filterNot { it in before }.joinToString("\n") { it + "\t" + ObsoleteMembers.typeOf(host.global, it) }
-        }.lines().associate { it.substringBefore('\t') to it.substringAfter('\t') }
+        val globals = ScriptModuleExpectations.obsolete("globals").lines().associate { it.substringBefore('\t') to it.substringAfter('\t') }
         assertEquals(OBSOLETE_GLOBALS.sorted(), globals.keys.sorted())
         globals.forEach { (name, type) -> assertEquals(name, type, ObsoleteMembers.typeOf(rhino.ktScope.globalThis, name)) }
 
-        val rootAutomator = ScriptModuleExpectations.obsoleteSurface("surface: RootAutomator") { SurfaceDiff.surface(host.load("RootAutomator"), rhino.jsScope.globalThis) }
+        val rootAutomator = ScriptModuleExpectations.obsoleteSurface("surface: RootAutomator")
         val constructorProblems = ObsoleteMembers.problems(rootAutomator, rhino.evalKt("RootAutomator"), rhino.ktScope.globalThis)
         assertTrue("RootAutomator:\n" + constructorProblems.joinToString("\n"), constructorProblems.isEmpty())
-        val bound = ScriptModuleExpectations.obsolete("bound: RootAutomator") {
-            File(ObsoleteModuleHost.OBSOLETE_DIR, "__RootAutomator__.js").readText()
-                .substringAfter("this.__ra__ = ").substringAfter("[").substringBefore("].forEach")
-                .split(",").map { it.trim().removeSurrounding("'") }.filter { it.isNotEmpty() }.joinToString(",")
-        }.split(",")
+        val bound = ScriptModuleExpectations.obsolete("bound: RootAutomator").split(",")
         assertEquals(bound.toString(), 17, bound.size)
         val instance = RuntimeModulesFixture.allocate(RootAutomatorNativeObject::class.java)
         RuntimeModulesFixture.setField(instance, RootAutomatorNativeObject::class.java, "scriptRuntime", rhino.ktRuntime)
@@ -468,8 +442,8 @@ class AutomatorModulesTest {
     fun resultsAgreeWithTheCurrentModules() {
         val expressions = (automatorArgumentCases + pointArgumentCases + toolkitOptionFieldCases + autoOptionFieldCases + autoArgumentCases + rootAutomatorArgumentCases)
             .map { it.first } + acceptedArgumentCases + ISSUE_275
-        val summary = newSide(newLayer = true).use { new ->
-            newSide(newLayer = false).use { current -> CurrentModuleResults.assertAgree(new, current, expressions.distinct(), KNOWN) }
+        val summary = newSide().use { new ->
+            CurrentModuleResults.assertAgree(new, expressions.distinct(), KNOWN)
         }
         println("P3.6 A automator: $summary")
     }
@@ -532,7 +506,7 @@ class AutomatorModulesTest {
     private fun passes(expression: String) =
         "(function () { try { $expression; } catch (e) { if (e instanceof TypeError || e instanceof RangeError) return e.name + ': ' + e.message; } return 'passed'; })()" to "\"passed\""
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         val runtime = side.ktRuntime
         RuntimeModulesFixture.prepareHost(runtime)
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "scale", Scale(runtime))
@@ -540,14 +514,7 @@ class AutomatorModulesTest {
         // zh-CN: auto.wait 读取运行时的 Flow 执行器, 它存于运行时属性中并随运行时关闭.
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "mProperties", ConcurrentHashMap<String, Any>())
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "closeableManager", RuntimeResourceScope("automator-modules-test"))
-        RuntimeModulesFixture.mount(side, MODULES, newLayer) { name, global, rt ->
-            when (name) {
-                "auto" -> Auto(rt).augment(global)
-                "automator" -> Automator(rt).augment(global)
-                "RootAutomator" -> RootAutomator(rt).augment(global)
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES)
     }
 
     private companion object {

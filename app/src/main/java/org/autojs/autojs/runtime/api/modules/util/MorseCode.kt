@@ -2,27 +2,17 @@ package org.autojs.autojs.runtime.api.modules.util
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 
 @Suppress("unused")
-object MorseCode : Augmentable(), Invokable {
+object MorseCode : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey("morseCode", withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::getPattern.name,
-        ::getCode.name,
-        ::vibrate.name,
-    )
-
-    override fun invoke(vararg args: Any?): NativeObject = ensureArgumentsLengthInRange(args, 1..2) {
+    fun invoke(vararg args: Any?): NativeObject = ensureArgumentsLengthInRange(args, 1..2) {
         MorseCodeNativeObject(MorseCodeParser.buildParser(*args))
     }
 

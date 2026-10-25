@@ -8,8 +8,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.app.App
 import org.autojs.autojs.runtime.api.modules.shell.Shell
 import org.autojs.autojs.runtime.api.modules.shell.ShellProcess
@@ -17,31 +15,9 @@ import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import java.util.function.Supplier
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Shizuku(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Shizuku(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        ::execCommand.name,
-        ::getCommand.name,
-        ::kill.name,
-        ::currentPackage.name,
-        ::currentActivity.name,
-        ::currentComponent.name,
-        ::spawn.name,
-    )
-
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "state" to Supplier {
-            newNativeObject(scriptRuntime.topLevelScope).also { o ->
-                o.defineProp("isInstalled", WrappedShizuku.isInstalled(globalContext))
-                o.defineProp("hasService", WrappedShizuku.hasService())
-                o.defineProp("isRunning", WrappedShizuku.isRunning())
-                o.defineProp("hasPermission", WrappedShizuku.hasPermission())
-                o.defineProp("isOperational", WrappedShizuku.isOperational())
-            }
-        }
-    )
-
-    override fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)
+    fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 

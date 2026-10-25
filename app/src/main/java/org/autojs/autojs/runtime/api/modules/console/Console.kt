@@ -17,7 +17,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.AugmentableProxy
 import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.autojs.autojs.runtime.api.modules.util.Util
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -54,7 +53,7 @@ import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
+class Console(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     private val mRtConsole = scriptRuntime.console
     private val mTopLevelScope = scriptRuntime.topLevelScope
@@ -82,69 +81,6 @@ class Console(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scrip
             else -> null
         } ?: mRtConsole.log(message)
     }, NOT_CONSTRUCTABLE)
-
-    override val selfAssignmentProperties = listOf(
-        FUNC_NAME_TRACE to mCaptureStack,
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::show.name,
-        ::hide.name,
-        ::reset.name,
-        ::clear.name,
-        ::expand.name,
-        ::collapse.name,
-        ::assert.name,
-        ::input.name,
-        ::rawInput.name,
-        ::log.name to AS_GLOBAL,
-        ::verbose.name to AS_GLOBAL,
-        ::info.name,
-        ::warn.name to AS_GLOBAL,
-        ::error.name,
-        ::print.name to AS_GLOBAL,
-        ::time.name,
-        ::timeEnd.name,
-        ::build.name,
-        ::setSize.name,
-        ::setPosition.name,
-        ::setTitle.name,
-        ::setTitleTextSize.name,
-        ::setTitleTextColor.name,
-        ::setTitleBackgroundColor.name,
-        ::setTitleBackgroundTint.name,
-        ::setTitleBackgroundAlpha.name,
-        ::setTitleIconsTint.name,
-        ::setContentTextSize.name,
-        ::setContentTextColor.name,
-        ::setContentTextColors.name,
-        ::setContentBackgroundColor.name,
-        ::setContentBackgroundTint.name,
-        ::setContentBackgroundAlpha.name,
-        ::setTextSize.name,
-        ::setTextColor.name,
-        ::setBackgroundColor.name,
-        ::setBackgroundTint.name,
-        ::setBackgroundAlpha.name,
-        ::setExitOnClose.name,
-        ::setTouchable.name,
-        ::setTimeVisible.name,
-        ::setTimeFormat.name,
-        ::setColorful.name,
-        ::setAvoidStatusBar.name,
-        ::setInputVisible.name,
-        ::setGlobalLogConfig.name,
-        ::resetGlobalLogConfig.name,
-        ::launch.name,
-        ::printAllStackTrace.name,
-    )
-
-    override val globalAssignmentFunctions = listOf(
-        ::error.name to "err",
-        ::show.name to listOf("openConsole", "showConsole"),
-        ::clear.name to "clearConsole",
-        ::launch.name to "launchConsole",
-    )
 
     private fun getStackTrace() = withRhinoContext(scriptRuntime) { cx ->
         newNativeObject(scriptRuntime.topLevelScope).also { o ->

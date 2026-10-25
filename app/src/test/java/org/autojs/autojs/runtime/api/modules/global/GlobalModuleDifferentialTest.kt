@@ -2,11 +2,9 @@ package org.autojs.autojs.runtime.api.modules.global
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases.KnownDifference
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases.KnownDifference
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs6.BuildConfig
 import org.junit.After
 import org.junit.Before
@@ -31,14 +29,6 @@ class GlobalModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            host.loadAndDefine("util")
-            rhino.evalJs(JS_STUBS)
-            host.setRuntimeProperty("isStopped", rhino.evalJs("(function () { return false; })"))
-            host.setRuntimeProperty("sleep", rhino.evalJs("(function (millis) { java.lang.Thread.sleep(millis); })"))
-            host.load("globals")
-        }
         listOf("mThread" to Thread.currentThread(), "scale" to Scale(rhino.ktRuntime)).forEach { (name, value) ->
             ScriptRuntime::class.java.getDeclaredField(name).apply { isAccessible = true }.set(rhino.ktRuntime, value)
         }
@@ -57,17 +47,6 @@ class GlobalModuleDifferentialTest {
 
     companion object {
 
-        /** Host objects the obsolete module reads, as plain stubs (the version of this build for `autojs`). */
-        private val JS_STUBS = """
-            global.ui = { isUiThread: function () { return false; } };
-            global.autojs = { versionCode: ${BuildConfig.VERSION_CODE}, versionName: '${BuildConfig.VERSION_NAME}' };
-            global.device = { width: 1080, height: 2340 };
-            global.ScriptRuntime = Packages.org.autojs.autojs.runtime.ScriptRuntime;
-            global.UiObject = Packages.org.autojs.autojs.core.automator.UiObject;
-            global.ScriptInterruptedException = Packages.org.autojs.autojs.runtime.exception.ScriptInterruptedException;
-            global.R = { strings: { error_an_operation_is_not_implemented: 0 } };
-            global.context = { getString: function () { return 'An operation is not implemented'; } };
-        """.trimIndent()
 
         private const val MESSAGE = "(function (f) { try { f(); return 'no error'; } catch (e) { return String((e.javaException || e).getMessage()); } })"
 

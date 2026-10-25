@@ -5,7 +5,6 @@ import com.google.gson.JsonParser
 import org.autojs.autojs.core.plugin.compose.ScriptUiDispatcher
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.epub.EpubService
 import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.installer.InstallerService
@@ -13,6 +12,7 @@ import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.runtime.api.modules.compose.Compose
 import org.autojs.autojs.runtime.api.modules.compose.ComposeScriptPlatform
 import org.autojs.autojs.runtime.api.modules.compose.ComposeScriptValues
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.autojs.autojs.runtime.api.modules.selector.SelectorGlobals
 import org.autojs.autojs.runtime.api.speech.SpeechService

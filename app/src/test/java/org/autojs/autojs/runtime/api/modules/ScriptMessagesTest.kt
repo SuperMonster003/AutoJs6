@@ -98,10 +98,8 @@ class ScriptMessagesTest {
     /** P1.3: the strings of the developer options entries follow the same rules. */
     @Test
     fun developerOptionStringsExistInEveryLanguage() = checkEveryLanguage(
-        "summary_new_script_module_layer",
         "summary_script_module_debug_print",
         "summary_script_module_debug_print_modules",
-        "text_new_script_module_layer",
         "text_script_module_debug_print",
         "text_script_module_debug_print_modules",
         "text_script_modules",

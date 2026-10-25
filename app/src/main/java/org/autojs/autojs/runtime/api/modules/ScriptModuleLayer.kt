@@ -6,16 +6,13 @@ import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.mozilla.javascript.ScriptableObject
 
 /**
- * Entry of the new script module layer for `ScriptRuntime` (roadmap D8 / T8). The switch
- * ([DeveloperKeys.NEW_SCRIPT_MODULE_LAYER], on by default since P5.1, in the developer options since P1.3) is read once per runtime
- * in `initPrologue`. [ORDER] decides where every module is mounted (appendix C Q8): `ScriptRuntime.augment()` walks
- * its top-level modules in order, and each one comes either from the `augment` package (its old augment call) or,
- * when the switch is on and the module is migrated ([MIGRATED]), from the generated registry. Either way the order of
+ * Entry of the script module layer for `ScriptRuntime` (roadmap D8 / T8; the only module layer since P5.2, which
+ * removed the old `augment` package and its switch). [ORDER] decides where every module is mounted (appendix C Q8):
+ * `ScriptRuntime.augment()` installs its top-level modules in order from the generated registry, so the order of
  * `Object.keys(global)` stays the one of the old `augment()`.
  *
- * zh-CN: 新脚本模块层在 ScriptRuntime 中的入口 (D8 / T8). 开关 (P5.1 起默认开, P1.3 起位于开发者选项) 在 initPrologue 中每个运行时读取一次. [ORDER] 决定每个模块的
- * 挂载位置 (附录 C Q8): `ScriptRuntime.augment()` 按序遍历其中的顶层模块, 每个模块或来自 augment 包 (原 augment 调用), 或在开关打开且模块已迁移
- * ([MIGRATED]) 时来自生成的注册表; 两种情况下 Object.keys(global) 的顺序都与原 augment() 相同.
+ * zh-CN: 脚本模块层在 ScriptRuntime 中的入口 (D8 / T8; P5.2 删除旧 augment 包与开关后为唯一的模块层). [ORDER] 决定每个模块的挂载位置 (附录 C Q8):
+ * `ScriptRuntime.augment()` 按序从生成的注册表安装其中的顶层模块, 因此 Object.keys(global) 的顺序仍与原 augment() 相同.
  */
 object ScriptModuleLayer {
 
@@ -47,10 +44,9 @@ object ScriptModuleLayer {
     val TOP_LEVEL_ORDER: List<String> = ORDER.filter { '.' !in it }
 
     /**
-     * Top-level modules served by the new layer when the switch is on: every top-level module of the host registry
-     * `generated.ScriptModules`, that is, a module is migrated once its @ScriptModule class exists in this package (P2.1;
-     * [ORDER] still decides where it is mounted). A migrated module brings all its sub-modules: the old augment call it
-     * replaces mounted them too (`ScriptModuleOrderTest` checks every registered module against [ORDER]).
+     * The top-level modules of the host registry `generated.ScriptModules` (every @ScriptModule class of this package,
+     * P2.1; [ORDER] decides where each is mounted). A module brings all its sub-modules (`ScriptModuleOrderTest` checks
+     * every registered module against [ORDER] and every top-level entry of [ORDER] against the registry).
      */
     @JvmStatic
     val MIGRATED: Set<String> by lazy { ScriptModules.moduleNames.toSet() }
@@ -62,53 +58,36 @@ object ScriptModuleLayer {
     @JvmField
     val BUILT_IN_EXTENSIONS: List<String> = listOf("Mathx", "Numberx", "Arrayx")
 
-    private const val JSOX = "jsox"
-
     private val noDebugPrinting = ScriptErrorMapper.DebugPrinting { false }
 
-    @JvmStatic
-    val isEnabled: Boolean
-        get() = DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get()
-
     /**
-     * A mounter of the host registry for [runtime]'s [global] object, or null when the switch is off.
+     * A mounter of the host registry for [runtime]'s [global] object.
      *
      * The debug printing policy (appendix C Q4: a master switch, off by default, plus a per-module list, all on by
-     * default) is read from the preferences here, once per runtime like the switch itself (the developer options say
-     * changes apply to scripts started afterwards), so mapping a Java exception reads no preference (R2); loading this
-     * object (unit tests read [ORDER]) changes nothing.
+     * default) is read from the preferences here, once per runtime (the developer options say changes apply to scripts
+     * started afterwards), so mapping a Java exception reads no preference (R2); loading this object (unit tests read
+     * [ORDER]) changes nothing.
      */
     @JvmStatic
-    fun mounterOrNull(runtime: ScriptRuntime, global: ScriptableObject): ScriptModuleMounter? {
-        if (!isEnabled) return null
+    fun mounter(runtime: ScriptRuntime, global: ScriptableObject): ScriptModuleMounter {
         val excluded = if (DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.get()) DeveloperKeys.scriptModuleDebugPrintDisabledModules else null
         ScriptErrorMapper.debugPrinting = excluded?.let { ScriptErrorMapper.DebugPrinting { module -> ScriptModuleDebugSettings.prints(module, true, it) } } ?: noDebugPrinting
         return ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ORDER)
     }
 
-    /**
-     * Mounts the top-level modules of [ORDER] in turn: each migrated one with [mounter], every other one (and all of
-     * them without a mounter) by [legacy], the old augment call of the module and its sub-modules.
-     */
+    /** Installs the top-level modules of [ORDER] in turn with [mounter], each with its sub-modules. */
     @JvmStatic
-    inline fun mountInOrder(mounter: ScriptModuleMounter?, legacy: (name: String) -> Unit) {
-        for (name in TOP_LEVEL_ORDER) mountOr(mounter, name) { legacy(name) }
-    }
-
-    /** Installs the migrated module [name] with [mounter], or runs [legacy] (the old augment call) without one. */
-    @JvmStatic
-    inline fun mountOr(mounter: ScriptModuleMounter?, name: String, legacy: () -> Unit) {
-        if (mounter == null || name !in MIGRATED || !mounter.install(name)) legacy()
+    fun mountInOrder(mounter: ScriptModuleMounter) {
+        for (name in TOP_LEVEL_ORDER) check(mounter.install(name)) { "Script module $name of ScriptModuleLayer.ORDER is not in the registry" }
     }
 
     /**
-     * The "extend JavaScript built-in objects" option in `initEpilogue`: with [mounter] and jsox migrated, the modules of
-     * [BUILT_IN_EXTENSIONS] extend their built-in objects ([ScriptBuiltInExtender]); otherwise [legacy] runs (the old
-     * `Jsox.extendAllRhinoWithRuntime`).
+     * The "extend JavaScript built-in objects" option in `initEpilogue` and `jsox.extendAll()`: the modules of
+     * [BUILT_IN_EXTENSIONS] extend their built-in objects ([ScriptBuiltInExtender]).
      */
     @JvmStatic
-    fun extendBuiltInsOr(mounter: ScriptModuleMounter?, legacy: () -> Unit) {
-        if (mounter == null || JSOX !in MIGRATED) legacy() else BUILT_IN_EXTENSIONS.forEach { mounter.builtIns.extend(it) }
+    fun extendBuiltIns(mounter: ScriptModuleMounter) {
+        BUILT_IN_EXTENSIONS.forEach { mounter.builtIns.extend(it) }
     }
 
 }

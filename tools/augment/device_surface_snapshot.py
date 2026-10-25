@@ -1,12 +1,13 @@
 """Takes a script API surface snapshot on a device and stores it as a sorted, diff-friendly text file.
 
 Usage: py -3.12 -I tools/augment/device_surface_snapshot.py -s SERIAL [--out tools/augment/baseline] [--tag TAG]
-    [--new-modules on|off] [--extend-builtins on|off] [--roots Array.prototype Number.prototype ...] [--global-classes]
+    [--extend-builtins on|off] [--roots Array.prototype Number.prototype ...] [--global-classes]
 Writes surface-<model>-<versionCode>[-TAG].txt (one line per property) and the raw .json next to it.
---new-modules / --extend-builtins set the switch of the new script module layer (ROADMAP T8) / the "extend JavaScript
-built-in objects" option for the snapshot and restore them afterwards. --roots also records the own properties of the
+--extend-builtins sets the "extend JavaScript built-in objects" option for the snapshot and restores it afterwards
+(--new-modules set the switch of the new script module layer the same way until P5.2 removed it). --roots also records the own properties of the
 given objects (paths from global, as "Array.prototype"), as lines prefixed with "@<path>." after the global ones.
---global-classes also records the Java class names of global (the fields of augment/global/Classes.kt), which the
+--global-classes also records the Java class names of global (GlobalJavaClasses.NAMES, the fields of the old
+augment/global/Classes.kt), which the
 global object resolves through its prototype without own properties: one "@lookup.<name>" line each with `in`, own
 property, `typeof` of the bare name, and `typeof` / String of the value read from global (surface_compare.py
 --only @lookup compares them). logcat is cleared before each script starts and polled through its last lines, as in
@@ -24,7 +25,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from device_bench import clear_log, console_lines, pref_value_js  # noqa: E402
-CLASSES_KT = HERE.parents[1] / "app/src/main/java/org/autojs/autojs/runtime/api/augment/global/Classes.kt"
+CLASSES_KT = HERE.parents[1] / "app/src/main/java/org/autojs/autojs/runtime/api/modules/global/GlobalJavaClasses.kt"
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
@@ -32,7 +33,6 @@ PACKAGE = "org.autojs.autojs6"
 END_RE = re.compile(r"运行结束|finished in [\d.]+ seconds")
 SWITCH_MARK = "AJ6SWITCH"
 SWITCH_KEYS = {
-    "new_modules": ("key_$_new_script_module_layer", "new script module layer"),
     "extend_builtins": ("key_$_extending_js_build_in_objects", "extend JavaScript built-in objects"),
 }
 
@@ -75,8 +75,9 @@ def set_pref(serial, key, value, label):
 
 
 def global_class_names():
-    """The field names of Classes.kt in declaration order (Canvas is commented out there)."""
-    names = re.findall(r"^\s*val\s+(\w+)\s*=", CLASSES_KT.read_text(encoding="utf-8"), re.MULTILINE)
+    """GlobalJavaClasses.NAMES in their order (the order of the fields of the old Classes.kt)."""
+    block = CLASSES_KT.read_text(encoding="utf-8").split("val NAMES: List<String> = listOf(", 1)[-1].split(")", 1)[0]
+    names = re.findall(r'"(\w+)"', block)
     if not names:
         sys.exit(f"no class names found in {CLASSES_KT}")
     return names
@@ -163,7 +164,6 @@ def main():
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--out", type=pathlib.Path, default=HERE / "baseline")
     parser.add_argument("--tag", help="suffix of the output file names, as on / off")
-    parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the snapshot")
     parser.add_argument("--extend-builtins", choices=["on", "off"], help="set the extend JavaScript built-in objects option for the snapshot")
     parser.add_argument("--roots", nargs="*", default=[], help="further objects to record, as paths from global (Array.prototype)")
     parser.add_argument("--global-classes", action="store_true", help="record the Java class names global resolves through its prototype")

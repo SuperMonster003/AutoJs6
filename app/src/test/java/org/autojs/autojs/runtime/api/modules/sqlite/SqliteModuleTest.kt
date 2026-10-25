@@ -1,17 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.sqlite
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.5: `sqlite` on the new script module layer. Opening a database needs Android's SQLite, so the JVM checks
@@ -41,16 +39,14 @@ class SqliteModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: sqlite") {
-            SurfaceDiff.surface(ObsoleteModuleHost(rhino.context, rhino.jsScope).load("sqlite"), rhino.jsScope.globalThis)
-        }
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: sqlite")
         val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("sqlite"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "sqlite") { SQLite(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        HostModuleTestSupport.assertSameSurface(rhino, "sqlite")
     }
 
     @Test
@@ -69,7 +65,7 @@ class SqliteModuleTest {
         val errors = ERRORS.drop(1)
         val known = errors.associate { (expression, expected) -> expression to (expected to "appendix E P3.5 sqlite (D10, Q7)") }
         val expressions = listOf("[typeof sqlite, typeof sqlite.open]") + errors.map { it.first }
-        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, known) { SQLite(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, known)
         assertEquals(expressions.size, compared)
     }
 

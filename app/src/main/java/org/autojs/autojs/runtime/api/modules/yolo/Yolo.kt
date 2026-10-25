@@ -9,7 +9,6 @@ import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -25,9 +24,7 @@ import java.io.File
 
 /** Explicit-provider Rhino Preview entry point for the isolated YOLO plugin. */
 @Suppress("unused")
-class Yolo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(::load.name)
+class Yolo(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

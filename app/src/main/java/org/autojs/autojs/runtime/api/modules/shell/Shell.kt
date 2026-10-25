@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.modules.shell
 import android.util.Log
 import android.view.KeyEvent
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
@@ -15,8 +16,6 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.app.App
 import org.autojs.autojs.runtime.api.shell.ShellLauncher
 import org.autojs.autojs.runtime.api.shell.ShellPipes
@@ -35,45 +34,9 @@ import java.util.Collections
 import java.util.WeakHashMap
 
 @Suppress("unused", "FunctionName", "UNUSED_PARAMETER")
-class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Shell(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        ::execCommand.name,
-        ::getCommand.name,
-        ::fromIntent.name,
-        ::kill.name,
-        ::currentPackage.name,
-        ::currentActivity.name,
-        ::currentComponent.name,
-        ::spawn.name,
-        ::setDefaultOptions.name,
-        ::checkAccess.name,
-        ::isRootAvailable.name,
-    )
-
-    override val globalAssignmentFunctions = listOf(
-        ::Menu.name,
-        ::Home.name,
-        ::Back.name,
-        ::Up.name,
-        ::Down.name,
-        ::Left.name,
-        ::Right.name,
-        ::OK.name,
-        ::VolumeUp.name,
-        ::VolumeDown.name,
-        ::Power.name,
-        ::Camera.name,
-        ::Text.name,
-        ::Input.name,
-        ::Tap.name,
-        ::Screencap.name,
-        ::KeyCode.name,
-        ::SetScreenMetrics.name,
-        ::Swipe.name,
-    )
-
-    override fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)
+    fun invoke(vararg args: Any?): AbstractShell.Result = execCommand(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 
@@ -410,7 +373,7 @@ class Shell(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
             val raw = coerceString(keyCode)
             val codeNumber = parseKeyCodeNumber(raw)
             require(codeNumber != KeyEvent.KEYCODE_UNKNOWN) {
-                globalContext.getString(R.string.error_unknown_key_code, raw)
+                GlobalAppContext.get().getString(R.string.error_unknown_key_code, raw)
             }
             val defaults = defaultsOf(scriptRuntime)
             when {

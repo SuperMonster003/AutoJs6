@@ -54,10 +54,11 @@ class LiteralKeysQ15Test : DomainKeysTestBase() {
         assertEquals("{}", ExtensibilityKeys.THREE_STOVE_AGENT_SCRIPT_ROOT_CONFIGURATION.defaultText)
         assertNull(DeveloperKeys.DEX_COMPILER_EXPERIMENTAL_COMPONENT.getOrNull())
         assertNull(DeveloperKeys.R8_COMPILER_EXPLICIT_COMPONENT.getOrNull())
-        // P4.2 added COLOR_FAVORITE_SORT (Q18), the memory roadmap P5.1 added key_memory_script_heap_dump.
+        // P4.2 added COLOR_FAVORITE_SORT (Q18), the memory roadmap P5.1 added key_memory_script_heap_dump, and
+        // docs/augment/ROADMAP.md P5.2 removed key_$_new_script_module_layer.
         assertEquals(12, AppearanceKeys.keys.size)
         assertEquals(3, ExtensibilityKeys.keys.size)
-        assertEquals(11, DeveloperKeys.keys.size)
+        assertEquals(10, DeveloperKeys.keys.size)
     }
 
     @Test

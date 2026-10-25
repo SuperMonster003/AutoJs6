@@ -7,11 +7,9 @@ import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.core.automator.pick.PickVerdict
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.automator.Automator
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.flow.Flow
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
@@ -21,7 +19,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject.READONLY
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
@@ -42,7 +39,7 @@ class SelectorModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -53,7 +50,7 @@ class SelectorModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
     }
 
@@ -209,20 +206,13 @@ class SelectorModulesTest {
             RuntimeModulesFixture.exportForDevice(EXPORT, cases)
         }
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         val runtime = side.ktRuntime
         RuntimeModulesFixture.prepareHost(runtime)
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "scale", Scale(runtime))
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "mProperties", ConcurrentHashMap<String, Any>())
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "closeableManager", RuntimeResourceScope("selector-modules-test"))
-        RuntimeModulesFixture.mount(side, MODULES, newLayer) { name, global, rt ->
-            when (name) {
-                "automator" -> Automator(rt).augment(global)
-                "flow" -> Flow(rt).augment(global)
-                "selector" -> Selector(rt).augment(global, additionalAttributes = READONLY)
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES)
     }
 
     private companion object {

@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.modules.device
 import androidx.core.net.toUri
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.app.tool.PointerLocationTool
 import org.autojs.autojs.core.plugin.nativealign.NativePageSize
 import org.autojs.autojs.rhino.ArgumentGuards
@@ -12,7 +13,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.util.MorseCode
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -29,39 +29,7 @@ import java.util.function.Supplier
 import org.autojs.autojs.runtime.api.Device as ApiDevice
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::summary.name,
-        ::digest.name,
-        ::vibrate.name,
-        ::isScreenOff.name,
-        ::isScreenPortrait.name,
-        ::isScreenLandscape.name,
-        ::getIpAddress.name,
-        ::getIpv6Address.name,
-        ::getGatewayAddress.name,
-        ::isActiveNetworkMetered.name,
-        ::isConnectedOrConnecting.name,
-        ::isWifiAvailable.name,
-        ::getSharedDeviceId.name,
-
-        ::setPointerLocation.name,
-        ::setPointerLocationEnabled.name,
-        ::setPointerLocationDisabled.name,
-        ::isPointerLocationEnabled.name,
-        ::isPointerLocationDisabled.name,
-        ::togglePointerLocation.name,
-    )
-
-    override val selfAssignmentGetters = listOf<Any>(
-        "width" to Supplier { ScreenMetrics.deviceScreenWidth },
-        "height" to Supplier { ScreenMetrics.deviceScreenHeight },
-        "rotation" to Supplier { scriptRuntime.device.rotation },
-        "orientation" to Supplier { scriptRuntime.device.orientation },
-        "density" to Supplier { ScreenMetrics.deviceScreenDensity },
-        ("pageSize" to Supplier { NativePageSize.current() }) to (READONLY or PERMANENT),
-    )
+class Device(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 
@@ -70,7 +38,7 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun summary(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsIsEmpty(args) {
-            DeviceUtils.getDeviceSummary(globalContext)
+            DeviceUtils.getDeviceSummary(GlobalAppContext.get())
         }
 
         @JvmStatic
@@ -218,7 +186,7 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             // val b = globalContext.contentResolver.call("content://org.autojs.autojs6.deviceid.provider".toUri(), "getDeviceId", null, null)
             // b?.getString("device_id")
             val uri = "content://org.autojs.autojs6.deviceid.provider/v1/device_id".toUri()
-            globalContext.contentResolver.query(uri, arrayOf("device_id"), null, null, null)?.use { c ->
+            GlobalAppContext.get().contentResolver.query(uri, arrayOf("device_id"), null, null, null)?.use { c ->
                 if (c.moveToFirst()) c.getString(0) else null
             }
         }
@@ -255,7 +223,7 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             //  #     }
             //  # }
 
-            PointerLocationTool.checkPointerLocationState(globalContext, enabled) || PointerLocationTool.togglePointerLocation(globalContext)
+            PointerLocationTool.checkPointerLocationState(GlobalAppContext.get(), enabled) || PointerLocationTool.togglePointerLocation(GlobalAppContext.get())
         }
 
         @JvmStatic
@@ -273,13 +241,13 @@ class Device(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun isPointerLocationEnabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
-            PointerLocationTool.isPointerLocationEnabled(globalContext)
+            PointerLocationTool.isPointerLocationEnabled(GlobalAppContext.get())
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun isPointerLocationDisabled(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsIsEmpty(args) {
-            PointerLocationTool.isPointerLocationDisabled(globalContext)
+            PointerLocationTool.isPointerLocationDisabled(GlobalAppContext.get())
         }
 
         @JvmStatic

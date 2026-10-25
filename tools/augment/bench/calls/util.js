@@ -1,5 +1,5 @@
-// Module calls of util (roadmap P2.3), appended to bench/calls_prelude.js by device_bench.py --calls util. With the
-// switch of the new script module layer on they reach the new module, with it off the old augment one. "ok" cases
+// Module calls of util (roadmap P2.3), appended to bench/calls_prelude.js by device_bench.py --calls util. They reach
+// the modules of the script module layer (with its switch off they reached the old augment ones until P5.2). "ok" cases
 // succeed; the other cases fail with an argument error (arity, type, range), compared with the "ref" cases of the
 // prelude (Rhino's own errors). The "big" case inspects 100 objects with nested values, printed alike by both
 // implementations; the "huge" case 2000 of them, which the new module prints in full as documented (maxArrayItems 10000)

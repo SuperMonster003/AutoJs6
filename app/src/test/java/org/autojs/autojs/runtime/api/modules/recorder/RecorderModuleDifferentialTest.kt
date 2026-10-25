@@ -1,18 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.recorder
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases.KnownDifference
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.recorder.Recorder
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases.KnownDifference
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 import org.autojs.autojs.runtime.api.Recorder as ApiRecorder
 
 /**
@@ -34,7 +31,6 @@ class RecorderModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("recorder")
         prepare(rhino)
         rhino.mountNewModules("recorder")
     }
@@ -46,26 +42,22 @@ class RecorderModuleDifferentialTest {
 
     private fun prepare(side: DifferentialRhino) = HostModuleTestSupport.setField(side.ktRuntime, "recorder", ApiRecorder(side.ktRuntime))
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        Recorder(side.ktRuntime).augment(side.ktScope.globalThis as ScriptableObject, side.ktRuntime.recorder)
-    }
-
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(rhino.evalJs("recorder"), rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("recorder"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface"), SurfaceDiff.surface(rhino.evalKt("recorder"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "recorder", ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "recorder")
     }
 
     @Test
     fun resultsAgree() {
         DifferentialCases.run(rhino, EXPRESSIONS, KNOWN, exportDir = "build/script-modules-device", exportAll = true)
         // The current module refused the surplus arguments too, with a message it cannot build on the JVM.
-        HostModuleTestSupport.assertSameResults(rhino, EXPRESSIONS, mapOf("recorder(1, 2, 3) >= 0" to ("throws TypeError" to "appendix C Q7")), ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameResults(rhino, EXPRESSIONS, mapOf("recorder(1, 2, 3) >= 0" to ("throws TypeError" to "appendix C Q7")))
     }
 
     companion object {

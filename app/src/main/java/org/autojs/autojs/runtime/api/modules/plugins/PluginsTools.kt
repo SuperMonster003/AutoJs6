@@ -19,12 +19,11 @@ import org.autojs.autojs.engine.NodeBridgeRequest
 import org.autojs.autojs.engine.NodeBridgeResponse
 import org.autojs.autojs.engine.NodeBridgeScreenCapture
 import org.autojs.autojs.engine.PluginToolPaths
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.modules.ScriptAsyncDispatcher
 import org.autojs.autojs.runtime.api.modules.toJsPromise
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -64,16 +63,7 @@ import java.util.concurrent.TimeUnit
  * (含 USER_GRANTED). 图片参数接受 `"screen"`, 路径或 `ImageWrapper`; 文件参数与输出接受路径, 按 `files.path` 解析.
  */
 @Suppress("unused", "UNUSED_PARAMETER")
-class PluginsTools(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("tools", withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::list.name,
-        ::providers.name,
-        ::call.name,
-        ::callAsync.name,
-    )
+class PluginsTools(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     @RhinoRuntimeFunctionInterface
     fun list(runtime: ScriptRuntime, args: Array<out Any?>): Any? {

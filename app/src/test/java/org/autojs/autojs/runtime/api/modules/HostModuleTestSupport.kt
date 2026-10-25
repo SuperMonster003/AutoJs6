@@ -3,8 +3,8 @@ package org.autojs.autojs.runtime.api.modules
 import org.autojs.autojs.engine.JavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.script.JavaScriptSource
 import org.junit.Assert.assertTrue
 import java.io.File
@@ -33,34 +33,28 @@ internal object HostModuleTestSupport {
     }
 
     /**
-     * The surface of [expression] (a module object) on the new layer against the current module mounted by
-     * [mountCurrent] in a second Rhino: names, kinds and attributes, the prototype chain included; `length` is allowed to
-     * differ (appendix C Q9).
+     * The surface of [expression] (a module object) on the new layer against the current module's, recorded before
+     * P5.2 removed it ([ScriptModuleExpectations]): names, kinds and attributes, the prototype chain included; `length`
+     * is allowed to differ (appendix C Q9).
      */
-    fun assertSameSurface(rhino: DifferentialRhino, expression: String, prepare: (DifferentialRhino) -> Unit = {}, mountCurrent: (DifferentialRhino) -> Unit) {
+    fun assertSameSurface(rhino: DifferentialRhino, expression: String) {
         val actual = SurfaceDiff.surface(rhino.evalKt(expression), rhino.ktScope.globalThis)
-        val expected = ScriptModuleExpectations.obsoleteSurface("surface: $expression") {
-            DifferentialRhino().use { current ->
-                prepare(current)
-                mountCurrent(current)
-                SurfaceDiff.surface(current.evalKt(expression), current.ktScope.globalThis)
-            }
-        }
+        val expected = ScriptModuleExpectations.obsoleteSurface("surface: $expression")
         val report = SurfaceDiff.compare(expected, actual)
         assertTrue("$expression:\n" + SurfaceDiff.describe(report, "current", "new"), report.namesMatch && report.attributeMismatches.isEmpty())
     }
 
     /**
-     * Evaluates [expressions] on the new layer ([rhino], already mounted) and on the current module ([mountCurrent] in a
-     * second Rhino); the results must be equal except for [known] (expression to the expected new value with a reason),
-     * whose current value is checked to differ. A Java exception of the current module (rendered from its printed stack
+     * Evaluates [expressions] on the new layer ([rhino], already mounted) against the current module's results, recorded
+     * before P5.2 removed it ([currentResults]); the results must be equal except for [known] (expression to the expected
+     * new value with a reason), whose current value is checked to differ. A Java exception of the current module (rendered from its printed stack
      * as `throws <Class>`) equals the same class mapped by the new layer (`throws JavaException <Class>`, T5); results
      * the current module cannot produce on the JVM (`unavailable(jvm)`, Android classes behind its helpers) are skipped
      * and left to the device cases. Returns the number of expressions compared.
      */
-    fun assertSameResults(rhino: DifferentialRhino, expressions: List<String>, known: Map<String, Pair<String, String>>, prepare: (DifferentialRhino) -> Unit = {}, mountCurrent: (DifferentialRhino) -> Unit): Int {
+    fun assertSameResults(rhino: DifferentialRhino, expressions: List<String>, known: Map<String, Pair<String, String>>): Int {
         val actual = expressions.associateWith { rhino.render(DifferentialRhino.Side.KT, it) }
-        val expected = expressions.zip(currentResults(expressions, prepare, mountCurrent)).toMap()
+        val expected = expressions.zip(currentResults(expressions)).toMap()
         var compared = 0
         val failures = expressions.mapNotNull { expression ->
             val now = expected.getValue(expression)
@@ -80,18 +74,9 @@ internal object HostModuleTestSupport {
         return compared
     }
 
-    /**
-     * The results of [expressions] on the current module ([mountCurrent] in a second Rhino), recorded (see
-     * [ScriptModuleExpectations]): the second Rhino is only created when recording.
-     */
-    fun currentResults(expressions: List<String>, prepare: (DifferentialRhino) -> Unit = {}, mountCurrent: (DifferentialRhino) -> Unit): List<DifferentialRhino.Rendered> {
-        val current = lazy { DifferentialRhino().also { prepare(it); mountCurrent(it) } }
-        return try {
-            expressions.map { expression -> ScriptModuleExpectations.obsoleteRendered("current: $expression") { current.value.render(DifferentialRhino.Side.KT, expression) } }
-        } finally {
-            if (current.isInitialized()) current.value.close()
-        }
-    }
+    /** The results of [expressions] on the current module, recorded before P5.2 removed it ([ScriptModuleExpectations]). */
+    fun currentResults(expressions: List<String>): List<DifferentialRhino.Rendered> =
+        expressions.map { expression -> ScriptModuleExpectations.obsoleteRendered("current: $expression") }
 
     /** Checks [cases] (expression to expected rendering) on the new layer. */
     fun check(rhino: DifferentialRhino, cases: List<Pair<String, String>>) {

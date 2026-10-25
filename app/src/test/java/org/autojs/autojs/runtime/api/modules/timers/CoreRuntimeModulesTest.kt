@@ -1,16 +1,11 @@
 package org.autojs.autojs.runtime.api.modules.timers
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.timers.Timers
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.continuation.Continuation
-import org.autojs.autojs.runtime.api.modules.engines.Engines
-import org.autojs.autojs.runtime.api.modules.threads.Threads
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -18,7 +13,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.4, first group: `timers`, `threads`, `continuation` and `engines` on the new script module layer. The surface
@@ -37,7 +31,7 @@ class CoreRuntimeModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -53,7 +47,7 @@ class CoreRuntimeModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, MODULES)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, MODULES) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
     }
 
@@ -73,7 +67,7 @@ class CoreRuntimeModulesTest {
         val side = DifferentialRhino()
         side.use {
             RuntimeModulesFixture.prepareHost(it.ktRuntime)
-            val mounter = RuntimeModulesFixture.mount(it, MODULES, newLayer = true) { name, _, _ -> throw AssertionError(name) }
+            val mounter = RuntimeModulesFixture.mount(it, MODULES)
             RuntimeModulesFixture.setField(it.ktRuntime, ScriptRuntime::class.java, "scriptModules", mounter)
             assertTrue(it.ktRuntime.isScriptModulePending("engines"))
             it.evalKt("\$engines.listenerCount('start')")
@@ -195,22 +189,12 @@ class CoreRuntimeModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
-        val host by lazy {
-            ObsoleteModuleHost(rhino.context, rhino.jsScope).also { host ->
-                host.setRuntimeProperty("engines", rhino.evalJs(ENGINES_STUB))
-                host.setRuntimeProperty("timers", rhino.ktRuntime.timers)
-                rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (name) { scope[name] = function () {}; }); }")
-            }
-        }
-        val before by lazy { host.global.allIds.toSet() }
         listOf("engines", "timers").forEach { name ->
-            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") { before; SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis) }
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
-        val globals = ScriptModuleExpectations.obsolete("globals") { host.global.allIds.filterIsInstance<String>().filterNot { it in before }.joinToString(",") }.split(",")
+        val globals = ScriptModuleExpectations.obsolete("globals").split(",")
         assertEquals(OBSOLETE_TIMER_GLOBALS.sorted(), globals.sorted())
         globals.forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
     }
@@ -225,9 +209,7 @@ class CoreRuntimeModulesTest {
     @Test
     fun timersGiveTheSameResultsAsTheCurrentModule() {
         val expressions = TIMER_RESULTS + TIMER_KNOWN.keys
-        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, TIMER_KNOWN, prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }) {
-            RuntimeModulesFixture.mount(it, listOf("timers"), newLayer = false) { _, global, runtime -> Timers(runtime).augment(global, runtime.timers) }
-        }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, TIMER_KNOWN)
         assertEquals(expressions.size, compared)
     }
 
@@ -239,9 +221,7 @@ class CoreRuntimeModulesTest {
      */
     @Test
     fun callbackOnlyGivesTheSameResultsAsTheCurrentModule() {
-        val compared = HostModuleTestSupport.assertSameResults(rhino, CALLBACK_ONLY, emptyMap(), prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }) {
-            RuntimeModulesFixture.mount(it, listOf("timers"), newLayer = false) { _, global, runtime -> Timers(runtime).augment(global, runtime.timers) }
-        }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, CALLBACK_ONLY, emptyMap())
         assertEquals(CALLBACK_ONLY.size, compared)
     }
 
@@ -292,17 +272,9 @@ class CoreRuntimeModulesTest {
         )
     )
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         RuntimeModulesFixture.prepareHost(side.ktRuntime)
-        RuntimeModulesFixture.mount(side, MODULES, newLayer) { name, global, runtime ->
-            when (name) {
-                "timers" -> Timers(runtime).augment(global, runtime.timers)
-                "threads" -> Threads(runtime).augment(global, runtime.threads)
-                "continuation" -> Continuation(runtime).augment(global, runtime.js_mod_continuation, additionalAttributes = ScriptableObject.READONLY)
-                "engines" -> Engines(runtime).augment(global)
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES)
     }
 
     private companion object {

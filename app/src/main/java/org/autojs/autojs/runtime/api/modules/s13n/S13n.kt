@@ -4,13 +4,13 @@ package org.autojs.autojs.runtime.api.modules.s13n
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsObject
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsString
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -33,7 +33,7 @@ import android.graphics.Point as AndroidPoint
 import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes as CoreBytes
 import org.opencv.core.Point as OpencvPoint
 
-object S13n : Augmentable() {
+object S13n : ArgumentGuards() {
 
     private const val KEY_NANO_SECONDS = "nanoSeconds"
     private const val KEY_MICRO_SECONDS = "microSeconds"
@@ -59,14 +59,6 @@ object S13n : Augmentable() {
         KEY_MINUTES to Regex("^(M(INUTES?)?|MINS?)$", IGNORE_CASE),
         KEY_HOURS to Regex("^(H(OURS?)?|HRS?)$", IGNORE_CASE),
         KEY_DAYS to Regex("^D(AYS?)?$", IGNORE_CASE)
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::color.name,
-        ::throwable.name,
-        ::point.name,
-        ::time.name,
-        ::bytes.name,
     )
 
     @JvmStatic
@@ -174,10 +166,10 @@ object S13n : Augmentable() {
         when (argList.size) {
             2 -> when {
                 arg1.isJsString() -> listOf("source", "fromUnit").forBytes(source = arg0, fromUnit = arg1)
-                else -> throw WrappedIllegalArgumentException("Invalid argument[1] ${arg1.jsBrief()} for $key.bytes")
+                else -> throw WrappedIllegalArgumentException("Invalid argument[1] ${arg1.jsBrief()} for s13n.bytes")
             }
             1 -> listOf("source").forBytes(source = arg0)
-            else -> throw WrappedIllegalArgumentException("Invalid arguments length ${argList.size} for $key.bytes")
+            else -> throw WrappedIllegalArgumentException("Invalid arguments length ${argList.size} for s13n.bytes")
         }
     }
 
@@ -190,8 +182,8 @@ object S13n : Augmentable() {
         funcSignature: List<String> = emptyList(),
     ): Any {
         val signature = when {
-            funcSignature.isNotEmpty() -> "$key.bytes(${funcSignature.joinToString(", ")})"
-            else -> "$key.bytes()"
+            funcSignature.isNotEmpty() -> "s13n.bytes(${funcSignature.joinToString(", ")})"
+            else -> "s13n.bytes()"
         }
         return CoreBytes.numberRhino(
             source = source,

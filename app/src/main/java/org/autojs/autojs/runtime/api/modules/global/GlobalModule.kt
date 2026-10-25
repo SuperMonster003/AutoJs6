@@ -5,7 +5,6 @@ import io.github.g00fy2.versioncompare.Version
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
-import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
@@ -14,6 +13,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptNameLookup
 import org.autojs.autojs.runtime.api.modules.ScriptProperty
 import org.autojs.autojs.runtime.api.modules.ScriptPrototype
 import org.autojs.autojs.runtime.api.modules.ScriptToString
+import org.autojs.autojs.runtime.api.modules.automator.Auto
 import org.autojs.autojs.runtime.api.modules.console.Console
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.Axis
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.ComponentFetchMode

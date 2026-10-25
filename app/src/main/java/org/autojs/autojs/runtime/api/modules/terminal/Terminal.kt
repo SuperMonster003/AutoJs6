@@ -2,9 +2,8 @@ package org.autojs.autojs.runtime.api.modules.terminal
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.terminal.TerminalJson
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.terminal.TerminalScriptArguments
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.util.RhinoUtils
@@ -36,36 +35,7 @@ import org.mozilla.javascript.NativeObject
 class Terminal(
     private val scriptRuntime: ScriptRuntime,
     private val service: TerminalService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("terminal"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::open.name,
-        ::openAsync.name,
-        ::sessions.name,
-        ::sessionsAsync.name,
-        ::session.name,
-        ::close.name,
-        ::closeAsync.name,
-        ::closeAll.name,
-        ::closeAllAsync.name,
-        ::show.name,
-        ::showAsync.name,
-        ::state.name,
-        ::isAvailable.name,
-        ::isAvailableAsync.name,
-        ::exec.name,
-        ::execAsync.name,
-        ::env.name,
-        ::envAsync.name,
-    )
-
-    /** `TerminalError` instances thrown by these functions reach the script unwrapped. zh-CN: 这些函数抛出的 `TerminalError` 实例不经包装到达脚本. */
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+) : ArgumentGuards() {
 
     /**
      * The data properties the `terminal` script module defines on its module object, in their order (its install hook

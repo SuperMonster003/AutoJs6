@@ -1,11 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.dialogs
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -42,10 +41,6 @@ class DialogsModuleTest {
         rhino.close()
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        Dialogs(side.ktRuntime).augment(side.ktScope.globalThis as ScriptableObject)
-    }
-
     @Test
     fun installingBuildsNothing() {
         listOf("dialogs", "\$dialogs").forEach { assertTrue(it, LazyDataSlot.isPending(rhino.ktScope.globalThis, it)) }
@@ -53,23 +48,18 @@ class DialogsModuleTest {
 
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "dialogs", mountCurrent = ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "dialogs")
         val names = GLOBALS.joinToString(", ") { "'$it'" }
         val globals = "[$names].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); " +
             "return k + ':' + typeof this[k] + ':' + (d ? [d.writable, d.enumerable, d.configurable].join('/') : 'none'); }, this).join()"
-        assertEquals(1, HostModuleTestSupport.assertSameResults(rhino, listOf(globals), emptyMap(), mountCurrent = ::mountCurrent))
+        assertEquals(1, HostModuleTestSupport.assertSameResults(rhino, listOf(globals), emptyMap()))
         HostModuleTestSupport.check(rhino, SURFACE)
         DEVICE.add(SURFACE)
     }
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: dialogs") {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            // The obsolete module reads the preset texts from the global `R` and assigns its globals with `__asGlobal__` when it loads.
-            rhino.evalJs("var R = { strings: {} }; var __asGlobal__ = function () {};")
-            SurfaceDiff.surface(host.load("dialogs"), rhino.jsScope.globalThis)
-        }
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: dialogs")
         val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("dialogs"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         HostModuleTestSupport.check(rhino, listOf("rawInput", "alert", "confirm", "prompt").map { "typeof $it" to "\"function\"" })

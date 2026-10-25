@@ -28,7 +28,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.runtime.api.modules.ui.UI
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -54,19 +53,7 @@ import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Scriptable
 import java.lang.reflect.Array as JavaArray
 
-class Dialogs(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::build.name,
-        ::rawInput.name to AS_GLOBAL,
-        ::input.name,
-        ::prompt.name to AS_GLOBAL,
-        ::alert.name to AS_GLOBAL,
-        ::confirm.name to AS_GLOBAL,
-        ::select.name,
-        ::singleChoice.name,
-        ::multiChoice.name,
-    )
+class Dialogs(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

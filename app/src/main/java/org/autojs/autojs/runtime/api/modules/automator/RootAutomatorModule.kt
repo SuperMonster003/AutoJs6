@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.automator
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.runtime.api.augment.automator.RootAutomatorNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptConstruct
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues

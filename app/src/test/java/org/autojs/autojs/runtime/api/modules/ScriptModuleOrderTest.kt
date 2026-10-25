@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.modules
 
 import com.google.gson.JsonParser
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.autojs.autojs.runtime.api.modules.generated.TestScriptModules
 import org.autojs.autojs.runtime.api.modules.sample.FakeEmitter
@@ -56,14 +56,12 @@ class ScriptModuleOrderTest {
         assertEquals(keys.filter { it in topLevel }, topLevel.filter { it in keys })
     }
 
+    /** Since P5.2 the layer mounts every top-level module itself (`mountInOrder` installs each name of `TOP_LEVEL_ORDER`). */
     @Test
-    fun augmentLegacyDispatchesTheTopLevelNamesInOrder() {
+    fun augmentMountsTheTopLevelNamesInOrder() {
         val source = File(SCRIPT_RUNTIME).readText()
-        val body = source.substringAfter("private fun augmentLegacy(").substringBefore("else -> throw IllegalStateException(")
-        val labels = Regex("^ {12}\"([^\"]+)\" ->", RegexOption.MULTILINE).findAll(body).map { it.groupValues[1] }.toList()
-        assertEquals(topLevel, labels)
-        assertTrue("augment() must walk ScriptModuleLayer.ORDER", source.contains("ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }"))
-        assertTrue("the built-in objects must be extended through the layer", source.contains("ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }"))
+        assertTrue("augment() must walk ScriptModuleLayer.ORDER", source.contains("ScriptModuleLayer.mountInOrder(scriptModules)"))
+        assertTrue("the built-in objects must be extended through the layer", source.contains("fun extendJsBuiltIns() = ScriptModuleLayer.extendBuiltIns(scriptModules)"))
         assertTrue("initEpilogue() must use extendJsBuiltIns()", source.contains("if (ExtensibilityKeys.EXTENDING_JS_BUILD_IN_OBJECTS.get()) extendJsBuiltIns()"))
         val engine = File(JAVASCRIPT_ENGINE).readText()
         assertTrue("the execution mode jsox must use extendJsBuiltIns()", engine.contains("mRuntime.extendJsBuiltIns();") && !engine.contains("Jsox."))

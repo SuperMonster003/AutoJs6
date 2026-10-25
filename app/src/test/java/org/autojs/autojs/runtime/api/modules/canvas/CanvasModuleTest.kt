@@ -1,14 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.canvas
 
-import org.autojs.autojs.runtime.api.augment.canvas.Canvas
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.1: the `Canvas` constructor on the new script module layer. A canvas needs Android's graphics, so the JVM
@@ -36,7 +34,7 @@ class CanvasModuleTest {
 
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "Canvas") { Canvas(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        HostModuleTestSupport.assertSameSurface(rhino, "Canvas")
         HostModuleTestSupport.check(rhino, SHAPE)
     }
 
@@ -54,7 +52,7 @@ class CanvasModuleTest {
     @Test
     fun argumentErrorsDifferFromTheCurrentModuleAsKnown() {
         val known = ERRORS.associate { (expression, expected) -> expression to (expected to "appendix E P3.1 Canvas (D10, Q7)") }
-        val compared = HostModuleTestSupport.assertSameResults(rhino, ERRORS.map { it.first }, known) { Canvas(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, ERRORS.map { it.first }, known)
         assertEquals(ERRORS.size, compared)
     }
 

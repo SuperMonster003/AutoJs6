@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.notice
 
+import org.autojs.autojs.app.GlobalAppContext
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.BigTextStyle
@@ -13,8 +14,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.app.App
 import org.autojs.autojs.runtime.api.modules.util.Util
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -36,23 +35,10 @@ import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredMemberProperties
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
-
-    override val selfAssignmentFunctions = listOf(
-        ::isEnabled.name,
-        ::ensureEnabled.name,
-        ::launchSettings.name,
-        ::config.name,
-        ::cancel.name,
-        ::getBuilder.name,
-    )
-
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "builder" to Supplier { getBuilder(scriptRuntime, emptyArray()) }
-    )
+class Notice(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     @Suppress("UnnecessaryVariable")
-    override fun invoke(vararg args: Any?): Int = ensureArgumentsAtMost(args, 3) { argList ->
+    fun invoke(vararg args: Any?): Int = ensureArgumentsAtMost(args, 3) { argList ->
         val (arg0, arg1, arg2) = argList
 
         when {
@@ -273,7 +259,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         fun cancel(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) { id ->
             if (!id.isJsNullish()) {
                 Context.toNumber(id).takeUnless { it.isNaN() }?.let {
-                    NotificationManagerCompat.from(globalContext).cancel(it.roundToInt())
+                    NotificationManagerCompat.from(GlobalAppContext.get()).cancel(it.roundToInt())
                 }
             }
             UNDEFINED
@@ -321,7 +307,7 @@ class Notice(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                     AppUtils.isActivityShortForm(intent) -> {
                         val prop = scriptRuntime.getProperty("class.$intent") as Class<*>?
                         checkNotNull(prop) { "Activity short form $intent not found" }
-                        Intent(globalContext, prop).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        Intent(GlobalAppContext.get(), prop).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     else -> {
                         val rexWebSiteWithoutProtocol = Regex("^(www\\.)?[a-z0-9]+(\\.[a-z]{2,}){1,3}(#?/?.*)?$")

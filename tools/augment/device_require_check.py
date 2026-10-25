@@ -1,14 +1,16 @@
-"""ROADMAP P3.7: smoke of require on a device, with the switch of the new script module layer off and then on.
+"""ROADMAP P3.7: smoke of require on a device.
 
     py -3.12 -I tools/augment/device_require_check.py -s SERIAL
 
-Pushes bench/require_smoke to /sdcard/Download/aj6-augment-bench/p37 and, in each state, runs main.js (file modules,
-JSON, packages, index.js, node_modules found upwards, a cycle, the three files of issue #564, core names, axios, errors,
-runMain) and project/ (a project with the continuation feature whose modules suspend at their top level, started through
-ProjectLauncher as the app starts a project). The "AJ6REQ <item> <value>" lines of the two runs are compared: an item
-outside REGISTERED must print the same value in both states (and the value of EXPECTED where given); a registered item
-(appendix E "P3.7") must differ, and its value with the switch on must contain every text listed for it. Prints one line
-per item and PASS / FAIL. The switch is restored to its previous value and the device directory is removed afterwards.
+Pushes bench/require_smoke to /sdcard/Download/aj6-augment-bench/p37 and runs main.js (file modules, JSON, packages,
+index.js, node_modules found upwards, a cycle, the three files of issue #564, core names, axios, errors, runMain) and
+project/ (a project with the continuation feature whose modules suspend at their top level, started through
+ProjectLauncher as the app starts a project). Of the "AJ6REQ <item> <value>" lines, an item of EXPECTED must print its
+value, a registered item (appendix E "P3.7") a value containing every text listed for it, and every other item must be
+there (its value is printed). Until P5.2 both ran with the switch of the new script module layer off (jvm-npm) and then
+on, an item outside REGISTERED had to print the same in both and a registered one had to differ; the values of EXPECTED
+and REGISTERED are those of the two states. Prints one line per item and PASS / FAIL. The device directory is removed
+afterwards.
 Each run reads the GlobalConsole lines logged since its start second (logcat -T), as device_bootstrap_check.py does:
 `logcat -c` does not reliably drop the previous run's lines on every device.
 """
@@ -25,7 +27,7 @@ MARK = "AJ6REQ"
 LOCAL = db.HERE / "bench" / "require_smoke"
 REMOTE = f"{db.DEVICE_DIR}/p37"
 
-# Values that must be printed in both states.
+# Values that must be printed (until P5.2 in both states of the switch).
 EXPECTED = {
     "file": '["a","<root>/lib/a.js","<root>/lib",true,"undefined"]',
     "json": '{"x":1,"exports":2}',
@@ -39,7 +41,7 @@ EXPECTED = {
     "cont-modules": '["inner a / b",true,true]',
 }
 
-# Registered differences: the texts the value with the switch on must contain (appendix E "P3.7", Q81 fixes and Q83).
+# Registered differences from jvm-npm: the texts the value must contain (appendix E "P3.7", Q81 fixes and Q83).
 REGISTERED = {
     "missing": ["throws Error [Cannot find module './nope'", "code=MODULE_NOT_FOUND"],
     "missing-bare": ["throws Error [Cannot find module 'aj6-nope-pkg'", "code=MODULE_NOT_FOUND"],
@@ -99,34 +101,29 @@ def main():
     text = (db.HERE / "bench" / "bootstrap_smoke" / "launch_project.js").read_text(encoding="utf-8")
     launcher.write_text(text.replace("PROJECT_DIR", f"{REMOTE}/project"), encoding="utf-8")
     db.adb(s, "push", str(launcher), f"{REMOTE}/launch.js", check=True)
-    previous = None
-    runs = {}
     try:
-        for on in (False, True):
-            before = db.set_new_modules(s, on)
-            previous = before if previous is None else previous
-            runs[on] = run_state(s, f"{REMOTE}/launch.js", args.wait)
+        items, finished = run_state(s, f"{REMOTE}/launch.js", args.wait)
     finally:
-        if previous is not None:
-            db.set_new_modules(s, previous)
         db.adb(s, "shell", "rm", "-rf", REMOTE)
-    (off, off_done), (on, on_done) = runs[False], runs[True]
-    failures = [f"run did not finish: {name}" for name, done in (("off", off_done), ("on", on_done)) if not done]
-    for item in list(dict.fromkeys(list(off) + list(on) + list(EXPECTED) + list(REGISTERED))):
-        a, b = off.get(item), on.get(item)
-        if a is None or b is None:
+    failures = [] if finished else ["run did not finish"]
+    for item in list(dict.fromkeys(list(items) + list(EXPECTED) + list(REGISTERED))):
+        value = items.get(item)
+        if value is None:
             failures.append(item)
-            print(f"{item}: MISSING off {a} | on {b}")
-        elif item in REGISTERED:
-            ok = a != b and all(t in b for t in REGISTERED[item])
-            if not ok:
-                failures.append(item)
-            print(f"{item}: {'registered' if ok else 'FAIL registered'} off {a} | on {b}")
+            print(f"{item}: MISSING")
+            continue
+        if item in REGISTERED:
+            ok = all(t in value for t in REGISTERED[item])
+            label = "registered"
+        elif item in EXPECTED:
+            ok = value == EXPECTED[item]
+            label = "expected"
         else:
-            ok = a == b and (item not in EXPECTED or b == EXPECTED[item])
-            if not ok:
-                failures.append(item)
-            print(f"{item}: same {b}" if ok else f"{item}: FAIL off {a} | on {b}")
+            ok = True
+            label = "printed"
+        if not ok:
+            failures.append(item)
+        print(f"{item}: {label if ok else 'FAIL ' + label} {value}")
     print("FAIL: " + ", ".join(failures) if failures else "PASS")
     return 1 if failures else 0
 

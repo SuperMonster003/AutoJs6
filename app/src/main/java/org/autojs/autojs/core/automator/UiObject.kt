@@ -32,7 +32,7 @@ import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.query.Poller
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.automator.DumpArguments
+import org.autojs.autojs.runtime.api.modules.automator.DumpArguments
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.DisplayUtils.toRoundIntX
 import org.autojs.autojs.util.DisplayUtils.toRoundIntY

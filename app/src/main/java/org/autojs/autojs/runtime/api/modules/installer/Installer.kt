@@ -1,9 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.installer
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.installer.InstallerScriptArguments
 import org.autojs.autojs.runtime.api.installer.InstallerScriptOptions
 import org.autojs.autojs.runtime.api.installer.InstallerScriptValues
@@ -24,23 +23,7 @@ internal typealias InstallerWork = suspend () -> Any?
 class Installer(
     private val runtime: ScriptRuntime,
     private val service: InstallerService,
-) : Augmentable(runtime) {
-    override val keys = listOf(AugmentableKey("installer"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::install.name, ::installAsync.name, ::session.name,
-        ::uninstall.name, ::uninstallAsync.name, ::inspect.name, ::inspectAsync.name,
-        ::isDefault.name, ::setDefault.name, ::setDefaultAsync.name,
-        ::users.name, ::usersAsync.name, ::isAvailable.name,
-    )
-
-    override val scriptErrorPassThroughFunctions: Set<String> get() = selfAssignmentFunctions.toSet()
-
-    override val selfAssignmentGetters = listOf<Any>(
-        "status" to Supplier<Any?> { statusValue() },
-    )
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+) : ArgumentGuards() {
 
     /**
      * The data properties the `installer` script module defines on its module object, in their order (its install hook

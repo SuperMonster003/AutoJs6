@@ -12,7 +12,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsArray
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.automator.EventWaitApi
+import org.autojs.autojs.runtime.api.modules.automator.EventWaitApi
 import org.autojs.autojs.runtime.api.modules.global.Global
 import org.autojs.autojs.runtime.api.modules.promise.PromiseSuspension
 import org.autojs.autojs.runtime.api.modules.toJsPromise

@@ -1,9 +1,9 @@
 // Calls of the modules of roadmap P3.2 (ui, dialogs, console, notice, toast, floaty), appended to bench/calls_prelude.js
-// by device_bench.py --calls ui. With the switch of the new script module layer on they reach the new modules, with it
-// off the current augment modules. Nothing is shown, posted or written: the "ok" cases only read state or post an empty
+// by device_bench.py --calls ui. They reach the modules of the script module layer (with its switch off they reached the
+// old augment ones until P5.2). Nothing is shown, posted or written: the "ok" cases only read state or post an empty
 // action to the UI thread, and every "fail" case is one the old modules also reject or ignore without showing anything
-// (old toast / notice / floaty calls with wrong arguments may still show a toast, post a notification or open a
-// settings page, so those are left out); they are compared with the "ref" cases of the prelude.
+// (old toast / notice / floaty calls with wrong arguments may still show a toast, post a notification or open a settings
+// page, so those are left out); they are compared with the "ref" cases of the prelude.
 // Arguments are built once, so that the timed calls do not include building an object (the ref cases build none).
 let benchAction = () => { }, benchNope = { nope: 1 };
 time("ok ui.isUiThread", () => { try { ui.isUiThread(); } catch (e) { } });

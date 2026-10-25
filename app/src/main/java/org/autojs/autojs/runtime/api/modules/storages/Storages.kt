@@ -3,23 +3,16 @@ package org.autojs.autojs.runtime.api.modules.storages
 import android.content.Context.MODE_PRIVATE
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.storage.LocalStorage
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
 
-object Storages : Augmentable() {
-
-    override val selfAssignmentFunctions = listOf(
-        ::create.name,
-        ::remove.name,
-        ::removeSync.name,
-        ::all.name,
-        ::names.name,
-    )
+object Storages : ArgumentGuards() {
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -45,7 +38,7 @@ object Storages : Augmentable() {
     fun removeRhino(name: Any?) = when {
         name.isJsNullish() -> throw WrappedIllegalArgumentException("Argument for storages.remove cannot be nullish")
         else -> LocalStorage.NAME_PREFIX + Context.toString(name)
-    }.let { globalContext.getSharedPreferences(it, MODE_PRIVATE).edit().clear().apply() }
+    }.let { GlobalAppContext.get().getSharedPreferences(it, MODE_PRIVATE).edit().clear().apply() }
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -58,7 +51,7 @@ object Storages : Augmentable() {
     fun removeSyncRhino(name: Any?) = when {
         name.isJsNullish() -> throw WrappedIllegalArgumentException("Argument for storages.remove cannot be nullish")
         else -> LocalStorage.NAME_PREFIX + Context.toString(name)
-    }.let { globalContext.getSharedPreferences(it, MODE_PRIVATE).edit().clear().commit() }
+    }.let { GlobalAppContext.get().getSharedPreferences(it, MODE_PRIVATE).edit().clear().commit() }
 
     @JvmStatic
     @RhinoSingletonFunctionInterface

@@ -205,9 +205,7 @@ class SettingsDomainsTest {
          * zh-CN: P0 基线之后由其他路线图的决定改了默认值的设置 (R2 约束的是设置层路线图本身): 资源名 -> 新的默认值文本.
          */
         private val DEFAULTS_CHANGED_AFTER_P0: Map<String, String?> = mapOf(
-            // docs/augment/ROADMAP.md P5.1 (D8): the new script module layer is on by default, fragment_developer_options.xml
-            // app:defaultValue="true"; the old augment package and this switch go in P5.2.
-            "key_new_script_module_layer" to "true",
+            // docs/augment/ROADMAP.md P5.1 (D8) turned key_new_script_module_layer on by default; P5.2 removed the switch.
         )
 
         /**

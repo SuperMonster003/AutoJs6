@@ -1,21 +1,17 @@
 package org.autojs.autojs.runtime.api.modules.web
 
-import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertSame
+import org.junit.Assert.assertFalse
 import org.junit.Test
-import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.Scriptable.NOT_FOUND
 
 /**
  * Freezes the static fields scripts can read from `WebSocket` (`web.newWebSocket` result class): the public
- * constants of `WebSocket.Companion`, nothing else. A change here is a change of the script surface.
+ * constants of `WebSocket.Companion`, nothing else, as the lookup prototype [WebSocketConstants] (the current
+ * `WebSocketFields` until P5.2) gives them. A change here is a change of the script surface.
  * zh-CN: 固化脚本可从 `WebSocket` (`web.newWebSocket` 返回值的类) 读取的静态字段: `WebSocket.Companion` 的公开常量,
- * 仅此而已. 这里的变化就是脚本表面的变化.
+ * 仅此而已, 由名称查找原型 [WebSocketConstants] (P5.2 之前为现有 `WebSocketFields`) 给出. 这里的变化就是脚本表面的变化.
  */
 class WebSocketFieldsTest {
-
-    private val scope = NativeObject()
 
     private val expected = mapOf(
         "CODE_CLOSE_NORMAL" to 1000,
@@ -45,14 +41,13 @@ class WebSocketFieldsTest {
 
     @Test
     fun `exports exactly the public companion constants`() {
-        assertEquals(expected.keys, WebSocketFields.exportedNames)
-        expected.forEach { (name, value) -> assertEquals(name, value, WebSocketFields.get(scope, name)) }
+        assertEquals(expected, WebSocketConstants.VALUES)
     }
 
     @Test
     fun `hides private members, functions and the companion holder`() {
         listOf("TAG", "instances", "DEFAULT_EXIT_ON_CLOSE_TIMEOUT", "Companion", "onExit", "missing").forEach {
-            assertSame(it, NOT_FOUND, WebSocketFields.get(scope, it))
+            assertFalse(it, it in WebSocketConstants.VALUES)
         }
     }
 

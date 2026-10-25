@@ -5,7 +5,6 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.project.ScriptConfig.Companion.FEATURE_CONTINUATION
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.mozilla.javascript.Scriptable
 import java.util.function.Supplier
 
@@ -16,17 +15,7 @@ import java.util.function.Supplier
 //  ! zh-CN:
 //  ! 这个扩充类并不完全适用于协程对象 (continuation), 因为 Continuation#await 调用总是会卡住.
 //  ! 或许在 org.mozilla.javascript.Context#captureContinuation 可以找到一些线索.
-class Continuation(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "enabled" to Supplier { isEnabled(scriptRuntime) }
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::create.name,
-        // ::await.name,
-        // ::delay.name,
-    )
+class Continuation(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

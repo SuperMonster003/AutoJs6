@@ -1033,7 +1033,6 @@
     <string name="summary_memory_force_gc">执行 3 次垃圾回收与 finalization, 最长等待 10 秒让已结束的 runtime 被回收, 然后刷新</string>
     <string name="summary_memory_script_heap_dump">允许 memory.dumpHeap 在 release 版本中写出堆转储 (debug 版本始终允许). 堆转储包含堆中的全部数据 (含所有脚本的变量)</string>
     <string name="summary_memory_unreclaimed_warning">脚本结束 10 秒后执行一次垃圾回收, 若其 runtime 仍未被回收, 则向全局控制台输出一条警告</string>
-    <string name="summary_new_script_module_layer">脚本使用新的脚本模块实现 (默认开启). 关闭后改用旧实现, 旧实现将在后续版本中移除. 对之后启动的脚本生效</string>
     <string name="summary_nodejs_doctor_report">生成已隐去隐私信息的 Node 运行时诊断报告, 用于提交错误报告</string>
     <string name="summary_nodejs_inspector_enabled">允许脚本进行本地调试和性能分析. 桌面 DevTools 通过 ADB 端口转发连接.</string>
     <string name="summary_not_showing_main_activity">启动应用后直接运行脚本</string>
@@ -2394,7 +2393,6 @@
     <string name="text_new_path">新路径</string>
     <string name="text_new_path_is_same_as_old_path">新旧路径相同</string>
     <string name="text_new_project">新建项目</string>
-    <string name="text_new_script_module_layer">使用新的脚本模块实现</string>
     <string name="text_new_version_found">检测到新版本</string>
     <string name="text_new_watching_variables">增加监视的变量或表达式</string>
     <string name="text_next_retry">下次重试</string>

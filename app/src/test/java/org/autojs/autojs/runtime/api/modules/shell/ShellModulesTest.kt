@@ -1,13 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.shell
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.plugins.Plugins
-import org.autojs.autojs.runtime.api.modules.plugins.PluginsTools
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -33,7 +30,7 @@ class ShellModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -49,7 +46,7 @@ class ShellModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
     }
 
@@ -151,19 +148,15 @@ class ShellModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
-        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope).also { it.setRuntimeProperty("shizuku", rhino.evalJs("({})")) } }
-        val before by lazy { host.global.allIds.toSet() }
         listOf("shell", "plugins", "shizuku").forEach { name ->
-            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name") { before; SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis) }
+            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(js, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
             if (name == "shizuku") assertTrue(js.keys.toString(), js.isEmpty())
         }
         // The obsolete shell and shizuku were callable; plugins was a plain object (callable on the new layer, an addition).
         listOf("shell", "shizuku").forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
-        val globals = ScriptModuleExpectations.obsolete("globals") { host.global.allIds.filterIsInstance<String>().filterNot { it in before }.joinToString(",") }.split(",")
+        val globals = ScriptModuleExpectations.obsolete("globals").split(",")
         assertEquals(GLOBALS.filter { it.first().isUpperCase() }.sorted(), globals.sorted())
         globals.forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
     }
@@ -177,9 +170,7 @@ class ShellModulesTest {
     @Test
     fun getCommandGivesTheSameResultsAsTheCurrentModule() {
         val expressions = COMMAND_RESULTS + COMMAND_KNOWN.keys
-        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, COMMAND_KNOWN, prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }) {
-            RuntimeModulesFixture.mount(it, listOf("shell"), newLayer = false) { _, global, runtime -> Shell(runtime).augment(global) }
-        }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, COMMAND_KNOWN)
         assertEquals(expressions.size, compared)
         // A command built by concatenation (a ConsString in Rhino) is a string as documented.
         HostModuleTestSupport.check(rhino, listOf("(function () { var s = 's'; return shell.getCommand('l' + s); })()" to "\"ls\""))
@@ -212,15 +203,9 @@ class ShellModulesTest {
         )
     )
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         RuntimeModulesFixture.prepareHost(side.ktRuntime)
-        RuntimeModulesFixture.mount(side, MODULES + (if (newLayer) listOf("shizuku") else emptyList()), newLayer) { name, global, runtime ->
-            when (name) {
-                "shell" -> Shell(runtime).augment(global)
-                "plugins" -> Plugins(runtime).augment(global).also { PluginsTools(runtime).augment(it) }
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES + "shizuku")
     }
 
     private companion object {

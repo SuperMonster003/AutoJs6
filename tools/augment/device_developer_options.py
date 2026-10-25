@@ -1,11 +1,11 @@
 """Opens the developer options page of the installed host and takes a screenshot (roadmap P1.3).
 
-Usage: py -3.12 -I tools/augment/device_developer_options.py -s SERIAL [--out DIR] [--new-modules on|off] [--debug-print on|off]
+Usage: py -3.12 -I tools/augment/device_developer_options.py -s SERIAL [--out DIR] [--debug-print on|off]
 
 DeveloperOptionsActivity is not exported, so `am start` from adb cannot open it; a small script started through
-RunIntentActivity opens it from the app's own process instead (no taps). --new-modules / --debug-print set the hidden
-preferences first (as device_eval.py does) and are not restored, so the screenshot shows those values; run again with
-the old values to restore them. The screenshot is pulled to --out (default: tools/augment/__pycache__/) and the
+RunIntentActivity opens it from the app's own process instead (no taps). --debug-print sets the hidden preference first
+(as device_eval.py does) and is not restored, so the screenshot shows that value; run again with the old value to
+restore it (--new-modules set the switch of the new script module layer the same way until P5.2 removed it). The screenshot is pulled to --out (default: tools/augment/__pycache__/) and the
 pushed script is removed. The screen must be on and unlocked; the script only checks and reports it.
 """
 import argparse
@@ -22,7 +22,6 @@ PACKAGE = "org.autojs.autojs6"
 ACTIVITY = "org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
 MARK = "AJ6OPEN"
 KEYS = {
-    "new_modules": "key_$_new_script_module_layer",
     "debug_print": "key_$_script_module_debug_print",
 }
 
@@ -69,7 +68,6 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--out", type=pathlib.Path, default=HERE / "__pycache__")
-    parser.add_argument("--new-modules", choices=["on", "off"])
     parser.add_argument("--debug-print", choices=["on", "off"])
     parser.add_argument("--wait", type=float, default=2.5, help="seconds between opening the page and the screenshot")
     args = parser.parse_args()

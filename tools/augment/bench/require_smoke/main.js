@@ -1,6 +1,7 @@
-// ROADMAP P3.7 smoke of require: run by tools/augment/device_require_check.py with the switch of the new script module
-// layer off and on, which compares the "AJ6REQ <item> <value>" lines of the two runs. Paths are printed relative to this
-// directory ("<root>"); the items of the registered differences (appendix E "P3.7") are listed in the tool.
+// ROADMAP P3.7 smoke of require: run by tools/augment/device_require_check.py, which checks the "AJ6REQ <item> <value>"
+// lines against its expected values (until P5.2 it compared them with those of jvm-npm, the switch of the new script
+// module layer off). Paths are printed relative to this directory ("<root>"); the items of the registered differences
+// from jvm-npm (appendix E "P3.7") are listed in the tool.
 var MARK = 'AJ6REQ';
 var root = String(files.cwd());
 var canonical = String(new java.io.File(root).getCanonicalPath());

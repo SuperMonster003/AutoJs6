@@ -3,13 +3,10 @@ package org.autojs.autojs.runtime.api.modules.global
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.global.Classes
-import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
-import org.autojs.autojs.runtime.api.augment.global.Legacy
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.autojs.autojs6.BuildConfig
 import org.junit.After
@@ -22,7 +19,6 @@ import org.mozilla.javascript.EcmaError
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.ScriptableObject
 import java.io.File
-import java.lang.reflect.Modifier
 import kotlin.reflect.KClass
 import org.autojs.autojs.runtime.api.modules.global.CoordinateScale as CurrentCoordinateScale
 
@@ -47,7 +43,7 @@ class GlobalModuleTest {
     fun setUp() {
         rhino = DifferentialRhino()
         prepare(rhino.ktRuntime)
-        mountInOrder(rhino.ktScope.globalThis, rhino.ktRuntime, newLayer = true)
+        mountInOrder(rhino.ktScope.globalThis, rhino.ktRuntime)
     }
 
     @After
@@ -68,15 +64,7 @@ class GlobalModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = describe(rhino)
-        val expected = ScriptModuleExpectations.obsolete("describe") {
-            DifferentialRhino().use { current ->
-                prepare(current.ktRuntime)
-                mountInOrder(current.ktScope.globalThis, current.ktRuntime, newLayer = false)
-                // Documented: Image is an alias of ImageWrapper; the current Classes.Image is the class of a KClass value
-                // (ROADMAP appendix E, P3.0).
-                describe(current).replace(Regex("(?<=;Image function )\\[JavaClass [\\w.]+]"), "[JavaClass ${ImageWrapper::class.java.name}]")
-            }
-        }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }
 
@@ -99,19 +87,17 @@ class GlobalModuleTest {
         listOf("TODO", "wait", "cXy", "isObjectSpecies").forEach { assertTrue(it, LazyDataSlot.isPending(global, it)) }
     }
 
-    /** `GlobalJavaClasses` lists exactly the fields of the current `Classes`, each with the same class. */
+    /**
+     * `GlobalJavaClasses` lists exactly the 156 fields of the current `Classes`, each with the same class (the field table
+     * recorded before P5.2 removed `Classes`, [ScriptModuleExpectations]).
+     */
     @Test
     fun javaClassesMatchTheCurrentClasses() {
-        val current = Classes()
-        val fields = Classes::class.java.declaredFields.filter { !Modifier.isStatic(it.modifiers) }
-        assertEquals(156, fields.size)
-        assertEquals(fields.map { it.name }.sorted(), GlobalJavaClasses.NAMES.sorted())
-        fields.forEach { field ->
-            // Documented alias (appendix E, P3.0): the current field holds the class of a KClass value.
-            val type = if (field.name == "Image") ImageWrapper::class.java else (field.get(current) as KClass<*>).java
-            assertEquals(field.name, type, GlobalJavaClasses.classOf(field.name))
-        }
-        assertTrue(KClass::class.java.isAssignableFrom((Classes::class.java.getDeclaredField("Image").get(current) as KClass<*>).java))
+        assertEquals(156, GlobalJavaClasses.NAMES.size)
+        val actual = GlobalJavaClasses.NAMES.filter { it != "Image" }.sorted().joinToString("\n") { name -> "$name=${GlobalJavaClasses.classOf(name)!!.canonicalName}" }
+        assertEquals(ScriptModuleExpectations.obsolete("classes"), actual)
+        // Documented alias (appendix E, P3.0): the current field held the class of a KClass value.
+        assertEquals(ImageWrapper::class.java, GlobalJavaClasses.classOf("Image"))
         assertEquals(null, GlobalJavaClasses.classOf("NoSuchClass"))
     }
 
@@ -443,20 +429,10 @@ class GlobalModuleTest {
             }
         }
 
-        /** global, legacy, isNullish and species in their order: from the new layer, or all from their current augment calls. */
-        private fun mountInOrder(global: ScriptableObject, runtime: ScriptRuntime, newLayer: Boolean) {
-            val mounter = if (newLayer) ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ScriptModuleLayer.ORDER) else null
-            ScriptModuleLayer.TOP_LEVEL_ORDER.filter { it in MODULES }.forEach { name ->
-                ScriptModuleLayer.mountOr(mounter, name) {
-                    when (name) {
-                        "global" -> Global(runtime).assignWithRuntime(global, runtime, GlobalClasses)
-                        "legacy" -> Legacy(runtime).assignWithRuntime(global, runtime)
-                        "isNullish" -> IsNullish.augmentWithRuntime(global, runtime)
-                        "species" -> Species.augmentWithRuntime(global, runtime)
-                        else -> throw AssertionError(name)
-                    }
-                }
-            }
+        /** global, legacy, isNullish and species from the new layer in their order. */
+        private fun mountInOrder(global: ScriptableObject, runtime: ScriptRuntime) {
+            val mounter = ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ScriptModuleLayer.ORDER)
+            ScriptModuleLayer.TOP_LEVEL_ORDER.filter { it in MODULES }.forEach { name -> check(mounter.install(name)) { name } }
         }
 
         private val MODULES = listOf("global", "legacy", "isNullish", "species")

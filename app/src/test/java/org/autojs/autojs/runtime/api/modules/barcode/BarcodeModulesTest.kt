@@ -1,16 +1,14 @@
 package org.autojs.autojs.runtime.api.modules.barcode
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.1: `barcode` and `qrcode` on the new script module layer. Detection needs the ML Kit barcode plugin, so the
@@ -43,18 +41,10 @@ class BarcodeModulesTest {
         rhino.close()
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        val global = side.ktScope.globalThis as ScriptableObject
-        Barcode(side.ktRuntime).augment(global)
-        QrCode(side.ktRuntime).augment(global)
-    }
-
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
         listOf("barcode", "qrcode").forEach { name ->
-            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") {
-                SurfaceDiff.surface(ObsoleteModuleHost(rhino.context, rhino.jsScope).load(name), rhino.jsScope.globalThis)
-            }
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
@@ -62,9 +52,9 @@ class BarcodeModulesTest {
 
     @Test
     fun surfaceMatchesTheCurrentModules() {
-        HostModuleTestSupport.assertSameSurface(rhino, "barcode", mountCurrent = ::mountCurrent)
-        HostModuleTestSupport.assertSameSurface(rhino, "qrcode", mountCurrent = ::mountCurrent)
-        val compared = HostModuleTestSupport.assertSameResults(rhino, SHAPE.map { it.first }, emptyMap(), mountCurrent = ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "barcode")
+        HostModuleTestSupport.assertSameSurface(rhino, "qrcode")
+        val compared = HostModuleTestSupport.assertSameResults(rhino, SHAPE.map { it.first }, emptyMap())
         assertTrue("compared $compared", compared == SHAPE.size)
         HostModuleTestSupport.check(rhino, SHAPE)
     }

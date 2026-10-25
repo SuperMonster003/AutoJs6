@@ -1,17 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.http
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 import org.autojs.autojs.runtime.api.Http as ApiHttp
 
 /**
@@ -29,12 +27,10 @@ import org.autojs.autojs.runtime.api.Http as ApiHttp
 class HttpModuleTest {
 
     private lateinit var rhino: DifferentialRhino
-    private lateinit var jsHttp: Any
 
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) jsHttp = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("http")!!
         prepare(rhino)
         rhino.mountNewModules("http")
     }
@@ -46,19 +42,15 @@ class HttpModuleTest {
 
     private fun prepare(side: DifferentialRhino) = HostModuleTestSupport.setField(side.ktRuntime, "http", ApiHttp())
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        Http(side.ktRuntime).augment(side.ktScope.globalThis as ScriptableObject, side.ktRuntime.http)
-    }
-
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsHttp, rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("http"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface"), SurfaceDiff.surface(rhino.evalKt("http"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "http", ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "http")
     }
 
     @Test
@@ -68,7 +60,7 @@ class HttpModuleTest {
 
     @Test
     fun resultsMatchTheCurrentModule() {
-        val compared = HostModuleTestSupport.assertSameResults(rhino, BUILD_REQUESTS.map { it.first } + CURRENT_ONLY.map { it.first }, KNOWN_CURRENT, ::prepare, ::mountCurrent)
+        val compared = HostModuleTestSupport.assertSameResults(rhino, BUILD_REQUESTS.map { it.first } + CURRENT_ONLY.map { it.first }, KNOWN_CURRENT)
         assertTrue("compared $compared", compared == BUILD_REQUESTS.size + CURRENT_ONLY.size)
         HostModuleTestSupport.check(rhino, BUILD_REQUESTS + CURRENT_ONLY)
         DEVICE.add(CURRENT_ONLY)

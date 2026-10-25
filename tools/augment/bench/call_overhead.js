@@ -1,5 +1,6 @@
-// Per-call overhead of an augmented Kotlin function versus Rhino's own Java bridge and a plain JS function.
-// device.isScreenPortrait() is registered through Augmentable (LambdaFunction -> Method.invoke -> toJsValue);
+// Per-call overhead of a Kotlin module function versus Rhino's own Java bridge and a plain JS function.
+// device.isScreenPortrait() is a function of the script module layer (until P5.2 the old layer registered it through
+// Augmentable: LambdaFunction -> Method.invoke -> toJsValue);
 // Object.getPrototypeOf(device) is the wrapped org.autojs.autojs.runtime.api.Device, so the same Java method
 // is reached through NativeJavaMethod. The error path calls device.vibrate() with no arguments 1000 times.
 let N = 200000;

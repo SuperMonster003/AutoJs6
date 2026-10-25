@@ -6,7 +6,7 @@ import org.autojs.autojs.core.automator.filter.BooleanFilter
 import org.autojs.autojs.core.automator.filter.JsRegexUtils
 import org.autojs.autojs.core.automator.filter.PatternPrecheck
 import org.autojs.autojs.core.automator.selector.SelectorRegistry.Outcome
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

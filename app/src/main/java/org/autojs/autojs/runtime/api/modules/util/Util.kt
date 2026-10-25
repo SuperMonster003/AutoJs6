@@ -23,8 +23,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.util.Java
 import org.autojs.autojs.runtime.api.modules.global.Species
 import org.autojs.autojs.runtime.api.modules.util.Inspect.inspectRhino
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -61,61 +59,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * Created by SuperMonster003 on Jun 3, 2024.
  */
 @Suppress("unused", "FunctionName", "UNUSED_PARAMETER")
-object Util : Augmentable() {
-
-    @Suppress("DEPRECATION")
-    override val selfAssignmentFunctions = listOf(
-        ::__assignFunctions__.name to (READONLY or DONTENUM or PERMANENT),
-        ::isArray.name,
-        ::isBoolean.name,
-        ::isNull.name,
-        ::isNullOrUndefined.name,
-        ::isNumber.name,
-        ::isString.name,
-        ::isSymbol.name,
-        ::isUndefined.name,
-        ::isRegExp.name,
-        ::isObject.name,
-        ::isDate.name,
-        ::isError.name,
-        ::isFunction.name,
-        ::isBigInt.name,
-        ::isJavaObject.name,
-        ::isJavaArray.name,
-        ::isInteger.name,
-        ::isPrimitive.name,
-        ::isReference.name,
-        ::isEmptyObject.name,
-        ::unwrapJavaObject.name,
-        ::extend.name,
-        ::format.name,
-        ::deprecate.name,
-        ::debuglog.name,
-        ::log.name,
-        ::checkStringParam.name,
-        ::checkStringArgument.name,
-        ::assureStringStartsWith.name,
-        ::assureStringEndsWith.name,
-        ::assureStringSurroundsWith.name,
-        ::ensureType.name,
-        ::ensureStringType.name,
-        ::ensureNumberType.name,
-        ::ensureUndefinedType.name,
-        ::ensureBooleanType.name,
-        ::ensureSymbolType.name,
-        ::ensureBigIntType.name to listOf(::ensureBigIntType.name, "ensureBigintType"),
-        ::ensureObjectType.name,
-        ::ensureFunctionType.name,
-        ::ensureNonNullObjectType.name,
-        ::ensureArrayType.name,
-        ::toRegular.name,
-        ::toRegularAndCall.name,
-        ::toRegularAndApply.name,
-        ::dpToPx.name,
-        ::spToPx.name,
-        ::pxToDp.name,
-        ::pxToSp.name,
-    )
+object Util : ArgumentGuards() {
 
     private val availableTypes = listOf(
         "object", "string", "undefined", "symbol",

@@ -1,6 +1,6 @@
 // Calls of the global Promise (roadmap P4.2 / appendix C Q95), appended to bench/calls_prelude.js by device_r2.py
-// --calls promise. With the switch of the new script module layer on the global Promise is PromiseConstructor, with it
-// off assets/modules/promise.js. The "ok" cases time the synchronous part of a call (then on a settled promise posts its
+// --calls promise. The global Promise is PromiseConstructor (with the switch of the new script module layer off it was
+// assets/modules/promise.js until P5.2). The "ok" cases time the synchronous part of a call (then on a settled promise posts its
 // reaction to the timer, run later by the looper or by the wait() of a later case); the "fail" cases throw the TypeError
 // of the constructor, compared with the "ref" cases of the prelude.
 let noop = function () { };

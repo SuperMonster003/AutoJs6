@@ -68,11 +68,7 @@ class ProcessWideAssetModuleScriptProvider internal constructor(
                 )
             }
         }
-        return if (resolved.relativePath in STRONGLY_CACHED_MODULES) {
-            strongModuleScripts.getOrPut(key, compileModule)
-        } else {
-            softModuleScripts.getOrPut(key, compileModule)
-        }
+        return softModuleScripts.getOrPut(key, compileModule)
     }
 
     private fun resolveModuleId(moduleId: String): ResolvedAsset? {
@@ -124,12 +120,6 @@ class ProcessWideAssetModuleScriptProvider internal constructor(
 
         private const val JAVASCRIPT_EXTENSION = ".js"
         private val URI_SCHEME = Regex("^[A-Za-z][A-Za-z0-9+.-]*:")
-        // The modules every script loads (roadmap P2.5 left promise and jvm-npm; the polyfills now load on first access).
-        private val STRONGLY_CACHED_MODULES = setOf(
-            "promise.js",
-            "jvm-npm.js",
-        )
-
         private fun normalizeAssetRoot(assetDirPath: String): String {
             return assetDirPath.replace('\\', '/').trim('/')
                 .also { require(it.isNotEmpty()) { "Asset module root must not be empty" } }
@@ -195,7 +185,6 @@ internal object ProcessWideRhinoAssetCache {
 
     internal fun clearForTests() {
         bootstrapScripts.clear()
-        strongModuleScripts.clear()
         softModuleScripts.clear()
     }
 
@@ -250,26 +239,7 @@ private data class ModuleCacheKey(
     val uri: URI,
 )
 
-private val strongModuleScripts = SingleFlightStrongCache<ModuleCacheKey, ModuleScript>()
 private val softModuleScripts = SingleFlightSoftCache<ModuleCacheKey, ModuleScript>()
-
-private class SingleFlightStrongCache<K : Any, V : Any> {
-
-    private val values = ConcurrentHashMap<K, V>()
-    private val locks = Array(LOCK_COUNT) { Any() }
-
-    fun getOrPut(key: K, producer: () -> V?): V? {
-        values[key]?.let { return it }
-        synchronized(locks[stripeIndex(key)]) {
-            values[key]?.let { return it }
-            val value = producer() ?: return null
-            values[key] = value
-            return value
-        }
-    }
-
-    fun clear() = values.clear()
-}
 
 private class SingleFlightSoftCache<K : Any, V : Any> {
 

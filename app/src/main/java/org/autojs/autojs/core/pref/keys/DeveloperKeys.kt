@@ -9,24 +9,18 @@ import org.autojs.autojs.core.pref.SettingsDomain
 import org.autojs.autojs6.R
 
 /**
- * Developer options (docs/settings/ROADMAP.md P2.5, appendix A.1 `developer`, not selected by default): the new script
- * module layer of the Augment refactor with its debug printing, the Node.js inspector and LeakCanary of debug builds.
+ * Developer options (docs/settings/ROADMAP.md P2.5, appendix A.1 `developer`, not selected by default): the debug
+ * printing of the script module layer (the switch of the Augment refactor's new layer went with the old layer in
+ * docs/augment/ROADMAP.md P5.2), the Node.js inspector and LeakCanary of debug builds.
  * P3.6 (appendix C Q15) adds the explicitly selected dex and R8 compiler plugins, each a switch and the component it
  * names (`DexCompilerOptInStore` / `R8CompilerOptInStore`); an import skips a pair whose plugin is not installed
  * (`TARGET_MISSING`, P7.2).
  *
- * zh-CN: 开发者选项 (ROADMAP P2.5, 附录 A.1 `developer`, 默认不勾选): Augment 重构的新脚本模块层及其调试打印, Node.js inspector,
+ * zh-CN: 开发者选项 (ROADMAP P2.5, 附录 A.1 `developer`, 默认不勾选): 脚本模块层的调试打印 (Augment 重构新层的开关已在 augment P5.2 随旧层删除), Node.js inspector,
  * debug 构建的 LeakCanary. P3.6 (附录 C Q15) 加入显式选择的 dex 与 R8 编译器插件 (各为一个开关与其指向的组件); 导入时组件所属
  * 插件未安装则整组跳过 (`TARGET_MISSING`, P7.2).
  */
 object DeveloperKeys : SettingsDomain {
-
-    /**
-     * Scripts started while it is on mount the migrated modules from the new layer (docs/augment/ROADMAP.md T8); on by
-     * default since P5.1 (D8), off falls back to the old augment package until P5.2 removes it together with this switch.
-     */
-    @JvmField
-    val NEW_SCRIPT_MODULE_LAYER = SettingKey.Bool(R.string.key_new_script_module_layer, DEVELOPER, SettingDefault.of(true))
 
     /** Master switch of the debug printing of the new module layer (docs/augment/ROADMAP.md T5). */
     @JvmField
@@ -82,7 +76,7 @@ object DeveloperKeys : SettingsDomain {
     val R8_COMPILER_EXPLICIT_COMPONENT = SettingKey.Str(name = "r8_compiler_explicit_component", category = DEVELOPER, default = SettingDefault.None)
 
     override val keys: List<PrefKey<*>> = listOf(
-        NEW_SCRIPT_MODULE_LAYER, SCRIPT_MODULE_DEBUG_PRINT, SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES, NODEJS_INSPECTOR_ENABLED,
+        SCRIPT_MODULE_DEBUG_PRINT, SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES, NODEJS_INSPECTOR_ENABLED,
         LEAKCANARY_ENABLED, MEMORY_UNRECLAIMED_WARNING, MEMORY_SCRIPT_HEAP_DUMP,
         DEX_COMPILER_EXPERIMENTAL_ENABLED, DEX_COMPILER_EXPERIMENTAL_COMPONENT, R8_COMPILER_EXPLICIT_ENABLED, R8_COMPILER_EXPLICIT_COMPONENT,
     )

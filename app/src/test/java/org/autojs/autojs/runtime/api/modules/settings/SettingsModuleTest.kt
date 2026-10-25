@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.settings
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -20,10 +20,7 @@ class SettingsModuleTest {
     fun setUp() {
         rhino = DifferentialRhino().also { side ->
             RuntimeModulesFixture.prepareHost(side.ktRuntime)
-            RuntimeModulesFixture.mount(side, listOf("settings"), newLayer = true) { name, global, runtime ->
-                check(name == "settings") { name }
-                Settings(runtime).augment(global)
-            }
+            RuntimeModulesFixture.mount(side, listOf("settings"))
         }
     }
 

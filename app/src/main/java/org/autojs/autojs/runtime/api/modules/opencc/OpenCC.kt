@@ -3,11 +3,10 @@ package org.autojs.autojs.runtime.api.modules.opencc
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.plugin.opencc.api.OpenccConversionTypes
@@ -15,47 +14,9 @@ import org.mozilla.javascript.Wrapper
 import java.util.Locale
 
 @Suppress("unused")
-object OpenCC : Augmentable(), Invokable {
+object OpenCC : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey("opencc"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::convert.name,
-        ::hk2s.name,
-        ::hk2t.name,
-        ::jp2t.name,
-        ::s2hk.name,
-        ::s2t.name,
-        ::s2tw.name,
-        ::s2twp.name,
-        ::t2hk.name,
-        ::t2s.name,
-        ::t2tw.name,
-        ::t2jp.name,
-        ::tw2s.name,
-        ::tw2t.name,
-        ::tw2sp.name,
-        ::s2twi.name,
-        ::twi2s.name,
-        ::s2jp.name,
-        ::t2twi.name,
-        ::hk2tw.name,
-        ::hk2twi.name,
-        ::hk2jp.name,
-        ::tw2hk.name,
-        ::tw2twi.name,
-        ::tw2jp.name,
-        ::twi2t.name,
-        ::twi2hk.name,
-        ::twi2tw.name,
-        ::twi2jp.name,
-        ::jp2s.name,
-        ::jp2hk.name,
-        ::jp2tw.name,
-        ::jp2twi.name,
-    )
-
-    override fun invoke(vararg args: Any?): String = convert(args)
+    fun invoke(vararg args: Any?): String = convert(args)
 
     @JvmStatic
     @RhinoSingletonFunctionInterface
@@ -342,7 +303,7 @@ object OpenCC : Augmentable(), Invokable {
     /* Private methods. */
 
     private fun cvt(s: Any?, type: String): String = runBlocking {
-        OpenccPluginHost.convert(globalContext, coerceString(s), type.uppercase(Locale.ROOT))
+        OpenccPluginHost.convert(GlobalAppContext.get(), coerceString(s), type.uppercase(Locale.ROOT))
     }
 
     private fun cvtComposite(s: Any?, name: String): String {
@@ -350,7 +311,7 @@ object OpenCC : Augmentable(), Invokable {
     }
 
     private fun cvtChain(s: Any?, conversionTypes: List<String>): String = runBlocking {
-        OpenccPluginHost.convertChain(globalContext, coerceString(s), conversionTypes)
+        OpenccPluginHost.convertChain(GlobalAppContext.get(), coerceString(s), conversionTypes)
     }
 
 }

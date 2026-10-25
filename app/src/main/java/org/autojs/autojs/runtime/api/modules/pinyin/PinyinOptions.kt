@@ -40,7 +40,7 @@ internal object PinyinOptions {
             val unwrapped = value.jsUnwrapped()
             return when {
                 unwrapped.isJsNullish() -> null
-                type.isInstance(unwrapped) -> valueOf(type.cast(unwrapped))
+                type.isInstance(unwrapped) -> valueOf(type.cast(unwrapped)!!)
                 unwrapped is Number -> unwrapped.toDouble().toInt()
                 else -> valueOf(named(unwrapped)!!)
             }

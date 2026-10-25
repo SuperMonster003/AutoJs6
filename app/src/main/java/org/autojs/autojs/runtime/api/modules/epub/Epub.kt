@@ -5,9 +5,8 @@ import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.plugin.epub.EpubPluginException
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.core.plugin.epub.EpubReaderOptions
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.epub.EpubBookOperations
 import org.autojs.autojs.runtime.api.epub.EpubScriptArguments
 import org.autojs.autojs.runtime.api.epub.EpubService
@@ -33,38 +32,7 @@ import org.autojs.autojs.util.RhinoUtils
 class Epub(
     private val scriptRuntime: ScriptRuntime,
     private val service: EpubService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("epub"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::open.name,
-        ::openAsync.name,
-        ::metadata.name,
-        ::metadataAsync.name,
-        ::toc.name,
-        ::tocAsync.name,
-        ::readingOrder.name,
-        ::readingOrderAsync.name,
-        ::text.name,
-        ::textAsync.name,
-        ::cover.name,
-        ::coverAsync.name,
-        ::search.name,
-        ::searchAsync.name,
-        ::annotations.name,
-        ::annotationsAsync.name,
-        ::read.name,
-        ::readAsync.name,
-        ::isAvailable.name,
-        ::isAvailableAsync.name,
-    )
-
-    /** `EpubError` instances thrown by these functions reach the script unwrapped. zh-CN: 这些函数抛出的 `EpubError` 实例不经包装到达脚本. */
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+) : ArgumentGuards() {
 
     /**
      * The data properties the `epub` script module defines on its module object, in their order (its install hook

@@ -1,9 +1,9 @@
 package org.autojs.autojs.runtime.api.modules.colors
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -20,15 +20,10 @@ import org.junit.Test
 class ColorsModuleDifferentialTest {
 
     private lateinit var rhino: DifferentialRhino
-    private lateinit var jsColors: Any
 
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) {
-            ObsoleteColorsFakes.install(rhino)
-            jsColors = rhino.evalJs("colors")!!
-        }
         rhino.mountNewModules("util", "colors")
     }
 
@@ -40,13 +35,13 @@ class ColorsModuleDifferentialTest {
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val ktColors = rhino.evalKt("colors")
-        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsColors, rhino.jsScope.globalThis) }, SurfaceDiff.surface(ktColors, rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface"), SurfaceDiff.surface(ktColors, rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         // The color table constants sit on the Java prototypes as static fields, which a NativeJavaObject reads but does not
         // list: compare those by value instead.
         // zh-CN: 颜色表常量是 Java 原型上的静态字段, NativeJavaObject 能读取但不列出, 这些按值比较.
         val missing = (report.onlyInFirst - KNOWN_MISSING).filterNot { name ->
-            val js = ScriptModuleExpectations.obsolete("js: colors['$name']") { rhino.render(DifferentialRhino.Side.JS, "colors['$name']").key }
+            val js = ScriptModuleExpectations.obsolete("js: colors['$name']")
             js != "undefined" && js == rhino.render(DifferentialRhino.Side.KT, "colors['$name']").key
         }
         assertTrue("Obsolete colors members missing from the new module: $missing", missing.isEmpty())

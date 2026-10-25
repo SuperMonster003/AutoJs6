@@ -1,20 +1,17 @@
-"""Evaluates the documented differences of the JVM differential tests with the host installed on a device.
+"""Evaluates the device cases of the JVM script module tests with the host installed on a device.
 
-Usage: py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep] [--new-modules on|off] [--strict-errors]
+Usage: py -3.12 -I tools/augment/device_eval.py -s SERIAL [--cases DIR_OR_FILE ...] [--keep] [--strict-errors]
        [--debug-print on|off] [--console]
 
-The differential tests (app/src/test/java/org/autojs/autojs/runtime/api/augment/differential/) write their
-documented differences and the expressions they had to skip on the JVM to app/build/augment-differential/*.json.
-This script runs the same expressions in one script on the device (RunIntentActivity), renders every result the
-way DifferentialRhino.render does and compares it with the Kotlin value recorded on the JVM. Two failures count as
-agreeing whatever their error names (the JVM cannot build the Kotlin error messages), as in the P0 differential
-tests. Skipped expressions have no expected value and are only printed. The pushed script is removed afterwards
-unless --keep is given.
-
---new-modules sets the hidden switch of the new script module layer (ROADMAP T8) for the run and restores it
-afterwards; with --strict-errors two failures only agree when their error names are the same. The new layer's JVM
-tests write their cases to app/build/script-modules-device/ (expected values in "kt"), for example:
-py -3.12 -I tools/augment/device_eval.py -s SERIAL --cases app/build/script-modules-device --new-modules on --strict-errors
+The script module tests write their cases (the expressions with the values the JVM gives, in "kt", and the ones they
+cannot evaluate on the JVM, without a value) to app/build/script-modules-device/*.json. This script runs the same
+expressions in one script on the device (RunIntentActivity), renders every result the way DifferentialRhino.render
+does and compares it with the value recorded on the JVM. Two failures count as agreeing whatever their error names
+unless --strict-errors is given (the JVM cannot always build the error messages). Expressions without an expected value
+are only printed. The pushed script is removed afterwards unless --keep is given. For example:
+py -3.12 -I tools/augment/device_eval.py -s SERIAL --cases app/build/script-modules-device --strict-errors
+Until P5.2 --new-modules set the switch of the new script module layer for the run, and the default cases were those
+of the P0 differential tests (app/build/augment-differential).
 --debug-print sets the master switch of the new layer's debug printing (appendix C Q4) the same way, and --console
 prints the console (GlobalConsole) and ScriptModules logcat lines written while the cases ran. logcat is cleared
 before each script starts and polled through its last lines, as in device_bench.py.
@@ -34,12 +31,11 @@ sys.path.insert(0, str(HERE))
 
 from device_bench import clear_log, console_lines, pref_value_js  # noqa: E402
 HOST = HERE.parents[1]
-DEFAULT_CASES = HOST / "app" / "build" / "augment-differential"
+DEFAULT_CASES = HOST / "app" / "build" / "script-modules-device"
 DEVICE_DIR = "/sdcard/Download/aj6-augment-bench"
 RUN_ACTIVITY = "org.autojs.autojs.external.open.RunIntentActivity"
 PACKAGE = "org.autojs.autojs6"
 MARK = "AJ6EVAL"
-SWITCH_KEY = "key_$_new_script_module_layer"
 DEBUG_PRINT_KEY = "key_$_script_module_debug_print"
 SWITCH_MARK = "AJ6SWITCH"
 
@@ -107,11 +103,6 @@ def run_script(serial, remote, count, wait, run):
     if len(results) < count:
         print(f"warning: got {len(results)} of {count} results before the timeout", file=sys.stderr)
     return results
-
-
-def set_new_modules(serial, value):
-    """Sets the hidden switch of the new script module layer (ROADMAP T8) and returns its previous value."""
-    return set_pref(serial, SWITCH_KEY, value, "new script module layer")
 
 
 def set_pref(serial, key, value, label):
@@ -182,7 +173,6 @@ def main():
     parser.add_argument("--cases", nargs="*", type=pathlib.Path, default=[DEFAULT_CASES])
     parser.add_argument("--keep", action="store_true", help="keep the pushed script on the device")
     parser.add_argument("--wait", type=int, default=120)
-    parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     parser.add_argument("--strict-errors", action="store_true", help="two failures agree only with the same error name")
     parser.add_argument("--debug-print", choices=["on", "off"], help="set the debug printing master switch for the run")
     parser.add_argument("--console", action="store_true", help="print the console and ScriptModules lines of the run")
@@ -202,8 +192,6 @@ def main():
     remote = f"{DEVICE_DIR}/aj6_device_eval_{run}.js"
     adb(args.serial, "shell", "mkdir", "-p", DEVICE_DIR, check=True)
     adb(args.serial, "push", str(local), remote, check=True)
-    wanted = args.new_modules == "on"
-    previous = set_new_modules(args.serial, wanted) if args.new_modules else None
     wanted_debug = args.debug_print == "on"
     previous_debug = set_pref(args.serial, DEBUG_PRINT_KEY, wanted_debug, "debug printing") if args.debug_print else None
     started = device_epoch(args.serial)
@@ -218,8 +206,6 @@ def main():
     finally:
         if previous_debug is not None and previous_debug != wanted_debug:
             set_pref(args.serial, DEBUG_PRINT_KEY, previous_debug, "debug printing")
-        if previous is not None and previous != wanted:
-            set_new_modules(args.serial, previous)
         if not args.keep:
             adb(args.serial, "shell", "rm", "-rf", DEVICE_DIR)
 

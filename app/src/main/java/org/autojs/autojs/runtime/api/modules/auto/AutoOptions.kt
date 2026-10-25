@@ -6,8 +6,8 @@ import org.autojs.autojs.core.automator.diagnostics.DumpFormat
 import org.autojs.autojs.core.automator.diagnostics.NodeDump
 import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
-import org.autojs.autojs.runtime.api.augment.automator.DumpArguments
-import org.autojs.autojs.runtime.api.augment.automator.WindowMatchArguments
+import org.autojs.autojs.runtime.api.modules.automator.DumpArguments
+import org.autojs.autojs.runtime.api.modules.automator.WindowMatchArguments
 import org.autojs.autojs.runtime.api.modules.flow.FlowOptions
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish

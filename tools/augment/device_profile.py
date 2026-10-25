@@ -1,6 +1,6 @@
 """Samples a looping script call with simpleperf and reports the Java frames that still run interpreted (ROADMAP P2.4).
 
-Usage: py -3.12 -I tools/augment/device_profile.py -s SERIAL [--new-modules on|off] [--seconds 8] EXPRESSION ...
+Usage: py -3.12 -I tools/augment/device_profile.py -s SERIAL [--seconds 8] EXPRESSION ...
 
 Each EXPRESSION (for example "base64.encode()" or "isNullish(null)") runs in a try / catch loop in its own script
 for --seconds plus a margin; `simpleperf record --app` samples the host process meanwhile (the debug host is
@@ -9,7 +9,6 @@ iteration measured by the script, and the frames of the module layer (org.autojs
 Rhino (org.mozilla.javascript) that ran from the dex file, i.e. in the ART interpreter, with their inclusive share of
 the samples. A warmed process should list none of the module layer; P2.4 found a long-running process where the
 module layer's hot path stayed interpreted, which made failing calls 1.13-1.46 times Rhino's own errors.
---new-modules sets the switch of the new script module layer for the run and restores it afterwards.
 """
 import argparse
 import pathlib
@@ -85,7 +84,6 @@ def profile(s, expression, seconds, quiet=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     parser.add_argument("--seconds", type=int, default=8, help="sampling time per expression")
     parser.add_argument("expressions", nargs="+")
     args = parser.parse_args()
@@ -93,13 +91,8 @@ def main():
     if not db.adb(s, "shell", "command -v simpleperf").stdout.strip():
         # G8441 (Android 9) has none, and the NDK's binary (r26) does not link there.
         sys.exit("simpleperf is not on the device")
-    previous = db.set_new_modules(s, args.new_modules == "on") if args.new_modules else None
-    try:
-        for expression in args.expressions:
-            profile(s, expression, args.seconds)
-    finally:
-        if previous is not None and previous != (args.new_modules == "on"):
-            db.set_new_modules(s, previous)
+    for expression in args.expressions:
+        profile(s, expression, args.seconds)
 
 
 if __name__ == "__main__":

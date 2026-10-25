@@ -1,21 +1,18 @@
 package org.autojs.autojs.runtime.api.modules.ocr
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.Callable
-import org.mozilla.javascript.ScriptableObject
 import java.io.File
 import org.autojs.autojs.runtime.api.Ocr as ApiOcr
 
@@ -44,7 +41,7 @@ class OcrModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -55,11 +52,11 @@ class OcrModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
-        PATHS.forEach { HostModuleTestSupport.assertSameSurface(rhino, it, ::prepare, ::mountCurrent) }
+        PATHS.forEach { HostModuleTestSupport.assertSameSurface(rhino, it) }
         val jvmSelection = selection(JVM_MODE)
-        val compared = HostModuleTestSupport.assertSameResults(rhino, LAYOUT + jvmSelection.keys, emptyMap(), ::prepare, ::mountCurrent)
+        val compared = HostModuleTestSupport.assertSameResults(rhino, LAYOUT + jvmSelection.keys, emptyMap())
         assertEquals(LAYOUT.size + jvmSelection.size, compared)
         HostModuleTestSupport.check(rhino, SHAPE + jvmSelection.toList() + kept(JVM_MODE).toList())
     }
@@ -67,14 +64,7 @@ class OcrModulesTest {
     /** The obsolete module loads its engine modules with `require` and reads `scriptRuntime.ocrMLKit` / `ocrPaddle` lazily. */
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: ocr") {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            val factories = rhino.context.newObject(rhino.jsScope)
-            listOf("ocr-mlkit", "ocr-paddle").forEach { factories.put(it, factories, factory(it)) }
-            rhino.jsScope.globalThis.put("__obsoleteFactories__", rhino.jsScope.globalThis, factories)
-            rhino.evalJs("global.require = function (name) { return __obsoleteFactories__[name]; }")
-            SurfaceDiff.surface(host.load("ocr"), rhino.jsScope.globalThis)
-        }
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: ocr")
         val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("ocr"), rhino.ktScope.globalThis))
         assertEquals(SurfaceDiff.describe(report, "js", "kt"), setOf("_modeName", "_forcibleModeArgIndex"), report.onlyInFirst)
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.typeMismatches.isEmpty())
@@ -91,39 +81,16 @@ class OcrModulesTest {
         DEVICE.add(SHAPE + selection("''").toList() + kept("''").toList() + DEVICE_ONLY)
     }
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         prepare(side)
-        val mounter = RuntimeModulesFixture.mount(side, MODULES, newLayer) { _, global, runtime -> mountLegacy(global, runtime) }
-        // The runtime reads the engine module objects from the mounter, as with the switch on.
-        if (mounter != null) HostModuleTestSupport.setField(side.ktRuntime, "scriptModules", mounter)
+        // The runtime reads the engine module objects from the mounter.
+        HostModuleTestSupport.setField(side.ktRuntime, "scriptModules", RuntimeModulesFixture.mount(side, MODULES))
     }
 
     /** The JVM starts with an engine selected: the `mode` getter (also read by `Object.getOwnPropertyDescriptor`) needs the OCR plugins when automatic. */
     private fun prepare(side: DifferentialRhino) {
         RuntimeModulesFixture.prepareHost(side.ktRuntime)
         HostModuleTestSupport.setField(side.ktRuntime, "ocr", ApiOcr().apply { mode = OcrMode.MLKIT })
-    }
-
-    private fun mountCurrent(side: DifferentialRhino) {
-        mountLegacy(side.ktScope.globalThis as ScriptableObject, side.ktRuntime)
-    }
-
-    /** The current modules as `ScriptRuntime.augmentLegacy` mounts them, keeping the engine module objects. */
-    private fun mountLegacy(global: ScriptableObject, runtime: ScriptRuntime) {
-        Ocr(runtime).augment(global).also { ocr ->
-            HostModuleTestSupport.setField(runtime, "legacyAugmentedOcrMLKit", OcrMLKit(runtime).augment(ocr))
-            HostModuleTestSupport.setField(runtime, "legacyAugmentedOcrPaddle", OcrPaddle(runtime).augment(ocr))
-            HostModuleTestSupport.setField(runtime, "legacyAugmentedOcrRapid", OcrRapid(runtime).augment(ocr))
-        }
-    }
-
-    /** The factory exported by the obsolete engine module `[name].js`. */
-    private fun factory(name: String): Any? {
-        val file = File(ObsoleteModuleHost.OBSOLETE_DIR, "$name.js")
-        val wrapper = rhino.context.evaluateString(rhino.jsScope, "(function (module, exports) {\n${file.readText()}\nreturn module.exports; })", file.name, 0, null) as Callable
-        val module = rhino.context.newObject(rhino.jsScope)
-        module.put("exports", module, rhino.context.newObject(rhino.jsScope))
-        return wrapper.call(rhino.context, rhino.jsScope, rhino.jsScope.globalThis, arrayOf(module, module.get("exports", module)))
     }
 
     companion object {

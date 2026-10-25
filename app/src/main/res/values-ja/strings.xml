@@ -1038,7 +1038,6 @@
     <string name="summary_memory_force_gc">ガベージコレクションと finalization を 3 回実行し, 終了したランタイムが回収されるまで最大 10 秒待ってから更新します</string>
     <string name="summary_memory_script_heap_dump">release ビルドで memory.dumpHeap によるヒープダンプの書き出しを許可します (debug ビルドでは常に許可). ヒープダンプにはヒープ内のすべてのデータ (すべてのスクリプトの変数を含む) が含まれます</string>
     <string name="summary_memory_unreclaimed_warning">スクリプトの終了から 10 秒後にガベージコレクションを 1 回実行し, そのランタイムがまだ回収されていなければグローバルコンソールに警告を出力します</string>
-    <string name="summary_new_script_module_layer">スクリプトは新しいスクリプトモジュール実装を使用します (デフォルトで有効). 無効にすると旧実装を使用します. 旧実装は今後のバージョンで削除されます. 以降に開始したスクリプトに適用されます</string>
     <string name="summary_nodejs_doctor_report">不具合報告用にプライバシー情報を除去した Node ランタイム診断レポートを生成</string>
     <string name="summary_nodejs_inspector_enabled">スクリプトのローカルデバッグとプロファイリングを許可します. PC の DevTools は ADB ポート転送で接続します.</string>
     <string name="summary_not_showing_main_activity">メインのアクティビティを表示せずにスクリプトを直接実行</string>
@@ -2398,7 +2397,6 @@
     <string name="text_new_path">新しいパス</string>
     <string name="text_new_path_is_same_as_old_path">新しいパスが古いパスと同じ</string>
     <string name="text_new_project">新しいプロジェクト</string>
-    <string name="text_new_script_module_layer">新しいスクリプトモジュール実装を使用</string>
     <string name="text_new_version_found">新しいバージョンが見つかりました</string>
     <string name="text_new_watching_variables">新しいウォッチング変数</string>
     <string name="text_next_retry">次回の再試行</string>

@@ -176,8 +176,6 @@
 | `key_memory_unreclaimed_warning` | Boolean | 调用处字面量 | `true` | `true` | runtime/memory/MemoryDiagnostics.kt:112 |  |
 | `key_memory_unreclaimed_warning` | Boolean | 调用处字面量 | `SettingDefault.of(true)` | `true` | core/pref/keys/DeveloperKeys.kt:54 |  |
 | `key_memory_unreclaimed_warning` | Boolean | XML 字面量 | `app:defaultValue="true"` | `true` | res/xml/fragment_developer_options.xml:153 |  |
-| `key_new_script_module_layer` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/DeveloperKeys.kt:26 |  |
-| `key_new_script_module_layer` | Boolean | XML 字面量 | `app:defaultValue="false"` | `false` | res/xml/fragment_developer_options.xml:9 |  |
 | `key_night_mode` | String (Enum) | R.string | `keyResource(R.string.default_key_night_mode, "default_key_night_mode")` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | core/pref/keys/AppearanceKeys.kt:63 |  |
 | `key_night_mode` | String (Enum) | R.string | `app:itemDefaultKey="@string/default_key_night_mode"` | `key_night_mode_follow_system = key_$_night_mode_follow_system` | res/xml/fragment_preferences.xml:20 |  |
 | `key_night_mode_enabled` | Boolean | 调用处字面量 | `SettingDefault.of(false)` | `false` | core/pref/keys/AppearanceKeys.kt:70 |  |

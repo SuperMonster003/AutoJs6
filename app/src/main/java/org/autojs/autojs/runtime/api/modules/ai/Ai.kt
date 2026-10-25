@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.ai
 
+import org.autojs.autojs.rhino.ArgumentGuards
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -11,8 +12,6 @@ import org.autojs.autojs.core.plugin.ai.AiPluginMessage
 import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
 import org.autojs.autojs.runtime.api.ai.AiRequestInput
 import org.autojs.autojs.runtime.api.ai.AiService
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.toJsPromise
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
@@ -22,21 +21,12 @@ import org.mozilla.javascript.Undefined
 class Ai(
     private val scriptRuntime: ScriptRuntime,
     private val aiService: AiService,
-) : Augmentable(scriptRuntime), Invokable {
+) : ArgumentGuards() {
 
     /** The `agent` object of the module (the `ai.agent` getter). */
     internal val agentObject by lazy { AiAgent(scriptRuntime) { aiService.agent }.createObject() }
-    override val selfAssignmentGetters = listOf("agent" to java.util.function.Supplier { agentObject })
 
-    override val selfAssignmentFunctions = listOf(
-        ::ask.name,
-        ::chat.name,
-        ::stream.name,
-        ::session.name,
-        ::catalog.name,
-    )
-
-    override fun invoke(vararg args: Any?): Any {
+    fun invoke(vararg args: Any?): Any {
         return ask(scriptRuntime, args)
     }
 

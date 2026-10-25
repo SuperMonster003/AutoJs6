@@ -1,17 +1,8 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.base64.Base64
-import org.autojs.autojs.runtime.api.augment.converter.Converter
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.formatter.Formatter
-import org.autojs.autojs.runtime.api.augment.global.Legacy
-import org.autojs.autojs.runtime.api.augment.mime.Mime
-import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
-import org.autojs.autojs.runtime.api.modules.global.IsNullish
-import org.autojs.autojs.runtime.api.modules.global.Species
-import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -19,9 +10,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.ScriptableObject
 import java.io.File
-import org.autojs.autojs.runtime.api.Mime as ApiMime
-import org.autojs.autojs.runtime.api.augment.converter.Bytes as BytesCvt
-import org.autojs.autojs.runtime.api.augment.formatter.Bytes as BytesFmt
 
 /**
  * Roadmap P2.2: the pure logic modules of the new script module layer (`isNullish`, `species`, `s13n`, `cvt`, `fmt`,
@@ -38,7 +26,7 @@ class PureLogicModulesTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        mountInOrder(rhino.ktScope.globalThis, rhino.ktRuntime, newLayer = true)
+        mountInOrder(rhino.ktScope.globalThis, rhino.ktRuntime)
     }
 
     @After
@@ -335,12 +323,7 @@ class PureLogicModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = rhino.evalKt(DESCRIBE).toString()
-        val expected = ScriptModuleExpectations.obsolete("describe") {
-            DifferentialRhino().use { legacy ->
-                mountInOrder(legacy.ktScope.globalThis, legacy.ktRuntime, newLayer = false)
-                legacy.evalKt(DESCRIBE).toString()
-            }
-        }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }
 
@@ -349,28 +332,10 @@ class PureLogicModulesTest {
         /** The top-level modules of this stage in their mounting order, after `legacy` (which binds `isObject` first). */
         private val MODULES = listOf("legacy", "isNullish", "species", "s13n", "cvt", "fmt", "base64", "mime", "nanoid")
 
-        /**
-         * Mounts [MODULES] in the order of `ScriptModuleLayer.ORDER` the way `ScriptRuntime.augment()` does: from the new
-         * layer when [newLayer] is true (`legacy` too since P3.0), otherwise all from their old augment calls.
-         */
-        private fun mountInOrder(global: ScriptableObject, runtime: ScriptRuntime, newLayer: Boolean) {
-            val mounter = if (newLayer) ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ScriptModuleLayer.ORDER) else null
-            ScriptModuleLayer.TOP_LEVEL_ORDER.filter { it in MODULES }.forEach { name ->
-                ScriptModuleLayer.mountOr(mounter, name) {
-                    when (name) {
-                        "legacy" -> Legacy(runtime).assignWithRuntime(global, runtime)
-                        "isNullish" -> IsNullish.augmentWithRuntime(global, runtime)
-                        "species" -> Species.augmentWithRuntime(global, runtime)
-                        "s13n" -> S13n.augmentWithRuntime(global, runtime)
-                        "cvt" -> Converter.augmentWithRuntime(global, runtime).also { BytesCvt.augmentWithRuntime(it, runtime) }
-                        "fmt" -> Formatter.augmentWithRuntime(global, runtime).also { BytesFmt.augmentWithRuntime(it, runtime) }
-                        "base64" -> Base64.augmentWithRuntime(global, runtime)
-                        "mime" -> Mime(runtime).augment(global, ApiMime)
-                        "nanoid" -> NanoID.augmentWithRuntime(global, runtime)
-                        else -> throw AssertionError(name)
-                    }
-                }
-            }
+        /** Mounts [MODULES] from the new layer in the order of `ScriptModuleLayer.ORDER`, the way `ScriptRuntime.augment()` does. */
+        private fun mountInOrder(global: ScriptableObject, runtime: ScriptRuntime) {
+            val mounter = ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ScriptModuleLayer.ORDER)
+            ScriptModuleLayer.TOP_LEVEL_ORDER.filter { it in MODULES }.forEach { name -> check(mounter.install(name)) { name } }
         }
 
         /** Every exported case so far (JUnit creates an instance per test method). */

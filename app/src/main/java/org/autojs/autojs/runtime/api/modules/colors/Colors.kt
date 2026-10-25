@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.colors
 
+import org.autojs.autojs.rhino.ArgumentGuards
 import android.content.res.ColorStateList
 import android.graphics.Color.HSVToColor
 import android.graphics.Paint
@@ -22,7 +23,6 @@ import org.autojs.autojs.rhino.extension.ArrayExtensions.jsArrayBrief
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.jsox.Numberx
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -58,7 +58,7 @@ import org.autojs.autojs.theme.color.OkLch
 import org.autojs.autojs.theme.color.ThemeColorDerivation
 
 @Suppress("unused", "UNUSED_PARAMETER")
-object Colors : Augmentable() {
+object Colors : ArgumentGuards() {
 
     @JvmField
     @Suppress("MayBeConstant")
@@ -103,93 +103,6 @@ object Colors : Augmentable() {
         }
         colorMap
     }
-
-    override val selfAssignmentFunctions = listOf(
-        "toString" to AS_FUNCTIONAL_TO_STRING,
-        ::toInt.name,
-        ::toHex.name,
-        ::toFullHex.name,
-        ::alpha.name,
-        ::getAlpha.name,
-        ::alphaDouble.name,
-        ::getAlphaDouble.name,
-        ::setAlpha.name,
-        ::setAlphaRelative.name,
-        ::removeAlpha.name,
-        ::red.name,
-        ::getRed.name,
-        ::redDouble.name,
-        ::getRedDouble.name,
-        ::setRed.name,
-        ::setRedRelative.name,
-        ::removeRed.name,
-        ::green.name,
-        ::getGreen.name,
-        ::greenDouble.name,
-        ::getGreenDouble.name,
-        ::setGreen.name,
-        ::setGreenRelative.name,
-        ::removeGreen.name,
-        ::blue.name,
-        ::getBlue.name,
-        ::blueDouble.name,
-        ::getBlueDouble.name,
-        ::setBlue.name,
-        ::setBlueRelative.name,
-        ::removeBlue.name,
-        ::rgb.name,
-        ::argb.name,
-        ::rgba.name,
-        ::hsv.name,
-        ::hsva.name,
-        ::hsl.name,
-        ::hsla.name,
-        ::toRgb.name,
-        ::toRgba.name,
-        ::toArgb.name,
-        ::toHsv.name,
-        ::toHsva.name,
-        ::toHsl.name,
-        ::toHsla.name,
-        ::toRgbString.name,
-        ::toRgbaString.name,
-        ::toArgbString.name,
-        ::toHsvString.name,
-        ::toHsvaString.name,
-        ::toHslString.name,
-        ::toHslaString.name,
-        ::isSimilar.name,
-        ::isEqual.name,
-        ::distance.name,
-        ::invert.name,
-        ::blend.name,
-        ::contrast.name,
-        ::toColorStateList.name,
-        ::setPaintColor.name,
-        ::luminance.name,
-        ::build.name,
-        ::summary.name,
-        ::toOklab.name,
-        ::oklab.name,
-        ::toOklch.name,
-        ::oklch.name,
-        ::ensureContrast.name,
-        ::harmony.name,
-        ::tones.name,
-        ::derive.name,
-        ::nightVariant.name,
-        ::simulate.name,
-        ::extract.name,
-    )
-
-    override val selfAssignmentProperties = colorTables.map { table ->
-        table::class.java.simpleName.lowercase() to table
-    }
-
-    override val selfAssignmentGetters = listOf(
-        "all" to Supplier { all } to DONTENUM,
-        "themeColor" to Supplier { ThemeColorManager.currentThemeColor },
-    )
 
     @JvmStatic
     @RhinoSingletonFunctionInterface

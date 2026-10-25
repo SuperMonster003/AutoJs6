@@ -512,7 +512,7 @@ var CALLERS = {
     DeveloperKeys: function () {
         var D = Keys.DeveloperKeys;
         check('developer-readers', function () {
-            var bools = [D.NEW_SCRIPT_MODULE_LAYER, D.SCRIPT_MODULE_DEBUG_PRINT];
+            var bools = [D.SCRIPT_MODULE_DEBUG_PRINT];
             var bad = bools.filter(function (k) { return !same(k.get(), sp.getBoolean(k.getName(), String(k.defaultOrNull()) === 'true')); });
             if (bad.length) return 'stored reading ' + bad.map(function (k) { return String(k.getName()); }).join(' ');
             var raw = sp.getStringSet(D.SCRIPT_MODULE_DEBUG_PRINT_DISABLED_MODULES.getName(), null);

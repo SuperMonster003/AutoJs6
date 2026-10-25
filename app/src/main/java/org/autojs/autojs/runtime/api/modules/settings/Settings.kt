@@ -9,7 +9,6 @@ import org.autojs.autojs.core.pref.data.SettingsDataCapture
 import org.autojs.autojs.core.pref.store.SettingsStores
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.ui.settings.transfer.SettingsExporter
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
@@ -26,14 +25,7 @@ import org.mozilla.javascript.Undefined
 import java.io.File
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Settings(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::isEnabled.name,
-        ::setEnabled.name,
-        ::export.name,
-        ::categories.name,
-    )
+class Settings(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

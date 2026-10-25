@@ -104,9 +104,9 @@ true
 [false,false,true,true]
 === resultsAgree js: isStopped(1)
 false
-=== resultsAgree js: requiresAutojsVersion(5935)
+=== resultsAgree js: requiresAutojsVersion({VERSION_CODE})
 undefined
-=== resultsAgree js: requiresAutojsVersion(5936)
+=== resultsAgree js: requiresAutojsVersion({VERSION_CODE+1})
 throws Error
 === resultsAgree js: requiresAutojsVersion(461)
 undefined

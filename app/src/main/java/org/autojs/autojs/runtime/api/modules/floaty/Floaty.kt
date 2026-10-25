@@ -17,7 +17,6 @@ import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_SETTER_KEY
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Floaty
 import org.autojs.autojs.runtime.api.Floaty.JsWindow
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceLongNumber
@@ -33,18 +32,7 @@ import org.mozilla.javascript.xmlimpl.XML
 import android.content.Context as AndroidContext
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Floaty(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::window.name,
-        ::rawWindow.name,
-        ::hasPermission.name,
-        ::checkPermission.name,
-        ::requestPermission.name,
-        ::ensurePermission.name,
-        ::closeAll.name,
-        ::getClip.name,
-    )
+class Floaty(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

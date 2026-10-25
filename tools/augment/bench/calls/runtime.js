@@ -1,6 +1,6 @@
 // Calls of the runtime modules of roadmap P3.4, first group (timers, threads, continuation, engines), appended to
-// bench/calls_prelude.js by device_bench.py --calls runtime. With the switch of the new script module layer on they reach
-// the new modules, with it off the current augment modules. "ok" cases succeed (timers are cleared at once); the "fail"
+// bench/calls_prelude.js by device_bench.py --calls runtime. They reach the modules of the script module layer (with its
+// switch off they reached the old augment ones until P5.2). "ok" cases succeed (timers are cleared at once); the "fail"
 // cases fail with an argument error, compared with the "ref" cases of the prelude (Rhino's own errors).
 let benchNoop = () => undefined;
 time("ok setTimeout-clear", () => { try { clearTimeout(setTimeout(benchNoop, 60000)); } catch (e) { } });

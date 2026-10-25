@@ -1,9 +1,9 @@
 package org.autojs.autojs.runtime.api.modules.jsox
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -49,7 +49,7 @@ class JsoxModulesTest {
         if (export) exportForDevice(cases.map { (expression, expected) -> (if (extended) "(jsox.extendAll(), $expression)" else expression) to expected })
     }
 
-    private fun extendAll() = ScriptModuleLayer.extendBuiltInsOr(mounter) { throw AssertionError("jsox must be served by the new layer") }
+    private fun extendAll() = ScriptModuleLayer.extendBuiltIns(mounter)
 
     /** Appendix E: calcBy passed the arguments as one vararg element, so the fraction was summed as a number. */
     @Test
@@ -323,21 +323,7 @@ class JsoxModulesTest {
     fun surfaceMatchesTheCurrentModules() {
         extendAll()
         val actual = rhino.evalKt(DESCRIBE).toString()
-        val expected = ScriptModuleExpectations.obsolete("describe") {
-            DifferentialRhino().use { legacy ->
-                val global = legacy.ktScope.globalThis
-                Arrayx(legacy.ktRuntime).augment(global)
-                Numberx(legacy.ktRuntime).augment(global)
-                Mathx(legacy.ktRuntime).augment(global)
-                Jsox(legacy.ktRuntime).augment(global)
-                // Jsox.extendAllRhinoWithRuntime reaches StringUtils (Android static initialization), so the extensions of its
-                // preset list (Mathx, Numberx, Arrayx) are applied directly.
-                Mathx(legacy.ktRuntime).extendBuildInObject()
-                Numberx(legacy.ktRuntime).extendBuildInObject()
-                Arrayx(legacy.ktRuntime).extendBuildInObject()
-                legacy.evalKt(DESCRIBE).toString()
-            }
-        }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }
 

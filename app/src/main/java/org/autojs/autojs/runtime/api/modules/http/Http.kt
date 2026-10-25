@@ -2,6 +2,7 @@
 
 package org.autojs.autojs.runtime.api.modules.http
 
+import org.autojs.autojs.rhino.ArgumentGuards
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -24,7 +25,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Mime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.continuation.Continuation
 import org.autojs.autojs.runtime.api.modules.continuation.Creator
 import org.autojs.autojs.runtime.api.modules.http.RequestBuilder.Companion.applyOkHttpClientBuilder
@@ -41,6 +41,7 @@ import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
+import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
@@ -50,36 +51,17 @@ import org.mozilla.javascript.ScriptableObject.READONLY
 import java.io.IOException
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Http(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
+class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val selfAssignmentProperties = listOf(
-        "__okhttp__" to scriptRuntime.http.okhttp to (READONLY or DONTENUM or PERMANENT)
-    )
+    companion object : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        ::client.name,
-        ::buildRequest.name,
-        ::request.name,
-        ::requestAsync.name,
-        ::get.name,
-        ::getAsync.name,
-        ::head.name,
-        ::headAsync.name,
-        ::post.name,
-        ::postAsync.name,
-        ::postJson.name,
-        ::postJsonAsync.name,
-        ::postMultipart.name,
-        ::postMultipartAsync.name,
-        "put",
-        ::putAsync.name,
-        ::delete.name,
-        ::del.name,
-        ::deleteAsync.name,
-        ::delAsync.name,
-    )
+        private fun put(o: ScriptableObject, item: Pair<String, Any?>) = o.put(item.first, o, item.second)
 
-    companion object : Augmentable() {
+        private fun put(o: ScriptableObject, items: List<Pair<String, Any?>>) = items.forEach { put(o, it) }
+
+        private fun putIfAbsent(o: ScriptableObject, item: Pair<String, Any>) {
+            if (o.prop(item.first).isJsNullish()) put(o, item)
+        }
 
         internal const val KEY_METHOD = "method"
         internal const val KEY_CONTENT_TYPE = "contentType"

@@ -1,7 +1,7 @@
-// Module calls of colors (roadmap P2.3), appended to bench/calls_prelude.js by device_bench.py --calls colors. With the
-// switch of the new script module layer on they reach the new module, with it off the old augment one. "ok" cases
-// succeed; the other cases fail with an argument error (arity, type, range) or a RangeError of the implementation,
-// compared with the "ref" cases of the prelude (Rhino's own errors).
+// Module calls of colors (roadmap P2.3), appended to bench/calls_prelude.js by device_bench.py --calls colors. They
+// reach the modules of the script module layer (with its switch off they reached the old augment ones until P5.2). "ok"
+// cases succeed; the other cases fail with an argument error (arity, type, range) or a RangeError of the
+// implementation, compared with the "ref" cases of the prelude (Rhino's own errors).
 time("ok colors.toInt-hex", () => { try { colors.toInt("#663399"); } catch (e) { } });
 time("ok colors.toInt-name", () => { try { colors.toInt("burnt-orange"); } catch (e) { } });
 time("ok colors.toHex", () => { try { colors.toHex(-3386112, 8); } catch (e) { } });

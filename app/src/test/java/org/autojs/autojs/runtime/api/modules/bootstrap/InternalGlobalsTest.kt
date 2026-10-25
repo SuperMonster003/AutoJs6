@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.bootstrap
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino.Side
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino.Side
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

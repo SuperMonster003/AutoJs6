@@ -4,6 +4,7 @@ import android.os.Build
 import io.github.g00fy2.versioncompare.Version
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
@@ -18,8 +19,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.automator.Auto
+import org.autojs.autojs.runtime.api.modules.automator.Auto
 import org.autojs.autojs.runtime.api.modules.console.Console
 import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.autojs.autojs.runtime.api.modules.selector.Selector
@@ -55,7 +55,7 @@ import kotlin.math.floor
 import kotlin.math.roundToLong
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
+class Global(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     internal data class SleepRange(val min: Double, val max: Double)
 
@@ -67,67 +67,6 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         val isNoop get() = times <= 0
     }
 
-    override val selfAssignmentProperties = listOf(
-        "isAutoJs6" to true,
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        "toString" to AS_LITERAL_TO_STRING,
-        ::TODO.name,
-        ::isUiThread.name,
-        ::isJavaObject.name,
-        ::isInteger.name,
-        ::isBigInt.name,
-        ::isPrimitive.name,
-        ::isReference.name,
-        ::isEmptyObject.name,
-        ::unwrapJavaObject.name,
-        ::toastVerbose.name to listOf(::toastVerbose.name, ::toastVerbose.name.lowercase()),
-        ::toastLog.name to listOf(::toastLog.name, ::toastLog.name.lowercase()),
-        ::toastInfo.name to listOf(::toastInfo.name, ::toastInfo.name.lowercase()),
-        ::toastWarn.name to listOf(::toastWarn.name, ::toastWarn.name.lowercase()),
-        ::toastError.name to listOf(::toastError.name, ::toastError.name.lowercase()),
-        ::sleep.name,
-        ::isStopped.name,
-        ::isShuttingDown.name,
-        ::notStopped.name,
-        ::isRunning.name,
-        ::exit.name,
-        ::stop.name,
-        ::setClip.name,
-        ::getClip.name,
-        ::currentPackage.name,
-        ::currentActivity.name,
-        ::currentComponent.name,
-        ::wait.name,
-        ::waitForActivity.name,
-        ::waitForPackage.name,
-        ::random.name,
-        ::setScreenMetrics.name,
-        ::requiresApi.name,
-        ::requiresAutojsVersion.name,
-        ::getScaleBases.name,
-        ::getScaleBaseX.name,
-        ::getScaleBaseY.name,
-        ::setScaleBases.name,
-        ::setScaleBaseX.name,
-        ::setScaleBaseY.name,
-        ::cX.name,
-        ::cY.name,
-        ::cYx.name,
-        ::cXy.name,
-    )
-
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "WIDTH" to Supplier { ScreenMetrics.deviceScreenWidth },
-        "HEIGHT" to Supplier { ScreenMetrics.deviceScreenHeight },
-        "axios" to Supplier { scriptRuntime.js_mod_axios },
-        "cheerio" to Supplier { scriptRuntime.js_mod_cheerio },
-        "dayjs" to Supplier { scriptRuntime.js_mod_dayjs },
-        "i18n" to Supplier { scriptRuntime.js_mod_i18n },
-        "pangu" to Supplier { scriptRuntime.js_mod_pangu },
-    )
-
     companion object : ArgumentGuards() {
 
         @Suppress("FunctionName")
@@ -137,7 +76,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
             val (reason) = argList
             when {
                 reason.isJsNullish() || reason == "" -> {
-                    globalContext.getString(R.string.error_an_operation_is_not_implemented)
+                    GlobalAppContext.get().getString(R.string.error_an_operation_is_not_implemented)
                 }
                 else -> coerceString(reason)
             }.let { throw NotImplementedError(it) }
@@ -518,7 +457,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @RhinoRuntimeFunctionInterface
         fun waitForActivity(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..4) { argList ->
             require(!RhinoUtils.isUiThread()) {
-                globalContext.getString(R.string.blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution)
+                GlobalAppContext.get().getString(R.string.blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforactivity_with_solution)
             }
             val (activityNameArg, limitArg, intervalArg, callbackArg) = argList
             val condition = newBaseFunction(scriptRuntime.topLevelScope, "condition", {
@@ -531,7 +470,7 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
         @RhinoRuntimeFunctionInterface
         fun waitForPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any? = ensureArgumentsLengthInRange(args, 1..4) { argList ->
             require(!RhinoUtils.isUiThread()) {
-                globalContext.getString(R.string.blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution)
+                GlobalAppContext.get().getString(R.string.blocking_operations_cannot_be_performed_on_the_ui_thread_for_waitforpackage_with_solution)
             }
             val (packageNameArg, limitArg, intervalArg, callbackArg) = argList
             val condition = newBaseFunction(scriptRuntime.topLevelScope, "condition", {
@@ -580,17 +519,17 @@ class Global(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRunti
                         }
                         else -> {
                             require(num.toInt() >= 461) {
-                                globalContext.getString(R.string.error_specified_autojs6_version_number_must_be_greater_than_461)
+                                GlobalAppContext.get().getString(R.string.error_specified_autojs6_version_number_must_be_greater_than_461)
                             }
                             require(BuildConfig.VERSION_CODE >= num.toInt()) {
-                                globalContext.getString(R.string.error_autojs6_version_number_must_not_be_lower_than_num, num.jsString)
+                                GlobalAppContext.get().getString(R.string.error_autojs6_version_number_must_not_be_lower_than_num, num.jsString)
                             }
                         }
                     }
                 }
                 else -> coerceString(version).let { ver ->
                     require(Version(BuildConfig.VERSION_NAME).isAtLeast(Version(ver))) {
-                        globalContext.getString(R.string.error_autojs6_version_must_not_be_lower_than_ver, ver)
+                        GlobalAppContext.get().getString(R.string.error_autojs6_version_must_not_be_lower_than_ver, ver)
                     }
                 }
             }

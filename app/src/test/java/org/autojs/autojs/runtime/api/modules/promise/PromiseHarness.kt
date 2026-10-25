@@ -13,15 +13,15 @@ import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
-import java.io.File
 import java.util.PriorityQueue
 import java.util.concurrent.atomic.AtomicLong
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 /**
- * One script engine as AutoJs6 runs it, for comparing the global Promise of both switch states (roadmap P4.2, appendix C
- * Q95): `assets/modules/promise.js` ([Impl.MODULE]) and [PromiseConstructor] ([Impl.KOTLIN] through the global
- * `setImmediate`, [Impl.KOTLIN_POSTED] with a [ReactionPoster] as the runtime has).
+ * One script engine as AutoJs6 runs it, for the global Promise (roadmap P4.2, appendix C Q95): [PromiseConstructor]
+ * ([Impl.KOTLIN] through the global `setImmediate`, [Impl.KOTLIN_POSTED] with a [ReactionPoster] as the runtime has).
+ * Until P5.2 it also ran `assets/modules/promise.js`, the Promise of the switch off; [PromiseDifferentialTest] replays
+ * its results.
  *
  * A single script thread runs a timer in virtual time (`setImmediate` and `setTimeout` ordered by due time, then by
  * posting, as `core/looper/Timer`) and each callback as a top call that lets a coroutine suspending again through (Q23).
@@ -32,20 +32,17 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * timer (a binder thread, a Java thread): `setImmediate` there posts to the script timer, as `Timers.setImmediate` falls
  * back to the main timer. `kotlinAwait(p)` is the `await()` of Flow (Q97): Kotlin suspending through [PromiseSuspension].
  *
- * zh-CN: 按 AutoJs6 的方式运行的一个脚本引擎, 用于比较开关两态的全局 Promise (ROADMAP P4.2, 附录 C Q95): `promise.js` 与 [PromiseConstructor]
- * (经全局 setImmediate, 或像运行时那样带 [ReactionPoster]). 单个脚本线程以虚拟时间运行 timer, 续体为真实的 Rhino 续体, wait() 用真实的
+ * zh-CN: 按 AutoJs6 的方式运行的一个脚本引擎, 用于全局 Promise (ROADMAP P4.2, 附录 C Q95): [PromiseConstructor] (经全局 setImmediate,
+ * 或像运行时那样带 [ReactionPoster]). P5.2 之前还运行开关关闭时的 promise.js, 其结果由 [PromiseDifferentialTest] 回放. 单个脚本线程以虚拟时间运行 timer, 续体为真实的 Rhino 续体, wait() 用真实的
  * [SettlementLatch]; otherThread(fn) 在没有 timer 的其他 Java 线程上调用 fn; kotlinAwait(p) 即 Flow 的 await() (Q97).
  */
 class PromiseHarness(val impl: Impl) : AutoCloseable {
 
     enum class Impl {
-        /** `assets/modules/promise.js`, the switch off. */
-        MODULE,
-
         /** [PromiseConstructor] with every job through the global `setImmediate`. */
         KOTLIN,
 
-        /** [PromiseConstructor] posting its jobs itself while `setImmediate` is the harness's own, the switch on. */
+        /** [PromiseConstructor] posting its jobs itself while `setImmediate` is the harness's own, as the runtime does. */
         KOTLIN_POSTED,
     }
 
@@ -116,7 +113,6 @@ class PromiseHarness(val impl: Impl) : AutoCloseable {
         global.defineProperty("runtime", runtime, ScriptableObject.DONTENUM)
 
         promise = when (impl) {
-            Impl.MODULE -> module(File("src/main/assets/modules/promise.js")) as BaseFunction
             Impl.KOTLIN -> PromiseConstructor(scope)
             Impl.KOTLIN_POSTED -> PromiseConstructor(scope) { setImmediate, job ->
                 (setImmediate === ownSetImmediate).also { own -> if (own) post(0) { callTop(job, emptyArray()) } }
@@ -238,13 +234,6 @@ class PromiseHarness(val impl: Impl) : AutoCloseable {
         else -> e.javaClass.simpleName + " " + e.message
     }
 
-    private fun module(file: File): Any? {
-        val wrapper = cx.evaluateString(scope, "(function (module, exports) {\n${file.readText()}\n})", file.name, 0, null) as Callable
-        val module = cx.newObject(scope)
-        ScriptableObject.putProperty(module, "exports", cx.newObject(scope))
-        wrapper.call(cx, scope, global, arrayOf(module, ScriptableObject.getProperty(module, "exports")))
-        return ScriptableObject.getProperty(module, "exports")
-    }
 
     private fun fn(name: String, length: Int, body: (Context, Array<out Any?>) -> Any?): BaseFunction = object : BaseFunction(scope, ScriptableObject.getFunctionPrototype(scope)) {
         override fun call(cx: Context, nt: Any?, s: VarScope, thisObj: Any?, args: Array<out Any?>): Any? = body(cx, args)

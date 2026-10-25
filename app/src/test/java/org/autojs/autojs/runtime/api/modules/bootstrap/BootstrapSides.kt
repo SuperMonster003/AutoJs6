@@ -1,8 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.bootstrap
 
 import org.autojs.autojs.rhino.TopLevelScope
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino.Side
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino.Side
 import org.junit.Assert.assertTrue
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context

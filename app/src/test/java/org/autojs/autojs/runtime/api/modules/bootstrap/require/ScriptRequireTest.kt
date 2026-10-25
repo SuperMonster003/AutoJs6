@@ -3,8 +3,8 @@ package org.autojs.autojs.runtime.api.modules.bootstrap.require
 import org.autojs.autojs.engine.encryption.AdvancedEncryptionStandard
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.rhino.TopLevelScope
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino.Side
 import org.autojs.autojs.runtime.api.modules.bootstrap.BootstrapSides
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino.Side
 import org.autojs.autojs.script.EncryptedScriptFileHeader
 import org.junit.After
 import org.junit.Assert.assertEquals

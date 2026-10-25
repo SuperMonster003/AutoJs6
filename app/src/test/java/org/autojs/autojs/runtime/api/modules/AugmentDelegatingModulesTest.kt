@@ -1,26 +1,13 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.api.ai.AiService
-import org.autojs.autojs.runtime.api.modules.ai.Ai
 import org.autojs.autojs.runtime.api.modules.compose.Compose
 import org.autojs.autojs.runtime.api.modules.compose.ComposeScriptPlatform
 import org.autojs.autojs.runtime.api.modules.compose.ComposeScriptValues
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.modules.epub.Epub
-import org.autojs.autojs.runtime.api.modules.gallery.Gallery
-import org.autojs.autojs.runtime.api.modules.installer.Installer
-import org.autojs.autojs.runtime.api.modules.mail.Mail
-import org.autojs.autojs.runtime.api.modules.mediainfo.Mediainfo
-import org.autojs.autojs.runtime.api.modules.memory.Memory
-import org.autojs.autojs.runtime.api.modules.opencc.OpenCC
-import org.autojs.autojs.runtime.api.modules.pinyin.Pinyin
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions
 import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4j
 import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4jOptions
-import org.autojs.autojs.runtime.api.modules.speech.Speech
-import org.autojs.autojs.runtime.api.modules.speech.SpeechModels
-import org.autojs.autojs.runtime.api.modules.speech.SpeechSpeaker
-import org.autojs.autojs.runtime.api.modules.terminal.Terminal
 import org.autojs.autojs.runtime.api.epub.EpubService
 import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.installer.InstallerService
@@ -62,7 +49,6 @@ class AugmentDelegatingModulesTest {
      */
     private class Case(
         val name: String,
-        val mountCurrent: (DifferentialRhino) -> Unit,
         val calls: List<String>,
         val prepare: (DifferentialRhino) -> Unit = {},
         val checked: List<Pair<String, String>> = emptyList(),
@@ -73,7 +59,7 @@ class AugmentDelegatingModulesTest {
     fun surfacesMatchTheCurrentModules() {
         val failures = CASES.mapNotNull { case ->
             withNew(case) { rhino ->
-                runCatching { HostModuleTestSupport.assertSameSurface(rhino, case.name, case.prepare, case.mountCurrent) }.exceptionOrNull()?.message
+                runCatching { HostModuleTestSupport.assertSameSurface(rhino, case.name) }.exceptionOrNull()?.message
             }
         }
         assertTrue(failures.joinToString("\n"), failures.isEmpty())
@@ -82,14 +68,14 @@ class AugmentDelegatingModulesTest {
     @Test
     fun speechModelsSurfaceMatchesTheCurrentModule() {
         val case = CASES.first { it.name == "speech" }
-        withNew(case) { rhino -> HostModuleTestSupport.assertSameSurface(rhino, "speech.models", case.prepare, case.mountCurrent) }
+        withNew(case) { rhino -> HostModuleTestSupport.assertSameSurface(rhino, "speech.models") }
     }
 
     /** 3-Macaw Speech roadmap P8.3.2: `speech.speaker`, mounted like `speech.models`. */
     @Test
     fun speechSpeakerSurfaceMatchesTheCurrentModule() {
         val case = CASES.first { it.name == "speech" }
-        withNew(case) { rhino -> HostModuleTestSupport.assertSameSurface(rhino, "speech.speaker", case.prepare, case.mountCurrent) }
+        withNew(case) { rhino -> HostModuleTestSupport.assertSameSurface(rhino, "speech.speaker") }
     }
 
     @Test
@@ -101,7 +87,7 @@ class AugmentDelegatingModulesTest {
         val failures = CASES.flatMap { case ->
             val all = case.calls + case.checked.map { it.first }
             val new = withNew(case) { rhino -> all.map { rhino.render(DifferentialRhino.Side.KT, it) } }
-            val current = HostModuleTestSupport.currentResults(all, case.prepare, case.mountCurrent)
+            val current = HostModuleTestSupport.currentResults(all)
             val expected = case.checked.toMap()
             all.indices.mapNotNull { i ->
                 val (now, next) = current[i] to new[i]
@@ -134,7 +120,7 @@ class AugmentDelegatingModulesTest {
         var compared = 0
         val failures = CASES.filter { it.accepted.isNotEmpty() }.flatMap { case ->
             val new = withNew(case) { rhino -> case.accepted.map { rhino.render(DifferentialRhino.Side.KT, it) } }
-            val current = HostModuleTestSupport.currentResults(case.accepted, case.prepare, case.mountCurrent)
+            val current = HostModuleTestSupport.currentResults(case.accepted)
             case.accepted.indices.mapNotNull { i ->
                 compared++
                 val (now, next) = reached(current[i]) to reached(new[i])
@@ -324,7 +310,7 @@ class AugmentDelegatingModulesTest {
         private fun rangeErrors(vararg calls: String) = calls.map { it to R }
 
         private val CASES = listOf(
-            Case("ai", { Ai(it.ktRuntime, ScriptRuntimeFields.ai(it.ktRuntime)).augment(global(it)) }, emptyList(), service(AiService::class.java, "ai"),
+            Case("ai", emptyList(), service(AiService::class.java, "ai"),
                 typeErrors("ai()", "ai.ask()", "ai.ask(1)", "ai.ask({})", "ai.ask({ messages: 1 })", "ai.ask('a', 1)", "ai.ask('a', {}, 1)", "ai.chat()", "ai.stream(1)",
                     "ai.session(1)", "ai.session({ system: 1 })", "ai.session(1, 2)", "ai.catalog(1, 2)", "ai.catalog([])", "ai.ask(null)", "ai.ask(function () {})",
                     "ai.ask(Object.create({ role: 'user', content: 'x' }))", "ai.ask({ messages: null })", "ai.ask('x', { toJSON: function () { return [] } })", "ai.ask('x', new Date(0))",
@@ -337,23 +323,22 @@ class AugmentDelegatingModulesTest {
                     "ai.session(Object.create({ system: 1 }))", "ai.catalog({})",
                     "(function () { Array.prototype.toJSON = function () { return 'x' }; try { return ai.ask([]) } finally { delete Array.prototype.toJSON } })()",
                     "(function () { var a = []; a.toJSON = function () { return {} }; return ai.catalog(a) })()")),
-            Case("opencc", { OpenCC.augmentWithRuntime(global(it), it.ktRuntime) }, listOf("typeof opencc.s2t"), checked =
+            Case("opencc", listOf("typeof opencc.s2t"), checked =
                 typeErrors("opencc()", "opencc('a')", "opencc.convert('a')", "opencc.convert('a', 1)", "opencc.convert(null, 's2t')", "opencc.s2t()", "opencc.s2t('a', 'b')", "opencc.s2t(null)") +
                     typeErrors("opencc.convert('a', new String('s2t'))") + rangeErrors("opencc.convert('a', 'nope')", "opencc('a', 'nope')"),
                 accepted = listOf("(function () { var t = 's2'; t += 't'; return opencc.convert('a', t) })()", "opencc.convert('a', new java.lang.String('s2t'))", "opencc.convert(1, 's2t')",
                     "opencc.convert({}, 's2t')", "(function () { var t = 'a'; t += 'b'; return opencc.s2t(t) })()")),
-            Case("pinyin", { Pinyin.augmentWithRuntime(global(it), it.ktRuntime) },
-                listOf("typeof pinyin.STYLE_TONE", "pinyin.compact([['a', 'b'], ['c']])", "pinyin.convert('')", "pinyin('', { mode: 'nope' })", "pinyin.convert(null, 1)"), checked =
+            Case("pinyin", listOf("typeof pinyin.STYLE_TONE", "pinyin.compact([['a', 'b'], ['c']])", "pinyin.convert('')", "pinyin('', { mode: 'nope' })", "pinyin.convert(null, 1)"), checked =
                 typeErrors("pinyin()", "pinyin.convert()", "pinyin.compare('a')", "pinyin.compact()", "pinyin.compact(1)", "pinyin.compact([1])", "pinyin.compact([[null]])", "pinyin.simple()",
                     "pinyin.fromCodePoint()", "pinyin.fromCodePoint('x')", "pinyin.fromPhrase()", "pinyin.fromPhrase(null)", "pinyin('a', { customDictionary: 1 })", "pinyin('a', { customDictionary: { a: 1 } })") +
                     rangeErrors("pinyin.fromCodePoint(1e20)", "pinyin('a', { mode: 'nope' })", "pinyin.convert('a', { style: 99 })", "pinyin('a', { mode: new java.lang.String('nope') })",
                         "(function () { var m = 'no'; m += 'pe'; return pinyin('a', { style: m }) })()"),
                 accepted = listOf("pinyin.fromCodePoint(new java.lang.Integer(65))", "pinyin('a', { mode: undefined })", "pinyin.fromCodePoint('65')")),
-            Case("pinyin4j", { Pinyin4j.augmentWithRuntime(global(it), it.ktRuntime) }, listOf("pinyin4j.of('')", "pinyin4j('', { tone: 'nope' })", "pinyin4j.readings(null, { romanization: 'x' })"), checked =
+            Case("pinyin4j", listOf("pinyin4j.of('')", "pinyin4j('', { tone: 'nope' })", "pinyin4j.readings(null, { romanization: 'x' })"), checked =
                 typeErrors("pinyin4j()", "pinyin4j.of()", "pinyin4j.readings()", "pinyin4j.as()", "pinyin4j.as('a', 'b')") +
                     rangeErrors("pinyin4j.of('a', { tone: 'nope' })", "pinyin4j('a', { case: 'x' })", "pinyin4j.of('a', { v: 'x' })", "pinyin4j.readings('a', { romanization: 'x' })",
                         "pinyin4j.readings('a', { romanization: 'yale', tone: 'num' })", "pinyin4j.readings('a', { tone: 'x' })")),
-            Case("mediainfo", { Mediainfo(it.ktRuntime).augment(global(it)) }, listOf("typeof mediainfo.SNAPSHOT_SCHEMA_V1"), checked =
+            Case("mediainfo", listOf("typeof mediainfo.SNAPSHOT_SCHEMA_V1"), checked =
                 typeErrors("mediainfo()", "mediainfo(null)", "mediainfo.read()", "mediainfo.get('a')", "mediainfo.get('/a', null, 'x')", "mediainfo.get('/a', 'General', undefined)",
                     "mediainfo.get('/a', 'General', 'x', 1)", "mediainfo.get('/a', 'General', 'x', { streamNumber: 'x' })", "mediainfo.get('/a', 'General', 'x', { infoKind: 1 })",
                     "mediainfo.countGet('a')", "mediainfo.countGet('/a', null)", "mediainfo.snapshot()", "mediainfo.snapshot('/a', 1)", "mediainfo.capabilities(1)") +
@@ -361,25 +346,17 @@ class AugmentDelegatingModulesTest {
                         "mediainfo.get('/a', 'General', 'x', { infoKind: 'nope' })", "mediainfo.get('/a', 'General', 'x', { streamNumber: new java.lang.Integer(-1) })"),
                 accepted = listOf("mediainfo.get('/a', 'General', 'x', { streamNumber: new java.lang.Integer(1) })", "mediainfo.get('/a', 'General', 'x', { infoKind: new java.lang.String('TEXT') })",
                     "mediainfo.get('/a', 'General', 'x', { streamNumber: undefined, infoKind: null })")),
-            Case("mail", { Mail(it.ktRuntime, ScriptRuntimeFields.mail(it.ktRuntime)).augment(global(it)) }, listOf("mail.connect()", "mail.connect(1)", "mail.setDefault()", "mail.close(1)", "mail.connectAsync()"), service(MailService::class.java, "mail")),
-            Case("installer", { Installer(it.ktRuntime, ScriptRuntimeFields.installer(it.ktRuntime)).augment(global(it)) }, listOf("installer.install()", "installer.session()", "installer.inspect()", "installer.uninstall()"), service(InstallerService::class.java, "installer")),
-            Case("epub", { Epub(it.ktRuntime, ScriptRuntimeFields.epub(it.ktRuntime)).augment(global(it)) }, listOf("epub.open()", "epub.metadata()", "epub.toc(1, 2)", "epub.read()"), service(EpubService::class.java, "epub")),
-            Case("gallery", { Gallery(it.ktRuntime, ScriptRuntimeFields.gallery(it.ktRuntime)).augment(global(it)) }, listOf("gallery.pick(1, 2)", "gallery.view()", "gallery.edit()", "gallery.convert()"), service(GalleryService::class.java, "gallery")),
-            Case("terminal", { Terminal(it.ktRuntime, ScriptRuntimeFields.terminal(it.ktRuntime)).augment(global(it)) }, listOf("terminal.open(1, 2, 3)", "terminal.session()", "terminal.exec()", "terminal.env(1, 2, 3)"), service(TerminalService::class.java, "terminal")),
-            Case("speech", {
-                Speech(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime), ScriptRuntimeFields.tts(it.ktRuntime)).augment(global(it)).also { speech ->
-                    SpeechModels(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime)).augment(speech)
-                    SpeechSpeaker(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime)).augment(speech)
-                }
-            },
-                listOf(
-                    "speech.isAvailable(1)", "speech.capabilities(1, 2)", "speech.models.list(1, 2)", "speech.models.remove()",
-                    "speech.speaker.list(1)", "speech.speaker.remove()", "speech.speaker.enroll('a')", "speech.speaker.identify()",
-                ),
+            Case("mail", listOf("mail.connect()", "mail.connect(1)", "mail.setDefault()", "mail.close(1)", "mail.connectAsync()"), service(MailService::class.java, "mail")),
+            Case("installer", listOf("installer.install()", "installer.session()", "installer.inspect()", "installer.uninstall()"), service(InstallerService::class.java, "installer")),
+            Case("epub", listOf("epub.open()", "epub.metadata()", "epub.toc(1, 2)", "epub.read()"), service(EpubService::class.java, "epub")),
+            Case("gallery", listOf("gallery.pick(1, 2)", "gallery.view()", "gallery.edit()", "gallery.convert()"), service(GalleryService::class.java, "gallery")),
+            Case("terminal", listOf("terminal.open(1, 2, 3)", "terminal.session()", "terminal.exec()", "terminal.env(1, 2, 3)"), service(TerminalService::class.java, "terminal")),
+            Case("speech", listOf("speech.isAvailable(1)", "speech.capabilities(1, 2)", "speech.models.list(1, 2)", "speech.models.remove()",
+                "speech.speaker.list(1)", "speech.speaker.remove()", "speech.speaker.enroll('a')", "speech.speaker.identify()"),
                 services(SpeechService::class.java to "speech", TtsService::class.java to "tts")),
-            Case("compose", { side -> checkNotNull(ScriptRuntimeFields.compose(side.ktRuntime)).augment(global(side)) }, listOf("compose.isAvailable()", "compose.isAvailable(1)", "compose.createElement()", "compose.state()", "typeof compose.version"),
+            Case("compose", listOf("compose.isAvailable()", "compose.isAvailable(1)", "compose.createElement()", "compose.state()", "typeof compose.version"),
                 { side -> ScriptRuntimeFields.setCompose(side.ktRuntime, Compose(side.ktRuntime, NoPluginPlatform())) }),
-            Case("memory", { Memory(it.ktRuntime).augment(global(it)) }, emptyList(), checked =
+            Case("memory", emptyList(), checked =
                 typeErrors("memory.snapshot(1)", "memory.retained(1)", "memory.collect(1, 2)", "memory.collect('1')", "memory.collect(NaN)", "memory.dumpHeap(1, 2)", "memory.dumpHeap(1)",
                     "memory.watch()", "memory.watch(1)", "memory.watch('a')", "memory.watch(null)", "memory.watch({}, 1)",
                     "memory.watch(new java.lang.String('a'))") +

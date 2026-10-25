@@ -1,6 +1,6 @@
-"""ROADMAP P4.2 / Q95: the global Promise on a device (promise.js with the switch off, PromiseConstructor with it on).
+"""ROADMAP P4.2 / Q95: the global Promise on a device (PromiseConstructor; promise.js with the switch off until P5.2).
 
-    py -3.12 -I tools/augment/device_promise_check.py -s SERIAL [--new-modules on|off] [--sample] [--scenarios] [--bench]
+    py -3.12 -I tools/augment/device_promise_check.py -s SERIAL [--sample] [--scenarios] [--bench]
 
 --sample runs the app sample "协程/协程HelloWorld" (app/src/main/assets-app/sample) as a project, as the app runs it,
 and checks its console lines in order ("Hello, Continuation!", "1 秒后...", "2 秒后...", "1 + 2 = 3", the file read);
@@ -11,7 +11,6 @@ feature: queued reactions are awaited, so the looper runs them; "queued+wait" ru
 microseconds per operation. The rejected await of --scenarios shows an error toast (existing
 behavior of popException); no tap is needed.
 
---new-modules sets the hidden switch of the new script module layer for the run (as device_bench.py) and restores it.
 Scripts start through RunIntentActivity, results are read from the GlobalConsole lines of logcat (those logged since
 each script started, as logcat -c does not always clear the buffer). The device directory /sdcard/Download/aj6-augment-bench/p42 is removed afterwards.
 """
@@ -135,13 +134,11 @@ def bench(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("--new-modules", choices=["on", "off"])
     parser.add_argument("--sample", action="store_true")
     parser.add_argument("--scenarios", action="store_true")
     parser.add_argument("--bench", action="store_true")
     parser.add_argument("--wait", type=int, default=90, help="seconds to wait for a script")
     args = parser.parse_args()
-    previous = device_bench.set_new_modules(args.serial, args.new_modules == "on") if args.new_modules else None
     ok = True
     try:
         if args.sample:
@@ -152,9 +149,6 @@ def main():
             ok = bench(args) and ok
     finally:
         adb(args.serial, "shell", "rm", "-rf", DEVICE_DIR)
-        if previous is not None and previous != (args.new_modules == "on"):
-            device_bench.set_new_modules(args.serial, previous)
-        adb(args.serial, "shell", "rm", "-rf", device_bench.DEVICE_DIR + "/aj6_switch.js")
     sys.exit(0 if ok else 1)
 
 

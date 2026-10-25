@@ -2,9 +2,8 @@ package org.autojs.autojs.runtime.api.modules.speech
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.speech.SpeechPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.speech.SpeechScriptArguments
 import org.autojs.autojs.runtime.api.speech.SpeechService
 
@@ -28,23 +27,7 @@ import org.autojs.autojs.runtime.api.speech.SpeechService
 class SpeechSpeaker(
     private val scriptRuntime: ScriptRuntime,
     private val service: SpeechService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("speaker", withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::enroll.name,
-        ::enrollAsync.name,
-        ::verify.name,
-        ::verifyAsync.name,
-        ::identify.name,
-        ::identifyAsync.name,
-        ::list.name,
-        ::remove.name,
-    )
-
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
+) : ArgumentGuards() {
 
     @RhinoRuntimeFunctionInterface
     fun enroll(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {

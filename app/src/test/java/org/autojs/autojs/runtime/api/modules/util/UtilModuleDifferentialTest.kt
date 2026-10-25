@@ -1,10 +1,9 @@
 package org.autojs.autojs.runtime.api.modules.util
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -20,12 +19,10 @@ import org.junit.Test
 class UtilModuleDifferentialTest {
 
     private lateinit var rhino: DifferentialRhino
-    private lateinit var jsUtil: Any
 
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) jsUtil = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("util")!!
         rhino.mountNewModules("util")
     }
 
@@ -37,7 +34,7 @@ class UtilModuleDifferentialTest {
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val ktUtil = rhino.evalKt("util")
-        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsUtil, rhino.jsScope.globalThis) }, SurfaceDiff.surface(ktUtil, rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface"), SurfaceDiff.surface(ktUtil, rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         val missing = report.onlyInFirst - KNOWN_MISSING
         assertTrue("Obsolete util members missing from the new module: $missing", missing.isEmpty())

@@ -12,7 +12,6 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
-import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
 
@@ -30,22 +29,6 @@ class UtilLegacyAliasTest {
     @After
     fun exitContext() {
         Context.exit()
-    }
-
-    @Test
-    fun legacyBigintSpellingIsExportedAlongsideCanonicalName() {
-        val target = RhinoUtils.newNativeObject(scope)
-
-        Util.assign(target)
-
-        val canonical = ScriptableObject.getProperty(target, "ensureBigIntType")
-        val legacy = ScriptableObject.getProperty(target, "ensureBigintType")
-        assertTrue(canonical is BaseFunction)
-        assertTrue(legacy is BaseFunction)
-        assertEquals(
-            Undefined.instance,
-            RhinoUtils.callFunction(legacy as BaseFunction, target, target, emptyArray()),
-        )
     }
 
     @Test

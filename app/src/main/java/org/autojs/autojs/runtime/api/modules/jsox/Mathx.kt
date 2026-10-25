@@ -7,8 +7,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.util.RhinoUtils.coerceNumber
@@ -28,42 +26,7 @@ import android.graphics.Rect as AndroidRect
 /**
  * JavaScript build-in object extension for the native Math object.
  */
-class Mathx(private val scriptRuntime: ScriptRuntime) : Augmentable(), JsBuildInObjectExtensible {
-
-    override val keys = listOf(AugmentableKey("Mathx", withDollarPrefix = false))
-
-    @Suppress("DEPRECATION")
-    override val selfAssignmentFunctions = listOf(
-        ::randInt.name to AS_JSOX_STATIC,
-        ::randomInt.name to (AS_JSOX_STATIC or AS_GLOBAL),
-        ::randFloat.name to AS_JSOX_STATIC,
-        ::randomFloat.name to (AS_JSOX_STATIC or AS_GLOBAL),
-        ::random.name to AS_JSOX_STATIC,
-        ::sum.name to AS_JSOX_STATIC,
-        ::mean.name to AS_JSOX_STATIC,
-        ::avg.name to AS_JSOX_STATIC,
-        ::median.name to AS_JSOX_STATIC,
-        ::`var`.name to AS_JSOX_STATIC,
-        ::std.name to AS_JSOX_STATIC,
-        ::cv.name to AS_JSOX_STATIC,
-        ::mode.name to AS_JSOX_STATIC,
-        ::dist.name to AS_JSOX_STATIC,
-        ::logMn.name to AS_JSOX_STATIC,
-        ::floorLog.name to AS_JSOX_STATIC,
-        ::ceilLog.name to AS_JSOX_STATIC,
-        ::roundLog.name to AS_JSOX_STATIC,
-        ::floorPow.name to AS_JSOX_STATIC,
-        ::ceilPow.name to AS_JSOX_STATIC,
-        ::roundPow.name to AS_JSOX_STATIC,
-        ::max.name,
-        ::maxi.name to (AS_JSOX_STATIC or AS_IGNORED),
-        ::min.name,
-        ::mini.name to (AS_JSOX_STATIC or AS_IGNORED),
-    )
-
-    override fun extendBuildInObject() {
-        extendBuildInObjectInternal(scriptRuntime, this, "Math")
-    }
+class Mathx(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

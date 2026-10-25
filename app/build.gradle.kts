@@ -272,7 +272,6 @@ val appMergedAssetPruneIncludes = listOf(
     "default_key_store.bks",
     "docs/**/*",
     "sample/declarations/**/*",
-    "modules/obsolete/**/*",
 ) + prunedChangelogAssets
 
 val inrtMergedAssetPruneIncludes = listOf(
@@ -287,7 +286,6 @@ val inrtMergedAssetPruneIncludes = listOf(
     "models/**/*",
     "modules/**/*.d.ts",
     "modules/**/*.md",
-    "modules/obsolete/**/*",
     "project/**/*",
     "sample/**/*",
     "stored-locales/**/*",
@@ -472,7 +470,6 @@ idea {
     module {
         excludeDirs.addAll(
             listOf(
-                file("$rootDir/app/src/main/assets/modules/obsolete/"),
                 file("$rootDir/app/src/main/assets-app/js-beautify/"),
             )
         )
@@ -1449,7 +1446,6 @@ tasks.register("generateRuntimeKit") {
         rootDir.resolve("app/src/main/assets/declarations"),
         rootDir.resolve("app/src/main/assets/modules"),
         rootDir.resolve("app/src/main/java/org/autojs/autojs/runtime/api"),
-        rootDir.resolve("app/src/main/java/org/autojs/autojs/runtime/api/augment"),
         rootDir.resolve("plugin-api/apk-builder-template/src/main"),
         rootDir.resolve("plugin-api/common-plugin-api/src/main"),
     )
@@ -1505,7 +1501,6 @@ tasks.register("generateRuntimeKit") {
                 "app/src/main/assets/declarations",
                 "app/src/main/assets/modules",
                 "app/src/main/java/org/autojs/autojs/runtime/api",
-                "app/src/main/java/org/autojs/autojs/runtime/api/augment",
                 "plugin-api/apk-builder-template/src/main",
                 "plugin-api/common-plugin-api/src/main",
             ),

@@ -2,22 +2,18 @@ package org.autojs.autojs.runtime.api.modules.selector
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.automator.Automator
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.flow.Flow
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject.READONLY
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -60,37 +56,17 @@ class SelectorObsoleteMembersTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        // The obsolete module runs only when recording; what is read of it is replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
-        val host by lazy {
-            ObsoleteModuleHost(rhino.context, rhino.jsScope).also {
-                it.setRuntimeProperty("selector", rhino.evalJs("(function () { return new Packages.org.autojs.autojs.core.accessibility.UiSelector(null); })"))
-            }
-        }
-        val loaded by lazy {
-            val before = host.global.allIds.toSet()
-            host.load("selector") to host.global.allIds.filterIsInstance<String>().filterNot { it in before }
-        }
-        val selector = ScriptModuleExpectations.obsoleteSurface("surface: selector") { SurfaceDiff.surface(loaded.first, rhino.jsScope.globalThis) }
+        val selector = ScriptModuleExpectations.obsoleteSurface("surface: selector")
         val report = SurfaceDiff.compare(selector, SurfaceDiff.surface(rhino.evalKt("selector"), rhino.ktScope.globalThis))
         assertTrue("selector: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
 
-        val addedTypes = ScriptModuleExpectations.obsolete("globals") {
-            loaded.second.joinToString("\n") { it + "\t" + ObsoleteMembers.typeOf(host.global, it) }
-        }.lines().associate { it.substringBefore('\t') to it.substringAfter('\t') }
+        val addedTypes = ScriptModuleExpectations.obsolete("globals").lines().associate { it.substringBefore('\t') to it.substringAfter('\t') }
         val added = addedTypes.keys.toList()
         assertTrue(added.toString(), added.containsAll(MODULE_GLOBALS) && added.containsAll(AUTOMATOR_NAMES))
 
-        val dead = ScriptModuleExpectations.obsolete("dead wrappers") {
-            (added - MODULE_GLOBALS).filter { '$' !in it }
-                .filter { rhino.evalJs("typeof new Packages.org.autojs.autojs.core.accessibility.UiSelector(null)['$it']") != "function" }
-                .joinToString(",")
-        }.split(",").filter { it.isNotEmpty() }
+        val dead = ScriptModuleExpectations.obsolete("dead wrappers").split(",").filter { it.isNotEmpty() }
         assertEquals(DEAD_WRAPPERS, dead.sorted())
-        val deadErrors = ScriptModuleExpectations.obsolete("dead wrapper errors") {
-            host.setRuntimeProperty("console", rhino.evalJs("({ warn: function () {} })"))
-            dead.joinToString(",") { rhino.evalJs("(function () { try { global['$it'](1, 2); return 'returned'; } catch (e) { return e.name; } })()").toString() }
-        }.split(",")
+        val deadErrors = ScriptModuleExpectations.obsolete("dead wrapper errors").split(",")
         dead.zip(deadErrors).forEach { (name, error) -> assertEquals(name, "TypeError", error) }
 
         val mismatches = added.filterNot { it in SelectorGlobals.excluded || '$' in it || it in dead }
@@ -112,26 +88,19 @@ class SelectorObsoleteMembersTest {
      */
     @Test(timeout = 600_000)
     fun resultsAgreeWithTheCurrentModules() {
-        val summary = newSide(newLayer = true).use { new ->
-            newSide(newLayer = false).use { current -> CurrentModuleResults.assertAgree(new, current, EXPRESSIONS, KNOWN) }
+        val summary = newSide().use { new ->
+            CurrentModuleResults.assertAgree(new, EXPRESSIONS, KNOWN)
         }
         println("P3.6 A selector: $summary")
     }
 
-    private fun newSide(newLayer: Boolean = true): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         val runtime = side.ktRuntime
         RuntimeModulesFixture.prepareHost(runtime)
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "scale", Scale(runtime))
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "mProperties", ConcurrentHashMap<String, Any>())
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "closeableManager", RuntimeResourceScope("selector-obsolete-members-test"))
-        RuntimeModulesFixture.mount(side, MODULES, newLayer) { name, global, rt ->
-            when (name) {
-                "automator" -> Automator(rt).augment(global)
-                "flow" -> Flow(rt).augment(global)
-                "selector" -> Selector(rt).augment(global, additionalAttributes = READONLY)
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES)
     }
 
     private companion object {

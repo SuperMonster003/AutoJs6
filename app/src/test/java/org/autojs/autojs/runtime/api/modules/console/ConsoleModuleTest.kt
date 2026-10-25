@@ -1,14 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.console
 
 import org.autojs.autojs.core.console.ConsoleImpl
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.tool.UiHandler
-import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -19,7 +17,6 @@ import org.mozilla.javascript.Context
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.VarScope
-import java.io.File
 
 /**
  * Roadmap P3.2 (group 2): `console` on the new script module layer. The runtime's console is a recording `ConsoleImpl`
@@ -81,17 +78,6 @@ class ConsoleModuleTest {
         })
     }
 
-    /**
-     * The current module as a plain object with the same members (`augment`): a read through its proxy fails on the JVM
-     * (`AugmentableProxy.get` derives the names with `StringUtils`, whose class needs Android to load), the device
-     * compares the proxies. Its setters return the proxy of the old augment call, made on a throwaway object.
-     */
-    private fun mountCurrent(side: DifferentialRhino) {
-        val runtime = side.ktRuntime
-        HostModuleTestSupport.setField(runtime, "legacyConsoleProxyObject", Console(runtime).proxying(RhinoUtils.newNativeObject(runtime.topLevelScope), runtime.console))
-        Console(runtime).augment(side.ktScope.globalThis as ScriptableObject, runtime.console)
-    }
-
     @Test
     fun installingBuildsNothing() {
         listOf("console", "\$console").forEach { assertTrue(it, LazyDataSlot.isPending(rhino.ktScope.globalThis, it)) }
@@ -100,13 +86,7 @@ class ConsoleModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = SurfaceDiff.surface(rhino.evalKt("console.__augmented__"), rhino.ktScope.globalThis)
-        val expected = ScriptModuleExpectations.obsoleteSurface("surface: console") {
-            DifferentialRhino().use { current ->
-                prepare(current)
-                mountCurrent(current)
-                SurfaceDiff.surface(current.evalKt("console"), current.ktScope.globalThis)
-            }
-        }
+        val expected = ScriptModuleExpectations.obsoleteSurface("surface: console")
         val report = SurfaceDiff.compare(expected, actual)
         assertTrue(SurfaceDiff.describe(report, "current", "new"), report.namesMatch && report.attributeMismatches.isEmpty())
         HostModuleTestSupport.check(rhino, SURFACE)
@@ -118,12 +98,12 @@ class ConsoleModuleTest {
         val names = GLOBALS.joinToString(", ") { "'$it'" }
         val expression = "[$names].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); " +
             "return k + ':' + typeof this[k] + ':' + (d ? [d.writable, d.enumerable, d.configurable].join('/') : 'none'); }, this).join()"
-        assertEquals(1, HostModuleTestSupport.assertSameResults(rhino, listOf(expression), emptyMap(), ::prepare, ::mountCurrent))
+        assertEquals(1, HostModuleTestSupport.assertSameResults(rhino, listOf(expression), emptyMap()))
     }
 
     @Test
     fun printedLinesMatchTheCurrentModule() {
-        val compared = HostModuleTestSupport.assertSameResults(rhino, PRINTED, KNOWN, ::prepare, ::mountCurrent)
+        val compared = HostModuleTestSupport.assertSameResults(rhino, PRINTED, KNOWN)
         assertTrue("compared $compared", compared >= PRINTED.size - 2)
     }
 
@@ -139,10 +119,7 @@ class ConsoleModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val members = ScriptModuleExpectations.obsolete("members: console") {
-            val source = File(ObsoleteModuleHost.OBSOLETE_DIR, "__console__.js").readText()
-            Regex("^ {16}([A-Za-z]+)(?:\\(|: function)", RegexOption.MULTILINE).findAll(source).map { it.groupValues[1] }.joinToString(",")
-        }.split(",")
+        val members = ScriptModuleExpectations.obsolete("members: console").split(",")
         assertTrue(members.toString(), members.size >= 44 && "trace" in members && "printAllStackTrace" in members)
         val globals = listOf("verbose", "print", "log", "warn", "err", "openConsole", "showConsole", "clearConsole", "launchConsole")
         HostModuleTestSupport.check(rhino, members.map { "typeof console.$it" to "\"function\"" } + globals.map { "typeof $it" to "\"function\"" })

@@ -12,8 +12,6 @@ import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
@@ -35,18 +33,11 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import kotlin.reflect.full.declaredMembers
 
-class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Selector(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     private val global by lazy {
         scriptRuntime.topLevelScope
     }
-
-    override val globalAssignmentFunctions = listOf(
-        ::pickup.name,
-        ::detect.name,
-        ::existsAll.name,
-        ::existsOne.name,
-    )
 
     init {
         // Registry properties (text, clickable, ...) go straight to the registry; the whitelisted
@@ -126,7 +117,7 @@ class Selector(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
         }
     }
 
-    override fun invoke(vararg args: Any?): Scriptable = ensureArgumentsIsEmpty(args) {
+    fun invoke(vararg args: Any?): Scriptable = ensureArgumentsIsEmpty(args) {
         Context.javaToJS(scriptRuntime.selector(), scriptRuntime.topLevelScope) as Scriptable
     }
 

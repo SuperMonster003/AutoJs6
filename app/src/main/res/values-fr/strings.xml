@@ -1037,7 +1037,6 @@
     <string name="summary_memory_force_gc">Exécuter 3 fois le ramasse-miettes et la finalisation, attendre jusqu\'à 10 s que les environnements d\'exécution terminés soient libérés, puis actualiser</string>
     <string name="summary_memory_script_heap_dump">Permettre à memory.dumpHeap d\'écrire des vidages du tas dans les versions release (toujours autorisé dans les versions debug). Un vidage du tas contient toutes les données du tas, y compris les variables de tous les scripts</string>
     <string name="summary_memory_unreclaimed_warning">10 s après la fin d\'un script, exécuter une fois le ramasse-miettes; si son environnement d\'exécution n\'est toujours pas libéré, afficher un avertissement dans la console globale</string>
-    <string name="summary_new_script_module_layer">Les scripts utilisent la nouvelle implémentation des modules de script (activée par défaut). Désactivez-la pour utiliser l\'ancienne implémentation, qui sera supprimée dans une version ultérieure. S\'applique aux scripts démarrés ensuite</string>
     <string name="summary_nodejs_doctor_report">Générer un rapport de diagnostic de l\'environnement Node expurgé des données privées pour signaler des erreurs</string>
     <string name="summary_nodejs_inspector_enabled">Autoriser le débogage local et le profilage. Connecter DevTools sur ordinateur via la redirection de ports ADB.</string>
     <string name="summary_not_showing_main_activity">Exécutez directement le script sans afficher l\'activité principale.</string>
@@ -2397,7 +2396,6 @@
     <string name="text_new_path">Nouveau chemin</string>
     <string name="text_new_path_is_same_as_old_path">Le nouveau chemin est identique à l\'ancien</string>
     <string name="text_new_project">Nouveau projet</string>
-    <string name="text_new_script_module_layer">Utiliser la nouvelle implémentation des modules de script</string>
     <string name="text_new_version_found">Nouvelle version trouvée</string>
     <string name="text_new_watching_variables">Nouvelles variables de surveillance</string>
     <string name="text_next_retry">Prochaine tentative</string>

@@ -4,7 +4,7 @@ Usage: py -3.12 -I tools/augment/device_net.py -s SERIAL [--port 18735] [--cases
 
 Starts an HTTP and WebSocket server on 127.0.0.1:PORT, forwards the device's 127.0.0.1:PORT to it with
 `adb reverse`, runs tools/augment/device_eval.py with the given cases (default app/build/script-modules-device-net,
-written by HttpModuleTest and WebModulesTest) and the remaining options (for example --new-modules on --strict-errors),
+written by HttpModuleTest and WebModulesTest) and the remaining options (for example --strict-errors),
 then removes the forwarding and stops the server. Endpoints:
 
   /echo        any method: JSON {method, path, query, contentType, body, header} (header is the X-A request header),

@@ -193,7 +193,7 @@ class ComposeTsxRuntimeTest {
         initStandardObjects(context, false)
         with(RhinoUtils) { context.registerStandardObjects(this@apply) }
     }
-    private fun module(scope: TopLevelScope, platform: Platform) = Compose(RhinoTestRuntime.create(scope), platform).also { it.augment(scope.globalThis) }
+    private fun module(scope: TopLevelScope, platform: Platform) = RhinoTestRuntime.create(scope).let { runtime -> mountCompose(runtime, Compose(runtime, platform)) }
     private fun evaluate(source: String): Any? = context.evaluateString(scope, source, "compose-tsx-classic.js", 1, null)
     private fun failureCode(source: String): Any? = evaluate("(function(){try{$source;return null;}catch(e){if(!(e instanceof ComposeError))throw e;return e.code;}})()")
 

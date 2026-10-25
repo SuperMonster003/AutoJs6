@@ -1,12 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.threads
 
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.looper.TimerThread
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -28,18 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor
 import org.mozilla.javascript.Function as RhinoFunction
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::interrupt.name,
-        ::start.name,
-        ::pool.name,
-        ::disposable.name,
-    )
-
-    override val globalAssignmentFunctions = listOf(
-        ::sync.name,
-    )
+class Threads(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 
@@ -58,7 +47,7 @@ class Threads(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                 scriptRuntime.threads.start(coerceRunnable(scriptRuntime, it))
             } catch (e: Exception) {
                 if (!ScriptInterruptedException.causedByInterrupt(Throwable(e))) {
-                    if (e.message?.endsWith(globalContext.getString(R.string.error_script_is_on_exiting)) != true) {
+                    if (e.message?.endsWith(GlobalAppContext.get().getString(R.string.error_script_is_on_exiting)) != true) {
                         throw RuntimeException("${e}\n${e.stackTrace}")
                     }
                 }

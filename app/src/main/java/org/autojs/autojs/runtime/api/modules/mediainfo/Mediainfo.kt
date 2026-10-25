@@ -8,8 +8,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -24,9 +22,7 @@ import org.mozilla.javascript.NativeObject
 import java.io.File
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+class Mediainfo(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     /**
      * The data properties the `mediainfo` script module defines on its module object, in their order (its install hook
@@ -38,15 +34,7 @@ class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
         "SNAPSHOT_SCHEMA_V2" to MediainfoSnapshotSchemas.V2,
     )
 
-    override val selfAssignmentFunctions = listOf(
-        ::read.name,
-        ::snapshot.name,
-        ::capabilities.name,
-        ::get.name,
-        ::countGet.name,
-    )
-
-    override fun invoke(vararg args: Any?): NativeObject = ensureArgumentsOnlyOne(args) { path ->
+    fun invoke(vararg args: Any?): NativeObject = ensureArgumentsOnlyOne(args) { path ->
         read(scriptRuntime, arrayOf(path))
     }
 

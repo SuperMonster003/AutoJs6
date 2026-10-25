@@ -3,13 +3,13 @@ package org.autojs.autojs.runtime.api.modules.pinyin
 import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions.DefaultOptions
 import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions.PinyinMode
 import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions.PinyinStyle
@@ -34,10 +34,7 @@ import org.mozilla.javascript.ScriptableObject.DONTENUM
 import org.mozilla.javascript.ScriptableObject.PERMANENT
 import org.mozilla.javascript.ScriptableObject.READONLY
 
-object Pinyin : Augmentable(), Invokable {
-
-    @Suppress("SpellCheckingInspection")
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+object Pinyin : ArgumentGuards() {
 
     /**
      * The data properties the `pinyin` script module defines on its module object, in their order (its install hook
@@ -57,17 +54,8 @@ object Pinyin : Augmentable(), Invokable {
         "MODE_PLACE_NAME" to PinyinMode.PLACE_NAME,
     )
 
-    override val selfAssignmentFunctions = listOf(
-        ::convert.name,
-        ::simple.name,
-        ::compare.name,
-        ::compact.name,
-        ::fromCodePoint.name,
-        ::fromPhrase.name,
-    )
-
     @RhinoSingletonFunctionInterface
-    override fun invoke(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+    fun invoke(args: Array<out Any?>): NativeArray = ensureArgumentsLengthInRange(args, 1..2) { argList ->
         convert(argList)
     }
 
@@ -100,7 +88,7 @@ object Pinyin : Augmentable(), Invokable {
     fun convertRhino(hans: String, opt: NativeObject): List<List<String>> = when {
         hans.isEmpty() -> emptyList()
         else -> parseNestedStringArray(runBlocking {
-            PinyinPluginHost.convert(globalContext, hans, opt.toPluginOptions())
+            PinyinPluginHost.convert(GlobalAppContext.get(), hans, opt.toPluginOptions())
         })
     }
 
@@ -123,7 +111,7 @@ object Pinyin : Augmentable(), Invokable {
     @JvmOverloads
     fun simpleRhino(s: String, enableNumericTone: Boolean = false, enableSegment: Boolean = false): String {
         return runBlocking {
-            PinyinPluginHost.simple(globalContext, s, enableNumericTone, enableSegment)
+            PinyinPluginHost.simple(GlobalAppContext.get(), s, enableNumericTone, enableSegment)
         }
     }
 
@@ -138,7 +126,7 @@ object Pinyin : Augmentable(), Invokable {
     }
 
     internal fun fromCodePointInternal(codePoint: Int): String? = runBlocking {
-        PinyinPluginHost.fromCodePoint(globalContext, codePoint)
+        PinyinPluginHost.fromCodePoint(GlobalAppContext.get(), codePoint)
     }
 
     internal fun compareInternal(hanA: String, hanB: String): Int {
@@ -146,14 +134,14 @@ object Pinyin : Augmentable(), Invokable {
             putInt(PinyinOptionKeys.STYLE, PinyinStyle.TONE.value)
         }
         val (pinyinA, pinyinB) = runBlocking {
-            parseNestedStringArray(PinyinPluginHost.convert(globalContext, hanA, options)) to
-                    parseNestedStringArray(PinyinPluginHost.convert(globalContext, hanB, options))
+            parseNestedStringArray(PinyinPluginHost.convert(GlobalAppContext.get(), hanA, options)) to
+                    parseNestedStringArray(PinyinPluginHost.convert(GlobalAppContext.get(), hanB, options))
         }
         return Util.compare(pinyinA, pinyinB)
     }
 
     private fun fromPhraseInternal(phrase: String): List<List<String>> = parseNestedStringArray(runBlocking {
-        PinyinPluginHost.fromPhrase(globalContext, phrase)
+        PinyinPluginHost.fromPhrase(GlobalAppContext.get(), phrase)
     })
 
     private fun NativeObject.toPluginOptions(): Bundle {

@@ -1,18 +1,14 @@
 package org.autojs.autojs.runtime.api.modules.colors
 
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Versatile
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 
 /**
  * Created by SuperMonster003 on May 26, 2024.
  */
-object Color : Augmentable(), Versatile {
+object Color : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey("Color", withDollarPrefix = false))
-
-    override fun invoke(vararg args: Any?): ColorNativeObject = ensureArgumentsLengthInRange(args, 0..4) {
+    fun invoke(vararg args: Any?): ColorNativeObject = ensureArgumentsLengthInRange(args, 0..4) {
         when (it.size) {
             0 -> ColorNativeObject()
             1 -> ColorNativeObject(it[0])

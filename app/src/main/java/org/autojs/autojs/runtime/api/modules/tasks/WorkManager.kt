@@ -3,8 +3,6 @@ package org.autojs.autojs.runtime.api.modules.tasks
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.util.RhinoUtils.js_object_assign
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeObject
@@ -18,26 +16,7 @@ import org.mozilla.javascript.VarScope
  * whose remove operations return the database result. Keeping a separate
  * facade prevents the two public contracts from silently overriding each other.
  */
-class WorkManager(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(
-        AugmentableKey("workManager"),
-        AugmentableKey("work_manager"),
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::addDailyTask.name,
-        ::addWeeklyTask.name,
-        ::addDisposableTask.name,
-        ::addIntentTask.name,
-        ::addBroadcastIntentTask.name,
-        ::getTimedTask.name,
-        ::getIntentTask.name,
-        ::removeTimedTask.name,
-        ::removeIntentTask.name,
-        ::queryTimedTasks.name,
-        ::queryIntentTasks.name,
-    )
+class WorkManager(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

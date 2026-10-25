@@ -1,7 +1,7 @@
 // Calls of the modules of roadmap P3.5, third group (tts, recorder, media, sensors), appended to bench/calls_prelude.js by
-// device_bench.py --calls tts. With the switch of the new script module layer on they reach the new modules, with it off
-// the current augment modules. "ok" cases only read state (nothing is spoken); the "fail" cases fail with an argument
-// error before the TTS service is called, compared with the "ref" cases of the prelude.
+// device_bench.py --calls tts. They reach the modules of the script module layer (with its switch off they reached the old
+// augment ones until P5.2). "ok" cases only read state (nothing is spoken); the "fail" cases fail with an argument error
+// before the TTS service is called, compared with the "ref" cases of the prelude.
 time("ok tts.getMaxInputLength", () => { try { tts.getMaxInputLength(); } catch (e) { } });
 time("ok tts.isSpeaking", () => { try { tts.isSpeaking(); } catch (e) { } });
 time("ok recorder", () => { try { recorder("aj6-bench"); } catch (e) { } });

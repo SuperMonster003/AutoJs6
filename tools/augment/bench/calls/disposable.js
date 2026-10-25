@@ -1,6 +1,6 @@
 // Calls of the object of threads.disposable() (docs/augment/ROADMAP.md appendix C Q52), appended to bench/calls_prelude.js
-// by device_bench.py --calls disposable. The object is of the same class with the switch of the new script module layer on
-// or off; only threads.disposable itself reaches the new module or the current augment one. The "ok" waits return at once
+// by device_bench.py --calls disposable. The object was of the same class with the switch of the new script module layer on
+// or off (until P5.2); only threads.disposable itself reached the new module or the old augment one. The "ok" waits return at once
 // because the value is set before them (an unbounded one never returned before the Q52 fix, so this group needs a fixed
 // host); the "fail" cases fail with an argument error, compared with the "ref" cases of the prelude.
 let benchDisposable = threads.disposable();

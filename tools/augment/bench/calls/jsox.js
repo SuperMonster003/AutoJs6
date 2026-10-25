@@ -1,7 +1,7 @@
 // Module calls of Arrayx / Numberx / Mathx (roadmap P2.1), appended to bench/calls_prelude.js by
-// device_bench.py --calls jsox. With the switch of the new script module layer on they reach the new modules, with it
-// off the old augment ones. "ok" cases succeed; the other cases fail with an argument error (arity, type, range) or a
-// RangeError of the implementation, compared with the "ref" cases of the prelude (Rhino's own errors).
+// device_bench.py --calls jsox. They reach the modules of the script module layer (with its switch off they reached the
+// old augment ones until P5.2). "ok" cases succeed; the other cases fail with an argument error (arity, type, range) or
+// a RangeError of the implementation, compared with the "ref" cases of the prelude (Rhino's own errors).
 // What Mathx.sum-fraction adds to Mathx.sum (the old Kotlin module skipped the rounding, ROADMAP appendix E), in Rhino.
 time("ref rhino-sum-toFixed", () => { try { Number((1.111 + 2.222).toFixed(1)); } catch (e) { } });
 time("ok Mathx.sum", () => { try { Mathx.sum([1, 2, 3]); } catch (e) { } });

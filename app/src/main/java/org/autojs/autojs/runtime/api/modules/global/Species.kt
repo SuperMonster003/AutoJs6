@@ -2,8 +2,7 @@ package org.autojs.autojs.runtime.api.modules.global
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.util.RhinoUtils.getOrCreateStandardObjects
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.mozilla.javascript.Context
@@ -12,49 +11,9 @@ import org.mozilla.javascript.Undefined
 import java.math.BigInteger
 
 @Suppress("unused")
-object Species : Augmentable(), Invokable {
+object Species : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        ::isArray.name,
-        ::isArrayBuffer.name,
-        ::isBigInt.name,
-        ::isBoolean.name,
-        ::isContinuation.name,
-        ::isDataView.name,
-        ::isDate.name,
-        ::isError.name,
-        ::isFloat32Array.name,
-        ::isFloat64Array.name,
-        ::isFunction.name,
-        ::isHTMLDocument.name,
-        ::isInt16Array.name,
-        ::isInt32Array.name,
-        ::isInt8Array.name,
-        ::isJavaObject.name,
-        ::isJavaClass.name to AS_GLOBAL,
-        ::isJavaPackage.name to AS_GLOBAL,
-        ::isMap.name,
-        ::isNamespace.name,
-        ::isNull.name,
-        ::isNumber.name,
-        ::isObject.name to AS_GLOBAL,
-        ::isQName.name,
-        ::isRegExp.name,
-        ::isSet.name,
-        ::isString.name,
-        ::isUint16Array.name,
-        ::isUint32Array.name,
-        ::isUint8Array.name,
-        ::isUint8ClampedArray.name,
-        ::isUndefined.name,
-        ::isWeakMap.name,
-        ::isWeakSet.name,
-        ::isWindow.name,
-        ::isXML.name,
-        ::isXMLList.name,
-    )
-
-    override fun invoke(vararg args: Any?): String = ensureArgumentsOnlyOne(args, true) {
+    fun invoke(vararg args: Any?): String = ensureArgumentsOnlyOne(args, true) {
         speciesRhino(it)
     }
 

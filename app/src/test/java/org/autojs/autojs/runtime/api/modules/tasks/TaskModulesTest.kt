@@ -1,11 +1,8 @@
 package org.autojs.autojs.runtime.api.modules.tasks
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.sysprops.SysProps
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.power.PowerManager
-import org.autojs.autojs.runtime.api.modules.settings.Settings
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -29,7 +26,7 @@ class TaskModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -45,7 +42,7 @@ class TaskModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, MODULES)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, MODULES) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
     }
 
@@ -152,18 +149,9 @@ class TaskModulesTest {
         )
     )
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         RuntimeModulesFixture.prepareHost(side.ktRuntime)
-        RuntimeModulesFixture.mount(side, MODULES + (if (newLayer) listOf("timers") else emptyList()), newLayer) { name, global, runtime ->
-            when (name) {
-                "tasks" -> Tasks(runtime).augment(global)
-                "workManager" -> WorkManager(runtime).augment(global)
-                "settings" -> Settings(runtime).augment(global)
-                "powerManager" -> PowerManager(runtime).augment(global)
-                "sysprops" -> SysProps(runtime).augment(global)
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES + "timers")
     }
 
     private companion object {

@@ -4,9 +4,8 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.gallery.GalleryOutputRequest
 import org.autojs.autojs.core.plugin.gallery.GalleryPickPolicy
 import org.autojs.autojs.core.plugin.gallery.GalleryPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.gallery.GalleryScriptArguments
 import org.autojs.autojs.runtime.api.gallery.GalleryScriptValues
 import org.autojs.autojs.runtime.api.gallery.GalleryService
@@ -33,28 +32,7 @@ import org.autojs.autojs.util.RhinoUtils
 class Gallery(
     private val scriptRuntime: ScriptRuntime,
     private val service: GalleryService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("gallery"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::pick.name,
-        ::pickAsync.name,
-        ::view.name,
-        ::viewAsync.name,
-        ::edit.name,
-        ::editAsync.name,
-        ::convert.name,
-        ::convertAsync.name,
-        ::isAvailable.name,
-        ::isAvailableAsync.name,
-    )
-
-    /** `GalleryError` instances thrown by these functions reach the script unwrapped. zh-CN: 这些函数抛出的 `GalleryError` 实例不经包装到达脚本. */
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+) : ArgumentGuards() {
 
     /**
      * The data properties the `gallery` script module defines on its module object, in their order (its install hook

@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.automator
 
-import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues

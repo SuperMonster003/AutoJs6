@@ -40,17 +40,18 @@ class ScriptModuleDebugSettingsTest {
     }
 
     @Test
-    fun developerOptionsListTheThreeEntries() {
+    fun developerOptionsListTheDebugPrintEntries() {
         val xml = File("src/main/res/xml/fragment_developer_options.xml").readText()
+        // The switch of the new script module layer went with the old layer (docs/augment/ROADMAP.md P5.2).
+        assertFalse("key_new_script_module_layer" in xml)
         listOf(
-            "app:key=\"@string/key_new_script_module_layer\"",
             "app:key=\"@string/key_script_module_debug_print\"",
             "app:key=\"@string/key_script_module_debug_print_disabled_modules\"",
             "app:dependency=\"@string/key_script_module_debug_print\"",
             "org.autojs.autojs.ui.settings.ScriptModuleDebugPrintModulesPreference",
         ).forEach { assertTrue("missing $it", it in xml) }
         val keys = File("src/main/res/values/strings_donottranslate.xml").readText()
-        listOf("key_\$_new_script_module_layer", "key_\$_script_module_debug_print", "key_\$_script_module_debug_print_disabled_modules").forEach {
+        listOf("key_\$_script_module_debug_print", "key_\$_script_module_debug_print_disabled_modules").forEach {
             assertTrue("missing key value $it", ">$it<" in keys)
         }
     }

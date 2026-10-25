@@ -8,8 +8,6 @@ import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.modules.util.Util.ensureArrayTypeRhino
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
 import org.autojs.autojs.util.RhinoUtils.callFunction
@@ -33,119 +31,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * JavaScript build-in object extension for the native Array object.
  */
 @Suppress("unused", "UNUSED_PARAMETER")
-class Arrayx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), JsBuildInObjectExtensible {
-
-    override val keys = listOf(AugmentableKey("Arrayx", withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::ensureArray.name to AS_JSOX_STATIC,
-        ::distinct.name to AS_JSOX_PROTO,
-        ::distinctBy.name to AS_JSOX_PROTO,
-        ::union.name to AS_JSOX_PROTO,
-        ::intersect.name to AS_JSOX_PROTO,
-        ::subtract.name to AS_JSOX_PROTO,
-        ::differ.name to AS_JSOX_PROTO,
-        ::sortBy.name to AS_JSOX_PROTO,
-        ::sortByDescending.name to AS_JSOX_PROTO,
-        ::sortDescending.name to AS_JSOX_PROTO,
-        ::sorted.name to AS_JSOX_PROTO,
-        ::sortedDescending.name to AS_JSOX_PROTO,
-        ::sortedBy.name to AS_JSOX_PROTO,
-        ::sortedByDescending.name to AS_JSOX_PROTO,
-        ::shuffle.name to AS_JSOX_PROTO,
-    )
-
-    override fun extendBuildInObject() {
-        extendBuildInObjectInternal(scriptRuntime, this, "Array", Proto::class.java)
-    }
-
-    internal object Proto {
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun distinct(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 0) {
-            distinct(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun distinctBy(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            distinctBy(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun union(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsAtLeast(args, 0) {
-            union(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun intersect(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsAtLeast(args, 0) {
-            intersect(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun subtract(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            subtract(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun differ(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            differ(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sortBy(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            sortBy(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sortByDescending(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            sortByDescending(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sortDescending(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 0) {
-            sortDescending(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sorted(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 0) {
-            sorted(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sortedDescending(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 0) {
-            sortedDescending(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sortedBy(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            sortedBy(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun sortedByDescending(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 1) {
-            sortedByDescending(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun shuffle(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): NativeArray = ensureArgumentsLength(args, 0) {
-            shuffle(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-    }
+class Arrayx(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

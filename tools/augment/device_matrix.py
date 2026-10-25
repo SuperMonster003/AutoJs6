@@ -1,37 +1,34 @@
-"""The device matrix of ROADMAP P5.1 on one device: every item in turn, one line per item (pass / fail and key numbers).
+"""The device matrix of ROADMAP P5.1 / P5.2 on one device: every item in turn, one line per item (pass / fail and key numbers).
 
 Usage:
   py -3.12 -I -u tools/augment/device_matrix.py -s SERIAL --out DIR [--items ITEM ...] [--cases DIR ...]
-      [--backup DIR] [--install APK] [--test-apk APK] [--restore DIR]
+      [--backup DIR] [--install APK] [--test-apk APK] [--restore DIR] [--surface-baseline FILE] [--probe-baseline FILE]
 
---backup DIR pulls the installed host and test packages to DIR and records their md5 and the stored state of the
-switch of the new script module layer (absent, true or false); --install / --test-apk then install the build under
-test (adb install -r -d -t, data kept). --restore DIR puts back what --backup saved (packages, md5 check, switch state)
-and removes the bench directory; it runs last, after the items.
+--backup DIR pulls the installed host and test packages to DIR and records their md5; --install / --test-apk then
+install the build under test (adb install -r -d -t, data kept). --restore DIR puts back what --backup saved (packages,
+md5 check) and removes the bench directory; it runs last, after the items.
 
 Items, in this order (default: all of them):
-  default       removes the stored switch so the build's default applies and checks what scripts get: the declared
-                value (on since P5.1), and the new layer itself (base64.encode() without arguments is a TypeError of
-                the new layer's argument check, D10; the old module reports another error)
-  eval-default  every case file (default app/build/script-modules-device, one script per file, device_eval.py
-                --strict-errors) in the default state: agree / differ / informational, files without all results
-  eval-off      the same files with the switch off and without --strict-errors, so a difference is a value that
-                differs from the new layer (two failures differing only in the error name are D10, not counted);
-                every difference goes to DIR/eval-off-differences.txt for the comparison with appendix E. The cases of
-                OFF_SKIPPED are left out (side effects of the old modules recorded in appendix E), and "extend
-                JavaScript built-in objects" is off for the run (appendix E P3.6: with it on, Numberx / jsox cases hang
-                the old modules), then restored
-  surface       surface snapshots of both states (--extend-builtins on --roots Array.prototype Number.prototype
-                --global-classes) and their comparison (surface_compare.py --allow-length, DIR/surface-compare.txt);
-                differences of KNOWN_SURFACE are counted apart from the others
-  bootstrap     device_bootstrap_check.py --probe in both states (the default state compared with the off state) and
-                --smoke coroutine listener suspend images automator in the default state
+  layer         checks that scripts get the script module layer: base64.encode() without arguments is a TypeError of
+                its argument check (D10; the old module reported another error), and reports whether a value of the
+                switch removed in P5.2 is still stored (harmless: no build since then reads it)
+  eval          every case file (default app/build/script-modules-device, one script per file, device_eval.py
+                --strict-errors): agree / differ / informational, files without all results
+  surface       a surface snapshot (--extend-builtins on --roots Array.prototype Number.prototype --global-classes),
+                compared with --surface-baseline (an earlier snapshot .txt) when given (surface_compare.py
+                --allow-length, DIR/surface-compare.txt); differences of KNOWN_SURFACE are counted apart from the others
+  bootstrap     device_bootstrap_check.py --probe (saved to DIR/bootstrap-probe.json, compared with --probe-baseline when
+                given) and --smoke coroutine listener suspend images automator
   instrumented  the instrumented tests of tools/rhino/device_rhino_check.py and EXTRA_CLASSES (needs the test APK of
                 the same build, :app:assembleAppDebugAndroidTest)
 
+Until P5.2 the matrix ran both states of the switch of the new script module layer: the items "default" (the switch
+not stored, on since P5.1) and "eval-default" are now "layer" and "eval", "eval-off" ran the cases with the switch off
+(the differences went to appendix E), "surface" and "bootstrap" compared the two states, and --backup / --restore also
+kept the stored state of the switch.
+
 The tools write their temporary scripts under tools/augment/__pycache__, so to run several devices at the same time
-run each from its own copy of tools/augment (and tools/rhino). Logs of every step are kept in DIR. The switch is left
-not stored (the default) after the items unless --restore puts back another state.
+run each from its own copy of tools/augment (and tools/rhino). Logs of every step are kept in DIR.
 """
 import argparse
 import json
@@ -50,30 +47,23 @@ import device_bench as db  # noqa: E402
 
 PACKAGE = db.PACKAGE
 TEST_PACKAGE = "org.autojs.autojs6.test"
-EXTEND_BUILTINS_KEY = "key_$_extending_js_build_in_objects"
 MARK = "AJ6MATRIX"
-ITEMS = ["default", "eval-default", "eval-off", "surface", "bootstrap", "instrumented"]
+ITEMS = ["layer", "eval", "surface", "bootstrap", "instrumented"]
 
-# Cases left out of the off state: the old modules act on the device (appendix E "P3.6 真机关态补登" and P3.4 / P3.2).
-OFF_SKIPPED = [
-    (re.compile(r"setPointerLocation\(\s*[^)\s]"), "turns on the system pointer location display (appendix E P3.6)"),
-    (re.compile(r"sendBroadcast\('no_such_form'\)"), "crashes the host (appendix E P3.4)"),
-    (re.compile(r"^(dialogs\.)?(rawInput|input|prompt|alert|confirm|select|singleChoice|multiChoice)\("),
-     "the old module may show the dialog and block the script (appendix E P3.2 / P3.6)"),
-]
+# The key of the switch of the new script module layer, removed in P5.2 (a device may still store a value).
+REMOVED_SWITCH_KEY = "key_$_new_script_module_layer"
 
-# Surface differences of the two states recorded before (appendix A "P4.1", appendix E P3.0 / P3.2 / P3.4), matched
-# against the path without its leading "global." / "globalThis." parts.
+
+# Surface differences expected between two snapshots, matched against the path without its leading "global." /
+# "globalThis." parts. Until P5.2 the list also held the differences of the two states of the switch (appendix A
+# "P4.1", appendix E P3.0 / P3.2 / P3.4: @lookup.Image, files.batchRename.apply, console global function names).
 KNOWN_SURFACE = [
     (re.compile(r"^\$?auto\.stats\b"), "auto.stats timing values"),
-    (re.compile(r"^@lookup\.Image\b"), "@lookup.Image (appendix E P3.0)"),
-    (re.compile(r"^\$?files\.batchRename\.apply\b"), "files.batchRename.apply (appendix E P3.4)"),
-    (re.compile(r"^(clearConsole|err|launchConsole|openConsole|showConsole)(\.name)?$"), "console global function names (appendix E P3.2)"),
 ]
 
 EXTRA_CLASSES = [
-    "org.autojs.autojs.runtime.api.augment.global.CoordinateScaleDeviceTest",
-    "org.autojs.autojs.runtime.api.augment.device.DevicePageSizeInstrumentationTest",
+    "org.autojs.autojs.runtime.api.modules.global.CoordinateScaleDeviceTest",
+    "org.autojs.autojs.runtime.api.modules.device.DevicePageSizeInstrumentationTest",
 ]
 
 
@@ -117,27 +107,6 @@ def run_js(serial, name, lines, wait=30):
     return out
 
 
-def switch_state(serial):
-    """The stored state of the switch: "absent", "true" or "false"."""
-    key = db.SWITCH_KEY
-    got = run_js(serial, "aj6_matrix_state.js", [f"console.log('{MARK} ' + (pref.containsKey('{key}') ? String(pref.getBoolean('{key}', false)) : 'absent'));"])
-    if not got:
-        raise RuntimeError("no switch state from the device")
-    return got[0].strip()
-
-
-def set_switch_state(serial, state):
-    """Stores [state] ("absent" removes the key) with commit, through the default preferences of any build."""
-    key = db.SWITCH_KEY
-    edit = f"edit.remove('{key}')" if state == "absent" else f"edit.putBoolean('{key}', {state})"
-    got = run_js(serial, "aj6_matrix_set.js", [
-        "var sp = android.preference.PreferenceManager.getDefaultSharedPreferences(context);",
-        f"var edit = sp.edit(); {edit}; edit.commit();",
-        f"console.log('{MARK} ' + (sp.contains('{key}') ? String(sp.getBoolean('{key}', false)) : 'absent'));",
-    ])
-    if not got or got[0].strip() != state:
-        raise RuntimeError(f"the switch state did not become {state}: {got}")
-
 
 def package_paths(serial, package):
     out = adb(serial, "shell", "pm", "path", package).stdout
@@ -153,7 +122,7 @@ def md5_of(serial, package):
 
 def backup(serial, folder):
     folder.mkdir(parents=True, exist_ok=True)
-    state = {"switch": switch_state(serial)}
+    state = {}
     for package in (PACKAGE, TEST_PACKAGE):
         paths = sorted(package_paths(serial, package))
         files = []
@@ -163,7 +132,7 @@ def backup(serial, folder):
             files.append(local.name)
         state[package] = {"md5": md5_of(serial, package), "files": files}
     (folder / "state.json").write_text(json.dumps(state, indent=1), encoding="utf-8")
-    return report("backup", True, f"host {state[PACKAGE]['md5']}, test {state[TEST_PACKAGE]['md5']}, switch {state['switch']}")
+    return report("backup", True, f"host {state[PACKAGE]['md5']}, test {state[TEST_PACKAGE]['md5']}")
 
 
 def install(serial, apk):
@@ -182,25 +151,23 @@ def restore(serial, folder):
             install(serial, files[0])
         else:
             adb(serial, "install-multiple", "-r", "-d", "-t", *map(str, files), check=True)
-    set_switch_state(serial, state["switch"])
     adb(serial, "shell", "rm", "-rf", db.DEVICE_DIR)
     host, test = md5_of(serial, PACKAGE), md5_of(serial, TEST_PACKAGE)
     ok = host == state[PACKAGE]["md5"] and test == state[TEST_PACKAGE]["md5"]
-    return report("restore", ok, f"host {host} (was {state[PACKAGE]['md5']}), test {test} (was {state[TEST_PACKAGE]['md5']}), switch {state['switch']}")
+    return report("restore", ok, f"host {host} (was {state[PACKAGE]['md5']}), test {test} (was {state[TEST_PACKAGE]['md5']})")
 
 
-def item_default(serial, out):
-    set_switch_state(serial, "absent")
-    got = run_js(serial, "aj6_matrix_default.js", [
-        "var declared = String(org.autojs.autojs.core.pref.keys.DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get());",
+def item_layer(serial, out):
+    key = REMOVED_SWITCH_KEY
+    got = run_js(serial, "aj6_matrix_layer.js", [
         "var marker; try { base64.encode(); marker = 'no error'; } catch (e) { marker = String(e.name); }",
-        f"console.log('{MARK} ' + declared + ' ' + pref.containsKey('{db.SWITCH_KEY}') + ' ' + marker);",
+        f"var stored = pref.containsKey('{key}') ? String(pref.getBoolean('{key}', false)) : 'absent';",
+        f"console.log('{MARK} ' + marker + ' ' + stored);",
     ])
     if not got:
-        return report("default", False, "no output from the device")
-    declared, stored, marker = got[0].split()[:3]
-    return report("default", declared == "true" and stored == "false" and marker == "TypeError",
-                  f"declared {declared}, stored {stored}, base64.encode() {marker}")
+        return report("layer", False, "no output from the device")
+    marker, stored = got[0].split()[:2]
+    return report("layer", marker == "TypeError", f"base64.encode() {marker}, removed switch stored: {stored}")
 
 
 EVAL_RE = re.compile(r"(\d+) agree with the JVM Kotlin value, (\d+) differ, (\d+) informational")
@@ -265,64 +232,13 @@ def eval_files(serial, files, out, label, extra):
     return totals, short, entries, enders
 
 
-def item_eval_default(serial, files, out):
-    set_switch_state(serial, "absent")
-    (agree, differ, info), short, _, enders = eval_files(serial, files, out, "eval-default", ["--strict-errors"])
-    return report("eval-default", differ == 0 and not short and not enders,
+def item_eval(serial, files, out):
+    (agree, differ, info), short, _, enders = eval_files(serial, files, out, "eval", ["--strict-errors"])
+    return report("eval", differ == 0 and not short and not enders,
                   f"{len(files)} files, agree {agree}, differ {differ}, info {info}" + (f", short {' '.join(short)}" if short else "")
                   + (f", ended the script: {'; '.join(e for _, e in enders)}" if enders else ""))
 
 
-def off_cases(files, out):
-    """Copies of the case files without OFF_SKIPPED; returns the copies and the skipped cases."""
-    folder = out / "cases-off"
-    folder.mkdir(parents=True, exist_ok=True)
-    copies, skipped = [], []
-    for file in files:
-        kept = []
-        for entry in json.loads(file.read_text(encoding="utf-8")):
-            reason = next((r for p, r in OFF_SKIPPED if p.search(entry["expression"])), None)
-            if reason:
-                skipped.append((file.stem, entry["expression"], reason))
-            else:
-                kept.append(entry)
-        if kept:
-            copy = folder / file.name
-            copy.write_text(json.dumps(kept, ensure_ascii=True, indent=1), encoding="utf-8")
-            copies.append(copy)
-    return copies, skipped
-
-
-def set_pref_boolean(serial, key, value):
-    got = run_js(serial, "aj6_matrix_pref.js", [
-        f"var before = {db.pref_value_js(key)};",
-        f"pref.putBooleanSync('{key}', {'true' if value else 'false'});",
-        f"console.log('{MARK} ' + before);",
-    ])
-    if not got:
-        raise RuntimeError(f"no output setting {key}")
-    return got[0].strip() == "true"
-
-
-def item_eval_off(serial, files, out):
-    copies, skipped = off_cases(files, out)
-    extend_before = set_pref_boolean(serial, EXTEND_BUILTINS_KEY, False)
-    set_switch_state(serial, "false")
-    try:
-        (agree, differ, info), short, entries, enders = eval_files(serial, copies, out, "eval-off", [])
-    finally:
-        set_switch_state(serial, "absent")
-        if extend_before:
-            set_pref_boolean(serial, EXTEND_BUILTINS_KEY, True)
-    with (out / "eval-off-differences.txt").open("w", encoding="utf-8") as f:
-        for test, expression, jvm, device in entries:
-            f.write(f"{test}\t{expression}\n    new {jvm}\n    off {device}\n")
-        for test, expression in enders:
-            f.write(f"ENDED {test}\t{expression}\n")
-        for test, expression, reason in skipped:
-            f.write(f"SKIPPED {test}\t{expression}\t{reason}\n")
-    return report("eval-off", not short, f"{len(copies)} files, agree {agree}, differ {differ} (DIR/eval-off-differences.txt), "
-                  f"info {info}, ended the script {len(enders)}, skipped {len(skipped)}" + (f", short {' '.join(short)}" if short else ""))
 
 
 def surface_path(line):
@@ -330,18 +246,19 @@ def surface_path(line):
     return m.group(1) if m else None
 
 
-def item_surface(serial, out):
+def item_surface(serial, out, baseline):
     folder = out / "surface"
+    for old in folder.glob("surface-*-matrix.*"):
+        old.unlink()
     common = ["--out", folder, "--extend-builtins", "on", "--roots", "Array.prototype", "Number.prototype", "--global-classes"]
-    set_switch_state(serial, "absent")
-    for tag, extra in (("off", ["--new-modules", "off"]), ("default", [])):
-        code, text = tool("device_surface_snapshot.py", "-s", serial, *common, "--tag", tag, *extra, log=out / f"surface-{tag}.log", timeout=1800)
-        if code != 0:
-            return report("surface", False, f"snapshot {tag} failed (exit {code})")
-    set_switch_state(serial, "absent")
-    off = next(folder.glob("surface-*-off.txt"))
-    default = next(folder.glob("surface-*-default.txt"))
-    _, text = tool("surface_compare.py", off, default, "--allow-length", log=out / "surface-compare.txt")
+    code, text = tool("device_surface_snapshot.py", "-s", serial, *common, "--tag", "matrix", log=out / "surface.log", timeout=1800)
+    if code != 0:
+        return report("surface", False, f"snapshot failed (exit {code})")
+    snapshot = next(folder.glob("surface-*-matrix.txt"))
+    lines = len(snapshot.read_text(encoding="utf-8").splitlines())
+    if baseline is None:
+        return report("surface", True, f"{lines} lines in {snapshot.name}, no baseline")
+    _, text = tool("surface_compare.py", baseline, snapshot, "--allow-length", log=out / "surface-compare.txt")
     known, other = {}, []
     for line in text.splitlines():
         path = surface_path(line)
@@ -355,25 +272,22 @@ def item_surface(serial, out):
             other.append(path)
     summary = text.strip().splitlines()[-1] if text.strip() else "no output"
     (out / "surface-other.txt").write_text("\n".join(other) + "\n", encoding="utf-8")
-    return report("surface", not other, f"{summary}; known {sum(known.values())} ({', '.join(f'{k} {v}' for k, v in known.items())}), "
+    return report("surface", not other, f"{lines} lines; {summary}; known {sum(known.values())} ({', '.join(f'{k} {v}' for k, v in known.items())}), "
                   f"other {len(other)}")
 
 
-def item_bootstrap(serial, out):
-    saved = out / "bootstrap-off.json"
-    set_switch_state(serial, "false")
-    try:
-        tool("device_bootstrap_check.py", "-s", serial, "--probe", "--save", saved, log=out / "bootstrap-probe-off.txt")
-    finally:
-        set_switch_state(serial, "absent")
-    _, probe = tool("device_bootstrap_check.py", "-s", serial, "--probe", "--compare", saved, log=out / "bootstrap-probe-default.txt")
+def item_bootstrap(serial, out, baseline):
+    saved = out / "bootstrap-probe.json"
+    extra = ["--compare", baseline] if baseline else []
+    probe_code, probe = tool("device_bootstrap_check.py", "-s", serial, "--probe", "--save", saved, *extra, log=out / "bootstrap-probe.txt")
     m = re.search(r"compare: (\d+) same, (\d+) different", probe)
+    items = len(json.loads(saved.read_text(encoding="utf-8"))) if saved.is_file() else 0
     code, smoke = tool("device_bootstrap_check.py", "-s", serial, "--smoke", "coroutine", "listener", "suspend", "images", "automator",
                        log=out / "bootstrap-smoke.txt")
     lines = [l for l in smoke.splitlines() if re.match(r"^(coroutine|listener|suspend|images|automator)", l)]
-    ok = code == 0 and m is not None
-    return report("bootstrap", ok, (f"probe {m.group(1)} same / {m.group(2)} different" if m else "probe: no comparison")
-                  + f"; smoke exit {code}, {len(lines)} lines")
+    ok = code == 0 and probe_code == 0 and (m is not None or baseline is None)
+    compared = f"{m.group(1)} same / {m.group(2)} different" if m else ("no comparison" if baseline else "no baseline")
+    return report("bootstrap", ok, f"probe exit {probe_code}, {items} items, {compared}; smoke exit {code}, {len(lines)} lines")
 
 
 def item_instrumented(serial, out):
@@ -399,6 +313,8 @@ def main():
     parser.add_argument("--install", type=pathlib.Path)
     parser.add_argument("--test-apk", type=pathlib.Path)
     parser.add_argument("--restore", type=pathlib.Path)
+    parser.add_argument("--surface-baseline", type=pathlib.Path, help="an earlier surface snapshot (.txt) to compare with")
+    parser.add_argument("--probe-baseline", type=pathlib.Path, help="an earlier bootstrap probe (.json) to compare with")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     s = args.serial
@@ -414,16 +330,14 @@ def main():
     for item in args.items:
         started = time.time()
         try:
-            if item == "default":
-                result = item_default(s, args.out)
-            elif item == "eval-default":
-                result = item_eval_default(s, files, args.out)
-            elif item == "eval-off":
-                result = item_eval_off(s, files, args.out)
+            if item == "layer":
+                result = item_layer(s, args.out)
+            elif item == "eval":
+                result = item_eval(s, files, args.out)
             elif item == "surface":
-                result = item_surface(s, args.out)
+                result = item_surface(s, args.out, args.surface_baseline)
             elif item == "bootstrap":
-                result = item_bootstrap(s, args.out)
+                result = item_bootstrap(s, args.out, args.probe_baseline)
             else:
                 result = item_instrumented(s, args.out)
         except Exception as e:  # one item failing must not keep the others (and the restore) from running

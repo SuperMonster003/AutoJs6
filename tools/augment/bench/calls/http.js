@@ -1,6 +1,6 @@
 // Calls of the modules of roadmap P3.5, second group (http, web, WebSocket), appended to bench/calls_prelude.js by
-// device_bench.py --calls http. With the switch of the new script module layer on they reach the new modules, with it off
-// the current augment modules. "ok" cases make no connection (a request is only built, a constant is read); the "fail"
+// device_bench.py --calls http. They reach the modules of the script module layer (with its switch off they reached the
+// old augment ones until P5.2). "ok" cases make no connection (a request is only built, a constant is read); the "fail"
 // cases fail with an argument error before any connection, compared with the "ref" cases of the prelude.
 time("ok http.buildRequest", () => { try { http.buildRequest("http://example.com/", { method: "GET" }); } catch (e) { } });
 time("ok http.client", () => { try { http.client(); } catch (e) { } });

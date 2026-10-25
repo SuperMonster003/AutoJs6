@@ -88,8 +88,8 @@ storages EW- [object Object]
 $storages EW- [object Object]
 app object proto [object JavaObject]<org.autojs.autojs.runtime.api.AppUtils> > Object.prototype
 app keys versionCode,versionName,intent,startActivity,startDualActivity,intentToShell,startService,sendEmail,sendBroadcast,sendLocalBroadcastSync,parseUri,openUrl,openDualUrl,getUriForFile,getAppByAlias,launch,launchDual,launchPackage,launchDualPackage,launchApp,launchDualApp,getPackageName,getAppName,getInstalledApps,getInstalledPackages,getApkInfo,launchAppDetailsSettings,launchSettings,openAppSetting,openAppSettings,launchDualAppDetailsSettings,launchDualSettings,openDualAppSetting,openDualAppSettings,isInstalled,isDualInstalled,uninstall,uninstallDual,viewFile,editFile,kill,killDual,autojs
-app.versionCode EW- number 5935
-app.versionName EW- string 6.8.0
+app.versionCode EW- number {VERSION_CODE}
+app.versionName EW- string {VERSION_NAME}
 app.intent EW- function intent
 app.startActivity EW- function startActivity
 app.startDualActivity EW- function startDualActivity

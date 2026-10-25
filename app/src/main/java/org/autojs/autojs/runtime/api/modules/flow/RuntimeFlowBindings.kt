@@ -12,7 +12,7 @@ import org.autojs.autojs.core.automator.flow.StabilityCompare
 import org.autojs.autojs.core.automator.flow.Stabilizer
 import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.automator.Automator
+import org.autojs.autojs.runtime.api.modules.automator.Automator
 import org.autojs.autojs.runtime.api.modules.global.Global
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException

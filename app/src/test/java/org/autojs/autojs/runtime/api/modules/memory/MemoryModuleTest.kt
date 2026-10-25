@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.memory
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino.Side
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino.Side
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.memory.ExitKind
 import org.autojs.autojs.runtime.memory.MemoryClock
@@ -51,7 +51,10 @@ class MemoryModuleTest {
         probes = FakeProbes()
         core = MemoryDiagnosticsCore(probes, clock)
         platform = FakePlatform(core, clock, temp.newFolder("cwd"))
-        Memory(rhino.ktRuntime, platform).augment(rhino.ktScope.globalThis)
+        // The module of the script module layer, its Memory on the fake platform before first use (the old
+        // `Memory.augment` mounted it until P5.2). zh-CN: 脚本模块层的模块, 首次使用前把其 Memory 换为替身平台上的实例.
+        val module = rhino.mountNewModules("memory").instance("memory") as MemoryModule
+        MemoryModule::class.java.getDeclaredField("memory\$delegate").apply { isAccessible = true }.set(module, lazyOf(Memory(rhino.ktRuntime, platform)))
     }
 
     @After
@@ -85,7 +88,8 @@ class MemoryModuleTest {
         )
         assertEquals(0, probes.gcCalls)
         assertThrows("memory.snapshot(1)")
-        assertThrows("memory.snapshot(undefined)")
+        // A trailing undefined counts as omitted (T4, appendix E "P4.1"; the old module refused it until P5.2).
+        assertEquals(eval("memory.snapshot()"), eval("memory.snapshot(undefined)"))
     }
 
     @Test

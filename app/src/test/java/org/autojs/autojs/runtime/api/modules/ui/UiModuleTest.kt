@@ -2,13 +2,12 @@ package org.autojs.autojs.runtime.api.modules.ui
 
 import org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -18,8 +17,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
 import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.ScriptableObject
-import java.io.File
 import java.lang.reflect.Modifier
 import java.util.concurrent.ConcurrentHashMap
 import org.autojs.autojs.runtime.api.UI as ApiUI
@@ -60,12 +57,6 @@ class UiModuleTest {
         HostModuleTestSupport.setField(side.ktRuntime, "ui", newRuntimeUi(side.ktRuntime))
     }
 
-    /** The current module as a plain object with the same members (`augment`), as for console: its proxy needs Android. */
-    private fun mountCurrent(side: DifferentialRhino) {
-        val runtime = side.ktRuntime
-        UI(runtime).augment(side.ktScope.globalThis as ScriptableObject, runtime.ui)
-    }
-
     @Test
     fun installingBindsTheRuntimeUiAndBuildsNothing() {
         listOf("ui", "\$ui").forEach { assertTrue(it, LazyDataSlot.isPending(rhino.ktScope.globalThis, it)) }
@@ -75,13 +66,7 @@ class UiModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = SurfaceDiff.surface(rhino.evalKt("ui.__augmented__"), rhino.ktScope.globalThis)
-        val expected = ScriptModuleExpectations.obsoleteSurface("surface: ui") {
-            DifferentialRhino().use { current ->
-                prepare(current)
-                mountCurrent(current)
-                SurfaceDiff.surface(current.evalKt("ui"), current.ktScope.globalThis)
-            }
-        }
+        val expected = ScriptModuleExpectations.obsoleteSurface("surface: ui")
         val report = SurfaceDiff.compare(expected, actual)
         assertTrue(SurfaceDiff.describe(report, "current", "new"), report.namesMatch && report.attributeMismatches.isEmpty())
         HostModuleTestSupport.check(rhino, SURFACE)
@@ -93,14 +78,14 @@ class UiModuleTest {
         val names = GLOBALS.joinToString(", ") { "'$it'" }
         val expression = "[$names].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); " +
             "return k + ':' + typeof this[k] + ':' + (d ? [d.writable, d.enumerable, d.configurable].join('/') : 'none'); }, this).join()"
-        assertEquals(1, HostModuleTestSupport.assertSameResults(rhino, listOf(expression), emptyMap(), ::prepare, ::mountCurrent))
+        assertEquals(1, HostModuleTestSupport.assertSameResults(rhino, listOf(expression), emptyMap()))
         // Decision a of P3.2: the current module binds a global isUiThread of its own, the new layer leaves it to the global module.
         HostModuleTestSupport.check(rhino, listOf("typeof isUiThread" to "\"undefined\"", "typeof ui.isUiThread" to "\"function\""))
     }
 
     @Test
     fun proxiedMembersMatchTheCurrentModule() {
-        assertEquals(PROXIED.size, HostModuleTestSupport.assertSameResults(rhino, PROXIED.map { it.first }, emptyMap(), ::prepare, ::mountCurrent))
+        assertEquals(PROXIED.size, HostModuleTestSupport.assertSameResults(rhino, PROXIED.map { it.first }, emptyMap()))
         HostModuleTestSupport.check(rhino, PROXIED)
         // A write goes to the runtime's ui, which keeps a name it does not hold on the members behind the proxy.
         HostModuleTestSupport.check(rhino, WRITES)
@@ -117,12 +102,7 @@ class UiModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val members = ScriptModuleExpectations.obsolete("members: ui") {
-            val source = File(ObsoleteModuleHost.OBSOLETE_DIR, "__ui__.js").readText()
-            val block = source.substringAfter("UI.prototype = {").substringBefore("\n            };")
-            // `view` is the runtime's ui property, read through the proxy.
-            Regex("^ {16}(?:get )?([A-Za-z_]+)(?:[(]|: )", RegexOption.MULTILINE).findAll(block).map { it.groupValues[1] }.filter { it != "constructor" && it != "view" }.joinToString(",")
-        }.split(",")
+        val members = ScriptModuleExpectations.obsolete("members: ui").split(",")
         assertTrue(members.toString(), members.size >= 20 && "Widget" in members && "__widgets__" in members && "finish" in members)
         HostModuleTestSupport.check(rhino, members.map { "'$it' in ui.__augmented__" to "true" } + listOf("ui.view" to "null"))
     }

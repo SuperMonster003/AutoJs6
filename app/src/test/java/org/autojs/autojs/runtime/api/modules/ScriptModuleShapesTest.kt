@@ -1,7 +1,7 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.rhino.ProxyObject
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.TestScriptModules
 import org.autojs.autojs.runtime.api.modules.sample.AssignProbeModule
 import org.autojs.autojs.runtime.api.modules.sample.FakeEmitter

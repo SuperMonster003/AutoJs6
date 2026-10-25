@@ -1,12 +1,11 @@
 package org.autojs.autojs.runtime.api.modules.images
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -39,7 +38,7 @@ class ImagesModuleTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -54,10 +53,10 @@ class ImagesModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, emptyList())
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, emptyList()) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
-        HostModuleTestSupport.assertSameSurface(rhino, "images", prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }, mountCurrent = ::mountCurrent)
-        val compared = HostModuleTestSupport.assertSameResults(rhino, LAYOUT, emptyMap(), prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }, mountCurrent = ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "images")
+        val compared = HostModuleTestSupport.assertSameResults(rhino, LAYOUT, emptyMap())
         assertEquals(LAYOUT.size, compared)
         HostModuleTestSupport.check(rhino, SHAPE)
     }
@@ -65,12 +64,7 @@ class ImagesModuleTest {
     /** The obsolete module needs `scriptRuntime.threads.atomic`, `events.__asEmitter__` and `__asGlobal__` when it is created. */
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: images") {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            host.setRuntimeProperty("threads", rhino.evalJs("({ atomic: function () { return {}; } })"))
-            rhino.evalJs("global.events = { __asEmitter__: function (o) { return o; } }; global.__asGlobal__ = function () {}")
-            SurfaceDiff.surface(host.load("images"), rhino.jsScope.globalThis)
-        }
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: images")
         val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("images"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
@@ -122,13 +116,9 @@ class ImagesModuleTest {
         assertTrue(ScriptableObject.getProperty(options, "orientation") !is String)
     }
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         RuntimeModulesFixture.prepareHost(side.ktRuntime)
-        RuntimeModulesFixture.mount(side, MODULES, newLayer) { _, global, runtime -> Images(runtime).augment(global) }
-    }
-
-    private fun mountCurrent(side: DifferentialRhino) {
-        Images(side.ktRuntime).augment(side.ktScope.globalThis as ScriptableObject)
+        RuntimeModulesFixture.mount(side, MODULES)
     }
 
     companion object {

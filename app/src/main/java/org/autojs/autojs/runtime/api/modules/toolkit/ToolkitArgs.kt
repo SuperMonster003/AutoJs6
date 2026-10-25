@@ -2,8 +2,8 @@ package org.autojs.autojs.runtime.api.modules.toolkit
 
 import android.view.accessibility.AccessibilityEvent
 import org.autojs.autojs.core.automator.filter.JsRegexUtils
-import org.autojs.autojs.runtime.api.augment.automator.EventWaitArguments
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
+import org.autojs.autojs.runtime.api.modules.automator.EventWaitArguments
 import org.autojs.autojs.runtime.api.modules.flow.FlowArgs
 import org.autojs.autojs.runtime.api.modules.flow.FlowOptions
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues

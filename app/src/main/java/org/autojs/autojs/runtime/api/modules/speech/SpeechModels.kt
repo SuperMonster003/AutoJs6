@@ -4,9 +4,8 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.plugin.speech.SpeechBundles
 import org.autojs.autojs.core.plugin.speech.SpeechModelQuery
 import org.autojs.autojs.core.plugin.speech.SpeechPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.speech.SpeechScriptArguments
 import org.autojs.autojs.runtime.api.speech.SpeechService
 
@@ -25,23 +24,7 @@ import org.autojs.autojs.runtime.api.speech.SpeechService
 class SpeechModels(
     private val scriptRuntime: ScriptRuntime,
     private val service: SpeechService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("models", withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::list.name,
-        ::install.name,
-        ::installAsync.name,
-        ::importFile.name,
-        ::remove.name,
-        ::setDefault.name,
-        ::getDefault.name,
-        ::refreshCatalog.name,
-    )
-
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
+) : ArgumentGuards() {
 
     @RhinoRuntimeFunctionInterface
     fun list(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {

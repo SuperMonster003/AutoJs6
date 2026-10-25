@@ -6,13 +6,13 @@ import org.junit.Test
 import java.io.File
 
 /**
- * Roadmap P4.2 / appendix C Q95: JVM micro benchmark of the global Promise, `assets/modules/promise.js` against
- * [PromiseConstructor] (interpreted Rhino, as on the device), with the cases of the evaluation (`PromiseEvalBenchTest`
- * of the prototype, appendix A "Promise (路线 A)"). Each case is a script run [ROUNDS] times in a fresh harness after
+ * Roadmap P4.2 / appendix C Q95: JVM micro benchmark of the global Promise, [PromiseConstructor] (interpreted Rhino, as
+ * on the device; `assets/modules/promise.js` until P5.2, see appendix A "Promise (路线 A)"), with the cases of the
+ * evaluation (`PromiseEvalBenchTest` of the prototype). Each case is a script run [ROUNDS] times in a fresh harness after
  * [WARMUP] runs; the median per operation in microseconds goes to `build/reports/promise/bench.md`. Runs only when
  * `app/build/promise-bench` exists.
  *
- * zh-CN: ROADMAP P4.2 / 附录 C Q95: 全局 Promise 的 JVM 微基准, `assets/modules/promise.js` 对 [PromiseConstructor] (解释模式 Rhino, 同真机),
+ * zh-CN: ROADMAP P4.2 / 附录 C Q95: 全局 Promise 的 JVM 微基准, [PromiseConstructor] (解释模式 Rhino, 同真机; P5.2 之前对照 promise.js, 见附录 A),
  * 用例同评估 (原型的 `PromiseEvalBenchTest`, 附录 A "Promise (路线 A)"). 每个用例是一段脚本, 在新的测试环境中先运行 [WARMUP] 次, 再运行 [ROUNDS] 次,
  * 每次操作耗时 (微秒) 的中位数写入 `build/reports/promise/bench.md`. 仅当 `app/build/promise-bench` 存在时运行.
  */

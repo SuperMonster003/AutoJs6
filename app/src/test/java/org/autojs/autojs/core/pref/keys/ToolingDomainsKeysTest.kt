@@ -70,8 +70,6 @@ class ToolingDomainsKeysTest : DomainKeysTestBase() {
 
     @Test
     fun developerKeys() {
-        // On by default since docs/augment/ROADMAP.md P5.1 (D8).
-        assertTrue(DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.get())
         assertFalse(DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.get())
         assertFalse(DeveloperKeys.NODEJS_INSPECTOR_ENABLED.get())
         assertTrue(DeveloperKeys.LEAKCANARY_ENABLED.get())

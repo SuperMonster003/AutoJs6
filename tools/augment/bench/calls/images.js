@@ -1,6 +1,6 @@
 // Calls of the modules of roadmap P3.1 (images, Canvas, ocr, barcode, qrcode, yolo), appended to bench/calls_prelude.js by
-// device_bench.py --calls images. With the switch of the new script module layer on they reach the new modules, with it
-// off the current augment modules. The "ok" cases work on an image drawn in the script (no screen capture) or only read
+// device_bench.py --calls images. They reach the modules of the script module layer (with its switch off they reached the
+// old augment ones until P5.2). The "ok" cases work on an image drawn in the script (no screen capture) or only read
 // state; the "fail" cases fail with an argument error on a missing or blank path before any image is read or captured,
 // compared with the "ref" cases of the prelude. Nothing is written to the host settings.
 let img = (function () {

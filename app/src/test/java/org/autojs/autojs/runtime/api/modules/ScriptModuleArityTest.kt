@@ -9,8 +9,8 @@ import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.automator.AutomatorArgs
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.flow.FlowArgs
 import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope

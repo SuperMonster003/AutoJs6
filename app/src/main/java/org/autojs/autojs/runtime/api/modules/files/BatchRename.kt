@@ -16,13 +16,11 @@ import org.autojs.autojs.core.plugin.batchrename.BatchRenameScriptCodes
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameScriptException
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameScriptProgress
 import org.autojs.autojs.core.plugin.batchrename.BatchRenameScriptService
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.ScriptAsyncDispatcher
 import org.autojs.autojs.runtime.api.modules.toJsPromise
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -62,38 +60,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * (或拒绝) 该回调的错误.
  */
 @Suppress("unused", "UNUSED_PARAMETER")
-class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
-
-    override val keys = listOf(AugmentableKey("batchRename", withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::plan.name,
-        ::applyPlan.name to "apply",
-        ::undo.name,
-        ::history.name,
-        ::isAvailable.name,
-        ::planAsync.name,
-        ::applyAsync.name,
-        ::undoAsync.name,
-        ::presets.name,
-        ::presetsAsync.name,
-        ::importPresets.name,
-        ::importPresetsAsync.name,
-        ::preview.name,
-        ::previewAsync.name,
-        ::deleteHistory.name,
-        ::clearHistory.name,
-    )
-
-    /** `BatchRenameError` instances reach the script unwrapped. zh-CN: `BatchRenameError` 实例不经包装到达脚本. */
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = PASS_THROUGH
-
-    override val scriptErrorPassThroughInvoke = true
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
-        listOf<Pair<Any, Any?>>(BatchRenameJsErrors.NAME to BatchRenameJsErrors.constructor(scriptRuntime))
-    }
+class BatchRename(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     private val service by lazy {
         val context = ScriptRuntime.applicationContext
@@ -105,7 +72,7 @@ class BatchRename(private val scriptRuntime: ScriptRuntime) : Augmentable(script
     }
 
     /** `files.batchRename(paths, options)`: `apply(plan(paths, options), { onProgress })`. */
-    override fun invoke(vararg args: Any?): Any? = guarded {
+    fun invoke(vararg args: Any?): Any? = guarded {
         ensureArgumentsLength(args, 2) { (paths, options) ->
             val planWork = planWork(paths, options)
             val progress = progressOf(options)

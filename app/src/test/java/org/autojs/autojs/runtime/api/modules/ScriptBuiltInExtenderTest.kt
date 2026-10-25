@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.modules
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.TestScriptModules
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -98,13 +98,6 @@ class ScriptBuiltInExtenderTest {
         rhino.evalKt("var aj6Twice = Number.twice; var aj6Plus = Number.prototype.plus;")
         mounter.builtIns.extend("numberProbe")
         check(listOf("Number.twice === aj6Twice" to "false", "Number.prototype.plus === aj6Plus" to "false", "Number.twice(4)" to "8"))
-    }
-
-    @Test
-    fun extendBuiltInsOrRunsTheLegacyExtensionWithoutAMounter() {
-        var legacy = 0
-        ScriptModuleLayer.extendBuiltInsOr(null) { legacy++ }
-        assertEquals(1, legacy)
     }
 
 }

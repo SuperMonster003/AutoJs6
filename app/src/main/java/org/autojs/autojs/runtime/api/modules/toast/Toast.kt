@@ -1,20 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.toast
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptToast
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.mozilla.javascript.Undefined
 
-class Toast(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
-
-    override val selfAssignmentFunctions = listOf(
-        ::dismissAll.name,
-    )
+class Toast(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     // @Caution by SuperMonster003 on Oct 11, 2022.
     //  ! android.widget.Toast.makeText() doesn't work well on Android API Level 28 (9) [P].
@@ -28,7 +23,7 @@ class Toast(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
     //  ! 进行测试的设备包括:
     //  ! 1. 索尼 XPERIA XZ1 Compact (G8441 型号)
     //  ! 2. Android Studio 自带的安卓虚拟设备 (安卓 9.0 x86 架构)
-    override fun invoke(vararg args: Any?): Undefined = call(scriptRuntime, args)
+    fun invoke(vararg args: Any?): Undefined = call(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 
@@ -36,10 +31,10 @@ class Toast(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntim
         @RhinoRuntimeFunctionInterface
         fun call(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLengthInRange(args, 0..3) {
             val toastParser = when (it.size) {
-                0 -> ToastParser(globalContext, "")
-                1 -> ToastParser(globalContext, args[0])
-                2 -> ToastParser(globalContext, args[0], args[1])
-                3 -> ToastParser(globalContext, args[0], args[1], args[2])
+                0 -> ToastParser(GlobalAppContext.get(), "")
+                1 -> ToastParser(GlobalAppContext.get(), args[0])
+                2 -> ToastParser(GlobalAppContext.get(), args[0], args[1])
+                3 -> ToastParser(GlobalAppContext.get(), args[0], args[1], args[2])
                 else -> throw WrappedIllegalArgumentException("Invalid arguments length ${args.size} for global.toast")
             }
             toastParser.show(scriptRuntime)

@@ -1,19 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.web
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.http.Http
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 import org.autojs.autojs.runtime.api.Http as ApiHttp
 
 /**
@@ -46,25 +42,10 @@ class WebModulesTest {
 
     private fun prepare(side: DifferentialRhino) = HostModuleTestSupport.setField(side.ktRuntime, "http", ApiHttp())
 
-    /** The current http, web and WebSocket modules in their order of `ScriptModuleLayer.ORDER` (consecutive there). */
-    private fun mountCurrent(side: DifferentialRhino) {
-        val global = side.ktScope.globalThis as ScriptableObject
-        Http(side.ktRuntime).augment(global, side.ktRuntime.http)
-        Web(side.ktRuntime).augment(global)
-        WebSocket(side.ktRuntime).augment(global, WebSocketFields)
-    }
-
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val globals = listOf("newInjectableWebView", "newInjectableWebClient", "newWebSocket", "WebSocket")
-        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface") {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (n) { scope[n] = o[n].bind(o); }); };")
-            host.loadAndDefine("util")
-            val jsWeb = host.loadAndDefine("web")
-            globals.forEach { name -> assertEquals(name, "function", rhino.evalJs("typeof $name")) }
-            SurfaceDiff.surface(jsWeb, rhino.jsScope.globalThis)
-        }
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface")
         val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("web"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         globals.forEach { name -> assertEquals(name, "function", rhino.evalKt("typeof $name")) }
@@ -72,28 +53,20 @@ class WebModulesTest {
 
     @Test
     fun surfaceMatchesTheCurrentModules() {
-        HostModuleTestSupport.assertSameSurface(rhino, "web", ::prepare, ::mountCurrent)
-        HostModuleTestSupport.assertSameSurface(rhino, "WebSocket", ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "web")
+        HostModuleTestSupport.assertSameSurface(rhino, "WebSocket")
         listOf("newInjectableWebView", "newInjectableWebClient", "newWebSocket").forEach { name ->
-            HostModuleTestSupport.assertSameSurface(rhino, name, ::prepare, ::mountCurrent)
+            HostModuleTestSupport.assertSameSurface(rhino, name)
         }
         // The global names of the three modules and their order, as ScriptRuntime.augment() mounts them.
-        val expected = ScriptModuleExpectations.obsolete("keys") {
-            DifferentialRhino().use { current ->
-                prepare(current)
-                mountCurrent(current)
-                current.evalKt(KEYS).toString()
-            }
-        }
+        val expected = ScriptModuleExpectations.obsolete("keys")
         assertEquals(expected, rhino.evalKt(KEYS).toString())
     }
 
     /** The constants resolve through the lookup prototype like the current `WebSocketFields`: same names and values, none listed. */
     @Test
     fun webSocketConstantsMatchTheCurrentFields() {
-        val fields = ScriptModuleExpectations.obsolete("fields") {
-            WebSocketFields.exportedNames.sorted().joinToString("\n") { name -> "$name=${WebSocketFields.get(rhino.ktScope.globalThis, name)}" }
-        }
+        val fields = ScriptModuleExpectations.obsolete("fields")
         assertEquals(fields, WebSocketConstants.VALUES.keys.sorted().joinToString("\n") { name -> "$name=${WebSocketConstants.VALUES[name]}" })
         HostModuleTestSupport.check(rhino, CONSTANTS)
         DEVICE.add(CONSTANTS)
@@ -116,7 +89,7 @@ class WebModulesTest {
         val errors = ERRORS.drop(1).dropLast(1)
         val known = errors.associate { (expression, expected) -> expression to (expected to "appendix E P3.5 web (D10, Q7)") }
         val expressions = CONSTANTS.map { it.first } + errors.map { it.first }
-        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, known, ::prepare, ::mountCurrent)
+        val compared = HostModuleTestSupport.assertSameResults(rhino, expressions, known)
         assertEquals(expressions.size, compared)
     }
 

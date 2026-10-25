@@ -1,10 +1,8 @@
 package org.autojs.autojs.runtime.api.modules
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases.KnownDifference
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs6.BuildConfig
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases.KnownDifference
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -32,14 +30,6 @@ class RuntimeModulesDifferentialTest {
         rhino = DifferentialRhino()
         RuntimeModulesFixture.prepareHost(rhino.ktRuntime, RuntimeModulesFixture.CORE_FIELDS + "app")
         RuntimeModulesFixture.installAppContext()
-        if (ScriptModuleExpectations.RECORDING) {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            rhino.evalJs(JS_STUBS)
-            host.setRuntimeProperty("files", rhino.ktRuntime.files)
-            host.setRuntimeProperty("threads", rhino.ktRuntime.threads)
-            host.setRuntimeProperty("app", rhino.ktRuntime.app)
-            listOf("threads", "tasks", "autojs", "app", "files").forEach { host.loadAndDefine(it) }
-        }
         rhino.mountNewModules("app", "autojs", "threads", "tasks", "files")
     }
 
@@ -55,24 +45,6 @@ class RuntimeModulesDifferentialTest {
 
     companion object {
 
-        /** Host objects the obsolete modules read when loaded, as plain stubs (the version of this build). */
-        private val JS_STUBS = """
-            global.context = {
-                getString: function () { return 'AutoJs6'; },
-                packageName: 'org.autojs.autojs6',
-                getPackageName: function () { return 'org.autojs.autojs6'; },
-                getPackageManager: function () {
-                    return { getPackageInfo: function () { return { versionCode: ${BuildConfig.VERSION_CODE}, versionName: '${BuildConfig.VERSION_NAME}' }; } };
-                },
-            };
-            global.R = { strings: { app_name: 0 } };
-            global.Version = Packages.io.github.g00fy2.versioncompare.Version;
-            global.app = {};
-            // The former internal.js: binds the named members of an object as global functions.
-            global.__asGlobal__ = function (obj, names, scope) {
-                names.forEach(function (name) { var f = obj[name]; scope[name] = typeof f === 'function' ? f.bind(obj) : f; });
-            };
-        """.trimIndent()
 
         private val EXPRESSIONS = listOf(
             "typeof sync(function () {})",

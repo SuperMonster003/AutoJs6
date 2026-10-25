@@ -1,5 +1,4 @@
-"""ROADMAP P4.3: the modules of the Bundled Libraries plugin on a device in the four plugin states, both states of the
-new script module layer.
+"""ROADMAP P4.3: the modules of the Bundled Libraries plugin on a device in the four plugin states.
 
     py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --plugin-apk PLUGIN.apk [--local-first]
 
@@ -15,9 +14,10 @@ order and in one host process (so the broadcasts of each change are what makes i
                        build of the plugin; on again after)
     uninstalled        adb uninstall
 
-In each state bench/plugin_modules_smoke/main.js runs with the layer switch off and then on; the "AJ6REQ <item> <json>"
-lines must be the same in both (position-axios excepted: the error position, registered) and match the expectation of
-the state. Prints one line per state and item group and PASS / FAIL. The layer switch is restored, the plugin is left
+In each state bench/plugin_modules_smoke/main.js runs once; the "AJ6REQ <item> <json>" lines must match the expectation
+of the state (an item without one, as the getters of an available library, must be there; position-axios, the error
+position, is printed only). Until P5.2 the script ran with the switch of the new script module layer off and then on,
+and the two runs had to print the same. Prints one line per state and item group and PASS / FAIL. The plugin is left
 uninstalled and the device directory removed.
 """
 import argparse
@@ -53,7 +53,7 @@ DISABLED_LIBRARIES = ["axios", "buffer"]
 
 
 def expected(state):
-    """{item: expected value} of [state]; a missing item may print anything that is the same in both layer states."""
+    """{item: expected value} of [state]; an item without one may print anything (a getter: "ok" with any value)."""
     result = {}
 
     def unavailable(library, reason):
@@ -76,7 +76,7 @@ def expected(state):
         elif state == "library-disabled" and name in DISABLED_LIBRARIES:
             result[key] = unavailable(name, "library-disabled")
         else:
-            result[key] = None  # "ok" with the type of the module, the same in both layer states
+            result[key] = None  # "ok" with the type of the module
     available = state in ("enabled", "local-first")
     result["identity-axios"] = ["ok", True] if available else None
     result["message-axios"] = "no throw" if available else None
@@ -124,43 +124,38 @@ def installed(serial):
     return PLUGIN in db.adb(serial, "shell", "pm", "list", "packages", PLUGIN).stdout
 
 
-def run_layers(serial, wait):
-    runs = {}
-    for on in (False, True):
-        db.set_new_modules(serial, on)
-        items, finished = drc.run_marked(serial, f"{REMOTE}/main.js", wait)
-        runs[on] = (items, finished)
-    return runs
+def run_smoke(serial, wait):
+    return drc.run_marked(serial, f"{REMOTE}/main.js", wait)
 
 
-def check(state, runs):
-    (off, off_done), (on, on_done) = runs[False], runs[True]
-    failures = [f"{state}: run did not finish ({name})" for name, done in (("off", off_done), ("on", on_done)) if not done]
+def check(state, run):
+    items, finished = run
+    failures = [] if finished else [f"{state}: run did not finish"]
     want = expected(state)
     groups = {}
-    for item in dict.fromkeys(list(want) + list(off) + list(on)):
-        a, b = off.get(item), on.get(item)
+    for item in dict.fromkeys(list(want) + list(items)):
+        got = items.get(item)
         if item == "position-axios":
-            print(f"{state} {item}: off {a} | on {b} (registered)")
+            print(f"{state} {item}: {got} (registered)")
             continue
-        if a is None or b is None:
+        if got is None:
             failures.append(f"{state} {item}")
-            print(f"{state} {item}: MISSING off {a} | on {b}")
+            print(f"{state} {item}: MISSING")
             continue
-        value = json.loads(b)
+        value = json.loads(got)
         if item.startswith("getter-") and want.get(item) is None:
-            ok = a == b and value[0] == "ok"
+            ok = value[0] == "ok"
         elif want.get(item) is None:
-            ok = a == b
+            ok = True
         else:
-            ok = a == b and value == want[item]
+            ok = value == want[item]
         groups.setdefault(ok, []).append(item)
         if not ok:
             failures.append(f"{state} {item}")
-            print(f"{state} {item}: FAIL off {a} | on {b} (expected {json.dumps(want.get(item))})")
-    print(f"{state}: {len(groups.get(True, []))} items same in both layer states and as expected, {len(groups.get(False, []))} failed")
-    if "message-axios" in on and want.get("message-axios") is None:
-        print(f"{state} message-axios: {on['message-axios']}")
+            print(f"{state} {item}: FAIL {got} (expected {json.dumps(want.get(item))})")
+    print(f"{state}: {len(groups.get(True, []))} items as expected, {len(groups.get(False, []))} failed")
+    if "message-axios" in items and want.get("message-axios") is None:
+        print(f"{state} message-axios: {items['message-axios']}")
     return failures
 
 
@@ -177,27 +172,25 @@ def main():
     db.adb(s, "shell", "rm", "-rf", REMOTE)
     db.adb(s, "shell", "mkdir", "-p", db.DEVICE_DIR, check=True)
     db.adb(s, "push", str(LOCAL), REMOTE, check=True)
-    previous = db.set_new_modules(s, False)
     failures = []
     try:
         if installed(s):
             db.adb(s, "uninstall", PLUGIN, check=True)
         if args.local_first:
-            failures += check("local-first", run_layers(s, args.wait))
+            failures += check("local-first", run_smoke(s, args.wait))
         else:
-            failures += check("not-installed", run_layers(s, args.wait))
+            failures += check("not-installed", run_smoke(s, args.wait))
             db.adb(s, "install", "-r", args.plugin_apk, check=True)
-            failures += check("enabled", run_layers(s, args.wait))
+            failures += check("enabled", run_smoke(s, args.wait))
             set_plugin_enabled(s, False)
-            failures += check("plugin-disabled", run_layers(s, args.wait))
+            failures += check("plugin-disabled", run_smoke(s, args.wait))
             set_plugin_enabled(s, True)
             set_libraries(s, DISABLED_LIBRARIES, False)
-            failures += check("library-disabled", run_layers(s, args.wait))
+            failures += check("library-disabled", run_smoke(s, args.wait))
             set_libraries(s, DISABLED_LIBRARIES, True)
             db.adb(s, "uninstall", PLUGIN, check=True)
-            failures += check("uninstalled", run_layers(s, args.wait))
+            failures += check("uninstalled", run_smoke(s, args.wait))
     finally:
-        db.set_new_modules(s, previous)
         if installed(s):
             db.adb(s, "uninstall", PLUGIN)
         db.adb(s, "shell", "rm", "-rf", REMOTE)

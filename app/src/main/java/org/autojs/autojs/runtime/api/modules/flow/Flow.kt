@@ -6,8 +6,6 @@ import org.autojs.autojs.core.automator.flow.CombinatorKind
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.mozilla.javascript.ScriptableObject
@@ -38,78 +36,9 @@ import java.util.function.Supplier
  * Created by SuperMonster003 on Sep 6, 2026.
  */
 @Suppress("unused", "UNUSED_PARAMETER")
-class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Flow(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     private val executor = FlowExecutor.of(scriptRuntime)
-
-    override val selfAssignmentFunctions = listOf(
-        ::wait.name to listOf("wait", "waitAsync"),
-        ::waitUntil.name,
-        ::waitWhile.name,
-        ::whenPresent.name,
-        ::repeatUntil.name,
-        ::waitForStable.name,
-        ::waitForVisible.name,
-        ::waitForHidden.name to listOf("waitForHidden", "waitForGone"),
-        ::waitForActivity.name,
-        ::waitForPackage.name,
-        ::waitThenClick.name to listOf("waitThenClick", "clickWait"),
-        ::waitThenClickBounds.name to listOf("waitThenClickBounds", "clickBoundsWait"),
-        ::waitThenLongClick.name,
-        ::waitForStableThenClick.name to listOf("waitForStableThenClick", "clickWhenStable"),
-        ::waitForStableThenClickBounds.name to listOf("waitForStableThenClickBounds", "clickBoundsWhenStable"),
-        ::clickWhenStableAfter.name,
-        ::clickBoundsWhenStableAfter.name,
-        ::sleep.name to listOf("sleep", "delay"),
-        Companion::run.name,
-        ::of.name,
-        ::all.name,
-        ::race.name,
-        ::any.name,
-        ::cancelAll.name,
-        ::defaults.name,
-        ::trace.name,
-        // Toolkit roots (roadmap P4.2); the synchronous forms are the globals of Automator (D10).
-        // zh-CN: 工具起点 (Roadmap P4.2); 同步形式为 Automator 的全局函数 (D10).
-        ::smartClick.name,
-        ::smartClickBounds.name,
-        ::clickIfExists.name,
-        ::clickBoundsIfExists.name,
-        ::clickAny.name,
-        ::clickBoundsAny.name,
-        ::findAny.name,
-        ::waitForIdle.name,
-        ::waitForEvent.name,
-        ::waitForToast.name,
-        ::waitForNotification.name,
-        ::scrollUntil.name,
-        ::typeInto.name,
-        ::dismissPopups.name,
-        ::collectList.name,
-        ::launchAndWait.name,
-        ::backUntil.name,
-        ::backToApp.name,
-        ::toggle.name,
-    )
-
-    override val globalAssignmentFunctions = listOf(
-        ::waitAsync.name,
-        ::waitThenClick.name to listOf("waitThenClick", "clickWait"),
-        ::waitThenClickBounds.name to listOf("waitThenClickBounds", "clickBoundsWait"),
-        ::waitForStable.name,
-        ::waitForStableThenClick.name to listOf("waitForStableThenClick", "clickWhenStable"),
-        ::waitForStableThenClickBounds.name to listOf("waitForStableThenClickBounds", "clickBoundsWhenStable"),
-        ::waitForVisible.name,
-        ::waitForHidden.name to listOf("waitForHidden", "waitForGone"),
-        ::clickWhenStableAfter.name,
-        ::clickBoundsWhenStableAfter.name,
-    )
-
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "Flow" to Supplier { executor.prototype.constructor },
-        "pending" to Supplier { executor.pendingCount },
-        "workers" to Supplier { executor.workerCount },
-    )
 
     init {
         // `wait.async(...)` on the synchronous global `wait` (D1); Global has been assigned by now.
@@ -121,7 +50,7 @@ class Flow(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         )
     }
 
-    override fun invoke(vararg args: Any?): Any = wait(scriptRuntime, args)
+    fun invoke(vararg args: Any?): Any = wait(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
@@ -20,8 +21,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -39,21 +38,9 @@ import android.graphics.Rect as AndroidRect
 import org.autojs.autojs.runtime.api.modules.images.Images as AugmentableImages
 import org.opencv.core.Rect as OpencvRect
 
-class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Ocr(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        "toString" to AS_LITERAL_TO_STRING,
-        ::tap.name,
-        ::recognizeText.name,
-        ::detect.name,
-        ::summary.name,
-    )
-
-    override val selfAssignmentGettersAndSetters = listOf(
-        Triple("mode", Supplier<Any?> { modeValue(scriptRuntime) }, Consumer<Any?> { tap(scriptRuntime, arrayOf(it)) }),
-    )
-
-    override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
+    fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 
@@ -216,16 +203,16 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
         }
 
         private fun availableModes(): List<OcrMode> {
-            val engines = OcrPluginHost.availableEngines(globalContext).toMutableSet()
+            val engines = OcrPluginHost.availableEngines(GlobalAppContext.get()).toMutableSet()
             if (isInrt) {
                 engines.remove("paddle-ocr")
                 engines.remove("rapid-ocr")
                 val paddleAvailable = runCatching {
                     ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles()
-                    PaddleOcrEmbeddedEngine.resolveVariantName(globalContext) != null
+                    PaddleOcrEmbeddedEngine.resolveVariantName(GlobalAppContext.get()) != null
                 }.getOrDefault(false)
                 if (paddleAvailable) engines += "paddle-ocr"
-                if (org.autojs.autojs.runtime.api.OcrRapid.isEmbeddedAvailable(globalContext)) engines += "rapid-ocr"
+                if (org.autojs.autojs.runtime.api.OcrRapid.isEmbeddedAvailable(GlobalAppContext.get())) engines += "rapid-ocr"
             }
             return OcrMode.entries.filter { it.engine in engines }
         }
@@ -241,12 +228,12 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
             if (requested != OcrMode.AUTO) return Selection(requested)
             if (isInrt) {
                 val embedded = availableModes().firstOrNull()
-                    ?: throw IllegalStateException(globalContext.getString(org.autojs.autojs6.R.string.error_no_available_ocr_engine))
+                    ?: throw IllegalStateException(GlobalAppContext.get().getString(org.autojs.autojs6.R.string.error_no_available_ocr_engine))
                 return Selection(embedded)
             }
             val plugin = runBlocking(scriptRuntime.coroutineContext) {
                 OcrPluginHost.selectOrThrow(
-                    context = globalContext,
+                    context = GlobalAppContext.get(),
                     engineId = options?.inquire(PaddleOcrOptionExtraKeys.ENGINE_ID, ::coerceString, "")?.takeIf { it.isNotBlank() },
                     engine = options?.inquire(PaddleOcrOptionExtraKeys.ENGINE, ::coerceString, "")?.takeIf { it.isNotBlank() },
                     variant = options?.inquire(PaddleOcrOptionExtraKeys.VARIANT, ::coerceString, "")?.takeIf { it.isNotBlank() },

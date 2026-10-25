@@ -1,8 +1,8 @@
 // Cost of a failing call (roadmap P1.4, red line R2), measured inside the script: every case runs W warm-up
 // iterations, then up to N timed ones (at least MIN, stopping after LIMIT_MS), and prints microseconds per iteration
-// (each iteration is one arrow function call around a try / catch). base64 is served by the new script module layer
-// when its switch (ROADMAP T8) is on and by the old augment module otherwise; the Rhino and script cases are the same
-// either way and serve as the reference. The "part" cases reach single steps of the module error path through
+// (each iteration is one arrow function call around a try / catch). base64 is served by the script module layer (until
+// P5.2 by the old augment module when the switch of ROADMAP T8 was off); the Rhino and script cases serve as the
+// reference. The "part" cases reach single steps of the module error path through
 // Rhino's Java bridge; "bridge" is a trivial bridged static call of the same shape, to subtract from them.
 let N = 2000;
 let MIN = 100;

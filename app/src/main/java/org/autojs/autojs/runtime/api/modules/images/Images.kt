@@ -37,8 +37,6 @@ import org.autojs.autojs.runtime.api.ImageSimilarity
 import org.autojs.autojs.runtime.api.PngQuantBridge
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.AsEmitter
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
@@ -84,96 +82,7 @@ import org.opencv.core.Scalar as OpencvScalar
 import org.opencv.core.Size as OpencvSize
 
 @Suppress("SameParameterValue", "unused", "UNUSED_PARAMETER")
-class Images(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), AsEmitter {
-
-    @Suppress("DEPRECATION")
-    override val selfAssignmentFunctions = listOf(
-        ::initOpenCvIfNeeded.name,
-        ::read.name,
-        ::imread.name,
-        ::copy.name,
-        ::load.name,
-        ::loadAsync.name,
-        ::clip.name,
-        ::pixel.name,
-        ::captureScreen.name to AS_GLOBAL,
-        ::requestScreenCapture.name to AS_GLOBAL,
-        ::requestScreenCaptureAsync.name to AS_GLOBAL,
-        ::stopScreenCapture.name,
-        ::getScreenCaptureOptions.name,
-        ::save.name,
-        ::saveImage.name,
-        ::invert.name,
-        ::grayscale.name,
-        ::isGrayscale.name,
-        ::threshold.name,
-        ::inRange.name,
-        ::interval.name,
-        ::adaptiveThreshold.name,
-        ::blur.name,
-        ::medianBlur.name,
-        ::gaussianBlur.name,
-        ::bilateralFilter.name,
-        ::cvtColor.name,
-        ::findCircles.name,
-        ::resize.name,
-        ::scale.name,
-        ::rotate.name,
-        ::flip.name,
-        ::concat.name,
-        ::detectColor.name,
-        ::detectsColor.name,
-        ::detectMultiColors.name,
-        ::detectsMultiColors.name,
-        ::findPointByColor.name,
-        ::findColor.name to AS_GLOBAL,
-        ::findColorInRegion.name to AS_GLOBAL,
-        ::findPointByColorExactly.name,
-        ::findColorEquals.name to AS_GLOBAL,
-        ::findPointsByColor.name,
-        ::findAllPointsForColor.name,
-        ::findPointByColors.name,
-        ::findMultiColors.name to AS_GLOBAL,
-        ::findPointsByColors.name,
-        ::countPointsByColor.name,
-        ::getMeanColor.name,
-        ::findPointByImage.name,
-        ::findImage.name to AS_GLOBAL,
-        ::findImageInRegion.name to AS_GLOBAL,
-        ::matchTemplate.name,
-        ::fromBase64.name,
-        ::toBase64.name,
-        ::fromBytes.name,
-        ::toBytes.name,
-        ::readPixels.name,
-        ::matToImage.name,
-        ::detectAndComputeFeatures.name,
-        ::matchFeatures.name,
-        ::isRecycled.name,
-        ::recycle.name,
-        ::quantize.name,
-        ::quantizeToFile.name,
-        ::compress.name,
-        ::compressToBytes.name,
-        ::downsample.name,
-        ::getSize.name,
-        ::getWidth.name,
-        ::getHeight.name,
-        ::buildRegion.name,
-        ::__buildRegion.name,
-        ::psnr.name,
-        ::ssim.name,
-        ::mssim.name,
-        ::hist.name,
-        ::mse.name,
-        ::ncc.name,
-        ::isEqual.name,
-        ::getSimilarity.name,
-    )
-
-    override val selfAssignmentJavaClasses = listOf(
-        "ObjectFrame" to ObjectFrame::class,
-    )
+class Images(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     @Suppress("MayBeConstant")
     companion object : ArgumentGuards() {

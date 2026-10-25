@@ -12,8 +12,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
@@ -35,82 +33,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * JavaScript build-in object extension for the native Number object.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate", "UNUSED_PARAMETER")
-class Numberx(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), JsBuildInObjectExtensible {
-
-    override val keys = listOf(AugmentableKey("Numberx", withDollarPrefix = false))
-
-    override val selfAssignmentProperties = listOf(
-        // @Hint by SuperMonster003 on Jun 20, 2024.
-        //  ! A tiny magic for generating this constant value. :)
-        //  ! zh-CN: 生成这个常量的一个小魔法. [笑脸符号]
-        //  !
-        //  # val workdays = 5
-        //  # val weekends = 2
-        //  # val health = "Your health"
-        //  # val evil = "Hard working only"
-        //  # evil.split(
-        //  #     Regex("[${health.lowercase()}]")
-        //  # ).sumOf {
-        //  #     it.takeIf { it.isNotEmpty() }
-        //  #         ?.codePointAt(0)?.toDouble()
-        //  #         ?: (996.0 / workdays / weekends - weekends)
-        //  # }.roundToInt()
-        "ICU" to 996 to AS_JSOX_STATIC,
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        ::ensureNumber.name to AS_JSOX_STATIC,
-        ::ensureNumberLike.name to AS_JSOX_STATIC,
-        ::ensureNumbersLike.name to AS_JSOX_STATIC,
-        ::check.name to AS_JSOX_STATIC,
-        ::clamp.name to AS_JSOX_PROTO,
-        ::clampTo.name to AS_JSOX_PROTO,
-        ::toFixedNum.name to AS_JSOX_PROTO,
-        ::padStart.name to AS_JSOX_PROTO,
-        ::padEnd.name to AS_JSOX_PROTO,
-        ::parseFloat.name to (AS_JSOX_STATIC or AS_JSOX_GLOBAL),
-        ::parsePercent.name to AS_JSOX_STATIC,
-        ::parseRatio.name to AS_JSOX_STATIC,
-        ::parseAny.name to AS_JSOX_STATIC,
-    )
-
-    override fun extendBuildInObject() {
-        extendBuildInObjectInternal(scriptRuntime, this, "Number", Proto::class.java)
-    }
-
-    internal object Proto {
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun clamp(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): Double = unwrapArguments(args) {
-            clamp(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun clampTo(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): Double = ensureArgumentsLengthInRange(args, 1..2) {
-            clampTo(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun toFixedNum(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): Double = ensureArgumentsLength(args, 1) {
-            toFixedNum(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun padStart(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..2) {
-            padStart(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-        @JvmStatic
-        @RhinoRuntimeFunctionWithThisObjInterface
-        fun padEnd(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..2) {
-            padEnd(scriptRuntime, it.unshiftWith(thisObj))
-        }
-
-    }
+class Numberx(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

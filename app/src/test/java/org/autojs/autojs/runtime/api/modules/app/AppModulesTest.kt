@@ -3,13 +3,9 @@ package org.autojs.autojs.runtime.api.modules.app
 import android.content.ContextWrapper
 import android.content.SharedPreferences
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.files.BatchRename
-import org.autojs.autojs.runtime.api.augment.files.Files
 import org.autojs.autojs.runtime.api.modules.storages.Storages
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
@@ -20,8 +16,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject
-import org.autojs.autojs.util.RhinoUtils
 
 /**
  * Roadmap P3.4, second group: `app`, `autojs` (with `autojs.version`), `device`, `files` (with `files.batchRename`) and
@@ -41,7 +35,7 @@ class AppModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -57,7 +51,7 @@ class AppModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(
             // Documented: the function under `apply` is named after its script name (formerly the Kotlin name applyPlan).
             expected.replace("files.batchRename.apply EW- function applyPlan", "files.batchRename.apply EW- function apply"),
@@ -191,24 +185,14 @@ class AppModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val store = StoreContext.install()
-        // The obsolete modules run only when recording; their surfaces are replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放记录的表面.
-        val obsolete by lazy {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            host.setRuntimeProperty("device", rhino.evalJs("({})"))
-            ScriptableObject.putProperty(host.global, "context", Context.javaToJS(store, rhino.jsScope))
-            val modules = listOf("device", "storages").associateWith { host.load(it) }
-            ScriptableObject.putProperty(host.global, "obsoleteStorages", modules["storages"])
-            modules + ("storage" to rhino.evalJs("obsoleteStorages.create('aj6-p36-obsolete')"))
-        }
+        StoreContext.install()
         listOf(
             "device" to "device",
             "storages" to "storages",
             // `_storage` is the LocalStorage the obsolete proxy kept as a property; the new storage object keeps it in Kotlin.
             "storage" to "storages.create('aj6-p36-obsolete')",
         ).forEach { (name, kt) ->
-            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name") { SurfaceDiff.surface(obsolete[name], rhino.jsScope.globalThis) }
+            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(js.filterKeys { it != "_storage" }, SurfaceDiff.surface(rhino.evalKt(kt), rhino.ktScope.globalThis))
             assertTrue(name + ": " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
@@ -223,10 +207,7 @@ class AppModulesTest {
     @Test
     fun storagesGiveTheSameResultsAsTheCurrentModule() {
         StoreContext.install()
-        val compared = HostModuleTestSupport.assertSameResults(rhino, STORAGE_RESULTS.map { it.first }, emptyMap(), prepare = {
-            RuntimeModulesFixture.prepareHost(it.ktRuntime, RuntimeModulesFixture.CORE_FIELDS + "app")
-            StoreContext.install()
-        }) { Storages.augmentWithRuntime(it.ktScope.globalThis as ScriptableObject, it.ktRuntime) }
+        val compared = HostModuleTestSupport.assertSameResults(rhino, STORAGE_RESULTS.map { it.first }, emptyMap())
         assertEquals(STORAGE_RESULTS.size, compared)
         StoreContext.install()
         RuntimeModulesFixture.check(rhino, STORAGE_RESULTS)
@@ -294,21 +275,10 @@ class AppModulesTest {
         )
     )
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         RuntimeModulesFixture.prepareHost(side.ktRuntime, RuntimeModulesFixture.CORE_FIELDS + "app")
         RuntimeModulesFixture.installAppContext()
-        var app: ScriptableObject? = null
-        RuntimeModulesFixture.mount(side, if (newLayer) MODULES + listOf("autojs", "device") else MODULES, newLayer) { name, global, runtime ->
-            when (name) {
-                "app" -> app = App(runtime).augment(global, runtime.app)
-                "files" -> Files(runtime).augment(global, runtime.files).also { BatchRename(runtime).augment(it) }
-                "storages" -> Storages.augmentWithRuntime(global, runtime)
-                else -> throw AssertionError(name)
-            }
-        }
-        // As ScriptRuntime.augment() does after mounting every module with the new layer off; the current autojs module
-        // reads Context.getString when constructed, which the JVM android stubs refuse, so a plain object stands in for it.
-        if (!newLayer) app!!.defineProp("autojs", RhinoUtils.newNativeObject(side.ktScope))
+        RuntimeModulesFixture.mount(side, MODULES + listOf("autojs", "device"))
     }
 
     /**

@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.modules
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before

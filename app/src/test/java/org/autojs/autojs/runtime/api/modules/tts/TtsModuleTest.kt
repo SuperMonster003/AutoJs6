@@ -1,14 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.tts
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.tts.Tts
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.tts.TtsService
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.5: `tts` on the new script module layer. There is no obsolete JS (6.8.0), and the TtsService needs
@@ -43,13 +41,9 @@ class TtsModuleTest {
         HostModuleTestSupport.setField(side.ktRuntime, "tts", DifferentialRhino.allocateWithoutConstructor(TtsService::class.java))
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        Tts(side.ktRuntime, TtsServices.of(side.ktRuntime)).augment(side.ktScope.globalThis as ScriptableObject)
-    }
-
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "tts", ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "tts")
         HostModuleTestSupport.check(rhino, SURFACE)
         DEVICE.add(SURFACE)
     }

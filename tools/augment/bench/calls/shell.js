@@ -1,6 +1,6 @@
 // Calls of the modules of roadmap P3.4, fourth group (shell, shizuku, plugins), appended to bench/calls_prelude.js by
-// device_bench.py --calls shell. With the switch of the new script module layer on they reach the new modules, with it
-// off the current augment modules. "ok" cases run no command; the "fail" cases fail with an argument error, compared with
+// device_bench.py --calls shell. They reach the modules of the script module layer (with its switch off they reached the
+// old augment ones until P5.2). "ok" cases run no command; the "fail" cases fail with an argument error, compared with
 // the "ref" cases of the prelude (Rhino's own errors).
 time("ok shell.getCommand", () => { try { shell.getCommand("ls", true); } catch (e) { } });
 time("ok shizuku.getCommand-array", () => { try { shizuku.getCommand(["a", "b"]); } catch (e) { } });

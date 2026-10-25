@@ -5,15 +5,13 @@ import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
@@ -24,16 +22,9 @@ import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 
-class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class OcrRapid(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey(OcrMode.RAPID.value, withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::recognizeText.name,
-        ::detect.name,
-    )
-
-    override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
+    fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 
@@ -62,13 +53,13 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
                 val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
-                    context = globalContext,
+                    context = GlobalAppContext.get(),
                     engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                     engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_RAPID_OCR,
                     variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                     moduleLabel = MODULE_LABEL_RAPID_OCR,
                 )
-                OcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
+                OcrPluginHost.recognizeText(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
             }
         }
 
@@ -79,13 +70,13 @@ class OcrRapid(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRun
             val ocrOptions = getOcrOptions(options)
             return runBlocking(scriptRuntime.coroutineContext) {
                 val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
-                    context = globalContext,
+                    context = GlobalAppContext.get(),
                     engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                     engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_RAPID_OCR,
                     variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                     moduleLabel = MODULE_LABEL_RAPID_OCR,
                 )
-                OcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
+                OcrPluginHost.detect(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
             }.map { OcrResult(it.text, it.confidence, it.bounds) }
         }
 

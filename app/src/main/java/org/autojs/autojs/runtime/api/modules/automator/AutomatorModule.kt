@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.automator
 
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptModule

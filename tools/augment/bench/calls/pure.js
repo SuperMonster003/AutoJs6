@@ -1,7 +1,7 @@
 // Module calls of the pure logic modules of roadmap P2.2 (s13n, cvt, fmt, mime, nanoid, species, isNullish, base64),
-// appended to bench/calls_prelude.js by device_bench.py --calls pure. With the switch of the new script module layer on
-// they reach the new modules, with it off the old augment ones. "ok" cases succeed; the other cases fail with an argument
-// error (arity, type, range), compared with the "ref" cases of the prelude (Rhino's own errors).
+// appended to bench/calls_prelude.js by device_bench.py --calls pure. They reach the modules of the script module layer
+// (with its switch off they reached the old augment ones until P5.2). "ok" cases succeed; the other cases fail with an
+// argument error (arity, type, range), compared with the "ref" cases of the prelude (Rhino's own errors).
 time("ok isNullish", () => { try { isNullish(null); } catch (e) { } });
 time("ok species", () => { try { species([]); } catch (e) { } });
 time("ok species.isString", () => { try { species.isString("a"); } catch (e) { } });

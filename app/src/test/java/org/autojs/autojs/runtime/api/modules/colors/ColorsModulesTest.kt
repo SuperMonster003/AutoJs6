@@ -1,8 +1,7 @@
 package org.autojs.autojs.runtime.api.modules.colors
 
-import org.autojs.autojs.runtime.api.augment.colors.ColorsTheme
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.util.ColorUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -10,7 +9,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
-import org.autojs.autojs.core.image.Colors as CoreColors
 
 /**
  * Roadmap P2.3: `colors`, `colors.theme` and `Color` of the new script module layer beyond the differential test against
@@ -332,15 +330,7 @@ class ColorsModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = rhino.evalKt(DESCRIBE).toString()
-        val expected = ScriptModuleExpectations.obsolete("describe") {
-            DifferentialRhino().use { legacy ->
-                val global = legacy.ktScope.globalThis
-                val colors = Colors.augmentWithRuntime(global, legacy.ktRuntime, Colors.colorTables + CoreColors())
-                ColorsTheme(legacy.ktRuntime).augment(colors)
-                Color.augmentWithRuntime(global, legacy.ktRuntime, Colors.colorTables)
-                legacy.evalKt(DESCRIBE).toString()
-            }
-        }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }
 

@@ -1,10 +1,9 @@
 package org.autojs.autojs.runtime.api.modules.mime
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -20,16 +19,10 @@ import org.autojs.autojs.runtime.api.Mime as ApiMime
 class MimeModuleDifferentialTest {
 
     private lateinit var rhino: DifferentialRhino
-    private lateinit var jsMime: Any
 
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) jsMime = ObsoleteModuleHost(rhino.context, rhino.jsScope).run {
-            setRuntimeProperty("mime", ApiMime)
-            loadAndDefine("util")
-            loadAndDefine("mime")!!
-        }
         rhino.mountNewModules("mime")
     }
 
@@ -41,7 +34,7 @@ class MimeModuleDifferentialTest {
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val ktMime = rhino.evalKt("mime")
-        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsMime, rhino.jsScope.globalThis) }, SurfaceDiff.surface(ktMime, rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface"), SurfaceDiff.surface(ktMime, rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         assertTrue("Obsolete mime members missing from the new module: ${report.onlyInFirst}", report.onlyInFirst.isEmpty())
         assertTrue("typeof differs: ${report.typeMismatches}", report.typeMismatches.isEmpty())

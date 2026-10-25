@@ -13,7 +13,6 @@ import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.external.receiver.DynamicBroadcastReceivers
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.threads.Threads
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.timing.IntentTask
@@ -41,30 +40,7 @@ import org.mozilla.javascript.ScriptableObject
 import kotlin.math.pow
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class Tasks(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentFunctions = listOf(
-        ::addTask.name,
-        ::addTimedTask.name,
-        ::addDailyTask.name,
-        ::addWeeklyTask.name,
-        ::addMonthlyTask.name,
-        ::addYearlyTask.name,
-        ::addDisposableTask.name,
-        ::addCountdownTask.name,
-        ::addIntentTask.name,
-        ::addBroadcastIntentTask.name,
-        ::getTimedTask.name,
-        ::getIntentTask.name,
-        ::removeTask.name,
-        ::removeTimedTask.name,
-        ::removeIntentTask.name,
-        ::updateTask.name,
-        ::queryTimedTasks.name,
-        ::queryIntentTasks.name,
-        ::timeFlagToDays.name,
-        ::daysToTimeFlag.name,
-    )
+class Tasks(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 

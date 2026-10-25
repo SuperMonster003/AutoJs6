@@ -1039,7 +1039,6 @@
     <string name="summary_memory_force_gc">تشغيل جمع البيانات المهملة و finalization ثلاث مرات, والانتظار حتى 10 ثوان لتحرير بيئات التشغيل المنتهية, ثم التحديث</string>
     <string name="summary_memory_script_heap_dump">السماح لـ memory.dumpHeap بكتابة تفريغات الكومة في إصدارات release (مسموح دائما في إصدارات debug). يحتوي تفريغ الكومة على جميع بيانات الكومة بما في ذلك متغيرات جميع البرامج النصية</string>
     <string name="summary_memory_unreclaimed_warning">بعد 10 ثوان من انتهاء البرنامج النصي, تشغيل جمع البيانات المهملة مرة واحدة, وإذا لم يتم تحرير بيئة التشغيل الخاصة به بعد, طباعة تحذير في وحدة التحكم العامة</string>
-    <string name="summary_new_script_module_layer">تستخدم البرامج النصية التنفيذ الجديد لوحدات البرامج النصية (مفعل افتراضيا). عند إيقافه يستخدم التنفيذ القديم, الذي ستتم إزالته في إصدار لاحق. يسري على البرامج النصية التي تبدأ بعد ذلك</string>
     <string name="summary_nodejs_doctor_report">إنشاء تقرير تشخيصي لوقت تشغيل Node منقح للخصوصية لاستخدامه في تقارير الأخطاء</string>
     <string name="summary_nodejs_inspector_enabled">السماح للنصوص باستخدام التصحيح المحلي وتحليل الأداء. اتصل بأدوات DevTools على الكمبيوتر عبر إعادة توجيه منافذ ADB.</string>
     <string name="summary_not_showing_main_activity">قم بتشغيل البرنامج النصي مباشرة دون إظهار النشاط الرئيسي</string>
@@ -2399,7 +2398,6 @@
     <string name="text_new_path">طريق جديد</string>
     <string name="text_new_path_is_same_as_old_path">المسار الجديد هو نفس المسار القديم</string>
     <string name="text_new_project">مشروع جديد</string>
-    <string name="text_new_script_module_layer">استخدام التنفيذ الجديد لوحدات البرامج النصية</string>
     <string name="text_new_version_found">تم العثور على نسخة جديدة</string>
     <string name="text_new_watching_variables">متغيرات مشاهدة جديدة</string>
     <string name="text_next_retry">المحاولة التالية</string>

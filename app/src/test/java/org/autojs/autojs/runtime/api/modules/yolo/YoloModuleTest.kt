@@ -1,13 +1,12 @@
 package org.autojs.autojs.runtime.api.modules.yolo
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.1: `yolo` on the new script module layer. `load` hands its arguments to the current function, whose failures
@@ -36,7 +35,7 @@ class YoloModuleTest {
 
     @Test
     fun surfaceMatchesTheCurrentModule() {
-        HostModuleTestSupport.assertSameSurface(rhino, "yolo") { Yolo(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
+        HostModuleTestSupport.assertSameSurface(rhino, "yolo")
         HostModuleTestSupport.check(rhino, SHAPE)
     }
 
@@ -60,9 +59,8 @@ class YoloModuleTest {
     @Test
     fun codedErrorsGiveTheSameResultsAsTheCurrentModule() {
         val calls = CODED_CALLS.map { it.first }
-        val mountCurrent: (DifferentialRhino) -> Unit = { Yolo(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
-        assertEquals(calls.size, HostModuleTestSupport.assertSameResults(rhino, calls, emptyMap(), mountCurrent = mountCurrent))
-        val current = HostModuleTestSupport.currentResults(calls, mountCurrent = mountCurrent)
+        assertEquals(calls.size, HostModuleTestSupport.assertSameResults(rhino, calls, emptyMap()))
+        val current = HostModuleTestSupport.currentResults(calls)
         CODED_CALLS.forEachIndexed { i, (call, code) ->
             val new = rhino.render(DifferentialRhino.Side.KT, call)
             assertEquals("$call\n    current ${current[i]}\n    new     $new", listOf(code, code), listOf(current[i], new).map { CODE.find(it.detail.orEmpty())?.value })

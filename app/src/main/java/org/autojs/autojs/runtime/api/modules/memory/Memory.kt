@@ -1,13 +1,13 @@
 package org.autojs.autojs.runtime.api.modules.memory
 
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.memory.MemoryDiagnosticsCore
 import org.autojs.autojs.runtime.memory.MemorySnapshot
@@ -40,19 +40,9 @@ import java.util.Locale
 class Memory internal constructor(
     scriptRuntime: ScriptRuntime,
     private val platform: MemoryScriptPlatform,
-) : Augmentable(scriptRuntime) {
+) : ArgumentGuards() {
 
     constructor(scriptRuntime: ScriptRuntime) : this(scriptRuntime, AndroidMemoryScriptPlatform(scriptRuntime))
-
-    override val keys = listOf(AugmentableKey("memory"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::snapshot.name,
-        ::collect.name,
-        ::retained.name,
-        ::dumpHeap.name,
-        ::watch.name,
-    )
 
     /**
      * `memory.snapshot()`: the current readings, without collecting garbage first.
@@ -105,7 +95,7 @@ class Memory internal constructor(
     fun dumpHeap(scriptRuntime: ScriptRuntime, args: Array<out Any?>): String = ensureArgumentsAtMost(args, 1) { argList ->
         val (path) = argList
         if (!isHeapDumpAllowed()) {
-            throw IllegalStateException(globalContext.getString(R.string.error_memory_script_heap_dump_not_allowed))
+            throw IllegalStateException(GlobalAppContext.get().getString(R.string.error_memory_script_heap_dump_not_allowed))
         }
         platform.dumpHeap(heapDumpFileOf(path)).absolutePath
     }

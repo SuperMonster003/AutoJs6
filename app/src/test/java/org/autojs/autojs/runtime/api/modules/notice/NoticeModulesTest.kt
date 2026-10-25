@@ -1,11 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.notice
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -14,7 +13,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject
 import org.autojs.autojs.runtime.api.Notice as ApiNotice
 
 /**
@@ -49,11 +47,6 @@ class NoticeModulesTest {
         HostModuleTestSupport.setField(side.ktRuntime, "notice", ApiNotice(side.ktRuntime))
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        val notice = Notice(side.ktRuntime).augment(side.ktScope.globalThis as ScriptableObject)
-        Channel(side.ktRuntime).augment(notice)
-    }
-
     @Test
     fun installingBuildsNothing() {
         listOf("notice", "\$notice").forEach { assertTrue(it, LazyDataSlot.isPending(rhino.ktScope.globalThis, it)) }
@@ -61,8 +54,8 @@ class NoticeModulesTest {
 
     @Test
     fun surfaceMatchesTheCurrentModules() {
-        HostModuleTestSupport.assertSameSurface(rhino, "notice", ::prepare, ::mountCurrent)
-        HostModuleTestSupport.assertSameSurface(rhino, "notice.channel", ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "notice")
+        HostModuleTestSupport.assertSameSurface(rhino, "notice.channel")
         HostModuleTestSupport.check(rhino, SURFACE)
         DEVICE.add(SURFACE)
     }
@@ -105,17 +98,8 @@ class NoticeModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        // The obsolete module runs only when recording; its surfaces are replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放记录的表面.
-        val obsolete by lazy {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            rhino.evalJs("global.context = { getSystemService: function () { return null; } }")
-            host.load("notice") as ScriptableObject
-        }
         listOf("notice", "notice.channel").forEach { name ->
-            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name") {
-                SurfaceDiff.surface(if (name == "notice") obsolete else ScriptableObject.getProperty(obsolete, "channel"), rhino.jsScope.globalThis)
-            }
+            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(js, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }

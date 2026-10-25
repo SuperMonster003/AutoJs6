@@ -1,19 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.util
 
 import org.autojs.autojs.core.image.ColorTable
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.util.Java
-import org.autojs.autojs.runtime.api.augment.util.Version
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.NativeObject
-import org.mozilla.javascript.ScriptableObject
 import java.io.File
 import kotlin.system.measureTimeMillis
-import org.autojs.autojs.runtime.api.Util as ApiUtil
 
 /**
  * Roadmap P2.3: `util` and its sub-modules (`java`, `version`, `versionCodes`, `inspect`, `morseCode`) of the new script
@@ -236,28 +232,15 @@ class UtilModulesTest {
         assertEquals(text.length, Inspect.inspectRhino(value).length)
     }
 
-    /** Members, order, attributes and kinds against the current Kotlin modules in the same JVM (length aside). */
+    /**
+     * Members, order, attributes and kinds against the current Kotlin modules (length aside), recorded before P5.2
+     * removed their old mounting ([ScriptModuleExpectations]).
+     */
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = rhino.evalKt(DESCRIBE).toString()
-        val expected = DifferentialRhino().use { legacy ->
-            val runtime = legacy.ktRuntime
-            val util = Util.augmentWithRuntime(legacy.ktScope.globalThis, runtime, ApiUtil)
-            Java.augmentWithRuntime(util, runtime)
-            Version.augmentWithRuntime(util, runtime)
-            VersionCodes.augmentWithRuntime(util, runtime, legacyVersionCodes(legacy))
-            Inspect.augmentWithRuntime(util, runtime)
-            MorseCode.augmentWithRuntime(util, runtime)
-            legacy.evalKt(DESCRIBE).toString()
-        }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
-    }
-
-    /** The prototype the current module gives `util.versionCodes`: a read-only entry per version code. */
-    private fun legacyVersionCodes(legacy: DifferentialRhino): NativeObject = (legacy.context.newObject(legacy.ktScope) as NativeObject).apply {
-        VersionCodesInfo.list.forEach { info ->
-            defineProperty(info.versionCode, { info.toNativeObject() }, null, ScriptableObject.READONLY or ScriptableObject.PERMANENT)
-        }
     }
 
     /** Cases that need Android, exported for the device run with their expected values. */

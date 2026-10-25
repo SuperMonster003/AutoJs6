@@ -12,24 +12,15 @@ import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.SQLite.Companion.DEFAULT_READ_ONLY
 import org.autojs.autojs.runtime.api.SQLite.Companion.DEFAULT_VERSION
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeObject
 
-class SQLite(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class SQLite(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey("sqlite"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::open.name,
-    )
-
-    override fun invoke(vararg args: Any?): Database = ensureArgumentsLengthInRange(args, 1..3) { argList ->
+    fun invoke(vararg args: Any?): Database = ensureArgumentsLengthInRange(args, 1..3) { argList ->
         open(scriptRuntime, argList)
     }
 

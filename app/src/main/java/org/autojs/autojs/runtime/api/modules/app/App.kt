@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.external.receiver.BaseBroadcastReceiver
 import org.autojs.autojs.ipc.LayoutInspectEventBus
 import org.autojs.autojs.rhino.ArgumentGuards
@@ -33,7 +34,6 @@ import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.AppUtils.Companion.ActivityShortForm
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.app.App.Companion.ShellAction.Companion.toFallbackShellAction
 import org.autojs.autojs.runtime.api.modules.app.App.Companion.ShellAction.Companion.toRootShellAction
 import org.autojs.autojs.runtime.api.modules.app.App.Companion.ShellAction.Companion.toShizukuShellAction
@@ -64,57 +64,7 @@ import java.net.URI
 import org.autojs.autojs.util.App as PresetApp
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
-
-    override val selfAssignmentProperties = listOf(
-        "versionCode" to BuildConfig.VERSION_CODE,
-        "versionName" to BuildConfig.VERSION_NAME,
-    )
-
-    @Suppress("DEPRECATION")
-    override val selfAssignmentFunctions = listOf(
-        ::intent.name,
-        ::startActivity.name to AS_GLOBAL,
-        ::startDualActivity.name to AS_GLOBAL,
-        ::intentToShell.name,
-        ::startService.name to AS_GLOBAL,
-        ::sendEmail.name to AS_GLOBAL,
-        ::sendBroadcast.name to AS_GLOBAL,
-        ::sendLocalBroadcastSync.name to AS_GLOBAL,
-        ::parseUri.name,
-        ::openUrl.name,
-        ::openDualUrl.name,
-        ::getUriForFile.name,
-        ::getAppByAlias.name,
-        ::launch.name to AS_GLOBAL,
-        ::launchDual.name to AS_GLOBAL,
-        ::launchPackage.name to AS_GLOBAL,
-        ::launchDualPackage.name to AS_GLOBAL,
-        ::launchApp.name to AS_GLOBAL,
-        ::launchDualApp.name to AS_GLOBAL,
-        ::getPackageName.name to AS_GLOBAL,
-        ::getAppName.name to AS_GLOBAL,
-        ::getInstalledApps.name,
-        ::getInstalledPackages.name,
-        ::getApkInfo.name,
-
-        ::launchAppDetailsSettings.name to listOf(
-            "launchAppDetailsSettings", "launchSettings", "openAppSetting", "openAppSettings",
-        ) to AS_GLOBAL,
-
-        ::launchDualAppDetailsSettings.name to listOf(
-            "launchDualAppDetailsSettings", "launchDualSettings", "openDualAppSetting", "openDualAppSettings",
-        ) to AS_GLOBAL,
-
-        ::isInstalled.name to AS_GLOBAL,
-        ::isDualInstalled.name to AS_GLOBAL,
-        ::uninstall.name to AS_GLOBAL,
-        ::uninstallDual.name to AS_GLOBAL,
-        ::viewFile.name,
-        ::editFile.name,
-        ::kill.name to AS_GLOBAL,
-        ::killDual.name to AS_GLOBAL,
-    )
+class App(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     companion object : ArgumentGuards() {
 
@@ -153,7 +103,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     obj.contains("://") -> openUrlRhino(obj)
                     rexWebSiteWithoutProtocol.matches(obj) -> openUrlRhino("http://$obj")
                     else -> runCatching {
-                        startActivityWithGlobalContext(Intent(globalContext, ActivityShortForm.valueOf(obj.uppercase()).classType))
+                        startActivityWithGlobalContext(Intent(GlobalAppContext.get(), ActivityShortForm.valueOf(obj.uppercase()).classType))
                     }.getOrElse {
                         when (it) {
                             is WrappedIllegalArgumentException -> throw WrappedIllegalArgumentException("Activity short form $obj cannot be found")
@@ -219,7 +169,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     obj.contains("://") -> openDualUrlRhino(scriptRuntime, obj)
                     rexWebSiteWithoutProtocol.matches(obj) -> openDualUrlRhino(scriptRuntime, "http://$obj")
                     else -> runCatching {
-                        startActivityForDualUser(scriptRuntime, Intent(globalContext, ActivityShortForm.valueOf(obj.uppercase()).classType))
+                        startActivityForDualUser(scriptRuntime, Intent(GlobalAppContext.get(), ActivityShortForm.valueOf(obj.uppercase()).classType))
                     }.getOrElse {
                         when (it) {
                             is WrappedIllegalArgumentException -> throw WrappedIllegalArgumentException("Activity short form $obj cannot be found")
@@ -422,7 +372,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     @Suppress("SpellCheckingInspection")
                     Shell.execCommand(scriptRuntime, arrayOf<Any>(/* cmd = */ "am startservice ${intentToShellRhino(scriptRuntime.topLevelScope, o)}", /* withRoot = */ true))
                 }
-                else -> globalContext.startService(intentRhinoWithRuntime(scriptRuntime, o))
+                else -> GlobalAppContext.get().startService(intentRhinoWithRuntime(scriptRuntime, o))
             }
             UNDEFINED
         }
@@ -480,7 +430,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     o is NativeObject && checkRootProperty(o) -> {
                         Shell.execCommand(scriptRuntime, arrayOf<Any>("am broadcast ${intentToShellRhino(scriptRuntime.topLevelScope, o)}", /* withRoot = */ true))
                     }
-                    else -> globalContext.sendBroadcast(intentRhinoWithRuntime(scriptRuntime, o))
+                    else -> GlobalAppContext.get().sendBroadcast(intentRhinoWithRuntime(scriptRuntime, o))
                 }
             }
             UNDEFINED
@@ -518,7 +468,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                                 .blockingGet()
                             task?.let {
                                 mainHandler.post {
-                                    BaseBroadcastReceiver.runTask(globalContext, intent, it)
+                                    BaseBroadcastReceiver.runTask(GlobalAppContext.get(), intent, it)
                                 }
                             }
                         } catch (e: Throwable) {
@@ -574,7 +524,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             val prefix = "http://".takeUnless { url.contains("://") } ?: ""
             Intent(Intent.ACTION_VIEW)
                 .setData((prefix + url).toUri())
-                .startSafely(globalContext)
+                .startSafely(GlobalAppContext.get())
         }
 
         @Suppress("HttpUrlsUsage")
@@ -601,14 +551,14 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     else -> uri
                 }
             ) ?: return null
-            return IntentUtils.getUriOfFile(globalContext, path, scriptRuntime.app.fileProviderAuthority)
+            return IntentUtils.getUriOfFile(GlobalAppContext.get(), path, scriptRuntime.app.fileProviderAuthority)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getInstalledApps(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 1) {
             val flags = parsePackageManagerFlags(it.getOrNull(0), PackageManager.GET_META_DATA)
-            val packageManager = globalContext.packageManager
+            val packageManager = GlobalAppContext.get().packageManager
             val applications = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                     packageManager.getInstalledApplications(ApplicationInfoFlags.of(flags.toLong()))
@@ -618,14 +568,14 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
                     packageManager.getInstalledApplications(flags)
                 }
             }
-            applications.map { info -> AppInfo(globalContext, info) }.toNativeArray()
+            applications.map { info -> AppInfo(GlobalAppContext.get(), info) }.toNativeArray()
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun getInstalledPackages(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsAtMost(args, 1) {
             val flags = parsePackageManagerFlags(it.getOrNull(0), PackageManager.GET_META_DATA)
-            val packageManager = globalContext.packageManager
+            val packageManager = GlobalAppContext.get().packageManager
             val packages = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                     packageManager.getInstalledPackages(PackageInfoFlags.of(flags.toLong()))
@@ -637,7 +587,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             }
             packages.onEach { info ->
                 info.applicationInfo = info.applicationInfo?.let { applicationInfo ->
-                    AppInfo(globalContext, applicationInfo)
+                    AppInfo(GlobalAppContext.get(), applicationInfo)
                 }
             }.toNativeArray()
         }
@@ -647,7 +597,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         fun getApkInfo(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLengthInRange(args, 1..2) {
             val path = scriptRuntime.files.path(coerceString(it[0])) ?: return@ensureArgumentsLengthInRange null
             val flags = parsePackageManagerFlags(it.getOrNull(1), PackageManager.GET_META_DATA)
-            val packageManager = globalContext.packageManager
+            val packageManager = GlobalAppContext.get().packageManager
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                     packageManager.getPackageArchiveInfo(path, PackageInfoFlags.of(flags.toLong()))
@@ -996,7 +946,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
         }
 
         private fun startActivityWithGlobalContext(o: Intent) {
-            o.startSafely(globalContext)
+            o.startSafely(GlobalAppContext.get())
         }
 
         private fun startActivityForDualUser(scriptRuntime: ScriptRuntime, o: Any?) {
@@ -1013,7 +963,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
             command: String,
             options: NativeObject? = null,
         ): AbstractShell.Result? {
-            val userManager = globalContext.getSystemService(Class.forName("android.os.UserManager"))
+            val userManager = GlobalAppContext.get().getSystemService(Class.forName("android.os.UserManager"))
 
             val getUserProfilesMethod = userManager.javaClass.getDeclaredMethod("getUserProfiles")
             val userProfiles = getUserProfilesMethod.invoke(userManager) as List<*>
@@ -1098,7 +1048,7 @@ class App(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {
 
         private fun launchDualPackageInternal(scriptRuntime: ScriptRuntime, o: String): Boolean {
             val nicePackageName = getAppByAlias(scriptRuntime, arrayOf(o))?.packageName ?: (/* packageName = */ o)
-            val intent = globalContext.packageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
+            val intent = GlobalAppContext.get().packageManager.getLaunchIntentForPackage(nicePackageName) ?: return false
             startActivityForDualUser(scriptRuntime, intent)
             return true
         }

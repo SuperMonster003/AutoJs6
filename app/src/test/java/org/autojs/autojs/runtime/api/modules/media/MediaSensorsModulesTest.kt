@@ -1,20 +1,16 @@
 package org.autojs.autojs.runtime.api.modules.media
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.media.Media
-import org.autojs.autojs.runtime.api.augment.sensors.Sensors
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject
 import org.autojs.autojs.runtime.api.Media as ApiMedia
 import org.autojs.autojs.runtime.api.Sensors as ApiSensors
 
@@ -50,12 +46,6 @@ class MediaSensorsModulesTest {
         HostModuleTestSupport.setField(side.ktRuntime, "sensors", DifferentialRhino.allocateWithoutConstructor(ApiSensors::class.java))
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        val global = side.ktScope.globalThis as ScriptableObject
-        Media.augmentWithRuntime(global, side.ktRuntime, side.ktRuntime.media)
-        Sensors.augmentWithRuntime(global, side.ktRuntime, side.ktRuntime.sensors)
-    }
-
     @Test
     fun installingBuildsNothing() {
         listOf("media", "\$media", "sensors", "\$sensors").forEach { assertTrue(it, LazyDataSlot.isPending(rhino.ktScope.globalThis, it)) }
@@ -63,18 +53,14 @@ class MediaSensorsModulesTest {
 
     @Test
     fun surfaceMatchesTheCurrentModules() {
-        HostModuleTestSupport.assertSameSurface(rhino, "media", ::prepare, ::mountCurrent)
-        HostModuleTestSupport.assertSameSurface(rhino, "sensors", ::prepare, ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "media")
+        HostModuleTestSupport.assertSameSurface(rhino, "sensors")
         assertEquals("[]", rhino.evalKt("JSON.stringify(Object.getOwnPropertyNames(media).concat(Object.getOwnPropertyNames(sensors)))"))
     }
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val jsMedia = ScriptModuleExpectations.obsoleteSurface("surface: media") {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            host.setRuntimeProperty("media", rhino.ktRuntime.media)
-            SurfaceDiff.surface(host.load("media"), rhino.jsScope.globalThis)
-        }
+        val jsMedia = ScriptModuleExpectations.obsoleteSurface("surface: media")
         val report = SurfaceDiff.compare(jsMedia, SurfaceDiff.surface(rhino.evalKt("media"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
@@ -85,7 +71,7 @@ class MediaSensorsModulesTest {
      */
     @Test
     fun callsGiveTheSameResultsAsTheCurrentModules() {
-        val compared = HostModuleTestSupport.assertSameResults(rhino, CALLS, emptyMap(), ::prepare, ::mountCurrent)
+        val compared = HostModuleTestSupport.assertSameResults(rhino, CALLS, emptyMap())
         assertEquals(CALLS.size, compared)
     }
 

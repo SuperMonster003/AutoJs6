@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.modules
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.Assert.assertTrue
 import java.util.Timer
 import java.util.TimerTask
@@ -51,11 +51,11 @@ internal object CurrentModuleResults {
     data class Summary(val compared: Int, val same: Int, val renamed: Int, val known: Int, val skipped: List<String>)
 
     /**
-     * Compares [expressions] on [newSide] (the new layer, mounted) and [currentSide] (the current modules, mounted) and
-     * fails with every difference that is neither loose nor in [known] (expression to the expected new rendering and the
-     * appendix E row).
+     * Compares [expressions] on [newSide] (the new layer, mounted) with the current modules' results, recorded before
+     * P5.2 removed them ([ScriptModuleExpectations]), and fails with every difference that is neither loose nor in [known]
+     * (expression to the expected new rendering and the appendix E row).
      */
-    fun assertAgree(newSide: DifferentialRhino, currentSide: DifferentialRhino, expressions: List<String>, known: Map<String, Pair<String, String>>): Summary {
+    fun assertAgree(newSide: DifferentialRhino, expressions: List<String>, known: Map<String, Pair<String, String>>): Summary {
         var same = 0
         var renamed = 0
         var knownCount = 0
@@ -63,9 +63,7 @@ internal object CurrentModuleResults {
         val watchdog = Timer("current-module-results", true)
         val failures = try {
             (expressions + known.keys.filterNot { it in expressions }).mapNotNull { expression ->
-                val current = DifferentialRhino.Rendered(ScriptModuleExpectations.obsolete("current: $expression") {
-                    (renderWithin(watchdog, currentSide, expression)?.let(::onDevice) ?: DifferentialRhino.Rendered(BLOCKED, null)).key
-                }, null)
+                val current = DifferentialRhino.Rendered(ScriptModuleExpectations.obsolete("current: $expression"), null)
                 val new = renderWithin(watchdog, newSide, expression) ?: DifferentialRhino.Rendered(NEW_BLOCKED, null)
                 val failure = compare(expression, current, new, known[expression])
                 when {

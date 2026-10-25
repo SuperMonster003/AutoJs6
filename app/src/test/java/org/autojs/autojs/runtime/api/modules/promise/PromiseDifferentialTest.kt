@@ -8,17 +8,19 @@ import org.junit.Test
 import org.mozilla.javascript.NativeObject
 
 /**
- * The global Promise of both switch states run side by side (roadmap P4.2, appendix C Q95): each scenario runs in a
- * fresh [PromiseHarness] with `assets/modules/promise.js` and with [PromiseConstructor] (through the global `setImmediate`
- * and posting its jobs itself), and the logs must be the same, except for the differences of appendix E "P4.2" ([KNOWN]:
+ * The global Promise of both switch states side by side (roadmap P4.2, appendix C Q95): each scenario runs in a fresh
+ * [PromiseHarness] with [PromiseConstructor] (through the global `setImmediate` and posting its jobs itself), and the logs
+ * must be those of `assets/modules/promise.js`, recorded before P5.2 removed it ([ScriptModuleExpectations]; the
+ * evaluation's results of docs/augment/P4-2-promise-eval.md §2 pinned them until then), except for the differences of
+ * appendix E "P4.2" ([KNOWN]:
  * the instance properties that Q96 dropped, receivers that are not instances, the surface of the functions it hands out).
  * The scenarios are the 23 of docs/augment/P4-2-promise-eval.md §4.1 (A order, B errors, C surface, K coroutines, W wait,
  * T threads) and the D ones of the implementation (replaced `_immediateFn` / `setImmediate` / `_unhandledRejectionFn`,
  * receivers that are not instances, thenables that misbehave, not-a-function messages, many queued reactions and
  * `wait()`, the functions it hands out and error positions).
  *
- * zh-CN: 开关两态的全局 Promise 并排运行 (ROADMAP P4.2, 附录 C Q95): 每个场景在新的 [PromiseHarness] 中分别以 promise.js 与 [PromiseConstructor]
- * (经全局 setImmediate, 以及自行投递任务) 运行, 日志必须相同, 附录 E "P4.2" 的差异除外 ([KNOWN]: Q96 去掉的实例属性, 非实例接收者, 交出的函数的表面).
+ * zh-CN: 开关两态的全局 Promise 并排比较 (ROADMAP P4.2, 附录 C Q95): 每个场景在新的 [PromiseHarness] 中以 [PromiseConstructor] (经全局 setImmediate,
+ * 以及自行投递任务) 运行, 日志必须与 P5.2 删除前记录的 promise.js 结果相同 (此前由评估文档 §2 的结果固定), 附录 E "P4.2" 的差异除外 ([KNOWN]: Q96 去掉的实例属性, 非实例接收者, 交出的函数的表面).
  * 场景为评估文档 §4.1 的 23 个与实施时新增的 D 组.
  */
 class PromiseDifferentialTest {
@@ -27,7 +29,7 @@ class PromiseDifferentialTest {
     fun bothStatesLogTheSame() {
         val differences = ArrayList<String>()
         SCENARIOS.forEach { (id, source) ->
-            val reference = ScriptModuleExpectations.obsolete("module: $id") { runOne(Impl.MODULE, source) }
+            val reference = ScriptModuleExpectations.obsolete("module: $id")
             listOf(Impl.KOTLIN, Impl.KOTLIN_POSTED).forEach { impl ->
                 val actual = runOne(impl, source)
                 val expected = KNOWN[id] ?: reference
@@ -38,18 +40,9 @@ class PromiseDifferentialTest {
     }
 
     @Test
-    fun theModuleStillBehavesAsTheEvaluationRecorded() {
-        // The reference itself, so that both columns cannot drift together.
-        // zh-CN: 参照列本身的结果, 防止两列一起漂移.
-        PINNED.forEach { (id, expected) ->
-            assertEquals(id, expected, runOne(Impl.MODULE, SCENARIOS.toMap().getValue(id)))
-        }
-    }
-
-    @Test
     fun flowAwaitSuspendsFromKotlinInBothStates() {
-        // Q97: `FlowNativeObject.await` suspends through PromiseSuspension, which works for the module's Promise as well.
-        // zh-CN: Q97: FlowNativeObject.await 经 PromiseSuspension 挂起, 对原模块的 Promise 同样有效.
+        // Q97: `FlowNativeObject.await` suspends through PromiseSuspension (it worked for the module's Promise as well).
+        // zh-CN: Q97: FlowNativeObject.await 经 PromiseSuspension 挂起 (对原模块的 Promise 同样有效).
         Impl.entries.forEach { impl ->
             assertEquals(impl.name, "(suspended) ; kotlin await k ; later 3 ; rejected ; popException Error: no ; got Error: no", runOne(impl, """
                 log('kotlin await ' + kotlinAwait(Promise.resolve('k')));
@@ -95,14 +88,6 @@ class PromiseDifferentialTest {
             // Resolving functions have no prototype; the constructor cannot be applied to an instance (the module set it up
             // again); its TypeError is at the script line (the module's at line 0).
             "D13-functions-and-positions" to "resolver prototype undefined undefined ; reapply TypeError: Promises must be constructed via new ; new 1 at line 5 ; call at line 6 ; kept 1 ; wait threw w at line 0",
-        )
-
-        /** Results of the module that the evaluation recorded (docs/augment/P4-2-promise-eval.md §2). */
-        val PINNED = mapOf(
-            "A2-vs-timers" to "timeout0 ; p1 ; immediate ; p2 ; timeout-default",
-            "A4-adopt-own" to "t1 ; adopted x ; t2 ; t3 ; t4",
-            "A5-thenable-sync" to "then called ; after resolve ; value 5",
-            "C2-surface-instance" to "_state,_handled,_value,_deferreds [object Object] [object Object] true true",
         )
 
         val SCENARIOS = listOf(

@@ -7,15 +7,13 @@ import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.AbstractAutoJs.Companion.isInrt
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.apkbuilder.ApkBuilder
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
@@ -33,16 +31,9 @@ import kotlin.math.max
  * Modified by SuperMonster003 as of Mar 26, 2026.
  */
 @Suppress("unused")
-class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey(OcrMode.PADDLE.value, withDollarPrefix = false))
-
-    override val selfAssignmentFunctions = listOf(
-        ::recognizeText.name,
-        ::detect.name,
-    )
-
-    override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
+    fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
 
     companion object : ArgumentGuards() {
 
@@ -84,18 +75,18 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             return if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
-                        context = globalContext,
+                        context = GlobalAppContext.get(),
                         engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
                         variant = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
-                    OcrPluginHost.recognizeText(globalContext, target, image.bitmap, ocrOptions)
+                    OcrPluginHost.recognizeText(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
                 }
             } else {
                 // Use embedded engine in packaged (INRT) app.
                 // zh-CN: 打包应用 (INRT) 使用内置引擎 (本地推理), 不依赖插件.
-                PaddleOcrEmbeddedEngine.recognizeText(globalContext, image.bitmap, ocrOptions)
+                PaddleOcrEmbeddedEngine.recognizeText(GlobalAppContext.get(), image.bitmap, ocrOptions)
             }
         }
 
@@ -114,18 +105,18 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRu
             val results = if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
-                        context = globalContext,
+                        context = GlobalAppContext.get(),
                         engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
                         variant = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
-                    OcrPluginHost.detect(globalContext, target, image.bitmap, ocrOptions)
+                    OcrPluginHost.detect(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
                 }.map { OcrResult(it.text, it.confidence, it.bounds) }
             } else {
                 // Use embedded engine in packaged (INRT) app.
                 // zh-CN: 打包应用 (INRT) 使用内置引擎 (本地推理), 不依赖插件.
-                PaddleOcrEmbeddedEngine.detect(globalContext, image.bitmap, ocrOptions).map {
+                PaddleOcrEmbeddedEngine.detect(GlobalAppContext.get(), image.bitmap, ocrOptions).map {
                     OcrResult(it.text, it.confidence, it.bounds)
                 }
             }

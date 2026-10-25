@@ -1,7 +1,7 @@
 // Calls of the global functions of roadmap P3.0 (global and legacy), appended to bench/calls_prelude.js by
-// device_bench.py --calls global. With the switch of the new script module layer on they reach the new modules, with it
-// off the old Global / Legacy. "ok" cases succeed; the "fail" cases fail with an argument error (arity, type, range) or,
-// for TODO, a Java exception, compared with the "ref" cases of the prelude (Rhino's own errors).
+// device_bench.py --calls global. They reach the modules of the script module layer (with its switch off they reached
+// the old augment ones until P5.2). "ok" cases succeed; the "fail" cases fail with an argument error (arity, type,
+// range) or, for TODO, a Java exception, compared with the "ref" cases of the prelude (Rhino's own errors).
 let benchTrue = () => true;
 time("ok isInteger", () => { try { isInteger(1); } catch (e) { } });
 time("ok isPrimitive", () => { try { isPrimitive("a"); } catch (e) { } });

@@ -3,10 +3,10 @@ package org.autojs.autojs.runtime.api.modules.colors
 import android.graphics.Color.BLACK
 import org.autojs.autojs.annotation.RhinoFunctionObjectBody
 import org.autojs.autojs.annotation.RhinoStandardFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsIsEmpty
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.ensureArgumentsOnlyOne
 import org.autojs.autojs.runtime.api.StringReadable
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.modules.colors.Colors.parseRelativePercentage
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
@@ -101,7 +101,7 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
     override fun toStringReadable(): String = Colors.summaryRhino(color)
 
     @Suppress("unused")
-    internal object Setter : Augmentable() {
+    internal object Setter : ArgumentGuards() {
 
         @JvmStatic
         @RhinoStandardFunctionInterface

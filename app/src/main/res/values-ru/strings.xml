@@ -1037,7 +1037,6 @@
     <string name="summary_memory_force_gc">Выполнить сборку мусора и finalization 3 раза, подождать до 10 с, пока завершенные среды выполнения освободятся, затем обновить</string>
     <string name="summary_memory_script_heap_dump">Разрешить memory.dumpHeap записывать дампы кучи в release-сборках (в debug-сборках разрешено всегда). Дамп кучи содержит все данные кучи, включая переменные всех скриптов</string>
     <string name="summary_memory_unreclaimed_warning">Через 10 с после завершения скрипта выполнить одну сборку мусора; если его среда выполнения все еще не освобождена, вывести предупреждение в глобальную консоль</string>
-    <string name="summary_new_script_module_layer">Скрипты используют новую реализацию модулей скриптов (включено по умолчанию). При отключении используется старая реализация, которая будет удалена в одной из следующих версий. Действует для скриптов, запущенных после изменения</string>
     <string name="summary_nodejs_doctor_report">Создать диагностический отчёт среды Node со скрытыми конфиденциальными данными для сообщения об ошибке</string>
     <string name="summary_nodejs_inspector_enabled">Разрешить локальную отладку и профилирование. Подключайте DevTools на компьютере через переадресацию портов ADB.</string>
     <string name="summary_not_showing_main_activity">Выполнять скрипт напрямую, не показывая основную активность</string>
@@ -2397,7 +2396,6 @@
     <string name="text_new_path">Новый путь</string>
     <string name="text_new_path_is_same_as_old_path">Новый путь совпадает со старым путем</string>
     <string name="text_new_project">Новый проект</string>
-    <string name="text_new_script_module_layer">Использовать новую реализацию модулей скриптов</string>
     <string name="text_new_version_found">Найдена новая версия</string>
     <string name="text_new_watching_variables">Новые наблюдающие переменные</string>
     <string name="text_next_retry">Следующая попытка</string>

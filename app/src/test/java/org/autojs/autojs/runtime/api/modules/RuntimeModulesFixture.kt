@@ -6,11 +6,10 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
 import org.autojs.autojs.engine.ScriptEngine
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.bootstrap.ContinuationPrototype
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
 import org.junit.Assert.assertTrue
-import org.mozilla.javascript.ScriptableObject
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import org.autojs.autojs.runtime.api.Engines as ApiEngines
@@ -89,19 +88,12 @@ internal object RuntimeModulesFixture {
      */
     val CORE_FIELDS = listOf("timers", "threads", "engines", "events", "files")
 
-    /**
-     * Mounts the top-level modules [names] in the order of `ScriptModuleLayer.ORDER`: from the new layer when [newLayer],
-     * otherwise each by [legacy] (its current augment call).
-     */
-    fun mount(rhino: DifferentialRhino, names: Collection<String>, newLayer: Boolean, legacy: (name: String, global: ScriptableObject, runtime: ScriptRuntime) -> Unit): ScriptModuleMounter? {
+    /** Mounts the top-level modules [names] from the new layer in the order of `ScriptModuleLayer.ORDER`. */
+    fun mount(rhino: DifferentialRhino, names: Collection<String>): ScriptModuleMounter {
         val runtime = rhino.ktRuntime
-        val global = rhino.ktScope.globalThis
-        val mounter = if (newLayer) ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, global, order = ScriptModuleLayer.ORDER) else null
+        val mounter = ScriptModuleMounter(ScriptModules, runtime, runtime.topLevelScope, rhino.ktScope.globalThis, order = ScriptModuleLayer.ORDER)
         ScriptModuleLayer.TOP_LEVEL_ORDER.filter { it in names }.forEach { name ->
-            ScriptModuleLayer.mountOr(mounter, name) {
-                check(!newLayer) { "Script module $name is not migrated to the new layer" }
-                legacy(name, global, runtime)
-            }
+            check(mounter.install(name)) { "Script module $name is not in the registry" }
         }
         return mounter
     }

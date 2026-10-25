@@ -179,12 +179,12 @@ class SettingsImportPlannerTest : DomainKeysTestBase() {
                 DeveloperKeys.DEX_COMPILER_EXPERIMENTAL_COMPONENT.name to TypedValue("string", dexComponent),
                 DeveloperKeys.R8_COMPILER_EXPLICIT_ENABLED.name to TypedValue("bool", true),
                 DeveloperKeys.R8_COMPILER_EXPLICIT_COMPONENT.name to TypedValue("string", r8Component),
-                DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.name to TypedValue("bool", true),
+                DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.name to TypedValue("bool", true),
             ),
         )
         val plan = SettingsImportPlanner.plan(listOf(file), listOf("developer"), ImportEnvironment(setOf("org.example")))
         assertEquals(
-            listOf(DeveloperKeys.DEX_COMPILER_EXPERIMENTAL_ENABLED.name, DeveloperKeys.DEX_COMPILER_EXPERIMENTAL_COMPONENT.name, DeveloperKeys.NEW_SCRIPT_MODULE_LAYER.name),
+            listOf(DeveloperKeys.DEX_COMPILER_EXPERIMENTAL_ENABLED.name, DeveloperKeys.DEX_COMPILER_EXPERIMENTAL_COMPONENT.name, DeveloperKeys.SCRIPT_MODULE_DEBUG_PRINT.name),
             plan.puts.map { it.name },
         )
         assertEquals(

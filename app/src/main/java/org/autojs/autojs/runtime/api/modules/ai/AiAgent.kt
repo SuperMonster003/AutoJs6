@@ -1,9 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.ai
 
+import org.autojs.autojs.runtime.api.modules.AugmentMembers
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.execution.AgentScriptExecutionState
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.ai.AiAgentArguments
 import org.autojs.autojs.runtime.api.ai.AiAgentService
 import org.autojs.autojs.runtime.api.modules.toJsPromise
@@ -17,11 +18,24 @@ import org.autojs.autojs.util.RhinoUtils.js_json_parse
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 
 /** Script task controls and the registered-script result channel share the existing ai object. */
-class AiAgent internal constructor(private val runtime: ScriptRuntime, serviceFactory: () -> AiAgentService = { AiAgentService(runtime) }) : Augmentable(runtime) {
+class AiAgent internal constructor(private val runtime: ScriptRuntime, serviceFactory: () -> AiAgentService = { AiAgentService(runtime) }) : ArgumentGuards() {
     private val service by lazy(serviceFactory)
-    override val selfAssignmentFunctions = listOf(::run.name, ::create.name, ::get.name, ::list.name,
-        ::catalog.name, ::presets.name, ::status.name, ::result.name, ::context.name)
-    fun createObject() = createAugmentedObject(runtime.topLevelScope.globalThis, emptyList<Any>())
+
+    /**
+     * The `ai.agent` object: these functions in their order, PERMANENT, failing as the old augment layer's functions did
+     * (`AugmentMembers.asCurrent`, the old key `aiAgent`).
+     */
+    fun createObject(): ScriptableObject = RhinoUtils.newObject(runtime.topLevelScope.globalThis).also { agent ->
+        listOf<Pair<String, (ScriptRuntime, Array<out Any?>) -> Any?>>(
+            "run" to ::run, "create" to ::create, "get" to ::get, "list" to ::list, "catalog" to ::catalog,
+            "presets" to ::presets, "status" to ::status, "result" to ::result, "context" to ::context,
+        ).forEach { (name, function) ->
+            val f = RhinoUtils.newBaseFunction(runtime.topLevelScope, name, { args ->
+                AugmentMembers.asCurrent("aiAgent", name) { RhinoUtils.toJsValue(runtime.topLevelScope, function(runtime, args)) }
+            }, RhinoUtils.NOT_CONSTRUCTABLE)
+            agent.defineProperty(name, f, ScriptableObject.PERMANENT)
+        }
+    }
 
     @RhinoRuntimeFunctionInterface
     fun run(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = ensureArgumentsLengthInRange(args, 1..2) {

@@ -1,7 +1,7 @@
 // Calls of the modules of roadmap P3.4, second group (app, autojs, device, files, storages), appended to
-// bench/calls_prelude.js by device_bench.py --calls app. With the switch of the new script module layer on they reach the
-// new modules, with it off the current augment modules. "ok" cases succeed without side effects; the "fail" cases fail
-// with an argument error, compared with the "ref" cases of the prelude (Rhino's own errors).
+// bench/calls_prelude.js by device_bench.py --calls app. They reach the modules of the script module layer (with its
+// switch off they reached the old augment ones until P5.2). "ok" cases succeed without side effects; the "fail" cases
+// fail with an argument error, compared with the "ref" cases of the prelude (Rhino's own errors).
 time("ok app.getPackageName-null", () => { try { app.getPackageName(null); } catch (e) { } });
 time("ok app.parseUri", () => { try { app.parseUri("https://example.com/a"); } catch (e) { } });
 time("ok autojs.version.isAtLeast", () => { try { autojs.version.isAtLeast("6.0.0"); } catch (e) { } });

@@ -3,26 +3,20 @@ package org.autojs.autojs.runtime.api.modules.pinyin4j
 import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.annotation.RhinoSingletonFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 
-object Pinyin4j : Augmentable(), Invokable {
-
-    override val selfAssignmentFunctions = listOf(
-        ::`as`.name,
-        ::of.name,
-        ::readings.name,
-    )
+object Pinyin4j : ArgumentGuards() {
 
     @RhinoSingletonFunctionInterface
-    override fun invoke(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..2) { argList ->
+    fun invoke(args: Array<out Any?>): String = ensureArgumentsLengthInRange(args, 1..2) { argList ->
         of(argList)
     }
 
@@ -65,7 +59,7 @@ object Pinyin4j : Augmentable(), Invokable {
     ): String {
         return runBlocking {
             Pinyin4jPluginHost.of(
-                globalContext,
+                GlobalAppContext.get(),
                 str,
                 Pinyin4jOptions.ofBundle(separator, caseType, toneType, vCharType),
             )
@@ -83,14 +77,14 @@ object Pinyin4j : Augmentable(), Invokable {
     internal fun readingsRhino(text: String, options: NativeObject): List<List<String>> {
         if (text.isEmpty()) return emptyList()
         return runBlocking {
-            Pinyin4jPluginHost.readings(globalContext, text, options.toReadingsBundle())
+            Pinyin4jPluginHost.readings(GlobalAppContext.get(), text, options.toReadingsBundle())
         }
     }
 
     @RhinoSingletonFunctionInterface
     fun `as`(args: Array<out Any?>): String = ensureArgumentsOnlyOne(args) { o ->
         runBlocking {
-            Pinyin4jPluginHost.asTone(globalContext, coerceString(o, ""))
+            Pinyin4jPluginHost.asTone(GlobalAppContext.get(), coerceString(o, ""))
         }
     }
 

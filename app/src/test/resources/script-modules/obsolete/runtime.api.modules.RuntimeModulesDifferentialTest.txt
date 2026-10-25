@@ -65,7 +65,7 @@ throws InternalError
 === resultsAgree js: autojs.version.isAtLeast()
 true
 === resultsAgree js: [autojs.versionCode, autojs.versionName, autojs.versionDate].join()
-"5935,6.8.0,Oct 25, 2026"
+"{VERSION_CODE},{VERSION_NAME},{VERSION_DATE}"
 === resultsAgree js: app.intentToShell({ action: 'VIEW', data: 'x' })
 " -a 'android.intent.action.VIEW' -d x"
 === resultsAgree js: app.intentToShell({ action: 'android.intent.action.MAIN' })

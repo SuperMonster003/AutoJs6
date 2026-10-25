@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules.util
 
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.core.automator.UiObjectCollection
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.ProxyObject
@@ -15,10 +16,6 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.StringReadable
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.runtime.api.augment.util.Java
 import org.autojs.autojs.runtime.api.modules.global.Species.isErrorRhino
 import org.autojs.autojs.runtime.api.modules.global.Species.isJavaObjectRhino
 import org.autojs.autojs.runtime.api.modules.global.Species.isStringRhino
@@ -67,16 +64,9 @@ import java.util.function.Supplier
  * Created by SuperMonster003 on Jun 10, 2024.
  */
 @Suppress("unused")
-object Inspect : Augmentable(), Invokable {
+object Inspect : ArgumentGuards() {
 
-    override val keys = listOf(AugmentableKey("inspect", withDollarPrefix = false))
-
-    override val selfAssignmentGetters = listOf<Pair<String, Supplier<Any?>>>(
-        "colors" to Supplier { colors },
-        "styles" to Supplier { styles },
-    )
-
-    override fun invoke(vararg args: Any?): String = ensureArgumentsLengthInRange(args, 1..2) {
+    fun invoke(vararg args: Any?): String = ensureArgumentsLengthInRange(args, 1..2) {
         val (obj, options) = it
         inspectRhino(obj, options)
     }

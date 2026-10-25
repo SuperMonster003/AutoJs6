@@ -33,10 +33,11 @@ class ComposeRobustnessTest {
         scope = TopLevelScope().apply { initStandardObjects(context, false) }
         with(RhinoUtils) { context.registerStandardObjects(scope) }
         platform = Platform()
-        compose = Compose(RhinoTestRuntime.create(scope), platform, ComposeScriptValues(colorParser = {
+        val runtime = RhinoTestRuntime.create(scope)
+        compose = Compose(runtime, platform, ComposeScriptValues(colorParser = {
             Colors.toFullHexRhino(it).substring(1).toLong(16).toInt()
         }))
-        compose.augment(scope.globalThis)
+        mountCompose(runtime, compose)
     }
     @After fun exit() { try { compose.close() } finally { Context.exit() } }
 

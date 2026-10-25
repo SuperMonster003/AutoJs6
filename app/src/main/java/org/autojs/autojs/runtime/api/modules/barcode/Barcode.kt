@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.barcode
 
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
@@ -8,8 +9,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.WrappedBarcode
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -19,16 +18,9 @@ import org.mozilla.javascript.NativeObject
 import org.autojs.plugin.mlkit.barcode.api.BarcodeFormats
 import org.autojs.autojs.runtime.api.modules.images.Images as AugmentableImages
 
-class Barcode(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Barcode(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        ::recognizeText.name,
-        ::recognizeTexts.name,
-        ::detect.name,
-        ::detectAll.name,
-    )
-
-    override fun invoke(vararg args: Any?): Any? = ensureArgumentsAtMost(args, 3) { argList ->
+    fun invoke(vararg args: Any?): Any? = ensureArgumentsAtMost(args, 3) { argList ->
         when {
             shouldTakeAsAll(argList) -> recognizeTexts(scriptRuntime, argList)
             else -> recognizeText(scriptRuntime, argList)

@@ -3,12 +3,11 @@ package org.autojs.autojs.runtime.api.modules.mail
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.getProp
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.mail.MailScriptOptions
 import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.util.RhinoUtils
@@ -42,26 +41,7 @@ import java.util.function.Supplier
 class Mail(
     private val scriptRuntime: ScriptRuntime,
     private val service: MailService,
-) : Augmentable(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("mail"))
-
-    override val selfAssignmentFunctions = listOf(
-        ::connect.name,
-        ::connectAsync.name,
-        ::setDefault.name,
-        ::close.name,
-    )
-
-    /** `MailError` instances thrown by these functions reach the script unwrapped. zh-CN: 这些函数抛出的 `MailError` 实例不经包装到达脚本. */
-    override val scriptErrorPassThroughFunctions: Set<String>
-        get() = selfAssignmentFunctions.toSet()
-
-    override val selfAssignmentGetters = listOf<Any>(
-        "default" to Supplier<Any?> { defaultClient },
-    )
-
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+) : ArgumentGuards() {
 
     /**
      * The data properties the `mail` script module defines on its module object, in their order (its install hook

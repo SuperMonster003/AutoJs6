@@ -1,17 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.cvt
 
-import org.autojs.autojs.runtime.RhinoTestRuntime
-import org.autojs.autojs.runtime.api.augment.converter.Converter
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.formatter.Formatter
-import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.s13n.S13n
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.autojs.autojs.runtime.api.augment.converter.Bytes as BytesCvt
-import org.autojs.autojs.runtime.api.augment.formatter.Bytes as BytesFmt
 
 /**
  * `cvt.bytes`, `fmt.bytes` and `s13n.bytes` (6.7.0, no obsolete JS, no unit tests in the `augment` package) of the new
@@ -30,13 +23,6 @@ class BytesModulesDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) {
-            val current = RhinoTestRuntime.create(rhino.jsScope)
-            val global = rhino.jsScope.globalThis
-            S13n.augmentWithRuntime(global, current)
-            Converter.augmentWithRuntime(global, current).also { BytesCvt.augmentWithRuntime(it, current) }
-            Formatter.augmentWithRuntime(global, current).also { BytesFmt.augmentWithRuntime(it, current) }
-        }
         rhino.mountNewModules("s13n", "cvt", "fmt")
     }
 

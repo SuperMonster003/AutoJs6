@@ -2,17 +2,12 @@ package org.autojs.autojs.runtime.api.modules.flow
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.events.Keys
-import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.events.Events
-import org.autojs.autojs.runtime.api.modules.global.Global
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -20,7 +15,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -39,7 +33,7 @@ class FlowModulesTest {
 
     @Before
     fun setUp() {
-        rhino = newSide(newLayer = true)
+        rhino = newSide()
     }
 
     @After
@@ -64,7 +58,7 @@ class FlowModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
+        val expected = ScriptModuleExpectations.obsolete("describe")
         assertEquals(expected, actual)
     }
 
@@ -89,24 +83,14 @@ class FlowModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
-        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
-        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope).also { it.setRuntimeProperty("events", rhino.ktRuntime.events) } }
-        val events by lazy {
-            val before = host.global.allIds.toSet()
-            host.load("events") to host.global.allIds.filterIsInstance<String>().filterNot { it in before }
-        }
-        assertEquals("keys", ScriptModuleExpectations.obsolete("globals added by events") { events.second.joinToString() })
+        assertEquals("keys", ScriptModuleExpectations.obsolete("globals added by events"))
         listOf("events", "keys").forEach { name ->
-            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") {
-                SurfaceDiff.surface(if (name == "events") events.first else ScriptableObject.getProperty(host.global, "keys"), rhino.jsScope.globalThis)
-            }
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
-        val globals by lazy { host.load("globals") }
         OBSOLETE_GLOBAL_FUNCTIONS.forEach { name ->
-            val type = ScriptModuleExpectations.obsolete("type: $name") { globals; ObsoleteMembers.typeOf(host.global, name) }
+            val type = ScriptModuleExpectations.obsolete("type: $name")
             assertEquals(name, "function", type)
             assertEquals(name, type, ObsoleteMembers.typeOf(rhino.ktScope.globalThis, name))
         }
@@ -392,8 +376,8 @@ class FlowModulesTest {
     fun resultsAgreeWithTheCurrentModules() {
         val expressions = (keysAndEventsCases + waitArgumentCases + waitStartedArgumentCases + optionFieldCases + toolkitOptionFieldCases +
             selectorFormCases + flowArgumentCases + toolkitRootArgumentCases).map { it.first }
-        val summary = newSide(newLayer = true).use { new ->
-            newSide(newLayer = false).use { current -> CurrentModuleResults.assertAgree(new, current, expressions.distinct(), KNOWN) }
+        val summary = newSide().use { new ->
+            CurrentModuleResults.assertAgree(new, expressions.distinct(), KNOWN)
         }
         println("P3.6 A flow: $summary")
     }
@@ -421,7 +405,7 @@ class FlowModulesTest {
         )
     )
 
-    private fun newSide(newLayer: Boolean): DifferentialRhino = DifferentialRhino().also { side ->
+    private fun newSide(): DifferentialRhino = DifferentialRhino().also { side ->
         val runtime = side.ktRuntime
         RuntimeModulesFixture.prepareHost(runtime)
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "scale", Scale(runtime))
@@ -429,15 +413,7 @@ class FlowModulesTest {
         // zh-CN: flow.Flow, flow.pending 与 flow.workers 读取运行时的 Flow 执行器, 它存于运行时属性中并随运行时关闭.
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "mProperties", ConcurrentHashMap<String, Any>())
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "closeableManager", RuntimeResourceScope("flow-modules-test"))
-        RuntimeModulesFixture.mount(side, MODULES, newLayer) { name, global, rt ->
-            when (name) {
-                "global" -> Global(rt).assignWithRuntime(global, rt, GlobalClasses)
-                "flow" -> Flow(rt).augment(global)
-                "events" -> Events(rt).augment(global, rt.events)
-                "keys" -> Keys.augmentWithRuntime(global, rt)
-                else -> throw AssertionError(name)
-            }
-        }
+        RuntimeModulesFixture.mount(side, MODULES)
     }
 
     private companion object {

@@ -11,8 +11,8 @@
 
 | 指标 | 数值 |
 | --- | --- |
-| `key_*` 字符串资源 | 277 (`strings_donottranslate.xml` 275, 其他文件 2: `key_ace_language_support_matrix`, `key_ace_semantic_languages`) |
-| 出现在设置页 XML 的 `key_*` 键 (各页之和去重) | 101 (preferences 39, code_editor_settings 40, developer_options 13, trash_and_version_history_settings 9, plugin_center_preferences 3) |
+| `key_*` 字符串资源 | 276 (`strings_donottranslate.xml` 274, 其他文件 2: `key_ace_language_support_matrix`, `key_ace_semantic_languages`) |
+| 出现在设置页 XML 的 `key_*` 键 (各页之和去重) | 100 (preferences 39, code_editor_settings 40, developer_options 12, trash_and_version_history_settings 9, plugin_center_preferences 3) |
 | 设置页中不经字符串资源的字面量键 | 4 (developer_options 1, plugin_center_preferences 3) |
 | 不在设置页的 `key_*` 键 | 176 |
 | 源码 (`app/src/main/java`) 没有引用的键 | 5 (其中设置页, 数组与其他资源也没有引用的 0 个: 无) |
@@ -23,7 +23,7 @@
 | filesDir / noBackupFilesDir 旁出现 JSON 文件名的源文件 | 14 |
 | `JsonFileStores` 声明的 JSON 文件存储 (P5.1) | 14 |
 
-kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, Excluded 29
+kind 统计 (`key_*` 资源): Setting 129, State 40, Cache 1, ValueConstant 77, Excluded 29
 
 ## 2. `key_*` 字符串资源
 
@@ -163,7 +163,7 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_editor_word_wrap_indent_style` | 代码编辑器设置 > 外观 | core/pref/keys/EditorKeys.kt:135, ui/settings/CodeEditorSettingsFragment.kt:307, ui/settings/CodeEditorSettingsFragment.kt:312, ui/settings/EditorSettingActionRegistry.kt:31, ui/edit/editor/EditorDisplayPreferences.kt:8 | Setting | `editor_appearance` | 列表项 |
 | `key_editor_word_wrap_indent_style_classic` | 候选值 `keys_editor_word_wrap_indent_style` (`key_editor_word_wrap_indent_style`) | core/pref/keys/EditorKeys.kt:47 | ValueConstant |  | 候选值 |
 | `key_editor_word_wrap_indent_style_continuation` | 候选值 `keys_editor_word_wrap_indent_style` (`key_editor_word_wrap_indent_style`); 默认值 `default_key_editor_word_wrap_indent_style` | core/pref/keys/EditorKeys.kt:47 | ValueConstant |  | 候选值, 默认值 |
-| `key_enable_a11y_service_with_root_access` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:85 | core/pref/keys/A11yKeys.kt:21, inrt/Pref.kt:40, runtime/api/augment/settings/Settings.kt:42 | Setting | `a11y` | 开关, 也是脚本 API settings 的 ROOT_ACCESSIBILITY_SERVICE |
+| `key_enable_a11y_service_with_root_access` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:85 | core/pref/keys/A11yKeys.kt:21, inrt/Pref.kt:40, runtime/api/modules/settings/Settings.kt:34 | Setting | `a11y` | 开关, 也是脚本 API settings 的 ROOT_ACCESSIBILITY_SERVICE |
 | `key_enable_a11y_service_with_secure_settings` | 设置 > 无障碍服务 | core/pref/keys/A11yKeys.kt:27 | Setting | `a11y` | 开关 |
 | `key_enable_a11y_service_with_shizuku` | 设置 > 无障碍服务 | core/pref/keys/A11yKeys.kt:33 | Setting | `a11y` | 开关 |
 | `key_enable_observe_key` |  | core/pref/keys/MiscStateKeys.kt:291 | State | `other` | 按键观察, 源码与资源均无读写方, 不作为可导入设置 (Q12 已拍板); P4.2 声明为 MiscStateKeys, 只登记不使用 |
@@ -177,7 +177,7 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_floating_console_time_format` |  | core/pref/keys/ConsoleKeys.kt:58 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
 | `key_floating_console_time_visible` |  | core/pref/keys/ConsoleKeys.kt:55 | Setting | `console` | ConsoleTimeSettings.FLOATING_WINDOW |
 | `key_floating_menu_shown` |  | core/pref/keys/MiscStateKeys.kt:84 | State | `other` | 抽屉 "悬浮按钮" 开关的镜像, 按悬浮窗实际状态回写; P4.2 声明为 MiscStateKeys |
-| `key_foreground_service` | 其他资源 res/xml/fragment_preferences_inrt.xml:12 | core/pref/keys/GeneralKeys.kt:87, inrt/SettingsActivity.kt:52, runtime/api/augment/settings/Settings.kt:45 | Setting | `general` | 抽屉 "前台服务" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12) |
+| `key_foreground_service` | 其他资源 res/xml/fragment_preferences_inrt.xml:12 | core/pref/keys/GeneralKeys.kt:87, inrt/SettingsActivity.kt:52, runtime/api/modules/settings/Settings.kt:37 | Setting | `general` | 抽屉 "前台服务" 开关, 脚本 API settings 与 inrt 也读写; 导入后按值启动或停止前台服务 (Q13 (d) 已拍板, T12) |
 | `key_gesture_observing` |  | core/pref/keys/A11yKeys.kt:41 | Setting | `a11y` | 开关 (手势观察) |
 | `key_github_token` | 开发者选项 > GitHub |  | Excluded |  | 动作条目, 令牌存于命名存储 `github_auth` (credentials) |
 | `key_global_console_element_time_format` |  | core/pref/keys/ConsoleKeys.kt:46 | Setting | `console` | ConsoleTimeSettings.GLOBAL_CONSOLE_ELEMENT |
@@ -226,7 +226,6 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_mcp_server_normally_closed` |  | core/pref/keys/MiscStateKeys.kt:136 | State | `other` | 上次是否正常关闭, 用于启动时恢复; P4.2 声明为 MiscStateKeys |
 | `key_memory_script_heap_dump` | 开发者选项 > 内存诊断 | core/pref/keys/DeveloperKeys.kt:63 | Setting | `developer` | 开发者选项 > 内存诊断: 允许脚本导出 hprof (release 构建的 memory.dumpHeap, debug 构建始终允许), 默认 false (内存路线图 P5.1, 附录 C Q8); 按 key_memory_unreclaimed_warning 的先例登记, DeveloperKeys 声明 |
 | `key_memory_unreclaimed_warning` | 开发者选项 > 内存诊断 | core/pref/keys/DeveloperKeys.kt:54, runtime/memory/MemoryDiagnostics.kt:112 | Setting | `developer` | 开发者选项 > 内存诊断: 已结束的脚本未被回收时在控制台警告, 默认 true (内存路线图 P2.3, 6b09b7d8e); 按 Q16 先例登记 (附录 C Q21), DeveloperKeys 声明 |
-| `key_new_script_module_layer` | 开发者选项 > 脚本模块 | core/pref/keys/DeveloperKeys.kt:26 | Setting | `developer` | 开关 |
 | `key_night_mode` | 设置 > 外观 | core/plugin/center/PluginCenterFragment.kt:979, core/pref/keys/AppearanceKeys.kt:64, ui/main/plugin/PluginFragment.kt:64 | Setting | `appearance` | 列表项 (ViewUtils.MODE) |
 | `key_night_mode_always_off` | 候选值 `keys_night_mode` (`key_night_mode`) | core/pref/keys/AppearanceKeys.kt:44, ui/settings/NightModePreference.kt:54, util/ViewUtils.kt:1675 | ValueConstant |  | 候选值 (MODE.DAY) |
 | `key_night_mode_always_on` | 候选值 `keys_night_mode` (`key_night_mode`) | core/pref/keys/AppearanceKeys.kt:43, util/ViewUtils.kt:1676 | ValueConstant |  | 候选值 (MODE.NIGHT) |
@@ -235,7 +234,7 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_night_mode_null` |  | core/pref/keys/AppearanceKeys.kt:45, util/ViewUtils.kt:1678 | ValueConstant |  | ViewUtils.MODE.NULL, 不在列表候选中 |
 | `key_nodejs_doctor_report` | 开发者选项 > Node.js | core/pref/keys/DeveloperKeys.kt:88 | Excluded |  | 动作条目 (生成 Node.js 诊断报告) |
 | `key_nodejs_inspector_enabled` | 开发者选项 > Node.js | core/pref/keys/DeveloperKeys.kt:38 | Setting | `developer` | 开关 |
-| `key_not_showing_main_activity` | 其他资源 res/xml/fragment_preferences_inrt.xml:72 | inrt/Pref.kt:44, inrt/Pref.kt:70, runtime/api/augment/settings/Settings.kt:44 | Excluded |  | inrt 运行配置 (打包时由 launchConfig 写入); 主应用只经脚本 API settings 读写, 无消费方 (附录 A.2, Q13 已拍板) |
+| `key_not_showing_main_activity` | 其他资源 res/xml/fragment_preferences_inrt.xml:72 | inrt/Pref.kt:44, inrt/Pref.kt:70, runtime/api/modules/settings/Settings.kt:36 | Excluded |  | inrt 运行配置 (打包时由 launchConfig 写入); 主应用只经脚本 API settings 读写, 无消费方 (附录 A.2, Q13 已拍板) |
 | `key_pc_server_address_history` |  | core/pref/keys/MiscStateKeys.kt:141 | State | `other` | 地址历史 (Gson LinkedHashSet); P4.2 声明为 MiscStateKeys |
 | `key_plugin_center_auto_check_updates` | 插件中心设置 > 更新 | core/plugin/center/PluginCenterFragment.kt:139, core/pref/keys/PluginCenterKeys.kt:57 | Setting | `plugin_center` | 开关 |
 | `key_plugin_center_last_online_check_ts` |  | core/pref/keys/MiscStateKeys.kt:162 | State | `other` | 时间戳; P4.2 声明为 MiscStateKeys |
@@ -287,7 +286,7 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_settings_auto_backup_periodic` | 其他资源 res/xml/fragment_settings_auto_backup.xml:18, res/xml/fragment_settings_auto_backup.xml:26 | core/pref/keys/GeneralKeys.kt:92 | Setting | `general` | "周期备份" 开关, 默认关 (T20); P9.2 声明为 GeneralKeys, 不触发变更后备份 (ownKeys) |
 | `key_setup_wizard_welcome_done` |  | core/pref/keys/MiscStateKeys.kt:172 | State | `other` | 欢迎向导已完成; P4.2 声明为 MiscStateKeys |
 | `key_setup_wizards` | 设置 > 配置 | core/pref/keys/GeneralKeys.kt:136, ui/settings/PreferencesFragment.kt:24 | Excluded |  | 动作条目 (打开设置向导) |
-| `key_stable_mode` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:92 | core/pref/keys/A11yKeys.kt:38, runtime/api/augment/settings/Settings.kt:41 | Setting | `a11y` | 开关, 也出现在无障碍服务管理器与脚本 API settings |
+| `key_stable_mode` | 设置 > 无障碍服务; 其他资源 res/xml/fragment_preferences_inrt.xml:92 | core/pref/keys/A11yKeys.kt:38, runtime/api/modules/settings/Settings.kt:33 | Setting | `a11y` | 开关, 也出现在无障碍服务管理器与脚本 API settings |
 | `key_theme_color` | 设置 > 外观 | core/pref/keys/AppearanceKeys.kt:133 | Excluded |  | 动作条目 (打开主题色选择), 值存于 `key_theme_color_primary` / `_primary_dark` / `_accent` |
 | `key_theme_color_accent` |  | core/pref/keys/AppearanceKeys.kt:93 | Setting | `appearance` | 主题色三项之一 |
 | `key_theme_color_primary` |  | core/pref/keys/AppearanceKeys.kt:81 | Setting | `appearance` | 主题色三项之一 |
@@ -301,7 +300,7 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_trash_max_total_bytes` | 回收站与版本历史设置 > 回收站 | core/pref/keys/HistoryKeys.kt:57 | Setting | `history` | 保留策略 |
 | `key_updates_checked_states_cleared` | 开发者选项 > 更新 | core/pref/keys/UpdatesKeys.kt:56 | Excluded |  | 动作条目 (开发者选项, 清除检查更新状态) |
 | `key_use_volume_control_record` | 设置 > 录制脚本 | core/pref/keys/RecordKeys.kt:25 | Setting | `record` | 开关 |
-| `key_use_volume_control_running` | 设置 > 脚本运行; 其他资源 res/xml/fragment_preferences_inrt.xml:60 | core/pref/keys/RunningKeys.kt:32, inrt/Pref.kt:48, runtime/api/augment/settings/Settings.kt:43 | Setting | `running` | 开关, 也是脚本 API settings 的 STOP_ALL_ON_VOLUME_UP |
+| `key_use_volume_control_running` | 设置 > 脚本运行; 其他资源 res/xml/fragment_preferences_inrt.xml:60 | core/pref/keys/RunningKeys.kt:32, inrt/Pref.kt:48, runtime/api/modules/settings/Settings.kt:35 | Setting | `running` | 开关, 也是脚本 API settings 的 STOP_ALL_ON_VOLUME_UP |
 | `key_version_history_restore_does_not_auto_save_to_disk` |  | core/pref/keys/DialogStateKeys.kt:53 | State | `other` | VersionHistoryController 中 NotAskAgainDialog 的不再提示键, 不是设置 (Q13 (a) 已拍板, P4.1); P4.1 声明为 DialogStateKeys |
 | `key_working_directory` |  | core/pref/keys/ExplorerKeys.kt:44 | Setting | `explorer`, deployment `CREATE_DIRECTORY` | 工作目录; 目标不存在时作为部署项创建 (D20 / Q1) |
 | `key_working_directory_history` |  | core/pref/keys/MiscStateKeys.kt:181 | State | `other` | 工作目录历史 (Gson LinkedHashSet); P4.2 声明为 MiscStateKeys |
@@ -409,17 +408,17 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `key_$_settings_transfer_export_categories` | default | core/pref/keys/MiscStateKeys.kt:190 | State | `other` | 导出向导上次选择的分类 (不含凭据, SettingsCategoryPickerStep); P6.3 声明为 MiscStateKeys (附录 C Q28) |
 | `key_$_suspended_plugin_$_` | plugin_center_enable_state | core/pref/keys/PluginCenterKeys.kt:283 | Setting | `plugin_enable_state` | 挂起标记, 前缀键族 (后接包名), P3.1 声明为 PluginCenterKeys.PLUGIN_SUSPENDED; 属于命名存储, 随整份计数 |
 | `key_$_terminal_` | default | core/plugin/terminal/TerminalLegacyCleanup.kt:26 | Excluded |  | 已移除的宿主终端的旧键前缀, TerminalLegacyCleanup 每次启动删除 (附录 A.2, Q13 已拍板) |
-| `key_dont_show_main_activity` | default | runtime/api/augment/settings/Settings.kt:57 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |
+| `key_dont_show_main_activity` | default | runtime/api/modules/settings/Settings.kt:49 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |
 | `key_down` | default | core/ui/nativeview/ViewPrototype.kt:111, core/ui/nativeview/ViewPrototype.kt:115, execution/ScriptExecuteActivity.kt:344, runtime/api/Events.java:403 | Excluded |  | 按键事件名, 不是偏好键 |
-| `key_enable_a11y_service_with_root_access` | default | runtime/api/augment/settings/Settings.kt:53 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
-| `key_enable_accessibility_service_by_root` | default | runtime/api/augment/settings/Settings.kt:52 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |
+| `key_enable_a11y_service_with_root_access` | default | runtime/api/modules/settings/Settings.kt:45 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
+| `key_enable_accessibility_service_by_root` | default | runtime/api/modules/settings/Settings.kt:44 | Excluded |  | 脚本 API settings 模块的别名字符串, 不是偏好键 |
 | `key_first_using` | default | inrt/Pref.kt:18 | Excluded |  | inrt 打包应用运行时状态 (附录 A.2) |
-| `key_foreground_service` | default | runtime/api/augment/settings/Settings.kt:60 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
+| `key_foreground_service` | default | runtime/api/modules/settings/Settings.kt:52 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
 | `key_inrt_applied_build_id` | default | inrt/Pref.kt:19 | Excluded |  | inrt 打包应用运行时状态 (附录 A.2) |
-| `key_not_showing_main_activity` | default | runtime/api/augment/settings/Settings.kt:58 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
-| `key_stable_mode` | default | runtime/api/augment/settings/Settings.kt:50 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
+| `key_not_showing_main_activity` | default | runtime/api/modules/settings/Settings.kt:50 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
+| `key_stable_mode` | default | runtime/api/modules/settings/Settings.kt:42 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
 | `key_up` | default | core/ui/nativeview/ViewPrototype.kt:111, core/ui/nativeview/ViewPrototype.kt:117, runtime/api/Events.java:406 | Excluded |  | 按键事件名, 不是偏好键 |
-| `key_use_volume_control_running` | default | runtime/api/augment/settings/Settings.kt:55 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
+| `key_use_volume_control_running` | default | runtime/api/modules/settings/Settings.kt:47 | Excluded |  | 脚本 API settings 模块的别名字符串 (资源名形式), 不是偏好键 |
 | `known_first_install_times` | plugin_center_attention | core/pref/keys/PluginCenterKeys.kt:304 | State | `other` | 已见过的包的首次安装时间, JSON 对象文本 (PluginCenterAttentionStore, 经 SettingsJson, 附录 C Q40); P3.1 声明为 PluginCenterKeys 的 State; 属于命名存储, 随整份计数 |
 | `org.autojs.autojs.engine.RootAutomatorEngine.touch_device` | default | core/pref/keys/MiscStateKeys.kt:47 | Cache |  | Root 自动化探测到的触摸设备 id, 本机才有效 (RootAutomatorEngine); P2.6 声明为 MiscStateKeys (附录 C Q15) |
 | `org.autojs.autojs.theme.app.ColorSettingRecyclerView.COLOR_SETTING_CUSTOM_COLOR` | default | core/pref/keys/MiscStateKeys.kt:212 | State | `other` | 颜色选择页的自定义颜色 (ColorSelectBaseActivity.KEY_CUSTOM_COLOR); 声明随 P4.2 (附录 C Q15); P4.2 声明为 MiscStateKeys |
@@ -454,7 +453,7 @@ kind 统计 (`key_*` 资源): Setting 130, State 40, Cache 1, ValueConstant 77, 
 | `ace_action_history` | 登记 `NamedStores.ACE_ACTION_HISTORY` (core/pref/keys/NamedStores.kt:41) | core/pref/keys/EditorKeyboardKeys.kt:110 | State | `other` | Ace 动作历史 (P3.2 为 State); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
 | `ace_editor_font_ui_preferences` | 登记 `NamedStores.ACE_EDITOR_FONT_UI_PREFERENCES` (core/pref/keys/NamedStores.kt:37) | core/pref/keys/EditorKeyboardKeys.kt:58, core/pref/keys/EditorKeyboardKeys.kt:64, core/pref/keys/EditorKeyboardKeys.kt:71, core/pref/keys/EditorKeyboardKeys.kt:79 等 7 处 | Setting | `editor_keyboard` | 字体选择界面的排序 / 预览 / 变体偏好 (附录 A); P3.2 登记为 NamedStores, 键声明在 EditorKeyboardKeys |
 | `agent_runtime_access` | 排除登记 `NamedStores.AGENT_RUNTIME_ACCESS` (core/pref/keys/NamedStores.kt:152); 字面量 | engine/RuntimeAgentAccessStore.kt:17 | Excluded |  | Agent consent and run ownership bind the current package, UID, signer and installation; never import or export them as portable settings |
-| `autojs.localstorage.*` | 排除登记 `NamedStores.SCRIPT_LOCAL_STORAGES` (core/pref/keys/NamedStores.kt:132); 人工: `.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`; 拼接 | core/storage/LocalStorage.java:28, runtime/api/augment/storages/Storages.kt:48, runtime/api/augment/storages/Storages.kt:61 | Excluded |  | 脚本自己的数据 (附录 A.2) |
+| `autojs.localstorage.*` | 排除登记 `NamedStores.SCRIPT_LOCAL_STORAGES` (core/pref/keys/NamedStores.kt:132); 人工: `.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`; 拼接 | core/storage/LocalStorage.java:28, runtime/api/modules/storages/Storages.kt:41, runtime/api/modules/storages/Storages.kt:54 | Excluded |  | 脚本自己的数据 (附录 A.2) |
 | `autojs.node.storage.*.*.*` | 排除登记 `NamedStores.NODE_SCRIPT_STORAGES` (core/pref/keys/NamedStores.kt:136); 函数 storagePreferencesName (engine/NodeBridgeProtocol.kt:3566) | engine/NodeBridgeProtocol.kt:3451 | Excluded |  | Node.js 运行时 storage 桥的脚本数据, 理由同 `autojs.localstorage.*` (附录 A.2, Q13 (e) 已拍板) |
 | `build_apk_config_profiles` | 登记 `NamedStores.BUILD_APK_CONFIG_PROFILES` (core/pref/keys/NamedStores.kt:48) | core/pref/keys/ApkBuildKeys.kt:26, core/pref/keys/ApkBuildKeys.kt:33 | Setting | `apk_build` | APK 构建配置档; P3.3 登记为 NamedStores, 键声明在 ApkBuildKeys |
 | `bun_host_capability_grants` | 登记 `NamedStores.BUN_HOST_CAPABILITY_GRANTS` (core/pref/keys/NamedStores.kt:121) | core/pref/keys/CredentialKeys.kt:55 | Setting | `credentials` | Bun 宿主能力授权, sensitive; P3.4 登记为 NamedStores, 键声明在 CredentialKeys |

@@ -8,6 +8,7 @@ import android.view.WindowManager
 import androidx.core.graphics.drawable.toDrawable
 import org.autojs.autojs.annotation.RhinoFunctionBody
 import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.looper.Loopers
 import org.autojs.autojs.core.ui.JsViewHelper
 import org.autojs.autojs.core.ui.UiContentHost
@@ -38,8 +39,6 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.AugmentableProxy
 import org.autojs.autojs.runtime.api.modules.colors.ColorNativeObject
 import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.runtime.api.modules.jsox.Numberx
@@ -90,11 +89,7 @@ import javax.xml.transform.stream.StreamResult
 import org.autojs.autojs.runtime.api.UI as ApiUI
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRuntime) {
-
-    override val keys = listOf(AugmentableKey("ui"))
-
-    override val scriptErrorPassThroughFunctions = setOf(::__autojs6Tsx.name, ::layout.name, ::inflate.name)
+class UI(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
     private val mProperties = ConcurrentHashMap<String, Any>()
 
@@ -114,90 +109,9 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
         }
     }.apply { initNewBaseFunction(scriptRuntime.topLevelScope, this) }
 
-    override val selfAssignmentProperties = listOf<Pair<Any, Any?>>(
-        WIDGET_KEY to mWidgetConstructor,
-        ("__autojs6TsxFragment" to TypeScriptTsxRuntime.FragmentToken) to AS_GLOBAL,
-    )
-
-    override val selfAssignmentFunctions = listOf(
-        "run",
-        ::__inflate__.name,
-        ::inflate.name,
-        ::useAndroidLayout.name,
-        ::isUiThread.name to AS_GLOBAL,
-        ::__autojs6Tsx.name to AS_GLOBAL,
-        ::post.name,
-        ::layout.name,
-        ::layoutFile.name,
-        ::registerWidget.name,
-        ::setContentView.name,
-        ::statusBarColor.name,
-        ::statusBarIconLight.name,
-        ::statusBarIconLightBy.name,
-        ::backgroundColor.name,
-        ::navigationBarColor.name,
-        ::navigationBarIconLight.name,
-        ::navigationBarIconLightBy.name,
-        ::findById.name,
-        ::findByStringId.name,
-        ::findView.name,
-        ::finish.name,
-        ::keepScreenOn.name,
-        ::getStatusBarHeight.name,
-        ::getVisibleStatusBarHeight.name,
-        ::getNavigationBarHeight.name,
-        ::getVisibleNavigationBarHeight.name,
-    )
-
-    override val selfAssignmentGetters = listOf(
-        "R" to Supplier { scriptRuntime.augmentedAutojs["R"] },
-        "__widgets__" to Supplier { scriptRuntime.ui.widgets },
-        "root" to Supplier<Any?> {
-            UiContentHost.of(scriptRuntime)?.contentRoot
-        },
-        "emitter" to Supplier {
-            // A preview run has its own emitter (contract v4); otherwise the Activity's.
-            UiContentHost.attached(scriptRuntime)?.lifecycleEmitter ?: run {
-                val activity = getActivity(scriptRuntime)
-                (activity as? ScriptExecuteActivity)?.eventEmitter
-            }
-        },
-        "statusBarHeight" to Supplier {
-            val activity = getActivity(scriptRuntime)
-            val context = (activity as? ScriptExecuteActivity) ?: globalContext
-            ViewUtils.getStatusBarHeight(context)
-        },
-        "visibleStatusBarHeight" to Supplier {
-            val activity = getActivity(scriptRuntime)
-            val context = (activity as? ScriptExecuteActivity) ?: globalContext
-            ViewUtils.getStatusBarHeight(context, ignoreVisibility = false)
-        },
-        "navigationBarHeight" to Supplier {
-            val activity = getActivity(scriptRuntime)
-            val context = (activity as? ScriptExecuteActivity) ?: globalContext
-            ViewUtils.getNavigationBarHeight(context)
-        },
-        "visibleNavigationBarHeight" to Supplier {
-            val activity = getActivity(scriptRuntime)
-            val context = (activity as? ScriptExecuteActivity) ?: globalContext
-            ViewUtils.getNavigationBarHeight(context, ignoreVisibility = false)
-        },
-    )
-
     init {
         bind(scriptRuntime.ui, scriptRuntime.topLevelScope.globalThis)
         initWidgetConstructor(scriptRuntime.topLevelScope, mWidgetConstructor)
-    }
-
-    override fun get(augmented: ScriptableObject, key: String): Any? {
-        return when (val augmentedValue = getCore(augmented, key)) {
-            NOT_FOUND -> scriptRuntime.ui.get(key, augmented)
-            else -> augmentedValue
-        }
-    }
-
-    override fun set(augmented: ScriptableObject, key: String, value: Any?) = undefined {
-        scriptRuntime.ui.put(key, augmented, value)
     }
 
     private fun bind(ui: ApiUI, scope: Scriptable) {
@@ -393,7 +307,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             args: Array<out Any?>,
         ): Any = TypeScriptTsxRuntime.create(
             args,
-            TypeScriptTsxRuntime.messageResolver(globalContext),
+            TypeScriptTsxRuntime.messageResolver(GlobalAppContext.get()),
             scriptRuntime.composeForTsx(),
         )
 
@@ -441,7 +355,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 else -> throw WrappedIllegalArgumentException("Global activity ${activity.jsBrief()} must be a ScriptExecuteActivity")
             }
             val tsxLayout = TypeScriptTsxRuntime.renderOrNull(
-                xml, TypeScriptTsxRuntime.messageResolver(globalContext), scriptRuntime.composeForTsx(),
+                xml, TypeScriptTsxRuntime.messageResolver(GlobalAppContext.get()), scriptRuntime.composeForTsx(),
             )
             val inflatedView = scriptRuntime.ui.layoutInflater.inflate(tsxLayout?.xml ?: toXMLString(xml), parentView, coerceBoolean(isAttachedToParent, false))
             tsxLayout?.attachClickHandlers(scriptRuntime, inflatedView)
@@ -543,7 +457,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
                 scriptRuntime.ui.layoutInflater.context = host.inflaterContext
                 val tsxLayout = TypeScriptTsxRuntime.renderOrNull(
                     xml,
-                    TypeScriptTsxRuntime.messageResolver(globalContext),
+                    TypeScriptTsxRuntime.messageResolver(GlobalAppContext.get()),
                     scriptRuntime.composeForTsx(),
                 )
                 val inflated = scriptRuntime.ui.layoutInflater.inflate(
@@ -764,7 +678,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             }
             val activity = getScriptExecuteActivity(scriptRuntime)
             if (activity == null) {
-                require(scriptRuntime.isExiting) { globalContext.getString(R.string.error_activity_is_required_for_ui_exec_mode) }
+                require(scriptRuntime.isExiting) { GlobalAppContext.get().getString(R.string.error_activity_is_required_for_ui_exec_mode) }
                 return@ensureArgumentsIsEmpty UNDEFINED
             }
             if (!activity.isFinishing && !activity.isDestroyed) {
@@ -792,7 +706,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
             val ignoreVisibility = opt.inquire("ignoreVisibility", ::coerceBoolean, true)
-            ViewUtils.getStatusBarHeight(globalContext, withComputed, withDimen, ignoreVisibility)
+            ViewUtils.getStatusBarHeight(GlobalAppContext.get(), withComputed, withDimen, ignoreVisibility)
         }
 
         @JvmStatic
@@ -802,7 +716,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
-            ViewUtils.getStatusBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
+            ViewUtils.getStatusBarHeight(GlobalAppContext.get(), withComputed, withDimen, ignoreVisibility = false)
         }
 
         @JvmStatic
@@ -813,7 +727,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
             val ignoreVisibility = opt.inquire("ignoreVisibility", ::coerceBoolean, true)
-            ViewUtils.getNavigationBarHeight(globalContext, withComputed, withDimen, ignoreVisibility)
+            ViewUtils.getNavigationBarHeight(GlobalAppContext.get(), withComputed, withDimen, ignoreVisibility)
         }
 
         @JvmStatic
@@ -823,7 +737,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
             val opt = coerceObject(options, newNativeObject(scriptRuntime.topLevelScope))
             val withComputed = opt.inquire("withComputed", ::coerceBoolean, true)
             val withDimen = opt.inquire("withDimen", ::coerceBoolean, true)
-            ViewUtils.getNavigationBarHeight(globalContext, withComputed, withDimen, ignoreVisibility = false)
+            ViewUtils.getNavigationBarHeight(GlobalAppContext.get(), withComputed, withDimen, ignoreVisibility = false)
         }
 
         private fun initWidgetConstructor(scope: VarScope, ctor: BaseFunction) {
@@ -1027,7 +941,7 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
         private fun <R> ensureActivity(scriptRuntime: ScriptRuntime, func: (activity: ScriptExecuteActivity) -> R): R {
             val activity = getScriptExecuteActivity(scriptRuntime)
-            require(activity != null) { globalContext.getString(R.string.error_activity_is_required_for_ui_exec_mode) }
+            require(activity != null) { GlobalAppContext.get().getString(R.string.error_activity_is_required_for_ui_exec_mode) }
             return func.invoke(activity)
         }
 

@@ -1,10 +1,9 @@
 package org.autojs.autojs.runtime.api.modules.jsox
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialCases
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -19,17 +18,10 @@ import org.junit.Test
 class MathxModuleDifferentialTest {
 
     private lateinit var rhino: DifferentialRhino
-    private lateinit var jsMathx: Any
 
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        if (ScriptModuleExpectations.RECORDING) {
-            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-            host.loadAndDefine("Arrayx")
-            host.loadAndDefine("Numberx")
-            jsMathx = host.loadAndDefine("Mathx")!!
-        }
         rhino.mountNewModules("Arrayx", "Numberx", "Mathx")
     }
 
@@ -40,7 +32,7 @@ class MathxModuleDifferentialTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsMathx, rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("Mathx"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface"), SurfaceDiff.surface(rhino.evalKt("Mathx"), rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         assertTrue("Obsolete Mathx members missing from the new module: ${report.onlyInFirst}", report.onlyInFirst.isEmpty())
         assertTrue("typeof differs: ${report.typeMismatches}", report.typeMismatches.isEmpty())

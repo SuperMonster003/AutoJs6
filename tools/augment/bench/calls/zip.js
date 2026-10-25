@@ -1,6 +1,6 @@
 // Calls of the modules of roadmap P3.5, first group (zip, sqlite, crypto), appended to bench/calls_prelude.js by
-// device_bench.py --calls zip. With the switch of the new script module layer on they reach the new modules, with it off
-// the current augment modules. "ok" cases create no file (a Zip4j handle is opened lazily, crypto works in memory); the
+// device_bench.py --calls zip. They reach the modules of the script module layer (with its switch off they reached the
+// old augment ones until P5.2). "ok" cases create no file (a Zip4j handle is opened lazily, crypto works in memory); the
 // "fail" cases fail with an argument error before any file is touched, compared with the "ref" cases of the prelude.
 time("ok zip.open", () => { try { zip.open("aj6-bench.zip"); } catch (e) { } });
 time("ok zip", () => { try { zip("aj6-bench.zip", undefined); } catch (e) { } });

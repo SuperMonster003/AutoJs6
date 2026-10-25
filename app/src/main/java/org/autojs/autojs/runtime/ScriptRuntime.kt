@@ -30,7 +30,6 @@ import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.rhino.AndroidClassLoader
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.TopLevelScope
-import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.AppUtils
@@ -44,91 +43,8 @@ import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.runtime.api.installer.InstallerService
-import org.autojs.autojs.runtime.api.modules.ai.Ai
-import org.autojs.autojs.runtime.api.modules.app.App
-import org.autojs.autojs.runtime.api.augment.autojs.Autojs
-import org.autojs.autojs.runtime.api.augment.automator.Auto
-import org.autojs.autojs.runtime.api.augment.automator.Automator
-import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
-import org.autojs.autojs.runtime.api.modules.barcode.Barcode
-import org.autojs.autojs.runtime.api.modules.barcode.QrCode
-import org.autojs.autojs.runtime.api.augment.base64.Base64
-import org.autojs.autojs.runtime.api.augment.canvas.Canvas
-import org.autojs.autojs.runtime.api.modules.colors.Color
-import org.autojs.autojs.runtime.api.modules.colors.Colors
-import org.autojs.autojs.runtime.api.modules.console.Console
 import org.autojs.autojs.runtime.api.modules.compose.Compose
-import org.autojs.autojs.runtime.api.modules.continuation.Continuation
-import org.autojs.autojs.runtime.api.augment.converter.Converter
-import org.autojs.autojs.runtime.api.augment.cryptyo.Crypto
-import org.autojs.autojs.runtime.api.modules.device.Device
-import org.autojs.autojs.runtime.api.modules.dialogs.Dialogs
-import org.autojs.autojs.runtime.api.modules.engines.Engines
-import org.autojs.autojs.runtime.api.modules.events.Events
-import org.autojs.autojs.runtime.api.augment.events.Keys
-import org.autojs.autojs.runtime.api.modules.files.BatchRename
-import org.autojs.autojs.runtime.api.augment.files.Files
-import org.autojs.autojs.runtime.api.modules.floaty.Floaty
-import org.autojs.autojs.runtime.api.modules.flow.Flow
-import org.autojs.autojs.runtime.api.augment.formatter.Formatter
-import org.autojs.autojs.runtime.api.modules.global.Global
-import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
-import org.autojs.autojs.runtime.api.modules.global.IsNullish
-import org.autojs.autojs.runtime.api.modules.global.Species
-import org.autojs.autojs.runtime.api.modules.http.Http
-import org.autojs.autojs.runtime.api.modules.images.Images
-import org.autojs.autojs.runtime.api.modules.jsox.Arrayx
-import org.autojs.autojs.runtime.api.modules.jsox.Jsox
-import org.autojs.autojs.runtime.api.modules.jsox.Mathx
-import org.autojs.autojs.runtime.api.modules.jsox.Numberx
-import org.autojs.autojs.runtime.api.augment.media.Media
-import org.autojs.autojs.runtime.api.modules.epub.Epub
-import org.autojs.autojs.runtime.api.modules.speech.Speech
-import org.autojs.autojs.runtime.api.modules.speech.SpeechModels
-import org.autojs.autojs.runtime.api.modules.speech.SpeechSpeaker
-import org.autojs.autojs.runtime.api.modules.gallery.Gallery
-import org.autojs.autojs.runtime.api.modules.terminal.Terminal
-import org.autojs.autojs.runtime.api.modules.mail.Mail
-import org.autojs.autojs.runtime.api.modules.installer.Installer
-import org.autojs.autojs.runtime.api.modules.mediainfo.Mediainfo
-import org.autojs.autojs.runtime.api.modules.memory.Memory
-import org.autojs.autojs.runtime.api.augment.mime.Mime
-import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
-import org.autojs.autojs.runtime.api.modules.notice.Notice
-import org.autojs.autojs.runtime.api.modules.ocr.Ocr
-import org.autojs.autojs.runtime.api.modules.ocr.OcrMLKit
-import org.autojs.autojs.runtime.api.modules.ocr.OcrPaddle
-import org.autojs.autojs.runtime.api.modules.ocr.OcrRapid
-import org.autojs.autojs.runtime.api.modules.opencc.OpenCC
-import org.autojs.autojs.runtime.api.modules.pinyin.Pinyin
-import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4j
-import org.autojs.autojs.runtime.api.modules.plugins.Plugins
-import org.autojs.autojs.runtime.api.modules.plugins.PluginsTools
-import org.autojs.autojs.runtime.api.modules.power.PowerManager
-import org.autojs.autojs.runtime.api.augment.recorder.Recorder
-import org.autojs.autojs.runtime.api.modules.s13n.S13n
-import org.autojs.autojs.runtime.api.modules.selector.Selector
-import org.autojs.autojs.runtime.api.augment.sensors.Sensors
-import org.autojs.autojs.runtime.api.modules.settings.Settings
-import org.autojs.autojs.runtime.api.modules.shell.Shell
-import org.autojs.autojs.runtime.api.modules.shizuku.Shizuku
-import org.autojs.autojs.runtime.api.modules.sqlite.SQLite
-import org.autojs.autojs.runtime.api.modules.storages.Storages
-import org.autojs.autojs.runtime.api.augment.sysprops.SysProps
-import org.autojs.autojs.runtime.api.modules.tasks.Tasks
-import org.autojs.autojs.runtime.api.modules.tasks.WorkManager
-import org.autojs.autojs.runtime.api.modules.threads.Threads
-import org.autojs.autojs.runtime.api.augment.timers.Timers
-import org.autojs.autojs.runtime.api.modules.toast.Toast
-import org.autojs.autojs.runtime.api.augment.tts.Tts
 import org.autojs.autojs.runtime.api.modules.ui.UI
-import org.autojs.autojs.runtime.api.modules.util.Util
-import org.autojs.autojs.runtime.api.modules.util.VersionCodesInfo
-import org.autojs.autojs.runtime.api.modules.web.Web
-import org.autojs.autojs.runtime.api.modules.web.WebSocket
-import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
-import org.autojs.autojs.runtime.api.modules.yolo.Yolo
-import org.autojs.autojs.runtime.api.modules.zip.Zip
 import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException
 import org.autojs.autojs.runtime.exception.ScriptException
@@ -151,8 +67,6 @@ import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
-import org.mozilla.javascript.ScriptableObject.PERMANENT
-import org.mozilla.javascript.ScriptableObject.READONLY
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
@@ -162,7 +76,6 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 import org.autojs.autojs.core.accessibility.UiSelector as CoreUiSelector
-import org.autojs.autojs.core.crypto.Crypto as CoreCrypto
 import org.autojs.autojs.core.image.Colors as CoreColors
 import org.autojs.autojs.core.permission.Permissions as CorePermissions
 import org.autojs.autojs.rhino.continuation.Continuation as RhinoContinuation
@@ -190,17 +103,6 @@ import org.autojs.autojs.runtime.api.Timers as ApiTimers
 import org.autojs.autojs.runtime.api.Toaster as ApiToaster
 import org.autojs.autojs.runtime.api.UI as ApiUI
 import org.autojs.autojs.runtime.api.Util as ApiUtil
-import org.autojs.autojs.runtime.api.augment.autojs.Version as AutojsVersion
-import org.autojs.autojs.runtime.api.augment.colors.ColorsTheme
-import org.autojs.autojs.runtime.api.augment.converter.Bytes as BytesCvt
-import org.autojs.autojs.runtime.api.augment.formatter.Bytes as BytesFmt
-import org.autojs.autojs.runtime.api.augment.global.Legacy as GlobalLegacy
-import org.autojs.autojs.runtime.api.modules.notice.Channel as NoticeChannel
-import org.autojs.autojs.runtime.api.modules.util.Inspect as UtilInspect
-import org.autojs.autojs.runtime.api.augment.util.Java as UtilJava
-import org.autojs.autojs.runtime.api.modules.util.MorseCode as UtilMorseCode
-import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
-import org.autojs.autojs.runtime.api.modules.util.VersionCodes as UtilVersionCodes
 import org.mozilla.javascript.Context as RhinoContext
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
@@ -445,59 +347,41 @@ class ScriptRuntime private constructor(builder: Builder) {
         get() = bridges.isJavaPrimitiveWrap()
         set(b) = bridges.setJavaPrimitiveWrap(b)
 
-    /** The `console` module object of the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
-    private lateinit var legacyConsoleProxyObject: ProxyObject
+    /**
+     * The mounter of the script module layer for this runtime, set in `augment()`; `initEpilogue` extends the built-in
+     * objects with it (P2.1).
+     * zh-CN: 本运行时的脚本模块层挂载器, 在 augment() 中设置; initEpilogue 用它扩展内置对象 (P2.1).
+     */
+    private lateinit var scriptModules: ScriptModuleMounter
 
     /**
-     * The `console` module object the setters of `console` return and `console.build` calls: the new layer's when it
-     * serves the module (roadmap P3.2, built on demand), else the one of the old augment call.
-     * zh-CN: console 各 setter 返回的, console.build 调用的 console 模块对象: 新层提供该模块时为新层的 (P3.2, 按需构建), 否则为原 augment 调用的.
+     * The `console` module object the setters of `console` return and `console.build` calls (roadmap P3.2, built on
+     * demand).
+     * zh-CN: console 各 setter 返回的, console.build 调用的 console 模块对象 (P3.2, 按需构建).
      */
     internal val consoleProxyObject: ProxyObject
-        get() = scriptModules?.moduleObject("console") as? ProxyObject ?: legacyConsoleProxyObject
+        get() = checkNotNull(scriptModules.moduleObject("console")) as ProxyObject
 
     /**
-     * The mounter of the new script module layer for this runtime, or null when its switch was off when the runtime
-     * started (roadmap T8); `initEpilogue` extends the built-in objects with it (P2.1).
-     * zh-CN: 本运行时的新脚本模块层挂载器, 运行时启动时开关关闭则为 null (T8); initEpilogue 用它扩展内置对象 (P2.1).
-     */
-    private var scriptModules: ScriptModuleMounter? = null
-
-    internal lateinit var augmentedApp: ScriptableObject
-
-    /** The `autojs` module object of the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
-    private lateinit var legacyAugmentedAutojs: ScriptableObject
-
-    /**
-     * The `autojs` module object the host reads (`UI.kt` reads `R`): the new layer's when it serves the module (roadmap
-     * P3.4, built on demand), else the one of the old augment call.
-     * zh-CN: 宿主读取的 autojs 模块对象 (UI.kt 读取 R): 新层提供该模块时为新层的 (P3.4, 按需构建), 否则为原 augment 调用的.
+     * The `autojs` module object the host reads (`UI.kt` reads `R`; roadmap P3.4, built on demand).
+     * zh-CN: 宿主读取的 autojs 模块对象 (UI.kt 读取 R; P3.4, 按需构建).
      */
     internal val augmentedAutojs: ScriptableObject
-        get() = scriptModules?.moduleObject("autojs") ?: legacyAugmentedAutojs
-
-    /** The engine module objects of `ocr` from the old augment call (`augmentLegacy`), set when the new layer does not serve it. */
-    private lateinit var legacyAugmentedOcrMLKit: ScriptableObject
-
-    private lateinit var legacyAugmentedOcrPaddle: ScriptableObject
-
-    private lateinit var legacyAugmentedOcrRapid: ScriptableObject
+        get() = checkNotNull(scriptModules.moduleObject("autojs"))
 
     /**
      * The engine module objects `ocr.mlkit` / `ocr.paddle` / `ocr.rapid` that `ocr.tap`, the `ocr.mode` setter and
-     * `options.mode` accept as modes: the new layer's when it serves `ocr` (roadmap P3.1, built on demand), else those of
-     * the old augment call.
-     * zh-CN: ocr.tap, ocr.mode 的 setter 与 options.mode 作为模式接受的引擎模块对象 ocr.mlkit / ocr.paddle / ocr.rapid: 新层提供 ocr 时为新层的 (P3.1,
-     * 按需构建), 否则为原 augment 调用的.
+     * `options.mode` accept as modes (roadmap P3.1, built on demand).
+     * zh-CN: ocr.tap, ocr.mode 的 setter 与 options.mode 作为模式接受的引擎模块对象 ocr.mlkit / ocr.paddle / ocr.rapid (P3.1, 按需构建).
      */
     internal val augmentedOcrMLKit: ScriptableObject
-        get() = scriptModules?.moduleObject("ocr.mlkit") ?: legacyAugmentedOcrMLKit
+        get() = checkNotNull(scriptModules.moduleObject("ocr.mlkit"))
 
     internal val augmentedOcrPaddle: ScriptableObject
-        get() = scriptModules?.moduleObject("ocr.paddle") ?: legacyAugmentedOcrPaddle
+        get() = checkNotNull(scriptModules.moduleObject("ocr.paddle"))
 
     internal val augmentedOcrRapid: ScriptableObject
-        get() = scriptModules?.moduleObject("ocr.rapid") ?: legacyAugmentedOcrRapid
+        get() = checkNotNull(scriptModules.moduleObject("ocr.rapid"))
 
     private val rhinoRequireFunction by lazy { topLevelScope.prop("require") as BaseFunction }
 
@@ -535,18 +419,14 @@ class ScriptRuntime private constructor(builder: Builder) {
      * AutoJs6/示例代码/协程/协程HelloWorld.js
      */
     /**
-     * Substitution of Promise: with the new script module layer, the Kotlin [PromiseConstructor] (roadmap P4.2, appendix C
-     * Q95), whose reactions go straight to the timer while the global `setImmediate` is the timers module's own; without it,
-     * `assets/modules/promise.js` (until P5.2). Created on first use, in `RhinoJavaScriptEngine.init` after the modules are
-     * mounted.
-     * zh-CN: Promise 的替代方案: 启用新脚本模块层时为 Kotlin 的 [PromiseConstructor] (ROADMAP P4.2, 附录 C Q95), 全局 setImmediate 仍是 timers 模块
-     * 自己的函数时反应直接投递到 timer; 否则为 `assets/modules/promise.js` (直到 P5.2). 首次使用时创建, 即 `RhinoJavaScriptEngine.init` 中模块挂载之后.
+     * Substitution of Promise: the Kotlin [PromiseConstructor] (roadmap P4.2, appendix C Q95; `assets/modules/promise.js`
+     * until P5.2), whose reactions go straight to the timer while the global `setImmediate` is the timers module's own.
+     * Created on first use, in `RhinoJavaScriptEngine.init` after the modules are mounted.
+     * zh-CN: Promise 的替代方案: Kotlin 的 [PromiseConstructor] (ROADMAP P4.2, 附录 C Q95; P5.2 之前为 `assets/modules/promise.js`), 全局 setImmediate
+     * 仍是 timers 模块自己的函数时反应直接投递到 timer. 首次使用时创建, 即 `RhinoJavaScriptEngine.init` 中模块挂载之后.
      */
     internal val js_Promise: BaseFunction by lazy {
-        when (val modules = scriptModules) {
-            null -> rhinoRequire("promise") as BaseFunction
-            else -> PromiseConstructor(topLevelScope, TimerReactionPoster(this) { modules.globalValue("timers", "setImmediate") })
-        }
+        PromiseConstructor(topLevelScope, TimerReactionPoster(this) { scriptModules.globalValue("timers", "setImmediate") })
     }
 
     /**
@@ -558,14 +438,14 @@ class ScriptRuntime private constructor(builder: Builder) {
      */
     internal val js_ResultAdapter: BaseFunction by lazy { ResultAdapterFunction(topLevelScope, topLevelScope.globalThis, isMainThread()) }
     internal val js_UiExt by lazy { rhinoRequire("ui-ext") as BaseFunction }
-    internal val js_Module by lazy { if (scriptModules != null) scriptRequire.module else rhinoRequire(JVM_NPM) as ScriptableObject }
+    internal val js_Module: ScriptableObject get() = scriptRequire.module
 
     /**
-     * The Kotlin `require` and `Module` of roadmap P3.7, for the runtimes with the new script module layer (the others load
-     * `jvm-npm.js`): Node core modules and the ids that the local lookup misses come from the engine's Rhino `require`,
-     * whose modules are those of the global getters, and `jvm-npm` is this `Module`.
-     * zh-CN: ROADMAP P3.7 的 Kotlin `require` 与 `Module`, 用于启用新脚本模块层的运行时 (其他运行时加载 `jvm-npm.js`): Node 核心模块与本地解析未命中的 id
-     * 来自引擎的 Rhino require, 模块实例与全局 getter 相同; `jvm-npm` 即本 `Module`.
+     * The Kotlin `require` and `Module` of roadmap P3.7 (`assets/modules/jvm-npm.js` until P5.2): Node core modules and
+     * the ids that the local lookup misses come from the engine's Rhino `require`, whose modules are those of the global
+     * getters, and `jvm-npm` is this `Module`.
+     * zh-CN: ROADMAP P3.7 的 Kotlin `require` 与 `Module` (P5.2 之前为 `assets/modules/jvm-npm.js`): Node 核心模块与本地解析未命中的 id 来自引擎的
+     * Rhino require, 模块实例与全局 getter 相同; `jvm-npm` 即本 `Module`.
      */
     private val scriptRequire by lazy {
         ScriptRequire(
@@ -663,39 +543,40 @@ class ScriptRuntime private constructor(builder: Builder) {
         //  ! 重定向 require 以支持相对路径和 npm 模块.
         //  ! en-US (translated by SuperMonster003 on Jul 27, 2024):
         //  ! Redirect the "require" method to support relative paths and npm modules.
-        if (scriptModules != null) {
-            // Roadmap P3.7: the Kotlin require replaces jvm-npm.js, created when a script first reads require or Module. The
-            // native require is taken before it is replaced, so that the global getters (axios, ...) keep loading through it.
-            // zh-CN: ROADMAP P3.7: Kotlin require 取代 jvm-npm.js, 脚本首次读取 require 或 Module 时创建. 原生 require 在被替换之前取得,
-            // 使全局 getter (axios 等) 仍经它加载.
-            rhinoRequireFunction
-            ScriptRequire.mount(topLevelScope.globalThis as ScriptableObject) { scriptRequire }
-        } else {
-            topLevelScope.defineProp("Module", js_Module, PERMANENT)
-            topLevelScope.defineProp("require", js_Module.prop("require"), PERMANENT)
-        }
+        // Roadmap P3.7: the Kotlin require (jvm-npm.js until P5.2), created when a script first reads require or Module. The
+        // native require is taken before it is replaced, so that the global getters (axios, ...) keep loading through it.
+        // zh-CN: ROADMAP P3.7: Kotlin require (P5.2 之前为 jvm-npm.js), 脚本首次读取 require 或 Module 时创建. 原生 require 在被替换之前取得,
+        // 使全局 getter (axios 等) 仍经它加载.
+        rhinoRequireFunction
+        ScriptRequire.mount(topLevelScope.globalThis as ScriptableObject) { scriptRequire }
 
         PluginAutoMountManager.apply(this)
     }
 
     /**
      * Extends the JavaScript built-in objects for the "extend JavaScript built-in objects" option and the execution mode
-     * "jsox": with the modules of the new script module layer when it serves jsox (roadmap P2.1), otherwise with the old
-     * Jsox.
-     * zh-CN: 为 "JavaScript 内置对象扩展" 设置与执行模式 "jsox" 扩展内置对象: 新脚本模块层提供 jsox 时用新层的模块 (ROADMAP P2.1), 否则用旧 Jsox.
+     * "jsox" with the modules of the script module layer (roadmap P2.1).
+     * zh-CN: 为 "JavaScript 内置对象扩展" 设置与执行模式 "jsox" 用脚本模块层的模块扩展内置对象 (ROADMAP P2.1).
      */
-    fun extendJsBuiltIns() = ScriptModuleLayer.extendBuiltInsOr(scriptModules) { Jsox.extendAllRhinoWithRuntime(this) }
+    fun extendJsBuiltIns() = ScriptModuleLayer.extendBuiltIns(scriptModules)
 
     /**
-     * Whether the new script module layer serves the top-level module [name] for this runtime and has not built it yet
+     * Extends the built-in object of the extension module [name] of `ScriptModuleLayer.BUILT_IN_EXTENSIONS` (the preset
+     * plugin extensions); false when the registry has no such module.
+     * zh-CN: 用 `ScriptModuleLayer.BUILT_IN_EXTENSIONS` 中的扩展模块 [name] 扩展其内置对象 (预置插件扩展); 注册表中没有该模块时返回 false.
+     */
+    internal fun extendJsBuiltIn(name: String): Boolean = name in ScriptModuleLayer.BUILT_IN_EXTENSIONS && scriptModules.builtIns.extend(name)
+
+    /**
+     * Whether the script module layer serves the top-level module [name] for this runtime and has not built it yet
      * (roadmap P3.4): nothing of the script has reached the module, so host code that only acts for scripts using it (the
      * engine events of `engines`) can skip this runtime instead of building the module.
-     * zh-CN: 新脚本模块层为本运行时提供顶层模块 [name] 且尚未构建 (P3.4): 脚本还没有用到该模块, 只为使用它的脚本工作的宿主代码 (engines 的引擎事件) 可跳过本运行时,
+     * zh-CN: 脚本模块层为本运行时提供顶层模块 [name] 且尚未构建 (P3.4): 脚本还没有用到该模块, 只为使用它的脚本工作的宿主代码 (engines 的引擎事件) 可跳过本运行时,
      * 不必为此构建模块.
      */
     fun isScriptModulePending(name: String): Boolean {
-        val modules = scriptModules ?: return false
-        return name in ScriptModuleLayer.MIGRATED && !modules.isBuilt(name)
+        if (!::scriptModules.isInitialized) return false
+        return name in ScriptModuleLayer.MIGRATED && !scriptModules.isBuilt(name)
     }
 
     @ScriptInterface
@@ -1127,124 +1008,11 @@ class ScriptRuntime private constructor(builder: Builder) {
 
     private fun augment(target: ScriptableObject) {
 
-        // Roadmap T8 / appendix C Q8: ScriptModuleLayer.ORDER decides where every module is mounted. With the hidden
-        // switch on, the migrated modules come from the new script module layer at their position; with it off, the
-        // mounter is null and every module comes from its old augment call (augmentLegacy) as before.
-        // zh-CN: ROADMAP T8 / 附录 C Q8: ScriptModuleLayer.ORDER 决定每个模块的挂载位置. 隐藏开关打开时, 已迁移的模块在该位置由新脚本模块层挂载;
-        // 关闭时 mounter 为 null, 所有模块照旧来自原 augment 调用 (augmentLegacy).
-        val modules = ScriptModuleLayer.mounterOrNull(this, target).also { scriptModules = it }
-        ScriptModuleLayer.mountInOrder(modules) { name -> augmentLegacy(target, name) }
-
-        // With the new layer, app.autojs is defined by the app module when it is built (P3.4).
-        // zh-CN: 新层开启时, app.autojs 由 app 模块在构建时定义 (P3.4).
-        if (modules == null) augmentedApp.defineProp(Autojs::class.java.simpleName.lowercase(), augmentedAutojs)
-    }
-
-    /**
-     * The old augment call of the top-level module [name] of `ScriptModuleLayer.ORDER`, its sub-modules included (the
-     * `augment` package, unchanged until P5.2 by roadmap R5).
-     * zh-CN: `ScriptModuleLayer.ORDER` 中顶层模块 [name] 的原 augment 调用, 含其子模块 (augment 包, 按 R5 在 P5.2 前不改动).
-     */
-    private fun augmentLegacy(target: ScriptableObject, name: String) {
-        when (name) {
-            "global" -> Global(this).assignWithRuntime(target, this, GlobalClasses)
-            "legacy" -> GlobalLegacy(this).assignWithRuntime(target, this)
-            "isNullish" -> IsNullish.augmentWithRuntime(target, this)
-            "util" -> Util.augmentWithRuntime(target, this, util).also { util ->
-                UtilJava.augmentWithRuntime(util, this)
-                UtilVersion.augmentWithRuntime(util, this)
-                UtilVersionCodes.augmentWithRuntime(util, this, VersionCodesInfo.newObj(topLevelScope))
-                UtilInspect.augmentWithRuntime(util, this)
-                UtilMorseCode.augmentWithRuntime(util, this)
-            }
-            "species" -> Species.augmentWithRuntime(target, this)
-            "app" -> App(this).augment(target, app).also { augmentedApp = it }
-            "autojs" -> Autojs(this).augment(target).also { legacyAugmentedAutojs = it }.also { autojs ->
-                AutojsVersion.augmentWithRuntime(autojs, this)
-            }
-            "shell" -> Shell(this).augment(target)
-            "timers" -> Timers(this).augment(target, timers)
-            "auto" -> Auto(this).augment(target)
-            "automator" -> Automator(this).augment(target)
-            "flow" -> Flow(this).augment(target)
-            "selector" -> Selector(this).augment(target, additionalAttributes = READONLY)
-            "events" -> Events(this).augment(target, events)
-            "keys" -> Keys.augmentWithRuntime(target, this)
-            "Canvas" -> Canvas(this).augment(target)
-            "images" -> Images(this).augment(target)
-            "ocr" -> Ocr(this).augment(target).also { ocr ->
-                OcrMLKit(this).augment(ocr).also { legacyAugmentedOcrMLKit = it }
-                OcrPaddle(this).augment(ocr).also { legacyAugmentedOcrPaddle = it }
-                OcrRapid(this).augment(ocr).also { legacyAugmentedOcrRapid = it }
-            }
-            "barcode" -> Barcode(this).augment(target)
-            "qrcode" -> QrCode(this).augment(target)
-            "yolo" -> Yolo(this).augment(target)
-            "threads" -> Threads(this).augment(target, threads)
-            "ui" -> UI(this).proxying(target, ui)
-            "colors" -> Colors.augmentWithRuntime(target, this, Colors.colorTables + colors).also { colors ->
-                ColorsTheme(this).augment(colors)
-            }
-            "Color" -> Color.augmentWithRuntime(target, this, Colors.colorTables)
-            "tasks" -> Tasks(this).augment(target)
-            "workManager" -> WorkManager(this).augment(target)
-            "dialogs" -> Dialogs(this).augment(target)
-            "continuation" -> Continuation(this).augment(target, js_mod_continuation, additionalAttributes = READONLY)
-            "ai" -> Ai(this, ai).augment(target)
-            "tts" -> Tts(this, tts).augment(target)
-            "http" -> Http(this).augment(target, http)
-            "web" -> Web(this).augment(target)
-            "WebSocket" -> WebSocket(this).augment(target, WebSocketFields)
-            "s13n" -> S13n.augmentWithRuntime(target, this)
-            "cvt" -> Converter.augmentWithRuntime(target, this).also { cvt ->
-                BytesCvt.augmentWithRuntime(cvt, this)
-            }
-            "fmt" -> Formatter.augmentWithRuntime(target, this).also { fmt ->
-                BytesFmt.augmentWithRuntime(fmt, this)
-            }
-            "console" -> Console(this).proxying(target, console).also { legacyConsoleProxyObject = it }
-            "plugins" -> Plugins(this).augment(target).also { PluginsTools(this).augment(it) }
-            "Arrayx" -> Arrayx(this).augment(target)
-            "Numberx" -> Numberx(this).augment(target)
-            "Mathx" -> Mathx(this).augment(target)
-            "jsox" -> Jsox(this).augment(target)
-            "files" -> Files(this).augment(target, files).also { BatchRename(this).augment(it) }
-            "crypto" -> Crypto.augmentWithRuntime(target, this, CoreCrypto)
-            "RootAutomator" -> RootAutomator(this).augment(target)
-            "engines" -> Engines(this).augment(target)
-            "floaty" -> Floaty(this).augment(target)
-            "storages" -> Storages.augmentWithRuntime(target, this)
-            "device" -> Device(this).augment(target, device)
-            "powerManager" -> PowerManager(this).augment(target)
-            "settings" -> Settings(this).augment(target)
-            "recorder" -> Recorder(this).augment(target, recorder)
-            "toast" -> Toast(this).augment(target)
-            "media" -> Media.augmentWithRuntime(target, this, media)
-            "sensors" -> Sensors.augmentWithRuntime(target, this, sensors)
-            "base64" -> Base64.augmentWithRuntime(target, this)
-            "notice" -> Notice(this).augment(target).also { notice ->
-                NoticeChannel(this).augment(notice)
-            }
-            "shizuku" -> Shizuku(this).augment(target, shizuku)
-            "opencc" -> OpenCC.augmentWithRuntime(target, this)
-            "mime" -> Mime(this).augment(target, mime)
-            "sysprops" -> SysProps(this).augment(target)
-            "sqlite" -> SQLite(this).augment(target)
-            "zip" -> Zip(this).augment(target)
-            "nanoid" -> NanoID.augmentWithRuntime(target, this)
-            "pinyin" -> Pinyin.augmentWithRuntime(target, this)
-            "pinyin4j" -> Pinyin4j.augmentWithRuntime(target, this)
-            "mediainfo" -> Mediainfo(this).augment(target)
-            "mail" -> Mail(this, mail).augment(target)
-            "installer" -> Installer(this, installer).augment(target)
-            "epub" -> Epub(this, epub).augment(target)
-            "gallery" -> Gallery(this, gallery).augment(target)
-            "terminal" -> Terminal(this, terminal).augment(target)
-            "speech" -> Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it); SpeechSpeaker(this, speech).augment(it) }
-            "compose" -> Compose(this).also { compose = it }.augment(target)
-            "memory" -> Memory(this).augment(target)
-            else -> throw IllegalStateException("Script module $name has no augment call")
-        }
+        // Roadmap T8 / appendix C Q8: ScriptModuleLayer.ORDER decides where every module is mounted; app.autojs is defined
+        // by the app module when it is built (P3.4).
+        // zh-CN: ROADMAP T8 / 附录 C Q8: ScriptModuleLayer.ORDER 决定每个模块的挂载位置; app.autojs 由 app 模块在构建时定义 (P3.4).
+        scriptModules = ScriptModuleLayer.mounter(this, target)
+        ScriptModuleLayer.mountInOrder(scriptModules)
     }
 
     /** `__exitIfError__` and `__asGlobal__`, in Kotlin since roadmap P2.5 (formerly `assets/modules/internal.js`). */

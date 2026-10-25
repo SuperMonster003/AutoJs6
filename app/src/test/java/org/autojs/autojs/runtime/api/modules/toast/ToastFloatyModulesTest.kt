@@ -1,18 +1,16 @@
 package org.autojs.autojs.runtime.api.modules.toast
 
-import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
-import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.floaty.Floaty
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mozilla.javascript.LazyDataSlot
-import org.mozilla.javascript.ScriptableObject
 
 /**
  * Roadmap P3.2 (group 1): `toast` and `floaty` on the new script module layer. Showing a toast or a window needs
@@ -40,12 +38,6 @@ class ToastFloatyModulesTest {
         rhino.close()
     }
 
-    private fun mountCurrent(side: DifferentialRhino) {
-        val global = side.ktScope.globalThis as ScriptableObject
-        Toast(side.ktRuntime).augment(global)
-        Floaty(side.ktRuntime).augment(global)
-    }
-
     @Test
     fun installingBuildsNothing() {
         listOf("toast", "\$toast", "floaty", "\$floaty").forEach { assertTrue(it, LazyDataSlot.isPending(rhino.ktScope.globalThis, it)) }
@@ -53,17 +45,16 @@ class ToastFloatyModulesTest {
 
     @Test
     fun surfaceMatchesTheCurrentModules() {
-        HostModuleTestSupport.assertSameSurface(rhino, "toast", mountCurrent = ::mountCurrent)
-        HostModuleTestSupport.assertSameSurface(rhino, "floaty", mountCurrent = ::mountCurrent)
+        HostModuleTestSupport.assertSameSurface(rhino, "toast")
+        HostModuleTestSupport.assertSameSurface(rhino, "floaty")
         HostModuleTestSupport.check(rhino, SURFACE)
         DEVICE.add(SURFACE)
     }
 
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope).also { it.setRuntimeProperty("getUiHandler", rhino.evalJs("(function () { return null; })")) } }
         listOf("toast", "floaty").forEach { name ->
-            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") { SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis) }
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name")
             val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue(name + "\n" + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }

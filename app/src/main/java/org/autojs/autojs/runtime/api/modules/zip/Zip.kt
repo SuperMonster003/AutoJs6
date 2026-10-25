@@ -9,8 +9,6 @@ import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component3
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.Invokable
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.StringUtils.toFile
 import org.mozilla.javascript.NativeObject
@@ -19,17 +17,9 @@ import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter.ofPattern
 import java.util.UUID.randomUUID
 
-class Zip(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
+class Zip(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
-    override val selfAssignmentFunctions = listOf(
-        ::open.name,
-        ::zipFile.name,
-        ::zipDir.name,
-        ::zipFiles.name,
-        ::unzip.name,
-    )
-
-    override fun invoke(vararg args: Any?): ZipNativeObject = ensureArgumentsOnlyOne(args) { zipPath ->
+    fun invoke(vararg args: Any?): ZipNativeObject = ensureArgumentsOnlyOne(args) { zipPath ->
         open(scriptRuntime, arrayOf(zipPath))
     }
 

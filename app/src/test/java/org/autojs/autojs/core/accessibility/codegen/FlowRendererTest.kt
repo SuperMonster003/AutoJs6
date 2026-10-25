@@ -65,10 +65,12 @@ class FlowRendererTest {
     fun everyGeneratedGlobalCallHasAnActualPublicRegistration() {
         // Read the registration declaration rather than copying a second whitelist that can drift.
         // zh-CN: 读取实际注册声明, 避免复制一份会与实现脱节的白名单.
-        val relative = "src/main/java/org/autojs/autojs/runtime/api/modules/flow/Flow.kt"
+        // The global forms of the flow module (FlowModule.globalForms; Flow.globalAssignmentFunctions until P5.2).
+        // zh-CN: flow 模块的全局形式 (FlowModule.globalForms; P5.2 之前为 Flow.globalAssignmentFunctions).
+        val relative = "src/main/java/org/autojs/autojs/runtime/api/modules/flow/FlowModule.kt"
         val flowFile = listOf(File(relative), File("app/$relative")).first { it.isFile }
-        val declarations = flowFile.readText().substringAfter("override val globalAssignmentFunctions = listOf(").substringBefore("\n    )")
-        val globals = Regex("::(\\w+)\\.name").findAll(declarations).map { it.groupValues[1] }.toSet()
+        val declarations = flowFile.readText().substringAfter("private fun globalForms()").substringBefore("\n    )")
+        val globals = Regex("Triple\\(\"(\\w+)\"").findAll(declarations).map { it.groupValues[1] }.toSet()
         assertTrue(globals.containsAll(listOf("waitAsync", "waitThenClick")))
         assertFalse(globals.contains("waitThenLongClick"))
         val allowed = globals + SelectorGlobals.names + "selector"

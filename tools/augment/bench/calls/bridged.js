@@ -1,9 +1,9 @@
 // Calls of the modules of roadmap P4.1 (ai, opencc, pinyin, pinyin4j, mediainfo, memory, and the plugin modules mail /
 // installer / epub / compose that hand their calls to the current augment modules), appended to bench/calls_prelude.js
-// by device_bench.py --calls bridged. With the switch of the new script module layer on they reach the new modules, with
-// it off the current augment modules. No case reaches a plugin: the "ok" cases are answered by the host, the "fail" cases
+// by device_bench.py --calls bridged. They reach the modules of the script module layer (with its switch off they reached
+// the old augment ones until P5.2). No case reaches a plugin: the "ok" cases are answered by the host, the "fail" cases
 // fail with an argument error the new layer checks itself (D10), compared with the "ref" cases of the prelude, and the
-// "coded" cases fail with the coded error of the current module in both states (not a ratio of R2: the same code runs).
+// "coded" cases fail with the coded error of the implementation (not a ratio of R2: the old layer ran the same code).
 time("ok pinyin.compact", () => { try { pinyin.compact([["a", "b"], ["c"]]); } catch (e) { } });
 time("ok pinyin4j.of-empty", () => { try { pinyin4j.of(""); } catch (e) { } });
 time("ok memory.retained", () => { try { memory.retained(); } catch (e) { } });
