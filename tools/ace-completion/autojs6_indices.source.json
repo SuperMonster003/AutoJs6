@@ -12751,6 +12751,41 @@
         }
       ]
     },
+    "memory": {
+      "doc": "AutoJs6 Memory API",
+      "members": [
+        {
+          "name": "snapshot",
+          "kind": "function",
+          "doc": "snapshot(): Memory.Snapshot;",
+          "signature": "snapshot(): Memory.Snapshot;"
+        },
+        {
+          "name": "collect",
+          "kind": "function",
+          "doc": "collect(timeout?: number): Memory.Snapshot;",
+          "signature": "collect(timeout?: number): Memory.Snapshot;"
+        },
+        {
+          "name": "retained",
+          "kind": "function",
+          "doc": "retained(): Memory.RetainedRuntime[];",
+          "signature": "retained(): Memory.RetainedRuntime[];"
+        },
+        {
+          "name": "dumpHeap",
+          "kind": "function",
+          "doc": "dumpHeap(path?: string): string;",
+          "signature": "dumpHeap(path?: string): string;"
+        },
+        {
+          "name": "watch",
+          "kind": "function",
+          "doc": "watch(obj: object, name?: string): boolean;",
+          "signature": "watch(obj: object, name?: string): boolean;"
+        }
+      ]
+    },
     "mime": {
       "doc": "AutoJs6 Mime API",
       "members": [
@@ -30034,6 +30069,18 @@
           "kind": "function",
           "doc": "setEnabled(key: Settings.Key | string, enabled: boolean): void;",
           "signature": "setEnabled(key: Settings.Key | string, enabled: boolean): void;"
+        },
+        {
+          "name": "export",
+          "kind": "function",
+          "doc": "export(path?: string | null, categories?: Settings.CategoryId | string | (Settings.CategoryId | string)[] | null): Settings.ExportResult;",
+          "signature": "export(path?: string | null, categories?: Settings.CategoryId | string | (Settings.CategoryId | string)[] | null): Settings.ExportResult;"
+        },
+        {
+          "name": "categories",
+          "kind": "function",
+          "doc": "categories(): Settings.Category[];",
+          "signature": "categories(): Settings.Category[];"
         }
       ]
     },
@@ -33288,6 +33335,7 @@
     "$power_manager": "power_manager",
     "$settings": "settings",
     "$mediainfo": "mediainfo",
+    "$memory": "memory",
     "$tts": "tts",
     "$workManager": "workManager",
     "$work_manager": "work_manager",
