@@ -1,0 +1,107 @@
+=== obsoleteMembersExistOnTheNewModule surface
+ensureArray	function	0	EWC
+distinct	function	1	EWC
+distinctBy	function	2	EWC
+union	function	2	EWC
+intersect	function	2	EWC
+different	function	0	EWC
+sortBy	function	2	EWC
+sortDescending	function	1	EWC
+sortByDescending	function	2	EWC
+sorted	function	1	EWC
+sortedBy	function	2	EWC
+sortedDescending	function	1	EWC
+sortedByDescending	function	2	EWC
+shuffle	function	1	EWC
+=== resultsAgree js: Arrayx.distinct([1, 1, 2, '2', NaN, NaN])
+[1,2,"2",null]
+=== resultsAgree js: Arrayx.distinct([1, 2, 1, 3, 2, 2])
+[1,2,3]
+=== resultsAgree js: Arrayx.distinct([1, , 1])
+[1,null]
+=== resultsAgree js: Arrayx.distinct([0, -0])
+[0]
+=== resultsAgree js: Arrayx.distinctBy([{ a: 1 }, { a: 1 }, { a: 2 }], o => o.a)
+[{"a":1},{"a":2}]
+=== resultsAgree js: Arrayx.distinctBy(['a', 'b', 'ab', 'ba', 'abc'], a => a.length)
+["a","ab","abc"]
+=== resultsAgree js: Arrayx.distinctBy([1, 2, 1, 3, 2, 2], e => e % 2)
+[1,2]
+=== resultsAgree js: Arrayx.union([1, 2], [2, 3], 4)
+[1,2,3,4]
+=== resultsAgree js: Arrayx.union([1, 1])
+[1]
+=== resultsAgree js: Arrayx.union([1, 2, 3], 0, 5, [2, 3, 4], [2, 3, 4, 2, 2, 2])
+[1,2,3,0,5,4]
+=== resultsAgree js: Arrayx.intersect([1, 2, 2, 3], [2, 3], 3)
+[3]
+=== resultsAgree js: Arrayx.intersect([1, 2, 2, 3], [2, 3])
+[2,3]
+=== resultsAgree js: Arrayx.intersect([1, 2, 3, 3], 2, [2, 3, 4], [2, 3, 3])
+[2]
+=== resultsAgree js: Arrayx.intersect([1, 1, 2], [1, 1, 3])
+[1]
+=== resultsAgree js: Arrayx.intersect([1, 2])
+[]
+=== resultsAgree js: Arrayx.intersect([])
+[]
+=== resultsAgree js: Arrayx.sortBy([3, 1, 2], x => -x)
+[3,2,1]
+=== resultsAgree js: Arrayx.sortBy(['10', '2', '30', '4', '50', '0x6'], Number)
+["2","4","0x6","10","30","50"]
+=== resultsAgree js: Arrayx.sortBy(['a', 'ab', 'c', 'bc', 'abc', '123'], e => e.length)
+["a","c","ab","bc","abc","123"]
+=== resultsAgree js: Arrayx.sortBy([5], x => x)
+[5]
+=== resultsAgree js: Arrayx.sortByDescending([1, 3, 2], x => x)
+[3,2,1]
+=== resultsAgree js: Arrayx.sortDescending([1, 3, 2])
+[3,2,1]
+=== resultsAgree js: Arrayx.sortDescending([])
+[]
+=== resultsAgree js: Arrayx.sorted([3, 1, 2])
+[1,2,3]
+=== resultsAgree js: Arrayx.sorted([80, 70, 9])
+[9,70,80]
+=== resultsAgree js: Arrayx.sorted(['b', 'a', 10, 9])
+[9,10,"a","b"]
+=== resultsAgree js: Arrayx.sortedBy([3, 1, 2], x => x)
+[1,2,3]
+=== resultsAgree js: Arrayx.sortedBy([], x => x)
+[]
+=== resultsAgree js: Arrayx.sortedDescending([3, 1, 2])
+[3,2,1]
+=== resultsAgree js: Arrayx.sortedByDescending([3, 1, 2], x => x)
+[3,2,1]
+=== resultsAgree js: Arrayx.shuffle([1, 2, 3]).length
+3
+=== resultsAgree js: (function () { var a = [1, 2, 3, 4]; return Arrayx.shuffle(a) === a && Arrayx.sorted(a).join() === '1,2,3,4'; })()
+true
+=== resultsAgree js: (function () { var a = [3, 1, 2]; var r = Arrayx.sortBy(a, x => x); return [a, r === a]; })()
+[[1,2,3],true]
+=== resultsAgree js: (function () { var a = [3, 1, 2]; var r = Arrayx.sortDescending(a); return [a, r === a]; })()
+[[3,2,1],true]
+=== resultsAgree js: (function () { var a = [3, 1, 2]; var r = Arrayx.sorted(a); return [a, r === a]; })()
+[[3,1,2],false]
+=== resultsAgree js: (function () { var a = [3, 1, 2]; var r = Arrayx.sortedBy(a, x => x); return [a, r === a]; })()
+[[3,1,2],false]
+=== resultsAgree js: (function () { var a = [3, 1, 2]; var r = Arrayx.sortedByDescending(a, x => x); return [a, r]; })()
+[[3,2,1],[3,2,1]]
+=== resultsAgree js: Arrayx.ensureArray([])
+undefined
+=== resultsAgree js: Arrayx.ensureArray([5], [2, 3])
+undefined
+=== resultsAgree js: Arrayx.ensureArray([], 9)
+throws TypeError
+=== resultsAgree js: Arrayx.ensureArray(1)
+throws TypeError
+=== resultsAgree js: Arrayx.ensureArray()
+undefined
+=== resultsAgree js: Arrayx.distinct(1)
+throws TypeError
+=== resultsAgree js: Arrayx.sortBy(1, x => x)
+throws TypeError
+=== resultsAgree js: Arrayx.sorted('abc')
+throws TypeError
+=== resultsAgree js: typeof Arrayx
+"function"

@@ -1,0 +1,93 @@
+=== surfaceMatchesTheCurrentModule surface: http
+client	function	0	EW-
+buildRequest	function	0	EW-
+request	function	0	EW-
+requestAsync	function	0	EW-
+get	function	0	EW-
+getAsync	function	0	EW-
+head	function	0	EW-
+headAsync	function	0	EW-
+post	function	0	EW-
+postAsync	function	0	EW-
+postJson	function	0	EW-
+postJsonAsync	function	0	EW-
+postMultipart	function	0	EW-
+postMultipartAsync	function	0	EW-
+put	function	0	EW-
+putAsync	function	0	EW-
+delete	function	0	EW-
+del	function	0	EW-
+deleteAsync	function	0	EW-
+delAsync	function	0	EW-
+getClass	function	0	EW-
+wait	function	0	EW-
+hashCode	function	0	EW-
+notifyAll	function	0	EW-
+equals	function	0	EW-
+toString	function	0	EW-
+okhttp	object	-	EW-
+class	object	-	EW-
+notify	function	0	EW-
+getOkhttp	function	0	EW-
+=== buildRequestAgreesWithTheObsoleteModule js: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('https://example.com/a?b=1', { method: 'GET' }))
+["GET","https://example.com/a?b=1",null,null,null]
+=== buildRequestAgreesWithTheObsoleteModule js: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('example.com/x', { method: 'GET', headers: { 'X-A': 'one' } }))
+["GET","http://example.com/x","one",null,null]
+=== buildRequestAgreesWithTheObsoleteModule js: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('http://example.com/', { method: 'POST', body: 'hello', contentType: 'text/plain' }))
+["POST","http://example.com/",null,"text/plain; charset=utf-8",5]
+=== buildRequestAgreesWithTheObsoleteModule js: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('http://example.com/', { method: 'PUT', headers: { 'X-A': ['1', '2'] }, body: 'x', contentType: 'application/json' }))
+["PUT","http://example.com/","2","application/json; charset=utf-8",1]
+=== buildRequestAgreesWithTheObsoleteModule js: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('http://example.com/', { method: 'DELETE' }))
+["DELETE","http://example.com/",null,null,null]
+=== buildRequestAgreesWithTheObsoleteModule js: http.buildRequest('http://example.com/', { method: 'POST' })
+throws JavaException IllegalArgumentException
+=== buildRequestAgreesWithTheObsoleteModule js: http.buildRequest('http://example.com/', { method: 'GET', body: 'x' })
+throws JavaException IllegalArgumentException
+=== buildRequestAgreesWithTheObsoleteModule js: http.buildRequest('http://example.com/', { method: 'POST', body: 1 })
+throws TypeError
+=== buildRequestAgreesWithTheObsoleteModule js: http.buildRequest('http:// bad', { method: 'GET' })
+throws JavaException IllegalArgumentException
+=== obsoleteMembersExistOnTheNewModule surface
+client	function	0	EWC
+buildRequest	function	2	EWC
+request	function	3	EWC
+get	function	3	EWC
+post	function	4	EWC
+postJson	function	4	EWC
+postMultipart	function	4	EWC
+=== resultsMatchTheCurrentModule current: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('https://example.com/a?b=1', { method: 'GET' }))
+["GET","https://example.com/a?b=1",null,null,null]
+=== resultsMatchTheCurrentModule current: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('example.com/x', { method: 'GET', headers: { 'X-A': 'one' } }))
+["GET","http://example.com/x","one",null,null]
+=== resultsMatchTheCurrentModule current: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('http://example.com/', { method: 'POST', body: 'hello', contentType: 'text/plain' }))
+["POST","http://example.com/",null,"text/plain; charset=utf-8",5]
+=== resultsMatchTheCurrentModule current: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('http://example.com/', { method: 'PUT', headers: { 'X-A': ['1', '2'] }, body: 'x', contentType: 'application/json' }))
+["PUT","http://example.com/","2","application/json; charset=utf-8",1]
+=== resultsMatchTheCurrentModule current: (function (r) { var b = r.body(); return [String(r.method()), String(r.url()), r.header('X-A') === null ? null : String(r.header('X-A')), b === null ? null : String(b.contentType()), b === null ? null : Number(b.contentLength())]; })(http.buildRequest('http://example.com/', { method: 'DELETE' }))
+["DELETE","http://example.com/",null,null,null]
+=== resultsMatchTheCurrentModule current: http.buildRequest('http://example.com/', { method: 'POST' })
+throws IllegalArgumentException
+method POST must have a request body.
+=== resultsMatchTheCurrentModule current: http.buildRequest('http://example.com/', { method: 'GET', body: 'x' })
+throws IllegalArgumentException
+method GET must not have a request body.
+=== resultsMatchTheCurrentModule current: http.buildRequest('http://example.com/', { method: 'POST', body: 1 })
+throws WrappedIllegalArgumentException
+Unknown type of body for header options.
+=== resultsMatchTheCurrentModule current: http.buildRequest('http:// bad', { method: 'GET' })
+throws IllegalArgumentException
+Invalid URL host: " bad"
+=== resultsMatchTheCurrentModule current: typeof http.client()
+"object"
+=== resultsMatchTheCurrentModule current: http.client() === http.client()
+true
+=== resultsMatchTheCurrentModule current: String(http.client().getClass().getName()).length > 0
+true
+=== resultsMatchTheCurrentModule current: String(http.__okhttp__.getClass().getName())
+"org.autojs.autojs.core.http.MutableOkHttp"
+=== resultsMatchTheCurrentModule current: Object.keys(http).indexOf('__okhttp__')
+-1
+=== resultsMatchTheCurrentModule current: Object.keys(http).length
+20
+=== resultsMatchTheCurrentModule current: [typeof http.del, http.del === http.delete, typeof http.delAsync, http.delAsync === http.deleteAsync]
+["function",false,"function",false]

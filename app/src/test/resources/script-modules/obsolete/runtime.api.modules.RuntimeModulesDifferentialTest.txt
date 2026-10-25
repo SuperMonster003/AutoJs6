@@ -1,0 +1,96 @@
+=== resultsAgree js: typeof sync(function () {})
+"function"
+=== resultsAgree js: sync(function (a) { return a + 1; })(1)
+2
+=== resultsAgree js: sync(function (a) { return a * 2; }, {})(21)
+42
+=== resultsAgree js: sync(function () { return this === globalThis || this === undefined; })()
+true
+=== resultsAgree js: sync(1)
+throws InternalError
+=== resultsAgree js: sync()
+throws InternalError
+=== resultsAgree js: typeof sync(function () {}, {}, 1)
+"function"
+=== resultsAgree js: tasks.timeFlagToDays(5)
+[0,2]
+=== resultsAgree js: tasks.timeFlagToDays(127)
+[0,1,2,3,4,5,6]
+=== resultsAgree js: tasks.timeFlagToDays(0)
+[]
+=== resultsAgree js: tasks.timeFlagToDays('5')
+[0,2]
+=== resultsAgree js: tasks.timeFlagToDays(64)
+[6]
+=== resultsAgree js: tasks.timeFlagToDays()
+[0,1,2]
+=== resultsAgree js: tasks.daysToTimeFlag([0, 2])
+5
+=== resultsAgree js: tasks.daysToTimeFlag([6, 0, 6])
+65
+=== resultsAgree js: tasks.daysToTimeFlag([])
+0
+=== resultsAgree js: tasks.daysToTimeFlag([7])
+0
+=== resultsAgree js: tasks.daysToTimeFlag([0, '2'])
+1
+=== resultsAgree js: tasks.daysToTimeFlag(null)
+throws TypeError
+=== resultsAgree js: autojs.version.code === autojs.versionCode && autojs.version.name === autojs.versionName && autojs.version.date === autojs.versionDate
+true
+=== resultsAgree js: autojs.version.isAtLeast('1.0.0')
+true
+=== resultsAgree js: autojs.version.isAtLeast('99.0.0')
+false
+=== resultsAgree js: autojs.version.isAtLeast(autojs.version.name)
+true
+=== resultsAgree js: autojs.version.isAtLeast(autojs.version.name, true)
+true
+=== resultsAgree js: autojs.version.isAtLeast('6.0.0', 1)
+true
+=== resultsAgree js: autojs.version.isHigherThan('1.0.0')
+true
+=== resultsAgree js: autojs.version.isHigherThan('99.0.0')
+false
+=== resultsAgree js: autojs.version.isLowerThan('99.0.0')
+true
+=== resultsAgree js: autojs.version.isEqual(autojs.version.name)
+true
+=== resultsAgree js: autojs.version.isEqual('1.0.0')
+false
+=== resultsAgree js: autojs.version.isAtLeast(new Packages.io.github.g00fy2.versioncompare.Version('1.0.0'))
+true
+=== resultsAgree js: autojs.version.isAtLeast(null)
+throws InternalError
+=== resultsAgree js: autojs.version.isAtLeast()
+true
+=== resultsAgree js: [autojs.versionCode, autojs.versionName, autojs.versionDate].join()
+"5935,6.8.0,Oct 25, 2026"
+=== resultsAgree js: app.intentToShell({ action: 'VIEW', data: 'x' })
+" -a 'android.intent.action.VIEW' -d x"
+=== resultsAgree js: app.intentToShell({ action: 'android.intent.action.MAIN' })
+" -a 'android.intent.action.MAIN'"
+=== resultsAgree js: app.intentToShell({ packageName: 'a.b', className: 'a.b.C' })
+" -n 'a.b/a.b.C'"
+=== resultsAgree js: app.intentToShell({ extras: { k: 'v', n: 1, f: 1.5, b: true } })
+" --es 'k' 'v' --ei 'n' 1 --ef 'f' 1.5 --ez 'b' true"
+=== resultsAgree js: app.intentToShell({ category: ['A', 'B'] })
+" -c A -c B"
+=== resultsAgree js: app.intentToShell({ category: 'A' })
+" -c A"
+=== resultsAgree js: app.intentToShell({ type: 'text/plain' })
+" -t text/plain"
+=== resultsAgree js: app.intentToShell({ flags: 268435456 })
+" -f 268435456"
+=== resultsAgree js: app.intentToShell({})
+""
+=== resultsAgree js: app.intentToShell(1)
+""
+=== resultsAgree js: files.join('a', 'b') === String(new java.io.File('a', 'b').getPath())
+true
+=== resultsAgree js: files.join('a')
+"a"
+=== resultsAgree js: files.join('a', null)
+throws JavaException NullPointerException
+=== resultsAgree js: files.join()
+throws InternalError

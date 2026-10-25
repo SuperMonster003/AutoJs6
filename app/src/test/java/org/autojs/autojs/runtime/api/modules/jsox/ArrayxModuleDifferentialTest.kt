@@ -4,6 +4,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -22,7 +23,7 @@ class ArrayxModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        jsArrayx = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("Arrayx")!!
+        if (ScriptModuleExpectations.RECORDING) jsArrayx = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("Arrayx")!!
         rhino.mountNewModules("Arrayx")
     }
 
@@ -34,7 +35,7 @@ class ArrayxModuleDifferentialTest {
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val ktArrayx = rhino.evalKt("Arrayx")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsArrayx, rhino.jsScope.globalThis), SurfaceDiff.surface(ktArrayx, rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsArrayx, rhino.jsScope.globalThis) }, SurfaceDiff.surface(ktArrayx, rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         val missing = report.onlyInFirst - KNOWN_MISSING
         assertTrue("Obsolete Arrayx members missing from the new module: $missing", missing.isEmpty())

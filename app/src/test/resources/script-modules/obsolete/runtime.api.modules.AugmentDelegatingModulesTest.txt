@@ -1,0 +1,849 @@
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.ask(new String('x'))
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.ask(new Date(0))
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.ask({ toJSON: function () { return 'x' } })
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.ask({ messages: function () {}, role: 'user', content: 'x' })
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.ask([1])
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.ask(new java.lang.String('x'))
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.chat({ role: 'user', content: 'x' })
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.session({ system: function () {} })
+throws NullPointerException
+activePluginSessions must not be null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.session({ system: new String('s') })
+throws NullPointerException
+activePluginSessions must not be null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.session(Object.create({ system: 1 }))
+throws NullPointerException
+activePluginSessions must not be null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: ai.catalog({})
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginCatalogRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: (function () { Array.prototype.toJSON = function () { return 'x' }; try { return ai.ask([]) } finally { delete Array.prototype.toJSON } })()
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginAskRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: (function () { var a = []; a.toJSON = function () { return {} }; return ai.catalog(a) })()
+throws NullPointerException
+Cannot invoke "kotlin.Lazy.getValue()" because "this.pluginCatalogRuntimeDelegate" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: (function () { var t = 's2'; t += 't'; return opencc.convert('a', t) })()
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: opencc.convert('a', new java.lang.String('s2t'))
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: opencc.convert(1, 's2t')
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: opencc.convert({}, 's2t')
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: (function () { var t = 'a'; t += 'b'; return opencc.s2t(t) })()
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: pinyin.fromCodePoint(new java.lang.Integer(65))
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: pinyin('a', { mode: undefined })
+throws(java) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: pinyin.fromCodePoint('65')
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { streamNumber: new java.lang.Integer(1) })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { infoKind: new java.lang.String('TEXT') })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { streamNumber: undefined, infoKind: null })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: memory.collect(new java.lang.Integer(5))
+unavailable(jvm) not mocked
+Method elapsedRealtime in android.os.SystemClock not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: memory.watch(new java.lang.StringBuilder('a'))
+false
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: memory.watch({}, new java.lang.String('n'))
+false
+=== acceptedCallsGetPastTheArgumentChecksAsOnTheCurrentModules current: memory.dumpHeap(new java.lang.String('a'))
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "this.scriptRuntime.files" is null
+=== surfacesMatchTheCurrentModules surface: ai
+ask	function	0	EW-
+chat	function	0	EW-
+stream	function	0	EW-
+session	function	0	EW-
+catalog	function	0	EW-
+agent	object	-	EW-
+=== surfacesMatchTheCurrentModules surface: opencc
+convert	function	0	EW-
+hk2s	function	0	EW-
+hk2t	function	0	EW-
+jp2t	function	0	EW-
+s2hk	function	0	EW-
+s2t	function	0	EW-
+s2tw	function	0	EW-
+s2twp	function	0	EW-
+t2hk	function	0	EW-
+t2s	function	0	EW-
+t2tw	function	0	EW-
+t2jp	function	0	EW-
+tw2s	function	0	EW-
+tw2t	function	0	EW-
+tw2sp	function	0	EW-
+s2twi	function	0	EW-
+twi2s	function	0	EW-
+s2jp	function	0	EW-
+t2twi	function	0	EW-
+hk2tw	function	0	EW-
+hk2twi	function	0	EW-
+hk2jp	function	0	EW-
+tw2hk	function	0	EW-
+tw2twi	function	0	EW-
+tw2jp	function	0	EW-
+twi2t	function	0	EW-
+twi2hk	function	0	EW-
+twi2tw	function	0	EW-
+twi2jp	function	0	EW-
+jp2s	function	0	EW-
+jp2hk	function	0	EW-
+jp2tw	function	0	EW-
+jp2twi	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: pinyin
+STYLE_NORMAL	object	-	EW-
+STYLE_TONE	object	-	EW-
+STYLE_TONE2	object	-	EW-
+STYLE_TO3NE	object	-	EW-
+STYLE_INITIALS	object	-	EW-
+STYLE_FIRST_LETTER	object	-	EW-
+MODE_NORMAL	object	-	EW-
+MODE_SURNAME	object	-	EW-
+MODE_PLACENAME	object	-	EW-
+MODE_PLACE_NAME	object	-	EW-
+convert	function	0	EW-
+simple	function	0	EW-
+compare	function	0	EW-
+compact	function	0	EW-
+fromCodePoint	function	0	EW-
+fromPhrase	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: pinyin4j
+as	function	0	EW-
+of	function	0	EW-
+readings	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: mediainfo
+SNAPSHOT_SCHEMA_V1	string	-	EW-
+SNAPSHOT_SCHEMA_V2	string	-	EW-
+read	function	0	EW-
+snapshot	function	0	EW-
+capabilities	function	0	EW-
+get	function	0	EW-
+countGet	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: mail
+MailError	function	4	EW-
+providers	object	-	EW-
+accounts	object	-	EW-
+test	function	0	EW-
+testAsync	function	0	EW-
+send	function	0	EW-
+sendAsync	function	0	EW-
+folders	function	0	EW-
+foldersAsync	function	0	EW-
+folder	function	0	EW-
+folderStatus	function	0	EW-
+folderStatusAsync	function	0	EW-
+createFolder	function	0	EW-
+createFolderAsync	function	0	EW-
+deleteFolder	function	0	EW-
+deleteFolderAsync	function	0	EW-
+renameFolder	function	0	EW-
+renameFolderAsync	function	0	EW-
+fetch	function	0	EW-
+fetchAsync	function	0	EW-
+search	function	0	EW-
+searchAsync	function	0	EW-
+get	function	0	EW-
+getAsync	function	0	EW-
+fetchBody	function	0	EW-
+fetchBodyAsync	function	0	EW-
+download	function	0	EW-
+downloadAsync	function	0	EW-
+raw	function	0	EW-
+rawAsync	function	0	EW-
+setFlags	function	0	EW-
+setFlagsAsync	function	0	EW-
+markRead	function	0	EW-
+markReadAsync	function	0	EW-
+markUnread	function	0	EW-
+markUnreadAsync	function	0	EW-
+flag	function	0	EW-
+flagAsync	function	0	EW-
+unflag	function	0	EW-
+unflagAsync	function	0	EW-
+move	function	0	EW-
+moveAsync	function	0	EW-
+copy	function	0	EW-
+copyAsync	function	0	EW-
+delete	function	0	EW-
+deleteAsync	function	0	EW-
+expunge	function	0	EW-
+expungeAsync	function	0	EW-
+append	function	0	EW-
+appendAsync	function	0	EW-
+watch	function	0	EW-
+connect	function	0	EW-
+connectAsync	function	0	EW-
+setDefault	function	0	EW-
+close	function	0	EW-
+default	object	-	EW-
+=== surfacesMatchTheCurrentModules surface: installer
+InstallerError	function	7	EW-
+authorizer	object	-	EW-
+install	function	0	EW-
+installAsync	function	0	EW-
+session	function	0	EW-
+uninstall	function	0	EW-
+uninstallAsync	function	0	EW-
+inspect	function	0	EW-
+inspectAsync	function	0	EW-
+isDefault	function	0	EW-
+setDefault	function	0	EW-
+setDefaultAsync	function	0	EW-
+users	function	0	EW-
+usersAsync	function	0	EW-
+isAvailable	function	0	EW-
+status	inaccessible	-	EW-
+=== surfacesMatchTheCurrentModules surface: epub
+EpubError	function	2	EW-
+open	function	0	EW-
+openAsync	function	0	EW-
+metadata	function	0	EW-
+metadataAsync	function	0	EW-
+toc	function	0	EW-
+tocAsync	function	0	EW-
+readingOrder	function	0	EW-
+readingOrderAsync	function	0	EW-
+text	function	0	EW-
+textAsync	function	0	EW-
+cover	function	0	EW-
+coverAsync	function	0	EW-
+search	function	0	EW-
+searchAsync	function	0	EW-
+annotations	function	0	EW-
+annotationsAsync	function	0	EW-
+read	function	0	EW-
+readAsync	function	0	EW-
+isAvailable	function	0	EW-
+isAvailableAsync	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: gallery
+GalleryError	function	2	EW-
+pick	function	0	EW-
+pickAsync	function	0	EW-
+view	function	0	EW-
+viewAsync	function	0	EW-
+edit	function	0	EW-
+editAsync	function	0	EW-
+convert	function	0	EW-
+convertAsync	function	0	EW-
+isAvailable	function	0	EW-
+isAvailableAsync	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: terminal
+TerminalError	function	3	EW-
+npm	object	-	EW-
+open	function	0	EW-
+openAsync	function	0	EW-
+sessions	function	0	EW-
+sessionsAsync	function	0	EW-
+session	function	0	EW-
+close	function	0	EW-
+closeAsync	function	0	EW-
+closeAll	function	0	EW-
+closeAllAsync	function	0	EW-
+show	function	0	EW-
+showAsync	function	0	EW-
+state	function	0	EW-
+isAvailable	function	0	EW-
+isAvailableAsync	function	0	EW-
+exec	function	0	EW-
+execAsync	function	0	EW-
+env	function	0	EW-
+envAsync	function	0	EW-
+=== surfacesMatchTheCurrentModules surface: speech
+SpeechError	function	2	EW-
+isAvailable	function	0	EW-
+capabilities	function	0	EW-
+listen	function	0	EW-
+recognize	function	0	EW-
+recognizeAsync	function	0	EW-
+detectVoice	function	0	EW-
+wake	function	0	EW-
+synthesize	function	0	EW-
+synthesizeAsync	function	0	EW-
+speak	function	0	EW-
+models	object	-	EW-
+speaker	object	-	EW-
+=== surfacesMatchTheCurrentModules surface: compose
+isAvailable	function	0	EW-
+createElement	function	0	EW-
+modifier	function	0	EW-
+state	function	0	EW-
+ref	function	0	EW-
+batch	function	0	EW-
+memo	function	0	EW-
+mount	function	0	EW-
+attach	function	0	EW-
+floaty	function	0	EW-
+dialog	function	0	EW-
+post	function	0	EW-
+theme	function	0	EW-
+Column	function	0	EW-
+Row	function	0	EW-
+Box	function	0	EW-
+Spacer	function	0	EW-
+LazyColumn	function	0	EW-
+LazyRow	function	0	EW-
+Scaffold	function	0	EW-
+Surface	function	0	EW-
+Card	function	0	EW-
+HorizontalDivider	function	0	EW-
+TopAppBar	function	0	EW-
+Text	function	0	EW-
+Icon	function	0	EW-
+Image	function	0	EW-
+Button	function	0	EW-
+ElevatedButton	function	0	EW-
+FilledTonalButton	function	0	EW-
+OutlinedButton	function	0	EW-
+TextButton	function	0	EW-
+IconButton	function	0	EW-
+Switch	function	0	EW-
+Checkbox	function	0	EW-
+RadioButton	function	0	EW-
+Slider	function	0	EW-
+TextField	function	0	EW-
+OutlinedTextField	function	0	EW-
+CircularProgressIndicator	function	0	EW-
+LinearProgressIndicator	function	0	EW-
+AlertDialog	function	0	EW-
+NavigationBar	function	0	EW-
+NavigationRail	function	0	EW-
+NavigationBarItem	function	0	EW-
+NavigationRailItem	function	0	EW-
+NavigationDrawer	function	0	EW-
+NavigationDrawerItem	function	0	EW-
+TabRow	function	0	EW-
+Tab	function	0	EW-
+ModalBottomSheet	function	0	EW-
+DropdownMenu	function	0	EW-
+DropdownMenuItem	function	0	EW-
+DatePicker	function	0	EW-
+TimePicker	function	0	EW-
+HorizontalPager	function	0	EW-
+LazyVerticalGrid	function	0	EW-
+AssistChip	function	0	EW-
+FilterChip	function	0	EW-
+InputChip	function	0	EW-
+Badge	function	0	EW-
+SegmentedButton	function	0	EW-
+SegmentedButtonItem	function	0	EW-
+FloatingActionButton	function	0	EW-
+SearchBar	function	0	EW-
+Tooltip	function	0	EW-
+PullToRefresh	function	0	EW-
+AndroidView	function	0	EW-
+ComposeError	function	5	EW-
+version	object	-	EW-
+sessions	object	-	EW-
+=== surfacesMatchTheCurrentModules surface: memory
+snapshot	function	0	EW-
+collect	function	0	EW-
+retained	function	0	EW-
+dumpHeap	function	0	EW-
+watch	function	0	EW-
+=== speechModelsSurfaceMatchesTheCurrentModule surface: speech.models
+list	function	0	EW-
+install	function	0	EW-
+installAsync	function	0	EW-
+importFile	function	0	EW-
+remove	function	0	EW-
+setDefault	function	0	EW-
+getDefault	function	0	EW-
+refreshCatalog	function	0	EW-
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(1)
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask({})
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask({ messages: 1 })
+throws IllegalArgumentException
+AI request messages must be an array
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask('a', 1)
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask('a', {}, 1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.chat()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.stream(1)
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session(1)
+throws WrappedIllegalArgumentException
+AI session options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session({ system: 1 })
+throws IllegalArgumentException
+AI session option system must be a string
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session(1, 2)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.catalog(1, 2)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.catalog([])
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(null)
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(function () {})
+throws WrappedIllegalArgumentException
+AI prompt or messages cannot be undefined.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(Object.create({ role: 'user', content: 'x' }))
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask({ messages: null })
+throws IllegalArgumentException
+AI request messages must be an array
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask('x', { toJSON: function () { return [] } })
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask('x', new Date(0))
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask('x', new java.util.HashMap())
+throws WrappedIllegalArgumentException
+AI options cannot be undefined.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.catalog(new String('x'))
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session({ system: null })
+throws IllegalArgumentException
+AI session option system must be a string
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(NaN)
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(true)
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask(-Infinity)
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session([])
+throws WrappedIllegalArgumentException
+AI session options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask('x', [])
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.catalog(false)
+throws WrappedIllegalArgumentException
+AI options must be a JavaScript Object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: (function () { Number.prototype.toJSON = function () { return 'x' }; try { return ai.ask(1) } finally { delete Number.prototype.toJSON } })()
+throws WrappedIllegalArgumentException
+AI input must be a prompt string, a message array, a message object, or a request object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask([])
+throws IllegalArgumentException
+AI messages must not be empty
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.ask({ messages: [] })
+throws IllegalArgumentException
+AI messages must not be empty
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session({ system: '' })
+throws IllegalArgumentException
+AI session option system must not be empty
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: ai.session({ system: new java.lang.String('') })
+throws IllegalArgumentException
+AI session option system must not be empty
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: typeof opencc.s2t
+"function"
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc('a')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.convert('a')
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.convert('a', 1)
+throws WrappedIllegalArgumentException
+Argument "type" 1 (Number) for opencc.convert is invalid.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.convert(null, 's2t')
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.s2t()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.s2t('a', 'b')
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.s2t(null)
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.OpenccPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.convert('a', new String('s2t'))
+throws WrappedIllegalArgumentException
+Argument "type" s2t (String) for opencc.convert is invalid.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc.convert('a', 'nope')
+throws WrappedIllegalArgumentException
+Unknown OpenCC conversion type "nope".
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: opencc('a', 'nope')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: typeof pinyin.STYLE_TONE
+"object"
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.compact([['a', 'b'], ['c']])
+[["a","c"],["b","c"]]
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.convert('')
+[]
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin('', { mode: 'nope' })
+[]
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.convert(null, 1)
+[]
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.convert()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.compare('a')
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.compact()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.compact(1)
+throws IllegalArgumentException
+pinyin.compact expects a two-dimensional array
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.compact([1])
+throws IllegalArgumentException
+pinyin.compact row 0 must be an array
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.compact([[null]])
+throws IllegalArgumentException
+Failed to coerce nullish (Null) into a string
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.simple()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.fromCodePoint()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.fromCodePoint('x')
+throws IllegalArgumentException
+Failed to coerce x (String) into a valid number
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.fromPhrase()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.fromPhrase(null)
+throws IllegalArgumentException
+Failed to coerce nullish (Null) into a string
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin('a', { customDictionary: 1 })
+throws(java) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin('a', { customDictionary: { a: 1 } })
+throws(java) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.fromCodePoint(1e20)
+throws IllegalArgumentException
+Failed to coerce 100000000000000000000 (Number) into a Int number without overflow
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin('a', { mode: 'nope' })
+throws(java) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin.convert('a', { style: 99 })
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin('a', { mode: new java.lang.String('nope') })
+throws(java) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: (function () { var m = 'no'; m += 'pe'; return pinyin('a', { style: m }) })()
+throws(java) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.PinyinPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.of('')
+""
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j('', { tone: 'nope' })
+""
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.readings(null, { romanization: 'x' })
+[]
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.of()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.readings()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.as()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.as('a', 'b')
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.of('a', { tone: 'nope' })
+throws IllegalArgumentException
+Invalid tone type: nope
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j('a', { case: 'x' })
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.of('a', { v: 'x' })
+throws IllegalArgumentException
+Invalid v char type: x
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.readings('a', { romanization: 'x' })
+unavailable(jvm) ExceptionInInitializerError
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.readings('a', { romanization: 'yale', tone: 'num' })
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: pinyin4j.readings('a', { tone: 'x' })
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: typeof mediainfo.SNAPSHOT_SCHEMA_V1
+"string"
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo(null)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.read()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('a')
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', null, 'x')
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', undefined)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', 1)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { streamNumber: 'x' })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { infoKind: 1 })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.countGet('a')
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.countGet('/a', null)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.snapshot()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.snapshot('/a', 1)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.capabilities(1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo('')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.read(' ')
+throws IllegalArgumentException
+Argument "path"   (String) for mediainfo cannot be empty
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { streamNumber: -1 })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { streamNumber: 1.5 })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { infoKind: 'nope' })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mediainfo.get('/a', 'General', 'x', { streamNumber: new java.lang.Integer(-1) })
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Files.nonNullPath(String)" because "scriptRuntime.files" is null
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mail.connect()
+throws MessageLookup
+MailError [INTERNAL]: mail host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mail.connect(1)
+throws JavaException MailPluginException
+mail.connect expects an account options object or a saved account alias, got 1 (Number)
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mail.setDefault()
+throws MessageLookup
+MailError [INTERNAL]: mail host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mail.close(1)
+throws MessageLookup
+MailError [INTERNAL]: mail host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: mail.connectAsync()
+throws MessageLookup
+MailError [INTERNAL]: mail host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: installer.install()
+throws JavaException InstallerPluginException
+installer.install expects 1 to 2 arguments
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: installer.session()
+throws JavaException InstallerPluginException
+installer.session expects 1 to 2 arguments
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: installer.inspect()
+throws JavaException InstallerPluginException
+installer.inspect expects 1 arguments
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: installer.uninstall()
+throws JavaException InstallerPluginException
+installer.uninstall expects 1 to 2 arguments
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: epub.open()
+throws MessageLookup
+EpubError [INTERNAL]: EPUB host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: epub.metadata()
+throws MessageLookup
+EpubError [INTERNAL]: EPUB host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: epub.toc(1, 2)
+throws JavaException NullPointerException
+EPUB host failure: Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.Argu
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: epub.read()
+throws MessageLookup
+EpubError [INTERNAL]: EPUB host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked 
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: gallery.pick(1, 2)
+throws JavaException NullPointerException
+gallery host failure: Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.A
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: gallery.view()
+throws MessageLookup
+GalleryError [INTERNAL]: gallery host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-m
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: gallery.edit()
+throws MessageLookup
+GalleryError [INTERNAL]: gallery host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-m
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: gallery.convert()
+throws MessageLookup
+GalleryError [INTERNAL]: gallery host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-m
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: terminal.open(1, 2, 3)
+throws MessageLookup
+TerminalError [INTERNAL]: terminal host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: terminal.session()
+throws MessageLookup
+TerminalError [INTERNAL]: terminal host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: terminal.exec()
+throws MessageLookup
+TerminalError [INTERNAL]: terminal host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: terminal.env(1, 2, 3)
+throws MessageLookup
+TerminalError [INTERNAL]: terminal host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.isAvailable(1)
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.capabilities(1, 2)
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.models.list(1, 2)
+throws JavaException NullPointerException
+speech host failure: Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.Ar
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.models.remove()
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: compose.isAvailable()
+false
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: compose.isAvailable(1)
+throws ComposeError
+isAvailable expects 0 arguments
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: compose.createElement()
+throws ComposeError
+createElement requires a component name
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: compose.state()
+throws ComposeError
+state expects 1 arguments
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: typeof compose.version
+"object"
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.snapshot(1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.retained(1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.collect(1, 2)
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.collect('1')
+throws WrappedIllegalArgumentException
+Argument timeout 1 (String) for memory.collect must be a number of milliseconds from 0 to 60000.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.collect(NaN)
+throws WrappedIllegalArgumentException
+Argument timeout NaN (Number) for memory.collect must be a number of milliseconds from 0 to 60000.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.dumpHeap(1, 2)
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.dumpHeap(1)
+throws WrappedIllegalArgumentException
+Argument path 1 (Number) for memory.dumpHeap must be a non-empty string.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.watch()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.watch(1)
+throws WrappedIllegalArgumentException
+Argument obj 1 (Number) for memory.watch must be an object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.watch('a')
+throws WrappedIllegalArgumentException
+Argument obj a (String) for memory.watch must be an object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.watch(null)
+throws WrappedIllegalArgumentException
+Argument obj null (Null) for memory.watch must be an object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.watch({}, 1)
+throws WrappedIllegalArgumentException
+Argument name 1 (Number) for memory.watch must be a string.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.watch(new java.lang.String('a'))
+throws WrappedIllegalArgumentException
+Argument obj a (String) for memory.watch must be an object.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.collect(-1)
+throws WrappedIllegalArgumentException
+Argument timeout -1 (Number) for memory.collect must be a number of milliseconds from 0 to 60000.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.collect(1e9)
+throws WrappedIllegalArgumentException
+Argument timeout 1000000000 (Number) for memory.collect must be a number of milliseconds from 0 to 60000.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.dumpHeap(' ')
+throws WrappedIllegalArgumentException
+Argument path   (String) for memory.dumpHeap must be a non-empty string.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.dumpHeap(new java.lang.String(' '))
+throws WrappedIllegalArgumentException
+Argument path   (String) for memory.dumpHeap must be a non-empty string.
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: memory.collect(new java.lang.Integer(-1))
+throws WrappedIllegalArgumentException
+Argument timeout -1 (Number) for memory.collect must be a number of milliseconds from 0 to 60000.
+=== speechSpeakerSurfaceMatchesTheCurrentModule surface: speech.speaker
+enroll	function	0	EW-
+enrollAsync	function	0	EW-
+verify	function	0	EW-
+verifyAsync	function	0	EW-
+identify	function	0	EW-
+identifyAsync	function	0	EW-
+list	function	0	EW-
+remove	function	0	EW-
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.speaker.list(1)
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.speaker.remove()
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.speaker.enroll('a')
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc
+=== failingCallsGiveTheSameResultsAsTheCurrentModules current: speech.speaker.identify()
+throws MessageLookup
+SpeechError [INTERNAL]: speech host failure: Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-moc

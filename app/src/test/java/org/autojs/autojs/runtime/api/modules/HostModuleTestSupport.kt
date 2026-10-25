@@ -39,10 +39,12 @@ internal object HostModuleTestSupport {
      */
     fun assertSameSurface(rhino: DifferentialRhino, expression: String, prepare: (DifferentialRhino) -> Unit = {}, mountCurrent: (DifferentialRhino) -> Unit) {
         val actual = SurfaceDiff.surface(rhino.evalKt(expression), rhino.ktScope.globalThis)
-        val expected = DifferentialRhino().use { current ->
-            prepare(current)
-            mountCurrent(current)
-            SurfaceDiff.surface(current.evalKt(expression), current.ktScope.globalThis)
+        val expected = ScriptModuleExpectations.obsoleteSurface("surface: $expression") {
+            DifferentialRhino().use { current ->
+                prepare(current)
+                mountCurrent(current)
+                SurfaceDiff.surface(current.evalKt(expression), current.ktScope.globalThis)
+            }
         }
         val report = SurfaceDiff.compare(expected, actual)
         assertTrue("$expression:\n" + SurfaceDiff.describe(report, "current", "new"), report.namesMatch && report.attributeMismatches.isEmpty())
@@ -58,11 +60,7 @@ internal object HostModuleTestSupport {
      */
     fun assertSameResults(rhino: DifferentialRhino, expressions: List<String>, known: Map<String, Pair<String, String>>, prepare: (DifferentialRhino) -> Unit = {}, mountCurrent: (DifferentialRhino) -> Unit): Int {
         val actual = expressions.associateWith { rhino.render(DifferentialRhino.Side.KT, it) }
-        val expected = DifferentialRhino().use { current ->
-            prepare(current)
-            mountCurrent(current)
-            expressions.associateWith { current.render(DifferentialRhino.Side.KT, it) }
-        }
+        val expected = expressions.zip(currentResults(expressions, prepare, mountCurrent)).toMap()
         var compared = 0
         val failures = expressions.mapNotNull { expression ->
             val now = expected.getValue(expression)
@@ -80,6 +78,19 @@ internal object HostModuleTestSupport {
         }
         assertTrue("Results differ from the current module:\n" + failures.joinToString("\n"), failures.isEmpty())
         return compared
+    }
+
+    /**
+     * The results of [expressions] on the current module ([mountCurrent] in a second Rhino), recorded (see
+     * [ScriptModuleExpectations]): the second Rhino is only created when recording.
+     */
+    fun currentResults(expressions: List<String>, prepare: (DifferentialRhino) -> Unit = {}, mountCurrent: (DifferentialRhino) -> Unit): List<DifferentialRhino.Rendered> {
+        val current = lazy { DifferentialRhino().also { prepare(it); mountCurrent(it) } }
+        return try {
+            expressions.map { expression -> ScriptModuleExpectations.obsoleteRendered("current: $expression") { current.value.render(DifferentialRhino.Side.KT, expression) } }
+        } finally {
+            if (current.isInitialized()) current.value.close()
+        }
     }
 
     /** Checks [cases] (expression to expected rendering) on the new layer. */

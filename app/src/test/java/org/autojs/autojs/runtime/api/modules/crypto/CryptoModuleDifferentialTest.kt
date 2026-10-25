@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -31,7 +32,7 @@ class CryptoModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        jsCrypto = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("crypto")!!
+        if (ScriptModuleExpectations.RECORDING) jsCrypto = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("crypto")!!
         rhino.mountNewModules("crypto")
     }
 
@@ -47,7 +48,7 @@ class CryptoModuleDifferentialTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsCrypto, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("crypto"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsCrypto, rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("crypto"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.typeMismatches.isEmpty())
         assertEquals(setOf("decrypt", "digest", "encrypt", "generateKeyPair"), report.onlyInFirst)
         report.onlyInFirst.forEach { name -> assertEquals(name, "function", rhino.evalKt("typeof crypto.$name")) }

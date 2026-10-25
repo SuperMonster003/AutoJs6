@@ -1,0 +1,102 @@
+=== obsoleteMembersExistOnTheNewModule surface: media
+getClass	function	0	EW-
+wait	function	0	EW-
+musicCurrentPosition	inaccessible	-	EW-
+notifyAll	function	0	EW-
+onScanCompleted	function	0	EW-
+getMusicDuration	function	0	EW-
+isMusicPlaying	function	0	EW-
+playMusic	function	0	EW-
+musicSeekTo	function	0	EW-
+notify	function	0	EW-
+stopMusic	function	0	EW-
+onMediaScannerConnected	function	0	EW-
+musicDuration	inaccessible	-	EW-
+musicPlaying	inaccessible	-	EW-
+getMusicCurrentPosition	function	0	EW-
+resumeMusic	function	0	EW-
+hashCode	function	0	EW-
+equals	function	0	EW-
+recycle	function	0	EW-
+toString	function	0	EW-
+scanFile	function	0	EW-
+pauseMusic	function	0	EW-
+class	object	-	EW-
+=== callsGiveTheSameResultsAsTheCurrentModules current: [typeof media.playMusic, typeof media.scanFile, typeof media.isMusicPlaying, typeof media.stopMusic]
+["function","function","function","function"]
+=== callsGiveTheSameResultsAsTheCurrentModules current: [typeof sensors.register, typeof sensors.unregister, typeof sensors.on, typeof sensors.delay]
+["function","function","function","object"]
+=== callsGiveTheSameResultsAsTheCurrentModules current: sensors.ignoresUnsupportedSensor
+false
+=== callsGiveTheSameResultsAsTheCurrentModules current: media.playMusic()
+throws InternalError
+Can't find method org.autojs.autojs.runtime.api.Media.playMusic(). (kt-side#3)
+=== callsGiveTheSameResultsAsTheCurrentModules current: media.scanFile()
+throws InternalError
+Can't find method org.autojs.autojs.runtime.api.Media.scanFile(). (kt-side#3)
+=== callsGiveTheSameResultsAsTheCurrentModules current: media.musicSeekTo('x')
+throws InternalError
+Cannot convert x to java.lang.Integer (kt-side#3)
+=== callsGiveTheSameResultsAsTheCurrentModules current: sensors.register()
+throws InternalError
+Can't find method org.autojs.autojs.runtime.api.Sensors.register(). (kt-side#3)
+=== callsGiveTheSameResultsAsTheCurrentModules current: sensors.unregister()
+throws InternalError
+Can't find method org.autojs.autojs.runtime.api.Sensors.unregister(). (kt-side#3)
+=== surfaceMatchesTheCurrentModules surface: media
+getClass	function	0	EW-
+wait	function	0	EW-
+musicCurrentPosition	inaccessible	-	EW-
+notifyAll	function	0	EW-
+onScanCompleted	function	0	EW-
+getMusicDuration	function	0	EW-
+isMusicPlaying	function	0	EW-
+playMusic	function	0	EW-
+musicSeekTo	function	0	EW-
+notify	function	0	EW-
+stopMusic	function	0	EW-
+onMediaScannerConnected	function	0	EW-
+musicDuration	inaccessible	-	EW-
+musicPlaying	inaccessible	-	EW-
+getMusicCurrentPosition	function	0	EW-
+resumeMusic	function	0	EW-
+hashCode	function	0	EW-
+equals	function	0	EW-
+recycle	function	0	EW-
+toString	function	0	EW-
+scanFile	function	0	EW-
+pauseMusic	function	0	EW-
+class	object	-	EW-
+=== surfaceMatchesTheCurrentModules surface: sensors
+getClass	function	0	EW-
+wait	function	0	EW-
+removeAllListeners	function	0	EW-
+notifyAll	function	0	EW-
+getMaxListeners	function	0	EW-
+unregisterAll	function	0	EW-
+notify	function	0	EW-
+listenerCount	function	0	EW-
+timer	object	-	EW-
+hashCode	function	0	EW-
+emitSticky	function	0	EW-
+class	object	-	EW-
+on	function	0	EW-
+addListener	function	0	EW-
+listeners	function	0	EW-
+prependListener	function	0	EW-
+ignoresUnsupportedSensor	boolean	-	EW-
+getSensor	function	0	EW-
+unregister	function	0	EW-
+removeListener	function	0	EW-
+delay	object	-	EW-
+prependOnceListener	function	0	EW-
+once	function	0	EW-
+equals	function	0	EW-
+eventNames	function	0	EW-
+toString	function	0	EW-
+shouldQuit	function	0	EW-
+emit	function	0	EW-
+setMaxListeners	function	0	EW-
+maxListeners	number	-	EW-
+getTimer	function	0	EW-
+register	function	0	EW-

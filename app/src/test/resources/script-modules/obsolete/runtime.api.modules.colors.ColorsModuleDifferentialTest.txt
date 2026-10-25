@@ -1,0 +1,2176 @@
+=== obsoleteMembersExistOnTheNewModule surface
+GRAY	number	-	EWC
+BLUE	number	-	EWC
+SILVER	number	-	EWC
+OLIVE	number	-	EWC
+NAVY	number	-	EWC
+LTGRAY	number	-	EWC
+BLACK	number	-	EWC
+TRANSPARENT	number	-	EWC
+DKGRAY	number	-	EWC
+WHITE	number	-	EWC
+AQUA	number	-	EWC
+FUCHSIA	number	-	EWC
+PURPLE	number	-	EWC
+GREEN	number	-	EWC
+MAROON	number	-	EWC
+RED	number	-	EWC
+LIGHT_GREY	number	-	EWC
+LIGHT_GRAY	number	-	EWC
+LIME	number	-	EWC
+DARK_GREY	number	-	EWC
+MAGENTA	number	-	EWC
+YELLOW	number	-	EWC
+TEAL	number	-	EWC
+DARK_GRAY	number	-	EWC
+CYAN	number	-	EWC
+GREY	number	-	EWC
+TURQUOISE	number	-	EWC
+LIGHT_SLATE_GRAY	number	-	EWC
+BEIGE	number	-	EWC
+CHOCOLATE	number	-	EWC
+CHARTREUSE	number	-	EWC
+DARK_KHAKI	number	-	EWC
+PALE_TURQUOISE	number	-	EWC
+SLATE_GREY	number	-	EWC
+DARK_TURQUOISE	number	-	EWC
+DARK_CYAN	number	-	EWC
+LIGHT_PINK	number	-	EWC
+DARK_SLATE_GREY	number	-	EWC
+LIGHT_STEEL_BLUE	number	-	EWC
+LAVENDER_BLUSH	number	-	EWC
+PALE_GOLDENROD	number	-	EWC
+LIGHT_CORAL	number	-	EWC
+ANTIQUE_WHITE	number	-	EWC
+WHEAT	number	-	EWC
+CORN_SILK	number	-	EWC
+INDIGO	number	-	EWC
+YELLOW_GREEN	number	-	EWC
+LIGHT_BLUE	number	-	EWC
+GOLDENROD	number	-	EWC
+SALMON	number	-	EWC
+LAVENDER	number	-	EWC
+DEEP_PINK	number	-	EWC
+SADDLE_BROWN	number	-	EWC
+WHITE_SMOKE	number	-	EWC
+DARK_ORANGE	number	-	EWC
+GOLD	number	-	EWC
+SAND_BROWN	number	-	EWC
+NAVAJO_WHITE	number	-	EWC
+DARK_SALMON	number	-	EWC
+BLANCHED_ALMOND	number	-	EWC
+HOT_PINK	number	-	EWC
+CORNFLOWER_BLUE	number	-	EWC
+SEA_GREEN	number	-	EWC
+PINK	number	-	EWC
+DARK_RED	number	-	EWC
+DARK_MAGENTA	number	-	EWC
+DARK_GOLDENROD	number	-	EWC
+MEDIUM_SEA_GREEN	number	-	EWC
+ORANGE	number	-	EWC
+LEMON_CHIFFON	number	-	EWC
+ALICE_BLUE	number	-	EWC
+STEEL_BLUE	number	-	EWC
+GAINSBORO	number	-	EWC
+LIGHT_YELLOW	number	-	EWC
+DIM_GREY	number	-	EWC
+FIRE_BRICK	number	-	EWC
+SKY_BLUE	number	-	EWC
+PATRIARCH	number	-	EWC
+DARK_GREEN	number	-	EWC
+TAN	number	-	EWC
+BURLY_WOOD	number	-	EWC
+FLORAL_WHITE	number	-	EWC
+LIGHT_GREEN	number	-	EWC
+DARK_OLIVE_GREEN	number	-	EWC
+MEDIUM_SPRING_GREEN	number	-	EWC
+SPRING_GREEN	number	-	EWC
+LINEN	number	-	EWC
+HONEYDEW	number	-	EWC
+BLUE_VIOLET	number	-	EWC
+SLATE_BLUE	number	-	EWC
+DEEP_SKY_BLUE	number	-	EWC
+OLIVE_DRAB	number	-	EWC
+VIOLET	number	-	EWC
+FOREST_GREEN	number	-	EWC
+LIGHT_SLATE_GREY	number	-	EWC
+SLATE_GRAY	number	-	EWC
+DARK_SEA_GREEN	number	-	EWC
+KHAKI	number	-	EWC
+DARK_SLATE_BLUE	number	-	EWC
+PEACH_PUFF	number	-	EWC
+CADET_BLUE	number	-	EWC
+SNOW	number	-	EWC
+IVORY	number	-	EWC
+DARK_ORCHID	number	-	EWC
+POWDER_BLUE	number	-	EWC
+PAPAYA_WHIP	number	-	EWC
+ROSY_BROWN	number	-	EWC
+MOCCASIN	number	-	EWC
+SIENNA	number	-	EWC
+LIGHT_SEA_GREEN	number	-	EWC
+LIME_GREEN	number	-	EWC
+DARK_SLATE_GRAY	number	-	EWC
+DODGER_BLUE	number	-	EWC
+MEDIUM_SLATE_BLUE	number	-	EWC
+CORAL	number	-	EWC
+DARK_VIOLET	number	-	EWC
+MEDIUM_BLUE	number	-	EWC
+GREEN_YELLOW	number	-	EWC
+AZURE	number	-	EWC
+ORCHID	number	-	EWC
+MISTY_ROSE	number	-	EWC
+AQUAMARINE	number	-	EWC
+PERU	number	-	EWC
+TOMATO	number	-	EWC
+ROYAL_BLUE	number	-	EWC
+BROWN	number	-	EWC
+DIM_GRAY	number	-	EWC
+MEDIUM_TURQUOISE	number	-	EWC
+LIGHT_GOLDENROD_YELLOW	number	-	EWC
+PALE_GREEN	number	-	EWC
+ORANGE_RED	number	-	EWC
+CRIMSON	number	-	EWC
+LIGHT_SALMON	number	-	EWC
+MEDIUM_AQUAMARINE	number	-	EWC
+SEASHELL	number	-	EWC
+INDIAN_RED	number	-	EWC
+DARK_BLUE	number	-	EWC
+MIDNIGHT_BLUE	number	-	EWC
+MEDIUM_PURPLE	number	-	EWC
+MEDIUM_LAVENDER_MAGENTA	number	-	EWC
+PALE_VIOLET_RED	number	-	EWC
+OLD_LACE	number	-	EWC
+MINT_CREAM	number	-	EWC
+GHOST_WHITE	number	-	EWC
+REBECCA_PURPLE	number	-	EWC
+MEDIUM_VIOLET_RED	number	-	EWC
+LAWN_GREEN	number	-	EWC
+LIGHT_SKY_BLUE	number	-	EWC
+LIGHT_CYAN	number	-	EWC
+THISTLE	number	-	EWC
+MEDIUM_ORCHID	number	-	EWC
+BISQUE	number	-	EWC
+TURQUOISE_GREEN	number	-	EWC
+FLAMINGO	number	-	EWC
+PRUSSIAN_BLUE	number	-	EWC
+CELADON	number	-	EWC
+LIGHT_VIOLET	number	-	EWC
+TROPICAL_ORANGE	number	-	EWC
+GRAYISH_PURPLE	number	-	EWC
+WISTERIA	number	-	EWC
+COCONUT_BROWN	number	-	EWC
+MINT	number	-	EWC
+BABY_BLUE	number	-	EWC
+ROSE_PINK	number	-	EWC
+STRONG_BLUE	number	-	EWC
+LAVENDER_BLUE	number	-	EWC
+MALACHITE	number	-	EWC
+STRONG_RED	number	-	EWC
+HONEY_ORANGE	number	-	EWC
+IRON_GRAY	number	-	EWC
+AMETHYST	number	-	EWC
+JASMINE	number	-	EWC
+CHROME_YELLOW	number	-	EWC
+CERISE	number	-	EWC
+SHELL_PINK	number	-	EWC
+PERIWINKLE	number	-	EWC
+LILAC	number	-	EWC
+DARK_POWDER_BLUE	number	-	EWC
+MIMOSA	number	-	EWC
+MAGENTA_ROSE	number	-	EWC
+CLEMATIS	number	-	EWC
+MUSTARD	number	-	EWC
+PERSIMMON	number	-	EWC
+SAND_BEIGE	number	-	EWC
+APRICOT	number	-	EWC
+LAPIS_LAZULI	number	-	EWC
+HORIZON_BLUE	number	-	EWC
+GOLDEN	number	-	EWC
+INTERNATIONAL_KLEIN_BLUE	number	-	EWC
+CERULEAN_BLUE	number	-	EWC
+MINERAL_BLUE	number	-	EWC
+ALIZARIN_CRIMSON	number	-	EWC
+OLD_ROSE	number	-	EWC
+SAXE_BLUE	number	-	EWC
+BURGUNDY	number	-	EWC
+BRONZE	number	-	EWC
+NAVY_BLUE	number	-	EWC
+PEACH	number	-	EWC
+CANARY_YELLOW	number	-	EWC
+OCHER	number	-	EWC
+FRESH_LEAVES	number	-	EWC
+COBALT_GREEN	number	-	EWC
+APPLE_GREEN	number	-	EWC
+MARIGOLD	number	-	EWC
+IVY_GREEN	number	-	EWC
+DARK_MINERAL_BLUE	number	-	EWC
+VERMILION	number	-	EWC
+PALE_OCHRE	number	-	EWC
+COFFEE	number	-	EWC
+CORAL_PINK	number	-	EWC
+MOON_YELLOW	number	-	EWC
+LAVENDER_MAGENTA	number	-	EWC
+OPERA_MAUVE	number	-	EWC
+PANSY	number	-	EWC
+TURQUOISE_BLUE	number	-	EWC
+TANGERINE	number	-	EWC
+CARDINAL_RED	number	-	EWC
+SPINEL_RED	number	-	EWC
+HELIOTROPE	number	-	EWC
+SAPPHIRE	number	-	EWC
+LIGHT_LIME	number	-	EWC
+LIGHT_KHAKI	number	-	EWC
+PALE_DENIM	number	-	EWC
+CHAMPAGNE_YELLOW	number	-	EWC
+WEDGWOOD_BLUE	number	-	EWC
+PEACH_PEARL	number	-	EWC
+PALE_BLUE	number	-	EWC
+VERY_LIGHT_MALACHITE_GREEN	number	-	EWC
+BABY_PINK	number	-	EWC
+CAMEL	number	-	EWC
+BRIGHT_GREEN	number	-	EWC
+EMERALD	number	-	EWC
+SEPIA	number	-	EWC
+SALVIA_BLUE	number	-	EWC
+MINERAL_VIOLET	number	-	EWC
+ROSE	number	-	EWC
+PEACOCK_GREEN	number	-	EWC
+SCARLET	number	-	EWC
+AMBER	number	-	EWC
+MARINE_BLUE	number	-	EWC
+TANGERINE_YELLOW	number	-	EWC
+PEARL_PINK	number	-	EWC
+BURNT_ORANGE	number	-	EWC
+SUN_ORANGE	number	-	EWC
+ULTRAMARINE	number	-	EWC
+AQUA_BLUE	number	-	EWC
+PLUM	number	-	EWC
+PEACOCK_BLUE	number	-	EWC
+CREAM	number	-	EWC
+FOLIAGE_GREEN	number	-	EWC
+CAMELLIA	number	-	EWC
+VIRIDIAN	number	-	EWC
+COBALT_BLUE	number	-	EWC
+LAVENDER_MIST	number	-	EWC
+CARMINE	number	-	EWC
+GRASS_GREEN	number	-	EWC
+MALLOW	number	-	EWC
+MOSS_GREEN	number	-	EWC
+MAUVE	number	-	EWC
+CYAN_BLUE	number	-	EWC
+PAIL_LILAC	number	-	EWC
+SALMON_PINK	number	-	EWC
+RUBY	number	-	EWC
+CYAN_700	number	-	EWC
+PINK_200	number	-	EWC
+DEEP_PURPLE_900	number	-	EWC
+GREEN_600	number	-	EWC
+LIGHT_GREEN_600	number	-	EWC
+DEEP_PURPLE_100	number	-	EWC
+LIME_50	number	-	EWC
+LIGHT_BLUE_500	number	-	EWC
+LIGHT_BLUE_A400	number	-	EWC
+RED_800	number	-	EWC
+GREEN_A700	number	-	EWC
+AMBER_A700	number	-	EWC
+GREY_300	number	-	EWC
+DEEP_ORANGE_50	number	-	EWC
+PURPLE_700	number	-	EWC
+AMBER_300	number	-	EWC
+LIME_400	number	-	EWC
+YELLOW_400	number	-	EWC
+DEEP_ORANGE_400	number	-	EWC
+BLUE_A400	number	-	EWC
+DEEP_ORANGE_A100	number	-	EWC
+LIME_A200	number	-	EWC
+TEAL_300	number	-	EWC
+ORANGE_200	number	-	EWC
+INDIGO_200	number	-	EWC
+CYAN_A700	number	-	EWC
+BROWN_800	number	-	EWC
+BLUE_GRAY_700	number	-	EWC
+RED_A700	number	-	EWC
+GRAY_500	number	-	EWC
+BLUE_600	number	-	EWC
+BLUE_GREY_600	number	-	EWC
+DEEP_PURPLE_A400	number	-	EWC
+YELLOW_50	number	-	EWC
+PINK_300	number	-	EWC
+DEEP_PURPLE_800	number	-	EWC
+BLACK_1000	number	-	EWC
+RED_100	number	-	EWC
+GREY_50	number	-	EWC
+ORANGE_A200	number	-	EWC
+GREEN_700	number	-	EWC
+CYAN_800	number	-	EWC
+PURPLE_50	number	-	EWC
+LIGHT_GREEN_700	number	-	EWC
+RED_900	number	-	EWC
+DEEP_PURPLE	number	-	EWC
+LIGHT_BLUE_400	number	-	EWC
+GREY_200	number	-	EWC
+PURPLE_800	number	-	EWC
+LIME_500	number	-	EWC
+AMBER_400	number	-	EWC
+YELLOW_500	number	-	EWC
+DEEP_ORANGE_500	number	-	EWC
+INDIGO_A400	number	-	EWC
+TEAL_50	number	-	EWC
+ORANGE_900	number	-	EWC
+PURPLE_A400	number	-	EWC
+ORANGE_100	number	-	EWC
+AMBER_50	number	-	EWC
+INDIGO_300	number	-	EWC
+PINK_A400	number	-	EWC
+BROWN_700	number	-	EWC
+GRAY_50	number	-	EWC
+BLUE_GRAY_800	number	-	EWC
+GRAY_400	number	-	EWC
+TEAL_A200	number	-	EWC
+TEAL_200	number	-	EWC
+BLUE_700	number	-	EWC
+BLUE_GREY_500	number	-	EWC
+CYAN_500	number	-	EWC
+PINK_800	number	-	EWC
+ORANGE_A100	number	-	EWC
+GREEN_400	number	-	EWC
+LIGHT_GREEN_50	number	-	EWC
+DEEP_PURPLE_700	number	-	EWC
+BLUE_GRAY_100	number	-	EWC
+LIGHT_BLUE_700	number	-	EWC
+RED_A100	number	-	EWC
+LIGHT_BLUE_A200	number	-	EWC
+RED_600	number	-	EWC
+AMBER_A100	number	-	EWC
+LIME_600	number	-	EWC
+BLUE_A200	number	-	EWC
+DEEP_ORANGE_600	number	-	EWC
+GREY_100	number	-	EWC
+PURPLE_500	number	-	EWC
+LIGHT_GREEN_400	number	-	EWC
+GREY_900	number	-	EWC
+ORANGE_50	number	-	EWC
+AMBER_500	number	-	EWC
+YELLOW_600	number	-	EWC
+TEAL_900	number	-	EWC
+LIME_A400	number	-	EWC
+BLUE_400	number	-	EWC
+INDIGO_400	number	-	EWC
+PURPLE_A700	number	-	EWC
+ORANGE_800	number	-	EWC
+BROWN_200	number	-	EWC
+BLUE_GRAY_900	number	-	EWC
+GRAY_300	number	-	EWC
+TEAL_100	number	-	EWC
+BLUE_GREY_800	number	-	EWC
+LIGHT_GREEN_A700	number	-	EWC
+DEEP_PURPLE_A200	number	-	EWC
+CYAN_600	number	-	EWC
+PINK_100	number	-	EWC
+GREEN_500	number	-	EWC
+LIGHT_GREEN_500	number	-	EWC
+DEEP_PURPLE_600	number	-	EWC
+LIGHT_BLUE_A100	number	-	EWC
+INDIGO_50	number	-	EWC
+RED_700	number	-	EWC
+BLUE_GRAY_200	number	-	EWC
+LIGHT_BLUE_600	number	-	EWC
+LIME_700	number	-	EWC
+BLUE_A100	number	-	EWC
+WHITE_1000	number	-	EWC
+DEEP_ORANGE_700	number	-	EWC
+YELLOW_A700	number	-	EWC
+PURPLE_600	number	-	EWC
+AMBER_600	number	-	EWC
+GREY_800	number	-	EWC
+PINK_900	number	-	EWC
+DEEP_ORANGE	number	-	EWC
+YELLOW_700	number	-	EWC
+DEEP_ORANGE_A200	number	-	EWC
+TEAL_800	number	-	EWC
+INDIGO_500	number	-	EWC
+PINK_A200	number	-	EWC
+BROWN_900	number	-	EWC
+ORANGE_700	number	-	EWC
+CYAN_50	number	-	EWC
+RED_50	number	-	EWC
+BROWN_100	number	-	EWC
+TEAL_A400	number	-	EWC
+CYAN_A400	number	-	EWC
+PINK_50	number	-	EWC
+GRAY_200	number	-	EWC
+BLUE_GREY_700	number	-	EWC
+BLUE_500	number	-	EWC
+DEEP_PURPLE_A100	number	-	EWC
+ORANGE_A700	number	-	EWC
+LIGHT_BLUE_100	number	-	EWC
+RED_400	number	-	EWC
+PINK_600	number	-	EWC
+BLUE_GRAY_300	number	-	EWC
+GREEN_200	number	-	EWC
+LIGHT_BLUE_900	number	-	EWC
+CYAN_300	number	-	EWC
+DEEP_PURPLE_500	number	-	EWC
+DEEP_ORANGE_800	number	-	EWC
+LIME_800	number	-	EWC
+LIGHT_GREEN_200	number	-	EWC
+GREY_700	number	-	EWC
+PURPLE_300	number	-	EWC
+AMBER_700	number	-	EWC
+LIME_A700	number	-	EWC
+INDIGO_A700	number	-	EWC
+YELLOW_800	number	-	EWC
+BLUE_GRAY	number	-	EWC
+TEAL_700	number	-	EWC
+BLUE_200	number	-	EWC
+INDIGO_600	number	-	EWC
+PURPLE_A100	number	-	EWC
+PINK_A100	number	-	EWC
+ORANGE_600	number	-	EWC
+BLUE_GREY_200	number	-	EWC
+GRAY_900	number	-	EWC
+BROWN_400	number	-	EWC
+LIGHT_GREEN_A100	number	-	EWC
+GRAY_100	number	-	EWC
+TEAL_A700	number	-	EWC
+RED_500	number	-	EWC
+CYAN_400	number	-	EWC
+PINK_700	number	-	EWC
+BLUE_GRAY_400	number	-	EWC
+GREEN_300	number	-	EWC
+LIGHT_BLUE_800	number	-	EWC
+DEEP_PURPLE_400	number	-	EWC
+RED_A200	number	-	EWC
+AMBER_A200	number	-	EWC
+LIGHT_BLUE_A700	number	-	EWC
+DEEP_ORANGE_900	number	-	EWC
+LIME_900	number	-	EWC
+GREEN_A400	number	-	EWC
+GREY_600	number	-	EWC
+PURPLE_400	number	-	EWC
+YELLOW_100	number	-	EWC
+LIGHT_GREEN_300	number	-	EWC
+DEEP_ORANGE_100	number	-	EWC
+LIME_100	number	-	EWC
+YELLOW_900	number	-	EWC
+BLUE_A700	number	-	EWC
+AMBER_800	number	-	EWC
+TEAL_600	number	-	EWC
+BLUE_300	number	-	EWC
+INDIGO_700	number	-	EWC
+ORANGE_500	number	-	EWC
+YELLOW_A400	number	-	EWC
+BLUE_GREY_100	number	-	EWC
+GRAY_800	number	-	EWC
+BROWN_300	number	-	EWC
+CYAN_A200	number	-	EWC
+LIGHT_GREEN_A200	number	-	EWC
+BLUE_GREY_900	number	-	EWC
+BLUE_50	number	-	EWC
+DEEP_PURPLE_A700	number	-	EWC
+DEEP_ORANGE_A400	number	-	EWC
+PINK_400	number	-	EWC
+GREEN_800	number	-	EWC
+LIGHT_BLUE_300	number	-	EWC
+RED_200	number	-	EWC
+CYAN_900	number	-	EWC
+BLUE_GRAY_50	number	-	EWC
+DEEP_PURPLE_300	number	-	EWC
+PURPLE_100	number	-	EWC
+BLUE_GRAY_500	number	-	EWC
+LIGHT_GREEN_800	number	-	EWC
+CYAN_100	number	-	EWC
+GREEN_A100	number	-	EWC
+PURPLE_900	number	-	EWC
+LIME_200	number	-	EWC
+GREEN_50	number	-	EWC
+AMBER_100	number	-	EWC
+YELLOW_200	number	-	EWC
+GREY_500	number	-	EWC
+DEEP_ORANGE_200	number	-	EWC
+AMBER_900	number	-	EWC
+INDIGO_A100	number	-	EWC
+TEAL_500	number	-	EWC
+INDIGO_800	number	-	EWC
+YELLOW_A100	number	-	EWC
+ORANGE_400	number	-	EWC
+PINK_A700	number	-	EWC
+BLUE_GREY	number	-	EWC
+TEAL_A100	number	-	EWC
+BROWN_600	number	-	EWC
+GRAY_700	number	-	EWC
+CYAN_A100	number	-	EWC
+BLUE_800	number	-	EWC
+DEEP_ORANGE_A700	number	-	EWC
+BLUE_GREY_400	number	-	EWC
+RED_300	number	-	EWC
+ORANGE_A400	number	-	EWC
+GREEN_900	number	-	EWC
+LIGHT_BLUE_200	number	-	EWC
+BLUE_GREY_50	number	-	EWC
+PINK_500	number	-	EWC
+DEEP_PURPLE_200	number	-	EWC
+PURPLE_200	number	-	EWC
+BLUE_GRAY_600	number	-	EWC
+GREEN_100	number	-	EWC
+LIGHT_GREEN_900	number	-	EWC
+CYAN_200	number	-	EWC
+GREEN_A200	number	-	EWC
+AMBER_A400	number	-	EWC
+LIME_300	number	-	EWC
+AMBER_200	number	-	EWC
+LIGHT_GREEN_100	number	-	EWC
+GREY_400	number	-	EWC
+LIGHT_BLUE_50	number	-	EWC
+YELLOW_300	number	-	EWC
+DEEP_ORANGE_300	number	-	EWC
+PURPLE_A200	number	-	EWC
+INDIGO_A200	number	-	EWC
+INDIGO_900	number	-	EWC
+DEEP_PURPLE_50	number	-	EWC
+LIME_A100	number	-	EWC
+TEAL_400	number	-	EWC
+BLUE_100	number	-	EWC
+ORANGE_300	number	-	EWC
+INDIGO_100	number	-	EWC
+BROWN_50	number	-	EWC
+YELLOW_A200	number	-	EWC
+RED_A400	number	-	EWC
+BROWN_500	number	-	EWC
+GRAY_600	number	-	EWC
+LIGHT_GREEN_A400	number	-	EWC
+BLUE_GREY_300	number	-	EWC
+BLUE_900	number	-	EWC
+android	function	-	EWC
+web	function	-	EWC
+css	function	-	EWC
+material	function	-	EWC
+alpha	function	2	EWC
+getAlpha	function	0	EWC
+alphaDouble	function	1	EWC
+getAlphaDouble	function	0	EWC
+setAlpha	function	2	EWC
+setAlphaRelative	function	2	EWC
+removeAlpha	function	1	EWC
+red	function	2	EWC
+getRed	function	0	EWC
+redDouble	function	1	EWC
+getRedDouble	function	0	EWC
+setRed	function	2	EWC
+setRedRelative	function	2	EWC
+removeRed	function	1	EWC
+green	function	2	EWC
+getGreen	function	0	EWC
+greenDouble	function	1	EWC
+getGreenDouble	function	0	EWC
+setGreen	function	2	EWC
+setGreenRelative	function	2	EWC
+removeGreen	function	1	EWC
+blue	function	2	EWC
+getBlue	function	0	EWC
+blueDouble	function	1	EWC
+getBlueDouble	function	0	EWC
+setBlue	function	2	EWC
+setBlueRelative	function	2	EWC
+removeBlue	function	1	EWC
+toInt	function	1	EWC
+toHex	function	2	EWC
+toFullHex	function	1	EWC
+toString	function	0	EWC
+rgb	function	0	EWC
+argb	function	0	EWC
+rgba	function	0	EWC
+hsv	function	3	EWC
+hsva	function	4	EWC
+hsl	function	3	EWC
+hsla	function	4	EWC
+toRgb	function	1	EWC
+toRgba	function	2	EWC
+toArgb	function	2	EWC
+toHsv	function	1	EWC
+toHsva	function	1	EWC
+toHsl	function	1	EWC
+toHsla	function	1	EWC
+isSimilar	function	4	EWC
+isEqual	function	3	EWC
+toColorStateList	function	1	EWC
+setPaintColor	function	2	EWC
+luminance	function	1	EWC
+build	function	0	EWC
+summary	function	1	EWC
+RGBToHSV	function	4	EWC
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY']
+-7829368
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE']
+-16776961
+=== obsoleteMembersExistOnTheNewModule js: colors['SILVER']
+-4144960
+=== obsoleteMembersExistOnTheNewModule js: colors['OLIVE']
+-8355840
+=== obsoleteMembersExistOnTheNewModule js: colors['NAVY']
+-16777088
+=== obsoleteMembersExistOnTheNewModule js: colors['LTGRAY']
+-3355444
+=== obsoleteMembersExistOnTheNewModule js: colors['BLACK']
+-16777216
+=== obsoleteMembersExistOnTheNewModule js: colors['TRANSPARENT']
+0
+=== obsoleteMembersExistOnTheNewModule js: colors['DKGRAY']
+-12303292
+=== obsoleteMembersExistOnTheNewModule js: colors['WHITE']
+-1
+=== obsoleteMembersExistOnTheNewModule js: colors['AQUA']
+-16711681
+=== obsoleteMembersExistOnTheNewModule js: colors['FUCHSIA']
+-65281
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE']
+-8388480
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN']
+-16711936
+=== obsoleteMembersExistOnTheNewModule js: colors['MAROON']
+-8388608
+=== obsoleteMembersExistOnTheNewModule js: colors['RED']
+-65536
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREY']
+-3355444
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GRAY']
+-3355444
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME']
+-16711936
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_GREY']
+-12303292
+=== obsoleteMembersExistOnTheNewModule js: colors['MAGENTA']
+-65281
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW']
+-256
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL']
+-16744320
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_GRAY']
+-12303292
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN']
+-16711681
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY']
+-7829368
+=== obsoleteMembersExistOnTheNewModule js: colors['TURQUOISE']
+-12525360
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_SLATE_GRAY']
+-8943463
+=== obsoleteMembersExistOnTheNewModule js: colors['BEIGE']
+-657956
+=== obsoleteMembersExistOnTheNewModule js: colors['CHOCOLATE']
+-2987746
+=== obsoleteMembersExistOnTheNewModule js: colors['CHARTREUSE']
+-8388864
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_KHAKI']
+-4343957
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_TURQUOISE']
+-5247250
+=== obsoleteMembersExistOnTheNewModule js: colors['SLATE_GREY']
+-9404272
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_TURQUOISE']
+-16724271
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_CYAN']
+-16741493
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_PINK']
+-18751
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_SLATE_GREY']
+-13676721
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_STEEL_BLUE']
+-5192482
+=== obsoleteMembersExistOnTheNewModule js: colors['LAVENDER_BLUSH']
+-3851
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_GOLDENROD']
+-1120086
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_CORAL']
+-1015680
+=== obsoleteMembersExistOnTheNewModule js: colors['ANTIQUE_WHITE']
+-332841
+=== obsoleteMembersExistOnTheNewModule js: colors['WHEAT']
+-663885
+=== obsoleteMembersExistOnTheNewModule js: colors['CORN_SILK']
+-1828
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO']
+-11861886
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_GREEN']
+-6632142
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE']
+-5383962
+=== obsoleteMembersExistOnTheNewModule js: colors['GOLDENROD']
+-2448096
+=== obsoleteMembersExistOnTheNewModule js: colors['SALMON']
+-360334
+=== obsoleteMembersExistOnTheNewModule js: colors['LAVENDER']
+-1644806
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PINK']
+-60269
+=== obsoleteMembersExistOnTheNewModule js: colors['SADDLE_BROWN']
+-7650029
+=== obsoleteMembersExistOnTheNewModule js: colors['WHITE_SMOKE']
+-657931
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_ORANGE']
+-29696
+=== obsoleteMembersExistOnTheNewModule js: colors['GOLD']
+-10496
+=== obsoleteMembersExistOnTheNewModule js: colors['SAND_BROWN']
+-744352
+=== obsoleteMembersExistOnTheNewModule js: colors['NAVAJO_WHITE']
+-8531
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_SALMON']
+-1468806
+=== obsoleteMembersExistOnTheNewModule js: colors['BLANCHED_ALMOND']
+-5171
+=== obsoleteMembersExistOnTheNewModule js: colors['HOT_PINK']
+-38476
+=== obsoleteMembersExistOnTheNewModule js: colors['CORNFLOWER_BLUE']
+-10185235
+=== obsoleteMembersExistOnTheNewModule js: colors['SEA_GREEN']
+-13726889
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK']
+-16181
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_RED']
+-7667712
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_MAGENTA']
+-7667573
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_GOLDENROD']
+-4684277
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_SEA_GREEN']
+-12799119
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE']
+-23296
+=== obsoleteMembersExistOnTheNewModule js: colors['LEMON_CHIFFON']
+-1331
+=== obsoleteMembersExistOnTheNewModule js: colors['ALICE_BLUE']
+-984833
+=== obsoleteMembersExistOnTheNewModule js: colors['STEEL_BLUE']
+-12156236
+=== obsoleteMembersExistOnTheNewModule js: colors['GAINSBORO']
+-2302756
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_YELLOW']
+-32
+=== obsoleteMembersExistOnTheNewModule js: colors['DIM_GREY']
+-9868951
+=== obsoleteMembersExistOnTheNewModule js: colors['FIRE_BRICK']
+-5103070
+=== obsoleteMembersExistOnTheNewModule js: colors['SKY_BLUE']
+-7876885
+=== obsoleteMembersExistOnTheNewModule js: colors['PATRIARCH']
+-8388480
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_GREEN']
+-16751616
+=== obsoleteMembersExistOnTheNewModule js: colors['TAN']
+-2968436
+=== obsoleteMembersExistOnTheNewModule js: colors['BURLY_WOOD']
+-2180985
+=== obsoleteMembersExistOnTheNewModule js: colors['FLORAL_WHITE']
+-1296
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN']
+-7278960
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_OLIVE_GREEN']
+-11179217
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_SPRING_GREEN']
+-16713062
+=== obsoleteMembersExistOnTheNewModule js: colors['SPRING_GREEN']
+-16711809
+=== obsoleteMembersExistOnTheNewModule js: colors['LINEN']
+-331546
+=== obsoleteMembersExistOnTheNewModule js: colors['HONEYDEW']
+-983056
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_VIOLET']
+-7722014
+=== obsoleteMembersExistOnTheNewModule js: colors['SLATE_BLUE']
+-9807155
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_SKY_BLUE']
+-16728065
+=== obsoleteMembersExistOnTheNewModule js: colors['OLIVE_DRAB']
+-9728477
+=== obsoleteMembersExistOnTheNewModule js: colors['VIOLET']
+-1146130
+=== obsoleteMembersExistOnTheNewModule js: colors['FOREST_GREEN']
+-14513374
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_SLATE_GREY']
+-8943463
+=== obsoleteMembersExistOnTheNewModule js: colors['SLATE_GRAY']
+-9404272
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_SEA_GREEN']
+-7357297
+=== obsoleteMembersExistOnTheNewModule js: colors['KHAKI']
+-989556
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_SLATE_BLUE']
+-12042869
+=== obsoleteMembersExistOnTheNewModule js: colors['PEACH_PUFF']
+-9543
+=== obsoleteMembersExistOnTheNewModule js: colors['CADET_BLUE']
+-10510688
+=== obsoleteMembersExistOnTheNewModule js: colors['SNOW']
+-1286
+=== obsoleteMembersExistOnTheNewModule js: colors['IVORY']
+-16
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_ORCHID']
+-6737204
+=== obsoleteMembersExistOnTheNewModule js: colors['POWDER_BLUE']
+-5185306
+=== obsoleteMembersExistOnTheNewModule js: colors['PAPAYA_WHIP']
+-4139
+=== obsoleteMembersExistOnTheNewModule js: colors['ROSY_BROWN']
+-4419697
+=== obsoleteMembersExistOnTheNewModule js: colors['MOCCASIN']
+-6987
+=== obsoleteMembersExistOnTheNewModule js: colors['SIENNA']
+-6270419
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_SEA_GREEN']
+-14634326
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_GREEN']
+-13447886
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_SLATE_GRAY']
+-13676721
+=== obsoleteMembersExistOnTheNewModule js: colors['DODGER_BLUE']
+-14774017
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_SLATE_BLUE']
+-8689426
+=== obsoleteMembersExistOnTheNewModule js: colors['CORAL']
+-32944
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_VIOLET']
+-7077677
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_BLUE']
+-16777011
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_YELLOW']
+-5374161
+=== obsoleteMembersExistOnTheNewModule js: colors['AZURE']
+-983041
+=== obsoleteMembersExistOnTheNewModule js: colors['ORCHID']
+-2461482
+=== obsoleteMembersExistOnTheNewModule js: colors['MISTY_ROSE']
+-6943
+=== obsoleteMembersExistOnTheNewModule js: colors['AQUAMARINE']
+-8388652
+=== obsoleteMembersExistOnTheNewModule js: colors['PERU']
+-3308225
+=== obsoleteMembersExistOnTheNewModule js: colors['TOMATO']
+-40121
+=== obsoleteMembersExistOnTheNewModule js: colors['ROYAL_BLUE']
+-12490271
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN']
+-5952982
+=== obsoleteMembersExistOnTheNewModule js: colors['DIM_GRAY']
+-9868951
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_TURQUOISE']
+-12004916
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GOLDENROD_YELLOW']
+-329006
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_GREEN']
+-6751336
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_RED']
+-47872
+=== obsoleteMembersExistOnTheNewModule js: colors['CRIMSON']
+-2354116
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_SALMON']
+-24454
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_AQUAMARINE']
+-10039894
+=== obsoleteMembersExistOnTheNewModule js: colors['SEASHELL']
+-2578
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIAN_RED']
+-3318692
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_BLUE']
+-16777077
+=== obsoleteMembersExistOnTheNewModule js: colors['MIDNIGHT_BLUE']
+-15132304
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_PURPLE']
+-7114533
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_LAVENDER_MAGENTA']
+-2252579
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_VIOLET_RED']
+-2396013
+=== obsoleteMembersExistOnTheNewModule js: colors['OLD_LACE']
+-133658
+=== obsoleteMembersExistOnTheNewModule js: colors['MINT_CREAM']
+-655366
+=== obsoleteMembersExistOnTheNewModule js: colors['GHOST_WHITE']
+-460545
+=== obsoleteMembersExistOnTheNewModule js: colors['REBECCA_PURPLE']
+-10079335
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_VIOLET_RED']
+-3730043
+=== obsoleteMembersExistOnTheNewModule js: colors['LAWN_GREEN']
+-8586240
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_SKY_BLUE']
+-7876870
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_CYAN']
+-2031617
+=== obsoleteMembersExistOnTheNewModule js: colors['THISTLE']
+-2572328
+=== obsoleteMembersExistOnTheNewModule js: colors['MEDIUM_ORCHID']
+-4565549
+=== obsoleteMembersExistOnTheNewModule js: colors['BISQUE']
+-6972
+=== obsoleteMembersExistOnTheNewModule js: colors['TURQUOISE_GREEN']
+-11671936
+=== obsoleteMembersExistOnTheNewModule js: colors['FLAMINGO']
+-1668424
+=== obsoleteMembersExistOnTheNewModule js: colors['PRUSSIAN_BLUE']
+-16764589
+=== obsoleteMembersExistOnTheNewModule js: colors['CELADON']
+-5447249
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_VIOLET']
+-5202503
+=== obsoleteMembersExistOnTheNewModule js: colors['TROPICAL_ORANGE']
+-32717
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAYISH_PURPLE']
+-7965535
+=== obsoleteMembersExistOnTheNewModule js: colors['WISTERIA']
+-3563300
+=== obsoleteMembersExistOnTheNewModule js: colors['COCONUT_BROWN']
+-11723008
+=== obsoleteMembersExistOnTheNewModule js: colors['MINT']
+-15296469
+=== obsoleteMembersExistOnTheNewModule js: colors['BABY_BLUE']
+-7745552
+=== obsoleteMembersExistOnTheNewModule js: colors['ROSE_PINK']
+-39220
+=== obsoleteMembersExistOnTheNewModule js: colors['STRONG_BLUE']
+-16751756
+=== obsoleteMembersExistOnTheNewModule js: colors['LAVENDER_BLUE']
+-3355393
+=== obsoleteMembersExistOnTheNewModule js: colors['MALACHITE']
+-14499026
+=== obsoleteMembersExistOnTheNewModule js: colors['STRONG_RED']
+-1703936
+=== obsoleteMembersExistOnTheNewModule js: colors['HONEY_ORANGE']
+-19610
+=== obsoleteMembersExistOnTheNewModule js: colors['IRON_GRAY']
+-10331305
+=== obsoleteMembersExistOnTheNewModule js: colors['AMETHYST']
+-6723892
+=== obsoleteMembersExistOnTheNewModule js: colors['JASMINE']
+-1653924
+=== obsoleteMembersExistOnTheNewModule js: colors['CHROME_YELLOW']
+-1656832
+=== obsoleteMembersExistOnTheNewModule js: colors['CERISE']
+-2215581
+=== obsoleteMembersExistOnTheNewModule js: colors['SHELL_PINK']
+-19521
+=== obsoleteMembersExistOnTheNewModule js: colors['PERIWINKLE']
+-3355393
+=== obsoleteMembersExistOnTheNewModule js: colors['LILAC']
+-3628344
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_POWDER_BLUE']
+-16764007
+=== obsoleteMembersExistOnTheNewModule js: colors['MIMOSA']
+-1648333
+=== obsoleteMembersExistOnTheNewModule js: colors['MAGENTA_ROSE']
+-62042
+=== obsoleteMembersExistOnTheNewModule js: colors['CLEMATIS']
+-3365940
+=== obsoleteMembersExistOnTheNewModule js: colors['MUSTARD']
+-3355571
+=== obsoleteMembersExistOnTheNewModule js: colors['PERSIMMON']
+-45760
+=== obsoleteMembersExistOnTheNewModule js: colors['SAND_BEIGE']
+-1653821
+=== obsoleteMembersExistOnTheNewModule js: colors['APRICOT']
+-1664666
+=== obsoleteMembersExistOnTheNewModule js: colors['LAPIS_LAZULI']
+-14261860
+=== obsoleteMembersExistOnTheNewModule js: colors['HORIZON_BLUE']
+-4661816
+=== obsoleteMembersExistOnTheNewModule js: colors['GOLDEN']
+-10496
+=== obsoleteMembersExistOnTheNewModule js: colors['INTERNATIONAL_KLEIN_BLUE']
+-16765017
+=== obsoleteMembersExistOnTheNewModule js: colors['CERULEAN_BLUE']
+-14003522
+=== obsoleteMembersExistOnTheNewModule js: colors['MINERAL_BLUE']
+-16757351
+=== obsoleteMembersExistOnTheNewModule js: colors['ALIZARIN_CRIMSON']
+-1890762
+=== obsoleteMembersExistOnTheNewModule js: colors['OLD_ROSE']
+-4161407
+=== obsoleteMembersExistOnTheNewModule js: colors['SAXE_BLUE']
+-12085069
+=== obsoleteMembersExistOnTheNewModule js: colors['BURGUNDY']
+-8388576
+=== obsoleteMembersExistOnTheNewModule js: colors['BRONZE']
+-3309774
+=== obsoleteMembersExistOnTheNewModule js: colors['NAVY_BLUE']
+-16777088
+=== obsoleteMembersExistOnTheNewModule js: colors['PEACH']
+-6732
+=== obsoleteMembersExistOnTheNewModule js: colors['CANARY_YELLOW']
+-4352
+=== obsoleteMembersExistOnTheNewModule js: colors['OCHER']
+-3377374
+=== obsoleteMembersExistOnTheNewModule js: colors['FRESH_LEAVES']
+-6684851
+=== obsoleteMembersExistOnTheNewModule js: colors['COBALT_GREEN']
+-10027175
+=== obsoleteMembersExistOnTheNewModule js: colors['APPLE_GREEN']
+-7543296
+=== obsoleteMembersExistOnTheNewModule js: colors['MARIGOLD']
+-26368
+=== obsoleteMembersExistOnTheNewModule js: colors['IVY_GREEN']
+-13189322
+=== obsoleteMembersExistOnTheNewModule js: colors['DARK_MINERAL_BLUE']
+-14403971
+=== obsoleteMembersExistOnTheNewModule js: colors['VERMILION']
+-1883596
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_OCHRE']
+-3361908
+=== obsoleteMembersExistOnTheNewModule js: colors['COFFEE']
+-11716352
+=== obsoleteMembersExistOnTheNewModule js: colors['CORAL_PINK']
+-32577
+=== obsoleteMembersExistOnTheNewModule js: colors['MOON_YELLOW']
+-179
+=== obsoleteMembersExistOnTheNewModule js: colors['LAVENDER_MAGENTA']
+-1146130
+=== obsoleteMembersExistOnTheNewModule js: colors['OPERA_MAUVE']
+-4750169
+=== obsoleteMembersExistOnTheNewModule js: colors['PANSY']
+-9174879
+=== obsoleteMembersExistOnTheNewModule js: colors['TURQUOISE_BLUE']
+-16711697
+=== obsoleteMembersExistOnTheNewModule js: colors['TANGERINE']
+-883456
+=== obsoleteMembersExistOnTheNewModule js: colors['CARDINAL_RED']
+-6750154
+=== obsoleteMembersExistOnTheNewModule js: colors['SPINEL_RED']
+-35917
+=== obsoleteMembersExistOnTheNewModule js: colors['HELIOTROPE']
+-2132993
+=== obsoleteMembersExistOnTheNewModule js: colors['SAPPHIRE']
+-16243353
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_LIME']
+-3342592
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_KHAKI']
+-989556
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_DENIM']
+-10582335
+=== obsoleteMembersExistOnTheNewModule js: colors['CHAMPAGNE_YELLOW']
+-103
+=== obsoleteMembersExistOnTheNewModule js: colors['WEDGWOOD_BLUE']
+-11106625
+=== obsoleteMembersExistOnTheNewModule js: colors['PEACH_PEARL']
+-278879
+=== obsoleteMembersExistOnTheNewModule js: colors['PALE_BLUE']
+-3019278
+=== obsoleteMembersExistOnTheNewModule js: colors['VERY_LIGHT_MALACHITE_GREEN']
+-9181556
+=== obsoleteMembersExistOnTheNewModule js: colors['BABY_PINK']
+-9754
+=== obsoleteMembersExistOnTheNewModule js: colors['CAMEL']
+-6198457
+=== obsoleteMembersExistOnTheNewModule js: colors['BRIGHT_GREEN']
+-10027264
+=== obsoleteMembersExistOnTheNewModule js: colors['EMERALD']
+-11483016
+=== obsoleteMembersExistOnTheNewModule js: colors['SEPIA']
+-9420268
+=== obsoleteMembersExistOnTheNewModule js: colors['SALVIA_BLUE']
+-11697946
+=== obsoleteMembersExistOnTheNewModule js: colors['MINERAL_VIOLET']
+-6054482
+=== obsoleteMembersExistOnTheNewModule js: colors['ROSE']
+-65409
+=== obsoleteMembersExistOnTheNewModule js: colors['PEACOCK_GREEN']
+-16735908
+=== obsoleteMembersExistOnTheNewModule js: colors['SCARLET']
+-56320
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER']
+-16640
+=== obsoleteMembersExistOnTheNewModule js: colors['MARINE_BLUE']
+-16758915
+=== obsoleteMembersExistOnTheNewModule js: colors['TANGERINE_YELLOW']
+-13312
+=== obsoleteMembersExistOnTheNewModule js: colors['PEARL_PINK']
+-19482
+=== obsoleteMembersExistOnTheNewModule js: colors['BURNT_ORANGE']
+-3386112
+=== obsoleteMembersExistOnTheNewModule js: colors['SUN_ORANGE']
+-36096
+=== obsoleteMembersExistOnTheNewModule js: colors['ULTRAMARINE']
+-16763905
+=== obsoleteMembersExistOnTheNewModule js: colors['AQUA_BLUE']
+-10027034
+=== obsoleteMembersExistOnTheNewModule js: colors['PLUM']
+-7453307
+=== obsoleteMembersExistOnTheNewModule js: colors['PEACOCK_BLUE']
+-16744308
+=== obsoleteMembersExistOnTheNewModule js: colors['CREAM']
+-560
+=== obsoleteMembersExistOnTheNewModule js: colors['FOLIAGE_GREEN']
+-9193415
+=== obsoleteMembersExistOnTheNewModule js: colors['CAMELLIA']
+-1689195
+=== obsoleteMembersExistOnTheNewModule js: colors['VIRIDIAN']
+-15567818
+=== obsoleteMembersExistOnTheNewModule js: colors['COBALT_BLUE']
+-16758869
+=== obsoleteMembersExistOnTheNewModule js: colors['LAVENDER_MIST']
+-1644806
+=== obsoleteMembersExistOnTheNewModule js: colors['CARMINE']
+-1703844
+=== obsoleteMembersExistOnTheNewModule js: colors['GRASS_GREEN']
+-6691251
+=== obsoleteMembersExistOnTheNewModule js: colors['MALLOW']
+-2535937
+=== obsoleteMembersExistOnTheNewModule js: colors['MOSS_GREEN']
+-9865437
+=== obsoleteMembersExistOnTheNewModule js: colors['MAUVE']
+-2051841
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_BLUE']
+-15876212
+=== obsoleteMembersExistOnTheNewModule js: colors['PAIL_LILAC']
+-1650714
+=== obsoleteMembersExistOnTheNewModule js: colors['SALMON_PINK']
+-32615
+=== obsoleteMembersExistOnTheNewModule js: colors['RUBY']
+-3407744
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_700']
+-16738393
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_200']
+-749647
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_900']
+-13558894
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_600']
+-12345273
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_600']
+-8604862
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_100']
+-3029783
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_50']
+-394265
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_500']
+-16537100
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_A400']
+-16731905
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_800']
+-3790808
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_A700']
+-16725933
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_A700']
+-21760
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_300']
+-2039584
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_50']
+-267865
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_700']
+-8708190
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_300']
+-10929
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_400']
+-2825897
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_400']
+-4520
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_400']
+-36797
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_A400']
+-14059009
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_A100']
+-24960
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_A200']
+-1114303
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_300']
+-11684180
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_200']
+-13184
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_200']
+-6313766
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_A700']
+-16729900
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_800']
+-11652050
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_700']
+-12232092
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_A700']
+-2818048
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_500']
+-6381922
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_600']
+-14776091
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_600']
+-11243910
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_A400']
+-10149889
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_50']
+-537
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_300']
+-1023342
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_800']
+-12245088
+=== obsoleteMembersExistOnTheNewModule js: colors['BLACK_1000']
+-16777216
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_100']
+-12846
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_50']
+-328966
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_A200']
+-21696
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_700']
+-13070788
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_800']
+-16743537
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_50']
+-793099
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_700']
+-9920712
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_900']
+-4776932
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE']
+-10011977
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_400']
+-14043396
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_200']
+-1118482
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_800']
+-9823334
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_500']
+-3285959
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_400']
+-13784
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_500']
+-5317
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_500']
+-43230
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_A400']
+-12756226
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_50']
+-2034959
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_900']
+-1683200
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_A400']
+-2817799
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_100']
+-8014
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_50']
+-1823
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_300']
+-8812853
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_A400']
+-720809
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_700']
+-10665929
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_50']
+-328966
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_800']
+-13154481
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_400']
+-4342339
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_A200']
+-10158118
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_200']
+-8336444
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_700']
+-15108398
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_500']
+-10453621
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_500']
+-16728876
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_800']
+-5434281
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_A100']
+-11904
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_400']
+-10044566
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_50']
+-919319
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_700']
+-11457112
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_100']
+-3155748
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_700']
+-16611119
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_A100']
+-30080
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_A200']
+-12532481
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_600']
+-1754827
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_A100']
+-6785
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_600']
+-4142541
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_A200']
+-12285185
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_600']
+-765666
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_100']
+-657931
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_500']
+-6543440
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_400']
+-6501275
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_900']
+-14606047
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_50']
+-3104
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_500']
+-16121
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_600']
+-141259
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_900']
+-16757440
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_A400']
+-3735808
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_400']
+-12409355
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_400']
+-10720320
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_A700']
+-5635841
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_800']
+-1086464
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_200']
+-4412764
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_900']
+-14273992
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_300']
+-2039584
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_100']
+-5054501
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_800']
+-13154481
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_A700']
+-10167017
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_A200']
+-8630785
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_600']
+-16732991
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_100']
+-476208
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_500']
+-11751600
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_500']
+-7617718
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_600']
+-10603087
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_A100']
+-8333057
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_50']
+-1512714
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_700']
+-2937041
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_200']
+-5194811
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_600']
+-16540699
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_700']
+-5983189
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_A100']
+-8211969
+=== obsoleteMembersExistOnTheNewModule js: colors['WHITE_1000']
+-1
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_700']
+-1684967
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_A700']
+-10752
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_600']
+-7461718
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_600']
+-19712
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_800']
+-12434878
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_900']
+-7860657
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE']
+-43230
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_700']
+-278483
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_A200']
+-37312
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_800']
+-16750244
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_500']
+-12627531
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_A200']
+-49023
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_900']
+-12703965
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_700']
+-689152
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_50']
+-2033670
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_50']
+-5138
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_100']
+-2634552
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_A400']
+-14816842
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_A400']
+-16718337
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_50']
+-203540
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_200']
+-1118482
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_700']
+-12232092
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_500']
+-14575885
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_A100']
+-5011201
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_A700']
+-37632
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_100']
+-4987396
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_400']
+-1092784
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_600']
+-2614432
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_300']
+-7297874
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_200']
+-5908825
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_900']
+-16689253
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_300']
+-11677471
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_500']
+-10011977
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_800']
+-2604267
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_800']
+-6382300
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_200']
+-3808859
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_700']
+-10395295
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_300']
+-4560696
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_700']
+-24576
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_A700']
+-5314048
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_A700']
+-13611010
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_800']
+-415707
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY']
+-10453621
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_700']
+-16746133
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_200']
+-7288071
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_600']
+-13022805
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_A100']
+-1408772
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_A100']
+-32597
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_600']
+-291840
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_200']
+-5194811
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_900']
+-14606047
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_400']
+-7508381
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_A100']
+-3342448
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_100']
+-657931
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_A700']
+-16728155
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_500']
+-769226
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_400']
+-14235942
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_700']
+-4056997
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_400']
+-8875876
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_300']
+-8271996
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_800']
+-16615491
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_400']
+-8497214
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_A200']
+-44462
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_A200']
+-10432
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_A700']
+-16739862
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_900']
+-4246004
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_900']
+-8227049
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_A400']
+-16718218
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_600']
+-9079435
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_400']
+-5552196
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_100']
+-1596
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_300']
+-5319295
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_100']
+-13124
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_100']
+-985917
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_900']
+-688361
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_A700']
+-14064897
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_800']
+-28928
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_600']
+-16742021
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_300']
+-10177034
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_700']
+-13615201
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_500']
+-26624
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_A400']
+-5632
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_100']
+-3155748
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_800']
+-12434878
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_300']
+-6190977
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_A200']
+-15138817
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_A200']
+-5046439
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_900']
+-14273992
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_50']
+-1838339
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_A700']
+-10354454
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_A400']
+-49920
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_400']
+-1294214
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_800']
+-13730510
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_300']
+-11549705
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_200']
+-1074534
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_900']
+-16752540
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_50']
+-1249295
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_300']
+-6982195
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_100']
+-1982745
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_500']
+-10453621
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_800']
+-11171025
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_100']
+-5051406
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_A100']
+-4589878
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_900']
+-11922292
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_200']
+-1642852
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_50']
+-1509911
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_100']
+-4941
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_200']
+-2672
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_500']
+-6381922
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_200']
+-21615
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_900']
+-37120
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_A100']
+-7561473
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_500']
+-16738680
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_800']
+-14142061
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_A100']
+-126
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_400']
+-22746
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_A700']
+-3862174
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY']
+-10453621
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_A100']
+-5767189
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_600']
+-9614271
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_700']
+-10395295
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_A100']
+-8060929
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_800']
+-15374912
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_A700']
+-2284032
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_400']
+-8875876
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_300']
+-1739917
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_A400']
+-28416
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_900']
+-14983648
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_200']
+-8268550
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_50']
+-1249295
+=== obsoleteMembersExistOnTheNewModule js: colors['PINK_500']
+-1499549
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_200']
+-5005861
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_200']
+-3238952
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GRAY_600']
+-11243910
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_100']
+-3610935
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_900']
+-13407970
+=== obsoleteMembersExistOnTheNewModule js: colors['CYAN_200']
+-8331542
+=== obsoleteMembersExistOnTheNewModule js: colors['GREEN_A200']
+-9834322
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_A400']
+-15360
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_300']
+-2300043
+=== obsoleteMembersExistOnTheNewModule js: colors['AMBER_200']
+-8062
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_100']
+-2298424
+=== obsoleteMembersExistOnTheNewModule js: colors['GREY_400']
+-4342339
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_BLUE_50']
+-1968642
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_300']
+-3722
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_ORANGE_300']
+-30107
+=== obsoleteMembersExistOnTheNewModule js: colors['PURPLE_A200']
+-2080517
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_A200']
+-11309570
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_900']
+-15064194
+=== obsoleteMembersExistOnTheNewModule js: colors['DEEP_PURPLE_50']
+-1185802
+=== obsoleteMembersExistOnTheNewModule js: colors['LIME_A100']
+-721023
+=== obsoleteMembersExistOnTheNewModule js: colors['TEAL_400']
+-14244198
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_100']
+-4464901
+=== obsoleteMembersExistOnTheNewModule js: colors['ORANGE_300']
+-18611
+=== obsoleteMembersExistOnTheNewModule js: colors['INDIGO_100']
+-3814679
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_50']
+-1053719
+=== obsoleteMembersExistOnTheNewModule js: colors['YELLOW_A200']
+-256
+=== obsoleteMembersExistOnTheNewModule js: colors['RED_A400']
+-59580
+=== obsoleteMembersExistOnTheNewModule js: colors['BROWN_500']
+-8825528
+=== obsoleteMembersExistOnTheNewModule js: colors['GRAY_600']
+-9079435
+=== obsoleteMembersExistOnTheNewModule js: colors['LIGHT_GREEN_A400']
+-8978685
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_GREY_300']
+-7297874
+=== obsoleteMembersExistOnTheNewModule js: colors['BLUE_900']
+-15906911
+=== resultsAgree js: colors.toInt('#CC5500')
+-3386112
+=== resultsAgree js: colors.toInt('#C50')
+-3386112
+=== resultsAgree js: colors.toInt('#FFCC5500')
+-3386112
+=== resultsAgree js: colors.toInt('#80cc5500')
+-2134092544
+=== resultsAgree js: colors.toInt(0xFFCC5500)
+-3386112
+=== resultsAgree js: colors.toInt(-3386112)
+-3386112
+=== resultsAgree js: colors.toInt(0x80FF0000)
+-2130771968
+=== resultsAgree js: colors.toInt('BURNT_ORANGE')
+-3386112
+=== resultsAgree js: colors.toInt('burnt-orange')
+-3386112
+=== resultsAgree js: colors.toInt('red')
+-65536
+=== resultsAgree js: colors.toInt('dark_gray')
+-12303292
+=== resultsAgree js: colors.toInt('-65536')
+-65536
+=== resultsAgree js: colors.toInt('4294901760')
+-65536
+=== resultsAgree js: colors.toInt('+16711680')
+16711680
+=== resultsAgree js: colors.toInt('-')
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt('Burnt_Orange-')
+-3386112
+=== resultsAgree js: colors.toInt(1.7)
+1
+=== resultsAgree js: colors.toInt(colors.web.BURNT_ORANGE)
+-3386112
+=== resultsAgree js: colors.toInt(colors.RED)
+-65536
+=== resultsAgree js: colors.toInt('#' + 'FF0000')
+-65536
+=== resultsAgree js: colors.toInt('nope')
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt('#GGGGGG')
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt('#1234')
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt({})
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt(true)
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt(null)
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toInt()
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toHex('#CC5500')
+"#CC5500"
+=== resultsAgree js: colors.toHex('#C50')
+"#CC5500"
+=== resultsAgree js: colors.toHex('#DECC5500')
+"#DECC5500"
+=== resultsAgree js: colors.toHex('#FFCC5500')
+"#CC5500"
+=== resultsAgree js: colors.toHex(0xFFCC5500)
+"#CC5500"
+=== resultsAgree js: colors.toHex('BURNT_ORANGE')
+"#CC5500"
+=== resultsAgree js: colors.toHex('#AAC0C0C0', 'auto')
+"#AAC0C0C0"
+=== resultsAgree js: colors.toHex('#FFC0C0C0', 'auto')
+"#C0C0C0"
+=== resultsAgree js: colors.toHex('#AAC0C0C0', false)
+"#C0C0C0"
+=== resultsAgree js: colors.toHex('#AAC0C0C0', 'none')
+"#C0C0C0"
+=== resultsAgree js: colors.toHex('#FFC0C0C0', true)
+"#FFC0C0C0"
+=== resultsAgree js: colors.toHex('#C0C0C0', 'keep')
+"#FFC0C0C0"
+=== resultsAgree js: colors.toHex('#AA9966CC', 8)
+"#AA9966CC"
+=== resultsAgree js: colors.toHex('#9966CC', 8)
+"#FF9966CC"
+=== resultsAgree js: colors.toHex('#AA9966CC', 6)
+"#9966CC"
+=== resultsAgree js: colors.toHex('#AA9966CC', 3)
+"#96C"
+=== resultsAgree js: colors.toHex('#FF9966CC', 3)
+"#96C"
+=== resultsAgree js: colors.toHex('#9966CC', 3)
+"#96C"
+=== resultsAgree js: colors.toHex('#FAEBD7', 3)
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toHex(0xFF9966CC, 3)
+"#96C"
+=== resultsAgree js: colors.toHex('#AA9966CC', 7)
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toHex('#AA9966CC', 'whatever')
+throws JavaException IllegalArgumentException
+=== resultsAgree js: colors.toHex(-1, 8)
+"#FFFFFFFF"
+=== resultsAgree js: colors.toHex(0)
+"#00000000"
+=== resultsAgree js: colors.toHex(0, 6)
+"#000000"
+=== resultsAgree js: colors.toFullHex('#CC5500')
+"#FFCC5500"
+=== resultsAgree js: colors.toFullHex(0x80FF0000)
+"#80FF0000"
+=== resultsAgree js: colors.toFullHex('red')
+"#FFFF0000"
+=== resultsAgree js: colors.toString('#CC5500')
+"#CC5500"
+=== resultsAgree js: colors.toString(0x80FF0000, 6)
+"#FF0000"
+=== resultsAgree js: colors.toString(0xFFFF0000, true)
+"#FFFF0000"
+=== resultsAgree js: colors.alpha('#663399')
+255
+=== resultsAgree js: colors.alpha(colors.TRANSPARENT)
+0
+=== resultsAgree js: colors.alpha('#05060708')
+5
+=== resultsAgree js: colors.alpha('#663399', { max: 1 })
+1
+=== resultsAgree js: colors.alpha('#05060708', { max: 1 })
+0.0196078431372549
+=== resultsAgree js: colors.alpha('#05060708', { max: 255 })
+5
+=== resultsAgree js: colors.alpha('#05060708', { max: 3 })
+throws TypeError
+=== resultsAgree js: colors.alpha('#05060708', {})
+5
+=== resultsAgree js: colors.alpha('#05060708', null)
+5
+=== resultsAgree js: colors.getAlpha('#05060708')
+5
+=== resultsAgree js: colors.alphaDouble('#663399')
+1
+=== resultsAgree js: colors.alphaDouble('#05060708')
+0.0196078431372549
+=== resultsAgree js: colors.alphaDouble('#80060708')
+0.5019607843137255
+=== resultsAgree js: colors.getAlphaDouble('#80060708')
+0.5019607843137255
+=== resultsAgree js: colors.red('#663399')
+102
+=== resultsAgree js: colors.red('#663399', { max: 1 })
+0.4
+=== resultsAgree js: colors.red('#05060708')
+6
+=== resultsAgree js: colors.redDouble('#663399')
+0.4
+=== resultsAgree js: colors.getRed('#663399')
+102
+=== resultsAgree js: colors.getRedDouble('#663399')
+0.4
+=== resultsAgree js: colors.green('#663399')
+51
+=== resultsAgree js: colors.green('#663399', { max: 1 })
+0.2
+=== resultsAgree js: colors.greenDouble('#663399')
+0.2
+=== resultsAgree js: colors.getGreen('#663399')
+51
+=== resultsAgree js: colors.blue('#663399')
+153
+=== resultsAgree js: colors.blue('#663399', { max: 1 })
+0.6
+=== resultsAgree js: colors.blueDouble('#663399')
+0.6
+=== resultsAgree js: colors.getBlue('#663399')
+153
+=== resultsAgree js: colors.toHex(colors.setAlpha('#663399', 0x80), 8)
+"#80663399"
+=== resultsAgree js: colors.toHex(colors.setAlpha('#663399', 0.5), 8)
+"#80663399"
+=== resultsAgree js: colors.toHex(colors.setAlpha('#663399', 255), 8)
+"#FF663399"
+=== resultsAgree js: colors.toHex(colors.setAlpha('#663399', 1), 8)
+"#FF663399"
+=== resultsAgree js: colors.toHex(colors.setAlpha('#663399', 0), 8)
+"#00663399"
+=== resultsAgree js: colors.toHex(colors.removeAlpha('#BE663399'), 8)
+"#00663399"
+=== resultsAgree js: colors.toHex(colors.removeAlpha('#CC5500'), 8)
+"#00CC5500"
+=== resultsAgree js: colors.toHex(colors.setRed('#663399', 0x80))
+"#803399"
+=== resultsAgree js: colors.toHex(colors.setRed('#663399', 0.5))
+"#803399"
+=== resultsAgree js: colors.toHex(colors.setRed('#663399', 255))
+"#FF3399"
+=== resultsAgree js: colors.toHex(colors.setRed('#663399', 1))
+"#013399"
+=== resultsAgree js: colors.toHex(colors.removeRed('#BE663399'), 8)
+"#BE003399"
+=== resultsAgree js: colors.toHex(colors.setGreen('#663399', 0x80))
+"#668099"
+=== resultsAgree js: colors.toHex(colors.setGreen('#663399', 1))
+"#660199"
+=== resultsAgree js: colors.toHex(colors.removeGreen('#CC5500'))
+"#CC0000"
+=== resultsAgree js: colors.toHex(colors.setBlue('#663399', 0x80))
+"#663380"
+=== resultsAgree js: colors.toHex(colors.setBlue('#663399', 1))
+"#663301"
+=== resultsAgree js: colors.toHex(colors.removeBlue('#BE663399'), 8)
+"#BE663300"
+=== resultsAgree js: colors.toHex(colors.setAlphaRelative('#50FF0000', 0.5), 8)
+"#28FF0000"
+=== resultsAgree js: colors.toHex(colors.setAlphaRelative('#50FF0000', '50%'), 8)
+"#28FF0000"
+=== resultsAgree js: colors.toHex(colors.setAlphaRelative('#50FF0000', 1.5), 8)
+"#78FF0000"
+=== resultsAgree js: colors.toHex(colors.setAlphaRelative('#50FF0000', 10), 8)
+"#FFFF0000"
+=== resultsAgree js: colors.toHex(colors.setAlphaRelative('#00FF0000', 10), 8)
+"#00FF0000"
+=== resultsAgree js: colors.toHex(colors.setRedRelative('#503399', 0.5))
+"#283399"
+=== resultsAgree js: colors.toHex(colors.setRedRelative('#503399', '150%'))
+"#783399"
+=== resultsAgree js: colors.toHex(colors.setRedRelative('#503399', 10))
+"#FF3399"
+=== resultsAgree js: colors.toHex(colors.setGreenRelative('#335099', 0.5))
+"#00000050"
+=== resultsAgree js: colors.toHex(colors.setBlueRelative('#339950', 0.5))
+"#339928"
+=== resultsAgree js: colors.setRedRelative('#503399', -1)
+throws TypeError
+=== resultsAgree js: colors.setRed('#663399', -1)
+throws TypeError
+=== resultsAgree js: colors.setRed('#663399', 'x')
+throws TypeError
+=== resultsAgree js: colors.toHex(colors.rgb(255, 128, 9))
+"#FF8009"
+=== resultsAgree js: colors.toHex(colors.rgb(0xFF, 0x80, 0x09))
+"#FF8009"
+=== resultsAgree js: colors.toHex(colors.rgb('#FF8009'))
+"#FF8009"
+=== resultsAgree js: colors.toHex(colors.rgb('#DE663399'))
+"#663399"
+=== resultsAgree js: colors.toHex(colors.rgb(1, 0.5, '3.53%'))
+"#FF8009"
+=== resultsAgree js: colors.toHex(colors.rgb([255, 128, 9]))
+"#FF8009"
+=== resultsAgree js: colors.toHex(colors.rgb([1, 0.5, '3.53%']))
+"#FF8009"
+=== resultsAgree js: colors.toHex(colors.rgb(1, 1, 1))
+"#010101"
+=== resultsAgree js: colors.toHex(colors.rgb(1, 1, 0.5))
+"#FFFF80"
+=== resultsAgree js: colors.toHex(colors.rgb(300, 0, 7.4))
+"#FF0007"
+=== resultsAgree js: colors.toHex(colors.rgb('50%', '25%', '12.5%'))
+"#804020"
+=== resultsAgree js: colors.rgb(-1, 0, 0)
+throws TypeError
+=== resultsAgree js: colors.rgb('x', 0, 0)
+throws TypeError
+=== resultsAgree js: colors.rgb(1, 2)
+-16777215
+=== resultsAgree js: colors.rgb([1, 2])
+-16777215
+=== resultsAgree js: colors.toHex(colors.argb(64, 255, 128, 9), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.argb('#40FF8009'), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.argb(0.25, 1, 0.5, '3.53%'), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.argb([64, 255, 128, 9]), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.argb('#663399'), 8)
+"#FF663399"
+=== resultsAgree js: colors.toHex(colors.argb('#DE663399'), 8)
+"#DE663399"
+=== resultsAgree js: colors.toHex(colors.argb(1, 255, 0, 0), 8)
+"#FFFF0000"
+=== resultsAgree js: colors.toHex(colors.rgba(255, 128, 9, 64), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.rgba(1, 0.5, '3.53%', 0.25), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.rgba('#FF800940'), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.rgba('#663399FF'), 8)
+"#FF663399"
+=== resultsAgree js: colors.toHex(colors.rgba('#11335577'), 8)
+"#77113355"
+=== resultsAgree js: colors.toHex(colors.rgba([255, 128, 9, 64]), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.rgba([255, 128, 9], 64), 8)
+"#40FF8009"
+=== resultsAgree js: colors.toHex(colors.rgba('red'), 8)
+"#FFFF0000"
+=== resultsAgree js: colors.toHex(colors.rgba(0x80FF0000), 8)
+"#80FF0000"
+=== resultsAgree js: colors.toHex(colors.hsv(90, 80, 64))
+"#62A321"
+=== resultsAgree js: colors.toHex(colors.hsv(90, 0.8, 0.64))
+"#62A321"
+=== resultsAgree js: colors.toHex(colors.hsv(0.25, 0.8, 0.64))
+"#62A321"
+=== resultsAgree js: colors.toHex(colors.hsv('25%', '80%', '64%'))
+"#62A321"
+=== resultsAgree js: colors.toHex(colors.hsv([90, 80, 64]))
+"#62A321"
+=== resultsAgree js: colors.toHex(colors.hsv(0, 1, 1))
+"#FF0000"
+=== resultsAgree js: colors.toHex(colors.hsv(359.9, 1, 1))
+"#FF0000"
+=== resultsAgree js: colors.toHex(colors.hsv(360, 1, 1))
+"#FF0000"
+=== resultsAgree js: colors.toHex(colors.hsv(-90, 1, 1))
+"#8000FF"
+=== resultsAgree js: colors.toHex(colors.hsv(450, 1, 1))
+"#80FF00"
+=== resultsAgree js: colors.toHex(colors.hsv(200, 0, 0.5))
+"#808080"
+=== resultsAgree js: colors.toHex(colors.hsva(90, 80, 64, 64), 8)
+"#4062A321"
+=== resultsAgree js: colors.toHex(colors.hsva(90, 0.8, 0.64, 0.25), 8)
+"#4062A321"
+=== resultsAgree js: colors.toHex(colors.hsva([90, 80, 64, 64]), 8)
+"#4062A321"
+=== resultsAgree js: colors.toHex(colors.hsva([90, 80, 64], 64), 8)
+"#4062A321"
+=== resultsAgree js: colors.toHex(colors.hsl(90, 80, 64))
+"#A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsl(90, 0.8, 0.64))
+"#A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsl(0.25, 0.8, 0.64))
+"#A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsl('25%', '80%', '64%'))
+"#A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsl([90, 80, 64]))
+"#A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsl(270, 0.5, 0.4))
+"#663399"
+=== resultsAgree js: colors.toHex(colors.hsl(0, 1, 0.5))
+"#FF0000"
+=== resultsAgree js: colors.toHex(colors.hsla(90, 80, 64, 64), 8)
+"#40A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsla(90, 0.8, 0.64, 0.25), 8)
+"#40A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsla([90, 80, 64, 64]), 8)
+"#40A3ED5A"
+=== resultsAgree js: colors.toHex(colors.hsla([90, 80, 64], 64), 8)
+"#40A3ED5A"
+=== resultsAgree js: colors.hsv(1, 2)
+throws TypeError
+=== resultsAgree js: colors.hsv(90, 120, 50)
+-12550144
+=== resultsAgree js: colors.toRgb('#663399')
+[102,51,153]
+=== resultsAgree js: colors.toRgb(0x80112233)
+[17,34,51]
+=== resultsAgree js: colors.toRgba('#DE663399')
+[102,51,153,222]
+=== resultsAgree js: colors.toRgba('#DE663399', { maxAlpha: 1 })
+[102,51,153,0.8705882352941177]
+=== resultsAgree js: colors.toArgb('#DE663399')
+[222,102,51,153]
+=== resultsAgree js: colors.toArgb('#DE663399', { maxAlpha: 1 })
+[0.8705882352941177,102,51,153]
+=== resultsAgree js: colors.toHsv('#663399')
+[270,0.6666666865348816,0.6000000238418579]
+=== resultsAgree js: colors.toHsv('#FF8000')
+[30.11764907836914,1,1]
+=== resultsAgree js: colors.toHsv('#123456')
+[210,0.7906976938247681,0.33725491166114807]
+=== resultsAgree js: colors.toHsv(102, 51, 153)
+[270,0.6666666865348816,0.6000000238418579]
+=== resultsAgree js: colors.toHsv([102, 51, 153])
+[270,0.6666666865348816,0.6000000238418579]
+=== resultsAgree js: colors.toHsv('#888888')
+[0,0,0.5333333611488342]
+=== resultsAgree js: (function () { var r = util.java.array('float', 3); var v = colors.toHsv('#663399', r); return [v, Array.from(r)]; })()
+[[270,0.6666666865348816,0.6000000238418579],[270,0.6666666865348816,0.6000000238418579]]
+=== resultsAgree js: (function () { var r = util.java.array('float', 3); var v = colors.toHsv(102, 51, 153, r); return [v, Array.from(r)]; })()
+[[270,0.6666666865348816,0.6000000238418579],[270,0.6666666865348816,0.6000000238418579]]
+=== resultsAgree js: colors.toHsva('#BF663399')
+[270,0.6666666865348816,0.6000000238418579,0.7490196078431373]
+=== resultsAgree js: colors.toHsva(102, 51, 153, 191)
+[270,0.6666666865348816,0.6000000238418579,0.7490196078431373]
+=== resultsAgree js: colors.toHsva('#663399')
+[270,0.6666666865348816,0.6000000238418579,1]
+=== resultsAgree js: (function () { var r = util.java.array('float', 4); var v = colors.toHsva('#BF663399', r); return [v, Array.from(r)]; })()
+[[270,0.6666666865348816,0.6000000238418579,0.7490196078431373],[270,0.6666666865348816,0.6000000238418579,0.7490196228027344]]
+=== resultsAgree js: colors.toHsl('#663399')
+[270,0.5000000596046448,0.4000000059604645]
+=== resultsAgree js: colors.toHsl('#FF8000')
+[30.11764907836914,1,0.5]
+=== resultsAgree js: colors.toHsl(102, 51, 153)
+[270,0.5000000596046448,0.4000000059604645]
+=== resultsAgree js: colors.toHsl([102, 51, 153])
+[270,0.5000000596046448,0.4000000059604645]
+=== resultsAgree js: (function () { var r = util.java.array('float', 3); var v = colors.toHsl('#663399', r); return [v, Array.from(r)]; })()
+[[270,0.5000000596046448,0.4000000059604645],[270,0.5000000596046448,0.4000000059604645]]
+=== resultsAgree js: colors.toHsla('#BF663399')
+[270,0.5000000596046448,0.4000000059604645,0.7490196078431373]
+=== resultsAgree js: colors.toHsla(102, 51, 153, 191)
+[270,0.5000000596046448,0.4000000059604645,0.7490196078431373]
+=== resultsAgree js: colors.toHsla(102, 51, 153, 0.5)
+[270,0.5000000596046448,0.4000000059604645,0.5]
+=== resultsAgree js: colors.toHsla('#663399')
+[270,0.5000000596046448,0.4000000059604645,1]
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 5)
+false
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 10)
+true
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 9, 'rgb+')
+false
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 9, 'diff')
+true
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 9, 'hs')
+true
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 8, 'rgb+')
+false
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 8, 'diff')
+false
+=== resultsAgree js: colors.isSimilar('orange', 'dark-orange', 8, 'hs')
+true
+=== resultsAgree js: colors.isSimilar('#010101', '#020202', { similarity: 0.95 })
+true
+=== resultsAgree js: colors.isSimilar('#010101', '#090909', { threshold: 4 })
+false
+=== resultsAgree js: colors.isSimilar('#010101', '#090909', { threshold: 10, algorithm: 'rgb' })
+true
+=== resultsAgree js: colors.isSimilar('#010101', '#020202')
+true
+=== resultsAgree js: colors.isSimilar('#010101', '#020202', { threshold: 4, similarity: 0.9 })
+throws TypeError
+=== resultsAgree js: colors.isEqual('#FF0000', '#FF0000')
+true
+=== resultsAgree js: colors.isEqual('#FF0000', '#F00')
+true
+=== resultsAgree js: colors.isEqual(-65536, 0xFF0000)
+true
+=== resultsAgree js: colors.isEqual('red', 'RED')
+true
+=== resultsAgree js: colors.isEqual('orange', 'Orange')
+true
+=== resultsAgree js: colors.isEqual('dark-gray', 'DARK_GRAY')
+true
+=== resultsAgree js: colors.isEqual('red', '#FF0000')
+true
+=== resultsAgree js: colors.isEqual('orange', '#FFA500')
+true
+=== resultsAgree js: colors.isEqual('#A1FF0000', '#A2FF0000')
+true
+=== resultsAgree js: colors.isEqual('#A1FF0000', '#A2FF0000', true)
+false
+=== resultsAgree js: colors.isEqual('#A1FF0000', '#A2FF0000', false)
+true
+=== resultsAgree js: colors.isEqual('#A1FF0000', '#A2FF0000', 1)
+throws TypeError
+=== resultsAgree js: colors.luminance(colors.WHITE)
+1
+=== resultsAgree js: colors.luminance(colors.BLACK)
+0
+=== resultsAgree js: colors.luminance(colors.RED)
+0.2126
+=== resultsAgree js: colors.luminance(colors.GREEN)
+0.7152
+=== resultsAgree js: colors.luminance(colors.BLUE)
+0.0722
+=== resultsAgree js: colors.luminance(colors.YELLOW)
+0.9278
+=== resultsAgree js: colors.luminance('#663399')
+0.07492341159447033
+=== resultsAgree js: colors.summary('#009688')
+"hex(#009688), rgba(0,150,136/1.0), int(-16738680)"
+=== resultsAgree js: colors.summary('#BE009688')
+"hex(#BE009688), rgba(0,150,136/0.75), int(-1107257720)"
+=== resultsAgree js: colors.summary('red')
+"hex(#FF0000), rgba(255,0,0/1.0), int(-65536)"
+=== resultsAgree js: colors.summary('#6400008B')
+"hex(#6400008B), rgba(0,0,139/0.39), int(1677721739)"
+=== resultsAgree js: colors.summary(0)
+"hex(#00000000), rgba(0,0,0/0.0), int(0)"
+=== resultsAgree js: [colors.RED, colors.BLACK, colors.ORANGE, colors.TRANSPARENT, colors.WHITE]
+[-65536,-16777216,-23296,0,-1]
+=== resultsAgree js: [colors.android.RED, colors.css.ORANGE, colors.web.BURNT_ORANGE, colors.material.ORANGE_300]
+[-65536,-23296,-3386112,-18611]
+=== resultsAgree js: [colors.PANSY, colors.ALIZARIN_CRIMSON, colors.PURPLE_300]
+[-9174879,-1890762,-4560696]
+=== resultsAgree js: typeof colors
+"object"

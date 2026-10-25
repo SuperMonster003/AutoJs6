@@ -1,0 +1,50 @@
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load()
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load accepts modelDir and optional options
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', {}, 1)
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load accepts modelDir and optional options
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', 5)
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load options must be a JavaScript object
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', [])
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load options must be a JavaScript object
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model')
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: yolo.load requires options.component; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', null)
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: yolo.load requires options.component; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', undefined)
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: yolo.load requires options.component; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', { component: '  ' })
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: options.component must not be blank; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load() #2
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load accepts modelDir and optional options
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', {}, 1) #2
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load accepts modelDir and optional options
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', 5) #2
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load options must be a JavaScript object
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', []) #2
+throws YoloScriptException
+YOLO_INVALID_ARGUMENT: yolo.load options must be a JavaScript object
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model') #2
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: yolo.load requires options.component; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', null) #2
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: yolo.load requires options.component; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', undefined) #2
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: yolo.load requires options.component; provider fallback is disabled
+=== codedErrorsGiveTheSameResultsAsTheCurrentModule current: yolo.load('/sdcard/Download/aj6-augment-bench/aj6-p31-no-model', { component: '  ' }) #2
+throws YoloScriptException
+YOLO_COMPONENT_REQUIRED: options.component must not be blank; provider fallback is disabled
+=== surfaceMatchesTheCurrentModule surface: yolo
+load	function	0	EW-

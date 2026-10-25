@@ -1,0 +1,297 @@
+=== resultsAgreeWithTheCurrentModules current: selector(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: pickup(1, 2, 3, 4, 5, 6)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: pickup(1, 'a', '>', 'w', null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: pickup('a', 1, 'w', null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: pickup('a', '>', 'w', 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: detect()
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: detect(null)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: detect(1, 'p')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: detect(null, 1, 'w')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: detect(null, 'p', 'w', 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: detect(null, 'p', 'w', null, 1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: text(1, 2, 3)
+throws(java) NullPointerException
+=== resultsAgreeWithTheCurrentModules current: findOne('x')
+throws(java) NullPointerException
+=== resultsAgreeWithTheCurrentModules current: pickup(undefined)
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup(true)
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup({ nope: 1 })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup({ clickable: 'x' })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup(['aj6-none', { nope: 1 }])
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup([[true]])
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup(selector().text)
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup({ depth: NaN })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup({ textMatches: '[' })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', 'nope')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', ['click', 1])
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', ['child', NaN])
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', ['child', '0'])
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', 'p', '@')
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', 'c')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', 'x2', 'w')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: detect(null, 'widgets')
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: detect(null, ['#'])
+null
+=== resultsAgreeWithTheCurrentModules current: detect(null, 'c', 'w')
+null
+=== resultsAgreeWithTheCurrentModules current: existsAll({ nope: 1 })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: depth(NaN)
+throws(java) NullPointerException
+=== resultsAgreeWithTheCurrentModules current: textMatches('[')
+throws(java) NullPointerException
+=== resultsAgreeWithTheCurrentModules current: pickup({ depth: [NaN] })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup({ textMatch: '(' })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup({ textMatches: '(?i)(' })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', ['setTextSelection', 1, NaN])
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: pickup('aj6-none', 'c2147483648')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: detect(null, 's', 'w')
+null
+=== resultsAgreeWithTheCurrentModules current: textMatch('a|*')
+throws(java) NullPointerException
+=== resultsAgreeWithTheCurrentModules current: indexInParent(NaN)
+throws(java) NullPointerException
+=== obsoleteMembersExistOnTheNewModules surface: selector
+
+=== obsoleteMembersExistOnTheNewModules globals
+pickup	function
+detect	function
+existsAll	function
+existsOne	function
+pageLeft	function
+boundsMaxCenterX	function
+boundsMaxCenterY	function
+boundsMaxBottom	function
+clickable	function
+boundsMinCenterX	function
+boundsMinCenterY	function
+minHeight	function
+scrollBackward	function
+password	function
+clearSelection	function
+idMatch	function
+findOneOf$app	function
+contextClick	function
+boundsHeight	function
+boundsMaxTop	function
+minLeft	function
+height	function
+accessibilityFocus	function
+boundsRight	function
+boundsCenterY	function
+imeEnter	function
+boundsCenterX	function
+click	function
+classNameStartsWith	function
+scrollTo	function
+setSelection	function
+selection	function
+left	function
+getSearchAlgorithm$app	function
+minIndexInParent	function
+contentMatch	function
+cut	function
+setProgress	function
+searchIn$app	function
+getSelector$app	function
+scrollUp	function
+pressAndHold	function
+maxHeight	function
+boundsContains	function
+minTop	function
+findOnce	function
+rowCount	function
+textContains	function
+boundsMinTop	function
+scrollable	function
+clearFocus	function
+column	function
+contentStartsWith	function
+childCount	function
+right	function
+boundsMinBottom	function
+findOf$app	function
+findIterator	function
+query$app	function
+longClick	function
+progress	function
+idEndsWith	function
+boundsWidth	function
+hasChildren	function
+classNameEndsWith	function
+maxRight	function
+maxChildCount	function
+classNameContains	function
+packageNameMatch	function
+screenCenterX	function
+screenCenterY	function
+clearAccessibilityFocus	function
+dismissable	function
+drawingOrder	function
+findWithin$app	function
+longClickable	function
+minChildCount	function
+findAndReturnList$app	function
+packageNameEndsWith	function
+idContains	function
+hideTooltip	function
+desc	function
+boundsMinLeft	function
+contentInvalid	function
+idMatches	function
+multiLine	function
+show	function
+findOne	function
+paste	function
+descContains	function
+content	function
+toStringReadable	function
+maxTop	function
+rowSpan	function
+pageDown	function
+scrollDown	function
+performAction	function
+descMatch	function
+showTextSuggestions	function
+selector$app	function
+textStartsWith	function
+packageNameMatches	function
+maxBottom	function
+setText	function
+addFilter$app	function
+currentApp	function
+maxCenterX	function
+centerY	function
+select	function
+minCenterY	function
+centerX	function
+minCenterX	function
+focus	function
+action	function
+boundsTop	function
+descMatches	function
+boundsMinWidth	function
+id	function
+text	function
+contentContains	function
+algorithm	function
+maxWidth	function
+moveWindow	function
+previousHtmlElement	function
+dismiss	function
+focusable	function
+contentEndsWith	function
+pageUp	function
+scrollRight	function
+contentMatches	function
+dragCancel	function
+setSelector$app	function
+boundsBottom	function
+bounds	function
+pageRight	function
+maxCenterY	function
+columnSpan	function
+minBottom	function
+dragStart	function
+visibleToUser	function
+textMatches	function
+boundsInside	function
+className	function
+enabled	function
+boundsMaxHeight	function
+minRight	function
+top	function
+nextHtmlElement	function
+useAlgorithm$app	function
+copy	function
+descEndsWith	function
+maxIndexInParent	function
+minDepth	function
+packageNameStartsWith	function
+showTooltip	function
+minWidth	function
+classNameMatch	function
+filter	function
+maxDepth	function
+depth	function
+setSearchAlgorithm$app	function
+width	function
+exists	function
+idStartsWith	function
+descStartsWith	function
+untilFindOne	function
+accessibilityFocused	function
+searchAlgorithm$app	function
+indexInParent	function
+dragDrop	function
+boundsMinRight	function
+screenCoverage	function
+find	function
+checked	function
+scrollLeft	function
+waitFor	function
+selected	function
+checkable	function
+bottom	function
+untilFind	function
+packageNameContains	function
+expand	function
+focused	function
+textMatch	function
+boundsMaxLeft	function
+previousAtMovementGranularity	function
+scrollForward	function
+textEndsWith	function
+bridge$app	function
+boundsMaxWidth	function
+maxLeft	function
+boundsMinHeight	function
+contextClickable	function
+packageName	function
+row	function
+boundsLeft	function
+boundsMaxRight	function
+editable	function
+columnCount	function
+classNameMatches	function
+nextAtMovementGranularity	function
+idHex	function
+getBridge$app	function
+collapse	function
+=== obsoleteMembersExistOnTheNewModules dead wrappers
+selection,progress
+=== obsoleteMembersExistOnTheNewModules dead wrapper errors
+TypeError,TypeError

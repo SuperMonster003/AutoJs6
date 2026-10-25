@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.global.Classes
 import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
 import org.autojs.autojs.runtime.api.augment.global.Legacy
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
@@ -67,12 +68,14 @@ class GlobalModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = describe(rhino)
-        val expected = DifferentialRhino().use { current ->
-            prepare(current.ktRuntime)
-            mountInOrder(current.ktScope.globalThis, current.ktRuntime, newLayer = false)
-            // Documented: Image is an alias of ImageWrapper; the current Classes.Image is the class of a KClass value
-            // (ROADMAP appendix E, P3.0).
-            describe(current).replace(Regex("(?<=;Image function )\\[JavaClass [\\w.]+]"), "[JavaClass ${ImageWrapper::class.java.name}]")
+        val expected = ScriptModuleExpectations.obsolete("describe") {
+            DifferentialRhino().use { current ->
+                prepare(current.ktRuntime)
+                mountInOrder(current.ktScope.globalThis, current.ktRuntime, newLayer = false)
+                // Documented: Image is an alias of ImageWrapper; the current Classes.Image is the class of a KClass value
+                // (ROADMAP appendix E, P3.0).
+                describe(current).replace(Regex("(?<=;Image function )\\[JavaClass [\\w.]+]"), "[JavaClass ${ImageWrapper::class.java.name}]")
+            }
         }
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }

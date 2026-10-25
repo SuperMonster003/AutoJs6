@@ -1,0 +1,574 @@
+=== resultsAgreeWithTheCurrentModules current: Object.keys(keys).join()
+"home,HOME,menu,MENU,back,BACK,volumeUp,volume_up,VOLUME_UP,volumeDown,volume_down,VOLUME_DOWN"
+=== resultsAgreeWithTheCurrentModules current: [keys.home, keys.MENU, keys.back, keys.volume_up, keys.VOLUME_DOWN]
+[3,82,4,24,25]
+=== resultsAgreeWithTheCurrentModules current: $keys === keys
+true
+=== resultsAgreeWithTheCurrentModules current: Object.getOwnPropertyDescriptor(events, '__asEmitter__').enumerable
+false
+=== resultsAgreeWithTheCurrentModules current: Object.getOwnPropertyDescriptor(events, '__asEmitter__').writable
+false
+=== resultsAgreeWithTheCurrentModules current: events.__asEmitter__(1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: events.__asEmitter__('x')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: events.__asEmitter__({}, 1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: events.__asEmitter__({}, {})
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: events.__asEmitter__({}, null, 1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: typeof wait.async
+"function"
+=== resultsAgreeWithTheCurrentModules current: Object.getOwnPropertyDescriptor(wait, 'async').enumerable
+false
+=== resultsAgreeWithTheCurrentModules current: flow.waitAsync === flow.wait
+false
+=== resultsAgreeWithTheCurrentModules current: waitAsync === flow.wait
+false
+=== resultsAgreeWithTheCurrentModules current: clickWait === flow.clickWait
+false
+=== resultsAgreeWithTheCurrentModules current: clickWait.name
+"waitThenClick"
+=== resultsAgreeWithTheCurrentModules current: flow()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: flow.wait()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: waitAsync()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: wait.async()
+throws(java) IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: wait.async(undefined, 1)
+throws(java) IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, 'x')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, -1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, 1, Infinity)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, 1, -1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, 1, 2, 3)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, {}, {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, [])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(function () {}, function () {}, function () {}, function () {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitUntil()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitWhile(function () {}, true)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent('a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent('a', 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent('a', function () {}, 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent('a', function () {}, {}, 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(1, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(function () {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForActivity()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForActivity(1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForPackage('a', -1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForPackage('a', 1, 2, 3)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: waitForStable()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: waitForVisible('a', NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: waitForGone(null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: waitThenClick()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickBoundsWait('a', 'b')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitThenLongClick('a', 1, 2, 3)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickWhenStable('a', -1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickBoundsWhenStable()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickWhenStableAfter('a', 1, 2, -1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickBoundsWhenStableAfter('a', 1, 2, 3, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickBoundsWhenStableAfter('a', 1, 2, 3, 4, 5)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickWhenStableAfter('a')
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: clickWhenStableAfter('a', 1, 2)
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: clickWhenStableAfter('a', { timeout: 1 })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { timeout: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { timeout: 'x' })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { interval: Infinity })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { times: NaN })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { stableFor: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { snapshot: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { snapshot: function () {}, compare: 'bounds' })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { compare: 'nope' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { compare: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { missing: 'skip' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { delay: [] })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { delay: [1, 2, 3] })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { delay: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { delay: [1, 'x'] })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { delay: [1, {}] })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { root: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { compass: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('a', { resultType: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: clickWhenStableAfter('a', 1, 2, { delay: NaN })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(true)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent(true, function () {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent('a', function () {}, { nope: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent('a', function () {}, { times: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(function () {}, true)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(function () {}, 'a', { timeout: Infinity })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(function () {}, 'a', { maxAttempts: 1.5 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(function () {}, 'a', { retryOn: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ nope: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ timeout: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ stableFor: 'x' })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ humanize: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ humanize: { nope: 1 } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ humanize: { offset: [1] } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ humanize: { offset: -1 } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({ humanize: { delay: [5, 1] } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { nope: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { timeout: NaN })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { offset: [1, 2, 3] })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { offset: 2147483648 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { maxClimb: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { verify: true })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { verifyTimeout: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { root: {} })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { humanize: { delay: 'x' } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick(true)
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClickBounds('aj6-none', { maxClimb: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.clickIfExists('aj6-none', -1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.clickAny([])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.clickAny(['aj6-none', null])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.clickAny(['aj6-none', true])
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.findAny(['aj6-none'], { verify: 'a' })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.scrollUntil('aj6-none', { direction: 'x' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.scrollUntil('aj6-none', { method: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.scrollUntil('aj6-none', { maxSteps: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.scrollUntil('aj6-none', { container: true })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.typeInto('aj6-none', 'b', { verifyTimeout: 'x' })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.dismissPopups(['aj6-none'], { watch: true })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.dismissPopups(['aj6-none'], { onDismissed: function () {} })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.dismissPopups(['aj6-none'], { maxRounds: 0 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.dismissPopups(['aj6-none'], { click: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.dismissPopups(['aj6-none'], { click: { nope: 1 } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.collectList(null, 'aj6-none', { maxItems: 0 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.collectList(null, 'aj6-none', { resultType: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.launchAndWait('aj6.none', { timeout: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.backUntil('aj6-none', { interval: 0 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.backUntil('aj6-none', { maxTimes: 1.5 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.toggle('aj6-none', true, { click: { verify: true } })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle({ nope: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle({ quietFor: -1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle({ eventTypes: ['nope'] })
+unavailable(jvm) NoClassDefFoundError
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle({ eventTypes: [1] })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('nope')
+unavailable(jvm) NoClassDefFoundError
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent(['click', 1])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('click', { nope: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('click', { text: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForToast({ title: 'a' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForNotification({ title: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.wait({ nope: 1 })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.wait(['aj6-none', { nope: 1 }])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.wait({ depth: NaN })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('aj6-none', { compass: 'c' })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('aj6-none', { compass: 'x2' })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('aj6-none', { resultType: 'nope' })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.wait('aj6-none', { compass: 'p', resultType: '@' })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: flow.whenPresent({ nope: 1 }, function () {})
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.repeatUntil(function () {}, 'aj6-none', { compass: 'c' })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick({ nope: 1 })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('aj6-none', { verify: { nope: 1 } })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.clickAny(['aj6-none', { textMatches: '[' }])
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.collectList(null, 'aj6-none', { resultType: 'widgets' })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.collectList(null, 'aj6-none', { resultType: ['click', 1] })
+unavailable(jvm) timers
+=== resultsAgreeWithTheCurrentModules current: flow.sleep()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep(-1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.delay(NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep(Infinity)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep('x')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep(1, {})
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep(1, 'abc')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep(1, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.sleep(1, 2, 3)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.run()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.run(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.run(function () {}, function () {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.of(1, 2)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: flow.all(null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.race([1, null])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.any(1, undefined, 2)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.cancelAll(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: flow.defaults(1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults([])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.defaults({}, 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.trace(true, 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick()
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick(null)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('a', NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('a', [])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('a', 'b')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('a', {}, 1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.smartClick('a', {}, function () {}, function () {}, function () {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.clickAny()
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.findAny(undefined, {})
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.typeInto('a')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.typeInto(null, null)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.collectList('a')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.toggle('a')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.launchAndWait()
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.backUntil(null, {})
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.backToApp('a', true)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.scrollUntil('a', {}, 'b')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.dismissPopups()
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle(1, 2)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle(-1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle('x')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForIdle([])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('a', -1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('a', 1, 2)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('a', {}, function () {})
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForEvent('a', 1, {}, 2)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForToast(1, 2)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForToast(-1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForToast([], 1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForNotification('a', NaN)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: flow.waitForNotification('a', 'b')
+throws WrappedIllegalArgumentException
+=== obsoleteMembersExistOnTheNewModules globals added by events
+keys
+=== obsoleteMembersExistOnTheNewModules surface: events
+getClass	function	0	EW-
+removeToastObserver	function	0	EW-
+setKeyInterceptionEnabled	function	0	EW-
+listenerCount	function	0	EW-
+getScriptOwnerId	function	0	EW-
+removeAllKeyDownListeners	function	0	EW-
+removeAllKeyUpListeners	function	0	EW-
+recycle	function	0	EW-
+keyInterceptionEnabled	object	-	EW-
+emitSticky	function	0	EW-
+observeKey	function	0	EW-
+observeTouch	function	0	EW-
+prependListener	function	0	EW-
+removeNotificationObserver	function	0	EW-
+once	function	0	EW-
+scriptOwnerId	inaccessible	-	EW-
+emitter	function	0	EW-
+maxListeners	number	-	EW-
+getTimer	function	0	EW-
+broadcast	object	-	EW-
+onKeyDown	function	0	EW-
+getTouchEventTimeout	function	0	EW-
+wait	function	0	EW-
+removeAllListeners	function	0	EW-
+onGesture	function	0	EW-
+notifyAll	function	0	EW-
+observeToast	function	0	EW-
+removeAllTouchListeners	function	0	EW-
+getMaxListeners	function	0	EW-
+notify	function	0	EW-
+timer	object	-	EW-
+onToast	function	0	EW-
+hashCode	function	0	EW-
+onNotification	function	0	EW-
+touchEventTimeout	number	-	EW-
+observeNotification	function	0	EW-
+class	object	-	EW-
+on	function	0	EW-
+addListener	function	0	EW-
+onKeyUp	function	0	EW-
+setTouchEventTimeout	function	0	EW-
+listeners	function	0	EW-
+removeListener	function	0	EW-
+onKeyEvent	function	0	EW-
+prependOnceListener	function	0	EW-
+equals	function	0	EW-
+onceKeyUp	function	0	EW-
+eventNames	function	0	EW-
+toString	function	0	EW-
+onceKeyDown	function	0	EW-
+emit	function	0	EW-
+onTouch	function	0	EW-
+setMaxListeners	function	0	EW-
+=== obsoleteMembersExistOnTheNewModules surface: keys
+home	number	-	EWC
+menu	number	-	EWC
+back	number	-	EWC
+volume_up	number	-	EWC
+volume_down	number	-	EWC
+=== obsoleteMembersExistOnTheNewModules type: wait
+function
+=== obsoleteMembersExistOnTheNewModules type: waitForActivity
+function
+=== obsoleteMembersExistOnTheNewModules type: waitForPackage
+function
+=== obsoleteMembersExistOnTheNewModules type: currentPackage
+function
+=== obsoleteMembersExistOnTheNewModules type: currentActivity
+function
+=== surfaceMatchesTheCurrentModules describe
+keys wait,waitAsync,waitThenClick,clickWait,waitThenClickBounds,clickBoundsWait,waitForStable,waitForStableThenClick,clickWhenStable,waitForStableThenClickBounds,clickBoundsWhenStable,waitForVisible,waitForHidden,waitForGone,clickWhenStableAfter,clickBoundsWhenStableAfter,flow,$flow,events,$events,keys,$keys
+wait EW- function wait [async ---]
+waitAsync EW- function waitAsync
+waitThenClick EW- function waitThenClick
+clickWait EW- function waitThenClick
+waitThenClickBounds EW- function waitThenClickBounds
+clickBoundsWait EW- function waitThenClickBounds
+waitForStable EW- function waitForStable
+waitForStableThenClick EW- function waitForStableThenClick
+clickWhenStable EW- function waitForStableThenClick
+waitForStableThenClickBounds EW- function waitForStableThenClickBounds
+clickBoundsWhenStable EW- function waitForStableThenClickBounds
+waitForVisible EW- function waitForVisible
+waitForHidden EW- function waitForHidden
+waitForGone EW- function waitForHidden
+clickWhenStableAfter EW- function clickWhenStableAfter
+clickBoundsWhenStableAfter EW- function clickBoundsWhenStableAfter
+flow EW- function flow [wait EW-,waitAsync EW-,waitUntil EW-,waitWhile EW-,whenPresent EW-,repeatUntil EW-,waitForStable EW-,waitForVisible EW-,waitForHidden EW-,waitForGone EW-,waitForActivity EW-,waitForPackage EW-,waitThenClick EW-,clickWait EW-,waitThenClickBounds EW-,clickBoundsWait EW-,waitThenLongClick EW-,waitForStableThenClick EW-,clickWhenStable EW-,waitForStableThenClickBounds EW-,clickBoundsWhenStable EW-,clickWhenStableAfter EW-,clickBoundsWhenStableAfter EW-,sleep EW-,delay EW-,run EW-,of EW-,all EW-,race EW-,any EW-,cancelAll EW-,defaults EW-,trace EW-,smartClick EW-,smartClickBounds EW-,clickIfExists EW-,clickBoundsIfExists EW-,clickAny EW-,clickBoundsAny EW-,findAny EW-,waitForIdle EW-,waitForEvent EW-,waitForToast EW-,waitForNotification EW-,scrollUntil EW-,typeInto EW-,dismissPopups EW-,collectList EW-,launchAndWait EW-,backUntil EW-,backToApp EW-,toggle EW-,Flow EW-,pending EW-,workers EW-]
+$flow EW- function flow [wait EW-,waitAsync EW-,waitUntil EW-,waitWhile EW-,whenPresent EW-,repeatUntil EW-,waitForStable EW-,waitForVisible EW-,waitForHidden EW-,waitForGone EW-,waitForActivity EW-,waitForPackage EW-,waitThenClick EW-,clickWait EW-,waitThenClickBounds EW-,clickBoundsWait EW-,waitThenLongClick EW-,waitForStableThenClick EW-,clickWhenStable EW-,waitForStableThenClickBounds EW-,clickBoundsWhenStable EW-,clickWhenStableAfter EW-,clickBoundsWhenStableAfter EW-,sleep EW-,delay EW-,run EW-,of EW-,all EW-,race EW-,any EW-,cancelAll EW-,defaults EW-,trace EW-,smartClick EW-,smartClickBounds EW-,clickIfExists EW-,clickBoundsIfExists EW-,clickAny EW-,clickBoundsAny EW-,findAny EW-,waitForIdle EW-,waitForEvent EW-,waitForToast EW-,waitForNotification EW-,scrollUntil EW-,typeInto EW-,dismissPopups EW-,collectList EW-,launchAndWait EW-,backUntil EW-,backToApp EW-,toggle EW-,Flow EW-,pending EW-,workers EW-]
+events EW- [object Object]
+$events EW- [object Object]
+keys EW- [object Object]
+$keys EW- [object Object]
+flow function proto Function.prototype > Object.prototype
+flow keys wait,waitAsync,waitUntil,waitWhile,whenPresent,repeatUntil,waitForStable,waitForVisible,waitForHidden,waitForGone,waitForActivity,waitForPackage,waitThenClick,clickWait,waitThenClickBounds,clickBoundsWait,waitThenLongClick,waitForStableThenClick,clickWhenStable,waitForStableThenClickBounds,clickBoundsWhenStable,clickWhenStableAfter,clickBoundsWhenStableAfter,sleep,delay,run,of,all,race,any,cancelAll,defaults,trace,smartClick,smartClickBounds,clickIfExists,clickBoundsIfExists,clickAny,clickBoundsAny,findAny,waitForIdle,waitForEvent,waitForToast,waitForNotification,scrollUntil,typeInto,dismissPopups,collectList,launchAndWait,backUntil,backToApp,toggle,Flow,pending,workers
+flow.wait EW- function wait
+flow.waitAsync EW- function wait
+flow.waitUntil EW- function waitUntil
+flow.waitWhile EW- function waitWhile
+flow.whenPresent EW- function whenPresent
+flow.repeatUntil EW- function repeatUntil
+flow.waitForStable EW- function waitForStable
+flow.waitForVisible EW- function waitForVisible
+flow.waitForHidden EW- function waitForHidden
+flow.waitForGone EW- function waitForHidden
+flow.waitForActivity EW- function waitForActivity
+flow.waitForPackage EW- function waitForPackage
+flow.waitThenClick EW- function waitThenClick
+flow.clickWait EW- function waitThenClick
+flow.waitThenClickBounds EW- function waitThenClickBounds
+flow.clickBoundsWait EW- function waitThenClickBounds
+flow.waitThenLongClick EW- function waitThenLongClick
+flow.waitForStableThenClick EW- function waitForStableThenClick
+flow.clickWhenStable EW- function waitForStableThenClick
+flow.waitForStableThenClickBounds EW- function waitForStableThenClickBounds
+flow.clickBoundsWhenStable EW- function waitForStableThenClickBounds
+flow.clickWhenStableAfter EW- function clickWhenStableAfter
+flow.clickBoundsWhenStableAfter EW- function clickBoundsWhenStableAfter
+flow.sleep EW- function sleep
+flow.delay EW- function sleep
+flow.run EW- function run
+flow.of EW- function of
+flow.all EW- function all
+flow.race EW- function race
+flow.any EW- function any
+flow.cancelAll EW- function cancelAll
+flow.defaults EW- function defaults
+flow.trace EW- function trace
+flow.smartClick EW- function smartClick
+flow.smartClickBounds EW- function smartClickBounds
+flow.clickIfExists EW- function clickIfExists
+flow.clickBoundsIfExists EW- function clickBoundsIfExists
+flow.clickAny EW- function clickAny
+flow.clickBoundsAny EW- function clickBoundsAny
+flow.findAny EW- function findAny
+flow.waitForIdle EW- function waitForIdle
+flow.waitForEvent EW- function waitForEvent
+flow.waitForToast EW- function waitForToast
+flow.waitForNotification EW- function waitForNotification
+flow.scrollUntil EW- function scrollUntil
+flow.typeInto EW- function typeInto
+flow.dismissPopups EW- function dismissPopups
+flow.collectList EW- function collectList
+flow.launchAndWait EW- function launchAndWait
+flow.backUntil EW- function backUntil
+flow.backToApp EW- function backToApp
+flow.toggle EW- function toggle
+flow.Flow EW- function Flow [prototype ---]
+flow.pending EW- number 0
+flow.workers EW- number 0
+events object proto [object JavaObject]<org.autojs.autojs.runtime.api.Events> > Object.prototype
+events keys 
+events.__asEmitter__ --- function __asEmitter__
+keys object proto Object.prototype
+keys keys home,HOME,menu,MENU,back,BACK,volumeUp,volume_up,VOLUME_UP,volumeDown,volume_down,VOLUME_DOWN
+keys.home EW- number 3
+keys.HOME EW- number 3
+keys.menu EW- number 82
+keys.MENU EW- number 82
+keys.back EW- number 4
+keys.BACK EW- number 4
+keys.volumeUp EW- number 24
+keys.volume_up EW- number 24
+keys.VOLUME_UP EW- number 24
+keys.volumeDown EW- number 25
+keys.volume_down EW- number 25
+keys.VOLUME_DOWN EW- number 25

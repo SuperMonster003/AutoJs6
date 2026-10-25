@@ -335,9 +335,11 @@ class PureLogicModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = rhino.evalKt(DESCRIBE).toString()
-        val expected = DifferentialRhino().use { legacy ->
-            mountInOrder(legacy.ktScope.globalThis, legacy.ktRuntime, newLayer = false)
-            legacy.evalKt(DESCRIBE).toString()
+        val expected = ScriptModuleExpectations.obsolete("describe") {
+            DifferentialRhino().use { legacy ->
+                mountInOrder(legacy.ktScope.globalThis, legacy.ktRuntime, newLayer = false)
+                legacy.evalKt(DESCRIBE).toString()
+            }
         }
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }

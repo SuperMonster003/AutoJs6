@@ -1,0 +1,242 @@
+=== resultsAgree js: cvt.bytes('1.5 MiB', 'KiB')
+1536
+=== resultsAgree js: cvt.bytes.strict('1 KB', 'B')
+1000
+=== resultsAgree js: cvt.bytes.strict('1 KiB', 'B')
+1024
+=== resultsAgree js: cvt.bytes(1536)
+1.5
+=== resultsAgree js: cvt.bytes('1536 B')
+1.5
+=== resultsAgree js: cvt.bytes('1.5 MiB')
+1.5
+=== resultsAgree js: cvt.bytes(1536, 'KB')
+1.5
+=== resultsAgree js: cvt.bytes('1.5 MB', 'KB')
+1536
+=== resultsAgree js: cvt.bytes('1 KiB', 'B')
+1024
+=== resultsAgree js: cvt.bytes(1536, { fromUnit: 'B', toUnit: 'KB', fractionDigits: 3 })
+1.5
+=== resultsAgree js: cvt.bytes(1536, 0)
+2
+=== resultsAgree js: cvt.bytes(1536, 'KB', 3)
+1.5
+=== resultsAgree js: cvt.bytes(1536, 'MB', { toUnit: 'KB' })
+1.5
+=== resultsAgree js: cvt.bytes(2, 'MB', 'KB')
+2048
+=== resultsAgree js: cvt.bytes.strict(2, 'MB', 'KB')
+2000
+=== resultsAgree js: cvt.bytes.strict(2, 'MiB', 'KiB')
+2048
+=== resultsAgree js: cvt.bytes.strict(1000, 'B', 'KB')
+1
+=== resultsAgree js: cvt.bytes.strict(1024, 'B', 'KiB')
+1
+=== resultsAgree js: cvt.bytes.loose('1 KB', 'B')
+1024
+=== resultsAgree js: cvt.bytes.loose('1 KiB', 'B')
+1024
+=== resultsAgree js: [cvt.bytes.UNITS, cvt.bytes.AUTO, cvt.bytes.IEC_DIV, cvt.bytes.SI_DIV]
+["KMGTPEZYRQ","AUTO",1024,1000]
+=== resultsAgree js: cvt.bytes(0)
+0
+=== resultsAgree js: cvt.bytes(1023)
+1023
+=== resultsAgree js: cvt.bytes(1024)
+1
+=== resultsAgree js: cvt.bytes(1048575)
+1024
+=== resultsAgree js: cvt.bytes(123456789, 'MB', 4)
+117.7376
+=== resultsAgree js: cvt.bytes('  42 kb ')
+42
+=== resultsAgree js: cvt.bytes('1 kib', 'b')
+1024
+=== resultsAgree js: cvt.bytes(1536, true)
+1.5
+=== resultsAgree js: cvt.bytes(1536, 'KB', true)
+1.5
+=== resultsAgree js: cvt.bytes(1, 'KB', 'B', true)
+1024
+=== resultsAgree js: cvt.bytes(1, 'MB', 'KB', 1)
+1024
+=== resultsAgree js: cvt.bytes(1, 'MB', 'KB', { fromUnit: 'GB' })
+1048576
+=== resultsAgree js: cvt.bytes(1536, { strict: true })
+1.54
+=== resultsAgree js: cvt.bytes(1536, { strict: true, toUnit: 'KiB' })
+1.5
+=== resultsAgree js: cvt.bytes(1536, { strict: 1 })
+1.54
+=== resultsAgree js: cvt.bytes(1048576 * 900, { autoCarryThreshold: 800 })
+0.88
+=== resultsAgree js: cvt.bytes(1500, { strict: true, autoCarryThreshold: 1 })
+0
+=== resultsAgree js: cvt.bytes.strict(1500000)
+1.5
+=== resultsAgree js: cvt.bytes.strict('1.5 GiB')
+1.5
+=== resultsAgree js: cvt.bytes.strict(1, 'kib', 'B')
+1024
+=== resultsAgree js: cvt.bytes.strict('1 kib', 'KiB', 'B')
+throws IllegalArgumentException
+=== resultsAgree js: cvt.bytes([1536])
+1.5
+=== resultsAgree js: cvt.bytes({ toString() { return '2 KB'; } }, 'B')
+2048
+=== resultsAgree js: cvt.bytes(1, 'QB', 'YB')
+1048576
+=== resultsAgree js: cvt.bytes(1, 'TB', 'B')
+1099511627776
+=== resultsAgree js: cvt.bytes(-1)
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(NaN)
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes('abc')
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes('-1 KB')
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes('1e3')
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1, 'XB')
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes('1 KB', 'MB', 'B')
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1, null)
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1, 'KB', 'MB', 'x')
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1536, { fractionDigits: -1 })
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1536, { fractionDigits: 'x' })
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1536, { autoCarryThreshold: 0 })
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1536, { autoCarryThreshold: 900, toUnit: 'KB' })
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes.strict(1, { strict: true })
+throws IllegalArgumentException
+=== resultsAgree js: cvt.bytes.loose(1, { strict: false })
+throws IllegalArgumentException
+=== resultsAgree js: cvt.bytes()
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1, 2, 3, 4, 5)
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(null)
+0
+=== resultsAgree js: cvt.bytes(undefined)
+0
+=== resultsAgree js: cvt.bytes(1.555)
+1.555
+=== resultsAgree js: cvt.bytes(1.555, 'B', 'B')
+1.555
+=== resultsAgree js: cvt.bytes.strict(1.555)
+1.555
+=== resultsAgree js: cvt.bytes(1, 'KMB', 'B')
+1024
+=== resultsAgree js: cvt.bytes(1, 'B', 'MGB')
+0
+=== resultsAgree js: typeof cvt.bytes(1, 'QB', 'B')
+"number"
+=== resultsAgree js: cvt.bytes(1536, { fractionDigits: 1.5 })
+1.5
+=== resultsAgree js: cvt.bytes(1536, { fractionDigits: true })
+1.5
+=== resultsAgree js: typeof cvt.bytes(1536, { autoCarryThreshold: 0.5 })
+throws(java) RuntimeException
+=== resultsAgree js: cvt.bytes(1536, undefined)
+throws(java) RuntimeException
+=== resultsAgree js: fmt.bytes(1536)
+"1.50 KB"
+=== resultsAgree js: fmt.bytes.strict(1000, 'B', 'KB')
+"1.00 KB"
+=== resultsAgree js: fmt.bytes.strict(1024, 'B', 'KiB')
+"1.00 KiB"
+=== resultsAgree js: fmt.bytes('1536 B')
+"1.50 KB"
+=== resultsAgree js: fmt.bytes('1.5 MiB')
+"1.50 MB"
+=== resultsAgree js: fmt.bytes(1536, 'KB')
+"1.50 KB"
+=== resultsAgree js: fmt.bytes('1.5 MB', 'KB')
+"1536.00 KB"
+=== resultsAgree js: fmt.bytes('1 KiB', 'B')
+"1024.00 B"
+=== resultsAgree js: fmt.bytes(1536, { toUnit: 'KB', fractionDigits: 3, useSpace: false })
+"1.500KB"
+=== resultsAgree js: fmt.bytes(1536, 0)
+"2 KB"
+=== resultsAgree js: fmt.bytes(1536, true)
+"1.50 KiB"
+=== resultsAgree js: fmt.bytes(1536, 'KB', 3)
+"1.500 KB"
+=== resultsAgree js: fmt.bytes(1536, 'KB', true)
+"1.50 KiB"
+=== resultsAgree js: fmt.bytes(1536, 'MB', { toUnit: 'KB' })
+"1.50 KB"
+=== resultsAgree js: fmt.bytes(2, 'MB', 'KB')
+"2048.00 KB"
+=== resultsAgree js: fmt.bytes.strict(2, 'MB', 'KB')
+"2000.00 KB"
+=== resultsAgree js: fmt.bytes.strict(2, 'MiB', 'KiB')
+"2048.00 KiB"
+=== resultsAgree js: fmt.bytes.strict('1 KB', 'B')
+"1000.00 B"
+=== resultsAgree js: fmt.bytes.strict('1 KiB', 'B')
+"1024.00 B"
+=== resultsAgree js: fmt.bytes.loose('1 KB', 'B')
+"1024.00 B"
+=== resultsAgree js: fmt.bytes.loose(1024, 'KB')
+"1.00 KB"
+=== resultsAgree js: fmt.bytes.loose(1024, 'KB', true)
+"1.00 KiB"
+=== resultsAgree js: fmt.bytes(0)
+"0.00 B"
+=== resultsAgree js: fmt.bytes(1.555, 'B')
+"1.56 B"
+=== resultsAgree js: fmt.bytes(1536, { trimTrailingZero: true })
+"1.5 KB"
+=== resultsAgree js: fmt.bytes(1024, { trimTrailingZero: true, useIecIdentifier: true })
+"1 KiB"
+=== resultsAgree js: fmt.bytes(1536, 'KB', { useSpace: false, fractionDigits: 0 })
+"2KB"
+=== resultsAgree js: fmt.bytes(1, 'MB', 'KB', true)
+"1024.00 KiB"
+=== resultsAgree js: fmt.bytes('1536 KiB', { strict: true })
+"1.50 MiB"
+=== resultsAgree js: fmt.bytes.strict('1536 KiB')
+"1.50 MiB"
+=== resultsAgree js: fmt.bytes.strict(1536, 'KB', true)
+throws IllegalArgumentException
+=== resultsAgree js: fmt.bytes.strict(1536, { useIecIdentifier: false })
+throws IllegalArgumentException
+=== resultsAgree js: fmt.bytes(-1)
+throws(java) RuntimeException
+=== resultsAgree js: fmt.bytes(1, 'XB')
+throws(java) RuntimeException
+=== resultsAgree js: fmt.bytes()
+throws(java) RuntimeException
+=== resultsAgree js: fmt.bytes.strict(1500000)
+"1.50 MiB"
+=== resultsAgree js: fmt.bytes(null)
+"0.00 B"
+=== resultsAgree js: s13n.bytes('1.5 KiB')
+1536
+=== resultsAgree js: s13n.bytes(2, 'MB')
+2097152
+=== resultsAgree js: s13n.bytes('1 KB', 'KiB')
+1024
+=== resultsAgree js: s13n.bytes('1 KB', 'MB')
+throws IllegalArgumentException
+=== resultsAgree js: s13n.bytes(-1)
+throws IllegalArgumentException
+=== resultsAgree js: s13n.bytes(1, 5)
+throws WrappedIllegalArgumentException
+=== resultsAgree js: s13n.bytes(1.5)
+1.5
+=== resultsAgree js: s13n.bytes('1.4 B')
+1.4
+=== resultsAgree js: typeof s13n.bytes(1, 'QB')
+"number"

@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.augment.recorder.Recorder
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -33,7 +34,7 @@ class RecorderModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("recorder")
+        if (ScriptModuleExpectations.RECORDING) ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("recorder")
         prepare(rhino)
         rhino.mountNewModules("recorder")
     }
@@ -51,7 +52,7 @@ class RecorderModuleDifferentialTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(rhino.evalJs("recorder"), rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("recorder"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(rhino.evalJs("recorder"), rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("recorder"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 

@@ -1,0 +1,72 @@
+=== surfaceMatchesTheCurrentModule surface: zip
+open	function	0	EW-
+zipFile	function	0	EW-
+zipDir	function	0	EW-
+zipFiles	function	0	EW-
+unzip	function	0	EW-
+=== surfaceMatchesTheCurrentModule surface: zip.open('handle.zip')
+toString	function	1	EW-
+addFile	function	1	EW-
+addFiles	function	1	EW-
+addFolder	function	1	EW-
+extractAll	function	1	EW-
+extractFile	function	1	EW-
+setPassword	function	1	EW-
+getFileHeader	function	1	EW-
+getFileHeaders	function	1	EW-
+isEncrypted	function	1	EW-
+removeFile	function	1	EW-
+isValidZipFile	function	1	EW-
+getPath	function	1	EW-
+getZipFile	function	1	EW-
+toStringReadable	function	0	---
+path	string	-	E--
+zipFile	object	-	E--
+options	object	-	E--
+zipParameters	object	-	E--
+unzipParameters	object	-	E--
+=== resultsMatchTheCurrentModule current: typeof zip
+"function"
+=== resultsMatchTheCurrentModule current: [typeof zip.open, typeof zip.zipFile, typeof zip.zipDir, typeof zip.zipFiles, typeof zip.unzip]
+["function","function","function","function","function"]
+=== resultsMatchTheCurrentModule current: (function () { var h = zip('handle.zip'); try { return [h.name, h.isValidZipFile(), String(h).split('\n')[0]]; } finally { h.getZipFile().close(); } })()
+["open",false,"Zip {"]
+=== resultsMatchTheCurrentModule current: (function () { var h = zip.open('handle.zip', { compressionLevel: 'MAXIMUM' }); try { return [h.name, String(h.zipParameters.getCompressionLevel())]; } finally { h.getZipFile().close(); } })()
+["open","MAXIMUM"]
+=== resultsMatchTheCurrentModule current: (function () { var h = zip.open('handle.zip', null); try { return String(h.zipParameters.getEncryptionMethod()); } finally { h.getZipFile().close(); } })()
+"AES"
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), (function () { var h = zip.zipFile('aj6-p35-zip/a.txt', 'aj6-p35-zip/a.zip'); try { return [h.name, h.isValidZipFile(), h.getFileHeaders().length, String(h.getFileHeaders()[0].getFileName()), h.isEncrypted()]; } finally { h.getZipFile().close(); } })())
+unavailable(jvm) ExceptionInInitializerError
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), (function () { var h = zip.zipFile('aj6-p35-zip/a.txt', { password: 'secret' }); try { return [h.isEncrypted(), String(new java.io.File(h.path).getName())]; } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), (function () { var h = zip.zipFile('aj6-p35-zip/a.txt', undefined, { fileComment: 'c' }); try { return String(new java.io.File(h.path).getName()); } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), (function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'b.txt'); var w = new java.io.FileWriter(f); w.write('hello b'); w.close(); return f; })(), (function () { var h = zip.zipFiles(['aj6-p35-zip/a.txt', 'aj6-p35-zip/b.txt'], null); try { return [h.name, h.getFileHeaders().length, String(new java.io.File(h.path).getName())]; } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), (function () { var h = zip.zipFiles(java.util.Arrays.asList('aj6-p35-zip/a.txt'), 'aj6-p35-zip/list.zip'); try { return h.getFileHeaders().length; } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), new java.io.File(files.cwd(), 'dir.zip').delete(), (function () { var h = zip.zipDir('aj6-p35-zip', 'dir.zip', { compressionLevel: 9 }); try { return [h.name, h.getFileHeaders().length > 0]; } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), zip.zipFile('aj6-p35-zip/a.txt', 'aj6-p35-zip/u.zip').getZipFile().close(), (function () { var h = zip.unzip('aj6-p35-zip/u.zip', 'aj6-p35-zip/out'); try { return [h.name, new java.io.File(files.cwd(), 'aj6-p35-zip/out/a.txt').exists()]; } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: ((function () { var d = new java.io.File(files.cwd(), 'aj6-p35-zip'); d.mkdirs(); var f = new java.io.File(d, 'a.txt'); var w = new java.io.FileWriter(f); w.write('hello zip'); w.close(); return f; })(), zip.zipFile('aj6-p35-zip/a.txt', 'aj6-p35-zip/p.zip', { password: 'secret' }).getZipFile().close(), (function () { var h = zip.unzip('aj6-p35-zip/p.zip', 'aj6-p35-zip/out', { password: 'secret' }); try { return new java.io.File(files.cwd(), 'aj6-p35-zip/out/a.txt').exists(); } finally { h.getZipFile().close(); } })())
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: zip.zipFile('aj6-p35-zip/no-such-file.txt', null)
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: zip.zipFiles(['aj6-p35-zip/no-such-file.txt'], null)
+unavailable(jvm) NoClassDefFoundError
+Could not initialize class org.autojs.autojs.util.StringUtils
+=== resultsMatchTheCurrentModule current: zip.open('handle.zip', { aesKeyStrength: 'nope' })
+throws IllegalArgumentException
+No enum constant net.lingala.zip4j.model.enums.AesKeyStrength.NOPE
+=== resultsMatchTheCurrentModule current: zip.unzip('aj6-p35-zip/missing.zip', 'aj6-p35-zip/out')
+throws ZipException
+java.io.FileNotFoundException: <tmp>\aj6-p35-zip\missing.zip (The system cannot find the file sp

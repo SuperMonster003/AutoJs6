@@ -70,7 +70,7 @@ class PluginModuleDifferentialTest {
         File(assets, "modules/pangu.js").writeText("module.exports = { local: true };")
         sides.both(PRELUDE)
         install(sides.jsScope, "js")
-        val jvmNpm = sides.module(sides.jsScope, sides.asset("jvm-npm.js")) as ScriptableObject
+        val jvmNpm = sides.module(sides.jsScope, sides.obsolete("jvm-npm.js")) as ScriptableObject
         sides.jsGlobal.defineProperty("Module", jvmNpm, ScriptableObject.PERMANENT)
         sides.jsGlobal.defineProperty("require", ScriptableObject.getProperty(jvmNpm, "require"), ScriptableObject.PERMANENT)
         val ktProvider = provider(sides.ktScope, "kt")

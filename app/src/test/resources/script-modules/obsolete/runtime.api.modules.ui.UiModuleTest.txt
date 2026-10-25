@@ -1,0 +1,54 @@
+=== globalsMatchTheCurrentModule current: ['__autojs6Tsx', '__autojs6TsxFragment'].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); return k + ':' + typeof this[k] + ':' + (d ? [d.writable, d.enumerable, d.configurable].join('/') : 'none'); }, this).join()
+"__autojs6Tsx:function:true/true/false,__autojs6TsxFragment:object:true/true/false"
+=== surfaceMatchesTheCurrentModule surface: ui
+Widget	function	0	EW-
+__autojs6TsxFragment	object	-	EW-
+run	function	0	EW-
+inflate	function	0	EW-
+useAndroidLayout	function	0	EW-
+isUiThread	function	0	EW-
+__autojs6Tsx	function	0	EW-
+post	function	0	EW-
+layout	function	0	EW-
+layoutFile	function	0	EW-
+registerWidget	function	0	EW-
+setContentView	function	0	EW-
+statusBarColor	function	0	EW-
+statusBarIconLight	function	0	EW-
+statusBarIconLightBy	function	0	EW-
+backgroundColor	function	0	EW-
+navigationBarColor	function	0	EW-
+navigationBarIconLight	function	0	EW-
+navigationBarIconLightBy	function	0	EW-
+findById	function	0	EW-
+findByStringId	function	0	EW-
+findView	function	0	EW-
+finish	function	0	EW-
+keepScreenOn	function	0	EW-
+getStatusBarHeight	function	0	EW-
+getVisibleStatusBarHeight	function	0	EW-
+getNavigationBarHeight	function	0	EW-
+getVisibleNavigationBarHeight	function	0	EW-
+R	inaccessible	-	EW-
+root	object	-	EW-
+emitter	object	-	EW-
+statusBarHeight	inaccessible	-	EW-
+visibleStatusBarHeight	inaccessible	-	EW-
+navigationBarHeight	inaccessible	-	EW-
+visibleNavigationBarHeight	inaccessible	-	EW-
+=== proxiedMembersMatchTheCurrentModule current: typeof ui.Widget
+"function"
+=== proxiedMembersMatchTheCurrentModule current: Object.keys(new ui.Widget()).join()
+"renderInternal,defineAttr,hasAttr,setAttr,getAttr,notifyViewCreated,notifyAfterInflation"
+=== proxiedMembersMatchTheCurrentModule current: typeof ui.useAndroidLayout(null)
+"undefined"
+=== proxiedMembersMatchTheCurrentModule current: (ui.registerWidget('aj6p32', function () {}), typeof ui.__widgets__.aj6p32)
+"function"
+=== proxiedMembersMatchTheCurrentModule current: ui.view
+null
+=== proxiedMembersMatchTheCurrentModule current: typeof ui.layoutInflater
+"object"
+=== proxiedMembersMatchTheCurrentModule current: ui.bindingContext === this
+true
+=== obsoleteMembersExistOnTheNewModule members: ui
+__widgets__,Widget,R,emitter,__inflate__,inflate,useAndroidLayout,run,post,layout,layoutFile,isUiThread,registerWidget,setContentView,statusBarColor,backgroundColor,findById,findByStringId,findView,finish

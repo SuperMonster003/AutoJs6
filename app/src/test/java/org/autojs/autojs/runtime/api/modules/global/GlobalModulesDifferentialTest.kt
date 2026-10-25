@@ -4,6 +4,7 @@ import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,11 +23,13 @@ class GlobalModulesDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        val current = RhinoTestRuntime.create(rhino.jsScope)
-        val global = rhino.jsScope.globalThis
-        IsNullish.augmentWithRuntime(global, current)
-        Species.augmentWithRuntime(global, current)
-        NanoID.augmentWithRuntime(global, current)
+        if (ScriptModuleExpectations.RECORDING) {
+            val current = RhinoTestRuntime.create(rhino.jsScope)
+            val global = rhino.jsScope.globalThis
+            IsNullish.augmentWithRuntime(global, current)
+            Species.augmentWithRuntime(global, current)
+            NanoID.augmentWithRuntime(global, current)
+        }
         rhino.mountNewModules("isNullish", "species", "nanoid")
     }
 

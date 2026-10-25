@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -54,7 +55,7 @@ class OcrModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
         assertEquals(expected, actual)
         PATHS.forEach { HostModuleTestSupport.assertSameSurface(rhino, it, ::prepare, ::mountCurrent) }
         val jvmSelection = selection(JVM_MODE)
@@ -66,13 +67,15 @@ class OcrModulesTest {
     /** The obsolete module loads its engine modules with `require` and reads `scriptRuntime.ocrMLKit` / `ocrPaddle` lazily. */
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        val factories = rhino.context.newObject(rhino.jsScope)
-        listOf("ocr-mlkit", "ocr-paddle").forEach { factories.put(it, factories, factory(it)) }
-        rhino.jsScope.globalThis.put("__obsoleteFactories__", rhino.jsScope.globalThis, factories)
-        rhino.evalJs("global.require = function (name) { return __obsoleteFactories__[name]; }")
-        val obsolete = host.load("ocr")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(obsolete, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("ocr"), rhino.ktScope.globalThis))
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: ocr") {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            val factories = rhino.context.newObject(rhino.jsScope)
+            listOf("ocr-mlkit", "ocr-paddle").forEach { factories.put(it, factories, factory(it)) }
+            rhino.jsScope.globalThis.put("__obsoleteFactories__", rhino.jsScope.globalThis, factories)
+            rhino.evalJs("global.require = function (name) { return __obsoleteFactories__[name]; }")
+            SurfaceDiff.surface(host.load("ocr"), rhino.jsScope.globalThis)
+        }
+        val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("ocr"), rhino.ktScope.globalThis))
         assertEquals(SurfaceDiff.describe(report, "js", "kt"), setOf("_modeName", "_forcibleModeArgIndex"), report.onlyInFirst)
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.typeMismatches.isEmpty())
     }

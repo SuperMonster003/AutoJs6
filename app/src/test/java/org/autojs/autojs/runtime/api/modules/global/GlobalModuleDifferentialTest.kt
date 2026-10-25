@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases.KnownDifference
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs6.BuildConfig
 import org.junit.After
 import org.junit.Before
@@ -30,12 +31,14 @@ class GlobalModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.loadAndDefine("util")
-        rhino.evalJs(JS_STUBS)
-        host.setRuntimeProperty("isStopped", rhino.evalJs("(function () { return false; })"))
-        host.setRuntimeProperty("sleep", rhino.evalJs("(function (millis) { java.lang.Thread.sleep(millis); })"))
-        host.load("globals")
+        if (ScriptModuleExpectations.RECORDING) {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            host.loadAndDefine("util")
+            rhino.evalJs(JS_STUBS)
+            host.setRuntimeProperty("isStopped", rhino.evalJs("(function () { return false; })"))
+            host.setRuntimeProperty("sleep", rhino.evalJs("(function (millis) { java.lang.Thread.sleep(millis); })"))
+            host.load("globals")
+        }
         listOf("mThread" to Thread.currentThread(), "scale" to Scale(rhino.ktRuntime)).forEach { (name, value) ->
             ScriptRuntime::class.java.getDeclaredField(name).apply { isAccessible = true }.set(rhino.ktRuntime, value)
         }

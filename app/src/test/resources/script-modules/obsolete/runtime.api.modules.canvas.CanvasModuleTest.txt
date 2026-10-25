@@ -1,0 +1,51 @@
+=== surfaceMatchesTheCurrentModule surface: Canvas
+
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(5)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas('a')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(null)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas({})
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(undefined, 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(10, '10')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas('10', 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(10, null)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(0, 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(10, -1)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(0.5, 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(NaN, 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(Infinity, 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(10, Math.pow(2, 31))
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: Canvas(0, 10)
+undefined
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: Canvas(10)
+undefined
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: new Canvas(10, 10, 10)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.

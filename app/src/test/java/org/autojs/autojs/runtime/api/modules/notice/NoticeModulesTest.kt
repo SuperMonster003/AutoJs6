@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -104,15 +105,18 @@ class NoticeModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        rhino.evalJs("global.context = { getSystemService: function () { return null; } }")
-        val obsolete = host.load("notice") as ScriptableObject
-        listOf(
-            "notice" to (obsolete to "notice"),
-            "notice.channel" to (ScriptableObject.getProperty(obsolete, "channel") to "notice.channel"),
-        ).forEach { (name, sides) ->
-            val (js, kt) = sides
-            val report = SurfaceDiff.compare(SurfaceDiff.surface(js, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt(kt), rhino.ktScope.globalThis))
+        // The obsolete module runs only when recording; its surfaces are replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放记录的表面.
+        val obsolete by lazy {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            rhino.evalJs("global.context = { getSystemService: function () { return null; } }")
+            host.load("notice") as ScriptableObject
+        }
+        listOf("notice", "notice.channel").forEach { name ->
+            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name") {
+                SurfaceDiff.surface(if (name == "notice") obsolete else ScriptableObject.getProperty(obsolete, "channel"), rhino.jsScope.globalThis)
+            }
+            val report = SurfaceDiff.compare(js, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
         assertEquals("function", rhino.evalKt("typeof notice"))

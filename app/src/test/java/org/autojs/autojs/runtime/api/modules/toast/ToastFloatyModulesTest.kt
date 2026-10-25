@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.floaty.Floaty
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -60,10 +61,10 @@ class ToastFloatyModulesTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("getUiHandler", rhino.evalJs("(function () { return null; })"))
+        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope).also { it.setRuntimeProperty("getUiHandler", rhino.evalJs("(function () { return null; })")) } }
         listOf("toast", "floaty").forEach { name ->
-            val report = SurfaceDiff.compare(SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") { SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis) }
+            val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue(name + "\n" + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
     }

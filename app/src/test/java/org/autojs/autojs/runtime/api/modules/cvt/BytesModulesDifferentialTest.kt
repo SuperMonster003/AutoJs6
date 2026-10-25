@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.converter.Converter
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.formatter.Formatter
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.junit.After
 import org.junit.Before
@@ -29,11 +30,13 @@ class BytesModulesDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        val current = RhinoTestRuntime.create(rhino.jsScope)
-        val global = rhino.jsScope.globalThis
-        S13n.augmentWithRuntime(global, current)
-        Converter.augmentWithRuntime(global, current).also { BytesCvt.augmentWithRuntime(it, current) }
-        Formatter.augmentWithRuntime(global, current).also { BytesFmt.augmentWithRuntime(it, current) }
+        if (ScriptModuleExpectations.RECORDING) {
+            val current = RhinoTestRuntime.create(rhino.jsScope)
+            val global = rhino.jsScope.globalThis
+            S13n.augmentWithRuntime(global, current)
+            Converter.augmentWithRuntime(global, current).also { BytesCvt.augmentWithRuntime(it, current) }
+            Formatter.augmentWithRuntime(global, current).also { BytesFmt.augmentWithRuntime(it, current) }
+        }
         rhino.mountNewModules("s13n", "cvt", "fmt")
     }
 

@@ -1,0 +1,22 @@
+=== surfaceMatchesTheCurrentModule surface: dialogs
+build	function	0	EW-
+rawInput	function	0	EW-
+input	function	0	EW-
+prompt	function	0	EW-
+alert	function	0	EW-
+confirm	function	0	EW-
+select	function	0	EW-
+singleChoice	function	0	EW-
+multiChoice	function	0	EW-
+=== surfaceMatchesTheCurrentModule current: ['rawInput', 'prompt', 'alert', 'confirm', 'input', 'select'].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); return k + ':' + typeof this[k] + ':' + (d ? [d.writable, d.enumerable, d.configurable].join('/') : 'none'); }, this).join()
+"rawInput:function:true/true/false,prompt:function:true/true/false,alert:function:true/true/false,confirm:function:true/true/false,input:undefined:none,select:undefined:none"
+=== obsoleteMembersExistOnTheNewModule surface: dialogs
+build	function	1	EWC
+rawInput	function	3	EWC
+input	function	3	EWC
+prompt	function	3	EWC
+alert	function	3	EWC
+confirm	function	3	EWC
+select	function	3	EWC
+singleChoice	function	4	EWC
+multiChoice	function	4	EWC

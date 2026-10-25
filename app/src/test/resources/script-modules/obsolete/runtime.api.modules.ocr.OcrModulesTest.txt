@@ -1,0 +1,75 @@
+=== surfaceMatchesTheCurrentModule describe
+keys ocr,$ocr
+ocr EW- function ocr [toString EW-,tap EW-,recognizeText EW-,detect EW-,summary EW-,mode EW-,mlkit EW-,paddle EW-,rapid EW-]
+$ocr EW- function ocr [toString EW-,tap EW-,recognizeText EW-,detect EW-,summary EW-,mode EW-,mlkit EW-,paddle EW-,rapid EW-]
+ocr function proto Function.prototype > Object.prototype
+ocr keys toString,tap,recognizeText,detect,summary,mode,mlkit,paddle,rapid
+ocr.toString EW- function toString
+ocr.tap EW- function tap
+ocr.recognizeText EW- function recognizeText
+ocr.detect EW- function detect
+ocr.summary EW- function summary
+ocr.mode EW- string mlkit
+ocr.mlkit EW- function mlkit [recognizeText EW-,detect EW-]
+ocr.paddle EW- function paddle [recognizeText EW-,detect EW-]
+ocr.rapid EW- function rapid [recognizeText EW-,detect EW-]
+ocr.mlkit function proto Function.prototype > Object.prototype
+ocr.mlkit keys recognizeText,detect
+ocr.mlkit.recognizeText EW- function recognizeText
+ocr.mlkit.detect EW- function detect
+ocr.paddle function proto Function.prototype > Object.prototype
+ocr.paddle keys recognizeText,detect
+ocr.paddle.recognizeText EW- function recognizeText
+ocr.paddle.detect EW- function detect
+ocr.rapid function proto Function.prototype > Object.prototype
+ocr.rapid keys recognizeText,detect
+ocr.rapid.recognizeText EW- function recognizeText
+ocr.rapid.detect EW- function detect
+=== surfaceMatchesTheCurrentModule surface: ocr
+toString	function	0	EW-
+tap	function	0	EW-
+recognizeText	function	0	EW-
+detect	function	0	EW-
+summary	function	0	EW-
+mode	string	-	EW-
+mlkit	function	0	EW-
+paddle	function	0	EW-
+rapid	function	0	EW-
+=== surfaceMatchesTheCurrentModule surface: ocr.mlkit
+recognizeText	function	0	EW-
+detect	function	0	EW-
+=== surfaceMatchesTheCurrentModule surface: ocr.paddle
+recognizeText	function	0	EW-
+detect	function	0	EW-
+=== surfaceMatchesTheCurrentModule surface: ocr.rapid
+recognizeText	function	0	EW-
+detect	function	0	EW-
+=== surfaceMatchesTheCurrentModule current: Object.keys(ocr).join()
+"toString,tap,recognizeText,detect,summary,mode,mlkit,paddle,rapid"
+=== surfaceMatchesTheCurrentModule current: [Object.keys(ocr.mlkit).join(), Object.keys(ocr.paddle).join(), Object.keys(ocr.rapid).join()]
+["recognizeText,detect","recognizeText,detect","recognizeText,detect"]
+=== surfaceMatchesTheCurrentModule current: (function () { var out = []; for (var p = Object.getPrototypeOf(ocr); p !== null; p = Object.getPrototypeOf(p)) out.push(p === Object.prototype ? 'Object.prototype' : p === Function.prototype ? 'Function.prototype' : Object.getOwnPropertyNames(p).sort().join()); return out.join(' > '); })()
+"Function.prototype > Object.prototype"
+=== surfaceMatchesTheCurrentModule current: (function () { var d = Object.getOwnPropertyDescriptor(ocr, 'mode'); return [typeof d.get, typeof d.set, typeof d.value, d.writable, d.enumerable, d.configurable]; })()
+["undefined","undefined","string",true,true,false]
+=== surfaceMatchesTheCurrentModule current: (function () { ocr.tap('PADDLE'); var m = ocr.mode; ocr.tap('mlkit'); return m; })()
+"paddle"
+=== surfaceMatchesTheCurrentModule current: (function () { ocr.mode = 'Rapid'; var m = ocr.mode; ocr.tap('mlkit'); return m; })()
+"rapid"
+=== surfaceMatchesTheCurrentModule current: (function () { ocr.tap(ocr.mlkit); var m = ocr.mode; ocr.tap('mlkit'); return m; })()
+"mlkit"
+=== surfaceMatchesTheCurrentModule current: (function () { ocr.mode = ocr.paddle; var m = ocr.mode; ocr.tap('mlkit'); return m; })()
+"paddle"
+=== surfaceMatchesTheCurrentModule current: (function () { var r = [ocr.tap(null), ocr.tap(undefined), ocr.tap(''), ocr.tap('AUTO'), ocr.mode = null]; ocr.tap('mlkit'); return r; })()
+[null,null,null,null,null]
+=== obsoleteMembersExistOnTheNewModule surface: ocr
+mlkit	function	0	E--
+paddle	function	0	E--
+mode	string	-	EW-
+tap	function	1	E--
+recognizeText	function	0	EWC
+detect	function	0	EWC
+summary	function	0	E--
+toString	function	0	E--
+_modeName	object	-	---
+_forcibleModeArgIndex	number	-	---

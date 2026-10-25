@@ -1,0 +1,193 @@
+=== obsoleteMembersExistOnTheNewModule surface
+ICU	number	-	EWC
+ensureNumber	function	0	EWC
+check	function	0	EWC
+clamp	function	2	EWC
+clampTo	function	3	EWC
+toFixedNum	function	2	EWC
+padStart	function	3	EWC
+padEnd	function	3	EWC
+parseFloat	function	2	EWC
+parsePercent	function	1	EWC
+parseRatio	function	1	EWC
+parseAny	function	1	EWC
+=== resultsAgree js: Numberx.ICU
+996
+=== resultsAgree js: Numberx.check()
+false
+=== resultsAgree js: Numberx.check(1)
+true
+=== resultsAgree js: Numberx.check('1')
+false
+=== resultsAgree js: Numberx.check(1, 1)
+true
+=== resultsAgree js: Numberx.check(1, 2)
+false
+=== resultsAgree js: Numberx.check(9, 2 + 7)
+true
+=== resultsAgree js: Numberx.check('9', '9')
+false
+=== resultsAgree js: Numberx.check(NaN, NaN)
+false
+=== resultsAgree js: Numberx.check(1, '<', 2, '<=', 2, '>=', 1)
+true
+=== resultsAgree js: Numberx.check(0.5, '<', 2011, '>', 5, '<', 23, '>', 0.5)
+true
+=== resultsAgree js: Numberx.check(3, '<', 2)
+false
+=== resultsAgree js: Numberx.check(0.5, 23, 2011)
+throws Error
+=== resultsAgree js: Numberx.check(1, '==', 1)
+throws Error
+=== resultsAgree js: Numberx.check(1, '<', '2')
+throws Error
+=== resultsAgree js: Numberx.clamp(5, 1, 3)
+3
+=== resultsAgree js: Numberx.clamp(5, [1, 3])
+3
+=== resultsAgree js: Numberx.clamp(5, [3, 1])
+3
+=== resultsAgree js: Numberx.clamp(-1, 0, 10)
+0
+=== resultsAgree js: Numberx.clamp(5)
+5
+=== resultsAgree js: Numberx.clamp(307, 523)
+523
+=== resultsAgree js: Numberx.clamp(5, [10, 12, 30, 22, 20])
+10
+=== resultsAgree js: Numberx.clamp(5, 'x', 3)
+3
+=== resultsAgree js: Numberx.clamp(5, [null, 3])
+3
+=== resultsAgree js: Numberx.clamp(10, [false, 'Hi', [-1], '7'])
+"7"
+=== resultsAgree js: Numberx.clamp('5', 1, 3)
+throws TypeError
+=== resultsAgree js: Numberx.clampTo(12, [0, 10])
+2
+=== resultsAgree js: Numberx.clampTo(-3, [0, 10], 5)
+2
+=== resultsAgree js: Numberx.clampTo(5, [0, 10])
+5
+=== resultsAgree js: Numberx.clampTo(5, [])
+5
+=== resultsAgree js: Numberx.clampTo(5, [3, 3])
+throws RangeError
+=== resultsAgree js: Numberx.clampTo(390, [0, 360])
+30
+=== resultsAgree js: Numberx.clampTo(30 - 10 * 360, [0, 360])
+30
+=== resultsAgree js: Numberx.clampTo(372, [0, 360], 10)
+352
+=== resultsAgree js: Numberx.clampTo(372, [0, 'x', 360])
+12
+=== resultsAgree js: Numberx.toFixedNum(1.23456, 2)
+1.23
+=== resultsAgree js: Numberx.toFixedNum(1.5, 0)
+2
+=== resultsAgree js: Numberx.toFixedNum(123.456, 2)
+123.46
+=== resultsAgree js: Numberx.toFixedNum(3.004, 2)
+3
+=== resultsAgree js: Numberx.toFixedNum(1.23456e3)
+1235
+=== resultsAgree js: Numberx.toFixedNum(1.5, 101)
+throws RangeError
+=== resultsAgree js: Numberx.toFixedNum('1.5', 0)
+throws TypeError
+=== resultsAgree js: Numberx.padStart(7, 3)
+"007"
+=== resultsAgree js: Numberx.padStart(7, 3, 'x')
+"xx7"
+=== resultsAgree js: Numberx.padStart(5, 2, 0)
+"05"
+=== resultsAgree js: Numberx.padStart(99, 5, 'AB')
+"ABA99"
+=== resultsAgree js: Numberx.padStart(7, 2.9)
+"07"
+=== resultsAgree js: Numberx.padStart(1e21, 25)
+"000000000000000000001e+21"
+=== resultsAgree js: Numberx.padStart(123, 2)
+"123"
+=== resultsAgree js: Numberx.padEnd(7, 3)
+"700"
+=== resultsAgree js: Numberx.padEnd(7, 3, 'xy')
+"7xy"
+=== resultsAgree js: Numberx.padEnd(99.1, 5)
+"99.10"
+=== resultsAgree js: Numberx.parseFloat('1.5')
+1.5
+=== resultsAgree js: Numberx.parseFloat('12.5px')
+12.5
+=== resultsAgree js: Numberx.parseFloat('  -.5e2x')
+-50
+=== resultsAgree js: Numberx.parseFloat('1.1', 2)
+1.5
+=== resultsAgree js: Numberx.parseFloat('ff.8', 16)
+255.5
+=== resultsAgree js: Numberx.parseFloat('0.8', 16)
+0.5
+=== resultsAgree js: Numberx.parseFloat('0.101', 2)
+0.625
+=== resultsAgree js: Numberx.parseFloat(1.25, 2)
+throws TypeError
+=== resultsAgree js: Numberx.parsePercent('50%')
+0.5
+=== resultsAgree js: Numberx.parsePercent('50%%')
+0.005
+=== resultsAgree js: Numberx.parsePercent('2%%')
+0.0002
+=== resultsAgree js: Numberx.parsePercent('50.00%')
+0.5
+=== resultsAgree js: Numberx.parsePercent(' 5 0 % ')
+0.5
+=== resultsAgree js: Numberx.parsePercent('-12.5%')
+-0.125
+=== resultsAgree js: Numberx.parsePercent(0.3)
+0.3
+=== resultsAgree js: Numberx.parsePercent(1e21)
+1e+21
+=== resultsAgree js: Numberx.parsePercent('abc')
+NaN
+=== resultsAgree js: Numberx.parseRatio('1:4')
+0.25
+=== resultsAgree js: Numberx.parseRatio('3 : 4')
+0.75
+=== resultsAgree js: Numberx.parseRatio('3:0.1')
+30
+=== resultsAgree js: Numberx.parseRatio('0.1:0.01')
+10
+=== resultsAgree js: Numberx.parseRatio('3px:2')
+1.5
+=== resultsAgree js: Numberx.parseRatio('x:4')
+NaN
+=== resultsAgree js: Numberx.parseRatio('5')
+NaN
+=== resultsAgree js: Numberx.parseAny(' 3:4 ')
+0.75
+=== resultsAgree js: Numberx.parseAny('12%')
+0.12
+=== resultsAgree js: Numberx.parseAny('20%%')
+0.002
+=== resultsAgree js: Numberx.parseAny('42')
+42
+=== resultsAgree js: Numberx.parseAny('0xFF')
+255
+=== resultsAgree js: Numberx.parseAny(42)
+42
+=== resultsAgree js: Numberx.parseAny(' ')
+0
+=== resultsAgree js: Numberx.parseAny('abc')
+NaN
+=== resultsAgree js: Numberx.ensureNumber(1, 2)
+undefined
+=== resultsAgree js: Numberx.ensureNumber(NaN, 0, Infinity)
+undefined
+=== resultsAgree js: Numberx.ensureNumber()
+undefined
+=== resultsAgree js: Numberx.ensureNumber('1')
+throws TypeError
+=== resultsAgree js: Numberx.ensureNumber(null)
+throws TypeError
+=== resultsAgree js: typeof Numberx
+"function"

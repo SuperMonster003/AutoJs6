@@ -111,7 +111,7 @@ class ScriptRequireDifferentialTest {
         sides.both(PRELUDE)
         // The state without the layer, as ScriptRuntime sets it up. zh-CN: 未启用新层的状态, 同 ScriptRuntime 的设置.
         sides.js("var require = nativeFake;")
-        val jvmNpm = sides.module(sides.jsScope, sides.asset("jvm-npm.js")) as ScriptableObject
+        val jvmNpm = sides.module(sides.jsScope, sides.obsolete("jvm-npm.js")) as ScriptableObject
         sides.jsGlobal.defineProperty("Module", jvmNpm, ScriptableObject.PERMANENT)
         sides.jsGlobal.defineProperty("require", ScriptableObject.getProperty(jvmNpm, "require"), ScriptableObject.PERMANENT)
         // The state with the layer. zh-CN: 启用新层的状态.

@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
@@ -99,10 +100,12 @@ class ConsoleModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = SurfaceDiff.surface(rhino.evalKt("console.__augmented__"), rhino.ktScope.globalThis)
-        val expected = DifferentialRhino().use { current ->
-            prepare(current)
-            mountCurrent(current)
-            SurfaceDiff.surface(current.evalKt("console"), current.ktScope.globalThis)
+        val expected = ScriptModuleExpectations.obsoleteSurface("surface: console") {
+            DifferentialRhino().use { current ->
+                prepare(current)
+                mountCurrent(current)
+                SurfaceDiff.surface(current.evalKt("console"), current.ktScope.globalThis)
+            }
         }
         val report = SurfaceDiff.compare(expected, actual)
         assertTrue(SurfaceDiff.describe(report, "current", "new"), report.namesMatch && report.attributeMismatches.isEmpty())
@@ -136,8 +139,10 @@ class ConsoleModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val source = File(ObsoleteModuleHost.OBSOLETE_DIR, "__console__.js").readText()
-        val members = Regex("^ {16}([A-Za-z]+)(?:\\(|: function)", RegexOption.MULTILINE).findAll(source).map { it.groupValues[1] }.toList()
+        val members = ScriptModuleExpectations.obsolete("members: console") {
+            val source = File(ObsoleteModuleHost.OBSOLETE_DIR, "__console__.js").readText()
+            Regex("^ {16}([A-Za-z]+)(?:\\(|: function)", RegexOption.MULTILINE).findAll(source).map { it.groupValues[1] }.joinToString(",")
+        }.split(",")
         assertTrue(members.toString(), members.size >= 44 && "trace" in members && "printAllStackTrace" in members)
         val globals = listOf("verbose", "print", "log", "warn", "err", "openConsole", "showConsole", "clearConsole", "launchConsole")
         HostModuleTestSupport.check(rhino, members.map { "typeof console.$it" to "\"function\"" } + globals.map { "typeof $it" to "\"function\"" })

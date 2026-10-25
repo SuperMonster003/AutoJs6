@@ -4,6 +4,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -21,7 +22,7 @@ class NumberxModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        jsNumberx = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("Numberx")!!
+        if (ScriptModuleExpectations.RECORDING) jsNumberx = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("Numberx")!!
         rhino.mountNewModules("Numberx")
     }
 
@@ -32,7 +33,7 @@ class NumberxModuleDifferentialTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsNumberx, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("Numberx"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsNumberx, rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("Numberx"), rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         assertTrue("Obsolete Numberx members missing from the new module: ${report.onlyInFirst}", report.onlyInFirst.isEmpty())
         assertTrue("typeof differs: ${report.typeMismatches}", report.typeMismatches.isEmpty())

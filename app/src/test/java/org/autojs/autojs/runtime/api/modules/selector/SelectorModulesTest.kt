@@ -10,6 +10,7 @@ import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.flow.Flow
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.RhinoUtils
@@ -52,7 +53,7 @@ class SelectorModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
         assertEquals(expected, actual)
     }
 

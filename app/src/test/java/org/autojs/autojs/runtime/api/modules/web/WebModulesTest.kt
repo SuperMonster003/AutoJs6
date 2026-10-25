@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.http.Http
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -55,16 +56,18 @@ class WebModulesTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (n) { scope[n] = o[n].bind(o); }); };")
-        host.loadAndDefine("util")
-        val jsWeb = host.loadAndDefine("web")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsWeb, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("web"), rhino.ktScope.globalThis))
-        assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
-        listOf("newInjectableWebView", "newInjectableWebClient", "newWebSocket", "WebSocket").forEach { name ->
-            assertEquals(name, "function", rhino.evalJs("typeof $name"))
-            assertEquals(name, "function", rhino.evalKt("typeof $name"))
+        val globals = listOf("newInjectableWebView", "newInjectableWebClient", "newWebSocket", "WebSocket")
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface") {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (n) { scope[n] = o[n].bind(o); }); };")
+            host.loadAndDefine("util")
+            val jsWeb = host.loadAndDefine("web")
+            globals.forEach { name -> assertEquals(name, "function", rhino.evalJs("typeof $name")) }
+            SurfaceDiff.surface(jsWeb, rhino.jsScope.globalThis)
         }
+        val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("web"), rhino.ktScope.globalThis))
+        assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
+        globals.forEach { name -> assertEquals(name, "function", rhino.evalKt("typeof $name")) }
     }
 
     @Test
@@ -75,10 +78,12 @@ class WebModulesTest {
             HostModuleTestSupport.assertSameSurface(rhino, name, ::prepare, ::mountCurrent)
         }
         // The global names of the three modules and their order, as ScriptRuntime.augment() mounts them.
-        val expected = DifferentialRhino().use { current ->
-            prepare(current)
-            mountCurrent(current)
-            current.evalKt(KEYS).toString()
+        val expected = ScriptModuleExpectations.obsolete("keys") {
+            DifferentialRhino().use { current ->
+                prepare(current)
+                mountCurrent(current)
+                current.evalKt(KEYS).toString()
+            }
         }
         assertEquals(expected, rhino.evalKt(KEYS).toString())
     }
@@ -86,10 +91,10 @@ class WebModulesTest {
     /** The constants resolve through the lookup prototype like the current `WebSocketFields`: same names and values, none listed. */
     @Test
     fun webSocketConstantsMatchTheCurrentFields() {
-        assertEquals(WebSocketFields.exportedNames.sorted(), WebSocketConstants.VALUES.keys.sorted())
-        WebSocketFields.exportedNames.forEach { name ->
-            assertEquals(name, WebSocketFields.get(rhino.ktScope.globalThis, name), WebSocketConstants.VALUES[name])
+        val fields = ScriptModuleExpectations.obsolete("fields") {
+            WebSocketFields.exportedNames.sorted().joinToString("\n") { name -> "$name=${WebSocketFields.get(rhino.ktScope.globalThis, name)}" }
         }
+        assertEquals(fields, WebSocketConstants.VALUES.keys.sorted().joinToString("\n") { name -> "$name=${WebSocketConstants.VALUES[name]}" })
         HostModuleTestSupport.check(rhino, CONSTANTS)
         DEVICE.add(CONSTANTS)
     }

@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -40,8 +41,10 @@ class SqliteModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val obsolete = ObsoleteModuleHost(rhino.context, rhino.jsScope).load("sqlite")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(obsolete, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("sqlite"), rhino.ktScope.globalThis))
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: sqlite") {
+            SurfaceDiff.surface(ObsoleteModuleHost(rhino.context, rhino.jsScope).load("sqlite"), rhino.jsScope.globalThis)
+        }
+        val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("sqlite"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 

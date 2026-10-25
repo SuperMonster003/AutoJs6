@@ -8,6 +8,7 @@ import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -74,10 +75,12 @@ class UiModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = SurfaceDiff.surface(rhino.evalKt("ui.__augmented__"), rhino.ktScope.globalThis)
-        val expected = DifferentialRhino().use { current ->
-            prepare(current)
-            mountCurrent(current)
-            SurfaceDiff.surface(current.evalKt("ui"), current.ktScope.globalThis)
+        val expected = ScriptModuleExpectations.obsoleteSurface("surface: ui") {
+            DifferentialRhino().use { current ->
+                prepare(current)
+                mountCurrent(current)
+                SurfaceDiff.surface(current.evalKt("ui"), current.ktScope.globalThis)
+            }
         }
         val report = SurfaceDiff.compare(expected, actual)
         assertTrue(SurfaceDiff.describe(report, "current", "new"), report.namesMatch && report.attributeMismatches.isEmpty())
@@ -114,10 +117,12 @@ class UiModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val source = File(ObsoleteModuleHost.OBSOLETE_DIR, "__ui__.js").readText()
-        val block = source.substringAfter("UI.prototype = {").substringBefore("\n            };")
-        // `view` is the runtime's ui property, read through the proxy.
-        val members = Regex("^ {16}(?:get )?([A-Za-z_]+)(?:[(]|: )", RegexOption.MULTILINE).findAll(block).map { it.groupValues[1] }.filter { it != "constructor" && it != "view" }.toList()
+        val members = ScriptModuleExpectations.obsolete("members: ui") {
+            val source = File(ObsoleteModuleHost.OBSOLETE_DIR, "__ui__.js").readText()
+            val block = source.substringAfter("UI.prototype = {").substringBefore("\n            };")
+            // `view` is the runtime's ui property, read through the proxy.
+            Regex("^ {16}(?:get )?([A-Za-z_]+)(?:[(]|: )", RegexOption.MULTILINE).findAll(block).map { it.groupValues[1] }.filter { it != "constructor" && it != "view" }.joinToString(",")
+        }.split(",")
         assertTrue(members.toString(), members.size >= 20 && "Widget" in members && "__widgets__" in members && "finish" in members)
         HostModuleTestSupport.check(rhino, members.map { "'$it' in ui.__augmented__" to "true" } + listOf("ui.view" to "null"))
     }

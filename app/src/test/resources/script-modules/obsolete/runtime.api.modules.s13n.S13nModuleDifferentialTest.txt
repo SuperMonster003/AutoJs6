@@ -1,0 +1,175 @@
+=== obsoleteMembersExistOnTheNewModule surface
+color	function	1	EWC
+throwable	function	1	EWC
+point	function	1	EWC
+time	function	3	EWC
+=== resultsAgree js: s13n.time(2, 'seconds')
+2000
+=== resultsAgree js: s13n.time(120000, { fromUnit: 'ms', toUnit: 'minutes' })
+2
+=== resultsAgree js: s13n.time(1000)
+1000
+=== resultsAgree js: s13n.time(1500, 'ms', 's')
+1.5
+=== resultsAgree js: s13n.time(1500.7, 'ms', 's')
+1.5
+=== resultsAgree js: s13n.time(2, 'm', 's')
+120
+=== resultsAgree js: s13n.time(1, 'h', 'MINUTES')
+60
+=== resultsAgree js: s13n.time(1, 'd', 'hrs')
+24
+=== resultsAgree js: s13n.time(3, 'SECS', 'micro')
+3000000
+=== resultsAgree js: s13n.time(5, 'nanos', 'NANOSECONDS')
+5
+=== resultsAgree js: s13n.time(1, 'x')
+throws TypeError
+=== resultsAgree js: s13n.time(1, 's', 'x')
+throws TypeError
+=== resultsAgree js: s13n.time(1, null, 's')
+0.001
+=== resultsAgree js: s13n.time(1000, { fromUnit: 'ms', toUnit: 's' })
+1
+=== resultsAgree js: s13n.time(1000, { toUnit: 's' })
+1
+=== resultsAgree js: s13n.time(1000, {})
+1000
+=== resultsAgree js: s13n.time(1000, { fromUnit: 's' }, 'ignored')
+1000000
+=== resultsAgree js: s13n.time(60, java.util.concurrent.TimeUnit.SECONDS, java.util.concurrent.TimeUnit.MINUTES)
+1
+=== resultsAgree js: s13n.time(1, java.util.concurrent.TimeUnit.DAYS, 'h')
+24
+=== resultsAgree js: s13n.time(90, 's', java.util.concurrent.TimeUnit.MINUTES)
+1.5
+=== resultsAgree js: s13n.time(1, { fromUnit: java.util.concurrent.TimeUnit.HOURS, toUnit: 'm' })
+60
+=== resultsAgree js: s13n.time(NaN)
+NaN
+=== resultsAgree js: s13n.time('1000')
+1000
+=== resultsAgree js: s13n.time(' 1 000 ')
+throws TypeError
+=== resultsAgree js: s13n.time('1000', 'ms', 's')
+1
+=== resultsAgree js: s13n.time('abc')
+NaN
+=== resultsAgree js: s13n.time('')
+NaN
+=== resultsAgree js: s13n.time('12:30')
+throws TypeError
+=== resultsAgree js: s13n.time('1 2 3 4 5 6 7')
+NaN
+=== resultsAgree js: s13n.time('2024/01/02 03:04:05') === new Date('2024/01/02 03:04:05').getTime()
+true
+=== resultsAgree js: s13n.time('2024-01-02 03:04:05', 'ms', 's') === new Date('2024/01/02 03:04:05').getTime() / 1000
+true
+=== resultsAgree js: s13n.time(new Date(0))
+0
+=== resultsAgree js: s13n.time(new Date(90000), 'ms', 'm')
+1.5
+=== resultsAgree js: s13n.time(undefined)
+throws TypeError
+=== resultsAgree js: s13n.time(null)
+0
+=== resultsAgree js: s13n.time(true)
+1
+=== resultsAgree js: s13n.time([1])
+1
+=== resultsAgree js: s13n.time({})
+throws TypeError
+=== resultsAgree js: s13n.time()
+throws TypeError
+=== resultsAgree js: s13n.time(1, 'ms', 's', 'extra')
+0.001
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1, 2))
+[1,2]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1))
+[1,1]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1.6, 2.4))
+[1,2]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(-1.6, -2.4))
+[-1,-2]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1, 2.5))
+[1,2]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1.5, -2.7))
+[1,-2]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1, 'x'))
+[1,1]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1, null))
+[1,0]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1, undefined))
+[1,1]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(1, '3'))
+[1,3]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point([3, 4]))
+[3,4]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point([3.7, '4']))
+[3,4]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point([3]))
+throws InternalError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point([]))
+throws InternalError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point({ x: 5, y: 6 }))
+[5,6]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point({ x: '5', y: 6.5 }))
+[5,6]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point({ x: 'a', y: 1 }))
+throws TypeError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point({ x: 5 }))
+throws TypeError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(new android.graphics.Point(7, 8)))
+[7,8]
+=== resultsAgree js: (function (p) { return s13n.point(p) === p; })(new android.graphics.Point(7, 8))
+true
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(new org.opencv.core.Point(1.5, 2.5)))
+[1,2]
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point('1'))
+throws TypeError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(null))
+throws TypeError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point(true))
+throws TypeError
+=== resultsAgree js: (function (p) { return [p.x, p.y]; })(s13n.point())
+throws TypeError
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable('boom'))
+["java.lang.Exception","boom"]
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable(new java.lang.IllegalStateException('bad state')))
+["java.lang.IllegalStateException","bad state"]
+=== resultsAgree js: (function (t) { return s13n.throwable(t) === t; })(new java.lang.IllegalStateException('x'))
+true
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable(new Error('js error')))
+["java.lang.Exception","js error"]
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable(new TypeError('type error')))
+["java.lang.Exception","type error"]
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable(Error()))
+["java.lang.Exception",""]
+=== resultsAgree js: (function () { try { java.lang.Integer.parseInt('x'); } catch (e) { return String(s13n.throwable(e).getClass().getName()); } })()
+"org.mozilla.javascript.WrappedException"
+=== resultsAgree js: (function () { try { undefined.x; } catch (e) { return String(s13n.throwable(e).getClass().getName()); } })()
+"org.mozilla.javascript.EcmaError"
+=== resultsAgree js: (function (s) { return String(s13n.throwable(s + 'x').getMessage()); })('a')
+"ax"
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable(123))
+throws TypeError
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable(null))
+throws InternalError
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable({ message: 'm' }))
+throws TypeError
+=== resultsAgree js: (function (t) { return [String(t.getClass().getName()), String(t.getMessage())]; })(s13n.throwable())
+throws TypeError
+=== resultsAgree js: s13n.color(null)
+throws TypeError
+=== resultsAgree js: s13n.color(true)
+throws TypeError
+=== resultsAgree js: s13n.color({})
+throws TypeError
+=== resultsAgree js: s13n.color([])
+throws TypeError
+=== resultsAgree js: s13n.color()
+throws TypeError
+=== resultsAgree js: typeof s13n
+"object"
+=== resultsAgree js: typeof s13n.time
+"function"

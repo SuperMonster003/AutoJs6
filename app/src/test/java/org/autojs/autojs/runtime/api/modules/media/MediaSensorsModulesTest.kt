@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.media.Media
 import org.autojs.autojs.runtime.api.augment.sensors.Sensors
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -69,10 +70,12 @@ class MediaSensorsModulesTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("media", rhino.ktRuntime.media)
-        val jsMedia = host.load("media")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsMedia, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("media"), rhino.ktScope.globalThis))
+        val jsMedia = ScriptModuleExpectations.obsoleteSurface("surface: media") {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            host.setRuntimeProperty("media", rhino.ktRuntime.media)
+            SurfaceDiff.surface(host.load("media"), rhino.jsScope.globalThis)
+        }
+        val report = SurfaceDiff.compare(jsMedia, SurfaceDiff.surface(rhino.evalKt("media"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 

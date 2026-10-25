@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.plugins.Plugins
 import org.autojs.autojs.runtime.api.modules.plugins.PluginsTools
 import org.junit.After
@@ -48,7 +49,7 @@ class ShellModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
         assertEquals(expected, actual)
     }
 
@@ -150,18 +151,19 @@ class ShellModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("shizuku", rhino.evalJs("({})"))
-        val before = host.global.allIds.toSet()
+        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
+        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope).also { it.setRuntimeProperty("shizuku", rhino.evalJs("({})")) } }
+        val before by lazy { host.global.allIds.toSet() }
         listOf("shell", "plugins", "shizuku").forEach { name ->
-            val js = SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis)
+            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name") { before; SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis) }
             val report = SurfaceDiff.compare(js, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
             if (name == "shizuku") assertTrue(js.keys.toString(), js.isEmpty())
         }
         // The obsolete shell and shizuku were callable; plugins was a plain object (callable on the new layer, an addition).
         listOf("shell", "shizuku").forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
-        val globals = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        val globals = ScriptModuleExpectations.obsolete("globals") { host.global.allIds.filterIsInstance<String>().filterNot { it in before }.joinToString(",") }.split(",")
         assertEquals(GLOBALS.filter { it.first().isUpperCase() }.sorted(), globals.sorted())
         globals.forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
     }

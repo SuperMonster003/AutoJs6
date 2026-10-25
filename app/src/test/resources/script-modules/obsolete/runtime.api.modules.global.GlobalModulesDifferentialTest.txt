@@ -1,0 +1,218 @@
+=== resultsAgree js: (function () { return species(null); })()
+"Null"
+=== resultsAgree js: (function () { return species(undefined); })()
+"Undefined"
+=== resultsAgree js: (function () { return species(true); })()
+"Boolean"
+=== resultsAgree js: (function () { return species('a'); })()
+"String"
+=== resultsAgree js: (function () { return species(1); })()
+"Number"
+=== resultsAgree js: (function () { return species(NaN); })()
+"Number"
+=== resultsAgree js: (function () { return species([]); })()
+"Array"
+=== resultsAgree js: (function () { return species({}); })()
+"Object"
+=== resultsAgree js: (function () { return species(function () {}); })()
+"Function"
+=== resultsAgree js: (function () { return species(new Date(0)); })()
+"Date"
+=== resultsAgree js: (function () { return species(/x/); })()
+"RegExp"
+=== resultsAgree js: (function () { return species(new Error('e')); })()
+"Error"
+=== resultsAgree js: (function () { return species(new TypeError('t')); })()
+"Error"
+=== resultsAgree js: (function () { return species(new Map()); })()
+"Map"
+=== resultsAgree js: (function () { return species(new Set()); })()
+"Set"
+=== resultsAgree js: (function () { return species(new WeakMap()); })()
+"WeakMap"
+=== resultsAgree js: (function () { return species(new WeakSet()); })()
+"WeakSet"
+=== resultsAgree js: (function () { return species(new ArrayBuffer(1)); })()
+"ArrayBuffer"
+=== resultsAgree js: (function () { return species(new Int8Array(1)); })()
+"Int8Array"
+=== resultsAgree js: (function () { return species(new Uint8ClampedArray(1)); })()
+"Uint8ClampedArray"
+=== resultsAgree js: (function () { return species(new Float64Array(1)); })()
+"Float64Array"
+=== resultsAgree js: (function () { return species(new DataView(new ArrayBuffer(1))); })()
+"DataView"
+=== resultsAgree js: (function () { return species(Symbol('s')); })()
+"JavaObject"
+=== resultsAgree js: (function () { return species(Object.create(null)); })()
+"Object"
+=== resultsAgree js: (function () { return species(arguments); })()
+"Arguments"
+=== resultsAgree js: (function () { return species(Math); })()
+"Math"
+=== resultsAgree js: (function () { return species(JSON); })()
+"JSON"
+=== resultsAgree js: (function () { return species(java); })()
+"JavaPackage"
+=== resultsAgree js: (function () { return species(java.lang.String); })()
+"JavaClass"
+=== resultsAgree js: (function () { return species(new java.lang.Object()); })()
+"JavaObject"
+=== resultsAgree js: (function () { return species(new java.lang.String('j')); })()
+"JavaObject"
+=== resultsAgree js: (function () { return species(java.lang.Integer.valueOf(7)); })()
+"JavaObject"
+=== resultsAgree js: (function () { return species(java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 1)); })()
+"JavaArray"
+=== resultsAgree js: (function () { return species(new java.util.ArrayList()); })()
+"JavaList"
+=== resultsAgree js: (function () { return species(new Boolean(true)); })()
+"Boolean"
+=== resultsAgree js: (function () { return species(new String('s')); })()
+"String"
+=== resultsAgree js: (function () { return species(new Number(1)); })()
+"Number"
+=== resultsAgree js: (function () { return species(Object(1)); })()
+"Number"
+=== resultsAgree js: (function () { return species(<x/>); })()
+"XML"
+=== resultsAgree js: (function () { return species(<><x/><y/></>); })()
+"XMLList"
+=== resultsAgree js: (function () { return species.isObject(null) + ',' + species.isJavaObject(null) + ',' + isNullish(null); })()
+"false,false,true"
+=== resultsAgree js: (function () { return species.isObject(undefined) + ',' + species.isJavaObject(undefined) + ',' + isNullish(undefined); })()
+"false,false,true"
+=== resultsAgree js: (function () { return species.isObject(true) + ',' + species.isJavaObject(true) + ',' + isNullish(true); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject('a') + ',' + species.isJavaObject('a') + ',' + isNullish('a'); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(1) + ',' + species.isJavaObject(1) + ',' + isNullish(1); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(NaN) + ',' + species.isJavaObject(NaN) + ',' + isNullish(NaN); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject([]) + ',' + species.isJavaObject([]) + ',' + isNullish([]); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject({}) + ',' + species.isJavaObject({}) + ',' + isNullish({}); })()
+"true,false,false"
+=== resultsAgree js: (function () { return species.isObject(function () {}) + ',' + species.isJavaObject(function () {}) + ',' + isNullish(function () {}); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Date(0)) + ',' + species.isJavaObject(new Date(0)) + ',' + isNullish(new Date(0)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(/x/) + ',' + species.isJavaObject(/x/) + ',' + isNullish(/x/); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Error('e')) + ',' + species.isJavaObject(new Error('e')) + ',' + isNullish(new Error('e')); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new TypeError('t')) + ',' + species.isJavaObject(new TypeError('t')) + ',' + isNullish(new TypeError('t')); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Map()) + ',' + species.isJavaObject(new Map()) + ',' + isNullish(new Map()); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Set()) + ',' + species.isJavaObject(new Set()) + ',' + isNullish(new Set()); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new WeakMap()) + ',' + species.isJavaObject(new WeakMap()) + ',' + isNullish(new WeakMap()); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new WeakSet()) + ',' + species.isJavaObject(new WeakSet()) + ',' + isNullish(new WeakSet()); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new ArrayBuffer(1)) + ',' + species.isJavaObject(new ArrayBuffer(1)) + ',' + isNullish(new ArrayBuffer(1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Int8Array(1)) + ',' + species.isJavaObject(new Int8Array(1)) + ',' + isNullish(new Int8Array(1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Uint8ClampedArray(1)) + ',' + species.isJavaObject(new Uint8ClampedArray(1)) + ',' + isNullish(new Uint8ClampedArray(1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Float64Array(1)) + ',' + species.isJavaObject(new Float64Array(1)) + ',' + isNullish(new Float64Array(1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new DataView(new ArrayBuffer(1))) + ',' + species.isJavaObject(new DataView(new ArrayBuffer(1))) + ',' + isNullish(new DataView(new ArrayBuffer(1))); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(Symbol('s')) + ',' + species.isJavaObject(Symbol('s')) + ',' + isNullish(Symbol('s')); })()
+"false,true,false"
+=== resultsAgree js: (function () { return species.isObject(Object.create(null)) + ',' + species.isJavaObject(Object.create(null)) + ',' + isNullish(Object.create(null)); })()
+"true,false,false"
+=== resultsAgree js: (function () { return species.isObject(arguments) + ',' + species.isJavaObject(arguments) + ',' + isNullish(arguments); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(Math) + ',' + species.isJavaObject(Math) + ',' + isNullish(Math); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(JSON) + ',' + species.isJavaObject(JSON) + ',' + isNullish(JSON); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(java) + ',' + species.isJavaObject(java) + ',' + isNullish(java); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(java.lang.String) + ',' + species.isJavaObject(java.lang.String) + ',' + isNullish(java.lang.String); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new java.lang.Object()) + ',' + species.isJavaObject(new java.lang.Object()) + ',' + isNullish(new java.lang.Object()); })()
+"false,true,false"
+=== resultsAgree js: (function () { return species.isObject(new java.lang.String('j')) + ',' + species.isJavaObject(new java.lang.String('j')) + ',' + isNullish(new java.lang.String('j')); })()
+"false,true,false"
+=== resultsAgree js: (function () { return species.isObject(java.lang.Integer.valueOf(7)) + ',' + species.isJavaObject(java.lang.Integer.valueOf(7)) + ',' + isNullish(java.lang.Integer.valueOf(7)); })()
+"false,true,false"
+=== resultsAgree js: (function () { return species.isObject(java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 1)) + ',' + species.isJavaObject(java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 1)) + ',' + isNullish(java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new java.util.ArrayList()) + ',' + species.isJavaObject(new java.util.ArrayList()) + ',' + isNullish(new java.util.ArrayList()); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Boolean(true)) + ',' + species.isJavaObject(new Boolean(true)) + ',' + isNullish(new Boolean(true)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new String('s')) + ',' + species.isJavaObject(new String('s')) + ',' + isNullish(new String('s')); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(new Number(1)) + ',' + species.isJavaObject(new Number(1)) + ',' + isNullish(new Number(1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(Object(1)) + ',' + species.isJavaObject(Object(1)) + ',' + isNullish(Object(1)); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(<x/>) + ',' + species.isJavaObject(<x/>) + ',' + isNullish(<x/>); })()
+"false,false,false"
+=== resultsAgree js: (function () { return species.isObject(<><x/><y/></>) + ',' + species.isJavaObject(<><x/><y/></>) + ',' + isNullish(<><x/><y/></>); })()
+"false,false,false"
+=== resultsAgree js: (function (s) { return species(s + 'x'); })('a')
+"JavaObject"
+=== resultsAgree js: (function (s) { return species.isString(s + 'x'); })('a')
+false
+=== resultsAgree js: (function () { var v = [1, 'a', null, {}]; return [v.map(function (x) { return species.isArray(x); }).join(), v.map(function (x) { return species.isArrayBuffer(x); }).join(), v.map(function (x) { return species.isBigInt(x); }).join(), v.map(function (x) { return species.isBoolean(x); }).join(), v.map(function (x) { return species.isContinuation(x); }).join(), v.map(function (x) { return species.isDataView(x); }).join(), v.map(function (x) { return species.isDate(x); }).join(), v.map(function (x) { return species.isError(x); }).join(), v.map(function (x) { return species.isFloat32Array(x); }).join(), v.map(function (x) { return species.isFloat64Array(x); }).join(), v.map(function (x) { return species.isFunction(x); }).join(), v.map(function (x) { return species.isHTMLDocument(x); }).join(), v.map(function (x) { return species.isInt16Array(x); }).join(), v.map(function (x) { return species.isInt32Array(x); }).join(), v.map(function (x) { return species.isInt8Array(x); }).join(), v.map(function (x) { return species.isJavaObject(x); }).join(), v.map(function (x) { return species.isJavaClass(x); }).join(), v.map(function (x) { return species.isJavaPackage(x); }).join(), v.map(function (x) { return species.isMap(x); }).join(), v.map(function (x) { return species.isNamespace(x); }).join(), v.map(function (x) { return species.isNull(x); }).join(), v.map(function (x) { return species.isNumber(x); }).join(), v.map(function (x) { return species.isObject(x); }).join(), v.map(function (x) { return species.isQName(x); }).join(), v.map(function (x) { return species.isRegExp(x); }).join(), v.map(function (x) { return species.isSet(x); }).join(), v.map(function (x) { return species.isString(x); }).join(), v.map(function (x) { return species.isUint16Array(x); }).join(), v.map(function (x) { return species.isUint32Array(x); }).join(), v.map(function (x) { return species.isUint8Array(x); }).join(), v.map(function (x) { return species.isUint8ClampedArray(x); }).join(), v.map(function (x) { return species.isUndefined(x); }).join(), v.map(function (x) { return species.isWeakMap(x); }).join(), v.map(function (x) { return species.isWeakSet(x); }).join(), v.map(function (x) { return species.isWindow(x); }).join(), v.map(function (x) { return species.isXML(x); }).join(), v.map(function (x) { return species.isXMLList(x); }).join()]; })()
+["false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,true,false","true,false,false,false","false,false,false,true","false,false,false,false","false,false,false,false","false,false,false,false","false,true,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false","false,false,false,false"]
+=== resultsAgree js: [isJavaClass(java.lang.String), isJavaPackage(java), isObject({}), isObject(1)]
+[true,true,true,false]
+=== resultsAgree js: isObject === species.isObject
+false
+=== resultsAgree js: species()
+throws(java) RuntimeException
+=== resultsAgree js: species(undefined)
+"Undefined"
+=== resultsAgree js: species(1, 2)
+throws(java) RuntimeException
+=== resultsAgree js: species.isArray()
+throws MessageLookup
+=== resultsAgree js: species.isArray([], 1)
+throws NullPointerException
+=== resultsAgree js: isNullish()
+true
+=== resultsAgree js: isNullish(null, 1)
+true
+=== resultsAgree js: [1, null, 2].some(isNullish)
+true
+=== resultsAgree js: typeof species
+"function"
+=== resultsAgree js: typeof isNullish
+"function"
+=== resultsAgree js: nanoid().length
+21
+=== resultsAgree js: nanoid(8).length
+8
+=== resultsAgree js: nanoid(0)
+""
+=== resultsAgree js: nanoid(8.7).length
+8
+=== resultsAgree js: nanoid('5').length
+5
+=== resultsAgree js: nanoid(undefined).length
+21
+=== resultsAgree js: nanoid(null).length
+21
+=== resultsAgree js: /^[A-Za-z0-9_-]{64}$/.test(nanoid(64))
+true
+=== resultsAgree js: nanoid(-1)
+throws(java) RuntimeException
+=== resultsAgree js: nanoid(NaN)
+throws(java) RuntimeException
+=== resultsAgree js: nanoid('abc')
+throws(java) RuntimeException
+=== resultsAgree js: nanoid(1, 2)
+throws(java) RuntimeException
+=== resultsAgree js: nanoid(true).length
+1
+=== resultsAgree js: typeof nanoid
+"function"

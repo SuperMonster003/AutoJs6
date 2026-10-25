@@ -1,0 +1,124 @@
+=== surfaceMatchesTheCurrentModule surface: recorder
+isLessThan	function	0	EW-
+getClass	function	0	EW-
+wait	function	0	EW-
+notifyAll	function	0	EW-
+isGreaterThan	function	0	EW-
+clear	function	0	EW-
+save	function	0	EW-
+remove	function	0	EW-
+notify	function	0	EW-
+shortcut	function	0	EW-
+load	function	0	EW-
+hashCode	function	0	EW-
+equals	function	0	EW-
+toString	function	0	EW-
+has	function	0	EW-
+class	object	-	EW-
+=== obsoleteMembersExistOnTheNewModule surface
+save	function	2	EWC
+load	function	2	EWC
+isLessThan	function	2	EWC
+isGreaterThan	function	2	EWC
+has	function	1	EWC
+remove	function	1	EWC
+clear	function	0	EWC
+=== resultsAgree js: typeof recorder
+"function"
+=== resultsAgree js: [typeof recorder.save, typeof recorder.load, typeof recorder.isLessThan, typeof recorder.isGreaterThan, typeof recorder.has, typeof recorder.remove, typeof recorder.clear]
+["function","function","function","function","function","function","function"]
+=== resultsAgree js: (recorder.clear(), recorder.save('a', 1000), recorder.load('a', 1500))
+500
+=== resultsAgree js: (recorder.clear(), recorder.save('a', 1000))
+1000
+=== resultsAgree js: (recorder.clear(), recorder.save('a', 1000), [recorder.has('a'), recorder.has('nope')])
+[true,false]
+=== resultsAgree js: (recorder.clear(), recorder.save('r', 1), recorder.remove('r'))
+true
+=== resultsAgree js: (recorder.clear(), recorder.remove('absent'))
+true
+=== resultsAgree js: (recorder.clear(), recorder.save('c', 1), recorder.clear(), recorder.has('c'))
+false
+=== resultsAgree js: (recorder.clear(), recorder.load('missing'))
+throws Error
+=== resultsAgree js: (recorder.clear(), recorder.save(undefined, 100), recorder.load(undefined, 150))
+50
+=== resultsAgree js: (recorder.clear(), recorder.save(null, 100), recorder.load(null, 160))
+60
+=== resultsAgree js: (recorder.clear(), recorder.load())
+NaN
+=== resultsAgree js: (recorder.clear(), recorder.save('x', 1000), [recorder.isLessThan('x', 1e15), recorder.isGreaterThan('x', 0), recorder.isGreaterThan('x', 1e15)])
+[true,true,false]
+=== resultsAgree js: (recorder.clear(), [typeof recorder('k'), recorder.has('k')])
+["number",true]
+=== resultsAgree js: (recorder.clear(), recorder('k') > 1e12)
+true
+=== resultsAgree js: (recorder.clear(), recorder('k'), recorder('k') < 1000)
+true
+=== resultsAgree js: (recorder.clear(), recorder(), recorder() < 1000)
+true
+=== resultsAgree js: recorder(function () {}) >= 0
+true
+=== resultsAgree js: (function () { var n = 0; recorder(function () { n++; }); return n; })()
+1
+=== resultsAgree js: (function () { var self; recorder(function () { self = this; }, { v: 7 }); return self.v; })()
+7
+=== resultsAgree js: (function () { var name; recorder(function named() { }); return recorder.has('named'); })()
+false
+=== resultsAgree js: (recorder.clear(), recorder('t', 5000), recorder('t', 9000) < 1000)
+false
+=== resultsAgree js: recorder(1, 2, 3) >= 0
+true
+=== resultsAgree js: (recorder.clear(), recorder.save('a', 'x') > 0)
+true
+=== resultsAgree current: typeof recorder
+"function"
+=== resultsAgree current: [typeof recorder.save, typeof recorder.load, typeof recorder.isLessThan, typeof recorder.isGreaterThan, typeof recorder.has, typeof recorder.remove, typeof recorder.clear]
+["function","function","function","function","function","function","function"]
+=== resultsAgree current: (recorder.clear(), recorder.save('a', 1000), recorder.load('a', 1500))
+500
+=== resultsAgree current: (recorder.clear(), recorder.save('a', 1000))
+1000
+=== resultsAgree current: (recorder.clear(), recorder.save('a', 1000), [recorder.has('a'), recorder.has('nope')])
+[true,false]
+=== resultsAgree current: (recorder.clear(), recorder.save('r', 1), recorder.remove('r'))
+true
+=== resultsAgree current: (recorder.clear(), recorder.remove('absent'))
+false
+=== resultsAgree current: (recorder.clear(), recorder.save('c', 1), recorder.clear(), recorder.has('c'))
+false
+=== resultsAgree current: (recorder.clear(), recorder.load('missing'))
+throws JavaException NoSuchElementException
+java.util.NoSuchElementException: Recorder key "missing" does not exist
+=== resultsAgree current: (recorder.clear(), recorder.save(undefined, 100), recorder.load(undefined, 150))
+50
+=== resultsAgree current: (recorder.clear(), recorder.save(null, 100), recorder.load(null, 160))
+60
+=== resultsAgree current: (recorder.clear(), recorder.load())
+NaN
+=== resultsAgree current: (recorder.clear(), recorder.save('x', 1000), [recorder.isLessThan('x', 1e15), recorder.isGreaterThan('x', 0), recorder.isGreaterThan('x', 1e15)])
+[true,true,false]
+=== resultsAgree current: (recorder.clear(), [typeof recorder('k'), recorder.has('k')])
+["number",true]
+=== resultsAgree current: (recorder.clear(), recorder('k') > 1e12)
+true
+=== resultsAgree current: (recorder.clear(), recorder('k'), recorder('k') < 1000)
+true
+=== resultsAgree current: (recorder.clear(), recorder(), recorder() < 1000)
+true
+=== resultsAgree current: recorder(function () {}) >= 0
+true
+=== resultsAgree current: (function () { var n = 0; recorder(function () { n++; }); return n; })()
+1
+=== resultsAgree current: (function () { var self; recorder(function () { self = this; }, { v: 7 }); return self.v; })()
+7
+=== resultsAgree current: (function () { var name; recorder(function named() { }); return recorder.has('named'); })()
+false
+=== resultsAgree current: (recorder.clear(), recorder('t', 5000), recorder('t', 9000) < 1000)
+true
+=== resultsAgree current: recorder(1, 2, 3) >= 0
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== resultsAgree current: (recorder.clear(), recorder.save('a', 'x') > 0)
+throws JavaException IllegalArgumentException
+java.lang.IllegalArgumentException: Failed to coerce x (String) into a valid number

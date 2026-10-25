@@ -7,6 +7,7 @@ import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.augment.timers.Timers
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.continuation.Continuation
 import org.autojs.autojs.runtime.api.modules.engines.Engines
 import org.autojs.autojs.runtime.api.modules.threads.Threads
@@ -52,7 +53,7 @@ class CoreRuntimeModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, MODULES)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, MODULES) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, MODULES) } }
         assertEquals(expected, actual)
     }
 
@@ -194,16 +195,22 @@ class CoreRuntimeModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("engines", rhino.evalJs(ENGINES_STUB))
-        host.setRuntimeProperty("timers", rhino.ktRuntime.timers)
-        rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (name) { scope[name] = function () {}; }); }")
-        val before = host.global.allIds.toSet()
+        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
+        val host by lazy {
+            ObsoleteModuleHost(rhino.context, rhino.jsScope).also { host ->
+                host.setRuntimeProperty("engines", rhino.evalJs(ENGINES_STUB))
+                host.setRuntimeProperty("timers", rhino.ktRuntime.timers)
+                rhino.evalJs("global.__asGlobal__ = function (o, names, scope) { names.forEach(function (name) { scope[name] = function () {}; }); }")
+            }
+        }
+        val before by lazy { host.global.allIds.toSet() }
         listOf("engines", "timers").forEach { name ->
-            val report = SurfaceDiff.compare(SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") { before; SurfaceDiff.surface(host.load(name), rhino.jsScope.globalThis) }
+            val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
-        val globals = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        val globals = ScriptModuleExpectations.obsolete("globals") { host.global.allIds.filterIsInstance<String>().filterNot { it in before }.joinToString(",") }.split(",")
         assertEquals(OBSOLETE_TIMER_GLOBALS.sorted(), globals.sorted())
         globals.forEach { assertEquals(it, "function", rhino.evalKt("typeof $it")) }
     }

@@ -1,0 +1,363 @@
+=== surfaceMatchesTheCurrentModule surface: console
+trace	function	0	EW-
+show	function	0	EW-
+hide	function	0	EW-
+reset	function	0	EW-
+clear	function	0	EW-
+expand	function	0	EW-
+collapse	function	0	EW-
+assert	function	0	EW-
+input	function	0	EW-
+rawInput	function	0	EW-
+log	function	0	EW-
+verbose	function	0	EW-
+info	function	0	EW-
+warn	function	0	EW-
+error	function	0	EW-
+print	function	0	EW-
+time	function	0	EW-
+timeEnd	function	0	EW-
+build	function	0	EW-
+setSize	function	0	EW-
+setPosition	function	0	EW-
+setTitle	function	0	EW-
+setTitleTextSize	function	0	EW-
+setTitleTextColor	function	0	EW-
+setTitleBackgroundColor	function	0	EW-
+setTitleBackgroundTint	function	0	EW-
+setTitleBackgroundAlpha	function	0	EW-
+setTitleIconsTint	function	0	EW-
+setContentTextSize	function	0	EW-
+setContentTextColor	function	0	EW-
+setContentTextColors	function	0	EW-
+setContentBackgroundColor	function	0	EW-
+setContentBackgroundTint	function	0	EW-
+setContentBackgroundAlpha	function	0	EW-
+setTextSize	function	0	EW-
+setTextColor	function	0	EW-
+setBackgroundColor	function	0	EW-
+setBackgroundTint	function	0	EW-
+setBackgroundAlpha	function	0	EW-
+setExitOnClose	function	0	EW-
+setTouchable	function	0	EW-
+setTimeVisible	function	0	EW-
+setTimeFormat	function	0	EW-
+setColorful	function	0	EW-
+setAvoidStatusBar	function	0	EW-
+setInputVisible	function	0	EW-
+setGlobalLogConfig	function	0	EW-
+resetGlobalLogConfig	function	0	EW-
+launch	function	0	EW-
+printAllStackTrace	function	0	EW-
+parent	object	-	EW-
+getTimeFormat	function	0	EW-
+getConfigurator	function	0	EW-
+context	inaccessible	-	EW-
+write	function	0	EW-
+getExitOnClose	function	0	EW-
+timeVisible	inaccessible	-	EW-
+getTitleBackgroundTint	function	0	EW-
+getFloatyWindow	function	0	EW-
+snapshotLogEntries	function	0	EW-
+touchThrough	inaccessible	-	EW-
+setConsoleView	function	0	EW-
+uiHandler	object	-	EW-
+logEntries	object	-	EW-
+onRuntimeExit	function	0	EW-
+avoidStatusBar	inaccessible	-	EW-
+consoleView	object	-	EW-
+getContentTextSize	function	0	EW-
+size	inaccessible	-	EW-
+copyAll	function	0	EW-
+contentBackgroundTint	inaccessible	-	EW-
+isAvoidStatusBar	function	0	EW-
+exitOnClose	inaccessible	-	EW-
+getHasPendingInput	function	0	EW-
+joinLogEntries	function	0	EW-
+wait	function	0	EW-
+backgroundAlpha	object	-	EW-
+global	boolean	-	EW-
+getTitleBackgroundColor	function	0	EW-
+addLogListener	function	0	EW-
+getTitleBackgroundAlpha	function	0	EW-
+notify	function	0	EW-
+runtimeExited	boolean	-	EW-
+removeLogListener	function	0	EW-
+assertTrue	function	0	EW-
+getPendingInputCount	function	0	EW-
+backgroundTint	object	-	EW-
+getParent	function	0	EW-
+getTitleTextColor	function	0	EW-
+backgroundColor	object	-	EW-
+submitInput	function	0	EW-
+getContentBackgroundAlpha	function	0	EW-
+titleIconsTint	inaccessible	-	EW-
+onUserMoved$app	function	0	EW-
+equals	function	0	EW-
+isGlobal	function	0	EW-
+hasPendingInput	inaccessible	-	EW-
+setGravity	function	0	EW-
+toString	function	0	EW-
+getLogEntries	function	0	EW-
+titleTextColor	inaccessible	-	EW-
+getClass	function	0	EW-
+onFloatyDetached$app	function	0	EW-
+isRuntimeExited	function	0	EW-
+contentBackgroundAlpha	inaccessible	-	EW-
+getContentTextColors	function	0	EW-
+titleBackgroundColor	inaccessible	-	EW-
+isShowing	function	0	EW-
+getTitle	function	0	EW-
+onUserResized$app	function	0	EW-
+pendingInputCount	inaccessible	-	EW-
+getContentBackgroundColor	function	0	EW-
+isTouchThrough	function	0	EW-
+titleTextSize	inaccessible	-	EW-
+getGravity	function	0	EW-
+resetBackgroundAlpha	function	0	EW-
+export	function	0	EW-
+onFloatyAttached$app	function	0	EW-
+getContentBackgroundTint	function	0	EW-
+format	function	0	EW-
+isInputVisible	function	0	EW-
+floaty	object	-	EW-
+contentBackgroundColor	inaccessible	-	EW-
+textColor	object	-	EW-
+touchable	inaccessible	-	EW-
+contentTextColors	inaccessible	-	EW-
+getTitleTextSize	function	0	EW-
+resetTitleBackgroundAlpha	function	0	EW-
+isColorful	function	0	EW-
+titleBackgroundTint	inaccessible	-	EW-
+floatyWindow	object	-	EW-
+position	inaccessible	-	EW-
+send	function	0	EW-
+colorful	inaccessible	-	EW-
+getLatestLogId	function	0	EW-
+formatEntry	function	0	EW-
+resetContentBackgroundAlpha	function	0	EW-
+contentTextSize	inaccessible	-	EW-
+notifyAll	function	0	EW-
+title	inaccessible	-	EW-
+printf	function	0	EW-
+println	function	0	EW-
+latestLogId	inaccessible	-	EW-
+inputVisible	inaccessible	-	EW-
+getTitleIconsTint	function	0	EW-
+hashCode	function	0	EW-
+getFloaty	function	0	EW-
+class	object	-	EW-
+isTimeVisible	function	0	EW-
+textSize	object	-	EW-
+setTouchThrough	function	0	EW-
+titleBackgroundAlpha	inaccessible	-	EW-
+getSize	function	0	EW-
+configurator	object	-	EW-
+getPosition	function	0	EW-
+getUiHandler	function	0	EW-
+gravity	inaccessible	-	EW-
+timeFormat	inaccessible	-	EW-
+requestInput$app	function	0	EW-
+hideDelayed	function	0	EW-
+getContext	function	0	EW-
+showing	boolean	-	EW-
+isTouchable	function	0	EW-
+=== obsoleteMembersExistOnTheNewModule members: console
+trace,show,hide,reset,clear,expand,collapse,assert,input,rawInput,log,verbose,print,info,warn,error,time,timeEnd,build,setSize,setPosition,setTitle,setTitleTextSize,setTitleTextColor,setTitleBackgroundColor,setTitleBackgroundTint,setTitleBackgroundAlpha,setTitleIconsTint,setContentTextSize,setContentTextColor,setContentBackgroundColor,setContentBackgroundTint,setContentBackgroundAlpha,setTextSize,setTextColor,setBackgroundColor,setBackgroundTint,setBackgroundAlpha,setExitOnClose,setTouchable,setGlobalLogConfig,resetGlobalLogConfig,launch,printAllStackTrace
+=== printedLinesMatchTheCurrentModule current: (console.log('a'), printed())
+"D|a"
+=== printedLinesMatchTheCurrentModule current: (console.error('a'), printed())
+"E|a"
+=== printedLinesMatchTheCurrentModule current: (console.log('a', 1, true, null, undefined), printed())
+"D|a 1 true null undefined"
+=== printedLinesMatchTheCurrentModule current: (console.error('a', 1, true, null, undefined), printed())
+"E|a 1 true null undefined"
+=== printedLinesMatchTheCurrentModule current: (console.log('%s=%d', 'x', 5), printed())
+"D|x=5"
+=== printedLinesMatchTheCurrentModule current: (console.error('%s=%d', 'x', 5), printed())
+"E|x=5"
+=== printedLinesMatchTheCurrentModule current: (console.log('%s=%d', 'x', '5'), printed())
+"D|x=5"
+=== printedLinesMatchTheCurrentModule current: (console.error('%s=%d', 'x', '5'), printed())
+"E|x=5"
+=== printedLinesMatchTheCurrentModule current: (console.log('%j', { a: [1, 'x'] }), printed())
+"D|{\"a\":[1,\"x\"]}"
+=== printedLinesMatchTheCurrentModule current: (console.error('%j', { a: [1, 'x'] }), printed())
+"E|{\"a\":[1,\"x\"]}"
+=== printedLinesMatchTheCurrentModule current: (console.log('100%%'), printed())
+"D|100%"
+=== printedLinesMatchTheCurrentModule current: (console.error('100%%'), printed())
+"E|100%"
+=== printedLinesMatchTheCurrentModule current: (console.log('%o', { a: 1 }), printed())
+"D|%o { a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.error('%o', { a: 1 }), printed())
+"E|%o { a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.log('%s'), printed())
+"D|%s"
+=== printedLinesMatchTheCurrentModule current: (console.error('%s'), printed())
+"E|%s"
+=== printedLinesMatchTheCurrentModule current: (console.log('%d %d', 1), printed())
+"D|1 %d"
+=== printedLinesMatchTheCurrentModule current: (console.error('%d %d', 1), printed())
+"E|1 %d"
+=== printedLinesMatchTheCurrentModule current: (console.log('%s', { a: 1 }), printed())
+"D|[object Object]"
+=== printedLinesMatchTheCurrentModule current: (console.error('%s', { a: 1 }), printed())
+"E|[object Object]"
+=== printedLinesMatchTheCurrentModule current: (console.log('%s', [1, [2, 3]]), printed())
+"D|1,2,3"
+=== printedLinesMatchTheCurrentModule current: (console.error('%s', [1, [2, 3]]), printed())
+"E|1,2,3"
+=== printedLinesMatchTheCurrentModule current: (console.log('a\nb'), printed())
+"D|a\nb"
+=== printedLinesMatchTheCurrentModule current: (console.error('a\nb'), printed())
+"E|a\nb"
+=== printedLinesMatchTheCurrentModule current: (console.log(1), printed())
+"D|1"
+=== printedLinesMatchTheCurrentModule current: (console.error(1), printed())
+"E|1"
+=== printedLinesMatchTheCurrentModule current: (console.log(1.5, -0, NaN, Infinity), printed())
+"D|1.5 0 NaN Infinity"
+=== printedLinesMatchTheCurrentModule current: (console.error(1.5, -0, NaN, Infinity), printed())
+"E|1.5 0 NaN Infinity"
+=== printedLinesMatchTheCurrentModule current: (console.log(0x10), printed())
+"D|16"
+=== printedLinesMatchTheCurrentModule current: (console.error(0x10), printed())
+"E|16"
+=== printedLinesMatchTheCurrentModule current: (console.log({ a: 1, b: 'x' }), printed())
+"D|{ a: 1, b: 'x' }"
+=== printedLinesMatchTheCurrentModule current: (console.error({ a: 1, b: 'x' }), printed())
+"E|{ a: 1, b: 'x' }"
+=== printedLinesMatchTheCurrentModule current: (console.log({ a: { b: { c: { d: 1 } } } }), printed())
+"D|{ a: { b: { c: [Object] } } }"
+=== printedLinesMatchTheCurrentModule current: (console.error({ a: { b: { c: { d: 1 } } } }), printed())
+"E|{ a: { b: { c: [Object] } } }"
+=== printedLinesMatchTheCurrentModule current: (console.log([1, 'a', [2, [3]]]), printed())
+"D|[ 1, 'a', [ 2, [ 3 ] ] ]"
+=== printedLinesMatchTheCurrentModule current: (console.error([1, 'a', [2, [3]]]), printed())
+"E|[ 1, 'a', [ 2, [ 3 ] ] ]"
+=== printedLinesMatchTheCurrentModule current: (console.log([]), printed())
+"D|[]"
+=== printedLinesMatchTheCurrentModule current: (console.error([]), printed())
+"E|[]"
+=== printedLinesMatchTheCurrentModule current: (console.log({}), printed())
+"D|{}"
+=== printedLinesMatchTheCurrentModule current: (console.error({}), printed())
+"E|{}"
+=== printedLinesMatchTheCurrentModule current: (console.log(null), printed())
+"D|null"
+=== printedLinesMatchTheCurrentModule current: (console.error(null), printed())
+"E|null"
+=== printedLinesMatchTheCurrentModule current: (console.log(undefined), printed())
+"D|undefined"
+=== printedLinesMatchTheCurrentModule current: (console.error(undefined), printed())
+"E|undefined"
+=== printedLinesMatchTheCurrentModule current: (console.log(), printed())
+"D|"
+=== printedLinesMatchTheCurrentModule current: (console.error(), printed())
+"E|"
+=== printedLinesMatchTheCurrentModule current: (console.log(function foo() {}), printed())
+"D|[Function foo()]"
+=== printedLinesMatchTheCurrentModule current: (console.error(function foo() {}), printed())
+"E|[Function foo()]"
+=== printedLinesMatchTheCurrentModule current: (console.log(Symbol('s')), printed())
+throws EcmaError
+TypeError: The object is not a string (kt-side#3)
+=== printedLinesMatchTheCurrentModule current: (console.error(Symbol('s')), printed())
+throws EcmaError
+TypeError: The object is not a string (kt-side#3)
+=== printedLinesMatchTheCurrentModule current: (console.log(new Date(0)), printed())
+"D|Thu Jan 01 1970 08:00:00 GMT+0800 (CST)"
+=== printedLinesMatchTheCurrentModule current: (console.error(new Date(0)), printed())
+"E|Thu Jan 01 1970 08:00:00 GMT+0800 (CST)"
+=== printedLinesMatchTheCurrentModule current: (console.log(/re/g), printed())
+"D|/re/g"
+=== printedLinesMatchTheCurrentModule current: (console.error(/re/g), printed())
+"E|/re/g"
+=== printedLinesMatchTheCurrentModule current: (console.log(new Map([[1, 2]])), printed())
+"D|{}"
+=== printedLinesMatchTheCurrentModule current: (console.error(new Map([[1, 2]])), printed())
+"E|{}"
+=== printedLinesMatchTheCurrentModule current: (console.log(['a\'b']), printed())
+"D|[ 'a'b' ]"
+=== printedLinesMatchTheCurrentModule current: (console.error(['a\'b']), printed())
+"E|[ 'a'b' ]"
+=== printedLinesMatchTheCurrentModule current: (console.log({ 'b-c': 1, _d: 2 }), printed())
+"D|{ \"b-c\": 1, _d: 2 }"
+=== printedLinesMatchTheCurrentModule current: (console.error({ 'b-c': 1, _d: 2 }), printed())
+"E|{ \"b-c\": 1, _d: 2 }"
+=== printedLinesMatchTheCurrentModule current: (console.log(true, { a: 1 }), printed())
+"D|true { a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.error(true, { a: 1 }), printed())
+"E|true { a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.log({ a: 1 }, 'x'), printed())
+"D|{ a: 1 } 'x'"
+=== printedLinesMatchTheCurrentModule current: (console.error({ a: 1 }, 'x'), printed())
+"E|{ a: 1 } 'x'"
+=== printedLinesMatchTheCurrentModule current: (console.log(java.lang.Integer.valueOf(7)), printed())
+"D|7"
+=== printedLinesMatchTheCurrentModule current: (console.error(java.lang.Integer.valueOf(7)), printed())
+"E|7"
+=== printedLinesMatchTheCurrentModule current: (console.log(new java.lang.StringBuilder('sb')), printed())
+"D|sb"
+=== printedLinesMatchTheCurrentModule current: (console.error(new java.lang.StringBuilder('sb')), printed())
+"E|sb"
+=== printedLinesMatchTheCurrentModule current: (console.log((function () { var o = {}; o.o = o; return o; })()), printed())
+"D|{ o: [Circular] }"
+=== printedLinesMatchTheCurrentModule current: (console.error((function () { var o = {}; o.o = o; return o; })()), printed())
+"E|{ o: [Circular] }"
+=== printedLinesMatchTheCurrentModule current: (console.verbose('v', 1), printed())
+"V|v 1"
+=== printedLinesMatchTheCurrentModule current: (console.info({ a: 1 }), printed())
+"I|{ a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.warn('w', [1]), printed())
+"W|w [ 1 ]"
+=== printedLinesMatchTheCurrentModule current: (console.print('p', { a: 1 }), printed())
+"D|p { a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.error(new Error('e1')), printed().split('\n')[0])
+"E|Error: e1"
+=== printedLinesMatchTheCurrentModule current: (console.error({ flowStack: 'f', stack: 'flow stack' }), printed())
+"E|flow stack"
+=== printedLinesMatchTheCurrentModule current: (console.error('x', { flowStack: 'f', stack: 'flow stack' }), printed())
+"E|x flow stack"
+=== printedLinesMatchTheCurrentModule current: (console.error({ flowStack: 'f', stack: 'flow %s' }, 1), printed())
+"E|flow %s 1"
+=== printedLinesMatchTheCurrentModule current: (log('g', 1), verbose('g'), warn('g'), print('g'), err('g'), printed())
+"D|g 1 ## V|g ## W|g ## D|g ## E|g"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t'), printed().split('\n')[0])
+"D|t"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 'info'), printed().split('\n')[0])
+"I|t"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 'WARN'), printed().split('\n')[0])
+"W|t"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 'Verbose'), printed().split('\n')[0])
+"V|t"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 6), printed().split('\n')[0])
+"E|t"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 3), printed().split('\n')[0])
+"D|t"
+=== printedLinesMatchTheCurrentModule current: (console.trace({ a: 1 }), printed().split('\n')[0])
+"D|{ a: 1 }"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 'x'), printed())
+"D|t\n\tat kt-side:3\r\n\tat kt-side:1\r\n"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t', 9), printed())
+"D|t\n\tat kt-side:3\r\n\tat kt-side:1\r\n"
+=== printedLinesMatchTheCurrentModule current: (console.trace('t'), printed().split('\n').length > 1)
+true
+=== printedLinesMatchTheCurrentModule current: (function () { printed(); try { console.assert(false, 'm'); return 'no'; } catch (e) { return printed() + '|' + e.name; } })()
+throws AssertionError
+m
+=== printedLinesMatchTheCurrentModule current: (function () { printed(); try { console.assert(0); return 'no'; } catch (e) { return printed(); } })()
+throws AssertionError
+java.lang.AssertionError
+=== printedLinesMatchTheCurrentModule current: (function () { printed(); try { console.assert(function () { return ''; }, 'f'); return 'no'; } catch (e) { return printed(); } })()
+throws AssertionError
+f
+=== printedLinesMatchTheCurrentModule current: (printed(), console.assert(true, 'm'), printed())
+"none"
+=== printedLinesMatchTheCurrentModule current: (printed(), console.assert(function () { return 1; }), printed())
+"none"
+=== printedLinesMatchTheCurrentModule current: (console.constructor = 1, 'ok')
+"ok"
+=== globalFunctionsMatchTheCurrentModule current: ['log', 'verbose', 'warn', 'print', 'err', 'openConsole', 'showConsole', 'clearConsole', 'launchConsole'].map(function (k) { var d = Object.getOwnPropertyDescriptor(this, k); return k + ':' + typeof this[k] + ':' + (d ? [d.writable, d.enumerable, d.configurable].join('/') : 'none'); }, this).join()
+"log:function:true/true/false,verbose:function:true/true/false,warn:function:true/true/false,print:function:true/true/false,err:function:true/true/false,openConsole:function:true/true/false,showConsole:function:true/true/false,clearConsole:function:true/true/false,launchConsole:function:true/true/false"

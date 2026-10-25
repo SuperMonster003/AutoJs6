@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.differential
 
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import java.io.File
@@ -41,7 +42,7 @@ internal object DifferentialCases {
         val ktValues = mutableMapOf<String, String>()
         val report = StringBuilder()
         expressions.forEach { expression ->
-            val js = rhino.render(DifferentialRhino.Side.JS, expression)
+            val js = DifferentialRhino.Rendered(ScriptModuleExpectations.obsolete("js: $expression") { rhino.render(DifferentialRhino.Side.JS, expression).key }, null)
             val kt = rhino.render(DifferentialRhino.Side.KT, expression)
             ktValues[expression] = kt.key
             val documented = knownByExpression[expression]

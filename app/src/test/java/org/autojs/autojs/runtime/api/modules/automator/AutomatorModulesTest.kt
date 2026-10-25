@@ -9,9 +9,11 @@ import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
 import org.autojs.autojs.runtime.api.augment.automator.RootAutomatorNativeObject
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
+import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.auto.AutoOptions
 import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
@@ -59,15 +61,15 @@ class AutomatorModulesTest {
     fun surfaceMatchesTheCurrentModules() {
         val globals = GLOBALS - AUTO_NAMES
         val actual = RuntimeModulesFixture.describe(rhino, globals, PATHS)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, globals, PATHS) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, globals, PATHS) } }
         assertEquals(expected, actual)
     }
 
     /** `auto` without reading its getters, which need the accessibility service: names, attributes and the functions' names. */
     @Test
     fun autoSurfaceMatchesTheCurrentModule() {
-        val actual = rhino.evalKt(DESCRIBE_AUTO)
-        val expected = newSide(newLayer = false).use { it.evalKt(DESCRIBE_AUTO) }
+        val actual = rhino.evalKt(DESCRIBE_AUTO).toString()
+        val expected = ScriptModuleExpectations.obsolete("describe: auto") { newSide(newLayer = false).use { it.evalKt(DESCRIBE_AUTO).toString() } }
         assertEquals(expected, actual)
     }
 
@@ -96,30 +98,42 @@ class AutomatorModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        rhino.evalJs(OBSOLETE_STUBS)
-        host.setRuntimeProperty("automator", rhino.evalJs("({})"))
-        host.setRuntimeProperty("accessibilityBridge", rhino.evalJs("({})"))
-        val before = host.global.allIds.toSet()
-        val automator = host.load("automator")
-        val problems = ObsoleteMembers.problems(automator, rhino.jsScope.globalThis, rhino.evalKt("automator"), rhino.ktScope.globalThis)
+        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
+        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope) }
+        val before by lazy {
+            rhino.evalJs(OBSOLETE_STUBS)
+            host.setRuntimeProperty("automator", rhino.evalJs("({})"))
+            host.setRuntimeProperty("accessibilityBridge", rhino.evalJs("({})"))
+            host.global.allIds.toSet()
+        }
+        val automator = ScriptModuleExpectations.obsoleteSurface("surface: automator") {
+            before
+            SurfaceDiff.surface(host.load("automator"), rhino.jsScope.globalThis)
+        }
+        val problems = ObsoleteMembers.problems(automator, rhino.evalKt("automator"), rhino.ktScope.globalThis)
         assertTrue("automator:\n" + problems.joinToString("\n"), problems.isEmpty())
 
-        val jsAuto = memberKinds(rhino.evalJs("$MEMBER_KINDS(global.auto, [])"))
+        val jsAuto = memberKinds(ScriptModuleExpectations.obsolete("member kinds: auto") { rhino.evalJs("$MEMBER_KINDS(global.auto, [])").toString() })
         val ktAuto = memberKinds(rhino.evalKt("$MEMBER_KINDS(auto, $AUTO_GETTER_NAMES)"))
         val autoMismatches = jsAuto.filter { (name, kind) -> ktAuto[name] != kind && !(ktAuto[name] == null && rhino.evalKt("typeof auto['$name']") == kind) }
             .map { (name, kind) -> "$name: js $kind, kt ${ktAuto[name]}" }
         assertTrue("auto:\n" + autoMismatches.joinToString("\n"), jsAuto.isNotEmpty() && autoMismatches.isEmpty())
 
-        val globals = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
-        assertEquals(OBSOLETE_GLOBALS.sorted(), globals.sorted())
-        globals.forEach { assertEquals(it, ObsoleteMembers.typeOf(host.global, it), ObsoleteMembers.typeOf(rhino.ktScope.globalThis, it)) }
+        val globals = ScriptModuleExpectations.obsolete("globals") {
+            host.global.allIds.filterIsInstance<String>().filterNot { it in before }.joinToString("\n") { it + "\t" + ObsoleteMembers.typeOf(host.global, it) }
+        }.lines().associate { it.substringBefore('\t') to it.substringAfter('\t') }
+        assertEquals(OBSOLETE_GLOBALS.sorted(), globals.keys.sorted())
+        globals.forEach { (name, type) -> assertEquals(name, type, ObsoleteMembers.typeOf(rhino.ktScope.globalThis, name)) }
 
-        val constructorProblems = ObsoleteMembers.problems(host.load("RootAutomator"), rhino.jsScope.globalThis, rhino.evalKt("RootAutomator"), rhino.ktScope.globalThis)
+        val rootAutomator = ScriptModuleExpectations.obsoleteSurface("surface: RootAutomator") { SurfaceDiff.surface(host.load("RootAutomator"), rhino.jsScope.globalThis) }
+        val constructorProblems = ObsoleteMembers.problems(rootAutomator, rhino.evalKt("RootAutomator"), rhino.ktScope.globalThis)
         assertTrue("RootAutomator:\n" + constructorProblems.joinToString("\n"), constructorProblems.isEmpty())
-        val bound = File(ObsoleteModuleHost.OBSOLETE_DIR, "__RootAutomator__.js").readText()
-            .substringAfter("this.__ra__ = ").substringAfter("[").substringBefore("].forEach")
-            .split(",").map { it.trim().removeSurrounding("'") }.filter { it.isNotEmpty() }
+        val bound = ScriptModuleExpectations.obsolete("bound: RootAutomator") {
+            File(ObsoleteModuleHost.OBSOLETE_DIR, "__RootAutomator__.js").readText()
+                .substringAfter("this.__ra__ = ").substringAfter("[").substringBefore("].forEach")
+                .split(",").map { it.trim().removeSurrounding("'") }.filter { it.isNotEmpty() }.joinToString(",")
+        }.split(",")
         assertEquals(bound.toString(), 17, bound.size)
         val instance = RuntimeModulesFixture.allocate(RootAutomatorNativeObject::class.java)
         RuntimeModulesFixture.setField(instance, RootAutomatorNativeObject::class.java, "scriptRuntime", rhino.ktRuntime)

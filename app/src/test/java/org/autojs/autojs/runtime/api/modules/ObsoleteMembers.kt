@@ -16,9 +16,11 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  */
 internal object ObsoleteMembers {
 
-    /** `name: obsolete <type>, new <type>` for every member of [obsolete] that [new] lacks or has with another type. */
-    fun problems(obsolete: Any?, obsoleteScope: Scriptable, new: Any?, newScope: Scriptable): List<String> {
-        val first = SurfaceDiff.surface(obsolete, obsoleteScope)
+    /**
+     * `name: obsolete <type>, new <type>` for every member of the obsolete surface [first] (recorded, see
+     * `ScriptModuleExpectations.obsoleteSurface`) that [new] lacks or has with another type.
+     */
+    fun problems(first: Map<String, SurfaceDiff.Member>, new: Any?, newScope: Scriptable): List<String> {
         val report = SurfaceDiff.compare(first, SurfaceDiff.surface(new, newScope))
         val absent = report.onlyInFirst.sorted().mapNotNull { name ->
             val type = typeOf(new as Scriptable, name)

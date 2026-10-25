@@ -10,6 +10,7 @@ import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.events.Events
 import org.autojs.autojs.runtime.api.modules.global.Global
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
@@ -63,7 +64,7 @@ class FlowModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
         assertEquals(expected, actual)
     }
 
@@ -88,19 +89,26 @@ class FlowModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("events", rhino.ktRuntime.events)
-        val before = host.global.allIds.toSet()
-        val events = host.load("events")
-        assertEquals(listOf("keys"), host.global.allIds.filterIsInstance<String>().filterNot { it in before })
-        listOf(events to "events", ScriptableObject.getProperty(host.global, "keys") to "keys").forEach { (obsolete, name) ->
-            val report = SurfaceDiff.compare(SurfaceDiff.surface(obsolete, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
+        // The obsolete modules run only when recording; what is read of them is replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
+        val host by lazy { ObsoleteModuleHost(rhino.context, rhino.jsScope).also { it.setRuntimeProperty("events", rhino.ktRuntime.events) } }
+        val events by lazy {
+            val before = host.global.allIds.toSet()
+            host.load("events") to host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        }
+        assertEquals("keys", ScriptModuleExpectations.obsolete("globals added by events") { events.second.joinToString() })
+        listOf("events", "keys").forEach { name ->
+            val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: $name") {
+                SurfaceDiff.surface(if (name == "events") events.first else ScriptableObject.getProperty(host.global, "keys"), rhino.jsScope.globalThis)
+            }
+            val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt(name), rhino.ktScope.globalThis))
             assertTrue("$name: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
-        host.load("globals")
+        val globals by lazy { host.load("globals") }
         OBSOLETE_GLOBAL_FUNCTIONS.forEach { name ->
-            assertEquals(name, "function", ObsoleteMembers.typeOf(host.global, name))
-            assertEquals(name, ObsoleteMembers.typeOf(host.global, name), ObsoleteMembers.typeOf(rhino.ktScope.globalThis, name))
+            val type = ScriptModuleExpectations.obsolete("type: $name") { globals; ObsoleteMembers.typeOf(host.global, name) }
+            assertEquals(name, "function", type)
+            assertEquals(name, type, ObsoleteMembers.typeOf(rhino.ktScope.globalThis, name))
         }
     }
 

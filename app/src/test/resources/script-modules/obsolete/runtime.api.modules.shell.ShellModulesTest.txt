@@ -1,0 +1,121 @@
+=== obsoleteMembersExistOnTheNewModules surface: shell
+fromIntent	function	1	EWC
+=== obsoleteMembersExistOnTheNewModules surface: plugins
+load	function	1	EWC
+=== obsoleteMembersExistOnTheNewModules surface: shizuku
+
+=== obsoleteMembersExistOnTheNewModules globals
+Menu,Home,Back,Up,Down,Left,Right,OK,VolumeUp,VolumeDown,Power,Camera,Text,Input,Tap,Screencap,KeyCode,SetScreenMetrics,Swipe
+=== surfaceMatchesTheCurrentModules describe
+keys Menu,Home,Back,Up,Down,Left,Right,OK,VolumeUp,VolumeDown,Power,Camera,Text,Input,Tap,Screencap,KeyCode,SetScreenMetrics,Swipe,shell,$shell,plugins,$plugins
+Menu EW- function Menu
+Home EW- function Home
+Back EW- function Back
+Up EW- function Up
+Down EW- function Down
+Left EW- function Left
+Right EW- function Right
+OK EW- function OK
+VolumeUp EW- function VolumeUp
+VolumeDown EW- function VolumeDown
+Power EW- function Power
+Camera EW- function Camera
+Text EW- function Text
+Input EW- function Input
+Tap EW- function Tap
+Screencap EW- function Screencap
+KeyCode EW- function KeyCode
+SetScreenMetrics EW- function SetScreenMetrics
+Swipe EW- function Swipe
+shell EW- function shell [execCommand EW-,getCommand EW-,fromIntent EW-,kill EW-,currentPackage EW-,currentActivity EW-,currentComponent EW-,spawn EW-,setDefaultOptions EW-,checkAccess EW-,isRootAvailable EW-]
+$shell EW- function shell [execCommand EW-,getCommand EW-,fromIntent EW-,kill EW-,currentPackage EW-,currentActivity EW-,currentComponent EW-,spawn EW-,setDefaultOptions EW-,checkAccess EW-,isRootAvailable EW-]
+plugins EW- function plugins [extend EW-,extendAll EW-,extendAllBut EW-,load EW-,tools EW-]
+$plugins EW- function plugins [extend EW-,extendAll EW-,extendAllBut EW-,load EW-,tools EW-]
+shell function proto Function.prototype > Object.prototype
+shell keys execCommand,getCommand,fromIntent,kill,currentPackage,currentActivity,currentComponent,spawn,setDefaultOptions,checkAccess,isRootAvailable
+shell.execCommand EW- function execCommand
+shell.getCommand EW- function getCommand
+shell.fromIntent EW- function fromIntent
+shell.kill EW- function kill
+shell.currentPackage EW- function currentPackage
+shell.currentActivity EW- function currentActivity
+shell.currentComponent EW- function currentComponent
+shell.spawn EW- function spawn
+shell.setDefaultOptions EW- function setDefaultOptions
+shell.checkAccess EW- function checkAccess
+shell.isRootAvailable EW- function isRootAvailable
+plugins function proto Function.prototype > Object.prototype
+plugins keys extend,extendAll,extendAllBut,load,tools
+plugins.extend EW- function extend [exclude EWC,registerModule EWC]
+plugins.extendAll EW- function extendAll
+plugins.extendAllBut EW- function extendAllBut
+plugins.load EW- function load
+plugins.tools EW- [object Object]
+plugins.tools object proto Object.prototype
+plugins.tools keys list,providers,call,callAsync
+plugins.tools.list EW- function list
+plugins.tools.providers EW- function providers
+plugins.tools.call EW- function call
+plugins.tools.callAsync EW- function callAsync
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls')
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', true)
+"su\nls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', false)
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', 1)
+"su\nls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', 0)
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand(['a', 'b'])
+"a\nb"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand(['a', 1, true])
+"a\n1\ntrue"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand(['a', 'b'], true)
+"su\na\nb"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', '-l')
+"ls -l"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', 'a=1|verbose')
+"ls -a 1 --verbose"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', '-l', false)
+"ls -l"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', { all: true })
+"ls --all"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', { a: 1 }, true)
+"su\nls -a 1"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', { dryRun: 'x y', n: -1, '--colorMode': 'auto', x: false })
+"ls --dry-run \"x y\" -n -1 --color-mode auto -x false"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', { root: true, exit: true })
+"su\nls\nexit\nkill $$"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', { root: false }, true)
+"su\nls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', { adb: true })
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', {}, null)
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', {}, undefined)
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: (function () { var s = 's'; return shell.getCommand('l' + s); })()
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand(new java.lang.String('ls'))
+"ls"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', new java.lang.String('-l'))
+"ls -l"
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', undefined)
+throws IllegalArgumentException
+Argument[1] must be either a string or JavaScript object as "arguments" or a boolean or number as "withRoot" instead of undefined (Undefined)
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand(1)
+throws IllegalStateException
+Argument cmd must be a string or JavaScript Array instead of 1 (Number)
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', null)
+throws IllegalArgumentException
+Argument[1] must be either a string or JavaScript object as "arguments" or a boolean or number as "withRoot" instead of null (Null)
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', [])
+throws IllegalArgumentException
+Argument[1] must be either a string or JavaScript object as "arguments" or a boolean or number as "withRoot" instead of  (Array)
+=== getCommandGivesTheSameResultsAsTheCurrentModule current: shell.getCommand('ls', 1, true)
+throws IllegalStateException
+Argument args must be a string or JavaScript object instead of 1 (Number)

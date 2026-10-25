@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules.colors
 
 import org.autojs.autojs.runtime.api.augment.colors.ColorsTheme
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.util.ColorUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -331,12 +332,14 @@ class ColorsModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = rhino.evalKt(DESCRIBE).toString()
-        val expected = DifferentialRhino().use { legacy ->
-            val global = legacy.ktScope.globalThis
-            val colors = Colors.augmentWithRuntime(global, legacy.ktRuntime, Colors.colorTables + CoreColors())
-            ColorsTheme(legacy.ktRuntime).augment(colors)
-            Color.augmentWithRuntime(global, legacy.ktRuntime, Colors.colorTables)
-            legacy.evalKt(DESCRIBE).toString()
+        val expected = ScriptModuleExpectations.obsolete("describe") {
+            DifferentialRhino().use { legacy ->
+                val global = legacy.ktScope.globalThis
+                val colors = Colors.augmentWithRuntime(global, legacy.ktRuntime, Colors.colorTables + CoreColors())
+                ColorsTheme(legacy.ktRuntime).augment(colors)
+                Color.augmentWithRuntime(global, legacy.ktRuntime, Colors.colorTables)
+                legacy.evalKt(DESCRIBE).toString()
+            }
         }
         assertEquals(expected.replace(';', '\n'), actual.replace(';', '\n'))
     }

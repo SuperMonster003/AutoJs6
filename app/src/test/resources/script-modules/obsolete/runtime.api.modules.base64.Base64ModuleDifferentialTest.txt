@@ -1,0 +1,99 @@
+=== obsoleteMembersExistOnTheNewModule surface
+encode	function	2	EWC
+decode	function	2	EWC
+=== resultsAgree js: base64.encode('hello')
+"aGVsbG8="
+=== resultsAgree js: base64.encode('')
+""
+=== resultsAgree js: base64.encode('hello', 'UTF-8')
+"aGVsbG8="
+=== resultsAgree js: base64.encode('\u4f60\u597d', 'utf8')
+"5L2g5aW9"
+=== resultsAgree js: base64.encode('\u4f60\u597d', 'UTF-16')
+"/v9PYFl9"
+=== resultsAgree js: base64.encode('\u4f60\u597d', 'utf_16le')
+"5L2g5aW9"
+=== resultsAgree js: base64.encode('\u4f60\u597d', ' UTF-16BE ')
+"T2BZfQ=="
+=== resultsAgree js: base64.encode('\u00e9', 'ISO-8859-1')
+"6Q=="
+=== resultsAgree js: base64.encode('\u00e9', 'latin1')
+"w6k="
+=== resultsAgree js: base64.encode('\u4f60\u597d', 'GBK') === base64.encode('\u4f60\u597d', 'UTF-8')
+true
+=== resultsAgree js: base64.encode('a', 'definitely-not-a-charset')
+"YQ=="
+=== resultsAgree js: base64.encode('\u4f60\u597d', java.nio.charset.StandardCharsets.UTF_16LE)
+"YE99WQ=="
+=== resultsAgree js: base64.encode([104, 105])
+"aGk="
+=== resultsAgree js: base64.encode([104, 'x', 300, -1])
+"aAAs/w=="
+=== resultsAgree js: base64.encode([])
+""
+=== resultsAgree js: base64.encode(new java.lang.String('hi').getBytes())
+"aGk="
+=== resultsAgree js: base64.encode({ toString() { return 'obj'; } })
+"b2Jq"
+=== resultsAgree js: base64.encode(123)
+"MTIz"
+=== resultsAgree js: base64.encode(1.5)
+"MS41"
+=== resultsAgree js: base64.encode(true)
+"dHJ1ZQ=="
+=== resultsAgree js: (function (s) { return base64.encode(s + 'i'); })('h')
+"aGk="
+=== resultsAgree js: base64.encode(null)
+throws InternalError
+=== resultsAgree js: base64.encode(undefined)
+throws Error
+=== resultsAgree js: base64.encode()
+throws Error
+=== resultsAgree js: base64.encode('a', 'UTF-8', 'extra')
+"YQ=="
+=== resultsAgree js: base64.decode('aGVsbG8=')
+"hello"
+=== resultsAgree js: base64.decode('aGVsbG8')
+"hello"
+=== resultsAgree js: base64.decode('aGVs bG8=')
+"hello"
+=== resultsAgree js: base64.decode('aGVs\nbG8=')
+"hello"
+=== resultsAgree js: base64.decode('aGVsbG8=!!')
+"hello"
+=== resultsAgree js: base64.decode('a')
+throws JavaException IllegalArgumentException
+=== resultsAgree js: base64.decode('')
+""
+=== resultsAgree js: base64.decode('5L2g5aW9', 'UTF-8')
+"你好"
+=== resultsAgree js: base64.decode('YM99WQ==', 'UTF-16LE')
+"콠好"
+=== resultsAgree js: base64.decode('/v9PYFl9', 'UTF-16')
+"你好"
+=== resultsAgree js: base64.decode('6Q==', 'ISO-8859-1')
+"é"
+=== resultsAgree js: base64.decode('xOO6ww==', 'GBK') === '\u4f60\u597d'
+false
+=== resultsAgree js: base64.decode('aGk=', 'definitely-not-a-charset')
+"hi"
+=== resultsAgree js: base64.decode([97, 71, 107, 61])
+"hi"
+=== resultsAgree js: base64.decode(new java.lang.String('aGk=').getBytes())
+"hi"
+=== resultsAgree js: base64.decode({ toString() { return 'aGk='; } }) === 'hi'
+true
+=== resultsAgree js: base64.decode(null)
+throws InternalError
+=== resultsAgree js: base64.decode()
+throws Error
+=== resultsAgree js: base64.decode('aGk=', 'UTF-8', 'extra')
+"hi"
+=== resultsAgree js: base64.decode(base64.encode('\u4f60\u597d', 'UTF-16'), 'UTF-16')
+"你好"
+=== resultsAgree js: base64.decode(base64.encode('\u4f60\u597d', 'UTF-16LE'), 'UTF-16LE')
+"你好"
+=== resultsAgree js: typeof base64
+"object"
+=== resultsAgree js: typeof base64.encode
+"function"

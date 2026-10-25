@@ -1,0 +1,92 @@
+=== constantsAndErrorsAgainstTheCurrentModules current: [WebSocket.CODE_CLOSE_NORMAL, WebSocket.CODE_TLS_HANDSHAKE_FAIL, WebSocket.EVENT_OPEN, WebSocket.EVENT_MAX_REBUILDS]
+[1000,1015,"open","max_rebuilds"]
+=== constantsAndErrorsAgainstTheCurrentModules current: [Object.keys(WebSocket).length, 'CODE_CLOSE_NORMAL' in WebSocket, WebSocket.hasOwnProperty('EVENT_TEXT'), typeof WebSocket.NO_SUCH_CONSTANT]
+[0,false,false,"undefined"]
+=== constantsAndErrorsAgainstTheCurrentModules current: typeof WebSocket.TAG
+"undefined"
+=== constantsAndErrorsAgainstTheCurrentModules current: [typeof $web, typeof $WebSocket]
+["object","undefined"]
+=== constantsAndErrorsAgainstTheCurrentModules current: newInjectableWebView(1, 2, 3)
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== constantsAndErrorsAgainstTheCurrentModules current: web.newInjectableWebClient(1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: newWebSocket()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: web.newWebSocket(null)
+throws IllegalArgumentException
+Failed to coerce nullish (Null) into a string
+=== constantsAndErrorsAgainstTheCurrentModules current: newWebSocket('ws://127.0.0.1:9/', 5)
+throws IllegalArgumentException
+Argument options for web.newWebSocket must be a JavaScript Object
+=== constantsAndErrorsAgainstTheCurrentModules current: newWebSocket('ws://127.0.0.1:9/', [])
+throws IllegalArgumentException
+Argument options for web.newWebSocket must be a JavaScript Object
+=== constantsAndErrorsAgainstTheCurrentModules current: newWebSocket('ws://127.0.0.1:9/', {}, 1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: WebSocket('ws://127.0.0.1:9/')
+undefined
+=== constantsAndErrorsAgainstTheCurrentModules current: new WebSocket()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: new WebSocket(null)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: new WebSocket(http.__okhttp__, undefined)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: new WebSocket(http.__okhttp__, 'ws://127.0.0.1:9/', 3)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: new WebSocket(http.__okhttp__)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== constantsAndErrorsAgainstTheCurrentModules current: new WebSocket(1)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== obsoleteMembersExistOnTheNewModule surface
+newInjectableWebView	function	2	EWC
+newInjectableWebClient	function	0	EWC
+newWebSocket	function	1	EWC
+=== surfaceMatchesTheCurrentModules surface: web
+newInjectableWebView	function	0	EW-
+newInjectableWebClient	function	0	EW-
+newWebSocket	function	0	EW-
+ByteString	function	-	EW-
+=== surfaceMatchesTheCurrentModules surface: WebSocket
+
+=== surfaceMatchesTheCurrentModules surface: newInjectableWebView
+
+=== surfaceMatchesTheCurrentModules surface: newInjectableWebClient
+
+=== surfaceMatchesTheCurrentModules surface: newWebSocket
+
+=== surfaceMatchesTheCurrentModules keys
+http,$http,newInjectableWebView,newInjectableWebClient,newWebSocket,web,$web,WebSocket
+=== webSocketConstantsMatchTheCurrentFields fields
+CODE_BAD_GATEWAY=1014
+CODE_CLOSED_NO_STATUS=1005
+CODE_CLOSE_ABNORMAL=1006
+CODE_CLOSE_GOING_AWAY=1001
+CODE_CLOSE_NORMAL=1000
+CODE_CLOSE_PROTOCOL_ERROR=1002
+CODE_CLOSE_TOO_LARGE=1009
+CODE_CLOSE_UNSUPPORTED=1003
+CODE_MANDATORY_EXTENSION=1010
+CODE_POLICY_VIOLATION=1008
+CODE_SERVER_ERROR=1011
+CODE_SERVICE_RESTART=1012
+CODE_TLS_HANDSHAKE_FAIL=1015
+CODE_TRY_AGAIN_LATER=1013
+CODE_UNSUPPORTED_PAYLOAD=1007
+EVENT_BYTES=bytes
+EVENT_CLOSED=closed
+EVENT_CLOSING=closing
+EVENT_FAILURE=failure
+EVENT_MAX_REBUILDS=max_rebuilds
+EVENT_MESSAGE=message
+EVENT_OPEN=open
+EVENT_TEXT=text

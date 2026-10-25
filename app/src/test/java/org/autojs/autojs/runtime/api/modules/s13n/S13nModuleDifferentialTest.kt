@@ -4,6 +4,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -23,7 +24,7 @@ class S13nModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        jsS13n = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("s13n")!!
+        if (ScriptModuleExpectations.RECORDING) jsS13n = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("s13n")!!
         rhino.mountNewModules("s13n")
     }
 
@@ -35,7 +36,7 @@ class S13nModuleDifferentialTest {
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val ktS13n = rhino.evalKt("s13n")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsS13n, rhino.jsScope.globalThis), SurfaceDiff.surface(ktS13n, rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsS13n, rhino.jsScope.globalThis) }, SurfaceDiff.surface(ktS13n, rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         assertTrue("Obsolete s13n members missing from the new module: ${report.onlyInFirst}", report.onlyInFirst.isEmpty())
         assertTrue("typeof differs: ${report.typeMismatches}", report.typeMismatches.isEmpty())

@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.promise
 
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.promise.PromiseHarness.Impl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -26,7 +27,7 @@ class PromiseDifferentialTest {
     fun bothStatesLogTheSame() {
         val differences = ArrayList<String>()
         SCENARIOS.forEach { (id, source) ->
-            val reference = runOne(Impl.MODULE, source)
+            val reference = ScriptModuleExpectations.obsolete("module: $id") { runOne(Impl.MODULE, source) }
             listOf(Impl.KOTLIN, Impl.KOTLIN_POSTED).forEach { impl ->
                 val actual = runOne(impl, source)
                 val expected = KNOWN[id] ?: reference

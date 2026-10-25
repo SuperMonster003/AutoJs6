@@ -1,0 +1,99 @@
+=== obsoleteMembersExistOnTheNewModule surface
+getClass	function	0	EW-
+wait	function	0	EW-
+unregisterMimeDetector	function	0	EW-
+hashCode	function	0	EW-
+equals	function	0	EW-
+notifyAll	function	0	EW-
+registerMimeDetector	function	0	EW-
+toString	function	0	EW-
+getMimeTypes	function	0	EW-
+getMimeDetector	function	0	EW-
+class	object	-	EW-
+notify	function	0	EW-
+=== resultsAgree js: typeof mime
+"function"
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text/plain'))
+["text/plain","text","plain","text/plain","text/plain","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text/html; charset=UTF-8'))
+["text/html; charset=UTF-8","text","html","text/html; charset=UTF-8","text/html","{\"charset\":\"UTF-8\"}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text/html;charset=UTF-8;q=0.5'))
+["text/html;charset=UTF-8;q=0.5","text","html","text/html; charset=UTF-8; q=0.5","text/html","{\"charset\":\"UTF-8\",\"q\":\"0.5\"}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('multipart/form-data; boundary=----x; flag'))
+["multipart/form-data; boundary=----x; flag","multipart","form-data","multipart/form-data; boundary=----x; flag","multipart/form-data","{\"boundary\":\"----x\"}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('application/json ; charset = utf-8 '))
+["application/json ; charset = utf-8 ","application","json ","application/json ; charset = utf-8 ","application/json ","{\"charset\":\"utf-8 \"}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('TEXT/PLAIN'))
+["TEXT/PLAIN","TEXT","PLAIN","TEXT/PLAIN","TEXT/PLAIN","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('image/*'))
+["image/*","image","*","image/*","image/*","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('*/*'))
+["*/*","*","*","*/*","*/*","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('application/vnd.api+json'))
+["application/vnd.api+json","application","vnd.api+json","application/vnd.api+json","application/vnd.api+json","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text/plain;'))
+["text/plain;","text","plain","text/plain","text/plain","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text/plain; a=1=2'))
+["text/plain; a=1=2","text","plain","text/plain; a=1=2","text/plain","{\"a\":\"1\"}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime(' text/plain'))
+[" text/plain","text","plain","text/plain","text/plain","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text'))
+["text","text","*","text/*","text/*","{}"]
+=== resultsAgree js: (function (m) { return [m.raw, m.type, m.subtype, m.mimeType, m.mimeTypeRefined].map(String).concat(JSON.stringify(m.parameters)); })(mime('text/plain; 2=b; 1=a'))
+["text/plain; 2=b; 1=a","text","plain","text/plain; 2=b; 1=a","text/plain","{\"1\":\"a\",\"2\":\"b\"}"]
+=== resultsAgree js: (function (s) { return mime(s + '/plain').type; })('text')
+"text"
+=== resultsAgree js: String(mime('text/plain'))
+"JsMime {\n  type: 'text',\n  subtype: 'plain',\n  mimeType: 'text/plain',\n  mimeTypeRefined: 'text/plain',\n  parameters: {},\n  raw: 'text/plain',\n}"
+=== resultsAgree js: String(mime('text/html; charset=UTF-8'))
+"JsMime {\n  type: 'text',\n  subtype: 'html',\n  mimeType: 'text/html; charset=UTF-8',\n  mimeTypeRefined: 'text/html',\n  parameters: { charset: 'UTF-8' },\n  raw: 'text/html; charset=UTF-8',\n}"
+=== resultsAgree js: String(mime('text/plain; my-key=1; q=0.5'))
+"JsMime {\n  type: 'text',\n  subtype: 'plain',\n  mimeType: 'text/plain; my-key=1; q=0.5',\n  mimeTypeRefined: 'text/plain',\n  parameters: { 'my-key': '1', q: '0.5' },\n  raw: 'text/plain; my-key=1; q=0.5',\n}"
+=== resultsAgree js: String(mime("text/plain; a=it's; b=\"x\""))
+"JsMime {\n  type: 'text',\n  subtype: 'plain',\n  mimeType: 'text/plain; a=it's; b=\"x\"',\n  mimeTypeRefined: 'text/plain',\n  parameters: { a: 'it\\'s', b: '\"x\"' },\n  raw: 'text/plain; a=it's; b=\"x\"',\n}"
+=== resultsAgree js: String(mime('text/plain; a=\\x\ty'))
+"JsMime {\n  type: 'text',\n  subtype: 'plain',\n  mimeType: 'text/plain; a=\\x\ty',\n  mimeTypeRefined: 'text/plain',\n  parameters: { a: '\\\\x\\ty' },\n  raw: 'text/plain; a=\\x\ty',\n}"
+=== resultsAgree js: String(mime('multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW; charset=utf-8'))
+"JsMime {\n  type: 'multipart',\n  subtype: 'form-data',\n  mimeType: 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW; charset=utf-8',\n  mimeTypeRefined: 'multipart/form-data',\n  parameters: { boundary: '----WebKitFormBoundary7MA4YWxkTrZu0gW',\n  charset: 'utf-8' },\n  raw: 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW; charset=utf-8',\n}"
+=== resultsAgree js: String(mime('text/plain; aaaaaaaaaa=bbbbbbbbbb; cccccccccc=dddddddddd; eeee=ffff'))
+"JsMime {\n  type: 'text',\n  subtype: 'plain',\n  mimeType: 'text/plain; aaaaaaaaaa=bbbbbbbbbb; cccccccccc=dddddddddd; eeee=ffff',\n  mimeTypeRefined: 'text/plain',\n  parameters: { aaaaaaaaaa: 'bbbbbbbbbb',\n  cccccccccc: 'dddddddddd',\n  eeee: 'ffff' },\n  raw: 'text/plain; aaaaaaaaaa=bbbbbbbbbb; cccccccccc=dddddddddd; eeee=ffff',\n}"
+=== resultsAgree js: mime('text/plain').toString() === String(mime('text/plain'))
+true
+=== resultsAgree js: JSON.stringify(mime('text/plain; a=1'))
+"{\"raw\":\"text/plain; a=1\",\"type\":\"text\",\"subtype\":\"plain\",\"mimeType\":\"text/plain; a=1\",\"mimeTypeRefined\":\"text/plain\",\"parameters\":{\"a\":\"1\"}}"
+=== resultsAgree js: Object.keys(mime('text/plain'))
+["raw","type","subtype","mimeType","mimeTypeRefined","parameters"]
+=== resultsAgree js: Object.keys(mime('text/plain; b=2; a=1').parameters)
+["b","a"]
+=== resultsAgree js: (function () { var a = []; for (var k in mime('text/plain')) a.push(k); return a; })()
+["raw","type","subtype","mimeType","mimeTypeRefined","parameters","constructor","toString"]
+=== resultsAgree js: mime('text/plain').constructor === mime('a/b').constructor
+true
+=== resultsAgree js: mime('text/plain') instanceof mime('a/b').constructor
+true
+=== resultsAgree js: Object.getPrototypeOf(mime('text/plain')).toString.call({ type: 't', subtype: 's' })
+"JsMime {\n  type: 't',\n  subtype: 's',\n  mimeType: 'undefined',\n  mimeTypeRefined: 'undefined',\n  parameters: undefined,\n  raw: 'undefined',\n}"
+=== resultsAgree js: (function (m) { m.parameters.extra = 'x'; return String(m); })(mime('text/plain'))
+"JsMime {\n  type: 'text',\n  subtype: 'plain',\n  mimeType: 'text/plain',\n  mimeTypeRefined: 'text/plain',\n  parameters: { extra: 'x' },\n  raw: 'text/plain',\n}"
+=== resultsAgree js: Object.getOwnPropertyDescriptor(mime('text/plain'), 'type').writable
+true
+=== resultsAgree js: Object.getOwnPropertyDescriptor(mime('text/plain'), 'type').enumerable
+true
+=== resultsAgree js: mime('')
+throws JavaException MimeException
+=== resultsAgree js: mime('text/')
+{"raw":"text/","type":"text","subtype":"*","mimeType":"text/*","mimeTypeRefined":"text/*","parameters":{}}
+=== resultsAgree js: mime(123)
+throws TypeError
+=== resultsAgree js: mime(null)
+throws TypeError
+=== resultsAgree js: mime()
+throws TypeError
+=== resultsAgree js: mime('text/plain', 'extra')
+{"raw":"text/plain","type":"text","subtype":"plain","mimeType":"text/plain","mimeTypeRefined":"text/plain","parameters":{}}
+=== resultsAgree js: mime.TEXT_PLAIN
+"text/plain"
+=== resultsAgree js: String(mime.getType('text/html'))
+"text"
+=== resultsAgree js: String(mime.getSubtype('text/html'))
+"html"

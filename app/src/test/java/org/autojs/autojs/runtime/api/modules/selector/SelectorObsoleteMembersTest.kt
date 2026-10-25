@@ -9,6 +9,7 @@ import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.flow.Flow
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
@@ -59,24 +60,41 @@ class SelectorObsoleteMembersTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("selector", rhino.evalJs("(function () { return new Packages.org.autojs.autojs.core.accessibility.UiSelector(null); })"))
-        val before = host.global.allIds.toSet()
-        val selector = host.load("selector")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(selector, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("selector"), rhino.ktScope.globalThis))
+        // The obsolete module runs only when recording; what is read of it is replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放读到的内容.
+        val host by lazy {
+            ObsoleteModuleHost(rhino.context, rhino.jsScope).also {
+                it.setRuntimeProperty("selector", rhino.evalJs("(function () { return new Packages.org.autojs.autojs.core.accessibility.UiSelector(null); })"))
+            }
+        }
+        val loaded by lazy {
+            val before = host.global.allIds.toSet()
+            host.load("selector") to host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        }
+        val selector = ScriptModuleExpectations.obsoleteSurface("surface: selector") { SurfaceDiff.surface(loaded.first, rhino.jsScope.globalThis) }
+        val report = SurfaceDiff.compare(selector, SurfaceDiff.surface(rhino.evalKt("selector"), rhino.ktScope.globalThis))
         assertTrue("selector: " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
 
-        val added = host.global.allIds.filterIsInstance<String>().filterNot { it in before }
+        val addedTypes = ScriptModuleExpectations.obsolete("globals") {
+            loaded.second.joinToString("\n") { it + "\t" + ObsoleteMembers.typeOf(host.global, it) }
+        }.lines().associate { it.substringBefore('\t') to it.substringAfter('\t') }
+        val added = addedTypes.keys.toList()
         assertTrue(added.toString(), added.containsAll(MODULE_GLOBALS) && added.containsAll(AUTOMATOR_NAMES))
 
-        val dead = (added - MODULE_GLOBALS).filter { '$' !in it }
-            .filter { rhino.evalJs("typeof new Packages.org.autojs.autojs.core.accessibility.UiSelector(null)['$it']") != "function" }
+        val dead = ScriptModuleExpectations.obsolete("dead wrappers") {
+            (added - MODULE_GLOBALS).filter { '$' !in it }
+                .filter { rhino.evalJs("typeof new Packages.org.autojs.autojs.core.accessibility.UiSelector(null)['$it']") != "function" }
+                .joinToString(",")
+        }.split(",").filter { it.isNotEmpty() }
         assertEquals(DEAD_WRAPPERS, dead.sorted())
-        host.setRuntimeProperty("console", rhino.evalJs("({ warn: function () {} })"))
-        dead.forEach { assertEquals(it, "TypeError", rhino.evalJs("(function () { try { global['$it'](1, 2); return 'returned'; } catch (e) { return e.name; } })()")) }
+        val deadErrors = ScriptModuleExpectations.obsolete("dead wrapper errors") {
+            host.setRuntimeProperty("console", rhino.evalJs("({ warn: function () {} })"))
+            dead.joinToString(",") { rhino.evalJs("(function () { try { global['$it'](1, 2); return 'returned'; } catch (e) { return e.name; } })()").toString() }
+        }.split(",")
+        dead.zip(deadErrors).forEach { (name, error) -> assertEquals(name, "TypeError", error) }
 
         val mismatches = added.filterNot { it in SelectorGlobals.excluded || '$' in it || it in dead }
-            .map { Triple(it, ObsoleteMembers.typeOf(host.global, it), ObsoleteMembers.typeOf(rhino.ktScope.globalThis, it)) }
+            .map { Triple(it, addedTypes.getValue(it), ObsoleteMembers.typeOf(rhino.ktScope.globalThis, it)) }
             .filter { (_, js, kt) -> js != kt }
         assertTrue(mismatches.joinToString("\n") { (name, js, kt) -> "$name: js $js, kt $kt" }, mismatches.isEmpty())
     }

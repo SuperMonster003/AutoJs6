@@ -4,6 +4,7 @@ import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -23,7 +24,7 @@ class Base64ModuleDifferentialTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        jsBase64 = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("base64")!!
+        if (ScriptModuleExpectations.RECORDING) jsBase64 = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("base64")!!
         rhino.mountNewModules("base64")
     }
 
@@ -35,7 +36,7 @@ class Base64ModuleDifferentialTest {
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
         val ktBase64 = rhino.evalKt("base64")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsBase64, rhino.jsScope.globalThis), SurfaceDiff.surface(ktBase64, rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsBase64, rhino.jsScope.globalThis) }, SurfaceDiff.surface(ktBase64, rhino.ktScope.globalThis))
         println(SurfaceDiff.describe(report, "js", "kt"))
         assertTrue("Obsolete base64 members missing from the new module: ${report.onlyInFirst}", report.onlyInFirst.isEmpty())
         assertTrue("typeof differs: ${report.typeMismatches}", report.typeMismatches.isEmpty())

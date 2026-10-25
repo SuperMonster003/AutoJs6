@@ -1,0 +1,148 @@
+=== resultsAgree js: TODO()
+throws [object JavaObject]
+=== resultsAgree js: TODO('why')
+throws [object JavaObject]
+=== resultsAgree js: (function (f) { try { f(); return 'no error'; } catch (e) { return String((e.javaException || e).getMessage()); } })(function () { TODO('why'); })
+"why"
+=== resultsAgree js: (function (f) { try { f(); return 'no error'; } catch (e) { return String((e.javaException || e).getMessage()); } })(function () { TODO(42); })
+"42"
+=== resultsAgree js: (function (f) { try { f(); return 'no error'; } catch (e) { return String((e.javaException || e).getMessage()); } })(function () { TODO({}); })
+"[object Object]"
+=== resultsAgree js: (function (f) { try { f(); return 'no error'; } catch (e) { return String((e.javaException || e).getMessage()); } })(function () { TODO(''); })
+"An operation is not implemented"
+=== resultsAgree js: (function (f) { try { f(); return 'no error'; } catch (e) { return String((e.javaException || e).getMessage()); } })(function () { TODO(null); })
+"An operation is not implemented"
+=== resultsAgree js: TODO('a', 'b')
+throws [object JavaObject]
+=== resultsAgree js: [isJavaObject(new java.lang.Object()), isJavaObject(java.lang.String), isJavaObject({}), isJavaObject(null), isJavaObject(1)]
+[true,false,false,false,false]
+=== resultsAgree js: [isInteger(1), isInteger(1.5), isInteger('1'), isInteger(NaN), isInteger(Infinity), isInteger(-0)]
+[true,false,false,false,false,true]
+=== resultsAgree js: [isBigInt(1n), isBigInt(1), isBigInt('1')]
+[true,false,false]
+=== resultsAgree js: [isPrimitive(1), isPrimitive('a'), isPrimitive(null), isPrimitive(undefined), isPrimitive({}), isPrimitive(function () {})]
+[true,true,true,true,false,false]
+=== resultsAgree js: [isReference({}), isReference([]), isReference(function () {}), isReference(1), isReference(null)]
+[true,true,true,false,false]
+=== resultsAgree js: [isEmptyObject({}), isEmptyObject({ a: 1 }), isEmptyObject([]), isEmptyObject(null), isEmptyObject('')]
+[true,false,true,true,true]
+=== resultsAgree js: unwrapJavaObject(1)
+1
+=== resultsAgree js: String(unwrapJavaObject(new java.lang.StringBuilder('ab')))
+"ab"
+=== resultsAgree js: isInteger()
+false
+=== resultsAgree js: isPrimitive(1, 2)
+true
+=== resultsAgree js: [isObjectSpecies({}), isObjectSpecies([]), isObjectSpecies(new Date(0)), isObjectSpecies(null), isObjectSpecies(function () {}), isObjectSpecies(1)]
+[true,false,false,false,false,false]
+=== resultsAgree js: isObjectSpecies()
+false
+=== resultsAgree js: typeof random()
+"number"
+=== resultsAgree js: random(5)
+NaN
+=== resultsAgree js: random(1, 1)
+1
+=== resultsAgree js: random(-3, -3)
+-3
+=== resultsAgree js: random(null, null)
+0
+=== resultsAgree js: random(undefined, 2)
+NaN
+=== resultsAgree js: random('2', '2')
+"02"
+=== resultsAgree js: typeof random(1, 2, 3)
+"number"
+=== resultsAgree js: wait(function () { return 1; })
+true
+=== resultsAgree js: wait(function () { return 0; }, 1)
+true
+=== resultsAgree js: wait(function () { return ''; }, 1)
+true
+=== resultsAgree js: wait(function () { return false; }, 2, 0)
+false
+=== resultsAgree js: wait(function () { return null; }, 1)
+false
+=== resultsAgree js: wait(function () { return NaN; }, 1)
+false
+=== resultsAgree js: (function () { var n = 0; wait(function () { n++; return false; }, 3, 0); return n; })()
+3
+=== resultsAgree js: (function () { var n = 0; wait(function () { return ++n === 2; }, 5, 0); return n; })()
+2
+=== resultsAgree js: wait(function () { return 'ok'; }, { then: function (v) { return v + '!'; } })
+"ok!"
+=== resultsAgree js: wait(function () { return false; }, 1, { else: function () { return 'no'; } })
+"no"
+=== resultsAgree js: wait(function () { return false; }, 1, 0, { else: function () {} })
+false
+=== resultsAgree js: wait(function () { return 'x'; }, 1, 0, { then: function (v) { return v; } })
+"x"
+=== resultsAgree js: wait(function () { return true; }, 0)
+false
+=== resultsAgree js: (function () { var n = 0; var r = wait(function () { n++; return true; }, 0, { else: function (v) { return 'else:' + v; } }); return [n, r]; })()
+[0,"else:undefined"]
+=== resultsAgree js: wait(function () { return true; }, '2', '0')
+true
+=== resultsAgree js: wait(function () { return true; }, -1)
+throws Error
+=== resultsAgree js: wait(function () { return true; }, 1, Infinity)
+throws Error
+=== resultsAgree js: wait(function () { return true; }, 1, -1)
+throws Error
+=== resultsAgree js: wait(function () { return true; }, 1, 0, 5)
+true
+=== resultsAgree js: wait(function () { return true; }, { then: 1 })
+throws TypeError
+=== resultsAgree js: wait(function () { throw new Error('inner'); }, 1)
+throws Error
+=== resultsAgree js: wait()
+throws TypeError
+=== resultsAgree js: wait(function () { return true; }, 1, 0, {}, 5)
+true
+=== resultsAgree js: [isStopped(), isShuttingDown(), notStopped(), isRunning()]
+[false,false,true,true]
+=== resultsAgree js: isStopped(1)
+false
+=== resultsAgree js: requiresAutojsVersion(5935)
+undefined
+=== resultsAgree js: requiresAutojsVersion(5936)
+throws Error
+=== resultsAgree js: requiresAutojsVersion(461)
+undefined
+=== resultsAgree js: requiresAutojsVersion(300)
+undefined
+=== resultsAgree js: requiresAutojsVersion(6)
+undefined
+=== resultsAgree js: requiresAutojsVersion('6.0.0')
+undefined
+=== resultsAgree js: requiresAutojsVersion('99.0.0')
+throws Error
+=== resultsAgree js: requiresAutojsVersion('abc')
+throws Error
+=== resultsAgree js: requiresAutojsVersion(null)
+throws Error
+=== resultsAgree js: requiresApi('x')
+throws InternalError
+=== resultsAgree js: getScaleBases()
+{"x":720,"y":1280}
+=== resultsAgree js: [getScaleBaseX(), getScaleBaseY()]
+[720,1280]
+=== resultsAgree js: setScaleBaseX(0)
+throws RangeError
+=== resultsAgree js: setScaleBaseX(-1.5)
+throws RangeError
+=== resultsAgree js: setScaleBaseX('a')
+throws RangeError
+=== resultsAgree js: setScaleBases(1080)
+throws RangeError
+=== resultsAgree js: (setScaleBases(1080.7, 1920), [getScaleBaseX(), getScaleBaseY()])
+throws RangeError
+=== resultsAgree js: setScaleBaseX(720)
+undefined
+=== resultsAgree js: [getScaleBases().x, getScaleBases().y]
+[720,1280]
+=== resultsAgree js: sleep(0)
+undefined
+=== resultsAgree js: sleep(null)
+throws TypeError

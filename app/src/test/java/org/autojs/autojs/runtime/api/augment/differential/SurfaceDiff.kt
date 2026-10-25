@@ -111,6 +111,17 @@ internal object SurfaceDiff {
         )
     }
 
+    /** [surface] as text, one member per line (`name`, `type`, `length` or `-`, the attributes), for a recording. */
+    fun encode(surface: Map<String, Member>): String = surface.values.joinToString("\n") { member ->
+        listOf(member.name, member.type, member.length?.toString() ?: "-", member.summary.substringAfterLast(' ')).joinToString("\t")
+    }
+
+    /** The surface [encode] wrote. */
+    fun decode(text: String): Map<String, Member> = text.lines().filter { it.isNotEmpty() }.associate { line ->
+        val (name, type, length, attributes) = line.split('\t')
+        name to Member(name, type, length.toIntOrNull(), attributes[0] == 'E', attributes[1] == 'W', attributes[2] == 'C')
+    }
+
     fun describe(report: Report, firstLabel: String, secondLabel: String): String = buildString {
         if (report.onlyInFirst.isNotEmpty()) appendLine("only in $firstLabel: ${report.onlyInFirst.sorted().joinToString()}")
         if (report.onlyInSecond.isNotEmpty()) appendLine("only in $secondLabel: ${report.onlyInSecond.sorted().joinToString()}")

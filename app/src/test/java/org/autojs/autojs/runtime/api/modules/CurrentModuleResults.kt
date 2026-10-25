@@ -63,7 +63,9 @@ internal object CurrentModuleResults {
         val watchdog = Timer("current-module-results", true)
         val failures = try {
             (expressions + known.keys.filterNot { it in expressions }).mapNotNull { expression ->
-                val current = renderWithin(watchdog, currentSide, expression)?.let(::onDevice) ?: DifferentialRhino.Rendered(BLOCKED, null)
+                val current = DifferentialRhino.Rendered(ScriptModuleExpectations.obsolete("current: $expression") {
+                    (renderWithin(watchdog, currentSide, expression)?.let(::onDevice) ?: DifferentialRhino.Rendered(BLOCKED, null)).key
+                }, null)
                 val new = renderWithin(watchdog, newSide, expression) ?: DifferentialRhino.Rendered(NEW_BLOCKED, null)
                 val failure = compare(expression, current, new, known[expression])
                 when {

@@ -7,6 +7,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.files.BatchRename
 import org.autojs.autojs.runtime.api.augment.files.Files
 import org.autojs.autojs.runtime.api.modules.storages.Storages
@@ -56,7 +57,7 @@ class AppModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, PATHS)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, PATHS) } }
         assertEquals(
             // Documented: the function under `apply` is named after its script name (formerly the Kotlin name applyPlan).
             expected.replace("files.batchRename.apply EW- function applyPlan", "files.batchRename.apply EW- function apply"),
@@ -190,19 +191,25 @@ class AppModulesTest {
      */
     @Test
     fun obsoleteMembersExistOnTheNewModules() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("device", rhino.evalJs("({})"))
-        ScriptableObject.putProperty(host.global, "context", Context.javaToJS(StoreContext.install(), rhino.jsScope))
-        val obsolete = listOf("device", "storages").associateWith { host.load(it) }
-        ScriptableObject.putProperty(host.global, "obsoleteStorages", obsolete["storages"])
+        val store = StoreContext.install()
+        // The obsolete modules run only when recording; their surfaces are replayed otherwise (ScriptModuleExpectations).
+        // zh-CN: 旧模块只在记录时运行, 其余时候回放记录的表面.
+        val obsolete by lazy {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            host.setRuntimeProperty("device", rhino.evalJs("({})"))
+            ScriptableObject.putProperty(host.global, "context", Context.javaToJS(store, rhino.jsScope))
+            val modules = listOf("device", "storages").associateWith { host.load(it) }
+            ScriptableObject.putProperty(host.global, "obsoleteStorages", modules["storages"])
+            modules + ("storage" to rhino.evalJs("obsoleteStorages.create('aj6-p36-obsolete')"))
+        }
         listOf(
-            "device" to (obsolete["device"] to "device"),
-            "storages" to (obsolete["storages"] to "storages"),
+            "device" to "device",
+            "storages" to "storages",
             // `_storage` is the LocalStorage the obsolete proxy kept as a property; the new storage object keeps it in Kotlin.
-            "storage" to (rhino.evalJs("obsoleteStorages.create('aj6-p36-obsolete')") to "storages.create('aj6-p36-obsolete')"),
-        ).forEach { (name, sides) ->
-            val (js, kt) = sides
-            val report = SurfaceDiff.compare(SurfaceDiff.surface(js, rhino.jsScope.globalThis).filterKeys { it != "_storage" }, SurfaceDiff.surface(rhino.evalKt(kt), rhino.ktScope.globalThis))
+            "storage" to "storages.create('aj6-p36-obsolete')",
+        ).forEach { (name, kt) ->
+            val js = ScriptModuleExpectations.obsoleteSurface("surface: $name") { SurfaceDiff.surface(obsolete[name], rhino.jsScope.globalThis) }
+            val report = SurfaceDiff.compare(js.filterKeys { it != "_storage" }, SurfaceDiff.surface(rhino.evalKt(kt), rhino.ktScope.globalThis))
             assertTrue(name + ": " + SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         }
     }

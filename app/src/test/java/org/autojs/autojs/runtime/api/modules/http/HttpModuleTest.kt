@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -33,7 +34,7 @@ class HttpModuleTest {
     @Before
     fun setUp() {
         rhino = DifferentialRhino()
-        jsHttp = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("http")!!
+        if (ScriptModuleExpectations.RECORDING) jsHttp = ObsoleteModuleHost(rhino.context, rhino.jsScope).loadAndDefine("http")!!
         prepare(rhino)
         rhino.mountNewModules("http")
     }
@@ -51,7 +52,7 @@ class HttpModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(jsHttp, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("http"), rhino.ktScope.globalThis))
+        val report = SurfaceDiff.compare(ScriptModuleExpectations.obsoleteSurface("surface") { SurfaceDiff.surface(jsHttp, rhino.jsScope.globalThis) }, SurfaceDiff.surface(rhino.evalKt("http"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 

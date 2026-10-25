@@ -1,0 +1,67 @@
+=== surfaceMatchesTheCurrentModules describe
+keys tasks,$tasks,workManager,$workManager,work_manager,$work_manager,powerManager,$powerManager,power_manager,$power_manager,settings,$settings,sysprops,$sysprops
+tasks EW- [object Object]
+$tasks EW- [object Object]
+workManager EW- [object Object]
+$workManager EW- [object Object]
+work_manager EW- [object Object]
+$work_manager EW- [object Object]
+settings EW- [object Object]
+$settings EW- [object Object]
+powerManager EW- [object Object]
+$powerManager EW- [object Object]
+power_manager EW- [object Object]
+$power_manager EW- [object Object]
+sysprops EW- function sysprops [get EW-,getInt EW-,getBoolean EW-,getAll EW-]
+$sysprops EW- function sysprops [get EW-,getInt EW-,getBoolean EW-,getAll EW-]
+tasks object proto Object.prototype
+tasks keys addTask,addTimedTask,addDailyTask,addWeeklyTask,addMonthlyTask,addYearlyTask,addDisposableTask,addCountdownTask,addIntentTask,addBroadcastIntentTask,getTimedTask,getIntentTask,removeTask,removeTimedTask,removeIntentTask,updateTask,queryTimedTasks,queryIntentTasks,timeFlagToDays,daysToTimeFlag
+tasks.addTask EW- function addTask
+tasks.addTimedTask EW- function addTimedTask
+tasks.addDailyTask EW- function addDailyTask
+tasks.addWeeklyTask EW- function addWeeklyTask
+tasks.addMonthlyTask EW- function addMonthlyTask
+tasks.addYearlyTask EW- function addYearlyTask
+tasks.addDisposableTask EW- function addDisposableTask
+tasks.addCountdownTask EW- function addCountdownTask
+tasks.addIntentTask EW- function addIntentTask
+tasks.addBroadcastIntentTask EW- function addBroadcastIntentTask
+tasks.getTimedTask EW- function getTimedTask
+tasks.getIntentTask EW- function getIntentTask
+tasks.removeTask EW- function removeTask
+tasks.removeTimedTask EW- function removeTimedTask
+tasks.removeIntentTask EW- function removeIntentTask
+tasks.updateTask EW- function updateTask
+tasks.queryTimedTasks EW- function queryTimedTasks
+tasks.queryIntentTasks EW- function queryIntentTasks
+tasks.timeFlagToDays EW- function timeFlagToDays
+tasks.daysToTimeFlag EW- function daysToTimeFlag
+workManager object proto Object.prototype
+workManager keys addDailyTask,addWeeklyTask,addDisposableTask,addIntentTask,addBroadcastIntentTask,getTimedTask,getIntentTask,removeTimedTask,removeIntentTask,queryTimedTasks,queryIntentTasks
+workManager.addDailyTask EW- function addDailyTask
+workManager.addWeeklyTask EW- function addWeeklyTask
+workManager.addDisposableTask EW- function addDisposableTask
+workManager.addIntentTask EW- function addIntentTask
+workManager.addBroadcastIntentTask EW- function addBroadcastIntentTask
+workManager.getTimedTask EW- function getTimedTask
+workManager.getIntentTask EW- function getIntentTask
+workManager.removeTimedTask EW- function removeTimedTask
+workManager.removeIntentTask EW- function removeIntentTask
+workManager.queryTimedTasks EW- function queryTimedTasks
+workManager.queryIntentTasks EW- function queryIntentTasks
+settings object proto Object.prototype
+settings keys isEnabled,setEnabled,export,categories
+settings.isEnabled EW- function isEnabled
+settings.setEnabled EW- function setEnabled
+settings.export EW- function export
+settings.categories EW- function categories
+powerManager object proto Object.prototype
+powerManager keys isIgnoringBatteryOptimizations,requestIgnoreBatteryOptimizations
+powerManager.isIgnoringBatteryOptimizations EW- function isIgnoringBatteryOptimizations
+powerManager.requestIgnoreBatteryOptimizations EW- function requestIgnoreBatteryOptimizations
+sysprops function proto Function.prototype > Object.prototype
+sysprops keys get,getInt,getBoolean,getAll
+sysprops.get EW- function get
+sysprops.getInt EW- function getInt
+sysprops.getBoolean EW- function getBoolean
+sysprops.getAll EW- function getAll

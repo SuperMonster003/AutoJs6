@@ -1,0 +1,575 @@
+=== resultsAgreeWithTheCurrentModules current: click()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click(null)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click(1, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click(1, 2, 3)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click(1, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click('a', 'b')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click(1, 2, 3, 'x')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: longClick(undefined)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: press()
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press('a')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press(1, 2, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press([1, 2], 'x')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(1, 2, 3, 4, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe([1, 2], [3, 4])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture('a', [1, 2])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture(-1, [1, 2])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gesture(1, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gestures()
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gestures(1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesturesAsync([1], [2], 3)
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: scrollDown(1, 2, 3)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: scrollDown(NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: scrollUp(null)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: input()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: input(NaN, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: input(1, null)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: setText(null)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: setText(1, 2, 3)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: automator.waitForService('a')
+throws UninitializedPropertyAccessException
+=== resultsAgreeWithTheCurrentModules current: automator.waitForService(NaN)
+throws UninitializedPropertyAccessException
+=== resultsAgreeWithTheCurrentModules current: automator.isServiceRunning(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: automator.switchToInputMethod(null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: automator.switchToInputMethodWithId()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: back(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: home(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: smartClick()
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: smartClick(null)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: smartClick('a', NaN)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: typeInto()
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: toggle('a')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: retry(1)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForIdle('a')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForIdle(-1)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForIdle(1, 2)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForEvent(1)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForToast(-1)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForNotification('a', 'b')
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: automator.click === click
+false
+=== resultsAgreeWithTheCurrentModules current: click.name
+"click"
+=== resultsAgreeWithTheCurrentModules current: automator.headsetHook === automator.headsethook
+false
+=== resultsAgreeWithTheCurrentModules current: click([1])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: click([])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: click([1, 2147483648])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click([1, NaN])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click({ x: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click({ x: 'a', y: 1 })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click({ x: 1, y: Infinity })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click(1, 2147483648)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click('a', 2147483648)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: click(1, 2, 3, Infinity)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: longClick({ x: NaN, y: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press([1])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: press([1, 'a'])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press([1, 2], 2147483648)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press(100, [1])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: press(100, [1, null])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press(1, 2, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: press([[1, null], 100])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [1, 2, 3])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [1, 2])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [[1, 2]])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [[1, 2], []])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [[1, 2], [3, 4, 5]])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [[1, 2], 'a'])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [[1, NaN], [3, 4]])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [1, 'a'], [3, 4])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe([1, 2], [3, 4], 2147483648)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: swipe(1, 2, 3, 4, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture(100, [1, 2, 3])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture(100, [[1, 2], [3, 'a']])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture(100, [1, 2], [])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture(Infinity, [1, 2])
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gesture(100, 1, 2, 3)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gestureAsync(100, [1, 2], 3)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: gestures([100])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: gestures([0, 100])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: gestures([100, [1]])
+throws IndexOutOfBoundsException
+=== resultsAgreeWithTheCurrentModules current: gestures([-1, 100, [1, 2]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gestures([100, [1, 2], 'a'])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gestures([100, [1, 2147483648]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gestures(['a', [1, 2]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gestures([100, [1, 2]], [1, 'a', [1, 2]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: scrollDown(2147483648)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: scrollUp('a', 2147483648)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: input(2147483648, 'a')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: automator.waitForService(Infinity)
+throws UninitializedPropertyAccessException
+=== resultsAgreeWithTheCurrentModules current: automator.waitForService(1e20)
+throws UninitializedPropertyAccessException
+=== resultsAgreeWithTheCurrentModules current: smartClick('aj6-none', { nope: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: clickAny([])
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: dismissPopups(['aj6-none'], { watch: true, onDismissed: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: dismissPopups(['aj6-none'], { onError: function () {} })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: backUntil('aj6-none', { interval: 0 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: retry(function () {}, { backoff: 0.5 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: retry(function () {}, 1.5)
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: launchAndWait('aj6.none', { nope: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: collectList(null, 'aj6-none', { direction: 'x' })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: toggle('aj6-none', true, { click: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForIdle({ eventTypes: 'nope' })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForEvent('click', { text: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForToast({ text: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: waitForNotification({ nope: 1 })
+unavailable(jvm) not mocked
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent('a', function () {}, { distinct: 'x' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent('a', function () {}, { distinct: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent('a', function () {}, { within: -1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvents(['a'], function () {}, { debounce: -5 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setWindowFilter({ nope: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setWindowFilter({ type: 'x' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setWindowFilter({ type: [1] })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindows({ packageName: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindows({ title: /a{,2}/ })
+throws PatternSyntaxException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindows({ active: 1 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindowRoots({ displayId: 1.5 })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindowRoots({ layer: 'a' })
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ nope: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump('x')
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ format: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ maxDepth: NaN })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ properties: ['nope'] })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ properties: [1] })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ visibleOnly: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ maxNodes: 0 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ indent: true })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump({ root: 1 })
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.explain({ nope: 1 })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: auto.explain({ depth: NaN })
+throws EcmaError
+=== resultsAgreeWithTheCurrentModules current: typeof auto
+"function"
+=== resultsAgreeWithTheCurrentModules current: $auto === auto
+true
+=== resultsAgreeWithTheCurrentModules current: auto(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto('x')
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto('fast', 1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto('x', true)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto(1, true)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto('fast', true, 1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.setMode()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.setMode(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setMode('x')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setFlags(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setFlags([1])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setFlags(['x'])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setFlags('x')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setFlags(['!x'])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.setFlags(['noFastPath', '!noFastPath'])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.clearFlags()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.clearFlags(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.clearFlags(['x'])
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.clearFlags('!noFastPath')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.waitFor('a')
+throws UninitializedPropertyAccessException
+=== resultsAgreeWithTheCurrentModules current: auto.waitFor(NaN)
+throws UninitializedPropertyAccessException
+=== resultsAgreeWithTheCurrentModules current: auto.waitFor(1, 2)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent(null, function () {})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent('a', 1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.registerEvent('a', null, 1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.removeEvent(null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.removeEvents()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.getWindowRoot({})
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.getWindowRoot()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.setWindowFilter(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindows(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.findWindowRoots('a')
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.dump(1)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.explain()
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.explain('a', 1)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: auto.start(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.isRunning(1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: auto.stateListener(1)
+throws WrappedIllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.wait()
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.wait(null)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: auto.wait(function () {}, NaN)
+throws IllegalArgumentException
+=== resultsAgreeWithTheCurrentModules current: new RootAutomator('x')
+unavailable(jvm) android-class
+=== resultsAgreeWithTheCurrentModules current: new RootAutomator({})
+unavailable(jvm) android-class
+=== resultsAgreeWithTheCurrentModules current: new RootAutomator(-1)
+unavailable(jvm) android-class
+=== resultsAgreeWithTheCurrentModules current: new RootAutomator(NaN)
+unavailable(jvm) android-class
+=== resultsAgreeWithTheCurrentModules current: new RootAutomator(true, 1)
+throws MessageLookup
+=== resultsAgreeWithTheCurrentModules current: click('10', '20')
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click([1, 'a'])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click({ x: '1', y: 2 })
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click(1, 2, '3', 4)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: press([[1, 2], 100])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: press(1, '2', 3)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: swipe('1', '2', 3, 4, '5')
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [[1, 2], [3]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [['1', 2], [3, 4]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: swipe(100, [1, Infinity], [3, 4])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gesture('100', [1, 2], [3])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gesture(100, [[[1, 2], [3, 4]]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: gestures([0, 100, [1, 2], [3, 4, 5]])
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: scrollDown('1')
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: input('1', 'a')
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click('文本', 1)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: longClick('文本', 1)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click('文本', 0)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: longClick('文本', -1)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: click('文本', '1')
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: automator.click('文本', 1)
+throws NullPointerException
+=== resultsAgreeWithTheCurrentModules current: automator.longClick('文本', 1)
+throws NullPointerException
+=== obsoleteMembersExistOnTheNewModules surface: automator
+toString	function	0	EWC
+click	function	0	EWC
+longClick	function	0	EWC
+press	function	3	EWC
+swipe	function	5	EWC
+gesture	function	2	EWC
+gestureAsync	function	2	EWC
+gestures	function	1	EWC
+gesturesAsync	function	1	EWC
+isServiceRunning	function	0	EWC
+ensureService	function	0	EWC
+waitForService	function	1	EWC
+input	function	0	EWC
+scrollDown	function	1	EWC
+scrollUp	function	1	EWC
+setText	function	0	EWC
+captureScreen	function	0	EWC
+lockScreen	function	0	EWC
+takeScreenshot	function	0	EWC
+headsethook	function	0	EWC
+accessibilityButton	function	0	EWC
+accessibilityButtonChooser	function	0	EWC
+accessibilityShortcut	function	0	EWC
+accessibilityAllApps	function	0	EWC
+dismissNotificationShade	function	0	EWC
+=== obsoleteMembersExistOnTheNewModules member kinds: auto
+toString:function,service:accessor,services:accessor,windows:accessor,root:accessor,rootInActiveWindow:accessor,windowRoots:accessor,start:function,stop:function,isRunning:function,exists:function,stateListener:function,registerEvent:function,registerEvents:function,removeEvent:function,removeEvents:function,waitFor:function,setMode:function,setFlags:function,setWindowFilter:function,launchSettings:function,clearCache:function
+=== obsoleteMembersExistOnTheNewModules globals
+click	function
+longClick	function
+press	function
+swipe	function
+gesture	function
+gestures	function
+gestureAsync	function
+gesturesAsync	function
+scrollDown	function
+scrollUp	function
+input	function
+setText	function
+back	function
+home	function
+powerDialog	function
+notifications	function
+quickSettings	function
+recents	function
+splitScreen	function
+auto	function
+=== obsoleteMembersExistOnTheNewModules surface: RootAutomator
+
+=== obsoleteMembersExistOnTheNewModules bound: RootAutomator
+sendEvent,touch,setScreenMetrics,touchX,touchY,sendSync,sendMtSync,tap,swipe,press,longPress,touchDown,touchUp,touchMove,getDefaultId,setDefaultId,exit
+=== autoSurfaceMatchesTheCurrentModule describe: auto
+auto EW- function auto | $auto EW- true | proto true | keys start,stop,enable,disable,hasInstance,hasService,exists,isRunning,isOperational,stateListener,registerEvent,registerEvents,removeEvent,removeEvents,waitFor,wait,setMode,setFlags,clearFlags,getWindowRoot,setWindowFilter,findWindows,findWindowRoots,launchSettings,clearCache,currentPackage,currentActivity,currentComponent,explain,dump,service,services,windows,root,rootInActiveWindow,windowRoots,stats,state | start EW- function start | stop EW- function stop | enable EW- function enable | disable EW- function disable | hasInstance EW- function hasInstance | hasService EW- function hasService | exists EW- function exists | isRunning EW- function isRunning | isOperational EW- function isOperational | stateListener EW- function stateListener | registerEvent EW- function registerEvent | registerEvents EW- function registerEvents | removeEvent EW- function removeEvent | removeEvents EW- function removeEvents | waitFor EW- function waitFor | wait EW- function wait | setMode EW- function setMode | setFlags EW- function setFlags | clearFlags EW- function clearFlags | getWindowRoot EW- function getWindowRoot | setWindowFilter EW- function setWindowFilter | findWindows EW- function findWindows | findWindowRoots EW- function findWindowRoots | launchSettings EW- function launchSettings | clearCache EW- function clearCache | currentPackage EW- function currentPackage | currentActivity EW- function currentActivity | currentComponent EW- function currentComponent | explain EW- function explain | dump EW- function dump | service getter | services getter | windows getter | root getter | rootInActiveWindow getter | windowRoots getter | stats getter | state getter
+=== surfaceMatchesTheCurrentModules describe
+keys click,longClick,press,swipe,gesture,gestureAsync,gestures,gesturesAsync,scrollDown,scrollUp,input,setText,back,home,powerDialog,notifications,quickSettings,recents,splitScreen,smartClick,smartClickBounds,waitForIdle,waitForEvent,waitForToast,waitForNotification,clickIfExists,clickBoundsIfExists,clickAny,clickBoundsAny,findAny,scrollUntil,typeInto,dismissPopups,collectList,launchAndWait,backUntil,backToApp,toggle,retry,automator,$automator,RootAutomator
+click EW- function click
+longClick EW- function longClick
+press EW- function press
+swipe EW- function swipe
+gesture EW- function gesture
+gestureAsync EW- function gestureAsync
+gestures EW- function gestures
+gesturesAsync EW- function gesturesAsync
+scrollDown EW- function scrollDown
+scrollUp EW- function scrollUp
+input EW- function input
+setText EW- function setText
+back EW- function back
+home EW- function home
+powerDialog EW- function powerDialog
+notifications EW- function notifications
+quickSettings EW- function quickSettings
+recents EW- function recents
+splitScreen EW- function splitScreen
+smartClick EW- function smartClick
+smartClickBounds EW- function smartClickBounds
+waitForIdle EW- function waitForIdle
+waitForEvent EW- function waitForEvent
+waitForToast EW- function waitForToast
+waitForNotification EW- function waitForNotification
+clickIfExists EW- function clickIfExists
+clickBoundsIfExists EW- function clickBoundsIfExists
+clickAny EW- function clickAny
+clickBoundsAny EW- function clickBoundsAny
+findAny EW- function findAny
+scrollUntil EW- function scrollUntil
+typeInto EW- function typeInto
+dismissPopups EW- function dismissPopups
+collectList EW- function collectList
+launchAndWait EW- function launchAndWait
+backUntil EW- function backUntil
+backToApp EW- function backToApp
+toggle EW- function toggle
+retry EW- function retry
+automator EW- [object Object]
+$automator EW- [object Object]
+RootAutomator EW- function RootAutomator [prototype -W-]
+$RootAutomator missing
+automator object proto Object.prototype
+automator keys click,longClick,press,swipe,gesture,gestureAsync,gestures,gesturesAsync,isServiceRunning,ensureService,waitForService,scrollDown,scrollUp,input,setText,captureScreen,lockScreen,takeScreenshot,headsethook,headsetHook,switchToInputMethodWithId,switchToInputMethod,accessibilityButton,accessibilityButtonChooser,accessibilityShortcut,accessibilityAllApps,dismissNotificationShade,back,home,powerDialog,notifications,quickSettings,recents,splitScreen,smartClick,smartClickBounds,waitForIdle,waitForEvent,waitForToast,waitForNotification,clickIfExists,clickBoundsIfExists,clickAny,clickBoundsAny,findAny,scrollUntil,typeInto,dismissPopups,collectList,launchAndWait,backUntil,backToApp,toggle,retry
+automator.click EW- function click
+automator.longClick EW- function longClick
+automator.press EW- function press
+automator.swipe EW- function swipe
+automator.gesture EW- function gesture
+automator.gestureAsync EW- function gestureAsync
+automator.gestures EW- function gestures
+automator.gesturesAsync EW- function gesturesAsync
+automator.isServiceRunning EW- function isServiceRunning
+automator.ensureService EW- function ensureService
+automator.waitForService EW- function waitForService
+automator.scrollDown EW- function scrollDown
+automator.scrollUp EW- function scrollUp
+automator.input EW- function input
+automator.setText EW- function setText
+automator.captureScreen EW- function captureScreen
+automator.lockScreen EW- function lockScreen
+automator.takeScreenshot EW- function takeScreenshot
+automator.headsethook EW- function headsethook
+automator.headsetHook EW- function headsethook
+automator.switchToInputMethodWithId EW- function switchToInputMethodWithId
+automator.switchToInputMethod EW- function switchToInputMethod
+automator.accessibilityButton EW- function accessibilityButton
+automator.accessibilityButtonChooser EW- function accessibilityButtonChooser
+automator.accessibilityShortcut EW- function accessibilityShortcut
+automator.accessibilityAllApps EW- function accessibilityAllApps
+automator.dismissNotificationShade EW- function dismissNotificationShade
+automator.back EW- function back
+automator.home EW- function home
+automator.powerDialog EW- function powerDialog
+automator.notifications EW- function notifications
+automator.quickSettings EW- function quickSettings
+automator.recents EW- function recents
+automator.splitScreen EW- function splitScreen
+automator.smartClick EW- function smartClick
+automator.smartClickBounds EW- function smartClickBounds
+automator.waitForIdle EW- function waitForIdle
+automator.waitForEvent EW- function waitForEvent
+automator.waitForToast EW- function waitForToast
+automator.waitForNotification EW- function waitForNotification
+automator.clickIfExists EW- function clickIfExists
+automator.clickBoundsIfExists EW- function clickBoundsIfExists
+automator.clickAny EW- function clickAny
+automator.clickBoundsAny EW- function clickBoundsAny
+automator.findAny EW- function findAny
+automator.scrollUntil EW- function scrollUntil
+automator.typeInto EW- function typeInto
+automator.dismissPopups EW- function dismissPopups
+automator.collectList EW- function collectList
+automator.launchAndWait EW- function launchAndWait
+automator.backUntil EW- function backUntil
+automator.backToApp EW- function backToApp
+automator.toggle EW- function toggle
+automator.retry EW- function retry
+RootAutomator function proto Function.prototype > Object.prototype
+RootAutomator keys 
+RootAutomator.prototype -W- [object Object]

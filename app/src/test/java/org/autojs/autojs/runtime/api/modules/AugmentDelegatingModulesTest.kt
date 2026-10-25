@@ -101,11 +101,7 @@ class AugmentDelegatingModulesTest {
         val failures = CASES.flatMap { case ->
             val all = case.calls + case.checked.map { it.first }
             val new = withNew(case) { rhino -> all.map { rhino.render(DifferentialRhino.Side.KT, it) } }
-            val current = DifferentialRhino().use { side ->
-                case.prepare(side)
-                case.mountCurrent(side)
-                all.map { side.render(DifferentialRhino.Side.KT, it) }
-            }
+            val current = HostModuleTestSupport.currentResults(all, case.prepare, case.mountCurrent)
             val expected = case.checked.toMap()
             all.indices.mapNotNull { i ->
                 val (now, next) = current[i] to new[i]
@@ -138,11 +134,7 @@ class AugmentDelegatingModulesTest {
         var compared = 0
         val failures = CASES.filter { it.accepted.isNotEmpty() }.flatMap { case ->
             val new = withNew(case) { rhino -> case.accepted.map { rhino.render(DifferentialRhino.Side.KT, it) } }
-            val current = DifferentialRhino().use { side ->
-                case.prepare(side)
-                case.mountCurrent(side)
-                case.accepted.map { side.render(DifferentialRhino.Side.KT, it) }
-            }
+            val current = HostModuleTestSupport.currentResults(case.accepted, case.prepare, case.mountCurrent)
             case.accepted.indices.mapNotNull { i ->
                 compared++
                 val (now, next) = reached(current[i]) to reached(new[i])

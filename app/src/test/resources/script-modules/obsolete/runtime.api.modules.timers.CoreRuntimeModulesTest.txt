@@ -1,0 +1,204 @@
+=== obsoleteMembersExistOnTheNewModules surface: engines
+all	function	0	EWC
+myEngine	function	0	EWC
+stopAll	function	0	EWC
+stopAllAndToast	function	0	EWC
+execScript	function	3	EWC
+execScriptFile	function	2	EWC
+execAutoFile	function	2	EWC
+=== obsoleteMembersExistOnTheNewModules surface: timers
+setIntervalExt	function	4	EWC
+getMaxCallbackUptimeMillisForAllThreads	function	0	EW-
+getMainTimer	function	0	EW-
+getClass	function	0	EW-
+wait	function	0	EW-
+notifyAll	function	0	EW-
+getTimerForCurrentThread	function	0	EW-
+clearInterval	function	0	EW-
+notify	function	0	EW-
+timeout	object	-	EW-
+clearImmediate	function	0	EW-
+getTimerForId	function	0	EW-
+setInterval	function	0	EW-
+hashCode	function	0	EW-
+clearTimeout	function	0	EW-
+recycle	function	0	EW-
+class	object	-	EW-
+mainTimer	object	-	EW-
+timerForCurrentThread	inaccessible	-	EW-
+hasPendingCallbacks	function	0	EW-
+getTimerForThread	function	0	EW-
+setImmediate	function	0	EW-
+setTimeout	function	0	EW-
+immediate	object	-	EW-
+maxCallbackUptimeMillisForAllThreads	object	-	EW-
+equals	function	0	EW-
+toString	function	0	EW-
+interval	object	-	EW-
+newTimer	function	0	EW-
+=== obsoleteMembersExistOnTheNewModules globals
+setTimeout,clearTimeout,setInterval,clearInterval,setImmediate,clearImmediate,loop
+=== timersGiveTheSameResultsAsTheCurrentModule current: typeof timers.setTimeout
+"function"
+=== timersGiveTheSameResultsAsTheCurrentModule current: typeof timers.setIntervalExt
+"function"
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, 10)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, '10')
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, 10.7, 'a', 'b')
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, null)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, undefined, 1)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setInterval(function () {}, '5')
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setImmediate(function () {}, 1, 2)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: clearTimeout(1)
+false
+=== timersGiveTheSameResultsAsTheCurrentModule current: clearInterval('2')
+false
+=== timersGiveTheSameResultsAsTheCurrentModule current: clearImmediate(3.5)
+false
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {})
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {}, '10', 20)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {}, 10, function () {}, function () {})
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: keepAlive()
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: keepAlive(-5)
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.keepAlive('20')
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout()
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(1)
+throws IllegalArgumentException
+Failed to coerce 1 (Number) into a JavaScript function
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(null, 1)
+throws IllegalArgumentException
+Failed to coerce nullish into a JavaScript function
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, 'a')
+throws IllegalArgumentException
+Failed to coerce a (String) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, NaN)
+throws IllegalArgumentException
+Failed to coerce NaN (Number) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: setTimeout(function () {}, Infinity)
+throws IllegalArgumentException
+Failed to coerce Infinity (Number) into a finite Long number
+=== timersGiveTheSameResultsAsTheCurrentModule current: setInterval(null)
+throws IllegalArgumentException
+Failed to coerce nullish into a JavaScript function
+=== timersGiveTheSameResultsAsTheCurrentModule current: setInterval(function () {}, {})
+throws IllegalArgumentException
+Failed to coerce [object Object] (Object) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: setImmediate('f')
+throws IllegalArgumentException
+Failed to coerce f (String) into a JavaScript function
+=== timersGiveTheSameResultsAsTheCurrentModule current: clearTimeout(null)
+throws IllegalArgumentException
+Failed to coerce nullish (Null) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: clearTimeout(1, 2)
+throws NullPointerException
+Cannot invoke "android.content.res.Resources.getQuantityString(int, int, Object[])" because the return value of "org.autojs.autojs.rhino.ArgumentGuards$Companio
+=== timersGiveTheSameResultsAsTheCurrentModule current: clearImmediate(NaN)
+throws IllegalArgumentException
+Failed to coerce NaN (Number) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {}, 'x')
+throws IllegalArgumentException
+Failed to coerce x (String) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {}, NaN)
+throws IllegalArgumentException
+Failed to coerce NaN (Number) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: keepAlive('x')
+throws IllegalArgumentException
+Failed to coerce x (String) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: keepAlive(Infinity)
+throws IllegalArgumentException
+Failed to coerce Infinity (Number) into a finite Long number
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {}, null)
+throws IllegalArgumentException
+Failed to coerce nullish (Null) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.setIntervalExt(function () {}, 100, null, function () {})
+throws IllegalArgumentException
+Failed to coerce nullish (Null) into a valid number
+=== timersGiveTheSameResultsAsTheCurrentModule current: timers.keepAlive === keepAlive
+false
+=== callbackOnlyGivesTheSameResultsAsTheCurrentModule current: setTimeout(function () {})
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== callbackOnlyGivesTheSameResultsAsTheCurrentModule current: setInterval(function () {})
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.Threads.getMainThread()" because "this.mThreads" is null
+=== surfaceMatchesTheCurrentModules describe
+keys setTimeout,setInterval,setImmediate,clearTimeout,clearInterval,clearImmediate,loop,keepAlive,timers,$timers,sync,threads,$threads,continuation,$continuation,engines,$engines
+setTimeout EW- function setTimeout
+setInterval EW- function setInterval
+setImmediate EW- function setImmediate
+clearTimeout EW- function clearTimeout
+clearInterval EW- function clearInterval
+clearImmediate EW- function clearImmediate
+loop EW- function loop
+keepAlive EW- function keepAlive
+timers EW- [object Object]
+$timers EW- [object Object]
+sync EW- function sync
+threads EW- [object Object]
+$threads EW- [object Object]
+continuation E-- [object Object]
+$continuation E-- [object Object]
+engines EW- [object Object]
+$engines EW- [object Object]
+timers object proto [object JavaObject]<org.autojs.autojs.runtime.api.Timers> > Object.prototype
+timers keys setIntervalExt,keepAlive,addDailyTask,addWeeklyTask,addDisposableTask,addIntentTask,getTimedTask,getIntentTask,removeIntentTask,removeTimedTask,queryIntentTasks,queryTimedTasks
+timers.setIntervalExt EW- function setIntervalExt
+timers.keepAlive EW- function keepAlive
+timers.addDailyTask EW- function addDailyTask
+timers.addWeeklyTask EW- function addWeeklyTask
+timers.addDisposableTask EW- function addDisposableTask
+timers.addIntentTask EW- function addIntentTask
+timers.getTimedTask EW- function getTimedTask
+timers.getIntentTask EW- function getIntentTask
+timers.removeIntentTask EW- function removeIntentTask
+timers.removeTimedTask EW- function removeTimedTask
+timers.queryIntentTasks EW- function queryIntentTasks
+timers.queryTimedTasks EW- function queryTimedTasks
+threads object proto [object JavaObject]<org.autojs.autojs.runtime.api.Threads> > Object.prototype
+threads keys interrupt,start,pool,disposable
+threads.interrupt EW- function interrupt
+threads.start EW- function start
+threads.pool EW- function pool
+threads.disposable EW- function disposable
+continuation object proto [object Object]{await,delay} > Object.prototype
+continuation keys create,enabled
+continuation.create EW- function create
+continuation.enabled EW- boolean false
+engines object proto [object Object]{addListener,defaultMaxListeners,emit,emitSticky,eventNames,getMaxListeners,getTimer,listenerCount,listeners,on,once,prependListener,prependOnceListener,removeAllListeners,removeListener,setMaxListeners} > Object.prototype
+engines keys all,myEngine,getEngines,stopAll,stopAllAndToast,execScript,execScriptFile,execAutoFile
+engines.all EW- function all
+engines.myEngine EW- function myEngine
+engines.getEngines EW- function getEngines
+engines.stopAll EW- function stopAll
+engines.stopAllAndToast EW- function stopAllAndToast
+engines.execScript EW- function execScript
+engines.execScriptFile EW- function execScriptFile
+engines.execAutoFile EW- function execAutoFile

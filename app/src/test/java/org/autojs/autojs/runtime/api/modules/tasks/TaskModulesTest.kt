@@ -3,6 +3,7 @@ package org.autojs.autojs.runtime.api.modules.tasks
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.sysprops.SysProps
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.runtime.api.modules.power.PowerManager
 import org.autojs.autojs.runtime.api.modules.settings.Settings
 import org.junit.After
@@ -44,7 +45,7 @@ class TaskModulesTest {
     @Test
     fun surfaceMatchesTheCurrentModules() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, MODULES)
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, MODULES) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, MODULES) } }
         assertEquals(expected, actual)
     }
 

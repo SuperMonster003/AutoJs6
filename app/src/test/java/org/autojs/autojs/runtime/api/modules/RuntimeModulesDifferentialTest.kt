@@ -32,12 +32,14 @@ class RuntimeModulesDifferentialTest {
         rhino = DifferentialRhino()
         RuntimeModulesFixture.prepareHost(rhino.ktRuntime, RuntimeModulesFixture.CORE_FIELDS + "app")
         RuntimeModulesFixture.installAppContext()
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        rhino.evalJs(JS_STUBS)
-        host.setRuntimeProperty("files", rhino.ktRuntime.files)
-        host.setRuntimeProperty("threads", rhino.ktRuntime.threads)
-        host.setRuntimeProperty("app", rhino.ktRuntime.app)
-        listOf("threads", "tasks", "autojs", "app", "files").forEach { host.loadAndDefine(it) }
+        if (ScriptModuleExpectations.RECORDING) {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            rhino.evalJs(JS_STUBS)
+            host.setRuntimeProperty("files", rhino.ktRuntime.files)
+            host.setRuntimeProperty("threads", rhino.ktRuntime.threads)
+            host.setRuntimeProperty("app", rhino.ktRuntime.app)
+            listOf("threads", "tasks", "autojs", "app", "files").forEach { host.loadAndDefine(it) }
+        }
         rhino.mountNewModules("app", "autojs", "threads", "tasks", "files")
     }
 

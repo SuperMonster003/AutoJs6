@@ -1,0 +1,26 @@
+=== obsoleteMembersExistOnTheNewModules surface: barcode
+recognizeTexts	function	0	EWC
+recognizeText	function	0	EWC
+detectAll	function	0	EWC
+detect	function	0	EWC
+=== obsoleteMembersExistOnTheNewModules surface: qrcode
+recognizeTexts	function	0	EWC
+recognizeText	function	0	EWC
+detectAll	function	0	EWC
+detect	function	0	EWC
+=== surfaceMatchesTheCurrentModules surface: barcode
+recognizeText	function	0	EW-
+recognizeTexts	function	0	EW-
+detect	function	0	EW-
+detectAll	function	0	EW-
+=== surfaceMatchesTheCurrentModules surface: qrcode
+recognizeText	function	0	EW-
+recognizeTexts	function	0	EW-
+detect	function	0	EW-
+detectAll	function	0	EW-
+=== surfaceMatchesTheCurrentModules current: [typeof barcode, typeof $barcode, barcode === $barcode, typeof qrcode, typeof $qrcode, qrcode === $qrcode]
+["function","function",true,"function","function",true]
+=== surfaceMatchesTheCurrentModules current: Object.keys(barcode).join()
+"recognizeText,recognizeTexts,detect,detectAll"
+=== surfaceMatchesTheCurrentModules current: Object.keys(qrcode).join()
+"recognizeText,recognizeTexts,detect,detectAll"

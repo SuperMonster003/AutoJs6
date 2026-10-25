@@ -1,0 +1,51 @@
+=== surfaceMatchesTheCurrentModule surface: sqlite
+open	function	0	EW-
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: [typeof sqlite, typeof sqlite.open]
+["function","function"]
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite()
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite(null)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite.open('  ')
+throws NullPointerException
+Cannot invoke "org.autojs.autojs.runtime.api.SQLite.open(String, int, boolean, org.autojs.autojs.core.database.Database$DatabaseCallback)" because "$scriptRunti
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite.open()
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', 5)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', [])
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', { version: 'x' })
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', { version: 0 })
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', { version: 0.5 })
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', { version: Infinity })
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', { version: 2147483648 })
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', null, 5)
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite('a.db', null, 'callback')
+throws(java) RuntimeException
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== argumentErrorsDifferFromTheCurrentModuleAsKnown current: sqlite.open('a.db', {}, null, 1)
+throws MessageLookup
+Method getString in android.content.Context not mocked. See https://developer.android.com/r/studio-ui/build/not-mocked for details.
+=== obsoleteMembersExistOnTheNewModule surface: sqlite
+open	function	3	EWC

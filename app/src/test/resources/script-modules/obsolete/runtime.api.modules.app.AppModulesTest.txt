@@ -1,0 +1,166 @@
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-a'); s.put('k', { a: [1, 'x', null], b: true }); return s.get('k'); })()
+{"a":[1,"x",null],"b":true}
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-b'); s.put('n', 1.5).put('t', 'x'); return [s.get('n'), s.get('t'), s.get('none') === undefined, s.get('none', 7), s.size]; })()
+[1.5,"x",true,7,2]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-c'); s.put('k', 1); var before = s.contains('k'); s.remove('k'); return [before, s.contains('k'), s.get('k', 'gone')]; })()
+[true,false,"gone"]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { storages.create('aj6-p36-d').put('k', 1); storages.remove('aj6-p36-d'); var s = storages.create('aj6-p36-d'); return [s.contains('k'), s.size]; })()
+[false,0]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-e'); s.putSync('k', 'v'); return [storages.removeSync('aj6-p36-e'), s.size]; })()
+[true,0]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-f'); s.put('a', 1).put('b', 2); s.clear(); return s.size; })()
+0
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-g'); return [s.put('k', 1) === s, s.remove('k') === s, s.name]; })()
+[true,true,"aj6-p36-g"]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { storages.create('aj6-p36-h').put('k', 'v'); return [storages.create('aj6-p36-h').get('k'), storages.create('aj6-p36-i').contains('k')]; })()
+["v",false]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: (function () { var s = storages.create('aj6-p36-j'); s.put('d', new Date(0)); s.put('s', ''); return [s.get('d'), s.get('s')]; })()
+["1970-01-01T00:00:00.000Z",""]
+=== storagesGiveTheSameResultsAsTheCurrentModule current: storages.create(1).name
+"1"
+=== storagesGiveTheSameResultsAsTheCurrentModule current: storages.create('aj6-p36-k').put('k', undefined)
+throws JavaException IllegalArgumentException
+java.lang.IllegalArgumentException: Value cannot be undefined for Storage#put
+=== obsoleteMembersExistOnTheNewModules surface: device
+width	inaccessible	-	EWC
+height	inaccessible	-	EWC
+rotation	inaccessible	-	EWC
+orientation	inaccessible	-	EWC
+density	inaccessible	-	EWC
+summary	function	0	EWC
+digest	function	0	EWC
+vibrate	function	0	EWC
+isScreenOff	function	0	EWC
+isScreenPortrait	function	0	EWC
+isScreenLandscape	function	0	EWC
+getIpAddress	function	1	EWC
+getIpv6Address	function	0	EWC
+getGatewayAddress	function	0	EWC
+isActiveNetworkMetered	function	0	EWC
+isConnectedOrConnecting	function	0	EWC
+isWifiAvailable	function	0	EWC
+=== obsoleteMembersExistOnTheNewModules surface: storages
+create	function	1	EWC
+remove	function	1	EWC
+=== obsoleteMembersExistOnTheNewModules surface: storage
+_storage	object	-	EWC
+put	function	2	EWC
+get	function	2	EWC
+remove	function	1	EWC
+contains	function	1	EWC
+clear	function	0	EWC
+=== surfaceMatchesTheCurrentModules describe
+keys startActivity,startDualActivity,startService,sendEmail,sendBroadcast,sendLocalBroadcastSync,launch,launchDual,launchPackage,launchDualPackage,launchApp,launchDualApp,getPackageName,getAppName,launchAppDetailsSettings,launchSettings,openAppSetting,openAppSettings,launchDualAppDetailsSettings,launchDualSettings,openDualAppSetting,openDualAppSettings,isInstalled,isDualInstalled,uninstall,uninstallDual,kill,killDual,app,$app,open,files,$files,storages,$storages
+startActivity EW- function startActivity
+startDualActivity EW- function startDualActivity
+startService EW- function startService
+sendEmail EW- function sendEmail
+sendBroadcast EW- function sendBroadcast
+sendLocalBroadcastSync EW- function sendLocalBroadcastSync
+launch EW- function launch
+launchDual EW- function launchDual
+launchPackage EW- function launchPackage
+launchDualPackage EW- function launchDualPackage
+launchApp EW- function launchApp
+launchDualApp EW- function launchDualApp
+getPackageName EW- function getPackageName
+getAppName EW- function getAppName
+launchAppDetailsSettings EW- function launchAppDetailsSettings
+launchSettings EW- function launchAppDetailsSettings
+openAppSetting EW- function launchAppDetailsSettings
+openAppSettings EW- function launchAppDetailsSettings
+launchDualAppDetailsSettings EW- function launchDualAppDetailsSettings
+launchDualSettings EW- function launchDualAppDetailsSettings
+openDualAppSetting EW- function launchDualAppDetailsSettings
+openDualAppSettings EW- function launchDualAppDetailsSettings
+isInstalled EW- function isInstalled
+isDualInstalled EW- function isDualInstalled
+uninstall EW- function uninstall
+uninstallDual EW- function uninstallDual
+kill EW- function kill
+killDual EW- function killDual
+app EW- [object Object]
+$app EW- [object Object]
+open EW- function open
+files EW- [object Object]
+$files EW- [object Object]
+storages EW- [object Object]
+$storages EW- [object Object]
+app object proto [object JavaObject]<org.autojs.autojs.runtime.api.AppUtils> > Object.prototype
+app keys versionCode,versionName,intent,startActivity,startDualActivity,intentToShell,startService,sendEmail,sendBroadcast,sendLocalBroadcastSync,parseUri,openUrl,openDualUrl,getUriForFile,getAppByAlias,launch,launchDual,launchPackage,launchDualPackage,launchApp,launchDualApp,getPackageName,getAppName,getInstalledApps,getInstalledPackages,getApkInfo,launchAppDetailsSettings,launchSettings,openAppSetting,openAppSettings,launchDualAppDetailsSettings,launchDualSettings,openDualAppSetting,openDualAppSettings,isInstalled,isDualInstalled,uninstall,uninstallDual,viewFile,editFile,kill,killDual,autojs
+app.versionCode EW- number 5935
+app.versionName EW- string 6.8.0
+app.intent EW- function intent
+app.startActivity EW- function startActivity
+app.startDualActivity EW- function startDualActivity
+app.intentToShell EW- function intentToShell
+app.startService EW- function startService
+app.sendEmail EW- function sendEmail
+app.sendBroadcast EW- function sendBroadcast
+app.sendLocalBroadcastSync EW- function sendLocalBroadcastSync
+app.parseUri EW- function parseUri
+app.openUrl EW- function openUrl
+app.openDualUrl EW- function openDualUrl
+app.getUriForFile EW- function getUriForFile
+app.getAppByAlias EW- function getAppByAlias
+app.launch EW- function launch
+app.launchDual EW- function launchDual
+app.launchPackage EW- function launchPackage
+app.launchDualPackage EW- function launchDualPackage
+app.launchApp EW- function launchApp
+app.launchDualApp EW- function launchDualApp
+app.getPackageName EW- function getPackageName
+app.getAppName EW- function getAppName
+app.getInstalledApps EW- function getInstalledApps
+app.getInstalledPackages EW- function getInstalledPackages
+app.getApkInfo EW- function getApkInfo
+app.launchAppDetailsSettings EW- function launchAppDetailsSettings
+app.launchSettings EW- function launchAppDetailsSettings
+app.openAppSetting EW- function launchAppDetailsSettings
+app.openAppSettings EW- function launchAppDetailsSettings
+app.launchDualAppDetailsSettings EW- function launchDualAppDetailsSettings
+app.launchDualSettings EW- function launchDualAppDetailsSettings
+app.openDualAppSetting EW- function launchDualAppDetailsSettings
+app.openDualAppSettings EW- function launchDualAppDetailsSettings
+app.isInstalled EW- function isInstalled
+app.isDualInstalled EW- function isDualInstalled
+app.uninstall EW- function uninstall
+app.uninstallDual EW- function uninstallDual
+app.viewFile EW- function viewFile
+app.editFile EW- function editFile
+app.kill EW- function kill
+app.killDual EW- function killDual
+app.autojs EWC [object Object]
+files object proto [object JavaObject]<org.autojs.autojs.runtime.api.Files> > Object.prototype
+files keys open,path,join,toFile,batchRename
+files.open EW- function open
+files.path EW- function path
+files.join EW- function join
+files.toFile EW- function toFile
+files.batchRename EW- function batchRename [BatchRenameError EW-,plan EW-,apply EW-,undo EW-,history EW-,isAvailable EW-,planAsync EW-,applyAsync EW-,undoAsync EW-,presets EW-,presetsAsync EW-,importPresets EW-,importPresetsAsync EW-,preview EW-,previewAsync EW-,deleteHistory EW-,clearHistory EW-]
+files.batchRename function proto Function.prototype > Object.prototype
+files.batchRename keys BatchRenameError,plan,apply,undo,history,isAvailable,planAsync,applyAsync,undoAsync,presets,presetsAsync,importPresets,importPresetsAsync,preview,previewAsync,deleteHistory,clearHistory
+files.batchRename.BatchRenameError EW- function BatchRenameError [prototype -W-]
+files.batchRename.plan EW- function plan
+files.batchRename.apply EW- function applyPlan
+files.batchRename.undo EW- function undo
+files.batchRename.history EW- function history
+files.batchRename.isAvailable EW- function isAvailable
+files.batchRename.planAsync EW- function planAsync
+files.batchRename.applyAsync EW- function applyAsync
+files.batchRename.undoAsync EW- function undoAsync
+files.batchRename.presets EW- function presets
+files.batchRename.presetsAsync EW- function presetsAsync
+files.batchRename.importPresets EW- function importPresets
+files.batchRename.importPresetsAsync EW- function importPresetsAsync
+files.batchRename.preview EW- function preview
+files.batchRename.previewAsync EW- function previewAsync
+files.batchRename.deleteHistory EW- function deleteHistory
+files.batchRename.clearHistory EW- function clearHistory
+storages object proto Object.prototype
+storages keys create,remove,removeSync,all,names
+storages.create EW- function create
+storages.remove EW- function remove
+storages.removeSync EW- function removeSync
+storages.all EW- function all
+storages.names EW- function names

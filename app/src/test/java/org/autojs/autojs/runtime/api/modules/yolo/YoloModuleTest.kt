@@ -62,7 +62,7 @@ class YoloModuleTest {
         val calls = CODED_CALLS.map { it.first }
         val mountCurrent: (DifferentialRhino) -> Unit = { Yolo(it.ktRuntime).augment(it.ktScope.globalThis as ScriptableObject) }
         assertEquals(calls.size, HostModuleTestSupport.assertSameResults(rhino, calls, emptyMap(), mountCurrent = mountCurrent))
-        val current = DifferentialRhino().use { side -> mountCurrent(side); calls.map { side.render(DifferentialRhino.Side.KT, it) } }
+        val current = HostModuleTestSupport.currentResults(calls, mountCurrent = mountCurrent)
         CODED_CALLS.forEachIndexed { i, (call, code) ->
             val new = rhino.render(DifferentialRhino.Side.KT, call)
             assertEquals("$call\n    current ${current[i]}\n    new     $new", listOf(code, code), listOf(current[i], new).map { CODE.find(it.detail.orEmpty())?.value })

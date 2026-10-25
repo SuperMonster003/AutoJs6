@@ -5,6 +5,7 @@ import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -63,10 +64,13 @@ class DialogsModuleTest {
 
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        // The obsolete module reads the preset texts from the global `R` and assigns its globals with `__asGlobal__` when it loads.
-        rhino.evalJs("var R = { strings: {} }; var __asGlobal__ = function () {};")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(host.load("dialogs"), rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("dialogs"), rhino.ktScope.globalThis))
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: dialogs") {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            // The obsolete module reads the preset texts from the global `R` and assigns its globals with `__asGlobal__` when it loads.
+            rhino.evalJs("var R = { strings: {} }; var __asGlobal__ = function () {};")
+            SurfaceDiff.surface(host.load("dialogs"), rhino.jsScope.globalThis)
+        }
+        val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("dialogs"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
         HostModuleTestSupport.check(rhino, listOf("rawInput", "alert", "confirm", "prompt").map { "typeof $it" to "\"function\"" })
     }

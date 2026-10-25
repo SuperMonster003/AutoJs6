@@ -6,6 +6,7 @@ import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -53,7 +54,7 @@ class ImagesModuleTest {
     @Test
     fun surfaceMatchesTheCurrentModule() {
         val actual = RuntimeModulesFixture.describe(rhino, GLOBALS, emptyList())
-        val expected = newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, emptyList()) }
+        val expected = ScriptModuleExpectations.obsolete("describe") { newSide(newLayer = false).use { RuntimeModulesFixture.describe(it, GLOBALS, emptyList()) } }
         assertEquals(expected, actual)
         HostModuleTestSupport.assertSameSurface(rhino, "images", prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }, mountCurrent = ::mountCurrent)
         val compared = HostModuleTestSupport.assertSameResults(rhino, LAYOUT, emptyMap(), prepare = { RuntimeModulesFixture.prepareHost(it.ktRuntime) }, mountCurrent = ::mountCurrent)
@@ -64,11 +65,13 @@ class ImagesModuleTest {
     /** The obsolete module needs `scriptRuntime.threads.atomic`, `events.__asEmitter__` and `__asGlobal__` when it is created. */
     @Test
     fun obsoleteMembersExistOnTheNewModule() {
-        val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
-        host.setRuntimeProperty("threads", rhino.evalJs("({ atomic: function () { return {}; } })"))
-        rhino.evalJs("global.events = { __asEmitter__: function (o) { return o; } }; global.__asGlobal__ = function () {}")
-        val obsolete = host.load("images")
-        val report = SurfaceDiff.compare(SurfaceDiff.surface(obsolete, rhino.jsScope.globalThis), SurfaceDiff.surface(rhino.evalKt("images"), rhino.ktScope.globalThis))
+        val obsolete = ScriptModuleExpectations.obsoleteSurface("surface: images") {
+            val host = ObsoleteModuleHost(rhino.context, rhino.jsScope)
+            host.setRuntimeProperty("threads", rhino.evalJs("({ atomic: function () { return {}; } })"))
+            rhino.evalJs("global.events = { __asEmitter__: function (o) { return o; } }; global.__asGlobal__ = function () {}")
+            SurfaceDiff.surface(host.load("images"), rhino.jsScope.globalThis)
+        }
+        val report = SurfaceDiff.compare(obsolete, SurfaceDiff.surface(rhino.evalKt("images"), rhino.ktScope.globalThis))
         assertTrue(SurfaceDiff.describe(report, "js", "kt"), report.onlyInFirst.isEmpty() && report.typeMismatches.isEmpty())
     }
 

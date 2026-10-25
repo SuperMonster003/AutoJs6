@@ -1,0 +1,56 @@
+=== surfaceMatchesTheCurrentModule surface: crypto
+Key	function	-	EW-
+KeyPair	function	-	EW-
+getClass	function	0	EW-
+wait	function	0	EW-
+hashCode	function	0	EW-
+equals	function	0	EW-
+notifyAll	function	0	EW-
+toString	function	0	EW-
+class	object	-	EW-
+notify	function	0	EW-
+=== obsoleteMembersExistOnTheNewModule surface
+Key	function	-	EWC
+KeyPair	function	-	EWC
+digest	function	0	EWC
+encrypt	function	0	EWC
+decrypt	function	0	EWC
+generateKeyPair	function	0	EWC
+=== resultsAgree js: typeof crypto
+"object"
+=== resultsAgree js: [typeof crypto.digest, typeof crypto.encrypt, typeof crypto.decrypt, typeof crypto.generateKeyPair]
+["function","function","function","function"]
+=== resultsAgree js: String(crypto.Key) === String(org.autojs.autojs.core.crypto.Crypto.Key)
+true
+=== resultsAgree js: crypto.digest('abc')
+"900150983cd24fb0d6963f7d28e17f72"
+=== resultsAgree js: crypto.digest('abc', 'SHA-256')
+"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+=== resultsAgree js: crypto.digest('abc', 'SHA-1', { output: 'base64' })
+"qZk+NkcGgWq6PiVxeFDCbJzQ2J0="
+=== resultsAgree js: crypto.digest('abc', { output: 'hex' })
+"900150983cd24fb0d6963f7d28e17f72"
+=== resultsAgree js: crypto.digest([97, 98, 99], 'MD5', { input: 'bytes' })
+"900150983cd24fb0d6963f7d28e17f72"
+=== resultsAgree js: crypto.digest('YWJj', 'MD5', { input: 'base64' })
+"900150983cd24fb0d6963f7d28e17f72"
+=== resultsAgree js: Array.from(crypto.digest('abc', 'MD5', { output: 'bytes' })).length
+0
+=== resultsAgree js: crypto.digest('abc', 'NO-SUCH-ALGORITHM')
+throws JavaException NoSuchAlgorithmException
+=== resultsAgree js: crypto.digest()
+throws InternalError
+=== resultsAgree js: crypto.encrypt('hello', new crypto.Key('0123456789abcdef'), 'AES/ECB/PKCS5Padding', { output: 'base64' })
+"Z0x+8454yr2c7JwSWCOmOQ=="
+=== resultsAgree js: crypto.decrypt(crypto.encrypt('hello', new crypto.Key('0123456789abcdef'), 'AES/ECB/PKCS5Padding', { output: 'base64' }), new crypto.Key('0123456789abcdef'), 'AES/ECB/PKCS5Padding', { input: 'base64', output: 'string' })
+"hello"
+=== resultsAgree js: crypto.decrypt(crypto.encrypt('hello', new crypto.Key('0123456789abcdef'), 'AES/CBC/PKCS5Padding', { iv: 'abcdefghijklmnop', output: 'hex' }), new crypto.Key('0123456789abcdef'), 'AES/CBC/PKCS5Padding', { iv: 'abcdefghijklmnop', input: 'hex', output: 'string' })
+"hello"
+=== resultsAgree js: crypto.encrypt('hello', 1, 'AES/ECB/PKCS5Padding')
+throws JavaException Exception
+=== resultsAgree js: crypto.encrypt('hello', new crypto.Key('0123456789abcdef'), 'NO/SUCH/TRANSFORMATION')
+throws JavaException NoSuchAlgorithmException
+=== resultsAgree js: (function (pair) { return [String(pair.publicKey.keyPair), String(pair.privateKey.keyPair), pair.publicKey.data.length > 0]; })(crypto.generateKeyPair('RSA', 1024))
+["public","private",true]
+=== resultsAgree js: crypto.generateKeyPair('NO-SUCH')
+throws JavaException NoSuchAlgorithmException
