@@ -191,21 +191,27 @@ class SelectorStringParser(private val registry: SelectorRegistry = SelectorRegi
      * with it, names containing it, then names within a small edit distance; at most [limit].
      * zh-CN: 与 [key] 相近的注册表名, 最近的在前: 大小写不同的同名, 以它开头的, 含有它的, 再是编辑距离很小的; 至多 [limit] 个.
      */
-    fun suggest(key: String, limit: Int = 5): List<String> {
-        val lower = key.lowercase()
-        if (lower.isEmpty()) return emptyList()
-        val names = registry.names
-        val exact = names.filter { it.lowercase() == lower }
-        val prefix = names.filter { it.lowercase().startsWith(lower) }
-        val contains = names.filter { lower in it.lowercase() }
-        val budget = maxOf(1, key.length / 3)
-        val close = names.filter { editDistance(it.lowercase(), lower) <= budget }.sortedBy { editDistance(it.lowercase(), lower) }
-        return (exact + prefix + contains + close).distinct().take(limit)
-    }
+    fun suggest(key: String, limit: Int = 5): List<String> = suggest(key, registry.names, limit)
 
     companion object {
 
         private val REGEX_FLAGS = setOf('g', 'i', 'm', 's', 'u', 'y', 'd')
+
+        /**
+         * [names] close to [key], nearest first, by the rules of the instance `suggest` (also the candidates of the
+         * result types and node methods of `pickup` / `detect`, docs/selector/ROADMAP.md P1.2); at most [limit].
+         * zh-CN: [names] 中与 [key] 相近的名称, 最近的在前, 规则同实例方法 `suggest` (`pickup` / `detect` 的结果类型与节点方法的候选也用它, P1.2); 至多 [limit] 个.
+         */
+        fun suggest(key: String, names: Collection<String>, limit: Int = 5): List<String> {
+            val lower = key.lowercase()
+            if (lower.isEmpty()) return emptyList()
+            val exact = names.filter { it.lowercase() == lower }
+            val prefix = names.filter { it.lowercase().startsWith(lower) }
+            val contains = names.filter { lower in it.lowercase() }
+            val budget = maxOf(1, key.length / 3)
+            val close = names.filter { editDistance(it.lowercase(), lower) <= budget }.sortedBy { editDistance(it.lowercase(), lower) }
+            return (exact + prefix + contains + close).distinct().take(limit)
+        }
 
         /** `/re/flags` as given, or `null` when [value] is not a regular expression literal. zh-CN: 原样的 `/re/flags`, [value] 不是正则字面量时为 `null`. */
         fun regexLiteral(value: String): String? {

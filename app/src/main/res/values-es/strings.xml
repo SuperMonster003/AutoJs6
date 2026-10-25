@@ -509,6 +509,11 @@
     <string name="error_parse_github_release_assets">Fallo al analizar los activos de publicación de GitHub</string>
     <string name="error_parse_version_info">Fallo al analizar la información de la versión</string>
     <string name="error_pattern_syntax">Sintaxis de patrón no válida</string>
+    <string name="error_pick_argument_count">%1$s acepta de %2$d a %3$d argumentos, se recibieron %4$d</string>
+    <string name="error_pick_argument_type">%1$s: el argumento \"%2$s\" debe ser de tipo %3$s, se recibió %4$s</string>
+    <string name="error_pick_argument_value">%1$s: el argumento \"%2$s\" no puede ser %3$s (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: argumento \"%2$s\": %3$s no es una condición de UiSelector, candidatos: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: argumento \"%2$s\": %3$s no es un tipo de resultado ni un método de UiObject, candidatos: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">El APK del plugin no contiene los recursos necesarios para variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">El APK del plugin no contiene las bibliotecas nativas requeridas: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">No se pudo obtener el índice de complementos: %1$s</string>

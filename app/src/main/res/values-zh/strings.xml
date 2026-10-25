@@ -505,6 +505,11 @@
     <string name="error_parse_github_release_assets">解析 GitHub 发行版资源信息失败</string>
     <string name="error_parse_version_info">无法解析版本信息</string>
     <string name="error_pattern_syntax">正则表达式句法错误</string>
+    <string name="error_pick_argument_count">%1$s 接受 %2$d 至 %3$d 个参数, 实际为 %4$d 个</string>
+    <string name="error_pick_argument_type">%1$s: 参数 \"%2$s\" 需要是 %3$s 类型, 实际为 %4$s</string>
+    <string name="error_pick_argument_value">%1$s: 参数 \"%2$s\" 不能为 %3$s (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: 参数 \"%2$s\": %3$s 不是 UiSelector 的条件, 候选: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: 参数 \"%2$s\": %3$s 既不是结果类型也不是 UiObject 的方法, 候选: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">插件 APK 不包含变体 \"%1$s\" 所需的资源文件: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">插件 APK 不包含所需的 native 库文件: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">获取插件索引失败: %1$s</string>

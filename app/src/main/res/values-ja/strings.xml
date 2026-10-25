@@ -510,6 +510,11 @@
     <string name="error_parse_github_release_assets">GitHub リリースアセットの解析に失敗しました</string>
     <string name="error_parse_version_info">バージョン情報の解析に失敗しました</string>
     <string name="error_pattern_syntax">無効なパターン構文</string>
+    <string name="error_pick_argument_count">%1$s は %2$d から %3$d 個の引数を受け付けますが, %4$d 個が渡されました</string>
+    <string name="error_pick_argument_type">%1$s: 引数 \"%2$s\" は %3$s 型である必要がありますが, %4$s が渡されました</string>
+    <string name="error_pick_argument_value">%1$s: 引数 \"%2$s\" は %3$s にできません (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: 引数 \"%2$s\": %3$s は UiSelector の条件ではありません, 候補: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: 引数 \"%2$s\": %3$s は結果タイプでも UiObject のメソッドでもありません, 候補: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">プラグイン APK に variant=\"%1$s\" に必要な assets が含まれていません: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">プラグイン APK に必要な native ライブラリが含まれていません: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">プラグインインデックスの取得に失敗しました: %1$s</string>

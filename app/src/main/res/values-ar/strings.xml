@@ -511,6 +511,11 @@
     <string name="error_parse_github_release_assets">فشل في تحليل أصول الإفراج عن جيثب</string>
     <string name="error_parse_version_info">فشل في تحليل معلومات الإصدار</string>
     <string name="error_pattern_syntax">بناء جملة نمط غير صالح</string>
+    <string name="error_pick_argument_count">يقبل %1$s من %2$d إلى %3$d وسيطات, العدد الفعلي %4$d</string>
+    <string name="error_pick_argument_type">%1$s: يجب أن تكون الوسيطة \"%2$s\" من النوع %3$s, القيمة الفعلية %4$s</string>
+    <string name="error_pick_argument_value">%1$s: الوسيطة \"%2$s\" لا يمكن أن تكون %3$s (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: الوسيطة \"%2$s\": %3$s ليس شرطا من شروط UiSelector, المرشحات: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: الوسيطة \"%2$s\": %3$s ليس نوع نتيجة ولا طريقة من طرق UiObject, المرشحات: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">ملف APK للمكوّن الإضافي لا يحتوي على الموارد المطلوبة لـ variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">ملف APK للمكوّن الإضافي لا يحتوي على مكتبات native المطلوبة: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">تعذر جلب فهرس الإضافات: %1$s</string>

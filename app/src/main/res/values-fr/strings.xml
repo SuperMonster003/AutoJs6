@@ -509,6 +509,11 @@
     <string name="error_parse_github_release_assets">Échec de l\'analyse des ressources de la version GitHub</string>
     <string name="error_parse_version_info">Fail to parse version information</string>
     <string name="error_pattern_syntax">Syntaxe de motif invalide</string>
+    <string name="error_pick_argument_count">%1$s accepte de %2$d à %3$d arguments, reçu %4$d</string>
+    <string name="error_pick_argument_type">%1$s: l\'argument \"%2$s\" doit être de type %3$s, reçu %4$s</string>
+    <string name="error_pick_argument_value">%1$s: l\'argument \"%2$s\" ne peut pas être %3$s (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: argument \"%2$s\": %3$s n\'est pas une condition de UiSelector, candidats: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: argument \"%2$s\": %3$s n\'est ni un type de résultat ni une méthode de UiObject, candidats: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">L\'APK du plugin ne contient pas les ressources requises pour variant=\"%1$s\" : %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">L\'APK du plugin ne contient pas les bibliothèques natives requises : %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">Échec de la récupération de l\'index des plugins: %1$s</string>

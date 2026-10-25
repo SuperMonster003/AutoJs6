@@ -504,6 +504,11 @@
     <string name="error_parse_github_release_assets">Failed to parse GitHub release assets</string>
     <string name="error_parse_version_info">Failed to parse version information</string>
     <string name="error_pattern_syntax">Invalid pattern syntax</string>
+    <string name="error_pick_argument_count">%1$s accepts %2$d to %3$d arguments, got %4$d</string>
+    <string name="error_pick_argument_type">%1$s: argument \"%2$s\" must be of type %3$s, got %4$s</string>
+    <string name="error_pick_argument_value">%1$s: argument \"%2$s\" cannot be %3$s (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: argument \"%2$s\": %3$s is not a condition of UiSelector, candidates: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: argument \"%2$s\": %3$s is neither a result type nor a method of UiObject, candidates: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">Plugin APK does not contain required assets for variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">Plugin APK does not contain required native libraries: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">Failed to fetch plugin index: %1$s</string>

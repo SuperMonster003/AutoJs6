@@ -511,6 +511,11 @@
     <string name="error_parse_github_release_assets">GitHub 릴리스 자산을 구문 분석하지 못했습니다</string>
     <string name="error_parse_version_info">버전 정보를 구문 분석하지 못했습니다</string>
     <string name="error_pattern_syntax">잘못된 패턴 구문</string>
+    <string name="error_pick_argument_count">%1$s 는 %2$d ~ %3$d 개의 인수를 받지만 %4$d 개가 전달되었습니다</string>
+    <string name="error_pick_argument_type">%1$s: 인수 \"%2$s\" 는 %3$s 유형이어야 하지만 %4$s 입니다</string>
+    <string name="error_pick_argument_value">%1$s: 인수 \"%2$s\" 는 %3$s 일 수 없습니다 (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: 인수 \"%2$s\": %3$s 는 UiSelector 의 조건이 아닙니다, 후보: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: 인수 \"%2$s\": %3$s 는 결과 유형도 UiObject 의 메서드도 아닙니다, 후보: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">플러그인 APK에 variant=\"%1$s\"에 필요한 assets가 포함되어 있지 않습니다: %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">플러그인 APK에 필요한 native 라이브러리가 포함되어 있지 않습니다: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">플러그인 인덱스를 가져오지 못했습니다: %1$s</string>

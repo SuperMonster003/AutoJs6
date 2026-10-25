@@ -509,6 +509,11 @@
     <string name="error_parse_github_release_assets">Не удалось разобрать активы релиза GitHub</string>
     <string name="error_parse_version_info">Не удалось разобрать информацию о версии</string>
     <string name="error_pattern_syntax">Неверный синтаксис шаблона</string>
+    <string name="error_pick_argument_count">%1$s принимает от %2$d до %3$d аргументов, получено %4$d</string>
+    <string name="error_pick_argument_type">%1$s: аргумент \"%2$s\" должен иметь тип %3$s, получено %4$s</string>
+    <string name="error_pick_argument_value">%1$s: аргумент \"%2$s\" не может быть %3$s (%4$s)</string>
+    <string name="error_pick_unknown_condition">%1$s: аргумент \"%2$s\": %3$s не является условием UiSelector, варианты: %4$s</string>
+    <string name="error_pick_unknown_result_type">%1$s: аргумент \"%2$s\": %3$s не является ни типом результата, ни методом UiObject, варианты: %4$s</string>
     <string name="error_plugin_apk_does_not_contain_required_assets_for_variant">APK плагина не содержит требуемые ресурсы для variant=\"%1$s\": %2$s.</string>
     <string name="error_plugin_apk_does_not_contain_required_native_libraries">APK плагина не содержит требуемые native-библиотеки: %1$s.</string>
     <string name="error_plugin_index_fetch_failed_with_reason">Не удалось получить индекс плагинов: %1$s</string>
