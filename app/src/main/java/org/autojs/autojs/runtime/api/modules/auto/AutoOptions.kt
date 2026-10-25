@@ -4,14 +4,13 @@ import org.autojs.autojs.core.accessibility.window.WindowMatch
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.diagnostics.DumpFormat
 import org.autojs.autojs.core.automator.diagnostics.NodeDump
-import org.autojs.autojs.core.automator.filter.JsRegexUtils
+import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.augment.automator.DumpArguments
 import org.autojs.autojs.runtime.api.augment.automator.WindowMatchArguments
 import org.autojs.autojs.runtime.api.modules.flow.FlowOptions
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish
-import org.autojs.autojs.runtime.api.modules.selector.SelectorForms
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeArray
@@ -106,11 +105,7 @@ internal object AutoOptions {
     private fun text(function: String, where: String, value: Any) {
         when (value) {
             is CharSequence -> Unit
-            is NativeRegExp -> try {
-                JsRegexUtils.compileJsOrPlainRegex(value.toString())
-            } catch (e: IllegalArgumentException) {
-                throw SelectorForms.rejected(function, where, value, e)
-            }
+            is NativeRegExp -> PickArguments.patternError(function, where, value, value.toString())?.let { throw it.exception() }
             else -> throw GlobalValues.typeError(function, where, "string | RegExp", value)
         }
     }

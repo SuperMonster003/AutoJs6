@@ -42,7 +42,6 @@ field | core/accessibility/AccessibilityService.kt | registry | kotlin object; r
 field | core/accessibility/codegen/features/FeatureSchema.kt | familiesByVersion | kotlin object; registry; - | table | locate plan families per feature schema version
 field | core/accessibility/inspector/KeywordFilter.kt | DEFAULT | kotlin object; registry; - | table | default keyword properties of the layout inspector
 field | core/automator/pick/CompassParser.kt | rules | kotlin object; registry; - | table | compass syntax: regex to step parser functions
-field | core/automator/pick/Invoker.kt | interceptedMap | kotlin object; registry; - | table | method name to intercepted argument classes, built once
 field | core/automator/pick/PickResultType.kt | groups | kotlin object; registry; - | table | result type groups
 field | core/automator/pick/PickResultType.kt | symbols | kotlin object; registry; - | table | symbol to result type
 field | core/automator/selector/SelectorRegistry.kt | byName | kotlin object; registry; - | table | selector definitions by name, filled once

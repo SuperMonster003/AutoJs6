@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.flow
 
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.runtime.api.augment.flow.FlowCondition
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
-import org.autojs.autojs.runtime.api.modules.selector.SelectorForms
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
@@ -91,7 +91,7 @@ internal class FlowOptions(
     /** `compass` of a selector condition: a string that parses (Q67). */
     fun compass() = read("compass") { value, where ->
         if (value !is CharSequence) throw GlobalValues.typeError(function, where, "string", value)
-        SelectorForms.compass(function, where, value)
+        PickArguments.uiObject.compassError(function, where, value)?.let { throw it.exception() }
     }
 
     /**
@@ -101,7 +101,7 @@ internal class FlowOptions(
     fun resultType(single: Boolean = false) = read("resultType") { value, where ->
         if (value !is CharSequence && value !is List<*>) throw GlobalValues.typeError(function, where, "string | Array", value)
         val compass = if (single) null else raw("compass") as? CharSequence
-        SelectorForms.resultType(function, where, if (value is CharSequence) value.toString() else value, compass, single)
+        PickArguments.uiObject.resultTypeError(function, where, if (value is CharSequence) value.toString() else value, compass, single)?.let { throw it.exception() }
     }
 
     /** One of [names] ([ignoreCase] as the current parser compares them), or with [orFunction] a function. */
@@ -123,7 +123,7 @@ internal class FlowOptions(
         val v = RhinoUtils.unwrap(value)
         when {
             v is UiObject || v is Callable -> Unit
-            FlowCondition.isSelectorForm(v) -> SelectorForms.selector(function, where, v)
+            FlowCondition.isSelectorForm(v) -> PickArguments.uiObject.selectorError(function, where, v)?.let { throw it.exception() }
             else -> throw GlobalValues.typeError(function, where, "UiObject | selector | function", value)
         }
     }

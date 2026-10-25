@@ -1,13 +1,13 @@
 package org.autojs.autojs.runtime.api.modules.flow
 
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.runtime.api.augment.flow.FlowArguments
 import org.autojs.autojs.runtime.api.augment.flow.FlowCondition
 import org.autojs.autojs.runtime.api.augment.flow.FlowNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish
-import org.autojs.autojs.runtime.api.modules.selector.SelectorForms
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
@@ -113,7 +113,7 @@ internal object FlowArgs {
         val v = RhinoUtils.unwrap(value)
         when {
             v is FlowNativeObject || v is UiObject || v is Callable || v is Scriptable && isThenable(v) -> Unit
-            FlowCondition.isSelectorForm(v) -> SelectorForms.selector(function, param, v)
+            FlowCondition.isSelectorForm(v) -> PickArguments.uiObject.selectorError(function, param, v)?.let { throw it.exception() }
             else -> throw GlobalValues.typeError(function, param, "selector | UiObject | function | Flow | Promise", value)
         }
     }
@@ -123,7 +123,7 @@ internal object FlowArgs {
         val v = RhinoUtils.unwrap(value)
         when {
             v is UiObject || v is Callable || v is Function0<*> -> Unit
-            FlowCondition.isSelectorForm(v) -> SelectorForms.selector(function, param, v)
+            FlowCondition.isSelectorForm(v) -> PickArguments.uiObject.selectorError(function, param, v)?.let { throw it.exception() }
             else -> throw GlobalValues.typeError(function, param, "selector | UiObject | function", value)
         }
     }

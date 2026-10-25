@@ -1,6 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.selector
 
-import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.core.automator.filter.BooleanFilter
+import org.autojs.autojs.core.automator.filter.PatternPrecheck
+import org.autojs.autojs.core.automator.pick.PickArguments
+import org.autojs.autojs.core.automator.pick.PickVerdict
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.automator.Automator
@@ -13,6 +17,7 @@ import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -83,8 +88,8 @@ class SelectorModulesTest {
     /**
      * The selector forms, compasses and result types the current readers refuse (appendix C Q66 (2), Q67) and the values a
      * condition refuses (Q68), run on the device with the switch on only: the current module refuses them as well, but
-     * only once a node is found, or after a console warning. Most are told by [SelectorChecks] without an exception
-     * (Q69 (2)); the last case has the regex engine of the device (ICU) refuse every pattern the check refuses.
+     * only once a node is found, or after a console warning. Most are told by [PickArguments] without an exception
+     * (Q69 (2), selector P1.4); the last case has the regex engine of the device (ICU) refuse every pattern the check refuses.
      */
     @Test
     fun selectorForms() {
@@ -119,7 +124,7 @@ class SelectorModulesTest {
             "detect(null, 's', 'w')" to "throws RangeError",
             "textMatch('a|*')" to "throws RangeError",
             "indexInParent(NaN)" to "throws RangeError",
-            // Q70 (2): refused by the full syntax check of SelectorPatterns. zh-CN: Q70 (2): 由 SelectorPatterns 的完整语法检查拒绝.
+            // Q70 (2): refused by the full syntax check of PatternPrecheck. zh-CN: Q70 (2): 由 PatternPrecheck 的完整语法检查拒绝.
             "pickup({ textMatches: '[z-a]' })" to "throws RangeError",
             "textMatches('a{2,1}')" to "throws RangeError",
             "pickup({ textMatch: '(?<1a>x)' })" to "throws RangeError",
@@ -133,7 +138,7 @@ class SelectorModulesTest {
     }
 
     /**
-     * Patterns [SelectorChecks.patternRefusal] refuses, up to [REFUSED_PER_KIND] of each description, from random strings
+     * Patterns [PatternPrecheck.refusal] refuses, up to [REFUSED_PER_KIND] of each description, from random strings
      * of the characters the check looks at (no `/`, so no literal form).
      */
     private fun refusedPatterns(): List<String> {
@@ -141,7 +146,7 @@ class SelectorModulesTest {
         val byKind = LinkedHashMap<String, MutableSet<String>>()
         repeat(50_000) {
             val s = buildString { repeat(1 + random.nextInt(8)) { append(PATTERN_ALPHABET[random.nextInt(PATTERN_ALPHABET.length)]) } }
-            val refusal = SelectorChecks.patternRefusal(s) ?: return@repeat
+            val refusal = PatternPrecheck.refusal(s) ?: return@repeat
             byKind.getOrPut(refusal.substringBefore(" near index")) { LinkedHashSet() }.takeIf { it.size < REFUSED_PER_KIND }?.add(s)
         }
         // The kinds of refusal random strings of these characters reach (seven before Q70 (2)).
@@ -149,46 +154,30 @@ class SelectorModulesTest {
         return byKind.values.flatten()
     }
 
-    /** JVM only (they search on a device): what the current readers accept passes the checks of [selectorForms]. */
+    /**
+     * JVM only (they search on a device): what the current readers accept passes the checks of [selectorForms]. The compat
+     * setters (`setTextSelection` ...) are no result types since the registry of D11 (docs/selector/ROADMAP.md appendix C Q10).
+     */
     @Test
     fun acceptedSelectorForms() {
+        val pick = PickArguments.uiObject
         listOf(
             "null", "'a'", "'a' + 'b'", "/a/", "1", "1.5", "selector().text('a')", "[]", "['a', null, /b/, [1.5, ['c']]]",
             "({ text: 'a', textMatches: /a/, depth: 2, clickable: true, filter: function () { return true; }, action: null })",
             "[{ desc: 'b', boundsInside: [0, 0, '100', 100] }, 'c']",
             "({ textMatch: 'a(b)c', textMatches: '(?i)a', depth: [2], algorithm: 'dfs', indexInParent: Infinity })",
-        ).forEach { SelectorForms.selector("pickup", "selector", unwrapped(it)) }
+        ).forEach { assertNull(it, pick.selectorError("pickup", "selector", unwrapped(it))) }
         listOf(
             "'w'", "''", "'widgets'", "'?'", "'@'", "'text'", "'bounds'", "'click'", "'parent'", "1", "[]", "[1]",
-            "['child', 0]", "['setText', 'a']", "['compass', 'p']", "['scrollTo', 1, 2]", "['#']", "['txt']", "['setTextSelection', 1, Infinity]",
-        ).forEach { SelectorForms.resultType("pickup", "resultType", unwrapped(it), null, single = false) }
-        listOf("'w'", "'text'", "['child', 0]", "'@'").forEach { SelectorForms.resultType("detect", "resultType", unwrapped(it), "%", single = true) }
-        listOf("'?'", "'w'", "['child', 0]", "'widgets'").forEach { SelectorForms.resultType("pickup", "resultType", unwrapped(it), "p2", single = false) }
+            "['child', 0]", "['setText', 'a']", "['compass', 'p']", "['scrollTo', 1, 2]", "['#']", "['txt']", "['setSelection', 1, Infinity]",
+        ).forEach { assertNull(it, pick.resultTypeError("pickup", "resultType", unwrapped(it), null, single = false)) }
+        listOf("'w'", "'text'", "['child', 0]", "'@'").forEach { assertNull(it, pick.resultTypeError("detect", "resultType", unwrapped(it), "%", single = true)) }
+        listOf("'?'", "'w'", "['child', 0]", "'widgets'").forEach { assertNull(it, pick.resultTypeError("pickup", "resultType", unwrapped(it), "p2", single = false)) }
         listOf(
-            "'%'", "'p'", "'p2'", "'pp'", "'c0'", "'c-1'", "'c0>1'", "'s1'", "'s<1'", "'s>-1'", "'k'", "'k2'", "'p2c1'", "null", "undefined",
+            "'%'", "'p'", "'p2'", "'pp'", "'c0'", "'c-1'", "'c0>1'", "'s1'", "'s<1'", "'s>-1'", "'k'", "'k2'", "'p2c1'",
             "''", "'p0'", "'k0'", "'c2147483647'", "'c-2147483648'",
-        ).forEach { SelectorForms.compass("pickup", "compass", unwrapped(it)) }
-    }
-
-    /**
-     * Q69 (2): a result type method finds through [SelectorForms.invoked] the methods `Invoker` tries, `name` then
-     * `getName`, for the names of every method of `UiObject` and their getter forms, and for first characters other than
-     * ASCII whose uppercase is (dotless i, long s) or is not.
-     */
-    @Test
-    fun invokedMethodsAreThoseInvokerTries() {
-        val methods = UiObject::class.java.methods
-        fun tried(name: String) = listOf(name, "get${name.replaceFirstChar { it.uppercase() }}").flatMap { n ->
-            methods.filter { it.name == n }.map { it.parameterTypes.toList() }
-        }.toSet()
-        val names = methods.flatMap { m ->
-            val rest = m.name.removePrefix("get")
-            listOf(m.name, rest, rest.replaceFirstChar { it.lowercase() }, rest.replaceFirstChar { it.uppercase() }, "get${m.name}", m.name.uppercase(), m.name.drop(1))
-        } + listOf("nope", "_", "\$x", "1", "getget") + listOf(0x131, 0x17F, 0xDF, 0xE9, 0xD1).flatMap { listOf(Char(it) + "d", Char(it) + "ize", Char(it) + "ext") }
-        val wrong = names.filter { it.isNotEmpty() }.distinct().filter { name -> SelectorForms.invoked(name).map { it.toList() }.toSet() != tried(name) }
-        assertEquals(emptyList<String>(), wrong.take(20))
-        listOf("text", "Text", "getText", "child", "Child").forEach { assertTrue(it, SelectorForms.invoked(it).isNotEmpty()) }
-        listOf("nope", "tEXT", "gettext").forEach { assertTrue(it, SelectorForms.invoked(it).isEmpty()) }
+        ).forEach { assertNull(it, pick.compassError("pickup", "compass", unwrapped(it) as CharSequence)) }
+        listOf("null", "undefined").forEach { assertTrue(it, pick.pickup(arrayOf("a", unwrapped(it), "w"), BINDING) is PickVerdict.Accepted) }
     }
 
     private fun unwrapped(source: String): Any? = RhinoUtils.unwrap(rhino.evalKt(source))
@@ -248,6 +237,9 @@ class SelectorModulesTest {
         val MODULE_GLOBALS = listOf("selector", "\$selector", "pickup", "detect", "existsAll", "existsOne")
         val PATHS = listOf("selector")
         val GLOBALS = SelectorGlobals.names + MODULE_GLOBALS
+
+        /** Selectors without a bridge: [acceptedSelectorForms] only normalizes, never searches. */
+        val BINDING = PickArguments.Binding({ UiSelector() }, { BooleanFilter.BooleanSupplier { true } })
     }
 
 }

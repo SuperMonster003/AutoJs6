@@ -11,7 +11,6 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.automator.filter.ScreenScale
 import org.autojs.autojs.core.automator.flow.FlowError
-import org.autojs.autojs.core.automator.pick.Detector
 import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.core.automator.toolkit.ActionPerformer
 import org.autojs.autojs.core.automator.toolkit.ScrollDirection
@@ -238,7 +237,7 @@ internal class RuntimeToolkitBindings(private val scriptRuntime: ScriptRuntime, 
 
     override fun refresh(node: UiObject): Boolean = node.refresh()
 
-    override fun pick(node: UiObject, resultType: Any?): Any? = withTopCall { RhinoUtils.unwrap(Detector.detect(scriptRuntime, node, null, resultType ?: PickResultType.WIDGET, null)) }
+    override fun pick(node: UiObject, resultType: Any?): Any? = withTopCall { RhinoUtils.unwrap(UiObject.detect(scriptRuntime, node, null, resultType ?: PickResultType.WIDGET, null)) }
 
     /** The package in front per the activity info the service feeds, so the service is started first (a fresh install has it idle). zh-CN: 服务喂给活动信息的前台包名, 因此先启动服务 (新安装时服务尚未运行). */
     override fun currentPackage(): String? {

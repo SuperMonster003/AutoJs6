@@ -2,6 +2,10 @@ package org.autojs.autojs.runtime.api.modules
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.autojs.autojs.core.accessibility.AccessibilityBridge
+import org.autojs.autojs.core.accessibility.UiSelector
+import org.autojs.autojs.core.automator.filter.BooleanFilter
+import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
@@ -10,6 +14,7 @@ import org.autojs.autojs.runtime.api.modules.automator.AutomatorArgs
 import org.autojs.autojs.runtime.api.modules.flow.FlowArgs
 import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitArgs
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
+import org.autojs.autojs.util.RhinoUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -71,7 +76,7 @@ class ScriptModuleArityTest {
             }
         }
         assertTrue("Declared arities differ from the checks in the source:\n" + failures.joinToString("\n"), failures.isEmpty())
-        assertEquals("arities checked in the source", 168, declared.size)
+        assertEquals("arities checked in the source", 166, declared.size)
     }
 
     @Test(timeout = 300_000)
@@ -83,7 +88,7 @@ class ScriptModuleArityTest {
             val failures = SAMPLES.flatMap { (key, sample) -> sampled(rhino, declared.getValue(key), sample) }
             assertTrue("Sampled argument checks differ from the declared arities:\n" + failures.joinToString("\n"), failures.isEmpty())
         }
-        assertEquals("arities sampled on the JVM", 87, SAMPLES.size)
+        assertEquals("arities sampled on the JVM", 89, SAMPLES.size)
         assertEquals("declared arities (overloads and install functions)", 178 + 77, declared.size)
     }
 
@@ -121,7 +126,7 @@ class ScriptModuleArityTest {
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "mProperties", ConcurrentHashMap<String, Any>())
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "closeableManager", RuntimeResourceScope("script-module-arity-test"))
         HostModuleTestSupport.setField(runtime, "console", DifferentialRhino.allocateWithoutConstructor(ConsoleImpl::class.java))
-        HostModuleTestSupport.setField(runtime, "scriptModules", rhino.mountNewModules("global", "util", "auto", "automator", "flow", "colors", "Color", "console"))
+        HostModuleTestSupport.setField(runtime, "scriptModules", rhino.mountNewModules("global", "util", "auto", "automator", "flow", "colors", "Color", "console", "selector"))
     }
 
     /** The arities of script-modules.json of the host (the unit test fixtures have their own). */
@@ -269,8 +274,12 @@ class ScriptModuleArityTest {
 
         fun counts(min: Int, max: Int) = if (max < 0) "[$min, -1]" else if (min == max) "[$min]" else "[$min, $max]"
 
+        /** Functions of a module that are on the global object only, called by their global names. */
+        val GLOBAL_ONLY = mapOf("selector.pickup" to "pickup", "selector.detect" to "detect")
+
         /** The script call of [key] with [args]. */
         fun call(key: String, args: List<String>): String {
+            GLOBAL_ONLY[key]?.let { return "$it(${args.joinToString()})" }
             if ('.' !in key) return "$key(${args.joinToString()})"
             val path = key.substringBeforeLast('.')
             return when (val name = key.substringAfterLast('.')) {
@@ -367,7 +376,21 @@ class ScriptModuleArityTest {
             // One color for each of the six levels.
             listOf("setContentTextColor", "setContentTextColors").associate {
                 "console.$it" to Sample(listOf(emptyList(), listOf("1", "2", "3", "4", "5", "6")), listOf(listOf("1", "2", "3", "4", "5", "6", "7")))
-            }
+            } +
+            // `pickup(root?, selector?, compass?, resultType?, callback?)` and `detect(w, compass?, resultType?, callback?)`: the normalizer of
+            // the core counts the arguments and tells their positions by type (docs/selector/ROADMAP.md P1.1); accepted calls are only
+            // normalized, never searched.
+            ("selector.pickup" to Sample(listOf(emptyList(), listOf("null", "'a'", "'p'", "'w'", F)), listOf(listOf("1", "2", "3", "4", "5", "6"))) { _, a ->
+                PickArguments.uiObject.pickup(unwrapped(a), PICK_BINDING).requestOrThrow()
+            }) +
+            ("selector.detect" to Sample(listOf(listOf("null", "'p'"), listOf("null", "'p'", "'w'", F)), listOf(listOf("null"), listOf("null", "'p'", "'w'", F, "1"))) { _, a ->
+                PickArguments.uiObject.detect(unwrapped(a)).requestOrThrow()
+            })
+
+        /** Selectors without a bridge for the samples of `pickup`. */
+        val PICK_BINDING = PickArguments.Binding({ UiSelector(null as AccessibilityBridge?) }, { BooleanFilter.BooleanSupplier { true } })
+
+        fun unwrapped(args: Array<Any?>): Array<Any?> = Array(args.size) { RhinoUtils.unwrap(args[it]) }
 
     }
 

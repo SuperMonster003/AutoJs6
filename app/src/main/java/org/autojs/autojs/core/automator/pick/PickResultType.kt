@@ -4,11 +4,11 @@ package org.autojs.autojs.core.automator.pick
  * The result type argument of `pickup` / `detect`, classified: the symbolic forms and their
  * aliases (`#` widget, `{}` collection, `[]` widgets, `$` content, `.` point, `@` selector, `?`
  * existence, each with its plural spellings), a method of the node by name (`"text"`,
- * `["child", 0]`), or nothing. This is the single alias table; the dispatch lives in [Detector].
+ * `["child", 0]`), or nothing. This is the single alias table; the dispatch lives in [PickExecutor].
  * Free of Android and Rhino dependencies.
  * zh-CN: `pickup` / `detect` 的结果类型参数的分类: 符号形式及其别名 (`#` 控件, `{}` 集合, `[]` 控件数组, `$` 内容,
  * `.` 坐标点, `@` 选择器, `?` 存在性, 各有复数拼写), 按名称调用节点的方法 (`"text"`, `["child", 0]`), 或无结果.
- * 这是唯一的别名表; 分派在 [Detector] 中. 不依赖 Android 与 Rhino.
+ * 这是唯一的别名表; 分派在 [PickExecutor] 中. 不依赖 Android 与 Rhino.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -60,10 +60,10 @@ sealed class PickResultType {
         const val WIDGET = "widget"
 
         // Built on the first lookup, not by the class initializer: when the first class of the hierarchy a process
-        // touches is one of the objects (SelectorForms of the new layer reads WidgetCollection), the JVM initializes
+        // touches is one of the objects (the former SelectorForms of the new layer read WidgetCollection), the JVM initializes
         // this class while that object is still being initialized, so the object would be null here and its
         // spellings would resolve to method names for the life of the process (docs/selector/ROADMAP.md appendix C Q9).
-        // zh-CN: 在首次查表时建立, 而不是在类初始化时: 进程首先触达的若是层级中的某个对象 (新层 SelectorForms 读取 WidgetCollection),
+        // zh-CN: 在首次查表时建立, 而不是在类初始化时: 进程首先触达的若是层级中的某个对象 (原新层 SelectorForms 读取 WidgetCollection),
         // JVM 会在该对象初始化途中初始化本类, 此处该对象尚为 null, 其拼写在整个进程内都会解析为方法名 (docs/selector/ROADMAP.md 附录 C Q9).
         private val groups: Map<PickResultType, List<String>> by lazy {
             linkedMapOf(

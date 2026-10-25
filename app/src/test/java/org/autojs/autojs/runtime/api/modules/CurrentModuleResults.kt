@@ -31,6 +31,10 @@ internal object CurrentModuleResults {
     val ARGUMENT_ERRORS = setOf(
         "InternalError", "Error", "TypeError", "RangeError", "MessageLookup",
         "IllegalArgumentException", "WrappedIllegalArgumentException", "IllegalStateException", "PatternSyntaxException",
+        // docs/selector/ROADMAP.md P1.1: the core refuses the arguments of `pickup` / `detect` with a TypeError or RangeError,
+        // which the wrapper of the current module prints on the JVM as the EcmaError it is.
+        // zh-CN: selector P1.1: core 以 TypeError 或 RangeError 拒绝 pickup / detect 的参数, 现有模块的包装在 JVM 上将其打印为 EcmaError.
+        "EcmaError",
     )
 
     /** How long one expression may run before the thread is interrupted. */

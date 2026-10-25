@@ -7,12 +7,12 @@ import org.autojs.autojs.core.automator.UiNode
  * about: how a target (a selector in any `pickup` form, a node, a predicate) is located under a
  * root, how a node is re-read or rendered as a value, which package is in front, how the screen
  * is sized, and how window changes are observed. The runtime implements it over
- * `UiSelector.pickup` / `Detector` / `ActivityInfoProvider` / the accessibility event bus
+ * `UiSelector.pickup` / `UiObject.detect` / `ActivityInfoProvider` / the accessibility event bus
  * (`RuntimeToolkitBindings`); the tests implement it over `FakeUiNode` (`FakeToolkitBindings`).
  * Effects go through [ActionPerformer] instead, so that a test can program their outcomes
  * independently of the tree.
  * zh-CN: 工具集 (Roadmap P4.1) 在查询侧需要而自身一无所知的运行时能力: 如何在根节点下定位目标 (`pickup` 任一形式的选择器, 节点,
- * 断言函数), 如何重读节点或把节点呈现为值, 前台是哪个包, 屏幕多大, 以及如何观察窗口变化. 运行时基于 `UiSelector.pickup` / `Detector` /
+ * 断言函数), 如何重读节点或把节点呈现为值, 前台是哪个包, 屏幕多大, 以及如何观察窗口变化. 运行时基于 `UiSelector.pickup` / `UiObject.detect` /
  * `ActivityInfoProvider` / 无障碍事件总线实现 (`RuntimeToolkitBindings`); 测试基于 `FakeUiNode` 实现 (`FakeToolkitBindings`).
  * 副作用则走 [ActionPerformer], 使测试能独立于节点树编排动作结果.
  *

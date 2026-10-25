@@ -17,7 +17,9 @@ import org.autojs.autojs.core.automator.UiObjectCollection.Companion.of
 import org.autojs.autojs.core.automator.UiObjectIterator
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.Selector
-import org.autojs.autojs.core.automator.pick.Picker
+import org.autojs.autojs.core.automator.pick.PickArguments
+import org.autojs.autojs.core.automator.pick.PickExecutor
+import org.autojs.autojs.core.automator.pick.PickResultAdapter
 import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
 import org.autojs.autojs.core.automator.selector.SelectorStringParser
@@ -41,10 +43,10 @@ import java.util.concurrent.TimeoutException
  * The script-facing selector: the builder methods are generated from [SelectorRegistry] into
  * [UiSelectorBuilders] and routed back here through [applyEntry]; this class keeps the queries
  * (`find*`, `exists`, `untilFind*`; the polling ones run as a [UiSelectorQuery]) and the search
- * settings; `pickup` is the entry to the [Picker] of `core/automator/pick`.
+ * settings; `pickup` is the entry of the current augment layer to the [PickExecutor] of `core/automator/pick`.
  * zh-CN: 面向脚本的选择器: builder 方法由 [SelectorRegistry] 生成到 [UiSelectorBuilders] 并经 [applyEntry] 转回此处;
  * 本类保留查询 (`find*`, `exists`, `untilFind*`; 轮询的查询以 [UiSelectorQuery] 执行) 与搜索设置; `pickup` 是
- * `core/automator/pick` 中 [Picker] 的入口.
+ * 现有 augment 层通往 `core/automator/pick` 中 [PickExecutor] 的入口.
  *
  * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Sep 6, 2026.
@@ -363,9 +365,10 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         }
 
         /**
-         * `pickup(root?, selector, compass?, resultType?, callback?)`: searches with the bridge of
-         * [scriptRuntime]; see [Picker]. zh-CN: `pickup(root?, selector, compass?, resultType?, callback?)`:
-         * 以 [scriptRuntime] 的 bridge 搜索; 见 [Picker].
+         * `pickup(root?, selector, compass?, resultType?, callback?)` with the positions told by the caller (the current
+         * augment layer, the toolkit, flows): searches with the bridge of [scriptRuntime]; see [PickArguments.legacyPickup]
+         * and [PickExecutor]. zh-CN: 位置已由调用方区分的 `pickup` (现有 augment 层, 工具集, Flow): 以 [scriptRuntime] 的 bridge 搜索;
+         * 见 [PickArguments.legacyPickup] 与 [PickExecutor].
          */
         @JvmStatic
         fun pickup(
@@ -375,14 +378,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
             compass: CharSequence?,
             resultType: Any?,
             callback: Callable? = null,
-        ): Any? = Picker.Builder(scriptRuntime.accessibilityBridge)
-            .setRoot(root)
-            .setCompass(compass)
-            .setResultType(resultType)
-            .setSelector(scriptRuntime, selector)
-            .setCallback(callback)
-            .build()
-            .pick(scriptRuntime)
+        ): Any? = PickResultAdapter.legacyPickup(scriptRuntime, root, selector, compass, resultType, callback)
 
     }
 

@@ -5,7 +5,8 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.diagnostics.A11yStats
 import org.autojs.autojs.core.automator.diagnostics.NodeDump
 import org.autojs.autojs.core.automator.diagnostics.SelectorExplainer
-import org.autojs.autojs.core.automator.pick.Picker
+import org.autojs.autojs.core.automator.pick.PickArguments
+import org.autojs.autojs.core.automator.pick.PickResultAdapter
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils
@@ -41,7 +42,7 @@ internal class A11yDiagnosticsApi(private val scriptRuntime: ScriptRuntime) {
     private val scope: VarScope get() = scriptRuntime.topLevelScope
 
     fun explain(selectorArg: Any?, rootArg: Any?): NativeObject {
-        val selector = Picker.Builder(bridge).setSelector(scriptRuntime, unwrap(selectorArg)).selector
+        val selector = PickArguments.uiObject.buildSelector("auto.explain", "selector", unwrap(selectorArg), PickResultAdapter.binding(scriptRuntime))
         bridge.ensureServiceStarted()
         val explanation = SelectorExplainer.explain(roots(rootArg), selector.selector.filters.toList(), selector.toString())
         val text = explanation.render()

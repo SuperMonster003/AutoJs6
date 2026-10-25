@@ -4,6 +4,7 @@ import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.flow.FlowNode
 import org.autojs.autojs.core.automator.flow.FlowScope
+import org.autojs.autojs.core.automator.pick.PickArguments
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.regexp.NativeRegExp
@@ -55,11 +56,8 @@ internal sealed class FlowCondition {
 
     companion object {
 
-        /** Whether [value] is a selector form `UiSelector.pickup` accepts. zh-CN: [value] 是否为 `UiSelector.pickup` 接受的选择器形式. */
-        fun isSelectorForm(value: Any?): Boolean = when (value) {
-            is String, is NativeRegExp, is UiSelector, is Map<*, *>, is List<*>, is BigInteger, is Number -> true
-            else -> false
-        }
+        /** Whether [value] is a selector form `UiSelector.pickup` accepts; see [PickArguments.isSelectorForm]. zh-CN: [value] 是否为 `UiSelector.pickup` 接受的选择器形式; 见 [PickArguments.isSelectorForm]. */
+        fun isSelectorForm(value: Any?): Boolean = PickArguments.isSelectorForm(value)
 
         /** A short rendering of a selector form for error messages. zh-CN: 选择器形式用于错误信息的简短呈现. */
         fun describeSelector(selector: Any): String = when (selector) {

@@ -23,7 +23,8 @@ import org.autojs.autojs.core.automator.flow.Stability
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
-import org.autojs.autojs.core.automator.pick.Detector
+import org.autojs.autojs.core.automator.pick.PickArguments
+import org.autojs.autojs.core.automator.pick.PickResultAdapter
 import org.autojs.autojs.core.automator.pick.PickResultType
 import org.autojs.autojs.core.automator.query.NodeWaits
 import org.autojs.autojs.core.automator.query.PollPolicy
@@ -624,10 +625,13 @@ open class UiObject private constructor(
             require(isCompass(s)) { str(R.string.error_invalid_compass, s) }
         }
 
-        /** `detect(w, compass, resultType, callback)`; see [Detector.detect]. zh-CN: `detect(w, compass, resultType, callback)`; 见 [Detector.detect]. */
+        /**
+         * `detect(w, compass, resultType, callback)` with the positions told by the caller; see [PickArguments.legacyDetect].
+         * zh-CN: 位置已由调用方区分的 `detect(w, compass, resultType, callback)`; 见 [PickArguments.legacyDetect].
+         */
         @JvmStatic
         fun detect(scriptRuntime: ScriptRuntime, w: UiObject?, compass: CharSequence?, resultType: Any?, callback: Callable? = null): Any? {
-            return Detector.detect(scriptRuntime, w, compass, resultType, callback)
+            return PickResultAdapter.legacyDetect(scriptRuntime, w, compass, resultType, callback)
         }
 
         // @Hint by SuperMonster003 on May 12, 2022.

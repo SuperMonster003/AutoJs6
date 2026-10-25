@@ -6,6 +6,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService
 import org.autojs.autojs.core.accessibility.AccessibilityServiceCallback
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
 import org.autojs.autojs.core.automator.UiObject
+import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.rhino.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
@@ -23,7 +24,6 @@ import org.autojs.autojs.runtime.api.modules.flow.FlowArgs
 import org.autojs.autojs.runtime.api.modules.flow.FlowOptions
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish
-import org.autojs.autojs.runtime.api.modules.selector.SelectorForms
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
@@ -41,12 +41,12 @@ import org.mozilla.javascript.Wrapper
  * Arguments follow the real signatures (T4): a count or a top-level type the documented signatures do not accept is a
  * TypeError, an unknown mode or flag a RangeError (D10; the current module threw IllegalArgumentException), and so are the
  * fields of the options of `registerEvent`, `setWindowFilter`, `findWindows`, `findWindowRoots` and `dump` ([AutoOptions])
- * and the selector of `explain` (`SelectorForms`), appendix C Q66 (2).
+ * and the selector of `explain` (`PickArguments`, docs/selector/ROADMAP.md P1.4), appendix C Q66 (2).
  *
  * zh-CN: 新脚本模块层上的 auto 模块 (P3.3): 无障碍服务 (可调用, auto(mode?, forceRestart?)), 其状态, 事件, 窗口与诊断, 以及 auto.wait (flow 的异步等待, D1),
  * 另有现有模块的 8 个 getter. 实际工作仍由现有模块的函数完成 (augment/automator/Auto, P5.2 迁出). 参数按真实签名 (T4): 文档签名不接受的个数或顶层类型为 TypeError,
  * 未知的模式或标志为 RangeError (D10; 现有模块抛 IllegalArgumentException); registerEvent, setWindowFilter, findWindows, findWindowRoots 与 dump 的选项字段
- * ([AutoOptions]) 以及 explain 的选择器 (SelectorForms) 同样如此, 附录 C Q66 (2).
+ * ([AutoOptions]) 以及 explain 的选择器 (PickArguments, selector P1.4) 同样如此, 附录 C Q66 (2).
  */
 @ScriptModule(name = "auto")
 class AutoModule(private val runtime: ScriptRuntime) {
@@ -191,7 +191,7 @@ class AutoModule(private val runtime: ScriptRuntime) {
     /** `auto.explain(selector, root?)`: the selector in any `pickup` form (undefined: no condition), the root a `UiObject`. */
     @ScriptFunction
     fun explain(selector: Any, root: Any? = null): NativeObject {
-        SelectorForms.selector("auto.explain", "selector", RhinoUtils.unwrap(selector).takeUnless { Undefined.isUndefined(it) })
+        PickArguments.uiObject.selectorError("auto.explain", "selector", RhinoUtils.unwrap(selector).takeUnless { Undefined.isUndefined(it) })?.let { throw it.exception() }
         if (!isNullish(root) && unwrap(root) !is UiObject) throw GlobalValues.typeError("auto.explain", "root", "UiObject", root)
         return Auto.explain(runtime, if (isNullish(root)) arrayOf(selector) else arrayOf(selector, root))
     }
