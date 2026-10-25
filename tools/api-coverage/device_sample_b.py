@@ -583,14 +583,13 @@ def compare(serial, state, packages):
 
 
 def normalize(key, value):
-    """Service lists compare as sets; app ops compare by mode, not by their relative access times."""
+    """Service lists compare as sets; app ops compare by their (uid and package) modes, not by the access times."""
     if not isinstance(value, str):
         return value
     if key.startswith("secure/enabled_"):
         return ":".join(sorted(part for part in value.split(":") if part and part != "null"))
     if "/" in key and key.split("/", 1)[1].isupper():
-        match = re.match(r"\w+: (\w+)", value)
-        return match.group(1) if match else value
+        return re.sub(r";\s*(time|rejectTime|duration)=[^;\n]*", "", value).strip()
     return value
 
 

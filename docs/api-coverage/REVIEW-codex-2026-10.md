@@ -233,6 +233,7 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | P3 / P4 补缺批次 | R2 (控制台), R3 (Bun 拼音常量, P4), R6 (compose.ComposeError, UI 族), R7 (可桥接部分, UI 族), R8 (Worker, 各族), R9 (自动化族), R10 / R14 / R16 / R18 (系统与设备族), R11 / R19 / R21 (文件与数据族) |
 | P3.6 (HOST-API 同步) | R5 |
 | P1.2 真机抽样 A (Redmi) | 无失败项 (41 个用例全部通过, 见 "P1.2 真机抽样 A (Redmi)" 节); 设备证据补强 R20 / Q27 与 R15; 待决 Q34 (自动点击系统授权界面的用例) |
+| P1.3 真机抽样 B (Xiaomi) | 无失败项 (53 个用例全部通过, 见 "P1.3 真机抽样 B (Xiaomi)" 节); 设备证据补强 R20 (Flow# / MailClient# / AiSession# / AgentRun# 句柄成员) 与 R19 的别名方向; 未新增待决 |
 | P1.5 矩阵修正 (Q26 / Q27 / Q28) | R13 改记 pending (rejects), 分组见 "P1.5 拒绝入口分组" 节, 白名单仍由 P1.4 拍板; R20 按句柄类型逐成员比对 (BASELINE 第 5 节); R9 中 Toolkit 助手 38 行经 flow 计为覆盖 |
 
 ## P1.2 真机抽样 A (Redmi)
@@ -474,3 +475,44 @@ JAR / DEX 输入由 `build-java-callback-fixtures.py` 现场构建 (callback.jar
 | ...#nativeArgumentFailuresKeepTheirSpeechCodeAcrossFragmentedPolling | bridge | 通过 | 2.2 | 分片轮询中参数错误保留 SpeechError 码 |
 
 项: 矩阵行 speech.isAvailable, capabilities, recognize, recognizeAsync, detectVoice, listen, wake, synthesize, speak, SpeechError, speech.models.list, getDefault, setDefault, importFile, install, installAsync, remove (17 / 19 行, 三列 bridged / capability-gated; 未直接调用 speech.synthesizeAsync 与 speech.models.refreshCatalog); 共 7 个用例 17 项, 全部通过.
+
+### ai (core 与 Agent)
+
+3-Stone AI 用设备原有的 1.3.0 (versionCode 282), 3-Stove Agent 用设备原有的 1.3.0 (versionCode 422), 均未替换 (Codex 验收时 3-Stone AI 为 1.5.0 / 299); 推理只用设备上已装的本地模型 (目录中优先 E2B), 不调用在线账户, 不下载模型. 宿主经签名保护的原入口访问, 无需应用授权对话框; Agent 用例的目标以本次抽样的批次标记开头, 3-Stove Agent 因此新增的 11 条任务记录在恢复时随私有数据备份一并移除.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeAiDeviceTest#nodeCoreUsesRealProvider | main | 通过 | 14.9 | 22 项检查 (Codex 门槛 >= 20), chat 输入 20 / 输出 2 token, 2054 ms; stream 1 次 open / chunk / usage / done |
+| ...#bunCoreUsesRealProvider | bun | 通过 | 13.5 | 同上, chat 1075 ms |
+| ...#workerCoreUsesRealProvider | worker | 通过 | 13.1 | 同上, chat 1122 ms |
+| ...#workerModesCloseSessionsAndKeepParentClientUsable | main / worker (3 种) | 通过 | 8.2 | Worker 结束关闭其会话, 父客户端与 provider 准入释放 |
+| ...#bunGrantAndNodeDeclarationRejectBeforeProviderAccess | main / bun | 通过 | 7.1 | Bun 无 ai.control 时 NOT_GRANTED, Node 未声明能力时拒绝, 均不触达 provider |
+| ...#terminalPacketsKeepCancellationOwnershipUntilAcknowledged | bridge | 通过 | 2.0 | 终止包在确认前保留取消归属 |
+| RuntimeAgentDeviceTest#nodeAgentUsesRealPluginAndModel | main | 通过 | 29.6 | 27 项检查 (与 Codex 相同), 模型调用 1 次, 输入 1013 / 输出 64 token (非估算), state 事件 2, step 1, done 1 |
+| ...#bunAgentUsesIndependentGrantWithRealPluginAndModel | bun | 通过 | 19.1 | 同上, 输出 32 token |
+| ...#workerAgentUsesRealPluginAndModel | worker | 通过 | 18.3 | 同上, 输出 30 token |
+| ...#agentDiscoveryUsesTheOriginalProtectedService | bridge | 通过 | 6.0 | 发现走原有受保护服务 |
+| ...#coreAiCapabilityDoesNotAuthorizeAgentTasks | main / bun | 通过 | 7.2 | 只有 ai / ai.control 时 Agent 任务被拒 |
+| ...#nativeTaskAcknowledgmentAndExplicitDetachedCancellationRetainOwnership | bridge | 通过 | 6.7 | detached 任务, 准入阶段显式取消 |
+| ...#workerModesCancelOwnedRunsButRetainDetachedRunsAndParentClient | main / worker (3 种) | 通过 | 8.5 | 3 种 Worker 退出取消自己的非 detached 任务, detached 任务与父客户端保留 |
+
+项: 矩阵行 ai.ask, chat, stream, session, catalog, agent (6 / 6 行, 三列 bridged / capability-gated); 运行时会话句柄成员 (矩阵 AiSession# 行) ask, chat, stream, close, isClosed, state, target; ai.agent 嵌套根 hasAccess, requestAccess, status, presets, catalog, context, result, create, run, get, list; 任务句柄成员 (矩阵 AgentRun# 行) id, goal, startedAt, detached, state, on, join, result, error, cancel, respond, confirm; 共 13 个用例 36 项, 全部通过. 与 R20 / R22 相关: AiSession# 7 个与 AgentRun# 12 个成员在三列实测可用, 支持 P1.5 的句柄类型比对; ai.agent 嵌套根在分母外, R22 归属 (P2.3) 不变.
+
+### 汇总, 未抽项与恢复
+
+| 族 | 用例 | 项 | 通过 / 失败 | 列 |
+|---|---:|---:|---|---|
+| Java 互操作与回调 | 12 | 20 | 12 / 0 | main / worker / bun, bridge 3 |
+| flow | 13 | 58 | 13 / 0 | main / worker / bun |
+| mail | 8 | 38 | 8 / 0 | main / worker / bun, bridge 2 |
+| speech | 7 | 17 | 7 / 0 | main / worker / bun, bridge 2 |
+| ai (core 与 Agent) | 13 | 36 | 13 / 0 | main / worker / bun, bridge 3 |
+| 合计 | 53 | 169 | 53 / 0 | |
+
+结论: 抽样范围内 Codex 宣称的设备行为在当前主工作区构建 (宿主 635c6c420 / app 代码同 05cfae5df, Node 1.32.0 / 292, Bun 0.21.0 / 296, 设备原有的 3-Macaw 81 / 3-Stone AI 282 / 3-Stove Agent 422, 本地 3-Stamp Mail 162) 上全部复现, 关键数值与 Codex 的 Xiaomi 记录一致 (flow-tools 47 项 / flow-scope 129 项, mail 5000 个标记与 98304 字节附件, Agent 27 项), 无失败项与新增不一致, 未新增待决 (Q37-Q39 未用). 设备证据补强 R20 (Flow# / MailClient# / AiSession# / AgentRun# 的运行时句柄成员三列可用, 与 P1.5 句柄类型比对一致) 与 R19 的别名方向 (java.instanceOf / newArray).
+
+未抽 (原因): 打包应用用例 (D11; 各族的 *PackagedDeviceTest); Codex 各批的 Node / Bun 插件自身测试 APK (nodejs.test / bun.runtime.test) 与 Ace 弹窗用例 (非宿主族用例); 3-Stamp Mail 插件自身的 provider / TLS / mail-core 设备套件 (插件内部, 非运行时列); Agent 的已注册脚本上下文用例 (registeredNodeBunAndWorkerScriptsShareOnlyTheirExecutionContext, 本轮按每族 10-20 项的规模未选); 矩阵 pending 行 (util.java 6 行等, 运行时无入口).
+
+授权与人工操作: 维护者选择题同意 flow 夹具临时重绑已授权的 AutoJs6 无障碍服务 (经 UiAutomation shell 写 secure 设置并写回) 与 mail 合成别名账户的写入及卸载删除; 本轮无系统授权对话框, 测试代码未自动点击任何系统界面.
+
+恢复与核对 (`device_sample_b.py cleanup` / `restore` / `verify`): 宿主, 宿主测试包, Node, Bun 装回抽样前 APK (Bun 由 296 降回 118), 3-Stamp Mail 与其测试包卸载, 九个记录包 (含未安装的两个) 的 versionCode 与 md5 全部与抽样前一致; 旋转, 熄屏时间, 充电常亮, 亮度与亮度模式, 无障碍服务列表, 通知使用权, 语音交互与识别服务, 数字助理, appops 四项模式, 四个音量流均一致; 3-Stone AI 私有文件 (含两个模型文件 md5) 未变, 3-Stove Agent 私有数据用抽样前的 run-as 备份还原 (11 条批次任务记录移除) 后与抽样前一致; 宿主外部目录中本次创建的文件 (证据 JSON, JAR / DEX fixture, 邮件 fixture JSON, 语音清单) 全部删除, 自建的 3 条 adb reverse 映射移除, 合成邮件服务器已停止. 唯一差异: 宿主私有文件 files/profileInstalled (24 字节, androidx.profileinstaller 记录的安装时间戳, 重装 APK 后应用启动即重写, 不是用户数据, 无法还原到原字节).
