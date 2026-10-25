@@ -7,12 +7,14 @@ signature, negative-type and runtime tests remain necessary for semantics.
 import argparse
 from collections import Counter
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
 import sys
 
 import arity
+import docs_support
 from extract_exports import extract
 import returned_objects
 
@@ -20,7 +22,8 @@ HERE = Path(__file__).resolve().parent
 
 
 def documentation_rows(exports, api_root, policy):
-    texts = {path.stem: path.read_text(encoding="utf-8") for path in api_root.glob("*.md")}
+    # The generated runtime support tables (P0.5) name APIs without documenting them.
+    texts = {path.stem: docs_support.strip_blocks(path.read_text(encoding="utf-8")) for path in api_root.glob("*.md")}
     if not texts:
         raise ValueError(f"No Markdown sources under {api_root}")
     rows = []
@@ -53,7 +56,7 @@ def public_queries(baseline, policy):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", type=Path, default=HERE.parents[1])
-    parser.add_argument("--documentation", type=Path)
+    parser.add_argument("--documentation", type=Path, help="AutoJs6-Documentation checkout (default: AUTOJS6_DOCUMENTATION_ROOT, else the sibling directory)")
     parser.add_argument("--declarations", type=Path)
     parser.add_argument("--ace", type=Path)
     parser.add_argument("--typescript", type=Path, help="Optional TypeScript compiler module; defaults to Ace's bundled compiler")
@@ -68,12 +71,14 @@ def main():
     parser.add_argument("--write-matrix", action="store_true", help="Like --matrix, and rewrite docs/api-coverage/MATRIX.md")
     parser.add_argument("--node", type=Path, help="Node runtime checkout for --matrix (default: sibling AutoJs6-Plugin-NodeJs-Runtime)")
     parser.add_argument("--bun", type=Path, help="Bun runtime checkout for --matrix (default: sibling AutoJs6-Plugin-Bun-Runtime)")
+    parser.add_argument("--docs-support", action="store_true",
+                        help="Also build runtime-matrix.json and fail when a documentation runtime support table differs from it (MATRIX.md is compared only with --matrix)")
     args = parser.parse_args()
     if args.write_matrix and args.skip_ace:
         parser.error("--write-matrix needs the Ace column of MATRIX.md; drop --skip-ace (--matrix --skip-ace reports MATRIX.md as skipped)")
     host = args.host.resolve()
     siblings = host.parent
-    docs = (args.documentation or siblings / "AutoJs6-Documentation").resolve()
+    docs = (args.documentation or Path(os.environ.get("AUTOJS6_DOCUMENTATION_ROOT") or siblings / "AutoJs6-Documentation")).resolve()
     declarations = (args.declarations or siblings / "AutoJs6-TypeScript-Declarations").resolve()
     ace = (args.ace or siblings / "AutoJs6-Plugin-Ace-Editor").resolve()
     output = (args.output or host / "build/reports/api-coverage").resolve()
@@ -119,8 +124,8 @@ def main():
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
     # Members of returned objects (P0.4): reported apart, never failures (P2.3 consumes returned-objects.json).
     returned_summary, returned_docs, returned_surfaces = returned_objects.gate(host, baseline, output, docs / "api", command)
-    matrix_summary = None
-    if args.matrix or args.write_matrix:
+    matrix_summary = docs_summary = None
+    if args.matrix or args.write_matrix or args.docs_support:
         import runtime_matrix
         node = (args.node or siblings / "AutoJs6-Plugin-NodeJs-Runtime").resolve()
         bun = (args.bun or siblings / "AutoJs6-Plugin-Bun-Runtime").resolve()
@@ -129,14 +134,19 @@ def main():
         surfaces["rows"] += returned_surfaces
         matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented + returned_docs, surfaces=surfaces)
         runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
-        matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN)
-        failures.extend(matrix_summary.pop("failures"))
+        if args.matrix or args.write_matrix:
+            matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN)
+            failures.extend(matrix_summary.pop("failures"))
+        if args.docs_support:
+            docs_summary, docs_failures = docs_support.check(docs, output / "runtime-matrix.json", output)
+            failures.extend(docs_failures)
     summary = {
         "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),
         "documentation": dict(Counter(row["status"] for row in documented)),
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
         "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"]), "matrix": matrix_summary,
+        "docsSupport": docs_summary,
         "scope": baseline["scope"], "failures": failures,
     }
     (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

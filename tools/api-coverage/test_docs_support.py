@@ -46,6 +46,17 @@ class StripBlocksTest(unittest.TestCase):
     def test_root_counts_match_documentation_roots(self):
         self.assertEqual(docs_support.root_counts(MATRIX), {'demo': 3, 'global': 1})
 
+    def test_documentation_gate_ignores_the_tables(self):
+        from check import documentation_rows
+        with tempfile.TemporaryDirectory() as directory:
+            api = Path(directory)
+            (api / 'demo.md').write_text('# Demo\n\n<!-- runtime-support:begin demo -->\n| `demo.write` |\n<!-- runtime-support:end -->\n\n## demo.read()\n',
+                                         encoding='utf-8')
+            exports = [{'api': name, 'module': 'demo', 'ownerModule': 'demo', 'member': name.split('.')[1]} for name in ('demo.read', 'demo.write')]
+            rows = documentation_rows(exports, api, {'documentationModules': {}})
+        self.assertEqual([(row['api'], row['status']) for row in rows], [('demo.read', 'heading'), ('demo.write', 'missing')])
+        self.assertEqual(rows[0]['evidence'], [{'page': 'api/demo.md', 'line': 7, 'heading': True}])
+
 
 @unittest.skipUnless(NODE, 'needs Node.js')
 class CheckTest(unittest.TestCase):

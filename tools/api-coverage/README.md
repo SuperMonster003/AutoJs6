@@ -356,6 +356,39 @@ exclusion rule carry `rule` (and `note` when the rule has one) instead.
   cells come from `runtime-policy.json` `returnedObjects` mappings and exclusions
   (`java-prototype` is allowed); unmapped members are `pending`.
 
+### Documentation runtime support tables (P0.5)
+
+Module pages of the documentation repository carry a generated "运行时支持" table
+at the top (roadmap D13), between `<!-- runtime-support:begin <roots> -->` and
+`<!-- runtime-support:end -->`. The renderer lives with the other documentation
+generators (`AutoJs6-Documentation/generator/runtime-support.js`, roadmap Q7 (a);
+usage and the reader-facing wording in that repository's `generator/README.md`);
+the host only checks:
+
+```text
+python tools/api-coverage/check.py --docs-support    # also with --matrix, --skip-ace or --source
+```
+
+`--docs-support` builds `runtime-matrix.json` as `--matrix` does (comparing
+`MATRIX.md` only when `--matrix` is given too), runs the generator's `--check`
+against it, cross-checks every block's row count with the matrix rows of its roots
+(`docs_support.py`) and writes the generator's report to `docs-support.json`
+(`summary.json` `docsSupport`). The documentation checkout is `--documentation`,
+else `AUTOJS6_DOCUMENTATION_ROOT`, else the sibling `AutoJs6-Documentation`.
+
+- A block names module roots, the root the documentation gate looks pages up by:
+  the first segment of the placement module, the owner module for a member of the
+  global object (`captureScreen` -> `images`), else `global`. Returned-object
+  members (`<Object>#<member>`) are not shown yet (roadmap Q20).
+- The documentation name gate ignores block contents (`docs_support.strip_blocks`,
+  line numbers kept), so a table never turns a missing name into a mention.
+- A block generated from the other export source (ksp / kotlin, recorded on its
+  second line) is `skipped`, as `MATRIX.md` is. A page without a block is not a
+  failure until P2.5 inserts the remaining pages.
+- After a matrix change that touches a page with a block, run
+  `node generator/runtime-support.js` in the documentation repository (then its
+  usual generation) and commit both repositories.
+
 ## Arity
 
 `arity.py` (api-coverage roadmap P0.3, decision D9) gives every function record
