@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2724 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2727 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则在 D12 / Q1 拍板前是草案.
 
-数据源: ksp, 2724 行 (显式导出 1368, 返回对象成员 1356).
+数据源: ksp, 2727 行 (显式导出 1368, 返回对象成员 1359).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 616 | 143 | 0 | 1120 | 1 | 844 |
-| Node Worker | 482 | 62 | 0 | 1180 | 1 | 999 |
-| Bun | 0 | 62 | 534 | 1179 | 1 | 948 |
+| Node main | 616 | 143 | 0 | 1123 | 1 | 844 |
+| Node Worker | 482 | 62 | 0 | 1183 | 1 | 999 |
+| Bun | 0 | 62 | 540 | 1182 | 1 | 942 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 331 / mention 230 / heading 2163 / signature 0 / example 0 |
-| dts | none 79 / name 1507 / arity 1138 / typed 0 |
-| ace | none 540 / semantic 825 / static 1359 |
+| doc | none 334 / mention 230 / heading 2163 / signature 0 / example 0 |
+| dts | none 82 / name 1507 / arity 1138 / typed 0 |
+| ace | none 543 / semantic 825 / static 1359 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: jsox-extensions shadowed (node_main, 54), rhino-engine shadowed (node_main, 3), sync-sleep shadowed (node_main, 1).
 
@@ -28,7 +28,7 @@
 | accessibility-sync-wait | denied: sync-only | 1 | 1 | 1 | await accessibility.ensureEnabled(); flow waitFor* with node snapshots |
 | internal-exports | not-portable: rhino-only | 9 | 9 | 9 |  |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
-| java-prototype-objects | not-portable: java-prototype | 1066 | 1066 | 1066 |  |
+| java-prototype-objects | not-portable: java-prototype | 1069 | 1069 | 1069 |  |
 | jsox-extensions | not-portable: rhino-only | 0 | 54 | 54 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 2 | 2 | 2 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
@@ -46,7 +46,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 194 | 205 | 205 | 93 / 16 / 99 | 47 / 17 / 144 | 73 / 17 / 118 |
+| (global) | 208 | 194 | 205 | 205 | 93 / 16 / 99 | 47 / 17 / 144 | 75 / 17 / 116 |
 | AgentRun# | 14 | 7 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
 | AiSession# | 11 | 11 | 0 | 0 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | App# | 10 | 10 | 0 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -86,9 +86,9 @@
 | ThemeColor# | 10 | 0 | 10 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | TimedTask# | 69 | 0 | 44 | 0 | 0 / 69 / 0 | 0 / 69 / 0 | 0 / 69 / 0 |
 | TtsUtterance# | 25 | 11 | 23 | 21 | 0 / 25 / 0 | 0 / 25 / 0 | 0 / 25 / 0 |
-| UiObject# | 145 | 136 | 145 | 145 | 0 / 145 / 0 | 0 / 145 / 0 | 0 / 145 / 0 |
-| UiObjectCollection# | 70 | 66 | 70 | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
-| UiSelector# | 185 | 182 | 184 | 184 | 0 / 185 / 0 | 0 / 185 / 0 | 0 / 185 / 0 |
+| UiObject# | 146 | 136 | 145 | 145 | 0 / 146 / 0 | 0 / 146 / 0 | 0 / 146 / 0 |
+| UiObjectCollection# | 71 | 66 | 70 | 70 | 0 / 71 / 0 | 0 / 71 / 0 | 0 / 71 / 0 |
+| UiSelector# | 186 | 182 | 184 | 184 | 0 / 186 / 0 | 0 / 186 / 0 | 0 / 186 / 0 |
 | VolatileDispose# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
 | WebSocket# | 25 | 10 | 24 | 0 | 0 / 25 / 0 | 0 / 25 / 0 | 0 / 25 / 0 |
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
@@ -108,7 +108,7 @@
 | continuation | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | crypto | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
-| device | 25 | 25 | 25 | 25 | 4 / 0 / 21 | 4 / 0 / 21 | 1 / 0 / 24 |
+| device | 25 | 25 | 25 | 25 | 4 / 0 / 21 | 4 / 0 / 21 | 4 / 0 / 21 |
 | dialogs | 9 | 9 | 9 | 9 | 8 / 0 / 1 | 8 / 0 / 1 | 8 / 0 / 1 |
 | engines | 8 | 8 | 8 | 8 | 5 / 1 / 2 | 0 / 3 / 5 | 0 / 3 / 5 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
@@ -127,7 +127,7 @@
 | mail | 56 | 9 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | mediainfo | 7 | 7 | 7 | 7 | 4 / 0 / 3 | 0 / 0 / 7 | 0 / 0 / 7 |
 | memory | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| notice | 7 | 7 | 7 | 7 | 1 / 0 / 6 | 1 / 0 / 6 | 0 / 0 / 7 |
+| notice | 7 | 7 | 7 | 7 | 1 / 0 / 6 | 1 / 0 / 6 | 1 / 0 / 6 |
 | notice.channel | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
 | ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
 | ocr.mlkit | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
@@ -233,7 +233,7 @@
 | `gestures` | pending | pending | pending |
 | `gesturesAsync` | pending | pending | pending |
 | `getAppName` | bridged | pending | capability-gated |
-| `getClip` | bridged | pending | pending |
+| `getClip` | bridged | pending | capability-gated |
 | `getPackageName` | bridged | pending | capability-gated |
 | `home` | bridged | pending | capability-gated |
 | `i18n` | pending | pending | pending |
@@ -303,7 +303,7 @@
 | `sendBroadcast` | bridged | pending | capability-gated |
 | `sendEmail` | bridged | pending | capability-gated |
 | `sendLocalBroadcastSync` | pending | pending | pending |
-| `setClip` | bridged | pending | pending |
+| `setClip` | bridged | pending | capability-gated |
 | `setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setScreenMetrics` | pending | pending | pending |
@@ -1608,6 +1608,7 @@
 | `UiObject#password` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObject#paste` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObject#performAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#performTooltipAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObject#point` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObject#pressAndHold` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObject#previousAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
@@ -1699,6 +1700,7 @@
 | `UiObjectCollection#paste` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObjectCollection#performAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObjectCollection#performActionEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#performTooltipAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObjectCollection#pressAndHold` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObjectCollection#previousAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiObjectCollection#previousHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
@@ -1873,6 +1875,7 @@
 | `UiSelector#password` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#paste` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#performAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#performTooltipAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#plus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#pressAndHold` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#previousAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
@@ -2285,13 +2288,11 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `device.density` | bridged | bridged | pending |
 | `device.digest` | pending | pending | pending |
 | `device.getGatewayAddress` | pending | pending | pending |
 | `device.getIpAddress` | pending | pending | pending |
 | `device.getIpv6Address` | pending | pending | pending |
 | `device.getSharedDeviceId` | pending | pending | pending |
-| `device.height` | bridged | bridged | pending |
 | `device.isActiveNetworkMetered` | pending | pending | pending |
 | `device.isConnectedOrConnecting` | pending | pending | pending |
 | `device.isPointerLocationDisabled` | pending | pending | pending |
@@ -2308,7 +2309,6 @@
 | `device.setPointerLocationEnabled` | pending | pending | pending |
 | `device.summary` | pending | pending | pending |
 | `device.togglePointerLocation` | pending | pending | pending |
-| `device.width` | bridged | bridged | pending |
 
 ### dialogs
 
@@ -2504,7 +2504,6 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `notice.builder` | pending | pending | pending |
-| `notice.cancel` | bridged | bridged | pending |
 | `notice.config` | pending | pending | pending |
 | `notice.ensureEnabled` | pending | pending | pending |
 | `notice.getBuilder` | pending | pending | pending |

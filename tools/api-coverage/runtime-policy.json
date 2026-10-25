@@ -27,6 +27,7 @@
     "namespaceAliases": {
       "auto": ["accessibility"],
       "automator": ["accessibility"],
+      "notice": ["notifications"],
       "timers": ["tasks"]
     },
     "globalNamespaces": ["coordinates"],
@@ -60,9 +61,18 @@
       "images.requestScreenCaptureAsync": {"capability": "screen.capture", "basis": "alias of requestScreenCapture"},
       "images.save": {"capability": "image.files", "basis": "calls saveImage"},
       "images.toBytes": {"capability": "image.process", "basis": "calls toBase64 and decodes"},
-      "shell.checkAccess": {"capability": "shell.control", "basis": "client-side check of the shell / shell.root / shell.shizuku grants; shell.control is the base grant"}
+      "shell.checkAccess": {"capability": "shell.control", "basis": "client-side check of the shell / shell.root / shell.shizuku grants; shell.control is the base grant"},
+      "device.getDensity": {"capability": "device.control", "basis": "reads the info route snapshot"},
+      "device.getHeight": {"capability": "device.control", "basis": "reads the info route snapshot"},
+      "device.getWidth": {"capability": "device.control", "basis": "reads the info route snapshot"}
     },
-    "memberAliases": {}
+    "memberAliases": {
+      "getClip": {"namespace": "clipboard", "member": "getText"},
+      "setClip": {"namespace": "clipboard", "member": "setText"},
+      "device.density": {"namespace": "device", "member": "getDensity"},
+      "device.height": {"namespace": "device", "member": "getHeight"},
+      "device.width": {"namespace": "device", "member": "getWidth"}
+    }
   },
   "returnedObjects": {},
   "exclusions": [
