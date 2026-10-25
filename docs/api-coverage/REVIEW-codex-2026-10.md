@@ -71,6 +71,17 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | runtime-speech-2026-10-20 | speech / models 18 个方法名 | speech 11 (10 函数 + SpeechError) + speech.models 8 = 19 行: 19 / 19 / 19 (speech.control) | 19 / 19 / 19 | 一致 |
 | runtime-epub-2026-10-21 | 20 个根方法, 书籍操作与阅读会话 | epub 21 (20 函数 + EpubError): 21 / 21 / 21 (epub.control); EpubBook# 14 成员 pending (augment-prototype, 运行时已有书籍句柄), EpubReaderSession# 35 按 Q17 记 java-prototype | 21 / 21 / 21 | 一致 (根名称); 句柄成员见 R20 |
 
+### 第 6 组 (附录 A 第 31-36 份)
+
+| 报告 | 宣称 | 矩阵 (行: Node main / Worker / Bun 覆盖) | 文档 / d.ts / Ace | 结论 |
+|---|---|---|---|---|
+| runtime-mail-2026-10-21 | 52 个根方法名 + providers / accounts 的 5 个嵌套名称 (共 57) | mail 56 (52 函数 + MailError / accounts / default / providers): 56 / 56 / 56 (mail.control); 5 个嵌套名称在嵌套对象上, 不在分母; MailClient# 53 成员 pending (augment-prototype, 运行时有 client 句柄) | doc 标题 9 + 提及 47 (P2.1 的 mail 47 项); d.ts / Ace 56 | 一致 (根名称); 嵌套名称见 R22, 句柄见 R20 |
+| runtime-flow-core-2026-10-21 | 52 个根名称中的 22 个 + Flow 构造器 / FlowError / 状态与核心链 | 已被 flow-tools 补齐, 见下 | - | 一致 (中间批次) |
+| runtime-flow-tools-2026-10-21 | 补齐其余 30 个根名称, 达到 52; 25 个节点动作链, Toolkit 原生算法, 事件等待, EventFlow.ready | flow 55 (52 函数 + Flow / pending / workers): 55 / 55 / 55 (flow.control) | doc 标题 30 + 提及 25 (P2.1 的 flow 25 项); d.ts / Ace 55 | 一致; automator 与全局的同名 Toolkit 助手见 Q28 |
+| runtime-flow-scope-2026-10-21 | within / scope, 继承根, compass / 结果投影, 节点数组动作, press / swipe / gesture / gestures 实例重载; 根名称仍为 52, 原型名 +6 | Flow# 106 成员 pending (augment-prototype; 运行时链对象已有这些方法) | Flow# d.ts 106, Ace 106, 文档标题 25 + 提及 79 | 一致 (根名称); Flow# 见 R20 |
+| runtime-ai-core-2026-10-22 | 5 个 AI core 根名称 (ask / chat / stream / session / catalog), 会话 4 方法, 3 个生命周期助手 | ai 6 (5 函数 + agent): 6 / 6 / 6 (ai.control); AiSession# 11 成员 pending, 且宿主 d.ts / Ace 无 (BASELINE 第 3 节) | ai 6 / 6 / 6 | 一致 (根名称); AiSession# 见 R20 |
+| runtime-ai-agent-2026-10-22 | ai.agent 9 个根 (run / create / get / list / catalog / presets / status / context / result), AgentRun 7 方法, 3 个助手; Node ai.agent 权限, Bun agent.control | ai.agent 的 9 个根在嵌套对象上, 不在分母; AgentRun# 14 成员 pending | ai.agent 已计入 ai 6 | 一致 (矩阵口径); 嵌套根见 R22, AgentRun# 见 R20 |
+
 ## 2. 不一致清单
 
 列: 编号 | 模块 | 名称 | Node d.ts | HOST-API | facade | Bun | 文档 / d.ts / Ace | 建议归属.
@@ -85,7 +96,7 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | R6 | compose | ComposeError (类导出) | 无 | 未列 | 无 | 无 | 有 | P3.3 / P4 UI 族 (Node / Bun 的 compose 错误类型; 也可记 local-shim 错误类) |
 | R7 | ui | 31 行: layout, layoutFile, setContentView, findById, findByStringId, run, post, isUiThread, finish, R, Widget, registerWidget, emitter, root, useAndroidLayout, keepScreenOn, backgroundColor, statusBar* / navigationBar* 颜色, 高度与图标 (14 行) | 无 (Codex 的可移植 ui 是 JSON 布局契约, 只同名 inflate / findView) | 未列 | 无 | 无 | 有 | 拆两类交 P1.4: 依赖 Rhino UI 线程与 Activity 内容视图的 (layout, layoutFile, setContentView, run, post, isUiThread, finish, R, Widget, registerWidget, emitter, root, useAndroidLayout, findById, findByStringId) 附录 D 候选 ui-thread; 只读系统栏高度 / 颜色与 keepScreenOn 等可桥接的归 P3.3 / P4 UI 族 |
 | R8 | app, files, storages, automator / accessibility, keys, clipboard | Node Worker 列: app 43, files 21, storages 5, automator 54 与对应全局 (click / back / home / getClip / setClip ...) 全部 pending | main 有 | - | Worker hostModuleMethods 无 accessibility / app / clipboard / files / storage(s) / keys | - | - | P3 (Worker 补缺批次, 随 P3.1 / P3.2 / P3.4 各族; Codex 两份 Bun 报告未宣称 Worker, 不算报告错误) |
-| R9 | auto, automator | auto 37 行 (服务管理 start / stop / state / windows / registerEvent ...) 三列 0 覆盖 (auto.waitFor 已 denied); automator 41 行 (clickAny / scrollUntil / waitForToast / smartClick / switchToInputMethod ...) Node / Bun pending | 无 (Node accessibility 名称不同: isEnabled / ensureEnabled) | 未列 | 无 | 无 | 有 | P3.4 / P4.4 自动化族; 能按语义对应的 (例如 auto.isRunning -> accessibility.isEnabled) 在 P3.4 前由 runtime-policy.json memberAliases 逐条核对, 不在本条目猜测 |
+| R9 | auto, automator | auto 37 行 (服务管理 start / stop / state / windows / registerEvent ...) 三列 0 覆盖 (auto.waitFor 已 denied); automator 41 行 (clickAny / scrollUntil / waitForToast / smartClick / switchToInputMethod ...) Node / Bun pending | 无 (Node accessibility 名称不同: isEnabled / ensureEnabled) | 未列 | 无 | 无 | 有 | P3.4 / P4.4 自动化族; 能按语义对应的 (例如 auto.isRunning -> accessibility.isEnabled) 在 P3.4 前由 runtime-policy.json memberAliases 逐条核对, 不在本条目猜测; automator 41 行中 19 个名称 (clickAny, scrollUntil, waitForToast, smartClick, typeInto ...; 连同全局放置共 38 行) 与 flow 同名且共用 Toolkit 实现, 见 Q28 |
 | R10 | app | autojs, getApkInfo, getAppByAlias, getInstalledPackages, sendLocalBroadcastSync | 无 | 未列 | 无 | 无 (app.control 13 条路由不含) | 有 | P3.1 / P4.1 系统族 (sendLocalBroadcastSync 在 Bun tasks.control 有同名路由, P4 时核对能否别名) |
 | R11 | files.batchRename | 17 行 (apply / plan / preview / undo / history / presets 及 Async 版本, BatchRenameError) | 无 | 未列 | 无 | 无 | 有 | P3.2 / P4.2 文件族 (依赖 Batch Rename 插件, 纳入方式参考 P5) |
 | R12 | (全局) | getClip, setClip: Bun 有 clipboard.getText / setText 但矩阵 pending (名称不同, 缺 memberAliases) | 经 autojs6:compat 覆盖 | - | - | 有同义入口 | 有 | 直接修: runtime-policy.json bun.memberAliases (见第 3 节) |
@@ -98,6 +109,7 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | R19 | util.java | array, instanceOf, instanceof, mapToObject, objectToMap, toJsArray | 无 (运行时 java 模块有 newArray / instanceOf / toArray, 名称不同) | 未列 | 无 | 无 (host.java 同上) | 有 | P3.2 / P4.2: instanceOf / instanceof / array / toJsArray 核对语义后用 memberAliases 对到 java.instanceOf / newArray / toArray; mapToObject / objectToMap 按 java-prototype 进白名单或 local-shim, P1.4 定 |
 | R20 | (返回句柄) | augment-prototype 句柄中运行时已有对应句柄类型的: Flow# 106, MailClient# 53, EpubBook# 14, AiSession# 11, AgentRun# 14, ShellProcess# 25, Storage# 12 (共 235 行) 三列记 pending; runtime-policy.json returnedObjects 为空, list-runtime-surfaces.mjs 不收集句柄类型成员 | 有句柄类型 (如 shell.d.ts ShellProcess, ai.d.ts AgentRun, storage.d.ts StorageStore) | - | 有 | 有 | 见 BASELINE 第 3 节 | 待决 Q27 (生成器按句柄类型比对成员); 未先行, Q17 (a) 的 "P3 / P4 补" 口径下这些行会被重复实现 |
 | R21 | colors, colors.theme | android, blend, contrast, css, derive, distance, ensureContrast, extract, harmony, invert, material, nightVariant, oklab, oklch, simulate, toOklab, toOklch, tones, web, theme.activate / current / deactivate / get / libraries / next / reset / set / state (28 行, 宿主 2026-07-27 / 07-28 已有, 早于 Codex 批次) | 无 | 列为 local-shim (只有旧 62 个) | 无 | 无 (Bun colors 同步自 Node, 同缺) | 有 | P3.2 / P4.2: 纯颜色函数 local-shim (需与 Rhino 行为一致的测试, Q5), colors.theme.* 依赖宿主主题状态, 走桥接 |
+| R22 | ai.agent, mail.providers / mail.accounts | ai.agent 的 9 个根与 mail 的 5 个嵌套名称不在矩阵分母 (extract_exports 排除嵌套动态对象; returned-objects.json 没有 Agent / 账户对象) | 有 | 有小节 | 有 | 有 | 有 | P2.3 (在 returned-objects.json 登记 ai.agent 与 mail.providers / accounts 对象, 使其进入分母); 运行时已实现, 登记后预计直接覆盖 |
 
 ## 3. 已直接修
 
@@ -134,6 +146,9 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | runtime-android-tasks | 原生对象句柄只在本执行有效; 任务结果是只读快照 | 无 | 不是排除项 (TimedTask# / IntentTask# 已按 Q17 记 java-prototype) |
 | runtime-java-interop, runtime-java-callbacks, 总审计 | 同步 Rhino 包全局 (Packages 等), 函数自动转接口, AAR 资源, JNI 部署不支持 | 来源 2 (任意 Java 对象 / 原型) 不含包全局 | 补进草案: Rhino 包全局与函数自动转接口 rhino-only (等价: java.type / java.proxy); 宿主无对应显式导出, 只作说明 |
 | runtime-tts, runtime-speech, runtime-epub | 依赖已安装引擎 / 模型 / 插件, 不做常驻前台服务; 不声称 Rhino 原型等价 | 无 | 不是排除项 (运行条件) |
+| runtime-flow-core / tools / scope | 同步 Rhino 终端, 注入的全局别名, 实时 Java UiObject 行为不在可移植契约 | 来源 2 (同步 Rhino 终端; 任意 Java 对象) | 已覆盖 (UiObject# 按 Q17 记 java-prototype); 全局别名 (clickAny 等) 见 Q28 |
+| runtime-ai-core, runtime-ai-agent | 不模拟 Rhino 同步行为; 不承诺任意 JS / Java 对象或原型等价 | 来源 2 | 已覆盖 |
+| runtime-mail | 已保存账户只在原签名入口, 打包应用只用内联凭据 | 无 | 不是排除项 (运行条件) |
 | runtime-view-components, runtime-webview-callbacks | 自定义同步 WebViewClient / WebChromeClient 回调与任意 Java 子类化, 原始 View / Bitmap 返回值, 自动 Activity ActionBar 集成, 已弃用的 database / quota 钩子 | 无 | 补进草案: 同步 WebView 客户端子类化 sync-only / java-prototype; ActionBar 自动集成 ui-thread; 弃用钩子不进矩阵 (宿主无导出) |
 - WebView 媒体与文件: 相机全尺寸, SAF 保存 / 目录, blob / data 下载, 系统录像 / 前台录音, getUserMedia / MediaRecorder, getDisplayMedia 适配, Camera2 后台录像 (runtime-webview-files / media / streams / display).
 - Java 互操作: Node java / autojs6:java 与 Bun host.java 的类描述, 构造, 调用, 字段, 数组, proxy / wrap, 子类生成, loadJar / loadDex (runtime-java-interop, runtime-java-callbacks); 宿主侧是 Rhino 语言层的 Java 访问, 没有显式导出.
