@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 from runtime_matrix import (MARKDOWN, POLICY_SCHEMA, build, compare_markdown, default_typescript, gate, generate, markdown_state,
-                            parse_host_api, parse_worker_modules, render_markdown)
+                            parse_host_api, parse_worker_modules, render_markdown, write)
 
 HOST = Path(__file__).resolve().parents[2]
 NODE = HOST.parent / 'AutoJs6-Plugin-NodeJs-Runtime'
@@ -356,6 +356,33 @@ class MarkdownTest(unittest.TestCase):
         findings = gate(result, Path('missing.md'))['findings']
         self.assertTrue(any(item.startswith('Runtime matrix pending in Node main') for item in findings))
         self.assertTrue(any('runtime-native without equivalent' in item for item in findings))
+
+    def test_without_ace_or_reports(self):
+        # check.py --skip-ace: surfaces.json has aceChecked false; the ace column stays unset and MATRIX.md is not compared.
+        def without_ace():
+            data = surfaces()
+            data['aceChecked'] = False
+            return data
+        host_api = parse_host_api(HOST_API)
+        full = matrix()
+        partial = build(copy.deepcopy(EXPORTS), copy.deepcopy(POLICY), POLICY_JSON, NODE_SURFACES, BUN_SURFACES, host_api, WORKER,
+                        {('flow', 'waitFor'): {'accessibility'}}, documentation(), without_ace())
+        rows = {row['id']: row for row in partial['rows']}
+        self.assertEqual((rows['images.read']['doc'], rows['images.read']['dts'], rows['images.read']['ace']), ('heading', 'arity', None))
+        self.assertIsNone(partial['summary']['byColumn']['ace'])
+        self.assertEqual([row['node_main'] for row in partial['rows']], [row['node_main'] for row in full['rows']])
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'MATRIX.md'
+            path.write_text(render_markdown(full), encoding='utf-8', newline='\n')
+            for result in (partial, matrix(docs=False)):
+                self.assertEqual(compare_markdown(result, path), 'skipped')
+                outcome = gate(result, path)
+                self.assertEqual(outcome['failures'], [])
+                self.assertTrue(outcome['findings'][0].startswith(f'{MARKDOWN} not compared: the matrix has no '))
+            self.assertIn('no ace column', gate(partial, path)['findings'][0])
+            with self.assertRaises(ValueError):
+                write(partial, Path(temp) / 'reports', path)
+            self.assertEqual(path.read_text(encoding='utf-8'), render_markdown(full))
 
 
 @unittest.skipUnless(NODE.is_dir() and BUN.is_dir() and ACE.is_dir() and shutil.which('node'), 'Node, Bun and Ace checkouts are required')

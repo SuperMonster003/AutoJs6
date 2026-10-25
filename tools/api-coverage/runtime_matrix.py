@@ -312,7 +312,8 @@ def returned_rows(exports):
     return rows
 
 
-def surface_states(row, documentation, surfaces):
+def surface_states(row, documentation, surfaces, ace_checked=True):
+    """doc / dts / ace states of a row; a column stays None without its check.py report (ace: check.py --skip-ace)."""
     states = {}
     if documentation is not None:
         doc = documentation.get(row['id'])
@@ -324,10 +325,9 @@ def surface_states(row, documentation, surfaces):
         else:
             arity = surface.get('arity') if isinstance(surface.get('arity'), dict) else {}
             states['dts'] = 'arity' if arity.get('status') in ('match', 'wider') else 'name'
-        if not surface or not (surface.get('aceDefault') and surface.get('aceAllGroups')):
-            states['ace'] = 'none'
-        else:
-            states['ace'] = 'static' if surface.get('aceStatic') else 'semantic'
+        if ace_checked:
+            completes = surface and surface.get('aceDefault') and surface.get('aceAllGroups')
+            states['ace'] = ('static' if surface.get('aceStatic') else 'semantic') if completes else 'none'
     return states
 
 
@@ -382,6 +382,7 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
     if len(by_id) != len(rows):
         raise ValueError('Duplicate row ids: ' + ', '.join(sorted(k for k, v in Counter(r['id'] for r in rows).items() if v > 1)))
     documentation = None if documentation is None else {item['api']: item for item in documentation}
+    ace_checked = surfaces is not None and surfaces.get('aceChecked', True)
     surfaces = None if surfaces is None else {item['api']: item for item in surfaces.get('rows', [])}
     node = NodeIndex(node_surfaces, policy.get('node', {}), host_api, worker, catalog)
     bun = BunIndex(bun_surfaces, policy.get('bun', {}))
@@ -389,7 +390,7 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
     for row in rows:
         row['rhino'] = 'native'
         row.update({column: None for column in ['doc', 'dts', 'ace']})
-        row.update(surface_states(row, documentation, surfaces))
+        row.update(surface_states(row, documentation, surfaces, ace_checked))
         if row['kind'] == 'export':
             group = [by_id[other] for other in row['aliases']]
             row['node_main'] = node.lookup(row, group) or {'status': 'pending'}
@@ -507,14 +508,20 @@ def markdown_state(text):
     return {'schema': match.group(1), 'dataSource': match.group(2), 'rows': int(match.group(3))} if match else None
 
 
+def partial_columns(matrix):
+    """doc / dts / ace columns the matrix was built without (no check.py report, or check.py --skip-ace for ace)."""
+    return [column for column in ('doc', 'dts', 'ace') if matrix['summary']['byColumn'][column] is None]
+
+
 def compare_markdown(matrix, path):
-    """'current', 'stale', 'missing' or 'skipped' (the checked-in file came from another data source)."""
+    """'current', 'stale', 'missing' or 'skipped': the checked-in file came from another data source, or the
+    matrix lacks a column of it (MATRIX.md is only written with all columns)."""
     path = Path(path)
     if not path.is_file():
         return 'missing'
     text = path.read_text(encoding='utf-8')
     state = markdown_state(text)
-    if state and state['dataSource'] != matrix['dataSource'].get('kind', 'kotlin'):
+    if state and state['dataSource'] != matrix['dataSource'].get('kind', 'kotlin') or partial_columns(matrix):
         return 'skipped'
     return 'current' if text == render_markdown(matrix) else 'stale'
 
@@ -567,7 +574,12 @@ def gate(matrix, markdown):
     summary = matrix['summary']
     failures += [f"Runtime matrix Bun capability-gated without a capability: {item['id']} ({item['namespace']}.{item['member']}); "
                  'map it in runtime-policy.json bun.memberCapabilities' for item in summary.get('missingCapabilities', [])]
-    findings = [f'Runtime matrix pending in {COLUMN_TITLES[column]}: {count}' for column, count in summary['pending'].items() if count]
+    findings = []
+    if state == 'skipped':
+        partial = partial_columns(matrix)
+        findings.append(f"{MARKDOWN} not compared: the matrix has no {' / '.join(partial)} column (check.py --skip-ace, or no check.py reports)"
+                        if partial else f'{MARKDOWN} not compared: it was generated from another data source')
+    findings += [f'Runtime matrix pending in {COLUMN_TITLES[column]}: {count}' for column, count in summary['pending'].items() if count]
     findings += [f"Runtime matrix exclusion without a valid reason: {item['id']} ({item['column']}: {item['problem']})" for item in summary['missingReasons']]
     return {'markdown': state, 'pending': summary['pending'], 'missingReasons': len(summary['missingReasons']),
             'missingCapabilities': len(summary.get('missingCapabilities', [])),
@@ -578,6 +590,9 @@ def write(matrix, reports, markdown=None):
     reports = Path(reports)
     reports.mkdir(parents=True, exist_ok=True)
     (reports / 'runtime-matrix.json').write_text(json.dumps(matrix, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    if markdown and partial_columns(matrix):
+        raise ValueError(f"{MARKDOWN} is only written with every column; this matrix has no {' / '.join(partial_columns(matrix))} column "
+                         '(run check.py --write-matrix without --skip-ace)')
     if markdown:
         Path(markdown).parent.mkdir(parents=True, exist_ok=True)
         Path(markdown).write_text(render_markdown(matrix), encoding='utf-8', newline='\n')

@@ -69,6 +69,8 @@ def main():
     parser.add_argument("--node", type=Path, help="Node runtime checkout for --matrix (default: sibling AutoJs6-Plugin-NodeJs-Runtime)")
     parser.add_argument("--bun", type=Path, help="Bun runtime checkout for --matrix (default: sibling AutoJs6-Plugin-Bun-Runtime)")
     args = parser.parse_args()
+    if args.write_matrix and args.skip_ace:
+        parser.error("--write-matrix needs the Ace column of MATRIX.md; drop --skip-ace (--matrix --skip-ace reports MATRIX.md as skipped)")
     host = args.host.resolve()
     siblings = host.parent
     docs = (args.documentation or siblings / "AutoJs6-Documentation").resolve()
