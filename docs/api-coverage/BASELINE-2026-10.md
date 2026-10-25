@@ -286,3 +286,67 @@ no-dts 1 行: `WebSocket.()` (模块可调用, 实现 1-2; d.ts 的 WebSocket �
 | Ace | 7d4f966 | generate-runtime-api-queries.mjs, runtime-api-queries.json, verify-runtime-api-coverage.mjs (矩阵查询, --fresh), BUNDLED_DECLARATIONS.md, 开发文档一节 |
 | Ace | cfe50d2 | 随宿主 5d6c2aa91 重新生成 runtime-api-queries.json (1893) |
 | TS 声明 | 9889606 | sync-runtime-declarations.mjs (Version 行), verify-runtime-declarations.mjs --ace, RUNTIME_APIS.md |
+
+## 5. P1.5 矩阵修正 (2026-10-25, 子会话 api-cov-p1-5)
+
+维护者 2026-10-25 拍板 Q26 / Q27 / Q28 均选 (a). 生成器, 策略与测试在宿主 a1873159b (规则见 tools/api-coverage/README.md "Runtime coverage matrix").
+
+### 5.1 数据与命令
+
+- 宿主 HEAD 导出副本 (6c62786b5, 副本内单独运行 `:app:kspAppDebugKotlin`, 不含其他会话未提交的改动), Node 990f9e35, Bun 3056b94, TypeScript 6.0.3 (Ace 自带编译器).
+- 修正后: `python tools/api-coverage/check.py --source ksp --write-matrix --strict-arity`, 再以 `--matrix --docs-support --strict-arity` (含 Ace) 复核, 退出码 0, failures 空, MATRIX.md / 文档三页 / Ace 查询清单均 current.
+- 修正前: 用 P1.5 之前的 runtime_matrix.py / list-runtime-surfaces.mjs / runtime-policy.json (宿主 e2ecc8aca) 读同一份报告. 两份矩阵行集相同 (2727 行), 状态变化全部可归到下表三项, 其他变化 0.
+
+### 5.2 pending 前后 (三列)
+
+| 列 | 修正前 | Q26 拒绝入口 (改记 pending) | Q27 句柄类型 (改记覆盖) | Q28 Toolkit 别名 (改记覆盖) | 修正后 |
+|---|---:|---:|---:|---:|---:|
+| Node main | 844 | +37 | -221 | -38 | 622 |
+| Node Worker | 999 | +3 | -210 | -38 | 754 |
+| Bun | 942 | +30 | -221 | -38 | 713 |
+
+### 5.3 Q27 句柄成员比对
+
+`runtime-policy.json` returnedObjects 把 7 个 augment-prototype 对象对到运行时句柄类型, 逐成员比对: 类型声明了的成员记覆盖 (Node 取模块状态 bridged, Worker 要求该模块是 Worker 宿主模块; Bun 记 capability-gated 并带生产调用的能力), 其余保持 pending. 运行时类型多出的成员 (如 Node / Bun `Book` 19 个成员对宿主 EpubBook 14 个) 不进分母.
+
+| 对象 | Node 类型 | Bun 类型 (能力) | 成员 | Node main 覆盖 / pending | Node Worker 覆盖 / pending | Bun 覆盖 / pending | pending 成员 |
+|---|---|---|---:|---|---|---|---|
+| Flow | `autojs6:flow` Flow<unknown> | RuntimeFlow.Flow<unknown> (flow.control) | 106 | 104 / 2 | 104 / 2 | 104 / 2 | await, sync |
+| MailClient | `autojs6:mail` Client | RuntimeMail.Client (mail.control) | 53 | 53 / 0 | 53 / 0 | 53 / 0 | - |
+| ShellProcess | `autojs6:shell` ShellProcess | RuntimeShell.ShellProcess (shell.control) | 25 | 15 / 10 | 15 / 10 | 15 / 10 | addListener, getErrorStream, getInputStream, getOutputStream, isAlive, listenerCount, prependListener, prependOnceListener, removeListener, toString |
+| AgentRun | `autojs6:ai` AgentRun | RuntimeAi.AgentRun (agent.control) | 14 | 14 / 0 | 14 / 0 | 14 / 0 | - |
+| EpubBook | `autojs6:epub` Book | RuntimeEpub.Book (epub.control) | 14 | 13 / 1 | 13 / 1 | 13 / 1 | toString |
+| Storage | `storages` StorageStore | RuntimeStorage.StorageStore (storage.control) | 12 | 11 / 1 | 0 / 12 | 11 / 1 | size; Worker 全部 12 个 (storages 不是 Worker 宿主模块, REVIEW R8) |
+| AiSession | `autojs6:ai` Session | RuntimeAi.Session (ai.control) | 11 | 11 / 0 | 11 / 0 | 11 / 0 | - |
+| 合计 | | | 235 | 221 / 14 | 210 / 25 | 221 / 14 | |
+
+剩余 14 个成员 (Node main / Bun) 的归属登记为待决 Q31 (附录 C): Flow#await / sync 与 ShellProcess 的三个 Java 流 getter 可作附录 D 候选, EventEmitter 别名 (addListener 等 5 个), isAlive, toString (2), Storage#size 可由 P3 / P4 在运行时句柄补成员或写 memberAliases. 没有句柄类型的 augment-prototype 对象 (Color, Zip, VolatileDispose, YoloDetector) 仍全部 pending.
+
+### 5.4 Q26 拒绝入口
+
+`list-runtime-surfaces.mjs` 把每个调用签名都返回 `never` / `Promise<never>` 的成员标 `rejects`; 生成器优先取不拒绝的入口, 只剩拒绝入口时该列记 `pending` 并带 `rejects: true` 与入口 (MATRIX.md 写 `pending (rejects)`, 汇总行 "拒绝入口"). 拒绝入口单元格 Node main 37 / Worker 3 / Bun 30, 共 40 个显式导出行; 按附录 D 核对版分组 (D-4 25 行, D-5 2 行, D-7 3 行, D-12 7 行) 见 [REVIEW "P1.5 拒绝入口分组"](REVIEW-codex-2026-10.md). 文档 files 页的 files.open / toFile / open 随之由 "已支持 (本地实现)" / "需授权" 改为 "待补" (文档仓库 4007465); image / flow 两页不变.
+
+### 5.5 Q28 Toolkit 别名
+
+`runtime-policy.json` node / bun memberAliases 把 automator 的 19 个 Toolkit 助手 (backToApp, backUntil, clickAny, clickBoundsAny, clickBoundsIfExists, clickIfExists, collectList, dismissPopups, findAny, launchAndWait, scrollUntil, smartClick, smartClickBounds, toggle, typeInto, waitForEvent, waitForIdle, waitForNotification, waitForToast) 与它们的全局放置 (共 38 行) 对到 `autojs6:flow` / Bun `flow` 的同名成员 (via member-alias): Node main 与 Worker 记 bridged, Bun 记 capability-gated (flow.control). 文档生成器给 member-alias 入口标 "经 <模块>" (文档仓库 241296c); automator 页尚未插入运行时支持表 (P2.5).
+
+### 5.6 Ace 运行时查询
+
+矩阵新增的句柄成员单元格带 `type`, Ace 生成器把它们放进 node_handle / bun_handle 两条路由, 校验脚本在该类型的值上补全 (`.cjs` 用 JSDoc 类型, `.bun.ts` 用 `declare const`); 拒绝入口不再查询. 覆盖行 759 -> 981, 矩阵查询 1893 -> 2291 (Node main 652, Worker 499, `$autojs` 全局 186, Bun 512, Node 句柄 221, Bun 句柄 221), 加手写查询共 3463, 全部通过; 伪造的两个句柄成员按预期报失败 (Ace 6e2bda0).
+
+### 5.7 共享签出中的校验
+
+在共享签出运行同一命令时, MATRIX.md 判 stale, 另有 `auto.clearFlags` 文档名与表面检查失败: 均来自其他会话未提交的改动 (多出 `auto.clearFlags` 导出与 `UiObject#refresh` 成员, 共享签出的 KSP 产物也较旧); 两边共有的 2727 行状态 0 差异. 待这些改动提交后由其会话 `--write-matrix`.
+
+### 5.8 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | e2ecc8aca | ROADMAP P1.5 条目, P1.4 依赖, 附录 C Q21 / Q26 / Q27 / Q28 已拍板 |
+| 宿主 | a1873159b | list-runtime-surfaces.mjs (rejects, 句柄类型成员), runtime_matrix.py, runtime-policy.json (returnedObjects 7 条, memberAliases 38 x 2), 单元测试, README |
+| 宿主 | 6c62786b5 | ROADMAP 进度 |
+| 宿主 | 9c440e7b5 | MATRIX.md (HEAD 导出副本生成) |
+| 宿主 | (本节所在提交) | 本节, REVIEW "P1.5 拒绝入口分组" 与第 9 节, ROADMAP 勾选与附录 C Q31 |
+| 文档 | 241296c | runtime-support.js "经 <模块>", 自检, generator/README |
+| 文档 | 4007465 | files 页运行时支持表与生成产物 |
+| Ace | 6e2bda0 | 句柄查询路由, runtime-api-queries.json (2291), 开发文档 |

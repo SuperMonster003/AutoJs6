@@ -233,6 +233,7 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | P3 / P4 补缺批次 | R2 (控制台), R3 (Bun 拼音常量, P4), R6 (compose.ComposeError, UI 族), R7 (可桥接部分, UI 族), R8 (Worker, 各族), R9 (自动化族), R10 / R14 / R16 / R18 (系统与设备族), R11 / R19 / R21 (文件与数据族) |
 | P3.6 (HOST-API 同步) | R5 |
 | P1.2 真机抽样 A (Redmi) | 无失败项 (41 个用例全部通过, 见 "P1.2 真机抽样 A (Redmi)" 节); 设备证据补强 R20 / Q27 与 R15; 待决 Q34 (自动点击系统授权界面的用例) |
+| P1.5 矩阵修正 (Q26 / Q27 / Q28) | R13 改记 pending (rejects), 分组见 "P1.5 拒绝入口分组" 节, 白名单仍由 P1.4 拍板; R20 按句柄类型逐成员比对 (BASELINE 第 5 节); R9 中 Toolkit 助手 38 行经 flow 计为覆盖 |
 
 ## P1.2 真机抽样 A (Redmi)
 
@@ -355,3 +356,22 @@ AutoJs6 的通知使用权抽样前未开启: 维护者在手机上开启, 抽�
 授权与人工操作: Shizuku 由本会话经 adb 启动, 维护者确认 AutoJs6 已授权; 通知使用权由维护者开启并在结束后关闭; Node main 截图由维护者点 Start now; Worker / Bun 及 asyncCapture 的 3 个截图用例由测试代码自动点击 MediaProjection, 维护者对本轮一次性允许 (Q34). 测试在宿主重启后重绑已授权的无障碍服务与通知监听, 只针对已授权组件.
 
 恢复与核对 (`device_sample_a.py restore` / `verify`): 宿主, 宿主测试包, Node, Bun 四个包装回抽样前 APK, 十个记录包的 versionCode 与 md5 全部与抽样前一致; 旋转, 熄屏时间, 充电常亮, 亮度与亮度模式, 无障碍服务列表 (集合), 通知使用权列表, appops PROJECT_MEDIA / SYSTEM_ALERT_WINDOW / POST_NOTIFICATION 模式, RECORD_AUDIO / CAMERA / POST_NOTIFICATIONS 授予状态均一致 (verify 退出码 0); 亮度, 无障碍与通知监听三项的抽样前值是首次安装前用 adb 读取后补入记录的. Shizuku 服务已停止 (管理器界面进程由维护者打开, 保留). 维护者在结束后重开了 AutoJs6 无障碍服务; dumpsys 的已绑定服务仍只有系统 Mi AI, 另 3 个插件的已启用服务同样未绑定, 抽样前未记录绑定状态. 证据 JSON 每条用例后即从设备删除; Shizuku 启动器自身在 /data/local/tmp 写入的 shizuku / shizuku_starter 保留 (启动器每次运行都会重写).
+
+## P1.5 拒绝入口分组 (供 P1.4 出选择题; 不代替维护者拍板, D12 / Q1)
+
+P1.5 (Q26 (a), 宿主 a1873159b) 起, 运行时声明只返回 `never` / `Promise<never>` 的入口不再算覆盖: 该行记 `pending`, 单元格带 `rejects: true` 并保留入口 (MATRIX.md 写 `pending (rejects)`); 同一行若另有不拒绝的入口 (例如 `autojs6:compat`) 则取后者. 要变 not-portable / denied, 必须在 `runtime-policy.json` 写排除规则并给理由 (缺理由计入 missingReasons). 拒绝入口单元格: Node main 37, Node Worker 3, Bun 30, 涉及 40 个显式导出行, 按第 6 节分组如下. 三列写 "rejects" 的是拒绝入口, 写 "pending" 的是该列本无入口.
+
+| 分组 | 草案理由 | 行 (显式导出) | 行数 | Node main | Node Worker | Bun | 运行时声明 |
+|---|---|---|---:|---|---|---|---|
+| D-4 特权与双开应用操作 | security (需 Root / Shizuku 特权) | app.isDualInstalled / launchDual / launchDualApp / launchDualAppDetailsSettings / launchDualPackage / launchDualSettings / openDualAppSetting / openDualAppSettings / openDualUrl / startDualActivity / uninstallDual / killDual / kill (13), 及除 openDualUrl 外的 12 个全局放置 | 25 | rejects 25 | pending 25 (Worker 无 app, R8) | rejects 25 | Node app.d.ts 与 Bun app 命名空间均为 `Promise<never>` |
+| D-5 存储枚举 | security (理由待 P1.4 定) | storages.names, storages.all | 2 | rejects 2 | pending 2 (Worker 无 storages) | rejects 2 | 两端 `never` |
+| D-7 控制台同步输入 | sync-only | console.input, console.rawInput, console.build | 3 | rejects 3 | rejects 3 | pending 3 (Bun 用全局 console, 无同名入口; 输出类见 D-10) | Node console.d.ts `never` |
+| D-12 Java 句柄与构造器 (拒绝部分) | java-prototype | files.open, files.toFile, open (全局) | 3 | rejects 3 (原记 local-shim) | pending 3 | rejects 3 | 两端 `never` |
+| D-12 同上 | java-prototype | s13n.color, s13n.point, s13n.throwable, s13n.time | 4 | rejects 4 (原记 local-shim) | pending 4 | pending 4 (Bun 无 s13n) | Node s13n.d.ts `never` |
+
+出题材料 (每组一题; 选项只列方向, 推荐项由 P1.4 结合 P1.2 / P1.3 结论标出):
+
+- 每组可选: 按草案理由写排除规则 (三列都会由 pending 变 not-portable / denied, 包括本无入口的列), 或保持 pending 由 P3 / P4 补真正的入口.
+- 五组全部按草案排除时, 三列 pending 各 -37 (Node main 37 个拒绝入口; Worker 3 个拒绝入口 + 34 个无入口; Bun 30 个拒绝入口 + 7 个无入口).
+- D-4 若补入口, 需要特权授权模型 (Codex bun-automation 报告把双开 / kill 归为 Root / Shizuku 特权); D-5 的理由 (security 或 not-portable) 在出题时一并定; D-7 Worker 也显式失败 (runtime-video-worker), 与主线程同组; D-12 其余 6 行 (dialogs.build, notice.builder / getBuilder, shell.fromIntent, util.java.mapToObject / objectToMap) 运行时没有同名声明, 不是拒绝入口, 仍按第 6 节与本组同题.
+- `autojs6:compat` 兼容门面里同名的拒绝入口 (compat.app.*, compat.files.open 等) 同样返回 never, 不会让这些行变为覆盖.
