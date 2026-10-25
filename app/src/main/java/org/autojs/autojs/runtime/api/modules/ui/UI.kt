@@ -98,6 +98,10 @@ class UI(private val scriptRuntime: ScriptRuntime) : AugmentableProxy(scriptRunt
 
     private val mProperties = ConcurrentHashMap<String, Any>()
 
+    /** The constructor of custom widgets, `ui.Widget` (`ui.registerWidget`). */
+    internal val widgetConstructor: BaseFunction
+        get() = mWidgetConstructor
+
     private val mWidgetConstructor = object : BaseFunction() {
 
         override fun getFunctionName() = WIDGET_KEY

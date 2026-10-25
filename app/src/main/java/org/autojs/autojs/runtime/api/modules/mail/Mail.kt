@@ -58,10 +58,21 @@ class Mail(
         get() = selfAssignmentFunctions.toSet()
 
     override val selfAssignmentGetters = listOf<Any>(
-        "default" to Supplier<Any?> { service.defaultClient },
+        "default" to Supplier<Any?> { defaultClient },
     )
 
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+
+    /**
+     * The data properties the `mail` script module defines on its module object, in their order (its install hook
+     * defines them, roadmap P5.2).
+     * zh-CN: `mail` 脚本模块在模块对象上定义的数据属性, 按顺序 (由其 install 钩子定义, P5.2).
+     */
+    /** The value of the `mail.default` getter: the default client of the runtime. */
+    internal val defaultClient: Any?
+        get() = service.defaultClient
+
+    val scriptProperties: List<Pair<Any, Any?>> by lazy {
         listOf<Pair<Any, Any?>>(
             MailJsErrors.NAME to MailJsErrors.constructor(scriptRuntime),
             "providers" to providersObject(),

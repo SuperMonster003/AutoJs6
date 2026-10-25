@@ -26,7 +26,14 @@ import java.io.File
 @Suppress("unused", "UNUSED_PARAMETER")
 class Mediainfo(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime), Invokable {
 
-    override val selfAssignmentProperties = listOf(
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+
+    /**
+     * The data properties the `mediainfo` script module defines on its module object, in their order (its install hook
+     * defines them, roadmap P5.2).
+     * zh-CN: `mediainfo` 脚本模块在模块对象上定义的数据属性, 按顺序 (由其 install 钩子定义, P5.2).
+     */
+    val scriptProperties = listOf(
         "SNAPSHOT_SCHEMA_V1" to MediainfoSnapshotSchemas.V1,
         "SNAPSHOT_SCHEMA_V2" to MediainfoSnapshotSchemas.V2,
     )

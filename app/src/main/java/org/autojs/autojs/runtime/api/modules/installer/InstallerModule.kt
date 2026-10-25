@@ -27,7 +27,7 @@ class InstallerModule(private val runtime: ScriptRuntime) {
     private val impl by lazy { Installer(runtime, ScriptRuntimeFields.installer(runtime)) }
 
     @ScriptInstall(names = [ScriptInstallNames(["InstallerError", "authorizer"])])
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl.scriptProperties, it) }
 
     @ScriptFunction(arity = [1, 2])
     fun install(vararg args: Any?): Any? = impl.install(runtime, args)
@@ -69,6 +69,6 @@ class InstallerModule(private val runtime: ScriptRuntime) {
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)
 
     @ScriptGetter(name = "status")
-    fun status(): Any? = AugmentMembers.getter(impl, "status")
+    fun status(): Any? = impl.statusValue()
 
 }

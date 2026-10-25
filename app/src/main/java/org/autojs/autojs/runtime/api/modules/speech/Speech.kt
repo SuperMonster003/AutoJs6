@@ -55,7 +55,14 @@ class Speech internal constructor(
     override val scriptErrorPassThroughFunctions: Set<String>
         get() = selfAssignmentFunctions.toSet()
 
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+
+    /**
+     * The data properties the `speech` script module defines on its module object, in their order (its install hook
+     * defines them, roadmap P5.2).
+     * zh-CN: `speech` 脚本模块在模块对象上定义的数据属性, 按顺序 (由其 install 钩子定义, P5.2).
+     */
+    val scriptProperties: List<Pair<Any, Any?>> by lazy {
         listOf<Pair<Any, Any?>>(SpeechJsErrors.NAME to SpeechJsErrors.constructor(scriptRuntime))
     }
 

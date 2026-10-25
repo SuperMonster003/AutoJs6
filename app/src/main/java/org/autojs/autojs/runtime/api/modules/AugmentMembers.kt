@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.modules
 
-import org.autojs.autojs.runtime.api.augment.Augmentable
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
@@ -8,9 +8,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException.Companion.getRefinedStackTrace
 import org.autojs.autojs.runtime.exception.WrappedRuntimeException
 import org.autojs.autojs6.R
-import org.mozilla.javascript.JavaScriptException
 import org.mozilla.javascript.ScriptableObject
-import java.util.function.Supplier
 
 /**
  * Members a module of roadmap P4.1 takes over from its current augment module unchanged, for what the annotations
@@ -24,12 +22,12 @@ import java.util.function.Supplier
 internal object AugmentMembers {
 
     /**
-     * Defines the data properties of [module] (`selfAssignmentProperties`, plain `name to value` pairs) on [target] in
-     * their order, with the attributes of the current `Augmentable.assign` (PERMANENT; the values as they are).
+     * Defines [properties] (`name to value` pairs, the `scriptProperties` of an implementation class) on [target] in
+     * their order, with the attributes the old `Augmentable.assign` gave them (PERMANENT; the values as they are).
      */
     @JvmStatic
-    fun defineProperties(module: Augmentable, target: ScriptableObject) {
-        module.selfAssignmentProperties.forEach { (name, value) ->
+    fun defineProperties(properties: List<Pair<Any, Any?>>, target: ScriptableObject) {
+        properties.forEach { (name, value) ->
             target.defineProperty(name as String, value, ScriptableObject.PERMANENT)
         }
     }
@@ -46,25 +44,24 @@ internal object AugmentMembers {
     }
 
     /**
-     * Runs [call], the function [function] of the current [module] (null: its invoke) reached after the new layer's own
-     * argument checks, and rethrows a failure as the current augment layer does (`Augmentable.installFunctions` and its
-     * invoke wrapper): an interruption and a script error of a pass-through function unchanged, any other exception
-     * printed and wrapped in a WrappedRuntimeException (InternalError) with the current message. The plugin modules of
+     * Runs [call], the function [function] of the module [module] (null: its invoke) reached after the new layer's own
+     * argument checks, and rethrows a failure as the old augment layer did (`Augmentable.installFunctions` and its invoke
+     * wrapper, none of these modules had script error pass-through functions): an interruption unchanged, any other
+     * exception printed and wrapped in a WrappedRuntimeException (InternalError) with the old message. The plugin modules of
      * P4.1 without error codes (ai, opencc, pinyin, pinyin4j, mediainfo) thus fail the same way in both states once their
      * arguments are accepted, for example when the plugin is not installed or disabled.
      */
     @JvmStatic
-    fun <T> asCurrent(module: Augmentable, function: String?, call: () -> T): T = try {
+    fun <T> asCurrent(module: String, function: String?, call: () -> T): T = try {
         call()
     } catch (t: Throwable) {
         throw if (function == null) invokeError(module, t) else functionError(module, function, t)
     }
 
-    private fun functionError(module: Augmentable, function: String, t: Throwable): Throwable {
+    private fun functionError(module: String, function: String, t: Throwable): Throwable {
         val e = (if (t is ScriptException) t.cause ?: t else t).also { it.printStackTrace() }
         if (ScriptInterruptedException.causedByInterrupt(e)) return ScriptInterruptedException(e)
-        if (e is JavaScriptException && function in module.scriptErrorPassThroughFunctions) return e
-        val message = Augmentable.globalContext.getString(R.string.error_failed_to_call_method, "${module.key}.$function")
+        val message = GlobalAppContext.get().getString(R.string.error_failed_to_call_method, "$module.$function")
         val niceMessage = when (val errMsg = e.message) {
             null -> e.takeUnless { it is WrappedIllegalArgumentException }?.stackTraceToString()?.let { getRefinedStackTrace(message, it) } ?: message
             else -> {
@@ -76,28 +73,19 @@ internal object AugmentMembers {
         return WrappedRuntimeException(niceMessage)
     }
 
-    private fun invokeError(module: Augmentable, t: Throwable): Throwable {
+    private fun invokeError(module: String, t: Throwable): Throwable {
         if (t !is Exception) return t
-        if (module.scriptErrorPassThroughInvoke && t is JavaScriptException) return t
         if (ScriptInterruptedException.causedByInterrupt(t)) return t
-        val context = Augmentable.globalContext
+        val context = GlobalAppContext.get()
         val message = t.message?.let { msg ->
             val lines = msg.split("\n")
-            val first = context.getString(R.string.error_failed_to_call_method_with_cause, module.key, lines.first())
+            val first = context.getString(R.string.error_failed_to_call_method_with_cause, module, lines.first())
             lines.drop(1).joinToString("\n").takeUnless { it.isBlank() }?.let { "$first\n$it" } ?: first
-        } ?: context.getString(R.string.error_failed_to_call_method, module.key)
+        } ?: context.getString(R.string.error_failed_to_call_method, module)
         return WrappedRuntimeException(message, t)
     }
 
     /** The current layer's pattern of an exception class name before its message. */
     private val CLASS_PREFIX = Regex("^(Wrapped )?\\w*(\\.\\w+)*(Exception|Error): ")
-
-    /** The current value of the getter [name] of [module] (`selfAssignmentGetters`, `name to Supplier`). */
-    @JvmStatic
-    fun getter(module: Augmentable, name: String): Any? {
-        val supplier = module.selfAssignmentGetters.firstNotNullOf { item -> (item as Pair<*, *>).takeIf { it.first == name }?.second }
-        @Suppress("UNCHECKED_CAST")
-        return (supplier as Supplier<Any?>).get()
-    }
 
 }

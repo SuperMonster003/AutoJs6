@@ -37,7 +37,14 @@ import org.mozilla.javascript.ScriptableObject.READONLY
 object Pinyin : Augmentable(), Invokable {
 
     @Suppress("SpellCheckingInspection")
-    override val selfAssignmentProperties = listOf(
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+
+    /**
+     * The data properties the `pinyin` script module defines on its module object, in their order (its install hook
+     * defines them, roadmap P5.2).
+     * zh-CN: `pinyin` 脚本模块在模块对象上定义的数据属性, 按顺序 (由其 install 钩子定义, P5.2).
+     */
+    val scriptProperties = listOf(
         "STYLE_NORMAL" to PinyinStyle.NORMAL,
         "STYLE_TONE" to PinyinStyle.TONE,
         "STYLE_TONE2" to PinyinStyle.TONE2,

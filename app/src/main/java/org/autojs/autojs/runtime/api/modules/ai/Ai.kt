@@ -24,7 +24,8 @@ class Ai(
     private val aiService: AiService,
 ) : Augmentable(scriptRuntime), Invokable {
 
-    private val agentObject by lazy { AiAgent(scriptRuntime) { aiService.agent }.createObject() }
+    /** The `agent` object of the module (the `ai.agent` getter). */
+    internal val agentObject by lazy { AiAgent(scriptRuntime) { aiService.agent }.createObject() }
     override val selfAssignmentGetters = listOf("agent" to java.util.function.Supplier { agentObject })
 
     override val selfAssignmentFunctions = listOf(

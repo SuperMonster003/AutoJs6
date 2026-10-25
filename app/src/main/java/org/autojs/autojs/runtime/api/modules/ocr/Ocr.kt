@@ -50,7 +50,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
     )
 
     override val selfAssignmentGettersAndSetters = listOf(
-        Triple("mode", Supplier<Any?> { currentMode(scriptRuntime)?.value.orEmpty() }, Consumer<Any?> { tap(scriptRuntime, arrayOf(it)) }),
+        Triple("mode", Supplier<Any?> { modeValue(scriptRuntime) }, Consumer<Any?> { tap(scriptRuntime, arrayOf(it)) }),
     )
 
     override fun invoke(vararg args: Any?): NativeArray = recognizeText(scriptRuntime, args)
@@ -206,6 +206,10 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime)
         }
 
         private fun shouldTakenAsRegion(o: Any?) = o is OpencvRect || o is AndroidRect || o is NativeArray
+
+        /** The value of the `ocr.mode` getter: the requested engine, or the first available one when automatic. */
+        @JvmStatic
+        internal fun modeValue(scriptRuntime: ScriptRuntime): Any = currentMode(scriptRuntime)?.value.orEmpty()
 
         private fun currentMode(scriptRuntime: ScriptRuntime): OcrMode? {
             return scriptRuntime.ocr.mode.takeUnless { it == OcrMode.AUTO } ?: availableModes().firstOrNull()

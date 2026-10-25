@@ -26,7 +26,7 @@ class SpeechModule(private val runtime: ScriptRuntime) {
     private val impl by lazy { Speech(runtime, ScriptRuntimeFields.speech(runtime), ScriptRuntimeFields.tts(runtime)) }
 
     @ScriptInstall(names = [ScriptInstallNames(["SpeechError"])])
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl.scriptProperties, it) }
 
     @ScriptFunction(arity = [0])
     fun isAvailable(vararg args: Any?): Any? = impl.isAvailable(runtime, args)

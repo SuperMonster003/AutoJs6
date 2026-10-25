@@ -146,11 +146,11 @@ class OpenccModule {
         if (name.uppercase(Locale.ROOT) !in OpenccConversionTypes.ALL && OpenccConversionPlan.chainFor(name) == null) {
             throw UtilValues.rangeError(function, ScriptMessages.argumentCannotBe("type", UtilValues.quote(type)))
         }
-        return AugmentMembers.asCurrent(OpenCC, if (function == MODULE) null else "convert") { OpenCC.convert(arrayOf(s, type)) }
+        return AugmentMembers.asCurrent(MODULE, if (function == MODULE) null else "convert") { OpenCC.convert(arrayOf(s, type)) }
     }
 
     /** The named conversion [function] of the current module, failing as there once [text] is checked. */
-    private fun named(function: String, text: Any, convert: (Array<Any?>) -> String): String = AugmentMembers.asCurrent(OpenCC, function) { convert(arrayOf(text)) }
+    private fun named(function: String, text: Any, convert: (Array<Any?>) -> String): String = AugmentMembers.asCurrent(MODULE, function) { convert(arrayOf(text)) }
 
     private fun text(function: String, s: Any?): Any {
         if (ScriptArgs.isNullish(s)) throw UtilValues.typeError(function, ScriptMessages.argumentType("s", "string", ScriptArgs.describe(s)))

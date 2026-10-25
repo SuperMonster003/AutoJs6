@@ -26,7 +26,7 @@ class EpubModule(private val runtime: ScriptRuntime) {
     private val impl by lazy { Epub(runtime, ScriptRuntimeFields.epub(runtime)) }
 
     @ScriptInstall(names = [ScriptInstallNames(["EpubError"])])
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl.scriptProperties, it) }
 
     @ScriptFunction(arity = [1])
     fun open(vararg args: Any?): Any? = impl.open(runtime, args)

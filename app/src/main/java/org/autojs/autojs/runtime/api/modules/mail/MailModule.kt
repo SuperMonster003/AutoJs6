@@ -55,7 +55,7 @@ class MailModule(private val runtime: ScriptRuntime) {
             ScriptInstallNames(["watch"], kind = ScriptInstallKind.FUNCTION, arity = [0, 2]),
         ],
     )
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl.scriptProperties, it) }
 
     @ScriptFunction(arity = [1])
     fun connect(vararg args: Any?): Any? = impl.connect(runtime, args)
@@ -70,6 +70,6 @@ class MailModule(private val runtime: ScriptRuntime) {
     fun close(vararg args: Any?): Any? = impl.close(runtime, args)
 
     @ScriptGetter(name = "default")
-    fun defaultValue(): Any? = AugmentMembers.getter(impl, "default")
+    fun defaultValue(): Any? = impl.defaultClient
 
 }

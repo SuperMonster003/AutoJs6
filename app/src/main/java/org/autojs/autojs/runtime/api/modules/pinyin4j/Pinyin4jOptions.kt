@@ -60,44 +60,56 @@ internal object Pinyin4jOptions {
         }
     }
 
-    fun normalizeRomanization(value: String?): String {
-        return when (value.normalizedSystemOr(Pinyin4jRomanizationSystems.HANYU)) {
-            "HANYU", "HANYU_PINYIN", "PINYIN" -> Pinyin4jRomanizationSystems.HANYU
-            "TONGYONG", "TONGYONG_PINYIN" -> Pinyin4jRomanizationSystems.TONGYONG
-            "WADE", "WADE_GILES", "WADEGILES", "WADE_GILES_PINYIN" -> Pinyin4jRomanizationSystems.WADE_GILES
-            "MPS2", "MANDARIN_PHONETIC_SYMBOLS_2" -> Pinyin4jRomanizationSystems.MPS2
-            "YALE", "YALE_PINYIN" -> Pinyin4jRomanizationSystems.YALE
-            "GWOYEU", "GWOYEU_ROMATZYH", "GR" -> Pinyin4jRomanizationSystems.GWOYEU_ROMATZYH
-            else -> throw IllegalArgumentException("Invalid romanization system: $value")
-        }
-    }
+    /**
+     * The names each normalizer accepts (as [normalized] reads them; romanization names also with `-` / space read as `_`)
+     * and what each one stands for. The script module checks options against the same tables before the call (R2).
+     * zh-CN: 各规范化函数接受的名称 (按 [normalized] 读取; 罗马化方案名另把 `-` / 空格读作 `_`) 及其对应值; 脚本模块调用前以同一份表检查选项 (R2).
+     */
+    val ROMANIZATIONS: Map<String, String> = names(
+        Pinyin4jRomanizationSystems.HANYU to listOf("HANYU", "HANYU_PINYIN", "PINYIN"),
+        Pinyin4jRomanizationSystems.TONGYONG to listOf("TONGYONG", "TONGYONG_PINYIN"),
+        Pinyin4jRomanizationSystems.WADE_GILES to listOf("WADE", "WADE_GILES", "WADEGILES", "WADE_GILES_PINYIN"),
+        Pinyin4jRomanizationSystems.MPS2 to listOf("MPS2", "MANDARIN_PHONETIC_SYMBOLS_2"),
+        Pinyin4jRomanizationSystems.YALE to listOf("YALE", "YALE_PINYIN"),
+        Pinyin4jRomanizationSystems.GWOYEU_ROMATZYH to listOf("GWOYEU", "GWOYEU_ROMATZYH", "GR"),
+    )
 
-    fun normalizeCaseType(value: String?): String {
-        return when (value.normalizedOr(DEFAULT_CASE_TYPE)) {
-            "LOWERCASE", "LOW", "L", "0" -> "LOWERCASE"
-            "UPPERCASE", "UP", "U", "1" -> "UPPERCASE"
-            else -> throw IllegalArgumentException("Invalid case type: $value")
-        }
-    }
+    val CASE_TYPES: Map<String, String> = names(
+        "LOWERCASE" to listOf("LOWERCASE", "LOW", "L", "0"),
+        "UPPERCASE" to listOf("UPPERCASE", "UP", "U", "1"),
+    )
 
-    fun normalizeToneType(value: String?, defaultValue: String): String {
-        return when (value.normalizedOr(defaultValue)) {
-            "WITH_TONE_NUMBER", "WITH_NUMBER", "NUMBER", "NUM" -> "WITH_TONE_NUMBER"
-            "WITHOUT_TONE", "NO_TONE", "NO", "FALSE", "0" -> "WITHOUT_TONE"
-            "WITH_TONE_MARK", "WITH_MARK", "MARK", "TRUE", "1" -> "WITH_TONE_MARK"
-            else -> throw IllegalArgumentException("Invalid tone type: $value")
-        }
-    }
+    val TONE_TYPES: Map<String, String> = names(
+        "WITH_TONE_NUMBER" to listOf("WITH_TONE_NUMBER", "WITH_NUMBER", "NUMBER", "NUM"),
+        "WITHOUT_TONE" to listOf("WITHOUT_TONE", "NO_TONE", "NO", "FALSE", "0"),
+        "WITH_TONE_MARK" to listOf("WITH_TONE_MARK", "WITH_MARK", "MARK", "TRUE", "1"),
+    )
+
+    val V_CHAR_TYPES: Map<String, String> = names(
+        "WITH_U_AND_COLON" to listOf("WITH_U_AND_COLON", "U_AND_COLON", "U_COLON", "U:"),
+        "WITH_V" to listOf("WITH_V", "V"),
+        "WITH_U_UNICODE" to listOf("WITH_U_UNICODE", "U_UNICODE", "UNICODE", "U", "Ü"),
+    )
+
+    fun normalizeRomanization(value: String?): String =
+        ROMANIZATIONS[value.normalizedSystemOr(Pinyin4jRomanizationSystems.HANYU)] ?: throw IllegalArgumentException("Invalid romanization system: $value")
+
+    fun normalizeCaseType(value: String?): String =
+        CASE_TYPES[value.normalizedOr(DEFAULT_CASE_TYPE)] ?: throw IllegalArgumentException("Invalid case type: $value")
+
+    fun normalizeToneType(value: String?, defaultValue: String): String =
+        TONE_TYPES[value.normalizedOr(defaultValue)] ?: throw IllegalArgumentException("Invalid tone type: $value")
 
     fun normalizeVCharType(value: String?, toneType: String): String {
         val defaultValue = if (toneType == "WITH_TONE_MARK") "WITH_U_UNICODE" else DEFAULT_V_CHAR_TYPE
-        return when (value.normalizedOr(defaultValue)) {
-            "WITH_U_AND_COLON", "U_AND_COLON", "U_COLON", "U:" -> "WITH_U_AND_COLON"
-            "WITH_V", "V" -> "WITH_V"
-            "WITH_U_UNICODE", "U_UNICODE", "UNICODE", "U", "Ü" -> "WITH_U_UNICODE"
-            else -> throw IllegalArgumentException("Invalid v char type: $value")
-        }
+        return V_CHAR_TYPES[value.normalizedOr(defaultValue)] ?: throw IllegalArgumentException("Invalid v char type: $value")
     }
+
+    /** An option value as the normalizers read it (trimmed, upper case), null when absent or blank. */
+    fun normalized(value: String?): String? = value?.trim()?.uppercase(Locale.ROOT)?.takeIf(String::isNotEmpty)
+
+    private fun names(vararg groups: Pair<String, List<String>>): Map<String, String> =
+        LinkedHashMap<String, String>().apply { groups.forEach { (canonical, names) -> names.forEach { put(it, canonical) } } }
 
     private fun requireHanyuFormattingCompatibility(
         romanization: String,
@@ -116,9 +128,7 @@ internal object Pinyin4jOptions {
         }
     }
 
-    private fun String?.normalizedOr(defaultValue: String): String {
-        return this?.trim()?.uppercase(Locale.ROOT)?.takeIf(String::isNotEmpty) ?: defaultValue
-    }
+    private fun String?.normalizedOr(defaultValue: String): String = normalized(this) ?: defaultValue
 
     private fun String?.normalizedSystemOr(defaultValue: String): String {
         return normalizedOr(defaultValue).replace('-', '_').replace(' ', '_')

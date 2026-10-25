@@ -26,7 +26,7 @@ import java.util.function.Supplier
 class OcrModule(private val runtime: ScriptRuntime) {
 
     /** The `mode` getter of the current module (the requested engine, or the first available one when automatic). */
-    private val currentMode: Supplier<Any?> by lazy { Ocr(runtime).selfAssignmentGettersAndSetters.single { it.first == "mode" }.second }
+    private val currentMode: Supplier<Any?> by lazy { Supplier { Ocr.modeValue(runtime) } }
 
     @ScriptInvoke
     fun invoke(input: Any? = ABSENT, optionsOrRegion: Any? = ABSENT): Any =

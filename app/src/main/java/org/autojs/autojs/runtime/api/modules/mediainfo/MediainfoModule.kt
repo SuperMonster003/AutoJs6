@@ -44,7 +44,7 @@ class MediainfoModule(private val runtime: ScriptRuntime) {
     private val current by lazy { Mediainfo(runtime) }
 
     @ScriptInstall(names = [ScriptInstallNames(["SNAPSHOT_SCHEMA_V1", "SNAPSHOT_SCHEMA_V2"])])
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(current, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(current.scriptProperties, it) }
 
     @ScriptInvoke
     fun invoke(path: Any?): Any = read(MODULE, path)
@@ -56,11 +56,11 @@ class MediainfoModule(private val runtime: ScriptRuntime) {
     fun snapshot(path: Any?, options: Any? = null): Any? {
         checkPath(FUNCTION_SNAPSHOT, path)
         checkOptions(FUNCTION_SNAPSHOT, options)
-        return AugmentMembers.asCurrent(current, "snapshot") { Mediainfo.snapshot(runtime, arrayOf(path, options)) }
+        return AugmentMembers.asCurrent(MODULE, "snapshot") { Mediainfo.snapshot(runtime, arrayOf(path, options)) }
     }
 
     @ScriptFunction
-    fun capabilities(): Any? = AugmentMembers.asCurrent(current, "capabilities") { Mediainfo.capabilities(runtime, emptyArray()) }
+    fun capabilities(): Any? = AugmentMembers.asCurrent(MODULE, "capabilities") { Mediainfo.capabilities(runtime, emptyArray()) }
 
     @ScriptFunction
     fun get(path: Any?, streamKind: Any?, parameter: Any?, options: Any? = null): Any {
@@ -76,19 +76,19 @@ class MediainfoModule(private val runtime: ScriptRuntime) {
             if (infoKind != null && infoKind !is String) throw UtilValues.typeError(FUNCTION_GET, ScriptMessages.argumentType("options.infoKind", "string", ScriptArgs.describe(infoKind)))
             AugmentMembers.values(FUNCTION_GET) { Mediainfo.queryOptions(options) }
         }
-        return AugmentMembers.asCurrent(current, "get") { Mediainfo.get(runtime, arrayOf(path, streamKind, parameter, options)) }
+        return AugmentMembers.asCurrent(MODULE, "get") { Mediainfo.get(runtime, arrayOf(path, streamKind, parameter, options)) }
     }
 
     @ScriptFunction
     fun countGet(path: Any?, streamKind: Any?): Any {
         checkPath(FUNCTION_COUNT_GET, path)
         checkText(FUNCTION_COUNT_GET, "streamKind", streamKind)
-        return AugmentMembers.asCurrent(current, "countGet") { Mediainfo.countGet(runtime, arrayOf(path, streamKind)) }
+        return AugmentMembers.asCurrent(MODULE, "countGet") { Mediainfo.countGet(runtime, arrayOf(path, streamKind)) }
     }
 
     private fun read(function: String, path: Any?): Any {
         checkPath(function, path)
-        return AugmentMembers.asCurrent(current, if (function == MODULE) null else "read") { Mediainfo.read(runtime, arrayOf(path)) }
+        return AugmentMembers.asCurrent(MODULE, if (function == MODULE) null else "read") { Mediainfo.read(runtime, arrayOf(path)) }
     }
 
     private fun checkPath(function: String, path: Any?) {

@@ -26,7 +26,7 @@ class GalleryModule(private val runtime: ScriptRuntime) {
     private val impl by lazy { Gallery(runtime, ScriptRuntimeFields.gallery(runtime)) }
 
     @ScriptInstall(names = [ScriptInstallNames(["GalleryError"])])
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl.scriptProperties, it) }
 
     @ScriptFunction(arity = [0, 1])
     fun pick(vararg args: Any?): Any? = impl.pick(runtime, args)

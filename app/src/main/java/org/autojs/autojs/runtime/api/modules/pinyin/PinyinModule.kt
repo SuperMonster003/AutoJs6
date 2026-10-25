@@ -62,7 +62,7 @@ class PinyinModule {
             ),
         ],
     )
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(Pinyin, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(Pinyin.scriptProperties, it) }
 
     @ScriptInvoke
     fun invoke(hans: Any?, options: Any? = null): Any = convert(MODULE, hans, options)
@@ -71,10 +71,10 @@ class PinyinModule {
     fun convert(hans: Any?, options: Any? = null): Any = convert(FUNCTION_CONVERT, hans, options)
 
     @ScriptFunction
-    fun simple(str: Any?, enableNumericTone: Any? = null, enableSegment: Any? = null): Any = AugmentMembers.asCurrent(Pinyin, "simple") { Pinyin.simple(arrayOf(str, enableNumericTone, enableSegment)) }
+    fun simple(str: Any?, enableNumericTone: Any? = null, enableSegment: Any? = null): Any = AugmentMembers.asCurrent(MODULE, "simple") { Pinyin.simple(arrayOf(str, enableNumericTone, enableSegment)) }
 
     @ScriptFunction
-    fun compare(hanA: Any?, hanB: Any?): Any = AugmentMembers.asCurrent(Pinyin, "compare") { Pinyin.compare(arrayOf(hanA, hanB)) }
+    fun compare(hanA: Any?, hanB: Any?): Any = AugmentMembers.asCurrent(MODULE, "compare") { Pinyin.compare(arrayOf(hanA, hanB)) }
 
     @ScriptFunction
     fun compact(matrix: Any?): Any {
@@ -87,7 +87,7 @@ class PinyinModule {
                 if (ScriptArgs.isNullish(item) || item === Scriptable.NOT_FOUND) throw matrixError(ScriptMessages.argumentType("matrix[$i][$j]", "string", ScriptArgs.describe(item)))
             }
         }
-        return AugmentMembers.asCurrent(Pinyin, "compact") { Pinyin.compact(arrayOf(matrix)) }
+        return AugmentMembers.asCurrent(MODULE, "compact") { Pinyin.compact(arrayOf(matrix)) }
     }
 
     @ScriptFunction
@@ -99,26 +99,26 @@ class PinyinModule {
         if (!(truncated >= Int.MIN_VALUE && truncated <= Int.MAX_VALUE)) {
             throw UtilValues.rangeError(FUNCTION_FROM_CODE_POINT, ScriptMessages.argumentInteger("codePoint", 32, UtilValues.quote(codePoint)))
         }
-        return AugmentMembers.asCurrent(Pinyin, "fromCodePoint") { Pinyin.fromCodePoint(arrayOf(codePoint)) }
+        return AugmentMembers.asCurrent(MODULE, "fromCodePoint") { Pinyin.fromCodePoint(arrayOf(codePoint)) }
     }
 
     @ScriptFunction
     fun fromPhrase(phrase: Any?): Any {
         if (ScriptArgs.isNullish(phrase)) throw UtilValues.typeError(FUNCTION_FROM_PHRASE, ScriptMessages.argumentType("phrase", "string", ScriptArgs.describe(phrase)))
-        return AugmentMembers.asCurrent(Pinyin, "fromPhrase") { Pinyin.fromPhrase(arrayOf(phrase)) }
+        return AugmentMembers.asCurrent(MODULE, "fromPhrase") { Pinyin.fromPhrase(arrayOf(phrase)) }
     }
 
     private fun convert(function: String, hans: Any?, options: Any?): Any {
         // The current module reads the options only for a text that is not empty.
         // zh-CN: 现有模块只在文本非空时读取选项.
         if (options is NativeObject && !isEmptyText(hans)) checkOptions(function, options)
-        return AugmentMembers.asCurrent(Pinyin, if (function == MODULE) null else "convert") { Pinyin.convert(arrayOf(hans, options)) }
+        return AugmentMembers.asCurrent(MODULE, if (function == MODULE) null else "convert") { Pinyin.convert(arrayOf(hans, options)) }
     }
 
     private fun checkOptions(function: String, options: NativeObject) {
         // Read as the current module reads them (inquire: getProp, nullish values skipped).
         // zh-CN: 读取方式同现有模块 (inquire: getProp, 跳过 nullish 值).
-        CHOICES.forEach { choice -> options.inquire(choice.label)?.let { value -> choice.rejection(value)?.let { throw UtilValues.rangeError(function, it) } } }
+        CHOICES.forEach { (label, rejection) -> options.inquire(label)?.let { value -> rejection(value)?.let { throw UtilValues.rangeError(function, it) } } }
         if (!options.has(CUSTOM_DICTIONARY, options)) return
         val dictionary = options.get(CUSTOM_DICTIONARY, options)
         if (ScriptArgs.isNullish(dictionary)) return
@@ -142,33 +142,13 @@ class PinyinModule {
 
     private fun matrixError(cause: String) = UtilValues.typeError(FUNCTION_COMPACT, cause)
 
-    /**
-     * A `mode` / `style` option as `PinyinOptions.parseMode` / `parseStyle` of the current module accept it (an enum
-     * constant, a number equal to a constant's value, a name of a constant in any case), checked without their
-     * IllegalArgumentException, which would make the failure path a Java exception more expensive (R2).
-     *
-     * zh-CN: 同现有模块 PinyinOptions.parseMode / parseStyle 的接受范围 (枚举常量, 等于常量值的数值, 不区分大小写的常量名) 判定 mode / style 选项, 不经它们的
-     * IllegalArgumentException (否则失败路径多一个 Java 异常, R2).
-     */
-    private class Choice(val label: String, private val type: Class<*>, private val names: List<String>, private val values: List<Int>) {
-
-        /** The message of the current parser for a [value] it rejects, null when it accepts it. */
-        fun rejection(value: Any): String? {
-            val unwrapped = value.jsUnwrapped()
-            return when {
-                unwrapped.isJsNullish() || type.isInstance(unwrapped) -> null
-                unwrapped is Number -> unwrapped.toDouble().let { number -> "Invalid $label constant: $unwrapped".takeUnless { values.any { it.toDouble() == number } } }
-                else -> "Invalid $label name: $unwrapped".takeUnless { coerceString(unwrapped, "").uppercase() in names }
-            }
-        }
-
-    }
-
     private companion object {
-        val CHOICES = listOf(
-            Choice("mode", PinyinMode::class.java, PinyinMode.entries.map { it.name }, PinyinMode.entries.map { it.value }),
-            Choice("style", PinyinStyle::class.java, PinyinStyle.entries.map { it.name }, PinyinStyle.entries.map { it.value }),
-        )
+        /**
+         * The `mode` / `style` options, checked with the rejections of the parsers (`PinyinOptions`) before the call, so a
+         * refused value is a RangeError without a Java exception on the way (R2).
+         * zh-CN: mode / style 选项, 调用前以解析器 (PinyinOptions) 的判定检查, 拒绝的值不经 Java 异常即为 RangeError (R2).
+         */
+        val CHOICES = listOf<Pair<String, (Any) -> String?>>("mode" to PinyinOptions::modeRejection, "style" to PinyinOptions::styleRejection)
 
         const val MODULE = "pinyin"
         const val FUNCTION_CONVERT = "pinyin.convert"

@@ -53,11 +53,24 @@ class Compose internal constructor(
     }
     override val selfAssignmentGetters: List<Any> by lazy {
         listOf(
-            "version" to Supplier { guarded { RhinoUtils.toJsValue(scope, platform.version()) } },
-            "sessions" to Supplier { guarded { RhinoUtils.toJsValue(scope, live.filterNot { it.isClosed }.map { it.js }) } },
+            "version" to Supplier { versionValue() },
+            "sessions" to Supplier { sessionsValue() },
         )
     }
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
+
+    /** The value of the `compose.version` getter: the version of the Compose UI plugin, null without it. */
+    internal fun versionValue(): Any? = guarded { RhinoUtils.toJsValue(scope, platform.version()) }
+
+    /** The value of the `compose.sessions` getter: the mounted sessions that are not closed. */
+    internal fun sessionsValue(): Any? = guarded { RhinoUtils.toJsValue(scope, live.filterNot { it.isClosed }.map { it.js }) }
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+
+    /**
+     * The data properties the `compose` script module defines on its module object, in their order (its install hook
+     * defines them, roadmap P5.2).
+     * zh-CN: `compose` 脚本模块在模块对象上定义的数据属性, 按顺序 (由其 install 钩子定义, P5.2).
+     */
+    val scriptProperties: List<Pair<Any, Any?>> by lazy {
         val functions = linkedMapOf<String, (Array<out Any?>) -> Any?>(
             "isAvailable" to { args -> composeArguments(args, 0, name = "isAvailable"); platform.version() != null },
             "createElement" to { args ->

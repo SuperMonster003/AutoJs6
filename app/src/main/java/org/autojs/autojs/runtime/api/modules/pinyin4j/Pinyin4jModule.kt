@@ -8,6 +8,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.autojs.autojs.util.RhinoUtils.coerceString
+import org.autojs.plugin.pinyin4j.api.Pinyin4jRomanizationSystems
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.NativeObject
 import java.util.Locale
@@ -43,9 +44,9 @@ class Pinyin4jModule {
     fun readings(s: Any?, options: Any? = null): Any {
         if (options is NativeObject && !isEmptyText(s)) {
             val romanization = options.optionalString(Pinyin4jOptions.ROMANIZATION_NAMES)
-            val system = normalized(romanization)?.replace('-', '_')?.replace(' ', '_')
-            if (system != null && system !in HANYU && system !in OTHER_ROMANIZATIONS) throw UtilValues.rangeError(FUNCTION_READINGS, "Invalid romanization system: $romanization")
-            if (system == null || system in HANYU) {
+            val system = Pinyin4jOptions.normalized(romanization)?.replace('-', '_')?.replace(' ', '_')
+            if (system != null && system !in Pinyin4jOptions.ROMANIZATIONS) throw UtilValues.rangeError(FUNCTION_READINGS, "Invalid romanization system: $romanization")
+            if (system == null || Pinyin4jOptions.ROMANIZATIONS[system] == Pinyin4jRomanizationSystems.HANYU) {
                 formatting(FUNCTION_READINGS, options)
             } else {
                 val explicit = listOf("case" to Pinyin4jOptions.CASE_TYPE_NAMES, "tone" to Pinyin4jOptions.TONE_TYPE_NAMES, "v" to Pinyin4jOptions.V_CHAR_TYPE_NAMES)
@@ -53,36 +54,34 @@ class Pinyin4jModule {
                 if (explicit.isNotEmpty()) throw UtilValues.rangeError(FUNCTION_READINGS, "Pinyin4j ${explicit.joinToString(", ")} options are only supported with HANYU romanization")
             }
         }
-        return AugmentMembers.asCurrent(Pinyin4j, "readings") { Pinyin4j.readings(arrayOf(s, options)) }
+        return AugmentMembers.asCurrent(MODULE, "readings") { Pinyin4j.readings(arrayOf(s, options)) }
     }
 
     @ScriptFunction(name = "as")
-    fun asTone(s: Any?): Any = AugmentMembers.asCurrent(Pinyin4j, "as") { Pinyin4j.`as`(arrayOf(s)) }
+    fun asTone(s: Any?): Any = AugmentMembers.asCurrent(MODULE, "as") { Pinyin4j.`as`(arrayOf(s)) }
 
     private fun of(function: String, s: Any?, options: Any?): Any {
         // The current module reads the options only for a text that is not empty.
         // zh-CN: 现有模块只在文本非空时读取选项.
         if (options is NativeObject && !isEmptyText(s)) formatting(function, options)
-        return AugmentMembers.asCurrent(Pinyin4j, if (function == MODULE) null else "of") { Pinyin4j.of(arrayOf(s, options)) }
+        return AugmentMembers.asCurrent(MODULE, if (function == MODULE) null else "of") { Pinyin4j.of(arrayOf(s, options)) }
     }
 
     /**
-     * Checks the tone, case and v char types of [options] in the order of the current module, with the names its
-     * normalizers (`Pinyin4jOptions.normalize*`) accept and the same messages, without their IllegalArgumentException,
-     * which would make the failure path a Java exception more expensive (R2). An absent or blank value takes the default.
+     * Checks the tone, case and v char types of [options] in the order of the parsers, against the tables of their
+     * normalizers (`Pinyin4jOptions.TONE_TYPES` / `CASE_TYPES` / `V_CHAR_TYPES`) and with the same messages, without their
+     * IllegalArgumentException, which would make the failure path a Java exception more expensive (R2). An absent or blank
+     * value takes the default.
      *
-     * zh-CN: 按现有模块的顺序检查 options 的声调, 大小写与 v 字符类型, 接受的名称与消息同它的规范化函数 (Pinyin4jOptions.normalize*), 不经它们的
-     * IllegalArgumentException (否则失败路径多一个 Java 异常, R2). 未给出或为空白的值取默认值.
+     * zh-CN: 按解析器的顺序检查 options 的声调, 大小写与 v 字符类型, 对照其规范化函数的表 (Pinyin4jOptions.TONE_TYPES / CASE_TYPES / V_CHAR_TYPES),
+     * 消息相同, 不经它们的 IllegalArgumentException (否则失败路径多一个 Java 异常, R2). 未给出或为空白的值取默认值.
      */
     private fun formatting(function: String, options: NativeObject) {
         FORMATTING.forEach { formatting ->
             val value = options.optionalString(formatting.names)
-            if (normalized(value)?.let { it !in formatting.accepted } == true) throw UtilValues.rangeError(function, "Invalid ${formatting.label}: $value")
+            if (Pinyin4jOptions.normalized(value)?.let { it !in formatting.accepted } == true) throw UtilValues.rangeError(function, "Invalid ${formatting.label}: $value")
         }
     }
-
-    /** A value as the normalizers of the current module read it (trimmed, upper case), null when absent or blank. */
-    private fun normalized(value: String?) = value?.trim()?.uppercase(Locale.ROOT)?.takeIf(String::isNotEmpty)
 
     private class Formatting(val names: List<String>, val label: String, val accepted: Set<String>)
 
@@ -97,23 +96,12 @@ class Pinyin4jModule {
         const val FUNCTION_OF = "pinyin4j.of"
         const val FUNCTION_READINGS = "pinyin4j.readings"
 
-        // The names the normalizers of the current module accept (Pinyin4jOptions.normalizeRomanization / normalizeToneType /
-        // normalizeCaseType / normalizeVCharType), in their order of checking.
-        // zh-CN: 现有模块的规范化函数接受的名称 (Pinyin4jOptions.normalizeRomanization / normalizeToneType / normalizeCaseType /
-        // normalizeVCharType), 按其检查顺序.
-        val HANYU = setOf("HANYU", "HANYU_PINYIN", "PINYIN")
-        val OTHER_ROMANIZATIONS = setOf(
-            "TONGYONG", "TONGYONG_PINYIN", "WADE", "WADE_GILES", "WADEGILES", "WADE_GILES_PINYIN", "MPS2", "MANDARIN_PHONETIC_SYMBOLS_2",
-            "YALE", "YALE_PINYIN", "GWOYEU", "GWOYEU_ROMATZYH", "GR",
-        )
+        // The option values the parsers check, in their order of checking.
+        // zh-CN: 解析器检查的选项值, 按其检查顺序.
         val FORMATTING = listOf(
-            Formatting(Pinyin4jOptions.TONE_TYPE_NAMES, "tone type", setOf(
-                "WITH_TONE_NUMBER", "WITH_NUMBER", "NUMBER", "NUM", "WITHOUT_TONE", "NO_TONE", "NO", "FALSE", "0", "WITH_TONE_MARK", "WITH_MARK", "MARK", "TRUE", "1",
-            )),
-            Formatting(Pinyin4jOptions.CASE_TYPE_NAMES, "case type", setOf("LOWERCASE", "LOW", "L", "0", "UPPERCASE", "UP", "U", "1")),
-            Formatting(Pinyin4jOptions.V_CHAR_TYPE_NAMES, "v char type", setOf(
-                "WITH_U_AND_COLON", "U_AND_COLON", "U_COLON", "U:", "WITH_V", "V", "WITH_U_UNICODE", "U_UNICODE", "UNICODE", "U", "Ü",
-            )),
+            Formatting(Pinyin4jOptions.TONE_TYPE_NAMES, "tone type", Pinyin4jOptions.TONE_TYPES.keys),
+            Formatting(Pinyin4jOptions.CASE_TYPE_NAMES, "case type", Pinyin4jOptions.CASE_TYPES.keys),
+            Formatting(Pinyin4jOptions.V_CHAR_TYPE_NAMES, "v char type", Pinyin4jOptions.V_CHAR_TYPES.keys),
         )
     }
 

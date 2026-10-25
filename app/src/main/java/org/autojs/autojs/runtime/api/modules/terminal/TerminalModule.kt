@@ -26,7 +26,7 @@ class TerminalModule(private val runtime: ScriptRuntime) {
     private val impl by lazy { Terminal(runtime, ScriptRuntimeFields.terminal(runtime)) }
 
     @ScriptInstall(names = [ScriptInstallNames(["TerminalError", "npm"])])
-    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl, it) }
+    fun install(installation: ScriptModuleInstallation) = installation.onBuilt { AugmentMembers.defineProperties(impl.scriptProperties, it) }
 
     @ScriptFunction(arity = [0, 1])
     fun open(vararg args: Any?): Any? = impl.open(runtime, args)

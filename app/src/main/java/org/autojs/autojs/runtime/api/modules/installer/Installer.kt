@@ -37,10 +37,20 @@ class Installer(
     override val scriptErrorPassThroughFunctions: Set<String> get() = selfAssignmentFunctions.toSet()
 
     override val selfAssignmentGetters = listOf<Any>(
-        "status" to Supplier<Any?> { syncOf { { service.status() } } },
+        "status" to Supplier<Any?> { statusValue() },
     )
 
-    override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> get() = scriptProperties
+
+    /**
+     * The data properties the `installer` script module defines on its module object, in their order (its install hook
+     * defines them, roadmap P5.2).
+     * zh-CN: `installer` 脚本模块在模块对象上定义的数据属性, 按顺序 (由其 install 钩子定义, P5.2).
+     */
+    /** The value of the `installer.status` getter. */
+    internal fun statusValue(): Any? = syncOf { { service.status() } }
+
+    val scriptProperties: List<Pair<Any, Any?>> by lazy {
         listOf(InstallerJsErrors.NAME to InstallerJsErrors.constructor(runtime), "authorizer" to authorizerObject())
     }
 

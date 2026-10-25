@@ -87,7 +87,7 @@ class UiModule(private val runtime: ScriptRuntime) {
     /** The constructor of custom widgets (`ui.registerWidget`), created when the module is installed. */
     @ScriptProperty(name = "Widget")
     val widget: Any?
-        get() = legacy.selfAssignmentProperties.first { (key, _) -> key == WIDGET }.second
+        get() = legacy.widgetConstructor
 
     @ScriptProperty(name = "__autojs6TsxFragment", global = ScriptGlobal.ALSO)
     val tsxFragment: Any = TypeScriptTsxRuntime.FragmentToken

@@ -52,17 +52,17 @@ class ComposeModule(private val runtime: ScriptRuntime) {
     )
     fun install(installation: ScriptModuleInstallation) {
         installation.defineLazy(COMPOSE_ERROR, ScriptableObject.PERMANENT) { ComposeJsErrors.constructor(runtime.topLevelScope) }
-        installation.onBuilt { AugmentMembers.defineProperties(compose, it) }
+        installation.onBuilt { AugmentMembers.defineProperties(compose.scriptProperties, it) }
     }
 
     @ScriptInvoke(arity = [1, 2])
     fun invoke(vararg args: Any?): Any? = compose.invoke(*args)
 
     @ScriptGetter
-    fun version(): Any? = AugmentMembers.getter(compose, "version")
+    fun version(): Any? = compose.versionValue()
 
     @ScriptGetter
-    fun sessions(): Any? = AugmentMembers.getter(compose, "sessions")
+    fun sessions(): Any? = compose.sessionsValue()
 
     private companion object {
         const val COMPOSE_ERROR = "ComposeError"

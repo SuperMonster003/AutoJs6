@@ -52,25 +52,25 @@ class AiModule(private val runtime: ScriptRuntime) {
     @ScriptInvoke
     fun invoke(prompt: Any?, options: Any? = null): Any {
         checkRequest(MODULE, prompt, options)
-        return AugmentMembers.asCurrent(ai, null) { ai.ask(runtime, arrayOf(prompt, options)) }
+        return AugmentMembers.asCurrent(MODULE, null) { ai.ask(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
     fun ask(prompt: Any?, options: Any? = null): Any {
         checkRequest(FUNCTION_ASK, prompt, options)
-        return AugmentMembers.asCurrent(ai, "ask") { ai.ask(runtime, arrayOf(prompt, options)) }
+        return AugmentMembers.asCurrent(MODULE, "ask") { ai.ask(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
     fun chat(prompt: Any?, options: Any? = null): Any {
         checkRequest(FUNCTION_CHAT, prompt, options)
-        return AugmentMembers.asCurrent(ai, "chat") { ai.chat(runtime, arrayOf(prompt, options)) }
+        return AugmentMembers.asCurrent(MODULE, "chat") { ai.chat(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
     fun stream(prompt: Any?, options: Any? = null): Any {
         checkRequest(FUNCTION_STREAM, prompt, options)
-        return AugmentMembers.asCurrent(ai, "stream") { ai.stream(runtime, arrayOf(prompt, options)) }
+        return AugmentMembers.asCurrent(MODULE, "stream") { ai.stream(runtime, arrayOf(prompt, options)) }
     }
 
     @ScriptFunction
@@ -81,17 +81,17 @@ class AiModule(private val runtime: ScriptRuntime) {
             }
             if (system.asString.isEmpty()) throw UtilValues.rangeError(FUNCTION_SESSION, ScriptMessages.argumentCannotBe("options.$SYSTEM", "\"\""))
         }
-        return AugmentMembers.asCurrent(ai, "session") { ai.session(runtime, arrayOf(options)) }
+        return AugmentMembers.asCurrent(MODULE, "session") { ai.session(runtime, arrayOf(options)) }
     }
 
     @ScriptFunction
     fun catalog(options: Any? = null): Any {
         checkOptions(FUNCTION_CATALOG, options)
-        return AugmentMembers.asCurrent(ai, "catalog") { ai.catalog(runtime, arrayOf(options)) }
+        return AugmentMembers.asCurrent(MODULE, "catalog") { ai.catalog(runtime, arrayOf(options)) }
     }
 
     @ScriptGetter
-    fun agent(): Any? = AugmentMembers.getter(ai, "agent")
+    fun agent(): Any? = ai.agentObject
 
     // The checks read the JSON of the values, as the current module does (`JSON.stringify`: own enumerable properties,
     // toJSON, primitive wrappers), in its order: the prompt is serialized, then the options are checked, then the shape.
