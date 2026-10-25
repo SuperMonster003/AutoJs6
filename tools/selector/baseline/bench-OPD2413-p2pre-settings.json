@@ -1,0 +1,293 @@
+{
+ "device": {
+  "serial": "63751f63",
+  "model": "OPD2413",
+  "sdk": 35,
+  "versionCode": 5935,
+  "build": 4283,
+  "date": "2026-10-25 20:59",
+  "newModules": true
+ },
+ "scenarios": {
+  "settings": {
+   "rootPackage": "com.oplus.wirelesssettings",
+   "nodes": 121,
+   "items": {
+    "full": {
+     "ok": true,
+     "median": 3.574,
+     "samples": [
+      5.336,
+      4.592,
+      4.496,
+      4.279,
+      3.494,
+      3.591,
+      3.513,
+      3.556,
+      3.255,
+      3.115
+     ],
+     "sizes": [
+      121
+     ]
+    },
+    "miss": {
+     "ok": true,
+     "median": 1.341,
+     "samples": [
+      1.209,
+      1.227,
+      1.411,
+      1.364,
+      2.024,
+      1.284,
+      1.479,
+      1.408,
+      1.317,
+      1.314
+     ]
+    },
+    "missId": {
+     "ok": true,
+     "median": 1.369,
+     "samples": [
+      1.285,
+      1.156,
+      1.166,
+      1.291,
+      1.45,
+      5.208,
+      2.612,
+      1.33,
+      1.483,
+      1.407
+     ]
+    },
+    "missMixed": {
+     "ok": true,
+     "median": 1.056,
+     "samples": [
+      1.192,
+      1.059,
+      1.185,
+      1.053,
+      1.123,
+      1.014,
+      1.179,
+      1.051,
+      0.98,
+      1.034
+     ]
+    },
+    "hit": {
+     "ok": true,
+     "median": 0.388,
+     "samples": [
+      0.415,
+      0.304,
+      0.411,
+      0.266,
+      0.667,
+      0.365,
+      0.544,
+      0.287,
+      0.453,
+      0.268
+     ]
+    },
+    "late": {
+     "ok": true,
+     "median": 1.006,
+     "samples": [
+      0.96,
+      0.926,
+      1.002,
+      1.002,
+      1.01,
+      1.045,
+      1.502,
+      0.967,
+      1.155,
+      6.122
+     ]
+    },
+    "findOne600": {
+     "ok": true,
+     "medianAttempts": 12,
+     "attempts": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12
+     ],
+     "median": 622.202,
+     "samples": [
+      606.32,
+      646.237,
+      622.541,
+      621.863,
+      612.571,
+      627.504,
+      634.697,
+      613.031,
+      608.517,
+      628.626
+     ],
+     "medianCpu": 84.5,
+     "medianCpuPerAttempt": 7.042,
+     "fastPath": null
+    },
+    "findOne600Id": {
+     "ok": true,
+     "medianAttempts": 12,
+     "attempts": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12
+     ],
+     "median": 626.114,
+     "samples": [
+      623.21,
+      627.533,
+      630.817,
+      622.269,
+      629.391,
+      631.924,
+      624.948,
+      625.937,
+      624.433,
+      626.291
+     ],
+     "medianCpu": 76.5,
+     "medianCpuPerAttempt": 6.375,
+     "fastPath": null
+    },
+    "lateOne": {
+     "ok": true,
+     "medianAttempts": 1,
+     "attempts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "median": 1.656,
+     "samples": [
+      3.229,
+      2.624,
+      2.54,
+      1.318,
+      1.781,
+      1.531,
+      1.453,
+      1.456,
+      1.089,
+      2.533
+     ],
+     "medianCpu": 2.5,
+     "medianCpuPerAttempt": 2.5,
+     "fastPath": null
+    },
+    "cpuIdle": {
+     "ok": true,
+     "medianCpu": 0.3,
+     "cpu": [
+      0.3,
+      0.3,
+      0.2
+     ],
+     "medianAttempts": null,
+     "attempts": []
+    },
+    "cpuFixed": {
+     "ok": true,
+     "medianCpu": 14.25,
+     "cpu": [
+      14.1,
+      14.3,
+      14.6,
+      13.9,
+      14.4,
+      14.5,
+      13.7,
+      14.2,
+      13,
+      14.4
+     ],
+     "medianAttempts": 180,
+     "attempts": [
+      180,
+      181,
+      180,
+      180,
+      181,
+      180,
+      179,
+      181,
+      180,
+      181
+     ]
+    },
+    "cpuAssisted": {
+     "ok": true,
+     "medianCpu": 5.55,
+     "cpu": [
+      5.7,
+      5.7,
+      6.2,
+      4.8,
+      5.4,
+      5.4,
+      5.5,
+      5.6,
+      4.5,
+      5.6
+     ],
+     "medianAttempts": 64.5,
+     "attempts": [
+      65,
+      65,
+      66,
+      65,
+      66,
+      63,
+      64,
+      63,
+      63,
+      63
+     ]
+    }
+   },
+   "late": {
+    "index": 112,
+    "total": 121,
+    "length": 9
+   },
+   "ok": true,
+   "scheduling": {
+    "before": "fg",
+    "after": "fg"
+   }
+  }
+ }
+}

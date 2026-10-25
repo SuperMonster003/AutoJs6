@@ -14,7 +14,7 @@
 
 ```
 py -3.12 -I tools/selector/device_bench.py -s SERIAL [--scenarios settings main overlay] [--rounds 10] [--warmup 5]
-    [--cpu-rounds 10] [--idle-rounds 3] [--cpu-ms 10000] [--new-modules on|off] [--save] [--label NAME]
+    [--cpu-rounds 10] [--idle-rounds 3] [--cpu-ms 10000] [--new-modules on|off] [--save] [--label NAME] [--settings-package PKG] [--settle S]
 ```
 
 场景: `settings` 系统设置首页 (`am start -S` 重启到首页), `main` AutoJs6 主界面, `overlay` 桌面之上的原始悬浮窗 (进度条, 标签与 300 个 TextView, 由脚本创建, 经窗口过滤器 `{ packageName: AutoJs6 }` 搜索). 每项先预热 `--warmup` 次, 再计 `--rounds` 次, 输出中位数 / 最小 / 最大 (毫秒):
@@ -27,9 +27,15 @@ py -3.12 -I tools/selector/device_bench.py -s SERIAL [--scenarios settings main 
 | `missMixed` | `textMatch(/^__aj6sel_none__$/).clickable(true).findOnce()` (正则声明在布尔条件之前, P2.2 的排序) |
 | `hit` | `packageName(<场景包名>).findOnce()`, 命中根节点 (早命中) |
 | `late` | `text(<DFS 顺序中最后一个唯一文本>).findOnce()` (晚命中, 单候选; 只记录其序号与长度) |
-| `findOne600` | `text('__aj6sel_none__').findOne(600)` 的尝试次数 (`auto.stats.queries.attempts`) 与耗时 |
+| `findOne600` | `text('__aj6sel_none__').findOne(600)` 的尝试次数 (`auto.stats.queries.attempts`), 耗时与进程 CPU (总量与每次尝试) |
+| `findOne600Id` | `id('aj6sel_none').findOne(600)`, 同上 (P2.3: 轮询的中间尝试由 id 查找判定未命中) |
+| `lateOne` | `text(<late 的文本>).findOne(600)`, 同上 (P2.3: 单候选命中经轮询入口, 期望非 null) |
 | `cpuIdle` / `cpuFixed` / `cpuAssisted` | `--cpu-ms` 内进程 CPU (占一个核的百分比, `Process.getElapsedCpuTime`) 与尝试次数: 只休眠 (下限), 默认固定间隔轮询, `eventAssistedPolling` 标志 |
 | `stormIdle` / `stormFixed` / `stormAssisted` | 同上, 悬浮窗场景中进度条与标签每 16 ms 更新 (事件风暴; 进程 CPU 含悬浮窗的绘制) |
+
+轮询的三项与 CPU 各项同时累计 `auto.stats.fastPath` (P2.3 快路径的命中 / 未命中 / 回退 / 不一致次数, 宿主未提供时不输出); 不一致 (查找为空而完整遍历找到节点) 大于 0 时该项判失败.
+
+`--settings-package`: 设置首页活动窗口的根节点不属于设置应用本身时给出其包名 (ColorOS 15 的 OPD2413: `com.oplus.wirelesssettings`), 否则场景判为不符; parity 同. `--settle`: 打开屏幕后再等 S 秒, 用于打开后还在加载内容的屏幕, parity 与 bench 同. OPD2413 (平板) 的设置首页是双栏, 活动窗口为右栏的 WLAN 列表, 条目随扫描结果增减与重排 (DFS 顺序约从第 96 个节点起变化, 最后一个唯一文本是某个网络名, 可能在测量中途消失), 因此不存 parity 快照, 只比同一构建的两次运行; bench 的 `lateOne` 在该屏幕上可能因网络消失而失败.
 
 `--save` 把汇总 (含各轮样本, 不含节点文本) 写到 `baseline/bench-<model>[-<label>].json`. 修前基线见 ROADMAP 附录 A.
 
@@ -37,9 +43,12 @@ py -3.12 -I tools/selector/device_bench.py -s SERIAL [--scenarios settings main 
 
 ```
 py -3.12 -I tools/selector/device_parity.py -s SERIAL [--scenarios main settings] [--runs 2] [--new-modules on|off] [--save] [--check]
+    [--settings-package PKG] [--settle S]
 ```
 
 在固定屏幕 (AutoJs6 主界面, 系统设置首页) 上运行一组选择器 (全树 DFS / BFS, 精确 id / 短 id / `idMatch`, 精确 text / `textContains` / `textMatch` / `descMatch`, className + clickable, `boundsInside`, 深度范围, `filter` 函数, 对象选择器与混合数组的 `pickup`, 内容 `pickup`, `select('...')` 字符串语法, BFS, `findOnce(index)`, `findOnce`, `untilFind`), 把每个 `find()` 结果序列记为 `[fingerprint(), depth(), indexInParent()]`. 选择器需要的字面值 (id, 文本, 类名) 由屏幕按固定规则从全树 DFS 结果推出, 快照只存其哈希; 比较时哈希不同即屏幕已变化, 结果不可比.
+
+轮询入口另有 7 个用例 (P2.3): `id(<全名>)` / `id(<短 id>)` / `text(<精确>)` / `text(<唯一文本>)` 的 `findOne(2000)`, `text(<唯一文本>).untilFindOne()`, `id(<全名>)` / `text(<精确>)` 的 `untilFind()`, 每个都与同一次运行中对应 `find()` 的结果逐节点比较 (不进快照), 并输出期间的 `auto.stats.fastPath`. `coverage` 一行统计根节点上的框架查找 (`findAccessibilityNodeInfosByText` / `ByViewId`) 对屏幕上不同文本 / id 的漏查数, 文本漏查按类名分组 (只有计数, 不含屏幕文本).
 
 `--runs` 次运行逐项比较 (稳定屏幕应 100% 一致); `--save` 把第一次写到 `baseline/parity-<model>-<scenario>.json`; `--check` 把第一次与该文件比较 (P2 的 "顺序与数量不变" 判据). 主界面的文件列表或设置首页的内容变了 (新文件, 账号, 电量文字) 时需在修前构建上重新 `--save`.
 

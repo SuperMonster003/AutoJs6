@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 import sys
+import time
 
 # py -I leaves the directory of the script off sys.path; the shared helpers live next to it.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -60,6 +61,8 @@ def main():
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     parser.add_argument("--scenarios", nargs="*", default=["main", "settings"], choices=list(SCREENS))
+    parser.add_argument("--settings-package", help="the package of the active window root on the settings home page when it is not the one of the settings activity (ColorOS 15: com.oplus.wirelesssettings)")
+    parser.add_argument("--settle", type=float, default=0, help="seconds to wait after opening a screen, for screens that keep loading content after they open (ColorOS 15 settings home page: 20)")
     parser.add_argument("--runs", type=int, default=2)
     parser.add_argument("--save", action="store_true", help="write the first run to baseline/parity-<model>-<scenario>.json")
     parser.add_argument("--check", action="store_true", help="compare the first run with the saved snapshot")
@@ -79,6 +82,10 @@ def run(args, info):
     all_ok = True
     for scenario in args.scenarios:
         expect = SCREENS[scenario](s)
+        if args.settle > 0:
+            time.sleep(args.settle)
+        if scenario == "settings" and args.settings_package:
+            expect = args.settings_package
         runs = []
         for i in range(max(1, args.runs)):
             res, lines = d.run_json(s, "parity.js", {"scenario": scenario, "expectPackage": expect}, 180,
@@ -98,6 +105,22 @@ def run(args, info):
         for c in first["cases"]:
             if c.get("error"):
                 print(f"  {c['name']}: ERROR {c['error']}")
+        # The polled entries (added by P2) must equal the DFS result of the same run, and no fast path miss may have
+        # been corrected by a full search (appendix C Q1).
+        mismatches = 0
+        for c in first["cases"]:
+            if "expect" not in c:
+                continue
+            same = c.get("nodes") == c.get("expect")
+            fp = c.get("fastPath") or {}
+            mismatches += fp.get("mismatches", 0)
+            all_ok = all_ok and same
+            print(f"  {c['name']}: {'PASS' if same else 'FAIL'} equals find() count={c.get('count')}"
+                  + (f" fastPath hits={fp['hits']} misses={fp['misses']} fallbacks={fp['fallbacks']}"
+                     f" mismatches={fp['mismatches']}" if fp else ""))
+        all_ok = all_ok and not mismatches
+        if first.get("coverage"):
+            print(f"  coverage: {first['coverage']}")
         for i, other in enumerate(runs[1:], start=2):
             result, ratio = compare(first, other)
             ok = all(v[0] for v in result.values())

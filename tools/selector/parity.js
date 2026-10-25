@@ -6,6 +6,12 @@
 // The literal values some cases need (an id, a text, a class name) are derived from the screen by fixed rules over the
 // full DFS result, so a rerun derives the same selectors; the snapshot keeps only a hash of each literal (no screen
 // text), which the comparison checks too. The result is written as JSON to AJ6SEL.out; the log has only progress marks.
+//
+// Added by P2 (the framework fast path of P2.3): the cases ending in 'One' / 'Until*' run through the polled entries
+// (findOne(timeout), untilFindOne(), untilFind()) and carry `expect`, the DFS result of find() in the same run that
+// they must equal, and `fastPath`, the counters of auto.stats for the case (null on a build without them); `coverage`
+// counts the texts and ids of the screen whose framework lookup (findAccessibilityNodeInfosByText / ByViewId on the
+// root) comes back empty although a full search finds them, the provider behaviour the fast path depends on.
 
 var CFG = typeof AJ6SEL === 'object' ? AJ6SEL : {};
 var SCENARIO = CFG.scenario || 'main';
@@ -65,6 +71,69 @@ function mostFrequent(rows, key, accept) {
         if (best === null || counts[v] > counts[best]) best = v;
     });
     return best;
+}
+
+function fastPathStats() {
+    var f = auto.stats.fastPath;
+    if (!f) return null;
+    return { hits: Number(f.hits), misses: Number(f.misses), fallbacks: Number(f.fallbacks), mismatches: Number(f.mismatches) };
+}
+
+// The last text in DFS order that occurs once on the screen, or null.
+function lastUniqueText(rows) {
+    var counts = {};
+    rows.forEach(function (r) {
+        if (r.text) counts[r.text] = (counts[r.text] || 0) + 1;
+    });
+    for (var j = rows.length - 1; j >= 0; j--) {
+        if (rows[j].text && counts[rows[j].text] === 1) return rows[j].text;
+    }
+    return null;
+}
+
+function lookupSize(list) {
+    return list === null || list === undefined ? 0 : Number(list.size());
+}
+
+// How many distinct texts / ids of the screen the framework lookups on the root miss (counts only, no screen text).
+function coverage(rows) {
+    var root = auto.root;
+    var out = { texts: 0, textMisses: 0, textMissClasses: {}, ids: 0, idMisses: 0, shortIds: 0, shortIdMisses: 0, idsWithoutPrefix: 0 };
+    if (!root) return out;
+    var pkg = String(root.packageName());
+    var seenText = {};
+    var seenId = {};
+    var seenEntry = {};
+    rows.forEach(function (r) {
+        if (r.text && !seenText[r.text] && out.texts < 300) {
+            seenText[r.text] = true;
+            out.texts++;
+            if (lookupSize(root.findAccessibilityNodeInfosByText(r.text)) === 0) {
+                out.textMisses++;
+                var cls = (r.className || '?').replace(/^.*\./, '');
+                out.textMissClasses[cls] = (out.textMissClasses[cls] || 0) + 1;
+            }
+        }
+        if (r.id && !seenId[r.id]) {
+            seenId[r.id] = true;
+            var at = r.id.indexOf(':id/');
+            if (at < 0) {
+                out.idsWithoutPrefix++;
+                return;
+            }
+            out.ids++;
+            if (lookupSize(root.findAccessibilityNodeInfosByViewId(r.id)) === 0) out.idMisses++;
+            var entry = r.id.slice(at + 4);
+            if (!seenEntry[entry]) {
+                seenEntry[entry] = true;
+                out.shortIds++;
+                var n = lookupSize(root.findAccessibilityNodeInfosByViewId(pkg + ':id/' + entry));
+                if (n === 0) n = lookupSize(root.findAccessibilityNodeInfosByViewId('android:id/' + entry));
+                if (n === 0) out.shortIdMisses++;
+            }
+        }
+    });
+    return out;
 }
 
 function waitService() {
@@ -145,6 +214,19 @@ function run() {
         ['untilFind', 'className(<className>).untilFind()', cls && function () { return className(cls).untilFind(); }],
         ['pickupOne', "pickup(className(<className>), 'w')", cls && function () { return one(pickup(className(cls), 'w')); }],
     ];
+    // The polled entries of the fast path (P2.3), each with the DFS result it must equal.
+    var uniqueText = lastUniqueText(rows);
+    result.literalsExtra = { uniqueText: hash(uniqueText) };
+    function first(c) { return c.size() > 0 ? [c.get(0)] : []; }
+    var polled = [
+        ['idExactOne', 'id(<idFull>).findOne(2000)', idFull && function () { return one(id(idFull).findOne(2000)); }, idFull && function () { return first(id(idFull).find()); }],
+        ['idShortOne', 'id(<idShort>).findOne(2000)', idShort && function () { return one(id(idShort).findOne(2000)); }, idShort && function () { return first(id(idShort).find()); }],
+        ['textExactOne', 'text(<textExact>).findOne(2000)', textExact && function () { return one(text(textExact).findOne(2000)); }, textExact && function () { return first(text(textExact).find()); }],
+        ['uniqueTextOne', 'text(<uniqueText>).findOne(2000)', uniqueText && function () { return one(text(uniqueText).findOne(2000)); }, uniqueText && function () { return first(text(uniqueText).find()); }],
+        ['uniqueTextUntilOne', 'text(<uniqueText>).untilFindOne()', uniqueText && function () { return one(text(uniqueText).untilFindOne()); }, uniqueText && function () { return first(text(uniqueText).find()); }],
+        ['idExactUntilFind', 'id(<idFull>).untilFind()', idFull && function () { return id(idFull).untilFind(); }, idFull && function () { return id(idFull).find(); }],
+        ['textExactUntilFind', 'text(<textExact>).untilFind()', textExact && function () { return text(textExact).untilFind(); }, textExact && function () { return text(textExact).find(); }],
+    ];
 
     cases.forEach(function (c) {
         var entry = { name: c[0], selector: c[1] };
@@ -162,6 +244,33 @@ function run() {
         result.cases.push(entry);
         mark(c[0] + ' ' + (entry.error ? 'ERROR' : entry.skipped ? 'SKIP' : entry.count));
     });
+
+    polled.forEach(function (c) {
+        var entry = { name: c[0], selector: c[1] };
+        if (!c[2]) {
+            entry.skipped = 'no literal on this screen';
+        } else {
+            try {
+                auto.stats.reset();
+                var p = prints(c[2]());
+                entry.fastPath = fastPathStats();
+                entry.count = p.length;
+                entry.nodes = p;
+                entry.expect = prints(c[3]());
+            } catch (e) {
+                entry.error = errorText(e);
+            }
+        }
+        result.cases.push(entry);
+        mark(c[0] + ' ' + (entry.error ? 'ERROR' : entry.skipped ? 'SKIP' : entry.count));
+    });
+
+    try {
+        result.coverage = coverage(rows);
+    } catch (e) {
+        result.coverage = { error: errorText(e) };
+    }
+    mark('coverage ' + JSON.stringify(result.coverage));
 }
 
 try {

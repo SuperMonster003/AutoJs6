@@ -10,7 +10,10 @@
 //   missMixed textMatch(/^__aj6sel_none__$/).clickable(true).findOnce() (regex declared before a boolean: P2.2 order)
 //   hit       packageName(<screen package>).findOnce(), the root itself (an early hit)
 //   late      text(<last unique text in DFS order>).findOnce() (a late hit with a single candidate)
-//   findOne600 text('__aj6sel_none__').findOne(600): attempts (auto.stats) and elapsed time
+//   findOne600 text('__aj6sel_none__').findOne(600): attempts (auto.stats), elapsed time and process CPU time (also per
+//             attempt: the intermediate attempts of a polled query, where the framework fast path of P2.3 applies)
+//   findOne600Id id('aj6sel_none').findOne(600), the same with an id (P2.3, added by P2)
+//   lateOne   text(<last unique text>).findOne(600): the late hit through a polled entry (a single candidate, P2.3)
 //   cpu*      text('__aj6sel_none__').findOne(cpuMs) polled for cpuMs: process CPU (percent of one core) and attempts,
 //             fixed interval (the default) and with the eventAssistedPolling flag; cpuIdle is the process without a
 //             query (the floor). The overlay scenario repeats them with the progress bar updated every 16 ms (storm).
@@ -105,6 +108,54 @@ function realtime() {
     return android.os.SystemClock.elapsedRealtime();
 }
 
+// The fast path counters of auto.stats (P2.4), or null on a build without them.
+function fastPathStats() {
+    var f = auto.stats.fastPath;
+    if (!f) return null;
+    return { hits: Number(f.hits), misses: Number(f.misses), fallbacks: Number(f.fallbacks), mismatches: Number(f.mismatches) };
+}
+
+function addFastPath(sum, f) {
+    if (!f) return sum;
+    sum = sum || { hits: 0, misses: 0, fallbacks: 0, mismatches: 0 };
+    for (var k in sum) sum[k] += f[k];
+    return sum;
+}
+
+// [query]() polled [ROUNDS] times after one untimed run: attempts, elapsed time, process CPU time and its share per attempt.
+function polledItem(name, query, expectNull) {
+    var item = { ok: false, samples: [], attempts: [], cpu: [], cpuPerAttempt: [], median: null, medianAttempts: null, medianCpu: null, medianCpuPerAttempt: null, fastPath: null };
+    try {
+        query();
+        for (var r = 0; r < ROUNDS; r++) {
+            auto.stats.reset();
+            var c0 = cpuTime();
+            var t0 = nowNs();
+            var v = query();
+            var t1 = nowNs();
+            var c1 = cpuTime();
+            var attempts = Number(auto.stats.queries.attempts);
+            item.samples.push(round3((t1 - t0) / 1e6));
+            item.attempts.push(attempts);
+            item.cpu.push(c1 - c0);
+            item.cpuPerAttempt.push(round3((c1 - c0) / Math.max(1, attempts)));
+            item.fastPath = addFastPath(item.fastPath, fastPathStats());
+            var isNull = v === null || v === undefined;
+            if (isNull !== expectNull) throw Error(expectNull ? 'the never-matching selector matched' : 'the selector found nothing');
+        }
+        item.median = median(item.samples);
+        item.medianAttempts = median(item.attempts);
+        item.medianCpu = median(item.cpu);
+        item.medianCpuPerAttempt = median(item.cpuPerAttempt);
+        item.ok = true;
+    } catch (e) {
+        item.error = errorText(e);
+    }
+    result.items[name] = item;
+    mark(name + ' ' + (item.ok ? 'PASS' : 'FAIL') + ' attempts ' + item.medianAttempts + ' ms ' + item.median + ' cpu/attempt ' + item.medianCpuPerAttempt);
+    return item;
+}
+
 // One poll of cpuMs: [query] true runs findOne(cpuMs) on a selector that never matches, false only sleeps.
 function cpuItem(name, rounds, query, flags) {
     var item = { ok: false, cpu: [], attempts: [], elapsed: [], medianCpu: null, medianAttempts: null };
@@ -121,6 +172,7 @@ function cpuItem(name, rounds, query, flags) {
             item.cpu.push(Math.round((c1 - c0) * 1000 / (t1 - t0)) / 10);
             item.elapsed.push(t1 - t0);
             if (query) item.attempts.push(Number(auto.stats.queries.attempts));
+            if (query) item.fastPath = addFastPath(item.fastPath, fastPathStats());
         }
         item.medianCpu = median(item.cpu);
         item.medianAttempts = query ? median(item.attempts) : null;
@@ -261,25 +313,14 @@ function bench() {
         mark('late FAIL');
     }
 
-    var f600 = { ok: false, samples: [], attempts: [], median: null, medianAttempts: null };
-    try {
-        text(NONE).findOne(600);
-        for (var r = 0; r < ROUNDS; r++) {
-            auto.stats.reset();
-            var t0 = nowNs();
-            var v = text(NONE).findOne(600);
-            f600.samples.push(round3((nowNs() - t0) / 1e6));
-            f600.attempts.push(Number(auto.stats.queries.attempts));
-            if (v !== null && v !== undefined) throw Error('the never-matching selector matched');
-        }
-        f600.median = median(f600.samples);
-        f600.medianAttempts = median(f600.attempts);
-        f600.ok = true;
-    } catch (e) {
-        f600.error = errorText(e);
+    polledItem('findOne600', function () { return text(NONE).findOne(600); }, true);
+    polledItem('findOne600Id', function () { return id('aj6sel_none').findOne(600); }, true);
+    if (late) {
+        polledItem('lateOne', function () { return text(late.text).findOne(600); }, false);
+    } else {
+        result.items.lateOne = { ok: false, error: 'no unique text on the screen' };
+        mark('lateOne FAIL');
     }
-    result.items.findOne600 = f600;
-    mark('findOne600 ' + (f600.ok ? 'PASS' : 'FAIL') + ' attempts ' + f600.medianAttempts + ' ms ' + f600.median);
 
     cpuItem('cpuIdle', IDLE_ROUNDS, false);
     cpuItem('cpuFixed', CPU_ROUNDS, true);

@@ -16,6 +16,7 @@ import argparse
 import json
 import os
 import sys
+import time
 
 # py -I leaves the directory of the script off sys.path; the shared helpers live next to it.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +24,15 @@ import _device as d  # noqa: E402
 
 SCREENS = {"settings": d.screen_settings, "main": d.screen_main, "overlay": d.screen_home}
 TIMED = ["full", "miss", "missId", "missMixed", "hit", "late"]
+POLLED = ["findOne600", "findOne600Id", "lateOne"]
 CPU = ["cpuIdle", "cpuFixed", "cpuAssisted", "stormIdle", "stormFixed", "stormAssisted"]
+
+
+def fast_path_text(f):
+    """The fast path counters of auto.stats (P2.4) summed over the rounds of an item, or an empty string."""
+    if not f:
+        return ""
+    return f" fastPath hits={f['hits']} misses={f['misses']} fallbacks={f['fallbacks']} mismatches={f['mismatches']}"
 
 
 def summarize(scenario, res, lines):
@@ -53,20 +62,30 @@ def summarize(scenario, res, lines):
               f" max={max(it['samples']) if it.get('samples') else None}{extra}")
         summary["items"][name] = {"ok": it.get("ok"), "median": it.get("median"), "samples": it.get("samples"),
                                   **({"sizes": it["sizes"]} if "sizes" in it else {})}
-    f = items.get("findOne600")
-    if f:
-        print(f"  findOne600: {'PASS' if f.get('ok') else 'FAIL'} attempts median={f.get('medianAttempts')}"
-              f" {f.get('attempts')} elapsed median={f.get('median')} ms{' error=' + f['error'] if f.get('error') else ''}")
-        summary["items"]["findOne600"] = {"ok": f.get("ok"), "medianAttempts": f.get("medianAttempts"),
-                                          "attempts": f.get("attempts"), "median": f.get("median")}
+    for name in POLLED:
+        f = items.get(name)
+        if f is None:
+            continue
+        # A fast path miss that a full search corrected (appendix C Q1) fails the item: it has to stay at 0.
+        ok = f.get("ok") and not (f.get("fastPath") or {}).get("mismatches")
+        print(f"  {name}: {'PASS' if ok else 'FAIL'} attempts median={f.get('medianAttempts')}"
+              f" {f.get('attempts')} elapsed median={f.get('median')} ms cpu median={f.get('medianCpu')} ms"
+              f" per attempt={f.get('medianCpuPerAttempt')} ms{fast_path_text(f.get('fastPath'))}"
+              f"{' error=' + f['error'] if f.get('error') else ''}")
+        summary["items"][name] = {"ok": ok, "medianAttempts": f.get("medianAttempts"), "attempts": f.get("attempts"),
+                                  "median": f.get("median"), "samples": f.get("samples"), "medianCpu": f.get("medianCpu"),
+                                  "medianCpuPerAttempt": f.get("medianCpuPerAttempt"), "fastPath": f.get("fastPath")}
     for name in CPU:
         it = items.get(name)
         if it is None:
             continue
-        print(f"  {name}: {'PASS' if it.get('ok') else 'FAIL'} cpu median={it.get('medianCpu')}% {it.get('cpu')}"
-              f" attempts median={it.get('medianAttempts')}{' error=' + it['error'] if it.get('error') else ''}")
-        summary["items"][name] = {"ok": it.get("ok"), "medianCpu": it.get("medianCpu"), "cpu": it.get("cpu"),
-                                  "medianAttempts": it.get("medianAttempts"), "attempts": it.get("attempts")}
+        ok = it.get("ok") and not (it.get("fastPath") or {}).get("mismatches")
+        print(f"  {name}: {'PASS' if ok else 'FAIL'} cpu median={it.get('medianCpu')}% {it.get('cpu')}"
+              f" attempts median={it.get('medianAttempts')}{fast_path_text(it.get('fastPath'))}"
+              f"{' error=' + it['error'] if it.get('error') else ''}")
+        summary["items"][name] = {"ok": ok, "medianCpu": it.get("medianCpu"), "cpu": it.get("cpu"),
+                                  "medianAttempts": it.get("medianAttempts"), "attempts": it.get("attempts"),
+                                  **({"fastPath": it["fastPath"]} if it.get("fastPath") else {})}
     if "stormUpdatesPerSecond" in res:
         print(f"  storm updates per second: {res['stormUpdatesPerSecond']}")
         summary["stormUpdatesPerSecond"] = res["stormUpdatesPerSecond"]
@@ -82,6 +101,8 @@ def main():
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--new-modules", choices=["on", "off"], help="set the new script module layer switch for the run")
     parser.add_argument("--scenarios", nargs="*", default=["settings", "main", "overlay"], choices=list(SCREENS))
+    parser.add_argument("--settings-package", help="the package of the active window root on the settings home page when it is not the one of the settings activity (ColorOS 15: com.oplus.wirelesssettings)")
+    parser.add_argument("--settle", type=float, default=0, help="seconds to wait after opening a screen, for screens that keep loading content after they open (ColorOS 15 settings home page: 20)")
     parser.add_argument("--rounds", type=int, default=10)
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--cpu-rounds", type=int, default=10)
@@ -106,6 +127,10 @@ def run(args, info):
     all_ok = True
     for scenario in args.scenarios:
         expect = SCREENS[scenario](s)
+        if args.settle > 0:
+            time.sleep(args.settle)
+        if scenario == "settings" and args.settings_package:
+            expect = args.settings_package
         pcy = d.host_scheduling(s)
         cpu_runs = 2 * args.cpu_rounds + args.idle_rounds
         storms = 2 if scenario == "overlay" else 1
