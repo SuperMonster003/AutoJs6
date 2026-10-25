@@ -116,6 +116,8 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | 提交 | 仓库 | 内容 |
 |---|---|---|
 | 6260c9788 | 宿主 | `check-runtime-tts.mjs` 断言改为 `session.pending.values.concurrentSnapshot()` (C36 后的源码), CI 中该步骤恢复通过 |
+| 5d6c2aa91 | 宿主 | R12 / R15 / R17: runtime-policy.json `bun.memberAliases` (getClip -> clipboard.getText, setClip -> clipboard.setText, device.density / height / width -> device.getDensity / getHeight / getWidth), `bun.namespaceAliases` notice -> notifications, `bun.memberCapabilities` 补 3 个 device 读取的能力名; MATRIX.md 重新生成, Bun pending 948 -> 942 |
+| 2cad31444 | 宿主 | (本条目第一步) Q17 java-prototype-objects 规则与 Q12 的 28 行 Bun 能力名, 缺能力名成为 `check.py --matrix` 失败项 |
 
 ## 4. 超出分母的运行时扩展
 
@@ -152,3 +154,81 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | runtime-view-components, runtime-webview-callbacks | 自定义同步 WebViewClient / WebChromeClient 回调与任意 Java 子类化, 原始 View / Bitmap 返回值, 自动 Activity ActionBar 集成, 已弃用的 database / quota 钩子 | 无 | 补进草案: 同步 WebView 客户端子类化 sync-only / java-prototype; ActionBar 自动集成 ui-thread; 弃用钩子不进矩阵 (宿主无导出) |
 - WebView 媒体与文件: 相机全尺寸, SAF 保存 / 目录, blob / data 下载, 系统录像 / 前台录音, getUserMedia / MediaRecorder, getDisplayMedia 适配, Camera2 后台录像 (runtime-webview-files / media / streams / display).
 - Java 互操作: Node java / autojs6:java 与 Bun host.java 的类描述, 构造, 调用, 字段, 数组, proxy / wrap, 子类生成, loadJar / loadDex (runtime-java-interop, runtime-java-callbacks); 宿主侧是 Rhino 语言层的 Java 访问, 没有显式导出.
+
+## 6. 附录 D 草案核对版 (按理由分类, 供 P1.4 整理成选择题; 不代替维护者拍板, D12 / Q1)
+
+行数按当前矩阵 (2727 行, 宿主 5d6c2aa91) 的显式导出行计; "现状" 是三列 Node main / Node Worker / Bun 的当前状态. "已在规则" = runtime-policy.json 已有规则 (草案, 待 Q1); "候选" = 本次核对新增, 标 "Codex 报告来源" 的是报告写明的边界 (已补进 ROADMAP 附录 D 来源 4).
+
+| 分组 | 理由 | 条目 (代表项) | 行数 | 现状 | 来源 |
+|---|---|---|---:|---|---|
+| D-1 无障碍同步与原始节点 | denied: sync-only / security | auto.waitFor (powerDialog 经 keys 覆盖, rawNode 无显式导出) | 1 | 已在规则 accessibility-sync-wait | 附录 D 来源 1 |
+| D-2 硬件标识符 | security | device 的 IMEI / 序列号 / MAC 类; 本次核对: device.getSharedDeviceId 待 P3.1 判定 | 0 (+1 待定) | 无规则 | 来源 1 / R18 |
+| D-3 原始输入通道 | security | RootAutomator / Shizuku sendEvent 类 (宿主无显式导出行) | 0 | 说明项 | 来源 1 |
+| D-4 特权与双开应用操作 | security (需 Root / Shizuku) | app.isDualInstalled / launchDual* / openDual* / startDualActivity / uninstallDual / killDual / kill 及其全局放置 | 25 | Node main bridged 25 / Worker pending 25 / Bun capability-gated 25, 但运行时声明只返回 never (显式拒绝) | 候选, Codex 报告来源 (bun-automation); 与 Q26 同组 |
+| D-5 存储枚举 | security (待 P1.4 定理由) | storages.names, storages.all | 2 | Node / Bun 记覆盖但显式不支持 | 候选, Codex 报告来源 (bun-storage); Q26 |
+| D-6 同步线程与延续 | sync-only | threads.*, sync, continuation.* | 7 | 已在规则 sync-threads (5), sync-continuation (2) | 来源 2 |
+| D-7 控制台同步输入 | sync-only | console.input, console.rawInput, console.build | 3 | Node 记 bridged (声明返回 never), Bun pending | 候选, Codex 报告来源 (runtime-video-worker); Q26 |
+| D-8 sleep 与保活 | runtime-native | sleep, keepAlive, loop, timers.keepAlive | 4 | 已在规则 sync-sleep (Node main 经 compat 覆盖, shadowed 1), sync-keep-alive (3) | 来源 2 |
+| D-9 运行时自带网络 / 加密 / 编码 / 定时器 | runtime-native | http.* (18 / 18 / 20), crypto.* (2), base64.* (Worker / Bun 2), Bun 全局 setTimeout 等 (6); Node nativeModules (timers / http / util ...) 自动判定 | 28+ | 已在规则 native-http / native-crypto / native-base64 / native-timers | 来源 3; http 的宿主 cookie / 代理逐函数复核留 P1.4 |
+| D-10 Bun 控制台输出 | runtime-native | console.assert / error / info / log / print / printAllStackTrace / time / timeEnd / trace / verbose / warn (等价: Bun 全局 console) | 11 | Bun pending (Node 覆盖) | 候选 (本次核对, R4) |
+| D-11 Java 对象与原型 | java-prototype | unwrapJavaObject, isJavaObject / isJavaClass / isJavaPackage (5); kotlin-class 返回对象成员 (UiObject / ImageWrapper / Dialog / Database / TimedTask ... 32 个对象 1069 成员, Q17 (a) 已拍板) | 5 + 1069 | 已在规则 java-prototype, java-prototype-objects | 来源 2 / Q17 |
+| D-12 Java 句柄与构造器 | java-prototype | files.open / toFile / 全局 open (3, 声明返回 never), s13n.color / point / throwable / time (4, 声明返回 never), dialogs.build, notice.builder / getBuilder, shell.fromIntent, util.java.mapToObject / objectToMap (6) | 13 | files / s13n 在 Node 记 local-shim 覆盖, 其余 pending | 候选, Codex 报告来源 (bun-storage, runtime-device-dialogs, runtime-events, runtime-shell); Q26 |
+| D-13 JSOX 扩展 | rhino-only | Arrayx / Mathx / Numberx / jsox.* | 54 (Worker / Bun) | 已在规则 jsox-extensions (Node main 有显式 jsox 函数, shadowed 54) | 来源 2 |
+| D-14 Rhino 引擎操作 | rhino-only | engines.execScript / execScriptFile / execAutoFile, plugins.load | 4 | 已在规则 rhino-engine (Node main 1, shadowed 3) | 来源 3 |
+| D-15 内部 / 标准导出 | rhino-only | __autojs6Tsx, ui.__inflate__, http.__okhttp__, toString 等 | 9 | 已在规则 internal-exports (Q13 (a) 已拍板) | policy.json |
+| D-16 Rhino 语言层 | rhino-only | E4X 语法, Rhino 包全局 (Packages) 与函数自动转接口, Rhino EventEmitter 扩展 | 0 (宿主无显式导出, 说明项) | - | 候选说明项, Codex 报告来源 (runtime-ui-interop, runtime-java-interop / callbacks, runtime-events) |
+| D-17 UI 线程与 Activity 内容视图 | ui-thread | ui.layout / layoutFile / setContentView / run / post / isUiThread / finish / R / Widget / registerWidget / emitter / root / useAndroidLayout / findById / findByStringId | 15 | 三列 pending | 候选 (本次核对, R7) |
+| D-18 完整 Rhino XML 与表达式绑定, 悬浮窗调整外框, ActionBar 自动集成, 同步 WebView 客户端子类化 | ui-thread / sync-only | 宿主无显式导出行, 说明项; 可移植契约现为 12 控件 + 58 可写 / 11 只读属性 + 12 组件命令 + 40 个 WebView 回调 | 0 | - | 来源 2 + 候选说明项, Codex 报告来源 (runtime-ui-*, runtime-xml-views, runtime-view-components, runtime-webview-callbacks) |
+| D-19 Node 可遮蔽 shim | runtime-builtin | BUILTIN_DISABLED 的 6 个 npm shim (宿主无对应显式导出) | 0 | 说明项 | 来源 1 |
+| D-20 非本主题 | - | Bun 32 位 ABI, native addon, 子进程沙箱 | 0 | 不进矩阵 | 来源 3 |
+
+合计: 已在规则的显式导出行约 120 (另 1069 个返回对象成员); 候选新增约 70 行 (D-4 25, D-5 2, D-7 3, D-10 11, D-12 13, D-17 15, D-2 1 待定), 其中 D-4 / D-5 / D-7 与 D-12 的 files / s13n 共 37 行目前被记为覆盖, 处理方式取决于 Q26.
+
+## 7. 矩阵 pending 分布 (初稿, P1.4 定稿; 作 P3 / P4 分批依据)
+
+总数 (2727 行): Node main 844, Node Worker 999, Bun 942. 下表按模块 (返回对象以 `#` 结尾) 列 Node main / Node Worker / Bun 的 pending 行数; 未列的 34 个小模块 (memory, zip, engines, ocr.*, plugins, sysprops, settings, web, util.* 子模块等) 合计 Node main 76 / Worker 123 / Bun 114.
+
+| 模块 | Node main | Node Worker | Bun | 对应条目 |
+|---|---:|---:|---:|---|
+| (global) | 99 | 144 | 116 | 拆入各族 (RootAutomator 简写 Back / Home / Tap ..., species is*, 全局 Toolkit 助手 Q28) |
+| Flow# | 106 | 106 | 106 | R20 / Q27 (运行时已有链对象) |
+| MailClient# | 53 | 53 | 53 | R20 / Q27 |
+| util | 49 | 49 | 50 | P3.2 / P4.2 |
+| automator | 41 | 54 | 47 | R9 / Q28, P3.4 / P4.4 |
+| species | 37 | 37 | 37 | P3.2 / P4.2 (预期 local-shim, Q5) |
+| auto | 36 | 36 | 36 | R9, P3.4 / P4.4 |
+| ui | 31 | 31 | 31 | R7, D-17 / P3.3 / P4.3 |
+| Color# | 29 | 29 | 29 | P3.2 / P4.2 |
+| ShellProcess# | 25 | 25 | 25 | R20 / Q27 |
+| Zip# | 21 | 21 | 21 | P3.2 / P4.2 |
+| autojs (+ autojs.version 7) | 28 | 28 | 28 | P3.1 / P4.1 |
+| device | 21 | 21 | 21 | R18, P3.1 / P4.1 |
+| terminal | 20 | 20 | 20 | P3.3 / P4.3 |
+| colors (+ colors.theme 9) | 28 | 28 | 28 | R21, P3.2 / P4.2 |
+| app | 5 | 43 | 5 | R10 / R8 |
+| files.batchRename | 17 | 17 | 17 | R11 |
+| installer | 16 | 16 | 16 | P3.1 / P4.1 |
+| AgentRun# / EpubBook# / Storage# / AiSession# | 51 | 51 | 51 | R20 / Q27 |
+| gallery / workManager | 22 | 22 | 22 | P3.2 / P3.1 |
+| console | 5 | 5 | 19 | R2 / R4 |
+| shell / shizuku | 16 | 16 | 16 | R14 |
+| keys | 0 | 12 | 12 | R8 (Worker), P4.4 |
+| notice / notice.channel | 12 | 12 | 12 | R16 |
+| pinyin | 0 | 0 | 10 | R3 |
+
+## 8. 新待决 (Q26-Q28, 已登记看板与附录 C)
+
+- Q26 声明只返回 never / Promise<never> 的显式拒绝入口怎么记 (R13, 约 Node main 37 / Bun 27 行): (a) list-runtime-surfaces.mjs 标记 rejects, 矩阵记为 pending 并要求排除规则给理由, 由 P1.4 归入 D-4 / D-5 / D-7 / D-12 (推荐) / (b) 保持覆盖, 只在 MATRIX.md 差异行加 rejects 标注. 未先行.
+- Q27 运行时已有句柄类型的 augment-prototype 返回对象 (R20, 235 行) 是否由生成器按句柄类型比对成员: (a) 新增条目, list-runtime-surfaces.mjs 收集句柄接口成员, runtime-policy.json returnedObjects 写 "宿主对象 -> 运行时类型" 映射 (推荐) / (b) 保持 pending, 由 P3 / P4 各批人工核对后逐条写 returnedObjects 映射. 未先行.
+- Q28 automator 与全局的 Toolkit 助手 (19 个名称, 38 行, 如 clickAny / scrollUntil / waitForToast) 与 flow 同名同实现, Node / Bun 只有 flow.* 异步版本: (a) runtime-policy.json memberAliases 对到 flow.* 计为覆盖 (via member-alias, 文档表注明 "经 flow") (推荐) / (b) 保持 pending, P3.4 / P4.4 在 accessibility / automator 模块补同名入口. 未先行.
+
+## 9. 后续条目映射
+
+| 归属 | 不一致编号 |
+|---|---|
+| 已直接修 | R12, R15, R17 (5d6c2aa91); TTS 检查脚本 (6260c9788) |
+| P0.6 (CI) | R1 |
+| P1.4 (白名单与待决) | R4, R7 (ui-thread 部分), R13 (Q26), R20 (Q27), Q28; 第 6 节分组 |
+| P2.3 (返回对象与嵌套对象) | R22 |
+| P3 / P4 补缺批次 | R2 (控制台), R3 (Bun 拼音常量, P4), R6 (compose.ComposeError, UI 族), R7 (可桥接部分, UI 族), R8 (Worker, 各族), R9 (自动化族), R10 / R14 / R16 / R18 (系统与设备族), R11 / R19 / R21 (文件与数据族) |
+| P3.6 (HOST-API 同步) | R5 |
