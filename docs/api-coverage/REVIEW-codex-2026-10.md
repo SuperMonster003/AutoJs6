@@ -441,3 +441,20 @@ JAR / DEX 输入由 `build-java-callback-fixtures.py` 现场构建 (callback.jar
 数值与 Codex 报告一致 (flow-tools 每种方式 47 项, flow-scope 129 项含 82 项范围 / 手势检查).
 
 项: 矩阵行 flow.of, run, all, any, race, delay, sleep, wait, waitAsync, waitUntil, waitWhile, repeatUntil, defaults, pending, workers, cancelAll, waitForActivity, waitForPackage, waitForVisible, waitForGone, waitForHidden, waitForStable, clickAny, clickIfExists, clickBoundsAny, clickBoundsIfExists, findAny, collectList, scrollUntil, smartClick, smartClickBounds, toggle, typeInto, waitThenLongClick, backToApp, backUntil, launchAndWait, waitForEvent, waitForIdle, waitForNotification, waitForToast (41 / 55 行, 三列 bridged / capability-gated); 运行时链对象成员 (矩阵 Flow# 行, P1.5 后除 await / sync 外按句柄类型计为覆盖) run, map, filter, retry, timeout, catch, whenPresent, click, setText, appendText, clear, collectList, dismissPopups, press, swipe, waitForIdle, toString; 共 13 个用例 58 项, 全部通过. 与 R20 / Q27 相关: Flow# 这 17 个成员在 Node main / Worker / Bun 的链对象上实测可用, 支持 P1.5 的句柄类型比对结论.
+
+### mail
+
+沿用 Codex 批次的账户配置: 本机启动 3-Stamp Mail 仓库 mail-core 测试类路径中的合成回环 IMAP / SMTP / POP3 服务器 (只监听 127.0.0.1), 经 adb reverse 映射到设备, `runtime-mail-fixture.json` 推到宿主外部目录; 设备原本未安装 3-Stamp Mail, 抽样时安装本地 2.1.0 debug 包 (versionCode 162, md5 3bea2e2ae024fa654ac6955ecb469f2e, Mail 仓库 HEAD 59b8b37, APK 构建于 276eecb 之后, 其后两笔只改文档) 与其测试包 (md5 46b4e8b7df1b485a54440f53d134f011), 由测试包 RuntimeMailAccountFixtureTest 写入合成别名账户 runtime-mail-fixture (合成地址与密码, 无真实凭据). 抽样后服务器停止, 自建的 3 条反向映射移除, 两个包卸载 (别名随之删除), 设备回到 Mail 未安装状态.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeMailDeviceTest#nodeUsesRealMailProtocolsAndAttachments | main | 通过 | 14.8 | 正文 5000 个 Unicode 标记, 附件 98304 字节 (sha256 一致), 下载进度, IDLE 监听收到 1 封并关闭, 就绪探针 1, 凭据脱敏, 已签名宿主可用保存的别名 |
+| ...#bunUsesRealMailProtocolsAndAttachments | bun | 通过 | 15.2 | 同上 |
+| ...#workerUsesRealMailProtocolsAndAttachments | worker | 通过 | 14.0 | 同上 |
+| ...#asynchronousTokenProvidersRefreshThroughTheRealPlugin | main / worker / bun | 通过 | 8.7 | xoauth2 令牌回调在三种方式中各刷新一次 |
+| ...#bunDeniesMissingGrantAndKeepsStreamingBeyond1024Calls | bun | 通过 | 12.1 | 无 mail.control 时 NOT_GRANTED; 1044 次流式调用不受 1024 次上限, 预设 10 个 |
+| ...#cjsEsmNestedWorkerExitPreservesTheParentMailClient | main / worker (3 种) | 通过 | 7.7 | 3 种 Worker 退出, 父客户端保留 |
+| RuntimeMailNativeTest#cancelledTokenRequestsLeaveNoUndrainableTerminalPackets | bridge | 通过 | 2.0 | 取消的令牌请求不留未取走的终止包 |
+| ...#invalidAccountsAndClosedClientHandlesRetainTheMailErrorCode | bridge | 通过 | 2.0 | 非法账户与已关闭句柄保留 MailError 码 |
+
+项: 矩阵行 mail.providers, accounts, connect, connectAsync, setDefault, default, fetch, foldersAsync, searchAsync, sendAsync, flagAsync, rawAsync, close, MailError (14 / 56 行, 三列 bridged / capability-gated); 运行时客户端句柄成员 (矩阵 MailClient# 行, P1.5 后按句柄类型计为覆盖) test, testAsync, folder, folderStatus, createFolder, deleteFolder, append, appendAsync, fetch, fetchAsync, fetchBodyAsync, get, search, markRead, markUnreadAsync, setFlagsAsync, unflag, copyAsync, move, delete, deleteAsync, expungeAsync, watch, close (24 项); 共 8 个用例 38 项, 全部通过. 与 R20 / R22 相关: MailClient# 24 个成员与 mail.accounts / providers 的嵌套方法 (has, list, resolve, get) 在三列实测可用, R22 归属 (P2.3 登记嵌套对象) 不变.
