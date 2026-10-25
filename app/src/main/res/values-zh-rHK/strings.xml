@@ -2122,6 +2122,7 @@
     <string name="text_inspector_clear_region">清除區域</string>
     <string name="text_inspector_collapse_search_bar">收起搜尋列</string>
     <string name="text_inspector_copy_always_ask">總是詢問</string>
+    <string name="text_inspector_copy_as_pickup">複製為 pickup</string>
     <string name="text_inspector_copy_as_selector">複製為選擇器</string>
     <string name="text_inspector_copy_button_behavior">複製按鈕行為</string>
     <string name="text_inspector_did_you_mean">是否想輸入: %1$s</string>

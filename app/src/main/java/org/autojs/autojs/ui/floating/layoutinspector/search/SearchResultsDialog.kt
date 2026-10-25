@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.ui.floating.layoutinspector.InspectorDialogBuilder
 import org.autojs.autojs.core.accessibility.NodeInfo
 import org.autojs.autojs.core.accessibility.inspector.InspectorNode
+import org.autojs.autojs.core.accessibility.inspector.SelectorExport
 import org.autojs.autojs.core.automator.diagnostics.SelectorExplainer
 import org.autojs.autojs.ui.floating.FloatyWindowManger
 import org.autojs.autojs.ui.floating.layoutinspector.LayoutHierarchyView
@@ -49,10 +50,12 @@ class SearchResultsDialog(
         val builder = InspectorDialogBuilder(context)
             .title(context.getString(R.string.text_inspector_matches_title, matches.size))
             .positiveText(R.string.dialog_button_dismiss)
-            // "Copy as selector" (roadmap P4.2, D8) lives here since the bar has no overflow menu.
-            // zh-CN: "复制为选择器" (Roadmap P4.2, D8) 放在这里, 因为搜索栏没有溢出菜单.
+            // "Copy as selector" (roadmap P4.2, D8) and "Copy as pickup" (selector P3.5) live here since the bar has no overflow menu.
+            // zh-CN: "复制为选择器" (Roadmap P4.2, D8) 与 "复制为 pickup" (selector P3.5) 放在这里, 因为搜索栏没有溢出菜单.
             .neutralText(R.string.text_inspector_copy_as_selector)
             .onNeutral { _, _ -> SelectorClipboard.copy(context, session) { it.error?.toString().orEmpty() } }
+            .negativeText(R.string.text_inspector_copy_as_pickup)
+            .onNegative { _, _ -> SelectorClipboard.copy(context, session, SelectorExport.Form.PICKUP) { it.error?.toString().orEmpty() } }
         var list: RecyclerView? = null
         if (matches.isEmpty()) {
             builder.content(explain())

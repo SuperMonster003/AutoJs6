@@ -2127,6 +2127,7 @@
     <string name="text_inspector_clear_region">مسح المنطقة</string>
     <string name="text_inspector_collapse_search_bar">طي شريط البحث</string>
     <string name="text_inspector_copy_always_ask">السؤال دائما</string>
+    <string name="text_inspector_copy_as_pickup">نسخ كاستدعاء pickup</string>
     <string name="text_inspector_copy_as_selector">نسخ كمحدد</string>
     <string name="text_inspector_copy_button_behavior">سلوك زر النسخ</string>
     <string name="text_inspector_did_you_mean">هل تقصد: %1$s</string>

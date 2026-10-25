@@ -76,6 +76,15 @@ sealed class PickResult {
 }
 
 /**
+ * The compass and the result type given to `auto.explain(selector, compass?, resultType?)` (docs/selector/ROADMAP.md
+ * P3.5), as given ([compass], [resultType]) and as `pickup` reads them ([walk], [result], refusals included); null for
+ * what is not given ([PickArguments.explainParts]).
+ * zh-CN: 传给 `auto.explain(selector, compass?, resultType?)` 的罗盘与结果类型 (P3.5): 给出的原值 ([compass], [resultType]) 与按 `pickup` 方式读取的结果
+ * ([walk], [result], 含拒绝); 未给出的为 null ([PickArguments.explainParts]).
+ */
+class PickParts internal constructor(val compass: Any?, val walk: PickCompass?, val resultType: Any?, val result: PickResult?)
+
+/**
  * An argument error of `pickup` / `detect` or of a selector form read like theirs: a TypeError or a RangeError with the
  * function and parameter names (P1.1), thrown by the caller ([exception]) once it is told.
  * zh-CN: `pickup` / `detect` 或按其方式读取的选择器形式的参数错误: 带函数名与参数名的 TypeError 或 RangeError (P1.1), 判定后由调用方抛出 ([exception]).

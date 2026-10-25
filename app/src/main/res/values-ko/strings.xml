@@ -2127,6 +2127,7 @@
     <string name="text_inspector_clear_region">영역 지우기</string>
     <string name="text_inspector_collapse_search_bar">검색창 접기</string>
     <string name="text_inspector_copy_always_ask">항상 묻기</string>
+    <string name="text_inspector_copy_as_pickup">pickup 형식으로 복사</string>
     <string name="text_inspector_copy_as_selector">선택자로 복사</string>
     <string name="text_inspector_copy_button_behavior">복사 버튼 동작</string>
     <string name="text_inspector_did_you_mean">다음을 의도했나요: %1$s</string>

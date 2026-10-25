@@ -9,13 +9,13 @@ import java.text.Normalizer as TextNormalizer
  * to every string condition of the selector it is part of, wherever it stands among them. A literal comparison
  * (`text`, `textStartsWith`, `textEndsWith`, `textContains` ...) normalizes both the value of the node and its
  * argument; a pattern (`textMatch`, `textMatches`, a RegExp) normalizes the value only, and [caseInsensitive] makes it
- * ignore the case instead of lowering the value (appendix C Q17). The texts (`text`, `desc`, `content`) take every
+ * ignore the case instead of lowering the value (appendix C Q18). The texts (`text`, `desc`, `content`) take every
  * option chosen, the names (`id`, `idHex`, `className`, `packageName`) only [trim] and [caseInsensitive] ([of]). The
  * options apply in the order [nfkc], [fullWidth], [whitespace], [trim], [caseInsensitive].
  *
  * zh-CN: 选择器的文本规范化 `normalize(...)` (D10, P3.3, 附录 C Q4): 作用于其所在选择器的每个字符串条件, 与它在各条件中的位置无关. 字面比较
  * (`text`, `textStartsWith`, `textEndsWith`, `textContains` ...) 同时规范化节点的值与参数; 模式 (`textMatch`, `textMatches`, RegExp) 只规范化值,
- * [caseInsensitive] 使其忽略大小写而不是把值转为小写 (附录 C Q17). 文本属性 (`text`, `desc`, `content`) 采用选中的全部选项, 名称属性
+ * [caseInsensitive] 使其忽略大小写而不是把值转为小写 (附录 C Q18). 文本属性 (`text`, `desc`, `content`) 采用选中的全部选项, 名称属性
  * (`id`, `idHex`, `className`, `packageName`) 只采用 [trim] 与 [caseInsensitive] ([of]). 选项按 [nfkc], [fullWidth], [whitespace], [trim],
  * [caseInsensitive] 的顺序施加.
  *

@@ -61,6 +61,9 @@ open class Selector : Filter {
     /** The preference among the candidates of a single result, `prefer(...)` (P3.4), or null. zh-CN: 单个结果的候选之间的偏好 `prefer(...)` (P3.4), 或 null. */
     val preference: Preference? get() = plan().preference
 
+    /** The options of `normalize(...)` in effect (P3.3), or null. zh-CN: 生效中的 `normalize(...)` 选项 (P3.3), 或 null. */
+    val normalization: NormalizeOptions? get() = plan().normalization
+
     override fun toString() = plan().text
 
     // The plan of the list as it is: the one kept while the list holds the same filters, else a new one.
@@ -71,7 +74,7 @@ open class Selector : Filter {
 
         val preference: Preference? = (declared.lastOrNull { it is PreferFilter } as PreferFilter?)?.preference
 
-        private val normalization: NormalizeOptions? = (declared.lastOrNull { it is NormalizeFilter } as NormalizeFilter?)?.options?.takeUnless { it.isOff }
+        val normalization: NormalizeOptions? = (declared.lastOrNull { it is NormalizeFilter } as NormalizeFilter?)?.options?.takeUnless { it.isOff }
 
         val effective: List<Filter> = when (val options = normalization) {
             null -> declared.asList()

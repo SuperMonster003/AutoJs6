@@ -24,16 +24,39 @@ object SelectorExport {
 
     private const val COMMENT_PREFIX = "/*"
 
+    /** What goes to the clipboard: the chain or a `pickup` call (selector P3.5). zh-CN: 写入剪贴板的形式: 链式或 `pickup` 调用 (selector P3.5). */
+    enum class Form { CHAIN, PICKUP }
+
     /** The chain [calls] and the trailing [comments]; [text] is what goes to the clipboard. zh-CN: 链式 [calls] 与尾随 [comments]; [text] 为写入剪贴板的内容. */
     class Rendered(val calls: List<String>, val comments: List<String>) {
 
         val isEmpty: Boolean get() = calls.isEmpty() && comments.isEmpty()
 
-        val text: String
-            get() = buildString {
-                append(calls.joinToString(".").ifEmpty { "selector()" })
-                for (comment in comments) append(' ').append(comment)
+        private val chain: String get() = calls.joinToString(".").ifEmpty { "selector()" }
+
+        val text: String get() = text(Form.CHAIN)
+
+        /**
+         * The [Form.PICKUP] form puts the calls in the object selector of `pickup`, `pickup({text: "OK", boundsInside: [0, 0, 100, 200]})`:
+         * each call is an entry whose value is null without arguments, the argument itself for one and an array for more (as
+         * `SelectorMapParser` spreads it). Calls naming the same property twice, or not of the form `name(arguments)`, keep the
+         * chain inside, `pickup(text("a").text("b"))`.
+         * zh-CN: [Form.PICKUP] 形式把调用放进 `pickup` 的对象选择器: 每个调用为一项, 无参数时值为 null, 一个参数时为参数本身, 多个时为数组
+         * (`SelectorMapParser` 会将其展开). 有调用重复同一属性, 或不是 `name(参数)` 形式时, 改为在 pickup 中保留链式, 如 `pickup(text("a").text("b"))`.
+         */
+        fun text(form: Form): String = buildString {
+            when (form) {
+                Form.CHAIN -> append(chain)
+                Form.PICKUP -> append("pickup(").append(objectSelector() ?: chain).append(')')
             }
+            for (comment in comments) append(' ').append(comment)
+        }
+
+        private fun objectSelector(): String? {
+            val entries = calls.map { CallSyntax.parse(it) ?: return null }
+            if (entries.distinctBy { it.first }.size < entries.size) return null
+            return entries.joinToString(", ", "{", "}") { (name, args) -> "$name: ${CallSyntax.valueOf(args)}" }
+        }
 
         override fun toString() = text
 
@@ -71,6 +94,117 @@ object SelectorExport {
             else -> filter.toString()
         }
         if (rendered.startsWith(COMMENT_PREFIX)) comments += rendered else calls += rendered
+    }
+
+}
+
+/**
+ * Splits a rendered call, `name(a, "b, c", /d,e/i, [1, 2])`, into its name and the source of each argument (commas inside
+ * strings, regular expression literals and brackets do not split); used by the [SelectorExport.Form.PICKUP] form.
+ * zh-CN: 把渲染出的调用拆为名称与每个参数的源码 (字符串, 正则字面量与括号内的逗号不拆分); 供 [SelectorExport.Form.PICKUP] 形式使用.
+ */
+internal object CallSyntax {
+
+    private val NAME = Regex("[A-Za-z_$][A-Za-z0-9_$]*")
+
+    /** The name and the arguments of [call], or null when it is not of the form `name(arguments)`. zh-CN: [call] 的名称与参数, 不是 `name(参数)` 形式时为 null. */
+    fun parse(call: String): Pair<String, List<String>>? {
+        val open = call.indexOf('(')
+        if (open <= 0 || !call.endsWith(')')) return null
+        val name = call.substring(0, open)
+        if (!NAME.matches(name)) return null
+        val args = split(call.substring(open + 1, call.length - 1)) ?: return null
+        return name to args
+    }
+
+    /**
+     * The value of an object selector entry for [args]: null, the argument, or an array; a single argument that is itself an
+     * array or null goes in an array so that it is not spread or taken as no argument.
+     * zh-CN: [args] 对应的对象选择器项的值: null, 参数本身或数组; 单个参数本身为数组或 null 时放进数组, 以免被展开或当作无参数.
+     */
+    fun valueOf(args: List<String>): String = when {
+        args.isEmpty() -> "null"
+        args.size == 1 && !args[0].startsWith("[") && args[0] != "null" -> args[0]
+        else -> args.joinToString(", ", "[", "]")
+    }
+
+    /** The top level arguments of [source], or null when its brackets or literals do not close. zh-CN: [source] 的顶层参数, 括号或字面量未闭合时为 null. */
+    fun split(source: String): List<String>? {
+        val args = ArrayList<String>()
+        var depth = 0
+        var start = 0
+        var operand = true
+        var i = 0
+        while (i < source.length) {
+            val c = source[i]
+            when {
+                c == '"' || c == '\'' -> {
+                    i = skipString(source, i) ?: return null
+                    operand = false
+                    continue
+                }
+                c == '/' && operand -> {
+                    i = skipRegex(source, i) ?: return null
+                    operand = false
+                    continue
+                }
+                c == '(' || c == '[' || c == '{' -> {
+                    depth++
+                    operand = true
+                }
+                c == ')' || c == ']' || c == '}' -> {
+                    if (--depth < 0) return null
+                    operand = false
+                }
+                c == ',' && depth == 0 -> {
+                    args += source.substring(start, i).trim()
+                    start = i + 1
+                    operand = true
+                }
+                c == ',' || c == ':' -> operand = true
+                !c.isWhitespace() -> operand = false
+            }
+            i++
+        }
+        if (depth != 0) return null
+        val last = source.substring(start).trim()
+        return when {
+            last.isNotEmpty() -> args + last
+            args.isEmpty() -> args
+            else -> null
+        }
+    }
+
+    private fun skipString(source: String, from: Int): Int? {
+        val quote = source[from]
+        var i = from + 1
+        while (i < source.length) {
+            when (source[i]) {
+                '\\' -> i++
+                quote -> return i + 1
+            }
+            i++
+        }
+        return null
+    }
+
+    private fun skipRegex(source: String, from: Int): Int? {
+        var i = from + 1
+        var inClass = false
+        while (i < source.length) {
+            when (source[i]) {
+                '\\' -> i++
+                '[' -> inClass = true
+                ']' -> inClass = false
+                '/' -> if (!inClass) {
+                    i++
+                    while (i < source.length && source[i].isLetter()) i++
+                    return i
+                }
+            }
+            i++
+        }
+        return null
     }
 
 }

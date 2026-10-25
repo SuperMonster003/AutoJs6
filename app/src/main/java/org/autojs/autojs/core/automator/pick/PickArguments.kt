@@ -120,6 +120,44 @@ class PickArguments<N : UiNode<N>>(private val nodeType: Class<N>, private val m
         return (resultOf(function, param, value, walk, single) as? PickResult.Refused)?.error
     }
 
+    /**
+     * The compass and the result type after the selector of `auto.explain(selector, compass?, resultType?)` (P3.5) in
+     * [rest]: one argument is the compass when it is one, else the result type; two are both. They are read as `pickup`
+     * reads them, but a refusal (a compass that is no string included) stays in the [PickParts] for the report instead
+     * of being thrown.
+     * zh-CN: `auto.explain(selector, compass?, resultType?)` 中选择器之后的罗盘与结果类型 ([rest], P3.5): 一个参数时, 是罗盘则为罗盘, 否则为结果类型;
+     * 两个参数时依次为两者. 按 `pickup` 的方式读取, 但拒绝 (含不是字符串的罗盘) 留在 [PickParts] 中供报告展示, 而不抛出.
+     */
+    fun explainParts(function: String, rest: List<Any?>): PickParts {
+        val compass: Any?
+        val resultType: Any?
+        when (rest.size) {
+            0 -> return PickParts(null, null, null, null)
+            1 -> if (Compass.isCompass(rest[0])) {
+                compass = rest[0]
+                resultType = null
+            } else {
+                compass = null
+                resultType = rest[0]
+            }
+            else -> {
+                compass = rest[0]
+                resultType = rest[1]
+            }
+        }
+        val walk = when {
+            isNullish(compass) -> null
+            compass is CharSequence -> compassOf(function, COMPASS, compass)
+            else -> PickCompass.Refused(PickError(PickError.Kind.TYPE, PickMessages.argumentType(function, COMPASS, "string", compass)))
+        }
+        val given = resultType.takeUnless(::isNullish)
+        val result = when (rest.size == 1 && resultType === null) {
+            true -> null
+            else -> resultOf(function, RESULT_TYPE, given, walk?.takeUnless { it is PickCompass.Refused } ?: PickCompass.PassOn, single = false)
+        }
+        return PickParts(compass.takeUnless(::isNullish), walk, given, result)
+    }
+
     private fun request(
         function: String, root: N?, selectorArg: Any?, compassArg: CharSequence?, resultArg: Any?, callback: Callable?,
         binding: Binding?, strict: Boolean, single: Boolean,

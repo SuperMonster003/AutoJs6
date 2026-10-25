@@ -365,7 +365,20 @@ class AutomatorModulesTest {
 
     /** JVM only: under the current module some of these change the mode, start the service or wait for it on a device. */
     @Test
-    fun autoArguments() = RuntimeModulesFixture.check(rhino, autoArgumentCases)
+    fun autoArguments() = RuntimeModulesFixture.check(rhino, autoArgumentCases + explainArgumentCases)
+
+    /**
+     * `auto.explain(selector, root?, compass?, resultType?)` (docs/selector/ROADMAP.md P3.5): a second argument that is no
+     * `UiObject` is the compass or the result type (`auto.explain('a', 1)` explains with the result type 1, as `pickup`
+     * takes it), so only four arguments refuse a root that is no `UiObject`. Not compared with the current module, which
+     * took at most two arguments.
+     * zh-CN: `auto.explain(selector, root?, compass?, resultType?)` (selector P3.5): 第二个参数不是 `UiObject` 时为罗盘或结果类型 (`auto.explain('a', 1)`
+     * 按 `pickup` 的方式以结果类型 1 解释), 因此只有四个参数时才拒绝不是 `UiObject` 的 root. 不与现有模块比较, 它至多接受两个参数.
+     */
+    private val explainArgumentCases
+        get() = listOf(
+            "auto.explain('a', 1, 'p', '#')" to "throws TypeError",
+        )
 
     private val autoArgumentCases
         get() = listOf(
@@ -406,7 +419,6 @@ class AutomatorModulesTest {
             "auto.findWindowRoots('a')" to "throws TypeError",
             "auto.dump(1)" to "throws TypeError",
             "auto.explain()" to "throws TypeError",
-            "auto.explain('a', 1)" to "throws TypeError",
             "auto.start(1)" to "throws TypeError",
             "auto.isRunning(1)" to "throws TypeError",
             "auto.stateListener(1)" to "throws TypeError",
@@ -596,16 +608,14 @@ class AutomatorModulesTest {
         )
 
         /**
-         * Differences found by P3.6 that appendix E does not register (reported, the product left as it is):
-         * `auto.explain('a', 1)` is refused before the accessibility service is started, while the current module starts the
-         * service first (on a device without it, the settings open) and then refuses the root.
+         * Differences found by P3.6 that appendix E does not register (reported, the product left as it is). The one P3.6
+         * found, `auto.explain('a', 1)` refused before the accessibility service is started, went with selector P3.5: the
+         * second argument is now the compass or the result type unless it is a `UiObject` ([explainArgumentCases]).
          *
-         * zh-CN: P3.6 发现, 未在附录 E 登记, 已报告 (产品不改): auto.explain('a', 1) 在启动无障碍服务之前被拒绝, 现有模块先启动服务 (未开服务的真机上会
-         * 打开设置页), 再拒绝 root.
+         * zh-CN: P3.6 发现, 未在附录 E 登记, 已报告 (产品不改). P3.6 发现的那一处 (auto.explain('a', 1) 在启动无障碍服务之前被拒绝) 随 selector P3.5 消失:
+         * 第二个参数不是 `UiObject` 时为罗盘或结果类型 (explainArgumentCases).
          */
-        val UNREGISTERED = mapOf(
-            "auto.explain('a', 1)" to ("throws TypeError" to "unregistered (P3.6)"),
-        )
+        val UNREGISTERED = emptyMap<String, Pair<String, String>>()
 
         /**
          * Differences from the current modules registered in appendix E of docs/augment/ROADMAP.md (P3.3): expression to

@@ -2125,6 +2125,7 @@
     <string name="text_inspector_clear_region">Очистить область</string>
     <string name="text_inspector_collapse_search_bar">Свернуть панель поиска</string>
     <string name="text_inspector_copy_always_ask">Всегда спрашивать</string>
+    <string name="text_inspector_copy_as_pickup">Копировать как pickup</string>
     <string name="text_inspector_copy_as_selector">Копировать как селектор</string>
     <string name="text_inspector_copy_button_behavior">Действие кнопки копирования</string>
     <string name="text_inspector_did_you_mean">Возможно, вы имели в виду: %1$s</string>

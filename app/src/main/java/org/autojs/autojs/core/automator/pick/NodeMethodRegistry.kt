@@ -165,8 +165,8 @@ class NodeMethodTable(
  */
 sealed class NodeMethodResolution {
 
-    /** The [method] to call with the converted arguments. zh-CN: 以转换后的参数调用的 [method]. */
-    class Found(val method: Method, private val arguments: Array<Any?>) : NodeMethodResolution() {
+    /** The [method] to call with the converted [arguments] (`auto.explain` shows them, P3.5). zh-CN: 以转换后的 [arguments] 调用的 [method] (`auto.explain` 展示它们, P3.5). */
+    class Found(val method: Method, internal val arguments: Array<Any?>) : NodeMethodResolution() {
 
         /**
          * Calls [method] on [node]. A null pointer or an interruption inside the method yields null, as the former

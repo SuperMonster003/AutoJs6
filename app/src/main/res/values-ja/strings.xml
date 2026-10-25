@@ -2126,6 +2126,7 @@
     <string name="text_inspector_clear_region">領域をクリア</string>
     <string name="text_inspector_collapse_search_bar">検索バーを折りたたむ</string>
     <string name="text_inspector_copy_always_ask">毎回確認</string>
+    <string name="text_inspector_copy_as_pickup">pickup 形式でコピー</string>
     <string name="text_inspector_copy_as_selector">セレクターとしてコピー</string>
     <string name="text_inspector_copy_button_behavior">コピーボタンの動作</string>
     <string name="text_inspector_did_you_mean">もしかして: %1$s</string>

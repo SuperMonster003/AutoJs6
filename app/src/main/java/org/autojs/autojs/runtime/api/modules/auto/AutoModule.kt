@@ -208,12 +208,18 @@ class AutoModule(private val runtime: ScriptRuntime) {
     @ScriptFunction
     fun currentComponent(): String = Auto.currentComponent(runtime, NO_ARGS)
 
-    /** `auto.explain(selector, root?)`: the selector in any `pickup` form (undefined: no condition), the root a `UiObject`. */
+    /**
+     * `auto.explain(selector, root?, compass?, resultType?)`: the selector in any `pickup` form (undefined: no condition); then
+     * the root when it is a `UiObject` (or nullish among four arguments), and the compass and the result type as `pickup`
+     * takes them (docs/selector/ROADMAP.md P3.5; their refusals are reported, not thrown). A root among four arguments must
+     * be a `UiObject`.
+     */
     @ScriptFunction
-    fun explain(selector: Any, root: Any? = null): NativeObject {
+    fun explain(selector: Any, vararg rest: Any?): NativeObject {
         PickArguments.uiObject.selectorError("auto.explain", "selector", RhinoUtils.unwrap(selector).takeUnless { Undefined.isUndefined(it) })?.let { throw it.exception() }
-        if (!isNullish(root) && unwrap(root) !is UiObject) throw GlobalValues.typeError("auto.explain", "root", "UiObject", root)
-        return Auto.explain(runtime, if (isNullish(root)) arrayOf(selector) else arrayOf(selector, root))
+        val root = rest.getOrNull(0)
+        if (rest.size == 3 && !isNullish(root) && unwrap(root) !is UiObject) throw GlobalValues.typeError("auto.explain", "root", "UiObject", root)
+        return Auto.explain(runtime, arrayOf(selector, *rest))
     }
 
     /** `auto.dump(options?)`: a format name or an options object. */

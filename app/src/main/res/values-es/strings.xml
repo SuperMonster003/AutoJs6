@@ -2125,6 +2125,7 @@
     <string name="text_inspector_clear_region">Borrar región</string>
     <string name="text_inspector_collapse_search_bar">Contraer la barra de búsqueda</string>
     <string name="text_inspector_copy_always_ask">Preguntar siempre</string>
+    <string name="text_inspector_copy_as_pickup">Copiar como pickup</string>
     <string name="text_inspector_copy_as_selector">Copiar como selector</string>
     <string name="text_inspector_copy_button_behavior">Comportamiento del botón Copiar</string>
     <string name="text_inspector_did_you_mean">¿Quiso decir: %1$s?</string>

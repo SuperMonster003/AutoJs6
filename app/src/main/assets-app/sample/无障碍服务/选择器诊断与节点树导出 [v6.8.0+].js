@@ -4,6 +4,8 @@
  * 选择器诊断与节点树导出 [v6.8.0+]
  *
  * auto.explain(selector, root?) 解释选择器为什么匹配或不匹配: 逐个过滤器单独与叠加的命中数, 失败的一步, "差一点" 的节点与文本报告.
+ * auto.explain(selector, compass?, resultType?) 还说明单个结果经历的过程: 取哪个节点 (含 prefer 的选择), 罗盘每一步到达的节点,
+ * 结果类型解析到的方法与参数 (只解析, 不调用), 以及快路径, 命中刷新与 normalize 是否生效.
  * auto.dump(options?) 与 UiObject.dumpSubtree(options?) 以文本 / JSON / XML 导出节点树; JSON.stringify(控件) 得到其属性对象.
  * auto.stats 汇总自上次重置以来的搜索, 轮询查询与 Flow 步骤耗时.
  *
@@ -45,24 +47,31 @@ bad.steps.forEach(step => console.log('   过滤器', step.index, step.filter, '
 const panel = text('诊断演示').findOne(3000).parent();
 console.log('3. 限定在悬浮窗内:', auto.explain('同意条款', panel).count, '个');
 
-/* 4. dumpSubtree: 文本形式 (默认) 与 JSON 形式; auto.dump 的选项相同, 并可指定 root 与 format. */
+/* 4. 单个结果经历的过程: 从 "同意条款" 出发, 罗盘 p1c3 先到父节点, 再到其第 4 个子节点 ("登录" 按钮), 结果类型 'text' 解析为节点方法. */
+const pick = auto.explain(text('同意条款').prefer('visible'), 'p1c3', 'text');
+console.log('4. 单个结果: 第', pick.targetIndex + 1, '个 (共', pick.count, '个)');
+pick.trail.forEach(hop => console.log('   罗盘', hop.step, '->', hop.node === null ? '无' : hop.node.className()));
+console.log('4. 结果类型:', pick.result.kind, '; 快路径:', pick.fastPath, '; 命中刷新:', pick.refreshOnHit);
+console.log(pick.text);
+
+/* 5. dumpSubtree: 文本形式 (默认) 与 JSON 形式; auto.dump 的选项相同, 并可指定 root 与 format. */
 const tree = panel.dumpSubtree({ maxDepth: 2 });
-console.log('4. 文本形式:\n' + tree);
+console.log('5. 文本形式:\n' + tree);
 const json = JSON.parse(panel.dumpSubtree('json'));
-console.log('4. JSON 形式的键:', Object.keys(json).join(', '));
-console.log('4. XML 形式 (1 层):', auto.dump({ root: panel, format: 'xml', maxDepth: 1 }).length, '个字符');
+console.log('5. JSON 形式的键:', Object.keys(json).join(', '));
+console.log('5. XML 形式 (1 层):', auto.dump({ root: panel, format: 'xml', maxDepth: 1 }).length, '个字符');
 
-/* 5. toJSON: JSON.stringify 直接得到控件自身的属性. */
-console.log('5.', JSON.stringify(text('登录').findOnce()));
+/* 6. toJSON: JSON.stringify 直接得到控件自身的属性. */
+console.log('6.', JSON.stringify(text('登录').findOnce()));
 
-/* 6. stats: 先重置, 做几次查询, 再看汇总. */
+/* 7. stats: 先重置, 做几次查询, 再看汇总. */
 auto.stats.reset();
 text('登录').findOne(2000);
 className('android.widget.Button').find();
 waitAsync('同意条款', 1000).sync();
 text('不存在的文本').findOne(300);
 const stats = auto.stats;
-console.log('6. 搜索', stats.searches.count, '次, 轮询查询', stats.queries.count, '次 (命中', stats.queries.found, '次), 最慢的选择器:', stats.slowest === null ? '无' : stats.slowest.selector);
+console.log('7. 搜索', stats.searches.count, '次, 轮询查询', stats.queries.count, '次 (命中', stats.queries.found, '次), 最慢的选择器:', stats.slowest === null ? '无' : stats.slowest.selector);
 console.log(stats.text);
 
 ui.run(() => win.close());

@@ -98,7 +98,7 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
 
     /**
      * A regex form over normalized values: the pattern is left as written, ignoring the case under `caseInsensitive`
-     * (appendix C Q17). zh-CN: 比较规范化之后的值的正则形式: 模式保持原样, `caseInsensitive` 下忽略大小写 (附录 C Q17).
+     * (appendix C Q18). zh-CN: 比较规范化之后的值的正则形式: 模式保持原样, `caseInsensitive` 下忽略大小写 (附录 C Q18).
      */
     private class NormalizedPattern(original: StringMatcher, private val options: NormalizeOptions, regex: Regex, private val whole: Boolean) :
         StringMatcher(original.suffix, original.argument) {

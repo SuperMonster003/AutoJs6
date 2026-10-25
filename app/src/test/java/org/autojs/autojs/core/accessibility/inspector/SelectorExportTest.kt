@@ -90,6 +90,58 @@ class SelectorExportTest {
     }
 
     @Test
+    fun thePickupFormPutsTheCallsInAnObjectSelector() {
+        val extra = profile(booleans = mapOf(BooleanProperty.CLICKABLE to Tri.YES), onScreenOnly = true) +
+            BoundsFilter(0.0, 120.0, 720.0, 900.0, BoundsFilter.TYPE_INSIDE)
+        val rendered = SelectorExport.render(keyword("/a,b/i", regex = true), emptyList(), KeywordProperty.TEXT, extra)
+        assertEquals(
+            """pickup({textMatch: /a,b/i, clickable: true, boundsInside: [0, 120, 720, 900]}) /* onScreen */""",
+            rendered.text(SelectorExport.Form.PICKUP),
+        )
+        val query = field("text=OK clickable minDepth=3")
+        assertEquals(
+            """pickup({text: "OK", clickable: null, minDepth: 3})""",
+            SelectorExport.render(query, filtersOf(query), null, emptyList()).text(SelectorExport.Form.PICKUP),
+        )
+        val actions = profile(actions = setOf("ACTION_FOCUS", "ACTION_CLICK"))
+        assertEquals(
+            """pickup({action: ["ACTION_CLICK", "ACTION_FOCUS"]})""",
+            SelectorExport.render(keyword(""), emptyList(), null, actions).text(SelectorExport.Form.PICKUP),
+        )
+    }
+
+    @Test
+    fun thePickupFormKeepsTheChainForARepeatedProperty() {
+        val rendered = SelectorExport.Rendered(listOf("""text("a")""", """text("b")"""), listOf("/* onScreen */"))
+        assertEquals("""pickup(text("a").text("b")) /* onScreen */""", rendered.text(SelectorExport.Form.PICKUP))
+        assertEquals("""text("a").text("b") /* onScreen */""", rendered.text)
+    }
+
+    @Test
+    fun theArgumentsSplitAtTheTopLevelOnly() {
+        val calls = listOf(
+            """textContains("x, \"y\", z")""",
+            """normalize({trim: true, nfkc: true})""",
+            """prefer("visible", "center")""",
+            """descMatch(/[/,]x\/,/g)""",
+            """idEndsWith('a,b')""",
+            """grid([1, 2])""",
+            """hint(null)""",
+        )
+        assertEquals(
+            """pickup({textContains: "x, \"y\", z", normalize: {trim: true, nfkc: true}, prefer: ["visible", "center"], """ +
+                """descMatch: /[/,]x\/,/g, idEndsWith: 'a,b', grid: [[1, 2]], hint: [null]})""",
+            SelectorExport.Rendered(calls, emptyList()).text(SelectorExport.Form.PICKUP),
+        )
+        assertEquals(listOf<String>(), CallSyntax.split("  "))
+        assertEquals(null, CallSyntax.split("\"a"))
+        assertEquals(null, CallSyntax.split("(a"))
+        assertEquals(null, CallSyntax.split("a,"))
+        assertEquals(null, CallSyntax.parse("text"))
+        assertEquals(null, CallSyntax.parse("a.b(1)"))
+    }
+
+    @Test
     fun stringLiteralsAreEscaped() {
         assertEquals("\"a\\\"b\\\\c\\n\"", JsLiteral.quote("a\"b\\c\n"))
         assertEquals("textContains(\"say \\\"hi\\\"\")", SelectorExport.render(keyword("say \"hi\""), emptyList(), KeywordProperty.TEXT, emptyList()).text)

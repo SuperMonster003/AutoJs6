@@ -4,6 +4,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.diagnostics.A11yStats
 import org.autojs.autojs.core.automator.diagnostics.NodeDump
+import org.autojs.autojs.core.automator.diagnostics.PickExplainer
 import org.autojs.autojs.core.automator.diagnostics.SelectorExplainer
 import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.core.automator.pick.PickResultAdapter
@@ -22,14 +23,15 @@ import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.Wrapper
 
 /**
- * The diagnostics of the `auto` module (roadmap P5.1): `auto.explain(selector, root?)` tallies
+ * The diagnostics of the `auto` module (roadmap P5.1): `auto.explain(selector, root?, compass?, resultType?)` tallies
  * every filter of a selector over the window roots (or under [root]) and reports which one
- * leaves nothing (see [SelectorExplainer]); `auto.dump(options?)` renders the window roots (or
+ * leaves nothing (see [SelectorExplainer]), then what a single result goes through (selector P3.5,
+ * [PickExplainer]); `auto.dump(options?)` renders the window roots (or
  * `options.root`) as text / JSON / XML (see [NodeDump], options per [DumpArguments]);
  * `auto.stats` is a snapshot of the script's search, query and Flow step tallies with `reset()`
  * (see [A11yStats]). Results are plain JavaScript objects whose `toString()` is the text report.
- * zh-CN: `auto` 模块的诊断 (路线图 P5.1): `auto.explain(selector, root?)` 在各窗口根 (或 [root] 之下) 对选择器的每个过滤器计数,
- * 报告哪一个使结果清空 (见 [SelectorExplainer]); `auto.dump(options?)` 把各窗口根 (或 `options.root`) 渲染为文本 / JSON / XML
+ * zh-CN: `auto` 模块的诊断 (路线图 P5.1): `auto.explain(selector, root?, compass?, resultType?)` 在各窗口根 (或 [root] 之下) 对选择器的每个过滤器计数,
+ * 报告哪一个使结果清空 (见 [SelectorExplainer]), 以及单个结果经历的过程 (selector P3.5, [PickExplainer]); `auto.dump(options?)` 把各窗口根 (或 `options.root`) 渲染为文本 / JSON / XML
  * (见 [NodeDump], 选项见 [DumpArguments]); `auto.stats` 为脚本的搜索, 查询与 Flow 步骤计数的快照, 带 `reset()` (见 [A11yStats]).
  * 结果为普通 JavaScript 对象, 其 `toString()` 为文本报告.
  *
@@ -41,11 +43,22 @@ internal class A11yDiagnosticsApi(private val scriptRuntime: ScriptRuntime) {
 
     private val scope: VarScope get() = scriptRuntime.topLevelScope
 
-    fun explain(selectorArg: Any?, rootArg: Any?): NativeObject {
+    /**
+     * [rest]: the arguments after the selector, `root?, compass?, resultType?`: the first is the root when it is a
+     * `UiObject`, or nullish among three (P3.5).
+     * zh-CN: [rest] 为选择器之后的参数 `root?, compass?, resultType?`: 首个参数为 `UiObject` 时 (或三个参数中为空值时) 是 root (P3.5).
+     */
+    fun explain(selectorArg: Any?, rest: List<Any?>): NativeObject {
         val selector = PickArguments.uiObject.buildSelector("auto.explain", "selector", unwrap(selectorArg), PickResultAdapter.binding(scriptRuntime))
+        val args = rest.map { unwrap(it) }
+        val hasRoot = args.firstOrNull() is UiObject || args.size == 3
+        val parts = PickArguments.uiObject.explainParts("auto.explain", if (hasRoot) args.drop(1) else args)
         bridge.ensureServiceStarted()
-        val explanation = SelectorExplainer.explain(roots(rootArg), selector.selector.effectiveFilters, selector.toString())
-        val text = explanation.render()
+        val roots = roots(if (hasRoot) args[0] else null)
+        val explanation = SelectorExplainer.explain(roots, selector.selector.effectiveFilters, selector.toString())
+        val settings = PickExplainer.Settings(fastPath = bridge.isFastPathEnabled, refreshOnHit = bridge.isRefreshOnHit)
+        val pick = PickExplainer.explain(roots, selector.selector, explanation, parts, settings, { it.refresh() })
+        val text = explanation.render() + "\n" + pick.render()
         return RhinoUtils.withRhinoContext(scriptRuntime) { _ ->
             obj(
                 "selector" to explanation.selector,
@@ -66,6 +79,20 @@ internal class A11yDiagnosticsApi(private val scriptRuntime: ScriptRuntime) {
                 },
                 "matches" to explanation.matches,
                 "nearMisses" to explanation.nearMisses,
+                // What a single result goes through (P3.5). zh-CN: 单个结果经历的过程 (P3.5).
+                "target" to pick.target,
+                "targetIndex" to pick.targetIndex.toDouble(),
+                "preference" to pick.preference,
+                "compass" to pick.compass,
+                "compassError" to pick.compassError,
+                "trail" to pick.trail.map { hop -> linkedMapOf<String, Any?>("step" to hop.step, "node" to hop.node) },
+                "reached" to pick.reached,
+                "result" to pick.result?.let { r -> linkedMapOf<String, Any?>("given" to r.given, "kind" to r.kind, "detail" to r.detail) },
+                "fastPath" to pick.fastPathKey,
+                "fastPathEnabled" to pick.fastPathEnabled,
+                "refreshOnHit" to pick.refreshOnHit,
+                "refreshes" to pick.refreshes,
+                "normalize" to pick.normalize,
                 "text" to text,
             ).withToString { text }
         }

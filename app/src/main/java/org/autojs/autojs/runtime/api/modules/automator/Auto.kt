@@ -436,14 +436,16 @@ class Auto(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         }
 
         /**
-         * `auto.explain(selector, root?)`: the per-filter tallies of a selector over the window roots
-         * (or under `root`); the result's `toString()` is the text report. See [A11yDiagnosticsApi].
-         * zh-CN: `auto.explain(selector, root?)`: 选择器在各窗口根 (或 `root` 之下) 的逐过滤器计数; 结果的 `toString()` 为文本报告. 见 [A11yDiagnosticsApi].
+         * `auto.explain(selector, root?, compass?, resultType?)`: the per-filter tallies of a selector over the window roots
+         * (or under `root`), then what a single result goes through (selector P3.5); the result's `toString()` is the text
+         * report. See [A11yDiagnosticsApi].
+         * zh-CN: `auto.explain(selector, root?, compass?, resultType?)`: 选择器在各窗口根 (或 `root` 之下) 的逐过滤器计数, 以及单个结果经历的过程
+         * (selector P3.5); 结果的 `toString()` 为文本报告. 见 [A11yDiagnosticsApi].
          */
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun explain(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..2) {
-            A11yDiagnosticsApi(scriptRuntime).explain(it.getOrNull(0), it.getOrNull(1))
+        fun explain(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+            A11yDiagnosticsApi(scriptRuntime).explain(it.getOrNull(0), it.drop(1))
         }
 
         /**

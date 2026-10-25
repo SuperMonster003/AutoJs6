@@ -2121,6 +2121,7 @@
     <string name="text_inspector_clear_region">Clear region</string>
     <string name="text_inspector_collapse_search_bar">Collapse search bar</string>
     <string name="text_inspector_copy_always_ask">Always ask</string>
+    <string name="text_inspector_copy_as_pickup">Copy as pickup</string>
     <string name="text_inspector_copy_as_selector">Copy as selector</string>
     <string name="text_inspector_copy_button_behavior">Copy button behavior</string>
     <string name="text_inspector_did_you_mean">Did you mean: %1$s</string>
