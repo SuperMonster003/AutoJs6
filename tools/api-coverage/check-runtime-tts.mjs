@@ -23,6 +23,6 @@ const types=read(resolve(node,'docs/nodejs/types/autojs6-node/tts.d.ts'));
 const docs=read(resolve(workspace,'AutoJs6-Documentation/api/runtimeApis.md')).split('## Node.js / Bun / Worker 的文字转语音')[1];assert(docs);
 for(const method of methods){assert(types.includes(method+'('),`Missing TTS declaration: ${method}`);assert(docs.includes(method),`Missing TTS documentation: ${method}`);}
 const provider=read(resolve(root,'app/src/main/java/org/autojs/autojs/engine/RuntimeTtsBridge.kt'));
-assert(provider.includes('TtsService(context, client)'));assert(provider.includes('selected: Set<String>?'));assert(provider.includes('session.pending.values.toList()'));
+assert(provider.includes('TtsService(context, client)'));assert(provider.includes('selected: Set<String>?'));assert(provider.includes('session.pending.values.concurrentSnapshot()'));
 assert(source.includes('for(const id of ttsClients)closeTts(id)'));
 console.log(JSON.stringify({rhinoTtsMethods:methods.size,sharedFacadeMembers:Object.keys(api).length,nodeBunWorker:true,sharedNativeService:true}));
