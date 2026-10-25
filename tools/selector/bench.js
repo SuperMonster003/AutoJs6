@@ -16,8 +16,9 @@
 //   findOne600Id id('aj6sel_none').findOne(600), the same with an id (P2.3, added by P2)
 //   lateOne   text(<last unique text>).findOne(600): the late hit through a polled entry (a single candidate, P2.3)
 //   cpu*      text('__aj6sel_none__').findOne(cpuMs) polled for cpuMs: process CPU (percent of one core) and attempts,
-//             fixed interval (the default) and with the eventAssistedPolling flag; cpuIdle is the process without a
-//             query (the floor). The overlay scenario repeats them with the progress bar updated every 16 ms (storm).
+//             fixed interval ('!eventAssistedPolling'; the default before P3.1) and with the eventAssistedPolling flag
+//             (the default since P3.1); cpuIdle is the process without a query (the floor). The overlay scenario repeats
+//             them with the progress bar updated every 16 ms (storm). The polled items above run with the default flags.
 // The result is written as JSON to AJ6SEL.out; the log has only progress marks, no node text.
 
 var CFG = typeof AJ6SEL === 'object' ? AJ6SEL : {};
@@ -160,11 +161,23 @@ function polledItem(name, query, expectNull) {
     return item;
 }
 
+// The fixed interval: eventAssistedPolling is on by default since P3.1.
+var FIXED = ['!eventAssistedPolling'];
+
+// auto.setFlags, without the names prefixed with '!' on a build before appendix C Q2 (which had no flag on by default).
+function setFlags(flags) {
+    try {
+        auto.setFlags(flags);
+    } catch (e) {
+        auto.setFlags(flags.filter(function (f) { return f.charAt(0) !== '!'; }));
+    }
+}
+
 // One poll of cpuMs: [query] true runs findOne(cpuMs) on a selector that never matches, false only sleeps.
 function cpuItem(name, rounds, query, flags) {
     var item = { ok: false, cpu: [], attempts: [], elapsed: [], medianCpu: null, medianAttempts: null };
     try {
-        auto.setFlags(flags || []);
+        setFlags(flags || []);
         for (var i = 0; i < rounds; i++) {
             auto.stats.reset();
             var c0 = cpuTime();
@@ -332,7 +345,7 @@ function bench() {
     }
 
     cpuItem('cpuIdle', IDLE_ROUNDS, false);
-    cpuItem('cpuFixed', CPU_ROUNDS, true);
+    cpuItem('cpuFixed', CPU_ROUNDS, true, FIXED);
     cpuItem('cpuAssisted', CPU_ROUNDS, true, ['eventAssistedPolling']);
 
     if (SCENARIO === 'overlay') {
@@ -341,7 +354,7 @@ function bench() {
         var u0 = storm.updates;
         var s0 = realtime();
         cpuItem('stormIdle', IDLE_ROUNDS, false);
-        cpuItem('stormFixed', CPU_ROUNDS, true);
+        cpuItem('stormFixed', CPU_ROUNDS, true, FIXED);
         cpuItem('stormAssisted', CPU_ROUNDS, true, ['eventAssistedPolling']);
         result.stormUpdatesPerSecond = Math.round((storm.updates - u0) * 10000 / (realtime() - s0)) / 10;
         stopStorm();

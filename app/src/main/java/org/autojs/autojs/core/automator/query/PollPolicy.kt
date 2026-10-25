@@ -7,10 +7,13 @@ import kotlin.math.pow
  * have passed, and sleep [interval] milliseconds between attempts (growing by [backoff] per
  * round, never above [maxInterval]). [UNBOUNDED] means no limit. The defaults reproduce the
  * selector queries as they have always been: a 50 ms interval and no limits. [eventAssisted]
- * lets a poller cut the sleep short when an accessibility event arrives (roadmap P5.2).
+ * lets a poller cut the sleep short when an accessibility event arrives (roadmap P5.2), yet no
+ * sooner than [minSpacing] milliseconds after the attempt before (docs/selector/ROADMAP.md D9), so
+ * that a burst of events polls no more often than the fixed 50 ms interval.
  * zh-CN: 轮询计划: 至多尝试 [times] 次, 经过的时间超过 [timeout] 毫秒后放弃, 两次尝试之间休眠 [interval] 毫秒 (每轮按
  * [backoff] 增长, 不超过 [maxInterval]). [UNBOUNDED] 表示不限. 默认值即选择器查询一贯的行为: 间隔 50 ms, 无上限.
- * [eventAssisted] 允许轮询器在无障碍事件到达时提前结束休眠 (Roadmap P5.2).
+ * [eventAssisted] 允许轮询器在无障碍事件到达时提前结束休眠 (Roadmap P5.2), 但不早于上一次尝试之后 [minSpacing] 毫秒 (D9),
+ * 使连发的事件不会比固定的 50 ms 间隔轮询得更频繁.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -21,6 +24,7 @@ data class PollPolicy(
     val backoff: Double = 1.0,
     val maxInterval: Long = interval,
     val eventAssisted: Boolean = false,
+    val minSpacing: Long = EVENT_MIN_SPACING,
 ) {
 
     init {
@@ -29,6 +33,7 @@ data class PollPolicy(
         require(times >= 0) { "times ($times) cannot be negative" }
         require(backoff >= 1.0) { "backoff ($backoff) must be at least 1" }
         require(maxInterval >= interval) { "maxInterval ($maxInterval) must be at least the interval ($interval)" }
+        require(minSpacing >= 0) { "minSpacing ($minSpacing) cannot be negative" }
     }
 
     /** Whether the plan can only end by a successful attempt. zh-CN: 计划是否只能以一次成功的尝试结束. */
@@ -65,6 +70,12 @@ data class PollPolicy(
 
         /** The fallback interval of event-assisted polling. zh-CN: 事件辅助轮询的兜底间隔. */
         const val EVENT_ASSISTED_INTERVAL = 200L
+
+        /**
+         * The least time between two attempts of event-assisted polling, the fixed interval of the other plans (D9).
+         * zh-CN: 事件辅助轮询两次尝试之间的最短时间, 即其他计划的固定间隔 (D9).
+         */
+        const val EVENT_MIN_SPACING = DEFAULT_INTERVAL
 
         /** A single attempt (`find()`, `findOnce()`, `exists()`). zh-CN: 单次尝试 (`find()`, `findOnce()`, `exists()`). */
         val ONCE = PollPolicy(times = 1)

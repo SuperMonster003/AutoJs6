@@ -214,9 +214,12 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     internal fun query(policy: PollPolicy = PollPolicy.ONCE, max: Int = Int.MAX_VALUE): UiSelectorQuery {
         val bridge = mAccessibilityBridge
         return when {
-            // Event-assisted polling (roadmap P5.2): a repeated query sleeps until the screen changes, at least 200 ms apart.
-            // zh-CN: 事件辅助轮询 (Roadmap P5.2): 重复的查询休眠到屏幕变化为止, 至少相隔 200 ms.
-            bridge != null && bridge.isEventAssistedPolling && policy.times != 1L && !policy.isNoop -> UiSelectorQuery(this, policy.assisted(), max, bridge.pulse.poller)
+            // Event-assisted polling (roadmap P5.2, on by default since 6.8.0: D6 (a), D9): a repeated query sleeps until the
+            // screen changes, at least 50 ms after an attempt and at most 200 ms; without a bound service (no events yet) the
+            // fixed interval stays.
+            // zh-CN: 事件辅助轮询 (Roadmap P5.2, 自 6.8.0 起默认开启: D6 (a), D9): 重复的查询休眠到屏幕变化为止, 距上一次尝试至少 50 ms,
+            // 至多 200 ms; 服务尚未绑定 (还没有事件) 时保持固定间隔.
+            bridge != null && bridge.isEventAssistedPolling && bridge.service != null && policy.times != 1L && !policy.isNoop -> UiSelectorQuery(this, policy.assisted(), max, bridge.pulse.poller)
             else -> UiSelectorQuery(this, policy, max)
         }
     }

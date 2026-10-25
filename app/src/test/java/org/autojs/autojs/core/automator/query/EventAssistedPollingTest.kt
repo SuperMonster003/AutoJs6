@@ -34,6 +34,9 @@ class EventAssistedPollingTest {
         assertEquals(300L, slow.interval)
         assertEquals(900L, slow.maxInterval)
 
+        assertEquals(PollPolicy.EVENT_MIN_SPACING, fast.minSpacing)
+        assertEquals(50L, PollPolicy.EVENT_MIN_SPACING)
+
         assertFalse(PollPolicy.ONCE.eventAssisted)
         assertEquals(PollPolicy(times = 1, interval = 200, eventAssisted = true), PollPolicy.ONCE.assisted())
         assertEquals(PollPolicy(interval = 500, maxInterval = 500, eventAssisted = true), PollPolicy.FOREVER.assisted(500))
@@ -54,6 +57,40 @@ class EventAssistedPollingTest {
         assertNull(result)
         assertEquals(listOf(50L), sleeps)
         assertEquals(emptyList<Long>(), eventSleeps)
+    }
+
+    /**
+     * docs/selector/ROADMAP.md D9 / P3.1: an event sooner than [PollPolicy.minSpacing] after the attempt sleeps the rest
+     * of the spacing, and the events of that rest are consumed with it (`eventSleep(0)`) instead of waking the next sleep.
+     */
+    @Test
+    fun anEarlyEventSleepsTheRestOfTheSpacing() {
+        val stormy = Poller({ now }, { millis -> sleeps += millis; now += millis }) { millis ->
+            eventSleeps += millis
+            now += minOf(millis, 10)
+        }
+        val result = stormy.poll(PollPolicy(times = 3, interval = 200).assisted()) { null }
+        assertNull(result)
+        assertEquals(listOf(200L, 0L, 200L, 0L), eventSleeps)
+        assertEquals(listOf(40L, 40L), sleeps)
+    }
+
+    /** D9 / P3.1: under an event every 16 ms, event-assisted polling attempts no more often than the fixed 50 ms interval. */
+    @Test
+    fun aStormPollsNoMoreOftenThanTheFixedInterval() {
+        fun attempts(poller: Poller, policy: PollPolicy): Int {
+            now = 0
+            var attempts = 0
+            poller.poll(policy) { attempts += 1; null }
+            return attempts
+        }
+        val storm = Poller({ now }, { millis -> now += millis }) { millis -> now += minOf(millis, 16) }
+        val assisted = attempts(storm, PollPolicy.within(1_000).assisted())
+        val fixed = attempts(storm, PollPolicy.within(1_000))
+        assertEquals(fixed, assisted)
+        assertEquals(22, fixed)
+        // Without the spacing (as before P3.1) the storm polls about three times as often. zh-CN: 没有间隔下限时 (P3.1 之前) 风暴下的轮询约为三倍.
+        assertEquals(64, attempts(storm, PollPolicy.within(1_000).assisted().copy(minSpacing = 0)))
     }
 
     @Test

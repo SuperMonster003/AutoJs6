@@ -233,9 +233,14 @@ abstract class AccessibilityBridge(
         const val FLAG_APP_WINDOWS_FALLBACK = 8
 
         /**
-         * Repeated selector queries and Flow waits sleep until an accessibility event arrives
-         * instead of a fixed interval (`auto.setFlags(["eventAssistedPolling"])`; roadmap P5.2).
-         * zh-CN: 重复的选择器查询与 Flow 等待休眠到无障碍事件到达为止, 而非固定间隔 (`auto.setFlags(["eventAssistedPolling"])`; Roadmap P5.2).
+         * Repeated selector queries, node waits and Flow waits sleep until an accessibility event arrives instead of a
+         * fixed interval (roadmap P5.2), at least 50 ms after the attempt before and at most 200 ms on a quiet screen.
+         * On by default since 6.8.0 (docs/selector/ROADMAP.md D6 (a), D9); `auto.clearFlags(["eventAssistedPolling"])`
+         * or `auto.setFlags(["!eventAssistedPolling"])` restores the fixed interval, `auto.setFlags(["eventAssistedPolling"])`
+         * keeps it on.
+         * zh-CN: 重复的选择器查询, 节点等待与 Flow 等待休眠到无障碍事件到达为止, 而非固定间隔 (Roadmap P5.2), 距上一次尝试至少 50 ms,
+         * 安静的屏幕上至多 200 ms. 自 6.8.0 起默认开启 (D6 (a), D9); `auto.clearFlags(["eventAssistedPolling"])` 或
+         * `auto.setFlags(["!eventAssistedPolling"])` 恢复固定间隔, `auto.setFlags(["eventAssistedPolling"])` 保持开启.
          */
         const val FLAG_EVENT_ASSISTED_POLLING = 16
 
@@ -248,10 +253,12 @@ abstract class AccessibilityBridge(
 
         /**
          * The flags of a bridge before any `auto.setFlags`, and the base `auto.setFlags(names)` starts from (appendix C Q2):
-         * the names it is given are set and the names prefixed with `!` cleared on top of these.
+         * the names it is given are set and the names prefixed with `!` cleared on top of these. [FLAG_EVENT_ASSISTED_POLLING]
+         * since 6.8.0 (D6 (a)).
          * zh-CN: 未调用 `auto.setFlags` 时 bridge 的标志, 也是 `auto.setFlags(names)` 的起点 (附录 C Q2): 在其上设置给出的名字, 清除带 `!` 前缀的名字.
+         * 自 6.8.0 起含 [FLAG_EVENT_ASSISTED_POLLING] (D6 (a)).
          */
-        const val DEFAULT_FLAGS = 0
+        const val DEFAULT_FLAGS = FLAG_EVENT_ASSISTED_POLLING
 
         private fun fallbackOf(flags: Int) = when {
             flags and FLAG_APP_WINDOWS_FALLBACK != 0 -> WindowRootPolicy.Fallback.APPLICATION_WINDOWS

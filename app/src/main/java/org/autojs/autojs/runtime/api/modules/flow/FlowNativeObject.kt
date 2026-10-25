@@ -106,9 +106,10 @@ internal class FlowApi(val executor: FlowExecutor) {
     }
 
     /**
-     * A wait step woken early by accessibility events when `auto.setFlags` includes
-     * `eventAssistedPolling` (roadmap P5.2); other steps unchanged.
-     * zh-CN: `auto.setFlags` 含 `eventAssistedPolling` 时由无障碍事件提前唤醒的等待步骤 (Roadmap P5.2); 其它步骤不变.
+     * A wait step woken early by accessibility events under the flag `eventAssistedPolling` (roadmap P5.2; on by
+     * default since 6.8.0, docs/selector/ROADMAP.md D6 (a)), at least 50 ms after its attempt before (D9); other steps unchanged.
+     * zh-CN: 标志 `eventAssistedPolling` 下由无障碍事件提前唤醒的等待步骤 (Roadmap P5.2; 自 6.8.0 起默认开启, D6 (a)), 距上一次尝试至少 50 ms (D9);
+     * 其它步骤不变.
      */
     private fun assisted(step: FlowStep): FlowStep = when {
         step is FlowStep.Wait && !step.policy.eventAssisted && scriptRuntime.accessibilityBridge.isEventAssistedPolling -> step.copy(policy = step.policy.copy(eventAssisted = true))

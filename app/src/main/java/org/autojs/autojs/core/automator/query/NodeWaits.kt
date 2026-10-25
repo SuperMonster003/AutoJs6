@@ -6,10 +6,10 @@ import org.autojs.autojs.core.automator.flow.Stability
 /**
  * The node-level waits of `UiObject` (roadmap P5.3): `waitUntilGone()` and `waitForStable()` as
  * plain poll loops over a [Poller], so that the loops are exact under test and share the script's
- * poller (event-assisted when `auto.setFlags(["eventAssistedPolling"])` is on) in production.
+ * poller (event-assisted under the flag `eventAssistedPolling`, on by default since 6.8.0) in production.
  * Android-free.
  * zh-CN: `UiObject` 的节点级等待 (Roadmap P5.3): 以 [Poller] 之上的普通轮询循环实现的 `waitUntilGone()` 与 `waitForStable()`,
- * 使循环在测试中精确, 在生产中共用脚本的轮询器 (`auto.setFlags(["eventAssistedPolling"])` 打开时为事件辅助). 不依赖 Android.
+ * 使循环在测试中精确, 在生产中共用脚本的轮询器 (标志 `eventAssistedPolling` 下为事件辅助, 自 6.8.0 起默认开启). 不依赖 Android.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */

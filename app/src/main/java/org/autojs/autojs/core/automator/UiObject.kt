@@ -575,9 +575,9 @@ open class UiObject private constructor(
      * Waits until the node is gone (roadmap P5.3): no longer refreshable, or refreshed but not
      * visible to the user (a dismissed dialog, a finished progress bar). `true` when it went within
      * [timeout] milliseconds (0 or less: no limit), polled every [interval] milliseconds and woken
-     * early by accessibility events under `auto.setFlags(["eventAssistedPolling"])`. Not for the
+     * early by accessibility events under the flag `eventAssistedPolling` (on by default since 6.8.0). Not for the
      * UI thread. zh-CN: 等待节点消失 (Roadmap P5.3): 不能再刷新, 或刷新后对用户不可见 (已关闭的对话框, 已完成的进度条). 在 [timeout]
-     * 毫秒内 (0 或负数: 不限) 消失时为 `true`, 每 [interval] 毫秒轮询一次, `auto.setFlags(["eventAssistedPolling"])` 下由无障碍事件
+     * 毫秒内 (0 或负数: 不限) 消失时为 `true`, 每 [interval] 毫秒轮询一次, 标志 `eventAssistedPolling` (自 6.8.0 起默认开启) 下由无障碍事件
      * 提前唤醒. 不可在 UI 线程调用.
      */
     @JvmOverloads
