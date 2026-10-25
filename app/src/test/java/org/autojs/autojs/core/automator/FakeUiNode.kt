@@ -100,15 +100,6 @@ class FakeUiNode private constructor(
      */
     fun findByViewId(viewId: String): List<FakeUiNode>? = lookedUp { it.id == viewId }
 
-    /**
-     * `findAccessibilityNodeInfosByText`: the nodes of the subtree whose text or description contains [text], ignoring
-     * case, as the framework matches; null when [lookup] is unavailable.
-     * zh-CN: `findAccessibilityNodeInfosByText`: 子树中文本或描述包含 [text] (不区分大小写, 同框架) 的节点; [lookup] 不可用时为 null.
-     */
-    fun findByText(text: String): List<FakeUiNode>? = lookedUp { node ->
-        node.text.contains(text, ignoreCase = true) || node.desc?.contains(text, ignoreCase = true) == true
-    }
-
     private fun lookedUp(predicate: (FakeUiNode) -> Boolean): List<FakeUiNode>? = when (lookup) {
         Lookup.NORMAL -> descendantsAndSelf().filter(predicate)
         Lookup.EMPTY -> emptyList()

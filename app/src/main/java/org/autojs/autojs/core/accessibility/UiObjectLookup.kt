@@ -10,10 +10,10 @@ import org.autojs.autojs.core.automator.search.FastPath
 
 /**
  * The framework lookups of the fast path over [UiObject] trees (docs/selector/ROADMAP.md P2.3): one
- * `findAccessibilityNodeInfosByViewId` / `findAccessibilityNodeInfosByText` per root (an entry name is looked up in
- * the package of the root and in `android`), a candidate placed at its depth by walking its parents up to the root.
+ * `findAccessibilityNodeInfosByViewId` per root (an entry name is looked up in the package of the root and in
+ * `android`), a candidate placed at its depth by walking its parents up to the root.
  * A lookup that throws counts as unavailable. Candidates are released through [NodeLifecycle.default] (API < 33).
- * zh-CN: 快路径在 [UiObject] 树上的框架查找 (P2.3): 每个根节点一次 `findAccessibilityNodeInfosByViewId` / `findAccessibilityNodeInfosByText`
+ * zh-CN: 快路径在 [UiObject] 树上的框架查找 (P2.3): 每个根节点一次 `findAccessibilityNodeInfosByViewId`
  * (条目名在根节点所属包与 `android` 中查找), 候选沿父节点上溯到根节点以确定深度. 抛出异常的查找视为不可用. 候选经 [NodeLifecycle.default] 释放 (API < 33).
  *
  * Created by SuperMonster003 on Oct 25, 2026.
@@ -29,7 +29,6 @@ internal object UiObjectLookup : FastPath.Lookup<UiObject, AccessibilityNodeInfo
         val info = root.unwrap()
         when (key) {
             is FastPath.Key.ViewId -> info.findAccessibilityNodeInfosByViewId(key.name).orEmpty()
-            is FastPath.Key.Text -> info.findAccessibilityNodeInfosByText(key.text).orEmpty()
             is FastPath.Key.IdEntry -> {
                 val own = root.packageName()?.let { info.findAccessibilityNodeInfosByViewId("$it${UiSelector.ID_IDENTIFIER}${key.entry}").orEmpty() }.orEmpty()
                 when (root.packageName()) {

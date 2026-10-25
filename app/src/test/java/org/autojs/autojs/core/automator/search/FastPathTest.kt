@@ -19,12 +19,12 @@ import org.junit.Test
 
 /**
  * docs/selector/ROADMAP.md P2.3 (appendix C Q1 / Q11): the dispatch of the framework fast path over `FakeUiNode` trees
- * with the lookups of [FakeUiNode.findByViewId] / [FakeUiNode.findByText]: the key of a selector, an empty lookup in an
+ * with the lookup of [FakeUiNode.findByViewId]: the key of a selector (an exact text has none, Q11), an empty lookup in an
  * intermediate and in a full attempt, a single candidate that passes or not, several candidates, all results /
  * breadth first / a negative index (not single), unavailable lookups, the release of the candidates, and the attempt
  * plan of a polled query (the first attempt, the last attempt by time and by count, the verification of long queries).
  *
- * zh-CN: P2.3 (附录 C Q1 / Q11): 以 [FakeUiNode.findByViewId] / [FakeUiNode.findByText] 查找, 在 `FakeUiNode` 树上验证框架快路径的分派: 选择器的键,
+ * zh-CN: P2.3 (附录 C Q1 / Q11): 以 [FakeUiNode.findByViewId] 查找, 在 `FakeUiNode` 树上验证框架快路径的分派: 选择器的键 (精确文本没有键, Q11),
  * 中间尝试与完整尝试中的空查找, 单候选通过与不通过, 多候选, 全部结果 / 广度优先 / 负数索引 (非单个), 查找不可用, 候选的释放, 以及轮询查询的
  * 尝试计划 (第一次尝试, 按时间与按次数的最后一次尝试, 长查询的校验).
  */
@@ -34,7 +34,6 @@ class FastPathTest {
         val released = ArrayList<String>()
         override fun candidates(root: FakeUiNode, key: FastPath.Key): List<FakeUiNode>? = when (key) {
             is FastPath.Key.ViewId -> root.findByViewId(key.name)
-            is FastPath.Key.Text -> root.findByText(key.text)
             is FastPath.Key.IdEntry -> {
                 val own = root.findByViewId("${root.packageName}:id/${key.entry}") ?: return null
                 val framework = root.findByViewId("android:id/${key.entry}") ?: return null
@@ -96,8 +95,8 @@ class FastPathTest {
     fun keyOfSelectors() {
         assertEquals("id(com.example:id/ok)", FastPath.keyOf(listOf(IdFilter.equals("com.example:id/ok"))).toString())
         assertTrue(FastPath.keyOf(listOf(IdFilter.equals("ok"))) is FastPath.Key.IdEntry)
-        assertTrue(FastPath.keyOf(listOf(text("OK"))) is FastPath.Key.Text)
-        // An id wins over a text, whatever the order. zh-CN: id 优先于 text, 与顺序无关.
+        // An exact text takes no fast path (Q11), an id beside it does. zh-CN: 精确文本不走快路径 (Q11), 与之并列的 id 走.
+        assertNull(FastPath.keyOf(listOf(text("OK"))))
         assertTrue(FastPath.keyOf(listOf(text("OK"), BooleanFilter(BooleanFilter.CLICKABLE), IdFilter.equals("ok"))) is FastPath.Key.IdEntry)
         assertNull(FastPath.keyOf(listOf(text(""))))
         assertNull(FastPath.keyOf(listOf(StringPropertyFilter(StringProperty.TEXT, StringMatcher.contains("OK")))))
@@ -114,17 +113,17 @@ class FastPathTest {
     @Test
     fun emptyLookupIsAMissOnlyInAnIntermediateAttempt() {
         val root = tree()
-        val none = selector(text("Nothing"))
+        val none = selector(IdFilter.equals("nothing"))
         assertSame(FastPath.Outcome.Miss, decide(root, none, true, FastPath.Attempt.INTERMEDIATE))
         assertTrue((decide(root, none, true, FastPath.Attempt.FULL) as FastPath.Outcome.Search).emptyLookup)
         assertSame(FastPath.Outcome.Miss, decide(root, selector(IdFilter.equals("none")), false, FastPath.Attempt.INTERMEDIATE))
         // A provider whose lookups find nothing: an intermediate attempt says "nothing", a full attempt walks the tree.
         // zh-CN: 查找什么也找不到的提供方: 中间尝试判定 "未找到", 完整尝试遍历整棵树.
         root.lookup = FakeUiNode.Lookup.EMPTY
-        assertSame(FastPath.Outcome.Miss, decide(root, selector(text("OK")), true, FastPath.Attempt.INTERMEDIATE))
-        val last = decide(root, selector(text("OK")), true, FastPath.Attempt.FULL)
+        assertSame(FastPath.Outcome.Miss, decide(root, selector(IdFilter.equals("ok")), true, FastPath.Attempt.INTERMEDIATE))
+        val last = decide(root, selector(IdFilter.equals("ok")), true, FastPath.Attempt.FULL)
         assertTrue((last as FastPath.Outcome.Search).emptyLookup)
-        assertEquals(listOf("ok"), DFS.search(root, selector(text("OK")).snapshot(), 1).map { it.name })
+        assertEquals(listOf("ok"), DFS.search(root, selector(IdFilter.equals("ok")).snapshot(), 1).map { it.name })
     }
 
     @Test
@@ -154,12 +153,6 @@ class FastPathTest {
 
     @Test
     fun severalCandidates() {
-        val lookup = FakeLookup()
-        // `text("OK")`: the lookup ignores case and finds substrings in descriptions too: "OK" and "ok, then" / "Okay".
-        // zh-CN: `text("OK")`: 查找不区分大小写, 也在描述中找子串: "OK" 与 "ok, then" / "Okay".
-        val outcome = decide(tree(), selector(text("OK")), true, FastPath.Attempt.INTERMEDIATE, lookup)
-        assertTrue(!(outcome as FastPath.Outcome.Search).emptyLookup)
-        assertEquals(listOf("ok", "footer"), lookup.released)
         val titles = FakeLookup()
         assertTrue(decide(tree(), selector(IdFilter.equals("title")), true, FastPath.Attempt.INTERMEDIATE, titles) is FastPath.Outcome.Search)
         assertEquals(listOf("title1", "title2"), titles.released)
@@ -177,7 +170,7 @@ class FastPathTest {
     @Test
     fun unavailableLookup() {
         val root = tree().apply { lookup = FakeUiNode.Lookup.UNAVAILABLE }
-        val outcome = decide(root, selector(text("Nothing")), true, FastPath.Attempt.INTERMEDIATE)
+        val outcome = decide(root, selector(IdFilter.equals("nothing")), true, FastPath.Attempt.INTERMEDIATE)
         assertTrue(!(outcome as FastPath.Outcome.Search).emptyLookup)
         // With several roots, the candidates of the roots before the failing one are released.
         // zh-CN: 有多个根节点时, 失败根节点之前各根节点的候选被释放.
@@ -235,15 +228,15 @@ class FastPathTest {
     @Test
     fun ledger() {
         val ledger = FastPath.Ledger()
-        assertTrue(!ledger.isUnreliable("com.example", FastPath.KIND_TEXT))
-        ledger.markUnreliable("com.example", FastPath.KIND_TEXT)
-        assertTrue(ledger.isUnreliable("com.example", FastPath.KIND_TEXT))
+        assertTrue(!ledger.isUnreliable("com.example", "other"))
+        ledger.markUnreliable("com.example", "other")
+        assertTrue(ledger.isUnreliable("com.example", "other"))
         assertTrue(!ledger.isUnreliable("com.example", FastPath.KIND_ID))
-        assertTrue(!ledger.isUnreliable("com.other", FastPath.KIND_TEXT))
+        assertTrue(!ledger.isUnreliable("com.other", "other"))
         ledger.markUnreliable(null, FastPath.KIND_ID)
         assertTrue(ledger.isUnreliable(null, FastPath.KIND_ID))
         ledger.clear()
-        assertTrue(!ledger.isUnreliable("com.example", FastPath.KIND_TEXT))
+        assertTrue(!ledger.isUnreliable("com.example", "other"))
     }
 
     private class Recording(private val inner: Filter, private val log: MutableList<String>) : Filter {

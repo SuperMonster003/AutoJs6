@@ -10,15 +10,16 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * The framework fast path of a selector search (docs/selector/ROADMAP.md P2.3, appendix C Q1 / Q2 / Q6 / Q11). A
  * selector with an exact `id` (the full name, or the entry name queried as `<root package>:id/<entry>` and
- * `android:id/<entry>`) or an exact non-empty `text` asks the framework for its candidates first, one IPC per root
- * (`findAccessibilityNodeInfosByViewId` / `findAccessibilityNodeInfosByText`):
+ * `android:id/<entry>`) asks the framework for its candidates first, one `findAccessibilityNodeInfosByViewId` per root.
+ * An exact `text` takes no fast path (appendix C Q11): the text lookup of the framework misses most texts of a WebView
+ * and some of ordinary views (measured on the devices of P2.3, appendix A):
  *
  * - no candidate: in an intermediate attempt of a polled query the attempt finds nothing without walking the tree; the
  *   first and the last attempt of the query, and a verification attempt at least every [VERIFY_INTERVAL] ms of a long
  *   query, walk the tree all the same, and a node found that way after an empty lookup is a mismatch (counted in
  *   `auto.stats`; the miss of the lookup is then no longer trusted for the package of that root in the script, see
  *   [Ledger]). The first attempt walking the tree keeps a node already on the screen from waiting for the last attempt
- *   when the provider of its window does not answer the lookup (Compose, for one, answers no text lookup);
+ *   when the lookup does not see it (an HTML id of a WebView, or an id of another package, for ones);
  * - exactly one candidate that passes the selector, for a single result searched depth first: it is the result;
  * - anything else (several candidates, all results, breadth first, a candidate that does not pass): the full search,
  *   so the order and the number of results never depend on the lookups.
@@ -27,10 +28,11 @@ import java.util.concurrent.ConcurrentHashMap
  * are behind [Lookup], so the dispatch is unit tested over `FakeUiNode`.
  *
  * zh-CN: 选择器搜索的框架快路径 (P2.3, 附录 C Q1 / Q2 / Q6 / Q11). 含精确 `id` (全名, 或以 `<根节点包名>:id/<条目>` 与 `android:id/<条目>` 查询的条目名)
- * 或精确非空 `text` 的选择器先向框架取候选, 每个根节点一次 IPC (`findAccessibilityNodeInfosByViewId` / `findAccessibilityNodeInfosByText`):
+ * 的选择器先向框架取候选, 每个根节点一次 `findAccessibilityNodeInfosByViewId`. 精确 `text` 不走快路径 (附录 C Q11): 框架的文本查找漏掉 WebView
+ * 中的大部分文本与普通控件中的部分文本 (P2.3 的真机实测, 附录 A):
  * 没有候选时, 轮询查询的中间尝试不遍历树即判定未找到; 查询的第一次与最后一次尝试, 以及长查询中至少每 [VERIFY_INTERVAL] ms 一次的校验尝试仍遍历整棵树,
  * 查找为空而遍历找到节点即为不一致 (计入 `auto.stats`; 此后该脚本对该根节点所属包不再信任查找为空的结论, 见 [Ledger]). 第一次尝试遍历整棵树,
- * 使窗口的提供方不响应查找时 (例如 Compose 不响应文本查找), 已在屏幕上的节点不必等到最后一次尝试;
+ * 使查找看不到的节点 (例如 WebView 的 HTML id, 其他包的 id) 已在屏幕上时不必等到最后一次尝试;
  * 单个结果且深度优先时, 恰好一个候选并通过选择器即为结果; 其余情况 (多个候选, 全部结果, 广度优先, 候选未通过) 走完整搜索,
  * 结果的顺序与数量因此从不取决于查找. 单次搜索 (`find()`, `findOnce()`, `exists()`, `pickup`) 总是遍历整棵树 (Q1).
  * Android-free: 查找藏在 [Lookup] 之后, 分派逻辑以 `FakeUiNode` 做单元测试.
@@ -51,13 +53,9 @@ object FastPath {
         /** `id("entry")`: the entry name in the package of the root, or in `android`. zh-CN: 条目名: 根节点所属包或 `android` 中的同名 id. */
         class IdEntry(val entry: String) : Key(KIND_ID)
 
-        /** `text("...")`, not empty. zh-CN: 非空的精确文本. */
-        class Text(val text: String) : Key(KIND_TEXT)
-
         override fun toString() = when (this) {
             is ViewId -> "id($name)"
             is IdEntry -> "id($entry)"
-            is Text -> "text($text)"
         }
 
     }
@@ -114,12 +112,10 @@ object FastPath {
     }
 
     /**
-     * The key of the filters of a selector: the first exact `id` among them, else the first exact non-empty `text`;
-     * null when there is neither (the fast path does not apply). zh-CN: 选择器各过滤器的键: 其中首个精确 `id`, 否则首个精确非空 `text`;
-     * 两者都没有时为 null (快路径不适用).
+     * The key of the filters of a selector: the first exact `id` among them; null when there is none (the fast path
+     * does not apply). zh-CN: 选择器各过滤器的键: 其中首个精确 `id`; 没有时为 null (快路径不适用).
      */
     fun keyOf(filters: List<Filter>): Key? {
-        var text: Key? = null
         for (filter in filters) {
             if (filter !is StringPropertyFilter) continue
             val exact = filter.matcher.exact?.takeIf { it.isNotEmpty() } ?: continue
@@ -128,11 +124,10 @@ object FastPath {
                 // zh-CN: 框架只解析完整名称 (`pkg:id/entry`); 其他形式的 id 留给搜索.
                 StringProperty.ID -> if (ID_IDENTIFIER in exact) return Key.ViewId(exact)
                 StringProperty.ID_ENTRY -> return Key.IdEntry(exact)
-                StringProperty.TEXT -> if (text == null) text = Key.Text(exact)
                 else -> Unit
             }
         }
-        return text
+        return null
     }
 
     /**
@@ -218,6 +213,5 @@ object FastPath {
 
     const val KIND_ID = "id"
 
-    const val KIND_TEXT = "text"
 
 }
