@@ -2,6 +2,8 @@ package org.autojs.autojs.core.automator.pick
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -79,6 +81,71 @@ class PickResultTypeTest {
         assertNull(PickResultType.arrayFormOf("@"))
         assertNull(PickResultType.arrayFormOf("text"))
         assertNull(PickResultType.arrayFormOf(null))
+    }
+
+    /**
+     * Appendix C Q9 (docs/selector/ROADMAP.md): the new layer's `SelectorForms` touched `WidgetCollection` before anything
+     * asked for the alias table, so the JVM initialized `PickResultType` while that object was still being initialized,
+     * and the eight collection spellings resolved to method names for the life of the process.
+     * zh-CN: 附录 C Q9: 新层 SelectorForms 在任何查表之前先触达 WidgetCollection, JVM 在该对象初始化途中初始化 PickResultType,
+     * 于是 8 种集合拼写在整个进程内都解析为方法名.
+     */
+    @Test
+    fun theCollectionSpellingsResolveWhenTheCollectionIsTouchedFirst() {
+        val loader = IsolatedLoader()
+        val collection = loader.objectOf("WidgetCollection")
+        COLLECTION_SPELLINGS.forEach { assertSame(it, collection, loader.of(it)) }
+        assertEquals(COLLECTION_SPELLINGS, loader.spellings(collection))
+    }
+
+    @Test
+    fun everySpellingResolvesWhicheverTypeIsTouchedFirst() {
+        SYMBOLIC_TYPES.forEach { first ->
+            val loader = IsolatedLoader()
+            loader.objectOf(first)
+            SYMBOLIC_TYPES.forEach { name ->
+                val type = loader.objectOf(name)
+                val spellings = loader.spellings(type)
+                assertTrue("$first first: $name", spellings.isNotEmpty())
+                spellings.forEach { assertSame("$first first: $it", type, loader.of(it)) }
+            }
+        }
+    }
+
+    /** Loads the `PickResultType` hierarchy afresh, so a test decides which of its classes is initialized first. zh-CN: 重新加载 PickResultType 层级, 由测试决定先初始化其中哪个类. */
+    private class IsolatedLoader : ClassLoader(PickResultType::class.java.classLoader) {
+
+        private val base = PickResultType::class.java.name
+
+        override fun loadClass(name: String, resolve: Boolean): Class<*> {
+            if (name != base && !name.startsWith("$base$")) return super.loadClass(name, resolve)
+            synchronized(this) {
+                findLoadedClass(name)?.let { return it }
+                val bytes = parent.getResourceAsStream(name.replace('.', '/') + ".class")!!.use { it.readBytes() }
+                return defineClass(name, bytes, 0, bytes.size)
+            }
+        }
+
+        /** The object [simpleName] of the hierarchy, initializing its class. zh-CN: 层级中的对象 [simpleName], 会初始化其类. */
+        fun objectOf(simpleName: String): Any = Class.forName("$base$$simpleName", true, this).getField("INSTANCE").get(null)
+
+        fun of(value: Any?): Any? = companion().let { it.javaClass.getMethod("of", Any::class.java).invoke(it, value) }
+
+        @Suppress("UNCHECKED_CAST")
+        fun spellings(type: Any): List<String> = companion().let {
+            it.javaClass.getMethod("spellings", Class.forName(base, false, this)).invoke(it, type) as List<String>
+        }
+
+        private fun companion(): Any = Class.forName(base, true, this).getField("Companion").get(null)
+
+    }
+
+    private companion object {
+
+        val COLLECTION_SPELLINGS = listOf("{}", "wc", "collection", "list", "#{}", "{#}", "w{}", "{w}")
+
+        val SYMBOLIC_TYPES = listOf("Widget", "WidgetCollection", "Widgets", "Content", "Contents", "Point", "Points", "Selector", "Existence")
+
     }
 
 }

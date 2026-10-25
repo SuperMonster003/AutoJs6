@@ -59,21 +59,31 @@ sealed class PickResultType {
         /** The default result type of `pickup` / `detect`. zh-CN: `pickup` / `detect` 的默认结果类型. */
         const val WIDGET = "widget"
 
-        private val groups: Map<PickResultType, List<String>> = linkedMapOf(
-            Widget to listOf("#", "w", WIDGET),
-            WidgetCollection to listOf("{}", "wc", "collection", "list") + listAliases("#", "w"),
-            Widgets to listOf("[]", "ws", "widgets") + arrayAliases("#", "w"),
-            Content to listOf("$", "txt", "content"),
-            Contents to listOf("contents") + arrayAliases("$", "txt", "content"),
-            Point to listOf(".", "pt", "point"),
-            Points to listOf("points", "pts") + arrayAliases(".", "point", "pt"),
-            Selector to listOf("@", "selector", "sel"),
-            Existence to listOf("?", "exists"),
-        )
+        // Built on the first lookup, not by the class initializer: when the first class of the hierarchy a process
+        // touches is one of the objects (SelectorForms of the new layer reads WidgetCollection), the JVM initializes
+        // this class while that object is still being initialized, so the object would be null here and its
+        // spellings would resolve to method names for the life of the process (docs/selector/ROADMAP.md appendix C Q9).
+        // zh-CN: 在首次查表时建立, 而不是在类初始化时: 进程首先触达的若是层级中的某个对象 (新层 SelectorForms 读取 WidgetCollection),
+        // JVM 会在该对象初始化途中初始化本类, 此处该对象尚为 null, 其拼写在整个进程内都会解析为方法名 (docs/selector/ROADMAP.md 附录 C Q9).
+        private val groups: Map<PickResultType, List<String>> by lazy {
+            linkedMapOf(
+                Widget to listOf("#", "w", WIDGET),
+                WidgetCollection to listOf("{}", "wc", "collection", "list") + listAliases("#", "w"),
+                Widgets to listOf("[]", "ws", "widgets") + arrayAliases("#", "w"),
+                Content to listOf("$", "txt", "content"),
+                Contents to listOf("contents") + arrayAliases("$", "txt", "content"),
+                Point to listOf(".", "pt", "point"),
+                Points to listOf("points", "pts") + arrayAliases(".", "point", "pt"),
+                Selector to listOf("@", "selector", "sel"),
+                Existence to listOf("?", "exists"),
+            )
+        }
 
-        private val symbols: Map<String, PickResultType> = groups.entries
-            .flatMap { (type, names) -> names.map { it to type } }
-            .toMap()
+        private val symbols: Map<String, PickResultType> by lazy {
+            groups.entries
+                .flatMap { (type, names) -> names.map { it to type } }
+                .toMap()
+        }
 
         /** The spellings of a symbolic type, the canonical one first. zh-CN: 符号类型的各种拼写, 规范拼写在前. */
         fun spellings(type: PickResultType): List<String> = groups[type].orEmpty()
