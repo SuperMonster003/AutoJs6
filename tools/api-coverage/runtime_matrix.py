@@ -212,6 +212,7 @@ class BunIndex:
         self.methods = surfaces.get('methods', {})
         self.capabilities = surfaces.get('capabilities', [])
         self.policy = policy
+        self.used = set()
 
     def related(self, namespace):
         related = self.policy.get('namespaceCapabilities', {}).get(namespace)
@@ -221,10 +222,18 @@ class BunIndex:
         return related
 
     def capability(self, namespace, path):
-        """The grant of a namespace member: a related capability whose method table has it, else the only related one."""
+        """The grant of a namespace member: a related capability whose method table has it, else the only related one,
+        else the explicit `memberCapabilities` mapping (client-side helpers and renamed wrappers of a method-table entry)."""
         related = self.related(namespace)
         owners = [name for name in related if path.split('.')[0] in self.methods.get(name, ())]
-        return owners[0] if owners else related[0] if len(related) == 1 else None
+        if owners or len(related) == 1:
+            return owners[0] if owners else related[0]
+        key = f'{namespace}.{path}'
+        mapped = self.policy.get('memberCapabilities', {}).get(key)
+        if mapped:
+            self.used.add(key)
+            return mapped['capability'] if mapped['capability'] in self.capabilities else None
+        return None
 
     def cell(self, namespace, path, via):
         """Client members are capability-gated; a namespace without any related capability holds client-side helpers."""
@@ -323,12 +332,15 @@ def surface_states(row, documentation, surfaces):
 
 
 def apply_exclusions(rows, rules):
-    """Exclusions fill pending cells only; a rule matching a covered cell is reported as shadowed."""
+    """Exclusions fill pending cells only; a rule matching a covered cell is reported as shadowed.
+    A rule with `memberSource` only matches returned-member rows of that source (kotlin-class / augment-prototype)."""
     used, shadowed = Counter(), defaultdict(list)
     for row in rows:
         for column in RUNTIME_COLUMNS:
             for rule in rules:
                 if column not in rule.get('columns', RUNTIME_COLUMNS) or not any(fnmatchcase(row['id'], pattern) for pattern in rule['match']):
+                    continue
+                if rule.get('memberSource') and row['memberSource'] != rule['memberSource']:
                     continue
                 used[rule['id']] += 1
                 cell = row[column]
@@ -354,6 +366,12 @@ def missing_reasons(rows):
             elif cell['reason'] == 'runtime-native' and not cell.get('equivalent'):
                 result.append({'id': row['id'], 'column': column, 'problem': 'runtime-native without equivalent'})
     return result
+
+
+def missing_capabilities(rows):
+    """Bun capability-gated cells without a capability name (Q12 (a): the grant must be named)."""
+    return [{'id': row['id'], 'namespace': row['bun'].get('namespace'), 'member': row['bun'].get('member')}
+            for row in rows if row['bun']['status'] == 'capability-gated' and not row['bun'].get('capability')]
 
 
 def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, worker, catalog=None, documentation=None, surfaces=None, sources=None):
@@ -382,6 +400,8 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
             for column in RUNTIME_COLUMNS:
                 row[column] = dict(mapping[column]) if column in mapping else {'status': 'pending'}
     conflicts = apply_exclusions(rows, policy.get('exclusions', []))
+    conflicts += [{'rule': f'bun.memberCapabilities {key}', 'kind': 'unused'}
+                  for key in sorted(set(policy.get('bun', {}).get('memberCapabilities', {})) - bun.used) if not key.startswith('_')]
     rows.sort(key=lambda row: row['id'])
     by_column = {}
     for column, values in [('doc', DOC_VALUES), ('dts', DTS_VALUES), ('ace', ACE_VALUES)]:
@@ -397,7 +417,7 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
         'summary': {'rows': len(rows), 'exports': exported, 'returnedMembers': len(rows) - exported,
                     'returnedObjectsInput': 'returnedObjects' in exports, 'byColumn': by_column,
                     'pending': {column: by_column[column]['pending'] for column in RUNTIME_COLUMNS},
-                    'missingReasons': missing_reasons(rows), 'policyConflicts': conflicts},
+                    'missingReasons': missing_reasons(rows), 'missingCapabilities': missing_capabilities(rows), 'policyConflicts': conflicts},
         'rows': rows,
     }
 
@@ -445,7 +465,7 @@ def render_markdown(matrix):
         for column in RUNTIME_COLUMNS:
             if row[column].get('rule'):
                 rules[row[column]['rule']][column] += 1
-    lines += ['', f"排除理由缺失: {len(summary['missingReasons'])}. 策略冲突: "
+    lines += ['', f"排除理由缺失: {len(summary['missingReasons'])}. Bun 缺能力名: {len(summary.get('missingCapabilities', []))}. 策略冲突: "
               + (', '.join(f"{item['rule']} {item['kind']}" + (f" ({item['column']}, {len(item['ids'])})" if item['kind'] == 'shadowed' else '')
                            for item in summary['policyConflicts']) or '无') + '.']
     lines += ['', '## 排除规则 (草案)', '', '| 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |', '|---|---|---:|---:|---:|---|']
@@ -538,15 +558,19 @@ def default_typescript(ace):
 
 
 def gate(matrix, markdown):
-    """check.py --matrix: failures (the checked-in MATRIX.md differs) and report-only findings (pending, missing reasons)."""
+    """check.py --matrix: failures (the checked-in MATRIX.md differs, a Bun capability-gated cell without its capability)
+    and report-only findings (pending, missing reasons)."""
     state = compare_markdown(matrix, markdown)
     failures = []
     if state in ('missing', 'stale'):
         failures.append(f'{MARKDOWN} is {state}; regenerate it with python tools/api-coverage/check.py --matrix --write-matrix')
     summary = matrix['summary']
+    failures += [f"Runtime matrix Bun capability-gated without a capability: {item['id']} ({item['namespace']}.{item['member']}); "
+                 'map it in runtime-policy.json bun.memberCapabilities' for item in summary.get('missingCapabilities', [])]
     findings = [f'Runtime matrix pending in {COLUMN_TITLES[column]}: {count}' for column, count in summary['pending'].items() if count]
     findings += [f"Runtime matrix exclusion without a valid reason: {item['id']} ({item['column']}: {item['problem']})" for item in summary['missingReasons']]
     return {'markdown': state, 'pending': summary['pending'], 'missingReasons': len(summary['missingReasons']),
+            'missingCapabilities': len(summary.get('missingCapabilities', [])),
             'policyConflicts': len(summary['policyConflicts']), 'failures': failures, 'findings': findings}
 
 
@@ -579,7 +603,8 @@ def main():
     write(matrix, reports, host / MARKDOWN if args.write_markdown else None)
     result = gate(matrix, host / MARKDOWN)
     print(json.dumps({key: matrix['summary'][key] for key in ['rows', 'exports', 'returnedMembers', 'pending']}
-                     | {'missingReasons': result['missingReasons'], 'policyConflicts': result['policyConflicts'], 'markdown': result['markdown']},
+                     | {'missingReasons': result['missingReasons'], 'missingCapabilities': result['missingCapabilities'],
+                        'policyConflicts': result['policyConflicts'], 'markdown': result['markdown']},
                      ensure_ascii=False, indent=2))
     return 1 if args.check and result['failures'] else 0
 

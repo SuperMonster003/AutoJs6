@@ -35,6 +35,33 @@
       "opencc": ["text.opencc"], "pinyin": ["text.pinyin"], "pinyin4j": ["text.pinyin4j"], "screenRecorder": ["screen.record"],
       "shizuku": ["shell.shizuku"], "sqlite": ["database.control"], "storages": ["storage.control"], "ui": ["ui.layout"]
     },
+    "memberCapabilities": {
+      "_note": "Q12 (a): namespace members missing from HOST_API_METHODS whose namespace has several related grants; the grant of the host-client.mjs call they wrap (2026-10-25, api-coverage P1.1)",
+      "images.ObjectFrame": {"capability": "image.process", "basis": "client-side class of matchFeatures results"},
+      "images.__buildRegion": {"capability": "image.process", "basis": "client-side region helper of the find* calls"},
+      "images.buildRegion": {"capability": "image.process", "basis": "client-side region helper of the find* calls"},
+      "images.detectColor": {"capability": "image.process", "basis": "alias of detectsColor"},
+      "images.detectsMultiColors": {"capability": "image.process", "basis": "alias of detectMultiColors"},
+      "images.findColorEquals": {"capability": "image.process", "basis": "findColor with threshold 0"},
+      "images.findColorInRegion": {"capability": "image.process", "basis": "findColor with a region"},
+      "images.findImageInRegion": {"capability": "image.process", "basis": "findImage with a region"},
+      "images.findPointByColor": {"capability": "image.process", "basis": "alias of findColor"},
+      "images.findPointByColorExactly": {"capability": "image.process", "basis": "findColor with threshold 0"},
+      "images.findPointByColors": {"capability": "image.process", "basis": "alias of findMultiColors"},
+      "images.findPointByImage": {"capability": "image.process", "basis": "alias of findImage"},
+      "images.findPointsByColor": {"capability": "image.process", "basis": "alias of findAllPointsForColor"},
+      "images.fromBytes": {"capability": "image.process", "basis": "encodes the bytes and calls fromBase64"},
+      "images.getHeight": {"capability": "image.process", "basis": "client-side, reads the handle dimensions (handles also come from image.files / screen.capture; image.process is the closest grant)"},
+      "images.getSize": {"capability": "image.process", "basis": "client-side, reads the handle dimensions (handles also come from image.files / screen.capture; image.process is the closest grant)"},
+      "images.getWidth": {"capability": "image.process", "basis": "client-side, reads the handle dimensions (handles also come from image.files / screen.capture; image.process is the closest grant)"},
+      "images.isRecycled": {"capability": "image.process", "basis": "client-side recycle tracking; recycle is in both image.process and image.files, image.process is tried first"},
+      "images.loadAsync": {"capability": "image.files", "basis": "alias of load"},
+      "images.read": {"capability": "image.files", "basis": "calls readImage"},
+      "images.requestScreenCaptureAsync": {"capability": "screen.capture", "basis": "alias of requestScreenCapture"},
+      "images.save": {"capability": "image.files", "basis": "calls saveImage"},
+      "images.toBytes": {"capability": "image.process", "basis": "calls toBase64 and decodes"},
+      "shell.checkAccess": {"capability": "shell.control", "basis": "client-side check of the shell / shell.root / shell.shizuku grants; shell.control is the base grant"}
+    },
     "memberAliases": {}
   },
   "returnedObjects": {},
@@ -96,6 +123,15 @@
       "equivalent": "java module handles (java.create / java.callInstance / java.callStatic)",
       "note": "isJava* entries are inferred from the appendix wording, review in P1.4",
       "source": "appendix D source 2"
+    },
+    {
+      "id": "java-prototype-objects",
+      "match": ["*#*"],
+      "memberSource": "kotlin-class",
+      "columns": ["node_main", "node_worker", "bun"],
+      "status": "not-portable", "reason": "java-prototype",
+      "note": "members of returned objects read from Kotlin classes (UiObject, ImageWrapper, Dialog, Database, ...): Node / Bun have no such Java object; augment-prototype handles (Flow, MailClient, ShellProcess, ...) stay pending for P3 / P4",
+      "source": "Q17 (a), maintainer 2026-10-25"
     },
     {
       "id": "jsox-extensions",

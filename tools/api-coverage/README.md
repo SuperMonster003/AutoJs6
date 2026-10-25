@@ -175,8 +175,9 @@ python tools/api-coverage/check.py --write-matrix   # regenerate MATRIX.md
 
 `--matrix` builds the matrix from the same run's `exports.json`,
 `documentation.json` and `surfaces.json` (with P0.3's arity statuses). It fails
-only when the checked-in `MATRIX.md` differs from the generated one; pending cells
-and exclusions without a valid reason are listed in `summary.json` `matrix.findings`
+when the checked-in `MATRIX.md` differs from the generated one and when a Bun
+`capability-gated` cell has no capability (`summary.missingCapabilities`, Q12 (a));
+pending cells and exclusions without a valid reason are listed in `summary.json` `matrix.findings`
 without failing until the exclusion list is decided (roadmap D12 / Q1). A
 `MATRIX.md` generated from another data source (ksp versus kotlin) is reported as
 `skipped`, not stale. `python tools/api-coverage/runtime_matrix.py` rebuilds the
@@ -207,7 +208,12 @@ behavior is reviewed in P1). The sources, all at the paths the roadmap names:
   methods (`toast`). Every entry is `capability-gated`; the capability is the
   related grant (same prefix, or `bun.namespaceCapabilities`) whose method table
   (`HOST_API_METHODS`, read from `host-client.mjs`, which `host-client.d.mts` only
-  types) contains the member, else the only related grant. A namespace without
+  types) contains the member, else the only related grant, else the explicit
+  `bun.memberCapabilities` mapping (`"images.read": {"capability": "image.files",
+  "basis": "calls readImage"}`) for client-side helpers and renamed wrappers whose
+  namespace has several grants (`images`: `image.process` / `image.files` /
+  `screen.capture`). A mapping naming an unknown grant leaves the cell without a
+  capability; an unused mapping is a policy conflict. A namespace without
   any related grant holds client-side helpers and is `local-shim` (`colors`).
 
 A row is looked up in its placement module, then through `runtime-policy.json`
@@ -216,7 +222,10 @@ owner module, then through the other placements of the same function, then the
 `globalModules` / `globalNamespaces` and the opt-in `autojs6:compat` facade. Only
 cells still pending take an exclusion rule; a rule matching a covered cell is
 reported as shadowed, a rule matching nothing as unused (`override: true` forces
-a rule).
+a rule). A rule with `memberSource` matches only returned-member rows of that
+source: `java-prototype-objects` (Q17 (a)) excludes the members of `kotlin-class`
+objects (Node / Bun have no such Java object), `augment-prototype` handles stay
+pending.
 
 ### Row ids
 
@@ -248,6 +257,7 @@ the Ace runtime queries join on them.
     "byColumn": {"node_main": {"bridged": 0, "pending": 0}},             // every column, every value
     "pending": {"node_main": 0, "node_worker": 0, "bun": 0},
     "missingReasons": [],      // excluded cells without a valid reason / equivalent
+    "missingCapabilities": [], // Bun capability-gated cells without a capability (fails --matrix)
     "policyConflicts": []      // exclusion rules shadowed by a real runtime entry, unused rules
   },
   "rows": [ROW]                // sorted by id

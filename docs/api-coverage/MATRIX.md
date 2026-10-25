@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 616 | 143 | 0 | 54 | 1 | 1910 |
-| Node Worker | 482 | 62 | 0 | 114 | 1 | 2065 |
-| Bun | 0 | 62 | 534 | 113 | 1 | 2014 |
+| Node main | 616 | 143 | 0 | 1120 | 1 | 844 |
+| Node Worker | 482 | 62 | 0 | 1180 | 1 | 999 |
+| Bun | 0 | 62 | 534 | 1179 | 1 | 948 |
 
 | 列 | 取值 |
 |---|---|
@@ -19,7 +19,7 @@
 | dts | none 79 / name 1507 / arity 1138 / typed 0 |
 | ace | none 540 / semantic 825 / static 1359 |
 
-排除理由缺失: 0. 策略冲突: jsox-extensions shadowed (node_main, 54), rhino-engine shadowed (node_main, 3), sync-sleep shadowed (node_main, 1).
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: jsox-extensions shadowed (node_main, 54), rhino-engine shadowed (node_main, 3), sync-sleep shadowed (node_main, 1).
 
 ## 排除规则 (草案)
 
@@ -28,6 +28,7 @@
 | accessibility-sync-wait | denied: sync-only | 1 | 1 | 1 | await accessibility.ensureEnabled(); flow waitFor* with node snapshots |
 | internal-exports | not-portable: rhino-only | 9 | 9 | 9 |  |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
+| java-prototype-objects | not-portable: java-prototype | 1066 | 1066 | 1066 |  |
 | jsox-extensions | not-portable: rhino-only | 0 | 54 | 54 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 2 | 2 | 2 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
@@ -48,48 +49,48 @@
 | (global) | 208 | 194 | 205 | 205 | 93 / 16 / 99 | 47 / 17 / 144 | 73 / 17 / 118 |
 | AgentRun# | 14 | 7 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
 | AiSession# | 11 | 11 | 0 | 0 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
-| App# | 10 | 10 | 0 | 0 | 0 / 0 / 10 | 0 / 0 / 10 | 0 / 0 / 10 |
+| App# | 10 | 10 | 0 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
-| Canvas# | 54 | 54 | 54 | 0 | 0 / 0 / 54 | 0 / 0 / 54 | 0 / 0 / 54 |
+| Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 21 | 28 | 28 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
-| ConsoleConfigurator# | 53 | 50 | 53 | 0 | 0 / 0 / 53 | 0 / 0 / 53 | 0 / 0 / 53 |
-| ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
-| Database# | 51 | 51 | 51 | 2 | 0 / 0 / 51 | 0 / 0 / 51 | 0 / 0 / 51 |
-| Dialog# | 140 | 6 | 139 | 3 | 0 / 0 / 140 | 0 / 0 / 140 | 0 / 0 / 140 |
+| ConsoleConfigurator# | 53 | 50 | 53 | 0 | 0 / 53 / 0 | 0 / 53 / 0 | 0 / 53 / 0 |
+| ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
+| Database# | 51 | 51 | 51 | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
+| Dialog# | 140 | 6 | 139 | 3 | 0 / 140 / 0 | 0 / 140 / 0 | 0 / 140 / 0 |
 | EpubBook# | 14 | 14 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
-| EpubReaderSession# | 35 | 20 | 34 | 32 | 0 / 0 / 35 | 0 / 0 / 35 | 0 / 0 / 35 |
-| FloatyWindow# | 12 | 9 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
+| EpubReaderSession# | 35 | 20 | 34 | 32 | 0 / 35 / 0 | 0 / 35 / 0 | 0 / 35 / 0 |
+| FloatyWindow# | 12 | 9 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
 | Flow# | 106 | 25 | 106 | 106 | 0 / 0 / 106 | 0 / 0 / 106 | 0 / 0 / 106 |
-| ImageFeatures# | 12 | 10 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
-| ImageWrapper# | 16 | 15 | 16 | 6 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
-| InjectableWebClient# | 3 | 2 | 3 | 0 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
-| InjectableWebView# | 1 | 1 | 1 | 0 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
-| IntentTask# | 21 | 0 | 20 | 0 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
+| ImageFeatures# | 12 | 10 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
+| ImageWrapper# | 16 | 15 | 16 | 6 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
+| InjectableWebClient# | 3 | 2 | 3 | 0 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
+| InjectableWebView# | 1 | 1 | 1 | 0 | 0 / 1 / 0 | 0 / 1 / 0 | 0 / 1 / 0 |
+| IntentTask# | 21 | 0 | 20 | 0 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | MailClient# | 53 | 53 | 53 | 53 | 0 / 0 / 53 | 0 / 0 / 53 | 0 / 0 / 53 |
-| Mat# | 9 | 0 | 3 | 0 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
-| MatchingResult# | 16 | 15 | 16 | 16 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
+| Mat# | 9 | 0 | 3 | 0 | 0 / 9 / 0 | 0 / 9 / 0 | 0 / 9 / 0 |
+| MatchingResult# | 16 | 15 | 16 | 16 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
 | Mathx | 23 | 21 | 23 | 23 | 23 / 0 / 0 | 0 / 23 / 0 | 0 / 23 / 0 |
 | Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 0 / 14 / 0 | 0 / 14 / 0 |
-| ObjectFrame# | 15 | 15 | 15 | 15 | 0 / 0 / 15 | 0 / 0 / 15 | 0 / 0 / 15 |
-| PReadableTextFile# | 5 | 4 | 5 | 0 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| PWritableTextFile# | 7 | 6 | 2 | 0 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
-| PngQuantizationFileResult# | 5 | 3 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| PngQuantizationResult# | 5 | 3 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| RawWindow# | 12 | 9 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
-| ScreenCaptureOptions# | 5 | 5 | 5 | 0 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| ScriptEngine# | 29 | 12 | 26 | 0 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
-| ScriptExecution# | 13 | 5 | 12 | 0 | 0 / 0 / 13 | 0 / 0 / 13 | 0 / 0 / 13 |
+| ObjectFrame# | 15 | 15 | 15 | 15 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
+| PReadableTextFile# | 5 | 4 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
+| PWritableTextFile# | 7 | 6 | 2 | 0 | 0 / 7 / 0 | 0 / 7 / 0 | 0 / 7 / 0 |
+| PngQuantizationFileResult# | 5 | 3 | 5 | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
+| PngQuantizationResult# | 5 | 3 | 5 | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
+| RawWindow# | 12 | 9 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
+| ScreenCaptureOptions# | 5 | 5 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
+| ScriptEngine# | 29 | 12 | 26 | 0 | 0 / 29 / 0 | 0 / 29 / 0 | 0 / 29 / 0 |
+| ScriptExecution# | 13 | 5 | 12 | 0 | 0 / 13 / 0 | 0 / 13 / 0 | 0 / 13 / 0 |
 | ShellProcess# | 25 | 12 | 25 | 25 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
-| ShellResult# | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| ShellResult# | 5 | 5 | 5 | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | Storage# | 12 | 12 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
-| ThemeColor# | 10 | 0 | 10 | 0 | 0 / 0 / 10 | 0 / 0 / 10 | 0 / 0 / 10 |
-| TimedTask# | 69 | 0 | 44 | 0 | 0 / 0 / 69 | 0 / 0 / 69 | 0 / 0 / 69 |
-| TtsUtterance# | 25 | 11 | 23 | 21 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
-| UiObject# | 145 | 136 | 145 | 145 | 0 / 0 / 145 | 0 / 0 / 145 | 0 / 0 / 145 |
-| UiObjectCollection# | 70 | 66 | 70 | 70 | 0 / 0 / 70 | 0 / 0 / 70 | 0 / 0 / 70 |
-| UiSelector# | 185 | 182 | 184 | 184 | 0 / 0 / 185 | 0 / 0 / 185 | 0 / 0 / 185 |
+| ThemeColor# | 10 | 0 | 10 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
+| TimedTask# | 69 | 0 | 44 | 0 | 0 / 69 / 0 | 0 / 69 / 0 | 0 / 69 / 0 |
+| TtsUtterance# | 25 | 11 | 23 | 21 | 0 / 25 / 0 | 0 / 25 / 0 | 0 / 25 / 0 |
+| UiObject# | 145 | 136 | 145 | 145 | 0 / 145 / 0 | 0 / 145 / 0 | 0 / 145 / 0 |
+| UiObjectCollection# | 70 | 66 | 70 | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
+| UiSelector# | 185 | 182 | 184 | 184 | 0 / 185 / 0 | 0 / 185 / 0 | 0 / 185 / 0 |
 | VolatileDispose# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
-| WebSocket# | 25 | 10 | 24 | 0 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
+| WebSocket# | 25 | 10 | 24 | 0 | 0 / 25 / 0 | 0 / 25 / 0 | 0 / 25 / 0 |
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | Zip# | 21 | 20 | 20 | 20 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
@@ -385,16 +386,16 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `App#alias` | pending | pending | pending |
-| `App#ensureInstalled` | pending | pending | pending |
-| `App#getAppName` | pending | pending | pending |
-| `App#getAppNameEn` | pending | pending | pending |
-| `App#getAppNameZh` | pending | pending | pending |
-| `App#isInstalled` | pending | pending | pending |
-| `App#launch` | pending | pending | pending |
-| `App#launchSettings` | pending | pending | pending |
-| `App#packageName` | pending | pending | pending |
-| `App#uninstall` | pending | pending | pending |
+| `App#alias` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#ensureInstalled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#getAppName` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#getAppNameEn` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#getAppNameZh` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#isInstalled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#launch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#launchSettings` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#packageName` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `App#uninstall` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Arrayx
 
@@ -420,60 +421,60 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Canvas#clipPath` | pending | pending | pending |
-| `Canvas#clipRect` | pending | pending | pending |
-| `Canvas#concat` | pending | pending | pending |
-| `Canvas#drawARGB` | pending | pending | pending |
-| `Canvas#drawArc` | pending | pending | pending |
-| `Canvas#drawBitmap` | pending | pending | pending |
-| `Canvas#drawBitmapMesh` | pending | pending | pending |
-| `Canvas#drawCircle` | pending | pending | pending |
-| `Canvas#drawColor` | pending | pending | pending |
-| `Canvas#drawImage` | pending | pending | pending |
-| `Canvas#drawLine` | pending | pending | pending |
-| `Canvas#drawLines` | pending | pending | pending |
-| `Canvas#drawOval` | pending | pending | pending |
-| `Canvas#drawPaint` | pending | pending | pending |
-| `Canvas#drawPath` | pending | pending | pending |
-| `Canvas#drawPicture` | pending | pending | pending |
-| `Canvas#drawPoint` | pending | pending | pending |
-| `Canvas#drawPoints` | pending | pending | pending |
-| `Canvas#drawPosText` | pending | pending | pending |
-| `Canvas#drawRGB` | pending | pending | pending |
-| `Canvas#drawRect` | pending | pending | pending |
-| `Canvas#drawRoundRect` | pending | pending | pending |
-| `Canvas#drawText` | pending | pending | pending |
-| `Canvas#drawTextOnPath` | pending | pending | pending |
-| `Canvas#drawTextRun` | pending | pending | pending |
-| `Canvas#drawVertices` | pending | pending | pending |
-| `Canvas#getAndroidCanvas` | pending | pending | pending |
-| `Canvas#getClipBounds` | pending | pending | pending |
-| `Canvas#getDensity` | pending | pending | pending |
-| `Canvas#getDrawFilter` | pending | pending | pending |
-| `Canvas#getHeight` | pending | pending | pending |
-| `Canvas#getMatrix` | pending | pending | pending |
-| `Canvas#getMaximumBitmapHeight` | pending | pending | pending |
-| `Canvas#getMaximumBitmapWidth` | pending | pending | pending |
-| `Canvas#getSaveCount` | pending | pending | pending |
-| `Canvas#getWidth` | pending | pending | pending |
-| `Canvas#isHardwareAccelerated` | pending | pending | pending |
-| `Canvas#isOpaque` | pending | pending | pending |
-| `Canvas#quickReject` | pending | pending | pending |
-| `Canvas#restore` | pending | pending | pending |
-| `Canvas#restoreToCount` | pending | pending | pending |
-| `Canvas#rotate` | pending | pending | pending |
-| `Canvas#save` | pending | pending | pending |
-| `Canvas#saveLayer` | pending | pending | pending |
-| `Canvas#saveLayerAlpha` | pending | pending | pending |
-| `Canvas#scale` | pending | pending | pending |
-| `Canvas#setBitmap` | pending | pending | pending |
-| `Canvas#setCanvas` | pending | pending | pending |
-| `Canvas#setDensity` | pending | pending | pending |
-| `Canvas#setDrawFilter` | pending | pending | pending |
-| `Canvas#setMatrix` | pending | pending | pending |
-| `Canvas#skew` | pending | pending | pending |
-| `Canvas#toImage` | pending | pending | pending |
-| `Canvas#translate` | pending | pending | pending |
+| `Canvas#clipPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#clipRect` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#concat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawARGB` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawArc` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawBitmap` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawBitmapMesh` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawCircle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawImage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawLine` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawLines` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawOval` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawPaint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawPicture` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawPoint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawPoints` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawPosText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawRGB` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawRect` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawRoundRect` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawTextOnPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawTextRun` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#drawVertices` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getAndroidCanvas` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getClipBounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getDensity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getDrawFilter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getMatrix` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getMaximumBitmapHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getMaximumBitmapWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getSaveCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#getWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#isHardwareAccelerated` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#isOpaque` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#quickReject` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#restore` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#restoreToCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#rotate` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#save` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#saveLayer` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#saveLayerAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#scale` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#setBitmap` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#setCanvas` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#setDensity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#setDrawFilter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#setMatrix` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#skew` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#toImage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Canvas#translate` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Color#
 
@@ -513,268 +514,268 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ConsoleConfigurator#clearStates` | pending | pending | pending |
-| `ConsoleConfigurator#contentBackgroundAlpha` | pending | pending | pending |
-| `ConsoleConfigurator#contentBackgroundColor` | pending | pending | pending |
-| `ConsoleConfigurator#contentBackgroundTint` | pending | pending | pending |
-| `ConsoleConfigurator#contentTextColors` | pending | pending | pending |
-| `ConsoleConfigurator#contentTextSize` | pending | pending | pending |
-| `ConsoleConfigurator#exitOnCloseTimeout` | pending | pending | pending |
-| `ConsoleConfigurator#gravity` | pending | pending | pending |
-| `ConsoleConfigurator#isAvoidStatusBar` | pending | pending | pending |
-| `ConsoleConfigurator#isColorful` | pending | pending | pending |
-| `ConsoleConfigurator#isExitOnClose` | pending | pending | pending |
-| `ConsoleConfigurator#isInputVisible` | pending | pending | pending |
-| `ConsoleConfigurator#isTimeVisible` | pending | pending | pending |
-| `ConsoleConfigurator#isTouchable` | pending | pending | pending |
-| `ConsoleConfigurator#position` | pending | pending | pending |
-| `ConsoleConfigurator#setAvoidStatusBar` | pending | pending | pending |
-| `ConsoleConfigurator#setBackgroundAlpha` | pending | pending | pending |
-| `ConsoleConfigurator#setBackgroundColor` | pending | pending | pending |
-| `ConsoleConfigurator#setBackgroundTint` | pending | pending | pending |
-| `ConsoleConfigurator#setColorful` | pending | pending | pending |
-| `ConsoleConfigurator#setContentBackgroundAlpha` | pending | pending | pending |
-| `ConsoleConfigurator#setContentBackgroundColor` | pending | pending | pending |
-| `ConsoleConfigurator#setContentBackgroundTint` | pending | pending | pending |
-| `ConsoleConfigurator#setContentTextColors` | pending | pending | pending |
-| `ConsoleConfigurator#setContentTextSize` | pending | pending | pending |
-| `ConsoleConfigurator#setExitOnClose` | pending | pending | pending |
-| `ConsoleConfigurator#setGravity` | pending | pending | pending |
-| `ConsoleConfigurator#setInputVisible` | pending | pending | pending |
-| `ConsoleConfigurator#setPosition` | pending | pending | pending |
-| `ConsoleConfigurator#setSize` | pending | pending | pending |
-| `ConsoleConfigurator#setTextColor` | pending | pending | pending |
-| `ConsoleConfigurator#setTextSize` | pending | pending | pending |
-| `ConsoleConfigurator#setTimeFormat` | pending | pending | pending |
-| `ConsoleConfigurator#setTimeVisible` | pending | pending | pending |
-| `ConsoleConfigurator#setTitle` | pending | pending | pending |
-| `ConsoleConfigurator#setTitleBackgroundAlpha` | pending | pending | pending |
-| `ConsoleConfigurator#setTitleBackgroundColor` | pending | pending | pending |
-| `ConsoleConfigurator#setTitleBackgroundTint` | pending | pending | pending |
-| `ConsoleConfigurator#setTitleIconsTint` | pending | pending | pending |
-| `ConsoleConfigurator#setTitleTextColor` | pending | pending | pending |
-| `ConsoleConfigurator#setTitleTextSize` | pending | pending | pending |
-| `ConsoleConfigurator#setTouchThrough` | pending | pending | pending |
-| `ConsoleConfigurator#setTouchable` | pending | pending | pending |
-| `ConsoleConfigurator#show` | pending | pending | pending |
-| `ConsoleConfigurator#size` | pending | pending | pending |
-| `ConsoleConfigurator#timeFormat` | pending | pending | pending |
-| `ConsoleConfigurator#title` | pending | pending | pending |
-| `ConsoleConfigurator#titleBackgroundAlpha` | pending | pending | pending |
-| `ConsoleConfigurator#titleBackgroundColor` | pending | pending | pending |
-| `ConsoleConfigurator#titleBackgroundTint` | pending | pending | pending |
-| `ConsoleConfigurator#titleIconsTint` | pending | pending | pending |
-| `ConsoleConfigurator#titleTextColor` | pending | pending | pending |
-| `ConsoleConfigurator#titleTextSize` | pending | pending | pending |
+| `ConsoleConfigurator#clearStates` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentTextColors` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#exitOnCloseTimeout` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#gravity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isAvoidStatusBar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isColorful` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isExitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isInputVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isTimeVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isTouchable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#position` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setAvoidStatusBar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setColorful` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentTextColors` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setExitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setGravity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setInputVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setPosition` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTextColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTimeFormat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTimeVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleIconsTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleTextColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTouchThrough` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTouchable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#show` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#timeFormat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#title` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleIconsTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleTextColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### ContinuationCreator#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ContinuationCreator#await` | pending | pending | pending |
-| `ContinuationCreator#resume` | pending | pending | pending |
-| `ContinuationCreator#resumeError` | pending | pending | pending |
+| `ContinuationCreator#await` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ContinuationCreator#resume` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ContinuationCreator#resumeError` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Database#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Database#acquireReference` | pending | pending | pending |
-| `Database#beginTransaction` | pending | pending | pending |
-| `Database#beginTransactionNonExclusive` | pending | pending | pending |
-| `Database#beginTransactionWithListener` | pending | pending | pending |
-| `Database#beginTransactionWithListenerNonExclusive` | pending | pending | pending |
-| `Database#close` | pending | pending | pending |
-| `Database#compileStatement` | pending | pending | pending |
-| `Database#delete` | pending | pending | pending |
-| `Database#disableWriteAheadLogging` | pending | pending | pending |
-| `Database#enableWriteAheadLogging` | pending | pending | pending |
-| `Database#endTransaction` | pending | pending | pending |
-| `Database#execSQL` | pending | pending | pending |
-| `Database#getAttachedDbs` | pending | pending | pending |
-| `Database#getMaximumSize` | pending | pending | pending |
-| `Database#getPageSize` | pending | pending | pending |
-| `Database#getPath` | pending | pending | pending |
-| `Database#getTypeAdapter` | pending | pending | pending |
-| `Database#getVersion` | pending | pending | pending |
-| `Database#inTransaction` | pending | pending | pending |
-| `Database#insert` | pending | pending | pending |
-| `Database#insertOrThrow` | pending | pending | pending |
-| `Database#insertWithOnConflict` | pending | pending | pending |
-| `Database#isDatabaseIntegrityOk` | pending | pending | pending |
-| `Database#isDbLockedByCurrentThread` | pending | pending | pending |
-| `Database#isOpen` | pending | pending | pending |
-| `Database#isReadOnly` | pending | pending | pending |
-| `Database#isWriteAheadLoggingEnabled` | pending | pending | pending |
-| `Database#needUpgrade` | pending | pending | pending |
-| `Database#onCreate` | pending | pending | pending |
-| `Database#onDowngrade` | pending | pending | pending |
-| `Database#onOpen` | pending | pending | pending |
-| `Database#onUpgrade` | pending | pending | pending |
-| `Database#query` | pending | pending | pending |
-| `Database#queryWithFactory` | pending | pending | pending |
-| `Database#rawQuery` | pending | pending | pending |
-| `Database#rawQueryWithFactory` | pending | pending | pending |
-| `Database#releaseReference` | pending | pending | pending |
-| `Database#replace` | pending | pending | pending |
-| `Database#replaceOrThrow` | pending | pending | pending |
-| `Database#setForeignKeyConstraintsEnabled` | pending | pending | pending |
-| `Database#setLocale` | pending | pending | pending |
-| `Database#setMaxSqlCacheSize` | pending | pending | pending |
-| `Database#setMaximumSize` | pending | pending | pending |
-| `Database#setPageSize` | pending | pending | pending |
-| `Database#setTransactionSuccessful` | pending | pending | pending |
-| `Database#setVersion` | pending | pending | pending |
-| `Database#transaction` | pending | pending | pending |
-| `Database#update` | pending | pending | pending |
-| `Database#updateWithOnConflict` | pending | pending | pending |
-| `Database#validateSql` | pending | pending | pending |
-| `Database#yieldIfContendedSafely` | pending | pending | pending |
+| `Database#acquireReference` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#beginTransaction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#beginTransactionNonExclusive` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#beginTransactionWithListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#beginTransactionWithListenerNonExclusive` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#compileStatement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#delete` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#disableWriteAheadLogging` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#enableWriteAheadLogging` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#endTransaction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#execSQL` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#getAttachedDbs` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#getMaximumSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#getPageSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#getPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#getTypeAdapter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#getVersion` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#inTransaction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#insert` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#insertOrThrow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#insertWithOnConflict` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#isDatabaseIntegrityOk` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#isDbLockedByCurrentThread` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#isOpen` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#isReadOnly` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#isWriteAheadLoggingEnabled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#needUpgrade` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#onCreate` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#onDowngrade` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#onOpen` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#onUpgrade` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#query` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#queryWithFactory` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#rawQuery` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#rawQueryWithFactory` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#releaseReference` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#replace` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#replaceOrThrow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setForeignKeyConstraintsEnabled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setLocale` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setMaxSqlCacheSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setMaximumSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setPageSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setTransactionSuccessful` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#setVersion` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#transaction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#update` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#updateWithOnConflict` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#validateSql` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Database#yieldIfContendedSafely` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Dialog#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Dialog#addContentView` | pending | pending | pending |
-| `Dialog#addListener` | pending | pending | pending |
-| `Dialog#cancel` | pending | pending | pending |
-| `Dialog#clearSelectedIndices` | pending | pending | pending |
-| `Dialog#closeOptionsMenu` | pending | pending | pending |
-| `Dialog#create` | pending | pending | pending |
-| `Dialog#defaultMaxListeners` | pending | pending | pending |
-| `Dialog#dismiss` | pending | pending | pending |
-| `Dialog#dispatchGenericMotionEvent` | pending | pending | pending |
-| `Dialog#dispatchKeyEvent` | pending | pending | pending |
-| `Dialog#dispatchKeyShortcutEvent` | pending | pending | pending |
-| `Dialog#dispatchPopulateAccessibilityEvent` | pending | pending | pending |
-| `Dialog#dispatchTouchEvent` | pending | pending | pending |
-| `Dialog#dispatchTrackballEvent` | pending | pending | pending |
-| `Dialog#emit` | pending | pending | pending |
-| `Dialog#eventNames` | pending | pending | pending |
-| `Dialog#findViewById` | pending | pending | pending |
-| `Dialog#getActionBar` | pending | pending | pending |
-| `Dialog#getActionButton` | pending | pending | pending |
-| `Dialog#getBuilder` | pending | pending | pending |
-| `Dialog#getContentView` | pending | pending | pending |
-| `Dialog#getContext` | pending | pending | pending |
-| `Dialog#getCurrentFocus` | pending | pending | pending |
-| `Dialog#getCurrentProgress` | pending | pending | pending |
-| `Dialog#getCustomView` | pending | pending | pending |
-| `Dialog#getIconView` | pending | pending | pending |
-| `Dialog#getInputEditText` | pending | pending | pending |
-| `Dialog#getItems` | pending | pending | pending |
-| `Dialog#getLayoutInflater` | pending | pending | pending |
-| `Dialog#getMaxListeners` | pending | pending | pending |
-| `Dialog#getMaxProgress` | pending | pending | pending |
-| `Dialog#getOwnerActivity` | pending | pending | pending |
-| `Dialog#getProgress` | pending | pending | pending |
-| `Dialog#getProgressBar` | pending | pending | pending |
-| `Dialog#getRecyclerView` | pending | pending | pending |
-| `Dialog#getSearchEvent` | pending | pending | pending |
-| `Dialog#getSelectedIndex` | pending | pending | pending |
-| `Dialog#getSelectedIndices` | pending | pending | pending |
-| `Dialog#getTag` | pending | pending | pending |
-| `Dialog#getTitleView` | pending | pending | pending |
-| `Dialog#getView` | pending | pending | pending |
-| `Dialog#getVolumeControlStream` | pending | pending | pending |
-| `Dialog#getWindow` | pending | pending | pending |
-| `Dialog#hasActionButtons` | pending | pending | pending |
-| `Dialog#hide` | pending | pending | pending |
-| `Dialog#incrementProgress` | pending | pending | pending |
-| `Dialog#invalidateOptionsMenu` | pending | pending | pending |
-| `Dialog#isCancelled` | pending | pending | pending |
-| `Dialog#isIndeterminateProgress` | pending | pending | pending |
-| `Dialog#isPromptCheckBoxChecked` | pending | pending | pending |
-| `Dialog#isShowing` | pending | pending | pending |
-| `Dialog#listenerCount` | pending | pending | pending |
-| `Dialog#listeners` | pending | pending | pending |
-| `Dialog#notifyItemChanged` | pending | pending | pending |
-| `Dialog#notifyItemInserted` | pending | pending | pending |
-| `Dialog#notifyItemsChanged` | pending | pending | pending |
-| `Dialog#numberOfActionButtons` | pending | pending | pending |
-| `Dialog#on` | pending | pending | pending |
-| `Dialog#onActionModeFinished` | pending | pending | pending |
-| `Dialog#onActionModeStarted` | pending | pending | pending |
-| `Dialog#onAttachedToWindow` | pending | pending | pending |
-| `Dialog#onBackPressed` | pending | pending | pending |
-| `Dialog#onClick` | pending | pending | pending |
-| `Dialog#onContentChanged` | pending | pending | pending |
-| `Dialog#onContextItemSelected` | pending | pending | pending |
-| `Dialog#onContextMenuClosed` | pending | pending | pending |
-| `Dialog#onCreateContextMenu` | pending | pending | pending |
-| `Dialog#onCreateOptionsMenu` | pending | pending | pending |
-| `Dialog#onCreatePanelMenu` | pending | pending | pending |
-| `Dialog#onCreatePanelView` | pending | pending | pending |
-| `Dialog#onDetachedFromWindow` | pending | pending | pending |
-| `Dialog#onGenericMotionEvent` | pending | pending | pending |
-| `Dialog#onItemSelected` | pending | pending | pending |
-| `Dialog#onKeyDown` | pending | pending | pending |
-| `Dialog#onKeyLongPress` | pending | pending | pending |
-| `Dialog#onKeyMultiple` | pending | pending | pending |
-| `Dialog#onKeyShortcut` | pending | pending | pending |
-| `Dialog#onKeyUp` | pending | pending | pending |
-| `Dialog#onMenuItemSelected` | pending | pending | pending |
-| `Dialog#onMenuOpened` | pending | pending | pending |
-| `Dialog#onOptionsItemSelected` | pending | pending | pending |
-| `Dialog#onOptionsMenuClosed` | pending | pending | pending |
-| `Dialog#onPanelClosed` | pending | pending | pending |
-| `Dialog#onPrepareOptionsMenu` | pending | pending | pending |
-| `Dialog#onPreparePanel` | pending | pending | pending |
-| `Dialog#onProvideKeyboardShortcuts` | pending | pending | pending |
-| `Dialog#onRestoreInstanceState` | pending | pending | pending |
-| `Dialog#onSaveInstanceState` | pending | pending | pending |
-| `Dialog#onSearchRequested` | pending | pending | pending |
-| `Dialog#onShow` | pending | pending | pending |
-| `Dialog#onTouchEvent` | pending | pending | pending |
-| `Dialog#onTrackballEvent` | pending | pending | pending |
-| `Dialog#onWindowAttributesChanged` | pending | pending | pending |
-| `Dialog#onWindowFocusChanged` | pending | pending | pending |
-| `Dialog#onWindowStartingActionMode` | pending | pending | pending |
-| `Dialog#once` | pending | pending | pending |
-| `Dialog#openContextMenu` | pending | pending | pending |
-| `Dialog#openOptionsMenu` | pending | pending | pending |
-| `Dialog#prependListener` | pending | pending | pending |
-| `Dialog#prependOnceListener` | pending | pending | pending |
-| `Dialog#registerForContextMenu` | pending | pending | pending |
-| `Dialog#removeAllListeners` | pending | pending | pending |
-| `Dialog#removeListener` | pending | pending | pending |
-| `Dialog#requestWindowFeature` | pending | pending | pending |
-| `Dialog#selectAllIndices` | pending | pending | pending |
-| `Dialog#setActionButton` | pending | pending | pending |
-| `Dialog#setCancelMessage` | pending | pending | pending |
-| `Dialog#setCancelable` | pending | pending | pending |
-| `Dialog#setCanceledOnTouchOutside` | pending | pending | pending |
-| `Dialog#setContent` | pending | pending | pending |
-| `Dialog#setContentView` | pending | pending | pending |
-| `Dialog#setDismissMessage` | pending | pending | pending |
-| `Dialog#setFeatureDrawable` | pending | pending | pending |
-| `Dialog#setFeatureDrawableAlpha` | pending | pending | pending |
-| `Dialog#setFeatureDrawableResource` | pending | pending | pending |
-| `Dialog#setFeatureDrawableUri` | pending | pending | pending |
-| `Dialog#setIcon` | pending | pending | pending |
-| `Dialog#setIconAttribute` | pending | pending | pending |
-| `Dialog#setItems` | pending | pending | pending |
-| `Dialog#setMaxListeners` | pending | pending | pending |
-| `Dialog#setMaxProgress` | pending | pending | pending |
-| `Dialog#setOnBackPressedFromJs` | pending | pending | pending |
-| `Dialog#setOnCancelListener` | pending | pending | pending |
-| `Dialog#setOnDismissListener` | pending | pending | pending |
-| `Dialog#setOnKeyListener` | pending | pending | pending |
-| `Dialog#setOnShowListener` | pending | pending | pending |
-| `Dialog#setOwnerActivity` | pending | pending | pending |
-| `Dialog#setProgress` | pending | pending | pending |
-| `Dialog#setProgressNumberFormat` | pending | pending | pending |
-| `Dialog#setProgressPercentFormat` | pending | pending | pending |
-| `Dialog#setPromptCheckBoxChecked` | pending | pending | pending |
-| `Dialog#setSelectedIndex` | pending | pending | pending |
-| `Dialog#setSelectedIndices` | pending | pending | pending |
-| `Dialog#setTitle` | pending | pending | pending |
-| `Dialog#setTypeface` | pending | pending | pending |
-| `Dialog#setVolumeControlStream` | pending | pending | pending |
-| `Dialog#show` | pending | pending | pending |
-| `Dialog#showSnack` | pending | pending | pending |
-| `Dialog#takeKeyEvents` | pending | pending | pending |
-| `Dialog#unregisterForContextMenu` | pending | pending | pending |
+| `Dialog#addContentView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#addListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#cancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#clearSelectedIndices` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#closeOptionsMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#create` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#defaultMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dismiss` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dispatchGenericMotionEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dispatchKeyEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dispatchKeyShortcutEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dispatchPopulateAccessibilityEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dispatchTouchEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#dispatchTrackballEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#emit` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#eventNames` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#findViewById` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getActionBar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getActionButton` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getBuilder` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getContentView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getContext` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getCurrentFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getCurrentProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getCustomView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getIconView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getInputEditText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getItems` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getLayoutInflater` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getMaxProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getOwnerActivity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getProgressBar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getRecyclerView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getSearchEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getSelectedIndex` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getSelectedIndices` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getTag` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getTitleView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getVolumeControlStream` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#getWindow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#hasActionButtons` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#hide` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#incrementProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#invalidateOptionsMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#isCancelled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#isIndeterminateProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#isPromptCheckBoxChecked` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#isShowing` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#listenerCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#listeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#notifyItemChanged` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#notifyItemInserted` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#notifyItemsChanged` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#numberOfActionButtons` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#on` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onActionModeFinished` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onActionModeStarted` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onAttachedToWindow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onBackPressed` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onContentChanged` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onContextItemSelected` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onContextMenuClosed` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onCreateContextMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onCreateOptionsMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onCreatePanelMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onCreatePanelView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onDetachedFromWindow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onGenericMotionEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onItemSelected` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onKeyDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onKeyLongPress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onKeyMultiple` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onKeyShortcut` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onKeyUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onMenuItemSelected` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onMenuOpened` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onOptionsItemSelected` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onOptionsMenuClosed` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onPanelClosed` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onPrepareOptionsMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onPreparePanel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onProvideKeyboardShortcuts` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onRestoreInstanceState` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onSaveInstanceState` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onSearchRequested` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onShow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onTouchEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onTrackballEvent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onWindowAttributesChanged` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onWindowFocusChanged` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#onWindowStartingActionMode` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#once` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#openContextMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#openOptionsMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#prependListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#prependOnceListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#registerForContextMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#removeAllListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#removeListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#requestWindowFeature` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#selectAllIndices` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setActionButton` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setCancelMessage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setCancelable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setCanceledOnTouchOutside` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setContent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setContentView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setDismissMessage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setFeatureDrawable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setFeatureDrawableAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setFeatureDrawableResource` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setFeatureDrawableUri` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setIcon` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setIconAttribute` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setItems` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setMaxProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setOnBackPressedFromJs` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setOnCancelListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setOnDismissListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setOnKeyListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setOnShowListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setOwnerActivity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setProgressNumberFormat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setProgressPercentFormat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setPromptCheckBoxChecked` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setSelectedIndex` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setSelectedIndices` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setTitle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setTypeface` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#setVolumeControlStream` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#show` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#showSnack` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#takeKeyEvents` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Dialog#unregisterForContextMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### EpubBook#
 
@@ -799,58 +800,58 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `EpubReaderSession#addListener` | pending | pending | pending |
-| `EpubReaderSession#bookmarks` | pending | pending | pending |
-| `EpubReaderSession#chapterTitle` | pending | pending | pending |
-| `EpubReaderSession#close` | pending | pending | pending |
-| `EpubReaderSession#defaultMaxListeners` | pending | pending | pending |
-| `EpubReaderSession#emit` | pending | pending | pending |
-| `EpubReaderSession#emitSticky` | pending | pending | pending |
-| `EpubReaderSession#eventNames` | pending | pending | pending |
-| `EpubReaderSession#getMaxListeners` | pending | pending | pending |
-| `EpubReaderSession#getTimer` | pending | pending | pending |
-| `EpubReaderSession#goTo` | pending | pending | pending |
-| `EpubReaderSession#href` | pending | pending | pending |
-| `EpubReaderSession#isClosed` | pending | pending | pending |
-| `EpubReaderSession#isOpen` | pending | pending | pending |
-| `EpubReaderSession#listenerCount` | pending | pending | pending |
-| `EpubReaderSession#listeners` | pending | pending | pending |
-| `EpubReaderSession#locator` | pending | pending | pending |
-| `EpubReaderSession#next` | pending | pending | pending |
-| `EpubReaderSession#nextChapter` | pending | pending | pending |
-| `EpubReaderSession#on` | pending | pending | pending |
-| `EpubReaderSession#once` | pending | pending | pending |
-| `EpubReaderSession#path` | pending | pending | pending |
-| `EpubReaderSession#positions` | pending | pending | pending |
-| `EpubReaderSession#prependListener` | pending | pending | pending |
-| `EpubReaderSession#prependOnceListener` | pending | pending | pending |
-| `EpubReaderSession#prev` | pending | pending | pending |
-| `EpubReaderSession#prevChapter` | pending | pending | pending |
-| `EpubReaderSession#progress` | pending | pending | pending |
-| `EpubReaderSession#reason` | pending | pending | pending |
-| `EpubReaderSession#removeAllListeners` | pending | pending | pending |
-| `EpubReaderSession#removeListener` | pending | pending | pending |
-| `EpubReaderSession#setMaxListeners` | pending | pending | pending |
-| `EpubReaderSession#setPreferences` | pending | pending | pending |
-| `EpubReaderSession#state` | pending | pending | pending |
-| `EpubReaderSession#title` | pending | pending | pending |
+| `EpubReaderSession#addListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#bookmarks` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#chapterTitle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#defaultMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#emit` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#emitSticky` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#eventNames` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#getMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#getTimer` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#goTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#href` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#isClosed` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#isOpen` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#listenerCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#listeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#locator` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#next` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#nextChapter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#on` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#once` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#path` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#positions` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#prependListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#prependOnceListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#prev` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#prevChapter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#progress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#reason` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#removeAllListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#removeListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#setMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#setPreferences` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#state` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `EpubReaderSession#title` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### FloatyWindow#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `FloatyWindow#close` | pending | pending | pending |
-| `FloatyWindow#disableFocus` | pending | pending | pending |
-| `FloatyWindow#exitOnClose` | pending | pending | pending |
-| `FloatyWindow#findView` | pending | pending | pending |
-| `FloatyWindow#height` | pending | pending | pending |
-| `FloatyWindow#isAdjustEnabled` | pending | pending | pending |
-| `FloatyWindow#requestFocus` | pending | pending | pending |
-| `FloatyWindow#setPosition` | pending | pending | pending |
-| `FloatyWindow#setSize` | pending | pending | pending |
-| `FloatyWindow#width` | pending | pending | pending |
-| `FloatyWindow#x` | pending | pending | pending |
-| `FloatyWindow#y` | pending | pending | pending |
+| `FloatyWindow#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#disableFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#exitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#findView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#isAdjustEnabled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#requestFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#setPosition` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#setSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#x` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#y` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Flow#
 
@@ -967,79 +968,79 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ImageFeatures#count` | pending | pending | pending |
-| `ImageFeatures#isRecycled` | pending | pending | pending |
-| `ImageFeatures#javaObject` | pending | pending | pending |
-| `ImageFeatures#method` | pending | pending | pending |
-| `ImageFeatures#onRecycled` | pending | pending | pending |
-| `ImageFeatures#oneShot` | pending | pending | pending |
-| `ImageFeatures#recycle` | pending | pending | pending |
-| `ImageFeatures#recycled` | pending | pending | pending |
-| `ImageFeatures#region` | pending | pending | pending |
-| `ImageFeatures#scale` | pending | pending | pending |
-| `ImageFeatures#setOneShot` | pending | pending | pending |
-| `ImageFeatures#shoot` | pending | pending | pending |
+| `ImageFeatures#count` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#isRecycled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#javaObject` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#method` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#onRecycled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#oneShot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#recycle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#recycled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#region` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#scale` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#setOneShot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageFeatures#shoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### ImageWrapper#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ImageWrapper#bgrMat` | pending | pending | pending |
-| `ImageWrapper#bitmap` | pending | pending | pending |
-| `ImageWrapper#ensureNotRecycled` | pending | pending | pending |
-| `ImageWrapper#height` | pending | pending | pending |
-| `ImageWrapper#isRecycled` | pending | pending | pending |
-| `ImageWrapper#mat` | pending | pending | pending |
-| `ImageWrapper#oneShot` | pending | pending | pending |
-| `ImageWrapper#pixel` | pending | pending | pending |
-| `ImageWrapper#plane` | pending | pending | pending |
-| `ImageWrapper#recycle` | pending | pending | pending |
-| `ImageWrapper#saveTo` | pending | pending | pending |
-| `ImageWrapper#scriptRuntime` | pending | pending | pending |
-| `ImageWrapper#setOneShot` | pending | pending | pending |
-| `ImageWrapper#shoot` | pending | pending | pending |
-| `ImageWrapper#size` | pending | pending | pending |
-| `ImageWrapper#width` | pending | pending | pending |
+| `ImageWrapper#bgrMat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#bitmap` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#ensureNotRecycled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#isRecycled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#mat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#oneShot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#pixel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#plane` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#recycle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#saveTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#scriptRuntime` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#setOneShot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#shoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ImageWrapper#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### InjectableWebClient#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `InjectableWebClient#inject` | pending | pending | pending |
-| `InjectableWebClient#injectAndWait` | pending | pending | pending |
-| `InjectableWebClient#onPageFinished` | pending | pending | pending |
+| `InjectableWebClient#inject` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `InjectableWebClient#injectAndWait` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `InjectableWebClient#onPageFinished` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### InjectableWebView#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `InjectableWebView#inject` | pending | pending | pending |
+| `InjectableWebView#inject` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### IntentTask#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `IntentTask#TABLE` | pending | pending | pending |
-| `IntentTask#getAction` | pending | pending | pending |
-| `IntentTask#getCategory` | pending | pending | pending |
-| `IntentTask#getDataType` | pending | pending | pending |
-| `IntentTask#getExtras` | pending | pending | pending |
-| `IntentTask#getId` | pending | pending | pending |
-| `IntentTask#getIntentFilter` | pending | pending | pending |
-| `IntentTask#getProjectRoot` | pending | pending | pending |
-| `IntentTask#getScriptPath` | pending | pending | pending |
-| `IntentTask#getSourceKind` | pending | pending | pending |
-| `IntentTask#isLocal` | pending | pending | pending |
-| `IntentTask#setAction` | pending | pending | pending |
-| `IntentTask#setCategory` | pending | pending | pending |
-| `IntentTask#setDataType` | pending | pending | pending |
-| `IntentTask#setExtras` | pending | pending | pending |
-| `IntentTask#setId` | pending | pending | pending |
-| `IntentTask#setLocal` | pending | pending | pending |
-| `IntentTask#setProjectRoot` | pending | pending | pending |
-| `IntentTask#setScriptPath` | pending | pending | pending |
-| `IntentTask#setScriptPathAndCaptureContext` | pending | pending | pending |
-| `IntentTask#setSourceKind` | pending | pending | pending |
+| `IntentTask#TABLE` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getCategory` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getDataType` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getExtras` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getIntentFilter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getProjectRoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getScriptPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#getSourceKind` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#isLocal` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setCategory` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setDataType` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setExtras` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setLocal` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setProjectRoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setScriptPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setScriptPathAndCaptureContext` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `IntentTask#setSourceKind` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### MailClient#
 
@@ -1103,36 +1104,36 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Mat#convertTo` | pending | pending | pending |
-| `Mat#from` | pending | pending | pending |
-| `Mat#getCreatedCount` | pending | pending | pending |
-| `Mat#getFinalizedCount` | pending | pending | pending |
-| `Mat#getLiveCount` | pending | pending | pending |
-| `Mat#getReleasedCount` | pending | pending | pending |
-| `Mat#isReleased` | pending | pending | pending |
-| `Mat#ones` | pending | pending | pending |
-| `Mat#release` | pending | pending | pending |
+| `Mat#convertTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#from` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#getCreatedCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#getFinalizedCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#getLiveCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#getReleasedCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#isReleased` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#ones` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `Mat#release` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### MatchingResult#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `MatchingResult#best` | pending | pending | pending |
-| `MatchingResult#bottommost` | pending | pending | pending |
-| `MatchingResult#filter` | pending | pending | pending |
-| `MatchingResult#findMax` | pending | pending | pending |
-| `MatchingResult#first` | pending | pending | pending |
-| `MatchingResult#isEmpty` | pending | pending | pending |
-| `MatchingResult#isNotEmpty` | pending | pending | pending |
-| `MatchingResult#last` | pending | pending | pending |
-| `MatchingResult#leftmost` | pending | pending | pending |
-| `MatchingResult#matches` | pending | pending | pending |
-| `MatchingResult#points` | pending | pending | pending |
-| `MatchingResult#rightmost` | pending | pending | pending |
-| `MatchingResult#size` | pending | pending | pending |
-| `MatchingResult#sortBy` | pending | pending | pending |
-| `MatchingResult#topmost` | pending | pending | pending |
-| `MatchingResult#worst` | pending | pending | pending |
+| `MatchingResult#best` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#bottommost` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#filter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#findMax` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#first` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#isEmpty` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#isNotEmpty` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#last` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#leftmost` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#matches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#points` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#rightmost` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#sortBy` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#topmost` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `MatchingResult#worst` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Mathx
 
@@ -1185,142 +1186,142 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ObjectFrame#angle` | pending | pending | pending |
-| `ObjectFrame#bottomLeft` | pending | pending | pending |
-| `ObjectFrame#bottomRight` | pending | pending | pending |
-| `ObjectFrame#bounds` | pending | pending | pending |
-| `ObjectFrame#center` | pending | pending | pending |
-| `ObjectFrame#centerX` | pending | pending | pending |
-| `ObjectFrame#centerY` | pending | pending | pending |
-| `ObjectFrame#height` | pending | pending | pending |
-| `ObjectFrame#inliers` | pending | pending | pending |
-| `ObjectFrame#matches` | pending | pending | pending |
-| `ObjectFrame#points` | pending | pending | pending |
-| `ObjectFrame#summary` | pending | pending | pending |
-| `ObjectFrame#topLeft` | pending | pending | pending |
-| `ObjectFrame#topRight` | pending | pending | pending |
-| `ObjectFrame#width` | pending | pending | pending |
+| `ObjectFrame#angle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#bottomLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#bottomRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#bounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#center` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#centerX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#centerY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#inliers` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#matches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#points` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#summary` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#topLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#topRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ObjectFrame#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### PReadableTextFile#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `PReadableTextFile#close` | pending | pending | pending |
-| `PReadableTextFile#getPath` | pending | pending | pending |
-| `PReadableTextFile#read` | pending | pending | pending |
-| `PReadableTextFile#readline` | pending | pending | pending |
-| `PReadableTextFile#readlines` | pending | pending | pending |
+| `PReadableTextFile#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PReadableTextFile#getPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PReadableTextFile#read` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PReadableTextFile#readline` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PReadableTextFile#readlines` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### PWritableTextFile#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `PWritableTextFile#close` | pending | pending | pending |
-| `PWritableTextFile#flush` | pending | pending | pending |
-| `PWritableTextFile#getPath` | pending | pending | pending |
-| `PWritableTextFile#open` | pending | pending | pending |
-| `PWritableTextFile#write` | pending | pending | pending |
-| `PWritableTextFile#writeline` | pending | pending | pending |
-| `PWritableTextFile#writelines` | pending | pending | pending |
+| `PWritableTextFile#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PWritableTextFile#flush` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PWritableTextFile#getPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PWritableTextFile#open` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PWritableTextFile#write` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PWritableTextFile#writeline` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PWritableTextFile#writelines` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### PngQuantizationFileResult#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `PngQuantizationFileResult#path` | pending | pending | pending |
-| `PngQuantizationFileResult#peakWorkingMemoryBytes` | pending | pending | pending |
-| `PngQuantizationFileResult#quality` | pending | pending | pending |
-| `PngQuantizationFileResult#quantizationError` | pending | pending | pending |
-| `PngQuantizationFileResult#size` | pending | pending | pending |
+| `PngQuantizationFileResult#path` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationFileResult#peakWorkingMemoryBytes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationFileResult#quality` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationFileResult#quantizationError` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationFileResult#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### PngQuantizationResult#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `PngQuantizationResult#bytes` | pending | pending | pending |
-| `PngQuantizationResult#peakWorkingMemoryBytes` | pending | pending | pending |
-| `PngQuantizationResult#quality` | pending | pending | pending |
-| `PngQuantizationResult#quantizationError` | pending | pending | pending |
-| `PngQuantizationResult#size` | pending | pending | pending |
+| `PngQuantizationResult#bytes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationResult#peakWorkingMemoryBytes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationResult#quality` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationResult#quantizationError` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `PngQuantizationResult#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### RawWindow#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `RawWindow#close` | pending | pending | pending |
-| `RawWindow#disableFocus` | pending | pending | pending |
-| `RawWindow#exitOnClose` | pending | pending | pending |
-| `RawWindow#findView` | pending | pending | pending |
-| `RawWindow#height` | pending | pending | pending |
-| `RawWindow#requestFocus` | pending | pending | pending |
-| `RawWindow#setPosition` | pending | pending | pending |
-| `RawWindow#setSize` | pending | pending | pending |
-| `RawWindow#setTouchable` | pending | pending | pending |
-| `RawWindow#width` | pending | pending | pending |
-| `RawWindow#x` | pending | pending | pending |
-| `RawWindow#y` | pending | pending | pending |
+| `RawWindow#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#disableFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#exitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#findView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#requestFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#setPosition` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#setSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#setTouchable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#x` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#y` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### ScreenCaptureOptions#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ScreenCaptureOptions#density` | pending | pending | pending |
-| `ScreenCaptureOptions#height` | pending | pending | pending |
-| `ScreenCaptureOptions#isAsync` | pending | pending | pending |
-| `ScreenCaptureOptions#orientation` | pending | pending | pending |
-| `ScreenCaptureOptions#width` | pending | pending | pending |
+| `ScreenCaptureOptions#density` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScreenCaptureOptions#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScreenCaptureOptions#isAsync` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScreenCaptureOptions#orientation` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScreenCaptureOptions#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### ScriptEngine#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ScriptEngine#TAG_ENV_PATH` | pending | pending | pending |
-| `ScriptEngine#TAG_SOURCE` | pending | pending | pending |
-| `ScriptEngine#TAG_WORKING_DIRECTORY` | pending | pending | pending |
-| `ScriptEngine#cwd` | pending | pending | pending |
-| `ScriptEngine#destroy` | pending | pending | pending |
-| `ScriptEngine#emit` | pending | pending | pending |
-| `ScriptEngine#execute` | pending | pending | pending |
-| `ScriptEngine#forceStop` | pending | pending | pending |
-| `ScriptEngine#getBackingSourcePath` | pending | pending | pending |
-| `ScriptEngine#getExecArgv` | pending | pending | pending |
-| `ScriptEngine#getId` | pending | pending | pending |
-| `ScriptEngine#getRuntime` | pending | pending | pending |
-| `ScriptEngine#getSource` | pending | pending | pending |
-| `ScriptEngine#getSourceDirectory` | pending | pending | pending |
-| `ScriptEngine#getSourcePath` | pending | pending | pending |
-| `ScriptEngine#getSourceUri` | pending | pending | pending |
-| `ScriptEngine#getStartTime` | pending | pending | pending |
-| `ScriptEngine#getTag` | pending | pending | pending |
-| `ScriptEngine#getUncaughtException` | pending | pending | pending |
-| `ScriptEngine#hasFeature` | pending | pending | pending |
-| `ScriptEngine#init` | pending | pending | pending |
-| `ScriptEngine#isDestroyed` | pending | pending | pending |
-| `ScriptEngine#put` | pending | pending | pending |
-| `ScriptEngine#setExecArgv` | pending | pending | pending |
-| `ScriptEngine#setId` | pending | pending | pending |
-| `ScriptEngine#setOnDestroyListener` | pending | pending | pending |
-| `ScriptEngine#setRuntime` | pending | pending | pending |
-| `ScriptEngine#setTag` | pending | pending | pending |
-| `ScriptEngine#uncaughtException` | pending | pending | pending |
+| `ScriptEngine#TAG_ENV_PATH` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#TAG_SOURCE` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#TAG_WORKING_DIRECTORY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#cwd` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#destroy` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#emit` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#execute` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#forceStop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getBackingSourcePath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getExecArgv` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getRuntime` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getSource` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getSourceDirectory` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getSourcePath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getSourceUri` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getStartTime` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getTag` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#getUncaughtException` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#hasFeature` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#init` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#isDestroyed` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#put` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#setExecArgv` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#setId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#setOnDestroyListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#setRuntime` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#setTag` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptEngine#uncaughtException` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### ScriptExecution#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ScriptExecution#NO_ID` | pending | pending | pending |
-| `ScriptExecution#getAgentContext` | pending | pending | pending |
-| `ScriptExecution#getAgentParametersJson` | pending | pending | pending |
-| `ScriptExecution#getAgentPresetName` | pending | pending | pending |
-| `ScriptExecution#getAgentResult` | pending | pending | pending |
-| `ScriptExecution#getAgentRunId` | pending | pending | pending |
-| `ScriptExecution#getConfig` | pending | pending | pending |
-| `ScriptExecution#getEngine` | pending | pending | pending |
-| `ScriptExecution#getId` | pending | pending | pending |
-| `ScriptExecution#getListener` | pending | pending | pending |
-| `ScriptExecution#getSource` | pending | pending | pending |
-| `ScriptExecution#isFinished` | pending | pending | pending |
-| `ScriptExecution#setAgentResult` | pending | pending | pending |
+| `ScriptExecution#NO_ID` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getAgentContext` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getAgentParametersJson` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getAgentPresetName` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getAgentResult` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getAgentRunId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getConfig` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getEngine` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#getSource` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#isFinished` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ScriptExecution#setAgentResult` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### ShellProcess#
 
@@ -1356,11 +1357,11 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ShellResult#code` | pending | pending | pending |
-| `ShellResult#error` | pending | pending | pending |
-| `ShellResult#result` | pending | pending | pending |
-| `ShellResult#throwIfError` | pending | pending | pending |
-| `ShellResult#toJson` | pending | pending | pending |
+| `ShellResult#code` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ShellResult#error` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ShellResult#result` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ShellResult#throwIfError` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ShellResult#toJson` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### Storage#
 
@@ -1383,535 +1384,535 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ThemeColor#colorAccent` | pending | pending | pending |
-| `ThemeColor#colorPrimary` | pending | pending | pending |
-| `ThemeColor#colorPrimaryDark` | pending | pending | pending |
-| `ThemeColor#getColorAccent` | pending | pending | pending |
-| `ThemeColor#getColorPrimary` | pending | pending | pending |
-| `ThemeColor#getColorPrimaryDark` | pending | pending | pending |
-| `ThemeColor#isLuminanceDark` | pending | pending | pending |
-| `ThemeColor#isLuminanceLight` | pending | pending | pending |
-| `ThemeColor#readFrom` | pending | pending | pending |
-| `ThemeColor#saveIn` | pending | pending | pending |
+| `ThemeColor#colorAccent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#colorPrimary` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#colorPrimaryDark` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#getColorAccent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#getColorPrimary` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#getColorPrimaryDark` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#isLuminanceDark` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#isLuminanceLight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#readFrom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ThemeColor#saveIn` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### TimedTask#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `TimedTask#END_MODE_COUNT` | pending | pending | pending |
-| `TimedTask#END_MODE_FOREVER` | pending | pending | pending |
-| `TimedTask#END_MODE_UNTIL_DATE` | pending | pending | pending |
-| `TimedTask#FLAG_FRIDAY` | pending | pending | pending |
-| `TimedTask#FLAG_MONDAY` | pending | pending | pending |
-| `TimedTask#FLAG_SATURDAY` | pending | pending | pending |
-| `TimedTask#FLAG_SUNDAY` | pending | pending | pending |
-| `TimedTask#FLAG_THURSDAY` | pending | pending | pending |
-| `TimedTask#FLAG_TUESDAY` | pending | pending | pending |
-| `TimedTask#FLAG_WEDNESDAY` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_COUNTDOWN` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_DAILY` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_DISPOSABLE` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_MONTHLY` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_UNKNOWN` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_WEEKLY` | pending | pending | pending |
-| `TimedTask#REPEAT_MODE_YEARLY` | pending | pending | pending |
-| `TimedTask#TABLE` | pending | pending | pending |
-| `TimedTask#captureLaunchContext` | pending | pending | pending |
-| `TimedTask#countdownTask` | pending | pending | pending |
-| `TimedTask#createIntent` | pending | pending | pending |
-| `TimedTask#createPendingIntent` | pending | pending | pending |
-| `TimedTask#dailyTask` | pending | pending | pending |
-| `TimedTask#disposableTask` | pending | pending | pending |
-| `TimedTask#getDayOfMonth` | pending | pending | pending |
-| `TimedTask#getDayOfWeekTimeFlag` | pending | pending | pending |
-| `TimedTask#getDelay` | pending | pending | pending |
-| `TimedTask#getEndMode` | pending | pending | pending |
-| `TimedTask#getEndValue` | pending | pending | pending |
-| `TimedTask#getFinishedTimes` | pending | pending | pending |
-| `TimedTask#getId` | pending | pending | pending |
-| `TimedTask#getInterval` | pending | pending | pending |
-| `TimedTask#getLoopTimes` | pending | pending | pending |
-| `TimedTask#getMillis` | pending | pending | pending |
-| `TimedTask#getMonthOfYear` | pending | pending | pending |
-| `TimedTask#getNextTime` | pending | pending | pending |
-| `TimedTask#getProjectRoot` | pending | pending | pending |
-| `TimedTask#getRepeatMode` | pending | pending | pending |
-| `TimedTask#getScriptPath` | pending | pending | pending |
-| `TimedTask#getSourceKind` | pending | pending | pending |
-| `TimedTask#getTimeFlag` | pending | pending | pending |
-| `TimedTask#hasDayOfWeek` | pending | pending | pending |
-| `TimedTask#isCountdown` | pending | pending | pending |
-| `TimedTask#isDaily` | pending | pending | pending |
-| `TimedTask#isDisposable` | pending | pending | pending |
-| `TimedTask#isMonthly` | pending | pending | pending |
-| `TimedTask#isScheduled` | pending | pending | pending |
-| `TimedTask#isWeekly` | pending | pending | pending |
-| `TimedTask#isYearly` | pending | pending | pending |
-| `TimedTask#monthlyTask` | pending | pending | pending |
-| `TimedTask#notifyFinished` | pending | pending | pending |
-| `TimedTask#setDayOfMonth` | pending | pending | pending |
-| `TimedTask#setDelay` | pending | pending | pending |
-| `TimedTask#setEndMode` | pending | pending | pending |
-| `TimedTask#setEndValue` | pending | pending | pending |
-| `TimedTask#setFinishedTimes` | pending | pending | pending |
-| `TimedTask#setId` | pending | pending | pending |
-| `TimedTask#setInterval` | pending | pending | pending |
-| `TimedTask#setLoopTimes` | pending | pending | pending |
-| `TimedTask#setMillis` | pending | pending | pending |
-| `TimedTask#setMonthOfYear` | pending | pending | pending |
-| `TimedTask#setProjectRoot` | pending | pending | pending |
-| `TimedTask#setRepeatMode` | pending | pending | pending |
-| `TimedTask#setScheduled` | pending | pending | pending |
-| `TimedTask#setScriptPath` | pending | pending | pending |
-| `TimedTask#setSourceKind` | pending | pending | pending |
-| `TimedTask#setTimeFlag` | pending | pending | pending |
-| `TimedTask#weeklyTask` | pending | pending | pending |
-| `TimedTask#yearlyTask` | pending | pending | pending |
+| `TimedTask#END_MODE_COUNT` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#END_MODE_FOREVER` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#END_MODE_UNTIL_DATE` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_FRIDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_MONDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_SATURDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_SUNDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_THURSDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_TUESDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#FLAG_WEDNESDAY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_COUNTDOWN` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_DAILY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_DISPOSABLE` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_MONTHLY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_UNKNOWN` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_WEEKLY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#REPEAT_MODE_YEARLY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#TABLE` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#captureLaunchContext` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#countdownTask` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#createIntent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#createPendingIntent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#dailyTask` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#disposableTask` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getDayOfMonth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getDayOfWeekTimeFlag` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getDelay` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getEndMode` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getEndValue` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getFinishedTimes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getInterval` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getLoopTimes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getMillis` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getMonthOfYear` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getNextTime` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getProjectRoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getRepeatMode` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getScriptPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getSourceKind` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#getTimeFlag` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#hasDayOfWeek` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isCountdown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isDaily` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isDisposable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isMonthly` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isScheduled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isWeekly` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#isYearly` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#monthlyTask` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#notifyFinished` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setDayOfMonth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setDelay` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setEndMode` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setEndValue` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setFinishedTimes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setInterval` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setLoopTimes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setMillis` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setMonthOfYear` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setProjectRoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setRepeatMode` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setScheduled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setScriptPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setSourceKind` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#setTimeFlag` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#weeklyTask` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TimedTask#yearlyTask` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### TtsUtterance#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `TtsUtterance#addListener` | pending | pending | pending |
-| `TtsUtterance#cancel` | pending | pending | pending |
-| `TtsUtterance#defaultMaxListeners` | pending | pending | pending |
-| `TtsUtterance#emit` | pending | pending | pending |
-| `TtsUtterance#emitSticky` | pending | pending | pending |
-| `TtsUtterance#eventNames` | pending | pending | pending |
-| `TtsUtterance#getMaxListeners` | pending | pending | pending |
-| `TtsUtterance#getTimer` | pending | pending | pending |
-| `TtsUtterance#id` | pending | pending | pending |
-| `TtsUtterance#isDone` | pending | pending | pending |
-| `TtsUtterance#listenerCount` | pending | pending | pending |
-| `TtsUtterance#listeners` | pending | pending | pending |
-| `TtsUtterance#on` | pending | pending | pending |
-| `TtsUtterance#once` | pending | pending | pending |
-| `TtsUtterance#operation` | pending | pending | pending |
-| `TtsUtterance#prependListener` | pending | pending | pending |
-| `TtsUtterance#prependOnceListener` | pending | pending | pending |
-| `TtsUtterance#removeAllListeners` | pending | pending | pending |
-| `TtsUtterance#removeListener` | pending | pending | pending |
-| `TtsUtterance#result` | pending | pending | pending |
-| `TtsUtterance#setMaxListeners` | pending | pending | pending |
-| `TtsUtterance#state` | pending | pending | pending |
-| `TtsUtterance#stop` | pending | pending | pending |
-| `TtsUtterance#text` | pending | pending | pending |
-| `TtsUtterance#utterance` | pending | pending | pending |
+| `TtsUtterance#addListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#cancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#defaultMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#emit` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#emitSticky` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#eventNames` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#getMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#getTimer` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#id` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#isDone` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#listenerCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#listeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#on` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#once` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#operation` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#prependListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#prependOnceListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#removeAllListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#removeListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#result` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#setMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#state` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#stop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#text` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `TtsUtterance#utterance` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### UiObject#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `UiObject#accessibilityFocus` | pending | pending | pending |
-| `UiObject#accessibilityFocused` | pending | pending | pending |
-| `UiObject#actionNames` | pending | pending | pending |
-| `UiObject#bottom` | pending | pending | pending |
-| `UiObject#bounds` | pending | pending | pending |
-| `UiObject#boundsBottom` | pending | pending | pending |
-| `UiObject#boundsCenterX` | pending | pending | pending |
-| `UiObject#boundsCenterY` | pending | pending | pending |
-| `UiObject#boundsExactCenterX` | pending | pending | pending |
-| `UiObject#boundsExactCenterY` | pending | pending | pending |
-| `UiObject#boundsHeight` | pending | pending | pending |
-| `UiObject#boundsInParent` | pending | pending | pending |
-| `UiObject#boundsInScreen` | pending | pending | pending |
-| `UiObject#boundsLeft` | pending | pending | pending |
-| `UiObject#boundsRight` | pending | pending | pending |
-| `UiObject#boundsTop` | pending | pending | pending |
-| `UiObject#boundsWidth` | pending | pending | pending |
-| `UiObject#brother` | pending | pending | pending |
-| `UiObject#center` | pending | pending | pending |
-| `UiObject#centerX` | pending | pending | pending |
-| `UiObject#centerY` | pending | pending | pending |
-| `UiObject#checkable` | pending | pending | pending |
-| `UiObject#checked` | pending | pending | pending |
-| `UiObject#child` | pending | pending | pending |
-| `UiObject#childCount` | pending | pending | pending |
-| `UiObject#children` | pending | pending | pending |
-| `UiObject#className` | pending | pending | pending |
-| `UiObject#clearAccessibilityFocus` | pending | pending | pending |
-| `UiObject#clearFocus` | pending | pending | pending |
-| `UiObject#clearSelection` | pending | pending | pending |
-| `UiObject#click` | pending | pending | pending |
-| `UiObject#clickBounds` | pending | pending | pending |
-| `UiObject#clickable` | pending | pending | pending |
-| `UiObject#collapse` | pending | pending | pending |
-| `UiObject#column` | pending | pending | pending |
-| `UiObject#columnCount` | pending | pending | pending |
-| `UiObject#columnSpan` | pending | pending | pending |
-| `UiObject#compass` | pending | pending | pending |
-| `UiObject#content` | pending | pending | pending |
-| `UiObject#contentInvalid` | pending | pending | pending |
-| `UiObject#contextClick` | pending | pending | pending |
-| `UiObject#contextClickable` | pending | pending | pending |
-| `UiObject#copy` | pending | pending | pending |
-| `UiObject#cut` | pending | pending | pending |
-| `UiObject#depth` | pending | pending | pending |
-| `UiObject#desc` | pending | pending | pending |
-| `UiObject#dismiss` | pending | pending | pending |
-| `UiObject#dismissable` | pending | pending | pending |
-| `UiObject#dragCancel` | pending | pending | pending |
-| `UiObject#dragDrop` | pending | pending | pending |
-| `UiObject#dragStart` | pending | pending | pending |
-| `UiObject#drawingOrder` | pending | pending | pending |
-| `UiObject#dumpSubtree` | pending | pending | pending |
-| `UiObject#editable` | pending | pending | pending |
-| `UiObject#enabled` | pending | pending | pending |
-| `UiObject#exactCenterX` | pending | pending | pending |
-| `UiObject#exactCenterY` | pending | pending | pending |
-| `UiObject#expand` | pending | pending | pending |
-| `UiObject#find` | pending | pending | pending |
-| `UiObject#findAccessibilityNodeInfosByText` | pending | pending | pending |
-| `UiObject#findAccessibilityNodeInfosByViewId` | pending | pending | pending |
-| `UiObject#findOne` | pending | pending | pending |
-| `UiObject#fingerprint` | pending | pending | pending |
-| `UiObject#firstChild` | pending | pending | pending |
-| `UiObject#firstSibling` | pending | pending | pending |
-| `UiObject#focus` | pending | pending | pending |
-| `UiObject#focusable` | pending | pending | pending |
-| `UiObject#focused` | pending | pending | pending |
-| `UiObject#fullId` | pending | pending | pending |
-| `UiObject#getChild` | pending | pending | pending |
-| `UiObject#getParent` | pending | pending | pending |
-| `UiObject#getText` | pending | pending | pending |
-| `UiObject#hasAction` | pending | pending | pending |
-| `UiObject#hasChildren` | pending | pending | pending |
-| `UiObject#height` | pending | pending | pending |
-| `UiObject#hideTooltip` | pending | pending | pending |
-| `UiObject#id` | pending | pending | pending |
-| `UiObject#idEntry` | pending | pending | pending |
-| `UiObject#idHex` | pending | pending | pending |
-| `UiObject#imeEnter` | pending | pending | pending |
-| `UiObject#indexInParent` | pending | pending | pending |
-| `UiObject#isShifted` | pending | pending | pending |
-| `UiObject#isSimilar` | pending | pending | pending |
-| `UiObject#isSingleton` | pending | pending | pending |
-| `UiObject#isStale` | pending | pending | pending |
-| `UiObject#lastChild` | pending | pending | pending |
-| `UiObject#lastSibling` | pending | pending | pending |
-| `UiObject#left` | pending | pending | pending |
-| `UiObject#longClick` | pending | pending | pending |
-| `UiObject#longClickable` | pending | pending | pending |
-| `UiObject#moveWindow` | pending | pending | pending |
-| `UiObject#multiLine` | pending | pending | pending |
-| `UiObject#nextAtMovementGranularity` | pending | pending | pending |
-| `UiObject#nextHtmlElement` | pending | pending | pending |
-| `UiObject#nextSibling` | pending | pending | pending |
-| `UiObject#offset` | pending | pending | pending |
-| `UiObject#packageName` | pending | pending | pending |
-| `UiObject#pageDown` | pending | pending | pending |
-| `UiObject#pageLeft` | pending | pending | pending |
-| `UiObject#pageRight` | pending | pending | pending |
-| `UiObject#pageUp` | pending | pending | pending |
-| `UiObject#parent` | pending | pending | pending |
-| `UiObject#password` | pending | pending | pending |
-| `UiObject#paste` | pending | pending | pending |
-| `UiObject#performAction` | pending | pending | pending |
-| `UiObject#point` | pending | pending | pending |
-| `UiObject#pressAndHold` | pending | pending | pending |
-| `UiObject#previousAtMovementGranularity` | pending | pending | pending |
-| `UiObject#previousHtmlElement` | pending | pending | pending |
-| `UiObject#previousSibling` | pending | pending | pending |
-| `UiObject#recycle` | pending | pending | pending |
-| `UiObject#right` | pending | pending | pending |
-| `UiObject#row` | pending | pending | pending |
-| `UiObject#rowCount` | pending | pending | pending |
-| `UiObject#rowSpan` | pending | pending | pending |
-| `UiObject#scrollBackward` | pending | pending | pending |
-| `UiObject#scrollDown` | pending | pending | pending |
-| `UiObject#scrollForward` | pending | pending | pending |
-| `UiObject#scrollLeft` | pending | pending | pending |
-| `UiObject#scrollRight` | pending | pending | pending |
-| `UiObject#scrollTo` | pending | pending | pending |
-| `UiObject#scrollUp` | pending | pending | pending |
-| `UiObject#scrollable` | pending | pending | pending |
-| `UiObject#select` | pending | pending | pending |
-| `UiObject#selected` | pending | pending | pending |
-| `UiObject#setProgress` | pending | pending | pending |
-| `UiObject#setSelection` | pending | pending | pending |
-| `UiObject#setText` | pending | pending | pending |
-| `UiObject#show` | pending | pending | pending |
-| `UiObject#showTextSuggestions` | pending | pending | pending |
-| `UiObject#showTooltip` | pending | pending | pending |
-| `UiObject#sibling` | pending | pending | pending |
-| `UiObject#siblingCount` | pending | pending | pending |
-| `UiObject#siblings` | pending | pending | pending |
-| `UiObject#simpleId` | pending | pending | pending |
-| `UiObject#size` | pending | pending | pending |
-| `UiObject#snapshot` | pending | pending | pending |
-| `UiObject#summary` | pending | pending | pending |
-| `UiObject#text` | pending | pending | pending |
-| `UiObject#toJSON` | pending | pending | pending |
-| `UiObject#top` | pending | pending | pending |
-| `UiObject#visibleToUser` | pending | pending | pending |
-| `UiObject#waitForStable` | pending | pending | pending |
-| `UiObject#waitUntilGone` | pending | pending | pending |
-| `UiObject#width` | pending | pending | pending |
+| `UiObject#accessibilityFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#accessibilityFocused` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#actionNames` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#bottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#bounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsBottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsExactCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsExactCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsInParent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsInScreen` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsTop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#boundsWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#brother` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#center` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#centerX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#centerY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#checkable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#checked` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#child` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#childCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#children` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#className` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#clearAccessibilityFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#clearFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#clearSelection` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#click` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#clickBounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#clickable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#collapse` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#column` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#columnCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#columnSpan` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#compass` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#content` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#contentInvalid` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#contextClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#contextClickable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#copy` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#cut` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#depth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#desc` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#dismiss` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#dismissable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#dragCancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#dragDrop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#dragStart` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#drawingOrder` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#dumpSubtree` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#editable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#enabled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#exactCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#exactCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#expand` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#find` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#findAccessibilityNodeInfosByText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#findAccessibilityNodeInfosByViewId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#findOne` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#fingerprint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#firstChild` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#firstSibling` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#focus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#focusable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#focused` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#fullId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#getChild` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#getParent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#getText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#hasAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#hasChildren` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#hideTooltip` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#id` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#idEntry` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#idHex` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#imeEnter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#indexInParent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#isShifted` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#isSimilar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#isSingleton` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#isStale` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#lastChild` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#lastSibling` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#left` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#longClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#longClickable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#moveWindow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#multiLine` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#nextAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#nextHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#nextSibling` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#offset` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#packageName` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#pageDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#pageLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#pageRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#pageUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#parent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#password` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#paste` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#performAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#point` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#pressAndHold` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#previousAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#previousHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#previousSibling` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#recycle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#right` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#row` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#rowCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#rowSpan` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollBackward` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollForward` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#scrollable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#select` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#selected` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#setProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#setSelection` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#setText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#show` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#showTextSuggestions` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#showTooltip` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#sibling` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#siblingCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#siblings` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#simpleId` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#snapshot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#summary` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#text` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#toJSON` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#top` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#visibleToUser` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#waitForStable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#waitUntilGone` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObject#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### UiObjectCollection#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `UiObjectCollection#accessibilityFocus` | pending | pending | pending |
-| `UiObjectCollection#at` | pending | pending | pending |
-| `UiObjectCollection#clearAccessibilityFocus` | pending | pending | pending |
-| `UiObjectCollection#clearFocus` | pending | pending | pending |
-| `UiObjectCollection#clearSelection` | pending | pending | pending |
-| `UiObjectCollection#click` | pending | pending | pending |
-| `UiObjectCollection#clickEach` | pending | pending | pending |
-| `UiObjectCollection#collapse` | pending | pending | pending |
-| `UiObjectCollection#contains` | pending | pending | pending |
-| `UiObjectCollection#contextClick` | pending | pending | pending |
-| `UiObjectCollection#copy` | pending | pending | pending |
-| `UiObjectCollection#cut` | pending | pending | pending |
-| `UiObjectCollection#dismiss` | pending | pending | pending |
-| `UiObjectCollection#dragCancel` | pending | pending | pending |
-| `UiObjectCollection#dragDrop` | pending | pending | pending |
-| `UiObjectCollection#dragStart` | pending | pending | pending |
-| `UiObjectCollection#each` | pending | pending | pending |
-| `UiObjectCollection#empty` | pending | pending | pending |
-| `UiObjectCollection#expand` | pending | pending | pending |
-| `UiObjectCollection#find` | pending | pending | pending |
-| `UiObjectCollection#findOne` | pending | pending | pending |
-| `UiObjectCollection#first` | pending | pending | pending |
-| `UiObjectCollection#focus` | pending | pending | pending |
-| `UiObjectCollection#get` | pending | pending | pending |
-| `UiObjectCollection#hideTooltip` | pending | pending | pending |
-| `UiObjectCollection#imeEnter` | pending | pending | pending |
-| `UiObjectCollection#isEmpty` | pending | pending | pending |
-| `UiObjectCollection#isNotEmpty` | pending | pending | pending |
-| `UiObjectCollection#isSimilar` | pending | pending | pending |
-| `UiObjectCollection#iterator` | pending | pending | pending |
-| `UiObjectCollection#last` | pending | pending | pending |
-| `UiObjectCollection#longClick` | pending | pending | pending |
-| `UiObjectCollection#longClickEach` | pending | pending | pending |
-| `UiObjectCollection#moveWindow` | pending | pending | pending |
-| `UiObjectCollection#nextAtMovementGranularity` | pending | pending | pending |
-| `UiObjectCollection#nextHtmlElement` | pending | pending | pending |
-| `UiObjectCollection#nodes` | pending | pending | pending |
-| `UiObjectCollection#nonEmpty` | pending | pending | pending |
-| `UiObjectCollection#nonNull` | pending | pending | pending |
-| `UiObjectCollection#pageDown` | pending | pending | pending |
-| `UiObjectCollection#pageLeft` | pending | pending | pending |
-| `UiObjectCollection#pageRight` | pending | pending | pending |
-| `UiObjectCollection#pageUp` | pending | pending | pending |
-| `UiObjectCollection#paste` | pending | pending | pending |
-| `UiObjectCollection#performAction` | pending | pending | pending |
-| `UiObjectCollection#performActionEach` | pending | pending | pending |
-| `UiObjectCollection#pressAndHold` | pending | pending | pending |
-| `UiObjectCollection#previousAtMovementGranularity` | pending | pending | pending |
-| `UiObjectCollection#previousHtmlElement` | pending | pending | pending |
-| `UiObjectCollection#scrollBackward` | pending | pending | pending |
-| `UiObjectCollection#scrollBackwardEach` | pending | pending | pending |
-| `UiObjectCollection#scrollDown` | pending | pending | pending |
-| `UiObjectCollection#scrollForward` | pending | pending | pending |
-| `UiObjectCollection#scrollForwardEach` | pending | pending | pending |
-| `UiObjectCollection#scrollLeft` | pending | pending | pending |
-| `UiObjectCollection#scrollRight` | pending | pending | pending |
-| `UiObjectCollection#scrollTo` | pending | pending | pending |
-| `UiObjectCollection#scrollUp` | pending | pending | pending |
-| `UiObjectCollection#select` | pending | pending | pending |
-| `UiObjectCollection#setProgress` | pending | pending | pending |
-| `UiObjectCollection#setSelection` | pending | pending | pending |
-| `UiObjectCollection#setText` | pending | pending | pending |
-| `UiObjectCollection#setTextEach` | pending | pending | pending |
-| `UiObjectCollection#show` | pending | pending | pending |
-| `UiObjectCollection#showTextSuggestions` | pending | pending | pending |
-| `UiObjectCollection#showTooltip` | pending | pending | pending |
-| `UiObjectCollection#size` | pending | pending | pending |
-| `UiObjectCollection#slice` | pending | pending | pending |
-| `UiObjectCollection#toArray` | pending | pending | pending |
-| `UiObjectCollection#toList` | pending | pending | pending |
+| `UiObjectCollection#accessibilityFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#at` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#clearAccessibilityFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#clearFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#clearSelection` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#click` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#clickEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#collapse` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#contains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#contextClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#copy` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#cut` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#dismiss` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#dragCancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#dragDrop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#dragStart` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#each` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#empty` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#expand` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#find` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#findOne` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#first` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#focus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#get` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#hideTooltip` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#imeEnter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#isEmpty` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#isNotEmpty` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#isSimilar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#iterator` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#last` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#longClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#longClickEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#moveWindow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#nextAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#nextHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#nodes` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#nonEmpty` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#nonNull` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#pageDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#pageLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#pageRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#pageUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#paste` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#performAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#performActionEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#pressAndHold` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#previousAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#previousHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollBackward` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollBackwardEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollForward` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollForwardEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#scrollUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#select` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#setProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#setSelection` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#setText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#setTextEach` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#show` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#showTextSuggestions` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#showTooltip` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#slice` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#toArray` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiObjectCollection#toList` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### UiSelector#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `UiSelector#accessibilityFocus` | pending | pending | pending |
-| `UiSelector#accessibilityFocused` | pending | pending | pending |
-| `UiSelector#action` | pending | pending | pending |
-| `UiSelector#algorithm` | pending | pending | pending |
-| `UiSelector#append` | pending | pending | pending |
-| `UiSelector#applyEntry` | pending | pending | pending |
-| `UiSelector#bottom` | pending | pending | pending |
-| `UiSelector#bounds` | pending | pending | pending |
-| `UiSelector#boundsBottom` | pending | pending | pending |
-| `UiSelector#boundsCenterX` | pending | pending | pending |
-| `UiSelector#boundsCenterY` | pending | pending | pending |
-| `UiSelector#boundsContains` | pending | pending | pending |
-| `UiSelector#boundsHeight` | pending | pending | pending |
-| `UiSelector#boundsInside` | pending | pending | pending |
-| `UiSelector#boundsLeft` | pending | pending | pending |
-| `UiSelector#boundsMaxBottom` | pending | pending | pending |
-| `UiSelector#boundsMaxCenterX` | pending | pending | pending |
-| `UiSelector#boundsMaxCenterY` | pending | pending | pending |
-| `UiSelector#boundsMaxHeight` | pending | pending | pending |
-| `UiSelector#boundsMaxLeft` | pending | pending | pending |
-| `UiSelector#boundsMaxRight` | pending | pending | pending |
-| `UiSelector#boundsMaxTop` | pending | pending | pending |
-| `UiSelector#boundsMaxWidth` | pending | pending | pending |
-| `UiSelector#boundsMinBottom` | pending | pending | pending |
-| `UiSelector#boundsMinCenterX` | pending | pending | pending |
-| `UiSelector#boundsMinCenterY` | pending | pending | pending |
-| `UiSelector#boundsMinHeight` | pending | pending | pending |
-| `UiSelector#boundsMinLeft` | pending | pending | pending |
-| `UiSelector#boundsMinRight` | pending | pending | pending |
-| `UiSelector#boundsMinTop` | pending | pending | pending |
-| `UiSelector#boundsMinWidth` | pending | pending | pending |
-| `UiSelector#boundsRight` | pending | pending | pending |
-| `UiSelector#boundsTop` | pending | pending | pending |
-| `UiSelector#boundsWidth` | pending | pending | pending |
-| `UiSelector#centerX` | pending | pending | pending |
-| `UiSelector#centerY` | pending | pending | pending |
-| `UiSelector#checkable` | pending | pending | pending |
-| `UiSelector#checked` | pending | pending | pending |
-| `UiSelector#childCount` | pending | pending | pending |
-| `UiSelector#className` | pending | pending | pending |
-| `UiSelector#classNameContains` | pending | pending | pending |
-| `UiSelector#classNameEndsWith` | pending | pending | pending |
-| `UiSelector#classNameMatch` | pending | pending | pending |
-| `UiSelector#classNameMatches` | pending | pending | pending |
-| `UiSelector#classNameStartsWith` | pending | pending | pending |
-| `UiSelector#clearAccessibilityFocus` | pending | pending | pending |
-| `UiSelector#clearFocus` | pending | pending | pending |
-| `UiSelector#clearSelection` | pending | pending | pending |
-| `UiSelector#click` | pending | pending | pending |
-| `UiSelector#clickable` | pending | pending | pending |
-| `UiSelector#collapse` | pending | pending | pending |
-| `UiSelector#column` | pending | pending | pending |
-| `UiSelector#columnCount` | pending | pending | pending |
-| `UiSelector#columnSpan` | pending | pending | pending |
-| `UiSelector#content` | pending | pending | pending |
-| `UiSelector#contentContains` | pending | pending | pending |
-| `UiSelector#contentEndsWith` | pending | pending | pending |
-| `UiSelector#contentInvalid` | pending | pending | pending |
-| `UiSelector#contentMatch` | pending | pending | pending |
-| `UiSelector#contentMatches` | pending | pending | pending |
-| `UiSelector#contentStartsWith` | pending | pending | pending |
-| `UiSelector#contextClick` | pending | pending | pending |
-| `UiSelector#contextClickable` | pending | pending | pending |
-| `UiSelector#copy` | pending | pending | pending |
-| `UiSelector#currentApp` | pending | pending | pending |
-| `UiSelector#cut` | pending | pending | pending |
-| `UiSelector#depth` | pending | pending | pending |
-| `UiSelector#desc` | pending | pending | pending |
-| `UiSelector#descContains` | pending | pending | pending |
-| `UiSelector#descEndsWith` | pending | pending | pending |
-| `UiSelector#descMatch` | pending | pending | pending |
-| `UiSelector#descMatches` | pending | pending | pending |
-| `UiSelector#descStartsWith` | pending | pending | pending |
-| `UiSelector#dismiss` | pending | pending | pending |
-| `UiSelector#dismissable` | pending | pending | pending |
-| `UiSelector#dragCancel` | pending | pending | pending |
-| `UiSelector#dragDrop` | pending | pending | pending |
-| `UiSelector#dragStart` | pending | pending | pending |
-| `UiSelector#drawingOrder` | pending | pending | pending |
-| `UiSelector#editable` | pending | pending | pending |
-| `UiSelector#enabled` | pending | pending | pending |
-| `UiSelector#exists` | pending | pending | pending |
-| `UiSelector#expand` | pending | pending | pending |
-| `UiSelector#filter` | pending | pending | pending |
-| `UiSelector#find` | pending | pending | pending |
-| `UiSelector#findIterator` | pending | pending | pending |
-| `UiSelector#findOnce` | pending | pending | pending |
-| `UiSelector#findOne` | pending | pending | pending |
-| `UiSelector#focus` | pending | pending | pending |
-| `UiSelector#focusable` | pending | pending | pending |
-| `UiSelector#focused` | pending | pending | pending |
-| `UiSelector#hasChildren` | pending | pending | pending |
-| `UiSelector#height` | pending | pending | pending |
-| `UiSelector#hideTooltip` | pending | pending | pending |
-| `UiSelector#id` | pending | pending | pending |
-| `UiSelector#idContains` | pending | pending | pending |
-| `UiSelector#idEndsWith` | pending | pending | pending |
-| `UiSelector#idHex` | pending | pending | pending |
-| `UiSelector#idMatch` | pending | pending | pending |
-| `UiSelector#idMatches` | pending | pending | pending |
-| `UiSelector#idStartsWith` | pending | pending | pending |
-| `UiSelector#imeEnter` | pending | pending | pending |
-| `UiSelector#indexInParent` | pending | pending | pending |
-| `UiSelector#left` | pending | pending | pending |
-| `UiSelector#longClick` | pending | pending | pending |
-| `UiSelector#longClickable` | pending | pending | pending |
-| `UiSelector#maxBottom` | pending | pending | pending |
-| `UiSelector#maxCenterX` | pending | pending | pending |
-| `UiSelector#maxCenterY` | pending | pending | pending |
-| `UiSelector#maxChildCount` | pending | pending | pending |
-| `UiSelector#maxDepth` | pending | pending | pending |
-| `UiSelector#maxHeight` | pending | pending | pending |
-| `UiSelector#maxIndexInParent` | pending | pending | pending |
-| `UiSelector#maxLeft` | pending | pending | pending |
-| `UiSelector#maxRight` | pending | pending | pending |
-| `UiSelector#maxTop` | pending | pending | pending |
-| `UiSelector#maxWidth` | pending | pending | pending |
-| `UiSelector#minBottom` | pending | pending | pending |
-| `UiSelector#minCenterX` | pending | pending | pending |
-| `UiSelector#minCenterY` | pending | pending | pending |
-| `UiSelector#minChildCount` | pending | pending | pending |
-| `UiSelector#minDepth` | pending | pending | pending |
-| `UiSelector#minHeight` | pending | pending | pending |
-| `UiSelector#minIndexInParent` | pending | pending | pending |
-| `UiSelector#minLeft` | pending | pending | pending |
-| `UiSelector#minRight` | pending | pending | pending |
-| `UiSelector#minTop` | pending | pending | pending |
-| `UiSelector#minWidth` | pending | pending | pending |
-| `UiSelector#moveWindow` | pending | pending | pending |
-| `UiSelector#multiLine` | pending | pending | pending |
-| `UiSelector#nextAtMovementGranularity` | pending | pending | pending |
-| `UiSelector#nextHtmlElement` | pending | pending | pending |
-| `UiSelector#packageName` | pending | pending | pending |
-| `UiSelector#packageNameContains` | pending | pending | pending |
-| `UiSelector#packageNameEndsWith` | pending | pending | pending |
-| `UiSelector#packageNameMatch` | pending | pending | pending |
-| `UiSelector#packageNameMatches` | pending | pending | pending |
-| `UiSelector#packageNameStartsWith` | pending | pending | pending |
-| `UiSelector#pageDown` | pending | pending | pending |
-| `UiSelector#pageLeft` | pending | pending | pending |
-| `UiSelector#pageRight` | pending | pending | pending |
-| `UiSelector#pageUp` | pending | pending | pending |
-| `UiSelector#password` | pending | pending | pending |
-| `UiSelector#paste` | pending | pending | pending |
-| `UiSelector#performAction` | pending | pending | pending |
-| `UiSelector#plus` | pending | pending | pending |
-| `UiSelector#pressAndHold` | pending | pending | pending |
-| `UiSelector#previousAtMovementGranularity` | pending | pending | pending |
-| `UiSelector#previousHtmlElement` | pending | pending | pending |
-| `UiSelector#right` | pending | pending | pending |
-| `UiSelector#row` | pending | pending | pending |
-| `UiSelector#rowCount` | pending | pending | pending |
-| `UiSelector#rowSpan` | pending | pending | pending |
-| `UiSelector#screenCenterX` | pending | pending | pending |
-| `UiSelector#screenCenterY` | pending | pending | pending |
-| `UiSelector#screenCoverage` | pending | pending | pending |
-| `UiSelector#scrollBackward` | pending | pending | pending |
-| `UiSelector#scrollDown` | pending | pending | pending |
-| `UiSelector#scrollForward` | pending | pending | pending |
-| `UiSelector#scrollLeft` | pending | pending | pending |
-| `UiSelector#scrollRight` | pending | pending | pending |
-| `UiSelector#scrollTo` | pending | pending | pending |
-| `UiSelector#scrollUp` | pending | pending | pending |
-| `UiSelector#scrollable` | pending | pending | pending |
-| `UiSelector#select` | pending | pending | pending |
-| `UiSelector#selected` | pending | pending | pending |
-| `UiSelector#setProgress` | pending | pending | pending |
-| `UiSelector#setSelection` | pending | pending | pending |
-| `UiSelector#setText` | pending | pending | pending |
-| `UiSelector#show` | pending | pending | pending |
-| `UiSelector#showTextSuggestions` | pending | pending | pending |
-| `UiSelector#showTooltip` | pending | pending | pending |
-| `UiSelector#text` | pending | pending | pending |
-| `UiSelector#textContains` | pending | pending | pending |
-| `UiSelector#textEndsWith` | pending | pending | pending |
-| `UiSelector#textMatch` | pending | pending | pending |
-| `UiSelector#textMatches` | pending | pending | pending |
-| `UiSelector#textStartsWith` | pending | pending | pending |
-| `UiSelector#toStringReadable` | pending | pending | pending |
-| `UiSelector#top` | pending | pending | pending |
-| `UiSelector#untilFind` | pending | pending | pending |
-| `UiSelector#untilFindOne` | pending | pending | pending |
-| `UiSelector#visibleToUser` | pending | pending | pending |
-| `UiSelector#waitFor` | pending | pending | pending |
-| `UiSelector#width` | pending | pending | pending |
+| `UiSelector#accessibilityFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#accessibilityFocused` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#action` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#algorithm` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#append` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#applyEntry` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#bottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#bounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsBottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsInside` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxBottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxTop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMaxWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinBottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinTop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsMinWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsTop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#boundsWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#centerX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#centerY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#checkable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#checked` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#childCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#className` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#classNameContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#classNameEndsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#classNameMatch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#classNameMatches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#classNameStartsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#clearAccessibilityFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#clearFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#clearSelection` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#click` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#clickable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#collapse` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#column` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#columnCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#columnSpan` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#content` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contentContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contentEndsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contentInvalid` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contentMatch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contentMatches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contentStartsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contextClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#contextClickable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#copy` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#currentApp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#cut` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#depth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#desc` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#descContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#descEndsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#descMatch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#descMatches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#descStartsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#dismiss` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#dismissable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#dragCancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#dragDrop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#dragStart` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#drawingOrder` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#editable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#enabled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#exists` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#expand` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#filter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#find` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#findIterator` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#findOnce` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#findOne` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#focus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#focusable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#focused` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#hasChildren` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#hideTooltip` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#id` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#idContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#idEndsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#idHex` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#idMatch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#idMatches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#idStartsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#imeEnter` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#indexInParent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#left` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#longClick` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#longClickable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxBottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxChildCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxDepth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxIndexInParent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxTop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#maxWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minBottom` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minChildCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minDepth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minHeight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minIndexInParent` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minTop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#minWidth` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#moveWindow` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#multiLine` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#nextAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#nextHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#packageName` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#packageNameContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#packageNameEndsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#packageNameMatch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#packageNameMatches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#packageNameStartsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#pageDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#pageLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#pageRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#pageUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#password` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#paste` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#performAction` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#plus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#pressAndHold` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#previousAtMovementGranularity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#previousHtmlElement` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#right` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#row` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#rowCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#rowSpan` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#screenCenterX` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#screenCenterY` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#screenCoverage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollBackward` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollDown` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollForward` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollLeft` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollRight` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollUp` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#scrollable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#select` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#selected` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#setProgress` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#setSelection` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#setText` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#show` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#showTextSuggestions` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#showTooltip` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#text` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#textContains` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#textEndsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#textMatch` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#textMatches` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#textStartsWith` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#toStringReadable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#top` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#untilFind` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#untilFindOne` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#visibleToUser` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#waitFor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `UiSelector#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### VolatileDispose#
 
@@ -1925,31 +1926,31 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `WebSocket#addListener` | pending | pending | pending |
-| `WebSocket#cancel` | pending | pending | pending |
-| `WebSocket#client` | pending | pending | pending |
-| `WebSocket#close` | pending | pending | pending |
-| `WebSocket#defaultMaxListeners` | pending | pending | pending |
-| `WebSocket#emit` | pending | pending | pending |
-| `WebSocket#emitSticky` | pending | pending | pending |
-| `WebSocket#eventNames` | pending | pending | pending |
-| `WebSocket#exitOnClose` | pending | pending | pending |
-| `WebSocket#getMaxListeners` | pending | pending | pending |
-| `WebSocket#getTimer` | pending | pending | pending |
-| `WebSocket#listenerCount` | pending | pending | pending |
-| `WebSocket#listeners` | pending | pending | pending |
-| `WebSocket#on` | pending | pending | pending |
-| `WebSocket#once` | pending | pending | pending |
-| `WebSocket#prependListener` | pending | pending | pending |
-| `WebSocket#prependOnceListener` | pending | pending | pending |
-| `WebSocket#queueSize` | pending | pending | pending |
-| `WebSocket#rebuild` | pending | pending | pending |
-| `WebSocket#removeAllListeners` | pending | pending | pending |
-| `WebSocket#removeListener` | pending | pending | pending |
-| `WebSocket#request` | pending | pending | pending |
-| `WebSocket#send` | pending | pending | pending |
-| `WebSocket#setMaxListeners` | pending | pending | pending |
-| `WebSocket#url` | pending | pending | pending |
+| `WebSocket#addListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#cancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#client` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#defaultMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#emit` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#emitSticky` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#eventNames` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#exitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#getMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#getTimer` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#listenerCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#listeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#on` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#once` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#prependListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#prependOnceListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#queueSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#rebuild` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#removeAllListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#removeListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#request` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#send` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#setMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#url` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### YoloDetector#
 

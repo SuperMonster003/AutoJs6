@@ -291,6 +291,39 @@ class StatusTest(unittest.TestCase):
         self.assertEqual(width['bun']['status'], 'pending')
         self.assertEqual(rows['ImageWrapper#recycle']['node_worker']['reason'], 'java-prototype')
 
+    def test_member_source_rule(self):
+        exports = copy.deepcopy(EXPORTS)
+        exports['returnedObjects'] = [
+            {'object': 'UiObject', 'producers': ['click'], 'memberSource': 'kotlin-class', 'members': [{'name': 'click', 'kind': 'Functions'}]},
+            {'object': 'Flow', 'producers': ['flow.waitFor'], 'memberSource': 'augment-prototype', 'members': [{'name': 'then', 'kind': 'Functions'}]},
+        ]
+        policy = copy.deepcopy(POLICY)
+        policy['exclusions'].append({'id': 'java-objects', 'match': ['*#*'], 'memberSource': 'kotlin-class', 'status': 'not-portable', 'reason': 'java-prototype'})
+        rows = {row['id']: row for row in matrix(exports, policy)['rows']}
+        self.assertEqual(rows['UiObject#click']['bun'], {'status': 'not-portable', 'reason': 'java-prototype', 'rule': 'java-objects'})
+        self.assertEqual(rows['Flow#then']['node_main']['status'], 'pending')
+        self.assertEqual(rows['click']['node_main']['status'], 'bridged')
+
+    def test_bun_member_capabilities(self):
+        exports = copy.deepcopy(EXPORTS)
+        exports['records'] += [record('images.save', 'images', 'images'), record('images.toBytes', 'images', 'images')]
+        bun = copy.deepcopy(BUN_SURFACES)
+        bun['namespaces']['images']['members'].update(save=member(), toBytes=member())
+        policy = copy.deepcopy(POLICY)
+        policy['bun']['memberCapabilities'] = {'_note': 'x', 'images.save': {'capability': 'image.files', 'basis': 'calls saveImage'},
+                                               'images.toBytes': {'capability': 'image.unknown', 'basis': 'not a grant'},
+                                               'images.stale': {'capability': 'image.files', 'basis': 'no such member'}}
+        result = build(exports, policy, POLICY_JSON, NODE_SURFACES, bun, parse_host_api(HOST_API), WORKER)
+        rows = {row['id']: row for row in result['rows']}
+        self.assertEqual(rows['images.save']['bun']['capability'], 'image.files')
+        self.assertEqual(rows['images.read']['bun']['capability'], 'image.files')
+        self.assertEqual(result['summary']['missingCapabilities'], [{'id': 'images.toBytes', 'namespace': 'images', 'member': 'toBytes'}])
+        self.assertEqual([item for item in result['summary']['policyConflicts'] if item['rule'].startswith('bun.')],
+                         [{'rule': 'bun.memberCapabilities images.stale', 'kind': 'unused'}])
+        failures = gate(result, Path('missing.md'))['failures']
+        self.assertTrue(any('images.toBytes' in item for item in failures))
+        self.assertEqual(matrix()['summary']['missingCapabilities'], [])
+
     def test_duplicate_ids_and_schema(self):
         exports = copy.deepcopy(EXPORTS)
         exports['records'].append(copy.deepcopy(exports['records'][0]))
@@ -349,6 +382,7 @@ class RepositoryTest(unittest.TestCase):
 
     def test_policy_reasons(self):
         self.assertEqual(self.matrix['summary']['missingReasons'], [])
+        self.assertEqual(self.matrix['summary']['missingCapabilities'], [])
 
 
 if __name__ == '__main__':
