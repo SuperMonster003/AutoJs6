@@ -232,3 +232,57 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | P2.3 (返回对象与嵌套对象) | R22 |
 | P3 / P4 补缺批次 | R2 (控制台), R3 (Bun 拼音常量, P4), R6 (compose.ComposeError, UI 族), R7 (可桥接部分, UI 族), R8 (Worker, 各族), R9 (自动化族), R10 / R14 / R16 / R18 (系统与设备族), R11 / R19 / R21 (文件与数据族) |
 | P3.6 (HOST-API 同步) | R5 |
+
+## P1.2 真机抽样 A (Redmi)
+
+日期: 2026-10-25. 会话: api-cov-p1-2 (local_a5def8d0). 设备: Redmi 22120RN86C (bek749scrwv4wo8h), Android 13 / API 33, arm64-v8a, 4096 字节页, 系统语言 en-US. 不重跑打包应用 (D11).
+
+方法: `tools/api-coverage/device_sample_a.py` (record / backup / install / run / restore / verify; `list` 打印抽样清单) 逐个运行 Codex 宿主设备套件 (`app/src/androidTest/.../engine/`) 里的单个测试方法, 每行输出通过 / 失败, 耗时与证据文件中的关键数值. 一个用例 (测试方法) 覆盖多个运行时列: main = Node 主线程 (CJS / ESM), worker = Node Worker (CJS / ESM / 嵌套), bun = Bun host client. "项" 指用例实际调用的 API 行 (矩阵 id) 或矩阵分母外的运行时句柄成员 (第 4 节). 选择依据: 第 9 节归 P3 / P4 的不一致所在模块 (R6 compose, R7 ui, R14 shell / shizuku, R16 notice, R20 ShellProcess#) 与各族 bridged 行数最多的模块 (images 82 行三列全覆盖, compose 15, dialogs 8). 系统授权对话框 (MediaProjection, 运行时权限, Shizuku, SAF) 由维护者在手机上确认 (规则 device-testing); Codex 用例中由测试代码自动点击系统对话框的方法不选, 或在维护者事先授权后再跑 (见各族).
+
+### 版本与安装包
+
+| 包 | 抽样前 (2026-10-25 15:2x 记录) | 抽样使用 | 来源 |
+|---|---|---|---|
+| org.autojs.autojs6 | 5935 (6.8.0) md5 c8207da2f01c5f1bf9c112b5738d0fec (selector P0 10:28 安装的 debug 包) | 5935 (6.8.0) md5 5c28c473251579b38441f9e422e0deb0 | 主工作区 HEAD 98f03b1f7 的 :app:assembleAppDebug; 构建时工作区另有他人未提交的 5 个文件 (.changelog/lang_zh-Hans.json, README.md, .readme/README-zh-Hans.md, assets-app/doc/CHANGELOG*.md), 无代码改动 |
+| org.autojs.autojs6.test | md5 ce520c9dc09990b44baf42e049e749d4 | md5 aaed28a1d82c9754926fdf63b1133383 | 同一次构建的 :app:assembleAppDebugAndroidTest |
+| ...plugin.nodejs | 291 (1.31.0) md5 a8811d17a2d96bd7cb2c4bb0a103e9a1 | 292 (1.32.0) md5 c240d6cd49d72363fbbdd9cdda790cdf | Node 仓库 HEAD 990f9e35 (APK 由 133812df 构建, 其后只有 docs/nodejs/history 一个文档提交, 工作区干净) |
+| ...plugin.bun.runtime | 293 (0.20.0) md5 bbfca1f67936a60a0700ec1a12e216eb | 296 (0.21.0) md5 900edd665ecf82c35db76d25dc603b27 | Bun 仓库 HEAD 3056b94 (APK 构建晚于该提交, 工作区干净) |
+| ...plugin.opencv / imagequant / opencc / pinyin / pinyin4j | 23 (1.1.4) 113bf168... / 25 (1.0.3) 91f06810... / 107 (1.5.0) 9538b79a... / 19 (1.0.3) 8ef7f61b... / 26 (1.3.2) b016924d... | 未替换 | 设备原有 |
+| moe.shizuku.privileged.api | 1049 (13.5.4) md5 d2db6e7df106b8fd119646374fe9b42c | 未替换 | 设备原有 |
+
+四个包签名证书相同 (SHA-256 31a681fc...), 本地 Node 292 为 debuggable, 恢复时可降级回 291. 记录的设置项: 旋转 (user_rotation 0 / accelerometer_rotation 1), screen_off_timeout, stay_on_while_plugged_in, 亮度与亮度模式, 无障碍服务列表 (含 AutoJs6), 通知使用权列表 (不含 AutoJs6), appops PROJECT_MEDIA (ignore) / SYSTEM_ALERT_WINDOW (allow) / POST_NOTIFICATION (allow), RECORD_AUDIO / CAMERA / POST_NOTIFICATIONS 已授予.
+
+### 图像 (images 含截图)
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| AdvancedImageBridgeDeviceTest#filtersColorsMetricsAndEncodingAcrossAllExecutionModes | main / worker / bun (6 种执行方式) | 通过 | 22.1 | 6 种方式一致: psnr 361.2, ssim 1, mse 0, ncc 1, pointCount 1200, 半透明像素 alpha 保留 |
+| ...#featuresMatricesFilesAndUrlsAcrossAllExecutionModes | main / worker / bun (6) | 通过 | 20.8 | SIFT 内点 203, ORB 内点 181 (6 种方式一致), 左上角 (60, 50) 最大误差 0.831 px, 与 Codex Redmi 数值相同 |
+| ...#circleDetectionAcrossAllExecutionModes | main / worker / bun (6) | 通过 | 13.4 | 圆心 (79.5, 69.5) 半径 33.5, 6 种方式一致 |
+| ...#imageMatAndFeatureHandlesShareTheExistingQuota | main / bun | 通过 | 10.7 | 32 句柄共享配额, 回收后恢复 |
+| ...#featureHandlesCrossWorkersButNeverCrossExecutions | main / worker | 通过 | 8.3 | Worker 特征句柄归属执行, 跨执行拒绝 |
+| ...#bunFileAndProcessingGrantsCannotBeBypassedByRawImageCalls | bun | 通过 | 7.9 | 关闭 image.files / image.process 后原始调用 NOT_GRANTED |
+| OpenccImageBridgeDeviceTest#publicImagesPreservePixelsDimensionsAndOwnership | main (CJS / ESM) / bun | 通过 | 11.9 | 3 种方式 passed |
+| ...#binaryTransportJsonBoundsAndExecutionOwnership | main / bun | 通过 | 12.7 | 257x257 大图句柄, 过期句柄拒绝, JSON 有界, 授权拒绝 |
+| ...#nodeWorkerCanUseOpenccAndImagesThroughItsDocumentedBridge | worker | 通过 | 9.5 | 像素 0x80ff0000 保留 |
+| NodeScreenCaptureInstrumentationTest#captureWithoutConsentReturnsPermissionDeniedAndImageSaveWorks | main | 通过 | 7.1 | 未授权截图返回 permission-denied, saveImage 正常 |
+
+项 (矩阵行, 均为三列 bridged / capability-gated): images.cvtColor, threshold, adaptiveThreshold, bilateralFilter, inRange, getMeanColor, isGrayscale, compress, compressToBytes, downsample, pixel, getSize, detectAndComputeFeatures, matchFeatures, matToImage, load, loadAsync, imread, ObjectFrame, findCircles, readImage, saveImage, clip, rotate, scale, flip, findColor, findMultiColors, findAllPointsForColor, readPixels, toBytes, fromBytes, toBase64, fromBase64, resize, recycle, isRecycled, captureScreen (拒绝路径); 共 38 项, 全部通过.
+
+### UI / Compose 与 View 互操作
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeUiComposeDeviceTest#layoutsBindingsAndClicksAcrossRuntimeModes | main / worker / bun (6) | 通过 | 18.9 | 6 种方式各 1 次真实点击, 窗口关闭 |
+| ...#composeClicksTextInputReactiveFramesAndRefsAcrossRuntimeModes | main / worker / bun (6) | 通过 | 18.5 | count 2, 文本编辑 1, compose.version plugin 219 / contract 2 |
+| ...#dialogsValidationAndOwnershipRemainExecutionScoped | main / worker / bun (6) | 通过 | 16.0 | 结束后会话数 0 |
+| ...#terminatingWorkerClosesItsWindowWithoutEndingMain | main / worker | 通过 | 9.0 | |
+| ...#floatingComposeWindowsRenderAndCloseAcrossRuntimeModes | main / worker / bun (6) | 通过 | 18.6 | 悬浮窗点击 1, 关闭 |
+| ...#snackbarActionsReachTheCreatingRuntime | main / worker / bun (6) | 通过 | 18.3 | snackbar 动作回到创建方 1 次 |
+| RuntimeUiInteropDeviceTest#xmlAttachAndNativeClickAcrossRuntimeModes | main / worker / bun (6) | 通过 | 16.6 | |
+| ...#factoriesReplacementAndOwnershipAcrossRuntimeModes | main / worker / bun (6) | 通过 | 19.1 | |
+| RuntimeXmlViewDeviceTest#commonXmlWidgetsAndOrderedPropertiesAcrossRuntimes | main / worker / bun (6) | 通过 | 20.1 | 12 种控件, 属性按序, 选中项 4, 宽 480 |
+| ...#nativeSelectionAndProgressEventsReachTheCreatingRuntime | main / worker / bun (6) | 通过 | 18.8 | selected / progress / radio / checked 事件均回到创建方 |
+| RuntimeViewComponentsDeviceTest#drawerToolbarPagerClicksAndRotationAcrossRuntimes | main / worker / bun (6) | 通过 | 25.3 | 抽屉开 / 关各 1, 菜单 1, 翻页 1, 旋转后离屏页保留 |
+
+项: 矩阵行 compose.isAvailable, version, mount, state, ref, batch, dialog, floaty, attach (compose 15 个 bridged 行中的 9 个), ui.inflate, ui.findView (ui 仅有的 2 个 bridged 行); 运行时扩展 (第 4 节, 分母外) ui.showLayout, ui.createView, ui.bind, ui.state, ui.view, ui.context, compose.Button / Column / Text / TextField / Scaffold / AndroidView, Window#on / close / flush / setPosition / setSize / setTouchable / disableFocus / showSnackbar / findView, View#findView / dispose / on; 共 11 + 9 组, 全部通过. 未抽: compose.createElement / memo / modifier / post / sessions / theme (矩阵 bridged, 本轮用例未直接调用); R6 compose.ComposeError 与 R7 ui 的 31 个 pending 行在运行时没有入口, 无从抽样, 仍归第 9 节原归属.
