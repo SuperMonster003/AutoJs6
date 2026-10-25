@@ -31,8 +31,12 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
 
     }
 
-    /** The polled queries: how many found something and how many attempts they took in all. zh-CN: 轮询查询: 多少次找到了, 总共尝试了多少次. */
-    data class QueryTiming(val count: Long, val found: Long, val attempts: Long, val totalMillis: Long, val maxMillis: Long) {
+    /**
+     * The polled queries: how many found something and how many attempts they took in all; [refinds] the searches again
+     * after a single result that had left the window, of every single-result entry (docs/selector/ROADMAP.md P3.2).
+     * zh-CN: 轮询查询: 多少次找到了, 总共尝试了多少次; [refinds] 为所有单结果入口在单个结果已离开窗口后的重新搜索次数 (P3.2).
+     */
+    data class QueryTiming(val count: Long, val found: Long, val attempts: Long, val totalMillis: Long, val maxMillis: Long, val refinds: Long = 0) {
 
         val missed: Long get() = count - found
 
@@ -94,7 +98,9 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
             append(", elapsed ").append(seconds(elapsed))
             append("\nsearches: ").append(searches.count).append(", ").append(timing(searches))
             append("\nqueries: ").append(queries.count).append(" (found ").append(queries.found).append(", missed ").append(queries.missed)
-            append(", attempts ").append(queries.attempts).append("), ").append(timing(Timing(queries.count, queries.totalMillis, queries.maxMillis)))
+            append(", attempts ").append(queries.attempts)
+            if (queries.refinds > 0) append(", refinds ").append(queries.refinds)
+            append("), ").append(timing(Timing(queries.count, queries.totalMillis, queries.maxMillis)))
             if (!fastPath.isEmpty) {
                 append("\nfast path: hits ").append(fastPath.hits).append(", misses ").append(fastPath.misses)
                 append(", fallbacks ").append(fastPath.fallbacks).append(", mismatches ").append(fastPath.mismatches)
@@ -169,6 +175,8 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
 
     private var attempts = 0L
 
+    private var refinds = 0L
+
     private val fastPath = LongArray(FastPathEvent.entries.size)
 
     private val selectors = LinkedHashMap<String, SelectorBucket>()
@@ -197,6 +205,12 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
         if (found) bucket.found += 1
     }
 
+    /** One search again after a single result that had left the window (P3.2). zh-CN: 单个结果已离开窗口后的一次重新搜索 (P3.2). */
+    @Synchronized
+    fun recordRefind() {
+        refinds += 1
+    }
+
     /** One [event] of the fast path. zh-CN: 快路径的一次 [event]. */
     @Synchronized
     fun recordFastPath(event: FastPathEvent) {
@@ -217,6 +231,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
         queries.apply { count = 0; total = 0; max = 0 }
         found = 0
         attempts = 0
+        refinds = 0
         fastPath.fill(0)
         selectors.clear()
         steps.clear()
@@ -228,7 +243,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
         since = since,
         now = clock(),
         searches = searches.timing(),
-        queries = QueryTiming(queries.count, found, attempts, queries.total, queries.max),
+        queries = QueryTiming(queries.count, found, attempts, queries.total, queries.max, refinds),
         selectors = selectors.map { (selector, b) -> SelectorStats(selector, b.searches.timing(), b.queries.timing(), b.found) }
             .sortedWith(compareByDescending<SelectorStats> { it.searches.maxMillis }.thenByDescending { it.searches.totalMillis }),
         steps = steps.map { (name, b) -> StepStats(name, b.runs.timing(), b.rejected) }

@@ -22,6 +22,7 @@ import org.autojs.autojs.core.automator.filter.Selector
 import org.autojs.autojs.core.automator.pick.PickArguments
 import org.autojs.autojs.core.automator.pick.PickExecutor
 import org.autojs.autojs.core.automator.pick.PickResultAdapter
+import org.autojs.autojs.core.automator.query.HitVerifier
 import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
 import org.autojs.autojs.core.automator.selector.SelectorStringParser
@@ -84,8 +85,13 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         }
     }
 
+    /**
+     * The first node of a single search, refreshed before it is returned: a node that has left the window since the
+     * search is searched for again (docs/selector/ROADMAP.md D6 (c), P3.2; off under `noRefreshOnHit`).
+     * zh-CN: 单次搜索的首个节点, 返回前刷新: 搜索之后已离开窗口的节点会重新搜索 (D6 (c), P3.2; `noRefreshOnHit` 下关闭).
+     */
     @ScriptInterface
-    fun findOnce(): UiObject? = findOnce(0)
+    fun findOnce(): UiObject? = verified(findOnce(0)) { findOnce(0) }
 
     @ScriptInterface
     fun findOnce(index: Int): UiObject? = when {
@@ -116,8 +122,9 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     @ScriptInterface
     fun select(syntax: String): UiSelector = SelectorStringParser().parse(syntax, this)
 
+    /** Whether a single search finds a node; the node is not refreshed (P3.2). zh-CN: 单次搜索是否找到节点; 不刷新该节点 (P3.2). */
     @ScriptInterface
-    fun exists() = findOnce() != null
+    fun exists() = findOnce(0) != null
 
     @ScriptInterface
     fun find(): UiObjectCollection = find(Int.MAX_VALUE)
@@ -295,7 +302,26 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     internal fun findOf(root: UiObject): UiObjectCollection = findOf(root, Int.MAX_VALUE)
 
-    internal fun findOneOf(root: UiObject): UiObject? = findOf(root, 1).takeIf { it.size() > 0 }?.get(0)
+    internal fun findOneOf(root: UiObject): UiObject? = verified(firstOf(root)) { firstOf(root) }
+
+    private fun firstOf(root: UiObject): UiObject? = findOf(root, 1).takeIf { it.size() > 0 }?.get(0)
+
+    /**
+     * [found], checked before a single-result entry returns it (docs/selector/ROADMAP.md D6 (c), P3.2, [HitVerifier]):
+     * refreshed, and searched for [again] when it has left the window, at most [HitVerifier.RETRIES] times ([unbounded]:
+     * until a node refreshes); unchecked under `noRefreshOnHit` or without a bridge. The searches again count in
+     * `auto.stats` (`queries.refinds`).
+     * zh-CN: 单结果入口返回前校验的 [found] (D6 (c), P3.2, [HitVerifier]): 刷新它, 已离开窗口时 [again] 重新搜索, 至多 [HitVerifier.RETRIES] 次
+     * ([unbounded]: 直到节点刷新成功); `noRefreshOnHit` 下或没有 bridge 时不校验. 重新搜索计入 `auto.stats` (`queries.refinds`).
+     */
+    internal fun verified(found: UiObject?, unbounded: Boolean = false, again: () -> UiObject?): UiObject? {
+        val bridge = mAccessibilityBridge
+        if (found == null || bridge == null || !bridge.isRefreshOnHit) return found
+        return HitVerifier.verify(found, if (unbounded) Int.MAX_VALUE else HitVerifier.RETRIES, refresh = { it.refresh() }) {
+            bridge.stats.recordRefind()
+            again()
+        }
+    }
 
     internal fun findAndReturnList(root: UiObject, max: Int = Int.MAX_VALUE): List<UiObject> = searchAlgorithm.search(root, selector.snapshot(), max)
 

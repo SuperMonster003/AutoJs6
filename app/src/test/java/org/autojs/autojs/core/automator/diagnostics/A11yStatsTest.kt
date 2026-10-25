@@ -57,6 +57,7 @@ class A11yStatsTest {
     fun resetStartsOver() {
         stats.recordSearch("a", 10)
         stats.recordQuery("a", 10, 1, true)
+        stats.recordRefind()
         stats.recordStep("wait", 10, false)
         now = 2_000
         stats.reset()
@@ -117,6 +118,12 @@ class A11yStatsTest {
         assertEquals("  wait  runs 2, total 150 ms, average 75.0 ms, max 100 ms, rejected 1", lines[7])
         assertEquals(8, lines.size)
         assertEquals(text, stats.snapshot().toString())
+        // Searches again after a stale single result (docs/selector/ROADMAP.md P3.2): shown once there are any.
+        // zh-CN: 过期的单个结果之后的重新搜索 (P3.2): 有了才显示.
+        stats.recordRefind()
+        stats.recordRefind()
+        assertEquals(2, stats.snapshot().queries.refinds)
+        assertEquals("queries: 2 (found 1, missed 1, attempts 7, refinds 2), total 545 ms, average 272.5 ms, max 500 ms", stats.snapshot().render().lines()[2])
         val empty = A11yStats { now }.snapshot().render().lines()
         assertEquals(3, empty.size)
         assertEquals("searches: 0, total 0 ms, average 0.0 ms, max 0 ms", empty[1])

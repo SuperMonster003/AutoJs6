@@ -159,6 +159,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             "appWindowsFallback" to AccessibilityBridge.FLAG_APP_WINDOWS_FALLBACK,
             "eventAssistedPolling" to AccessibilityBridge.FLAG_EVENT_ASSISTED_POLLING,
             "noFastPath" to AccessibilityBridge.FLAG_NO_FAST_PATH,
+            "noRefreshOnHit" to AccessibilityBridge.FLAG_NO_REFRESH_ON_HIT,
         )
 
         /** The prefix that clears a flag in `auto.setFlags` (docs/selector/ROADMAP.md appendix C Q2). zh-CN: `auto.setFlags` 中清除标志的前缀 (附录 C Q2). */

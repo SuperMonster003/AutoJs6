@@ -81,6 +81,12 @@ class FakeUiNode private constructor(
     var isRecycled = false
         private set
 
+    /** What [refresh] reports: false for a node that has left the window (docs/selector/ROADMAP.md P3.2). zh-CN: [refresh] 的返回值: 已离开窗口的节点为 false (P3.2). */
+    var refreshable = true
+
+    /** `AccessibilityNodeInfo.refresh`. */
+    fun refresh(): Boolean = refreshable
+
     /** How often [text] / [desc] were read (docs/selector/ROADMAP.md P2.1). zh-CN: [text] / [desc] 被读取的次数 (P2.1). */
     var textReads = 0
     var descReads = 0

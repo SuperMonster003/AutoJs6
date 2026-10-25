@@ -92,6 +92,9 @@ internal class A11yDiagnosticsApi(private val scriptRuntime: ScriptRuntime) {
                     put("found", snapshot.queries.found.toDouble())
                     put("missed", snapshot.queries.missed.toDouble())
                     put("attempts", snapshot.queries.attempts.toDouble())
+                    // Searches again after a single result that had left the window (docs/selector/ROADMAP.md P3.2).
+                    // zh-CN: 单个结果已离开窗口后的重新搜索 (P3.2).
+                    put("refinds", snapshot.queries.refinds.toDouble())
                 },
                 // The framework fast path of the polled queries (docs/selector/ROADMAP.md P2.4).
                 // zh-CN: 轮询查询的框架快路径 (P2.4).

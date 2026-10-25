@@ -298,7 +298,7 @@ class AutoModule(private val runtime: ScriptRuntime) {
         val MODES = FlowOptions.Words(listOf("normal", "fast"))
 
         /** The flags of `auto.setFlags` / `auto.clearFlags`. */
-        val FLAGS = FlowOptions.Words(listOf("findOnUiThread", "useUsageStats", "useShell", "appWindowsFallback", "eventAssistedPolling", "noFastPath"))
+        val FLAGS = FlowOptions.Words(listOf("findOnUiThread", "useUsageStats", "useShell", "appWindowsFallback", "eventAssistedPolling", "noFastPath", "noRefreshOnHit"))
 
         /** What `auto.setFlags` accepts: a flag, or a flag prefixed with `!` (appendix C Q2). */
         val FLAGS_NEGATABLE = "${FLAGS.quoted} (or one of them prefixed with \"!\")"

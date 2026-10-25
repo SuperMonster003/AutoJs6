@@ -98,6 +98,9 @@ abstract class AccessibilityBridge(
     /** Whether the framework fast path of the polled queries is on ([FLAG_NO_FAST_PATH] not set). zh-CN: 轮询查询的框架快路径是否开启 (未设置 [FLAG_NO_FAST_PATH]). */
     internal val isFastPathEnabled: Boolean get() = flags and FLAG_NO_FAST_PATH == 0
 
+    /** Whether a single result is refreshed before it is returned ([FLAG_NO_REFRESH_ON_HIT] not set). zh-CN: 单个结果返回前是否刷新 (未设置 [FLAG_NO_REFRESH_ON_HIT]). */
+    internal val isRefreshOnHit: Boolean get() = flags and FLAG_NO_REFRESH_ON_HIT == 0
+
     /**
      * The packages where an empty lookup of the fast path turned out wrong for this script (docs/selector/ROADMAP.md P2.3).
      * zh-CN: 快路径的空查找对本脚本被证实有误的包 (P2.3).
@@ -250,6 +253,15 @@ abstract class AccessibilityBridge(
          * zh-CN: 关闭轮询选择器查询的框架快路径 (`auto.setFlags(["noFastPath"])`; P2.3, 附录 C Q2): 每次尝试都遍历整棵树, 同 6.8.0 之前.
          */
         const val FLAG_NO_FAST_PATH = 32
+
+        /**
+         * Turns the check of a single result off (`auto.setFlags(["noRefreshOnHit"])`; docs/selector/ROADMAP.md D6 (c),
+         * P3.2, appendix C Q2): `findOnce()`, `findOne(timeout)`, `untilFindOne()` and the single result of `pickup` return
+         * the node found without refreshing it, as before 6.8.0.
+         * zh-CN: 关闭单个结果的校验 (`auto.setFlags(["noRefreshOnHit"])`; D6 (c), P3.2, 附录 C Q2): `findOnce()`, `findOne(timeout)`,
+         * `untilFindOne()` 与 `pickup` 的单个结果不刷新即返回找到的节点, 同 6.8.0 之前.
+         */
+        const val FLAG_NO_REFRESH_ON_HIT = 64
 
         /**
          * The flags of a bridge before any `auto.setFlags`, and the base `auto.setFlags(names)` starts from (appendix C Q2):
