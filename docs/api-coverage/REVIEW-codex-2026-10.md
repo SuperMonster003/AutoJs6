@@ -286,3 +286,17 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | RuntimeViewComponentsDeviceTest#drawerToolbarPagerClicksAndRotationAcrossRuntimes | main / worker / bun (6) | 通过 | 25.3 | 抽屉开 / 关各 1, 菜单 1, 翻页 1, 旋转后离屏页保留 |
 
 项: 矩阵行 compose.isAvailable, version, mount, state, ref, batch, dialog, floaty, attach (compose 15 个 bridged 行中的 9 个), ui.inflate, ui.findView (ui 仅有的 2 个 bridged 行); 运行时扩展 (第 4 节, 分母外) ui.showLayout, ui.createView, ui.bind, ui.state, ui.view, ui.context, compose.Button / Column / Text / TextField / Scaffold / AndroidView, Window#on / close / flush / setPosition / setSize / setTouchable / disableFocus / showSnackbar / findView, View#findView / dispose / on; 共 11 + 9 组, 全部通过. 未抽: compose.createElement / memo / modifier / post / sessions / theme (矩阵 bridged, 本轮用例未直接调用); R6 compose.ComposeError 与 R7 ui 的 31 个 pending 行在运行时没有入口, 无从抽样, 仍归第 9 节原归属.
+
+### WebView (文件 / 下载批)
+
+选 Codex runtime-webview-files 批的下载部分, 加 runtime-view-components 的两个 WebView 页面用例. 同批的 realSaveAndTreeTargetsPreserveExistingContentsAcrossRuntimes (系统文档选择器与目录 "Allow" 授权) 与 realCameraCaptureAndCancellationAcrossRuntimes (相机权限与系统相机) 由测试代码自动操作系统界面, 本轮不抽.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeWebFilesDeviceTest#dataAndBlobBytesCancellationAndNavigationAcrossRuntimes | main / worker / bun (6) | 通过 | 62.7 | 6 种方式各下载 blob 2097289 字节并逐字节校验, percent / base64 data URL, 撤销的 blob 与非法 data URL 失败, 取消, 导航中断, 源 WebView 释放后仍可读 |
+| ...#blobAndDataLinksReachTheDownloadListener | main / worker (嵌套) / bun | 通过 | 16.0 | blob / data 链接各 1 次真实点击 (isTrusted), 下载监听收到并读回 4 字节 |
+| ...#pickerModesAndDataDecodingRejectInvalidInputs | (宿主侧) | 通过 | 5.4 | 选择器模式与 data 解码拒绝非法输入 |
+| RuntimeViewComponentsDeviceTest#webPagesJavaScriptAndHistoryAcrossRuntimes | main / worker / bun (6) | 通过 | 19.6 | evaluateJavascript 返回 {answer: 42, array}, 页面完成 6 次, 标题 5 次, 历史前进 / 后退正确 |
+| ...#webViewDisposalReleasesAttachedAndOffscreenPages | main / worker / bun (6) | 通过 | 6.2 | 已附着与离屏页面释放 |
+
+项 (运行时 WebView 句柄成员, 第 4 节分母外): WebView#loadHtml, loadUrl, evaluateJavascript, download, getDownload, readDownload, cancelDownload, setDownloadListener, goBack, goForward, reload, stopLoading, on, dispose; 共 14 项, 全部通过. 矩阵 web 模块 4 行 (Rhino 的 web 工具函数) 三列 pending, 不在本批范围.
