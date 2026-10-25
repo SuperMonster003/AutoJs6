@@ -291,7 +291,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     internal fun findOneOf(root: UiObject): UiObject? = findOf(root, 1).takeIf { it.size() > 0 }?.get(0)
 
-    internal fun findAndReturnList(root: UiObject, max: Int = Int.MAX_VALUE): List<UiObject> = searchAlgorithm.search(root, selector, max)
+    internal fun findAndReturnList(root: UiObject, max: Int = Int.MAX_VALUE): List<UiObject> = searchAlgorithm.search(root, selector.snapshot(), max)
 
     /**
      * The search over any [UiNode] tree. Captured-tree callers can supply a no-op [lifecycle] when
@@ -300,7 +300,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
      * 其它调用方继续使用平台默认策略.
      */
     internal fun <N : UiNode<N>> searchIn(root: N, max: Int = Int.MAX_VALUE, lifecycle: NodeLifecycle = NodeLifecycle.default): List<N> =
-        searchAlgorithm.search(root, selector, max, lifecycle)
+        searchAlgorithm.search(root, selector.snapshot(), max, lifecycle)
 
     protected fun findImpl(max: Int): UiObjectCollection = findImpl(mAccessibilityBridge?.windowRoots() ?: emptyList(), max)
 

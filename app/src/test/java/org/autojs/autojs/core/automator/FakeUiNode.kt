@@ -81,6 +81,10 @@ class FakeUiNode private constructor(
     var isRecycled = false
         private set
 
+    /** How often [text] / [desc] were read (docs/selector/ROADMAP.md P2.1). zh-CN: [text] / [desc] 被读取的次数 (P2.1). */
+    var textReads = 0
+    var descReads = 0
+
     fun child(name: String, clickable: Boolean = false, build: FakeUiNode.() -> Unit = {}): FakeUiNode {
         val node = FakeUiNode(name, level + 1, children.size).also {
             it.parentNode = this
@@ -125,9 +129,9 @@ class FakeUiNode private constructor(
 
     override fun idHex(): String? = idHex
 
-    override fun text(): String = text
+    override fun text(): String = text.also { textReads++ }
 
-    override fun desc(): String? = desc
+    override fun desc(): String? = desc.also { descReads++ }
 
     override fun left(): Int = left
 

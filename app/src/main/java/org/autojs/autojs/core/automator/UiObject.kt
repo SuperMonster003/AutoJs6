@@ -2,6 +2,7 @@ package org.autojs.autojs.core.automator
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
@@ -74,6 +75,27 @@ open class UiObject private constructor(
     private val indexInParent: Int by lazy(LazyThreadSafetyMode.PUBLICATION) { indexInParentSupplier(this) }
 
     private val standaloneBridge by lazy { AutoJs.instance.createAccessibilityBridge() }
+
+    // The bounds on screen, read once per node (P2.1): the eight metrics and the bounds filters read the four fields
+    // instead of copying a new Rect each time; refresh() drops them, as it updates the platform node they come from.
+    // zh-CN: 屏幕边界, 每个节点只读取一次 (P2.1): 八个度量与 bounds 过滤器读这四个字段, 不再每次复制一个新 Rect; refresh() 更新其来源的平台节点, 同时丢弃它们.
+    @Volatile
+    private var boundsRead = false
+    private var cachedLeft = 0
+    private var cachedTop = 0
+    private var cachedRight = 0
+    private var cachedBottom = 0
+
+    private fun readBounds() {
+        if (boundsRead) return
+        val rect = Rect()
+        getBoundsInScreen(rect)
+        cachedLeft = rect.left
+        cachedTop = rect.top
+        cachedRight = rect.right
+        cachedBottom = rect.bottom
+        boundsRead = true
+    }
 
     constructor(
         info: Any?,
@@ -194,47 +216,54 @@ open class UiObject private constructor(
 
     fun findOne(selector: UiSelector): UiObject? = selector.findOneOf(this)
 
-    open fun bounds() = AccessibilityNodeInfoHelper.getBoundsInScreen(this)
+    // A new Rect each call: scripts may change the one they get.
+    // zh-CN: 每次调用返回新的 Rect: 脚本可能修改拿到的对象.
+    open fun bounds(): Rect {
+        readBounds()
+        return Rect(cachedLeft, cachedTop, cachedRight, cachedBottom)
+    }
 
     fun boundsInScreen() = bounds()
 
-    fun boundsLeft() = bounds().left
+    fun boundsLeft(): Int = readBounds().let { cachedLeft }
 
     override fun left() = boundsLeft()
 
-    fun boundsTop() = bounds().top
+    fun boundsTop(): Int = readBounds().let { cachedTop }
 
     override fun top() = boundsTop()
 
-    fun boundsRight() = bounds().right
+    fun boundsRight(): Int = readBounds().let { cachedRight }
 
     override fun right() = boundsRight()
 
-    fun boundsBottom() = bounds().bottom
+    fun boundsBottom(): Int = readBounds().let { cachedBottom }
 
     override fun bottom() = boundsBottom()
 
-    fun boundsWidth() = bounds().width()
+    fun boundsWidth(): Int = readBounds().let { cachedRight - cachedLeft }
 
     override fun width() = boundsWidth()
 
-    fun boundsHeight() = bounds().height()
+    fun boundsHeight(): Int = readBounds().let { cachedBottom - cachedTop }
 
     override fun height() = boundsHeight()
 
-    fun boundsCenterX() = bounds().centerX()
+    // The rounding of Rect.centerX() / exactCenterX() and of their Y twins.
+    // zh-CN: 与 Rect.centerX() / exactCenterX() 及其 Y 方向版本相同的取整.
+    fun boundsCenterX(): Int = readBounds().let { (cachedLeft + cachedRight) shr 1 }
 
     override fun centerX() = boundsCenterX()
 
-    fun boundsExactCenterX() = bounds().exactCenterX()
+    fun boundsExactCenterX(): Float = readBounds().let { (cachedLeft + cachedRight) * 0.5f }
 
     fun exactCenterX() = boundsExactCenterX()
 
-    fun boundsCenterY() = bounds().centerY()
+    fun boundsCenterY(): Int = readBounds().let { (cachedTop + cachedBottom) shr 1 }
 
     override fun centerY() = boundsCenterY()
 
-    fun boundsExactCenterY() = bounds().exactCenterY()
+    fun boundsExactCenterY(): Float = readBounds().let { (cachedTop + cachedBottom) * 0.5f }
 
     fun exactCenterY() = boundsExactCenterY()
 
@@ -437,6 +466,10 @@ open class UiObject private constructor(
             else -> allocator.findAccessibilityNodeInfosByViewId(this, viewId)
         }
     }
+
+    // Drops the bounds read before (P2.1): the platform node now holds the current ones.
+    // zh-CN: 丢弃此前读取的边界 (P2.1): 平台节点此时持有当前的边界.
+    override fun refresh(): Boolean = super.refresh().also { boundsRead = false }
 
     // With an allocator the node is released through the runtime's lifecycle and forgotten by the
     // allocator, so that the script's exit pass does not try again.

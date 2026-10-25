@@ -154,10 +154,13 @@ class NodeMethodRegistryTest {
 
     private companion object {
 
-        /** The methods of `AccessibilityNodeInfoCompat` with parameters that `UiObject` overrides, left out by D11. */
+        /**
+         * The methods of `AccessibilityNodeInfoCompat` that `UiObject` overrides, left out by D11: those with parameters,
+         * and `refresh()` (overridden by P2.1 to drop the cached bounds).
+         */
         val EXCLUDED_OVERRIDES = setOf(
             "getChild(int)", "findAccessibilityNodeInfosByText(String)", "findAccessibilityNodeInfosByViewId(String)",
-            "performAction(int)", "performAction(int, Bundle)",
+            "performAction(int)", "performAction(int, Bundle)", "refresh()",
         )
 
         /** The keys of `Invoker.Interceptor.interceptedMap` before P1.2 (by argument types: int, CharSequence, String, boolean, float, int x 2). */
