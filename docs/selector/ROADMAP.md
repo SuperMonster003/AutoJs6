@@ -80,10 +80,10 @@ D1-D11 由维护者 2026-10-25 经选择题确认 (题面与选项见附录 B), 
 
 ### P0 基线与安全网
 
-- [ ] P0.1 基准脚本 `tools/selector/bench.js` + `tools/selector/device_bench.py` (做法同 `tools/augment/device_bench.py`, `py -3.12 -I` 运行, adb 推送脚本经 RunIntentActivity 执行, 读 logcat 取结果): 三个场景 (系统设置首页, AutoJs6 主界面, 桌面之上 300 个 TextView 的合成悬浮窗), 指标 `full` (`selector().find().size()`), `miss` (`text('__none__').findOnce()`), `hit` (早命中 `findOnce()`), `findOne(600)` 未命中的尝试次数, 轮询 10 s 的进程 CPU (安静屏幕, 以及 "事件风暴" 场景: 悬浮窗内一个持续更新的进度条), 每项 10 轮, 输出通过 / 失败与中位数 (不打印节点全文). 验收: 在 23046RP50C 与 22120RN86C 上各跑一次, 修前基线写入附录 A. (DEVICE)
-- [ ] P0.2 结果对照脚本 `tools/selector/parity.js` + `device_parity.py`: 固定屏幕 (AutoJs6 主界面与设置首页) 上一组选择器 (精确 id / 短 id / 精确 text / textContains / 正则 / className + clickable / bounds / 对象选择器 / 混合数组 / `select('...')` 字符串语法 / BFS) 的 `find()` 结果序列按节点指纹 (`fingerprint()` + 深度 + indexInParent) 快照, 比对两次运行一致 (稳定屏幕上应 100% 一致), 作为 P2 快路径与排序优化 "顺序与数量不变" 的判据. 验收: 两台设备各一次, 快照文件进 `tools/selector/baseline/`. (DEVICE)
-- [ ] P0.3 pickup / detect 黄金表 `tools/selector/pick_table.js`: 枚举结果类型全部 43 种拼写 (`PickResultType` 的 spellings) x (缺省 / 带罗盘 `p` / `c0` / `s>1` / `k2`) x (有命中 / 无命中) x (有 / 无回调), 选择器参数的各类形式 (字符串, 正则, UiSelector, 对象, 数组, 数字, root), 以及拦截表内外的参化调用 (`['child', 0]`, `['setText', 'x']`, `['bounds']`, `['hintText']`, 未知名字); 输出每条的结果形状 (类型名, 数组长度, 字符串值) 与错误类型, 在 23046RP50C 上记录为 `tools/selector/baseline/pick_table-<device>.json`. 这是 P1 重构 "行为不变" 的判据 (D6 (b) 允许的差异除外). (DEVICE)
-- [ ] P0.4 JVM 安全网: 全量 `:app:testAppDebugUnitTest` 通过作为起点 (记录用例数); `CompassTest` / `CompassParserTest` / `PickResultTypeTest` / `SelectorRegistryTest` / `SelectorChecksTest` / `UiSelectorBuildersTest` / `SelectorExplainerTest` 为 P1 的回归集. (JVM)
+- [x] P0.1 基准脚本 `tools/selector/bench.js` + `tools/selector/device_bench.py` (做法同 `tools/augment/device_bench.py`, `py -3.12 -I` 运行, adb 推送脚本经 RunIntentActivity 执行, 读 logcat 取结果): 三个场景 (系统设置首页, AutoJs6 主界面, 桌面之上 300 个 TextView 的合成悬浮窗), 指标 `full` (`selector().find().size()`), `miss` (`text('__none__').findOnce()`), `hit` (早命中 `findOnce()`), `findOne(600)` 未命中的尝试次数, 轮询 10 s 的进程 CPU (安静屏幕, 以及 "事件风暴" 场景: 悬浮窗内一个持续更新的进度条), 每项 10 轮, 输出通过 / 失败与中位数 (不打印节点全文). 验收: 在 23046RP50C 与 22120RN86C 上各跑一次, 修前基线写入附录 A. (DEVICE) (`DEVICE` 2026-10-25, build 4283, 新层开关 on: 23046RP50C / 22120RN86C 各一次, 三场景共 36 项全部 PASS, 修前基线见附录 A P0.1; 脚本 ec389609c, 基线 895070a9f)
+- [x] P0.2 结果对照脚本 `tools/selector/parity.js` + `device_parity.py`: 固定屏幕 (AutoJs6 主界面与设置首页) 上一组选择器 (精确 id / 短 id / 精确 text / textContains / 正则 / className + clickable / bounds / 对象选择器 / 混合数组 / `select('...')` 字符串语法 / BFS) 的 `find()` 结果序列按节点指纹 (`fingerprint()` + 深度 + indexInParent) 快照, 比对两次运行一致 (稳定屏幕上应 100% 一致), 作为 P2 快路径与排序优化 "顺序与数量不变" 的判据. 验收: 两台设备各一次, 快照文件进 `tools/selector/baseline/`. (DEVICE) (`DEVICE` 2026-10-25: 两台 x 2 块屏幕 x 23 个用例, 两次运行逐节点 100% 一致, 23046RP50C 另以 `--check` 复核 100%; 快照 `baseline/parity-<model>-<screen>.json`, 见附录 A P0.2; 脚本 ec389609c, 快照 895070a9f)
+- [x] P0.3 pickup / detect 黄金表 `tools/selector/pick_table.js`: 枚举结果类型全部 43 种拼写 (`PickResultType` 的 spellings) x (缺省 / 带罗盘 `p` / `c0` / `s>1` / `k2`) x (有命中 / 无命中) x (有 / 无回调), 选择器参数的各类形式 (字符串, 正则, UiSelector, 对象, 数组, 数字, root), 以及拦截表内外的参化调用 (`['child', 0]`, `['setText', 'x']`, `['bounds']`, `['hintText']`, 未知名字); 输出每条的结果形状 (类型名, 数组长度, 字符串值) 与错误类型, 在 23046RP50C 上记录为 `tools/selector/baseline/pick_table-<device>.json`. 这是 P1 重构 "行为不变" 的判据 (D6 (b) 允许的差异除外). (DEVICE) (`DEVICE` 2026-10-25: 23046RP50C 新层 on / off 各一张 3778 行, 两次运行逐行一致, `--check` 复核一致; 22120RN86C 同样两张作参照; 拼写实为 47 种; 记录了附录 C Q8 (showTooltip 崩溃) 与 Q9 (集合拼写的类初始化缺陷), 见附录 A P0.3; 脚本 ec389609c, 黄金表 895070a9f)
+- [x] P0.4 JVM 安全网: 全量 `:app:testAppDebugUnitTest` 通过作为起点 (记录用例数); `CompassTest` / `CompassParserTest` / `PickResultTypeTest` / `SelectorRegistryTest` / `SelectorChecksTest` / `UiSelectorBuildersTest` / `SelectorExplainerTest` 为 P1 的回归集. (JVM) (`JVM` 2026-10-25, HEAD 25996d7d2: 949 个测试类 5808 例, 0 失败, 27 跳过; 7 个回归类均存在且全部通过, 共 54 例, 明细见附录 A)
 
 ### P1 PickRequest 模型 (D5, D6 (b), D11, D1 的预检合并)
 
@@ -137,7 +137,46 @@ P3 与 P2 可由两张卡片并行: P2 只改 `UiObject.kt` (读取缓存), `sea
 
 P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `full` / `miss` / `hit` 中位数, `findOne(600)` 尝试次数, 轮询 CPU (安静 / 事件风暴), parity 快照文件, pick_table 条数. P1.5 / P2.4 / P3 各条 / P5.1 追加修后数据与差异说明.
 
-- (待 P0 填写)
+### P0.1 修前基准 (2026-10-25)
+
+- 构建: 源码 HEAD 25996d7d2 的 `:app:assembleAppDebug` (宿主 VERSION_BUILD 4283, versionCode 5935), `adb install -r` 到两台设备; 新脚本模块层开关 on (构建默认值, 运行时设置, 结束后恢复设备原值 off). 命令 `py -3.12 -I tools/selector/device_bench.py -s SERIAL --new-modules on --save`, 两台各一次, 三场景共 36 项全部 PASS; 汇总与各轮样本在 `tools/selector/baseline/bench-<model>.json`.
+- 口径: 计时项每项预热 5 次后计 10 轮, 取中位数 (ms); `findOne(600)` 为 `text('__aj6sel_none__').findOne(600)` 的尝试次数 (`auto.stats.queries.attempts`) 与耗时; CPU 为 10 s 轮询 (`findOne(10000)`, 10 轮, 空闲下限 3 轮) 期间宿主进程的 CPU 占一个核的百分比 (`Process.getElapsedCpuTime`), 括号内为 10 s 内的尝试次数. 悬浮窗场景经窗口过滤器 `{ packageName: AutoJs6 }` 搜索, 每次查询都枚举窗口, 因此连 `hit` 也在 10 ms 以上. 调度组 (PCY) 在每个场景前后不变: 设置首页 fg, 主界面 ta, 悬浮窗 fg.
+
+| 设备 | 场景 (节点数) | PCY | full / miss / missId / missMixed / hit / late (ms) | findOne(600) 尝试 / ms | CPU 固定 50 ms (尝试) | CPU eventAssistedPolling (尝试) | CPU 空闲 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 23046RP50C API 35 | 设置首页 (66) | fg | 8.69 / 5.96 / 5.81 / 7.55 / 4.74 / 6.00 | 12 / 630 | 16.4% (166) | 5.5% (53) | 0.2% |
+| 23046RP50C API 35 | AutoJs6 主界面 (710) | ta | 9.48 / 2.57 / 2.94 / 5.91 / 0.78 / 2.90 | 11 / 650 | 47.9% (144.5) | 19.1% (47) | 0.4% |
+| 23046RP50C API 35 | 悬浮窗 300 TextView (303) | fg | 17.64 / 19.82 / 19.99 / 24.28 / 20.10 / 17.31 | 9 / 647 | 33.5% (116) | 12.7% (44) | 0.2% |
+| 23046RP50C API 35 | 悬浮窗 + 事件风暴 (57.7 次更新/s) | fg | - | - | 90.2% (137) | 91.8% (192) | 81.2% |
+| 22120RN86C API 33 | 设置首页 (42) | fg | 5.38 / 2.74 / 3.19 / 3.73 / 2.31 / 2.76 | 12 / 653 | 16.0% (174) | 4.7% (50) | 0.1% |
+| 22120RN86C API 33 | AutoJs6 主界面 (628) | ta | 12.92 / 5.89 / 6.91 / 14.86 / 2.68 / 7.57 | 9 / 642 | 74.4% (122) | 31.3% (43) | 0.3% |
+| 22120RN86C API 33 | 悬浮窗 300 TextView (303) | fg | 23.75 / 12.93 / 10.34 / 13.43 / 12.08 / 11.10 | 8 / 639 | 30.9% (120) | 11.4% (45) | 0.2% |
+| 22120RN86C API 33 | 悬浮窗 + 事件风暴 (57.9 次更新/s) | fg | - | - | 109.9% (110.5) | 120.7% (187) | 92.3% |
+
+- 项目含义 (详见 `tools/selector/README.md`): `miss` = `text` 未命中, `missId` = `id` 未命中 (P2.3 快路径的入口), `missMixed` = 正则声明在 `clickable(true)` 之前的未命中 (P2.2 排序), `hit` = 根节点早命中, `late` = DFS 顺序中最后一个唯一文本 (单候选晚命中). P2.1 / P2.2 / P2.3 / P2.4 的修后数据按同一命令, 同一开关状态与同一场景追加在本节之后.
+- 读数: (1) 固定 50 ms 轮询在静态屏幕上 10 s 做 116-174 次全树遍历, 宿主 CPU 16-74%; 事件辅助轮询降到 4.7-31%, 尝试 43-53 次. (2) 事件风暴下 (进度条与标签每 16 ms 更新) 事件辅助轮询的尝试反而多于固定间隔 (192 对 137, 187 对 110.5), CPU 也更高, 这正是 D9 的 50 ms 下限与事件合并 (P3.1) 要消除的; 风暴场景的 CPU 大部分是悬浮窗自身的绘制 (空闲下限 81-92%), 比较时看与 `stormIdle` 的差值与尝试次数. (3) 主界面 `miss` 低于 `full`: `findOnce` 不构造集合, 且两台设备主界面的子树多由客户端缓存供给. (4) 与架构文档 1.9 (2026-09-06, P5.5 探针) 的数值不可直接比较 (构建, 探针与调度组不同), P2 / P3 只与本节比较.
+- 设备状态: 23046RP50C 的宿主无障碍服务原本未开启, 22120RN86C 上在 P0.3 调试中宿主崩溃后被系统移出已启用列表 (见 P0.3), 两台均由维护者在手机上开启后测量.
+
+### P0.2 结果对照快照 (2026-10-25)
+
+- 同一构建与开关状态 (build 4283, 新层 on), `py -3.12 -I tools/selector/device_parity.py -s SERIAL --new-modules on --save` 两台各一次, 每台 2 块屏幕 x 2 次运行: 23 个用例逐节点一致率 100% (两台 4 块屏幕全部 PASS); 23046RP50C 另以 `--runs 1 --check` 对快照复核一次, 100%.
+- 快照: `tools/selector/baseline/parity-23046RP50C-main.json` / `-settings.json`, `parity-22120RN86C-main.json` / `-settings.json` (节点记为 `[fingerprint(), depth(), indexInParent()]`, 从屏幕推出的字面值只存哈希, 不含屏幕文本). P2.1-P2.3 的验收命令: 同一设备, 同一开关状态下 `device_parity.py -s SERIAL --new-modules on --runs 1 --check`; 屏幕内容变了 (主界面文件列表, 设置首页的账号或电量文字) 时字面值哈希会报 "the screen changed", 需在修前构建上重新 `--save` 后再比.
+- 各用例结果条数 (23046RP50C 主界面 710 节点 / 设置首页 66 节点; 22120RN86C 628 / 42): `full` 与 `fullBfs` 等于节点数; `idExact` = `idShort` 16 / 19, 5 / 12; `idMatch` 49 / 20, 20 / 15; `textExact` 136 / 1, 136 / 1; `textContains` 136 / 1, 136 / 2; `textMatch` 159 / 14, 146 / 2; `descMatch` 176 / 1, 155 / 1; `classClickable` = `objectPickup` = `selectSyntax` 138 / 21, 138 / 12; `boundsInside` 45 / 22, 34 / 12; `depthRange` 44 / 60, 33 / 38; `leaves` (`filter` 函数) 379 / 42, 315 / 26; `objectPickupArray` = `classBfs` = `untilFind` 418 / 21, 418 / 12; `mixedArray` 197 / 26, 161 / 18; `contentPickup` 136 / 1, 136 / 1; `findOnceIndex` / `findOnce` / `pickupOne` 各 1.
+- 用例 `objectPickup` 用 `'[]'` 而非 `'{}'`: 集合拼写的解析取决于进程里谁先用到 `PickResultType` (附录 C Q9), 对照只关心搜索顺序, 不依赖结果类型表.
+
+### P0.3 pickup / detect 黄金表 (2026-10-25)
+
+- `py -3.12 -I tools/selector/device_pick_table.py -s 968e9f18 --new-modules on|off --runs 2 --save`: 在脚本自建的合成悬浮窗 (13 个节点, 文本以 `aj6pt` 开头) 上每张表 3778 行, 两次运行逐行一致 (开关 on / off 各一张). 基线 (P1.5 的判据): `tools/selector/baseline/pick_table-23046RP50C.json` (新层 on, 6.8.0 默认) 与 `pick_table-23046RP50C-legacy.json` (开关 off, 旧 augment 层); 参照: 22120RN86C 的同样两张表 (`pick_table-22120RN86C.json` / `-legacy.json`, 同样稳定), 其进程的 `PickResultType` 初始化正常 (见下).
+- 行数 (分节: 行数, 新层 on 的错误行数): `types` 1770 行, 372 (47 种拼写 + 12 种非拼写参数 = 59 x 罗盘 5 x 选择器 3 (一个命中 / 三个命中 / 无命中) x 回调 2); `detect` 1180, 848 (59 x 5 x (行节点 / null) x 2); `forms` 280, 88 (40 种选择器形式 x 7: 6 种结果类型与单参数); `roots` 21, 5; `arity` 64, 25; `callbacks` 10, 2; `invoke` 80, 24 (拦截表内外的参化调用, 含 EditText 上的 `setText` / `setSelection`); `sweep` 365, 0 (`UiObject` 公开无参方法 187 个, 命中 178 个 + 无命中 187 个, 命中时跳过 9 个危险动作, 见下); `exists` 8, 1. 开关 off 的错误行数: `types` 232, `detect` 708, `forms` 81, 其余同上 (旧层的错误均为 InternalError 包装, 新层为 TypeError / RangeError).
+- 拼写数: `PickResultType` 的别名表实为 47 种拼写 (`#` 3, `{}` 8, `[]` 8, `$` 3, `contents` 8, `.` 3, `points` 9, `@` 3, `?` 2), 本 Roadmap P0.3 原文的 "43 种" 有误, 以 47 为准.
+- 进程状态 (附录 C Q9): 黄金表首行之前记录 `PickResultType.Companion.of('{}')` 的解析结果 (`meta.collectionSpelling`). 23046RP50C 的宿主进程在本次测量中先由新层 `SelectorForms` 用到该类 (P0.2 的首轮 `pickup(..., '{}')`), 8 种集合拼写在整个进程内解析为 `Invocation`: 两张基线表里这些拼写的 `types` / `detect` 行 (400 行) 与 `forms` 的 `'{}'` 列都是错误 (新层 RangeError "需要 PickupResult", 旧层 "未知结果类型"); 22120RN86C 的进程先经旧层用到该类, 解析正常 (`WidgetCollection`), 集合拼写返回集合. 两台之间的其余差异是设备几何 (坐标, bounds 246 行), 错误消息的语言 (平板中文, Redmi 英文) 与无命中时 `'{}'` 的 null / 空数组 (同为 Q9).
+- 发现 (附录 C Q8): 首次运行时 `sweep` 在命中节点上调用了 `showTooltip`, 框架 `View.showLongClickTooltip` 在没有 tooltip 的 View 上空指针, 在主线程抛出使 AutoJs6 自身崩溃 (22120RN86C, API 33, 显示 "AutoJs6 crashed" 页), MIUI 随后把宿主与两个插件 (accessibilitycompat, three.adapt.a11y) 的无障碍服务移出已启用列表, 由维护者在手机上恢复. 脚本此后在命中节点上跳过 `showTooltip` / `hideTooltip` / `dragStart` / `dragDrop` / `dragCancel` / `pressAndHold` / `showTextSuggestions` / `imeEnter` / `paste` (只在无命中时按名称调用). `getWindowId` 每次新建悬浮窗都变, 表中只记类型; 错误消息只留首行并把对象哈希改为 `@*`.
+- P1.5 的验收命令: `device_pick_table.py -s 968e9f18 --new-modules on --check` 与 `--new-modules off --check`, 输出按分节的差异行数与行 id; 允许的差异逐条列入本附录 (D6 (b), P1.1 的错误类型, Q9 修复后的集合拼写).
+
+### P0.4 JVM 起点 (2026-10-25)
+
+- 源码 HEAD 25996d7d2 (宿主 VERSION_BUILD 4283, versionCode 5935), `.\gradlew.bat :app:testAppDebugUnitTest` 通过 (1 min 56 s): 949 个测试类, 5808 例, 0 失败 / 0 错误, 27 跳过. P1.5 的 "用例数不少于 P0.4" 以 5808 为准.
+- P1 回归集 (类, 用例数): `pick.CompassTest` 9, `pick.CompassParserTest` 8, `pick.PickResultTypeTest` 6, `selector.SelectorRegistryTest` 14, `modules.selector.SelectorChecksTest` 7, `selector.UiSelectorBuildersTest` 3, `diagnostics.SelectorExplainerTest` 7, 共 54 例, 全部通过.
 
 ## 附录 B: 立项选择题记录 (2026-10-25)
 
@@ -168,6 +207,8 @@ P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `
 | Q5 | PickArguments 的错误消息: 复用新层 `ScriptMessages` (10 种语言, 已有 argumentType / cannotBe / failedToCall) 还是新增专用消息 | (1) 推荐: 复用, 结果类型的候选列表拼在 `cannotBe` 的说明里; (2) 新增 3-5 条专用资源 (10 种语言) | P1.1, P1.2 | 小 | 已决 (2026-10-25, 维护者选: (2) PickArguments 错误消息新增 3-5 条专用资源 (10 种语言), 不复用 ScriptMessages) |
 | Q6 | 预取与快路径在 `MODE_FAST` (`fastRootInActiveWindow`, 缓存根节点) 下是否启用 | (1) 推荐: 启用 (根来自缓存不影响 `findAccessibilityNodeInfosByViewId` 的 IPC; 根过期时快路径与 DFS 同样只见过期子树); (2) `MODE_FAST` 下关闭快路径, 只用预取 | P2.1, P2.3 | 小 | 已决 (2026-10-25, 维护者选: (1) MODE_FAST 下预取与快路径启用) |
 | Q7 | P2 与 P3 是否并行 | (1) 推荐: 并行两张卡, 按第 5 节 P3 的文件分工, 共同文件由先开始者改, 构建在 locks.md 排队; (2) 顺序 P2 再 P3 | 批次安排 | 无 | 已决 (2026-10-25, 维护者选: (2) P2 与 P3 顺序执行, 不并行) |
+| Q8 | 节点动作 `showTooltip` (以及同类的 `hideTooltip`) 在没有 tooltip 的 View 上执行时, 框架 `View.showLongClickTooltip` 空指针, 在目标应用的主线程抛出而使该进程崩溃 (P0.3 黄金表 2026-10-25 在 22120RN86C (API 33) 上对 AutoJs6 自己的悬浮窗执行 `pickup(sel, 'showTooltip')` 时 AutoJs6 崩溃, MIUI 随后把 AutoJs6 与另两个插件的无障碍服务移出已启用列表). 对其他应用的节点调用则是让那个应用崩溃. 是否在宿主侧加防护 | (1) 推荐: `UiObjectActions.showTooltip` / `hideTooltip` 先查节点的 actionList, 不含对应动作 (ACTION_SHOW_TOOLTIP / ACTION_HIDE_TOOLTIP) 时返回 false 不执行, 对 pickup 参化调用, 注册表与直接调用同样生效, changelog `fix`; (2) 只对 AutoJs6 自身包名的节点防护; (3) 不改, 只在文档注明 | P1.2, P1.3 (注册表条目), P4.1 (changelog), P4.2 (文档) | 小 (两个方法加一次 actionList 判断与 JVM 用例) | 需拍板 (P1 前; 不阻塞, P0.3 黄金表已改为不在命中节点上执行这类动作, 未先行改代码) |
+| Q9 | `PickResultType` 的类初始化顺序缺陷: 新层 `SelectorForms` 的静态 `PLURAL = setOf(PickResultType.WidgetCollection, ...)` 若是进程里第一个用到该类的地方, JVM 先初始化父类 `PickResultType`, 其伴生对象建别名表时 `WidgetCollection` 尚为 null, 于是 `{}` / `wc` / `collection` / `list` / `#{}` / `{#}` / `w{}` / `{w}` 8 种拼写在整个进程内都解析为 `Invocation`: 新层 `pickup(sel, '{}')` 报 RangeError (需要 PickupResult), 旧层报 "未知结果类型". 开关默认开的 6.8.0 上, 进程里第一次 `pickup` 走新层即触发 (P0.3 在 23046RP50C 上实测, 两层的黄金表都记录了这一状态; 22120RN86C 的进程先经旧层用到该类, 集合拼写正常). 修复与验收方式 | (1) 推荐: P1 修复 (别名表改为首次查表时惰性建立, 或 `PLURAL` 等集合改用 getter), JVM 回归用例在新类加载器中先触达子类对象再查表; P1.5 对照时把黄金表中这 8 种拼写的行列为允许差异 (修复), 并以 22120RN86C 的表 (`tools/selector/baseline/pick_table-22120RN86C*.json`, 初始化正常) 核对修复后的形状; changelog `fix`; (2) 现在单独修 (P1 之前发一张小卡); (3) 不单独修, 由 P1.3 重写自然消除, 只在 P1.5 核对 | P1.1, P1.3, P1.5, P4.1 | 小 (一处初始化方式与一个回归用例) | 需拍板 (P1 前; 不阻塞, 未先行改代码; 黄金表已记录进程状态 `collectionSpelling`) |
 
 ## 附录 D: 协同约束 (2026-10-25 登记)
 
@@ -183,3 +224,4 @@ P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `
 ### 2026-10-25
 
 - 立项会话 local_888c36fd (Fable 5.1): 读前序 Roadmap 与架构文档, pick 包, 新层 selector 模块, augment / memory 看板与 locks.md; 三轮 11 题选择题 (附录 B); 写出本 Roadmap 与看板; 未改代码. 调度会话待维护者从 dispatch 环境新建.
+- P0 子会话 local_cb1fa152 (selector-p0-jvm, Opus 5.5): 附录 C Q1-Q7 落盘 (25996d7d2); 构建 HEAD 的调试包 (build 4283) 装到 23046RP50C / 22120RN86C; 新建 `tools/selector/` 三组真机脚本 (ec389609c) 与修前基线 (895070a9f); P0.1-P0.4 全部勾选, 数据见附录 A; 新登记 Q8 (showTooltip 使节点所属进程崩溃) 与 Q9 (PickResultType 类初始化顺序使集合拼写失效), 均未先行改代码. `.gitignore` 增加 `tools/selector` 的放行规则 (同 memory / settings).
