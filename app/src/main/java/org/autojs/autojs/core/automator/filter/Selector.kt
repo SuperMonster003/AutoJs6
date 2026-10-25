@@ -14,11 +14,18 @@ import java.util.concurrent.CopyOnWriteArrayList
  * list itself keep the declared order. The sorted snapshot and the text are kept until the list
  * changes (P2.1: a search records the text of its selector).
  *
+ * The last `normalize(...)` among the filters ([NormalizeFilter], P3.3) makes the string conditions compare normalized
+ * values, wherever they stand ([effectiveFilters]); the last `prefer(...)` ([PreferFilter], P3.4) is the [preference]
+ * of the single-result queries. Both pass every node themselves.
+ *
  * zh-CN: 一组过滤器的 AND. `add` / `append` 原地修改列表 (`UiSelector` 随 builder 调用而增长), 而求值与 `toString` 遍历的是
  * 快照, 因此多个线程共享的选择器在另一线程仍在追加时也可安全搜索.
  *
  * 过滤器按开销从低到高求值 ([Filter.cost], P2.2; 稳定排序, 开销相同者保持声明顺序), 结果仍是同一个 AND; `toString` 与列表本身保持声明顺序.
  * 排序后的快照与文本保留到列表变化为止 (P2.1: 每次搜索都要记录其选择器的文本).
+ *
+ * 过滤器中最后一个 `normalize(...)` ([NormalizeFilter], P3.3) 使各字符串条件比较规范化之后的值, 与其位置无关 ([effectiveFilters]);
+ * 最后一个 `prefer(...)` ([PreferFilter], P3.4) 为单结果查询的 [preference]. 两者本身接受每个节点.
  *
  * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Oct 25, 2026.
@@ -45,6 +52,15 @@ open class Selector : Filter {
      */
     fun snapshot(): Filter = plan()
 
+    /**
+     * The filters as they compare, in the declared order: the string conditions normalized under `normalize(...)` (P3.3).
+     * zh-CN: 实际参与比较的过滤器, 按声明顺序: `normalize(...)` 下的字符串条件已规范化 (P3.3).
+     */
+    val effectiveFilters: List<Filter> get() = plan().effective
+
+    /** The preference among the candidates of a single result, `prefer(...)` (P3.4), or null. zh-CN: 单个结果的候选之间的偏好 `prefer(...)` (P3.4), 或 null. */
+    val preference: Preference? get() = plan().preference
+
     override fun toString() = plan().text
 
     // The plan of the list as it is: the one kept while the list holds the same filters, else a new one.
@@ -53,7 +69,16 @@ open class Selector : Filter {
 
     private class Plan(private val declared: Array<Filter>) : Filter {
 
-        private val ordered: Array<Filter> = if (declared.size < 2) declared else declared.sortedBy { it.cost }.toTypedArray()
+        val preference: Preference? = (declared.lastOrNull { it is PreferFilter } as PreferFilter?)?.preference
+
+        private val normalization: NormalizeOptions? = (declared.lastOrNull { it is NormalizeFilter } as NormalizeFilter?)?.options?.takeUnless { it.isOff }
+
+        val effective: List<Filter> = when (val options = normalization) {
+            null -> declared.asList()
+            else -> declared.map { if (it is StringPropertyFilter) it.normalized(options) else it }
+        }
+
+        private val ordered: Array<Filter> = if (effective.size < 2) effective.toTypedArray() else effective.sortedBy { it.cost }.toTypedArray()
 
         override val cost: Int = ordered.lastOrNull()?.cost ?: Filter.COST_PROPERTY
 

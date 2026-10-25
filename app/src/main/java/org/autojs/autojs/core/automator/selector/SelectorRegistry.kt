@@ -13,6 +13,10 @@ import org.autojs.autojs.core.automator.filter.IdFilter
 import org.autojs.autojs.core.automator.filter.IntFilter
 import org.autojs.autojs.core.automator.filter.MetricsFilter
 import org.autojs.autojs.core.automator.filter.MetricsFilter.Spelling
+import org.autojs.autojs.core.automator.filter.NormalizeFilter
+import org.autojs.autojs.core.automator.filter.NormalizeOptions
+import org.autojs.autojs.core.automator.filter.Preference
+import org.autojs.autojs.core.automator.filter.PreferFilter
 import org.autojs.autojs.core.automator.filter.StringMatcher
 import org.autojs.autojs.core.automator.filter.StringProperty
 import org.autojs.autojs.core.automator.filter.StringPropertyFilter
@@ -23,6 +27,8 @@ import org.autojs.autojs.core.automator.selector.SelectorArgType.BOOLEAN
 import org.autojs.autojs.core.automator.selector.SelectorArgType.DOUBLE
 import org.autojs.autojs.core.automator.selector.SelectorArgType.FILTER
 import org.autojs.autojs.core.automator.selector.SelectorArgType.INT
+import org.autojs.autojs.core.automator.selector.SelectorArgType.KEYS
+import org.autojs.autojs.core.automator.selector.SelectorArgType.OPTIONS
 import org.autojs.autojs.core.automator.selector.SelectorArgType.REGEX
 import org.autojs.autojs.core.automator.selector.SelectorArgType.STRING
 import org.autojs.autojs.util.App
@@ -242,6 +248,17 @@ object SelectorRegistry {
         }
 
         entry("algorithm") { overload(string("str")) { selector, args -> selector.useAlgorithm(args[0] as String) } }
+        // Settings of the selector rather than conditions (docs/selector/ROADMAP.md P3.3 / P3.4): each passes every node,
+        // and the last one of each kind applies to the whole selector (Selector.effectiveFilters, Selector.preference).
+        // zh-CN: 选择器的设置而非条件 (P3.3 / P3.4): 各自接受每个节点, 每种取最后一个作用于整个选择器.
+        entry("normalize") {
+            f0 { NormalizeFilter(NormalizeOptions.ALL) }
+            f1<Boolean>(boolean()) { NormalizeFilter(if (it) NormalizeOptions.ALL else NormalizeOptions.NONE) }
+            f1<Map<*, *>>(SelectorParam("options", OPTIONS)) { NormalizeFilter(NormalizeOptions.of(it)!!) }
+        }
+        entry("prefer") {
+            filter(SelectorParam("keys", KEYS)) { keys -> PreferFilter(Preference(keys.map { Preference.Key.of(it as String)!! })) }
+        }
         entry("action", getter = { it.actionNames() }) { filter(SelectorParam("actions", ACTIONS)) { ActionFilter(it.filterNotNull().toTypedArray()) } }
         entry("filter") {
             f1<BooleanFilter.BooleanSupplier>(SelectorParam("filter", FILTER)) { supplier ->

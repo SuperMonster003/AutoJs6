@@ -11,6 +11,7 @@
 //   missMixed textMatch(/^__aj6sel_none__$/).clickable(true).findOnce() (regex declared before a boolean: P2.2 order)
 //   hit       packageName(<screen package>).findOnce(), the root itself (an early hit)
 //   late      text(<last unique text in DFS order>).findOnce() (a late hit with a single candidate)
+//   refresh   refresh() of the node of late: what checking a single result costs since P3.2
 //   findOne600 text('__aj6sel_none__').findOne(600): attempts (auto.stats), elapsed time and process CPU time (also per
 //             attempt: the intermediate attempts of a polled query, where the framework fast path of P2.3 applies)
 //   findOne600Id id('aj6sel_none').findOne(600), the same with an id (P2.3, added by P2)
@@ -336,6 +337,9 @@ function bench() {
     if (late) {
         result.late = { index: late.index, total: late.total, length: late.text.length };
         timed('late', function () { return text(late.text).findOnce(); }, noneNull);
+        // The refresh a single result costs since P3.2 (D6 (c)), on the node of late.
+        var lateNode = text(late.text).findOnce(0);
+        timed('refresh', function () { return lateNode.refresh() || null; }, noneNull);
     } else {
         result.items.late = { ok: false, error: 'no unique text on the screen' };
         mark('late FAIL');

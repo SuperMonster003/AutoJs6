@@ -128,6 +128,7 @@ moveWindow
 multiLine
 nextAtMovementGranularity
 nextHtmlElement
+normalize
 packageName
 packageNameContains
 packageNameEndsWith
@@ -141,6 +142,7 @@ pageUp
 password
 paste
 performAction
+prefer
 pressAndHold
 previousAtMovementGranularity
 previousHtmlElement

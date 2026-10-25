@@ -3,6 +3,8 @@ package org.autojs.autojs.core.automator.selector
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.BooleanFilter
+import org.autojs.autojs.core.automator.filter.NormalizeOptions
+import org.autojs.autojs.core.automator.filter.Preference
 import org.autojs.autojs.core.automator.pick.PickMessages
 import org.autojs.autojs.rhino.JsArgumentCoercion
 import org.autojs.autojs.util.App
@@ -19,7 +21,7 @@ import org.mozilla.javascript.regexp.NativeRegExp
  *
  * Created by SuperMonster003 on Sep 5, 2026.
  */
-enum class SelectorArgType(val kotlinType: String) {
+enum class SelectorArgType(val kotlinType: String, val isVararg: Boolean = false) {
 
     STRING("String") {
         override fun coerce(value: Any?, lenient: Boolean): Any? = (value as? CharSequence)?.toString()
@@ -62,8 +64,24 @@ enum class SelectorArgType(val kotlinType: String) {
     },
 
     /** The `vararg actions: Any` of `action()`: any non-null values. zh-CN: `action()` 的 `vararg actions: Any`: 任意非空值. */
-    ACTIONS("Any") {
+    ACTIONS("Any", isVararg = true) {
         override fun coerce(value: Any?, lenient: Boolean): Any? = value
+    },
+
+    /**
+     * The options object of `normalize({ trim: true, ... })` (docs/selector/ROADMAP.md P3.3): any object; its names and
+     * values are checked when the overload is resolved. zh-CN: `normalize({ trim: true, ... })` 的选项对象 (P3.3): 任意对象; 解析重载时检查其名称与值.
+     */
+    OPTIONS("Map<*, *>") {
+        override fun coerce(value: Any?, lenient: Boolean): Any? = value as? Map<*, *>
+    },
+
+    /**
+     * The `vararg keys: String` of `prefer(...)` (P3.4): strings, checked against the keys when the overload is resolved.
+     * zh-CN: `prefer(...)` 的 `vararg keys: String` (P3.4): 字符串, 解析重载时按键名检查.
+     */
+    KEYS("String", isVararg = true) {
+        override fun coerce(value: Any?, lenient: Boolean): Any? = (value as? CharSequence)?.toString()
     },
     ;
 
@@ -87,7 +105,7 @@ class SelectorParam(val name: String, val type: SelectorArgType, val range: Clos
  */
 class SelectorOverload(val params: List<SelectorParam>, val apply: (UiSelector, List<Any?>) -> Unit) {
 
-    val isVararg: Boolean get() = params.size == 1 && params[0].type == SelectorArgType.ACTIONS
+    val isVararg: Boolean get() = params.size == 1 && params[0].type.isVararg
 
     /**
      * [args] coerced for this signature, or null when they do not fit (count or kinds).
@@ -95,7 +113,7 @@ class SelectorOverload(val params: List<SelectorParam>, val apply: (UiSelector, 
      */
     fun coerce(args: List<Any?>, lenient: Boolean): List<Any?>? {
         if (isVararg) {
-            return args.takeIf { list -> list.none { it == null } }
+            return args.map { params[0].type.coerce(it, lenient) ?: return null }
         }
         if (args.size != params.size) return null
         return params.mapIndexed { i, param -> param.type.coerce(args[i], lenient) ?: return null }
@@ -135,8 +153,8 @@ class SelectorEntry(
     fun resolve(args: List<Any?>, lenient: Boolean): SelectorResolution {
         for (overload in overloads) {
             if (overload.isVararg) {
-                if (args.none { it == null }) return SelectorResolution.Resolved(overload, args, emptyList())
-                continue
+                val coerced = overload.coerce(args, lenient) ?: continue
+                return rejection(coerced) ?: SelectorResolution.Resolved(overload, coerced, emptyList())
             }
             val params = overload.params
             if (args.size != params.size) continue
@@ -159,6 +177,7 @@ class SelectorEntry(
             val algorithm = coerced[0] as String
             if (UiSelector.algorithmOf(algorithm) == null) return SelectorResolution.Rejected { PickMessages.unknownAlgorithm(algorithm) }
         }
+        rejection(coerced)?.let { return it }
         val patterns = overload.params.indices.mapNotNull { i ->
             when (overload.params[i].type) {
                 // StringMatcher compiles a RegExp from its string form, `/source/flags`, and a string as it is.
@@ -173,9 +192,36 @@ class SelectorEntry(
 
     private fun isNaN(value: Any?) = value is Double && value.isNaN() || value is Float && value.isNaN()
 
+    /**
+     * The refusal of the options of `normalize` (P3.3: a name not among [NormalizeOptions.NAMES], or a value not a
+     * boolean) and of the keys of `prefer` (P3.4: none, or one not among [Preference.Key]), else null.
+     * zh-CN: `normalize` 的选项 (P3.3: 名称不在 [NormalizeOptions.NAMES] 中, 或值不是布尔值) 与 `prefer` 的键 (P3.4: 没有键, 或键不在 [Preference.Key] 中) 的拒绝, 否则为 null.
+     */
+    private fun rejection(coerced: List<Any?>): SelectorResolution.Rejected? = when (name) {
+        NORMALIZE -> (coerced.singleOrNull() as? Map<*, *>)?.takeIf { NormalizeOptions.of(it) == null }?.let { options ->
+            SelectorResolution.Rejected {
+                val names = NormalizeOptions.NAMES.joinToString(", ")
+                val unknown = options.keys.firstOrNull { it !is CharSequence || it.toString() !in NormalizeOptions.NAMES }
+                if (unknown != null) "Unknown option of normalize: \"$unknown\" (options: $names)"
+                else "The options of normalize take booleans (options: $names)"
+            }
+        }
+        PREFER -> when {
+            coerced.isEmpty() -> SelectorResolution.Rejected { "prefer needs at least one key (keys: ${Preference.Key.quoted})" }
+            else -> coerced.firstOrNull { Preference.Key.of(it as String) == null }?.let { key ->
+                SelectorResolution.Rejected { "Unknown key of prefer: \"$key\" (keys: ${Preference.Key.quoted})" }
+            }
+        }
+        else -> null
+    }
+
     private companion object {
 
         const val ALGORITHM = "algorithm"
+
+        const val NORMALIZE = "normalize"
+
+        const val PREFER = "prefer"
 
         /** The message of `roundToInt` / `roundToLong` for NaN (kotlin.math). zh-CN: kotlin.math 的 roundToInt / roundToLong 对 NaN 的信息. */
         const val NAN = "Cannot round NaN value."

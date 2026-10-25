@@ -231,8 +231,9 @@ class SelectorRegistryTest {
 
     @Test
     fun theTableHasTheExpectedSize() {
-        assertEquals(129, SelectorRegistry.entries.size)
-        assertEquals(196, SelectorRegistry.entries.sumOf { it.overloads.size })
+        // normalize (3 overloads) and prefer (1) since docs/selector/ROADMAP.md P3.3 / P3.4. zh-CN: 自 P3.3 / P3.4 起含 normalize (3 个重载) 与 prefer (1 个).
+        assertEquals(131, SelectorRegistry.entries.size)
+        assertEquals(200, SelectorRegistry.entries.sumOf { it.overloads.size })
     }
 
     @Test

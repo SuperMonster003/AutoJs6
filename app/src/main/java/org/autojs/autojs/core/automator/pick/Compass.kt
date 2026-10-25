@@ -31,14 +31,18 @@ object Compass {
         return navigate(start, steps)
     }
 
-    fun <N : UiNode<N>> navigate(start: N, steps: List<CompassStep>): N? {
+    /**
+     * Walks [steps] from [start]; [visibleOnly]: the step `k` takes only a clickable node visible to the user (`prefer('visible')`,
+     * docs/selector/ROADMAP.md P3.4). zh-CN: 从 [start] 起按 [steps] 行走; [visibleOnly]: `k` 步骤只取对用户可见的可点击节点 (`prefer('visible')`, P3.4).
+     */
+    fun <N : UiNode<N>> navigate(start: N, steps: List<CompassStep>, visibleOnly: Boolean = false): N? {
         var node = start
         for (step in steps) {
             node = when (step) {
                 is CompassStep.Up -> up(node, step.levels)
                 is CompassStep.Children -> children(node, step.indices)
                 is CompassStep.Sibling -> sibling(node, step)
-                is CompassStep.Clickable -> clickable(node, step.maxLevels)
+                is CompassStep.Clickable -> clickable(node, step.maxLevels, visibleOnly)
             } ?: return null
         }
         return node
@@ -91,11 +95,11 @@ object Compass {
     // Returns null when no clickable node exists within range (decided on Sep 5, 2026,
     // previously the node itself was returned unless the walk ran past the root).
     // zh-CN: 范围内不存在可点击节点时返回 null (2026-09-05 决定, 此前除非向上越过根节点, 否则返回节点自身).
-    private fun <N : UiNode<N>> clickable(start: N, maxLevels: Int): N? {
+    private fun <N : UiNode<N>> clickable(start: N, maxLevels: Int, visibleOnly: Boolean): N? {
         var node: N? = start
         repeat(maxLevels + 1) {
             val current = node ?: return null
-            if (current.clickable()) return current
+            if (current.clickable() && (!visibleOnly || current.visibleToUser())) return current
             node = current.parent()
         }
         return null

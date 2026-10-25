@@ -66,7 +66,9 @@ class PickExecutor<N : UiNode<N>>(private val request: PickRequest<N>, private v
 
     private fun walk(node: N): N? = when (val compass = request.compass) {
         PickCompass.PassOn -> node
-        is PickCompass.Steps -> Compass.navigate(node, compass.steps)
+        // Under prefer('visible') the step k passes over the clickable ancestors not visible to the user (P3.4).
+        // zh-CN: prefer('visible') 下 k 步骤越过对用户不可见的可点击祖先 (P3.4).
+        is PickCompass.Steps -> Compass.navigate(node, compass.steps, visibleOnly = request.selector?.selector?.preference?.visibleOnly == true)
         is PickCompass.Refused -> throw compass.error.exception()
     }
 

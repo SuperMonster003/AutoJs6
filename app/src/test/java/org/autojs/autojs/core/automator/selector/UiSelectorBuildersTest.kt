@@ -69,6 +69,8 @@ class UiSelectorBuildersTest {
         SelectorArgType.APP -> App::class.java
         SelectorArgType.FILTER -> BooleanFilter.BooleanSupplier::class.java
         SelectorArgType.ACTIONS -> Array<Any>::class.java
+        SelectorArgType.OPTIONS -> Map::class.java
+        SelectorArgType.KEYS -> Array<String>::class.java
     }
 
     private fun moduleDir(): File {

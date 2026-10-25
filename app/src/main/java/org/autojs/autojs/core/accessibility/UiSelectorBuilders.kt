@@ -467,6 +467,18 @@ abstract class UiSelectorBuilders {
     fun algorithm(str: String): UiSelector = applyEntry("algorithm", str)
 
     @ScriptInterface
+    fun normalize(): UiSelector = applyEntry("normalize")
+
+    @ScriptInterface
+    fun normalize(b: Boolean): UiSelector = applyEntry("normalize", b)
+
+    @ScriptInterface
+    fun normalize(options: Map<*, *>): UiSelector = applyEntry("normalize", options)
+
+    @ScriptInterface
+    fun prefer(vararg keys: String): UiSelector = applyEntry("prefer", *keys)
+
+    @ScriptInterface
     fun action(vararg actions: Any): UiSelector = applyEntry("action", *actions)
 
     @ScriptInterface

@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _device as d  # noqa: E402
 
 SCREENS = {"settings": d.screen_settings, "main": d.screen_main, "overlay": d.screen_home}
-TIMED = ["full", "miss", "missId", "lookupId", "missMixed", "hit", "late"]
+TIMED = ["full", "miss", "missId", "lookupId", "missMixed", "hit", "late", "refresh"]
 POLLED = ["findOne600", "findOne600Id", "findOne600Default", "lateOne"]
 CPU = ["cpuIdle", "cpuFixed", "cpuAssisted", "stormIdle", "stormFixed", "stormAssisted"]
 

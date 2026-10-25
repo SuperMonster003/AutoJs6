@@ -19,6 +19,12 @@ class StringPropertyFilter(val property: StringProperty, val matcher: StringMatc
 
     override fun toString() = matcher.describe(property)
 
+    /**
+     * This filter comparing values normalized by [options] as they apply to [property] (P3.3, [NormalizeOptions.of]); its
+     * string form stays the same. zh-CN: 以作用于 [property] 的 [options] 规范化后再比较的本过滤器 (P3.3); 字符串形式不变.
+     */
+    fun normalized(options: NormalizeOptions): StringPropertyFilter = options.of(property).let { if (it.isOff) this else StringPropertyFilter(property, matcher.normalized(it)) }
+
     // P2.2: the class name compared exactly is a field read; idHex looks the id up in the resources of the package.
     // zh-CN: P2.2: 精确比较的类名只是读字段; idHex 要在包的资源中查找 id.
     override val cost: Int

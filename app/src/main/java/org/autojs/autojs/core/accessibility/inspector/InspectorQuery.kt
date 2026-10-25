@@ -45,13 +45,13 @@ data class InspectorQuery(
             }
             Mode.FIELD -> try {
                 val selector = parser.parse(text.trim(), UiSelector(null as AccessibilityBridge?))
-                Compiled.Filters(selector.selector.filters.toList())
+                Compiled.Filters(selector.selector.effectiveFilters)
             } catch (e: SelectorStringException) {
                 Compiled.Error(InspectorQueryError(InspectorQueryError.Kind.SYNTAX, e.detail, e.position, e.term, e.candidates))
             }
             Mode.SELECTOR -> try {
                 val selector = callParser.parse(text.trim(), UiSelector(null as AccessibilityBridge?))
-                Compiled.Filters(selector.selector.filters.toList())
+                Compiled.Filters(selector.selector.effectiveFilters)
             } catch (e: SelectorCallException) {
                 val kind = if (e.incomplete) InspectorQueryError.Kind.INCOMPLETE else InspectorQueryError.Kind.SYNTAX
                 Compiled.Error(InspectorQueryError(kind, e.detail, e.position, e.term, e.candidates))

@@ -299,7 +299,7 @@ class PickArguments<N : UiNode<N>>(private val nodeType: Class<N>, private val m
     /** The values the overloads of a condition take: a single argument, `null` (none), or an array of the arguments. */
     private fun accepted(entry: SelectorEntry): String = entry.overloads.map { overload ->
         when {
-            overload.isVararg -> "string | number | Array"
+            overload.isVararg -> if (overload.params[0].type == SelectorArgType.ACTIONS) "string | number | Array" else "string | Array"
             overload.params.isEmpty() -> "null"
             overload.params.size == 1 -> kind(overload.params[0].type)
             else -> overload.params.joinToString(", ", "[", "]") { kind(it.type) }
@@ -314,6 +314,8 @@ class PickArguments<N : UiNode<N>>(private val nodeType: Class<N>, private val m
         SelectorArgType.APP -> "App"
         SelectorArgType.FILTER -> "function"
         SelectorArgType.ACTIONS -> "string | number"
+        SelectorArgType.OPTIONS -> "object"
+        SelectorArgType.KEYS -> "string"
     }
 
     private fun refused(kind: PickError.Kind, message: String) = PickVerdict.Refused<N>(PickError(kind, message))

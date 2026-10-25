@@ -44,7 +44,7 @@ internal class A11yDiagnosticsApi(private val scriptRuntime: ScriptRuntime) {
     fun explain(selectorArg: Any?, rootArg: Any?): NativeObject {
         val selector = PickArguments.uiObject.buildSelector("auto.explain", "selector", unwrap(selectorArg), PickResultAdapter.binding(scriptRuntime))
         bridge.ensureServiceStarted()
-        val explanation = SelectorExplainer.explain(roots(rootArg), selector.selector.filters.toList(), selector.toString())
+        val explanation = SelectorExplainer.explain(roots(rootArg), selector.selector.effectiveFilters, selector.toString())
         val text = explanation.render()
         return RhinoUtils.withRhinoContext(scriptRuntime) { _ ->
             obj(

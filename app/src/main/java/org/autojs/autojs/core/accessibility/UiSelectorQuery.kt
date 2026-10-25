@@ -41,13 +41,18 @@ class UiSelectorQuery internal constructor(
     /**
      * The first node found, or `null`; refreshed before it is returned, and searched for again within the rest of the
      * plan when it has left the window since the search (docs/selector/ROADMAP.md D6 (c), P3.2, [UiSelector.verified]).
+     * Under `prefer(...)` the attempts collect every node, and the best of them is the one (P3.4).
      * zh-CN: 找到的首个节点, 或 `null`; 返回前刷新, 搜索之后已离开窗口时在计划的剩余部分内重新搜索 (D6 (c), P3.2, [UiSelector.verified]).
+     * `prefer(...)` 下各次尝试收集全部节点, 取其中最优者 (P3.4).
      */
     fun one(): UiObject? {
         val start = SystemClock.uptimeMillis()
         val run = Run()
-        val found = selector.verified(run.search(policy)?.get(0), policy.isUnbounded) {
-            run.search(rest(SystemClock.uptimeMillis() - start, run.attempts))?.get(0)
+        val preference = selector.selector.preference
+        val limit = if (preference == null) max else Int.MAX_VALUE
+        fun first(found: UiObjectCollection?): UiObject? = found?.let { if (preference == null) it.get(0) else preference.best(it.nodes) }
+        val found = selector.verified(first(run.search(policy, limit)), policy.isUnbounded) {
+            first(run.search(rest(SystemClock.uptimeMillis() - start, run.attempts), limit))
         }
         selector.bridge?.stats?.recordQuery(selector.toString(), SystemClock.uptimeMillis() - start, run.attempts, found != null)
         return found
@@ -68,8 +73,8 @@ class UiSelectorQuery internal constructor(
         var attempts = 0L
             private set
 
-        /** The nodes of the first attempt of [plan] that found any, or null. zh-CN: [plan] 中首次找到节点的尝试的结果, 或 null. */
-        fun search(plan: PollPolicy): UiObjectCollection? {
+        /** The nodes (at most [limit]) of the first attempt of [plan] that found any, or null. zh-CN: [plan] 中首次找到节点的尝试的结果 (至多 [limit] 个), 或 null. */
+        fun search(plan: PollPolicy, limit: Int = max): UiObjectCollection? {
             // Which attempts the framework fast path may answer (docs/selector/ROADMAP.md P2.3, appendix C Q1), told by what
             // the lookups and the walks of this query cost (appendix C Q15 / Q17).
             // zh-CN: 框架快路径可以作答哪些尝试 (P2.3, 附录 C Q1), 依本查询的查找与遍历的开销而定 (附录 C Q15 / Q17).
@@ -80,7 +85,7 @@ class UiSelectorQuery internal constructor(
                 attempts = before + progress.round
                 val attempt = fastPath.attempt(progress.round, progress.remaining)
                 costs.reset()
-                val result = selector.findWithin(max, plan.timeout, attempt, costs)
+                val result = selector.findWithin(limit, plan.timeout, attempt, costs)
                 fastPath.record(attempt, costs)
                 result.takeIf { it.isNotEmpty() }
             }

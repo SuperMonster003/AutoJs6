@@ -87,11 +87,17 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     /**
      * The first node of a single search, refreshed before it is returned: a node that has left the window since the
-     * search is searched for again (docs/selector/ROADMAP.md D6 (c), P3.2; off under `noRefreshOnHit`).
-     * zh-CN: 单次搜索的首个节点, 返回前刷新: 搜索之后已离开窗口的节点会重新搜索 (D6 (c), P3.2; `noRefreshOnHit` 下关闭).
+     * search is searched for again (docs/selector/ROADMAP.md D6 (c), P3.2; off under `noRefreshOnHit`). Under
+     * `prefer(...)` the best of all the nodes found (P3.4).
+     * zh-CN: 单次搜索的首个节点, 返回前刷新: 搜索之后已离开窗口的节点会重新搜索 (D6 (c), P3.2; `noRefreshOnHit` 下关闭). `prefer(...)` 下为找到的全部节点中的最优者 (P3.4).
      */
     @ScriptInterface
-    fun findOnce(): UiObject? = verified(findOnce(0)) { findOnce(0) }
+    fun findOnce(): UiObject? = verified(single()) { single() }
+
+    private fun single(): UiObject? = when (val preference = selector.preference) {
+        null -> findOnce(0)
+        else -> preference.best(find().nodes)
+    }
 
     @ScriptInterface
     fun findOnce(index: Int): UiObject? = when {
@@ -304,7 +310,10 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     internal fun findOneOf(root: UiObject): UiObject? = verified(firstOf(root)) { firstOf(root) }
 
-    private fun firstOf(root: UiObject): UiObject? = findOf(root, 1).takeIf { it.size() > 0 }?.get(0)
+    private fun firstOf(root: UiObject): UiObject? = when (val preference = selector.preference) {
+        null -> findOf(root, 1).takeIf { it.size() > 0 }?.get(0)
+        else -> preference.best(findOf(root, Int.MAX_VALUE).nodes)
+    }
 
     /**
      * [found], checked before a single-result entry returns it (docs/selector/ROADMAP.md D6 (c), P3.2, [HitVerifier]):
@@ -372,7 +381,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
             bridge.stats.recordFastPath(A11yStats.FastPathEvent.WALK)
         }
         if (attempt.looksUp && max > 0 && roots.isNotEmpty() && bridge.isFastPathEnabled) {
-            key = FastPath.keyOf(selector.filters)?.takeIf { k -> roots.none { bridge.fastPathLedger.isUnreliable(it.packageName(), k.kind) } }
+            key = FastPath.keyOf(selector.effectiveFilters)?.takeIf { k -> roots.none { bridge.fastPathLedger.isUnreliable(it.packageName(), k.kind) } }
             if (key != null) {
                 val started = if (costs != null) Process.getElapsedCpuTime() else 0L
                 val outcome = FastPath.decide(roots, key, filter, max == 1 && algorithm === DFS, attempt, UiObjectLookup)

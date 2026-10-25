@@ -45,27 +45,70 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
     /** Whether the form matches a pattern (the filter order of P2.2). zh-CN: 该形式是否按模式匹配 (P2.2 的过滤器顺序). */
     internal open val isPattern: Boolean get() = false
 
+    /**
+     * This form comparing values normalized by [options] (docs/selector/ROADMAP.md P3.3, [NormalizeOptions]): a literal
+     * form normalizes its argument too, a pattern ignores the case under `caseInsensitive` instead; the string form
+     * stays the same. Itself when [options] are off.
+     * zh-CN: 以 [options] 规范化后再比较的本形式 (P3.3, [NormalizeOptions]): 字面形式同时规范化其参数, 模式在 `caseInsensitive` 下改为忽略大小写;
+     * 字符串形式不变. [options] 全部关闭时为本身.
+     */
+    internal fun normalized(options: NormalizeOptions): StringMatcher = if (options.isOff) this else normalizedBy(options)
+
+    protected abstract fun normalizedBy(options: NormalizeOptions): StringMatcher
+
+    /** A literal form over normalized values. zh-CN: 比较规范化之后的值的字面形式. */
+    private class NormalizedLiteral(
+        original: StringMatcher,
+        private val options: NormalizeOptions,
+        argument: String,
+        private val test: (String, String) -> Boolean,
+    ) : StringMatcher(original.suffix, original.argument) {
+        private val expected = options.apply(argument)
+        override fun matches(value: CharSequence) = test(options.apply(value), expected)
+        override fun normalizedBy(options: NormalizeOptions) = this
+    }
+
     private class Equals(private val expected: String) : StringMatcher("", quote(expected)) {
         override fun matches(value: CharSequence) = value.contentEquals(expected)
         override val exact get() = expected
+        override fun normalizedBy(options: NormalizeOptions): StringMatcher = NormalizedLiteral(this, options, expected) { v, e -> v == e }
     }
 
     private class StartsWith(private val prefix: String) : StringMatcher("StartsWith", quote(prefix)) {
         override fun matches(value: CharSequence) = value.startsWith(prefix)
+        override fun normalizedBy(options: NormalizeOptions): StringMatcher = NormalizedLiteral(this, options, prefix) { v, e -> v.startsWith(e) }
     }
 
     private class EndsWith(private val ending: String) : StringMatcher("EndsWith", quote(ending)) {
         override fun matches(value: CharSequence) = value.endsWith(ending)
+        override fun normalizedBy(options: NormalizeOptions): StringMatcher = NormalizedLiteral(this, options, ending) { v, e -> v.endsWith(e) }
     }
 
     private class Contains(private val part: String) : StringMatcher("Contains", quote(part)) {
         override fun matches(value: CharSequence) = value.contains(part)
+        override fun normalizedBy(options: NormalizeOptions): StringMatcher = NormalizedLiteral(this, options, part) { v, e -> v.contains(e) }
     }
 
     /** A regex form: the whole value must match, or a match must occur somewhere in it. zh-CN: 正则形式: 整个值须匹配, 或值中任意位置出现匹配. */
     private class Pattern(suffix: String, argument: String, private val regex: Regex, private val whole: Boolean) : StringMatcher(suffix, argument) {
         override fun matches(value: CharSequence) = if (whole) value.matches(regex) else value.contains(regex)
         override val isPattern get() = true
+        override fun normalizedBy(options: NormalizeOptions): StringMatcher = NormalizedPattern(this, options, regex, whole)
+    }
+
+    /**
+     * A regex form over normalized values: the pattern is left as written, ignoring the case under `caseInsensitive`
+     * (appendix C Q17). zh-CN: 比较规范化之后的值的正则形式: 模式保持原样, `caseInsensitive` 下忽略大小写 (附录 C Q17).
+     */
+    private class NormalizedPattern(original: StringMatcher, private val options: NormalizeOptions, regex: Regex, private val whole: Boolean) :
+        StringMatcher(original.suffix, original.argument) {
+        private val regex = if (!options.caseInsensitive) regex else {
+            val pattern = regex.toPattern()
+            java.util.regex.Pattern.compile(pattern.pattern(), pattern.flags() or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE).toRegex()
+        }
+        override fun matches(value: CharSequence) = options.apply(value, lowerCase = false).let { if (whole) it.matches(regex) else it.contains(regex) }
+        override val isPattern get() = true
+        override fun normalizedBy(options: NormalizeOptions) = this
     }
 
     companion object {
