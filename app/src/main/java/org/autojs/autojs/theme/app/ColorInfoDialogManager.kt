@@ -7,7 +7,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.runtime.api.augment.colors.Colors
+import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.ui.dialog.InfoDialog
 import org.autojs.autojs.util.ColorUtils
 import org.autojs.autojs.util.DialogUtils.showAdaptive

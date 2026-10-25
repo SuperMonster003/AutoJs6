@@ -2,12 +2,12 @@ package org.autojs.autojs.core.image
 
 import android.graphics.Paint
 import android.util.Log
-import org.autojs.autojs.runtime.api.augment.colors.Colors
+import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs6.BuildConfig
 import java.util.concurrent.ConcurrentHashMap
 
 // @Hint by JetBrains AI Assistant (GPT-5.2) on Jan 16, 2026.
-//  ! This class is no longer used (replaced by org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject).
+//  ! This class is no longer used (replaced by org.autojs.autojs.runtime.api.modules.proxy.PaintProxyObject).
 //  !
 //  ! Reason 1: RhinoPaint is a copy-based wrapper (class RhinoPaint(paint) : Paint(paint)).
 //  ! Copy-based wrapping breaks identity semantics between Java and JavaScript.
@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap
 //  !
 //  ! zh-CN:
 //  !
-//  ! 当前类不再使用 (由 org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject 替代).
+//  ! 当前类不再使用 (由 org.autojs.autojs.runtime.api.modules.proxy.PaintProxyObject 替代).
 //  !
 //  ! 原因 1: RhinoPaint 属于 "复制式包装" (class RhinoPaint(paint) : Paint(paint)).
 //  ! 复制式包装会破坏 Java 与 JavaScript 之间的对象身份一致性语义.

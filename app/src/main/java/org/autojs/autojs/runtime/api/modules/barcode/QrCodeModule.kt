@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.barcode
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.barcode.Barcode
-import org.autojs.autojs.runtime.api.augment.barcode.QrCode
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import org.autojs.autojs.app.GlobalAppContext;
-import org.autojs.autojs.runtime.api.augment.storages.StorageNativeObject;
+import org.autojs.autojs.runtime.api.modules.storages.StorageNativeObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 

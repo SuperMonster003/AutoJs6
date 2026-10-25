@@ -116,7 +116,7 @@ object GlobalJavaClasses : ScriptNameLookup {
         "Mat" -> org.autojs.autojs.core.opencv.Mat::class.java
         "DynamicLayoutInflater" -> org.autojs.autojs.core.ui.inflater.DynamicLayoutInflater::class.java
         "ContinuationResult" -> org.autojs.autojs.rhino.continuation.Continuation.Result::class.java
-        "ContinuationCreator" -> org.autojs.autojs.runtime.api.augment.continuation.Creator::class.java
+        "ContinuationCreator" -> org.autojs.autojs.runtime.api.modules.continuation.Creator::class.java
         "JavaScriptEngine" -> org.autojs.autojs.engine.JavaScriptEngine::class.java
         "PFile" -> org.autojs.autojs.pio.PFile::class.java
         "Pref" -> org.autojs.autojs.core.pref.Pref::class.java

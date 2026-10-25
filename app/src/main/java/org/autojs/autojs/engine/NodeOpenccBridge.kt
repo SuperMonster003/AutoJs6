@@ -3,7 +3,7 @@ package org.autojs.autojs.engine
 import android.content.Context
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.plugin.text.OpenccPluginHost
-import org.autojs.autojs.runtime.api.augment.opencc.OpenccConversionPlan
+import org.autojs.autojs.runtime.api.modules.opencc.OpenccConversionPlan
 import org.autojs.plugin.opencc.api.OpenccConversionTypes
 import org.json.JSONArray
 import java.util.Locale

@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.compose
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.compose.Compose
-import org.autojs.autojs.runtime.api.augment.compose.ComposeJsErrors
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal

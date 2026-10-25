@@ -12,7 +12,7 @@ import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.ProxyObject.Companion.AUGMENTED_CUSTOM_TO_STRING_KEY
 import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.events.Events
+import org.autojs.autojs.runtime.api.modules.events.Events
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException

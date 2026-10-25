@@ -1,8 +1,8 @@
 package org.autojs.autojs.core.plugin.compose
 
 import org.autojs.autojs.core.looper.TimerCallbackRejectedException
-import org.autojs.autojs.runtime.api.augment.ScriptAsyncDispatcher
-import org.autojs.autojs.runtime.api.augment.ScriptDispatchQueueOverflowException
+import org.autojs.autojs.runtime.api.modules.ScriptAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ScriptDispatchQueueOverflowException
 import org.autojs.plugin.compose.api.ComposeUiContractException
 import org.autojs.plugin.compose.api.ComposeUiErrorCodes
 import org.junit.Assert.*

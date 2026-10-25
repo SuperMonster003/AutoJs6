@@ -4,7 +4,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.autojs.autojs.core.http.MutableOkHttp
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.http.Http
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction

@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.power
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.power.PowerManager
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 

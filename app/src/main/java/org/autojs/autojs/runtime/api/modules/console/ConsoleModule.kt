@@ -8,9 +8,6 @@ import org.autojs.autojs.core.console.log.LogManager
 import org.autojs.autojs.rhino.ProxyObject
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject
-import org.autojs.autojs.runtime.api.augment.console.Console
-import org.autojs.autojs.runtime.api.augment.flow.FlowJsErrors
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
@@ -20,6 +17,8 @@ import org.autojs.autojs.runtime.api.modules.ScriptPrototype
 import org.autojs.autojs.runtime.api.modules.ScriptProxyGet
 import org.autojs.autojs.runtime.api.modules.ScriptProxyObject
 import org.autojs.autojs.runtime.api.modules.ScriptProxySet
+import org.autojs.autojs.runtime.api.modules.colors.ColorNativeObject
+import org.autojs.autojs.runtime.api.modules.flow.FlowJsErrors
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.util.Inspector
 import org.autojs.autojs.runtime.api.modules.util.UtilModule

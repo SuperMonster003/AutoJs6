@@ -4,8 +4,6 @@ import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.runtime.api.augment.shell.ShellProcess
-import org.autojs.autojs.runtime.api.augment.shizuku.Shizuku
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
@@ -13,6 +11,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptPrototype
 import org.autojs.autojs.runtime.api.modules.shell.ShellArgs
 import org.autojs.autojs.runtime.api.modules.shell.ShellArgs.ABSENT
+import org.autojs.autojs.runtime.api.modules.shell.ShellProcess
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject

@@ -5,13 +5,13 @@ import org.autojs.autojs.runtime.api.augment.base64.Base64
 import org.autojs.autojs.runtime.api.augment.converter.Converter
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.formatter.Formatter
-import org.autojs.autojs.runtime.api.augment.global.IsNullish
 import org.autojs.autojs.runtime.api.augment.global.Legacy
-import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.augment.mime.Mime
 import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
-import org.autojs.autojs.runtime.api.augment.s13n.S13n
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
+import org.autojs.autojs.runtime.api.modules.global.IsNullish
+import org.autojs.autojs.runtime.api.modules.global.Species
+import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

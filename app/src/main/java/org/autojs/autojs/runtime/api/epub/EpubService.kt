@@ -8,7 +8,7 @@ import org.autojs.autojs.core.plugin.epub.EpubErrorMapper
 import org.autojs.autojs.core.plugin.epub.EpubPluginException
 import org.autojs.autojs.core.plugin.epub.EpubPluginHost
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.epub.EpubReaderSessionRunner
+import org.autojs.autojs.runtime.api.modules.epub.EpubReaderSessionRunner
 import org.autojs.plugin.epub.api.EpubContract
 import org.autojs.plugin.epub.api.EpubErrorCodes
 import java.io.Closeable

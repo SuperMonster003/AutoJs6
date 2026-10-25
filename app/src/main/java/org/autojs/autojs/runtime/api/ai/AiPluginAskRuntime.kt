@@ -7,7 +7,7 @@ import org.autojs.autojs.core.plugin.ai.AiPluginAskRequest
 import org.autojs.autojs.core.plugin.ai.AiPluginAskRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
 import org.autojs.plugin.ai.provider.api.AiFinishReason
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap

@@ -6,7 +6,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.briefOfCurrentVersionInt
+import org.autojs.autojs.runtime.api.modules.util.VersionCodesInfo.briefOfCurrentVersionInt
 import org.autojs.autojs.tool.ProcessExitHistory
 import org.autojs.autojs.tool.ProcessExitHistory.Category
 import org.autojs.autojs.ui.BaseActivity

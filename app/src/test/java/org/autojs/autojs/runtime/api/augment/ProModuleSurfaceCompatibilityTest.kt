@@ -2,12 +2,12 @@ package org.autojs.autojs.runtime.api.augment
 
 import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.augment.automator.Automator
-import org.autojs.autojs.runtime.api.augment.floaty.Floaty
-import org.autojs.autojs.runtime.api.augment.http.Http
-import org.autojs.autojs.runtime.api.augment.images.Images
-import org.autojs.autojs.runtime.api.augment.images.ObjectFrame
-import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
 import org.autojs.autojs.runtime.api.augment.timers.Timers
+import org.autojs.autojs.runtime.api.modules.floaty.Floaty
+import org.autojs.autojs.runtime.api.modules.http.Http
+import org.autojs.autojs.runtime.api.modules.images.Images
+import org.autojs.autojs.runtime.api.modules.images.ObjectFrame
+import org.autojs.autojs.runtime.api.modules.tasks.WorkManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

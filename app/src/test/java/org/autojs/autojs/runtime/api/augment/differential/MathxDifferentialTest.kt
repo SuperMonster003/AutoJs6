@@ -1,8 +1,8 @@
 package org.autojs.autojs.runtime.api.augment.differential
 
-import org.autojs.autojs.runtime.api.augment.jsox.Arrayx
-import org.autojs.autojs.runtime.api.augment.jsox.Mathx
-import org.autojs.autojs.runtime.api.augment.jsox.Numberx
+import org.autojs.autojs.runtime.api.modules.jsox.Arrayx
+import org.autojs.autojs.runtime.api.modules.jsox.Mathx
+import org.autojs.autojs.runtime.api.modules.jsox.Numberx
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before

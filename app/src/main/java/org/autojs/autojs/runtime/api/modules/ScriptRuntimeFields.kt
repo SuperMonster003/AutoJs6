@@ -2,11 +2,11 @@ package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ai.AiService
-import org.autojs.autojs.runtime.api.augment.compose.Compose
 import org.autojs.autojs.runtime.api.epub.EpubService
 import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.installer.InstallerService
 import org.autojs.autojs.runtime.api.mail.MailService
+import org.autojs.autojs.runtime.api.modules.compose.Compose
 import org.autojs.autojs.runtime.api.speech.SpeechService
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.tts.TtsService

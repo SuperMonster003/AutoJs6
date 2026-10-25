@@ -24,7 +24,7 @@ class VersionCodesProcessor(private val env: SymbolProcessorEnvironment) : Symbo
 
         val sorted = rows.sortedByDescending { it.apiLevel.toIntOrNull() ?: Int.MIN_VALUE }
 
-        val pkg = "org.autojs.autojs.runtime.api.augment.util"
+        val pkg = "org.autojs.autojs.runtime.api.modules.util"
         val fileName = "VersionCodesInfoGenerated"
         val fileExtension = "kt"
         val content = buildString {
@@ -32,7 +32,7 @@ class VersionCodesProcessor(private val env: SymbolProcessorEnvironment) : Symbo
             appendLine("@file:Suppress(\"unused\",\"MemberVisibilityCanBePrivate\",\"RedundantVisibilityModifier\")")
             appendLine("package $pkg")
             appendLine()
-            appendLine("import org.autojs.autojs.runtime.api.augment.util.VersionCodes")
+            appendLine("import org.autojs.autojs.runtime.api.modules.util.VersionCodes")
             appendLine("import org.autojs.autojs.util.RhinoUtils.newNativeObject")
             appendLine("import org.mozilla.javascript.ScriptableObject.PERMANENT")
             appendLine("import org.mozilla.javascript.ScriptableObject.READONLY")

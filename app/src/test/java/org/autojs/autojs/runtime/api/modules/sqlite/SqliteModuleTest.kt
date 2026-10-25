@@ -3,7 +3,6 @@ package org.autojs.autojs.runtime.api.modules.sqlite
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.sqlite.SQLite
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.junit.After

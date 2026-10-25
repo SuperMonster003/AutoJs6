@@ -27,7 +27,7 @@ DEFAULT_CLASSES = [
     "org.autojs.autojs.engine.RhinoConstScopingDeviceTest",
     "org.autojs.autojs.engine.RhinoUnicodePropertyEscapeDeviceTest",
     "org.autojs.autojs.core.ui.widget.JsListViewDataBindingDeviceTest",
-    "org.autojs.autojs.runtime.api.augment.images.ImagesResizeRhinoInstrumentationTest",
+    "org.autojs.autojs.runtime.api.modules.images.ImagesResizeRhinoInstrumentationTest",
     "org.autojs.autojs.rhino.KotlinReflectionDeviceTest",
     "org.autojs.autojs.rhino.AndroidClassLoaderRawDexDeviceTest",
 ] + [

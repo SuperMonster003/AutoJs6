@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.console
 
 import org.autojs.autojs.core.console.ConsoleImpl
-import org.autojs.autojs.runtime.api.augment.console.Console
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff

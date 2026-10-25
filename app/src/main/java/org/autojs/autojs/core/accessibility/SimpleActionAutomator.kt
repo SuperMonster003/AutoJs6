@@ -27,7 +27,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.global.Global
+import org.autojs.autojs.runtime.api.modules.global.Global
 import org.autojs.autojs.util.DeveloperUtils
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger

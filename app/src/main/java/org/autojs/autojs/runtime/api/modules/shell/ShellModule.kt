@@ -3,8 +3,6 @@ package org.autojs.autojs.runtime.api.modules.shell
 import android.view.KeyEvent
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractShell
-import org.autojs.autojs.runtime.api.augment.shell.Shell
-import org.autojs.autojs.runtime.api.augment.shell.ShellProcess
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke

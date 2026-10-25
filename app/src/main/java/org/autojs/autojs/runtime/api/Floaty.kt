@@ -19,7 +19,7 @@ import org.autojs.autojs.leakcanary.LeakCanarySetup
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
-import org.autojs.autojs.runtime.api.augment.ui.UI
+import org.autojs.autojs.runtime.api.modules.ui.UI
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService

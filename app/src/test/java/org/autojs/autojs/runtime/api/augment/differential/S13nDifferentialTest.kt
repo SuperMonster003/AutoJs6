@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api.augment.differential
 
-import org.autojs.autojs.runtime.api.augment.s13n.S13n
+import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before

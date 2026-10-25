@@ -3,11 +3,10 @@ package org.autojs.autojs.runtime.api.modules.shell
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.plugins.Plugins
-import org.autojs.autojs.runtime.api.augment.plugins.PluginsTools
-import org.autojs.autojs.runtime.api.augment.shell.Shell
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.plugins.Plugins
+import org.autojs.autojs.runtime.api.modules.plugins.PluginsTools
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

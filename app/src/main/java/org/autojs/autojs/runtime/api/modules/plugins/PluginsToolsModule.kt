@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.plugins
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.plugins.PluginsTools
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues

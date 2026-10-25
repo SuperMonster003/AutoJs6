@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.yolo
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.yolo.Yolo
-import org.autojs.autojs.runtime.api.augment.yolo.YoloDetectorNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 

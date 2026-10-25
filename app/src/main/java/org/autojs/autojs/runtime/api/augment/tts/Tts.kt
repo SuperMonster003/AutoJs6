@@ -8,7 +8,8 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.runtime.api.augment.toJsPromise
+import org.autojs.autojs.runtime.api.modules.toJsPromise
+import org.autojs.autojs.runtime.api.modules.tts.TtsUtterance
 import org.autojs.autojs.runtime.api.tts.TtsOptions
 import org.autojs.autojs.runtime.api.tts.TtsOptionsParser
 import org.autojs.autojs.runtime.api.tts.TtsQueueMode

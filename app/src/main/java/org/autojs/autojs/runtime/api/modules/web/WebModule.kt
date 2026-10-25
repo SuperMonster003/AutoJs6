@@ -4,7 +4,6 @@ import okio.ByteString
 import org.autojs.autojs.core.web.InjectableWebClient
 import org.autojs.autojs.core.web.InjectableWebView
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.web.Web
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal

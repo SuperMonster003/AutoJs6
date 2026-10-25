@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.plugins
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.plugins.LegacyPluginExtensionRegistry
-import org.autojs.autojs.runtime.api.augment.plugins.Plugins
 import org.autojs.autojs.runtime.api.modules.ScriptBuiltInExtender
 import org.autojs.autojs.runtime.api.modules.ScriptErrorMapper
 import org.autojs.autojs.runtime.api.modules.ScriptFunction

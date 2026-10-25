@@ -56,7 +56,7 @@ import org.autojs.autojs.project.LaunchConfig;
 import org.autojs.autojs.project.ProjectConfig;
 import org.autojs.autojs.runtime.api.AppUtils;
 import org.autojs.autojs.runtime.api.AppUtils.Companion.SimpleVersionInfo;
-import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin;
+import org.autojs.autojs.runtime.api.modules.pinyin.Pinyin;
 import org.autojs.autojs.theme.ThemeColorManager;
 import org.autojs.autojs.ui.BaseActivity;
 import org.autojs.autojs.ui.common.NotAskAgainDialog;

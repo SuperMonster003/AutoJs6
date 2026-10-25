@@ -3,7 +3,6 @@ package org.autojs.autojs.runtime.api.modules.device
 import org.autojs.autojs.core.plugin.nativealign.NativePageSize
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
-import org.autojs.autojs.runtime.api.augment.device.Device
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter

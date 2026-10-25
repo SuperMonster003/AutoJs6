@@ -1,10 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.jsox
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.jsox.Arrayx
-import org.autojs.autojs.runtime.api.augment.jsox.Jsox
-import org.autojs.autojs.runtime.api.augment.jsox.Mathx
-import org.autojs.autojs.runtime.api.augment.jsox.Numberx
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
 import org.junit.After

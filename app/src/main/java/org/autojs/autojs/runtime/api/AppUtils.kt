@@ -32,7 +32,7 @@ import org.autojs.autojs.util.IntentUtils.startSafely
 import org.autojs.autojs6.R
 import java.lang.ref.WeakReference
 import java.net.URI
-import org.autojs.autojs.runtime.api.augment.app.App as AugmentableApp
+import org.autojs.autojs.runtime.api.modules.app.App as AugmentableApp
 
 /**
  * Created by Stardust on Apr 2, 2017.

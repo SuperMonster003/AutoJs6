@@ -3,9 +3,6 @@ package org.autojs.autojs.runtime.api.modules.flow
 import org.autojs.autojs.core.automator.flow.CallbackKind
 import org.autojs.autojs.core.automator.flow.CombinatorKind
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.flow.FlowApi
-import org.autojs.autojs.runtime.api.augment.flow.FlowExecutor
-import org.autojs.autojs.runtime.api.augment.flow.WaitKind
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter

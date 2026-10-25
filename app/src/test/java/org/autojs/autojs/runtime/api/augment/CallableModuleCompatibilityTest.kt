@@ -9,10 +9,10 @@ import org.autojs.autojs.core.automator.pick.PickRequest
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.console.Console
-import org.autojs.autojs.runtime.api.augment.global.Global
-import org.autojs.autojs.runtime.api.augment.selector.Selector
-import org.autojs.autojs.runtime.api.augment.threads.Threads
+import org.autojs.autojs.runtime.api.modules.console.Console
+import org.autojs.autojs.runtime.api.modules.global.Global
+import org.autojs.autojs.runtime.api.modules.selector.Selector
+import org.autojs.autojs.runtime.api.modules.threads.Threads
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals

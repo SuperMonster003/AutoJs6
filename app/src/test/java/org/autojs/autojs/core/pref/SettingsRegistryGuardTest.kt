@@ -345,7 +345,7 @@ class SettingsRegistryGuardTest {
          * Same cases as `MANUAL_STORE_NAMES` in tools/settings/inventory.py.
          */
         private val MANUAL_STORE_NAMES = mapOf(
-            ("runtime/api/augment/storages/Storages.kt" to "it") to listOf("autojs.localstorage.*"),
+            ("runtime/api/modules/storages/Storages.kt" to "it") to listOf("autojs.localstorage.*"),
             ("ui/wizard/WizardProfileStore.kt" to "spName") to listOf("permission_wizard", "plugin_install_wizard"),
             ("engine/NodeBridgeProtocol.kt" to "storagePreferencesName(storeName)") to listOf("autojs.node.storage.*.*.*"),
         )

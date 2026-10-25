@@ -48,7 +48,10 @@ jobs:
             ./gradlew \
             :app:testAppDebugUnitTest \
             --tests org.autojs.autojs.core.plugin.editor.AceEditorPluginPolicyTest \
-            --tests org.autojs.autojs.runtime.api.augment.global.* \
+            --tests org.autojs.autojs.runtime.api.modules.global.CoordinateScaleTest \
+            --tests org.autojs.autojs.runtime.api.modules.global.GlobalCompatibilityTest \
+            --tests org.autojs.autojs.runtime.api.modules.global.GlobalSleepCompatibilityTest \
+            --tests org.autojs.autojs.runtime.api.modules.global.GlobalWaitCompatibilityTest \
             --tests org.autojs.autojs.runtime.api.ScaleCompatibilityTest \
             --tests org.autojs.autojs.runtime.api.ScreenMetricsCacheTest \
             --tests org.autojs.autojs.ui.edit.editor.engine.AceEditorPluginMappingsTest \

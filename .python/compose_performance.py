@@ -43,7 +43,7 @@ import uuid
 import zipfile
 import zlib
 
-TEST_CLASS = "org.autojs.autojs.runtime.api.augment.compose.ComposePerformanceDeviceTest"
+TEST_CLASS = "org.autojs.autojs.runtime.api.modules.compose.ComposePerformanceDeviceTest"
 STATUS_PREFIX = "INSTRUMENTATION_STATUS: compose_perf_json="
 METHODS = {
     "cold": "coldUiFirstFrame",

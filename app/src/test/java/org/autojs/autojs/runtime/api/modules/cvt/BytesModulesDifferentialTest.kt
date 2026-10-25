@@ -5,7 +5,7 @@ import org.autojs.autojs.runtime.api.augment.converter.Converter
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.formatter.Formatter
-import org.autojs.autojs.runtime.api.augment.s13n.S13n
+import org.autojs.autojs.runtime.api.modules.s13n.S13n
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

@@ -2,7 +2,7 @@ package org.autojs.autojs.runtime
 
 import android.os.SystemClock
 import org.autojs.autojs.rhino.extension.NumberExtensions.jsString
-import org.autojs.autojs.runtime.api.augment.console.Console
+import org.autojs.autojs.runtime.api.modules.console.Console
 import java.util.concurrent.ConcurrentHashMap
 
 class ConsoleTimeTable(private val scriptRuntime: ScriptRuntime) {

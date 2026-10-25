@@ -7,10 +7,10 @@ import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 import kotlinx.coroutines.*
 import org.autojs.autojs.core.plugin.mail.*
-import org.autojs.autojs.runtime.api.augment.mail.MailWatch
-import org.autojs.autojs.runtime.api.augment.mail.MailWatchRunner
-import org.autojs.autojs.runtime.api.augment.mail.MailWatchTarget
 import org.autojs.autojs.runtime.api.mail.*
+import org.autojs.autojs.runtime.api.modules.mail.MailWatch
+import org.autojs.autojs.runtime.api.modules.mail.MailWatchRunner
+import org.autojs.autojs.runtime.api.modules.mail.MailWatchTarget
 import org.autojs.plugin.mail.api.MailContract
 import org.autojs.plugin.mail.api.MailErrorCodes
 import org.json.JSONArray

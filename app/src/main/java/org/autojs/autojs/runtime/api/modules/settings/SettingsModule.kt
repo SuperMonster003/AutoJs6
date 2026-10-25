@@ -2,8 +2,6 @@ package org.autojs.autojs.runtime.api.modules.settings
 
 import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.settings.Settings
-import org.autojs.autojs.runtime.api.augment.settings.SettingsScriptExport
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues

@@ -11,6 +11,7 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
+import org.autojs.autojs.runtime.api.modules.sysprops.SystemProperties
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean

@@ -5,11 +5,8 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.global.Classes
-import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
-import org.autojs.autojs.runtime.api.augment.global.IsNullish
 import org.autojs.autojs.runtime.api.augment.global.Legacy
-import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer
 import org.autojs.autojs.runtime.api.modules.ScriptModuleMounter
 import org.autojs.autojs.runtime.api.modules.generated.ScriptModules
@@ -26,7 +23,7 @@ import org.mozilla.javascript.ScriptableObject
 import java.io.File
 import java.lang.reflect.Modifier
 import kotlin.reflect.KClass
-import org.autojs.autojs.runtime.api.augment.global.CoordinateScale as CurrentCoordinateScale
+import org.autojs.autojs.runtime.api.modules.global.CoordinateScale as CurrentCoordinateScale
 
 /**
  * Roadmap P3.0: `global` and `legacy` on the new script module layer beyond the differential test against the obsolete

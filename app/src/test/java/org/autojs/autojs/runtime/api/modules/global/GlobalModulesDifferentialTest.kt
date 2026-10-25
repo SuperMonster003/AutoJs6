@@ -3,8 +3,6 @@ package org.autojs.autojs.runtime.api.modules.global
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialCases
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.global.IsNullish
-import org.autojs.autojs.runtime.api.augment.global.Species
 import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
 import org.junit.After
 import org.junit.Before

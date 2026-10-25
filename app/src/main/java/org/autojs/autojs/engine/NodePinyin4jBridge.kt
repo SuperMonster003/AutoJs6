@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
-import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4jOptions
+import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4jOptions
 import org.json.JSONArray
 import org.json.JSONObject
 

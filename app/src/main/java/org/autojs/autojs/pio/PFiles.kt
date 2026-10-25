@@ -5,7 +5,7 @@ import android.content.res.AssetManager
 import android.text.TextUtils
 import org.autojs.autojs.annotation.ReservedForCompatibility
 import org.autojs.autojs.app.GlobalAppContext
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes
 import org.autojs.autojs.tool.Func1
 import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs.util.FileUtils

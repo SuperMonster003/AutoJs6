@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.files
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.files.BatchRename
-import org.autojs.autojs.runtime.api.augment.files.BatchRenameJsErrors
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule

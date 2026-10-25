@@ -3,10 +3,9 @@ package org.autojs.autojs.runtime.api.modules.toast
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.floaty.Floaty
-import org.autojs.autojs.runtime.api.augment.toast.Toast
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.floaty.Floaty
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before

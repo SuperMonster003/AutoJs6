@@ -1,6 +1,6 @@
 package org.autojs.autojs.runtime.api
 
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr
+import org.autojs.autojs.runtime.api.modules.ocr.Ocr
 
 class Ocr {
 

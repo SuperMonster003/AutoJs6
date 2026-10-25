@@ -3,9 +3,9 @@ package org.autojs.autojs.runtime.api.augment
 import okio.Buffer
 import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.augment.automator.RootAutomatorNativeObject
-import org.autojs.autojs.runtime.api.augment.http.RequestBuilderHelper
-import org.autojs.autojs.runtime.api.augment.http.ResponseBodyNativeObject
-import org.autojs.autojs.runtime.api.augment.zip.ZipNativeObject
+import org.autojs.autojs.runtime.api.modules.http.RequestBuilderHelper
+import org.autojs.autojs.runtime.api.modules.http.ResponseBodyNativeObject
+import org.autojs.autojs.runtime.api.modules.zip.ZipNativeObject
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.junit.After

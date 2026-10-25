@@ -3,12 +3,10 @@ package org.autojs.autojs.runtime.api.modules.web
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.http.Http
-import org.autojs.autojs.runtime.api.augment.web.Web
-import org.autojs.autojs.runtime.api.augment.web.WebSocket
 import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
+import org.autojs.autojs.runtime.api.modules.http.Http
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

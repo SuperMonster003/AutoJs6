@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.runtime.api.ImageFeatureMatching
-import org.autojs.autojs.runtime.api.augment.images.ImageFeatures
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.colors.ColorValues

@@ -1,17 +1,17 @@
 package org.autojs.autojs.runtime.api.augment.differential
 
-import org.autojs.autojs.runtime.api.augment.util.Util
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
+import org.autojs.autojs.runtime.api.modules.util.Util
+import org.autojs.autojs.runtime.api.modules.util.VersionCodesInfo
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.autojs.autojs.runtime.api.Util as ApiUtil
-import org.autojs.autojs.runtime.api.augment.util.Inspect as UtilInspect
 import org.autojs.autojs.runtime.api.augment.util.Java as UtilJava
-import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
-import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
+import org.autojs.autojs.runtime.api.modules.util.Inspect as UtilInspect
+import org.autojs.autojs.runtime.api.modules.util.MorseCode as UtilMorseCode
+import org.autojs.autojs.runtime.api.modules.util.VersionCodes as UtilVersionCodes
 
 /**
  * Obsolete `__util__.js` against the Kotlin [Util] augmentable and its sub-modules, mounted as

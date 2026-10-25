@@ -7,7 +7,6 @@ import org.autojs.autojs.core.ui.dialog.JsDialogBuilder
 import org.autojs.autojs.core.ui.nativeview.NativeView
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsXml
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.dialogs.Dialogs
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal

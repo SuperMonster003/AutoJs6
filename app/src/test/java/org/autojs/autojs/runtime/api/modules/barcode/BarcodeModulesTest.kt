@@ -1,7 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.barcode
 
-import org.autojs.autojs.runtime.api.augment.barcode.Barcode
-import org.autojs.autojs.runtime.api.augment.barcode.QrCode
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff

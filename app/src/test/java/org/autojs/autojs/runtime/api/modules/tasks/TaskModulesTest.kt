@@ -1,12 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.tasks
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.power.PowerManager
-import org.autojs.autojs.runtime.api.augment.settings.Settings
 import org.autojs.autojs.runtime.api.augment.sysprops.SysProps
-import org.autojs.autojs.runtime.api.augment.tasks.Tasks
-import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.power.PowerManager
+import org.autojs.autojs.runtime.api.modules.settings.Settings
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

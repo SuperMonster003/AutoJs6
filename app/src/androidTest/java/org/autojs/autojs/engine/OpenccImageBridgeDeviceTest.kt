@@ -7,7 +7,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
-import org.autojs.autojs.runtime.api.augment.opencc.OpenccConversionPlan
+import org.autojs.autojs.runtime.api.modules.opencc.OpenccConversionPlan
 import org.autojs.autojs.script.StringScriptSource
 import org.json.JSONArray
 import org.json.JSONObject

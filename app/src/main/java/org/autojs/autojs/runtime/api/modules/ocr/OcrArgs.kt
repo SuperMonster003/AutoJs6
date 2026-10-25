@@ -2,11 +2,11 @@ package org.autojs.autojs.runtime.api.modules.ocr
 
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.images.ImageRegions
 import org.autojs.autojs.runtime.api.modules.images.OptionFields
+import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.Wrapper
 

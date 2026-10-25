@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.threads
 
 import org.autojs.autojs.core.looper.TimerThread
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.threads.VolatileDisposeNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptMessages

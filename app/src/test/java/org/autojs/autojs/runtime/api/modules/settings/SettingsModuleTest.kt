@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.settings
 
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.settings.Settings
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.junit.After
 import org.junit.Before

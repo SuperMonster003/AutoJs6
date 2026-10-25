@@ -18,7 +18,7 @@ import org.autojs.autojs.rhino.ProxyObject.Companion.PROXY_GETTER_KEY
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScreenMetrics
 import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.util.Util.checkStringArgument
+import org.autojs.autojs.runtime.api.modules.util.Util.checkStringArgument
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.util.FileUtils

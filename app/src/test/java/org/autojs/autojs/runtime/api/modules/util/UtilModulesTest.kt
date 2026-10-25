@@ -2,13 +2,8 @@ package org.autojs.autojs.runtime.api.modules.util
 
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.util.Inspect
 import org.autojs.autojs.runtime.api.augment.util.Java
-import org.autojs.autojs.runtime.api.augment.util.MorseCode
-import org.autojs.autojs.runtime.api.augment.util.Util
 import org.autojs.autojs.runtime.api.augment.util.Version
-import org.autojs.autojs.runtime.api.augment.util.VersionCodes
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

@@ -9,8 +9,8 @@ import org.autojs.autojs.core.plugin.agent.ThreeStoveAgentControlException
 import org.autojs.autojs.project.AgentScriptCatalog
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ai.AgentRunNativeObject
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AgentRunNativeObject
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs.util.RhinoUtils.js_json_parse
 import org.autojs.autojs.app.GlobalAppContext

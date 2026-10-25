@@ -138,7 +138,7 @@ class ContinuationPrototypeTest {
         f.call(sides.cx, scope, scope.globalThis, arrayOf(*args))
     }
 
-    /** A continuation creator like `org.autojs.autojs.runtime.api.augment.continuation.Creator`, recording what it gets. */
+    /** A continuation creator like `org.autojs.autojs.runtime.api.modules.continuation.Creator`, recording what it gets. */
     class TestCreator {
 
         var pending: ContinuationPending? = null

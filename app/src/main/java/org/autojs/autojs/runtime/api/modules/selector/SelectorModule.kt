@@ -9,8 +9,6 @@ import org.autojs.autojs.core.automator.selector.SelectorResolution
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.hasProp
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.selector.SelectorGlobals
-import org.autojs.autojs.runtime.api.augment.selector.SelectorMethodResolver
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction

@@ -9,7 +9,7 @@ import org.autojs.autojs.core.plugin.ai.AiPluginCatalogRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginTargetSummary
 import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
 import org.autojs.plugin.ai.common.api.AiCredentialMode
 import org.autojs.plugin.ai.common.api.AiDataLocality
 import org.autojs.plugin.ai.provider.api.AiProviderCapabilityId

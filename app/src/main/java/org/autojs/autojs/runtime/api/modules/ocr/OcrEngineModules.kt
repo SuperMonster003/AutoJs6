@@ -1,13 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.ocr
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
-import org.autojs.autojs.runtime.api.augment.ocr.OcrMLKit
-import org.autojs.autojs.runtime.api.augment.ocr.OcrPaddle
-import org.autojs.autojs.runtime.api.augment.ocr.OcrRapid
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule
+import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.autojs.autojs.runtime.api.modules.ocr.OcrArgs.ABSENT
 
 /*

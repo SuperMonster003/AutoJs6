@@ -15,8 +15,8 @@ import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.RhinoTestRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
-import org.autojs.autojs.runtime.api.augment.ai.AiStream
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

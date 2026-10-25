@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.dialogs
 
-import org.autojs.autojs.runtime.api.augment.dialogs.Dialogs
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff

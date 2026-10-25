@@ -5,14 +5,13 @@ import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.events.Events
 import org.autojs.autojs.runtime.api.augment.events.Keys
-import org.autojs.autojs.runtime.api.augment.flow.Flow
-import org.autojs.autojs.runtime.api.augment.global.Global
 import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.events.Events
+import org.autojs.autojs.runtime.api.modules.global.Global
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
 import org.junit.Assert.assertEquals

@@ -44,90 +44,90 @@ import org.autojs.autojs.runtime.api.gallery.GalleryService
 import org.autojs.autojs.runtime.api.terminal.TerminalService
 import org.autojs.autojs.runtime.api.mail.MailService
 import org.autojs.autojs.runtime.api.installer.InstallerService
-import org.autojs.autojs.runtime.api.augment.ai.Ai
-import org.autojs.autojs.runtime.api.augment.app.App
+import org.autojs.autojs.runtime.api.modules.ai.Ai
+import org.autojs.autojs.runtime.api.modules.app.App
 import org.autojs.autojs.runtime.api.augment.autojs.Autojs
 import org.autojs.autojs.runtime.api.augment.automator.Auto
 import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.augment.automator.RootAutomator
-import org.autojs.autojs.runtime.api.augment.barcode.Barcode
-import org.autojs.autojs.runtime.api.augment.barcode.QrCode
+import org.autojs.autojs.runtime.api.modules.barcode.Barcode
+import org.autojs.autojs.runtime.api.modules.barcode.QrCode
 import org.autojs.autojs.runtime.api.augment.base64.Base64
 import org.autojs.autojs.runtime.api.augment.canvas.Canvas
-import org.autojs.autojs.runtime.api.augment.colors.Color
-import org.autojs.autojs.runtime.api.augment.colors.Colors
-import org.autojs.autojs.runtime.api.augment.console.Console
-import org.autojs.autojs.runtime.api.augment.compose.Compose
-import org.autojs.autojs.runtime.api.augment.continuation.Continuation
+import org.autojs.autojs.runtime.api.modules.colors.Color
+import org.autojs.autojs.runtime.api.modules.colors.Colors
+import org.autojs.autojs.runtime.api.modules.console.Console
+import org.autojs.autojs.runtime.api.modules.compose.Compose
+import org.autojs.autojs.runtime.api.modules.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.converter.Converter
 import org.autojs.autojs.runtime.api.augment.cryptyo.Crypto
-import org.autojs.autojs.runtime.api.augment.device.Device
-import org.autojs.autojs.runtime.api.augment.dialogs.Dialogs
-import org.autojs.autojs.runtime.api.augment.engines.Engines
-import org.autojs.autojs.runtime.api.augment.events.Events
+import org.autojs.autojs.runtime.api.modules.device.Device
+import org.autojs.autojs.runtime.api.modules.dialogs.Dialogs
+import org.autojs.autojs.runtime.api.modules.engines.Engines
+import org.autojs.autojs.runtime.api.modules.events.Events
 import org.autojs.autojs.runtime.api.augment.events.Keys
-import org.autojs.autojs.runtime.api.augment.files.BatchRename
+import org.autojs.autojs.runtime.api.modules.files.BatchRename
 import org.autojs.autojs.runtime.api.augment.files.Files
-import org.autojs.autojs.runtime.api.augment.floaty.Floaty
-import org.autojs.autojs.runtime.api.augment.flow.Flow
+import org.autojs.autojs.runtime.api.modules.floaty.Floaty
+import org.autojs.autojs.runtime.api.modules.flow.Flow
 import org.autojs.autojs.runtime.api.augment.formatter.Formatter
-import org.autojs.autojs.runtime.api.augment.global.Global
+import org.autojs.autojs.runtime.api.modules.global.Global
 import org.autojs.autojs.runtime.api.augment.global.GlobalClasses
-import org.autojs.autojs.runtime.api.augment.global.IsNullish
-import org.autojs.autojs.runtime.api.augment.global.Species
-import org.autojs.autojs.runtime.api.augment.http.Http
-import org.autojs.autojs.runtime.api.augment.images.Images
-import org.autojs.autojs.runtime.api.augment.jsox.Arrayx
-import org.autojs.autojs.runtime.api.augment.jsox.Jsox
-import org.autojs.autojs.runtime.api.augment.jsox.Mathx
-import org.autojs.autojs.runtime.api.augment.jsox.Numberx
+import org.autojs.autojs.runtime.api.modules.global.IsNullish
+import org.autojs.autojs.runtime.api.modules.global.Species
+import org.autojs.autojs.runtime.api.modules.http.Http
+import org.autojs.autojs.runtime.api.modules.images.Images
+import org.autojs.autojs.runtime.api.modules.jsox.Arrayx
+import org.autojs.autojs.runtime.api.modules.jsox.Jsox
+import org.autojs.autojs.runtime.api.modules.jsox.Mathx
+import org.autojs.autojs.runtime.api.modules.jsox.Numberx
 import org.autojs.autojs.runtime.api.augment.media.Media
-import org.autojs.autojs.runtime.api.augment.epub.Epub
-import org.autojs.autojs.runtime.api.augment.speech.Speech
-import org.autojs.autojs.runtime.api.augment.speech.SpeechModels
-import org.autojs.autojs.runtime.api.augment.gallery.Gallery
-import org.autojs.autojs.runtime.api.augment.terminal.Terminal
-import org.autojs.autojs.runtime.api.augment.mail.Mail
-import org.autojs.autojs.runtime.api.augment.installer.Installer
-import org.autojs.autojs.runtime.api.augment.mediainfo.Mediainfo
-import org.autojs.autojs.runtime.api.augment.memory.Memory
+import org.autojs.autojs.runtime.api.modules.epub.Epub
+import org.autojs.autojs.runtime.api.modules.speech.Speech
+import org.autojs.autojs.runtime.api.modules.speech.SpeechModels
+import org.autojs.autojs.runtime.api.modules.gallery.Gallery
+import org.autojs.autojs.runtime.api.modules.terminal.Terminal
+import org.autojs.autojs.runtime.api.modules.mail.Mail
+import org.autojs.autojs.runtime.api.modules.installer.Installer
+import org.autojs.autojs.runtime.api.modules.mediainfo.Mediainfo
+import org.autojs.autojs.runtime.api.modules.memory.Memory
 import org.autojs.autojs.runtime.api.augment.mime.Mime
 import org.autojs.autojs.runtime.api.augment.nanoid.NanoID
-import org.autojs.autojs.runtime.api.augment.notice.Notice
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr
-import org.autojs.autojs.runtime.api.augment.ocr.OcrMLKit
-import org.autojs.autojs.runtime.api.augment.ocr.OcrPaddle
-import org.autojs.autojs.runtime.api.augment.ocr.OcrRapid
-import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
-import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
-import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4j
-import org.autojs.autojs.runtime.api.augment.plugins.Plugins
-import org.autojs.autojs.runtime.api.augment.plugins.PluginsTools
-import org.autojs.autojs.runtime.api.augment.power.PowerManager
+import org.autojs.autojs.runtime.api.modules.notice.Notice
+import org.autojs.autojs.runtime.api.modules.ocr.Ocr
+import org.autojs.autojs.runtime.api.modules.ocr.OcrMLKit
+import org.autojs.autojs.runtime.api.modules.ocr.OcrPaddle
+import org.autojs.autojs.runtime.api.modules.ocr.OcrRapid
+import org.autojs.autojs.runtime.api.modules.opencc.OpenCC
+import org.autojs.autojs.runtime.api.modules.pinyin.Pinyin
+import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4j
+import org.autojs.autojs.runtime.api.modules.plugins.Plugins
+import org.autojs.autojs.runtime.api.modules.plugins.PluginsTools
+import org.autojs.autojs.runtime.api.modules.power.PowerManager
 import org.autojs.autojs.runtime.api.augment.recorder.Recorder
-import org.autojs.autojs.runtime.api.augment.s13n.S13n
-import org.autojs.autojs.runtime.api.augment.selector.Selector
+import org.autojs.autojs.runtime.api.modules.s13n.S13n
+import org.autojs.autojs.runtime.api.modules.selector.Selector
 import org.autojs.autojs.runtime.api.augment.sensors.Sensors
-import org.autojs.autojs.runtime.api.augment.settings.Settings
-import org.autojs.autojs.runtime.api.augment.shell.Shell
-import org.autojs.autojs.runtime.api.augment.shizuku.Shizuku
-import org.autojs.autojs.runtime.api.augment.sqlite.SQLite
-import org.autojs.autojs.runtime.api.augment.storages.Storages
+import org.autojs.autojs.runtime.api.modules.settings.Settings
+import org.autojs.autojs.runtime.api.modules.shell.Shell
+import org.autojs.autojs.runtime.api.modules.shizuku.Shizuku
+import org.autojs.autojs.runtime.api.modules.sqlite.SQLite
+import org.autojs.autojs.runtime.api.modules.storages.Storages
 import org.autojs.autojs.runtime.api.augment.sysprops.SysProps
-import org.autojs.autojs.runtime.api.augment.tasks.Tasks
-import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
-import org.autojs.autojs.runtime.api.augment.threads.Threads
+import org.autojs.autojs.runtime.api.modules.tasks.Tasks
+import org.autojs.autojs.runtime.api.modules.tasks.WorkManager
+import org.autojs.autojs.runtime.api.modules.threads.Threads
 import org.autojs.autojs.runtime.api.augment.timers.Timers
-import org.autojs.autojs.runtime.api.augment.toast.Toast
+import org.autojs.autojs.runtime.api.modules.toast.Toast
 import org.autojs.autojs.runtime.api.augment.tts.Tts
-import org.autojs.autojs.runtime.api.augment.ui.UI
-import org.autojs.autojs.runtime.api.augment.util.Util
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
-import org.autojs.autojs.runtime.api.augment.web.Web
-import org.autojs.autojs.runtime.api.augment.web.WebSocket
+import org.autojs.autojs.runtime.api.modules.ui.UI
+import org.autojs.autojs.runtime.api.modules.util.Util
+import org.autojs.autojs.runtime.api.modules.util.VersionCodesInfo
+import org.autojs.autojs.runtime.api.modules.web.Web
+import org.autojs.autojs.runtime.api.modules.web.WebSocket
 import org.autojs.autojs.runtime.api.augment.web.WebSocketFields
-import org.autojs.autojs.runtime.api.augment.yolo.Yolo
-import org.autojs.autojs.runtime.api.augment.zip.Zip
+import org.autojs.autojs.runtime.api.modules.yolo.Yolo
+import org.autojs.autojs.runtime.api.modules.zip.Zip
 import org.autojs.autojs.runtime.api.tts.TtsService
 import org.autojs.autojs.runtime.exception.ScriptEnvironmentException
 import org.autojs.autojs.runtime.exception.ScriptException
@@ -194,12 +194,12 @@ import org.autojs.autojs.runtime.api.augment.colors.ColorsTheme
 import org.autojs.autojs.runtime.api.augment.converter.Bytes as BytesCvt
 import org.autojs.autojs.runtime.api.augment.formatter.Bytes as BytesFmt
 import org.autojs.autojs.runtime.api.augment.global.Legacy as GlobalLegacy
-import org.autojs.autojs.runtime.api.augment.notice.Channel as NoticeChannel
-import org.autojs.autojs.runtime.api.augment.util.Inspect as UtilInspect
+import org.autojs.autojs.runtime.api.modules.notice.Channel as NoticeChannel
+import org.autojs.autojs.runtime.api.modules.util.Inspect as UtilInspect
 import org.autojs.autojs.runtime.api.augment.util.Java as UtilJava
-import org.autojs.autojs.runtime.api.augment.util.MorseCode as UtilMorseCode
+import org.autojs.autojs.runtime.api.modules.util.MorseCode as UtilMorseCode
 import org.autojs.autojs.runtime.api.augment.util.Version as UtilVersion
-import org.autojs.autojs.runtime.api.augment.util.VersionCodes as UtilVersionCodes
+import org.autojs.autojs.runtime.api.modules.util.VersionCodes as UtilVersionCodes
 import org.mozilla.javascript.Context as RhinoContext
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 import org.autojs.autojs.runtime.api.modules.ScriptModuleLayer

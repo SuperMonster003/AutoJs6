@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CHECKLIST = ROOT / "docs/dev/android-sdk-37-physical-device-tests.md"
 PREFIX = "org.autojs.autojs."
 SUITES = {
-    "coordinate-api": [PREFIX + "runtime.api.augment.global.CoordinateScaleDeviceTest#" + method for method in (
+    "coordinate-api": [PREFIX + "runtime.api.modules.global.CoordinateScaleDeviceTest#" + method for method in (
         "publicFunctionsTrackRealRotationAndIndependentBaseConfigurations",
         "invalidPairDoesNotPartiallyConsumeBases",
         "scaleSettersKeepIntegerCoercionAndRejectTruncatedZeroBeforeMutation",

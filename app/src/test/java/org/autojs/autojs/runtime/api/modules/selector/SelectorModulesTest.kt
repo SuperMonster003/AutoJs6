@@ -9,10 +9,8 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
-import org.autojs.autojs.runtime.api.augment.flow.Flow
-import org.autojs.autojs.runtime.api.augment.selector.Selector
-import org.autojs.autojs.runtime.api.augment.selector.SelectorGlobals
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.flow.Flow
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After

@@ -4,7 +4,7 @@ import android.content.Context
 import android.provider.Settings
 import org.autojs.autojs.runtime.api.ProcessShell
 import org.autojs.autojs.runtime.api.WrappedShizuku
-import org.autojs.autojs.runtime.api.augment.device.Device.Companion.KEY_POINTER_LOCATION
+import org.autojs.autojs.runtime.api.modules.device.Device.Companion.KEY_POINTER_LOCATION
 import org.autojs.autojs.ui.main.drawer.ShowableItemHelper
 import org.autojs.autojs.util.IntentUtils
 

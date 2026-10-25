@@ -1,15 +1,15 @@
 package org.autojs.autojs.runtime.api.modules.timers
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.continuation.Continuation
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.engines.Engines
-import org.autojs.autojs.runtime.api.augment.threads.Threads
 import org.autojs.autojs.runtime.api.augment.timers.Timers
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.continuation.Continuation
+import org.autojs.autojs.runtime.api.modules.engines.Engines
+import org.autojs.autojs.runtime.api.modules.threads.Threads
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

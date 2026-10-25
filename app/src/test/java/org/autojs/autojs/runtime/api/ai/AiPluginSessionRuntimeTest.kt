@@ -12,7 +12,7 @@ import org.autojs.autojs.core.plugin.ai.AiPluginSessionRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

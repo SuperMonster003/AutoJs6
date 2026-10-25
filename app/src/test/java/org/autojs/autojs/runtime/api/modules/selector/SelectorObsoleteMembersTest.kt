@@ -6,12 +6,10 @@ import org.autojs.autojs.runtime.api.augment.automator.Automator
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.flow.Flow
-import org.autojs.autojs.runtime.api.augment.selector.Selector
-import org.autojs.autojs.runtime.api.augment.selector.SelectorGlobals
 import org.autojs.autojs.runtime.api.modules.CurrentModuleResults
 import org.autojs.autojs.runtime.api.modules.ObsoleteMembers
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.flow.Flow
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.junit.After
 import org.junit.Assert.assertEquals

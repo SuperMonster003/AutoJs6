@@ -8,7 +8,7 @@ import org.autojs.autojs.core.tts.TtsTextChunk
 import org.autojs.autojs.core.tts.TtsTextChunker
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.tts.TtsUtterance
+import org.autojs.autojs.runtime.api.modules.tts.TtsUtterance
 import java.util.ArrayDeque
 import java.util.Collections
 import java.util.Locale

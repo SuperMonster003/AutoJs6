@@ -2,8 +2,6 @@ package org.autojs.autojs.runtime.api.modules.storages
 
 import org.autojs.autojs.core.storage.LocalStorage
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
-import org.autojs.autojs.runtime.api.augment.storages.StorageNativeObject
-import org.autojs.autojs.runtime.api.augment.storages.Storages
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.mozilla.javascript.NativeArray

@@ -5,8 +5,8 @@ import org.autojs.autojs.rhino.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.MapExtensions.toNativeObject
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.global.IsNullish
-import org.autojs.autojs.runtime.api.augment.global.Species
+import org.autojs.autojs.runtime.api.modules.global.IsNullish
+import org.autojs.autojs.runtime.api.modules.global.Species
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.js_typeof

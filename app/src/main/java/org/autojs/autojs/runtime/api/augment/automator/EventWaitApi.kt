@@ -13,8 +13,8 @@ import org.autojs.autojs.core.automator.flow.FlowError
 import org.autojs.autojs.core.automator.flow.FlowStep
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.automator.EventWaitArguments.Filter
-import org.autojs.autojs.runtime.api.augment.flow.FlowExecutor
-import org.autojs.autojs.runtime.api.augment.flow.FlowJsErrors
+import org.autojs.autojs.runtime.api.modules.flow.FlowExecutor
+import org.autojs.autojs.runtime.api.modules.flow.FlowJsErrors
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.StringUtils.str

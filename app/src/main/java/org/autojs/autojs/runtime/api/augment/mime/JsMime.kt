@@ -2,7 +2,7 @@ package org.autojs.autojs.runtime.api.augment.mime
 
 import eu.medsea.mimeutil.MimeType
 import org.autojs.autojs.runtime.api.StringReadable
-import org.autojs.autojs.runtime.api.augment.util.Util
+import org.autojs.autojs.runtime.api.modules.util.Util
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.getCurrentTopCallScopeOrFallback
 import org.autojs.autojs.util.RhinoUtils.newNativeObject

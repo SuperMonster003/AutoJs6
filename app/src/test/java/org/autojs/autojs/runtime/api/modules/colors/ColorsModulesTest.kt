@@ -1,7 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.colors
 
-import org.autojs.autojs.runtime.api.augment.colors.Color
-import org.autojs.autojs.runtime.api.augment.colors.Colors
 import org.autojs.autojs.runtime.api.augment.colors.ColorsTheme
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.util.ColorUtils

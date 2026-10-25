@@ -3,7 +3,7 @@ package org.autojs.autojs.core.plugin.compose
 import android.os.Handler
 import android.os.Looper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.ScriptAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ScriptAsyncDispatcher
 import org.autojs.autojs.core.looper.TimerCallbackRejectedException
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean

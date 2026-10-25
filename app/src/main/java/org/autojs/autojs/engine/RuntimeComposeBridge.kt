@@ -17,7 +17,7 @@ import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import org.autojs.autojs.core.plugin.compose.*
-import org.autojs.autojs.runtime.api.augment.compose.ComposeScriptValues
+import org.autojs.autojs.runtime.api.modules.compose.ComposeScriptValues
 import org.autojs.autojs6.R
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.catalog.ComponentInvocation

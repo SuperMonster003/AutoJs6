@@ -11,8 +11,8 @@ import org.autojs.autojs.core.plugin.ai.AiPluginMessageRole
 import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.runtime.ScriptBridges
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
-import org.autojs.autojs.runtime.api.augment.ai.AiStream
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiStream
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.After
 import org.junit.Assert.assertEquals

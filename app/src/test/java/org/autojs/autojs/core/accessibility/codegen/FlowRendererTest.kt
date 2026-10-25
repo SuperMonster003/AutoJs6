@@ -9,7 +9,7 @@ import org.autojs.autojs.core.accessibility.codegen.plan.LocatePlan.Family
 import org.autojs.autojs.core.accessibility.codegen.plan.PlanReceiver
 import org.autojs.autojs.core.accessibility.codegen.plan.SelectorSpec
 import org.autojs.autojs.core.accessibility.codegen.render.FlowRenderer
-import org.autojs.autojs.runtime.api.augment.selector.SelectorGlobals
+import org.autojs.autojs.runtime.api.modules.selector.SelectorGlobals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -65,7 +65,7 @@ class FlowRendererTest {
     fun everyGeneratedGlobalCallHasAnActualPublicRegistration() {
         // Read the registration declaration rather than copying a second whitelist that can drift.
         // zh-CN: 读取实际注册声明, 避免复制一份会与实现脱节的白名单.
-        val relative = "src/main/java/org/autojs/autojs/runtime/api/augment/flow/Flow.kt"
+        val relative = "src/main/java/org/autojs/autojs/runtime/api/modules/flow/Flow.kt"
         val flowFile = listOf(File(relative), File("app/$relative")).first { it.isFile }
         val declarations = flowFile.readText().substringAfter("override val globalAssignmentFunctions = listOf(").substringBefore("\n    )")
         val globals = Regex("::(\\w+)\\.name").findAll(declarations).map { it.groupValues[1] }.toSet()

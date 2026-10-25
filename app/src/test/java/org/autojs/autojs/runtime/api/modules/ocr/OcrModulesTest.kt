@@ -4,14 +4,10 @@ import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr
-import org.autojs.autojs.runtime.api.augment.ocr.Ocr.Companion.OcrMode
-import org.autojs.autojs.runtime.api.augment.ocr.OcrMLKit
-import org.autojs.autojs.runtime.api.augment.ocr.OcrPaddle
-import org.autojs.autojs.runtime.api.augment.ocr.OcrRapid
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
+import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

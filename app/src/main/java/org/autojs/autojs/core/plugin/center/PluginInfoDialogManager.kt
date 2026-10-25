@@ -33,7 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.autojs.network.UpdateIgnoreStore
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes
 import org.autojs.autojs.theme.ThemeColorManager
 import org.autojs.autojs.ui.dialog.InfoDialog
 import org.autojs.autojs.ui.dialog.InfoDialogItems

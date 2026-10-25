@@ -1,7 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.opencc
 
-import org.autojs.autojs.runtime.api.augment.opencc.OpenCC
-import org.autojs.autojs.runtime.api.augment.opencc.OpenccConversionPlan
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction

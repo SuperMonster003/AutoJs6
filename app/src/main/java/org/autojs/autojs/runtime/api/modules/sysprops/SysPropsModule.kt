@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.sysprops
 
-import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptModule

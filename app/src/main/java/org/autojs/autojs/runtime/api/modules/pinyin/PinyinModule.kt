@@ -3,10 +3,6 @@ package org.autojs.autojs.runtime.api.modules.pinyin
 import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.rhino.extension.AnyExtensions.jsUnwrapped
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.runtime.api.augment.pinyin.Pinyin
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCustomDictionary
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinMode
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinStyle
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
@@ -16,6 +12,8 @@ import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptModuleInstallation
+import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions.PinyinMode
+import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions.PinyinStyle
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.coerceString

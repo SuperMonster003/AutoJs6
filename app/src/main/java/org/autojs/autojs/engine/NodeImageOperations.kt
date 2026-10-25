@@ -9,8 +9,8 @@ import org.autojs.autojs.core.image.ColorDetector
 import org.autojs.autojs.core.image.TemplateMatching
 import org.autojs.autojs.core.opencv.Mat
 import org.autojs.autojs.core.opencv.OpenCVHelper
-import org.autojs.autojs.runtime.api.augment.images.OpenCvImageArgumentPolicy
-import org.autojs.autojs.runtime.api.augment.colors.Colors
+import org.autojs.autojs.runtime.api.modules.images.OpenCvImageArgumentPolicy
+import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.json.JSONArray
 import org.json.JSONObject
 import org.opencv.android.Utils

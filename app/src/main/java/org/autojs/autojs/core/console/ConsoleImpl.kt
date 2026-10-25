@@ -20,7 +20,7 @@ import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AbstractConsole
 import org.autojs.autojs.runtime.api.Mime
-import org.autojs.autojs.runtime.api.augment.colors.Colors
+import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.ui.common.NotAskAgainDialog

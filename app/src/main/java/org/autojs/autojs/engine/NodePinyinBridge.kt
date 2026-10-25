@@ -4,10 +4,10 @@ import android.content.Context
 import android.os.Bundle
 import kotlinx.coroutines.runBlocking
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinCustomDictionary
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions
-import org.autojs.autojs.runtime.api.augment.pinyin.PinyinOptions.PinyinStyle
-import org.autojs.autojs.runtime.api.augment.pinyin.Util
+import org.autojs.autojs.runtime.api.modules.pinyin.PinyinCustomDictionary
+import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions
+import org.autojs.autojs.runtime.api.modules.pinyin.PinyinOptions.PinyinStyle
+import org.autojs.autojs.runtime.api.modules.pinyin.Util
 import org.autojs.plugin.pinyin.api.PinyinOptionKeys
 import org.json.JSONArray
 import org.json.JSONObject

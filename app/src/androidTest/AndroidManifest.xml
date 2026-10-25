@@ -40,7 +40,7 @@
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity-alias>
         <provider
-            android:name="org.autojs.autojs.runtime.api.augment.installer.InstallerSmokePipeProvider"
+            android:name="org.autojs.autojs.runtime.api.modules.installer.InstallerSmokePipeProvider"
             android:authorities="${applicationId}.installer.smoke.pipe"
             android:exported="true"
             android:permission="org.autojs.permission.PLUGIN" />

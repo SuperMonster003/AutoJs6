@@ -2,8 +2,8 @@ package org.autojs.autojs.runtime.api.tts
 
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ScriptAsyncDispatcher
-import org.autojs.autojs.runtime.api.augment.tts.TtsUtterance
+import org.autojs.autojs.runtime.api.modules.ScriptAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.tts.TtsUtterance
 
 /** Values and delivery owned by a scripting client, independent of the platform TTS actor. */
 internal interface TtsTask {

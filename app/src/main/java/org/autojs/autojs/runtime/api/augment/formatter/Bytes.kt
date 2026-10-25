@@ -13,18 +13,18 @@ import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.AugmentableKey
 import org.autojs.autojs.runtime.api.augment.Invokable
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.AUTO
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.DEFAULT_BYTES_STRICT
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.IEC_DIV
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.SI_DIV
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.Tough
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.Tough.LOOSE
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.Tough.NONE
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.Tough.STRICT
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes.UNITS
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.AUTO
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.DEFAULT_BYTES_STRICT
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.IEC_DIV
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.SI_DIV
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.Tough
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.Tough.LOOSE
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.Tough.NONE
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.Tough.STRICT
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes.UNITS
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.mozilla.javascript.ScriptableObject
-import org.autojs.autojs.runtime.api.augment.converter.core.Bytes as CoreBytes
+import org.autojs.autojs.runtime.api.modules.cvt.core.Bytes as CoreBytes
 
 object Bytes : Augmentable(), Invokable {
 

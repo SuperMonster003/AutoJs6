@@ -6,7 +6,7 @@ import org.autojs.autojs.core.plugin.mail.MailErrorMapper
 import org.autojs.autojs.core.plugin.mail.MailPluginException
 import org.autojs.autojs.core.plugin.mail.MailPluginHost
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.mail.MailClientNativeObject
+import org.autojs.autojs.runtime.api.modules.mail.MailClientNativeObject
 import org.autojs.plugin.mail.api.MailErrorCodes
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap

@@ -4,7 +4,7 @@ import org.autojs.autojs.annotation.RhinoRuntimeFunctionInterface
 import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.util.Util
+import org.autojs.autojs.runtime.api.modules.util.Util
 
 @Suppress("unused", "UNUSED_PARAMETER")
 class Legacy(scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime) {

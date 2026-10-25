@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.plugins.Plugins
+import org.autojs.autojs.runtime.api.modules.plugins.Plugins
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.util.RhinoUtils
 import org.mozilla.javascript.Scriptable

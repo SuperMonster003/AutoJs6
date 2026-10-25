@@ -7,8 +7,8 @@ import org.autojs.autojs.core.plugin.ai.AiPluginStreamEvent
 import org.autojs.autojs.core.plugin.ai.AiPluginStreamRunner
 import org.autojs.autojs.core.plugin.ai.AiPluginUsage
 import org.autojs.autojs.runtime.ScriptBridges
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
-import org.autojs.autojs.runtime.api.augment.ai.AiStream
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiStream
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean

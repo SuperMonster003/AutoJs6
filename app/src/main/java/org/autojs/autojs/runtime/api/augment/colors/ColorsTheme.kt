@@ -16,7 +16,8 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
 import org.autojs.autojs.runtime.api.augment.AugmentableKey
-import org.autojs.autojs.runtime.api.augment.jsox.Numberx
+import org.autojs.autojs.runtime.api.modules.colors.Colors
+import org.autojs.autojs.runtime.api.modules.jsox.Numberx
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.theme.ThemeColorCoordinator
 import org.autojs.autojs.theme.ThemeColorManager

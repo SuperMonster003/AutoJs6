@@ -16,7 +16,7 @@ import org.autojs.autojs.core.automator.GlobalActionAutomator
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.flow.FlowError
 import org.autojs.autojs.core.automator.toolkit.*
-import org.autojs.autojs.runtime.api.augment.flow.FlowActions
+import org.autojs.autojs.runtime.api.modules.flow.FlowActions
 import org.autojs.autojs.util.App
 import org.json.JSONArray
 import org.json.JSONObject

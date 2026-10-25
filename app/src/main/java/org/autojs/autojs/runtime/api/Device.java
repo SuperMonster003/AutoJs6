@@ -23,7 +23,7 @@ import org.autojs.autojs.deviceid.AndroidIdReader;
 import org.autojs.autojs.pio.PFiles;
 import org.autojs.autojs.pio.UncheckedIOException;
 import org.autojs.autojs.runtime.ScriptRuntime;
-import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties;
+import org.autojs.autojs.runtime.api.modules.sysprops.SystemProperties;
 import org.autojs.autojs.util.DeviceUtils;
 import org.autojs.autojs.util.RomUtils;
 import org.autojs.autojs.util.RomUtils.Brand;

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo.briefOfCurrentVersionInt
+import org.autojs.autojs.runtime.api.modules.util.VersionCodesInfo.briefOfCurrentVersionInt
 import org.autojs.autojs.ui.BaseActivity
 import org.autojs.autojs.ui.main.MainActivity
 import org.autojs.autojs.util.ClipboardUtils

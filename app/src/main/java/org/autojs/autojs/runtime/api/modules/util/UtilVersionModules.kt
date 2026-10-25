@@ -2,8 +2,6 @@ package org.autojs.autojs.runtime.api.modules.util
 
 import android.os.Build
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.util.VersionCodes
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfo
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptProperty

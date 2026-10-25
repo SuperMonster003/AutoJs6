@@ -2,7 +2,7 @@ package org.autojs.autojs.engine
 
 import org.autojs.autojs.runtime.api.Scale
 import org.autojs.autojs.runtime.api.ScreenMetrics
-import org.autojs.autojs.runtime.api.augment.global.CoordinateScale
+import org.autojs.autojs.runtime.api.modules.global.CoordinateScale
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.json.JSONArray
 import org.json.JSONObject

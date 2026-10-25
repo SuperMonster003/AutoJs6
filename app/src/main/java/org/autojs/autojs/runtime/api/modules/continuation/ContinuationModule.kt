@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.continuation
 
 import org.autojs.autojs.project.ScriptConfig.Companion.FEATURE_CONTINUATION
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.continuation.Creator
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter

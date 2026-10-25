@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.floaty
 
 import org.autojs.autojs.rhino.ProxyJavaObject
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.floaty.Floaty
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule

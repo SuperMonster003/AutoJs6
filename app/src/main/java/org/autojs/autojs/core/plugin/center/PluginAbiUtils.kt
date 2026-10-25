@@ -1,7 +1,7 @@
 package org.autojs.autojs.core.plugin.center
 
 import android.os.Build
-import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties
+import org.autojs.autojs.runtime.api.modules.sysprops.SystemProperties
 import org.autojs.autojs.util.AndroidUtils
 import org.json.JSONArray
 import org.json.JSONObject

@@ -3,12 +3,6 @@ package org.autojs.autojs.runtime.api.modules.images
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.core.image.capture.ScreenCapturer
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.images.ImageFeatures
-import org.autojs.autojs.runtime.api.augment.images.Images
-import org.autojs.autojs.runtime.api.augment.images.MatchingResult
-import org.autojs.autojs.runtime.api.augment.images.ObjectFrame
-import org.autojs.autojs.runtime.api.augment.images.PngQuantizationFileResult
-import org.autojs.autojs.runtime.api.augment.images.PngQuantizationResult
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptJavaClass

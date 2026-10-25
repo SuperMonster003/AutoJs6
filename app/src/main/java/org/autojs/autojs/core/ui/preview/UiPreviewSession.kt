@@ -37,7 +37,7 @@ import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.SimpleScriptExecutionListener
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.ui.UI
+import org.autojs.autojs.runtime.api.modules.ui.UI
 import org.autojs.autojs.script.StringScriptSource
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
 import org.autojs.autojs6.R

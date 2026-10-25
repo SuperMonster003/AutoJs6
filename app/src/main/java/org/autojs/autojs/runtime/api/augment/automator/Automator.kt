@@ -20,8 +20,8 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.toolkit.RuntimeToolkit
-import org.autojs.autojs.runtime.api.augment.toolkit.ToolkitApi
+import org.autojs.autojs.runtime.api.modules.toolkit.RuntimeToolkit
+import org.autojs.autojs.runtime.api.modules.toolkit.ToolkitApi
 import org.autojs.autojs.runtime.exception.ScriptException
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException

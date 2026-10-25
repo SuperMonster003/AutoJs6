@@ -7,7 +7,7 @@ import org.autojs.autojs.core.image.ColorDetector
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.core.image.ImageWrapper
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.images.Images
+import org.autojs.autojs.runtime.api.modules.images.Images
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter

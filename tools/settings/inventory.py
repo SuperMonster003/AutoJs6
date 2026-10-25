@@ -91,7 +91,7 @@ MANUAL_JSON_FILE_SOURCES = {
 
 # getSharedPreferences( arguments that no generic rule can resolve: (display path, argument) -> (name, how).
 MANUAL_STORE_NAMES = {
-    ('runtime/api/augment/storages/Storages.kt', 'it'): (
+    ('runtime/api/modules/storages/Storages.kt', 'it'): (
         'autojs.localstorage.*', '`.let` 的接收者是 `LocalStorage.NAME_PREFIX + name`'),
 }
 

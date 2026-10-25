@@ -12,9 +12,9 @@ import org.autojs.autojs.core.plugin.ai.AiProviderComponent
 import org.autojs.autojs.core.plugin.ai.AndroidAiPluginAskRunner
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
-import org.autojs.autojs.runtime.api.augment.ai.AiAsyncDispatcher
-import org.autojs.autojs.runtime.api.augment.ai.AiSessionNativeObject
-import org.autojs.autojs.runtime.api.augment.ai.AiStream
+import org.autojs.autojs.runtime.api.modules.ai.AiAsyncDispatcher
+import org.autojs.autojs.runtime.api.modules.ai.AiSessionNativeObject
+import org.autojs.autojs.runtime.api.modules.ai.AiStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 

@@ -8,7 +8,8 @@ import org.autojs.autojs.rhino.ArgumentGuards.Companion.component1
 import org.autojs.autojs.rhino.ArgumentGuards.Companion.component2
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.augment.Augmentable
-import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
+import org.autojs.autojs.runtime.api.modules.tasks.WorkManager
+import org.autojs.autojs.runtime.api.modules.timers.SetIntervalExt
 import org.autojs.autojs.runtime.exception.ShouldNeverHappenException
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED

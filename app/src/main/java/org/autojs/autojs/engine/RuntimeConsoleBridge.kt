@@ -5,7 +5,7 @@ import org.autojs.autojs.core.console.log.Level
 import org.autojs.autojs.core.console.log.LogConfigurator
 import org.autojs.autojs.core.console.log.LogManager
 import org.autojs.autojs.permission.DisplayOverOtherAppsPermission
-import org.autojs.autojs.runtime.api.augment.colors.Colors
+import org.autojs.autojs.runtime.api.modules.colors.Colors
 import org.autojs.autojs.util.ConsoleUtils
 import org.autojs.autojs.util.DisplayUtils
 import org.json.JSONArray

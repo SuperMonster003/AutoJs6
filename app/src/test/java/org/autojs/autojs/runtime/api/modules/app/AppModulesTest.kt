@@ -4,13 +4,12 @@ import android.content.ContextWrapper
 import android.content.SharedPreferences
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
-import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.augment.differential.DifferentialRhino
 import org.autojs.autojs.runtime.api.augment.differential.ObsoleteModuleHost
 import org.autojs.autojs.runtime.api.augment.differential.SurfaceDiff
-import org.autojs.autojs.runtime.api.augment.files.BatchRename
+import org.autojs.autojs.runtime.api.modules.files.BatchRename
 import org.autojs.autojs.runtime.api.augment.files.Files
-import org.autojs.autojs.runtime.api.augment.storages.Storages
+import org.autojs.autojs.runtime.api.modules.storages.Storages
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.RuntimeModulesFixture
 import org.junit.After

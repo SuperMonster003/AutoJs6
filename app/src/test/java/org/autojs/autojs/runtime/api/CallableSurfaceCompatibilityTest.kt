@@ -15,7 +15,7 @@ import org.autojs.autojs.core.ui.widget.JsCanvasView
 import org.autojs.autojs.core.web.WebSocket
 import org.autojs.autojs.runtime.IScriptBridges
 import org.autojs.autojs.runtime.ScriptBridges
-import org.autojs.autojs.runtime.api.augment.tts.TtsUtterance
+import org.autojs.autojs.runtime.api.modules.tts.TtsUtterance
 import org.autojs.autojs.util.RhinoUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.fail

@@ -1,7 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.tasks
 
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.mozilla.javascript.NativeObject

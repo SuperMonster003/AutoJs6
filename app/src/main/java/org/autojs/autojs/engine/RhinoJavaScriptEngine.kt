@@ -29,7 +29,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.proxy.PaintProxyObject
+import org.autojs.autojs.runtime.api.modules.proxy.PaintProxyObject
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.coerceString

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.AppUtils.Companion.BroadcastShortForm
-import org.autojs.autojs.runtime.api.augment.app.App
 import org.autojs.autojs.runtime.api.modules.ScriptAttributes
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal

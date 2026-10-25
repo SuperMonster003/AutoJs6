@@ -11,7 +11,7 @@ import androidx.core.net.toUri
 import ezy.assist.compat.RomUtil
 import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.pref.Language
-import org.autojs.autojs.runtime.api.augment.sysprops.SystemProperties
+import org.autojs.autojs.runtime.api.modules.sysprops.SystemProperties
 
 /**
  * Created by SuperMonster003 on Aug 17, 2023.

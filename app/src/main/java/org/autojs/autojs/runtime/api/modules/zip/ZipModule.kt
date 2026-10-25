@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.zip
 
 import okhttp3.internal.closeQuietly
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.zip.ZipNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke

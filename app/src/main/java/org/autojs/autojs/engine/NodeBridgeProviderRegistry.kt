@@ -14,7 +14,7 @@ import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
-import org.autojs.autojs.runtime.api.augment.ocr.PaddleOcrEmbeddedEngine
+import org.autojs.autojs.runtime.api.modules.ocr.PaddleOcrEmbeddedEngine
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
 import org.json.JSONArray
 import org.json.JSONObject

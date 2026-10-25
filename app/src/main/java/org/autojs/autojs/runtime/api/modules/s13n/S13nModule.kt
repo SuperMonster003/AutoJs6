@@ -1,10 +1,10 @@
 package org.autojs.autojs.runtime.api.modules.s13n
 
-import org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
+import org.autojs.autojs.runtime.api.modules.colors.ColorNativeObject
 import org.autojs.autojs.runtime.api.modules.cvt.ByteUnits
 import org.autojs.autojs.theme.ThemeColor
 import org.autojs.autojs.util.ColorUtils

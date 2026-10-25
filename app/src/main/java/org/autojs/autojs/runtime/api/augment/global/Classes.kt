@@ -258,7 +258,7 @@ class Classes {
     val ContinuationResult = org.autojs.autojs.rhino.continuation.Continuation.Result::class
 
     @JvmField
-    val ContinuationCreator = org.autojs.autojs.runtime.api.augment.continuation.Creator::class
+    val ContinuationCreator = org.autojs.autojs.runtime.api.modules.continuation.Creator::class
 
     @JvmField
     val JavaScriptEngine = org.autojs.autojs.engine.JavaScriptEngine::class

@@ -228,12 +228,19 @@ class ScriptModuleArityTest {
             return checks.mapNotNull { (regex, counts) -> regex.find(body)?.let { it.range.first to counts(it) } }.minByOrNull { it.first }?.second
         }
 
-        /** The class file of [receiver] when it is (or is made of) a class of the current augment package. */
+        /**
+         * The class file of [receiver] when it is (or is made of) an implementation class the module delegates to: a class
+         * beside the module, or imported from the old augment package or a subpackage of runtime/api/modules (where P5.2
+         * moved the classes of the old package), that is not a script module itself.
+         */
         private fun augmentClass(file: File, receiver: String): File? {
             val source = text(file)
             val type = if (receiver[0].isUpperCase()) receiver else Regex("""\bval $receiver\b[^\n]*?\b([A-Z]\w*)\(""").find(source)?.groupValues?.get(1) ?: return null
-            val import = Regex("""^import (org\.autojs\.autojs\.runtime\.api\.augment\.[\w.]+)\.$type$""", RegexOption.MULTILINE).find(source) ?: return null
-            return File(ROOT, "app/src/main/java/" + import.groupValues[1].replace('.', '/') + "/$type.kt").also { assertTrue("no file of $type", it.isFile) }
+            val target = File(file.parentFile, "$type.kt").takeIf { it.isFile } ?: run {
+                val import = Regex("""^import (org\.autojs\.autojs\.runtime\.api\.(?:augment|modules\.\w+)(?:\.\w+)*)\.$type$""", RegexOption.MULTILINE).find(source) ?: return null
+                File(ROOT, "app/src/main/java/" + import.groupValues[1].replace('.', '/') + "/$type.kt").also { assertTrue("no file of $type", it.isFile) }
+            }
+            return target.takeIf { it != file && "@ScriptModule" !in text(it) }
         }
 
         private fun named(file: File, name: String): Pair<String, String>? = declaration(file, name)?.let { function(file, it) }
@@ -338,8 +345,8 @@ class ScriptModuleArityTest {
         /** Where the install functions of a hook are defined (the hooks copy the members of the current module's objects). */
         val INSTALL_DEFINITIONS = mapOf(
             // `mail.send(...)` forwards to the method of the default client.
-            "mail" to "app/src/main/java/org/autojs/autojs/runtime/api/augment/mail/MailClientNativeObject.kt",
-            "compose" to "app/src/main/java/org/autojs/autojs/runtime/api/augment/compose/Compose.kt",
+            "mail" to "app/src/main/java/org/autojs/autojs/runtime/api/modules/mail/MailClientNativeObject.kt",
+            "compose" to "app/src/main/java/org/autojs/autojs/runtime/api/modules/compose/Compose.kt",
         )
 
         /** The global forms of flow's install hook (`clickWait` is a `waitThenClick`) and `wait.async`, which call the flow waits. */

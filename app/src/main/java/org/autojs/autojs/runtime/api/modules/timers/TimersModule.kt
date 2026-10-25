@@ -2,8 +2,6 @@ package org.autojs.autojs.runtime.api.modules.timers
 
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.tasks.WorkManager
-import org.autojs.autojs.runtime.api.augment.timers.SetIntervalExt
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGlobal
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
@@ -12,6 +10,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptPrototype
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues
 import org.autojs.autojs.runtime.api.modules.global.GlobalValues.isNullish
 import org.autojs.autojs.runtime.api.modules.tasks.TaskArgs
+import org.autojs.autojs.runtime.api.modules.tasks.WorkManager
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Callable

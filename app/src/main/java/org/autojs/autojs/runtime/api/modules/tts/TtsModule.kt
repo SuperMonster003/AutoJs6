@@ -4,14 +4,13 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.autojs.autojs.core.tts.TtsTextChunker
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.toJsPromise
-import org.autojs.autojs.runtime.api.augment.tts.TtsUtterance
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.ScriptProperty
+import org.autojs.autojs.runtime.api.modules.toJsPromise
 import org.autojs.autojs.runtime.api.modules.util.UtilValues
 import org.autojs.autojs.runtime.api.tts.TtsOptions
 import org.autojs.autojs.runtime.api.tts.TtsOptionsParser

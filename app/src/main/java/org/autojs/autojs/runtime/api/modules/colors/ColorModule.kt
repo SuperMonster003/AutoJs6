@@ -2,7 +2,6 @@ package org.autojs.autojs.runtime.api.modules.colors
 
 import org.autojs.autojs.core.image.ColorTable
 import org.autojs.autojs.runtime.ScriptRuntime
-import org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject
 import org.autojs.autojs.runtime.api.modules.ScriptConstruct
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
 import org.autojs.autojs.runtime.api.modules.ScriptMessages

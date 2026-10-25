@@ -1,6 +1,6 @@
 package org.autojs.autojs.util;
 
-import org.autojs.autojs.runtime.api.augment.util.VersionCodesInfoGenerated;
+import org.autojs.autojs.runtime.api.modules.util.VersionCodesInfoGenerated;
 
 /**
  * Created by Stardust on Apr 3, 2017.

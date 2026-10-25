@@ -1,8 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.pinyin4j
 
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
-import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4j
-import org.autojs.autojs.runtime.api.augment.pinyin4j.Pinyin4jOptions
 import org.autojs.autojs.runtime.api.modules.AugmentMembers
 import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction

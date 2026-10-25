@@ -34,7 +34,7 @@ import org.autojs.autojs.model.explorer.ExplorerPage;
 import org.autojs.autojs.model.explorer.Explorers;
 import org.autojs.autojs.model.script.Scripts;
 import org.autojs.autojs.runtime.api.WrappedShizuku;
-import org.autojs.autojs.runtime.api.augment.shell.Shell;
+import org.autojs.autojs.runtime.api.modules.shell.Shell;
 import org.autojs.autojs.tool.Func1;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyService;
 import org.autojs.autojs.ui.enhancedfloaty.FloatyWindow;
