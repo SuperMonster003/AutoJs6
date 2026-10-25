@@ -81,6 +81,75 @@ def mail_forwarded_names(source, list_end, limit):
     return [alias for name in values['FORWARDED'] for alias in
             ([name] if name in values['SYNC_ONLY'] else [name, name + json.loads(suffix[1])])]
 
+
+def leading_offset(source, offset, end):
+    return offset + len(source[offset:end]) - len(source[offset:end].lstrip())
+
+
+def simple_name_table_names(source, initializer):
+    """Resolve `= tables.map { t -> t::class.java.simpleName.lowercase() to t }` over `val tables = listOf(A.B, ...)`.
+
+    The names are the lower-cased simple names of the listed objects (colors.android / css / web / material).
+    Returns [(name, implementation, kind, offset)], or None for any other shape.
+    """
+    match = re.fullmatch(r'\s*(?::[^\n=]+)?=\s*(\w+)\.map\s*\{\s*(\w+)\s*->\s*\2::class\.java\.simpleName\.lowercase\(\)\s+to\s+\2\s*\}\s*', initializer)
+    table = match and re.search(r'\bval ' + match[1] + r'\s*=\s*listOf\(', source)
+    if not table:
+        return None
+    start = table.end() - 1
+    end = end_group(source, start)
+    if not initializer_tail_is_supported(source, end, len(source), False):
+        return None
+    names = []
+    for offset, expression in entries(source, start + 1, end):
+        reference = re.fullmatch(r'(?:\w+\.)*(\w+)', expression)
+        if not reference:
+            return None
+        names.append((reference[1].lower(), expression, None, leading_offset(source, offset, end)))
+    return names
+
+
+def compose_function_map_names(source, after, limit):
+    """Resolve Compose's lazy function map; its explicit keys are stable API names.
+
+    Shape: `by lazy { val functions = linkedMapOf<...>("name" to { ... }, ...)`, optionally the NODE catalogue
+    components added by `spec.name` (generated catalogue, validated by the Compose contract checks, like the KSP
+    installsComputed), then `functions.map { (name, action) -> name to ... } + ("Name" to Factory(scope))`.
+    Returns [(name, implementation, kind, offset)], or None for any other shape.
+    """
+    head = re.match(r'\s*(?::[^\n=]+)?\s*by\s+lazy\s*\{\s*val\s+functions\s*=\s*linkedMapOf[^\n]*\(', source[after:limit])
+    if not head:
+        return None
+    lazy_end = end_group(source, source.index('{', after))
+    map_open = after + head.end() - 1
+    map_end = end_group(source, map_open)
+    if lazy_end >= limit:
+        return None
+    names = []
+    for offset, expression in entries(source, map_open + 1, map_end):
+        entry = re.match(r'"(\w+)"\s+to\s+\{', expression)
+        if not entry or end_group(expression, entry.end() - 1) != len(expression) - 1:
+            return None
+        names.append((entry[1], entry[1], 'Functions', leading_offset(source, offset, map_end)))
+    tail = source[map_end + 1:lazy_end]
+    position = 0
+    catalogue = re.match(r'\s*[\w.]*\.interopCatalog\.components\.filter\s*\{\s*it\.invocation\s*==\s*ComponentInvocation\.NODE\s*\}'
+                         r'\s*\.forEach\s*\{\s*(\w+)\s*->\s*functions\[\1\.name\]\s*=\s*\{', tail)
+    if catalogue:
+        close = re.match(r'\s*\}', tail[end_group(tail, catalogue.end() - 1) + 1:])
+        if not close:
+            return None
+        position = end_group(tail, catalogue.end() - 1) + 1 + close.end()
+    final = re.compile(r'\s*functions\.map\s*\{\s*\(\s*(\w+)\s*,\s*\w+\s*\)\s*->\s*\1\s+to\s').match(tail, position)
+    if not final:
+        return None
+    position = end_group(tail, tail.index('{', position)) + 1
+    extra = re.compile(r'\s*\+\s*\(\s*"(\w+)"\s+to\s+[\w.]+\(\w*\)\s*\)')
+    while match := extra.match(tail, position):
+        names.append((match[1], match[1], 'Properties', map_end + 1 + match.start(1) - 1))
+        position = match.end()
+    return names if not tail[position:].strip() else None
+
 def masked(s):
     pattern = '"""[\\s\\S]*?"""|"(?:\\\\.|[^"\\\\])*"|\\\'(?:\\\\.|[^\\\'\\\\])*\\\'|//[^\\n]*|/\\*[\\s\\S]*?\\*/'
     return re.sub(pattern, lambda m: re.sub('[^\\n]', ' ', m[0]) if m[0].startswith(('/', '/*')) else m[0], s)
@@ -221,6 +290,15 @@ def extract_kotlin(host):
             after = decl.end()
             boundary = re.search('\\n\\s*(?:override |companion |@|(?:private |internal |protected )?fun )', s[after:])
             limit = after + (boundary.start() if boundary else len(s) - after)
+            # Two fixed table shapes (colour tables, Compose function map) without a listOf initializer.
+            resolved, label = simple_name_table_names(s, s[after:limit]), 'simpleName'
+            if resolved is None and module == 'compose' and reg == 'selfAssignmentProperties':
+                resolved, label = compose_function_map_names(s, after, limit), 'map'
+            if resolved is not None:
+                loc = '' if reg.startswith('global') else module
+                for name, implementation, kind, offset in resolved:
+                    records.append({'api': loc + '.' + name if loc else name, 'module': loc, 'ownerModule': module, 'member': name, 'implementation': implementation, 'kind': kind or reg.split('Assignment')[1], 'registration': reg + '/' + label, 'source': str(path), 'line': s[:offset].count('\n') + 1})
+                continue
             lm = re.search('listOf(?:<[^\\n]*>)?\\s*\\(', s[after:limit])
             if lm:
                 start = after + lm.end() - 1
@@ -296,23 +374,10 @@ def extract_kotlin(host):
                 for loc in set(locations):
                     for name in names:
                         records.append({'api': loc + '.' + name if loc else name, 'module': loc, 'ownerModule': module, 'member': name, 'implementation': implementation, 'kind': reg.split('Assignment')[1], 'registration': reg, 'source': str(path), 'line': line})
-    # Explicit keys of Compose's function map are stable API names; catalogue
-    # components are validated separately by the Compose contract checks.
-    if any(module['module'] == 'compose' for module in modules):
-        cp = BASE / 'compose/Compose.kt'
-        cs = masked(cp.read_text(encoding='utf-8'))
-        cm = re.search('val functions = linkedMapOf[^\\n]*\\(', cs)
-        if cm is None:
-            raise ValueError('Compose registration changed; review its dynamic exports')
-        for off, expr in entries(cs, cm.end(), end_group(cs, cm.end() - 1)):
-            mm = re.match('"(\\w+)" to', expr)
-            if mm:
-                records.append({'api': 'compose.' + mm[1], 'module': 'compose', 'ownerModule': 'compose', 'member': mm[1], 'implementation': mm[1], 'kind': 'Functions', 'registration': 'selfAssignmentProperties/map', 'source': str(cp), 'line': cs[:off].count('\n') + 2})
-        records.append({'api': 'compose.ComposeError', 'module': 'compose', 'ownerModule': 'compose', 'member': 'ComposeError', 'implementation': 'ComposeError', 'kind': 'Properties', 'registration': 'selfAssignmentProperties/map', 'source': str(cp), 'line': cs[:cs.index('+ ("ComposeError"')].count('\n') + 1})
     if 'augmentedApp.defineProp' in runtime:
         records.append({'api': 'app.autojs', 'module': 'app', 'ownerModule': 'app', 'member': 'autojs', 'implementation': 'autojs', 'kind': 'Properties', 'registration': 'ScriptRuntime.defineProp', 'source': str(HOST / 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'), 'line': runtime[:runtime.index('augmentedApp.defineProp')].count('\n') + 1})
     unique = {r['api']: r for r in records}
-    result = {'scope': 'Explicit Augmentable registrations plus explicit Compose function map. Excludes inherited Java prototype members, returned objects, nested dynamic objects, colour constants, generated Compose catalogue, JSOX prototype extensions, module alias expansion, overload semantics.', 'modules': modules, 'records': sorted(unique.values(), key=lambda x: x['api']), 'unresolved': unresolved}
+    result = {'scope': 'Explicit Augmentable registrations plus explicit Compose function map and colour table names. Excludes inherited Java prototype members, returned objects, nested dynamic objects, colour constants, generated Compose catalogue, JSOX prototype extensions, module alias expansion, overload semantics.', 'modules': modules, 'records': sorted(unique.values(), key=lambda x: x['api']), 'unresolved': unresolved}
     for record in result['records'] + result['modules'] + result['unresolved']:
         if 'source' in record:
             record['source'] = Path(record['source']).relative_to(HOST).as_posix()

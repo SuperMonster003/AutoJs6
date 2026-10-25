@@ -86,10 +86,7 @@
   "standardExports": {
     "toString": "Object.toString is implicit; not a TypeScript lexical global or standalone completion target."
   },
-  "dynamicRegistrations": {
-    "colors.selfAssignmentProperties": "Colour tables are generated from JVM objects; their constants use the dedicated colors contract checks.",
-    "compose.selfAssignmentProperties": "Explicit function-map keys are extracted; catalogue factories use the dedicated Compose contract checks."
-  },
+  "dynamicRegistrations": {},
   "returnedObjectProbes": [
     "threads.disposable.().blockedGet",
     "threads.disposable.().blockedGetOrThrow",

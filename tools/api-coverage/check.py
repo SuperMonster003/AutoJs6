@@ -57,6 +57,9 @@ def main():
     parser.add_argument("--typescript", type=Path, help="Optional TypeScript compiler module; defaults to Ace's bundled compiler")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--skip-ace", action="store_true", help="Explicitly check only source docs and canonical types")
+    parser.add_argument("--metadata", type=Path, help="script-modules.json (default: the KSP output of :app:kspAppDebugKotlin)")
+    parser.add_argument("--source", choices=["auto", "ksp", "kotlin"], default="auto",
+                        help="Exports from script-modules.json (ksp, required in CI), the Kotlin registrations (kotlin), or ksp when the file exists (auto)")
     args = parser.parse_args()
     host = args.host.resolve()
     siblings = host.parent
@@ -66,14 +69,18 @@ def main():
     output = (args.output or host / "build/reports/api-coverage").resolve()
     output.mkdir(parents=True, exist_ok=True)
     policy = json.loads((HERE / "policy.json").read_text(encoding="utf-8"))
-    baseline = extract(host)
+    baseline = extract(host, args.metadata, args.source)
     failures = []
     if not baseline["modules"] or not baseline["records"]:
         failures.append("No runtime exports extracted")
+    reviewed = set()
     for item in baseline["unresolved"]:
         key = item.get("module", "") + "." + item.get("registration", "")
+        reviewed.add(key)
         if key not in policy["dynamicRegistrations"]:
             failures.append(f"Unreviewed runtime registration: {item}")
+    failures.extend("Stale dynamicRegistrations entry (no such unresolved registration): " + key
+                    for key in policy["dynamicRegistrations"] if key not in reviewed)
     internal = policy["internalExports"]
     documented = documentation_rows([r for r in baseline["records"] if r["api"] not in internal], docs / "api", policy)
     failures.extend("Missing documentation name: " + r["api"] for r in documented if r["status"] == "missing")
@@ -101,6 +108,7 @@ def main():
         "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),
         "documentation": dict(Counter(row["status"] for row in documented)),
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
+        "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
         "scope": baseline["scope"], "failures": failures,
     }
     (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

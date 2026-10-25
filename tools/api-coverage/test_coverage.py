@@ -113,6 +113,87 @@ class RegistrationTests(unittest.TestCase):
             runtime_file.write_text(runtime.replace('augment(it)', 'augment(makeTarget())'), encoding='utf-8')
             self.assertTrue(any(row.get('reason') == 'Unrecognized runtime mount syntax' for row in extract_kotlin(root)['unresolved']))
 
+    @staticmethod
+    def single_module(root, class_name, body):
+        java = root / 'app/src/main/java/org/autojs/autojs/runtime'
+        module = java / 'api/augment/sample' / (class_name + '.kt')
+        module.parent.mkdir(parents=True, exist_ok=True)
+        module.write_text(f'class {class_name} : Augmentable() {{\n{body}\n}}', encoding='utf-8')
+        (java / 'ScriptRuntime.kt').write_text(f'import org.autojs.autojs.runtime.api.augment.sample.{class_name}\n'
+                                              f'private fun augment(target: ScriptableObject) {{\n    {class_name}(this).augment(target)\n}}\n', encoding='utf-8')
+        return extract_kotlin(root)
+
+    def test_simple_name_tables_resolve_listed_objects_only(self):
+        body = '''    override val keys = listOf(AugmentableKey("sample"))
+    internal val tables = listOf(
+        ColorTable.Android,
+        Css,
+    )
+    override val selfAssignmentProperties = tables.map { table ->
+        table::class.java.simpleName.lowercase() to table
+    }
+    override val selfAssignmentGetters = listOf("all" to Supplier { all })'''
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.single_module(Path(directory), 'Sample', body)
+            self.assertEqual([], result['unresolved'])
+            rows = {row['api']: row for row in result['records']}
+            self.assertEqual({'sample.android', 'sample.css', 'sample.all'}, set(rows))
+            self.assertEqual(('Properties', 'selfAssignmentProperties/simpleName', 'ColorTable.Android', 4),
+                             tuple(rows['sample.android'][key] for key in ['kind', 'registration', 'implementation', 'line']))
+        for changed in [body.replace('Css,', 'makeTable(),'), body.replace('simpleName.lowercase()', 'simpleName'),
+                        body.replace('    )\n', '    ) + extraTables\n', 1)]:
+            with tempfile.TemporaryDirectory() as directory:
+                result = self.single_module(Path(directory), 'Sample', changed)
+                self.assertEqual(['selfAssignmentProperties'], [row['registration'] for row in result['unresolved']])
+                self.assertNotIn('sample.android', {row['api'] for row in result['records']})
+
+    def test_compose_function_map_keys_resolve_and_other_shapes_stay_unresolved(self):
+        body = '''    override val keys = listOf(AugmentableKey("compose"))
+    override val selfAssignmentProperties: List<Pair<Any, Any?>> by lazy {
+        val functions = linkedMapOf<String, (Array<out Any?>) -> Any?>(
+            "mount" to { args -> mount(args).js },
+            "createElement" to { args ->
+                if (args.isEmpty()) throw IllegalStateException("createElement requires a name, (or not)")
+                create(args[0].toString())
+            },
+        )
+        org.autojs.plugin.compose.api.v2.ComposeUiV2.interopCatalog.components.filter { it.invocation == ComponentInvocation.NODE }.forEach { spec ->
+            functions[spec.name] = { args -> create(spec.name, args).js }
+        }
+        functions.map { (name, action) ->
+            name to RhinoUtils.newBaseFunction(scope, name, { args -> guarded { action(args) } }, RhinoUtils.NOT_CONSTRUCTABLE)
+        } + ("ComposeError" to ComposeJsErrors.constructor(scope))
+    }
+
+    override fun invoke(vararg args: Any?): Any? = guarded { mount(args).js }'''
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.single_module(Path(directory), 'Compose', body)
+            self.assertEqual([], result['unresolved'])
+            rows = {row['api']: row for row in result['records']}
+            self.assertEqual({'compose.mount', 'compose.createElement', 'compose.ComposeError'}, set(rows))
+            self.assertEqual(('Functions', 5), (rows['compose.mount']['kind'], rows['compose.mount']['line']))
+            self.assertEqual(('Properties', 'selfAssignmentProperties/map', 16),
+                             tuple(rows['compose.ComposeError'][key] for key in ['kind', 'registration', 'line']))
+        catalogue = 'functions[spec.name] = { args -> create(spec.name, args).js }'
+        for changed in [body.replace('"mount" to {', 'computedName() to {'),
+                        body.replace(catalogue, catalogue + '\n            functions["extra"] = { args -> null }'),
+                        body.replace('        functions.map {', '        functions["extra"] = { args -> null }\n        functions.map {'),
+                        body.replace('ComposeJsErrors.constructor(scope))', 'ComposeJsErrors.constructor(scope)) + extraPairs()'),
+                        body.replace('(name, action) ->\n            name to', '(name, action) ->\n            name.uppercase() to')]:
+            with tempfile.TemporaryDirectory() as directory:
+                result = self.single_module(Path(directory), 'Compose', changed)
+                self.assertEqual(['selfAssignmentProperties'], [row['registration'] for row in result['unresolved']])
+                self.assertNotIn('compose.mount', {row['api'] for row in result['records']})
+
+    def test_current_colour_tables_and_compose_function_map_resolve(self):
+        host = Path(__file__).resolve().parents[2]
+        if not (host / 'app/src/main/java/org/autojs/autojs/runtime/api/augment/compose/Compose.kt').is_file():
+            self.skipTest('the augment package is gone (augment roadmap P5.2)')
+        result = extract_kotlin(host)
+        self.assertEqual([], [row for row in result['unresolved'] if row.get('module') in ('colors', 'compose')])
+        apis = {row['api'] for row in result['records']}
+        self.assertLessEqual({'colors.android', 'colors.css', 'colors.web', 'colors.material', 'compose.mount', 'compose.ComposeError'}, apis)
+
 
 class CoverageTests(unittest.TestCase):
     def test_doc_search_is_scoped_and_does_not_match_partial_identifiers(self):
