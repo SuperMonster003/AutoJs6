@@ -18,6 +18,7 @@ on:
       - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
+      - 'docs/api-coverage/MATRIX.md'
       - 'tools/ace-completion/**'
       - '.github/workflows/api-coverage.yml'
   push:
@@ -38,6 +39,7 @@ on:
       - 'app/src/main/java/org/autojs/autojs/engine/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/ScriptRuntime.kt'
       - 'tools/api-coverage/**'
+      - 'docs/api-coverage/MATRIX.md'
       - 'tools/ace-completion/**'
       - '.github/workflows/api-coverage.yml'
   workflow_dispatch:
@@ -153,7 +155,7 @@ jobs:
         working-directory: AutoJs6
         run: |
           python -m unittest discover -s tools/api-coverage -p 'test_*.py'
-          python tools/api-coverage/check.py --source ksp
+          python tools/api-coverage/check.py --source ksp --matrix --strict-arity
           node tools/api-coverage/check-runtime-java-callbacks.mjs
           node tools/api-coverage/check-runtime-tts.mjs
           node tools/api-coverage/check-runtime-speech.mjs
@@ -162,6 +164,17 @@ jobs:
           node tools/api-coverage/check-runtime-flow.mjs
           node tools/api-coverage/check-runtime-ai.mjs
           node tools/api-coverage/check-runtime-ai-agent.mjs
+      - name: Check Ace runtime completion against the runtime matrix
+        working-directory: AutoJs6-Plugin-Ace-Editor
+        run: |
+          node tools/ace-lsp/generate-runtime-api-queries.mjs --check --host ../AutoJs6
+          node tools/ace-lsp/verify-runtime-api-coverage.mjs --fresh
+      - name: Check runtime declaration digests (declarations and Ace copies)
+        working-directory: AutoJs6-TypeScript-Declarations
+        run: |
+          compiler="$(node -p "const p=require('node:path');const a=p.resolve('../AutoJs6-Plugin-Ace-Editor');p.join(a,require(p.join(a,'tools/ace-lsp/ace-builds-lock.json')).assetRoot,'autojs6/typescript/typescript.js')")"
+          node tools/sync-runtime-declarations.mjs --check --ace ../AutoJs6-Plugin-Ace-Editor
+          node tools/verify-runtime-declarations.mjs "$compiler" --ace ../AutoJs6-Plugin-Ace-Editor
       - name: Check handwritten types and conditional extensions
         working-directory: AutoJs6-TypeScript-Declarations
         run: |
@@ -176,6 +189,14 @@ jobs:
           if (result.error) throw result.error;
           process.exit(result.status ?? 1);
           NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-coverage-matrix
+          path: |
+            AutoJs6/build/reports/api-coverage/runtime-matrix.json
+            AutoJs6/build/reports/api-coverage/summary.json
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         if: always()
         with:

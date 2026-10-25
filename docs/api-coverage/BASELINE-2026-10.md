@@ -246,3 +246,42 @@ no-dts 1 行: `WebSocket.()` (模块可调用, 实现 1-2; d.ts 的 WebSocket �
 |---|---|---|
 | 宿主 | 78cc3a241 | returned_objects.py, returned-objects.json, 单元测试, extract_exports / check.py 接线, verify-surfaces.mjs 的 `X.new()` Ace 文本, MATRIX.md |
 | 宿主 | (本节所在提交) | README "Returned objects", 本节 |
+
+## 4. P0.6 Ace 运行时指令提示门禁与 CI 接入 (2026-10-25, 子会话 api-cov-p0-6)
+
+### 4.1 CI 工作流 (Q14 / Q16 (a), D16)
+
+- `.github/workflows/api-coverage.yml`: check.py 改为 `--source ksp --matrix --strict-arity`; 新增产物 `runtime-coverage-matrix` (runtime-matrix.json 与 summary.json, 整个报告目录仍在 `script-api-coverage`); 新增两步: "Check Ace runtime completion against the runtime matrix" (Ace 仓库 `generate-runtime-api-queries.mjs --check --host ../AutoJs6` 与 `verify-runtime-api-coverage.mjs --fresh`) 和 "Check runtime declaration digests" (TS 仓库 `sync-runtime-declarations.mjs --check --ace` 与 `verify-runtime-declarations.mjs <Ace 自带编译器> --ace`); 触发路径加 `docs/api-coverage/MATRIX.md`. actionlint 通过. 维护说明 (Node / Bun 改声明或宿主改导出后回宿主 `--write-matrix`, 覆盖入口变化时再在 Ace 重新生成查询清单) 写进 README "Runtime coverage matrix > In CI".
+- 本机按 CI 同参数验证 (宿主 HEAD 导出副本, 本机 KSP script-modules.json, 兄弟仓库本地 HEAD): check.py 退出码 0, failures 空, MATRIX.md current; arity match 1155 / fail 0 / wider 21 / narrower 39 / vararg 60 / no-dts 1 (`--strict-arity` 只拦 fail); Ace 清单 `--check` 通过, Ace 校验 3059 次查询 (其中矩阵 1887) 全部通过; TS `sync --check --ace` changed 0, `verify --ace` 79 份副本摘要一致. 宿主 Gradle 未运行 (沿用已有 KSP 输出).
+- 同日直接在工作区运行时 MATRIX.md 为 stale: selector 会话尚未提交的 `UiObjectActions.kt` 新增 performTooltipAction (UiObject / UiObjectCollection / UiSelector 各 +1, 返回对象成员 1356 -> 1359). 这类改动提交时要一并 `check.py --write-matrix` 提交 MATRIX.md, 本卡片未替它重生成.
+
+### 4.2 远端 CI 与本机的差别
+
+远端作业读各仓库默认分支. 2026-10-25 本机领先远端: Ace 54, TS 声明 56, 文档 7, Node 56, Bun 54 个提交 (宿主不推送, D6). 推送前远端结果会与本机不同:
+
+- Ace 默认分支没有 `generate-runtime-api-queries.mjs` 与 `runtime-api-queries.json`, Ace 步骤会因文件不存在失败.
+- Node / Bun 默认分支的声明远落后于本机, 远端生成的矩阵与入库 MATRIX.md 不同, `--matrix` 会报 stale; TS 默认分支的 `verify-runtime-declarations.mjs` 忽略 `--ace` (只核对自身副本).
+- 推送顺序建议 (P7): Node / Bun / TS / Ace / 文档先推, 宿主最后推; 推送后在宿主重新 `--write-matrix` 确认 MATRIX.md 仍为 current.
+
+### 4.3 Ace 运行时查询 (D16)
+
+- `tools/ace-lsp/generate-runtime-api-queries.mjs` (Ace 仓库) 读宿主 `build/reports/api-coverage/runtime-matrix.json` (`--matrix` / `--host` / 环境变量 `AUTOJS6_RUNTIME_MATRIX`, 默认兄弟目录; 没有矩阵时说明生成方法并以退出码 2 结束), 写入库的 `tools/ace-lsp/runtime-api-queries.json`: Node main / Worker / Bun 列为 bridged / local-shim / capability-gated 的每一行都有查询, 入口取 Node 单元格的 module / member (另加 explicitGlobal 的 `$autojs.<module>` 入口) 与 Bun 单元格的 namespace / member, 别名行共用同一入口只查一次; `--check` 比对矩阵.
+- 数字: 矩阵 2724 行中覆盖行 759, 查询 1887 (Node main 676, Worker 502, `$autojs` 全局 186, Bun 523); `verify-runtime-api-coverage.mjs` 总查询 1172 -> 3059, 全部通过, 耗时约 21 s. 反例: 伪造 5 个不存在的入口 (各路线一个, 含错误命名空间与嵌套成员) 全部被列为失败. `--fresh` 把 LSP 声明生成到临时目录 (没有 Gradle 输出时自动使用), 宿主 CI 用它.
+
+### 4.4 BUNDLED_DECLARATIONS.md
+
+- Ace `types/autojs6/BUNDLED_DECLARATIONS.md` 写的是 4.42.0, 实际捆绑的 82 个核心声明与 TS 仓库 4.83.0 (44f6825) 逐字一致 (ROADMAP 立项时记的 4.81.0 之后又发了 4.82.0 / 4.83.0), 改为 4.83.0, 来源一行写明导入脚本与同步脚本, 新增运行时声明来源一行. 漂移原因: `sync-runtime-declarations.mjs --ace` 复制 package.json 却不改该行; 现在同步时一并改写, `--check` 时报 stale. 宿主导入脚本 `tools/ace-completion/import-autojs6-dts.mjs` 的模板同步更新, 重新导入得到同样的文本.
+- 重新导入还会改写 Ace 的 `autojs6/index.d.ts` (改为字母序, 去掉 `aj6-main-app.d.ts` 引用), 与 Ace 现行版本不一致; 本卡片没有应用这部分 (恢复为 HEAD), 登记为待决 Q23.
+
+### 4.5 `--skip-ace --matrix` 不再误报 stale
+
+`check.py --skip-ace` 时 surfaces.json 的 aceChecked 为 false, 矩阵的 ace 列原先全部记 none, 入库 MATRIX.md 被判为 stale. 现在 ace 列保持 null, 矩阵缺 doc / dts / ace 任一列时 MATRIX.md 记 skipped 并在 matrix.findings 说明原因; `--write-matrix` 拒绝 `--skip-ace`, 生成器拒绝写出缺列的 MATRIX.md (单元测试 test_without_ace_or_reports). 复现命令 `check.py --source ksp --skip-ace --matrix --output <scratch>` 退出码 0.
+
+### 4.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 466f6f1a0 | runtime_matrix.py / check.py 的 skipped 修法, 单元测试 |
+| 宿主 | (本节所在提交) | api-coverage.yml, README "In CI", import-autojs6-dts.mjs 模板, 本节 |
+| Ace | 7d4f966 | generate-runtime-api-queries.mjs, runtime-api-queries.json, verify-runtime-api-coverage.mjs (矩阵查询, --fresh), BUNDLED_DECLARATIONS.md, 开发文档一节 |
+| TS 声明 | 9889606 | sync-runtime-declarations.mjs (Version 行), verify-runtime-declarations.mjs --ace, RUNTIME_APIS.md |

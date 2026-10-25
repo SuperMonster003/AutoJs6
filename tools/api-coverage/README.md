@@ -180,10 +180,36 @@ when the checked-in `MATRIX.md` differs from the generated one and when a Bun
 pending cells and exclusions without a valid reason are listed in `summary.json` `matrix.findings`
 without failing until the exclusion list is decided (roadmap D12 / Q1). A
 `MATRIX.md` generated from another data source (ksp versus kotlin) is reported as
-`skipped`, not stale. `python tools/api-coverage/runtime_matrix.py` rebuilds the
+`skipped`, not stale, and so is any `MATRIX.md` when the matrix lacks a column:
+with `--skip-ace` the `ace` column stays `null` (`surfaces.json` `aceChecked`
+false), without `check.py` reports `doc` / `dts` / `ace` do; `matrix.findings`
+says why it was not compared. `MATRIX.md` is only written with every column, so
+`--write-matrix` rejects `--skip-ace`. `python tools/api-coverage/runtime_matrix.py` rebuilds the
 matrix from an existing report directory. `MATRIX.md` contains no commit ids or
 dates, so it only changes when a state changes; the runtime checkout commits are
 recorded in the JSON `sources`.
+
+### In CI
+
+The `Script API coverage` workflow runs `check.py --source ksp --matrix
+--strict-arity` (roadmap Q14 / Q16 (a)) and uploads `runtime-matrix.json` and
+`summary.json` as the `runtime-coverage-matrix` artifact (the whole report
+directory stays in `script-api-coverage`). It then checks, against the same
+matrix, the Ace plugin's runtime completion (`generate-runtime-api-queries.mjs
+--check --host ../AutoJs6` and `verify-runtime-api-coverage.mjs --fresh`: every
+covered Node main / Worker / `$autojs` global / Bun entry must complete) and the
+declarations repository's runtime digests (`sync-runtime-declarations.mjs --check
+--ace` and `verify-runtime-declarations.mjs --ace`; roadmap P0.6, D16).
+
+`MATRIX.md` and the Ace `runtime-api-queries.json` follow the Node and Bun
+declarations the job checks out (their default branches unless the manual inputs
+say otherwise). A change there that adds, removes or reclassifies an entry, and a
+host change to the exports or returned objects, makes the job fail until the
+derived files are regenerated and committed: `python tools/api-coverage/check.py
+--write-matrix` in the host, then `node tools/ace-lsp/generate-runtime-api-queries.mjs`
+in the Ace plugin (it reads the host report by default) when a covered entry changed.
+`--strict-arity` fails only on d.ts overloads disjoint from the implementation
+arity; `wider` / `narrower` stay warnings in `arity.json`.
 
 Runtime entries are declared entries, not behavior proofs (Rhino-equivalent
 behavior is reviewed in P1). The sources, all at the paths the roadmap names:
@@ -373,8 +399,8 @@ declared arity or optional parameters may cover counts the body rejects
 (`images.clip` accepts `(image, region)` and `(image, x, y, width, height)`, its
 parameters span 2-5). Counts between two implementation overloads are real gaps,
 so `wider` and `fail` use every count. The matrix `dts` column is `arity` for
-`match` and `wider`. The comparison reports only; `--strict-arity` makes `fail`
-rows gate failures. With `script-modules.json` as the data source, `crossCheck`
+`match` and `wider`. The comparison reports only; `--strict-arity` (passed in CI)
+makes `fail` rows gate failures. With `script-modules.json` as the data source, `crossCheck`
 lists the APIs whose ksp ranges differ from the `ensureArguments*` guard of the
 current Kotlin registration (`differs`), and undeclared varargs whose Kotlin
 implementation has a guard (`vararg-undeclared`, possibly a missing annotation);
