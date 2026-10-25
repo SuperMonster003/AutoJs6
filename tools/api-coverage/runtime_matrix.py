@@ -98,9 +98,10 @@ def catalog_capabilities(catalog):
 
 
 def list_surfaces(node, bun, typescript, output):
-    """Run list-runtime-surfaces.mjs (TypeScript checker over the runtime declarations)."""
+    """Run list-runtime-surfaces.mjs (TypeScript checker over the runtime declarations, and the handle types
+    runtime-policy.json returnedObjects names)."""
     command = ['node', str(HERE / 'list-runtime-surfaces.mjs'), '--node', str(node), '--bun', str(bun),
-               '--typescript', str(typescript), '--output', str(output)]
+               '--typescript', str(typescript), '--policy', str(HERE / 'runtime-policy.json'), '--output', str(output)]
     subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
     return json.loads(Path(output).read_text(encoding='utf-8'))
 
@@ -120,12 +121,25 @@ def placement(row):
     return row['ownerModule'], row['id'], 'owner-module'
 
 
+def refused(cell):
+    """An entry whose declarations only reject (never / Promise<never>) leaves the row pending (Q26); the cell keeps
+    the entry, and an exclusion rule with a reason is the only way to mark the row not-portable / denied."""
+    if not cell or not cell.get('rejects'):
+        return cell
+    return {'status': 'pending', 'rejects': True} | {key: cell[key] for key in ('module', 'namespace', 'type', 'member', 'via') if key in cell}
+
+
+def handle_types(items, key):
+    return {key(item): item['members'] for item in items or []}
+
+
 class NodeIndex:
     """Node main-thread / Worker entry lookup over the declared modules."""
 
     def __init__(self, surfaces, policy, host_api, worker, catalog=None):
         self.modules = surfaces['modules']
         self.explicit = set(surfaces.get('explicitGlobal', {}).values())
+        self.handles = handle_types(surfaces.get('handles'), lambda item: (item['module'], item['type']))
         self.policy = policy
         self.host_api = host_api
         self.worker = worker
@@ -138,24 +152,26 @@ class NodeIndex:
             names += [CANONICAL + alias, alias]
         return [(name, 'same-name' if i < 2 else 'module-alias') for i, name in enumerate(names)]
 
-    def available(self, name, path, worker):
-        module = self.modules.get(name)
-        if module is None or path not in module['members']:
-            return False
-        if not worker or bare(name) in self.native:
-            return True
+    def in_worker(self, name, path):
         key = 'console' if name == 'node:console' else bare(name)
         if key not in self.worker:
             return False
         members = self.worker[key]
         return members is None or path.split('.')[0] in members
 
-    def find(self, host_module, member, worker):
+    def available(self, name, path, worker, rejecting=False):
+        """`rejecting`: also accept entries that only reject (the second pass of lookup)."""
+        module = self.modules.get(name)
+        if module is None or path not in module['members'] or module['members'][path].get('rejects') and not rejecting:
+            return False
+        return not worker or bare(name) in self.native or self.in_worker(name, path)
+
+    def find(self, host_module, member, worker, rejecting=False):
         parts = host_module.split('.') if host_module else []
         for k in range(len(parts), 0, -1):
             path = '.'.join(parts[k:] + [member])
             for name, via in self.candidates('.'.join(parts[:k])):
-                if self.available(name, path, worker):
+                if self.available(name, path, worker, rejecting):
                     return name, path, via
         return None
 
@@ -170,6 +186,8 @@ class NodeIndex:
         status, host_api = self.status(name)
         info = self.modules[name]['members'][path]
         cell = {'status': status, 'module': name, 'member': path, 'async': info['async'], 'via': via}
+        if info.get('rejects'):
+            cell['rejects'] = True
         if host_api:
             cell['hostApi'] = host_api
         capabilities = sorted(self.catalog.get((bare(name), path.split('.')[0]), ()))
@@ -180,27 +198,46 @@ class NodeIndex:
         return cell
 
     def lookup(self, row, group, worker=False):
+        """The first entry that does not only reject, else the first rejecting one (pending, Q26)."""
+        return refused(self.search(row, group, worker) or self.search(row, group, worker, rejecting=True))
+
+    def search(self, row, group, worker, rejecting=False):
         alias = self.policy.get('memberAliases', {}).get(row['id'])
         if alias:
-            if self.available(alias['module'], alias['member'], worker):
+            if self.available(alias['module'], alias['member'], worker, rejecting):
                 return self.cell(alias['module'], alias['member'], 'member-alias')
             return None
         for candidate, via in [(row, None)] + [(other, 'alias') for other in group]:
             module, path, own = placement(candidate)
             if module:
-                found = self.find(module, path, worker)
+                found = self.find(module, path, worker, rejecting)
                 if found:
                     return self.cell(found[0], found[1], via or (own if own and found[2] == 'same-name' else found[2]))
         if not row['module']:
             for name in self.policy.get('globalModules', []):
-                if self.available(name, row['member'], worker):
+                if self.available(name, row['member'], worker, rejecting):
                     return self.cell(name, row['member'], 'global-module')
         compat = self.policy.get('compatModule')
         if compat:
             path = (row['module'] + '.' if row['module'] else '') + row['member']
-            if self.available(compat, path, worker):
+            if self.available(compat, path, worker, rejecting):
                 return self.cell(compat, path, 'compat')
         return None
+
+    def returned(self, row, target, worker=False):
+        """A returned-object member through the runtime handle type of runtime-policy.json returnedObjects (Q27):
+        covered when the type declares the member (in Worker when the type's module is a Worker host module)."""
+        members = self.handles.get((target['module'], target['type']))
+        if members is None:
+            raise ValueError(f"runtime-policy.json returnedObjects {row['object']}: Node type {target['type']} not found in {target['module']}")
+        info = members.get(row['member'])
+        if info is None or worker and bare(target['module']) not in self.worker:
+            return None
+        cell = {'status': self.status(target['module'])[0], 'module': target['module'], 'type': target['type'], 'member': row['member'],
+                'async': info['async'], 'via': 'handle-type'}
+        if info.get('rejects'):
+            cell['rejects'] = True
+        return refused(cell)
 
 
 class BunIndex:
@@ -211,6 +248,7 @@ class BunIndex:
         self.client = surfaces.get('clientMembers', {})
         self.methods = surfaces.get('methods', {})
         self.capabilities = surfaces.get('capabilities', [])
+        self.handles = handle_types(surfaces.get('handles'), lambda item: item['type'])
         self.policy = policy
         self.used = set()
 
@@ -240,41 +278,69 @@ class BunIndex:
         info = self.namespaces[namespace]['members'][path] if namespace else self.client[path]
         status = 'capability-gated' if not namespace or self.related(namespace) else 'local-shim'
         cell = {'status': status, 'namespace': namespace, 'member': path, 'async': info['async'], 'via': via}
+        if info.get('rejects'):
+            cell['rejects'] = True
         capability = self.capability(namespace, path) if namespace else None
         if capability:
             cell['capability'] = capability
         return cell
 
-    def find(self, host_module, member):
+    def has(self, namespace, path, rejecting):
+        info = self.namespaces.get(namespace, {}).get('members', {}).get(path) if namespace else self.client.get(path)
+        return info is not None and (rejecting or not info.get('rejects'))
+
+    def find(self, host_module, member, rejecting=False):
         parts = host_module.split('.')
         for k in range(len(parts), 0, -1):
             base = '.'.join(parts[:k])
             path = '.'.join(parts[k:] + [member])
             names = [(base, 'same-name')] + [(alias, 'module-alias') for alias in self.policy.get('namespaceAliases', {}).get(base, [])]
             for name, via in names:
-                if path in self.namespaces.get(name, {}).get('members', {}):
+                if name and self.has(name, path, rejecting):
                     return name, path, via
         return None
 
     def lookup(self, row, group):
+        """The first entry that does not only reject, else the first rejecting one (pending, Q26)."""
+        return refused(self.search(row, group) or self.search(row, group, rejecting=True))
+
+    def search(self, row, group, rejecting=False):
         alias = self.policy.get('memberAliases', {}).get(row['id'])
         if alias:
             namespace, path = alias['namespace'], alias['member']
-            known = path in self.namespaces.get(namespace, {}).get('members', {}) if namespace else path in self.client
-            return self.cell(namespace, path, 'member-alias') if known else None
+            return self.cell(namespace, path, 'member-alias') if self.has(namespace, path, rejecting) else None
         for candidate, via in [(row, None)] + [(other, 'alias') for other in group]:
             module, path, own = placement(candidate)
             if module:
-                found = self.find(module, path)
+                found = self.find(module, path, rejecting)
                 if found:
                     return self.cell(found[0], found[1], via or (own if own and found[2] == 'same-name' else found[2]))
         if not row['module']:
             for name in self.policy.get('globalNamespaces', []):
-                if row['member'] in self.namespaces.get(name, {}).get('members', {}):
+                if self.has(name, row['member'], rejecting):
                     return self.cell(name, row['member'], 'global-module')
-            if self.client.get(row['member'], {}).get('callable'):
+            if self.client.get(row['member'], {}).get('callable') and self.has('', row['member'], rejecting):
                 return self.cell('', row['member'], 'client-member')
         return None
+
+    def returned(self, row, target):
+        """A returned-object member through the host client handle type of runtime-policy.json returnedObjects (Q27):
+        capability-gated by the grant of the namespace producing the handle (`capability` when it has several)."""
+        members = self.handles.get(target['type'])
+        if members is None:
+            raise ValueError(f"runtime-policy.json returnedObjects {row['object']}: Bun type {target['type']} not found in {BUN_DECLARATIONS}")
+        info = members.get(row['member'])
+        if info is None:
+            return None
+        related = self.related(target['namespace'])
+        capability = target.get('capability') or (related[0] if len(related) == 1 else None)
+        cell = {'status': 'capability-gated' if related else 'local-shim', 'namespace': target['namespace'], 'type': target['type'],
+                'member': row['member'], 'async': info['async'], 'via': 'handle-type'}
+        if info.get('rejects'):
+            cell['rejects'] = True
+        if capability in self.capabilities:
+            cell['capability'] = capability
+        return refused(cell)
 
 
 def export_rows(exports, policy_json):
@@ -332,8 +398,9 @@ def surface_states(row, documentation, surfaces, ace_checked=True):
 
 
 def apply_exclusions(rows, rules):
-    """Exclusions fill pending cells only; a rule matching a covered cell is reported as shadowed.
-    A rule with `memberSource` only matches returned-member rows of that source (kotlin-class / augment-prototype)."""
+    """Exclusions fill pending cells only (a rejecting entry's cell keeps `rejects`); a rule matching a covered cell
+    is reported as shadowed. A rule with `memberSource` only matches returned-member rows of that source
+    (kotlin-class / augment-prototype)."""
     used, shadowed = Counter(), defaultdict(list)
     for row in rows:
         for column in RUNTIME_COLUMNS:
@@ -345,7 +412,8 @@ def apply_exclusions(rows, rules):
                 used[rule['id']] += 1
                 cell = row[column]
                 if cell['status'] == 'pending' or rule.get('override'):
-                    row[column] = {key: rule[key] for key in ('status', 'reason', 'equivalent', 'note') if rule.get(key)} | {'rule': rule['id']}
+                    row[column] = ({key: rule[key] for key in ('status', 'reason', 'equivalent', 'note') if rule.get(key)} | {'rule': rule['id']}
+                                   | ({'rejects': True} if cell.get('rejects') else {}))
                 elif cell['status'] in COVERED:
                     shadowed[(rule['id'], column)].append(row['id'])
                 break
@@ -398,9 +466,12 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
             row['bun'] = bun.lookup(row, group) or {'status': 'pending'}
         else:
             mapping = returned.get(row['object'], {})
-            for column in RUNTIME_COLUMNS:
-                row[column] = dict(mapping[column]) if column in mapping else {'status': 'pending'}
+            row['node_main'] = 'node' in mapping and node.returned(row, mapping['node']) or {'status': 'pending'}
+            row['node_worker'] = 'node' in mapping and node.returned(row, mapping['node'], worker=True) or {'status': 'pending'}
+            row['bun'] = 'bun' in mapping and bun.returned(row, mapping['bun']) or {'status': 'pending'}
     conflicts = apply_exclusions(rows, policy.get('exclusions', []))
+    objects = {row['object'] for row in rows}
+    conflicts += [{'rule': f'returnedObjects {name}', 'kind': 'unused'} for name in sorted(returned) if not name.startswith('_') and name not in objects]
     conflicts += [{'rule': f'bun.memberCapabilities {key}', 'kind': 'unused'}
                   for key in sorted(set(policy.get('bun', {}).get('memberCapabilities', {})) - bun.used) if not key.startswith('_')]
     rows.sort(key=lambda row: row['id'])
@@ -418,6 +489,7 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
         'summary': {'rows': len(rows), 'exports': exported, 'returnedMembers': len(rows) - exported,
                     'returnedObjectsInput': 'returnedObjects' in exports, 'byColumn': by_column,
                     'pending': {column: by_column[column]['pending'] for column in RUNTIME_COLUMNS},
+                    'rejects': {column: sum(bool(row[column].get('rejects')) for row in rows) for column in RUNTIME_COLUMNS},
                     'missingReasons': missing_reasons(rows), 'missingCapabilities': missing_capabilities(rows), 'policyConflicts': conflicts},
         'rows': rows,
     }
@@ -427,7 +499,7 @@ def short(cell):
     status = cell['status']
     if status in EXCLUDED:
         return f"{status}: {cell.get('reason', '?')} ({cell['rule']})" if cell.get('rule') else f"{status}: {cell.get('reason', '?')}"
-    return status
+    return f'{status} (rejects)' if cell.get('rejects') else status
 
 
 def cell_code(row, column):
@@ -469,6 +541,10 @@ def render_markdown(matrix):
     lines += ['', f"排除理由缺失: {len(summary['missingReasons'])}. Bun 缺能力名: {len(summary.get('missingCapabilities', []))}. 策略冲突: "
               + (', '.join(f"{item['rule']} {item['kind']}" + (f" ({item['column']}, {len(item['ids'])})" if item['kind'] == 'shadowed' else '')
                            for item in summary['policyConflicts']) or '无') + '.']
+    rejects = summary.get('rejects', {})
+    lines += ['', '拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): '
+              + ' / '.join(f'{COLUMN_TITLES[column]} {rejects.get(column, 0)}' for column in RUNTIME_COLUMNS)
+              + '. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.']
     lines += ['', '## 排除规则 (草案)', '', '| 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |', '|---|---|---:|---:|---:|---|']
     policy_rows = {}
     for row in matrix['rows']:

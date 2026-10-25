@@ -55,8 +55,8 @@ def record(api, module, owner, member=None, implementation=None, kind='Functions
             'kind': kind, 'registration': '@ScriptFunction', 'source': 'Sample.kt', 'line': 1, 'metadata': metadata, **extra}
 
 
-def member(is_async=True, callable_=True):
-    return {'callable': callable_, 'constructable': False, 'signatures': 1 if callable_ else 0, 'async': is_async}
+def member(is_async=True, callable_=True, rejects=False):
+    return {'callable': callable_, 'constructable': False, 'signatures': 1 if callable_ else 0, 'async': is_async, 'rejects': rejects}
 
 
 EXPORTS = {
@@ -279,7 +279,6 @@ class StatusTest(unittest.TestCase):
                                        'members': [{'name': 'getWidth', 'kind': 'Functions', 'source': 'ImageWrapper.kt', 'line': 3, 'arity': {'min': 0, 'max': 0}},
                                                    {'name': 'recycle', 'kind': 'Functions'}]}]
         policy = copy.deepcopy(POLICY)
-        policy['returnedObjects'] = {'ImageWrapper': {'node_main': {'status': 'bridged', 'module': 'autojs6:images', 'member': 'getWidth'}}}
         policy['exclusions'].append({'id': 'prototype', 'match': ['ImageWrapper#recycle'], 'status': 'not-portable', 'reason': 'java-prototype'})
         result = matrix(exports, policy)
         rows = {row['id']: row for row in result['rows']}
@@ -287,9 +286,94 @@ class StatusTest(unittest.TestCase):
         self.assertEqual(result['summary']['exports'], len(EXPORTS['records']))
         width = rows['ImageWrapper#getWidth']
         self.assertEqual((width['kind'], width['object'], width['producers'], width['arity']), ('returned-member', 'ImageWrapper', ['images.read'], {'min': 0, 'max': 0}))
-        self.assertEqual(width['node_main']['status'], 'bridged')
-        self.assertEqual(width['bun']['status'], 'pending')
+        self.assertEqual({column: width[column]['status'] for column in ['node_main', 'node_worker', 'bun']}, dict.fromkeys(['node_main', 'node_worker', 'bun'], 'pending'))
         self.assertEqual(rows['ImageWrapper#recycle']['node_worker']['reason'], 'java-prototype')
+
+    def test_handle_types(self):
+        # Q27: returnedObjects maps a host object to a runtime handle type, compared member by member.
+        exports = copy.deepcopy(EXPORTS)
+        exports['returnedObjects'] = [{'object': 'Flow', 'producers': ['flow.waitFor'], 'memberSource': 'augment-prototype',
+                                       'members': [{'name': name, 'kind': 'Functions'} for name in ['then', 'cancel', 'sync', 'abort']]},
+                                      {'object': 'Storage', 'producers': [], 'memberSource': 'augment-prototype', 'members': [{'name': 'get', 'kind': 'Functions'}]}]
+        node = copy.deepcopy(NODE_SURFACES)
+        node['handles'] = [{'module': 'autojs6:flow', 'type': 'Flow<unknown>', 'members': {'then': member(), 'cancel': member(), 'abort': member(rejects=True)}},
+                           {'module': 'storage', 'type': 'StorageStore', 'members': {'get': member()}}]
+        bun = copy.deepcopy(BUN_SURFACES)
+        bun['handles'] = [{'type': 'RuntimeFlow.Flow<unknown>', 'members': {'then': member(), 'cancel': member(False)}},
+                          {'type': 'RuntimeStorage.StorageStore', 'members': {'get': member()}}]
+        bun['capabilities'].append('storage.control')
+        policy = copy.deepcopy(POLICY)
+        policy['returnedObjects'] = {
+            '_note': 'x',
+            'Flow': {'node': {'module': 'autojs6:flow', 'type': 'Flow<unknown>'}, 'bun': {'namespace': 'flow', 'type': 'RuntimeFlow.Flow<unknown>'}},
+            'Storage': {'node': {'module': 'storage', 'type': 'StorageStore'}, 'bun': {'namespace': 'storages', 'type': 'RuntimeStorage.StorageStore', 'capability': 'storage.control'}},
+            'Missing': {'node': {'module': 'storage', 'type': 'StorageStore'}},
+        }
+        result = build(exports, policy, POLICY_JSON, node, bun, parse_host_api(HOST_API), WORKER)
+        rows = {row['id']: row for row in result['rows']}
+        then = rows['Flow#then']
+        self.assertEqual(then['node_main'], {'status': 'bridged', 'module': 'autojs6:flow', 'type': 'Flow<unknown>', 'member': 'then', 'async': True, 'via': 'handle-type'})
+        self.assertEqual(then['node_worker']['status'], 'bridged')
+        self.assertEqual(then['bun'], {'status': 'capability-gated', 'namespace': 'flow', 'type': 'RuntimeFlow.Flow<unknown>', 'member': 'then', 'async': True,
+                                       'via': 'handle-type', 'capability': 'flow.control'})
+        self.assertFalse(rows['Flow#cancel']['bun']['async'])
+        self.assertEqual({column: rows['Flow#sync'][column]['status'] for column in ['node_main', 'bun']}, {'node_main': 'pending', 'bun': 'pending'})
+        self.assertEqual(rows['Flow#abort']['node_main'], {'status': 'pending', 'rejects': True, 'module': 'autojs6:flow', 'type': 'Flow<unknown>',
+                                                            'member': 'abort', 'via': 'handle-type'})
+        # storage is not a Worker host module; the Bun grant comes from the mapping.
+        self.assertEqual(rows['Storage#get']['node_main']['status'], 'bridged')
+        self.assertEqual(rows['Storage#get']['node_worker']['status'], 'pending')
+        self.assertEqual(rows['Storage#get']['bun']['capability'], 'storage.control')
+        self.assertIn({'rule': 'returnedObjects Missing', 'kind': 'unused'}, result['summary']['policyConflicts'])
+        policy['returnedObjects']['Flow']['node']['type'] = 'Chain'
+        with self.assertRaises(ValueError):
+            build(exports, policy, POLICY_JSON, node, bun, parse_host_api(HOST_API), WORKER)
+
+    def test_rejecting_entries(self):
+        # Q26: a declared entry that only returns never / Promise<never> leaves the row pending, keeping the entry.
+        exports = copy.deepcopy(EXPORTS)
+        exports['records'] += [record('files.open', 'files', 'files'), record('open', '', 'files', implementation='open'),
+                               record('console.input', 'console', 'console'), record('files.write', 'files', 'files')]
+        node = copy.deepcopy(NODE_SURFACES)
+        node['modules']['files']['members'].update(open=member(False, rejects=True), write=member(False, rejects=True))
+        node['modules']['autojs6:console'] = {'members': {'input': member(False, rejects=True)}}
+        node['modules']['autojs6:compat'] = {'members': {'files.write': member(False)}}
+        bun = copy.deepcopy(BUN_SURFACES)
+        bun['namespaces']['files'] = {'members': {'open': member(False, rejects=True)}}
+        bun['capabilities'].append('files.control')
+        policy = copy.deepcopy(POLICY)
+        policy['exclusions'].append({'id': 'console-input', 'match': ['console.input'], 'status': 'not-portable', 'reason': 'sync-only'})
+        result = build(exports, policy, POLICY_JSON, node, bun, parse_host_api(HOST_API), {**WORKER, 'console': None})
+        rows = {row['id']: row for row in result['rows']}
+        self.assertEqual(rows['files.open']['node_main'], {'status': 'pending', 'rejects': True, 'module': 'files', 'member': 'open', 'via': 'same-name'})
+        self.assertEqual(rows['open']['node_main']['via'], 'owner-module')
+        self.assertEqual(rows['files.open']['bun'], {'status': 'pending', 'rejects': True, 'namespace': 'files', 'member': 'open', 'via': 'same-name'})
+        # Another entry that does not reject covers the row.
+        self.assertEqual((rows['files.write']['node_main']['status'], rows['files.write']['node_main']['via']), ('bridged', 'compat'))
+        # An exclusion with a reason is the only way out of pending; the cell keeps the marker.
+        self.assertEqual(rows['console.input']['node_worker'], {'status': 'not-portable', 'reason': 'sync-only', 'rule': 'console-input', 'rejects': True})
+        self.assertEqual(result['summary']['rejects'], {'node_main': 3, 'node_worker': 1, 'bun': 2})
+        text = render_markdown(result)
+        self.assertIn('| `files.open` | pending (rejects) | pending | pending (rejects) |', text)
+        self.assertIn('Node main 3 / Node Worker 1 / Bun 2', text)
+
+    def test_member_aliases(self):
+        # Q28: a host name mapped to a runtime member of another module (automator Toolkit helpers -> flow).
+        exports = copy.deepcopy(EXPORTS)
+        exports['records'] += [record('automator.clickAny', 'automator', 'automator', implementation='clickAny'),
+                               record('clickAny', '', 'automator', implementation='clickAny')]
+        node = copy.deepcopy(NODE_SURFACES)
+        node['modules']['autojs6:flow']['members']['clickAny'] = member()
+        bun = copy.deepcopy(BUN_SURFACES)
+        bun['namespaces']['flow']['members']['clickAny'] = member()
+        policy = copy.deepcopy(POLICY)
+        policy['node']['memberAliases'] = {name: {'module': 'autojs6:flow', 'member': 'clickAny'} for name in ['automator.clickAny', 'clickAny']}
+        policy['bun']['memberAliases'] = {name: {'namespace': 'flow', 'member': 'clickAny'} for name in ['automator.clickAny', 'clickAny']}
+        rows = {row['id']: row for row in build(exports, policy, POLICY_JSON, node, bun, parse_host_api(HOST_API), WORKER)['rows']}
+        for name in ['automator.clickAny', 'clickAny']:
+            self.assertEqual((rows[name]['node_main']['module'], rows[name]['node_main']['via']), ('autojs6:flow', 'member-alias'))
+            self.assertEqual(rows[name]['node_worker']['status'], 'bridged')
+            self.assertEqual((rows[name]['bun']['capability'], rows[name]['bun']['via']), ('flow.control', 'member-alias'))
 
     def test_member_source_rule(self):
         exports = copy.deepcopy(EXPORTS)
@@ -410,6 +494,21 @@ class RepositoryTest(unittest.TestCase):
     def test_policy_reasons(self):
         self.assertEqual(self.matrix['summary']['missingReasons'], [])
         self.assertEqual(self.matrix['summary']['missingCapabilities'], [])
+        self.assertEqual([item for item in self.matrix['summary']['policyConflicts'] if item['rule'].startswith('returnedObjects')], [])
+
+    def test_p1_5(self):
+        rows = {row['id']: row for row in self.matrix['rows']}
+        # Q26: the dual-app entries only reject in both runtimes.
+        for column in ['node_main', 'bun']:
+            self.assertEqual((rows['app.launchDual'][column]['status'], rows['app.launchDual'][column].get('rejects')), ('pending', True), column)
+        # Q27: every MailClient member has a runtime handle member.
+        mail = [row for row in self.matrix['rows'] if row['object'] == 'MailClient']
+        self.assertTrue(mail)
+        self.assertEqual({row['bun']['capability'] for row in mail}, {'mail.control'})
+        self.assertEqual({row['node_main']['via'] for row in mail}, {'handle-type'})
+        # Q28: the Toolkit helpers resolve to flow.
+        for name in ['automator.clickAny', 'clickAny']:
+            self.assertEqual((rows[name]['node_main']['module'], rows[name]['bun']['namespace']), ('autojs6:flow', 'flow'))
 
 
 if __name__ == '__main__':

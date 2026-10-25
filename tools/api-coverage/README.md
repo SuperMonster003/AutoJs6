@@ -197,7 +197,8 @@ The `Script API coverage` workflow runs `check.py --source ksp --matrix
 directory stays in `script-api-coverage`). It then checks, against the same
 matrix, the Ace plugin's runtime completion (`generate-runtime-api-queries.mjs
 --check --host ../AutoJs6` and `verify-runtime-api-coverage.mjs --fresh`: every
-covered Node main / Worker / `$autojs` global / Bun entry must complete) and the
+covered Node main / Worker / `$autojs` global / Bun entry must complete, a
+returned member on a value of its handle type) and the
 declarations repository's runtime digests (`sync-runtime-declarations.mjs --check
 --ace` and `verify-runtime-declarations.mjs --ace`; roadmap P0.6, D16).
 
@@ -251,7 +252,33 @@ reported as shadowed, a rule matching nothing as unused (`override: true` forces
 a rule). A rule with `memberSource` matches only returned-member rows of that
 source: `java-prototype-objects` (Q17 (a)) excludes the members of `kotlin-class`
 objects (Node / Bun have no such Java object), `augment-prototype` handles stay
-pending.
+pending unless `returnedObjects` names their runtime handle type (below).
+
+An entry whose every call signature returns `never` or `Promise<never>`
+(`list-runtime-surfaces.mjs` marks it `rejects`) is an explicit refusal, not
+coverage (roadmap Q26 (a)): the lookup prefers any other entry of the row, and
+when only rejecting entries exist the cell is `pending` with `rejects: true` and
+the entry kept (`app.launchDual`, `console.input`, `files.open`, `storages.names`).
+Such a row leaves pending only through an exclusion rule with a reason; the
+excluded cell keeps `rejects`. `summary.rejects` counts the cells per column.
+
+`runtime-policy.json` `returnedObjects` maps an `augment-prototype` object to the
+handle type its runtime producers return (roadmap Q27 (a)), and the members are
+compared one by one: a member the type declares is covered, others stay pending.
+
+```jsonc
+"Flow": {"node": {"module": "autojs6:flow", "type": "Flow<unknown>"},     // type in the module's namespace
+         "bun": {"namespace": "flow", "type": "RuntimeFlow.Flow<unknown>",  // type exported by host-client.d.mts
+                 "capability": "flow.control"}}                             // grant of the producing call
+```
+
+`list-runtime-surfaces.mjs --policy` reads the mappings and lists the members of
+each type (type arguments only serve the Ace queries). Node cells take the
+module's status (`bridged` / `local-shim`) and are available in Workers when the
+module is a Worker host module (`storages` is not); Bun cells are
+`capability-gated` with the mapping's capability, else the namespace's only
+related grant. A type that does not resolve fails the run; a mapping for an
+object without rows is an unused policy conflict.
 
 ### Row ids
 
@@ -282,6 +309,7 @@ the Ace runtime queries join on them.
     "rows": 1368, "exports": 1368, "returnedMembers": 0,
     "byColumn": {"node_main": {"bridged": 0, "pending": 0}},             // every column, every value
     "pending": {"node_main": 0, "node_worker": 0, "bun": 0},
+    "rejects": {"node_main": 0, "node_worker": 0, "bun": 0},  // cells of entries that only reject (Q26)
     "missingReasons": [],      // excluded cells without a valid reason / equivalent
     "missingCapabilities": [], // Bun capability-gated cells without a capability (fails --matrix)
     "policyConflicts": []      // exclusion rules shadowed by a real runtime entry, unused rules
@@ -320,6 +348,8 @@ the Ace runtime queries join on them.
 {"status": "capability-gated", "namespace": "images", "member": "getSize", "capability": "image.process", "async": false, "via": "same-name"} // Bun
 {"status": "not-portable", "reason": "runtime-native", "equivalent": "node:timers.setTimeout", "module": "timers", "member": "setTimeout", "via": "owner-module"}
 {"status": "not-portable", "reason": "sync-only", "equivalent": "Node worker_threads / Bun Worker with message passing", "rule": "sync-threads"}
+{"status": "bridged", "module": "autojs6:flow", "type": "Flow<unknown>", "member": "then", "async": true, "via": "handle-type"} // returned member
+{"status": "pending", "rejects": true, "module": "app", "member": "launchDual", "via": "same-name"} // entry only rejects
 {"status": "pending"}
 ```
 
@@ -328,7 +358,8 @@ true when every declared signature of the entry returns a thenable (Promise, Flo
 chain). `via` tells how the entry was found: `same-name`, `owner-module` (a
 global-object row in its owner module), `alias` (another placement of the same
 function), `module-alias` / `member-alias` (a `runtime-policy.json` mapping),
-`global-module`, `compat` (`autojs6:compat`), `client-member` (Bun). Cells set by an
+`global-module`, `compat` (`autojs6:compat`), `client-member` (Bun), `handle-type`
+(a returned member through `returnedObjects`). Cells set by an
 exclusion rule carry `rule` (and `note` when the rule has one) instead.
 `reason` is one of `security`, `sync-only`, `java-prototype`, `runtime-native`,
 `runtime-builtin`, `rhino-only`, `ui-thread`; a `runtime-native` cell must carry
@@ -353,8 +384,8 @@ exclusion rule carry `rule` (and `note` when the rule has one) instead.
 ```
 
   Until the list exists the matrix has no returned-member rows. Their runtime
-  cells come from `runtime-policy.json` `returnedObjects` mappings and exclusions
-  (`java-prototype` is allowed); unmapped members are `pending`.
+  cells come from the `runtime-policy.json` `returnedObjects` handle types and
+  exclusions (`java-prototype` is allowed); unmapped members are `pending`.
 
 ### Documentation runtime support tables (P0.5)
 

@@ -24,7 +24,8 @@ function program(root) {
     return {program: result, checker: result.getTypeChecker(), source: result.getSourceFile(root)};
 }
 
-// A member is async when every call signature returns a thenable (Promise, Flow chains).
+// A member is async when every call signature returns a thenable (Promise, Flow chains), and rejects when every
+// call signature returns never or Promise<never>: an explicit refusal entry, not coverage (roadmap Q26).
 function describe(checker, type) {
     const signatures = checker.getSignaturesOfType(checker.getNonNullableType(type), ts.SignatureKind.Call);
     const constructs = checker.getSignaturesOfType(checker.getNonNullableType(type), ts.SignatureKind.Construct);
@@ -32,8 +33,37 @@ function describe(checker, type) {
         const returned = checker.getReturnTypeOfSignature(signature);
         return checker.getPropertyOfType(returned, "then") !== undefined;
     };
+    const never = signature => {
+        const returned = checker.getReturnTypeOfSignature(signature);
+        return Boolean(returned.flags & ts.TypeFlags.Never || checker.getAwaitedType(returned)?.flags & ts.TypeFlags.Never);
+    };
     return {callable: signatures.length > 0, constructable: constructs.length > 0, signatures: signatures.length,
-        async: signatures.length > 0 && signatures.every(thenable)};
+        async: signatures.length > 0 && signatures.every(thenable), rejects: signatures.length > 0 && signatures.every(never)};
+}
+
+// The members of a handle type (roadmap Q27), named from a module symbol by a dotted path; type arguments
+// (`Flow<unknown>`) only matter to the editor queries and are dropped here.
+function handleMembers(checker, moduleSymbol, name) {
+    let symbol = moduleSymbol;
+    for (const part of name.replace(/<.*$/, "").split(".")) {
+        symbol = symbol && checker.getExportsOfModule(symbol).find(item => item.name === part && item.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Namespace));
+    }
+    if (!symbol) return null;
+    const location = symbol.declarations[0];
+    const result = {};
+    for (const property of checker.getPropertiesOfType(checker.getDeclaredTypeOfSymbol(symbol))) {
+        if (!property.name.startsWith("__@")) result[property.name] = describe(checker, checker.getTypeOfSymbolAtLocation(property, location));
+    }
+    return result;
+}
+
+// Handle types named by runtime-policy.json returnedObjects: [{module, type}] for Node, [{type}] for Bun.
+const handles = {node: [], bun: []};
+if (options.policy) {
+    for (const mapping of Object.values(JSON.parse(fs.readFileSync(options.policy, "utf8")).returnedObjects || {})) {
+        if (mapping?.node) handles.node.push({module: mapping.node.module, type: mapping.node.type});
+        if (mapping?.bun) handles.bun.push({type: mapping.bun.type});
+    }
 }
 
 // One nested level (cvt.bytes.toBytes, flow.wait.async) is listed as dotted names.
@@ -77,6 +107,9 @@ function nodeModules() {
             }
         }
         modules[name] = {file: path.relative(options.node, declaration.getSourceFile().fileName).replaceAll("\\", "/"), members: entries};
+        for (const handle of handles.node.filter(item => item.module === name)) {
+            handle.members = handleMembers(checker, checker.resolveExternalModuleSymbol(symbol), handle.type);
+        }
     }
     // $autojs.<module> explicit entries: properties typed as typeof import("<module>").
     const explicit = {};
@@ -89,7 +122,7 @@ function nodeModules() {
             if (match) explicit[property.name] = match[1];
         }
     }
-    return {modules, explicitGlobal: explicit};
+    return {modules, explicitGlobal: explicit, handles: handles.node.map(item => ({...item, members: item.members || null}))};
 }
 
 async function bunNamespaces() {
@@ -110,7 +143,8 @@ async function bunNamespaces() {
     const capabilities = capabilityType ? checker.getDeclaredTypeOfSymbol(capabilityType).types?.map(type => type.value) || [] : [];
     const client_ = await import(pathToFileURL(path.join(options.bun, "app/src/main/assets/autojs6/host-client.mjs")).href);
     return {file: "app/src/main/assets/autojs6/host-client.d.mts", namespaces, clientMembers, capabilities: capabilities.sort(),
-        methods: Object.fromEntries(Object.entries(client_.HOST_API_METHODS).map(([key, value]) => [key, [...value].sort()]))};
+        methods: Object.fromEntries(Object.entries(client_.HOST_API_METHODS).map(([key, value]) => [key, [...value].sort()])),
+        handles: handles.bun.map(item => ({...item, members: handleMembers(checker, moduleSymbol, item.type)}))};
 }
 
 const report = {typescript: ts.version, node: nodeModules(), bun: await bunNamespaces()};
