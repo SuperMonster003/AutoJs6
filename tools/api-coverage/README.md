@@ -86,6 +86,18 @@ The extractor also resolves Mail's explicit default-client forwarding table,
 including its synchronous-only methods and generated Async names. List suffixes,
 mutation chains and dynamic aliases that are not understood must be reported as
 unresolved, including changes to referenced forwarding constants.
+It resolves two more fixed table shapes: tables mapped to their lower-cased
+simple class names (`colors.android` / `css` / `web` / `material`) and Compose's
+lazy function map (its explicit keys plus `ComposeError`; the generated NODE
+catalogue stays excluded, as in the KSP `installsComputed`). Any other shape
+stays unresolved. `policy.json` `dynamicRegistrations` holds reviewed unresolved
+registrations only; an entry that matches none fails the check.
+
+`check.py --source ksp` requires `script-modules.json` (the CI job builds it with
+`:app:kspAppDebugKotlin` first), `--source kotlin` forces the Kotlin parser, and
+the default `auto` reads the file when it exists. The Kotlin path stays a
+fallback until augment P5.2 removes the old `augment` package; `summary.json`
+reports the data source and the unresolved count.
 
 Keep the host, documentation, declarations and Ace plugin checkouts beside one
 another, or supply their locations explicitly:
