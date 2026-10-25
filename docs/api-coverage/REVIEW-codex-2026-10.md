@@ -375,3 +375,45 @@ P1.5 (Q26 (a), 宿主 a1873159b) 起, 运行时声明只返回 `never` / `Promis
 - 五组全部按草案排除时, 三列 pending 各 -37 (Node main 37 个拒绝入口; Worker 3 个拒绝入口 + 34 个无入口; Bun 30 个拒绝入口 + 7 个无入口).
 - D-4 若补入口, 需要特权授权模型 (Codex bun-automation 报告把双开 / kill 归为 Root / Shizuku 特权); D-5 的理由 (security 或 not-portable) 在出题时一并定; D-7 Worker 也显式失败 (runtime-video-worker), 与主线程同组; D-12 其余 6 行 (dialogs.build, notice.builder / getBuilder, shell.fromIntent, util.java.mapToObject / objectToMap) 运行时没有同名声明, 不是拒绝入口, 仍按第 6 节与本组同题.
 - `autojs6:compat` 兼容门面里同名的拒绝入口 (compat.app.*, compat.files.open 等) 同样返回 never, 不会让这些行变为覆盖.
+
+## P1.3 真机抽样 B (Xiaomi)
+
+日期: 2026-10-25 / 26. 会话: api-cov-p1-3 (local_a6954132). 设备: Xiaomi 23046RP50C (968e9f18), Android 15 / API 35, arm64-v8a, 4096 字节页. 不重跑打包应用 (D11).
+
+方法: `tools/api-coverage/device_sample_b.py` (record / backup / install / prepare / run / cleanup / restore / verify; `list` 打印抽样清单, 通用函数取自 `device_sample_a.py`) 逐个运行 Codex 宿主设备套件 (`app/src/androidTest/.../engine/`) 里的单个测试方法, 每行输出通过 / 失败, 耗时与证据文件中的关键数值. 列与 "项" 的含义同 P1.2 节, 另加 bridge = 不经 JavaScript 程序, 直接调用宿主原生桥接的用例 (三列共用). 选择依据: 第 9 节归 P3 / P4 的不一致所在模块 (R19 util.java) 与 R20 / Q27 的句柄 (Flow# / MailClient# / AiSession# / AgentRun#, P1.5 后按句柄类型比对), 以及各族 bridged 行数最多的模块 (mail 56, flow 55, speech + speech.models 19, ai 6). 本族 7 个 Codex 静态检查脚本 (`check-runtime-java-interop / java-callbacks / flow / mail / speech / ai / ai-agent.mjs`) 在抽样前重跑, 7 / 7 通过. 维护者 2026-10-25 23:5x 选择题: flow 套件夹具经 UiAutomation shell 临时移除并重新加入已授权的 AutoJs6 无障碍服务 (结束写回), 允许; mail 装本地 3-Stamp Mail 与其测试包写入合成别名账户, 结束后卸载, 同意.
+
+### 版本与安装包
+
+| 包 | 抽样前 (2026-10-25 23:4x 记录) | 抽样使用 | 来源 |
+|---|---|---|---|
+| org.autojs.autojs6 | 5935 (6.8.0) md5 c8cd5a710095314bb85e24b2ea6cd621, debuggable | 5935 (6.8.0) md5 7654596c2766bcf1ab3d700c51aacc3c | 主工作区 635c6c420 的 :app:assembleAppDebug (构建期间落地的 bcd3a2fa9 / 05cfae5df 只改 docs / tools, app 代码与 05cfae5df 相同); 工作区另有他人未提交的 changelog / README / docs / tools/selector 文件, 无 app 代码改动 |
+| org.autojs.autojs6.test | md5 a45fbf5b21dc20f3fcef2c057b24588f | md5 d46ff56d8b5a4cad9b67e4d85b8777e2 | 同一次构建的 :app:assembleAppDebugAndroidTest |
+| ...plugin.nodejs | 292 (1.32.0) md5 399e7a359fea55557a2415801b3b6b3d, debuggable | 292 (1.32.0) md5 c240d6cd49d72363fbbdd9cdda790cdf | Node 仓库 HEAD 990f9e35, 与 P1.2 所用 APK 相同 |
+| ...plugin.bun.runtime | 118 (0.2.5) md5 555d45afcde4c611cb7665909313152b | 296 (0.21.0) md5 900edd665ecf82c35db76d25dc603b27 | Bun 仓库 HEAD 3056b94, 与 P1.2 所用 APK 相同 |
+| ...plugin.three.macaw.speech | 81 (1.1.0) md5 76954b4bc439c05e1980789abb6940ba | 未替换 | 设备原有 (release, run-as 不可用) |
+| ...plugin.threestoneai | 282 (1.3.0) md5 4ae10171f31f2673189982de8f47118c, debuggable | 未替换 | 设备原有 |
+| ...plugin.three.stove.agent | 422 (1.3.0) md5 cf01262bfcb25a3d7f853ae3646fe45d, debuggable | 未替换 | 设备原有 |
+| ...plugin.three.stamp.mail / .test | 未安装 | 见 mail 族 | |
+
+记录的设置项: 旋转, 熄屏时间 120000, 充电常亮, 亮度与亮度模式, 无障碍服务列表 (含 AutoJs6 / AutoJs4 Runtime / 3-Macaw), 通知使用权列表, 语音交互与识别服务 (3-Macaw 为数字助理), appops PROJECT_MEDIA / SYSTEM_ALERT_WINDOW / RECORD_AUDIO (宿主与 3-Macaw), RECORD_AUDIO / POST_NOTIFICATIONS 授予状态, 四个音量流 (音乐 0, 铃声 0, 闹钟 12, 通知 0), 宿主 / 3-Stone AI / 3-Stove Agent 私有文件 md5 (3-Stone AI 与 3-Stove Agent 另以 run-as 备份 64 MiB 以下的私有文件, 模型文件只比对 md5).
+
+### Java 互操作与回调
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeJavaInteropDeviceTest#nodePublicJavaAndAndroidObjects | main | 通过 | 5.3 | longExact, objectGraph (Rect / StringBuilder / Bundle / Intent / ArrayList), arrays, mainThread, packageName = 宿主 |
+| ...#workerPublicJavaAndAndroidObjects | worker | 通过 | 6.8 | 同上 |
+| ...#bunPublicJavaAndAndroidObjects | bun | 通过 | 5.8 | 同上 |
+| ...#cjsEsmAndNestedWorkersReleaseOnlyTheirOwnHandles | main / worker (3 种) | 通过 | 7.6 | Worker 结束只释放自己的句柄, 父句柄可用 |
+| RuntimeJavaInteropNativeTest#publicClassMetadataAndBunDefaultGrant | bridge | 通过 | 2.1 | 类描述, Bun java.interop 默认关闭 |
+| ...#explicitDisableExecutionOwnershipAndDestruction | bridge | 通过 | 2.2 | 显式禁用, 执行归属, provider 销毁 |
+| RuntimeJavaCallbacksDeviceTest#nodeCallbacksSubclassJarAndDex | main | 通过 | 8.9 | callbacks, superCall, reentry, constructorOnMain, androidListener, jar, dex, readOnlyCode, borrowedRetained, longExact |
+| ...#workerCallbacksSubclassJarAndDex | worker | 通过 | 9.2 | 同上 |
+| ...#bunCallbacksSubclassJarAndDex | bun | 通过 | 9.8 | 同上 |
+| ...#esmAndNestedWorkersKeepCallbacksInTheirOwnerAndReleaseThemOnExit | main / worker | 通过 | 9.9 | 回调留在注册方, Worker 退出释放 |
+| ...#snapshotsAvoidUserCodeAndNestedSuperCallbacksReturn | main / worker / bun | 通过 | 10.7 | 三种方式快照不调用 toString / hashCode 覆写 (各 1 次显式调用), 嵌套 callSuper 返回 |
+| RuntimeJavaCallbacksNativeTest#loadersAreExecutionLocalAndOwnedReadOnlyCacheIsRemoved | bridge | 通过 | 2.5 | 加载器按执行隔离, 只读代码缓存在结束后删除 |
+
+JAR / DEX 输入由 `build-java-callback-fixtures.py` 现场构建 (callback.jar sha256 1f8a2185..., fixture.dex 591f4228...), 推到宿主外部目录 `java-callback-fixtures/`, 结束时删除.
+
+项 (运行时 java 门面, 第 4 节分母外; 宿主 Java 访问是 Rhino 语言层, 无显式导出行): java.type, describe, new, callStatic, getStatic, setStatic, cast, newArray, instanceOf, getContext, release, 实例调用与字段读写, proxy, wrap, defineClass, loadJar, loadDex, retain, closeCallbacks, 生成类 callSuper; 共 12 个用例 20 项, 全部通过. 与 R19 相关: 矩阵 util.java 6 行 (array, instanceOf, instanceof, mapToObject, objectToMap, toJsArray) 三列 pending, 运行时同义入口 java.instanceOf 与 java.newArray 在 Node main / Worker / Bun 实测可用 (java.toArray 本轮用例未直接调用), 支持 R19 在 P3.2 / P4.2 用 memberAliases 对到 java.instanceOf / newArray 的方向, 归属不变.

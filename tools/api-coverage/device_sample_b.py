@@ -35,7 +35,7 @@ import sys
 import time
 import uuid
 
-from device_sample_a import (adb, sh, package_state, md5, install_files, parse_instrumentation,
+from device_sample_a import (adb, sh, package_state as installed_package_state, md5, install_files, parse_instrumentation,
                              failure_message, fetch_evidence, summarize)
 
 HOST = "org.autojs.autojs6"
@@ -57,7 +57,8 @@ MAIL_ALIAS = "runtime-mail-fixture"
 
 # Packages whose state is recorded; the first four are the ones sampling may replace.
 PACKAGES = [HOST, HOST_TEST, NODE, BUN, MAIL, MAIL_TEST, MACAW, STONE, STOVE]
-# Private files (shared_prefs, databases, files) compared before / after for these packages when run-as works.
+# Private files (shared_prefs, databases, files) compared before / after for these packages when run-as works;
+# backups leave out files of 64 MiB or more (model binaries), which are compared by md5 only.
 PRIVATE = [HOST, MAIL, MACAW, STONE, STOVE]
 PRIVATE_DIRS = "shared_prefs databases files"
 # External files the suites create or read under EVIDENCE_DIR.
@@ -251,6 +252,13 @@ CASES = [
 ]
 
 
+def package_state(serial, package):
+    """Version, flags and split md5 of a package, or None when it is not installed (`pm path` exits 1)."""
+    if "package:" not in adb(serial, "shell", f"pm path {package}", check=False):
+        return None
+    return installed_package_state(serial, package)
+
+
 def run_as(serial, package, command, timeout=180):
     return adb(serial, "shell", f"run-as {package} sh -c '{command}'", timeout=timeout, check=False).strip()
 
@@ -360,7 +368,8 @@ def backup(args):
         local.parent.mkdir(parents=True, exist_ok=True)
         with local.open("wb") as stream:
             subprocess.run(["adb", "-s", args.serial, "exec-out", "run-as", package, "sh", "-c",
-                            f"cd . && tar -cf - $(ls -d {PRIVATE_DIRS} 2>/dev/null)"], stdout=stream, check=True, timeout=600)
+                            f"cd . && tar -cf - $(find {PRIVATE_DIRS} -type f -size -65536k 2>/dev/null)"],
+                           stdout=stream, check=True, timeout=600)
         print(f"backup {package} private data: {local.stat().st_size} bytes")
 
 
