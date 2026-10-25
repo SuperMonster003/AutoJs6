@@ -417,3 +417,27 @@ P1.5 (Q26 (a), 宿主 a1873159b) 起, 运行时声明只返回 `never` / `Promis
 JAR / DEX 输入由 `build-java-callback-fixtures.py` 现场构建 (callback.jar sha256 1f8a2185..., fixture.dex 591f4228...), 推到宿主外部目录 `java-callback-fixtures/`, 结束时删除.
 
 项 (运行时 java 门面, 第 4 节分母外; 宿主 Java 访问是 Rhino 语言层, 无显式导出行): java.type, describe, new, callStatic, getStatic, setStatic, cast, newArray, instanceOf, getContext, release, 实例调用与字段读写, proxy, wrap, defineClass, loadJar, loadDex, retain, closeCallbacks, 生成类 callSuper; 共 12 个用例 20 项, 全部通过. 与 R19 相关: 矩阵 util.java 6 行 (array, instanceOf, instanceof, mapToObject, objectToMap, toJsArray) 三列 pending, 运行时同义入口 java.instanceOf 与 java.newArray 在 Node main / Worker / Bun 实测可用 (java.toArray 本轮用例未直接调用), 支持 R19 在 P3.2 / P4.2 用 memberAliases 对到 java.instanceOf / newArray 的方向, 归属不变.
+
+### flow
+
+套件夹具 (Codex 原样) 在每个用例前经 UiAutomation shell 先移除再重新加入已授权的 AutoJs6 无障碍服务, 等服务可用后在宿主测试页上运行, 用例结束写回原值 (维护者同意, 见本节开头); 抽样后 enabled_accessibility_services 与抽样前逐字相同.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeFlowDeviceTest#nodeChainsAndQueriesUseRealHost | main | 通过 | 6.5 | 核心 25 项检查, pending 0, 真实查询节点 1800x2880, visibleToUser |
+| ...#bunChainsAndQueriesUseRealHost | bun | 通过 | 10.8 | 同上 |
+| ...#workerChainsAndQueriesUseRealHost | worker | 通过 | 7.9 | 同上 |
+| ...#unavailableServiceIsNotAHiddenTarget | main / bun | 通过 | 7.9 | 服务断开时查询报不可用, 不落到隐藏目标 |
+| ...#bunLocalChainsNeedNoGrantButRawAndFacadeQueriesDo | bun | 通过 | 15.3 | 本地链无需授权, 原始调用与门面查询需 flow.control |
+| ...#cjsEsmAndNestedWorkersReleaseTimersAndPreserveParentDefaults | main / worker (3 种) | 通过 | 7.8 | 3 种 Worker 退出释放计时器, 父 defaults 保留, pending 0 |
+| RuntimeFlowToolsDeviceTest#nodeAdvancedToolsAndEvents | main | 通过 | 16.9 | 47 项检查, 18 次真实点击, 祖先上溯 1, 收集 4 项 35240 字符 |
+| ...#bunAdvancedToolsAndEvents | bun | 通过 | 20.0 | 同上 |
+| ...#workerAdvancedToolsAndEvents | worker | 通过 | 15.3 | 同上 |
+| ...#bunFlowGrantIsSeparateFromAccessibility | bun | 通过 | 8.7 | 关闭 flow.control 后拒绝, 与无障碍授权独立 |
+| RuntimeFlowScopeDeviceTest#nodeAdvancedToolsAndEvents | main | 通过 | 27.7 | 129 项检查, 其中范围 / 手势 82 项, 手势重载 16, within 两侧各 1 次点击 |
+| ...#bunAdvancedToolsAndEvents | bun | 通过 | 34.0 | 同上 |
+| ...#workerAdvancedToolsAndEvents | worker | 通过 | 27.4 | 同上 |
+
+数值与 Codex 报告一致 (flow-tools 每种方式 47 项, flow-scope 129 项含 82 项范围 / 手势检查).
+
+项: 矩阵行 flow.of, run, all, any, race, delay, sleep, wait, waitAsync, waitUntil, waitWhile, repeatUntil, defaults, pending, workers, cancelAll, waitForActivity, waitForPackage, waitForVisible, waitForGone, waitForHidden, waitForStable, clickAny, clickIfExists, clickBoundsAny, clickBoundsIfExists, findAny, collectList, scrollUntil, smartClick, smartClickBounds, toggle, typeInto, waitThenLongClick, backToApp, backUntil, launchAndWait, waitForEvent, waitForIdle, waitForNotification, waitForToast (41 / 55 行, 三列 bridged / capability-gated); 运行时链对象成员 (矩阵 Flow# 行, P1.5 后除 await / sync 外按句柄类型计为覆盖) run, map, filter, retry, timeout, catch, whenPresent, click, setText, appendText, clear, collectList, dismissPopups, press, swipe, waitForIdle, toString; 共 13 个用例 58 项, 全部通过. 与 R20 / Q27 相关: Flow# 这 17 个成员在 Node main / Worker / Bun 的链对象上实测可用, 支持 P1.5 的句柄类型比对结论.
