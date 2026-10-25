@@ -24,6 +24,8 @@ class ToleranceFilter(
         operator fun get(node: UiNode<*>, tolerance: Double, scale: ScreenScale): Boolean
     }
 
+    override val cost get() = Filter.COST_BOUNDS
+
     override fun filter(node: UiNode<*>) = mToleranceSupplier[node, mTolerance ?: DEFAULT_TOLERANCE, scale.scale()] == (mExceptedValue ?: DEFAULT_EXPECTED)
 
     override fun toString() = when (mExceptedValue != null) {

@@ -24,6 +24,8 @@ class BoundsFilter(
     private val scale: ScreenScale.Source = ScreenScale.Source.default,
 ) : Filter {
 
+    override val cost get() = Filter.COST_BOUNDS
+
     override fun filter(node: UiNode<*>): Boolean {
         val s = scale.scale()
         val actual = DesirableRect(s, node.left().toDouble(), node.top().toDouble(), node.right().toDouble(), node.bottom().toDouble())

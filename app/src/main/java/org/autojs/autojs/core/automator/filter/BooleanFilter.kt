@@ -16,6 +16,8 @@ class BooleanFilter(private val mBooleanSupplier: BooleanSupplier, private val m
 
     override fun toString() = "$mBooleanSupplier(${mExceptedValue ?: ""})"
 
+    override val cost get() = Filter.COST_PROPERTY
+
     companion object {
 
         const val DEFAULT = true

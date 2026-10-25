@@ -9,13 +9,16 @@ import java.util.concurrent.CopyOnWriteArrayList
  * builders are called), while evaluation and `toString` iterate a snapshot, so a selector shared
  * between threads is safe to search with while another thread is still appending to it.
  *
- * The snapshot and the text are kept until the list changes (docs/selector/ROADMAP.md P2.1: a
- * search records the text of its selector).
+ * The filters are evaluated cheapest first ([Filter.cost], docs/selector/ROADMAP.md P2.2; a stable
+ * sort, so equal costs keep the declared order), the result being the same AND; `toString` and the
+ * list itself keep the declared order. The sorted snapshot and the text are kept until the list
+ * changes (P2.1: a search records the text of its selector).
  *
  * zh-CN: 一组过滤器的 AND. `add` / `append` 原地修改列表 (`UiSelector` 随 builder 调用而增长), 而求值与 `toString` 遍历的是
  * 快照, 因此多个线程共享的选择器在另一线程仍在追加时也可安全搜索.
  *
- * 快照与文本保留到列表变化为止 (P2.1: 每次搜索都要记录其选择器的文本).
+ * 过滤器按开销从低到高求值 ([Filter.cost], P2.2; 稳定排序, 开销相同者保持声明顺序), 结果仍是同一个 AND; `toString` 与列表本身保持声明顺序.
+ * 排序后的快照与文本保留到列表变化为止 (P2.1: 每次搜索都要记录其选择器的文本).
  *
  * Created by Stardust on Mar 9, 2017.
  * Modified by SuperMonster003 as of Oct 25, 2026.
@@ -29,13 +32,16 @@ open class Selector : Filter {
 
     override fun filter(node: UiNode<*>) = plan().filter(node)
 
+    /** The most costly of the filters. zh-CN: 各过滤器中最高的开销. */
+    override val cost: Int get() = plan().cost
+
     fun add(filter: Filter) = filters.add(filter)
 
     fun append(uiSelector: UiSelector) = filters.addAll(uiSelector.selector.filters)
 
     /**
-     * The filters as they are now, as one filter: a search evaluates it on every node without looking at the list
-     * again. zh-CN: 当前的过滤器, 作为一个过滤器: 搜索在每个节点上求值它, 不再查看列表.
+     * The filters as they are now, cheapest first, as one filter: a search evaluates it on every node without looking
+     * at the list again. zh-CN: 当前的过滤器, 按开销从低到高, 作为一个过滤器: 搜索在每个节点上求值它, 不再查看列表.
      */
     fun snapshot(): Filter = plan()
 
@@ -47,6 +53,10 @@ open class Selector : Filter {
 
     private class Plan(private val declared: Array<Filter>) : Filter {
 
+        private val ordered: Array<Filter> = if (declared.size < 2) declared else declared.sortedBy { it.cost }.toTypedArray()
+
+        override val cost: Int = ordered.lastOrNull()?.cost ?: Filter.COST_PROPERTY
+
         // A nested selector may change behind this plan, so its text is not kept.
         // zh-CN: 嵌套的选择器可能在本计划之外变化, 因此不保留其文本.
         private val nested = declared.any { it is Selector }
@@ -56,7 +66,7 @@ open class Selector : Filter {
         val text: String get() = if (nested) render() else rendered ?: render().also { rendered = it }
 
         override fun filter(node: UiNode<*>): Boolean {
-            for (f in declared) {
+            for (f in ordered) {
                 if (!f.filter(node)) return false
             }
             return true

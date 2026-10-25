@@ -36,8 +36,18 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
 
     override fun toString() = describe("")
 
+    /**
+     * The value an exact comparison with a plain string expects, null for the other forms (the framework fast path of
+     * docs/selector/ROADMAP.md P2.3). zh-CN: 与普通字符串精确比较时期望的值, 其他形式为 null (P2.3 的框架快路径).
+     */
+    internal open val exact: String? get() = null
+
+    /** Whether the form matches a pattern (the filter order of P2.2). zh-CN: 该形式是否按模式匹配 (P2.2 的过滤器顺序). */
+    internal open val isPattern: Boolean get() = false
+
     private class Equals(private val expected: String) : StringMatcher("", quote(expected)) {
         override fun matches(value: CharSequence) = value.contentEquals(expected)
+        override val exact get() = expected
     }
 
     private class StartsWith(private val prefix: String) : StringMatcher("StartsWith", quote(prefix)) {
@@ -55,6 +65,7 @@ sealed class StringMatcher(val suffix: String, val argument: String) {
     /** A regex form: the whole value must match, or a match must occur somewhere in it. zh-CN: 正则形式: 整个值须匹配, 或值中任意位置出现匹配. */
     private class Pattern(suffix: String, argument: String, private val regex: Regex, private val whole: Boolean) : StringMatcher(suffix, argument) {
         override fun matches(value: CharSequence) = if (whole) value.matches(regex) else value.contains(regex)
+        override val isPattern get() = true
     }
 
     companion object {

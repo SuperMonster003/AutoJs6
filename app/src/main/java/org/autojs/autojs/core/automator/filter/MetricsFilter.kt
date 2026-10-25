@@ -78,6 +78,8 @@ class MetricsFilter(
 
     override fun filter(node: UiNode<*>) = comparison.test(property[node], property.axis, scale.scale())
 
+    override val cost get() = Filter.COST_BOUNDS
+
     override fun toString() = "$name(${comparison.arguments()})"
 
 }

@@ -22,6 +22,8 @@ class AppFilter(private val arbitraryName: String) : Filter {
 
     override fun filter(node: UiNode<*>) = node.packageName() == mName
 
+    override val cost get() = Filter.COST_STRING
+
     override fun toString() = "currentApp(${mApp?.name ?: mName})"
 
 }

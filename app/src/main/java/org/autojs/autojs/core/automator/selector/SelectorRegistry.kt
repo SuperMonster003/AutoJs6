@@ -247,6 +247,7 @@ object SelectorRegistry {
             f1<BooleanFilter.BooleanSupplier>(SelectorParam("filter", FILTER)) { supplier ->
                 object : Filter {
                     override fun filter(node: UiNode<*>) = supplier[node]
+                    override val cost get() = Filter.COST_SCRIPT
                     override fun toString() = "filter()"
                 }
             }

@@ -19,4 +19,14 @@ class StringPropertyFilter(val property: StringProperty, val matcher: StringMatc
 
     override fun toString() = matcher.describe(property)
 
+    // P2.2: the class name compared exactly is a field read; idHex looks the id up in the resources of the package.
+    // zh-CN: P2.2: 精确比较的类名只是读字段; idHex 要在包的资源中查找 id.
+    override val cost: Int
+        get() = when {
+            property == StringProperty.ID_HEX -> Filter.COST_RESOURCE
+            matcher.isPattern -> Filter.COST_REGEX
+            property == StringProperty.CLASS_NAME && matcher.exact != null -> Filter.COST_PROPERTY
+            else -> Filter.COST_STRING
+        }
+
 }

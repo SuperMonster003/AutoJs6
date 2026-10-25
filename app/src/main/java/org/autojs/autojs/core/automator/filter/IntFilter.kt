@@ -59,4 +59,6 @@ class IntFilter(val property: Property, val comparison: Comparison) : Filter {
 
     override fun toString() = "$name(${comparison.value})"
 
+    override val cost get() = Filter.COST_PROPERTY
+
 }

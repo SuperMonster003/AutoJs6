@@ -22,6 +22,8 @@ class DoubleMinFilter(
 
     override fun filter(node: UiNode<*>) = mDoubleMinProperty[node, scale.scale()] >= (mMin ?: DEFAULT)
 
+    override val cost get() = Filter.COST_BOUNDS
+
     override fun toString() = "$mDoubleMinProperty(${mMin?.let { FilterFormat.number(it) } ?: ""})"
 
     companion object {
