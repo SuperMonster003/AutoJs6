@@ -98,6 +98,17 @@ CASES = [
          ["images.requestScreenCapture", "images.captureScreen", "images.clip", "images.findColor", "images.findImage",
           "images.stopScreenCapture"], ["main"], needs=["maintainer approves the MediaProjection dialog"],
          args={"captureConsent": "manual", "imageAnalysis": "true"}),
+    # These Codex cases click the MediaProjection "Start now" button themselves; run them only with the
+    # maintainer's explicit permission for that run (given for P1.2 on 2026-10-25).
+    case("images", "img-capture-async", "AdvancedImageBridgeDeviceTest", "asyncCaptureAliasAndOptionsUseTheRealCaptureSession",
+         ["images.requestScreenCaptureAsync", "images.getScreenCaptureOptions", "images.captureScreen", "images.getSize",
+          "images.stopScreenCapture"], ["main", "bun"], needs=["maintainer permits the automatic MediaProjection click"]),
+    case("images", "img-capture-workers", "CaptureWorkerBridgeDeviceTest", "workerCjsEsmAndNestedFacadesUseRealProvidersAndBinaryTransport",
+         ["images.requestScreenCapture", "images.captureScreen", "images.pixel", "images.recycle", "opencc.convert"],
+         ["worker"], "capture-worker-worker-modules.json", needs=["maintainer permits the automatic MediaProjection click"]),
+    case("images", "img-capture-bun-rotation", "CaptureWorkerBridgeDeviceTest", "bunConsentOutlivesOneBridgeCallCapturesBothRotationsAndRequestsAgain",
+         ["images.requestScreenCapture", "images.captureScreen", "images.stopScreenCapture"], ["bun"],
+         "capture-worker-consent-rotation.json", needs=["maintainer permits the automatic MediaProjection click"]),
     # UI / Compose and View interop (Codex runtime-ui-compose / runtime-ui-interop / runtime-xml-views / runtime-view-components).
     case("ui", "ui-layouts", "RuntimeUiComposeDeviceTest", "layoutsBindingsAndClicksAcrossRuntimeModes",
          ["ui.showLayout", "ui.bind", "ui.state", "Window#on", "Window#close"], ALL, "runtime-ui-compose-layouts.json"),

@@ -266,8 +266,14 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | ...#binaryTransportJsonBoundsAndExecutionOwnership | main / bun | 通过 | 12.7 | 257x257 大图句柄, 过期句柄拒绝, JSON 有界, 授权拒绝 |
 | ...#nodeWorkerCanUseOpenccAndImagesThroughItsDocumentedBridge | worker | 通过 | 9.5 | 像素 0x80ff0000 保留 |
 | NodeScreenCaptureInstrumentationTest#captureWithoutConsentReturnsPermissionDeniedAndImageSaveWorks | main | 通过 | 7.1 | 未授权截图返回 permission-denied, saveImage 正常 |
+| NodeScreenCaptureInstrumentationTest#approvedCaptureSavesScreenSizedPngAndStops (`-e captureConsent manual -e imageAnalysis true`) | main | 通过 (第 2 次) | 29.9 | 维护者点 Start now; 截图尺寸等于屏幕, clip + findColor 找到已知像素, findImage 模板命中, 停止后再截图被拒. 第 1 次 120 s 超时 (bridge call timed out): 维护者未看到弹框, 未点击; 重跑时记录前台窗口, MediaProjectionPermissionActivity 显示约 15 s 后被点击, 不计为缺陷 |
+| AdvancedImageBridgeDeviceTest#asyncCaptureAliasAndOptionsUseTheRealCaptureSession | main / bun | 通过 | 13.9 | requestScreenCaptureAsync 后选项与截图尺寸一致, 竖屏, 停止后选项为 null, MediaProjection 已释放 |
+| CaptureWorkerBridgeDeviceTest#workerCjsEsmAndNestedFacadesUseRealProvidersAndBinaryTransport | worker (CJS / ESM / 嵌套) | 通过 | 12.0 | 三种 Worker 真实截图与二进制传输 |
+| ...#bunConsentOutlivesOneBridgeCallCapturesBothRotationsAndRequestsAgain | bun | 通过 | 25.2 | 竖屏 720x1650, 横屏 1650x720, 指定尺寸 320x180, 同意耗时 11858 ms, 新执行需重新同意 |
 
-项 (矩阵行, 均为三列 bridged / capability-gated): images.cvtColor, threshold, adaptiveThreshold, bilateralFilter, inRange, getMeanColor, isGrayscale, compress, compressToBytes, downsample, pixel, getSize, detectAndComputeFeatures, matchFeatures, matToImage, load, loadAsync, imread, ObjectFrame, findCircles, readImage, saveImage, clip, rotate, scale, flip, findColor, findMultiColors, findAllPointsForColor, readPixels, toBytes, fromBytes, toBase64, fromBase64, resize, recycle, isRecycled, captureScreen (拒绝路径); 共 38 项, 全部通过.
+后三条由测试代码自动点击 MediaProjection 的 Start now; 维护者 2026-10-25 对本轮一次性允许 (只针对测试自建画面), 见待决 Q34.
+
+项 (矩阵行, 均为三列 bridged / capability-gated): images.cvtColor, threshold, adaptiveThreshold, bilateralFilter, inRange, getMeanColor, isGrayscale, compress, compressToBytes, downsample, pixel, getSize, detectAndComputeFeatures, matchFeatures, matToImage, load, loadAsync, imread, ObjectFrame, findCircles, readImage, saveImage, clip, rotate, scale, flip, findColor, findMultiColors, findAllPointsForColor, readPixels, toBytes, fromBytes, toBase64, fromBase64, resize, recycle, isRecycled, captureScreen, requestScreenCapture, requestScreenCaptureAsync, getScreenCaptureOptions, stopScreenCapture, findImage; 共 14 个用例 43 项, 全部通过 (Node main / Worker / Bun 三列均有截图实拍).
 
 ### UI / Compose 与 View 互操作
 
@@ -300,3 +306,32 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | ...#webViewDisposalReleasesAttachedAndOffscreenPages | main / worker / bun (6) | 通过 | 6.2 | 已附着与离屏页面释放 |
 
 项 (运行时 WebView 句柄成员, 第 4 节分母外): WebView#loadHtml, loadUrl, evaluateJavascript, download, getDownload, readDownload, cancelDownload, setDownloadListener, goBack, goForward, reload, stopLoading, on, dispose; 共 14 项, 全部通过. 矩阵 web 模块 4 行 (Rhino 的 web 工具函数) 三列 pending, 不在本批范围.
+
+### shell + Shizuku
+
+Shizuku 抽样前未运行: 维护者同意后由本会话经 adb 运行设备上已有的 start.sh (shizuku_server 以 shell 身份运行), 维护者在 Shizuku 中确认 AutoJs6 已授权 (测试的授权框监视器因此无需点击). 抽样后停止服务.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeShellDeviceTest#bunGrantAndNodePrivilegeDenialsDoNotStartProcesses | main / bun | 通过 | 8.5 | Bun 无 shell.control 时 NOT_GRANTED; Node 未声明 shell.shizuku / root 时 shizuku.exec 与 shell.execRoot 拒绝 |
+| ...#mainNodeAndBunStreamOrdinaryAndShizukuProcesses | main / bun, 普通与 Shizuku 各一轮 | 通过 | 32.8 | 普通进程 uid 10778 (= 宿主), Shizuku 进程 uid 2000; 70000 字节二进制 stdin / stdout 一致; 流式两行间隔 373-404 ms (退出前到达); PTY, 超时码 124, AbortSignal, close 均通过 |
+| ...#workersCjsEsmAndNestedReleaseShellsWithoutTouchingParents | main / worker (CJS / ESM / 嵌套) | 通过 | 38.3 | 三种 Worker 普通 uid 10778 / Shizuku uid 2000, 流式间隔 365-387 ms; Worker 结束释放自己的进程, 父执行的进程存活 |
+
+项: 矩阵行 shell.spawn, shell.checkAccess (运行时 getAccess), shizuku.spawn (经 `shizuku: true` 选项) 三列 bridged / capability-gated, 均通过; 运行时扩展 shell.exec, shell.execFile, shell.open, shizuku.requestPermission, shizuku.exec / shell.execRoot (拒绝路径); 运行时 ShellProcess 句柄成员 write, writeLine, readLine, closeInput, waitFor, close, on (output / errorOutput), ready / exited / closed, stdout / stderr 流; 共 3 个用例 18 项, 全部通过. 与 R20 / Q27 相关: 矩阵 ShellProcess# 25 行三列 pending, 其中 write / writeLine / readLine / closeInput / waitFor / on 在 Node main / Worker / Bun 的运行时句柄上已实测可用 (同名), Rhino 的 kill 对应运行时 close; 支持 Q27 (a) 按句柄类型映射. R14 的 shell / shizuku pending 行 (currentActivity, execCommand, isRootAvailable, setDefaultOptions, state 等) 运行时无入口, 无从抽样.
+
+### 事件 / 通知 (含 device / dialogs)
+
+AutoJs6 的通知使用权抽样前未开启: 维护者在手机上开启, 抽样后关闭. 测试在宿主进程被 instrumentation 重启后重绑已授权的 AutoJs6 无障碍服务与通知监听 (只针对已授权组件), F8 按键经 uinput 测试工具的临时虚拟键盘注入.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeEventsDeviceTest#missingBunGrantsAndNodeSubGrantsRejectWithoutChangingAndroidSettings | main / bun | 通过 | 8.4 | Bun 无授权时 events / notifications NOT_GRANTED; Node 未声明子能力时 observeNotification / observeToast / observeKey / openSettings 拒绝 |
+| ...#mainNodeAndBunObserveRealSourcesAndPostSilentNotifications | main / bun | 通过 | 56.3 | 4 种来源 (通知 id 7, 外部测试包 Toast, F8 keyCode 138, 电量广播 100%) 均收到, 静默通知发出后取消 |
+| ...#cjsEsmAndNestedWorkersReleaseOwnedObserversAndNotifications | main / worker (CJS / ESM / 嵌套) | 通过 | 31.7 | 三种 Worker 4 种来源均收到; Worker 结束后其通知被撤销, 父执行的通知与订阅保留 |
+| RuntimeDeviceDialogsDeviceTest#nodeMainDeviceAndDialogs | main | 通过 | 16.7 | 720x1650, SDK 33, 12 个对话框交互 (alert / confirm x2 / input / rawInput / prompt / select / singleChoice / multiChoice / progress / abort / timeout), 音量未变, 亮度 permission-denied (无 WRITE_SETTINGS, 未写) |
+| ...#nodeWorkerDeviceAndDialogs | worker | 通过 | 15.8 | 同上 |
+| ...#bunDeviceAndDialogs | bun | 通过 | 16.6 | 同上 |
+| ...#bunMissingGrantsRejectDevicePowerAudioAndDialogs | bun | 通过 | 6.6 | 4 个授权缺失均 NOT_GRANTED, 无对话框残留 |
+| ...#esmAndNestedWorkerExitReleaseOwnedWindowsAndLocks | main / worker (3 种) | 通过 | 12.7 | Worker 结束释放自己的对话框与唤醒锁, 父进度框存活 |
+
+项: 矩阵行 dialogs.alert, confirm, input, rawInput, prompt, select, singleChoice, multiChoice (dialogs 8 个 bridged 行全部), device.vibrate, device.width / height / density (经 getWidth / getHeight / getDensity), notice.cancel (经 notifications.cancel, R15 别名) 三列均通过; 运行时扩展 events.observeNotification, observeToast, observeKey, observeBroadcasts, on, once, close, notifications.notify, cancelAll, getPermissionStatus, openNotificationSettings, openSettings (拒绝路径), device.getInfo, keepScreenOn, cancelKeepingAwake, wakeUp, getMusicVolume / setMusicVolume, isIgnoringBatteryOptimizations, openBatteryOptimizationSettings (dryRun), dialogs.progress; 共 8 个用例 36 项, 全部通过. R16 的 notice 12 行与 R18 的 device 21 行 pending 运行时无入口, 无从抽样.
