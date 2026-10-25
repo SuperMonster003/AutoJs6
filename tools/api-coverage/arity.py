@@ -274,6 +274,30 @@ def compare(baseline, surfaces):
     return {'rows': sorted(rows, key=lambda r: r['api']), 'counts': summary}
 
 
+def report(host, baseline, output):
+    """check.py: compares with output/surfaces.json, adds rows[].arity there, writes output/arity.json; returns the summary."""
+    surfaces_path = Path(output) / 'surfaces.json'
+    surfaces = json.loads(surfaces_path.read_text(encoding='utf-8'))
+    result = compare(baseline, surfaces['rows'])
+    by_api = {row['api']: row for row in result['rows']}
+    for row in surfaces['rows']:
+        if row['api'] in by_api:
+            found = by_api[row['api']]
+            row['arity'] = {key: found[key] for key in ('status', 'source', 'implementation', 'dts', 'disjoint', 'rejected', 'undeclared') if key in found}
+    surfaces_path.write_text(json.dumps(surfaces, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    crossed, crossing = [], 'not applicable (Kotlin registrations are the data source)'
+    if baseline['dataSource']['kind'] == 'ksp':
+        from extract_exports import extract_kotlin
+        try:
+            crossed, crossing = cross_check(baseline, attach(host, extract_kotlin(host))), 'ensureArguments guards of the Kotlin registrations'
+        except (OSError, ValueError, KeyError, StopIteration) as error:
+            crossing = f'unavailable: {error}'
+    result['stats'] = baseline.get('arityStats')
+    result['crossCheck'] = {'source': crossing, 'rows': crossed}
+    (Path(output) / 'arity.json').write_text(json.dumps(result, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+    return dict(result['counts'], crossCheck=len(crossed))
+
+
 def cross_check(ksp, kotlin):
     """APIs whose ksp arity differs from the ensureArguments guard of the Kotlin implementation (D9 cross-check)."""
     old = {r['api']: r['arity'] for r in kotlin['records'] if r.get('arity', {}).get('source') == 'ensureArguments'}

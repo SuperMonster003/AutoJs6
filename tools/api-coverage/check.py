@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 
+import arity
 from extract_exports import extract
 
 HERE = Path(__file__).resolve().parent
@@ -58,6 +59,7 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--skip-ace", action="store_true", help="Explicitly check only source docs and canonical types")
     parser.add_argument("--metadata", type=Path, help="script-modules.json (default: the KSP output of :app:kspAppDebugKotlin)")
+    parser.add_argument("--strict-arity", action="store_true", help="Fail on d.ts overloads disjoint from the implementation arity (default: report only)")
     parser.add_argument("--source", choices=["auto", "ksp", "kotlin"], default="auto",
                         help="Exports from script-modules.json (ksp, required in CI), the Kotlin registrations (kotlin), or ksp when the file exists (auto)")
     args = parser.parse_args()
@@ -104,11 +106,15 @@ def main():
     result = subprocess.run(command, check=False)
     if result.returncode:
         failures.append("TypeScript/Ace surface checks failed; see surfaces.json")
+    arity_summary = arity.report(host, baseline, output)
+    if args.strict_arity:
+        failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
     summary = {
         "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),
         "documentation": dict(Counter(row["status"] for row in documented)),
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
+        "arity": arity_summary,
         "scope": baseline["scope"], "failures": failures,
     }
     (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
