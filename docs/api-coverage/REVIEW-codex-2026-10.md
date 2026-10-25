@@ -49,6 +49,17 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | bun-automation-2026-10-19 | Bun host.accessibility 16 个原生操作 + 16 个本地选择器构造, host.app 13 条路由 + Node 本地 Intent 助手, host.clipboard getText / setText / hasText, 4 个授权 | automator 54: 13 / 0 / 7; 全局无障碍 7 行三列 (Worker 除外) 覆盖; app 43: 38 / 0 / 38 (app.control); auto 37: 0 / 0 / 0 (1 行 denied) | 全部有标题 / 声明 / 补全 (automator.headsethook 只有提及) | 有差异: R8 (Worker), R9 (auto / automator), R10 (app 5 行), R12 (Bun getClip / setClip 别名), R13 (显式拒绝的入口记为覆盖) |
 | bun-storage-2026-10-19 | host.files 15 个 Node files 名称 (12 异步 + 3 同步), host.storage / storages 6 条路由 | files 21 (宿主显式导出只有 join / open / path / toFile 与 17 个 batchRename; 其余 files.* 在 @ScriptPrototype 原型上, 不在分母, 见 Q18): 4 / 0 / 4; storages 5: 5 / 0 / 5 | 全部有 | 有差异: R8 (Worker), R11 (files.batchRename 17 行), R13 (files.open / toFile, storages.names / all 只显式拒绝) |
 
+### 第 4 组 (附录 A 第 19-24 份)
+
+| 报告 | 宣称 | 矩阵 (行: Node main / Worker / Bun 覆盖) | 文档 / d.ts / Ace | 结论 |
+|---|---|---|---|---|
+| bun-database-2026-10-19 | Bun database.open + 可调用 sqlite / sqlite.open, Worker 导入 database / sqlite, 7 条原生路由 (open / exec / run / get / all / transaction / close) | sqlite 1: 1 / 1 / 1 (database.control); 宿主 database 模块成员在 @ScriptPrototype 上 (Q18); Database# 51 成员按 Q17 记 java-prototype (运行时给的是 7 方法的可移植句柄) | 有 | 一致 |
+| bun-sensors-2026-10-19 | 共享 sensors 工厂 (getAvailableSensors / once / subscribe / policy), Bun sensors.control, Worker 导入 | 无显式导出行 (sensors 在原型上, Q18) | - | 一致 (超出显式分母); 报告记录的 5 个 shell 声明缺口已由 shell-api-coverage 关闭 |
+| shell-api-coverage-2026-10-19 | shell.checkAccess / isRootAvailable / setDefaultOptions / spawn, shizuku.spawn 的声明与补全; Shell.Process 25 个成员 | 5 个名称 doc / d.ts / Ace 全有; ShellProcess# 25 成员 d.ts 25, Ace 25, 文档标题 12 (提及 13) | 见左 | 一致 (Rhino 面); ShellProcess# 文档 13 行只有提及归 P2.3 (BASELINE 第 3 节已计) |
+| runtime-shell-2026-10-19 | Node / Bun / Worker 共享 shell 工厂: exec / execRoot / execShizuku / execFile / open / spawn / 流 / waitFor / kill / close, checkAccess, getAccess, requestShizukuPermission; Bun shell.control / shell.root / shell.shizuku | shell 11: 2 / 2 / 2 (checkAccess, spawn); shizuku 8: 1 / 1 / 1; exec 系列在 Shell 原型上 (不在显式分母); ShellProcess# 25 成员三列 pending (augment-prototype) | 有 | 有差异: R14 (shell / shizuku 16 行), ShellProcess# 归 P3 / P4 句柄补缺 (Q17 (a)) |
+| runtime-events-2026-10-19 | Bun host.events (observeBroadcasts / Notification / Toast / Key) 与 host.notifications (notify / cancel / cancelAll / getPermissionStatus / openSettings / openNotificationSettings), 6 个授权, Worker 同 | events 只有 internal __asEmitter__ 1 行 (其余在原型上); notice 13: 1 / 1 / 0 | notice 13 / 13 / 13 | 有差异: R15 (Bun notice 别名), R16 (notice 12 行) |
+| runtime-device-dialogs-2026-10-19 | Bun host.device (device.control / device.power / device.audio) 与 host.dialogs (alert / confirm / input / rawInput / select / singleChoice / multiChoice / progress) | device 25: 4 / 4 / 1; dialogs 9: 8 / 8 / 8 (dialogs.control); 全局 alert / confirm 等 4 行覆盖 | 全部有 | 有差异: R17 (Bun device.density / height / width 别名), R18 (device 21 行), dialogs.build 归附录 D 候选 |
+
 ## 2. 不一致清单
 
 列: 编号 | 模块 | 名称 | Node d.ts | HOST-API | facade | Bun | 文档 / d.ts / Ace | 建议归属.
@@ -68,6 +79,11 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | R11 | files.batchRename | 17 行 (apply / plan / preview / undo / history / presets 及 Async 版本, BatchRenameError) | 无 | 未列 | 无 | 无 | 有 | P3.2 / P4.2 文件族 (依赖 Batch Rename 插件, 纳入方式参考 P5) |
 | R12 | (全局) | getClip, setClip: Bun 有 clipboard.getText / setText 但矩阵 pending (名称不同, 缺 memberAliases) | 经 autojs6:compat 覆盖 | - | - | 有同义入口 | 有 | 直接修: runtime-policy.json bun.memberAliases (见第 3 节) |
 | R13 | app, files, storages, console, s13n | 声明只返回 never / Promise<never> 的显式拒绝入口被矩阵记为覆盖: Node main 约 37 行 (app 13 个 Dual / kill 系列及全局放置, console.input / rawInput / build, files.open / toFile, s13n.color / point / throwable / time, storages.names / all), Bun 约 27 行 (app Dual 系列, files.open / toFile, storages.names / all) | 有 (返回 never) | 未列 | 有 (抛错) | 有 (返回 never) | 有 | 待决 Q26 (生成器识别 never 返回, 记为待排除而非覆盖); 涉及行在 P1.4 归入白名单分组 |
+| R14 | shell, shizuku | shell: currentActivity, currentComponent, currentPackage, execCommand, fromIntent, getCommand, isRootAvailable, kill, setDefaultOptions; shizuku: currentActivity, currentComponent, currentPackage, execCommand, getCommand, kill, state (宿主均早于 Codex 批次, setDefaultOptions 为 2026-10-19) | 无 | 未列 | 无 | 无 | 有 | P3.1 / P4.1 (shell 族): isRootAvailable / setDefaultOptions / state / current* 可桥接; fromIntent 参数是 Java Intent, 附录 D 候选 java-prototype |
+| R15 | notice | Bun 有 notifications 命名空间 (notify / cancel / cancelAll ...), runtime-policy.json bun.namespaceAliases 缺 notice -> notifications (Node 已有 moduleAliases), notice.cancel 记 pending | 有 | - | - | 有同名入口 | 有 | 直接修: bun.namespaceAliases (见第 3 节) |
+| R16 | notice | builder, getBuilder, config, ensureEnabled, isEnabled, launchSettings, channel.contains / create / createIfNeeded / get / getAll / remove (12 行) | 无 (notifications 只有 notify / cancel / cancelAll / getPermissionStatus / openSettings / openNotificationSettings) | 未列 | 无 | 无 | 有 | P3.1 / P4.1 (通知渠道与权限; isEnabled / launchSettings 与 getPermissionStatus / openSettings 语义是否一致在 P3.1 核对后再定别名); builder / getBuilder 返回 Java 构造器, 附录 D 候选 java-prototype |
+| R17 | device | density, height, width: Bun 用异步 getDensity / getHeight / getWidth (报告写明), 缺 bun.memberAliases | 有 | - | - | 有同义入口 | 有 | 直接修: bun.memberAliases (见第 3 节) |
+| R18 | device | digest, getGatewayAddress, getIpAddress, getIpv6Address, getSharedDeviceId, isActiveNetworkMetered, isConnectedOrConnecting, isWifiAvailable, isScreenLandscape / Portrait / Off, orientation, rotation, pageSize, summary, isPointerLocationEnabled / Disabled, setPointerLocation / Enabled / Disabled, togglePointerLocation (21 行) | 无 | 未列 | 无 | 无 | 有 | P3.1 / P4.1 系统与设备族; getSharedDeviceId 等标识符类按附录 D 来源 1 (硬件标识符, security) 在 P1.4 判定 |
 
 ## 3. 已直接修
 
@@ -96,5 +112,10 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | runtime-ui-interop, runtime-xml-views, runtime-view-components | XML 词汇只是受支持控件集, 不是完整 Rhino XML inflater 与表达式绑定 | 来源 2 (完整 Rhino XML 控件与表达式绑定面) | 已覆盖; 契约数字更新为 12 控件 + 58 可写 / 11 只读属性 + 12 组件命令 |
 | bun-automation | 坐标点击沿用 Node provider 限制 (改用单点 gesture); Java 对象, 特权 / 双开操作显式拒绝 | 来源 1 (原始输入通道) 不含双开 | 补进草案: app 双开系列 (isDualInstalled / launchDual* / killDual / uninstallDual ...) 与 kill, 理由 security (需 Root / Shizuku 特权), 等价: 无; 与 R13 / Q26 同组 |
 | bun-storage | files.open / toFile 拒绝 Rhino / Java 句柄; storages.names / all 显式不支持; 单次读写受 64 KiB / 256 KiB 预算 | 无 | 补进草案: files.open / toFile java-prototype (等价: files.read / write 与运行时 fs), storages.names / all security (跨脚本枚举存储, 待 P1.4 定理由) |
+| bun-database | 命名数据库而非 Java 对象 / 游标; JSON 原始值绑定参数; 每执行 4 个句柄等预算 | 来源 2 (任意 Java 对象) | 已覆盖 (Database# 按 Q17 记 java-prototype) |
+| bun-sensors | 完整 Rhino SensorManager 类型面与 Java 对象不在可移植 API | 来源 2 | 已覆盖 (sensors 在原型上, Q18) |
+| runtime-shell | Java 流 / TermSession 不跨桥; Root 授权与守护进程受 Android 约束 | 来源 2 / 来源 1 (原始输入通道) 不含 | 补进草案: Shell 的 Java 流与 TermSession 对象 java-prototype (等价: 运行时可读 / 可写流); shell.fromIntent java-prototype |
+| runtime-events | 任意广播, 完整 Rhino EventEmitter 扩展, Java 通知对象 | 来源 2 (events 的同步 loop) 部分 | 补进草案: Rhino EventEmitter 扩展 rhino-only (等价: node:events / 订阅句柄 on / once / off); notice.builder / getBuilder java-prototype |
+| runtime-device-dialogs | 不实现所有 Rhino / Java 设备助手与完整 Rhino 对话框构造器对象模型 | 无 | 补进草案: dialogs.build 与 Dialog# 构造器模型 java-prototype (等价: dialogs.alert / select / progress 等); 设备助手逐条见 R18 |
 | runtime-view-components, runtime-webview-callbacks | 自定义同步 WebViewClient / WebChromeClient 回调与任意 Java 子类化, 原始 View / Bitmap 返回值, 自动 Activity ActionBar 集成, 已弃用的 database / quota 钩子 | 无 | 补进草案: 同步 WebView 客户端子类化 sync-only / java-prototype; ActionBar 自动集成 ui-thread; 弃用钩子不进矩阵 (宿主无导出) |
 - WebView 媒体与文件: 相机全尺寸, SAF 保存 / 目录, blob / data 下载, 系统录像 / 前台录音, getUserMedia / MediaRecorder, getDisplayMedia 适配, Camera2 后台录像 (runtime-webview-files / media / streams / display).
