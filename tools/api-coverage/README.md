@@ -320,6 +320,109 @@ exclusion rule carry `rule` (and `note` when the rule has one) instead.
   cells come from `runtime-policy.json` `returnedObjects` mappings and exclusions
   (`java-prototype` is allowed); unmapped members are `pending`.
 
+## Arity
+
+`arity.py` (api-coverage roadmap P0.3, decision D9) gives every function record
+and every callable or constructable module of `exports.json` its argument-count
+ranges: `records[].arity` and `modules[].invokeArity` / `constructArity` are
+`{source, overloads: [{min, max, basis, guard?}], reason?}`, `max` null meaning
+unbounded; `arityStats` counts them.
+
+- `source: "ksp"` (rows read from `script-modules.json`): `basis: "declared"` is
+  the `arity` a single raw vararg overload declares (or the one of an install
+  function), `basis: "params"` the parameter list (required parameters to all
+  parameters; a vararg parameter leaves `max` unbounded), `basis: "vararg"` a
+  single raw vararg overload without a declared arity, whose body checks the count
+  itself (`[0, n)`, not compared).
+- `source: "ensureArguments"` (Kotlin registrations): the `ensureArguments*` guard
+  that starts the implementation body, after runtime checks such as
+  `checkRuntime(runtime)` and lambda wrappers such as `guarded {`, following one
+  same-file delegation (`guard`: OnlyOne / Length / LengthInRange / AtMost /
+  AtLeast / IsEmpty / NotEmpty; `unwrapArguments` is an unchecked vararg).
+- `source: "unknown"` with a `reason`: any other body (checks in another class,
+  a guard inside a branch, a computed bound), the mail forwarding table and the
+  Compose function map.
+
+`dts-signatures.mjs` gives `verify-surfaces.mjs` the ranges of the d.ts call and
+construct signatures of each query (`declaration.signatures.call` /
+`construct`; a rest parameter of tuple type counts its elements). After the
+surface check `check.py` compares the two and writes `arity.json`
+(`rows`, `counts`, `stats`, `crossCheck`), adds `rows[].arity` to
+`surfaces.json` and puts the counts into `summary.json` `arity`:
+
+| status | rule |
+|---|---|
+| `fail` | a d.ts overload no implementation overload intersects (`disjoint`) |
+| `wider` (warning) | d.ts overloads accept counts outside every implementation range (`rejected`) |
+| `narrower` (warning) | an end of the implementation ranges is not accepted by any d.ts overload (`undeclared`): the lowest count, or the highest finite count, or an unbounded end that is not an undeclared vararg parameter |
+| `match` | none of the above |
+| `vararg` / `unknown` / `no-dts` | not compared: unchecked vararg, unknown implementation range, no explicit d.ts call signature |
+
+Only the ends are compared for `narrower` because metadata ranges are spans: a
+declared arity or optional parameters may cover counts the body rejects
+(`images.clip` accepts `(image, region)` and `(image, x, y, width, height)`, its
+parameters span 2-5). Counts between two implementation overloads are real gaps,
+so `wider` and `fail` use every count. The matrix `dts` column is `arity` for
+`match` and `wider`. The comparison reports only; `--strict-arity` makes `fail`
+rows gate failures. With `script-modules.json` as the data source, `crossCheck`
+lists the APIs whose ksp ranges differ from the `ensureArguments*` guard of the
+current Kotlin registration (`differs`), and undeclared varargs whose Kotlin
+implementation has a guard (`vararg-undeclared`, possibly a missing annotation);
+the new module layer may narrow arities on purpose, so these are leads for the
+augment roadmap, not failures.
+
+## Returned objects
+
+`returned_objects.py` (P0.4) lists the objects script functions return and the
+members scripts reach on them; `returned-objects.json` names each object (the
+matrix row prefix), its class, the member list source, the d.ts probe expression
+and the documentation pages. `extract_exports.py` writes them as
+`returnedObjects` (the schema of "Inputs from P0.3 and P0.4" above, plus
+`documentation`, `probe`, `complete`, `externalBases` / `dynamic`) and
+`returnedObjectsStats` (counts, incomplete objects, configuration problems, and the
+return types of `script-modules.json` that are host classes not listed yet
+(`unlistedHostTypes`) or classes outside the host sources (`externalTypes`,
+Java objects whose members are not enumerated)).
+
+- Producers: export rows whose `script-modules.json` overloads or getters return
+  the class, plus the `producers` of the entry (functions declared as
+  `kotlin.Any`; `X.()` / `X.new()` for a callable or constructable module).
+- `kotlin-class`: a Java object seen through Rhino's NativeJavaObject: public
+  methods (overloads merged, Kotlin default parameters optional only with
+  `@JvmOverloads`), public fields, Java record components, and Kotlin properties
+  as their name with the JVM accessors as `aliases` (`isEnabled`: `isEnabled`,
+  `setEnabled`, `enabled`), declared by the class and its supertypes in the host
+  sources. Supertypes outside the sources are listed in `externalBases`; their
+  members (Android `Paint`, androidx `AccessibilityNodeInfoCompat`, ...) are not
+  enumerated. `java.lang.Object` members are left out, and so are `exclude`.
+- `augment-prototype`: a Scriptable the runtime builds: names registered with
+  string literals by `defineProperty` (getter / getter and setter / value /
+  function), `defineFunction`, `defineOp` (with its range), `function`,
+  `method` (with its aliases), `listenerFunction`, `defineFlagShortcut`;
+  `helperSuffixes` adds the variants a helper also defines (`defineOp`:
+  `nameAsync`); name arrays passed to `defineFunctionProperties` or listed in
+  `nameArrays`; collections iterated into a helper
+  (`X.keys.forEach { name -> method(name) ... }`, `for (e in listOf(...))`) when X
+  resolves to a literal list or map in the sources; constants such as
+  `StringReadable.KEY`. Nested classes, helper definitions and `skipFunctions`
+  belong to other objects. Other computed registrations are listed in `dynamic`
+  and make the object incomplete; `dynamic` in the entry describes run-time
+  forwarding the scanner cannot see (`Color` forwards any colors function).
+- `policy`: the `members` of the entry.
+
+`check.py` checks every member (and its aliases) by name against the
+documentation pages, the d.ts type of `<probe>.<member>` and Ace completion, in a
+second surface run under `returned-objects/`, and writes `returned-objects.json`
+(`counts`, per-object probe state, `failures`, `rows` with `doc` heading /
+mention / missing, `dts` explicit / missing / no-probe, `ace` default /
+all-groups / none). Members of Java objects are completed from the generated
+Java declaration groups, which the default Ace library set leaves out: `ace`
+`all-groups` is counted (`aceAllGroupsOnly`) but is not a failure there, while
+the matrix `ace` column keeps its definition (both library sets, so `none`).
+Nothing here fails the gate; P2.3 works through the failures. The matrix gets
+`<Object>#<member>` rows; their runtime cells stay `pending` until
+`runtime-policy.json` maps or excludes them.
+
 ## Physical-device checks
 
 Build and install matching current host and instrumentation APKs with `adb install

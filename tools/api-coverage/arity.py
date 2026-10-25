@@ -87,12 +87,19 @@ class KotlinGuards:
         return self.files[relative]
 
     def body(self, text, name):
-        """(body text, args parameter name) of `fun name(..., <args>: Array<out Any?>)` or None."""
+        """(body text, args parameter name) of `fun name(..., <args>: Array<out Any?>)` or None.
+
+        Of same-name functions the one taking only a ScriptRuntime besides the arguments wins over prototype
+        extensions that also take `thisObj` (jsox Arrayx / Numberx)."""
+        candidates = []
         for m in re.finditer(r'\bfun\s+`?' + re.escape(name) + r'`?\s*\(', text):
             close = end_group(text, m.end() - 1)
+            params = text[m.end():close]
+            if re.search(r'\w+\s*:\s*Array<out Any\?>', params):
+                others = [p for p in params.split(',') if p.strip() and 'Array<out Any?>' not in p]
+                candidates.append((not all('ScriptRuntime' in p for p in others), m.start(), m, close))
+        for _, _, m, close in sorted(candidates, key=lambda c: c[:2]):
             args = re.search(r'(\w+)\s*:\s*Array<out Any\?>', text[m.end():close])
-            if not args:
-                continue
             rest = text[close + 1:]
             start = re.match(r'\s*(?::\s*[^={\n]+?)?\s*([={])', rest)
             if not start:

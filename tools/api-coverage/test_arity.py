@@ -68,6 +68,10 @@ object Sample {
 
     fun otherArray(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLength(other, 2) { 0 }
 
+    fun twin(scriptRuntime: ScriptRuntime, thisObj: Scriptable?, args: Array<out Any?>) = ensureArgumentsLength(args, 1) { 0 }
+
+    fun twin(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsLength(args, 2) { 0 }
+
     const val LIMIT = 2
 }
 '''
@@ -86,6 +90,8 @@ object Sample {
             self.assertEqual(arity_of('commented')['source'], 'unknown')
             self.assertEqual(arity_of('nested')['source'], 'unknown')
             self.assertEqual(arity_of('otherArray')['source'], 'unknown')
+            # The module function, not the prototype extension taking thisObj.
+            self.assertEqual(arity_of('twin')['overloads'], [span(2, 2, 'ensureArguments', guard='Length')])
 
 
 class CompareTests(unittest.TestCase):
