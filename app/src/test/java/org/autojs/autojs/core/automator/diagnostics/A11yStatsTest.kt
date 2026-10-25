@@ -133,7 +133,7 @@ class A11yStatsTest {
         assertTrue(text, text.lines()[4].startsWith("  1. s7  "))
     }
 
-    /** docs/selector/ROADMAP.md P2.4: the fast path counters, their line in the report (only once used) and reset. */
+    /** docs/selector/ROADMAP.md P2.4 / appendix C Q15: the fast path counters, their line in the report (only once used) and reset. */
     @Test
     fun fastPathCounters() {
         assertEquals(A11yStats.FastPathCounts.NONE, stats.snapshot().fastPath)
@@ -143,9 +143,13 @@ class A11yStatsTest {
         stats.recordFastPath(A11yStats.FastPathEvent.HIT)
         val s = stats.snapshot()
         assertEquals(A11yStats.FastPathCounts(hits = 1, misses = 3, fallbacks = 2, mismatches = 0), s.fastPath)
-        assertEquals("fast path: hits 1, misses 3, fallbacks 2, mismatches 0", s.render().lines()[3])
+        assertEquals("fast path: hits 1, misses 3, fallbacks 2, mismatches 0, walks 0", s.render().lines()[3])
         stats.recordFastPath(A11yStats.FastPathEvent.MISMATCH)
         assertEquals(1, stats.snapshot().fastPath.mismatches)
+        // Appendix C Q15: the intermediate attempts that walked because the lookups of their query cost more.
+        // zh-CN: 附录 C Q15: 因所属查询的查找更费时而直接遍历的中间尝试.
+        repeat(4) { stats.recordFastPath(A11yStats.FastPathEvent.WALK) }
+        assertEquals(A11yStats.FastPathCounts(hits = 1, misses = 3, fallbacks = 2, mismatches = 1, walks = 4), stats.snapshot().fastPath)
         stats.reset()
         assertEquals(A11yStats.FastPathCounts.NONE, stats.snapshot().fastPath)
     }

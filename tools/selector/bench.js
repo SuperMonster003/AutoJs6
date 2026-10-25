@@ -7,6 +7,7 @@
 //   full      selector().find().size(), the whole tree
 //   miss      text('__aj6sel_none__').findOnce()
 //   missId    id('aj6sel_none').findOnce() (the framework fast path of P2.3 starts with id / text)
+//   lookupId  the framework lookup of that id under each window root, as the fast path of P2.3 makes it (appendix C Q15)
 //   missMixed textMatch(/^__aj6sel_none__$/).clickable(true).findOnce() (regex declared before a boolean: P2.2 order)
 //   hit       packageName(<screen package>).findOnce(), the root itself (an early hit)
 //   late      text(<last unique text in DFS order>).findOnce() (a late hit with a single candidate)
@@ -75,12 +76,15 @@ function timed(name, fn, check, extra) {
     try {
         for (var w = 0; w < WARMUP; w++) fn();
         var values = [];
+        var c0 = cpuTime();
         for (var i = 0; i < ROUNDS; i++) {
             var t0 = nowNs();
             var v = fn();
             item.samples.push(round3((nowNs() - t0) / 1e6));
             values.push(v);
         }
+        // Process CPU per run (appendix C Q15: the walk and the lookups cost the process unlike their elapsed times).
+        item.cpuPerRun = round3((cpuTime() - c0) / ROUNDS);
         item.median = median(item.samples);
         item.ok = check(values, item);
         if (extra) extra(values, item);
@@ -108,16 +112,16 @@ function realtime() {
     return android.os.SystemClock.elapsedRealtime();
 }
 
-// The fast path counters of auto.stats (P2.4), or null on a build without them.
+// The fast path counters of auto.stats (P2.4; walks: appendix C Q15, 0 on a build without them), or null on a build without them.
 function fastPathStats() {
     var f = auto.stats.fastPath;
     if (!f) return null;
-    return { hits: Number(f.hits), misses: Number(f.misses), fallbacks: Number(f.fallbacks), mismatches: Number(f.mismatches) };
+    return { hits: Number(f.hits), misses: Number(f.misses), fallbacks: Number(f.fallbacks), mismatches: Number(f.mismatches), walks: Number(f.walks || 0) };
 }
 
 function addFastPath(sum, f) {
     if (!f) return sum;
-    sum = sum || { hits: 0, misses: 0, fallbacks: 0, mismatches: 0 };
+    sum = sum || { hits: 0, misses: 0, fallbacks: 0, mismatches: 0, walks: 0 };
     for (var k in sum) sum[k] += f[k];
     return sum;
 }
@@ -302,6 +306,11 @@ function bench() {
     });
     timed('miss', function () { return text(NONE).findOnce(); }, allNull);
     timed('missId', function () { return id('aj6sel_none').findOnce(); }, allNull);
+    timed('lookupId', function () {
+        var roots = auto.windowRoots, found = 0;
+        for (var r = 0; r < roots.length; r++) found += roots[r].findAccessibilityNodeInfosByViewId(PKG + ':id/aj6sel_none').size();
+        return found || null;
+    }, allNull);
     timed('missMixed', function () { return textMatch(/^__aj6sel_none__$/).clickable(true).findOnce(); }, allNull);
     timed('hit', function () { return packageName(EXPECT).findOnce(); }, noneNull);
     var late = lastUniqueText();

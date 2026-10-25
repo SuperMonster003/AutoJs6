@@ -100,6 +100,7 @@ internal class A11yDiagnosticsApi(private val scriptRuntime: ScriptRuntime) {
                     "misses" to snapshot.fastPath.misses.toDouble(),
                     "fallbacks" to snapshot.fastPath.fallbacks.toDouble(),
                     "mismatches" to snapshot.fastPath.mismatches.toDouble(),
+                    "walks" to snapshot.fastPath.walks.toDouble(),
                 ),
                 "selectors" to snapshot.selectors.map { selectorStats(it) },
                 "slowest" to snapshot.slowest?.let { selectorStats(it) },

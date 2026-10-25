@@ -33,12 +33,18 @@ class UiSelectorQuery internal constructor(
     fun collection(): UiObjectCollection {
         val start = SystemClock.uptimeMillis()
         var attempts = 0L
-        // Which attempts the framework fast path may answer (docs/selector/ROADMAP.md P2.3, appendix C Q1).
-        // zh-CN: 框架快路径可以作答哪些尝试 (P2.3, 附录 C Q1).
+        // Which attempts the framework fast path may answer (docs/selector/ROADMAP.md P2.3, appendix C Q1), told by what
+        // the lookups and the walks of this query cost (appendix C Q15).
+        // zh-CN: 框架快路径可以作答哪些尝试 (P2.3, 附录 C Q1), 依本查询的查找与遍历的耗时而定 (附录 C Q15).
         val fastPath = FastPath.Query(policy) { SystemClock.uptimeMillis() }
+        val costs = FastPath.Costs()
         val found = poller.poll(policy) { progress ->
             attempts = progress.round
-            selector.findWithin(max, policy.timeout, fastPath.attempt(progress.round, progress.remaining)).takeIf { it.isNotEmpty() }
+            val attempt = fastPath.attempt(progress.round, progress.remaining)
+            costs.reset()
+            val result = selector.findWithin(max, policy.timeout, attempt, costs)
+            fastPath.record(attempt, costs)
+            result.takeIf { it.isNotEmpty() }
         }
         selector.bridge?.stats?.recordQuery(selector.toString(), SystemClock.uptimeMillis() - start, attempts, found != null)
         return found ?: UiObjectCollection.EMPTY

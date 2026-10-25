@@ -60,17 +60,44 @@ object FastPath {
 
     }
 
-    /** What one search attempt lets the fast path decide. zh-CN: 一次搜索尝试允许快路径决定的内容. */
-    enum class Attempt {
+    /** What one search attempt lets the fast path decide; [looksUp]: whether it asks the framework first. zh-CN: 一次搜索尝试允许快路径决定的内容; [looksUp]: 是否先向框架查找. */
+    enum class Attempt(val looksUp: Boolean) {
 
         /** A single search: the full search (Q1). zh-CN: 单次搜索: 完整搜索 (Q1). */
-        SINGLE,
+        SINGLE(false),
 
         /** A polled attempt between the first and the last: no candidate means nothing found. zh-CN: 第一次与最后一次之间的轮询尝试: 没有候选即未找到. */
-        INTERMEDIATE,
+        INTERMEDIATE(true),
+
+        /**
+         * A polled attempt after the first that walks the tree without asking the framework, the last one included: the
+         * fast path of the query costs no less than its walk ([Query], appendix C Q15 / Q17).
+         * zh-CN: 第一次之后不向框架查找而直接遍历整棵树的轮询尝试, 含最后一次: 该查询的快路径不比遍历省 ([Query], 附录 C Q15 / Q17).
+         */
+        WALK(false),
 
         /** The first or the last polled attempt, or a verification: no candidate still walks the tree. zh-CN: 第一次或最后一次轮询尝试, 或校验: 没有候选时仍遍历整棵树. */
-        FULL,
+        FULL(true),
+
+    }
+
+    /**
+     * What one search attempt cost, -1 for a part it did not do: [lookup] the framework lookups, [walk] the walk of the
+     * roots. On a device the process CPU time in milliseconds (appendix C Q17), any one unit in the tests. Filled by the
+     * search, read by [Query.record].
+     * zh-CN: 一次搜索尝试的开销, 未做的部分为 -1: [lookup] 框架查找, [walk] 遍历各根节点. 设备上为进程 CPU 时间 (毫秒, 附录 C Q17), 测试中为任一单位.
+     * 由搜索填写, 由 [Query.record] 读取.
+     */
+    class Costs {
+
+        var lookup = -1L
+
+        var walk = -1L
+
+        fun reset() {
+            lookup = -1L
+            walk = -1L
+        }
 
     }
 
@@ -167,25 +194,62 @@ object FastPath {
      * The attempts of one polled query (appendix C Q1 / Q11): the last attempt and the verifications walk the tree.
      * An attempt is taken as the last when the remaining time does not exceed the sleep before the next one (that
      * attempt or the next one then ends after the timeout), or when it is the last by count. [clock] is the uptime.
+     *
+     * Adaptive per query (appendix C Q15): a full attempt measures the walk, the first intermediate attempt after it
+     * measures the fast path (its lookups, and its walk when they fall back); when the fast path costs no less than the
+     * walk, the other attempts until the next full attempt, the last one included, walk the tree without lookups
+     * ([Attempt.WALK]: a walk is as conclusive as a full attempt), and every full attempt (the verifications included)
+     * measures and compares anew. The costs are the process CPU time (appendix C Q17): the elapsed times of the lookups
+     * and the walk are close on the screens of appendix A while what they cost the process is not (22120RN86C: the lookups
+     * 7.0 ms against a walk of 12.9 ms on the main screen of the host, 9.3 ms against 8.7 ms on a floaty window). The
+     * results stay the same, the fast path deciding only misses and single candidates.
+     *
      * zh-CN: 一次轮询查询的各次尝试 (附录 C Q1 / Q11): 最后一次尝试与校验遍历整棵树. 剩余时间不超过下一次之前的休眠时 (这次或下一次尝试
      * 将在超时之后结束), 或按次数为最后一次时, 视为最后一次尝试. [clock] 为 uptime.
+     * 按查询自适应 (附录 C Q15): 完整尝试测量遍历的开销, 其后的第一次中间尝试测量快路径的开销 (查找, 以及回退时的遍历); 快路径不比遍历省的,
+     * 到下一次完整尝试为止的其余尝试 (含最后一次) 不查找而直接遍历 ([Attempt.WALK]: 遍历与完整尝试同样可下结论), 每次完整尝试 (含校验) 重新测量并比较.
+     * 开销为进程 CPU 时间 (附录 C Q17): 附录 A 各屏幕上查找与遍历的墙钟耗时接近, 对进程的开销却不同 (22120RN86C: 宿主主界面查找 7.0 ms 对遍历 12.9 ms,
+     * 悬浮窗 9.3 ms 对 8.7 ms). 结果不变, 快路径只判定未命中与单候选.
      */
     class Query(private val policy: PollPolicy, private val clock: () -> Long) {
 
         private var lastFull = clock()
 
+        /** The walk of the latest full attempt ([Costs]); -1 when it did not walk. zh-CN: 最近一次完整尝试的遍历开销 ([Costs]); 未遍历时为 -1. */
+        private var walkCost = -1L
+
+        /** The fast path of the first intermediate attempt since then ([Costs]); -1 when not measured yet. zh-CN: 此后第一次中间尝试的快路径开销 ([Costs]); 尚未测量时为 -1. */
+        private var fastCost = -1L
+
+        /** Whether the fast path of the query costs no less than its walk. zh-CN: 本查询的快路径是否不比遍历省. */
+        private val walks get() = walkCost >= 0 && fastCost >= walkCost
+
         /** The attempt number [round] (from 1) with [remaining] milliseconds before the timeout. zh-CN: 第 [round] 次 (从 1 计) 尝试, 距超时 [remaining] 毫秒. */
         fun attempt(round: Long, remaining: Long): Attempt {
             if (policy.times == 1L) return Attempt.SINGLE
             val now = clock()
-            val full = round <= 1
-                    || policy.times != PollPolicy.UNBOUNDED && round >= policy.times
+            val last = policy.times != PollPolicy.UNBOUNDED && round >= policy.times
                     || policy.timeout != PollPolicy.UNBOUNDED && remaining <= policy.intervalAfter(round - 1)
-            if (full || now - lastFull >= VERIFY_INTERVAL) {
-                lastFull = now
-                return Attempt.FULL
+            return when {
+                round <= 1 || now - lastFull >= VERIFY_INTERVAL -> Attempt.FULL.also { lastFull = now }
+                walks -> Attempt.WALK
+                last -> Attempt.FULL.also { lastFull = now }
+                else -> Attempt.INTERMEDIATE
             }
-            return Attempt.INTERMEDIATE
+        }
+
+        /** What an attempt cost, [attempt] being what [Query.attempt] gave for it. zh-CN: 一次尝试的耗时, [attempt] 为 [Query.attempt] 为它给出的值. */
+        fun record(attempt: Attempt, costs: Costs) {
+            when (attempt) {
+                Attempt.FULL -> {
+                    walkCost = costs.walk
+                    fastCost = -1L
+                }
+                Attempt.INTERMEDIATE -> if (fastCost < 0 && costs.lookup >= 0) {
+                    fastCost = costs.lookup + costs.walk.coerceAtLeast(0L)
+                }
+                else -> Unit
+            }
         }
 
     }

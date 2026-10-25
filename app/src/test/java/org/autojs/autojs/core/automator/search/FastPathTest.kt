@@ -1,5 +1,7 @@
 package org.autojs.autojs.core.automator.search
 
+import org.autojs.autojs.core.accessibility.node.NodeLifecycle
+import org.autojs.autojs.core.accessibility.node.NodeRecyclePolicy
 import org.autojs.autojs.core.automator.FakeUiNode
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.BooleanFilter
@@ -22,11 +24,12 @@ import org.junit.Test
  * with the lookup of [FakeUiNode.findByViewId]: the key of a selector (an exact text has none, Q11), an empty lookup in an
  * intermediate and in a full attempt, a single candidate that passes or not, several candidates, all results /
  * breadth first / a negative index (not single), unavailable lookups, the release of the candidates, and the attempt
- * plan of a polled query (the first attempt, the last attempt by time and by count, the verification of long queries).
+ * plan of a polled query (the first attempt, the last attempt by time and by count, the verification of long queries,
+ * the walks instead of dearer lookups of appendix C Q15).
  *
  * zh-CN: P2.3 (附录 C Q1 / Q11): 以 [FakeUiNode.findByViewId] 查找, 在 `FakeUiNode` 树上验证框架快路径的分派: 选择器的键 (精确文本没有键, Q11),
  * 中间尝试与完整尝试中的空查找, 单候选通过与不通过, 多候选, 全部结果 / 广度优先 / 负数索引 (非单个), 查找不可用, 候选的释放, 以及轮询查询的
- * 尝试计划 (第一次尝试, 按时间与按次数的最后一次尝试, 长查询的校验).
+ * 尝试计划 (第一次尝试, 按时间与按次数的最后一次尝试, 长查询的校验, 附录 C Q15 中查找更费时时改为遍历).
  */
 class FastPathTest {
 
@@ -81,6 +84,8 @@ class FastPathTest {
             desc = "Okay"
         }
     }
+
+    private val keepNodes = NodeLifecycle(NodeRecyclePolicy.NO_OP) { _, _ -> }
 
     private fun selector(vararg filters: Filter) = Selector().apply { filters.forEach { add(it) } }
 
@@ -223,6 +228,129 @@ class FastPathTest {
         // A full search at least every VERIFY_INTERVAL: an unreliable lookup cannot hide a node for longer.
         // zh-CN: 至少每 VERIFY_INTERVAL 一次完整搜索: 不可靠的查找不能把节点藏得更久.
         assertEquals(listOf(0L, 1000L, 2000L, 3000L, 4000L), fulls)
+    }
+
+    /**
+     * One polled query of `findOne(600)` over [root] as `UiSelector.search` runs it, on a fake clock: a lookup costs
+     * [lookupNanos] (injected by the lookup of the fake tree), a walk [walkNanos]; [change] alters the screen before an
+     * attempt. Returns the round that found a node (0: none) and the lookups and walks made.
+     */
+    private fun pollFindOne(root: FakeUiNode, selector: Selector, lookupNanos: Long, walkNanos: Long, adaptive: Boolean = true, change: (Long) -> Unit = {}): Triple<Long, Int, Int> {
+        var nanos = 0L
+        var lookups = 0
+        var walks = 0
+        val lookup = object : FastPath.Lookup<FakeUiNode, FakeUiNode> by FakeLookup() {
+            override fun candidates(root: FakeUiNode, key: FastPath.Key) = root.findByViewId((key as FastPath.Key.ViewId).name).also {
+                nanos += lookupNanos
+                lookups++
+            }
+        }
+        val key = FastPath.keyOf(selector.filters)!!
+        val filter = selector.snapshot()
+        var now = 0L
+        val query = FastPath.Query(PollPolicy.within(600)) { now }
+        val costs = FastPath.Costs()
+        for (round in 1L..13L) {
+            now = (round - 1) * 50
+            change(round)
+            val attempt = query.attempt(round, (600 - now).coerceAtLeast(0))
+            costs.reset()
+            var found: List<FakeUiNode>? = null
+            if (attempt.looksUp) {
+                val started = nanos
+                val outcome = FastPath.decide(listOf(root), key, filter, true, attempt, lookup)
+                costs.lookup = nanos - started
+                when (outcome) {
+                    is FastPath.Outcome.Hit -> found = listOf(outcome.node)
+                    FastPath.Outcome.Miss -> found = emptyList()
+                    is FastPath.Outcome.Search -> Unit
+                }
+            }
+            if (found == null) {
+                val started = nanos
+                // The fake tree is walked again and again: its nodes are kept. zh-CN: 假树被反复遍历: 保留其节点.
+                found = DFS.search(root, filter, 1, keepNodes)
+                nanos += walkNanos
+                walks++
+                costs.walk = nanos - started
+            }
+            // Without the costs the query decides as P2 did. zh-CN: 没有开销时查询按 P2 的方式决定.
+            if (adaptive) query.record(attempt, costs)
+            if (found.isNotEmpty()) return Triple(round, lookups, walks)
+        }
+        return Triple(0L, lookups, walks)
+    }
+
+    /**
+     * Appendix C Q15 / Q17: lookups dearer than a walk are measured once after the first full attempt, and the other
+     * attempts walk, the last ones included; cheaper lookups keep deciding the misses.
+     */
+    @Test
+    fun adaptiveQueryWalksWhereLookupsCostMore() {
+        val none = selector(IdFilter.equals("com.example:id/none"))
+        // Rounds 1 and 2 (the measure) look up; rounds 1 and 3-13 walk, the last ones (12, 13) included.
+        // zh-CN: 第 1, 2 (测量) 次查找; 第 1 与 3-13 次遍历, 含最后的第 12, 13 次.
+        assertEquals(Triple(0L, 2, 12), pollFindOne(tree(), none, lookupNanos = 7_500_000, walkNanos = 1_800_000))
+        assertEquals(Triple(0L, 13, 3), pollFindOne(tree(), none, lookupNanos = 7_500_000, walkNanos = 1_800_000, adaptive = false))
+        assertEquals(Triple(0L, 13, 3), pollFindOne(tree(), none, lookupNanos = 500_000, walkNanos = 1_800_000))
+        // As dear as a walk: no saving, so walk. zh-CN: 与遍历一样贵: 没有节省, 因此遍历.
+        assertEquals(Triple(0L, 2, 12), pollFindOne(tree(), none, lookupNanos = 1_800_000, walkNanos = 1_800_000))
+    }
+
+    /** Appendix C Q15: the same round finds the same node whether the query looks up or walks. */
+    @Test
+    fun adaptiveQueryFindsTheSameNodes() {
+        val late = selector(IdFilter.equals("com.example:id/late"))
+        for (lookupNanos in listOf(7_500_000L, 500_000L)) for (adaptive in listOf(true, false)) {
+            var node: FakeUiNode? = null
+            val root = tree()
+            val (round, _, _) = pollFindOne(root, late, lookupNanos, 1_800_000, adaptive) { r -> if (r == 5L) node = root.find("title2").apply { id = "com.example:id/late" } }
+            assertEquals("$lookupNanos $adaptive", 5L, round)
+            assertSame(node, DFS.search(root, late.snapshot(), 1, keepNodes).single())
+        }
+    }
+
+    /**
+     * Appendix C Q15: every full attempt (the verifications of a long query) measures the walk anew, and the first
+     * intermediate attempt after it the fast path (its lookups, and its walk when they fall back), so the choice
+     * follows the screen; a full attempt answered by the lookups (no walk) leaves the query looking up.
+     */
+    @Test
+    fun adaptiveQueryComparesAgainAtEachFullAttempt() {
+        var now = 0L
+        val query = FastPath.Query(PollPolicy.FOREVER) { now }
+        fun costs(lookup: Long, walk: Long) = FastPath.Costs().apply { this.lookup = lookup; this.walk = walk }
+        fun next(round: Long) = query.attempt(round, PollPolicy.UNBOUNDED).also { now += 50 }
+        assertSame(FastPath.Attempt.FULL, next(1))
+        query.record(FastPath.Attempt.FULL, costs(300, 1000))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(2))
+        query.record(FastPath.Attempt.INTERMEDIATE, costs(3000, -1))
+        val plan = (3L..20L).map { next(it) }
+        assertEquals(List(18) { FastPath.Attempt.WALK }, plan)
+        // The verification at 1000 ms: the lookups are now cheaper. zh-CN: 1000 ms 的校验: 查找现在更省时.
+        assertSame(FastPath.Attempt.FULL, next(21))
+        query.record(FastPath.Attempt.FULL, costs(300, 1000))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(22))
+        query.record(FastPath.Attempt.INTERMEDIATE, costs(400, -1))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(23))
+        query.record(FastPath.Attempt.INTERMEDIATE, costs(9000, -1))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(24))
+        // Lookups that fall back pay the walk too. zh-CN: 回退的查找还要付出遍历.
+        while (next(25) != FastPath.Attempt.FULL) {
+            // The rest of the intermediate attempts up to the next verification. zh-CN: 到下一次校验为止的其余中间尝试.
+        }
+        query.record(FastPath.Attempt.FULL, costs(300, 1000))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(26))
+        query.record(FastPath.Attempt.INTERMEDIATE, costs(400, 1000))
+        assertSame(FastPath.Attempt.WALK, next(27))
+        // A full attempt the lookups answered measured no walk: the query keeps looking up. zh-CN: 由查找作答的完整尝试未测到遍历: 查询继续查找.
+        while (next(28) != FastPath.Attempt.FULL) {
+            // As above. zh-CN: 同上.
+        }
+        query.record(FastPath.Attempt.FULL, costs(300, -1))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(29))
+        query.record(FastPath.Attempt.INTERMEDIATE, costs(9000, -1))
+        assertSame(FastPath.Attempt.INTERMEDIATE, next(30))
     }
 
     @Test

@@ -46,13 +46,15 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
      * The framework fast path of the polled queries (docs/selector/ROADMAP.md P2.3 / P2.4): [hits] attempts answered by
      * a single candidate, [misses] attempts answered "nothing" by an empty lookup, [fallbacks] attempts with a key that
      * walked the tree all the same (several candidates, the last attempt, a verification), [mismatches] full searches
-     * that found nodes after an empty lookup (appendix C Q1: expected to stay 0).
+     * that found nodes after an empty lookup (appendix C Q1: expected to stay 0), [walks] intermediate attempts that
+     * walked the tree without lookups, those of the query costing no less than its walk (appendix C Q15).
      * zh-CN: 轮询查询的框架快路径 (P2.3 / P2.4): [hits] 由唯一候选作答的尝试, [misses] 由空查找判定未找到的尝试, [fallbacks] 有键但仍遍历整棵树的尝试
-     * (多个候选, 最后一次尝试, 校验), [mismatches] 查找为空而完整搜索找到节点的次数 (附录 C Q1: 应保持为 0).
+     * (多个候选, 最后一次尝试, 校验), [mismatches] 查找为空而完整搜索找到节点的次数 (附录 C Q1: 应保持为 0), [walks] 因该查询的查找不比遍历省时
+     * 而不查找直接遍历的中间尝试 (附录 C Q15).
      */
-    data class FastPathCounts(val hits: Long, val misses: Long, val fallbacks: Long, val mismatches: Long) {
+    data class FastPathCounts(val hits: Long, val misses: Long, val fallbacks: Long, val mismatches: Long, val walks: Long = 0) {
 
-        val isEmpty: Boolean get() = hits == 0L && misses == 0L && fallbacks == 0L && mismatches == 0L
+        val isEmpty: Boolean get() = hits == 0L && misses == 0L && fallbacks == 0L && mismatches == 0L && walks == 0L
 
         companion object {
 
@@ -63,7 +65,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
     }
 
     /** One event of the fast path, see [FastPathCounts]. zh-CN: 快路径的一次事件, 见 [FastPathCounts]. */
-    enum class FastPathEvent { HIT, MISS, FALLBACK, MISMATCH }
+    enum class FastPathEvent { HIT, MISS, FALLBACK, MISMATCH, WALK }
 
     data class StepStats(val name: String, val runs: Timing, val rejected: Long)
 
@@ -96,6 +98,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
             if (!fastPath.isEmpty) {
                 append("\nfast path: hits ").append(fastPath.hits).append(", misses ").append(fastPath.misses)
                 append(", fallbacks ").append(fastPath.fallbacks).append(", mismatches ").append(fastPath.mismatches)
+                append(", walks ").append(fastPath.walks)
             }
             if (selectors.isNotEmpty()) {
                 append("\nslowest selectors (by max search time):")
@@ -235,6 +238,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
             misses = fastPath[FastPathEvent.MISS.ordinal],
             fallbacks = fastPath[FastPathEvent.FALLBACK.ordinal],
             mismatches = fastPath[FastPathEvent.MISMATCH.ordinal],
+            walks = fastPath[FastPathEvent.WALK.ordinal],
         ),
     )
 

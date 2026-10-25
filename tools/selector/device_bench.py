@@ -23,16 +23,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _device as d  # noqa: E402
 
 SCREENS = {"settings": d.screen_settings, "main": d.screen_main, "overlay": d.screen_home}
-TIMED = ["full", "miss", "missId", "missMixed", "hit", "late"]
+TIMED = ["full", "miss", "missId", "lookupId", "missMixed", "hit", "late"]
 POLLED = ["findOne600", "findOne600Id", "lateOne"]
 CPU = ["cpuIdle", "cpuFixed", "cpuAssisted", "stormIdle", "stormFixed", "stormAssisted"]
 
 
 def fast_path_text(f):
-    """The fast path counters of auto.stats (P2.4) summed over the rounds of an item, or an empty string."""
+    """The fast path counters of auto.stats (P2.4, walks: appendix C Q15) summed over the rounds of an item, or an empty string."""
     if not f:
         return ""
-    return f" fastPath hits={f['hits']} misses={f['misses']} fallbacks={f['fallbacks']} mismatches={f['mismatches']}"
+    return (f" fastPath hits={f['hits']} misses={f['misses']} fallbacks={f['fallbacks']} mismatches={f['mismatches']}"
+            f" walks={f.get('walks', 0)}")
 
 
 def summarize(scenario, res, lines):
@@ -59,8 +60,10 @@ def summarize(scenario, res, lines):
             extra += f" error={it['error']}"
         print(f"  {name}: {'PASS' if it.get('ok') else 'FAIL'} median={it.get('median')} ms"
               f" min={min(it['samples']) if it.get('samples') else None}"
-              f" max={max(it['samples']) if it.get('samples') else None}{extra}")
+              f" max={max(it['samples']) if it.get('samples') else None}"
+              f"{'' if it.get('cpuPerRun') is None else ' cpu/run=' + str(it['cpuPerRun']) + ' ms'}{extra}")
         summary["items"][name] = {"ok": it.get("ok"), "median": it.get("median"), "samples": it.get("samples"),
+                                  **({"cpuPerRun": it["cpuPerRun"]} if it.get("cpuPerRun") is not None else {}),
                                   **({"sizes": it["sizes"]} if "sizes" in it else {})}
     for name in POLLED:
         f = items.get(name)
