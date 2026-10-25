@@ -15,8 +15,17 @@ object SpeechCapabilityKeys {
     /** Long: host `versionCode` the plugin requires (read type-agnostically by the host). */
     const val REQUIRES_HOST_VERSION = PluginCapabilityKeys.REQUIRES_HOST_VERSION
 
-    /** Int: contract version the plugin implements ([SpeechContract.CONTRACT_VERSION]). */
+    /**
+     * Int: base contract version the plugin answers; plugins keep 1 here, which every host since build 5456 accepts
+     * (roadmap D136), and advertise newer versions as [MAX_CONTRACT_VERSION].
+     */
     const val CONTRACT_VERSION = "speechContractVersion"
+
+    /**
+     * Int, optional: highest contract version the plugin implements (2 since 3-Macaw Speech 1.3.0); absent means
+     * [CONTRACT_VERSION]. The host agrees on [SpeechContract.negotiate] and calls the methods of a version only up to it.
+     */
+    const val MAX_CONTRACT_VERSION = "speechMaxContractVersion"
 
     /** String array: the features the build implements, a subset of [SpeechContract.FEATURES]. */
     const val FEATURES = "speechFeatures"

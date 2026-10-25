@@ -2,7 +2,9 @@ package org.autojs.autojs.runtime.api.speech
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import org.autojs.autojs.core.plugin.speech.SpeechEnrollRequest
 import org.autojs.autojs.core.plugin.speech.SpeechErrorMapper
+import org.autojs.autojs.core.plugin.speech.SpeechIdentifyRequest
 import org.autojs.autojs.core.plugin.speech.SpeechImportRequest
 import org.autojs.autojs.core.plugin.speech.SpeechInstallRequest
 import org.autojs.autojs.core.plugin.speech.SpeechKeyword
@@ -12,6 +14,7 @@ import org.autojs.autojs.core.plugin.speech.SpeechPluginException
 import org.autojs.autojs.core.plugin.speech.SpeechRecognizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechSynthesisRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVadRequest
+import org.autojs.autojs.core.plugin.speech.SpeechVerifyRequest
 import org.autojs.autojs.core.plugin.speech.SpeechWakeRequest
 import org.autojs.autojs.runtime.api.tts.TtsSelection
 import org.autojs.autojs.runtime.api.tts.normalizeTtsLanguageTag
@@ -95,6 +98,8 @@ internal object SpeechScriptArguments {
     const val ENGINE = "engine"
     const val VOICE = "voice"
     const val RATE = "rate"
+    const val REPLACE = "replace"
+    const val TOP_K = "topK"
 
     /** The largest PCM sample rate accepted for `recognize` / `detectVoice` (the plugin resamples). zh-CN: `recognize` / `detectVoice` 接受的最大 PCM 采样率 (插件负责重采样). */
     const val MAX_PCM_SAMPLE_RATE = 192_000
@@ -115,6 +120,9 @@ internal object SpeechScriptArguments {
     private val QUERY_KEYS = setOf(KIND, LANGUAGE, INSTALLED)
     private val INSTALL_KEYS = setOf(ACCEPT_LICENSE, ON_PROGRESS)
     private val IMPORT_KEYS = setOf(ID, KIND, MODEL_TYPE, NAME, LANGUAGES, ACCEPT_LICENSE, ON_PROGRESS)
+    private val ENROLL_KEYS = setOf(REPLACE, MODEL)
+    private val VERIFY_KEYS = setOf(THRESHOLD)
+    private val IDENTIFY_KEYS = setOf(THRESHOLD, TOP_K)
 
     /** `tts` options `speak` refuses: the engine is the plugin's, the voice and rate come from `model` / `speaker` / `speed`. zh-CN: `speak` 拒绝的 `tts` 选项. */
     private val SPEAK_RESERVED = setOf(ENGINE, VOICE, RATE, "speechRate")
@@ -421,6 +429,69 @@ internal object SpeechScriptArguments {
         val text = string(value, label).trim().lowercase(Locale.ROOT)
         if (text !in SpeechContract.KINDS) throw invalid("'$label' must be one of ${SpeechContract.KINDS.joinToString()}, got $text")
         return text
+    }
+
+    // ------------------------------------------------------------------ speakers (contract version 2, roadmap D132 - D134)
+
+    /** `speech.speaker.enroll(name, files, options?)`: the request and the script paths, still unresolved. zh-CN: 请求与尚未解析的脚本路径. */
+    class Enroll(val request: SpeechEnrollRequest, val paths: List<String>)
+
+    /**
+     * `speech.speaker.enroll(name, files, options?)`: [files] is one path or an array of 1 to `MAX_ENROLL_FILES` paths;
+     * `replace` drops the earlier samples (roadmap D134), `model` picks the embedding model.
+     * zh-CN: [files] 为一个路径或 1 到 `MAX_ENROLL_FILES` 个路径的数组; `replace` 丢弃之前的样本 (路线图 D134), `model` 选择嵌入模型.
+     */
+    fun enroll(name: JsonElement?, files: JsonElement?, options: JsonElement?): Enroll {
+        val speaker = speakerName(name, "name")
+        val paths = if (files != null && files.isJsonArray) {
+            files.asJsonArray.mapIndexed { i, element -> path(element, "files[$i]") }
+        } else {
+            listOf(path(files, "files"))
+        }
+        if (paths.isEmpty()) throw invalid("'files' must hold at least one path")
+        if (paths.size > SpeechLimits.MAX_ENROLL_FILES) throw limit("'files' holds at most ${SpeechLimits.MAX_ENROLL_FILES} recordings, not ${paths.size}")
+        val given = optionalObject(options, "options") ?: return Enroll(SpeechEnrollRequest(speaker), paths)
+        given.rejectUnknown("options", ENROLL_KEYS)
+        val model = given.get(MODEL)?.takeUnless { it.isJsonNull }?.let { modelId(it, "options.model") }
+        return Enroll(SpeechEnrollRequest(speaker, given.booleanOrNull("options", REPLACE) ?: false, model), paths)
+    }
+
+    /** `speech.speaker.verify(name, file, options?)`. zh-CN: `speech.speaker.verify(name, file, options?)`. */
+    fun verify(name: JsonElement?, options: JsonElement?): SpeechVerifyRequest {
+        val speaker = speakerName(name, "name")
+        val given = optionalObject(options, "options") ?: return SpeechVerifyRequest(speaker)
+        given.rejectUnknown("options", VERIFY_KEYS)
+        return SpeechVerifyRequest(speaker, speakerThreshold(given))
+    }
+
+    /** `speech.speaker.identify(file, options?)`. zh-CN: `speech.speaker.identify(file, options?)`. */
+    fun identify(options: JsonElement?): SpeechIdentifyRequest {
+        val given = optionalObject(options, "options") ?: return SpeechIdentifyRequest()
+        given.rejectUnknown("options", IDENTIFY_KEYS)
+        val topK = given.get(TOP_K)?.takeUnless { it.isJsonNull }?.let { value ->
+            integral(value, "options.topK", 1.0, SpeechLimits.MAX_IDENTIFY_CANDIDATES.toDouble()).toInt()
+        } ?: SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES
+        return SpeechIdentifyRequest(speakerThreshold(given), topK)
+    }
+
+    /**
+     * A speaker name: trimmed, 1 to `MAX_SPEAKER_NAME_CHARS` UTF-16 characters, no control characters (line breaks
+     * included); names compare exactly.
+     * zh-CN: 说话人名字: 去首尾空白, 1 到 `MAX_SPEAKER_NAME_CHARS` 个 UTF-16 字符, 不含控制字符 (包括换行); 名字按原样比较.
+     */
+    fun speakerName(value: JsonElement?, label: String): String {
+        val text = string(value, label).trim()
+        if (text.isEmpty()) throw invalid("'$label' must not be blank")
+        if (text.length > SpeechLimits.MAX_SPEAKER_NAME_CHARS) throw limit("'$label' exceeds ${SpeechLimits.MAX_SPEAKER_NAME_CHARS} characters")
+        if (text.any { Character.isISOControl(it) }) throw invalid("'$label' must not contain control characters or line breaks")
+        return text
+    }
+
+    /** `threshold`: a cosine score between 0 and 1, or null for the plugin's value. zh-CN: 0 到 1 之间的余弦分数, 缺省为插件的值. */
+    private fun speakerThreshold(given: JsonObject): Double? {
+        val threshold = given.doubleOrNull("options", THRESHOLD) ?: return null
+        if (threshold < 0.0 || threshold > 1.0) throw invalid("'options.threshold' must be between 0 and 1, got $threshold")
+        return threshold
     }
 
     /** `onProgress` survives `JSON.stringify` only when it is not a function. zh-CN: 只有当 `onProgress` 不是函数时才会在 `JSON.stringify` 后留下. */

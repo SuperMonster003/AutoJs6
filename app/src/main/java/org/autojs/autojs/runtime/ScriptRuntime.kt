@@ -85,6 +85,7 @@ import org.autojs.autojs.runtime.api.augment.media.Media
 import org.autojs.autojs.runtime.api.modules.epub.Epub
 import org.autojs.autojs.runtime.api.modules.speech.Speech
 import org.autojs.autojs.runtime.api.modules.speech.SpeechModels
+import org.autojs.autojs.runtime.api.modules.speech.SpeechSpeaker
 import org.autojs.autojs.runtime.api.modules.gallery.Gallery
 import org.autojs.autojs.runtime.api.modules.terminal.Terminal
 import org.autojs.autojs.runtime.api.modules.mail.Mail
@@ -1239,7 +1240,7 @@ class ScriptRuntime private constructor(builder: Builder) {
             "epub" -> Epub(this, epub).augment(target)
             "gallery" -> Gallery(this, gallery).augment(target)
             "terminal" -> Terminal(this, terminal).augment(target)
-            "speech" -> Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it) }
+            "speech" -> Speech(this, speech, tts).augment(target).also { SpeechModels(this, speech).augment(it); SpeechSpeaker(this, speech).augment(it) }
             "compose" -> Compose(this).also { compose = it }.augment(target)
             "memory" -> Memory(this).augment(target)
             else -> throw IllegalStateException("Script module $name has no augment call")

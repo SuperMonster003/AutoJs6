@@ -2,11 +2,11 @@ package org.autojs.plugin.speech.api
 
 /**
  * Error codes of Bundle answers ([SpeechContract.KEY_ERROR_CODE]), of the exceptions thrown by calls that do not answer
- * with a Bundle, of error events and progress failures, and of the host-side `SpeechError` (roadmap D27). The set is
- * closed for contract version 1; a code the host does not know is reported as [INTERNAL].
+ * with a Bundle, of error events and progress failures, and of the host-side `SpeechError` (roadmap D27). Contract
+ * version 2 appends [SPEAKER_NOT_FOUND] and [AUDIO_TOO_SHORT]; a code the host does not know is reported as [INTERNAL].
  *
  * zh-CN: Bundle 应答 ([SpeechContract.KEY_ERROR_CODE]), 不以 Bundle 应答的调用抛出的异常, 错误事件与进度失败, 以及宿主侧 `SpeechError`
- * 的错误码 (路线图 D27). 契约版本 1 的集合已闭合; 宿主不认识的码报告为 [INTERNAL].
+ * 的错误码 (路线图 D27). 契约版本 2 追加 [SPEAKER_NOT_FOUND] 与 [AUDIO_TOO_SHORT]; 宿主不认识的码报告为 [INTERNAL].
  */
 object SpeechErrorCodes {
 
@@ -43,7 +43,16 @@ object SpeechErrorCodes {
     const val TIMEOUT = "TIMEOUT"
     const val INTERNAL = "INTERNAL"
 
-    /** Every code of contract version 1, in the order of roadmap D27 followed by the host additions. */
+    /** Version 2: the speaker name is not enrolled (roadmap D132). */
+    const val SPEAKER_NOT_FOUND = "SPEAKER_NOT_FOUND"
+
+    /** Version 2: a recording holds less than [SpeechLimits.MIN_SPEAKER_SPEECH_MILLIS] of speech (roadmap D132). */
+    const val AUDIO_TOO_SHORT = "AUDIO_TOO_SHORT"
+
+    /**
+     * Every code, in the order of roadmap D27 followed by the host additions and the codes of contract version 2. A host
+     * of version 1 reports the version 2 codes as [INTERNAL]; a plugin sends them only in answers to version 2 calls.
+     */
     val ALL: List<String> = listOf(
         PLUGIN_UNAVAILABLE,
         PLUGIN_DISABLED,
@@ -63,6 +72,8 @@ object SpeechErrorCodes {
         IO_FAILED,
         TIMEOUT,
         INTERNAL,
+        SPEAKER_NOT_FOUND,
+        AUDIO_TOO_SHORT,
     )
 
     /** Codes the host produces itself before any Binder call reaches the plugin. */

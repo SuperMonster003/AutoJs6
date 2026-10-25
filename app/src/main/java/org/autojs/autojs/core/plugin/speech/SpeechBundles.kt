@@ -3,6 +3,7 @@ package org.autojs.autojs.core.plugin.speech
 import android.os.Bundle
 import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
+import org.autojs.plugin.speech.api.SpeechLimits
 import org.autojs.plugin.speech.api.SpeechModelKeys
 import org.autojs.plugin.speech.api.SpeechOptionKeys
 import org.autojs.plugin.speech.api.SpeechResultKeys
@@ -17,9 +18,14 @@ import org.autojs.plugin.speech.api.SpeechResultKeys
  */
 object SpeechBundles {
 
-    /** The Bundle every request carries, stamped with the contract version; [build] adds the request keys. zh-CN: 每个请求携带的 Bundle, 带契约版本; [build] 添加请求键. */
-    fun request(build: Bundle.() -> Unit = {}): Bundle = Bundle().apply {
-        putInt(SpeechContract.KEY_CONTRACT_VERSION, SpeechContract.CONTRACT_VERSION)
+    /**
+     * The Bundle every request carries, stamped with the contract [version] of its call ([SpeechContract.CALL_VERSION_1]
+     * for the methods of version 1, which every plugin answers; roadmap D136); [build] adds the request keys.
+     * zh-CN: 每个请求携带的 Bundle, 带其调用所属的契约 [version] (版本 1 的方法为 [SpeechContract.CALL_VERSION_1], 所有插件都应答; 路线图
+     * D136); [build] 添加请求键.
+     */
+    fun request(version: Int = SpeechContract.CALL_VERSION_1, build: Bundle.() -> Unit = {}): Bundle = Bundle().apply {
+        putInt(SpeechContract.KEY_CONTRACT_VERSION, version)
         build()
     }
 
@@ -88,6 +94,84 @@ object SpeechBundles {
         putString(SpeechOptionKeys.MODEL, id)
         kind?.let { putString(SpeechOptionKeys.KIND, it) }
     }
+
+    // Speakers (contract version 2, roadmap D132 - D134).
+
+    fun enrollSpeaker(request: SpeechEnrollRequest, displayNames: List<String>): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        putString(SpeechOptionKeys.NAME, request.name)
+        putBoolean(SpeechOptionKeys.REPLACE, request.replace)
+        request.model?.let { putString(SpeechOptionKeys.MODEL, it) }
+        putStringArray(SpeechOptionKeys.DISPLAY_NAMES, displayNames.toTypedArray())
+    }
+
+    fun verifySpeaker(request: SpeechVerifyRequest, displayName: String?): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        putString(SpeechOptionKeys.NAME, request.name)
+        request.threshold?.let { putDouble(SpeechOptionKeys.THRESHOLD, it) }
+        displayName?.let { putString(SpeechOptionKeys.DISPLAY_NAME, it) }
+    }
+
+    fun identifySpeaker(request: SpeechIdentifyRequest, displayName: String?): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        request.threshold?.let { putDouble(SpeechOptionKeys.THRESHOLD, it) }
+        putInt(SpeechOptionKeys.TOP_K, request.topK)
+        displayName?.let { putString(SpeechOptionKeys.DISPLAY_NAME, it) }
+    }
+
+    /** `listSpeakers` (no [name]) and `removeSpeaker`. zh-CN: `listSpeakers` (无 [name]) 与 `removeSpeaker`. */
+    fun speakerRequest(name: String? = null): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        name?.let { putString(SpeechOptionKeys.NAME, it) }
+    }
+
+    /**
+     * The script's `{ name, score, matched, threshold }` of `verifySpeaker`, or with `candidates` of `identifySpeaker`
+     * (`name` null when no score reached the threshold); scores and thresholds rounded to four decimals, never an
+     * embedding (roadmap D125, D133).
+     * zh-CN: 脚本得到的 `verifySpeaker` 结果 `{ name, score, matched, threshold }`, 或带 `candidates` 的 `identifySpeaker` 结果 (没有分数达到
+     * 阈值时 `name` 为 null); 分数与阈值保留四位小数, 从不含嵌入向量 (路线图 D125, D133).
+     */
+    fun speakerMatch(answer: Bundle, identify: Boolean): Map<String, Any?> {
+        val plain = plain(answer)
+        val result = linkedMapOf<String, Any?>(
+            SpeechResultKeys.NAME to plain[SpeechResultKeys.NAME],
+            SpeechResultKeys.SCORE to score(plain[SpeechResultKeys.SCORE]),
+            SpeechResultKeys.MATCHED to (plain[SpeechResultKeys.MATCHED] == true),
+            SpeechResultKeys.THRESHOLD to score(plain[SpeechResultKeys.THRESHOLD]),
+        )
+        if (identify) {
+            result[SpeechResultKeys.CANDIDATES] = (plain[SpeechResultKeys.CANDIDATES] as? List<*>).orEmpty().mapNotNull { item ->
+                val candidate = item as? Map<*, *> ?: return@mapNotNull null
+                linkedMapOf(SpeechResultKeys.NAME to candidate[SpeechResultKeys.NAME], SpeechResultKeys.SCORE to score(candidate[SpeechResultKeys.SCORE]))
+            }
+        }
+        return result
+    }
+
+    /** The `enrollSpeaker` answer: `{ name, samples, durationMillis, modelId }`. zh-CN: `enrollSpeaker` 的应答. */
+    fun speakerEnrollment(answer: Bundle): Map<String, Any?> {
+        val plain = plain(answer)
+        return linkedMapOf(
+            SpeechResultKeys.NAME to plain[SpeechResultKeys.NAME],
+            SpeechResultKeys.SAMPLES to plain[SpeechResultKeys.SAMPLES],
+            SpeechResultKeys.DURATION_MILLIS to plain[SpeechResultKeys.DURATION_MILLIS],
+            SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
+        )
+    }
+
+    /** The speakers of a `listSpeakers` answer: `{ name, samples, updatedAt, modelId }` each. zh-CN: `listSpeakers` 应答中的说话人. */
+    fun speakers(answer: Bundle): List<Map<String, Any?>> {
+        @Suppress("DEPRECATION")
+        val list = answer.getParcelableArrayList<Bundle>(SpeechResultKeys.SPEAKERS).orEmpty()
+        return list.take(SpeechLimits.MAX_SPEAKERS).map { bundle ->
+            val plain = plain(bundle)
+            linkedMapOf(
+                SpeechResultKeys.NAME to plain[SpeechResultKeys.NAME],
+                SpeechResultKeys.SAMPLES to plain[SpeechResultKeys.SAMPLES],
+                SpeechResultKeys.UPDATED_AT to plain[SpeechResultKeys.UPDATED_AT],
+                SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
+            )
+        }
+    }
+
+    private fun score(value: Any?): Double? = (value as? Number)?.toDouble()?.let { Math.round(it * 10_000) / 10_000.0 }
 
     private fun Bundle.putListen(request: SpeechListenRequest) {
         request.model?.let { putString(SpeechOptionKeys.MODEL, it) }

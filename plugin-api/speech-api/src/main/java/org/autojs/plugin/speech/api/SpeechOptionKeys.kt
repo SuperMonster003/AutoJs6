@@ -109,4 +109,17 @@ object SpeechOptionKeys {
 
     /** String array: languages of an imported model. */
     const val LANGUAGES = "languages"
+
+    // Speakers (contract version 2: `enrollSpeaker`, `verifySpeaker`, `identifySpeaker`, `removeSpeaker`). The speaker
+    // name is [NAME] (at most [SpeechLimits.MAX_SPEAKER_NAME_CHARS]); [THRESHOLD] is a Float in 0.0 - 1.0 compared with
+    // the cosine score; [MODEL] chooses the embedding model of an enrollment.
+
+    /** Boolean: `enrollSpeaker` replaces the speaker's samples instead of adding to them (default false, roadmap D134). */
+    const val REPLACE = "replace"
+
+    /** Int: candidates `identifySpeaker` answers (default [SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES]). */
+    const val TOP_K = "topK"
+
+    /** String array: file names of the `enrollSpeaker` recordings as the host knows them, in descriptor order. */
+    const val DISPLAY_NAMES = "displayNames"
 }

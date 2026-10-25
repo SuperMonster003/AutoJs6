@@ -129,10 +129,12 @@ object SpeechPluginHost {
             Bundle()
         }
         fun string(key: String): String? = (live.getString(key) ?: advertised.getString(key))?.takeIf { it.isNotBlank() }
+        val agreed = agreedContractVersion(advertised)
+        // A version 2 feature is listed only when the version agreed with the plugin has it (roadmap D136, SpeechPeer.supports).
         val features = (live.getStringArray(SpeechCapabilityKeys.FEATURES) ?: advertised.getStringArray(SpeechCapabilityKeys.FEATURES))
-            ?.filterNotNull()?.filter { it in SpeechContract.FEATURES }.orEmpty()
+            ?.filterNotNull()?.filter { it in SpeechContract.FEATURES && (agreed >= SpeechContract.CALL_VERSION_2 || it in SpeechContract.FEATURES_V1) }.orEmpty()
         SpeechCapabilities(
-            contractVersion = baseContractVersion(advertised),
+            contractVersion = agreed,
             features = features,
             catalogVersion = intOf(live, SpeechCapabilityKeys.CATALOG_VERSION) ?: intOf(advertised, SpeechCapabilityKeys.CATALOG_VERSION) ?: 0,
             engineName = string(SpeechCapabilityKeys.ENGINE_NAME),
@@ -236,6 +238,72 @@ object SpeechPluginHost {
             proxy.detectVoice(input.descriptor, SpeechBundles.detectVoice(request, input.file.name))
         }
         return SpeechBundles.plain(SpeechBundles.answer(answer, "detectVoice"))
+    }
+
+    // ------------------------------------------------------------------ speakers (contract version 2, roadmap D125, D132)
+
+    /**
+     * Enrolls [request]'s name from [files] (1 to [SpeechLimits.MAX_ENROLL_FILES], all opened before the call, so a
+     * missing file fails before anything reaches the plugin).
+     * zh-CN: 以 [files] (1 到 [SpeechLimits.MAX_ENROLL_FILES] 个, 调用前全部打开, 缺失的文件在到达插件前就失败) 注册 [request] 的名字.
+     */
+    suspend fun enrollSpeaker(context: Context, files: List<File>, request: SpeechEnrollRequest): Map<String, Any?> = withContext(Dispatchers.IO) {
+        if (files.isEmpty() || files.size > SpeechLimits.MAX_ENROLL_FILES) {
+            throw SpeechErrorMapper.failure(SpeechErrorCodes.LIMIT_EXCEEDED, "speech.speaker.enroll takes 1 to ${SpeechLimits.MAX_ENROLL_FILES} recordings, not ${files.size}")
+        }
+        val target = selectForCall(context)
+        val peer = peerOf(target)
+        requireFeature(peer, SpeechContract.FEATURE_SPEAKER)
+        val inputs = ArrayList<SpeechAudioInput>()
+        try {
+            files.forEach { file -> inputs += SpeechAudioInput.open(file).also { SpeechAudio.requireReadable(it.wav, peer.features, file.name) } }
+            val answer = call(context, target, SpeechContract.FILE_CALL_TIMEOUT_MS, "enrollSpeaker") { proxy ->
+                proxy.enrollSpeaker(inputs.map { it.descriptor }.toTypedArray(), SpeechBundles.enrollSpeaker(request, inputs.map { it.file.name }))
+            }
+            SpeechBundles.speakerEnrollment(SpeechBundles.answer(answer, "enrollSpeaker"))
+        } finally {
+            inputs.forEach { runCatching { it.close() } }
+        }
+    }
+
+    suspend fun verifySpeaker(context: Context, file: File, request: SpeechVerifyRequest): Map<String, Any?> = withContext(Dispatchers.IO) {
+        SpeechAudioInput.open(file).use { input ->
+            val target = selectForCall(context)
+            val peer = peerOf(target)
+            requireFeature(peer, SpeechContract.FEATURE_SPEAKER)
+            SpeechAudio.requireReadable(input.wav, peer.features, file.name)
+            val answer = call(context, target, SpeechContract.FILE_CALL_TIMEOUT_MS, "verifySpeaker") { proxy ->
+                proxy.verifySpeaker(input.descriptor, SpeechBundles.verifySpeaker(request, file.name))
+            }
+            SpeechBundles.speakerMatch(SpeechBundles.answer(answer, "verifySpeaker"), identify = false)
+        }
+    }
+
+    suspend fun identifySpeaker(context: Context, file: File, request: SpeechIdentifyRequest): Map<String, Any?> = withContext(Dispatchers.IO) {
+        SpeechAudioInput.open(file).use { input ->
+            val target = selectForCall(context)
+            val peer = peerOf(target)
+            requireFeature(peer, SpeechContract.FEATURE_SPEAKER)
+            SpeechAudio.requireReadable(input.wav, peer.features, file.name)
+            val answer = call(context, target, SpeechContract.FILE_CALL_TIMEOUT_MS, "identifySpeaker") { proxy ->
+                proxy.identifySpeaker(input.descriptor, SpeechBundles.identifySpeaker(request, file.name))
+            }
+            SpeechBundles.speakerMatch(SpeechBundles.answer(answer, "identifySpeaker"), identify = true)
+        }
+    }
+
+    suspend fun listSpeakers(context: Context): List<Map<String, Any?>> = withContext(Dispatchers.IO) {
+        val target = selectForCall(context)
+        requireFeature(peerOf(target), SpeechContract.FEATURE_SPEAKER)
+        val answer = call(context, target, SpeechContract.CALL_TIMEOUT_MS, "listSpeakers") { proxy -> proxy.listSpeakers(SpeechBundles.speakerRequest()) }
+        SpeechBundles.speakers(SpeechBundles.answer(answer, "listSpeakers"))
+    }
+
+    suspend fun removeSpeaker(context: Context, name: String): Boolean = withContext(Dispatchers.IO) {
+        val target = selectForCall(context)
+        requireFeature(peerOf(target), SpeechContract.FEATURE_SPEAKER)
+        val answer = call(context, target, SpeechContract.CALL_TIMEOUT_MS, "removeSpeaker") { proxy -> proxy.removeSpeaker(SpeechBundles.speakerRequest(name)) }
+        SpeechBundles.answer(answer, "removeSpeaker").getBoolean(SpeechResultKeys.REMOVED)
     }
 
     // ------------------------------------------------------------------ sessions
@@ -427,10 +495,14 @@ object SpeechPluginHost {
     /** The contract version and features of the selected plugin. zh-CN: 选中插件的契约版本与功能. */
     internal fun peerOf(target: AidlPluginHost.Discovered): SpeechPeer {
         val capabilities = target.pluginInfo?.capabilities ?: return SpeechPeer.LEGACY
-        val version = baseContractVersion(capabilities).takeIf(SpeechContract::supportsContractVersion) ?: return SpeechPeer.LEGACY
+        val version = agreedContractVersion(capabilities).takeIf { it > 0 } ?: return SpeechPeer.LEGACY
         val features = capabilities.getStringArray(SpeechCapabilityKeys.FEATURES)?.filterNotNull()?.toSet().orEmpty()
         return SpeechPeer(version, features)
     }
+
+    /** [SpeechContract.negotiate] of the advertised base and highest versions (roadmap D136). zh-CN: 声明的基础版本与最高版本的商定结果. */
+    private fun agreedContractVersion(capabilities: Bundle): Int =
+        SpeechContract.negotiate(baseContractVersion(capabilities), intOf(capabilities, SpeechCapabilityKeys.MAX_CONTRACT_VERSION))
 
     private fun requireFeature(peer: SpeechPeer, feature: String) {
         if (!peer.supports(feature)) {

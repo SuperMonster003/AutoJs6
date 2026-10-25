@@ -21,7 +21,8 @@ object ScriptModuleLayer {
 
     /**
      * Every module of the old `ScriptRuntime.augment()` in its mounting order (91 augment calls, appendix C Q8; 92 since
-     * `memory` of docs/memory/ROADMAP.md P5.1): each top-level module by its primary name, followed by its sub-modules as
+     * `memory` of docs/memory/ROADMAP.md P5.1, 93 since `speech.speaker` of the 3-Macaw Speech roadmap P8.3.2): each
+     * top-level module by its primary name, followed by its sub-modules as
      * `parent.name`. `global` and `legacy` assign their members to the global object without a module object. The
      * relative order of the top-level names is the one of `Object.keys(global)` in the device baseline
      * `tools/augment/baseline/surface-XQ-AT72-5586.txt` (`ScriptModuleOrderTest`), modules added after the baseline go
@@ -38,7 +39,7 @@ object ScriptModuleLayer {
         "files", "files.batchRename", "crypto", "RootAutomator", "engines", "floaty", "storages", "device", "powerManager", "settings",
         "recorder", "toast", "media", "sensors", "base64", "notice", "notice.channel", "shizuku", "opencc", "mime", "sysprops",
         "sqlite", "zip", "nanoid", "pinyin", "pinyin4j", "mediainfo", "mail", "installer", "epub", "gallery", "terminal",
-        "speech", "speech.models", "compose", "memory",
+        "speech", "speech.models", "speech.speaker", "compose", "memory",
     )
 
     /** The top-level entries of [ORDER], the names `ScriptRuntime.augment()` mounts in turn. */

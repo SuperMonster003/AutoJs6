@@ -68,7 +68,7 @@ class FakeSpeechPluginService : Service() {
             variant = SpeechPluginIds.VARIANT_DEFAULT
             capabilities = Bundle().apply {
                 putLong(PluginCapabilityKeys.REQUIRES_HOST_VERSION, SpeechPluginIds.REQUIRED_HOST_VERSION_CODE)
-                putInt(SpeechCapabilityKeys.CONTRACT_VERSION, SpeechContract.CONTRACT_VERSION)
+                putInt(SpeechCapabilityKeys.CONTRACT_VERSION, SpeechContract.CALL_VERSION_1)
                 putStringArray(SpeechCapabilityKeys.FEATURES, FEATURES)
                 putInt(SpeechCapabilityKeys.CATALOG_VERSION, 1)
             }
@@ -223,6 +223,29 @@ class FakeSpeechPluginService : Service() {
             }.start()
             return opId
         }
+
+        // Contract version 2 (3-Macaw Speech roadmap D132): this provider stays on version 1, so the host never calls
+        // these; a direct call is answered like a plugin that lacks the feature.
+        override fun enrollSpeaker(audio: Array<out ParcelFileDescriptor>?, options: Bundle?): Bundle = unsupported("enrollSpeaker")
+
+        override fun verifySpeaker(audio: ParcelFileDescriptor?, options: Bundle?): Bundle = unsupported("verifySpeaker")
+
+        override fun identifySpeaker(audio: ParcelFileDescriptor?, options: Bundle?): Bundle = unsupported("identifySpeaker")
+
+        override fun listSpeakers(query: Bundle?): Bundle = unsupported("listSpeakers")
+
+        override fun removeSpeaker(request: Bundle?): Bundle = unsupported("removeSpeaker")
+
+        override fun diarizeFile(audio: ParcelFileDescriptor?, options: Bundle?, callback: ISpeechProgressCallback?): Int =
+            throw IllegalStateException(SpeechErrorCodes.encode(SpeechErrorCodes.PLUGIN_INCOMPATIBLE, "diarizeFile"))
+
+        override fun detectLanguage(audio: ParcelFileDescriptor?, options: Bundle?, callback: ISpeechProgressCallback?): Int =
+            throw IllegalStateException(SpeechErrorCodes.encode(SpeechErrorCodes.PLUGIN_INCOMPATIBLE, "detectLanguage"))
+
+        override fun tagAudio(audio: ParcelFileDescriptor?, options: Bundle?, callback: ISpeechProgressCallback?): Int =
+            throw IllegalStateException(SpeechErrorCodes.encode(SpeechErrorCodes.PLUGIN_INCOMPATIBLE, "tagAudio"))
+
+        private fun unsupported(method: String): Bundle = failure(SpeechErrorCodes.PLUGIN_INCOMPATIBLE, "$method needs speech contract version 2")
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
@@ -504,7 +527,7 @@ class FakeSpeechPluginService : Service() {
         )
 
         fun answer(build: Bundle.() -> Unit = {}): Bundle = Bundle().apply {
-            putInt(SpeechContract.KEY_CONTRACT_VERSION, SpeechContract.CONTRACT_VERSION)
+            putInt(SpeechContract.KEY_CONTRACT_VERSION, SpeechContract.CALL_VERSION_1)
             build()
         }
 

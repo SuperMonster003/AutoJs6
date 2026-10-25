@@ -9,12 +9,13 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
- * Freezes the transaction order of the contract (version 1): Binder transaction codes follow the declaration order, so
- * a method may only ever be appended, never inserted, removed or renamed. The plugin's device contract test calls
+ * Freezes the transaction order of the contract (versions 1 and 2): Binder transaction codes follow the declaration
+ * order, so a method may only ever be appended, never inserted, removed or renamed. Version 2 appends eight methods to
+ * `ISpeechPlugin` after `refreshCatalog` (transactions 15 - 22, roadmap D132). The plugin's device contract test calls
  * `getInfo()` by its code.
  *
- * zh-CN: 冻结契约 (版本 1) 的事务顺序: Binder 事务号按声明顺序分配, 因此方法只能追加, 不能插入, 删除或改名. 插件的设备契约测试按事务号
- * 调用 `getInfo()`.
+ * zh-CN: 冻结契约 (版本 1 与 2) 的事务顺序: Binder 事务号按声明顺序分配, 因此方法只能追加, 不能插入, 删除或改名. 版本 2 在 `ISpeechPlugin`
+ * 的 `refreshCatalog` 之后追加 8 个方法 (事务 15 - 22, 路线图 D132). 插件的设备契约测试按事务号调用 `getInfo()`.
  */
 class SpeechAidlOrderTest {
 
@@ -83,6 +84,15 @@ class SpeechAidlOrderTest {
                     "int importModel(in ParcelFileDescriptor archive, in Bundle request, ISpeechProgressCallback callback)",
                     "Bundle setDefaultModel(in Bundle request)",
                     "int refreshCatalog(ISpeechProgressCallback callback)",
+                    // Contract version 2.
+                    "Bundle enrollSpeaker(in ParcelFileDescriptor[] audio, in Bundle options)",
+                    "Bundle verifySpeaker(in ParcelFileDescriptor audio, in Bundle options)",
+                    "Bundle identifySpeaker(in ParcelFileDescriptor audio, in Bundle options)",
+                    "Bundle listSpeakers(in Bundle query)",
+                    "Bundle removeSpeaker(in Bundle request)",
+                    "int diarizeFile(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback)",
+                    "int detectLanguage(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback)",
+                    "int tagAudio(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback)",
                 ),
             ),
             "ISpeechSession.aidl" to Declaration(

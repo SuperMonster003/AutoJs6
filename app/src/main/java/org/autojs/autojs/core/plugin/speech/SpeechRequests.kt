@@ -90,6 +90,21 @@ data class SpeechImportRequest(
 )
 
 /**
+ * `speech.speaker.enroll(name, files, options)` (contract version 2, roadmap D125, D133, D134): [name] already trimmed and
+ * checked, [replace] drops the speaker's earlier samples, [model] picks the embedding model (the default speaker model
+ * when null).
+ * zh-CN: `speech.speaker.enroll(name, files, options)` (契约版本 2, 路线图 D125, D133, D134): [name] 已去空白并校验, [replace] 丢弃该说话人
+ * 之前的样本, [model] 选择嵌入模型 (为 null 时用默认说话人模型).
+ */
+data class SpeechEnrollRequest(val name: String, val replace: Boolean = false, val model: String? = null)
+
+/** `speech.speaker.verify(name, file, options)`; a null [threshold] takes the plugin's value. zh-CN: [threshold] 为 null 时取插件的默认值. */
+data class SpeechVerifyRequest(val name: String, val threshold: Double? = null)
+
+/** `speech.speaker.identify(file, options)`. zh-CN: `speech.speaker.identify(file, options)`. */
+data class SpeechIdentifyRequest(val threshold: Double? = null, val topK: Int = SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES)
+
+/**
  * The capabilities the plugin advertises, as `speech.capabilities()` answers them (roadmap appendix B.1).
  * zh-CN: 插件声明的能力, 即 `speech.capabilities()` 的应答 (路线图附录 B.1).
  */
@@ -107,14 +122,18 @@ data class SpeechCapabilities(
 )
 
 /**
- * The contract version and features the host agreed with one plugin: [contractVersion] is the plugin's
- * `speechContractVersion` (version 1 is the only one), [features] its `speechFeatures` array.
- * zh-CN: 宿主与一个插件商定的契约版本与功能: [contractVersion] 为插件的 `speechContractVersion` (目前只有版本 1), [features] 为其
- * `speechFeatures` 数组.
+ * The contract version and features the host agreed with one plugin: [contractVersion] is [SpeechContract.negotiate] of
+ * the plugin's `speechContractVersion` and `speechMaxContractVersion` (roadmap D136), [features] its `speechFeatures`
+ * array. A feature of contract version 2 counts only when the agreed version is 2, so the host never calls a method the
+ * plugin's contract does not have.
+ * zh-CN: 宿主与一个插件商定的契约版本与功能: [contractVersion] 为插件 `speechContractVersion` 与 `speechMaxContractVersion` 的
+ * [SpeechContract.negotiate] 结果 (路线图 D136), [features] 为其 `speechFeatures` 数组. 契约版本 2 的功能只在商定版本为 2 时才算数,
+ * 因此宿主从不调用插件契约中没有的方法.
  */
 data class SpeechPeer(val contractVersion: Int, val features: Set<String>) {
 
-    fun supports(feature: String): Boolean = feature in features
+    fun supports(feature: String): Boolean = feature in features &&
+        (contractVersion >= SpeechContract.CALL_VERSION_2 || feature in SpeechContract.FEATURES_V1)
 
     companion object {
         val LEGACY = SpeechPeer(SpeechContract.MIN_CONTRACT_VERSION, emptySet())

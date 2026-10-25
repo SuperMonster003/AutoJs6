@@ -9,8 +9,10 @@ import org.autojs.plugin.speech.api.ISpeechSessionCallback;
 import org.autojs.plugin.speech.api.ISpeechWakeCallback;
 
 /**
- * Entry point of the speech plugin (contract version 1, docs/dev/speech-plugin-protocol-v1.md). Transaction codes
- * follow the declaration order, so methods may only ever be appended (SpeechAidlOrderTest).
+ * Entry point of the speech plugin (contract versions 1 and 2, docs/dev/speech-plugin-protocol-v1.md). Transaction codes
+ * follow the declaration order, so methods may only ever be appended (SpeechAidlOrderTest). The first 14 methods are
+ * contract version 1; the host calls the methods of version 2 only when the plugin's SpeechCapabilityKeys
+ * MAX_CONTRACT_VERSION is at least 2 and its features list the method's feature (3-Macaw Speech roadmap D132, D136).
  *
  * Audio never crosses Binder as a stream: the plugin records the microphone itself (roadmap D6) and files travel as
  * read-only descriptors the host opened for the script's own paths. Methods that answer with a Bundle report failures
@@ -103,4 +105,51 @@ interface ISpeechPlugin {
      * completion carries SpeechResultKeys.CATALOG_VERSION and UPDATED.
      */
     int refreshCatalog(ISpeechProgressCallback callback);
+
+    // Contract version 2 (3-Macaw Speech roadmap D125, D132): speaker recognition, feature SpeechContract.FEATURE_SPEAKER.
+    // Every audio descriptor is read-only, owned and closed by the host after the call returns, at most
+    // SpeechLimits.MAX_AUDIO_FILE_BYTES and MAX_SPEAKER_AUDIO_MILLIS; the plugin keeps the voiceprints in its private
+    // storage and never returns an embedding.
+
+    /**
+     * Enrolls SpeechOptionKeys.NAME from 1 to SpeechLimits.MAX_ENROLL_FILES recordings, all or nothing: the mean of
+     * their embeddings joins the speaker's existing samples, or replaces them with SpeechOptionKeys.REPLACE. Options:
+     * NAME, REPLACE, MODEL (default: the default speaker model) and DISPLAY_NAMES. The answer carries
+     * SpeechResultKeys.NAME, SAMPLES, DURATION_MILLIS and MODEL_ID.
+     */
+    Bundle enrollSpeaker(in ParcelFileDescriptor[] audio, in Bundle options);
+
+    /**
+     * Compares one recording with the enrolled SpeechOptionKeys.NAME (SpeechErrorCodes.SPEAKER_NOT_FOUND otherwise).
+     * Options: NAME, THRESHOLD (default: the plugin's value for the speaker's model) and DISPLAY_NAME. The answer carries
+     * SpeechResultKeys.NAME, SCORE, MATCHED and THRESHOLD.
+     */
+    Bundle verifySpeaker(in ParcelFileDescriptor audio, in Bundle options);
+
+    /**
+     * Finds the enrolled speaker closest to one recording. Options: THRESHOLD, TOP_K (default 3, at most
+     * SpeechLimits.MAX_IDENTIFY_CANDIDATES) and DISPLAY_NAME. The answer carries SpeechResultKeys.NAME (absent when no
+     * score reaches the threshold), SCORE, MATCHED, THRESHOLD and CANDIDATES (NAME and SCORE, best first).
+     */
+    Bundle identifySpeaker(in ParcelFileDescriptor audio, in Bundle options);
+
+    /** The enrolled speakers, SpeechResultKeys.SPEAKERS (NAME, SAMPLES, UPDATED_AT and MODEL_ID, sorted by name). */
+    Bundle listSpeakers(in Bundle query);
+
+    /** Deletes the voiceprint of SpeechOptionKeys.NAME; the answer carries SpeechResultKeys.REMOVED. */
+    Bundle removeSpeaker(in Bundle request);
+
+    // Contract version 2, reserved for 3-Macaw Speech roadmap P8.4 (D126): offline analyses of one audio file (at most
+    // SpeechLimits.MAX_AUDIO_FILE_BYTES and MAX_AUDIO_MILLIS) that return the operation id; progress reports
+    // milliseconds of audio done over the total, cancelOperation stops them, and the completion carries the result.
+    // Their option and result keys are defined with P8.4.
+
+    /** Speaker diarization (feature SpeechContract.FEATURE_DIARIZATION); the completion carries SpeechResultKeys.SEGMENTS. */
+    int diarizeFile(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
+
+    /** Spoken language identification (feature SpeechContract.FEATURE_LANGUAGE_ID); the completion carries SpeechResultKeys.LANGUAGE. */
+    int detectLanguage(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
+
+    /** Audio event tagging (feature SpeechContract.FEATURE_AUDIO_TAGGING). */
+    int tagAudio(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
 }

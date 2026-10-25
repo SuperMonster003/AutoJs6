@@ -70,4 +70,25 @@ object SpeechLimits {
 
     /** `listModels` answers at most this many models. */
     const val MAX_MODELS = 512
+
+    // Speakers (contract version 2, roadmap D125, D132).
+
+    /** Speakers the plugin keeps; enrolling a new name beyond it is [SpeechErrorCodes.LIMIT_EXCEEDED]. */
+    const val MAX_SPEAKERS = 50
+
+    /** Recordings of one `enrollSpeaker` call. */
+    const val MAX_ENROLL_FILES = 10
+
+    /** Milliseconds of one recording given to a speaker call. */
+    const val MAX_SPEAKER_AUDIO_MILLIS = 60_000L
+
+    /** Speech a recording must hold after silence is trimmed, or the call fails with [SpeechErrorCodes.AUDIO_TOO_SHORT]. */
+    const val MIN_SPEAKER_SPEECH_MILLIS = 1000L
+
+    /** UTF-16 characters of a speaker name (trimmed, no control characters). */
+    const val MAX_SPEAKER_NAME_CHARS = 64
+
+    /** `topK` default and ceiling of `identifySpeaker`. */
+    const val DEFAULT_IDENTIFY_CANDIDATES = 3
+    const val MAX_IDENTIFY_CANDIDATES = 10
 }

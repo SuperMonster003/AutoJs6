@@ -25,7 +25,7 @@ class ScriptModuleOrderTest {
 
     @Test
     fun everyAugmentCallIsListedOnceWithItsSubModulesAfterIt() {
-        assertEquals(92, order.size)
+        assertEquals(93, order.size)
         assertEquals("duplicates in ORDER", order.size, order.toSet().size)
         assertEquals(order.filter { '.' !in it }, topLevel)
         assertEquals(76, topLevel.size)

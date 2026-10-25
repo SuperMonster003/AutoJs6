@@ -2,6 +2,8 @@ package org.autojs.autojs.runtime.api.speech
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import org.autojs.autojs.core.plugin.speech.SpeechEnrollRequest
+import org.autojs.autojs.core.plugin.speech.SpeechIdentifyRequest
 import org.autojs.autojs.core.plugin.speech.SpeechImportRequest
 import org.autojs.autojs.core.plugin.speech.SpeechInstallRequest
 import org.autojs.autojs.core.plugin.speech.SpeechKeyword
@@ -11,6 +13,7 @@ import org.autojs.autojs.core.plugin.speech.SpeechPluginException
 import org.autojs.autojs.core.plugin.speech.SpeechRecognizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechSynthesisRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVadRequest
+import org.autojs.autojs.core.plugin.speech.SpeechVerifyRequest
 import org.autojs.autojs.runtime.api.tts.TtsSelection
 import org.autojs.plugin.speech.api.SpeechContract
 import org.autojs.plugin.speech.api.SpeechErrorCodes
@@ -235,5 +238,59 @@ class SpeechScriptArgumentsTest {
         assertEquals("kws", SpeechScriptArguments.kind(json("\"KWS\""), "kind"))
         refused { SpeechScriptArguments.kind(json("\"x\""), "kind") }
         assertFalse(SpeechScriptArguments.modelId(json("\" asr.x \""), "id").contains(' '))
+    }
+
+    /** 3-Macaw Speech roadmap D132 - D134: `speech.speaker` arguments. */
+    @Test
+    fun speakerEnrollTakesOnePathOrAnArrayAndAppendsByDefault() {
+        val one = SpeechScriptArguments.enroll(json("\" Alice \""), json("\"a.wav\""), null)
+        assertEquals(SpeechEnrollRequest("Alice"), one.request)
+        assertEquals(listOf("a.wav"), one.paths)
+        assertFalse(one.request.replace)
+
+        val many = SpeechScriptArguments.enroll(json("\"Bob\""), json("[\"1.wav\", \"2.m4a\"]"), json("{\"replace\": true, \"model\": \"speaker.x\"}"))
+        assertEquals(SpeechEnrollRequest("Bob", replace = true, model = "speaker.x"), many.request)
+        assertEquals(listOf("1.wav", "2.m4a"), many.paths)
+
+        val ten = (1..SpeechLimits.MAX_ENROLL_FILES).joinToString(",", "[", "]") { "\"$it.wav\"" }
+        assertEquals(10, SpeechScriptArguments.enroll(json("\"a\""), json(ten), null).paths.size)
+        val eleven = (1..SpeechLimits.MAX_ENROLL_FILES + 1).joinToString(",", "[", "]") { "\"$it.wav\"" }
+        refused(SpeechErrorCodes.LIMIT_EXCEEDED) { SpeechScriptArguments.enroll(json("\"a\""), json(eleven), null) }
+        refused { SpeechScriptArguments.enroll(json("\"a\""), json("[]"), null) }
+        refused { SpeechScriptArguments.enroll(json("\"a\""), json("[1]"), null) }
+        refused { SpeechScriptArguments.enroll(json("\"a\""), null, null) }
+        refused { SpeechScriptArguments.enroll(json("\"a\""), json("\"content://x\""), null) }
+        refused { SpeechScriptArguments.enroll(json("\"a\""), json("\"a.wav\""), json("{\"append\": true}")) }
+        refused { SpeechScriptArguments.enroll(json("\"a\""), json("\"a.wav\""), json("{\"replace\": 1}")) }
+    }
+
+    @Test
+    fun speakerNamesAreTrimmedBoundedAndPrintable() {
+        assertEquals("Alice Smith", SpeechScriptArguments.speakerName(json("\"  Alice Smith \""), "name"))
+        assertEquals("\u5f20\u4e09", SpeechScriptArguments.speakerName(json("\"\u5f20\u4e09\""), "name"))
+        assertEquals(64, SpeechScriptArguments.speakerName(json("\"" + "x".repeat(64) + "\""), "name").length)
+        refused(SpeechErrorCodes.LIMIT_EXCEEDED) { SpeechScriptArguments.speakerName(json("\"" + "x".repeat(65) + "\""), "name") }
+        refused { SpeechScriptArguments.speakerName(json("\"   \""), "name") }
+        refused { SpeechScriptArguments.speakerName(json("\"a\\nb\""), "name") }
+        refused { SpeechScriptArguments.speakerName(json("42"), "name") }
+        refused { SpeechScriptArguments.speakerName(null, "name") }
+    }
+
+    @Test
+    fun speakerVerifyAndIdentifyCheckThresholdAndTopK() {
+        assertEquals(SpeechVerifyRequest("a"), SpeechScriptArguments.verify(json("\"a\""), null))
+        assertEquals(SpeechVerifyRequest("a", 0.5), SpeechScriptArguments.verify(json("\"a\""), json("{\"threshold\": 0.5}")))
+        assertEquals(SpeechVerifyRequest("a", 0.0), SpeechScriptArguments.verify(json("\"a\""), json("{\"threshold\": 0}")))
+        refused { SpeechScriptArguments.verify(json("\"a\""), json("{\"threshold\": 1.5}")) }
+        refused { SpeechScriptArguments.verify(json("\"a\""), json("{\"threshold\": -0.1}")) }
+        refused { SpeechScriptArguments.verify(json("\"a\""), json("{\"topK\": 1}")) }
+
+        assertEquals(SpeechIdentifyRequest(), SpeechScriptArguments.identify(null))
+        assertEquals(SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES, SpeechScriptArguments.identify(json("{}")).topK)
+        assertEquals(SpeechIdentifyRequest(0.4, 10), SpeechScriptArguments.identify(json("{\"threshold\": 0.4, \"topK\": 10}")))
+        refused { SpeechScriptArguments.identify(json("{\"topK\": 0}")) }
+        refused { SpeechScriptArguments.identify(json("{\"topK\": 11}")) }
+        refused { SpeechScriptArguments.identify(json("{\"topK\": 2.5}")) }
+        refused { SpeechScriptArguments.identify(json("{\"name\": \"a\"}")) }
     }
 }

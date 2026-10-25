@@ -19,6 +19,7 @@ import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4j
 import org.autojs.autojs.runtime.api.modules.pinyin4j.Pinyin4jOptions
 import org.autojs.autojs.runtime.api.modules.speech.Speech
 import org.autojs.autojs.runtime.api.modules.speech.SpeechModels
+import org.autojs.autojs.runtime.api.modules.speech.SpeechSpeaker
 import org.autojs.autojs.runtime.api.modules.terminal.Terminal
 import org.autojs.autojs.runtime.api.epub.EpubService
 import org.autojs.autojs.runtime.api.gallery.GalleryService
@@ -82,6 +83,13 @@ class AugmentDelegatingModulesTest {
     fun speechModelsSurfaceMatchesTheCurrentModule() {
         val case = CASES.first { it.name == "speech" }
         withNew(case) { rhino -> HostModuleTestSupport.assertSameSurface(rhino, "speech.models", case.prepare, case.mountCurrent) }
+    }
+
+    /** 3-Macaw Speech roadmap P8.3.2: `speech.speaker`, mounted like `speech.models`. */
+    @Test
+    fun speechSpeakerSurfaceMatchesTheCurrentModule() {
+        val case = CASES.first { it.name == "speech" }
+        withNew(case) { rhino -> HostModuleTestSupport.assertSameSurface(rhino, "speech.speaker", case.prepare, case.mountCurrent) }
     }
 
     @Test
@@ -194,6 +202,7 @@ class AugmentDelegatingModulesTest {
         }
         withNew(CASES.first { it.name == "speech" }) { rhino ->
             assertEquals("[\"object\",\"undefined\"]", rhino.render(DifferentialRhino.Side.KT, "[typeof speech.models, typeof speech.\$models]").key)
+            assertEquals("[\"object\",\"undefined\"]", rhino.render(DifferentialRhino.Side.KT, "[typeof speech.speaker, typeof speech.\$speaker]").key)
         }
         DEVICE.add(SHAPES)
     }
@@ -365,8 +374,16 @@ class AugmentDelegatingModulesTest {
             Case("epub", { Epub(it.ktRuntime, ScriptRuntimeFields.epub(it.ktRuntime)).augment(global(it)) }, listOf("epub.open()", "epub.metadata()", "epub.toc(1, 2)", "epub.read()"), service(EpubService::class.java, "epub")),
             Case("gallery", { Gallery(it.ktRuntime, ScriptRuntimeFields.gallery(it.ktRuntime)).augment(global(it)) }, listOf("gallery.pick(1, 2)", "gallery.view()", "gallery.edit()", "gallery.convert()"), service(GalleryService::class.java, "gallery")),
             Case("terminal", { Terminal(it.ktRuntime, ScriptRuntimeFields.terminal(it.ktRuntime)).augment(global(it)) }, listOf("terminal.open(1, 2, 3)", "terminal.session()", "terminal.exec()", "terminal.env(1, 2, 3)"), service(TerminalService::class.java, "terminal")),
-            Case("speech", { Speech(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime), ScriptRuntimeFields.tts(it.ktRuntime)).augment(global(it)).also { speech -> SpeechModels(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime)).augment(speech) } },
-                listOf("speech.isAvailable(1)", "speech.capabilities(1, 2)", "speech.models.list(1, 2)", "speech.models.remove()"),
+            Case("speech", {
+                Speech(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime), ScriptRuntimeFields.tts(it.ktRuntime)).augment(global(it)).also { speech ->
+                    SpeechModels(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime)).augment(speech)
+                    SpeechSpeaker(it.ktRuntime, ScriptRuntimeFields.speech(it.ktRuntime)).augment(speech)
+                }
+            },
+                listOf(
+                    "speech.isAvailable(1)", "speech.capabilities(1, 2)", "speech.models.list(1, 2)", "speech.models.remove()",
+                    "speech.speaker.list(1)", "speech.speaker.remove()", "speech.speaker.enroll('a')", "speech.speaker.identify()",
+                ),
                 services(SpeechService::class.java to "speech", TtsService::class.java to "tts")),
             Case("compose", { side -> checkNotNull(ScriptRuntimeFields.compose(side.ktRuntime)).augment(global(side)) }, listOf("compose.isAvailable()", "compose.isAvailable(1)", "compose.createElement()", "compose.state()", "typeof compose.version"),
                 { side -> ScriptRuntimeFields.setCompose(side.ktRuntime, Compose(side.ktRuntime, NoPluginPlatform())) }),

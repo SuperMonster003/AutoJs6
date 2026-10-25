@@ -1056,6 +1056,17 @@
       "callable": false
     },
     {
+      "module": "speech.speaker",
+      "class": "speech.SpeechSpeaker",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "operation": "augment",
+      "target": "it",
+      "aliases": [
+        "speaker"
+      ],
+      "callable": false
+    },
+    {
       "module": "compose",
       "class": "compose.Compose",
       "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/compose/Compose.kt",
@@ -13070,6 +13081,94 @@
       "registration": "selfAssignmentFunctions",
       "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/speech/Speech.kt",
       "line": 51
+    },
+    {
+      "api": "speech.speaker.enroll",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "enroll",
+      "implementation": "enroll",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 36
+    },
+    {
+      "api": "speech.speaker.enrollAsync",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "enrollAsync",
+      "implementation": "enrollAsync",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 37
+    },
+    {
+      "api": "speech.speaker.identify",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "identify",
+      "implementation": "identify",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 40
+    },
+    {
+      "api": "speech.speaker.identifyAsync",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "identifyAsync",
+      "implementation": "identifyAsync",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 41
+    },
+    {
+      "api": "speech.speaker.list",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "list",
+      "implementation": "list",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 42
+    },
+    {
+      "api": "speech.speaker.remove",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "remove",
+      "implementation": "remove",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 43
+    },
+    {
+      "api": "speech.speaker.verify",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "verify",
+      "implementation": "verify",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 38
+    },
+    {
+      "api": "speech.speaker.verifyAsync",
+      "module": "speech.speaker",
+      "ownerModule": "speech.speaker",
+      "member": "verifyAsync",
+      "implementation": "verifyAsync",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/SpeechSpeaker.kt",
+      "line": 39
     },
     {
       "api": "speech.synthesize",

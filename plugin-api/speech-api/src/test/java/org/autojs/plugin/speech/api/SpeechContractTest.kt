@@ -10,11 +10,11 @@ import org.junit.Test
 import java.lang.reflect.Modifier
 
 /**
- * Snapshot of every literal of contract version 1 (3-Macaw Speech roadmap D21, D27, D28, appendix C.1). The plugin, the
+ * Snapshot of every literal of contract versions 1 and 2 (3-Macaw Speech roadmap D21, D27, D28, D132, D136, appendix C.1). The plugin, the
  * host client and the script API repeat these values, so a change here is a protocol change: append new values, never
  * edit or remove frozen ones.
  *
- * zh-CN: 契约版本 1 全部字面值的快照 (3-Macaw Speech 路线图 D21, D27, D28, 附录 C.1). 插件, 宿主客户端与脚本 API 都重复使用这些值,
+ * zh-CN: 契约版本 1 与 2 全部字面值的快照 (3-Macaw Speech 路线图 D21, D27, D28, D132, D136, 附录 C.1). 插件, 宿主客户端与脚本 API 都重复使用这些值,
  * 因此此处的变化即协议变化: 只能追加, 不能修改或删除已冻结的值.
  */
 class SpeechContractTest {
@@ -45,23 +45,36 @@ class SpeechContractTest {
 
     @Test
     fun contractVersionAndCapabilityKeysAreFrozen() {
-        assertEquals(1, SpeechContract.CONTRACT_VERSION)
+        assertEquals(2, SpeechContract.CONTRACT_VERSION)
         assertEquals(1, SpeechContract.MIN_CONTRACT_VERSION)
-        assertEquals(1, SpeechContract.MAX_CONTRACT_VERSION)
+        assertEquals(2, SpeechContract.MAX_CONTRACT_VERSION)
+        assertEquals(1, SpeechContract.CALL_VERSION_1)
+        assertEquals(2, SpeechContract.CALL_VERSION_2)
         assertTrue(SpeechContract.supportsContractVersion(1))
+        assertTrue(SpeechContract.supportsContractVersion(2))
         assertFalse(SpeechContract.supportsContractVersion(0))
-        assertFalse(SpeechContract.supportsContractVersion(2))
+        assertFalse(SpeechContract.supportsContractVersion(3))
+
+        // Roadmap D136: plugins advertise the base version 1 and their highest version separately.
+        assertEquals(1, SpeechContract.negotiate(1, null))
+        assertEquals(1, SpeechContract.negotiate(1, 1))
+        assertEquals(2, SpeechContract.negotiate(1, 2))
+        assertEquals(2, SpeechContract.negotiate(1, 3))
+        assertEquals(2, SpeechContract.negotiate(2, null))
+        assertEquals(1, SpeechContract.negotiate(1, 0))
+        assertEquals(0, SpeechContract.negotiate(0, 2))
+        assertEquals(0, SpeechContract.negotiate(3, 3))
 
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, SpeechCapabilityKeys.REQUIRES_HOST_VERSION)
         assertEquals(
             listOf(
                 "speechContractVersion", "speechFeatures", "speechCatalogVersion", "speechMaxPcmSessions", "speechTtsEnginePackage",
-                "speechEngineName", "speechEngineVersion", "speechMicrophoneGranted",
+                "speechEngineName", "speechEngineVersion", "speechMicrophoneGranted", "speechMaxContractVersion",
             ),
             listOf(
                 SpeechCapabilityKeys.CONTRACT_VERSION, SpeechCapabilityKeys.FEATURES, SpeechCapabilityKeys.CATALOG_VERSION,
                 SpeechCapabilityKeys.MAX_PCM_SESSIONS, SpeechCapabilityKeys.TTS_ENGINE_PACKAGE, SpeechCapabilityKeys.ENGINE_NAME,
-                SpeechCapabilityKeys.ENGINE_VERSION, SpeechCapabilityKeys.MICROPHONE_GRANTED,
+                SpeechCapabilityKeys.ENGINE_VERSION, SpeechCapabilityKeys.MICROPHONE_GRANTED, SpeechCapabilityKeys.MAX_CONTRACT_VERSION,
             ),
         )
         val keys = constantsOf(SpeechCapabilityKeys::class.java, "")
@@ -78,10 +91,10 @@ class SpeechContractTest {
         assertEquals(options.size, options.values.toSet().size)
         assertEquals(
             listOf(
-                "acceptLicense", "boost", "displayName", "format", "hotwords", "installed", "keyword", "keywords", "kind", "language",
-                "languages", "maxDurationMillis", "minIntervalMillis", "minSilenceMillis", "minSpeechMillis", "model", "modelType", "name",
-                "punctuation", "sampleRate", "silenceEndMillis", "source", "speaker", "speed", "text", "thenListen", "threshold",
-                "timeoutMillis", "vad", "vadThreshold",
+                "acceptLicense", "boost", "displayName", "displayNames", "format", "hotwords", "installed", "keyword", "keywords", "kind",
+                "language", "languages", "maxDurationMillis", "minIntervalMillis", "minSilenceMillis", "minSpeechMillis", "model", "modelType",
+                "name", "punctuation", "replace", "sampleRate", "silenceEndMillis", "source", "speaker", "speed", "text", "thenListen",
+                "threshold", "timeoutMillis", "topK", "vad", "vadThreshold",
             ),
             options.values.sorted(),
         )
@@ -90,9 +103,10 @@ class SpeechContractTest {
         assertEquals(results.size, results.values.toSet().size)
         assertEquals(
             listOf(
-                "active", "catalogVersion", "durationMillis", "emotion", "endMillis", "event", "keyword", "language", "model", "modelId",
-                "models", "reason", "removed", "round", "sampleRate", "score", "segmentIndex", "segments", "sessionId", "sizeBytes",
-                "speakerId", "startMillis", "state", "tags", "text", "timestampMillis", "updated", "warnings",
+                "active", "candidates", "catalogVersion", "durationMillis", "emotion", "endMillis", "event", "keyword", "language", "matched",
+                "model", "modelId", "models", "name", "reason", "removed", "round", "sampleRate", "samples", "score", "segmentIndex",
+                "segments", "sessionId", "sizeBytes", "speakerId", "speakers", "startMillis", "state", "tags", "text", "threshold",
+                "timestampMillis", "updated", "updatedAt", "warnings",
             ),
             results.values.sorted(),
         )
@@ -114,9 +128,13 @@ class SpeechContractTest {
         assertEquals(setOf("stopped", "timeout", "maxDuration", "cancelled", "error"), SpeechContract.REASONS)
         assertEquals(setOf("pending", "active", "ended"), SpeechContract.STATES)
         assertEquals(setOf("mic", "external"), SpeechContract.SOURCES)
-        assertEquals(setOf("asr", "tts", "kws", "vad"), SpeechContract.KINDS)
+        assertEquals(setOf("asr", "tts", "kws", "vad", "speaker", "segment", "langid", "tagger"), SpeechContract.KINDS)
         assertEquals(setOf("catalog", "imported"), SpeechContract.MODEL_SOURCES)
-        assertEquals(setOf("asr", "asrStreaming", "vad", "kws", "tts", "ttsSystemEngine", "models", "audioDecode"), SpeechContract.FEATURES)
+        assertEquals(setOf("asr", "asrStreaming", "vad", "kws", "tts", "ttsSystemEngine", "models", "audioDecode"), SpeechContract.FEATURES_V1)
+        assertEquals(
+            SpeechContract.FEATURES_V1 + setOf("speaker", "diarization", "languageId", "audioTagging"),
+            SpeechContract.FEATURES,
+        )
         assertEquals(setOf("wav"), SpeechContract.FORMATS)
         assertEquals(constants("EVENT_").values.toSet(), SpeechContract.EVENTS)
         assertEquals(constants("REASON_").values.toSet(), SpeechContract.REASONS)
@@ -151,6 +169,13 @@ class SpeechContractTest {
         assertEquals(65_536, SpeechLimits.MAX_OPTIONS_BYTES)
         assertEquals(262_144, SpeechLimits.MAX_EVENT_BYTES)
         assertEquals(512, SpeechLimits.MAX_MODELS)
+        assertEquals(50, SpeechLimits.MAX_SPEAKERS)
+        assertEquals(10, SpeechLimits.MAX_ENROLL_FILES)
+        assertEquals(60_000L, SpeechLimits.MAX_SPEAKER_AUDIO_MILLIS)
+        assertEquals(1000L, SpeechLimits.MIN_SPEAKER_SPEECH_MILLIS)
+        assertEquals(64, SpeechLimits.MAX_SPEAKER_NAME_CHARS)
+        assertEquals(3, SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES)
+        assertEquals(10, SpeechLimits.MAX_IDENTIFY_CANDIDATES)
         assertEquals(30_000L, SpeechContract.CALL_TIMEOUT_MS)
         assertEquals(600_000L, SpeechContract.FILE_CALL_TIMEOUT_MS)
         assertEquals(600_000L, SpeechContract.SYNTHESIS_TIMEOUT_MS)
@@ -166,6 +191,10 @@ class SpeechContractTest {
         assertTrue(SpeechContract.CALL_TIMEOUT_MS < SpeechContract.FILE_CALL_TIMEOUT_MS)
         // A whole 30 minute file fits the file call timeout only with a real-time factor below 1 (roadmap P3.5 measures it).
         assertTrue(SpeechContract.FILE_CALL_TIMEOUT_MS >= SpeechLimits.MAX_AUDIO_MILLIS / 3)
+        assertTrue(SpeechLimits.MIN_SPEAKER_SPEECH_MILLIS < SpeechLimits.MAX_SPEAKER_AUDIO_MILLIS)
+        assertTrue(SpeechLimits.MAX_SPEAKER_AUDIO_MILLIS <= SpeechLimits.MAX_AUDIO_MILLIS)
+        assertTrue(SpeechLimits.MAX_SPEAKER_NAME_CHARS <= SpeechLimits.MAX_TOKEN_CHARS)
+        assertTrue(SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES <= SpeechLimits.MAX_IDENTIFY_CANDIDATES)
     }
 
     @Test
@@ -175,7 +204,7 @@ class SpeechContractTest {
                 "PLUGIN_UNAVAILABLE", "PLUGIN_DISABLED", "PLUGIN_INCOMPATIBLE", "PERMISSION_DENIED", "MODEL_MISSING",
                 "MODEL_DOWNLOAD_FAILED", "MODEL_CHECKSUM_MISMATCH", "MODEL_LICENSE_NOT_ACCEPTED", "INVALID_OPTIONS",
                 "UNSUPPORTED_FORMAT", "LIMIT_EXCEEDED", "SESSION_BUSY", "SESSION_CLOSED", "SESSION_CANCELLED", "ENGINE_FAILED",
-                "IO_FAILED", "TIMEOUT", "INTERNAL",
+                "IO_FAILED", "TIMEOUT", "INTERNAL", "SPEAKER_NOT_FOUND", "AUDIO_TOO_SHORT",
             ),
             SpeechErrorCodes.ALL,
         )

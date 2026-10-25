@@ -101,4 +101,28 @@ object SpeechResultKeys {
 
     /** Boolean: whether `refreshCatalog` installed a newer catalog. */
     const val UPDATED = "updated"
+
+    // Speakers (contract version 2). Scores are cosine similarities of embeddings in -1.0 - 1.0 ([SCORE]); no answer
+    // ever carries an embedding (roadmap D125).
+
+    /** String: speaker name (`enrollSpeaker`, `verifySpeaker`, the best match of `identifySpeaker`, entries of [SPEAKERS] and [CANDIDATES]). */
+    const val NAME = "name"
+
+    /** Boolean: whether [SCORE] reached [THRESHOLD]. */
+    const val MATCHED = "matched"
+
+    /** Float: the threshold the score was compared with. */
+    const val THRESHOLD = "threshold"
+
+    /** ArrayList of Bundle: the closest speakers of `identifySpeaker`, each keyed by [NAME] and [SCORE], best first. */
+    const val CANDIDATES = "candidates"
+
+    /** ArrayList of Bundle: `listSpeakers`, each keyed by [NAME], [SAMPLES], [UPDATED_AT] and [MODEL_ID]. */
+    const val SPEAKERS = "speakers"
+
+    /** Int: recordings averaged into a speaker's voiceprint. */
+    const val SAMPLES = "samples"
+
+    /** Long: epoch milliseconds of a speaker's last enrollment. */
+    const val UPDATED_AT = "updatedAt"
 }
