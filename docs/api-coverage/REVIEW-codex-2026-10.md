@@ -458,3 +458,19 @@ JAR / DEX 输入由 `build-java-callback-fixtures.py` 现场构建 (callback.jar
 | ...#invalidAccountsAndClosedClientHandlesRetainTheMailErrorCode | bridge | 通过 | 2.0 | 非法账户与已关闭句柄保留 MailError 码 |
 
 项: 矩阵行 mail.providers, accounts, connect, connectAsync, setDefault, default, fetch, foldersAsync, searchAsync, sendAsync, flagAsync, rawAsync, close, MailError (14 / 56 行, 三列 bridged / capability-gated); 运行时客户端句柄成员 (矩阵 MailClient# 行, P1.5 后按句柄类型计为覆盖) test, testAsync, folder, folderStatus, createFolder, deleteFolder, append, appendAsync, fetch, fetchAsync, fetchBodyAsync, get, search, markRead, markUnreadAsync, setFlagsAsync, unflag, copyAsync, move, delete, deleteAsync, expungeAsync, watch, close (24 项); 共 8 个用例 38 项, 全部通过. 与 R20 / R22 相关: MailClient# 24 个成员与 mail.accounts / providers 的嵌套方法 (has, list, resolve, get) 在三列实测可用, R22 归属 (P2.3 登记嵌套对象) 不变.
+
+### speech
+
+3-Macaw Speech 用设备原有的 1.1.0 (versionCode 81, release), 未替换. 识别用测试包内置的 6.625 秒 LibriSpeech WAV 与设备上已装的流式 ASR 模型; 合成以音量 0 播放 (抽样前后音乐音量均为 0); 麦克风与唤醒会话只开启即停止, 不发声, 与相邻手机的声学用例无冲突. 程序导入一个管理用模型包 (非推理模型), 临时改 ASR 默认后在 finally 中还原默认并移除导入的模型.
+
+| 用例 | 列 | 结果 | 秒 | 关键数值 |
+|---|---|---|---:|---|
+| RuntimeSpeechDeviceTest#nodeRecognitionSessionsAndModels | main | 通过 | 17.5 | 文件与偏移 PCM 视图各识别 104 字符 (6625 ms, 1 段), VAD 1 段, 外部会话 104 字符, 目录 11 个模型, 导入进度 2 次, 合成 13096 字节 (静音) |
+| ...#bunRecognitionSessionsAndModels | bun | 通过 | 19.1 | 同上, 合成 14666 字节 |
+| ...#workerRecognitionSessionsAndModels | worker | 通过 | 15.8 | 同上, 合成 13804 字节 |
+| ...#bunDeniedGrantAndMoreThan1024StreamingCalls | bun | 通过 | 11.8 | 无 speech.control 时 NOT_GRANTED; 1044 次流式调用不受 1024 次上限 |
+| ...#microphoneWakeAndEsmNestedWorkerCleanup | main / worker (3 种) | 通过 | 9.4 | 麦克风听写与唤醒会话开启并停止 (reason stopped), 3 种 Worker 清理 |
+| RuntimeSpeechNativeTest#pcmUploadsStayWithTheirClientAndDisappearOnClose | bridge | 通过 | 2.1 | PCM 上传归属客户端, 关闭后删除 |
+| ...#nativeArgumentFailuresKeepTheirSpeechCodeAcrossFragmentedPolling | bridge | 通过 | 2.2 | 分片轮询中参数错误保留 SpeechError 码 |
+
+项: 矩阵行 speech.isAvailable, capabilities, recognize, recognizeAsync, detectVoice, listen, wake, synthesize, speak, SpeechError, speech.models.list, getDefault, setDefault, importFile, install, installAsync, remove (17 / 19 行, 三列 bridged / capability-gated; 未直接调用 speech.synthesizeAsync 与 speech.models.refreshCatalog); 共 7 个用例 17 项, 全部通过.
