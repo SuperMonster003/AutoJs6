@@ -62,6 +62,11 @@ def main():
     parser.add_argument("--strict-arity", action="store_true", help="Fail on d.ts overloads disjoint from the implementation arity (default: report only)")
     parser.add_argument("--source", choices=["auto", "ksp", "kotlin"], default="auto",
                         help="Exports from script-modules.json (ksp, required in CI), the Kotlin registrations (kotlin), or ksp when the file exists (auto)")
+    parser.add_argument("--matrix", action="store_true",
+                        help="Also build runtime-matrix.json and fail when docs/api-coverage/MATRIX.md differs; pending and missing exclusion reasons are reported only (until D12)")
+    parser.add_argument("--write-matrix", action="store_true", help="Like --matrix, and rewrite docs/api-coverage/MATRIX.md")
+    parser.add_argument("--node", type=Path, help="Node runtime checkout for --matrix (default: sibling AutoJs6-Plugin-NodeJs-Runtime)")
+    parser.add_argument("--bun", type=Path, help="Bun runtime checkout for --matrix (default: sibling AutoJs6-Plugin-Bun-Runtime)")
     args = parser.parse_args()
     host = args.host.resolve()
     siblings = host.parent
@@ -109,12 +114,23 @@ def main():
     arity_summary = arity.report(host, baseline, output)
     if args.strict_arity:
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
+    matrix_summary = None
+    if args.matrix or args.write_matrix:
+        import runtime_matrix
+        node = (args.node or siblings / "AutoJs6-Plugin-NodeJs-Runtime").resolve()
+        bun = (args.bun or siblings / "AutoJs6-Plugin-Bun-Runtime").resolve()
+        typescript = args.typescript.resolve() if args.typescript else runtime_matrix.default_typescript(ace)
+        surfaces = json.loads((output / "surfaces.json").read_text(encoding="utf-8"))
+        matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented, surfaces=surfaces)
+        runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
+        matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN)
+        failures.extend(matrix_summary.pop("failures"))
     summary = {
         "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),
         "documentation": dict(Counter(row["status"] for row in documented)),
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
-        "arity": arity_summary,
+        "arity": arity_summary, "matrix": matrix_summary,
         "scope": baseline["scope"], "failures": failures,
     }
     (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

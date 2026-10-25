@@ -168,6 +168,56 @@ artifact) and `docs/api-coverage/MATRIX.md` (checked in, generated, never edited
 by hand). Manual annotations (module and member aliases, exclusion reasons,
 runtime equivalents) live only in `runtime-policy.json`.
 
+```text
+python tools/api-coverage/check.py --matrix         # also fails when MATRIX.md is stale
+python tools/api-coverage/check.py --write-matrix   # regenerate MATRIX.md
+```
+
+`--matrix` builds the matrix from the same run's `exports.json`,
+`documentation.json` and `surfaces.json` (with P0.3's arity statuses). It fails
+only when the checked-in `MATRIX.md` differs from the generated one; pending cells
+and exclusions without a valid reason are listed in `summary.json` `matrix.findings`
+without failing until the exclusion list is decided (roadmap D12 / Q1). A
+`MATRIX.md` generated from another data source (ksp versus kotlin) is reported as
+`skipped`, not stale. `python tools/api-coverage/runtime_matrix.py` rebuilds the
+matrix from an existing report directory. `MATRIX.md` contains no commit ids or
+dates, so it only changes when a state changes; the runtime checkout commits are
+recorded in the JSON `sources`.
+
+Runtime entries are declared entries, not behavior proofs (Rhino-equivalent
+behavior is reviewed in P1). The sources, all at the paths the roadmap names:
+
+- Node: `list-runtime-surfaces.mjs` lists, with the TypeScript checker (Ace's
+  bundled compiler unless `--typescript`), the members of every ambient module of
+  `docs/nodejs/types/autojs6-node/index.d.ts` (one nested level as dotted names,
+  `converter.bytes.toBytes`) and the `$autojs.<module>` entries. `autojs6:<name>`
+  is tried before the bare name. Module statuses come from `docs/HOST-API.md`:
+  the tables of sections 1-3 are bridged (detail kept as `hostApi`), the list in
+  section 4 is local-shim; modules it does not list are bridged. An entry in a
+  module listed in `runtime-policy.json` `node.nativeModules` (Node's own
+  `timers`, `http`, `util`, ...) is `not-portable` / `runtime-native` with the
+  native name as `equivalent`. `node-capability-catalog.json` adds the declared
+  Node capabilities.
+- Node Worker: the `hostModuleMethods` table of `app/src/main/cpp/node_bridge_sources.cpp`
+  is the set of modules a Worker resolves (`Object.keys(...)` of the main-thread
+  facade, or an explicit member list such as `database: ["open"]`); Node's
+  native modules are available as well. Other modules (local shims, `autojs6:compat`)
+  are pending in Workers.
+- Bun: members of the `HostClient` namespaces of `host-client.d.mts`, plus client
+  methods (`toast`). Every entry is `capability-gated`; the capability is the
+  related grant (same prefix, or `bun.namespaceCapabilities`) whose method table
+  (`HOST_API_METHODS`, read from `host-client.mjs`, which `host-client.d.mts` only
+  types) contains the member, else the only related grant. A namespace without
+  any related grant holds client-side helpers and is `local-shim` (`colors`).
+
+A row is looked up in its placement module, then through `runtime-policy.json`
+module aliases (`automator` -> `accessibility`), a global-object row through its
+owner module, then through the other placements of the same function, then the
+`globalModules` / `globalNamespaces` and the opt-in `autojs6:compat` facade. Only
+cells still pending take an exclusion rule; a rule matching a covered cell is
+reported as shadowed, a rule matching nothing as unused (`override: true` forces
+a rule).
+
 ### Row ids
 
 Row ids are stable; later checks, the documentation "runtime support" tables and
@@ -191,7 +241,7 @@ the Ace runtime queries join on them.
   "schema": "autojs6-runtime-matrix-v1",
   "generatedBy": "tools/api-coverage/runtime_matrix.py",
   "dataSource": {"kind": "ksp", "file": "app/build/.../script-modules.json"}, // exports.json dataSource
-  "sources": {"node": {"root": "...", "commit": "..."}, "bun": {...}, "documentation": "...", "surfaces": "..."},
+  "sources": {"node": {"root": "...", "commit": "...", "files": []}, "bun": {...}, "typescript": "6.0.3", "documentation": true, "surfaces": true},
   "columns": ["rhino", "doc", "dts", "ace", "node_main", "node_worker", "bun"],
   "summary": {
     "rows": 1368, "exports": 1368, "returnedMembers": 0,
@@ -230,16 +280,20 @@ the Ace runtime queries join on them.
 
 ```jsonc
 // CELL: status is bridged / local-shim / capability-gated / not-portable / denied / pending
-{"status": "bridged", "module": "autojs6:images", "member": "read", "async": true, "via": "same-name"} // Node
-{"status": "capability-gated", "namespace": "images", "member": "read", "capability": "image.process", "async": true, "via": "same-name"} // Bun
-{"status": "not-portable", "reason": "runtime-native", "equivalent": "setTimeout (Node timers)", "rule": "sync-timers"}
+{"status": "bridged", "module": "autojs6:images", "member": "read", "async": true, "via": "same-name", "hostApi": "bridged"} // Node
+{"status": "capability-gated", "namespace": "images", "member": "getSize", "capability": "image.process", "async": false, "via": "same-name"} // Bun
+{"status": "not-portable", "reason": "runtime-native", "equivalent": "node:timers.setTimeout", "module": "timers", "member": "setTimeout", "via": "owner-module"}
+{"status": "not-portable", "reason": "sync-only", "equivalent": "Node worker_threads / Bun Worker with message passing", "rule": "sync-threads"}
 {"status": "pending"}
 ```
 
 `member` is `"()"` when the module value itself is the callable entry. `async` is
-true when every declared signature of the entry returns a Promise. `via` tells how
-the entry was found: `same-name`, `alias` (through another placement of the same
-function), `module-alias` / `member-alias` (a `runtime-policy.json` mapping).
+true when every declared signature of the entry returns a thenable (Promise, Flow
+chain). `via` tells how the entry was found: `same-name`, `owner-module` (a
+global-object row in its owner module), `alias` (another placement of the same
+function), `module-alias` / `member-alias` (a `runtime-policy.json` mapping),
+`global-module`, `compat` (`autojs6:compat`), `client-member` (Bun). Cells set by an
+exclusion rule carry `rule` (and `note` when the rule has one) instead.
 `reason` is one of `security`, `sync-only`, `java-prototype`, `runtime-native`,
 `runtime-builtin`, `rhino-only`, `ui-thread`; a `runtime-native` cell must carry
 `equivalent`.
@@ -247,8 +301,9 @@ function), `module-alias` / `member-alias` (a `runtime-policy.json` mapping).
 ### Inputs from P0.3 and P0.4
 
 - P0.3 (arity): `extract_exports.py` adds `arity` to `records[]`; the matrix copies
-  it unchanged. When `surfaces.json` `rows[]` carries `arity.status` (`match`,
-  `wider`, `fail`, `unknown`), `dts` becomes `arity` for `match` and `wider`.
+  it unchanged. `check.py` adds `rows[].arity.status` to `surfaces.json` (`arity.py`
+  statuses); `dts` becomes `arity` for `match` and `wider`, where every count the
+  implementation accepts is declared, and stays `name` otherwise.
 - P0.4 (returned objects): `exports.json` gains a top-level `returnedObjects` list;
   each member becomes a `returned-member` row with the id `<object>#<name>`:
 
