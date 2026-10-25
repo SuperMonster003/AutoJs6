@@ -146,6 +146,113 @@ Its manual inputs can select coordinated branch names or commits when reviewing
 a change spanning all four repositories. A pass against one set of revisions
 does not certify a different set of published artifacts.
 
+## Runtime coverage matrix
+
+`runtime_matrix.py` (api-coverage roadmap P0.2, definition in section 4 of
+`docs/api-coverage/ROADMAP.md`) gives every explicit export one row with a state
+for Rhino, documentation, declarations, Ace, the Node main thread, Node Workers
+and Bun. It writes `build/reports/api-coverage/runtime-matrix.json` (the CI
+artifact) and `docs/api-coverage/MATRIX.md` (checked in, generated, never edited
+by hand). Manual annotations (module and member aliases, exclusion reasons,
+runtime equivalents) live only in `runtime-policy.json`.
+
+### Row ids
+
+Row ids are stable; later checks, the documentation "runtime support" tables and
+the Ace runtime queries join on them.
+
+- An explicit export's id is its `exports.json` `records[].api`: `<module>.<name>`
+  for a module member (`images.read`, `files.batchRename.apply`), `<name>` for a
+  member of the global object (module `""`: `toast`, `sleep`), `<target>.<name>`
+  for a name an install hook places on a global value (`wait.async`). The id does
+  not change when the denominator switches from the Kotlin registrations to
+  `script-modules.json` (augment T10). Each placement of a function is its own row
+  (`captureScreen` and `images.captureScreen`); the row lists the other placements
+  of the same owner, implementation and kind in `aliases`.
+- A member of a returned object (P0.4) has the id `<Object>#<member>`
+  (`UiObject#click`, `ImageWrapper#getWidth`). `#` never occurs in export ids.
+
+### runtime-matrix.json (schema `autojs6-runtime-matrix-v1`)
+
+```jsonc
+{
+  "schema": "autojs6-runtime-matrix-v1",
+  "generatedBy": "tools/api-coverage/runtime_matrix.py",
+  "dataSource": {"kind": "ksp", "file": "app/build/.../script-modules.json"}, // exports.json dataSource
+  "sources": {"node": {"root": "...", "commit": "..."}, "bun": {...}, "documentation": "...", "surfaces": "..."},
+  "columns": ["rhino", "doc", "dts", "ace", "node_main", "node_worker", "bun"],
+  "summary": {
+    "rows": 1368, "exports": 1368, "returnedMembers": 0,
+    "byColumn": {"node_main": {"bridged": 0, "pending": 0}},             // every column, every value
+    "pending": {"node_main": 0, "node_worker": 0, "bun": 0},
+    "missingReasons": [],      // excluded cells without a valid reason / equivalent
+    "policyConflicts": []      // exclusion rules shadowed by a real runtime entry, unused rules
+  },
+  "rows": [ROW]                // sorted by id
+}
+```
+
+```jsonc
+// ROW
+{
+  "id": "images.read",
+  "kind": "export",            // or "returned-member" (P0.4)
+  "module": "images",          // placement, "" = global object; null for returned members
+  "member": "read",
+  "ownerModule": "images",     // module that defines the export
+  "aliases": [],               // other row ids with the same owner, implementation and kind
+  "exportKind": "Functions",   // Functions / Getters / Properties / GettersAndSetters / JavaClasses
+  "registration": "@ScriptFunction",
+  "source": "app/src/main/java/.../ImagesModule.kt", "line": 63,
+  "metadataSource": "ksp",     // or "kotlin": records[].metadata (D9)
+  "surface": "public",         // or "internal" / "standard" (policy.json internalExports / standardExports)
+  "arity": null,               // reserved for P0.3: copied verbatim from records[].arity
+  "object": null, "producers": [], "memberSource": null,  // returned members (P0.4)
+  "rhino": "native",
+  "doc": "heading",            // none / mention / heading; signature / example reserved (P2)
+  "dts": "name",               // none / name; arity (P0.3) / typed (D9 step 2) reserved
+  "ace": "static",             // none / semantic (default and all-group LSP) / static (semantic + static index)
+  "node_main": CELL, "node_worker": CELL, "bun": CELL
+}
+```
+
+```jsonc
+// CELL: status is bridged / local-shim / capability-gated / not-portable / denied / pending
+{"status": "bridged", "module": "autojs6:images", "member": "read", "async": true, "via": "same-name"} // Node
+{"status": "capability-gated", "namespace": "images", "member": "read", "capability": "image.process", "async": true, "via": "same-name"} // Bun
+{"status": "not-portable", "reason": "runtime-native", "equivalent": "setTimeout (Node timers)", "rule": "sync-timers"}
+{"status": "pending"}
+```
+
+`member` is `"()"` when the module value itself is the callable entry. `async` is
+true when every declared signature of the entry returns a Promise. `via` tells how
+the entry was found: `same-name`, `alias` (through another placement of the same
+function), `module-alias` / `member-alias` (a `runtime-policy.json` mapping).
+`reason` is one of `security`, `sync-only`, `java-prototype`, `runtime-native`,
+`runtime-builtin`, `rhino-only`, `ui-thread`; a `runtime-native` cell must carry
+`equivalent`.
+
+### Inputs from P0.3 and P0.4
+
+- P0.3 (arity): `extract_exports.py` adds `arity` to `records[]`; the matrix copies
+  it unchanged. When `surfaces.json` `rows[]` carries `arity.status` (`match`,
+  `wider`, `fail`, `unknown`), `dts` becomes `arity` for `match` and `wider`.
+- P0.4 (returned objects): `exports.json` gains a top-level `returnedObjects` list;
+  each member becomes a `returned-member` row with the id `<object>#<name>`:
+
+```jsonc
+"returnedObjects": [{
+  "object": "UiObject", "class": "org.autojs.autojs.core.automator.UiObject",
+  "producers": ["selector.findOne", "findOne"],   // row ids returning the object
+  "memberSource": "kotlin-class",                 // or "augment-prototype" / "policy"
+  "members": [{"name": "click", "kind": "Functions", "source": "...", "line": 42, "arity": null}]
+}]
+```
+
+  Until the list exists the matrix has no returned-member rows. Their runtime
+  cells come from `runtime-policy.json` `returnedObjects` mappings and exclusions
+  (`java-prototype` is allowed); unmapped members are `pending`.
+
 ## Physical-device checks
 
 Build and install matching current host and instrumentation APKs with `adb install
