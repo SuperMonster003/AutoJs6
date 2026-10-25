@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.accessibility.codegen.plan
 
 import org.autojs.autojs.core.automator.selector.SelectorRegistry
+import org.autojs.autojs.core.automator.selector.SelectorResolution
 import java.util.Collections
 
 /**
@@ -14,7 +15,7 @@ data class Condition(val attr: String, val value: Any) {
         require(value is String || value is Boolean || value is Int) { "Unsupported selector literal type" }
         val entry = requireNotNull(SelectorRegistry.entry(attr)) { "Unknown selector condition: " + attr }
         require(attr != "algorithm" && attr != "currentApp") { "Plan conditions must be node predicates" }
-        require(entry.resolve(listOf(value), lenient = false) != null) { "Invalid argument for selector condition: " + attr }
+        require(entry.resolve(listOf(value), lenient = false) is SelectorResolution.Resolved) { "Invalid argument for selector condition: " + attr }
     }
 }
 

@@ -331,11 +331,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     internal fun addFilter(filter: Filter) = also { selector.add(filter) }
 
     internal fun useAlgorithm(name: String) {
-        searchAlgorithm = when {
-            name.equals("BFS", true) -> BFS
-            name.equals("DFS", true) -> DFS
-            else -> throw IllegalArgumentException(str(R.string.error_unknown_algorithm_selector_param, name))
-        }
+        searchAlgorithm = algorithmOf(name) ?: throw IllegalArgumentException(str(R.string.error_unknown_algorithm_selector_param, name))
     }
 
     fun append(selector: UiSelector?) = also {
@@ -355,6 +351,16 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     companion object {
 
         internal const val ID_IDENTIFIER = ":id/"
+
+        /**
+         * The search algorithm `algorithm(name)` selects (`BFS` / `DFS`, any case), or null for an unknown name; told
+         * before applying it (docs/selector/ROADMAP.md P1.4). zh-CN: `algorithm(name)` 选择的搜索算法 (`BFS` / `DFS`, 不区分大小写), 未知名称为 null; 施加前先查 (P1.4).
+         */
+        internal fun algorithmOf(name: String): SearchAlgorithm? = when {
+            name.equals("BFS", true) -> BFS
+            name.equals("DFS", true) -> DFS
+            else -> null
+        }
 
         /**
          * `pickup(root?, selector, compass?, resultType?, callback?)`: searches with the bridge of

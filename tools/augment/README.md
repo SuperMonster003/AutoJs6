@@ -89,7 +89,7 @@ JVM 差分测试 (`app/src/test/java/org/autojs/autojs/runtime/api/augment/diffe
 py -3.12 -I tools/augment/device_patterns.py -s SERIAL [--samples 100000] [--seed 70] [--verdicts FILE]
 ```
 
-在宿主进程里运行 `bench/patterns_check.js` (宿主须含 Q70 (2) 的 `selector/SelectorPatterns.kt`): 预检拒绝的正则都不得能被 JsRegexUtils.compileJsOrPlainRegex (Android 上为 ICU 的 java.util.regex.Pattern) 编译. 正则来自 JVM 用例的语料 (`app/src/test/resources/augment-q70/patterns.json`), `--samples` 条随机正则字符串与 `--samples` 条按语法构造的正则 (半数再变异). 每组打印条数, 不能编译, 被拒绝, 误拒 (为 0 时 PASS) 与交给编译的条数, 另记只有 Rhino `RegExp` 或只有 Pattern 接受的条数; `--verdicts` 保存语料每条的结果 (能编译, 被拒绝, RegExp 接受, 各 0 / 1) 供与 JVM 比较. 不需要开关, 不点按; XQ-AT72 上 10 万条约 45 秒, G8441 约 6 分钟.
+在宿主进程里运行 `bench/patterns_check.js` (宿主须含 Q70 (2) 的正则预检, selector P1.4 起为 `core/automator/filter/PatternPrecheck.kt`): 预检拒绝的正则都不得能被 JsRegexUtils.compileJsOrPlainRegex (Android 上为 ICU 的 java.util.regex.Pattern) 编译. 正则来自 JVM 用例的语料 (`app/src/test/resources/augment-q70/patterns.json`), `--samples` 条随机正则字符串与 `--samples` 条按语法构造的正则 (半数再变异). 每组打印条数, 不能编译, 被拒绝, 误拒 (为 0 时 PASS) 与交给编译的条数, 另记只有 Rhino `RegExp` 或只有 Pattern 接受的条数; `--verdicts` 保存语料每条的结果 (能编译, 被拒绝, RegExp 接受, 各 0 / 1) 供与 JVM 比较. 不需要开关, 不点按; XQ-AT72 上 10 万条约 45 秒, G8441 约 6 分钟.
 
 ## device_net.py: 需要网络对端的真机用例 (P3.5)
 

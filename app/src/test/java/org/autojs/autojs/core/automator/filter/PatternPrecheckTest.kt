@@ -1,6 +1,5 @@
-package org.autojs.autojs.runtime.api.modules.selector
+package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.filter.JsRegexUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -10,17 +9,17 @@ import java.util.regex.PatternSyntaxException
 import kotlin.random.Random
 
 /**
- * Appendix C Q70 (2): the pattern check of [SelectorPatterns] against the compiler it stands in for
+ * Appendix C Q70 (2): the pattern check of [PatternPrecheck] against the compiler it stands in for
  * (`JsRegexUtils.compileJsOrPlainRegex`, the JVM engine here; Android ICU on the devices, tools/augment/device_patterns.py).
  * A refused pattern must not compile, on any input: the hand-written cases and the patterns taken from the host sources
  * (resource `augment-q70/patterns.json`), random strings of regex characters and random patterns built from the syntax
  * and then mutated. The share of failing patterns the check leaves to compiling is printed (appendix A "Q70 (2)").
  *
- * zh-CN: 附录 C Q70 (2): [SelectorPatterns] 的正则检查与其代替的编译 (JsRegexUtils.compileJsOrPlainRegex, 此处为 JVM 引擎; 设备上为 Android ICU, 见
+ * zh-CN: 附录 C Q70 (2): [PatternPrecheck] 的正则检查与其代替的编译 (JsRegexUtils.compileJsOrPlainRegex, 此处为 JVM 引擎; 设备上为 Android ICU, 见
  * tools/augment/device_patterns.py) 对照. 被拒绝的正则在任何输入上都不得能编译: 手写用例与取自宿主源码的正则 (资源 augment-q70/patterns.json), 正则字符的
  * 随机串, 以及按语法随机构造再变异的正则. 打印检查交给编译的失败正则所占比例 (附录 A "Q70 (2)").
  */
-class SelectorPatternsTest {
+class PatternPrecheckTest {
 
     @Test
     fun corpusRefusalsDoNotCompile() {
@@ -59,12 +58,12 @@ class SelectorPatternsTest {
         listOf(
             "*a", "+", "?a", "a(*b)", "a(+b)", "a|*", "a|+", "a|?", "a\\", "\\", "[a", "a[b]c[d", "a)", ")", "a(b))", "(a", "((a)",
             "/a(/i", "/[/", "(?:a", "(?=a))", "[]", "[^]", "a**", "a{2}??", "(?i)*", "(?i)(", "\\p{L}(", "\\E", "a\\yb",
-        ).forEach { s -> assertEquals(s, described(compileError(s)), SelectorPatterns.refusal(s)) }
+        ).forEach { s -> assertEquals(s, described(compileError(s)), PatternPrecheck.refusal(s)) }
     }
 
     @Test
     fun refusedClasses() {
-        // One case of each class of refusal (the doc of SelectorPatterns); each must not compile either.
+        // One case of each class of refusal (the doc of PatternPrecheck); each must not compile either.
         listOf(
             "a{2,1}", "a{10,2}?", "a{,2}", "a{", "a{x}", "a{1 }", "{a", "x{1}{", "a{2}*", "a*??", "a+++",
             "(?<1a>x)", "(?<a_b>x)", "(?<>x)", "(?<a>x)(?<a>y)", "(?<a>x)|(?<a>y)", "(?P<a>x)", "(?'a'x)", "(?|a)", "(?R)", "(?1)", "(?z)", "(?iz)", "(?",
@@ -73,7 +72,7 @@ class SelectorPatternsTest {
             "[z-a]", "[\\x7a-\\x61]", "[\\u007a-a]", "[\\t-\\x01]", "[a[z-a]]", "[^z-a]", "[z-a&&b]", "[\\uD835\\uDFD8-a]", "[\\b]", "[\\R]", "[\\X]", "[\\A]",
             "[\\k<a>]", "[\\x]", "[\\0]", "[\\p{foo}]", "[a-\\]", "[[]]", "/[z-a]/i", "/a{2,1}/",
         ).forEach { s ->
-            assertNotNull(s, SelectorPatterns.refusal(s))
+            assertNotNull(s, PatternPrecheck.refusal(s))
             assertNotNull(s, runCatching { JsRegexUtils.compileJsOrPlainRegex(s) }.exceptionOrNull())
         }
     }
@@ -85,14 +84,14 @@ class SelectorPatternsTest {
             "(?#c)", "(?#[)[z-a]", "(?x)a{2, 1}", "\\Q(\\E", "\\Q[z-a", "\\b{g}", "^*", "\\b*", "(?=a)*", "a*{2}", "{1}", "}", "(?<=a*)", "(a)\\2",
             "\\c", "a\\xb", "\\U0001F600", "\\pL", "\\p{IsLatin}", "[A-\\C]a", "[0-\\p{NoSuch}]", "[ -\\k<a>]", "[a-\\x]", "[a&&]", "[&&a]", "[a--b]", "[!--]", "[[:foo:]]", "[a-\\p{L}]", "[\\1]",
             "[\\0400-0]", "(?)", "(?U)", "(?w)", "(?--i)", "\\1", "/x/u",
-        ).forEach { assertNull(it, SelectorPatterns.refusal(it)) }
+        ).forEach { assertNull(it, PatternPrecheck.refusal(it)) }
         // Compiling on both. zh-CN: 两种引擎都能编译.
         listOf(
             "", "a", "[(]", "[a]]", "[]a]", "[^]a]", "[a-]", "[-a]", "[\\w-]", "[a-b-a]", "[a[b]c]", "[a-z&&[^aeiou]]", "a{2}?", "a*+", "a{0,0}",
             "(?<a>x)\\k<a>", "(?i:a)", "(?-:a)", "(?i-)", "(?<=a{1,3})", "\\x{10FFFF}", "\\x{0000041}", "\\u0041", "\\cA", "\\00", "\\0377",
             "\\N{LATIN SMALL LETTER A}", "\\p{L}", "\\p{Lu}", "[\\p{L}-a]", "/a/i", "x[(]](?:)", "\\{", "a\\Q\\E*",
         ).forEach {
-            assertNull(it, SelectorPatterns.refusal(it))
+            assertNull(it, PatternPrecheck.refusal(it))
             JsRegexUtils.compileJsOrPlainRegex(it)
         }
     }
@@ -100,13 +99,13 @@ class SelectorPatternsTest {
     @Test
     fun namesAreCompiledOnce() {
         // The second check of a name reads the kept verdict; both give the same refusal.
-        val first = SelectorPatterns.refusal("\\p{NoSuchProperty}")
+        val first = PatternPrecheck.refusal("\\p{NoSuchProperty}")
         assertNotNull(first)
-        assertEquals(first, SelectorPatterns.refusal("\\p{NoSuchProperty}"))
-        assertNull(SelectorPatterns.refusal("\\p{Lu}\\p{Lu}"))
+        assertEquals(first, PatternPrecheck.refusal("\\p{NoSuchProperty}"))
+        assertNull(PatternPrecheck.refusal("\\p{Lu}\\p{Lu}"))
         // More names than are kept: verdicts are compiled again, never wrong.
-        repeat(200) { assertNotNull(SelectorPatterns.refusal("\\p{NoSuch$it}")) }
-        assertNull(SelectorPatterns.refusal("\\p{Lu}"))
+        repeat(200) { assertNotNull(PatternPrecheck.refusal("\\p{NoSuch$it}")) }
+        assertNull(PatternPrecheck.refusal("\\p{Lu}"))
     }
 
     /** Refusals that compile ([wrong]) and how many failing patterns are refused. */
@@ -119,7 +118,7 @@ class SelectorPatternsTest {
         fun check(s: String) {
             total++
             val compiles = runCatching { JsRegexUtils.compileJsOrPlainRegex(s) }.isSuccess
-            val refusal = SelectorPatterns.refusal(s)
+            val refusal = PatternPrecheck.refusal(s)
             if (!compiles) failing++
             if (refusal != null) {
                 refused++

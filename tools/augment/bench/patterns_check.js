@@ -6,7 +6,7 @@
 
 var dir = files.cwd();
 var args = JSON.parse(files.read(dir + '/patterns_args.json'));
-var check = org.autojs.autojs.runtime.api.modules.selector.SelectorPatterns.INSTANCE;
+var check = org.autojs.autojs.core.automator.filter.PatternPrecheck.INSTANCE;
 var regex = org.autojs.autojs.core.automator.filter.JsRegexUtils.INSTANCE;
 
 var seed = args.seed >>> 0;

@@ -3,6 +3,7 @@ package org.autojs.autojs.core.automator.selector
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.UiNode
 import org.autojs.autojs.core.automator.filter.BooleanFilter
+import org.autojs.autojs.core.automator.pick.PickMessages
 import org.autojs.autojs.rhino.JsArgumentCoercion
 import org.autojs.autojs.util.App
 import org.mozilla.javascript.regexp.NativeRegExp
@@ -119,13 +120,89 @@ class SelectorEntry(
 
     val isDeprecated: Boolean get() = deprecatedFor != null
 
-    /** The first overload accepting [args], with the coerced arguments. zh-CN: 首个接受 [args] 的重载及转换后的参数. */
-    fun resolve(args: List<Any?>, lenient: Boolean): Pair<SelectorOverload, List<Any?>>? {
+    /** Whether a string argument of this property is compiled as a pattern (`xxxMatches`, `xxxMatch`). zh-CN: 本属性的字符串参数是否按正则编译. */
+    private val compilesStrings: Boolean = name.endsWith("Matches") || name.endsWith("Match")
+
+    /**
+     * What the first overload accepting [args] makes of them, told without throwing (docs/selector/ROADMAP.md P1.4: the
+     * overload check of the former `SelectorChecks`): the overload with the coerced arguments, no overload, or a refusal
+     * of the overload that takes them (NaN for an integer, which `JsArgumentCoercion.toInt` cannot round; the name of
+     * an unknown `algorithm`). A pattern is not compiled here: [SelectorResolution.Resolved.patterns] names what
+     * applying the overload compiles.
+     * zh-CN: 首个接受 [args] 的重载对其的判定, 不抛异常 (P1.4: 原 `SelectorChecks` 的重载检查): 重载及转换后的参数, 没有重载, 或接受参数的重载拒绝了它们
+     * (整数处的 NaN, `JsArgumentCoercion.toInt` 无法取整; 未知的 `algorithm` 名称). 此处不编译正则: [SelectorResolution.Resolved.patterns] 给出施加重载时要编译的内容.
+     */
+    fun resolve(args: List<Any?>, lenient: Boolean): SelectorResolution {
         for (overload in overloads) {
-            val coerced = overload.coerce(args, lenient) ?: continue
-            return overload to coerced
+            if (overload.isVararg) {
+                if (args.none { it == null }) return SelectorResolution.Resolved(overload, args, emptyList())
+                continue
+            }
+            val params = overload.params
+            if (args.size != params.size) continue
+            var fits = true
+            for (i in params.indices) {
+                if (params[i].type == SelectorArgType.INT && isNaN(args[i])) return SelectorResolution.Rejected { NAN }
+                if (params[i].type.coerce(args[i], lenient) == null) {
+                    fits = false
+                    break
+                }
+            }
+            if (fits) return resolved(overload, args, lenient)
         }
-        return null
+        return SelectorResolution.NoOverload
+    }
+
+    private fun resolved(overload: SelectorOverload, args: List<Any?>, lenient: Boolean): SelectorResolution {
+        val coerced = overload.params.mapIndexed { i, param -> param.type.coerce(args[i], lenient) }
+        if (name == ALGORITHM) {
+            val algorithm = coerced[0] as String
+            if (UiSelector.algorithmOf(algorithm) == null) return SelectorResolution.Rejected { PickMessages.unknownAlgorithm(algorithm) }
+        }
+        val patterns = overload.params.indices.mapNotNull { i ->
+            when (overload.params[i].type) {
+                // StringMatcher compiles a RegExp from its string form, `/source/flags`, and a string as it is.
+                // zh-CN: StringMatcher 由 RegExp 的字符串形式 (/source/flags) 编译, 字符串则原样编译.
+                SelectorArgType.REGEX -> coerced[i].toString()
+                SelectorArgType.STRING -> if (compilesStrings) coerced[i] as String else null
+                else -> null
+            }
+        }
+        return SelectorResolution.Resolved(overload, coerced, patterns)
+    }
+
+    private fun isNaN(value: Any?) = value is Double && value.isNaN() || value is Float && value.isNaN()
+
+    private companion object {
+
+        const val ALGORITHM = "algorithm"
+
+        /** The message of `roundToInt` / `roundToLong` for NaN (kotlin.math). zh-CN: kotlin.math 的 roundToInt / roundToLong 对 NaN 的信息. */
+        const val NAN = "Cannot round NaN value."
+
+    }
+
+}
+
+/**
+ * What [SelectorEntry.resolve] makes of the arguments of a selector property.
+ * zh-CN: [SelectorEntry.resolve] 对选择器属性参数的判定.
+ */
+sealed class SelectorResolution {
+
+    /**
+     * The first overload accepting the arguments, with them [coerced][arguments]; applying it compiles [patterns] (the
+     * strings of the pattern conditions and the `/source/flags` form of a RegExp), each of which may still not compile.
+     * zh-CN: 首个接受参数的重载及转换后的 [arguments]; 施加它时会编译 [patterns] (正则条件的字符串与 RegExp 的 /source/flags 形式), 它们仍可能无法编译.
+     */
+    class Resolved(val overload: SelectorOverload, val arguments: List<Any?>, val patterns: List<String>) : SelectorResolution()
+
+    /** No overload takes the arguments. zh-CN: 没有重载接受参数. */
+    object NoOverload : SelectorResolution()
+
+    /** The overload that takes the arguments refuses them, for [reason] (read lazily: a string resource). zh-CN: 接受参数的重载拒绝了它们, 原因为 [reason] (读取时才生成). */
+    class Rejected(private val describe: () -> String) : SelectorResolution() {
+        val reason: String get() = describe()
     }
 
 }

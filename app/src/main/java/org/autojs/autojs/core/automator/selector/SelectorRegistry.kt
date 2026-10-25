@@ -65,9 +65,13 @@ object SelectorRegistry {
      */
     fun apply(selector: UiSelector, name: String, args: List<Any?>, lenient: Boolean = false): Outcome {
         val entry = byName[name] ?: return Outcome.NO_SUCH_PROPERTY
-        val (overload, coerced) = entry.resolve(args, lenient) ?: return Outcome.NO_MATCHING_OVERLOAD
-        overload.apply(selector, coerced)
-        return Outcome.APPLIED
+        return when (val resolution = entry.resolve(args, lenient)) {
+            is SelectorResolution.Resolved -> Outcome.APPLIED.also { resolution.overload.apply(selector, resolution.arguments) }
+            SelectorResolution.NoOverload -> Outcome.NO_MATCHING_OVERLOAD
+            // The exceptions building the condition threw before the refusals were told first (rounding NaN, UiSelector.useAlgorithm).
+            // zh-CN: 先行判定之前构建条件时抛出的异常 (NaN 取整, UiSelector.useAlgorithm).
+            is SelectorResolution.Rejected -> throw IllegalArgumentException(resolution.reason)
+        }
     }
 
     /* The table. zh-CN: 表. */

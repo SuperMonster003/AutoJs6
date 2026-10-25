@@ -2,7 +2,7 @@
 
 Usage: py -3.12 -I tools/augment/device_patterns.py -s SERIAL [--samples 100000] [--seed 70] [--verdicts FILE]
 
-Runs bench/patterns_check.js in the host process (a host built with SelectorPatterns, Q70 (2)): every pattern the check
+Runs bench/patterns_check.js in the host process (a host built with the pattern precheck, core/automator/filter/PatternPrecheck.kt since selector P1.4, Q70 (2)): every pattern the check
 refuses must not compile with JsRegexUtils.compileJsOrPlainRegex, i.e. java.util.regex.Pattern on ICU. The patterns are
 the corpus of the JVM test (app/src/test/resources/augment-q70/patterns.json), --samples random strings of regex
 characters and --samples random patterns built from the syntax (half of them mutated). Printed per group: patterns,
@@ -65,7 +65,7 @@ def main():
     for name in ("patterns_check.js", "patterns.json", "patterns_args.json", "patterns_verdicts.txt"):
         db.adb(s, "shell", "rm", "-f", f"{db.DEVICE_DIR}/{name}")
     if groups != 3:
-        print(f"FAIL {groups} of 3 groups reported (host without SelectorPatterns, or the script did not finish)")
+        print(f"FAIL {groups} of 3 groups reported (host without PatternPrecheck, or the script did not finish)")
         failed = True
     sys.exit(1 if failed else 0)
 

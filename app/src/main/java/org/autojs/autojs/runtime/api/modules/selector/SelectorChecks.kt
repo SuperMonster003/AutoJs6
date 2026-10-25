@@ -1,5 +1,6 @@
 package org.autojs.autojs.runtime.api.modules.selector
 
+import org.autojs.autojs.core.automator.filter.PatternPrecheck
 import org.autojs.autojs.core.automator.pick.Compass
 import org.autojs.autojs.core.automator.pick.CompassParser
 import org.autojs.autojs.core.automator.pick.CompassSyntaxException
@@ -125,13 +126,13 @@ internal object SelectorChecks {
 
     /**
      * Why [input] does not compile as `JsRegexUtils.compileJsOrPlainRegex` compiles it, or null when it is not refused
-     * here (it may still not compile): the full syntax check of [SelectorPatterns] (appendix C Q70 (2)), which refuses
+     * here (it may still not compile): the full syntax check of [PatternPrecheck] (appendix C Q70 (2)), which refuses
      * only what the engines of both the JVM and Android (ICU) refuse and leaves the rest to compiling.
      *
-     * zh-CN: [input] 按 JsRegexUtils.compileJsOrPlainRegex 的方式无法编译的原因; 此处不拒绝时为 null (仍可能无法编译). 由 [SelectorPatterns] 做完整的语法检查
+     * zh-CN: [input] 按 JsRegexUtils.compileJsOrPlainRegex 的方式无法编译的原因; 此处不拒绝时为 null (仍可能无法编译). 由 [PatternPrecheck] 做完整的语法检查
      * (附录 C Q70 (2)), 只拒绝 JVM 与 Android (ICU) 两种引擎都拒绝的写法, 其余交给编译判定.
      */
-    fun patternRefusal(input: String): String? = SelectorPatterns.refusal(input)
+    fun patternRefusal(input: String): String? = PatternPrecheck.refusal(input)
 
     /**
      * Whether [value] is a compass string as `Compass.isCompass` tells it: [Compass.PASS_ON], the empty string or the

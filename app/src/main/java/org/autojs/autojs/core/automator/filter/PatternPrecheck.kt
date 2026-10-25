@@ -1,10 +1,11 @@
-package org.autojs.autojs.runtime.api.modules.selector
+package org.autojs.autojs.core.automator.filter
 
-import org.autojs.autojs.core.automator.filter.JsRegexUtils
 import java.util.regex.Pattern
 
 /**
- * The pattern check of [SelectorChecks.patternRefusal] (appendix C Q70 (2)): a scan of the regular expression syntax
+ * The pattern precheck of the selector conditions that compile a pattern (augment appendix C Q70 (2), moved here from
+ * the new script module layer by docs/selector/ROADMAP.md P1.4; used by `PickArguments` and the global selector
+ * functions before `JsRegexUtils.compileJsOrPlainRegex` would compile a pattern): a scan of the regular expression syntax
  * that refuses a pattern only where the engines of both the JVM (`java.util.regex`) and Android (ICU behind
  * `java.util.regex.Pattern`) refuse it, so that a pattern which does not compile costs no Java exception on the way to
  * its RangeError (roadmap R2). It never refuses a pattern that compiles: where the engines differ, or where the scan
@@ -48,7 +49,8 @@ import java.util.regex.Pattern
  * The descriptions are those of `java.util.regex.PatternSyntaxException`. The JS literal form `/source/flags` is checked by
  * its source, as `JsRegexUtils.compileJsOrPlainRegex` compiles it.
  *
- * zh-CN: [SelectorChecks.patternRefusal] 的正则检查 (附录 C Q70 (2)): 逐字符扫描正则语法, 只拒绝 JVM (java.util.regex) 与 Android (java.util.regex.Pattern
+ * zh-CN: 编译正则的选择器条件的正则预检 (augment 附录 C Q70 (2), 由 P1.4 从新脚本模块层迁至此处; `PickArguments` 与全局选择器函数在
+ * JsRegexUtils.compileJsOrPlainRegex 编译之前使用): 逐字符扫描正则语法, 只拒绝 JVM (java.util.regex) 与 Android (java.util.regex.Pattern
  * 背后的 ICU) 两种引擎都拒绝的写法, 使无法编译的正则在报 RangeError 之前不经过 Java 异常 (R2). 不拒绝任何能编译的正则: 引擎有差异或扫描判断不了之处,
  * 扫描停止, 交给读取方照旧在 try 中编译.
  * 拒绝的写法 (两种引擎都拒绝, 已在 JVM 与 Android 9 / 12 上核对, 见附录 A "Q70 (2)"): 没有可重复内容的量词 (开头, ( 或 | 之后, (?i) 等标志组之后),
@@ -57,7 +59,7 @@ import java.util.regex.Pattern
  * 引擎有差异之处一律不拒绝: 构造在两种引擎中结束位置相同时继续扫描, 否则停止. 实测的差异逐条列在上面的英文部分; \p / \N 的名称差异很大, 每个名称由当前引擎
  * 编译一次并记住结果 (最多 [NAMES] 个). 描述沿用 java.util.regex.PatternSyntaxException 的写法.
  */
-internal object SelectorPatterns {
+internal object PatternPrecheck {
 
     /** The names of `\p` / `\P` / `\N` whose verdict is kept. zh-CN: 记住结果的 \p / \P / \N 名称个数. */
     private const val NAMES = 64
