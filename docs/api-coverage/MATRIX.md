@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 616 | 143 | 0 | 1123 | 1 | 844 |
-| Node Worker | 482 | 62 | 0 | 1183 | 1 | 999 |
-| Bun | 0 | 62 | 540 | 1182 | 1 | 942 |
+| Node main | 845 | 136 | 0 | 1123 | 1 | 622 |
+| Node Worker | 727 | 62 | 0 | 1183 | 1 | 754 |
+| Bun | 0 | 62 | 769 | 1182 | 1 | 713 |
 
 | 列 | 取值 |
 |---|---|
@@ -20,6 +20,8 @@
 | ace | none 543 / semantic 825 / static 1359 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: jsox-extensions shadowed (node_main, 54), rhino-engine shadowed (node_main, 3), sync-sleep shadowed (node_main, 1).
+
+拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 37 / Node Worker 3 / Bun 30. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
 ## 排除规则 (草案)
 
@@ -46,9 +48,9 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 194 | 205 | 205 | 93 / 16 / 99 | 47 / 17 / 144 | 75 / 17 / 116 |
-| AgentRun# | 14 | 7 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
-| AiSession# | 11 | 11 | 0 | 0 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
+| (global) | 208 | 194 | 205 | 205 | 99 / 16 / 93 | 66 / 17 / 125 | 81 / 17 / 110 |
+| AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
+| AiSession# | 11 | 11 | 0 | 0 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 0 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
 | Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
@@ -57,16 +59,16 @@
 | ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
 | Dialog# | 140 | 6 | 139 | 3 | 0 / 140 / 0 | 0 / 140 / 0 | 0 / 140 / 0 |
-| EpubBook# | 14 | 14 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
+| EpubBook# | 14 | 14 | 14 | 14 | 13 / 0 / 1 | 13 / 0 / 1 | 13 / 0 / 1 |
 | EpubReaderSession# | 35 | 20 | 34 | 32 | 0 / 35 / 0 | 0 / 35 / 0 | 0 / 35 / 0 |
 | FloatyWindow# | 12 | 9 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
-| Flow# | 106 | 25 | 106 | 106 | 0 / 0 / 106 | 0 / 0 / 106 | 0 / 0 / 106 |
+| Flow# | 106 | 25 | 106 | 106 | 104 / 0 / 2 | 104 / 0 / 2 | 104 / 0 / 2 |
 | ImageFeatures# | 12 | 10 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
 | ImageWrapper# | 16 | 15 | 16 | 6 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
 | InjectableWebClient# | 3 | 2 | 3 | 0 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | InjectableWebView# | 1 | 1 | 1 | 0 | 0 / 1 / 0 | 0 / 1 / 0 | 0 / 1 / 0 |
 | IntentTask# | 21 | 0 | 20 | 0 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
-| MailClient# | 53 | 53 | 53 | 53 | 0 / 0 / 53 | 0 / 0 / 53 | 0 / 0 / 53 |
+| MailClient# | 53 | 53 | 53 | 53 | 53 / 0 / 0 | 53 / 0 / 0 | 53 / 0 / 0 |
 | Mat# | 9 | 0 | 3 | 0 | 0 / 9 / 0 | 0 / 9 / 0 | 0 / 9 / 0 |
 | MatchingResult# | 16 | 15 | 16 | 16 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
 | Mathx | 23 | 21 | 23 | 23 | 23 / 0 / 0 | 0 / 23 / 0 | 0 / 23 / 0 |
@@ -80,9 +82,9 @@
 | ScreenCaptureOptions# | 5 | 5 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | ScriptEngine# | 29 | 12 | 26 | 0 | 0 / 29 / 0 | 0 / 29 / 0 | 0 / 29 / 0 |
 | ScriptExecution# | 13 | 5 | 12 | 0 | 0 / 13 / 0 | 0 / 13 / 0 | 0 / 13 / 0 |
-| ShellProcess# | 25 | 12 | 25 | 25 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
+| ShellProcess# | 25 | 12 | 25 | 25 | 15 / 0 / 10 | 15 / 0 / 10 | 15 / 0 / 10 |
 | ShellResult# | 5 | 5 | 5 | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
-| Storage# | 12 | 12 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
+| Storage# | 12 | 12 | 12 | 12 | 11 / 0 / 1 | 0 / 0 / 12 | 11 / 0 / 1 |
 | ThemeColor# | 10 | 0 | 10 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | TimedTask# | 69 | 0 | 44 | 0 | 0 / 69 / 0 | 0 / 69 / 0 | 0 / 69 / 0 |
 | TtsUtterance# | 25 | 11 | 23 | 21 | 0 / 25 / 0 | 0 / 25 / 0 | 0 / 25 / 0 |
@@ -94,17 +96,17 @@
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | Zip# | 21 | 20 | 20 | 20 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| app | 43 | 43 | 43 | 43 | 38 / 0 / 5 | 0 / 0 / 43 | 38 / 0 / 5 |
+| app | 43 | 43 | 43 | 43 | 25 / 0 / 18 | 0 / 0 / 43 | 25 / 0 / 18 |
 | auto | 37 | 37 | 37 | 37 | 0 / 1 / 36 | 0 / 1 / 36 | 0 / 1 / 36 |
 | autojs | 21 | 21 | 21 | 21 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | autojs.version | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
-| automator | 54 | 53 | 54 | 54 | 13 / 0 / 41 | 0 / 0 / 54 | 7 / 0 / 47 |
+| automator | 54 | 53 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
 | barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | base64 | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | colors | 81 | 81 | 81 | 81 | 62 / 0 / 19 | 62 / 0 / 19 | 62 / 0 / 19 |
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 16 | 16 | 16 | 16 | 15 / 0 / 1 | 15 / 0 / 1 | 15 / 0 / 1 |
-| console | 50 | 50 | 50 | 50 | 45 / 0 / 5 | 45 / 0 / 5 | 31 / 0 / 19 |
+| console | 50 | 50 | 50 | 50 | 42 / 0 / 8 | 42 / 0 / 8 | 31 / 0 / 19 |
 | continuation | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | crypto | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
@@ -113,7 +115,7 @@
 | engines | 8 | 8 | 8 | 8 | 5 / 1 / 2 | 0 / 3 / 5 | 0 / 3 / 5 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | events | 1 | 0 | 0 | 0 | 0 / 1 / 0 | 0 / 1 / 0 | 0 / 1 / 0 |
-| files | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 4 / 0 / 0 |
+| files | 4 | 4 | 4 | 4 | 2 / 0 / 2 | 0 / 0 / 4 | 2 / 0 / 2 |
 | files.batchRename | 17 | 17 | 17 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
 | floaty | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | flow | 55 | 30 | 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
@@ -140,7 +142,7 @@
 | plugins.tools | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | powerManager | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
-| s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 0 / 0 / 5 | 0 / 0 / 5 |
+| s13n | 5 | 5 | 5 | 5 | 1 / 0 / 4 | 0 / 0 / 5 | 0 / 0 / 5 |
 | settings | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | shell | 11 | 11 | 11 | 11 | 2 / 0 / 9 | 2 / 0 / 9 | 2 / 0 / 9 |
 | shizuku | 8 | 8 | 8 | 8 | 1 / 0 / 7 | 1 / 0 / 7 | 1 / 0 / 7 |
@@ -148,7 +150,7 @@
 | speech | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | sqlite | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
-| storages | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 0 / 0 / 5 | 5 / 0 / 0 |
+| storages | 5 | 5 | 5 | 5 | 3 / 0 / 2 | 0 / 0 / 5 | 3 / 0 / 2 |
 | sysprops | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
@@ -204,30 +206,21 @@
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `axios` | pending | pending | pending |
 | `back` | bridged | pending | capability-gated |
-| `backToApp` | pending | pending | pending |
-| `backUntil` | pending | pending | pending |
 | `cheerio` | pending | pending | pending |
 | `clearConsole` | bridged | bridged | pending |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `click` | bridged | pending | capability-gated |
-| `clickAny` | pending | pending | pending |
-| `clickBoundsAny` | pending | pending | pending |
-| `clickBoundsIfExists` | pending | pending | pending |
-| `clickIfExists` | pending | pending | pending |
-| `collectList` | pending | pending | pending |
 | `currentActivity` | pending | pending | pending |
 | `currentComponent` | pending | pending | pending |
 | `currentPackage` | pending | pending | pending |
 | `dayjs` | pending | pending | pending |
 | `detect` | pending | pending | pending |
-| `dismissPopups` | pending | pending | pending |
 | `err` | bridged | bridged | pending |
 | `existsAll` | pending | pending | pending |
 | `existsOne` | pending | pending | pending |
 | `exit` | pending | pending | pending |
-| `findAny` | pending | pending | pending |
 | `gesture` | bridged | pending | capability-gated |
 | `gestureAsync` | pending | pending | pending |
 | `gestures` | pending | pending | pending |
@@ -240,7 +233,7 @@
 | `input` | pending | pending | pending |
 | `isAutoJs6` | pending | pending | pending |
 | `isBigInt` | pending | pending | pending |
-| `isDualInstalled` | bridged | pending | capability-gated |
+| `isDualInstalled` | pending (rejects) | pending | pending (rejects) |
 | `isEmptyObject` | pending | pending | pending |
 | `isInstalled` | bridged | pending | capability-gated |
 | `isInteger` | pending | pending | pending |
@@ -256,18 +249,17 @@
 | `isStopped` | pending | pending | pending |
 | `isUiThread` | pending | pending | pending |
 | `keepAlive` | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) |
-| `kill` | bridged | pending | capability-gated |
-| `killDual` | bridged | pending | capability-gated |
+| `kill` | pending (rejects) | pending | pending (rejects) |
+| `killDual` | pending (rejects) | pending | pending (rejects) |
 | `launch` | bridged | pending | capability-gated |
-| `launchAndWait` | pending | pending | pending |
 | `launchApp` | bridged | pending | capability-gated |
 | `launchAppDetailsSettings` | bridged | pending | capability-gated |
 | `launchConsole` | bridged | bridged | pending |
-| `launchDual` | bridged | pending | capability-gated |
-| `launchDualApp` | bridged | pending | capability-gated |
-| `launchDualAppDetailsSettings` | bridged | pending | capability-gated |
-| `launchDualPackage` | bridged | pending | capability-gated |
-| `launchDualSettings` | bridged | pending | capability-gated |
+| `launchDual` | pending (rejects) | pending | pending (rejects) |
+| `launchDualApp` | pending (rejects) | pending | pending (rejects) |
+| `launchDualAppDetailsSettings` | pending (rejects) | pending | pending (rejects) |
+| `launchDualPackage` | pending (rejects) | pending | pending (rejects) |
+| `launchDualSettings` | pending (rejects) | pending | pending (rejects) |
 | `launchPackage` | bridged | pending | capability-gated |
 | `launchSettings` | bridged | pending | capability-gated |
 | `log` | bridged | bridged | pending |
@@ -278,12 +270,12 @@
 | `newWebSocket` | pending | pending | pending |
 | `notStopped` | pending | pending | pending |
 | `notifications` | bridged | pending | pending |
-| `open` | local-shim | pending | capability-gated |
+| `open` | pending (rejects) | pending | pending (rejects) |
 | `openAppSetting` | bridged | pending | capability-gated |
 | `openAppSettings` | bridged | pending | capability-gated |
 | `openConsole` | bridged | bridged | pending |
-| `openDualAppSetting` | bridged | pending | capability-gated |
-| `openDualAppSettings` | bridged | pending | capability-gated |
+| `openDualAppSetting` | pending (rejects) | pending | pending (rejects) |
+| `openDualAppSettings` | pending (rejects) | pending | pending (rejects) |
 | `pangu` | pending | pending | pending |
 | `pickup` | pending | pending | pending |
 | `powerDialog` | bridged | pending | pending |
@@ -298,7 +290,6 @@
 | `requiresAutojsVersion` | pending | pending | pending |
 | `retry` | pending | pending | pending |
 | `scrollDown` | pending | pending | pending |
-| `scrollUntil` | pending | pending | pending |
 | `scrollUp` | pending | pending | pending |
 | `sendBroadcast` | bridged | pending | capability-gated |
 | `sendEmail` | bridged | pending | capability-gated |
@@ -311,11 +302,9 @@
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `showConsole` | bridged | bridged | pending |
 | `sleep` | bridged | not-portable: runtime-native (sync-sleep) | not-portable: runtime-native (sync-sleep) |
-| `smartClick` | pending | pending | pending |
-| `smartClickBounds` | pending | pending | pending |
 | `splitScreen` | bridged | pending | pending |
 | `startActivity` | bridged | pending | capability-gated |
-| `startDualActivity` | bridged | pending | capability-gated |
+| `startDualActivity` | pending (rejects) | pending | pending (rejects) |
 | `startService` | bridged | pending | capability-gated |
 | `stop` | pending | pending | pending |
 | `swipe` | bridged | pending | capability-gated |
@@ -331,56 +320,15 @@
 | `toastlog` | pending | pending | pending |
 | `toastverbose` | pending | pending | pending |
 | `toastwarn` | pending | pending | pending |
-| `toggle` | pending | pending | pending |
-| `typeInto` | pending | pending | pending |
 | `uninstall` | bridged | pending | capability-gated |
-| `uninstallDual` | bridged | pending | capability-gated |
+| `uninstallDual` | pending (rejects) | pending | pending (rejects) |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `verbose` | bridged | bridged | pending |
 | `wait` | pending | pending | pending |
 | `wait.async` | pending | pending | pending |
 | `waitForActivity` | pending | pending | pending |
-| `waitForEvent` | pending | pending | pending |
-| `waitForIdle` | pending | pending | pending |
-| `waitForNotification` | pending | pending | pending |
 | `waitForPackage` | pending | pending | pending |
-| `waitForToast` | pending | pending | pending |
 | `warn` | bridged | bridged | pending |
-
-### AgentRun#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `AgentRun#cancel` | pending | pending | pending |
-| `AgentRun#confirm` | pending | pending | pending |
-| `AgentRun#detached` | pending | pending | pending |
-| `AgentRun#error` | pending | pending | pending |
-| `AgentRun#goal` | pending | pending | pending |
-| `AgentRun#id` | pending | pending | pending |
-| `AgentRun#join` | pending | pending | pending |
-| `AgentRun#off` | pending | pending | pending |
-| `AgentRun#on` | pending | pending | pending |
-| `AgentRun#once` | pending | pending | pending |
-| `AgentRun#respond` | pending | pending | pending |
-| `AgentRun#result` | pending | pending | pending |
-| `AgentRun#startedAt` | pending | pending | pending |
-| `AgentRun#state` | pending | pending | pending |
-
-### AiSession#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `AiSession#ask` | pending | pending | pending |
-| `AiSession#backend` | pending | pending | pending |
-| `AiSession#chat` | pending | pending | pending |
-| `AiSession#close` | pending | pending | pending |
-| `AiSession#isClosed` | pending | pending | pending |
-| `AiSession#model` | pending | pending | pending |
-| `AiSession#profile` | pending | pending | pending |
-| `AiSession#provider` | pending | pending | pending |
-| `AiSession#state` | pending | pending | pending |
-| `AiSession#stream` | pending | pending | pending |
-| `AiSession#target` | pending | pending | pending |
 
 ### App#
 
@@ -781,20 +729,7 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `EpubBook#annotations` | pending | pending | pending |
-| `EpubBook#close` | pending | pending | pending |
-| `EpubBook#cover` | pending | pending | pending |
-| `EpubBook#isClosed` | pending | pending | pending |
-| `EpubBook#metadata` | pending | pending | pending |
-| `EpubBook#path` | pending | pending | pending |
-| `EpubBook#positions` | pending | pending | pending |
-| `EpubBook#readingOrder` | pending | pending | pending |
-| `EpubBook#resource` | pending | pending | pending |
-| `EpubBook#search` | pending | pending | pending |
-| `EpubBook#text` | pending | pending | pending |
-| `EpubBook#textAll` | pending | pending | pending |
 | `EpubBook#toString` | pending | pending | pending |
-| `EpubBook#toc` | pending | pending | pending |
 
 ### EpubReaderSession#
 
@@ -857,112 +792,8 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Flow#appendText` | pending | pending | pending |
 | `Flow#await` | pending | pending | pending |
-| `Flow#back` | pending | pending | pending |
-| `Flow#backToApp` | pending | pending | pending |
-| `Flow#backUntil` | pending | pending | pending |
-| `Flow#cancel` | pending | pending | pending |
-| `Flow#catch` | pending | pending | pending |
-| `Flow#clear` | pending | pending | pending |
-| `Flow#clearFocus` | pending | pending | pending |
-| `Flow#click` | pending | pending | pending |
-| `Flow#clickAfter` | pending | pending | pending |
-| `Flow#clickAny` | pending | pending | pending |
-| `Flow#clickBounds` | pending | pending | pending |
-| `Flow#clickBoundsAfter` | pending | pending | pending |
-| `Flow#clickBoundsAny` | pending | pending | pending |
-| `Flow#clickBoundsIfExists` | pending | pending | pending |
-| `Flow#clickBoundsWait` | pending | pending | pending |
-| `Flow#clickBoundsWhenStable` | pending | pending | pending |
-| `Flow#clickBoundsWhenStableAfter` | pending | pending | pending |
-| `Flow#clickIfExists` | pending | pending | pending |
-| `Flow#clickWait` | pending | pending | pending |
-| `Flow#clickWhenStable` | pending | pending | pending |
-| `Flow#clickWhenStableAfter` | pending | pending | pending |
-| `Flow#collapse` | pending | pending | pending |
-| `Flow#collectList` | pending | pending | pending |
-| `Flow#contextClick` | pending | pending | pending |
-| `Flow#copy` | pending | pending | pending |
-| `Flow#cut` | pending | pending | pending |
-| `Flow#delay` | pending | pending | pending |
-| `Flow#dismiss` | pending | pending | pending |
-| `Flow#dismissNotificationShade` | pending | pending | pending |
-| `Flow#dismissPopups` | pending | pending | pending |
-| `Flow#else` | pending | pending | pending |
-| `Flow#error` | pending | pending | pending |
-| `Flow#expand` | pending | pending | pending |
-| `Flow#filter` | pending | pending | pending |
-| `Flow#finally` | pending | pending | pending |
-| `Flow#findAny` | pending | pending | pending |
-| `Flow#focus` | pending | pending | pending |
-| `Flow#gesture` | pending | pending | pending |
-| `Flow#gestures` | pending | pending | pending |
-| `Flow#home` | pending | pending | pending |
-| `Flow#imeEnter` | pending | pending | pending |
-| `Flow#launchAndWait` | pending | pending | pending |
-| `Flow#lockScreen` | pending | pending | pending |
-| `Flow#longClick` | pending | pending | pending |
-| `Flow#longClickAfter` | pending | pending | pending |
-| `Flow#map` | pending | pending | pending |
-| `Flow#notifications` | pending | pending | pending |
-| `Flow#paste` | pending | pending | pending |
-| `Flow#peek` | pending | pending | pending |
-| `Flow#performAction` | pending | pending | pending |
-| `Flow#powerDialog` | pending | pending | pending |
-| `Flow#press` | pending | pending | pending |
-| `Flow#quickSettings` | pending | pending | pending |
-| `Flow#recents` | pending | pending | pending |
-| `Flow#repeatUntil` | pending | pending | pending |
-| `Flow#retry` | pending | pending | pending |
-| `Flow#run` | pending | pending | pending |
-| `Flow#scope` | pending | pending | pending |
-| `Flow#scrollBackward` | pending | pending | pending |
-| `Flow#scrollDown` | pending | pending | pending |
-| `Flow#scrollForward` | pending | pending | pending |
-| `Flow#scrollLeft` | pending | pending | pending |
-| `Flow#scrollRight` | pending | pending | pending |
-| `Flow#scrollUntil` | pending | pending | pending |
-| `Flow#scrollUp` | pending | pending | pending |
-| `Flow#select` | pending | pending | pending |
-| `Flow#setText` | pending | pending | pending |
-| `Flow#show` | pending | pending | pending |
-| `Flow#sleep` | pending | pending | pending |
-| `Flow#smartClick` | pending | pending | pending |
-| `Flow#smartClickBounds` | pending | pending | pending |
-| `Flow#splitScreen` | pending | pending | pending |
-| `Flow#state` | pending | pending | pending |
-| `Flow#step` | pending | pending | pending |
-| `Flow#swipe` | pending | pending | pending |
 | `Flow#sync` | pending | pending | pending |
-| `Flow#takeScreenshot` | pending | pending | pending |
-| `Flow#then` | pending | pending | pending |
-| `Flow#timeout` | pending | pending | pending |
-| `Flow#toPromise` | pending | pending | pending |
-| `Flow#toString` | pending | pending | pending |
-| `Flow#toggle` | pending | pending | pending |
-| `Flow#typeInto` | pending | pending | pending |
-| `Flow#value` | pending | pending | pending |
-| `Flow#wait` | pending | pending | pending |
-| `Flow#waitForActivity` | pending | pending | pending |
-| `Flow#waitForEvent` | pending | pending | pending |
-| `Flow#waitForGone` | pending | pending | pending |
-| `Flow#waitForHidden` | pending | pending | pending |
-| `Flow#waitForIdle` | pending | pending | pending |
-| `Flow#waitForNotification` | pending | pending | pending |
-| `Flow#waitForPackage` | pending | pending | pending |
-| `Flow#waitForStable` | pending | pending | pending |
-| `Flow#waitForStableThenClick` | pending | pending | pending |
-| `Flow#waitForStableThenClickBounds` | pending | pending | pending |
-| `Flow#waitForToast` | pending | pending | pending |
-| `Flow#waitForVisible` | pending | pending | pending |
-| `Flow#waitThenClick` | pending | pending | pending |
-| `Flow#waitThenClickBounds` | pending | pending | pending |
-| `Flow#waitThenLongClick` | pending | pending | pending |
-| `Flow#waitUntil` | pending | pending | pending |
-| `Flow#waitWhile` | pending | pending | pending |
-| `Flow#whenPresent` | pending | pending | pending |
-| `Flow#within` | pending | pending | pending |
 
 ### ImageFeatures#
 
@@ -1041,64 +872,6 @@
 | `IntentTask#setScriptPath` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `IntentTask#setScriptPathAndCaptureContext` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `IntentTask#setSourceKind` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### MailClient#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `MailClient#account` | pending | pending | pending |
-| `MailClient#append` | pending | pending | pending |
-| `MailClient#appendAsync` | pending | pending | pending |
-| `MailClient#close` | pending | pending | pending |
-| `MailClient#copy` | pending | pending | pending |
-| `MailClient#copyAsync` | pending | pending | pending |
-| `MailClient#createFolder` | pending | pending | pending |
-| `MailClient#createFolderAsync` | pending | pending | pending |
-| `MailClient#delete` | pending | pending | pending |
-| `MailClient#deleteAsync` | pending | pending | pending |
-| `MailClient#deleteFolder` | pending | pending | pending |
-| `MailClient#deleteFolderAsync` | pending | pending | pending |
-| `MailClient#download` | pending | pending | pending |
-| `MailClient#downloadAsync` | pending | pending | pending |
-| `MailClient#expunge` | pending | pending | pending |
-| `MailClient#expungeAsync` | pending | pending | pending |
-| `MailClient#fetch` | pending | pending | pending |
-| `MailClient#fetchAsync` | pending | pending | pending |
-| `MailClient#fetchBody` | pending | pending | pending |
-| `MailClient#fetchBodyAsync` | pending | pending | pending |
-| `MailClient#flag` | pending | pending | pending |
-| `MailClient#flagAsync` | pending | pending | pending |
-| `MailClient#folder` | pending | pending | pending |
-| `MailClient#folderStatus` | pending | pending | pending |
-| `MailClient#folderStatusAsync` | pending | pending | pending |
-| `MailClient#folders` | pending | pending | pending |
-| `MailClient#foldersAsync` | pending | pending | pending |
-| `MailClient#get` | pending | pending | pending |
-| `MailClient#getAsync` | pending | pending | pending |
-| `MailClient#isClosed` | pending | pending | pending |
-| `MailClient#isConnected` | pending | pending | pending |
-| `MailClient#markRead` | pending | pending | pending |
-| `MailClient#markReadAsync` | pending | pending | pending |
-| `MailClient#markUnread` | pending | pending | pending |
-| `MailClient#markUnreadAsync` | pending | pending | pending |
-| `MailClient#move` | pending | pending | pending |
-| `MailClient#moveAsync` | pending | pending | pending |
-| `MailClient#raw` | pending | pending | pending |
-| `MailClient#rawAsync` | pending | pending | pending |
-| `MailClient#renameFolder` | pending | pending | pending |
-| `MailClient#renameFolderAsync` | pending | pending | pending |
-| `MailClient#search` | pending | pending | pending |
-| `MailClient#searchAsync` | pending | pending | pending |
-| `MailClient#send` | pending | pending | pending |
-| `MailClient#sendAsync` | pending | pending | pending |
-| `MailClient#setFlags` | pending | pending | pending |
-| `MailClient#setFlagsAsync` | pending | pending | pending |
-| `MailClient#test` | pending | pending | pending |
-| `MailClient#testAsync` | pending | pending | pending |
-| `MailClient#toString` | pending | pending | pending |
-| `MailClient#unflag` | pending | pending | pending |
-| `MailClient#unflagAsync` | pending | pending | pending |
-| `MailClient#watch` | pending | pending | pending |
 
 ### Mat#
 
@@ -1328,30 +1101,15 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `ShellProcess#addListener` | pending | pending | pending |
-| `ShellProcess#closeInput` | pending | pending | pending |
-| `ShellProcess#command` | pending | pending | pending |
-| `ShellProcess#exitCode` | pending | pending | pending |
 | `ShellProcess#getErrorStream` | pending | pending | pending |
 | `ShellProcess#getInputStream` | pending | pending | pending |
 | `ShellProcess#getOutputStream` | pending | pending | pending |
 | `ShellProcess#isAlive` | pending | pending | pending |
-| `ShellProcess#kill` | pending | pending | pending |
 | `ShellProcess#listenerCount` | pending | pending | pending |
-| `ShellProcess#mode` | pending | pending | pending |
-| `ShellProcess#off` | pending | pending | pending |
-| `ShellProcess#on` | pending | pending | pending |
-| `ShellProcess#once` | pending | pending | pending |
-| `ShellProcess#pid` | pending | pending | pending |
 | `ShellProcess#prependListener` | pending | pending | pending |
 | `ShellProcess#prependOnceListener` | pending | pending | pending |
-| `ShellProcess#readErrorLine` | pending | pending | pending |
-| `ShellProcess#readLine` | pending | pending | pending |
-| `ShellProcess#removeAllListeners` | pending | pending | pending |
 | `ShellProcess#removeListener` | pending | pending | pending |
 | `ShellProcess#toString` | pending | pending | pending |
-| `ShellProcess#waitFor` | pending | pending | pending |
-| `ShellProcess#write` | pending | pending | pending |
-| `ShellProcess#writeLine` | pending | pending | pending |
 
 ### ShellResult#
 
@@ -1367,17 +1125,17 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Storage#clear` | pending | pending | pending |
-| `Storage#clearSync` | pending | pending | pending |
-| `Storage#contains` | pending | pending | pending |
-| `Storage#get` | pending | pending | pending |
-| `Storage#name` | pending | pending | pending |
-| `Storage#put` | pending | pending | pending |
-| `Storage#putSync` | pending | pending | pending |
-| `Storage#remove` | pending | pending | pending |
-| `Storage#removeSync` | pending | pending | pending |
-| `Storage#selfRemove` | pending | pending | pending |
-| `Storage#selfRemoveSync` | pending | pending | pending |
+| `Storage#clear` | bridged | pending | capability-gated |
+| `Storage#clearSync` | bridged | pending | capability-gated |
+| `Storage#contains` | bridged | pending | capability-gated |
+| `Storage#get` | bridged | pending | capability-gated |
+| `Storage#name` | bridged | pending | capability-gated |
+| `Storage#put` | bridged | pending | capability-gated |
+| `Storage#putSync` | bridged | pending | capability-gated |
+| `Storage#remove` | bridged | pending | capability-gated |
+| `Storage#removeSync` | bridged | pending | capability-gated |
+| `Storage#selfRemove` | bridged | pending | capability-gated |
+| `Storage#selfRemoveSync` | bridged | pending | capability-gated |
 | `Storage#size` | pending | pending | pending |
 
 ### ThemeColor#
@@ -2003,35 +1761,35 @@
 | `app.getUriForFile` | bridged | pending | capability-gated |
 | `app.intent` | bridged | pending | capability-gated |
 | `app.intentToShell` | bridged | pending | capability-gated |
-| `app.isDualInstalled` | bridged | pending | capability-gated |
+| `app.isDualInstalled` | pending (rejects) | pending | pending (rejects) |
 | `app.isInstalled` | bridged | pending | capability-gated |
-| `app.kill` | bridged | pending | capability-gated |
-| `app.killDual` | bridged | pending | capability-gated |
+| `app.kill` | pending (rejects) | pending | pending (rejects) |
+| `app.killDual` | pending (rejects) | pending | pending (rejects) |
 | `app.launch` | bridged | pending | capability-gated |
 | `app.launchApp` | bridged | pending | capability-gated |
 | `app.launchAppDetailsSettings` | bridged | pending | capability-gated |
-| `app.launchDual` | bridged | pending | capability-gated |
-| `app.launchDualApp` | bridged | pending | capability-gated |
-| `app.launchDualAppDetailsSettings` | bridged | pending | capability-gated |
-| `app.launchDualPackage` | bridged | pending | capability-gated |
-| `app.launchDualSettings` | bridged | pending | capability-gated |
+| `app.launchDual` | pending (rejects) | pending | pending (rejects) |
+| `app.launchDualApp` | pending (rejects) | pending | pending (rejects) |
+| `app.launchDualAppDetailsSettings` | pending (rejects) | pending | pending (rejects) |
+| `app.launchDualPackage` | pending (rejects) | pending | pending (rejects) |
+| `app.launchDualSettings` | pending (rejects) | pending | pending (rejects) |
 | `app.launchPackage` | bridged | pending | capability-gated |
 | `app.launchSettings` | bridged | pending | capability-gated |
 | `app.openAppSetting` | bridged | pending | capability-gated |
 | `app.openAppSettings` | bridged | pending | capability-gated |
-| `app.openDualAppSetting` | bridged | pending | capability-gated |
-| `app.openDualAppSettings` | bridged | pending | capability-gated |
-| `app.openDualUrl` | bridged | pending | capability-gated |
+| `app.openDualAppSetting` | pending (rejects) | pending | pending (rejects) |
+| `app.openDualAppSettings` | pending (rejects) | pending | pending (rejects) |
+| `app.openDualUrl` | pending (rejects) | pending | pending (rejects) |
 | `app.openUrl` | bridged | pending | capability-gated |
 | `app.parseUri` | bridged | pending | capability-gated |
 | `app.sendBroadcast` | bridged | pending | capability-gated |
 | `app.sendEmail` | bridged | pending | capability-gated |
 | `app.sendLocalBroadcastSync` | pending | pending | pending |
 | `app.startActivity` | bridged | pending | capability-gated |
-| `app.startDualActivity` | bridged | pending | capability-gated |
+| `app.startDualActivity` | pending (rejects) | pending | pending (rejects) |
 | `app.startService` | bridged | pending | capability-gated |
 | `app.uninstall` | bridged | pending | capability-gated |
-| `app.uninstallDual` | bridged | pending | capability-gated |
+| `app.uninstallDual` | pending (rejects) | pending | pending (rejects) |
 | `app.versionCode` | bridged | pending | capability-gated |
 | `app.versionName` | bridged | pending | capability-gated |
 | `app.viewFile` | bridged | pending | capability-gated |
@@ -2125,19 +1883,10 @@
 | `automator.accessibilityButtonChooser` | pending | pending | pending |
 | `automator.accessibilityShortcut` | pending | pending | pending |
 | `automator.back` | bridged | pending | capability-gated |
-| `automator.backToApp` | pending | pending | pending |
-| `automator.backUntil` | pending | pending | pending |
 | `automator.captureScreen` | pending | pending | pending |
 | `automator.click` | bridged | pending | capability-gated |
-| `automator.clickAny` | pending | pending | pending |
-| `automator.clickBoundsAny` | pending | pending | pending |
-| `automator.clickBoundsIfExists` | pending | pending | pending |
-| `automator.clickIfExists` | pending | pending | pending |
-| `automator.collectList` | pending | pending | pending |
 | `automator.dismissNotificationShade` | pending | pending | pending |
-| `automator.dismissPopups` | pending | pending | pending |
 | `automator.ensureService` | pending | pending | pending |
-| `automator.findAny` | pending | pending | pending |
 | `automator.gesture` | bridged | pending | capability-gated |
 | `automator.gestureAsync` | pending | pending | pending |
 | `automator.gestures` | pending | pending | pending |
@@ -2147,7 +1896,6 @@
 | `automator.home` | bridged | pending | capability-gated |
 | `automator.input` | pending | pending | pending |
 | `automator.isServiceRunning` | pending | pending | pending |
-| `automator.launchAndWait` | pending | pending | pending |
 | `automator.lockScreen` | bridged | pending | pending |
 | `automator.longClick` | bridged | pending | capability-gated |
 | `automator.notifications` | bridged | pending | pending |
@@ -2157,23 +1905,14 @@
 | `automator.recents` | pending | pending | pending |
 | `automator.retry` | pending | pending | pending |
 | `automator.scrollDown` | pending | pending | pending |
-| `automator.scrollUntil` | pending | pending | pending |
 | `automator.scrollUp` | pending | pending | pending |
 | `automator.setText` | bridged | pending | capability-gated |
-| `automator.smartClick` | pending | pending | pending |
-| `automator.smartClickBounds` | pending | pending | pending |
 | `automator.splitScreen` | bridged | pending | pending |
 | `automator.swipe` | bridged | pending | capability-gated |
 | `automator.switchToInputMethod` | pending | pending | pending |
 | `automator.switchToInputMethodWithId` | pending | pending | pending |
 | `automator.takeScreenshot` | bridged | pending | pending |
-| `automator.toggle` | pending | pending | pending |
-| `automator.typeInto` | pending | pending | pending |
-| `automator.waitForEvent` | pending | pending | pending |
-| `automator.waitForIdle` | pending | pending | pending |
-| `automator.waitForNotification` | pending | pending | pending |
 | `automator.waitForService` | pending | pending | pending |
-| `automator.waitForToast` | pending | pending | pending |
 
 ### barcode
 
@@ -2240,14 +1979,14 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `console.assert` | bridged | bridged | pending |
-| `console.build` | bridged | bridged | pending |
+| `console.build` | pending (rejects) | pending (rejects) | pending |
 | `console.error` | bridged | bridged | pending |
 | `console.info` | bridged | bridged | pending |
-| `console.input` | bridged | bridged | pending |
+| `console.input` | pending (rejects) | pending (rejects) | pending |
 | `console.log` | bridged | bridged | pending |
 | `console.print` | bridged | bridged | pending |
 | `console.printAllStackTrace` | bridged | bridged | pending |
-| `console.rawInput` | bridged | bridged | pending |
+| `console.rawInput` | pending (rejects) | pending (rejects) | pending |
 | `console.setAvoidStatusBar` | pending | pending | pending |
 | `console.setColorful` | pending | pending | pending |
 | `console.setInputVisible` | pending | pending | pending |
@@ -2340,9 +2079,9 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `files.join` | local-shim | pending | capability-gated |
-| `files.open` | local-shim | pending | capability-gated |
+| `files.open` | pending (rejects) | pending | pending (rejects) |
 | `files.path` | local-shim | pending | capability-gated |
-| `files.toFile` | local-shim | pending | capability-gated |
+| `files.toFile` | pending (rejects) | pending | pending (rejects) |
 
 ### files.batchRename
 
@@ -2607,10 +2346,10 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `s13n.bytes` | local-shim | pending | pending |
-| `s13n.color` | local-shim | pending | pending |
-| `s13n.point` | local-shim | pending | pending |
-| `s13n.throwable` | local-shim | pending | pending |
-| `s13n.time` | local-shim | pending | pending |
+| `s13n.color` | pending (rejects) | pending | pending |
+| `s13n.point` | pending (rejects) | pending | pending |
+| `s13n.throwable` | pending (rejects) | pending | pending |
+| `s13n.time` | pending (rejects) | pending | pending |
 
 ### settings
 
@@ -2693,9 +2432,9 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `storages.all` | bridged | pending | capability-gated |
+| `storages.all` | pending (rejects) | pending | pending (rejects) |
 | `storages.create` | bridged | pending | capability-gated |
-| `storages.names` | bridged | pending | capability-gated |
+| `storages.names` | pending (rejects) | pending | pending (rejects) |
 | `storages.remove` | bridged | pending | capability-gated |
 | `storages.removeSync` | bridged | pending | capability-gated |
 
