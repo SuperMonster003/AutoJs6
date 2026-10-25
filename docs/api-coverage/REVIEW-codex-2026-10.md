@@ -232,6 +232,7 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | P2.3 (返回对象与嵌套对象) | R22 |
 | P3 / P4 补缺批次 | R2 (控制台), R3 (Bun 拼音常量, P4), R6 (compose.ComposeError, UI 族), R7 (可桥接部分, UI 族), R8 (Worker, 各族), R9 (自动化族), R10 / R14 / R16 / R18 (系统与设备族), R11 / R19 / R21 (文件与数据族) |
 | P3.6 (HOST-API 同步) | R5 |
+| P1.2 真机抽样 A (Redmi) | 无失败项 (41 个用例全部通过, 见 "P1.2 真机抽样 A (Redmi)" 节); 设备证据补强 R20 / Q27 与 R15; 待决 Q34 (自动点击系统授权界面的用例) |
 
 ## P1.2 真机抽样 A (Redmi)
 
@@ -317,7 +318,7 @@ Shizuku 抽样前未运行: 维护者同意后由本会话经 adb 运行设备�
 | ...#mainNodeAndBunStreamOrdinaryAndShizukuProcesses | main / bun, 普通与 Shizuku 各一轮 | 通过 | 32.8 | 普通进程 uid 10778 (= 宿主), Shizuku 进程 uid 2000; 70000 字节二进制 stdin / stdout 一致; 流式两行间隔 373-404 ms (退出前到达); PTY, 超时码 124, AbortSignal, close 均通过 |
 | ...#workersCjsEsmAndNestedReleaseShellsWithoutTouchingParents | main / worker (CJS / ESM / 嵌套) | 通过 | 38.3 | 三种 Worker 普通 uid 10778 / Shizuku uid 2000, 流式间隔 365-387 ms; Worker 结束释放自己的进程, 父执行的进程存活 |
 
-项: 矩阵行 shell.spawn, shell.checkAccess (运行时 getAccess), shizuku.spawn (经 `shizuku: true` 选项) 三列 bridged / capability-gated, 均通过; 运行时扩展 shell.exec, shell.execFile, shell.open, shizuku.requestPermission, shizuku.exec / shell.execRoot (拒绝路径); 运行时 ShellProcess 句柄成员 write, writeLine, readLine, closeInput, waitFor, close, on (output / errorOutput), ready / exited / closed, stdout / stderr 流; 共 3 个用例 18 项, 全部通过. 与 R20 / Q27 相关: 矩阵 ShellProcess# 25 行三列 pending, 其中 write / writeLine / readLine / closeInput / waitFor / on 在 Node main / Worker / Bun 的运行时句柄上已实测可用 (同名), Rhino 的 kill 对应运行时 close; 支持 Q27 (a) 按句柄类型映射. R14 的 shell / shizuku pending 行 (currentActivity, execCommand, isRootAvailable, setDefaultOptions, state 等) 运行时无入口, 无从抽样.
+项: 矩阵行 shell.spawn, shell.checkAccess (运行时 getAccess) 三列 bridged / capability-gated, 均通过 (shizuku.spawn 未直接调用, 用例经 shell.spawn / exec / open 的 `shizuku: true` 选项走同一 Shizuku 进程路径); 运行时扩展 shell.exec, shell.execFile, shell.open, shizuku.requestPermission, shizuku.exec / shell.execRoot (拒绝路径); 运行时 ShellProcess 句柄成员 write, writeLine, readLine, closeInput, waitFor, close, on (output / errorOutput), ready / exited / closed, stdout / stderr 流; 共 3 个用例 18 项, 全部通过. 与 R20 / Q27 相关: 矩阵 ShellProcess# 25 行三列 pending, 其中 write / writeLine / readLine / closeInput / waitFor / on 在 Node main / Worker / Bun 的运行时句柄上已实测可用 (同名), Rhino 的 kill 对应运行时 close; 支持 Q27 (a) 按句柄类型映射. R14 的 shell / shizuku pending 行 (currentActivity, execCommand, isRootAvailable, setDefaultOptions, state 等) 运行时无入口, 无从抽样.
 
 ### 事件 / 通知 (含 device / dialogs)
 
@@ -335,3 +336,22 @@ AutoJs6 的通知使用权抽样前未开启: 维护者在手机上开启, 抽�
 | ...#esmAndNestedWorkerExitReleaseOwnedWindowsAndLocks | main / worker (3 种) | 通过 | 12.7 | Worker 结束释放自己的对话框与唤醒锁, 父进度框存活 |
 
 项: 矩阵行 dialogs.alert, confirm, input, rawInput, prompt, select, singleChoice, multiChoice (dialogs 8 个 bridged 行全部), device.vibrate, device.width / height / density (经 getWidth / getHeight / getDensity), notice.cancel (经 notifications.cancel, R15 别名) 三列均通过; 运行时扩展 events.observeNotification, observeToast, observeKey, observeBroadcasts, on, once, close, notifications.notify, cancelAll, getPermissionStatus, openNotificationSettings, openSettings (拒绝路径), device.getInfo, keepScreenOn, cancelKeepingAwake, wakeUp, getMusicVolume / setMusicVolume, isIgnoringBatteryOptimizations, openBatteryOptimizationSettings (dryRun), dialogs.progress; 共 8 个用例 36 项, 全部通过. R16 的 notice 12 行与 R18 的 device 21 行 pending 运行时无入口, 无从抽样.
+
+### 汇总, 未抽项与恢复
+
+| 族 | 用例 | 项 | 通过 / 失败 | 列 |
+|---|---:|---:|---|---|
+| 图像 (含截图) | 14 | 43 | 14 / 0 | main / worker / bun (截图三列均实拍) |
+| UI / Compose 与 View 互操作 | 11 | 20 组 (矩阵行 11) | 11 / 0 | main / worker / bun |
+| WebView (文件 / 下载批) | 5 | 14 | 5 / 0 | main / worker / bun |
+| shell + Shizuku | 3 | 18 | 3 / 0 | main / worker / bun, 普通与 Shizuku (uid 2000) |
+| 事件 / 通知, device / dialogs | 8 | 36 | 8 / 0 | main / worker / bun |
+| 合计 | 41 | | 41 / 0 | |
+
+结论: 抽样范围内 Codex 宣称的设备行为在当前主工作区构建 (宿主 98f03b1f7, Node 1.32.0 / 292, Bun 0.21.0 / 296) 上全部复现, 数值与 Codex 的 Redmi 记录一致 (SIFT 203 / ORB 181 / 0.831 px, Shizuku uid 2000), 无失败项与新增不一致, 第 9 节归属表只加一行指向本节. 设备证据补强两条待决: R20 / Q27 (ShellProcess 运行时句柄的同名成员三列实测可用), R15 别名 (notice.cancel 经 notifications.cancel 三列可用).
+
+未抽 (原因): 打包应用用例 (D11); Codex 各批的 Node / Bun 插件自身测试 APK (nodejs.test / bun.runtime.test, 非宿主族用例); WebView 的 SAF 与相机用例, WebMedia 批 (测试自动操作系统文档选择器 / 相机 / 麦克风权限界面, 见 Q34); 录屏与音频 (CaptureWorker 录屏 4 个方法, RecordingAudio, 不在本族清单); 矩阵 pending 行 (运行时无入口, 无从抽样).
+
+授权与人工操作: Shizuku 由本会话经 adb 启动, 维护者确认 AutoJs6 已授权; 通知使用权由维护者开启并在结束后关闭; Node main 截图由维护者点 Start now; Worker / Bun 及 asyncCapture 的 3 个截图用例由测试代码自动点击 MediaProjection, 维护者对本轮一次性允许 (Q34). 测试在宿主重启后重绑已授权的无障碍服务与通知监听, 只针对已授权组件.
+
+恢复与核对 (`device_sample_a.py restore` / `verify`): 宿主, 宿主测试包, Node, Bun 四个包装回抽样前 APK, 十个记录包的 versionCode 与 md5 全部与抽样前一致; 旋转, 熄屏时间, 充电常亮, 亮度与亮度模式, 无障碍服务列表 (集合), 通知使用权列表, appops PROJECT_MEDIA / SYSTEM_ALERT_WINDOW / POST_NOTIFICATION 模式, RECORD_AUDIO / CAMERA / POST_NOTIFICATIONS 授予状态均一致 (verify 退出码 0); 亮度, 无障碍与通知监听三项的抽样前值是首次安装前用 adb 读取后补入记录的. Shizuku 服务已停止 (管理器界面进程由维护者打开, 保留). 维护者在结束后重开了 AutoJs6 无障碍服务; dumpsys 的已绑定服务仍只有系统 Mi AI, 另 3 个插件的已启用服务同样未绑定, 抽样前未记录绑定状态. 证据 JSON 每条用例后即从设备删除; Shizuku 启动器自身在 /data/local/tmp 写入的 shizuku / shizuku_starter 保留 (启动器每次运行都会重写).

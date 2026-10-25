@@ -320,11 +320,24 @@ def compare(serial, state, packages):
     for group, current in (("settings", {f"{ns}/{key}": sh(serial, f"settings get {ns} {key}") for ns, key in SETTINGS}),
                            ("appops", {f"{p}/{op}": sh(serial, f"appops get {p} {op}") for p, op in APPOPS})):
         for key, value in current.items():
-            same = state[group].get(key) == value
+            if key not in state[group]:
+                print(f"verify {group} {key}: not recorded (now {normalize(key, value)})")
+                continue
+            same = normalize(key, state[group][key]) == normalize(key, value)
             if not same:
                 differences.append(key)
-            print(f"verify {group} {key}: {'same' if same else 'CHANGED: ' + value}")
+            print(f"verify {group} {key}: {'same' if same else 'CHANGED: ' + normalize(key, value)}")
     return differences
+
+
+def normalize(key, value):
+    """Service lists compare as sets; app ops compare by mode, not by their relative access times."""
+    if key.startswith("secure/enabled_"):
+        return ":".join(sorted(part for part in value.split(":") if part and part != "null"))
+    if "/" in key and key.split("/", 1)[1].isupper():
+        match = re.match(r"\w+: (\w+)", value)
+        return match.group(1) if match else value
+    return value
 
 
 def restore(args):
