@@ -42,6 +42,29 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
 
     data class SelectorStats(val selector: String, val searches: Timing, val queries: Timing, val found: Long)
 
+    /**
+     * The framework fast path of the polled queries (docs/selector/ROADMAP.md P2.3 / P2.4): [hits] attempts answered by
+     * a single candidate, [misses] attempts answered "nothing" by an empty lookup, [fallbacks] attempts with a key that
+     * walked the tree all the same (several candidates, the last attempt, a verification), [mismatches] full searches
+     * that found nodes after an empty lookup (appendix C Q1: expected to stay 0).
+     * zh-CN: 轮询查询的框架快路径 (P2.3 / P2.4): [hits] 由唯一候选作答的尝试, [misses] 由空查找判定未找到的尝试, [fallbacks] 有键但仍遍历整棵树的尝试
+     * (多个候选, 最后一次尝试, 校验), [mismatches] 查找为空而完整搜索找到节点的次数 (附录 C Q1: 应保持为 0).
+     */
+    data class FastPathCounts(val hits: Long, val misses: Long, val fallbacks: Long, val mismatches: Long) {
+
+        val isEmpty: Boolean get() = hits == 0L && misses == 0L && fallbacks == 0L && mismatches == 0L
+
+        companion object {
+
+            val NONE = FastPathCounts(0, 0, 0, 0)
+
+        }
+
+    }
+
+    /** One event of the fast path, see [FastPathCounts]. zh-CN: 快路径的一次事件, 见 [FastPathCounts]. */
+    enum class FastPathEvent { HIT, MISS, FALLBACK, MISMATCH }
+
     data class StepStats(val name: String, val runs: Timing, val rejected: Long)
 
     /**
@@ -56,6 +79,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
         val queries: QueryTiming,
         val selectors: List<SelectorStats>,
         val steps: List<StepStats>,
+        val fastPath: FastPathCounts = FastPathCounts.NONE,
     ) {
 
         val elapsed: Long get() = now - since
@@ -69,6 +93,10 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
             append("\nsearches: ").append(searches.count).append(", ").append(timing(searches))
             append("\nqueries: ").append(queries.count).append(" (found ").append(queries.found).append(", missed ").append(queries.missed)
             append(", attempts ").append(queries.attempts).append("), ").append(timing(Timing(queries.count, queries.totalMillis, queries.maxMillis)))
+            if (!fastPath.isEmpty) {
+                append("\nfast path: hits ").append(fastPath.hits).append(", misses ").append(fastPath.misses)
+                append(", fallbacks ").append(fastPath.fallbacks).append(", mismatches ").append(fastPath.mismatches)
+            }
             if (selectors.isNotEmpty()) {
                 append("\nslowest selectors (by max search time):")
                 selectors.take(MAX_RENDERED_SELECTORS).forEachIndexed { index, s ->
@@ -138,6 +166,8 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
 
     private var attempts = 0L
 
+    private val fastPath = LongArray(FastPathEvent.entries.size)
+
     private val selectors = LinkedHashMap<String, SelectorBucket>()
 
     private val steps = LinkedHashMap<String, StepBucket>()
@@ -164,6 +194,12 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
         if (found) bucket.found += 1
     }
 
+    /** One [event] of the fast path. zh-CN: 快路径的一次 [event]. */
+    @Synchronized
+    fun recordFastPath(event: FastPathEvent) {
+        fastPath[event.ordinal] += 1
+    }
+
     /** One settled Flow step named [name]. zh-CN: 一个已结算的名为 [name] 的 Flow 步骤. */
     @Synchronized
     fun recordStep(name: String, elapsed: Long, rejected: Boolean) {
@@ -178,6 +214,7 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
         queries.apply { count = 0; total = 0; max = 0 }
         found = 0
         attempts = 0
+        fastPath.fill(0)
         selectors.clear()
         steps.clear()
         since = clock()
@@ -193,6 +230,12 @@ class A11yStats(private val clock: () -> Long = System::currentTimeMillis) {
             .sortedWith(compareByDescending<SelectorStats> { it.searches.maxMillis }.thenByDescending { it.searches.totalMillis }),
         steps = steps.map { (name, b) -> StepStats(name, b.runs.timing(), b.rejected) }
             .sortedWith(compareByDescending<StepStats> { it.runs.totalMillis }.thenByDescending { it.runs.count }),
+        fastPath = FastPathCounts(
+            hits = fastPath[FastPathEvent.HIT.ordinal],
+            misses = fastPath[FastPathEvent.MISS.ordinal],
+            fallbacks = fastPath[FastPathEvent.FALLBACK.ordinal],
+            mismatches = fastPath[FastPathEvent.MISMATCH.ordinal],
+        ),
     )
 
     private fun bucket(selector: String): SelectorBucket = selectors[selector] ?: when {

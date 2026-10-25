@@ -70,6 +70,7 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         ::wait.name,
         ::setMode.name,
         ::setFlags.name,
+        ::clearFlags.name,
         ::getWindowRoot.name,
         ::setWindowFilter.name,
         ::findWindows.name,
@@ -157,7 +158,11 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
             "useShell" to AccessibilityBridge.FLAG_USE_SHELL,
             "appWindowsFallback" to AccessibilityBridge.FLAG_APP_WINDOWS_FALLBACK,
             "eventAssistedPolling" to AccessibilityBridge.FLAG_EVENT_ASSISTED_POLLING,
+            "noFastPath" to AccessibilityBridge.FLAG_NO_FAST_PATH,
         )
+
+        /** The prefix that clears a flag in `auto.setFlags` (docs/selector/ROADMAP.md appendix C Q2). zh-CN: `auto.setFlags` 中清除标志的前缀 (附录 C Q2). */
+        private const val FLAG_NEGATION = "!"
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
@@ -370,16 +375,42 @@ class Auto(private val scriptRuntime: ScriptRuntime) : Augmentable(scriptRuntime
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun setFlags(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsOnlyOne(args) {
-            var flagsInt = 0
-            when (it) {
-                is NativeArray -> it
-                is String -> listOf(it)
-                else -> throw WrappedIllegalArgumentException("Unknown flags ($it) for auto.setFlags")
-            }.forEach { s ->
-                val flag = flags[s] ?: throw WrappedIllegalArgumentException("Unknown flag ($s) for auto.setFlags")
-                flagsInt = flagsInt or flag
+            // The flags given replace the current ones, on top of the defaults: a name sets its flag, a name prefixed
+            // with "!" clears it (appendix C Q2; `!noFastPath` turns the fast path back on).
+            // zh-CN: 给出的标志在默认值之上替换当前标志: 名字设置其标志, 带 "!" 前缀的名字清除它 (附录 C Q2; `!noFastPath` 重新开启快路径).
+            var set = 0
+            var cleared = 0
+            flagNames(it, "setFlags").forEach { s ->
+                val name = "$s"
+                val negated = name.startsWith(FLAG_NEGATION)
+                val flag = flags[name.removePrefix(FLAG_NEGATION)] ?: throw WrappedIllegalArgumentException("Unknown flag ($s) for auto.setFlags")
+                if (negated) cleared = cleared or flag else set = set or flag
             }
-            scriptRuntime.accessibilityBridge.flags = flagsInt
+            if (set and cleared != 0) {
+                throw WrappedIllegalArgumentException("Flags both set and cleared (${flags.filterValues { v -> v and set and cleared != 0 }.keys.joinToString()}) for auto.setFlags")
+            }
+            scriptRuntime.accessibilityBridge.flags = (AccessibilityBridge.DEFAULT_FLAGS or set) and cleared.inv()
+        }
+
+        /**
+         * `auto.clearFlags(names)` (appendix C Q2): clears the flags named, the others stay as they are.
+         * zh-CN: `auto.clearFlags(names)` (附录 C Q2): 清除给出名字的标志, 其余保持不变.
+         */
+        @JvmStatic
+        @RhinoRuntimeFunctionInterface
+        fun clearFlags(scriptRuntime: ScriptRuntime, args: Array<out Any?>) = ensureArgumentsOnlyOne(args) {
+            var cleared = 0
+            flagNames(it, "clearFlags").forEach { s ->
+                cleared = cleared or (flags["$s"] ?: throw WrappedIllegalArgumentException("Unknown flag ($s) for auto.clearFlags"))
+            }
+            val bridge = scriptRuntime.accessibilityBridge
+            bridge.flags = bridge.flags and cleared.inv()
+        }
+
+        private fun flagNames(names: Any?, function: String): List<Any?> = when (names) {
+            is NativeArray -> names
+            is String -> listOf(names)
+            else -> throw WrappedIllegalArgumentException("Unknown flags ($names) for auto.$function")
         }
 
         @JvmStatic

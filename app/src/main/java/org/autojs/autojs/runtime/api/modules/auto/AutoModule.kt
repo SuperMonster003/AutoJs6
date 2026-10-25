@@ -137,18 +137,38 @@ class AutoModule(private val runtime: ScriptRuntime) {
     @ScriptFunction
     fun setMode(mode: Any) = Auto.setModeRhinoWithRuntime(runtime, modeOf("auto.setMode", "mode", mode))
 
+    /** `auto.setFlags(flags)`: a name prefixed with `!` clears its flag (docs/selector/ROADMAP.md appendix C Q2). */
     @ScriptFunction
     fun setFlags(flags: Any) {
+        val names = flagNames("auto.setFlags", flags, negation = true)
+        val set = names.filterNot { it.startsWith("!") }.toSet()
+        names.forEachIndexed { i, name ->
+            if (name.startsWith("!") && name.substring(1) in set) throw GlobalValues.cannotBe("auto.setFlags", "flags[$i]", "\"$name\" together with \"${name.substring(1)}\"")
+        }
+        Auto.setFlags(runtime, arrayOf(if (flags is CharSequence) flags.toString() else names.toNativeArray()))
+    }
+
+    /** `auto.clearFlags(flags)`: clears the flags named, the others stay (appendix C Q2). */
+    @ScriptFunction
+    fun clearFlags(flags: Any) {
+        val names = flagNames("auto.clearFlags", flags, negation = false)
+        Auto.clearFlags(runtime, arrayOf(if (flags is CharSequence) flags.toString() else names.toNativeArray()))
+    }
+
+    // The names of a flag argument (a string or an array of strings), each one checked against FLAGS ("!" allowed for setFlags).
+    private fun flagNames(function: String, flags: Any, negation: Boolean): List<String> {
         val names = when (flags) {
             is CharSequence -> listOf(flags)
             is NativeArray -> flags.toList()
-            else -> throw GlobalValues.typeError("auto.setFlags", "flags", "string | string[]", flags)
+            else -> throw GlobalValues.typeError(function, "flags", "string | string[]", flags)
         }
-        names.forEachIndexed { i, flag ->
-            if (flag !is CharSequence) throw GlobalValues.typeError("auto.setFlags", "flags[$i]", "string", flag)
-            if (flag.toString() !in FLAGS.set) throw GlobalValues.rangeError("auto.setFlags", "flags[$i]", FLAGS.quoted, flag)
+        return names.mapIndexed { i, flag ->
+            if (flag !is CharSequence) throw GlobalValues.typeError(function, "flags[$i]", "string", flag)
+            val name = flag.toString()
+            val bare = if (negation) name.removePrefix("!") else name
+            if (bare !in FLAGS.set) throw GlobalValues.rangeError(function, "flags[$i]", if (negation) FLAGS_NEGATABLE else FLAGS.quoted, flag)
+            name
         }
-        Auto.setFlags(runtime, arrayOf(if (flags is CharSequence) flags.toString() else names.map { it.toString() }.toNativeArray()))
     }
 
     @ScriptFunction
@@ -277,8 +297,11 @@ class AutoModule(private val runtime: ScriptRuntime) {
         /** The modes of `auto.setMode`, as the current module accepts them (any case). */
         val MODES = FlowOptions.Words(listOf("normal", "fast"))
 
-        /** The flags of `auto.setFlags`. */
-        val FLAGS = FlowOptions.Words(listOf("findOnUiThread", "useUsageStats", "useShell", "appWindowsFallback", "eventAssistedPolling"))
+        /** The flags of `auto.setFlags` / `auto.clearFlags`. */
+        val FLAGS = FlowOptions.Words(listOf("findOnUiThread", "useUsageStats", "useShell", "appWindowsFallback", "eventAssistedPolling", "noFastPath"))
+
+        /** What `auto.setFlags` accepts: a flag, or a flag prefixed with `!` (appendix C Q2). */
+        val FLAGS_NEGATABLE = "${FLAGS.quoted} (or one of them prefixed with \"!\")"
     }
 
 }

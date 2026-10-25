@@ -5,17 +5,20 @@ import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.automator.query.PollPolicy
 import org.autojs.autojs.core.automator.query.Poller
+import org.autojs.autojs.core.automator.search.FastPath
 import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 
 /**
  * A selector search repeated under a [PollPolicy]: `find()` / `findOnce()` / `exists()` are the
  * [PollPolicy.ONCE] case, `findOne(timeout)` is [PollPolicy.within], `untilFind*()` is
- * [PollPolicy.FOREVER]. Every attempt is a full [UiSelector.find]; the search posted to the UI
- * thread under `FLAG_FIND_ON_UI_THREAD` is given the policy's timeout as its budget. The sleep
- * between attempts is interruptible, so stopping the script ends an unbounded query.
+ * [PollPolicy.FOREVER]. Every attempt is a [UiSelector.find], told by [FastPath.Query] whether it
+ * is an intermediate attempt, where an empty framework lookup may stand for the walk (P2.3); the
+ * search posted to the UI thread under `FLAG_FIND_ON_UI_THREAD` is given the policy's timeout as its
+ * budget. The sleep between attempts is interruptible, so stopping the script ends an unbounded query.
  * zh-CN: 在 [PollPolicy] 下重复进行的选择器搜索: `find()` / `findOnce()` / `exists()` 为 [PollPolicy.ONCE], `findOne(timeout)` 为
- * [PollPolicy.within], `untilFind*()` 为 [PollPolicy.FOREVER]. 每次尝试都是一次完整的 [UiSelector.find]; `FLAG_FIND_ON_UI_THREAD`
- * 下投递到 UI 线程的搜索以计划的超时为预算. 尝试之间的休眠可中断, 因此停止脚本会结束无上限的查询.
+ * [PollPolicy.within], `untilFind*()` 为 [PollPolicy.FOREVER]. 每次尝试都是一次 [UiSelector.find], 由 [FastPath.Query] 告知是否为中间尝试
+ * (中间尝试中框架查找为空可代替遍历, P2.3); `FLAG_FIND_ON_UI_THREAD` 下投递到 UI 线程的搜索以计划的超时为预算. 尝试之间的休眠可中断,
+ * 因此停止脚本会结束无上限的查询.
  *
  * Created by SuperMonster003 on Sep 6, 2026.
  */
@@ -30,9 +33,12 @@ class UiSelectorQuery internal constructor(
     fun collection(): UiObjectCollection {
         val start = SystemClock.uptimeMillis()
         var attempts = 0L
+        // Which attempts the framework fast path may answer (docs/selector/ROADMAP.md P2.3, appendix C Q1).
+        // zh-CN: 框架快路径可以作答哪些尝试 (P2.3, 附录 C Q1).
+        val fastPath = FastPath.Query(policy) { SystemClock.uptimeMillis() }
         val found = poller.poll(policy) { progress ->
             attempts = progress.round
-            selector.findWithin(max, policy.timeout).takeIf { it.isNotEmpty() }
+            selector.findWithin(max, policy.timeout, fastPath.attempt(progress.round, progress.remaining)).takeIf { it.isNotEmpty() }
         }
         selector.bridge?.stats?.recordQuery(selector.toString(), SystemClock.uptimeMillis() - start, attempts, found != null)
         return found ?: UiObjectCollection.EMPTY

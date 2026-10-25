@@ -15,6 +15,7 @@ import org.autojs.autojs.core.automator.UiObjectCollection
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.EMPTY
 import org.autojs.autojs.core.automator.UiObjectCollection.Companion.of
 import org.autojs.autojs.core.automator.UiObjectIterator
+import org.autojs.autojs.core.automator.diagnostics.A11yStats
 import org.autojs.autojs.core.automator.filter.Filter
 import org.autojs.autojs.core.automator.filter.Selector
 import org.autojs.autojs.core.automator.pick.PickArguments
@@ -25,6 +26,7 @@ import org.autojs.autojs.core.automator.selector.SelectorRegistry
 import org.autojs.autojs.core.automator.selector.SelectorStringParser
 import org.autojs.autojs.core.automator.search.BFS
 import org.autojs.autojs.core.automator.search.DFS
+import org.autojs.autojs.core.automator.search.FastPath
 import org.autojs.autojs.core.automator.search.LazySearch
 import org.autojs.autojs.core.automator.search.SearchAlgorithm
 import org.autojs.autojs.runtime.ScriptRuntime
@@ -151,45 +153,43 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     fun findIterator(): UiObjectIterator {
         val bridge = mAccessibilityBridge ?: return UiObjectIterator(LazySearch(emptyList(), selector))
         bridge.ensureServiceStarted()
-        val roots = bridge.windowRoots()
-            .filter { !bridge.config.isInBlacklist("${it.packageName}") }
-            .map { UiObject.createRoot(it, mAllocator, bridge) }
-        return UiObjectIterator(LazySearch(roots, selector, breadthFirst = searchAlgorithm === BFS))
+        return UiObjectIterator(LazySearch(searchRoots(bridge), selector, breadthFirst = searchAlgorithm === BFS))
     }
 
     /**
      * One attempt of a query: a single search, where a search posted to the UI thread under
      * [AccessibilityBridge.FLAG_FIND_ON_UI_THREAD] is waited for at most [budget] milliseconds
-     * ([PollPolicy.UNBOUNDED]: interruptibly, without limit).
+     * ([PollPolicy.UNBOUNDED]: interruptibly, without limit). [attempt] tells the framework fast
+     * path what it may decide (docs/selector/ROADMAP.md P2.3; see [FastPath]).
      * zh-CN: 查询的一次尝试: 单次搜索; [AccessibilityBridge.FLAG_FIND_ON_UI_THREAD] 下投递到 UI 线程的搜索至多等待
-     * [budget] 毫秒 ([PollPolicy.UNBOUNDED]: 可中断地无限等待).
+     * [budget] 毫秒 ([PollPolicy.UNBOUNDED]: 可中断地无限等待). [attempt] 告诉框架快路径它可以决定什么 (P2.3; 见 [FastPath]).
      */
-    internal fun findWithin(max: Int, budget: Long): UiObjectCollection {
+    internal fun findWithin(max: Int, budget: Long, attempt: FastPath.Attempt = FastPath.Attempt.SINGLE): UiObjectCollection {
         val start = SystemClock.uptimeMillis()
         try {
-            return findWithinUntimed(max, budget)
+            return findWithinUntimed(max, budget, attempt)
         } finally {
             mAccessibilityBridge?.stats?.recordSearch(toString(), SystemClock.uptimeMillis() - start)
         }
     }
 
-    private fun findWithinUntimed(max: Int, budget: Long): UiObjectCollection {
+    private fun findWithinUntimed(max: Int, budget: Long, attempt: FastPath.Attempt): UiObjectCollection {
         // The bridge routes to the shared controller; without a bridge nothing can be searched anyway.
         // zh-CN: bridge 会转到共享的控制器; 没有 bridge 时也无从查找.
         mAccessibilityBridge?.ensureServiceStarted()
         return when {
-            mAccessibilityBridge == null -> findImpl(max)
-            isMainThread() -> findImpl(max)
-            mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max)
-            else -> findOnUiThread(mAccessibilityBridge, max, budget)
+            mAccessibilityBridge == null -> findImpl(max, attempt)
+            isMainThread() -> findImpl(max, attempt)
+            mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max, attempt)
+            else -> findOnUiThread(mAccessibilityBridge, max, budget, attempt)
         }
     }
 
     // A FutureTask instead of the former VolatileBox.blockedGet(): the wait is bounded when the query
     // is, interruptible otherwise, and a search that never ran cannot be waited for forever.
     // zh-CN: 以 FutureTask 取代原先的 VolatileBox.blockedGet(): 查询有超时则等待有界, 否则可中断; 从未执行的搜索不会被无限等待.
-    private fun findOnUiThread(bridge: AccessibilityBridge, max: Int, budget: Long): UiObjectCollection {
-        val task = FutureTask { findImpl(max) }
+    private fun findOnUiThread(bridge: AccessibilityBridge, max: Int, budget: Long, attempt: FastPath.Attempt): UiObjectCollection {
+        val task = FutureTask { findImpl(max, attempt) }
         bridge.post(task)
         try {
             return when (budget) {
@@ -302,21 +302,71 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     internal fun <N : UiNode<N>> searchIn(root: N, max: Int = Int.MAX_VALUE, lifecycle: NodeLifecycle = NodeLifecycle.default): List<N> =
         searchAlgorithm.search(root, selector.snapshot(), max, lifecycle)
 
-    protected fun findImpl(max: Int): UiObjectCollection = findImpl(mAccessibilityBridge?.windowRoots() ?: emptyList(), max)
+    protected fun findImpl(max: Int): UiObjectCollection = findImpl(max, FastPath.Attempt.SINGLE)
+
+    private fun findImpl(max: Int, attempt: FastPath.Attempt): UiObjectCollection {
+        val bridge = mAccessibilityBridge ?: return of(emptyList())
+        return search(bridge, searchRoots(bridge), max, attempt)
+    }
 
     protected fun findImpl(node: AccessibilityNodeInfo, max: Int): UiObjectCollection = findImpl(listOf(node), max)
 
-    // Roots of blacklisted packages (guard mode, AccessibilityConfig) are skipped here, not by the bridge.
-    // zh-CN: 黑名单包名 (保护模式, AccessibilityConfig) 的根节点在此跳过, 而非由 bridge 过滤.
     protected fun findImpl(roots: List<AccessibilityNodeInfo>, max: Int): UiObjectCollection {
-        mAccessibilityBridge ?: return of(emptyList())
-        fun isInWhitelist(node: AccessibilityNodeInfo) = !mAccessibilityBridge.config.isInBlacklist("${node.packageName}")
+        val bridge = mAccessibilityBridge ?: return of(emptyList())
+        return search(bridge, roots.filter { !bridge.config.isInBlacklist("${it.packageName}") }.map { UiObject.createRoot(it, mAllocator, bridge) }, max, FastPath.Attempt.SINGLE)
+    }
+
+    // The window roots a search walks. Roots of blacklisted packages (guard mode, AccessibilityConfig) are skipped here,
+    // not by the bridge. The framework's prefetching strategy is kept (P2.1, appendix C Q12).
+    // zh-CN: 搜索遍历的窗口根节点. 黑名单包名 (保护模式, AccessibilityConfig) 的根节点在此跳过, 而非由 bridge 过滤. 沿用框架的预取策略 (P2.1, 附录 C Q12).
+    private fun searchRoots(bridge: AccessibilityBridge): List<UiObject> = bridge.windowRoots()
+        .filter { !bridge.config.isInBlacklist("${it.packageName}") }
+        .map { UiObject.createRoot(it, mAllocator, bridge) }
+
+    /**
+     * The search over [roots]: the framework fast path first where [attempt] allows it (P2.3, [FastPath]; off under
+     * `noFastPath` and for the packages of [AccessibilityBridge.fastPathLedger]), else the walk of every root in turn
+     * with the filters of the moment, cheapest first (P2.2).
+     * zh-CN: 在 [roots] 上的搜索: [attempt] 允许时先走框架快路径 (P2.3, [FastPath]; `noFastPath` 下与 [AccessibilityBridge.fastPathLedger] 中的包除外),
+     * 否则依次遍历每个根节点, 使用当时的过滤器, 按开销从低到高 (P2.2).
+     */
+    private fun search(bridge: AccessibilityBridge, roots: List<UiObject>, max: Int, attempt: FastPath.Attempt): UiObjectCollection {
+        val filter = selector.snapshot()
+        val algorithm = searchAlgorithm
+        var key: FastPath.Key? = null
+        var emptyLookup = false
+        if (attempt != FastPath.Attempt.SINGLE && max > 0 && roots.isNotEmpty() && bridge.isFastPathEnabled) {
+            key = FastPath.keyOf(selector.filters)?.takeIf { k -> roots.none { bridge.fastPathLedger.isUnreliable(it.packageName(), k.kind) } }
+            if (key != null) {
+                when (val outcome = FastPath.decide(roots, key, filter, max == 1 && algorithm === DFS, attempt, UiObjectLookup)) {
+                    is FastPath.Outcome.Hit -> {
+                        bridge.stats.recordFastPath(A11yStats.FastPathEvent.HIT)
+                        return of(listOf(outcome.node))
+                    }
+                    FastPath.Outcome.Miss -> {
+                        bridge.stats.recordFastPath(A11yStats.FastPathEvent.MISS)
+                        return of(emptyList())
+                    }
+                    is FastPath.Outcome.Search -> {
+                        bridge.stats.recordFastPath(A11yStats.FastPathEvent.FALLBACK)
+                        emptyLookup = outcome.emptyLookup
+                    }
+                }
+            }
+        }
         val result = mutableListOf<UiObject?>()
         for (root in roots) {
-            if (isInWhitelist(root)) {
-                result.addAll(findAndReturnList(UiObject.createRoot(root, mAllocator, mAccessibilityBridge), max - result.size))
-                if (result.size >= max) break
+            val found = algorithm.search(root, filter, max - result.size)
+            if (emptyLookup && found.isNotEmpty() && key != null) {
+                // The lookup missed what the walk finds (appendix C Q1): no longer trusted for that package.
+                // zh-CN: 查找漏掉了遍历找到的节点 (附录 C Q1): 此后不再信任该包的查找.
+                bridge.fastPathLedger.markUnreliable(root.packageName(), key.kind)
             }
+            result.addAll(found)
+            if (result.size >= max) break
+        }
+        if (emptyLookup && result.isNotEmpty()) {
+            bridge.stats.recordFastPath(A11yStats.FastPathEvent.MISMATCH)
         }
         return of(result)
     }

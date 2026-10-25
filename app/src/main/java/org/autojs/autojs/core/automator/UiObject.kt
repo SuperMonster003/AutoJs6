@@ -689,6 +689,16 @@ open class UiObject private constructor(
         internal fun createRoot(root: AccessibilityNodeInfo?, allocator: AccessibilityNodeInfoAllocator?, bridge: AccessibilityBridge? = null) =
             UiObject(root, allocator, 0, bridge) { -1 }
 
+        /**
+         * A node a framework lookup under [root] found (`findAccessibilityNodeInfosByViewId` / `ByText`, the fast path of
+         * docs/selector/ROADMAP.md P2.3), [depth] levels below it: it takes what [root] lends its descendants, and its
+         * index among the siblings is looked up when asked for.
+         * zh-CN: 框架查找在 [root] 之下找到的节点 (P2.3 快路径的 `findAccessibilityNodeInfosByViewId` / `ByText`), 位于其下 [depth] 层:
+         * 继承 [root] 借给后代的内容, 在兄弟节点中的序号在被问到时再查.
+         */
+        internal fun createDescendant(info: AccessibilityNodeInfo, root: UiObject, depth: Int): UiObject =
+            UiObject(info, root.allocator, depth, root.bridge) { it.indexAmongSiblings(it) }
+
     }
 
 }

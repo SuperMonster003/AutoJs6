@@ -133,4 +133,21 @@ class A11yStatsTest {
         assertTrue(text, text.lines()[4].startsWith("  1. s7  "))
     }
 
+    /** docs/selector/ROADMAP.md P2.4: the fast path counters, their line in the report (only once used) and reset. */
+    @Test
+    fun fastPathCounters() {
+        assertEquals(A11yStats.FastPathCounts.NONE, stats.snapshot().fastPath)
+        assertTrue(!stats.snapshot().render().contains("fast path"))
+        repeat(3) { stats.recordFastPath(A11yStats.FastPathEvent.MISS) }
+        repeat(2) { stats.recordFastPath(A11yStats.FastPathEvent.FALLBACK) }
+        stats.recordFastPath(A11yStats.FastPathEvent.HIT)
+        val s = stats.snapshot()
+        assertEquals(A11yStats.FastPathCounts(hits = 1, misses = 3, fallbacks = 2, mismatches = 0), s.fastPath)
+        assertEquals("fast path: hits 1, misses 3, fallbacks 2, mismatches 0", s.render().lines()[3])
+        stats.recordFastPath(A11yStats.FastPathEvent.MISMATCH)
+        assertEquals(1, stats.snapshot().fastPath.mismatches)
+        stats.reset()
+        assertEquals(A11yStats.FastPathCounts.NONE, stats.snapshot().fastPath)
+    }
+
 }

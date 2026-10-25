@@ -10,6 +10,7 @@ import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import org.autojs.autojs.core.activity.ActivityInfoProvider
 import org.autojs.autojs.core.automator.diagnostics.A11yStats
+import org.autojs.autojs.core.automator.search.FastPath
 import org.autojs.autojs.permission.UsageStatsPermission
 import org.autojs.autojs.runtime.accessibility.AccessibilityConfig
 import org.autojs.autojs.tool.UiHandler
@@ -94,6 +95,15 @@ abstract class AccessibilityBridge(
     /** Whether [FLAG_EVENT_ASSISTED_POLLING] is set. zh-CN: 是否设置了 [FLAG_EVENT_ASSISTED_POLLING]. */
     val isEventAssistedPolling: Boolean get() = flags and FLAG_EVENT_ASSISTED_POLLING != 0
 
+    /** Whether the framework fast path of the polled queries is on ([FLAG_NO_FAST_PATH] not set). zh-CN: 轮询查询的框架快路径是否开启 (未设置 [FLAG_NO_FAST_PATH]). */
+    internal val isFastPathEnabled: Boolean get() = flags and FLAG_NO_FAST_PATH == 0
+
+    /**
+     * The packages where an empty lookup of the fast path turned out wrong for this script (docs/selector/ROADMAP.md P2.3).
+     * zh-CN: 快路径的空查找对本脚本被证实有误的包 (P2.3).
+     */
+    internal val fastPathLedger = FastPath.Ledger()
+
     /** Drops the event subscription of [pulse] if it was ever made (script exit). zh-CN: 取消 [pulse] 的事件订阅 (若曾建立; 脚本退出时). */
     fun releasePulse() {
         if (pulseDelegate.isInitialized()) pulse.close()
@@ -114,7 +124,7 @@ abstract class AccessibilityBridge(
     var windowRootPolicy: A11yWindowRootPolicy = WindowRootPolicy()
         private set
 
-    var flags: Int = 0
+    var flags: Int = DEFAULT_FLAGS
         set(value) {
             field = value
             windowRootPolicy = windowRootPolicy.copy(fallback = fallbackOf(value))
@@ -228,6 +238,20 @@ abstract class AccessibilityBridge(
          * zh-CN: 重复的选择器查询与 Flow 等待休眠到无障碍事件到达为止, 而非固定间隔 (`auto.setFlags(["eventAssistedPolling"])`; Roadmap P5.2).
          */
         const val FLAG_EVENT_ASSISTED_POLLING = 16
+
+        /**
+         * Turns the framework fast path of the polled selector queries off (`auto.setFlags(["noFastPath"])`; docs/selector/ROADMAP.md
+         * P2.3, appendix C Q2): every attempt walks the tree, as before 6.8.0.
+         * zh-CN: 关闭轮询选择器查询的框架快路径 (`auto.setFlags(["noFastPath"])`; P2.3, 附录 C Q2): 每次尝试都遍历整棵树, 同 6.8.0 之前.
+         */
+        const val FLAG_NO_FAST_PATH = 32
+
+        /**
+         * The flags of a bridge before any `auto.setFlags`, and the base `auto.setFlags(names)` starts from (appendix C Q2):
+         * the names it is given are set and the names prefixed with `!` cleared on top of these.
+         * zh-CN: 未调用 `auto.setFlags` 时 bridge 的标志, 也是 `auto.setFlags(names)` 的起点 (附录 C Q2): 在其上设置给出的名字, 清除带 `!` 前缀的名字.
+         */
+        const val DEFAULT_FLAGS = 0
 
         private fun fallbackOf(flags: Int) = when {
             flags and FLAG_APP_WINDOWS_FALLBACK != 0 -> WindowRootPolicy.Fallback.APPLICATION_WINDOWS

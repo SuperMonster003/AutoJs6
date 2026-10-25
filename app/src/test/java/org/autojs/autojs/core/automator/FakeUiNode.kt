@@ -85,6 +85,36 @@ class FakeUiNode private constructor(
     var textReads = 0
     var descReads = 0
 
+    /**
+     * What the framework lookups of the fast path (P2.3) find under this node: [Lookup.NORMAL] as the framework does,
+     * [Lookup.EMPTY] nothing (a provider that does not implement them), [Lookup.UNAVAILABLE] a failure.
+     * zh-CN: 快路径 (P2.3) 的框架查找在本节点之下找到的内容: [Lookup.NORMAL] 同框架, [Lookup.EMPTY] 什么也找不到 (未实现查找的提供方), [Lookup.UNAVAILABLE] 失败.
+     */
+    var lookup = Lookup.NORMAL
+
+    enum class Lookup { NORMAL, EMPTY, UNAVAILABLE }
+
+    /**
+     * `findAccessibilityNodeInfosByViewId`: the nodes of the subtree with that id, null when [lookup] is unavailable.
+     * zh-CN: `findAccessibilityNodeInfosByViewId`: 子树中具有该 id 的节点, [lookup] 不可用时为 null.
+     */
+    fun findByViewId(viewId: String): List<FakeUiNode>? = lookedUp { it.id == viewId }
+
+    /**
+     * `findAccessibilityNodeInfosByText`: the nodes of the subtree whose text or description contains [text], ignoring
+     * case, as the framework matches; null when [lookup] is unavailable.
+     * zh-CN: `findAccessibilityNodeInfosByText`: 子树中文本或描述包含 [text] (不区分大小写, 同框架) 的节点; [lookup] 不可用时为 null.
+     */
+    fun findByText(text: String): List<FakeUiNode>? = lookedUp { node ->
+        node.text.contains(text, ignoreCase = true) || node.desc?.contains(text, ignoreCase = true) == true
+    }
+
+    private fun lookedUp(predicate: (FakeUiNode) -> Boolean): List<FakeUiNode>? = when (lookup) {
+        Lookup.NORMAL -> descendantsAndSelf().filter(predicate)
+        Lookup.EMPTY -> emptyList()
+        Lookup.UNAVAILABLE -> null
+    }
+
     fun child(name: String, clickable: Boolean = false, build: FakeUiNode.() -> Unit = {}): FakeUiNode {
         val node = FakeUiNode(name, level + 1, children.size).also {
             it.parentNode = this
