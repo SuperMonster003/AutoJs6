@@ -6,6 +6,7 @@ import os from "node:os";
 import {createRequire} from "node:module";
 import {spawnSync} from "node:child_process";
 import {performance} from "node:perf_hooks";
+import {signatureArities} from "./dts-signatures.mjs";
 
 const options = {};
 for (let i = 2; i < process.argv.length; i++) {
@@ -57,7 +58,8 @@ function typeOf(api) {
             type = checker.getTypeOfSymbolAtLocation(symbol, source);
         }
     }
-    return {status: type.flags & ts.TypeFlags.Any ? "any" : "explicit", type: checker.typeToString(type)};
+    if (type.flags & ts.TypeFlags.Any) return {status: "any", type: checker.typeToString(type)};
+    return {status: "explicit", type: checker.typeToString(type), ...signatureArities(ts, checker, type)};
 }
 
 function session(text) {
