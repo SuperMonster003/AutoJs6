@@ -20,6 +20,9 @@ are frozen by `SpeechContractTest` and its transaction order by `SpeechAidlOrder
 `core/plugin/speech` (`SpeechPluginHost`, `SpeechSessionProxy`, `SpeechErrorMapper`), the script object
 `runtime/api/augment/speech` (`Speech`, `SpeechModels`, `SpeechSession`, `SpeechWakeSession`).
 
+Contract version 2 (plugin roadmap P8.3, D132 - D136) appends speaker recognition and reserves three offline calls of
+P8.4 without changing any version 1 call; see "Contract version 2". Everything else in this document is version 1.
+
 ## Discovery and binding
 
 | Item | Value |
@@ -38,7 +41,8 @@ Center lists the official package once, under its INFO identity, and probes it t
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `requiresHostVersion` | Long | at least 5456 (`SpeechPluginIds.REQUIRED_HOST_VERSION_CODE`, see Status) |
-| `speechContractVersion` | Int | 1 |
+| `speechContractVersion` | Int | 1, the base version; a plugin that implements version 2 keeps 1 here (see "Contract version 2") |
+| `speechMaxContractVersion` | Int, optional | the highest version the build implements (2 from 3-Macaw Speech 1.3.0); absent means the base version |
 | `speechFeatures` | String array | the features the build implements, a subset of the table below |
 | `speechCatalogVersion` | Int | version of the bundled model catalog, 0 before one is bundled |
 | `speechMaxPcmSessions` | Int, optional | external PCM sessions per caller, at most 4 |
@@ -58,8 +62,14 @@ Bundles and shows it as `ttsEnginePackage`.
 | `tts` | `synthesizeToFile` |
 | `ttsSystemEngine` | the system TTS engine of `speechTtsEnginePackage` (see "System TTS engine") |
 | `models` | `installModel`, `importModel`, `removeModel`, `setDefaultModel`, `refreshCatalog` |
+| `audioDecode` | inputs other than WAV (MP3, AAC, Ogg, FLAC, the audio of video files) for the file calls |
+| `speaker` (version 2) | `enrollSpeaker`, `verifySpeaker`, `identifySpeaker`, `listSpeakers`, `removeSpeaker` |
+| `diarization` (version 2) | `diarizeFile` (reserved for plugin roadmap P8.4) |
+| `languageId` (version 2) | `detectLanguage` (reserved for P8.4) |
+| `audioTagging` (version 2) | `tagAudio` (reserved for P8.4) |
 
-The host refuses a call whose feature the plugin does not advertise with `PLUGIN_INCOMPATIBLE` before any transaction;
+The host refuses a call whose feature the plugin does not advertise with `PLUGIN_INCOMPATIBLE` before any transaction
+(a version 2 feature counts only when the agreed version is 2, `SpeechPeer.supports`);
 `getInfo`, `getCapabilities`, `listModels` and `cancelOperation` need no feature. `ttsSystemEngine` guards no Binder
 call: the engine is an ordinary Android `TextToSpeechService` that `tts` and `speech.speak` reach through
 `TextToSpeech`.
@@ -89,6 +99,15 @@ interface ISpeechPlugin {
     int importModel(in ParcelFileDescriptor archive, in Bundle request, ISpeechProgressCallback callback);
     Bundle setDefaultModel(in Bundle request);
     int refreshCatalog(ISpeechProgressCallback callback);
+    // Contract version 2 (transactions 15 to 22).
+    Bundle enrollSpeaker(in ParcelFileDescriptor[] audio, in Bundle options);
+    Bundle verifySpeaker(in ParcelFileDescriptor audio, in Bundle options);
+    Bundle identifySpeaker(in ParcelFileDescriptor audio, in Bundle options);
+    Bundle listSpeakers(in Bundle query);
+    Bundle removeSpeaker(in Bundle request);
+    int diarizeFile(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
+    int detectLanguage(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
+    int tagAudio(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
 }
 
 interface ISpeechSession {
@@ -128,13 +147,14 @@ oneway interface ISpeechProgressCallback {
 
 Transaction codes follow the declaration order: a later version may only append methods and optional keys. Compared
 with roadmap appendix C.1, version 1 adds `importModel`, `setDefaultModel`, `refreshCatalog`, the listen callback of
-`openWakeSession` and `ISpeechSession.finishRound` (the `thenListen` rounds of roadmap D16).
+`openWakeSession` and `ISpeechSession.finishRound` (the `thenListen` rounds of roadmap D16). Version 2 appends the
+eight methods after `refreshCatalog`; `SpeechAidlOrderTest` freezes all 22.
 
 ### Common rules
 
-- Every request Bundle carries `contractVersion` (Int, 1). Every answer Bundle and every completion of
-  `ISpeechProgressCallback` carries `contractVersion` as well; the host refuses an answer of another version with
-  `PLUGIN_INCOMPATIBLE`.
+- Every request Bundle carries `contractVersion` (Int): 1 for the methods of version 1, 2 for the methods of version 2.
+  Every answer Bundle and every completion of `ISpeechProgressCallback` carries `contractVersion` as well, the version
+  of its request; the host refuses an answer of a version it does not implement with `PLUGIN_INCOMPATIBLE`.
 - Bundle answers never are null. A failed call answers `errorCode` and `errorMessage` only (no result keys); the host
   throws the carried error.
 - Methods that answer a session or an operation id throw `IllegalArgumentException`, `IllegalStateException` or
@@ -165,6 +185,12 @@ with roadmap appendix C.1, version 1 adds `importModel`, `setDefaultModel`, `ref
 | `importModel` | returns the operation id at once | none | archive (`tar.bz2` or `zip`) | completion `model` | `INVALID_OPTIONS`, `UNSUPPORTED_FORMAT`, `MODEL_CHECKSUM_MISMATCH`, `IO_FAILED` |
 | `setDefaultModel` | immediate | 30 s | `model`, `kind` | `model` | `MODEL_MISSING`, `INVALID_OPTIONS` |
 | `refreshCatalog` | returns the operation id at once | 2 min to completion | - | completion `catalogVersion`, `updated` | `IO_FAILED`, `MODEL_CHECKSUM_MISMATCH` (signature) |
+| `enrollSpeaker` (v2) | blocks until done | 10 min | 1 to 10 files as `recognizeFile`, 60 s of audio each; `name` 64 | `name`, `samples`, `durationMillis`, `modelId` | `MODEL_MISSING`, `AUDIO_TOO_SHORT`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED` (also the 51st speaker), `INVALID_OPTIONS`, `ENGINE_FAILED`, `IO_FAILED` |
+| `verifySpeaker` (v2) | blocks until done | 10 min | one file, 60 s | `name`, `score`, `matched`, `threshold`, `modelId` | `SPEAKER_NOT_FOUND`, `MODEL_MISSING`, `AUDIO_TOO_SHORT`, `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED`, `ENGINE_FAILED`, `IO_FAILED` |
+| `identifySpeaker` (v2) | blocks until done | 10 min | one file, 60 s; `topK` 1 to 10 | `name` (absent below the threshold), `score`, `matched`, `threshold`, `candidates`, `modelId` | as `verifySpeaker` except `SPEAKER_NOT_FOUND` |
+| `listSpeakers` (v2) | immediate | 30 s | - | `speakers` (at most 50) | - |
+| `removeSpeaker` (v2) | immediate | 30 s | `name` | `removed` | `INVALID_OPTIONS` |
+| `diarizeFile`, `detectLanguage`, `tagAudio` (v2) | return the operation id at once | - | reserved for plugin roadmap P8.4 | - | - |
 
 ### Resource ownership
 
@@ -336,6 +362,11 @@ failing. A model the engine lists no voice for fails the `tts` promise (`CONFIGU
 | Characters of a keyword, hotword, model id or speaker | 128 |
 | Models of one `listModels` answer | 512 |
 | Error message | 4 KiB UTF-8 |
+| Enrolled speakers (version 2) | 50 |
+| Recordings of one `enrollSpeaker` | 10 |
+| Audio of one speaker recording | 60 seconds, at least 1 second of speech |
+| Characters of a speaker name | 64 |
+| `identifySpeaker` candidates | 10 (default 3) |
 | Request Bundle / event Bundle | 64 KiB / 256 KiB |
 
 The host checks the session length, hotwords, keywords, text length, file size and `feed` size before any transaction
@@ -350,7 +381,9 @@ microphone permission; as a `warning`, the microphone is silenced or its foregro
 `MODEL_MISSING`, `MODEL_DOWNLOAD_FAILED`, `MODEL_CHECKSUM_MISMATCH`, `MODEL_LICENSE_NOT_ACCEPTED`, `INVALID_OPTIONS`,
 `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED`, `SESSION_BUSY` (the plugin's microphone is held by another session of any
 host, or the caller already runs 4 external sessions), `SESSION_CLOSED`, `SESSION_CANCELLED`, `ENGINE_FAILED`,
-`IO_FAILED`, `TIMEOUT`, `INTERNAL`. The script sees the same codes on `speech.SpeechError` (roadmap D27).
+`IO_FAILED`, `TIMEOUT`, `INTERNAL`; version 2 adds `SPEAKER_NOT_FOUND` (the name has no voiceprint) and
+`AUDIO_TOO_SHORT` (less than 1 second of speech after voice activity detection). The script sees the same codes on
+`speech.SpeechError` (roadmap D27).
 
 The user grants the microphone permission in the plugin. Until its home screen does (plugin roadmap P5.1), 3-Macaw
 Speech opens the system dialog from `MicrophonePermissionActivity`
@@ -456,11 +489,90 @@ silenced until `maxDuration`.
 - `models.list(filter?)`, `models.install(id, { acceptLicense, onProgress })` / `installAsync`,
   `models.importFile(path, options?)`, `models.remove(id)`, `models.setDefault(kind, id)`, `models.getDefault(kind)`,
   `models.refreshCatalog()`.
+- `speaker` (version 2, `runtime/api/modules/speech/SpeechSpeaker.kt`): `enroll(name, files, { replace, model }?)` /
+  `enrollAsync`, `verify(name, file, { threshold }?)` / `verifyAsync`, `identify(file, { threshold, topK }?)` /
+  `identifyAsync`, `list()`, `remove(name)`; see "Contract version 2".
 
 Paths resolve against the script's working directory; URIs are refused. Synchronous forms that may wait (recognition,
 synthesis, downloads) refuse the UI thread. Recognized text is never written to the host log (roadmap appendix D Q8).
 Without the plugin every call fails with `PLUGIN_UNAVAILABLE` and the localized message
 `error_missing_required_plugin_for_module_label` for "3-Macaw Speech".
+
+## Contract version 2
+
+Plugin roadmap P8.3 (D132 - D136). Version 2 only appends: the 14 methods of version 1, their keys and their events stay
+as they are.
+
+### Negotiation
+
+The host takes the agreed version as `SpeechContract.negotiate(speechContractVersion, speechMaxContractVersion)`: the
+smaller of the host's `CONTRACT_VERSION` and the plugin's highest version, or 0 (incompatible) when the base version is
+not one the host implements. A plugin that implements version 2 still advertises `speechContractVersion` 1 and adds
+`speechMaxContractVersion` 2, stamps each answer with the version of its request and accepts requests of version 1 and
+2. Each pairing keeps what it had:
+
+| Host | Plugin | Result |
+| --- | --- | --- |
+| before version 2 (5456 up to the 6.8.0 development builds without it) | 1.3.0 | the base version 1: every script API of version 1 works, there is no `speech.speaker` |
+| version 2 | 1.2.0 and earlier | agreed version 1: the host never calls a version 2 method, `speech.speaker.*` fails with `PLUGIN_INCOMPATIBLE` |
+| version 2 | 1.3.0 | agreed version 2 |
+
+Advertising `speechContractVersion` 2 directly would have locked 1.3.0 out of the earlier hosts, whose plugin
+validation accepts 1 only.
+
+### Speakers
+
+A voiceprint is the mean of the speaker embeddings of a name's recordings, kept in the plugin's private storage. Only
+names, scores, thresholds and counts cross Binder; no call takes or answers an embedding (plugin roadmap D125).
+
+- `enrollSpeaker(audio[], options)`: `name` (String, trimmed, 1 to 64 characters without control characters), `replace`
+  (Boolean, default false), `model` (a speaker model id, default the default model of kind `speaker`), `displayNames`
+  (String array, the file names, for diagnostics). The plugin embeds every recording (at most 60 seconds each, at least
+  1 second of speech) and writes the speaker atomically: all recordings or none. Without `replace` the recordings join
+  the name's earlier ones (the mean is weighted by the sample count), with `replace` they take their place. The answer
+  carries `name`, `samples` (the name's recordings in total), `durationMillis` (the speech of this call) and `modelId`.
+  A 51st name fails with `LIMIT_EXCEEDED`; adding to a name enrolled with another model needs `replace`
+  (`INVALID_OPTIONS`).
+- `verifySpeaker(audio, options)`: `name`, optional `threshold` (Double, 0 to 1), `displayName`. The answer carries
+  `name`, `score` (the cosine similarity of the recording and the voiceprint, -1 to 1), `matched` (`score >=
+  threshold`), `threshold` (the one applied: the request's, or the model's default) and `modelId`. An unknown name fails
+  with `SPEAKER_NOT_FOUND`.
+- `identifySpeaker(audio, options)`: optional `threshold`, `topK` (Int, 1 to 10, default 3), `displayName`. The plugin
+  scores the recording against every voiceprint of the default speaker model. The answer carries `candidates`
+  (ArrayList of Bundle with `name` and `score`, best first, at most `topK`), `score` (the best one), `matched`, `name`
+  (the best candidate, only when it reached the threshold), `threshold` and `modelId`. Without any voiceprint the answer
+  has empty `candidates`, no `score` and `matched` false.
+- `listSpeakers(query)`: `speakers` (ArrayList of Bundle with `name`, `samples`, `updatedAt` (Long, epoch milliseconds)
+  and `modelId`), sorted by name. The query has no keys yet.
+- `removeSpeaker(request)`: `name`; the answer's `removed` tells whether a voiceprint was deleted (an unknown name is
+  not an error).
+
+The host checks names, file counts, thresholds and `topK` before any transaction (`SpeechScriptArguments`), opens every
+recording read-only as for `recognizeFile` and calls the file methods from its IO dispatcher with the file timeout.
+Scores reach the script rounded to four decimals.
+
+### Reserved calls
+
+`diarizeFile`, `detectLanguage` and `tagAudio` (features `diarization`, `languageId`, `audioTagging`) return an
+operation id and report through `ISpeechProgressCallback` like `synthesizeToFile`, so they can be cancelled with
+`cancelOperation`. Their keys and the script API come with plugin roadmap P8.4; until a plugin advertises the feature
+the host does not call them, and a plugin without them throws `PLUGIN_INCOMPATIBLE`.
+
+### Script API
+
+`speech.speaker` (`SpeechSpeaker` on the old layer, `SpeechSpeakerModule` on the module layer):
+
+- `enroll(name, files, options?)` / `enrollAsync`: `files` is a path or an array of 1 to 10 paths (formats as
+  `speech.recognize`), `options` `{ replace, model }`; answers `{ name, samples, durationMillis, modelId }`.
+- `verify(name, file, options?)` / `verifyAsync`: `options` `{ threshold }`; answers `{ name, score, matched,
+  threshold }`.
+- `identify(file, options?)` / `identifyAsync`: `options` `{ threshold, topK }`; answers `{ name, score, matched,
+  threshold, candidates: [{ name, score }] }`, `name` null below the threshold.
+- `list()` answers `[{ name, samples, updatedAt, modelId }]`, `remove(name)` a boolean.
+
+The synchronous forms refuse the UI thread like `speech.recognize`; the `Async` forms answer a Promise. A plugin
+without the feature `speaker` (3-Macaw Speech 1.2.0 and earlier, or a host that agreed on version 1) fails every call
+with `PLUGIN_INCOMPATIBLE`.
 
 ## Status
 
@@ -475,3 +587,7 @@ plugin.
 `SpeechPluginIds.REQUIRED_HOST_VERSION_CODE` (5456) is the value of plugin roadmap D28 written in P6.4: the first host
 build with every host change of the speech plugin, up to commit `11f75efbe` (`VERSION_BUILD` 3804 + 1652; the P1.3
 temporary value was 5451, the build that first shipped this module).
+Contract version 2 (plugin roadmap P8.3) adds the eight methods, `speechMaxContractVersion` and `speech.speaker` to the
+host for AutoJs6 6.8.0; `SpeechContractTest`, `SpeechAidlOrderTest`, `SpeechScriptArgumentsTest` and
+`AugmentDelegatingModulesTest` cover them. 3-Macaw Speech 1.3.0 implements the feature `speaker`; the minimum host stays
+5456 (plugin roadmap D122), since the negotiation above keeps every other pairing working.
