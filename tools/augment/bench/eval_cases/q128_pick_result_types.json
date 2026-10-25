@@ -1,0 +1,118 @@
+[
+  {
+    "expression": "pickup({ text: 'aj6-q128-none' }) === null",
+    "kt": "true"
+  },
+  {
+    "expression": "detect(pickup({ textMatches: /aj6-q128-n.ne/ }), 'p') === null",
+    "kt": "true"
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, '{}'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, 'wc'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, 'collection'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, 'list'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, '#{}'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, '{#}'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, 'w{}'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({ text: 'aj6-q128-none' }, '{w}'))",
+    "kt": "\"collection 0\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '{}'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'wc'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'collection'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'list'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '#{}'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '{#}'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'w{}'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '{w}'))",
+    "kt": "\"collection 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '#'))",
+    "kt": "\"UiObject\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'w'))",
+    "kt": "\"UiObject\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'widget'))",
+    "kt": "\"UiObject\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '[]'))",
+    "kt": "\"array 1\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '$'))",
+    "kt": "\"string\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '@'))",
+    "kt": "\"UiSelector\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, '?'))",
+    "kt": "\"boolean\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(detect(pickup({}), 'w'))",
+    "kt": "\"UiObject\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(detect(pickup({}), '{}'))",
+    "kt": "throws RangeError"
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'text'))",
+    "kt": "\"string\""
+  },
+  {
+    "expression": "(function (r) { return r === null ? 'null' : r === undefined ? 'undefined' : Array.isArray(r) ? (typeof r.performAction === 'function' ? 'collection ' : 'array ') + Math.min(r.length, 1) : typeof r.getClass === 'function' ? String(r.getClass().getSimpleName()) : typeof r; })(pickup({}, 'aj6NoSuchMethod'))",
+    "kt": "throws RangeError"
+  }
+]
