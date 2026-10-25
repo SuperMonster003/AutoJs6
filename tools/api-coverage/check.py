@@ -14,6 +14,7 @@ import sys
 
 import arity
 from extract_exports import extract
+import returned_objects
 
 HERE = Path(__file__).resolve().parent
 
@@ -114,6 +115,8 @@ def main():
     arity_summary = arity.report(host, baseline, output)
     if args.strict_arity:
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
+    # Members of returned objects (P0.4): reported apart, never failures (P2.3 consumes returned-objects.json).
+    returned_summary, returned_docs, returned_surfaces = returned_objects.gate(host, baseline, output, docs / "api", command)
     matrix_summary = None
     if args.matrix or args.write_matrix:
         import runtime_matrix
@@ -121,7 +124,8 @@ def main():
         bun = (args.bun or siblings / "AutoJs6-Plugin-Bun-Runtime").resolve()
         typescript = args.typescript.resolve() if args.typescript else runtime_matrix.default_typescript(ace)
         surfaces = json.loads((output / "surfaces.json").read_text(encoding="utf-8"))
-        matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented, surfaces=surfaces)
+        surfaces["rows"] += returned_surfaces
+        matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented + returned_docs, surfaces=surfaces)
         runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
         matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN)
         failures.extend(matrix_summary.pop("failures"))
@@ -130,7 +134,7 @@ def main():
         "documentation": dict(Counter(row["status"] for row in documented)),
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
-        "arity": arity_summary, "matrix": matrix_summary,
+        "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"]), "matrix": matrix_summary,
         "scope": baseline["scope"], "failures": failures,
     }
     (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

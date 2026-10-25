@@ -489,8 +489,10 @@ def extract_ksp(host, metadata):
 def extract(host, metadata=None, source='auto'):
     """Exports of `source` ksp (script-modules.json), kotlin (registration parser), or auto: ksp when the file exists.
 
-    Functions and callable modules carry their argument-count ranges (arity.py, api-coverage P0.3)."""
+    Functions and callable modules carry their argument-count ranges (arity.py, api-coverage P0.3); the returned
+    objects and their members are in "returnedObjects" (returned_objects.py, P0.4)."""
     from arity import attach as attach_arity
+    from returned_objects import attach as attach_returned
     HOST = Path(host).resolve()
     metadata = Path(metadata) if metadata else HOST / DEFAULT_METADATA
     if source == 'ksp' or (source == 'auto' and metadata.is_file()):
@@ -498,14 +500,14 @@ def extract(host, metadata=None, source='auto'):
             raise FileNotFoundError(f'{metadata} not found; build it with gradlew :app:kspAppDebugKotlin')
         if metadata_is_stale(HOST, metadata):
             print(f'warning: {metadata} is older than the module sources; run gradlew :app:kspAppDebugKotlin', file=sys.stderr)
-        return attach_arity(HOST, extract_ksp(HOST, metadata), metadata)
+        return attach_returned(HOST, attach_arity(HOST, extract_ksp(HOST, metadata), metadata), metadata)
     if source == 'auto':
         print(f'warning: {metadata} not found, reading the Kotlin registrations (run gradlew :app:kspAppDebugKotlin)', file=sys.stderr)
     result = extract_kotlin(HOST)
     for item in result['records'] + result['modules']:
         item['metadata'] = 'kotlin'
     result['dataSource'] = {'kind': 'kotlin'}
-    return attach_arity(HOST, result)
+    return attach_returned(HOST, attach_arity(HOST, result))
 
 
 def compare(ksp, kotlin):

@@ -1,0 +1,178 @@
+{
+  "description": "Objects script functions return (api-coverage P0.4, README \"Returned objects\"). producers adds rows to the script-modules.json return types (functions declared as kotlin.Any); probe is the d.ts expression whose type holds the members; documentation lists the api/*.md pages searched for member names.",
+  "objects": [
+    {
+      "object": "UiSelector", "class": "org.autojs.autojs.core.accessibility.UiSelector", "memberSource": "kotlin-class",
+      "producers": ["selector.()"], "probe": "selector.()", "documentation": ["uiSelectorType", "uiObjectActionsType"]
+    },
+    {
+      "object": "UiObject", "class": "org.autojs.autojs.core.automator.UiObject", "memberSource": "kotlin-class",
+      "probe": "auto.getWindowRoot.()", "documentation": ["uiObjectType", "uiObjectActionsType"]
+    },
+    {
+      "object": "UiObjectCollection", "class": "org.autojs.autojs.core.automator.UiObjectCollection", "memberSource": "kotlin-class",
+      "probe": "selector.().find.()", "documentation": ["uiObjectCollectionType", "uiObjectActionsType"]
+    },
+    {
+      "object": "ImageWrapper", "class": "org.autojs.autojs.core.image.ImageWrapper", "memberSource": "kotlin-class",
+      "probe": "images.read.()", "documentation": ["imageWrapperType"]
+    },
+    {
+      "object": "Flow", "class": "org.autojs.autojs.runtime.api.augment.flow.FlowNativeObject", "memberSource": "augment-prototype",
+      "classes": ["org.autojs.autojs.runtime.api.augment.flow.FlowPrototype"], "exclude": ["constructor"], "producers": ["flow.of", "flow.wait", "flow.run", "flow.sleep", "flow.all", "flow.race", "flow.any"], "probe": "flow.of.()", "documentation": ["flowType"]
+    },
+    {
+      "object": "MailClient", "class": "org.autojs.autojs.runtime.api.augment.mail.MailClientNativeObject", "memberSource": "augment-prototype",
+      "skipFunctions": ["folderObject"], "helperSuffixes": {"defineOp": ["Async"], "defineFlagShortcut": ["Async"]}, "producers": ["mail.connect", "mail.default"], "probe": "mail.connect.()", "documentation": ["mailClientType"]
+    },
+    {
+      "object": "EpubBook", "class": "org.autojs.autojs.runtime.api.augment.epub.EpubBookNativeObject", "memberSource": "augment-prototype",
+      "producers": ["epub.open"], "probe": "epub.open.()", "documentation": ["epubBookType"]
+    },
+    {
+      "object": "EpubReaderSession", "class": "org.autojs.autojs.runtime.api.augment.epub.EpubReaderSession", "memberSource": "kotlin-class",
+      "producers": ["epub.read"], "probe": "epub.read.()", "documentation": ["epubReaderSessionType"]
+    },
+    {
+      "object": "AiSession", "class": "org.autojs.autojs.runtime.api.augment.ai.AiSessionNativeObject", "memberSource": "augment-prototype",
+      "producers": ["ai.session"], "probe": "ai.session.()", "documentation": ["ai"]
+    },
+    {
+      "object": "AgentRun", "class": "org.autojs.autojs.runtime.api.augment.ai.AgentRunNativeObject", "memberSource": "augment-prototype",
+      "probe": "ai.agent.run.()", "documentation": ["agentRunType"]
+    },
+    {
+      "object": "ShellProcess", "class": "org.autojs.autojs.runtime.api.augment.shell.ShellProcess", "memberSource": "augment-prototype",
+      "probe": "shell.spawn.()", "documentation": ["shellProcessType"]
+    },
+    {
+      "object": "ShellResult", "class": "org.autojs.autojs.runtime.api.AbstractShell.Result", "memberSource": "kotlin-class",
+      "producers": ["shell.()", "shizuku.()"], "exclude": ["fromJson"], "probe": "shell.()", "documentation": ["shell", "shizuku"]
+    },
+    {
+      "object": "Dialog", "class": "org.autojs.autojs.core.ui.dialog.JsDialog", "memberSource": "kotlin-class",
+      "probe": "dialogs.build.()", "documentation": ["dialogs"]
+    },
+    {
+      "object": "Canvas", "class": "org.autojs.autojs.core.graphics.ScriptCanvas", "memberSource": "kotlin-class",
+      "producers": ["Canvas.new()", "Canvas.()"], "probe": "Canvas.new()", "documentation": ["canvas"]
+    },
+    {
+      "object": "Color", "class": "org.autojs.autojs.runtime.api.augment.colors.ColorNativeObject", "memberSource": "augment-prototype",
+      "nameArrays": ["mProxySetterNames", "mProxyTowardsNames"], "members": ["equals", "toStringReadable"], "dynamic": ["get() forwards any other name to the colors function of that name with the color as the first argument (Colors static methods taking Array<Any>), and argb / hsl / hsla / hsv / hsva / rgb / rgba to toArgb ... toRgba"], "producers": ["Color.()", "Color.new()"], "probe": "Color.()", "documentation": ["colorType"]
+    },
+    {
+      "object": "VolatileDispose", "class": "org.autojs.autojs.runtime.api.augment.threads.VolatileDisposeNativeObject", "memberSource": "augment-prototype",
+      "probe": "threads.disposable.()", "documentation": ["threads"]
+    },
+    {
+      "object": "RawWindow", "class": "org.autojs.autojs.runtime.api.Floaty.JsRawWindow", "memberSource": "kotlin-class",
+      "producers": ["floaty.rawWindow"], "probe": "floaty.rawWindow.()", "documentation": ["floaty"]
+    },
+    {
+      "object": "FloatyWindow", "class": "org.autojs.autojs.runtime.api.Floaty.JsResizableWindow", "memberSource": "kotlin-class",
+      "producers": ["floaty.window"], "probe": "floaty.window.()", "documentation": ["floaty"]
+    },
+    {
+      "object": "Zip", "class": "org.autojs.autojs.runtime.api.augment.zip.ZipNativeObject", "memberSource": "augment-prototype",
+      "probe": "zip.open.()", "documentation": ["zip"], "nameArrays": ["mPropertyNames"], "ignoreComputed": ["propertyName"]
+    },
+    {
+      "object": "Storage", "class": "org.autojs.autojs.runtime.api.augment.storages.StorageNativeObject", "memberSource": "augment-prototype",
+      "probe": "storages.create.()", "documentation": ["storageType"]
+    },
+    {
+      "object": "YoloDetector", "class": "org.autojs.autojs.runtime.api.augment.yolo.YoloDetectorNativeObject", "memberSource": "augment-prototype",
+      "probe": "yolo.load.()", "documentation": ["yolo"]
+    },
+    {
+      "object": "TtsUtterance", "class": "org.autojs.autojs.runtime.api.augment.tts.TtsUtterance", "memberSource": "kotlin-class",
+      "probe": "tts.utterance.()", "documentation": ["tts"]
+    },
+    {
+      "object": "ScriptExecution", "class": "org.autojs.autojs.execution.ScriptExecution", "memberSource": "kotlin-class",
+      "probe": "engines.execScript.()", "documentation": ["engines"]
+    },
+    {
+      "object": "Database", "class": "org.autojs.autojs.core.database.Database", "memberSource": "kotlin-class",
+      "probe": "sqlite.open.()", "documentation": ["sqlite"]
+    },
+    {
+      "object": "WebSocket", "class": "org.autojs.autojs.core.web.WebSocket", "memberSource": "kotlin-class",
+      "probe": "web.newWebSocket.()", "documentation": ["webSocketType"]
+    },
+    {
+      "object": "InjectableWebView", "class": "org.autojs.autojs.core.web.InjectableWebView", "memberSource": "kotlin-class",
+      "probe": "web.newInjectableWebView.()", "documentation": ["injectableWebViewType"]
+    },
+    {
+      "object": "InjectableWebClient", "class": "org.autojs.autojs.core.web.InjectableWebClient", "memberSource": "kotlin-class",
+      "probe": "web.newInjectableWebClient.()", "documentation": ["injectableWebClientType"]
+    },
+    {
+      "object": "PReadableTextFile", "class": "org.autojs.autojs.pio.PReadableTextFile", "memberSource": "kotlin-class",
+      "producers": ["files.open", "open"], "probe": "files.open.()", "documentation": ["files"]
+    },
+    {
+      "object": "PWritableTextFile", "class": "org.autojs.autojs.pio.PWritableTextFile", "memberSource": "kotlin-class",
+      "producers": ["files.open", "open"], "probe": "files.open.()", "documentation": ["files"]
+    },
+    {
+      "object": "TimedTask", "class": "org.autojs.autojs.timing.TimedTask", "memberSource": "kotlin-class",
+      "probe": "tasks.getTimedTask.()", "documentation": ["tasks"]
+    },
+    {
+      "object": "IntentTask", "class": "org.autojs.autojs.timing.IntentTask", "memberSource": "kotlin-class",
+      "probe": "tasks.getIntentTask.()", "documentation": ["tasks"]
+    },
+    {
+      "object": "Mat", "class": "org.autojs.autojs.core.opencv.Mat", "memberSource": "kotlin-class",
+      "probe": "images.imread.()", "documentation": ["image"]
+    },
+    {
+      "object": "MatchingResult", "class": "org.autojs.autojs.runtime.api.augment.images.MatchingResult", "memberSource": "kotlin-class",
+      "probe": "images.matchTemplate.()", "documentation": ["image"]
+    },
+    {
+      "object": "ImageFeatures", "class": "org.autojs.autojs.runtime.api.augment.images.ImageFeatures", "memberSource": "kotlin-class",
+      "probe": "images.detectAndComputeFeatures.()", "documentation": ["image"]
+    },
+    {
+      "object": "ObjectFrame", "class": "org.autojs.autojs.runtime.api.augment.images.ObjectFrame", "memberSource": "kotlin-class",
+      "probe": "images.matchFeatures.()", "documentation": ["image"]
+    },
+    {
+      "object": "PngQuantizationResult", "class": "org.autojs.autojs.runtime.api.augment.images.PngQuantizationResult", "memberSource": "kotlin-class",
+      "probe": "images.quantize.()", "documentation": ["image"]
+    },
+    {
+      "object": "PngQuantizationFileResult", "class": "org.autojs.autojs.runtime.api.augment.images.PngQuantizationFileResult", "memberSource": "kotlin-class",
+      "probe": "images.quantizeToFile.()", "documentation": ["image"]
+    },
+    {
+      "object": "ConsoleConfigurator", "class": "org.autojs.autojs.core.console.ConsoleImpl.Configurator", "memberSource": "kotlin-class",
+      "probe": "console.build.()", "documentation": ["console", "consoleBuildOptionsType"]
+    },
+    {
+      "object": "ContinuationCreator", "class": "org.autojs.autojs.runtime.api.augment.continuation.Creator", "memberSource": "kotlin-class",
+      "probe": "continuation.create.()", "documentation": ["continuation"]
+    },
+    {
+      "object": "ThemeColor", "class": "org.autojs.autojs.theme.ThemeColor", "memberSource": "kotlin-class",
+      "probe": "autojs.themeColor", "documentation": ["autojs", "color"]
+    },
+    {
+      "object": "App", "class": "org.autojs.autojs.util.App", "memberSource": "kotlin-class",
+      "probe": "app.getAppByAlias.()", "documentation": ["appType", "app"]
+    },
+    {
+      "object": "ScreenCaptureOptions", "class": "org.autojs.autojs.core.image.capture.ScreenCapturer.Options", "memberSource": "kotlin-class",
+      "probe": "images.getScreenCaptureOptions.()", "documentation": ["image"]
+    },
+    {
+      "object": "ScriptEngine", "class": "org.autojs.autojs.engine.JavaScriptEngine", "memberSource": "kotlin-class",
+      "probe": "engines.myEngine.()", "documentation": ["engines"]
+    }
+  ],
+  "ignoredReturnTypes": ["kotlin.Any", "kotlin.Unit", "kotlin.String", "kotlin.Boolean", "kotlin.Int", "kotlin.Long", "kotlin.Double", "kotlin.Float", "kotlin.Number", "kotlin.ByteArray", "kotlin.CharSequence", "kotlin.Throwable", "org.mozilla.javascript.NativeArray", "org.mozilla.javascript.NativeObject", "org.mozilla.javascript.Scriptable", "org.mozilla.javascript.ScriptableObject", "org.mozilla.javascript.Undefined", "org.autojs.autojs.rhino.ProxyObject", "org.autojs.autojs.rhino.ProxyJavaObject", "org.autojs.autojs.pio.PFileInterface"]
+}

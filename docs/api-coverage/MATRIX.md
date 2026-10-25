@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=1368 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2724 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则在 D12 / Q1 拍板前是草案.
 
-数据源: ksp, 1368 行 (显式导出 1368, 返回对象成员 0, exports.json 尚无 returnedObjects 段).
+数据源: ksp, 2724 行 (显式导出 1368, 返回对象成员 1356).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 616 | 143 | 0 | 54 | 1 | 554 |
-| Node Worker | 482 | 62 | 0 | 114 | 1 | 709 |
-| Bun | 0 | 62 | 534 | 113 | 1 | 658 |
+| Node main | 616 | 143 | 0 | 54 | 1 | 1910 |
+| Node Worker | 482 | 62 | 0 | 114 | 1 | 2065 |
+| Bun | 0 | 62 | 534 | 113 | 1 | 2014 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 8 / mention 95 / heading 1265 / signature 0 / example 0 |
-| dts | none 9 / name 221 / arity 1138 / typed 0 |
-| ace | none 9 / semantic 0 / static 1359 |
+| doc | none 331 / mention 230 / heading 2163 / signature 0 / example 0 |
+| dts | none 79 / name 1507 / arity 1138 / typed 0 |
+| ace | none 540 / semantic 825 / static 1359 |
 
 排除理由缺失: 0. 策略冲突: jsox-extensions shadowed (node_main, 54), rhino-engine shadowed (node_main, 3), sync-sleep shadowed (node_main, 1).
 
@@ -46,9 +46,52 @@
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
 | (global) | 208 | 194 | 205 | 205 | 93 / 16 / 99 | 47 / 17 / 144 | 73 / 17 / 118 |
+| AgentRun# | 14 | 7 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
+| AiSession# | 11 | 11 | 0 | 0 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
+| App# | 10 | 10 | 0 | 0 | 0 / 0 / 10 | 0 / 0 / 10 | 0 / 0 / 10 |
 | Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
+| Canvas# | 54 | 54 | 54 | 0 | 0 / 0 / 54 | 0 / 0 / 54 | 0 / 0 / 54 |
+| Color# | 29 | 21 | 28 | 28 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
+| ConsoleConfigurator# | 53 | 50 | 53 | 0 | 0 / 0 / 53 | 0 / 0 / 53 | 0 / 0 / 53 |
+| ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
+| Database# | 51 | 51 | 51 | 2 | 0 / 0 / 51 | 0 / 0 / 51 | 0 / 0 / 51 |
+| Dialog# | 140 | 6 | 139 | 3 | 0 / 0 / 140 | 0 / 0 / 140 | 0 / 0 / 140 |
+| EpubBook# | 14 | 14 | 14 | 14 | 0 / 0 / 14 | 0 / 0 / 14 | 0 / 0 / 14 |
+| EpubReaderSession# | 35 | 20 | 34 | 32 | 0 / 0 / 35 | 0 / 0 / 35 | 0 / 0 / 35 |
+| FloatyWindow# | 12 | 9 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
+| Flow# | 106 | 25 | 106 | 106 | 0 / 0 / 106 | 0 / 0 / 106 | 0 / 0 / 106 |
+| ImageFeatures# | 12 | 10 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
+| ImageWrapper# | 16 | 15 | 16 | 6 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
+| InjectableWebClient# | 3 | 2 | 3 | 0 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
+| InjectableWebView# | 1 | 1 | 1 | 0 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
+| IntentTask# | 21 | 0 | 20 | 0 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
+| MailClient# | 53 | 53 | 53 | 53 | 0 / 0 / 53 | 0 / 0 / 53 | 0 / 0 / 53 |
+| Mat# | 9 | 0 | 3 | 0 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
+| MatchingResult# | 16 | 15 | 16 | 16 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
 | Mathx | 23 | 21 | 23 | 23 | 23 / 0 / 0 | 0 / 23 / 0 | 0 / 23 / 0 |
 | Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 0 / 14 / 0 | 0 / 14 / 0 |
+| ObjectFrame# | 15 | 15 | 15 | 15 | 0 / 0 / 15 | 0 / 0 / 15 | 0 / 0 / 15 |
+| PReadableTextFile# | 5 | 4 | 5 | 0 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| PWritableTextFile# | 7 | 6 | 2 | 0 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
+| PngQuantizationFileResult# | 5 | 3 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| PngQuantizationResult# | 5 | 3 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| RawWindow# | 12 | 9 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
+| ScreenCaptureOptions# | 5 | 5 | 5 | 0 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| ScriptEngine# | 29 | 12 | 26 | 0 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
+| ScriptExecution# | 13 | 5 | 12 | 0 | 0 / 0 / 13 | 0 / 0 / 13 | 0 / 0 / 13 |
+| ShellProcess# | 25 | 12 | 25 | 25 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
+| ShellResult# | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| Storage# | 12 | 12 | 12 | 12 | 0 / 0 / 12 | 0 / 0 / 12 | 0 / 0 / 12 |
+| ThemeColor# | 10 | 0 | 10 | 0 | 0 / 0 / 10 | 0 / 0 / 10 | 0 / 0 / 10 |
+| TimedTask# | 69 | 0 | 44 | 0 | 0 / 0 / 69 | 0 / 0 / 69 | 0 / 0 / 69 |
+| TtsUtterance# | 25 | 11 | 23 | 21 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
+| UiObject# | 145 | 136 | 145 | 145 | 0 / 0 / 145 | 0 / 0 / 145 | 0 / 0 / 145 |
+| UiObjectCollection# | 70 | 66 | 70 | 70 | 0 / 0 / 70 | 0 / 0 / 70 | 0 / 0 / 70 |
+| UiSelector# | 185 | 182 | 184 | 184 | 0 / 0 / 185 | 0 / 0 / 185 | 0 / 0 / 185 |
+| VolatileDispose# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
+| WebSocket# | 25 | 10 | 24 | 0 | 0 / 0 / 25 | 0 / 0 / 25 | 0 / 0 / 25 |
+| YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
+| Zip# | 21 | 20 | 20 | 20 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 43 | 38 / 0 / 5 | 0 / 0 / 43 | 38 / 0 / 5 |
 | auto | 37 | 37 | 37 | 37 | 0 / 1 / 36 | 0 / 1 / 36 | 0 / 1 / 36 |
@@ -303,6 +346,56 @@
 | `waitForToast` | pending | pending | pending |
 | `warn` | bridged | bridged | pending |
 
+### AgentRun#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `AgentRun#cancel` | pending | pending | pending |
+| `AgentRun#confirm` | pending | pending | pending |
+| `AgentRun#detached` | pending | pending | pending |
+| `AgentRun#error` | pending | pending | pending |
+| `AgentRun#goal` | pending | pending | pending |
+| `AgentRun#id` | pending | pending | pending |
+| `AgentRun#join` | pending | pending | pending |
+| `AgentRun#off` | pending | pending | pending |
+| `AgentRun#on` | pending | pending | pending |
+| `AgentRun#once` | pending | pending | pending |
+| `AgentRun#respond` | pending | pending | pending |
+| `AgentRun#result` | pending | pending | pending |
+| `AgentRun#startedAt` | pending | pending | pending |
+| `AgentRun#state` | pending | pending | pending |
+
+### AiSession#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `AiSession#ask` | pending | pending | pending |
+| `AiSession#backend` | pending | pending | pending |
+| `AiSession#chat` | pending | pending | pending |
+| `AiSession#close` | pending | pending | pending |
+| `AiSession#isClosed` | pending | pending | pending |
+| `AiSession#model` | pending | pending | pending |
+| `AiSession#profile` | pending | pending | pending |
+| `AiSession#provider` | pending | pending | pending |
+| `AiSession#state` | pending | pending | pending |
+| `AiSession#stream` | pending | pending | pending |
+| `AiSession#target` | pending | pending | pending |
+
+### App#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `App#alias` | pending | pending | pending |
+| `App#ensureInstalled` | pending | pending | pending |
+| `App#getAppName` | pending | pending | pending |
+| `App#getAppNameEn` | pending | pending | pending |
+| `App#getAppNameZh` | pending | pending | pending |
+| `App#isInstalled` | pending | pending | pending |
+| `App#launch` | pending | pending | pending |
+| `App#launchSettings` | pending | pending | pending |
+| `App#packageName` | pending | pending | pending |
+| `App#uninstall` | pending | pending | pending |
+
 ### Arrayx
 
 | 行 id | Node main | Node Worker | Bun |
@@ -322,6 +415,724 @@
 | `Arrayx.sortedDescending` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
 | `Arrayx.subtract` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
 | `Arrayx.union` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
+
+### Canvas#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Canvas#clipPath` | pending | pending | pending |
+| `Canvas#clipRect` | pending | pending | pending |
+| `Canvas#concat` | pending | pending | pending |
+| `Canvas#drawARGB` | pending | pending | pending |
+| `Canvas#drawArc` | pending | pending | pending |
+| `Canvas#drawBitmap` | pending | pending | pending |
+| `Canvas#drawBitmapMesh` | pending | pending | pending |
+| `Canvas#drawCircle` | pending | pending | pending |
+| `Canvas#drawColor` | pending | pending | pending |
+| `Canvas#drawImage` | pending | pending | pending |
+| `Canvas#drawLine` | pending | pending | pending |
+| `Canvas#drawLines` | pending | pending | pending |
+| `Canvas#drawOval` | pending | pending | pending |
+| `Canvas#drawPaint` | pending | pending | pending |
+| `Canvas#drawPath` | pending | pending | pending |
+| `Canvas#drawPicture` | pending | pending | pending |
+| `Canvas#drawPoint` | pending | pending | pending |
+| `Canvas#drawPoints` | pending | pending | pending |
+| `Canvas#drawPosText` | pending | pending | pending |
+| `Canvas#drawRGB` | pending | pending | pending |
+| `Canvas#drawRect` | pending | pending | pending |
+| `Canvas#drawRoundRect` | pending | pending | pending |
+| `Canvas#drawText` | pending | pending | pending |
+| `Canvas#drawTextOnPath` | pending | pending | pending |
+| `Canvas#drawTextRun` | pending | pending | pending |
+| `Canvas#drawVertices` | pending | pending | pending |
+| `Canvas#getAndroidCanvas` | pending | pending | pending |
+| `Canvas#getClipBounds` | pending | pending | pending |
+| `Canvas#getDensity` | pending | pending | pending |
+| `Canvas#getDrawFilter` | pending | pending | pending |
+| `Canvas#getHeight` | pending | pending | pending |
+| `Canvas#getMatrix` | pending | pending | pending |
+| `Canvas#getMaximumBitmapHeight` | pending | pending | pending |
+| `Canvas#getMaximumBitmapWidth` | pending | pending | pending |
+| `Canvas#getSaveCount` | pending | pending | pending |
+| `Canvas#getWidth` | pending | pending | pending |
+| `Canvas#isHardwareAccelerated` | pending | pending | pending |
+| `Canvas#isOpaque` | pending | pending | pending |
+| `Canvas#quickReject` | pending | pending | pending |
+| `Canvas#restore` | pending | pending | pending |
+| `Canvas#restoreToCount` | pending | pending | pending |
+| `Canvas#rotate` | pending | pending | pending |
+| `Canvas#save` | pending | pending | pending |
+| `Canvas#saveLayer` | pending | pending | pending |
+| `Canvas#saveLayerAlpha` | pending | pending | pending |
+| `Canvas#scale` | pending | pending | pending |
+| `Canvas#setBitmap` | pending | pending | pending |
+| `Canvas#setCanvas` | pending | pending | pending |
+| `Canvas#setDensity` | pending | pending | pending |
+| `Canvas#setDrawFilter` | pending | pending | pending |
+| `Canvas#setMatrix` | pending | pending | pending |
+| `Canvas#skew` | pending | pending | pending |
+| `Canvas#toImage` | pending | pending | pending |
+| `Canvas#translate` | pending | pending | pending |
+
+### Color#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Color#argb` | pending | pending | pending |
+| `Color#equals` | pending | pending | pending |
+| `Color#hsl` | pending | pending | pending |
+| `Color#hsla` | pending | pending | pending |
+| `Color#hsv` | pending | pending | pending |
+| `Color#hsva` | pending | pending | pending |
+| `Color#removeAlpha` | pending | pending | pending |
+| `Color#removeBlue` | pending | pending | pending |
+| `Color#removeGreen` | pending | pending | pending |
+| `Color#removeRed` | pending | pending | pending |
+| `Color#rgb` | pending | pending | pending |
+| `Color#rgba` | pending | pending | pending |
+| `Color#setAlpha` | pending | pending | pending |
+| `Color#setAlphaRelative` | pending | pending | pending |
+| `Color#setArgb` | pending | pending | pending |
+| `Color#setBlue` | pending | pending | pending |
+| `Color#setBlueRelative` | pending | pending | pending |
+| `Color#setGreen` | pending | pending | pending |
+| `Color#setGreenRelative` | pending | pending | pending |
+| `Color#setHsl` | pending | pending | pending |
+| `Color#setHsla` | pending | pending | pending |
+| `Color#setHsv` | pending | pending | pending |
+| `Color#setHsva` | pending | pending | pending |
+| `Color#setPaintColor` | pending | pending | pending |
+| `Color#setRed` | pending | pending | pending |
+| `Color#setRedRelative` | pending | pending | pending |
+| `Color#setRgb` | pending | pending | pending |
+| `Color#setRgba` | pending | pending | pending |
+| `Color#toStringReadable` | pending | pending | pending |
+
+### ConsoleConfigurator#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ConsoleConfigurator#clearStates` | pending | pending | pending |
+| `ConsoleConfigurator#contentBackgroundAlpha` | pending | pending | pending |
+| `ConsoleConfigurator#contentBackgroundColor` | pending | pending | pending |
+| `ConsoleConfigurator#contentBackgroundTint` | pending | pending | pending |
+| `ConsoleConfigurator#contentTextColors` | pending | pending | pending |
+| `ConsoleConfigurator#contentTextSize` | pending | pending | pending |
+| `ConsoleConfigurator#exitOnCloseTimeout` | pending | pending | pending |
+| `ConsoleConfigurator#gravity` | pending | pending | pending |
+| `ConsoleConfigurator#isAvoidStatusBar` | pending | pending | pending |
+| `ConsoleConfigurator#isColorful` | pending | pending | pending |
+| `ConsoleConfigurator#isExitOnClose` | pending | pending | pending |
+| `ConsoleConfigurator#isInputVisible` | pending | pending | pending |
+| `ConsoleConfigurator#isTimeVisible` | pending | pending | pending |
+| `ConsoleConfigurator#isTouchable` | pending | pending | pending |
+| `ConsoleConfigurator#position` | pending | pending | pending |
+| `ConsoleConfigurator#setAvoidStatusBar` | pending | pending | pending |
+| `ConsoleConfigurator#setBackgroundAlpha` | pending | pending | pending |
+| `ConsoleConfigurator#setBackgroundColor` | pending | pending | pending |
+| `ConsoleConfigurator#setBackgroundTint` | pending | pending | pending |
+| `ConsoleConfigurator#setColorful` | pending | pending | pending |
+| `ConsoleConfigurator#setContentBackgroundAlpha` | pending | pending | pending |
+| `ConsoleConfigurator#setContentBackgroundColor` | pending | pending | pending |
+| `ConsoleConfigurator#setContentBackgroundTint` | pending | pending | pending |
+| `ConsoleConfigurator#setContentTextColors` | pending | pending | pending |
+| `ConsoleConfigurator#setContentTextSize` | pending | pending | pending |
+| `ConsoleConfigurator#setExitOnClose` | pending | pending | pending |
+| `ConsoleConfigurator#setGravity` | pending | pending | pending |
+| `ConsoleConfigurator#setInputVisible` | pending | pending | pending |
+| `ConsoleConfigurator#setPosition` | pending | pending | pending |
+| `ConsoleConfigurator#setSize` | pending | pending | pending |
+| `ConsoleConfigurator#setTextColor` | pending | pending | pending |
+| `ConsoleConfigurator#setTextSize` | pending | pending | pending |
+| `ConsoleConfigurator#setTimeFormat` | pending | pending | pending |
+| `ConsoleConfigurator#setTimeVisible` | pending | pending | pending |
+| `ConsoleConfigurator#setTitle` | pending | pending | pending |
+| `ConsoleConfigurator#setTitleBackgroundAlpha` | pending | pending | pending |
+| `ConsoleConfigurator#setTitleBackgroundColor` | pending | pending | pending |
+| `ConsoleConfigurator#setTitleBackgroundTint` | pending | pending | pending |
+| `ConsoleConfigurator#setTitleIconsTint` | pending | pending | pending |
+| `ConsoleConfigurator#setTitleTextColor` | pending | pending | pending |
+| `ConsoleConfigurator#setTitleTextSize` | pending | pending | pending |
+| `ConsoleConfigurator#setTouchThrough` | pending | pending | pending |
+| `ConsoleConfigurator#setTouchable` | pending | pending | pending |
+| `ConsoleConfigurator#show` | pending | pending | pending |
+| `ConsoleConfigurator#size` | pending | pending | pending |
+| `ConsoleConfigurator#timeFormat` | pending | pending | pending |
+| `ConsoleConfigurator#title` | pending | pending | pending |
+| `ConsoleConfigurator#titleBackgroundAlpha` | pending | pending | pending |
+| `ConsoleConfigurator#titleBackgroundColor` | pending | pending | pending |
+| `ConsoleConfigurator#titleBackgroundTint` | pending | pending | pending |
+| `ConsoleConfigurator#titleIconsTint` | pending | pending | pending |
+| `ConsoleConfigurator#titleTextColor` | pending | pending | pending |
+| `ConsoleConfigurator#titleTextSize` | pending | pending | pending |
+
+### ContinuationCreator#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ContinuationCreator#await` | pending | pending | pending |
+| `ContinuationCreator#resume` | pending | pending | pending |
+| `ContinuationCreator#resumeError` | pending | pending | pending |
+
+### Database#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Database#acquireReference` | pending | pending | pending |
+| `Database#beginTransaction` | pending | pending | pending |
+| `Database#beginTransactionNonExclusive` | pending | pending | pending |
+| `Database#beginTransactionWithListener` | pending | pending | pending |
+| `Database#beginTransactionWithListenerNonExclusive` | pending | pending | pending |
+| `Database#close` | pending | pending | pending |
+| `Database#compileStatement` | pending | pending | pending |
+| `Database#delete` | pending | pending | pending |
+| `Database#disableWriteAheadLogging` | pending | pending | pending |
+| `Database#enableWriteAheadLogging` | pending | pending | pending |
+| `Database#endTransaction` | pending | pending | pending |
+| `Database#execSQL` | pending | pending | pending |
+| `Database#getAttachedDbs` | pending | pending | pending |
+| `Database#getMaximumSize` | pending | pending | pending |
+| `Database#getPageSize` | pending | pending | pending |
+| `Database#getPath` | pending | pending | pending |
+| `Database#getTypeAdapter` | pending | pending | pending |
+| `Database#getVersion` | pending | pending | pending |
+| `Database#inTransaction` | pending | pending | pending |
+| `Database#insert` | pending | pending | pending |
+| `Database#insertOrThrow` | pending | pending | pending |
+| `Database#insertWithOnConflict` | pending | pending | pending |
+| `Database#isDatabaseIntegrityOk` | pending | pending | pending |
+| `Database#isDbLockedByCurrentThread` | pending | pending | pending |
+| `Database#isOpen` | pending | pending | pending |
+| `Database#isReadOnly` | pending | pending | pending |
+| `Database#isWriteAheadLoggingEnabled` | pending | pending | pending |
+| `Database#needUpgrade` | pending | pending | pending |
+| `Database#onCreate` | pending | pending | pending |
+| `Database#onDowngrade` | pending | pending | pending |
+| `Database#onOpen` | pending | pending | pending |
+| `Database#onUpgrade` | pending | pending | pending |
+| `Database#query` | pending | pending | pending |
+| `Database#queryWithFactory` | pending | pending | pending |
+| `Database#rawQuery` | pending | pending | pending |
+| `Database#rawQueryWithFactory` | pending | pending | pending |
+| `Database#releaseReference` | pending | pending | pending |
+| `Database#replace` | pending | pending | pending |
+| `Database#replaceOrThrow` | pending | pending | pending |
+| `Database#setForeignKeyConstraintsEnabled` | pending | pending | pending |
+| `Database#setLocale` | pending | pending | pending |
+| `Database#setMaxSqlCacheSize` | pending | pending | pending |
+| `Database#setMaximumSize` | pending | pending | pending |
+| `Database#setPageSize` | pending | pending | pending |
+| `Database#setTransactionSuccessful` | pending | pending | pending |
+| `Database#setVersion` | pending | pending | pending |
+| `Database#transaction` | pending | pending | pending |
+| `Database#update` | pending | pending | pending |
+| `Database#updateWithOnConflict` | pending | pending | pending |
+| `Database#validateSql` | pending | pending | pending |
+| `Database#yieldIfContendedSafely` | pending | pending | pending |
+
+### Dialog#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Dialog#addContentView` | pending | pending | pending |
+| `Dialog#addListener` | pending | pending | pending |
+| `Dialog#cancel` | pending | pending | pending |
+| `Dialog#clearSelectedIndices` | pending | pending | pending |
+| `Dialog#closeOptionsMenu` | pending | pending | pending |
+| `Dialog#create` | pending | pending | pending |
+| `Dialog#defaultMaxListeners` | pending | pending | pending |
+| `Dialog#dismiss` | pending | pending | pending |
+| `Dialog#dispatchGenericMotionEvent` | pending | pending | pending |
+| `Dialog#dispatchKeyEvent` | pending | pending | pending |
+| `Dialog#dispatchKeyShortcutEvent` | pending | pending | pending |
+| `Dialog#dispatchPopulateAccessibilityEvent` | pending | pending | pending |
+| `Dialog#dispatchTouchEvent` | pending | pending | pending |
+| `Dialog#dispatchTrackballEvent` | pending | pending | pending |
+| `Dialog#emit` | pending | pending | pending |
+| `Dialog#eventNames` | pending | pending | pending |
+| `Dialog#findViewById` | pending | pending | pending |
+| `Dialog#getActionBar` | pending | pending | pending |
+| `Dialog#getActionButton` | pending | pending | pending |
+| `Dialog#getBuilder` | pending | pending | pending |
+| `Dialog#getContentView` | pending | pending | pending |
+| `Dialog#getContext` | pending | pending | pending |
+| `Dialog#getCurrentFocus` | pending | pending | pending |
+| `Dialog#getCurrentProgress` | pending | pending | pending |
+| `Dialog#getCustomView` | pending | pending | pending |
+| `Dialog#getIconView` | pending | pending | pending |
+| `Dialog#getInputEditText` | pending | pending | pending |
+| `Dialog#getItems` | pending | pending | pending |
+| `Dialog#getLayoutInflater` | pending | pending | pending |
+| `Dialog#getMaxListeners` | pending | pending | pending |
+| `Dialog#getMaxProgress` | pending | pending | pending |
+| `Dialog#getOwnerActivity` | pending | pending | pending |
+| `Dialog#getProgress` | pending | pending | pending |
+| `Dialog#getProgressBar` | pending | pending | pending |
+| `Dialog#getRecyclerView` | pending | pending | pending |
+| `Dialog#getSearchEvent` | pending | pending | pending |
+| `Dialog#getSelectedIndex` | pending | pending | pending |
+| `Dialog#getSelectedIndices` | pending | pending | pending |
+| `Dialog#getTag` | pending | pending | pending |
+| `Dialog#getTitleView` | pending | pending | pending |
+| `Dialog#getView` | pending | pending | pending |
+| `Dialog#getVolumeControlStream` | pending | pending | pending |
+| `Dialog#getWindow` | pending | pending | pending |
+| `Dialog#hasActionButtons` | pending | pending | pending |
+| `Dialog#hide` | pending | pending | pending |
+| `Dialog#incrementProgress` | pending | pending | pending |
+| `Dialog#invalidateOptionsMenu` | pending | pending | pending |
+| `Dialog#isCancelled` | pending | pending | pending |
+| `Dialog#isIndeterminateProgress` | pending | pending | pending |
+| `Dialog#isPromptCheckBoxChecked` | pending | pending | pending |
+| `Dialog#isShowing` | pending | pending | pending |
+| `Dialog#listenerCount` | pending | pending | pending |
+| `Dialog#listeners` | pending | pending | pending |
+| `Dialog#notifyItemChanged` | pending | pending | pending |
+| `Dialog#notifyItemInserted` | pending | pending | pending |
+| `Dialog#notifyItemsChanged` | pending | pending | pending |
+| `Dialog#numberOfActionButtons` | pending | pending | pending |
+| `Dialog#on` | pending | pending | pending |
+| `Dialog#onActionModeFinished` | pending | pending | pending |
+| `Dialog#onActionModeStarted` | pending | pending | pending |
+| `Dialog#onAttachedToWindow` | pending | pending | pending |
+| `Dialog#onBackPressed` | pending | pending | pending |
+| `Dialog#onClick` | pending | pending | pending |
+| `Dialog#onContentChanged` | pending | pending | pending |
+| `Dialog#onContextItemSelected` | pending | pending | pending |
+| `Dialog#onContextMenuClosed` | pending | pending | pending |
+| `Dialog#onCreateContextMenu` | pending | pending | pending |
+| `Dialog#onCreateOptionsMenu` | pending | pending | pending |
+| `Dialog#onCreatePanelMenu` | pending | pending | pending |
+| `Dialog#onCreatePanelView` | pending | pending | pending |
+| `Dialog#onDetachedFromWindow` | pending | pending | pending |
+| `Dialog#onGenericMotionEvent` | pending | pending | pending |
+| `Dialog#onItemSelected` | pending | pending | pending |
+| `Dialog#onKeyDown` | pending | pending | pending |
+| `Dialog#onKeyLongPress` | pending | pending | pending |
+| `Dialog#onKeyMultiple` | pending | pending | pending |
+| `Dialog#onKeyShortcut` | pending | pending | pending |
+| `Dialog#onKeyUp` | pending | pending | pending |
+| `Dialog#onMenuItemSelected` | pending | pending | pending |
+| `Dialog#onMenuOpened` | pending | pending | pending |
+| `Dialog#onOptionsItemSelected` | pending | pending | pending |
+| `Dialog#onOptionsMenuClosed` | pending | pending | pending |
+| `Dialog#onPanelClosed` | pending | pending | pending |
+| `Dialog#onPrepareOptionsMenu` | pending | pending | pending |
+| `Dialog#onPreparePanel` | pending | pending | pending |
+| `Dialog#onProvideKeyboardShortcuts` | pending | pending | pending |
+| `Dialog#onRestoreInstanceState` | pending | pending | pending |
+| `Dialog#onSaveInstanceState` | pending | pending | pending |
+| `Dialog#onSearchRequested` | pending | pending | pending |
+| `Dialog#onShow` | pending | pending | pending |
+| `Dialog#onTouchEvent` | pending | pending | pending |
+| `Dialog#onTrackballEvent` | pending | pending | pending |
+| `Dialog#onWindowAttributesChanged` | pending | pending | pending |
+| `Dialog#onWindowFocusChanged` | pending | pending | pending |
+| `Dialog#onWindowStartingActionMode` | pending | pending | pending |
+| `Dialog#once` | pending | pending | pending |
+| `Dialog#openContextMenu` | pending | pending | pending |
+| `Dialog#openOptionsMenu` | pending | pending | pending |
+| `Dialog#prependListener` | pending | pending | pending |
+| `Dialog#prependOnceListener` | pending | pending | pending |
+| `Dialog#registerForContextMenu` | pending | pending | pending |
+| `Dialog#removeAllListeners` | pending | pending | pending |
+| `Dialog#removeListener` | pending | pending | pending |
+| `Dialog#requestWindowFeature` | pending | pending | pending |
+| `Dialog#selectAllIndices` | pending | pending | pending |
+| `Dialog#setActionButton` | pending | pending | pending |
+| `Dialog#setCancelMessage` | pending | pending | pending |
+| `Dialog#setCancelable` | pending | pending | pending |
+| `Dialog#setCanceledOnTouchOutside` | pending | pending | pending |
+| `Dialog#setContent` | pending | pending | pending |
+| `Dialog#setContentView` | pending | pending | pending |
+| `Dialog#setDismissMessage` | pending | pending | pending |
+| `Dialog#setFeatureDrawable` | pending | pending | pending |
+| `Dialog#setFeatureDrawableAlpha` | pending | pending | pending |
+| `Dialog#setFeatureDrawableResource` | pending | pending | pending |
+| `Dialog#setFeatureDrawableUri` | pending | pending | pending |
+| `Dialog#setIcon` | pending | pending | pending |
+| `Dialog#setIconAttribute` | pending | pending | pending |
+| `Dialog#setItems` | pending | pending | pending |
+| `Dialog#setMaxListeners` | pending | pending | pending |
+| `Dialog#setMaxProgress` | pending | pending | pending |
+| `Dialog#setOnBackPressedFromJs` | pending | pending | pending |
+| `Dialog#setOnCancelListener` | pending | pending | pending |
+| `Dialog#setOnDismissListener` | pending | pending | pending |
+| `Dialog#setOnKeyListener` | pending | pending | pending |
+| `Dialog#setOnShowListener` | pending | pending | pending |
+| `Dialog#setOwnerActivity` | pending | pending | pending |
+| `Dialog#setProgress` | pending | pending | pending |
+| `Dialog#setProgressNumberFormat` | pending | pending | pending |
+| `Dialog#setProgressPercentFormat` | pending | pending | pending |
+| `Dialog#setPromptCheckBoxChecked` | pending | pending | pending |
+| `Dialog#setSelectedIndex` | pending | pending | pending |
+| `Dialog#setSelectedIndices` | pending | pending | pending |
+| `Dialog#setTitle` | pending | pending | pending |
+| `Dialog#setTypeface` | pending | pending | pending |
+| `Dialog#setVolumeControlStream` | pending | pending | pending |
+| `Dialog#show` | pending | pending | pending |
+| `Dialog#showSnack` | pending | pending | pending |
+| `Dialog#takeKeyEvents` | pending | pending | pending |
+| `Dialog#unregisterForContextMenu` | pending | pending | pending |
+
+### EpubBook#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `EpubBook#annotations` | pending | pending | pending |
+| `EpubBook#close` | pending | pending | pending |
+| `EpubBook#cover` | pending | pending | pending |
+| `EpubBook#isClosed` | pending | pending | pending |
+| `EpubBook#metadata` | pending | pending | pending |
+| `EpubBook#path` | pending | pending | pending |
+| `EpubBook#positions` | pending | pending | pending |
+| `EpubBook#readingOrder` | pending | pending | pending |
+| `EpubBook#resource` | pending | pending | pending |
+| `EpubBook#search` | pending | pending | pending |
+| `EpubBook#text` | pending | pending | pending |
+| `EpubBook#textAll` | pending | pending | pending |
+| `EpubBook#toString` | pending | pending | pending |
+| `EpubBook#toc` | pending | pending | pending |
+
+### EpubReaderSession#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `EpubReaderSession#addListener` | pending | pending | pending |
+| `EpubReaderSession#bookmarks` | pending | pending | pending |
+| `EpubReaderSession#chapterTitle` | pending | pending | pending |
+| `EpubReaderSession#close` | pending | pending | pending |
+| `EpubReaderSession#defaultMaxListeners` | pending | pending | pending |
+| `EpubReaderSession#emit` | pending | pending | pending |
+| `EpubReaderSession#emitSticky` | pending | pending | pending |
+| `EpubReaderSession#eventNames` | pending | pending | pending |
+| `EpubReaderSession#getMaxListeners` | pending | pending | pending |
+| `EpubReaderSession#getTimer` | pending | pending | pending |
+| `EpubReaderSession#goTo` | pending | pending | pending |
+| `EpubReaderSession#href` | pending | pending | pending |
+| `EpubReaderSession#isClosed` | pending | pending | pending |
+| `EpubReaderSession#isOpen` | pending | pending | pending |
+| `EpubReaderSession#listenerCount` | pending | pending | pending |
+| `EpubReaderSession#listeners` | pending | pending | pending |
+| `EpubReaderSession#locator` | pending | pending | pending |
+| `EpubReaderSession#next` | pending | pending | pending |
+| `EpubReaderSession#nextChapter` | pending | pending | pending |
+| `EpubReaderSession#on` | pending | pending | pending |
+| `EpubReaderSession#once` | pending | pending | pending |
+| `EpubReaderSession#path` | pending | pending | pending |
+| `EpubReaderSession#positions` | pending | pending | pending |
+| `EpubReaderSession#prependListener` | pending | pending | pending |
+| `EpubReaderSession#prependOnceListener` | pending | pending | pending |
+| `EpubReaderSession#prev` | pending | pending | pending |
+| `EpubReaderSession#prevChapter` | pending | pending | pending |
+| `EpubReaderSession#progress` | pending | pending | pending |
+| `EpubReaderSession#reason` | pending | pending | pending |
+| `EpubReaderSession#removeAllListeners` | pending | pending | pending |
+| `EpubReaderSession#removeListener` | pending | pending | pending |
+| `EpubReaderSession#setMaxListeners` | pending | pending | pending |
+| `EpubReaderSession#setPreferences` | pending | pending | pending |
+| `EpubReaderSession#state` | pending | pending | pending |
+| `EpubReaderSession#title` | pending | pending | pending |
+
+### FloatyWindow#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `FloatyWindow#close` | pending | pending | pending |
+| `FloatyWindow#disableFocus` | pending | pending | pending |
+| `FloatyWindow#exitOnClose` | pending | pending | pending |
+| `FloatyWindow#findView` | pending | pending | pending |
+| `FloatyWindow#height` | pending | pending | pending |
+| `FloatyWindow#isAdjustEnabled` | pending | pending | pending |
+| `FloatyWindow#requestFocus` | pending | pending | pending |
+| `FloatyWindow#setPosition` | pending | pending | pending |
+| `FloatyWindow#setSize` | pending | pending | pending |
+| `FloatyWindow#width` | pending | pending | pending |
+| `FloatyWindow#x` | pending | pending | pending |
+| `FloatyWindow#y` | pending | pending | pending |
+
+### Flow#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Flow#appendText` | pending | pending | pending |
+| `Flow#await` | pending | pending | pending |
+| `Flow#back` | pending | pending | pending |
+| `Flow#backToApp` | pending | pending | pending |
+| `Flow#backUntil` | pending | pending | pending |
+| `Flow#cancel` | pending | pending | pending |
+| `Flow#catch` | pending | pending | pending |
+| `Flow#clear` | pending | pending | pending |
+| `Flow#clearFocus` | pending | pending | pending |
+| `Flow#click` | pending | pending | pending |
+| `Flow#clickAfter` | pending | pending | pending |
+| `Flow#clickAny` | pending | pending | pending |
+| `Flow#clickBounds` | pending | pending | pending |
+| `Flow#clickBoundsAfter` | pending | pending | pending |
+| `Flow#clickBoundsAny` | pending | pending | pending |
+| `Flow#clickBoundsIfExists` | pending | pending | pending |
+| `Flow#clickBoundsWait` | pending | pending | pending |
+| `Flow#clickBoundsWhenStable` | pending | pending | pending |
+| `Flow#clickBoundsWhenStableAfter` | pending | pending | pending |
+| `Flow#clickIfExists` | pending | pending | pending |
+| `Flow#clickWait` | pending | pending | pending |
+| `Flow#clickWhenStable` | pending | pending | pending |
+| `Flow#clickWhenStableAfter` | pending | pending | pending |
+| `Flow#collapse` | pending | pending | pending |
+| `Flow#collectList` | pending | pending | pending |
+| `Flow#contextClick` | pending | pending | pending |
+| `Flow#copy` | pending | pending | pending |
+| `Flow#cut` | pending | pending | pending |
+| `Flow#delay` | pending | pending | pending |
+| `Flow#dismiss` | pending | pending | pending |
+| `Flow#dismissNotificationShade` | pending | pending | pending |
+| `Flow#dismissPopups` | pending | pending | pending |
+| `Flow#else` | pending | pending | pending |
+| `Flow#error` | pending | pending | pending |
+| `Flow#expand` | pending | pending | pending |
+| `Flow#filter` | pending | pending | pending |
+| `Flow#finally` | pending | pending | pending |
+| `Flow#findAny` | pending | pending | pending |
+| `Flow#focus` | pending | pending | pending |
+| `Flow#gesture` | pending | pending | pending |
+| `Flow#gestures` | pending | pending | pending |
+| `Flow#home` | pending | pending | pending |
+| `Flow#imeEnter` | pending | pending | pending |
+| `Flow#launchAndWait` | pending | pending | pending |
+| `Flow#lockScreen` | pending | pending | pending |
+| `Flow#longClick` | pending | pending | pending |
+| `Flow#longClickAfter` | pending | pending | pending |
+| `Flow#map` | pending | pending | pending |
+| `Flow#notifications` | pending | pending | pending |
+| `Flow#paste` | pending | pending | pending |
+| `Flow#peek` | pending | pending | pending |
+| `Flow#performAction` | pending | pending | pending |
+| `Flow#powerDialog` | pending | pending | pending |
+| `Flow#press` | pending | pending | pending |
+| `Flow#quickSettings` | pending | pending | pending |
+| `Flow#recents` | pending | pending | pending |
+| `Flow#repeatUntil` | pending | pending | pending |
+| `Flow#retry` | pending | pending | pending |
+| `Flow#run` | pending | pending | pending |
+| `Flow#scope` | pending | pending | pending |
+| `Flow#scrollBackward` | pending | pending | pending |
+| `Flow#scrollDown` | pending | pending | pending |
+| `Flow#scrollForward` | pending | pending | pending |
+| `Flow#scrollLeft` | pending | pending | pending |
+| `Flow#scrollRight` | pending | pending | pending |
+| `Flow#scrollUntil` | pending | pending | pending |
+| `Flow#scrollUp` | pending | pending | pending |
+| `Flow#select` | pending | pending | pending |
+| `Flow#setText` | pending | pending | pending |
+| `Flow#show` | pending | pending | pending |
+| `Flow#sleep` | pending | pending | pending |
+| `Flow#smartClick` | pending | pending | pending |
+| `Flow#smartClickBounds` | pending | pending | pending |
+| `Flow#splitScreen` | pending | pending | pending |
+| `Flow#state` | pending | pending | pending |
+| `Flow#step` | pending | pending | pending |
+| `Flow#swipe` | pending | pending | pending |
+| `Flow#sync` | pending | pending | pending |
+| `Flow#takeScreenshot` | pending | pending | pending |
+| `Flow#then` | pending | pending | pending |
+| `Flow#timeout` | pending | pending | pending |
+| `Flow#toPromise` | pending | pending | pending |
+| `Flow#toString` | pending | pending | pending |
+| `Flow#toggle` | pending | pending | pending |
+| `Flow#typeInto` | pending | pending | pending |
+| `Flow#value` | pending | pending | pending |
+| `Flow#wait` | pending | pending | pending |
+| `Flow#waitForActivity` | pending | pending | pending |
+| `Flow#waitForEvent` | pending | pending | pending |
+| `Flow#waitForGone` | pending | pending | pending |
+| `Flow#waitForHidden` | pending | pending | pending |
+| `Flow#waitForIdle` | pending | pending | pending |
+| `Flow#waitForNotification` | pending | pending | pending |
+| `Flow#waitForPackage` | pending | pending | pending |
+| `Flow#waitForStable` | pending | pending | pending |
+| `Flow#waitForStableThenClick` | pending | pending | pending |
+| `Flow#waitForStableThenClickBounds` | pending | pending | pending |
+| `Flow#waitForToast` | pending | pending | pending |
+| `Flow#waitForVisible` | pending | pending | pending |
+| `Flow#waitThenClick` | pending | pending | pending |
+| `Flow#waitThenClickBounds` | pending | pending | pending |
+| `Flow#waitThenLongClick` | pending | pending | pending |
+| `Flow#waitUntil` | pending | pending | pending |
+| `Flow#waitWhile` | pending | pending | pending |
+| `Flow#whenPresent` | pending | pending | pending |
+| `Flow#within` | pending | pending | pending |
+
+### ImageFeatures#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImageFeatures#count` | pending | pending | pending |
+| `ImageFeatures#isRecycled` | pending | pending | pending |
+| `ImageFeatures#javaObject` | pending | pending | pending |
+| `ImageFeatures#method` | pending | pending | pending |
+| `ImageFeatures#onRecycled` | pending | pending | pending |
+| `ImageFeatures#oneShot` | pending | pending | pending |
+| `ImageFeatures#recycle` | pending | pending | pending |
+| `ImageFeatures#recycled` | pending | pending | pending |
+| `ImageFeatures#region` | pending | pending | pending |
+| `ImageFeatures#scale` | pending | pending | pending |
+| `ImageFeatures#setOneShot` | pending | pending | pending |
+| `ImageFeatures#shoot` | pending | pending | pending |
+
+### ImageWrapper#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImageWrapper#bgrMat` | pending | pending | pending |
+| `ImageWrapper#bitmap` | pending | pending | pending |
+| `ImageWrapper#ensureNotRecycled` | pending | pending | pending |
+| `ImageWrapper#height` | pending | pending | pending |
+| `ImageWrapper#isRecycled` | pending | pending | pending |
+| `ImageWrapper#mat` | pending | pending | pending |
+| `ImageWrapper#oneShot` | pending | pending | pending |
+| `ImageWrapper#pixel` | pending | pending | pending |
+| `ImageWrapper#plane` | pending | pending | pending |
+| `ImageWrapper#recycle` | pending | pending | pending |
+| `ImageWrapper#saveTo` | pending | pending | pending |
+| `ImageWrapper#scriptRuntime` | pending | pending | pending |
+| `ImageWrapper#setOneShot` | pending | pending | pending |
+| `ImageWrapper#shoot` | pending | pending | pending |
+| `ImageWrapper#size` | pending | pending | pending |
+| `ImageWrapper#width` | pending | pending | pending |
+
+### InjectableWebClient#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `InjectableWebClient#inject` | pending | pending | pending |
+| `InjectableWebClient#injectAndWait` | pending | pending | pending |
+| `InjectableWebClient#onPageFinished` | pending | pending | pending |
+
+### InjectableWebView#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `InjectableWebView#inject` | pending | pending | pending |
+
+### IntentTask#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `IntentTask#TABLE` | pending | pending | pending |
+| `IntentTask#getAction` | pending | pending | pending |
+| `IntentTask#getCategory` | pending | pending | pending |
+| `IntentTask#getDataType` | pending | pending | pending |
+| `IntentTask#getExtras` | pending | pending | pending |
+| `IntentTask#getId` | pending | pending | pending |
+| `IntentTask#getIntentFilter` | pending | pending | pending |
+| `IntentTask#getProjectRoot` | pending | pending | pending |
+| `IntentTask#getScriptPath` | pending | pending | pending |
+| `IntentTask#getSourceKind` | pending | pending | pending |
+| `IntentTask#isLocal` | pending | pending | pending |
+| `IntentTask#setAction` | pending | pending | pending |
+| `IntentTask#setCategory` | pending | pending | pending |
+| `IntentTask#setDataType` | pending | pending | pending |
+| `IntentTask#setExtras` | pending | pending | pending |
+| `IntentTask#setId` | pending | pending | pending |
+| `IntentTask#setLocal` | pending | pending | pending |
+| `IntentTask#setProjectRoot` | pending | pending | pending |
+| `IntentTask#setScriptPath` | pending | pending | pending |
+| `IntentTask#setScriptPathAndCaptureContext` | pending | pending | pending |
+| `IntentTask#setSourceKind` | pending | pending | pending |
+
+### MailClient#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `MailClient#account` | pending | pending | pending |
+| `MailClient#append` | pending | pending | pending |
+| `MailClient#appendAsync` | pending | pending | pending |
+| `MailClient#close` | pending | pending | pending |
+| `MailClient#copy` | pending | pending | pending |
+| `MailClient#copyAsync` | pending | pending | pending |
+| `MailClient#createFolder` | pending | pending | pending |
+| `MailClient#createFolderAsync` | pending | pending | pending |
+| `MailClient#delete` | pending | pending | pending |
+| `MailClient#deleteAsync` | pending | pending | pending |
+| `MailClient#deleteFolder` | pending | pending | pending |
+| `MailClient#deleteFolderAsync` | pending | pending | pending |
+| `MailClient#download` | pending | pending | pending |
+| `MailClient#downloadAsync` | pending | pending | pending |
+| `MailClient#expunge` | pending | pending | pending |
+| `MailClient#expungeAsync` | pending | pending | pending |
+| `MailClient#fetch` | pending | pending | pending |
+| `MailClient#fetchAsync` | pending | pending | pending |
+| `MailClient#fetchBody` | pending | pending | pending |
+| `MailClient#fetchBodyAsync` | pending | pending | pending |
+| `MailClient#flag` | pending | pending | pending |
+| `MailClient#flagAsync` | pending | pending | pending |
+| `MailClient#folder` | pending | pending | pending |
+| `MailClient#folderStatus` | pending | pending | pending |
+| `MailClient#folderStatusAsync` | pending | pending | pending |
+| `MailClient#folders` | pending | pending | pending |
+| `MailClient#foldersAsync` | pending | pending | pending |
+| `MailClient#get` | pending | pending | pending |
+| `MailClient#getAsync` | pending | pending | pending |
+| `MailClient#isClosed` | pending | pending | pending |
+| `MailClient#isConnected` | pending | pending | pending |
+| `MailClient#markRead` | pending | pending | pending |
+| `MailClient#markReadAsync` | pending | pending | pending |
+| `MailClient#markUnread` | pending | pending | pending |
+| `MailClient#markUnreadAsync` | pending | pending | pending |
+| `MailClient#move` | pending | pending | pending |
+| `MailClient#moveAsync` | pending | pending | pending |
+| `MailClient#raw` | pending | pending | pending |
+| `MailClient#rawAsync` | pending | pending | pending |
+| `MailClient#renameFolder` | pending | pending | pending |
+| `MailClient#renameFolderAsync` | pending | pending | pending |
+| `MailClient#search` | pending | pending | pending |
+| `MailClient#searchAsync` | pending | pending | pending |
+| `MailClient#send` | pending | pending | pending |
+| `MailClient#sendAsync` | pending | pending | pending |
+| `MailClient#setFlags` | pending | pending | pending |
+| `MailClient#setFlagsAsync` | pending | pending | pending |
+| `MailClient#test` | pending | pending | pending |
+| `MailClient#testAsync` | pending | pending | pending |
+| `MailClient#toString` | pending | pending | pending |
+| `MailClient#unflag` | pending | pending | pending |
+| `MailClient#unflagAsync` | pending | pending | pending |
+| `MailClient#watch` | pending | pending | pending |
+
+### Mat#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Mat#convertTo` | pending | pending | pending |
+| `Mat#from` | pending | pending | pending |
+| `Mat#getCreatedCount` | pending | pending | pending |
+| `Mat#getFinalizedCount` | pending | pending | pending |
+| `Mat#getLiveCount` | pending | pending | pending |
+| `Mat#getReleasedCount` | pending | pending | pending |
+| `Mat#isReleased` | pending | pending | pending |
+| `Mat#ones` | pending | pending | pending |
+| `Mat#release` | pending | pending | pending |
+
+### MatchingResult#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `MatchingResult#best` | pending | pending | pending |
+| `MatchingResult#bottommost` | pending | pending | pending |
+| `MatchingResult#filter` | pending | pending | pending |
+| `MatchingResult#findMax` | pending | pending | pending |
+| `MatchingResult#first` | pending | pending | pending |
+| `MatchingResult#isEmpty` | pending | pending | pending |
+| `MatchingResult#isNotEmpty` | pending | pending | pending |
+| `MatchingResult#last` | pending | pending | pending |
+| `MatchingResult#leftmost` | pending | pending | pending |
+| `MatchingResult#matches` | pending | pending | pending |
+| `MatchingResult#points` | pending | pending | pending |
+| `MatchingResult#rightmost` | pending | pending | pending |
+| `MatchingResult#size` | pending | pending | pending |
+| `MatchingResult#sortBy` | pending | pending | pending |
+| `MatchingResult#topmost` | pending | pending | pending |
+| `MatchingResult#worst` | pending | pending | pending |
 
 ### Mathx
 
@@ -369,6 +1180,809 @@
 | `Numberx.parsePercent` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
 | `Numberx.parseRatio` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
 | `Numberx.toFixedNum` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
+
+### ObjectFrame#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ObjectFrame#angle` | pending | pending | pending |
+| `ObjectFrame#bottomLeft` | pending | pending | pending |
+| `ObjectFrame#bottomRight` | pending | pending | pending |
+| `ObjectFrame#bounds` | pending | pending | pending |
+| `ObjectFrame#center` | pending | pending | pending |
+| `ObjectFrame#centerX` | pending | pending | pending |
+| `ObjectFrame#centerY` | pending | pending | pending |
+| `ObjectFrame#height` | pending | pending | pending |
+| `ObjectFrame#inliers` | pending | pending | pending |
+| `ObjectFrame#matches` | pending | pending | pending |
+| `ObjectFrame#points` | pending | pending | pending |
+| `ObjectFrame#summary` | pending | pending | pending |
+| `ObjectFrame#topLeft` | pending | pending | pending |
+| `ObjectFrame#topRight` | pending | pending | pending |
+| `ObjectFrame#width` | pending | pending | pending |
+
+### PReadableTextFile#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `PReadableTextFile#close` | pending | pending | pending |
+| `PReadableTextFile#getPath` | pending | pending | pending |
+| `PReadableTextFile#read` | pending | pending | pending |
+| `PReadableTextFile#readline` | pending | pending | pending |
+| `PReadableTextFile#readlines` | pending | pending | pending |
+
+### PWritableTextFile#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `PWritableTextFile#close` | pending | pending | pending |
+| `PWritableTextFile#flush` | pending | pending | pending |
+| `PWritableTextFile#getPath` | pending | pending | pending |
+| `PWritableTextFile#open` | pending | pending | pending |
+| `PWritableTextFile#write` | pending | pending | pending |
+| `PWritableTextFile#writeline` | pending | pending | pending |
+| `PWritableTextFile#writelines` | pending | pending | pending |
+
+### PngQuantizationFileResult#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `PngQuantizationFileResult#path` | pending | pending | pending |
+| `PngQuantizationFileResult#peakWorkingMemoryBytes` | pending | pending | pending |
+| `PngQuantizationFileResult#quality` | pending | pending | pending |
+| `PngQuantizationFileResult#quantizationError` | pending | pending | pending |
+| `PngQuantizationFileResult#size` | pending | pending | pending |
+
+### PngQuantizationResult#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `PngQuantizationResult#bytes` | pending | pending | pending |
+| `PngQuantizationResult#peakWorkingMemoryBytes` | pending | pending | pending |
+| `PngQuantizationResult#quality` | pending | pending | pending |
+| `PngQuantizationResult#quantizationError` | pending | pending | pending |
+| `PngQuantizationResult#size` | pending | pending | pending |
+
+### RawWindow#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `RawWindow#close` | pending | pending | pending |
+| `RawWindow#disableFocus` | pending | pending | pending |
+| `RawWindow#exitOnClose` | pending | pending | pending |
+| `RawWindow#findView` | pending | pending | pending |
+| `RawWindow#height` | pending | pending | pending |
+| `RawWindow#requestFocus` | pending | pending | pending |
+| `RawWindow#setPosition` | pending | pending | pending |
+| `RawWindow#setSize` | pending | pending | pending |
+| `RawWindow#setTouchable` | pending | pending | pending |
+| `RawWindow#width` | pending | pending | pending |
+| `RawWindow#x` | pending | pending | pending |
+| `RawWindow#y` | pending | pending | pending |
+
+### ScreenCaptureOptions#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ScreenCaptureOptions#density` | pending | pending | pending |
+| `ScreenCaptureOptions#height` | pending | pending | pending |
+| `ScreenCaptureOptions#isAsync` | pending | pending | pending |
+| `ScreenCaptureOptions#orientation` | pending | pending | pending |
+| `ScreenCaptureOptions#width` | pending | pending | pending |
+
+### ScriptEngine#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ScriptEngine#TAG_ENV_PATH` | pending | pending | pending |
+| `ScriptEngine#TAG_SOURCE` | pending | pending | pending |
+| `ScriptEngine#TAG_WORKING_DIRECTORY` | pending | pending | pending |
+| `ScriptEngine#cwd` | pending | pending | pending |
+| `ScriptEngine#destroy` | pending | pending | pending |
+| `ScriptEngine#emit` | pending | pending | pending |
+| `ScriptEngine#execute` | pending | pending | pending |
+| `ScriptEngine#forceStop` | pending | pending | pending |
+| `ScriptEngine#getBackingSourcePath` | pending | pending | pending |
+| `ScriptEngine#getExecArgv` | pending | pending | pending |
+| `ScriptEngine#getId` | pending | pending | pending |
+| `ScriptEngine#getRuntime` | pending | pending | pending |
+| `ScriptEngine#getSource` | pending | pending | pending |
+| `ScriptEngine#getSourceDirectory` | pending | pending | pending |
+| `ScriptEngine#getSourcePath` | pending | pending | pending |
+| `ScriptEngine#getSourceUri` | pending | pending | pending |
+| `ScriptEngine#getStartTime` | pending | pending | pending |
+| `ScriptEngine#getTag` | pending | pending | pending |
+| `ScriptEngine#getUncaughtException` | pending | pending | pending |
+| `ScriptEngine#hasFeature` | pending | pending | pending |
+| `ScriptEngine#init` | pending | pending | pending |
+| `ScriptEngine#isDestroyed` | pending | pending | pending |
+| `ScriptEngine#put` | pending | pending | pending |
+| `ScriptEngine#setExecArgv` | pending | pending | pending |
+| `ScriptEngine#setId` | pending | pending | pending |
+| `ScriptEngine#setOnDestroyListener` | pending | pending | pending |
+| `ScriptEngine#setRuntime` | pending | pending | pending |
+| `ScriptEngine#setTag` | pending | pending | pending |
+| `ScriptEngine#uncaughtException` | pending | pending | pending |
+
+### ScriptExecution#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ScriptExecution#NO_ID` | pending | pending | pending |
+| `ScriptExecution#getAgentContext` | pending | pending | pending |
+| `ScriptExecution#getAgentParametersJson` | pending | pending | pending |
+| `ScriptExecution#getAgentPresetName` | pending | pending | pending |
+| `ScriptExecution#getAgentResult` | pending | pending | pending |
+| `ScriptExecution#getAgentRunId` | pending | pending | pending |
+| `ScriptExecution#getConfig` | pending | pending | pending |
+| `ScriptExecution#getEngine` | pending | pending | pending |
+| `ScriptExecution#getId` | pending | pending | pending |
+| `ScriptExecution#getListener` | pending | pending | pending |
+| `ScriptExecution#getSource` | pending | pending | pending |
+| `ScriptExecution#isFinished` | pending | pending | pending |
+| `ScriptExecution#setAgentResult` | pending | pending | pending |
+
+### ShellProcess#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ShellProcess#addListener` | pending | pending | pending |
+| `ShellProcess#closeInput` | pending | pending | pending |
+| `ShellProcess#command` | pending | pending | pending |
+| `ShellProcess#exitCode` | pending | pending | pending |
+| `ShellProcess#getErrorStream` | pending | pending | pending |
+| `ShellProcess#getInputStream` | pending | pending | pending |
+| `ShellProcess#getOutputStream` | pending | pending | pending |
+| `ShellProcess#isAlive` | pending | pending | pending |
+| `ShellProcess#kill` | pending | pending | pending |
+| `ShellProcess#listenerCount` | pending | pending | pending |
+| `ShellProcess#mode` | pending | pending | pending |
+| `ShellProcess#off` | pending | pending | pending |
+| `ShellProcess#on` | pending | pending | pending |
+| `ShellProcess#once` | pending | pending | pending |
+| `ShellProcess#pid` | pending | pending | pending |
+| `ShellProcess#prependListener` | pending | pending | pending |
+| `ShellProcess#prependOnceListener` | pending | pending | pending |
+| `ShellProcess#readErrorLine` | pending | pending | pending |
+| `ShellProcess#readLine` | pending | pending | pending |
+| `ShellProcess#removeAllListeners` | pending | pending | pending |
+| `ShellProcess#removeListener` | pending | pending | pending |
+| `ShellProcess#toString` | pending | pending | pending |
+| `ShellProcess#waitFor` | pending | pending | pending |
+| `ShellProcess#write` | pending | pending | pending |
+| `ShellProcess#writeLine` | pending | pending | pending |
+
+### ShellResult#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ShellResult#code` | pending | pending | pending |
+| `ShellResult#error` | pending | pending | pending |
+| `ShellResult#result` | pending | pending | pending |
+| `ShellResult#throwIfError` | pending | pending | pending |
+| `ShellResult#toJson` | pending | pending | pending |
+
+### Storage#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Storage#clear` | pending | pending | pending |
+| `Storage#clearSync` | pending | pending | pending |
+| `Storage#contains` | pending | pending | pending |
+| `Storage#get` | pending | pending | pending |
+| `Storage#name` | pending | pending | pending |
+| `Storage#put` | pending | pending | pending |
+| `Storage#putSync` | pending | pending | pending |
+| `Storage#remove` | pending | pending | pending |
+| `Storage#removeSync` | pending | pending | pending |
+| `Storage#selfRemove` | pending | pending | pending |
+| `Storage#selfRemoveSync` | pending | pending | pending |
+| `Storage#size` | pending | pending | pending |
+
+### ThemeColor#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ThemeColor#colorAccent` | pending | pending | pending |
+| `ThemeColor#colorPrimary` | pending | pending | pending |
+| `ThemeColor#colorPrimaryDark` | pending | pending | pending |
+| `ThemeColor#getColorAccent` | pending | pending | pending |
+| `ThemeColor#getColorPrimary` | pending | pending | pending |
+| `ThemeColor#getColorPrimaryDark` | pending | pending | pending |
+| `ThemeColor#isLuminanceDark` | pending | pending | pending |
+| `ThemeColor#isLuminanceLight` | pending | pending | pending |
+| `ThemeColor#readFrom` | pending | pending | pending |
+| `ThemeColor#saveIn` | pending | pending | pending |
+
+### TimedTask#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `TimedTask#END_MODE_COUNT` | pending | pending | pending |
+| `TimedTask#END_MODE_FOREVER` | pending | pending | pending |
+| `TimedTask#END_MODE_UNTIL_DATE` | pending | pending | pending |
+| `TimedTask#FLAG_FRIDAY` | pending | pending | pending |
+| `TimedTask#FLAG_MONDAY` | pending | pending | pending |
+| `TimedTask#FLAG_SATURDAY` | pending | pending | pending |
+| `TimedTask#FLAG_SUNDAY` | pending | pending | pending |
+| `TimedTask#FLAG_THURSDAY` | pending | pending | pending |
+| `TimedTask#FLAG_TUESDAY` | pending | pending | pending |
+| `TimedTask#FLAG_WEDNESDAY` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_COUNTDOWN` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_DAILY` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_DISPOSABLE` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_MONTHLY` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_UNKNOWN` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_WEEKLY` | pending | pending | pending |
+| `TimedTask#REPEAT_MODE_YEARLY` | pending | pending | pending |
+| `TimedTask#TABLE` | pending | pending | pending |
+| `TimedTask#captureLaunchContext` | pending | pending | pending |
+| `TimedTask#countdownTask` | pending | pending | pending |
+| `TimedTask#createIntent` | pending | pending | pending |
+| `TimedTask#createPendingIntent` | pending | pending | pending |
+| `TimedTask#dailyTask` | pending | pending | pending |
+| `TimedTask#disposableTask` | pending | pending | pending |
+| `TimedTask#getDayOfMonth` | pending | pending | pending |
+| `TimedTask#getDayOfWeekTimeFlag` | pending | pending | pending |
+| `TimedTask#getDelay` | pending | pending | pending |
+| `TimedTask#getEndMode` | pending | pending | pending |
+| `TimedTask#getEndValue` | pending | pending | pending |
+| `TimedTask#getFinishedTimes` | pending | pending | pending |
+| `TimedTask#getId` | pending | pending | pending |
+| `TimedTask#getInterval` | pending | pending | pending |
+| `TimedTask#getLoopTimes` | pending | pending | pending |
+| `TimedTask#getMillis` | pending | pending | pending |
+| `TimedTask#getMonthOfYear` | pending | pending | pending |
+| `TimedTask#getNextTime` | pending | pending | pending |
+| `TimedTask#getProjectRoot` | pending | pending | pending |
+| `TimedTask#getRepeatMode` | pending | pending | pending |
+| `TimedTask#getScriptPath` | pending | pending | pending |
+| `TimedTask#getSourceKind` | pending | pending | pending |
+| `TimedTask#getTimeFlag` | pending | pending | pending |
+| `TimedTask#hasDayOfWeek` | pending | pending | pending |
+| `TimedTask#isCountdown` | pending | pending | pending |
+| `TimedTask#isDaily` | pending | pending | pending |
+| `TimedTask#isDisposable` | pending | pending | pending |
+| `TimedTask#isMonthly` | pending | pending | pending |
+| `TimedTask#isScheduled` | pending | pending | pending |
+| `TimedTask#isWeekly` | pending | pending | pending |
+| `TimedTask#isYearly` | pending | pending | pending |
+| `TimedTask#monthlyTask` | pending | pending | pending |
+| `TimedTask#notifyFinished` | pending | pending | pending |
+| `TimedTask#setDayOfMonth` | pending | pending | pending |
+| `TimedTask#setDelay` | pending | pending | pending |
+| `TimedTask#setEndMode` | pending | pending | pending |
+| `TimedTask#setEndValue` | pending | pending | pending |
+| `TimedTask#setFinishedTimes` | pending | pending | pending |
+| `TimedTask#setId` | pending | pending | pending |
+| `TimedTask#setInterval` | pending | pending | pending |
+| `TimedTask#setLoopTimes` | pending | pending | pending |
+| `TimedTask#setMillis` | pending | pending | pending |
+| `TimedTask#setMonthOfYear` | pending | pending | pending |
+| `TimedTask#setProjectRoot` | pending | pending | pending |
+| `TimedTask#setRepeatMode` | pending | pending | pending |
+| `TimedTask#setScheduled` | pending | pending | pending |
+| `TimedTask#setScriptPath` | pending | pending | pending |
+| `TimedTask#setSourceKind` | pending | pending | pending |
+| `TimedTask#setTimeFlag` | pending | pending | pending |
+| `TimedTask#weeklyTask` | pending | pending | pending |
+| `TimedTask#yearlyTask` | pending | pending | pending |
+
+### TtsUtterance#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `TtsUtterance#addListener` | pending | pending | pending |
+| `TtsUtterance#cancel` | pending | pending | pending |
+| `TtsUtterance#defaultMaxListeners` | pending | pending | pending |
+| `TtsUtterance#emit` | pending | pending | pending |
+| `TtsUtterance#emitSticky` | pending | pending | pending |
+| `TtsUtterance#eventNames` | pending | pending | pending |
+| `TtsUtterance#getMaxListeners` | pending | pending | pending |
+| `TtsUtterance#getTimer` | pending | pending | pending |
+| `TtsUtterance#id` | pending | pending | pending |
+| `TtsUtterance#isDone` | pending | pending | pending |
+| `TtsUtterance#listenerCount` | pending | pending | pending |
+| `TtsUtterance#listeners` | pending | pending | pending |
+| `TtsUtterance#on` | pending | pending | pending |
+| `TtsUtterance#once` | pending | pending | pending |
+| `TtsUtterance#operation` | pending | pending | pending |
+| `TtsUtterance#prependListener` | pending | pending | pending |
+| `TtsUtterance#prependOnceListener` | pending | pending | pending |
+| `TtsUtterance#removeAllListeners` | pending | pending | pending |
+| `TtsUtterance#removeListener` | pending | pending | pending |
+| `TtsUtterance#result` | pending | pending | pending |
+| `TtsUtterance#setMaxListeners` | pending | pending | pending |
+| `TtsUtterance#state` | pending | pending | pending |
+| `TtsUtterance#stop` | pending | pending | pending |
+| `TtsUtterance#text` | pending | pending | pending |
+| `TtsUtterance#utterance` | pending | pending | pending |
+
+### UiObject#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `UiObject#accessibilityFocus` | pending | pending | pending |
+| `UiObject#accessibilityFocused` | pending | pending | pending |
+| `UiObject#actionNames` | pending | pending | pending |
+| `UiObject#bottom` | pending | pending | pending |
+| `UiObject#bounds` | pending | pending | pending |
+| `UiObject#boundsBottom` | pending | pending | pending |
+| `UiObject#boundsCenterX` | pending | pending | pending |
+| `UiObject#boundsCenterY` | pending | pending | pending |
+| `UiObject#boundsExactCenterX` | pending | pending | pending |
+| `UiObject#boundsExactCenterY` | pending | pending | pending |
+| `UiObject#boundsHeight` | pending | pending | pending |
+| `UiObject#boundsInParent` | pending | pending | pending |
+| `UiObject#boundsInScreen` | pending | pending | pending |
+| `UiObject#boundsLeft` | pending | pending | pending |
+| `UiObject#boundsRight` | pending | pending | pending |
+| `UiObject#boundsTop` | pending | pending | pending |
+| `UiObject#boundsWidth` | pending | pending | pending |
+| `UiObject#brother` | pending | pending | pending |
+| `UiObject#center` | pending | pending | pending |
+| `UiObject#centerX` | pending | pending | pending |
+| `UiObject#centerY` | pending | pending | pending |
+| `UiObject#checkable` | pending | pending | pending |
+| `UiObject#checked` | pending | pending | pending |
+| `UiObject#child` | pending | pending | pending |
+| `UiObject#childCount` | pending | pending | pending |
+| `UiObject#children` | pending | pending | pending |
+| `UiObject#className` | pending | pending | pending |
+| `UiObject#clearAccessibilityFocus` | pending | pending | pending |
+| `UiObject#clearFocus` | pending | pending | pending |
+| `UiObject#clearSelection` | pending | pending | pending |
+| `UiObject#click` | pending | pending | pending |
+| `UiObject#clickBounds` | pending | pending | pending |
+| `UiObject#clickable` | pending | pending | pending |
+| `UiObject#collapse` | pending | pending | pending |
+| `UiObject#column` | pending | pending | pending |
+| `UiObject#columnCount` | pending | pending | pending |
+| `UiObject#columnSpan` | pending | pending | pending |
+| `UiObject#compass` | pending | pending | pending |
+| `UiObject#content` | pending | pending | pending |
+| `UiObject#contentInvalid` | pending | pending | pending |
+| `UiObject#contextClick` | pending | pending | pending |
+| `UiObject#contextClickable` | pending | pending | pending |
+| `UiObject#copy` | pending | pending | pending |
+| `UiObject#cut` | pending | pending | pending |
+| `UiObject#depth` | pending | pending | pending |
+| `UiObject#desc` | pending | pending | pending |
+| `UiObject#dismiss` | pending | pending | pending |
+| `UiObject#dismissable` | pending | pending | pending |
+| `UiObject#dragCancel` | pending | pending | pending |
+| `UiObject#dragDrop` | pending | pending | pending |
+| `UiObject#dragStart` | pending | pending | pending |
+| `UiObject#drawingOrder` | pending | pending | pending |
+| `UiObject#dumpSubtree` | pending | pending | pending |
+| `UiObject#editable` | pending | pending | pending |
+| `UiObject#enabled` | pending | pending | pending |
+| `UiObject#exactCenterX` | pending | pending | pending |
+| `UiObject#exactCenterY` | pending | pending | pending |
+| `UiObject#expand` | pending | pending | pending |
+| `UiObject#find` | pending | pending | pending |
+| `UiObject#findAccessibilityNodeInfosByText` | pending | pending | pending |
+| `UiObject#findAccessibilityNodeInfosByViewId` | pending | pending | pending |
+| `UiObject#findOne` | pending | pending | pending |
+| `UiObject#fingerprint` | pending | pending | pending |
+| `UiObject#firstChild` | pending | pending | pending |
+| `UiObject#firstSibling` | pending | pending | pending |
+| `UiObject#focus` | pending | pending | pending |
+| `UiObject#focusable` | pending | pending | pending |
+| `UiObject#focused` | pending | pending | pending |
+| `UiObject#fullId` | pending | pending | pending |
+| `UiObject#getChild` | pending | pending | pending |
+| `UiObject#getParent` | pending | pending | pending |
+| `UiObject#getText` | pending | pending | pending |
+| `UiObject#hasAction` | pending | pending | pending |
+| `UiObject#hasChildren` | pending | pending | pending |
+| `UiObject#height` | pending | pending | pending |
+| `UiObject#hideTooltip` | pending | pending | pending |
+| `UiObject#id` | pending | pending | pending |
+| `UiObject#idEntry` | pending | pending | pending |
+| `UiObject#idHex` | pending | pending | pending |
+| `UiObject#imeEnter` | pending | pending | pending |
+| `UiObject#indexInParent` | pending | pending | pending |
+| `UiObject#isShifted` | pending | pending | pending |
+| `UiObject#isSimilar` | pending | pending | pending |
+| `UiObject#isSingleton` | pending | pending | pending |
+| `UiObject#isStale` | pending | pending | pending |
+| `UiObject#lastChild` | pending | pending | pending |
+| `UiObject#lastSibling` | pending | pending | pending |
+| `UiObject#left` | pending | pending | pending |
+| `UiObject#longClick` | pending | pending | pending |
+| `UiObject#longClickable` | pending | pending | pending |
+| `UiObject#moveWindow` | pending | pending | pending |
+| `UiObject#multiLine` | pending | pending | pending |
+| `UiObject#nextAtMovementGranularity` | pending | pending | pending |
+| `UiObject#nextHtmlElement` | pending | pending | pending |
+| `UiObject#nextSibling` | pending | pending | pending |
+| `UiObject#offset` | pending | pending | pending |
+| `UiObject#packageName` | pending | pending | pending |
+| `UiObject#pageDown` | pending | pending | pending |
+| `UiObject#pageLeft` | pending | pending | pending |
+| `UiObject#pageRight` | pending | pending | pending |
+| `UiObject#pageUp` | pending | pending | pending |
+| `UiObject#parent` | pending | pending | pending |
+| `UiObject#password` | pending | pending | pending |
+| `UiObject#paste` | pending | pending | pending |
+| `UiObject#performAction` | pending | pending | pending |
+| `UiObject#point` | pending | pending | pending |
+| `UiObject#pressAndHold` | pending | pending | pending |
+| `UiObject#previousAtMovementGranularity` | pending | pending | pending |
+| `UiObject#previousHtmlElement` | pending | pending | pending |
+| `UiObject#previousSibling` | pending | pending | pending |
+| `UiObject#recycle` | pending | pending | pending |
+| `UiObject#right` | pending | pending | pending |
+| `UiObject#row` | pending | pending | pending |
+| `UiObject#rowCount` | pending | pending | pending |
+| `UiObject#rowSpan` | pending | pending | pending |
+| `UiObject#scrollBackward` | pending | pending | pending |
+| `UiObject#scrollDown` | pending | pending | pending |
+| `UiObject#scrollForward` | pending | pending | pending |
+| `UiObject#scrollLeft` | pending | pending | pending |
+| `UiObject#scrollRight` | pending | pending | pending |
+| `UiObject#scrollTo` | pending | pending | pending |
+| `UiObject#scrollUp` | pending | pending | pending |
+| `UiObject#scrollable` | pending | pending | pending |
+| `UiObject#select` | pending | pending | pending |
+| `UiObject#selected` | pending | pending | pending |
+| `UiObject#setProgress` | pending | pending | pending |
+| `UiObject#setSelection` | pending | pending | pending |
+| `UiObject#setText` | pending | pending | pending |
+| `UiObject#show` | pending | pending | pending |
+| `UiObject#showTextSuggestions` | pending | pending | pending |
+| `UiObject#showTooltip` | pending | pending | pending |
+| `UiObject#sibling` | pending | pending | pending |
+| `UiObject#siblingCount` | pending | pending | pending |
+| `UiObject#siblings` | pending | pending | pending |
+| `UiObject#simpleId` | pending | pending | pending |
+| `UiObject#size` | pending | pending | pending |
+| `UiObject#snapshot` | pending | pending | pending |
+| `UiObject#summary` | pending | pending | pending |
+| `UiObject#text` | pending | pending | pending |
+| `UiObject#toJSON` | pending | pending | pending |
+| `UiObject#top` | pending | pending | pending |
+| `UiObject#visibleToUser` | pending | pending | pending |
+| `UiObject#waitForStable` | pending | pending | pending |
+| `UiObject#waitUntilGone` | pending | pending | pending |
+| `UiObject#width` | pending | pending | pending |
+
+### UiObjectCollection#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `UiObjectCollection#accessibilityFocus` | pending | pending | pending |
+| `UiObjectCollection#at` | pending | pending | pending |
+| `UiObjectCollection#clearAccessibilityFocus` | pending | pending | pending |
+| `UiObjectCollection#clearFocus` | pending | pending | pending |
+| `UiObjectCollection#clearSelection` | pending | pending | pending |
+| `UiObjectCollection#click` | pending | pending | pending |
+| `UiObjectCollection#clickEach` | pending | pending | pending |
+| `UiObjectCollection#collapse` | pending | pending | pending |
+| `UiObjectCollection#contains` | pending | pending | pending |
+| `UiObjectCollection#contextClick` | pending | pending | pending |
+| `UiObjectCollection#copy` | pending | pending | pending |
+| `UiObjectCollection#cut` | pending | pending | pending |
+| `UiObjectCollection#dismiss` | pending | pending | pending |
+| `UiObjectCollection#dragCancel` | pending | pending | pending |
+| `UiObjectCollection#dragDrop` | pending | pending | pending |
+| `UiObjectCollection#dragStart` | pending | pending | pending |
+| `UiObjectCollection#each` | pending | pending | pending |
+| `UiObjectCollection#empty` | pending | pending | pending |
+| `UiObjectCollection#expand` | pending | pending | pending |
+| `UiObjectCollection#find` | pending | pending | pending |
+| `UiObjectCollection#findOne` | pending | pending | pending |
+| `UiObjectCollection#first` | pending | pending | pending |
+| `UiObjectCollection#focus` | pending | pending | pending |
+| `UiObjectCollection#get` | pending | pending | pending |
+| `UiObjectCollection#hideTooltip` | pending | pending | pending |
+| `UiObjectCollection#imeEnter` | pending | pending | pending |
+| `UiObjectCollection#isEmpty` | pending | pending | pending |
+| `UiObjectCollection#isNotEmpty` | pending | pending | pending |
+| `UiObjectCollection#isSimilar` | pending | pending | pending |
+| `UiObjectCollection#iterator` | pending | pending | pending |
+| `UiObjectCollection#last` | pending | pending | pending |
+| `UiObjectCollection#longClick` | pending | pending | pending |
+| `UiObjectCollection#longClickEach` | pending | pending | pending |
+| `UiObjectCollection#moveWindow` | pending | pending | pending |
+| `UiObjectCollection#nextAtMovementGranularity` | pending | pending | pending |
+| `UiObjectCollection#nextHtmlElement` | pending | pending | pending |
+| `UiObjectCollection#nodes` | pending | pending | pending |
+| `UiObjectCollection#nonEmpty` | pending | pending | pending |
+| `UiObjectCollection#nonNull` | pending | pending | pending |
+| `UiObjectCollection#pageDown` | pending | pending | pending |
+| `UiObjectCollection#pageLeft` | pending | pending | pending |
+| `UiObjectCollection#pageRight` | pending | pending | pending |
+| `UiObjectCollection#pageUp` | pending | pending | pending |
+| `UiObjectCollection#paste` | pending | pending | pending |
+| `UiObjectCollection#performAction` | pending | pending | pending |
+| `UiObjectCollection#performActionEach` | pending | pending | pending |
+| `UiObjectCollection#pressAndHold` | pending | pending | pending |
+| `UiObjectCollection#previousAtMovementGranularity` | pending | pending | pending |
+| `UiObjectCollection#previousHtmlElement` | pending | pending | pending |
+| `UiObjectCollection#scrollBackward` | pending | pending | pending |
+| `UiObjectCollection#scrollBackwardEach` | pending | pending | pending |
+| `UiObjectCollection#scrollDown` | pending | pending | pending |
+| `UiObjectCollection#scrollForward` | pending | pending | pending |
+| `UiObjectCollection#scrollForwardEach` | pending | pending | pending |
+| `UiObjectCollection#scrollLeft` | pending | pending | pending |
+| `UiObjectCollection#scrollRight` | pending | pending | pending |
+| `UiObjectCollection#scrollTo` | pending | pending | pending |
+| `UiObjectCollection#scrollUp` | pending | pending | pending |
+| `UiObjectCollection#select` | pending | pending | pending |
+| `UiObjectCollection#setProgress` | pending | pending | pending |
+| `UiObjectCollection#setSelection` | pending | pending | pending |
+| `UiObjectCollection#setText` | pending | pending | pending |
+| `UiObjectCollection#setTextEach` | pending | pending | pending |
+| `UiObjectCollection#show` | pending | pending | pending |
+| `UiObjectCollection#showTextSuggestions` | pending | pending | pending |
+| `UiObjectCollection#showTooltip` | pending | pending | pending |
+| `UiObjectCollection#size` | pending | pending | pending |
+| `UiObjectCollection#slice` | pending | pending | pending |
+| `UiObjectCollection#toArray` | pending | pending | pending |
+| `UiObjectCollection#toList` | pending | pending | pending |
+
+### UiSelector#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `UiSelector#accessibilityFocus` | pending | pending | pending |
+| `UiSelector#accessibilityFocused` | pending | pending | pending |
+| `UiSelector#action` | pending | pending | pending |
+| `UiSelector#algorithm` | pending | pending | pending |
+| `UiSelector#append` | pending | pending | pending |
+| `UiSelector#applyEntry` | pending | pending | pending |
+| `UiSelector#bottom` | pending | pending | pending |
+| `UiSelector#bounds` | pending | pending | pending |
+| `UiSelector#boundsBottom` | pending | pending | pending |
+| `UiSelector#boundsCenterX` | pending | pending | pending |
+| `UiSelector#boundsCenterY` | pending | pending | pending |
+| `UiSelector#boundsContains` | pending | pending | pending |
+| `UiSelector#boundsHeight` | pending | pending | pending |
+| `UiSelector#boundsInside` | pending | pending | pending |
+| `UiSelector#boundsLeft` | pending | pending | pending |
+| `UiSelector#boundsMaxBottom` | pending | pending | pending |
+| `UiSelector#boundsMaxCenterX` | pending | pending | pending |
+| `UiSelector#boundsMaxCenterY` | pending | pending | pending |
+| `UiSelector#boundsMaxHeight` | pending | pending | pending |
+| `UiSelector#boundsMaxLeft` | pending | pending | pending |
+| `UiSelector#boundsMaxRight` | pending | pending | pending |
+| `UiSelector#boundsMaxTop` | pending | pending | pending |
+| `UiSelector#boundsMaxWidth` | pending | pending | pending |
+| `UiSelector#boundsMinBottom` | pending | pending | pending |
+| `UiSelector#boundsMinCenterX` | pending | pending | pending |
+| `UiSelector#boundsMinCenterY` | pending | pending | pending |
+| `UiSelector#boundsMinHeight` | pending | pending | pending |
+| `UiSelector#boundsMinLeft` | pending | pending | pending |
+| `UiSelector#boundsMinRight` | pending | pending | pending |
+| `UiSelector#boundsMinTop` | pending | pending | pending |
+| `UiSelector#boundsMinWidth` | pending | pending | pending |
+| `UiSelector#boundsRight` | pending | pending | pending |
+| `UiSelector#boundsTop` | pending | pending | pending |
+| `UiSelector#boundsWidth` | pending | pending | pending |
+| `UiSelector#centerX` | pending | pending | pending |
+| `UiSelector#centerY` | pending | pending | pending |
+| `UiSelector#checkable` | pending | pending | pending |
+| `UiSelector#checked` | pending | pending | pending |
+| `UiSelector#childCount` | pending | pending | pending |
+| `UiSelector#className` | pending | pending | pending |
+| `UiSelector#classNameContains` | pending | pending | pending |
+| `UiSelector#classNameEndsWith` | pending | pending | pending |
+| `UiSelector#classNameMatch` | pending | pending | pending |
+| `UiSelector#classNameMatches` | pending | pending | pending |
+| `UiSelector#classNameStartsWith` | pending | pending | pending |
+| `UiSelector#clearAccessibilityFocus` | pending | pending | pending |
+| `UiSelector#clearFocus` | pending | pending | pending |
+| `UiSelector#clearSelection` | pending | pending | pending |
+| `UiSelector#click` | pending | pending | pending |
+| `UiSelector#clickable` | pending | pending | pending |
+| `UiSelector#collapse` | pending | pending | pending |
+| `UiSelector#column` | pending | pending | pending |
+| `UiSelector#columnCount` | pending | pending | pending |
+| `UiSelector#columnSpan` | pending | pending | pending |
+| `UiSelector#content` | pending | pending | pending |
+| `UiSelector#contentContains` | pending | pending | pending |
+| `UiSelector#contentEndsWith` | pending | pending | pending |
+| `UiSelector#contentInvalid` | pending | pending | pending |
+| `UiSelector#contentMatch` | pending | pending | pending |
+| `UiSelector#contentMatches` | pending | pending | pending |
+| `UiSelector#contentStartsWith` | pending | pending | pending |
+| `UiSelector#contextClick` | pending | pending | pending |
+| `UiSelector#contextClickable` | pending | pending | pending |
+| `UiSelector#copy` | pending | pending | pending |
+| `UiSelector#currentApp` | pending | pending | pending |
+| `UiSelector#cut` | pending | pending | pending |
+| `UiSelector#depth` | pending | pending | pending |
+| `UiSelector#desc` | pending | pending | pending |
+| `UiSelector#descContains` | pending | pending | pending |
+| `UiSelector#descEndsWith` | pending | pending | pending |
+| `UiSelector#descMatch` | pending | pending | pending |
+| `UiSelector#descMatches` | pending | pending | pending |
+| `UiSelector#descStartsWith` | pending | pending | pending |
+| `UiSelector#dismiss` | pending | pending | pending |
+| `UiSelector#dismissable` | pending | pending | pending |
+| `UiSelector#dragCancel` | pending | pending | pending |
+| `UiSelector#dragDrop` | pending | pending | pending |
+| `UiSelector#dragStart` | pending | pending | pending |
+| `UiSelector#drawingOrder` | pending | pending | pending |
+| `UiSelector#editable` | pending | pending | pending |
+| `UiSelector#enabled` | pending | pending | pending |
+| `UiSelector#exists` | pending | pending | pending |
+| `UiSelector#expand` | pending | pending | pending |
+| `UiSelector#filter` | pending | pending | pending |
+| `UiSelector#find` | pending | pending | pending |
+| `UiSelector#findIterator` | pending | pending | pending |
+| `UiSelector#findOnce` | pending | pending | pending |
+| `UiSelector#findOne` | pending | pending | pending |
+| `UiSelector#focus` | pending | pending | pending |
+| `UiSelector#focusable` | pending | pending | pending |
+| `UiSelector#focused` | pending | pending | pending |
+| `UiSelector#hasChildren` | pending | pending | pending |
+| `UiSelector#height` | pending | pending | pending |
+| `UiSelector#hideTooltip` | pending | pending | pending |
+| `UiSelector#id` | pending | pending | pending |
+| `UiSelector#idContains` | pending | pending | pending |
+| `UiSelector#idEndsWith` | pending | pending | pending |
+| `UiSelector#idHex` | pending | pending | pending |
+| `UiSelector#idMatch` | pending | pending | pending |
+| `UiSelector#idMatches` | pending | pending | pending |
+| `UiSelector#idStartsWith` | pending | pending | pending |
+| `UiSelector#imeEnter` | pending | pending | pending |
+| `UiSelector#indexInParent` | pending | pending | pending |
+| `UiSelector#left` | pending | pending | pending |
+| `UiSelector#longClick` | pending | pending | pending |
+| `UiSelector#longClickable` | pending | pending | pending |
+| `UiSelector#maxBottom` | pending | pending | pending |
+| `UiSelector#maxCenterX` | pending | pending | pending |
+| `UiSelector#maxCenterY` | pending | pending | pending |
+| `UiSelector#maxChildCount` | pending | pending | pending |
+| `UiSelector#maxDepth` | pending | pending | pending |
+| `UiSelector#maxHeight` | pending | pending | pending |
+| `UiSelector#maxIndexInParent` | pending | pending | pending |
+| `UiSelector#maxLeft` | pending | pending | pending |
+| `UiSelector#maxRight` | pending | pending | pending |
+| `UiSelector#maxTop` | pending | pending | pending |
+| `UiSelector#maxWidth` | pending | pending | pending |
+| `UiSelector#minBottom` | pending | pending | pending |
+| `UiSelector#minCenterX` | pending | pending | pending |
+| `UiSelector#minCenterY` | pending | pending | pending |
+| `UiSelector#minChildCount` | pending | pending | pending |
+| `UiSelector#minDepth` | pending | pending | pending |
+| `UiSelector#minHeight` | pending | pending | pending |
+| `UiSelector#minIndexInParent` | pending | pending | pending |
+| `UiSelector#minLeft` | pending | pending | pending |
+| `UiSelector#minRight` | pending | pending | pending |
+| `UiSelector#minTop` | pending | pending | pending |
+| `UiSelector#minWidth` | pending | pending | pending |
+| `UiSelector#moveWindow` | pending | pending | pending |
+| `UiSelector#multiLine` | pending | pending | pending |
+| `UiSelector#nextAtMovementGranularity` | pending | pending | pending |
+| `UiSelector#nextHtmlElement` | pending | pending | pending |
+| `UiSelector#packageName` | pending | pending | pending |
+| `UiSelector#packageNameContains` | pending | pending | pending |
+| `UiSelector#packageNameEndsWith` | pending | pending | pending |
+| `UiSelector#packageNameMatch` | pending | pending | pending |
+| `UiSelector#packageNameMatches` | pending | pending | pending |
+| `UiSelector#packageNameStartsWith` | pending | pending | pending |
+| `UiSelector#pageDown` | pending | pending | pending |
+| `UiSelector#pageLeft` | pending | pending | pending |
+| `UiSelector#pageRight` | pending | pending | pending |
+| `UiSelector#pageUp` | pending | pending | pending |
+| `UiSelector#password` | pending | pending | pending |
+| `UiSelector#paste` | pending | pending | pending |
+| `UiSelector#performAction` | pending | pending | pending |
+| `UiSelector#plus` | pending | pending | pending |
+| `UiSelector#pressAndHold` | pending | pending | pending |
+| `UiSelector#previousAtMovementGranularity` | pending | pending | pending |
+| `UiSelector#previousHtmlElement` | pending | pending | pending |
+| `UiSelector#right` | pending | pending | pending |
+| `UiSelector#row` | pending | pending | pending |
+| `UiSelector#rowCount` | pending | pending | pending |
+| `UiSelector#rowSpan` | pending | pending | pending |
+| `UiSelector#screenCenterX` | pending | pending | pending |
+| `UiSelector#screenCenterY` | pending | pending | pending |
+| `UiSelector#screenCoverage` | pending | pending | pending |
+| `UiSelector#scrollBackward` | pending | pending | pending |
+| `UiSelector#scrollDown` | pending | pending | pending |
+| `UiSelector#scrollForward` | pending | pending | pending |
+| `UiSelector#scrollLeft` | pending | pending | pending |
+| `UiSelector#scrollRight` | pending | pending | pending |
+| `UiSelector#scrollTo` | pending | pending | pending |
+| `UiSelector#scrollUp` | pending | pending | pending |
+| `UiSelector#scrollable` | pending | pending | pending |
+| `UiSelector#select` | pending | pending | pending |
+| `UiSelector#selected` | pending | pending | pending |
+| `UiSelector#setProgress` | pending | pending | pending |
+| `UiSelector#setSelection` | pending | pending | pending |
+| `UiSelector#setText` | pending | pending | pending |
+| `UiSelector#show` | pending | pending | pending |
+| `UiSelector#showTextSuggestions` | pending | pending | pending |
+| `UiSelector#showTooltip` | pending | pending | pending |
+| `UiSelector#text` | pending | pending | pending |
+| `UiSelector#textContains` | pending | pending | pending |
+| `UiSelector#textEndsWith` | pending | pending | pending |
+| `UiSelector#textMatch` | pending | pending | pending |
+| `UiSelector#textMatches` | pending | pending | pending |
+| `UiSelector#textStartsWith` | pending | pending | pending |
+| `UiSelector#toStringReadable` | pending | pending | pending |
+| `UiSelector#top` | pending | pending | pending |
+| `UiSelector#untilFind` | pending | pending | pending |
+| `UiSelector#untilFindOne` | pending | pending | pending |
+| `UiSelector#visibleToUser` | pending | pending | pending |
+| `UiSelector#waitFor` | pending | pending | pending |
+| `UiSelector#width` | pending | pending | pending |
+
+### VolatileDispose#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `VolatileDispose#blockedGet` | pending | pending | pending |
+| `VolatileDispose#blockedGetOrThrow` | pending | pending | pending |
+| `VolatileDispose#setAndNotify` | pending | pending | pending |
+
+### WebSocket#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `WebSocket#addListener` | pending | pending | pending |
+| `WebSocket#cancel` | pending | pending | pending |
+| `WebSocket#client` | pending | pending | pending |
+| `WebSocket#close` | pending | pending | pending |
+| `WebSocket#defaultMaxListeners` | pending | pending | pending |
+| `WebSocket#emit` | pending | pending | pending |
+| `WebSocket#emitSticky` | pending | pending | pending |
+| `WebSocket#eventNames` | pending | pending | pending |
+| `WebSocket#exitOnClose` | pending | pending | pending |
+| `WebSocket#getMaxListeners` | pending | pending | pending |
+| `WebSocket#getTimer` | pending | pending | pending |
+| `WebSocket#listenerCount` | pending | pending | pending |
+| `WebSocket#listeners` | pending | pending | pending |
+| `WebSocket#on` | pending | pending | pending |
+| `WebSocket#once` | pending | pending | pending |
+| `WebSocket#prependListener` | pending | pending | pending |
+| `WebSocket#prependOnceListener` | pending | pending | pending |
+| `WebSocket#queueSize` | pending | pending | pending |
+| `WebSocket#rebuild` | pending | pending | pending |
+| `WebSocket#removeAllListeners` | pending | pending | pending |
+| `WebSocket#removeListener` | pending | pending | pending |
+| `WebSocket#request` | pending | pending | pending |
+| `WebSocket#send` | pending | pending | pending |
+| `WebSocket#setMaxListeners` | pending | pending | pending |
+| `WebSocket#url` | pending | pending | pending |
+
+### YoloDetector#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `YoloDetector#close` | pending | pending | pending |
+| `YoloDetector#detect` | pending | pending | pending |
+
+### Zip#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `Zip#addFile` | pending | pending | pending |
+| `Zip#addFiles` | pending | pending | pending |
+| `Zip#addFolder` | pending | pending | pending |
+| `Zip#extractAll` | pending | pending | pending |
+| `Zip#extractFile` | pending | pending | pending |
+| `Zip#getFileHeader` | pending | pending | pending |
+| `Zip#getFileHeaders` | pending | pending | pending |
+| `Zip#getPath` | pending | pending | pending |
+| `Zip#getZipFile` | pending | pending | pending |
+| `Zip#isEncrypted` | pending | pending | pending |
+| `Zip#isValidZipFile` | pending | pending | pending |
+| `Zip#name` | pending | pending | pending |
+| `Zip#options` | pending | pending | pending |
+| `Zip#path` | pending | pending | pending |
+| `Zip#removeFile` | pending | pending | pending |
+| `Zip#setPassword` | pending | pending | pending |
+| `Zip#toString` | pending | pending | pending |
+| `Zip#toStringReadable` | pending | pending | pending |
+| `Zip#unzipParameters` | pending | pending | pending |
+| `Zip#zipFile` | pending | pending | pending |
+| `Zip#zipParameters` | pending | pending | pending |
 
 ### app
 

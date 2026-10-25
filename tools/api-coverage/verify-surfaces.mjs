@@ -116,7 +116,8 @@ try {
         const fallback = context.AutoJsAceCompleter.createCompleter(context.AutoJsAceIndices);
         const returnProbe = api => api.includes(".().") || api.includes(".new().") || api.includes(".await.");
         for (const row of rows) {
-            const text = row.api.replaceAll(".()", "()");
+            // `Canvas.new().drawLine` is typed as `new Canvas().drawLine`.
+            const text = row.api.replace(/^(.+?)\.new\(\)/, "new $1()").replaceAll(".()", "()");
             const prefix = text.slice(text.lastIndexOf(".") + 1);
             row.aceDefault = completionNames(defaults, text, prefix).some(item => item.caption === prefix);
             row.aceAllGroups = completionNames(all, text, prefix).some(item => item.caption === prefix);
