@@ -71,8 +71,8 @@ object FastPath {
 
         /**
          * A polled attempt after the first that walks the tree without asking the framework, the last one included: the
-         * fast path of the query costs no less than its walk ([Query], appendix C Q15 / Q17).
-         * zh-CN: 第一次之后不向框架查找而直接遍历整棵树的轮询尝试, 含最后一次: 该查询的快路径不比遍历省 ([Query], 附录 C Q15 / Q17).
+         * fast path of the query costs more than its walk ([Query], appendix C Q15 / Q17).
+         * zh-CN: 第一次之后不向框架查找而直接遍历整棵树的轮询尝试, 含最后一次: 该查询的快路径比遍历更费 ([Query], 附录 C Q15 / Q17).
          */
         WALK(false),
 
@@ -196,7 +196,7 @@ object FastPath {
      * attempt or the next one then ends after the timeout), or when it is the last by count. [clock] is the uptime.
      *
      * Adaptive per query (appendix C Q15): a full attempt measures the walk, the first intermediate attempt after it
-     * measures the fast path (its lookups, and its walk when they fall back); when the fast path costs no less than the
+     * measures the fast path (its lookups, and its walk when they fall back); when the fast path costs more than the
      * walk, the other attempts until the next full attempt, the last one included, walk the tree without lookups
      * ([Attempt.WALK]: a walk is as conclusive as a full attempt), and every full attempt (the verifications included)
      * measures and compares anew. The costs are the process CPU time (appendix C Q17): the elapsed times of the lookups
@@ -206,7 +206,7 @@ object FastPath {
      *
      * zh-CN: 一次轮询查询的各次尝试 (附录 C Q1 / Q11): 最后一次尝试与校验遍历整棵树. 剩余时间不超过下一次之前的休眠时 (这次或下一次尝试
      * 将在超时之后结束), 或按次数为最后一次时, 视为最后一次尝试. [clock] 为 uptime.
-     * 按查询自适应 (附录 C Q15): 完整尝试测量遍历的开销, 其后的第一次中间尝试测量快路径的开销 (查找, 以及回退时的遍历); 快路径不比遍历省的,
+     * 按查询自适应 (附录 C Q15): 完整尝试测量遍历的开销, 其后的第一次中间尝试测量快路径的开销 (查找, 以及回退时的遍历); 快路径比遍历更费的,
      * 到下一次完整尝试为止的其余尝试 (含最后一次) 不查找而直接遍历 ([Attempt.WALK]: 遍历与完整尝试同样可下结论), 每次完整尝试 (含校验) 重新测量并比较.
      * 开销为进程 CPU 时间 (附录 C Q17): 附录 A 各屏幕上查找与遍历的墙钟耗时接近, 对进程的开销却不同 (22120RN86C: 宿主主界面查找 7.0 ms 对遍历 12.9 ms,
      * 悬浮窗 9.3 ms 对 8.7 ms). 结果不变, 快路径只判定未命中与单候选.
@@ -221,8 +221,12 @@ object FastPath {
         /** The fast path of the first intermediate attempt since then ([Costs]); -1 when not measured yet. zh-CN: 此后第一次中间尝试的快路径开销 ([Costs]); 尚未测量时为 -1. */
         private var fastCost = -1L
 
-        /** Whether the fast path of the query costs no less than its walk. zh-CN: 本查询的快路径是否不比遍历省. */
-        private val walks get() = walkCost >= 0 && fastCost >= walkCost
+        /**
+         * Whether the fast path of the query costs more than its walk (appendix C Q17: an equal cost, often a millisecond
+         * against a millisecond, keeps the lookups, which leave the walk's garbage and refetches out of the measure).
+         * zh-CN: 本查询的快路径是否比遍历更费 (附录 C Q17: 开销相等时, 常见为 1 ms 对 1 ms, 保留查找; 遍历产生的垃圾与重取不在测量之内).
+         */
+        private val walks get() = walkCost >= 0 && fastCost > walkCost
 
         /** The attempt number [round] (from 1) with [remaining] milliseconds before the timeout. zh-CN: 第 [round] 次 (从 1 计) 尝试, 距超时 [remaining] 毫秒. */
         fun attempt(round: Long, remaining: Long): Attempt {

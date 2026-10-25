@@ -14,6 +14,8 @@
 //   findOne600 text('__aj6sel_none__').findOne(600): attempts (auto.stats), elapsed time and process CPU time (also per
 //             attempt: the intermediate attempts of a polled query, where the framework fast path of P2.3 applies)
 //   findOne600Id id('aj6sel_none').findOne(600), the same with an id (P2.3, added by P2)
+//   findOne600Default findOne600 with the default flags (event-assisted polling since P3.1); the other polled items
+//             poll at the fixed interval ('!eventAssistedPolling'), as before P3.1
 //   lateOne   text(<last unique text>).findOne(600): the late hit through a polled entry (a single candidate, P2.3)
 //   cpu*      text('__aj6sel_none__').findOne(cpuMs) polled for cpuMs: process CPU (percent of one core) and attempts,
 //             fixed interval ('!eventAssistedPolling'; the default before P3.1) and with the eventAssistedPolling flag
@@ -128,9 +130,23 @@ function addFastPath(sum, f) {
 }
 
 // [query]() polled [ROUNDS] times after one untimed run: attempts, elapsed time, process CPU time and its share per attempt.
-function polledItem(name, query, expectNull) {
+// The fixed interval: eventAssistedPolling is on by default since P3.1.
+var FIXED = ['!eventAssistedPolling'];
+
+// auto.setFlags, without the names prefixed with '!' on a build before appendix C Q2 (which had no flag on by default).
+function setFlags(flags) {
+    try {
+        auto.setFlags(flags);
+    } catch (e) {
+        auto.setFlags(flags.filter(function (f) { return f.charAt(0) !== '!'; }));
+    }
+}
+
+// [flags]: the flags of the item (the default flags when omitted).
+function polledItem(name, query, expectNull, flags) {
     var item = { ok: false, samples: [], attempts: [], cpu: [], cpuPerAttempt: [], median: null, medianAttempts: null, medianCpu: null, medianCpuPerAttempt: null, fastPath: null };
     try {
+        setFlags(flags || []);
         query();
         for (var r = 0; r < ROUNDS; r++) {
             auto.stats.reset();
@@ -155,22 +171,12 @@ function polledItem(name, query, expectNull) {
         item.ok = true;
     } catch (e) {
         item.error = errorText(e);
+    } finally {
+        auto.setFlags([]);
     }
     result.items[name] = item;
     mark(name + ' ' + (item.ok ? 'PASS' : 'FAIL') + ' attempts ' + item.medianAttempts + ' ms ' + item.median + ' cpu/attempt ' + item.medianCpuPerAttempt);
     return item;
-}
-
-// The fixed interval: eventAssistedPolling is on by default since P3.1.
-var FIXED = ['!eventAssistedPolling'];
-
-// auto.setFlags, without the names prefixed with '!' on a build before appendix C Q2 (which had no flag on by default).
-function setFlags(flags) {
-    try {
-        auto.setFlags(flags);
-    } catch (e) {
-        auto.setFlags(flags.filter(function (f) { return f.charAt(0) !== '!'; }));
-    }
 }
 
 // One poll of cpuMs: [query] true runs findOne(cpuMs) on a selector that never matches, false only sleeps.
@@ -335,10 +341,11 @@ function bench() {
         mark('late FAIL');
     }
 
-    polledItem('findOne600', function () { return text(NONE).findOne(600); }, true);
-    polledItem('findOne600Id', function () { return id('aj6sel_none').findOne(600); }, true);
+    polledItem('findOne600', function () { return text(NONE).findOne(600); }, true, FIXED);
+    polledItem('findOne600Id', function () { return id('aj6sel_none').findOne(600); }, true, FIXED);
+    polledItem('findOne600Default', function () { return text(NONE).findOne(600); }, true);
     if (late) {
-        polledItem('lateOne', function () { return text(late.text).findOne(600); }, false);
+        polledItem('lateOne', function () { return text(late.text).findOne(600); }, false, FIXED);
     } else {
         result.items.lateOne = { ok: false, error: 'no unique text on the screen' };
         mark('lateOne FAIL');

@@ -293,8 +293,8 @@ class FastPathTest {
         assertEquals(Triple(0L, 2, 12), pollFindOne(tree(), none, lookupNanos = 7_500_000, walkNanos = 1_800_000))
         assertEquals(Triple(0L, 13, 3), pollFindOne(tree(), none, lookupNanos = 7_500_000, walkNanos = 1_800_000, adaptive = false))
         assertEquals(Triple(0L, 13, 3), pollFindOne(tree(), none, lookupNanos = 500_000, walkNanos = 1_800_000))
-        // As dear as a walk: no saving, so walk. zh-CN: 与遍历一样贵: 没有节省, 因此遍历.
-        assertEquals(Triple(0L, 2, 12), pollFindOne(tree(), none, lookupNanos = 1_800_000, walkNanos = 1_800_000))
+        // As dear as a walk: the lookups stay (appendix C Q17). zh-CN: 与遍历一样贵: 保留查找 (附录 C Q17).
+        assertEquals(Triple(0L, 13, 3), pollFindOne(tree(), none, lookupNanos = 1_800_000, walkNanos = 1_800_000))
     }
 
     /** Appendix C Q15: the same round finds the same node whether the query looks up or walks. */

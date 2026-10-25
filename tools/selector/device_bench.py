@@ -24,7 +24,7 @@ import _device as d  # noqa: E402
 
 SCREENS = {"settings": d.screen_settings, "main": d.screen_main, "overlay": d.screen_home}
 TIMED = ["full", "miss", "missId", "lookupId", "missMixed", "hit", "late"]
-POLLED = ["findOne600", "findOne600Id", "lateOne"]
+POLLED = ["findOne600", "findOne600Id", "findOne600Default", "lateOne"]
 CPU = ["cpuIdle", "cpuFixed", "cpuAssisted", "stormIdle", "stormFixed", "stormAssisted"]
 
 
