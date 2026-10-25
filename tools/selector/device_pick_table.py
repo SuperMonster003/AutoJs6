@@ -4,11 +4,14 @@ records the table as baseline/pick_table-<model>[-legacy].json (-legacy: the new
 frozen augment layer is recorded too), with --check compares a run with that file.
 
 Usage: py -3.12 -I tools/selector/device_pick_table.py -s SERIAL [--runs 2] [--new-modules on|off] [--save] [--check]
-    [--show 20]
+    [--show 20] [--shape-against TABLE]
 --new-modules sets the hidden switch of the new script module layer for the run and restores it afterwards (default:
 leave it as it is; the file name follows the state in effect). Prints the row count of each section, PASS / FAIL of the
 run-to-run and the baseline comparison, and the ids of at most --show differing rows (the rows hold synthetic texts
-only). AutoJs6 needs its accessibility service and the floaty permission; no taps.
+only). --shape-against compares a run with the table of another device (a file name under baseline/ or a path) by
+shape only: the error name, or the type of the result and of the callback argument, so that devices of other geometry,
+language or API level can be compared (selector appendix C Q16: API 28 against 23046RP50C). AutoJs6 needs its
+accessibility service and the floaty permission; no taps.
 """
 import argparse
 import json
@@ -44,6 +47,22 @@ def compare(a_rows, b_rows):
     return diff
 
 
+def shape(row):
+    """The shape of a row: its error name, or the types of its result and callback argument, and the callback calls."""
+    if "error" in row:
+        return ("error", row["error"].get("name"))
+    return ((row.get("result") or {}).get("t"), (row.get("cbArg") or {}).get("t"), row.get("cbCalls"))
+
+
+def compare_shapes(base_rows, rows):
+    """Row ids whose shape differs (missing rows included), in the order of [base_rows]."""
+    now = {r["id"]: r for r in rows}
+    diff = [r["id"] for r in base_rows if r["id"] not in now or shape(r) != shape(now[r["id"]])]
+    base_ids = {r["id"] for r in base_rows}
+    diff.extend(r["id"] for r in rows if r["id"] not in base_ids)
+    return diff
+
+
 def dump(info, res):
     """The table as JSON with one row per line, so that a diff of two tables shows the rows that changed."""
     head = {k: v for k, v in res.items() if k != "rows"}
@@ -64,6 +83,7 @@ def main():
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--show", type=int, default=20, help="differing row ids to print")
+    parser.add_argument("--shape-against", help="table of another device to compare shapes with (name under baseline/ or path)")
     args = parser.parse_args()
     s = args.serial
     info = d.device_info(s)
@@ -132,6 +152,23 @@ def run(args, info):
                 print(f"  {name}: {n} rows differ")
             for rid in diff[:args.show]:
                 print(f"  differs: {rid}")
+    if args.shape_against:
+        other = d.BASELINE / args.shape_against
+        if not other.exists():
+            other = d.pathlib.Path(args.shape_against)
+        base = json.loads(other.read_text(encoding="utf-8"))
+        diff = compare_shapes(base["rows"], rows)
+        dev = base["device"]
+        print(f"shapes vs {other.name} ({dev.get('model')} API {dev.get('sdk')}): {len(base['rows']) - sum(1 for x in diff if x in {r['id'] for r in base['rows']})}"
+              f" / {len(base['rows'])} rows of the same shape")
+        for name, n in Counter(section(x) for x in diff).items():
+            print(f"  {name}: {n} rows differ")
+        now = {r["id"]: r for r in rows}
+        old = {r["id"]: r for r in base["rows"]}
+        for rid in diff[:args.show]:
+            print(f"  differs: {rid}: {shape(old[rid]) if rid in old else '-'} -> {shape(now[rid]) if rid in now else '-'}")
+        error_names = Counter(r["error"].get("name") for r in rows if "error" in r)
+        print("  error names now: " + ", ".join(f"{k} {v}" for k, v in error_names.most_common()))
     if args.save:
         d.BASELINE.mkdir(exist_ok=True)
         path.write_text(dump(info, first), encoding="utf-8")

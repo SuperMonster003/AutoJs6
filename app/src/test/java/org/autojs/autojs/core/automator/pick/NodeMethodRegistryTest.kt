@@ -93,6 +93,32 @@ class NodeMethodRegistryTest {
         assertTrue("hintText" in registry.spellings && "viewIdResourceName" in registry.spellings && "getHintText" in registry.spellings)
     }
 
+    /**
+     * Appendix C Q16: on API 24-29 ART throws `NoClassDefFoundError` when it reads the return type of `getExtraRenderingInfo`
+     * (`AccessibilityNodeInfo.ExtraRenderingInfo`, API 30), and every pickup / detect failed while building the registry.
+     * HotSpot resolves the types while it lists the methods, so the readers here fail as ART does: for that return type,
+     * and (`TypeNotPresentException`) for a parameter type. Those methods are left out, the rest of the registry is the same.
+     * zh-CN: 附录 C Q16: API 24-29 的 ART 读取 `getExtraRenderingInfo` 的返回类型 (API 30 的类) 时抛 `NoClassDefFoundError`, 建注册表失败使全部 pickup / detect 出错.
+     * HotSpot 在列出方法时即已解析类型, 因此此处的读取器像 ART 那样失败: 该返回类型, 以及参数类型 (`TypeNotPresentException`). 这些方法被排除, 注册表其余部分不变.
+     */
+    @Test
+    fun signaturesNamingMissingClasses() {
+        val keys = registry.methods.values.flatten().map(::key).toSet()
+        val lackingReturn = object : NodeMethodRegistry.SignatureReader {
+            override fun returnType(method: Method): Class<*> = method.returnType.also { if (it.name == EXTRA_RENDERING_INFO) throw NoClassDefFoundError(it.name.replace('.', '/')) }
+        }
+        val lost = UiObject::class.java.methods.filter { it.returnType.name == EXTRA_RENDERING_INFO }.map(::key).toSet()
+        assertEquals(setOf("AccessibilityNodeInfoCompat.getExtraRenderingInfo():ExtraRenderingInfo"), lost)
+        assertTrue(lost.all { it in keys })
+        assertEquals(keys - lost, NodeMethodRegistry.tableOf(lackingReturn).methods.values.flatten().map(::key).toSet())
+        val lackingParameter = object : NodeMethodRegistry.SignatureReader {
+            override fun parameterTypes(method: Method): Array<Class<*>> = method.parameterTypes.also { types ->
+                types.firstOrNull { it.name == "android.os.Bundle" }?.let { throw TypeNotPresentException(it.name, null) }
+            }
+        }
+        assertEquals(keys, NodeMethodRegistry.tableOf(lackingParameter).methods.values.flatten().map(::key).toSet())
+    }
+
     @Test
     fun resolutionOnUiObject() {
         assertEquals("child", found("child", 0.0).name)
@@ -153,6 +179,9 @@ class NodeMethodRegistryTest {
     }
 
     private companion object {
+
+        /** A class of API 30 (appendix C Q16). zh-CN: API 30 的类. */
+        const val EXTRA_RENDERING_INFO = "android.view.accessibility.AccessibilityNodeInfo\$ExtraRenderingInfo"
 
         /**
          * The methods of `AccessibilityNodeInfoCompat` that `UiObject` overrides, left out by D11: those with parameters,

@@ -230,7 +230,11 @@ object NodeMethodRegistry {
         /** `recycle`: the nodes of a query are recycled by the platform policy, not by scripts. zh-CN: `recycle`: 查询节点按平台策略回收, 不由脚本回收. */
         RECYCLE(false),
 
-        /** A static, synthetic or covariant bridge method, or an internal one (its name mangled with `$`). zh-CN: 静态, 合成或协变桥接方法, 或 internal 方法 (名称含 `$`). */
+        /**
+         * A static, synthetic or covariant bridge method, an internal one (its name mangled with `$`), or one whose signature
+         * names a class the platform lacks (API 24-29: `getExtraRenderingInfo` returns a class of API 30; appendix C Q16).
+         * zh-CN: 静态, 合成或协变桥接方法, internal 方法 (名称含 `$`), 或签名中含平台所缺类的方法 (API 24-29: `getExtraRenderingInfo` 返回 API 30 的类; 附录 C Q16).
+         */
         INTERNAL(false),
 
         /** Another method of `AccessibilityNodeInfoCompat` (a setter, a method with parameters, `refresh`, `unwrap`). zh-CN: `AccessibilityNodeInfoCompat` 的其他方法. */
@@ -240,21 +244,43 @@ object NodeMethodRegistry {
     private val OBJECT_METHODS = setOf("equals", "hashCode", "toString", "getClass", "wait", "notify", "notifyAll")
 
     /** The registry of `UiObject`. zh-CN: `UiObject` 的注册表. */
-    val uiObject: NodeMethodTable by lazy {
-        val methods = UiObject::class.java.methods.filter { kindOf(it).registered }
-        NodeMethodTable(UiObject::class.java, methods, mapOf("compass" to ::compassRefusal))
-    }
+    val uiObject: NodeMethodTable by lazy { tableOf(SignatureReader) }
 
-    private val compatSignatures: Set<String> by lazy { AccessibilityNodeInfoCompat::class.java.methods.mapTo(HashSet(), ::signatureKey) }
+    private val compatSignatures: Set<String> by lazy { compatSignatures(SignatureReader) }
 
     /** Why [method] (a public method of `UiObject`) is in the registry or not. zh-CN: [method] (`UiObject` 的公开方法) 在或不在注册表中的原因. */
-    fun kindOf(method: Method): Kind = when {
-        Modifier.isStatic(method.modifiers) || method.isSynthetic || isCovariantBridge(method) || '$' in method.name -> Kind.INTERNAL
-        method.name in OBJECT_METHODS -> Kind.OBJECT
-        method.name == "recycle" -> Kind.RECYCLE
-        signatureKey(method) !in compatSignatures -> if (method.declaringClass.name.startsWith(HOST_PACKAGE)) Kind.OWN else Kind.COMPAT
-        isGetter(method) -> Kind.COMPAT_GETTER
-        else -> Kind.COMPAT
+    fun kindOf(method: Method): Kind = kindOf(method, compatSignatures, SignatureReader)
+
+    /** The registry of `UiObject` with the signatures read by [reader]. zh-CN: 以 [reader] 读取签名的 `UiObject` 注册表. */
+    internal fun tableOf(reader: SignatureReader): NodeMethodTable {
+        val compat = compatSignatures(reader)
+        val methods = UiObject::class.java.methods.filter { kindOf(it, compat, reader).registered }
+        return NodeMethodTable(UiObject::class.java, methods, mapOf("compass" to ::compassRefusal))
+    }
+
+    private fun compatSignatures(reader: SignatureReader): Set<String> = AccessibilityNodeInfoCompat::class.java.methods.mapNotNullTo(HashSet()) { readable { signatureKey(it, reader) } }
+
+    private fun kindOf(method: Method, compat: Set<String>, reader: SignatureReader): Kind = readable {
+        when {
+            Modifier.isStatic(method.modifiers) || method.isSynthetic || isCovariantBridge(method) || '$' in method.name -> Kind.INTERNAL
+            method.name in OBJECT_METHODS -> Kind.OBJECT
+            method.name == "recycle" -> Kind.RECYCLE
+            signatureKey(method, reader) !in compat -> if (method.declaringClass.name.startsWith(HOST_PACKAGE)) Kind.OWN else Kind.COMPAT
+            isGetter(method, reader) -> Kind.COMPAT_GETTER
+            else -> Kind.COMPAT
+        }
+    } ?: Kind.INTERNAL
+
+    /**
+     * [block], or null when it reads a signature naming a class the platform lacks (appendix C Q16).
+     * zh-CN: [block] 的结果, 读取的签名含平台所缺的类时为 null (附录 C Q16).
+     */
+    private inline fun <T : Any> readable(block: () -> T): T? = try {
+        block()
+    } catch (_: LinkageError) {
+        null
+    } catch (_: TypeNotPresentException) {
+        null
     }
 
     /**
@@ -268,13 +294,31 @@ object NodeMethodRegistry {
         !it.isBridge && it.name == method.name && it.parameterTypes.contentEquals(method.parameterTypes)
     }
 
-    private fun isGetter(method: Method): Boolean {
-        if (method.parameterCount != 0 || method.returnType == Void.TYPE) return false
+    private fun isGetter(method: Method, reader: SignatureReader): Boolean {
+        if (method.parameterCount != 0 || reader.returnType(method) == Void.TYPE) return false
         val name = method.name
         return READER_PREFIXES.any { name.length > it.length && name.startsWith(it) && name[it.length] in 'A'..'Z' }
     }
 
-    private fun signatureKey(method: Method) = method.name + method.parameterTypes.joinToString(",", "(", ")") { it.name }
+    private fun signatureKey(method: Method, reader: SignatureReader) = method.name + reader.parameterTypes(method).joinToString(",", "(", ")") { it.name }
+
+    /**
+     * Reads the types in the signature of a method. ART resolves them when they are read, and throws `NoClassDefFoundError`
+     * for a class the platform lacks (appendix C Q16); HotSpot resolves them when it lists the methods, so a JVM test
+     * hands in a reader that fails as ART does.
+     * zh-CN: 读取方法签名中的类型. ART 在读取时才解析, 遇平台所缺的类抛 `NoClassDefFoundError` (附录 C Q16); HotSpot 在列出方法时即已解析,
+     * 因此 JVM 测试传入一个像 ART 那样失败的读取器.
+     */
+    internal interface SignatureReader {
+
+        fun returnType(method: Method): Class<*> = method.returnType
+
+        fun parameterTypes(method: Method): Array<Class<*>> = method.parameterTypes
+
+        /** The reader of the platform. zh-CN: 平台的读取器. */
+        companion object : SignatureReader
+
+    }
 
     /** `compass(compass)`: a compass that does not parse is refused (it threw once a node was found). zh-CN: 无法解析的罗盘被拒绝 (原先在找到节点后抛出). */
     private fun compassRefusal(args: List<Any?>): String? = when (val parse = (args.firstOrNull() as? CharSequence)?.let(CompassParser::tryParse)) {
