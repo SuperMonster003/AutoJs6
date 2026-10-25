@@ -98,6 +98,9 @@ CLAUDE.md
 !/tools/memory/
 !/tools/memory/**
 /tools/memory/__pycache__/
+!/tools/selector/
+!/tools/selector/**
+/tools/selector/__pycache__/
 !/tools/plugin-center/
 !/tools/plugin-center/**
 /tools/plugin-center/__pycache__/
