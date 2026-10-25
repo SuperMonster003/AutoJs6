@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/modules/**'
+      - 'build-logic/ksp-script-modules-*/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/speech/**'
       - 'app/src/main/java/org/autojs/autojs/core/plugin/speech/**'
@@ -22,6 +24,8 @@ on:
     branches: [master]
     paths:
       - 'app/src/main/java/org/autojs/autojs/runtime/api/augment/**'
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/modules/**'
+      - 'build-logic/ksp-script-modules-*/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/tts/**'
       - 'app/src/main/java/org/autojs/autojs/runtime/api/speech/**'
       - 'app/src/main/java/org/autojs/autojs/core/plugin/speech/**'
@@ -73,7 +77,7 @@ concurrency:
 jobs:
   coverage:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -129,11 +133,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Set up JDK 21 and Gradle dependency cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+          cache-dependency-path: |
+            AutoJs6/**/*.gradle*
+            AutoJs6/**/gradle-wrapper.properties
+      - name: Build script module metadata (script-modules.json)
+        working-directory: AutoJs6
+        env:
+          GRADLE_CI_TIMEOUT_SECONDS: '1200'
+        run: |
+          chmod +x gradlew
+          bash .github/scripts/run-gradle-ci.sh ./gradlew :app:kspAppDebugKotlin --no-daemon --build-cache --console=plain --stacktrace
       - name: Test registration extraction and compare public surfaces
         working-directory: AutoJs6
         run: |
           python -m unittest discover -s tools/api-coverage -p 'test_*.py'
-          python tools/api-coverage/check.py
+          python tools/api-coverage/check.py --source ksp
           node tools/api-coverage/check-runtime-java-callbacks.mjs
           node tools/api-coverage/check-runtime-tts.mjs
           node tools/api-coverage/check-runtime-speech.mjs
@@ -160,5 +180,7 @@ jobs:
         if: always()
         with:
           name: script-api-coverage
-          path: AutoJs6/build/reports/api-coverage/
+          path: |
+            AutoJs6/build/reports/api-coverage/
+            AutoJs6/app/build/generated/ksp/appDebug/resources/autojs6/script-modules.json
           if-no-files-found: warn
