@@ -38,14 +38,17 @@ class NodeMethodRegistryTest {
         // Own methods are declared by the host, getters of the compat class take nothing and return something.
         // zh-CN: 自有方法由宿主声明, compat 类的 getter 无参且有返回值.
         byKind[Kind.OWN]!!.forEach { assertTrue(key(it), it.declaringClass.name.startsWith("org.autojs.")) }
-        byKind[Kind.COMPAT_GETTER]!!.forEach { assertTrue(key(it), it.parameterCount == 0 && it.returnType != Void.TYPE && (it.name.startsWith("get") || it.name.startsWith("is"))) }
+        byKind[Kind.COMPAT_GETTER]!!.forEach { m -> assertTrue(key(m), m.parameterCount == 0 && m.returnType != Void.TYPE && listOf("get", "is", "can", "has").any { m.name.startsWith(it) }) }
+        // Appendix C Q10 (2): the readers `canXxx` / `hasXxx` of the compat class are registered as its getters are.
+        // zh-CN: 附录 C Q10 (2): compat 类的只读方法 `canXxx` / `hasXxx` 与其 getter 一样登记.
+        assertEquals(setOf("canOpenPopup", "hasRequestInitialAccessibilityFocus"), byKind[Kind.COMPAT_GETTER]!!.map { it.name }.filter { it.startsWith("can") || it.startsWith("has") }.toSet())
         // The methods of the compat class the host overrides that D11 leaves out: a new override has to be classified here.
         // zh-CN: 宿主覆盖但 D11 排除的 compat 类方法: 新增的覆盖须在此分类.
         assertEquals(EXCLUDED_OVERRIDES, byKind[Kind.COMPAT]!!.filter { it.declaringClass.name.startsWith("org.autojs.") }.map(NodeMethodTable::signature).toSet())
         // No setter of the compat class is registered: the registered `set*` methods are the actions of the host.
         // zh-CN: compat 类的 setter 都不在注册表中: 注册的 `set*` 方法都是宿主的动作.
         assertEquals(setOf("setProgress", "setSelection", "setText"), registry.names.filter { it.startsWith("set") }.toSet())
-        listOf("text", "desc", "bounds", "child", "parent", "compass", "click", "performAction", "getHintText", "isChecked", "getViewIdResourceName").forEach {
+        listOf("text", "desc", "bounds", "child", "parent", "compass", "click", "performAction", "getHintText", "isChecked", "getViewIdResourceName", "canOpenPopup", "hasRequestInitialAccessibilityFocus").forEach {
             assertTrue(it, it in registry.names)
         }
         listOf("recycle", "equals", "hashCode", "toString", "getClass", "getChild", "refresh", "unwrap", "setChecked", "findAccessibilityNodeInfosByText").forEach {
@@ -56,7 +59,10 @@ class NodeMethodRegistryTest {
         assertSame(Kind.COMPAT, NodeMethodRegistry.kindOf(UiObject::class.java.getMethod("setChecked", java.lang.Boolean.TYPE)))
     }
 
-    /** Appendix C Q10: the names of the former interception table, registered or excluded by D11 (the compat setters ...). */
+    /**
+     * Appendix C Q10: the names of the former interception table, registered or excluded by D11 (the compat setters ...).
+     * The readers Q10 (2) adds (`canOpenPopup` ...) are not among them: the 49 names keep their classification.
+     */
     @Test
     fun formerInterceptedNames() {
         assertEquals(49, INTERCEPTED.size)

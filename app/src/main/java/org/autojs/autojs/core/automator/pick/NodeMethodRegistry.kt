@@ -196,7 +196,8 @@ sealed class NodeMethodResolution {
 /**
  * The node method registry of `UiObject` (docs/selector/ROADMAP.md D11, P1.2): the public methods `UiObject` and its
  * interfaces of the host declare (`UiObjectActions`, `UiNode`; 151 at P1.2), and the getters without parameters of
- * `AccessibilityNodeInfoCompat` (`getHintText` / `isChecked` ...; 65), built once by reflection. Not in it: the methods of
+ * `AccessibilityNodeInfoCompat` (`getHintText` / `isChecked` ...; 65, and the readers `canOpenPopup` /
+ * `hasRequestInitialAccessibilityFocus` of appendix C Q10), built once by reflection. Not in it: the methods of
  * `Object`, `recycle`, internal (mangled) names, and the other methods of `AccessibilityNodeInfoCompat`: its setters
  * (the nodes of the service are sealed and refuse them), its methods with parameters even where `UiObject` overrides
  * them (`getChild(int)`: use `child`; `findAccessibilityNodeInfosByText`; `performAction(int)`: the `performAction` of
@@ -204,7 +205,7 @@ sealed class NodeMethodResolution {
  * `NodeMethodRegistryTest` checks the classification against `UiObject::class.java.methods`.
  *
  * zh-CN: `UiObject` 的节点方法注册表 (D11, P1.2): `UiObject` 及宿主中它实现的接口 (`UiObjectActions`, `UiNode`) 声明的公开方法 (P1.2 时 151 个), 加上
- * `AccessibilityNodeInfoCompat` 的无参 getter (`getHintText` / `isChecked` ...), 由反射一次生成. 不含: `Object` 的方法, `recycle`, internal (混淆) 名称,
+ * `AccessibilityNodeInfoCompat` 的无参 getter (`getHintText` / `isChecked` ..., 以及附录 C Q10 补收的只读方法 `canOpenPopup` / `hasRequestInitialAccessibilityFocus`), 由反射一次生成. 不含: `Object` 的方法, `recycle`, internal (混淆) 名称,
  * 以及 `AccessibilityNodeInfoCompat` 的其余方法: setter (服务给出的节点已密封, 会拒绝), 带参数的方法即使被 `UiObject` 覆盖 (`getChild(int)`: 改用 `child`;
  * `findAccessibilityNodeInfosByText`; `performAction(int)`: `UiObjectActions` 的 `performAction` 接受同样的调用), 以及不读取内容的其余无参方法 (`refresh`, `unwrap`).
  * `NodeMethodRegistryTest` 以 `UiObject::class.java.methods` 核对分类.
@@ -217,7 +218,10 @@ object NodeMethodRegistry {
         /** Declared by `UiObject` or an interface of the host. zh-CN: 由 `UiObject` 或宿主的接口声明. */
         OWN(true),
 
-        /** A getter without parameters of `AccessibilityNodeInfoCompat`. zh-CN: `AccessibilityNodeInfoCompat` 的无参 getter. */
+        /**
+         * A getter without parameters of `AccessibilityNodeInfoCompat`: `getXxx` / `isXxx`, and the readers `canXxx` / `hasXxx`
+         * (appendix C Q10). zh-CN: `AccessibilityNodeInfoCompat` 的无参 getter: `getXxx` / `isXxx`, 以及只读的 `canXxx` / `hasXxx` (附录 C Q10).
+         */
         COMPAT_GETTER(true),
 
         /** `equals`, `hashCode`, `toString`, `getClass`, `wait`, `notify`, `notifyAll`. zh-CN: `Object` 的方法. */
@@ -267,7 +271,7 @@ object NodeMethodRegistry {
     private fun isGetter(method: Method): Boolean {
         if (method.parameterCount != 0 || method.returnType == Void.TYPE) return false
         val name = method.name
-        return name.length > 3 && name.startsWith("get") || name.length > 2 && name.startsWith("is")
+        return READER_PREFIXES.any { name.length > it.length && name.startsWith(it) && name[it.length] in 'A'..'Z' }
     }
 
     private fun signatureKey(method: Method) = method.name + method.parameterTypes.joinToString(",", "(", ")") { it.name }
@@ -280,5 +284,8 @@ object NodeMethodRegistry {
     }
 
     private const val HOST_PACKAGE = "org.autojs."
+
+    /** The prefixes of the readers without parameters (D11; `can` / `has` added by appendix C Q10). zh-CN: 无参只读方法的前缀. */
+    private val READER_PREFIXES = listOf("get", "is", "can", "has")
 
 }
