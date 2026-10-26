@@ -1,0 +1,780 @@
+{
+ "schema": 1,
+ "design": "docs/augment/P6-1-ci-timing-gate.md",
+ "thresholds": {
+  "ratioLimit": 1.2,
+  "ratioFactor": 1.35,
+  "ratioFactorFallback": 1.6,
+  "prologueFactor": 1.5,
+  "prologueFactorFallback": 3.0,
+  "prologueCapMs": 60
+ },
+ "fallbackProfile": "local-avd",
+ "notes": {
+  "calls/automator: fail detect-arity": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail detect-compass": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-compass": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-condition-key": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-condition-pattern": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-condition-range": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-condition-value": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-result-argument": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-result-type": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/automator: fail pickup-type": "Q152: pickup / detect failing calls slower since selector P1 (candidate lists), selector topic",
+  "calls/disposable: fail disposable.blockedGet-arity": "appendix A P5.1: Rhino's overload resolution of a Java method, as with the old layer; not R2",
+  "calls/ui: fail console.build-range": "R2 boundary item (appendix A P5.1, appendix C Q122), about 1.2 on XQ-AT72 too",
+  "calls/images: fail images.clip-arity": "R2 boundary item (appendix A P5.1, appendix C Q122), about 1.2 on XQ-AT72 too",
+  "calls/automator: fail textMatches-property": "R2 boundary item (appendix A P5.1, appendix C Q122), about 1.2 on XQ-AT72 too"
+ },
+ "profiles": {
+  "local-avd": {
+   "updated": "2026-10-26",
+   "recipe": {
+    "model": "sdk_gphone64_x86_64",
+    "sdk": "35",
+    "abi": "x86_64",
+    "cpus": "0-1"
+   },
+   "sources": [
+    {
+     "label": "base10",
+     "time": "2026-10-26T03:27:33+08:00",
+     "commit": "635c6c420a5a582b27f1bb33f3b3022bf78f535f",
+     "versionCode": 5935,
+     "hostMachine": "12th Gen Intel(R) Core(TM) i5-12400 x12",
+     "verdict": "FAIL"
+    },
+    {
+     "label": "base11",
+     "time": "2026-10-26T03:44:49+08:00",
+     "commit": "635c6c420a5a582b27f1bb33f3b3022bf78f535f",
+     "versionCode": 5935,
+     "hostMachine": "12th Gen Intel(R) Core(TM) i5-12400 x12",
+     "verdict": "FAIL"
+    },
+    {
+     "label": "base12",
+     "time": "2026-10-26T04:02:11+08:00",
+     "commit": "635c6c420a5a582b27f1bb33f3b3022bf78f535f",
+     "versionCode": 5935,
+     "hostMachine": "12th Gen Intel(R) Core(TM) i5-12400 x12",
+     "verdict": "FAIL"
+    }
+   ],
+   "values": {
+    "calls/app: fail app.intent-type": 0.904,
+    "calls/app: fail autojs.setRootMode-type": 1.025,
+    "calls/app: fail device.vibrate-type": 0.95,
+    "calls/app: fail files.open-arity": 0.932,
+    "calls/app: fail startActivity-type": 0.883,
+    "calls/app: fail storages.create-type": 0.98,
+    "calls/automator: fail auto.setMode-range": 1.0,
+    "calls/automator: fail auto.setMode-type": 0.941,
+    "calls/automator: fail click-arity": 1.108,
+    "calls/automator: fail depth-value": 1.112,
+    "calls/automator: fail detect-arity": 1.432,
+    "calls/automator: fail detect-compass": 1.522,
+    "calls/automator: fail events.__asEmitter__-type": 1.004,
+    "calls/automator: fail flow.defaults-key": 1.083,
+    "calls/automator: fail flow.wait-arity": 0.978,
+    "calls/automator: fail flow.wait-option": 1.132,
+    "calls/automator: fail gesture-arity": 0.885,
+    "calls/automator: fail pickup-compass": 1.64,
+    "calls/automator: fail pickup-condition-key": 9.747,
+    "calls/automator: fail pickup-condition-pattern": 1.461,
+    "calls/automator: fail pickup-condition-range": 1.516,
+    "calls/automator: fail pickup-condition-value": 1.443,
+    "calls/automator: fail pickup-result-argument": 1.821,
+    "calls/automator: fail pickup-result-type": 18.289,
+    "calls/automator: fail pickup-type": 1.258,
+    "calls/automator: fail press-type": 1.044,
+    "calls/automator: fail smartClick-option": 1.101,
+    "calls/automator: fail textMatches-interval": 1.177,
+    "calls/automator: fail textMatches-pattern": 1.11,
+    "calls/automator: fail textMatches-property": 1.227,
+    "calls/automator: fail waitForEvent-type": 1.087,
+    "calls/bridged: fail ai.ask-range": 0.971,
+    "calls/bridged: fail ai.ask-type": 1.036,
+    "calls/bridged: fail ai.session-type": 0.994,
+    "calls/bridged: fail mediainfo-range": 0.97,
+    "calls/bridged: fail mediainfo.get-type": 0.929,
+    "calls/bridged: fail memory.collect-range": 0.962,
+    "calls/bridged: fail memory.collect-type": 0.951,
+    "calls/bridged: fail memory.watch-type": 1.048,
+    "calls/bridged: fail opencc-arity": 0.916,
+    "calls/bridged: fail opencc.convert-range": 0.927,
+    "calls/bridged: fail opencc.convert-type": 0.938,
+    "calls/bridged: fail pinyin-arity": 1.026,
+    "calls/bridged: fail pinyin-option": 1.095,
+    "calls/bridged: fail pinyin.compact-type": 0.952,
+    "calls/bridged: fail pinyin.fromCodePoint-range": 1.085,
+    "calls/bridged: fail pinyin4j.of-option": 1.021,
+    "calls/colors: fail colors.rgb-range": 1.026,
+    "calls/colors: fail colors.toInt-arity": 0.933,
+    "calls/colors: fail colors.toInt-range": 1.132,
+    "calls/colors: fail colors.toInt-type": 0.909,
+    "calls/disposable: fail disposable.blockedGet-arity": 7.829,
+    "calls/disposable: fail threads.disposable-arity": 0.912,
+    "calls/global: fail TODO-java": 1.075,
+    "calls/global: fail isInteger-arity": 0.855,
+    "calls/global: fail random-arity": 0.951,
+    "calls/global: fail setScaleBaseX-type": 1.046,
+    "calls/global: fail sleep-type": 0.912,
+    "calls/global: fail wait-range": 1.123,
+    "calls/http: fail http.get-arity": 0.976,
+    "calls/http: fail http.get-type": 0.974,
+    "calls/http: fail http.post-callback": 1.028,
+    "calls/http: fail http.request-type": 1.027,
+    "calls/http: fail newWebSocket-arity": 0.913,
+    "calls/http: fail web.newWebSocket-type": 0.996,
+    "calls/images: fail barcode-range": 1.037,
+    "calls/images: fail canvas-range": 1.019,
+    "calls/images: fail images.clip-arity": 1.2,
+    "calls/images: fail images.pixel-arity": 0.929,
+    "calls/images: fail images.read-range": 1.019,
+    "calls/images: fail images.threshold-range": 1.129,
+    "calls/images: fail ocr-range": 0.956,
+    "calls/images: fail ocr.tap-arity": 0.976,
+    "calls/images: fail ocr.tap-type": 1.067,
+    "calls/images: fail qrcode-type": 0.919,
+    "calls/images: fail yolo.load-arity": 1.16,
+    "calls/jsox: fail Arrayx.distinct-type": 0.981,
+    "calls/jsox: fail Mathx.randInt-type": 1.067,
+    "calls/jsox: fail Numberx.clamp-arity": 0.891,
+    "calls/jsox: fail Numberx.toFixedNum-range": 1.099,
+    "calls/promise: fail Promise-not-function": 0.661,
+    "calls/promise: fail Promise-without-new": 0.686,
+    "calls/pure: fail cvt.bytes-range": 0.935,
+    "calls/pure: fail fmt.bytes-arity": 0.94,
+    "calls/pure: fail mime-type": 0.949,
+    "calls/pure: fail nanoid-range": 0.945,
+    "calls/pure: fail s13n.point-type": 0.982,
+    "calls/pure: fail s13n.time-type": 1.066,
+    "calls/pure: fail species-arity": 0.972,
+    "calls/require: fail require('')": 0.893,
+    "calls/require: fail require(1)": 0.989,
+    "calls/runtime: fail clearTimeout-arity": 0.838,
+    "calls/runtime: fail continuation.create-type": 1.03,
+    "calls/runtime: fail engines.execScript-type": 0.996,
+    "calls/runtime: fail setIntervalExt-type": 0.979,
+    "calls/runtime: fail setTimeout-type": 1.02,
+    "calls/runtime: fail threads.pool-range": 1.018,
+    "calls/shell: fail Tap-type": 0.942,
+    "calls/shell: fail plugins.tools.call-type": 1.016,
+    "calls/shell: fail shell-type": 1.075,
+    "calls/shell: fail shell.checkAccess-range": 0.993,
+    "calls/shell: fail shell.spawn-type": 1.016,
+    "calls/shell: fail shizuku-type": 1.0,
+    "calls/tasks: fail settings.setEnabled-arity": 0.887,
+    "calls/tasks: fail sysprops.getInt-type": 0.98,
+    "calls/tasks: fail tasks.daysToTimeFlag-type": 1.071,
+    "calls/tasks: fail tasks.getTimedTask-type": 1.048,
+    "calls/tasks: fail workManager.addDailyTask-type": 0.975,
+    "calls/tts: fail recorder-arity": 0.964,
+    "calls/tts: fail tts-arity": 0.998,
+    "calls/tts: fail tts.ready-type": 0.956,
+    "calls/tts: fail tts.silence-range": 1.047,
+    "calls/tts: fail tts.speak-options": 0.94,
+    "calls/tts: fail tts.speak-range": 0.968,
+    "calls/ui: fail console.build-range": 1.281,
+    "calls/ui: fail dialogs.build-type": 0.991,
+    "calls/ui: fail floaty.hasPermission-arity": 0.847,
+    "calls/ui: fail notice.cancel-type": 1.028,
+    "calls/ui: fail notice.getBuilder-arity": 0.898,
+    "calls/ui: fail toast.dismissAll-arity": 0.84,
+    "calls/ui: fail ui.getStatusBarHeight-type": 0.994,
+    "calls/ui: fail ui.post-type": 1.077,
+    "calls/ui: fail ui.run-type": 0.986,
+    "calls/util: fail util.ensureType-range": 1.023,
+    "calls/util: fail util.ensureType-type": 0.967,
+    "calls/util: fail util.inspect-options": 0.993,
+    "calls/util: fail util.isString-arity": 0.947,
+    "calls/zip: fail sqlite-arity": 0.993,
+    "calls/zip: fail sqlite-range": 0.897,
+    "calls/zip: fail sqlite-type": 0.956,
+    "calls/zip: fail zip-arity": 0.867,
+    "calls/zip: fail zip-range": 0.936,
+    "calls/zip: fail zip.open-type": 0.948,
+    "calls/zip: fail zip.zipFiles-type": 0.977,
+    "error_path: module-arity": 0.981,
+    "error_path: module-arity-read-message": 1.087,
+    "error_path: module-arity-read-stack": 1.041,
+    "error_path: module-java-exception": 0.907,
+    "error_path: module-null-argument": 0.897,
+    "error_path: module-unknown-charset": 1.005,
+    "startup: runtime-init-epilogue": 0.0,
+    "startup: runtime-init-prologue": 17.0
+   },
+   "spread": {
+    "calls/app: fail app.intent-type": [
+     0.876,
+     0.934
+    ],
+    "calls/app: fail autojs.setRootMode-type": [
+     1.013,
+     1.088
+    ],
+    "calls/app: fail device.vibrate-type": [
+     0.898,
+     1.012
+    ],
+    "calls/app: fail files.open-arity": [
+     0.908,
+     0.985
+    ],
+    "calls/app: fail startActivity-type": [
+     0.871,
+     0.933
+    ],
+    "calls/app: fail storages.create-type": [
+     0.914,
+     1.031
+    ],
+    "calls/automator: fail auto.setMode-range": [
+     0.907,
+     1.15
+    ],
+    "calls/automator: fail auto.setMode-type": [
+     0.927,
+     1.022
+    ],
+    "calls/automator: fail click-arity": [
+     0.978,
+     1.17
+    ],
+    "calls/automator: fail depth-value": [
+     1.096,
+     1.126
+    ],
+    "calls/automator: fail detect-arity": [
+     1.32,
+     1.541
+    ],
+    "calls/automator: fail detect-compass": [
+     1.452,
+     1.656
+    ],
+    "calls/automator: fail events.__asEmitter__-type": [
+     0.912,
+     1.079
+    ],
+    "calls/automator: fail flow.defaults-key": [
+     1.018,
+     1.087
+    ],
+    "calls/automator: fail flow.wait-arity": [
+     0.879,
+     1.019
+    ],
+    "calls/automator: fail flow.wait-option": [
+     1.112,
+     1.209
+    ],
+    "calls/automator: fail gesture-arity": [
+     0.85,
+     0.908
+    ],
+    "calls/automator: fail pickup-compass": [
+     1.58,
+     1.66
+    ],
+    "calls/automator: fail pickup-condition-key": [
+     9.351,
+     9.956
+    ],
+    "calls/automator: fail pickup-condition-pattern": [
+     1.427,
+     1.517
+    ],
+    "calls/automator: fail pickup-condition-range": [
+     1.466,
+     1.584
+    ],
+    "calls/automator: fail pickup-condition-value": [
+     1.407,
+     1.485
+    ],
+    "calls/automator: fail pickup-result-argument": [
+     1.734,
+     1.933
+    ],
+    "calls/automator: fail pickup-result-type": [
+     16.744,
+     19.436
+    ],
+    "calls/automator: fail pickup-type": [
+     1.256,
+     1.347
+    ],
+    "calls/automator: fail press-type": [
+     0.979,
+     1.088
+    ],
+    "calls/automator: fail smartClick-option": [
+     1.082,
+     1.148
+    ],
+    "calls/automator: fail textMatches-interval": [
+     1.111,
+     1.248
+    ],
+    "calls/automator: fail textMatches-pattern": [
+     1.104,
+     1.155
+    ],
+    "calls/automator: fail textMatches-property": [
+     1.2,
+     1.272
+    ],
+    "calls/automator: fail waitForEvent-type": [
+     1.037,
+     1.2
+    ],
+    "calls/bridged: fail ai.ask-range": [
+     0.965,
+     0.991
+    ],
+    "calls/bridged: fail ai.ask-type": [
+     0.917,
+     1.04
+    ],
+    "calls/bridged: fail ai.session-type": [
+     0.982,
+     1.043
+    ],
+    "calls/bridged: fail mediainfo-range": [
+     0.909,
+     1.002
+    ],
+    "calls/bridged: fail mediainfo.get-type": [
+     0.913,
+     1.032
+    ],
+    "calls/bridged: fail memory.collect-range": [
+     0.928,
+     1.007
+    ],
+    "calls/bridged: fail memory.collect-type": [
+     0.943,
+     1.075
+    ],
+    "calls/bridged: fail memory.watch-type": [
+     0.909,
+     1.073
+    ],
+    "calls/bridged: fail opencc-arity": [
+     0.878,
+     0.968
+    ],
+    "calls/bridged: fail opencc.convert-range": [
+     0.886,
+     0.979
+    ],
+    "calls/bridged: fail opencc.convert-type": [
+     0.895,
+     1.047
+    ],
+    "calls/bridged: fail pinyin-arity": [
+     1.002,
+     1.063
+    ],
+    "calls/bridged: fail pinyin-option": [
+     0.998,
+     1.108
+    ],
+    "calls/bridged: fail pinyin.compact-type": [
+     0.912,
+     0.974
+    ],
+    "calls/bridged: fail pinyin.fromCodePoint-range": [
+     1.081,
+     1.125
+    ],
+    "calls/bridged: fail pinyin4j.of-option": [
+     0.992,
+     1.168
+    ],
+    "calls/colors: fail colors.rgb-range": [
+     0.945,
+     1.164
+    ],
+    "calls/colors: fail colors.toInt-arity": [
+     0.81,
+     0.941
+    ],
+    "calls/colors: fail colors.toInt-range": [
+     1.098,
+     1.143
+    ],
+    "calls/colors: fail colors.toInt-type": [
+     0.895,
+     1.031
+    ],
+    "calls/disposable: fail disposable.blockedGet-arity": [
+     7.493,
+     8.308
+    ],
+    "calls/disposable: fail threads.disposable-arity": [
+     0.828,
+     0.959
+    ],
+    "calls/global: fail TODO-java": [
+     1.029,
+     1.11
+    ],
+    "calls/global: fail isInteger-arity": [
+     0.837,
+     0.857
+    ],
+    "calls/global: fail random-arity": [
+     0.901,
+     0.97
+    ],
+    "calls/global: fail setScaleBaseX-type": [
+     1.018,
+     1.071
+    ],
+    "calls/global: fail sleep-type": [
+     0.869,
+     0.932
+    ],
+    "calls/global: fail wait-range": [
+     1.109,
+     1.141
+    ],
+    "calls/http: fail http.get-arity": [
+     0.898,
+     1.009
+    ],
+    "calls/http: fail http.get-type": [
+     0.949,
+     0.991
+    ],
+    "calls/http: fail http.post-callback": [
+     0.976,
+     1.033
+    ],
+    "calls/http: fail http.request-type": [
+     1.0,
+     1.034
+    ],
+    "calls/http: fail newWebSocket-arity": [
+     0.894,
+     0.923
+    ],
+    "calls/http: fail web.newWebSocket-type": [
+     0.988,
+     1.034
+    ],
+    "calls/images: fail barcode-range": [
+     1.007,
+     1.046
+    ],
+    "calls/images: fail canvas-range": [
+     0.998,
+     1.135
+    ],
+    "calls/images: fail images.clip-arity": [
+     1.121,
+     1.242
+    ],
+    "calls/images: fail images.pixel-arity": [
+     0.837,
+     0.93
+    ],
+    "calls/images: fail images.read-range": [
+     0.989,
+     1.176
+    ],
+    "calls/images: fail images.threshold-range": [
+     1.054,
+     1.159
+    ],
+    "calls/images: fail ocr-range": [
+     0.948,
+     0.998
+    ],
+    "calls/images: fail ocr.tap-arity": [
+     0.873,
+     0.986
+    ],
+    "calls/images: fail ocr.tap-type": [
+     1.033,
+     1.161
+    ],
+    "calls/images: fail qrcode-type": [
+     0.897,
+     1.046
+    ],
+    "calls/images: fail yolo.load-arity": [
+     1.111,
+     1.165
+    ],
+    "calls/jsox: fail Arrayx.distinct-type": [
+     0.888,
+     0.986
+    ],
+    "calls/jsox: fail Mathx.randInt-type": [
+     1.015,
+     1.149
+    ],
+    "calls/jsox: fail Numberx.clamp-arity": [
+     0.839,
+     0.913
+    ],
+    "calls/jsox: fail Numberx.toFixedNum-range": [
+     1.071,
+     1.16
+    ],
+    "calls/promise: fail Promise-not-function": [
+     0.622,
+     0.671
+    ],
+    "calls/promise: fail Promise-without-new": [
+     0.678,
+     0.692
+    ],
+    "calls/pure: fail cvt.bytes-range": [
+     0.888,
+     0.945
+    ],
+    "calls/pure: fail fmt.bytes-arity": [
+     0.887,
+     0.942
+    ],
+    "calls/pure: fail mime-type": [
+     0.912,
+     1.005
+    ],
+    "calls/pure: fail nanoid-range": [
+     0.876,
+     0.967
+    ],
+    "calls/pure: fail s13n.point-type": [
+     0.908,
+     1.065
+    ],
+    "calls/pure: fail s13n.time-type": [
+     0.936,
+     1.151
+    ],
+    "calls/pure: fail species-arity": [
+     0.933,
+     0.987
+    ],
+    "calls/require: fail require('')": [
+     0.878,
+     0.979
+    ],
+    "calls/require: fail require(1)": [
+     0.908,
+     1.034
+    ],
+    "calls/runtime: fail clearTimeout-arity": [
+     0.825,
+     0.947
+    ],
+    "calls/runtime: fail continuation.create-type": [
+     1.005,
+     1.063
+    ],
+    "calls/runtime: fail engines.execScript-type": [
+     0.967,
+     1.004
+    ],
+    "calls/runtime: fail setIntervalExt-type": [
+     0.904,
+     1.015
+    ],
+    "calls/runtime: fail setTimeout-type": [
+     0.947,
+     1.026
+    ],
+    "calls/runtime: fail threads.pool-range": [
+     0.971,
+     1.149
+    ],
+    "calls/shell: fail Tap-type": [
+     0.926,
+     1.03
+    ],
+    "calls/shell: fail plugins.tools.call-type": [
+     1.011,
+     1.016
+    ],
+    "calls/shell: fail shell-type": [
+     0.982,
+     1.11
+    ],
+    "calls/shell: fail shell.checkAccess-range": [
+     0.854,
+     1.048
+    ],
+    "calls/shell: fail shell.spawn-type": [
+     0.964,
+     1.097
+    ],
+    "calls/shell: fail shizuku-type": [
+     0.989,
+     1.11
+    ],
+    "calls/tasks: fail settings.setEnabled-arity": [
+     0.879,
+     0.92
+    ],
+    "calls/tasks: fail sysprops.getInt-type": [
+     0.947,
+     1.033
+    ],
+    "calls/tasks: fail tasks.daysToTimeFlag-type": [
+     1.062,
+     1.128
+    ],
+    "calls/tasks: fail tasks.getTimedTask-type": [
+     1.007,
+     1.048
+    ],
+    "calls/tasks: fail workManager.addDailyTask-type": [
+     0.908,
+     1.007
+    ],
+    "calls/tts: fail recorder-arity": [
+     0.891,
+     0.991
+    ],
+    "calls/tts: fail tts-arity": [
+     0.963,
+     1.094
+    ],
+    "calls/tts: fail tts.ready-type": [
+     0.953,
+     1.047
+    ],
+    "calls/tts: fail tts.silence-range": [
+     1.0,
+     1.079
+    ],
+    "calls/tts: fail tts.speak-options": [
+     0.854,
+     0.993
+    ],
+    "calls/tts: fail tts.speak-range": [
+     0.956,
+     0.976
+    ],
+    "calls/ui: fail console.build-range": [
+     1.231,
+     1.298
+    ],
+    "calls/ui: fail dialogs.build-type": [
+     0.976,
+     1.032
+    ],
+    "calls/ui: fail floaty.hasPermission-arity": [
+     0.802,
+     0.895
+    ],
+    "calls/ui: fail notice.cancel-type": [
+     0.925,
+     1.043
+    ],
+    "calls/ui: fail notice.getBuilder-arity": [
+     0.867,
+     0.919
+    ],
+    "calls/ui: fail toast.dismissAll-arity": [
+     0.797,
+     0.867
+    ],
+    "calls/ui: fail ui.getStatusBarHeight-type": [
+     0.935,
+     0.996
+    ],
+    "calls/ui: fail ui.post-type": [
+     0.973,
+     1.099
+    ],
+    "calls/ui: fail ui.run-type": [
+     0.938,
+     1.133
+    ],
+    "calls/util: fail util.ensureType-range": [
+     0.947,
+     1.037
+    ],
+    "calls/util: fail util.ensureType-type": [
+     0.923,
+     0.972
+    ],
+    "calls/util: fail util.inspect-options": [
+     0.938,
+     0.993
+    ],
+    "calls/util: fail util.isString-arity": [
+     0.891,
+     0.951
+    ],
+    "calls/zip: fail sqlite-arity": [
+     0.921,
+     1.009
+    ],
+    "calls/zip: fail sqlite-range": [
+     0.88,
+     0.928
+    ],
+    "calls/zip: fail sqlite-type": [
+     0.952,
+     0.97
+    ],
+    "calls/zip: fail zip-arity": [
+     0.837,
+     0.946
+    ],
+    "calls/zip: fail zip-range": [
+     0.878,
+     0.965
+    ],
+    "calls/zip: fail zip.open-type": [
+     0.941,
+     0.957
+    ],
+    "calls/zip: fail zip.zipFiles-type": [
+     0.968,
+     1.025
+    ],
+    "error_path: module-arity": [
+     0.845,
+     0.991
+    ],
+    "error_path: module-arity-read-message": [
+     0.939,
+     1.096
+    ],
+    "error_path: module-arity-read-stack": [
+     0.959,
+     1.086
+    ],
+    "error_path: module-java-exception": [
+     0.864,
+     0.94
+    ],
+    "error_path: module-null-argument": [
+     0.839,
+     1.005
+    ],
+    "error_path: module-unknown-charset": [
+     0.905,
+     1.016
+    ],
+    "startup: runtime-init-epilogue": [
+     0.0,
+     0.0
+    ],
+    "startup: runtime-init-prologue": [
+     16.5,
+     17.0
+    ]
+   }
+  }
+ }
+}
