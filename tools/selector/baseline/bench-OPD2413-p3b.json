@@ -1,0 +1,1267 @@
+{
+ "device": {
+  "serial": "63751f63",
+  "model": "OPD2413",
+  "sdk": 35,
+  "versionCode": 5935,
+  "build": 4283,
+  "date": "2026-10-26 02:54",
+  "newModules": true
+ },
+ "scenarios": {
+  "settings": {
+   "rootPackage": "com.oplus.wirelesssettings",
+   "nodes": 122,
+   "items": {
+    "full": {
+     "ok": true,
+     "median": 3.479,
+     "samples": [
+      4.492,
+      4.13,
+      3.675,
+      3.741,
+      3.433,
+      3.393,
+      3.094,
+      3.037,
+      3.274,
+      3.524
+     ],
+     "cpuPerRun": 4.2,
+     "sizes": [
+      122
+     ]
+    },
+    "miss": {
+     "ok": true,
+     "median": 1.208,
+     "samples": [
+      1.326,
+      1.12,
+      1.071,
+      1.093,
+      1.653,
+      1.16,
+      1.073,
+      1.388,
+      1.274,
+      1.255
+     ],
+     "cpuPerRun": 1.6
+    },
+    "missId": {
+     "ok": true,
+     "median": 1.296,
+     "samples": [
+      1.345,
+      1.35,
+      1.294,
+      1.201,
+      1.192,
+      1.363,
+      1.285,
+      1.421,
+      1.297,
+      1.203
+     ],
+     "cpuPerRun": 2.2
+    },
+    "lookupId": {
+     "ok": true,
+     "median": 0.654,
+     "samples": [
+      0.828,
+      0.561,
+      0.551,
+      0.551,
+      0.645,
+      0.7,
+      0.662,
+      0.693,
+      0.603,
+      0.721
+     ],
+     "cpuPerRun": 1
+    },
+    "missMixed": {
+     "ok": true,
+     "median": 1.227,
+     "samples": [
+      1.297,
+      1.245,
+      1.228,
+      1.196,
+      1.208,
+      1.2,
+      1.261,
+      1.225,
+      1.234,
+      1.218
+     ],
+     "cpuPerRun": 2.6
+    },
+    "hit": {
+     "ok": true,
+     "median": 1.033,
+     "samples": [
+      1.043,
+      1.063,
+      1.023,
+      1.016,
+      1.053,
+      0.933,
+      0.822,
+      1.137,
+      1.269,
+      0.853
+     ],
+     "cpuPerRun": 0.8
+    },
+    "late": {
+     "ok": true,
+     "median": 1.259,
+     "samples": [
+      1.255,
+      1.249,
+      1.299,
+      1.257,
+      1.26,
+      1.397,
+      1.23,
+      1.242,
+      1.508,
+      1.918
+     ],
+     "cpuPerRun": 1.7
+    },
+    "refresh": {
+     "ok": true,
+     "median": 0.202,
+     "samples": [
+      0.188,
+      0.177,
+      0.182,
+      0.184,
+      0.181,
+      0.36,
+      0.524,
+      0.232,
+      0.215,
+      0.366
+     ],
+     "cpuPerRun": 0.3
+    },
+    "findOne600": {
+     "ok": true,
+     "medianAttempts": 12,
+     "attempts": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12,
+      12
+     ],
+     "median": 620.343,
+     "samples": [
+      615.694,
+      633.088,
+      635.797,
+      610.384,
+      623.479,
+      628.745,
+      617.207,
+      630.907,
+      613.217,
+      609.873
+     ],
+     "medianCpu": 86.5,
+     "medianCpuPerAttempt": 7.209,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "findOne600Id": {
+     "ok": true,
+     "medianAttempts": 12,
+     "attempts": [
+      12,
+      12,
+      12,
+      12,
+      11,
+      12,
+      12,
+      11,
+      11,
+      12
+     ],
+     "median": 643.627,
+     "samples": [
+      658.264,
+      653.592,
+      627.591,
+      633.661,
+      603.591,
+      655.22,
+      658.972,
+      603.337,
+      602.59,
+      661.364
+     ],
+     "medianCpu": 61,
+     "medianCpuPerAttempt": 5.133,
+     "fastPath": {
+      "hits": 0,
+      "misses": 66,
+      "fallbacks": 23,
+      "mismatches": 0,
+      "walks": 28
+     }
+    },
+    "findOne600Default": {
+     "ok": true,
+     "medianAttempts": 5.5,
+     "attempts": [
+      5,
+      6,
+      6,
+      5,
+      5,
+      5,
+      6,
+      4,
+      6,
+      6
+     ],
+     "median": 714.924,
+     "samples": [
+      698.212,
+      728.783,
+      754.27,
+      633.497,
+      701.064,
+      647.351,
+      792.152,
+      621.127,
+      780.909,
+      782.093
+     ],
+     "medianCpu": 33,
+     "medianCpuPerAttempt": 6.05,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "lateOne": {
+     "ok": true,
+     "medianAttempts": 1,
+     "attempts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "median": 2.611,
+     "samples": [
+      6.402,
+      4.744,
+      4.083,
+      2.675,
+      2.547,
+      2.512,
+      1.938,
+      1.949,
+      3.148,
+      1.623
+     ],
+     "medianCpu": 5,
+     "medianCpuPerAttempt": 5,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 0
+     }
+    },
+    "cpuIdle": {
+     "ok": true,
+     "medianCpu": 0.3,
+     "cpu": [
+      0.4,
+      0.3,
+      0.3
+     ],
+     "medianAttempts": null,
+     "attempts": []
+    },
+    "cpuFixed": {
+     "ok": true,
+     "medianCpu": 14.6,
+     "cpu": [
+      14.7,
+      15.2,
+      13.9,
+      14.8,
+      14.4,
+      14.8,
+      14.5,
+      14.2,
+      15.3,
+      13.8
+     ],
+     "medianAttempts": 181,
+     "attempts": [
+      179,
+      181,
+      181,
+      181,
+      181,
+      181,
+      182,
+      181,
+      181,
+      181
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 100
+     }
+    },
+    "cpuAssisted": {
+     "ok": true,
+     "medianCpu": 5.4,
+     "cpu": [
+      6,
+      5.3,
+      6.1,
+      5.1,
+      5.1,
+      6,
+      5.3,
+      5.6,
+      5.5,
+      5.2
+     ],
+     "medianAttempts": 64.5,
+     "attempts": [
+      65,
+      65,
+      64,
+      63,
+      62,
+      64,
+      65,
+      64,
+      66,
+      65
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 93
+     }
+    }
+   },
+   "late": {
+    "index": 112,
+    "total": 122,
+    "length": 12
+   },
+   "ok": true,
+   "scheduling": {
+    "before": "fg",
+    "after": "fg"
+   }
+  },
+  "main": {
+   "rootPackage": "org.autojs.autojs6",
+   "nodes": 151,
+   "items": {
+    "full": {
+     "ok": true,
+     "median": 2.955,
+     "samples": [
+      3.94,
+      3.097,
+      3.212,
+      3.08,
+      2.987,
+      2.922,
+      2.886,
+      2.859,
+      2.804,
+      2.807
+     ],
+     "cpuPerRun": 5.7,
+     "sizes": [
+      151
+     ]
+    },
+    "miss": {
+     "ok": true,
+     "median": 0.647,
+     "samples": [
+      0.758,
+      0.642,
+      0.636,
+      0.626,
+      0.65,
+      0.643,
+      0.882,
+      0.631,
+      0.672,
+      0.669
+     ],
+     "cpuPerRun": 1.8
+    },
+    "missId": {
+     "ok": true,
+     "median": 0.958,
+     "samples": [
+      0.945,
+      1.097,
+      0.999,
+      1.105,
+      0.971,
+      0.984,
+      0.868,
+      0.84,
+      0.892,
+      0.928
+     ],
+     "cpuPerRun": 1.5
+    },
+    "lookupId": {
+     "ok": true,
+     "median": 0.616,
+     "samples": [
+      0.632,
+      0.628,
+      0.62,
+      0.619,
+      0.618,
+      0.614,
+      0.582,
+      0.554,
+      0.522,
+      0.521
+     ],
+     "cpuPerRun": 0.7
+    },
+    "missMixed": {
+     "ok": true,
+     "median": 1.185,
+     "samples": [
+      1.252,
+      1.142,
+      1.283,
+      1.121,
+      1.182,
+      1.14,
+      1.203,
+      1.074,
+      1.2,
+      1.188
+     ],
+     "cpuPerRun": 1.8
+    },
+    "hit": {
+     "ok": true,
+     "median": 0.437,
+     "samples": [
+      0.545,
+      0.426,
+      0.435,
+      0.411,
+      0.552,
+      0.438,
+      0.417,
+      0.418,
+      0.769,
+      0.595
+     ],
+     "cpuPerRun": 0.6
+    },
+    "late": {
+     "ok": true,
+     "median": 0.809,
+     "samples": [
+      0.868,
+      0.872,
+      0.805,
+      0.793,
+      0.777,
+      0.765,
+      0.805,
+      0.813,
+      0.967,
+      0.908
+     ],
+     "cpuPerRun": 1.4
+    },
+    "refresh": {
+     "ok": true,
+     "median": 0.17,
+     "samples": [
+      0.179,
+      0.172,
+      0.168,
+      0.17,
+      0.169,
+      0.187,
+      0.17,
+      0.166,
+      0.23,
+      0.169
+     ],
+     "cpuPerRun": 0.3
+    },
+    "findOne600": {
+     "ok": true,
+     "medianAttempts": 13,
+     "attempts": [
+      13,
+      12,
+      13,
+      12,
+      13,
+      13,
+      13,
+      12,
+      13,
+      13
+     ],
+     "median": 648.955,
+     "samples": [
+      652.617,
+      606.781,
+      650.43,
+      605.339,
+      648.181,
+      647.072,
+      652.84,
+      608.835,
+      649.729,
+      651.097
+     ],
+     "medianCpu": 183.5,
+     "medianCpuPerAttempt": 14.917,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "findOne600Id": {
+     "ok": true,
+     "medianAttempts": 12,
+     "attempts": [
+      12,
+      12,
+      12,
+      12,
+      12,
+      11,
+      12,
+      12,
+      12,
+      12
+     ],
+     "median": 645.709,
+     "samples": [
+      644.476,
+      648.205,
+      648.976,
+      632.788,
+      643.267,
+      602.306,
+      646.906,
+      660.067,
+      644.513,
+      648.722
+     ],
+     "medianCpu": 124,
+     "medianCpuPerAttempt": 10.334,
+     "fastPath": {
+      "hits": 0,
+      "misses": 80,
+      "fallbacks": 29,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "findOne600Default": {
+     "ok": true,
+     "medianAttempts": 6,
+     "attempts": [
+      5,
+      4,
+      6,
+      6,
+      7,
+      4,
+      6,
+      6,
+      6,
+      4
+     ],
+     "median": 767.741,
+     "samples": [
+      660.257,
+      620.509,
+      780.418,
+      787.068,
+      805.566,
+      622.915,
+      755.063,
+      790.489,
+      787.922,
+      620.522
+     ],
+     "medianCpu": 101,
+     "medianCpuPerAttempt": 18.155,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "lateOne": {
+     "ok": true,
+     "medianAttempts": 1,
+     "attempts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "median": 2.673,
+     "samples": [
+      3.852,
+      3.158,
+      3.181,
+      2.957,
+      2.389,
+      2.199,
+      2.068,
+      1.484,
+      4.741,
+      1.848
+     ],
+     "medianCpu": 4.5,
+     "medianCpuPerAttempt": 4.5,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 0
+     }
+    },
+    "cpuIdle": {
+     "ok": true,
+     "medianCpu": 4.8,
+     "cpu": [
+      4.8,
+      4.4,
+      5.6
+     ],
+     "medianAttempts": null,
+     "attempts": []
+    },
+    "cpuFixed": {
+     "ok": true,
+     "medianCpu": 27.65,
+     "cpu": [
+      28.4,
+      28.5,
+      28.3,
+      27.4,
+      28.1,
+      27.6,
+      27.6,
+      27.3,
+      27.7,
+      26.7
+     ],
+     "medianAttempts": 186,
+     "attempts": [
+      186,
+      186,
+      186,
+      186,
+      186,
+      186,
+      185,
+      186,
+      186,
+      186
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 100
+     }
+    },
+    "cpuAssisted": {
+     "ok": true,
+     "medianCpu": 12.45,
+     "cpu": [
+      12.7,
+      12.4,
+      12.5,
+      12.3,
+      13,
+      12.1,
+      12,
+      13.3,
+      12.7,
+      12.1
+     ],
+     "medianAttempts": 62,
+     "attempts": [
+      63,
+      61,
+      62,
+      62,
+      62,
+      62,
+      62,
+      62,
+      62,
+      61
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 95
+     }
+    }
+   },
+   "late": {
+    "index": 149,
+    "total": 151,
+    "length": 17
+   },
+   "ok": true,
+   "scheduling": {
+    "before": "ta",
+    "after": "ta"
+   }
+  },
+  "overlay": {
+   "rootPackage": "org.autojs.autojs6",
+   "nodes": 305,
+   "items": {
+    "full": {
+     "ok": true,
+     "median": 5.09,
+     "samples": [
+      4.538,
+      4.533,
+      9.416,
+      4.176,
+      4.719,
+      5.952,
+      8.229,
+      7.151,
+      5.12,
+      5.059
+     ],
+     "cpuPerRun": 10.8,
+     "sizes": [
+      305
+     ]
+    },
+    "miss": {
+     "ok": true,
+     "median": 1.343,
+     "samples": [
+      1.486,
+      1.347,
+      1.31,
+      1.533,
+      1.333,
+      1.294,
+      1.447,
+      1.327,
+      1.338,
+      1.696
+     ],
+     "cpuPerRun": 1.2
+    },
+    "missId": {
+     "ok": true,
+     "median": 1.838,
+     "samples": [
+      1.495,
+      1.956,
+      1.924,
+      1.767,
+      1.531,
+      2.175,
+      2.971,
+      1.858,
+      1.817,
+      1.615
+     ],
+     "cpuPerRun": 1.6
+    },
+    "lookupId": {
+     "ok": true,
+     "median": 1.577,
+     "samples": [
+      1.224,
+      1.238,
+      1.187,
+      1.183,
+      1.274,
+      1.963,
+      1.879,
+      1.908,
+      1.956,
+      1.946
+     ],
+     "cpuPerRun": 3
+    },
+    "missMixed": {
+     "ok": true,
+     "median": 3.518,
+     "samples": [
+      4.227,
+      3.714,
+      3.468,
+      3.549,
+      3.487,
+      3.621,
+      3.737,
+      3.398,
+      3.328,
+      3.319
+     ],
+     "cpuPerRun": 3.2
+    },
+    "hit": {
+     "ok": true,
+     "median": 2.489,
+     "samples": [
+      2.973,
+      2.283,
+      2.459,
+      2.135,
+      2.032,
+      2.687,
+      1.964,
+      2.519,
+      3.606,
+      5.381
+     ],
+     "cpuPerRun": 2.4
+    },
+    "late": {
+     "ok": true,
+     "median": 3.159,
+     "samples": [
+      2.966,
+      3.159,
+      2.956,
+      3.158,
+      2.982,
+      3.042,
+      3.474,
+      3.231,
+      3.254,
+      3.479
+     ],
+     "cpuPerRun": 2.8
+    },
+    "refresh": {
+     "ok": true,
+     "median": 0.441,
+     "samples": [
+      0.436,
+      0.443,
+      0.45,
+      0.454,
+      0.432,
+      0.428,
+      0.44,
+      0.433,
+      0.441,
+      0.446
+     ],
+     "cpuPerRun": 1
+    },
+    "findOne600": {
+     "ok": true,
+     "medianAttempts": 11,
+     "attempts": [
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      11,
+      12,
+      11,
+      11
+     ],
+     "median": 613.593,
+     "samples": [
+      606.011,
+      613.661,
+      616.324,
+      606.661,
+      625.867,
+      620.077,
+      613.525,
+      639.514,
+      603.155,
+      613.161
+     ],
+     "medianCpu": 81,
+     "medianCpuPerAttempt": 7.364,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "findOne600Id": {
+     "ok": true,
+     "medianAttempts": 11,
+     "attempts": [
+      11,
+      11,
+      11,
+      12,
+      11,
+      11,
+      12,
+      11,
+      11,
+      11
+     ],
+     "median": 615.327,
+     "samples": [
+      604.142,
+      608.95,
+      616.446,
+      652.649,
+      617.909,
+      603.613,
+      653.613,
+      624.173,
+      601.908,
+      614.207
+     ],
+     "medianCpu": 77.5,
+     "medianCpuPerAttempt": 7.046,
+     "fastPath": {
+      "hits": 0,
+      "misses": 10,
+      "fallbacks": 10,
+      "mismatches": 0,
+      "walks": 92
+     }
+    },
+    "findOne600Default": {
+     "ok": true,
+     "medianAttempts": 5,
+     "attempts": [
+      5,
+      6,
+      4,
+      5,
+      6,
+      4,
+      6,
+      6,
+      5,
+      4
+     ],
+     "median": 669.132,
+     "samples": [
+      708.243,
+      673.666,
+      643.646,
+      653.669,
+      782.152,
+      645.454,
+      770.303,
+      664.597,
+      679.101,
+      642.073
+     ],
+     "medianCpu": 45,
+     "medianCpuPerAttempt": 8.017,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "lateOne": {
+     "ok": true,
+     "medianAttempts": 1,
+     "attempts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "median": 4.978,
+     "samples": [
+      6.116,
+      5.07,
+      4.984,
+      4.971,
+      4.68,
+      5.448,
+      5.405,
+      4.21,
+      4.108,
+      3.761
+     ],
+     "medianCpu": 6,
+     "medianCpuPerAttempt": 6,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 0
+     }
+    },
+    "cpuIdle": {
+     "ok": true,
+     "medianCpu": 0.3,
+     "cpu": [
+      0.9,
+      0.3,
+      0.2
+     ],
+     "medianAttempts": null,
+     "attempts": []
+    },
+    "cpuFixed": {
+     "ok": true,
+     "medianCpu": 17.95,
+     "cpu": [
+      18.9,
+      18,
+      21,
+      16.4,
+      15.6,
+      17.9,
+      18.7,
+      17.5,
+      19.1,
+      17.9
+     ],
+     "medianAttempts": 168,
+     "attempts": [
+      168,
+      169,
+      163,
+      167,
+      167,
+      168,
+      168,
+      169,
+      168,
+      167
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 100
+     }
+    },
+    "cpuAssisted": {
+     "ok": true,
+     "medianCpu": 7.15,
+     "cpu": [
+      7.5,
+      6.2,
+      6.5,
+      5.9,
+      6.6,
+      7.2,
+      7.7,
+      7.2,
+      7.1,
+      8.6
+     ],
+     "medianAttempts": 63,
+     "attempts": [
+      62,
+      62,
+      63,
+      63,
+      64,
+      64,
+      63,
+      63,
+      64,
+      65
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 91
+     }
+    },
+    "stormIdle": {
+     "ok": true,
+     "medianCpu": 32,
+     "cpu": [
+      32.8,
+      32,
+      31.3
+     ],
+     "medianAttempts": null,
+     "attempts": []
+    },
+    "stormFixed": {
+     "ok": true,
+     "medianCpu": 40.9,
+     "cpu": [
+      42.3,
+      41.4,
+      40.9,
+      41,
+      40.7,
+      40.9,
+      40.9,
+      41,
+      39.8,
+      40.8
+     ],
+     "medianAttempts": 124,
+     "attempts": [
+      125,
+      124,
+      124,
+      124,
+      124,
+      124,
+      126,
+      124,
+      124,
+      125
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 100
+     }
+    },
+    "stormAssisted": {
+     "ok": true,
+     "medianCpu": 39.85,
+     "cpu": [
+      39.9,
+      40.2,
+      39.9,
+      40.5,
+      39.1,
+      39.1,
+      39.2,
+      38.3,
+      39.8,
+      40.1
+     ],
+     "medianAttempts": 121.5,
+     "attempts": [
+      122,
+      123,
+      122,
+      121,
+      122,
+      121,
+      122,
+      121,
+      121,
+      120
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 100
+     }
+    }
+   },
+   "stormUpdatesPerSecond": 59.7,
+   "late": {
+    "index": 304,
+    "total": 305,
+    "length": 8
+   },
+   "ok": true,
+   "scheduling": {
+    "before": "fg",
+    "after": "fg"
+   }
+  }
+ }
+}
