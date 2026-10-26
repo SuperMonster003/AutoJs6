@@ -2,7 +2,6 @@
 
 package org.autojs.autojs.core.accessibility
 
-import android.os.Process
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityNodeInfo
 import org.autojs.autojs.annotation.ScriptInterface
@@ -174,38 +173,38 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
      * One attempt of a query: a single search, where a search posted to the UI thread under
      * [AccessibilityBridge.FLAG_FIND_ON_UI_THREAD] is waited for at most [budget] milliseconds
      * ([PollPolicy.UNBOUNDED]: interruptibly, without limit). [attempt] tells the framework fast
-     * path what it may decide (docs/selector/ROADMAP.md P2.3; see [FastPath]); [costs], when given, receives the process
-     * CPU time of the lookups and the walk (appendix C Q15 / Q17).
+     * path what it may decide (docs/selector/ROADMAP.md P2.3; see [FastPath]); [trace], when given, receives whether the
+     * attempt looked up and walked (appendix C Q15 / Q17).
      * zh-CN: 查询的一次尝试: 单次搜索; [AccessibilityBridge.FLAG_FIND_ON_UI_THREAD] 下投递到 UI 线程的搜索至多等待
      * [budget] 毫秒 ([PollPolicy.UNBOUNDED]: 可中断地无限等待). [attempt] 告诉框架快路径它可以决定什么 (P2.3; 见 [FastPath]);
-     * 给出 [costs] 时记入查找与遍历的进程 CPU 开销 (附录 C Q15 / Q17).
+     * 给出 [trace] 时记入这次尝试是否查找, 是否遍历 (附录 C Q15 / Q17).
      */
-    internal fun findWithin(max: Int, budget: Long, attempt: FastPath.Attempt = FastPath.Attempt.SINGLE, costs: FastPath.Costs? = null): UiObjectCollection {
+    internal fun findWithin(max: Int, budget: Long, attempt: FastPath.Attempt = FastPath.Attempt.SINGLE, trace: FastPath.Trace? = null): UiObjectCollection {
         val start = SystemClock.uptimeMillis()
         try {
-            return findWithinUntimed(max, budget, attempt, costs)
+            return findWithinUntimed(max, budget, attempt, trace)
         } finally {
             mAccessibilityBridge?.stats?.recordSearch(toString(), SystemClock.uptimeMillis() - start)
         }
     }
 
-    private fun findWithinUntimed(max: Int, budget: Long, attempt: FastPath.Attempt, costs: FastPath.Costs?): UiObjectCollection {
+    private fun findWithinUntimed(max: Int, budget: Long, attempt: FastPath.Attempt, trace: FastPath.Trace?): UiObjectCollection {
         // The bridge routes to the shared controller; without a bridge nothing can be searched anyway.
         // zh-CN: bridge 会转到共享的控制器; 没有 bridge 时也无从查找.
         mAccessibilityBridge?.ensureServiceStarted()
         return when {
-            mAccessibilityBridge == null -> findImpl(max, attempt, costs)
-            isMainThread() -> findImpl(max, attempt, costs)
-            mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max, attempt, costs)
-            else -> findOnUiThread(mAccessibilityBridge, max, budget, attempt, costs)
+            mAccessibilityBridge == null -> findImpl(max, attempt, trace)
+            isMainThread() -> findImpl(max, attempt, trace)
+            mAccessibilityBridge.flags and AccessibilityBridge.FLAG_FIND_ON_UI_THREAD == 0 -> findImpl(max, attempt, trace)
+            else -> findOnUiThread(mAccessibilityBridge, max, budget, attempt, trace)
         }
     }
 
     // A FutureTask instead of the former VolatileBox.blockedGet(): the wait is bounded when the query
     // is, interruptible otherwise, and a search that never ran cannot be waited for forever.
     // zh-CN: 以 FutureTask 取代原先的 VolatileBox.blockedGet(): 查询有超时则等待有界, 否则可中断; 从未执行的搜索不会被无限等待.
-    private fun findOnUiThread(bridge: AccessibilityBridge, max: Int, budget: Long, attempt: FastPath.Attempt, costs: FastPath.Costs?): UiObjectCollection {
-        val task = FutureTask { findImpl(max, attempt, costs) }
+    private fun findOnUiThread(bridge: AccessibilityBridge, max: Int, budget: Long, attempt: FastPath.Attempt, trace: FastPath.Trace?): UiObjectCollection {
+        val task = FutureTask { findImpl(max, attempt, trace) }
         bridge.post(task)
         try {
             return when (budget) {
@@ -345,9 +344,9 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
 
     protected fun findImpl(max: Int): UiObjectCollection = findImpl(max, FastPath.Attempt.SINGLE, null)
 
-    private fun findImpl(max: Int, attempt: FastPath.Attempt, costs: FastPath.Costs?): UiObjectCollection {
+    private fun findImpl(max: Int, attempt: FastPath.Attempt, trace: FastPath.Trace?): UiObjectCollection {
         val bridge = mAccessibilityBridge ?: return of(emptyList())
-        return search(bridge, searchRoots(bridge), max, attempt, costs)
+        return search(bridge, searchRoots(bridge), max, attempt, trace)
     }
 
     protected fun findImpl(node: AccessibilityNodeInfo, max: Int): UiObjectCollection = findImpl(listOf(node), max)
@@ -367,12 +366,12 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
     /**
      * The search over [roots]: the framework fast path first where [attempt] allows it (P2.3, [FastPath]; off under
      * `noFastPath` and for the packages of [AccessibilityBridge.fastPathLedger]), else the walk of every root in turn
-     * with the filters of the moment, cheapest first (P2.2). [costs] receives the process CPU time of the lookups and
-     * the walk (Q15 / Q17).
+     * with the filters of the moment, cheapest first (P2.2). [trace] receives whether the search looked up and walked
+     * (Q15 / Q17).
      * zh-CN: 在 [roots] 上的搜索: [attempt] 允许时先走框架快路径 (P2.3, [FastPath]; `noFastPath` 下与 [AccessibilityBridge.fastPathLedger] 中的包除外),
-     * 否则依次遍历每个根节点, 使用当时的过滤器, 按开销从低到高 (P2.2). [costs] 记入查找与遍历的进程 CPU 时间 (Q15 / Q17).
+     * 否则依次遍历每个根节点, 使用当时的过滤器, 按开销从低到高 (P2.2). [trace] 记入是否查找, 是否遍历 (Q15 / Q17).
      */
-    private fun search(bridge: AccessibilityBridge, roots: List<UiObject>, max: Int, attempt: FastPath.Attempt, costs: FastPath.Costs?): UiObjectCollection {
+    private fun search(bridge: AccessibilityBridge, roots: List<UiObject>, max: Int, attempt: FastPath.Attempt, trace: FastPath.Trace?): UiObjectCollection {
         val filter = selector.snapshot()
         val algorithm = searchAlgorithm
         var key: FastPath.Key? = null
@@ -383,9 +382,8 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
         if (attempt.looksUp && max > 0 && roots.isNotEmpty() && bridge.isFastPathEnabled) {
             key = FastPath.keyOf(selector.effectiveFilters)?.takeIf { k -> roots.none { bridge.fastPathLedger.isUnreliable(it.packageName(), k.kind) } }
             if (key != null) {
-                val started = if (costs != null) Process.getElapsedCpuTime() else 0L
+                trace?.lookedUp = true
                 val outcome = FastPath.decide(roots, key, filter, max == 1 && algorithm === DFS, attempt, UiObjectLookup)
-                costs?.lookup = Process.getElapsedCpuTime() - started
                 when (outcome) {
                     is FastPath.Outcome.Hit -> {
                         bridge.stats.recordFastPath(A11yStats.FastPathEvent.HIT)
@@ -402,7 +400,7 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
                 }
             }
         }
-        val walkStarted = if (costs != null) Process.getElapsedCpuTime() else 0L
+        trace?.walked = true
         val result = mutableListOf<UiObject?>()
         for (root in roots) {
             val found = algorithm.search(root, filter, max - result.size)
@@ -414,7 +412,6 @@ open class UiSelector : UiSelectorBuilders, UiObjectActions, StringReadable {
             result.addAll(found)
             if (result.size >= max) break
         }
-        costs?.walk = Process.getElapsedCpuTime() - walkStarted
         if (emptyLookup && result.isNotEmpty()) {
             bridge.stats.recordFastPath(A11yStats.FastPathEvent.MISMATCH)
         }

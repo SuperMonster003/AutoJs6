@@ -1,5 +1,6 @@
 package org.autojs.autojs.core.accessibility
 
+import android.os.Process
 import android.os.SystemClock
 import org.autojs.autojs.core.automator.UiObject
 import org.autojs.autojs.core.automator.UiObjectCollection
@@ -76,17 +77,17 @@ class UiSelectorQuery internal constructor(
         /** The nodes (at most [limit]) of the first attempt of [plan] that found any, or null. zh-CN: [plan] 中首次找到节点的尝试的结果 (至多 [limit] 个), 或 null. */
         fun search(plan: PollPolicy, limit: Int = max): UiObjectCollection? {
             // Which attempts the framework fast path may answer (docs/selector/ROADMAP.md P2.3, appendix C Q1), told by what
-            // the lookups and the walks of this query cost (appendix C Q15 / Q17).
-            // zh-CN: 框架快路径可以作答哪些尝试 (P2.3, 附录 C Q1), 依本查询的查找与遍历的开销而定 (附录 C Q15 / Q17).
-            val fastPath = FastPath.Query(plan) { SystemClock.uptimeMillis() }
-            val costs = FastPath.Costs()
+            // the lookups and the walks of this query cost, in process CPU time (appendix C Q15 / Q17).
+            // zh-CN: 框架快路径可以作答哪些尝试 (P2.3, 附录 C Q1), 依本查询的查找与遍历的开销 (进程 CPU 时间) 而定 (附录 C Q15 / Q17).
+            val fastPath = FastPath.Query(plan, { Process.getElapsedCpuTime() }) { SystemClock.uptimeMillis() }
+            val trace = FastPath.Trace()
             val before = attempts
             return poller.poll(plan) { progress ->
                 attempts = before + progress.round
                 val attempt = fastPath.attempt(progress.round, progress.remaining)
-                costs.reset()
-                val result = selector.findWithin(limit, plan.timeout, attempt, costs)
-                fastPath.record(attempt, costs)
+                trace.reset()
+                val result = selector.findWithin(limit, plan.timeout, attempt, trace)
+                fastPath.record(attempt, trace)
                 result.takeIf { it.isNotEmpty() }
             }
         }
