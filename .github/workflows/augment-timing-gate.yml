@@ -1,0 +1,126 @@
+name: Augment timing gate
+run-name: Augment timing gate (${{ github.event_name }})
+
+# Regression gate of the script module layer (docs/augment/ROADMAP.md P6.1, design docs/augment/P6-1-ci-timing-gate.md):
+# the startup timing (runtime-init-prologue) and the failing calls of bench/error_path.js and bench/calls/*.js against
+# Rhino's own errors, on a disposable API 35 emulator of the memory gate's recipe, through tools/augment/ci_timing_gate.py
+# (the same entry as a local run on an AVD of that recipe). The limits come from tools/augment/baseline/timing-gate.json,
+# measured on emulators; red line R2 on XQ-AT72 stays a manual check (tools/augment/device_r2.py --verify), phone and
+# emulator numbers are not comparable.
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/modules/**'
+      # The selector implementation behind pickup / detect and the automator modules (ROADMAP appendix C Q154).
+      - 'app/src/main/java/org/autojs/autojs/core/automator/**'
+      - 'build-logic/ksp-script-modules-*/**'
+      - 'tools/augment/**'
+      - '.github/workflows/augment-timing-gate.yml'
+  pull_request:
+    branches: [ "master" ]
+    paths:
+      - 'app/src/main/java/org/autojs/autojs/runtime/api/modules/**'
+      # The selector implementation behind pickup / detect and the automator modules (ROADMAP appendix C Q154).
+      - 'app/src/main/java/org/autojs/autojs/core/automator/**'
+      - 'build-logic/ksp-script-modules-*/**'
+      - 'tools/augment/**'
+      - '.github/workflows/augment-timing-gate.yml'
+  # Only repository writers can dispatch.
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Baseline profile in tools/augment/baseline/timing-gate.json (github-actions; local-avd for a comparison)"
+        required: false
+        default: "github-actions"
+      calls:
+        description: "Space-separated bench/calls files without .js, e.g. automator ui; empty runs every file with failing calls"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: augment-timing-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GRADLE_CI_TIMEOUT_SECONDS: '3600'
+      GRADLE_CI_MAX_LOG_BYTES: '33554432'
+      EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+      # Passed through the environment rather than interpolated into the script.
+      GATE_PROFILE: ${{ inputs.profile || 'github-actions' }}
+      GATE_CALLS: ${{ inputs.calls }}
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 and Gradle dependency cache
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      # The debug host prints the startup timing lines (release builds do not); the gate step runs no Gradle task.
+      - name: Build the debug host
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          bash .github/scripts/run-gradle-ci.sh \
+            ./gradlew \
+            :app:assembleAppDebug \
+            --no-daemon \
+            --build-cache \
+            --console=plain \
+            --stacktrace
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # The recipe of memory-gate.yml with the runner's default of 2 cores spelled out: the baseline was measured on it.
+      # ci_timing_gate.py installs the x86_64 host, warms a new process up, measures 2 rounds of 3 runs per script
+      # (10 of the startup timing), checks against the baseline profile and measures the failing scripts once more in a
+      # new process before it fails. Each line of the script runs on its own (sh -c), so the optional --calls list is
+      # built inline.
+      - name: Run the timing gate
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          cores: 2
+          ram-size: 4096M
+          disk-size: 6000M
+          avd-name: AutoJs6_Timing_Gate_CI_35
+          emulator-options: ${{ env.EMULATOR_OPTIONS }}
+          script: |
+            python3 -I -u tools/augment/ci_timing_gate.py -s emulator-5554 --profile "$GATE_PROFILE" --label ci --out build/augment-timing-gate $([ -n "$GATE_CALLS" ] && printf -- '--calls %s' "$GATE_CALLS")
+
+      - name: Upload the gate result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: augment-timing-gate-result
+          path: build/augment-timing-gate/*.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Upload Gradle failure log
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: augment-timing-gate-gradle-failure-log
+          path: ${{ runner.temp }}/android-gradle-build.log
+          if-no-files-found: ignore
+          retention-days: 7
