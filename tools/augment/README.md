@@ -172,3 +172,16 @@ py -3.12 -I -u tools/augment/device_matrix.py -s SERIAL --out DIR --items --rest
 P5.2 之前矩阵跑开关的两态: `default` (删除开关的存储值, 核对默认为开) 与 `eval-default` 即现在的 `layer` 与 `eval`; `eval-off` 以开关关运行同一批用例 (差异对照附录 E, 跳过 `OFF_SKIPPED` 中会操作设备的用例); `surface` 与 `bootstrap` 对照两态 (`KNOWN_SURFACE` 还包括 console 的全局函数名, files.batchRename.apply, @lookup.Image); `--backup` / `--restore` 还保存与恢复开关的存储值.
 
 各工具把临时脚本写在 `tools/augment/__pycache__`, 多台设备同时运行时各用一份 `tools/augment` 与 `tools/rhino` 的副本 (`surface` 还读 `modules/global/GlobalJavaClasses.kt`). 不点按屏幕; 需要无障碍服务的用例 (automator) 在服务未开启时跳过.
+
+## ci_timing_gate.py: 模拟器上的计时回归门禁 (P6.1)
+
+```
+py -3.12 -I -u tools/augment/ci_timing_gate.py -s emulator-5554 [--profile local-avd] [--calls NAME ...] [--no-install] [--apk-dir DIR] [--no-rerun]
+py -3.12 -I tools/augment/ci_timing_baseline.py --profile local-avd RESULT.json RESULT.json RESULT.json [--write]
+```
+
+设计, 阈值的理由与基线的更新步骤见 `docs/augment/P6-1-ci-timing-gate.md`; 工作流 `.github/workflows/augment-timing-gate.yml` 只调用它. 在 API 35 x86_64 的模拟器上 (与 `memory-gate.yml` 同配方, 2 核) 测启动的 `runtime-init-prologue` 与 `error_path.js` / `bench/calls/*.js` 全部失败项对 Rhino 参照的比值, 与 `baseline/timing-gate.json` 中 `--profile` 档案比较: prologue 不超过基线 1.5 倍且不超过 60 ms, 每个比值不超过 max(1.2, 基线 x 1.35). 只测宿主的默认状态, 不读写新脚本模块层开关.
+
+与本目录其他工具不同, 它会安装 debug 宿主 (`install -r -t -g`, 取 `--apk-dir` 下与设备 ABI 对应的分包) 并改设备设置: 放行 "所有文件访问", 关动画, 保持亮屏, 关闭 cached apps freezer (结束时恢复原值), logcat 缓冲设为 16 MiB. 因此只接受模拟器 (`ro.kernel.qemu` 或 `ro.boot.qemu` 为 1), 真机仍用 `device_r2.py`. 每个调用文件与 `calls_prelude.js` 之间插入一段 `GATE_SHIM`, 在每个失败项后紧跟一次 `undefined.x` 作为相邻参照 (不改共享的计时脚本). 一次全套约 17 分钟 (暖机 100 次, 2 轮 x 每个脚本 3 次, 启动计时每轮 10 次); 有检查未通过时只把相关脚本在新进程中重测一次, 每项取两次中较好的值.
+
+输出 `CI_TIMING_*` 行: 每个未通过的检查一行 `CI_TIMING_PROBLEM` (over / missing / timeout, 附值, 基线与上限), 基线 `notes` 中的项各一行 `CI_TIMING_KNOWN`, 最后 `CI_TIMING_RESULT PASS|FAIL`; 退出码 0 / 1, 得出结论前出错为 2. 结果 JSON 写到 `--out` (默认 `build/augment-timing-gate`), 记录每次运行的原始数值, 也是 `ci_timing_baseline.py` 的输入; 其中的 `commit` 取 `--apk-dir` 所在仓库的 HEAD (CI 为 `GITHUB_SHA`). 本机测基线时用同配方的 AVD 跑全套至少 3 次 (`--no-rerun`), 机器同时有其他负载时把 `qemu-system-x86_64-headless` 的优先级调到高于正常.
