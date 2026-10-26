@@ -1001,7 +1001,7 @@ P5.2 (2026-10-26, 删除旧层后的单态复测, 子会话 augment-p5-2). XQ-AT
 | promise | 2: 0.78-0.79 | 6: 0.97 | |
 | bridged | 16: 0.99-1.14 | 4: 0.99 | |
 
-启动: runtime-init-prologue 26 / 26 ms (红线 60 ms, P5.1 开 24 / 25); runtime-init-epilogue 1 / 1 ms.
+启动: runtime-init-prologue 26 / 26 ms (红线 60 ms, P5.1 开 24 / 25); runtime-init-epilogue 1 / 1 ms. `device_bench.py --runs 5` (10:13, 不暖机, 同一构建): prologue 47-60 ms (中位 53), epilogue 5-8 ms; error_path 的模块失败调用中位 218.0-241.7 us, 同次 `undefined.x` 218.5 us; 每次调用开销 (第二遍) js-function 11.8, augment-function 32.2, augment-getter(device.width) 20.8, augment-global(isNullish) 10.6, Math.max 11.4 us.
 
 automator 超出 1.2 的失败调用 (两轮): pickup 的结果类型 `pickup("aj6-none", "nope")` 15.92 / 15.59 (3374 / 3397 us, P5.1 256 us), 条件键 `pickup({ 未知键 })` 8.42 / 8.29 (1783 / 1807 us, P5.1 267), 结果参数 1.74 / 1.66, 罗盘 `pickup(.., "c")` 1.77 / 1.69 与 `detect(.., "c")` 1.63 / 1.60, 条件取值 / 正则 / 范围 1.46-1.57, `detect()` 1.42 / 1.38, `pickup("a", 1, "w", null)` 1.39 / 1.36; textMatches 三条 1.16-1.24 (Q71 / Q86 的边界项, 同 P5.1). pickup / detect 一族在 P5.1 时为 1.02-1.29, 代价在 selector P1.1 (`ff082119c`) 之后的错误消息候选: `PickArguments` 对未知结果类型 / 条件键调用 `SelectorStringParser.suggest`, 对约 240 个拼写各转小写 4 次并逐个算不设上限的编辑距离 (排序时再算一次).
 
@@ -1053,7 +1053,7 @@ P5.2 结果 (2026-10-26, 子会话 augment-p5-2, 单态 `tools/augment/device_ma
 说明:
 
 - XQ-AT72 首轮 eval 有 47 条不同, 都是 OpenCvPluginLoadException: augment-q128 按维护者要求卸载了该机的全部插件. 从 23046RP50C 取回 OpenCV 插件 1.1.4 装上并经脚本 `PluginEnableStore.setEnabled` 启用后, 这 47 条所在文件重跑 284 / 284 一致, 插桩中因此跳过的 ImagesResizeRhinoInstrumentationTest 重跑通过; 测后卸载该插件, 恢复测前状态.
-- 表面快照: XQ-AT72 与 23046RP50C (同一构建) 只差设备相关的值 (屏幕尺寸, 无障碍服务与窗口个数, 应用语言下的错误消息, 已装插件决定的 ocr.mode / compose.version 等), 没有名称或属性的差异; G8441 另多出选择器的 normalize / prefer (P3.3 / P3.4, 构建较新). 单态没有两态对照, 快照留作此后的参照 (`--surface-baseline`).
+- 表面快照: XQ-AT72 与 23046RP50C (同一构建) 只差设备相关的值 (屏幕尺寸, 无障碍服务与窗口个数, 应用语言下的错误消息, 已装插件决定的 ocr.mode / compose.version 等), 没有名称或属性的差异; G8441 另多出选择器的 normalize / prefer (P3.3 / P3.4, 构建较新). 单态没有两态对照, 快照留作此后的参照 (`--surface-baseline`; XQ-AT72 的 .txt 与 R2 / A/B 的原始输出存于共享笔记 augment-p52-files, 未入库).
 - G8441 的 Promise 场景都为正常结果 (含附录 C Q97 修复的 `flow.of(5).await()` 为 5); bench: resolve+then 52.8, new+then3 149.4, all10 525.7, wait-resolved 84.1, await-resolved 276.7, queued1200+wait 51.6 us.
 
 ## 附录 C 待决事项
