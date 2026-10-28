@@ -1072,8 +1072,14 @@
         {
           "name": "setFlags",
           "kind": "function",
-          "doc": "setFlags(flags: Automator.Flags | Automator.Flags[]): void;",
-          "signature": "setFlags(flags: Automator.Flags | Automator.Flags[]): void;"
+          "doc": "setFlags(flags: Automator.FlagSetting | Automator.FlagSetting[]): void;",
+          "signature": "setFlags(flags: Automator.FlagSetting | Automator.FlagSetting[]): void;"
+        },
+        {
+          "name": "clearFlags",
+          "kind": "function",
+          "doc": "clearFlags(flags: Automator.Flags | Automator.Flags[]): void;",
+          "signature": "clearFlags(flags: Automator.Flags | Automator.Flags[]): void;"
         },
         {
           "name": "setWindowFilter",
@@ -1102,8 +1108,12 @@
         {
           "name": "explain",
           "kind": "function",
-          "doc": "explain(selector: Automator.Target, root?: UiObject | null): Automator.ExplainResult;",
-          "signature": "explain(selector: Automator.Target, root?: UiObject | null): Automator.ExplainResult;"
+          "doc": "explain(selector: Automator.Target, root?: UiObject | null, compass?: Detect.Compass | null, resultType?: Pickup.ResultType): Automator.ExplainResult;",
+          "signature": "explain(selector: Automator.Target, root?: UiObject | null, compass?: Detect.Compass | null, resultType?: Pickup.ResultType): Automator.ExplainResult;",
+          "signatures": [
+            "explain(selector: Automator.Target, root?: UiObject | null, compass?: Detect.Compass | null, resultType?: Pickup.ResultType): Automator.ExplainResult;",
+            "explain(selector: Automator.Target, compassOrResultType: Detect.Compass | Pickup.ResultType, resultType?: Pickup.ResultType): Automator.ExplainResult;"
+          ]
         },
         {
           "name": "dump",
@@ -1218,6 +1228,12 @@
           "signature": "queries: QueryTiming;"
         },
         {
+          "name": "fastPath",
+          "kind": "variable",
+          "doc": "fastPath: FastPathCounts;",
+          "signature": "fastPath: FastPathCounts;"
+        },
+        {
           "name": "selectors",
           "kind": "variable",
           "doc": "selectors: SelectorStats[];",
@@ -1255,6 +1271,41 @@
         }
       ]
     },
+    "auto.stats.fastPath": {
+      "doc": "AutoJs6 auto.stats.fastPath API",
+      "members": [
+        {
+          "name": "hits",
+          "kind": "variable",
+          "doc": "hits: number;",
+          "signature": "hits: number;"
+        },
+        {
+          "name": "misses",
+          "kind": "variable",
+          "doc": "misses: number;",
+          "signature": "misses: number;"
+        },
+        {
+          "name": "fallbacks",
+          "kind": "variable",
+          "doc": "fallbacks: number;",
+          "signature": "fallbacks: number;"
+        },
+        {
+          "name": "mismatches",
+          "kind": "variable",
+          "doc": "mismatches: number;",
+          "signature": "mismatches: number;"
+        },
+        {
+          "name": "walks",
+          "kind": "variable",
+          "doc": "walks: number;",
+          "signature": "walks: number;"
+        }
+      ]
+    },
     "auto.stats.queries": {
       "doc": "AutoJs6 auto.stats.queries API",
       "members": [
@@ -1275,6 +1326,12 @@
           "kind": "variable",
           "doc": "attempts: number;",
           "signature": "attempts: number;"
+        },
+        {
+          "name": "refinds",
+          "kind": "variable",
+          "doc": "refinds: number;",
+          "signature": "refinds: number;"
         },
         {
           "name": "count",
@@ -33008,7 +33065,9 @@
     "clickWhenStableAfter",
     "clickBoundsWhenStableAfter",
     "nanoid",
-    "sync"
+    "sync",
+    "normalize",
+    "prefer"
   ],
   "variables": [
     "context",
