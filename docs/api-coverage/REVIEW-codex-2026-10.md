@@ -516,3 +516,117 @@ JAR / DEX 输入由 `build-java-callback-fixtures.py` 现场构建 (callback.jar
 授权与人工操作: 维护者选择题同意 flow 夹具临时重绑已授权的 AutoJs6 无障碍服务 (经 UiAutomation shell 写 secure 设置并写回) 与 mail 合成别名账户的写入及卸载删除; 本轮无系统授权对话框, 测试代码未自动点击任何系统界面.
 
 恢复与核对 (`device_sample_b.py cleanup` / `restore` / `verify`): 宿主, 宿主测试包, Node, Bun 装回抽样前 APK (Bun 由 296 降回 118), 3-Stamp Mail 与其测试包卸载, 九个记录包 (含未安装的两个) 的 versionCode 与 md5 全部与抽样前一致; 旋转, 熄屏时间, 充电常亮, 亮度与亮度模式, 无障碍服务列表, 通知使用权, 语音交互与识别服务, 数字助理, appops 四项模式, 四个音量流均一致; 3-Stone AI 私有文件 (含两个模型文件 md5) 未变, 3-Stove Agent 私有数据用抽样前的 run-as 备份还原 (11 条批次任务记录移除) 后与抽样前一致; 宿主外部目录中本次创建的文件 (证据 JSON, JAR / DEX fixture, 邮件 fixture JSON, 语音清单) 全部删除, 自建的 3 条 adb reverse 映射移除, 合成邮件服务器已停止. 唯一差异: 宿主私有文件 files/profileInstalled (24 字节, androidx.profileinstaller 记录的安装时间戳, 重装 APK 后应用启动即重写, 不是用户数据, 无法还原到原字节).
+
+## P1.4 白名单拍板材料 (供 Q1 / Q5 选择题; 2026-10-29, 子会话 api-cov-p1-4 local_7dd24704)
+
+数据: 宿主 HEAD ffd0b4a58 的导出副本 (副本内单独运行 `:app:kspAppDebugKotlin`), Node 990f9e35, Bun 3056b94, 排除规则为草案. 门禁修复 (0671ffb36): augment P5.2 (37b93d893) 删除 `runtime/api/augment` 后, `returned-objects.json` 的 19 个对象 (Flow, MailClient, ShellProcess, Color, Zip ...) 与 `check-shell-contract.mjs` 仍指向旧包, 返回对象成员从 1362 掉到 956, check.py 因 shell 契约脚本找不到文件而失败; 改为 `runtime/api/modules` 后矩阵 2739 行 (显式导出 1377, 返回对象成员 1362), 与入库 MATRIX.md (2729 行) 相比只多 `speech.speaker.*` 8 行 (3-Macaw P8.3, c31ea30ee) 与 UiSelector# 2 行 (selector), 两边共有行的状态 0 差异. 此时 pending: Node main 631 / Node Worker 763 / Bun 722 (下称 "现状"). 另有 7 个 Codex 结构检查脚本 (`check-runtime-ai / ai-agent / bridges / epub / mail / speech / tts.mjs`, CI 跑的 8 个中占 6 个) 解析旧包的注册写法, 新层没有这种写法, 只改路径仍失败, 见本节末 "门禁现状与题 12".
+
+每组: 行 (显式导出, 返回对象成员另计) | 现状三列 (Node main / Worker / Bun) | 真机抽样 (P1.2 Redmi / P1.3 Xiaomi) 是否触及 | 选项与 pending 变化 (相对现状) | 改选返工. 推荐项都写了等价写法 (not-portable 的 runtime-native 项必填).
+
+| 题 | 分组 | 理由 | 显式行 | 现状 main / Worker / Bun | 推荐 | 推荐后 pending 变化 |
+|---|---|---|---:|---|---|---|
+| 1 | Q5 local-shim | - | - | local-shim 格 136 / 62 / 62 | 允许, 须与 Rhino 一致且有测试 | 0 |
+| 2 | D-9 运行时自带网络 / 加密 / 编码 / 定时器 | runtime-native | 30 | 排除 28 (另 2 local-shim) / 30 / 30 | 保持排除, http.client / buildRequest 改记 java-prototype | 0 |
+| 3 | D-4 特权与双开应用操作 | security | 25 | pending (拒绝) 25 / pending 25 / pending (拒绝) 25 | denied | -25 / -25 / -25 |
+| 4 | D-17 UI 线程与 Activity 内容视图 | ui-thread | 15 | pending 15 / 15 / 15 | 排除 | -15 / -15 / -15 |
+| 5 | D-11 + D-12 Java 对象与句柄 | java-prototype | 5 + 13 | 排除 5 + pending 13 (拒绝 7) / 排除 5 + 13 / 排除 5 + 13 (拒绝 3) | 18 行排除 | -13 / -13 / -13 |
+| 6 | Q31 句柄成员 5 行 | sync-only / java-prototype | 返回对象 5 | pending 5 / 5 / 5 | 排除 | -5 / -5 / -5 |
+| 7 | D-13 JSOX 扩展 | rhino-only | 54 + 全局 2 | local-shim 56 / 排除 54 + pending 2 / 同 Worker | Worker / Bun 保持排除, 全局 randomInt / randomFloat 并入 | 0 / -2 / -2 |
+| 8 | D-14 Rhino 引擎操作 | rhino-only | 4 | 覆盖 3 + 排除 1 / 排除 4 / 排除 4 | 拆分: engines.exec* 3 行不排除 | +1 / +3 / +3 |
+| 9 | D-1 + D-6 + D-7 同步终端 | sync-only (console.build: java-prototype) | 1 + 7 + 3 | 排除 8 + pending 3 (拒绝 3) / 排除 8 + 3 (拒绝 3) / 排除 8 + 3 | 11 行排除 | -3 / -3 / -3 |
+| 10 | D-8 + D-10 运行时自带 sleep / console | runtime-native | 4 + 11 | 覆盖 1 + 排除 3 / 排除 4 / 排除 4 + pending 11 | D-8 保持, D-10 Bun 排除 | 0 / 0 / -11 |
+| 11 | D-2 + D-5 标识符与存储枚举 | security | 1 + 2 | pending 3 (拒绝 2) / 3 / 3 (拒绝 2) | denied | -3 / -3 / -3 |
+
+全部按推荐: pending Node main 631 -> 568, Worker 763 -> 701, Bun 722 -> 646 (题 1 不改变现状数字). 只列不问: D-15 内部 / 标准导出 9 行 (Q13 (a) 已拍板, 保持); D-3 原始输入通道, D-16 Rhino 语言层, D-18 完整 XML 绑定 / 悬浮窗外框 / ActionBar / 同步 WebView 子类化, D-19 Node 可遮蔽 shim, D-20 非本主题 (宿主无显式导出, 0 行, 保留为说明项, 不进矩阵). 题 12 不属于白名单, 见本节末.
+
+### 题 1 Q5: pending 项可否用 local-shim (运行时侧纯 JS 实现) 满足
+
+- 现状 local-shim 格 Node main 136 / Worker 62 / Bun 62: colors 62 (三列, 经 `autojs6:colors`), 只在 Node main 的 jsox / Arrayx / Mathx / Numberx 56, cvt.bytes / fmt.bytes 12, base64 2, files 2, plugins 1, s13n 1.
+- 后续 P3 / P4 可走 local-shim 的 pending: species 37, util 约 45 (ensure* / is* / 字符串与单位助手), colors 19 个纯颜色函数 (R21) 与 Color# 29, Bun pinyin 常量 10 (R3), cvt.bytes / fmt.bytes 在 Worker / Bun 各 6, util.morseCode / util.version* 等.
+- 真机: P1.2 / P1.3 未专门抽 local-shim 行.
+- (a) 允许, 须与 Rhino 行为一致且有对照测试, 矩阵标 local-shim (推荐): 现状不变; 纯 JS 行在 P3 / P4 不经桥接.
+- (b) 只有 bridged 计为覆盖, local-shim 限 cvt / fmt / species / s13n: 这 4 个模块以外的现有 local-shim 改回 pending, Node main +123 / Worker +62 / Bun +62 (colors 62 x 3, jsox 系 56, base64 2, files 2, plugins 1); 这些行与 util / colors / Color# / pinyin 常量须改为宿主桥接 (每次调用一次跨进程), P3.2 / P4.2 返工大.
+
+### 题 2 D-9 运行时自带网络 / 加密 / 编码 / 定时器 (runtime-native)
+
+- 行 30: http 20 (get / post / postJson / postMultipart / put / del / delete / head / request 及其 Async, client, buildRequest; http.__okhttp__ 属 D-15), crypto.Key / KeyPair, base64.encode / decode, 全局 setTimeout / setInterval / setImmediate 及三个 clear. 现状: Node main 排除 28 (规则 native-http 18, http.get / request 与 6 个定时器由 `runtime-policy.json` node.nativeModules 自动判定为 node:http / node:timers), base64 2 行 Node main 为 local-shim; Worker / Bun 排除 30. 自动判定还有 util.format (Node main / Worker; Bun pending, 归 util 批次).
+- 代表: http.get, http.postJsonAsync, crypto.Key, setTimeout. 真机: 未触及.
+- (a) 保持排除 runtime-native (推荐): 等价写法 全局 fetch (Node / Bun), Node `autojs6:fetch` (宿主 OkHttp, 代理 / 证书 / 网络策略随宿主, 只有 GET / POST), node:crypto / WebCrypto, Buffer / atob / btoa, 全局定时器; http.client / http.buildRequest 返回 OkHttp 对象, 理由改记 java-prototype (状态不变). pending 0.
+- (b) http 补入口: Node / Bun 按 Rhino 函数名桥接宿主 OkHttp: pending +20 / +20 / +20, P3.2 / P4.2 新增网络批次 (宿主 provider 要支持 PUT / DELETE / HEAD 与 multipart).
+
+### 题 3 D-4 特权与双开应用操作 (security)
+
+- 行 25: app.isDualInstalled / launchDual / launchDualApp / launchDualAppDetailsSettings / launchDualPackage / launchDualSettings / openDualAppSetting / openDualAppSettings / openDualUrl / startDualActivity / uninstallDual / killDual / kill (13), 及除 openDualUrl 外的 12 个全局放置. 现状: Node main 与 Bun 只有拒绝入口 (声明 `Promise<never>`, Node app 选项的 root / shizuku / dual 为 never), Worker 无 app 模块 (R8).
+- 依据: 宿主经 Shizuku / Root / 回退 shell 执行 `am force-stop` 与双开用户操作 (App.kt); Codex bun-automation 报告写明特权 / 双开操作显式拒绝. 真机: 未触及 (拒绝入口).
+- (a) denied / security (推荐): 等价写法 已授权的 shell (Node 能力 shell.root / shell.shizuku, Bun 授权 shell.root / shell.shizuku) 执行 `am force-stop <包名>` 等命令; pending -25 / -25 / -25.
+- (b) 保持 pending, P3.1 / P4.1 在 app 模块实现特权入口 (复用 shell.root / shell.shizuku 或新增授权): 0; 13 个路由 x 2 运行时 + Worker app 模块, 需 Root / Shizuku 真机验证.
+- (c) 拆分: app.kill / killDual 与全局 kill / killDual (4 行) 补入口 (经 Shizuku / Root 授权), 其余 21 行排除: -21 / -21 / -21.
+
+### 题 4 D-17 UI 线程与 Activity 内容视图 (ui-thread)
+
+- 行 15: ui.layout / layoutFile / setContentView / run / post / isUiThread / finish / R / Widget / registerWidget / emitter / root / useAndroidLayout / findById / findByStringId; 现状三列 pending.
+- 依据: 依赖 Rhino UI 线程与脚本 Activity 的内容视图; 运行时的可移植 ui 是 JSON 布局契约 (ui.showLayout / inflate / findView / createView / bind / state, compose.mount), UI 线程由运行时自动切换. 真机: P1.2 UI 族 11 个用例覆盖 ui.inflate / findView 与上述运行时扩展, 三列通过; 本组行运行时无入口.
+- (a) not-portable / ui-thread (推荐), 等价写法如上: -15 / -15 / -15.
+- (b) 拆分: findById / findByStringId 归 P3.3 / P4.3, 核对语义后用 memberAliases 对到 ui.findView, 其余 13 行排除: -13 / -13 / -13.
+- (c) 保持 pending, P3.3 / P4.3 设计 Activity 内容视图桥接: 0; 新增 UI 批次.
+- R7 的另外 16 行 (keepScreenOn, backgroundColor, statusBar* / navigationBar* 颜色 / 高度 / 图标) 不在本组, 仍归 P3.3 / P4.3 补入口.
+
+### 题 5 D-11 + D-12 Java 对象与句柄 (java-prototype)
+
+- D-11 5 行: unwrapJavaObject, util.unwrapJavaObject, isJavaObject, isJavaClass, isJavaPackage (已在规则 java-prototype, 三列排除). kotlin-class 返回对象成员 1070 行已由 Q17 (a) 拍板, 不再问.
+- D-12 13 行: files.open / files.toFile / 全局 open (Node main / Bun 拒绝入口), s13n.color / point / throwable / time (Node main 拒绝入口), dialogs.build, notice.builder / getBuilder, shell.fromIntent, util.java.mapToObject / objectToMap (无入口); 现状三列 pending.
+- 依据: 返回或接收 Java 对象 (文件句柄, Color / Point / Throwable / TimeUnit, 对话框与通知构造器, Intent, Java Map). 真机: P1.3 Java 互操作 12 个用例实测运行时 java 门面 (java.type / new / instanceOf / newArray ...) 三列可用, 即本组的等价写法.
+- 等价写法: files.read / write 与运行时 fs 流; 颜色数值 (colors.*), {x, y}, Error, 毫秒数; dialogs.alert / select / progress; notifications.notify(options); app.startActivity 或 shell 执行 `am start`; java 模块句柄.
+- (a) 18 行全部 not-portable / java-prototype (推荐): -13 / -13 / -13.
+- (b) 16 行排除, util.java.mapToObject / objectToMap 保持 pending 归 P3.2 / P4.2 (同 R19 用 java 模块句柄做 JSON 互转): -11 / -11 / -11.
+- (c) 只排除 D-11 5 行 (现状), D-12 13 行由 P3 / P4 各族补句柄式入口: 0.
+
+### 题 6 Q31 句柄成员 5 行 (返回对象)
+
+- Flow#await / Flow#sync (阻塞到流程结束, sync-only; 等价写法: 运行时 Flow 是 thenable, `await flow` 或 flow.run()), ShellProcess#getErrorStream / getInputStream / getOutputStream (返回 Java 流, java-prototype; 等价写法: 运行时句柄的 stdout / stderr 流与 write / writeLine / closeInput). 现状三列 pending.
+- 真机: P1.2 shell 族实测运行时 ShellProcess 的 write / writeLine / readLine / closeInput / stdout / stderr 三列可用; P1.3 flow 族实测 Flow 17 个成员三列可用 (运行时没有 await / sync).
+- (a) 5 行排除 (推荐; Q31 (a) 已定为附录 D 候选): -5 / -5 / -5.
+- (b) 保持 pending, P3 / P4 在运行时句柄补同名成员 (await 返回 Promise, 三个 getter 返回流句柄): 0.
+- Q31 其余 9 行 (EventEmitter 别名 5 个, isAlive, ShellProcess / EpubBook#toString, Storage#size) 按 Q31 (a) 保持 pending 归 P3 / P4, 不在本题.
+
+### 题 7 D-13 JSOX 扩展 (rhino-only)
+
+- 行 54: Arrayx 15, Mathx 23, Numberx 14, jsox.extend / extendAll; 另全局 randomInt / randomFloat (Mathx 的全局放置) 2 行. 现状: Node main 56 行 local-shim (`jsox` 显式函数模块); Worker / Bun 54 行规则排除, 全局 2 行 pending.
+- 依据: Rhino 内置对象原型扩展, 不是宿主 API; Node 主线程的 jsox 是显式函数形式的便利模块, Worker 只解析宿主模块与 Node 内建模块. 真机: 未触及.
+- (a) Worker / Bun 保持排除 rhino-only, 规则并入 randomInt / randomFloat (推荐), 等价写法: 标准 Math / Array / Number 方法, Node 主线程 `require("jsox")`: 0 / -2 / -2.
+- (b) Worker 补入口 (Worker 可导入 jsox 本地模块), Bun 排除: 0 / +54 / -2.
+- (c) Worker 与 Bun 都补入口 (Bun 新增 jsox 本地命名空间, 依题 1): 0 / +54 / +54.
+
+### 题 8 D-14 Rhino 引擎操作 (rhino-only)
+
+- 行 4: engines.execScript / execScriptFile / execAutoFile, plugins.load. 现状: Node main 的 execScript / execScriptFile 已桥接 (返回 EngineSnapshot), plugins.load 为 local-shim (本地 ./plugins 目录扫描), execAutoFile 排除; Worker / Bun 4 行规则排除.
+- 依据: 草案理由 "操作 Rhino 引擎本身" 与 Node 主线程已桥接 execScript 的事实不符; 宿主启动脚本是宿主能力, 参数与返回可序列化. 真机: 未触及.
+- (a) 拆分 (推荐): engines.execScript / execScriptFile / execAutoFile 不再排除, 归 P3.1 / P4.1 与 engines 其余 pending 行 (all / myEngine / stopAll 等) 同批; plugins.load 在 Worker / Bun 保持 rhino-only (等价写法: Node 主线程 plugins 本地扫描, Bun 运行时自有模块): +1 / +3 / +3.
+- (b) 保持草案: 0.
+- (c) 4 行都不排除: +1 / +4 / +4.
+
+### 题 9 D-1 + D-6 + D-7 同步终端 (sync-only)
+
+- D-1 auto.waitFor (denied / sync-only, 已在规则), D-6 threads.disposable / interrupt / pool / start, sync, continuation.create / enabled (not-portable / sync-only, 已在规则), D-7 console.input / rawInput / build (Node main / Worker 拒绝入口, Bun 无入口; 新候选, console.build 返回 Java 配置器, 理由改记 java-prototype).
+- 等价写法: flow waitFor* 与 accessibility.ensureEnabled; worker_threads / Bun Worker; await; dialogs.input / rawInput (三列已桥接), 运行时控制台窗口控制 (Node console.* / Bun console.control). 真机: P1.2 dialogs 族 8 个桥接行 (含 input / rawInput) 三列通过.
+- (a) 11 行全部排除 (推荐): -3 / -3 / -3.
+- (b) D-1 / D-6 排除, D-7 保持 pending, P3 / P4 在 console 模块补异步 input / rawInput (读控制台窗口的输入框): 0.
+
+### 题 10 D-8 + D-10 运行时自带 sleep 与 console 输出 (runtime-native)
+
+- D-8 sleep / keepAlive / loop / timers.keepAlive (已在规则; Node main 的 sleep 经 `autojs6:compat` 已覆盖, 规则被遮蔽).
+- D-10 Bun 的 console.assert / error / info / log / print / printAllStackTrace / time / timeEnd / trace / verbose / warn 11 行 (Node main / Worker 已桥接, Bun pending; Bun 文档写明原生 console 与 host-client 分开使用). 真机: 未触及.
+- (a) D-8 保持, D-10 Bun 11 行排除 runtime-native (推荐), 等价写法: Bun 全局 console (print 用 log, verbose 用 debug, printAllStackTrace 用 error(err.stack)): 0 / 0 / -11.
+- (b) D-8 保持, D-10 保持 pending, P4 在 console.control 补 11 个输出函数 (写入本执行的控制台窗口): 0.
+
+### 题 11 D-2 + D-5 标识符与存储枚举 (security)
+
+- D-2 device.getSharedDeviceId (经伴生 deviceid provider 读跨应用共享的设备 ID; 三列 pending). D-5 storages.names / all (Node main / Bun 拒绝入口, Worker 无 storages; Bun 文档: 存储按执行应用包名与脚本目录分组, names / all 不提供全局命名空间枚举). 真机: 未触及.
+- (a) 3 行 denied / security (推荐), 等价写法: 设备标识符无 (附录 D 来源 1); 存储按名称 create / open: -3 / -3 / -3.
+- (b) D-5 排除, D-2 保持 pending 归 P3.1 / P4.1 桥接: -2 / -2 / -2.
+- (c) 3 行保持 pending (D-5 在 P3.2 / P4.2 补只列当前分组的 names / all): 0.
+
+### 门禁现状与题 12
+
+- HEAD 上 `check.py --matrix --strict-arity --docs-support` (含 Ace) 在门禁修复后仍退出 1, 原因都是其他主题新增的导出缺文档 / d.ts / Ace: auto.clearFlags (selector, cde3fee03; selector P4 写声明与文档, 进行中) 与 speech.speaker 及 enroll / enrollAsync / identify / identifyAsync / list / remove / verify / verifyAsync (3-Macaw P8.3, c31ea30ee; 该子会话暂停): 文档名缺 7, 表面检查失败 8 条. 题 12 问 P1.4 验收如何对待它们.
+- 7 个 Codex 结构检查脚本 (check-runtime-ai / ai-agent / bridges / epub / mail / speech / tts, CI 跑的 8 个中占 6 个; 其余 17 个与 2 个 test-web 脚本通过) 用正则读旧包的 `selfAssignmentFunctions` / `FUNCTION_ASSIGNMENTS` / OpenCC 注册等写法, 新层是 `@ScriptFunction` 注解, 只改路径仍失败 (已试); 宜改读 exports.json (同一次运行的显式导出). 不在 P1.4 验收内, 登记待决 (见附录 C) 由调度会话安排.
