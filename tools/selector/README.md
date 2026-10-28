@@ -69,3 +69,16 @@ py -3.12 -I tools/selector/device_pick_table.py -s SERIAL [--runs 2] [--new-modu
 - `exists`: `existsAll` / `existsOne`.
 
 `--runs` 次运行逐行比较; `--save` 写到 `baseline/pick_table-<model>.json` (开关开) 或 `pick_table-<model>-legacy.json` (开关关, 旧 augment 层), 一行一条, diff 即可看出变化的行; `--check` 与该文件比较并按分节统计差异. P1.5 允许的差异只有 D6 (b) 与 P1.1 的错误类型, 逐条列入 ROADMAP 附录 A.
+
+## registry_export.py: 节点方法注册表导出 (P4.2 / P4.3)
+
+```
+py -3.12 -I tools/selector/registry_export.py [--docs DIR] [--dts DIR] [--ace DIR] [--check]
+```
+
+不需要设备. 注册表 (`NodeMethodRegistry.uiObject`, D11) 由 JVM 用例 `NodeMethodRegistrySnapshotTest` 固化在 `app/src/test/resources/node-method-registry.txt` (每个方法一行: 分类 `own` / `compat_getter`, 名称与参数类型); 注册表变化时该用例失败并把新清单写到 `app/build/node-method-registry.txt`, 确属有意就用它覆盖资源文件, 再运行本脚本. 脚本读该文件, 改写三处标记之间的生成块:
+
+- 文档仓库 `api/dataTypes.md` (`<!-- node-method-registry:begin -->` ... `end -->`): `UiObjectInvokable` 的可调用方法清单 (自有方法与 compat 只读方法两组, 带参数的重载列出参数类型).
+- 声明仓库 `declarations/autojs6/aj6-int-selector.d.ts` 与 Ace Editor 插件中的副本 (`// <node-method-registry:begin>` ... `end>`): `Detect.ResultTypeFuncWithoutParams` (有无参重载的拼写) 与 `Detect.ResultTypeFuncWithParams` (每个带参重载一个元组), `Pickup.ResultType` / `Detect.ResultType` 包含它们.
+
+拼写为方法名, getter `getXyz` 另有 `xyz` (与已有名称同名时不列). 三个仓库默认为宿主的同级目录, 给 `-` 跳过; `--check` 不写文件, 生成块与注册表不一致时退出码为 1. JVM 看到的是最新 API 的注册表 (2026-10-29: 206 个名称, 218 个方法), API 24-29 上 `getExtraRenderingInfo` 不登记 (附录 C Q16), 文档注明 API 30+.
