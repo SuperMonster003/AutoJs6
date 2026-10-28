@@ -112,9 +112,9 @@ P3 与 P2 可由两张卡片并行: P2 只改 `UiObject.kt` (读取缓存), `sea
 
 ### P4 changelog, 文档, 声明, 示例
 
-- [ ] P4.1 changelog: `.changelog/lang_zh-Hans.json` 补 `feature` (normalize, prefer, 诊断), `improvement` (事件辅助默认开, 命中后校验, 快路径, 预取), `fix` (Invoker 参数类型), 生成 README; 其他语言由维护者同步 (记忆: 6.8.0 仅重写 zh-Hans); 该文件有他人未提交改动时只写草稿交维护者. (DOCS)
+- [x] P4.1 changelog: `.changelog/lang_zh-Hans.json` 补 `feature` (normalize, prefer, 诊断), `improvement` (事件辅助默认开, 命中后校验, 快路径, 预取), `fix` (Invoker 参数类型), 生成 README; 其他语言由维护者同步 (记忆: 6.8.0 仅重写 zh-Hans); 该文件有他人未提交改动时只写草稿交维护者. (DOCS) (DOCS 2026-10-29: `.changelog/lang_zh-Hans.json`, `README.md`, `.readme/README-zh-Hans.md` 与 `CHANGELOG*.md` 仍有他人未提交的改动, 未改; zh-Hans 终稿 (新增 3 feature + 2 fix + 5 improvement, 改写 6.8.0 已有的 2 feature + 1 improvement) 写在会话记录 2026-10-29 本会话条目 "P4.1 changelog 终稿 (待维护者写入)"; 预取 (Q12 未采用) 不列)
 - [x] P4.2 文档仓库 `AutoJs6-Documentation`: `api/uiSelectorType.md` 的 pickup / normalize / prefer 节, `api/uiObjectType.md` 的 detect 节, `api/dataTypes.md` 的 PickupResult (按注册表列出可用方法名) / DetectCompass, `api/automator.md` 的 setFlags 新标志与 explain 扩展; 运行 `generator/auto-generate-for-autojs6.bat`, 提交文档仓库与 Offline Docs 插件仓库 (按惯例). (DOCS) (DOCS 2026-10-29: 宿主 1842d7408 (注册表快照 `NodeMethodRegistrySnapshotTest` + `app/src/test/resources/node-method-registry.txt`, 206 个名称 / 218 个方法, 导出脚本 `tools/selector/registry_export.py`); 文档 d163293 (normalize / prefer 两节, findOnce / findOne / untilFindOne / pickup 的命中刷新, exists / find / findOnce(index) 不刷新 (Q19), 刷新失败立即重找 (Q20), 正则在 normalize 下的大小写 (Q18), 快路径在查找更贵的界面改遍历 (Q15 / Q17), pickup / detect 先查参数与只调注册表方法, `UiObjectInvokable` 的可调用方法清单由脚本生成, PickupResult 补 `##` / `$$` / `..` 与数组形式, setFlags 的 `!` 与默认标志, noFastPath / noRefreshOnHit, clearFlags, explain 新签名与字段, stats 的 refinds / fastPath) + 83c5368 (版本 169); 离线文档插件 774fb55 (`--verify-offline` 单测与 debug / release APK 门禁通过, VERSION_BUILD 207, 同时带上此前未打包的运行时支持表 / memory / speech 页); 字符串选择器 `prefer=a,b` 报错见附录 C Q21)
-- [ ] P4.3 d.ts 仓库 `AutoJs6-TypeScript-Declarations`: `aj6-int-selector.d.ts` 的 `Pickup.ResultType` 由 `any` 改为注册表派生的联合类型 (由 `NodeMethodRegistry` 导出清单, 生成脚本或测试输出), `normalize` / `prefer` 重载, `Auto.Flags` 新项; 同步 Ace Editor 插件的 `aj6-int-*.d.ts` 并运行 `:app:generateAutoJs6LspDeclarations`; 两个仓库版本号加一. (DOCS)
+- [x] P4.3 d.ts 仓库 `AutoJs6-TypeScript-Declarations`: `aj6-int-selector.d.ts` 的 `Pickup.ResultType` 由 `any` 改为注册表派生的联合类型 (由 `NodeMethodRegistry` 导出清单, 生成脚本或测试输出), `normalize` / `prefer` 重载, `Auto.Flags` 新项; 同步 Ace Editor 插件的 `aj6-int-*.d.ts` 并运行 `:app:generateAutoJs6LspDeclarations`; 两个仓库版本号加一. (DOCS) (DOCS 2026-10-29: 声明 0c4b188 (4.84.0: `normalize` / `prefer` 的全局函数, 链式方法与对象选择器键, `Selector.NormalizeOptions` / `Selector.PreferKey`; `Detect.ResultTypeFuncWithoutParams` / `ResultTypeFuncWithParams` 由 `tools/selector/registry_export.py` 从注册表快照生成 (206 个名称, 每个带参重载一个元组), `Pickup.ResultType` 补 `'##'` / `'$$'` / `'..'` 与数组形式; `auto.setFlags` 的 `!` 前缀, `noFastPath` / `noRefreshOnHit`, `clearFlags`, `explain` 两个重载与新字段, `stats` 的 `queries.refinds` / `fastPath`; 新 fixture `docs/smoke/selector-smoke.ts`; changelog 10 种语言); Ace 5847c8b (2.46.0, VERSION_BUILD 336: 三份 `aj6-int-*.d.ts` 副本, 补全索引与 `lib.autojs6.d.ts` 重生成, `:app:generateAutoJs6LspDeclarations` + `:app:verifyAutoJs6LspRuntime` 通过); 宿主 d8941cada (补全源 `tools/ace-completion/autojs6_indices.source.json`) 与 ffdd8c25c (生成块的换行格式); `check.py` 里 `auto.clearFlags` 的文档 / 声明 / Ace 缺口已消除, 剩余失败只有 `speech.speaker.*` (3-Macaw 主题); `MATRIX.md` 重生成未丢行, 已提交 a709e83a7 (2729 -> 2739 行: `UiSelector#` 186 -> 188, auto 行 Ace 列 37 -> 38, 另含已入库的 `speech.speaker` 8 行))
 - [ ] P4.4 示例: `app/src/main/assets-app/sample/无障碍服务/` 新增 "选择器规范化与候选偏好 [v6.8.0+].js", 更新 "选择器诊断与节点树导出 [v6.8.0+].js" 的 explain 用法; 真机运行一次. (DEVICE)
 - [ ] P4.5 通知 api-coverage 主题 (看板 `.claude/boards/api-coverage.md` 待决区追加一行): 本主题新增 / 变更的脚本 API 清单 (normalize, prefer, setFlags 新标志, explain 扩展, PickupResult 类型), 供其 P3.4 (automator / selector / UiObject 函数级差异) 对照. (DOCS)
 
@@ -413,3 +413,36 @@ P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `
     - 说明: P2 的 improvement 草稿 (含精确 id 条件的等待查询先经系统按 id 查找) 与本期 Q15 / Q17 是同一版本的同一功能, 按 AGENTS.md 更新日志第 1 条合并为最终行为: 在其括号前加 "在按 id 查找比遍历更费的界面上 (例如 AutoJs6 自己的悬浮窗) 自动改为遍历". 第三条的 "50 ms" 是 D9 的最小间隔, 固定间隔轮询的默认间隔也是 50 ms.
   - 待决: Q17 (度量, e8fe4494e), Q18 (normalize 下正则的大小写, 094f4b084), Q19 (`exists()` 不校验, 4acdced3d), Q20 (命中刷新失败后立即重找, 4acdced3d) 均已按推荐先行待确认.
   - 设备: 22120RN86C / OPD2413 留着 e8fe4494e 的调试包 (versionCode 5935), 工具写的新层偏好已恢复; G8441 已恢复原装 5835 并重新绑定无障碍服务.
+
+### 2026-10-29
+
+- P4 文档子会话 local_4368d82c (selector-p4-docs, Opus 5.5): P4.1-P4.3 勾选, 附录 C Q17-Q20 已决; 本地提交均未推送: 宿主 ffd0b4a58 (Q17-Q20 已决), 1842d7408 (注册表快照与导出脚本), a97e9012a (P4.2 勾选与 Q21), d8941cada (Ace 补全源), a709e83a7 (`MATRIX.md`), ffdd8c25c (导出格式), 以及本条所在的 roadmap 提交; 文档 d163293 + 83c5368 (版本 169); 离线文档插件 774fb55 (VERSION_BUILD 207); 声明 0c4b188 (4.84.0); Ace 5847c8b (2.46.0, VERSION_BUILD 336). 未用设备.
+  - 注册表导出 (可重复): JVM 用例 `NodeMethodRegistrySnapshotTest` 把 `NodeMethodRegistry.uiObject` 渲染为 `种类 名称(参数类型)` 排序后与 `app/src/test/resources/node-method-registry.txt` 比较 (218 个方法, 206 个名称: 控件自有 139, compat 只读 67), 不一致时写出 `app/build/node-method-registry.txt` 并失败 (有意改动注册表后用它覆盖快照); `py -3.12 -I tools/selector/registry_export.py [--check]` 读快照, 改写文档 `api/dataTypes.md` 与声明, Ace 两份 `aj6-int-selector.d.ts` 的生成块 (`--check` 只比较). 注册表相关源码 (`NodeMethodRegistry.kt` / `UiObject.kt` / `UiObjectActions.kt`) 自 e8fe4494e 未变; JVM 比 G8441 (API 28, 205 个名称) 多 `getExtraRenderingInfo`, 文档标 "(API 30+)" (Q16).
+  - 校验: 文档 `normalize-markdown.py --check`, `auto-generate.py --check` 与链接锚点检查; 离线文档 `auto-generate-for-autojs6.bat --verify-offline` (单测与 debug / release APK 门禁); 声明 `npm test`, `verify-runtime-declarations.mjs --ace`, `docs:test`; Ace `generate-editor-assets.mjs --check`, `test-completer`, Gradle 两个任务; 宿主 `tools/api-coverage/check.py` (见 P4.3).
+  - `MATRIX.md`: 本次在共享工作区 `check.py --matrix --write-matrix` 重生成未丢行 (2026-10-26 记录的约 400 行返回对象丢失已不再出现), 差异只有本主题的 `UiSelector#normalize` / `prefer` 两行, auto 行 Ace 列与已入库的 `speech.speaker` (c31ea30eeb) 8 行, 已提交 a709e83a7.
+  - 待决: 新登记 Q21 (字符串选择器中可变参数的键不按逗号拆分, 未先行; 文档已按 (2) 写明 `prefer` 在字符串选择器中只给一个键).
+  - P4.1 changelog 终稿 (待维护者写入): 写入 `.changelog/lang_zh-Hans.json` 的 v6.8.0, 然后按 AGENTS.md 更新日志第 8 条生成 zh-Hans 的 Markdown; 其他语言由维护者同步. 下列字符串已按 JSON 转义半角双引号, 可直接粘贴. 新增条目 (按分类, 插入位置见后):
+    ```json
+    "feature": [
+      "UiSelector#normalize 方法, 用于匹配前统一文本格式: 去除首尾空白, 忽略大小写, 全角转半角, 合并空白字符及 NFKC 兼容字符转换, 可只启用其中几项 (作用于 text/desc/content 系列条件, id/className/packageName 只去除首尾空白与忽略大小写), 并支持全局方法, 对象选择器及选择器字符串语法 (例如 text('确定').normalize() 也能匹配 \" 确定 \")",
+      "UiSelector#prefer 方法, 用于多个控件符合条件时按偏好选取单个结果, 偏好可选 visible (对用户可见)/clickable/enabled/center (靠近屏幕中心)/area (面积大)/top (靠上), 按给出的顺序依次比较, 并支持全局方法及对象选择器写法 (例如 text('确定').prefer('visible', 'clickable').findOne())",
+      "auto.clearFlags 方法, 用于清除 auto.setFlags 设置的标志; auto.setFlags 支持在标志名前加 `!` 以清除该标志 (例如 auto.setFlags(['!eventAssistedPolling']))"
+    ],
+    "fix": [
+      "UiObject#showTooltip/hideTooltip 在没有提示文字 (tooltip) 的控件上执行时 (含选择器, 控件集合及 pickup/detect 的同名调用), 控件所在的应用 (包括 AutoJs6 自身) 崩溃的问题 (现在控件不支持该动作时不执行并返回 false)",
+      "pickup/detect 以数组形式调用控件的带参方法 (例如 ['sibling', 1], ['offset', 1]) 时报 \"未知结果类型\" 的问题"
+    ],
+    "improvement": [
+      "等待控件出现的选择器查询 (findOne/untilFind/untilFindOne/waitFor 等) 含精确 id 条件时, 先经系统按 id 查找判断控件是否已出现, 不再每次遍历整个控件树, 等待期间的 CPU 占用降低; 在按 id 查找比遍历更费的界面上 (例如 AutoJs6 自己的悬浮窗) 自动改为遍历 (auto.setFlags(['noFastPath']) 可关闭, auto.stats 的 fastPath 记录命中与回退次数)",
+      "选择器的各个条件按开销从低到高判断, 含正则或 filter 函数的选择器在其他条件不满足时不再执行正则匹配或脚本函数",
+      "选择器的单个结果 (findOnce/findOne/untilFindOne 及 pickup 的单个控件结果) 返回前先刷新控件, 控件已从界面消失时重新查找, 不再返回已关闭的对话框中的控件 (find/exists/findOnce(index) 不刷新; auto.setFlags(['noRefreshOnHit']) 可关闭, auto.stats 的 queries.refinds 记录重新查找的次数)",
+      "pickup/detect 的参数错误消息指明函数名与参数名, 结果类型写错时列出最多 5 个相近的写法; 全局方法 pickup/detect 在查找控件之前检查全部参数",
+      "pickup/detect 的结果类型只调用控件 (UiObject) 的方法与 AccessibilityNodeInfoCompat 的无参只读方法, AccessibilityNodeInfoCompat 的 setter, getChild, findAccessibilityNodeInfosByText 等不再作为结果类型 (改报未知结果类型并列出相近写法; 获取子控件使用 child) (参阅 项目文档 > [控件可调用方法](https://docs.autojs6.com/#/dataTypes?id=uiobjectinvokable))"
+    ]
+    ```
+    - 改写 6.8.0 已有条目 (按原文查找, 同一版本的同一功能合并为最终行为, AGENTS.md 更新日志第 1 条):
+      - feature `auto.explain/dump 方法及 auto.stats 对象, 用于选择器诊断, 节点树导出及查询耗时统计` -> `auto.explain/dump 方法及 auto.stats 对象, 用于选择器诊断, 节点树导出及查询耗时统计; auto.explain 可传入罗盘与结果类型, 报告说明单个结果选取的控件, 罗盘每一步到达的控件及结果类型对应的方法 (参阅 示例代码 > 无障碍服务 > 选择器诊断与节点树导出)`
+      - feature `布局分析支持 \"复制为选择器\", 将关键词, 字段条件, 筛选配置及框选区域转换为链式选择器` -> `布局分析支持 \"复制为选择器\" 与 \"复制为 pickup\", 将关键词, 字段条件, 筛选配置及框选区域转换为链式选择器或 pickup({...}) 形式` (两个按钮都在搜索结果对话框 `SearchResultsDialog`)
+      - improvement `选择器及 Flow 等待支持事件辅助轮询, 无障碍事件到达时提前重试 (通过 auto.setFlags 的 eventAssistedPolling 标志启用)` -> `选择器查询 (findOne/untilFind/untilFindOne/waitFor 等), 控件的等待方法及 Flow 等待默认启用事件辅助轮询, 无障碍事件到达时提前重试, 两次检查至少间隔 50 ms, 界面静止时 CPU 占用明显降低 (auto.setFlags(['!eventAssistedPolling']) 或 auto.clearFlags(['eventAssistedPolling']) 恢复固定间隔轮询)`
+    - 插入位置 (AGENTS.md 更新日志第 5 条, 相关条目相邻): normalize / prefer 接在 feature `UiSelector#findIterator 方法, ...` 之后; clearFlags 接在 feature `auto.setFlags 方法支持 appWindowsFallback 标志, ...` 之后; 两条 fix 接在 fix `UiObject#compass 及 pickup/detect 方法的罗盘参数解析与结果返回异常` 之后; 五条 improvement 接在改写后的事件辅助轮询条目之后.
+    - 合并与取舍: 会话记录中 P1 / P2 / P3 与 Q8 / Q9 小卡的草稿已合并: P2 快路径与 Q15 / Q17 的自适应合为一条; P3 的事件辅助默认开, explain 扩展与 "复制为 pickup" 并入 6.8.0 已有的同一功能条目; P1 参数错误消息去掉 "新脚本模块层开启时" (开关已删除). 不列: 预取 (Q12 未采用); Q9 (集合写法失效) 与 Q16 (API 24-29 上注册表建立失败) 只出现在 6.8.0 的开发构建 (`PickResultType` 2026-09-06 引入, `NodeMethodRegistry` 本主题 P1 引入); 字符串选择器 `prefer=a,b` 待 Q21 拍板. showTooltip 的缺陷自 6.2.0 起存在, `['sibling', 1]` 的缺陷在 v6.7.0 已存在, 两条 fix 保留.
