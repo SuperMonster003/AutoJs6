@@ -16,12 +16,12 @@ const shell=checker.getSymbolsInScope(source,ts.SymbolFlags.Namespace).find(x=>x
 const symbols=checker.getExportsOfModule(shell);
 const members=name=>checker.getPropertiesOfType(checker.getDeclaredTypeOfSymbol(symbols.find(x=>x.name===name))).map(x=>x.name).sort();
 const read=p=>fs.readFileSync(path.join(host,p),'utf8');
-const native=read('app/src/main/java/org/autojs/autojs/runtime/api/augment/shell/ShellProcess.kt');
+const native=read('app/src/main/java/org/autojs/autojs/runtime/api/modules/shell/ShellProcess.kt');
 const exports=[...native.matchAll(/(?:function|listenerFunction|defineProperty)\("([^"]+)"/g)].map(m=>m[1]).sort();
 assert.equal(exports.length,25);assert.deepEqual(members('Process'),exports,'Shell.Process differs from the actual script object');
 const options=read('app/src/main/java/org/autojs/autojs/runtime/api/shell/ShellPipes.kt').match(/OPTION_KEYS = setOf\(([^)]*)\)/)[1];
 const keys=[...options.matchAll(/"(\w+)"/g)].map(m=>m[1]).sort();
-assert.deepEqual(members('Options'),keys);assert.deepEqual(members('SpawnOptions'),keys.filter(k=>k!=='cmd'));const defaults=read('app/src/main/java/org/autojs/autojs/runtime/api/augment/shell/Shell.kt').match(/DEFAULT_OPTION_KEYS = setOf\(([^)]*)\)/)[1];
+assert.deepEqual(members('Options'),keys);assert.deepEqual(members('SpawnOptions'),keys.filter(k=>k!=='cmd'));const defaults=read('app/src/main/java/org/autojs/autojs/runtime/api/modules/shell/Shell.kt').match(/DEFAULT_OPTION_KEYS = setOf\(([^)]*)\)/)[1];
 assert.deepEqual(members('DefaultOptions'),[...defaults.matchAll(/"(\w+)"/g)].map(m=>m[1]).sort());
 const events=[...native.matchAll(/const val EVENT_\w+ = "([^"]+)"/g)].map(m=>m[1]).sort();assert.deepEqual(members('ProcessEventMap'),events);
 if(!skipAce)for(const name of ['aj6-int-shell.d.ts','aj6-int-shizuku.d.ts','aj6-int-init.d.ts']){
