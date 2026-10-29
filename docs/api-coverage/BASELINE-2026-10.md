@@ -775,3 +775,48 @@ d.ts (TS fa26b8b / 8f8ec07):
 ### 11.5 待决
 
 - Q104 新增 pending 一次性计入基线 (已按推荐先行), Q105 行 id 与契约来源 (已按推荐先行), Q106 compose 其余返回对象 (约 42 行, 需拍板). 见附录 C.
+
+## 12. P5.2f-1 imgui 纳入矩阵 / 基线 / 门禁 (2026-10-30, 子会话 api-cov-p5-2f1)
+
+### 12.1 做了什么
+
+- Q115 (a) 拆出的第一步: 宿主模块 imgui (61317ec4d, 插件 R1.1 的 dp / px / density 25eac064a) 的 464 个 KSP 安装项进分母. 463 个公开导出在 Node main / Worker / Bun 三列 pending, 一次性计入 pending-baseline.json (Q122); `imgui.__pluginId` 记 `policy.json` internalExports 与 internal-exports 规则 (Q123); Node / Bun 终态待 P5.2f-2 定 (Q124). 构造出的对象 (会话, DrawList 等) 未登记返回对象, 随 P5.2f-2.
+- 名称门禁暂缓 (Q121): `policy.json` 新键 `deferredNameGate` 列 imgui. check.py 不把该根的 "Missing documentation name" 计为失败, verify-surfaces.mjs 把该根 (含 `$imgui`) 的 d.ts / Ace 失败路径记为 `deferred`; `summary.json` `deferredNameGate` 计数 (导出 464, 缺文档名 463, 失败路径 465); 该根无缺口或无导出时这一项本身失败, P5.2f-2 收尾必须删除. MATRIX.md 在状态汇总下写一行备注, doc / dts / ace 列照实记 none.
+- `pending-baseline.json` 新增 `decisions` 列表, 重写时保留, `check.py --pending-decision "..."` 可重复追加; 现记 Q104 (P5.2c, ComposeNode# 24 格), Q114 (a) (speech 6 行 x 3 列, P3.2b 写入), Q122 (imgui).
+- Q118 (a): runtime-policy.json 新规则 `java-introspection` (util.class / className / getClassName, 理由 java-prototype, 附录 D D-11), 三列各 -3, util 页运行时表随之重生成.
+- 文档站原无 imgui 页: 新建最小页 api/imgui.md (标题 + 一句说明 + 生成的运行时支持表), 不进侧栏 / 目录, changelog 只写 util 表 (Q125).
+- 顺带修两个原本失败的结构脚本 (与 imgui 无关): `check-runtime-speech.mjs` (在 CI 内) 跳过基线中 Node main 仍 pending 的 speech 行 (Q114 的 6 个函数, 基线去掉后恢复检查); `check-runtime-bridges.mjs` (不在 CI) 为 P3.2b 后 recorder 门面依赖的共享 JS 工具核心补桩.
+
+### 12.2 前后数字
+
+| 项 | 改动前 (宿主 23fa91217, MATRIX e50f26694) | 改动后 (宿主 150b4dbce) |
+| --- | --- | --- |
+| 矩阵行 (显式导出 / 原型成员 / 返回对象成员) | 2946 (1438 / 205 / 1303) | 3410 (1902 / 205 / 1303) |
+| pending Node 主线程 / Worker / Bun | 477 / 546 / 566 | 937 / 1006 / 1026 (imgui 各 +463, Q118 各 -3) |
+| not-portable Node 主线程 / Worker / Bun | 1041 / 1044 / 1038 | 1045 / 1048 / 1042 (各 +4: imgui.__pluginId 1, Q118 3) |
+| 文档列 none / mention / heading | 8 / 268 / 2670 | 472 / 268 / 2670 |
+| d.ts 列 none / name / arity | 9 / 1774 / 1163 | 473 / 1774 / 1163 |
+| Ace 列 none / semantic / static | 414 / 898 / 1634 | 878 / 898 / 1634 |
+| 文档运行时支持表 | 85 页, 表内 2275 行, 返回对象小表 671 个成员 | 86 页 (+imgui), 2739 行, 671 个成员 |
+| Ace 运行时查询 | 3703 | 3703 (imgui 全 pending, 不出查询) |
+
+- 名称级: 文档 heading 1430, missing 463 全在 imgui (暂缓); 查询路径 2138, 失败路径 465 全在 imgui / `$imgui` (暂缓); 返回对象 47 个, failingMembers 0; arity fail 0.
+
+### 12.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p5-2f1-h3` (`git -c core.autocrlf=false archive`, 宿主 23fa91217 + 本条目工具改动 = 5cf22077f, 文档 62af947 + 本条目改动, TS 6c93f5d, Ace 81e6fe6, Node a4309516 (P3.1b 的 1e69e422 之前, 与 P5.2c 快照相同), Bun 5e2f9e1, Bundled Libraries / Macaw / Folio / Stamp HEAD). 宿主 KSP 在副本内跑 (`--no-daemon --max-workers=2`, 不去掉 imgui).
+- `check.py --source ksp --matrix --strict-arity --docs-support` (含 Ace) 退出码 0, failures 空; MATRIX.md 与 pending-baseline.json current, docs-support 86 页 current, uncovered 0 / 0.
+- 单元测试 96 项通过 (跳过 3); `tools/api-coverage/check-*.mjs` 28 个全部通过 (改动前 bridges / speech 两个失败); Ace `generate-runtime-api-queries.mjs --check` 与 `verify-runtime-api-coverage.mjs --fresh` 通过; TS `sync-runtime-declarations.mjs --check --ace`, `verify-runtime-declarations.mjs`, `verify-api-coverage.mjs` 通过; 文档 `normalize-markdown.py --check` changed=0, `test-runtime-support.js` 通过, `auto-generate.py --sync-offline` 生成 2 个新文件 (imgui.html / imgui.json), 插件资源 +1 / ~4.
+- 共享 HEAD 全量 (Node a1f09612) 仍有 P3.1b 尚未重生成的派生文件失败 (与 P5.2c 快照 A 相同, 不属本条目).
+- imgui R 系列 (imgui 看板) 之后每加一个名称, 都要重跑 `check.py --write-matrix --write-pending-baseline --allow-new-pending` (新格归 Q122) 与文档 `runtime-support.js`, 否则 check.py 失败; Q124 (b) 可免去基线一步.
+
+### 12.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 5cf22077f | check.py / verify-surfaces.mjs / runtime_matrix.py 名称门禁暂缓与基线 decisions, policy.json / runtime-policy.json, 两个结构脚本, 测试, README |
+| 宿主 | 150b4dbce | MATRIX.md 与 pending-baseline.json |
+| 文档 | 5ca5ea7 | imgui 最小页, util 表, changelog / progress |
+| 文档 | 4950012 | 生成物 (HTML / JSON / 搜索索引) |
+| Offline Docs | ead196f | 同步 5 个文件, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, ROADMAP 附录 C (Q83 状态, Q114 / Q115 / Q117 / Q118 / Q120 / Q121-Q125) 与附录 D D-11, P5.2 落点, PLUGIN-APIS 8.2 拆 P5.2f-1 / P5.2f-2 |
