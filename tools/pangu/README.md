@@ -4,8 +4,12 @@ The Bundled Libraries plugin (AutoJs6-Plugin-Bundled-Libraries) carries the text
 [pangu.js 10.1.0](https://github.com/vinta/pangu.js/tree/v10.1.0),
 published as [pangu 10.1.0 on npm](https://www.npmjs.com/package/pangu/v/10.1.0).
 Since augment P5.2 the AutoJs6 APK no longer has it; this build writes the
-module to the host's test resources (`app/src/test/resources/script-modules/bundled-libraries`),
-where the Rhino module tests read it.
+module to the plugin's `app/src/main/assets/modules`, where the plugin's Rhino
+module tests (`PanguModuleTest`) read it (augment appendix C Q182).
+The output directory is, in this order, the one given by `--out <dir>`, the
+`AUTOJS6_BUNDLED_LIBRARIES_MODULES` environment variable, or
+`../../../AutoJs6-Plugin-Bundled-Libraries/app/src/main/assets/modules`
+(a checkout of the plugin next to this repository).
 `package-lock.json` pins the npm tarball integrity and the build tools.
 
 The upstream browser bundle contains class syntax that the bundled Rhino engine
@@ -27,9 +31,11 @@ From this directory:
 npm ci --ignore-scripts
 npm run build
 npm run check
+npm run build -- --out D:/work/AutoJs6-Plugin-Bundled-Libraries/app/src/main/assets/modules
 ```
 
-Gradle consumes the committed files and does not need npm or a network request
-to load `pangu`. When upgrading, update the pinned version and lockfile, rebuild,
-run the Rhino module tests, copy `pangu.min.js` and `pangu.LICENSE.txt` to the
-plugin's `app/src/main/assets/modules`, and synchronize the declarations and API docs.
+The plugin's Gradle build consumes the committed files and does not need npm or a
+network request to load `pangu`. When upgrading, update the pinned version and
+lockfile, rebuild into the plugin, run the plugin's unit tests
+(`gradlew :app:testDebugUnitTest`), commit the module files there, and synchronize
+the declarations and API docs.

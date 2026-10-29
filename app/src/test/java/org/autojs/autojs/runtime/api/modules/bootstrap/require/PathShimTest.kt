@@ -2,47 +2,35 @@ package org.autojs.autojs.runtime.api.modules.bootstrap.require
 
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport
 import org.autojs.autojs.runtime.api.modules.HostModuleTestSupport.DeviceCases
-import org.autojs.autojs.runtime.api.modules.bootstrap.BootstrapSides
+import org.autojs.autojs.runtime.api.modules.differential.DifferentialRhino
 import org.junit.After
-import org.junit.Before
 import org.junit.Test
-import org.mozilla.javascript.ScriptableObject
 
 /**
- * The Node `path` module of the Bundled Libraries plugin (`path.js`, in the APK's `assets/modules` until P5.2; the test
- * resources keep a copy), which both states load for `require('path')` / `require('node:path')` (P3.7, appendix C Q6),
- * against `path.posix` of Node.js 24.15: the expected values are Node's results rendered as `DifferentialRhino.render`
- * does. With the Rhino jar before `0e4f95bb2` a const in a loop body of a function kept the value of the first iteration,
- * so `path.join('a', 'b', 'c')` gave "a/a/a" in both states; dirname, basename, extname, parse and format followed Node
- * only for a normalized path without a trailing separator, format normalized its result, and a backslash was a separator
- * (appendix C Q131). The device cases run the same expressions through `require('path')` (`PathShimTest.json`), so they
- * need the plugin on the device.
+ * `require('path')` / `require('node:path')` of both states loads `path.js` of the Bundled Libraries plugin (P3.7,
+ * appendix C Q6), which follows `path.posix` of Node.js 24.15 (appendix C Q131). The plugin repository tests the file
+ * itself on Rhino (`PathModuleTest`, moved there by appendix C Q182); the host keeps what needs its own Rhino build or a
+ * device. With the Rhino jar before `0e4f95bb2` a const in a loop body of a function kept the value of the first
+ * iteration, so `path.join('a', 'b', 'c')` gave "a/a/a" in both states. The device cases run the expressions of the
+ * plugin test, with Node's results rendered as `DifferentialRhino.render` does, through `require('path')`
+ * (`PathShimTest.json`), so they need the plugin on the device.
  *
- * zh-CN: Bundled Libraries 插件的 Node path 模块 (path.js, P5.2 之前在 APK 的 assets/modules 中; 测试资源保留副本), 两态的 require('path') /
- * require('node:path') 都加载它 (P3.7, 附录 C Q6), 对照 Node.js 24.15 的 path.posix: 期望值是 Node 的结果按 DifferentialRhino.render 的规则渲染.
- * 0e4f95bb2 之前的 Rhino jar 中, 函数内循环体里的 const 保持首轮的值, 因此两态的 path.join('a', 'b', 'c') 都是 "a/a/a"; dirname, basename, extname,
- * parse 与 format 只在路径已规范化且没有末尾分隔符时与 Node 一致, format 会规范化结果, 反斜杠被当作分隔符 (附录 C Q131). 设备用例经 require('path') 运行同一组表达式 (PathShimTest.json), 因此设备上需要安装插件.
+ * zh-CN: 两态的 require('path') / require('node:path') 都加载 Bundled Libraries 插件的 path.js (P3.7, 附录 C Q6), 它对照 Node.js 24.15 的 path.posix
+ * (附录 C Q131). 文件本身由插件仓库在 Rhino 上测试 (PathModuleTest, 附录 C Q182 移去); 宿主保留需要自身 Rhino 构建或设备的部分.
+ * 0e4f95bb2 之前的 Rhino jar 中, 函数内循环体里的 const 保持首轮的值, 因此两态的 path.join('a', 'b', 'c') 都是 "a/a/a". 设备用例经 require('path')
+ * 运行插件测试的同一组表达式 (期望值是 Node 的结果按 DifferentialRhino.render 的规则渲染, PathShimTest.json), 因此设备上需要安装插件.
  */
 class PathShimTest {
 
-    private lateinit var sides: BootstrapSides
-
-    @Before
-    fun setUp() {
-        sides = BootstrapSides()
-        ScriptableObject.putProperty(sides.ktGlobal, "path", sides.module(sides.ktScope, sides.plugin("path.js")))
-    }
+    private val rhino = DifferentialRhino()
 
     @After
-    fun tearDown() = sides.close()
-
-    @Test
-    fun followsNodePathPosix() = HostModuleTestSupport.check(sides.rhino, CASES)
+    fun tearDown() = rhino.close()
 
     // What normalizeArray relies on: a const in a loop body of a function is bound again on every iteration (0e4f95bb2).
     @Test
     fun constInLoopBodiesOfFunctionsIsBoundEveryIteration() = HostModuleTestSupport.check(
-        sides.rhino,
+        rhino,
         listOf(
             "(function (a) { var r = []; for (let i = 0; i < a.length; i += 1) { const x = a[i]; r.push(x); } return r.join(); })(['a', 'b', 'c'])" to "\"a,b,c\"",
             "(function (a) { var r = [], i = 0; while (i < a.length) { const x = a[i]; r.push(x); i += 1; } return r.join(); })(['a', 'b', 'c'])" to "\"a,b,c\"",
@@ -59,7 +47,8 @@ class PathShimTest {
 
         private val DEVICE = DeviceCases("PathShimTest", "path.js of the Bundled Libraries plugin against Node path.posix (augment-misc, appendix C Q131)")
 
-        // Expressions with `path` the module and their rendering on Node 24.15 (a backslash is shown as "|").
+        // Expressions with `path` the module and their rendering on Node 24.15 (a backslash is shown as "|"), the same as
+        // in PathModuleTest of the plugin repository.
         private val CASES = listOf(
             """path.join('a', 'b', 'c')""" to """"a/b/c"""",
             """path.join('/a', 'b', '../c')""" to """"/a/c"""",
