@@ -21,4 +21,4 @@ const declaration=fs.readFileSync(path.join(node,'docs/nodejs/types/autojs6-node
 const body=declaration.split('interface ShellModule {')[1].split('\n    }')[0];const declared=[...body.matchAll(/^\s+(\w+)\(/gm)].map(x=>x[1]).sort();
 assert.deepEqual(Object.keys(api.shell).sort(),declared);assert.equal(typeof api.shizuku,'function');
 for(const name of ['exec','spawn','open','checkAccess','getAccess','requestPermission'])assert.equal(typeof api.shizuku[name],'function');
-console.log('Shell coverage: 10 native routes, 10 shell methods, callable Shizuku, shared Node/Worker/Bun factory and types');
+console.log(`Shell coverage: 10 native routes, ${declared.length} shell methods, callable Shizuku, shared Node/Worker/Bun factory and types`);

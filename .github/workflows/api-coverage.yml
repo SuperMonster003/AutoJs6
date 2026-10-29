@@ -171,6 +171,7 @@ jobs:
           node tools/api-coverage/check-runtime-ai-agent.mjs
           node tools/api-coverage/check-runtime-js-tools.mjs
           node tools/api-coverage/check-runtime-files-data.mjs
+          node tools/api-coverage/check-runtime-app-shell.mjs
           node tools/api-coverage/check-bun-js-tools.mjs
           node tools/api-coverage/check-bun-files-data.mjs
           node tools/api-coverage/check-bun-app-shell.mjs
