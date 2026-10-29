@@ -60,6 +60,7 @@
         "ui.inflate 方法支持编译后的 XML TSX 布局及其 onClick 回调绑定",
         "flow 模块及 waitAsync 全局方法, 用于异步等待与链式操作, 支持分支, 循环, 超时, 重试及取消 (参阅 项目文档 > [流程](https://docs.autojs6.com/#/flow))",
         "terminal 全局对象, 用于终端会话管理, 可见执行与输出监听, 支持等待输出及退出码 (需要 3-Shell Terminal 插件) (参阅 示例代码 > 终端)",
+        "imgui 全局对象, 用于以 Dear ImGui 构建悬浮窗及全屏即时模式界面, 插件启用后直接使用, 首次调用成员时加载插件; 原有 plugins.load(\"io.github.supermonster003.autojs6.plugin.imgui\") 写法返回同一对象 (需要 ImGui 插件)",
         "shell.spawn/shizuku.spawn 方法, 用于以进程运行命令并实时读取输出, 支持逐行读取, output/errorOutput/exit 事件, 写入 stdin, 限时等待及结束进程 (连同其启动的子进程), 脚本结束时自动结束进程 (adb 选项与 shizuku.spawn 需要 Shizuku, root 选项需要 Root 权限)",
         "Shell 构造器支持选项对象 { cmd, root, adb, pty, env, cwd } (兼容 Auto.js Pro), 以此创建的 Shell 基于管道运行并提供 getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult 方法, 可经 Shizuku (adb 选项) 运行, 其 execAndWaitFor 按退出码标记分割每条命令的输出",
         "shell.spawn 及选项构造的 Shell 支持 pty 选项, 用于在伪终端上运行命令, 使 getevent/awk 等在管道上缓冲输出的程序逐行输出 (stderr 并入 stdout)",

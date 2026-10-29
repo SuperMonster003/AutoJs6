@@ -1089,6 +1089,18 @@
         "$memory"
       ],
       "callable": false
+    },
+    {
+      "module": "imgui",
+      "class": "imgui.ImguiModule",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/imgui/ImguiModule.kt",
+      "operation": "module",
+      "target": "target",
+      "aliases": [
+        "imgui",
+        "$imgui"
+      ],
+      "callable": false
     }
   ],
   "records": [

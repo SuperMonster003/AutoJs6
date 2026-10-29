@@ -66,7 +66,7 @@ class ScriptModuleInstallsTest {
             DifferentialRhino().use { rhino -> compare(rhino, case, module) }
         }
         assertTrue("Install hooks differ from their declarations:\n" + failures.joinToString("\n"), failures.isEmpty())
-        assertEquals("declared install names", 101, names)
+        assertEquals("declared install names", 101 + 459, names)
     }
 
     @Test
@@ -207,6 +207,9 @@ class ScriptModuleInstallsTest {
             Case("epub", prepare = service(EpubService::class.java to "epub")),
             Case("flow", before = listOf("global")),
             Case("gallery", prepare = service(GalleryService::class.java to "gallery")),
+            // The ImGui plugin's API names (ImguiNames): forwarding functions and getters, defined without the plugin.
+            // zh-CN: ImGui 插件的 API 名称 (ImguiNames): 转发函数与 getter, 定义时不需要插件.
+            Case("imgui"),
             Case("installer", prepare = service(InstallerService::class.java to "installer")),
             Case("mail", prepare = service(MailService::class.java to "mail")),
             Case("mediainfo"),

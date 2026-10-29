@@ -113,6 +113,9 @@ CLAUDE.md
 !/tools/rhino/
 !/tools/rhino/**
 /tools/rhino/__pycache__/
+!/tools/imgui/
+!/tools/imgui/**
+/tools/imgui/__pycache__/
 
 /gradle/wrappers/backup/
 

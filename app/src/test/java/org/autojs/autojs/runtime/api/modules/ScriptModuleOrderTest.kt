@@ -25,10 +25,10 @@ class ScriptModuleOrderTest {
 
     @Test
     fun everyAugmentCallIsListedOnceWithItsSubModulesAfterIt() {
-        assertEquals(93, order.size)
+        assertEquals(94, order.size)
         assertEquals("duplicates in ORDER", order.size, order.toSet().size)
         assertEquals(order.filter { '.' !in it }, topLevel)
-        assertEquals(76, topLevel.size)
+        assertEquals(77, topLevel.size)
         var current = ""
         order.forEach { name ->
             if ('.' in name) assertEquals("$name must follow its parent", current, name.substringBefore('.')) else current = name
@@ -110,8 +110,11 @@ class ScriptModuleOrderTest {
         private const val JAVASCRIPT_ENGINE = "src/main/java/org/autojs/autojs/engine/JavaScriptEngine.java"
         private const val KEYS_ORDER = "# keys order:"
 
-        /** Top-level modules added after the device baseline 5586: `memory` (docs/memory/ROADMAP.md P5.1). */
-        private val ADDED_AFTER_BASELINE = listOf("memory")
+        /**
+         * Top-level modules added after the device baseline 5586: `memory` (docs/memory/ROADMAP.md P5.1), `imgui` (the
+         * ImGui plugin as a host module, docs/api-coverage/PLUGIN-APIS.md Q2-1).
+         */
+        private val ADDED_AFTER_BASELINE = listOf("memory", "imgui")
     }
 
 }

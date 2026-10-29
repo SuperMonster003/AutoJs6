@@ -36,7 +36,7 @@ object ScriptModuleLayer {
         "files", "files.batchRename", "crypto", "RootAutomator", "engines", "floaty", "storages", "device", "powerManager", "settings",
         "recorder", "toast", "media", "sensors", "base64", "notice", "notice.channel", "shizuku", "opencc", "mime", "sysprops",
         "sqlite", "zip", "nanoid", "pinyin", "pinyin4j", "mediainfo", "mail", "installer", "epub", "gallery", "terminal",
-        "speech", "speech.models", "speech.speaker", "compose", "memory",
+        "speech", "speech.models", "speech.speaker", "compose", "memory", "imgui",
     )
 
     /** The top-level entries of [ORDER], the names `ScriptRuntime.augment()` mounts in turn. */
