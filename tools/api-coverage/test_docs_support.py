@@ -27,7 +27,7 @@ MATRIX = {'schema': 'autojs6-runtime-matrix-v1', 'dataSource': {'kind': 'ksp'}, 
 ]}
 
 STUB = '''
-const report = {matrix: process.argv[5], dataSource: "ksp", mode: "check", problems: [], uncovered: ["global"],
+const report = {matrix: process.argv[5], dataSource: "ksp", mode: "check", problems: [], uncovered: ["global"], uncoveredObjects: ["Thing#"],
   pages: [{page: "api/demo.md", status: "current", roots: ["demo"], rows: Number(process.env.STUB_ROWS), differences: 0, line: 3}]};
 if (process.env.STUB_PROBLEM) { report.pages.push({page: "api/notes.md", status: "problem"}); report.problems.push("api/notes.md: line 3: malformed runtime-support marker"); }
 if (process.env.STUB_EXIT) { console.error("boom"); process.exit(Number(process.env.STUB_EXIT)); }
@@ -94,7 +94,7 @@ class CheckTest(unittest.TestCase):
         self.stub(4)
         summary, failures = docs_support.check(self.root, self.matrix, output=self.root)
         self.assertEqual(failures, [])
-        self.assertEqual((summary['pages'], summary['rows'], summary['coveredRoots'], summary['uncoveredRoots']), (1, 4, 1, 1))
+        self.assertEqual((summary['pages'], summary['rows'], summary['coveredRoots'], summary['uncoveredRoots'], summary['uncoveredObjects']), (1, 4, 1, 1, 1))
         self.assertTrue((self.root / 'docs-support.json').is_file())
         self.stub(3)
         _, failures = docs_support.check(self.root, self.matrix)
@@ -124,13 +124,21 @@ class CheckTest(unittest.TestCase):
         self.assertIn('api/demo.md: runtime-support block differs from the matrix', failures[0])
         subprocess.run([NODE, str(self.root / docs_support.GENERATOR), '--matrix', str(self.matrix), '--api', str(self.root / 'api')], check=True, capture_output=True)
         summary, failures = docs_support.check(self.root, self.matrix, require_all=True)
-        self.assertEqual(failures, ['Documentation runtime support: module roots without a runtime-support block: global'])
-        self.assertEqual((summary['byStatus'], summary['rows']), ({'current': 1}, 4))
+        self.assertEqual(failures, ['Documentation runtime support: module roots without a runtime-support block: global',
+                                    'Documentation runtime support: returned objects shown by no runtime-support block '
+                                    '(a root of their own, or the module block of their page): Thing#'])
+        self.assertEqual((summary['uncoveredObjects'], summary['byStatus'], summary['rows']), (1, {'current': 1}, 4))
         text = page.read_text(encoding='utf-8')
         self.assertIn('`demo.sub`', text)
         stripped = docs_support.strip_blocks(text).splitlines()
         self.assertEqual(len(stripped), len(text.splitlines()))
         self.assertEqual([line for line in stripped if line], ['# Demo', 'Intro.'])
+        # A type page block shows the object.
+        (self.root / 'api' / 'thingType.md').write_text('# Thing\n\n<!-- runtime-support:begin Thing# -->\n<!-- runtime-support:end -->\n', encoding='utf-8')
+        subprocess.run([NODE, str(self.root / docs_support.GENERATOR), '--matrix', str(self.matrix), '--api', str(self.root / 'api')], check=True, capture_output=True)
+        summary, failures = docs_support.check(self.root, self.matrix, require_all=True)
+        self.assertEqual(failures, ['Documentation runtime support: module roots without a runtime-support block: global'])
+        self.assertEqual((summary['uncoveredObjects'], summary['byStatus'], summary['rows']), (0, {'current': 2}, 5))
 
 
 if __name__ == '__main__':

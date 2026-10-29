@@ -79,7 +79,8 @@ def main():
     parser.add_argument("--node", type=Path, help="Node runtime checkout for --matrix (default: sibling AutoJs6-Plugin-NodeJs-Runtime)")
     parser.add_argument("--bun", type=Path, help="Bun runtime checkout for --matrix (default: sibling AutoJs6-Plugin-Bun-Runtime)")
     parser.add_argument("--docs-support", action="store_true",
-                        help="Also build runtime-matrix.json and fail when a documentation runtime support table differs from it (MATRIX.md is compared only with --matrix)")
+                        help="Also build runtime-matrix.json and fail when a documentation runtime support table differs from it, or a module root or returned object "
+                             "has none (MATRIX.md is compared only with --matrix)")
     args = parser.parse_args()
     if args.write_matrix and args.skip_ace:
         parser.error("--write-matrix needs the Ace column of MATRIX.md; drop --skip-ace (--matrix --skip-ace reports MATRIX.md as skipped)")
@@ -157,7 +158,8 @@ def main():
             matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN, host / runtime_matrix.PENDING_BASELINE)
             failures.extend(matrix_summary.pop("failures"))
         if args.docs_support:
-            docs_summary, docs_failures = docs_support.check(docs, output / "runtime-matrix.json", output)
+            # Since P2.5 every module root and returned object has a table on its page.
+            docs_summary, docs_failures = docs_support.check(docs, output / "runtime-matrix.json", output, require_all=True)
             failures.extend(docs_failures)
     summary = {
         "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),

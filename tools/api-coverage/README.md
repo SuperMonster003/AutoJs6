@@ -210,9 +210,12 @@ recorded in the JSON `sources`.
 ### In CI
 
 The `Script API coverage` workflow runs `check.py --source ksp --matrix
---strict-arity` (roadmap Q14 / Q16 (a)) and uploads `runtime-matrix.json` and
-`summary.json` as the `runtime-coverage-matrix` artifact (the whole report
-directory stays in `script-api-coverage`). It then checks, against the same
+--strict-arity --docs-support` (roadmap Q14 / Q16 (a), P2.5) and uploads
+`runtime-matrix.json` and `summary.json` as the `runtime-coverage-matrix` artifact
+(the whole report directory, `docs-support.json` included, stays in
+`script-api-coverage`). The documentation tables are checked against the
+documentation repository the job checks out (its default branch unless
+`documentation_ref` says otherwise). It then checks, against the same
 matrix, the Ace plugin's runtime completion (`generate-runtime-api-queries.mjs
 --check --host ../AutoJs6` and `verify-runtime-api-coverage.mjs --fresh`: every
 covered Node main / Worker / `$autojs` global / Bun entry must complete, a
@@ -227,7 +230,9 @@ host change to the exports or returned objects, makes the job fail until the
 derived files are regenerated and committed: `python tools/api-coverage/check.py
 --write-matrix` in the host (with `--write-pending-baseline` when cells stopped
 being pending), then `node tools/ace-lsp/generate-runtime-api-queries.mjs`
-in the Ace plugin (it reads the host report by default) when a covered entry changed.
+in the Ace plugin (it reads the host report by default) when a covered entry changed,
+and `node generator/runtime-support.js` (then its usual generation) in the
+documentation repository when a page's table changed.
 `--strict-arity` fails only on d.ts overloads disjoint from the implementation
 arity; `wider` / `narrower` stay warnings in `arity.json`.
 
@@ -451,8 +456,13 @@ else `AUTOJS6_DOCUMENTATION_ROOT`, else the sibling `AutoJs6-Documentation`.
 - The documentation name gate ignores block contents (`docs_support.strip_blocks`,
   line numbers kept), so a table never turns a missing name into a mention.
 - A block generated from the other export source (ksp / kotlin, recorded on its
-  second line) is `skipped`, as `MATRIX.md` is. A page without a block is not a
-  failure until P2.5 inserts the remaining pages.
+  second line) is `skipped`, as `MATRIX.md` is.
+- Every module root and returned object has a table since P2.5 (83 pages): the
+  check runs the generator with `--require-all`, so a module root without a block,
+  or an object whose first documentation page has neither its `<Object>#` root nor
+  a module block, fails (`uncoveredRoots` / `uncoveredObjects`). A new module or
+  returned object gets one with `node generator/runtime-support.js --insert
+  <page>:<root>` in the documentation repository.
 - After a matrix change that touches a page with a block, run
   `node generator/runtime-support.js` in the documentation repository (then its
   usual generation) and commit both repositories.

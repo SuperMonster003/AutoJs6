@@ -9,6 +9,8 @@ name gate ignores the blocks (`strip_blocks`): the tables name APIs without docu
 Prototype members (Q18) count as exports of their module. Returned object members (Q20 (a))
 belong to the object's first documentation page: a root `<Object>#` shows them on a type page,
 otherwise the module page's block lists the object in its "返回对象" table (`objectRows`).
+With `require_all` (check.py since P2.5) a module root without a block, or an object no block
+shows, fails too (the generator's `--require-all`).
 """
 from collections import Counter
 import json
@@ -87,6 +89,7 @@ def check(docs, matrix_path, output=None, require_all=False, node="node"):
         "differences": sum(page.get("differences") or 0 for page in report["pages"]),
         "coveredRoots": len([root for root in counts if not root.endswith("#")]) - len(report["uncovered"]),
         "uncoveredRoots": len(report["uncovered"]),
+        "uncoveredObjects": len(report.get("uncoveredObjects", [])),
         "requireAll": require_all,
     }
     return summary, failures
