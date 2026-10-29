@@ -154,7 +154,10 @@ def screen_settings(serial):
     """The home page of the system settings, restarted (-S) so that no sub-page is open; returns its package."""
     resolved = shell(serial, "cmd package resolve-activity --brief -a android.settings.SETTINGS").splitlines()
     component = resolved[-1].strip() if resolved else ""
-    adb(serial, "shell", "am", "start", "-S", "-W", "-a", "android.settings.SETTINGS")
+    started = adb(serial, "shell", "am", "start", "-S", "-W", "-a", "android.settings.SETTINGS")
+    if "Error" in started.stdout + started.stderr and "/" in component:
+        # API 28 (G8441): with -S, am does not resolve the implicit intent ("Intent does not match any activities").
+        adb(serial, "shell", "am", "start", "-S", "-W", "-n", component)
     time.sleep(3)
     return component.split("/")[0] if "/" in component else "com.android.settings"
 

@@ -1,15 +1,22 @@
-"""Runs the selector samples of the host on a device as they ship and checks their console output (ROADMAP selector P3.5,
-P4.4): "选择器诊断与节点树导出" (`explain`: the tallies of auto.explain, the single result, the compass trail and the result
+"""Runs the accessibility samples of the host on a device as they ship and checks their console output (ROADMAP selector
+P3.5, P4.4, P5.1): "选择器诊断与节点树导出" (`explain`: the tallies of auto.explain, the single result, the compass trail and the result
 type of the auto.explain(selector, compass, resultType) form with the fields of its result, the dump forms and
 auto.stats) and "选择器规范化与候选偏好" (`normalize`: normalize(...) in its overloads, options and forms, prefer(...) with
-each key, the key order, the compass step k and the forms); prints PASS / FAIL per check (no node text: the samples work
-on floaty windows of their own with synthetic texts, and only the check names are printed).
+each key, the key order, the compass step k and the forms); for the release gate (P5.1) also the other samples of the
+accessibility automation roadmap P6.4 ("流程 (Flow) 异步等待与链式动作", "工具集 表单填写与弹窗关闭", "工具集 列表滚动与采集",
+"字符串选择器与惰性迭代", "事件驱动等待") and the developer smoke test sample/accessibility/smoke-legacy-api.js (its own
+"N/N checks passed" summary). Prints PASS / FAIL per check (no node text: the samples work on floaty windows of their own
+with synthetic texts, and only the check names are printed; the smoke test works on the main screen of AutoJs6).
 
-Usage: py -3.12 -I tools/selector/device_sample_explain.py -s SERIAL [--samples explain normalize] [--show-lines]
-Needs the accessibility service of AutoJs6 running and the floaty permission; no taps (the samples go home first).
+Usage: py -3.12 -I tools/selector/device_sample_explain.py -s SERIAL [--samples explain normalize flow form list string
+    events smoke] [--show-lines]
+Needs the accessibility service of AutoJs6 running and the floaty permission; no taps (the samples go home first). The
+smoke test clicks a node and scrolls on the main screen of AutoJs6, and restarts the accessibility service only when
+AutoJs6 can do it unattended (root, secure settings or Shizuku), otherwise it skips those checks.
 """
 import argparse
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -68,24 +75,118 @@ NORMALIZE_CHECKS = [
     ("finished", ["完成"]),
 ]
 
+FLOW_CHECKS = [
+    ("chain pending", ["1. 链已建立, 当前状态: pending"]),
+    ("chain wait", ["1. 出现了: 加载完成"]),
+    ("waitForStable", ["2. 计数已稳定: 计数 5"]),
+    ("waitForHidden", ["3. \"加载完成\" 已消失"]),
+    ("catch FlowError", ["4. FlowError TIMEOUT: 步骤 "]),
+    ("all", ["5. all: 开始加载 | 计数 5"]),
+    ("race and cancel", ["5. race: 定时器先到 ; 取消落败者: true"]),
+    ("sync timeout", ["6. sync 限时到期: TIMEOUT sync ; 链仍在等待: pending"]),
+    ("cancel", ["6. 取消: true 状态: "]),
+    ("finished", ["完成"]),
+]
+
+FORM_CHECKS = [
+    ("typeInto index", ["1. 用户名: alice"]),
+    ("typeInto selector", ["2. 密码框上报的文本: "]),
+    ("typeInto append", ["3. 追加后: alice@example.com"]),
+    ("toggle", ["4. 记住我: true ", "; 再设一次: 无变化"]),
+    ("smartClick verify", ["5. 登录按钮以 ", "; 结果: 欢迎, alice@example.com (已记住)"]),
+    ("dismissPopups none", ["6. 没有弹窗时: null"]),
+    ("dismissPopups", ["6. 关闭了候选 #0 (以后再说), 方式: "]),
+    ("clickIfExists", ["7. clickIfExists: false true"]),
+    ("FlowError", ["8. FlowError "]),
+    ("flow typeInto", ["9. Flow 输入: bob"]),
+    ("flow toggle", ["9. Flow 取消勾选: true"]),
+    ("flow smartClick", ["9. Flow 结果: 欢迎, bob"]),
+    ("finished", ["完成"]),
+]
+
+LIST_CHECKS = [
+    ("collectList", ["1. 采集到 ", "第 1 项, 第 2 项, 第 3 项 ..."]),
+    ("collectList until", ["2. 向上采集到 \"第 1 项\" 为止: ", "最后一项: 第 1 项"]),
+    ("collectList maxItems", ["2. 最多 3 项: "]),
+    ("scrollUntil down", ["3. 滚到了: 第 30 项"]),
+    ("scrollUntil up", ["3. 回到顶部: 第 1 项"]),
+    ("scrollUntil missing", ["4. ", " reason: "]),
+    ("flow collectList", ["5. Flow 采集: "]),
+    ("flow scrollUntil", ["5. Flow 滚到: 第 20 项"]),
+    ("finished", ["完成"]),
+]
+
+STRING_CHECKS = [
+    ("key=value and flag", ["1. 确定"]),
+    ("regex and !flag", ["1. 已禁用"]),
+    ("!password", ["1. 输入框 2 个, 其中非密码框 1 个"]),
+    ("append and ~=", ["2. 确定, 取消"]),
+    ("quoted values", ["3. true false"]),
+    # e.message carries the Java class name in front (org.autojs...SelectorStringException: Invalid selector string ...).
+    ("syntax error", ["4. ", "Invalid selector string at 8 in ", "unknown property", "did you mean clickable?"]),
+    ("findIterator stop", ["5. 找到并停止于: 取消"]),
+    ("findIterator counts", ["5. 已访问节点 ", "; 已关闭: "]),
+    ("for...of break", ["6. 第 2 项"]),
+    ("find(max)", ["7. 前两项: 第 1 项, 第 2 项 ; 最后一项: 第 3 项"]),
+    ("collection methods", ["7. first / last / at(-1) / slice(1): 第 1 项 第 3 项 第 3 项 2"]),
+    ("content and select", ["8. 确定 | 取消"]),
+    ("finished", ["完成"]),
+]
+
+EVENTS_CHECKS = [
+    ("waitForIdle", ["1. 安静了 "]),
+    ("waitForEvent flow", ["2. 事件: TYPE_WINDOW", " 来自 org.autojs.autojs6 "]),
+    ("waitForEvent sync", ["3. 点击事件的类名: android.widget.Button"]),
+    ("waitForToast timeout", ["4. FlowError TIMEOUT "]),
+    ("waitForNotification", ["5. 通知: 示例通知 - 事件驱动等待"]),
+    ("chained notification", ["6. Flow: 链式步骤"]),
+    ("finished", ["完成"]),
+]
+
+SMOKE_SUMMARY = re.compile(r"(\d+)/(\d+) checks passed")
+
+
+def smoke_passed(lines):
+    for line in lines:
+        m = SMOKE_SUMMARY.search(line)
+        if m:
+            return m.group(1) == m.group(2) and m.group(1) != "0"
+    return False
+
+
+# The smoke test prints [PASS] / [FAIL] per check and the summary; [FAIL] lines go to console.error (checked as errors).
+SMOKE_CHECKS = [
+    ("all checks passed", smoke_passed),
+    ("no failed check", lambda lines: not any("[FAIL]" in line for line in lines)),
+]
+
 SAMPLES = {
     "explain": ("选择器诊断与节点树导出 [v6.8.0+].js", EXPLAIN_CHECKS),
     "normalize": ("选择器规范化与候选偏好 [v6.8.0+].js", NORMALIZE_CHECKS),
+    "flow": ("流程 (Flow) 异步等待与链式动作 [v6.8.0+].js", FLOW_CHECKS),
+    "form": ("工具集 表单填写与弹窗关闭 [v6.8.0+].js", FORM_CHECKS),
+    "list": ("工具集 列表滚动与采集 [v6.8.0+].js", LIST_CHECKS),
+    "string": ("字符串选择器与惰性迭代 [v6.8.0+].js", STRING_CHECKS),
+    "events": ("事件驱动等待 [v6.8.0+].js", EVENTS_CHECKS),
+    "smoke": (d.HOST / "sample/accessibility/smoke-legacy-api.js", SMOKE_CHECKS),
 }
+
+# Seconds to wait for a run; the smoke test waits for window events and may restart the service.
+WAIT = {"smoke": 240}
 
 
 def run_sample(serial, key, show_lines):
     name, checks = SAMPLES[key]
     print(f"sample {key}")
     remote = d.push(serial, SAMPLE_DIR / name, f"sample-{key}.js")
-    lines = d.run_script(serial, remote, 90)
+    lines = d.run_script(serial, remote, WAIT.get(key, 90))
     d.adb(serial, "shell", "rm", "-f", remote)
     if show_lines:
         for line in lines:
             print("  | " + line)
     ok = True
     for check, parts in checks:
-        hit = any(all(p in line for p in parts) for line in lines)
+        hit = parts(lines) if callable(parts) else any(all(p in line for p in parts) for line in lines)
         ok = ok and hit
         print(f"  {check}: {'PASS' if hit else 'FAIL'}")
     errors = d.script_errors(lines)

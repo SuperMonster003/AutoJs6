@@ -17,7 +17,7 @@ py -3.12 -I tools/selector/device_bench.py -s SERIAL [--scenarios settings main 
     [--cpu-rounds 10] [--idle-rounds 3] [--cpu-ms 10000] [--new-modules on|off] [--save] [--label NAME] [--settings-package PKG] [--settle S]
 ```
 
-场景: `settings` 系统设置首页 (`am start -S` 重启到首页), `main` AutoJs6 主界面, `overlay` 桌面之上的原始悬浮窗 (进度条, 标签与 300 个 TextView, 由脚本创建, 经窗口过滤器 `{ packageName: AutoJs6 }` 搜索). 每项先预热 `--warmup` 次, 再计 `--rounds` 次, 输出中位数 / 最小 / 最大 (毫秒):
+场景: `settings` 系统设置首页 (`am start -S` 重启到首页; API 28 (G8441) 上隐式 intent 加 `-S` 报 "Intent does not match any activities", 改用解析出的组件 `-n`), `main` AutoJs6 主界面, `overlay` 桌面之上的原始悬浮窗 (进度条, 标签与 300 个 TextView, 由脚本创建, 经窗口过滤器 `{ packageName: AutoJs6 }` 搜索). 每项先预热 `--warmup` 次, 再计 `--rounds` 次, 输出中位数 / 最小 / 最大 (毫秒):
 
 | 项 | 内容 |
 | --- | --- |
@@ -83,10 +83,18 @@ py -3.12 -I tools/selector/registry_export.py [--docs DIR] [--dts DIR] [--ace DI
 
 拼写为方法名, getter `getXyz` 另有 `xyz` (与已有名称同名时不列). 三个仓库默认为宿主的同级目录, 给 `-` 跳过; `--check` 不写文件, 生成块与注册表不一致时退出码为 1. JVM 看到的是最新 API 的注册表 (2026-10-29: 206 个名称, 218 个方法), API 24-29 上 `getExtraRenderingInfo` 不登记 (附录 C Q16), 文档注明 API 30+.
 
-## device_sample_explain.py: 应用内示例核对 (P3.5, P4.4, P5.1)
+## device_sample_explain.py: 应用内示例与冒烟核对 (P3.5, P4.4, P5.1)
 
 ```
-py -3.12 -I tools/selector/device_sample_explain.py -s SERIAL [--samples explain normalize] [--show-lines]
+py -3.12 -I tools/selector/device_sample_explain.py -s SERIAL [--samples explain normalize flow form list string events smoke] [--show-lines]
 ```
 
-把仓库中的示例原样推送到设备运行, 按控制台输出逐项核对 (只打印核对项名称与通过 / 失败; `--show-lines` 另打印控制台行, 均为示例悬浮窗中的合成文本): `explain` 为 "无障碍服务 > 选择器诊断与节点树导出" (`auto.explain` 的逐过滤器计数, 单个结果, 罗盘每一步, 结果类型与结果对象的各字段, 写错的结果类型, 快路径的键, `dump` 三种形式, `toJSON`, `auto.stats`, 22 项), `normalize` 为 "无障碍服务 > 选择器规范化与候选偏好" (`normalize` 的重载, 选项, 写法与适用属性, `prefer` 的每个键, 键的顺序, 罗盘 `k`, 各种写法与报错, 20 项). 示例先回到桌面, 在自己的悬浮窗上运行, 需要无障碍服务与悬浮窗权限, 屏幕须已解锁; 不点屏幕.
+把仓库中的示例原样推送到设备运行, 按控制台输出逐项核对 (只打印核对项名称与通过 / 失败; `--show-lines` 另打印控制台行, 均为示例悬浮窗中的合成文本): `explain` 为 "无障碍服务 > 选择器诊断与节点树导出" (`auto.explain` 的逐过滤器计数, 单个结果, 罗盘每一步, 结果类型与结果对象的各字段, 写错的结果类型, 快路径的键, `dump` 三种形式, `toJSON`, `auto.stats`, 22 项), `normalize` 为 "无障碍服务 > 选择器规范化与候选偏好" (`normalize` 的重载, 选项, 写法与适用属性, `prefer` 的每个键, 键的顺序, 罗盘 `k`, 各种写法与报错, 20 项). P5.1 发布门禁另加前序 a11y roadmap P6.4 的其余 5 个示例: `flow` ("流程 (Flow) 异步等待与链式动作", 10 项), `form` ("工具集 表单填写与弹窗关闭", 13 项), `list` ("工具集 列表滚动与采集", 9 项), `string` ("字符串选择器与惰性迭代", 13 项), `events` ("事件驱动等待", 7 项, 第 5 / 6 项需要 AutoJs6 的通知权限), 以及开发冒烟 `smoke` (`sample/accessibility/smoke-legacy-api.js`, 按其 "N/N checks passed" 汇总与有无 `[FAIL]` 判定; 它以 AutoJs6 主界面为目标, 会点击一个控件并滚动, 只在宿主能无人值守重启无障碍服务 (root, 安全设置或 Shizuku) 时才做服务重启的检查, 否则跳过; 它会把主界面的列表滚下去, 之后 parity 的主界面快照不再可比, 因此门禁中先跑 parity 再跑示例, 或之后把主界面滚回顶部). 不给 `--samples` 时全部运行. 示例先回到桌面, 在自己的悬浮窗上运行, 需要无障碍服务与悬浮窗权限, 屏幕须已解锁; 不点屏幕.
+
+## device_node_instances.py: 节点实例数 (P5.1, 红线 2)
+
+```
+py -3.12 -I tools/selector/device_node_instances.py -s SERIAL [--warmup 20] [--rounds 300] [--limit 50]
+```
+
+在 AutoJs6 主界面上循环本主题的查询 (每轮: `find()`, 命中刷新的 `findOnce()` 与其 `children()` / `parent()`, `prefer` 的单个结果, 精确 id 快路径的 `findOnce()` / `findOne(30)`, `text` 的 `findOne(30)` 轮询, 带罗盘与结果类型的 `pickup`, 含多键 `prefer` 的字符串选择器), 用 `dalvik.system.VMDebug.countInstancesOfClass` (memory 门禁的口径: 先 GC, 只计可达实例; 隐藏 API, 宿主在 API 24 / 28 上可用) 读 `AccessibilityNodeInfo` 的实例数: 开始, 预热结束, 一半与结束. 结束相对预热结束的增长不超过 `--limit` (+50, 同 memory 门禁 S7 / S7b) 且每轮的查询都得到预期结果时通过. 只输出轮数, 节点计数与实例数, 不含节点文本. 主要用于 API < 33 (节点按进程池化, 前序 P1.5).

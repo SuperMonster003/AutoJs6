@@ -1,0 +1,403 @@
+{
+ "device": {
+  "serial": "BH900ASK9E",
+  "model": "G8441",
+  "sdk": 28,
+  "versionCode": 5935,
+  "build": 4283,
+  "date": "2026-10-29 11:48",
+  "newModules": true
+ },
+ "scenarios": {
+  "settings": {
+   "rootPackage": "com.android.settings",
+   "nodes": 25,
+   "items": {
+    "full": {
+     "ok": true,
+     "median": 4.478,
+     "samples": [
+      10.211,
+      15.919,
+      16.643,
+      16.322,
+      4.578,
+      4.261,
+      4.11,
+      4.148,
+      4.148,
+      4.377
+     ],
+     "cpuPerRun": 3.3,
+     "sizes": [
+      25
+     ]
+    },
+    "miss": {
+     "ok": true,
+     "median": 1.798,
+     "samples": [
+      1.733,
+      1.734,
+      1.829,
+      1.763,
+      1.886,
+      1.808,
+      1.803,
+      1.822,
+      1.793,
+      1.761
+     ],
+     "cpuPerRun": 0.8
+    },
+    "missId": {
+     "ok": true,
+     "median": 1.857,
+     "samples": [
+      1.775,
+      1.762,
+      1.817,
+      1.885,
+      1.884,
+      1.97,
+      2.085,
+      1.949,
+      1.83,
+      1.758
+     ],
+     "cpuPerRun": 0.8
+    },
+    "lookupId": {
+     "ok": true,
+     "median": 9.448,
+     "samples": [
+      5.728,
+      11.729,
+      9.241,
+      9.762,
+      9.327,
+      8.783,
+      11.795,
+      12.858,
+      9.289,
+      9.568
+     ],
+     "cpuPerRun": 5.2
+    },
+    "missMixed": {
+     "ok": true,
+     "median": 6.165,
+     "samples": [
+      8.968,
+      8.785,
+      9.106,
+      8.258,
+      6.068,
+      5.963,
+      6.011,
+      5.871,
+      6.261,
+      5.92
+     ],
+     "cpuPerRun": 3.7
+    },
+    "hit": {
+     "ok": true,
+     "median": 7.643,
+     "samples": [
+      7.437,
+      8.298,
+      8.315,
+      8.532,
+      7.579,
+      7.29,
+      7.748,
+      7.375,
+      7.708,
+      7.301
+     ],
+     "cpuPerRun": 3.5
+    },
+    "late": {
+     "ok": true,
+     "median": 8.212,
+     "samples": [
+      9.682,
+      8.177,
+      8.059,
+      8.248,
+      8.078,
+      8.324,
+      7.957,
+      8.141,
+      8.657,
+      8.834
+     ],
+     "cpuPerRun": 3.9
+    },
+    "refresh": {
+     "ok": true,
+     "median": 2.153,
+     "samples": [
+      1.89,
+      2.432,
+      2.661,
+      2.161,
+      2.326,
+      2.218,
+      2.043,
+      2.144,
+      2.089,
+      2.118
+     ],
+     "cpuPerRun": 1.2
+    },
+    "findOne600": {
+     "ok": true,
+     "medianAttempts": 10.5,
+     "attempts": [
+      11,
+      10,
+      10,
+      11,
+      10,
+      10,
+      10,
+      11,
+      11,
+      11
+     ],
+     "median": 635.989,
+     "samples": [
+      667.491,
+      606.325,
+      620.995,
+      670.397,
+      623.438,
+      616.434,
+      636.887,
+      656.939,
+      647.629,
+      635.091
+     ],
+     "medianCpu": 58.5,
+     "medianCpuPerAttempt": 5.8,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "findOne600Id": {
+     "ok": true,
+     "medianAttempts": 10,
+     "attempts": [
+      10,
+      10,
+      9,
+      10,
+      9,
+      10,
+      10,
+      10,
+      10,
+      10
+     ],
+     "median": 635.17,
+     "samples": [
+      622.659,
+      680.743,
+      620.305,
+      635.753,
+      632.595,
+      634.198,
+      638.416,
+      651.964,
+      634.587,
+      647.906
+     ],
+     "medianCpu": 72,
+     "medianCpuPerAttempt": 7.25,
+     "fastPath": {
+      "hits": 0,
+      "misses": 25,
+      "fallbacks": 14,
+      "mismatches": 0,
+      "walks": 59
+     }
+    },
+    "findOne600Default": {
+     "ok": true,
+     "medianAttempts": 5,
+     "attempts": [
+      5,
+      4,
+      6,
+      5,
+      5,
+      4,
+      5,
+      5,
+      6,
+      4
+     ],
+     "median": 734.325,
+     "samples": [
+      726.55,
+      668.548,
+      808.533,
+      699.599,
+      770.356,
+      665.371,
+      742.1,
+      772.17,
+      795.172,
+      637.29
+     ],
+     "medianCpu": 34.5,
+     "medianCpuPerAttempt": 7.3,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 10
+     }
+    },
+    "lateOne": {
+     "ok": true,
+     "medianAttempts": 1,
+     "attempts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "median": 13.664,
+     "samples": [
+      12.421,
+      13.774,
+      18.468,
+      12.497,
+      14.012,
+      12.287,
+      13.038,
+      13.553,
+      16.479,
+      20.306
+     ],
+     "medianCpu": 6,
+     "medianCpuPerAttempt": 6,
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 0
+     }
+    },
+    "cpuIdle": {
+     "ok": true,
+     "medianCpu": 0.8,
+     "cpu": [
+      0.8,
+      0.8,
+      1.7
+     ],
+     "medianAttempts": null,
+     "attempts": []
+    },
+    "cpuFixed": {
+     "ok": true,
+     "medianCpu": 9.75,
+     "cpu": [
+      9.9,
+      10.8,
+      9.6,
+      9.8,
+      9.7,
+      10.9,
+      9.6,
+      9.3,
+      11,
+      9.6
+     ],
+     "medianAttempts": 148,
+     "attempts": [
+      147,
+      149,
+      148,
+      147,
+      148,
+      149,
+      149,
+      150,
+      148,
+      148
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 100
+     }
+    },
+    "cpuAssisted": {
+     "ok": true,
+     "medianCpu": 4.25,
+     "cpu": [
+      4.4,
+      3.9,
+      4.5,
+      4.2,
+      4.3,
+      5.6,
+      5.1,
+      3.6,
+      3.6,
+      3.6
+     ],
+     "medianAttempts": 59,
+     "attempts": [
+      60,
+      60,
+      59,
+      59,
+      60,
+      60,
+      59,
+      58,
+      57,
+      53
+     ],
+     "fastPath": {
+      "hits": 0,
+      "misses": 0,
+      "fallbacks": 0,
+      "mismatches": 0,
+      "walks": 98
+     }
+    }
+   },
+   "late": {
+    "index": 24,
+    "total": 25,
+    "length": 31
+   },
+   "ok": true,
+   "scheduling": {
+    "before": "fg",
+    "after": "fg"
+   }
+  }
+ }
+}
