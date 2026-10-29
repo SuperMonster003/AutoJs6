@@ -15,4 +15,5 @@ for(const [cap,key,module] of [['app.control','APP_CONTROL','app'],['accessibili
  const native=names(protocol.match(new RegExp(`val ${module}Methods = setOf\\(([\\s\\S]*?)\\)`))[1]);
  assert(actual.every(name=>native.includes(name)),cap+' must use real Node provider routes');
 }
-console.log('Bun automation: 32 native routes and generated public adapters/declarations match Node');
+const routes=['app.control','accessibility.control','clipboard.control'].reduce((sum,cap)=>sum+sdk.HOST_API_METHODS[cap].length,0);
+console.log(`Bun automation: ${routes} native routes and generated public adapters/declarations match Node`);
