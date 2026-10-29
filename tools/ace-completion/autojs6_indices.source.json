@@ -30871,6 +30871,42 @@
           "signature": "speak(text: string, options?: Speech.SpeakOptions | null): Promise<Tts.Result>;"
         },
         {
+          "name": "diarize",
+          "kind": "function",
+          "doc": "diarize(file: string, options?: Speech.DiarizeOptions | null): Speech.Diarization;",
+          "signature": "diarize(file: string, options?: Speech.DiarizeOptions | null): Speech.Diarization;"
+        },
+        {
+          "name": "diarizeAsync",
+          "kind": "function",
+          "doc": "diarizeAsync(file: string, options?: Speech.DiarizeOptions | null): Promise<Speech.Diarization>;",
+          "signature": "diarizeAsync(file: string, options?: Speech.DiarizeOptions | null): Promise<Speech.Diarization>;"
+        },
+        {
+          "name": "detectLanguage",
+          "kind": "function",
+          "doc": "detectLanguage(file: string, options?: Speech.DetectLanguageOptions | null): Speech.LanguageDetection;",
+          "signature": "detectLanguage(file: string, options?: Speech.DetectLanguageOptions | null): Speech.LanguageDetection;"
+        },
+        {
+          "name": "detectLanguageAsync",
+          "kind": "function",
+          "doc": "detectLanguageAsync(file: string, options?: Speech.DetectLanguageOptions | null): Promise<Speech.LanguageDetection>;",
+          "signature": "detectLanguageAsync(file: string, options?: Speech.DetectLanguageOptions | null): Promise<Speech.LanguageDetection>;"
+        },
+        {
+          "name": "tag",
+          "kind": "function",
+          "doc": "tag(file: string, options?: Speech.TagOptions | null): Speech.Tagging;",
+          "signature": "tag(file: string, options?: Speech.TagOptions | null): Speech.Tagging;"
+        },
+        {
+          "name": "tagAsync",
+          "kind": "function",
+          "doc": "tagAsync(file: string, options?: Speech.TagOptions | null): Promise<Speech.Tagging>;",
+          "signature": "tagAsync(file: string, options?: Speech.TagOptions | null): Promise<Speech.Tagging>;"
+        },
+        {
           "name": "models",
           "kind": "variable",
           "doc": "models: Speech.Models;",
