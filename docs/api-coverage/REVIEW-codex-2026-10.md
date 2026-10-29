@@ -250,6 +250,17 @@ ROADMAP 约定每批 3 ~ 5 个模块, 1 个子会话 (宿主桥接 + facade + d.
 
 建议启动顺序: P3.2a 与 P4.2a 先行 (无设计前置, 行数最多); 其后 P3.1a / P3.2b 与对应 P4 批次; 需要设计的 UI 与自动化批次 (D-1 / D-6 / D-7 / D-8 / D-17) 在设计待决拍板后启动. 每批结束用 `check.py --write-pending-baseline` 收缩基线.
 
+P3.2a 落点 (2026-10-29, api-cov-p3-2a; 宿主 3ebafb50e): 本批 Node main 122 -> 9, Worker 191 -> 10 (含 Q18 新增的 util 3 行; 全列 776 / 987 -> 663 / 806). 遗留:
+
+| 行 | Node main | Node Worker | 待决 |
+|---|---|---|---|
+| dayjs, pangu, cheerio, i18n (全局库 getter) | pending | pending | P3.2a 遗留 (待 Q61) |
+| axios (全局 getter) | local-shim (getter 本身, 返回现有 axios facade; axios 模块成员另计) | pending | P3.2a 遗留 (待 Q61) |
+| util.class, util.className, util.getClassName | pending | pending | P3.2a 遗留 (待 Q54 (b), Java 内省) |
+| util.toRegularAndCall, util.toRegularAndApply | pending (rejects) | pending (rejects) | P3.2a 遗留 (待 Q63; Rhino 中同样总是抛错) |
+
+另: util.unwrapJavaObject 保持 not-portable (D-11); 全局 isJavaClass / isJavaPackage 的属主模块 species 在 Node 已覆盖, java-prototype 规则加 override 按 D-11 保持 not-portable (否则报 shadowed). 已按推荐先行的设计: Q59 (jsox.extend 改内建), Q60 (dp / sp 快照线性), Q62 (与 Rhino 的剩余差异写进 HOST-API).
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).
