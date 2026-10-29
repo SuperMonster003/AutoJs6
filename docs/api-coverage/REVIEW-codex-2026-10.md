@@ -289,7 +289,7 @@ P3.1a 落点 (2026-10-29, api-cov-p3-1a; 矩阵随 P4.1a 的宿主 2780f3e3c 写
 |---|---|---|---|
 | app.autojs | pending | pending | P3.1a 遗留 (Q93 (2), 随 P3.1b 的 autojs 模块) |
 
-另: D-4 按 Q89-Q92 (a) 复用 shell / shell.root / shell.shizuku 与 app 子能力, 新增宿主只读路由 6 个, 未加新能力; Q93 的其余形态 (fromIntent 只收 JSON 意图, 快照返回值, execCommand 结果对象, 状态查询返回 Promise) 已按推荐先行, 写进 HOST-API 与 d.ts. 真机在 Shizuku 未运行与运行并授权两种状态下对照 Rhino 全部一致; shizuku.hasService 反映宿主是否已绑定 Shizuku 用户服务 (首次经 Shizuku 执行命令时绑定), 与调用顺序有关, 不是运行时差异.
+另: D-4 按 Q89-Q92 (a) 复用 shell / shell.root / shell.shizuku 与 app 子能力, 新增宿主只读路由 6 个, 未加新能力; Q93 的其余形态 (fromIntent 只收 JSON 意图, 快照返回值, execCommand 结果对象, 状态查询返回 Promise) 已拍板 (a), 写进 HOST-API 与 d.ts. 真机在 Shizuku 未运行与运行并授权两种状态下对照 Rhino 全部一致; shizuku.hasService 反映宿主是否已绑定 Shizuku 用户服务 (首次经 Shizuku 执行命令时绑定), 与调用顺序有关, 不是运行时差异.
 
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
