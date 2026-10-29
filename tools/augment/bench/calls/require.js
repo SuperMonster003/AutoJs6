@@ -1,7 +1,8 @@
 // Calls of require (roadmap P3.7), appended to bench/calls_prelude.js by device_r2.py --calls require. They reach the
 // Kotlin require (with the switch of the new script module layer off they reached jvm-npm until P5.2). The modules are written to
 // ./aj6req and removed at the end. "ok" cases succeed: a cache hit, a JSON cache hit, a first load after deleting the
-// cache entry, a core name and the asset module axios; "fail" cases are argument errors, compared with the "ref" cases;
+// cache entry, a core name and axios (both from the Bundled Libraries plugin since P5.2 stage 5; without it they time its
+// guidance error); "fail" cases are argument errors, compared with the "ref" cases;
 // "miss" cases are modules not found from a module six directories below ./aj6req, compared by hand with the same case
 // of jvm-npm (appendix C Q84).
 let reqRoot = files.join(files.cwd(), 'aj6req');

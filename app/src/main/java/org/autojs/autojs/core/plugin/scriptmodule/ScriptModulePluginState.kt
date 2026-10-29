@@ -81,9 +81,9 @@ internal sealed interface ScriptModulePluginState {
     companion object {
 
         /**
-         * The requirable names of the first Bundled Libraries release (the files of `assets/modules` that P5.2 removes) to
+         * The requirable names of the first Bundled Libraries release (the files of `assets/modules` that P5.2 removed) to
          * their library, for the guidance while there is no catalog to read. An installed plugin answers from its catalog.
-         * zh-CN: Bundled Libraries 首个版本可 require 的名称 (即 P5.2 删除的 `assets/modules` 文件) 到其所属的库, 用于没有清单可读时的指引.
+         * zh-CN: Bundled Libraries 首个版本可 require 的名称 (即 P5.2 已删除的 `assets/modules` 文件) 到其所属的库, 用于没有清单可读时的指引.
          * 已安装的插件以其清单为准.
          */
         val KNOWN_MODULES: Map<String, String> = linkedMapOf(

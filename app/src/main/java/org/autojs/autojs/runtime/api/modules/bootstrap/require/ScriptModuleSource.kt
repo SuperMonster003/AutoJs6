@@ -49,16 +49,17 @@ internal class ScriptModuleSources(private val sources: List<ScriptModuleSource>
 }
 
 /**
- * The modules of the APK assets (`assets/modules`), loaded by the engine's Rhino `Require` so that a module is the same
- * instance as the one of the global getters (`require('axios') === axios`): the Node core modules of jvm-npm (buffer,
- * events, fs, lodash, nodejs, os, path, process) and any id the engine's module script providers can supply (assets and
- * their sub-paths, existing absolute paths). Relative ids are not named modules: a relative id that the local lookup
- * misses is not found, where jvm-npm passed it to the native `require`, which resolved it against jvm-npm's own asset
- * directory.
+ * The modules of the engine's Rhino `Require`, loaded through it so that a module is the same instance as the one of the
+ * global getters (`require('axios') === axios`): the Node core modules of jvm-npm (buffer, events, fs, lodash, nodejs,
+ * os, path, process) and any id the engine's module script providers can supply (the APK assets `assets/modules` and
+ * their sub-paths, the modules of the Bundled Libraries plugin, existing absolute paths). Since P5.2 the core modules come
+ * from the plugin only (design P4-3 (f)). Relative ids are not named modules: a relative id that the local lookup misses
+ * is not found, where jvm-npm passed it to the native `require`, which resolved it against jvm-npm's own asset directory.
  *
- * zh-CN: APK 资产 (`assets/modules`) 中的模块, 由引擎的 Rhino Require 加载, 因此与全局 getter 的模块是同一实例 (`require('axios') === axios`):
- * jvm-npm 的 Node 核心模块 (buffer, events, fs, lodash, nodejs, os, path, process) 与引擎的模块脚本提供者能提供的任意 id (资产及其子路径,
- * 存在的绝对路径). 相对 id 不是命名模块: 本地解析未命中的相对 id 即为找不到; jvm-npm 曾把它交给原生 require, 后者按 jvm-npm 自身的资产目录解析.
+ * zh-CN: 引擎 Rhino Require 中的模块, 经它加载, 因此与全局 getter 的模块是同一实例 (`require('axios') === axios`): jvm-npm 的 Node 核心模块
+ * (buffer, events, fs, lodash, nodejs, os, path, process) 与引擎的模块脚本提供者能提供的任意 id (APK 资产 `assets/modules` 及其子路径,
+ * Bundled Libraries 插件的模块, 存在的绝对路径). P5.2 起核心模块只由插件提供 (设计 P4-3 (f)). 相对 id 不是命名模块: 本地解析未命中的相对 id
+ * 即为找不到; jvm-npm 曾把它交给原生 require, 后者按 jvm-npm 自身的资产目录解析.
  *
  * @param canLoad whether the engine's providers can supply [id] (no module is executed)
  * @param load the exports of [id] from the engine's `Require`
@@ -89,7 +90,7 @@ internal class AssetModuleSource(
     }
 
     companion object {
-        /** jvm-npm's `builtInModules`. */
+        /** jvm-npm's `builtInModules`: lodash and the Node shims, all in the Bundled Libraries plugin (P5.2). */
         val CORE_FILES = setOf("buffer.js", "events.js", "fs.js", "lodash.js", "nodejs.js", "os.js", "path.js", "process.js")
     }
 

@@ -1,17 +1,19 @@
 """ROADMAP P4.3: the modules of the Bundled Libraries plugin on a device in the four plugin states.
 
-    py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --plugin-apk PLUGIN.apk [--local-first]
+    py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --plugin-apk PLUGIN.apk [--switch-apk DEBUG.apk]
+    py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --local-first
 
-The host on the device must be a build without the 14 module files in assets/modules (design
-docs/augment/P4-3-bundled-libraries-design.md (g), roadmap Q102), except with --local-first, which expects the normal
-build (files present) and checks that every module still loads with the plugin not installed. The plugin states, in
-order and in one host process (so the broadcasts of each change are what makes it visible):
+The host on the device must be a build without the 14 module files in assets/modules (every build since P5.2; before it
+design docs/augment/P4-3-bundled-libraries-design.md (g), roadmap Q102), except with --local-first, which expects a build
+before P5.2 (files present) and checks that every module still loads with the plugin not installed. The plugin states,
+in order and in one host process (so the broadcasts of each change are what makes it visible):
 
     not-installed      the plugin is uninstalled first
     enabled            adb install of --plugin-apk
     plugin-disabled    the Plugin Center switch, set off through PluginEnableStore by a script (and on again after)
     library-disabled   axios and buffer switched off (the switches of the plugin page, through the receiver of the debug
-                       build of the plugin; on again after)
+                       build of the plugin; on again after). A release --plugin-apk has no receiver: --switch-apk, a debug
+                       build with the same signing key and version code, is installed over it for this state
     uninstalled        adb uninstall
 
 In each state bench/plugin_modules_smoke/main.js runs once; the "AJ6REQ <item> <json>" lines must match the expectation
@@ -162,8 +164,9 @@ def check(state, run):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-s", "--serial", required=True)
-    parser.add_argument("--plugin-apk", help="the debug APK of AutoJs6-Plugin-Bundled-Libraries")
-    parser.add_argument("--local-first", action="store_true", help="the host still has the files: modules load without the plugin")
+    parser.add_argument("--plugin-apk", help="the APK of AutoJs6-Plugin-Bundled-Libraries")
+    parser.add_argument("--switch-apk", help="a debug APK of the plugin (same key and version code) for the per-library switches")
+    parser.add_argument("--local-first", action="store_true", help="a host before P5.2, with the files: modules load without the plugin")
     parser.add_argument("--wait", type=int, default=60, help="seconds to wait for each run")
     args = parser.parse_args()
     s = args.serial
@@ -185,6 +188,8 @@ def main():
             set_plugin_enabled(s, False)
             failures += check("plugin-disabled", run_smoke(s, args.wait))
             set_plugin_enabled(s, True)
+            if args.switch_apk:
+                db.adb(s, "install", "-r", args.switch_apk, check=True)
             set_libraries(s, DISABLED_LIBRARIES, False)
             failures += check("library-disabled", run_smoke(s, args.wait))
             set_libraries(s, DISABLED_LIBRARIES, True)

@@ -11,6 +11,8 @@ there (its value is printed). Until P5.2 both ran with the switch of the new scr
 on, an item outside REGISTERED had to print the same in both and a registered one had to differ; the values of EXPECTED
 and REGISTERED are those of the two states. Prints one line per item and PASS / FAIL. The device directory is removed
 afterwards.
+Since P5.2 stage 5 the core names (core-path, core-events) and axios come from the Bundled Libraries plugin: install and
+enable it first, otherwise those items print its MODULE_NOT_FOUND guidance and fail.
 Each run reads the GlobalConsole lines logged since its start second (logcat -T), as device_bootstrap_check.py does:
 `logcat -c` does not reliably drop the previous run's lines on every device.
 """

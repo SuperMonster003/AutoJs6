@@ -9,18 +9,19 @@ import org.junit.Test
 import org.mozilla.javascript.ScriptableObject
 
 /**
- * The Node `path` module of `assets/modules/path.js`, which both states load for `require('path')` / `require('node:path')`
- * (P3.7; the Bundled Libraries plugin ships the same file, appendix C Q6), against `path.posix` of Node.js 24.15: the
- * expected values are Node's results rendered as `DifferentialRhino.render` does. With the Rhino jar before `0e4f95bb2` a
- * const in a loop body of a function kept the value of the first iteration, so `path.join('a', 'b', 'c')` gave "a/a/a" in
- * both states; dirname, basename, extname, parse and format followed Node only for a normalized path without a trailing
- * separator, format normalized its result, and a backslash was a separator (appendix C Q131). The device cases run the
- * same expressions through `require('path')` (`PathShimTest.json`).
+ * The Node `path` module of the Bundled Libraries plugin (`path.js`, in the APK's `assets/modules` until P5.2; the test
+ * resources keep a copy), which both states load for `require('path')` / `require('node:path')` (P3.7, appendix C Q6),
+ * against `path.posix` of Node.js 24.15: the expected values are Node's results rendered as `DifferentialRhino.render`
+ * does. With the Rhino jar before `0e4f95bb2` a const in a loop body of a function kept the value of the first iteration,
+ * so `path.join('a', 'b', 'c')` gave "a/a/a" in both states; dirname, basename, extname, parse and format followed Node
+ * only for a normalized path without a trailing separator, format normalized its result, and a backslash was a separator
+ * (appendix C Q131). The device cases run the same expressions through `require('path')` (`PathShimTest.json`), so they
+ * need the plugin on the device.
  *
- * zh-CN: assets/modules/path.js 中的 Node path 模块, 两态的 require('path') / require('node:path') 都加载它 (P3.7; Bundled Libraries 插件带同一文件,
- * 附录 C Q6), 对照 Node.js 24.15 的 path.posix: 期望值是 Node 的结果按 DifferentialRhino.render 的规则渲染. 0e4f95bb2 之前的 Rhino jar 中, 函数内循环体里的
- * const 保持首轮的值, 因此两态的 path.join('a', 'b', 'c') 都是 "a/a/a"; dirname, basename, extname, parse 与 format 只在路径已规范化且没有末尾分隔符时与 Node
- * 一致, format 会规范化结果, 反斜杠被当作分隔符 (附录 C Q131). 设备用例经 require('path') 运行同一组表达式 (PathShimTest.json).
+ * zh-CN: Bundled Libraries 插件的 Node path 模块 (path.js, P5.2 之前在 APK 的 assets/modules 中; 测试资源保留副本), 两态的 require('path') /
+ * require('node:path') 都加载它 (P3.7, 附录 C Q6), 对照 Node.js 24.15 的 path.posix: 期望值是 Node 的结果按 DifferentialRhino.render 的规则渲染.
+ * 0e4f95bb2 之前的 Rhino jar 中, 函数内循环体里的 const 保持首轮的值, 因此两态的 path.join('a', 'b', 'c') 都是 "a/a/a"; dirname, basename, extname,
+ * parse 与 format 只在路径已规范化且没有末尾分隔符时与 Node 一致, format 会规范化结果, 反斜杠被当作分隔符 (附录 C Q131). 设备用例经 require('path') 运行同一组表达式 (PathShimTest.json), 因此设备上需要安装插件.
  */
 class PathShimTest {
 
@@ -29,7 +30,7 @@ class PathShimTest {
     @Before
     fun setUp() {
         sides = BootstrapSides()
-        ScriptableObject.putProperty(sides.ktGlobal, "path", sides.module(sides.ktScope, sides.asset("path.js")))
+        ScriptableObject.putProperty(sides.ktGlobal, "path", sides.module(sides.ktScope, sides.plugin("path.js")))
     }
 
     @After
@@ -56,7 +57,7 @@ class PathShimTest {
 
     companion object {
 
-        private val DEVICE = DeviceCases("PathShimTest", "assets/modules/path.js against Node path.posix (augment-misc, appendix C Q131)")
+        private val DEVICE = DeviceCases("PathShimTest", "path.js of the Bundled Libraries plugin against Node path.posix (augment-misc, appendix C Q131)")
 
         // Expressions with `path` the module and their rendering on Node 24.15 (a backslash is shown as "|").
         private val CASES = listOf(

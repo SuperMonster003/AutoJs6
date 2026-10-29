@@ -44,13 +44,17 @@ class ScriptModulePluginStateTest {
         assertEquals("modules/axios/utils/index.js", release.assetPath("axios/utils/index.js"))
     }
 
-    /** The guidance names without a catalog are the module names of the first release, and the host still has their files (until P5.2). */
+    /** The guidance names without a catalog are the module names of the first release, whose files the host no longer has (P5.2). */
     @Test
-    fun knownModulesMatchTheCatalogAndTheAssets() {
+    fun knownModulesMatchTheCatalogAndTheAssetsHaveNoneOfTheFiles() {
         val names = release.libraries.flatMap { library -> library.modules.keys.map { it to library.id } }.toMap()
         assertEquals(names, ScriptModulePluginState.KNOWN_MODULES)
-        // P5.2 removes these files from the APK; drop this check then. zh-CN: P5.2 从 APK 删除这些文件, 届时删去此项检查.
-        release.libraries.flatMap { it.files }.forEach { assertTrue(it, File(ASSETS, it.removeSuffix("/")).exists()) }
+        // Neither AutoJs6 nor the packaged apps (inrt) carry them; the plugin is their only source (appendix C Q181).
+        // zh-CN: AutoJs6 与打包应用 (inrt) 都不再带这些文件, 插件是唯一来源 (附录 C Q181).
+        val roots = listOf(ASSETS, "src/main/assets-app/modules", "src/main/assets-inrt/modules")
+        release.libraries.flatMap { it.files }.forEach { file ->
+            roots.forEach { root -> assertFalse("$root/$file", File(root, file.removeSuffix("/")).exists()) }
+        }
     }
 
     @Test

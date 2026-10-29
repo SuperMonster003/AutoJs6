@@ -26,15 +26,15 @@ import java.io.Reader
 /**
  * Roadmap P4.3 (design `docs/augment/P4-3-bundled-libraries-design.md` (b) / (d) / (g)): the plugin modules in both states
  * of the module layer. Each side has the engine's arrangement: a Rhino `Require` over the asset provider (a temporary
- * asset directory with one local file) and [PluginModuleScriptProvider] (a fake plugin whose files are the host's
- * `assets/modules`, the files the plugin carries); the "js" side loads jvm-npm over it, the "kt" side mounts
- * [ScriptRequire] with [AssetModuleSource], and both define a global `dayjs` getter through the Rhino `Require`, as
+ * asset directory with one local file) and [PluginModuleScriptProvider] (a fake plugin whose files are the stand-ins of
+ * [FILES], since P5.2 removed the host's copies of the plugin's files); the "js" side loads jvm-npm over it, the "kt" side
+ * mounts [ScriptRequire] with [AssetModuleSource], and both define a global `dayjs` getter through the Rhino `Require`, as
  * `ScriptRuntime.js_mod_dayjs`. Every expression renders the same on both sides in the four states (messages, codes,
  * libraries and reasons of the errors included); the "kt" side also gives its errors the position of the calling script.
  *
  * zh-CN: ROADMAP P4.3 (设计 P4-3 (b) / (d) / (g)): 模块层两态下的插件模块. 两侧都照引擎的结构: Rhino Require 之下是资产 provider (只有一个本地文件的临时资产目录)
- * 与 [PluginModuleScriptProvider] (插件替身, 文件为宿主 `assets/modules`, 即插件携带的文件); "js" 侧在其上加载 jvm-npm, "kt" 侧以 [AssetModuleSource] 挂载
- * [ScriptRequire], 两侧都像 ScriptRuntime.js_mod_dayjs 那样经 Rhino Require 定义全局 dayjs getter. 四态下每个表达式两侧结果相同 (含错误的消息, code, library,
+ * 与 [PluginModuleScriptProvider] (插件替身, 文件为 [FILES] 中的替身, P5.2 已删除宿主中的插件文件); "js" 侧在其上加载 jvm-npm,
+ * "kt" 侧以 [AssetModuleSource] 挂载 [ScriptRequire], 两侧都像 ScriptRuntime.js_mod_dayjs 那样经 Rhino Require 定义全局 dayjs getter. 四态下每个表达式两侧结果相同 (含错误的消息, code, library,
  * reason); "kt" 侧的错误位置还取调用脚本的位置.
  */
 class PluginModuleDifferentialTest {
@@ -55,7 +55,7 @@ class PluginModuleDifferentialTest {
         override fun state() = state
         override fun open(plugin: Installed, path: String): Reader? {
             opened += path
-            return File(ScriptModulePluginStateTest.ASSETS, path).takeIf(File::isFile)?.reader()
+            return FILES[path]?.reader()
         }
     }
 
@@ -204,6 +204,22 @@ class PluginModuleDifferentialTest {
     }
 
     companion object {
+
+        /**
+         * The fake plugin's files: stand-ins with the shape the tests read (a module with a sub-path, `fs` needing `buffer`),
+         * not the libraries.
+         * zh-CN: 插件替身的文件: 只具备测试读取的形状 (带子路径的模块, fs 依赖 buffer), 不是真正的库.
+         */
+        val FILES = mapOf(
+            "dayjs.js" to "module.exports = require('dayjs/dayjs.min.js');",
+            "dayjs/dayjs.min.js" to "module.exports = function dayjs(t) { var v = t === undefined ? 1 : +t; return { valueOf: function () { return v; }, format: function () { return String(v); } }; };",
+            "path.js" to "exports.sep = '/'; exports.join = function () { return Array.prototype.slice.call(arguments).join('/'); };",
+            "lodash.js" to "exports.forEach = function (a, f) { for (var i = 0; i < a.length; i++) f(a[i], i); return a; };",
+            "events.js" to "function EventEmitter() {} EventEmitter.EventEmitter = EventEmitter; module.exports = EventEmitter;",
+            "banana-i18n.js" to "module.exports = function Banana() {};",
+            "buffer.js" to "exports.Buffer = function Buffer() {};",
+            "fs.js" to "var Buffer = require('buffer').Buffer; var path = require('path'); exports.existsSync = function () { return false; };",
+        )
 
         val PRELUDE = """
             var runtime = { files: { cwd: function () { return ''; }, exists: function () { return false; }, readBytes: function () { throw new Error('no files'); } } };

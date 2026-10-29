@@ -69,6 +69,9 @@ internal class BootstrapSides : AutoCloseable {
     /** The module [name] as the APK ships it now. */
     fun asset(name: String): File = File(ASSETS, name)
 
+    /** The module [name] of the Bundled Libraries plugin, from its copy in the test resources (P5.2 removed it from the APK). */
+    fun plugin(name: String): File = File(PLUGIN, name)
+
     /** The module [name] as the APK shipped it last before P5.2 removed it. */
     fun obsolete(name: String): File = File(OBSOLETE, name)
 
@@ -96,6 +99,7 @@ internal class BootstrapSides : AutoCloseable {
     companion object {
         const val ORIGINALS = "src/test/resources/augment-p25"
         const val ASSETS = "src/main/assets/modules"
+        const val PLUGIN = "src/test/resources/script-modules/bundled-libraries"
         const val OBSOLETE = "src/test/resources/script-modules/obsolete"
     }
 

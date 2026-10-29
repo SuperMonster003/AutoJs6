@@ -281,8 +281,8 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         val provider = AssetAndUrlModuleSourceProvider(
             androidContext, MODULES_ROOT_PATH, listOf<URI>(File(File.separator).toURI())
         )
-        // The plugin modules (roadmap T11 / P4.3) come after the APK assets, which win while they still have the files.
-        // zh-CN: 插件模块 (ROADMAP T11 / P4.3) 位于 APK 资产之后, 资产中仍有文件时以资产为准.
+        // The plugin modules (roadmap T11 / P4.3) come after the APK assets, which no longer have the plugin's files (P5.2).
+        // zh-CN: 插件模块 (ROADMAP T11 / P4.3) 位于 APK 资产之后; P5.2 起资产中不再有插件的文件.
         val moduleScriptProvider = MultiModuleScriptProvider(
             listOf(
                 ProcessWideAssetModuleScriptProvider(androidContext, MODULES_ROOT_PATH),

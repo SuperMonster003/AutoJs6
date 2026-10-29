@@ -19,10 +19,10 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * The JavaScript modules of the Bundled Libraries plugin (roadmap T11 / P4.3, design
  * `docs/augment/P4-3-bundled-libraries-design.md` (b)) in the provider chain of the engine's Rhino `Require`, after the
- * APK assets (the local files win while `assets/modules` still has them, until P5.2) and before files and URLs. Both
- * states of the module layer reach it: the Kotlin `require` (P3.7) through `canRequireNamedModule`, jvm-npm through its
- * native fallback, and the global getters (`axios` ...) through the engine's `require`, so a plugin module is one
- * instance for all of them.
+ * APK assets (which no longer have the plugin's files since P5.2, so the plugin is their only source) and before files
+ * and URLs. Both states of the module layer reach it: the Kotlin `require` (P3.7) through `canRequireNamedModule`,
+ * jvm-npm through its native fallback, and the global getters (`axios` ...) through the engine's `require`, so a plugin
+ * module is one instance for all of them.
  *
  * For an id that a plugin module of the current state answers, the compiled script (shared by the engines of the process,
  * like [ProcessWideAssetModuleScriptProvider], per plugin version); for a known id that the plugin cannot give now (not
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap
  * with the guidance; for anything else null, for the next provider.
  *
  * zh-CN: Bundled Libraries 插件的 JavaScript 模块 (ROADMAP T11 / P4.3, 设计 P4-3 (b)), 位于引擎 Rhino Require 的 provider 链中, 在 APK 资产之后
- * (assets/modules 仍有文件时本地优先, 直到 P5.2), 文件与 URL 之前. 模块层两态都经过它: Kotlin require (P3.7) 经 canRequireNamedModule, jvm-npm 经其原生回退,
+ * (P5.2 起 assets/modules 不再有插件的文件, 插件是它们唯一的来源), 文件与 URL 之前. 模块层两态都经过它: Kotlin require (P3.7) 经 canRequireNamedModule, jvm-npm 经其原生回退,
  * 全局 getter (axios 等) 经引擎的 require, 因此插件模块对它们是同一实例. 当前状态下插件模块能回答的 id 返回编译结果 (同进程各引擎共享, 同
  * ProcessWideAssetModuleScriptProvider, 按插件版本); 插件现在不能提供的已知 id (未安装, 未授权, 在插件中心或插件页面关闭) 抛出带指引的
  * [ScriptModuleUnavailableException]; 其余返回 null, 交给下一个 provider.

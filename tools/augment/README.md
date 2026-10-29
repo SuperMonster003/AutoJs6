@@ -147,11 +147,11 @@ G8441 上 `logcat -c` 有时清不掉上一次运行的行, 所以只读取每�
 ## device_plugin_modules_check.py: Bundled Libraries 插件的四态 (P4.3)
 
 ```
-py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --plugin-apk PLUGIN.apk [--wait 60]
+py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --plugin-apk PLUGIN.apk [--switch-apk DEBUG.apk] [--wait 60]
 py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --local-first
 ```
 
-宿主须是去掉 `assets/modules` 中 14 个库模块文件的构建 (设计 `docs/augment/P4-3-bundled-libraries-design.md` (g), 附录 C Q102), `--plugin-apk` 是 AutoJs6-Plugin-Bundled-Libraries 的 debug 包. 在同一宿主进程中依次经过 未安装 (先卸载插件), 已安装并启用 (`adb install`), 插件中心关闭 (脚本经 `PluginEnableStore` 关闭再打开), 插件页关闭 axios 与 buffer (经插件 debug 构建的 `DebugLibrarySwitchReceiver` 切换对应的 activity-alias, 之后打开; Android 9 起 shell 不能 `pm disable` 非 test-only 应用的组件), 卸载后. 每一态运行一次 `bench/plugin_modules_smoke/main.js` (13 个库共 15 个 require 项, axios / cheerio / dayjs / i18n / pangu 的全局 getter, `require('axios') === axios`, 指引错误的消息与位置), 输出须符合该态的预期 (错误为 `code` = MODULE_NOT_FOUND, `library`, `reason`; 可用的库的 getter 为 "ok"; 位置只登记; P5.2 之前开关关与开各运行一次, 两次须一致). `--local-first` 用常规构建 (资产还在), 未安装插件时全部模块照常加载. 结束时卸载插件, 删除 `/sdcard/Download/aj6-augment-bench/p43`. 插件状态的变化由宿主的包广播与插件中心监听器生效, 不点按屏幕.
+宿主须是去掉 `assets/modules` 中 14 个库模块文件的构建 (P5.2 起的构建都是; 此前见设计 `docs/augment/P4-3-bundled-libraries-design.md` (g), 附录 C Q102), `--plugin-apk` 是 AutoJs6-Plugin-Bundled-Libraries 的安装包; 它是 release 包时 (没有下面的调试接收器), 用 `--switch-apk` 给出同一签名, 同一 versionCode 的 debug 包, 插件页开关一态前覆盖安装. 在同一宿主进程中依次经过 未安装 (先卸载插件), 已安装并启用 (`adb install`), 插件中心关闭 (脚本经 `PluginEnableStore` 关闭再打开), 插件页关闭 axios 与 buffer (经插件 debug 构建的 `DebugLibrarySwitchReceiver` 切换对应的 activity-alias, 之后打开; Android 9 起 shell 不能 `pm disable` 非 test-only 应用的组件), 卸载后. 每一态运行一次 `bench/plugin_modules_smoke/main.js` (13 个库共 15 个 require 项, axios / cheerio / dayjs / i18n / pangu 的全局 getter, `require('axios') === axios`, 指引错误的消息与位置), 输出须符合该态的预期 (错误为 `code` = MODULE_NOT_FOUND, `library`, `reason`; 可用的库的 getter 为 "ok"; 位置只登记; P5.2 之前开关关与开各运行一次, 两次须一致). `--local-first` 用 P5.2 之前的构建 (资产还在), 未安装插件时全部模块照常加载. 结束时卸载插件, 删除 `/sdcard/Download/aj6-augment-bench/p43`. 插件状态的变化由宿主的包广播与插件中心监听器生效, 不点按屏幕.
 
 ## device_matrix.py: 附录 B 一台设备的真机矩阵 (P5.1 / P5.2)
 

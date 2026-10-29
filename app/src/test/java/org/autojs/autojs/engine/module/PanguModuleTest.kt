@@ -77,10 +77,12 @@ class PanguModuleTest {
     }
 
     private fun createScope(context: Context): TopLevel {
-        val assets = listOf(File("src/main/assets"), File("app/src/main/assets")).first { it.isDirectory }
+        // The plugin's pangu files (tools/pangu writes them to the test resources; P5.2 removed them from the APK).
+        // zh-CN: 插件的 pangu 文件 (tools/pangu 输出到测试资源; P5.2 已从 APK 删除).
+        val files = listOf(File(PLUGIN_FILES), File("app/$PLUGIN_FILES")).first { it.isDirectory }
         val provider = ProcessWideAssetModuleScriptProvider(object : RhinoAssetLoader {
             override val namespace = "pangu-module-test"
-            override fun open(assetPath: String) = File(assets, assetPath).reader(Charsets.UTF_8)
+            override fun open(assetPath: String) = File(files, assetPath.removePrefix("modules/")).reader(Charsets.UTF_8)
         }, "modules")
         return context.initStandardObjects().also { scope ->
             RequireBuilder().setModuleScriptProvider(provider).setSandboxed(true)
@@ -97,5 +99,9 @@ class PanguModuleTest {
             context.isInterpretedMode = true
             block(context)
         }
+    }
+
+    private companion object {
+        const val PLUGIN_FILES = "src/test/resources/script-modules/bundled-libraries"
     }
 }
