@@ -5,7 +5,9 @@
  *
  * auto.explain(selector, root?) 解释选择器为什么匹配或不匹配: 逐个过滤器单独与叠加的命中数, 失败的一步, "差一点" 的节点与文本报告.
  * auto.explain(selector, compass?, resultType?) 还说明单个结果经历的过程: 取哪个节点 (含 prefer 的选择), 罗盘每一步到达的节点,
- * 结果类型解析到的方法与参数 (只解析, 不调用), 以及快路径, 命中刷新与 normalize 是否生效.
+ * 结果类型解析到的方法与参数 (只解析, 不调用), 以及快路径, 命中刷新与 normalize 是否生效. 结果对象的对应字段: target / targetIndex (单个结果及其序号),
+ * preference, compass / compassError, trail (罗盘每一步 { step, node }), reached (罗盘终点), result ({ given, kind, detail }),
+ * fastPath / fastPathEnabled, refreshOnHit / refreshes, normalize.
  * auto.dump(options?) 与 UiObject.dumpSubtree(options?) 以文本 / JSON / XML 导出节点树; JSON.stringify(控件) 得到其属性对象.
  * auto.stats 汇总自上次重置以来的搜索, 轮询查询与 Flow 步骤耗时.
  *
@@ -52,7 +54,14 @@ const pick = auto.explain(text('同意条款').prefer('visible'), 'p1c3', 'text'
 console.log('4. 单个结果: 第', pick.targetIndex + 1, '个 (共', pick.count, '个)');
 pick.trail.forEach(hop => console.log('   罗盘', hop.step, '->', hop.node === null ? '无' : hop.node.className()));
 console.log('4. 结果类型:', pick.result.kind, '; 快路径:', pick.fastPath, '; 命中刷新:', pick.refreshOnHit);
+console.log('4. 目标:', pick.target.text(), '; 偏好:', pick.preference, '; 罗盘:', pick.compass, '; 终点:', pick.reached === null ? '无' : pick.reached.text(), '; 目标能否刷新:', pick.refreshes);
 console.log(pick.text);
+
+/* 4. 结果类型写错时不抛出, 写进报告 (kind 为 refused, detail 列出相近的写法); normalize 给出生效中的选项; 含精确 id 条件时 fastPath 给出轮询查询快路径的键. */
+const typo = auto.explain(text(' 登录 ').normalize({ trim: true }), 'txet');
+console.log('4. 写错的结果类型:', typo.result.kind, '; 说明:', typo.result.detail, '; normalize:', typo.normalize, '; 找到:', typo.found);
+const byId = auto.explain(id('login'));
+console.log('4. 快路径的键:', byId.fastPath, '; 已开启:', byId.fastPathEnabled);
 
 /* 5. dumpSubtree: 文本形式 (默认) 与 JSON 形式; auto.dump 的选项相同, 并可指定 root 与 format. */
 const tree = panel.dumpSubtree({ maxDepth: 2 });

@@ -82,3 +82,11 @@ py -3.12 -I tools/selector/registry_export.py [--docs DIR] [--dts DIR] [--ace DI
 - 声明仓库 `declarations/autojs6/aj6-int-selector.d.ts` 与 Ace Editor 插件中的副本 (`// <node-method-registry:begin>` ... `end>`): `Detect.ResultTypeFuncWithoutParams` (有无参重载的拼写) 与 `Detect.ResultTypeFuncWithParams` (每个带参重载一个元组), `Pickup.ResultType` / `Detect.ResultType` 包含它们.
 
 拼写为方法名, getter `getXyz` 另有 `xyz` (与已有名称同名时不列). 三个仓库默认为宿主的同级目录, 给 `-` 跳过; `--check` 不写文件, 生成块与注册表不一致时退出码为 1. JVM 看到的是最新 API 的注册表 (2026-10-29: 206 个名称, 218 个方法), API 24-29 上 `getExtraRenderingInfo` 不登记 (附录 C Q16), 文档注明 API 30+.
+
+## device_sample_explain.py: 应用内示例核对 (P3.5, P4.4, P5.1)
+
+```
+py -3.12 -I tools/selector/device_sample_explain.py -s SERIAL [--samples explain normalize] [--show-lines]
+```
+
+把仓库中的示例原样推送到设备运行, 按控制台输出逐项核对 (只打印核对项名称与通过 / 失败; `--show-lines` 另打印控制台行, 均为示例悬浮窗中的合成文本): `explain` 为 "无障碍服务 > 选择器诊断与节点树导出" (`auto.explain` 的逐过滤器计数, 单个结果, 罗盘每一步, 结果类型与结果对象的各字段, 写错的结果类型, 快路径的键, `dump` 三种形式, `toJSON`, `auto.stats`, 22 项), `normalize` 为 "无障碍服务 > 选择器规范化与候选偏好" (`normalize` 的重载, 选项, 写法与适用属性, `prefer` 的每个键, 键的顺序, 罗盘 `k`, 各种写法与报错, 20 项). 示例先回到桌面, 在自己的悬浮窗上运行, 需要无障碍服务与悬浮窗权限, 屏幕须已解锁; 不点屏幕.
