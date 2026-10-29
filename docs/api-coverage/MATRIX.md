@@ -9,8 +9,8 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1087 | 341 | 0 | 1045 | 0 | 937 |
-| Node Worker | 1018 | 338 | 0 | 1048 | 0 | 1006 |
+| Node main | 1191 | 348 | 0 | 1046 | 0 | 825 |
+| Node Worker | 1129 | 345 | 0 | 1049 | 0 | 887 |
 | Bun | 0 | 298 | 1044 | 1042 | 0 | 1026 |
 
 | 列 | 取值 |
@@ -37,6 +37,7 @@
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
+| native-memory-watch | not-portable: runtime-native | 1 | 1 | 0 | FinalizationRegistry (a callback once the object is collected), node:v8 writeHeapSnapshot / getHeapStatistics |
 | native-timers | not-portable: runtime-native | 0 | 0 | 6 | global setTimeout / setInterval / setImmediate and their clear functions |
 | obsoleted-functions | not-portable: obsoleted | 2 | 2 | 2 |  |
 | rhino-engine | not-portable: rhino-only | 0 | 1 | 1 |  |
@@ -47,7 +48,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 145 / 13 / 50 | 129 / 13 / 66 | 129 / 13 / 66 |
+| (global) | 208 | 206 | 205 | 205 | 163 / 13 / 32 | 149 / 13 / 46 | 129 / 13 / 66 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -99,10 +100,10 @@
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | Zip# | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| app | 43 | 43 | 43 | 43 | 42 / 0 / 1 | 42 / 0 / 1 | 42 / 0 / 1 |
+| app | 43 | 43 | 43 | 43 | 43 / 0 / 0 | 43 / 0 / 0 | 42 / 0 / 1 |
 | auto | 38 | 38 | 38 | 38 | 0 / 0 / 38 | 0 / 0 / 38 | 0 / 0 / 38 |
-| autojs | 21 | 21 | 21 | 21 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
-| autojs.version | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
+| autojs | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 0 / 0 / 21 |
+| autojs.version | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 0 / 0 / 7 |
 | automator | 54 | 54 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
 | barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | base64 | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
@@ -114,8 +115,8 @@
 | crypto | 8 | 7 | 8 | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | device | 86 | 86 | 86 | 86 | 35 / 0 / 51 | 35 / 0 / 51 | 25 / 0 / 61 |
-| dialogs | 9 | 9 | 9 | 9 | 8 / 0 / 1 | 8 / 0 / 1 | 8 / 0 / 1 |
-| engines | 8 | 8 | 8 | 8 | 5 / 0 / 3 | 0 / 0 / 8 | 0 / 0 / 8 |
+| dialogs | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 8 / 0 / 1 |
+| engines | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | events | 37 | 34 | 36 | 36 | 5 / 1 / 31 | 5 / 1 / 31 | 5 / 1 / 31 |
 | files | 34 | 34 | 34 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 34 / 0 / 0 |
@@ -127,16 +128,16 @@
 | http | 21 | 20 | 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | imgui | 464 | 0 | 0 | 0 | 0 / 1 / 463 | 0 / 1 / 463 | 0 / 1 / 463 |
-| installer | 16 | 16 | 16 | 16 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
+| installer | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 0 / 0 / 16 |
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 0 / 0 / 9 | 0 / 0 / 9 |
 | mediainfo | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
-| memory | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| memory | 5 | 5 | 5 | 5 | 4 / 1 / 0 | 4 / 1 / 0 | 0 / 0 / 5 |
 | mime | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
-| notice | 7 | 7 | 7 | 7 | 1 / 0 / 6 | 1 / 0 / 6 | 1 / 0 / 6 |
-| notice.channel | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
+| notice | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 1 / 0 / 6 |
+| notice.channel | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 0 / 0 / 6 |
 | ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
 | ocr.mlkit | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | ocr.paddle | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
@@ -144,14 +145,14 @@
 | opencc | 33 | 33 | 33 | 33 | 33 / 0 / 0 | 33 / 0 / 0 | 33 / 0 / 0 |
 | pinyin | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | pinyin4j | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
-| plugins | 4 | 4 | 4 | 4 | 1 / 0 / 3 | 0 / 1 / 3 | 0 / 1 / 3 |
-| plugins.tools | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
-| powerManager | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
+| plugins | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 3 / 1 / 0 | 0 / 1 / 3 |
+| plugins.tools | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
+| powerManager | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | recorder | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sensors | 21 | 21 | 21 | 21 | 1 / 0 / 20 | 1 / 0 / 20 | 1 / 0 / 20 |
-| settings | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| settings | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
 | shell | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | shizuku | 13 | 8 | 13 | 13 | 13 / 0 / 0 | 13 / 0 / 0 | 13 / 0 / 0 |
 | species | 37 | 37 | 37 | 37 | 37 / 0 / 0 | 37 / 0 / 0 | 37 / 0 / 0 |
@@ -160,7 +161,7 @@
 | speech.speaker | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | sqlite | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | storages | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
-| sysprops | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| sysprops | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
 | threads | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
@@ -175,7 +176,7 @@
 | util.version | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | util.versionCodes | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | web | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
-| workManager | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
+| workManager | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 0 / 0 / 11 |
 | yolo | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
 | zip | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 
@@ -188,10 +189,10 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `ComposeError` | pending | pending | pending |
-| `HEIGHT` | pending | pending | pending |
-| `R` | pending | pending | pending |
+| `HEIGHT` | bridged | bridged | pending |
+| `R` | bridged | bridged | pending |
 | `TODO` | pending | pending | pending |
-| `WIDTH` | pending | pending | pending |
+| `WIDTH` | bridged | bridged | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `back` | bridged | pending | capability-gated |
@@ -200,28 +201,27 @@
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `click` | bridged | pending | capability-gated |
-| `currentActivity` | pending | pending | pending |
-| `currentComponent` | pending | pending | pending |
-| `currentPackage` | pending | pending | pending |
+| `currentActivity` | bridged | bridged | pending |
+| `currentComponent` | bridged | bridged | pending |
+| `currentPackage` | bridged | bridged | pending |
 | `detect` | pending | pending | pending |
 | `err` | bridged | bridged | pending |
 | `existsAll` | pending | pending | pending |
 | `existsOne` | pending | pending | pending |
-| `exit` | pending | pending | pending |
+| `exit` | bridged | bridged | pending |
 | `gesture` | bridged | pending | capability-gated |
 | `gestureAsync` | pending | pending | pending |
 | `gestures` | pending | pending | pending |
 | `gesturesAsync` | pending | pending | pending |
-| `getClip` | bridged | pending | capability-gated |
 | `home` | bridged | pending | capability-gated |
 | `input` | pending | pending | pending |
-| `isAutoJs6` | pending | pending | pending |
+| `isAutoJs6` | bridged | bridged | pending |
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `isRunning` | pending | pending | pending |
-| `isShuttingDown` | pending | pending | pending |
-| `isStopped` | pending | pending | pending |
+| `isRunning` | bridged | bridged | pending |
+| `isShuttingDown` | bridged | bridged | pending |
+| `isStopped` | bridged | bridged | pending |
 | `isUiThread` | pending | pending | pending |
 | `keepAlive` | pending | pending | pending |
 | `launchConsole` | bridged | bridged | pending |
@@ -231,7 +231,7 @@
 | `newInjectableWebClient` | pending | pending | pending |
 | `newInjectableWebView` | pending | pending | pending |
 | `newWebSocket` | pending | pending | pending |
-| `notStopped` | pending | pending | pending |
+| `notStopped` | bridged | bridged | pending |
 | `notifications` | bridged | pending | pending |
 | `openConsole` | bridged | bridged | pending |
 | `pickup` | pending | pending | pending |
@@ -240,21 +240,20 @@
 | `print` | bridged | bridged | pending |
 | `quickSettings` | bridged | pending | pending |
 | `recents` | bridged | pending | pending |
-| `requiresApi` | pending | pending | pending |
-| `requiresAutojsVersion` | pending | pending | pending |
+| `requiresApi` | bridged | bridged | pending |
+| `requiresAutojsVersion` | bridged | bridged | pending |
 | `retry` | pending | pending | pending |
 | `scrollDown` | pending | pending | pending |
 | `scrollUp` | pending | pending | pending |
-| `setClip` | bridged | pending | capability-gated |
 | `setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `setScreenMetrics` | pending | pending | pending |
+| `setScreenMetrics` | bridged | bridged | pending |
 | `setText` | bridged | pending | capability-gated |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `showConsole` | bridged | bridged | pending |
 | `sleep` | bridged | pending | pending |
 | `splitScreen` | bridged | pending | pending |
-| `stop` | pending | pending | pending |
+| `stop` | bridged | bridged | pending |
 | `swipe` | bridged | pending | capability-gated |
 | `sync` | pending | pending | pending |
 | `toString` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
@@ -272,8 +271,8 @@
 | `verbose` | bridged | bridged | pending |
 | `wait` | pending | pending | pending |
 | `wait.async` | pending | pending | pending |
-| `waitForActivity` | pending | pending | pending |
-| `waitForPackage` | pending | pending | pending |
+| `waitForActivity` | bridged | bridged | pending |
+| `waitForPackage` | bridged | bridged | pending |
 | `warn` | bridged | bridged | pending |
 
 ### App#
@@ -1470,7 +1469,7 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `app.autojs` | pending | pending | pending |
+| `app.autojs` | bridged | bridged | pending |
 
 ### auto
 
@@ -1519,39 +1518,39 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `autojs.R` | pending | pending | pending |
-| `autojs.canDisplayOverOtherApps` | pending | pending | pending |
-| `autojs.canModifySystemSettings` | pending | pending | pending |
-| `autojs.canWriteSecureSettings` | pending | pending | pending |
-| `autojs.exit` | pending | pending | pending |
-| `autojs.getLanguage` | pending | pending | pending |
-| `autojs.getLanguageTag` | pending | pending | pending |
-| `autojs.getRootMode` | pending | pending | pending |
-| `autojs.isRootAvailable` | pending | pending | pending |
-| `autojs.isScreenLandscape` | pending | pending | pending |
-| `autojs.isScreenPortrait` | pending | pending | pending |
-| `autojs.name` | pending | pending | pending |
-| `autojs.orientation` | pending | pending | pending |
-| `autojs.packageName` | pending | pending | pending |
-| `autojs.restart` | pending | pending | pending |
-| `autojs.rotation` | pending | pending | pending |
-| `autojs.setRootMode` | pending | pending | pending |
-| `autojs.themeColor` | pending | pending | pending |
-| `autojs.versionCode` | pending | pending | pending |
-| `autojs.versionDate` | pending | pending | pending |
-| `autojs.versionName` | pending | pending | pending |
+| `autojs.R` | bridged | bridged | pending |
+| `autojs.canDisplayOverOtherApps` | bridged | bridged | pending |
+| `autojs.canModifySystemSettings` | bridged | bridged | pending |
+| `autojs.canWriteSecureSettings` | bridged | bridged | pending |
+| `autojs.exit` | bridged | bridged | pending |
+| `autojs.getLanguage` | bridged | bridged | pending |
+| `autojs.getLanguageTag` | bridged | bridged | pending |
+| `autojs.getRootMode` | bridged | bridged | pending |
+| `autojs.isRootAvailable` | bridged | bridged | pending |
+| `autojs.isScreenLandscape` | bridged | bridged | pending |
+| `autojs.isScreenPortrait` | bridged | bridged | pending |
+| `autojs.name` | bridged | bridged | pending |
+| `autojs.orientation` | bridged | bridged | pending |
+| `autojs.packageName` | bridged | bridged | pending |
+| `autojs.restart` | bridged | bridged | pending |
+| `autojs.rotation` | bridged | bridged | pending |
+| `autojs.setRootMode` | bridged | bridged | pending |
+| `autojs.themeColor` | bridged | bridged | pending |
+| `autojs.versionCode` | bridged | bridged | pending |
+| `autojs.versionDate` | bridged | bridged | pending |
+| `autojs.versionName` | bridged | bridged | pending |
 
 ### autojs.version
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `autojs.version.code` | pending | pending | pending |
-| `autojs.version.date` | pending | pending | pending |
-| `autojs.version.isAtLeast` | pending | pending | pending |
-| `autojs.version.isEqual` | pending | pending | pending |
-| `autojs.version.isHigherThan` | pending | pending | pending |
-| `autojs.version.isLowerThan` | pending | pending | pending |
-| `autojs.version.name` | pending | pending | pending |
+| `autojs.version.code` | bridged | bridged | pending |
+| `autojs.version.date` | bridged | bridged | pending |
+| `autojs.version.isAtLeast` | bridged | bridged | pending |
+| `autojs.version.isEqual` | bridged | bridged | pending |
+| `autojs.version.isHigherThan` | bridged | bridged | pending |
+| `autojs.version.isLowerThan` | bridged | bridged | pending |
+| `autojs.version.name` | bridged | bridged | pending |
 
 ### automator
 
@@ -1751,20 +1750,20 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `dialogs.build` | pending | pending | pending |
+| `dialogs.build` | bridged | bridged | pending |
 
 ### engines
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `engines.all` | bridged | pending | pending |
-| `engines.execAutoFile` | pending | pending | pending |
-| `engines.execScript` | bridged | pending | pending |
-| `engines.execScriptFile` | bridged | pending | pending |
-| `engines.getEngines` | pending | pending | pending |
-| `engines.myEngine` | bridged | pending | pending |
-| `engines.stopAll` | bridged | pending | pending |
-| `engines.stopAllAndToast` | pending | pending | pending |
+| `engines.all` | bridged | bridged | pending |
+| `engines.execAutoFile` | bridged | bridged | pending |
+| `engines.execScript` | bridged | bridged | pending |
+| `engines.execScriptFile` | bridged | bridged | pending |
+| `engines.getEngines` | bridged | bridged | pending |
+| `engines.myEngine` | bridged | bridged | pending |
+| `engines.stopAll` | bridged | bridged | pending |
+| `engines.stopAllAndToast` | bridged | bridged | pending |
 
 ### events
 
@@ -2353,22 +2352,22 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `installer.InstallerError` | pending | pending | pending |
-| `installer.authorizer` | pending | pending | pending |
-| `installer.inspect` | pending | pending | pending |
-| `installer.inspectAsync` | pending | pending | pending |
-| `installer.install` | pending | pending | pending |
-| `installer.installAsync` | pending | pending | pending |
-| `installer.isAvailable` | pending | pending | pending |
-| `installer.isDefault` | pending | pending | pending |
-| `installer.session` | pending | pending | pending |
-| `installer.setDefault` | pending | pending | pending |
-| `installer.setDefaultAsync` | pending | pending | pending |
-| `installer.status` | pending | pending | pending |
-| `installer.uninstall` | pending | pending | pending |
-| `installer.uninstallAsync` | pending | pending | pending |
-| `installer.users` | pending | pending | pending |
-| `installer.usersAsync` | pending | pending | pending |
+| `installer.InstallerError` | bridged | bridged | pending |
+| `installer.authorizer` | bridged | bridged | pending |
+| `installer.inspect` | bridged | bridged | pending |
+| `installer.inspectAsync` | bridged | bridged | pending |
+| `installer.install` | bridged | bridged | pending |
+| `installer.installAsync` | bridged | bridged | pending |
+| `installer.isAvailable` | bridged | bridged | pending |
+| `installer.isDefault` | bridged | bridged | pending |
+| `installer.session` | bridged | bridged | pending |
+| `installer.setDefault` | bridged | bridged | pending |
+| `installer.setDefaultAsync` | bridged | bridged | pending |
+| `installer.status` | bridged | bridged | pending |
+| `installer.uninstall` | bridged | bridged | pending |
+| `installer.uninstallAsync` | bridged | bridged | pending |
+| `installer.users` | bridged | bridged | pending |
+| `installer.usersAsync` | bridged | bridged | pending |
 
 ### keys
 
@@ -2405,33 +2404,33 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `memory.collect` | pending | pending | pending |
-| `memory.dumpHeap` | pending | pending | pending |
-| `memory.retained` | pending | pending | pending |
-| `memory.snapshot` | pending | pending | pending |
-| `memory.watch` | pending | pending | pending |
+| `memory.collect` | bridged | bridged | pending |
+| `memory.dumpHeap` | bridged | bridged | pending |
+| `memory.retained` | bridged | bridged | pending |
+| `memory.snapshot` | bridged | bridged | pending |
+| `memory.watch` | not-portable: runtime-native (native-memory-watch) | not-portable: runtime-native (native-memory-watch) | pending |
 
 ### notice
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `notice.builder` | pending | pending | pending |
-| `notice.config` | pending | pending | pending |
-| `notice.ensureEnabled` | pending | pending | pending |
-| `notice.getBuilder` | pending | pending | pending |
-| `notice.isEnabled` | pending | pending | pending |
-| `notice.launchSettings` | pending | pending | pending |
+| `notice.builder` | bridged | bridged | pending |
+| `notice.config` | bridged | bridged | pending |
+| `notice.ensureEnabled` | bridged | bridged | pending |
+| `notice.getBuilder` | bridged | bridged | pending |
+| `notice.isEnabled` | bridged | bridged | pending |
+| `notice.launchSettings` | bridged | bridged | pending |
 
 ### notice.channel
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `notice.channel.contains` | pending | pending | pending |
-| `notice.channel.create` | pending | pending | pending |
-| `notice.channel.createIfNeeded` | pending | pending | pending |
-| `notice.channel.get` | pending | pending | pending |
-| `notice.channel.getAll` | pending | pending | pending |
-| `notice.channel.remove` | pending | pending | pending |
+| `notice.channel.contains` | bridged | bridged | pending |
+| `notice.channel.create` | bridged | bridged | pending |
+| `notice.channel.createIfNeeded` | bridged | bridged | pending |
+| `notice.channel.get` | bridged | bridged | pending |
+| `notice.channel.getAll` | bridged | bridged | pending |
+| `notice.channel.remove` | bridged | bridged | pending |
 
 ### ocr
 
@@ -2469,26 +2468,26 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `plugins.extend` | pending | pending | pending |
-| `plugins.extendAll` | pending | pending | pending |
-| `plugins.extendAllBut` | pending | pending | pending |
+| `plugins.extend` | local-shim | local-shim | pending |
+| `plugins.extendAll` | local-shim | local-shim | pending |
+| `plugins.extendAllBut` | local-shim | local-shim | pending |
 | `plugins.load` | local-shim | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) |
 
 ### plugins.tools
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `plugins.tools.call` | pending | pending | pending |
-| `plugins.tools.callAsync` | pending | pending | pending |
-| `plugins.tools.list` | pending | pending | pending |
-| `plugins.tools.providers` | pending | pending | pending |
+| `plugins.tools.call` | local-shim | local-shim | pending |
+| `plugins.tools.callAsync` | local-shim | local-shim | pending |
+| `plugins.tools.list` | local-shim | local-shim | pending |
+| `plugins.tools.providers` | local-shim | local-shim | pending |
 
 ### powerManager
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `powerManager.isIgnoringBatteryOptimizations` | pending | pending | pending |
-| `powerManager.requestIgnoreBatteryOptimizations` | pending | pending | pending |
+| `powerManager.isIgnoringBatteryOptimizations` | bridged | bridged | pending |
+| `powerManager.requestIgnoreBatteryOptimizations` | bridged | bridged | pending |
 
 ### qrcode
 
@@ -2528,10 +2527,10 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `settings.categories` | pending | pending | pending |
-| `settings.export` | pending | pending | pending |
-| `settings.isEnabled` | pending | pending | pending |
-| `settings.setEnabled` | pending | pending | pending |
+| `settings.categories` | bridged | bridged | pending |
+| `settings.export` | bridged | bridged | pending |
+| `settings.isEnabled` | bridged | bridged | pending |
+| `settings.setEnabled` | bridged | bridged | pending |
 
 ### speech
 
@@ -2561,10 +2560,10 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `sysprops.get` | pending | pending | pending |
-| `sysprops.getAll` | pending | pending | pending |
-| `sysprops.getBoolean` | pending | pending | pending |
-| `sysprops.getInt` | pending | pending | pending |
+| `sysprops.get` | bridged | bridged | pending |
+| `sysprops.getAll` | bridged | bridged | pending |
+| `sysprops.getBoolean` | bridged | bridged | pending |
+| `sysprops.getInt` | bridged | bridged | pending |
 
 ### terminal
 
@@ -2689,17 +2688,17 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `workManager.addBroadcastIntentTask` | pending | pending | pending |
-| `workManager.addDailyTask` | pending | pending | pending |
-| `workManager.addDisposableTask` | pending | pending | pending |
-| `workManager.addIntentTask` | pending | pending | pending |
-| `workManager.addWeeklyTask` | pending | pending | pending |
-| `workManager.getIntentTask` | pending | pending | pending |
-| `workManager.getTimedTask` | pending | pending | pending |
-| `workManager.queryIntentTasks` | pending | pending | pending |
-| `workManager.queryTimedTasks` | pending | pending | pending |
-| `workManager.removeIntentTask` | pending | pending | pending |
-| `workManager.removeTimedTask` | pending | pending | pending |
+| `workManager.addBroadcastIntentTask` | bridged | bridged | pending |
+| `workManager.addDailyTask` | bridged | bridged | pending |
+| `workManager.addDisposableTask` | bridged | bridged | pending |
+| `workManager.addIntentTask` | bridged | bridged | pending |
+| `workManager.addWeeklyTask` | bridged | bridged | pending |
+| `workManager.getIntentTask` | bridged | bridged | pending |
+| `workManager.getTimedTask` | bridged | bridged | pending |
+| `workManager.queryIntentTasks` | bridged | bridged | pending |
+| `workManager.queryTimedTasks` | bridged | bridged | pending |
+| `workManager.removeIntentTask` | bridged | bridged | pending |
+| `workManager.removeTimedTask` | bridged | bridged | pending |
 
 ### yolo
 
