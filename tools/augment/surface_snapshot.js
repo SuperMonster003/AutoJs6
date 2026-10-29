@@ -132,6 +132,42 @@ function describeOwn(o, depth) {
     return result;
 }
 
+// How global resolves each of the names (in, own property, typeof of the bare name, typeof / String of global[name]).
+function describeLookup(names) {
+    let lookup = {};
+    names.forEach(name => {
+        let entry = { inGlobal: name in global, own: Object.prototype.hasOwnProperty.call(global, name) };
+        try {
+            entry.bare = eval("typeof " + name);
+            let v = global[name];
+            entry.type = typeof v;
+            entry.text = String(v);
+        } catch (e) {
+            entry.error = String(e);
+        }
+        lookup[name] = entry;
+    });
+    return lookup;
+}
+
+// For each $ name of global whose base name (without the $) is also an own property: is it the same value.
+function describeAliases() {
+    let aliases = {};
+    Object.getOwnPropertyNames(global).forEach(name => {
+        if (name.charAt(0) === "$" && name.length > 1) {
+            let base = name.slice(1);
+            try {
+                if (Object.prototype.hasOwnProperty.call(global, base)) aliases[name] = global[name] === global[base] ? "same" : "different";
+            } catch (e) {
+                aliases[name] = "error " + e;
+            }
+        }
+    });
+    return aliases;
+}
+
+// ScriptSurfaceGateTest (roadmap P6.2) runs everything above this line on the JVM, with its own part instead of the
+// rest of the script (no files / device there, and the subtrees of global itself and of the same $ aliases not repeated).
 let snapshot = {
     versionName: String(autojs.versionName),
     versionCode: Number(autojs.versionCode),
@@ -140,33 +176,12 @@ let snapshot = {
     aliases: {},
     global: describeOwn(global, 0),
     roots: {},
-    lookup: {},
+    lookup: describeLookup(LOOKUP_NAMES),
 };
-LOOKUP_NAMES.forEach(name => {
-    let entry = { inGlobal: name in global, own: Object.prototype.hasOwnProperty.call(global, name) };
-    try {
-        entry.bare = eval("typeof " + name);
-        let v = global[name];
-        entry.type = typeof v;
-        entry.text = String(v);
-    } catch (e) {
-        entry.error = String(e);
-    }
-    snapshot.lookup[name] = entry;
-});
 EXTRA_ROOTS.forEach(path => {
     let o = path.split(".").reduce((v, k) => (v === undefined || v === null ? v : v[k]), global);
     snapshot.roots[path] = o === undefined || o === null ? { "[error]": { error: "missing" } } : describeOwn(o, 1);
 });
-Object.getOwnPropertyNames(global).forEach(name => {
-    if (name.charAt(0) === "$" && name.length > 1) {
-        let base = name.slice(1);
-        try {
-            if (Object.prototype.hasOwnProperty.call(global, base)) snapshot.aliases[name] = global[name] === global[base] ? "same" : "different";
-        } catch (e) {
-            snapshot.aliases[name] = "error " + e;
-        }
-    }
-});
+snapshot.aliases = describeAliases();
 files.write(OUT, JSON.stringify(snapshot));
 console.log("AJ6SURFACE written " + OUT + " keys=" + snapshot.keysOrder.length);

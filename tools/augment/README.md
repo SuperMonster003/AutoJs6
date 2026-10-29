@@ -185,3 +185,20 @@ py -3.12 -I tools/augment/ci_timing_baseline.py --profile local-avd RESULT.json 
 与本目录其他工具不同, 它会安装 debug 宿主 (`install -r -t -g`, 取 `--apk-dir` 下与设备 ABI 对应的分包) 并改设备设置: 放行 "所有文件访问", 关动画, 保持亮屏, 关闭 cached apps freezer (结束时恢复原值), logcat 缓冲设为 16 MiB. 因此只接受模拟器 (`ro.kernel.qemu` 或 `ro.boot.qemu` 为 1), 真机仍用 `device_r2.py`. 每个调用文件与 `calls_prelude.js` 之间插入一段 `GATE_SHIM`, 在每个失败项后紧跟一次 `undefined.x` 作为相邻参照 (不改共享的计时脚本). 一次全套约 17 分钟 (暖机 100 次, 2 轮 x 每个脚本 3 次, 启动计时每轮 10 次); 有检查未通过时只把相关脚本在新进程中重测一次, 每项取两次中较好的值.
 
 输出 `CI_TIMING_*` 行: 每个未通过的检查一行 `CI_TIMING_PROBLEM` (over / missing / timeout, 附值, 基线与上限), 基线 `notes` 中的项各一行 `CI_TIMING_KNOWN`, 最后 `CI_TIMING_RESULT PASS|FAIL`; 退出码 0 / 1, 得出结论前出错为 2. 结果 JSON 写到 `--out` (默认 `build/augment-timing-gate`), 记录每次运行的原始数值, 也是 `ci_timing_baseline.py` 的输入; 其中的 `commit` 取 `--apk-dir` 所在仓库的 HEAD (CI 为 `GITHUB_SHA`). 本机测基线时用同配方的 AVD 跑全套至少 3 次 (`--no-rerun`), 机器同时有其他负载时把 `qemu-system-x86_64-headless` 的优先级调到高于正常.
+
+## surface_gate.py: 表面快照门禁的基线 (P6.2)
+
+```
+py -3.12 -I tools/augment/surface_gate.py [--diff | --update] [--limit N]
+```
+
+门禁本身是单测 `ScriptSurfaceGateTest` (`app/src/test/java/org/autojs/autojs/runtime/api/modules/`), 随 `:app:testAppDebugUnitTest` 进入 `prepush_check.py` 的快速检查与 CI, 不需要设备; 设计与边界见 `docs/augment/P6-2-surface-prepush-design.md`. `runtimeSurface` 在 JVM 上挂载新层的全部顶层模块, 用 `surface_snapshot.js` 中 `let snapshot = {` 之前的函数描述全局对象 (所以改这段函数也会改变 JVM 表面), `metadataSurface` 把 `script-modules.json` 投影成每个模块 / 函数 (含各重载的 arity) / accessor / install / Java 类一行. 两者把结果写到 `app/build/script-modules-surface/`, 与 `baseline/surface-jvm.txt` / `baseline/script-modules-surface.txt` 不同时失败, 消息列出增减行数, 前 40 行差异与更新命令; 没有基线时跳过.
+
+有意改动脚本 API 表面时, 先跑单测, 再用 `--update` 把实际结果复制成基线, 与改动放在同一个提交里:
+
+```
+gradlew :app:testAppDebugUnitTest --tests org.autojs.autojs.runtime.api.modules.ScriptSurfaceGateTest
+py -3.12 -I tools/augment/surface_gate.py --update
+```
+
+`--diff` (默认) 只打印差异, 有差异或缺少实际结果时退出码为 1. 只改基线而代码未变时 Gradle 可能判测试为最新而不重跑, 需要时加 `--rerun`.
