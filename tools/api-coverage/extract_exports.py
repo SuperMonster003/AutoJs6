@@ -480,34 +480,39 @@ def extract_ksp(host, metadata):
                 unique[record['api']] = dict(record, metadata='kotlin')
         # Mount and source errors (no module) mean the fallback itself is incomplete.
         unresolved += [item for item in kotlin['unresolved'] if item.get('module', fallback[0]) in fallback]
-    return {'scope': 'Modules, functions with their aliases, getters, properties and Java classes declared in script-modules.json (KSP), placed on their module and / or the global object; names defined by @ScriptInstall hooks from the module "installs" list (without one, from the Kotlin registrations, metadata kotlin). Excludes inherited Java prototype members, returned objects, nested dynamic objects, names install hooks compute at run time (dataSource installComputed: the global selector functions, the Compose catalogue), JSOX built-in extensions, overload semantics.',
+    return {'scope': 'Modules, functions with their aliases, getters, properties and Java classes declared in script-modules.json (KSP), placed on their module and / or the global object; names defined by @ScriptInstall hooks from the module "installs" list (without one, from the Kotlin registrations, metadata kotlin). Excludes inherited Java prototype members, returned objects, nested dynamic objects, names install hooks compute at run time (dataSource installComputed: the global selector functions, the Compose catalogue; the catalogue NODE components are added from policy.json pluginExports, metadata plugin:compose), JSOX built-in extensions, overload semantics.',
             'dataSource': {'kind': 'ksp', 'file': Path(metadata).resolve().relative_to(HOST).as_posix() if Path(metadata).resolve().is_relative_to(HOST) else str(metadata),
                            'format': meta['format'], 'installFallback': fallback, 'installComputed': computed},
             'modules': modules, 'records': sorted(unique.values(), key=lambda x: x['api']), 'unresolved': unresolved}
 
 
-def extract(host, metadata=None, source='auto'):
+def extract(host, metadata=None, source='auto', policy=None):
     """Exports of `source` ksp (script-modules.json), kotlin (registration parser), or auto: ksp when the file exists.
 
     Functions and callable modules carry their argument-count ranges (arity.py, api-coverage P0.3); the returned
-    objects and their members are in "returnedObjects" (returned_objects.py, P0.4)."""
+    objects and their members are in "returnedObjects" (returned_objects.py, P0.4). The names plugin contracts define
+    (policy.json pluginExports, P5.2c) are added as records with metadata "plugin:<name>" (plugin_exports.py)."""
     from arity import attach as attach_arity
+    from plugin_exports import attach as attach_plugins
     from returned_objects import attach as attach_returned
     HOST = Path(host).resolve()
+    if policy is None:
+        policy = json.loads((Path(__file__).resolve().parent / 'policy.json').read_text(encoding='utf-8'))
     metadata = Path(metadata) if metadata else HOST / DEFAULT_METADATA
     if source == 'ksp' or (source == 'auto' and metadata.is_file()):
         if not metadata.is_file():
             raise FileNotFoundError(f'{metadata} not found; build it with gradlew :app:kspAppDebugKotlin')
         if metadata_is_stale(HOST, metadata):
             print(f'warning: {metadata} is older than the module sources; run gradlew :app:kspAppDebugKotlin', file=sys.stderr)
-        return attach_returned(HOST, attach_arity(HOST, extract_ksp(HOST, metadata), metadata), metadata)
+        result = attach_plugins(HOST, extract_ksp(HOST, metadata), policy)
+        return attach_returned(HOST, attach_arity(HOST, result, metadata), metadata)
     if source == 'auto':
         print(f'warning: {metadata} not found, reading the Kotlin registrations (run gradlew :app:kspAppDebugKotlin)', file=sys.stderr)
     result = extract_kotlin(HOST)
     for item in result['records'] + result['modules']:
         item['metadata'] = 'kotlin'
     result['dataSource'] = {'kind': 'kotlin'}
-    return attach_returned(HOST, attach_arity(HOST, result))
+    return attach_returned(HOST, attach_arity(HOST, attach_plugins(HOST, result, policy)))
 
 
 def compare(ksp, kotlin):

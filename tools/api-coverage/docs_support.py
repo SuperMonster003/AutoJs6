@@ -69,8 +69,13 @@ def check(docs, matrix_path, output=None, require_all=False, node="node"):
     report = json.loads(result.stdout)
     if output:
         (Path(output) / "docs-support.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    failures = ["Documentation runtime support: " + problem for problem in report["problems"]]
     matrix = json.loads(Path(matrix_path).read_text(encoding="utf-8"))
+    skipped = matrix["dataSource"].get("pluginExportsSkipped", [])
+    if skipped:
+        # The matrix lacks the rows of a plugin contract (policy.json pluginExports): the tables are not compared.
+        return {"generator": str(script), "dataSource": report["dataSource"], "pages": len(report["pages"]),
+                "skippedPluginExports": skipped, "requireAll": require_all}, []
+    failures = ["Documentation runtime support: " + problem for problem in report["problems"]]
     counts = root_counts(matrix)
     for page in report["pages"]:
         if page["status"] in ("current", "stale", "skipped"):

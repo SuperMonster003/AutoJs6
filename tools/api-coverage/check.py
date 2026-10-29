@@ -92,7 +92,7 @@ def main():
     output = (args.output or host / "build/reports/api-coverage").resolve()
     output.mkdir(parents=True, exist_ok=True)
     policy = json.loads((HERE / "policy.json").read_text(encoding="utf-8"))
-    baseline = extract(host, args.metadata, args.source)
+    baseline = extract(host, args.metadata, args.source, policy)
     failures = []
     if not baseline["modules"] or not baseline["records"]:
         failures.append("No runtime exports extracted")
@@ -138,6 +138,9 @@ def main():
     failures.extend(f"Prototype member below the name gate: {row['id']} (doc {row['doc']}, d.ts {row['dts']}, Ace {row['ace']})"
                     for row in returned_report["prototypes"]["failures"])
     failures.extend("returned-objects.json: " + problem for problem in baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"])
+    # Names plugin contracts define (policy.json pluginExports, P5.2c): a catalogue that no longer parses fails; a
+    # missing contract checkout is skipped (summary pluginExports), as are the comparisons depending on its rows.
+    failures.extend(f"pluginExports {name}: {problem}" for name, item in baseline["pluginExports"].items() for problem in item.get("problems", []))
     matrix_summary = docs_summary = None
     if args.write_pending_baseline:
         args.matrix = True
@@ -167,6 +170,7 @@ def main():
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
         "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"]),
+        "pluginExports": {name: {key: item[key] for key in ("status", "root", "reason", "counts") if key in item} for name, item in baseline["pluginExports"].items()},
         "matrix": matrix_summary,
         "docsSupport": docs_summary,
         "scope": baseline["scope"], "failures": failures,

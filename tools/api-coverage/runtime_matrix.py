@@ -617,15 +617,20 @@ def partial_columns(matrix):
     return [column for column in ('doc', 'dts', 'ace') if matrix['summary']['byColumn'][column] is None]
 
 
+def skipped_plugins(matrix):
+    """pluginExports sources the run could not read (plugin_exports.py): the matrix lacks their rows."""
+    return matrix['dataSource'].get('pluginExportsSkipped', [])
+
+
 def compare_markdown(matrix, path):
     """'current', 'stale', 'missing' or 'skipped': the checked-in file came from another data source, or the
-    matrix lacks a column of it (MATRIX.md is only written with all columns)."""
+    matrix lacks a column of it (MATRIX.md is only written with all columns) or the rows of a pluginExports source."""
     path = Path(path)
     if not path.is_file():
         return 'missing'
     text = path.read_text(encoding='utf-8')
     state = markdown_state(text)
-    if state and state['dataSource'] != matrix['dataSource'].get('kind', 'kotlin') or partial_columns(matrix):
+    if state and state['dataSource'] != matrix['dataSource'].get('kind', 'kotlin') or partial_columns(matrix) or skipped_plugins(matrix):
         return 'skipped'
     return 'current' if text == render_markdown(matrix) else 'stale'
 
@@ -685,14 +690,15 @@ def render_pending_baseline(matrix):
 
 def compare_pending_baseline(matrix, path):
     """('current' | 'differs' | 'missing' | 'skipped', new cells, stale cells); a cell is (column, row id). A baseline written
-    from the other export source (ksp / kotlin) is skipped, as MATRIX.md is."""
+    from the other export source (ksp / kotlin), or compared with a matrix lacking a pluginExports source, is skipped, as
+    MATRIX.md is."""
     path = Path(path)
     if not path.is_file():
         return 'missing', [], []
     baseline = json.loads(path.read_text(encoding='utf-8'))
     if baseline.get('schema') != BASELINE_SCHEMA:
         raise ValueError(f'{PENDING_BASELINE} schema must be {BASELINE_SCHEMA}')
-    if baseline.get('dataSource') != matrix['dataSource'].get('kind', 'kotlin'):
+    if baseline.get('dataSource') != matrix['dataSource'].get('kind', 'kotlin') or skipped_plugins(matrix):
         return 'skipped', [], []
     current = pending_cells(matrix)
     listed = {column: set(baseline['pending'].get(column, [])) for column in RUNTIME_COLUMNS}
@@ -704,6 +710,8 @@ def compare_pending_baseline(matrix, path):
 def write_pending_baseline(matrix, path, allow_new=False):
     """Rewrite the baseline with the current pending cells; without allow_new it only shrinks (returns the refused new cells)."""
     path = Path(path)
+    if skipped_plugins(matrix):
+        raise ValueError(f"{PENDING_BASELINE} is not written without the pluginExports source(s) {', '.join(skipped_plugins(matrix))}")
     state, new, _ = compare_pending_baseline(matrix, path) if path.is_file() else ('missing', [], [])
     if new and not allow_new:
         return new
@@ -727,7 +735,8 @@ def gate(matrix, markdown, baseline=None):
     if state == 'skipped':
         partial = partial_columns(matrix)
         findings.append(f"{MARKDOWN} not compared: the matrix has no {' / '.join(partial)} column (check.py --skip-ace, or no check.py reports)"
-                        if partial else f'{MARKDOWN} not compared: it was generated from another data source')
+                        if partial else f"{MARKDOWN} not compared: pluginExports {', '.join(skipped_plugins(matrix))} skipped (contract sources not found)"
+                        if skipped_plugins(matrix) else f'{MARKDOWN} not compared: it was generated from another data source')
     findings += [f'Runtime matrix pending in {COLUMN_TITLES[column]}: {count}' for column, count in summary['pending'].items() if count]
     baseline_state = None
     if baseline is not None:
@@ -735,7 +744,8 @@ def gate(matrix, markdown, baseline=None):
         if baseline_state == 'missing':
             failures.append(f'{PENDING_BASELINE} is missing; write it with python tools/api-coverage/check.py --write-pending-baseline')
         elif baseline_state == 'skipped':
-            findings.append(f'{PENDING_BASELINE} not compared: it was written from another data source')
+            findings.append(f"{PENDING_BASELINE} not compared: pluginExports {', '.join(skipped_plugins(matrix))} skipped"
+                            if skipped_plugins(matrix) else f'{PENDING_BASELINE} not compared: it was written from another data source')
         failures += [f'Runtime matrix new pending cell {item} ({COLUMN_TITLES[column]}): cover it, exclude it with a decided reason, '
                      f'or register it and write {PENDING_BASELINE} with --write-pending-baseline --allow-new-pending' for column, item in new]
         if stale:
@@ -753,6 +763,8 @@ def write(matrix, reports, markdown=None):
     if markdown and partial_columns(matrix):
         raise ValueError(f"{MARKDOWN} is only written with every column; this matrix has no {' / '.join(partial_columns(matrix))} column "
                          '(run check.py --write-matrix without --skip-ace)')
+    if markdown and skipped_plugins(matrix):
+        raise ValueError(f"{MARKDOWN} is not written without the pluginExports source(s) {', '.join(skipped_plugins(matrix))}")
     if markdown:
         Path(markdown).parent.mkdir(parents=True, exist_ok=True)
         Path(markdown).write_text(render_markdown(matrix), encoding='utf-8', newline='\n')

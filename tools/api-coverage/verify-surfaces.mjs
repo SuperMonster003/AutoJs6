@@ -52,6 +52,11 @@ function typeOf(api) {
             type = checker.getReturnTypeOfSignature(signatures[0]);
         } else if (member === "await") {
             type = checker.getAwaitedType(type);
+        } else if (member === "[]") {
+            // An element of an array result (`ocr.detect.().[]`, P5.2c), typed as `ocr.detect()[0]`.
+            const element = checker.getIndexTypeOfType(checker.getNonNullableType(type), ts.IndexKind.Number);
+            if (!element) return {status: "not-indexable"};
+            type = element;
         } else {
             symbol = checker.getPropertyOfType(checker.getNonNullableType(type), member);
             if (!symbol) return {status: "missing-member"};
@@ -114,10 +119,12 @@ try {
         const all = factory.create({documentUri: "file:///autojs6/editor/coverage-all.js", libraryTextByUri: libraries,
             libraryUris: [...factory.constants.defaultLibraryUris, ...["android", "libraries", "resources", "main-app"].map(group => `file:///autojs6/types/generated/lib.autojs6.${group}.d.ts`)], completionLimit: 3000});
         const fallback = context.AutoJsAceCompleter.createCompleter(context.AutoJsAceIndices);
-        const returnProbe = api => api.includes(".().") || api.includes(".new().") || api.includes(".await.");
+        const returnProbe = api => api.includes(".().") || api.includes(".new().") || api.includes(".await.") || api.includes(".[].");
         for (const row of rows) {
-            // `Canvas.new().drawLine` is typed as `new Canvas().drawLine`, `ai.session.().await.ask` as `(await ai.session()).ask`.
-            const text = row.api.replace(/^(.+?)\.new\(\)/, "new $1()").replaceAll(".()", "()").replace(/^(.+)\.await(?=\.)/, "(await $1)");
+            // `Canvas.new().drawLine` is typed as `new Canvas().drawLine`, `ai.session.().await.ask` as `(await ai.session()).ask`,
+            // `ocr.detect.().[].text` as `ocr.detect()[0].text`.
+            const text = row.api.replace(/^(.+?)\.new\(\)/, "new $1()").replaceAll(".()", "()").replaceAll(".[]", "[0]")
+                .replace(/^(.+)\.await(?=\.)/, "(await $1)");
             const prefix = text.slice(text.lastIndexOf(".") + 1);
             row.aceDefault = completionNames(defaults, text, prefix).some(item => item.caption === prefix);
             row.aceAllGroups = completionNames(all, text, prefix).some(item => item.caption === prefix);

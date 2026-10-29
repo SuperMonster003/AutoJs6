@@ -556,6 +556,9 @@ Java objects whose members are not enumerated)).
   and make the object incomplete; `dynamic` in the entry describes run-time
   forwarding the scanner cannot see (`Color` forwards any colors function).
 - `policy`: the `members` of the entry.
+- `plugin:<name>`: the list `catalog` of a plugin contract source (`policy.json` `pluginExports`, below):
+  the Compose catalogue modifiers of `ComposeModifier`, its shortcut accessors of `ComposeNode`;
+  `catalogProducers` makes every row the source adds a producer.
 
 `check.py` checks every member (and its aliases) by name against the
 documentation pages, the d.ts type of `<probe>.<member>` and Ace completion, in a
@@ -580,7 +583,8 @@ external base whose members are not enumerated (`UiObject.getChild`), the host's
 lifecycle and scheduling side (`ScriptEngine.init`, `TimedTask.createPendingIntent`),
 static factories and runtime references. `probe` must resolve to the object type:
 `ai.session.().await` takes the fulfilled value of a Promise (Ace completes it as
-`(await ai.session()).`), and an overloaded producer whose first signature returns
+`(await ai.session()).`), `ocr.detect.().[]` an element of an array result (Ace completes
+`ocr.detect()[0].`), and an overloaded producer whose first signature returns
 another type is probed through the class (`probeNote`).
 
 ### Module prototypes (Q18 (a))
@@ -616,6 +620,34 @@ library sets and the static index. The surface run is the returned-object one;
 the Java class are not in the default Ace library set, so the module types of the
 d.ts declare them explicitly. In the documentation runtime support tables they
 count as exports of their module (Q22 (a)).
+
+### Plugin contract exports (P5.2c, Q75 (a))
+
+`plugin_exports.py` adds the names a plugin contract defines although no host module registers
+them one by one; `policy.json` `pluginExports` lists the sources. The only kind,
+`compose-ui-catalog`, reads the Compose UI catalogue the compose module installs at run time
+(the KSP `installsComputed` of `compose`) from the contract sources in the host,
+`plugin-api/compose-ui-api` (`V1Catalog`, `ComposeUiV2`, `AndroidViewInteropV1` and the
+vocabulary constants they reference); the 3-Block Compose plugin only renders it:
+
+- the NODE components of the interop catalogue (55: V1 without the command-only `Snackbar`, V2,
+  `AndroidView`) become export records `compose.<Name>` with `metadata` / matrix `metadataSource`
+  `plugin:compose` and registration `pluginExports` (no arity: `unknown`);
+- the modifiers (20) are the members of the returned object `ComposeModifier` (`compose.modifier()`),
+  the shortcuts (8, `w` / `h` / `padding` / ...) the accessors of `ComposeNode`, which every node
+  factory returns (`returned-objects.json` entries with `memberSource` `plugin:compose`).
+
+A constant of the vocabulary objects that the catalogue functions no longer reference, or a
+reference that is not a constant, is a problem and fails the check. `root` is relative to the host
+or absolute, and `rootEnvironment` names a variable overriding it. Without the sources the
+source is `skipped` (`summary.json` `pluginExports`, `exports.json` `dataSource.pluginExportsSkipped`):
+its rows and objects are left out, `MATRIX.md`, the pending baseline and the documentation tables are
+reported as skipped instead of compared, and neither `MATRIX.md` nor the baseline is written.
+
+Runtime cells follow `runtime-policy.json` as for other rows: the component functions are members of
+the Node / Bun `compose` facades; `ComposeModifier` and `ComposeNode` map to the handle types
+`RuntimeCompose.Modifier` / `RuntimeCompose.Node` (a handle type's first segment the module does not
+export is looked up among the global namespaces of its declaration file).
 
 ## Language runtime APIs (Q77)
 

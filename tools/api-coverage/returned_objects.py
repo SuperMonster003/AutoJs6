@@ -15,6 +15,9 @@ Member list sources:
   `X.forEach { name -> helper(name, ...) }` when X resolves to a literal list or map in the sources; other
   computed registrations are listed in "dynamic" and the member list is marked incomplete.
 - policy: the members the file lists.
+- plugin:<name>: the members a plugin contract lists (policy.json pluginExports, plugin_exports.py; P5.2c), the list
+  named by `catalog` (the Compose catalogue modifiers of ComposeModifier, the shortcuts of ComposeNode);
+  `catalogProducers` makes every row the source adds a producer. Without the contract checkout the object is skipped.
 
 The name-level gate (gate()) checks every member against the object's documentation pages, the d.ts type of
 a probe expression (`<probe>.<member>`) and Ace completion, in a separate surface run whose failures are
@@ -599,10 +602,18 @@ def attach(host, result, metadata=None, config=CONFIG):
     # Producers are export rows, or calls of a callable / constructable module (`Color.()`, `Canvas.new()`).
     apis = {r['api'] for r in result['records']}
     apis |= {m['module'] + suffix for m in result['modules'] if m['module'] for suffix in ('.()', '.new()')}
-    objects, problems = [], []
+    objects, problems, skipped = [], [], []
+    plugins = result.get('pluginExports') or {}
     for entry in entries['objects']:
         listed = entry.get('producers', [])
-        producers = sorted(set(typed.get(entry['class'], [])) | {p for p in listed if p in apis})
+        plugin = plugins.get(entry['memberSource'][len('plugin:'):]) if entry['memberSource'].startswith('plugin:') else None
+        if entry['memberSource'].startswith('plugin:') and (plugin or {}).get('status') != 'read':
+            # The contract checkout is missing (plugin_exports.py): the object is left out with its rows.
+            skipped.append(entry['object'])
+            continue
+        # catalogProducers: every row the plugin source adds returns the object (the compose.<Name> node factories).
+        catalogue = set(plugin['records']) if plugin and entry.get('catalogProducers') else set()
+        producers = sorted(set(typed.get(entry['class'], [])) | {p for p in listed if p in apis} | catalogue)
         problems += [f'{entry["object"]}: producer {p} is not an export' for p in listed if p not in apis]
         item = {'object': entry['object'], 'class': entry['class'], 'producers': producers, 'memberSource': entry['memberSource'],
                 'documentation': entry.get('documentation', []), 'probe': entry.get('probe')}
@@ -631,6 +642,13 @@ def attach(host, result, metadata=None, config=CONFIG):
             members = [m for m in members if m['name'] not in exclude]
             notes = entry.get('dynamic', [])
             item.update(source=source, dynamic=notes + dynamic, complete=not dynamic and not notes)
+        elif plugin:
+            # plugin:<name> (P5.2c): the members a plugin contract lists (plugin_exports.py), `catalog` naming the list.
+            if entry.get('catalog') not in plugin['members']:
+                problems.append(f'{entry["object"]}: catalog {entry.get("catalog")} is not a list of {entry["memberSource"]}')
+                continue
+            members = [dict(m) for m in plugin['members'][entry['catalog']]]
+            item.update(source=plugin['root'], complete=True)
         else:
             members = [{'name': n, 'kind': 'Functions', 'source': None, 'line': None, 'arity': None} for n in entry['members']]
             item.update(source=None, complete=True)
@@ -638,7 +656,8 @@ def attach(host, result, metadata=None, config=CONFIG):
         objects.append(item)
     result['returnedObjects'] = objects
     result['returnedObjectsStats'] = dict({'objects': len(objects), 'members': sum(len(o['members']) for o in objects),
-                                           'incomplete': [o['object'] for o in objects if not o['complete']], 'problems': problems},
+                                           'incomplete': [o['object'] for o in objects if not o['complete']], 'problems': problems,
+                                           'skipped': skipped},
                                           **(other_return_types(sources, metadata, set(classes) | set(entries.get('ignoredReturnTypes', []))) if metadata else {}))
     attach_prototypes(sources, result, entries.get('prototypes', []), metadata)
     return result

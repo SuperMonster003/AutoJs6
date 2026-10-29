@@ -38,7 +38,13 @@ export function completeTypeBackedModules(dtsRoot, modules) {
       const symbol = checker.getPropertyOfType(type, name);
       if (symbol && !candidates.some(candidate => candidate.name === name)) candidates.push(symbol);
     }
+    // A mapped type's properties have no declarations of their own (compose's ComposeFactories: one factory per
+    // catalogue component, api-coverage P5.2c); they belong to the scripted type that maps them.
+    const owner = type.symbol || type.aliasSymbol;
+    const mapped = symbol => !symbol.declarations?.length && symbol.flags & ts.SymbolFlags.Property &&
+      symbol.name !== "prototype" && owner && scripted(owner);
     const properties = candidates.filter(symbol => {
+      if (mapped(symbol)) return publicName(symbol.name);
       const inherited = inheritedScriptMembers.has(`${moduleName}.${symbol.name}`);
       if (!publicName(symbol.name) || (!scripted(symbol) && !inherited)) return false;
       return (symbol.declarations || []).some(declaration =>

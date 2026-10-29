@@ -205,5 +205,15 @@
       "page": "luaRuntime",
       "prefix": "autojs."
     }
+  },
+  "pluginExports": {
+    "_note": "api-coverage P5.2c (roadmap appendix C Q75 (a)): contracts whose names scripts reach although no host module registers them one by one (plugin_exports.py). root is relative to the host checkout or absolute (rootEnvironment names a variable that overrides it); a missing root is skipped, and so are the comparisons that depend on its rows",
+    "compose": {
+      "kind": "compose-ui-catalog",
+      "plugin": "AutoJs6-Plugin-Three-Block-Compose",
+      "module": "compose",
+      "root": "plugin-api/compose-ui-api/src/main/java/org/autojs/plugin/compose/api",
+      "rootEnvironment": "AUTOJS6_COMPOSE_UI_API_ROOT"
+    }
   }
 }

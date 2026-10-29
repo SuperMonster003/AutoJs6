@@ -42,11 +42,18 @@ function describe(checker, type) {
 }
 
 // The members of a handle type (roadmap Q27), named from a module symbol by a dotted path; type arguments
-// (`Flow<unknown>`) only matter to the editor queries and are dropped here.
+// (`Flow<unknown>`) only matter to the editor queries and are dropped here. A first segment the module does not
+// export is looked up among the global namespaces of the module's declaration file (Node's `RuntimeCompose.Modifier`).
 function handleMembers(checker, moduleSymbol, name) {
-    let symbol = moduleSymbol;
-    for (const part of name.replace(/<.*$/, "").split(".")) {
-        symbol = symbol && checker.getExportsOfModule(symbol).find(item => item.name === part && item.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Namespace));
+    const meaning = ts.SymbolFlags.Type | ts.SymbolFlags.Namespace;
+    const parts = name.replace(/<.*$/, "").split(".");
+    let symbol = moduleSymbol && checker.getExportsOfModule(moduleSymbol).find(item => item.name === parts[0] && item.flags & meaning);
+    const file = moduleSymbol?.declarations?.[0]?.getSourceFile();
+    if (!symbol && file && parts.length > 1) {
+        symbol = checker.getSymbolsInScope(file, ts.SymbolFlags.Namespace).find(item => item.name === parts[0]);
+    }
+    for (const part of parts.slice(1)) {
+        symbol = symbol && checker.getExportsOfModule(symbol).find(item => item.name === part && item.flags & meaning);
     }
     if (!symbol) return null;
     const location = symbol.declarations[0];

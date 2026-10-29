@@ -172,6 +172,26 @@
     {
       "object": "ScriptEngine", "class": "org.autojs.autojs.engine.JavaScriptEngine", "memberSource": "kotlin-class",
       "probe": "engines.myEngine.()", "documentation": ["engines"], "skipConstants": true, "exclude": ["destroy", "execute", "getRuntime", "init", "put", "setExecArgv", "setId", "setOnDestroyListener", "setRuntime", "uncaughtException"], "excludeNote": "not script API (Q57): the engine lifecycle the host drives (init / put / execute / destroy, the runtime, id, execArgv and destroy listener set when the engine starts, the uncaught exception report); scripts stop an engine with forceStop"
+    },
+    {
+      "object": "OcrResult", "class": "org.autojs.autojs.runtime.api.OcrResult", "memberSource": "kotlin-class",
+      "producers": ["ocr.detect", "ocr.mlkit.detect", "ocr.paddle.detect", "ocr.rapid.detect"], "probe": "ocr.detect.().[]", "documentation": ["ocr", "dataTypes"],
+      "note": "Q74 (a), P5.2c: an element of the arrays the ocr.detect functions return (declared kotlin.Any); compareTo is Comparable's ordering the host sorts results by (reading order)"
+    },
+    {
+      "object": "WrappedBarcode", "class": "org.autojs.autojs.runtime.api.WrappedBarcode", "memberSource": "kotlin-class",
+      "producers": ["barcode.detect", "barcode.detectAll", "qrcode.detect", "qrcode.detectAll"], "probe": "barcode.detectAll.().[]", "documentation": ["barcode", "qrcode"],
+      "note": "Q74 (a), P5.2c: the first result or an element of the results of barcode / qrcode detect and detectAll (declared kotlin.Any); barcode is the plugin contract's BarcodeResult"
+    },
+    {
+      "object": "ComposeModifier", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeModifier", "memberSource": "plugin:compose", "catalog": "modifiers",
+      "producers": ["compose.modifier"], "probe": "compose.modifier.()", "documentation": ["composeModifierType"],
+      "note": "Q75 (a), P5.2c: the Compose catalogue modifiers (policy.json pluginExports compose); every method returns a new chain"
+    },
+    {
+      "object": "ComposeNode", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeNodeNativeObject", "memberSource": "plugin:compose", "catalog": "shortcuts",
+      "producers": ["compose.createElement"], "catalogProducers": true, "probe": "compose.Text.()", "documentation": ["composeNodeType", "composeModifierType"],
+      "note": "Q75 (a), P5.2c: the catalogue shortcut accessors every node defines (w / h / padding / bg / weight / alpha / testTag / contentDescription, also accepted as props); the node's own members (type, set, append, ...) and the catalogue property accessors are not listed yet (Q106)"
     }
   ],
   "prototypes": [
