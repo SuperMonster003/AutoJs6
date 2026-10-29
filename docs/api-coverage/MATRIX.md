@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 892 | 149 | 0 | 1013 | 0 | 776 |
-| Node Worker | 765 | 62 | 0 | 1016 | 0 | 987 |
-| Bun | 0 | 62 | 810 | 1009 | 0 | 949 |
+| Node main | 892 | 263 | 0 | 1012 | 0 | 663 |
+| Node Worker | 765 | 244 | 0 | 1015 | 0 | 806 |
+| Bun | 0 | 183 | 820 | 1009 | 0 | 818 |
 
 | 列 | 取值 |
 |---|---|
@@ -21,7 +21,7 @@
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
-拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 37 / Node Worker 3 / Bun 30. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
+拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 35 / Node Worker 5 / Bun 32. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
 ## 排除规则
 
@@ -43,11 +43,11 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 99 / 13 / 96 | 66 / 13 / 129 | 81 / 13 / 114 |
+| (global) | 208 | 206 | 205 | 205 | 108 / 13 / 87 | 76 / 13 / 119 | 82 / 13 / 113 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
-| Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 0 / 0 / 15 | 0 / 0 / 15 |
+| Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 0 / 0 / 15 |
 | Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 29 | 29 | 29 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
 | ConsoleConfigurator# | 52 | 50 | 52 | 0 | 0 / 52 / 0 | 0 / 52 / 0 | 0 / 52 / 0 |
@@ -66,8 +66,8 @@
 | MailClient# | 53 | 53 | 53 | 53 | 53 / 0 / 0 | 53 / 0 / 0 | 53 / 0 / 0 |
 | Mat# | 3 | 0 | 3 | 0 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | MatchingResult# | 16 | 16 | 16 | 16 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
-| Mathx | 23 | 23 | 23 | 23 | 23 / 0 / 0 | 0 / 0 / 23 | 0 / 0 / 23 |
-| Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 0 / 0 / 14 | 0 / 0 / 14 |
+| Mathx | 23 | 23 | 23 | 23 | 23 / 0 / 0 | 23 / 0 / 0 | 0 / 0 / 23 |
+| Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 0 / 0 / 14 |
 | ObjectFrame# | 15 | 15 | 15 | 15 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
 | PReadableTextFile# | 5 | 5 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PWritableTextFile# | 6 | 6 | 6 | 0 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
@@ -104,7 +104,7 @@
 | console | 56 | 56 | 56 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 31 / 0 / 25 |
 | continuation | 4 | 3 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | crypto | 8 | 7 | 8 | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
-| cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
+| cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | device | 86 | 86 | 86 | 86 | 35 / 0 / 51 | 35 / 0 / 51 | 25 / 0 / 61 |
 | dialogs | 9 | 9 | 9 | 9 | 8 / 0 / 1 | 8 / 0 / 1 | 8 / 0 / 1 |
 | engines | 8 | 8 | 8 | 8 | 5 / 0 / 3 | 0 / 0 / 8 | 0 / 0 / 8 |
@@ -114,12 +114,12 @@
 | files.batchRename | 17 | 17 | 17 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
 | floaty | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | flow | 55 | 55 | 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
-| fmt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
+| fmt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | gallery | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | http | 21 | 20 | 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | installer | 16 | 16 | 16 | 16 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
-| jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 0 / 2 | 0 / 0 / 2 |
+| jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 0 / 0 / 9 | 0 / 0 / 9 |
@@ -133,19 +133,19 @@
 | ocr.paddle | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | ocr.rapid | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | opencc | 33 | 33 | 33 | 33 | 33 / 0 / 0 | 33 / 0 / 0 | 33 / 0 / 0 |
-| pinyin | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 6 / 0 / 10 |
+| pinyin | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | pinyin4j | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
 | plugins | 4 | 4 | 4 | 4 | 1 / 0 / 3 | 0 / 1 / 3 | 0 / 1 / 3 |
 | plugins.tools | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | powerManager | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | recorder | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
-| s13n | 5 | 5 | 5 | 5 | 1 / 0 / 4 | 0 / 0 / 5 | 0 / 0 / 5 |
+| s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sensors | 21 | 21 | 21 | 21 | 1 / 0 / 20 | 1 / 0 / 20 | 1 / 0 / 20 |
 | settings | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | shell | 11 | 11 | 11 | 11 | 2 / 0 / 9 | 2 / 0 / 9 | 2 / 0 / 9 |
 | shizuku | 13 | 8 | 13 | 13 | 1 / 0 / 12 | 1 / 0 / 12 | 1 / 0 / 12 |
-| species | 37 | 37 | 37 | 37 | 0 / 0 / 37 | 0 / 0 / 37 | 0 / 0 / 37 |
+| species | 37 | 37 | 37 | 37 | 37 / 0 / 0 | 37 / 0 / 0 | 37 / 0 / 0 |
 | speech | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | speech.speaker | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
@@ -159,12 +159,12 @@
 | toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
 | tts | 35 | 35 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 40 | 36 | 36 | 36 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
-| util | 54 | 54 | 54 | 54 | 0 / 2 / 52 | 0 / 2 / 52 | 0 / 1 / 53 |
-| util.inspect | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
-| util.java | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
-| util.morseCode | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
-| util.version | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
-| util.versionCodes | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| util | 54 | 54 | 54 | 54 | 48 / 1 / 5 | 48 / 1 / 5 | 48 / 1 / 5 |
+| util.inspect | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
+| util.java | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
+| util.morseCode | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
+| util.version | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
+| util.versionCodes | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | web | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | workManager | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | yolo | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
@@ -204,7 +204,7 @@
 | `WIDTH` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `axios` | pending | pending | pending |
+| `axios` | local-shim | pending | pending |
 | `back` | bridged | pending | capability-gated |
 | `cheerio` | pending | pending | pending |
 | `clearConsole` | bridged | bridged | pending |
@@ -232,18 +232,17 @@
 | `i18n` | pending | pending | pending |
 | `input` | pending | pending | pending |
 | `isAutoJs6` | pending | pending | pending |
-| `isBigInt` | pending | pending | pending |
+| `isBigInt` | local-shim | local-shim | pending |
 | `isDualInstalled` | pending (rejects) | pending | pending (rejects) |
-| `isEmptyObject` | pending | pending | pending |
+| `isEmptyObject` | local-shim | local-shim | pending |
 | `isInstalled` | bridged | pending | capability-gated |
-| `isInteger` | pending | pending | pending |
+| `isInteger` | local-shim | local-shim | pending |
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `isObject` | pending | pending | pending |
-| `isObjectSpecies` | pending | pending | pending |
-| `isPrimitive` | pending | pending | pending |
-| `isReference` | pending | pending | pending |
+| `isObjectSpecies` | local-shim | local-shim | pending |
+| `isPrimitive` | local-shim | local-shim | pending |
+| `isReference` | local-shim | local-shim | pending |
 | `isRunning` | pending | pending | pending |
 | `isShuttingDown` | pending | pending | pending |
 | `isStopped` | pending | pending | pending |
@@ -282,9 +281,9 @@
 | `press` | pending | pending | pending |
 | `print` | bridged | bridged | pending |
 | `quickSettings` | bridged | pending | pending |
-| `random` | pending | pending | pending |
-| `randomFloat` | local-shim | pending | pending |
-| `randomInt` | local-shim | pending | pending |
+| `random` | local-shim | local-shim | pending |
+| `randomFloat` | local-shim | local-shim | pending |
+| `randomInt` | local-shim | local-shim | pending |
 | `recents` | bridged | pending | pending |
 | `requiresApi` | pending | pending | pending |
 | `requiresAutojsVersion` | pending | pending | pending |
@@ -349,21 +348,21 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Arrayx.differ` | local-shim | pending | pending |
-| `Arrayx.distinct` | local-shim | pending | pending |
-| `Arrayx.distinctBy` | local-shim | pending | pending |
-| `Arrayx.ensureArray` | local-shim | pending | pending |
-| `Arrayx.intersect` | local-shim | pending | pending |
-| `Arrayx.shuffle` | local-shim | pending | pending |
-| `Arrayx.sortBy` | local-shim | pending | pending |
-| `Arrayx.sortByDescending` | local-shim | pending | pending |
-| `Arrayx.sortDescending` | local-shim | pending | pending |
-| `Arrayx.sorted` | local-shim | pending | pending |
-| `Arrayx.sortedBy` | local-shim | pending | pending |
-| `Arrayx.sortedByDescending` | local-shim | pending | pending |
-| `Arrayx.sortedDescending` | local-shim | pending | pending |
-| `Arrayx.subtract` | local-shim | pending | pending |
-| `Arrayx.union` | local-shim | pending | pending |
+| `Arrayx.differ` | local-shim | local-shim | pending |
+| `Arrayx.distinct` | local-shim | local-shim | pending |
+| `Arrayx.distinctBy` | local-shim | local-shim | pending |
+| `Arrayx.ensureArray` | local-shim | local-shim | pending |
+| `Arrayx.intersect` | local-shim | local-shim | pending |
+| `Arrayx.shuffle` | local-shim | local-shim | pending |
+| `Arrayx.sortBy` | local-shim | local-shim | pending |
+| `Arrayx.sortByDescending` | local-shim | local-shim | pending |
+| `Arrayx.sortDescending` | local-shim | local-shim | pending |
+| `Arrayx.sorted` | local-shim | local-shim | pending |
+| `Arrayx.sortedBy` | local-shim | local-shim | pending |
+| `Arrayx.sortedByDescending` | local-shim | local-shim | pending |
+| `Arrayx.sortedDescending` | local-shim | local-shim | pending |
+| `Arrayx.subtract` | local-shim | local-shim | pending |
+| `Arrayx.union` | local-shim | local-shim | pending |
 
 ### Canvas#
 
@@ -854,48 +853,48 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Mathx.avg` | local-shim | pending | pending |
-| `Mathx.ceilLog` | local-shim | pending | pending |
-| `Mathx.ceilPow` | local-shim | pending | pending |
-| `Mathx.cv` | local-shim | pending | pending |
-| `Mathx.dist` | local-shim | pending | pending |
-| `Mathx.floorLog` | local-shim | pending | pending |
-| `Mathx.floorPow` | local-shim | pending | pending |
-| `Mathx.logMn` | local-shim | pending | pending |
-| `Mathx.max` | local-shim | pending | pending |
-| `Mathx.mean` | local-shim | pending | pending |
-| `Mathx.median` | local-shim | pending | pending |
-| `Mathx.min` | local-shim | pending | pending |
-| `Mathx.mode` | local-shim | pending | pending |
-| `Mathx.randFloat` | local-shim | pending | pending |
-| `Mathx.randInt` | local-shim | pending | pending |
-| `Mathx.random` | local-shim | pending | pending |
-| `Mathx.randomFloat` | local-shim | pending | pending |
-| `Mathx.randomInt` | local-shim | pending | pending |
-| `Mathx.roundLog` | local-shim | pending | pending |
-| `Mathx.roundPow` | local-shim | pending | pending |
-| `Mathx.std` | local-shim | pending | pending |
-| `Mathx.sum` | local-shim | pending | pending |
-| `Mathx.var` | local-shim | pending | pending |
+| `Mathx.avg` | local-shim | local-shim | pending |
+| `Mathx.ceilLog` | local-shim | local-shim | pending |
+| `Mathx.ceilPow` | local-shim | local-shim | pending |
+| `Mathx.cv` | local-shim | local-shim | pending |
+| `Mathx.dist` | local-shim | local-shim | pending |
+| `Mathx.floorLog` | local-shim | local-shim | pending |
+| `Mathx.floorPow` | local-shim | local-shim | pending |
+| `Mathx.logMn` | local-shim | local-shim | pending |
+| `Mathx.max` | local-shim | local-shim | pending |
+| `Mathx.mean` | local-shim | local-shim | pending |
+| `Mathx.median` | local-shim | local-shim | pending |
+| `Mathx.min` | local-shim | local-shim | pending |
+| `Mathx.mode` | local-shim | local-shim | pending |
+| `Mathx.randFloat` | local-shim | local-shim | pending |
+| `Mathx.randInt` | local-shim | local-shim | pending |
+| `Mathx.random` | local-shim | local-shim | pending |
+| `Mathx.randomFloat` | local-shim | local-shim | pending |
+| `Mathx.randomInt` | local-shim | local-shim | pending |
+| `Mathx.roundLog` | local-shim | local-shim | pending |
+| `Mathx.roundPow` | local-shim | local-shim | pending |
+| `Mathx.std` | local-shim | local-shim | pending |
+| `Mathx.sum` | local-shim | local-shim | pending |
+| `Mathx.var` | local-shim | local-shim | pending |
 
 ### Numberx
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Numberx.ICU` | local-shim | pending | pending |
-| `Numberx.check` | local-shim | pending | pending |
-| `Numberx.clamp` | local-shim | pending | pending |
-| `Numberx.clampTo` | local-shim | pending | pending |
-| `Numberx.ensureNumber` | local-shim | pending | pending |
-| `Numberx.ensureNumberLike` | local-shim | pending | pending |
-| `Numberx.ensureNumbersLike` | local-shim | pending | pending |
-| `Numberx.padEnd` | local-shim | pending | pending |
-| `Numberx.padStart` | local-shim | pending | pending |
-| `Numberx.parseAny` | local-shim | pending | pending |
-| `Numberx.parseFloat` | local-shim | pending | pending |
-| `Numberx.parsePercent` | local-shim | pending | pending |
-| `Numberx.parseRatio` | local-shim | pending | pending |
-| `Numberx.toFixedNum` | local-shim | pending | pending |
+| `Numberx.ICU` | local-shim | local-shim | pending |
+| `Numberx.check` | local-shim | local-shim | pending |
+| `Numberx.clamp` | local-shim | local-shim | pending |
+| `Numberx.clampTo` | local-shim | local-shim | pending |
+| `Numberx.ensureNumber` | local-shim | local-shim | pending |
+| `Numberx.ensureNumberLike` | local-shim | local-shim | pending |
+| `Numberx.ensureNumbersLike` | local-shim | local-shim | pending |
+| `Numberx.padEnd` | local-shim | local-shim | pending |
+| `Numberx.padStart` | local-shim | local-shim | pending |
+| `Numberx.parseAny` | local-shim | local-shim | pending |
+| `Numberx.parseFloat` | local-shim | local-shim | pending |
+| `Numberx.parsePercent` | local-shim | local-shim | pending |
+| `Numberx.parseRatio` | local-shim | local-shim | pending |
+| `Numberx.toFixedNum` | local-shim | local-shim | pending |
 
 ### ObjectFrame#
 
@@ -1917,17 +1916,6 @@
 | `crypto.generateKeyPair` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
 | `crypto.toHex` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
 
-### cvt.bytes
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `cvt.bytes.AUTO` | local-shim | pending | pending |
-| `cvt.bytes.IEC_DIV` | local-shim | pending | pending |
-| `cvt.bytes.SI_DIV` | local-shim | pending | pending |
-| `cvt.bytes.UNITS` | local-shim | pending | pending |
-| `cvt.bytes.loose` | local-shim | pending | pending |
-| `cvt.bytes.strict` | local-shim | pending | pending |
-
 ### device
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2124,17 +2112,6 @@
 | `floaty.requestPermission` | pending | pending | pending |
 | `floaty.window` | pending | pending | pending |
 
-### fmt.bytes
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `fmt.bytes.AUTO` | local-shim | pending | pending |
-| `fmt.bytes.IEC_DIV` | local-shim | pending | pending |
-| `fmt.bytes.SI_DIV` | local-shim | pending | pending |
-| `fmt.bytes.UNITS` | local-shim | pending | pending |
-| `fmt.bytes.loose` | local-shim | pending | pending |
-| `fmt.bytes.strict` | local-shim | pending | pending |
-
 ### gallery
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2197,13 +2174,6 @@
 | `installer.uninstallAsync` | pending | pending | pending |
 | `installer.users` | pending | pending | pending |
 | `installer.usersAsync` | pending | pending | pending |
-
-### jsox
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `jsox.extend` | local-shim | pending | pending |
-| `jsox.extendAll` | local-shim | pending | pending |
 
 ### keys
 
@@ -2322,21 +2292,6 @@
 | `ocr.rapid.detect` | pending | pending | pending |
 | `ocr.rapid.recognizeText` | pending | pending | pending |
 
-### pinyin
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `pinyin.MODE_NORMAL` | bridged | bridged | pending |
-| `pinyin.MODE_PLACENAME` | bridged | bridged | pending |
-| `pinyin.MODE_PLACE_NAME` | bridged | bridged | pending |
-| `pinyin.MODE_SURNAME` | bridged | bridged | pending |
-| `pinyin.STYLE_FIRST_LETTER` | bridged | bridged | pending |
-| `pinyin.STYLE_INITIALS` | bridged | bridged | pending |
-| `pinyin.STYLE_NORMAL` | bridged | bridged | pending |
-| `pinyin.STYLE_TO3NE` | bridged | bridged | pending |
-| `pinyin.STYLE_TONE` | bridged | bridged | pending |
-| `pinyin.STYLE_TONE2` | bridged | bridged | pending |
-
 ### plugins
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2382,16 +2337,6 @@
 | `recorder.load` | pending | pending | pending |
 | `recorder.remove` | pending | pending | pending |
 | `recorder.save` | pending | pending | pending |
-
-### s13n
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `s13n.bytes` | local-shim | pending | pending |
-| `s13n.color` | pending (rejects) | pending | pending |
-| `s13n.point` | pending (rejects) | pending | pending |
-| `s13n.throwable` | pending (rejects) | pending | pending |
-| `s13n.time` | pending (rejects) | pending | pending |
 
 ### sensors
 
@@ -2457,48 +2402,6 @@
 | `shizuku.isRunning` | pending | pending | pending |
 | `shizuku.kill` | pending | pending | pending |
 | `shizuku.state` | pending | pending | pending |
-
-### species
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `species.isArray` | pending | pending | pending |
-| `species.isArrayBuffer` | pending | pending | pending |
-| `species.isBigInt` | pending | pending | pending |
-| `species.isBoolean` | pending | pending | pending |
-| `species.isContinuation` | pending | pending | pending |
-| `species.isDataView` | pending | pending | pending |
-| `species.isDate` | pending | pending | pending |
-| `species.isError` | pending | pending | pending |
-| `species.isFloat32Array` | pending | pending | pending |
-| `species.isFloat64Array` | pending | pending | pending |
-| `species.isFunction` | pending | pending | pending |
-| `species.isHTMLDocument` | pending | pending | pending |
-| `species.isInt16Array` | pending | pending | pending |
-| `species.isInt32Array` | pending | pending | pending |
-| `species.isInt8Array` | pending | pending | pending |
-| `species.isJavaClass` | pending | pending | pending |
-| `species.isJavaObject` | pending | pending | pending |
-| `species.isJavaPackage` | pending | pending | pending |
-| `species.isMap` | pending | pending | pending |
-| `species.isNamespace` | pending | pending | pending |
-| `species.isNull` | pending | pending | pending |
-| `species.isNumber` | pending | pending | pending |
-| `species.isObject` | pending | pending | pending |
-| `species.isQName` | pending | pending | pending |
-| `species.isRegExp` | pending | pending | pending |
-| `species.isSet` | pending | pending | pending |
-| `species.isString` | pending | pending | pending |
-| `species.isUint16Array` | pending | pending | pending |
-| `species.isUint32Array` | pending | pending | pending |
-| `species.isUint8Array` | pending | pending | pending |
-| `species.isUint8ClampedArray` | pending | pending | pending |
-| `species.isUndefined` | pending | pending | pending |
-| `species.isWeakMap` | pending | pending | pending |
-| `species.isWeakSet` | pending | pending | pending |
-| `species.isWindow` | pending | pending | pending |
-| `species.isXML` | pending | pending | pending |
-| `species.isXMLList` | pending | pending | pending |
 
 ### speech.speaker
 
@@ -2635,101 +2538,12 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `util.__assignFunctions__` | pending | pending | pending |
-| `util.assureStringEndsWith` | pending | pending | pending |
-| `util.assureStringStartsWith` | pending | pending | pending |
-| `util.assureStringSurroundsWith` | pending | pending | pending |
-| `util.checkStringArgument` | pending | pending | pending |
-| `util.checkStringParam` | pending | pending | pending |
 | `util.class` | pending | pending | pending |
 | `util.className` | pending | pending | pending |
-| `util.debuglog` | pending | pending | pending |
-| `util.deprecate` | pending | pending | pending |
-| `util.dpToPx` | pending | pending | pending |
-| `util.ensureArrayType` | pending | pending | pending |
-| `util.ensureBigIntType` | pending | pending | pending |
-| `util.ensureBigintType` | pending | pending | pending |
-| `util.ensureBooleanType` | pending | pending | pending |
-| `util.ensureFunctionType` | pending | pending | pending |
-| `util.ensureNonNullObjectType` | pending | pending | pending |
-| `util.ensureNumberType` | pending | pending | pending |
-| `util.ensureObjectType` | pending | pending | pending |
-| `util.ensureStringType` | pending | pending | pending |
-| `util.ensureSymbolType` | pending | pending | pending |
-| `util.ensureType` | pending | pending | pending |
-| `util.ensureUndefinedType` | pending | pending | pending |
-| `util.extend` | pending | pending | pending |
-| `util.format` | not-portable: runtime-native | not-portable: runtime-native | pending |
 | `util.getClassName` | pending | pending | pending |
-| `util.isArray` | pending | pending | pending |
-| `util.isBigInt` | pending | pending | pending |
-| `util.isBoolean` | pending | pending | pending |
-| `util.isDate` | pending | pending | pending |
-| `util.isEmptyObject` | pending | pending | pending |
-| `util.isError` | pending | pending | pending |
-| `util.isFunction` | pending | pending | pending |
-| `util.isInteger` | pending | pending | pending |
-| `util.isJavaArray` | pending | pending | pending |
-| `util.isJavaObject` | pending | pending | pending |
-| `util.isNull` | pending | pending | pending |
-| `util.isNullOrUndefined` | pending | pending | pending |
-| `util.isNumber` | pending | pending | pending |
-| `util.isObject` | pending | pending | pending |
-| `util.isPrimitive` | pending | pending | pending |
-| `util.isReference` | pending | pending | pending |
-| `util.isRegExp` | pending | pending | pending |
-| `util.isString` | pending | pending | pending |
-| `util.isSymbol` | pending | pending | pending |
-| `util.isUndefined` | pending | pending | pending |
-| `util.log` | pending | pending | pending |
-| `util.pxToDp` | pending | pending | pending |
-| `util.pxToSp` | pending | pending | pending |
-| `util.spToPx` | pending | pending | pending |
-| `util.toRegular` | pending | pending | pending |
-| `util.toRegularAndApply` | pending | pending | pending |
-| `util.toRegularAndCall` | pending | pending | pending |
+| `util.toRegularAndApply` | pending (rejects) | pending (rejects) | pending (rejects) |
+| `util.toRegularAndCall` | pending (rejects) | pending (rejects) | pending (rejects) |
 | `util.unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-
-### util.inspect
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `util.inspect.colors` | pending | pending | pending |
-| `util.inspect.styles` | pending | pending | pending |
-
-### util.java
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `util.java.array` | pending | pending | pending |
-| `util.java.instanceOf` | pending | pending | pending |
-| `util.java.instanceof` | pending | pending | pending |
-| `util.java.mapToObject` | pending | pending | pending |
-| `util.java.objectToMap` | pending | pending | pending |
-| `util.java.toJsArray` | pending | pending | pending |
-
-### util.morseCode
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `util.morseCode.getCode` | pending | pending | pending |
-| `util.morseCode.getPattern` | pending | pending | pending |
-| `util.morseCode.vibrate` | pending | pending | pending |
-
-### util.version
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `util.version.sdkInt` | pending | pending | pending |
-
-### util.versionCodes
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `util.versionCodes.search` | pending | pending | pending |
-| `util.versionCodes.searchAll` | pending | pending | pending |
-| `util.versionCodes.summary` | pending | pending | pending |
-| `util.versionCodes.toString` | pending | pending | pending |
 
 ### web
 

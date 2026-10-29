@@ -195,7 +195,8 @@
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "java-prototype",
       "equivalent": "java module handles (java.create / java.callInstance / java.callStatic)",
-      "source": "appendix D D-11, maintainer 2026-10-29 (P1.4 question 5)"
+      "override": true,
+      "source": "appendix D D-11, maintainer 2026-10-29 (P1.4 question 5); override since P3.2a: the global isJavaClass / isJavaPackage placements stay excluded as decided although the owner module species covers them on Node"
     },
     {
       "id": "java-prototype-objects",

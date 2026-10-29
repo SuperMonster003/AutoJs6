@@ -27,7 +27,8 @@ const groups = [
   ['cvt.bytes', main.converter.bytes], ['fmt.bytes', main.formatter.bytes],
 ];
 const types = ['util', 'species', 'global', 's13n', 'jsox', 'converter', 'formatter'].map(name => read(resolve(node, `docs/nodejs/types/autojs6-node/${name}.d.ts`))).join('\n');
-const declared = name => new RegExp(`\\b${name.replace(/\$/g, '\\$')}\\??(\\(|:|<)`).test(types);
+// A member name may be quoted in the declaration ("var"(...values)).
+const declared = name => new RegExp(`(^|[^\\w$])["']?${name.replace(/\$/g, '\\$')}["']?\\??(\\(|:|<)`).test(types);
 let members = 0;
 for (const [module, value, skipped = []] of groups) {
   for (const kind of ['Functions', 'Properties', 'Getters']) {
