@@ -1,34 +1,37 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2946 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3410 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 2946 行 (显式导出 1438, 原型成员 205, 返回对象成员 1303).
+数据源: ksp, 3410 行 (显式导出 1902, 原型成员 205, 返回对象成员 1303).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1087 | 341 | 0 | 1041 | 0 | 477 |
-| Node Worker | 1018 | 338 | 0 | 1044 | 0 | 546 |
-| Bun | 0 | 298 | 1044 | 1038 | 0 | 566 |
+| Node main | 1087 | 341 | 0 | 1045 | 0 | 937 |
+| Node Worker | 1018 | 338 | 0 | 1048 | 0 | 1006 |
+| Bun | 0 | 298 | 1044 | 1042 | 0 | 1026 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 8 / mention 268 / heading 2670 / signature 0 / example 0 |
-| dts | none 9 / name 1774 / arity 1163 / typed 0 |
-| ace | none 414 / semantic 898 / static 1634 |
+| doc | none 472 / mention 268 / heading 2670 / signature 0 / example 0 |
+| dts | none 473 / name 1774 / arity 1163 / typed 0 |
+| ace | none 878 / semantic 898 / static 1634 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 5 / Node Worker 5 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
+
+名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 464 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
 ## 排除规则
 
 | 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |
 |---|---|---:|---:|---:|---|
 | http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
-| internal-exports | not-portable: rhino-only | 9 | 9 | 9 |  |
+| internal-exports | not-portable: rhino-only | 10 | 10 | 10 |  |
+| java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
 | java-prototype-objects | not-portable: java-prototype | 985 | 985 | 985 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
@@ -123,6 +126,7 @@
 | gallery | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | http | 21 | 20 | 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
+| imgui | 464 | 0 | 0 | 0 | 0 / 1 / 463 | 0 / 1 / 463 | 0 / 1 / 463 |
 | installer | 16 | 16 | 16 | 16 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
@@ -164,7 +168,7 @@
 | toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
 | tts | 35 | 35 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 40 | 36 | 36 | 36 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
-| util | 54 | 54 | 54 | 54 | 48 / 3 / 3 | 48 / 3 / 3 | 48 / 3 / 3 |
+| util | 54 | 54 | 54 | 54 | 48 / 6 / 0 | 48 / 6 / 0 | 48 / 6 / 0 |
 | util.inspect | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | util.java | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | util.morseCode | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
@@ -1876,6 +1880,475 @@
 | `http.request` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-http) |
 | `http.requestAsync` | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) |
 
+### imgui
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `imgui.AddButtonEx` | pending | pending | pending |
+| `imgui.Alert` | pending | pending | pending |
+| `imgui.AlignTextToFramePadding` | pending | pending | pending |
+| `imgui.Appearance` | pending | pending | pending |
+| `imgui.ArrowButton` | pending | pending | pending |
+| `imgui.BackendStatus` | pending | pending | pending |
+| `imgui.Begin` | pending | pending | pending |
+| `imgui.BeginChild` | pending | pending | pending |
+| `imgui.BeginCombo` | pending | pending | pending |
+| `imgui.BeginDisabled` | pending | pending | pending |
+| `imgui.BeginGroup` | pending | pending | pending |
+| `imgui.BeginItemTooltip` | pending | pending | pending |
+| `imgui.BeginListBox` | pending | pending | pending |
+| `imgui.BeginMenu` | pending | pending | pending |
+| `imgui.BeginMenuBar` | pending | pending | pending |
+| `imgui.BeginPopup` | pending | pending | pending |
+| `imgui.BeginPopupContextItem` | pending | pending | pending |
+| `imgui.BeginPopupContextWindow` | pending | pending | pending |
+| `imgui.BeginPopupModal` | pending | pending | pending |
+| `imgui.BeginTabBar` | pending | pending | pending |
+| `imgui.BeginTabItem` | pending | pending | pending |
+| `imgui.BeginTable` | pending | pending | pending |
+| `imgui.BeginTooltip` | pending | pending | pending |
+| `imgui.Bullet` | pending | pending | pending |
+| `imgui.BulletText` | pending | pending | pending |
+| `imgui.Button` | pending | pending | pending |
+| `imgui.ButtonFlags` | pending | pending | pending |
+| `imgui.CalcTextSize` | pending | pending | pending |
+| `imgui.Checkbox` | pending | pending | pending |
+| `imgui.ChildFlags` | pending | pending | pending |
+| `imgui.CloseCurrentPopup` | pending | pending | pending |
+| `imgui.CloseWindow` | pending | pending | pending |
+| `imgui.Col` | pending | pending | pending |
+| `imgui.CollapseWindow` | pending | pending | pending |
+| `imgui.CollapsingHeader` | pending | pending | pending |
+| `imgui.ColorButton` | pending | pending | pending |
+| `imgui.ColorEdit3` | pending | pending | pending |
+| `imgui.ColorEdit4` | pending | pending | pending |
+| `imgui.ColorEditFlags` | pending | pending | pending |
+| `imgui.ColorPicker3` | pending | pending | pending |
+| `imgui.ColorPicker4` | pending | pending | pending |
+| `imgui.ColorU32` | pending | pending | pending |
+| `imgui.Combo` | pending | pending | pending |
+| `imgui.ComboFlags` | pending | pending | pending |
+| `imgui.Cond` | pending | pending | pending |
+| `imgui.Confirm` | pending | pending | pending |
+| `imgui.CreateTexture` | pending | pending | pending |
+| `imgui.CreateWindow` | pending | pending | pending |
+| `imgui.DataTable` | pending | pending | pending |
+| `imgui.DestroyTexture` | pending | pending | pending |
+| `imgui.Dir` | pending | pending | pending |
+| `imgui.Dp` | pending | pending | pending |
+| `imgui.DragFloat` | pending | pending | pending |
+| `imgui.DragInt` | pending | pending | pending |
+| `imgui.DrawFlags` | pending | pending | pending |
+| `imgui.DrawListLayer` | pending | pending | pending |
+| `imgui.Dummy` | pending | pending | pending |
+| `imgui.End` | pending | pending | pending |
+| `imgui.EndChild` | pending | pending | pending |
+| `imgui.EndCombo` | pending | pending | pending |
+| `imgui.EndDisabled` | pending | pending | pending |
+| `imgui.EndGroup` | pending | pending | pending |
+| `imgui.EndListBox` | pending | pending | pending |
+| `imgui.EndMenu` | pending | pending | pending |
+| `imgui.EndMenuBar` | pending | pending | pending |
+| `imgui.EndPopup` | pending | pending | pending |
+| `imgui.EndTabBar` | pending | pending | pending |
+| `imgui.EndTabItem` | pending | pending | pending |
+| `imgui.EndTable` | pending | pending | pending |
+| `imgui.EndTooltip` | pending | pending | pending |
+| `imgui.ExpandWindow` | pending | pending | pending |
+| `imgui.FocusedFlags` | pending | pending | pending |
+| `imgui.Fonts` | pending | pending | pending |
+| `imgui.GetBackendCapabilities` | pending | pending | pending |
+| `imgui.GetBackgroundDrawList` | pending | pending | pending |
+| `imgui.GetComponent` | pending | pending | pending |
+| `imgui.GetContentRegionAvail` | pending | pending | pending |
+| `imgui.GetCursorPos` | pending | pending | pending |
+| `imgui.GetExampleSource` | pending | pending | pending |
+| `imgui.GetForegroundDrawList` | pending | pending | pending |
+| `imgui.GetFrameHeight` | pending | pending | pending |
+| `imgui.GetFrameHeightWithSpacing` | pending | pending | pending |
+| `imgui.GetMouseDragDelta` | pending | pending | pending |
+| `imgui.GetMousePos` | pending | pending | pending |
+| `imgui.GetScrollMaxX` | pending | pending | pending |
+| `imgui.GetScrollMaxY` | pending | pending | pending |
+| `imgui.GetScrollX` | pending | pending | pending |
+| `imgui.GetScrollY` | pending | pending | pending |
+| `imgui.GetTextLineHeight` | pending | pending | pending |
+| `imgui.GetTextLineHeightWithSpacing` | pending | pending | pending |
+| `imgui.GetWindowDrawList` | pending | pending | pending |
+| `imgui.GetWindowPos` | pending | pending | pending |
+| `imgui.GetWindowSize` | pending | pending | pending |
+| `imgui.HoveredFlags` | pending | pending | pending |
+| `imgui.Icon` | pending | pending | pending |
+| `imgui.Icons` | pending | pending | pending |
+| `imgui.Image` | pending | pending | pending |
+| `imgui.ImageButton` | pending | pending | pending |
+| `imgui.Indent` | pending | pending | pending |
+| `imgui.InputFloat` | pending | pending | pending |
+| `imgui.InputInt` | pending | pending | pending |
+| `imgui.InputText` | pending | pending | pending |
+| `imgui.InputTextFlags` | pending | pending | pending |
+| `imgui.InputTextMultiline` | pending | pending | pending |
+| `imgui.InvisibleButton` | pending | pending | pending |
+| `imgui.IsAnyItemActive` | pending | pending | pending |
+| `imgui.IsAnyItemHovered` | pending | pending | pending |
+| `imgui.IsItemActivated` | pending | pending | pending |
+| `imgui.IsItemActive` | pending | pending | pending |
+| `imgui.IsItemClicked` | pending | pending | pending |
+| `imgui.IsItemDeactivated` | pending | pending | pending |
+| `imgui.IsItemDeactivatedAfterEdit` | pending | pending | pending |
+| `imgui.IsItemEdited` | pending | pending | pending |
+| `imgui.IsItemFocused` | pending | pending | pending |
+| `imgui.IsItemHovered` | pending | pending | pending |
+| `imgui.IsItemVisible` | pending | pending | pending |
+| `imgui.IsMouseClicked` | pending | pending | pending |
+| `imgui.IsMouseDoubleClicked` | pending | pending | pending |
+| `imgui.IsMouseDown` | pending | pending | pending |
+| `imgui.IsMouseDragging` | pending | pending | pending |
+| `imgui.IsMouseReleased` | pending | pending | pending |
+| `imgui.IsPopupOpen` | pending | pending | pending |
+| `imgui.IsWindowAppearing` | pending | pending | pending |
+| `imgui.IsWindowCollapsed` | pending | pending | pending |
+| `imgui.IsWindowFocused` | pending | pending | pending |
+| `imgui.IsWindowHovered` | pending | pending | pending |
+| `imgui.Key` | pending | pending | pending |
+| `imgui.LabelText` | pending | pending | pending |
+| `imgui.Launch` | pending | pending | pending |
+| `imgui.LaunchFloaty` | pending | pending | pending |
+| `imgui.LaunchPrivileged` | pending | pending | pending |
+| `imgui.Limits` | pending | pending | pending |
+| `imgui.ListBox` | pending | pending | pending |
+| `imgui.ListExamples` | pending | pending | pending |
+| `imgui.LogLevel` | pending | pending | pending |
+| `imgui.LogWindow` | pending | pending | pending |
+| `imgui.MenuItem` | pending | pending | pending |
+| `imgui.MouseButton` | pending | pending | pending |
+| `imgui.MultiChoice` | pending | pending | pending |
+| `imgui.NewLine` | pending | pending | pending |
+| `imgui.OpenPopup` | pending | pending | pending |
+| `imgui.PlotHistogram` | pending | pending | pending |
+| `imgui.PlotLines` | pending | pending | pending |
+| `imgui.PopFont` | pending | pending | pending |
+| `imgui.PopID` | pending | pending | pending |
+| `imgui.PopItemWidth` | pending | pending | pending |
+| `imgui.PopStyleColor` | pending | pending | pending |
+| `imgui.PopStyleVar` | pending | pending | pending |
+| `imgui.PopupFlags` | pending | pending | pending |
+| `imgui.ProgressBar` | pending | pending | pending |
+| `imgui.PushFont` | pending | pending | pending |
+| `imgui.PushID` | pending | pending | pending |
+| `imgui.PushItemWidth` | pending | pending | pending |
+| `imgui.PushStyleColor` | pending | pending | pending |
+| `imgui.PushStyleVar` | pending | pending | pending |
+| `imgui.Px` | pending | pending | pending |
+| `imgui.RadioButton` | pending | pending | pending |
+| `imgui.Ref` | pending | pending | pending |
+| `imgui.ResetMouseDragDelta` | pending | pending | pending |
+| `imgui.RunExample` | pending | pending | pending |
+| `imgui.SameLine` | pending | pending | pending |
+| `imgui.Selectable` | pending | pending | pending |
+| `imgui.SelectableFlags` | pending | pending | pending |
+| `imgui.Separator` | pending | pending | pending |
+| `imgui.SeparatorText` | pending | pending | pending |
+| `imgui.SetCursorPos` | pending | pending | pending |
+| `imgui.SetGlobalAlpha` | pending | pending | pending |
+| `imgui.SetItemTooltip` | pending | pending | pending |
+| `imgui.SetKeyboardFocusHere` | pending | pending | pending |
+| `imgui.SetMoreTouch` | pending | pending | pending |
+| `imgui.SetNextItemWidth` | pending | pending | pending |
+| `imgui.SetNextWindowBgAlpha` | pending | pending | pending |
+| `imgui.SetNextWindowPos` | pending | pending | pending |
+| `imgui.SetNextWindowSize` | pending | pending | pending |
+| `imgui.SetNextWindowSizeConstraints` | pending | pending | pending |
+| `imgui.SetScrollHereX` | pending | pending | pending |
+| `imgui.SetScrollHereY` | pending | pending | pending |
+| `imgui.SetScrollX` | pending | pending | pending |
+| `imgui.SetScrollY` | pending | pending | pending |
+| `imgui.SetSecure` | pending | pending | pending |
+| `imgui.SetStyleColor` | pending | pending | pending |
+| `imgui.SetStyleProperties` | pending | pending | pending |
+| `imgui.SetTheme` | pending | pending | pending |
+| `imgui.SetTooltip` | pending | pending | pending |
+| `imgui.SetTouchable` | pending | pending | pending |
+| `imgui.SetWindowFontScale` | pending | pending | pending |
+| `imgui.ShowDemoWindow` | pending | pending | pending |
+| `imgui.SingleChoice` | pending | pending | pending |
+| `imgui.SliderFlags` | pending | pending | pending |
+| `imgui.SliderFloat` | pending | pending | pending |
+| `imgui.SliderInt` | pending | pending | pending |
+| `imgui.SmallButton` | pending | pending | pending |
+| `imgui.Spacing` | pending | pending | pending |
+| `imgui.StatsOverlay` | pending | pending | pending |
+| `imgui.StyleColorsClassic` | pending | pending | pending |
+| `imgui.StyleColorsDark` | pending | pending | pending |
+| `imgui.StyleColorsLight` | pending | pending | pending |
+| `imgui.StyleVar` | pending | pending | pending |
+| `imgui.TabBarFlags` | pending | pending | pending |
+| `imgui.TabItemFlags` | pending | pending | pending |
+| `imgui.TableBgTarget` | pending | pending | pending |
+| `imgui.TableColumnFlags` | pending | pending | pending |
+| `imgui.TableFlags` | pending | pending | pending |
+| `imgui.TableHeadersRow` | pending | pending | pending |
+| `imgui.TableNextColumn` | pending | pending | pending |
+| `imgui.TableNextRow` | pending | pending | pending |
+| `imgui.TableRowFlags` | pending | pending | pending |
+| `imgui.TableSetBgColor` | pending | pending | pending |
+| `imgui.TableSetColumnIndex` | pending | pending | pending |
+| `imgui.TableSetupColumn` | pending | pending | pending |
+| `imgui.TableSetupScrollFreeze` | pending | pending | pending |
+| `imgui.Text` | pending | pending | pending |
+| `imgui.TextColored` | pending | pending | pending |
+| `imgui.TextDisabled` | pending | pending | pending |
+| `imgui.TextWrapped` | pending | pending | pending |
+| `imgui.TextureFlags` | pending | pending | pending |
+| `imgui.Themes` | pending | pending | pending |
+| `imgui.Toast` | pending | pending | pending |
+| `imgui.ToastPosition` | pending | pending | pending |
+| `imgui.Toggle` | pending | pending | pending |
+| `imgui.ToggleSwitch` | pending | pending | pending |
+| `imgui.TouchMode` | pending | pending | pending |
+| `imgui.TreeNode` | pending | pending | pending |
+| `imgui.TreeNodeEx` | pending | pending | pending |
+| `imgui.TreeNodeFlags` | pending | pending | pending |
+| `imgui.TreePop` | pending | pending | pending |
+| `imgui.Unindent` | pending | pending | pending |
+| `imgui.VSliderFloat` | pending | pending | pending |
+| `imgui.VSliderInt` | pending | pending | pending |
+| `imgui.WantCaptureMouse` | pending | pending | pending |
+| `imgui.WindowFlags` | pending | pending | pending |
+| `imgui.WindowMode` | pending | pending | pending |
+| `imgui.WithFont` | pending | pending | pending |
+| `imgui.__pluginId` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
+| `imgui.addButtonEx` | pending | pending | pending |
+| `imgui.addInputCharacters` | pending | pending | pending |
+| `imgui.addKeyEvent` | pending | pending | pending |
+| `imgui.addMouseWheel` | pending | pending | pending |
+| `imgui.alert` | pending | pending | pending |
+| `imgui.alignTextToFramePadding` | pending | pending | pending |
+| `imgui.arrowButton` | pending | pending | pending |
+| `imgui.begin` | pending | pending | pending |
+| `imgui.beginChild` | pending | pending | pending |
+| `imgui.beginCombo` | pending | pending | pending |
+| `imgui.beginDisabled` | pending | pending | pending |
+| `imgui.beginGroup` | pending | pending | pending |
+| `imgui.beginItemTooltip` | pending | pending | pending |
+| `imgui.beginListBox` | pending | pending | pending |
+| `imgui.beginMenu` | pending | pending | pending |
+| `imgui.beginMenuBar` | pending | pending | pending |
+| `imgui.beginPopup` | pending | pending | pending |
+| `imgui.beginPopupContextItem` | pending | pending | pending |
+| `imgui.beginPopupContextWindow` | pending | pending | pending |
+| `imgui.beginPopupModal` | pending | pending | pending |
+| `imgui.beginTabBar` | pending | pending | pending |
+| `imgui.beginTabItem` | pending | pending | pending |
+| `imgui.beginTable` | pending | pending | pending |
+| `imgui.beginTooltip` | pending | pending | pending |
+| `imgui.bool` | pending | pending | pending |
+| `imgui.bullet` | pending | pending | pending |
+| `imgui.bulletText` | pending | pending | pending |
+| `imgui.button` | pending | pending | pending |
+| `imgui.bytes` | pending | pending | pending |
+| `imgui.calcTextSize` | pending | pending | pending |
+| `imgui.checkbox` | pending | pending | pending |
+| `imgui.closeCurrentPopup` | pending | pending | pending |
+| `imgui.closeWindow` | pending | pending | pending |
+| `imgui.collapseWindow` | pending | pending | pending |
+| `imgui.collapsingHeader` | pending | pending | pending |
+| `imgui.colorButton` | pending | pending | pending |
+| `imgui.colorEdit3` | pending | pending | pending |
+| `imgui.colorEdit4` | pending | pending | pending |
+| `imgui.colorPicker3` | pending | pending | pending |
+| `imgui.colorPicker4` | pending | pending | pending |
+| `imgui.colorU32` | pending | pending | pending |
+| `imgui.combo` | pending | pending | pending |
+| `imgui.confirm` | pending | pending | pending |
+| `imgui.createTexture` | pending | pending | pending |
+| `imgui.createWindow` | pending | pending | pending |
+| `imgui.dataTable` | pending | pending | pending |
+| `imgui.density` | pending | pending | pending |
+| `imgui.destroyTexture` | pending | pending | pending |
+| `imgui.dp` | pending | pending | pending |
+| `imgui.dragFloat` | pending | pending | pending |
+| `imgui.dragInt` | pending | pending | pending |
+| `imgui.dummy` | pending | pending | pending |
+| `imgui.end` | pending | pending | pending |
+| `imgui.endChild` | pending | pending | pending |
+| `imgui.endCombo` | pending | pending | pending |
+| `imgui.endDisabled` | pending | pending | pending |
+| `imgui.endGroup` | pending | pending | pending |
+| `imgui.endListBox` | pending | pending | pending |
+| `imgui.endMenu` | pending | pending | pending |
+| `imgui.endMenuBar` | pending | pending | pending |
+| `imgui.endPopup` | pending | pending | pending |
+| `imgui.endTabBar` | pending | pending | pending |
+| `imgui.endTabItem` | pending | pending | pending |
+| `imgui.endTable` | pending | pending | pending |
+| `imgui.endTooltip` | pending | pending | pending |
+| `imgui.expandWindow` | pending | pending | pending |
+| `imgui.float` | pending | pending | pending |
+| `imgui.floats` | pending | pending | pending |
+| `imgui.framerate` | pending | pending | pending |
+| `imgui.getBackendCapabilities` | pending | pending | pending |
+| `imgui.getBackgroundDrawList` | pending | pending | pending |
+| `imgui.getComponent` | pending | pending | pending |
+| `imgui.getContentRegionAvail` | pending | pending | pending |
+| `imgui.getCursorPos` | pending | pending | pending |
+| `imgui.getExampleSource` | pending | pending | pending |
+| `imgui.getForegroundDrawList` | pending | pending | pending |
+| `imgui.getFrameHeight` | pending | pending | pending |
+| `imgui.getFrameHeightWithSpacing` | pending | pending | pending |
+| `imgui.getMouseDragDelta` | pending | pending | pending |
+| `imgui.getMousePos` | pending | pending | pending |
+| `imgui.getScrollMaxX` | pending | pending | pending |
+| `imgui.getScrollMaxY` | pending | pending | pending |
+| `imgui.getScrollX` | pending | pending | pending |
+| `imgui.getScrollY` | pending | pending | pending |
+| `imgui.getTextLineHeight` | pending | pending | pending |
+| `imgui.getTextLineHeightWithSpacing` | pending | pending | pending |
+| `imgui.getWindowDrawList` | pending | pending | pending |
+| `imgui.getWindowPos` | pending | pending | pending |
+| `imgui.getWindowSize` | pending | pending | pending |
+| `imgui.icon` | pending | pending | pending |
+| `imgui.image` | pending | pending | pending |
+| `imgui.imageButton` | pending | pending | pending |
+| `imgui.indent` | pending | pending | pending |
+| `imgui.inputFloat` | pending | pending | pending |
+| `imgui.inputInt` | pending | pending | pending |
+| `imgui.inputText` | pending | pending | pending |
+| `imgui.inputTextMultiline` | pending | pending | pending |
+| `imgui.int` | pending | pending | pending |
+| `imgui.invisibleButton` | pending | pending | pending |
+| `imgui.isAnyItemActive` | pending | pending | pending |
+| `imgui.isAnyItemHovered` | pending | pending | pending |
+| `imgui.isItemActivated` | pending | pending | pending |
+| `imgui.isItemActive` | pending | pending | pending |
+| `imgui.isItemClicked` | pending | pending | pending |
+| `imgui.isItemDeactivated` | pending | pending | pending |
+| `imgui.isItemDeactivatedAfterEdit` | pending | pending | pending |
+| `imgui.isItemEdited` | pending | pending | pending |
+| `imgui.isItemFocused` | pending | pending | pending |
+| `imgui.isItemHovered` | pending | pending | pending |
+| `imgui.isItemVisible` | pending | pending | pending |
+| `imgui.isMouseClicked` | pending | pending | pending |
+| `imgui.isMouseDoubleClicked` | pending | pending | pending |
+| `imgui.isMouseDown` | pending | pending | pending |
+| `imgui.isMouseDragging` | pending | pending | pending |
+| `imgui.isMouseReleased` | pending | pending | pending |
+| `imgui.isPopupOpen` | pending | pending | pending |
+| `imgui.isWindowAppearing` | pending | pending | pending |
+| `imgui.isWindowCollapsed` | pending | pending | pending |
+| `imgui.isWindowFocused` | pending | pending | pending |
+| `imgui.isWindowHovered` | pending | pending | pending |
+| `imgui.labelText` | pending | pending | pending |
+| `imgui.launch` | pending | pending | pending |
+| `imgui.launchFloaty` | pending | pending | pending |
+| `imgui.launchPrivileged` | pending | pending | pending |
+| `imgui.listBox` | pending | pending | pending |
+| `imgui.listExamples` | pending | pending | pending |
+| `imgui.logWindow` | pending | pending | pending |
+| `imgui.menuItem` | pending | pending | pending |
+| `imgui.multiChoice` | pending | pending | pending |
+| `imgui.newLine` | pending | pending | pending |
+| `imgui.openPopup` | pending | pending | pending |
+| `imgui.plotHistogram` | pending | pending | pending |
+| `imgui.plotLines` | pending | pending | pending |
+| `imgui.popFont` | pending | pending | pending |
+| `imgui.popId` | pending | pending | pending |
+| `imgui.popItemWidth` | pending | pending | pending |
+| `imgui.popStyleColor` | pending | pending | pending |
+| `imgui.popStyleVar` | pending | pending | pending |
+| `imgui.progressBar` | pending | pending | pending |
+| `imgui.pushFont` | pending | pending | pending |
+| `imgui.pushId` | pending | pending | pending |
+| `imgui.pushItemWidth` | pending | pending | pending |
+| `imgui.pushStyleColor` | pending | pending | pending |
+| `imgui.pushStyleVar` | pending | pending | pending |
+| `imgui.px` | pending | pending | pending |
+| `imgui.radioButton` | pending | pending | pending |
+| `imgui.ref` | pending | pending | pending |
+| `imgui.resetMouseDragDelta` | pending | pending | pending |
+| `imgui.runExample` | pending | pending | pending |
+| `imgui.sameLine` | pending | pending | pending |
+| `imgui.selectable` | pending | pending | pending |
+| `imgui.sendKey` | pending | pending | pending |
+| `imgui.separator` | pending | pending | pending |
+| `imgui.separatorText` | pending | pending | pending |
+| `imgui.setCursorPos` | pending | pending | pending |
+| `imgui.setGlobalAlpha` | pending | pending | pending |
+| `imgui.setItemTooltip` | pending | pending | pending |
+| `imgui.setKeyboardFocusHere` | pending | pending | pending |
+| `imgui.setMoreTouch` | pending | pending | pending |
+| `imgui.setNextItemWidth` | pending | pending | pending |
+| `imgui.setNextWindowBgAlpha` | pending | pending | pending |
+| `imgui.setNextWindowPos` | pending | pending | pending |
+| `imgui.setNextWindowSize` | pending | pending | pending |
+| `imgui.setNextWindowSizeConstraints` | pending | pending | pending |
+| `imgui.setScrollHereX` | pending | pending | pending |
+| `imgui.setScrollHereY` | pending | pending | pending |
+| `imgui.setScrollX` | pending | pending | pending |
+| `imgui.setScrollY` | pending | pending | pending |
+| `imgui.setSecure` | pending | pending | pending |
+| `imgui.setStyleColor` | pending | pending | pending |
+| `imgui.setStyleProperties` | pending | pending | pending |
+| `imgui.setTheme` | pending | pending | pending |
+| `imgui.setTooltip` | pending | pending | pending |
+| `imgui.setTouchable` | pending | pending | pending |
+| `imgui.setWindowFontScale` | pending | pending | pending |
+| `imgui.showDemoWindow` | pending | pending | pending |
+| `imgui.singleChoice` | pending | pending | pending |
+| `imgui.sliderFloat` | pending | pending | pending |
+| `imgui.sliderInt` | pending | pending | pending |
+| `imgui.smallButton` | pending | pending | pending |
+| `imgui.spacing` | pending | pending | pending |
+| `imgui.statsOverlay` | pending | pending | pending |
+| `imgui.string` | pending | pending | pending |
+| `imgui.strings` | pending | pending | pending |
+| `imgui.styleColorsClassic` | pending | pending | pending |
+| `imgui.styleColorsDark` | pending | pending | pending |
+| `imgui.styleColorsLight` | pending | pending | pending |
+| `imgui.tableHeadersRow` | pending | pending | pending |
+| `imgui.tableNextColumn` | pending | pending | pending |
+| `imgui.tableNextRow` | pending | pending | pending |
+| `imgui.tableSetBgColor` | pending | pending | pending |
+| `imgui.tableSetColumnIndex` | pending | pending | pending |
+| `imgui.tableSetupColumn` | pending | pending | pending |
+| `imgui.tableSetupScrollFreeze` | pending | pending | pending |
+| `imgui.text` | pending | pending | pending |
+| `imgui.textColored` | pending | pending | pending |
+| `imgui.textDisabled` | pending | pending | pending |
+| `imgui.textWrapped` | pending | pending | pending |
+| `imgui.toast` | pending | pending | pending |
+| `imgui.toggle` | pending | pending | pending |
+| `imgui.toggleSwitch` | pending | pending | pending |
+| `imgui.treeNode` | pending | pending | pending |
+| `imgui.treeNodeEx` | pending | pending | pending |
+| `imgui.treePop` | pending | pending | pending |
+| `imgui.unindent` | pending | pending | pending |
+| `imgui.vSliderFloat` | pending | pending | pending |
+| `imgui.vSliderInt` | pending | pending | pending |
+| `imgui.version` | pending | pending | pending |
+| `imgui.wantCaptureMouse` | pending | pending | pending |
+| `imgui.wantTextInput` | pending | pending | pending |
+| `imgui.withChild` | pending | pending | pending |
+| `imgui.withCombo` | pending | pending | pending |
+| `imgui.withContextItem` | pending | pending | pending |
+| `imgui.withContextWindow` | pending | pending | pending |
+| `imgui.withDisabled` | pending | pending | pending |
+| `imgui.withFont` | pending | pending | pending |
+| `imgui.withGroup` | pending | pending | pending |
+| `imgui.withId` | pending | pending | pending |
+| `imgui.withItemTooltip` | pending | pending | pending |
+| `imgui.withListBox` | pending | pending | pending |
+| `imgui.withMenu` | pending | pending | pending |
+| `imgui.withMenuBar` | pending | pending | pending |
+| `imgui.withPopup` | pending | pending | pending |
+| `imgui.withPopupModal` | pending | pending | pending |
+| `imgui.withTabBar` | pending | pending | pending |
+| `imgui.withTabItem` | pending | pending | pending |
+| `imgui.withTable` | pending | pending | pending |
+| `imgui.withTooltip` | pending | pending | pending |
+| `imgui.withTreeNode` | pending | pending | pending |
+| `imgui.withWindow` | pending | pending | pending |
+
 ### installer
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2196,9 +2669,9 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `util.class` | pending | pending | pending |
-| `util.className` | pending | pending | pending |
-| `util.getClassName` | pending | pending | pending |
+| `util.class` | not-portable: java-prototype (java-introspection) | not-portable: java-prototype (java-introspection) | not-portable: java-prototype (java-introspection) |
+| `util.className` | not-portable: java-prototype (java-introspection) | not-portable: java-prototype (java-introspection) | not-portable: java-prototype (java-introspection) |
+| `util.getClassName` | not-portable: java-prototype (java-introspection) | not-portable: java-prototype (java-introspection) | not-portable: java-prototype (java-introspection) |
 | `util.toRegularAndApply` | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) |
 | `util.toRegularAndCall` | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) |
 | `util.unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
