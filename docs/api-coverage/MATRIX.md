@@ -11,7 +11,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Node main | 892 | 263 | 0 | 1012 | 0 | 663 |
 | Node Worker | 765 | 244 | 0 | 1015 | 0 | 806 |
-| Bun | 0 | 183 | 820 | 1009 | 0 | 818 |
+| Bun | 0 | 235 | 829 | 1009 | 0 | 757 |
 
 | 列 | 取值 |
 |---|---|
@@ -43,11 +43,11 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 108 / 13 / 87 | 76 / 13 / 119 | 82 / 13 / 113 |
+| (global) | 208 | 206 | 205 | 205 | 108 / 13 / 87 | 76 / 13 / 119 | 91 / 13 / 104 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
-| Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 0 / 0 / 15 |
+| Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 15 / 0 / 0 |
 | Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 29 | 29 | 29 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
 | ConsoleConfigurator# | 52 | 50 | 52 | 0 | 0 / 52 / 0 | 0 / 52 / 0 | 0 / 52 / 0 |
@@ -66,8 +66,8 @@
 | MailClient# | 53 | 53 | 53 | 53 | 53 / 0 / 0 | 53 / 0 / 0 | 53 / 0 / 0 |
 | Mat# | 3 | 0 | 3 | 0 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | MatchingResult# | 16 | 16 | 16 | 16 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
-| Mathx | 23 | 23 | 23 | 23 | 23 / 0 / 0 | 23 / 0 / 0 | 0 / 0 / 23 |
-| Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 0 / 0 / 14 |
+| Mathx | 23 | 23 | 23 | 23 | 23 / 0 / 0 | 23 / 0 / 0 | 23 / 0 / 0 |
+| Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | ObjectFrame# | 15 | 15 | 15 | 15 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
 | PReadableTextFile# | 5 | 5 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PWritableTextFile# | 6 | 6 | 6 | 0 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
@@ -232,17 +232,11 @@
 | `i18n` | pending | pending | pending |
 | `input` | pending | pending | pending |
 | `isAutoJs6` | pending | pending | pending |
-| `isBigInt` | local-shim | local-shim | pending |
 | `isDualInstalled` | pending (rejects) | pending | pending (rejects) |
-| `isEmptyObject` | local-shim | local-shim | pending |
 | `isInstalled` | bridged | pending | capability-gated |
-| `isInteger` | local-shim | local-shim | pending |
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `isObjectSpecies` | local-shim | local-shim | pending |
-| `isPrimitive` | local-shim | local-shim | pending |
-| `isReference` | local-shim | local-shim | pending |
 | `isRunning` | pending | pending | pending |
 | `isShuttingDown` | pending | pending | pending |
 | `isStopped` | pending | pending | pending |
@@ -281,9 +275,6 @@
 | `press` | pending | pending | pending |
 | `print` | bridged | bridged | pending |
 | `quickSettings` | bridged | pending | pending |
-| `random` | local-shim | local-shim | pending |
-| `randomFloat` | local-shim | local-shim | pending |
-| `randomInt` | local-shim | local-shim | pending |
 | `recents` | bridged | pending | pending |
 | `requiresApi` | pending | pending | pending |
 | `requiresAutojsVersion` | pending | pending | pending |
@@ -343,26 +334,6 @@
 | `App#launchSettings` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `App#packageName` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `App#uninstall` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### Arrayx
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Arrayx.differ` | local-shim | local-shim | pending |
-| `Arrayx.distinct` | local-shim | local-shim | pending |
-| `Arrayx.distinctBy` | local-shim | local-shim | pending |
-| `Arrayx.ensureArray` | local-shim | local-shim | pending |
-| `Arrayx.intersect` | local-shim | local-shim | pending |
-| `Arrayx.shuffle` | local-shim | local-shim | pending |
-| `Arrayx.sortBy` | local-shim | local-shim | pending |
-| `Arrayx.sortByDescending` | local-shim | local-shim | pending |
-| `Arrayx.sortDescending` | local-shim | local-shim | pending |
-| `Arrayx.sorted` | local-shim | local-shim | pending |
-| `Arrayx.sortedBy` | local-shim | local-shim | pending |
-| `Arrayx.sortedByDescending` | local-shim | local-shim | pending |
-| `Arrayx.sortedDescending` | local-shim | local-shim | pending |
-| `Arrayx.subtract` | local-shim | local-shim | pending |
-| `Arrayx.union` | local-shim | local-shim | pending |
 
 ### Canvas#
 
@@ -848,53 +819,6 @@
 | `MatchingResult#sortBy` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `MatchingResult#topmost` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `MatchingResult#worst` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### Mathx
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Mathx.avg` | local-shim | local-shim | pending |
-| `Mathx.ceilLog` | local-shim | local-shim | pending |
-| `Mathx.ceilPow` | local-shim | local-shim | pending |
-| `Mathx.cv` | local-shim | local-shim | pending |
-| `Mathx.dist` | local-shim | local-shim | pending |
-| `Mathx.floorLog` | local-shim | local-shim | pending |
-| `Mathx.floorPow` | local-shim | local-shim | pending |
-| `Mathx.logMn` | local-shim | local-shim | pending |
-| `Mathx.max` | local-shim | local-shim | pending |
-| `Mathx.mean` | local-shim | local-shim | pending |
-| `Mathx.median` | local-shim | local-shim | pending |
-| `Mathx.min` | local-shim | local-shim | pending |
-| `Mathx.mode` | local-shim | local-shim | pending |
-| `Mathx.randFloat` | local-shim | local-shim | pending |
-| `Mathx.randInt` | local-shim | local-shim | pending |
-| `Mathx.random` | local-shim | local-shim | pending |
-| `Mathx.randomFloat` | local-shim | local-shim | pending |
-| `Mathx.randomInt` | local-shim | local-shim | pending |
-| `Mathx.roundLog` | local-shim | local-shim | pending |
-| `Mathx.roundPow` | local-shim | local-shim | pending |
-| `Mathx.std` | local-shim | local-shim | pending |
-| `Mathx.sum` | local-shim | local-shim | pending |
-| `Mathx.var` | local-shim | local-shim | pending |
-
-### Numberx
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Numberx.ICU` | local-shim | local-shim | pending |
-| `Numberx.check` | local-shim | local-shim | pending |
-| `Numberx.clamp` | local-shim | local-shim | pending |
-| `Numberx.clampTo` | local-shim | local-shim | pending |
-| `Numberx.ensureNumber` | local-shim | local-shim | pending |
-| `Numberx.ensureNumberLike` | local-shim | local-shim | pending |
-| `Numberx.ensureNumbersLike` | local-shim | local-shim | pending |
-| `Numberx.padEnd` | local-shim | local-shim | pending |
-| `Numberx.padStart` | local-shim | local-shim | pending |
-| `Numberx.parseAny` | local-shim | local-shim | pending |
-| `Numberx.parseFloat` | local-shim | local-shim | pending |
-| `Numberx.parsePercent` | local-shim | local-shim | pending |
-| `Numberx.parseRatio` | local-shim | local-shim | pending |
-| `Numberx.toFixedNum` | local-shim | local-shim | pending |
 
 ### ObjectFrame#
 
