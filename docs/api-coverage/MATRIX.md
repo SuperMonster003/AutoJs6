@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2739 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2943 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 2739 行 (显式导出 1377, 返回对象成员 1362).
+数据源: ksp, 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1361).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 845 | 136 | 0 | 1115 | 0 | 643 |
-| Node Worker | 727 | 62 | 0 | 1118 | 0 | 832 |
-| Bun | 0 | 62 | 769 | 1117 | 0 | 791 |
+| Node main | 892 | 149 | 0 | 1126 | 0 | 776 |
+| Node Worker | 765 | 62 | 0 | 1129 | 0 | 987 |
+| Bun | 0 | 62 | 810 | 1122 | 0 | 949 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 334 / mention 136 / heading 2269 / signature 0 / example 0 |
-| dts | none 82 / name 1500 / arity 1157 / typed 0 |
-| ace | none 544 / semantic 827 / static 1368 |
+| doc | none 340 / mention 145 / heading 2458 / signature 0 / example 0 |
+| dts | none 81 / name 1705 / arity 1157 / typed 0 |
+| ace | none 605 / semantic 827 / static 1511 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
@@ -30,9 +30,9 @@
 | http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
 | internal-exports | not-portable: rhino-only | 9 | 9 | 9 |  |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
-| java-prototype-objects | not-portable: java-prototype | 1072 | 1072 | 1072 |  |
+| java-prototype-objects | not-portable: java-prototype | 1071 | 1071 | 1071 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
-| native-crypto | not-portable: runtime-native | 2 | 2 | 2 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
+| native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
 | native-timers | not-portable: runtime-native | 0 | 0 | 6 | global setTimeout / setInterval / setImmediate and their clear functions |
 | rhino-engine | not-portable: rhino-only | 0 | 1 | 1 |  |
@@ -82,7 +82,7 @@
 | Storage# | 12 | 12 | 12 | 12 | 11 / 0 / 1 | 0 / 0 / 12 | 11 / 0 / 1 |
 | ThemeColor# | 10 | 0 | 10 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | TimedTask# | 69 | 0 | 44 | 0 | 0 / 69 / 0 | 0 / 69 / 0 | 0 / 69 / 0 |
-| TtsUtterance# | 25 | 11 | 23 | 21 | 0 / 25 / 0 | 0 / 25 / 0 | 0 / 25 / 0 |
+| TtsUtterance# | 24 | 10 | 23 | 21 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
 | UiObject# | 147 | 136 | 146 | 145 | 0 / 147 / 0 | 0 / 147 / 0 | 0 / 147 / 0 |
 | UiObjectCollection# | 71 | 66 | 70 | 70 | 0 / 71 / 0 | 0 / 71 / 0 | 0 / 71 / 0 |
 | UiSelector# | 188 | 184 | 186 | 186 | 0 / 188 / 0 | 0 / 188 / 0 | 0 / 188 / 0 |
@@ -98,19 +98,19 @@
 | automator | 54 | 54 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
 | barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | base64 | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
-| colors | 81 | 81 | 81 | 81 | 62 / 0 / 19 | 62 / 0 / 19 | 62 / 0 / 19 |
+| colors | 82 | 82 | 82 | 82 | 62 / 0 / 20 | 62 / 0 / 20 | 62 / 0 / 20 |
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 16 | 16 | 16 | 16 | 15 / 0 / 1 | 15 / 0 / 1 | 15 / 0 / 1 |
-| console | 50 | 50 | 50 | 50 | 42 / 0 / 8 | 42 / 0 / 8 | 31 / 0 / 19 |
-| continuation | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
-| crypto | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
+| console | 56 | 56 | 56 | 53 | 42 / 0 / 14 | 42 / 0 / 14 | 31 / 0 / 25 |
+| continuation | 4 | 3 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| crypto | 8 | 6 | 8 | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
-| device | 25 | 25 | 25 | 25 | 4 / 0 / 21 | 4 / 0 / 21 | 4 / 0 / 21 |
+| device | 86 | 86 | 86 | 73 | 35 / 0 / 51 | 35 / 0 / 51 | 25 / 0 / 61 |
 | dialogs | 9 | 9 | 9 | 9 | 8 / 0 / 1 | 8 / 0 / 1 | 8 / 0 / 1 |
 | engines | 8 | 8 | 8 | 8 | 5 / 0 / 3 | 0 / 0 / 8 | 0 / 0 / 8 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
-| events | 1 | 0 | 0 | 0 | 0 / 1 / 0 | 0 / 1 / 0 | 0 / 1 / 0 |
-| files | 4 | 4 | 4 | 4 | 2 / 0 / 2 | 0 / 0 / 4 | 2 / 0 / 2 |
+| events | 37 | 32 | 36 | 21 | 5 / 1 / 31 | 5 / 1 / 31 | 5 / 1 / 31 |
+| files | 34 | 34 | 34 | 34 | 15 / 0 / 19 | 0 / 0 / 34 | 15 / 0 / 19 |
 | files.batchRename | 17 | 17 | 17 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
 | floaty | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | flow | 55 | 55 | 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
@@ -122,8 +122,10 @@
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 0 / 2 | 0 / 0 / 2 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
+| media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 0 / 0 / 9 | 0 / 0 / 9 |
 | mediainfo | 7 | 7 | 7 | 7 | 4 / 0 / 3 | 0 / 0 / 7 | 0 / 0 / 7 |
 | memory | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| mime | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
 | notice | 7 | 7 | 7 | 7 | 1 / 0 / 6 | 1 / 0 / 6 | 1 / 0 / 6 |
 | notice.channel | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
 | ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
@@ -137,10 +139,12 @@
 | plugins.tools | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | powerManager | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
+| recorder | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
 | s13n | 5 | 5 | 5 | 5 | 1 / 0 / 4 | 0 / 0 / 5 | 0 / 0 / 5 |
+| sensors | 21 | 21 | 21 | 3 | 1 / 0 / 20 | 1 / 0 / 20 | 1 / 0 / 20 |
 | settings | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | shell | 11 | 11 | 11 | 11 | 2 / 0 / 9 | 2 / 0 / 9 | 2 / 0 / 9 |
-| shizuku | 8 | 8 | 8 | 8 | 1 / 0 / 7 | 1 / 0 / 7 | 1 / 0 / 7 |
+| shizuku | 13 | 8 | 13 | 8 | 1 / 0 / 12 | 1 / 0 / 12 | 1 / 0 / 12 |
 | species | 37 | 37 | 37 | 37 | 0 / 0 / 37 | 0 / 0 / 37 | 0 / 0 / 37 |
 | speech | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
@@ -150,12 +154,12 @@
 | sysprops | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
-| threads | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
-| timers | 12 | 12 | 12 | 12 | 10 / 0 / 2 | 10 / 0 / 2 | 10 / 0 / 2 |
+| threads | 8 | 8 | 8 | 7 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
+| timers | 18 | 18 | 18 | 12 | 10 / 6 / 2 | 10 / 6 / 2 | 10 / 0 / 8 |
 | toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
 | tts | 35 | 35 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
-| ui | 37 | 33 | 33 | 33 | 2 / 4 / 31 | 2 / 4 / 31 | 2 / 4 / 31 |
-| util | 51 | 51 | 51 | 51 | 0 / 2 / 49 | 0 / 2 / 49 | 0 / 1 / 50 |
+| ui | 40 | 36 | 36 | 35 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
+| util | 54 | 51 | 54 | 54 | 0 / 2 / 52 | 0 / 2 / 52 | 0 / 1 / 53 |
 | util.inspect | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | util.java | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
 | util.morseCode | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
@@ -1251,7 +1255,6 @@
 | `TtsUtterance#state` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `TtsUtterance#stop` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `TtsUtterance#text` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `TtsUtterance#utterance` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### UiObject#
 
@@ -1948,6 +1951,7 @@
 | `colors.nightVariant` | pending | pending | pending |
 | `colors.oklab` | pending | pending | pending |
 | `colors.oklch` | pending | pending | pending |
+| `colors.parseColor` | pending | pending | pending |
 | `colors.simulate` | pending | pending | pending |
 | `colors.toOklab` | pending | pending | pending |
 | `colors.toOklch` | pending | pending | pending |
@@ -1983,15 +1987,21 @@
 | `console.error` | bridged | bridged | pending |
 | `console.info` | bridged | bridged | pending |
 | `console.input` | pending (rejects) | pending (rejects) | pending |
+| `console.isShowing` | pending | pending | pending |
 | `console.log` | bridged | bridged | pending |
 | `console.print` | bridged | bridged | pending |
 | `console.printAllStackTrace` | bridged | bridged | pending |
 | `console.rawInput` | pending (rejects) | pending (rejects) | pending |
+| `console.resetBackgroundAlpha` | pending | pending | pending |
+| `console.resetContentBackgroundAlpha` | pending | pending | pending |
+| `console.resetTitleBackgroundAlpha` | pending | pending | pending |
 | `console.setAvoidStatusBar` | pending | pending | pending |
 | `console.setColorful` | pending | pending | pending |
+| `console.setGravity` | pending | pending | pending |
 | `console.setInputVisible` | pending | pending | pending |
 | `console.setTimeFormat` | pending | pending | pending |
 | `console.setTimeVisible` | pending | pending | pending |
+| `console.setTouchThrough` | pending | pending | pending |
 | `console.time` | bridged | bridged | pending |
 | `console.timeEnd` | bridged | bridged | pending |
 | `console.trace` | bridged | bridged | pending |
@@ -2002,7 +2012,9 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
+| `continuation.await` | pending | pending | pending |
 | `continuation.create` | pending | pending | pending |
+| `continuation.delay` | pending | pending | pending |
 | `continuation.enabled` | pending | pending | pending |
 
 ### crypto
@@ -2011,6 +2023,12 @@
 |---|---|---|---|
 | `crypto.Key` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
 | `crypto.KeyPair` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
+| `crypto.decrypt` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
+| `crypto.digest` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
+| `crypto.encrypt` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
+| `crypto.fromHex` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
+| `crypto.generateKeyPair` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
+| `crypto.toHex` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
 
 ### cvt.bytes
 
@@ -2027,27 +2045,67 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
+| `device.baseOS` | pending | pending | pending |
+| `device.board` | bridged | bridged | pending |
+| `device.bootloader` | bridged | bridged | pending |
+| `device.brand` | bridged | bridged | pending |
+| `device.brands` | pending | pending | pending |
+| `device.buildDisplay` | pending | pending | pending |
+| `device.buildId` | bridged | bridged | pending |
+| `device.cancelVibration` | pending | pending | pending |
+| `device.codename` | pending | pending | pending |
+| `device.device` | pending | pending | pending |
 | `device.digest` | pending | pending | pending |
+| `device.ensureReadPhoneStatePermission` | pending | pending | pending |
+| `device.fingerprint` | bridged | bridged | pending |
+| `device.getAndroidId` | pending | pending | pending |
 | `device.getGatewayAddress` | pending | pending | pending |
+| `device.getIMEI` | pending | pending | pending |
 | `device.getIpAddress` | pending | pending | pending |
 | `device.getIpv6Address` | pending | pending | pending |
+| `device.getMacAddress` | pending | pending | pending |
+| `device.getMarketName` | pending | pending | pending |
+| `device.getOrientation` | pending | pending | pending |
+| `device.getRotation` | pending | pending | pending |
+| `device.getSerial` | pending | pending | pending |
 | `device.getSharedDeviceId` | pending | pending | pending |
+| `device.hardware` | bridged | bridged | pending |
+| `device.hasReadPhoneStatePermission` | pending | pending | pending |
+| `device.imei` | pending | pending | pending |
+| `device.incremental` | pending | pending | pending |
 | `device.isActiveNetworkMetered` | pending | pending | pending |
 | `device.isConnectedOrConnecting` | pending | pending | pending |
+| `device.isManufacturer` | pending | pending | pending |
 | `device.isPointerLocationDisabled` | pending | pending | pending |
 | `device.isPointerLocationEnabled` | pending | pending | pending |
+| `device.isPowerSourceAC` | pending | pending | pending |
+| `device.isPowerSourceDock` | pending | pending | pending |
+| `device.isPowerSourceUSB` | pending | pending | pending |
+| `device.isPowerSourceWireless` | pending | pending | pending |
 | `device.isScreenLandscape` | pending | pending | pending |
 | `device.isScreenOff` | pending | pending | pending |
 | `device.isScreenPortrait` | pending | pending | pending |
 | `device.isWifiAvailable` | pending | pending | pending |
+| `device.keepAwake` | pending | pending | pending |
+| `device.keepScreenDim` | pending | pending | pending |
+| `device.manufacturer` | pending | pending | pending |
+| `device.manufacturers` | pending | pending | pending |
+| `device.model` | bridged | bridged | pending |
 | `device.orientation` | pending | pending | pending |
 | `device.pageSize` | pending | pending | pending |
+| `device.product` | bridged | bridged | pending |
+| `device.release` | bridged | bridged | pending |
+| `device.roms` | pending | pending | pending |
 | `device.rotation` | pending | pending | pending |
+| `device.sdkInt` | bridged | bridged | pending |
+| `device.securityPatch` | pending | pending | pending |
+| `device.serial` | pending | pending | pending |
 | `device.setPointerLocation` | pending | pending | pending |
 | `device.setPointerLocationDisabled` | pending | pending | pending |
 | `device.setPointerLocationEnabled` | pending | pending | pending |
 | `device.summary` | pending | pending | pending |
 | `device.togglePointerLocation` | pending | pending | pending |
+| `device.wakeUpIfNeeded` | pending | pending | pending |
 
 ### dialogs
 
@@ -2073,15 +2131,76 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `events.__asEmitter__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
+| `events.addListener` | pending | pending | pending |
+| `events.broadcast` | pending | pending | pending |
+| `events.emit` | pending | pending | pending |
+| `events.emitSticky` | pending | pending | pending |
+| `events.emitter` | pending | pending | pending |
+| `events.eventNames` | pending | pending | pending |
+| `events.getMaxListeners` | pending | pending | pending |
+| `events.getTimer` | pending | pending | pending |
+| `events.getTouchEventTimeout` | pending | pending | pending |
+| `events.listenerCount` | pending | pending | pending |
+| `events.listeners` | pending | pending | pending |
+| `events.observeTouch` | pending | pending | pending |
+| `events.onKeyDown` | pending | pending | pending |
+| `events.onKeyUp` | pending | pending | pending |
+| `events.onNotification` | pending | pending | pending |
+| `events.onToast` | pending | pending | pending |
+| `events.onTouch` | pending | pending | pending |
+| `events.onceKeyDown` | pending | pending | pending |
+| `events.onceKeyUp` | pending | pending | pending |
+| `events.prependListener` | pending | pending | pending |
+| `events.prependOnceListener` | pending | pending | pending |
+| `events.removeAllKeyDownListeners` | pending | pending | pending |
+| `events.removeAllKeyUpListeners` | pending | pending | pending |
+| `events.removeAllListeners` | pending | pending | pending |
+| `events.removeAllTouchListeners` | pending | pending | pending |
+| `events.removeListener` | pending | pending | pending |
+| `events.removeNotificationObserver` | pending | pending | pending |
+| `events.removeToastObserver` | pending | pending | pending |
+| `events.setKeyInterceptionEnabled` | pending | pending | pending |
+| `events.setMaxListeners` | pending | pending | pending |
+| `events.setTouchEventTimeout` | pending | pending | pending |
 
 ### files
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
+| `files.append` | local-shim | pending | capability-gated |
+| `files.appendBytes` | pending | pending | pending |
+| `files.copy` | local-shim | pending | capability-gated |
+| `files.create` | pending | pending | pending |
+| `files.createIfNotExists` | pending | pending | pending |
+| `files.createWithDirs` | pending | pending | pending |
+| `files.cwd` | pending | pending | pending |
+| `files.ensureDir` | local-shim | pending | capability-gated |
+| `files.exists` | local-shim | pending | capability-gated |
+| `files.formatSizeWithUnit` | pending | pending | pending |
+| `files.getExtension` | local-shim | pending | capability-gated |
+| `files.getHumanReadableSize` | pending | pending | pending |
+| `files.getName` | local-shim | pending | capability-gated |
+| `files.getNameWithoutExtension` | pending | pending | pending |
+| `files.getSimplifiedPath` | pending | pending | pending |
+| `files.isDir` | local-shim | pending | capability-gated |
+| `files.isEmptyDir` | pending | pending | pending |
+| `files.isFile` | local-shim | pending | capability-gated |
 | `files.join` | local-shim | pending | capability-gated |
+| `files.listDir` | local-shim | pending | capability-gated |
+| `files.move` | local-shim | pending | capability-gated |
 | `files.open` | pending (rejects) | pending | pending (rejects) |
 | `files.path` | local-shim | pending | capability-gated |
+| `files.read` | local-shim | pending | capability-gated |
+| `files.readAssets` | pending | pending | pending |
+| `files.readBytes` | pending | pending | pending |
+| `files.remove` | local-shim | pending | capability-gated |
+| `files.removeDir` | pending | pending | pending |
+| `files.rename` | pending | pending | pending |
+| `files.renameWithoutExtension` | pending | pending | pending |
+| `files.sdcardPath` | pending | pending | pending |
 | `files.toFile` | pending (rejects) | pending | pending (rejects) |
+| `files.write` | local-shim | pending | capability-gated |
+| `files.writeBytes` | pending | pending | pending |
 
 ### files.batchRename
 
@@ -2216,6 +2335,20 @@
 | `keys.volume_down` | bridged | pending | pending |
 | `keys.volume_up` | bridged | pending | pending |
 
+### media
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `media.getMusicCurrentPosition` | bridged | pending | pending |
+| `media.getMusicDuration` | bridged | pending | pending |
+| `media.isMusicPlaying` | bridged | pending | pending |
+| `media.musicSeekTo` | bridged | pending | pending |
+| `media.pauseMusic` | bridged | pending | pending |
+| `media.playMusic` | bridged | pending | pending |
+| `media.resumeMusic` | bridged | pending | pending |
+| `media.scanFile` | bridged | pending | pending |
+| `media.stopMusic` | bridged | pending | pending |
+
 ### mediainfo
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2237,6 +2370,16 @@
 | `memory.retained` | pending | pending | pending |
 | `memory.snapshot` | pending | pending | pending |
 | `memory.watch` | pending | pending | pending |
+
+### mime
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `mime.fromFile` | pending | pending | pending |
+| `mime.fromFileOr` | pending | pending | pending |
+| `mime.fromFileOrWildcard` | pending | pending | pending |
+| `mime.getMediaType` | pending | pending | pending |
+| `mime.parseMediaType` | pending | pending | pending |
 
 ### notice
 
@@ -2341,6 +2484,18 @@
 | `qrcode.recognizeText` | bridged | pending | pending |
 | `qrcode.recognizeTexts` | bridged | pending | pending |
 
+### recorder
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `recorder.clear` | pending | pending | pending |
+| `recorder.has` | pending | pending | pending |
+| `recorder.isGreaterThan` | pending | pending | pending |
+| `recorder.isLessThan` | pending | pending | pending |
+| `recorder.load` | pending | pending | pending |
+| `recorder.remove` | pending | pending | pending |
+| `recorder.save` | pending | pending | pending |
+
 ### s13n
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2350,6 +2505,31 @@
 | `s13n.point` | pending (rejects) | pending | pending |
 | `s13n.throwable` | pending (rejects) | pending | pending |
 | `s13n.time` | pending (rejects) | pending | pending |
+
+### sensors
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `sensors.addListener` | pending | pending | pending |
+| `sensors.delay` | pending | pending | pending |
+| `sensors.emit` | pending | pending | pending |
+| `sensors.emitSticky` | pending | pending | pending |
+| `sensors.eventNames` | pending | pending | pending |
+| `sensors.getMaxListeners` | pending | pending | pending |
+| `sensors.getSensor` | pending | pending | pending |
+| `sensors.getTimer` | pending | pending | pending |
+| `sensors.ignoresUnsupportedSensor` | pending | pending | pending |
+| `sensors.listenerCount` | pending | pending | pending |
+| `sensors.listeners` | pending | pending | pending |
+| `sensors.on` | pending | pending | pending |
+| `sensors.prependListener` | pending | pending | pending |
+| `sensors.prependOnceListener` | pending | pending | pending |
+| `sensors.register` | pending | pending | pending |
+| `sensors.removeAllListeners` | pending | pending | pending |
+| `sensors.removeListener` | pending | pending | pending |
+| `sensors.setMaxListeners` | pending | pending | pending |
+| `sensors.unregister` | pending | pending | pending |
+| `sensors.unregisterAll` | pending | pending | pending |
 
 ### settings
 
@@ -2383,6 +2563,11 @@
 | `shizuku.currentPackage` | pending | pending | pending |
 | `shizuku.execCommand` | pending | pending | pending |
 | `shizuku.getCommand` | pending | pending | pending |
+| `shizuku.hasPermission` | pending | pending | pending |
+| `shizuku.hasService` | pending | pending | pending |
+| `shizuku.isInstalled` | pending | pending | pending |
+| `shizuku.isOperational` | pending | pending | pending |
+| `shizuku.isRunning` | pending | pending | pending |
 | `shizuku.kill` | pending | pending | pending |
 | `shizuku.state` | pending | pending | pending |
 
@@ -2489,17 +2674,27 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
+| `threads.atomic` | pending | pending | pending |
+| `threads.currentThread` | pending | pending | pending |
 | `threads.disposable` | pending | pending | pending |
 | `threads.interrupt` | pending | pending | pending |
+| `threads.lock` | pending | pending | pending |
 | `threads.pool` | pending | pending | pending |
+| `threads.shutDownAll` | pending | pending | pending |
 | `threads.start` | pending | pending | pending |
 
 ### timers
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
+| `timers.clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | pending |
+| `timers.clearInterval` | not-portable: runtime-native | not-portable: runtime-native | pending |
+| `timers.clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | pending |
 | `timers.keepAlive` | pending | pending | pending |
+| `timers.setImmediate` | not-portable: runtime-native | not-portable: runtime-native | pending |
+| `timers.setInterval` | not-portable: runtime-native | not-portable: runtime-native | pending |
 | `timers.setIntervalExt` | pending | pending | pending |
+| `timers.setTimeout` | not-portable: runtime-native | not-portable: runtime-native | pending |
 
 ### toast
 
@@ -2518,6 +2713,7 @@
 | `ui.__inflate__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__widgets__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.backgroundColor` | pending | pending | pending |
+| `ui.bindingContext` | pending | pending | pending |
 | `ui.emitter` | pending | pending | pending |
 | `ui.findById` | pending | pending | pending |
 | `ui.findByStringId` | pending | pending | pending |
@@ -2530,6 +2726,7 @@
 | `ui.keepScreenOn` | pending | pending | pending |
 | `ui.layout` | pending | pending | pending |
 | `ui.layoutFile` | pending | pending | pending |
+| `ui.layoutInflater` | pending | pending | pending |
 | `ui.navigationBarColor` | pending | pending | pending |
 | `ui.navigationBarHeight` | pending | pending | pending |
 | `ui.navigationBarIconLight` | pending | pending | pending |
@@ -2557,6 +2754,8 @@
 | `util.assureStringSurroundsWith` | pending | pending | pending |
 | `util.checkStringArgument` | pending | pending | pending |
 | `util.checkStringParam` | pending | pending | pending |
+| `util.class` | pending | pending | pending |
+| `util.className` | pending | pending | pending |
 | `util.debuglog` | pending | pending | pending |
 | `util.deprecate` | pending | pending | pending |
 | `util.dpToPx` | pending | pending | pending |
@@ -2574,6 +2773,7 @@
 | `util.ensureUndefinedType` | pending | pending | pending |
 | `util.extend` | pending | pending | pending |
 | `util.format` | not-portable: runtime-native | not-portable: runtime-native | pending |
+| `util.getClassName` | pending | pending | pending |
 | `util.isArray` | pending | pending | pending |
 | `util.isBigInt` | pending | pending | pending |
 | `util.isBoolean` | pending | pending | pending |

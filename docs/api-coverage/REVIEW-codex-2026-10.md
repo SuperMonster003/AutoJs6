@@ -250,6 +250,35 @@ ROADMAP 约定每批 3 ~ 5 个模块, 1 个子会话 (宿主桥接 + facade + d.
 
 建议启动顺序: P3.2a 与 P4.2a 先行 (无设计前置, 行数最多); 其后 P3.1a / P3.2b 与对应 P4 批次; 需要设计的 UI 与自动化批次 (D-1 / D-6 / D-7 / D-8 / D-17) 在设计待决拍板后启动. 每批结束用 `check.py --write-pending-baseline` 收缩基线.
 
+### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
+
+P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).
+
+| 族 (条目) | 模块 | Node main | Node Worker | Bun | 说明 |
+|---|---|---:|---:|---:|---|
+| 系统与设备 (P3.1b / P4.1b) | device | 30 | 30 | 40 | baseOS / codename / serial / imei 等字段, 权限 / 电源 / 方向查询, brands / manufacturers / roms 对象; Bun 比 Node 多 10 行 (Build 字段 board / brand / model 等 Node 已有) |
+| | sensors | 20 | 20 | 20 | EventEmitter 成员 (sensors.once 已有) 与 register / unregister / getSensor / delay |
+| | media | 0 | 9 | 9 | 音乐播放与 scanFile; Node main 已有, Worker 与 Bun 缺 |
+| 系统与设备 (P3.1a / P4.1a) | shizuku | 5 | 5 | 5 | hasPermission / hasService / isInstalled / isOperational / isRunning |
+| | 小计 | 55 | 64 | 74 | |
+| 文件与数据 (P3.2b / P4.2b) | files | 17 | 30 | 17 | 原型上的 exists / isFile / read / write 等 30 个; Node main 与 Bun 各有 13 个 (local-shim), Worker 全缺 |
+| | recorder | 7 | 7 | 7 | save / load / has / clear / remove / isGreaterThan / isLessThan |
+| | mime | 5 | 5 | 5 | fromFile / fromFileOr / fromFileOrWildcard / getMediaType / parseMediaType (MIME 常量不计, Q55) |
+| | colors | 1 | 1 | 1 | parseColor (色表不计, Q55) |
+| 文件与数据 (P3.2a / P4.2a) | util | 3 | 3 | 3 | class / className / getClassName: Java 类内省, 与 D-11 同类, 可在 P3.2a 登记排除候选 (见 Q54 选项 b) |
+| | 小计 | 33 | 46 | 33 | |
+| UI (P3.3 / P4.3) | console | 6 | 6 | 6 | isShowing, setGravity, setTouchThrough, reset*BackgroundAlpha 3 个 |
+| | ui | 2 | 2 | 2 | bindingContext, layoutInflater (ui.view 已有入口) |
+| | 小计 | 8 | 8 | 8 | |
+| 自动化 (P3.4 / P4.4) | events | 31 | 31 | 31 | EventEmitter 成员, broadcast / emitter, onKeyDown / onKeyUp / onTouch / onceKey* / removeAll*Listeners, onNotification / onToast 与 remove*Observer |
+| | timers | 0 | 0 | 6 | timers.setTimeout 等 6 个: Node 经 nativeModules 已记 runtime-native; Bun 的 native-timers 规则只匹配全局名, 可作排除候选 (见 Q54 选项 b) |
+| | threads | 4 | 4 | 4 | atomic, currentThread, lock, shutDownAll |
+| | continuation | 2 | 2 | 2 | await, delay |
+| | 小计 | 37 | 37 | 43 | |
+| 合计 | | 133 | 155 | 158 | |
+
+7.1 的分批行数加上本表后: P3.2a / P4.2a 122 / 191 / 202, P3.2b / P4.2b 151 / 184 / 155, P3.1a / P4.1a 81 / 121 / 81, P3.1b / P4.1b 182 / 198 / 206, P3.3 / P4.3 95 / 96 / 116, P3.4 / P4.4 136 / 188 / 180, P3.5 / P4.5 9 / 9 / 9 (合计 776 / 987 / 949). P3.1b 超过 150 行, 可把 device / sensors / media (50 / 59 / 69) 拆为单独批次.
+
 ## 8. 新待决 (Q26-Q28, 已登记看板与附录 C)
 
 - Q26 声明只返回 never / Promise<never> 的显式拒绝入口怎么记 (R13, 约 Node main 37 / Bun 27 行): (a) list-runtime-surfaces.mjs 标记 rejects, 矩阵记为 pending 并要求排除规则给理由, 由 P1.4 归入 D-4 / D-5 / D-7 / D-12 (推荐) / (b) 保持覆盖, 只在 MATRIX.md 差异行加 rejects 标注. 未先行.
