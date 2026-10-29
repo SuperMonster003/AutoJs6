@@ -141,6 +141,8 @@
 
 ## 4. 盘点中发现的宿主分母缺口 (不属 Q2, 另行登记)
 
+拍板: Q74 / Q75 均已拍板 2026-10-29 (推荐项), 由 P5.2c 实施 (第 8 节).
+
 | 编号 | 发现 | 条目 | 建议 |
 |---|---|---|---|
 | Q74 | `ocr.detect` 等与 `barcode.detect` 等在 KSP 元数据里返回 `kotlin.Any`, `tools/api-coverage/returned-objects.json` 的 producers 没有列它们, 宿主 `OcrResult` (text / confidence / bounds / label 4 个字段) 与 `WrappedBarcode` (约 23 个成员, `barcode` 字段是插件契约的 BarcodeResult) 不在返回对象表 (现 43 个对象). 文档对 WrappedBarcode 有 23/23 标题, d.ts 两者都有 (`aj6-int-barcode.d.ts`, `libraries.d.ts`) | 约 27 行 | 补进 returned-objects.json (静态, 一个小条目) |
@@ -154,24 +156,24 @@ AutoJs6-Plugin-Bundled-Libraries, AutoJs6-Plugin-Three-Paper-PDF, AutoJs6-Plugin
 
 ## 6. 汇总表
 
-"自有条目" 只计不在分母的入口. "结论" 列在 Q2 拍板后填写.
+"自有条目" 只计不在分母的入口. "结论" 列为 Q2 拍板结果 (2026-10-29, 见第 8 节).
 
 | 插件 | 机制 | 自有条目 | 文档 | d.ts | Ace | Node | Bun | 已在分母 (M3) | 建议 | 结论 |
 |---|---|---:|---|---|---|---|---|---|---|---|
-| ImGui | M1 + 全局 imgui | 458 名称 (约 349 行) | 0 | 0 | 0 | 0 | 0 | 无 | 纳入 (Q2-1) | 待拍板 |
-| Three-Macaw-Speech | M2 | 6 工具 | 0/6 | 0/6 | 0/6 | 0/6 | 0/6 | speech 27 | 工具表, 不逐工具进矩阵 (Q2-2) | 待拍板 |
-| Three-Stack-Archive | M2 | 3 工具 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 | 无 | 同上 | 待拍板 |
-| Three-Hanzi-CC | M2 | 1 工具 | 示例 1 | 0/1 | 0/1 | 0/1 | 0/1 | opencc 33 | 同上 | 待拍板 |
-| Yolo-NCNN | M2 | 1 工具 | 0/1 | 0/1 | 0/1 | 0/1 | 0/1 | yolo 1 + 2 | 同上 | 待拍板 |
-| Image-Quantization | M2 | 1 工具 | 示例 1 (参数名错) | 0/1 | 0/1 | 0/1 | 0/1 | images 2 + 10 | 同上 | 待拍板 |
-| NodeJs-Runtime | M4 | 110 | 0/110 | 109/110 | 109/110 | 110/110 | 不适用 | 无 (矩阵列) | 附表, 补文档小节与 WorkerPool (Q2-3) | 待拍板 |
-| Bun-Runtime | M4 | 12 | 5/12 提及 | 12/12 | 12/12 | 不适用 | 12/12 | 无 (矩阵列) | 同上 | 待拍板 |
-| QuickJS-Runtime | M4 | 7 | 0/7 | 0/7 | 0/7 | 不适用 | 不适用 | 无 | 同上 | 待拍板 |
-| Python-Runtime | M4 (Python) | 46 函数 | 0/46 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 不纳入本主题 (Q2-4) | 待拍板 |
-| AutoJs4-Runtime | M4 (上游 Auto.js 4) | 约 180 名称 | 0 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 待拍板 |
-| Java-Runtime | M4 (Java) | 17 方法 | 0/17 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 待拍板 |
-| Kotlin-Runtime | M4 (Kotlin) | 13 方法 | 0/13 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 待拍板 |
-| Lua-Runtime | M4 (Lua) | 12 | 0/12 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 待拍板 |
+| ImGui | M1 + 全局 imgui | 458 名称 (约 349 行) | 0 | 0 | 0 | 0 | 0 | 无 | 纳入 (Q2-1) | 纳入; 维护者另开会话把 ImGui 改为宿主注册的全局模块 (能力交插件), 落地后经 KSP 进分母, P5.2f 等它 |
+| Three-Macaw-Speech | M2 | 6 工具 | 0/6 | 0/6 | 0/6 | 0/6 | 0/6 | speech 27 | 工具表, 不逐工具进矩阵 (Q2-2) | 工具表, 不进矩阵 (P5.2a) |
+| Three-Stack-Archive | M2 | 3 工具 | 0/3 | 0/3 | 0/3 | 0/3 | 0/3 | 无 | 同上 | 工具表, 不进矩阵 (P5.2a) |
+| Three-Hanzi-CC | M2 | 1 工具 | 示例 1 | 0/1 | 0/1 | 0/1 | 0/1 | opencc 33 | 同上 | 工具表, 不进矩阵 (P5.2a) |
+| Yolo-NCNN | M2 | 1 工具 | 0/1 | 0/1 | 0/1 | 0/1 | 0/1 | yolo 1 + 2 | 同上 | 工具表, 不进矩阵 (P5.2a) |
+| Image-Quantization | M2 | 1 工具 | 示例 1 (参数名错) | 0/1 | 0/1 | 0/1 | 0/1 | images 2 + 10 | 同上 | 工具表, 不进矩阵 (P5.2a) |
+| NodeJs-Runtime | M4 | 110 | 0/110 | 109/110 | 109/110 | 110/110 | 不适用 | 无 (矩阵列) | 附表, 补文档小节与 WorkerPool (Q2-3) | 附表跟踪, 只补缺口 (P5.2b) |
+| Bun-Runtime | M4 | 12 | 5/12 提及 | 12/12 | 12/12 | 不适用 | 12/12 | 无 (矩阵列) | 同上 | 附表跟踪, 只补缺口 (P5.2b) |
+| QuickJS-Runtime | M4 | 7 | 0/7 | 0/7 | 0/7 | 不适用 | 不适用 | 无 | 同上 | 附表跟踪, 只补缺口 (P5.2b) |
+| Python-Runtime | M4 (Python) | 46 函数 | 0/46 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 不纳入本主题 (Q2-4) | 纳入本主题 (维护者选非推荐项; P5.2d / P5.2e, 门禁 Q77) |
+| AutoJs4-Runtime | M4 (上游 Auto.js 4) | 约 180 名称 | 0 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 不纳入 (Q76; 上游原样 API, 补全与文档以 AutoJs6 为准) |
+| Java-Runtime | M4 (Java) | 17 方法 | 0/17 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 纳入本主题 (P5.2d / P5.2e) |
+| Kotlin-Runtime | M4 (Kotlin) | 13 方法 | 0/13 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 纳入本主题 (P5.2d / P5.2e) |
+| Lua-Runtime | M4 (Lua) | 12 | 0/12 | 不适用 | 不适用 | 不适用 | 不适用 | 无 | 同上 | 纳入本主题 (P5.2d / P5.2e) |
 | 第 3 节 36 个插件 | 无 / M3 | 0 | - | - | - | - | - | 见第 3 节 | 不纳入 (无自有 API) | 无自有脚本 API |
 
 合计: 50 个插件中 14 个有自有入口 (JS 可见: ImGui 458 名称, 工具 12, Node 110, Bun 12, QuickJS 7; 其他语言: Python 46, Java 17, Kotlin 13, Lua 12, AutoJs4 约 180), 36 个没有.
@@ -209,3 +211,33 @@ AutoJs6-Plugin-Bundled-Libraries, AutoJs6-Plugin-Three-Paper-PDF, AutoJs6-Plugin
 
 - 第 3 节 36 个插件没有自有脚本 API, 结论直接记为 "无自有脚本 API".
 - Q74 / Q75 是宿主分母缺口, 不属 Q2, 与 Q2 同轮请维护者拍板 (见附录 C).
+
+## 8. 拍板结果 (2026-10-29, 两轮选择题) 与 P5.2 分批
+
+### 8.1 结论
+
+| 题 | 维护者选择 | 影响 |
+|---|---|---|
+| Q2-1 ImGui | 纳入. 维护者另开会话把 ImGui 改为类似 pinyin / mediainfo 的形式: 宿主直接注册全局模块, 背后能力交给插件, 不再依赖 `plugins.load` | 改造落地后 ImGui 经 KSP 以 M3 进分母 (不需要 pluginExports 来源), 再按 P2 ~ P4 规则补文档 / d.ts / Ace 与 Node / Bun 状态; P5.2f 等该会话完成 |
+| Q2-2 plugins.tools 工具 | 工具表, 不进矩阵 (推荐) | P5.2a |
+| Q2-3 JS 运行时自有入口 | 附表跟踪, 只补缺口 (推荐) | P5.2b |
+| Q2-4 非 JS 语言运行时 | 纳入本主题 (非推荐项): 文档页 + 类型桩 (Python .pyi, LuaLS 定义, Java / Kotlin 桩) + Ace 对应语言补全 | P5.2d / P5.2e, 改 Python / Java / Kotlin / Lua 4 个插件仓库与 Ace |
+| Q76 AutoJs4 上游 API | 不纳入 (推荐) | autojs4Runtime.md 可选补 "与 AutoJs6 的主要差异" 指引, 随 P5.2d |
+| Q77 语言 API 防漂移 | 加静态门禁 (推荐) | P5.2d 新增检查: 从 Python `__all__`, Lua `install_autojs_module`, `JvmEntryApi.kt` 提取清单, 校验文档页标题与类型桩一致 |
+| Q74 OcrResult / WrappedBarcode | 补进返回对象表 (推荐) | P5.2c, 矩阵约 +27 行 |
+| Q75 compose 运行时目录 | 纳入分母 (推荐) | P5.2c, 矩阵 +83 行 |
+
+纳入合计: ImGui 约 349 行 (改造后以宿主模块计), 工具 12 条 (工具表, 不进矩阵), JS 运行时自有 129 条 (附表), 语言运行时 88 条 (附表 + 门禁), 宿主分母补漏约 110 行 (Q74 约 27 + Q75 83). 不纳入: AutoJs4 上游 API 约 180 名称, 以及第 3 节 36 个无自有 API 的插件.
+
+### 8.2 P5.2 分批建议 (每批 1 个子会话)
+
+| 批次 | 插件 | 内容 | 改动仓库 | 设备与插件安装 | 依赖 / 并行 |
+|---|---|---|---|---|---|
+| P5.2a 工具表 [静态 + 1 台核对] | Three-Hanzi-CC, Yolo-NCNN, Image-Quantization, Three-Stack-Archive, Three-Macaw-Speech (5) | plugins.md "官方插件工具表" 12 行 (名称, 提供插件, 最低版本, 参数, 输出), 修正第 306 行示例 (`maxColors`, 输出 `png`); d.ts / Ace 加工具名字面量联合 (保留 string, 不计覆盖); 生成离线文档 | Documentation, Offline-Docs, TS 声明, Ace | 一台主力设备 (Redmi 或 Xiaomi) 装齐 5 个插件, `plugins.tools.list()` 核对名称与参数; Macaw 的两个说话人工具需 1.3.0 构建 (未发布时表内最低版本写 1.3.0 并只核对其余 10 个) | 可与 P5.2b / P5.2c / P5.2d 并行; Ace 索引重建与 P5.2b 排队 |
+| P5.2b JS 运行时附表 [静态] | NodeJs-Runtime, Bun-Runtime, QuickJS-Runtime (3) | runtimeApis.md 加 "运行时自有接口" 小节 (按组表格: Node 12 组 110 条, Bun 12 条, QuickJS 7 条, 重点写 scriptArgs); Node `worker_threads.WorkerPool` 补 d.ts (Node 插件 `docs/nodejs/types/autojs6-node`, TS 声明 autojs6-node 同步, Ace 捆绑副本); 本文件加附表 | Documentation, Offline-Docs, Node 插件 (d.ts), TS 声明, Ace | 无 | 与 P3 系列错开 Node 插件 d.ts 文件 (共享 checkout 先在 locks.md 登记) |
+| P5.2c 宿主分母补漏 [静态] | MLKit-OCR / Paddle / Rapid 系列, MLKit-Barcode, Three-Block-Compose (只作来源) | Q74: `returned-objects.json` 加 OcrResult# 与 WrappedBarcode# (producers 写 ocr.detect 系列与 barcode.detect 系列), 约 +27 行; Q75: `extract_exports.py` 读 compose-ui-api 目录契约 (V1Catalog / ComposeUiV2 / ComposeModifier) 生成 83 行, 核对五处覆盖; 重新生成 MATRIX.md 与 pending-baseline | 宿主 tools/api-coverage, docs/api-coverage | 无 | MATRIX 重新生成与同期其他子会话排队; 新增行若有 pending 交对应 P3 / P4 批次 |
+| P5.2d 语言运行时文档与门禁 [静态] | Python-Runtime, Java-Runtime, Kotlin-Runtime, Lua-Runtime (4) | 文档站新增语言运行时 API 页 (Python 46 函数 + 常量 / 异常, Java 17, Kotlin 13, Lua 12, 签名 + 示例); Q77 静态门禁 (tools/api-coverage 新检查约 120 行 + CI 一步, 先校验文档标题); autojs4Runtime.md 可选补差异指引 (Q76) | Documentation, Offline-Docs, 宿主 tools/api-coverage | 无 | 可与 P5.2a / b / c 并行 |
+| P5.2e 语言类型桩与 Ace 补全 [静态 + 1 台抽查] | Python-Runtime, Lua-Runtime, Java-Runtime, Kotlin-Runtime (4) + Ace | Python `.pyi` (插件仓库), LuaLS `---@meta` 定义 (插件仓库), Java / Kotlin 接口桩并入 Ace 的 ECJ / Kotlin 补全 classpath, Ace 捆绑 Pyright / LuaLS 类型; P5.2d 门禁扩展到类型桩 | 4 个插件仓库, Ace | 一台主力设备装 Ace 与 4 个语言运行时, 在编辑器里抽查补全 (每种语言 3 个名称) | 依赖 P5.2d 的清单与门禁 |
+| P5.2f ImGui [静态 + 1 台冒烟, 约 2 个子会话] | ImGui (1) | 等维护者的 ImGui 宿主模块化会话落地: KSP 导出进分母后, 文档新增 imgui 页与对象类型页 (约 349 个标题 + 示例, 194 个别名并入驼峰条目), d.ts / Ace 由插件 imgui.d.ts 改写为模块声明 (补 4 个对象方法), Node / Bun 状态按矩阵规则 (不可移植的登记待决) | Documentation, Offline-Docs, TS 声明, Ace (宿主模块化由维护者的会话负责) | 一台主力设备装 ImGui, 文档示例冒烟 | 依赖维护者的 ImGui 会话; 文档量大可拆两批 |
+
+P5.3 收尾时 bump 被改到的仓库 (D19): 文档 / Offline-Docs / TS 声明 / Ace, 以及 P5.2b / P5.2e 改到的 Node / Python / Java / Kotlin / Lua 插件.
