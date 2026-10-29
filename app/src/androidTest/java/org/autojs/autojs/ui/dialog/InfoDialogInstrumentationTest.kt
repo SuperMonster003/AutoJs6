@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.dialog
 
+import android.Manifest
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -8,11 +9,15 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.View
+import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import com.afollestad.materialdialogs.MaterialDialog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
@@ -43,20 +48,42 @@ class InfoDialogInstrumentationTest {
     private val context = instrumentation.targetContext
     private val dialogs = mutableListOf<InfoDialog>()
     private val files = mutableListOf<File>()
-    private lateinit var activity: MainActivity
+    private var resumedActivity: MainActivity? = null
+    private val activity: MainActivity get() = checkNotNull(resumedActivity) { "MainActivity has not been resumed" }
 
     @Before
     fun launchActivity() {
-        activity = instrumentation.startActivitySync(
-            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        ) as MainActivity
+        // Connect UiAutomation before any view under test exists. ListView gives an item the accessibility delegate that
+        // reports ACTION_CLICK only when accessibility is enabled at the moment the item view is created, and accessibility
+        // is enabled for this process by the UiAutomation connection, which the first uiAutomation access makes lazily. A
+        // popup menu opened before that first access keeps item nodes without ACTION_CLICK for as long as it is shown; in a
+        // fresh process that was the first test to open one, see packageComponentsAppearOnlyInTheMoreInformationDialog.
+        val automation = instrumentation.uiAutomation
+        val accessibilityManager = context.getSystemService(AccessibilityManager::class.java)
+        awaitMain(message = "Accessibility did not become enabled for the test process") { accessibilityManager.isEnabled }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // LeakCanary asks for the notification permission with an activity of its own once per fresh install. That
+            // activity becomes the active window and hides the dialogs under test from rootInActiveWindow.
+            automation.grantRuntimePermission(context.packageName, Manifest.permission.POST_NOTIFICATIONS)
+        }
+        // Wait for RESUMED instead of startActivitySync, which only accepts an activity it saw being created and then
+        // waits for an idle main thread, 45 s at most. The first launch after a read-only emulator boots takes 30 s and
+        // more, and once that launch has timed out the test cannot finish the activity it never received; MainActivity is
+        // singleTask, so every later launch of the class only reaches the leaked instance as onNewIntent and times out
+        // too. A resumed instance, whoever created it, is all these tests need.
+        context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        awaitMain(LAUNCH_TIMEOUT_MS, "MainActivity did not reach RESUMED") {
+            resumedActivity = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED)
+                .filterIsInstance<MainActivity>().firstOrNull { !it.isFinishing }
+            resumedActivity != null
+        }
     }
 
     @After
     fun cleanUp() {
         instrumentation.runOnMainSync {
             dialogs.forEach { it.dialog.dismiss() }
-            activity.finish()
+            resumedActivity?.finish()
         }
         files.forEach { it.delete() }
     }
@@ -405,15 +432,32 @@ class InfoDialogInstrumentationTest {
     }
 
     private fun clickStableText(text: String) {
-        var target = awaitStableText(text)
-        assertTrue("The menu item disappeared before its click: $text", target.refresh())
+        val label = awaitStableText(text)
+        assertTrue("The menu item disappeared before its click: $text", label.refresh())
+        var target = label
         while (!target.isClickable || target.actionList.none { it.id == AccessibilityNodeInfo.ACTION_CLICK }) {
-            target = target.parent ?: throw AssertionError("No accessible click action for menu item: $text")
+            target = target.parent ?: throw AssertionError("No accessible click action for menu item: $text; ${describeForFailure(label)}")
         }
         assertTrue("The menu item must remain visible and enabled: $text", target.isVisibleToUser && target.isEnabled)
         // Activate the actual popup row. Retaining a text-node coordinate across popup animation
         // can dismiss the popup outside its row without ever invoking the item's callback.
         assertTrue("The menu click was rejected: $text", target.performAction(AccessibilityNodeInfo.ACTION_CLICK))
+    }
+
+    /** The ancestry of a node and the windows on screen, for the message of a failed accessibility lookup. */
+    private fun describeForFailure(node: AccessibilityNodeInfo): String {
+        val chain = generateSequence(node) { it.parent }.joinToString(" < ") {
+            val name = it.className?.toString()?.substringAfterLast('.') ?: "?"
+            val actions = it.actionList.joinToString(",") { action -> action.id.toString() }
+            name + (if (it.isClickable) "[clickable]" else "") + (if (it.isEnabled) "" else "[disabled]") +
+                (if (it.isVisibleToUser) "" else "[invisible]") + "{" + actions + "}" + "@w" + it.windowId
+        }
+        val window = node.window?.let { "type=${it.type}, active=${it.isActive}, focused=${it.isFocused}, layer=${it.layer}" }
+        val windows = instrumentation.uiAutomation.windows.joinToString { window ->
+            "w${window.id}(type=${window.type}, active=${window.isActive}, focused=${window.isFocused}, title=${window.title}, " +
+                "root=${window.root?.className?.toString()?.substringAfterLast('.')})"
+        }
+        return "node chain: $chain; node window: $window; windows: $windows"
     }
 
     private fun captureIfRequested(name: String) {
@@ -437,14 +481,23 @@ class InfoDialogInstrumentationTest {
 
     private fun temporaryFile(suffix: String): File = File.createTempFile("info-dialog-", suffix, context.cacheDir).also { files += it }
 
-    private fun awaitMain(condition: () -> Boolean) {
-        val deadline = SystemClock.elapsedRealtime() + 30_000
+    private fun awaitMain(
+        timeoutMs: Long = 30_000,
+        message: String = "Information dialog metadata did not become ready",
+        condition: () -> Boolean,
+    ) {
+        val deadline = SystemClock.elapsedRealtime() + timeoutMs
         while (SystemClock.elapsedRealtime() < deadline) {
             var ready = false
             instrumentation.runOnMainSync { ready = condition() }
             if (ready) return
             SystemClock.sleep(50)
         }
-        throw AssertionError("Information dialog metadata did not become ready")
+        throw AssertionError(message)
+    }
+
+    private companion object {
+        /** The first launch of a cold, freshly booted read-only emulator has been measured above 30 s. */
+        const val LAUNCH_TIMEOUT_MS = 120_000L
     }
 }
