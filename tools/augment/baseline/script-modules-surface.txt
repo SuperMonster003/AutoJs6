@@ -1238,6 +1238,7 @@ install imgui:CreateWindow	kind="function" attributes=4 global="NONE" target=nul
 install imgui:DataTable	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:DestroyTexture	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:Dir	kind="getter" attributes=4 global="NONE" target=null arity=null
+install imgui:Dp	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:DragFloat	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:DragInt	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:DrawFlags	kind="getter" attributes=4 global="NONE" target=null arity=null
@@ -1341,6 +1342,7 @@ install imgui:PushID	kind="function" attributes=4 global="NONE" target=null arit
 install imgui:PushItemWidth	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:PushStyleColor	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:PushStyleVar	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:Px	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:RadioButton	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:Ref	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:ResetMouseDragDelta	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1465,7 +1467,9 @@ install imgui:confirm	kind="function" attributes=4 global="NONE" target=null ari
 install imgui:createTexture	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:createWindow	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:dataTable	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:density	kind="getter" attributes=4 global="NONE" target=null arity=null
 install imgui:destroyTexture	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:dp	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:dragFloat	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:dragInt	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:dummy	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1561,6 +1565,7 @@ install imgui:pushId	kind="function" attributes=4 global="NONE" target=null arit
 install imgui:pushItemWidth	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:pushStyleColor	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:pushStyleVar	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:px	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:radioButton	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:ref	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:resetMouseDragDelta	kind="function" attributes=4 global="NONE" target=null arity=null

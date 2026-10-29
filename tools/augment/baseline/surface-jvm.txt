@@ -5282,6 +5282,10 @@ imgui.DestroyTexture.arity	--C	number '0'
 imgui.DestroyTexture.length	--C	number '0'
 imgui.DestroyTexture.name	--C	string 'DestroyTexture'
 imgui.Dir	EAG--	accessor
+imgui.Dp	EW-	function name='Dp' length=0
+imgui.Dp.arity	--C	number '0'
+imgui.Dp.length	--C	number '0'
+imgui.Dp.name	--C	string 'Dp'
 imgui.DragFloat	EW-	function name='DragFloat' length=0
 imgui.DragFloat.arity	--C	number '0'
 imgui.DragFloat.length	--C	number '0'
@@ -5658,6 +5662,10 @@ imgui.PushStyleVar	EW-	function name='PushStyleVar' length=0
 imgui.PushStyleVar.arity	--C	number '0'
 imgui.PushStyleVar.length	--C	number '0'
 imgui.PushStyleVar.name	--C	string 'PushStyleVar'
+imgui.Px	EW-	function name='Px' length=0
+imgui.Px.arity	--C	number '0'
+imgui.Px.length	--C	number '0'
+imgui.Px.name	--C	string 'Px'
 imgui.RadioButton	EW-	function name='RadioButton' length=0
 imgui.RadioButton.arity	--C	number '0'
 imgui.RadioButton.length	--C	number '0'
@@ -6103,10 +6111,15 @@ imgui.dataTable	EW-	function name='dataTable' length=0
 imgui.dataTable.arity	--C	number '0'
 imgui.dataTable.length	--C	number '0'
 imgui.dataTable.name	--C	string 'dataTable'
+imgui.density	EAG--	accessor
 imgui.destroyTexture	EW-	function name='destroyTexture' length=0
 imgui.destroyTexture.arity	--C	number '0'
 imgui.destroyTexture.length	--C	number '0'
 imgui.destroyTexture.name	--C	string 'destroyTexture'
+imgui.dp	EW-	function name='dp' length=0
+imgui.dp.arity	--C	number '0'
+imgui.dp.length	--C	number '0'
+imgui.dp.name	--C	string 'dp'
 imgui.dragFloat	EW-	function name='dragFloat' length=0
 imgui.dragFloat.arity	--C	number '0'
 imgui.dragFloat.length	--C	number '0'
@@ -6487,6 +6500,10 @@ imgui.pushStyleVar	EW-	function name='pushStyleVar' length=0
 imgui.pushStyleVar.arity	--C	number '0'
 imgui.pushStyleVar.length	--C	number '0'
 imgui.pushStyleVar.name	--C	string 'pushStyleVar'
+imgui.px	EW-	function name='px' length=0
+imgui.px.arity	--C	number '0'
+imgui.px.length	--C	number '0'
+imgui.px.name	--C	string 'px'
 imgui.radioButton	EW-	function name='radioButton' length=0
 imgui.radioButton.arity	--C	number '0'
 imgui.radioButton.length	--C	number '0'

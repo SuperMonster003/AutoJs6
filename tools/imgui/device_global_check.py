@@ -99,8 +99,14 @@ if (EXPECT_MISSING) {
     });
     check('examples', function () {
         var list = imgui.listExamples();
-        assert(list && list.length === 6, 'length = ' + (list && list.length));
-        return 'length=6';
+        assert(list && list.length === 7, 'length = ' + (list && list.length));
+        return 'length=7';
+    });
+    check('units', function () {
+        var density = imgui.density;
+        assert(typeof density === 'number' && density > 0, 'density = ' + density);
+        assert(imgui.dp(10) === 10 * density && Math.abs(imgui.Px(imgui.Dp(10)) - 10) < 1e-9, 'dp / px');
+        return 'density=' + density;
     });
     check('backend', function () {
         var caps = imgui.getBackendCapabilities();

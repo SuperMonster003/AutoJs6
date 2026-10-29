@@ -43,7 +43,7 @@ object ImguiNames {
         "withPopupModal", "withContextItem", "withContextWindow", "withTooltip", "withItemTooltip", "withMenuBar", "withMenu", "withListBox",
         "withCombo", "withGroup", "withDisabled", "withId", "logWindow", "toast", "alert", "confirm", "singleChoice", "multiChoice", "statsOverlay",
         "dataTable", "createWindow", "closeWindow", "launchFloaty", "launch", "launchPrivileged", "addButtonEx", "setTouchable", "setMoreTouch",
-        "setGlobalAlpha", "setSecure", "collapseWindow", "expandWindow", "getComponent",
+        "setGlobalAlpha", "setSecure", "collapseWindow", "expandWindow", "getComponent", "dp", "px",
     )
 
     /** PascalCase aliases of [FUNCTIONS] (`Begin` for `begin`, `PushID` for `pushId`), functions as well. */
@@ -71,7 +71,7 @@ object ImguiNames {
         "IsItemDeactivatedAfterEdit", "IsItemFocused", "IsItemVisible", "IsWindowHovered", "IsWindowFocused", "IsWindowCollapsed",
         "IsWindowAppearing", "GetMousePos", "IsMouseDown", "IsMouseClicked", "IsMouseDoubleClicked", "IsMouseReleased", "IsMouseDragging",
         "GetMouseDragDelta", "ResetMouseDragDelta", "CalcTextSize", "GetFrameHeight", "GetFrameHeightWithSpacing", "GetTextLineHeight",
-        "GetTextLineHeightWithSpacing",
+        "GetTextLineHeightWithSpacing", "Dp", "Px",
     )
 
     /** Constant groups of the plugin API (flag and enum tables, theme and font names), read through getters. */
@@ -79,7 +79,7 @@ object ImguiNames {
         "Limits", "BackendStatus", "Cond", "WindowFlags", "InputTextFlags", "SliderFlags", "TreeNodeFlags", "SelectableFlags", "TabBarFlags",
         "TabItemFlags", "MouseButton", "ChildFlags", "ComboFlags", "PopupFlags", "HoveredFlags", "FocusedFlags", "ColorEditFlags", "TableFlags",
         "TableColumnFlags", "TableRowFlags", "TableBgTarget", "Col", "StyleVar", "Themes", "Appearance", "Fonts", "TextureFlags", "DrawListLayer",
-        "DrawFlags", "TouchMode", "WindowMode", "LogLevel", "ToastPosition", "Icons", "Dir", "ButtonFlags", "Key",
+        "DrawFlags", "TouchMode", "WindowMode", "LogLevel", "ToastPosition", "Icons", "Dir", "ButtonFlags", "Key", "density",
     )
 
 }
