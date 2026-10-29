@@ -19,11 +19,13 @@ from extract_exports import extract
 import returned_objects
 
 HERE = Path(__file__).resolve().parent
+# Markdown backslash escapes, as the documentation generator drops them from headings (`\_\_name\_\_` is `__name__`).
+MARKDOWN_ESCAPE = re.compile(r"\\([\\`*{}\[\]()#+\-.!_>])")
 
 
 def documentation_rows(exports, api_root, policy):
     # The generated runtime support tables (P0.5) name APIs without documenting them.
-    texts = {path.stem: docs_support.strip_blocks(path.read_text(encoding="utf-8")) for path in api_root.glob("*.md")}
+    texts = {path.stem: MARKDOWN_ESCAPE.sub(r"\1", docs_support.strip_blocks(path.read_text(encoding="utf-8"))) for path in api_root.glob("*.md")}
     if not texts:
         raise ValueError(f"No Markdown sources under {api_root}")
     rows = []

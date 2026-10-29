@@ -207,6 +207,15 @@ class CoverageTests(unittest.TestCase):
             rows = documentation_rows([{"api": "app.launch", "module": "app", "ownerModule": "app", "member": "launch"}], root, {"documentationModules": {}})
             self.assertEqual("mention", rows[0]["status"])
 
+    def test_markdown_escapes_do_not_hide_a_heading(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "util.md").write_text("## [m] \\_\\_assignFunctions\\_\\_\n\nThe property name is `util.__assignFunctions__`.\n", encoding="utf-8")
+            item = {"api": "util.__assignFunctions__", "module": "util", "ownerModule": "util", "member": "__assignFunctions__"}
+            rows = documentation_rows([item], root, {"documentationModules": {}})
+            self.assertEqual("heading", rows[0]["status"])
+            self.assertEqual(1, rows[0]["evidence"][0]["line"])
+
     def test_module_aliases_keep_their_parent_and_exclusions_are_exact(self):
         policy = {"internalExports": {"ui.__bridge": "internal"}, "standardExports": {}, "returnedObjectProbes": ["threads.disposable.().blockedGet"]}
         baseline = {"records": [{"api": "ui.__bridge"}, {"api": "ui.newPublicMethod"}], "modules": [{"module": "util.version", "aliases": ["version"]}, {"module": "powerManager", "aliases": ["powerManager", "$powerManager", "power_manager", "$power_manager"]}]}
