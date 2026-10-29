@@ -617,6 +617,43 @@ the Java class are not in the default Ace library set, so the module types of th
 d.ts declare them explicitly. In the documentation runtime support tables they
 count as exports of their module (Q22 (a)).
 
+## Language runtime APIs (Q77)
+
+The Python, Java, Kotlin and Lua runtime plugins give their scripts own APIs (PLUGIN-APIS.md 2.4: Python
+46 functions with 54 constants and 10 exception classes, Java 17 methods of 7 types, Kotlin 13 of 6, Lua 12).
+They have no Node / Bun columns, so they stay out of the runtime matrix; `language_runtimes.py` keeps them
+and their documentation pages (`api/pythonRuntime.md`, `javaRuntime.md`, `kotlinRuntime.md`,
+`luaRuntime.md`) in step (roadmap P5.2d, appendix C Q77 (a)):
+
+```text
+python tools/api-coverage/language_runtimes.py            # check, one line per runtime
+python tools/api-coverage/language_runtimes.py --write    # after a plugin API change: rewrite the name list
+```
+
+`policy.json` "languageRuntimes" names per runtime the plugin checkout (`repository`, a sibling directory
+name or a local path; `--plugin NAME=PATH` overrides it), the registration source and its reader (`kind`),
+the documentation page and the name prefix used there. `language-runtimes.json` is the committed name list
+both checks compare with:
+
+- source: the names the checkout registers. `python-package`: `__all__` of `autojs6/__init__.py` and of
+  each submodule it lists (functions with their signatures, constants, classes). `jvm-entry-aar`: the
+  plugin's frozen `protocol/jvm-source-api.aar` (Java is at Entry API 4, Kotlin at Entry API 2, so the
+  host's current `JvmEntryApi.kt` cannot stand for both), every public type and non-synthetic method
+  reachable from `AutoJsJvmEntry` through the parameter, return and thrown types of its package.
+  `lua-module`: the table `install_autojs_module` builds, by following its `lua_newtable` /
+  `lua_setfield` stack operations. A missing checkout prints `source skipped` and does not fail.
+- doc: every function needs a `### <prefix><name>(<parameters>)` heading; Python parameter names, `*`
+  markers and which ones have defaults must match the signature, JVM parameter counts the descriptor.
+  Constants, classes, types and values need a heading or a table row whose first cell is
+  `` `<prefix><name>` ``. Names the page lacks, API headings or rows the list lacks and a missing page
+  fail (without a documentation checkout the doc part prints `skipped`); with
+  the empty JVM prefix every dotted `###` heading and every table row starting with a code name counts,
+  so the Java and Kotlin pages keep other tables (error codes) without that form.
+
+CI checks out the four public plugin repositories and runs the script after the unit tests. Type stubs
+(`.pyi`, LuaLS meta, Java / Kotlin stubs for Ace, roadmap P5.2e) become another surface checked against
+the same list: a reader per stub kind next to `check_page`, with the stub paths in the same policy entries.
+
 ## Physical-device checks
 
 Build and install matching current host and instrumentation APKs with `adb install

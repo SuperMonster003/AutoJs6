@@ -134,6 +134,26 @@ jobs:
           ref: ${{ inputs.mail_plugin_ref }}
           path: AutoJs6-Plugin-Three-Stamp-Mail
           lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Python-Runtime
+          path: AutoJs6-Plugin-Python-Runtime
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Java-Runtime
+          path: AutoJs6-Plugin-Java-Runtime
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Kotlin-Runtime
+          path: AutoJs6-Plugin-Kotlin-Runtime
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Lua-Runtime
+          path: AutoJs6-Plugin-Lua-Runtime
+          lfs: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -175,6 +195,9 @@ jobs:
           node tools/api-coverage/check-bun-js-tools.mjs
           node tools/api-coverage/check-bun-files-data.mjs
           node tools/api-coverage/check-bun-app-shell.mjs
+      - name: Check language runtime APIs against their documentation pages
+        working-directory: AutoJs6
+        run: python tools/api-coverage/language_runtimes.py
       - name: Check Ace runtime completion against the runtime matrix
         working-directory: AutoJs6-Plugin-Ace-Editor
         run: |

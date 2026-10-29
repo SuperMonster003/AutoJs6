@@ -172,5 +172,38 @@
     "shizuku.().throwIfError",
     "shizuku.().toJson",
     "shizuku.().toString"
-  ]
+  ],
+  "languageRuntimes": {
+    "python": {
+      "repository": "AutoJs6-Plugin-Python-Runtime",
+      "kind": "python-package",
+      "source": "app/src/main/python/autojs6",
+      "page": "pythonRuntime",
+      "prefix": "autojs6."
+    },
+    "java": {
+      "repository": "AutoJs6-Plugin-Java-Runtime",
+      "kind": "jvm-entry-aar",
+      "source": "protocol/jvm-source-api.aar",
+      "entry": "org/autojs/plugin/jvmsource/api/AutoJsJvmEntry",
+      "page": "javaRuntime",
+      "prefix": ""
+    },
+    "kotlin": {
+      "repository": "AutoJs6-Plugin-Kotlin-Runtime",
+      "kind": "jvm-entry-aar",
+      "source": "protocol/jvm-source-api.aar",
+      "entry": "org/autojs/plugin/jvmsource/api/AutoJsJvmEntry",
+      "page": "kotlinRuntime",
+      "prefix": ""
+    },
+    "lua": {
+      "repository": "AutoJs6-Plugin-Lua-Runtime",
+      "kind": "lua-module",
+      "source": "app/src/main/cpp/lua_runtime_jni.cpp",
+      "function": "install_autojs_module",
+      "page": "luaRuntime",
+      "prefix": "autojs."
+    }
+  }
 }
