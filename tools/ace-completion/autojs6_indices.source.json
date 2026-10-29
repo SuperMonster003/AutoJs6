@@ -2786,6 +2786,12 @@
       "doc": "AutoJs6 Color API",
       "members": [
         {
+          "name": "toStringReadable",
+          "kind": "function",
+          "doc": "toStringReadable(): string;",
+          "signature": "toStringReadable(): string;"
+        },
+        {
           "name": "argb",
           "kind": "function",
           "doc": "argb(): number[];",
@@ -7334,6 +7340,24 @@
       "doc": "Console logging API",
       "members": [
         {
+          "name": "isShowing",
+          "kind": "function",
+          "doc": "isShowing(): boolean;",
+          "signature": "isShowing(): boolean;"
+        },
+        {
+          "name": "setGravity",
+          "kind": "function",
+          "doc": "setGravity(gravity: number | string): void;",
+          "signature": "setGravity(gravity: number | string): void;"
+        },
+        {
+          "name": "setTouchThrough",
+          "kind": "function",
+          "doc": "setTouchThrough(touchThrough?: boolean): void;",
+          "signature": "setTouchThrough(touchThrough?: boolean): void;"
+        },
+        {
           "name": "assert",
           "kind": "function",
           "doc": "assert(value: boolean | (() => boolean), message?: string): void;",
@@ -8693,6 +8717,84 @@
       "doc": "Device information and controls",
       "members": [
         {
+          "name": "brands",
+          "kind": "variable",
+          "doc": "brands: org.autojs.autojs.util.RomUtils.Brand;",
+          "signature": "brands: org.autojs.autojs.util.RomUtils.Brand;"
+        },
+        {
+          "name": "manufacturers",
+          "kind": "variable",
+          "doc": "manufacturers: org.autojs.autojs.runtime.api.Device.Manufacturers;",
+          "signature": "manufacturers: org.autojs.autojs.runtime.api.Device.Manufacturers;"
+        },
+        {
+          "name": "roms",
+          "kind": "variable",
+          "doc": "roms: org.autojs.autojs.util.RomUtils;",
+          "signature": "roms: org.autojs.autojs.util.RomUtils;"
+        },
+        {
+          "name": "ensureReadPhoneStatePermission",
+          "kind": "function",
+          "doc": "ensureReadPhoneStatePermission(): void;",
+          "signature": "ensureReadPhoneStatePermission(): void;"
+        },
+        {
+          "name": "getMarketName",
+          "kind": "function",
+          "doc": "getMarketName(): string;",
+          "signature": "getMarketName(): string;"
+        },
+        {
+          "name": "getOrientation",
+          "kind": "function",
+          "doc": "getOrientation(): number;",
+          "signature": "getOrientation(): number;"
+        },
+        {
+          "name": "getRotation",
+          "kind": "function",
+          "doc": "getRotation(): number;",
+          "signature": "getRotation(): number;"
+        },
+        {
+          "name": "hasReadPhoneStatePermission",
+          "kind": "function",
+          "doc": "hasReadPhoneStatePermission(): boolean;",
+          "signature": "hasReadPhoneStatePermission(): boolean;"
+        },
+        {
+          "name": "isManufacturer",
+          "kind": "function",
+          "doc": "isManufacturer(manufacturer: string): boolean;",
+          "signature": "isManufacturer(manufacturer: string): boolean;"
+        },
+        {
+          "name": "isPowerSourceAC",
+          "kind": "function",
+          "doc": "isPowerSourceAC(): boolean;",
+          "signature": "isPowerSourceAC(): boolean;"
+        },
+        {
+          "name": "isPowerSourceDock",
+          "kind": "function",
+          "doc": "isPowerSourceDock(): boolean;",
+          "signature": "isPowerSourceDock(): boolean;"
+        },
+        {
+          "name": "isPowerSourceUSB",
+          "kind": "function",
+          "doc": "isPowerSourceUSB(): boolean;",
+          "signature": "isPowerSourceUSB(): boolean;"
+        },
+        {
+          "name": "isPowerSourceWireless",
+          "kind": "function",
+          "doc": "isPowerSourceWireless(): boolean;",
+          "signature": "isPowerSourceWireless(): boolean;"
+        },
+        {
           "name": "width",
           "kind": "variable",
           "doc": "width: number;",
@@ -9438,6 +9540,108 @@
       "doc": "Event emitter and system event helpers",
       "members": [
         {
+          "name": "addListener",
+          "kind": "function",
+          "doc": "addListener(eventName: string, listener: any): this;",
+          "signature": "addListener(eventName: string, listener: any): this;"
+        },
+        {
+          "name": "emit",
+          "kind": "function",
+          "doc": "emit(eventName: string, ...args: any[]): boolean;",
+          "signature": "emit(eventName: string, ...args: any[]): boolean;"
+        },
+        {
+          "name": "emitSticky",
+          "kind": "function",
+          "doc": "emitSticky(eventName: string, ...args: any[]): boolean;",
+          "signature": "emitSticky(eventName: string, ...args: any[]): boolean;"
+        },
+        {
+          "name": "eventNames",
+          "kind": "function",
+          "doc": "eventNames(): string[];",
+          "signature": "eventNames(): string[];"
+        },
+        {
+          "name": "getMaxListeners",
+          "kind": "function",
+          "doc": "getMaxListeners(): number;",
+          "signature": "getMaxListeners(): number;"
+        },
+        {
+          "name": "getTimer",
+          "kind": "function",
+          "doc": "getTimer(): org.autojs.autojs.core.looper.Timer;",
+          "signature": "getTimer(): org.autojs.autojs.core.looper.Timer;"
+        },
+        {
+          "name": "listenerCount",
+          "kind": "function",
+          "doc": "listenerCount(eventName: string): number;",
+          "signature": "listenerCount(eventName: string): number;"
+        },
+        {
+          "name": "listeners",
+          "kind": "function",
+          "doc": "listeners(eventName: string): any[];",
+          "signature": "listeners(eventName: string): any[];"
+        },
+        {
+          "name": "on",
+          "kind": "function",
+          "doc": "on(eventName: string, listener: any): this;",
+          "signature": "on(eventName: string, listener: any): this;"
+        },
+        {
+          "name": "once",
+          "kind": "function",
+          "doc": "once(eventName: string, listener: any): this;",
+          "signature": "once(eventName: string, listener: any): this;"
+        },
+        {
+          "name": "prependListener",
+          "kind": "function",
+          "doc": "prependListener(eventName: string, listener: any): this;",
+          "signature": "prependListener(eventName: string, listener: any): this;"
+        },
+        {
+          "name": "prependOnceListener",
+          "kind": "function",
+          "doc": "prependOnceListener(eventName: string, listener: any): this;",
+          "signature": "prependOnceListener(eventName: string, listener: any): this;"
+        },
+        {
+          "name": "removeAllListeners",
+          "kind": "function",
+          "doc": "removeAllListeners(eventName?: string): this;",
+          "signature": "removeAllListeners(eventName?: string): this;"
+        },
+        {
+          "name": "removeListener",
+          "kind": "function",
+          "doc": "removeListener(eventName: string, listener: any): this;",
+          "signature": "removeListener(eventName: string, listener: any): this;"
+        },
+        {
+          "name": "removeNotificationObserver",
+          "kind": "function",
+          "doc": "removeNotificationObserver(): void;",
+          "signature": "removeNotificationObserver(): void;"
+        },
+        {
+          "name": "removeToastObserver",
+          "kind": "function",
+          "doc": "removeToastObserver(): void;",
+          "signature": "removeToastObserver(): void;"
+        },
+        {
+          "name": "setMaxListeners",
+          "kind": "function",
+          "doc": "setMaxListeners(maxListeners: number): this;",
+          "signature": "setMaxListeners(maxListeners: number): this;"
+        },
+        {
           "name": "broadcast",
           "kind": "variable",
           "doc": "broadcast: org.autojs.autojs.core.broadcast.BroadcastEmitter;",
@@ -9485,22 +9689,10 @@
           "signature": "observeNotification(): void;"
         },
         {
-          "name": "removeNotificationObserver",
-          "kind": "function",
-          "doc": "removeNotificationObserver(): void;",
-          "signature": "removeNotificationObserver(): void;"
-        },
-        {
           "name": "observeToast",
           "kind": "function",
           "doc": "observeToast(): void;",
           "signature": "observeToast(): void;"
-        },
-        {
-          "name": "removeToastObserver",
-          "kind": "function",
-          "doc": "removeToastObserver(): void;",
-          "signature": "removeToastObserver(): void;"
         },
         {
           "name": "onceKeyDown",
@@ -9585,72 +9777,7 @@
           ]
         },
         {
-          "name": "on",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "once",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "emit",
-          "kind": "function",
-          "doc": ""
-        },
-        {
           "name": "getListeners",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "addListener",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "eventNames",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "listenerCount",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "listeners",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "prependListener",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "prependOnceListener",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "removeAllListeners",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "removeListener",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "setMaxListeners",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "getMaxListeners",
           "kind": "function",
           "doc": ""
         },
@@ -30102,9 +30229,112 @@
           "signature": "unregister(emitter: Sensors.EventEmitter | null): void;"
         },
         {
+          "name": "delay",
+          "kind": "variable",
+          "doc": "delay: org.autojs.autojs.runtime.api.Sensors.Delay;",
+          "signature": "delay: org.autojs.autojs.runtime.api.Sensors.Delay;"
+        },
+        {
+          "name": "addListener",
+          "kind": "function",
+          "doc": "addListener(eventName: string, listener: (...args: unknown[]) => void): this;",
+          "signature": "addListener(eventName: string, listener: (...args: unknown[]) => void): this;"
+        },
+        {
+          "name": "emit",
+          "kind": "function",
+          "doc": "emit(eventName: string, ...args: unknown[]): boolean;",
+          "signature": "emit(eventName: string, ...args: unknown[]): boolean;"
+        },
+        {
+          "name": "emitSticky",
+          "kind": "function",
+          "doc": "emitSticky(eventName: string, ...args: unknown[]): boolean;",
+          "signature": "emitSticky(eventName: string, ...args: unknown[]): boolean;"
+        },
+        {
+          "name": "eventNames",
+          "kind": "function",
+          "doc": "eventNames(): string[];",
+          "signature": "eventNames(): string[];"
+        },
+        {
+          "name": "getMaxListeners",
+          "kind": "function",
+          "doc": "getMaxListeners(): number;",
+          "signature": "getMaxListeners(): number;"
+        },
+        {
+          "name": "getSensor",
+          "kind": "function",
+          "doc": "getSensor(sensorName: string): android.hardware.Sensor | null;",
+          "signature": "getSensor(sensorName: string): android.hardware.Sensor | null;"
+        },
+        {
+          "name": "getTimer",
+          "kind": "function",
+          "doc": "getTimer(): org.autojs.autojs.core.looper.Timer;",
+          "signature": "getTimer(): org.autojs.autojs.core.looper.Timer;"
+        },
+        {
+          "name": "listenerCount",
+          "kind": "function",
+          "doc": "listenerCount(eventName: string): number;",
+          "signature": "listenerCount(eventName: string): number;"
+        },
+        {
+          "name": "listeners",
+          "kind": "function",
+          "doc": "listeners(eventName: string): Function[];",
+          "signature": "listeners(eventName: string): Function[];"
+        },
+        {
+          "name": "on",
+          "kind": "function",
+          "doc": "on(eventName: string, listener: (...args: unknown[]) => void): this;",
+          "signature": "on(eventName: string, listener: (...args: unknown[]) => void): this;"
+        },
+        {
+          "name": "once",
+          "kind": "function",
+          "doc": "once(eventName: string, listener: (...args: unknown[]) => void): this;",
+          "signature": "once(eventName: string, listener: (...args: unknown[]) => void): this;"
+        },
+        {
+          "name": "prependListener",
+          "kind": "function",
+          "doc": "prependListener(eventName: string, listener: (...args: unknown[]) => void): this;",
+          "signature": "prependListener(eventName: string, listener: (...args: unknown[]) => void): this;"
+        },
+        {
+          "name": "prependOnceListener",
+          "kind": "function",
+          "doc": "prependOnceListener(eventName: string, listener: (...args: unknown[]) => void): this;",
+          "signature": "prependOnceListener(eventName: string, listener: (...args: unknown[]) => void): this;"
+        },
+        {
+          "name": "removeAllListeners",
+          "kind": "function",
+          "doc": "removeAllListeners(eventName?: string): this;",
+          "signature": "removeAllListeners(eventName?: string): this;"
+        },
+        {
+          "name": "removeListener",
+          "kind": "function",
+          "doc": "removeListener(eventName: string, listener: Function): this;",
+          "signature": "removeListener(eventName: string, listener: Function): this;"
+        },
+        {
+          "name": "setMaxListeners",
+          "kind": "function",
+          "doc": "setMaxListeners(maxListeners: number): this;",
+          "signature": "setMaxListeners(maxListeners: number): this;"
+        },
+        {
           "name": "unregisterAll",
           "kind": "function",
-          "doc": ""
+          "doc": "unregisterAll(): void;",
+          "signature": "unregisterAll(): void;"
         }
       ]
     },
@@ -30228,6 +30458,36 @@
           "kind": "variable",
           "doc": "state: Shizuku.State;",
           "signature": "state: Shizuku.State;"
+        },
+        {
+          "name": "hasPermission",
+          "kind": "function",
+          "doc": "hasPermission(): boolean;",
+          "signature": "hasPermission(): boolean;"
+        },
+        {
+          "name": "hasService",
+          "kind": "function",
+          "doc": "hasService(): boolean;",
+          "signature": "hasService(): boolean;"
+        },
+        {
+          "name": "isInstalled",
+          "kind": "function",
+          "doc": "isInstalled(context: android.content.Context): boolean;",
+          "signature": "isInstalled(context: android.content.Context): boolean;"
+        },
+        {
+          "name": "isOperational",
+          "kind": "function",
+          "doc": "isOperational(): boolean;",
+          "signature": "isOperational(): boolean;"
+        },
+        {
+          "name": "isRunning",
+          "kind": "function",
+          "doc": "isRunning(): boolean;",
+          "signature": "isRunning(): boolean;"
         },
         {
           "name": "execCommand",
@@ -31127,6 +31387,12 @@
       "doc": "Thread helpers",
       "members": [
         {
+          "name": "shutDownAll",
+          "kind": "function",
+          "doc": "shutDownAll(): void;",
+          "signature": "shutDownAll(): void;"
+        },
+        {
           "name": "start",
           "kind": "function",
           "doc": "start(runnable: java.lang.Runnable | Func): org.autojs.autojs.runtime.api.Threads.Companion.TimerThread | undefined;",
@@ -31167,11 +31433,6 @@
           "kind": "function",
           "doc": "interrupt(thread: org.autojs.autojs.core.looper.TimerThread | any): void;",
           "signature": "interrupt(thread: org.autojs.autojs.core.looper.TimerThread | any): void;"
-        },
-        {
-          "name": "shutDownAll",
-          "kind": "function",
-          "doc": ""
         }
       ]
     },
@@ -31189,6 +31450,42 @@
           "kind": "function",
           "doc": "keepAlive(timeout?: number | null): number;",
           "signature": "keepAlive(timeout?: number | null): number;"
+        },
+        {
+          "name": "clearImmediate",
+          "kind": "function",
+          "doc": "clearImmediate(id: number): boolean;",
+          "signature": "clearImmediate(id: number): boolean;"
+        },
+        {
+          "name": "clearInterval",
+          "kind": "function",
+          "doc": "clearInterval(id: number): boolean;",
+          "signature": "clearInterval(id: number): boolean;"
+        },
+        {
+          "name": "clearTimeout",
+          "kind": "function",
+          "doc": "clearTimeout(id: number): boolean;",
+          "signature": "clearTimeout(id: number): boolean;"
+        },
+        {
+          "name": "setImmediate",
+          "kind": "function",
+          "doc": "setImmediate(callback: any, ...args: any[]): number;",
+          "signature": "setImmediate(callback: any, ...args: any[]): number;"
+        },
+        {
+          "name": "setInterval",
+          "kind": "function",
+          "doc": "setInterval(callback: Function, interval?: number, ...args: any[]): number;",
+          "signature": "setInterval(callback: Function, interval?: number, ...args: any[]): number;"
+        },
+        {
+          "name": "setTimeout",
+          "kind": "function",
+          "doc": "setTimeout(callback: Function, delay?: number, ...args: any[]): number;",
+          "signature": "setTimeout(callback: Function, delay?: number, ...args: any[]): number;"
         },
         {
           "name": "addDailyTask",
@@ -31249,36 +31546,6 @@
           "kind": "function",
           "doc": "queryTimedTasks(options?: Tasks.Query.Timed): TimedTask$[];",
           "signature": "queryTimedTasks(options?: Tasks.Query.Timed): TimedTask$[];"
-        },
-        {
-          "name": "setTimeout",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "clearTimeout",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "setInterval",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "clearInterval",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "setImmediate",
-          "kind": "function",
-          "doc": ""
-        },
-        {
-          "name": "clearImmediate",
-          "kind": "function",
-          "doc": ""
         }
       ]
     },
@@ -31511,6 +31778,12 @@
     "ui": {
       "doc": "UI DSL namespace",
       "members": [
+        {
+          "name": "view",
+          "kind": "variable",
+          "doc": "view: android.view.View;",
+          "signature": "view: android.view.View;"
+        },
         {
           "name": "layoutInflater",
           "kind": "variable",
