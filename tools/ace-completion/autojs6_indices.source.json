@@ -30621,6 +30621,12 @@
           "signature": "models: Speech.Models;"
         },
         {
+          "name": "speaker",
+          "kind": "variable",
+          "doc": "speaker: Speech.Speaker;",
+          "signature": "speaker: Speech.Speaker;"
+        },
+        {
           "name": "SpeechError",
           "kind": "variable",
           "doc": "SpeechError: Speech.ErrorConstructor;",
@@ -30678,6 +30684,59 @@
           "kind": "function",
           "doc": "refreshCatalog(): { version: number; updated: boolean; };",
           "signature": "refreshCatalog(): { version: number; updated: boolean; };"
+        }
+      ]
+    },
+    "speech.speaker": {
+      "doc": "AutoJs6 speech.speaker API",
+      "members": [
+        {
+          "name": "enroll",
+          "kind": "function",
+          "doc": "enroll(name: string, files: string | string[], options?: EnrollOptions | null): Enrollment;",
+          "signature": "enroll(name: string, files: string | string[], options?: EnrollOptions | null): Enrollment;"
+        },
+        {
+          "name": "enrollAsync",
+          "kind": "function",
+          "doc": "enrollAsync(name: string, files: string | string[], options?: EnrollOptions | null): Promise<Enrollment>;",
+          "signature": "enrollAsync(name: string, files: string | string[], options?: EnrollOptions | null): Promise<Enrollment>;"
+        },
+        {
+          "name": "verify",
+          "kind": "function",
+          "doc": "verify(name: string, file: string, options?: VerifyOptions | null): Verification;",
+          "signature": "verify(name: string, file: string, options?: VerifyOptions | null): Verification;"
+        },
+        {
+          "name": "verifyAsync",
+          "kind": "function",
+          "doc": "verifyAsync(name: string, file: string, options?: VerifyOptions | null): Promise<Verification>;",
+          "signature": "verifyAsync(name: string, file: string, options?: VerifyOptions | null): Promise<Verification>;"
+        },
+        {
+          "name": "identify",
+          "kind": "function",
+          "doc": "identify(file: string, options?: IdentifyOptions | null): Identification;",
+          "signature": "identify(file: string, options?: IdentifyOptions | null): Identification;"
+        },
+        {
+          "name": "identifyAsync",
+          "kind": "function",
+          "doc": "identifyAsync(file: string, options?: IdentifyOptions | null): Promise<Identification>;",
+          "signature": "identifyAsync(file: string, options?: IdentifyOptions | null): Promise<Identification>;"
+        },
+        {
+          "name": "list",
+          "kind": "function",
+          "doc": "list(): SpeakerInfo[];",
+          "signature": "list(): SpeakerInfo[];"
+        },
+        {
+          "name": "remove",
+          "kind": "function",
+          "doc": "remove(name: string): boolean;",
+          "signature": "remove(name: string): boolean;"
         }
       ]
     },
