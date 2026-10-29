@@ -68,16 +68,20 @@
       "auto": ["accessibility"],
       "automator": ["accessibility"],
       "notice": ["notifications"],
-      "timers": ["tasks"]
+      "timers": ["tasks"],
+      "_note": "P4.2a: Mathx / Arrayx / Numberx are the mathx / arrayx / numberx objects of host.jsox (dotted alias: namespace.member prefix)",
+      "Mathx": ["jsox.mathx"],
+      "Arrayx": ["jsox.arrayx"],
+      "Numberx": ["jsox.numberx"]
     },
-    "globalNamespaces": ["coordinates"],
+    "globalNamespaces": ["coordinates", "global"],
     "namespaceCapabilities": {
       "compose": ["ui.compose"], "coordinates": ["screen.metrics"], "images": ["image.process", "image.files", "screen.capture"],
       "opencc": ["text.opencc"], "pinyin": ["text.pinyin"], "pinyin4j": ["text.pinyin4j"], "screenRecorder": ["screen.record"],
       "shizuku": ["shell.shizuku"], "sqlite": ["database.control"], "storages": ["storage.control"], "ui": ["ui.layout"]
     },
     "memberCapabilities": {
-      "_note": "Q12 (a): namespace members missing from HOST_API_METHODS whose namespace has several related grants; the grant of the host-client.mjs call they wrap (2026-10-25, api-coverage P1.1)",
+      "_note": "Q12 (a): namespace members missing from HOST_API_METHODS whose namespace has several related grants; the grant of the host-client.mjs call they wrap (2026-10-25, api-coverage P1.1). P4.2a: members of a local namespace (no related grant) that call the host through another grant, capability-gated by it",
       "events.on": {"capability": "events.observe", "basis": "client-side listener; screen / battery broadcasts subscribe through observeBroadcasts"},
       "events.once": {"capability": "events.observe", "basis": "client-side listener; screen / battery broadcasts subscribe through observeBroadcasts"},
       "images.ObjectFrame": {"capability": "image.process", "basis": "client-side class of matchFeatures results"},
@@ -121,7 +125,16 @@
       "device.setMusicVolume": {"capability": "device.audio", "basis": "calls media setAudioStreamVolume with the stream (device.audio)"},
       "device.setNotificationVolume": {"capability": "device.audio", "basis": "calls media setAudioStreamVolume with the stream (device.audio)"},
       "device.getHeight": {"capability": "device.control", "basis": "reads the info route snapshot"},
-      "device.getWidth": {"capability": "device.control", "basis": "reads the info route snapshot"}
+      "device.getWidth": {"capability": "device.control", "basis": "reads the info route snapshot"},
+      "util.java.array": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: newArray rows of the component type"},
+      "util.java.instanceof": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: Class.isInstance through the facade"},
+      "util.java.instanceOf": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: Class.isInstance through the facade"},
+      "util.java.toJsArray": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: reads a Java list or array through the facade"},
+      "util.java.objectToMap": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: creates a java.util.HashMap through the facade"},
+      "util.java.mapToObject": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: reads a Java map through the facade"},
+      "s13n.point": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: creates an android.graphics.Point through the facade"},
+      "s13n.throwable": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: creates a java.lang.Throwable through the facade"},
+      "util.morseCode.vibrate": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: vibrates through the facade (Device / Vibrator of the host)"}
     },
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",

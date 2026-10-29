@@ -277,9 +277,11 @@ class BunIndex:
         return None
 
     def cell(self, namespace, path, via):
-        """Client members are capability-gated; a namespace without any related capability holds client-side helpers."""
+        """Client members are capability-gated; a namespace without any related capability holds client-side helpers,
+        except the members `memberCapabilities` maps to a grant (util.java.* over the Java facade)."""
         info = self.namespaces[namespace]['members'][path] if namespace else self.client[path]
-        status = 'capability-gated' if not namespace or self.related(namespace) else 'local-shim'
+        mapped = bool(namespace) and f'{namespace}.{path}' in self.policy.get('memberCapabilities', {})
+        status = 'capability-gated' if not namespace or self.related(namespace) or mapped else 'local-shim'
         cell = {'status': status, 'namespace': namespace, 'member': path, 'async': info['async'], 'via': via}
         if info.get('rejects'):
             cell['rejects'] = True
@@ -299,8 +301,11 @@ class BunIndex:
             path = '.'.join(parts[k:] + [member])
             names = [(base, 'same-name')] + [(alias, 'module-alias') for alias in self.policy.get('namespaceAliases', {}).get(base, [])]
             for name, via in names:
-                if name and self.has(name, path, rejecting):
-                    return name, path, via
+                # A dotted alias names an object nested in a namespace (Mathx -> jsox.mathx).
+                namespace, _, prefix = name.partition('.') if via == 'module-alias' else (name, '', '')
+                nested = f'{prefix}.{path}' if prefix else path
+                if namespace and self.has(namespace, nested, rejecting):
+                    return namespace, nested, via
         return None
 
     def lookup(self, row, group):

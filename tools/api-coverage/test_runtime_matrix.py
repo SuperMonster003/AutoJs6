@@ -443,6 +443,26 @@ class StatusTest(unittest.TestCase):
         self.assertTrue(any('images.toBytes' in item for item in failures))
         self.assertEqual(matrix()['summary']['missingCapabilities'], [])
 
+    def test_bun_nested_alias_and_member_grant(self):
+        exports = copy.deepcopy(EXPORTS)
+        exports['records'] += [record('Mathx.sum', 'Mathx', 'Mathx'), record('util.java.array', 'util.java', 'util.java'),
+                               record('util.isArray', 'util', 'util')]
+        bun = copy.deepcopy(BUN_SURFACES)
+        bun['namespaces']['jsox'] = {'members': {'mathx': member(False), 'mathx.sum': member(False)}}
+        bun['namespaces']['util'] = {'members': {'java': member(False), 'java.array': member(), 'isArray': member(False)}}
+        bun['capabilities'].append('java.interop')
+        policy = copy.deepcopy(POLICY)
+        policy['bun']['namespaceAliases']['Mathx'] = ['jsox.mathx']
+        policy['bun']['memberCapabilities'] = {'util.java.array': {'capability': 'java.interop', 'basis': 'Java facade'}}
+        result = build(exports, policy, POLICY_JSON, NODE_SURFACES, bun, parse_host_api(HOST_API), WORKER)
+        rows = {row['id']: row['bun'] for row in result['rows']}
+        self.assertEqual((rows['Mathx.sum']['status'], rows['Mathx.sum']['namespace'], rows['Mathx.sum']['member'], rows['Mathx.sum']['via']),
+                         ('local-shim', 'jsox', 'mathx.sum', 'module-alias'))
+        self.assertEqual((rows['util.java.array']['status'], rows['util.java.array']['capability']), ('capability-gated', 'java.interop'))
+        self.assertEqual(rows['util.isArray']['status'], 'local-shim')
+        self.assertNotIn('capability', rows['util.isArray'])
+        self.assertEqual(result['summary']['missingCapabilities'], [])
+
     def test_duplicate_ids_and_schema(self):
         exports = copy.deepcopy(EXPORTS)
         exports['records'].append(copy.deepcopy(exports['records'][0]))

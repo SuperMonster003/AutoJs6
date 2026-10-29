@@ -260,10 +260,14 @@ behavior is reviewed in P1). The sources, all at the paths the roadmap names:
   namespace has several grants (`images`: `image.process` / `image.files` /
   `screen.capture`). A mapping naming an unknown grant leaves the cell without a
   capability; an unused mapping is a policy conflict. A namespace without
-  any related grant holds client-side helpers and is `local-shim` (`colors`).
+  any related grant holds client-side helpers and is `local-shim` (`colors`,
+  `util`, `jsox`), except its members `bun.memberCapabilities` maps to the grant
+  they call the host through (`util.java.array` -> `java.interop`), which are
+  `capability-gated`.
 
 A row is looked up in its placement module, then through `runtime-policy.json`
-module aliases (`automator` -> `accessibility`), a global-object row through its
+module aliases (`automator` -> `accessibility`; a dotted Bun alias names an object
+nested in a namespace, `Mathx` -> `jsox.mathx`), a global-object row through its
 owner module, then through the other placements of the same function, then the
 `globalModules` / `globalNamespaces` and the opt-in `autojs6:compat` facade. Only
 cells still pending take an exclusion rule; a rule matching a covered cell is
