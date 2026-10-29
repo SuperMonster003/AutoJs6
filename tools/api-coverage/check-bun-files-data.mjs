@@ -45,8 +45,10 @@ assert.equal(typeof host.files.sdcardPath === 'string' || host.files.sdcardPath 
 // colors, zip, mime, recorder (the shared JS tools core), storages and the global members of the family.
 const members = {colors: host.colors, zip: host.zip, mime: host.mime, recorder: host.recorder, storages: host.storages};
 const counts = {};
+// mime and recorder are Rhino prototype modules (Q18), the others registered modules.
+const PROTOTYPE_MODULES = ['mime', 'recorder'];
 for (const [module, value] of Object.entries(members)) {
-  const names = exported.names(module).filter(name => !(PENDING[module] || []).includes(name));
+  const names = (PROTOTYPE_MODULES.includes(module) ? prototypeMembers(module) : exported.names(module)).filter(name => !(PENDING[module] || []).includes(name));
   assert.deepEqual(names.filter(name => !(name in value)), [], `Rhino ${module} members missing from host.${module}`);
   counts[module] = names.length;
 }

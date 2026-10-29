@@ -15,10 +15,12 @@ const nodeFiles=fs.readFileSync(path.join(node,'docs/nodejs/types/autojs6-node/f
 // runtime computes them in its own process, so they are not compared with the Node host functions.
 const prototypeFiles=['cwd','create','createIfNotExists','createWithDirs','readBytes','writeBytes','appendBytes','rename','renameWithoutExtension','removeDir','isEmptyDir','readAssets','getSimplifiedPath'];
 assert(prototypeFiles.every(name=>HOST_API_METHODS['files.control'].includes(name)),'Bun files.control lacks a Rhino files prototype member');
+// The path helpers and open / toFile of the shared JS tools core run in the client (P4.2b).
+const coreFiles=['join','getName','getExtension','getNameWithoutExtension','getHumanReadableSize','formatSizeWithUnit','nonNullPath','open','toFile'];
 const publicFiles=[...nodeFiles.matchAll(/^\s+(\w+)\([^\n]+\): (?!never;)/gm)].map(m=>m[1]).filter(name=>!prototypeFiles.includes(name)).sort();
-assert.deepEqual(publicFiles,[...HOST_API_METHODS['files.control'].filter(name=>!prototypeFiles.includes(name)),'join','getName','getExtension'].sort());
+assert.deepEqual(publicFiles,[...HOST_API_METHODS['files.control'].filter(name=>!prototypeFiles.includes(name)),...coreFiles].sort());
 const automation=fs.readFileSync(path.join(root,'app/src/main/java/org/autojs/autojs/engine/BunAutomationBridge.kt'),'utf8');
 assert.deepEqual(names(automation.match(/Grants.STORAGE_CONTROL to setOf\(([^)]*)\)/)[1]),[...HOST_API_METHODS['storage.control']].sort());
 const provider=fs.readFileSync(path.join(root,'app/src/main/java/org/autojs/autojs/engine/NodeBridgeProtocol.kt'),'utf8');
 assert.deepEqual(names(provider.match(/val storageMethods = setOf\(([^)]*)\)/)[1]),[...HOST_API_METHODS['storage.control']].sort());
-console.log('Bun file/storage coverage: 15 public file functions, 13 Rhino files prototype members and 6 shared native storage routes');
+console.log(`Bun file/storage coverage: ${publicFiles.length} public file functions, ${prototypeFiles.length} Rhino files prototype members and 6 shared native storage routes`);

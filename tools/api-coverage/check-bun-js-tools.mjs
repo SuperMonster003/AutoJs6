@@ -22,9 +22,10 @@ const host = await createHostClient({socket: 'coverage', fetch: async url => {
 }});
 const exported = hostExports();
 // util.unwrapJavaObject stays not-portable (java-prototype). Of the library getters of the global object, axios is the
-// embedded host axios (Q64 (b), P4.2b); dayjs / pangu / cheerio / i18n follow the shared core (Q61).
+// embedded host axios (Q64 (b), P4.2b); dayjs / pangu / cheerio / i18n follow the shared core (Q61). The files and data
+// family adds Color and open (P4.2b, checked by check-bun-files-data.mjs).
 const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies'];
-const LIBRARIES = ['axios'];
+const LIBRARIES = ['axios', 'dayjs', 'pangu', 'cheerio', 'i18n', 'Color', 'open'];
 const groups = [
   ['util', host.util, ['unwrapJavaObject']], ['util.inspect', host.util.inspect], ['util.java', host.util.java], ['util.morseCode', host.util.morseCode],
   ['util.version', host.util.version], ['util.versionCodes', host.util.versionCodes], ['species', host.species], ['s13n', host.s13n],
