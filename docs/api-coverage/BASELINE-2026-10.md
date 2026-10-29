@@ -547,3 +547,132 @@ Q46 (`ai.agent` 的 9 个根不在 exports.json, 脚本保留清单) 已按推�
 | 宿主 | 1a86f2268 | host-exports.mjs, 7 个脚本改读 exports.json, README |
 | 宿主 | 08ba1e80a | ROADMAP 勾选 P1.6, 附录 C Q42 标已拍板并落地, 登记 Q46 |
 | 宿主 | (本节所在提交) | 本节 |
+
+## 9. P2.3 返回对象成员补齐 + Q18 原型成员纳入分母 (2026-10-29, 子会话 api-cov-p2-3)
+
+### 9.1 数据与命令
+
+- 清单与验收都在 HEAD 导出副本 `E:/.cache/aj6-p2-3-head` 中运行 (`git -c core.autocrlf=false archive HEAD`, 兄弟仓库按 CI 布局).
+  - KSP `script-modules.json` 由该副本在宿主 5f2403c34 上构建; 之后 app/src/main 未变, 只变了 androidTest.
+  - Node 990f9e35, Bun 3056b94.
+  - Ace 检查: `AUTOJS6_ACE_EDITOR_ROOT` 指向副本内的 Ace.
+- 命令:
+  - `python tools/api-coverage/check.py --write-matrix --write-pending-baseline --strict-arity` 重写 MATRIX.md 与基线 (第 1 步加 `--allow-new-pending`, Q54).
+  - 验收: `check.py --matrix --strict-arity --docs-support`.
+  - 单元测试: `python -m unittest discover -s tools/api-coverage -p 'test_*.py'`.
+  - 文档仓库: `node generator/test-runtime-support.js`.
+
+### 9.2 Q18 原型成员 (第 1 步, Q54 - Q56)
+
+- `returned-objects.json` 新增 `prototypes`: 22 个 `@ScriptPrototype` 模块逐个登记.
+- `extract_exports.py` 输出 `prototypes` / `prototypesStats`. 矩阵行为 `<module>.<member>`, 字段:
+  - kind `prototype-member`;
+  - memberSource `script-prototype`;
+  - 运行时列与显式导出同样查找, 不适用 `java-prototype-objects`.
+- 模块自身的显式导出遮蔽同名原型成员, 不重复计入.
+- 不逐个计入的内容 (Q55): 色表, mime 常量, util.versionCodes, WebSocket 常量, 全局 156 个 Java 类代理, 用 `notEnumerated` / `skipConstants` 写明.
+- 98 个非脚本 API 的 Java 成员按 exclude 排除 (Q56).
+- 矩阵 2739 -> 2943 行:
+  - 显式导出 1377;
+  - 原型成员 205;
+  - 返回对象成员 1362 -> 1361 (修正 TtsUtterance#utterance 误计).
+- pending (Node main / Worker / Bun): 643 / 832 / 791 -> 776 / 987 / 949, 已写入基线 (Q54). 按模块与分批的增量见 REVIEW 7.2.
+
+### 9.3 名称级失败 (第 2 步, Q57 / Q58)
+
+| 项 | 第 2 步开始时 (HEAD 副本) | P2.3 结束 |
+|---|---|---|
+| 返回对象成员 | 1361 | 1248 |
+| 返回对象名称级失败 | 352 (文档缺 326, d.ts 缺 72, Ace 无 22) | 0 |
+| 返回对象只在 Ace 全部声明组补全 (不算失败) | 476 | 405 |
+| 原型成员 | 205 | 205 |
+| 原型成员名称级失败 | 68 (文档缺 6, Ace 无 62) | 0 |
+
+返回对象成员减少 113 个:
+
+- Q57 排除 70 个 (`excludeNote` 写明理由, 宿主 b693690b3):
+  - Dialog 43: 包装的 android.app.Dialog 的系统回调, 自身注册的监听器实现, setOnBackPressedFromJs.
+  - ScriptEngine 10: 引擎生命周期.
+  - UiObject 5: 覆写外部基类 AccessibilityNodeInfoCompat 的成员.
+  - TimedTask 4: 调度侧.
+  - ImageFeatures 2.
+  - 其余 6 个对象各 1.
+- 大写常量 23 个: `skipConstants` 用于 TimedTask / IntentTask / ScriptEngine / ScriptExecution.
+- 静态成员 13 个: TimedTask 的工厂方法, Mat 的计数器与工厂方法.
+- EventEmitter 的静态 defaultMaxListeners 4 个: Dialog / EpubReaderSession / WebSocket / TtsUtterance 改由 eventEmitterType 页说明继承成员.
+- 接口里的 private fun 3 个: UiObjectActions.performTooltipAction, 属于提取缺陷.
+
+文档 95bf148:
+
+- 17 页补条目.
+- Java / Android 转发成员与属性读写方法写成员表 (Q58): Dialog 76 个, TimedTask / IntentTask, ThemeColor, Mat, Flow 事件等待步骤.
+- 其余写独立标题.
+- uiSelectorType 的 contentValid 在宿主中不存在, 改为实际的 contentInvalid.
+
+d.ts (TS fa26b8b / 8f8ec07):
+
+- 8 个原型模块的 Java 成员在模块类型上显式声明. 默认 Ace 库组不含生成的 Java 声明, 原型成员的 Ace 失败 62 个都源于此.
+- App 预设成员写在与空前向类合并的接口里. Ace 的声明生成器只改写空前向类; 若直接在类里加成员, 会使 `App.CHR` 补全丢失, 已由 verifyAutoJs6LspRuntime 发现.
+- Color / ZipFileHandle 补 toStringReadable.
+
+探针调整:
+
+- AiSession 的探针改为 `ai.session.().await`. `verify-surfaces.mjs` 把它补全为 `(await ai.session()).`.
+- PWritableTextFile 的探针改为类路径. 原探针 `files.open.()` 取第一个重载, 返回 PReadableTextFile.
+
+门禁 (b693690b3):
+
+- 返回对象与原型成员的名称级失败, 以及 `returnedObjectsStats` / `prototypesStats` 的配置问题, 都进入 check.py failures.
+
+### 9.4 Q20 (a) / Q22 (a) 运行时支持表 (第 3 步)
+
+- 文档生成器 (文档 d45c14b):
+  - 原型成员计入其模块 (Q22, 不加说明).
+  - 类型页的标记块以 `<对象>#` 为根, 显示该对象的成员.
+  - 模块页的标记块内另起 "返回对象" 小表, 每个对象一行; Java 对象成员整列 "不适用 (需要 Java 对象)" 只占一格.
+- 矩阵的返回对象行新增 `page` 字段, 即对象的第一个文档页.
+- 宿主 `docs_support.py`:
+  - 行数核对计入原型成员与 `<对象>#` 根;
+  - 另核对小表的成员数 `objectRows`;
+  - 问题页 (标记写坏) 不再使核对本身报错 (794229e48).
+- 三个试点页 (文档 004b35c):
+  - image: 91 行; 返回对象 7 个, 共 70 个成员.
+  - files: 22 -> 52 行, 含 30 个原型成员.
+  - flow: 71 行, 不变.
+- 其余页面的标记块 (含 16 个类型页的 `<对象>#` 块) 归 P2.5.
+
+### 9.5 验收
+
+- HEAD 副本: 宿主 794229e48 (MATRIX.md 885000bd2), 文档 e84af64, TS 8f8ec07, Ace aac52af, Node 990f9e35, Bun 3056b94.
+- `check.py --matrix --strict-arity --docs-support` (含 Ace) 退出码 0, failures 空:
+  - 返回对象 43 个 1248 个成员, 失败 0;
+  - 原型成员 22 个模块 205 个, 失败 0;
+  - MATRIX.md current, 2830 行 (显式导出 1377, 原型成员 205, 返回对象成员 1248);
+  - pending 776 / 987 / 949, 与第 1 步相同: 去掉的返回对象行都是不适用 (java-prototype);
+  - pending-baseline.json current;
+  - docs-support 3 页 current, 行 214, 返回对象行 70;
+  - arity: match 1195, fail 0, narrower 29, no-dts 1, 不变.
+- 单元测试 74 项通过 (跳过 3). 文档 `test-runtime-support.js` 10 项通过.
+- 在共享宿主工作区跑单测时, RepositoryTest.test_p1_4 会因 P3.2a 未提交的 Node facade (Worker 的 jsox.mathx) 失败. 这是 P3.2a 的预期变化, 已告知; HEAD 副本中通过.
+- TS 与 Ace 校验:
+  - TS: `tools/verify-*.mjs` 全部通过 (TypeScript 5.1.3 与 Ace 的 6.0.3), `sync-runtime-declarations --ace --check` 在副本中通过.
+  - Ace 宿主侧: `generate-editor-assets.mjs --check` 与 5 个 verify / test 通过.
+  - Ace 仓库: Gradle `verifyAutoJs6LspRuntime` / `verifyAutoJs6LanguageIndices` / `verifyAutoJs6ApiCoverage` 与 `ace-builds-lock --check` 通过.
+- 文档: `normalize-markdown.py --check` changed=0, `auto-generate.py --check` 通过. Offline Docs 同步 2 次 (68bd7d0 / ec87e8c), 版本与 VERSION_BUILD 不变.
+
+### 9.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | b027777bc / d41ebd872 | Q18: prototypes 登记, 提取, 矩阵行, README |
+| 宿主 | 642e859b5 | MATRIX.md + pending-baseline.json (Q54), REVIEW 7.2 |
+| 宿主 | b693690b3 | Q57 排除, 名称级失败进 failures, 探针, page 字段, docs_support, P3.2a 要的带引号 Worker 键 |
+| 宿主 | 56e278420 | Ace 补全源 autojs6_indices.source.json |
+| 宿主 | 885000bd2 | MATRIX.md (2830 行) |
+| 宿主 | 794229e48 | docs_support 问题页 |
+| 宿主 | (本节所在提交) | 本节, ROADMAP 勾选 P2.3, 附录 C Q18 / Q20 / Q22 / Q23 已落地, Q54 - Q58 |
+| 文档 | 95bf148 / d45c14b / 004b35c / 49cb020 | 成员条目, 生成器, 试点页表格与 changelog / progress |
+| 文档 | 4cd0f07 / e84af64 | 生成物 |
+| TS | fa26b8b / 8f8ec07 | 显式成员与 App 接口 |
+| Ace | aac52af | 重新导入, 索引与 lib.autojs6.d.ts |
+| Offline Docs | 68bd7d0 / ec87e8c | 同步, 版本不变 |
