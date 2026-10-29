@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Generate the runtime coverage matrix (api-coverage roadmap P0.2, definition in ROADMAP section 4).
 
-One row per explicit export of exports.json (plus returned-object members once
-exports.json has a returnedObjects list), with the documentation, declaration
+One row per explicit export of exports.json (plus the members of module prototypes
+and of returned objects, its prototypes and returnedObjects lists), with the documentation, declaration
 and Ace states of check.py's reports and a state per runtime column: Node main
 thread, Node Worker and Bun. Runtime entries are read from the runtime
 repositories (Node declarations, HOST-API status tables and the Worker module
@@ -380,6 +380,21 @@ def returned_rows(exports):
     return rows
 
 
+def prototype_rows(exports):
+    """Rows for the prototypes list (Q18 (a)): members scripts reach through the prototype of a @ScriptPrototype module,
+    `<module>.<member>` like an explicit export and looked up in the runtimes the same way."""
+    rows = []
+    for item in exports.get('prototypes') or []:
+        for member in item.get('members', []):
+            rows.append({
+                'id': f"{item['module']}.{member['name']}", 'kind': 'prototype-member', 'module': item['module'], 'member': member['name'],
+                'ownerModule': item['module'], 'aliases': [], 'exportKind': member.get('kind'), 'registration': '@ScriptPrototype',
+                'source': member.get('source'), 'line': member.get('line'), 'metadataSource': item.get('memberList'),
+                'surface': 'public', 'arity': member.get('arity'), 'object': None, 'producers': [], 'memberSource': 'script-prototype',
+            })
+    return rows
+
+
 def surface_states(row, documentation, surfaces, ace_checked=True):
     """doc / dts / ace states of a row; a column stays None without its check.py report (ace: check.py --skip-ace)."""
     states = {}
@@ -447,7 +462,7 @@ def missing_capabilities(rows):
 def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, worker, catalog=None, documentation=None, surfaces=None, sources=None):
     if policy.get('schema') != POLICY_SCHEMA:
         raise ValueError(f'runtime-policy.json schema must be {POLICY_SCHEMA}')
-    rows = export_rows(exports, policy_json) + returned_rows(exports)
+    rows = export_rows(exports, policy_json) + prototype_rows(exports) + returned_rows(exports)
     by_id = {row['id']: row for row in rows}
     if len(by_id) != len(rows):
         raise ValueError('Duplicate row ids: ' + ', '.join(sorted(k for k, v in Counter(r['id'] for r in rows).items() if v > 1)))
@@ -461,7 +476,7 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
         row['rhino'] = 'native'
         row.update({column: None for column in ['doc', 'dts', 'ace']})
         row.update(surface_states(row, documentation, surfaces, ace_checked))
-        if row['kind'] == 'export':
+        if row['kind'] in ('export', 'prototype-member'):
             group = [by_id[other] for other in row['aliases']]
             row['node_main'] = node.lookup(row, group) or {'status': 'pending'}
             row['node_worker'] = node.lookup(row, group, worker=True) or {'status': 'pending'}
@@ -485,10 +500,11 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
         counts = Counter(row[column]['status'] for row in rows)
         by_column[column] = {status: counts.get(status, 0) for status in STATUSES}
     exported = sum(row['kind'] == 'export' for row in rows)
+    prototyped = sum(row['kind'] == 'prototype-member' for row in rows)
     return {
         'schema': SCHEMA, 'generatedBy': 'tools/api-coverage/runtime_matrix.py',
         'dataSource': exports.get('dataSource', {'kind': 'kotlin'}), 'sources': sources or {}, 'columns': COLUMNS,
-        'summary': {'rows': len(rows), 'exports': exported, 'returnedMembers': len(rows) - exported,
+        'summary': {'rows': len(rows), 'exports': exported, 'prototypeMembers': prototyped, 'returnedMembers': len(rows) - exported - prototyped,
                     'returnedObjectsInput': 'returnedObjects' in exports, 'byColumn': by_column,
                     'pending': {column: by_column[column]['pending'] for column in RUNTIME_COLUMNS},
                     'rejects': {column: sum(bool(row[column].get('rejects')) for row in rows) for column in RUNTIME_COLUMNS},
@@ -521,7 +537,8 @@ def render_markdown(matrix):
         '人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), '
         '新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).',
         '',
-        f"数据源: {kind}, {summary['rows']} 行 (显式导出 {summary['exports']}, 返回对象成员 {summary['returnedMembers']}"
+        f"数据源: {kind}, {summary['rows']} 行 (显式导出 {summary['exports']}, 原型成员 {summary.get('prototypeMembers', 0)}, "
+        f"返回对象成员 {summary['returnedMembers']}"
         + ('' if summary['returnedObjectsInput'] else ', exports.json 尚无 returnedObjects 段') + ').',
         '',
         '## 状态汇总',

@@ -129,8 +129,8 @@ def main():
     arity_summary = arity.report(host, baseline, output)
     if args.strict_arity:
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
-    # Members of returned objects (P0.4): reported apart, never failures (P2.3 consumes returned-objects.json).
-    returned_summary, returned_docs, returned_surfaces = returned_objects.gate(host, baseline, output, docs / "api", command)
+    # Members of returned objects (P0.4) and of module prototypes (Q18): reported apart, never failures (P2.3 consumes returned-objects.json).
+    returned_summary, returned_docs, returned_surfaces = returned_objects.gate(host, baseline, output, docs / "api", command, policy)
     matrix_summary = docs_summary = None
     if args.write_pending_baseline:
         args.matrix = True
@@ -158,7 +158,8 @@ def main():
         "documentation": dict(Counter(row["status"] for row in documented)),
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
-        "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"]), "matrix": matrix_summary,
+        "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"]),
+        "matrix": matrix_summary,
         "docsSupport": docs_summary,
         "scope": baseline["scope"], "failures": failures,
     }

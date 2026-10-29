@@ -271,7 +271,10 @@ reported as shadowed, a rule matching nothing as unused (`override: true` forces
 a rule). A rule with `memberSource` matches only returned-member rows of that
 source: `java-prototype-objects` (Q17 (a)) excludes the members of `kotlin-class`
 objects (Node / Bun have no such Java object), `augment-prototype` handles stay
-pending unless `returnedObjects` names their runtime handle type (below).
+pending unless `returnedObjects` names their runtime handle type (below). Prototype
+members (`script-prototype`, Q18) are module members: they are looked up as
+explicit exports are, and only rules without `memberSource` (or with
+`script-prototype`) apply to them.
 
 An entry whose every call signature returns `never` or `Promise<never>`
 (`list-runtime-surfaces.mjs` marks it `rejects`) is an explicit refusal, not
@@ -312,6 +315,10 @@ the Ace runtime queries join on them.
   `script-modules.json` (augment T10). Each placement of a function is its own row
   (`captureScreen` and `images.captureScreen`); the row lists the other placements
   of the same owner, implementation and kind in `aliases`.
+- A member of a module prototype (Q18 (a), "Module prototypes" below) has the id
+  `<module>.<member>` of the module path, as scripts reach it (`files.isFile`,
+  `device.getBattery`); the module object's own names shadow the prototype, so
+  these ids never repeat an export id.
 - A member of a returned object (P0.4) has the id `<Object>#<member>`
   (`UiObject#click`, `ImageWrapper#getWidth`). `#` never occurs in export ids.
 
@@ -325,7 +332,7 @@ the Ace runtime queries join on them.
   "sources": {"node": {"root": "...", "commit": "...", "files": []}, "bun": {...}, "typescript": "6.0.3", "documentation": true, "surfaces": true},
   "columns": ["rhino", "doc", "dts", "ace", "node_main", "node_worker", "bun"],
   "summary": {
-    "rows": 1368, "exports": 1368, "returnedMembers": 0,
+    "rows": 1368, "exports": 1368, "prototypeMembers": 0, "returnedMembers": 0,
     "byColumn": {"node_main": {"bridged": 0, "pending": 0}},             // every column, every value
     "pending": {"node_main": 0, "node_worker": 0, "bun": 0},
     "rejects": {"node_main": 0, "node_worker": 0, "bun": 0},  // cells of entries that only reject (Q26)
@@ -341,7 +348,7 @@ the Ace runtime queries join on them.
 // ROW
 {
   "id": "images.read",
-  "kind": "export",            // or "returned-member" (P0.4)
+  "kind": "export",            // or "prototype-member" (Q18), "returned-member" (P0.4)
   "module": "images",          // placement, "" = global object; null for returned members
   "member": "read",
   "ownerModule": "images",     // module that defines the export
@@ -352,7 +359,7 @@ the Ace runtime queries join on them.
   "metadataSource": "ksp",     // or "kotlin": records[].metadata (D9)
   "surface": "public",         // or "internal" / "standard" (policy.json internalExports / standardExports)
   "arity": null,               // reserved for P0.3: copied verbatim from records[].arity
-  "object": null, "producers": [], "memberSource": null,  // returned members (P0.4)
+  "object": null, "producers": [], "memberSource": null,  // returned members (P0.4); "script-prototype" for prototype members
   "rhino": "native",
   "doc": "heading",            // none / mention / heading; signature / example reserved (P2)
   "dts": "name",               // none / name; arity (P0.3) / typed (D9 step 2) reserved
@@ -429,7 +436,8 @@ else `AUTOJS6_DOCUMENTATION_ROOT`, else the sibling `AutoJs6-Documentation`.
 - A block names module roots, the root the documentation gate looks pages up by:
   the first segment of the placement module, the owner module for a member of the
   global object (`captureScreen` -> `images`), else `global`. Returned-object
-  members (`<Object>#<member>`) are not shown yet (roadmap Q20).
+  members (`<Object>#<member>`) and prototype members are not shown yet
+  (roadmap Q20 / Q22, P2.3).
 - The documentation name gate ignores block contents (`docs_support.strip_blocks`,
   line numbers kept), so a table never turns a missing name into a mention.
 - A block generated from the other export source (ksp / kotlin, recorded on its
@@ -541,6 +549,37 @@ the matrix `ace` column keeps its definition (both library sets, so `none`).
 Nothing here fails the gate; P2.3 works through the failures. The matrix gets
 `<Object>#<member>` rows; their runtime cells stay `pending` until
 `runtime-policy.json` maps or excludes them.
+
+### Module prototypes (Q18 (a))
+
+22 modules declare `@ScriptPrototype` (script-modules.json `prototype`): the module
+object's prototype is a Java object (`files` -> `runtime.files`, `device` ->
+`runtime.device`), a script object (`continuation`) or a name lookup (the global
+Java classes, the WebSocket constants). Scripts call its members as module
+members, so `returned-objects.json` `prototypes` lists one entry per module (module
+path as in `exports.json`, `""` for the global object) and `extract_exports.py`
+writes the members as `prototypes` (with `prototypesStats`); with
+`script-modules.json` a `@ScriptPrototype` module missing from the list is a
+problem in `summary.json` `returnedObjects.problems`.
+
+- `memberSource` `kotlin-class` / `augment-prototype` / `policy` read the members as
+  for returned objects. Names the module object defines itself (its explicit
+  exports) shadow the prototype and are left out (`shadowed`).
+- `exclude` drops public Java members that are not script API (`excludeNote` says
+  why: Android objects, callbacks the host calls, runtime bookkeeping, the state
+  behind documented setters); an `exclude` name matching no member is a problem.
+- `skipConstants` drops upper-case fields (`mime`'s MIME type constants), and
+  `notEnumerated` describes what the prototype holds without listing it: the
+  color tables (`Color`, `colors`), `util.versionCodes`, the WebSocket constants and
+  the 156 global Java classes, as the color constants are outside the name gate.
+
+Each member is a matrix row `<module>.<member>` (kind `prototype-member`,
+memberSource `script-prototype`, registration `@ScriptPrototype`), checked like
+an export: its module's documentation pages (`policy.json` `documentationModules`,
+or the entry's `documentation`, such as `eventEmitterType` for `events`), the d.ts
+type of `<module>.<member>` and Ace completion in the default and all-group
+library sets and the static index. The surface run is the returned-object one;
+`returned-objects.json` reports them under `prototypes`.
 
 ## Physical-device checks
 

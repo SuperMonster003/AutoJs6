@@ -222,6 +222,49 @@ class AttachTests(unittest.TestCase):
             self.assertEqual(['Widget: producer sample.missing is not an export', 'Handle: org.autojs.autojs.sample.Handle is a Scriptable; use augment-prototype'], stats['problems'])
             self.assertEqual({'android.net.Uri': ['sample.uri']}, stats['externalTypes'])
 
+    def test_prototypes(self):
+        # Q18 (a): members of the prototype of a @ScriptPrototype module, without the module's own names, exclusions and constants.
+        directory, root = host()
+        with directory:
+            metadata = root / 'script-modules.json'
+            metadata.write_text(json.dumps({'format': 1, 'modules': [
+                {'class': 'org.autojs.autojs.sample.SampleModule', 'name': 'sample', 'parent': None, 'assign': False, 'prototype': 'prototype',
+                 'accessors': [], 'functions': []},
+                {'class': 'org.autojs.autojs.sample.LegacyModule', 'name': 'legacy', 'parent': None, 'assign': False, 'prototype': 'prototype',
+                 'accessors': [], 'functions': []},
+                {'class': 'org.autojs.autojs.sample.GlobalModule', 'name': 'global', 'parent': None, 'assign': True, 'prototype': 'javaClasses',
+                 'accessors': [], 'functions': []},
+                {'class': 'org.autojs.autojs.sample.TableModule', 'name': 'table', 'parent': None, 'assign': False, 'prototype': 'prototypes',
+                 'accessors': [], 'functions': []}]}), encoding='utf-8')
+            config = root / 'returned-objects.json'
+            config.write_text(json.dumps({'objects': [], 'prototypes': [
+                {'module': 'sample', 'class': 'org.autojs.autojs.sample.Widget', 'memberSource': 'kotlin-class', 'exclude': ['all', 'missing']},
+                {'module': 'legacy', 'class': 'org.autojs.autojs.sample.Legacy', 'memberSource': 'kotlin-class', 'skipConstants': True,
+                 'documentation': ['legacy', 'legacyType']},
+                {'module': '', 'notEnumerated': 'Java classes'},
+                {'module': 'other', 'notEnumerated': 'no such module'},
+            ]}), encoding='utf-8')
+            result = {'modules': [{'module': m, 'class': f'org.autojs.autojs.sample.{c}Module', 'metadata': 'ksp'}
+                                  for m, c in (('sample', 'Sample'), ('legacy', 'Legacy'), ('', 'Global'), ('table', 'Table'))],
+                      'records': [{'api': 'sample.area', 'module': 'sample', 'ownerModule': 'sample', 'member': 'area'},
+                                  {'api': 'move', 'module': '', 'ownerModule': 'sample', 'member': 'move'}]}
+            attach(root, result, metadata, config)
+            prototypes = {p['module']: p for p in result['prototypes']}
+            sample = prototypes['sample']
+            # area is the module's own export; move is only placed on the global object, so the prototype still provides sample.move.
+            self.assertEqual(['area'], sample['shadowed'])
+            self.assertEqual(['all'], sample['excluded'])
+            self.assertEqual({'id', 'count', 'width', 'isEnabled', 'label', 'move', 'sides', 'baseName'}, {m['name'] for m in sample['members']})
+            self.assertEqual(('script-prototype', 'kotlin-class', 'sample'), (sample['memberSource'], sample['memberList'], sample['probe']))
+            legacy = prototypes['legacy']
+            self.assertEqual((1, ['legacy', 'legacyType']), (legacy['constants'], legacy['documentation']))
+            self.assertEqual({'code', 'read', 'log', 'close'}, {m['name'] for m in legacy['members']})
+            self.assertEqual(([], 'Java classes'), (prototypes['']['members'], prototypes['']['notEnumerated']))
+            stats = result['prototypesStats']
+            self.assertEqual((3, 2, 12), (stats['modules'], stats['enumerated'], stats['members']))
+            self.assertEqual(['prototype sample: exclude missing matches no member', 'prototype other: no such module',
+                              'prototype table: @ScriptPrototype module not listed in returned-objects.json prototypes'], stats['problems'])
+
 
 if __name__ == '__main__':
     unittest.main()

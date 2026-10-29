@@ -396,6 +396,31 @@ class StatusTest(unittest.TestCase):
         self.assertEqual(rows['Flow#then']['node_main']['status'], 'pending')
         self.assertEqual(rows['click']['node_main']['status'], 'bridged')
 
+    def test_prototype_members(self):
+        # Q18 (a): prototype members are module members (`<module>.<member>`), looked up like exports; rules with a
+        # memberSource of returned objects never match them, rules on the id do.
+        exports = copy.deepcopy(EXPORTS)
+        exports['prototypes'] = [{'module': 'images', 'memberSource': 'script-prototype', 'memberList': 'kotlin-class',
+                                  'members': [{'name': 'captureScreen2', 'kind': 'Functions', 'source': 'Images.kt', 'line': 9, 'arity': None}]},
+                                 {'module': 'threads', 'memberSource': 'script-prototype', 'memberList': 'kotlin-class',
+                                  'members': [{'name': 'atomic', 'kind': 'Functions'}]}]
+        node = copy.deepcopy(NODE_SURFACES)
+        node['modules']['autojs6:images']['members']['captureScreen2'] = member()
+        policy = copy.deepcopy(POLICY)
+        policy['exclusions'].append({'id': 'java-objects', 'match': ['*'], 'memberSource': 'kotlin-class', 'status': 'not-portable', 'reason': 'java-prototype'})
+        result = build(exports, policy, POLICY_JSON, node, BUN_SURFACES, parse_host_api(HOST_API), WORKER)
+        rows = {row['id']: row for row in result['rows']}
+        capture = rows['images.captureScreen2']
+        self.assertEqual((capture['kind'], capture['memberSource'], capture['registration'], capture['metadataSource']),
+                         ('prototype-member', 'script-prototype', '@ScriptPrototype', 'kotlin-class'))
+        self.assertEqual((capture['node_main']['status'], capture['node_main']['via']), ('bridged', 'same-name'))
+        self.assertEqual(capture['node_worker']['status'], rows['images.read']['node_worker']['status'])
+        self.assertEqual(capture['bun']['status'], 'pending')
+        self.assertEqual(rows['threads.atomic']['node_main']['rule'], 'sync-threads')
+        summary = result['summary']
+        self.assertEqual((summary['exports'], summary['prototypeMembers'], summary['returnedMembers']), (len(EXPORTS['records']), 2, 0))
+        self.assertIn('原型成员 2', render_markdown(result))
+
     def test_bun_member_capabilities(self):
         exports = copy.deepcopy(EXPORTS)
         exports['records'] += [record('images.save', 'images', 'images'), record('images.toBytes', 'images', 'images')]
@@ -572,6 +597,16 @@ class RepositoryTest(unittest.TestCase):
         for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'Mathx.sum', 'keepAlive', 'app.launchDual', 'ui.layout', 'files.open']:
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
+
+    def test_p2_3(self):
+        # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.
+        self.assertEqual(self.exports['prototypesStats']['problems'], [])
+        rows = {row['id']: row for row in self.matrix['rows']}
+        self.assertEqual((rows['files.isFile']['kind'], rows['files.isFile']['memberSource']), ('prototype-member', 'script-prototype'))
+        self.assertEqual(rows['files.isFile']['node_main']['status'], 'local-shim')
+        self.assertNotIn('files.context', rows)
+        self.assertEqual(rows['crypto.digest']['bun']['rule'], 'native-crypto')
+        self.assertEqual(self.matrix['summary']['prototypeMembers'], sum(len(p['members']) for p in self.exports['prototypes']))
 
 if __name__ == '__main__':
     unittest.main()

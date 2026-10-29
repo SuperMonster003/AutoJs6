@@ -19,6 +19,12 @@ Member list sources:
 The name-level gate (gate()) checks every member against the object's documentation pages, the d.ts type of
 a probe expression (`<probe>.<member>`) and Ace completion, in a separate surface run whose failures are
 reported apart from the export gate (P2.3 consumes them).
+
+The "prototypes" list of returned-objects.json (api-coverage Q18 (a)) names the prototype of every module declaring
+@ScriptPrototype: scripts call its members as module members (`files.isFile`), so they become rows `<module>.<member>`
+with memberSource "script-prototype", looked up in the runtimes like explicit exports. The member list comes from the
+same sources (kotlin-class, augment-prototype, policy); names the module object defines itself shadow the prototype and
+are left out, and constant tables or Java class proxies are described ("notEnumerated") instead of listed.
 """
 import json
 from pathlib import Path
@@ -233,10 +239,11 @@ def _entries(mk, code, start, end):
 
 
 def member_depth_matches(pattern, mk, code, body_start, body_end, group=3):
-    """Matches of pattern whose group starts directly in the body (not in nested functions, classes or initializers)."""
+    """Matches of pattern whose group starts directly in the body (not in nested functions, classes or initializers, nor in
+    the primary constructor of a nested class without a body)."""
     spans, i = [], body_start + 1
     while i < body_end:
-        if code[i] == '{':
+        if code[i] in '{(':
             spans.append((i, end_group(code, i)))
             i = spans[-1][1] + 1
             continue
@@ -629,6 +636,85 @@ def attach(host, result, metadata=None, config=CONFIG):
     result['returnedObjectsStats'] = dict({'objects': len(objects), 'members': sum(len(o['members']) for o in objects),
                                            'incomplete': [o['object'] for o in objects if not o['complete']], 'problems': problems},
                                           **(other_return_types(sources, metadata, set(classes) | set(entries.get('ignoredReturnTypes', []))) if metadata else {}))
+    attach_prototypes(sources, result, entries.get('prototypes', []), metadata)
+    return result
+
+
+CONSTANT_NAME = re.compile(r'[A-Z][A-Z0-9_]*$')
+
+
+def prototype_modules(metadata):
+    """Module paths (as extract_exports.extract_ksp names them, "" for an assign module) of the script-modules.json modules
+    declaring @ScriptPrototype."""
+    meta = json.loads(Path(metadata).read_text(encoding='utf-8'))
+    by_class = {m['class']: m for m in meta['modules']}
+
+    def path(m):
+        return (path(by_class[m['parent']]) + '.' if m.get('parent') else '') + ('' if m.get('assign') else m['name'])
+
+    return sorted(path(m) for m in meta['modules'] if m.get('prototype'))
+
+
+def attach_prototypes(sources, result, entries, metadata=None):
+    """Adds result["prototypes"] and result["prototypesStats"] (Q18 (a)): the members scripts reach through the prototype of
+    a module declaring @ScriptPrototype, without the names the module object defines itself (they shadow the prototype),
+    the entry's `exclude` (public Java members that are not script API) and, with `skipConstants`, upper-case fields
+    (constant tables). An entry with only `notEnumerated` describes what the prototype holds without listing it."""
+    modules = {m['module'] for m in result['modules']}
+    own = {}
+    for record in result['records']:
+        own.setdefault(record.get('module'), set()).add(record['member'])
+    items, problems = [], []
+    for entry in entries:
+        module = entry['module']
+        if module not in modules:
+            problems.append(f'prototype {module}: no such module')
+            continue
+        item = {'module': module, 'class': entry.get('class'), 'memberSource': 'script-prototype', 'memberList': entry.get('memberSource'),
+                'documentation': entry.get('documentation', []), 'probe': entry.get('probe', module), 'notEnumerated': entry.get('notEnumerated')}
+        if entry.get('memberSource') == 'kotlin-class':
+            found = class_members(sources, entry['class'])
+            if found is None:
+                problems.append(f'prototype {module}: class {entry["class"]} not found')
+                continue
+            members, external, scriptable, source = found
+            if scriptable:
+                problems.append(f'prototype {module}: {entry["class"]} is a Scriptable; use augment-prototype or policy')
+            item.update(source=source, externalBases=external, complete=True)
+        elif entry.get('memberSource') == 'augment-prototype':
+            found = prototype_members(sources, entry)
+            if found is None:
+                problems.append(f'prototype {module}: class {entry["class"]} not found')
+                continue
+            members, dynamic, source = found
+            item.update(source=source, dynamic=dynamic, complete=not dynamic)
+        elif entry.get('memberSource') == 'policy':
+            members = [{'name': n, 'kind': 'Functions', 'source': None, 'line': None, 'arity': None} for n in entry['members']]
+            item.update(source=None, complete=True)
+        else:
+            members = []
+            item.update(source=None, complete=True)
+            if not entry.get('notEnumerated'):
+                problems.append(f'prototype {module}: neither a member source nor notEnumerated')
+        names = {m['name'] for m in members}
+        exclude = set(entry.get('exclude', []))
+        problems += [f'prototype {module}: exclude {name} matches no member' for name in sorted(exclude - names)]
+        constants = [m['name'] for m in members if entry.get('skipConstants') and m['kind'] == 'Properties' and CONSTANT_NAME.match(m['name'])]
+        shadowed = sorted(n for n in names if n in own.get(module, ()))
+        dropped = OBJECT_MEMBERS | exclude | set(constants) | set(shadowed)
+        item.update(members=sorted((m for m in members if m['name'] not in dropped), key=lambda m: m['name']),
+                    shadowed=shadowed, excluded=sorted(exclude & names), constants=len(constants))
+        items.append(item)
+    listed = {entry['module'] for entry in entries}
+    if metadata:
+        problems += [f'prototype {module}: @ScriptPrototype module not listed in returned-objects.json prototypes'
+                     for module in prototype_modules(metadata) if module not in listed]
+    result['prototypes'] = items
+    result['prototypesStats'] = {'modules': len(items), 'enumerated': sum(bool(i['members']) for i in items),
+                                 'members': sum(len(i['members']) for i in items), 'shadowed': sum(len(i['shadowed']) for i in items),
+                                 'excluded': sum(len(i['excluded']) for i in items), 'constants': sum(i['constants'] for i in items),
+                                 'notEnumerated': [i['module'] for i in items if i['notEnumerated']],
+                                 'incomplete': [i['module'] for i in items if not i['complete']], 'problems': problems}
     return result
 
 
@@ -656,17 +742,18 @@ def ace_status(hits):
     return 'all-groups' if any(h.get('aceAllGroups') for h in hits) else 'none'
 
 
-def gate(host, baseline, output, docs_root, surface_command):
-    """Name-level gate of the returned-object members (documentation, d.ts, Ace); writes returned-objects.json.
+def gate(host, baseline, output, docs_root, surface_command, policy=None):
+    """Name-level gate of the returned-object and prototype members (documentation, d.ts, Ace); writes returned-objects.json.
 
-    Returns (counts, documentation rows, surface rows): the rows are keyed by the matrix row id `<object>#<member>`
-    in the shapes of documentation.json and surfaces.json, so the matrix fills the doc / dts / ace columns of the
-    returned-member rows from them."""
+    Returns (counts, documentation rows, surface rows): the rows are keyed by the matrix row id (`<object>#<member>`,
+    `<module>.<member>` for a prototype member) in the shapes of documentation.json and surfaces.json, so the matrix
+    fills the doc / dts / ace columns of those rows from them."""
     from check import documentation_rows
     output = Path(output)
     work = output / 'returned-objects'
     work.mkdir(parents=True, exist_ok=True)
     objects = baseline.get('returnedObjects', [])
+    prototypes = baseline.get('prototypes', [])
     queries, owners = set(), {}
     for o in objects:
         if not o.get('probe'):
@@ -677,6 +764,12 @@ def gate(host, baseline, output, docs_root, surface_command):
                 queries.add(query)
                 owners.setdefault((o['object'], m['name']), []).append(query)
         queries.add(o['probe'])
+    for p in prototypes:
+        for m in p['members']:
+            for name in [m['name']] + m.get('aliases', []):
+                query = p['probe'] + '.' + name
+                queries.add(query)
+                owners.setdefault((p['module'] + '.', m['name']), []).append(query)
     exports = work / 'exports.json'
     exports.write_text(json.dumps({'queries': sorted(queries)}, ensure_ascii=False) + '\n', encoding='utf-8')
     command = list(surface_command)
@@ -711,12 +804,43 @@ def gate(host, baseline, output, docs_root, surface_command):
     # Members of Java objects are completed from the generated Java declaration groups, which the default library set of
     # Ace leaves out: "all-groups" is reported (aceAllGroupsOnly) but is not a failure.
     failing = [r for r in rows if r['doc'] in ('missing', 'no-page') or r['dts'] != 'explicit' or (ace and r['ace'] not in ('default', 'all-groups'))]
+    # Prototype members are module members: their pages are the module's (policy.json documentationModules, as for an
+    # export), and Ace must complete them as an export, in both library sets and in the static index (`static`).
+    prototype_rows, prototype_counts = [], {'members': 0, 'documentation': 0, 'dts': 0, 'ace': 0}
+    for p in prototypes:
+        items = [{'api': f'{p["module"]}.{m["name"]}', 'module': p['module'], 'ownerModule': p['module'], 'member': name}
+                 for m in p['members'] for name in [m['name']] + m.get('aliases', [])]
+        pages = {'documentationModules': dict((policy or {}).get('documentationModules', {}),
+                                              **({p['module'].split('.')[0]: p['documentation']} if p['documentation'] else {}))}
+        docs = {}
+        for row in documentation_rows(items, docs_root, pages) if items else []:
+            docs.setdefault(row['api'], []).append(row['status'])
+        for m in p['members']:
+            row_id = f'{p["module"]}.{m["name"]}'
+            hits = [surfaces.get(q, {}) for q in owners.get((p['module'] + '.', m['name']), [])]
+            row = {'id': row_id, 'module': p['module'], 'member': m['name'],
+                   'doc': max(docs.get(row_id, ['missing']), key=['missing', 'mention', 'heading'].index),
+                   'dts': 'explicit' if any(h.get('declaration', {}).get('status') == 'explicit' for h in hits) else 'missing',
+                   'ace': (('static' if any(h.get('aceStatic') for h in hits) else 'semantic')
+                           if any(h.get('aceDefault') and h.get('aceAllGroups') for h in hits) else 'none') if ace else None}
+            prototype_counts['members'] += 1
+            prototype_counts['documentation'] += row['doc'] == 'missing'
+            prototype_counts['dts'] += row['dts'] != 'explicit'
+            prototype_counts['ace'] += ace and row['ace'] != 'static'
+            prototype_rows.append(row)
+    prototype_failing = [r for r in prototype_rows if r['doc'] == 'missing' or r['dts'] != 'explicit' or (ace and r['ace'] != 'static')]
     report = {'counts': counts, 'objects': {o['object']: {'members': len(o['members']), 'probe': o.get('probe'),
                                                           'probeResolved': surfaces.get(o.get('probe') or '', {}).get('declaration', {}).get('status') == 'explicit'}
                                             for o in objects},
-              'failures': failing, 'rows': rows}
+              'failures': failing, 'rows': rows,
+              'prototypes': {'counts': prototype_counts, 'modules': {p['module']: len(p['members']) for p in prototypes},
+                             'failures': prototype_failing, 'rows': prototype_rows}}
     (output / 'returned-objects.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    documentation = [{'api': r['id'], 'status': {'heading': 'heading', 'mention': 'mention'}.get(r['doc'], 'missing')} for r in rows]
+    documentation = [{'api': r['id'], 'status': {'heading': 'heading', 'mention': 'mention'}.get(r['doc'], 'missing')} for r in rows + prototype_rows]
     surface_rows = [{'api': r['id'], 'declaration': {'status': r['dts']}, 'aceDefault': r['ace'] == 'default', 'aceAllGroups': r['ace'] in ('default', 'all-groups')}
                     for r in rows]
-    return dict(counts, failingMembers=len(failing), objects=len(objects)), documentation, surface_rows
+    surface_rows += [{'api': r['id'], 'declaration': {'status': r['dts']}, 'aceDefault': r['ace'] in ('semantic', 'static'),
+                      'aceAllGroups': r['ace'] in ('semantic', 'static'), 'aceStatic': r['ace'] == 'static'} for r in prototype_rows]
+    return (dict(counts, failingMembers=len(failing), objects=len(objects),
+                 prototypes=dict(prototype_counts, failingMembers=len(prototype_failing), modules=len(prototypes))),
+            documentation, surface_rows)
