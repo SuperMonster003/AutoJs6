@@ -738,6 +738,12 @@ object NodeBridgeModules {
         "sendBroadcast",
         "getInstalledApps",
         "getPackageInfo",
+        "resolvePackage",
+        "getUserProfiles",
+        "getInstalledPackages",
+        "getApkInfo",
+        "getAppByAlias",
+        "sendLocalBroadcastSync",
     )
     val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop")
     val agentMethods = setOf("listScripts", "readManifest", "execRegistered")
@@ -5426,6 +5432,21 @@ class AndroidNodeBridgeCapabilityProvider(
                 try { appPackageInfoJson(appContext.packageManager.getPackageInfo(packageName, 0)) }
                 catch (_: PackageManager.NameNotFoundException) { null }
             }
+            // Rhino app module parity (api-coverage P3.1a): D-4 target and user queries, package snapshots, intent tasks.
+            "resolvePackage" -> NodeBridgeAppPackages.resolvePackage(appContext, args.getString(0))
+            "getUserProfiles" -> NodeBridgeAppPackages.userProfiles(appContext)
+            "getInstalledPackages" -> NodeBridgeAppPackages.installedPackages(appContext, args.optJSONObject(0))
+            "getApkInfo" -> {
+                val file = resolveScopedAppFile(args.getString(0)) ?: throw SecurityException("app.getApkInfo path must stay inside the scoped working directory.")
+                if (file.isFile) NodeBridgeAppPackages.apkInfo(appContext, file, args.optJSONObject(1)) else null
+            }
+            "getAppByAlias" -> NodeBridgeAppPackages.presetApp(args.getString(0))
+            "sendLocalBroadcastSync" -> {
+                val intent = createIntent(args.getJSONObject(0), forActivity = false)
+                    ?: throw IllegalArgumentException("A valid JSON intent descriptor is required.")
+                org.autojs.autojs.runtime.api.modules.app.App.sendLocalBroadcastSyncInternal(intent)
+                null
+            }
             else -> {
                 val intent = createIntent(args.getJSONObject(0), forActivity = false)
                     ?: throw IllegalArgumentException("A valid JSON intent descriptor is required.")
@@ -5474,7 +5495,8 @@ class AndroidNodeBridgeCapabilityProvider(
         }
         dispatchOnMain(request, callback) {
             when (request.method) {
-                "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo" -> dispatchAppExtension(request)
+                "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo", "resolvePackage", "getUserProfiles",
+                "getInstalledPackages", "getApkInfo", "getAppByAlias", "sendLocalBroadcastSync" -> dispatchAppExtension(request)
                 "launchPackage" -> NodeBridgeResponse.success(
                     request.id,
                     launchPackage(request.firstStringArg()).toString(),

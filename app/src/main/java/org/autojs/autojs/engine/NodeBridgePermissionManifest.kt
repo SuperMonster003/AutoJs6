@@ -491,6 +491,8 @@ object NodeBridgePermissionManifest {
                 "startActivity", "startService", "sendBroadcast" -> listOf(APP_ACTIVITY)
                 "viewFile", "editFile" -> listOf(APP_ACTIVITY)
                 "getPackageName", "getAppName", "isInstalled", "getInstalledApps", "getPackageInfo" -> listOf(APP_QUERY)
+                "resolvePackage", "getUserProfiles", "getInstalledPackages", "getApkInfo", "getAppByAlias" -> listOf(APP_QUERY)
+                "sendLocalBroadcastSync" -> listOf(APP_ACTIVITY)
                 "currentWindow" -> listOf(APP_QUERY, ACCESSIBILITY)
                 "listSamples", "readSample", "listDocs", "readDoc", "pluginCapabilities" -> listOf(APP_QUERY)
                 else -> listOf(APP)

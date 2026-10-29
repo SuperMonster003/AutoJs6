@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import android.util.Base64
+import org.autojs.autojs.app.GlobalAppContext
 import org.autojs.autojs.core.plugin.concurrentSnapshot
 import org.autojs.autojs.runtime.api.WrappedShizuku
 import org.autojs.autojs.runtime.api.shell.ProcessTree
@@ -69,6 +70,8 @@ internal class RuntimeShellBridge(
                 JSONObject().put("shell","shell" !in missing).put("rootAvailable",RootUtils.isRootAvailable())
                     .put("shizukuRunning",WrappedShizuku.isRunning()).put("shizukuGranted",WrappedShizuku.hasPermission())
                     .put("shizuku",WrappedShizuku.isOperational() && "shell.shizuku" !in missing)
+                    .put("shizukuInstalled",WrappedShizuku.isInstalled(GlobalAppContext.get())).put("shizukuHasService",WrappedShizuku.hasService())
+                    .put("shizukuOperational",WrappedShizuku.isOperational())
                     .put("missingCapabilities",JSONArray(missing)).put("uid",android.os.Process.myUid())
             }
             "spawn", "open", "exec" -> {
