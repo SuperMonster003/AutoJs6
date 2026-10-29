@@ -169,16 +169,26 @@ by hand). Manual annotations (module and member aliases, exclusion reasons,
 runtime equivalents) live only in `runtime-policy.json`.
 
 ```text
-python tools/api-coverage/check.py --matrix         # also fails when MATRIX.md is stale
-python tools/api-coverage/check.py --write-matrix   # regenerate MATRIX.md
+python tools/api-coverage/check.py --matrix                   # also fails when MATRIX.md is stale
+python tools/api-coverage/check.py --write-matrix             # regenerate MATRIX.md
+python tools/api-coverage/check.py --write-pending-baseline   # shrink pending-baseline.json
 ```
 
 `--matrix` builds the matrix from the same run's `exports.json`,
 `documentation.json` and `surfaces.json` (with P0.3's arity statuses). It fails
-when the checked-in `MATRIX.md` differs from the generated one and when a Bun
-`capability-gated` cell has no capability (`summary.missingCapabilities`, Q12 (a));
-pending cells and exclusions without a valid reason are listed in `summary.json` `matrix.findings`
-without failing until the exclusion list is decided (roadmap D12 / Q1). A
+when the checked-in `MATRIX.md` differs from the generated one, when a Bun
+`capability-gated` cell has no capability (`summary.missingCapabilities`, Q12 (a)),
+when an exclusion has no valid reason (`summary.missingReasons`; the exclusion
+list was decided on 2026-10-29, roadmap D12 / Q1, appendix D) and when the
+pending cells differ from `pending-baseline.json` (roadmap Q40 (a)): the baseline
+lists, per runtime column, the row ids allowed to be pending after P1.4, so a
+pending cell it does not list fails (a new export, a lost runtime entry, a removed
+exclusion), and so does a listed cell that is no longer pending, until
+`--write-pending-baseline` shrinks the file. That option refuses to add cells;
+`--write-pending-baseline --allow-new-pending` writes them after they are
+registered as a pending decision on the api-coverage board. Pending counts stay
+in `summary.json` `matrix.findings`. A new exclusion goes through the same
+board first (D12). A
 `MATRIX.md` generated from another data source (ksp versus kotlin) is reported as
 `skipped`, not stale, and so is any `MATRIX.md` when the matrix lacks a column:
 with `--skip-ace` the `ace` column stays `null` (`surfaces.json` `aceChecked`
@@ -207,7 +217,8 @@ declarations the job checks out (their default branches unless the manual inputs
 say otherwise). A change there that adds, removes or reclassifies an entry, and a
 host change to the exports or returned objects, makes the job fail until the
 derived files are regenerated and committed: `python tools/api-coverage/check.py
---write-matrix` in the host, then `node tools/ace-lsp/generate-runtime-api-queries.mjs`
+--write-matrix` in the host (with `--write-pending-baseline` when cells stopped
+being pending), then `node tools/ace-lsp/generate-runtime-api-queries.mjs`
 in the Ace plugin (it reads the host report by default) when a covered entry changed.
 `--strict-arity` fails only on d.ts overloads disjoint from the implementation
 arity; `wider` / `narrower` stay warnings in `arity.json`.

@@ -5,8 +5,8 @@ import shutil
 import tempfile
 import unittest
 
-from runtime_matrix import (MARKDOWN, POLICY_SCHEMA, build, compare_markdown, default_typescript, gate, generate, markdown_state,
-                            parse_host_api, parse_worker_modules, render_markdown, write)
+from runtime_matrix import (MARKDOWN, POLICY_SCHEMA, build, compare_markdown, compare_pending_baseline, default_typescript, gate, generate,
+                            markdown_state, parse_host_api, parse_worker_modules, render_markdown, write, write_pending_baseline)
 
 HOST = Path(__file__).resolve().parents[2]
 NODE = HOST.parent / 'AutoJs6-Plugin-NodeJs-Runtime'
@@ -141,6 +141,14 @@ def surfaces():
         {'api': 'images.getSize', 'declaration': {'status': 'explicit'}, 'aceDefault': True, 'aceAllGroups': True, 'aceStatic': None},
         {'api': 'flow.waitFor', 'declaration': {'status': 'missing-member'}, 'aceDefault': False, 'aceAllGroups': True, 'aceStatic': False},
     ]}
+
+
+def valid_policy():
+    """POLICY without its deliberately invalid exclusions (check.py --matrix fails on them since D12 was decided)."""
+    policy = copy.deepcopy(POLICY)
+    policy['exclusions'] = [dict(rule, equivalent='fetch') if rule['id'] == 'native-http' else rule
+                            for rule in policy['exclusions'] if rule['id'] != 'bad-reason']
+    return policy
 
 
 def matrix(exports=EXPORTS, policy=POLICY, docs=True):
@@ -419,9 +427,9 @@ class StatusTest(unittest.TestCase):
 
 class MarkdownTest(unittest.TestCase):
     def test_render_and_compare(self):
-        result = matrix()
+        result = matrix(policy=valid_policy())
         text = render_markdown(result)
-        self.assertEqual(text, render_markdown(matrix()))
+        self.assertEqual(text, render_markdown(matrix(policy=valid_policy())))
         self.assertEqual(markdown_state(text), {'schema': 'autojs6-runtime-matrix-v1', 'dataSource': 'ksp', 'rows': len(EXPORTS['records'])})
         self.assertIn('| `threads.start` | not-portable: sync-only (sync-threads) |', text)
         self.assertIn('| images | 3 |', text)
@@ -439,7 +447,12 @@ class MarkdownTest(unittest.TestCase):
             self.assertEqual(compare_markdown(kotlin, path), 'skipped')
         findings = gate(result, Path('missing.md'))['findings']
         self.assertTrue(any(item.startswith('Runtime matrix pending in Node main') for item in findings))
-        self.assertTrue(any('runtime-native without equivalent' in item for item in findings))
+
+    def test_missing_reasons_fail(self):
+        # D12 decided (P1.4): an exclusion without a valid reason fails check.py --matrix.
+        failures = gate(matrix(), Path('missing.md'))['failures']
+        self.assertTrue(any('http.postJson' in item and 'runtime-native without equivalent' in item for item in failures))
+        self.assertTrue(any('database.close' in item and 'reason missing or unknown' in item for item in failures))
 
     def test_without_ace_or_reports(self):
         # check.py --skip-ace: surfaces.json has aceChecked false; the ace column stays unset and MATRIX.md is not compared.
@@ -448,8 +461,8 @@ class MarkdownTest(unittest.TestCase):
             data['aceChecked'] = False
             return data
         host_api = parse_host_api(HOST_API)
-        full = matrix()
-        partial = build(copy.deepcopy(EXPORTS), copy.deepcopy(POLICY), POLICY_JSON, NODE_SURFACES, BUN_SURFACES, host_api, WORKER,
+        full = matrix(policy=valid_policy())
+        partial = build(copy.deepcopy(EXPORTS), valid_policy(), POLICY_JSON, NODE_SURFACES, BUN_SURFACES, host_api, WORKER,
                         {('flow', 'waitFor'): {'accessibility'}}, documentation(), without_ace())
         rows = {row['id']: row for row in partial['rows']}
         self.assertEqual((rows['images.read']['doc'], rows['images.read']['dts'], rows['images.read']['ace']), ('heading', 'arity', None))
@@ -458,7 +471,7 @@ class MarkdownTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / 'MATRIX.md'
             path.write_text(render_markdown(full), encoding='utf-8', newline='\n')
-            for result in (partial, matrix(docs=False)):
+            for result in (partial, matrix(policy=valid_policy(), docs=False)):
                 self.assertEqual(compare_markdown(result, path), 'skipped')
                 outcome = gate(result, path)
                 self.assertEqual(outcome['failures'], [])
@@ -468,6 +481,44 @@ class MarkdownTest(unittest.TestCase):
                 write(partial, Path(temp) / 'reports', path)
             self.assertEqual(path.read_text(encoding='utf-8'), render_markdown(full))
 
+
+
+class PendingBaselineTest(unittest.TestCase):
+    """Q40 (a): pending cells may only shrink against tools/api-coverage/pending-baseline.json."""
+
+    def test_new_and_stale_cells(self):
+        result = matrix(policy=valid_policy())
+        markdown = Path('missing.md')
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'pending-baseline.json'
+            self.assertEqual(compare_pending_baseline(result, path)[0], 'missing')
+            self.assertTrue(any('pending-baseline.json is missing' in item for item in gate(result, markdown, path)['failures']))
+            self.assertEqual(write_pending_baseline(result, path), [])
+            data = json.loads(path.read_text(encoding='utf-8'))
+            self.assertEqual(data['counts'], result['summary']['pending'])
+            self.assertEqual(compare_pending_baseline(result, path), ('current', [], []))
+            self.assertEqual([item for item in gate(result, markdown, path)['failures'] if 'pending' in item], [])
+            # A pending cell outside the baseline fails, and is not written without allow_new.
+            cell = data['pending']['bun'].pop(0)
+            path.write_text(json.dumps(data), encoding='utf-8')
+            self.assertEqual(compare_pending_baseline(result, path), ('differs', [('bun', cell)], []))
+            self.assertTrue(any(f'new pending cell {cell} (Bun)' in item for item in gate(result, markdown, path)['failures']))
+            self.assertEqual(write_pending_baseline(result, path), [('bun', cell)])
+            self.assertNotIn(cell, json.loads(path.read_text(encoding='utf-8'))['pending']['bun'])
+            self.assertEqual(write_pending_baseline(result, path, allow_new=True), [])
+            self.assertEqual(compare_pending_baseline(result, path)[0], 'current')
+            # A baseline cell that is no longer pending fails until the baseline shrinks.
+            data = json.loads(path.read_text(encoding='utf-8'))
+            data['pending']['node_main'].append('images.read')
+            path.write_text(json.dumps(data), encoding='utf-8')
+            self.assertEqual(compare_pending_baseline(result, path)[2], [('node_main', 'images.read')])
+            self.assertTrue(any('no longer pending' in item for item in gate(result, markdown, path)['failures']))
+            self.assertEqual(write_pending_baseline(result, path), [])
+            self.assertEqual(compare_pending_baseline(result, path)[0], 'current')
+            # A baseline of the other export source is not compared.
+            kotlin = copy.deepcopy(result)
+            kotlin['dataSource'] = {'kind': 'kotlin'}
+            self.assertEqual(compare_pending_baseline(kotlin, path)[0], 'skipped')
 
 @unittest.skipUnless(NODE.is_dir() and BUN.is_dir() and ACE.is_dir() and shutil.which('node'), 'Node, Bun and Ace checkouts are required')
 class RepositoryTest(unittest.TestCase):
@@ -510,6 +561,17 @@ class RepositoryTest(unittest.TestCase):
         for name in ['automator.clickAny', 'clickAny']:
             self.assertEqual((rows[name]['node_main']['module'], rows[name]['bun']['namespace']), ('autojs6:flow', 'flow'))
 
+
+    def test_p1_4(self):
+        rows = {row['id']: row for row in self.matrix['rows']}
+        # Appendix D decided 2026-10-29: the kept exclusions.
+        self.assertEqual((rows['http.client']['bun']['rule'], rows['http.client']['bun']['reason']), ('http-java-objects', 'java-prototype'))
+        self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
+        self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
+        # The groups the maintainer kept pending for P3 / P4.
+        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'Mathx.sum', 'keepAlive', 'app.launchDual', 'ui.layout', 'files.open']:
+            self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
+        self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
 
 if __name__ == '__main__':
     unittest.main()

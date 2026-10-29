@@ -1,6 +1,6 @@
 {
   "schema": "autojs6-runtime-policy-v1",
-  "status": "draft: exclusions follow docs/api-coverage/ROADMAP.md appendix D (D12), decided together in P1.4 (Q1); aliases only map host names to existing runtime entry names",
+  "status": "decided 2026-10-29: exclusions follow docs/api-coverage/ROADMAP.md appendix D (D12, Q1, api-coverage P1.4); a new exclusion is registered as a pending decision first; aliases only map host names to existing runtime entry names",
   "node": {
     "nativeModules": {
       "dns": "node:dns", "dns/promises": "node:dns/promises", "http": "node:http", "https": "node:https", "net": "node:net",
@@ -170,48 +170,7 @@
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "rhino-only",
       "note": "policy.json internalExports / standardExports: compiler or Rhino internals, not script APIs (Q13)",
-      "source": "policy.json"
-    },
-    {
-      "id": "accessibility-sync-wait",
-      "match": ["auto.waitFor"],
-      "columns": ["node_main", "node_worker", "bun"],
-      "status": "denied", "reason": "sync-only",
-      "equivalent": "await accessibility.ensureEnabled(); flow waitFor* with node snapshots",
-      "note": "accessibility powerDialog / waitFor / rawNode; powerDialog is reachable through keys.powerDialog, rawNode has no explicit host export",
-      "source": "appendix D source 1 (Node HOST-API section 8)"
-    },
-    {
-      "id": "sync-threads",
-      "match": ["threads.*", "sync"],
-      "columns": ["node_main", "node_worker", "bun"],
-      "status": "not-portable", "reason": "sync-only",
-      "equivalent": "Node worker_threads / Bun Worker with message passing",
-      "source": "appendix D source 2"
-    },
-    {
-      "id": "sync-continuation",
-      "match": ["continuation.*"],
-      "columns": ["node_main", "node_worker", "bun"],
-      "status": "not-portable", "reason": "sync-only",
-      "equivalent": "await on the Promise returned by the asynchronous entry",
-      "source": "appendix D source 2"
-    },
-    {
-      "id": "sync-sleep",
-      "match": ["sleep"],
-      "columns": ["node_main", "node_worker", "bun"],
-      "status": "not-portable", "reason": "runtime-native",
-      "equivalent": "await new Promise(resolve => setTimeout(resolve, ms)) (Node timers/promises setTimeout, Bun.sleep)",
-      "source": "appendix D source 2"
-    },
-    {
-      "id": "sync-keep-alive",
-      "match": ["keepAlive", "loop", "timers.keepAlive"],
-      "columns": ["node_main", "node_worker", "bun"],
-      "status": "not-portable", "reason": "runtime-native",
-      "equivalent": "the runtime event loop stays alive while timers, listeners or pending Promises exist",
-      "source": "appendix D source 2 (timers synchronous semantics)"
+      "source": "policy.json; appendix D D-15 (Q13 (a))"
     },
     {
       "id": "java-prototype",
@@ -219,8 +178,7 @@
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "java-prototype",
       "equivalent": "java module handles (java.create / java.callInstance / java.callStatic)",
-      "note": "isJava* entries are inferred from the appendix wording, review in P1.4",
-      "source": "appendix D source 2"
+      "source": "appendix D D-11, maintainer 2026-10-29 (P1.4 question 5)"
     },
     {
       "id": "java-prototype-objects",
@@ -229,23 +187,24 @@
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "java-prototype",
       "note": "members of returned objects read from Kotlin classes (UiObject, ImageWrapper, Dialog, Database, ...): Node / Bun have no such Java object; augment-prototype handles (Flow, MailClient, ShellProcess, ...) stay pending for P3 / P4",
-      "source": "Q17 (a), maintainer 2026-10-25"
-    },
-    {
-      "id": "jsox-extensions",
-      "match": ["Arrayx.*", "Mathx.*", "Numberx.*", "jsox.*"],
-      "columns": ["node_main", "node_worker", "bun"],
-      "status": "not-portable", "reason": "rhino-only",
-      "note": "Node exposes explicit jsox functions (shadows this rule on the main thread); Bun to be decided (Q1)",
-      "source": "appendix D source 2"
+      "source": "Q17 (a), maintainer 2026-10-25; appendix D D-11 (P1.4)"
     },
     {
       "id": "rhino-engine",
-      "match": ["engines.execScript", "engines.execScriptFile", "engines.execAutoFile", "plugins.load"],
-      "columns": ["node_main", "node_worker", "bun"],
+      "match": ["plugins.load"],
+      "columns": ["node_worker", "bun"],
       "status": "not-portable", "reason": "rhino-only",
-      "note": "operate the Rhino engine itself; read-only queries (version, running scripts) are not excluded",
-      "source": "appendix D source 3"
+      "note": "loads Rhino plugin modules; the Node main thread plugins.load is a local scan of ./plugins. engines.execScript / execScriptFile / execAutoFile are not excluded (Node main bridges them)",
+      "source": "appendix D D-14, maintainer 2026-10-29 (P1.4 question 8)"
+    },
+    {
+      "id": "http-java-objects",
+      "match": ["http.client", "http.buildRequest"],
+      "columns": ["node_main", "node_worker", "bun"],
+      "status": "not-portable", "reason": "java-prototype",
+      "equivalent": "fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects",
+      "note": "return okhttp3.OkHttpClient / okhttp3.Request",
+      "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
     },
     {
       "id": "native-http",
@@ -253,8 +212,8 @@
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "runtime-native",
       "equivalent": "global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy",
-      "note": "per-function review in P1.4: host-specific behavior (cookies, proxy settings) still needs bridged or local-shim",
-      "source": "appendix D source 3"
+      "note": "host proxy / certificate policy through Node autojs6:fetch (GET / POST); http.client / buildRequest are http-java-objects",
+      "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
     },
     {
       "id": "native-timers",
@@ -262,7 +221,7 @@
       "columns": ["bun"],
       "status": "not-portable", "reason": "runtime-native",
       "equivalent": "global setTimeout / setInterval / setImmediate and their clear functions",
-      "source": "appendix D source 3"
+      "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
     },
     {
       "id": "native-crypto",
@@ -270,7 +229,7 @@
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "runtime-native",
       "equivalent": "node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle)",
-      "source": "appendix D source 3"
+      "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
     },
     {
       "id": "native-base64",
@@ -278,7 +237,7 @@
       "columns": ["node_worker", "bun"],
       "status": "not-portable", "reason": "runtime-native",
       "equivalent": "Buffer.from(text).toString(\"base64\") / Buffer.from(data, \"base64\"), atob / btoa",
-      "source": "appendix D source 3"
+      "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
     }
   ]
 }

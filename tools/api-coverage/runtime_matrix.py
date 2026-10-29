@@ -35,6 +35,8 @@ DOC_VALUES = ['none', 'mention', 'heading', 'signature', 'example']
 DTS_VALUES = ['none', 'name', 'arity', 'typed']
 ACE_VALUES = ['none', 'semantic', 'static']
 MARKDOWN = 'docs/api-coverage/MATRIX.md'
+PENDING_BASELINE = 'tools/api-coverage/pending-baseline.json'
+BASELINE_SCHEMA = 'autojs6-pending-baseline-v1'
 REPORTS = 'build/reports/api-coverage'
 NODE_DECLARATIONS = 'docs/nodejs/types/autojs6-node'
 NODE_HOST_API = 'docs/HOST-API.md'
@@ -516,7 +518,8 @@ def render_markdown(matrix):
         '',
         '由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. '
         '定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, '
-        '人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则在 D12 / Q1 拍板前是草案.',
+        '人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), '
+        '新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).',
         '',
         f"数据源: {kind}, {summary['rows']} 行 (显式导出 {summary['exports']}, 返回对象成员 {summary['returnedMembers']}"
         + ('' if summary['returnedObjectsInput'] else ', exports.json 尚无 returnedObjects 段') + ').',
@@ -545,7 +548,7 @@ def render_markdown(matrix):
     lines += ['', '拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): '
               + ' / '.join(f'{COLUMN_TITLES[column]} {rejects.get(column, 0)}' for column in RUNTIME_COLUMNS)
               + '. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.']
-    lines += ['', '## 排除规则 (草案)', '', '| 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |', '|---|---|---:|---:|---:|---|']
+    lines += ['', '## 排除规则', '', '| 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |', '|---|---|---:|---:|---:|---|']
     policy_rows = {}
     for row in matrix['rows']:
         for column in RUNTIME_COLUMNS:
@@ -640,9 +643,53 @@ def default_typescript(ace):
     return Path(ace) / lock['assetRoot'] / 'autojs6/typescript/typescript.js'
 
 
-def gate(matrix, markdown):
-    """check.py --matrix: failures (the checked-in MATRIX.md differs, a Bun capability-gated cell without its capability)
-    and report-only findings (pending, missing reasons)."""
+def pending_cells(matrix):
+    """Row ids of the pending cells, per runtime column."""
+    return {column: sorted(row['id'] for row in matrix['rows'] if row[column]['status'] == 'pending') for column in RUNTIME_COLUMNS}
+
+
+def render_pending_baseline(matrix):
+    kind = matrix['dataSource'].get('kind', 'kotlin')
+    data = {'schema': BASELINE_SCHEMA, 'dataSource': kind,
+            'note': 'Pending cells allowed by check.py --matrix (roadmap Q40 (a)): a pending cell missing here fails, and so does a listed '
+                    'cell that is no longer pending; shrink with check.py --write-pending-baseline, add only with --allow-new-pending '
+                    'and a pending decision on the api-coverage board.',
+            'counts': {column: len(ids) for column, ids in pending_cells(matrix).items()}, 'pending': pending_cells(matrix)}
+    return json.dumps(data, ensure_ascii=False, indent=1) + '\n'
+
+
+def compare_pending_baseline(matrix, path):
+    """('current' | 'differs' | 'missing' | 'skipped', new cells, stale cells); a cell is (column, row id). A baseline written
+    from the other export source (ksp / kotlin) is skipped, as MATRIX.md is."""
+    path = Path(path)
+    if not path.is_file():
+        return 'missing', [], []
+    baseline = json.loads(path.read_text(encoding='utf-8'))
+    if baseline.get('schema') != BASELINE_SCHEMA:
+        raise ValueError(f'{PENDING_BASELINE} schema must be {BASELINE_SCHEMA}')
+    if baseline.get('dataSource') != matrix['dataSource'].get('kind', 'kotlin'):
+        return 'skipped', [], []
+    current = pending_cells(matrix)
+    listed = {column: set(baseline['pending'].get(column, [])) for column in RUNTIME_COLUMNS}
+    new = [(column, item) for column in RUNTIME_COLUMNS for item in current[column] if item not in listed[column]]
+    stale = [(column, item) for column in RUNTIME_COLUMNS for item in sorted(listed[column] - set(current[column]))]
+    return ('differs' if new or stale else 'current'), new, stale
+
+
+def write_pending_baseline(matrix, path, allow_new=False):
+    """Rewrite the baseline with the current pending cells; without allow_new it only shrinks (returns the refused new cells)."""
+    path = Path(path)
+    state, new, _ = compare_pending_baseline(matrix, path) if path.is_file() else ('missing', [], [])
+    if new and not allow_new:
+        return new
+    path.write_text(render_pending_baseline(matrix), encoding='utf-8', newline='\n')
+    return []
+
+
+def gate(matrix, markdown, baseline=None):
+    """check.py --matrix: failures (the checked-in MATRIX.md differs, a Bun capability-gated cell without its capability,
+    an exclusion without a valid reason, and with a baseline path a pending cell outside the baseline or a baseline cell
+    no longer pending) and report-only findings (pending counts)."""
     state = compare_markdown(matrix, markdown)
     failures = []
     if state in ('missing', 'stale'):
@@ -650,14 +697,26 @@ def gate(matrix, markdown):
     summary = matrix['summary']
     failures += [f"Runtime matrix Bun capability-gated without a capability: {item['id']} ({item['namespace']}.{item['member']}); "
                  'map it in runtime-policy.json bun.memberCapabilities' for item in summary.get('missingCapabilities', [])]
+    failures += [f"Runtime matrix exclusion without a valid reason: {item['id']} ({item['column']}: {item['problem']})" for item in summary['missingReasons']]
     findings = []
     if state == 'skipped':
         partial = partial_columns(matrix)
         findings.append(f"{MARKDOWN} not compared: the matrix has no {' / '.join(partial)} column (check.py --skip-ace, or no check.py reports)"
                         if partial else f'{MARKDOWN} not compared: it was generated from another data source')
     findings += [f'Runtime matrix pending in {COLUMN_TITLES[column]}: {count}' for column, count in summary['pending'].items() if count]
-    findings += [f"Runtime matrix exclusion without a valid reason: {item['id']} ({item['column']}: {item['problem']})" for item in summary['missingReasons']]
-    return {'markdown': state, 'pending': summary['pending'], 'missingReasons': len(summary['missingReasons']),
+    baseline_state = None
+    if baseline is not None:
+        baseline_state, new, stale = compare_pending_baseline(matrix, baseline)
+        if baseline_state == 'missing':
+            failures.append(f'{PENDING_BASELINE} is missing; write it with python tools/api-coverage/check.py --write-pending-baseline')
+        elif baseline_state == 'skipped':
+            findings.append(f'{PENDING_BASELINE} not compared: it was written from another data source')
+        failures += [f'Runtime matrix new pending cell {item} ({COLUMN_TITLES[column]}): cover it, exclude it with a decided reason, '
+                     f'or register it and write {PENDING_BASELINE} with --write-pending-baseline --allow-new-pending' for column, item in new]
+        if stale:
+            failures.append(f'{PENDING_BASELINE} lists {len(stale)} cells that are no longer pending (first: {stale[0][1]} in '
+                            f'{COLUMN_TITLES[stale[0][0]]}); shrink it with python tools/api-coverage/check.py --write-pending-baseline')
+    return {'markdown': state, 'pending': summary['pending'], 'pendingBaseline': baseline_state, 'missingReasons': len(summary['missingReasons']),
             'missingCapabilities': len(summary.get('missingCapabilities', [])),
             'policyConflicts': len(summary['policyConflicts']), 'failures': failures, 'findings': findings}
 
@@ -692,7 +751,7 @@ def main():
     reports = (args.reports or host / REPORTS).resolve()
     matrix = generate(host, node, bun, typescript, reports)
     write(matrix, reports, host / MARKDOWN if args.write_markdown else None)
-    result = gate(matrix, host / MARKDOWN)
+    result = gate(matrix, host / MARKDOWN, host / PENDING_BASELINE)
     print(json.dumps({key: matrix['summary'][key] for key in ['rows', 'exports', 'returnedMembers', 'pending']}
                      | {'missingReasons': result['missingReasons'], 'missingCapabilities': result['missingCapabilities'],
                         'policyConflicts': result['policyConflicts'], 'markdown': result['markdown']},

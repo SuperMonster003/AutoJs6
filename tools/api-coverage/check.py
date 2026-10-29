@@ -67,8 +67,13 @@ def main():
     parser.add_argument("--source", choices=["auto", "ksp", "kotlin"], default="auto",
                         help="Exports from script-modules.json (ksp, required in CI), the Kotlin registrations (kotlin), or ksp when the file exists (auto)")
     parser.add_argument("--matrix", action="store_true",
-                        help="Also build runtime-matrix.json and fail when docs/api-coverage/MATRIX.md differs; pending and missing exclusion reasons are reported only (until D12)")
+                        help="Also build runtime-matrix.json and fail when docs/api-coverage/MATRIX.md differs, an exclusion has no valid reason (D12 decided) "
+                             "or the pending cells differ from tools/api-coverage/pending-baseline.json (Q40)")
     parser.add_argument("--write-matrix", action="store_true", help="Like --matrix, and rewrite docs/api-coverage/MATRIX.md")
+    parser.add_argument("--write-pending-baseline", action="store_true",
+                        help="Like --matrix, and rewrite tools/api-coverage/pending-baseline.json; refused when it would add pending cells")
+    parser.add_argument("--allow-new-pending", action="store_true",
+                        help="With --write-pending-baseline: also write pending cells the baseline does not list (register them as a pending decision)")
     parser.add_argument("--node", type=Path, help="Node runtime checkout for --matrix (default: sibling AutoJs6-Plugin-NodeJs-Runtime)")
     parser.add_argument("--bun", type=Path, help="Bun runtime checkout for --matrix (default: sibling AutoJs6-Plugin-Bun-Runtime)")
     parser.add_argument("--docs-support", action="store_true",
@@ -125,6 +130,8 @@ def main():
     # Members of returned objects (P0.4): reported apart, never failures (P2.3 consumes returned-objects.json).
     returned_summary, returned_docs, returned_surfaces = returned_objects.gate(host, baseline, output, docs / "api", command)
     matrix_summary = docs_summary = None
+    if args.write_pending_baseline:
+        args.matrix = True
     if args.matrix or args.write_matrix or args.docs_support:
         import runtime_matrix
         node = (args.node or siblings / "AutoJs6-Plugin-NodeJs-Runtime").resolve()
@@ -134,8 +141,12 @@ def main():
         surfaces["rows"] += returned_surfaces
         matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented + returned_docs, surfaces=surfaces)
         runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
+        if args.write_pending_baseline:
+            refused = runtime_matrix.write_pending_baseline(matrix, host / runtime_matrix.PENDING_BASELINE, args.allow_new_pending)
+            failures.extend(f"Not written to {runtime_matrix.PENDING_BASELINE}: new pending cell {item} ({column}); "
+                            "add --allow-new-pending after registering it" for column, item in refused)
         if args.matrix or args.write_matrix:
-            matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN)
+            matrix_summary = runtime_matrix.gate(matrix, host / runtime_matrix.MARKDOWN, host / runtime_matrix.PENDING_BASELINE)
             failures.extend(matrix_summary.pop("failures"))
         if args.docs_support:
             docs_summary, docs_failures = docs_support.check(docs, output / "runtime-matrix.json", output)
