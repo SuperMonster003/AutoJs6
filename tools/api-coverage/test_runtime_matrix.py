@@ -266,6 +266,10 @@ class StatusTest(unittest.TestCase):
         self.assertIn({'id': 'http.postJson', 'column': 'node_main', 'problem': 'runtime-native without equivalent'}, missing)
         self.assertIn({'id': 'database.close', 'column': 'node_worker', 'problem': 'reason missing or unknown'}, missing)
         self.assertNotIn('threads.start', {item['id'] for item in missing})
+        # Q63 (a): obsoleted is a decided reason (appendix D D-21).
+        override = copy.deepcopy(POLICY)
+        override['exclusions'][4]['reason'] = 'obsoleted'
+        self.assertNotIn('database.close', {item['id'] for item in matrix(policy=override)['summary']['missingReasons']})
 
     def test_surface_columns(self):
         self.assertEqual((self.rows['images.read']['doc'], self.rows['images.read']['dts'], self.rows['images.read']['ace']), ('heading', 'arity', 'static'))

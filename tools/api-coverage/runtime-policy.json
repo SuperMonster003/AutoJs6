@@ -221,6 +221,14 @@
       "source": "Q17 (a), maintainer 2026-10-25; appendix D D-11 (P1.4)"
     },
     {
+      "id": "obsoleted-functions",
+      "match": ["util.toRegularAndCall", "util.toRegularAndApply"],
+      "columns": ["node_main", "node_worker", "bun"],
+      "status": "not-portable", "reason": "obsoleted",
+      "note": "obsoleted in the host: Rhino always throws ObsoletedRhinoFunctionException, and so do Node / Bun",
+      "source": "appendix D D-21, maintainer 2026-10-29 (Q63 (a))"
+    },
+    {
       "id": "rhino-engine",
       "match": ["plugins.load"],
       "columns": ["node_worker", "bun"],
