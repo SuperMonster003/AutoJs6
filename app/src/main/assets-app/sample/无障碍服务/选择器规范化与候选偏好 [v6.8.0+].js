@@ -16,7 +16,7 @@
  * 含 visible 时, 罗盘 k (向上找可点击的控件) 只停在对用户可见的可点击控件上.
  *
  * 两者都有同名全局函数 (从空选择器开始), 也可以写在对象选择器 ({ normalize: ..., prefer: ... }) 与字符串选择器
- * (select('... normalize prefer=visible')) 中. auto.explain 的报告说明 normalize 与 prefer 是否生效以及取了哪个控件
+ * (select('... normalize prefer=visible,top'), 多个键以逗号分隔) 中. auto.explain 的报告说明 normalize 与 prefer 是否生效以及取了哪个控件
  * (参阅 示例代码 > 无障碍服务 > 选择器诊断与节点树导出).
  *
  * 示例以本脚本自己的悬浮窗为目标. 某些系统上悬浮窗只有在桌面之上才是活动窗口, 因此先回到桌面.
@@ -117,9 +117,9 @@ console.log('12. area 取大的:', same(text('标签').prefer('area').findOnce()
 const dist = w => Math.hypot(w.centerX() - device.width / 2, w.centerY() - device.height / 2);
 console.log('12. center 取中心离屏幕中心近的:', dist(text('标签').prefer('center').findOnce()) <= Math.min(dist(big), dist(small)));
 
-/* 13. 全局函数 prefer(...), 对象选择器 (一个键用字符串, 多个键用数组) 与字符串选择器. */
+/* 13. 全局函数 prefer(...), 对象选择器 (一个键用字符串, 多个键用数组) 与字符串选择器 (多个键以逗号分隔). */
 console.log('13.', prefer('enabled').text('提交').findOnce().enabled(), pickup({ text: '提交', prefer: ['enabled', 'top'] }).enabled(),
-    select('text=提交 prefer=enabled').findOnce().enabled());
+    select('text=提交 prefer=enabled,top').findOnce().enabled());
 
 /* 14. 选项或键写错时报错. */
 try {

@@ -4,6 +4,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityBridge
 import org.autojs.autojs.core.accessibility.UiSelector
 import org.autojs.autojs.core.automator.FakeUiNode
 import org.autojs.autojs.core.automator.filter.BoundsFilter
+import org.autojs.autojs.core.automator.filter.Preference
 import org.autojs.autojs.core.automator.selector.SelectorStringParser.Op
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -121,6 +122,35 @@ class SelectorStringParserTest {
         assertEquals(1, filters.size)
         assertTrue(filters[0].toString(), filters[0] is BoundsFilter)
         assertEquals(2, select("bounds=0,0,100,100 boundsInside=0,0,200,200").selector.filters.size)
+    }
+
+    @Test
+    fun commaValuesOfPreferAreSeveralKeys() {
+        // A vararg property fits the whole value as one argument too, so the comma split comes first (docs/selector/ROADMAP.md Q21).
+        // zh-CN: 可变参数属性也能以整值为单个参数匹配, 因此先按逗号拆分 (Q21).
+        val preference = select("text=Login prefer=visible,center").selector.preference!!
+        assertEquals(listOf(Preference.Key.VISIBLE, Preference.Key.CENTER), preference.keys)
+        assertEquals(listOf(Preference.Key.ENABLED), select("prefer=enabled").selector.preference!!.keys)
+        val e = error("prefer=visible,middle")
+        assertEquals("prefer=visible,middle", e.term)
+        assertTrue(e.detail, e.detail.startsWith("Unknown key of prefer: \"middle\""))
+        val quoted = error("prefer=\"visible,center\"").detail
+        assertTrue(quoted, quoted.startsWith("Unknown key of prefer: \"visible,center\""))
+    }
+
+    @Test
+    fun commaValuesOfActionAreSeveralActions() {
+        // A search recycles the nodes it passes over, so every search gets a tree of its own.
+        // zh-CN: 搜索会回收经过的节点, 因此每次搜索使用新的树.
+        fun screen() = FakeUiNode.root("screen") {
+            child("field") { actions = listOf("ACTION_CLICK", "ACTION_SET_TEXT") }
+            child("button") { actions = listOf("ACTION_CLICK") }
+        }
+        fun found(syntax: String) = select(syntax).searchIn(screen()).map { it.name }
+        assertEquals(listOf("field"), found("action=CLICK,SET_TEXT"))
+        assertEquals(listOf("field", "button"), found("action=CLICK"))
+        assertEquals("action([CLICK,SET_TEXT])", select("action=CLICK,SET_TEXT").toString())
+        assertEquals(emptyList<String>(), found("action=\"CLICK,SET_TEXT\""))
     }
 
     @Test

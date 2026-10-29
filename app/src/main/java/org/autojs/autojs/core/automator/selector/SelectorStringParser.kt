@@ -8,7 +8,8 @@ import org.autojs.autojs.core.accessibility.UiSelector
  *
  * - `key=value`: the property with one argument; a value with spaces goes in `"..."` or `'...'`
  *   (escapes `\"`, `\\`, `\n`, `\t`); an unquoted value with commas is split into several arguments
- *   when a single one does not fit (`bounds=0,0,100,200`, `left=10,20`); numbers and booleans are
+ *   when a single one does not fit (`bounds=0,0,100,200`, `left=10,20`), and always for the vararg
+ *   properties (`prefer=visible,center`, `action=CLICK,SET_TEXT`); numbers and booleans are
  *   parsed leniently as in map selectors (`depth=3`, `clickable=false`).
  * - `key~=regex` or `key=/regex/flags`: `keyMatch(regex)`, a regular expression search (like
  *   `RegExp.test`), for the string properties `text` / `desc` / `content` / `id` / `className` /
@@ -21,7 +22,8 @@ import org.autojs.autojs.core.accessibility.UiSelector
  * string as a content match; this syntax is only entered through `select("...")` (D13).
  *
  * zh-CN: 字符串选择器语法 (Roadmap D13, P5.3): 以空白分隔的若干条件, 每条指向 [SelectorRegistry] 的一个属性:
- * `key=value` (含空格的值用引号, 转义 `\"` / `\\` / `\n` / `\t`; 未加引号且含逗号的值在单个参数不匹配时拆成多个参数; 数字与布尔值
+ * `key=value` (含空格的值用引号, 转义 `\"` / `\\` / `\n` / `\t`; 未加引号且含逗号的值在单个参数不匹配时拆成多个参数, 可变参数属性则总是拆分
+ * (`prefer=visible,center`, `action=CLICK,SET_TEXT`); 数字与布尔值
  * 同 map 选择器一样宽松解析), `key~=regex` 或 `key=/regex/flags` (字符串属性的 `keyMatch(regex)`, 正则搜索), `key` / `!key`
  * (无参重载或布尔 `false`). 错误带字符位置, 出错的条件与候选属性名. 条件按顺序施加; 解析器只向给定选择器追加过滤器, 不涉及 Android,
  * 因此在 JVM 上单元测试. `pickup` / `wait` 与 Flow 条件中的普通字符串仍是内容匹配; 本语法只经 `select("...")` 进入 (D13).
@@ -149,9 +151,12 @@ class SelectorStringParser(private val registry: SelectorRegistry = SelectorRegi
                     match(syntax, term, into, literal)
                     return
                 }
-                var result = applyCatching(syntax, term) { registry.apply(into, term.key, listOf(value), lenient = true) }
-                if (result == SelectorRegistry.Outcome.NO_MATCHING_OVERLOAD && !term.quoted && ',' in value) {
-                    val parts = value.split(',').map { it.trim() }
+                val parts = if (term.quoted || ',' !in value) null else value.split(',').map { it.trim() }
+                // A vararg property (`prefer`, `action`) also fits the whole value as one argument, so its parts go first (docs/selector/ROADMAP.md Q21).
+                // zh-CN: 可变参数属性 (`prefer`, `action`) 也能以整值为单个参数匹配, 因此先按拆分后的各部分施加 (Q21).
+                val args = parts?.takeIf { entry.overloads.any { overload -> overload.isVararg } } ?: listOf(value)
+                var result = applyCatching(syntax, term) { registry.apply(into, term.key, args, lenient = true) }
+                if (result == SelectorRegistry.Outcome.NO_MATCHING_OVERLOAD && parts != null && args !== parts) {
                     result = applyCatching(syntax, term) { registry.apply(into, term.key, parts, lenient = true) }
                 }
                 outcome(syntax, term, result) { "value ${quote(value)} does not fit \"${term.key}\" (${signatures(entry)})" }
