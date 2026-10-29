@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 932 | 341 | 0 | 1014 | 0 | 549 |
-| Node Worker | 823 | 338 | 0 | 1017 | 0 | 658 |
-| Bun | 0 | 236 | 836 | 1011 | 0 | 753 |
+| Node main | 1012 | 341 | 0 | 1014 | 0 | 469 |
+| Node Worker | 943 | 338 | 0 | 1017 | 0 | 538 |
+| Bun | 0 | 277 | 940 | 1011 | 0 | 608 |
 
 | 列 | 取值 |
 |---|---|
@@ -21,7 +21,7 @@
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
-拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 30 / Node Worker 5 / Bun 32. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
+拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 5 / Node Worker 5 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
 ## 排除规则
 
@@ -44,7 +44,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 113 / 13 / 82 | 82 / 13 / 113 | 92 / 13 / 103 |
+| (global) | 208 | 206 | 205 | 205 | 145 / 13 / 50 | 129 / 13 / 66 | 129 / 13 / 66 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -55,7 +55,7 @@
 | ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
 | Dialog# | 96 | 19 | 96 | 3 | 0 / 96 / 0 | 0 / 96 / 0 | 0 / 96 / 0 |
-| EpubBook# | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 13 / 0 / 1 |
+| EpubBook# | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | EpubReaderSession# | 34 | 34 | 34 | 32 | 0 / 34 / 0 | 0 / 34 / 0 | 0 / 34 / 0 |
 | FloatyWindow# | 12 | 12 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
 | Flow# | 106 | 25 | 106 | 106 | 104 / 0 / 2 | 104 / 0 / 2 | 104 / 0 / 2 |
@@ -78,9 +78,9 @@
 | ScreenCaptureOptions# | 5 | 5 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | ScriptEngine# | 16 | 16 | 16 | 0 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
 | ScriptExecution# | 12 | 12 | 12 | 0 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
-| ShellProcess# | 25 | 12 | 25 | 25 | 15 / 0 / 10 | 15 / 0 / 10 | 15 / 0 / 10 |
+| ShellProcess# | 25 | 12 | 25 | 25 | 25 / 0 / 0 | 25 / 0 / 0 | 25 / 0 / 0 |
 | ShellResult# | 5 | 5 | 5 | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
-| Storage# | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 11 / 0 / 1 |
+| Storage# | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
 | ThemeColor# | 10 | 0 | 10 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | TimedTask# | 40 | 0 | 40 | 0 | 0 / 40 / 0 | 0 / 40 / 0 | 0 / 40 / 0 |
 | TtsUtterance# | 23 | 23 | 23 | 21 | 0 / 23 / 0 | 0 / 23 / 0 | 0 / 23 / 0 |
@@ -92,14 +92,14 @@
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | Zip# | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 0 / 0 / 21 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| app | 43 | 43 | 43 | 43 | 25 / 0 / 18 | 0 / 0 / 43 | 25 / 0 / 18 |
+| app | 43 | 43 | 43 | 43 | 42 / 0 / 1 | 42 / 0 / 1 | 42 / 0 / 1 |
 | auto | 38 | 38 | 38 | 38 | 0 / 0 / 38 | 0 / 0 / 38 | 0 / 0 / 38 |
 | autojs | 21 | 21 | 21 | 21 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | autojs.version | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
 | automator | 54 | 54 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
 | barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | base64 | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
-| colors | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 62 / 0 / 20 |
+| colors | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 16 | 16 | 16 | 16 | 15 / 0 / 1 | 15 / 0 / 1 | 15 / 0 / 1 |
 | console | 56 | 56 | 56 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 31 / 0 / 25 |
@@ -111,7 +111,7 @@
 | engines | 8 | 8 | 8 | 8 | 5 / 0 / 3 | 0 / 0 / 8 | 0 / 0 / 8 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | events | 37 | 34 | 36 | 36 | 5 / 1 / 31 | 5 / 1 / 31 | 5 / 1 / 31 |
-| files | 34 | 34 | 34 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 15 / 0 / 19 |
+| files | 34 | 34 | 34 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 34 / 0 / 0 |
 | files.batchRename | 17 | 17 | 17 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
 | floaty | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | flow | 55 | 55 | 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
@@ -126,7 +126,7 @@
 | media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 0 / 0 / 9 | 0 / 0 / 9 |
 | mediainfo | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | memory | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| mime | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 0 / 0 / 5 |
+| mime | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | notice | 7 | 7 | 7 | 7 | 1 / 0 / 6 | 1 / 0 / 6 | 1 / 0 / 6 |
 | notice.channel | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
 | ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
@@ -140,18 +140,18 @@
 | plugins.tools | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | powerManager | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
-| recorder | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 0 / 0 / 7 |
+| recorder | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sensors | 21 | 21 | 21 | 21 | 1 / 0 / 20 | 1 / 0 / 20 | 1 / 0 / 20 |
 | settings | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
-| shell | 11 | 11 | 11 | 11 | 2 / 0 / 9 | 2 / 0 / 9 | 2 / 0 / 9 |
-| shizuku | 13 | 8 | 13 | 13 | 1 / 0 / 12 | 1 / 0 / 12 | 1 / 0 / 12 |
+| shell | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
+| shizuku | 13 | 8 | 13 | 13 | 13 / 0 / 0 | 13 / 0 / 0 | 13 / 0 / 0 |
 | species | 37 | 37 | 37 | 37 | 37 / 0 / 0 | 37 / 0 / 0 | 37 / 0 / 0 |
 | speech | 17 | 11 | 11 | 11 | 11 / 0 / 6 | 11 / 0 / 6 | 11 / 0 / 6 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | speech.speaker | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | sqlite | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
-| storages | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 3 / 0 / 2 |
+| storages | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sysprops | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
@@ -169,7 +169,7 @@
 | web | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | workManager | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | yolo | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
-| zip | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 0 / 0 / 5 |
+| zip | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 
 ## 差异行
 
@@ -179,34 +179,14 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Back` | pending | pending | pending |
-| `Camera` | pending | pending | pending |
 | `ComposeError` | pending | pending | pending |
-| `Down` | pending | pending | pending |
 | `HEIGHT` | pending | pending | pending |
-| `Home` | pending | pending | pending |
-| `Input` | pending | pending | pending |
-| `KeyCode` | pending | pending | pending |
-| `Left` | pending | pending | pending |
-| `Menu` | pending | pending | pending |
-| `OK` | pending | pending | pending |
-| `Power` | pending | pending | pending |
 | `R` | pending | pending | pending |
-| `Right` | pending | pending | pending |
-| `Screencap` | pending | pending | pending |
-| `SetScreenMetrics` | pending | pending | pending |
-| `Swipe` | pending | pending | pending |
 | `TODO` | pending | pending | pending |
-| `Tap` | pending | pending | pending |
-| `Text` | pending | pending | pending |
-| `Up` | pending | pending | pending |
-| `VolumeDown` | pending | pending | pending |
-| `VolumeUp` | pending | pending | pending |
 | `WIDTH` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `back` | bridged | pending | capability-gated |
-| `cheerio` | local-shim | local-shim | pending |
 | `clearConsole` | bridged | bridged | pending |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
@@ -215,7 +195,6 @@
 | `currentActivity` | pending | pending | pending |
 | `currentComponent` | pending | pending | pending |
 | `currentPackage` | pending | pending | pending |
-| `dayjs` | local-shim | local-shim | pending |
 | `detect` | pending | pending | pending |
 | `err` | bridged | bridged | pending |
 | `existsAll` | pending | pending | pending |
@@ -225,15 +204,10 @@
 | `gestureAsync` | pending | pending | pending |
 | `gestures` | pending | pending | pending |
 | `gesturesAsync` | pending | pending | pending |
-| `getAppName` | bridged | pending | capability-gated |
 | `getClip` | bridged | pending | capability-gated |
-| `getPackageName` | bridged | pending | capability-gated |
 | `home` | bridged | pending | capability-gated |
-| `i18n` | local-shim | local-shim | pending |
 | `input` | pending | pending | pending |
 | `isAutoJs6` | pending | pending | pending |
-| `isDualInstalled` | pending (rejects) | pending | pending (rejects) |
-| `isInstalled` | bridged | pending | capability-gated |
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
@@ -242,19 +216,7 @@
 | `isStopped` | pending | pending | pending |
 | `isUiThread` | pending | pending | pending |
 | `keepAlive` | pending | pending | pending |
-| `kill` | pending (rejects) | pending | pending (rejects) |
-| `killDual` | pending (rejects) | pending | pending (rejects) |
-| `launch` | bridged | pending | capability-gated |
-| `launchApp` | bridged | pending | capability-gated |
-| `launchAppDetailsSettings` | bridged | pending | capability-gated |
 | `launchConsole` | bridged | bridged | pending |
-| `launchDual` | pending (rejects) | pending | pending (rejects) |
-| `launchDualApp` | pending (rejects) | pending | pending (rejects) |
-| `launchDualAppDetailsSettings` | pending (rejects) | pending | pending (rejects) |
-| `launchDualPackage` | pending (rejects) | pending | pending (rejects) |
-| `launchDualSettings` | pending (rejects) | pending | pending (rejects) |
-| `launchPackage` | bridged | pending | capability-gated |
-| `launchSettings` | bridged | pending | capability-gated |
 | `log` | bridged | bridged | pending |
 | `longClick` | bridged | pending | capability-gated |
 | `loop` | pending | pending | pending |
@@ -263,13 +225,7 @@
 | `newWebSocket` | pending | pending | pending |
 | `notStopped` | pending | pending | pending |
 | `notifications` | bridged | pending | pending |
-| `open` | local-shim | local-shim | pending (rejects) |
-| `openAppSetting` | bridged | pending | capability-gated |
-| `openAppSettings` | bridged | pending | capability-gated |
 | `openConsole` | bridged | bridged | pending |
-| `openDualAppSetting` | pending (rejects) | pending | pending (rejects) |
-| `openDualAppSettings` | pending (rejects) | pending | pending (rejects) |
-| `pangu` | local-shim | local-shim | pending |
 | `pickup` | pending | pending | pending |
 | `powerDialog` | bridged | pending | pending |
 | `press` | pending | pending | pending |
@@ -281,9 +237,6 @@
 | `retry` | pending | pending | pending |
 | `scrollDown` | pending | pending | pending |
 | `scrollUp` | pending | pending | pending |
-| `sendBroadcast` | bridged | pending | capability-gated |
-| `sendEmail` | bridged | pending | capability-gated |
-| `sendLocalBroadcastSync` | pending | pending | pending |
 | `setClip` | bridged | pending | capability-gated |
 | `setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
@@ -293,9 +246,6 @@
 | `showConsole` | bridged | bridged | pending |
 | `sleep` | bridged | pending | pending |
 | `splitScreen` | bridged | pending | pending |
-| `startActivity` | bridged | pending | capability-gated |
-| `startDualActivity` | pending (rejects) | pending | pending (rejects) |
-| `startService` | bridged | pending | capability-gated |
 | `stop` | pending | pending | pending |
 | `swipe` | bridged | pending | capability-gated |
 | `sync` | pending | pending | pending |
@@ -310,8 +260,6 @@
 | `toastlog` | pending | pending | pending |
 | `toastverbose` | pending | pending | pending |
 | `toastwarn` | pending | pending | pending |
-| `uninstall` | bridged | pending | capability-gated |
-| `uninstallDual` | pending (rejects) | pending | pending (rejects) |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `verbose` | bridged | bridged | pending |
 | `wait` | pending | pending | pending |
@@ -650,12 +598,6 @@
 | `Dialog#takeKeyEvents` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `Dialog#unregisterForContextMenu` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
-### EpubBook#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `EpubBook#toString` | bridged | bridged | pending |
-
 ### EpubReaderSession#
 
 | 行 id | Node main | Node Worker | Bun |
@@ -946,21 +888,6 @@
 | `ScriptExecution#isFinished` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ScriptExecution#setAgentResult` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
-### ShellProcess#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ShellProcess#addListener` | pending | pending | pending |
-| `ShellProcess#getErrorStream` | pending | pending | pending |
-| `ShellProcess#getInputStream` | pending | pending | pending |
-| `ShellProcess#getOutputStream` | pending | pending | pending |
-| `ShellProcess#isAlive` | pending | pending | pending |
-| `ShellProcess#listenerCount` | pending | pending | pending |
-| `ShellProcess#prependListener` | pending | pending | pending |
-| `ShellProcess#prependOnceListener` | pending | pending | pending |
-| `ShellProcess#removeListener` | pending | pending | pending |
-| `ShellProcess#toString` | pending | pending | pending |
-
 ### ShellResult#
 
 | 行 id | Node main | Node Worker | Bun |
@@ -970,12 +897,6 @@
 | `ShellResult#result` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ShellResult#throwIfError` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ShellResult#toJson` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### Storage#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Storage#size` | bridged | bridged | pending |
 
 ### ThemeColor#
 
@@ -1552,48 +1473,6 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `app.autojs` | pending | pending | pending |
-| `app.editFile` | bridged | pending | capability-gated |
-| `app.getApkInfo` | pending | pending | pending |
-| `app.getAppByAlias` | pending | pending | pending |
-| `app.getAppName` | bridged | pending | capability-gated |
-| `app.getInstalledApps` | bridged | pending | capability-gated |
-| `app.getInstalledPackages` | pending | pending | pending |
-| `app.getPackageName` | bridged | pending | capability-gated |
-| `app.getUriForFile` | bridged | pending | capability-gated |
-| `app.intent` | bridged | pending | capability-gated |
-| `app.intentToShell` | bridged | pending | capability-gated |
-| `app.isDualInstalled` | pending (rejects) | pending | pending (rejects) |
-| `app.isInstalled` | bridged | pending | capability-gated |
-| `app.kill` | pending (rejects) | pending | pending (rejects) |
-| `app.killDual` | pending (rejects) | pending | pending (rejects) |
-| `app.launch` | bridged | pending | capability-gated |
-| `app.launchApp` | bridged | pending | capability-gated |
-| `app.launchAppDetailsSettings` | bridged | pending | capability-gated |
-| `app.launchDual` | pending (rejects) | pending | pending (rejects) |
-| `app.launchDualApp` | pending (rejects) | pending | pending (rejects) |
-| `app.launchDualAppDetailsSettings` | pending (rejects) | pending | pending (rejects) |
-| `app.launchDualPackage` | pending (rejects) | pending | pending (rejects) |
-| `app.launchDualSettings` | pending (rejects) | pending | pending (rejects) |
-| `app.launchPackage` | bridged | pending | capability-gated |
-| `app.launchSettings` | bridged | pending | capability-gated |
-| `app.openAppSetting` | bridged | pending | capability-gated |
-| `app.openAppSettings` | bridged | pending | capability-gated |
-| `app.openDualAppSetting` | pending (rejects) | pending | pending (rejects) |
-| `app.openDualAppSettings` | pending (rejects) | pending | pending (rejects) |
-| `app.openDualUrl` | pending (rejects) | pending | pending (rejects) |
-| `app.openUrl` | bridged | pending | capability-gated |
-| `app.parseUri` | bridged | pending | capability-gated |
-| `app.sendBroadcast` | bridged | pending | capability-gated |
-| `app.sendEmail` | bridged | pending | capability-gated |
-| `app.sendLocalBroadcastSync` | pending | pending | pending |
-| `app.startActivity` | bridged | pending | capability-gated |
-| `app.startDualActivity` | pending (rejects) | pending | pending (rejects) |
-| `app.startService` | bridged | pending | capability-gated |
-| `app.uninstall` | bridged | pending | capability-gated |
-| `app.uninstallDual` | pending (rejects) | pending | pending (rejects) |
-| `app.versionCode` | bridged | pending | capability-gated |
-| `app.versionName` | bridged | pending | capability-gated |
-| `app.viewFile` | bridged | pending | capability-gated |
 
 ### auto
 
@@ -1731,31 +1610,6 @@
 |---|---|---|---|
 | `base64.decode` | local-shim | not-portable: runtime-native (native-base64) | not-portable: runtime-native (native-base64) |
 | `base64.encode` | local-shim | not-portable: runtime-native (native-base64) | not-portable: runtime-native (native-base64) |
-
-### colors
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `colors.android` | local-shim | local-shim | pending |
-| `colors.blend` | local-shim | local-shim | pending |
-| `colors.contrast` | local-shim | local-shim | pending |
-| `colors.css` | local-shim | local-shim | pending |
-| `colors.derive` | local-shim | local-shim | pending |
-| `colors.distance` | local-shim | local-shim | pending |
-| `colors.ensureContrast` | local-shim | local-shim | pending |
-| `colors.extract` | local-shim | local-shim | pending |
-| `colors.harmony` | local-shim | local-shim | pending |
-| `colors.invert` | local-shim | local-shim | pending |
-| `colors.material` | local-shim | local-shim | pending |
-| `colors.nightVariant` | local-shim | local-shim | pending |
-| `colors.oklab` | local-shim | local-shim | pending |
-| `colors.oklch` | local-shim | local-shim | pending |
-| `colors.parseColor` | local-shim | local-shim | pending |
-| `colors.simulate` | local-shim | local-shim | pending |
-| `colors.toOklab` | local-shim | local-shim | pending |
-| `colors.toOklch` | local-shim | local-shim | pending |
-| `colors.tones` | local-shim | local-shim | pending |
-| `colors.web` | local-shim | local-shim | pending |
 
 ### colors.theme
 
@@ -1951,30 +1805,6 @@
 | `events.setMaxListeners` | pending | pending | pending |
 | `events.setTouchEventTimeout` | pending | pending | pending |
 
-### files
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `files.appendBytes` | local-shim | local-shim | pending |
-| `files.create` | local-shim | local-shim | pending |
-| `files.createIfNotExists` | local-shim | local-shim | pending |
-| `files.createWithDirs` | local-shim | local-shim | pending |
-| `files.cwd` | local-shim | local-shim | pending |
-| `files.formatSizeWithUnit` | local-shim | local-shim | pending |
-| `files.getHumanReadableSize` | local-shim | local-shim | pending |
-| `files.getNameWithoutExtension` | local-shim | local-shim | pending |
-| `files.getSimplifiedPath` | local-shim | local-shim | pending |
-| `files.isEmptyDir` | local-shim | local-shim | pending |
-| `files.open` | local-shim | local-shim | pending (rejects) |
-| `files.readAssets` | local-shim | local-shim | pending |
-| `files.readBytes` | local-shim | local-shim | pending |
-| `files.removeDir` | local-shim | local-shim | pending |
-| `files.rename` | local-shim | local-shim | pending |
-| `files.renameWithoutExtension` | local-shim | local-shim | pending |
-| `files.sdcardPath` | local-shim | local-shim | pending |
-| `files.toFile` | local-shim | local-shim | pending (rejects) |
-| `files.writeBytes` | local-shim | local-shim | pending |
-
 ### files.batchRename
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2114,16 +1944,6 @@
 | `memory.snapshot` | pending | pending | pending |
 | `memory.watch` | pending | pending | pending |
 
-### mime
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `mime.fromFile` | local-shim | local-shim | pending |
-| `mime.fromFileOr` | local-shim | local-shim | pending |
-| `mime.fromFileOrWildcard` | local-shim | local-shim | pending |
-| `mime.getMediaType` | local-shim | local-shim | pending |
-| `mime.parseMediaType` | local-shim | local-shim | pending |
-
 ### notice
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2212,18 +2032,6 @@
 | `qrcode.recognizeText` | bridged | pending | pending |
 | `qrcode.recognizeTexts` | bridged | pending | pending |
 
-### recorder
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `recorder.clear` | bridged | bridged | pending |
-| `recorder.has` | bridged | bridged | pending |
-| `recorder.isGreaterThan` | bridged | bridged | pending |
-| `recorder.isLessThan` | bridged | bridged | pending |
-| `recorder.load` | bridged | bridged | pending |
-| `recorder.remove` | bridged | bridged | pending |
-| `recorder.save` | bridged | bridged | pending |
-
 ### sensors
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2258,37 +2066,6 @@
 | `settings.isEnabled` | pending | pending | pending |
 | `settings.setEnabled` | pending | pending | pending |
 
-### shell
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `shell.currentActivity` | pending | pending | pending |
-| `shell.currentComponent` | pending | pending | pending |
-| `shell.currentPackage` | pending | pending | pending |
-| `shell.execCommand` | pending | pending | pending |
-| `shell.fromIntent` | pending | pending | pending |
-| `shell.getCommand` | pending | pending | pending |
-| `shell.isRootAvailable` | pending | pending | pending |
-| `shell.kill` | pending | pending | pending |
-| `shell.setDefaultOptions` | pending | pending | pending |
-
-### shizuku
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `shizuku.currentActivity` | pending | pending | pending |
-| `shizuku.currentComponent` | pending | pending | pending |
-| `shizuku.currentPackage` | pending | pending | pending |
-| `shizuku.execCommand` | pending | pending | pending |
-| `shizuku.getCommand` | pending | pending | pending |
-| `shizuku.hasPermission` | pending | pending | pending |
-| `shizuku.hasService` | pending | pending | pending |
-| `shizuku.isInstalled` | pending | pending | pending |
-| `shizuku.isOperational` | pending | pending | pending |
-| `shizuku.isRunning` | pending | pending | pending |
-| `shizuku.kill` | pending | pending | pending |
-| `shizuku.state` | pending | pending | pending |
-
 ### speech
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2312,13 +2089,6 @@
 | `speech.speaker.remove` | pending | pending | pending |
 | `speech.speaker.verify` | pending | pending | pending |
 | `speech.speaker.verifyAsync` | pending | pending | pending |
-
-### storages
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `storages.all` | bridged | bridged | pending (rejects) |
-| `storages.names` | bridged | bridged | pending (rejects) |
 
 ### sysprops
 
@@ -2469,13 +2239,3 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `yolo.load` | pending | pending | pending |
-
-### zip
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `zip.open` | bridged | bridged | pending |
-| `zip.unzip` | bridged | bridged | pending |
-| `zip.zipDir` | bridged | bridged | pending |
-| `zip.zipFile` | bridged | bridged | pending |
-| `zip.zipFiles` | bridged | bridged | pending |
