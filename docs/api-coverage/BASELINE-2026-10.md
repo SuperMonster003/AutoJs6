@@ -730,3 +730,48 @@ d.ts (TS fa26b8b / 8f8ec07):
 | Offline Docs | 4d7b117 | 同步 74 个文件, 版本与 VERSION_BUILD 不变 |
 | 宿主 | 6499e3976 | check.py / docs_support.py require-all, 测试, README, api-coverage.yml |
 | 宿主 | (本节所在提交) | 本节, ROADMAP 勾选 P2.5, 附录 C 七行状态与 Q69 |
+
+## 11. P5.2c 插件契约导出与识别结果对象纳入分母 (2026-10-30, 子会话 api-cov-p5-2c)
+
+### 11.1 新增的 110 行
+
+- Q74 (a): `returned-objects.json` 加 `OcrResult` (kotlin-class `org.autojs.autojs.runtime.api.OcrResult`, 5 个成员 text / label / confidence / bounds / compareTo; producers ocr.detect 与 ocr.mlkit / paddle / rapid 的 detect) 与 `WrappedBarcode` (22 个成员 barcode / value 与 getFormat ... getWifi / getCornerPoints; producers barcode / qrcode 的 detect 与 detectAll). d.ts 探针新增数组元素语法 `.[]` (`ocr.detect.().[]`, `barcode.detectAll.().[]`). Node / Bun 按 java-prototype-objects (Q17 (a)) 记 not-portable; 两个运行时自己的 OcrResult / BarcodeSnapshot 是形态不同的快照, 与其他 Java 对象同样处理.
+- Q75 (a): 新来源 `tools/api-coverage/plugin_exports.py` (`policy.json` `pluginExports.compose`, 根目录可由 `AUTOJS6_COMPOSE_UI_API_ROOT` 覆盖), 静态读宿主 `plugin-api/compose-ui-api` 的组件目录 (ComposeUiVocabulary / V1Catalog / ComposeUiV2 / AndroidViewInteropV1): 55 个 NODE 组件记显式导出行 `compose.<Name>` (metadata plugin:compose; Snackbar 是会话命令, 不计), 20 个修饰符记 `ComposeModifier#<名>` (producer compose.modifier), 8 个快捷属性记 `ComposeNode#<名>` (producer 55 个组件工厂 + createElement). 契约源码缺失时来源记 skipped, MATRIX.md / 基线 / 文档表比对记 skipped 且不写入. 行 id 与来源见附录 C Q105.
+- Node / Bun: `runtime-policy.json` returnedObjects 把 ComposeModifier 映射到 Node 的全局类型 `RuntimeCompose.Modifier` (`typeScope: "global"`, 宿主 552f2b489) 与 Bun 的 `RuntimeCompose.Modifier`, ComposeNode 映射到 Node compose 模块的 `Node` 与 Bun 的 `RuntimeCompose.Node`. 两个运行时的节点只在 props 中接受快捷名, 没有 `node.w` 这类访问器, 8 行在三列各记 pending (Q104 (a), 已按推荐先行, 交 P3.3 / P4.3).
+
+### 11.2 前后数字
+
+| 项 | 改动前 (宿主 3fa1fc8ad, MATRIX 6ce328d3d) | 改动后 (宿主 e50f26694) |
+| --- | --- | --- |
+| 矩阵行 (显式导出 / 原型成员 / 返回对象成员) | 2836 (1383 / 205 / 1248) | 2946 (1438 / 205 / 1303) |
+| 返回对象 | 43 个 | 47 个 (+OcrResult, WrappedBarcode, ComposeModifier, ComposeNode) |
+| pending Node 主线程 / Worker / Bun | 469 / 538 / 558 | 477 / 546 / 566 |
+| Node 主线程 bridged / not-portable | 1012 / 1014 | 1087 / 1041 |
+| Bun capability-gated / not-portable | 969 / 1011 | 1044 / 1038 |
+| 文档列 heading | 2560 | 2670 |
+| d.ts 列 name | 1664 | 1774 |
+| Ace 列 semantic / static | 843 / 1579 | 898 / 1634 |
+| 文档运行时支持表 | 83 页, 表内 2192 行, 返回对象小表 644 个成员 | 85 页 (+composeModifierType, composeNodeType), 2275 行, 671 个成员 |
+| 参数个数 match / narrower / unknown | 1201 / 29 / 0 | 1201 / 29 / 55 (组件工厂, 目录不给参数个数) |
+
+- 名称级失败: 改动前后都是 0 (返回对象 47 个, failingMembers 0); 新增 110 行文档均为 heading, d.ts 均为 name 以上.
+- pending 增加的 24 格全是 ComposeNode# 的 8 个快捷属性 (每列 8 格), 用 `--allow-new-pending` 写入基线 (宿主 e50f26694).
+- Ace 运行时查询 3498 -> 3703 (Node 主线程 / Worker / Bun 各 +55 个组件函数, Node / Bun 句柄各 +20 个修饰符; Ace 81e6fe6).
+
+### 11.3 提交
+
+- 宿主: 25cf178be (附录 C Q104-Q106), efa050e2b (plugin_exports.py, 两个返回对象, `.[]` 探针, ace-completion 映射类型属性), e50f26694 (MATRIX.md 与 pending-baseline.json), 552f2b489 (typeScope), a211654e7 (Ace 索引源).
+- TS 6c93f5d (Ocr.Result 与 Barcode.Result 成员). Ace cd6f5f6 (声明副本与补全索引), 81e6fe6 (运行时查询与 typeScope).
+- 文档 78a1f70 (dataTypes OcrResult, composeNodeType 快捷属性访问器, 五页运行时支持表, changelog / progress), 62af947 (生成物); Offline Docs 69438ca (版本不变).
+
+### 11.4 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p5-2c-head` (六个仓库按 CI 布局并排). 宿主 KSP 在 3fa1fc8ad 的副本内跑一次; 其后宿主提交只改 imgui (P5.2f1 并行纳入, 本条目的元数据去掉 imgui, 谁后提交 MATRIX 谁重生成) 与 Rhino 反射调用的异常解包, 不改其余模块的注册.
+- 快照 B (本条目的验收): 宿主 d4ca4333f, 文档 62af947, TS 6c93f5d, Ace 81e6fe6, Node a4309516, Bun 5e2f9e1. `check.py --matrix --strict-arity --docs-support` (含 Ace) 退出码 0, failures 空: MATRIX.md 与 pending-baseline.json current, 文档表 85 页 current, 未覆盖 0 / 0; tools/api-coverage 单元测试 92 项通过 (跳过 3).
+- 快照 A (共享 HEAD 全量, Node 1e69e422): 退出码 1, 12 项失败都来自并行条目 P3.1b 的 Node 提交 (系统信息族进主线程与 Worker) 尚未重生成的派生文件: MATRIX.md 过期, 基线有 167 格不再 pending, app / autojs / dialogs / engines / installer / memory / notice / plugins / settings / sysprops 十页的表过期. 按并行规则由 P3.1b 提交矩阵时重生成.
+- TS: verify-api-coverage / verify-runtime-declarations / verify-colors / verify-compose-declaration-body / verify-compose-tsx / verify-terminal 与 `sync-runtime-declarations.mjs --check --ace` 通过. Ace: `generate-runtime-api-queries.mjs --check` current, `verify-runtime-api-coverage.mjs --fresh` 3703 条通过; Gradle `verifyAutoJs6LspRuntime` / `verifyAutoJs6LanguageIndices` / `verifyAutoJs6ApiCoverage` (Ace 81e6fe6 的副本, `--max-workers=2 --no-daemon`) BUILD SUCCESSFUL.
+- 文档: `normalize-markdown.py --check` changed=0 (174 个文件), `auto-generate.py --check` current, `runtime-support.js --check --require-all` 85 页 current, `test-runtime-support.js` 通过; Offline Docs `normalize_offline_docs.py --check` changed=0.
+
+### 11.5 待决
+
+- Q104 新增 pending 一次性计入基线 (已按推荐先行), Q105 行 id 与契约来源 (已按推荐先行), Q106 compose 其余返回对象 (约 42 行, 需拍板). 见附录 C.
