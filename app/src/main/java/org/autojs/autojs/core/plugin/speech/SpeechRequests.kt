@@ -105,6 +105,27 @@ data class SpeechVerifyRequest(val name: String, val threshold: Double? = null)
 data class SpeechIdentifyRequest(val threshold: Double? = null, val topK: Int = SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES)
 
 /**
+ * `speech.diarize(file, options)` (contract version 2, roadmap D147): [model] the segmentation model, [speakerModel] the
+ * embedding model, [speakers] the known speaker count (0 lets the plugin count them), [threshold] the clustering
+ * threshold (null: the plugin's value), [identify] names the speakers after the enrolled voiceprints.
+ * zh-CN: `speech.diarize(file, options)` (契约版本 2, 路线图 D147): [model] 为分割模型, [speakerModel] 为嵌入模型, [speakers] 为已知人数
+ * (0 由插件计数), [threshold] 为聚类阈值 (null 取插件的值), [identify] 按已注册声纹为说话人取名.
+ */
+data class SpeechDiarizeRequest(
+    val model: String? = null,
+    val speakerModel: String? = null,
+    val speakers: Int = 0,
+    val threshold: Double? = null,
+    val identify: Boolean = false,
+)
+
+/** `speech.detectLanguage(file, options)` (roadmap D148): a vote over the first [windows] speech windows. zh-CN: 对前 [windows] 个语音窗投票. */
+data class SpeechLanguageRequest(val model: String? = null, val windows: Int = SpeechLimits.DEFAULT_LANGUAGE_WINDOWS)
+
+/** `speech.tag(file, options)` (roadmap D149): the [topK] strongest labels, with [timeline] those of every window too. zh-CN: 最强的 [topK] 个标签, 带 [timeline] 时另给每个窗的标签. */
+data class SpeechTagRequest(val model: String? = null, val topK: Int = SpeechLimits.DEFAULT_TAG_TOP_K, val timeline: Boolean = false)
+
+/**
  * The capabilities the plugin advertises, as `speech.capabilities()` answers them (roadmap appendix B.1).
  * zh-CN: 插件声明的能力, 即 `speech.capabilities()` 的应答 (路线图附录 B.1).
  */

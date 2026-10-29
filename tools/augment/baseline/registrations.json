@@ -12929,6 +12929,28 @@
       "line": 43
     },
     {
+      "api": "speech.detectLanguage",
+      "module": "speech",
+      "ownerModule": "speech",
+      "member": "detectLanguage",
+      "implementation": "detectLanguage",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/Speech.kt",
+      "line": 146
+    },
+    {
+      "api": "speech.detectLanguageAsync",
+      "module": "speech",
+      "ownerModule": "speech",
+      "member": "detectLanguageAsync",
+      "implementation": "detectLanguageAsync",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/Speech.kt",
+      "line": 153
+    },
+    {
       "api": "speech.detectVoice",
       "module": "speech",
       "ownerModule": "speech",
@@ -12938,6 +12960,28 @@
       "registration": "selfAssignmentFunctions",
       "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/speech/Speech.kt",
       "line": 47
+    },
+    {
+      "api": "speech.diarize",
+      "module": "speech",
+      "ownerModule": "speech",
+      "member": "diarize",
+      "implementation": "diarize",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/Speech.kt",
+      "line": 127
+    },
+    {
+      "api": "speech.diarizeAsync",
+      "module": "speech",
+      "ownerModule": "speech",
+      "member": "diarizeAsync",
+      "implementation": "diarizeAsync",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/Speech.kt",
+      "line": 134
     },
     {
       "api": "speech.isAvailable",
@@ -13191,6 +13235,28 @@
       "registration": "selfAssignmentFunctions",
       "source": "app/src/main/java/org/autojs/autojs/runtime/api/augment/speech/Speech.kt",
       "line": 50
+    },
+    {
+      "api": "speech.tag",
+      "module": "speech",
+      "ownerModule": "speech",
+      "member": "tag",
+      "implementation": "tag",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/Speech.kt",
+      "line": 166
+    },
+    {
+      "api": "speech.tagAsync",
+      "module": "speech",
+      "ownerModule": "speech",
+      "member": "tagAsync",
+      "implementation": "tagAsync",
+      "kind": "Functions",
+      "registration": "selfAssignmentFunctions",
+      "source": "app/src/main/java/org/autojs/autojs/runtime/api/modules/speech/Speech.kt",
+      "line": 173
     },
     {
       "api": "speech.wake",

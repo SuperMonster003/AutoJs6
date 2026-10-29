@@ -203,4 +203,10 @@ object SpeechContract {
 
     /** From `refreshCatalog` to its completion callback. */
     const val CATALOG_TIMEOUT_MS = 120_000L
+
+    /**
+     * From `diarizeFile`, `detectLanguage` or `tagAudio` to its first progress, between two progress callbacks and from
+     * the last one to the completion; the whole analysis has no limit (roadmap D150).
+     */
+    const val ANALYSIS_TIMEOUT_MS = 600_000L
 }

@@ -139,17 +139,34 @@ interface ISpeechPlugin {
     /** Deletes the voiceprint of SpeechOptionKeys.NAME; the answer carries SpeechResultKeys.REMOVED. */
     Bundle removeSpeaker(in Bundle request);
 
-    // Contract version 2, reserved for 3-Macaw Speech roadmap P8.4 (D126): offline analyses of one audio file (at most
-    // SpeechLimits.MAX_AUDIO_FILE_BYTES and MAX_AUDIO_MILLIS) that return the operation id; progress reports
-    // milliseconds of audio done over the total, cancelOperation stops them, and the completion carries the result.
-    // Their option and result keys are defined with P8.4.
+    // Contract version 2 (3-Macaw Speech roadmap D126, D147 - D151): offline analyses of one audio file (at most
+    // SpeechLimits.MAX_AUDIO_FILE_BYTES and MAX_AUDIO_MILLIS, the formats of recognizeFile) that return the operation id.
+    // Progress reports milliseconds of audio done over the total and comes at least every SpeechContract.ANALYSIS_TIMEOUT_MS;
+    // cancelOperation answers SpeechErrorCodes.SESSION_CANCELLED at once; the completion carries the result plus
+    // SpeechResultKeys.DURATION_MILLIS and MODEL_ID. Long lists travel as parallel primitive arrays (D151).
 
-    /** Speaker diarization (feature SpeechContract.FEATURE_DIARIZATION); the completion carries SpeechResultKeys.SEGMENTS. */
+    /**
+     * Speaker diarization (feature SpeechContract.FEATURE_DIARIZATION). Options: MODEL (segment model), SPEAKER_MODEL,
+     * SPEAKER_COUNT (0 or absent: count them), THRESHOLD (clustering, 0.0 - 2.0), IDENTIFY and DISPLAY_NAME. The
+     * completion carries SpeechResultKeys.SEGMENT_STARTS, SEGMENT_ENDS, SEGMENT_SPEAKERS (numbered from 0 in order of
+     * appearance), SPEAKER_COUNT and, with IDENTIFY, NAMES (SPEAKER, NAME when matched, SCORE).
+     */
     int diarizeFile(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
 
-    /** Spoken language identification (feature SpeechContract.FEATURE_LANGUAGE_ID); the completion carries SpeechResultKeys.LANGUAGE. */
+    /**
+     * Spoken language identification (feature SpeechContract.FEATURE_LANGUAGE_ID): a vote over the first WINDOWS speech
+     * windows (default 3). Options: MODEL, WINDOWS and DISPLAY_NAME. The completion carries SpeechResultKeys.LANGUAGE,
+     * CANDIDATES (LANGUAGE and SCORE, the share of the votes, best first) and SEGMENTS (START_MILLIS, END_MILLIS and
+     * LANGUAGE per window).
+     */
     int detectLanguage(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
 
-    /** Audio event tagging (feature SpeechContract.FEATURE_AUDIO_TAGGING). */
+    /**
+     * Audio event tagging (feature SpeechContract.FEATURE_AUDIO_TAGGING) over windows of SpeechLimits.TAG_WINDOW_MILLIS.
+     * Options: MODEL, TOP_K (default 5, at most 20), TIMELINE and DISPLAY_NAME. The completion carries
+     * SpeechResultKeys.LABELS (LABEL, MID, SCORE, START_MILLIS and END_MILLIS of each label's best window, best first)
+     * and, with TIMELINE, TIMELINE_STARTS, TIMELINE_ENDS, TIMELINE_LABELS, TIMELINE_SCORES, TIMELINE_TOP_K, LABEL_NAMES
+     * and LABEL_MIDS.
+     */
     int tagAudio(in ParcelFileDescriptor audio, in Bundle options, ISpeechProgressCallback callback);
 }

@@ -306,6 +306,49 @@ object SpeechPluginHost {
         SpeechBundles.answer(answer, "removeSpeaker").getBoolean(SpeechResultKeys.REMOVED)
     }
 
+    // ------------------------------------------------------------------ offline analyses (contract version 2, roadmap D147 - D151)
+
+    /**
+     * Speaker turns of [file] (roadmap D147). The analyses run as operations: the host waits
+     * [SpeechContract.ANALYSIS_TIMEOUT_MS] for each progress (milliseconds of audio) and for the completion, with no limit
+     * on the whole call (a 30 minute file takes about 9 minutes on a Sony G8441, roadmap D146).
+     * zh-CN: [file] 的说话人分段 (路线图 D147). 分析以操作运行: 宿主为每次进度 (音频毫秒) 与完成各等待 [SpeechContract.ANALYSIS_TIMEOUT_MS],
+     * 整个调用不设上限 (30 分钟的文件在 Sony G8441 上约需 9 分钟, 路线图 D146).
+     */
+    suspend fun diarizeFile(context: Context, file: File, request: SpeechDiarizeRequest, onProgress: ((Long, Long) -> Unit)? = null): Map<String, Any?> =
+        analyze(context, file, SpeechContract.FEATURE_DIARIZATION, "diarizeFile", onProgress) { proxy, input, callback ->
+            proxy.diarizeFile(input.descriptor, SpeechBundles.diarize(request, file.name), callback)
+        }.let { SpeechBundles.diarization(SpeechBundles.plain(it)) }
+
+    /** The spoken language of [file] (roadmap D148). zh-CN: [file] 的语种 (路线图 D148). */
+    suspend fun detectLanguage(context: Context, file: File, request: SpeechLanguageRequest, onProgress: ((Long, Long) -> Unit)? = null): Map<String, Any?> =
+        analyze(context, file, SpeechContract.FEATURE_LANGUAGE_ID, "detectLanguage", onProgress) { proxy, input, callback ->
+            proxy.detectLanguage(input.descriptor, SpeechBundles.detectLanguage(request, file.name), callback)
+        }.let { SpeechBundles.languageResult(SpeechBundles.plain(it)) }
+
+    /** The audio events of [file] (roadmap D149). zh-CN: [file] 中的音频事件 (路线图 D149). */
+    suspend fun tagAudio(context: Context, file: File, request: SpeechTagRequest, onProgress: ((Long, Long) -> Unit)? = null): Map<String, Any?> =
+        analyze(context, file, SpeechContract.FEATURE_AUDIO_TAGGING, "tagAudio", onProgress) { proxy, input, callback ->
+            proxy.tagAudio(input.descriptor, SpeechBundles.tag(request, file.name), callback)
+        }.let { SpeechBundles.tagResult(SpeechBundles.plain(it)) }
+
+    private suspend fun analyze(
+        context: Context,
+        file: File,
+        feature: String,
+        label: String,
+        onProgress: ((Long, Long) -> Unit)?,
+        start: (ISpeechPlugin, SpeechAudioInput, ISpeechProgressCallback) -> Int,
+    ): Bundle = withContext(Dispatchers.IO) {
+        SpeechAudioInput.open(file).use { input ->
+            val target = selectForCall(context)
+            val peer = peerOf(target)
+            requireFeature(peer, feature)
+            SpeechAudio.requireReadable(input.wav, peer.features, file.name)
+            operation(context, target, label, SpeechContract.ANALYSIS_TIMEOUT_MS, onProgress, renewOnProgress = true) { proxy, callback -> start(proxy, input, callback) }
+        }
+    }
+
     // ------------------------------------------------------------------ sessions
 
     /**

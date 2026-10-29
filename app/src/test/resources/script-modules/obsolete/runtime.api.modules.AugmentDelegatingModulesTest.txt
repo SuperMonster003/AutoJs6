@@ -290,6 +290,12 @@ detectVoice	function	0	EW-
 wake	function	0	EW-
 synthesize	function	0	EW-
 synthesizeAsync	function	0	EW-
+diarize	function	0	EW-
+diarizeAsync	function	0	EW-
+detectLanguage	function	0	EW-
+detectLanguageAsync	function	0	EW-
+tag	function	0	EW-
+tagAsync	function	0	EW-
 speak	function	0	EW-
 models	object	-	EW-
 speaker	object	-	EW-

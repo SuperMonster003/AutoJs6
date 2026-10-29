@@ -122,4 +122,25 @@ object SpeechOptionKeys {
 
     /** String array: file names of the `enrollSpeaker` recordings as the host knows them, in descriptor order. */
     const val DISPLAY_NAMES = "displayNames"
+
+    // Offline analyses (contract version 2: `diarizeFile`, `detectLanguage`, `tagAudio`; 3-Macaw Speech roadmap D147 -
+    // D149). [MODEL] chooses the model of the call's kind (`segment`, `langid`, `tagger`) and [DISPLAY_NAME] names the
+    // file. `diarizeFile` takes [THRESHOLD] as the clustering threshold, a Float in 0.0 - 2.0 (a larger value merges more
+    // voices into one speaker; absent means the plugin's value); `tagAudio` takes [TOP_K] (default
+    // [SpeechLimits.DEFAULT_TAG_TOP_K], at most [SpeechLimits.MAX_TAG_TOP_K]).
+
+    /** Int: speakers of `diarizeFile`, 1 to [SpeechLimits.MAX_DIARIZATION_SPEAKERS]; absent or 0 lets the plugin count them. */
+    const val SPEAKER_COUNT = "speakers"
+
+    /** String: speaker embedding model of `diarizeFile` (a model of kind `speaker`); absent means the default one. */
+    const val SPEAKER_MODEL = "speakerModel"
+
+    /** Boolean: `diarizeFile` also names each speaker after the closest enrolled voiceprint (default false, roadmap D147). */
+    const val IDENTIFY = "identify"
+
+    /** Int: speech windows of at most [SpeechLimits.LANGUAGE_WINDOW_MILLIS] `detectLanguage` votes on (default [SpeechLimits.DEFAULT_LANGUAGE_WINDOWS]). */
+    const val WINDOWS = "windows"
+
+    /** Boolean: `tagAudio` also answers the labels of every window (default false, roadmap D149). */
+    const val TIMELINE = "timeline"
 }

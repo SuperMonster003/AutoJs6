@@ -2,16 +2,19 @@ package org.autojs.autojs.runtime.api.speech
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import org.autojs.autojs.core.plugin.speech.SpeechDiarizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechEnrollRequest
 import org.autojs.autojs.core.plugin.speech.SpeechIdentifyRequest
 import org.autojs.autojs.core.plugin.speech.SpeechImportRequest
 import org.autojs.autojs.core.plugin.speech.SpeechInstallRequest
 import org.autojs.autojs.core.plugin.speech.SpeechKeyword
+import org.autojs.autojs.core.plugin.speech.SpeechLanguageRequest
 import org.autojs.autojs.core.plugin.speech.SpeechListenRequest
 import org.autojs.autojs.core.plugin.speech.SpeechModelQuery
 import org.autojs.autojs.core.plugin.speech.SpeechPluginException
 import org.autojs.autojs.core.plugin.speech.SpeechRecognizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechSynthesisRequest
+import org.autojs.autojs.core.plugin.speech.SpeechTagRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVadRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVerifyRequest
 import org.autojs.autojs.runtime.api.tts.TtsSelection
@@ -292,5 +295,39 @@ class SpeechScriptArgumentsTest {
         refused { SpeechScriptArguments.identify(json("{\"topK\": 11}")) }
         refused { SpeechScriptArguments.identify(json("{\"topK\": 2.5}")) }
         refused { SpeechScriptArguments.identify(json("{\"name\": \"a\"}")) }
+    }
+
+    /** 3-Macaw Speech roadmap D147 - D149: `speech.diarize` / `detectLanguage` / `tag` options. */
+    @Test
+    fun analysisOptionsTakeTheirDefaultsAndRanges() {
+        assertEquals(SpeechDiarizeRequest(), SpeechScriptArguments.diarize(null))
+        assertEquals(
+            SpeechDiarizeRequest("segment.x", "speaker.y", 3, 0.85, identify = true),
+            SpeechScriptArguments.diarize(json("""{"model":"segment.x","speakerModel":"speaker.y","speakers":3,"threshold":0.85,"identify":true}""")),
+        )
+        assertEquals(0, SpeechScriptArguments.diarize(json("""{"speakers":0}""")).speakers)
+        assertEquals(SpeechLimits.MAX_DIARIZATION_SPEAKERS, SpeechScriptArguments.diarize(json("""{"speakers":20}""")).speakers)
+        refused { SpeechScriptArguments.diarize(json("""{"speakers":21}""")) }
+        refused { SpeechScriptArguments.diarize(json("""{"speakers":-1}""")) }
+        refused { SpeechScriptArguments.diarize(json("""{"speakers":1.5}""")) }
+        refused { SpeechScriptArguments.diarize(json("""{"threshold":2.5}""")) }
+        refused { SpeechScriptArguments.diarize(json("""{"identify":"yes"}""")) }
+        refused { SpeechScriptArguments.diarize(json("""{"onProgress":1}""")) }
+        refused { SpeechScriptArguments.diarize(json("""{"topK":1}""")) }
+
+        assertEquals(SpeechLanguageRequest(), SpeechScriptArguments.detectLanguage(null))
+        assertEquals(SpeechLimits.DEFAULT_LANGUAGE_WINDOWS, SpeechScriptArguments.detectLanguage(json("{}")).windows)
+        assertEquals(SpeechLanguageRequest("langid.x", 60), SpeechScriptArguments.detectLanguage(json("""{"model":"langid.x","windows":60}""")))
+        refused { SpeechScriptArguments.detectLanguage(json("""{"windows":0}""")) }
+        refused { SpeechScriptArguments.detectLanguage(json("""{"windows":61}""")) }
+        refused { SpeechScriptArguments.detectLanguage(json("""{"language":"en"}""")) }
+
+        assertEquals(SpeechTagRequest(), SpeechScriptArguments.tag(null))
+        assertEquals(SpeechTagRequest("tagger.x", 20, timeline = true), SpeechScriptArguments.tag(json("""{"model":"tagger.x","topK":20,"timeline":true}""")))
+        assertEquals(SpeechLimits.DEFAULT_TAG_TOP_K, SpeechScriptArguments.tag(json("""{"onProgress":null}""")).topK)
+        refused { SpeechScriptArguments.tag(json("""{"topK":0}""")) }
+        refused { SpeechScriptArguments.tag(json("""{"topK":21}""")) }
+        refused { SpeechScriptArguments.tag(json("""{"timeline":1}""")) }
+        refused { SpeechScriptArguments.tag(json("""{"windows":3}""")) }
     }
 }

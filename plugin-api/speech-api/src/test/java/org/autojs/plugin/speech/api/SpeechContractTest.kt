@@ -91,10 +91,11 @@ class SpeechContractTest {
         assertEquals(options.size, options.values.toSet().size)
         assertEquals(
             listOf(
-                "acceptLicense", "boost", "displayName", "displayNames", "format", "hotwords", "installed", "keyword", "keywords", "kind",
-                "language", "languages", "maxDurationMillis", "minIntervalMillis", "minSilenceMillis", "minSpeechMillis", "model", "modelType",
-                "name", "punctuation", "replace", "sampleRate", "silenceEndMillis", "source", "speaker", "speed", "text", "thenListen",
-                "threshold", "timeoutMillis", "topK", "vad", "vadThreshold",
+                "acceptLicense", "boost", "displayName", "displayNames", "format", "hotwords", "identify", "installed", "keyword", "keywords",
+                "kind", "language", "languages", "maxDurationMillis", "minIntervalMillis", "minSilenceMillis", "minSpeechMillis", "model",
+                "modelType", "name", "punctuation", "replace", "sampleRate", "silenceEndMillis", "source", "speaker", "speakerModel",
+                "speakers", "speed", "text", "thenListen", "threshold", "timeline", "timeoutMillis", "topK", "vad", "vadThreshold",
+                "windows",
             ),
             options.values.sorted(),
         )
@@ -103,10 +104,12 @@ class SpeechContractTest {
         assertEquals(results.size, results.values.toSet().size)
         assertEquals(
             listOf(
-                "active", "candidates", "catalogVersion", "durationMillis", "emotion", "endMillis", "event", "keyword", "language", "matched",
-                "model", "modelId", "models", "name", "reason", "removed", "round", "sampleRate", "samples", "score", "segmentIndex",
-                "segments", "sessionId", "sizeBytes", "speakerId", "speakers", "startMillis", "state", "tags", "text", "threshold",
-                "timestampMillis", "updated", "updatedAt", "warnings",
+                "active", "candidates", "catalogVersion", "durationMillis", "emotion", "endMillis", "event", "keyword", "label", "labelMids",
+                "labelNames", "labels", "language", "matched", "mid", "model", "modelId", "models", "name", "names", "reason", "removed",
+                "round", "sampleRate", "samples", "score", "segmentEnds", "segmentIndex", "segmentSpeakers", "segmentStarts", "segments",
+                "sessionId", "sizeBytes", "speaker", "speakerCount", "speakerId", "speakers", "startMillis", "state", "tags", "text",
+                "threshold", "timelineEnds", "timelineLabels", "timelineScores", "timelineStarts", "timelineTopK", "timestampMillis",
+                "updated", "updatedAt", "warnings",
             ),
             results.values.sorted(),
         )
@@ -176,10 +179,19 @@ class SpeechContractTest {
         assertEquals(64, SpeechLimits.MAX_SPEAKER_NAME_CHARS)
         assertEquals(3, SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES)
         assertEquals(10, SpeechLimits.MAX_IDENTIFY_CANDIDATES)
+        assertEquals(20, SpeechLimits.MAX_DIARIZATION_SPEAKERS)
+        assertEquals(10_000, SpeechLimits.MAX_DIARIZATION_SEGMENTS)
+        assertEquals(30_000L, SpeechLimits.LANGUAGE_WINDOW_MILLIS)
+        assertEquals(3, SpeechLimits.DEFAULT_LANGUAGE_WINDOWS)
+        assertEquals(60, SpeechLimits.MAX_LANGUAGE_WINDOWS)
+        assertEquals(10_000L, SpeechLimits.TAG_WINDOW_MILLIS)
+        assertEquals(5, SpeechLimits.DEFAULT_TAG_TOP_K)
+        assertEquals(20, SpeechLimits.MAX_TAG_TOP_K)
         assertEquals(30_000L, SpeechContract.CALL_TIMEOUT_MS)
         assertEquals(600_000L, SpeechContract.FILE_CALL_TIMEOUT_MS)
         assertEquals(600_000L, SpeechContract.SYNTHESIS_TIMEOUT_MS)
         assertEquals(120_000L, SpeechContract.CATALOG_TIMEOUT_MS)
+        assertEquals(600_000L, SpeechContract.ANALYSIS_TIMEOUT_MS)
 
         // One feed call and one event stay well inside the 1 MiB Binder buffer shared by the process.
         assertTrue(SpeechLimits.MAX_FEED_BYTES <= 1024 * 1024)
@@ -195,6 +207,12 @@ class SpeechContractTest {
         assertTrue(SpeechLimits.MAX_SPEAKER_AUDIO_MILLIS <= SpeechLimits.MAX_AUDIO_MILLIS)
         assertTrue(SpeechLimits.MAX_SPEAKER_NAME_CHARS <= SpeechLimits.MAX_TOKEN_CHARS)
         assertTrue(SpeechLimits.DEFAULT_IDENTIFY_CANDIDATES <= SpeechLimits.MAX_IDENTIFY_CANDIDATES)
+        assertTrue(SpeechLimits.DEFAULT_LANGUAGE_WINDOWS <= SpeechLimits.MAX_LANGUAGE_WINDOWS)
+        // The windows cover a whole file at most.
+        assertTrue(SpeechLimits.MAX_LANGUAGE_WINDOWS * SpeechLimits.LANGUAGE_WINDOW_MILLIS <= SpeechLimits.MAX_AUDIO_MILLIS)
+        assertTrue(SpeechLimits.DEFAULT_TAG_TOP_K <= SpeechLimits.MAX_TAG_TOP_K)
+        // Three parallel arrays (20 bytes a turn) keep the longest diarization inside one event.
+        assertTrue(SpeechLimits.MAX_DIARIZATION_SEGMENTS * 20 < SpeechLimits.MAX_EVENT_BYTES)
     }
 
     @Test

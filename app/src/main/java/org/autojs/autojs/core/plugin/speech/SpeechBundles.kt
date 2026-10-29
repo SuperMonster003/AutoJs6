@@ -186,6 +186,140 @@ object SpeechBundles {
         putBoolean(SpeechOptionKeys.PUNCTUATION, request.punctuation)
     }
 
+    // Offline analyses (contract version 2, roadmap D147 - D151).
+
+    fun diarize(request: SpeechDiarizeRequest, displayName: String?): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        request.model?.let { putString(SpeechOptionKeys.MODEL, it) }
+        request.speakerModel?.let { putString(SpeechOptionKeys.SPEAKER_MODEL, it) }
+        putInt(SpeechOptionKeys.SPEAKER_COUNT, request.speakers)
+        request.threshold?.let { putFloat(SpeechOptionKeys.THRESHOLD, it.toFloat()) }
+        putBoolean(SpeechOptionKeys.IDENTIFY, request.identify)
+        displayName?.let { putString(SpeechOptionKeys.DISPLAY_NAME, it) }
+    }
+
+    fun detectLanguage(request: SpeechLanguageRequest, displayName: String?): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        request.model?.let { putString(SpeechOptionKeys.MODEL, it) }
+        putInt(SpeechOptionKeys.WINDOWS, request.windows)
+        displayName?.let { putString(SpeechOptionKeys.DISPLAY_NAME, it) }
+    }
+
+    fun tag(request: SpeechTagRequest, displayName: String?): Bundle = request(SpeechContract.CALL_VERSION_2) {
+        request.model?.let { putString(SpeechOptionKeys.MODEL, it) }
+        putInt(SpeechOptionKeys.TOP_K, request.topK)
+        putBoolean(SpeechOptionKeys.TIMELINE, request.timeline)
+        displayName?.let { putString(SpeechOptionKeys.DISPLAY_NAME, it) }
+    }
+
+    /**
+     * The script's `{ segments: [{ startMillis, endMillis, speaker }], speakers, durationMillis, modelId }` of
+     * `diarizeFile` from its [plain] completion, with `names: [{ speaker, name, score }]` when the plugin identified the
+     * speakers (roadmap D147); the parallel arrays of the answer (D151) must have one length.
+     * zh-CN: 由 `diarizeFile` 的 [plain] 完成值构造脚本结果, 插件辨认了说话人时另有 `names: [{ speaker, name, score }]` (路线图 D147); 应答中的
+     * 并列数组 (D151) 须等长.
+     */
+    fun diarization(plain: Map<String, Any?>): Map<String, Any?> {
+        val starts = numbers(plain[SpeechResultKeys.SEGMENT_STARTS])
+        val ends = numbers(plain[SpeechResultKeys.SEGMENT_ENDS])
+        val speakers = numbers(plain[SpeechResultKeys.SEGMENT_SPEAKERS]).map { it.toInt() }
+        if (ends.size != starts.size || speakers.size != starts.size) {
+            throw SpeechErrorMapper.failure(SpeechErrorCodes.INTERNAL, "diarizeFile answered ${starts.size} starts, ${ends.size} ends and ${speakers.size} speakers")
+        }
+        val result = linkedMapOf<String, Any?>(
+            SpeechResultKeys.SEGMENTS to starts.indices.map { i ->
+                linkedMapOf(
+                    SpeechResultKeys.START_MILLIS to SpeechValues.number(starts[i]),
+                    SpeechResultKeys.END_MILLIS to SpeechValues.number(ends[i]),
+                    SpeechResultKeys.SPEAKER to speakers[i],
+                )
+            },
+            FIELD_SPEAKERS to (plain[SpeechResultKeys.SPEAKER_COUNT] ?: (speakers.maxOrNull()?.plus(1) ?: 0)),
+            SpeechResultKeys.DURATION_MILLIS to plain[SpeechResultKeys.DURATION_MILLIS],
+            SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
+        )
+        (plain[SpeechResultKeys.NAMES] as? List<*>)?.let { names ->
+            result[SpeechResultKeys.NAMES] = names.mapNotNull { item ->
+                val entry = item as? Map<*, *> ?: return@mapNotNull null
+                linkedMapOf(
+                    SpeechResultKeys.SPEAKER to entry[SpeechResultKeys.SPEAKER],
+                    SpeechResultKeys.NAME to entry[SpeechResultKeys.NAME],
+                    SpeechResultKeys.SCORE to score(entry[SpeechResultKeys.SCORE]),
+                )
+            }
+        }
+        return result
+    }
+
+    /**
+     * The script's `{ language, candidates: [{ language, score }], segments: [{ startMillis, endMillis, language }],
+     * durationMillis, modelId }` from the [plain] completion of `detectLanguage` (roadmap D148).
+     * zh-CN: 由 `detectLanguage` 的 [plain] 完成值构造脚本结果 (路线图 D148).
+     */
+    fun languageResult(plain: Map<String, Any?>): Map<String, Any?> = linkedMapOf(
+        SpeechResultKeys.LANGUAGE to plain[SpeechResultKeys.LANGUAGE],
+        SpeechResultKeys.CANDIDATES to entries(plain[SpeechResultKeys.CANDIDATES]).map { entry ->
+            linkedMapOf(SpeechResultKeys.LANGUAGE to entry[SpeechResultKeys.LANGUAGE], SpeechResultKeys.SCORE to score(entry[SpeechResultKeys.SCORE]))
+        },
+        SpeechResultKeys.SEGMENTS to entries(plain[SpeechResultKeys.SEGMENTS]).map { entry ->
+            linkedMapOf(
+                SpeechResultKeys.START_MILLIS to entry[SpeechResultKeys.START_MILLIS],
+                SpeechResultKeys.END_MILLIS to entry[SpeechResultKeys.END_MILLIS],
+                SpeechResultKeys.LANGUAGE to entry[SpeechResultKeys.LANGUAGE],
+            )
+        },
+        SpeechResultKeys.DURATION_MILLIS to plain[SpeechResultKeys.DURATION_MILLIS],
+        SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
+    )
+
+    /**
+     * The script's `{ labels: [{ label, mid, score, startMillis, endMillis }], durationMillis, modelId }` from the [plain]
+     * completion of `tagAudio`, with `timeline: [{ startMillis, endMillis, labels: [{ label, mid, score }] }]` rebuilt
+     * from the parallel arrays when the plugin sent them (roadmap D149, D151).
+     * zh-CN: 由 `tagAudio` 的 [plain] 完成值构造脚本结果; 插件发送了并列数组时由其还原 `timeline` (路线图 D149, D151).
+     */
+    fun tagResult(plain: Map<String, Any?>): Map<String, Any?> {
+        val result = linkedMapOf<String, Any?>(
+            SpeechResultKeys.LABELS to entries(plain[SpeechResultKeys.LABELS]).map { entry ->
+                linkedMapOf(
+                    SpeechResultKeys.LABEL to entry[SpeechResultKeys.LABEL],
+                    SpeechResultKeys.MID to entry[SpeechResultKeys.MID],
+                    SpeechResultKeys.SCORE to score(entry[SpeechResultKeys.SCORE]),
+                    SpeechResultKeys.START_MILLIS to entry[SpeechResultKeys.START_MILLIS],
+                    SpeechResultKeys.END_MILLIS to entry[SpeechResultKeys.END_MILLIS],
+                )
+            },
+            SpeechResultKeys.DURATION_MILLIS to plain[SpeechResultKeys.DURATION_MILLIS],
+            SpeechResultKeys.MODEL_ID to plain[SpeechResultKeys.MODEL_ID],
+        )
+        if (plain[SpeechResultKeys.TIMELINE_STARTS] == null) return result
+        val starts = numbers(plain[SpeechResultKeys.TIMELINE_STARTS])
+        val ends = numbers(plain[SpeechResultKeys.TIMELINE_ENDS])
+        val positions = numbers(plain[SpeechResultKeys.TIMELINE_LABELS]).map { it.toInt() }
+        val scores = numbers(plain[SpeechResultKeys.TIMELINE_SCORES])
+        val names = (plain[SpeechResultKeys.LABEL_NAMES] as? List<*>).orEmpty().map { it?.toString() }
+        val mids = (plain[SpeechResultKeys.LABEL_MIDS] as? List<*>).orEmpty().map { it?.toString() }
+        val topK = (plain[SpeechResultKeys.TIMELINE_TOP_K] as? Number)?.toInt() ?: 0
+        if (ends.size != starts.size || topK < 0 || positions.size != starts.size * topK || scores.size != positions.size ||
+            mids.size != names.size || positions.any { it !in names.indices }
+        ) {
+            throw SpeechErrorMapper.failure(SpeechErrorCodes.INTERNAL, "tagAudio answered a timeline whose arrays do not match")
+        }
+        result[FIELD_TIMELINE] = starts.indices.map { i ->
+            linkedMapOf(
+                SpeechResultKeys.START_MILLIS to SpeechValues.number(starts[i]),
+                SpeechResultKeys.END_MILLIS to SpeechValues.number(ends[i]),
+                SpeechResultKeys.LABELS to (0 until topK).map { j ->
+                    val p = positions[i * topK + j]
+                    linkedMapOf(SpeechResultKeys.LABEL to names[p], SpeechResultKeys.MID to mids[p], SpeechResultKeys.SCORE to score(scores[i * topK + j]))
+                },
+            )
+        }
+        return result
+    }
+
+    private fun numbers(value: Any?): List<Number> = (value as? List<*>).orEmpty().map { it as? Number ?: 0 }
+
+    private fun entries(value: Any?): List<Map<*, *>> = (value as? List<*>).orEmpty().filterIsInstance<Map<*, *>>()
+
     /**
      * A Bundle answer of the contract: refuses a missing answer or an unsupported contract version, throws the carried
      * error, otherwise returns the Bundle for its result keys.
@@ -278,6 +412,10 @@ object SpeechBundles {
 
     const val FIELD_CODE = "code"
     const val FIELD_MESSAGE = "message"
+
+    /** `speakers` (a count) and `timeline` of the analysis results, rebuilt by the host (roadmap D147, D149). zh-CN: 分析结果中由宿主还原的 `speakers` (人数) 与 `timeline`. */
+    const val FIELD_SPEAKERS = "speakers"
+    const val FIELD_TIMELINE = "timeline"
 
     private val TRANSPORT_KEYS = setOf(SpeechContract.KEY_CONTRACT_VERSION, SpeechContract.KEY_ERROR_CODE, SpeechContract.KEY_ERROR_MESSAGE)
 }

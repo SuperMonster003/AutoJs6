@@ -56,6 +56,24 @@ class SpeechModule(private val runtime: ScriptRuntime) {
     fun synthesizeAsync(vararg args: Any?): Any? = impl.synthesizeAsync(runtime, args)
 
     @ScriptFunction(arity = [1, 2])
+    fun diarize(vararg args: Any?): Any? = impl.diarize(runtime, args)
+
+    @ScriptFunction(arity = [1, 2])
+    fun diarizeAsync(vararg args: Any?): Any? = impl.diarizeAsync(runtime, args)
+
+    @ScriptFunction(arity = [1, 2])
+    fun detectLanguage(vararg args: Any?): Any? = impl.detectLanguage(runtime, args)
+
+    @ScriptFunction(arity = [1, 2])
+    fun detectLanguageAsync(vararg args: Any?): Any? = impl.detectLanguageAsync(runtime, args)
+
+    @ScriptFunction(arity = [1, 2])
+    fun tag(vararg args: Any?): Any? = impl.tag(runtime, args)
+
+    @ScriptFunction(arity = [1, 2])
+    fun tagAsync(vararg args: Any?): Any? = impl.tagAsync(runtime, args)
+
+    @ScriptFunction(arity = [1, 2])
     fun speak(vararg args: Any?): Any? = impl.speak(runtime, args)
 
 }

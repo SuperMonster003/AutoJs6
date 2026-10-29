@@ -20,8 +20,9 @@ are frozen by `SpeechContractTest` and its transaction order by `SpeechAidlOrder
 `core/plugin/speech` (`SpeechPluginHost`, `SpeechSessionProxy`, `SpeechErrorMapper`), the script object
 `runtime/api/augment/speech` (`Speech`, `SpeechModels`, `SpeechSession`, `SpeechWakeSession`).
 
-Contract version 2 (plugin roadmap P8.3, D132 - D136) appends speaker recognition and reserves three offline calls of
-P8.4 without changing any version 1 call; see "Contract version 2". Everything else in this document is version 1.
+Contract version 2 (plugin roadmap P8.3 and P8.4, D132 - D136, D147 - D151) appends speaker recognition and three
+offline analyses (diarization, language identification, audio tagging) without changing any version 1 call; see
+"Contract version 2". Everything else in this document is version 1.
 
 ## Discovery and binding
 
@@ -64,9 +65,9 @@ Bundles and shows it as `ttsEnginePackage`.
 | `models` | `installModel`, `importModel`, `removeModel`, `setDefaultModel`, `refreshCatalog` |
 | `audioDecode` | inputs other than WAV (MP3, AAC, Ogg, FLAC, the audio of video files) for the file calls |
 | `speaker` (version 2) | `enrollSpeaker`, `verifySpeaker`, `identifySpeaker`, `listSpeakers`, `removeSpeaker` |
-| `diarization` (version 2) | `diarizeFile` (reserved for plugin roadmap P8.4) |
-| `languageId` (version 2) | `detectLanguage` (reserved for P8.4) |
-| `audioTagging` (version 2) | `tagAudio` (reserved for P8.4) |
+| `diarization` (version 2) | `diarizeFile` |
+| `languageId` (version 2) | `detectLanguage` |
+| `audioTagging` (version 2) | `tagAudio` |
 
 The host refuses a call whose feature the plugin does not advertise with `PLUGIN_INCOMPATIBLE` before any transaction
 (a version 2 feature counts only when the agreed version is 2, `SpeechPeer.supports`);
@@ -190,7 +191,9 @@ eight methods after `refreshCatalog`; `SpeechAidlOrderTest` freezes all 22.
 | `identifySpeaker` (v2) | blocks until done | 10 min | one file, 60 s; `topK` 1 to 10 | `name` (absent below the threshold), `score`, `matched`, `threshold`, `candidates`, `modelId` | as `verifySpeaker` except `SPEAKER_NOT_FOUND` |
 | `listSpeakers` (v2) | immediate | 30 s | - | `speakers` (at most 50) | - |
 | `removeSpeaker` (v2) | immediate | 30 s | `name` | `removed` | `INVALID_OPTIONS` |
-| `diarizeFile`, `detectLanguage`, `tagAudio` (v2) | return the operation id at once | - | reserved for plugin roadmap P8.4 | - | - |
+| `diarizeFile` (v2) | returns the operation id at once | 10 min to the first progress, between two and to the completion | one file as `recognizeFile`; `speakers` 0 to 20 | completion `segmentStarts`, `segmentEnds`, `segmentSpeakers`, `speakerCount`, `names`, `durationMillis`, `modelId` | `MODEL_MISSING` (also the speaker model), `UNSUPPORTED_FORMAT`, `LIMIT_EXCEEDED` (more than 10000 turns), `INVALID_OPTIONS`, `ENGINE_FAILED`, `IO_FAILED`, `SESSION_CANCELLED` |
+| `detectLanguage` (v2) | returns the operation id at once | as `diarizeFile` | one file; `windows` 1 to 60 | completion `language`, `candidates`, `segments`, `durationMillis`, `modelId` | `MODEL_MISSING`, `AUDIO_TOO_SHORT` (no speech), `UNSUPPORTED_FORMAT`, `INVALID_OPTIONS`, `ENGINE_FAILED`, `IO_FAILED`, `SESSION_CANCELLED` |
+| `tagAudio` (v2) | returns the operation id at once | as `diarizeFile` | one file; `topK` 1 to 20 | completion `labels`, the timeline arrays with `timeline`, `durationMillis`, `modelId` | `MODEL_MISSING`, `UNSUPPORTED_FORMAT`, `INVALID_OPTIONS`, `ENGINE_FAILED`, `IO_FAILED`, `SESSION_CANCELLED` |
 
 ### Resource ownership
 
@@ -500,8 +503,8 @@ Without the plugin every call fails with `PLUGIN_UNAVAILABLE` and the localized 
 
 ## Contract version 2
 
-Plugin roadmap P8.3 (D132 - D136). Version 2 only appends: the 14 methods of version 1, their keys and their events stay
-as they are.
+Plugin roadmap P8.3 (D132 - D136) and P8.4 (D147 - D151). Version 2 only appends: the 14 methods of version 1, their
+keys and their events stay as they are.
 
 ### Negotiation
 
@@ -551,12 +554,43 @@ The host checks names, file counts, thresholds and `topK` before any transaction
 recording read-only as for `recognizeFile` and calls the file methods from its IO dispatcher with the file timeout.
 Scores reach the script rounded to four decimals.
 
-### Reserved calls
+### Offline analyses
 
-`diarizeFile`, `detectLanguage` and `tagAudio` (features `diarization`, `languageId`, `audioTagging`) return an
-operation id and report through `ISpeechProgressCallback` like `synthesizeToFile`, so they can be cancelled with
-`cancelOperation`. Their keys and the script API come with plugin roadmap P8.4; until a plugin advertises the feature
-the host does not call them, and a plugin without them throws `PLUGIN_INCOMPATIBLE`.
+`diarizeFile`, `detectLanguage` and `tagAudio` (features `diarization`, `languageId`, `audioTagging`; plugin roadmap
+D147 - D151) take one audio file like `recognizeFile` (at most 200 MiB and 30 minutes; formats other than WAV need
+`audioDecode`), return an operation id at once and report through `ISpeechProgressCallback` like `synthesizeToFile`:
+`onProgress(opId, done, total)` counts milliseconds of audio and comes at least once every
+`SpeechContract.ANALYSIS_TIMEOUT_MS` (10 minutes), the time the host waits for each progress and for the completion; the
+whole call has no limit. `cancelOperation` makes the plugin answer `SESSION_CANCELLED` at once; work a native engine
+cannot stop finishes in the background and is dropped. Every completion carries `durationMillis` (the decoded audio)
+and `modelId` (the model of the call's kind). Lists that may grow long travel as parallel primitive arrays of one length
+(D151), which keeps 10000 speaker turns or a 30 minute timeline far below `MAX_EVENT_BYTES`.
+
+- `diarizeFile(audio, options, callback)`: `model` (a `segment` model, default the default one), `speakerModel` (a
+  `speaker` model, default the default one; a missing one fails with `MODEL_MISSING`), `speakers` (Int, 0 to 20, 0
+  counts them), `threshold` (Float, 0 to 2: the clustering distance, a larger one merges more voices; default the
+  plugin's value), `identify` (Boolean, default false), `displayName`. The completion carries `segmentStarts` and
+  `segmentEnds` (long[], milliseconds, ascending), `segmentSpeakers` (int[], speakers numbered from 0 in order of first
+  appearance), `speakerCount` and, with `identify`, `names` (ArrayList of Bundle with `speaker`, `name` when the closest
+  enrolled voiceprint reached its threshold, and `score`; the plugin embeds at most 10 seconds of each speaker's longest
+  turns). More than 10000 turns fail with `LIMIT_EXCEEDED`.
+- `detectLanguage(audio, options, callback)`: `model` (a `langid` model), `windows` (Int, 1 to 60, default 3),
+  `displayName`. The plugin cuts the speech (VAD) into windows of at most 30 seconds and identifies the first `windows`
+  of them; the completion carries `language` (the most voted whisper language code; a tie goes to the earliest window),
+  `candidates` (ArrayList of Bundle with `language` and `score`, the share of the windows, most voted first) and
+  `segments` (one Bundle per window with `startMillis`, `endMillis` and `language`). A file without speech fails with
+  `AUDIO_TOO_SHORT`.
+- `tagAudio(audio, options, callback)`: `model` (a `tagger` model), `topK` (Int, 1 to 20, default 5), `timeline`
+  (Boolean, default false), `displayName`. The plugin scores windows of 10 seconds against the 527 AudioSet labels; the
+  completion carries `labels` (ArrayList of Bundle with `label`, `mid`, `score` and the `startMillis` / `endMillis` of
+  the label's best window: the `topK` labels with the best scores). With `timeline` it adds `timelineStarts` and
+  `timelineEnds` (long[], one per window), `timelineTopK` (the labels per window), `timelineLabels` (int[], `timelineTopK`
+  positions per window into `labelNames` / `labelMids`, String[]) and `timelineScores` (float[], their scores).
+
+The host checks the options (`SpeechScriptArguments`) and opens the file read-only before any transaction, refuses a
+call whose feature the plugin does not advertise, checks that the parallel arrays have one length and rebuilds the
+lists: `segments: [{ startMillis, endMillis, speaker }]` and `timeline: [{ startMillis, endMillis, labels: [{ label,
+mid, score }] }]`. Scores reach the script rounded to four decimals.
 
 ### Script API
 
@@ -570,9 +604,21 @@ the host does not call them, and a plugin without them throws `PLUGIN_INCOMPATIB
   threshold, candidates: [{ name, score }] }`, `name` null below the threshold.
 - `list()` answers `[{ name, samples, updatedAt, modelId }]`, `remove(name)` a boolean.
 
+The analyses are functions of `speech` itself, each with an `Async` form and an optional `onProgress(done, total)` in
+`options` (milliseconds of audio, on the script thread):
+
+- `diarize(file, options?)` / `diarizeAsync`: `options` `{ model, speakerModel, speakers, threshold, identify }`; answers
+  `{ segments: [{ startMillis, endMillis, speaker }], speakers, durationMillis, modelId }`, with `identify` also
+  `names: [{ speaker, name, score }]` (`name` null below the threshold).
+- `detectLanguage(file, options?)` / `detectLanguageAsync`: `options` `{ model, windows }`; answers `{ language,
+  candidates: [{ language, score }], segments: [{ startMillis, endMillis, language }], durationMillis, modelId }`.
+- `tag(file, options?)` / `tagAsync`: `options` `{ model, topK, timeline }`; answers `{ labels: [{ label, mid, score,
+  startMillis, endMillis }], durationMillis, modelId }`, with `timeline` also `timeline: [{ startMillis, endMillis,
+  labels: [{ label, mid, score }] }]`.
+
 The synchronous forms refuse the UI thread like `speech.recognize`; the `Async` forms answer a Promise. A plugin
-without the feature `speaker` (3-Macaw Speech 1.2.0 and earlier, or a host that agreed on version 1) fails every call
-with `PLUGIN_INCOMPATIBLE`.
+without the feature of a call (`speaker`, `diarization`, `languageId`, `audioTagging`; 3-Macaw Speech 1.2.0 and earlier,
+or a host that agreed on version 1) fails it with `PLUGIN_INCOMPATIBLE`.
 
 ## Status
 
@@ -591,3 +637,6 @@ Contract version 2 (plugin roadmap P8.3) adds the eight methods, `speechMaxContr
 host for AutoJs6 6.8.0; `SpeechContractTest`, `SpeechAidlOrderTest`, `SpeechScriptArgumentsTest` and
 `AugmentDelegatingModulesTest` cover them. 3-Macaw Speech 1.3.0 implements the feature `speaker`; the minimum host stays
 5456 (plugin roadmap D122), since the negotiation above keeps every other pairing working.
+Plugin roadmap P8.4 defines the keys of `diarizeFile`, `detectLanguage` and `tagAudio` and adds `speech.diarize`,
+`speech.detectLanguage` and `speech.tag` (with their `Async` forms); `SpeechContractTest`, `SpeechScriptArgumentsTest`
+and `SpeechAnalysisHostTest` cover them, and 3-Macaw Speech 1.3.0 implements the three features.

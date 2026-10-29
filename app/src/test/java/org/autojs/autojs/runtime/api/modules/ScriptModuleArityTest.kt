@@ -76,7 +76,7 @@ class ScriptModuleArityTest {
             }
         }
         assertTrue("Declared arities differ from the checks in the source:\n" + failures.joinToString("\n"), failures.isEmpty())
-        assertEquals("arities checked in the source", 174, declared.size)
+        assertEquals("arities checked in the source", 180, declared.size)
     }
 
     @Test(timeout = 300_000)
@@ -89,7 +89,7 @@ class ScriptModuleArityTest {
             assertTrue("Sampled argument checks differ from the declared arities:\n" + failures.joinToString("\n"), failures.isEmpty())
         }
         assertEquals("arities sampled on the JVM", 89, SAMPLES.size)
-        assertEquals("declared arities (overloads and install functions)", 186 + 77, declared.size)
+        assertEquals("declared arities (overloads and install functions)", 192 + 77, declared.size)
     }
 
     private fun sampled(rhino: DifferentialRhino, d: Declared, sample: Sample): List<String> {

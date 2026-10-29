@@ -91,4 +91,27 @@ object SpeechLimits {
     /** `topK` default and ceiling of `identifySpeaker`. */
     const val DEFAULT_IDENTIFY_CANDIDATES = 3
     const val MAX_IDENTIFY_CANDIDATES = 10
+
+    // Offline analyses (contract version 2, roadmap D147 - D151). Their files have the ceilings of `recognizeFile`
+    // ([MAX_AUDIO_FILE_BYTES], [MAX_AUDIO_MILLIS]).
+
+    /** `speakers` ceiling of `diarizeFile`. */
+    const val MAX_DIARIZATION_SPEAKERS = 20
+
+    /** Speaker turns one `diarizeFile` answers; more fail with [SpeechErrorCodes.LIMIT_EXCEEDED]. */
+    const val MAX_DIARIZATION_SEGMENTS = 10_000
+
+    /** Speech of one `detectLanguage` window (whisper looks at 30 seconds). */
+    const val LANGUAGE_WINDOW_MILLIS = 30_000L
+
+    /** `windows` default and ceiling of `detectLanguage` (60 windows cover a 30 minute file). */
+    const val DEFAULT_LANGUAGE_WINDOWS = 3
+    const val MAX_LANGUAGE_WINDOWS = 60
+
+    /** Audio of one `tagAudio` window. */
+    const val TAG_WINDOW_MILLIS = 10_000L
+
+    /** `topK` default and ceiling of `tagAudio`. */
+    const val DEFAULT_TAG_TOP_K = 5
+    const val MAX_TAG_TOP_K = 20
 }

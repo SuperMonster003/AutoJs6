@@ -74,6 +74,7 @@
         "gallery 模块, 用于通过 3-Maple Image 插件选择, 查看, 编辑及转换图片, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Maple Image 插件 3.4.0 及以上) (参阅 项目文档 > [相册](https://docs.autojs6.com/#/gallery))",
         "speech 模块, 用于离线语音识别, 语音活动检测, 唤醒词检测及语音合成, 支持麦克风听写会话, 唤醒词会话 (可在唤醒后自动听写), 识别 WAV 文件或 PCM 数据, 合成到 WAV 文件, 通过插件引擎朗读文本及管理语音模型, 读取与写入的文件限于脚本自身可访问的路径; 麦克风会话在 AutoJs6 位于前台时开启后, 应用退到后台或熄屏仍可继续收音 (需要 3-Macaw Speech 插件) (参阅 示例代码 > 3-Macaw Speech)",
         "speech.speaker 模块, 用于说话人识别, 可注册说话人的声音, 判断一段录音是否出自某人 (验证) 或在已注册的人中找出最像的一位 (辨认); 声纹只保存在插件内, 脚本只得到名字与相似度分数 (需要 3-Macaw Speech 插件 1.3.0 及以上) (参阅 示例代码 > 3-Macaw Speech)",
+        "speech.diarize/detectLanguage/tag 方法, 用于离线分析音频文件: 找出谁在什么时候说话 (说话人分离, 可按已注册的声纹取名), 识别说话的语种, 以及听出录音里的声音类别 (说话, 音乐, 狗叫, 雨声等), 均带进度回调与 Async 形式 (需要 3-Macaw Speech 插件 1.3.0 及以上) (参阅 示例代码 > 3-Macaw Speech)",
         "yolo 模块, 用于通过 YOLO 插件加载模型并进行目标检测 (参阅 项目文档 > [YOLO](https://docs.autojs6.com/#/yolo))",
         "tts 模块, 用于文本转语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))",
         "settings 模块, 用于读取及修改应用设置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))",

@@ -125,4 +125,60 @@ object SpeechResultKeys {
 
     /** Long: epoch milliseconds of a speaker's last enrollment. */
     const val UPDATED_AT = "updatedAt"
+
+    // Offline analyses (contract version 2, roadmap D147 - D151). Every completion carries [DURATION_MILLIS] and
+    // [MODEL_ID]. Lists that may grow long travel as parallel primitive arrays of equal length (roadmap D151), so a 30
+    // minute file stays inside [SpeechLimits.MAX_EVENT_BYTES].
+
+    /** long[]: `diarizeFile`, start of each speaker turn in milliseconds, ascending. */
+    const val SEGMENT_STARTS = "segmentStarts"
+
+    /** long[]: `diarizeFile`, end of each speaker turn in milliseconds. */
+    const val SEGMENT_ENDS = "segmentEnds"
+
+    /** int[]: `diarizeFile`, speaker of each turn, numbered from 0 in order of first appearance. */
+    const val SEGMENT_SPEAKERS = "segmentSpeakers"
+
+    /** Int: `diarizeFile`, speakers found. */
+    const val SPEAKER_COUNT = "speakerCount"
+
+    /** ArrayList of Bundle: `diarizeFile` with `identify`, one per speaker keyed by [SPEAKER], [NAME] (absent below the threshold) and [SCORE]. */
+    const val NAMES = "names"
+
+    /** Int: speaker number of an entry of [NAMES]. */
+    const val SPEAKER = "speaker"
+
+    // `detectLanguage` answers [LANGUAGE] (the most voted whisper language code), [CANDIDATES] (each keyed by [LANGUAGE]
+    // and [SCORE], the share of the windows, most voted first) and [SEGMENTS] (one per window, each keyed by
+    // [START_MILLIS], [END_MILLIS] and [LANGUAGE]).
+
+    /** ArrayList of Bundle: `tagAudio`, the strongest labels keyed by [LABEL], [MID], [SCORE], [START_MILLIS] and [END_MILLIS] (its best window). */
+    const val LABELS = "labels"
+
+    /** String: AudioSet display name of a label (English). */
+    const val LABEL = "label"
+
+    /** String: AudioSet ontology id of a label, such as `/m/0bt9lr`. */
+    const val MID = "mid"
+
+    /** long[]: `tagAudio` with `timeline`, start of each window in milliseconds. */
+    const val TIMELINE_STARTS = "timelineStarts"
+
+    /** long[]: `tagAudio` with `timeline`, end of each window. */
+    const val TIMELINE_ENDS = "timelineEnds"
+
+    /** int[]: `tagAudio` with `timeline`, [TIMELINE_TOP_K] positions into [LABEL_NAMES] / [LABEL_MIDS] per window, window by window. */
+    const val TIMELINE_LABELS = "timelineLabels"
+
+    /** float[]: `tagAudio` with `timeline`, the scores of [TIMELINE_LABELS]. */
+    const val TIMELINE_SCORES = "timelineScores"
+
+    /** Int: `tagAudio` with `timeline`, labels per window. */
+    const val TIMELINE_TOP_K = "timelineTopK"
+
+    /** String[]: `tagAudio` with `timeline`, the labels [TIMELINE_LABELS] refers to. */
+    const val LABEL_NAMES = "labelNames"
+
+    /** String[]: `tagAudio` with `timeline`, the AudioSet ids of [LABEL_NAMES]. */
+    const val LABEL_MIDS = "labelMids"
 }

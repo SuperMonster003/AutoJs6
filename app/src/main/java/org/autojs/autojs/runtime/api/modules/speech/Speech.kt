@@ -117,6 +117,66 @@ class Speech internal constructor(
     }
 
     /**
+     * `speech.diarize(file, options?)` (contract version 2, 3-Macaw Speech roadmap D147): who spoke when,
+     * `{ segments: [{ startMillis, endMillis, speaker }], speakers, durationMillis, modelId }` with speakers numbered from
+     * 0, plus `names` with `identify: true`; `onProgress(done, total)` reports milliseconds of audio.
+     * zh-CN: `speech.diarize(file, options?)` (契约版本 2, 3-Macaw Speech 路线图 D147): 谁在何时说话, 说话人从 0 编号, `identify: true` 时另有
+     * `names`; `onProgress(done, total)` 报告音频毫秒.
+     */
+    @RhinoRuntimeFunctionInterface
+    fun diarize(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsLengthInRange(args, 1..2) { a ->
+            SpeechCalls.blockingWithProgress(scriptRuntime, "speech.diarize", SpeechCalls.progressOf(a.getOrNull(1))) { diarizeWork(a[0], a.getOrNull(1)) }
+        }
+    }
+
+    @RhinoRuntimeFunctionInterface
+    fun diarizeAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any = guarded {
+        ensureArgumentsLengthInRange(args, 1..2) { a ->
+            SpeechCalls.asyncWithProgress(scriptRuntime, SpeechCalls.progressOf(a.getOrNull(1))) { diarizeWork(a[0], a.getOrNull(1)) }
+        }
+    }
+
+    /**
+     * `speech.detectLanguage(file, options?)` (roadmap D148): `{ language, candidates: [{ language, score }], segments,
+     * durationMillis, modelId }` from a vote over the first speech windows.
+     * zh-CN: `speech.detectLanguage(file, options?)` (路线图 D148): 对前几个语音窗投票得到的语种.
+     */
+    @RhinoRuntimeFunctionInterface
+    fun detectLanguage(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsLengthInRange(args, 1..2) { a ->
+            SpeechCalls.blockingWithProgress(scriptRuntime, "speech.detectLanguage", SpeechCalls.progressOf(a.getOrNull(1))) { detectLanguageWork(a[0], a.getOrNull(1)) }
+        }
+    }
+
+    @RhinoRuntimeFunctionInterface
+    fun detectLanguageAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any = guarded {
+        ensureArgumentsLengthInRange(args, 1..2) { a ->
+            SpeechCalls.asyncWithProgress(scriptRuntime, SpeechCalls.progressOf(a.getOrNull(1))) { detectLanguageWork(a[0], a.getOrNull(1)) }
+        }
+    }
+
+    /**
+     * `speech.tag(file, options?)` (roadmap D149): the strongest AudioSet labels,
+     * `{ labels: [{ label, mid, score, startMillis, endMillis }], durationMillis, modelId }`, plus `timeline` with
+     * `timeline: true`.
+     * zh-CN: `speech.tag(file, options?)` (路线图 D149): 最强的 AudioSet 标签, `timeline: true` 时另有 `timeline`.
+     */
+    @RhinoRuntimeFunctionInterface
+    fun tag(runtime: ScriptRuntime, args: Array<out Any?>): Any? = guarded {
+        ensureArgumentsLengthInRange(args, 1..2) { a ->
+            SpeechCalls.blockingWithProgress(scriptRuntime, "speech.tag", SpeechCalls.progressOf(a.getOrNull(1))) { tagWork(a[0], a.getOrNull(1)) }
+        }
+    }
+
+    @RhinoRuntimeFunctionInterface
+    fun tagAsync(runtime: ScriptRuntime, args: Array<out Any?>): Any = guarded {
+        ensureArgumentsLengthInRange(args, 1..2) { a ->
+            SpeechCalls.asyncWithProgress(scriptRuntime, SpeechCalls.progressOf(a.getOrNull(1))) { tagWork(a[0], a.getOrNull(1)) }
+        }
+    }
+
+    /**
      * `speech.speak(text, options?)`: the host `tts(text, options)` with the engine fixed to the plugin (roadmap D20);
      * `model` / `speaker` choose the voice `<model>/<speaker>` (roadmap D19; a speaker name is resolved by the engine,
      * a model without `speaker` gets its speaker for the language of the text, no model the engine's voice for that
@@ -278,6 +338,27 @@ class Speech internal constructor(
                 }
             }
         }
+    }
+
+    private fun diarizeWork(file: Any?, options: Any?): SpeechProgressWork {
+        val request = SpeechScriptArguments.diarize(SpeechCalls.json(options))
+        val input = service.resolveFile(SpeechScriptArguments.path(SpeechCalls.json(file), "file"))
+        service.ensureOpen()
+        return { emit -> service.host { context -> SpeechPluginHost.diarizeFile(context, input, request, emit) } }
+    }
+
+    private fun detectLanguageWork(file: Any?, options: Any?): SpeechProgressWork {
+        val request = SpeechScriptArguments.detectLanguage(SpeechCalls.json(options))
+        val input = service.resolveFile(SpeechScriptArguments.path(SpeechCalls.json(file), "file"))
+        service.ensureOpen()
+        return { emit -> service.host { context -> SpeechPluginHost.detectLanguage(context, input, request, emit) } }
+    }
+
+    private fun tagWork(file: Any?, options: Any?): SpeechProgressWork {
+        val request = SpeechScriptArguments.tag(SpeechCalls.json(options))
+        val input = service.resolveFile(SpeechScriptArguments.path(SpeechCalls.json(file), "file"))
+        service.ensureOpen()
+        return { emit -> service.host { context -> SpeechPluginHost.tagAudio(context, input, request, emit) } }
     }
 
     private fun synthesizeWork(text: Any?, path: Any?, options: Any?): SpeechWork {

@@ -2,17 +2,20 @@ package org.autojs.autojs.runtime.api.speech
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import org.autojs.autojs.core.plugin.speech.SpeechDiarizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechEnrollRequest
 import org.autojs.autojs.core.plugin.speech.SpeechErrorMapper
 import org.autojs.autojs.core.plugin.speech.SpeechIdentifyRequest
 import org.autojs.autojs.core.plugin.speech.SpeechImportRequest
 import org.autojs.autojs.core.plugin.speech.SpeechInstallRequest
 import org.autojs.autojs.core.plugin.speech.SpeechKeyword
+import org.autojs.autojs.core.plugin.speech.SpeechLanguageRequest
 import org.autojs.autojs.core.plugin.speech.SpeechListenRequest
 import org.autojs.autojs.core.plugin.speech.SpeechModelQuery
 import org.autojs.autojs.core.plugin.speech.SpeechPluginException
 import org.autojs.autojs.core.plugin.speech.SpeechRecognizeRequest
 import org.autojs.autojs.core.plugin.speech.SpeechSynthesisRequest
+import org.autojs.autojs.core.plugin.speech.SpeechTagRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVadRequest
 import org.autojs.autojs.core.plugin.speech.SpeechVerifyRequest
 import org.autojs.autojs.core.plugin.speech.SpeechWakeRequest
@@ -100,6 +103,11 @@ internal object SpeechScriptArguments {
     const val RATE = "rate"
     const val REPLACE = "replace"
     const val TOP_K = "topK"
+    const val SPEAKERS = "speakers"
+    const val SPEAKER_MODEL = "speakerModel"
+    const val IDENTIFY = "identify"
+    const val WINDOWS = "windows"
+    const val TIMELINE = "timeline"
 
     /** The largest PCM sample rate accepted for `recognize` / `detectVoice` (the plugin resamples). zh-CN: `recognize` / `detectVoice` 接受的最大 PCM 采样率 (插件负责重采样). */
     const val MAX_PCM_SAMPLE_RATE = 192_000
@@ -123,6 +131,9 @@ internal object SpeechScriptArguments {
     private val ENROLL_KEYS = setOf(REPLACE, MODEL)
     private val VERIFY_KEYS = setOf(THRESHOLD)
     private val IDENTIFY_KEYS = setOf(THRESHOLD, TOP_K)
+    private val DIARIZE_KEYS = setOf(MODEL, SPEAKER_MODEL, SPEAKERS, THRESHOLD, IDENTIFY, ON_PROGRESS)
+    private val LANGUAGE_ID_KEYS = setOf(MODEL, WINDOWS, ON_PROGRESS)
+    private val TAG_KEYS = setOf(MODEL, TOP_K, TIMELINE, ON_PROGRESS)
 
     /** `tts` options `speak` refuses: the engine is the plugin's, the voice and rate come from `model` / `speaker` / `speed`. zh-CN: `speak` 拒绝的 `tts` 选项. */
     private val SPEAK_RESERVED = setOf(ENGINE, VOICE, RATE, "speechRate")
@@ -268,6 +279,54 @@ internal object SpeechScriptArguments {
             throw invalid("'$label' must be a file path (relative to the script directory or absolute); URIs such as content:// are not accepted, got $text")
         }
         return text
+    }
+
+    // ------------------------------------------------------------------ offline analyses (contract version 2, roadmap D147 - D149)
+
+    /**
+     * `speech.diarize(file, options?)`: `model` (segmentation), `speakerModel` (embedding), `speakers` (0 to
+     * `MAX_DIARIZATION_SPEAKERS`, 0 counts them), `threshold` (clustering, 0 to 2), `identify` and `onProgress`.
+     * zh-CN: `model` (分割), `speakerModel` (嵌入), `speakers` (0 到 `MAX_DIARIZATION_SPEAKERS`, 0 为自动计数), `threshold` (聚类, 0 到 2),
+     * `identify` 与 `onProgress`.
+     */
+    fun diarize(options: JsonElement?): SpeechDiarizeRequest {
+        val given = optionalObject(options, "options") ?: return SpeechDiarizeRequest()
+        given.rejectUnknown("options", DIARIZE_KEYS)
+        rejectNonFunctionProgress(given)
+        val speakers = given.get(SPEAKERS)?.takeUnless { it.isJsonNull }?.let { value ->
+            integral(value, "options.speakers", 0.0, SpeechLimits.MAX_DIARIZATION_SPEAKERS.toDouble()).toInt()
+        } ?: 0
+        val threshold = given.doubleOrNull("options", THRESHOLD)
+        if (threshold != null && threshold !in 0.0..2.0) throw invalid("'options.threshold' must be between 0 and 2, got $threshold")
+        return SpeechDiarizeRequest(
+            model = token(given.get(MODEL), "options.model"),
+            speakerModel = token(given.get(SPEAKER_MODEL), "options.speakerModel"),
+            speakers = speakers,
+            threshold = threshold,
+            identify = given.booleanOrNull("options", IDENTIFY) ?: false,
+        )
+    }
+
+    /** `speech.detectLanguage(file, options?)`: `model`, `windows` (1 to `MAX_LANGUAGE_WINDOWS`) and `onProgress`. zh-CN: `model`, `windows` (1 到 `MAX_LANGUAGE_WINDOWS`) 与 `onProgress`. */
+    fun detectLanguage(options: JsonElement?): SpeechLanguageRequest {
+        val given = optionalObject(options, "options") ?: return SpeechLanguageRequest()
+        given.rejectUnknown("options", LANGUAGE_ID_KEYS)
+        rejectNonFunctionProgress(given)
+        val windows = given.get(WINDOWS)?.takeUnless { it.isJsonNull }?.let { value ->
+            integral(value, "options.windows", 1.0, SpeechLimits.MAX_LANGUAGE_WINDOWS.toDouble()).toInt()
+        } ?: SpeechLimits.DEFAULT_LANGUAGE_WINDOWS
+        return SpeechLanguageRequest(token(given.get(MODEL), "options.model"), windows)
+    }
+
+    /** `speech.tag(file, options?)`: `model`, `topK` (1 to `MAX_TAG_TOP_K`), `timeline` and `onProgress`. zh-CN: `model`, `topK` (1 到 `MAX_TAG_TOP_K`), `timeline` 与 `onProgress`. */
+    fun tag(options: JsonElement?): SpeechTagRequest {
+        val given = optionalObject(options, "options") ?: return SpeechTagRequest()
+        given.rejectUnknown("options", TAG_KEYS)
+        rejectNonFunctionProgress(given)
+        val topK = given.get(TOP_K)?.takeUnless { it.isJsonNull }?.let { value ->
+            integral(value, "options.topK", 1.0, SpeechLimits.MAX_TAG_TOP_K.toDouble()).toInt()
+        } ?: SpeechLimits.DEFAULT_TAG_TOP_K
+        return SpeechTagRequest(token(given.get(MODEL), "options.model"), topK, given.booleanOrNull("options", TIMELINE) ?: false)
     }
 
     // ------------------------------------------------------------------ synthesis
