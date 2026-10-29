@@ -9,7 +9,7 @@ This directory owns the generated ACE completion artifacts for AutoJs6.
 - `autojs6-api-model.mjs`: declaration-backed intermediate API model builder.
 - `type-backed-api-model.mjs`: resolves namespace merges, nested members and aliases with the editor's TypeScript runtime.
 - `generate-editor-assets.mjs`: refreshes both static indices and semantic declaration bundles, then verifies both paths.
-- `import-autojs6-dts.mjs`: imports selected AutoJs6 declaration files from a local declarations checkout.
+- `import-autojs6-dts.mjs`: imports selected AutoJs6 declaration files from a local declarations checkout. The checkout's `declarations/autojs6/index.d.ts` is kept as it is (its order and the `aj6-main-app.d.ts` reference, which the editor's LSP generation reads for the core group); selected core files it does not reference yet are appended.
 - `generate-autojs6-indices-from-dts.mjs`: regenerates the completion source from bundled declaration files.
 - `generate-autojs6-indices.mjs`: generates `autojs6_indices.js` and a build report.
 - `generate-dts.mjs`: generates `lib.autojs6.d.ts` from the same source.
