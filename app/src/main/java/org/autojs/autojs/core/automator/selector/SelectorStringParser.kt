@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.automator.selector
 
 import org.autojs.autojs.core.accessibility.UiSelector
+import kotlin.math.abs
 
 /**
  * The string selector syntax (roadmap D13, P5.3): whitespace-separated terms, each naming a
@@ -196,7 +197,93 @@ class SelectorStringParser(private val registry: SelectorRegistry = SelectorRegi
      * with it, names containing it, then names within a small edit distance; at most [limit].
      * zh-CN: 与 [key] 相近的注册表名, 最近的在前: 大小写不同的同名, 以它开头的, 含有它的, 再是编辑距离很小的; 至多 [limit] 个.
      */
-    fun suggest(key: String, limit: Int = 5): List<String> = suggest(key, registry.names, limit)
+    fun suggest(key: String, limit: Int = 5): List<String> = registry.suggestions.suggest(key, limit)
+
+    /**
+     * [names] prepared for [suggest]: each name in lower case and the characters it has, worked out once, so that a call
+     * only computes the edit distances that can stay within the budget, each row by row until it cannot. Failing calls
+     * of `pickup` / `detect` list candidates from about 250 names; lowering every name four times and computing every
+     * distance in full took 1.8-3.4 ms per call on XQ-AT72 (docs/augment/ROADMAP.md appendix C Q141).
+     * zh-CN: 为 [suggest] 预处理的 [names]: 每个名称的小写形式与所含字符只算一次, 调用时只计算可能不超过预算的编辑距离, 且逐行计算, 超出即停.
+     * `pickup` / `detect` 的失败调用要从约 250 个名称中列出候选; 每个名称转小写 4 次且完整计算每个编辑距离时, XQ-AT72 上每次需 1.8-3.4 ms (augment 附录 C Q141).
+     */
+    class Suggestions(names: Collection<String>) {
+
+        // The first of equal names only: the candidates are distinct, and each keeps the place of its first occurrence.
+        // zh-CN: 相同的名称只保留第一个: 候选互不相同, 且各自保持首次出现的位置.
+        private val names: Array<String> = LinkedHashSet(names).toTypedArray()
+        private val lowered = Array(this.names.size) { this.names[it].lowercase() }
+        private val masks = LongArray(this.names.size) { charMask(lowered[it]) }
+
+        /**
+         * The names close to [key], nearest first: the same name in another case, names starting with it, names
+         * containing it, then names within an edit distance of a third of its length (at least 1), the nearer first;
+         * at most [limit]. zh-CN: 与 [key] 相近的名称, 最近的在前: 大小写不同的同名, 以它开头的, 含有它的, 再是编辑距离不超过其长度三分之一 (至少 1) 的,
+         * 近的在前; 至多 [limit] 个.
+         */
+        fun suggest(key: String, limit: Int = 5): List<String> {
+            val lower = key.lowercase()
+            if (lower.isEmpty()) return emptyList()
+            val keyMask = charMask(lower)
+            val budget = maxOf(1, key.length / 3)
+            val exact = ArrayList<String>(1)
+            val prefix = ArrayList<String>()
+            val contains = ArrayList<String>()
+            // The nearest [limit] other names within the budget, by distance and then in the order of the names.
+            // zh-CN: 预算内最近的 [limit] 个其他名称, 按距离, 距离相同时按名称顺序.
+            val capacity = maxOf(limit, 0)
+            val closeNames = arrayOfNulls<String>(capacity)
+            val closeDistances = IntArray(capacity)
+            var closeCount = 0
+            val rows = Array(2) { IntArray(lower.length + 1) }
+            for (i in names.indices) {
+                val name = lowered[i]
+                val mask = masks[i]
+                // A name with a character the key lacks cannot be or contain it. zh-CN: 缺少键中某个字符的名称不可能等于或包含它.
+                if (name.length >= lower.length && keyMask and mask.inv() == 0L) {
+                    val at = indexOf(name, lower)
+                    if (at >= 0) {
+                        when {
+                            at > 0 -> contains += names[i]
+                            name.length == lower.length -> exact += names[i]
+                            else -> prefix += names[i]
+                        }
+                        continue
+                    }
+                }
+                // A later name of the same distance comes after the ones kept, so once [capacity] are kept it has to be nearer.
+                // zh-CN: 距离相同的后续名称排在已保留者之后, 因此保留满 [capacity] 个之后, 它必须更近.
+                val bound = when {
+                    closeCount < capacity -> budget
+                    capacity == 0 -> -1
+                    else -> minOf(budget, closeDistances[capacity - 1] - 1)
+                }
+                if (bound < 0 || abs(name.length - lower.length) > bound) continue
+                // Every character one string has and the other lacks takes an edit of its own. zh-CN: 一方有而另一方没有的每个字符都需要各自的一次编辑.
+                if ((keyMask and mask.inv()).countOneBits() > bound || (mask and keyMask.inv()).countOneBits() > bound) continue
+                val distance = editDistance(name, lower, bound, rows)
+                if (distance > bound) continue
+                // After the kept names of the same or a smaller distance; the farthest drops out when every place is taken.
+                // zh-CN: 排在距离相同或更小的已保留名称之后; 位置已满时最远的一个被挤出.
+                var at = minOf(closeCount, capacity - 1)
+                while (at > 0 && closeDistances[at - 1] > distance) {
+                    closeDistances[at] = closeDistances[at - 1]
+                    closeNames[at] = closeNames[at - 1]
+                    at -= 1
+                }
+                closeDistances[at] = distance
+                closeNames[at] = names[i]
+                if (closeCount < capacity) closeCount += 1
+            }
+            val out = ArrayList<String>(exact.size + prefix.size + contains.size + closeCount)
+            out += exact
+            out += prefix
+            out += contains
+            for (k in 0 until closeCount) out += closeNames[k]!!
+            return out.take(limit)
+        }
+
+    }
 
     companion object {
 
@@ -204,18 +291,69 @@ class SelectorStringParser(private val registry: SelectorRegistry = SelectorRegi
 
         /**
          * [names] close to [key], nearest first, by the rules of the instance `suggest` (also the candidates of the
-         * result types and node methods of `pickup` / `detect`, docs/selector/ROADMAP.md P1.2); at most [limit].
+         * result types and node methods of `pickup` / `detect`, docs/selector/ROADMAP.md P1.2); at most [limit]. Names
+         * asked again and again go through one [Suggestions] instead.
          * zh-CN: [names] 中与 [key] 相近的名称, 最近的在前, 规则同实例方法 `suggest` (`pickup` / `detect` 的结果类型与节点方法的候选也用它, P1.2); 至多 [limit] 个.
+         * 反复查询的名称改用同一个 [Suggestions].
          */
-        fun suggest(key: String, names: Collection<String>, limit: Int = 5): List<String> {
-            val lower = key.lowercase()
-            if (lower.isEmpty()) return emptyList()
-            val exact = names.filter { it.lowercase() == lower }
-            val prefix = names.filter { it.lowercase().startsWith(lower) }
-            val contains = names.filter { lower in it.lowercase() }
-            val budget = maxOf(1, key.length / 3)
-            val close = names.filter { editDistance(it.lowercase(), lower) <= budget }.sortedBy { editDistance(it.lowercase(), lower) }
-            return (exact + prefix + contains + close).distinct().take(limit)
+        fun suggest(key: String, names: Collection<String>, limit: Int = 5): List<String> = Suggestions(names).suggest(key, limit)
+
+        /**
+         * The characters of [s] as bits: `a`-`z` and `0`-`9` one each, the others hashed onto the rest. Bits one string has and
+         * the other lacks count characters that take an edit each (shared bits only make the count smaller).
+         * zh-CN: [s] 所含字符的位集: `a`-`z` 与 `0`-`9` 各占一位, 其他字符散列到其余各位. 一方有而另一方没有的位数是各需一次编辑的字符数 (共用的位只会使其更小).
+         */
+        private fun charMask(s: String): Long {
+            var mask = 0L
+            for (c in s) {
+                val bit = when (c) {
+                    in 'a'..'z' -> c - 'a'
+                    in '0'..'9' -> 26 + (c - '0')
+                    else -> 36 + c.code % 28
+                }
+                mask = mask or (1L shl bit)
+            }
+            return mask
+        }
+
+        /**
+         * Where [key] first occurs in [name], or -1. A loop of its own: `startsWith` / `contains` of kotlin.text stayed
+         * interpreted in the debug host on XQ-AT72 and took a fifth of a failing `pickup` (docs/augment/ROADMAP.md appendix C Q141).
+         * zh-CN: [key] 在 [name] 中首次出现的位置, 没有时为 -1. 自行循环: kotlin.text 的 `startsWith` / `contains` 在 XQ-AT72 的 debug 宿主上一直解释执行,
+         * 占失败的 `pickup` 的五分之一 (augment 附录 C Q141).
+         */
+        private fun indexOf(name: String, key: String): Int {
+            outer@ for (start in 0..name.length - key.length) {
+                for (k in 0 until key.length) if (name[start + k] != key[k]) continue@outer
+                return start
+            }
+            return -1
+        }
+
+        /**
+         * The edit distance of [a] and [b], or a number past [bound] once every entry of a row is (the entries of a row
+         * never get smaller than the smallest of the row before); [rows] are two rows for [b], reused.
+         * zh-CN: [a] 与 [b] 的编辑距离, 或在某一行全部超过 [bound] 时返回大于 [bound] 的数 (每行的值不小于上一行的最小值); [rows] 为按 [b] 分配, 可复用的两行.
+         */
+        private fun editDistance(a: String, b: String, bound: Int, rows: Array<IntArray>): Int {
+            var previous = rows[0]
+            var current = rows[1]
+            for (j in 0..b.length) previous[j] = j
+            for (i in 1..a.length) {
+                current[0] = i
+                var smallest = i
+                for (j in 1..b.length) {
+                    val cost = if (a[i - 1] == b[j - 1]) 0 else 1
+                    val value = minOf(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost)
+                    current[j] = value
+                    if (value < smallest) smallest = value
+                }
+                if (smallest > bound) return bound + 1
+                val swap = previous
+                previous = current
+                current = swap
+            }
+            return previous[b.length]
         }
 
         /** `/re/flags` as given, or `null` when [value] is not a regular expression literal. zh-CN: 原样的 `/re/flags`, [value] 不是正则字面量时为 `null`. */

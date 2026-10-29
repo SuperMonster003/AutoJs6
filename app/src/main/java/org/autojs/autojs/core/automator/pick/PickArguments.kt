@@ -250,9 +250,11 @@ class PickArguments<N : UiNode<N>>(private val nodeType: Class<N>, private val m
     }
 
     private fun resultCandidates(name: String): List<String> =
-        SelectorStringParser.suggest(name, resultSpellings).ifEmpty { FALLBACK_RESULT_CANDIDATES }
+        resultSpellings.suggest(name).ifEmpty { FALLBACK_RESULT_CANDIDATES }
 
-    private val resultSpellings: List<String> by lazy { (SYMBOLS.flatMap { PickResultType.spellings(it) } + methods.spellings).distinct() }
+    private val resultSpellings: SelectorStringParser.Suggestions by lazy {
+        SelectorStringParser.Suggestions((SYMBOLS.flatMap { PickResultType.spellings(it) } + methods.spellings).distinct())
+    }
 
     /**
      * Reads a selector form into the selector given ([binding] builds it), or only checks it (no binding, no selector):
@@ -332,7 +334,7 @@ class PickArguments<N : UiNode<N>>(private val nodeType: Class<N>, private val m
     }
 
     private fun conditionCandidates(key: String): List<String> =
-        SelectorStringParser.suggest(key, SelectorRegistry.names).ifEmpty { FALLBACK_CONDITION_CANDIDATES.filter { it in SelectorRegistry } }
+        SelectorRegistry.suggestions.suggest(key).ifEmpty { FALLBACK_CONDITION_CANDIDATES.filter { it in SelectorRegistry } }
 
     /** The values the overloads of a condition take: a single argument, `null` (none), or an array of the arguments. */
     private fun accepted(entry: SelectorEntry): String = entry.overloads.map { overload ->

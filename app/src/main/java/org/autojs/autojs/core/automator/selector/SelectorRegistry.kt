@@ -58,6 +58,9 @@ object SelectorRegistry {
 
     val names: List<String> get() = entries.map { it.name }
 
+    /** [names] prepared once for the candidates of an unknown name (docs/augment/ROADMAP.md appendix C Q141). zh-CN: 为未知名称的候选预处理一次的 [names] (augment 附录 C Q141). */
+    val suggestions: SelectorStringParser.Suggestions by lazy { SelectorStringParser.Suggestions(names) }
+
     fun entry(name: String): SelectorEntry? = byName[name]
 
     operator fun contains(name: String): Boolean = name in byName
