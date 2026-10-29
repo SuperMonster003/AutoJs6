@@ -1,0 +1,101 @@
+// Device cases of the Bun files and data family (api-coverage roadmap P4.2b), run by device_bun_js_tools.py --cases
+// next to the shared JS tools cases (which supply the encoders). Format of the shared cases: [id, Rhino expression,
+// Bun expression (may return a Promise)]. The files cases work below the run directory /sdcard/Download/aj6-bun-js-tools
+// (removed after each run) and remove their own entries; the mediainfo cases read aj6-media.wav, a 0.1 s 8 kHz mono PCM
+// WAV file the device script pushes there first (fixture --media). Rhino results are normalized to plain values (Java
+// byte[] to unsigned numbers, Java numbers to numbers) where Bun has no Java object to compare with.
+// zip and the open / toFile cases work in Z (a directory literal) and in z below the script directory, which is the
+// working directory of both runs (relative paths of Bun's zip / open / toFile resolve against the host's files.cwd()).
+var Z = "'/sdcard/Download/aj6-bun-js-tools/z'";
+// The entry names of the Zip z.
+var ZN = "(function (z) { return z.getFileHeaders().map(function (h) { return String(h.getFileName()); }).sort(); })";
+var BZN = "(async z => (await Promise.all((await z.getFileHeaders()).map(h => h.call('getFileName')))).sort())";
+var JS_TOOLS_CASES = [
+    ["files.sdcardPath", "files.sdcardPath"],
+    ["files.cwd", "files.cwd()"],
+    ["files.create",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/create'; files.removeDir(d); files.ensureDir(d + '/'); var r = [files.create(d + '/a.txt'), files.isFile(d + '/a.txt'), files.create(d + '/a.txt'), files.create(d + '/x/'), files.isDir(d + '/x')]; files.removeDir(d); return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/create'; await files.removeDir(d); await files.ensureDir(d + '/'); const r = [await files.create(d + '/a.txt'), await files.isFile(d + '/a.txt'), await files.create(d + '/a.txt'), await files.create(d + '/x/'), await files.isDir(d + '/x')]; await files.removeDir(d); return r; })()"],
+    ["files.createIfNotExists",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/cine'; files.removeDir(d); var r = [files.createIfNotExists(d + '/a/b.txt'), files.isFile(d + '/a/b.txt'), files.createIfNotExists(d + '/a/b.txt'), files.createIfNotExists(d + '/c/')]; r.push(files.isDir(d + '/c')); files.removeDir(d); return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/cine'; await files.removeDir(d); const r = [await files.createIfNotExists(d + '/a/b.txt'), await files.isFile(d + '/a/b.txt'), await files.createIfNotExists(d + '/a/b.txt'), await files.createIfNotExists(d + '/c/')]; r.push(await files.isDir(d + '/c')); await files.removeDir(d); return r; })()"],
+    ["files.createWithDirs",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/cwd'; files.removeDir(d); var r = [files.createWithDirs(d + '/a/b/c.txt'), files.isFile(d + '/a/b/c.txt'), files.createWithDirs(d + '/a/b/c.txt')]; files.removeDir(d); return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/cwd'; await files.removeDir(d); const r = [await files.createWithDirs(d + '/a/b/c.txt'), await files.isFile(d + '/a/b/c.txt'), await files.createWithDirs(d + '/a/b/c.txt')]; await files.removeDir(d); return r; })()"],
+    ["files.isEmptyDir",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/empty'; files.removeDir(d); files.ensureDir(d + '/x/'); var r = [files.isEmptyDir(d + '/x'), files.isEmptyDir(d), files.isEmptyDir(d + '/missing')]; files.removeDir(d); return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/empty'; await files.removeDir(d); await files.ensureDir(d + '/x/'); const r = [await files.isEmptyDir(d + '/x'), await files.isEmptyDir(d), await files.isEmptyDir(d + '/missing')]; await files.removeDir(d); return r; })()"],
+    ["files.removeDir",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/rm'; files.createWithDirs(d + '/a/b.txt'); var r = [files.removeDir(d), files.exists(d), files.removeDir(d)]; return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/rm'; await files.createWithDirs(d + '/a/b.txt'); return [await files.removeDir(d), await files.exists(d), await files.removeDir(d)]; })()"],
+    ["files.writeBytes",
+        "(function () { var p = '/sdcard/Download/aj6-bun-js-tools/f/w.bin'; files.createWithDirs(p); var a = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 4); a[0] = 0; a[1] = 1; a[2] = 127; a[3] = -1; files.writeBytes(p, a); files.writeBytes(p, a); var b = files.readBytes(p), r = []; for (var i = 0; i < b.length; i++) r.push(b[i] & 255); files.remove(p); return r; })()",
+        "(async () => { const p = '/sdcard/Download/aj6-bun-js-tools/f/w.bin'; await files.createWithDirs(p); await files.writeBytes(p, [0, 1, 127, -1]); await files.writeBytes(p, new Uint8Array([0, 1, 127, 255])); const b = await files.readBytes(p); await files.remove(p); return Array.from(b); })()"],
+    ["files.appendBytes",
+        "(function () { var p = '/sdcard/Download/aj6-bun-js-tools/f/a.bin'; files.removeDir('/sdcard/Download/aj6-bun-js-tools/f/a.bin'); files.ensureDir(p); var a = java.lang.reflect.Array.newInstance(java.lang.Byte.TYPE, 2); a[0] = 65; a[1] = -128; files.appendBytes(p, a); files.appendBytes(p, a); var r = [files.read(p).length]; var b = files.readBytes(p); for (var i = 0; i < b.length; i++) r.push(b[i] & 255); files.remove(p); return r; })()",
+        "(async () => { const p = '/sdcard/Download/aj6-bun-js-tools/f/a.bin'; await files.removeDir(p); await files.ensureDir(p); await files.appendBytes(p, [65, -128]); await files.appendBytes(p, Buffer.from([65, 128])); const r = [(await files.read(p)).length]; r.push(...await files.readBytes(p)); await files.remove(p); return r; })()"],
+    ["files.readBytes",
+        "(function () { var p = '/sdcard/Download/aj6-bun-js-tools/f/r.txt'; files.createWithDirs(p); files.write(p, 'h\\u00e9'); var b = files.readBytes(p), r = []; for (var i = 0; i < b.length; i++) r.push(b[i] & 255); files.remove(p); return r; })()",
+        "(async () => { const p = '/sdcard/Download/aj6-bun-js-tools/f/r.txt'; await files.createWithDirs(p); await files.write(p, 'h\\u00e9'); const b = await files.readBytes(p); await files.remove(p); return [...b]; })()"],
+    ["files.rename",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/ren'; files.removeDir(d); files.createWithDirs(d + '/a.txt'); var r = [files.rename(d + '/a.txt', 'b.txt'), files.exists(d + '/a.txt'), files.isFile(d + '/b.txt'), files.rename(d + '/missing.txt', 'c.txt')]; files.removeDir(d); return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/ren'; await files.removeDir(d); await files.createWithDirs(d + '/a.txt'); const r = [await files.rename(d + '/a.txt', 'b.txt'), await files.exists(d + '/a.txt'), await files.isFile(d + '/b.txt'), await files.rename(d + '/missing.txt', 'c.txt')]; await files.removeDir(d); return r; })()"],
+    ["files.renameWithoutExtension",
+        "(function () { var d = '/sdcard/Download/aj6-bun-js-tools/f/rwe'; files.removeDir(d); files.createWithDirs(d + '/a.txt'); var r = [files.renameWithoutExtension(d + '/a.txt', 'c'), files.isFile(d + '/c.txt'), files.listDir(d).length]; files.removeDir(d); return r; })()",
+        "(async () => { const d = '/sdcard/Download/aj6-bun-js-tools/f/rwe'; await files.removeDir(d); await files.createWithDirs(d + '/a.txt'); const r = [await files.renameWithoutExtension(d + '/a.txt', 'c'), await files.isFile(d + '/c.txt'), (await files.listDir(d)).length]; await files.removeDir(d); return r; })()"],
+    ["files.readAssets", "files.readAssets('apk_builder_default_signer_certificate_sha256.txt')"],
+    ["files.readAssets.charset", "files.readAssets('apk_builder_default_signer_certificate_sha256.txt', 'ISO-8859-1').length",
+        "files.readAssets('apk_builder_default_signer_certificate_sha256.txt', 'ISO-8859-1').then(text => text.length)"],
+    ["files.getSimplifiedPath", "[files.getSimplifiedPath('/storage/emulated/0/Download/a.txt'), files.getSimplifiedPath('/data/local/tmp/a.txt')]",
+        "Promise.all([files.getSimplifiedPath('/storage/emulated/0/Download/a.txt'), files.getSimplifiedPath('/data/local/tmp/a.txt')])"],
+    ["mediainfo.SNAPSHOT_SCHEMA_V1", "mediainfo.SNAPSHOT_SCHEMA_V1"],
+    ["mediainfo.SNAPSHOT_SCHEMA_V2", "mediainfo.SNAPSHOT_SCHEMA_V2"],
+    ["mediainfo.get", "[mediainfo.get('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'audio', 'Format'), mediainfo.get('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'Audio', 'SamplingRate')]",
+        "Promise.all([mediainfo.get('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'audio', 'Format'), mediainfo.get('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'Audio', 'SamplingRate')])"],
+    ["mediainfo.get.options", "mediainfo.get('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'audio', 'Channels', {streamNumber: 0, infoKind: 'TEXT'})"],
+    ["mediainfo.countGet", "Number(mediainfo.countGet('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'audio'))",
+        "mediainfo.countGet('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', 'audio').then(Number)"],
+    ["mediainfo.capabilities", "(function (c) { return [String(c.defaultSnapshotSchema), c.snapshotSchemas.length > 0, c.streamCount === true]; })(mediainfo.capabilities())",
+        "mediainfo.capabilities().then(c => [String(c.defaultSnapshotSchema), c.snapshotSchemas.length > 0, c.streamCount === true])"],
+
+    // zip (zip4j in the host; Bun: over the Java facade, java.interop), files.open / toFile and the global open.
+    ["zip.zipFile",
+        "(function () { var d = " + Z + "; files.removeDir(d); files.createWithDirs(d + '/a.txt'); files.write(d + '/a.txt', 'hello'); zip.zipFile(d + '/a.txt', d + '/a.zip'); var z = zip.open(d + '/a.zip'); return [z.isValidZipFile(), z.isEncrypted(), " + ZN + "(z)]; })()",
+        "(async () => { const d = " + Z + "; await files.removeDir(d); await files.createWithDirs(d + '/a.txt'); await files.write(d + '/a.txt', 'hello'); await zip.zipFile(d + '/a.txt', d + '/a.zip'); const z = await zip.open(d + '/a.zip'); return [await z.isValidZipFile(), await z.isEncrypted(), await " + BZN + "(z)]; })()"],
+    ["zip.unzip",
+        "(function () { var d = " + Z + "; zip.unzip(d + '/a.zip', d + '/out'); return files.read(d + '/out/a.txt'); })()",
+        "(async () => { const d = " + Z + "; await zip.unzip(d + '/a.zip', d + '/out'); return files.read(d + '/out/a.txt'); })()"],
+    ["zip.zipDir",
+        "(function () { var d = " + Z + "; files.createWithDirs(d + '/dir/x.txt'); files.createWithDirs(d + '/dir/y/z.txt'); zip.zipDir(d + '/dir', d + '/dir.zip'); return " + ZN + "(zip.open(d + '/dir.zip')); })()",
+        "(async () => { const d = " + Z + "; await files.createWithDirs(d + '/dir/x.txt'); await files.createWithDirs(d + '/dir/y/z.txt'); await zip.zipDir(d + '/dir', d + '/dir.zip'); return " + BZN + "(await zip.open(d + '/dir.zip')); })()"],
+    ["zip.zipFiles",
+        "(function () { var d = " + Z + "; zip.zipFiles([d + '/dir/x.txt', d + '/a.txt'], d + '/files.zip'); return " + ZN + "(zip(d + '/files.zip')); })()",
+        "(async () => { const d = " + Z + "; await zip.zipFiles([d + '/dir/x.txt', d + '/a.txt'], d + '/files.zip'); return " + BZN + "(await zip(d + '/files.zip')); })()"],
+    ["zip.password",
+        "(function () { var d = " + Z + "; zip.zipFile(d + '/a.txt', d + '/p.zip', {password: 'pw'}); var r = [zip.open(d + '/p.zip').isEncrypted()]; zip.unzip(d + '/p.zip', d + '/pout', {password: 'pw'}); r.push(files.read(d + '/pout/a.txt')); return r; })()",
+        "(async () => { const d = " + Z + "; await zip.zipFile(d + '/a.txt', d + '/p.zip', {password: 'pw'}); const r = [await (await zip.open(d + '/p.zip')).isEncrypted()]; await zip.unzip(d + '/p.zip', d + '/pout', {password: 'pw'}); r.push(await files.read(d + '/pout/a.txt')); return r; })()"],
+    ["zip.relative",
+        "(function () { zip.zipFile('z/a.txt', 'z/rel.zip'); return [files.exists(" + Z + " + '/rel.zip'), " + ZN + "(zip.open('z/rel.zip'))]; })()",
+        "(async () => { await zip.zipFile('z/a.txt', 'z/rel.zip'); return [await files.exists(" + Z + " + '/rel.zip'), await " + BZN + "(await zip.open('z/rel.zip'))]; })()"],
+    ["zip.open.none", "(function () { try { zip.open(); return 'no error'; } catch (e) { return e.javaException ? String(e.javaException.getClass().getSimpleName()) : String(e.name); } })()",
+        "zip.open().then(() => 'no error', e => String(e.name))"],
+    ["files.toFile.name", "String(files.toFile(" + Z + " + '/a.txt').getName())", "files.toFile(" + Z + " + '/a.txt').then(f => f.call('getName'))"],
+    ["files.toFile.relative", "String(files.toFile('z/a.txt').getPath())", "files.toFile('z/a.txt').then(f => f.call('getPath'))"],
+    ["files.open.read", "(function () { var f = files.open(" + Z + " + '/a.txt'); try { return f.read(); } finally { f.close(); } })()",
+        "files.open(" + Z + " + '/a.txt').then(async f => { try { return await f.call('read'); } finally { await f.call('close'); } })"],
+    ["global.open.write", "(function () { var f = G.open(" + Z + " + '/w.txt', 'w'); f.write('xy'); f.close(); return files.read(" + Z + " + '/w.txt'); })()",
+        "(async () => { const f = await G.open(" + Z + " + '/w.txt', 'w'); await f.call('write', ['xy']); await f.call('close'); return files.read(" + Z + " + '/w.txt'); })()"],
+    ["zip.cleanup", "files.removeDir(" + Z + ")"],
+    // The MediaInfo reports last: a plugin that cannot open the file may keep Rhino waiting (no timeout there).
+    ["mediainfo.read", "(function (s) { return [String(s.fileName), Number(s.sizeBytes), String(s.inform).length > 0]; })(mediainfo.read('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav'))",
+        "mediainfo.read('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav').then(s => [String(s.fileName), Number(s.sizeBytes), String(s.inform).length > 0])"],
+    ["mediainfo.snapshot", "String(mediainfo.snapshot('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav').schema)",
+        "mediainfo.snapshot('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav').then(s => s.schema)"],
+    ["mediainfo.snapshot.v1", "(function (s) { return [String(s.schema), String(s.fileName), Number(s.sizeBytes)]; })(mediainfo.snapshot('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', {schema: mediainfo.SNAPSHOT_SCHEMA_V1}))",
+        "mediainfo.snapshot('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav', {schema: mediainfo.SNAPSHOT_SCHEMA_V1}).then(s => [String(s.schema), String(s.fileName), Number(s.sizeBytes)])"],
+    ["mediainfo.invoke", "(function (s) { return Number(s.sizeBytes); })(mediainfo('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav'))",
+        "mediainfo('/sdcard/Download/aj6-bun-js-tools/aj6-media.wav').then(s => Number(s.sizeBytes))"],
+];
+if (typeof module === "object" && module && module.exports) {
+    module.exports = {cases: JS_TOOLS_CASES};
+}

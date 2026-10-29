@@ -113,6 +113,11 @@ jobs:
           lfs: false
       - uses: actions/checkout@v4
         with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Bundled-Libraries
+          path: AutoJs6-Plugin-Bundled-Libraries
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
           repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Three-Macaw-Speech
           ref: ${{ inputs.speech_plugin_ref }}
           path: AutoJs6-Plugin-Three-Macaw-Speech
@@ -167,6 +172,7 @@ jobs:
           node tools/api-coverage/check-runtime-js-tools.mjs
           node tools/api-coverage/check-runtime-files-data.mjs
           node tools/api-coverage/check-bun-js-tools.mjs
+          node tools/api-coverage/check-bun-files-data.mjs
           node tools/api-coverage/check-bun-app-shell.mjs
       - name: Check Ace runtime completion against the runtime matrix
         working-directory: AutoJs6-Plugin-Ace-Editor

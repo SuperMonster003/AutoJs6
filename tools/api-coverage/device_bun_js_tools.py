@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 """Device comparison of the Bun pure JS tool family (api-coverage roadmap P4.2a): util, species, the global data
-functions, jsox (Mathx / Arrayx / Numberx), cvt / fmt / s13n and pinyin of the Bun host client against Rhino.
+functions, jsox (Mathx / Arrayx / Numberx), cvt / fmt / s13n and pinyin of the Bun host client against Rhino, and of
+the files and data family (P4.2b, --cases device_bun_files_data_cases.js).
 
 The cases are the shared JS tools cases (the Node runtime's tools/nodejs/api/js-tools/cases.js, synchronized into the
 Bun checkout as tools/host-client/js-tools/cases.js): [id, expression] or [id, expression, runtime expression], where
 the runtime expression (Node / Bun, may return a Promise) replaces the Rhino one and null skips the case. Results are
 encoded by the cases file's own jsToolsEncode / jsToolsThrown in both engines and travel as chunked console lines
-(GlobalConsole logcat). Only counts, failing case ids and short values are printed.
+(GlobalConsole logcat). Only counts, failing case ids and short values are printed. --cases FILE runs the cases of
+FILE (same format, encoders from the shared cases) instead, with the MediaInfo WAV fixture pushed next to the script.
+bun --node-groups colors,mime,data runs the P3.2b cases of the Node runtime (tools/nodejs/api/files-data, ids prefixed
+with the group) against its rhino-expected.json. A Bun case that does not settle in 30 s is reported as CaseTimeout; a
+host call failure is the same in both when Rhino's InternalError "Failed to call method" and Bun's HostCallError carry
+the same message or error code. --foreground brings the host to the front first: ColorOS freezes the host and the
+plugin processes in the background during a long run.
 
 Phases (all take --serial; record / install / restore / verify also --state, a private directory):
   record                 versions and APK md5 of the host and the Bun plugin, and a copy of their APKs
@@ -15,10 +22,10 @@ Phases (all take --serial; record / install / restore / verify also --state, a p
   rhino [--out FILE]     run the cases in Rhino (RunIntentActivity) and write the expected values
   bun --expected FILE [--modes main,worker] [--denied G ...] [--report FILE]
                          run the cases in a Bun main script and a Bun Worker and compare them with the expected
-                         values; with a denied grant (java.interop) the cases that reach the Java facade must reject
-                         with NOT_GRANTED (or fail the same argument check Rhino fails first), all others still pass
-                         ("open": the library getters of the global object, global.axios / dayjs / pangu / cheerio /
-                         i18n, are counted apart until api-coverage Q61 / Q64 decide them)
+                         values; with a denied grant (java.interop, files.control, mediainfo.control, storage.control)
+                         the cases that reach it must reject with NOT_GRANTED (or fail the same argument check Rhino
+                         fails first), all others still pass (the library getters of the global object are compared
+                         like the other cases since api-coverage Q61 (b) / Q64 (b))
   grant --set on|off|restore --only G ...   set (or restore) host Bun grants through a host script; the first change
                          of each grant records its previous value in --state
 
@@ -26,15 +33,19 @@ No dialog is answered here: the grants are host preferences (BunHostCapabilityGr
 runs in the host and restored afterwards. Pushed scripts are removed after each phase.
 """
 import argparse
+import io
 import json
+import math
 from pathlib import Path
 import re
+import struct
 import subprocess
 import sys
 import threading
 import time
 import urllib.parse
 import uuid
+import wave
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -51,9 +62,17 @@ CHUNK = 1000
 # Bun expressions reaching the host's Java facade (java.interop): util.java.*, s13n.point / throwable, the display
 # conversions, morse vibration and the java handle API itself.
 JAVA_SOURCE = re.compile(r"\bjava\.|util\.java\.|s13n\.(point|throwable)\(|\.vibrate\(")
-# The library getters of the Rhino global object: not in the Bun client while api-coverage Q61 / Q64 are open; counted
-# apart as "open", not as failures.
-OPEN_CASES = re.compile(r"^global\.(axios|dayjs|pangu|cheerio|i18n)\.")
+# The Bun expressions each denied grant may answer with NOT_GRANTED (a broad match only widens what may pass that way;
+# the other cases of a denied run still have to give the Rhino values).
+GRANT_SOURCES = {"java.interop": JAVA_SOURCE, "files.control": re.compile(r"\bfiles\."),
+                 "mediainfo.control": re.compile(r"\bmediainfo\b"), "storage.control": re.compile(r"\bstorages?\.")}
+# The MediaInfo fixture of the files and data cases (--cases device_bun_files_data_cases.js): a 0.1 s 8 kHz mono
+# 16-bit PCM WAV file, pushed to the run directory as aj6-media.wav.
+MEDIA_NAME = "aj6-media.wav"
+# The P3.2b cases files of the Node runtime (tools/nodejs/api/files-data) whose Node expressions the Bun client can
+# evaluate; files and zip use Node's synchronous files and stay with the Node runtime.
+NL = chr(10)
+NODE_GROUPS = {"colors": "cases-colors.js", "mime": "cases-mime-recorder.js", "data": "cases-data.js"}
 
 EMIT_JS = """
 function aj6Emit(run, index, result) {
@@ -90,6 +109,8 @@ function aj6JavaInfo(v) {
             result = {th: jsToolsThrown(e)};
         }
         aj6Emit(AJ6_RUN, i, result);
+        // A burst of console lines can lose some on the way to logcat.
+        if ((i + 1) % 20 === 0) java.lang.Thread.sleep(30);
     }
     aj6Emit(AJ6_RUN, -1, {done: JS_TOOLS_CASES.length, sdk: android.os.Build.VERSION.SDK_INT});
 })(aj6Global);
@@ -98,9 +119,12 @@ function aj6JavaInfo(v) {
 # The Bun case runner, shared by the main script and the Worker: the host client namespaces under the names the
 # cases use (the Node module names).
 BUN_RUNNER_JS = """
+const AJ6_D = '""" + DEVICE_DIR + """/d', AJ6_CASE_TIMEOUT_MS = 30000;
 function aj6Env(host) {
     return {util: host.util, species: host.species, G: host.global, Mathx: host.jsox.mathx, Arrayx: host.jsox.arrayx,
-        Numberx: host.jsox.numberx, jsox: host.jsox, cvt: host.cvt, fmt: host.fmt, s13n: host.s13n, pinyin: host.pinyin, java: host.java};
+        Numberx: host.jsox.numberx, jsox: host.jsox, cvt: host.cvt, fmt: host.fmt, s13n: host.s13n, pinyin: host.pinyin, java: host.java,
+        files: host.files, mediainfo: host.mediainfo, storages: host.storages, colors: host.colors, Color: host.global.Color,
+        zip: host.zip, mime: host.mime, recorder: host.recorder, D: AJ6_D};
 }
 async function aj6Run(env, emit) {
     const names = Object.keys(env), values = names.map(name => env[name]);
@@ -117,7 +141,11 @@ async function aj6Run(env, emit) {
                 let async = false;
                 if (value && typeof value.then === 'function') {
                     async = true;
-                    value = await value;
+                    // A case that never settles is reported and the run goes on.
+                    let timer;
+                    value = await Promise.race([value, new Promise((_, reject) => { timer = setTimeout(() => reject(
+                        Object.assign(new Error('the case did not settle in ' + AJ6_CASE_TIMEOUT_MS + ' ms'), {name: 'CaseTimeout'})), AJ6_CASE_TIMEOUT_MS); })])
+                        .finally(() => clearTimeout(timer));
                 }
                 result = {ok: jsToolsEncode(value, javaInfo)};
                 if (async) result.async = 1;
@@ -126,6 +154,8 @@ async function aj6Run(env, emit) {
             }
         }
         emit(i, result);
+        // A burst of console lines can lose some on the way to logcat.
+        if ((i + 1) % 20 === 0) await new Promise(resolve => setTimeout(resolve, 30));
     }
 }
 """
@@ -227,16 +257,32 @@ class Collector:
         self.process.kill()
 
 
-def run_script(serial, name, text, run, wait):
-    """Pushes [text], starts it with RunIntentActivity and returns the results of run [run] by index."""
+FOREGROUND = False
+
+
+def run_script(serial, name, text, run, wait, extra=None):
+    """Pushes [text] (and the [extra] files, name to bytes), starts it with RunIntentActivity and returns the results of
+    run [run] by index."""
     local = HERE / "__pycache__" / name
     local.parent.mkdir(exist_ok=True)
     local.write_text(text, encoding="utf-8")
     remote = f"{DEVICE_DIR}/{name}"
     sample.adb(serial, "shell", "mkdir", "-p", DEVICE_DIR)
     sample.adb(serial, "push", str(local), remote)
+    for file_name, data in (extra or {}).items():
+        path = HERE / "__pycache__" / file_name
+        path.write_bytes(data)
+        try:
+            sample.adb(serial, "push", str(path), f"{DEVICE_DIR}/{file_name}")
+        finally:
+            path.unlink(missing_ok=True)
     collector = Collector(serial, run)
     try:
+        if FOREGROUND:
+            # ColorOS freezes the host and its plugin processes once the host is in the background (cached), so a long
+            # run keeps the host's launcher activity in front of the script.
+            sample.adb(serial, "shell", "monkey", "-p", HOST, "-c", "android.intent.category.LAUNCHER", "1", check=False)
+            time.sleep(2)
         time.sleep(0.5)
         sample.adb(serial, "shell", "am", "start", "-n", f"{HOST}/{RUN_ACTIVITY}", "-e", "path", remote)
         if not collector.done.wait(wait):
@@ -322,15 +368,52 @@ def verify(args):
 
 
 def cases_source(args):
-    return (args.bun / CASES).read_text(encoding="utf-8")
+    """The shared cases (and their encoders), followed by the --cases file, whose JS_TOOLS_CASES replaces theirs."""
+    shared = (args.bun / CASES).read_text(encoding="utf-8")
+    return shared + "\n" + args.cases.read_text(encoding="utf-8") if args.cases else shared
 
 
 def case_list(args):
     """[id, rhino expression, runtime expression or None when skipped] of every case."""
     script = ("const c = require(process.argv[1]).cases;"
               "process.stdout.write(JSON.stringify(c.map(x => [x[0], x[1], x.length > 2 ? x[2] : x[1]])))")
-    out = subprocess.run(["node", "-e", script, str(args.bun / CASES)], capture_output=True, text=True, encoding="utf-8", check=True)
+    path = args.cases.resolve() if args.cases else args.bun / CASES
+    out = subprocess.run(["node", "-e", script, str(path)], capture_output=True, text=True, encoding="utf-8", check=True)
     return json.loads(out.stdout)
+
+
+def node_group_cases(args):
+    """A cases file (written to the state directory) with the P3.2b cases of the Node runtime's files-data groups that
+    the Bun client can evaluate (colors / Color, mime and the recorder, storages / mediainfo / global), their ids
+    prefixed with the group as in its rhino-expected.json; each file runs in its own function so that their helpers do
+    not clash. D is an empty directory name on shared storage."""
+    groups = []
+    for name in args.node_groups.split(","):
+        text = (args.node / "tools/nodejs/api/files-data" / NODE_GROUPS[name]).read_text(encoding="utf-8")
+        text = text[:text.index('if (typeof module === "object"')]
+        variable = re.search(r"^var (\w+_CASES) = \[", text, re.M).group(1)
+        groups.append("(function () {" + NL + text + NL + "return " + variable + ".map(function (c) { return [" + json.dumps(name + "/")
+                      + " + c[0]].concat(c.slice(1)); });" + NL + "})()")
+    path = args.state / "node-group-cases.js"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("var JS_TOOLS_CASES = [].concat(" + ("," + NL).join(groups) + ");" + NL
+                    + 'if (typeof module === "object" && module && module.exports) module.exports = {cases: JS_TOOLS_CASES};' + NL, encoding="utf-8")
+    return path
+
+
+def media_fixture():
+    """The WAV bytes of the MediaInfo cases: 800 frames of a 440 Hz tone, 8 kHz, mono, 16-bit."""
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(8000)
+        out.writeframes(b"".join(struct.pack("<h", int(8000 * math.sin(2 * math.pi * 440 * i / 8000))) for i in range(800)))
+    return buffer.getvalue()
+
+
+def fixtures(args):
+    return {MEDIA_NAME: media_fixture()} if args.cases else {}
 
 
 def same(a, b):
@@ -351,16 +434,33 @@ def error_name(name):
     return name[len("JavaException "):] if name.startswith("JavaException ") else name
 
 
+def same_host_failure(rhino, bun):
+    """Rhino reports a host member that threw as an InternalError "Failed to call method ..." with the host's message;
+    the Bun client reports the failure of the same host call as a HostCallError with that message, or its own check of
+    the same condition as an error carrying the same error code (MEDIAINFO_QUERY_UNSUPPORTED, ...)."""
+    message = rhino.get("message", "")
+    if rhino["name"] != "InternalError" or not message.startswith("Failed to call method"):
+        return False
+    if bun["name"] == "HostCallError" and bun.get("message", "").rstrip(".") in message:
+        return True
+    return any(code in bun.get("message", "") for code in re.findall(r"\b[A-Z][A-Z0-9]*_[A-Z0-9_]{3,}\b", message))
+
+
 def verdict(expected, actual, denied):
     """'pass', 'skip' or the reason of a failure; a [denied] case passes with NOT_GRANTED, or with the Rhino result when
     it is answered before the Java facade (argument errors, nullish shortcuts)."""
     if "skip" in actual:
         return "skip"
+    # Rhino's interpreter itself failed on this case (a host member rethrowing a checked exception): Bun has to throw.
+    if "rhinoCrash" in expected:
+        return "pass" if "th" in actual else f"Rhino fails on this case, Bun returned {json.dumps(actual.get('ok'), ensure_ascii=False)[:120]}"
     if denied and "th" in actual and actual["th"]["name"] == "NOT_GRANTED":
         return "pass"
     if "th" in expected:
         if "th" not in actual:
             return f"expected {expected['th']['name']}, got {json.dumps(actual.get('ok'), ensure_ascii=False)[:120]}"
+        if same_host_failure(expected["th"], actual["th"]):
+            return "pass"
         return "pass" if error_name(expected["th"]["name"]) == error_name(actual["th"]["name"]) \
             else f"expected {expected['th']['name']}, got {actual['th']['name']}: {actual['th']['message'][:120]}"
     if "th" in actual:
@@ -373,7 +473,7 @@ def verdict(expected, actual, denied):
 def rhino(args):
     run = uuid.uuid4().hex[:8]
     script = f"var AJ6_RUN = '{run}';\n" + cases_source(args) + EMIT_JS + RHINO_JS
-    results = run_script(args.serial, f"aj6_js_tools_rhino_{run}.js", script, run, args.wait)
+    results = run_script(args.serial, f"aj6_js_tools_rhino_{run}.js", script, run, args.wait, fixtures(args))
     ids = [c[0] for c in case_list(args)]
     meta = results.get(-1, {})
     host = package_state(args.serial, HOST) or {}
@@ -393,14 +493,15 @@ def bun(args):
     cases = case_list(args)
     modes = args.modes.split(",")
     run = uuid.uuid4().hex[:8]
-    results = run_script(args.serial, f"aj6_js_tools_bun_{run}.js", bun_script(cases_source(args), modes, run), run, args.wait)
+    results = run_script(args.serial, f"aj6_js_tools_bun_{run}.js", bun_script(cases_source(args), modes, run), run, args.wait,
+                         fixtures(args))
     if -2 in results:
         print(f"bun: runner error {results[-2].get('error', '')[:600]}")
     report, failed = {}, 0
     for mode, offset in (("main", 0), ("worker", 100000)):
         if mode not in modes:
             continue
-        counts = {"pass": 0, "fail": 0, "skip": 0, "missing": 0, "async": 0, "denied": 0, "open": 0}
+        counts = {"pass": 0, "fail": 0, "skip": 0, "missing": 0, "async": 0, "denied": 0}
         failures = {}
         for i, (case_id, _, source) in enumerate(cases):
             actual = results.get(offset + i)
@@ -409,11 +510,11 @@ def bun(args):
                 failures[case_id] = "missing"
                 continue
             counts["async"] += 1 if actual.get("async") else 0
-            denied = bool(args.denied) and source is not None and bool(JAVA_SOURCE.search(source))
+            # A case reaches a denied grant when its source names the namespace, or when the client refuses it naming the
+            # grant (colors.toInt(colors.themeColor) reaches java.interop through the theme getter).
+            refused = "th" in actual and actual["th"]["name"] == "NOT_GRANTED" and any(grant in actual["th"].get("message", "") for grant in args.denied)
+            denied = source is not None and (refused or any(GRANT_SOURCES[grant].search(source) for grant in args.denied))
             counts["denied"] += 1 if denied else 0
-            if OPEN_CASES.search(case_id):
-                counts["open"] += 1
-                continue
             if case_id not in expected:
                 counts["missing"] += 1
                 failures[case_id] = "no expected value"
@@ -427,7 +528,7 @@ def bun(args):
         failed += counts["fail"] + counts["missing"]
         report[mode] = {"counts": counts, "failures": failures}
         print(f"bun {mode} (denied {','.join(args.denied) or 'none'}): pass {counts['pass']} / fail {counts['fail']} / skip {counts['skip']}"
-              f" / missing {counts['missing']} / open {counts['open']} (async {counts['async']}, java cases {counts['denied'] if args.denied else '-'})")
+              f" / missing {counts['missing']} (async {counts['async']}, denied-grant cases {counts['denied'] if args.denied else '-'})")
         for case_id, reason in list(failures.items())[:args.show]:
             print(f"  {case_id}: {reason}")
     if args.report:
@@ -466,13 +567,20 @@ def main():
     parser.add_argument("--bun", type=Path, default=HERE.parents[2] / "AutoJs6-Plugin-Bun-Runtime", help="Bun runtime checkout")
     parser.add_argument("--out", type=Path, help="rhino: expected values file (default <state>/rhino-<serial>.json)")
     parser.add_argument("--expected", type=Path, help="bun: expected values file")
+    parser.add_argument("--cases", type=Path, help="rhino / bun: cases file used instead of the shared JS tools cases"
+                        " (tools/api-coverage/device_bun_files_data_cases.js)")
+    parser.add_argument("--node-groups", help="bun: instead of --cases, the P3.2b groups of the Node runtime to run"
+                        f" ({','.join(NODE_GROUPS)}), compared with the Rhino values of its device_files_data.py rhino")
+    parser.add_argument("--node", type=Path, default=HERE.parents[2] / "AutoJs6-Plugin-NodeJs-Runtime", help="Node runtime checkout")
     parser.add_argument("--modes", default="main,worker", help="bun: main and / or worker")
-    parser.add_argument("--denied", nargs="*", default=[], help="bun: grants that are off for this run (java.interop)")
+    parser.add_argument("--denied", nargs="*", default=[], choices=sorted(GRANT_SOURCES), help="bun: grants that are off for this run")
     parser.add_argument("--report", type=Path, help="bun: write the counts and failures as JSON")
     parser.add_argument("--show", type=int, default=40, help="bun: failing cases printed per mode")
     parser.add_argument("--only", nargs="*", default=[], help="grant: the grants to change")
     parser.add_argument("--set", choices=["on", "off", "restore"], help="grant: the value to set")
     parser.add_argument("--wait", type=int, default=300)
+    parser.add_argument("--foreground", action="store_true", help="rhino / bun / grant: bring the host to the front first"
+                        " (ColorOS freezes it and the plugin processes in the background)")
     parser.add_argument("--apk", action="append", default=[], help="install: package=path")
     args = parser.parse_args()
     sys.stdout.reconfigure(errors="backslashreplace")
@@ -484,6 +592,12 @@ def main():
         parser.error("rhino needs --out or --state")
     if args.phase == "bun" and not args.expected:
         parser.error("bun needs --expected")
+    global FOREGROUND
+    FOREGROUND = args.foreground
+    if args.node_groups:
+        if not args.state:
+            parser.error("--node-groups needs --state")
+        args.cases = node_group_cases(args)
     {"record": record, "install": install, "restore": restore, "verify": verify, "rhino": rhino, "bun": bun, "grant": grant}[args.phase](args)
 
 
