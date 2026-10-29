@@ -652,6 +652,24 @@ class RepositoryTest(unittest.TestCase):
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['util.toRegularAndCall']['node_main']['status'], 'not-portable')
 
+    def test_p4_2b(self):
+        # The Bun files and data family: the shared JS tools core in the client (colors / Color, mime, recorder, the
+        # libraries), the Java facade (zip / Zip and the colors members over Java objects) behind java.interop, and the host
+        # bridges behind files.control / storage.control / mediainfo.control / epub.control.
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status, capability in [('colors.toInt', 'local-shim', None), ('Color#argb', 'local-shim', None), ('mime.getMediaType', 'local-shim', None),
+                                         ('recorder.save', 'local-shim', None), ('dayjs', 'local-shim', None), ('axios', 'local-shim', None),
+                                         ('colors.toColorStateList', 'capability-gated', 'java.interop'), ('zip.unzip', 'capability-gated', 'java.interop'),
+                                         ('Zip#addFile', 'capability-gated', 'java.interop'), ('files.isFile', 'capability-gated', 'files.control'),
+                                         ('files.open', 'capability-gated', 'files.control'), ('open', 'capability-gated', 'files.control'),
+                                         ('storages.names', 'capability-gated', 'storage.control'), ('Storage#size', 'capability-gated', 'storage.control'),
+                                         ('mediainfo.get', 'capability-gated', 'mediainfo.control'), ('EpubBook#toString', 'capability-gated', 'epub.control')]:
+            self.assertEqual((rows[name]['bun']['status'], rows[name]['bun'].get('capability')), (status, capability), name)
+        self.assertEqual({rows[name]['bun']['via'] for name in ['Color#argb', 'Zip#addFile', 'Storage#size']}, {'handle-type'})
+        # Q80 / Q81 / Q82 (a): host bridge modules in P4.5; Q54 (b) stays pending.
+        for name in ['colors.theme.get', 'gallery.pick', 'files.batchRename.plan', 'util.class']:
+            self.assertEqual(rows[name]['bun']['status'], 'pending', name)
+
     def test_p2_3(self):
         # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.
         self.assertEqual(self.exports['prototypesStats']['problems'], [])

@@ -78,7 +78,8 @@
     "namespaceCapabilities": {
       "compose": ["ui.compose"], "coordinates": ["screen.metrics"], "images": ["image.process", "image.files", "screen.capture"],
       "opencc": ["text.opencc"], "pinyin": ["text.pinyin"], "pinyin4j": ["text.pinyin4j"], "screenRecorder": ["screen.record"],
-      "shizuku": ["shell.shizuku"], "sqlite": ["database.control"], "storages": ["storage.control"], "ui": ["ui.layout"]
+      "shizuku": ["shell.shizuku"], "sqlite": ["database.control"], "storages": ["storage.control"], "ui": ["ui.layout"],
+      "zip": ["java.interop"]
     },
     "memberCapabilities": {
       "_note": "Q12 (a): namespace members missing from HOST_API_METHODS whose namespace has several related grants; the grant of the host-client.mjs call they wrap (2026-10-25, api-coverage P1.1). P4.2a: members of a local namespace (no related grant) that call the host through another grant, capability-gated by it",
@@ -161,7 +162,10 @@
       "util.java.mapToObject": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: reads a Java map through the facade"},
       "s13n.point": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: creates an android.graphics.Point through the facade"},
       "s13n.throwable": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: creates a java.lang.Throwable through the facade"},
-      "util.morseCode.vibrate": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: vibrates through the facade (Device / Vibrator of the host)"}
+      "util.morseCode.vibrate": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: vibrates through the facade (Device / Vibrator of the host)"},
+      "colors.toColorStateList": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: creates an android.content.res.ColorStateList through the Java facade"},
+      "colors.setPaintColor": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: sets the ARGB of an android.graphics.Paint through the Java facade"},
+      "colors.extract": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: reads the pixels of an image or Bitmap and quantizes them through the Java facade"}
     },
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",
@@ -214,13 +218,13 @@
     "_note": "Q27 (a), maintainer 2026-10-25: augment-prototype objects with a runtime handle type, compared member by member (node: declaring module and type in docs/nodejs/types/autojs6-node; bun: the host client namespace producing the handle, its type in host-client.d.mts and the grant of the producing call); type arguments only feed the Ace queries",
     "AgentRun": {"node": {"module": "autojs6:ai", "type": "AgentRun"}, "bun": {"namespace": "ai", "type": "RuntimeAi.AgentRun", "capability": "agent.control"}},
     "AiSession": {"node": {"module": "autojs6:ai", "type": "Session"}, "bun": {"namespace": "ai", "type": "RuntimeAi.Session", "capability": "ai.control"}},
-    "Color": {"node": {"module": "colors", "type": "Color"}},
+    "Color": {"node": {"module": "colors", "type": "Color"}, "bun": {"namespace": "colors", "type": "RuntimeColors.Color"}},
     "EpubBook": {"node": {"module": "autojs6:epub", "type": "Book"}, "bun": {"namespace": "epub", "type": "RuntimeEpub.Book", "capability": "epub.control"}},
     "Flow": {"node": {"module": "autojs6:flow", "type": "Flow<unknown>"}, "bun": {"namespace": "flow", "type": "RuntimeFlow.Flow<unknown>", "capability": "flow.control"}},
     "MailClient": {"node": {"module": "autojs6:mail", "type": "Client"}, "bun": {"namespace": "mail", "type": "RuntimeMail.Client", "capability": "mail.control"}},
     "ShellProcess": {"node": {"module": "autojs6:shell", "type": "ShellProcess"}, "bun": {"namespace": "shell", "type": "RuntimeShell.ShellProcess", "capability": "shell.control"}},
     "Storage": {"node": {"module": "storages", "type": "StorageStore"}, "bun": {"namespace": "storages", "type": "RuntimeStorage.StorageStore", "capability": "storage.control"}},
-    "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}}
+    "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}, "bun": {"namespace": "zip", "type": "RuntimeZip.Zip", "capability": "java.interop"}}
   },
   "exclusions": [
     {
