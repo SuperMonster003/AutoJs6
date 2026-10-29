@@ -170,7 +170,7 @@ ROADMAP P6.3, 不走门禁. 先 `./gradlew :app:assembleInrtDebug` 生成 inrt �
 py -3.12 -I tools/memory/static_audit.py [--out docs/memory/evidence] [--json]
 ```
 
-扫描 `app/src/main/java`, 输出 `static-audit-<yyyyMMdd>.md`: (a) 进程级字段 (Java `static`, Kotlin `object` / `companion object` / 顶层属性) 中类型为 ScriptRuntime / ScriptEngine / Scriptable / Rhino Context / Activity / View / Fragment / Dialog 的清单 (Android Context 单列备查); (c) 脚本相关包内或元素为线程 / Looper / 监听器 / 窗口 / 图像 / 引擎 / 类加载器的进程级注册表 (附录 B.1 候选); (b) `registerReceiver` / `bindService` / `.subscribe(` / 创建 WebView / `addIdleHandler` / `Looper.prepare` / `ThreadLocal` 的文件及同文件内对应释放调用的次数. 这是文本扫描 (先抹掉注释与字符串), 归属列按包路径猜测, 结论须人工复核后再写进附录 B; 也是 ROADMAP T8 源码守卫白名单的来源.
+扫描 `app/src/main/java`, 输出 `static-audit-<yyyyMMdd>.md`: (a) 进程级字段 (Java `static`, Kotlin `object` / `companion object` / 顶层属性) 中类型为 ScriptRuntime / ScriptEngine / Scriptable / Rhino Context / Activity / View / Fragment / Dialog 的清单 (Android Context 单列备查); (c) 脚本相关包内或元素为线程 / Looper / 监听器 / 窗口 / 图像 / 引擎 / 类加载器的进程级注册表 (附录 B.1 候选); (b) `registerReceiver` / `bindService` / `.subscribe(` / 创建 WebView / `addIdleHandler` / `Looper.prepare` / `ThreadLocal` 的文件及同文件内对应释放调用的次数. 这是文本扫描 (先抹掉注释与字符串), 字段类型由声明类型或初始化表达式推断, `val x =` 之后换行再写初始化表达式的声明也取下一个非空行 (ROADMAP 附录 C Q45: H29 的两个静态 WeakHashMap 就是这样声明的); 归属列按包路径猜测, 结论须人工复核后再写进附录 B; 也是 ROADMAP T8 源码守卫白名单的来源.
 
 ### Q11 探针: 标准对象在脚本线程上首次创建 (ROADMAP 附录 C Q11, P4.4)
 
@@ -186,6 +186,6 @@ adb -s SERIAL shell am instrument -w -r -e class org.autojs.autojs.memory.RhinoS
 py -3.12 -I tools/memory/static_audit.py --guard [--check]
 ```
 
-`--guard` 不写报告, 改为更新 `app/src/test/resources/memory/static-reference-whitelist.txt`: 每行 `kind | 路径 | 名称 | 明细 | 理由 | 说明`, 前四列由脚本生成, 后两列手写. 生成的行有两类: `field` 为 (a) 中除弱引用以外的字段 (含 Android Context) 与 (c) 的注册表, `call` 为 (b) 中调用 `registerReceiver` / `bindService` / `addIdleHandler` / `Looper.prepare` 或创建 WebView 的文件; `manual` 行是附录 B.1 中扫描看不到的项 (进程级单例的实例字段, 事件总线), 手写, 脚本原样保留. 重新生成时已有键的理由与说明保留, 已消失的键删除, 新键的理由写成 `TODO`. `--check` 不写文件, 白名单过期时退出码 1. 理由的取值与含义在文件头部.
+`--guard` 不写报告, 改为更新 `app/src/test/resources/memory/static-reference-whitelist.txt`: 每行 `kind | 路径 | 名称 | 明细 | 理由 | 说明`, 前四列由脚本生成, 后两列手写. 生成的行有两类: `field` 为 (a) 中除弱引用以外的字段 (含 Android Context) 与 (c) 的注册表, `call` 为 (b) 中调用 `registerReceiver` / `bindService` / `addIdleHandler` / `Looper.prepare` 或创建 WebView 的文件; `manual` 行是附录 B.1 中扫描看不到的项 (进程级单例的实例字段, 事件总线), 手写, 脚本原样保留. 重新生成时已有键的理由与说明保留, 已消失的键删除, 新键的理由写成 `TODO`. `--check` 不写文件, 白名单过期时退出码 1. 理由的取值与含义在文件头部; 理由为 `weak` 的 weak-key map / registry 行, 说明列必须写明 "values do not reference the key" (Q45: WeakHashMap 强引用值, 值引用键则键永不回收, 这种表改用理由 `owner` 并在 owner 结束时移除), 守卫会核对这句.
 
 守卫测试 `app/src/test/java/org/autojs/autojs/memory/StaticReferenceGuardTest.kt` 属于全量 `:app:testAppDebugUnitTest` (CI 也跑), 用同目录的 `StaticReferenceScanner.kt` (本脚本规则的 Kotlin 移植) 直接扫描源码, 不依赖 Python: 新增进程级静态引用或注册调用而白名单没有对应行, 白名单行已不对应任何引用, 理由无效或仍为 `TODO`, `manual` 行指向的声明已不存在, 都会失败并给出文件, 类名, 字段名与登记方法; 另有一条用例核对白名单的生成列与扫描器的输出逐行相同, 证明两份实现的规则一致. 改了规则就两边一起改, 然后重新生成. 登记流程: 运行 `--guard`, 把新行的 `TODO` 换成理由与说明 (持有什么, 谁释放); 能改成弱引用或按 runtime / owner id 清理 (ROADMAP T7) 的优先改代码.
