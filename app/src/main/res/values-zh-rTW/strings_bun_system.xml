@@ -8,6 +8,8 @@
     <string name="summary_bun_installer_mutate_grant">允許安裝和解除安裝應用程式, 以及變更預設安裝程式; 可能仍需 Android 確認</string>
     <string name="summary_bun_memory_control_grant">允許讀取 AutoJs6 的記憶體診斷並要求記憶體回收</string>
     <string name="summary_bun_memory_dump_grant">允許把 AutoJs6 的堆積傾印寫入檔案</string>
+    <string name="summary_bun_plugin_tools_control_grant">允許列出並呼叫已安裝外掛提供的工具</string>
+    <string name="summary_bun_plugin_tools_user_granted_grant">另外允許由使用者授權的第三方外掛提供的工具</string>
     <string name="summary_bun_settings_control_grant">允許讀取與匯出 AutoJs6 設定</string>
     <string name="summary_bun_settings_write_grant">允許開啟或關閉 AutoJs6 設定</string>
     <string name="summary_bun_sysprops_control_grant">允許讀取 Android 系統屬性</string>
@@ -19,6 +21,8 @@
     <string name="text_bun_installer_mutate_grant">應用程式安裝</string>
     <string name="text_bun_memory_control_grant">記憶體診斷</string>
     <string name="text_bun_memory_dump_grant">堆積傾印</string>
+    <string name="text_bun_plugin_tools_control_grant">外掛工具</string>
+    <string name="text_bun_plugin_tools_user_granted_grant">使用者授權外掛的工具</string>
     <string name="text_bun_settings_control_grant">AutoJs6 設定</string>
     <string name="text_bun_settings_write_grant">AutoJs6 設定變更</string>
     <string name="text_bun_sysprops_control_grant">系統屬性</string>

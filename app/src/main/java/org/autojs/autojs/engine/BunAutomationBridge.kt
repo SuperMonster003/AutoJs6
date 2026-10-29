@@ -81,7 +81,7 @@ internal class BunAutomationBridge(
             if (missing.isNotEmpty()) throw SecurityException("Flow tool requires additional grants: ${missing.joinToString()}")
         }
         val timeout = (request.opt("timeoutMs") ?: 10000) as? Number ?: throw IllegalArgumentException("timeoutMs must be an integer")
-        require(timeout.toDouble().isFinite() && timeout.toDouble() == timeout.toLong().toDouble() && timeout.toLong() in 1..120000)
+        require(timeout.toDouble().isFinite() && timeout.toDouble() == timeout.toLong().toDouble() && timeout.toLong() in 1..maxTimeout(capability))
         val id = UUID.randomUUID().toString()
         val job = Job(id, capability, method, args.toString(), SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture(), module = module)
         synchronized(jobs) {
@@ -95,7 +95,7 @@ internal class BunAutomationBridge(
                 if (job.abandoned.get() || SystemClock.elapsedRealtime() >= job.deadline) { job.future.cancel(false); return@execute }
                 if (!job.future.isDone && SystemClock.elapsedRealtime() < job.deadline) try {
                     provider().dispatch(NodeBridgeRequest(id, module, method, args.toString(), timeout.toLong(),
-                        permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString()))) { job.future.complete(it) }
+                        permissions = permissions(module, method, args))) { job.future.complete(it) }
                     if(job.abandoned.get() && capability==Grants.SHELL_CONTROL)provider().cancelShellRequest(id)
                     if(job.abandoned.get() && capability==Grants.DIALOGS_CONTROL)provider().cancelDialogRequest(id)
                 } catch (error: Exception) {
@@ -116,6 +116,20 @@ internal class BunAutomationBridge(
         if (method in engineStartMethods && Grants.ENGINES_EXEC !in grants) throw SecurityException("Starting scripts requires engines.exec")
         require(!(method == "stop" && args.opt(0) is JSONObject)) { "engines.stop takes an execution id" }
         require(!(method == "execScript" && args.optJSONObject(2)?.has("agentInvocationId") == true)) { "Agent invocations need agent.control" }
+    }
+
+    /**
+     * The capabilities a request declares: those of the route, and for plugin tools (Q137 (a)) the optional tokens the
+     * tool bridge looks for (USER_GRANTED providers, screen inputs, file inputs and outputs) when their grants are on.
+     */
+    private fun permissions(module: String, method: String, args: JSONArray): List<String> {
+        val required = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString())
+        if (module != NodeBridgeModules.PLUGIN_TOOLS) return required
+        return required + buildList {
+            if (Grants.PLUGIN_TOOLS_USER_GRANTED in grants) add(NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED)
+            if (Grants.SCREEN_CAPTURE in grants) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)
+            if (Grants.FILES_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.FILES, NodeBridgePermissionManifest.FILES_WRITE))
+        }
     }
 
     override fun close() {
@@ -221,8 +235,9 @@ internal class BunAutomationBridge(
             if (Grants.NOTIFICATIONS_SETTINGS in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS)
             // The system and engines family (api-coverage P4.1b, Q136 (a)): the Bun grant of each Node capability of Q133 (b).
             systemCapabilities.forEach { (grant, capability) -> if (grant in grants) add(capability) }
-            // settings.export writes its file as the files.write of Node; Bun's files.control already writes host files.
-            if (Grants.FILES_CONTROL in grants) add(NodeBridgePermissionManifest.FILES_WRITE)
+            // settings.export and plugin tool outputs write files as the files.write of Node, tool inputs read them as its
+            // files; Bun's files.control already reads and writes host files.
+            if (Grants.FILES_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.FILES, NodeBridgePermissionManifest.FILES_WRITE))
         }
         private val systemCapabilities = listOf(
             Grants.AUTOJS_CONTROL to NodeBridgePermissionManifest.AUTOJS, Grants.AUTOJS_MANAGE to NodeBridgePermissionManifest.AUTOJS_CONTROL,
@@ -231,8 +246,11 @@ internal class BunAutomationBridge(
             Grants.MEMORY_CONTROL to NodeBridgePermissionManifest.MEMORY, Grants.MEMORY_DUMP to NodeBridgePermissionManifest.MEMORY_DUMP,
             Grants.INSTALLER_CONTROL to NodeBridgePermissionManifest.INSTALLER, Grants.INSTALLER_MUTATE to NodeBridgePermissionManifest.INSTALLER_MUTATE,
             Grants.ENGINES_CONTROL to NodeBridgePermissionManifest.ENGINES, Grants.ENGINES_EXEC to NodeBridgePermissionManifest.ENGINES_EXEC,
+            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgePermissionManifest.PLUGIN_TOOLS, Grants.PLUGIN_TOOLS_USER_GRANTED to NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED,
         )
         private val engineStartMethods = setOf("execScript", "execScriptFile", "execAutoFile")
+        /** Installs and uninstalls wait for the user like Node's installer (15 min and 5 s); plugin tools run as long. */
+        fun maxTimeout(capability: String): Long = if (capability == Grants.INSTALLER_CONTROL || capability == Grants.PLUGIN_TOOLS_CONTROL) 905_000L else 120_000L
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
             Grants.FLOW_CONTROL to RuntimeFlowBridge.methods,
@@ -265,6 +283,7 @@ internal class BunAutomationBridge(
             Grants.MEMORY_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.MEMORY),
             Grants.INSTALLER_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.INSTALLER),
             Grants.ENGINES_CONTROL to NodeBridgeModules.enginesMethods,
+            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.pluginToolsMethods,
         )
         /** Second Node modules of a grant, with their methods: the notice extras of notifications.post, powerManager of device.control. */
         val extraModules = mapOf(
@@ -273,6 +292,7 @@ internal class BunAutomationBridge(
         )
         private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
             Grants.AUTOJS_CONTROL to RuntimeSystemBridge.AUTOJS, Grants.SETTINGS_CONTROL to RuntimeSystemBridge.SETTINGS, Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.SYSPROPS,
-            Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES)
+            Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES,
+            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.PLUGIN_TOOLS)
     }
 }

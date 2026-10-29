@@ -8,6 +8,8 @@
     <string name="summary_bun_installer_mutate_grant">Allow installing and uninstalling packages and changing the default installer; Android confirmation may still be required</string>
     <string name="summary_bun_memory_control_grant">Allow reading the memory diagnostics of AutoJs6 and requesting garbage collection</string>
     <string name="summary_bun_memory_dump_grant">Allow writing heap dumps of AutoJs6 to files</string>
+    <string name="summary_bun_plugin_tools_control_grant">Allow listing and calling the tools that installed plugins provide</string>
+    <string name="summary_bun_plugin_tools_user_granted_grant">Also allow the tools of third-party plugins that the user has authorized</string>
     <string name="summary_bun_settings_control_grant">Allow reading and exporting AutoJs6 settings</string>
     <string name="summary_bun_settings_write_grant">Allow turning AutoJs6 settings on or off</string>
     <string name="summary_bun_sysprops_control_grant">Allow reading Android system properties</string>
@@ -19,6 +21,8 @@
     <string name="text_bun_installer_mutate_grant">Package installation</string>
     <string name="text_bun_memory_control_grant">Memory diagnostics</string>
     <string name="text_bun_memory_dump_grant">Heap dumps</string>
+    <string name="text_bun_plugin_tools_control_grant">Plugin tools</string>
+    <string name="text_bun_plugin_tools_user_granted_grant">Tools of user-granted plugins</string>
     <string name="text_bun_settings_control_grant">AutoJs6 settings</string>
     <string name="text_bun_settings_write_grant">AutoJs6 settings changes</string>
     <string name="text_bun_sysprops_control_grant">System properties</string>

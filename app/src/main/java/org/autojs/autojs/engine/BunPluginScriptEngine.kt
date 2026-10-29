@@ -84,7 +84,7 @@ class BunPluginScriptEngine internal constructor(
         val executionConsole = consoleFactory().apply { setTitle(scriptSource.name) }
         val callback = OutputCallback(executionId, selection.providerUid, executionConsole)
         var payloadFile: File? = null
-        val broker = createCapabilityBroker(selection, executionId, executionConsole)
+        val broker = createCapabilityBroker(selection, executionId, executionConsole, logicalSourceName(scriptSource))
         // Released in the order of the former finally: broker, callback, console, then a payload not unlinked yet.
         // zh-CN: 按原 finally 的顺序释放: broker, callback, console, 最后是尚未删除的 payload.
         val scope = BridgeExecutionScope("bun", executionId).apply {
@@ -248,13 +248,14 @@ class BunPluginScriptEngine internal constructor(
         selection: BunRuntimePluginClient.Selection,
         executionId: String,
         executionConsole: ConsoleImpl,
+        sourceName: String,
     ): BunHostCapabilityBroker? {
         if (!supportsCapabilityBridge(selection)) return null
         val granted = BunHostCapabilityGrants.grantedBridgeCapabilities(appContext)
         if (granted.isEmpty()) return null
         val config = getTag(ExecutionConfig.tag) as? ExecutionConfig
         val spawnDepth = (config?.getArgument(NodeBridgeEngineInfo.SPAWN_DEPTH_ARGUMENT) as? Number)?.toInt()?.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH) ?: 0
-        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd(), config?.agentExecutionState, spawnDepth)
+        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd(), config?.agentExecutionState, spawnDepth, sourceName)
     }
 
     private fun supportsCapabilityBridge(selection: BunRuntimePluginClient.Selection): Boolean =

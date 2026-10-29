@@ -24,8 +24,8 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 (P4.1b).
-        assertEquals(255,BunAutomationBridge.methods.values.sumOf{it.size})
+        // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 and plugin tools 3 (P4.1b).
+        assertEquals(258,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -89,6 +89,17 @@ class BunAutomationPolicyTest {
         val powerGrants = BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL, Grants.DEVICE_POWER))
         for (method in power) assertEquals(method, emptyList<String>(),
             NodeBridgePermissionManifest.missingCapabilities(powerGrants, NodeBridgePermissionManifest.requiredCapabilitiesFor("power_manager", method)))
+    }
+
+    // Q137 (a): plugin_tools.control lists and calls the tools; USER_GRANTED providers also need plugin_tools.user_granted.
+    @Test fun pluginToolsGrantsMapToNodePluginToolsAndUserGrantedStaysSeparate() {
+        assertEquals(listOf("plugin_tools"), BunAutomationBridge.nodeCapabilities(listOf(Grants.PLUGIN_TOOLS_CONTROL)))
+        assertEquals(listOf("plugin_tools", "plugin_tools.user_granted"),
+            BunAutomationBridge.nodeCapabilities(listOf(Grants.PLUGIN_TOOLS_CONTROL, Grants.PLUGIN_TOOLS_USER_GRANTED)))
+        assertEquals(NodeBridgeModules.pluginToolsMethods, BunAutomationBridge.methods[Grants.PLUGIN_TOOLS_CONTROL])
+        for (method in NodeBridgeModules.pluginToolsMethods)
+            assertEquals(listOf("plugin_tools"), NodeBridgePermissionManifest.requiredCapabilitiesFor("plugin_tools", method))
+        assertEquals(listOf("files", "files.write"), BunAutomationBridge.nodeCapabilities(listOf(Grants.FILES_CONTROL)))
     }
 
 }

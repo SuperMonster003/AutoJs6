@@ -511,6 +511,22 @@
             app:summary="@string/summary_bun_engines_exec_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_plugin_tools_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_plugin_tools_control_grant"
+            app:summary="@string/summary_bun_plugin_tools_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_plugin_tools_user_granted_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_plugin_tools_user_granted_grant"
+            app:summary="@string/summary_bun_plugin_tools_user_granted_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_console_control_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"

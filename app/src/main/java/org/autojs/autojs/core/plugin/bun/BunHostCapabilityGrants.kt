@@ -83,10 +83,13 @@ object BunHostCapabilityGrants {
     const val INSTALLER_MUTATE = "installer.mutate"
     const val ENGINES_CONTROL = "engines.control"
     const val ENGINES_EXEC = "engines.exec"
+    // plugins.tools (Q137 (a)): the tools of tool-provider plugins; those of USER_GRANTED providers need the second grant too.
+    const val PLUGIN_TOOLS_CONTROL = "plugin_tools.control"
+    const val PLUGIN_TOOLS_USER_GRANTED = "plugin_tools.user_granted"
 
     /** The system and engines grants in contract order (api-coverage P4.1b). */
     val SYSTEM_FAMILY = listOf(AUTOJS_CONTROL, AUTOJS_MANAGE, SETTINGS_CONTROL, SETTINGS_WRITE, SYSPROPS_CONTROL, MEMORY_CONTROL, MEMORY_DUMP,
-        INSTALLER_CONTROL, INSTALLER_MUTATE, ENGINES_CONTROL, ENGINES_EXEC)
+        INSTALLER_CONTROL, INSTALLER_MUTATE, ENGINES_CONTROL, ENGINES_EXEC, PLUGIN_TOOLS_CONTROL, PLUGIN_TOOLS_USER_GRANTED)
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
     private const val KEY_HOST_INFO = "host_info"
