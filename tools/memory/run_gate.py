@@ -17,6 +17,10 @@ instrumentation runs it changes two things and puts them back, also when a run f
 interrupted: `settings put global hidden_api_policy 1` for the binding probe (ROADMAP D9), and
 `pm grant` of the permissions a scenario needs when the host lacks them (ND12 RECORD_AUDIO,
 ROADMAP D11; ND7c CAMERA, appendix C Q4), revoked afterwards.
+
+`--attach <runId> --attach-dir <dir>` runs nothing: it writes the same report from the files a
+device-side run left behind (tools/memory/device_gate.sh, started with nohup so that a dropped adb
+link does not end the test; ROADMAP appendix C Q51 (b)) after they were pulled into <dir>.
 """
 import argparse
 import datetime
@@ -202,6 +206,85 @@ def test_outcome(text):
     if 0 in codes:
         return "pass"
     return "unknown"
+
+
+def crash_excerpt(crash):
+    """The last fatal signal or exception of a crash buffer dump with 200 characters before it, 8000 at most."""
+    start = max(crash.rfind("Fatal signal"), crash.rfind("*** *** ***"), crash.rfind("FATAL EXCEPTION"))
+    return crash[max(0, start - 200):][:8000] if start >= 0 else crash[-6000:]
+
+
+def read_optional(path):
+    return path.read_text(encoding="utf-8", errors="replace") if path.is_file() else None
+
+
+def pick_reports(text, pairs, run_id, json_text, logcat_text):
+    """Reports of the scenario / mode pairs, in pair order: the instrumentation status lines first, then the JSON
+    the test wrote per pair (`json_text(scenario, mode)`, None when there is none), then the AJ6MEM logcat chunks
+    (`logcat_text()`), each only for the pairs still missing."""
+    found = [r for r in parse_reports(text) if (r.get("scenario"), r.get("mode")) in pairs]
+    for s, m in pairs:
+        if any((r.get("scenario"), r.get("mode")) == (s, m) for r in found):
+            continue
+        raw = json_text(s, m)
+        if raw:
+            found.append(json.loads(raw))
+    if len(found) < len(pairs):
+        seen = {(r.get("scenario"), r.get("mode")) for r in found}
+        found += [r for r in parse_logcat_reports(logcat_text(), run_id)
+                  if (r.get("scenario"), r.get("mode")) in pairs and (r.get("scenario"), r.get("mode")) not in seen]
+    found.sort(key=lambda r: pairs.index((r.get("scenario"), r.get("mode"))))
+    return found
+
+
+def attach_reports(folder, run_id, pairs, capture_scenarios=(), expected=None):
+    """Reports of a run that tools/memory/device_gate.sh made on the device itself, from the files pulled into
+    `folder`: per scenario and mode `<runId>-<S>-<mode>.log` (the `am instrument -w -r` output between the
+    script's `start`, `projection_before=`, `rc=`, `projection_after=` and `end` lines), `.json` (the report the
+    test wrote), `.logcat` (the AJ6MEM lines) and `.crash` (the crash buffer). Every selected pair needs a
+    finished log; a report of another run, or one made with other parameters than `expected` (warmups,
+    iterations, pollMs, forceDelayMs), is refused. Returns the reports, the pairs without one, the
+    PROJECT_MEDIA record and the device-clock window of the logs."""
+    reports, failures, projection, window = [], [], {"allowedDuring": []}, {}
+    for s, m in pairs:
+        log = folder / f"{run_id}-{s}-{m}.log"
+        if not log.is_file():
+            raise RuntimeError(f"No device-side log for {s} {m}: expected {log}")
+        text = read_optional(log)
+        if not re.search(r"^rc=-?\d+\s*$", text, re.MULTILINE):
+            raise RuntimeError(f"{log.name} has no rc= line: the device-side run of {s} {m} has not finished")
+        started = re.search(r"^start (\S+)", text, re.MULTILINE)
+        ended = re.search(r"^end (\S+)", text, re.MULTILINE)
+        if started:
+            window["started"] = min(window.get("started", started[1]), started[1])
+        if ended:
+            window["finished"] = max(window.get("finished", ended[1]), ended[1])
+        outcome = test_outcome(text)
+        if s in capture_scenarios:
+            before = re.search(r"^projection_before=.*PROJECT_MEDIA: (\w+)", text, re.MULTILINE)
+            after = re.search(r"^projection_after=.*PROJECT_MEDIA: (\w+)", text, re.MULTILINE)
+            projection.setdefault("before", before[1] if before else "default")
+            projection["allowedDuring"].append(f"{s} {m}")
+            projection["restoredTo"] = after[1] if after else "default"
+        found = pick_reports(text, [(s, m)], run_id,
+                             lambda s2, m2: read_optional(folder / f"{run_id}-{s2}-{m2}.json"),
+                             lambda s2=s, m2=m: read_optional(folder / f"{run_id}-{s2}-{m2}.logcat") or "")
+        for report in found:
+            if report.get("runId") not in (None, run_id):
+                raise RuntimeError(f"{log.name}: a report of run {report.get('runId')}, expected {run_id}")
+            for key, want in (expected or {}).items():
+                if key in report and report[key] != want:
+                    raise RuntimeError(f"{log.name}: the device-side run used {key} {report[key]}, this call expects {want}")
+            report["instrumentation"] = outcome
+            reports.append(report)
+            print(summary_line(report))
+            for line in leak_lines(report)[:3]:
+                print(f"     {line[:220]}")
+        if not found:
+            crash = crash_excerpt(read_optional(folder / f"{run_id}-{s}-{m}.crash") or "") if outcome == "crashed" else ""
+            failures.append({"scenario": s, "mode": m, "outcome": outcome, "tail": text[-1500:], "crashLog": crash})
+            print(f"{s:<4} {MODES[m]} NO REPORT (instrumentation {outcome})")
+    return reports, failures, projection, window
 
 
 def mb(value):
@@ -418,6 +501,8 @@ def markdown(meta, reports, failures):
         *([f"- Merged runs: " + "; ".join(f"{r.get('runId')} ({', '.join(r.get('scenarios') or ['all'])})"
                                          for r in meta["mergedRuns"])] if meta.get("mergedRuns") else []),
         *([f"- Stopped early: {meta['interrupted']}"] if meta.get("interrupted") else []),
+        *([f"- Attached (ROADMAP appendix C Q51 (b)): a device-side run of {meta['attached'].get('deviceScript')}, collected "
+           f"from {meta['attached'].get('dir')}; the run times are the device clock"] if meta.get("attached") else []),
         *([f"- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during {', '.join(meta['projectionAppOp']['allowedDuring'])}, "
            f"before `{meta['projectionAppOp'].get('before')}`, afterwards `{meta['projectionAppOp'].get('restoredTo')}`"]
           if meta.get("projectionAppOp") else []),
@@ -622,6 +707,24 @@ def device_state(device):
             "wakefulness": wakefulness[1] if wakefulness else None}
 
 
+def host_facts(device, package):
+    """The device identity, the installed debug host and its test runner, checked before any scenario runs."""
+    device.require_online()
+    identity = device.identity()
+    package_dump = device.shell("dumpsys", "package", package)["stdout"]
+    version = re.search(r"versionCode=(\d+)", package_dump)
+    version_name = re.search(r"versionName=(\S+)", package_dump)
+    if not version:
+        raise RuntimeError(f"{package} is not installed on {device.serial}")
+    if not re.search(r"(?:pkgFlags|flags)=\[[^\]]*\bDEBUGGABLE\b", package_dump):
+        raise RuntimeError("The installed host must be the debug build")
+    runner = f"{package}.test/androidx.test.runner.AndroidJUnitRunner"
+    if f"instrumentation:{runner} (target={package})" not in device.shell("pm", "list", "instrumentation")["stdout"]:
+        raise RuntimeError("Install the matching test APK (app-*-debug-androidTest.apk) first")
+    return {"identity": identity, "versionCode": int(version[1]), "versionName": version_name[1] if version_name else None,
+            "runner": runner, "state": device_state(device)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-s", "--serial", required=True)
@@ -657,9 +760,21 @@ def main():
     parser.add_argument("--merge", action="store_true", help="Replace only the rerun scenarios in an existing report of the same name")
     parser.add_argument("--meminfo", choices=("off", "phases", "runs"), default="phases",
                         help="dumpsys meminfo of the test process at the start, after the warm-ups and at the end (phases), after every run as well (runs), or never")
+    parser.add_argument("--attach", metavar="RUN_ID",
+                        help="Run nothing: write the report from the files of a device-side run (tools/memory/device_gate.sh, ROADMAP "
+                             "appendix C Q51 (b)) pulled into --attach-dir; the device is only asked for its identity and the host version, "
+                             "cached in <attach-dir>/device.json so that a later call works while it is offline")
+    parser.add_argument("--attach-dir", type=Path, help="Directory holding the <runId>-<S>-<mode>.log / .json / .logcat / .crash files of --attach")
     args = parser.parse_args()
     if args.label and not re.fullmatch(r"[a-z0-9-]{1,32}", args.label):
         parser.error("--label must be lower-case letters, digits or '-'")
+    if args.attach:
+        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,80}", args.attach):
+            parser.error("--attach must be the run id the device-side script was started with")
+        if not args.attach_dir or not args.attach_dir.is_dir():
+            parser.error("--attach needs --attach-dir, an existing directory with the pulled files")
+        if args.suite != "runtime" or args.hprof or args.one_process:
+            parser.error("--attach supports --suite runtime without --hprof and --one-process")
     if not 60 <= args.timeout <= 7200:
         parser.error("--timeout must be between 60 and 7200 seconds")
     # The test rejects memoryGateAccessibilityWaitMs above 900 s before showing any toast.
@@ -680,31 +795,30 @@ def main():
     args.out = args.out or suite["out"]
 
     device = physical_device.Device(args.adb, args.serial)
-    device.require_online()
-    identity = device.identity()
-    package_dump = device.shell("dumpsys", "package", args.package)["stdout"]
-    version = re.search(r"versionCode=(\d+)", package_dump)
-    version_name = re.search(r"versionName=(\S+)", package_dump)
-    if not version:
-        raise RuntimeError(f"{args.package} is not installed on {args.serial}")
-    if not re.search(r"(?:pkgFlags|flags)=\[[^\]]*\bDEBUGGABLE\b", package_dump):
-        raise RuntimeError("The installed host must be the debug build")
-    runner = f"{args.package}.test/androidx.test.runner.AndroidJUnitRunner"
-    if f"instrumentation:{runner} (target={args.package})" not in device.shell("pm", "list", "instrumentation")["stdout"]:
-        raise RuntimeError("Install the matching test APK (app-*-debug-androidTest.apk) first")
+    cache = args.attach_dir / "device.json" if args.attach else None
+    if cache and cache.is_file():
+        # A device-side run is attached while the device may be offline: the facts read by the first call are reused.
+        facts = json.loads(cache.read_text(encoding="utf-8"))
+        if facts.get("identity", {}).get("serial") != args.serial:
+            print(f"Note: {cache} was recorded from {facts.get('identity', {}).get('serial')}, now {args.serial}", file=sys.stderr)
+    else:
+        facts = host_facts(device, args.package)
+        if cache:
+            physical_device.write_json(cache, facts)
+    identity, version_code, version_name, runner, state = (facts["identity"], facts["versionCode"], facts["versionName"],
+                                                           facts["runner"], facts["state"])
 
     started = physical_device.utc_now()
     today = datetime.date.today().strftime("%Y%m%d")
     model = re.sub(r"[^A-Za-z0-9_.-]", "_", identity.get("model") or "device")
-    run_id = f"{model}-{version[1]}-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    run_id = args.attach or f"{model}-{version_code}-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
     modes = ["normal", "force"] if args.mode == "both" else [args.mode]
-    state = device_state(device)
     if state["powered"] == ["none"] or state["wakefulness"] != "Awake":
         print(f"Warning: ROADMAP R6 asks for a charging, awake device; state {state}", file=sys.stderr)
     args.out.mkdir(parents=True, exist_ok=True)
     device_dir = DEVICE_DIR.format(package=args.package)
-    reports, failures = [], []
-    stamp = package_stamp(device, args.package)
+    reports, failures, window = [], [], {}
+    stamp = [] if args.attach else package_stamp(device, args.package)
     interrupted = None
     projection = {"allowedDuring": []}
     hidden_api, grants = {}, []
@@ -716,7 +830,8 @@ def main():
         plugins.append({"engine": engine, "package": suite["plugins"][engine],
                         "versionCode": int(plugin_version[1]) if plugin_version else None,
                         "versionName": plugin_name[1] if plugin_name else None, "commit": commits.get(engine)})
-    groups = [(list(args.scenarios), ",".join(modes))] if args.one_process else [([s], m) for s in args.scenarios for m in modes]
+    groups = [] if args.attach else ([(list(args.scenarios), ",".join(modes))] if args.one_process
+                                     else [([s], m) for s in args.scenarios for m in modes])
     for group, mode in groups:
             scenario = "+".join(group)
             pairs = [(s, m) for s in group for m in mode.split(",")]
@@ -788,21 +903,18 @@ def main():
                     hidden_api["restoredTo"] = global_setting(device, "hidden_api_policy")
             text = result["stdout"] + result["stderr"]
             outcome = "timeout" if result.get("timeout") else test_outcome(text)
-            found = [r for r in parse_reports(text) if (r.get("scenario"), r.get("mode")) in pairs]
-            for s, m in pairs:
-                if any((r.get("scenario"), r.get("mode")) == (s, m) for r in found):
-                    continue
+            def pulled_json(s, m):
                 local = args.out / f".{run_id}-{s}-{m}.json"
                 pulled = device.call("pull", f"{device_dir}/{run_id}-{s}-{m}.json", str(local))
                 if pulled["exitCode"] == 0 and local.is_file():
-                    found.append(json.loads(local.read_text(encoding="utf-8")))
+                    raw = local.read_text(encoding="utf-8")
                     local.unlink()
-            if len(found) < len(pairs):
-                logcat = device.call("logcat", "-d", "-v", "raw", "-s", f"{LOG_TAG}:I", timeout=60)
-                seen = {(r.get("scenario"), r.get("mode")) for r in found}
-                found += [r for r in parse_logcat_reports(logcat["stdout"], run_id)
-                          if (r.get("scenario"), r.get("mode")) in pairs and (r.get("scenario"), r.get("mode")) not in seen]
-            found.sort(key=lambda r: pairs.index((r.get("scenario"), r.get("mode"))))
+                    return raw
+                return None
+
+            # -v brief keeps the tag in each line, which parse_logcat_reports looks for (-v raw drops it).
+            found = pick_reports(text, pairs, run_id, pulled_json,
+                                 lambda: device.call("logcat", "-d", "-v", "brief", "-s", f"{LOG_TAG}:I", timeout=60)["stdout"])
             for report in found:
                 report["instrumentation"] = outcome
                 reports.append(report)
@@ -812,9 +924,7 @@ def main():
             missing = [pair for pair in pairs if pair not in {(r.get("scenario"), r.get("mode")) for r in found}]
             if missing:
                 # The next scenario clears logcat, so keep the crash buffer of a crashed process now.
-                crash = device.call("logcat", "-d", "-b", "crash", "-v", "brief", timeout=60)["stdout"] if outcome == "crashed" else ""
-                start = max(crash.rfind("Fatal signal"), crash.rfind("*** *** ***"), crash.rfind("FATAL EXCEPTION"))
-                crash = crash[max(0, start - 200):][:8000] if start >= 0 else crash[-6000:]
+                crash = crash_excerpt(device.call("logcat", "-d", "-b", "crash", "-v", "brief", timeout=60)["stdout"]) if outcome == "crashed" else ""
                 for s, m in missing:
                     failures.append({"scenario": s, "mode": m, "outcome": outcome, "tail": text[-1500:], "crashLog": crash})
                     print(f"{s:<4} {MODES[m]} NO REPORT (instrumentation {outcome})")
@@ -841,19 +951,24 @@ def main():
                     report["status"], report["reasons"] = "invalid", [interrupted]
     if interrupted:
         print(f"Stopped: {interrupted}; scenarios after this point were not run", file=sys.stderr)
-    if not args.keep_process:
+    if args.attach:
+        reports, failures, projection, window = attach_reports(
+            args.attach_dir, run_id, [(s, m) for s in args.scenarios for m in modes], suite["capture"] if args.capture == "on" else (),
+            {"warmups": args.warmups, "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms})
+    elif not args.keep_process:
         device.shell("am", "force-stop", args.package)
-    meta = {"suite": suite["name"], "runId": run_id, "label": args.label, "started": started,
-            "finished": physical_device.utc_now(), "date": today, "package": args.package,
-            "versionCode": int(version[1]), "versionName": version_name[1] if version_name else None,
+    meta = {"suite": suite["name"], "runId": run_id, "label": args.label, "started": window.get("started", started),
+            "finished": window.get("finished", physical_device.utc_now()), "date": today, "package": args.package,
+            "versionCode": version_code, "versionName": version_name,
             "device": {k: identity.get(k) for k in ("serial", "manufacturer", "model", "sdk", "release", "abiList", "emulator")},
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
             "capture": args.capture, "meminfo": args.meminfo, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
+            **({"attached": {"dir": args.attach_dir.name, "deviceScript": "tools/memory/device_gate.sh"}} if args.attach else {}),
             **({"projectionAppOp": projection} if projection["allowedDuring"] else {}),
             **({"plugins": plugins} if plugins else {}),
             **({"hiddenApiPolicy": hidden_api} if hidden_api else {}), **({"grants": grants} if grants else {})}
-    stem = f"gate-{model}-{version[1]}" + (f"-{args.label}" if args.label else "") + f"-{today}"
+    stem = f"gate-{model}-{version_code}" + (f"-{args.label}" if args.label else "") + f"-{today}"
     if args.merge and (args.out / f"{stem}.json").is_file():
         reports, failures, meta = merge_evidence(json.loads((args.out / f"{stem}.json").read_text(encoding="utf-8")),
                                                  reports, failures, meta, suite["scenarios"])

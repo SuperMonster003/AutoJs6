@@ -2,7 +2,11 @@
 
 py -3.12 -I -m unittest discover -s tools/memory -p "test_*.py"
 """
+import contextlib
+import io
 import json
+from pathlib import Path
+import tempfile
 import unittest
 
 import run_gate
@@ -267,6 +271,110 @@ class BridgeSuiteTest(unittest.TestCase):
         run_gate.put_global_setting(device, "hidden_api_policy", None)
         self.assertEqual([("settings", "put", "global", "hidden_api_policy", "1"), ("settings", "delete", "global", "hidden_api_policy")],
                          device.commands[-2:])
+
+
+class AttachTest(unittest.TestCase):
+    """run_gate.py --attach: the report from the files tools/memory/device_gate.sh leaves on the device (Q51 (b))."""
+    RUN = "SM-A566B-5935-20261029231000"
+
+    def write(self, folder, name, text):
+        (folder / f"{self.RUN}-{name}").write_text(text, encoding="utf-8")
+
+    def tagged(self, scenario, mode, status="pass", retained=0, **extra):
+        result = {**report(scenario, mode, status, retained), "runId": self.RUN, "warmups": 2, "pollMs": 10000, **extra}
+        return result
+
+    def attach(self, folder, pairs, expected=None):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            attached = run_gate.attach_reports(folder, self.RUN, pairs, ("S4a", "S4f"),
+                                               expected if expected is not None else {"warmups": 2, "iterations": 20, "pollMs": 10000})
+        return (*attached, out.getvalue())
+
+    def test_pick_reports_falls_back_from_status_lines_to_json_to_logcat_in_pair_order(self):
+        pairs = [("S4a", "normal"), ("S4a", "force"), ("S4f", "normal"), ("S4f", "force")]
+        text = "INSTRUMENTATION_STATUS: aj6mem_json=" + json.dumps(report("S4f", "normal", "pass", 0))
+        chunk = json.dumps(report("S4a", "force", "pass", 0))
+        other = json.dumps(report("S4f", "force", "pass", 0))
+        logcat = f"I/AJ6MEM( 7): JSON run S4a-force 1/1 {chunk}\nI/AJ6MEM( 7): JSON other S4f-force 1/1 {other}\n"
+        asked = []
+
+        def json_text(s, m):
+            asked.append((s, m))
+            return json.dumps(report("S4a", "normal", "fail", 2)) if (s, m) == ("S4a", "normal") else None
+
+        found = run_gate.pick_reports(text, pairs, "run", json_text, lambda: logcat)
+        self.assertEqual([("S4a", "normal", "fail"), ("S4a", "force", "pass"), ("S4f", "normal", "pass")],
+                         [(r["scenario"], r["mode"], r["status"]) for r in found])
+        # The JSON is asked only for the pairs the status lines did not cover.
+        self.assertEqual([("S4a", "normal"), ("S4a", "force"), ("S4f", "force")], asked)
+
+    def test_attach_reads_status_lines_json_and_logcat_and_keeps_the_pair_without_a_report(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            self.write(folder, "S4a-normal.log", "\n".join([
+                f"start 2026-10-29T23:10:00 {self.RUN} S4a s04aCaptureScreen normal capture=on tz=Asia/Shanghai",
+                "projection_before=No operations.",
+                "INSTRUMENTATION_STATUS: aj6mem_json=" + json.dumps(self.tagged("S4a", "normal")),
+                "INSTRUMENTATION_STATUS_CODE: 0", "rc=0", "projection_after=PROJECT_MEDIA: default; time=+1s ago",
+                "end 2026-10-29T23:15:00", ""]))
+            # S4a force: the status line was lost, the test's own JSON file has the report.
+            self.write(folder, "S4a-force.log", "start 2026-10-29T23:16:00 x\nINSTRUMENTATION_STATUS_CODE: 0\nrc=0\nend 2026-10-29T23:21:00\n")
+            self.write(folder, "S4a-force.json", json.dumps(self.tagged("S4a", "force")))
+            # S4f normal: only the logcat chunks are left.
+            chunked = json.dumps(self.tagged("S4f", "normal", "fail", 3))
+            half = len(chunked) // 2
+            self.write(folder, "S4f-normal.log", "start 2026-10-29T23:22:00 x\nINSTRUMENTATION_STATUS_CODE: -2\nrc=0\nend 2026-10-29T23:27:00\n")
+            self.write(folder, "S4f-normal.logcat", f"I/AJ6MEM( 9): JSON {self.RUN} S4f-normal 1/2 {chunked[:half]}\n"
+                                                    f"I/AJ6MEM( 9): JSON {self.RUN} S4f-normal 2/2 {chunked[half:]}\n")
+            # S4f force: the process crashed before any report.
+            self.write(folder, "S4f-force.log", "start 2026-10-29T23:28:00 x\nINSTRUMENTATION_RESULT: shortMsg=Process crashed.\nrc=0\nend 2026-10-29T23:29:00\n")
+            self.write(folder, "S4f-force.crash", "x" * 300 + "\nFatal signal 6 (SIGABRT)\nAbort message: 'boom'\n")
+            pairs = [("S4a", "normal"), ("S4a", "force"), ("S4f", "normal"), ("S4f", "force")]
+            reports, failures, projection, window, printed = self.attach(folder, pairs)
+        self.assertEqual([("S4a", "normal", "pass", "pass"), ("S4a", "force", "pass", "pass"), ("S4f", "normal", "fail", "fail")],
+                         [(r["scenario"], r["mode"], r["status"], r["instrumentation"]) for r in reports])
+        self.assertEqual([("S4f", "force", "crashed")], [(f["scenario"], f["mode"], f["outcome"]) for f in failures])
+        # 200 characters before the signal line: 199 x and the line break.
+        self.assertTrue(failures[0]["crashLog"].startswith("x" * 199 + "\nFatal signal 6"))
+        self.assertNotIn("x" * 200, failures[0]["crashLog"])
+        self.assertEqual({"allowedDuring": ["S4a normal", "S4a force", "S4f normal", "S4f force"], "before": "default",
+                          "restoredTo": "default"}, projection)
+        self.assertEqual({"started": "2026-10-29T23:10:00", "finished": "2026-10-29T23:29:00"}, window)
+        self.assertIn("S4f  F NO REPORT (instrumentation crashed)", printed)
+
+    def test_attach_refuses_missing_or_unfinished_logs_other_runs_and_other_parameters(self):
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            with self.assertRaisesRegex(RuntimeError, "No device-side log for S4a normal"):
+                self.attach(folder, [("S4a", "normal")])
+            self.write(folder, "S4a-normal.log", "start 2026-10-29T23:10:00 x\nINSTRUMENTATION_STATUS_CODE: 1\n")
+            with self.assertRaisesRegex(RuntimeError, "has no rc= line"):
+                self.attach(folder, [("S4a", "normal")])
+            self.write(folder, "S4a-normal.log", "INSTRUMENTATION_STATUS: aj6mem_json="
+                       + json.dumps(self.tagged("S4a", "normal", runId="SM-A566B-5935-other")) + "\nINSTRUMENTATION_STATUS_CODE: 0\nrc=0\n")
+            with self.assertRaisesRegex(RuntimeError, "a report of run SM-A566B-5935-other"):
+                self.attach(folder, [("S4a", "normal")])
+            self.write(folder, "S4a-normal.log", "INSTRUMENTATION_STATUS: aj6mem_json="
+                       + json.dumps(self.tagged("S4a", "normal", iterations=10)) + "\nINSTRUMENTATION_STATUS_CODE: 0\nrc=0\n")
+            with self.assertRaisesRegex(RuntimeError, "used iterations 10, this call expects 20"):
+                self.attach(folder, [("S4a", "normal")])
+            # The same files pass once the call expects what the device-side run used.
+            reports, failures, projection, window, _ = self.attach(folder, [("S4a", "normal")], {"iterations": 10})
+            self.assertEqual(1, len(reports))
+            self.assertEqual([], failures)
+            self.assertEqual({}, window)
+
+    def test_attached_report_header(self):
+        meta = {"device": {"model": "SM-A566B", "manufacturer": "samsung", "sdk": "36", "serial": "localhost:57135"}, "versionCode": 5935,
+                "versionName": "6.8.0", "package": "org.autojs.autojs6", "runId": self.RUN, "label": "p6g",
+                "started": "2026-10-29T23:10:00", "finished": "2026-10-29T23:29:00", "date": "20261029", "deviceState": {}, "warmups": 2,
+                "iterations": 20, "pollMs": 10000, "forceDelayMs": 1000, "capture": "on",
+                "attached": {"dir": "attach-p6g", "deviceScript": "tools/memory/device_gate.sh"},
+                "projectionAppOp": {"allowedDuring": ["S4a normal"], "before": "default", "restoredTo": "default"}}
+        text = run_gate.markdown(meta, [report("S4a", "normal", "pass", 0)], [])
+        self.assertIn("- Attached (ROADMAP appendix C Q51 (b)): a device-side run of tools/memory/device_gate.sh, collected from attach-p6g; "
+                      "the run times are the device clock", text)
+        self.assertIn("`allow` during S4a normal, before `default`, afterwards `default`", text)
 
 
 if __name__ == "__main__":
