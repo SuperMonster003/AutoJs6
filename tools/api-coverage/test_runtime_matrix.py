@@ -620,7 +620,7 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
         self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
         # The groups the maintainer kept pending for P3 / P4.
-        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'keepAlive', 'app.launchDual', 'ui.layout', 'files.open']:
+        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'keepAlive', 'app.launchDual', 'ui.layout']:
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
 
@@ -631,10 +631,26 @@ class RepositoryTest(unittest.TestCase):
             for column in ['node_main', 'node_worker']:
                 self.assertEqual(rows[name][column]['status'], 'local-shim', (name, column))
         self.assertEqual((rows['Mathx.sum']['node_worker']['module'], rows['random']['node_worker']['module']), ('jsox.mathx', 'autojs6:global'))
-        # Q61 and Q54 (b) stay pending.
-        for name in ['dayjs', 'pangu', 'cheerio', 'i18n', 'util.class']:
-            self.assertEqual(rows[name]['node_main']['status'], 'pending', name)
-        self.assertEqual((rows['axios']['node_main']['status'], rows['axios']['node_worker']['status']), ('local-shim', 'pending'))
+        # Q61 (b) came with P3.2b (test_p3_2b); Q54 (b) stays pending.
+        self.assertEqual(rows['util.class']['node_main']['status'], 'pending')
+
+    def test_p3_2b(self):
+        # The files and data family: colors / Color, files (with open) and mime in the shared JS tools core, zip, recorder,
+        # storages, mediainfo and EpubBook through bridge facades, in both threads; Color / Zip / Storage members through
+        # their Node handle types; Q61 (b) libraries and the Worker's axios on autojs6:global.
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status in [('colors.toInt', 'local-shim'), ('files.isFile', 'local-shim'), ('files.open', 'local-shim'), ('open', 'local-shim'),
+                             ('mime.getMediaType', 'local-shim'), ('Color#argb', 'local-shim'), ('zip.unzip', 'bridged'), ('Zip#addFile', 'bridged'),
+                             ('recorder.save', 'bridged'), ('storages.names', 'bridged'), ('Storage#size', 'bridged'), ('mediainfo.get', 'bridged'),
+                             ('EpubBook#toString', 'bridged'), ('dayjs', 'local-shim'), ('cheerio', 'local-shim'), ('axios', 'local-shim')]:
+            for column in ['node_main', 'node_worker']:
+                self.assertEqual(rows[name][column]['status'], status, (name, column))
+        self.assertEqual({rows[name]['node_worker']['via'] for name in ['Color#argb', 'Zip#addFile', 'Storage#size']}, {'handle-type'})
+        self.assertEqual(rows['axios']['node_worker']['module'], 'autojs6:global')
+        # Q80 / Q81 / Q82 (a): host bridge modules in P3.5; Q63 (a): obsoleted.
+        for name in ['colors.theme.get', 'gallery.pick', 'files.batchRename.plan']:
+            self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
+        self.assertEqual(rows['util.toRegularAndCall']['node_main']['status'], 'not-portable')
 
     def test_p2_3(self):
         # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.

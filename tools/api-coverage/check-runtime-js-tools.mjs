@@ -18,8 +18,10 @@ const create = new Function(source.slice(first, last) + ';return __autojs6_creat
 const host = {device: {sdkInt: 33, density: 2, densityDpi: 320, scaledDensity: 2}, log() {}, warn() {}, java() { throw Error('Coverage inspection must not call the host'); }};
 const main = create({...host, axios: () => ({})}), worker = create(host);
 const exported = hostExports();
-// util.unwrapJavaObject stays not-portable (java-prototype); dayjs / pangu / cheerio / i18n wait for Q61.
+// util.unwrapJavaObject stays not-portable (java-prototype). The global object also has the Q61 libraries and Rhino's
+// global open / Color (P3.2b, check-runtime-files-data.mjs).
 const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies'];
+const LATER = ['cheerio', 'dayjs', 'i18n', 'pangu', 'open', 'Color'];
 const groups = [
   ['util', main.util, ['unwrapJavaObject']], ['util.inspect', main.util.inspect], ['util.java', main.util.java], ['util.morseCode', main.util.morseCode],
   ['util.version', main.util.version], ['util.versionCodes', main.util.versionCodes], ['species', main.species], ['s13n', main.s13n],
@@ -50,13 +52,13 @@ for (const name of GLOBALS) {
   assert(declared(name), `Missing declaration of global ${name}`);
 }
 assert.equal(typeof main.global.axios, 'object', 'Main thread axios getter');
-assert.deepEqual(Object.keys(worker.global).sort(), [...GLOBALS].sort(), 'Worker global data functions (no axios, Q61)');
+assert.deepEqual(Object.keys(worker.global).sort(), [...GLOBALS, ...LATER].sort(), 'Worker global object (its axios is added by the Worker host modules)');
 const table = source.slice(source.indexOf('hostModuleMethods: {'), source.indexOf('hostModuleConstants: {'));
 for (const name of ['util', 'species', 's13n', 'formatter', 'fmt', 'converter', 'cvt', 'jsox', '"jsox.mathx"', '"jsox.arrayx"', '"jsox.numberx"']) {
   assert(new RegExp(`(^|[\\s,{])${name.replace(/\./g, '\\.')}\\s*:`).test(table), `Worker table entry ${name}`);
 }
 const workerGlobals = JSON.parse(/global: (\[[^\]]*\])/.exec(table)[1]);
-assert.deepEqual([...workerGlobals].sort(), [...GLOBALS].sort(), 'Worker table global list');
+assert.deepEqual([...workerGlobals].sort(), [...GLOBALS, 'axios', ...LATER].sort(), 'Worker table global list');
 const hostApi = read(resolve(node, 'docs/HOST-API.md'));
 const local = hostApi.split('## 四.')[1].split('由插件本地实现')[0];
 for (const name of ['autojs6:util', 'species', 'autojs6:global', 's13n', 'jsox']) assert(local.includes('`' + name + '`'), `HOST-API section 4 lists ${name}`);

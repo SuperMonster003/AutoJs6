@@ -165,6 +165,7 @@ jobs:
           node tools/api-coverage/check-runtime-ai.mjs
           node tools/api-coverage/check-runtime-ai-agent.mjs
           node tools/api-coverage/check-runtime-js-tools.mjs
+          node tools/api-coverage/check-runtime-files-data.mjs
           node tools/api-coverage/check-bun-js-tools.mjs
       - name: Check Ace runtime completion against the runtime matrix
         working-directory: AutoJs6-Plugin-Ace-Editor

@@ -187,11 +187,13 @@
     "_note": "Q27 (a), maintainer 2026-10-25: augment-prototype objects with a runtime handle type, compared member by member (node: declaring module and type in docs/nodejs/types/autojs6-node; bun: the host client namespace producing the handle, its type in host-client.d.mts and the grant of the producing call); type arguments only feed the Ace queries",
     "AgentRun": {"node": {"module": "autojs6:ai", "type": "AgentRun"}, "bun": {"namespace": "ai", "type": "RuntimeAi.AgentRun", "capability": "agent.control"}},
     "AiSession": {"node": {"module": "autojs6:ai", "type": "Session"}, "bun": {"namespace": "ai", "type": "RuntimeAi.Session", "capability": "ai.control"}},
+    "Color": {"node": {"module": "colors", "type": "Color"}},
     "EpubBook": {"node": {"module": "autojs6:epub", "type": "Book"}, "bun": {"namespace": "epub", "type": "RuntimeEpub.Book", "capability": "epub.control"}},
     "Flow": {"node": {"module": "autojs6:flow", "type": "Flow<unknown>"}, "bun": {"namespace": "flow", "type": "RuntimeFlow.Flow<unknown>", "capability": "flow.control"}},
     "MailClient": {"node": {"module": "autojs6:mail", "type": "Client"}, "bun": {"namespace": "mail", "type": "RuntimeMail.Client", "capability": "mail.control"}},
     "ShellProcess": {"node": {"module": "autojs6:shell", "type": "ShellProcess"}, "bun": {"namespace": "shell", "type": "RuntimeShell.ShellProcess", "capability": "shell.control"}},
-    "Storage": {"node": {"module": "storages", "type": "StorageStore"}, "bun": {"namespace": "storages", "type": "RuntimeStorage.StorageStore", "capability": "storage.control"}}
+    "Storage": {"node": {"module": "storages", "type": "StorageStore"}, "bun": {"namespace": "storages", "type": "RuntimeStorage.StorageStore", "capability": "storage.control"}},
+    "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}}
   },
   "exclusions": [
     {
