@@ -97,4 +97,10 @@ ROADMAP P7.1 的设计 (子会话 augment-p7-1, 2026-10-29). 第 1 - 5 节是现
 
 ## 8. 实施结果
 
-(待实施.)
+宿主 `0d928b9a8` (2026-10-29), 按第 3 - 7 节实施:
+
+- 扫描: `core/plugin/scriptmodule/ScriptModuleUsageScanner.kt` (规则同第 3 节). 计划: `PackagedScriptModules.kt` 的纯函数按 `ScriptModulePluginState.unavailableReason` 决定每个库复制或列为缺失, 已复制的 `.js` 再扫依赖; Android 侧从插件 APK 的 `ZipFile` 读文件, 读取期间插件版本或安装时间变化视为不兼容.
+- 构建: `RemoteApkBuildRequestPreparer` 把复制的文件写进 build inputs 归档的 `assets/modules/...` (没有原生库时归档也可只含模块文件, 模板插件不用改); 勾选项 `ApkBuildLibrary.BUNDLED_LIBRARIES` 显示在打包页 "支持库" (中文界面的实际名称, 第 3 节写作 "依赖库") 中. 提示经 `BuildOutcome.notices` 显示在成功对话框新增的一段 (`dialog_build_progress.xml`).
+- 消息: `ScriptModulePluginMessages.unavailable(..., packaged = BuildConfig.isInrt)`, 打包应用的两条按第 7 节, 11 个 values 目录各加 8 条字符串 (两条运行时消息, 成功对话框的已打包 / 未打包与各原因的处理办法).
+- 实测: 扫描 0-1 ms, 计划 13-38 ms (63751f63, 一个脚本); 全部 13 个库使应用增大 211357 字节, 与第 2 节的估算 (约 199 KB) 相近. 真机两态 (插件未装 / 已装) 下应用 a (扫描) / b (打包时无插件) / c (勾选) 全部符合预期, 第 6 节的回退在装有插件的设备上可用 (b 什么都没带也可用). 详见 ROADMAP 附录 A "P7.1".
+- 偏离设计: 无. 实施中发现缺库消息里 Node 兼容模块与 lodash 的名称带 `.js` (jvm-npm 一致的既有行为), 登记为附录 C Q189, 推荐项 (保持现状) 已先行.
