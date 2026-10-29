@@ -37,7 +37,7 @@ const create = new Function('__autojs6_call_autojs', '__autojs6_invalid_arg_type
   const __autojs6_rhino_compat_stop_screen_capture = __autojs6_rhino_compat_request_screen_capture;
   const __autojs6_has_own = (object,name) => Object.prototype.hasOwnProperty.call(object,name);
   ${segment('  const __autojs6_opencc_methods =','  const __autojs6_pinyin_styles =')}
-  ${segment('  const __autojs6_pinyin_styles =','  function __autojs6_jsox_mathx_flatten(')}
+  ${segment('  const __autojs6_pinyin_styles =','  // Shared JS tools core.')}
   ${segment('  function __autojs6_limited_image(moduleName)','  function __autojs6_ocr_bridge_options(')}
   ${segment('  function __autojs6_limited_console()','  let __autojs6_main_module_ref =')}
   ${segment('  function __autojs6_limited_screen_recorder()','  function __autojs6_limited_image(')}
