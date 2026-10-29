@@ -492,3 +492,58 @@ augment P5.2 (37b93d893) 删除 `runtime/api/augment` 后, `returned-objects.jso
 | Ace | f4f0651 | 重新导入 8 个 d.ts, autojs6_indices.js, lib.autojs6.d.ts |
 | 宿主 | 3fd931ffb | Ace 补全源 autojs6_indices.source.json |
 | 宿主 | (本节所在提交) | 本节, ROADMAP 勾选 P2.2, 附录 C Q23 已落地与 Q51 |
+
+## 8. P1.6 Codex 结构检查脚本改读 exports.json (2026-10-29, 子会话 api-cov-p1-6)
+
+Q42 (a). augment P5.2 (37b93d893) 删除旧 `augment` 包后, 7 个 Codex 结构检查脚本用正则读旧注册写法 (`selfAssignmentFunctions` / `FUNCTION_ASSIGNMENTS` / `FORWARDED`) 取宿主方法集, 读文件即 ENOENT 失败; 其中 6 个在 CI "Script API coverage" 里 (共 8 个脚本). 其余 17 个 Codex 静态脚本在 HEAD 本就通过, 没有同类失败, 未改.
+
+### 8.1 改法
+
+新增 `tools/api-coverage/host-exports.mjs`: 读同一次 `check.py` 运行写出的 `build/reports/api-coverage/exports.json` (`extract_exports.py` 读 KSP `script-modules.json`; 环境变量 `AUTOJS6_API_COVERAGE_EXPORTS` 可指定别的文件), 文件缺失, `dataSource.kind` 不是 ksp, 或比 `script-modules.json` 旧, 都直接失败并提示先运行 `check.py`. 7 个脚本只换宿主方法集的来源, 其余比对 (Node facade / Worker, `sync-*.mjs --check` 的 Bun host-client, Node d.ts, 文档, engine 路由集, 插件清单与打包权限) 不变, 不再读 Kotlin 注册.
+
+| 脚本 | 旧来源 (augment 包) | 新来源 (exports.json) | 数量 |
+|---|---|---|---:|
+| check-runtime-tts | Tts.kt `FUNCTION_ASSIGNMENTS` | `tts` 的 Functions; 另加 Properties 须在 facade 上 | 31 + 4 |
+| check-runtime-speech | Speech.kt / SpeechModels.kt | `speech` / `speech.models` 的 Functions | 10 + 8 |
+| check-runtime-epub | Epub.kt | `epub` 的 Functions (仍断言 20) | 20 |
+| check-runtime-mail | Mail.kt 注册 + `FORWARDED` (+Async) | `mail` 的 Functions (仍断言 52); Properties 须含 providers / accounts | 52 |
+| check-runtime-ai | Ai.kt | `ai` 的 Functions 与 5 个名称相等, Getters 只有 agent, 模块可调用 | 5 |
+| check-runtime-ai-agent | AiAgent.kt | 9 个根仍是脚本内清单 (见 Q46), 宿主侧核对 getter `ai.agent`; AgentRun 函数改取 `returnedObjects` (原写死 7 个) | 9 / 7 |
+| check-runtime-bridges | OpenCC.kt / Images.kt | `opencc` / `images` 的 Functions; 转换表 `OpenccConversionPlan.kt` 只改路径到 `modules/opencc` (实现表交叉核对, 不是注册) | 33 / 81 |
+
+数量与 Codex 批次报告一致 (tts 31, speech 18, epub 20, mail 52 + 嵌套 5, images 81). 反例 10 个全部失败 (退出码 1): 7 个模块各加一个宿主独有函数 (tts / speech.models / epub / mail / ai / opencc / images), AgentRun 加一个成员, dataSource 改 kotlin, 文件缺失.
+
+### 8.2 CI
+
+- `api-coverage.yml` 不需要改: 8 个脚本本就在 KSP 构建 (199d13444, augment Q111) 与 `check.py --source ksp --matrix --strict-arity` 之后, 同一步骤 "Test registration extraction and compare public surfaces" 内 (bash -e, check.py 失败即停), exports.json 用默认输出目录, 与脚本默认路径一致. 6 个失效步骤随脚本修复恢复.
+- `act` 未安装, 按工作流顺序在 HEAD 导出副本内逐步骤运行等价命令 (8.3).
+- 观察 (未改): 触发路径 `runtime/api/augment/**` 已无文件, 无害; bridges 与其余 16 个脚本仍只在本地运行 (REVIEW R1).
+
+### 8.3 HEAD 导出副本与结果
+
+- 快照: 宿主 1a86f2268 (本条目脚本提交; 其后的 P2.2 / P2.3 提交由其自行验收), 文档 ffd5c2c (P1.4 生成 MATRIX.md 之后, P2.1 提交之前), TS 496aaf8, Ace 9fce0de, Node 990f9e35, Bun 3056b94, Macaw cf32b5e, Folio 34658be, Stamp 59b8b37; 按 CI 布局并排放在 `E:/.cache/aj6-p1-6/`, 用 `git -c core.autocrlf=false archive` 导出 (见 8.4). 副本内 `gradlew.bat :app:kspAppDebugKotlin --max-workers=2 --no-daemon` 2 min 31 s.
+- CI 步骤 "Test registration extraction and compare public surfaces" (工作目录宿主):
+  - `python -m unittest discover -s tools/api-coverage -p 'test_*.py'`: 68 项通过 (跳过 3 项, 与 6.1 相同).
+  - `python tools/api-coverage/check.py --source ksp --matrix --strict-arity`: 退出码 0, failures 空, MATRIX.md current, pending 643 / 832 / 791 与基线一致, 策略冲突 0.
+  - `node tools/api-coverage/check-runtime-<java-callbacks|tts|speech|epub|mail|flow|ai|ai-agent>.mjs`: 8 个退出码 0.
+- 其后的 CI 步骤 (Ace 运行时查询 `generate-runtime-api-queries.mjs --check --host ../AutoJs6` 与 `verify-runtime-api-coverage.mjs --fresh`, TS `sync-runtime-declarations.mjs --check --ace`, `verify-runtime-declarations.mjs`, `verify-api-coverage.mjs`): 5 个退出码 0.
+- 全部 Codex 静态脚本: `node tools/api-coverage/check-*.mjs` 22 个与 `test-web-display-stream.mjs` / `test-web-download-stream.mjs` 共 24 个退出码 0; 第 25 个 `verify-surfaces.mjs` 由 check.py 调用 (上条通过).
+- 验收: `AUTOJS6_ACE_EDITOR_ROOT=<副本>/AutoJs6-Plugin-Ace-Editor python tools/api-coverage/check.py --matrix --strict-arity --docs-support` 退出码 0 (含 Ace, 1377 个导出; 文档运行时表 3 页 current; Ace 指向副本而非共享签出, 因为共享 Ace 已有 P2.2 的新提交).
+- 参考: 同命令改用文档 10424a2 (P2.1 给 mail 47 项加标题) 时唯一失败为 "MATRIX.md is stale" (doc 列 mention 231 -> 184 / heading 2174 -> 2221, mail 行 doc 9 -> 56), 属 P2.1 在途, 由其重生成.
+
+### 8.4 本机导出的换行符
+
+本机 `core.autocrlf=true` 时 `git archive` 把没有 eol 属性的文件转成 CRLF: Node 的 `node_bridge_sources.cpp` 变 CRLF, 而 Bun 的 `host-client.mjs` 有 `eol=lf` 仍是 LF, bridges 比较两边图像适配器源码文本 ("Portable Node/Bun image adapters drifted") 因此失败. CI (ubuntu) 与共享签出都是 LF, 不受影响. HEAD 导出副本应以 `git -c core.autocrlf=false archive` 导出.
+
+### 8.5 待决
+
+Q46 (`ai.agent` 的 9 个根不在 exports.json, 脚本保留清单) 已按推荐先行, 见 ROADMAP 附录 C.
+
+### 8.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 163cdc5c3 | ROADMAP 新增 P1.6 条目 |
+| 宿主 | 1a86f2268 | host-exports.mjs, 7 个脚本改读 exports.json, README |
+| 宿主 | 08ba1e80a | ROADMAP 勾选 P1.6, 附录 C Q42 标已拍板并落地, 登记 Q46 |
+| 宿主 | (本节所在提交) | 本节 |
