@@ -35,9 +35,13 @@ class NodeProjectTimeoutInstrumentationTest {
             root, entry, launchOptions = NodeProjectLaunchOptions(timeoutMs = 5000L),
         ) as NodeProjectLaunchSource
         assertEquals(5000L, NodeProjectRunner.buildProjectRequest(overridden).timeoutMs)
-        root.resolve("project.json").writeText("""{"type":"node","main":"main.cjs"}""")
-        val ordinary = NodeProjectScriptSourceFactory.create(entry) as NodeProjectLaunchSource
-        assertEquals(5000L, NodeProjectRunner.buildProjectRequest(ordinary).timeoutMs)
+        // No budget, or a budget of 0, means no limit (api-coverage Q126).
+        assertEquals(0L, NodePluginScriptRequest.DEFAULT_TIMEOUT_MS)
+        for (config in listOf("""{"type":"node","main":"main.cjs"}""", """{"type":"node","main":"main.cjs","node":{"timeoutMs":0}}""")) {
+            root.resolve("project.json").writeText(config)
+            val ordinary = NodeProjectScriptSourceFactory.create(entry) as NodeProjectLaunchSource
+            assertEquals(config, NodePluginScriptRequest.DEFAULT_TIMEOUT_MS, NodeProjectRunner.buildProjectRequest(ordinary).timeoutMs)
+        }
     }
 
     private fun withProject(test: (File, File) -> Unit) {

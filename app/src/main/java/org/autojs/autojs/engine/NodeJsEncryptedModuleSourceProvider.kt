@@ -63,7 +63,8 @@ internal class NodeJsEncryptedModuleSourceProvider(
         )
     private val providerId = "module-source-$executionId"
     private val startedAt = SystemClock.elapsedRealtime()
-    private val deadline = deadlineAfter(startedAt, timeoutMs.coerceAtLeast(1L))
+    // An execution without a budget (0 or less, the default since api-coverage Q126) gives the provider no deadline.
+    private val deadline = if (timeoutMs > 0L) deadlineAfter(startedAt, timeoutMs) else Long.MAX_VALUE
     private val resolutionLock = Any()
     private var usedSourceCount = initialSourceCount
     private var usedSourceBytes = initialSourceBytes

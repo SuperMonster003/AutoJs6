@@ -227,7 +227,8 @@ class NodePluginJavaScriptEngine(
                         ),
                     )
                 }
-                val timeoutMs = if (launchSource?.nodeProjectTimeoutMs == null) {
+                // A project budget leaves room for the compilation; no budget (0) stays without a limit.
+                val timeoutMs = if (launchSource?.nodeProjectTimeoutMs == null && projectRequest.timeoutMs > 0L) {
                     maxOf(projectRequest.timeoutMs, DEFAULT_TYPESCRIPT_PROJECT_TIMEOUT_MS)
                 } else {
                     projectRequest.timeoutMs

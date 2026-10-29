@@ -52,6 +52,8 @@
 
 这三个插件对宿主 API 的映射由矩阵的 Node main / Node Worker / Bun 列衡量, 下面只列没有宿主模块对应的运行时自有入口.
 
+P5.2b (2026-10-30) 之后的现状见第 9 节附表: 文档 132/132, d.ts 与 Ace 各 125/125 (QuickJS 不适用), Node 改计 113 条 (ROADMAP 附录 C Q99). 本节保留 P5.1 盘点时的数字.
+
 #### AutoJs6-Plugin-NodeJs-Runtime (1.32.0 / 299, 3f620da0)
 
 - 入口 (M4): 12 组 110 条, 声明在 `docs/nodejs/types/autojs6-node/`. 运行时控制: `autojs6:bridge` 2, `autojs6:host` 11 (宿主消息 EventEmitter), `autojs6:lifecycle` 7, `autojs6:profile` 1 (38 个字段的能力快照), `$autojs` 自有 3 (schema / profile / androidContext). 包与本地插件: npm 21, package_manager 14, plugins 19 (本地 JS 插件管理器). Rhino 迁移: rhino 13, `autojs6:compat` 控制成员 10 (另 89 个是宿主 API 再导出, 不计). 其他: media_store 8 (scanFile 除外), `worker_threads.WorkerPool` 1. android / input_observer / fetch / websocket 宿主有分散的对应, 不计.
@@ -247,10 +249,39 @@ AutoJs6-Plugin-Bundled-Libraries, AutoJs6-Plugin-Three-Paper-PDF, AutoJs6-Plugin
 | 批次 | 插件 | 内容 | 改动仓库 | 设备与插件安装 | 依赖 / 并行 |
 |---|---|---|---|---|---|
 | P5.2a 工具表 [静态 + 1 台核对] | Three-Hanzi-CC, Yolo-NCNN, Image-Quantization, Three-Stack-Archive, Three-Macaw-Speech (5) | plugins.md "官方插件工具表" 12 行 (名称, 提供插件, 最低版本, 参数, 输出), 修正第 306 行示例 (`maxColors`, 输出 `png`); d.ts / Ace 加工具名字面量联合 (保留 string, 不计覆盖); 生成离线文档 | Documentation, Offline-Docs, TS 声明, Ace | 一台主力设备 (Redmi 或 Xiaomi) 装齐 5 个插件, `plugins.tools.list()` 核对名称与参数; Macaw 的两个说话人工具需 1.3.0 构建 (未发布时表内最低版本写 1.3.0 并只核对其余 10 个) | 可与 P5.2b / P5.2c / P5.2d 并行; Ace 索引重建与 P5.2b 排队 |
-| P5.2b JS 运行时附表 [静态] | NodeJs-Runtime, Bun-Runtime, QuickJS-Runtime (3) | runtimeApis.md 加 "运行时自有接口" 小节 (按组表格: Node 12 组 110 条, Bun 12 条, QuickJS 7 条, 重点写 scriptArgs); Node `worker_threads.WorkerPool` 补 d.ts (Node 插件 `docs/nodejs/types/autojs6-node`, TS 声明 autojs6-node 同步, Ace 捆绑副本); 本文件加附表 | Documentation, Offline-Docs, Node 插件 (d.ts), TS 声明, Ace | 无 | 与 P3 系列错开 Node 插件 d.ts 文件 (共享 checkout 先在 locks.md 登记) |
+| P5.2b JS 运行时附表 [静态] | NodeJs-Runtime, Bun-Runtime, QuickJS-Runtime (3) | runtimeApis.md 加 "运行时自有接口" 小节 (按组表格: Node 12 组 110 条, Bun 12 条, QuickJS 7 条, 重点写 scriptArgs); Node `worker_threads.WorkerPool` 补 d.ts (Node 插件 `docs/nodejs/types/autojs6-node`, TS 声明 autojs6-node 同步, Ace 捆绑副本); 本文件加附表 | Documentation, Offline-Docs, Node 插件 (d.ts), TS 声明, Ace | 无 | 与 P3 系列错开 Node 插件 d.ts 文件 (共享 checkout 先在 locks.md 登记); 落点 (2026-10-30, api-cov-p5-2b): 文档 b31e71b / 62455f7 / 10bc48b, Offline Docs 836e334, Node 9e6e1a32, TS baf2100, Ace 79a115b |
 | P5.2c 宿主分母补漏 [静态] | MLKit-OCR / Paddle / Rapid 系列, MLKit-Barcode, Three-Block-Compose (只作来源) | Q74: `returned-objects.json` 加 OcrResult# 与 WrappedBarcode# (producers 写 ocr.detect 系列与 barcode.detect 系列), 约 +27 行; Q75: `extract_exports.py` 读 compose-ui-api 目录契约 (V1Catalog / ComposeUiV2 / ComposeModifier) 生成 83 行, 核对五处覆盖; 重新生成 MATRIX.md 与 pending-baseline | 宿主 tools/api-coverage, docs/api-coverage | 无 | MATRIX 重新生成与同期其他子会话排队; 新增行若有 pending 交对应 P3 / P4 批次 |
 | P5.2d 语言运行时文档与门禁 [静态] | Python-Runtime, Java-Runtime, Kotlin-Runtime, Lua-Runtime (4) | 文档站新增语言运行时 API 页 (Python 46 函数 + 常量 / 异常, Java 17, Kotlin 13, Lua 12, 签名 + 示例); Q77 静态门禁 (tools/api-coverage 新检查约 120 行 + CI 一步, 先校验文档标题); autojs4Runtime.md 可选补差异指引 (Q76) | Documentation, Offline-Docs, 宿主 tools/api-coverage | 无 | 可与 P5.2a / b / c 并行. 落点 (2026-10-30, api-cov-p5-2d): 宿主 3fa1fc8ad (门禁 + 名称清单 + CI), 文档 fee509b (四页 + autojs4Runtime 指引) / 4e9a3d7 (生成物), Offline Docs a25a1ff; 附表见 2.4 节末 |
 | P5.2e 语言类型桩与 Ace 补全 [静态 + 1 台抽查] | Python-Runtime, Lua-Runtime, Java-Runtime, Kotlin-Runtime (4) + Ace | Python `.pyi` (插件仓库), LuaLS `---@meta` 定义 (插件仓库), Java / Kotlin 接口桩并入 Ace 的 ECJ / Kotlin 补全 classpath, Ace 捆绑 Pyright / LuaLS 类型; P5.2d 门禁扩展到类型桩 | 4 个插件仓库, Ace | 一台主力设备装 Ace 与 4 个语言运行时, 在编辑器里抽查补全 (每种语言 3 个名称) | 依赖 P5.2d 的清单与门禁 |
 | P5.2f ImGui [静态 + 1 台冒烟, 约 2 个子会话] | ImGui (1) | 等维护者的 ImGui 宿主模块化会话落地: KSP 导出进分母后, 文档新增 imgui 页与对象类型页 (约 349 个标题 + 示例, 194 个别名并入驼峰条目), d.ts / Ace 由插件 imgui.d.ts 改写为模块声明 (补 4 个对象方法), Node / Bun 状态按矩阵规则 (不可移植的登记待决) | Documentation, Offline-Docs, TS 声明, Ace (宿主模块化由维护者的会话负责) | 一台主力设备装 ImGui, 文档示例冒烟 | 依赖维护者的 ImGui 会话; 文档量大可拆两批 |
 
 P5.3 收尾时 bump 被改到的仓库 (D19): 文档 / Offline-Docs / TS 声明 / Ace, 以及 P5.2b / P5.2e 改到的 Node / Python / Java / Kotlin / Lua 插件.
+
+## 9. JS 运行时自有接口附表 (P5.2b, 2026-10-30)
+
+按 Q2-3 (a), Node / Bun / QuickJS 运行时插件的自有入口不进矩阵分母, 在本表跟踪. 文档 = 文档站 `api/runtimeApis.md` 的 "运行时自有接口" 节 (每条一个表格行, 不设逐条标题); d.ts = Node 插件 `docs/nodejs/types/autojs6-node` 与 TS 声明 `declarations/autojs6-node`, Bun 插件 `app/src/main/assets/autojs6/host-client.d.mts` 与 TS 声明 `declarations/autojs6-bun` (两处逐字相同, 摘要见 `declarations/runtime-declarations.json`); Ace = Ace 捆绑副本 `autojs6/types/autojs6-node` / `autojs6-bun` (由 TS 仓库 `tools/sync-runtime-declarations.mjs --ace` 同步, 摘要与 TS 相同). 最低版本是首个含该入口的插件版本 (开发版本号, 按各版本最后一个提交的声明与源码判定).
+
+计数: Node 113 (P5.1 记 110; 另计 `worker_threads` 主线程门面的 `policy` / `nativeAvailable` / `diagnostics` 3 条, 见 ROADMAP 附录 C Q99), Bun 12, QuickJS 7, 共 132.
+
+| 运行时 | 组 | 入口 | 条数 | 最低版本 | 文档 | d.ts | Ace |
+|---|---|---|---:|---|---|---|---|
+| Node | `autojs6:bridge` | callAutoJs, permissions | 2 | 1.0.0 (Worker 1.6.0) | 有 2/2 | 有 2/2 (bridge.d.ts) | 有 2/2 |
+| Node | `autojs6:host` | on, once, addListener, prependListener, prependOnceListener, off, removeListener, removeAllListeners, listenerCount, ref, unref | 11 | 1.3.0 | 有 11/11 | 有 11/11 (host.d.ts) | 有 11/11 |
+| Node | `autojs6:lifecycle` | policy, checkpoint, readCheckpoint, clearCheckpoint, onCheckpoint, onRestore, onStop | 7 | 1.0.0 | 有 7/7 | 有 7/7 (lifecycle.d.ts) | 有 7/7 |
+| Node | `autojs6:profile` | 模块本身 (能力快照) | 1 | 1.0.0 | 有 1/1 | 有 1/1 (autojs_global.d.ts) | 有 1/1 |
+| Node | `$autojs` 自有 | schema, profile, androidContext | 3 | 1.0.0 | 有 3/3 | 有 3/3 (autojs_global.d.ts) | 有 3/3 |
+| Node | `package_manager` | status, policy, sourcePolicy, planInstall, planUpdate, planRemove, planRegistryInstall, planTarballInstall, install, update, remove, list, verify, prune | 14 | 1.0.0 (install / update / remove 的 npm 包规格形态 1.6.0) | 有 14/14 | 有 14/14 (package_manager.d.ts) | 有 14/14 |
+| Node | `npm` | package_manager 的 14 个名称, packageManager, cli, exec, runScript, installFromRegistry, publish, pack | 21 | 1.0.0; cli / exec / runScript / installFromRegistry / publish / pack 1.6.0 (此前名称在但一律拒绝) | 有 21/21 | 有 21/21 (npm.d.ts) | 有 21/21 |
+| Node | `plugins` (本地 JS 插件) | install, enable, disable, isEnabled, configure, config, version, dependencies, exports, capabilities, status, start, stop, reload, unload, list, manifest, resolve, load | 19 | 1.0.0 | 有 19/19 | 有 19/19 (plugins.d.ts) | 有 19/19 |
+| Node | `rhino` | name, version, schema, mode, enabled, errorCodes, isEnabled, status, run, install, importClass, importPackage, JavaAdapter | 13 | 1.0.0 | 有 13/13 | 有 13/13 (rhino.d.ts) | 有 13/13 |
+| Node | `autojs6:compat` 控制成员 | name, version, mode, errorCodes, status, install, unsupported, blockedByDesign, assertSupported, selector (其余 89 个是宿主 API 再导出, 不计) | 10 | 1.0.0 | 有 10/10 | 有 10/10 (rhino_compat.d.ts) | 有 10/10 |
+| Node | `media_store` | capabilities, query, get, insert, update, delete, remove, exportFile (scanFile 对应宿主 media.scanFile, 不计) | 8 | 1.5.5 | 有 8/8 | 有 8/8 (media_store.d.ts) | 有 8/8 |
+| Node | `worker_threads` 主线程扩展 | WorkerPool, policy, nativeAvailable, diagnostics | 4 | 1.0.0 | 有 4/4 | 有 4/4 (worker_threads.d.ts, P5.2b 新增) | 有 4/4 (P5.2b 新增) |
+| Bun | 客户端模块导出与环境变量 | createHostClient, SDK_VERSION, HOST_API_METHODS, HostCallError, OPENCC_CONVERSION_TYPES, AUTOJS6_HOST_CLIENT_MODULE | 6 | 0.2.6 | 有 6/6 | 有 6/6 (host-client.d.mts; 环境变量为文件头说明, process.env 的类型来自 Bun 类型包) | 有 6/6 (环境变量由 Ace runtime-bun 组声明) |
+| Bun | `HostClient` 非宿主成员 | sdkVersion, bridgeVersion, capabilities, limits, hasCapability, call | 6 | 0.2.6 | 有 6/6 | 有 6/6 | 有 6/6 |
+| QuickJS | 全局输出 | console.debug / info / log / warn / error, print | 6 | 1.0.0 | 有 6/6 | 不适用 (Q2-3 (a): 不设 QuickJS 声明组) | 不适用 (同左) |
+| QuickJS | 入参 | scriptArgs | 1 | 1.0.0 | 有 1/1 | 不适用 | 不适用 |
+
+合计: 文档 132/132 (P5.1 时 Node 0/110, Bun 5/12 仅正文提及, QuickJS 0/7); d.ts 与 Ace 各 125/125 适用条目 (Node 113 + Bun 12; P5.1 时 Node 109/110, 缺 WorkerPool), QuickJS 7 条按 Q2-3 (a) 不适用. 无 "缺".
+
+维护: 运行时插件增删自有入口时同步本表与 runtimeApis.md 的对应表格. 本表不在 `check.py` 门禁内 (Q2-3 (a) 未加附表校验); Node / Bun 的宿主模块成员仍由矩阵的 Node / Bun 列衡量.

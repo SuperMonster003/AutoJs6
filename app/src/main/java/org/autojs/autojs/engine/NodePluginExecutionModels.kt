@@ -36,7 +36,11 @@ data class NodePluginScriptRequest(
     val idleExitMs: Long = 0L,
 ) {
     companion object {
-        const val DEFAULT_TIMEOUT_MS = 300_000L
+        /**
+         * No limit: the plugin runs a request whose [timeoutMs] is 0 or less until it ends or is stopped, as Rhino scripts
+         * run; Node scripts and projects are limited only by an explicit budget (`node.timeoutMs`, api-coverage Q126).
+         */
+        const val DEFAULT_TIMEOUT_MS = 0L
     }
 }
 

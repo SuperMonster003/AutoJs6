@@ -59,6 +59,8 @@ internal class NodeJsTypeScriptModuleSourceProvider(
         initialSourceCount = initialSourceCount,
         initialSourceBytes = initialSourceBytes,
     )
+    // An execution without a budget (0 or less, the default since api-coverage Q126) puts no limit on compilations.
+    private val budgetMs = if (timeoutMs > 0L) timeoutMs else Long.MAX_VALUE
     private val cancelled = AtomicBoolean(false)
     private val compileCount = AtomicInteger(0)
     private val compileFailureCount = AtomicInteger(0)
@@ -264,7 +266,7 @@ internal class NodeJsTypeScriptModuleSourceProvider(
             val requestDeadline = request
                 .getLong(
                     NodeJsRuntimeContract.KEY_MODULE_SOURCE_PROVIDER_DEADLINE_ELAPSED_REALTIME_MS,
-                    deadlineAfter(startedAt, timeoutMs),
+                    deadlineAfter(startedAt, budgetMs),
                 )
             val remaining = requestDeadline - SystemClock.elapsedRealtime()
             if (remaining < TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS) {
@@ -279,7 +281,7 @@ internal class NodeJsTypeScriptModuleSourceProvider(
             }
             val compilationTimeout = minOf(
                 remaining,
-                timeoutMs,
+                budgetMs,
                 TypeScriptCompilerContract.MAX_TIMEOUT_MS,
             ).coerceAtLeast(TypeScriptR2Contract.MIN_PUBLIC_COMPILATION_TIMEOUT_MS)
             val nextOverlays = LinkedHashMap<String, ByteArray>(overlays.size + 1).apply {
