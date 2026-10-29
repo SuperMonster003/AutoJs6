@@ -1,5 +1,6 @@
 package org.autojs.autojs.ui.main.scripts
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.SystemClock
@@ -11,6 +12,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import org.autojs.autojs.AutoJs
+import org.autojs.autojs.core.plugin.center.PluginAuthorizationStore
+import org.autojs.autojs.core.plugin.center.PluginEnableStore
+import org.autojs.autojs.core.plugin.center.PluginSignatureUtils
 import org.autojs.autojs.core.plugin.mediainfo.MediainfoPluginHost
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
@@ -62,6 +66,7 @@ class MediaInfoDialogInstrumentationTest {
         val monitor = instrumentation.addMonitor(DisplayMediaInfoActivity::class.java.name, null, false)
         var main: MainActivity? = null
         var details: DisplayMediaInfoActivity? = null
+        val restorePlugins = enablePlugins()
         try {
             instrumentation.runOnMainSync {
                 ViewUtils.isAutoNightModeEnabled = false
@@ -107,7 +112,31 @@ class MediaInfoDialogInstrumentationTest {
                 ViewUtils.isNightModeEnabled = originalNight
                 AppCompatDelegate.setDefaultNightMode(originalMode)
             }
+            restorePlugins()
             if (demoPath == null) source.delete()
+        }
+    }
+
+    /**
+     * Authorizes and enables the installed MediaInfo plugins in the Plugin Center for the test and returns how to restore
+     * their state. An officially signed plugin is authorized anyway, a locally built debug one is not, and the dialog then
+     * never offers the MediaInfo button.
+     */
+    private fun enablePlugins(): () -> Unit {
+        val intent = Intent(MediainfoPluginHost.ACTION_MEDIAINFO).addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+        val packages = context.packageManager.queryIntentServices(intent, 0).map { it.serviceInfo.packageName }.distinct()
+        val enable = context.getSharedPreferences("plugin_center_enable_state", Context.MODE_PRIVATE)
+        val enableKeys = packages.map { "key_\$_enabled_plugin_\$_$it" }
+        val enableBefore = enableKeys.associateWith { if (enable.contains(it)) enable.getBoolean(it, false) else null }
+        val authorization = context.getSharedPreferences("plugin_center_authorization", Context.MODE_PRIVATE)
+        val fingerprints = packages.associateWith { PluginSignatureUtils.getSha256Fingerprints(context, it) }
+        val authorizationKeys = fingerprints.flatMap { (packageName, prints) -> prints.map { "key_\$_plugin_auth_\$_$packageName\$_$it" } }
+        val authorizationBefore = authorizationKeys.associateWith { if (authorization.contains(it)) authorization.getBoolean(it, false) else null }
+        fingerprints.forEach { (packageName, prints) -> prints.forEach { PluginAuthorizationStore.grant(context, packageName, it) } }
+        packages.forEach { PluginEnableStore.setEnabled(context, it, true) }
+        return {
+            enable.edit().apply { enableBefore.forEach { (key, value) -> remove(key); value?.let { putBoolean(key, it) } } }.commit()
+            authorization.edit().apply { authorizationBefore.forEach { (key, value) -> remove(key); value?.let { putBoolean(key, it) } } }.commit()
         }
     }
 
