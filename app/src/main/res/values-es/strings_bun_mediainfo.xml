@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mediainfo_control_grant">Permitir leer los metadatos de archivos multimedia mediante el complemento MediaInfo.</string>
+    <string name="text_bun_mediainfo_control_grant">Metadatos multimedia de Bun</string>
+</resources>

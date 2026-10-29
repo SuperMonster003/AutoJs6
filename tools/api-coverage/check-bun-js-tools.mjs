@@ -21,8 +21,10 @@ const host = await createHostClient({socket: 'coverage', fetch: async url => {
   return Response.json({ok: true, bridgeVersion: 1, capabilities: [], limits: {}});
 }});
 const exported = hostExports();
-// util.unwrapJavaObject stays not-portable (java-prototype); the library getters of the global object wait for Q61 / Q64.
+// util.unwrapJavaObject stays not-portable (java-prototype). Of the library getters of the global object, axios is the
+// embedded host axios (Q64 (b), P4.2b); dayjs / pangu / cheerio / i18n follow the shared core (Q61).
 const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies'];
+const LIBRARIES = ['axios'];
 const groups = [
   ['util', host.util, ['unwrapJavaObject']], ['util.inspect', host.util.inspect], ['util.java', host.util.java], ['util.morseCode', host.util.morseCode],
   ['util.version', host.util.version], ['util.versionCodes', host.util.versionCodes], ['species', host.species], ['s13n', host.s13n],
@@ -58,7 +60,9 @@ for (const name of GLOBALS) {
   assert.equal(typeof host.global[name], 'function', `Missing global ${name}`);
   assert(declared(name), `Missing declaration of global ${name}`);
 }
-assert.deepEqual(Object.keys(host.global).sort(), [...GLOBALS].sort(), 'Bun global data functions (no library getters, Q61 / Q64)');
+assert.deepEqual(Object.keys(host.global).sort(), [...GLOBALS, ...LIBRARIES].sort(), 'Bun global data functions and library getters (Q61 / Q64)');
+for (const name of LIBRARIES) assert(declared(name), `Missing declaration of global ${name}`);
+assert.equal(host.global.axios.VERSION, '1.1.2', 'global.axios is the host axios library');
 for (const [client, name] of [['util', 'RuntimeUtil'], ['species', 'RuntimeSpecies'], ['global', 'RuntimeGlobal'], ['s13n', 'RuntimeS13n'], ['cvt', 'RuntimeConverter'], ['fmt', 'RuntimeFormatter'], ['jsox', 'RuntimeJsox']]) {
   assert(new RegExp(`readonly ${client}: ${name}\\.`).test(declarations), `HostClient.${client} is declared as ${name}`);
 }
@@ -76,4 +80,4 @@ const hostApi = read(resolve(bun, 'docs/host-api.md'));
 for (const name of ['host.util', 'host.species', 'host.global', 'host.s13n', 'host.cvt', 'host.fmt', 'host.jsox', 'device-info.json', 'STYLE_TONE']) {
   assert(hostApi.includes(name), `Bun docs/host-api.md describes ${name}`);
 }
-console.log(JSON.stringify({hostMembers: members, globals: GLOBALS.length, pinyinConstants: constants.length, coreInSync: true, hostApi: true}));
+console.log(JSON.stringify({hostMembers: members, globals: GLOBALS.length, libraries: LIBRARIES.length, pinyinConstants: constants.length, coreInSync: true, hostApi: true}));

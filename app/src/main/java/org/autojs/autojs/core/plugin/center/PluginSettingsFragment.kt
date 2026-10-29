@@ -117,6 +117,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunEpubControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunSpeechControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTtsControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunMediainfoControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunJavaInteropGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTasksControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
@@ -284,6 +285,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunEpubControlGrantPreference = findPreference("plugin_bun_epub_control_grant")
         bunSpeechControlGrantPreference = findPreference("plugin_bun_speech_control_grant")
         bunTtsControlGrantPreference = findPreference("plugin_bun_tts_control_grant")
+        bunMediainfoControlGrantPreference = findPreference("plugin_bun_mediainfo_control_grant")
         bunJavaInteropGrantPreference = findPreference("plugin_bun_java_interop_grant")
         bunTasksControlGrantPreference = findPreference("plugin_bun_tasks_control_grant")
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
@@ -524,6 +526,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setTtsControlGranted(requireContext(), value == true)
             true
         }
+        bunMediainfoControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setMediainfoControlGranted(requireContext(), value == true)
+            true
+        }
         bunJavaInteropGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setJavaInteropGranted(requireContext(), value == true)
             true
@@ -642,6 +648,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunEpubControlGrantPreference?.isChecked = BunHostCapabilityGrants.isEpubControlGranted(requireContext())
         bunSpeechControlGrantPreference?.isChecked = BunHostCapabilityGrants.isSpeechControlGranted(requireContext())
         bunTtsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTtsControlGranted(requireContext())
+        bunMediainfoControlGrantPreference?.isChecked = BunHostCapabilityGrants.isMediainfoControlGranted(requireContext())
         bunJavaInteropGrantPreference?.isChecked = BunHostCapabilityGrants.isJavaInteropGranted(requireContext())
         bunTasksControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTasksControlGranted(requireContext())
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())

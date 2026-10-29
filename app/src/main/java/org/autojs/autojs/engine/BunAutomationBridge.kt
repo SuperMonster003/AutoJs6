@@ -178,6 +178,7 @@ internal class BunAutomationBridge(
             if (Grants.EPUB_CONTROL in grants) add(NodeBridgePermissionManifest.EPUB)
             if (Grants.SPEECH_CONTROL in grants) add(NodeBridgePermissionManifest.SPEECH)
             if (Grants.TTS_CONTROL in grants) add(NodeBridgePermissionManifest.TTS)
+            if (Grants.MEDIAINFO_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA))
             if (Grants.JAVA_INTEROP in grants) add(NodeBridgePermissionManifest.JAVA_INTEROP)
             if (Grants.ANDROID_OBJECTS in grants) add(NodeBridgePermissionManifest.ANDROID_OBJECTS)
             if (Grants.TASKS_CONTROL in grants) add(NodeBridgePermissionManifest.TASKS)
@@ -215,6 +216,7 @@ internal class BunAutomationBridge(
             Grants.EPUB_CONTROL to RuntimeEpubBridge.methods,
             Grants.SPEECH_CONTROL to RuntimeSpeechBridge.methods,
             Grants.TTS_CONTROL to RuntimeTtsBridge.methods,
+            Grants.MEDIAINFO_CONTROL to NodeBridgeModules.mediainfoMethods,
             Grants.JAVA_INTEROP to ControlledJavaInteropPolicy.methods,
             Grants.ANDROID_OBJECTS to RuntimeAndroidObjects.methods,
             Grants.TASKS_CONTROL to RuntimeTasksBridge.methods,
@@ -231,6 +233,6 @@ internal class BunAutomationBridge(
             Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
         )
-        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
+        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
     }
 }

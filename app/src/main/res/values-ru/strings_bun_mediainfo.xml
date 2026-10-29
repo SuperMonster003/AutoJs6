@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mediainfo_control_grant">Разрешить чтение метаданных медиафайлов через плагин MediaInfo.</string>
+    <string name="text_bun_mediainfo_control_grant">Метаданные медиа в Bun</string>
+</resources>

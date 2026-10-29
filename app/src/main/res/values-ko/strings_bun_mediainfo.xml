@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mediainfo_control_grant">MediaInfo 플러그인을 통한 미디어 파일 메타데이터 읽기를 허용합니다.</string>
+    <string name="text_bun_mediainfo_control_grant">Bun 미디어 메타데이터</string>
+</resources>

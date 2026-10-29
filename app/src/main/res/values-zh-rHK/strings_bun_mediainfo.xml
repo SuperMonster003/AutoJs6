@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_mediainfo_control_grant">允許透過 MediaInfo 插件讀取媒體檔案的元數據.</string>
+    <string name="text_bun_mediainfo_control_grant">Bun 媒體元數據</string>
+</resources>

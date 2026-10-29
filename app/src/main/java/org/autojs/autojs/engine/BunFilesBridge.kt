@@ -7,12 +7,22 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.util.Base64
+import org.autojs.autojs.pio.PFiles
 
-/** Host-side equivalents of Node's public files facade. Android decides path access. */
-internal class BunFilesBridge(private val directory: File) {
+/**
+ * Host-side equivalents of Node's public files facade. Android decides path access.
+ *
+ * The members of the Rhino files prototype (api-coverage P4.2b) follow the host's `Files` / `PFiles`: create / remove
+ * results, byte payloads as base64 within the same budget, [assets] for readAssets, simplified paths by `PFiles`.
+ */
+internal class BunFilesBridge(
+    private val directory: File,
+    private val assets: (String) -> java.io.InputStream = { throw IOException("No application assets") },
+    private val simplify: (String) -> String = { it },
+) {
     fun invoke(method: String, args: List<Any?>): Any? {
         require(method in methods) { "Unsupported public files method: $method" }
-        val expected = when (method) { "write", "append", "copy", "move" -> 2; else -> 1 }
+        val expected = when (method) { "cwd" -> 0; "write", "append", "copy", "move", "writeBytes", "appendBytes", "rename", "renameWithoutExtension" -> 2; else -> 1 }
         require(args.size <= expected) { "Unexpected files.$method arguments" }
         fun text(index: Int): String? = if (args.getOrNull(index) == null) null else
             args[index] as? String ?: throw IllegalArgumentException("files.$method arguments must be strings")
@@ -22,21 +32,47 @@ internal class BunFilesBridge(private val directory: File) {
             val file = File(value)
             return (if (file.isAbsolute) file else File(directory, value)).toPath().toAbsolutePath().normalize().toFile()
         }
+        fun bytes(index: Int) = Base64.getDecoder().decode(requireNotNull(text(index)) { "Encoded file contents are required" })
+        fun encode(input: java.io.InputStream) = input.use {
+            val bytes = it.readNBytes(MAX_READ_BYTES + 1)
+            if (bytes.size > MAX_READ_BYTES) throw BunFilePayloadException()
+            Base64.getEncoder().encodeToString(bytes)
+        }
+        if (method == "cwd") return directory.path
         if (text(0) == null) return when (method) {
             "path" -> null
             "read" -> ""
-            "exists", "remove", "isFile", "isDir" -> false
+            "exists", "remove", "isFile", "isDir", "create", "createIfNotExists", "createWithDirs", "removeDir", "isEmptyDir" -> false
             "listDir" -> emptyList<String>()
             else -> throw IllegalArgumentException("files.$method path must not be nullish")
         }
+        when (method) {
+            "readAssets" -> return encode(assets(text(0)!!))
+            "getSimplifiedPath" -> return simplify(text(0)!!)
+        }
         val file = path(0)
         return when (method) {
-            "path" -> file.path
-            "read" -> Files.newInputStream(file.toPath()).use { input ->
-                val bytes = input.readNBytes(MAX_READ_BYTES + 1)
-                if (bytes.size > MAX_READ_BYTES) throw BunFilePayloadException()
-                Base64.getEncoder().encodeToString(bytes)
+            "create" -> if (text(0)!!.endsWith('/')) file.mkdir() else runCatching { file.createNewFile() }.isSuccess
+            "createIfNotExists", "createWithDirs" -> {
+                // PFiles.ensureDir creates the directories before the last separator, a trailing one included.
+                (if (text(0)!!.endsWith('/')) file else file.parentFile)?.let { it.exists() || it.mkdirs() }
+                !file.exists() && runCatching { file.createNewFile() }.getOrDefault(false)
             }
+            "readBytes" -> encode(Files.newInputStream(file.toPath()))
+            "writeBytes" -> { val data = bytes(1); java.io.FileOutputStream(file).use { it.write(data) }; null }
+            "appendBytes" -> {
+                val data = bytes(1)
+                runCatching { file.createNewFile() }
+                java.io.FileOutputStream(file, true).use { it.write(data) }; null
+            }
+            "rename", "renameWithoutExtension" -> {
+                val name = requireNotNull(text(1)) { "files.$method newName must not be nullish" }
+                file.renameTo(File(file.parentFile, if (method == "rename") name else name + "." + PFiles.getExtension(file.name)))
+            }
+            "removeDir" -> PFiles.deleteRecursively(file)
+            "isEmptyDir" -> file.isDirectory && file.list()?.isEmpty() == true
+            "path" -> file.path
+            "read" -> encode(Files.newInputStream(file.toPath()))
             "write", "append" -> {
                 val bytes = Base64.getDecoder().decode(requireNotNull(text(1)) { "Encoded file contents are required" })
                 Files.write(file.toPath(), bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
@@ -77,7 +113,9 @@ internal class BunFilesBridge(private val directory: File) {
     }
 
     companion object {
-        val methods = setOf("path", "read", "write", "append", "exists", "listDir", "remove", "copy", "move", "ensureDir", "isFile", "isDir")
+        val methods = setOf("path", "read", "write", "append", "exists", "listDir", "remove", "copy", "move", "ensureDir", "isFile", "isDir",
+            "cwd", "create", "createIfNotExists", "createWithDirs", "readBytes", "writeBytes", "appendBytes", "rename", "renameWithoutExtension",
+            "removeDir", "isEmptyDir", "readAssets", "getSimplifiedPath")
         // Leave room for the result envelope; encoded bytes use the existing JSON transport budget.
         const val MAX_READ_BYTES = (BunRuntimeContract.MAX_HOST_CALL_RESULT_BYTES - 128) / 4 * 3
     }
