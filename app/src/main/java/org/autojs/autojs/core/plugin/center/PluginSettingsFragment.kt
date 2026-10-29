@@ -120,6 +120,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunMediainfoControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunJavaInteropGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTasksControlGrantPreference: ThemeColorSwitchPreference? = null
+    // The system and engines grants of api-coverage P4.1b (Q136), by capability.
+    private val bunSystemFamilyGrantPreferences = LinkedHashMap<String, ThemeColorSwitchPreference>()
     private var bunConsoleControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiLayoutGrantPreference: ThemeColorSwitchPreference? = null
     private var bunUiComposeGrantPreference: ThemeColorSwitchPreference? = null
@@ -288,6 +290,9 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunMediainfoControlGrantPreference = findPreference("plugin_bun_mediainfo_control_grant")
         bunJavaInteropGrantPreference = findPreference("plugin_bun_java_interop_grant")
         bunTasksControlGrantPreference = findPreference("plugin_bun_tasks_control_grant")
+        BunHostCapabilityGrants.SYSTEM_FAMILY.forEach { capability ->
+            findPreference<ThemeColorSwitchPreference>("plugin_bun_${capability.replace('.', '_')}_grant")?.let { bunSystemFamilyGrantPreferences[capability] = it }
+        }
         bunConsoleControlGrantPreference = findPreference("plugin_bun_console_control_grant")
         bunUiLayoutGrantPreference = findPreference("plugin_bun_ui_layout_grant")
         bunUiComposeGrantPreference = findPreference("plugin_bun_ui_compose_grant")
@@ -538,6 +543,12 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setTasksControlGranted(requireContext(), value == true)
             true
         }
+        bunSystemFamilyGrantPreferences.forEach { (capability, preference) ->
+            preference.setOnPreferenceChangeListener { _, value ->
+                BunHostCapabilityGrants.setSystemFamilyGranted(requireContext(), capability, value == true)
+                true
+            }
+        }
         bunConsoleControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setConsoleControlGranted(requireContext(), value == true)
             true
@@ -651,6 +662,9 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunMediainfoControlGrantPreference?.isChecked = BunHostCapabilityGrants.isMediainfoControlGranted(requireContext())
         bunJavaInteropGrantPreference?.isChecked = BunHostCapabilityGrants.isJavaInteropGranted(requireContext())
         bunTasksControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTasksControlGranted(requireContext())
+        bunSystemFamilyGrantPreferences.forEach { (capability, preference) ->
+            preference.isChecked = BunHostCapabilityGrants.isSystemFamilyGranted(requireContext(), capability)
+        }
         bunConsoleControlGrantPreference?.isChecked = BunHostCapabilityGrants.isConsoleControlGranted(requireContext())
         bunUiLayoutGrantPreference?.isChecked = BunHostCapabilityGrants.isUiLayoutGranted(requireContext())
         bunUiComposeGrantPreference?.isChecked = BunHostCapabilityGrants.isUiComposeGranted(requireContext())

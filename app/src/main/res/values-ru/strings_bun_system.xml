@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_autojs_control_grant">Разрешить чтение состояния AutoJs6: режим Root, язык интерфейса, ориентацию экрана, цвет темы, идентификаторы ресурсов и специальные разрешения</string>
+    <string name="summary_bun_autojs_manage_grant">Разрешить изменение режима Root AutoJs6, перезапуск и выход из AutoJs6</string>
+    <string name="summary_bun_engines_control_grant">Разрешить получение списка скриптов, запущенных в AutoJs6, и их остановку</string>
+    <string name="summary_bun_engines_exec_grant">Разрешить запуск скриптов и файлов скриптов в AutoJs6</string>
+    <string name="summary_bun_installer_control_grant">Разрешить запрос установщика пакетов, его состояния, установщика по умолчанию и пользователей</string>
+    <string name="summary_bun_installer_mutate_grant">Разрешить установку и удаление пакетов и смену установщика по умолчанию; может потребоваться подтверждение Android</string>
+    <string name="summary_bun_memory_control_grant">Разрешить чтение диагностики памяти AutoJs6 и запрос сборки мусора</string>
+    <string name="summary_bun_memory_dump_grant">Разрешить запись дампов кучи AutoJs6 в файлы</string>
+    <string name="summary_bun_settings_control_grant">Разрешить чтение и экспорт настроек AutoJs6</string>
+    <string name="summary_bun_settings_write_grant">Разрешить включение и выключение настроек AutoJs6</string>
+    <string name="summary_bun_sysprops_control_grant">Разрешить чтение системных свойств Android</string>
+    <string name="text_bun_autojs_control_grant">Сведения AutoJs6</string>
+    <string name="text_bun_autojs_manage_grant">Перезапуск и режим Root AutoJs6</string>
+    <string name="text_bun_engines_control_grant">Движки скриптов</string>
+    <string name="text_bun_engines_exec_grant">Запуск скриптов</string>
+    <string name="text_bun_installer_control_grant">Запросы установщика</string>
+    <string name="text_bun_installer_mutate_grant">Установка пакетов</string>
+    <string name="text_bun_memory_control_grant">Диагностика памяти</string>
+    <string name="text_bun_memory_dump_grant">Дампы кучи</string>
+    <string name="text_bun_settings_control_grant">Настройки AutoJs6</string>
+    <string name="text_bun_settings_write_grant">Изменение настроек AutoJs6</string>
+    <string name="text_bun_sysprops_control_grant">Системные свойства</string>
+</resources>

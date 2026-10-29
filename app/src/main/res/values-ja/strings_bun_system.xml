@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_autojs_control_grant">Root モード, 表示言語, 画面の向き, テーマカラー, リソース ID, 特別な権限など AutoJs6 の状態の読み取りを許可</string>
+    <string name="summary_bun_autojs_manage_grant">AutoJs6 の Root モードの変更と AutoJs6 の再起動または終了を許可</string>
+    <string name="summary_bun_engines_control_grant">AutoJs6 で実行中のスクリプトの一覧取得と停止を許可</string>
+    <string name="summary_bun_engines_exec_grant">AutoJs6 でのスクリプトとスクリプトファイルの起動を許可</string>
+    <string name="summary_bun_installer_control_grant">インストーラー, その状態, 既定のインストーラーとユーザーの照会を許可</string>
+    <string name="summary_bun_installer_mutate_grant">パッケージのインストールとアンインストール, 既定のインストーラーの変更を許可; Android の確認が必要な場合があります</string>
+    <string name="summary_bun_memory_control_grant">AutoJs6 のメモリ診断の読み取りとガベージコレクションの要求を許可</string>
+    <string name="summary_bun_memory_dump_grant">AutoJs6 のヒープダンプのファイルへの書き込みを許可</string>
+    <string name="summary_bun_settings_control_grant">AutoJs6 の設定の読み取りとエクスポートを許可</string>
+    <string name="summary_bun_settings_write_grant">AutoJs6 の設定のオンとオフの切り替えを許可</string>
+    <string name="summary_bun_sysprops_control_grant">Android のシステムプロパティの読み取りを許可</string>
+    <string name="text_bun_autojs_control_grant">AutoJs6 の情報</string>
+    <string name="text_bun_autojs_manage_grant">AutoJs6 の再起動と Root モード</string>
+    <string name="text_bun_engines_control_grant">スクリプトエンジン</string>
+    <string name="text_bun_engines_exec_grant">スクリプトの実行</string>
+    <string name="text_bun_installer_control_grant">インストーラーの照会</string>
+    <string name="text_bun_installer_mutate_grant">パッケージのインストール</string>
+    <string name="text_bun_memory_control_grant">メモリ診断</string>
+    <string name="text_bun_memory_dump_grant">ヒープダンプ</string>
+    <string name="text_bun_settings_control_grant">AutoJs6 の設定</string>
+    <string name="text_bun_settings_write_grant">AutoJs6 の設定の変更</string>
+    <string name="text_bun_sysprops_control_grant">システムプロパティ</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_autojs_control_grant">Root 모드, 표시 언어, 화면 방향, 테마 색상, 리소스 ID, 특수 권한 등 AutoJs6 상태 읽기 허용</string>
+    <string name="summary_bun_autojs_manage_grant">AutoJs6의 Root 모드 변경과 AutoJs6 재시작 또는 종료 허용</string>
+    <string name="summary_bun_engines_control_grant">AutoJs6에서 실행 중인 스크립트 목록 조회와 중지 허용</string>
+    <string name="summary_bun_engines_exec_grant">AutoJs6에서 스크립트와 스크립트 파일 시작 허용</string>
+    <string name="summary_bun_installer_control_grant">설치 프로그램, 그 상태, 기본 설치 프로그램과 사용자 조회 허용</string>
+    <string name="summary_bun_installer_mutate_grant">패키지 설치와 제거, 기본 설치 프로그램 변경 허용; Android 확인이 여전히 필요할 수 있음</string>
+    <string name="summary_bun_memory_control_grant">AutoJs6의 메모리 진단 읽기와 가비지 컬렉션 요청 허용</string>
+    <string name="summary_bun_memory_dump_grant">AutoJs6의 힙 덤프를 파일에 쓰기 허용</string>
+    <string name="summary_bun_settings_control_grant">AutoJs6 설정 읽기와 내보내기 허용</string>
+    <string name="summary_bun_settings_write_grant">AutoJs6 설정 켜기 또는 끄기 허용</string>
+    <string name="summary_bun_sysprops_control_grant">Android 시스템 속성 읽기 허용</string>
+    <string name="text_bun_autojs_control_grant">AutoJs6 정보</string>
+    <string name="text_bun_autojs_manage_grant">AutoJs6 재시작 및 Root 모드</string>
+    <string name="text_bun_engines_control_grant">스크립트 엔진</string>
+    <string name="text_bun_engines_exec_grant">스크립트 실행</string>
+    <string name="text_bun_installer_control_grant">설치 프로그램 조회</string>
+    <string name="text_bun_installer_mutate_grant">패키지 설치</string>
+    <string name="text_bun_memory_control_grant">메모리 진단</string>
+    <string name="text_bun_memory_dump_grant">힙 덤프</string>
+    <string name="text_bun_settings_control_grant">AutoJs6 설정</string>
+    <string name="text_bun_settings_write_grant">AutoJs6 설정 변경</string>
+    <string name="text_bun_sysprops_control_grant">시스템 속성</string>
+</resources>

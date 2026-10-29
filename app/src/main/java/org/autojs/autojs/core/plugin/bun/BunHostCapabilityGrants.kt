@@ -70,6 +70,24 @@ object BunHostCapabilityGrants {
     const val ANDROID_OBJECTS = "android.objects"
     const val TASKS_CONTROL = "tasks.control"
 
+    // The system and engines family (api-coverage P4.1b, Q136 (a)): one grant per namespace for the queries and a
+    // separate one for the writes, after the Node capabilities of Q133 (b).
+    const val AUTOJS_CONTROL = "autojs.control"
+    const val AUTOJS_MANAGE = "autojs.manage"
+    const val SETTINGS_CONTROL = "settings.control"
+    const val SETTINGS_WRITE = "settings.write"
+    const val SYSPROPS_CONTROL = "sysprops.control"
+    const val MEMORY_CONTROL = "memory.control"
+    const val MEMORY_DUMP = "memory.dump"
+    const val INSTALLER_CONTROL = "installer.control"
+    const val INSTALLER_MUTATE = "installer.mutate"
+    const val ENGINES_CONTROL = "engines.control"
+    const val ENGINES_EXEC = "engines.exec"
+
+    /** The system and engines grants in contract order (api-coverage P4.1b). */
+    val SYSTEM_FAMILY = listOf(AUTOJS_CONTROL, AUTOJS_MANAGE, SETTINGS_CONTROL, SETTINGS_WRITE, SYSPROPS_CONTROL, MEMORY_CONTROL, MEMORY_DUMP,
+        INSTALLER_CONTROL, INSTALLER_MUTATE, ENGINES_CONTROL, ENGINES_EXEC)
+
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
     private const val KEY_HOST_INFO = "host_info"
 
@@ -218,6 +236,17 @@ object BunHostCapabilityGrants {
     fun isTasksControlGranted(context: Context): Boolean = isGranted(context, TASKS_CONTROL, false)
     fun setTasksControlGranted(context: Context, granted: Boolean) = setGranted(context, TASKS_CONTROL, granted)
 
+    /** A grant of [SYSTEM_FAMILY] (api-coverage P4.1b), off by default. */
+    fun isSystemFamilyGranted(context: Context, capability: String): Boolean {
+        require(capability in SYSTEM_FAMILY) { "Not a system family grant: $capability" }
+        return isGranted(context, capability, false)
+    }
+
+    fun setSystemFamilyGranted(context: Context, capability: String, granted: Boolean) {
+        require(capability in SYSTEM_FAMILY) { "Not a system family grant: $capability" }
+        setGranted(context, capability, granted)
+    }
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -289,6 +318,7 @@ object BunHostCapabilityGrants {
         if (isJavaInteropGranted(context)) add(JAVA_INTEROP)
         if (isAndroidObjectsGranted(context)) add(ANDROID_OBJECTS)
         if (isTasksControlGranted(context)) add(TASKS_CONTROL)
+        SYSTEM_FAMILY.filterTo(this) { isSystemFamilyGranted(context, it) }
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -296,7 +326,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL)
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL) + SYSTEM_FAMILY
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

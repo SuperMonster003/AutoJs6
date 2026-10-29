@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_autojs_control_grant">السماح بقراءة حالات AutoJs6 مثل وضع Root ولغة العرض واتجاه الشاشة ولون السمة ومعرفات الموارد والأذونات الخاصة</string>
+    <string name="summary_bun_autojs_manage_grant">السماح بتغيير وضع Root في AutoJs6 وإعادة تشغيل AutoJs6 أو الخروج منه</string>
+    <string name="summary_bun_engines_control_grant">السماح بسرد البرامج النصية العاملة في AutoJs6 وإيقافها</string>
+    <string name="summary_bun_engines_exec_grant">السماح بتشغيل البرامج النصية وملفاتها في AutoJs6</string>
+    <string name="summary_bun_installer_control_grant">السماح بالاستعلام عن مثبت الحزم وحالته والمثبت الافتراضي والمستخدمين</string>
+    <string name="summary_bun_installer_mutate_grant">السماح بتثبيت الحزم وإلغاء تثبيتها وتغيير المثبت الافتراضي; قد يظل تأكيد Android مطلوبا</string>
+    <string name="summary_bun_memory_control_grant">السماح بقراءة تشخيص ذاكرة AutoJs6 وطلب جمع البيانات المهملة</string>
+    <string name="summary_bun_memory_dump_grant">السماح بكتابة تفريغات كومة AutoJs6 إلى ملفات</string>
+    <string name="summary_bun_settings_control_grant">السماح بقراءة إعدادات AutoJs6 وتصديرها</string>
+    <string name="summary_bun_settings_write_grant">السماح بتشغيل إعدادات AutoJs6 أو إيقافها</string>
+    <string name="summary_bun_sysprops_control_grant">السماح بقراءة خصائص نظام Android</string>
+    <string name="text_bun_autojs_control_grant">معلومات AutoJs6</string>
+    <string name="text_bun_autojs_manage_grant">إعادة تشغيل AutoJs6 ووضع Root</string>
+    <string name="text_bun_engines_control_grant">محركات البرامج النصية</string>
+    <string name="text_bun_engines_exec_grant">تشغيل البرامج النصية</string>
+    <string name="text_bun_installer_control_grant">استعلامات المثبت</string>
+    <string name="text_bun_installer_mutate_grant">تثبيت الحزم</string>
+    <string name="text_bun_memory_control_grant">تشخيص الذاكرة</string>
+    <string name="text_bun_memory_dump_grant">تفريغات الكومة</string>
+    <string name="text_bun_settings_control_grant">إعدادات AutoJs6</string>
+    <string name="text_bun_settings_write_grant">تغيير إعدادات AutoJs6</string>
+    <string name="text_bun_sysprops_control_grant">خصائص النظام</string>
+</resources>

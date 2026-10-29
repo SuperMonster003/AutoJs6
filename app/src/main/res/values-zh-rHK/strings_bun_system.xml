@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_autojs_control_grant">允許讀取 AutoJs6 的 Root 模式, 顯示語言, 螢幕方向, 主題色, 資源 ID 與特殊權限等狀態</string>
+    <string name="summary_bun_autojs_manage_grant">允許修改 AutoJs6 的 Root 模式, 以及重新啟動或退出 AutoJs6</string>
+    <string name="summary_bun_engines_control_grant">允許列出 AutoJs6 中運行的腳本並停止它們</string>
+    <string name="summary_bun_engines_exec_grant">允許在 AutoJs6 中啟動腳本與腳本檔案</string>
+    <string name="summary_bun_installer_control_grant">允許查詢安裝器, 其狀態, 預設安裝器與用戶</string>
+    <string name="summary_bun_installer_mutate_grant">允許安裝和解除安裝應用程式, 以及修改預設安裝器; 可能仍需 Android 確認</string>
+    <string name="summary_bun_memory_control_grant">允許讀取 AutoJs6 的記憶體診斷並請求垃圾回收</string>
+    <string name="summary_bun_memory_dump_grant">允許把 AutoJs6 的堆轉儲寫入檔案</string>
+    <string name="summary_bun_settings_control_grant">允許讀取與匯出 AutoJs6 設定</string>
+    <string name="summary_bun_settings_write_grant">允許開啟或關閉 AutoJs6 設定</string>
+    <string name="summary_bun_sysprops_control_grant">允許讀取 Android 系統屬性</string>
+    <string name="text_bun_autojs_control_grant">AutoJs6 資訊</string>
+    <string name="text_bun_autojs_manage_grant">AutoJs6 重新啟動與 Root 模式</string>
+    <string name="text_bun_engines_control_grant">腳本引擎</string>
+    <string name="text_bun_engines_exec_grant">腳本執行</string>
+    <string name="text_bun_installer_control_grant">安裝器查詢</string>
+    <string name="text_bun_installer_mutate_grant">應用程式安裝</string>
+    <string name="text_bun_memory_control_grant">記憶體診斷</string>
+    <string name="text_bun_memory_dump_grant">堆轉儲</string>
+    <string name="text_bun_settings_control_grant">AutoJs6 設定</string>
+    <string name="text_bun_settings_write_grant">AutoJs6 設定修改</string>
+    <string name="text_bun_sysprops_control_grant">系統屬性</string>
+</resources>
