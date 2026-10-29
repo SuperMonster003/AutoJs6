@@ -1,27 +1,27 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2830 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2836 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 2830 行 (显式导出 1377, 原型成员 205, 返回对象成员 1248).
+数据源: ksp, 2836 行 (显式导出 1383, 原型成员 205, 返回对象成员 1248).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 892 | 263 | 0 | 1012 | 0 | 663 |
-| Node Worker | 765 | 244 | 0 | 1015 | 0 | 806 |
-| Bun | 0 | 235 | 829 | 1009 | 0 | 757 |
+| Node main | 932 | 341 | 0 | 1014 | 0 | 549 |
+| Node Worker | 823 | 338 | 0 | 1017 | 0 | 658 |
+| Bun | 0 | 236 | 836 | 1011 | 0 | 753 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 8 / mention 268 / heading 2554 / signature 0 / example 0 |
-| dts | none 9 / name 1664 / arity 1157 / typed 0 |
-| ace | none 414 / semantic 843 / static 1573 |
+| doc | none 14 / mention 268 / heading 2554 / signature 0 / example 0 |
+| dts | none 15 / name 1664 / arity 1157 / typed 0 |
+| ace | none 420 / semantic 843 / static 1573 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
-拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 35 / Node Worker 5 / Bun 32. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
+拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 30 / Node Worker 5 / Bun 32. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
 ## 排除规则
 
@@ -35,6 +35,7 @@
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
 | native-timers | not-portable: runtime-native | 0 | 0 | 6 | global setTimeout / setInterval / setImmediate and their clear functions |
+| obsoleted-functions | not-portable: obsoleted | 2 | 2 | 2 |  |
 | rhino-engine | not-portable: rhino-only | 0 | 1 | 1 |  |
 
 ## 按模块汇总
@@ -43,18 +44,18 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 108 / 13 / 87 | 76 / 13 / 119 | 91 / 13 / 104 |
+| (global) | 208 | 206 | 205 | 205 | 113 / 13 / 82 | 82 / 13 / 113 | 92 / 13 / 103 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 15 / 0 / 0 |
 | Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
-| Color# | 29 | 29 | 29 | 29 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
+| Color# | 29 | 29 | 29 | 29 | 29 / 0 / 0 | 29 / 0 / 0 | 0 / 0 / 29 |
 | ConsoleConfigurator# | 52 | 50 | 52 | 0 | 0 / 52 / 0 | 0 / 52 / 0 | 0 / 52 / 0 |
 | ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
 | Dialog# | 96 | 19 | 96 | 3 | 0 / 96 / 0 | 0 / 96 / 0 | 0 / 96 / 0 |
-| EpubBook# | 14 | 14 | 14 | 14 | 13 / 0 / 1 | 13 / 0 / 1 | 13 / 0 / 1 |
+| EpubBook# | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 13 / 0 / 1 |
 | EpubReaderSession# | 34 | 34 | 34 | 32 | 0 / 34 / 0 | 0 / 34 / 0 | 0 / 34 / 0 |
 | FloatyWindow# | 12 | 12 | 12 | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
 | Flow# | 106 | 25 | 106 | 106 | 104 / 0 / 2 | 104 / 0 / 2 | 104 / 0 / 2 |
@@ -79,7 +80,7 @@
 | ScriptExecution# | 12 | 12 | 12 | 0 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
 | ShellProcess# | 25 | 12 | 25 | 25 | 15 / 0 / 10 | 15 / 0 / 10 | 15 / 0 / 10 |
 | ShellResult# | 5 | 5 | 5 | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
-| Storage# | 12 | 12 | 12 | 12 | 11 / 0 / 1 | 0 / 0 / 12 | 11 / 0 / 1 |
+| Storage# | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 11 / 0 / 1 |
 | ThemeColor# | 10 | 0 | 10 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | TimedTask# | 40 | 0 | 40 | 0 | 0 / 40 / 0 | 0 / 40 / 0 | 0 / 40 / 0 |
 | TtsUtterance# | 23 | 23 | 23 | 21 | 0 / 23 / 0 | 0 / 23 / 0 | 0 / 23 / 0 |
@@ -89,7 +90,7 @@
 | VolatileDispose# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
 | WebSocket# | 24 | 24 | 24 | 0 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
-| Zip# | 21 | 21 | 21 | 21 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
+| Zip# | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 0 / 0 / 21 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 43 | 25 / 0 / 18 | 0 / 0 / 43 | 25 / 0 / 18 |
 | auto | 38 | 38 | 38 | 38 | 0 / 0 / 38 | 0 / 0 / 38 | 0 / 0 / 38 |
@@ -98,7 +99,7 @@
 | automator | 54 | 54 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
 | barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | base64 | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
-| colors | 82 | 82 | 82 | 82 | 62 / 0 / 20 | 62 / 0 / 20 | 62 / 0 / 20 |
+| colors | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 62 / 0 / 20 |
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 16 | 16 | 16 | 16 | 15 / 0 / 1 | 15 / 0 / 1 | 15 / 0 / 1 |
 | console | 56 | 56 | 56 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 31 / 0 / 25 |
@@ -110,7 +111,7 @@
 | engines | 8 | 8 | 8 | 8 | 5 / 0 / 3 | 0 / 0 / 8 | 0 / 0 / 8 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | events | 37 | 34 | 36 | 36 | 5 / 1 / 31 | 5 / 1 / 31 | 5 / 1 / 31 |
-| files | 34 | 34 | 34 | 34 | 15 / 0 / 19 | 0 / 0 / 34 | 15 / 0 / 19 |
+| files | 34 | 34 | 34 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 15 / 0 / 19 |
 | files.batchRename | 17 | 17 | 17 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
 | floaty | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | flow | 55 | 55 | 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
@@ -123,9 +124,9 @@
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 0 / 0 / 9 | 0 / 0 / 9 |
-| mediainfo | 7 | 7 | 7 | 7 | 4 / 0 / 3 | 0 / 0 / 7 | 0 / 0 / 7 |
+| mediainfo | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | memory | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
-| mime | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| mime | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 0 / 0 / 5 |
 | notice | 7 | 7 | 7 | 7 | 1 / 0 / 6 | 1 / 0 / 6 | 1 / 0 / 6 |
 | notice.channel | 6 | 6 | 6 | 6 | 0 / 0 / 6 | 0 / 0 / 6 | 0 / 0 / 6 |
 | ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
@@ -139,18 +140,18 @@
 | plugins.tools | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | powerManager | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
-| recorder | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
+| recorder | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 0 / 0 / 7 |
 | s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sensors | 21 | 21 | 21 | 21 | 1 / 0 / 20 | 1 / 0 / 20 | 1 / 0 / 20 |
 | settings | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | shell | 11 | 11 | 11 | 11 | 2 / 0 / 9 | 2 / 0 / 9 | 2 / 0 / 9 |
 | shizuku | 13 | 8 | 13 | 13 | 1 / 0 / 12 | 1 / 0 / 12 | 1 / 0 / 12 |
 | species | 37 | 37 | 37 | 37 | 37 / 0 / 0 | 37 / 0 / 0 | 37 / 0 / 0 |
-| speech | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
+| speech | 17 | 11 | 11 | 11 | 11 / 0 / 6 | 11 / 0 / 6 | 11 / 0 / 6 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | speech.speaker | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | sqlite | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
-| storages | 5 | 5 | 5 | 5 | 3 / 0 / 2 | 0 / 0 / 5 | 3 / 0 / 2 |
+| storages | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 3 / 0 / 2 |
 | sysprops | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
@@ -159,7 +160,7 @@
 | toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
 | tts | 35 | 35 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 40 | 36 | 36 | 36 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
-| util | 54 | 54 | 54 | 54 | 48 / 1 / 5 | 48 / 1 / 5 | 48 / 1 / 5 |
+| util | 54 | 54 | 54 | 54 | 48 / 3 / 3 | 48 / 3 / 3 | 48 / 3 / 3 |
 | util.inspect | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | util.java | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | util.morseCode | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
@@ -168,7 +169,7 @@
 | web | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | workManager | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | yolo | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
-| zip | 5 | 5 | 5 | 5 | 0 / 0 / 5 | 0 / 0 / 5 | 0 / 0 / 5 |
+| zip | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 0 / 0 / 5 |
 
 ## 差异行
 
@@ -204,9 +205,8 @@
 | `WIDTH` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `axios` | local-shim | pending | pending |
 | `back` | bridged | pending | capability-gated |
-| `cheerio` | pending | pending | pending |
+| `cheerio` | local-shim | local-shim | pending |
 | `clearConsole` | bridged | bridged | pending |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
@@ -215,7 +215,7 @@
 | `currentActivity` | pending | pending | pending |
 | `currentComponent` | pending | pending | pending |
 | `currentPackage` | pending | pending | pending |
-| `dayjs` | pending | pending | pending |
+| `dayjs` | local-shim | local-shim | pending |
 | `detect` | pending | pending | pending |
 | `err` | bridged | bridged | pending |
 | `existsAll` | pending | pending | pending |
@@ -229,7 +229,7 @@
 | `getClip` | bridged | pending | capability-gated |
 | `getPackageName` | bridged | pending | capability-gated |
 | `home` | bridged | pending | capability-gated |
-| `i18n` | pending | pending | pending |
+| `i18n` | local-shim | local-shim | pending |
 | `input` | pending | pending | pending |
 | `isAutoJs6` | pending | pending | pending |
 | `isDualInstalled` | pending (rejects) | pending | pending (rejects) |
@@ -263,13 +263,13 @@
 | `newWebSocket` | pending | pending | pending |
 | `notStopped` | pending | pending | pending |
 | `notifications` | bridged | pending | pending |
-| `open` | pending (rejects) | pending | pending (rejects) |
+| `open` | local-shim | local-shim | pending (rejects) |
 | `openAppSetting` | bridged | pending | capability-gated |
 | `openAppSettings` | bridged | pending | capability-gated |
 | `openConsole` | bridged | bridged | pending |
 | `openDualAppSetting` | pending (rejects) | pending | pending (rejects) |
 | `openDualAppSettings` | pending (rejects) | pending | pending (rejects) |
-| `pangu` | pending | pending | pending |
+| `pangu` | local-shim | local-shim | pending |
 | `pickup` | pending | pending | pending |
 | `powerDialog` | bridged | pending | pending |
 | `press` | pending | pending | pending |
@@ -398,35 +398,35 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Color#argb` | pending | pending | pending |
-| `Color#equals` | pending | pending | pending |
-| `Color#hsl` | pending | pending | pending |
-| `Color#hsla` | pending | pending | pending |
-| `Color#hsv` | pending | pending | pending |
-| `Color#hsva` | pending | pending | pending |
-| `Color#removeAlpha` | pending | pending | pending |
-| `Color#removeBlue` | pending | pending | pending |
-| `Color#removeGreen` | pending | pending | pending |
-| `Color#removeRed` | pending | pending | pending |
-| `Color#rgb` | pending | pending | pending |
-| `Color#rgba` | pending | pending | pending |
-| `Color#setAlpha` | pending | pending | pending |
-| `Color#setAlphaRelative` | pending | pending | pending |
-| `Color#setArgb` | pending | pending | pending |
-| `Color#setBlue` | pending | pending | pending |
-| `Color#setBlueRelative` | pending | pending | pending |
-| `Color#setGreen` | pending | pending | pending |
-| `Color#setGreenRelative` | pending | pending | pending |
-| `Color#setHsl` | pending | pending | pending |
-| `Color#setHsla` | pending | pending | pending |
-| `Color#setHsv` | pending | pending | pending |
-| `Color#setHsva` | pending | pending | pending |
-| `Color#setPaintColor` | pending | pending | pending |
-| `Color#setRed` | pending | pending | pending |
-| `Color#setRedRelative` | pending | pending | pending |
-| `Color#setRgb` | pending | pending | pending |
-| `Color#setRgba` | pending | pending | pending |
-| `Color#toStringReadable` | pending | pending | pending |
+| `Color#argb` | local-shim | local-shim | pending |
+| `Color#equals` | local-shim | local-shim | pending |
+| `Color#hsl` | local-shim | local-shim | pending |
+| `Color#hsla` | local-shim | local-shim | pending |
+| `Color#hsv` | local-shim | local-shim | pending |
+| `Color#hsva` | local-shim | local-shim | pending |
+| `Color#removeAlpha` | local-shim | local-shim | pending |
+| `Color#removeBlue` | local-shim | local-shim | pending |
+| `Color#removeGreen` | local-shim | local-shim | pending |
+| `Color#removeRed` | local-shim | local-shim | pending |
+| `Color#rgb` | local-shim | local-shim | pending |
+| `Color#rgba` | local-shim | local-shim | pending |
+| `Color#setAlpha` | local-shim | local-shim | pending |
+| `Color#setAlphaRelative` | local-shim | local-shim | pending |
+| `Color#setArgb` | local-shim | local-shim | pending |
+| `Color#setBlue` | local-shim | local-shim | pending |
+| `Color#setBlueRelative` | local-shim | local-shim | pending |
+| `Color#setGreen` | local-shim | local-shim | pending |
+| `Color#setGreenRelative` | local-shim | local-shim | pending |
+| `Color#setHsl` | local-shim | local-shim | pending |
+| `Color#setHsla` | local-shim | local-shim | pending |
+| `Color#setHsv` | local-shim | local-shim | pending |
+| `Color#setHsva` | local-shim | local-shim | pending |
+| `Color#setPaintColor` | local-shim | local-shim | pending |
+| `Color#setRed` | local-shim | local-shim | pending |
+| `Color#setRedRelative` | local-shim | local-shim | pending |
+| `Color#setRgb` | local-shim | local-shim | pending |
+| `Color#setRgba` | local-shim | local-shim | pending |
+| `Color#toStringReadable` | local-shim | local-shim | pending |
 
 ### ConsoleConfigurator#
 
@@ -654,7 +654,7 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `EpubBook#toString` | pending | pending | pending |
+| `EpubBook#toString` | bridged | bridged | pending |
 
 ### EpubReaderSession#
 
@@ -975,18 +975,7 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Storage#clear` | bridged | pending | capability-gated |
-| `Storage#clearSync` | bridged | pending | capability-gated |
-| `Storage#contains` | bridged | pending | capability-gated |
-| `Storage#get` | bridged | pending | capability-gated |
-| `Storage#name` | bridged | pending | capability-gated |
-| `Storage#put` | bridged | pending | capability-gated |
-| `Storage#putSync` | bridged | pending | capability-gated |
-| `Storage#remove` | bridged | pending | capability-gated |
-| `Storage#removeSync` | bridged | pending | capability-gated |
-| `Storage#selfRemove` | bridged | pending | capability-gated |
-| `Storage#selfRemoveSync` | bridged | pending | capability-gated |
-| `Storage#size` | pending | pending | pending |
+| `Storage#size` | bridged | bridged | pending |
 
 ### ThemeColor#
 
@@ -1536,27 +1525,27 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Zip#addFile` | pending | pending | pending |
-| `Zip#addFiles` | pending | pending | pending |
-| `Zip#addFolder` | pending | pending | pending |
-| `Zip#extractAll` | pending | pending | pending |
-| `Zip#extractFile` | pending | pending | pending |
-| `Zip#getFileHeader` | pending | pending | pending |
-| `Zip#getFileHeaders` | pending | pending | pending |
-| `Zip#getPath` | pending | pending | pending |
-| `Zip#getZipFile` | pending | pending | pending |
-| `Zip#isEncrypted` | pending | pending | pending |
-| `Zip#isValidZipFile` | pending | pending | pending |
-| `Zip#name` | pending | pending | pending |
-| `Zip#options` | pending | pending | pending |
-| `Zip#path` | pending | pending | pending |
-| `Zip#removeFile` | pending | pending | pending |
-| `Zip#setPassword` | pending | pending | pending |
-| `Zip#toString` | pending | pending | pending |
-| `Zip#toStringReadable` | pending | pending | pending |
-| `Zip#unzipParameters` | pending | pending | pending |
-| `Zip#zipFile` | pending | pending | pending |
-| `Zip#zipParameters` | pending | pending | pending |
+| `Zip#addFile` | bridged | bridged | pending |
+| `Zip#addFiles` | bridged | bridged | pending |
+| `Zip#addFolder` | bridged | bridged | pending |
+| `Zip#extractAll` | bridged | bridged | pending |
+| `Zip#extractFile` | bridged | bridged | pending |
+| `Zip#getFileHeader` | bridged | bridged | pending |
+| `Zip#getFileHeaders` | bridged | bridged | pending |
+| `Zip#getPath` | bridged | bridged | pending |
+| `Zip#getZipFile` | bridged | bridged | pending |
+| `Zip#isEncrypted` | bridged | bridged | pending |
+| `Zip#isValidZipFile` | bridged | bridged | pending |
+| `Zip#name` | bridged | bridged | pending |
+| `Zip#options` | bridged | bridged | pending |
+| `Zip#path` | bridged | bridged | pending |
+| `Zip#removeFile` | bridged | bridged | pending |
+| `Zip#setPassword` | bridged | bridged | pending |
+| `Zip#toString` | bridged | bridged | pending |
+| `Zip#toStringReadable` | bridged | bridged | pending |
+| `Zip#unzipParameters` | bridged | bridged | pending |
+| `Zip#zipFile` | bridged | bridged | pending |
+| `Zip#zipParameters` | bridged | bridged | pending |
 
 ### app
 
@@ -1747,26 +1736,26 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `colors.android` | pending | pending | pending |
-| `colors.blend` | pending | pending | pending |
-| `colors.contrast` | pending | pending | pending |
-| `colors.css` | pending | pending | pending |
-| `colors.derive` | pending | pending | pending |
-| `colors.distance` | pending | pending | pending |
-| `colors.ensureContrast` | pending | pending | pending |
-| `colors.extract` | pending | pending | pending |
-| `colors.harmony` | pending | pending | pending |
-| `colors.invert` | pending | pending | pending |
-| `colors.material` | pending | pending | pending |
-| `colors.nightVariant` | pending | pending | pending |
-| `colors.oklab` | pending | pending | pending |
-| `colors.oklch` | pending | pending | pending |
-| `colors.parseColor` | pending | pending | pending |
-| `colors.simulate` | pending | pending | pending |
-| `colors.toOklab` | pending | pending | pending |
-| `colors.toOklch` | pending | pending | pending |
-| `colors.tones` | pending | pending | pending |
-| `colors.web` | pending | pending | pending |
+| `colors.android` | local-shim | local-shim | pending |
+| `colors.blend` | local-shim | local-shim | pending |
+| `colors.contrast` | local-shim | local-shim | pending |
+| `colors.css` | local-shim | local-shim | pending |
+| `colors.derive` | local-shim | local-shim | pending |
+| `colors.distance` | local-shim | local-shim | pending |
+| `colors.ensureContrast` | local-shim | local-shim | pending |
+| `colors.extract` | local-shim | local-shim | pending |
+| `colors.harmony` | local-shim | local-shim | pending |
+| `colors.invert` | local-shim | local-shim | pending |
+| `colors.material` | local-shim | local-shim | pending |
+| `colors.nightVariant` | local-shim | local-shim | pending |
+| `colors.oklab` | local-shim | local-shim | pending |
+| `colors.oklch` | local-shim | local-shim | pending |
+| `colors.parseColor` | local-shim | local-shim | pending |
+| `colors.simulate` | local-shim | local-shim | pending |
+| `colors.toOklab` | local-shim | local-shim | pending |
+| `colors.toOklch` | local-shim | local-shim | pending |
+| `colors.tones` | local-shim | local-shim | pending |
+| `colors.web` | local-shim | local-shim | pending |
 
 ### colors.theme
 
@@ -1966,40 +1955,25 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `files.append` | local-shim | pending | capability-gated |
-| `files.appendBytes` | pending | pending | pending |
-| `files.copy` | local-shim | pending | capability-gated |
-| `files.create` | pending | pending | pending |
-| `files.createIfNotExists` | pending | pending | pending |
-| `files.createWithDirs` | pending | pending | pending |
-| `files.cwd` | pending | pending | pending |
-| `files.ensureDir` | local-shim | pending | capability-gated |
-| `files.exists` | local-shim | pending | capability-gated |
-| `files.formatSizeWithUnit` | pending | pending | pending |
-| `files.getExtension` | local-shim | pending | capability-gated |
-| `files.getHumanReadableSize` | pending | pending | pending |
-| `files.getName` | local-shim | pending | capability-gated |
-| `files.getNameWithoutExtension` | pending | pending | pending |
-| `files.getSimplifiedPath` | pending | pending | pending |
-| `files.isDir` | local-shim | pending | capability-gated |
-| `files.isEmptyDir` | pending | pending | pending |
-| `files.isFile` | local-shim | pending | capability-gated |
-| `files.join` | local-shim | pending | capability-gated |
-| `files.listDir` | local-shim | pending | capability-gated |
-| `files.move` | local-shim | pending | capability-gated |
-| `files.open` | pending (rejects) | pending | pending (rejects) |
-| `files.path` | local-shim | pending | capability-gated |
-| `files.read` | local-shim | pending | capability-gated |
-| `files.readAssets` | pending | pending | pending |
-| `files.readBytes` | pending | pending | pending |
-| `files.remove` | local-shim | pending | capability-gated |
-| `files.removeDir` | pending | pending | pending |
-| `files.rename` | pending | pending | pending |
-| `files.renameWithoutExtension` | pending | pending | pending |
-| `files.sdcardPath` | pending | pending | pending |
-| `files.toFile` | pending (rejects) | pending | pending (rejects) |
-| `files.write` | local-shim | pending | capability-gated |
-| `files.writeBytes` | pending | pending | pending |
+| `files.appendBytes` | local-shim | local-shim | pending |
+| `files.create` | local-shim | local-shim | pending |
+| `files.createIfNotExists` | local-shim | local-shim | pending |
+| `files.createWithDirs` | local-shim | local-shim | pending |
+| `files.cwd` | local-shim | local-shim | pending |
+| `files.formatSizeWithUnit` | local-shim | local-shim | pending |
+| `files.getHumanReadableSize` | local-shim | local-shim | pending |
+| `files.getNameWithoutExtension` | local-shim | local-shim | pending |
+| `files.getSimplifiedPath` | local-shim | local-shim | pending |
+| `files.isEmptyDir` | local-shim | local-shim | pending |
+| `files.open` | local-shim | local-shim | pending (rejects) |
+| `files.readAssets` | local-shim | local-shim | pending |
+| `files.readBytes` | local-shim | local-shim | pending |
+| `files.removeDir` | local-shim | local-shim | pending |
+| `files.rename` | local-shim | local-shim | pending |
+| `files.renameWithoutExtension` | local-shim | local-shim | pending |
+| `files.sdcardPath` | local-shim | local-shim | pending |
+| `files.toFile` | local-shim | local-shim | pending (rejects) |
+| `files.writeBytes` | local-shim | local-shim | pending |
 
 ### files.batchRename
 
@@ -2130,18 +2104,6 @@
 | `media.scanFile` | bridged | pending | pending |
 | `media.stopMusic` | bridged | pending | pending |
 
-### mediainfo
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `mediainfo.SNAPSHOT_SCHEMA_V1` | pending | pending | pending |
-| `mediainfo.SNAPSHOT_SCHEMA_V2` | pending | pending | pending |
-| `mediainfo.capabilities` | bridged | pending | pending |
-| `mediainfo.countGet` | bridged | pending | pending |
-| `mediainfo.get` | bridged | pending | pending |
-| `mediainfo.read` | bridged | pending | pending |
-| `mediainfo.snapshot` | pending | pending | pending |
-
 ### memory
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2156,11 +2118,11 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `mime.fromFile` | pending | pending | pending |
-| `mime.fromFileOr` | pending | pending | pending |
-| `mime.fromFileOrWildcard` | pending | pending | pending |
-| `mime.getMediaType` | pending | pending | pending |
-| `mime.parseMediaType` | pending | pending | pending |
+| `mime.fromFile` | local-shim | local-shim | pending |
+| `mime.fromFileOr` | local-shim | local-shim | pending |
+| `mime.fromFileOrWildcard` | local-shim | local-shim | pending |
+| `mime.getMediaType` | local-shim | local-shim | pending |
+| `mime.parseMediaType` | local-shim | local-shim | pending |
 
 ### notice
 
@@ -2254,13 +2216,13 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `recorder.clear` | pending | pending | pending |
-| `recorder.has` | pending | pending | pending |
-| `recorder.isGreaterThan` | pending | pending | pending |
-| `recorder.isLessThan` | pending | pending | pending |
-| `recorder.load` | pending | pending | pending |
-| `recorder.remove` | pending | pending | pending |
-| `recorder.save` | pending | pending | pending |
+| `recorder.clear` | bridged | bridged | pending |
+| `recorder.has` | bridged | bridged | pending |
+| `recorder.isGreaterThan` | bridged | bridged | pending |
+| `recorder.isLessThan` | bridged | bridged | pending |
+| `recorder.load` | bridged | bridged | pending |
+| `recorder.remove` | bridged | bridged | pending |
+| `recorder.save` | bridged | bridged | pending |
 
 ### sensors
 
@@ -2327,6 +2289,17 @@
 | `shizuku.kill` | pending | pending | pending |
 | `shizuku.state` | pending | pending | pending |
 
+### speech
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `speech.detectLanguage` | pending | pending | pending |
+| `speech.detectLanguageAsync` | pending | pending | pending |
+| `speech.diarize` | pending | pending | pending |
+| `speech.diarizeAsync` | pending | pending | pending |
+| `speech.tag` | pending | pending | pending |
+| `speech.tagAsync` | pending | pending | pending |
+
 ### speech.speaker
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2344,11 +2317,8 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `storages.all` | pending (rejects) | pending | pending (rejects) |
-| `storages.create` | bridged | pending | capability-gated |
-| `storages.names` | pending (rejects) | pending | pending (rejects) |
-| `storages.remove` | bridged | pending | capability-gated |
-| `storages.removeSync` | bridged | pending | capability-gated |
+| `storages.all` | bridged | bridged | pending (rejects) |
+| `storages.names` | bridged | bridged | pending (rejects) |
 
 ### sysprops
 
@@ -2465,8 +2435,8 @@
 | `util.class` | pending | pending | pending |
 | `util.className` | pending | pending | pending |
 | `util.getClassName` | pending | pending | pending |
-| `util.toRegularAndApply` | pending (rejects) | pending (rejects) | pending (rejects) |
-| `util.toRegularAndCall` | pending (rejects) | pending (rejects) | pending (rejects) |
+| `util.toRegularAndApply` | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) |
+| `util.toRegularAndCall` | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) |
 | `util.unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 
 ### web
@@ -2504,8 +2474,8 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `zip.open` | pending | pending | pending |
-| `zip.unzip` | pending | pending | pending |
-| `zip.zipDir` | pending | pending | pending |
-| `zip.zipFile` | pending | pending | pending |
-| `zip.zipFiles` | pending | pending | pending |
+| `zip.open` | bridged | bridged | pending |
+| `zip.unzip` | bridged | bridged | pending |
+| `zip.zipDir` | bridged | bridged | pending |
+| `zip.zipFile` | bridged | bridged | pending |
+| `zip.zipFiles` | bridged | bridged | pending |
