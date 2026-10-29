@@ -63,6 +63,9 @@ SCENARIOS = {
 }
 MODES = {"normal": "N", "force": "F"}
 CAPTURE_SCENARIOS = {"S4a", "S4f"}
+# Scenarios that fix their own loop counts in GateScenarios.kt (the memoryGateWarmups / memoryGateIterations arguments
+# do not apply to them); --attach checks a device-side report against these instead of the call's values.
+SCENARIO_PARAMS = {"S4f": {"warmups": 1, "iterations": 3}}
 DEVICE_DIR = "/sdcard/Android/data/{package}/files/memory-gate"
 
 BRIDGE_TEST_CLASS = "org.autojs.autojs.memory.bridge.BridgeLeakGateDeviceTest"
@@ -241,9 +244,11 @@ def attach_reports(folder, run_id, pairs, capture_scenarios=(), expected=None):
     """Reports of a run that tools/memory/device_gate.sh made on the device itself, from the files pulled into
     `folder`: per scenario and mode `<runId>-<S>-<mode>.log` (the `am instrument -w -r` output between the
     script's `start`, `projection_before=`, `rc=`, `projection_after=` and `end` lines), `.json` (the report the
-    test wrote), `.logcat` (the AJ6MEM lines) and `.crash` (the crash buffer). Every selected pair needs a
+    test wrote), `.logcat` (the AJ6MEM lines) and `.crash` (the crash buffer). A log whose start line carries
+    `launch=detached` came from tools/memory/detached_gate.sh (`am instrument` without -w): it needs an `end` line
+    instead of `rc=`, and the outcome is read from the TestRunner lines of the `.logcat`. Every selected pair needs a
     finished log; a report of another run, or one made with other parameters than `expected` (warmups,
-    iterations, pollMs, forceDelayMs), is refused. Returns the reports, the pairs without one, the
+    iterations, pollMs, forceDelayMs; a scenario listed in SCENARIO_PARAMS is checked against its own counts), is refused. Returns the reports, the pairs without one, the
     PROJECT_MEDIA record and the device-clock window of the logs."""
     reports, failures, projection, window = [], [], {"allowedDuring": []}, {}
     for s, m in pairs:
@@ -251,7 +256,12 @@ def attach_reports(folder, run_id, pairs, capture_scenarios=(), expected=None):
         if not log.is_file():
             raise RuntimeError(f"No device-side log for {s} {m}: expected {log}")
         text = read_optional(log)
-        if not re.search(r"^rc=-?\d+\s*$", text, re.MULTILINE):
+        detached = re.search(r"^start .*\blaunch=detached\b", text, re.MULTILINE) is not None
+        if detached:
+            if not re.search(r"^end \S+", text, re.MULTILINE):
+                raise RuntimeError(f"{log.name} has no end line: detached_gate.sh collect has not run for {s} {m}")
+            window["launch"] = "detached"
+        elif not re.search(r"^rc=-?\d+\s*$", text, re.MULTILINE):
             raise RuntimeError(f"{log.name} has no rc= line: the device-side run of {s} {m} has not finished")
         started = re.search(r"^start (\S+)", text, re.MULTILINE)
         ended = re.search(r"^end (\S+)", text, re.MULTILINE)
@@ -259,7 +269,8 @@ def attach_reports(folder, run_id, pairs, capture_scenarios=(), expected=None):
             window["started"] = min(window.get("started", started[1]), started[1])
         if ended:
             window["finished"] = max(window.get("finished", ended[1]), ended[1])
-        outcome = test_outcome(text)
+        logcat_file = folder / f"{run_id}-{s}-{m}.logcat"
+        outcome = detached_outcome(read_optional(logcat_file) or "") if detached else test_outcome(text)
         if s in capture_scenarios:
             before = re.search(r"^projection_before=.*PROJECT_MEDIA: (\w+)", text, re.MULTILINE)
             after = re.search(r"^projection_after=.*PROJECT_MEDIA: (\w+)", text, re.MULTILINE)
@@ -273,18 +284,39 @@ def attach_reports(folder, run_id, pairs, capture_scenarios=(), expected=None):
             if report.get("runId") not in (None, run_id):
                 raise RuntimeError(f"{log.name}: a report of run {report.get('runId')}, expected {run_id}")
             for key, want in (expected or {}).items():
+                want = SCENARIO_PARAMS.get(s, {}).get(key, want)
                 if key in report and report[key] != want:
                     raise RuntimeError(f"{log.name}: the device-side run used {key} {report[key]}, this call expects {want}")
             report["instrumentation"] = outcome
+            if detached:
+                report["launch"] = "detached"
             reports.append(report)
             print(summary_line(report))
             for line in leak_lines(report)[:3]:
                 print(f"     {line[:220]}")
         if not found:
-            crash = crash_excerpt(read_optional(folder / f"{run_id}-{s}-{m}.crash") or "") if outcome == "crashed" else ""
+            crashed = outcome == "crashed" or (detached and outcome == "unknown")
+            crash = crash_excerpt(read_optional(folder / f"{run_id}-{s}-{m}.crash") or "") if crashed else ""
             failures.append({"scenario": s, "mode": m, "outcome": outcome, "tail": text[-1500:], "crashLog": crash})
             print(f"{s:<4} {MODES[m]} NO REPORT (instrumentation {outcome})")
     return reports, failures, projection, window
+
+
+def detached_outcome(logcat):
+    """Outcome of a detached run (`am instrument` without -w, tools/memory/detached_gate.sh) from the TestRunner
+    lines of its logcat: AndroidJUnitRunner logs `started:`, then `finished:`, `failed:`, `ignored:` or
+    `assumption failed:` per test, and `run finished: N tests, M failed, K ignored`. Without a `run finished` line
+    the outcome is unknown (the process died or the run was still going when the logcat was taken)."""
+    lines = [line for line in logcat.splitlines() if re.search(r"\bTestRunner\b", line)]
+    text = "\n".join(lines)
+    if re.search(r"TestRunner[^:]*: failed: ", text):
+        return "fail"
+    if re.search(r"TestRunner[^:]*: (ignored|assumption failed): ", text):
+        return "skipped"
+    done = re.search(r"TestRunner[^:]*: run finished: (\d+) tests?, (\d+) failed, (\d+) ignored", text)
+    if done and re.search(r"TestRunner[^:]*: finished: ", text) and done[1] == "1" and done[2] == "0" and done[3] == "0":
+        return "pass"
+    return "unknown"
 
 
 def mb(value):
@@ -501,7 +533,12 @@ def markdown(meta, reports, failures):
         *([f"- Merged runs: " + "; ".join(f"{r.get('runId')} ({', '.join(r.get('scenarios') or ['all'])})"
                                          for r in meta["mergedRuns"])] if meta.get("mergedRuns") else []),
         *([f"- Stopped early: {meta['interrupted']}"] if meta.get("interrupted") else []),
-        *([f"- Attached (ROADMAP appendix C Q51 (b)): a device-side run of {meta['attached'].get('deviceScript')}, collected "
+        *([f"- Attached (ROADMAP appendix C Q51 (b)): `am instrument` without -w, started and collected by single adb commands "
+           f"({meta['attached'].get('deviceScript')}) into {meta['attached'].get('dir')}; the test outcome is read from the "
+           f"TestRunner logcat lines; the run times are the host clock; without -w the test has no UiAutomation connection, "
+           f"so the meminfo column (dumpsys meminfo through that shell) stays empty"
+           if meta["attached"].get("launch") == "detached" else
+           f"- Attached (ROADMAP appendix C Q51 (b)): a device-side run of {meta['attached'].get('deviceScript')}, collected "
            f"from {meta['attached'].get('dir')}; the run times are the device clock"] if meta.get("attached") else []),
         *([f"- PROJECT_MEDIA app-op (ROADMAP Q3): `allow` during {', '.join(meta['projectionAppOp']['allowedDuring'])}, "
            f"before `{meta['projectionAppOp'].get('before')}`, afterwards `{meta['projectionAppOp'].get('restoredTo')}`"]
@@ -964,7 +1001,9 @@ def main():
             "deviceState": state, "modes": modes, "scenarios": args.scenarios, "warmups": args.warmups,
             "iterations": args.iterations, "pollMs": args.poll_ms, "forceDelayMs": args.force_delay_ms,
             "capture": args.capture, "meminfo": args.meminfo, "hprof": args.hprof, "interrupted": interrupted, "keepProcess": args.keep_process, "oneProcess": args.one_process,
-            **({"attached": {"dir": args.attach_dir.name, "deviceScript": "tools/memory/device_gate.sh"}} if args.attach else {}),
+            **({"attached": {"dir": args.attach_dir.name, "deviceScript": "tools/memory/detached_gate.sh", "launch": "detached"}
+                if window.get("launch") == "detached" else
+                {"dir": args.attach_dir.name, "deviceScript": "tools/memory/device_gate.sh"}} if args.attach else {}),
             **({"projectionAppOp": projection} if projection["allowedDuring"] else {}),
             **({"plugins": plugins} if plugins else {}),
             **({"hiddenApiPolicy": hidden_api} if hidden_api else {}), **({"grants": grants} if grants else {})}

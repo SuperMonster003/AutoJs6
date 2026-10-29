@@ -281,7 +281,9 @@ class AttachTest(unittest.TestCase):
         (folder / f"{self.RUN}-{name}").write_text(text, encoding="utf-8")
 
     def tagged(self, scenario, mode, status="pass", retained=0, **extra):
-        result = {**report(scenario, mode, status, retained), "runId": self.RUN, "warmups": 2, "pollMs": 10000, **extra}
+        # S4f carries its own counts, as on the device (run_gate.SCENARIO_PARAMS).
+        result = {**report(scenario, mode, status, retained), "runId": self.RUN, "warmups": 2, "pollMs": 10000,
+                  **run_gate.SCENARIO_PARAMS.get(scenario, {}), **extra}
         return result
 
     def attach(self, folder, pairs, expected=None):
@@ -363,6 +365,16 @@ class AttachTest(unittest.TestCase):
             self.assertEqual(1, len(reports))
             self.assertEqual([], failures)
             self.assertEqual({}, window)
+            # S4f fixes warmups 1 / iterations 3 itself (GateScenarios.kt): its report is checked against those, not
+            # the call's 2 / 20, and a run with the call's counts would be from another test build.
+            self.write(folder, "S4f-force.log", "INSTRUMENTATION_STATUS: aj6mem_json="
+                       + json.dumps(self.tagged("S4f", "force", warmups=1, iterations=3)) + "\nINSTRUMENTATION_STATUS_CODE: 0\nrc=0\n")
+            reports, failures, _, _, _ = self.attach(folder, [("S4f", "force")])
+            self.assertEqual([("S4f", "force")], [(r["scenario"], r["mode"]) for r in reports])
+            self.write(folder, "S4f-force.log", "INSTRUMENTATION_STATUS: aj6mem_json="
+                       + json.dumps(self.tagged("S4f", "force", warmups=2, iterations=20)) + "\nINSTRUMENTATION_STATUS_CODE: 0\nrc=0\n")
+            with self.assertRaisesRegex(RuntimeError, "used warmups 2, this call expects 1"):
+                self.attach(folder, [("S4f", "force")])
 
     def test_attached_report_header(self):
         meta = {"device": {"model": "SM-A566B", "manufacturer": "samsung", "sdk": "36", "serial": "localhost:57135"}, "versionCode": 5935,
@@ -375,6 +387,73 @@ class AttachTest(unittest.TestCase):
         self.assertIn("- Attached (ROADMAP appendix C Q51 (b)): a device-side run of tools/memory/device_gate.sh, collected from attach-p6g; "
                       "the run times are the device clock", text)
         self.assertIn("`allow` during S4a normal, before `default`, afterwards `default`", text)
+
+    def runner_lines(self, *middle):
+        return "\n".join(["I/TestRunner(24001): run started: 1 tests",
+                          "I/TestRunner(24001): started: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+                          *middle, ""])
+
+    def test_detached_outcome_from_the_testrunner_lines(self):
+        passed = self.runner_lines("I/TestRunner(24001): finished: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+                                   "I/TestRunner(24001): run finished: 1 tests, 0 failed, 0 ignored")
+        self.assertEqual("pass", run_gate.detached_outcome(passed))
+        failed = self.runner_lines("E/TestRunner(24001): failed: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+                                   "E/TestRunner(24001): ----- begin exception -----",
+                                   "I/TestRunner(24001): finished: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+                                   "I/TestRunner(24001): run finished: 1 tests, 1 failed, 0 ignored")
+        self.assertEqual("fail", run_gate.detached_outcome(failed))
+        skipped = self.runner_lines("I/TestRunner(24001): ignored: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+                                    "I/TestRunner(24001): run finished: 1 tests, 0 failed, 1 ignored")
+        self.assertEqual("skipped", run_gate.detached_outcome(skipped))
+        # Started but never finished (the process died, or the logcat was taken too early): unknown, never pass.
+        self.assertEqual("unknown", run_gate.detached_outcome(self.runner_lines()))
+        self.assertEqual("unknown", run_gate.detached_outcome(""))
+        # A `run finished` line of another test count or without the per-test `finished:` line is not a pass either.
+        self.assertEqual("unknown", run_gate.detached_outcome(self.runner_lines("I/TestRunner(24001): run finished: 1 tests, 0 failed, 0 ignored")))
+        self.assertEqual("unknown", run_gate.detached_outcome(self.runner_lines(
+            "I/TestRunner(24001): finished: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+            "I/TestRunner(24001): run finished: 2 tests, 0 failed, 0 ignored")))
+
+    def test_attach_detached_logs_need_the_end_line_and_take_the_outcome_from_the_logcat(self):
+        start = f"start 2026-10-29T23:22:20 {self.RUN} S4a s04aCaptureScreen normal capture=on host-clock launch=detached"
+        with tempfile.TemporaryDirectory() as temp:
+            folder = Path(temp)
+            self.write(folder, "S4a-normal.log", "\n".join([start, "device_time=2026-10-30T00:22:22 tz=Asia/Seoul",
+                                                            "projection_before=No operations.", "projection_set=PROJECT_MEDIA: allow",
+                                                            "am_rc=0", "launched 2026-10-29T23:22:43", ""]))
+            with self.assertRaisesRegex(RuntimeError, "has no end line: detached_gate.sh collect has not run for S4a normal"):
+                self.attach(folder, [("S4a", "normal")])
+            self.write(folder, "S4a-normal.log", "\n".join([start, "am_rc=0", "launched 2026-10-29T23:22:43", "json_pulled=4321",
+                                                            "projection_after=PROJECT_MEDIA: default; time=+1s ago",
+                                                            "end 2026-10-29T23:29:10", ""]))
+            self.write(folder, "S4a-normal.json", json.dumps(self.tagged("S4a", "normal")))
+            self.write(folder, "S4a-normal.logcat", self.runner_lines(
+                "I/TestRunner(24001): finished: s04aCaptureScreen(org.autojs.autojs.memory.RuntimeLeakGateDeviceTest)",
+                "I/TestRunner(24001): run finished: 1 tests, 0 failed, 0 ignored"))
+            # S4a force: collected after a timeout, the runner never finished and the crash buffer has the reason.
+            self.write(folder, "S4a-force.log", "\n".join([start.replace("normal", "force"), "am_rc=0", "end 2026-10-29T23:45:00", ""]))
+            self.write(folder, "S4a-force.logcat", self.runner_lines())
+            self.write(folder, "S4a-force.crash", "y" * 300 + "\nFATAL EXCEPTION: main\nProcess: org.autojs.autojs6, PID: 24001\n")
+            reports, failures, projection, window, printed = self.attach(folder, [("S4a", "normal"), ("S4a", "force")])
+        self.assertEqual([("S4a", "normal", "pass", "pass", "detached")],
+                         [(r["scenario"], r["mode"], r["status"], r["instrumentation"], r["launch"]) for r in reports])
+        self.assertEqual([("S4a", "force", "unknown")], [(f["scenario"], f["mode"], f["outcome"]) for f in failures])
+        self.assertTrue(failures[0]["crashLog"].startswith("y" * 199 + "\nFATAL EXCEPTION: main"))
+        self.assertEqual({"allowedDuring": ["S4a normal", "S4a force"], "before": "default", "restoredTo": "default"}, projection)
+        self.assertEqual({"launch": "detached", "started": "2026-10-29T23:22:20", "finished": "2026-10-29T23:45:00"}, window)
+        self.assertIn("S4a  F NO REPORT (instrumentation unknown)", printed)
+
+    def test_detached_report_header(self):
+        meta = {"device": {"model": "SM-A566B", "manufacturer": "samsung", "sdk": "36", "serial": "localhost:57135"}, "versionCode": 5935,
+                "versionName": "6.8.0", "package": "org.autojs.autojs6", "runId": self.RUN, "label": "p6g",
+                "started": "2026-10-29T23:22:20", "finished": "2026-10-29T23:29:10", "date": "20261029", "deviceState": {}, "warmups": 2,
+                "iterations": 20, "pollMs": 10000, "forceDelayMs": 1000, "capture": "on",
+                "attached": {"dir": "attach-p6g", "deviceScript": "tools/memory/detached_gate.sh", "launch": "detached"}}
+        text = run_gate.markdown(meta, [report("S4a", "normal", "pass", 0)], [])
+        self.assertIn("- Attached (ROADMAP appendix C Q51 (b)): `am instrument` without -w, started and collected by single adb commands "
+                      "(tools/memory/detached_gate.sh) into attach-p6g; the test outcome is read from the TestRunner logcat lines; "
+                      "the run times are the host clock; without -w the test has no UiAutomation connection, so the meminfo column "
+                      "(dumpsys meminfo through that shell) stays empty", text)
 
 
 if __name__ == "__main__":
