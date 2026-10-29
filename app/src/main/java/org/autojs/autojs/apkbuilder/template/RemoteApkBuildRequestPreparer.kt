@@ -22,6 +22,7 @@ import org.autojs.autojs.core.plugin.imagequant.ImageQuantPluginHost
 import org.autojs.autojs.core.plugin.nativealign.ElfDynamicInfo
 import org.autojs.autojs.core.plugin.opencv.BundledOpenCvRuntime
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
+import org.autojs.autojs.core.plugin.scriptmodule.PackagedScriptModules
 import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptApkBuildPlan
 import org.autojs.autojs.apkbuilder.ApkBuildLibrary
@@ -144,6 +145,8 @@ object RemoteApkBuildRequestPreparer {
         val nativeLibraryAlignments: Map<String, Long?> = emptyMap(),
         val warnings: List<String> = emptyList(),
         val nativeAlignmentMetadataFile: File? = null,
+        /** What the build success dialog reports about the Bundled Libraries modules (roadmap P7.1, Q186). */
+        val notices: List<String> = emptyList(),
     ) : Closeable {
         override fun close() {
             runCatching { request.projectArchiveFd?.close() }
@@ -274,11 +277,15 @@ object RemoteApkBuildRequestPreparer {
             typeScriptPlan?.close()
             typeScriptPlan = null
             ensureNotCancelled(cancelSignal)
+            val scriptModules = planScriptModules(appContext, projectConfig, source, cancelSignal, progressListener)
+            val scriptModuleNotices = PackagedScriptModules.notices(appContext, scriptModules)
+            ensureNotCancelled(cancelSignal)
             notifyProgress(progressListener, "Preparing remote build inputs", projectConfig.libs.joinToString(", "))
             nativeLibrariesArchiveFile = writeBuildInputsArchive(
                 context = appContext,
                 cacheDir = cacheDir,
                 projectConfig = projectConfig,
+                scriptModules = scriptModules,
                 cancelSignal = cancelSignal,
                 progressListener = progressListener,
             )
@@ -393,6 +400,7 @@ object RemoteApkBuildRequestPreparer {
                 nativeLibraryAlignments = nativeLibraryAlignments.associate { it.path to it.minLoadAlign },
                 nativeAlignmentMetadataFile = nativeAlignmentMetadataFile,
                 warnings = nativeAlignmentWarnings,
+                notices = scriptModuleNotices,
                 archiveFile = archiveFile,
                 nativeLibrariesArchiveFile = nativeLibrariesArchiveFile,
                 expectedSignerCertificateSha256 = expectedSignerCertificateSha256,
@@ -684,10 +692,39 @@ object RemoteApkBuildRequestPreparer {
         return true
     }
 
+    /**
+     * The Bundled Libraries modules the packaged app takes along (roadmap P7.1): those the scripts of [source] use, or
+     * all of them when "Bundled Libraries" is selected. Node and Bun entries are not scanned: their `require` never
+     * reaches these modules, and the Node built-ins of the same names would be taken for them.
+     */
+    private fun planScriptModules(
+        context: Context,
+        projectConfig: ProjectConfig,
+        source: File,
+        cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
+    ): PackagedScriptModules.Plan {
+        val bundled = ApkBuildLibrary.BUNDLED_LIBRARIES
+        val includeAll = projectConfig.libs.any { selected ->
+            selected.trim().equals(bundled.label, ignoreCase = true) || bundled.aliases.any { selected.trim().equals(it, ignoreCase = true) }
+        }
+        if (!includeAll && (requiresNodeRuntime(projectConfig, source, includeSelectedLibraries = false) || requiresBunRuntime(projectConfig, source))) {
+            return PackagedScriptModules.Plan.EMPTY
+        }
+        notifyProgress(progressListener, "Resolving plugin artifacts", bundled.label)
+        return PackagedScriptModules.plan(
+            context = context,
+            source = source,
+            excludedDirs = projectConfig.excludedDirs.mapNotNull { runCatching { it.canonicalFile }.getOrNull() },
+            includeAll = includeAll,
+        ) { ensureNotCancelled(cancelSignal) }
+    }
+
     private fun writeBuildInputsArchive(
         context: Context,
         cacheDir: File,
         projectConfig: ProjectConfig,
+        scriptModules: PackagedScriptModules.Plan,
         cancelSignal: AtomicBoolean?,
         progressListener: ((ApkBuildProgress) -> Unit)?,
     ): File? {
@@ -697,58 +734,73 @@ object RemoteApkBuildRequestPreparer {
         val targetAbis = projectConfig.abis.distinct()
         notifyProgress(progressListener, "Resolving plugin artifacts", projectConfig.libs.joinToString(", "))
         val pluginArtifacts = resolveSelectedPluginArtifacts(context, projectConfig, cancelSignal, progressListener)
-        if ((requiredLibs.isEmpty() && pluginArtifacts.isEmpty()) || targetAbis.isEmpty()) {
+        val writesNative = (requiredLibs.isNotEmpty() || pluginArtifacts.isNotEmpty()) && targetAbis.isNotEmpty()
+        if (!writesNative && scriptModules.files.isEmpty()) {
             return null
         }
 
-        val host = installedCode(
-            context,
-            context.packageName,
-            PackagedNativeLibraryPolicy.Source(
-                label = HOST_SOURCE_LABEL,
-                packageName = context.packageName,
-                versionName = BuildConfig.VERSION_NAME,
-                isHost = true,
-            ),
-        )
         val archiveFile = File(cacheDir, "native-libraries-${System.nanoTime()}.zip")
         try {
-            NativeStaging(File(cacheDir, "native-staging-${System.nanoTime()}")).use { staging ->
-                targetAbis.forEach { abi ->
-                    requiredLibs.forEach { soName ->
-                        ensureNotCancelled(cancelSignal)
-                        stageNativeLibrary(staging, host, abi, soName, cancelSignal, progressListener)
+            val staging = if (writesNative) NativeStaging(File(cacheDir, "native-staging-${System.nanoTime()}")) else null
+            staging.use {
+                val selected = staging?.let {
+                    val host = installedCode(
+                        context,
+                        context.packageName,
+                        PackagedNativeLibraryPolicy.Source(
+                            label = HOST_SOURCE_LABEL,
+                            packageName = context.packageName,
+                            versionName = BuildConfig.VERSION_NAME,
+                            isHost = true,
+                        ),
+                    )
+                    targetAbis.forEach { abi ->
+                        requiredLibs.forEach { soName ->
+                            ensureNotCancelled(cancelSignal)
+                            stageNativeLibrary(staging, host, abi, soName, cancelSignal, progressListener)
+                        }
                     }
-                }
-                pluginArtifacts.forEach { artifact ->
-                    stagePluginNativeLibraries(context, staging, host, artifact, targetAbis, cancelSignal, progressListener)
-                }
-                stageHostCxxRuntimeForConsumers(staging, host, targetAbis, cancelSignal, progressListener)
+                    pluginArtifacts.forEach { artifact ->
+                        stagePluginNativeLibraries(context, staging, host, artifact, targetAbis, cancelSignal, progressListener)
+                    }
+                    stageHostCxxRuntimeForConsumers(staging, host, targetAbis, cancelSignal, progressListener)
 
-                notifyProgress(progressListener, "Checking native libraries", null)
-                val selected = try {
-                    PackagedNativeLibraryPolicy.resolve(staging.candidates, staging::dynamicInfo)
-                } catch (failure: PackagedNativeLibraryPolicy.Failure) {
-                    throw IOException(describeNativeLibraryFailure(context, failure), failure)
+                    notifyProgress(progressListener, "Checking native libraries", null)
+                    try {
+                        PackagedNativeLibraryPolicy.resolve(staging.candidates, staging::dynamicInfo)
+                    } catch (failure: PackagedNativeLibraryPolicy.Failure) {
+                        throw IOException(describeNativeLibraryFailure(context, failure), failure)
+                    }
                 }
 
                 var wroteAny = false
                 writeZipFile(archiveFile, Deflater.BEST_SPEED) { zip ->
-                    selected.forEach { library ->
-                        ensureNotCancelled(cancelSignal)
-                        notifyProgress(progressListener, "Copying native libraries", library.entryName)
-                        addFile(zip, library.file, library.entryName, cancelSignal)
-                        wroteAny = true
-                    }
-                    val writtenAssets = linkedSetOf<String>()
-                    pluginArtifacts.forEach { artifact ->
-                        ensureNotCancelled(cancelSignal)
-                        if (copyPluginArtifactAssetsToZip(zip, writtenAssets, context, artifact, cancelSignal, progressListener)) {
+                    if (selected != null) {
+                        selected.forEach { library ->
+                            ensureNotCancelled(cancelSignal)
+                            notifyProgress(progressListener, "Copying native libraries", library.entryName)
+                            addFile(zip, library.file, library.entryName, cancelSignal)
                             wroteAny = true
                         }
+                        val writtenAssets = linkedSetOf<String>()
+                        pluginArtifacts.forEach { artifact ->
+                            ensureNotCancelled(cancelSignal)
+                            if (copyPluginArtifactAssetsToZip(zip, writtenAssets, context, artifact, cancelSignal, progressListener)) {
+                                wroteAny = true
+                            }
+                        }
+                        bundledOpenCvRuntimeRecord(context, pluginArtifacts, selected)?.let { record ->
+                            addBytes(zip, BundledOpenCvRuntime.encode(record), "assets/${BundledOpenCvRuntime.ASSET_PATH}")
+                        }
                     }
-                    bundledOpenCvRuntimeRecord(context, pluginArtifacts, selected)?.let { record ->
-                        addBytes(zip, BundledOpenCvRuntime.encode(record), "assets/${BundledOpenCvRuntime.ASSET_PATH}")
+                    // Rhino `require` reads `assets/modules` before the plugin (roadmap P7.1).
+                    // zh-CN: Rhino `require` 先读 `assets/modules`, 再读插件 (ROADMAP P7.1).
+                    scriptModules.files.forEach { (path, bytes) ->
+                        ensureNotCancelled(cancelSignal)
+                        val entryName = "${PackagedScriptModules.ASSET_ROOT}/$path"
+                        notifyProgress(progressListener, "Copying plugin assets", entryName)
+                        addBytes(zip, bytes, entryName)
+                        wroteAny = true
                     }
                 }
                 return archiveFile.takeIf { wroteAny && it.length() > 0L } ?: run {

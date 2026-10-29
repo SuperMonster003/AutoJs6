@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">No se encuentra el módulo \'%1$s\': esta aplicación se empaquetó sin la biblioteca \"%3$s\", y la biblioteca está desactivada en el plugin \"%2$s\" de este dispositivo. Vuelva a empaquetar la aplicación con AutoJs6, o active la biblioteca en el plugin.</string>
+    <string name="error_script_module_packaged_not_included">No se encuentra el módulo \'%1$s\': esta aplicación se empaquetó sin la biblioteca \"%3$s\". Vuelva a empaquetar la aplicación con AutoJs6 (seleccione \"%2$s\" en \"Bibliotecas\" si el módulo se carga dinámicamente), o instale el plugin \"%2$s\" en este dispositivo.</string>
     <string name="error_script_module_plugin_disabled">No se encuentra el módulo \'%1$s\': el plugin \"%2$s\" que lo proporciona está desactivado. Active el plugin en AutoJs6 > Centro de plugins.</string>
     <string name="error_script_module_plugin_incompatible">No se encuentra el módulo \'%1$s\': esta versión de AutoJs6 no puede leer el plugin instalado \"%2$s\". Actualice AutoJs6 o el plugin.</string>
     <string name="error_script_module_plugin_library_disabled">No se encuentra el módulo \'%1$s\': la biblioteca \"%3$s\" está desactivada en el plugin \"%2$s\". Actívela en AutoJs6 > Centro de plugins > %2$s.</string>
     <string name="error_script_module_plugin_not_authorized">No se encuentra el módulo \'%1$s\': el plugin \"%2$s\" que lo proporciona no está autorizado. Autorice el plugin en AutoJs6 > Centro de plugins.</string>
     <string name="error_script_module_plugin_not_installed">No se encuentra el módulo \'%1$s\': lo proporciona el plugin oficial \"%2$s\", que no está instalado. Instale el plugin en AutoJs6 > Centro de plugins.</string>
+    <string name="text_apk_build_script_modules_packaged">Bibliotecas empaquetadas desde el plugin \"%1$s\": %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">Bibliotecas no empaquetadas: %2$s. Esta versión de AutoJs6 no puede leer el plugin instalado \"%1$s\". Actualice AutoJs6 o el plugin y vuelva a compilar.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">Bibliotecas no empaquetadas: %2$s. Están desactivadas en el plugin \"%1$s\". Actívelas en AutoJs6 > Centro de plugins > %1$s y vuelva a compilar.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">Bibliotecas no empaquetadas: %2$s. El plugin \"%1$s\" no está autorizado. Autorícelo en AutoJs6 > Centro de plugins y vuelva a compilar.</string>
+    <string name="warning_apk_build_script_modules_not_installed">Bibliotecas no empaquetadas: %2$s. El plugin \"%1$s\" no está instalado. Instálelo en AutoJs6 > Centro de plugins y vuelva a compilar.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">Bibliotecas no empaquetadas: %2$s. El plugin \"%1$s\" está desactivado. Actívelo en AutoJs6 > Centro de plugins y vuelva a compilar.</string>
 </resources>

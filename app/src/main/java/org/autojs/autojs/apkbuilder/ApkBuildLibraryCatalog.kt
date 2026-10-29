@@ -287,6 +287,13 @@ enum class ApkBuildLibrary(
             ),
         ),
     ),
+
+    // Copies every library of the Bundled Libraries plugin, for modules the scan cannot see (roadmap P7.1, Q185).
+    // zh-CN: 复制 Bundled Libraries 插件中的全部库, 用于扫描看不到的模块 (ROADMAP P7.1, Q185).
+    BUNDLED_LIBRARIES(
+        label = "Bundled Libraries",
+        aliases = listOf("bundled-libraries", "bundled_libraries", "bundledlibraries"),
+    ),
     ;
 
     val isPlugin: Boolean

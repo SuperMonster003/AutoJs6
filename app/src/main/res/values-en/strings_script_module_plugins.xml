@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">Cannot find module \'%1$s\': this app was packaged without the library \"%3$s\", and the library is switched off in the plugin \"%2$s\" on this device. Package the app again with AutoJs6, or switch the library on in the plugin.</string>
+    <string name="error_script_module_packaged_not_included">Cannot find module \'%1$s\': this app was packaged without the library \"%3$s\". Package the app again with AutoJs6 (select \"%2$s\" in \"Libraries\" if the module is loaded dynamically), or install the plugin \"%2$s\" on this device.</string>
     <string name="error_script_module_plugin_disabled">Cannot find module \'%1$s\': the plugin \"%2$s\" that provides it is disabled. Enable the plugin in AutoJs6 > Plugin center.</string>
     <string name="error_script_module_plugin_incompatible">Cannot find module \'%1$s\': the installed plugin \"%2$s\" cannot be read by this version of AutoJs6. Update AutoJs6 or the plugin.</string>
     <string name="error_script_module_plugin_library_disabled">Cannot find module \'%1$s\': the library \"%3$s\" is switched off in the plugin \"%2$s\". Switch it on in AutoJs6 > Plugin center > %2$s.</string>
     <string name="error_script_module_plugin_not_authorized">Cannot find module \'%1$s\': the plugin \"%2$s\" that provides it is not authorized. Authorize the plugin in AutoJs6 > Plugin center.</string>
     <string name="error_script_module_plugin_not_installed">Cannot find module \'%1$s\': it is provided by the official plugin \"%2$s\", which is not installed. Install the plugin in AutoJs6 > Plugin center.</string>
+    <string name="text_apk_build_script_modules_packaged">Libraries packaged from the plugin \"%1$s\": %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">Libraries not packaged: %2$s. This version of AutoJs6 cannot read the installed plugin \"%1$s\". Update AutoJs6 or the plugin, then build again.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">Libraries not packaged: %2$s. They are switched off in the plugin \"%1$s\". Switch them on in AutoJs6 > Plugin center > %1$s, then build again.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">Libraries not packaged: %2$s. The plugin \"%1$s\" is not authorized. Authorize it in AutoJs6 > Plugin center, then build again.</string>
+    <string name="warning_apk_build_script_modules_not_installed">Libraries not packaged: %2$s. The plugin \"%1$s\" is not installed. Install it in AutoJs6 > Plugin center, then build again.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">Libraries not packaged: %2$s. The plugin \"%1$s\" is disabled. Enable it in AutoJs6 > Plugin center, then build again.</string>
 </resources>

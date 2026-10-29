@@ -78,6 +78,23 @@ internal sealed interface ScriptModulePluginState {
         }
     }
 
+    /**
+     * Why the library [libraryId] cannot be used now, or null when it can: what the APK builder may copy into a packaged
+     * app (roadmap P7.1), checked in the order of [lookup].
+     * zh-CN: 库 [libraryId] 当前不能使用的原因, 能使用时为 null: 即打包时可以复制哪些库 (ROADMAP P7.1), 检查顺序同 [lookup].
+     */
+    fun unavailableReason(libraryId: String): Reason? = when (this) {
+        NotInstalled -> Reason.NOT_INSTALLED
+        is Installed -> when {
+            catalog == null -> Reason.INCOMPATIBLE
+            catalog.libraries.none { it.id == libraryId } -> Reason.NOT_INSTALLED
+            !authorized -> Reason.UNAUTHORIZED
+            !pluginEnabled -> Reason.PLUGIN_DISABLED
+            libraryId !in enabledLibraries -> Reason.LIBRARY_DISABLED
+            else -> null
+        }
+    }
+
     companion object {
 
         /**

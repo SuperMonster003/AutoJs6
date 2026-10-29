@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">モジュール \'%1$s\' が見つかりません: このアプリはライブラリ \"%3$s\" を含めずにパッケージ化されており, このデバイスのプラグイン \"%2$s\" ではこのライブラリがオフになっています. AutoJs6 でアプリを再パッケージ化するか, プラグインでライブラリをオンにしてください.</string>
+    <string name="error_script_module_packaged_not_included">モジュール \'%1$s\' が見つかりません: このアプリはライブラリ \"%3$s\" を含めずにパッケージ化されています. AutoJs6 でアプリを再パッケージ化する (モジュールを動的に読み込む場合は \"ライブラリー\" で \"%2$s\" を選択) か, このデバイスにプラグイン \"%2$s\" をインストールしてください.</string>
     <string name="error_script_module_plugin_disabled">モジュール \'%1$s\' が見つかりません: 提供元のプラグイン \"%2$s\" が無効になっています. AutoJs6 > プラグインセンター でプラグインを有効にしてください.</string>
     <string name="error_script_module_plugin_incompatible">モジュール \'%1$s\' が見つかりません: インストールされているプラグイン \"%2$s\" はこのバージョンの AutoJs6 では読み込めません. AutoJs6 またはプラグインを更新してください.</string>
     <string name="error_script_module_plugin_library_disabled">モジュール \'%1$s\' が見つかりません: ライブラリ \"%3$s\" がプラグイン \"%2$s\" でオフになっています. AutoJs6 > プラグインセンター > %2$s でオンにしてください.</string>
     <string name="error_script_module_plugin_not_authorized">モジュール \'%1$s\' が見つかりません: 提供元のプラグイン \"%2$s\" が承認されていません. AutoJs6 > プラグインセンター でプラグインを承認してください.</string>
     <string name="error_script_module_plugin_not_installed">モジュール \'%1$s\' が見つかりません: 公式プラグイン \"%2$s\" が提供していますが, インストールされていません. AutoJs6 > プラグインセンター でプラグインをインストールしてください.</string>
+    <string name="text_apk_build_script_modules_packaged">プラグイン \"%1$s\" からパッケージ化したライブラリ: %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">パッケージ化されていないライブラリ: %2$s. このバージョンの AutoJs6 ではインストールされているプラグイン \"%1$s\" を読み込めません. AutoJs6 またはプラグインを更新してから再度ビルドしてください.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">パッケージ化されていないライブラリ: %2$s. これらのライブラリはプラグイン \"%1$s\" でオフになっています. AutoJs6 > プラグインセンター > %1$s でオンにしてから再度ビルドしてください.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">パッケージ化されていないライブラリ: %2$s. プラグイン \"%1$s\" が承認されていません. AutoJs6 > プラグインセンター で承認してから再度ビルドしてください.</string>
+    <string name="warning_apk_build_script_modules_not_installed">パッケージ化されていないライブラリ: %2$s. プラグイン \"%1$s\" がインストールされていません. AutoJs6 > プラグインセンター でインストールしてから再度ビルドしてください.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">パッケージ化されていないライブラリ: %2$s. プラグイン \"%1$s\" が無効になっています. AutoJs6 > プラグインセンター で有効にしてから再度ビルドしてください.</string>
 </resources>

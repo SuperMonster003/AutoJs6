@@ -49,9 +49,31 @@ class ScriptModulePluginMessagesTest {
         assertEquals(default["error_script_module_plugin_disabled"], ScriptModulePluginMessages.PLUGIN_DISABLED)
         assertEquals(default["error_script_module_plugin_library_disabled"], ScriptModulePluginMessages.LIBRARY_DISABLED)
         assertEquals(default["error_script_module_plugin_incompatible"], ScriptModulePluginMessages.INCOMPATIBLE)
+        assertEquals(default["error_script_module_packaged_library_disabled"], ScriptModulePluginMessages.PACKAGED_LIBRARY_DISABLED)
+        assertEquals(default["error_script_module_packaged_not_included"], ScriptModulePluginMessages.PACKAGED_NOT_INCLUDED)
         assertEquals(
             "Cannot find module 'banana-i18n': the library \"i18n\" is switched off in the plugin \"Bundled Libraries\". Switch it on in AutoJs6 > Plugin center > Bundled Libraries.",
-            ScriptModulePluginMessages.unavailable("banana-i18n", "i18n", Reason.LIBRARY_DISABLED),
+            ScriptModulePluginMessages.unavailable("banana-i18n", "i18n", Reason.LIBRARY_DISABLED, packaged = false),
+        )
+    }
+
+    /** Roadmap P7.1 (Q188): a packaged app has no Plugin center, so its messages speak to the developer. */
+    @Test
+    fun packagedAppsGetTwoMessages() {
+        assertEquals(
+            "Cannot find module 'dayjs': this app was packaged without the library \"dayjs\". Package the app again with AutoJs6 (select \"Bundled Libraries\" in \"Libraries\" if the module is loaded dynamically), or install the plugin \"Bundled Libraries\" on this device.",
+            ScriptModulePluginMessages.unavailable("dayjs", "dayjs", Reason.NOT_INSTALLED, packaged = true),
+        )
+        listOf(Reason.UNAUTHORIZED, Reason.PLUGIN_DISABLED, Reason.INCOMPATIBLE).forEach { reason ->
+            assertEquals(
+                reason.code,
+                ScriptModulePluginMessages.unavailable("dayjs", "dayjs", Reason.NOT_INSTALLED, packaged = true),
+                ScriptModulePluginMessages.unavailable("dayjs", "dayjs", reason, packaged = true),
+            )
+        }
+        assertEquals(
+            "Cannot find module 'lodash': this app was packaged without the library \"lodash\", and the library is switched off in the plugin \"Bundled Libraries\" on this device. Package the app again with AutoJs6, or switch the library on in the plugin.",
+            ScriptModulePluginMessages.unavailable("lodash", "lodash", Reason.LIBRARY_DISABLED, packaged = true),
         )
     }
 

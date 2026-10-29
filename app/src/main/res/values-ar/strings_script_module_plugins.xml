@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">تعذر العثور على الوحدة \'%1$s\': حزم هذا التطبيق بدون المكتبة \"%3$s\", والمكتبة موقوفة في الاضافة \"%2$s\" على هذا الجهاز. اعد حزم التطبيق باستخدام AutoJs6, او شغل المكتبة في الاضافة.</string>
+    <string name="error_script_module_packaged_not_included">تعذر العثور على الوحدة \'%1$s\': حزم هذا التطبيق بدون المكتبة \"%3$s\". اعد حزم التطبيق باستخدام AutoJs6 (اختر \"%2$s\" في \"المكتبات\" اذا كانت الوحدة تحمل ديناميكيا), او ثبت الاضافة \"%2$s\" على هذا الجهاز.</string>
     <string name="error_script_module_plugin_disabled">تعذر العثور على الوحدة \'%1$s\': الاضافة \"%2$s\" التي توفرها معطلة. فعل الاضافة من AutoJs6 > مركز الاضافات.</string>
     <string name="error_script_module_plugin_incompatible">تعذر العثور على الوحدة \'%1$s\': لا يستطيع هذا الاصدار من AutoJs6 قراءة الاضافة المثبتة \"%2$s\". حدث AutoJs6 او الاضافة.</string>
     <string name="error_script_module_plugin_library_disabled">تعذر العثور على الوحدة \'%1$s\': المكتبة \"%3$s\" موقوفة في الاضافة \"%2$s\". شغلها من AutoJs6 > مركز الاضافات > %2$s.</string>
     <string name="error_script_module_plugin_not_authorized">تعذر العثور على الوحدة \'%1$s\': الاضافة \"%2$s\" التي توفرها غير مصرح بها. امنح الاذن للاضافة من AutoJs6 > مركز الاضافات.</string>
     <string name="error_script_module_plugin_not_installed">تعذر العثور على الوحدة \'%1$s\': توفرها الاضافة الرسمية \"%2$s\" وهي غير مثبتة. ثبت الاضافة من AutoJs6 > مركز الاضافات.</string>
+    <string name="text_apk_build_script_modules_packaged">المكتبات المحزومة من الاضافة \"%1$s\": %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">مكتبات لم تحزم: %2$s. لا يستطيع هذا الاصدار من AutoJs6 قراءة الاضافة المثبتة \"%1$s\". حدث AutoJs6 او الاضافة ثم اعد البناء.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">مكتبات لم تحزم: %2$s. هذه المكتبات موقوفة في الاضافة \"%1$s\". شغلها من AutoJs6 > مركز الاضافات > %1$s ثم اعد البناء.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">مكتبات لم تحزم: %2$s. الاضافة \"%1$s\" غير مصرح بها. امنحها الاذن من AutoJs6 > مركز الاضافات ثم اعد البناء.</string>
+    <string name="warning_apk_build_script_modules_not_installed">مكتبات لم تحزم: %2$s. الاضافة \"%1$s\" غير مثبتة. ثبتها من AutoJs6 > مركز الاضافات ثم اعد البناء.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">مكتبات لم تحزم: %2$s. الاضافة \"%1$s\" معطلة. فعلها من AutoJs6 > مركز الاضافات ثم اعد البناء.</string>
 </resources>

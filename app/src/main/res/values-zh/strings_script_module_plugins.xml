@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">找不到模块 \'%1$s\': 此应用打包时没有带上库 \"%3$s\", 本设备上插件 \"%2$s\" 中的该库已关闭. 请用 AutoJs6 重新打包, 或在插件中开启该库.</string>
+    <string name="error_script_module_packaged_not_included">找不到模块 \'%1$s\': 此应用打包时没有带上库 \"%3$s\". 请用 AutoJs6 重新打包 (模块为动态加载时, 在 \"支持库\" 中勾选 \"%2$s\"), 或在本设备安装插件 \"%2$s\".</string>
     <string name="error_script_module_plugin_disabled">找不到模块 \'%1$s\': 提供它的插件 \"%2$s\" 已被禁用. 请在 AutoJs6 > 插件中心 启用该插件.</string>
     <string name="error_script_module_plugin_incompatible">找不到模块 \'%1$s\': 当前版本的 AutoJs6 无法读取已安装的插件 \"%2$s\". 请更新 AutoJs6 或该插件.</string>
     <string name="error_script_module_plugin_library_disabled">找不到模块 \'%1$s\': 库 \"%3$s\" 已在插件 \"%2$s\" 中关闭. 请在 AutoJs6 > 插件中心 > %2$s 中开启.</string>
     <string name="error_script_module_plugin_not_authorized">找不到模块 \'%1$s\': 提供它的插件 \"%2$s\" 未获授权. 请在 AutoJs6 > 插件中心 授权该插件.</string>
     <string name="error_script_module_plugin_not_installed">找不到模块 \'%1$s\': 它由官方插件 \"%2$s\" 提供, 该插件尚未安装. 请在 AutoJs6 > 插件中心 安装该插件.</string>
+    <string name="text_apk_build_script_modules_packaged">已从插件 \"%1$s\" 打包的库: %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">未打包的库: %2$s. 当前版本的 AutoJs6 无法读取已安装的插件 \"%1$s\". 请更新 AutoJs6 或该插件后重新打包.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">未打包的库: %2$s. 这些库已在插件 \"%1$s\" 中关闭. 请在 AutoJs6 > 插件中心 > %1$s 中开启后重新打包.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">未打包的库: %2$s. 插件 \"%1$s\" 未获授权. 请在 AutoJs6 > 插件中心 授权后重新打包.</string>
+    <string name="warning_apk_build_script_modules_not_installed">未打包的库: %2$s. 插件 \"%1$s\" 尚未安装. 请在 AutoJs6 > 插件中心 安装后重新打包.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">未打包的库: %2$s. 插件 \"%1$s\" 已被禁用. 请在 AutoJs6 > 插件中心 启用后重新打包.</string>
 </resources>

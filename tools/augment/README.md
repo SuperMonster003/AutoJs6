@@ -153,6 +153,21 @@ py -3.12 -I tools/augment/device_plugin_modules_check.py -s SERIAL --local-first
 
 宿主须是去掉 `assets/modules` 中 14 个库模块文件的构建 (P5.2 起的构建都是; 此前见设计 `docs/augment/P4-3-bundled-libraries-design.md` (g), 附录 C Q102), `--plugin-apk` 是 AutoJs6-Plugin-Bundled-Libraries 的安装包; 它是 release 包时 (没有下面的调试接收器), 用 `--switch-apk` 给出同一签名, 同一 versionCode 的 debug 包, 插件页开关一态前覆盖安装. 在同一宿主进程中依次经过 未安装 (先卸载插件), 已安装并启用 (`adb install`), 插件中心关闭 (脚本经 `PluginEnableStore` 关闭再打开), 插件页关闭 axios 与 buffer (经插件 debug 构建的 `DebugLibrarySwitchReceiver` 切换对应的 activity-alias, 之后打开; Android 9 起 shell 不能 `pm disable` 非 test-only 应用的组件), 卸载后. 每一态运行一次 `bench/plugin_modules_smoke/main.js` (13 个库共 15 个 require 项, axios / cheerio / dayjs / i18n / pangu 的全局 getter, `require('axios') === axios`, 指引错误的消息与位置), 输出须符合该态的预期 (错误为 `code` = MODULE_NOT_FOUND, `library`, `reason`; 可用的库的 getter 为 "ok"; 位置只登记; P5.2 之前开关关与开各运行一次, 两次须一致). `--local-first` 用 P5.2 之前的构建 (资产还在), 未安装插件时全部模块照常加载. 结束时卸载插件, 删除 `/sdcard/Download/aj6-augment-bench/p43`. 插件状态的变化由宿主的包广播与插件中心监听器生效, 不点按屏幕.
 
+## device_packaged_libraries_check.py: 打包应用带上 Bundled Libraries 的库 (P7.1)
+
+```
+py -3.12 -I -u tools/augment/device_packaged_libraries_check.py -s SERIAL --host-apk HOST.apk --test-apk TEST_APK --template-apk TEMPLATE.apk --plugin-apk PLUGIN.apk --work DIR
+```
+
+`--template-apk` 是用同一宿主的 Runtime Kit (`:app:generateRuntimeKit`) 构建的 APK Builder Template 插件 debug 包 (模板仓库 `-Pautojs.apkBuilder.templatePlugin.runtimeKitDir=<kit>`), `--plugin-apk` 是 Bundled Libraries 的发行包. 设计见 `docs/augment/P7-1-packaged-app-libraries-design.md`. 步骤:
+
+1. 把设备上的宿主, 测试包与模板插件拉到 DIR 并记录 md5, 装上给出的三个包.
+2. 插件已安装时由插桩用例 `PackagedScriptModulesProducerDeviceTest` 打包应用 a (扫描) 与 c (勾选 "Bundled Libraries"), 卸载插件后打包 b. 脚本用到 dayjs, lodash, pangu, fs, 以及扫描看不到的拼接名 os; 核对每个应用 `assets/modules` 中的库, 体积与成功对话框的提示.
+3. 安装三个应用, 依次在插件未安装与已安装时运行, 脚本输出的 `P71_RESULT` 与预期对照: 带上的库为 "ok", 缺少的库抛出 `code` = MODULE_NOT_FOUND, `library`, `reason`, 消息不指向插件中心 (附录 C Q188); Node 核心模块与 lodash 的消息模块名带 `.js` (Q189). 装有插件时三个应用全部可用 (Q187 的回退).
+4. 卸载应用 (插件原先不在时也卸载), 装回原包核对 md5, 删除设备上的产物.
+
+每项一行通过 / 失败与关键数字 (库数, 文件数, 字节数, 扫描与计划耗时, 第一条缺库错误). ColorOS 上每次 `adb install` 都会弹出安装确认, 由维护者在手机上确认; 脚本不点按屏幕.
+
 ## device_matrix.py: 附录 B 一台设备的真机矩阵 (P5.1 / P5.2)
 
 ```

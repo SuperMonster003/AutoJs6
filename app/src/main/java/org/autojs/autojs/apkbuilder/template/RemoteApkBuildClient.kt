@@ -37,6 +37,8 @@ object RemoteApkBuildClient {
         val warnings: List<String> = emptyList(),
         val errors: List<String> = emptyList(),
         val updatedProjectConfigJson: String? = null,
+        /** The Bundled Libraries modules packaged or missing, for the success dialog (roadmap P7.1, Q186). */
+        val notices: List<String> = emptyList(),
     ) {
         val isSuccess: Boolean
             get() = status == ApkBuildResult.STATUS_OK
@@ -290,7 +292,7 @@ object RemoteApkBuildClient {
                     progressListener = progressListener,
                     hostCompatibilityWarnings = opened.hostCompatibilityWarnings + prepared.warnings,
                     diagnosticTracker = diagnosticTracker,
-                )
+                ).copy(notices = prepared.notices)
             } finally {
                 if (deathRecipientLinked) {
                     runCatching {

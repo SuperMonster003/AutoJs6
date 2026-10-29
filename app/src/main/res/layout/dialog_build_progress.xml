@@ -179,5 +179,16 @@
             android:ellipsize="middle"
             android:textSize="@dimen/build_progress_icon_text_size"
             tools:text="@string/text_content" />
+
+        <TextView
+            android:id="@+id/text_state_notices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:lineSpacingMultiplier="1.2"
+            android:textSize="@dimen/build_progress_icon_text_size"
+            android:visibility="gone"
+            tools:text="@string/text_content"
+            tools:visibility="visible" />
     </LinearLayout>
 </LinearLayout>

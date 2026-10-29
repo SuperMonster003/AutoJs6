@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">找不到模組 \'%1$s\': 此應用程式打包時沒有帶上函式庫 \"%3$s\", 本裝置上外掛 \"%2$s\" 中的該函式庫已關閉. 請用 AutoJs6 重新打包, 或在外掛中開啟該函式庫.</string>
+    <string name="error_script_module_packaged_not_included">找不到模組 \'%1$s\': 此應用程式打包時沒有帶上函式庫 \"%3$s\". 請用 AutoJs6 重新打包 (模組為動態載入時, 在 \"支援庫\" 中勾選 \"%2$s\"), 或在本裝置安裝外掛 \"%2$s\".</string>
     <string name="error_script_module_plugin_disabled">找不到模組 \'%1$s\': 提供它的外掛 \"%2$s\" 已停用. 請在 AutoJs6 > 外掛中心 啟用該外掛.</string>
     <string name="error_script_module_plugin_incompatible">找不到模組 \'%1$s\': 目前版本的 AutoJs6 無法讀取已安裝的外掛 \"%2$s\". 請更新 AutoJs6 或該外掛.</string>
     <string name="error_script_module_plugin_library_disabled">找不到模組 \'%1$s\': 函式庫 \"%3$s\" 已在外掛 \"%2$s\" 中關閉. 請在 AutoJs6 > 外掛中心 > %2$s 中開啟.</string>
     <string name="error_script_module_plugin_not_authorized">找不到模組 \'%1$s\': 提供它的外掛 \"%2$s\" 未獲授權. 請在 AutoJs6 > 外掛中心 授權該外掛.</string>
     <string name="error_script_module_plugin_not_installed">找不到模組 \'%1$s\': 它由官方外掛 \"%2$s\" 提供, 該外掛尚未安裝. 請在 AutoJs6 > 外掛中心 安裝該外掛.</string>
+    <string name="text_apk_build_script_modules_packaged">已從外掛 \"%1$s\" 打包的函式庫: %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">未打包的函式庫: %2$s. 目前版本的 AutoJs6 無法讀取已安裝的外掛 \"%1$s\". 請更新 AutoJs6 或該外掛後重新打包.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">未打包的函式庫: %2$s. 這些函式庫已在外掛 \"%1$s\" 中關閉. 請在 AutoJs6 > 外掛中心 > %1$s 中開啟後重新打包.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">未打包的函式庫: %2$s. 外掛 \"%1$s\" 未獲授權. 請在 AutoJs6 > 外掛中心 授權後重新打包.</string>
+    <string name="warning_apk_build_script_modules_not_installed">未打包的函式庫: %2$s. 外掛 \"%1$s\" 尚未安裝. 請在 AutoJs6 > 外掛中心 安裝後重新打包.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">未打包的函式庫: %2$s. 外掛 \"%1$s\" 已停用. 請在 AutoJs6 > 外掛中心 啟用後重新打包.</string>
 </resources>

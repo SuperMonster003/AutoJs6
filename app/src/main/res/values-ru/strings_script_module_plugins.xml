@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">Не удается найти модуль \'%1$s\': приложение упаковано без библиотеки \"%3$s\", а в плагине \"%2$s\" на этом устройстве она отключена. Упакуйте приложение заново в AutoJs6 или включите библиотеку в плагине.</string>
+    <string name="error_script_module_packaged_not_included">Не удается найти модуль \'%1$s\': приложение упаковано без библиотеки \"%3$s\". Упакуйте приложение заново в AutoJs6 (если модуль загружается динамически, выберите \"%2$s\" в разделе \"Библиотеки\") или установите плагин \"%2$s\" на это устройство.</string>
     <string name="error_script_module_plugin_disabled">Не удается найти модуль \'%1$s\': плагин \"%2$s\", который его предоставляет, отключен. Включите плагин в AutoJs6 > Центр плагинов.</string>
     <string name="error_script_module_plugin_incompatible">Не удается найти модуль \'%1$s\': эта версия AutoJs6 не может прочитать установленный плагин \"%2$s\". Обновите AutoJs6 или плагин.</string>
     <string name="error_script_module_plugin_library_disabled">Не удается найти модуль \'%1$s\': библиотека \"%3$s\" отключена в плагине \"%2$s\". Включите ее в AutoJs6 > Центр плагинов > %2$s.</string>
     <string name="error_script_module_plugin_not_authorized">Не удается найти модуль \'%1$s\': плагин \"%2$s\", который его предоставляет, не авторизован. Авторизуйте плагин в AutoJs6 > Центр плагинов.</string>
     <string name="error_script_module_plugin_not_installed">Не удается найти модуль \'%1$s\': его предоставляет официальный плагин \"%2$s\", который не установлен. Установите плагин в AutoJs6 > Центр плагинов.</string>
+    <string name="text_apk_build_script_modules_packaged">Библиотеки, упакованные из плагина \"%1$s\": %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">Библиотеки не упакованы: %2$s. Эта версия AutoJs6 не может прочитать установленный плагин \"%1$s\". Обновите AutoJs6 или плагин и соберите приложение снова.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">Библиотеки не упакованы: %2$s. Они отключены в плагине \"%1$s\". Включите их в AutoJs6 > Центр плагинов > %1$s и соберите приложение снова.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">Библиотеки не упакованы: %2$s. Плагин \"%1$s\" не авторизован. Авторизуйте его в AutoJs6 > Центр плагинов и соберите приложение снова.</string>
+    <string name="warning_apk_build_script_modules_not_installed">Библиотеки не упакованы: %2$s. Плагин \"%1$s\" не установлен. Установите его в AutoJs6 > Центр плагинов и соберите приложение снова.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">Библиотеки не упакованы: %2$s. Плагин \"%1$s\" отключен. Включите его в AutoJs6 > Центр плагинов и соберите приложение снова.</string>
 </resources>

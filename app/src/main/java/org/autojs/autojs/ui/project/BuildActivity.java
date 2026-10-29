@@ -283,6 +283,7 @@ public class BuildActivity extends BaseActivity {
     private TextView mProgressCleanDurationText;
     private TextView mStateTitleText;
     private TextView mStateContentText;
+    private TextView mStateNoticesText;
     private final EnumMap<BuildStep, Long> mStepDurationMs = new EnumMap<>(BuildStep.class);
     @Nullable
     private BuildStep mCurrentTimingStep;
@@ -294,6 +295,9 @@ public class BuildActivity extends BaseActivity {
     private final AtomicBoolean mBuildCancelled = new AtomicBoolean(false);
     private final Object mBuildCompletionLock = new Object();
     private boolean mBuildSuccessCommitted;
+    // The Bundled Libraries modules packaged or missing, shown when the build succeeds (roadmap P7.1, Q186).
+    // zh-CN: 已打包或缺少的 Bundled Libraries 模块, 构建成功时显示 (ROADMAP P7.1, Q186).
+    private List<String> mBuildNotices = Collections.emptyList();
     @Nullable
     private File mBuildWorkspace;
     @Nullable
@@ -2468,6 +2472,7 @@ public class BuildActivity extends BaseActivity {
         synchronized (mBuildCompletionLock) {
             mBuildCancelled.set(false);
             mBuildSuccessCommitted = false;
+            mBuildNotices = Collections.emptyList();
             mBuildWorkspace = buildPath;
             mBuildOutputApk = outApk;
             mBuildOutputApkBackup = outApkBackup;
@@ -2689,6 +2694,7 @@ public class BuildActivity extends BaseActivity {
                     return false;
                 }
                 commitRemoteProjectConfigIfNeeded(projectConfig, remoteOutcome.getUpdatedProjectConfigJson());
+                mBuildNotices = remoteOutcome.getNotices();
                 mBuildSuccessCommitted = true;
             }
             runOnUiThread(() -> updateProgressDialog(BuildStep.FINISHED));
@@ -2845,6 +2851,7 @@ public class BuildActivity extends BaseActivity {
         mProgressCleanDurationText = contentView.findViewById(R.id.text_clean_duration);
         mStateTitleText = contentView.findViewById(R.id.text_state_title);
         mStateContentText = contentView.findViewById(R.id.text_state_content);
+        mStateNoticesText = contentView.findViewById(R.id.text_state_notices);
         resetStepDurations();
         applyThemeColorIcons(mProgressPrepareIcon, mProgressBuildIcon, mProgressSignIcon, mProgressCleanIcon);
         mProgressDialog = new MaterialDialog.Builder(this)
@@ -3125,6 +3132,7 @@ public class BuildActivity extends BaseActivity {
         mProgressCleanDurationText = null;
         mStateTitleText = null;
         mStateContentText = null;
+        mStateNoticesText = null;
         resetStepDurations();
     }
 
@@ -3153,6 +3161,10 @@ public class BuildActivity extends BaseActivity {
             mProgressDialog.setTitle(R.string.text_build_succeeded);
             mStateTitleText.setText(getString(R.string.text_property_colon, getString(R.string.text_built_apk_file_path)));
             mStateContentText.setText(outApk.getPath());
+            if (mStateNoticesText != null && !mBuildNotices.isEmpty()) {
+                mStateNoticesText.setText(String.join("\n\n", mBuildNotices));
+                mStateNoticesText.setVisibility(View.VISIBLE);
+            }
             var positiveButton = mProgressDialog.getActionButton(DialogAction.POSITIVE);
             positiveButton.setEnabled(true);
             positiveButton.setText(getString(R.string.text_install));

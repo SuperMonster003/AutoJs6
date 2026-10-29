@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="error_script_module_packaged_library_disabled">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 이 앱은 라이브러리 \"%3$s\" 없이 패키징되었고, 이 기기의 플러그인 \"%2$s\" 에서 해당 라이브러리가 꺼져 있습니다. AutoJs6 로 앱을 다시 패키징하거나 플러그인에서 라이브러리를 켜세요.</string>
+    <string name="error_script_module_packaged_not_included">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 이 앱은 라이브러리 \"%3$s\" 없이 패키징되었습니다. AutoJs6 로 앱을 다시 패키징하거나 (모듈을 동적으로 불러오는 경우 \"라이브러리\" 에서 \"%2$s\" 선택), 이 기기에 플러그인 \"%2$s\" 을(를) 설치하세요.</string>
     <string name="error_script_module_plugin_disabled">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 이를 제공하는 플러그인 \"%2$s\" 이(가) 비활성화되어 있습니다. AutoJs6 > 플러그인 센터 에서 플러그인을 활성화하세요.</string>
     <string name="error_script_module_plugin_incompatible">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 설치된 플러그인 \"%2$s\" 을(를) 이 버전의 AutoJs6 에서 읽을 수 없습니다. AutoJs6 또는 플러그인을 업데이트하세요.</string>
     <string name="error_script_module_plugin_library_disabled">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 라이브러리 \"%3$s\" 이(가) 플러그인 \"%2$s\" 에서 꺼져 있습니다. AutoJs6 > 플러그인 센터 > %2$s 에서 켜세요.</string>
     <string name="error_script_module_plugin_not_authorized">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 이를 제공하는 플러그인 \"%2$s\" 이(가) 승인되지 않았습니다. AutoJs6 > 플러그인 센터 에서 플러그인을 승인하세요.</string>
     <string name="error_script_module_plugin_not_installed">모듈 \'%1$s\' 을(를) 찾을 수 없습니다: 공식 플러그인 \"%2$s\" 이(가) 제공하지만 설치되어 있지 않습니다. AutoJs6 > 플러그인 센터 에서 플러그인을 설치하세요.</string>
+    <string name="text_apk_build_script_modules_packaged">플러그인 \"%1$s\" 에서 패키징한 라이브러리: %2$s.</string>
+    <string name="warning_apk_build_script_modules_incompatible">패키징되지 않은 라이브러리: %2$s. 이 버전의 AutoJs6 에서 설치된 플러그인 \"%1$s\" 을(를) 읽을 수 없습니다. AutoJs6 또는 플러그인을 업데이트한 후 다시 빌드하세요.</string>
+    <string name="warning_apk_build_script_modules_library_disabled">패키징되지 않은 라이브러리: %2$s. 이 라이브러리들은 플러그인 \"%1$s\" 에서 꺼져 있습니다. AutoJs6 > 플러그인 센터 > %1$s 에서 켠 후 다시 빌드하세요.</string>
+    <string name="warning_apk_build_script_modules_not_authorized">패키징되지 않은 라이브러리: %2$s. 플러그인 \"%1$s\" 이(가) 승인되지 않았습니다. AutoJs6 > 플러그인 센터 에서 승인한 후 다시 빌드하세요.</string>
+    <string name="warning_apk_build_script_modules_not_installed">패키징되지 않은 라이브러리: %2$s. 플러그인 \"%1$s\" 이(가) 설치되어 있지 않습니다. AutoJs6 > 플러그인 센터 에서 설치한 후 다시 빌드하세요.</string>
+    <string name="warning_apk_build_script_modules_plugin_disabled">패키징되지 않은 라이브러리: %2$s. 플러그인 \"%1$s\" 이(가) 비활성화되어 있습니다. AutoJs6 > 플러그인 센터 에서 활성화한 후 다시 빌드하세요.</string>
 </resources>

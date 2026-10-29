@@ -317,6 +317,7 @@ constructor(
         MLKIT_BARCODE(ApkBuildLibrary.MLKIT_BARCODE),
         MEDIA_INFO(ApkBuildLibrary.MEDIA_INFO),
         IMAGE_QUANT(ApkBuildLibrary.IMAGE_QUANT),
+        BUNDLED_LIBRARIES(ApkBuildLibrary.BUNDLED_LIBRARIES),
         ;
 
         @JvmField
