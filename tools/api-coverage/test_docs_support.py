@@ -29,6 +29,7 @@ MATRIX = {'schema': 'autojs6-runtime-matrix-v1', 'dataSource': {'kind': 'ksp'}, 
 STUB = '''
 const report = {matrix: process.argv[5], dataSource: "ksp", mode: "check", problems: [], uncovered: ["global"],
   pages: [{page: "api/demo.md", status: "current", roots: ["demo"], rows: Number(process.env.STUB_ROWS), differences: 0, line: 3}]};
+if (process.env.STUB_PROBLEM) { report.pages.push({page: "api/notes.md", status: "problem"}); report.problems.push("api/notes.md: line 3: malformed runtime-support marker"); }
 if (process.env.STUB_EXIT) { console.error("boom"); process.exit(Number(process.env.STUB_EXIT)); }
 console.log(JSON.stringify(report));
 '''
@@ -98,6 +99,14 @@ class CheckTest(unittest.TestCase):
         self.stub(3)
         _, failures = docs_support.check(self.root, self.matrix)
         self.assertEqual(failures, ['Documentation runtime support: api/demo.md shows 3 rows, the matrix has 4 for demo'])
+
+    def test_problem_page_without_counts(self):
+        self.stub(4)
+        os.environ['STUB_PROBLEM'] = '1'
+        self.addCleanup(os.environ.pop, 'STUB_PROBLEM', None)
+        summary, failures = docs_support.check(self.root, self.matrix)
+        self.assertEqual(failures, ['Documentation runtime support: api/notes.md: line 3: malformed runtime-support marker'])
+        self.assertEqual(summary['rows'], 4)
 
     def test_generator_error_fails(self):
         self.stub(4, exit_code=2)
