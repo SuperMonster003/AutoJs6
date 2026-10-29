@@ -2,7 +2,6 @@ package org.autojs.autojs.ui.explorer
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.Bitmap
 import android.os.SystemClock
@@ -18,7 +17,7 @@ import org.autojs.autojs.core.plugin.explorer.ExplorerSurface
 import org.autojs.autojs.core.plugin.explorer.ResolvedExplorerAction
 import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.model.explorer.ExplorerItem
-import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.main.ResumedMainActivity
 import org.autojs.autojs.util.FileUtils
 import org.autojs.plugin.explorer.api.ExplorerActionProtocol
 import org.autojs.plugin.explorer.api.ExplorerActionValues
@@ -100,9 +99,7 @@ class ExplorerM3uPlaylistInstrumentationTest {
 
     private fun checkPluginCenterDestination(label: String, packageName: String) {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val activity = instrumentation.startActivitySync(
-            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        ) as MainActivity
+        val activity = ResumedMainActivity.launch()
         val monitor = instrumentation.addMonitor(PluginCenterActivity::class.java.name, null, false)
         try {
             instrumentation.runOnMainSync {

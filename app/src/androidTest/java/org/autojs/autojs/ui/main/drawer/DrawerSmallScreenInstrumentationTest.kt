@@ -1,6 +1,5 @@
 package org.autojs.autojs.ui.main.drawer
 
-import android.content.Intent
 import android.graphics.Rect
 import android.os.SystemClock
 import android.view.Gravity
@@ -10,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.main.ResumedMainActivity
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -101,9 +101,7 @@ class DrawerSmallScreenInstrumentationTest {
     }
 
     private fun withDrawer(block: (MainActivity, DrawerLayout) -> Unit) {
-        val activity = instrumentation.startActivitySync(
-            Intent(instrumentation.targetContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        ) as MainActivity
+        val activity = ResumedMainActivity.launch()
         try {
             val drawerLayout = onMain { activity.findViewById<DrawerLayout>(R.id.drawer_layout) }
             awaitLayout(drawerLayout) { drawerLayout.width > 0 }

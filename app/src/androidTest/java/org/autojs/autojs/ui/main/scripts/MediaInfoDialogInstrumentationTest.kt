@@ -19,6 +19,7 @@ import org.autojs.autojs.model.explorer.ExplorerFileItem
 import org.autojs.autojs.script.JavaScriptFileSource
 import org.autojs.autojs.ui.log.LogActivity
 import org.autojs.autojs.ui.main.MainActivity
+import org.autojs.autojs.ui.main.ResumedMainActivity
 import org.autojs.autojs.util.ViewUtils
 import org.autojs.autojs6.R
 import org.junit.Assert.assertEquals
@@ -67,10 +68,7 @@ class MediaInfoDialogInstrumentationTest {
                 ViewUtils.isNightModeEnabled = night
                 ViewUtils.setDefaultNightMode(if (night) ViewUtils.MODE.NIGHT else ViewUtils.MODE.DAY)
             }
-            main = instrumentation.startActivitySync(
-                Intent(context, MainActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
-            ) as MainActivity
+            main = ResumedMainActivity.launch(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             captureScriptIfRequested(night)
             instrumentation.runOnMainSync {
                 MediaInfoDialogManager.showMediaInfoDialog(main, ExplorerFileItem(source, null)) {
