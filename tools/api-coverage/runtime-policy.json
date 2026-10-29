@@ -15,11 +15,12 @@
       "cvt": ["converter"],
       "fmt": ["formatter"],
       "notice": ["notifications"],
+      "powerManager": ["power_manager"],
       "storages": ["storage"],
       "timers": ["tasks"],
-      "workManager": ["work_manager"]
+      "workManager": ["work_manager", "tasks"]
     },
-    "globalModules": ["autojs6:screen_metrics", "autojs6:compat", "autojs6:global"],
+    "globalModules": ["autojs6:screen_metrics", "autojs6:compat", "autojs6:global", "autojs6:system"],
     "compatModule": "autojs6:compat",
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",
@@ -306,6 +307,15 @@
       "status": "not-portable", "reason": "runtime-native",
       "equivalent": "global setTimeout / setInterval / setImmediate and their clear functions",
       "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
+    },
+    {
+      "id": "native-memory-watch",
+      "match": ["memory.watch"],
+      "columns": ["node_main", "node_worker"],
+      "status": "not-portable", "reason": "runtime-native",
+      "equivalent": "FinalizationRegistry (a callback once the object is collected), node:v8 writeHeapSnapshot / getHeapStatistics",
+      "note": "memory.watch hands a Rhino object to the host leak watcher; objects of the plugin's V8 heap are not host objects (memory.snapshot / collect / retained / dumpHeap are bridged)",
+      "source": "appendix D D-22, maintainer 2026-10-29 (Q134 (a))"
     },
     {
       "id": "native-crypto",

@@ -647,21 +647,50 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual((rows['http.client']['bun']['rule'], rows['http.client']['bun']['reason']), ('http-java-objects', 'java-prototype'))
         self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
         self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
-        # The groups the maintainer kept pending for P3 / P4 (app.launchDual came with P3.1a, test_p3_1a).
-        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'keepAlive', 'ui.layout']:
+        # The groups the maintainer kept pending for P3 / P4 (app.launchDual came with P3.1a, test_p3_1a; engines.execScript
+        # in Workers with P3.1b, test_p3_1b).
+        for name in ['auto.waitFor', 'threads.start', 'keepAlive', 'ui.layout']:
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
 
     def test_p3_1a(self):
         # The app and shell family: app from one factory in both threads (Workers gain app), the D-4 dual-user helpers on
         # the module and the global object, the shell / shizuku members with the Q18 prototype rows, the global key
-        # functions and the ShellProcess members; app.autojs follows the autojs module of P3.1b (Q93 (2)).
+        # functions and the ShellProcess members; app.autojs came with the autojs module of P3.1b (Q93 (2), test_p3_1b).
         rows = {row['id']: row for row in self.matrix['rows']}
         for name in ['app.launchDual', 'launchDual', 'app.getInstalledPackages', 'shell.execCommand', 'shizuku.isRunning', 'Home', 'ShellProcess#getInputStream']:
             for column in ['node_main', 'node_worker']:
                 self.assertEqual(rows[name][column]['status'], 'bridged', (name, column))
         self.assertEqual((rows['app.launchDual']['node_worker']['module'], rows['Home']['node_worker']['module']), ('autojs6:app', 'autojs6:shell'))
-        self.assertEqual(rows['app.autojs']['node_main']['status'], 'pending')
+        self.assertEqual(rows['app.autojs']['node_main']['status'], 'bridged')
+
+    def test_p3_1b(self):
+        # The system information & engines family: the autojs6: modules of the shared system factory in both threads, the
+        # global system functions through the autojs6:system global module, powerManager / workManager through module
+        # aliases (power_manager, tasks), the notice extras, plugins.extend* / tools, the host view of engines (Q131 (a)),
+        # dialogs.build (Q132 (a)); memory.watch is runtime-native (Q134 (a), D-22).
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status, module, via in [
+                ('autojs.getRootMode', 'bridged', 'autojs6:autojs', 'same-name'), ('autojs.version.isAtLeast', 'bridged', 'autojs6:autojs', 'same-name'),
+                ('R', 'bridged', 'autojs6:autojs', 'owner-module'), ('app.autojs', 'bridged', 'autojs6:app', 'same-name'),
+                ('installer.session', 'bridged', 'autojs6:installer', 'same-name'), ('memory.collect', 'bridged', 'autojs6:memory', 'same-name'),
+                ('settings.export', 'bridged', 'autojs6:settings', 'same-name'), ('sysprops.getAll', 'bridged', 'autojs6:sysprops', 'same-name'),
+                ('powerManager.isIgnoringBatteryOptimizations', 'bridged', 'autojs6:power_manager', 'module-alias'),
+                ('workManager.addDailyTask', 'bridged', 'autojs6:tasks', 'module-alias'),
+                ('notice.channel.create', 'bridged', 'autojs6:notifications', 'module-alias'),
+                ('currentPackage', 'bridged', 'autojs6:system', 'global-module'), ('waitForActivity', 'bridged', 'autojs6:system', 'global-module'),
+                ('isAutoJs6', 'bridged', 'autojs6:system', 'global-module'), ('engines.execScript', 'bridged', 'engines', 'same-name'),
+                ('engines.execAutoFile', 'bridged', 'engines', 'same-name'), ('dialogs.build', 'bridged', 'autojs6:dialogs', 'same-name'),
+                # plugins stays a local module (HOST-API section 4); extend* use the shared jsox, tools the host routes.
+                ('plugins.extendAllBut', 'local-shim', 'plugins', 'same-name'), ('plugins.tools.callAsync', 'local-shim', 'plugins', 'same-name')]:
+            for column in ['node_main', 'node_worker']:
+                cell = rows[name][column]
+                self.assertEqual((cell['status'], cell['module'], cell['via']), (status, module, via), (name, column))
+        # Rhino getClip / setClip: autojs6:compat on the main thread, autojs6:system in Workers.
+        self.assertEqual((rows['getClip']['node_main']['module'], rows['getClip']['node_worker']['module']), ('autojs6:compat', 'autojs6:system'))
+        for column in ['node_main', 'node_worker']:
+            self.assertEqual((rows['memory.watch'][column]['status'], rows['memory.watch'][column]['reason']), ('not-portable', 'runtime-native'))
+        self.assertEqual(rows['plugins.load']['node_worker']['status'], 'not-portable')
 
     def test_p3_2a(self):
         # The shared JS tools core: local-shim on the main thread and in Workers, global data functions through autojs6:global.

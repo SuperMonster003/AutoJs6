@@ -68,7 +68,7 @@ for (const member of exported.returnedObject('ShellProcess').members) {
 }
 
 // Workers build app from the shared factory and list its members.
-assert(/function __autojs6_worker_host_modules\([^)]*, createApp\)/.test(source), 'Worker host modules take createApp');
+assert(/function __autojs6_worker_host_modules\([^)]*, createApp[,)]/.test(source), 'Worker host modules take createApp');
 assert(source.includes('__autojs6_create_app.toString()'), 'Worker preload receives the app factory');
 assert(source.includes('app:Object.keys(__autojs6_limited_app())'), 'Worker table entry app');
 assert(source.includes('appMissing:__autojs6_bridge_missing_capabilities('), 'Worker app capability constants');
