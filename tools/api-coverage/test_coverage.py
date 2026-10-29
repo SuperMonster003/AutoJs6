@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from check import documentation_rows, public_queries
+from check import deferred_names, documentation_rows, public_queries, query_roots
 from extract_exports import end_group, entries, extract_kotlin, function_assignment_is_supported, initializer_tail_is_supported, mail_forwarded_names, masked
 
 
@@ -226,6 +226,22 @@ class CoverageTests(unittest.TestCase):
         self.assertNotIn("ui.__bridge", result)
         self.assertIn("$power_manager", result)
         self.assertIn("threads.disposable.().blockedGet", result)
+
+    def test_deferred_name_gate_counts_gaps_and_stale_entries_fail(self):
+        # Q115 (a): a deferred module root keeps its gaps out of the failures, and fails once it has none.
+        baseline = {"records": [{"api": "imgui.begin", "module": "imgui", "ownerModule": "imgui"}, {"api": "app.launch", "module": "app", "ownerModule": "app"}],
+                    "modules": [{"module": "imgui", "aliases": ["imgui", "$imgui"]}, {"module": "app", "aliases": ["app"]}]}
+        self.assertEqual({"imgui": "imgui", "$imgui": "imgui"}, query_roots(baseline, {"imgui": "later"}))
+        policy = {"deferredNameGate": {"imgui": "later"}}
+        documented = [{"api": "imgui.begin", "status": "missing"}, {"api": "app.launch", "status": "heading"}]
+        surfaces = {"deferred": [{"api": "imgui.begin"}, {"api": "$imgui"}]}
+        report, failures = deferred_names(baseline, documented, surfaces, policy)
+        self.assertEqual([], failures)
+        self.assertEqual({"note": "later", "exports": 1, "missingDocumentation": 1, "failingPaths": 2}, report["imgui"])
+        _, failures = deferred_names(baseline, [{"api": "imgui.begin", "status": "heading"}], {}, policy)
+        self.assertIn("Ace cover the module root", failures[0])
+        _, failures = deferred_names(baseline, documented, surfaces, {"deferredNameGate": {"gone": "later"}})
+        self.assertIn("no exports under the module root", failures[0])
 
 
 if __name__ == "__main__":

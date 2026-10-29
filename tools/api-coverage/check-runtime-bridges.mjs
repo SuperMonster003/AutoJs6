@@ -36,6 +36,8 @@ const create = new Function('__autojs6_call_autojs', '__autojs6_invalid_arg_type
   const __autojs6_rhino_compat_request_screen_capture = () => { throw Error('Screen capture is not exercised by this structural check'); };
   const __autojs6_rhino_compat_stop_screen_capture = __autojs6_rhino_compat_request_screen_capture;
   const __autojs6_has_own = (object,name) => Object.prototype.hasOwnProperty.call(object,name);
+  // The recorder facade adds its audio members to the shared JS tools core's timing recorder (P3.2b), checked by check-runtime-js-tools.
+  const __autojs6_js_tools = () => ({recorder: {}});
   ${segment('  const __autojs6_opencc_methods =','  const __autojs6_pinyin_styles =')}
   ${segment('  const __autojs6_pinyin_styles =','  // Shared JS tools core.')}
   ${segment('  function __autojs6_limited_image(moduleName)','  function __autojs6_ocr_bridge_options(')}

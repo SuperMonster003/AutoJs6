@@ -232,7 +232,7 @@
   "exclusions": [
     {
       "id": "internal-exports",
-      "match": ["__autojs6Tsx", "__autojs6TsxFragment", "ui.__autojs6Tsx", "ui.__autojs6TsxFragment", "events.__asEmitter__", "http.__okhttp__", "ui.__inflate__", "ui.__widgets__", "toString"],
+      "match": ["__autojs6Tsx", "__autojs6TsxFragment", "ui.__autojs6Tsx", "ui.__autojs6TsxFragment", "events.__asEmitter__", "http.__okhttp__", "ui.__inflate__", "ui.__widgets__", "imgui.__pluginId", "toString"],
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "rhino-only",
       "note": "policy.json internalExports / standardExports: compiler or Rhino internals, not script APIs (Q13)",
@@ -246,6 +246,15 @@
       "equivalent": "java module handles (java.create / java.callInstance / java.callStatic)",
       "override": true,
       "source": "appendix D D-11, maintainer 2026-10-29 (P1.4 question 5); override since P3.2a: the global isJavaClass / isJavaPackage placements stay excluded as decided although the owner module species covers them on Node"
+    },
+    {
+      "id": "java-introspection",
+      "match": ["util.class", "util.className", "util.getClassName"],
+      "columns": ["node_main", "node_worker", "bun"],
+      "status": "not-portable", "reason": "java-prototype",
+      "equivalent": "java module handles (java.callInstance(handle, \"getClass\"))",
+      "note": "util prototype members (Q18) that read the Java class of a Rhino-wrapped Java object; Node / Bun values are not Java objects",
+      "source": "appendix D D-11, maintainer 2026-10-29 22:4x (Q118 (a), Q54 (b) candidates)"
     },
     {
       "id": "java-prototype-objects",

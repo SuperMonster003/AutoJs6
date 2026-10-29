@@ -575,6 +575,30 @@ class PendingBaselineTest(unittest.TestCase):
             kotlin['dataSource'] = {'kind': 'kotlin'}
             self.assertEqual(compare_pending_baseline(kotlin, path)[0], 'skipped')
 
+    def test_decisions_are_kept_and_added_once(self):
+        result = matrix(policy=valid_policy())
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / 'pending-baseline.json'
+            self.assertEqual(write_pending_baseline(result, path, decisions=['Q1: first']), [])
+            self.assertEqual(write_pending_baseline(result, path, allow_new=True, decisions=['Q2: second', 'Q1: first', 'Q2: second']), [])
+            self.assertEqual(write_pending_baseline(result, path), [])
+            self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['decisions'], ['Q1: first', 'Q2: second'])
+
+
+class DeferredNameGateTest(unittest.TestCase):
+    """policy.json deferredNameGate (Q115 (a)): the matrix counts the deferred root's rows and MATRIX.md names the decision."""
+
+    def test_summary_and_markdown(self):
+        result = build(copy.deepcopy(EXPORTS), valid_policy(), dict(POLICY_JSON, deferredNameGate={'flow': 'Q0: later'}), NODE_SURFACES, BUN_SURFACES,
+                       parse_host_api(HOST_API), WORKER, None, documentation(), surfaces())
+        # A global placement counts under its owner module, as in the documentation gate.
+        rows = sum((row['module'] or row['ownerModule']).split('.')[0] == 'flow' for row in result['rows'] if row['kind'] == 'export')
+        self.assertEqual(rows, 2)
+        self.assertEqual(result['summary']['deferredNameGate'], {'flow': {'rows': rows, 'note': 'Q0: later'}})
+        self.assertIn(f'名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): flow {rows} 行 (Q0: later).',
+                      render_markdown(result))
+        self.assertNotIn('名称门禁暂缓', render_markdown(matrix(policy=valid_policy())))
+
 @unittest.skipUnless(NODE.is_dir() and BUN.is_dir() and ACE.is_dir() and shutil.which('node'), 'Node, Bun and Ace checkouts are required')
 class RepositoryTest(unittest.TestCase):
     """The matrix over the real runtime repositories: one row per export, Codex batch modules fully covered."""
@@ -646,8 +670,8 @@ class RepositoryTest(unittest.TestCase):
             for column in ['node_main', 'node_worker']:
                 self.assertEqual(rows[name][column]['status'], 'local-shim', (name, column))
         self.assertEqual((rows['Mathx.sum']['node_worker']['module'], rows['random']['node_worker']['module']), ('jsox.mathx', 'autojs6:global'))
-        # Q61 (b) came with P3.2b (test_p3_2b); Q54 (b) stays pending.
-        self.assertEqual(rows['util.class']['node_main']['status'], 'pending')
+        # Q61 (b) came with P3.2b (test_p3_2b); the Java introspection members are excluded by Q118 (a) (D-11).
+        self.assertEqual((rows['util.class']['node_main']['status'], rows['util.class']['node_main']['rule']), ('not-portable', 'java-introspection'))
 
     def test_p3_2b(self):
         # The files and data family: colors / Color, files (with open) and mime in the shared JS tools core, zip, recorder,
@@ -681,9 +705,21 @@ class RepositoryTest(unittest.TestCase):
                                          ('mediainfo.get', 'capability-gated', 'mediainfo.control'), ('EpubBook#toString', 'capability-gated', 'epub.control')]:
             self.assertEqual((rows[name]['bun']['status'], rows[name]['bun'].get('capability')), (status, capability), name)
         self.assertEqual({rows[name]['bun']['via'] for name in ['Color#argb', 'Zip#addFile', 'Storage#size']}, {'handle-type'})
-        # Q80 / Q81 / Q82 (a): host bridge modules in P4.5; Q54 (b) stays pending.
-        for name in ['colors.theme.get', 'gallery.pick', 'files.batchRename.plan', 'util.class']:
+        # Q80 / Q81 / Q82 (a): host bridge modules in P4.5; util.class is excluded by Q118 (a).
+        for name in ['colors.theme.get', 'gallery.pick', 'files.batchRename.plan']:
             self.assertEqual(rows[name]['bun']['status'], 'pending', name)
+        self.assertEqual(rows['util.class']['bun']['status'], 'not-portable')
+
+    def test_p5_2f1(self):
+        # Q122 - Q124: the host imgui module is in the denominator, pending in every runtime column except the internal __pluginId.
+        rows = {row['id']: row for row in self.matrix['rows'] if row['kind'] == 'export' and row['module'].split('.')[0] == 'imgui'}
+        if not rows:
+            self.skipTest('the imgui installs come from the KSP metadata')
+        self.assertEqual(rows['imgui.__pluginId']['node_main'].get('rule'), 'internal-exports')
+        public = [row for name, row in rows.items() if name != 'imgui.__pluginId']
+        for column in ['node_main', 'node_worker', 'bun']:
+            self.assertEqual({row[column]['status'] for row in public}, {'pending'}, column)
+        self.assertEqual(self.matrix['summary']['deferredNameGate']['imgui']['rows'], len(rows))
 
     def test_p2_3(self):
         # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.

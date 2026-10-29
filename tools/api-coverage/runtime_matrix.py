@@ -519,7 +519,11 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
                     'returnedObjectsInput': 'returnedObjects' in exports, 'byColumn': by_column,
                     'pending': {column: by_column[column]['pending'] for column in RUNTIME_COLUMNS},
                     'rejects': {column: sum(bool(row[column].get('rejects')) for row in rows) for column in RUNTIME_COLUMNS},
-                    'missingReasons': missing_reasons(rows), 'missingCapabilities': missing_capabilities(rows), 'policyConflicts': conflicts},
+                    'missingReasons': missing_reasons(rows), 'missingCapabilities': missing_capabilities(rows), 'policyConflicts': conflicts,
+                    # policy.json deferredNameGate (Q115 (a)): doc / dts / ace gaps of these module roots do not fail check.py yet.
+                    'deferredNameGate': {root: {'rows': sum((row['module'] or row['ownerModule'] or 'global').split('.')[0] == root
+                                                            for row in rows if row['kind'] != 'returned-member'), 'note': note}
+                                         for root, note in sorted(policy_json.get('deferredNameGate', {}).items())}},
         'rows': rows,
     }
 
@@ -576,6 +580,10 @@ def render_markdown(matrix):
     lines += ['', '拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): '
               + ' / '.join(f'{COLUMN_TITLES[column]} {rejects.get(column, 0)}' for column in RUNTIME_COLUMNS)
               + '. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.']
+    deferred = summary.get('deferredNameGate', {})
+    if deferred:
+        lines += ['', '名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): '
+                  + '; '.join(f"{root} {item['rows']} 行 ({item['note']})" for root, item in deferred.items()) + '.']
     lines += ['', '## 排除规则', '', '| 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |', '|---|---|---:|---:|---:|---|']
     policy_rows = {}
     for row in matrix['rows']:
@@ -681,12 +689,13 @@ def pending_cells(matrix):
     return {column: sorted(row['id'] for row in matrix['rows'] if row[column]['status'] == 'pending') for column in RUNTIME_COLUMNS}
 
 
-def render_pending_baseline(matrix):
+def render_pending_baseline(matrix, decisions=()):
     kind = matrix['dataSource'].get('kind', 'kotlin')
     data = {'schema': BASELINE_SCHEMA, 'dataSource': kind,
             'note': 'Pending cells allowed by check.py --matrix (roadmap Q40 (a)): a pending cell missing here fails, and so does a listed '
                     'cell that is no longer pending; shrink with check.py --write-pending-baseline, add only with --allow-new-pending '
-                    'and a pending decision on the api-coverage board.',
+                    'and a pending decision on the api-coverage board, named in decisions (--pending-decision).',
+            'decisions': list(decisions),
             'counts': {column: len(ids) for column, ids in pending_cells(matrix).items()}, 'pending': pending_cells(matrix)}
     return json.dumps(data, ensure_ascii=False, indent=1) + '\n'
 
@@ -710,15 +719,18 @@ def compare_pending_baseline(matrix, path):
     return ('differs' if new or stale else 'current'), new, stale
 
 
-def write_pending_baseline(matrix, path, allow_new=False):
-    """Rewrite the baseline with the current pending cells; without allow_new it only shrinks (returns the refused new cells)."""
+def write_pending_baseline(matrix, path, allow_new=False, decisions=()):
+    """Rewrite the baseline with the current pending cells; without allow_new it only shrinks (returns the refused new cells).
+    The decisions that allowed earlier cells are kept, and the given ones (board id and scope) are added."""
     path = Path(path)
     if skipped_plugins(matrix):
         raise ValueError(f"{PENDING_BASELINE} is not written without the pluginExports source(s) {', '.join(skipped_plugins(matrix))}")
     state, new, _ = compare_pending_baseline(matrix, path) if path.is_file() else ('missing', [], [])
     if new and not allow_new:
         return new
-    path.write_text(render_pending_baseline(matrix), encoding='utf-8', newline='\n')
+    kept = json.loads(path.read_text(encoding='utf-8')).get('decisions', []) if path.is_file() else []
+    decisions = kept + [item for item in dict.fromkeys(decisions) if item not in kept]
+    path.write_text(render_pending_baseline(matrix, decisions), encoding='utf-8', newline='\n')
     return []
 
 

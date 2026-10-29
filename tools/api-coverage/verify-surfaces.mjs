@@ -136,11 +136,15 @@ try {
         defaults.dispose?.();
         all.dispose?.();
     }
-    const failures = rows.filter(row => row.declaration.status !== "explicit" || (!options.skipAce && (!row.aceDefault || !row.aceAllGroups || row.aceStatic === false)));
-    const report = {typescript: ts.version, count: rows.length, aceChecked: !options.skipAce, failures, rows};
+    const failing = rows.filter(row => row.declaration.status !== "explicit" || (!options.skipAce && (!row.aceDefault || !row.aceAllGroups || row.aceStatic === false)));
+    // Module roots whose documentation, d.ts and Ace wait for a decided later step (policy.json deferredNameGate, Q115 (a)).
+    const deferredRoots = new Set(baseline.deferredNameGate || []);
+    const failures = failing.filter(row => !deferredRoots.has(row.api.split(".")[0]));
+    const deferred = failing.filter(row => deferredRoots.has(row.api.split(".")[0]));
+    const report = {typescript: ts.version, count: rows.length, aceChecked: !options.skipAce, failures, deferred, rows};
     fs.mkdirSync(options.output, {recursive: true});
     fs.writeFileSync(path.join(options.output, "surfaces.json"), JSON.stringify(report, null, 2) + "\n");
-    console.log(JSON.stringify({queriedPaths: rows.length, failingPaths: failures.length, failures: failures.map(({api, declaration, aceDefault, aceAllGroups, aceStatic}) => ({api, declaration: declaration.status, aceDefault, aceAllGroups, aceStatic}))}, null, 2));
+    console.log(JSON.stringify({queriedPaths: rows.length, failingPaths: failures.length, deferredPaths: deferred.length, failures: failures.map(({api, declaration, aceDefault, aceAllGroups, aceStatic}) => ({api, declaration: declaration.status, aceDefault, aceAllGroups, aceStatic}))}, null, 2));
     if (failures.length) process.exitCode = 1;
 } finally {
     if (temp) {

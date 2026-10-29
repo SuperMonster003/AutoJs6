@@ -81,7 +81,11 @@
     "events.__asEmitter__": "Internal event-emitter augmentation bridge.",
     "http.__okhttp__": "Internal HTTP client bridge.",
     "ui.__inflate__": "Internal UI inflater bridge.",
-    "ui.__widgets__": "Internal widget registry."
+    "ui.__widgets__": "Internal widget registry.",
+    "imgui.__pluginId": "Plugin package id that lets plugins.load return the host imgui module (Q123)."
+  },
+  "deferredNameGate": {
+    "imgui": "Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定"
   },
   "standardExports": {
     "toString": "Object.toString is implicit; not a TypeScript lexical global or standalone completion target."

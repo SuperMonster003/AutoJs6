@@ -24,6 +24,13 @@ T10). `check.py` compares those names with the associated
 documentation pages, resolves their real TypeScript symbols, and queries the
 plugin's actual semantic and static completion providers.
 
+A module root listed in `policy.json` `deferredNameGate` (a decided deferral:
+`imgui` until P5.2f-2, roadmap Q115 (a)) keeps its documentation, d.ts and Ace
+gaps out of the failures. `summary.json` `deferredNameGate` counts them,
+`surfaces.json` lists the paths as `deferred` (with the module aliases, `$imgui`),
+`MATRIX.md` names the root, and the matrix columns still record the gaps. The
+entry fails as stale once its root has no gap left, or no exports.
+
 The structural checks `check-runtime-ai`, `-ai-agent`, `-bridges`, `-epub`, `-mail`,
 `-speech` and `-tts` (`.mjs`) take the host's registered names from the `exports.json`
 of the same `check.py` run (`host-exports.mjs`; `AUTOJS6_API_COVERAGE_EXPORTS` selects
@@ -194,7 +201,9 @@ pending cell it does not list fails (a new export, a lost runtime entry, a remov
 exclusion), and so does a listed cell that is no longer pending, until
 `--write-pending-baseline` shrinks the file. That option refuses to add cells;
 `--write-pending-baseline --allow-new-pending` writes them after they are
-registered as a pending decision on the api-coverage board. Pending counts stay
+registered as a pending decision on the api-coverage board;
+`--pending-decision "Q122: ..."` (repeatable) names that decision in the file's
+`decisions` list, which later rewrites keep. Pending counts stay
 in `summary.json` `matrix.findings`. A new exclusion goes through the same
 board first (D12). A
 `MATRIX.md` generated from another data source (ksp versus kotlin) is reported as

@@ -23,6 +23,11 @@ HERE = Path(__file__).resolve().parent
 MARKDOWN_ESCAPE = re.compile(r"\\([\\`*{}\[\]()#+\-.!_>])")
 
 
+def name_root(item):
+    """Module root the documentation gate looks pages up by: the placement module, the owner module of a global, else global."""
+    return (item["module"] or item["ownerModule"] or "global").split(".")[0]
+
+
 def documentation_rows(exports, api_root, policy):
     # The generated runtime support tables (P0.5) name APIs without documenting them.
     texts = {path.stem: MARKDOWN_ESCAPE.sub(r"\1", docs_support.strip_blocks(path.read_text(encoding="utf-8"))) for path in api_root.glob("*.md")}
@@ -30,7 +35,7 @@ def documentation_rows(exports, api_root, policy):
         raise ValueError(f"No Markdown sources under {api_root}")
     rows = []
     for item in exports:
-        root = (item["module"] or item["ownerModule"] or "global").split(".")[0]
+        root = name_root(item)
         pages = policy["documentationModules"].get(root, [root])
         pattern = re.compile(r"(?<![\w$])" + re.escape(item["member"]) + r"(?![\w$])")
         evidence = []
@@ -55,6 +60,35 @@ def public_queries(baseline, policy):
     return sorted(queries)
 
 
+def query_roots(baseline, deferred):
+    """First query segment -> deferred module root: the root itself and the aliases of its modules (`$imgui`)."""
+    roots = {root: root for root in deferred}
+    for module in baseline["modules"]:
+        root = module["module"].split(".")[0]
+        if root in deferred and "." not in module["module"]:
+            roots.update((alias, root) for alias in module["aliases"])
+    return roots
+
+
+def deferred_names(baseline, documented, surfaces, policy):
+    """Name-gate gaps under the module roots of policy.json deferredNameGate (decided deferrals, Q115 (a)) are counted, not failed.
+    An entry without exports under its root, or whose root no longer has a gap, is stale and fails."""
+    deferred = policy.get("deferredNameGate", {})
+    roots = {item["api"]: name_root(item) for item in baseline["records"]}
+    aliases = query_roots(baseline, deferred)
+    report, failures = {}, []
+    for root, note in deferred.items():
+        exports = sum(value == root for value in roots.values())
+        docs = sum(roots.get(row["api"]) == root and row["status"] == "missing" for row in documented)
+        paths = sum(aliases.get(row["api"].split(".")[0]) == root for row in surfaces.get("deferred", []))
+        report[root] = {"note": note, "exports": exports, "missingDocumentation": docs, "failingPaths": paths}
+        if not exports:
+            failures.append(f"Stale deferredNameGate entry (no exports under the module root): {root}")
+        elif not docs and not paths:
+            failures.append(f"Stale deferredNameGate entry (documentation, d.ts and Ace cover the module root): {root}; remove it from policy.json")
+    return report, failures
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", type=Path, default=HERE.parents[1])
@@ -76,6 +110,8 @@ def main():
                         help="Like --matrix, and rewrite tools/api-coverage/pending-baseline.json; refused when it would add pending cells")
     parser.add_argument("--allow-new-pending", action="store_true",
                         help="With --write-pending-baseline: also write pending cells the baseline does not list (register them as a pending decision)")
+    parser.add_argument("--pending-decision", metavar="TEXT", action="append", default=[],
+                        help="With --write-pending-baseline: add a board decision that allows new cells to the baseline's decisions (repeatable)")
     parser.add_argument("--node", type=Path, help="Node runtime checkout for --matrix (default: sibling AutoJs6-Plugin-NodeJs-Runtime)")
     parser.add_argument("--bun", type=Path, help="Bun runtime checkout for --matrix (default: sibling AutoJs6-Plugin-Bun-Runtime)")
     parser.add_argument("--docs-support", action="store_true",
@@ -106,8 +142,12 @@ def main():
                     for key in policy["dynamicRegistrations"] if key not in reviewed)
     internal = policy["internalExports"]
     documented = documentation_rows([r for r in baseline["records"] if r["api"] not in internal], docs / "api", policy)
-    failures.extend("Missing documentation name: " + r["api"] for r in documented if r["status"] == "missing")
+    deferred = policy.get("deferredNameGate", {})
+    roots = {item["api"]: name_root(item) for item in baseline["records"]}
+    failures.extend("Missing documentation name: " + r["api"] for r in documented if r["status"] == "missing" and roots[r["api"]] not in deferred)
     baseline["queries"] = public_queries(baseline, policy)
+    # verify-surfaces.mjs reports the paths under these roots as deferred instead of failing them (Q115 (a)).
+    baseline["deferredNameGate"] = sorted(query_roots(baseline, deferred))
     exports_path = output / "exports.json"
     exports_path.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (output / "documentation.json").write_text(json.dumps(documented, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -127,6 +167,9 @@ def main():
     result = subprocess.run(command, check=False)
     if result.returncode:
         failures.append("TypeScript/Ace surface checks failed; see surfaces.json")
+    surfaces_path = output / "surfaces.json"
+    deferred_summary, deferred_failures = deferred_names(baseline, documented, json.loads(surfaces_path.read_text(encoding="utf-8")) if surfaces_path.is_file() else {}, policy)
+    failures.extend(deferred_failures)
     arity_summary = arity.report(host, baseline, output)
     if args.strict_arity:
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
@@ -154,7 +197,8 @@ def main():
         matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented + returned_docs, surfaces=surfaces)
         runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
         if args.write_pending_baseline:
-            refused = runtime_matrix.write_pending_baseline(matrix, host / runtime_matrix.PENDING_BASELINE, args.allow_new_pending)
+            refused = runtime_matrix.write_pending_baseline(matrix, host / runtime_matrix.PENDING_BASELINE, args.allow_new_pending,
+                                                             args.pending_decision)
             failures.extend(f"Not written to {runtime_matrix.PENDING_BASELINE}: new pending cell {item} ({column}); "
                             "add --allow-new-pending after registering it" for column, item in refused)
         if args.matrix or args.write_matrix:
@@ -167,6 +211,7 @@ def main():
     summary = {
         "registrationRoutes": len(baseline["modules"]), "explicitExports": len(baseline["records"]),
         "documentation": dict(Counter(row["status"] for row in documented)),
+        "deferredNameGate": deferred_summary,
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
         "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"]),
