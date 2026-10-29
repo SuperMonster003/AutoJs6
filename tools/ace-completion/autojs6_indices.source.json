@@ -7305,6 +7305,336 @@
             "theme(): ComposeThemeSnapshot;",
             "theme(theme: ComposeTheme | null | undefined): ComposeThemeSnapshot;"
           ]
+        },
+        {
+          "name": "AlertDialog",
+          "kind": "function",
+          "doc": "AlertDialog(props: Internal.ComposeProps<\"AlertDialog\">): Internal.ComposeNodeHandle<\"AlertDialog\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); open: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "AlertDialog(props: Internal.ComposeProps<\"AlertDialog\">): Internal.ComposeNodeHandle<\"AlertDialog\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); open: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "Box",
+          "kind": "function",
+          "doc": "Box(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Box\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Box\"> & Internal.ComposeNodeShortcuts & { alignment: \"bottomCenter\" | \"bottomEnd\" | \"bottomStart\" | \"center\" | \"centerEnd\" | \"centerStart\" | \"topCenter\" | \"topEnd\" | \"topStart\"; contentAlignment: \"bottomCenter\" | \"bottomEnd\" | \"bottomStart\" | \"center\" | \"centerEnd\" | \"centerStart\" | \"topCenter\" | \"topEnd\" | \"topStart\"; };",
+          "signature": "Box(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Box\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Box\"> & Internal.ComposeNodeShortcuts & { alignment: \"bottomCenter\" | \"bottomEnd\" | \"bottomStart\" | \"center\" | \"centerEnd\" | \"centerStart\" | \"topCenter\" | \"topEnd\" | \"topStart\"; contentAlignment: \"bottomCenter\" | \"bottomEnd\" | \"bottomStart\" | \"center\" | \"centerEnd\" | \"centerStart\" | \"topCenter\" | \"topEnd\" | \"topStart\"; };"
+        },
+        {
+          "name": "Button",
+          "kind": "function",
+          "doc": "Button(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Button\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Button\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "Button(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Button\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Button\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "Card",
+          "kind": "function",
+          "doc": "Card(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Card\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Card\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); get elevation(): number | undefined; set elevation(value: Internal.ComposeDpInput); get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "Card(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Card\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Card\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); get elevation(): number | undefined; set elevation(value: Internal.ComposeDpInput); get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "Checkbox",
+          "kind": "function",
+          "doc": "Checkbox(...args: [] | [props?: Internal.ComposeProps<\"Checkbox\"> | null | undefined]): Internal.ComposeNodeHandle<\"Checkbox\"> & Internal.ComposeNodeShortcuts & { checked: boolean; enabled: boolean; };",
+          "signature": "Checkbox(...args: [] | [props?: Internal.ComposeProps<\"Checkbox\"> | null | undefined]): Internal.ComposeNodeHandle<\"Checkbox\"> & Internal.ComposeNodeShortcuts & { checked: boolean; enabled: boolean; };"
+        },
+        {
+          "name": "CircularProgressIndicator",
+          "kind": "function",
+          "doc": "CircularProgressIndicator(...args: [] | [props?: Internal.ComposeProps<\"CircularProgressIndicator\"> | null | undefined]): Internal.ComposeNodeHandle<\"CircularProgressIndicator\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); progress: null | number; get trackColor(): number | null | undefined; set trackColor(value: Internal.ComposeColorInput | null); };",
+          "signature": "CircularProgressIndicator(...args: [] | [props?: Internal.ComposeProps<\"CircularProgressIndicator\"> | null | undefined]): Internal.ComposeNodeHandle<\"CircularProgressIndicator\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); progress: null | number; get trackColor(): number | null | undefined; set trackColor(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "Column",
+          "kind": "function",
+          "doc": "Column(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Column\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Column\"> & Internal.ComposeNodeShortcuts & { alignment: \"center\" | \"end\" | \"start\"; horizontalAlignment: \"center\" | \"end\" | \"start\"; arrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; verticalArrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; get spacing(): number; set spacing(value: Internal.ComposeDpInput); };",
+          "signature": "Column(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Column\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Column\"> & Internal.ComposeNodeShortcuts & { alignment: \"center\" | \"end\" | \"start\"; horizontalAlignment: \"center\" | \"end\" | \"start\"; arrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; verticalArrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; get spacing(): number; set spacing(value: Internal.ComposeDpInput); };"
+        },
+        {
+          "name": "ElevatedButton",
+          "kind": "function",
+          "doc": "ElevatedButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"ElevatedButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"ElevatedButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "ElevatedButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"ElevatedButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"ElevatedButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "FilledTonalButton",
+          "kind": "function",
+          "doc": "FilledTonalButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"FilledTonalButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"FilledTonalButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "FilledTonalButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"FilledTonalButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"FilledTonalButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "HorizontalDivider",
+          "kind": "function",
+          "doc": "HorizontalDivider(...args: [] | [props?: Internal.ComposeProps<\"HorizontalDivider\"> | null | undefined]): Internal.ComposeNodeHandle<\"HorizontalDivider\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get thickness(): number; set thickness(value: Internal.ComposeDpInput); };",
+          "signature": "HorizontalDivider(...args: [] | [props?: Internal.ComposeProps<\"HorizontalDivider\"> | null | undefined]): Internal.ComposeNodeHandle<\"HorizontalDivider\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get thickness(): number; set thickness(value: Internal.ComposeDpInput); };"
+        },
+        {
+          "name": "Icon",
+          "kind": "function",
+          "doc": "Icon(props: Internal.ComposeProps<\"Icon\">): Internal.ComposeNodeHandle<\"Icon\"> & Internal.ComposeNodeShortcuts & { name: Internal.ComposeIconNameInput; get tint(): number | null | undefined; set tint(value: Internal.ComposeColorInput | null); };",
+          "signature": "Icon(props: Internal.ComposeProps<\"Icon\">): Internal.ComposeNodeHandle<\"Icon\"> & Internal.ComposeNodeShortcuts & { name: Internal.ComposeIconNameInput; get tint(): number | null | undefined; set tint(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "IconButton",
+          "kind": "function",
+          "doc": "IconButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"IconButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"IconButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "IconButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"IconButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"IconButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "Image",
+          "kind": "function",
+          "doc": "Image(props: Internal.ComposeProps<\"Image\">): Internal.ComposeNodeHandle<\"Image\"> & Internal.ComposeNodeShortcuts & { contentScale: \"crop\" | \"fillBounds\" | \"fillHeight\" | \"fillWidth\" | \"fit\" | \"inside\" | \"none\"; get src(): Internal.ComposeBitmap | null; set src(value: Internal.ComposeImageInput); };",
+          "signature": "Image(props: Internal.ComposeProps<\"Image\">): Internal.ComposeNodeHandle<\"Image\"> & Internal.ComposeNodeShortcuts & { contentScale: \"crop\" | \"fillBounds\" | \"fillHeight\" | \"fillWidth\" | \"fit\" | \"inside\" | \"none\"; get src(): Internal.ComposeBitmap | null; set src(value: Internal.ComposeImageInput); };"
+        },
+        {
+          "name": "LazyColumn",
+          "kind": "function",
+          "doc": "LazyColumn(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"LazyColumn\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"LazyColumn\"> & Internal.ComposeNodeShortcuts & { alignment: \"center\" | \"end\" | \"start\"; horizontalAlignment: \"center\" | \"end\" | \"start\"; arrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; verticalArrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; get contentPadding(): number | Array<number>; set contentPadding(value: Internal.ComposePaddingInput); reverseLayout: boolean; get spacing(): number; set spacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };",
+          "signature": "LazyColumn(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"LazyColumn\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"LazyColumn\"> & Internal.ComposeNodeShortcuts & { alignment: \"center\" | \"end\" | \"start\"; horizontalAlignment: \"center\" | \"end\" | \"start\"; arrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; verticalArrangement: \"bottom\" | \"center\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"top\"; get contentPadding(): number | Array<number>; set contentPadding(value: Internal.ComposePaddingInput); reverseLayout: boolean; get spacing(): number; set spacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };"
+        },
+        {
+          "name": "LazyRow",
+          "kind": "function",
+          "doc": "LazyRow(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"LazyRow\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"LazyRow\"> & Internal.ComposeNodeShortcuts & { alignment: \"bottom\" | \"center\" | \"top\"; verticalAlignment: \"bottom\" | \"center\" | \"top\"; arrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; horizontalArrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; get contentPadding(): number | Array<number>; set contentPadding(value: Internal.ComposePaddingInput); reverseLayout: boolean; get spacing(): number; set spacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };",
+          "signature": "LazyRow(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"LazyRow\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"LazyRow\"> & Internal.ComposeNodeShortcuts & { alignment: \"bottom\" | \"center\" | \"top\"; verticalAlignment: \"bottom\" | \"center\" | \"top\"; arrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; horizontalArrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; get contentPadding(): number | Array<number>; set contentPadding(value: Internal.ComposePaddingInput); reverseLayout: boolean; get spacing(): number; set spacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };"
+        },
+        {
+          "name": "LinearProgressIndicator",
+          "kind": "function",
+          "doc": "LinearProgressIndicator(...args: [] | [props?: Internal.ComposeProps<\"LinearProgressIndicator\"> | null | undefined]): Internal.ComposeNodeHandle<\"LinearProgressIndicator\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); progress: null | number; get trackColor(): number | null | undefined; set trackColor(value: Internal.ComposeColorInput | null); };",
+          "signature": "LinearProgressIndicator(...args: [] | [props?: Internal.ComposeProps<\"LinearProgressIndicator\"> | null | undefined]): Internal.ComposeNodeHandle<\"LinearProgressIndicator\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); progress: null | number; get trackColor(): number | null | undefined; set trackColor(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "OutlinedButton",
+          "kind": "function",
+          "doc": "OutlinedButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"OutlinedButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"OutlinedButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "OutlinedButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"OutlinedButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"OutlinedButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "OutlinedTextField",
+          "kind": "function",
+          "doc": "OutlinedTextField(...args: [] | [props?: Internal.ComposeProps<\"OutlinedTextField\"> | null | undefined]): Internal.ComposeNodeHandle<\"OutlinedTextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & { edit(edit: Internal.ComposeEdit): Internal.ComposeNodeHandle<\"OutlinedTextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & any; };",
+          "signature": "OutlinedTextField(...args: [] | [props?: Internal.ComposeProps<\"OutlinedTextField\"> | null | undefined]): Internal.ComposeNodeHandle<\"OutlinedTextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & { edit(edit: Internal.ComposeEdit): Internal.ComposeNodeHandle<\"OutlinedTextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & any; };"
+        },
+        {
+          "name": "RadioButton",
+          "kind": "function",
+          "doc": "RadioButton(...args: [] | [props?: Internal.ComposeProps<\"RadioButton\"> | null | undefined]): Internal.ComposeNodeHandle<\"RadioButton\"> & Internal.ComposeNodeShortcuts & { checked: boolean; selected: boolean; enabled: boolean; };",
+          "signature": "RadioButton(...args: [] | [props?: Internal.ComposeProps<\"RadioButton\"> | null | undefined]): Internal.ComposeNodeHandle<\"RadioButton\"> & Internal.ComposeNodeShortcuts & { checked: boolean; selected: boolean; enabled: boolean; };"
+        },
+        {
+          "name": "Row",
+          "kind": "function",
+          "doc": "Row(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Row\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Row\"> & Internal.ComposeNodeShortcuts & { alignment: \"bottom\" | \"center\" | \"top\"; verticalAlignment: \"bottom\" | \"center\" | \"top\"; arrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; horizontalArrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; get spacing(): number; set spacing(value: Internal.ComposeDpInput); };",
+          "signature": "Row(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"Row\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"Row\"> & Internal.ComposeNodeShortcuts & { alignment: \"bottom\" | \"center\" | \"top\"; verticalAlignment: \"bottom\" | \"center\" | \"top\"; arrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; horizontalArrangement: \"center\" | \"end\" | \"spaceAround\" | \"spaceBetween\" | \"spaceEvenly\" | \"start\"; get spacing(): number; set spacing(value: Internal.ComposeDpInput); };"
+        },
+        {
+          "name": "Scaffold",
+          "kind": "function",
+          "doc": "Scaffold(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"Scaffold\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"Scaffold\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };",
+          "signature": "Scaffold(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"Scaffold\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"Scaffold\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "Slider",
+          "kind": "function",
+          "doc": "Slider(...args: [] | [props?: Internal.ComposeProps<\"Slider\"> | null | undefined]): Internal.ComposeNodeHandle<\"Slider\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; get range(): [number, number]; set range(value: readonly [number, number]); steps: number; value: number; };",
+          "signature": "Slider(...args: [] | [props?: Internal.ComposeProps<\"Slider\"> | null | undefined]): Internal.ComposeNodeHandle<\"Slider\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; get range(): [number, number]; set range(value: readonly [number, number]); steps: number; value: number; };"
+        },
+        {
+          "name": "Spacer",
+          "kind": "function",
+          "doc": "Spacer(...args: [] | [props?: Internal.ComposeProps<\"Spacer\"> | null | undefined]): Internal.ComposeNodeHandle<\"Spacer\"> & Internal.ComposeNodeShortcuts;",
+          "signature": "Spacer(...args: [] | [props?: Internal.ComposeProps<\"Spacer\"> | null | undefined]): Internal.ComposeNodeHandle<\"Spacer\"> & Internal.ComposeNodeShortcuts;"
+        },
+        {
+          "name": "Surface",
+          "kind": "function",
+          "doc": "Surface(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"Surface\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"Surface\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); get shape(): Internal.ComposeShapeValue; set shape(value: Internal.ComposeShapeInput); get tonalElevation(): number; set tonalElevation(value: Internal.ComposeDpInput); };",
+          "signature": "Surface(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"Surface\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"Surface\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); get shape(): Internal.ComposeShapeValue; set shape(value: Internal.ComposeShapeInput); get tonalElevation(): number; set tonalElevation(value: Internal.ComposeDpInput); };"
+        },
+        {
+          "name": "Switch",
+          "kind": "function",
+          "doc": "Switch(...args: [] | [props?: Internal.ComposeProps<\"Switch\"> | null | undefined]): Internal.ComposeNodeHandle<\"Switch\"> & Internal.ComposeNodeShortcuts & { checked: boolean; enabled: boolean; };",
+          "signature": "Switch(...args: [] | [props?: Internal.ComposeProps<\"Switch\"> | null | undefined]): Internal.ComposeNodeHandle<\"Switch\"> & Internal.ComposeNodeShortcuts & { checked: boolean; enabled: boolean; };"
+        },
+        {
+          "name": "Text",
+          "kind": "function",
+          "doc": "Text(...args: [] | [props?: Internal.ComposeProps<\"Text\"> | null | undefined]): Internal.ComposeNodeHandle<\"Text\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get fontSize(): number | undefined; set fontSize(value: Internal.ComposeSpInput); get fontWeight(): number | undefined; set fontWeight(value: number); maxLines: number; overflow: \"clip\" | \"ellipsis\" | \"visible\"; selectable: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; textAlign: \"center\" | \"end\" | \"justify\" | \"left\" | \"right\" | \"start\"; };",
+          "signature": "Text(...args: [] | [props?: Internal.ComposeProps<\"Text\"> | null | undefined]): Internal.ComposeNodeHandle<\"Text\"> & Internal.ComposeNodeShortcuts & { get color(): number | null | undefined; set color(value: Internal.ComposeColorInput | null); get fontSize(): number | undefined; set fontSize(value: Internal.ComposeSpInput); get fontWeight(): number | undefined; set fontWeight(value: number); maxLines: number; overflow: \"clip\" | \"ellipsis\" | \"visible\"; selectable: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; textAlign: \"center\" | \"end\" | \"justify\" | \"left\" | \"right\" | \"start\"; };"
+        },
+        {
+          "name": "TextButton",
+          "kind": "function",
+          "doc": "TextButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"TextButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"TextButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "TextButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"TextButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"TextButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); enabled: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "TextField",
+          "kind": "function",
+          "doc": "TextField(...args: [] | [props?: Internal.ComposeProps<\"TextField\"> | null | undefined]): Internal.ComposeNodeHandle<\"TextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & { edit(edit: Internal.ComposeEdit): Internal.ComposeNodeHandle<\"TextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & any; };",
+          "signature": "TextField(...args: [] | [props?: Internal.ComposeProps<\"TextField\"> | null | undefined]): Internal.ComposeNodeHandle<\"TextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & { edit(edit: Internal.ComposeEdit): Internal.ComposeNodeHandle<\"TextField\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; imeAction: \"default\" | \"done\" | \"go\" | \"next\" | \"none\" | \"previous\" | \"search\" | \"send\"; isError: boolean; keyboardType: \"ascii\" | \"decimal\" | \"email\" | \"number\" | \"numberPassword\" | \"password\" | \"phone\" | \"text\" | \"uri\"; maxLines: number; minLines: number; readOnly: boolean; singleLine: boolean; get style(): \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleValue | undefined; set style(value: \"bodyLarge\" | \"bodyMedium\" | \"bodySmall\" | \"displayLarge\" | \"displayMedium\" | \"displaySmall\" | \"headlineLarge\" | \"headlineMedium\" | \"headlineSmall\" | \"labelLarge\" | \"labelMedium\" | \"labelSmall\" | \"titleLarge\" | \"titleMedium\" | \"titleSmall\" | Internal.ComposeTextStyleInput); text: string; value: string; visualTransformation: \"none\" | \"password\"; } & any; };"
+        },
+        {
+          "name": "TopAppBar",
+          "kind": "function",
+          "doc": "TopAppBar(...args: [] | [props?: Internal.ComposeProps<\"TopAppBar\"> | null | undefined]): Internal.ComposeNodeHandle<\"TopAppBar\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };",
+          "signature": "TopAppBar(...args: [] | [props?: Internal.ComposeProps<\"TopAppBar\"> | null | undefined]): Internal.ComposeNodeHandle<\"TopAppBar\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "AndroidView",
+          "kind": "function",
+          "doc": "AndroidView(props: Internal.ComposeProps<\"AndroidView\">): Internal.ComposeNodeHandle<\"AndroidView\"> & Internal.ComposeNodeShortcuts & { get view(): Internal.ComposeNativeView; set view(value: Internal.ComposeViewInput); };",
+          "signature": "AndroidView(props: Internal.ComposeProps<\"AndroidView\">): Internal.ComposeNodeHandle<\"AndroidView\"> & Internal.ComposeNodeShortcuts & { get view(): Internal.ComposeNativeView; set view(value: Internal.ComposeViewInput); };"
+        },
+        {
+          "name": "AssistChip",
+          "kind": "function",
+          "doc": "AssistChip(props: Internal.ComposeProps<\"AssistChip\">): Internal.ComposeNodeHandle<\"AssistChip\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; };",
+          "signature": "AssistChip(props: Internal.ComposeProps<\"AssistChip\">): Internal.ComposeNodeHandle<\"AssistChip\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; };"
+        },
+        {
+          "name": "Badge",
+          "kind": "function",
+          "doc": "Badge(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"Badge\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"Badge\"> & Internal.ComposeNodeShortcuts & { text: string; visible: boolean; };",
+          "signature": "Badge(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"Badge\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"Badge\"> & Internal.ComposeNodeShortcuts & { text: string; visible: boolean; };"
+        },
+        {
+          "name": "DatePicker",
+          "kind": "function",
+          "doc": "DatePicker(...args: [] | [props?: Internal.ComposeProps<\"DatePicker\"> | null | undefined]): Internal.ComposeNodeHandle<\"DatePicker\"> & Internal.ComposeNodeShortcuts & { displayMode: \"input\" | \"picker\"; selectedDateMillis: null | number; showModeToggle: boolean; yearEnd: number; yearStart: number; };",
+          "signature": "DatePicker(...args: [] | [props?: Internal.ComposeProps<\"DatePicker\"> | null | undefined]): Internal.ComposeNodeHandle<\"DatePicker\"> & Internal.ComposeNodeShortcuts & { displayMode: \"input\" | \"picker\"; selectedDateMillis: null | number; showModeToggle: boolean; yearEnd: number; yearStart: number; };"
+        },
+        {
+          "name": "DropdownMenu",
+          "kind": "function",
+          "doc": "DropdownMenu(props: Internal.ComposeProps<\"DropdownMenu\">, ...children: Internal.ComposeChild[]): Internal.ComposeNodeHandle<\"DropdownMenu\"> & Internal.ComposeNodeShortcuts & { open: boolean; };",
+          "signature": "DropdownMenu(props: Internal.ComposeProps<\"DropdownMenu\">, ...children: Internal.ComposeChild[]): Internal.ComposeNodeHandle<\"DropdownMenu\"> & Internal.ComposeNodeShortcuts & { open: boolean; };"
+        },
+        {
+          "name": "DropdownMenuItem",
+          "kind": "function",
+          "doc": "DropdownMenuItem(props: Internal.ComposeProps<\"DropdownMenuItem\">): Internal.ComposeNodeHandle<\"DropdownMenuItem\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; };",
+          "signature": "DropdownMenuItem(props: Internal.ComposeProps<\"DropdownMenuItem\">): Internal.ComposeNodeHandle<\"DropdownMenuItem\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; };"
+        },
+        {
+          "name": "FilterChip",
+          "kind": "function",
+          "doc": "FilterChip(props: Internal.ComposeProps<\"FilterChip\">): Internal.ComposeNodeHandle<\"FilterChip\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };",
+          "signature": "FilterChip(props: Internal.ComposeProps<\"FilterChip\">): Internal.ComposeNodeHandle<\"FilterChip\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };"
+        },
+        {
+          "name": "FloatingActionButton",
+          "kind": "function",
+          "doc": "FloatingActionButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"FloatingActionButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"FloatingActionButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "FloatingActionButton(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"FloatingActionButton\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"FloatingActionButton\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "HorizontalPager",
+          "kind": "function",
+          "doc": "HorizontalPager(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"HorizontalPager\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"HorizontalPager\"> & Internal.ComposeNodeShortcuts & { page: number; get pageSpacing(): number; set pageSpacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };",
+          "signature": "HorizontalPager(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"HorizontalPager\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"HorizontalPager\"> & Internal.ComposeNodeShortcuts & { page: number; get pageSpacing(): number; set pageSpacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };"
+        },
+        {
+          "name": "InputChip",
+          "kind": "function",
+          "doc": "InputChip(props: Internal.ComposeProps<\"InputChip\">): Internal.ComposeNodeHandle<\"InputChip\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };",
+          "signature": "InputChip(props: Internal.ComposeProps<\"InputChip\">): Internal.ComposeNodeHandle<\"InputChip\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };"
+        },
+        {
+          "name": "LazyVerticalGrid",
+          "kind": "function",
+          "doc": "LazyVerticalGrid(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"LazyVerticalGrid\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"LazyVerticalGrid\"> & Internal.ComposeNodeShortcuts & { columns: number; get contentPadding(): number | Array<number>; set contentPadding(value: Internal.ComposePaddingInput); reverseLayout: boolean; get spacing(): number; set spacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };",
+          "signature": "LazyVerticalGrid(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"LazyVerticalGrid\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"LazyVerticalGrid\"> & Internal.ComposeNodeShortcuts & { columns: number; get contentPadding(): number | Array<number>; set contentPadding(value: Internal.ComposePaddingInput); reverseLayout: boolean; get spacing(): number; set spacing(value: Internal.ComposeDpInput); userScrollEnabled: boolean; };"
+        },
+        {
+          "name": "ModalBottomSheet",
+          "kind": "function",
+          "doc": "ModalBottomSheet(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"ModalBottomSheet\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"ModalBottomSheet\"> & Internal.ComposeNodeShortcuts & { cancelable: boolean; get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); open: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };",
+          "signature": "ModalBottomSheet(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"ModalBottomSheet\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"ModalBottomSheet\"> & Internal.ComposeNodeShortcuts & { cancelable: boolean; get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); open: boolean; get shape(): Internal.ComposeShapeValue | undefined; set shape(value: Internal.ComposeShapeInput); };"
+        },
+        {
+          "name": "NavigationBar",
+          "kind": "function",
+          "doc": "NavigationBar(...args: Internal.ComposeItemChild<\"NavigationBarItem\">[] | [props?: Internal.ComposeProps<\"NavigationBar\"> | null | undefined, ...children: Internal.ComposeItemChild<\"NavigationBarItem\">[]]): Internal.ComposeNodeHandle<\"NavigationBar\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };",
+          "signature": "NavigationBar(...args: Internal.ComposeItemChild<\"NavigationBarItem\">[] | [props?: Internal.ComposeProps<\"NavigationBar\"> | null | undefined, ...children: Internal.ComposeItemChild<\"NavigationBarItem\">[]]): Internal.ComposeNodeHandle<\"NavigationBar\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "NavigationBarItem",
+          "kind": "function",
+          "doc": "NavigationBarItem(props: Internal.ComposeProps<\"NavigationBarItem\">): Internal.ComposeNodeHandle<\"NavigationBarItem\"> & Internal.ComposeNodeShortcuts & { alwaysShowLabel: boolean; enabled: boolean; selected: boolean; };",
+          "signature": "NavigationBarItem(props: Internal.ComposeProps<\"NavigationBarItem\">): Internal.ComposeNodeHandle<\"NavigationBarItem\"> & Internal.ComposeNodeShortcuts & { alwaysShowLabel: boolean; enabled: boolean; selected: boolean; };"
+        },
+        {
+          "name": "NavigationDrawer",
+          "kind": "function",
+          "doc": "NavigationDrawer(props: Internal.ComposeProps<\"NavigationDrawer\">, child?: Internal.ComposeSlotInput): Internal.ComposeNodeHandle<\"NavigationDrawer\"> & Internal.ComposeNodeShortcuts & { gesturesEnabled: boolean; open: boolean; };",
+          "signature": "NavigationDrawer(props: Internal.ComposeProps<\"NavigationDrawer\">, child?: Internal.ComposeSlotInput): Internal.ComposeNodeHandle<\"NavigationDrawer\"> & Internal.ComposeNodeShortcuts & { gesturesEnabled: boolean; open: boolean; };"
+        },
+        {
+          "name": "NavigationDrawerItem",
+          "kind": "function",
+          "doc": "NavigationDrawerItem(props: Internal.ComposeProps<\"NavigationDrawerItem\">): Internal.ComposeNodeHandle<\"NavigationDrawerItem\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };",
+          "signature": "NavigationDrawerItem(props: Internal.ComposeProps<\"NavigationDrawerItem\">): Internal.ComposeNodeHandle<\"NavigationDrawerItem\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };"
+        },
+        {
+          "name": "NavigationRail",
+          "kind": "function",
+          "doc": "NavigationRail(...args: Internal.ComposeItemChild<\"NavigationRailItem\">[] | [props?: Internal.ComposeProps<\"NavigationRail\"> | null | undefined, ...children: Internal.ComposeItemChild<\"NavigationRailItem\">[]]): Internal.ComposeNodeHandle<\"NavigationRail\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };",
+          "signature": "NavigationRail(...args: Internal.ComposeItemChild<\"NavigationRailItem\">[] | [props?: Internal.ComposeProps<\"NavigationRail\"> | null | undefined, ...children: Internal.ComposeItemChild<\"NavigationRailItem\">[]]): Internal.ComposeNodeHandle<\"NavigationRail\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); };"
+        },
+        {
+          "name": "NavigationRailItem",
+          "kind": "function",
+          "doc": "NavigationRailItem(props: Internal.ComposeProps<\"NavigationRailItem\">): Internal.ComposeNodeHandle<\"NavigationRailItem\"> & Internal.ComposeNodeShortcuts & { alwaysShowLabel: boolean; enabled: boolean; selected: boolean; };",
+          "signature": "NavigationRailItem(props: Internal.ComposeProps<\"NavigationRailItem\">): Internal.ComposeNodeHandle<\"NavigationRailItem\"> & Internal.ComposeNodeShortcuts & { alwaysShowLabel: boolean; enabled: boolean; selected: boolean; };"
+        },
+        {
+          "name": "PullToRefresh",
+          "kind": "function",
+          "doc": "PullToRefresh(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"PullToRefresh\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"PullToRefresh\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; refreshing: boolean; };",
+          "signature": "PullToRefresh(...args: [child?: Internal.ComposeSlotInput] | [props?: Internal.ComposeProps<\"PullToRefresh\"> | null | undefined, child?: Internal.ComposeSlotInput]): Internal.ComposeNodeHandle<\"PullToRefresh\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; refreshing: boolean; };"
+        },
+        {
+          "name": "SearchBar",
+          "kind": "function",
+          "doc": "SearchBar(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"SearchBar\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"SearchBar\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; expanded: boolean; query: string; };",
+          "signature": "SearchBar(...args: Internal.ComposeChild[] | [props?: Internal.ComposeProps<\"SearchBar\"> | null | undefined, ...children: Internal.ComposeChild[]]): Internal.ComposeNodeHandle<\"SearchBar\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; expanded: boolean; query: string; };"
+        },
+        {
+          "name": "SegmentedButton",
+          "kind": "function",
+          "doc": "SegmentedButton(...args: Internal.ComposeItemChild<\"SegmentedButtonItem\">[] | [props?: Internal.ComposeProps<\"SegmentedButton\"> | null | undefined, ...children: Internal.ComposeItemChild<\"SegmentedButtonItem\">[]]): Internal.ComposeNodeHandle<\"SegmentedButton\"> & Internal.ComposeNodeShortcuts & { mode: \"multi\" | \"single\"; };",
+          "signature": "SegmentedButton(...args: Internal.ComposeItemChild<\"SegmentedButtonItem\">[] | [props?: Internal.ComposeProps<\"SegmentedButton\"> | null | undefined, ...children: Internal.ComposeItemChild<\"SegmentedButtonItem\">[]]): Internal.ComposeNodeHandle<\"SegmentedButton\"> & Internal.ComposeNodeShortcuts & { mode: \"multi\" | \"single\"; };"
+        },
+        {
+          "name": "SegmentedButtonItem",
+          "kind": "function",
+          "doc": "SegmentedButtonItem(props: Internal.ComposeProps<\"SegmentedButtonItem\">): Internal.ComposeNodeHandle<\"SegmentedButtonItem\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };",
+          "signature": "SegmentedButtonItem(props: Internal.ComposeProps<\"SegmentedButtonItem\">): Internal.ComposeNodeHandle<\"SegmentedButtonItem\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; selected: boolean; };"
+        },
+        {
+          "name": "Tab",
+          "kind": "function",
+          "doc": "Tab(...args: [] | [props?: Internal.ComposeProps<\"Tab\"> | null | undefined]): Internal.ComposeNodeHandle<\"Tab\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; };",
+          "signature": "Tab(...args: [] | [props?: Internal.ComposeProps<\"Tab\"> | null | undefined]): Internal.ComposeNodeHandle<\"Tab\"> & Internal.ComposeNodeShortcuts & { enabled: boolean; };"
+        },
+        {
+          "name": "TabRow",
+          "kind": "function",
+          "doc": "TabRow(...args: Internal.ComposeItemChild<\"Tab\">[] | [props?: Internal.ComposeProps<\"TabRow\"> | null | undefined, ...children: Internal.ComposeItemChild<\"Tab\">[]]): Internal.ComposeNodeHandle<\"TabRow\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); scrollable: boolean; selectedIndex: number; };",
+          "signature": "TabRow(...args: Internal.ComposeItemChild<\"Tab\">[] | [props?: Internal.ComposeProps<\"TabRow\"> | null | undefined, ...children: Internal.ComposeItemChild<\"Tab\">[]]): Internal.ComposeNodeHandle<\"TabRow\"> & Internal.ComposeNodeShortcuts & { get containerColor(): number | null | undefined; set containerColor(value: Internal.ComposeColorInput | null); get contentColor(): number | null | undefined; set contentColor(value: Internal.ComposeColorInput | null); scrollable: boolean; selectedIndex: number; };"
+        },
+        {
+          "name": "TimePicker",
+          "kind": "function",
+          "doc": "TimePicker(...args: [] | [props?: Internal.ComposeProps<\"TimePicker\"> | null | undefined]): Internal.ComposeNodeHandle<\"TimePicker\"> & Internal.ComposeNodeShortcuts & { displayMode: \"input\" | \"picker\"; hour: number; is24Hour: boolean; minute: number; };",
+          "signature": "TimePicker(...args: [] | [props?: Internal.ComposeProps<\"TimePicker\"> | null | undefined]): Internal.ComposeNodeHandle<\"TimePicker\"> & Internal.ComposeNodeShortcuts & { displayMode: \"input\" | \"picker\"; hour: number; is24Hour: boolean; minute: number; };"
+        },
+        {
+          "name": "Tooltip",
+          "kind": "function",
+          "doc": "Tooltip(props: Internal.ComposeProps<\"Tooltip\">, child?: Internal.ComposeSlotInput): Internal.ComposeNodeHandle<\"Tooltip\"> & Internal.ComposeNodeShortcuts & { open: boolean; };",
+          "signature": "Tooltip(props: Internal.ComposeProps<\"Tooltip\">, child?: Internal.ComposeSlotInput): Internal.ComposeNodeHandle<\"Tooltip\"> & Internal.ComposeNodeShortcuts & { open: boolean; };"
         }
       ]
     },
@@ -28580,13 +28910,13 @@
         {
           "name": "detect",
           "kind": "function",
-          "doc": "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
-          "signature": "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
+          "doc": "detect(options?: DetectOptionsAny): Ocr.Result[];",
+          "signature": "detect(options?: DetectOptionsAny): Ocr.Result[];",
           "signatures": [
-            "detect(options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, options?: DetectOptionsAny): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+            "detect(options?: DetectOptionsAny): Ocr.Result[];",
+            "detect(region: OmniRegion): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsAny): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): Ocr.Result[];"
           ]
         },
         {
@@ -28633,13 +28963,13 @@
         {
           "name": "detect",
           "kind": "function",
-          "doc": "detect(options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
-          "signature": "detect(options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
+          "doc": "detect(options?: DetectOptionsMLKit): Ocr.Result[];",
+          "signature": "detect(options?: DetectOptionsMLKit): Ocr.Result[];",
           "signatures": [
-            "detect(options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, options?: DetectOptionsMLKit): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+            "detect(options?: DetectOptionsMLKit): Ocr.Result[];",
+            "detect(region: OmniRegion): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsMLKit): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): Ocr.Result[];"
           ]
         }
       ]
@@ -28662,13 +28992,13 @@
         {
           "name": "detect",
           "kind": "function",
-          "doc": "detect(options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
-          "signature": "detect(options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
+          "doc": "detect(options?: DetectOptionsPaddle): Ocr.Result[];",
+          "signature": "detect(options?: DetectOptionsPaddle): Ocr.Result[];",
           "signatures": [
-            "detect(options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, options?: DetectOptionsPaddle): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+            "detect(options?: DetectOptionsPaddle): Ocr.Result[];",
+            "detect(region: OmniRegion): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsPaddle): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): Ocr.Result[];"
           ]
         }
       ]
@@ -28691,13 +29021,13 @@
         {
           "name": "detect",
           "kind": "function",
-          "doc": "detect(options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
-          "signature": "detect(options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
+          "doc": "detect(options?: DetectOptionsRapid): Ocr.Result[];",
+          "signature": "detect(options?: DetectOptionsRapid): Ocr.Result[];",
           "signatures": [
-            "detect(options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, options?: DetectOptionsRapid): org.autojs.autojs.runtime.api.OcrResult[];",
-            "detect(img: ImageWrapper | string, region: OmniRegion): org.autojs.autojs.runtime.api.OcrResult[];"
+            "detect(options?: DetectOptionsRapid): Ocr.Result[];",
+            "detect(region: OmniRegion): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, options?: DetectOptionsRapid): Ocr.Result[];",
+            "detect(img: ImageWrapper | string, region: OmniRegion): Ocr.Result[];"
           ]
         }
       ]
@@ -32632,6 +32962,210 @@
     "util.versionCodes": {
       "doc": "AutoJs6 util.versionCodes API",
       "members": [
+        {
+          "name": "UPSIDE_DOWN_CAKE",
+          "kind": "variable",
+          "doc": "UPSIDE_DOWN_CAKE: Util.VersionCodes.Info;",
+          "signature": "UPSIDE_DOWN_CAKE: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "TIRAMISU",
+          "kind": "variable",
+          "doc": "TIRAMISU: Util.VersionCodes.Info;",
+          "signature": "TIRAMISU: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "S_V2",
+          "kind": "variable",
+          "doc": "S_V2: Util.VersionCodes.Info;",
+          "signature": "S_V2: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "S",
+          "kind": "variable",
+          "doc": "S: Util.VersionCodes.Info;",
+          "signature": "S: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "R",
+          "kind": "variable",
+          "doc": "R: Util.VersionCodes.Info;",
+          "signature": "R: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "Q",
+          "kind": "variable",
+          "doc": "Q: Util.VersionCodes.Info;",
+          "signature": "Q: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "P",
+          "kind": "variable",
+          "doc": "P: Util.VersionCodes.Info;",
+          "signature": "P: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "O_MR1",
+          "kind": "variable",
+          "doc": "O_MR1: Util.VersionCodes.Info;",
+          "signature": "O_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "O",
+          "kind": "variable",
+          "doc": "O: Util.VersionCodes.Info;",
+          "signature": "O: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "N_MR1",
+          "kind": "variable",
+          "doc": "N_MR1: Util.VersionCodes.Info;",
+          "signature": "N_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "N",
+          "kind": "variable",
+          "doc": "N: Util.VersionCodes.Info;",
+          "signature": "N: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "M",
+          "kind": "variable",
+          "doc": "M: Util.VersionCodes.Info;",
+          "signature": "M: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "LOLLIPOP_MR1",
+          "kind": "variable",
+          "doc": "LOLLIPOP_MR1: Util.VersionCodes.Info;",
+          "signature": "LOLLIPOP_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "LOLLIPOP",
+          "kind": "variable",
+          "doc": "LOLLIPOP: Util.VersionCodes.Info;",
+          "signature": "LOLLIPOP: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "KITKAT_WATCH",
+          "kind": "variable",
+          "doc": "KITKAT_WATCH: Util.VersionCodes.Info;",
+          "signature": "KITKAT_WATCH: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "KITKAT",
+          "kind": "variable",
+          "doc": "KITKAT: Util.VersionCodes.Info;",
+          "signature": "KITKAT: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "JELLY_BEAN_MR2",
+          "kind": "variable",
+          "doc": "JELLY_BEAN_MR2: Util.VersionCodes.Info;",
+          "signature": "JELLY_BEAN_MR2: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "JELLY_BEAN_MR1",
+          "kind": "variable",
+          "doc": "JELLY_BEAN_MR1: Util.VersionCodes.Info;",
+          "signature": "JELLY_BEAN_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "JELLY_BEAN",
+          "kind": "variable",
+          "doc": "JELLY_BEAN: Util.VersionCodes.Info;",
+          "signature": "JELLY_BEAN: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "ICE_CREAM_SANDWICH_MR1",
+          "kind": "variable",
+          "doc": "ICE_CREAM_SANDWICH_MR1: Util.VersionCodes.Info;",
+          "signature": "ICE_CREAM_SANDWICH_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "ICE_CREAM_SANDWICH",
+          "kind": "variable",
+          "doc": "ICE_CREAM_SANDWICH: Util.VersionCodes.Info;",
+          "signature": "ICE_CREAM_SANDWICH: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "HONEYCOMB_MR2",
+          "kind": "variable",
+          "doc": "HONEYCOMB_MR2: Util.VersionCodes.Info;",
+          "signature": "HONEYCOMB_MR2: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "HONEYCOMB_MR1",
+          "kind": "variable",
+          "doc": "HONEYCOMB_MR1: Util.VersionCodes.Info;",
+          "signature": "HONEYCOMB_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "HONEYCOMB",
+          "kind": "variable",
+          "doc": "HONEYCOMB: Util.VersionCodes.Info;",
+          "signature": "HONEYCOMB: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "GINGERBREAD_MR1",
+          "kind": "variable",
+          "doc": "GINGERBREAD_MR1: Util.VersionCodes.Info;",
+          "signature": "GINGERBREAD_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "GINGERBREAD",
+          "kind": "variable",
+          "doc": "GINGERBREAD: Util.VersionCodes.Info;",
+          "signature": "GINGERBREAD: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "FROYO",
+          "kind": "variable",
+          "doc": "FROYO: Util.VersionCodes.Info;",
+          "signature": "FROYO: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "ECLAIR_MR1",
+          "kind": "variable",
+          "doc": "ECLAIR_MR1: Util.VersionCodes.Info;",
+          "signature": "ECLAIR_MR1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "ECLAIR_0_1",
+          "kind": "variable",
+          "doc": "ECLAIR_0_1: Util.VersionCodes.Info;",
+          "signature": "ECLAIR_0_1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "ECLAIR",
+          "kind": "variable",
+          "doc": "ECLAIR: Util.VersionCodes.Info;",
+          "signature": "ECLAIR: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "DONUT",
+          "kind": "variable",
+          "doc": "DONUT: Util.VersionCodes.Info;",
+          "signature": "DONUT: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "CUPCAKE",
+          "kind": "variable",
+          "doc": "CUPCAKE: Util.VersionCodes.Info;",
+          "signature": "CUPCAKE: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "BASE_1_1",
+          "kind": "variable",
+          "doc": "BASE_1_1: Util.VersionCodes.Info;",
+          "signature": "BASE_1_1: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "BASE",
+          "kind": "variable",
+          "doc": "BASE: Util.VersionCodes.Info;",
+          "signature": "BASE: Util.VersionCodes.Info;"
+        },
         {
           "name": "toString",
           "kind": "function",
