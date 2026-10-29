@@ -49,14 +49,32 @@ internal object NodeBridgeAppPackages {
         return JSONObject().put("current", current).put("others", JSONArray(others))
     }
 
-    fun installedPackages(context: Context, options: JSONObject?): JSONArray {
+    /**
+     * One page of `app.getInstalledPackages`: the snapshots from [offset] up to about [PAGE_CHARS] JSON characters, so
+     * that component lists of every package stay under the Binder transaction size; `next` is the following offset, or
+     * null after the last package.
+     * zh-CN: `app.getInstalledPackages` 的一页: 从 [offset] 起约 [PAGE_CHARS] 个 JSON 字符的快照, 使所有包的组件列表都不超过 Binder 事务大小;
+     * `next` 为下一页的起点, 最后一页为 null.
+     */
+    fun installedPackages(context: Context, options: JSONObject?, offset: Int): JSONObject {
         val manager = context.packageManager
         val flags = flagsOf(options)
         @Suppress("DEPRECATION")
         val packages = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             manager.getInstalledPackages(PackageManager.PackageInfoFlags.of(flags.toLong()))
         } else manager.getInstalledPackages(flags)
-        return JSONArray(packages.map { snapshot(manager, it) })
+        val items = JSONArray()
+        var chars = 0
+        var index = offset.coerceAtLeast(0)
+        while (index < packages.size) {
+            val item = snapshot(manager, packages[index])
+            val length = item.toString().length
+            if (items.length() > 0 && chars + length > PAGE_CHARS) break
+            items.put(item)
+            chars += length
+            index += 1
+        }
+        return JSONObject().put("items", items).put("next", if (index < packages.size) index else JSONObject.NULL)
     }
 
     fun apkInfo(context: Context, file: File, options: JSONObject?): JSONObject? {
@@ -76,6 +94,8 @@ internal object NodeBridgeAppPackages {
         JSONObject().put("alias", it.alias).put("packageName", it.packageName).put("appName", it.getAppName())
             .put("appNameZh", it.getAppNameZh()).put("appNameEn", it.getAppNameEn())
     }
+
+    private const val PAGE_CHARS = 200_000
 
     /** `{ get?: string[], match?: string[] }` as Rhino reads it: `get: ["activities"]` is `PackageManager.GET_ACTIVITIES`; GET_META_DATA by default. */
     private fun flagsOf(options: JSONObject?): Int {

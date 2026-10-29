@@ -5435,7 +5435,7 @@ class AndroidNodeBridgeCapabilityProvider(
             // Rhino app module parity (api-coverage P3.1a): D-4 target and user queries, package snapshots, intent tasks.
             "resolvePackage" -> NodeBridgeAppPackages.resolvePackage(appContext, args.getString(0))
             "getUserProfiles" -> NodeBridgeAppPackages.userProfiles(appContext)
-            "getInstalledPackages" -> NodeBridgeAppPackages.installedPackages(appContext, args.optJSONObject(0))
+            "getInstalledPackages" -> NodeBridgeAppPackages.installedPackages(appContext, args.optJSONObject(0), args.optInt(1))
             "getApkInfo" -> {
                 val file = resolveScopedAppFile(args.getString(0)) ?: throw SecurityException("app.getApkInfo path must stay inside the scoped working directory.")
                 if (file.isFile) NodeBridgeAppPackages.apkInfo(appContext, file, args.optJSONObject(1)) else null
