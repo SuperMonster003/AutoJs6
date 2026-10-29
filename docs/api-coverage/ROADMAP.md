@@ -161,6 +161,7 @@
 ### P4 Bun 补缺 [同 P3 的分批与验收, 列为 bun; 与 P3 并行时占用另一台主力设备 (D15); host-client 每个新命名空间配独立能力授权, 默认关闭, 沿用 `<module>.control` 命名 (附录 C Q3 待拍板)]
 
 - [ ] P4.1 ~ P4.4 模块族同 P3.1 ~ P3.4 (Bun 侧另含 http / timers / util / jsox / threads / engines / plugins / workManager 的 not-portable 或 capability-gated 判定, 每条写等价写法).
+  - P4.2a (2026-10-29 启动, api-cov-p4-2a): 模块 util (+ util.java / util.inspect / util.morseCode / util.version / util.versionCodes 子模块) 66, species 37 + 全局 isObject 1, jsox (Mathx 23 / Arrayx 15 / Numberx 14 / jsox 2) + 全局 randomInt / randomFloat 2, cvt 6 / fmt 6 / s13n 5, pinyin 常量 10 (R3), 全局数据函数 12 (random, isInteger / isPrimitive / isReference / isBigInt / isEmptyObject / isObjectSpecies, axios / cheerio / dayjs / pangu / i18n), 起始 pending Bun 199 (宿主 08f5eb2ea 矩阵, 全列 791).
 - [ ] P4.5 矩阵清零 (bun 列).
 - [ ] P4.6 阶段收尾: bump Bun 插件 (minor), changelog (zh-Hans), `docs/host-api.md` 同步, 看板摘要. 不推送.
 
