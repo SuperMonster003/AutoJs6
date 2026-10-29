@@ -291,6 +291,17 @@ P3.1a 落点 (2026-10-29, api-cov-p3-1a; 矩阵随 P4.1a 的宿主 2780f3e3c 写
 
 另: D-4 按 Q89-Q92 (a) 复用 shell / shell.root / shell.shizuku 与 app 子能力, 新增宿主只读路由 6 个, 未加新能力; Q93 的其余形态 (fromIntent 只收 JSON 意图, 快照返回值, execCommand 结果对象, 状态查询返回 Promise) 已拍板 (a), 写进 HOST-API 与 d.ts. 真机在 Shizuku 未运行与运行并授权两种状态下对照 Rhino 全部一致; shizuku.hasService 反映宿主是否已绑定 Shizuku 用户服务 (首次经 Shizuku 执行命令时绑定), 与调用顺序有关, 不是运行时差异.
 
+P4.2b 落点 (2026-10-29, api-cov-p4-2b; 宿主 6ce328d3d, 本族前 65 格随 P4.1a 的 2780f3e3c 写入): 本族 Bun 165 -> 40 (本族 155 + Q64 5 + P4.2a 遗留 util 5; 全列 757 -> 558, 其中 2780f3e3c 的 753 -> 608 含本族 65 格与 P4.1a 80 格, 6ce328d3d 的 608 -> 558 为本族 Color# 29 / Zip# 21). 本族 242 行 Bun 列: local-shim 125 (共享 JS 核心: colors / Color#, files 路径函数, mime, recorder, 全局 Color 与五个库), capability-gated 75 (files.control 35: files 原型成员, files.open / toFile 与全局 open; java.interop 29: zip 5, Zip# 21, colors.toColorStateList / setPaintColor / extract; mediainfo.control 7; storage.control 3: storages.names / all, Storage#size; epub.control 1: EpubBook#toString), not-portable 2 (Q63 (a), obsoleted), pending 40. 遗留:
+
+| 行 | Bun | 待决 |
+|---|---|---|
+| colors.theme.* (9) | pending | P4.2b 遗留 (待 Q80 (a), 宿主桥接新模块, P4.5) |
+| gallery.* (11) | pending | P4.2b 遗留 (待 Q81 (a), 宿主桥接新模块, P4.5) |
+| files.batchRename.* (17) | pending | P4.2b 遗留 (待 Q82 (a), 宿主桥接新模块, P4.5) |
+| util.class, util.className, util.getClassName | pending | P4.2a 遗留 (待 Q54 (b), Java 内省; P4.2b 未补) |
+
+另: Color# 按句柄类型整体记 local-shim, 其中 Color#setPaintColor 实际要经 java.interop (矩阵的句柄映射只能给整个类型一个授权, 已写进 host-api.md); 共享核心沿用 Node 的形态 (Q83), zip / Zip 的成员与参数错误都以 Promise 返回 (Rhino 同步抛出). Bun 的 files 原型成员与宿主同语义 (Q85 (a)), 相对路径在有 files.control 时按宿主脚本目录解析. 真机 (OnePlus OPD2413, ColorOS) 另见报告的 ColorOS 一节: 宿主进入后台后插件进程被冻结 (device_bun_js_tools.py --foreground 规避), logcat 丢行较多 (每 20 条暂停并补跑); MediaInfo 插件在该机报告库不可用, 成功的 MediaInfo 报告未在本机对照.
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).
