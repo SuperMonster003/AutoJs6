@@ -617,6 +617,23 @@ object RhinoUtils {
     fun newNativeJavaMethod(scope: VarScope, method: Method, name: String): NativeJavaMethod =
         NativeJavaMethod(scope, method, name)
 
+    /**
+     * Invokes [method] for a script call and throws what the method throws as Rhino's own Java members do
+     * ([Context.throwAsScriptRuntimeEx]): a Rhino exception as is, any other exception wrapped so that script `catch`
+     * blocks catch it (`JavaException`, with `javaException`). An [InvocationTargetException] reaching the interpreter
+     * makes it fail with a ClassCastException, past the script's try / catch (api-coverage Q116).
+     *
+     * zh-CN: 为脚本调用反射执行 [method], 其抛出的异常按 Rhino 自身 Java 成员的方式抛出 ([Context.throwAsScriptRuntimeEx]):
+     * Rhino 异常原样抛出, 其他异常经包装后可被脚本的 `catch` 捕获 (`JavaException`, 带 `javaException`).
+     * [InvocationTargetException] 直接到达解释器时, 解释器会以 ClassCastException 失败, 越过脚本的 try / catch (api-coverage Q116).
+     */
+    @JvmStatic
+    fun invokeForScript(method: Method, receiver: Any?, vararg args: Any?): Any? = try {
+        method.invoke(receiver, *args)
+    } catch (e: InvocationTargetException) {
+        throw Context.throwAsScriptRuntimeEx(e)
+    }
+
     @JvmStatic
     fun wrap(o: Any?): Any = withRhinoContext { cx ->
         val scope = cx.getOrCreateStandardObjects()

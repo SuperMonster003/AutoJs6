@@ -12,6 +12,7 @@ import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.ArrayUtils.unshiftWith
 import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.NOT_CONSTRUCTABLE
+import org.autojs.autojs.util.RhinoUtils.invokeForScript
 import org.autojs.autojs.util.RhinoUtils.newBaseFunction
 import org.autojs.autojs.util.StringUtils.uppercaseFirstChar
 import org.mozilla.javascript.Context
@@ -85,7 +86,7 @@ class ColorNativeObject @JvmOverloads constructor(color: Any? = BLACK) : NativeO
             }
             try {
                 val method = Colors::class.java.getMethod(protoName, Array<Any>::class.java)
-                newBaseFunction(RhinoUtils.getDeclarationScope(this), protoName, { args -> method.invoke(null, args.unshiftWith(color)) }, NOT_CONSTRUCTABLE)
+                newBaseFunction(RhinoUtils.getDeclarationScope(this), protoName, { args -> invokeForScript(method, null, args.unshiftWith(color)) }, NOT_CONSTRUCTABLE)
             } catch (_: Exception) {
                 super.get(protoName, start)
             }

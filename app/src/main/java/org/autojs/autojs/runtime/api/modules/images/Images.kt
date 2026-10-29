@@ -53,6 +53,7 @@ import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.getDeclarationScope
 import org.autojs.autojs.util.RhinoUtils.coerceStringLowercase
 import org.autojs.autojs.util.RhinoUtils.handleAsyncOperation
+import org.autojs.autojs.util.RhinoUtils.invokeForScript
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
@@ -1666,7 +1667,7 @@ class Images(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                 if (similarityMethod.returnType != Double::class.java) {
                     throw WrappedIllegalArgumentException("Similarity metric ($metric) method must return Double type. Found: ${similarityMethod.returnType}")
                 }
-                similarityMethod.invoke(ImageSimilarity, matA, matB) as Double
+                invokeForScript(similarityMethod, ImageSimilarity, matA, matB) as Double
             }
         }
 

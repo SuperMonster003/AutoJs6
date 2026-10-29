@@ -275,6 +275,7 @@
         "images.resize 方法传入错误参数时可能导致应用崩溃的问题",
         "images 部分方法可能提前回收图像, 泄漏原生内存或回收其他脚本图像的问题",
         "colors.isSimilar/images.detectColor 的 hs 算法结果错误, 以及 colors.rgb/rgba 无法正确处理小数或百分比分量的问题",
+        "Color 对象的 toHex/toInt/alpha/toHsv/isSimilar/blend/build 等方法, images.getSimilarity 及 http 请求的 client 选项参数出错时, 脚本以 ClassCastException 异常结束且无法被 try/catch 捕获的问题",
         "images.isEqual/mse/ncc/isGrayscale 等方法的比较结果及灰度或 RGBA 图像处理异常",
         "images.invert 丢失透明度, ImageWrapper#saveTo 红蓝通道颠倒及 images.clip 越界区域处理错误",
         "images.load 等方法可能未关闭连接或释放临时图像资源的问题",

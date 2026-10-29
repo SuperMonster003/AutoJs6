@@ -101,7 +101,7 @@ class RequestBuilder(
                 val twoArgs = candidates.firstOrNull { it.parameterCount == 2 }
                 if (twoArgs != null && rawVal is List<*> && rawVal.size == 2) {
                     val args2 = arrayOf(coerceArg(twoArgs.parameterTypes[0], rawVal[0]), coerceArg(twoArgs.parameterTypes[1], rawVal[1]))
-                    twoArgs.invoke(builder, args2[0], args2[1])
+                    RhinoUtils.invokeForScript(twoArgs, builder, args2[0], args2[1])
                     return@forEach
                 }
 
@@ -109,7 +109,7 @@ class RequestBuilder(
                 if (oneArg != null) {
                     val paramTypes = oneArg.parameterTypes
                     val arg0 = coerceArg(paramTypes[0], rawVal)
-                    oneArg.invoke(builder, arg0)
+                    RhinoUtils.invokeForScript(oneArg, builder, arg0)
                     return@forEach
                 }
 
