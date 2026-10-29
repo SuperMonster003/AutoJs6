@@ -302,6 +302,14 @@ P4.2b 落点 (2026-10-29, api-cov-p4-2b; 宿主 6ce328d3d, 本族前 65 格随 P
 
 另: Color# 按句柄类型整体记 local-shim, 其中 Color#setPaintColor 实际要经 java.interop (矩阵的句柄映射只能给整个类型一个授权, 已写进 host-api.md); 共享核心沿用 Node 的形态 (Q83), zip / Zip 的成员与参数错误都以 Promise 返回 (Rhino 同步抛出). Bun 的 files 原型成员与宿主同语义 (Q85 (a)), 相对路径在有 files.control 时按宿主脚本目录解析. 真机 (OnePlus OPD2413, ColorOS) 另见报告的 ColorOS 一节: 宿主进入后台后插件进程被冻结 (device_bun_js_tools.py --foreground 规避), logcat 丢行较多 (每 20 条暂停并补跑); MediaInfo 插件在该机报告库不可用, 成功的 MediaInfo 报告未在本机对照.
 
+P4.1a 落点 (2026-10-29, api-cov-p4-1a; 矩阵与基线宿主 2780f3e3c): 本族 Bun 81 -> 1 (全列 753 -> 608, 其中本族 80 格, P4.2b 65 格). 本族 139 行 (app 43 + 全局 28, shell 11 + 全局 19, shizuku 13, ShellProcess# 25) Bun 列: capability-gated 138 (app.control 70, shell.control 34, shell.root 21: current* 与兼容 shell 的按键 / 手势, shell.shizuku 13), pending 1. 遗留:
+
+| 行 | Bun | 待决 |
+|---|---|---|
+| app.autojs | pending | P4.1a 遗留 (Q93 (2), 随 P4.1b 的 autojs 模块) |
+
+另: Bun 经 sync-automation / sync-shell 同步 Node 共享工厂 (Node 5afd8b02 / 30f05398), Node 能力名映射为 Bun 授权 (shell -> shell.control, app.* -> app.control, shell.root / shell.shizuku 同名), 不新增授权 (Q89); 授权关闭时在访问宿主前 reject NOT_GRANTED 并带 missingCapabilities (Q90); runtime-policy.json bun.memberCapabilities 新增 27 条 shell.* 映射. 宿主 Java 异常在 Bun 中为 HostCallError (例如 app.uninstallDual 不存在的包), 与其他 Bun 族一致, 未登记新待决. 真机 (Redmi 22120RN86C, Shizuku 运行并授权, 无 Root, 无双开用户) Rhino 对 Bun main / Worker 51 / 51 两轮, 授权关闭 14 / 14 (docs/dev/bun-app-shell-2026-10-29.md).
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).
