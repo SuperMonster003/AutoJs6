@@ -283,6 +283,14 @@ P3.2b 落点 (2026-10-29, api-cov-p3-2b; 宿主 0a39eeb3f): 本族 Node main 160
 
 另: Q61 (b) 的 dayjs / pangu / cheerio / i18n 用宿主的构建随 Node 插件 APK (每 ABI 约 0.3 MB), 与 augment P4.3 / P5.2 把同一批库移进 Bundled Libraries 插件的方向不同, 交调度会话决定是否改为从插件读取; Q79 (a) 的 storages.names / all 只列 Node 自记过的存储; Q83 的五处差异已按推荐先行, 写进 HOST-API 与 d.ts. Rhino 对照中 15 例因宿主 ColorNativeObject 抛出未解包的 InvocationTargetException 而使 Rhino 解释器失败 (try / catch 拦不住), 属宿主缺陷, 另行报告.
 
+P3.1a 落点 (2026-10-29, api-cov-p3-1a; 矩阵随 P4.1a 的宿主 2780f3e3c 写入): 本族 Node main 81 -> 1, Worker 121 -> 1 (全列 549 / 658 -> 469 / 538, 差额全部来自本族; Bun 列见 P4.1a). 本族 139 行 (app 43 + 全局 28, shell 11 + 全局 19, shizuku 13, ShellProcess# 25), Node main 与 Worker 相同: bridged 138, pending 1. 遗留:
+
+| 行 | Node main | Node Worker | 待决 |
+|---|---|---|---|
+| app.autojs | pending | pending | P3.1a 遗留 (Q93 (2), 随 P3.1b 的 autojs 模块) |
+
+另: D-4 按 Q89-Q92 (a) 复用 shell / shell.root / shell.shizuku 与 app 子能力, 新增宿主只读路由 6 个, 未加新能力; Q93 的其余形态 (fromIntent 只收 JSON 意图, 快照返回值, execCommand 结果对象, 状态查询返回 Promise) 已按推荐先行, 写进 HOST-API 与 d.ts. 真机在 Shizuku 未运行与运行并授权两种状态下对照 Rhino 全部一致; shizuku.hasService 反映宿主是否已绑定 Shizuku 用户服务 (首次经 Shizuku 执行命令时绑定), 与调用顺序有关, 不是运行时差异.
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).
