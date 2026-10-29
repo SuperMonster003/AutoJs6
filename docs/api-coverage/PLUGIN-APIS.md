@@ -84,6 +84,19 @@
 
 - 建议: 不纳入本主题 (D1 / D2 / D3 的对象是 AutoJs6 的 JS API 与 Node / Bun 矩阵, 语言层 API 是另一维度); 缺口 (Python 无 .pyi, Lua 无 LuaLS 定义, Kotlin 无 API 表, 文档站无语言 API 页) 交各插件路线图或另立项. 详见 Q2-4.
 
+#### 语言运行时 API 附表 (P5.2d, 2026-10-30)
+
+Q2-4 纳入的四个语言运行时 API 不进覆盖矩阵, 由文档页与静态门禁 `tools/api-coverage/language_runtimes.py` (Q77 (a), 宿主 3fa1fc8ad) 保证与插件一致. 门禁从各插件仓库的注册源提取名称 (Python: 包与各子模块的 `__all__`, 函数带签名; Java / Kotlin: 插件冻结的 `protocol/jvm-source-api.aar`, 从 AutoJsJvmEntry 出发取同包内经参数 / 返回 / throws 可达的类型与方法, 因为 Kotlin 锁在 Entry API 2 而宿主 HEAD 的 `JvmEntryApi.kt` 是 Entry API 4, 见附录 C Q109; Lua: 模拟 `install_autojs_module` 的建表操作), 与入库的名称清单 `tools/api-coverage/language-runtimes.json` 比对, 再与文档页的 `###` 标题和表格首格比对; 缺项, 多出的项与缺页都失败, 插件仓库不在时源码比对打印 skipped. CI 检出四个公开插件仓库运行它 (Q110). 第 2.4 节与第 6 节的 "文档 0/n" 是 P5.1 盘点时 (文档 6b1267e) 的状态.
+
+| 插件 (版本, HEAD) | 条目数 | 文档页 (文档 fee509b) | 门禁状态 |
+|---|---|---|---|
+| Python-Runtime (0.5.5, 5514e82) | 函数 46 + 常量 54 + 异常类 10 | `api/pythonRuntime.md` | 通过: 名称, 参数名 / `*` / 是否有默认值 |
+| Java-Runtime (0.8.4-m9, 67212f9) | 方法 17 + 类型 7 (Entry API 4) | `api/javaRuntime.md` | 通过: 名称, 参数个数 |
+| Kotlin-Runtime (0.7.3-m10, ea1c21d) | 方法 13 + 类型 6 (Entry API 2, 无 args / clipboard) | `api/kotlinRuntime.md` | 通过: 名称, 参数个数 |
+| Lua-Runtime (0.1.3-rc.2, 9ced281) | 函数 11 + 值 1 (arguments), 共 12 | `api/luaRuntime.md` | 通过: 名称 (C 源码无参数信息) |
+
+类型桩 (Python `.pyi`, LuaLS meta, Java / Kotlin 桩并入 Ace) 由 P5.2e 补; 门禁以同一份名称清单为基准扩展, 扩展点见 `tools/api-coverage/README.md` "Language runtime APIs (Q77)". AutoJs4 上游 API 不纳入 (Q76), autojs4Runtime.md 只给差异指引.
+
 ## 3. 没有自有脚本 API 的插件 (36 个)
 
 每行一个插件: 版本, 证据, 已在分母的宿主模块 (矩阵行数). 结论均为 "无自有脚本 API, 不纳入".
@@ -236,7 +249,7 @@ AutoJs6-Plugin-Bundled-Libraries, AutoJs6-Plugin-Three-Paper-PDF, AutoJs6-Plugin
 | P5.2a 工具表 [静态 + 1 台核对] | Three-Hanzi-CC, Yolo-NCNN, Image-Quantization, Three-Stack-Archive, Three-Macaw-Speech (5) | plugins.md "官方插件工具表" 12 行 (名称, 提供插件, 最低版本, 参数, 输出), 修正第 306 行示例 (`maxColors`, 输出 `png`); d.ts / Ace 加工具名字面量联合 (保留 string, 不计覆盖); 生成离线文档 | Documentation, Offline-Docs, TS 声明, Ace | 一台主力设备 (Redmi 或 Xiaomi) 装齐 5 个插件, `plugins.tools.list()` 核对名称与参数; Macaw 的两个说话人工具需 1.3.0 构建 (未发布时表内最低版本写 1.3.0 并只核对其余 10 个) | 可与 P5.2b / P5.2c / P5.2d 并行; Ace 索引重建与 P5.2b 排队 |
 | P5.2b JS 运行时附表 [静态] | NodeJs-Runtime, Bun-Runtime, QuickJS-Runtime (3) | runtimeApis.md 加 "运行时自有接口" 小节 (按组表格: Node 12 组 110 条, Bun 12 条, QuickJS 7 条, 重点写 scriptArgs); Node `worker_threads.WorkerPool` 补 d.ts (Node 插件 `docs/nodejs/types/autojs6-node`, TS 声明 autojs6-node 同步, Ace 捆绑副本); 本文件加附表 | Documentation, Offline-Docs, Node 插件 (d.ts), TS 声明, Ace | 无 | 与 P3 系列错开 Node 插件 d.ts 文件 (共享 checkout 先在 locks.md 登记) |
 | P5.2c 宿主分母补漏 [静态] | MLKit-OCR / Paddle / Rapid 系列, MLKit-Barcode, Three-Block-Compose (只作来源) | Q74: `returned-objects.json` 加 OcrResult# 与 WrappedBarcode# (producers 写 ocr.detect 系列与 barcode.detect 系列), 约 +27 行; Q75: `extract_exports.py` 读 compose-ui-api 目录契约 (V1Catalog / ComposeUiV2 / ComposeModifier) 生成 83 行, 核对五处覆盖; 重新生成 MATRIX.md 与 pending-baseline | 宿主 tools/api-coverage, docs/api-coverage | 无 | MATRIX 重新生成与同期其他子会话排队; 新增行若有 pending 交对应 P3 / P4 批次 |
-| P5.2d 语言运行时文档与门禁 [静态] | Python-Runtime, Java-Runtime, Kotlin-Runtime, Lua-Runtime (4) | 文档站新增语言运行时 API 页 (Python 46 函数 + 常量 / 异常, Java 17, Kotlin 13, Lua 12, 签名 + 示例); Q77 静态门禁 (tools/api-coverage 新检查约 120 行 + CI 一步, 先校验文档标题); autojs4Runtime.md 可选补差异指引 (Q76) | Documentation, Offline-Docs, 宿主 tools/api-coverage | 无 | 可与 P5.2a / b / c 并行 |
+| P5.2d 语言运行时文档与门禁 [静态] | Python-Runtime, Java-Runtime, Kotlin-Runtime, Lua-Runtime (4) | 文档站新增语言运行时 API 页 (Python 46 函数 + 常量 / 异常, Java 17, Kotlin 13, Lua 12, 签名 + 示例); Q77 静态门禁 (tools/api-coverage 新检查约 120 行 + CI 一步, 先校验文档标题); autojs4Runtime.md 可选补差异指引 (Q76) | Documentation, Offline-Docs, 宿主 tools/api-coverage | 无 | 可与 P5.2a / b / c 并行. 落点 (2026-10-30, api-cov-p5-2d): 宿主 3fa1fc8ad (门禁 + 名称清单 + CI), 文档 fee509b (四页 + autojs4Runtime 指引) / 4e9a3d7 (生成物), Offline Docs a25a1ff; 附表见 2.4 节末 |
 | P5.2e 语言类型桩与 Ace 补全 [静态 + 1 台抽查] | Python-Runtime, Lua-Runtime, Java-Runtime, Kotlin-Runtime (4) + Ace | Python `.pyi` (插件仓库), LuaLS `---@meta` 定义 (插件仓库), Java / Kotlin 接口桩并入 Ace 的 ECJ / Kotlin 补全 classpath, Ace 捆绑 Pyright / LuaLS 类型; P5.2d 门禁扩展到类型桩 | 4 个插件仓库, Ace | 一台主力设备装 Ace 与 4 个语言运行时, 在编辑器里抽查补全 (每种语言 3 个名称) | 依赖 P5.2d 的清单与门禁 |
 | P5.2f ImGui [静态 + 1 台冒烟, 约 2 个子会话] | ImGui (1) | 等维护者的 ImGui 宿主模块化会话落地: KSP 导出进分母后, 文档新增 imgui 页与对象类型页 (约 349 个标题 + 示例, 194 个别名并入驼峰条目), d.ts / Ace 由插件 imgui.d.ts 改写为模块声明 (补 4 个对象方法), Node / Bun 状态按矩阵规则 (不可移植的登记待决) | Documentation, Offline-Docs, TS 声明, Ace (宿主模块化由维护者的会话负责) | 一台主力设备装 ImGui, 文档示例冒烟 | 依赖维护者的 ImGui 会话; 文档量大可拆两批 |
 
