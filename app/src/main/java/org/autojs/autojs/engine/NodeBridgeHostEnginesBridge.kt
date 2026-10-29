@@ -82,6 +82,14 @@ internal class NodeBridgeHostEnginesBridge(
         }
     }
 
+    /** Rhino's engines.stopAllAndToast (api-coverage P3.1b): every host script stopped, with the host's toast. */
+    fun stopAllAndToast(request: NodeBridgeRequest): NodeBridgeResponse = guarded(request) {
+        JSONObject()
+            .put("schema", SCHEMA_STOP_ALL)
+            .put("scope", SCOPE_HOST)
+            .put("stopped", serviceProvider().stopAllAndToast())
+    }
+
     private fun snapshot(): List<ScriptExecution> {
         val service = serviceProvider()
         repeat(3) {

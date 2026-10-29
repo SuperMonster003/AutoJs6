@@ -603,6 +603,9 @@ data class NodeBridgeEngineInfo(
         put("packageName", packageName)
         put("versionName", versionName)
         put("versionCode", versionCode)
+        // Rhino autojs.versionDate / autojs.name as synchronous values of the JS runtimes (api-coverage P3.1b).
+        put("versionDate", org.autojs.autojs6.BuildConfig.VERSION_DATE)
+        put("appName", runCatching { org.autojs.autojs.app.GlobalAppContext.get().getString(org.autojs.autojs6.R.string.app_name) }.getOrDefault("AutoJs6"))
         put("startedAt", startedAt)
     }
 
@@ -745,7 +748,7 @@ object NodeBridgeModules {
         "getAppByAlias",
         "sendLocalBroadcastSync",
     )
-    val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop")
+    val enginesMethods = setOf("myEngine", "all", "stopAll", "stopSelf", "execScript", "execScriptFile", "list", "stop", "execAutoFile", "stopAllAndToast")
     val agentMethods = setOf("listScripts", "readManifest", "execRegistered")
     val dialogsMethods = setOf("alert", "confirm", "input", "select", "rawInput", "singleChoice", "multiChoice", "progressShow", "progressUpdate", "progressDismiss", "cancelRequest", "closeScope")
     val keysMethods = setOf("notifications", "quickSettings", "lockScreen", "takeScreenshot", "splitScreen", "powerDialog")
@@ -896,7 +899,7 @@ object NodeBridgeModules {
         FILES to filesMethods,
         CONSOLE to consoleMethods,
         PLUGIN_TOOLS to pluginToolsMethods,
-    )
+    ) + RuntimeSystemBridge.methodsByModule
 
     fun supports(module: String, method: String): Boolean {
         return supportedMethodsByModule[module]?.contains(method) == true
@@ -1012,6 +1015,10 @@ class AndroidNodeBridgeCapabilityProvider(
     private val dialogs = NodeDialogs(appContext)
     private val androidObjects = RuntimeAndroidObjects(appContext,engineInfo.cwd)
     private val calendarTasks = RuntimeTasksBridge(appContext,engineInfo.cwd)
+    private val systemBridge = lazy { RuntimeSystemBridge(appContext, ::resolveAndroidFile) }
+    private val systemExecutor = Executors.newCachedThreadPool { task ->
+        Thread(task, "AutoJs6NodeSystem").apply { isDaemon = true }
+    }
     internal fun closeAndroidObjects() = androidObjects.close()
     private val audioRecorder = lazy { NodeAudioRecorder(appContext, ::resolveAndroidFile) }
     private val mediaPlayback = lazy { NodeMediaPlayback(appContext, ::resolveAndroidFile) }
@@ -1216,6 +1223,7 @@ class AndroidNodeBridgeCapabilityProvider(
                 }) }
             }
             request.module == NodeBridgeModules.DIALOGS && request.method in NodeBridgeModules.dialogsMethods -> dispatchDialogs(request, auditedCallback)
+            request.module in RuntimeSystemBridge.methodsByModule.keys && NodeBridgeModules.supports(request.module, request.method) -> dispatchSystem(request, auditedCallback)
             request.module == NodeBridgeModules.ACCESSIBILITY && request.method in NodeBridgeModules.accessibilityMethods -> dispatchAccessibility(request, auditedCallback)
             request.module == NodeBridgeModules.SCREEN_RECORDER && request.method in NodeBridgeModules.screenRecorderMethods -> dispatchScreenRecording(request, auditedCallback)
             request.module == NodeBridgeModules.MEDIA_PROJECTION && request.method in NodeBridgeModules.mediaProjectionMethods -> dispatchMediaProjection(request, auditedCallback)
@@ -1387,6 +1395,8 @@ class AndroidNodeBridgeCapabilityProvider(
         imageDestroyed.set(true)
         if (advancedImages.isInitialized()) advancedImages.value.cancelPending()
         imageExecutor.shutdownNow()
+        systemExecutor.shutdownNow()
+        if (systemBridge.isInitialized()) systemBridge.value.close()
         screenCapture.close()
         deviceControls.close()
         eventObservers.closeAll()
@@ -1498,7 +1508,7 @@ class AndroidNodeBridgeCapabilityProvider(
             dispatchAgent(request, callback)
             return
         }
-        if (request.method == "execScript" || request.method == "execScriptFile") {
+        if (request.method == "execScript" || request.method == "execScriptFile" || request.method == "execAutoFile") {
             NodeBridgeEngineDispatchService.dispatch(
                 appContext,
                 request.withEngineExecutionContext(),
@@ -1514,6 +1524,8 @@ class AndroidNodeBridgeCapabilityProvider(
             )
             // MCP roadmap P1.3: host-process semantics only with {scope: "host"}; the plugin view stays.
             "stopAll" -> hostEnginesBridge.stopAll(request) ?: NodeBridgeResponse.success(request.id, "0")
+            // api-coverage P3.1b (Q131 (a)): Rhino's engines.stopAllAndToast, the host-wide stop with its toast.
+            "stopAllAndToast" -> hostEnginesBridge.stopAllAndToast(request)
             "list" -> hostEnginesBridge.list(request)
             "stop" -> hostEnginesBridge.stop(request)
             "stopSelf" -> NodeBridgeResponse.success(request.id, "true")
@@ -1533,7 +1545,7 @@ class AndroidNodeBridgeCapabilityProvider(
         val args = runCatching { JSONArray(argsJson) }.getOrDefault(JSONArray())
         val optionsIndex = when (method) {
             "execScript" -> 2
-            "execScriptFile" -> 1
+            "execScriptFile", "execAutoFile" -> 1
             else -> return this
         }
         val options = args.optJSONObject(optionsIndex) ?: JSONObject()
@@ -1541,6 +1553,31 @@ class AndroidNodeBridgeCapabilityProvider(
         options.put(NodeBridgeEngineDispatchService.INTERNAL_PARENT_SPAWN_DEPTH, engineInfo.spawnDepth)
         args.put(optionsIndex, options)
         return copy(argsJson = args.toString())
+    }
+
+    /**
+     * The Rhino system information family (api-coverage P3.1b): autojs, settings, sysprops, memory, installer, the notice extras and
+     * powerManager through [RuntimeSystemBridge], on threads of their own because some calls block (installer, memory.collect, settings.export).
+     * zh-CN: Rhino 系统信息族 (P3.1b) 经 [RuntimeSystemBridge] 执行, 使用独立的线程池, 因为部分调用会阻塞 (installer, memory.collect, settings.export).
+     */
+    private fun dispatchSystem(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        val task = Runnable {
+            val response = try {
+                NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(systemBridge.value.invoke(request.module, request.method, request.argsArray())))
+            } catch (error: Throwable) {
+                NodeBridgeResponse.failure(request.id, when (error) {
+                    is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Android permission denied.", request.module, request.method)
+                    is IllegalArgumentException, is org.json.JSONException -> NodeBridgeError.invalidRequest(error.message ?: "Invalid ${request.module} argument.", request.module, request.method)
+                    else -> NodeBridgeError.providerFailed(error.message ?: error.javaClass.name, request.module, request.method)
+                })
+            }
+            callback(response)
+        }
+        try {
+            systemExecutor.execute(task)
+        } catch (_: java.util.concurrent.RejectedExecutionException) {
+            callback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("${request.module.uppercase()} execution has ended")))
+        }
     }
 
     private fun dispatchDialogs(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {

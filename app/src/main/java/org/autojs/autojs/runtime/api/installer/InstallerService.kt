@@ -21,6 +21,7 @@ import org.autojs.plugin.installer.api.InstallerContract
 import org.autojs.plugin.installer.api.InstallerErrorCodes
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -33,10 +34,12 @@ import kotlin.coroutines.resumeWithException
  * V1 one-shot operations have no remote cancellation token: closing cancels their host wait and
  * releases the binding, but cannot undo an uninstall or permission action already sent to Android.
  */
-class InstallerService(context: Context, scriptRuntime: ScriptRuntime) : Closeable {
+class InstallerService(context: Context, parentContext: CoroutineContext) : Closeable {
+
+    constructor(context: Context, scriptRuntime: ScriptRuntime) : this(context, scriptRuntime.coroutineContext)
 
     private val appContext = context.applicationContext ?: context
-    private val tasks = InstallerTaskScope(scriptRuntime.coroutineContext)
+    private val tasks = InstallerTaskScope(parentContext)
     private val lock = Any()
     private val operations = mutableSetOf<InstallerOperation>()
     private val inspections = mutableSetOf<SourceLease>()

@@ -90,6 +90,17 @@ object NodeBridgePermissionManifest {
     const val EVENTS_TOAST = "events.toast"
     const val EVENTS_KEY = "events.key"
     const val KEYS = "keys"
+    // Rhino system information family (api-coverage P3.1b, Q133 (b)): one capability per module, the state-changing calls
+    // need the dotted one as well, which the module capability never implies.
+    const val AUTOJS = "autojs"
+    const val AUTOJS_CONTROL = "autojs.control"
+    const val SETTINGS = "settings"
+    const val SETTINGS_WRITE = "settings.write"
+    const val SYSPROPS = "sysprops"
+    const val MEMORY = "memory"
+    const val MEMORY_DUMP = "memory.dump"
+    const val INSTALLER = "installer"
+    const val INSTALLER_MUTATE = "installer.mutate"
 
     const val ANDROID_PERMISSION_INTERNET = "android.permission.INTERNET"
     const val ANDROID_PERMISSION_FOREGROUND_SERVICE = "android.permission.FOREGROUND_SERVICE"
@@ -186,6 +197,15 @@ object NodeBridgePermissionManifest {
         EVENTS_TOAST,
         EVENTS_KEY,
         KEYS,
+        AUTOJS,
+        AUTOJS_CONTROL,
+        SETTINGS,
+        SETTINGS_WRITE,
+        SYSPROPS,
+        MEMORY,
+        MEMORY_DUMP,
+        INSTALLER,
+        INSTALLER_MUTATE,
     )
 
     private val definedCapabilitySet = definedCapabilities.toSet()
@@ -498,7 +518,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(APP)
             }
             NodeBridgeModules.ENGINES -> when (method) {
-                "execScript", "execScriptFile" -> listOf(ENGINES, ENGINES_EXEC)
+                "execScript", "execScriptFile", "execAutoFile" -> listOf(ENGINES, ENGINES_EXEC)
                 else -> listOf(ENGINES)
             }
             NodeBridgeModules.AGENT -> when (method) {
@@ -587,6 +607,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(FILES)
             }
             NodeBridgeModules.CONSOLE -> listOf(CONSOLE)
+            in RuntimeSystemBridge.methodsByModule.keys -> RuntimeSystemBridge.capabilities(module, method)
             NodeBridgeModules.PLUGIN_TOOLS -> listOf(PLUGIN_TOOLS)
             NodeBridgeModules.EVENTS -> when (method) {
                 "observeNotification" -> listOf(EVENTS, EVENTS_NOTIFICATION)
@@ -665,6 +686,11 @@ object NodeBridgePermissionManifest {
             required == AGENT_EXEC ||
             required == AI_AGENT ||
             required == PLUGIN_TOOLS_USER_GRANTED ||
+            // api-coverage P3.1b (Q133 (b)): the state-changing system capabilities are never implied by the module one.
+            required == AUTOJS_CONTROL ||
+            required == SETTINGS_WRITE ||
+            required == MEMORY_DUMP ||
+            required == INSTALLER_MUTATE ||
             // M3.2: coordinate gestures are never implied by "accessibility".
             required == ACCESSIBILITY_GESTURE
         ) {

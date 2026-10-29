@@ -15,6 +15,7 @@ import org.autojs.autojs.AutoJs
 import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.execution.ScriptExecution
 import org.autojs.autojs.execution.ScriptExecutionListener
+import org.autojs.autojs.script.AutoFileSource
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
 import org.autojs.autojs.script.ScriptSource
@@ -137,6 +138,7 @@ class NodeBridgeEngineDispatchService : Service() {
         return when (request.method) {
             "execScript" -> executeScript(request)
             "execScriptFile" -> executeScriptFile(request)
+            "execAutoFile" -> executeAutoFile(request)
             else -> NodeBridgeResponse.failure(
                 request.id,
                 NodeBridgeError.bridgeUnavailable(request.module, request.method),
@@ -199,6 +201,32 @@ class NodeBridgeEngineDispatchService : Service() {
             overrideWorkingDirectory = true,
         )
         return startExecution(request, options, launch.source, executionConfig)
+    }
+
+    /** Rhino's engines.execAutoFile (api-coverage P3.1b, Q131 (a)): an auto file inside the scoped working directory. */
+    private fun executeAutoFile(request: NodeBridgeRequest): NodeBridgeResponse {
+        val args = request.argsArray()
+        val path = args.optString(0).takeIf { it.isNotBlank() && !it.contains('\u0000') }
+            ?: return policyFailure(request, "engines.execAutoFile requires a non-empty scoped path without NUL bytes.")
+        val options = args.optJSONObject(1) ?: JSONObject()
+        val config = try {
+            buildExecutionConfig(request, options)
+        } catch (denied: ExecutionDenied) {
+            return NodeBridgeResponse.failure(request.id, denied.error)
+        }
+        val autoFile = resolveScopedFile(config.workingDirectory, path)
+            ?.takeIf { it.isFile }
+            ?: return policyFailure(request, "engines.execAutoFile path must stay inside the scoped working directory.")
+        val source = runCatching {
+            ScriptLaunchSourceFactory.enforcePythonLaunchBoundary(autoFile.absolutePath)
+            AutoFileSource(autoFile.absolutePath)
+        }.getOrElse { error ->
+            return NodeBridgeResponse.failure(
+                request.id,
+                NodeBridgeError.permissionDenied(message = error.message ?: error.javaClass.name, module = request.module, method = request.method),
+            )
+        }
+        return startExecution(request, options, source, config)
     }
 
     /**

@@ -15,7 +15,6 @@ import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceString
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
-import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.autojs.autojs6.R
@@ -78,8 +77,19 @@ class Settings(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         fun export(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsAtMost(args, 2) {
             val (path, categories) = it
             val target = SettingsScriptExport.pathOf(path)?.let(scriptRuntime.files::nonNullPath)
-            val selection = SettingsScriptExport.select(SettingsScriptExport.categoryIds(categories))
+            val ids = SettingsScriptExport.categoryIds(categories)
             ensureNonUiThread("settings.export")
+            RhinoUtils.toJsValue(scriptRuntime.topLevelScope, exportPlain(target, ids)) as NativeObject
+        }
+
+        /**
+         * The result of `settings.export` as plain values, for an already resolved [target] (null for the default
+         * directory) and the category [ids] (null for the default categories); shared with the JS runtime bridge
+         * (api-coverage P3.1b).
+         * zh-CN: settings.export 的结果 (普通值), [target] 已解析 (null 为默认目录), [ids] 为分类 id (null 为默认分类); 与 JS 运行时桥共用 (P3.1b).
+         */
+        internal fun exportPlain(target: String?, ids: List<String>?): Map<String, Any?> {
+            val selection = SettingsScriptExport.select(ids)
             val context = ScriptRuntime.applicationContext
             val now = System.currentTimeMillis()
             val result = SettingsScriptExport.write(
@@ -91,19 +101,13 @@ class Settings(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                 SettingsExporter.host(context),
                 SettingsExporter.device(),
             )
-            val scope = scriptRuntime.topLevelScope
-            newNativeObject(scope).also { o ->
-                o.put("path", o, result.file.path)
-                o.put("categories", o, newNativeArray(scope, result.categories.toTypedArray<Any?>()))
-                o.put("entries", o, result.entries)
-                o.put("unexportable", o, result.unexportable)
-                o.put("skipped", o, newNativeArray(scope, result.skipped.map { skip ->
-                    newNativeObject(scope).also { s ->
-                        s.put("id", s, skip.id)
-                        s.put("reason", s, skip.reason.label)
-                    }
-                }.toTypedArray<Any?>()))
-            }
+            return linkedMapOf(
+                "path" to result.file.path,
+                "categories" to result.categories.toList(),
+                "entries" to result.entries,
+                "unexportable" to result.unexportable,
+                "skipped" to result.skipped.map { skip -> linkedMapOf("id" to skip.id, "reason" to skip.reason.label) },
+            )
         }
 
         /**
@@ -117,23 +121,28 @@ class Settings(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @RhinoRuntimeFunctionInterface
         fun categories(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeArray = ensureArgumentsIsEmpty(args) {
             ensureNonUiThread("settings.categories")
+            val scope = scriptRuntime.topLevelScope
+            newNativeArray(scope, categoriesPlain().map { RhinoUtils.toJsValue(scope, it) }.toTypedArray<Any?>())
+        }
+
+        /** `settings.categories()` as plain values, shared with the JS runtime bridge (P3.1b). zh-CN: 普通值形式, 与 JS 运行时桥共用. */
+        internal fun categoriesPlain(): List<Map<String, Any?>> {
             val context = ScriptRuntime.applicationContext
             val all = SettingCategory.ALL
             val entries = SettingsScriptExport.entries(
                 SettingsSnapshot.capture(all),
                 SettingsDataCapture.capture(context, all.filter { it.isData }, System.currentTimeMillis()),
             )
-            val scope = scriptRuntime.topLevelScope
-            newNativeArray(scope, entries.map { (category, count) ->
-                newNativeObject(scope).also { o ->
-                    o.put("id", o, category.id)
-                    o.put("title", o, category.titleRes.takeIf { res -> res != SettingCategory.NO_TITLE }?.let(context::getString) ?: category.id)
-                    o.put("kind", o, if (category.isData) "data" else "settings")
-                    o.put("entries", o, count)
-                    o.put("defaultSelected", o, category.defaultSelected)
-                    o.put("sensitive", o, category.sensitive)
-                }
-            }.toTypedArray<Any?>())
+            return entries.map { (category, count) ->
+                linkedMapOf(
+                    "id" to category.id,
+                    "title" to (category.titleRes.takeIf { res -> res != SettingCategory.NO_TITLE }?.let(context::getString) ?: category.id),
+                    "kind" to if (category.isData) "data" else "settings",
+                    "entries" to count,
+                    "defaultSelected" to category.defaultSelected,
+                    "sensitive" to category.sensitive,
+                )
+            }
         }
 
         private fun ensureNonUiThread(function: String) {
