@@ -120,7 +120,7 @@ P3 与 P2 可由两张卡片并行: P2 只改 `UiObject.kt` (读取缓存), `sea
 
 ### P5 发布门禁
 
-- [ ] P5.1 两台真机 (一台 API >= 33: 23046RP50C 或 OPD2413; 一台 API < 33: G8441 或预置 AVD_API_24, 覆盖节点回收分支) 上: `sample/accessibility/smoke-legacy-api.js`, P6.4 与 P4.4 的示例, `tools/selector/parity.js`, `pick_table.js` 全部通过; `device_bench.py` 一次; `:app:testAppDebugUnitTest` 通过; `:app:assembleAppDebug` 通过 (构建可长达 9 分钟, 按 AGENTS.md 等待策略); API < 33 设备上 `AccessibilityNodeInfo` 实例数在 S7b 式循环后不增长 (沿用 memory 门禁的 VMDebug 口径, +50 以内). 结果写入附录 A, 架构文档 1.7 / 1.9 更新. (DEVICE; ANDROID_BUILD)
+- [x] P5.1 两台真机 (一台 API >= 33: 23046RP50C 或 OPD2413; 一台 API < 33: G8441 或预置 AVD_API_24, 覆盖节点回收分支) 上: `sample/accessibility/smoke-legacy-api.js`, P6.4 与 P4.4 的示例, `tools/selector/parity.js`, `pick_table.js` 全部通过; `device_bench.py` 一次; `:app:testAppDebugUnitTest` 通过; `:app:assembleAppDebug` 通过 (构建可长达 9 分钟, 按 AGENTS.md 等待策略); API < 33 设备上 `AccessibilityNodeInfo` 实例数在 S7b 式循环后不增长 (沿用 memory 门禁的 VMDebug 口径, +50 以内). 结果写入附录 A, 架构文档 1.7 / 1.9 更新. (DEVICE; ANDROID_BUILD) (DEVICE 2026-10-29: 83f300268 (Q21) 的调试包 versionCode 5935 + 工具与基线 535e22dec; OPD2413 (API 35) / 23046RP50C (API 35) / G8441 (API 28, 原装 5835 已恢复, md5 一致); `:app:assembleAppDebug` 通过, `:app:testAppDebugUnitTest` 951 个类 5854 例 0 失败 27 跳过; 示例与冒烟三台 8 / 8 PASS (P4.4 两个, P6.4 其余五个, `smoke-legacy-api.js` 42 / 42, 42 / 42, 53 / 53); parity OPD2413 主界面与 23046RP50C 设置首页 `--check` 100%, 23046RP50C 主界面 99.9% (数量与顺序相同, 只有含文件数的分组标题一个节点的描述变了), G8441 两屏两次运行 100% 并存为首个 API < 33 快照; 黄金表 OPD2413 与 23046RP50C 同形状 3778 / 3778, 23046RP50C 本机基线逐行相同, G8441 3775 / 3778 (3 行为 Q16 平台差异); 基准 OPD2413 与 P3 修后同一量级, G8441 为首个 API < 33 基线; G8441 `AccessibilityNodeInfo` 320 轮后 +0; 详见附录 A "P5.1 发布门禁", 架构文档 1.4 / 1.7 / 1.9 已更新; 新待决 Q22 (已按推荐保持现状))
 
 ## 6. 红线 (全程遵守)
 
@@ -292,6 +292,46 @@ P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `
   - (4) 其余项 (full / miss / missId / missMixed / late) 与 P2 修后在同一量级, 波动大于版本差 (P3 不改遍历路径).
   - (5) 黄金表 (`device_pick_table.py --runs 2 --new-modules on --shape-against pick_table-23046RP50C.json`, P3.5 的包): 两台 3778 / 3778 行与 23046RP50C 同形状, 两次运行一致; parity `--check` 100% (22120RN86C 主界面与设置首页, OPD2413 主界面; OPD2413 设置首页为 WLAN 列表, 不可比, 同 P2); `device_accuracy.py` 14 例两台 PASS; `device_sample_explain.py` 19 项两台 PASS.
 
+### P5.1 发布门禁 (2026-10-29, P5 子会话 local_b88735f3)
+
+- 构建: 宿主 83f300268 (Q21) 的 `:app:assembleAppDebug` 与 `:app:testAppDebugUnitTest` (同一次 Gradle 调用, 共享签出, 工作区只有他人未提交的 changelog / README 文件), VERSION_BUILD 4283, versionCode 5935, arm64-v8a 包 md5 `1de778e01894e156b113dd3fbf1e7714`; 单元测试 951 个类 5854 例, 0 失败, 27 跳过 (P3 后 950 / 5851, 加 P4 的 `NodeMethodRegistrySnapshotTest` 与 Q21 的 2 例).
+- 设备与安装: OPD2413 (63751f63, ColorOS 15, API 35) 与 23046RP50C (968e9f18, HyperOS, API 35) 由 e8fe4494e 的调试包 `adb install -r` 换装; G8441 (BH900ASK9E, Android 9, API 28) 先把原装 5835 的 `base.apk` 拉到本机 (md5 `5e836c4d7727f7a4a3ef6d4f613f85fe`), 再装调试包, 全部跑完后 `install -r -d` 恢复并核对 md5. 三台的宿主无障碍服务都在启用列表中, 装包后自动重新绑定, 未请维护者操作 (23046RP50C 停在图案锁屏, 由维护者解锁两次).
+- 命令: `py -3.12 -I tools/selector/<脚本> -s SERIAL`, parity / 黄金表 / 准确率 / 基准加 `--new-modules on` (3b 之后只写一个不再被读取的偏好, 照旧传以对应新层的基线文件名), OPD2413 的基准加 `--settings-package com.oplus.wirelesssettings`; 示例与冒烟用 `device_sample_explain.py` (本次扩展为 8 个: P4.4 的 2 个, 前序 P6.4 的其余 5 个, `sample/accessibility/smoke-legacy-api.js`), 节点实例数用新脚本 `device_node_instances.py`.
+
+| 项 | OPD2413 API 35 | 23046RP50C API 35 | G8441 API 28 |
+| --- | --- | --- | --- |
+| 注册表 (`device_registry.py`) | PASS, 206 个名称 | PASS, 206 个名称 | PASS, 205 个名称 (不含 `getExtraRenderingInfo`, Q16) |
+| 示例 (P4.4: explain 22 项, normalize 20 项; P6.4: flow 10, form 13, list 9, string 13, events 7) | 7 / 7 PASS | 7 / 7 PASS | 7 / 7 PASS |
+| `smoke-legacy-api.js` | PASS 42 / 42 (没有无人值守启动方式, 服务重启的 11 项跳过) | PASS 42 / 42 (同左) | PASS 53 / 53 (含服务重启) |
+| parity (`device_parity.py --runs 2`) | 主界面 `--check` 100% (P2 的修前快照, build 4283), 两次运行 100%; 设置首页为 WLAN 扫描列表, 不比 (同 P2) | 设置首页 `--check` 100%; 主界面 `--check` 99.9%: 710 个节点数量与顺序都相同, 只有 DFS 第 60 个节点 (文件分组标题 `title_container`, 描述含脚本目录的文件数 `文件 [ N ]`, 10-25 录快照后文件数变了) 的指纹不同, 涉及它的 5 个用例 (`full` / `fullBfs` / `idMatch` / `descMatch` / `leaves`) 在同一位置差这一个节点; 两次运行 100% | 无修前快照 (见读数 (3)); 修后主界面与设置首页两次运行 100%, 存为首个 API < 33 快照 `parity-G8441-main.json` / `parity-G8441-settings.json` (设置首页改正启动方式后 `--check` 再跑一次 100%) |
+| 轮询入口 7 例与 `find()` 一致, 快路径不一致计数 | PASS, 0 | PASS, 0 | PASS, 0 |
+| 文本 / id 查找漏查 (parity `coverage`, 主界面) | 文本 39 漏 0, id 40 漏 0 | 文本 191 漏 143 (WebView 内容), id 27 漏 0 | 文本 170 漏 143 (WebView 内容), id 22 漏 0 |
+| 黄金表 (`device_pick_table.py --runs 2`) | 两次一致; 与 23046RP50C 同形状 3778 / 3778 | 两次一致; `--check` 本机基线 3778 / 3778 行逐行相同 | 两次一致; 与 23046RP50C 同形状 3775 / 3778, 不同的 3 行都是 Q16 的平台差异 (`sweep` 的 `getExtraRenderingInfo` 两行改报 RangeError, `getAvailableExtraData` 一行为空列表) |
+| 准确率 (`device_accuracy.py`, 14 例) | PASS | - | PASS |
+| 基准 (`device_bench.py`, 见下表) | PASS (`bench-OPD2413-p5.json`) | - | 主界面 / 悬浮窗 PASS (`bench-G8441-p5.json`), 设置首页 PASS (`bench-G8441-p5-settings.json`; 同一次运行中的设置首页停在桌面, 见读数 (4)) |
+| `AccessibilityNodeInfo` 实例数 (`device_node_instances.py`, 预热 20 轮 + 300 轮, VMDebug) | - (API 33+ 不池化, VMDebug 为隐藏 API) | - | PASS: 开始 672, 预热结束 1214, 一半 1214, 结束 1214, 增长 +0 (门槛 +50); 320 轮 145 s, 读到 57280 个节点, 每轮查询均得到预期结果 |
+
+基准 (同 "P3 修后" 的列; OPD2413 两行为 P3 修后 `-p3b` 与本次 `-p5`, 同一设备同一场景; G8441 为首次, 作为 API < 33 的基线; 括号外是每次查询的进程 CPU 中位数, Q15 比值为 `findOne600Id` / `findOne600` 的 CPU, 括号内是 10 轮累计的 `fastPath.walks`):
+
+| 设备 | 场景 (节点) | full / miss / missId / missMixed / hit / late (ms) | `refresh` ms | `findOne600` 尝试 / CPU ms | `findOne600Default` 尝试 / CPU ms | CPU 固定 50 ms / 默认 (尝试) | 事件风暴 CPU 默认 / 固定 50 ms (尝试), 空闲 | Q15 比值 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| OPD2413 `-p3b` | 设置首页 (122) | 3.479 / 1.208 / 1.296 / 1.227 / 1.033 / 1.259 | 0.202 | 12 / 86.5 | 5.5 / 33 | 14.6% (181) / 5.4% (64.5) | - | 61 / 86.5 = 0.71 (28) |
+| OPD2413 `-p5` | 设置首页 (121) | 2.837 / 0.666 / 0.878 / 0.908 / 0.601 / 1.151 | 0.211 | 12 / 59 | 6 / 30.5 | 14.45% (181) / 5.55% (65.5) | - | 57.5 / 59 = 0.97 (19) |
+| OPD2413 `-p3b` | AutoJs6 主界面 (151) | 2.955 / 0.647 / 0.958 / 1.185 / 0.437 / 0.809 | 0.17 | 13 / 183.5 | 6 / 101 | 27.65% (186) / 12.45% (62) | - | 124 / 183.5 = 0.68 (10) |
+| OPD2413 `-p5` | AutoJs6 主界面 (151) | 2.337 / 0.666 / 0.871 / 1.337 / 0.388 / 0.881 | 0.162 | 13 / 186.5 | 6 / 103.5 | 29.6% (186) / 16.65% (62) | - | 129 / 186.5 = 0.69 (19) |
+| OPD2413 `-p3b` | 悬浮窗 300 TextView (305) | 5.09 / 1.343 / 1.838 / 3.518 / 2.489 / 3.159 | 0.441 | 11 / 81 | 5 / 45 | 17.95% (168) / 7.15% (63) | 39.85% (121.5) / 40.9% (124), 32% | 77.5 / 81 = 0.96 (92) |
+| OPD2413 `-p5` | 悬浮窗 300 TextView (305) | 4.975 / 1.335 / 1.297 / 1.492 / 0.866 / 2.509 | 0.305 | 11 / 82 | 5.5 / 42 | 18.35% (167) / 7.6% (63) | 40.7% (122) / 41.4% (124), 31% | 72 / 82 = 0.88 (98) |
+| G8441 `-p5` | 设置首页 (25) | 4.478 / 1.798 / 1.857 / 6.165 / 7.643 / 8.212 | 2.153 | 10.5 / 58.5 | 5 / 34.5 | 9.75% (148) / 4.25% (59) | - | 72 / 58.5 = 1.23 (59) |
+| G8441 `-p5` | AutoJs6 主界面 (641) | 8.896 / 10.317 / 8.521 / 11.494 / 8.211 / 8.93 | 1.009 | 8 / 301 | 5 / 173 | 43.55% (121.5) / 24.35% (57) | - | 237.5 / 301 = 0.79 (34) |
+| G8441 `-p5` | 悬浮窗 300 TextView (303) | 65.851 / 58.675 / 64.653 / 45.989 / 54.751 / 59.851 | 4.497 | 6 / 260 | 4 / 164.5 | 38.1% (90.5) / 21.3% (50) | 98.25% (80) / 98.35% (79), 86.9% | 267.5 / 260 = 1.03 (29) |
+
+- 读数:
+  - (1) OPD2413 `-p5` 与 `-p3b` 在同一量级, 差别不大于两次运行间的波动 (P3 修后 (4)): 安静主界面 10 s CPU 固定 50 ms 29.6% -> 默认 16.65% (P3 修后 27.65% -> 12.45%); 默认的 `findOne(600)` 尝试 5.5-6 次 (固定 50 ms 为 11-13 次); 事件风暴下默认与固定 50 ms 的尝试数持平 (122 / 124); `refresh()` 0.16-0.31 ms. Q15 比值主界面 0.69 / 悬浮窗 0.88 (P2 为 0.63 / 1.14); 设置首页 0.97 (`-p3b` 0.71, `-p3` 1.00): 该页是 WLAN 扫描列表, 节点随扫描变化, 比值在三次之间摆动.
+  - (2) G8441 (API 28): 主界面 641 个节点的 `full` 8.9 ms, 宿主自己的悬浮窗 303 个节点 `full` 65.9 ms / `refresh()` 4.5 ms (同一窗口在 OPD2413 上为 5.0 / 0.3 ms; 原因未查). 事件辅助的收益在两处都有: 安静主界面 CPU 43.55% -> 24.35%, 悬浮窗 38.1% -> 21.3%, `findOne(600)` 尝试 8 -> 5 / 6 -> 4; 事件风暴下尝试数持平 (80 / 79), CPU 都约 98% (空闲 86.9%, 主要是悬浮窗每 16 ms 的绘制). Q15 比值主界面 0.79, 悬浮窗 1.03 (该窗口上查找与遍历相当, 自适应改为遍历 29 次), 设置首页 1.23: 该页只有 25 个节点, 一次 id 查找 (`lookupId`) 9.4 ms / CPU 5.2 ms, 一次未命中的遍历 1.8 ms / CPU 0.8 ms, 自适应每个查询重新判定, 每个 600 ms 的查询在改为遍历之前约做 2.5 次查找 (10 轮累计查找 25 次, 遍历 59 次), 比不走快路径的 `text` 轮询每次查询多约 13 ms CPU (+23%), 登记为附录 C Q22.
+  - (3) G8441 没有修前对照: 原装 5835 (build 4183) 在打开新脚本模块层开关 (`--new-modules on`) 后, 经 `RunIntentActivity` 运行的脚本在引擎初始化时报 `lateinit property augmentedApp has not been initialized` (两次 parity 都没有结果文件), 该开关与 augment 层已在 3b (37b93d893) 删除, 与本期无关; 开关随后在调试包上改回原值 (false), 原装包恢复后照旧.
+  - (4) 门禁中途的两处工具问题 (已修, 与宿主无关): `smoke-legacy-api.js` 会 `click()` 主界面的一个控件并 `scrollDown()`, 先跑示例再跑 parity 时 OPD2413 主界面 `--check` 只有 8.8% (列表滚下去了), 滚回顶部后 100%, 门禁改为先 parity 后示例 (README 已注明); API 28 上 `am start -S -a android.settings.SETTINGS` 报 "Intent does not match any activities" (只写在 stderr), `_device.screen_settings` 改为此时用解析出的组件 `-n` 启动, G8441 的设置首页由此才是设置应用 (改正前基准的设置首页场景两次停在桌面).
+  - (5) 观察 (非本期, 未登记): "字符串选择器与惰性迭代" 第 4 节捕获的语法错误, `e.message` 前带 Java 类名 (`org.autojs...SelectorStringException: Invalid selector string at 8 ...`), 且控制台另有一条 W 级的同一消息与堆栈 (`ScriptErrorMapper` 的调试输出, 模块层 `ScriptModuleInstallation.guarded`); 示例的核对项按 "含出错位置与候选键名" 判定, 三台都通过.
+
 ## 附录 B: 立项选择题记录 (2026-10-25)
 
 | 题 | 问题 | 维护者选择 | 落入 |
@@ -335,6 +375,7 @@ P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `
 | Q19 | P3.2 的校验范围: `exists()` 是否也刷新校验 | (1) 推荐 (已先行, 4acdced3d): 不校验, `exists()` 即 `findOnce(0) != null`, 与 `find()` / `findOnce(index)` 一样返回搜索所见, 刚离开窗口的节点在服务缓存更新前仍算存在; (2) `exists()` 与 `findOnce()` 一样刷新并重找 (每次多一次 IPC, 节点离开时最多再搜索 2 次) | P3.2, P4.2 | 小 | 已决 (2026-10-26 08:48, 维护者选 (1) 保持现状) |
 | Q20 | 命中刷新失败后的重找不等待: OPD2413 (ColorOS 15) 上界面变化后, 服务的节点缓存在一段时间内仍给出已移除的节点 (真机用例在变化后等 300 ms 才稳定), 这段时间内 `findOnce()` 连续重找 2 次都拿到旧节点时返回 null (P3.2 之前返回失效的旧节点) | (1) 推荐 (已先行, 4acdced3d): 保持立即重找; `findOne(timeout)` / `untilFindOne()` 在剩余时间内继续轮询, 能拿到新节点; (2) `findOnce()` 重找前等一个界面事件或 50 ms; (3) 重找前清空服务的节点缓存 | P3.2, P4.2 | 小 | 已决 (2026-10-26 08:48, 维护者选 (1) 保持现状) |
 | Q21 | 字符串选择器中可变参数的键 (`prefer`, `action`) 不按逗号拆分多个值: `select('prefer=visible,center')` 抛出 `Unknown key of prefer: "visible,center"` (P4.2 的 JVM 探针, 2026-10-29); 按源码, `action=CLICK,SET_TEXT` 不报错, 而是作为一个名为 `ACTION_CLICK,SET_TEXT` 的行为判断, 不匹配任何控件. 原因: `SelectorStringParser` 只在整值调用得到 NO_MATCHING_OVERLOAD 时才按逗号拆分, 可变参数的键以单个值调用总能匹配重载. `select` 文档写的是 "多参数的键以逗号分隔值" | (1) 推荐 (未先行, 属宿主代码, 超出 P4 文档范围): 条目为可变参数且值未加引号含逗号时先按逗号拆分 (`prefer=visible,center`, `action=CLICK,SET_TEXT`), 加 2 条 JVM 用例, 文档 `select` 与 `prefer` 两节各改一句; (2) 保持现状, 文档写明字符串选择器中 `prefer` 只能给一个键 (已按此写入文档 d163293), `action` 同样补一句 | P4.2 (文档), P5.1 (改代码后重跑单测) | (1): `SelectorStringParser` 一处约 5 行 + 2 条用例 + 文档两句, 小; (2): 文档一句 | 已决 (2026-10-29 07:50, 维护者选 (1) 修解析器, 实施提交 83f300268) |
+| Q22 | 快路径按查询自适应 (Q17) 在节点很少且 id 查找贵的屏幕上仍比不走快路径更费: G8441 (API 28) 设置首页 25 个节点, 一次 id 查找 (`lookupId`) 9.4 ms / CPU 5.2 ms, 一次未命中的遍历 1.8 ms / CPU 0.8 ms; 每个查询重新判定, 改为遍历之前约做 2.5 次查找, `id(...).findOne(600)` 每次查询的 CPU 72 ms 对 `text(...).findOne(600)` 58.5 ms (+23%, 约 13 ms); 其余场景 (OPD2413 三屏, G8441 主界面 / 悬浮窗) 比值 0.69-1.03 (P5.1 门禁, 附录 A "P5.1 发布门禁") | (1) 推荐 (已先行, 即不改): 保持每个查询独立判定, 在文档 / 架构文档写明小树上的这一开销 (已写入架构文档 1.9); (2) 在 bridge 内按根节点包名记住 "查找更贵" 的判定一段时间 (例如 10 s), 后续查询直接遍历; (3) 树的节点数低于阈值 (例如 50, 取自上一次完整遍历) 时不走快路径 | 快路径 (P2.3 / Q15 / Q17), P5.1 的基准 | (1): 无; (2): `FastPath` 判定移到 bridge 级账本, 约 30 行 + JVM 用例 + 三台 bench 重跑, 中; (3): `FastPath` 一处约 10 行 + 用例 + bench 重跑, 小, 但阈值是经验值 | 已按推荐先行待确认 (2026-10-29, P5 子会话 local_b88735f3) |
 
 ## 附录 D: 协同约束 (2026-10-25 登记)
 
@@ -453,5 +494,19 @@ P0.1 / P0.2 / P0.3 落地时填写: 设备, 宿主构建号, 日期, 三场景 `
   - P4.1 终稿补充 (维护者写入 changelog 时): `UiSelector#normalize` 与 `UiSelector#prefer` 两条 feature 末尾可加 `(参阅 示例代码 > 无障碍服务 > 选择器规范化与候选偏好)`, 与 explain 条目的 "参阅 示例代码 > 无障碍服务 > 选择器诊断与节点树导出" 一致.
   - 待决: 无新登记 (字符串选择器的多键 `prefer` 已是 Q21; 改选 (1) 后可把新示例第 13 节的 `select('text=提交 prefer=enabled')` 改回多键, 并在 `device_sample_explain.py` 相应核对项上保持 `13. true true true`).
   - 设备: 两台未改设置, 推送的示例与探针已删除 (OPD2413 上本会话新建的 `/sdcard/Download/aj6-selector` 空目录一并删除); 维护者操作: 连接并解锁 OPD2413.
-- P5 子会话 local_b88735f3 (selector-p5-p5-1-q21, Opus 5.5): 进行中; 本地提交均未推送:
+- P5 子会话 local_b88735f3 (selector-p5-p5-1-q21, Opus 5.5): Q21 实施, P5.1 勾选; 本地提交均未推送: 宿主 83f300268 (Q21), a2dca7500 (Q21 已决), 535e22dec (门禁工具, 基线与架构文档), 以及本条所在的 roadmap 提交; 文档 185724a + ffd5c2c (版本 170); 离线文档插件 f6e5e39 (VERSION_BUILD 208).
   - Q21 (完成): 宿主 83f300268 (`SelectorStringParser`: 条目的属性有可变参数重载 (`prefer`, `action`) 且值未加引号含逗号时, 先以拆分后的各部分调用, 其余属性仍是整值不匹配时才拆分; JVM 用例 `commaValuesOfPreferAreSeveralKeys` / `commaValuesOfActionAreSeveralActions`, 含引号的值不拆分; 示例 "选择器规范化与候选偏好" 第 13 节改回 `select('text=提交 prefer=enabled,top')`, 文件头注释补 "多个键以逗号分隔"); 文档 185724a (`prefer` 节改为 "多个偏好键以逗号分隔 (不加空格与引号), 如 `prefer=visible,center`"; `select` 节 "多参数的键以逗号分隔值 (不加引号)" 并举 `prefer` / `action` 两例, 补一个 `prefer=visible,center` 的示例行; 同节错误消息示例的 `unknown key` 改为实际的 `unknown property`) + ffd5c2c (版本 170); 离线文档插件 f6e5e39 (VERSION_BUILD 208, `--verify-offline` 单测与 debug / release APK 门禁通过; 同时带上文档 14714fa 尚未打包的 `speech.speaker` 两页). selector 包 5 个 JVM 类 52 例通过.
+  - P5.1 发布门禁 (完成): 结果与数字见附录 A "P5.1 发布门禁". 83f300268 的 `:app:assembleAppDebug` 与 `:app:testAppDebugUnitTest` (951 个类 5854 例, 0 失败, 27 跳过) 通过; OPD2413 / 23046RP50C (API 35) 与 G8441 (API 28) 上注册表, 8 个示例与冒烟, parity, 黄金表全部通过 (23046RP50C 主界面 parity 99.9%: 节点数量与顺序相同, 只有含文件数的分组标题一个节点的描述在 10-25 录快照后变了); OPD2413 与 G8441 的准确率 14 例与基准 PASS; G8441 `AccessibilityNodeInfo` 实例数 320 轮后 +0 (门槛 +50). 门禁中没有能归到本期改动的失败, 未改宿主代码.
+  - 门禁工具 (535e22dec): `device_sample_explain.py` 扩展为 8 个样本 (P6.4 的 flow / form / list / string / events 与 `smoke-legacy-api.js`); 新脚本 `device_node_instances.py` (VMDebug 实例数, 预热 + 300 轮本期各类查询); `_device.screen_settings` 在 API 28 上 `am start -S -a` 解析失败时改用组件启动 (改正前 G8441 的设置首页基准停在桌面); README 注明冒烟会滚动主界面, 门禁中先 parity 后示例. 新基线: `bench-OPD2413-p5.json`, `bench-G8441-p5.json` (主界面与悬浮窗; 其中的设置首页场景失败, 以 `bench-G8441-p5-settings.json` 为准), `parity-G8441-main.json` / `parity-G8441-settings.json` (修后构建, 首个 API < 33 快照).
+  - 原装 5835 (G8441) 不能录修前 parity: `--new-modules on` 打开该版本的新脚本模块层开关后, 经 `RunIntentActivity` 运行的脚本在引擎初始化时报 `lateinit property augmentedApp has not been initialized` (开关与 augment 层已在 3b 删除, 与本期无关); 开关在调试包上改回 false, 恢复原装后 `device_registry.py` 能正常运行 (结果为该版本的旧注册表形态). OPD2413 / 23046RP50C 上工具写的该偏好也都恢复为 false.
+  - 观察 (非本期, 未登记): "字符串选择器与惰性迭代" 第 4 节捕获的语法错误, `e.message` 前带 Java 类名, 控制台另有一条 W 级的同一消息与堆栈 (`ScriptErrorMapper` 的调试输出, 模块层 `ScriptModuleInstallation.guarded`); 示例仍按 "含出错位置与候选键名" 通过. 如需处理属 augment / 模块层主题.
+  - 待决: 新登记 Q22 (G8441 设置首页 25 个节点上快路径按查询自适应仍比不走快路径多约 13 ms / 查询, +23%; 已按推荐 (1) 保持现状先行待确认).
+  - 设备: OPD2413 与 23046RP50C 留着 83f300268 的调试包 (versionCode 5935), 宿主无障碍服务在启用列表中; G8441 已恢复原装 5835 (md5 `5e836c4d7727f7a4a3ef6d4f613f85fe` 与备份一致, 服务重新绑定); 三台 `/sdcard/Download/aj6-selector` 已删除. 维护者操作: 23046RP50C 解锁两次, 该机的息屏时间若为本次调长, 可改回.
+
+#### roadmap 完成与维护者待办 (2026-10-29, P5 子会话 local_b88735f3)
+
+- P0-P5 共 24 条全部勾选; 附录 C Q1-Q21 已决, Q22 已按推荐先行待确认 (由调度会话出题).
+- 未推送的宿主提交: 本主题的提交自 25996d7d2 (P0.1, 2026-10-25) 至 535e22dec 与本条所在的 roadmap 提交, 约 41 笔, 与其他主题的提交交错 (该区间共 123 笔); 宿主 master 相对 private/master 共领先 2168 笔 (含其他主题), 推送由维护者决定.
+- 关联仓库的本地提交 (均未推送): 文档 `AutoJs6-Documentation` d163293 / 83c5368 (P4.2, 版本 169), 185724a / ffd5c2c (Q21, 版本 170); 离线文档插件 `AutoJs6-Plugin-Offline-Docs` 774fb55 (VERSION_BUILD 207), f6e5e39 (208); 声明 `AutoJs6-TypeScript-Declarations` 0c4b188 (4.84.0); Ace `AutoJs6-Plugin-Ace-Editor` 5847c8b (2.46.0, VERSION_BUILD 336). 四个仓库此后都有其他主题的提交.
+- zh-Hans changelog 终稿待写入: `.changelog/lang_zh-Hans.json`, `README.md`, `.readme/README-zh-Hans.md`, `CHANGELOG*.md` 仍有他人未提交的改动, 本主题不碰; 终稿在本节 2026-10-29 P4 文档子会话条目 "P4.1 changelog 终稿 (待维护者写入)" 与 P4 示例子会话条目的补充 (normalize / prefer 两条加 "参阅 示例代码"); Q21 落地后, `UiSelector#prefer` 条目可在 "并支持全局方法及对象选择器写法" 处改为 "并支持全局方法, 对象选择器及选择器字符串语法 (多个偏好键以逗号分隔)". 写入后按 AGENTS.md 更新日志第 8 条生成 zh-Hans 的 Markdown.
+- 其他 9 种语言的 changelog 由维护者在 zh-Hans 定稿后同步 (记忆: 6.8.0 仅重写 zh-Hans).
