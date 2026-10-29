@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
+import {hostExports} from './host-exports.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..'), workspace = resolve(root, '..');
 const node = resolve(workspace, 'AutoJs6-Plugin-NodeJs-Runtime'), bun = resolve(workspace, 'AutoJs6-Plugin-Bun-Runtime');
 const read = path => readFileSync(path, 'utf8');
@@ -15,11 +16,10 @@ const speech = create(() => { throw Error('Coverage inspection must not call the
 const types = read(resolve(node, 'docs/nodejs/types/autojs6-node/speech.d.ts'));
 const docs = read(resolve(workspace, 'AutoJs6-Documentation/api/runtimeApis.md')).split('## Node.js / Bun / Worker 的语音识别与模型管理')[1];
 assert(docs, 'Speech runtime documentation');
+const exported = hostExports();
 let count = 0;
-for (const [name, api] of [['Speech', speech], ['SpeechModels', speech.models]]) {
-  const rhino = read(resolve(root, 'app/src/main/java/org/autojs/autojs/runtime/api/augment/speech', name + '.kt'));
-  const declarations = rhino.split('override val selfAssignmentFunctions = listOf(')[1].split('\n    )')[0];
-  for (const [, method] of declarations.matchAll(/::(\w+)\.name/g)) {
+for (const [name, api] of [['speech', speech], ['speech.models', speech.models]]) {
+  for (const method of exported.functions(name)) {
     assert.equal(typeof api[method], 'function', `Missing ${name}.${method}`);
     assert(types.includes(method + '('), `Missing speech declaration ${method}`);
     assert(docs.includes(method), `Missing speech documentation ${method}`); count++;

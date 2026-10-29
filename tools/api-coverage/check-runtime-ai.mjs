@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
+import {hostExports} from './host-exports.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'), workspace=resolve(root,'..');
 const node=resolve(workspace,'AutoJs6-Plugin-NodeJs-Runtime'), bun=resolve(workspace,'AutoJs6-Plugin-Bun-Runtime');
 execFileSync(process.execPath,[resolve(bun,'tools/host-client/sync-ai.mjs'),'--check'],{stdio:'inherit'});
@@ -12,9 +13,9 @@ const first=source.indexOf('  // Shared AI facade.'),last=source.indexOf('  // E
 assert(first>=0&&last>first);
 const ai=new Function(source.slice(first,last)+';return __autojs6_create_ai;')()(()=>{throw Error('Unexpected host call');});
 const names=['ask','chat','stream','session','catalog'];
-const registered=read(resolve(root,'app/src/main/java/org/autojs/autojs/runtime/api/augment/ai/Ai.kt'))
-  .split('override val selfAssignmentFunctions = listOf(')[1].split(')')[0];
-assert.deepEqual([...registered.matchAll(/::(\w+)\.name/g)].map(x=>x[1]).sort(),names.slice().sort());
+const exported=hostExports();
+assert.deepEqual(exported.functions('ai'),names.slice().sort());
+assert.deepEqual(exported.names('ai','Getters'),['agent']);assert(exported.module('ai').callable);
 const types=read(resolve(node,'docs/nodejs/types/autojs6-node/ai.d.ts'));
 const docs=read(resolve(workspace,'AutoJs6-Documentation/api/ai.md')).split('## Node.js, Bun 和 Worker')[1];
 assert(docs);

@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import {hostExports} from './host-exports.mjs';
 const host = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const workspace = path.dirname(host);
 const nodeRoot = path.resolve(process.argv[2] || path.join(workspace, 'AutoJs6-Plugin-NodeJs-Runtime'));
@@ -66,10 +67,8 @@ for(const [name,expected,actual] of groups) {
   assert.deepEqual(sorted(actual),expected,`${name}: Node client/host drift`);
   assert.deepEqual(sorted(bun.HOST_API_METHODS[name]),expected,`${name}: Bun client/host drift`);
 }
-const openccSource = read(path.join(host,'app/src/main/java/org/autojs/autojs/runtime/api/augment/opencc/OpenCC.kt'));
-const openccRegistrations = openccSource.match(/selfAssignmentFunctions = listOf\(([\s\S]*?)\)/);
-assert(openccRegistrations,'Rhino OpenCC registration changed');
-const openccMethods = sorted([...openccRegistrations[1].matchAll(/::(\w+)\.name/g)].map(item => item[1]));
+const exported = hostExports();
+const openccMethods = exported.functions('opencc');
 const conversionTypes = openccMethods.filter(name => name !== 'convert');
 const nativeTypes = read(path.join(host,'plugin-api/opencc-api/src/main/java/org/autojs/plugin/opencc/api/OpenccConversionTypes.kt'));
 const nativeConstants = Object.fromEntries([...nativeTypes.matchAll(/const val (\w+) = "([^"]+)"/g)].map(item => [item[1],item[2].toLowerCase()]));
@@ -79,7 +78,7 @@ const nativeNames = [...nativeAll[1].matchAll(/\b[A-Z][A-Z0-9_]*\b/g)].map(item 
   assert(nativeConstants[item[0]],`Unresolved OpenCC type: ${item[0]}`);
   return nativeConstants[item[0]];
 });
-const plans = read(path.join(host,'app/src/main/java/org/autojs/autojs/runtime/api/augment/opencc/OpenccConversionPlan.kt'));
+const plans = read(path.join(host,'app/src/main/java/org/autojs/autojs/runtime/api/modules/opencc/OpenccConversionPlan.kt'));
 const planNames = [...plans.matchAll(/"([a-z0-9]+)" to listOf\(/g)].map(item => item[1]);
 assert.deepEqual(sorted([...nativeNames,...planNames]),conversionTypes,'Host conversion plans differ from Rhino exports');
 assert.match(read(path.join(engine,'NodeOpenccBridge.kt')),/val METHODS[^=]*= setOf\("convert"\) \+ OpenccConversionPlan\.supportedNames/);
@@ -140,9 +139,7 @@ assert.deepEqual(sorted(keys(bunClient.images)),sorted([
   ...bun.HOST_API_METHODS['image.process'],...bun.HOST_API_METHODS['image.files'],
   ...nodeImageAdaptors,'fromBytes','toBytes','captureScreen','getScreenCaptureOptions',
 ]),'Bun public image wrapper drift');
-const imageRegistration=read(path.join(host,'app/src/main/java/org/autojs/autojs/runtime/api/augment/images/Images.kt'))
-  .split('override val selfAssignmentFunctions = listOf(')[1].split('override val selfAssignmentJavaClasses')[0];
-const imageExports=sorted([...imageRegistration.matchAll(/::(\w+)\.name/g)].map(match=>match[1]));
+const imageExports=exported.functions('images');
 for(const name of imageExports) for(const [runtime,api] of [['Node',node.images],['Bun',bunClient.images]])
   assert.equal(typeof api[name],'function',`${runtime}: missing registered images.${name}`);
 const imageExtensions = new Function('return ('+segment('  function __autojs6_image_extensions(', '  function __autojs6_limited_image(')+')')();

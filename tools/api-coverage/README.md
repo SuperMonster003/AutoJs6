@@ -24,6 +24,14 @@ T10). `check.py` compares those names with the associated
 documentation pages, resolves their real TypeScript symbols, and queries the
 plugin's actual semantic and static completion providers.
 
+The structural checks `check-runtime-ai`, `-ai-agent`, `-bridges`, `-epub`, `-mail`,
+`-speech` and `-tts` (`.mjs`) take the host's registered names from the `exports.json`
+of the same `check.py` run (`host-exports.mjs`; `AUTOJS6_API_COVERAGE_EXPORTS` selects
+another file), not from Kotlin sources: run `check.py` first. They fail when the file
+is missing, was not read from `script-modules.json` or is older than it. CI runs them
+after `check.py` in the same step. The `ai.agent` roots are not in the metadata (the
+object is built by `AiAgent.createObject`) and stay listed in the script (Q46).
+
 `node tools/api-coverage/check-runtime-bridges.mjs` compares the real Node client
 exports and Bun SDK method table with the host's Pinyin, Pinyin4j, coordinate and
 console control routes, all OpenCC names and image routes. OpenCC checks invoke

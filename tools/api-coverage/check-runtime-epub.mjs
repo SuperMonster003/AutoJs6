@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
+import {hostExports} from './host-exports.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..'), workspace = resolve(root, '..');
 const node = resolve(workspace, 'AutoJs6-Plugin-NodeJs-Runtime'), bun = resolve(workspace, 'AutoJs6-Plugin-Bun-Runtime');
@@ -16,10 +17,8 @@ const epub = factory(() => { throw Error('Export inspection must not call the ho
 const types = read(resolve(node, 'docs/nodejs/types/autojs6-node/epub.d.ts'));
 const docs = read(resolve(workspace, 'AutoJs6-Documentation/api/runtimeApis.md')).split('## Node.js / Bun / Worker 的 EPUB')[1];
 assert(docs, 'EPUB runtime reference missing');
-const rhino = read(resolve(root, 'app/src/main/java/org/autojs/autojs/runtime/api/augment/epub/Epub.kt'));
-const registrations = rhino.split('override val selfAssignmentFunctions = listOf(')[1].split('\n    )')[0];
 let count = 0;
-for (const [, method] of registrations.matchAll(/::(\w+)\.name/g)) {
+for (const method of hostExports().functions('epub')) {
   assert.equal(typeof epub[method], 'function', 'Missing EPUB method ' + method);
   assert(types.includes(method + '('), 'Missing EPUB declaration ' + method);
   assert(docs.includes(method), 'Missing EPUB documentation ' + method);

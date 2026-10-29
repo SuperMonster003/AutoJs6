@@ -3,6 +3,7 @@ import {readFileSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
+import {hostExports} from './host-exports.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),workspace=resolve(root,'..');
 const node=resolve(workspace,'AutoJs6-Plugin-NodeJs-Runtime'),bun=resolve(workspace,'AutoJs6-Plugin-Bun-Runtime');
@@ -13,11 +14,9 @@ const a=source.indexOf('  // Shared mail facade.'),z=source.indexOf('  // End sh
 assert(a>=0&&z>a);
 const factory=new Function(source.slice(a,z)+';return __autojs6_create_mail;')();
 const mail=factory(()=>{throw Error('Export inspection must not call the host');});
-const rhino=read(resolve(root,'app/src/main/java/org/autojs/autojs/runtime/api/augment/mail/Mail.kt'));
-const registrations=rhino.split('override val selfAssignmentFunctions = listOf(')[1].split('\n    )')[0];
-const names=[...registrations.matchAll(/::(\w+)\.name/g)].map(item=>item[1]);
-const forwarded=[...rhino.match(/val FORWARDED: List<String> = listOf\(([\s\S]*?)\n        \)/)[1].matchAll(/"(\w+)"/g)].map(item=>item[1]);
-for(const name of forwarded){names.push(name);if(!['folder','watch'].includes(name))names.push(name+'Async');}
+const exported=hostExports();
+const names=exported.functions('mail');
+for(const object of ['providers','accounts'])assert(exported.names('mail','Properties').includes(object),'Missing mail property '+object);
 const types=read(resolve(node,'docs/nodejs/types/autojs6-node/mail.d.ts'));
 const docs=read(resolve(workspace,'AutoJs6-Documentation/api/runtimeApis.md')).split('## Node.js / Bun / Worker 的 Mail')[1];
 assert(docs,'Mail runtime reference missing');
