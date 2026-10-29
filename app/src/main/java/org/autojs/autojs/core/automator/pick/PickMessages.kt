@@ -1,12 +1,11 @@
 package org.autojs.autojs.core.automator.pick
 
-import org.autojs.autojs.app.GlobalAppContext
+import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs6.R
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.Wrapper
-import java.util.Locale
 import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
 
 /**
@@ -70,13 +69,16 @@ internal object PickMessages {
 
     /**
      * A host message resource formatted with [args] as `Resources.getString(id, args)` formats it, or [fallback] (the
-     * text of the default `values/strings.xml`) without an Android context.
+     * text of the default `values/strings.xml`) without an Android context. The resources stay those above (Q5 (2)); the
+     * lookup and the formatting are those of [ScriptMessages.resource]: each text read once per resources and locale,
+     * `%s` / `%d` without `java.util.Formatter` (docs/augment/ROADMAP.md appendix C Q165: a failing `pickup` with a wrong
+     * type went from about 300 to 220 us on XQ-AT72).
+     *
+     * zh-CN: 按 `Resources.getString(id, args)` 的方式以 [args] 格式化的宿主消息资源; 没有 Android Context 时为 [fallback] (默认 `values/strings.xml` 的文本).
+     * 资源仍是上面这些 (Q5 (2)); 取值与格式化同 [ScriptMessages.resource]: 每份资源与语言只读一次文本, `%s` / `%d` 不经 `java.util.Formatter`
+     * (augment 附录 C Q165: XQ-AT72 上类型不对的失败 `pickup` 由约 300 us 降到 220 us).
      */
-    private fun resource(id: Int, fallback: String, vararg args: Any?): String = try {
-        GlobalAppContext.get().getString(id, *args)
-    } catch (e: RuntimeException) {
-        String.format(Locale.ROOT, fallback, *args)
-    }
+    private fun resource(id: Int, fallback: String, vararg args: Any?): String = ScriptMessages.resource(id, fallback, *args)
 
     /** The type of [value] as the messages name it: `null`, `undefined`, `string`, `number`, `Array`, a class name ... */
     fun describe(value: Any?): String = when {
