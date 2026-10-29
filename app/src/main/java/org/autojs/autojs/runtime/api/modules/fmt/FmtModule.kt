@@ -38,13 +38,13 @@ object FmtBytesModule {
     @ScriptProperty
     val SI_DIV: Long = ByteUnits.SI_DIV
 
-    @ScriptInvoke
+    @ScriptInvoke(arity = [1, 4])
     fun invoke(source: Any?, vararg args: Any?): String = format("fmt.bytes", source, args, ByteUnits.Mode.DEFAULT)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun strict(source: Any?, vararg args: Any?): String = format("fmt.bytes.strict", source, args, ByteUnits.Mode.STRICT)
 
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun loose(source: Any?, vararg args: Any?): String = format("fmt.bytes.loose", source, args, ByteUnits.Mode.LOOSE)
 
     private fun format(function: String, source: Any?, args: Array<out Any?>, mode: ByteUnits.Mode): String =

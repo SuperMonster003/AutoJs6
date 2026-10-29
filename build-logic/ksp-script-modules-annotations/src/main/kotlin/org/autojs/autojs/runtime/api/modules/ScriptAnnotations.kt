@@ -81,11 +81,13 @@ annotation class ScriptModule(
  * @property builtIn where the function is also bound when the module's [ScriptModule.builtIn] object is extended.
  * @property builtInOnly bind the function only there, neither on the module object nor on the global object (the
  * current `AS_IGNORED` flag of `Math.maxi` / `Math.mini`).
- * @property arity for an overload whose only script parameter is a vararg (`vararg args: Any?`) that the function body
- * counts itself: the argument counts of its real signatures, `[n]` for exactly n, `[min, max]` (max -1: no upper
- * limit), as its argument check enforces them (`ensureArguments*` of the current module, the checks of the module).
- * Metadata only (`arity` of the overload in script-modules.json, appendix C Q112): the call and the function `length`
- * do not change. Empty: not declared (a true variadic function, as `console.log`).
+ * @property arity for an overload whose last script parameter is a vararg (`vararg args: Any?`) that the function body
+ * counts itself, alone or after fixed parameters (`source: Any?, vararg args: Any?`, appendix C Q171): the argument
+ * counts of its real signatures, every script argument counted (the fixed parameters too), `[n]` for exactly n,
+ * `[min, max]` (max -1: no upper limit), as its argument check enforces them (`ensureArguments*` of the current
+ * module, the checks of the module). Metadata only (`arity` of the overload in script-modules.json, appendix C Q112):
+ * the call and the function `length` do not change. Empty: not declared (a true variadic function, as `console.log`
+ * or `files.join(base, ...paths)`).
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.BINARY)

@@ -214,9 +214,10 @@ class AutoModule(private val runtime: ScriptRuntime) {
      * the root when it is a `UiObject` (or nullish among four arguments), and the compass and the result type as `pickup`
      * takes them (docs/selector/ROADMAP.md P3.5; their refusals are reported, not thrown). A root among four arguments must
      * be a `UiObject`. More than four arguments are a TypeError (trailing `undefined` ones count as omitted, T4), not the
-     * InternalError of the current module's check (augment appendix C Q170).
+     * InternalError of the current module's check (augment appendix C Q170); `arity` declares the 1 to 4 arguments for the
+     * metadata (Q171).
      */
-    @ScriptFunction
+    @ScriptFunction(arity = [1, 4])
     fun explain(selector: Any, vararg rest: Any?): NativeObject {
         val n = ScriptArgs.count(rest, 3)
         if (n > 3) throw ScriptArgs.arityError("auto.explain", 1, 4, n + 1)

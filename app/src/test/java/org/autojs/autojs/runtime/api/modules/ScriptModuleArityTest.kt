@@ -27,23 +27,25 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Appendix C Q112: an overload whose only script parameter is a vararg it counts itself declares the argument counts of
- * its real signatures (`arity` of the overload in script-modules.json); so does a function an install hook defines
+ * its real signatures (`arity` of the overload in script-modules.json), as does one whose fixed parameters come before
+ * such a vararg, every script argument counted (Q171); so does a function an install hook defines
  * (`arity` of the install name, Q127). Each declared arity is compared with the check of the function body. A delegate
  * to the current augment module, and a function of the new layer that compares the count with numbers in its body, is
  * checked in the source: the first `ensureArguments*`, `count(name, args, a..b)`, `args.size in a..b`, `args.size >= n`,
  * `if (args.isEmpty()) throw`, `arityError(name, min, max, …)` or `composeArguments(args, min, max?, …)` of the body, or
  * of the function it hands its arguments to (up to three calls deep); the install functions of mail and compose where
  * the current module defines them ([INSTALL_DEFINITIONS]). The checks of the new layer that parse
- * the arguments by their types (`FlowArgs`, `ToolkitArgs`, `AutomatorArgs`, `Color`, `console`) are sampled on the JVM:
+ * the arguments by their types (`FlowArgs`, `ToolkitArgs`, `AutomatorArgs`, `Color`, `console`, `ByteUnits`) are sampled on the JVM:
  * calls with the fewest and the most arguments pass the check, a call with one argument less or one more is refused
  * with a TypeError or RangeError. A wait or a flow tool skips nullish arguments and reads an options object beside the
  * numbers, as the current parser; its samples are the positional forms its arity counts (appendix C Q126).
  *
- * zh-CN: 附录 C Q112: 唯一的脚本参数是自行计数的 vararg 的重载, 声明其真实签名的参数个数 (script-modules.json 中重载的 arity); install 钩子定义的函数
+ * zh-CN: 附录 C Q112: 唯一的脚本参数是自行计数的 vararg 的重载, 声明其真实签名的参数个数 (script-modules.json 中重载的 arity), 固定参数之后跟这种 vararg
+ * 的重载同样声明, 计全部脚本参数 (Q171); install 钩子定义的函数
  * 同样声明 (install 名称的 arity, Q127). 每个声明的 arity 都与函数体的检查比较. 委托给现有 augment 模块的函数, 以及在函数体中把个数与数字比较的新层函数,
  * 在源码中核对: 函数体中第一个 ensureArguments*, count(name, args, a..b), args.size in a..b, args.size >= n, if (args.isEmpty()) throw,
  * arityError(name, min, max, …) 或 composeArguments(args, min, max?, …), 没有时看它把参数交给的函数 (最多三层); mail 与 compose 的 install 函数在现有
- * 模块定义它们之处核对 (INSTALL_DEFINITIONS). 按类型解析参数的新层检查 (FlowArgs, ToolkitArgs, AutomatorArgs, Color, console) 在 JVM 上抽样: 参数最少与最多的调用通过检查, 少一个或多一个参数的调用以
+ * 模块定义它们之处核对 (INSTALL_DEFINITIONS). 按类型解析参数的新层检查 (FlowArgs, ToolkitArgs, AutomatorArgs, Color, console, ByteUnits) 在 JVM 上抽样: 参数最少与最多的调用通过检查, 少一个或多一个参数的调用以
  * TypeError 或 RangeError 拒绝. 等待与 flow 工具同现有解析器一样跳过 nullish 参数, 并在数字之外接受一个选项对象; 其样例是 arity 所计的位置形式 (附录 C Q126).
  */
 class ScriptModuleArityTest {
@@ -76,7 +78,20 @@ class ScriptModuleArityTest {
             }
         }
         assertTrue("Declared arities differ from the checks in the source:\n" + failures.joinToString("\n"), failures.isEmpty())
-        assertEquals("arities checked in the source", 180, declared.size)
+        assertEquals("arities checked in the source", 181, declared.size)
+    }
+
+    /**
+     * Appendix C Q171: of the overloads taking fixed parameters before a vararg, those whose body limits the count declare
+     * it (every script argument counted, checked by the tests above); the true variadic ones declare nothing, so the
+     * metadata gives them no upper limit.
+     */
+    @Test
+    fun varargsAfterFixedParametersDeclareOnlyTheLimitsOfTheirBodies() {
+        val overloads = overloads().filter { (_, o) -> o.getAsJsonArray("params").let { p -> p.size() > 1 && p.last().asJsonObject.get("vararg").asBoolean } }
+        val declared = overloads.mapNotNull { (key, o) -> o.get("arity").takeUnless { it.isJsonNull }?.asJsonObject?.let { "$key ${counts(it.min(), it.max())}" } }
+        assertEquals(BOUNDED_VARARGS.map { "$it [1, 4]" }, declared.sorted())
+        assertEquals("true variadic overloads after fixed parameters", 10, overloads.size - declared.size)
     }
 
     @Test(timeout = 300_000)
@@ -88,8 +103,8 @@ class ScriptModuleArityTest {
             val failures = SAMPLES.flatMap { (key, sample) -> sampled(rhino, declared.getValue(key), sample) }
             assertTrue("Sampled argument checks differ from the declared arities:\n" + failures.joinToString("\n"), failures.isEmpty())
         }
-        assertEquals("arities sampled on the JVM", 89, SAMPLES.size)
-        assertEquals("declared arities (overloads and install functions)", 192 + 77, declared.size)
+        assertEquals("arities sampled on the JVM", 95, SAMPLES.size)
+        assertEquals("declared arities (overloads and install functions)", 199 + 77, declared.size)
     }
 
     private fun sampled(rhino: DifferentialRhino, d: Declared, sample: Sample): List<String> {
@@ -126,28 +141,39 @@ class ScriptModuleArityTest {
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "mProperties", ConcurrentHashMap<String, Any>())
         RuntimeModulesFixture.setField(runtime, ScriptRuntime::class.java, "closeableManager", RuntimeResourceScope("script-module-arity-test"))
         HostModuleTestSupport.setField(runtime, "console", DifferentialRhino.allocateWithoutConstructor(ConsoleImpl::class.java))
-        HostModuleTestSupport.setField(runtime, "scriptModules", rhino.mountNewModules("global", "util", "auto", "automator", "flow", "colors", "Color", "console", "selector"))
+        HostModuleTestSupport.setField(runtime, "scriptModules", rhino.mountNewModules("global", "util", "auto", "automator", "flow", "colors", "Color", "console", "selector", "cvt", "fmt"))
     }
 
-    /** The arities of script-modules.json of the host (the unit test fixtures have their own). */
-    private fun declared(): List<Declared> {
+    /** The modules of script-modules.json of the host (the unit test fixtures have their own), with their script paths. */
+    private fun modules(): List<Pair<String, JsonObject>> {
         val text = javaClass.classLoader!!.getResources("autojs6/script-modules.json").toList().map { it.readText() }
             .filter { "\"class\": \"org.autojs.autojs.runtime.api.modules.base64.Base64Module\"" in it }.distinct().single()
         val modules = JsonParser.parseString(text).asJsonObject.getAsJsonArray("modules").map { it.asJsonObject }
         val byClass = modules.associateBy { it.get("class").asString }
         fun path(m: JsonObject): String = m.get("parent").takeUnless { it.isJsonNull }?.let { path(byClass.getValue(it.asString)) + "." }.orEmpty() + m.get("name").asString
-        return modules.flatMap { m ->
-            val overloads = listOfNotNull(m.get("invoke").takeUnless { it.isJsonNull }?.let { "()" to it.asJsonObject }, m.get("construct").takeUnless { it.isJsonNull }?.let { "new" to it.asJsonObject }) +
-                m.getAsJsonArray("functions").flatMap { f -> f.asJsonObject.getAsJsonArray("overloads").map { f.asJsonObject.get("name").asString to it.asJsonObject } }
-            val installs = m.getAsJsonArray("installs").map { it.asJsonObject }.mapNotNull { i ->
-                val name = i.get("name").asString
-                val key = i.get("target").takeUnless { it.isJsonNull }?.let { "${it.asString}.$name" } ?: if (i.get("global").asString == "ONLY") name else "${path(m)}.$name"
-                i.get("arity").takeUnless { it.isJsonNull }?.asJsonObject?.let { a -> Declared(key, i.get("source").asString, a.min(), a.max(), install = path(m)) }
-            }
-            overloads.mapNotNull { (name, o) ->
-                o.get("arity").takeUnless { it.isJsonNull }?.asJsonObject?.let { a -> Declared("${path(m)}.$name", o.get("source").asString, a.min(), a.max()) }
-            } + installs
+        return modules.map { path(it) to it }
+    }
+
+    /** Every overload with its script path (`module.name`, `module.()`, `module.new`). */
+    private fun overloads(): List<Pair<String, JsonObject>> = modules().flatMap { (path, m) ->
+        val overloads = listOfNotNull(m.get("invoke").takeUnless { it.isJsonNull }?.let { "()" to it.asJsonObject }, m.get("construct").takeUnless { it.isJsonNull }?.let { "new" to it.asJsonObject }) +
+            m.getAsJsonArray("functions").flatMap { f -> f.asJsonObject.getAsJsonArray("overloads").map { f.asJsonObject.get("name").asString to it.asJsonObject } }
+        overloads.map { (name, o) -> "$path.$name" to o }
+    }
+
+    /** The arities of script-modules.json of the host. */
+    private fun declared(): List<Declared> {
+        val overloads = overloads().mapNotNull { (key, o) ->
+            o.get("arity").takeUnless { it.isJsonNull }?.asJsonObject?.let { a -> Declared(key, o.get("source").asString, a.min(), a.max()) }
         }
+        val installs = modules().flatMap { (path, m) ->
+            m.getAsJsonArray("installs").map { it.asJsonObject }.mapNotNull { i ->
+                val name = i.get("name").asString
+                val key = i.get("target").takeUnless { it.isJsonNull }?.let { "${it.asString}.$name" } ?: if (i.get("global").asString == "ONLY") name else "$path.$name"
+                i.get("arity").takeUnless { it.isJsonNull }?.asJsonObject?.let { a -> Declared(key, i.get("source").asString, a.min(), a.max(), install = path) }
+            }
+        }
+        return overloads + installs
     }
 
     private fun JsonObject.min() = get("min").asInt
@@ -355,6 +381,9 @@ class ScriptModuleArityTest {
             "waitForStableThenClickBounds", "clickBoundsWhenStable", "waitForVisible", "waitForHidden", "waitForGone", "wait.async",
         )
 
+        /** The overloads with fixed parameters before a vararg whose body limits the count to 1..4 (appendix C Q171). */
+        val BOUNDED_VARARGS = listOf("auto.explain", "cvt.bytes.()", "cvt.bytes.loose", "cvt.bytes.strict", "fmt.bytes.()", "fmt.bytes.loose", "fmt.bytes.strict")
+
         val SAMPLES: Map<String, Sample> = WAITS.associate { "flow.$it" to wait(withDelay = false) } +
             GLOBAL_WAITS.associateWith { wait(withDelay = false) } +
             listOf("clickWhenStableAfter", "clickBoundsWhenStableAfter").associateWith { wait(withDelay = true) } +
@@ -392,7 +421,12 @@ class ScriptModuleArityTest {
             }) +
             ("selector.detect" to Sample(listOf(listOf("null", "'p'"), listOf("null", "'p'", "'w'", F)), listOf(listOf("null"), listOf("null", "'p'", "'w'", F, "1"))) { _, a ->
                 PickArguments.uiObject.detect(unwrapped(a)).requestOrThrow()
-            })
+            }) +
+            // `cvt.bytes(source, ...)` and `fmt.bytes(source, ...)`: `ByteUnits.request` reads up to three arguments after the source by the
+            // type of the last one (appendix C Q171); the most are `(source, fromUnit, toUnit, options)`.
+            BOUNDED_VARARGS.filter { it.startsWith("cvt.") || it.startsWith("fmt.") }.associateWith {
+                Sample(listOf(listOf("1536"), listOf("1536", "'B'", "'KB'", "{}")), listOf(emptyList(), listOf("1536", "'B'", "'KB'", "{}", "1")))
+            }
 
         /** Selectors without a bridge for the samples of `pickup`. */
         val PICK_BINDING = PickArguments.Binding({ UiSelector(null as AccessibilityBridge?) }, { BooleanFilter.BooleanSupplier { true } })

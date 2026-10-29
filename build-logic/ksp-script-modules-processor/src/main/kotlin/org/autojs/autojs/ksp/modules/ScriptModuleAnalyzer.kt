@@ -209,15 +209,22 @@ internal class ScriptModuleAnalyzer(private val logger: KSPLogger, private val p
     }
 
     /**
-     * The `arity` an overload declares ([ScriptFunction.arity]): only for one whose script parameters are a single
-     * vararg, `[n]` or `[min, max]` with `0 <= min <= max`, max -1 for no upper limit.
+     * The `arity` an overload declares ([ScriptFunction.arity]): only for one whose last script parameter is a vararg,
+     * alone or after fixed parameters (appendix C Q171), `[n]` or `[min, max]` with `0 <= min <= max`, max -1 for no
+     * upper limit, counting every script argument: min at least the required fixed parameters, max at least all of them.
      */
     private fun arityOf(function: KSFunctionDeclaration, display: String, annotation: KSAnnotation, params: List<Param>): Arity? {
         val values = annotation.ints("arity")
         if (values.isEmpty()) return null
         val script = params.filter { it.kind.injected == null }
-        if (script.size != 1 || !script[0].vararg) return error(function, "$display: arity applies to an overload whose only script parameter is a vararg")
-        return arityOf(function, display, values)
+        if (script.lastOrNull()?.vararg != true) return error(function, "$display: arity applies to an overload whose last script parameter is a vararg")
+        val arity = arityOf(function, display, values) ?: return null
+        val fixed = script.size - 1
+        val required = script.count { !it.optional && !it.vararg }
+        if (arity.min < required || arity.max != null && arity.max < fixed) {
+            return error(function, "$display: arity counts every script argument, from at least the $required required to at least the $fixed fixed parameters")
+        }
+        return arity
     }
 
     /** Declared argument counts: `[n]` or `[min, max]` with `0 <= min <= max`, max -1 for no upper limit; empty for none. */
