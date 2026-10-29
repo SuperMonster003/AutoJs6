@@ -596,9 +596,21 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
         self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
         # The groups the maintainer kept pending for P3 / P4.
-        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'Mathx.sum', 'keepAlive', 'app.launchDual', 'ui.layout', 'files.open']:
+        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'keepAlive', 'app.launchDual', 'ui.layout', 'files.open']:
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
+
+    def test_p3_2a(self):
+        # The shared JS tools core: local-shim on the main thread and in Workers, global data functions through autojs6:global.
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name in ['Mathx.sum', 'util.isEmptyObject', 'util.java.array', 'species.isString', 's13n.point', 'cvt.bytes.strict', 'random', 'isObjectSpecies']:
+            for column in ['node_main', 'node_worker']:
+                self.assertEqual(rows[name][column]['status'], 'local-shim', (name, column))
+        self.assertEqual((rows['Mathx.sum']['node_worker']['module'], rows['random']['node_worker']['module']), ('jsox.mathx', 'autojs6:global'))
+        # Q61 and Q54 (b) stay pending.
+        for name in ['dayjs', 'pangu', 'cheerio', 'i18n', 'util.class']:
+            self.assertEqual(rows[name]['node_main']['status'], 'pending', name)
+        self.assertEqual((rows['axios']['node_main']['status'], rows['axios']['node_worker']['status']), ('local-shim', 'pending'))
 
     def test_p2_3(self):
         # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.

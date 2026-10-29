@@ -19,7 +19,7 @@
       "timers": ["tasks"],
       "workManager": ["work_manager"]
     },
-    "globalModules": ["autojs6:screen_metrics", "autojs6:compat"],
+    "globalModules": ["autojs6:screen_metrics", "autojs6:compat", "autojs6:global"],
     "compatModule": "autojs6:compat",
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",
