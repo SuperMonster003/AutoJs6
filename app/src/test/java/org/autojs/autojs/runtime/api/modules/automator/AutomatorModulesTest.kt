@@ -370,14 +370,17 @@ class AutomatorModulesTest {
     /**
      * `auto.explain(selector, root?, compass?, resultType?)` (docs/selector/ROADMAP.md P3.5): a second argument that is no
      * `UiObject` is the compass or the result type (`auto.explain('a', 1)` explains with the result type 1, as `pickup`
-     * takes it), so only four arguments refuse a root that is no `UiObject`. Not compared with the current module, which
+     * takes it), so only four arguments refuse a root that is no `UiObject`; five arguments are a TypeError, where the
+     * current module's check threw an InternalError (augment appendix C Q170). Not compared with the current module, which
      * took at most two arguments.
      * zh-CN: `auto.explain(selector, root?, compass?, resultType?)` (selector P3.5): 第二个参数不是 `UiObject` 时为罗盘或结果类型 (`auto.explain('a', 1)`
-     * 按 `pickup` 的方式以结果类型 1 解释), 因此只有四个参数时才拒绝不是 `UiObject` 的 root. 不与现有模块比较, 它至多接受两个参数.
+     * 按 `pickup` 的方式以结果类型 1 解释), 因此只有四个参数时才拒绝不是 `UiObject` 的 root; 五个参数为 TypeError, 现有模块的检查抛 InternalError (augment
+     * 附录 C Q170). 不与现有模块比较, 它至多接受两个参数.
      */
     private val explainArgumentCases
         get() = listOf(
             "auto.explain('a', 1, 'p', '#')" to "throws TypeError",
+            "auto.explain('a', null, 1, 'p', '#')" to "throws TypeError",
         )
 
     private val autoArgumentCases

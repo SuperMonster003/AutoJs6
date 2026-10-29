@@ -11,6 +11,7 @@ import org.autojs.autojs.rhino.extension.ArrayExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.IterableExtensions.toNativeArray
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.modules.ScriptArgs
 import org.autojs.autojs.runtime.api.modules.ScriptFunction
 import org.autojs.autojs.runtime.api.modules.ScriptGetter
 import org.autojs.autojs.runtime.api.modules.ScriptInvoke
@@ -212,14 +213,18 @@ class AutoModule(private val runtime: ScriptRuntime) {
      * `auto.explain(selector, root?, compass?, resultType?)`: the selector in any `pickup` form (undefined: no condition); then
      * the root when it is a `UiObject` (or nullish among four arguments), and the compass and the result type as `pickup`
      * takes them (docs/selector/ROADMAP.md P3.5; their refusals are reported, not thrown). A root among four arguments must
-     * be a `UiObject`.
+     * be a `UiObject`. More than four arguments are a TypeError (trailing `undefined` ones count as omitted, T4), not the
+     * InternalError of the current module's check (augment appendix C Q170).
      */
     @ScriptFunction
     fun explain(selector: Any, vararg rest: Any?): NativeObject {
+        val n = ScriptArgs.count(rest, 3)
+        if (n > 3) throw ScriptArgs.arityError("auto.explain", 1, 4, n + 1)
+        val args = if (n < rest.size) rest.copyOf(n) else rest
         PickArguments.uiObject.selectorError("auto.explain", "selector", RhinoUtils.unwrap(selector).takeUnless { Undefined.isUndefined(it) })?.let { throw it.exception() }
-        val root = rest.getOrNull(0)
-        if (rest.size == 3 && !isNullish(root) && unwrap(root) !is UiObject) throw GlobalValues.typeError("auto.explain", "root", "UiObject", root)
-        return Auto.explain(runtime, arrayOf(selector, *rest))
+        val root = args.getOrNull(0)
+        if (args.size == 3 && !isNullish(root) && unwrap(root) !is UiObject) throw GlobalValues.typeError("auto.explain", "root", "UiObject", root)
+        return Auto.explain(runtime, arrayOf(selector, *args))
     }
 
     /** `auto.dump(options?)`: a format name or an options object. */
