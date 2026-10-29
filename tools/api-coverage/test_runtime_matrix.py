@@ -600,9 +600,9 @@ class RepositoryTest(unittest.TestCase):
 
     def test_p1_5(self):
         rows = {row['id']: row for row in self.matrix['rows']}
-        # Q26: the dual-app entries only reject in both runtimes.
-        for column in ['node_main', 'bun']:
-            self.assertEqual((rows['app.launchDual'][column]['status'], rows['app.launchDual'][column].get('rejects')), ('pending', True), column)
+        # Q26: an entry that only rejects stays pending (console.input, D-7); the dual-app entries left with P3.1a (test_p3_1a).
+        for column in ['node_main', 'node_worker']:
+            self.assertEqual((rows['console.input'][column]['status'], rows['console.input'][column].get('rejects')), ('pending', True), column)
         # Q27: every MailClient member has a runtime handle member.
         mail = [row for row in self.matrix['rows'] if row['object'] == 'MailClient']
         self.assertTrue(mail)
@@ -619,10 +619,21 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual((rows['http.client']['bun']['rule'], rows['http.client']['bun']['reason']), ('http-java-objects', 'java-prototype'))
         self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
         self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
-        # The groups the maintainer kept pending for P3 / P4.
-        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'keepAlive', 'app.launchDual', 'ui.layout']:
+        # The groups the maintainer kept pending for P3 / P4 (app.launchDual came with P3.1a, test_p3_1a).
+        for name in ['engines.execScript', 'auto.waitFor', 'threads.start', 'keepAlive', 'ui.layout']:
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
+
+    def test_p3_1a(self):
+        # The app and shell family: app from one factory in both threads (Workers gain app), the D-4 dual-user helpers on
+        # the module and the global object, the shell / shizuku members with the Q18 prototype rows, the global key
+        # functions and the ShellProcess members; app.autojs follows the autojs module of P3.1b (Q93 (2)).
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name in ['app.launchDual', 'launchDual', 'app.getInstalledPackages', 'shell.execCommand', 'shizuku.isRunning', 'Home', 'ShellProcess#getInputStream']:
+            for column in ['node_main', 'node_worker']:
+                self.assertEqual(rows[name][column]['status'], 'bridged', (name, column))
+        self.assertEqual((rows['app.launchDual']['node_worker']['module'], rows['Home']['node_worker']['module']), ('autojs6:app', 'autojs6:shell'))
+        self.assertEqual(rows['app.autojs']['node_main']['status'], 'pending')
 
     def test_p3_2a(self):
         # The shared JS tools core: local-shim on the main thread and in Workers, global data functions through autojs6:global.
