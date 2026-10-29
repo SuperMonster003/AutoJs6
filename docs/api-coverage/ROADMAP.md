@@ -151,6 +151,7 @@
 
 - [ ] P3.1 系统与设备族: settings, sysprops, powerManager, installer, memory (只读诊断), autojs 运行时信息, notice 与 notifications 的函数级差异.
 - [ ] P3.2 文件与数据族: zip, crypto (与 Node 自带 crypto 的分工: 宿主实现的文件级 / 算法别名走 local-shim 或 not-portable, 逐条写理由), gallery, base64 / cvt / fmt / species / s13n 工具函数 (预期多为 local-shim).
+  - P3.2a (2026-10-29 启动, api-cov-p3-2a): 模块 util (+ util.java / util.inspect / util.morseCode / util.version / util.versionCodes 子模块) 65, species 37 + 全局 isObjectSpecies 1, s13n 4 / 5, Worker 另有 jsox (Mathx 23 / Arrayx 15 / Numberx 14 / jsox 2) + 全局 randomInt / randomFloat 2 与 cvt 6 / fmt 6, 全局数据函数 12 (random, isInteger / isPrimitive / isObject / isReference / isBigInt / isEmptyObject, axios / cheerio / dayjs / pangu / i18n), 起始 pending Node main 119 / Worker 188 (宿主 8fabfac74 矩阵, 全列 643 / 832).
 - [ ] P3.3 UI 族: floaty 与 ui.overlay 的差异, canvas, web (InjectableWebView / WebSocket 差异), terminal.
 - [ ] P3.4 自动化族: automator / selector / UiObject 函数级差异, qrcode / barcode / ocr / yolo 差异, continuation / threads / timers 的排除决定落地.
 - [ ] P3.5 矩阵清零: 前四批之外剩余 pending 的收口批次 (数量由矩阵给出), 每条 bridged 或有拍板过的排除理由.
