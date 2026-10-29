@@ -20,7 +20,7 @@ internal class BunAutomationBridge(
     private val provider: () -> AndroidNodeBridgeCapabilityProvider,
 ) : Closeable {
     private data class Job(val id:String, val capability: String, val method: String, val argsJson: String, val deadline: Long, val future: CompletableFuture<NodeBridgeResponse>,
-        val abandoned: java.util.concurrent.atomic.AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean(false))
+        val abandoned: java.util.concurrent.atomic.AtomicBoolean = java.util.concurrent.atomic.AtomicBoolean(false), val module: String = "")
     private val jobs = LinkedHashMap<String, Job>()
     private val executor = Executors.newFixedThreadPool(2)
     private var closed = false
@@ -65,11 +65,15 @@ internal class BunAutomationBridge(
                 return NodeBridgeResponse.failure(id, NodeBridgeError.timeout(modules.getValue(capability), "poll"))
             }
         }
-        require(action == "start" && request.keys().asSequence().all { it in setOf("action", "method", "args", "timeoutMs") })
+        require(action == "start" && request.keys().asSequence().all { it in setOf("action", "method", "args", "timeoutMs", "module") })
         val method = request.opt("method") as? String ?: throw IllegalArgumentException("method must be a string")
-        require(method in methods.getValue(capability)) { "Unsupported public automation method: $method" }
+        // A grant may also answer a second Node module (the notice extras, powerManager), named by the request.
+        val module = if (request.has("module")) (request.opt("module") as? String ?: throw IllegalArgumentException("module must be a string"))
+            .also { require(extraModules[capability]?.containsKey(it) == true) { "Unsupported automation module: $it" } } else modules.getValue(capability)
+        require(method in (extraModules[capability]?.get(module) ?: methods.getValue(capability))) { "Unsupported public automation method: $method" }
         if (method in gestureMethods && Grants.ACCESSIBILITY_GESTURE !in grants) throw SecurityException("Gestures require accessibility.gesture")
         val args = if (request.has("args")) request.optJSONArray("args") ?: throw IllegalArgumentException("args must be an array") else JSONArray()
+        if (capability == Grants.ENGINES_CONTROL) checkEngines(method, args)
         if (capability == Grants.FLOW_CONTROL) {
             val available = nodeCapabilities(grants)
             require(NodeBridgePermissionManifest.ACCESSIBILITY in available) { "Flow tools require accessibility.control" }
@@ -79,7 +83,7 @@ internal class BunAutomationBridge(
         val timeout = (request.opt("timeoutMs") ?: 10000) as? Number ?: throw IllegalArgumentException("timeoutMs must be an integer")
         require(timeout.toDouble().isFinite() && timeout.toDouble() == timeout.toLong().toDouble() && timeout.toLong() in 1..120000)
         val id = UUID.randomUUID().toString()
-        val job = Job(id, capability, method, args.toString(), SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture())
+        val job = Job(id, capability, method, args.toString(), SystemClock.elapsedRealtime() + timeout.toLong(), CompletableFuture(), module = module)
         synchronized(jobs) {
             check(!closed) { "Automation execution is closed" }
             // Completed calls still belong to their caller until drained, but abandoned timeouts do not fill the map.
@@ -90,7 +94,6 @@ internal class BunAutomationBridge(
             executor.execute {
                 if (job.abandoned.get() || SystemClock.elapsedRealtime() >= job.deadline) { job.future.cancel(false); return@execute }
                 if (!job.future.isDone && SystemClock.elapsedRealtime() < job.deadline) try {
-                    val module = modules.getValue(capability)
                     provider().dispatch(NodeBridgeRequest(id, module, method, args.toString(), timeout.toLong(),
                         permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString()))) { job.future.complete(it) }
                     if(job.abandoned.get() && capability==Grants.SHELL_CONTROL)provider().cancelShellRequest(id)
@@ -103,6 +106,16 @@ internal class BunAutomationBridge(
             }
         }
         return success(JSONObject().put("id", id))
+    }
+
+    /**
+     * engines (api-coverage P4.1b): starting scripts needs engines.exec, which the Node engines capability would imply; the Agent
+     * routes of engines (stop with an invocation, execScript with agentInvocationId) stay with agent.control.
+     */
+    private fun checkEngines(method: String, args: JSONArray) {
+        if (method in engineStartMethods && Grants.ENGINES_EXEC !in grants) throw SecurityException("Starting scripts requires engines.exec")
+        require(!(method == "stop" && args.opt(0) is JSONObject)) { "engines.stop takes an execution id" }
+        require(!(method == "execScript" && args.optJSONObject(2)?.has("agentInvocationId") == true)) { "Agent invocations need agent.control" }
     }
 
     override fun close() {
@@ -206,7 +219,20 @@ internal class BunAutomationBridge(
             if (Grants.EVENTS_KEY in grants) add(NodeBridgePermissionManifest.EVENTS_KEY)
             if (Grants.NOTIFICATIONS_POST in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS)
             if (Grants.NOTIFICATIONS_SETTINGS in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS)
+            // The system and engines family (api-coverage P4.1b, Q136 (a)): the Bun grant of each Node capability of Q133 (b).
+            systemCapabilities.forEach { (grant, capability) -> if (grant in grants) add(capability) }
+            // settings.export writes its file as the files.write of Node; Bun's files.control already writes host files.
+            if (Grants.FILES_CONTROL in grants) add(NodeBridgePermissionManifest.FILES_WRITE)
         }
+        private val systemCapabilities = listOf(
+            Grants.AUTOJS_CONTROL to NodeBridgePermissionManifest.AUTOJS, Grants.AUTOJS_MANAGE to NodeBridgePermissionManifest.AUTOJS_CONTROL,
+            Grants.SETTINGS_CONTROL to NodeBridgePermissionManifest.SETTINGS, Grants.SETTINGS_WRITE to NodeBridgePermissionManifest.SETTINGS_WRITE,
+            Grants.SYSPROPS_CONTROL to NodeBridgePermissionManifest.SYSPROPS,
+            Grants.MEMORY_CONTROL to NodeBridgePermissionManifest.MEMORY, Grants.MEMORY_DUMP to NodeBridgePermissionManifest.MEMORY_DUMP,
+            Grants.INSTALLER_CONTROL to NodeBridgePermissionManifest.INSTALLER, Grants.INSTALLER_MUTATE to NodeBridgePermissionManifest.INSTALLER_MUTATE,
+            Grants.ENGINES_CONTROL to NodeBridgePermissionManifest.ENGINES, Grants.ENGINES_EXEC to NodeBridgePermissionManifest.ENGINES_EXEC,
+        )
+        private val engineStartMethods = setOf("execScript", "execScriptFile", "execAutoFile")
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
             Grants.FLOW_CONTROL to RuntimeFlowBridge.methods,
@@ -233,7 +259,20 @@ internal class BunAutomationBridge(
             Grants.SHELL_CONTROL to setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission"),
             Grants.SENSORS_CONTROL to setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents"),
             Grants.DATABASE_CONTROL to setOf("open", "exec", "run", "get", "all", "transaction", "close"),
+            Grants.AUTOJS_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.AUTOJS),
+            Grants.SETTINGS_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.SETTINGS),
+            Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.SYSPROPS),
+            Grants.MEMORY_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.MEMORY),
+            Grants.INSTALLER_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.INSTALLER),
+            Grants.ENGINES_CONTROL to NodeBridgeModules.enginesMethods,
         )
-        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL)
+        /** Second Node modules of a grant, with their methods: the notice extras of notifications.post, powerManager of device.control. */
+        val extraModules = mapOf(
+            Grants.NOTIFICATIONS_POST to mapOf(RuntimeSystemBridge.NOTICE to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.NOTICE)),
+            Grants.DEVICE_CONTROL to mapOf(RuntimeSystemBridge.POWER_MANAGER to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.POWER_MANAGER)),
+        )
+        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
+            Grants.AUTOJS_CONTROL to RuntimeSystemBridge.AUTOJS, Grants.SETTINGS_CONTROL to RuntimeSystemBridge.SETTINGS, Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.SYSPROPS,
+            Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES)
     }
 }

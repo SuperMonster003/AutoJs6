@@ -252,8 +252,9 @@ class BunPluginScriptEngine internal constructor(
         if (!supportsCapabilityBridge(selection)) return null
         val granted = BunHostCapabilityGrants.grantedBridgeCapabilities(appContext)
         if (granted.isEmpty()) return null
-        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd(),
-            (getTag(ExecutionConfig.tag) as? ExecutionConfig)?.agentExecutionState)
+        val config = getTag(ExecutionConfig.tag) as? ExecutionConfig
+        val spawnDepth = (config?.getArgument(NodeBridgeEngineInfo.SPAWN_DEPTH_ARGUMENT) as? Number)?.toInt()?.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH) ?: 0
+        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd(), config?.agentExecutionState, spawnDepth)
     }
 
     private fun supportsCapabilityBridge(selection: BunRuntimePluginClient.Selection): Boolean =

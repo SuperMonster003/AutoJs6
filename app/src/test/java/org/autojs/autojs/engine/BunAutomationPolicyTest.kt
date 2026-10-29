@@ -24,7 +24,8 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        assertEquals(194,BunAutomationBridge.methods.values.sumOf{it.size})
+        // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 (P4.1b).
+        assertEquals(255,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -47,6 +48,47 @@ class BunAutomationPolicyTest {
         assertEquals(listOf("mail.control"), Grants.validatePackagedCapabilities(listOf("mail.control")))
         for (method in RuntimeMailBridge.methods)
             assertEquals(listOf("mail"), NodeBridgePermissionManifest.requiredCapabilitiesFor("mail", method))
+    }
+
+    // api-coverage P4.1b (Q136 (a)): a query grant and a write grant per namespace, after the Node capabilities of Q133 (b).
+    @Test fun systemGrantsCoverTheirRoutesAndWritesNeedTheirOwnGrant() {
+        val pairs = mapOf(Grants.AUTOJS_CONTROL to Grants.AUTOJS_MANAGE, Grants.SETTINGS_CONTROL to Grants.SETTINGS_WRITE, Grants.SYSPROPS_CONTROL to null,
+            Grants.MEMORY_CONTROL to Grants.MEMORY_DUMP, Grants.INSTALLER_CONTROL to Grants.INSTALLER_MUTATE)
+        val modules = mapOf(Grants.AUTOJS_CONTROL to "autojs", Grants.SETTINGS_CONTROL to "settings", Grants.SYSPROPS_CONTROL to "sysprops",
+            Grants.MEMORY_CONTROL to "memory", Grants.INSTALLER_CONTROL to "installer")
+        for ((grant, write) in pairs) {
+            val module = modules.getValue(grant)
+            assertEquals(RuntimeSystemBridge.methodsByModule[module], BunAutomationBridge.methods[grant])
+            val all = BunAutomationBridge.nodeCapabilities(listOfNotNull(grant, write, Grants.FILES_CONTROL))
+            val query = BunAutomationBridge.nodeCapabilities(listOf(grant))
+            for (method in BunAutomationBridge.methods.getValue(grant)) {
+                val required = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method)
+                assertEquals(method, emptyList<String>(), NodeBridgePermissionManifest.missingCapabilities(all, required))
+                val missing = NodeBridgePermissionManifest.missingCapabilities(query, required)
+                assertTrue("$module.$method", missing.isEmpty() || missing.any { it.contains('.') })
+            }
+        }
+        assertEquals(listOf("autojs.control"), NodeBridgePermissionManifest.missingCapabilities(BunAutomationBridge.nodeCapabilities(listOf(Grants.AUTOJS_CONTROL)),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("autojs", "setRootMode")))
+        assertEquals(listOf("installer.mutate"), NodeBridgePermissionManifest.missingCapabilities(BunAutomationBridge.nodeCapabilities(listOf(Grants.INSTALLER_CONTROL)),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("installer", "install")))
+        assertEquals(listOf("files.write"), NodeBridgePermissionManifest.missingCapabilities(BunAutomationBridge.nodeCapabilities(listOf(Grants.SETTINGS_CONTROL)),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("settings", "export")))
+        assertEquals(Grants.SYSTEM_FAMILY, Grants.validatePackagedCapabilities(Grants.SYSTEM_FAMILY))
+    }
+
+    @Test fun enginesGrantMapsToEnginesAndNoticeAndPowerManagerFollowTheirGrants() {
+        assertEquals(listOf("engines"), BunAutomationBridge.nodeCapabilities(listOf(Grants.ENGINES_CONTROL)))
+        assertEquals(listOf("engines", "engines.exec"), BunAutomationBridge.nodeCapabilities(listOf(Grants.ENGINES_CONTROL, Grants.ENGINES_EXEC)))
+        assertEquals(NodeBridgeModules.enginesMethods, BunAutomationBridge.methods[Grants.ENGINES_CONTROL])
+        val notice = BunAutomationBridge.extraModules.getValue(Grants.NOTIFICATIONS_POST).getValue("notice")
+        val noticeGrants = BunAutomationBridge.nodeCapabilities(listOf(Grants.NOTIFICATIONS_POST, Grants.NOTIFICATIONS_SETTINGS))
+        for (method in notice) assertEquals(method, emptyList<String>(),
+            NodeBridgePermissionManifest.missingCapabilities(noticeGrants, NodeBridgePermissionManifest.requiredCapabilitiesFor("notice", method)))
+        val power = BunAutomationBridge.extraModules.getValue(Grants.DEVICE_CONTROL).getValue("power_manager")
+        val powerGrants = BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL, Grants.DEVICE_POWER))
+        for (method in power) assertEquals(method, emptyList<String>(),
+            NodeBridgePermissionManifest.missingCapabilities(powerGrants, NodeBridgePermissionManifest.requiredCapabilitiesFor("power_manager", method)))
     }
 
 }

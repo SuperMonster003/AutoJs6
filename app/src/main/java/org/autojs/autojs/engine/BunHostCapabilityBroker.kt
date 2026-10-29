@@ -45,6 +45,8 @@ internal class BunHostCapabilityBroker(
     consoleProvider: () -> ConsoleImpl,
     private val workingDirectory: String? = null,
     private val agentExecutionState: org.autojs.autojs.execution.AgentScriptExecutionState? = null,
+    // The spawn depth of this execution (engines.execScript* of api-coverage P4.1b): a script started by a script starts no other.
+    private val spawnDepth: Int = 0,
 ) {
     private val exported = ExportedBroker(this)
     private val appContext = context.applicationContext ?: context
@@ -174,7 +176,9 @@ internal class BunHostCapabilityBroker(
         val outcome = when (capability) {
             BunHostCapabilityGrants.APP_CONTROL, BunHostCapabilityGrants.ACCESSIBILITY_CONTROL,
             BunHostCapabilityGrants.CLIPBOARD_CONTROL, BunHostCapabilityGrants.STORAGE_CONTROL,
-            BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL, BunHostCapabilityGrants.SHELL_CONTROL, BunHostCapabilityGrants.EVENTS_OBSERVE, BunHostCapabilityGrants.NOTIFICATIONS_POST, BunHostCapabilityGrants.DEVICE_CONTROL, BunHostCapabilityGrants.DEVICE_AUDIO, BunHostCapabilityGrants.DIALOGS_CONTROL, BunHostCapabilityGrants.ANDROID_OBJECTS, BunHostCapabilityGrants.TASKS_CONTROL, BunHostCapabilityGrants.JAVA_INTEROP, BunHostCapabilityGrants.TTS_CONTROL, BunHostCapabilityGrants.MEDIAINFO_CONTROL, BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL, BunHostCapabilityGrants.SHELL_CONTROL, BunHostCapabilityGrants.EVENTS_OBSERVE, BunHostCapabilityGrants.NOTIFICATIONS_POST, BunHostCapabilityGrants.DEVICE_CONTROL, BunHostCapabilityGrants.DEVICE_AUDIO, BunHostCapabilityGrants.DIALOGS_CONTROL, BunHostCapabilityGrants.ANDROID_OBJECTS, BunHostCapabilityGrants.TASKS_CONTROL, BunHostCapabilityGrants.JAVA_INTEROP, BunHostCapabilityGrants.TTS_CONTROL, BunHostCapabilityGrants.MEDIAINFO_CONTROL, BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL,
+            BunHostCapabilityGrants.AUTOJS_CONTROL, BunHostCapabilityGrants.SETTINGS_CONTROL, BunHostCapabilityGrants.SYSPROPS_CONTROL, BunHostCapabilityGrants.MEMORY_CONTROL,
+            BunHostCapabilityGrants.INSTALLER_CONTROL, BunHostCapabilityGrants.ENGINES_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.FILES_CONTROL -> {
                 try {
                     val (method, args) = parseMethodCall(request)
@@ -265,7 +269,7 @@ internal class BunHostCapabilityBroker(
             check(!closed.get()) { "Bun execution has finished" }
             imageProvider ?: AndroidNodeBridgeCapabilityProvider(
                 appContext,
-                engineInfo = NodeBridgeEngineInfo.fromContext(appContext, id = executionId, cwd = workingDirectory.orEmpty())
+                engineInfo = NodeBridgeEngineInfo.fromContext(appContext, id = executionId, cwd = workingDirectory.orEmpty(), spawnDepth = spawnDepth)
                     .copy(engineName = "bun", backend = "plugin"),
                 javaInteropEnabled = BunHostCapabilityGrants.JAVA_INTEROP in capabilities,
                 agentExecutionState = agentExecutionState,
