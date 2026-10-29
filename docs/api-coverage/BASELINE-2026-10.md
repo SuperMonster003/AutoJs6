@@ -676,3 +676,57 @@ d.ts (TS fa26b8b / 8f8ec07):
 | TS | fa26b8b / 8f8ec07 | 显式成员与 App 接口 |
 | Ace | aac52af | 重新导入, 索引与 lib.autojs6.d.ts |
 | Offline Docs | 68bd7d0 / ec87e8c | 同步, 版本不变 |
+
+## 10. P2.5 运行时支持表全量插入 + `--docs-support` 进 CI (2026-10-29, 子会话 api-cov-p2-5)
+
+### 10.1 页面与根
+
+- 依据: 宿主 72064c1a8 的矩阵 (KSP), 69 个模块根 1582 行 (显式导出 1377, 原型成员 205) 与 43 个返回对象 1248 个成员.
+- 模块根的页: `policy.json` `documentationModules` 的第一页, 没有映射时为同名页 (与文档名称门禁相同). 返回对象的页: 矩阵行的 `page` (returned-objects.json `documentation` 的第一页).
+- 结果 83 页, 其中 13 页此前已有表 (P0.5 / P2.3 / P3.2a / P4.2a), 本条目新增 70 页, global 页的根由 `global` 改为 `global species` (species 映射到 global 页, 此前未覆盖):
+  - 67 个模块页: automator 页根为 `automator auto`, global 页为 `global species`, 其余一页一根; 27 个返回对象的第一页是模块页, 在该页 "返回对象" 小表 (Q20 (a)).
+  - 16 个类型页, 根为 `<对象>#`: agentRunType, appType, canvas, colorType, epubBookType, epubReaderSessionType, flowType, imageWrapperType, injectableWebClientType, injectableWebViewType, mailClientType, shellProcessType, storageType, uiObjectCollectionType, uiObjectType, webSocketType.
+- 问题页: 无. 页面都存在, 返回对象的 `documentation` 第一页都存在, 正文没有字面标记; returned-objects.json 未改.
+- locks.md 中没有其他会话登记的文档页, 全部 70 页由本条目插入. P3.2b / P4.2b / P3.1a / P4.1a 改矩阵后按规则重生成各自页面的表 (`node generator/runtime-support.js`).
+- 插入在 HEAD 导出副本内进行 (`--insert <页>:<根>` 70 次 + 改 global 的 begin 行), 再按字节拷回共享签出; `normalize-markdown.py --check` changed=0.
+
+### 10.2 生成器与门禁
+
+- 文档 49e36a2: `runtime-support.js --require-all` 另查返回对象: 对象的第一页既没有 `<对象>#` 根, 也没有模块根的标记块时记入 `uncoveredObjects` 并失败; 自测加一例 (10 项通过); generator/README 写明宿主以 `--check --require-all` 调用.
+- 宿主 6499e3976: `check.py --docs-support` 一律带 require-all (Q69, 已按推荐先行), `docs_support.py` 摘要加 `uncoveredObjects`, `test_docs_support.py` 两例覆盖 (单测总数仍 76), README 的文档表一节与 "In CI".
+- CI: `api-coverage.yml` 的 check.py 命令加 `--docs-support`. 工作流已把文档仓库检出到兄弟目录 `AutoJs6-Documentation` (默认分支, 手动运行可用 `documentation_ref`), check.py 默认读兄弟目录; 生成器只用 Node 内置模块, 不需 `npm ci`; Node 24 由 setup-node 提供. 宿主推送前文档仓库须已推送, 否则 CI 读到的默认分支没有这些表而失败 (与 TS / Ace / Node / Bun 的既有顺序约束相同, 供 P7.1).
+
+### 10.3 顺带的签名修正 (文档 38a1239)
+
+- appType: `openSettings` 改为 `launchSettings`. 宿主 `util/App.kt` 枚举只有 `launchSettings()` (`appUtils.launchSettings(packageName)`), d.ts 也是 `launchSettings(): boolean`; 文档写错, 宿主不改.
+- color: `colors.rgba` / `hsva` / `hsla` 补 `(components, alpha)` 重载 (数组恰好 3 个分量 + 单独的 alpha), 依据 `ColorsModule.kt` (`componentsOf(..., 3, "rgb")` 等) 与 d.ts; 重载序号改为 1/4 - 4/4 与 1/3 - 3/3. 版本标 `6.2.0`, 与同组重载一致 (6.3.0 起的 `__colors__.js` 已有同一分支).
+- 其他签名级差异本条目没有新发现.
+
+### 10.4 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p2-5-head` (`git -c core.autocrlf=false archive`, 六个仓库按 CI 布局并排). 宿主 KSP 在副本内跑一次 (72064c1a8, `--no-daemon --max-workers=2`), `script-modules.json` 与共享签出的逐字节相同; 其后宿主新增的提交不改 `app/` 的脚本模块 (只有 Node 插件 id 一行), 沿用该产物.
+- 快照 B (本条目的验收): 宿主 HEAD 6499e3976 去掉 d268ce3a4 的三个工具文件 (等于 72064c1a8 + 6499e3976, 两者之间其余提交只改 ROADMAP), 文档 6b1267e, TS cfd7bc4, Ace fe92aaa, Node 3f620da0, Bun 976312d (本批开始时). `check.py --matrix --strict-arity --docs-support` (含 Ace, `--source` auto 即 ksp) 退出码 0, failures 空:
+  - docs-support: 83 页全部 current, requireAll true, uncoveredRoots 0, uncoveredObjects 0; 表内 2186 行 (模块根 1582 + 16 个类型页的对象成员 604), 返回对象小表 644 个成员 (27 个对象), 差异项 585 行;
+  - MATRIX.md current (2830 行), pending-baseline.json current, pending 663 / 806 / 757;
+  - 返回对象 43 个 1248 个成员, 原型成员 22 个模块 205 个, 失败 0; 文档名称门禁 heading 1369; arity match 1195, fail 0, narrower 29, no-dts 1, 不变.
+- 快照 A (共享 HEAD 全量: 宿主 6499e3976 含 d268ce3a4, Bun ddf607b): 退出码 1, 4 项失败都来自并行条目尚未重生成的派生文件: MATRIX.md 过期; pending-baseline.json 有 7 格不再 pending (P3.2b d268ce3a4 的 Q63 obsoleted 规则 6 格, P4.2b Bun ddf607b 的 global axios 1 格); global 与 util 两页的表过期. 其余 81 页 current, 未覆盖 0 / 0. 按并行规则由 P3.2b / P4.2b 在提交矩阵时 `--write-matrix` / `--write-pending-baseline` 并重生成这两页.
+- 单元测试: 共享签出 (含本条目改动, 提交前) 与副本 (HEAD 工具) 均为 76 项通过 (跳过 3).
+- 文档: `node generator/test-runtime-support.js` 10 项通过; `normalize-markdown.py --check` changed=0 (169 个文件); `auto-generate.py --check` "Generated documentation is current (169 modules)"; `git diff --check` 无输出. 全量生成与 `--sync-offline` 在副本内进行 (插件 74 个文件, 新增 / 删除 0, 插件 `normalize_offline_docs.py --check` 随同步通过), 生成物按字节拷回共享签出.
+- CI 等价: "Test registration extraction and compare public surfaces" 步骤中本条目只改 check.py 一行, 已按上面运行单测与 check.py; 其余 10 个 node 脚本, Ace 与 TS 步骤不读文档表, 输入未变, 未重跑.
+
+### 10.5 待决
+
+- Q69 `check.py --docs-support` 是否要求每个模块根与返回对象都有表: (a) 一律要求, CI 同样执行 (推荐, 已先行) / (b) 另加开关, CI 只校验已有表 / (c) 不要求. 见附录 C.
+- 附录 C Q46 / Q51 / Q54 - Q58 标 "已拍板 2026-10-29 (a)" (维护者在调度会话全选推荐项).
+
+### 10.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 文档 | 38a1239 | appType launchSettings, colors (components, alpha) 重载 |
+| 文档 | 49e36a2 | 生成器 --require-all 查返回对象, 自测, README |
+| 文档 | a26ef47 | 70 页标记块 + global 根, changelog / progress |
+| 文档 | 6b1267e | 生成物 (73 页 HTML / JSON + 搜索索引) |
+| Offline Docs | 4d7b117 | 同步 74 个文件, 版本与 VERSION_BUILD 不变 |
+| 宿主 | 6499e3976 | check.py / docs_support.py require-all, 测试, README, api-coverage.yml |
+| 宿主 | (本节所在提交) | 本节, ROADMAP 勾选 P2.5, 附录 C 七行状态与 Q69 |
