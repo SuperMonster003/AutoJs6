@@ -30,7 +30,10 @@ import org.mozilla.javascript.VarScope
  * package, except while `index.js` runs, so `plugins.load("io.github.supermonster003.autojs6.plugin.imgui")` of an
  * older script returns this module object instead of building a second API object. A member used when the plugin is not
  * installed, disabled or untrusted fails with the Plugin Center message, mapped by the layer (T5); nothing is loaded
- * until a member is used, so a script that only mentions `imgui` pays nothing.
+ * until a member is used, so a script that only mentions `imgui` pays nothing. A plugin newer than this host may have
+ * public members [ImguiNames] does not list: once the plugin is loaded (by the first use of any member) they are defined
+ * on the module object the same way, so `imgui.newMember(...)` works from then on, while before the load such a name is
+ * still undefined (the `ui` the render callback receives is the API object itself and always has every member).
  *
  * zh-CN: 脚本模块层上的 imgui: ImGui 插件 (AutoJs6-Plugin-ImGui) 的全局对象, 由宿主注册, 形式同 pinyin / mediainfo 之于各自的插件 (api-coverage
  * PLUGIN-APIS.md Q2-1), 脚本直接调用 imgui.begin(...) 而不再需要 plugins.load. 插件仍是 SDK (进程内) 插件: 首次使用某个成员时经 Plugins.load 加载
@@ -39,13 +42,19 @@ import org.mozilla.javascript.VarScope
  * 成员即插件的 API 名称 ([ImguiNames], 来自插件的 imgui.d.ts): 函数及其 PascalCase 别名转发到 API 对象 (转发调用的 this 即该对象), 常量组 (Col, Key,
  * WindowFlags 等) 是读取它的 getter. __pluginId 以插件包名回应 index.js 的身份检查 (index.js 运行期间除外), 因此旧脚本的
  * plugins.load("io.github.supermonster003.autojs6.plugin.imgui") 返回的就是本模块对象, 不会再构建第二个 API 对象. 插件未安装, 未启用或未授信时使用
- * 成员以插件中心的提示失败, 由本层映射 (T5); 使用成员之前不加载任何东西, 只提到 imgui 的脚本没有开销.
+ * 成员以插件中心的提示失败, 由本层映射 (T5); 使用成员之前不加载任何东西, 只提到 imgui 的脚本没有开销. 插件比宿主新时可能有 [ImguiNames] 未列出的公开成员:
+ * 插件加载后 (首次使用任一成员时) 以同样方式补挂到模块对象上, 此后 imgui.newMember(...) 可用; 加载之前该名称仍为 undefined (渲染回调收到的 ui 就是 API
+ * 对象本身, 始终含全部成员).
  */
 @ScriptModule(name = "imgui")
 class ImguiModule(private val runtime: ScriptRuntime) {
 
+    private lateinit var installation: ScriptModuleInstallation
     private lateinit var scope: VarScope
     private lateinit var global: ScriptableObject
+
+    /** The object holding the module's members, where [forwardUnlisted] defines the names [ImguiNames] lacks. */
+    private var members: ScriptableObject? = null
 
     /** The API object `index.js` of the plugin returned, built on the first use of a member. */
     private var api: Scriptable? = null
@@ -135,15 +144,41 @@ class ImguiModule(private val runtime: ScriptRuntime) {
         ],
     )
     fun install(installation: ScriptModuleInstallation) {
+        this.installation = installation
         scope = installation.scope
         global = installation.global
         installation.onBuilt { members ->
+            this.members = members
             members.defineGetter(PLUGIN_ID_KEY, installation) { if (loading) Undefined.instance else PLUGIN_ID }
-            (ImguiNames.FUNCTIONS + ImguiNames.ALIASES).forEach { name ->
-                members.defineProperty(name, installation.function(name, 0) { cx, s, _, args -> call(name, cx, s, args) }, ScriptableObject.PERMANENT)
-            }
+            (ImguiNames.FUNCTIONS + ImguiNames.ALIASES).forEach { name -> members.defineForwarder(name) }
             ImguiNames.CONSTANTS.forEach { name ->
                 members.defineGetter(name, installation) { member(name) }
+            }
+        }
+    }
+
+    /** Defines [name] as a permanent function forwarding to the function of the same name of the API object. */
+    private fun ScriptableObject.defineForwarder(name: String) {
+        defineProperty(name, installation.function(name, 0) { cx, s, _, args -> call(name, cx, s, args) }, ScriptableObject.PERMANENT)
+    }
+
+    /**
+     * Defines on the module object the public members of [api] (names not starting with `_`) that it does not have yet:
+     * a function as a forwarder, any other value as a getter, as for the listed names. A plugin newer than this host
+     * thus keeps its new members on `imgui` without a host release; the names stay out of the declared installs, they
+     * exist only after the plugin is loaded.
+     *
+     * zh-CN: 把 [api] 的公开成员 (不以 _ 开头的名称) 中模块对象尚未定义的, 按与名单内名称相同的方式补挂到模块对象上: 函数定义为转发函数, 其他值定义为 getter.
+     * 这样插件比宿主新时, 新成员不必等宿主发版也能经 imgui 使用; 这些名称不进入声明的安装项, 只在插件加载后存在.
+     */
+    private fun forwardUnlisted(api: Scriptable) {
+        val members = members ?: return
+        api.ids.forEach { id ->
+            val name = id as? String ?: return@forEach
+            if (name.startsWith("_") || members.has(name, members)) return@forEach
+            when (ScriptableObject.getProperty(api, name)) {
+                is Callable -> members.defineForwarder(name)
+                else -> members.defineGetter(name, installation) { member(name) }
             }
         }
     }
@@ -174,7 +209,10 @@ class ImguiModule(private val runtime: ScriptRuntime) {
 
     /** The API object, loading the plugin on the first call; one object per runtime, whichever thread asks first. */
     private fun api(): Scriptable = synchronized(this) {
-        api ?: load().also { api = it }
+        api ?: load().also {
+            api = it
+            forwardUnlisted(it)
+        }
     }
 
     private fun load(): Scriptable {

@@ -8,12 +8,13 @@ with --expect-missing: the only check is that a member of imgui fails with the P
 plugin the checks are the module object (459 members before anything is loaded), __pluginId, version() (the first
 member use loads the plugin), constant groups, PascalCase aliases, references, listExamples, getBackendCapabilities,
 plugins.load(package) returning the same object, and (unless --no-window) a floating window rendered for 30 frames
-(needs the overlay permission). The pushed script is removed afterwards unless --keep is given.
+(needs the overlay permission) whose first frame checks that every public member of the API object (`ui`) is
+reachable on imgui. The pushed script is removed afterwards unless --keep is given.
 
 zh-CN: 在设备上检查宿主模块 imgui (ImGui 插件作为全局对象). 经 RunIntentActivity 运行一个脚本, 每项检查打印一行 PASS / FAIL 与关键值.
 没有插件 (未安装, 未启用或未授信) 时加 --expect-missing, 只检查成员调用以插件中心的提示失败; 有插件时检查模块对象 (加载前 459 个成员),
 __pluginId, version() (首次调用成员加载插件), 常量组, PascalCase 别名, 引用, listExamples, getBackendCapabilities,
-plugins.load(包名) 返回同一对象, 以及 (除非 --no-window) 渲染 30 帧的悬浮窗 (需要悬浮窗权限).
+plugins.load(包名) 返回同一对象, 以及 (除非 --no-window) 渲染 30 帧的悬浮窗 (需要悬浮窗权限), 首帧检查 API 对象 (ui) 的每个公开成员都能经 imgui 访问.
 """
 import argparse
 import pathlib
@@ -98,8 +99,8 @@ if (EXPECT_MISSING) {
     });
     check('examples', function () {
         var list = imgui.listExamples();
-        assert(list && list.length === 5, 'length = ' + (list && list.length));
-        return 'length=5';
+        assert(list && list.length === 6, 'length = ' + (list && list.length));
+        return 'length=6';
     });
     check('backend', function () {
         var caps = imgui.getBackendCapabilities();
@@ -122,6 +123,12 @@ if (EXPECT_MISSING) {
         try {
             session = imgui.createWindow(function (ui, s) {
                 frames++;
+                if (frames === 1) {
+                    // Every public member of the plugin's API object is reachable on imgui, listed in ImguiNames or forwarded after the load.
+                    var keys = Object.keys(ui).filter(function (k) { return k.charAt(0) !== '_'; });
+                    var missing = keys.filter(function (k) { return typeof imgui[k] !== typeof ui[k]; });
+                    report('forwarded', missing.length === 0, 'public=' + keys.length + ' missing=' + missing.length + (missing.length ? ' ' + missing.slice(0, 5).join(',') : ''));
+                }
                 ui.withWindow('AJ6 check', null, 0, function () {
                     ui.text('frame ' + frames);
                 });

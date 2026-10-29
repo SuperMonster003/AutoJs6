@@ -5,13 +5,13 @@ package org.autojs.autojs.runtime.api.modules.imgui
  * `ApiAliases`), as [ImguiModule] defines them: [FUNCTIONS] and the PascalCase [ALIASES] forward to the plugin's API
  * object, [CONSTANTS] are its constant groups (Col, Key, WindowFlags, ...). The same names are declared on the module's
  * `@ScriptInstall` for the metadata (script-modules.json, read by the api-coverage, d.ts and documentation tools);
- * `ScriptModuleInstallsTest` keeps the two lists equal. When the plugin adds a name, add it to both (the host forwards
- * only the names it knows).
+ * `ScriptModuleInstallsTest` keeps the two lists equal. When the plugin adds a name, add it to both: a name missing here
+ * is still forwarded, but only after the plugin is loaded, and stays out of the metadata.
  *
  * zh-CN: ImGui 插件的 API 名称 (插件仓库 app/src/main/assets/types/imgui.d.ts 的 ApiCore 与 ApiAliases), [ImguiModule] 按此定义成员: [FUNCTIONS]
  * 与 PascalCase 别名 [ALIASES] 转发到插件的 API 对象, [CONSTANTS] 是它的常量组 (Col, Key, WindowFlags 等). 同一组名称声明在模块的 @ScriptInstall 上供
- * 元数据 (script-modules.json, api-coverage / d.ts / 文档工具读取) 使用; ScriptModuleInstallsTest 保证两份清单一致. 插件新增名称时两处同时添加 (宿主只转发
- * 它知道的名称).
+ * 元数据 (script-modules.json, api-coverage / d.ts / 文档工具读取) 使用; ScriptModuleInstallsTest 保证两份清单一致. 插件新增名称时两处同时添加: 这里缺少的
+ * 名称仍会转发, 但要等插件加载之后, 且不进入元数据.
  */
 object ImguiNames {
 
