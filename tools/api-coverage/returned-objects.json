@@ -3,11 +3,11 @@
   "objects": [
     {
       "object": "UiSelector", "class": "org.autojs.autojs.core.accessibility.UiSelector", "memberSource": "kotlin-class",
-      "producers": ["selector.()"], "probe": "selector.()", "documentation": ["uiSelectorType", "uiObjectActionsType"]
+      "producers": ["selector.()"], "probe": "selector.()", "documentation": ["uiSelectorType", "uiObjectActionsType"], "exclude": ["applyEntry"], "excludeNote": "not script API (Q57): the hook through which every UiSelectorBuilders condition is stored"
     },
     {
       "object": "UiObject", "class": "org.autojs.autojs.core.automator.UiObject", "memberSource": "kotlin-class",
-      "probe": "auto.getWindowRoot.()", "documentation": ["uiObjectType", "uiObjectActionsType"]
+      "probe": "auto.getWindowRoot.()", "documentation": ["uiObjectType", "uiObjectActionsType"], "exclude": ["findAccessibilityNodeInfosByText", "findAccessibilityNodeInfosByViewId", "getChild", "getParent", "recycle"], "excludeNote": "not script API (Q57): overrides of AccessibilityNodeInfoCompat members (an external base whose members are not enumerated) that register the returned nodes with the runtime; scripts use child / parent / findByText / findByViewId"
     },
     {
       "object": "UiObjectCollection", "class": "org.autojs.autojs.core.automator.UiObjectCollection", "memberSource": "kotlin-class",
@@ -15,7 +15,7 @@
     },
     {
       "object": "ImageWrapper", "class": "org.autojs.autojs.core.image.ImageWrapper", "memberSource": "kotlin-class",
-      "probe": "images.read.()", "documentation": ["imageWrapperType"]
+      "probe": "images.read.()", "documentation": ["imageWrapperType"], "exclude": ["scriptRuntime"], "excludeNote": "not script API (Q57): the runtime that owns the image, kept for resource registration"
     },
     {
       "object": "Flow", "class": "org.autojs.autojs.runtime.api.modules.flow.FlowNativeObject", "memberSource": "augment-prototype",
@@ -31,11 +31,11 @@
     },
     {
       "object": "EpubReaderSession", "class": "org.autojs.autojs.runtime.api.modules.epub.EpubReaderSession", "memberSource": "kotlin-class",
-      "producers": ["epub.read"], "probe": "epub.read.()", "documentation": ["epubReaderSessionType"]
+      "producers": ["epub.read"], "probe": "epub.read.()", "documentation": ["epubReaderSessionType", "eventEmitterType"], "exclude": ["defaultMaxListeners"]
     },
     {
       "object": "AiSession", "class": "org.autojs.autojs.runtime.api.modules.ai.AiSessionNativeObject", "memberSource": "augment-prototype",
-      "producers": ["ai.session"], "probe": "ai.session.()", "documentation": ["ai"]
+      "producers": ["ai.session"], "probe": "ai.session.().await", "probeNote": "ai.session resolves to the session", "documentation": ["ai"]
     },
     {
       "object": "AgentRun", "class": "org.autojs.autojs.runtime.api.modules.ai.AgentRunNativeObject", "memberSource": "augment-prototype",
@@ -51,7 +51,7 @@
     },
     {
       "object": "Dialog", "class": "org.autojs.autojs.core.ui.dialog.JsDialog", "memberSource": "kotlin-class",
-      "probe": "dialogs.build.()", "documentation": ["dialogs"]
+      "probe": "dialogs.build.()", "documentation": ["dialogs", "eventEmitterType"], "exclude": ["defaultMaxListeners", "dispatchGenericMotionEvent", "dispatchKeyEvent", "dispatchKeyShortcutEvent", "dispatchPopulateAccessibilityEvent", "dispatchTouchEvent", "dispatchTrackballEvent", "onActionModeFinished", "onActionModeStarted", "onAttachedToWindow", "onClick", "onContentChanged", "onContextItemSelected", "onContextMenuClosed", "onCreateContextMenu", "onCreateOptionsMenu", "onCreatePanelMenu", "onCreatePanelView", "onDetachedFromWindow", "onGenericMotionEvent", "onItemSelected", "onKeyDown", "onKeyLongPress", "onKeyMultiple", "onKeyShortcut", "onKeyUp", "onMenuItemSelected", "onMenuOpened", "onOptionsItemSelected", "onOptionsMenuClosed", "onPanelClosed", "onPrepareOptionsMenu", "onPreparePanel", "onProvideKeyboardShortcuts", "onRestoreInstanceState", "onSaveInstanceState", "onSearchRequested", "onShow", "onTouchEvent", "onTrackballEvent", "onWindowAttributesChanged", "onWindowFocusChanged", "onWindowStartingActionMode", "setOnBackPressedFromJs"], "excludeNote": "not script API (Q57): defaultMaxListeners is the static EventEmitter default; the on* / dispatch* members are the Window.Callback / KeyEvent.Callback, menu, action mode and instance state callbacks of the wrapped Android dialog and the listeners the dialog registers on itself (onClick / onShow / onItemSelected), called by the system; setOnBackPressedFromJs is the hook dialogs.build installs for the onBackPressed option"
     },
     {
       "object": "Canvas", "class": "org.autojs.autojs.core.graphics.ScriptCanvas", "memberSource": "kotlin-class",
@@ -87,11 +87,11 @@
     },
     {
       "object": "TtsUtterance", "class": "org.autojs.autojs.runtime.api.modules.tts.TtsUtterance", "memberSource": "kotlin-class",
-      "probe": "tts.utterance.()", "documentation": ["tts"]
+      "probe": "tts.utterance.()", "documentation": ["tts", "eventEmitterType"], "exclude": ["defaultMaxListeners"]
     },
     {
       "object": "ScriptExecution", "class": "org.autojs.autojs.execution.ScriptExecution", "memberSource": "kotlin-class",
-      "probe": "engines.execScript.()", "documentation": ["engines"]
+      "probe": "engines.execScript.()", "documentation": ["engines"], "skipConstants": true
     },
     {
       "object": "Database", "class": "org.autojs.autojs.core.database.Database", "memberSource": "kotlin-class",
@@ -99,7 +99,7 @@
     },
     {
       "object": "WebSocket", "class": "org.autojs.autojs.core.web.WebSocket", "memberSource": "kotlin-class",
-      "probe": "web.newWebSocket.()", "documentation": ["webSocketType"]
+      "probe": "web.newWebSocket.()", "documentation": ["webSocketType", "eventEmitterType"], "exclude": ["defaultMaxListeners"]
     },
     {
       "object": "InjectableWebView", "class": "org.autojs.autojs.core.web.InjectableWebView", "memberSource": "kotlin-class",
@@ -107,7 +107,7 @@
     },
     {
       "object": "InjectableWebClient", "class": "org.autojs.autojs.core.web.InjectableWebClient", "memberSource": "kotlin-class",
-      "probe": "web.newInjectableWebClient.()", "documentation": ["injectableWebClientType"]
+      "probe": "web.newInjectableWebClient.()", "documentation": ["injectableWebClientType"], "exclude": ["onPageFinished"], "excludeNote": "not script API (Q57): the WebViewClient callback the WebView calls"
     },
     {
       "object": "PReadableTextFile", "class": "org.autojs.autojs.pio.PReadableTextFile", "memberSource": "kotlin-class",
@@ -115,19 +115,19 @@
     },
     {
       "object": "PWritableTextFile", "class": "org.autojs.autojs.pio.PWritableTextFile", "memberSource": "kotlin-class",
-      "producers": ["files.open", "open"], "probe": "files.open.()", "documentation": ["files"]
+      "producers": ["files.open", "open"], "probe": "org.autojs.autojs.pio.PWritableTextFile.open.()", "probeNote": "files.open.() takes the first overload (mode r, PReadableTextFile)", "documentation": ["files"], "exclude": ["open"], "excludeNote": "not script API (Q57): the static factory behind files.open / files.write"
     },
     {
       "object": "TimedTask", "class": "org.autojs.autojs.timing.TimedTask", "memberSource": "kotlin-class",
-      "probe": "tasks.getTimedTask.()", "documentation": ["tasks"]
+      "probe": "tasks.getTimedTask.()", "documentation": ["tasks"], "skipConstants": true, "exclude": ["captureLaunchContext", "countdownTask", "createIntent", "createPendingIntent", "dailyTask", "disposableTask", "getDayOfWeekTimeFlag", "monthlyTask", "notifyFinished", "weeklyTask", "yearlyTask"], "excludeNote": "not script API (Q57): the static factories behind tasks.add*Task, and the scheduler side of the task (launch context capture, the launch Intent / PendingIntent, the finished-run bookkeeping)"
     },
     {
       "object": "IntentTask", "class": "org.autojs.autojs.timing.IntentTask", "memberSource": "kotlin-class",
-      "probe": "tasks.getIntentTask.()", "documentation": ["tasks"]
+      "probe": "tasks.getIntentTask.()", "documentation": ["tasks"], "skipConstants": true, "exclude": ["setScriptPathAndCaptureContext"], "excludeNote": "not script API (Q57): the setter tasks.addIntentTask uses to store the script path with the launch context"
     },
     {
       "object": "Mat", "class": "org.autojs.autojs.core.opencv.Mat", "memberSource": "kotlin-class",
-      "probe": "images.imread.()", "documentation": ["image"]
+      "probe": "images.imread.()", "documentation": ["image"], "exclude": ["from", "getCreatedCount", "getFinalizedCount", "getLiveCount", "getReleasedCount", "ones"]
     },
     {
       "object": "MatchingResult", "class": "org.autojs.autojs.runtime.api.modules.images.MatchingResult", "memberSource": "kotlin-class",
@@ -135,7 +135,7 @@
     },
     {
       "object": "ImageFeatures", "class": "org.autojs.autojs.runtime.api.modules.images.ImageFeatures", "memberSource": "kotlin-class",
-      "probe": "images.detectAndComputeFeatures.()", "documentation": ["image"]
+      "probe": "images.detectAndComputeFeatures.()", "documentation": ["image"], "exclude": ["javaObject", "onRecycled"], "excludeNote": "not script API (Q57): the OpenCV descriptor images.matchFeatures reads and the recycle hook of the runtime"
     },
     {
       "object": "ObjectFrame", "class": "org.autojs.autojs.runtime.api.modules.images.ObjectFrame", "memberSource": "kotlin-class",
@@ -151,7 +151,7 @@
     },
     {
       "object": "ConsoleConfigurator", "class": "org.autojs.autojs.core.console.ConsoleImpl.Configurator", "memberSource": "kotlin-class",
-      "probe": "console.build.()", "documentation": ["console", "consoleBuildOptionsType"]
+      "probe": "console.build.()", "documentation": ["console", "consoleBuildOptionsType"], "exclude": ["clearStates"], "excludeNote": "not script API (Q57): the reset the console runs when the floating window is rebuilt"
     },
     {
       "object": "ContinuationCreator", "class": "org.autojs.autojs.runtime.api.modules.continuation.Creator", "memberSource": "kotlin-class",
@@ -171,7 +171,7 @@
     },
     {
       "object": "ScriptEngine", "class": "org.autojs.autojs.engine.JavaScriptEngine", "memberSource": "kotlin-class",
-      "probe": "engines.myEngine.()", "documentation": ["engines"]
+      "probe": "engines.myEngine.()", "documentation": ["engines"], "skipConstants": true, "exclude": ["destroy", "execute", "getRuntime", "init", "put", "setExecArgv", "setId", "setOnDestroyListener", "setRuntime", "uncaughtException"], "excludeNote": "not script API (Q57): the engine lifecycle the host drives (init / put / execute / destroy, the runtime, id, execArgv and destroy listener set when the engine starts, the uncaught exception report); scripts stop an engine with forceStop"
     }
   ],
   "prototypes": [

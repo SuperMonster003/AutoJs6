@@ -285,7 +285,6 @@ def kotlin_members(sources, path, region):
     _, kind, start, header_end, body_start, body_end = region
     raw, mk, code = sources.text(path)
     members = []
-    interface = kind == 'interface'
     header = mk[start:header_end]
     # Properties of the primary constructor.
     ctor = re.search(r'\b(?:class)\s+\w+\s*(?:<[^{(]*?>)?\s*(?:(?:private|internal|protected|public)?\s*(?:@\w+\s*)*constructor\s*)?\(', mk[start:header_end])
@@ -300,7 +299,8 @@ def kotlin_members(sources, path, region):
         return members, header
     for m in member_depth_matches(KOTLIN_MEMBER, mk, code, body_start, body_end):
         modifiers = m[2]
-        if re.search(r'\b(?:private|protected|internal)\b', modifiers) and not interface:
+        # Also in an interface: a private fun with a body (UiObjectActions.performTooltipAction) is private on the JVM.
+        if re.search(r'\b(?:private|protected|internal)\b', modifiers):
             continue
         annotations = annotations_before(mk, m.start(3)) + re.findall(r'@([\w.]+)', m[1])
         name, keyword = m[4], m[3]
@@ -614,9 +614,13 @@ def attach(host, result, metadata=None, config=CONFIG):
             members, external, scriptable, source = found
             if scriptable:
                 problems.append(f'{entry["object"]}: {entry["class"]} is a Scriptable; use augment-prototype')
+            names = {m['name'] for m in members}
+            problems += [f'{entry["object"]}: exclude {name} matches no member' for name in sorted(set(entry.get('exclude', [])) - names)]
             exclude = set(entry.get('exclude', [])) | OBJECT_MEMBERS
-            members = [m for m in members if m['name'] not in exclude]
-            item.update(source=source, externalBases=external, complete=True)
+            # Upper-case fields are constants of the class (TimedTask.FLAG_MONDAY), not state of the returned object.
+            constants = {m['name'] for m in members if entry.get('skipConstants') and m['kind'] == 'Properties' and CONSTANT_NAME.match(m['name'])}
+            members = [m for m in members if m['name'] not in exclude | constants]
+            item.update(source=source, externalBases=external, complete=True, constants=len(constants))
         elif entry['memberSource'] == 'augment-prototype':
             found = prototype_members(sources, entry)
             if found is None:

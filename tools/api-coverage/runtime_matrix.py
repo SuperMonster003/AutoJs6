@@ -85,8 +85,9 @@ def parse_worker_modules(source):
     end = source.find('\n          },', start)
     body = source[start + len('hostModuleMethods: {'):end]
     modules = {}
-    for name, value in re.findall(r'(\w+)\s*:\s*(Object\.keys\(|\[[^\]]*\])', body):
-        modules[name] = None if value.startswith('Object.keys') else re.findall(r'"([^"]+)"', value)
+    # Dotted names ("jsox.mathx") can only be string keys.
+    for quoted, plain, value in re.findall(r'(?:"([\w.]+)"|(\w+))\s*:\s*(Object\.keys\(|\[[^\]]*\])', body):
+        modules[quoted or plain] = None if value.startswith('Object.keys') else re.findall(r'"([^"]+)"', value)
     if not modules:
         raise ValueError('Worker hostModuleMethods table is empty or changed shape')
     return modules
@@ -376,6 +377,8 @@ def returned_rows(exports):
                 'source': member.get('source'), 'line': member.get('line'), 'metadataSource': item.get('memberSource'),
                 'surface': 'public', 'arity': member.get('arity'), 'object': item['object'],
                 'producers': sorted(item.get('producers', [])), 'memberSource': item.get('memberSource'),
+                # The documentation runtime support table of the object is on this page (Q20 (a)).
+                'page': (item.get('documentation') or [None])[0],
             })
     return rows
 

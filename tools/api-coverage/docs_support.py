@@ -5,6 +5,10 @@ The documentation repository's `generator/runtime-support.js` writes the tables 
 module pages from `runtime-matrix.json`. `check.py --docs-support` runs its `--check`
 against the matrix of the same run and cross-checks the row counts. The documentation
 name gate ignores the blocks (`strip_blocks`): the tables name APIs without documenting them.
+
+Prototype members (Q18) count as exports of their module. Returned object members (Q20 (a))
+belong to the object's first documentation page: a root `<Object>#` shows them on a type page,
+otherwise the module page's block lists the object in its "返回对象" table (`objectRows`).
 """
 from collections import Counter
 import json
@@ -13,7 +17,7 @@ import re
 import subprocess
 
 GENERATOR = Path("generator/runtime-support.js")
-BEGIN = re.compile(r"^<!-- runtime-support:begin((?: [\w$.]+)*) -->$")
+BEGIN = re.compile(r"^<!-- runtime-support:begin((?: [\w$.]+#?)*) -->$")
 END = "<!-- runtime-support:end -->"
 
 
@@ -35,7 +39,18 @@ def row_root(row):
 
 
 def root_counts(matrix):
-    return Counter(row_root(row) for row in matrix["rows"] if row["kind"] == "export")
+    """Rows by block root: module roots of the exports and prototype members, `<Object>#` of the returned members."""
+    counts = Counter(row_root(row) for row in matrix["rows"] if row["kind"] in ("export", "prototype-member"))
+    counts.update(row["object"] + "#" for row in matrix["rows"] if row["kind"] == "returned-member")
+    return counts
+
+
+def page_object_counts(matrix, page, roots):
+    """Returned members a module page's "返回对象" table shows: objects documented first on it, without a root of their own."""
+    if not any(not root.endswith("#") for root in roots):
+        return 0
+    return sum(1 for row in matrix["rows"]
+               if row["kind"] == "returned-member" and row.get("page") == page and row["object"] + "#" not in roots)
 
 
 def check(docs, matrix_path, output=None, require_all=False, node="node"):
@@ -53,19 +68,25 @@ def check(docs, matrix_path, output=None, require_all=False, node="node"):
     if output:
         (Path(output) / "docs-support.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     failures = ["Documentation runtime support: " + problem for problem in report["problems"]]
-    counts = root_counts(json.loads(Path(matrix_path).read_text(encoding="utf-8")))
+    matrix = json.loads(Path(matrix_path).read_text(encoding="utf-8"))
+    counts = root_counts(matrix)
     for page in report["pages"]:
         if page["status"] in ("current", "stale", "skipped"):
             expected = sum(counts[root] for root in page["roots"])
             if page["rows"] != expected:
                 failures.append(f"Documentation runtime support: {page['page']} shows {page['rows']} rows, the matrix has {expected} for {' '.join(page['roots'])}")
+            objects = page_object_counts(matrix, Path(page["page"]).stem, page["roots"])
+            if (page.get("objectRows") or 0) != objects:
+                failures.append(f"Documentation runtime support: {page['page']} shows {page.get('objectRows') or 0} returned object rows, the matrix has {objects}")
     summary = {
         "generator": str(script), "dataSource": report["dataSource"], "pages": len(report["pages"]),
         "byStatus": dict(Counter(page["status"] for page in report["pages"])),
         "skipped": [page["page"] for page in report["pages"] if page["status"] == "skipped"],
         "rows": sum(page["rows"] or 0 for page in report["pages"]),
+        "objectRows": sum(page.get("objectRows") or 0 for page in report["pages"]),
         "differences": sum(page["differences"] or 0 for page in report["pages"]),
-        "coveredRoots": len(counts) - len(report["uncovered"]), "uncoveredRoots": len(report["uncovered"]),
+        "coveredRoots": len([root for root in counts if not root.endswith("#")]) - len(report["uncovered"]),
+        "uncoveredRoots": len(report["uncovered"]),
         "requireAll": require_all,
     }
     return summary, failures

@@ -435,9 +435,15 @@ else `AUTOJS6_DOCUMENTATION_ROOT`, else the sibling `AutoJs6-Documentation`.
 
 - A block names module roots, the root the documentation gate looks pages up by:
   the first segment of the placement module, the owner module for a member of the
-  global object (`captureScreen` -> `images`), else `global`. Returned-object
-  members (`<Object>#<member>`) and prototype members are not shown yet
-  (roadmap Q20 / Q22, P2.3).
+  global object (`captureScreen` -> `images`), else `global`. Prototype members
+  count as exports of their module (Q22 (a)).
+- Returned-object members (`<Object>#<member>`, Q20 (a)) belong to the object's
+  first documentation page (the matrix row's `page`). On a type page the block
+  names the object with a trailing `#` (`<!-- runtime-support:begin ImageWrapper# -->`)
+  and shows its members like a module; a module page's block lists the objects
+  documented on it in a "返回对象" table, one line per object (a column of Java
+  object members all "不适用 (需要 Java 对象)" reads as one cell). The cross-check
+  also compares that table's member count (`objectRows`).
 - The documentation name gate ignores block contents (`docs_support.strip_blocks`,
   line numbers kept), so a table never turns a missing name into a mention.
 - A block generated from the other export source (ksp / kotlin, recorded on its
@@ -546,9 +552,22 @@ all-groups / none). Members of Java objects are completed from the generated
 Java declaration groups, which the default Ace library set leaves out: `ace`
 `all-groups` is counted (`aceAllGroupsOnly`) but is not a failure there, while
 the matrix `ace` column keeps its definition (both library sets, so `none`).
-Nothing here fails the gate; P2.3 works through the failures. The matrix gets
-`<Object>#<member>` rows; their runtime cells stay `pending` until
-`runtime-policy.json` maps or excludes them.
+Since P2.3 every member in `failures` (and in `prototypes.failures`, below) fails
+the gate ("Returned object member below the name gate: ..."), and so does every
+configuration problem of `returnedObjectsStats` / `prototypesStats` (an `exclude`
+name matching no member, an unknown module). The matrix gets `<Object>#<member>`
+rows with the object's first documentation `page`; their runtime cells stay
+`pending` until `runtime-policy.json` maps or excludes them.
+
+Members of Java facade objects that are not script API are excluded with an
+`excludeNote` (Q57): Android framework callbacks the system calls on the wrapped
+object (the `Dialog` `on*` / `dispatch*` members), overrides of members of an
+external base whose members are not enumerated (`UiObject.getChild`), the host's
+lifecycle and scheduling side (`ScriptEngine.init`, `TimedTask.createPendingIntent`),
+static factories and runtime references. `probe` must resolve to the object type:
+`ai.session.().await` takes the fulfilled value of a Promise (Ace completes it as
+`(await ai.session()).`), and an overloaded producer whose first signature returns
+another type is probed through the class (`probeNote`).
 
 ### Module prototypes (Q18 (a))
 
@@ -579,7 +598,10 @@ an export: its module's documentation pages (`policy.json` `documentationModules
 or the entry's `documentation`, such as `eventEmitterType` for `events`), the d.ts
 type of `<module>.<member>` and Ace completion in the default and all-group
 library sets and the static index. The surface run is the returned-object one;
-`returned-objects.json` reports them under `prototypes`.
+`returned-objects.json` reports them under `prototypes`. Members declared only on
+the Java class are not in the default Ace library set, so the module types of the
+d.ts declare them explicitly. In the documentation runtime support tables they
+count as exports of their module (Q22 (a)).
 
 ## Physical-device checks
 

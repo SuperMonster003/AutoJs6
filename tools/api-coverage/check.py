@@ -129,8 +129,14 @@ def main():
     arity_summary = arity.report(host, baseline, output)
     if args.strict_arity:
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
-    # Members of returned objects (P0.4) and of module prototypes (Q18): reported apart, never failures (P2.3 consumes returned-objects.json).
+    # Members of returned objects (P0.4) and of module prototypes (Q18): name-level failures since P2.3, like the exports.
     returned_summary, returned_docs, returned_surfaces = returned_objects.gate(host, baseline, output, docs / "api", command, policy)
+    returned_report = json.loads((output / "returned-objects.json").read_text(encoding="utf-8"))
+    failures.extend(f"Returned object member below the name gate: {row['id']} (doc {row['doc']}, d.ts {row['dts']}, Ace {row['ace']})"
+                    for row in returned_report["failures"])
+    failures.extend(f"Prototype member below the name gate: {row['id']} (doc {row['doc']}, d.ts {row['dts']}, Ace {row['ace']})"
+                    for row in returned_report["prototypes"]["failures"])
+    failures.extend("returned-objects.json: " + problem for problem in baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"])
     matrix_summary = docs_summary = None
     if args.write_pending_baseline:
         args.matrix = True

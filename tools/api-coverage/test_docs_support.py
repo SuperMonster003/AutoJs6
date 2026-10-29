@@ -22,7 +22,8 @@ def row(api, module, owner, cells=('bridged', 'bridged', 'capability-gated'), ki
 
 MATRIX = {'schema': 'autojs6-runtime-matrix-v1', 'dataSource': {'kind': 'ksp'}, 'rows': [
     row('demo.read', 'demo', 'demo'), row('demo.sub.write', 'demo.sub', 'demo'), row('capture', '', 'demo'),
-    row('toast', '', ''), row('Thing#size', None, None, kind='returned-member'),
+    row('toast', '', ''), dict(row('Thing#size', None, None, kind='returned-member'), object='Thing', page='thingType'),
+    row('demo.isFile', 'demo', 'demo', kind='prototype-member'),
 ]}
 
 STUB = '''
@@ -44,7 +45,13 @@ class StripBlocksTest(unittest.TestCase):
         self.assertEqual(docs_support.strip_blocks(text), text)
 
     def test_root_counts_match_documentation_roots(self):
-        self.assertEqual(docs_support.root_counts(MATRIX), {'demo': 3, 'global': 1})
+        self.assertEqual(docs_support.root_counts(MATRIX), {'demo': 4, 'global': 1, 'Thing#': 1})
+
+    def test_page_object_counts(self):
+        matrix = dict(MATRIX, rows=MATRIX['rows'] + [dict(row('Mat#release', None, None, kind='returned-member'), object='Mat', page='demo')])
+        self.assertEqual(docs_support.page_object_counts(matrix, 'demo', ['demo']), 1)
+        self.assertEqual(docs_support.page_object_counts(matrix, 'demo', ['demo', 'Mat#']), 0, 'shown by its own root')
+        self.assertEqual(docs_support.page_object_counts(matrix, 'thingType', ['Thing#']), 0, 'a type page has no table')
 
     def test_documentation_gate_ignores_the_tables(self):
         from check import documentation_rows
@@ -83,17 +90,17 @@ class CheckTest(unittest.TestCase):
         self.assertIn('generator not found', failures[0])
 
     def test_row_counts_cross_checked(self):
-        self.stub(3)
+        self.stub(4)
         summary, failures = docs_support.check(self.root, self.matrix, output=self.root)
         self.assertEqual(failures, [])
-        self.assertEqual((summary['pages'], summary['rows'], summary['coveredRoots'], summary['uncoveredRoots']), (1, 3, 1, 1))
+        self.assertEqual((summary['pages'], summary['rows'], summary['coveredRoots'], summary['uncoveredRoots']), (1, 4, 1, 1))
         self.assertTrue((self.root / 'docs-support.json').is_file())
-        self.stub(2)
+        self.stub(3)
         _, failures = docs_support.check(self.root, self.matrix)
-        self.assertEqual(failures, ['Documentation runtime support: api/demo.md shows 2 rows, the matrix has 3 for demo'])
+        self.assertEqual(failures, ['Documentation runtime support: api/demo.md shows 3 rows, the matrix has 4 for demo'])
 
     def test_generator_error_fails(self):
-        self.stub(3, exit_code=2)
+        self.stub(4, exit_code=2)
         _, failures = docs_support.check(self.root, self.matrix)
         self.assertIn('failed (2): boom', failures[0])
 
@@ -109,7 +116,7 @@ class CheckTest(unittest.TestCase):
         subprocess.run([NODE, str(self.root / docs_support.GENERATOR), '--matrix', str(self.matrix), '--api', str(self.root / 'api')], check=True, capture_output=True)
         summary, failures = docs_support.check(self.root, self.matrix, require_all=True)
         self.assertEqual(failures, ['Documentation runtime support: module roots without a runtime-support block: global'])
-        self.assertEqual((summary['byStatus'], summary['rows']), ({'current': 1}, 3))
+        self.assertEqual((summary['byStatus'], summary['rows']), ({'current': 1}, 4))
         text = page.read_text(encoding='utf-8')
         self.assertIn('`demo.sub`', text)
         stripped = docs_support.strip_blocks(text).splitlines()

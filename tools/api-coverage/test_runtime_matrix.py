@@ -175,6 +175,8 @@ class ParsingTest(unittest.TestCase):
         self.assertEqual(parse_worker_modules(FACADE), {'flow': None, 'database': ['open'], 'sensors': ['policy', 'once'], 'image': None})
         with self.assertRaises(ValueError):
             parse_worker_modules('const x = {};')
+        dotted = FACADE.replace('image:', '"jsox.mathx": Object.keys(x), image:')
+        self.assertEqual(parse_worker_modules(dotted)['jsox.mathx'], None)
 
 
 class StatusTest(unittest.TestCase):
