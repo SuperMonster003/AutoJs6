@@ -1024,7 +1024,7 @@ P5.2 阶段 5 (2026-10-29, 删除 assets/modules 中 Bundled Libraries 插件收
 | 测试 | `PanguModuleTest` / `PathShimTest` 读测试资源副本 `src/test/resources/script-modules/bundled-libraries/` (4 个文件约 28 KB, 不进 APK, Q182); `PluginModuleDifferentialTest` 的插件替身改为测试内 8 个小模块 |
 | JVM | 隔离克隆 (`c7ce8ce3e` + 本改动) 全量 `:app:testAppDebugUnitTest` 951 类 5855 例 1 失败 27 跳过: `BunAutomationPolicyTest.publicAutomationDoesNotExposeInternalAgentRoutes` (方法数期望 194 实为 204; 基线已有, 来自 api-coverage `922673186` / `257807691` / `77d17909a` 新增的 Bun 方法, 与本改动无关); `:app:assembleAppDebug` 通过; 放回共享工作区后补丁与克隆一致 (patch-id 相同) |
 | 体积 (debug 5935 arm64) | 32 个条目在 APK 中压缩后 242740 字节, 连同 zip 头约 247 KB; 克隆构建的 arm64 包 47148759 字节 (md5 `3b14b896`), assets/modules 只剩上述 6 个文件 |
-| 真机 (G8441) | 待测 (设备被其他主题占用, 结果补在本表之后) |
+| 真机 (G8441, 2026-10-29 21:05-21:08) | 通过. 宿主为上述克隆 arm64 包 (5935, 覆盖安装保留数据), 插件为签名 release 包 (`b45b2448`, md5 `82288e48`), "库被关闭" 一态前用 `--switch-apk` 覆盖安装同签名同 versionCode 的 debug 包: `device_plugin_modules_check.py` 未安装 / 启用 / 插件中心停用 / 库被关闭 / 卸载 5 态各 22 项全部符合预期, 不可用时 axios 的消息分别为未安装 / 停用 / 库被关闭的指引, 错误位置指向 main.js. 测后插件已卸载, 原宿主包 (5835, md5 `5e836c4d`) 降级装回并启动正常, 设备目录已删 |
 
 影响: 之后的构建上, `device_require_check.py` 的 core-path / core-events / axios 三项, `device_r2.py --calls require` 的 "ok require path / axios" 两条与 `PathShimTest` 的设备用例, 都要先装并启用插件 (前两者的说明已注明); `device_plugin_modules_check.py` 加 `--switch-apk` (release 插件没有 debug 开关接收器, 插件页开关一态前覆盖安装同签名同 versionCode 的 debug 包).
 
