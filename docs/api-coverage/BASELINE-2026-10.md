@@ -404,3 +404,91 @@ augment P5.2 (37b93d893) 删除 `runtime/api/augment` 后, `returned-objects.jso
 | 文档 | 14714fa | speech.md speaker 节, 错误码, features, progress.md, 全量生成 |
 | TS | 496aaf8 | aj6-int-speech.d.ts speech.speaker |
 | Ace | 9fce0de | aj6-int-speech.d.ts 副本, autojs6_indices.js, lib.autojs6.d.ts |
+
+## 7. P2.2 参数个数不一致项修复 (2026-10-29, 子会话 api-cov-p2-2)
+
+### 7.1 数据与命令
+
+- 清单: 宿主 HEAD 导出副本 08f5eb2ea (script-modules.json 复用 P2.1 副本的 KSP 产物: 两副本 app/src/main 与 build-logic 逐字相同, 未再跑 Gradle), TS 496aaf8, 文档 ffd5c2c, Ace 9fce0de; `check.py --skip-ace` 得 match 1164, fail 0, wider 21, narrower 39, vararg 60, no-dts 1, 与 2.3 节同为 61 行.
+- crossCheck 为 0 行: augment P5.2 (37b93d893) 删除旧包后没有可比的 Kotlin 注册守卫, 2.6 节的 47 处在 7.4 逐项核对.
+- 判定依据: 新层 `runtime/api/modules/**` 的 `@ScriptFunction` 参数表与函数体检查, 文档 (`AutoJs6-Documentation/api`) 的签名与正文用法, 必要时对照 AutoJs4 (`modules/__http__.js`).
+
+### 7.2 wider 21 行 (全部改 d.ts)
+
+| API | 实现 | 原 d.ts | 结论 |
+|---|---|---|---|
+| auto.registerEvent / registerEvents | 2-3 | 1-2, 3-3 | 改 d.ts: listener 必需, 类型含 null / undefined (文档: 为 null 或 undefined 时移除监听; 旧实现同为 2-3) |
+| automator.gestures / gestures, automator.gesturesAsync / gesturesAsync (4 行) | 1-n | 0-n | 改 d.ts: `(stroke, ...strokes)` 至少 1 笔 (文档 "一个或多个笔画") |
+| flow.clickWhenStableAfter / clickBoundsWhenStableAfter 及全局 (4 行) | 2-7 | 1-7, 2-4 | 改 d.ts `Flow.WaitAfterFunction` 与文档签名 (flow.md / global.md) 的位置形式为 `(cond, timeout, interval, delayMin, delayMax?, onOk?, onErr?)`: FlowArgs 的位置延时是第 3 个数字, 少于 3 个数字且选项没有 delay 时抛错, 原签名的 timeout? / interval? 不成立 |
+| colors.toColorStateList | 1-n | 0-n | 改 d.ts: `(color, ...colors)` (文档 "一个或多个") |
+| console.trace | 0-2 | 1-n, 2-2 | 改 d.ts 为 `trace(message?, level?)`: 第二个参数是输出等级, 不是格式化参数, 3 个以上参数报错; 文档签名改 message 可选 (新层无参输出 undefined 与调用栈) |
+| http.buildRequest / request / requestAsync (3 行) | 2-2 / 2-3 | 1-2 / 1-3 | 改 d.ts: options 必需. 6.8.0 文档写明必需且须含 method, 新层 builderOptions 一致; 6.7 文档可选的兼容问题见 Q51 |
+| http.postJson / postJsonAsync (2 行) | 2-4 | 1-4 | 改 d.ts: data 必需 (文档 `postJson(url, data, options?, callback?)`); 见 Q51 |
+| util.java.array | 2-n | 2-2, 1-n | 改 d.ts: `(type, dimension, ...dimensions)` (文档 "至少需要一个维度"; 旧实现 1 个参数同样抛错) |
+| util.java.mapToObject / objectToMap (2 行) | 1-1 | 0-1 | 改 d.ts: 参数必需, 类型含 null / undefined (文档同) |
+| util.java.toJsArray | 1-2 | 0-2 | 同上 |
+
+### 7.3 narrower 39 行与 no-dts 1 行
+
+改 d.ts 10 行 (文档签名本已如此):
+
+| API | 实现 | 原 d.ts | 改为 |
+|---|---|---|---|
+| console.setContentTextColor / setContentTextColors | 0-6 | 1-1, 1-6 | 位置重载第一个参数可选 (文档: 0 至 6 个位置颜色, 无参传入空颜色配置) |
+| dialogs.build | 0-1 | 1-1 | `build(properties?)` |
+| engines.execScript / execScriptFile / execAutoFile (3 行) | 2-3 / 1-2 | 3-3 / 2-2 | config 可选 |
+| openConsole / showConsole | 0-1 | 0-0 | `(isReset?)` |
+| util.morseCode.getCode / getPattern | 1-2 | 1-1 | `(text, timeUnit?)` (文档 timeSpan?) |
+
+保留 29 行 (d.ts 与文档不变):
+
+| API | 实现 | d.ts | 理由 |
+|---|---|---|---|
+| tasks 的 addTimedTask / addDailyTask / addWeeklyTask / addMonthlyTask / addYearlyTask / addDisposableTask / addCountdownTask / addIntentTask / addBroadcastIntentTask, timers 的 addDailyTask / addDisposableTask / addIntentTask / addWeeklyTask, workManager 的 addBroadcastIntentTask / addDailyTask / addDisposableTask / addIntentTask / addWeeklyTask (18 行) | 0-1 | 1-1 | 新层 `options: NativeObject? = null`, 缺省时以空对象代入, 随后因缺少 path 抛出 (旧实现 AtMost 1 同此); 实际必需, 文档与 d.ts 写必需 |
+| colors.alphaDouble / redDouble / greenDouble / blueDouble 与 getAlphaDouble / getRedDouble / getGreenDouble / getBlueDouble (8 行) | 1-2 | 1-1 | 第二个参数 options 只校验 max 取 1 或 255, 不影响结果 (恒为 0..1), 属兼容入口, 不作为用法列出 |
+| colors.toString | 0-2 | 1-2, 2-2 | 无参时是对象自身的 toString (返回 "[object Object]"), 不是颜色用法 |
+| Mathx.dist | 0-3 | 2-3, 1-2 | 无参返回 NaN (同内置 Math 函数的无参行为), 文档未列 |
+| yolo.load | 1-2 | 2-2 | arity [1, 2] 只为缺 options 时给出 YOLO 自己的错误码; 缺 options.component 即抛 "yolo.load requires options.component", 文档与 d.ts 写 `(modelDir, options)` |
+| WebSocket.() (no-dts) | 1-2 | 无调用签名 | 调用即 TypeError (须用 new), d.ts 只声明构造签名, 正确 |
+
+### 7.4 ksp 与旧实现的 47 处差异 (2.6 节; Q19 本主题结论)
+
+- colors 19: 新层按类型分重载 (argb 1 / 4; rgb / hsl / hsv 1 / 3; rgba / hsla / hsva 1 / 2 / 4; oklab / oklch 1 / 3-4; toHsva 1 / 2 / 4 / 5; toHsla 1 / 4; toRgb / toRgbString / toHslString / toHsvString 1 / 3; toArgbString / toRgbaString / toHslaString / toHsvaString 1-2), 文档签名一致, d.ts match. 文档缺 rgba / hsla / hsva 的 `(components, alpha)` 两参数重载 (实现与 d.ts 都有), 记为签名级文档补充项, 不属个数矛盾.
+- ocr 8 与 barcode / qrcode 4: 文档形态最多 2 个参数 (ocr 的 `(img, options?)` / `(img, region)`, detectAll / recognizeTexts 的 `(image, options?)`), 新层一致, d.ts match.
+- http 7: 6.8.0 文档 options / data / files 必需, 新层一致; d.ts 5 行改必需 (7.2), postMultipart(Async) 本已 match. 6.7.x 文档写为可选且旧实现接受只传 url, 登记 Q51 (推荐保持 6.8.0 必需, 已按推荐先行).
+- util.java.array 下限 2 与 util.java.toJsArray 上限 2: 与文档一致, d.ts 已改 (7.2).
+- Numberx.toFixedNum 1-2 (新层放宽): 文档 `(num, fraction?)` 一致. 全局 detect 2-4: 文档与 selector P1 一致.
+- Numberx.ensureNumber (ksp 未声明的 vararg): 新层 0 个参数不抛 (旧 NotEmpty 抛), 与文档 "任意一个 o 不满足时抛出" 不矛盾, 不比, 不改.
+- cvt.bytes / fmt.bytes 的 loose / strict (4 处): 元数据 1-n, 函数体自查 1-4, 文档与 d.ts 为 1-4 的重载, match.
+- 结论: 新层与文档用法矛盾的 0 处. 可选改进 (不阻塞, 不登记): add*Task 18 行与 yolo.load 若在新层去掉默认值或收紧 arity, 可消去 19 行 narrower 警告, 但缺 path / component 的具体错误会变成通用的参数个数错误.
+
+### 7.5 P2.2 宿主修复项
+
+无 (7.4). 看板不登记 "转 augment" 行.
+
+### 7.6 Q23 与 Ace 重新导入
+
+- `import-autojs6-dts.mjs` (宿主 9fb6274a0): 不再按字母序生成 index.d.ts, 改为沿用 TS 仓库 `declarations/autojs6/index.d.ts` (Ace 现行版本与之逐行一致: 含 `aj6-main-app.d.ts`, mathx / numberx / arrayx 在末尾), 只追加源 index 未引用的核心文件, 引用的文件既不导入也不在 Ace 时告警. 探针文件验证: 只追加一行.
+- 重新导入 (宿主工具, TS f5e837a, Ace 9fce0de 都用 HEAD 导出副本): `import-autojs6-dts.mjs` + `generate-editor-assets.mjs` (indices-from-dts, indices, generate-dts, LSP generate-declarations, 四个 verify 与 Ace verify-api-coverage) 后 `--check` 通过. Ace 改动 10 个文件 (8 个 aj6-int 副本, autojs6_indices.js, lib.autojs6.d.ts), index.d.ts 不变; 宿主 autojs6_indices.source.json 只有这些签名变化.
+- LSP 分组: 导入前后 generate-declarations 的 manifest 10 组 (core 79, android 5, runtime-node 77, libraries / resources / main-app / jsox 三组 / runtime-bun 各 1) 源文件清单相同, 只有 core 内容哈希变化 (6dcc836a5278 -> f5a9b71eb191).
+- Ace 自身校验: `verify-runtime-api-coverage`, `verify-runtime` (LSP 运行时, 与 Gradle verifyAutoJs6LspRuntime 同参数), `generate-language-indices --check`, `ace-builds-lock --check` 通过.
+
+### 7.7 验收
+
+- HEAD 导出副本 (宿主工具 5c6442382 + MATRIX.md af2208173, TS f5e837a, Ace f4f0651, 文档 0b9b58d, Node 990f9e35, Bun 3056b94, KSP 同 7.1): arity match 1195, fail 0, wider 0, narrower 29, vararg 60, unknown 0, no-dts 1; `check.py --matrix --strict-arity --docs-support` (含 Ace) 退出码 0, failures 空. 本会话在副本内重生成的 MATRIX.md 与 P2.1 提交的 af2208173 相同 (dts 列 name 1510 -> 1500, arity 1147 -> 1157 来自本节 d.ts).
+- 宿主 HEAD 含 P2.3 的 b027777bc / d41ebd872 (Q18 原型成员入分母), `--matrix` 暂报新 pending 与 MATRIX 过期, 属 P2.3 进行中 (登记 Q54 后重写); arity 部分不变.
+- TS: `tools/verify-api-coverage` / `verify-colors` / `verify-compose-declaration-body` / `verify-compose-tsx` / `verify-runtime-declarations --ace` / `verify-terminal` 与 `sync-runtime-declarations --ace --check` 通过 (TypeScript 5.1.3 与 Ace 的 6.0.3).
+- TS ROADMAP Phase 7 "WebStorm 补全": TypeScript 语言服务对只引用 index.d.ts 的 JS 文件在全局位置请求补全, aj6-int 的 692 个值全局 (declare var / function / class / enum) 全部出现 (5.1.3 / 6.0.3), 已勾选 (f5e837a); WebStorm 界面未人工打开.
+- 文档生成物: P2.1 的 0b9b58d 从包含 c579f54 的 HEAD 全量生成, 已含本节签名.
+
+### 7.8 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| TS | 3b62d65 | 8 个 aj6-int d.ts 的参数个数 (7.2 / 7.3) |
+| TS | f5e837a | docs/ROADMAP.md Phase 7 全局补全核对 |
+| 文档 | c579f54 | flow.md / global.md 的 clickWhenStableAfter / clickBoundsWhenStableAfter 签名, console.md trace 签名 |
+| 宿主 | 9fb6274a0 | Q23: import-autojs6-dts.mjs 沿用源 index.d.ts, README |
+| Ace | f4f0651 | 重新导入 8 个 d.ts, autojs6_indices.js, lib.autojs6.d.ts |
+| 宿主 | 3fd931ffb | Ace 补全源 autojs6_indices.source.json |
+| 宿主 | (本节所在提交) | 本节, ROADMAP 勾选 P2.2, 附录 C Q23 已落地与 Q51 |
