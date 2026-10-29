@@ -1,7 +1,7 @@
 <!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=2739 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
-由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则在 D12 / Q1 拍板前是草案.
+由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
 数据源: ksp, 2739 行 (显式导出 1377, 返回对象成员 1362).
 
@@ -9,38 +9,33 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 845 | 136 | 0 | 1126 | 1 | 631 |
-| Node Worker | 727 | 62 | 0 | 1186 | 1 | 763 |
-| Bun | 0 | 62 | 769 | 1185 | 1 | 722 |
+| Node main | 845 | 136 | 0 | 1115 | 0 | 643 |
+| Node Worker | 727 | 62 | 0 | 1118 | 0 | 832 |
+| Bun | 0 | 62 | 769 | 1117 | 0 | 791 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 340 / mention 231 / heading 2168 / signature 0 / example 0 |
-| dts | none 90 / name 1510 / arity 1139 / typed 0 |
-| ace | none 552 / semantic 827 / static 1360 |
+| doc | none 334 / mention 231 / heading 2174 / signature 0 / example 0 |
+| dts | none 82 / name 1510 / arity 1147 / typed 0 |
+| ace | none 544 / semantic 827 / static 1368 |
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: jsox-extensions shadowed (node_main, 54), rhino-engine shadowed (node_main, 3), sync-sleep shadowed (node_main, 1).
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 37 / Node Worker 3 / Bun 30. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
-## 排除规则 (草案)
+## 排除规则
 
 | 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |
 |---|---|---:|---:|---:|---|
-| accessibility-sync-wait | denied: sync-only | 1 | 1 | 1 | await accessibility.ensureEnabled(); flow waitFor* with node snapshots |
+| http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
 | internal-exports | not-portable: rhino-only | 9 | 9 | 9 |  |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
 | java-prototype-objects | not-portable: java-prototype | 1072 | 1072 | 1072 |  |
-| jsox-extensions | not-portable: rhino-only | 0 | 54 | 54 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 2 | 2 | 2 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
-| native-http | not-portable: runtime-native | 18 | 18 | 20 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
+| native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
 | native-timers | not-portable: runtime-native | 0 | 0 | 6 | global setTimeout / setInterval / setImmediate and their clear functions |
-| rhino-engine | not-portable: rhino-only | 1 | 4 | 4 |  |
-| sync-continuation | not-portable: sync-only | 2 | 2 | 2 | await on the Promise returned by the asynchronous entry |
-| sync-keep-alive | not-portable: runtime-native | 3 | 3 | 3 | the runtime event loop stays alive while timers, listeners or pending Promises exist |
-| sync-sleep | not-portable: runtime-native | 0 | 1 | 1 | await new Promise(resolve => setTimeout(resolve, ms)) (Node timers/promises setTimeout, Bun.sleep) |
-| sync-threads | not-portable: sync-only | 5 | 5 | 5 | Node worker_threads / Bun Worker with message passing |
+| rhino-engine | not-portable: rhino-only | 0 | 1 | 1 |  |
 
 ## 按模块汇总
 
@@ -48,11 +43,11 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 194 | 205 | 205 | 99 / 16 / 93 | 66 / 17 / 125 | 81 / 17 / 110 |
+| (global) | 208 | 194 | 205 | 205 | 99 / 13 / 96 | 66 / 13 / 129 | 81 / 13 / 114 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 0 | 0 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 0 | 0 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
-| Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
+| Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 0 / 0 / 15 | 0 / 0 / 15 |
 | Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 21 | 28 | 28 | 0 / 0 / 29 | 0 / 0 / 29 | 0 / 0 / 29 |
 | ConsoleConfigurator# | 53 | 50 | 53 | 0 | 0 / 53 / 0 | 0 / 53 / 0 | 0 / 53 / 0 |
@@ -71,8 +66,8 @@
 | MailClient# | 53 | 53 | 53 | 53 | 53 / 0 / 0 | 53 / 0 / 0 | 53 / 0 / 0 |
 | Mat# | 9 | 0 | 3 | 0 | 0 / 9 / 0 | 0 / 9 / 0 | 0 / 9 / 0 |
 | MatchingResult# | 16 | 15 | 16 | 16 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
-| Mathx | 23 | 21 | 23 | 23 | 23 / 0 / 0 | 0 / 23 / 0 | 0 / 23 / 0 |
-| Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 0 / 14 / 0 | 0 / 14 / 0 |
+| Mathx | 23 | 21 | 23 | 23 | 23 / 0 / 0 | 0 / 0 / 23 | 0 / 0 / 23 |
+| Numberx | 14 | 14 | 14 | 14 | 14 / 0 / 0 | 0 / 0 / 14 | 0 / 0 / 14 |
 | ObjectFrame# | 15 | 15 | 15 | 15 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
 | PReadableTextFile# | 5 | 4 | 5 | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PWritableTextFile# | 7 | 6 | 2 | 0 | 0 / 7 / 0 | 0 / 7 / 0 | 0 / 7 / 0 |
@@ -97,7 +92,7 @@
 | Zip# | 21 | 20 | 20 | 20 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 43 | 25 / 0 / 18 | 0 / 0 / 43 | 25 / 0 / 18 |
-| auto | 38 | 38 | 38 | 38 | 0 / 1 / 37 | 0 / 1 / 37 | 0 / 1 / 37 |
+| auto | 38 | 38 | 38 | 38 | 0 / 0 / 38 | 0 / 0 / 38 | 0 / 0 / 38 |
 | autojs | 21 | 21 | 21 | 21 | 0 / 0 / 21 | 0 / 0 / 21 | 0 / 0 / 21 |
 | autojs.version | 7 | 7 | 7 | 7 | 0 / 0 / 7 | 0 / 0 / 7 | 0 / 0 / 7 |
 | automator | 54 | 53 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
@@ -107,12 +102,12 @@
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 16 | 16 | 16 | 16 | 15 / 0 / 1 | 15 / 0 / 1 | 15 / 0 / 1 |
 | console | 50 | 50 | 50 | 50 | 42 / 0 / 8 | 42 / 0 / 8 | 31 / 0 / 19 |
-| continuation | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
+| continuation | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
 | crypto | 2 | 2 | 2 | 2 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
 | device | 25 | 25 | 25 | 25 | 4 / 0 / 21 | 4 / 0 / 21 | 4 / 0 / 21 |
 | dialogs | 9 | 9 | 9 | 9 | 8 / 0 / 1 | 8 / 0 / 1 | 8 / 0 / 1 |
-| engines | 8 | 8 | 8 | 8 | 5 / 1 / 2 | 0 / 3 / 5 | 0 / 3 / 5 |
+| engines | 8 | 8 | 8 | 8 | 5 / 0 / 3 | 0 / 0 / 8 | 0 / 0 / 8 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | events | 1 | 0 | 0 | 0 | 0 / 1 / 0 | 0 / 1 / 0 | 0 / 1 / 0 |
 | files | 4 | 4 | 4 | 4 | 2 / 0 / 2 | 0 / 0 / 4 | 2 / 0 / 2 |
@@ -124,7 +119,7 @@
 | http | 21 | 20 | 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | installer | 16 | 16 | 16 | 16 | 0 / 0 / 16 | 0 / 0 / 16 | 0 / 0 / 16 |
-| jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
+| jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 0 / 2 | 0 / 0 / 2 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
 | mail | 56 | 9 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | mediainfo | 7 | 7 | 7 | 7 | 4 / 0 / 3 | 0 / 0 / 7 | 0 / 0 / 7 |
@@ -149,14 +144,14 @@
 | species | 37 | 37 | 37 | 37 | 0 / 0 / 37 | 0 / 0 / 37 | 0 / 0 / 37 |
 | speech | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
-| speech.speaker | 8 | 2 | 0 | 0 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
+| speech.speaker | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | sqlite | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | storages | 5 | 5 | 5 | 5 | 3 / 0 / 2 | 0 / 0 / 5 | 3 / 0 / 2 |
 | sysprops | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
-| threads | 4 | 4 | 4 | 4 | 0 / 4 / 0 | 0 / 4 / 0 | 0 / 4 / 0 |
-| timers | 12 | 12 | 12 | 12 | 10 / 1 / 1 | 10 / 1 / 1 | 10 / 1 / 1 |
+| threads | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| timers | 12 | 12 | 12 | 12 | 10 / 0 / 2 | 10 / 0 / 2 | 10 / 0 / 2 |
 | toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
 | tts | 35 | 28 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 37 | 33 | 33 | 33 | 2 / 4 / 31 | 2 / 4 / 31 | 2 / 4 / 31 |
@@ -249,7 +244,7 @@
 | `isShuttingDown` | pending | pending | pending |
 | `isStopped` | pending | pending | pending |
 | `isUiThread` | pending | pending | pending |
-| `keepAlive` | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) |
+| `keepAlive` | pending | pending | pending |
 | `kill` | pending (rejects) | pending | pending (rejects) |
 | `killDual` | pending (rejects) | pending | pending (rejects) |
 | `launch` | bridged | pending | capability-gated |
@@ -265,7 +260,7 @@
 | `launchSettings` | bridged | pending | capability-gated |
 | `log` | bridged | bridged | pending |
 | `longClick` | bridged | pending | capability-gated |
-| `loop` | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) |
+| `loop` | pending | pending | pending |
 | `newInjectableWebClient` | pending | pending | pending |
 | `newInjectableWebView` | pending | pending | pending |
 | `newWebSocket` | pending | pending | pending |
@@ -302,14 +297,14 @@
 | `setText` | bridged | pending | capability-gated |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `showConsole` | bridged | bridged | pending |
-| `sleep` | bridged | not-portable: runtime-native (sync-sleep) | not-portable: runtime-native (sync-sleep) |
+| `sleep` | bridged | pending | pending |
 | `splitScreen` | bridged | pending | pending |
 | `startActivity` | bridged | pending | capability-gated |
 | `startDualActivity` | pending (rejects) | pending | pending (rejects) |
 | `startService` | bridged | pending | capability-gated |
 | `stop` | pending | pending | pending |
 | `swipe` | bridged | pending | capability-gated |
-| `sync` | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) |
+| `sync` | pending | pending | pending |
 | `toString` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `toastError` | pending | pending | pending |
 | `toastInfo` | pending | pending | pending |
@@ -350,21 +345,21 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Arrayx.differ` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.distinct` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.distinctBy` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.ensureArray` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.intersect` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.shuffle` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sortBy` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sortByDescending` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sortDescending` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sorted` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sortedBy` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sortedByDescending` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.sortedDescending` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.subtract` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Arrayx.union` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
+| `Arrayx.differ` | local-shim | pending | pending |
+| `Arrayx.distinct` | local-shim | pending | pending |
+| `Arrayx.distinctBy` | local-shim | pending | pending |
+| `Arrayx.ensureArray` | local-shim | pending | pending |
+| `Arrayx.intersect` | local-shim | pending | pending |
+| `Arrayx.shuffle` | local-shim | pending | pending |
+| `Arrayx.sortBy` | local-shim | pending | pending |
+| `Arrayx.sortByDescending` | local-shim | pending | pending |
+| `Arrayx.sortDescending` | local-shim | pending | pending |
+| `Arrayx.sorted` | local-shim | pending | pending |
+| `Arrayx.sortedBy` | local-shim | pending | pending |
+| `Arrayx.sortedByDescending` | local-shim | pending | pending |
+| `Arrayx.sortedDescending` | local-shim | pending | pending |
+| `Arrayx.subtract` | local-shim | pending | pending |
+| `Arrayx.union` | local-shim | pending | pending |
 
 ### Canvas#
 
@@ -913,48 +908,48 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Mathx.avg` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.ceilLog` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.ceilPow` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.cv` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.dist` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.floorLog` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.floorPow` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.logMn` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.max` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.mean` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.median` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.min` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.mode` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.randFloat` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.randInt` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.random` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.randomFloat` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.randomInt` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.roundLog` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.roundPow` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.std` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.sum` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Mathx.var` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
+| `Mathx.avg` | local-shim | pending | pending |
+| `Mathx.ceilLog` | local-shim | pending | pending |
+| `Mathx.ceilPow` | local-shim | pending | pending |
+| `Mathx.cv` | local-shim | pending | pending |
+| `Mathx.dist` | local-shim | pending | pending |
+| `Mathx.floorLog` | local-shim | pending | pending |
+| `Mathx.floorPow` | local-shim | pending | pending |
+| `Mathx.logMn` | local-shim | pending | pending |
+| `Mathx.max` | local-shim | pending | pending |
+| `Mathx.mean` | local-shim | pending | pending |
+| `Mathx.median` | local-shim | pending | pending |
+| `Mathx.min` | local-shim | pending | pending |
+| `Mathx.mode` | local-shim | pending | pending |
+| `Mathx.randFloat` | local-shim | pending | pending |
+| `Mathx.randInt` | local-shim | pending | pending |
+| `Mathx.random` | local-shim | pending | pending |
+| `Mathx.randomFloat` | local-shim | pending | pending |
+| `Mathx.randomInt` | local-shim | pending | pending |
+| `Mathx.roundLog` | local-shim | pending | pending |
+| `Mathx.roundPow` | local-shim | pending | pending |
+| `Mathx.std` | local-shim | pending | pending |
+| `Mathx.sum` | local-shim | pending | pending |
+| `Mathx.var` | local-shim | pending | pending |
 
 ### Numberx
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `Numberx.ICU` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.check` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.clamp` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.clampTo` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.ensureNumber` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.ensureNumberLike` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.ensureNumbersLike` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.padEnd` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.padStart` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.parseAny` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.parseFloat` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.parsePercent` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.parseRatio` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `Numberx.toFixedNum` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
+| `Numberx.ICU` | local-shim | pending | pending |
+| `Numberx.check` | local-shim | pending | pending |
+| `Numberx.clamp` | local-shim | pending | pending |
+| `Numberx.clampTo` | local-shim | pending | pending |
+| `Numberx.ensureNumber` | local-shim | pending | pending |
+| `Numberx.ensureNumberLike` | local-shim | pending | pending |
+| `Numberx.ensureNumbersLike` | local-shim | pending | pending |
+| `Numberx.padEnd` | local-shim | pending | pending |
+| `Numberx.padStart` | local-shim | pending | pending |
+| `Numberx.parseAny` | local-shim | pending | pending |
+| `Numberx.parseFloat` | local-shim | pending | pending |
+| `Numberx.parsePercent` | local-shim | pending | pending |
+| `Numberx.parseRatio` | local-shim | pending | pending |
+| `Numberx.toFixedNum` | local-shim | pending | pending |
 
 ### ObjectFrame#
 
@@ -1837,7 +1832,7 @@
 | `auto.stats` | pending | pending | pending |
 | `auto.stop` | pending | pending | pending |
 | `auto.wait` | pending | pending | pending |
-| `auto.waitFor` | denied: sync-only (accessibility-sync-wait) | denied: sync-only (accessibility-sync-wait) | denied: sync-only (accessibility-sync-wait) |
+| `auto.waitFor` | pending | pending | pending |
 | `auto.windowRoots` | pending | pending | pending |
 | `auto.windows` | pending | pending | pending |
 
@@ -2007,8 +2002,8 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `continuation.create` | not-portable: sync-only (sync-continuation) | not-portable: sync-only (sync-continuation) | not-portable: sync-only (sync-continuation) |
-| `continuation.enabled` | not-portable: sync-only (sync-continuation) | not-portable: sync-only (sync-continuation) | not-portable: sync-only (sync-continuation) |
+| `continuation.create` | pending | pending | pending |
+| `continuation.enabled` | pending | pending | pending |
 
 ### crypto
 
@@ -2065,9 +2060,9 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `engines.all` | bridged | pending | pending |
-| `engines.execAutoFile` | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) |
-| `engines.execScript` | bridged | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) |
-| `engines.execScriptFile` | bridged | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) |
+| `engines.execAutoFile` | pending | pending | pending |
+| `engines.execScript` | bridged | pending | pending |
+| `engines.execScriptFile` | bridged | pending | pending |
 | `engines.getEngines` | pending | pending | pending |
 | `engines.myEngine` | bridged | pending | pending |
 | `engines.stopAll` | bridged | pending | pending |
@@ -2155,8 +2150,8 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `http.__okhttp__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `http.buildRequest` | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) |
-| `http.client` | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) |
+| `http.buildRequest` | not-portable: java-prototype (http-java-objects) | not-portable: java-prototype (http-java-objects) | not-portable: java-prototype (http-java-objects) |
+| `http.client` | not-portable: java-prototype (http-java-objects) | not-portable: java-prototype (http-java-objects) | not-portable: java-prototype (http-java-objects) |
 | `http.del` | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) |
 | `http.delAsync` | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) |
 | `http.delete` | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) | not-portable: runtime-native (native-http) |
@@ -2201,8 +2196,8 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `jsox.extend` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
-| `jsox.extendAll` | local-shim | not-portable: rhino-only (jsox-extensions) | not-portable: rhino-only (jsox-extensions) |
+| `jsox.extend` | local-shim | pending | pending |
+| `jsox.extendAll` | local-shim | pending | pending |
 
 ### keys
 
@@ -2494,16 +2489,16 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `threads.disposable` | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) |
-| `threads.interrupt` | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) |
-| `threads.pool` | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) |
-| `threads.start` | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) | not-portable: sync-only (sync-threads) |
+| `threads.disposable` | pending | pending | pending |
+| `threads.interrupt` | pending | pending | pending |
+| `threads.pool` | pending | pending | pending |
+| `threads.start` | pending | pending | pending |
 
 ### timers
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `timers.keepAlive` | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) | not-portable: runtime-native (sync-keep-alive) |
+| `timers.keepAlive` | pending | pending | pending |
 | `timers.setIntervalExt` | pending | pending | pending |
 
 ### toast
