@@ -238,6 +238,9 @@ class NodeIndex:
             return None
         cell = {'status': self.status(target['module'])[0], 'module': target['module'], 'type': target['type'], 'member': row['member'],
                 'async': info['async'], 'via': 'handle-type'}
+        if target.get('typeScope'):
+            # A global type of the module's declarations, not one the module exports (editor queries name it bare).
+            cell['typeScope'] = target['typeScope']
         if info.get('rejects'):
             cell['rejects'] = True
         return refused(cell)

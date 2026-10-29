@@ -320,7 +320,8 @@ class StatusTest(unittest.TestCase):
         policy['returnedObjects'] = {
             '_note': 'x',
             'Flow': {'node': {'module': 'autojs6:flow', 'type': 'Flow<unknown>'}, 'bun': {'namespace': 'flow', 'type': 'RuntimeFlow.Flow<unknown>'}},
-            'Storage': {'node': {'module': 'storage', 'type': 'StorageStore'}, 'bun': {'namespace': 'storages', 'type': 'RuntimeStorage.StorageStore', 'capability': 'storage.control'}},
+            'Storage': {'node': {'module': 'storage', 'type': 'StorageStore', 'typeScope': 'global'},
+                        'bun': {'namespace': 'storages', 'type': 'RuntimeStorage.StorageStore', 'capability': 'storage.control'}},
             'Missing': {'node': {'module': 'storage', 'type': 'StorageStore'}},
         }
         result = build(exports, policy, POLICY_JSON, node, bun, parse_host_api(HOST_API), WORKER)
@@ -336,6 +337,9 @@ class StatusTest(unittest.TestCase):
                                                             'member': 'abort', 'via': 'handle-type'})
         # storage is not a Worker host module; the Bun grant comes from the mapping.
         self.assertEqual(rows['Storage#get']['node_main']['status'], 'bridged')
+        # A global type of the module's declarations keeps typeScope for the editor queries; module types have none.
+        self.assertEqual(rows['Storage#get']['node_main']['typeScope'], 'global')
+        self.assertNotIn('typeScope', then['node_main'])
         self.assertEqual(rows['Storage#get']['node_worker']['status'], 'pending')
         self.assertEqual(rows['Storage#get']['bun']['capability'], 'storage.control')
         self.assertIn({'rule': 'returnedObjects Missing', 'kind': 'unused'}, result['summary']['policyConflicts'])

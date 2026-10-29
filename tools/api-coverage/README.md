@@ -646,8 +646,10 @@ reported as skipped instead of compared, and neither `MATRIX.md` nor the baselin
 
 Runtime cells follow `runtime-policy.json` as for other rows: the component functions are members of
 the Node / Bun `compose` facades; `ComposeModifier` and `ComposeNode` map to the handle types
-`RuntimeCompose.Modifier` / `RuntimeCompose.Node` (a handle type's first segment the module does not
-export is looked up among the global namespaces of its declaration file).
+`RuntimeCompose.Modifier` / `RuntimeCompose.Node` (Bun) and `RuntimeCompose.Modifier` / `Node` (Node).
+Node's `RuntimeCompose` is a global namespace of the compose declarations that `autojs6:compose` does not
+export: the mapping says `"typeScope": "global"`, the type is looked up among the global namespaces of the
+module's declaration file, and the cell keeps `typeScope` so the Ace queries name the type bare.
 
 ## Language runtime APIs (Q77)
 

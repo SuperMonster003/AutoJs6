@@ -42,16 +42,15 @@ function describe(checker, type) {
 }
 
 // The members of a handle type (roadmap Q27), named from a module symbol by a dotted path; type arguments
-// (`Flow<unknown>`) only matter to the editor queries and are dropped here. A first segment the module does not
-// export is looked up among the global namespaces of the module's declaration file (Node's `RuntimeCompose.Modifier`).
-function handleMembers(checker, moduleSymbol, name) {
+// (`Flow<unknown>`) only matter to the editor queries and are dropped here. With typeScope "global" the first
+// segment is a global namespace of the module's declaration file instead (Node's `RuntimeCompose.Modifier`).
+function handleMembers(checker, moduleSymbol, name, typeScope) {
     const meaning = ts.SymbolFlags.Type | ts.SymbolFlags.Namespace;
     const parts = name.replace(/<.*$/, "").split(".");
-    let symbol = moduleSymbol && checker.getExportsOfModule(moduleSymbol).find(item => item.name === parts[0] && item.flags & meaning);
     const file = moduleSymbol?.declarations?.[0]?.getSourceFile();
-    if (!symbol && file && parts.length > 1) {
-        symbol = checker.getSymbolsInScope(file, ts.SymbolFlags.Namespace).find(item => item.name === parts[0]);
-    }
+    let symbol = typeScope === "global"
+        ? file && checker.getSymbolsInScope(file, ts.SymbolFlags.Namespace).find(item => item.name === parts[0])
+        : moduleSymbol && checker.getExportsOfModule(moduleSymbol).find(item => item.name === parts[0] && item.flags & meaning);
     for (const part of parts.slice(1)) {
         symbol = symbol && checker.getExportsOfModule(symbol).find(item => item.name === part && item.flags & meaning);
     }
@@ -64,11 +63,11 @@ function handleMembers(checker, moduleSymbol, name) {
     return result;
 }
 
-// Handle types named by runtime-policy.json returnedObjects: [{module, type}] for Node, [{type}] for Bun.
+// Handle types named by runtime-policy.json returnedObjects: [{module, type, typeScope}] for Node, [{type}] for Bun.
 const handles = {node: [], bun: []};
 if (options.policy) {
     for (const mapping of Object.values(JSON.parse(fs.readFileSync(options.policy, "utf8")).returnedObjects || {})) {
-        if (mapping?.node) handles.node.push({module: mapping.node.module, type: mapping.node.type});
+        if (mapping?.node) handles.node.push({module: mapping.node.module, type: mapping.node.type, ...(mapping.node.typeScope ? {typeScope: mapping.node.typeScope} : {})});
         if (mapping?.bun) handles.bun.push({type: mapping.bun.type});
     }
 }
@@ -115,7 +114,7 @@ function nodeModules() {
         }
         modules[name] = {file: path.relative(options.node, declaration.getSourceFile().fileName).replaceAll("\\", "/"), members: entries};
         for (const handle of handles.node.filter(item => item.module === name)) {
-            handle.members = handleMembers(checker, checker.resolveExternalModuleSymbol(symbol), handle.type);
+            handle.members = handleMembers(checker, checker.resolveExternalModuleSymbol(symbol), handle.type, handle.typeScope);
         }
     }
     // $autojs.<module> explicit entries: properties typed as typeof import("<module>").
