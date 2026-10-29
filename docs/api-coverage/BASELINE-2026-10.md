@@ -350,3 +350,57 @@ no-dts 1 行: `WebSocket.()` (模块可调用, 实现 1-2; d.ts 的 WebSocket �
 | 文档 | 241296c | runtime-support.js "经 <模块>", 自检, generator/README |
 | 文档 | 4007465 | files 页运行时支持表与生成产物 |
 | Ace | 6e2bda0 | 句柄查询路由, runtime-api-queries.json (2291), 开发文档 |
+
+## 6. P1.4 白名单拍板与 pending 基线 (2026-10-29, 子会话 api-cov-p1-4)
+
+维护者 2026-10-29 以三轮选择题逐组拍板附录 D (Q1) 与 Q5 (a); 结论表在 ROADMAP 附录 D, 题目材料在 REVIEW "P1.4 白名单拍板材料". 排除规则在 `tools/api-coverage/runtime-policy.json` (status "decided 2026-10-29"), 生成器与门禁规则见 `tools/api-coverage/README.md` "Runtime coverage matrix".
+
+### 6.1 数据与命令
+
+- 宿主 HEAD 导出副本 (git archive ffd0b4a58, 副本内单独运行 `:app:kspAppDebugKotlin`; 之后的宿主提交只改 tools / docs 与 assets 样例, 用 git archive HEAD 覆盖副本的 tools / docs, 不含其他会话未提交的改动), Node 990f9e35, Bun 3056b94, Ace 9fce0de, TS 496aaf8, 文档 14714fa.
+- 生成: `check.py --write-matrix --write-pending-baseline --strict-arity --docs-support` (含 Ace); 验收: `check.py --matrix --strict-arity --docs-support` (含 Ace, `AUTOJS6_ACE_EDITOR_ROOT` 指向 Ace 仓库) 退出码 0, failures 空, MATRIX.md / pending-baseline.json / 文档三页 (images / files / flow) 均 current, 策略冲突 0.
+- 单元测试 `python -m unittest discover -p "test_*.py"` (tools/api-coverage, 共享签出): 68 项通过, 跳过 3 项 (augment 包已删除的 2 项与需要旧 augment 包的 1 项, 与本条目无关).
+
+### 6.2 HEAD 门禁修复 (拍板前)
+
+augment P5.2 (37b93d893) 删除 `runtime/api/augment` 后, `returned-objects.json` 的 19 个对象类名与 `check-shell-contract.mjs` 读的两个源文件仍指向旧包, 返回对象成员从 1362 掉到 956. 0671ffb36 改指 `runtime/api/modules/<m>/`, 成员恢复 1362, 矩阵 2739 行. 另 7 个 Codex 设备脚本 (`check-runtime-ai` / `ai-agent` / `bridges` / `epub` / `mail` / `speech` / `tts`) 用正则读旧注册写法, 只改路径仍失败, 登记待决 Q42 (未先行).
+
+### 6.3 pending 前后 (三列, 2739 行)
+
+拍板前为 P1.5 规则下的 HEAD 矩阵 (P1.5 后宿主新增导出 12 行, 故与第 5.2 节的 622 / 754 / 713 不同).
+
+| 列 | 拍板前 | D-13 删 jsox-extensions | D-14 拆分 | D-1 | D-6 | D-8 | 拍板后 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Node main | 631 | 0 | +1 | +1 | +7 | +3 | 643 |
+| Node Worker | 763 | +54 | +3 | +1 | +7 | +4 | 832 |
+| Bun | 722 | +54 | +3 | +1 | +7 | +4 | 791 |
+
+- 状态计数: not-portable 1126 / 1186 / 1185 -> 1115 / 1118 / 1117, denied 1 -> 0 (auto.waitFor 的 accessibility-sync-wait 删除), 覆盖 (bridged / local-shim / capability-gated) 不变.
+- 删除规则 6 条: accessibility-sync-wait, sync-threads, sync-continuation, sync-sleep, sync-keep-alive, jsox-extensions; rhino-engine 只留 `plugins.load` (Worker / Bun); 新增 http-java-objects (http.client / http.buildRequest, java-prototype, 原属 native-http, pending 不变). 其余保持 pending 的组 (D-2 / D-4 / D-5 / D-7 / D-10 / D-12 / D-17, Q31 的 5 个句柄成员) 本来就是 pending, 计数不变.
+- 拍板前的 3 个 shadowed 冲突 (jsox-extensions / rhino-engine / sync-sleep 在 Node main) 随规则删改消失.
+- 按模块与模块族的分布见 REVIEW 第 7 节.
+
+### 6.4 门禁: 缺理由与 pending 基线 (Q40 先行)
+
+- `check.py --matrix` 把排除理由缺失, Bun 缺能力名与策略冲突列为失败 (此前只报告).
+- `tools/api-coverage/pending-baseline.json` 按列记录允许的 pending 单元格 (643 / 832 / 791). 矩阵出现基线没有的 pending 格, 或基线列出的格已不再 pending, 都是失败; 基线缺失也是失败. 收缩用 `--write-pending-baseline`; 新增 pending 时该命令拒写, 须在看板登记待决后加 `--allow-new-pending`. 数据源不同 (例如 kotlin 与 ksp) 时比较记 skipped.
+- 单元测试 `PendingBaselineTest.test_new_and_stale_cells` 覆盖新增与过期两种失败, `MarkdownTest.test_missing_reasons_fail` 覆盖缺理由失败, `RepositoryTest.test_p1_4` 核对拍板后的代表行.
+
+### 6.5 Q41 代补 speech.speaker
+
+题 12 (Q41) 维护者选本条目代补 8 行; auto.clearFlags 已由 selector P4 补齐 (文档 d163293, TS 0c4b188, Ace 5847c8b), 本条目只补 speech.speaker (`[p+] speaker` 与 enroll / enrollAsync / verify / verifyAsync / identify / identifyAsync / list / remove, 错误码 SPEAKER_NOT_FOUND / AUDIO_TOO_SHORT, feature `speaker`). 文档 none 340 -> 334, d.ts none 90 -> 82, Ace none 552 -> 544; 名称级门禁失败清零. 运行时列仍为 pending (Node / Bun 没有 speaker 入口, REVIEW 第 7 节归 P3.5 / P4.5). 3-Macaw P8.3.7 (d.ts / 文档站 / Ace) 届时只需核对.
+
+### 6.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 0671ffb36 | returned-objects.json 与 check-shell-contract.mjs 改指 runtime/api/modules |
+| 宿主 | 0529f59db | REVIEW "P1.4 白名单拍板材料" (题 1-12) |
+| 宿主 | 34de6958a | ROADMAP 附录 C (Q1 / Q5 / Q18 / Q20 / Q22 / Q23 / Q31 / Q34, Q40-Q42) 与附录 D 结论表 |
+| 宿主 | d52fd2072 | runtime-policy.json 按拍板, check.py `--write-pending-baseline` / `--allow-new-pending`, 门禁缺理由失败与基线比较, 单元测试, README |
+| 宿主 | 3c3764c4e | Ace 补全源 autojs6_indices.source.json (speech.speaker) |
+| 宿主 | f461d9c1d | MATRIX.md 与 pending-baseline.json (HEAD 导出副本生成) |
+| 宿主 | (本节所在提交) | 本节, REVIEW 第 7 节定稿与第 9 节, ROADMAP 勾选 P1.4 |
+| 文档 | 14714fa | speech.md speaker 节, 错误码, features, progress.md, 全量生成 |
+| TS | 496aaf8 | aj6-int-speech.d.ts speech.speaker |
+| Ace | 9fce0de | aj6-int-speech.d.ts 副本, autojs6_indices.js, lib.autojs6.d.ts |

@@ -184,37 +184,71 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 
 合计: 已在规则的显式导出行约 120 (另 1069 个返回对象成员); 候选新增约 70 行 (D-4 25, D-5 2, D-7 3, D-10 11, D-12 13, D-17 15, D-2 1 待定), 其中 D-4 / D-5 / D-7 与 D-12 的 files / s13n 共 37 行目前被记为覆盖, 处理方式取决于 Q26.
 
-## 7. 矩阵 pending 分布 (初稿, P1.4 定稿; 作 P3 / P4 分批依据)
+## 7. 矩阵 pending 分布 (P1.4 定稿, 2026-10-29; 作 P3 / P4 分批依据)
 
-总数 (2727 行): Node main 844, Node Worker 999, Bun 942. 下表按模块 (返回对象以 `#` 结尾) 列 Node main / Node Worker / Bun 的 pending 行数; 未列的 34 个小模块 (memory, zip, engines, ocr.*, plugins, sysprops, settings, web, util.* 子模块等) 合计 Node main 76 / Worker 123 / Bun 114.
+拍板后的 HEAD 矩阵 (2739 行, 来源与命令见 BASELINE 第 6 节): Node main 643, Node Worker 832, Bun 791, 与 `tools/api-coverage/pending-baseline.json` 一致. 演变: P1.1 初稿 (2727 行) 844 / 999 / 942 -> P1.5 修正 622 / 754 / 713 -> 拍板前 HEAD (2739 行) 631 / 763 / 722 -> 拍板后 643 / 832 / 791 (各组增量见 BASELINE 6.3). P2.3 登记原型成员后分母会增加数百行 (Q18), 届时按同一方法再定一次.
 
-| 模块 | Node main | Node Worker | Bun | 对应条目 |
-|---|---:|---:|---:|---|
-| (global) | 99 | 144 | 116 | 拆入各族 (RootAutomator 简写 Back / Home / Tap ..., species is*, 全局 Toolkit 助手 Q28) |
-| Flow# | 106 | 106 | 106 | R20 / Q27 (运行时已有链对象) |
-| MailClient# | 53 | 53 | 53 | R20 / Q27 |
-| util | 49 | 49 | 50 | P3.2 / P4.2 |
-| automator | 41 | 54 | 47 | R9 / Q28, P3.4 / P4.4 |
-| species | 37 | 37 | 37 | P3.2 / P4.2 (预期 local-shim, Q5) |
-| auto | 36 | 36 | 36 | R9, P3.4 / P4.4 |
-| ui | 31 | 31 | 31 | R7, D-17 / P3.3 / P4.3 |
-| Color# | 29 | 29 | 29 | P3.2 / P4.2 |
-| ShellProcess# | 25 | 25 | 25 | R20 / Q27 |
-| Zip# | 21 | 21 | 21 | P3.2 / P4.2 |
-| autojs (+ autojs.version 7) | 28 | 28 | 28 | P3.1 / P4.1 |
-| device | 21 | 21 | 21 | R18, P3.1 / P4.1 |
-| terminal | 20 | 20 | 20 | P3.3 / P4.3 |
-| colors (+ colors.theme 9) | 28 | 28 | 28 | R21, P3.2 / P4.2 |
-| app | 5 | 43 | 5 | R10 / R8 |
-| files.batchRename | 17 | 17 | 17 | R11 |
-| installer | 16 | 16 | 16 | P3.1 / P4.1 |
-| AgentRun# / EpubBook# / Storage# / AiSession# | 51 | 51 | 51 | R20 / Q27 |
-| gallery / workManager | 22 | 22 | 22 | P3.2 / P3.1 |
-| console | 5 | 5 | 19 | R2 / R4 |
-| shell / shizuku | 16 | 16 | 16 | R14 |
-| keys | 0 | 12 | 12 | R8 (Worker), P4.4 |
-| notice / notice.channel | 12 | 12 | 12 | R16 |
-| pinyin | 0 | 0 | 10 | R3 |
+下表按 P3 / P4 模块族列各模块 (返回对象以 `#` 结尾, 全局函数按用途拆入各族) 的 Node main / Node Worker / Bun pending 行数. 族名与条目见 ROADMAP 第 5 节; 拍板后保持 pending 的附录 D 组标在 "说明" 列.
+
+| 族 (条目) | 模块 | Node main | Node Worker | Bun | 说明 |
+|---|---|---:|---:|---:|---|
+| 系统与设备 (P3.1 / P4.1) | app | 31 | 71 | 31 | D-4 特权与双开 25 行 (Root / Shizuku 真机); Worker 缺 app 模块 (R8) |
+| | autojs (+ autojs.version) | 29 | 29 | 29 | |
+| | shell | 28 | 28 | 28 | R14; D-12 shell.fromIntent |
+| | device | 21 | 21 | 21 | R18; D-2 getSharedDeviceId |
+| | 全局 (currentPackage / currentActivity / currentComponent, exit / stop / isRunning 等, requiresApi, waitForActivity / waitForPackage, setScreenMetrics, WIDTH / HEIGHT, Worker 的 getClip / setClip) | 17 | 19 | 17 | |
+| | installer | 16 | 16 | 16 | |
+| | notice | 12 | 12 | 12 | R16; D-12 notice.builder / getBuilder |
+| | workManager | 11 | 11 | 11 | |
+| | ShellProcess# | 10 | 10 | 10 | Q31 三个 Java 流 getter, EventEmitter 别名 5, isAlive, toString |
+| | engines | 3 | 8 | 8 | D-14 execScript / execScriptFile / execAutoFile |
+| | plugins / shizuku / memory / settings / sysprops / powerManager / dialogs | 30 | 30 | 30 | 各 7 / 7 / 5 / 4 / 4 / 2 / 1; D-12 dialogs.build |
+| | 小计 | 208 | 255 | 213 | |
+| 文件与数据 (P3.2 / P4.2) | util (+ util.java 等子模块) | 65 | 65 | 66 | D-12 util.java.* |
+| | species | 38 | 38 | 38 | 预期 local-shim (Q5 (a)) |
+| | Color# / colors (+ colors.theme) | 57 | 57 | 57 | R21 |
+| | Mathx / Arrayx / Numberx / jsox | 0 | 56 | 56 | D-13 (Worker 导入 jsox 本地模块, Bun 新增 jsox 命名空间, local-shim) |
+| | files | 20 | 22 | 20 | R11 (batchRename); D-12 files.open / toFile |
+| | Zip# / zip | 26 | 26 | 26 | |
+| | 全局 (axios / cheerio / dayjs / pangu / i18n, random, isInteger / isPrimitive 等) | 12 | 12 | 12 | D-13 全局 randomInt / randomFloat 在 Mathx 行 |
+| | Storage# / storages | 3 | 17 | 3 | D-5 storages.names / all; Worker 缺 storages 模块 (R8) |
+| | gallery | 11 | 11 | 11 | |
+| | pinyin | 0 | 0 | 10 | R3 (Bun 常量) |
+| | mediainfo / cvt / fmt / s13n / EpubBook# | 8 | 25 | 25 | 各 3-7 / 0-6 / 0-6 / 4-5 / 1; D-12 s13n.* |
+| | 小计 | 240 | 329 | 324 | |
+| UI (P3.3 / P4.3) | ui | 31 | 31 | 31 | R7, D-17 Activity 内容视图 15 行 |
+| | console | 8 | 8 | 28 | R2 / R4, D-7 同步输入 3 行, D-10 Bun 输出 11 行 |
+| | terminal | 20 | 20 | 20 | |
+| | 全局 (toast* 10 个, Node main 的 toastLog 已覆盖; isUiThread) / toast | 11 | 12 | 12 | |
+| | floaty / web / compose | 17 | 17 | 17 | 各 8 / 7 / 2; R6 compose.ComposeError |
+| | 小计 | 87 | 88 | 108 | |
+| 自动化 (P3.4 / P4.4) | automator | 30 | 55 | 41 | R9 |
+| | auto | 38 | 38 | 38 | R9; D-1 auto.waitFor |
+| | keys | 0 | 12 | 12 | R8 |
+| | ocr / barcode / qrcode / YoloDetector# / yolo | 9 | 23 | 23 | 各 6-12 / 0-4 / 0-4 / 2 / 1 |
+| | threads / continuation / timers / VolatileDispose# / 全局 sleep / wait | 15 | 16 | 16 | D-6 (7 行), D-8 (sleep, keepAlive, loop, timers.keepAlive) |
+| | selector / Flow# / flow | 7 | 7 | 7 | Q31 Flow#await / sync |
+| | 小计 | 99 | 151 | 137 | |
+| 收口 (P3.5 / P4.5) | speech | 8 | 8 | 8 | speech.speaker 8 个函数: 运行时侧随 3-Macaw Speech 1.3.0 (路线图 P8.3, 已暂停) 补入口 |
+| | 全局 TODO | 1 | 1 | 1 | |
+| | 小计 | 9 | 9 | 9 | |
+| 合计 | | 643 | 832 | 791 | |
+
+### 7.1 P3 / P4 建议分批
+
+ROADMAP 约定每批 3 ~ 5 个模块, 1 个子会话 (宿主桥接 + facade + d.ts + HOST-API + 文档运行时表 + 真机验证). 系统与数据两族超过 200 行, 各拆两批; P4 同批次与 P3 对应 (Bun 列), 并行时占另一台主力设备 (D15).
+
+| 批次 | 模块 | Node main / Worker / Bun | 依赖与前置 |
+|---|---|---|---|
+| P3.2a / P4.2a 纯 JS 工具 | util, species, cvt, fmt, s13n, jsox (Mathx / Arrayx / Numberx), 全局数据函数, pinyin (Bun) | 119 / 188 / 199 | 无宿主桥接依赖, 可最先启动; local-shim 须与 Rhino 行为一致且有对照测试 (Q5 (a)); util.java.* / s13n.* 句柄入口 (D-12) 需先定句柄形式 |
+| P3.2b / P4.2b 文件与数据 | colors / Color#, files, zip / Zip#, storages / Storage#, gallery, mediainfo, EpubBook# | 121 / 141 / 125 | Worker 补 storages 模块 (R8); EpubBook# 的设备验证依赖 Q42 (check-runtime-epub 失效) |
+| P3.1a / P4.1a 应用与 shell | app (D-4 特权), shell / shizuku, ShellProcess# | 76 / 116 / 76 | Root / Shizuku 真机; D-4 的授权方式 (复用 shell.root / shell.shizuku 或新授权) 可能需新待决 |
+| P3.1b / P4.1b 系统信息与引擎 | autojs, device, installer, notice, workManager, engines (D-14), plugins, memory, settings, sysprops, powerManager, dialogs, 全局系统函数 | 132 / 139 / 137 | engines.execScript* 的跨运行时语义需设计; 与 P3.1a 共用宿主 host-client 文件时串行 |
+| P3.3 / P4.3 UI | ui, console, terminal, floaty, web, compose, toast | 87 / 88 / 108 | D-17 Activity 内容视图桥接与 D-7 异步 console.input 先出设计 (可能登记待决); D-10 只在 P4.3 |
+| P3.4 / P4.4 自动化 | automator, auto, keys, ocr / barcode / qrcode / yolo, threads / continuation / timers, selector / Flow# | 99 / 151 / 137 | D-1 / D-6 / D-8 的异步替代入口先出设计; selector 路线图 (P4) 与本批改同一批文件时先协调 |
+| P3.5 / P4.5 收口 | speech.speaker, 全局 TODO, 以及前几批遗留 | 9 / 9 / 9 | speech.speaker 等 3-Macaw Speech 1.3.0 插件实现 (P8.3 暂停中); 设备验证依赖 Q42 (check-runtime-speech) |
+
+建议启动顺序: P3.2a 与 P4.2a 先行 (无设计前置, 行数最多); 其后 P3.1a / P3.2b 与对应 P4 批次; 需要设计的 UI 与自动化批次 (D-1 / D-6 / D-7 / D-8 / D-17) 在设计待决拍板后启动. 每批结束用 `check.py --write-pending-baseline` 收缩基线.
 
 ## 8. 新待决 (Q26-Q28, 已登记看板与附录 C)
 
@@ -235,6 +269,13 @@ Codex 的 25 个静态检查脚本在当前 HEAD 全部重跑 (2026-10-25): 24 �
 | P1.2 真机抽样 A (Redmi) | 无失败项 (41 个用例全部通过, 见 "P1.2 真机抽样 A (Redmi)" 节); 设备证据补强 R20 / Q27 与 R15; 待决 Q34 (自动点击系统授权界面的用例) |
 | P1.3 真机抽样 B (Xiaomi) | 无失败项 (53 个用例全部通过, 见 "P1.3 真机抽样 B (Xiaomi)" 节); 设备证据补强 R20 (Flow# / MailClient# / AiSession# / AgentRun# 句柄成员) 与 R19 的别名方向; 未新增待决 |
 | P1.5 矩阵修正 (Q26 / Q27 / Q28) | R13 改记 pending (rejects), 分组见 "P1.5 拒绝入口分组" 节, 白名单仍由 P1.4 拍板; R20 按句柄类型逐成员比对 (BASELINE 第 5 节); R9 中 Toolkit 助手 38 行经 flow 计为覆盖 |
+| P1.4 拍板 (2026-10-29) | R4 / R7 (ui-thread) / R13 / Q31 由附录 D 结论表收口; 保持排除: D-9 (runtime-native, http.client / buildRequest 改 java-prototype), D-11, D-14 的 plugins.load (Worker / Bun), D-15 |
+| P3.1 / P4.1 (保持 pending 的组) | D-2 device.getSharedDeviceId, D-4 特权与双开 (25 行), D-12 的 dialogs.build / notice.builder / getBuilder / shell.fromIntent, D-14 的 engines.execScript / execScriptFile / execAutoFile, Q31 ShellProcess 三个 Java 流 getter |
+| P3.2 / P4.2 (保持 pending 的组) | D-5 storages.names / all, D-12 的 files.open / toFile / open, s13n.*, util.java.*, D-13 JSOX 扩展 54 行与全局 randomInt / randomFloat (local-shim) |
+| P3.3 / P4.3 (保持 pending 的组) | D-7 console.input / rawInput / build, D-17 Activity 内容视图 (15 行); D-10 Bun 控制台输出 11 行只在 P4.3 |
+| P3.4 / P4.4 (保持 pending 的组) | D-1 auto.waitFor, D-6 threads / sync / continuation (7 行), D-8 sleep (Worker / Bun) / keepAlive / loop / timers.keepAlive, Q31 Flow#await / sync |
+| P3.5 / P4.5 | speech.speaker 8 行的运行时入口 (文档 / d.ts / Ace 已由 P1.4 代补, Q41); 前几批遗留 |
+| 待决 | Q40 pending 基线只减 (已先行); Q42 7 个 Codex 设备脚本失效 (未先行, 影响 P3 / P4 涉及 ai / bridges / epub / mail / speech / tts 的设备验证) |
 
 ## P1.2 真机抽样 A (Redmi)
 
