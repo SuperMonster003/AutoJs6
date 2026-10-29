@@ -11,13 +11,13 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Node main | 1012 | 341 | 0 | 1014 | 0 | 469 |
 | Node Worker | 943 | 338 | 0 | 1017 | 0 | 538 |
-| Bun | 0 | 277 | 940 | 1011 | 0 | 608 |
+| Bun | 0 | 298 | 969 | 1011 | 0 | 558 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 14 / mention 268 / heading 2554 / signature 0 / example 0 |
-| dts | none 15 / name 1664 / arity 1157 / typed 0 |
-| ace | none 420 / semantic 843 / static 1573 |
+| doc | none 8 / mention 268 / heading 2560 / signature 0 / example 0 |
+| dts | none 9 / name 1664 / arity 1163 / typed 0 |
+| ace | none 414 / semantic 843 / static 1579 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
@@ -50,7 +50,7 @@
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | Arrayx | 15 | 15 | 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 15 / 0 / 0 |
 | Canvas# | 54 | 54 | 54 | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
-| Color# | 29 | 29 | 29 | 29 | 29 / 0 / 0 | 29 / 0 / 0 | 0 / 0 / 29 |
+| Color# | 29 | 29 | 29 | 29 | 29 / 0 / 0 | 29 / 0 / 0 | 29 / 0 / 0 |
 | ConsoleConfigurator# | 52 | 50 | 52 | 0 | 0 / 52 / 0 | 0 / 52 / 0 | 0 / 52 / 0 |
 | ContinuationCreator# | 3 | 3 | 3 | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
@@ -90,7 +90,7 @@
 | VolatileDispose# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
 | WebSocket# | 24 | 24 | 24 | 0 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
 | YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
-| Zip# | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 0 / 0 / 21 |
+| Zip# | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 43 | 42 / 0 / 1 | 42 / 0 / 1 | 42 / 0 / 1 |
 | auto | 38 | 38 | 38 | 38 | 0 / 0 / 38 | 0 / 0 / 38 | 0 / 0 / 38 |
@@ -147,7 +147,7 @@
 | shell | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | shizuku | 13 | 8 | 13 | 13 | 13 / 0 / 0 | 13 / 0 / 0 | 13 / 0 / 0 |
 | species | 37 | 37 | 37 | 37 | 37 / 0 / 0 | 37 / 0 / 0 | 37 / 0 / 0 |
-| speech | 17 | 11 | 11 | 11 | 11 / 0 / 6 | 11 / 0 / 6 | 11 / 0 / 6 |
+| speech | 17 | 17 | 17 | 17 | 11 / 0 / 6 | 11 / 0 / 6 | 11 / 0 / 6 |
 | speech.models | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | speech.speaker | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | sqlite | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
@@ -341,40 +341,6 @@
 | `Canvas#skew` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `Canvas#toImage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `Canvas#translate` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### Color#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Color#argb` | local-shim | local-shim | pending |
-| `Color#equals` | local-shim | local-shim | pending |
-| `Color#hsl` | local-shim | local-shim | pending |
-| `Color#hsla` | local-shim | local-shim | pending |
-| `Color#hsv` | local-shim | local-shim | pending |
-| `Color#hsva` | local-shim | local-shim | pending |
-| `Color#removeAlpha` | local-shim | local-shim | pending |
-| `Color#removeBlue` | local-shim | local-shim | pending |
-| `Color#removeGreen` | local-shim | local-shim | pending |
-| `Color#removeRed` | local-shim | local-shim | pending |
-| `Color#rgb` | local-shim | local-shim | pending |
-| `Color#rgba` | local-shim | local-shim | pending |
-| `Color#setAlpha` | local-shim | local-shim | pending |
-| `Color#setAlphaRelative` | local-shim | local-shim | pending |
-| `Color#setArgb` | local-shim | local-shim | pending |
-| `Color#setBlue` | local-shim | local-shim | pending |
-| `Color#setBlueRelative` | local-shim | local-shim | pending |
-| `Color#setGreen` | local-shim | local-shim | pending |
-| `Color#setGreenRelative` | local-shim | local-shim | pending |
-| `Color#setHsl` | local-shim | local-shim | pending |
-| `Color#setHsla` | local-shim | local-shim | pending |
-| `Color#setHsv` | local-shim | local-shim | pending |
-| `Color#setHsva` | local-shim | local-shim | pending |
-| `Color#setPaintColor` | local-shim | local-shim | pending |
-| `Color#setRed` | local-shim | local-shim | pending |
-| `Color#setRedRelative` | local-shim | local-shim | pending |
-| `Color#setRgb` | local-shim | local-shim | pending |
-| `Color#setRgba` | local-shim | local-shim | pending |
-| `Color#toStringReadable` | local-shim | local-shim | pending |
 
 ### ConsoleConfigurator#
 
@@ -1441,32 +1407,6 @@
 |---|---|---|---|
 | `YoloDetector#close` | pending | pending | pending |
 | `YoloDetector#detect` | pending | pending | pending |
-
-### Zip#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Zip#addFile` | bridged | bridged | pending |
-| `Zip#addFiles` | bridged | bridged | pending |
-| `Zip#addFolder` | bridged | bridged | pending |
-| `Zip#extractAll` | bridged | bridged | pending |
-| `Zip#extractFile` | bridged | bridged | pending |
-| `Zip#getFileHeader` | bridged | bridged | pending |
-| `Zip#getFileHeaders` | bridged | bridged | pending |
-| `Zip#getPath` | bridged | bridged | pending |
-| `Zip#getZipFile` | bridged | bridged | pending |
-| `Zip#isEncrypted` | bridged | bridged | pending |
-| `Zip#isValidZipFile` | bridged | bridged | pending |
-| `Zip#name` | bridged | bridged | pending |
-| `Zip#options` | bridged | bridged | pending |
-| `Zip#path` | bridged | bridged | pending |
-| `Zip#removeFile` | bridged | bridged | pending |
-| `Zip#setPassword` | bridged | bridged | pending |
-| `Zip#toString` | bridged | bridged | pending |
-| `Zip#toStringReadable` | bridged | bridged | pending |
-| `Zip#unzipParameters` | bridged | bridged | pending |
-| `Zip#zipFile` | bridged | bridged | pending |
-| `Zip#zipParameters` | bridged | bridged | pending |
 
 ### app
 
