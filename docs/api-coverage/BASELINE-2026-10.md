@@ -820,3 +820,54 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 文档 | 4950012 | 生成物 (HTML / JSON / 搜索索引) |
 | Offline Docs | ead196f | 同步 5 个文件, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, ROADMAP 附录 C (Q83 状态, Q114 / Q115 / Q117 / Q118 / Q120 / Q121-Q125) 与附录 D D-11, P5.2 落点, PLUGIN-APIS 8.2 拆 P5.2f-1 / P5.2f-2 |
+
+## 13. P3.1b Node 系统信息与引擎族 (2026-10-30, 子会话 api-cov-p3-1b)
+
+### 13.1 做了什么
+
+- 本族 121 行 (autojs 21 + autojs.version 7 + 全局 R, app.autojs (Q93 (2)), installer 16, notice 7 + notice.channel 6, workManager 11, engines 8 (D-14), plugins 4 + plugins.tools 4, memory 5, settings 4, sysprops 4, powerManager 2, dialogs.build 1, 全局系统函数 17, Worker 另 getClip / setClip) 在 Node main / Worker 两列全部有显式状态, pending 清零. device / sensors / media 拆到 P3.1c.
+- Node 插件: 共享工厂 `__autojs6_create_system` 供主线程与 Worker (CJS / ESM / 嵌套) 共用, 入口 autojs6:autojs / installer / memory / settings / sysprops / power_manager / system; notice 与 dialogs.build, engines (Q131 (a) 宿主视角), plugins.extend* / tools 补齐; d.ts, HOST-API, 能力目录与 9 个新能力 (Q133 (b), 非推荐).
+- 宿主: RuntimeSystemBridge 路由与 9 个能力, engines execAutoFile / stopAllAndToast; runtime-policy.json 加 moduleAliases (powerManager -> power_manager, workManager -> tasks), globalModules 加 autojs6:system, 新规则 native-memory-watch (memory.watch, Node 两列, Q134 (a), 附录 D D-22); 结构脚本 check-runtime-system.mjs 接入 CI "Script API coverage"; test_runtime_matrix.py 加 test_p3_1b.
+- 运行时形态登记 Q135 (已按推荐先行待确认), 真机发现的 getClip 后台差异与 plugin_tools.user_granted 并入该题.
+
+### 13.2 前后数字
+
+| 项 | 改动前 (宿主 476c17979, MATRIX 150b4dbce) | 改动后 (宿主 2c997b35d) |
+| --- | --- | --- |
+| 矩阵行 | 3410 | 3410 (不变) |
+| pending Node 主线程 / Worker / Bun | 937 / 1006 / 1026 | 825 / 887 / 1026 (本族 112 / 119 -> 0; Bun 待 P4.1b) |
+| bridged Node 主线程 / Worker | 1087 / 1018 | 1191 / 1129 |
+| local-shim Node 主线程 / Worker | 341 / 338 | 348 / 345 |
+| not-portable Node 主线程 / Worker / Bun | 1045 / 1048 / 1042 | 1046 / 1049 / 1042 (memory.watch, D-22) |
+| 文档 / d.ts / Ace 列 | none 472 / 473 / 878 | 不变 |
+| 文档运行时支持表 | 86 页 | 86 页, 本族 13 页的 Node 两列重生成 |
+| Ace 运行时查询 | 3703 (Node main 1002, Worker 941) | 3908 (Node main 1101, Worker 1047) |
+
+- 本族 121 行: Node main bridged 112 / local-shim 8 (plugins 与 plugins.tools) / not-portable 1; Worker bridged 112 / local-shim 7 / not-portable 2 (另 plugins.load, D-14).
+
+### 13.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p3-1b-acc` (宿主 2c997b35d, KSP 取自 23fa91217 (其后 app/ 无改动), Node 08781cee, Bun 5e2f9e1, TS ba92f3a, Ace 345c39a, 文档 b67f671).
+- `check.py --matrix --strict-arity --docs-support` (含 Ace, AUTOJS6_ACE_EDITOR_ROOT) 退出码 0; MATRIX.md 与 pending-baseline.json current; 单元测试通过 (跳过 3).
+- check-runtime-system.mjs (`{"hostMembers":118,"globals":20,"workerSystem":true,"capabilities":9,"hostApi":true}`) 与 check-runtime-app-shell.mjs 通过; Node 插件 api 测试 42 / 42 (含 test-system-rhino.js 10 项); TS `npm test` 通过; Ace `verify-runtime-api-coverage.mjs --fresh` 通过 (3908 条).
+- 唯一失败: check-bun-app-shell.mjs 报 "Bun automation adapters differ from Node sources" (Node 08781cee 改了 Bun 客户端复制的无障碍段), 待 P4.1b 同步并重生成 host-client.mjs. 副本缺 speech / epub / mail / Bundled Libraries 兄弟仓库导致的跳过只与环境有关.
+- 真机 968e9f18 (23046RP50C, API 35, 宿主 debug 5935): Rhino 46 / 46, Node main / ESM / 嵌套 Worker 各 46 通过, 未声明能力 7 通过; 装回原包并核对 md5. 报告 [runtime-system-engines-2026-10-30](../dev/runtime-system-engines-2026-10-30.md).
+
+### 13.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| Node 插件 | 1e69e422 | 共享工厂, notice / dialogs.build / engines / plugins 补齐, d.ts, HOST-API, 能力目录与 9 个能力, 桌面对照测试 |
+| Node 插件 | a1f09612 | 运行时套件钉住新目录摘要 |
+| Node 插件 | d6662d91 | 真机修正 (isAutoJs6 属性, extendAllBut, powerManager device.power, Worker engines 列表冻结, plugin_tools.user_granted), 真机对照脚本 |
+| Node 插件 | 08781cee | 无障碍坐标缩放经 __autojs6_accessibility_point_scale (Bun 客户端的副本没有本族时不缩放) |
+| 宿主 | ea2e5bad4 | RuntimeSystemBridge, 9 个能力, engines execAutoFile / stopAllAndToast |
+| 宿主 | 405d47c33 | runtime-policy.json, check-runtime-system.mjs 与 CI, test_p3_1b |
+| 宿主 | 2c997b35d | MATRIX.md 与 pending-baseline.json |
+| 文档 | b174541 | 本族 13 页运行时支持表, changelog / progress |
+| 文档 | b67f671 | 生成物 (HTML / JSON / 搜索索引) |
+| Offline Docs | 6323f87 | 同步生成页, 版本不变 |
+| TS | ba92f3a | 同步 Node 运行时声明 |
+| Ace | f618e66 | 内置 Node 运行时声明 |
+| Ace | 345c39a | 运行时查询表 3703 -> 3908 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.1b 落点 / 附录 C Q131-Q135 / 附录 D D-22, REVIEW 7.1 P3.1b 落点 |
