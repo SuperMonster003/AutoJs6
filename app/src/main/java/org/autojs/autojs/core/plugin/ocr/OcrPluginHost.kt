@@ -245,13 +245,25 @@ object OcrPluginHost {
             return discoverServices(context, services)
         }
         var discovered = discoverCandidates()
-        selectFrom(discovered, context, engineId, engine, variant, profile, automatic)?.let { return SelectionResult(it, discovered) }
-        if (discovered.any { it.error != null }) {
+        var selected = selectFrom(discovered, context, engineId, engine, variant, profile, automatic)
+        if (selected == null && discovered.any { it.error != null }) {
             recoverFailedDiscoveries(context, discovered)
             discovered = discoverCandidates()
-            selectFrom(discovered, context, engineId, engine, variant, profile, automatic)?.let { return SelectionResult(it, discovered) }
+            selected = selectFrom(discovered, context, engineId, engine, variant, profile, automatic)
         }
-        return SelectionResult(null, discovered)
+        // The chosen package shows which plugin served a script call (paddle-ocr-v3 P2.2).
+        // zh-CN: 选中的包名表明脚本调用由哪个插件处理 (paddle-ocr-v3 P2.2).
+        selected?.let { Log.i(TAG, "select: ${it.serviceInfo.packageName} (variant ${it.pluginInfo?.variant}) for ${describeCriteria(engineId, engine, variant, profile)}") }
+        return SelectionResult(selected, discovered)
+    }
+
+    private fun describeCriteria(engineId: String?, engine: String?, variant: String?, profile: String?): String {
+        return listOfNotNull(
+            engineId?.let { "engineId=$it" },
+            engine?.let { "engine=$it" },
+            variant?.let { "variant=$it" },
+            profile?.let { "profile=$it" },
+        ).joinToString(" ").ifEmpty { "no criteria" }
     }
 
     private fun selectFrom(

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
@@ -68,6 +69,9 @@ class OnnxPaddleOcrEngine(
         release()
         nativeRuntimeLoader()
         val root = if (key.slim) OnnxPaddleOcrAssets.SLIM_ROOT else OnnxPaddleOcrAssets.ROOT
+        // The model directory shows whether useSlim took effect in the packaged application (paddle-ocr-v3 P3.5).
+        // zh-CN: 模型目录表明 useSlim 在打包应用中是否生效 (paddle-ocr-v3 P3.5).
+        Log.i(TAG, "Loading $root (threads ${key.threads}, nnapi ${if (key.useNnapi) "requested" else "off"}, cls ${if (key.useCls) "on" else "off"})")
         return PaddleOCR.create(
             context = appContext,
             config = PaddleOCRConfig(useCls = key.useCls),
@@ -96,6 +100,8 @@ class OnnxPaddleOcrEngine(
     )
 
     companion object {
+
+        private const val TAG = "OnnxPaddleOcrEngine"
 
         const val DEFAULT_THREADS = 4
 
