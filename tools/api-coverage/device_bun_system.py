@@ -7,8 +7,10 @@ Rhino.
 The cases are those of the Node runtime (AutoJs6-Plugin-NodeJs-Runtime tools/nodejs/api/system/cases.js, P3.1b):
 [id, Rhino expression, runtime expression] or [id, null, runtime expression, expected]; the runtime expressions see
 autojs, installer, memory, settings, sysprops, powerManager, system (here host.global), notice (host.notifications),
-engines, plugins, app, dialogs and APK (a copy of an installed APK). EXTRA_CASES adds Bun's engine record and a started
-script. Results depend on the device (Root, settings, notification channels, plugins), so Rhino and Bun run in one
+engines, plugins, app, dialogs and APK (a copy of an installed APK); the global system functions and R are also globals
+(host.global.install(), Q161 (a)). EXTRA_CASES adds Bun's engine record and a started script. The scripts are named
+p31b_<engine>_<run>.js, as the default notice channel id case expects. Results depend on the device (Root, settings,
+notification channels, plugins), so Rhino and Bun run in one
 session and are compared there. The run, console and package helpers are those of device_bun_js_tools.py. A Bun case
 that does not settle in 30 s is reported as CaseTimeout. Only counts, failing case ids and short values are printed.
 
@@ -20,6 +22,9 @@ Phases (all take --serial; record / install / restore / verify / grant also --st
   denied [--modes main,worker] [--report FILE]      Bun only, with the query grants QUERY_GRANTS on and the others of
                                                      GRANTS off: the entries that need a grant that is off reject
                                                      NOT_GRANTED with missingCapabilities before the host; queries answer
+  exit                                              Bun only (Q139 (b)): exit(error) and stop() in a Worker end the
+                                                     whole execution (the main thread does not go on), exit(error) with
+                                                     its error on the host console
 
 Typical run: record, install the candidate host and Bun APKs, grant --set on --only (GRANTS), compare, grant --set off
 --only (GRANTS without QUERY_GRANTS), denied, grant --set restore --only (GRANTS), restore. No dialog is answered here;
@@ -52,7 +57,7 @@ SYSTEM_CASES = SYSTEM_CASES.concat([
 """
 GRANTS = ["autojs.control", "autojs.manage", "settings.control", "settings.write", "files.control", "sysprops.control", "memory.control",
           "memory.dump", "installer.control", "installer.mutate", "engines.control", "engines.exec", "plugintools.control",
-          "plugintools.usergranted", "device.control", "device.power", "notifications.post", "notifications.settings", "clipboard.control",
+          "device.control", "device.power", "notifications.post", "notifications.settings", "clipboard.control",
           "accessibility.control", "app.control", "shell.control", "shell.root", "shell.shizuku"]
 QUERY_GRANTS = ["autojs.control", "settings.control", "memory.control", "installer.control", "engines.control", "device.control", "notifications.post"]
 # The denied run: [id, Bun expression, expected] where expected is {missing: [...]} (NOT_GRANTED before the host) or
@@ -97,6 +102,7 @@ aj6Emit(AJ6_RUN, -1, {done: SYSTEM_CASES.length, sdk: android.os.Build.VERSION.S
 # Node expressions use. A rejection keeps its code and missingCapabilities.
 BUN_RUNNER_JS = """
 function aj6Env(host) {
+    host.global.install();
     return {autojs: host.autojs, installer: host.installer, memory: host.memory, settings: host.settings, sysprops: host.sysprops,
         powerManager: host.powerManager, system: host.global, notice: host.notifications, engines: host.engines, plugins: host.plugins,
         app: host.app, dialogs: host.dialogs, APK: AJ6_APK, systemCount, systemKeys, systemIds};
@@ -210,7 +216,7 @@ def run_script(args, name, text, run):
 def run_bun(args, sources):
     modes = args.modes.split(",")
     run = uuid.uuid4().hex[:8]
-    results = run_script(args, f"aj6_system_bun_{run}.js", bun_script(args, sources, modes, run), run)
+    results = run_script(args, f"p31b_bun_{run}.js", bun_script(args, sources, modes, run), run)
     if -2 in results:
         print(f"bun: runner error {results[-2].get('error', '')[:600]}")
     return modes, results
@@ -226,7 +232,7 @@ def compare(args):
     table = case_list(args)
     run = uuid.uuid4().hex[:8]
     script = f"var AJ6_RUN = '{run}';\nvar APK = {json.dumps(APK)};\n" + cases_source(args) + encoder(args) + base.EMIT_JS + RHINO_JS
-    rhino = run_script(args, f"aj6_system_rhino_{run}.js", script, run)
+    rhino = run_script(args, f"p31b_rhino_{run}.js", script, run)
     modes, results = run_bun(args, [case[2] for case in table])
     host = base.package_state(args.serial, base.HOST) or {}
     bun = base.package_state(args.serial, base.sample.BUN) or {}
@@ -286,9 +292,52 @@ def denied(args):
     finish(args, report, failed)
 
 
+# exit / stop in a Worker (Q139 (b)): the main thread reports that it started and, 15 s later, that it survived; the Worker
+# reports, then calls exit(error) or stop(). The execution must end before the main thread's second report.
+EXIT_JS = """
+(async () => {
+    const {createHostClient} = await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);
+    await createHostClient();
+    aj6Emit(AJ6_RUN, 0, "main");
+    const w = new Worker(URL.createObjectURL(new Blob([%s], {type: "application/javascript"})));
+    w.onmessage = event => aj6Emit(AJ6_RUN, 1, event.data);
+    w.postMessage(1);
+    await new Promise(resolve => setTimeout(resolve, 15000));
+    aj6Emit(AJ6_RUN, 2, "main survived");
+    aj6Emit(AJ6_RUN, -1, {done: 3});
+})();
+"""
+EXIT_WORKER_JS = """
+self.onmessage = async () => {
+    const {createHostClient} = await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);
+    const host = await createHostClient();
+    postMessage(["worker", host.capabilities.includes("execution.control")]);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    %s;
+};
+"""
+EXIT_ERROR = "p41b worker exit error"
+
+
+def exit_phase(args):
+    failed = 0
+    for label, call in (("exit(error)", f"host.global.exit(new Error({json.dumps(EXIT_ERROR)}))"), ("stop()", "host.global.stop()")):
+        run = uuid.uuid4().hex[:8]
+        worker = EXIT_WORKER_JS % call
+        script = ('"bun";\n' + f"const AJ6_RUN = '{run}';\n" + base.EMIT_JS + EXIT_JS % json.dumps(worker))
+        results = base.run_script(args.serial, f"p41b_exit_{run}.js", script, run, 30)
+        console = base.sample.adb(args.serial, "logcat", "-d", "-v", "raw", "-s", "GlobalConsole:*", check=False)
+        error_logged = EXIT_ERROR in console
+        ok = results.get(0) == "main" and results.get(1) == ["worker", True] and 2 not in results and error_logged == (label == "exit(error)")
+        failed += 0 if ok else 1
+        print(f"bun worker {label}: {'pass' if ok else 'fail'} (main {results.get(0) is not None}, worker {json.dumps(results.get(1))},"
+              f" main survived {2 in results}, error on the console {error_logged})")
+    sys.exit(1 if failed else 0)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("phase", choices=["record", "install", "restore", "verify", "grant", "compare", "denied"])
+    parser.add_argument("phase", choices=["record", "install", "restore", "verify", "grant", "compare", "denied", "exit"])
     parser.add_argument("--serial", required=True)
     parser.add_argument("--state", type=Path, help="private state directory (APK copies, recorded grants)")
     parser.add_argument("--bun", type=Path, default=HERE.parents[2] / "AutoJs6-Plugin-Bun-Runtime", help="Bun runtime checkout")
@@ -307,7 +356,7 @@ def main():
     if args.phase == "grant" and (not args.set or not args.only):
         parser.error("grant needs --set and --only")
     {"record": base.record, "install": base.install, "restore": base.restore, "verify": base.verify, "grant": base.grant,
-     "compare": compare, "denied": denied}[args.phase](args)
+     "compare": compare, "denied": denied, "exit": exit_phase}[args.phase](args)
 
 
 if __name__ == "__main__":

@@ -183,7 +183,7 @@
       "notifications.channel.get": {"capability": "notifications.post", "basis": "P4.1b: notice route channelGet"},
       "notifications.channel.getAll": {"capability": "notifications.post", "basis": "P4.1b: notice route channelGetAll"},
       "notifications.channel.remove": {"capability": "notifications.post", "basis": "P4.1b: notice route channelRemove"},
-      "plugins.tools.list": {"capability": "plugintools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route list; USER_GRANTED providers also need plugintools.usergranted"},
+      "plugins.tools.list": {"capability": "plugintools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route list; USER_GRANTED providers included as in Rhino (Q162 (a))"},
       "plugins.tools.providers": {"capability": "plugintools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route list"},
       "plugins.tools.call": {"capability": "plugintools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route invoke"},
       "plugins.tools.callAsync": {"capability": "plugintools.control", "basis": "P4.1b (Q137 (a)): alias of call"},

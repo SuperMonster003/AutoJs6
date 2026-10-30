@@ -27,7 +27,7 @@ const sdk = await import(pathToFileURL(resolve(bun, 'app/src/main/assets/autojs6
 // A client with every grant of the family but engines.control (which asks the host for its record first): building it
 // and reading its members must not reach the host except for the app identity.
 const FAMILY = ['autojs.control', 'autojs.manage', 'settings.control', 'settings.write', 'sysprops.control', 'memory.control', 'memory.dump',
-  'installer.control', 'installer.mutate', 'engines.control', 'engines.exec', 'plugintools.control', 'plugintools.usergranted'];
+  'installer.control', 'installer.mutate', 'engines.control', 'engines.exec', 'plugintools.control'];
 async function client(capabilities, calls = []) {
   return sdk.createHostClient({socket: 'coverage', fetch: async (url, init) => {
     if (url.endsWith('/info')) return Response.json({ok: true, bridgeVersion: 1, capabilities, limits: {}});
@@ -99,6 +99,11 @@ const SYSTEM = new Set(['currentPackage', 'currentActivity', 'currentComponent',
 const globals = records.filter(row => row.module === '' && (row.ownerModule === '' && SYSTEM.has(row.member) || row.ownerModule === 'autojs'));
 for (const row of globals) check(row.ownerModule || 'global', row.member, row.kind);
 assert(globals.length >= 17, `global rows ${globals.length}`);
+// Q161 (a): host.global.install puts them and R on a target, as Rhino's globals; it is not one of host.global's members.
+const installTarget = {};
+const installed = host.global.install(installTarget);
+for (const name of [...SYSTEM, 'R']) assert(installed.includes(name) && name in installTarget, `host.global.install puts ${name}`);
+assert(!Object.keys(host.global).includes('install') && /\binstall\(target\?: object\): readonly string\[\];/.test(declarations), 'host.global.install, declared and not enumerable');
 
 // Method tables: client == host white list, every route a real host route; notice / powerManager are the host's second
 // modules of their grants; the family's grants are host grants with plugin center switches.
@@ -119,6 +124,11 @@ const grantsFile = read(resolve(root, 'app/src/main/java/org/autojs/autojs/core/
 const preferences = read(resolve(root, 'app/src/main/res/xml/fragment_plugin_settings_preferences_official.xml'));
 const strings = read(resolve(root, 'app/src/main/res/values/strings_bun_system.xml'));
 const hostCapability = declarations.match(/export type HostCapability = ([^;]*);/)[1];
+// Q162 (a): no second plugin tools grant; execution.control (Q139 (b)) is a capability of every broker, not a grant.
+assert(!grantsFile.includes('usergranted') && !preferences.includes('usergranted') && !strings.includes('usergranted') && !hostCapability.includes('usergranted'),
+  'plugintools.usergranted is gone (Q162 (a))');
+assert(grantsFile.includes('"execution.control"') && hostCapability.includes('"execution.control"') && !preferences.includes('plugin_bun_execution_control_grant'),
+  'execution.control: a host capability without a switch (Q139 (b))');
 for (const grant of FAMILY) {
   assert(grantsFile.includes(`"${grant}"`), `Host grant ${grant}`);
   const key = grant.replace(/\./g, '_');
@@ -151,7 +161,7 @@ const policy = JSON.parse(read(resolve(root, 'tools/api-coverage/runtime-policy.
 assert(policy.bun.namespaceAliases.workManager.includes('tasks'), 'Bun workManager alias tasks');
 assert(policy.exclusions.find(rule => rule.id === 'native-memory-watch').columns.includes('bun'), 'memory.watch not-portable for Bun (Q140 (a))');
 const hostApi = read(resolve(bun, 'docs/host-api.md'));
-for (const name of ['autojs.manage', 'settings.write', 'memory.dump', 'installer.mutate', 'engines.exec', 'plugintools.usergranted', 'AUTOJS6_HOST_INFO_FILE', 'myEngine']) {
+for (const name of ['autojs.manage', 'settings.write', 'memory.dump', 'installer.mutate', 'engines.exec', 'execution.control', 'host.global.install()', 'RootMode', 'AUTOJS6_HOST_INFO_FILE', 'myEngine']) {
   assert(hostApi.includes(name), `Bun docs/host-api.md describes ${name}`);
 }
 console.log(JSON.stringify({members, globals: globals.length, grants: FAMILY.length, routes: Object.fromEntries(['autojs.control', 'installer.control', 'engines.control', 'plugintools.control']
