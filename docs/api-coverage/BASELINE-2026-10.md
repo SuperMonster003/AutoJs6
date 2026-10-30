@@ -1373,7 +1373,8 @@ Node main, Node Worker, Bun 三列的 pending 基线都是 574 行, 由下表构
 - api-coverage 单测 121 例通过 (跳过 3), 全部 check-runtime-* / check-bun-* / check-ui-* 通过, Node 桌面测试 153 + 16 + 3 + 62, Bun host client 测试 150 全过, sync-*.mjs --check 全过.
 - TS sync --check changed 0, verify-runtime-declarations 通过 (declarations 95), verify-api-coverage 在真实仓库退出码 0; Ace verify-runtime-api-coverage --fresh 通过, verify-api-coverage 在真实仓库退出码 0. 文档 auto-generate --check 当前.
 - 真机结果与设备恢复见 docs/dev/runtime-closeout-2026-10-31.md. 重录脚本改动后的 rhino 阶段在 Xiaomi 968e9f18 上复跑 633 / 633 (只验证脚本, 该机宿主与录制值错误名全同, 差异只在堆栈文本).
-- 未验证: Bun d12edff 的超时路径只过桌面; process.exit 清定时器只在 x86_64 模拟器验证, 未在 arm64 真机复测, 未跑 Node AndroidTest 冒烟.
+- 终版包复跑 (AVD_API_33, x86_64 debug, Node fde5c5a8, Bun 24a66fe): Bun 超时轮 6 / 6; Node AndroidTest SimpleRunSmokeTest, ExecutionModeLifecycleSmokeTest, NpmEcosystemSmokeTest, NodeRuntimePluginAndroidConformanceTest 全类 OK (37 tests).
+- 未验证: process.exit 清定时器未在 arm64 真机复测 (改动是共享 JS, 已在 x86_64 验证).
 
 ### 20.5 提交
 

@@ -54,11 +54,19 @@ The first Node run of that round gave [-1, 0, 3], and fixing the catch gave [-1,
 catch, then the timer armed before the wait still ran. Both are fixed (Node 5c1ce68b, 2025b2e1). `process.exit()` does not
 close sockets or other handles: the event loop ends when they close (HOST-API).
 
-Not verified on a device:
+Repeated on the final commits (AVD_API_33, x86_64 debug packages of Node fde5c5a8 and Bun 24a66fe):
 
-- Bun d12edff (the same catch in the Bun copy) passed the desktop tests only; the emulator round ran before it. The exit of
-  Bun does not throw that signal, so the change is a guard.
-- `process.exit()` clearing timers ran on x86_64 only, not on arm64. The Node AndroidTest smoke tests were not run.
+| Run | Result |
+| --- | --- |
+| Timeout, Rhino, Bun main, Bun Worker | 6 / 6 |
+| Node AndroidTest: SimpleRunSmokeTest 1, ExecutionModeLifecycleSmokeTest 2, NpmEcosystemSmokeTest 1, NodeRuntimePluginAndroidConformanceTest 33 | OK (37 tests) |
+
+The conformance class uses `process.exit` in 18 places, so it covers the change to the timers on the paths that already had
+tests.
+
+Not verified:
+
+- `process.exit()` clearing timers on an arm64 device. The change is JavaScript in the shared core, and it ran on x86_64.
 - `new Worker(__filename)` in a project without package.json throws SyntaxError (Q200). It is older than this batch.
 
 ## Restoration

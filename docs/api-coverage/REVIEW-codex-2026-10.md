@@ -417,7 +417,7 @@ P3.5 / P4.5 收口 B 落点 (2026-10-31, api-cov-p35-closeout; 矩阵与基线�
 | Flow#await, Flow#sync | pending | pending | Q31, Q202 |
 | new Worker(__filename), 项目无 package.json | 抛 SyntaxError, 既有缺陷 | 不涉及 | Q200 |
 | process.exit 清已排定时器 | 已实施 | 不涉及 | Q201 |
-| Node 超时轮的 arm64 真机与 AndroidTest 冒烟 | 未跑 | - | P3.6 收尾时跑 |
+| process.exit 清定时器的 arm64 真机 | 未跑, 已在 x86_64 验证 | 不涉及 | 随 P3.6 收尾的真机验证 |
 
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
