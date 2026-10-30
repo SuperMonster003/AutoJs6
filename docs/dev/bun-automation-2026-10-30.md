@@ -69,12 +69,13 @@ py -3.12 tools/api-coverage/device_bun_automation.py restore --serial SERIAL --s
 ```
 
 Desktop checks:
-- Bun: `node --test` of the CI host-client tests (automation-family.test.mjs 5 among them), `sync-automation-family.mjs` / `sync-events.mjs` / `sync-system.mjs --check` against Node HEAD, type checks of host-client.d.mts and `tools/host-client/types.mts`.
+- Bun (37a5f5c): the 140 `node --test` tests of the CI (125 of the host client, automation-family.test.mjs 5 among them), `sync-automation-family.mjs` / `sync-events.mjs` / `sync-system.mjs --check` against Node HEAD, type checks of host-client.d.mts and `tools/host-client/types.mts`.
 - Host: BunAutomationPolicyTest 18, RuntimeAutomationBridgeCapabilityTest 6, RuntimeFlowPolicyTest 8; `check-bun-automation-family.mjs` (members automator 55, auto 38, keys 12, ocr 6, barcode 4, qrcode 4, yolo 1, threads 9, continuation 4, timers 4; factory routes 37, ocr.control 3, barcode.control 4, yolo.control 3) and `check-runtime-events.mjs`; test_runtime_matrix 45 tests (test_p4_4); `check.py --matrix --strict-arity --docs-support` with Ace in an export of host HEAD with the KSP metadata of 77e94eb5b (the host sources after it only touch engine / plugin files).
 - TS `verify-runtime-declarations.mjs` and Ace `verify-runtime-api-coverage.mjs --fresh` (4736 queries).
 
 ## Leftovers
 
 - Flow#await / Flow#sync stay pending (Q31).
+- threads.pool without maxPoolSize means no upper bound, as in Node (same shared factory), while Rhino throws IllegalArgumentException (Q180, undecided; `{corePoolSize: 3, maxPoolSize: 2}` throws in all three).
 - In the matrix a Bun cell names one grant, the one whose method table routes the member. press / swipe / gesture* (accessibility.gesture), auto.start and the other service members (accessibility.service), captureScreen (screen.capture) and events.observeKey / observeTouch and the other observe* members (their events.* grant) need a second grant, checked per call before the host and listed in host-api.md; the denied run covers them.
 - The flow namespace's own rows show flow.control. Flow's waits read the nodes over accessibility.control as the selector functions do; the selector rows now show accessibility.control, the flow rows are left to the flow family (Q28).

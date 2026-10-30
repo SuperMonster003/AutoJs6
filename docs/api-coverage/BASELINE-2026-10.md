@@ -1211,3 +1211,50 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 文档 | efaad8e / 6e0936c | 13 页运行时支持表, changelog / progress, 生成物 |
 | Offline Docs | 28fa851 | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.4 勾选与落点 / 附录 C Q180, REVIEW 7.1 P3.4 落点 |
+
+## 18. P4.4 Bun 自动化族 (2026-10-30, 子会话 api-cov-p4-4)
+
+### 18.1 做了什么
+
+- 本族 (automator / auto / keys / ocr / barcode / qrcode / yolo / YoloDetector#, threads / continuation / timers / VolatileDispose# / 全局 sleep / wait, selector 全局 / Flow#, events) 的 Bun 列 pending 清零, 只剩 Flow#await / Flow#sync (Q31). 设计 Q181 - Q185 全选推荐 (a).
+- Bun 插件: sync-automation-family.mjs 同步 Node 共享工厂与声明, familyCall 授权映射, ocr / barcode / qrcode 门面, events 的 Rhino 成员, host.global 的本族 29 个全局 (install() 显式装, Q184 (a)), d.mts, host-api.md.
+- 宿主: 6 个 Bun 授权 (accessibility.service / events.touch / events.key.intercept / ocr.control / barcode.control / yolo.control) 与插件中心开关, BunAutomationBridge 路由 (automator / auto 为 accessibility.control 的第二模块, ocr / barcode / yolo, captureScreenImage / dump / explain), runtime-policy.json bun 节, 结构脚本 check-bun-automation-family.mjs 接入 CI, test_p4_4, 真机脚本 device_bun_automation.py.
+
+### 18.2 前后数字
+
+| 项 | 改动前 (宿主 63b4c3c71) | 改动后 (宿主 7bb11982c) |
+| --- | --- | --- |
+| pending 基线 Bun | 835 | 656 (本族 166 + P4.3 的 console 13; Node 列的 92 / 92 来自 P3.3) |
+| 本族行 Bun | 249 行, pending 168 | pending 2 (Flow#await / Flow#sync, Q31) |
+| 全列 pending 基线 (Node main / Worker / Bun) | - | 577 / 577 / 577 (验收 HEAD 9ad6b0e3d, 含 P3.3 / P4.3 / P3.4 全部落点) |
+| BunAutomationBridge 路由方法 | 295 | 314 |
+| Ace 运行时查询 | 4577 (Bun 1158, Bun 句柄 303) | 4736 (Bun 1312, Bun 句柄 308) |
+| 文档运行时支持表 | - | 12 页的 Bun 列 (automator, barcode, continuation, events, flow, global, ocr, qrcode, threads, timers, uiSelectorType, yolo) |
+
+### 18.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p4-4-head6` (宿主 9ad6b0e3d, KSP 取 77e94eb5b, 其后宿主源码只改了引擎与插件文件, 无脚本模块改动; Node 4ed3a670, Bun fa46dda, 文档 ca10c2e, TS be281ba, Ace c5009db): `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) 退出码 0; test_runtime_matrix 45 项通过 (含 test_p4_4).
+- check-bun-automation-family.mjs 通过 (成员 automator 55 / auto 38 / keys 12 / ocr 6 / barcode 4 / qrcode 4 / yolo 1 / threads 9 / continuation 4 / timers 4, 工厂路由 37, ocr.control 3 / barcode.control 4 / yolo.control 3); 宿主 BunAutomationPolicyTest 18, RuntimeAutomationBridgeCapabilityTest 6, RuntimeFlowPolicyTest 8 通过; Bun 37a5f5c 的 CI node 测试 140 项通过 (host-client 125 项, 含 automation-family.test.mjs 5); TS verify-runtime-declarations 与 Ace verify-runtime-api-coverage.mjs --fresh 通过.
+- 真机 bek749scrwv4wo8h (Redmi 22120RN86C, Android 13 / API 33, 宿主 debug 5935 含 e2d824545, Bun debug 296 = 37a5f5c): Rhino 53 / 53, Bun main / Worker 各 53 / 53, 只开 events.observe 的拒绝轮各 19 / 19; 装回原包并核对 md5, 12 个授权恢复为 absent. 报告 [bun-automation-2026-10-30](../dev/bun-automation-2026-10-30.md).
+
+### 18.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| Bun 插件 | 40ea7e0 | keys 本地键码 12 名, automation-family.test.mjs 进 CI |
+| 宿主 | 33ab825c4 | 6 个授权, 插件中心开关 11 语言, 策略单测 |
+| 宿主 | 248dc70db | 附录 C Q181 - Q184 |
+| 宿主 | 47fa448db | BunAutomationBridge 路由, Broker 路由, 单测 |
+| Bun 插件 | 9b40a39 | 同步 Node 自动化族工厂与声明, 授权映射, 门面, 全局, d.mts, host-api.md, 测试 |
+| 宿主 | e2d824545 | captureScreenImage / dump / explain (Q185 (a)), check-bun-automation-family.mjs, check-runtime-events.mjs |
+| 宿主 | 7bb11982c | runtime-policy.json, MATRIX.md, pending-baseline.json, 附录 C Q185, CI |
+| 文档 | a816ace / 8fef88c | 12 页 Bun 列, changelog / progress, 生成物 |
+| Offline Docs | ac85b8a | 同步生成页, 版本不变 |
+| TS | 26b89d9 | 同步 Bun 声明 |
+| Ace | f1f1820 / b79c2f7 | 内置 Bun 声明, 运行时查询表 4577 -> 4736 |
+| 宿主 | b23220775 | selector 授权更正为 accessibility.control |
+| 文档 / Offline Docs | b003076 / ca10c2e, e0f38ce | uiSelectorType 授权与 changelog 更正 |
+| 宿主 | df6f3448c / 1e17429cb | test_p4_4, device_bun_automation.py |
+| Bun 插件 | fa46dda | host-api.md selector 授权名 |
+| 宿主 | ac3ffd91e | 报告 bun-automation-2026-10-30 |
+| 宿主 | (本节所在提交) | 本节, ROADMAP P4.4 落点, REVIEW 7.1 P4.4 落点 |
