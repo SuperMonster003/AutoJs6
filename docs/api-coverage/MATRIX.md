@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3517 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3518 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3517 行 (显式导出 1962, 原型成员 205, 返回对象成员 1350).
+数据源: ksp, 3518 行 (显式导出 1962, 原型成员 205, 返回对象成员 1351).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1628 | 368 | 0 | 944 | 0 | 577 |
-| Node Worker | 1628 | 365 | 0 | 947 | 0 | 577 |
-| Bun | 0 | 376 | 1617 | 947 | 0 | 577 |
+| Node main | 1628 | 368 | 0 | 945 | 0 | 577 |
+| Node Worker | 1628 | 365 | 0 | 948 | 0 | 577 |
+| Bun | 0 | 376 | 1617 | 948 | 0 | 577 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 532 / mention 274 / heading 2711 / signature 0 / example 0 |
-| dts | none 533 / name 1737 / arity 319 / typed 928 |
-| ace | none 938 / semantic 945 / static 1634 |
+| doc | none 532 / mention 274 / heading 2712 / signature 0 / example 0 |
+| dts | none 533 / name 1738 / arity 319 / typed 928 |
+| ace | none 938 / semantic 946 / static 1634 |
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 993 / differs 23 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
@@ -36,7 +36,7 @@
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
 | java-prototype-layout-inflater | not-portable: java-prototype | 1 | 1 | 1 | ui.inflate / ui.createView |
-| java-prototype-objects | not-portable: java-prototype | 882 | 882 | 882 |  |
+| java-prototype-objects | not-portable: java-prototype | 883 | 883 | 883 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
@@ -83,7 +83,7 @@
 | Mathx | 23 | 23 | 23 | 23 / 23 | 23 | 23 / 0 / 0 | 23 / 0 / 0 | 23 / 0 / 0 |
 | Numberx | 14 | 14 | 14 | 14 / 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | ObjectFrame# | 15 | 15 | 15 | - | 15 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
-| OcrResult# | 5 | 5 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
+| OcrResult# | 6 | 6 | 6 | - | 6 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
 | PReadableTextFile# | 5 | 5 | 5 | - | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PWritableTextFile# | 6 | 6 | 6 | - | 0 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
 | PngQuantizationFileResult# | 5 | 3 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
@@ -610,6 +610,7 @@
 | `OcrResult#bounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `OcrResult#compareTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `OcrResult#confidence` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `OcrResult#extras` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `OcrResult#label` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `OcrResult#text` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
