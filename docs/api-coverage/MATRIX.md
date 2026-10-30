@@ -1,29 +1,29 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3412 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3470 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3412 行 (显式导出 1904, 原型成员 205, 返回对象成员 1303).
+数据源: ksp, 3470 行 (显式导出 1962, 原型成员 205, 返回对象成员 1303).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1262 | 348 | 0 | 1046 | 0 | 756 |
-| Node Worker | 1209 | 345 | 0 | 1049 | 0 | 809 |
-| Bun | 0 | 313 | 1235 | 1043 | 0 | 821 |
+| Node main | 1262 | 348 | 0 | 1046 | 0 | 814 |
+| Node Worker | 1209 | 345 | 0 | 1049 | 0 | 867 |
+| Bun | 0 | 313 | 1235 | 1043 | 0 | 879 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 474 / mention 268 / heading 2670 / signature 0 / example 0 |
-| dts | none 475 / name 1774 / arity 1163 / typed 0 |
-| ace | none 880 / semantic 898 / static 1634 |
+| doc | none 532 / mention 268 / heading 2670 / signature 0 / example 0 |
+| dts | none 533 / name 1774 / arity 1163 / typed 0 |
+| ace | none 938 / semantic 898 / static 1634 |
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 5 / Node Worker 5 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
-名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 466 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
+名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 524 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
 ## 排除规则
 
@@ -127,7 +127,7 @@
 | gallery | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | http | 21 | 20 | 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| imgui | 466 | 0 | 0 | 0 | 0 / 1 / 465 | 0 / 1 / 465 | 0 / 1 / 465 |
+| imgui | 524 | 0 | 0 | 0 | 0 / 1 / 523 | 0 / 1 / 523 | 0 / 1 / 523 |
 | installer | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
@@ -1789,7 +1789,15 @@
 | `imgui.Dir` | pending | pending | pending |
 | `imgui.Dp` | pending | pending | pending |
 | `imgui.DragFloat` | pending | pending | pending |
+| `imgui.DragFloat2` | pending | pending | pending |
+| `imgui.DragFloat3` | pending | pending | pending |
+| `imgui.DragFloat4` | pending | pending | pending |
+| `imgui.DragFloatRange2` | pending | pending | pending |
 | `imgui.DragInt` | pending | pending | pending |
+| `imgui.DragInt2` | pending | pending | pending |
+| `imgui.DragInt3` | pending | pending | pending |
+| `imgui.DragInt4` | pending | pending | pending |
+| `imgui.DragIntRange2` | pending | pending | pending |
 | `imgui.DrawFlags` | pending | pending | pending |
 | `imgui.DrawListLayer` | pending | pending | pending |
 | `imgui.Dummy` | pending | pending | pending |
@@ -1836,7 +1844,13 @@
 | `imgui.ImageButton` | pending | pending | pending |
 | `imgui.Indent` | pending | pending | pending |
 | `imgui.InputFloat` | pending | pending | pending |
+| `imgui.InputFloat2` | pending | pending | pending |
+| `imgui.InputFloat3` | pending | pending | pending |
+| `imgui.InputFloat4` | pending | pending | pending |
 | `imgui.InputInt` | pending | pending | pending |
+| `imgui.InputInt2` | pending | pending | pending |
+| `imgui.InputInt3` | pending | pending | pending |
+| `imgui.InputInt4` | pending | pending | pending |
 | `imgui.InputText` | pending | pending | pending |
 | `imgui.InputTextFlags` | pending | pending | pending |
 | `imgui.InputTextMultiline` | pending | pending | pending |
@@ -1923,12 +1937,26 @@
 | `imgui.SetTooltip` | pending | pending | pending |
 | `imgui.SetTouchable` | pending | pending | pending |
 | `imgui.SetWindowFontScale` | pending | pending | pending |
+| `imgui.ShowAboutWindow` | pending | pending | pending |
+| `imgui.ShowDebugLogWindow` | pending | pending | pending |
 | `imgui.ShowDemoWindow` | pending | pending | pending |
+| `imgui.ShowIDStackToolWindow` | pending | pending | pending |
+| `imgui.ShowMetricsWindow` | pending | pending | pending |
+| `imgui.ShowStyleEditor` | pending | pending | pending |
+| `imgui.ShowUserGuide` | pending | pending | pending |
 | `imgui.SingleChoice` | pending | pending | pending |
+| `imgui.SliderAngle` | pending | pending | pending |
 | `imgui.SliderFlags` | pending | pending | pending |
 | `imgui.SliderFloat` | pending | pending | pending |
+| `imgui.SliderFloat2` | pending | pending | pending |
+| `imgui.SliderFloat3` | pending | pending | pending |
+| `imgui.SliderFloat4` | pending | pending | pending |
 | `imgui.SliderInt` | pending | pending | pending |
+| `imgui.SliderInt2` | pending | pending | pending |
+| `imgui.SliderInt3` | pending | pending | pending |
+| `imgui.SliderInt4` | pending | pending | pending |
 | `imgui.SmallButton` | pending | pending | pending |
+| `imgui.SortDirection` | pending | pending | pending |
 | `imgui.Spacing` | pending | pending | pending |
 | `imgui.StatsOverlay` | pending | pending | pending |
 | `imgui.StyleColorsClassic` | pending | pending | pending |
@@ -1940,6 +1968,7 @@
 | `imgui.TableBgTarget` | pending | pending | pending |
 | `imgui.TableColumnFlags` | pending | pending | pending |
 | `imgui.TableFlags` | pending | pending | pending |
+| `imgui.TableGetSortSpecs` | pending | pending | pending |
 | `imgui.TableHeadersRow` | pending | pending | pending |
 | `imgui.TableNextColumn` | pending | pending | pending |
 | `imgui.TableNextRow` | pending | pending | pending |
@@ -2021,7 +2050,15 @@
 | `imgui.destroyTexture` | pending | pending | pending |
 | `imgui.dp` | pending | pending | pending |
 | `imgui.dragFloat` | pending | pending | pending |
+| `imgui.dragFloat2` | pending | pending | pending |
+| `imgui.dragFloat3` | pending | pending | pending |
+| `imgui.dragFloat4` | pending | pending | pending |
+| `imgui.dragFloatRange2` | pending | pending | pending |
 | `imgui.dragInt` | pending | pending | pending |
+| `imgui.dragInt2` | pending | pending | pending |
+| `imgui.dragInt3` | pending | pending | pending |
+| `imgui.dragInt4` | pending | pending | pending |
+| `imgui.dragIntRange2` | pending | pending | pending |
 | `imgui.dummy` | pending | pending | pending |
 | `imgui.end` | pending | pending | pending |
 | `imgui.endChild` | pending | pending | pending |
@@ -2065,10 +2102,17 @@
 | `imgui.imageButton` | pending | pending | pending |
 | `imgui.indent` | pending | pending | pending |
 | `imgui.inputFloat` | pending | pending | pending |
+| `imgui.inputFloat2` | pending | pending | pending |
+| `imgui.inputFloat3` | pending | pending | pending |
+| `imgui.inputFloat4` | pending | pending | pending |
 | `imgui.inputInt` | pending | pending | pending |
+| `imgui.inputInt2` | pending | pending | pending |
+| `imgui.inputInt3` | pending | pending | pending |
+| `imgui.inputInt4` | pending | pending | pending |
 | `imgui.inputText` | pending | pending | pending |
 | `imgui.inputTextMultiline` | pending | pending | pending |
 | `imgui.int` | pending | pending | pending |
+| `imgui.ints` | pending | pending | pending |
 | `imgui.invisibleButton` | pending | pending | pending |
 | `imgui.isAnyItemActive` | pending | pending | pending |
 | `imgui.isAnyItemHovered` | pending | pending | pending |
@@ -2147,10 +2191,23 @@
 | `imgui.setTooltip` | pending | pending | pending |
 | `imgui.setTouchable` | pending | pending | pending |
 | `imgui.setWindowFontScale` | pending | pending | pending |
+| `imgui.showAboutWindow` | pending | pending | pending |
+| `imgui.showDebugLogWindow` | pending | pending | pending |
 | `imgui.showDemoWindow` | pending | pending | pending |
+| `imgui.showIdStackToolWindow` | pending | pending | pending |
+| `imgui.showMetricsWindow` | pending | pending | pending |
+| `imgui.showStyleEditor` | pending | pending | pending |
+| `imgui.showUserGuide` | pending | pending | pending |
 | `imgui.singleChoice` | pending | pending | pending |
+| `imgui.sliderAngle` | pending | pending | pending |
 | `imgui.sliderFloat` | pending | pending | pending |
+| `imgui.sliderFloat2` | pending | pending | pending |
+| `imgui.sliderFloat3` | pending | pending | pending |
+| `imgui.sliderFloat4` | pending | pending | pending |
 | `imgui.sliderInt` | pending | pending | pending |
+| `imgui.sliderInt2` | pending | pending | pending |
+| `imgui.sliderInt3` | pending | pending | pending |
+| `imgui.sliderInt4` | pending | pending | pending |
 | `imgui.smallButton` | pending | pending | pending |
 | `imgui.spacing` | pending | pending | pending |
 | `imgui.statsOverlay` | pending | pending | pending |
@@ -2159,6 +2216,7 @@
 | `imgui.styleColorsClassic` | pending | pending | pending |
 | `imgui.styleColorsDark` | pending | pending | pending |
 | `imgui.styleColorsLight` | pending | pending | pending |
+| `imgui.tableGetSortSpecs` | pending | pending | pending |
 | `imgui.tableHeadersRow` | pending | pending | pending |
 | `imgui.tableNextColumn` | pending | pending | pending |
 | `imgui.tableNextRow` | pending | pending | pending |
