@@ -58,6 +58,7 @@
       "smartClickBounds": {"module": "autojs6:flow", "member": "smartClickBounds"},
       "toggle": {"module": "autojs6:flow", "member": "toggle"},
       "typeInto": {"module": "autojs6:flow", "member": "typeInto"},
+      "wait.async": {"module": "autojs6:system", "member": "wait.async"},
       "waitForEvent": {"module": "autojs6:flow", "member": "waitForEvent"},
       "waitForIdle": {"module": "autojs6:flow", "member": "waitForIdle"},
       "waitForNotification": {"module": "autojs6:flow", "member": "waitForNotification"},
@@ -303,6 +304,8 @@
     "MailClient": {"node": {"module": "autojs6:mail", "type": "Client"}, "bun": {"namespace": "mail", "type": "RuntimeMail.Client", "capability": "mail.control"}},
     "ShellProcess": {"node": {"module": "autojs6:shell", "type": "ShellProcess"}, "bun": {"namespace": "shell", "type": "RuntimeShell.ShellProcess", "capability": "shell.control"}},
     "Storage": {"node": {"module": "storages", "type": "StorageStore"}, "bun": {"namespace": "storages", "type": "RuntimeStorage.StorageStore", "capability": "storage.control"}},
+    "VolatileDispose": {"node": {"module": "autojs6:threads", "type": "VolatileDispose"}},
+    "YoloDetector": {"node": {"module": "autojs6:yolo", "type": "YoloDetector"}},
     "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}, "bun": {"namespace": "zip", "type": "RuntimeZip.Zip", "capability": "java.interop"}}
   },
   "exclusions": [

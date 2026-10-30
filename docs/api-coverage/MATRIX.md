@@ -9,8 +9,8 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1262 | 348 | 0 | 1046 | 0 | 814 |
-| Node Worker | 1209 | 345 | 0 | 1049 | 0 | 867 |
+| Node main | 1376 | 368 | 0 | 1046 | 0 | 680 |
+| Node Worker | 1375 | 365 | 0 | 1049 | 0 | 681 |
 | Bun | 0 | 326 | 1266 | 1043 | 0 | 835 |
 
 | 列 | 取值 |
@@ -48,7 +48,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 163 / 13 / 32 | 149 / 13 / 46 | 167 / 13 / 28 |
+| (global) | 208 | 206 | 205 | 205 | 180 / 13 / 15 | 179 / 13 / 16 | 167 / 13 / 28 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -94,31 +94,31 @@
 | UiObject# | 141 | 139 | 141 | 140 | 0 / 141 / 0 | 0 / 141 / 0 | 0 / 141 / 0 |
 | UiObjectCollection# | 70 | 69 | 70 | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
 | UiSelector# | 186 | 186 | 186 | 186 | 0 / 186 / 0 | 0 / 186 / 0 | 0 / 186 / 0 |
-| VolatileDispose# | 3 | 3 | 3 | 3 | 0 / 0 / 3 | 0 / 0 / 3 | 0 / 0 / 3 |
+| VolatileDispose# | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 0 / 0 / 3 |
 | WebSocket# | 24 | 24 | 24 | 0 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
 | WrappedBarcode# | 22 | 22 | 22 | 22 | 0 / 22 / 0 | 0 / 22 / 0 | 0 / 22 / 0 |
-| YoloDetector# | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
+| YoloDetector# | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
 | Zip# | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | ai | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 43 | 43 / 0 / 0 | 43 / 0 / 0 | 43 / 0 / 0 |
-| auto | 38 | 38 | 38 | 38 | 0 / 0 / 38 | 0 / 0 / 38 | 0 / 0 / 38 |
+| auto | 38 | 38 | 38 | 38 | 38 / 0 / 0 | 38 / 0 / 0 | 0 / 0 / 38 |
 | autojs | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | autojs.version | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
-| automator | 54 | 54 | 54 | 54 | 32 / 0 / 22 | 19 / 0 / 35 | 26 / 0 / 28 |
-| barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
+| automator | 54 | 54 | 54 | 54 | 54 / 0 / 0 | 54 / 0 / 0 | 26 / 0 / 28 |
+| barcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
 | base64 | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | colors | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 71 | 71 | 71 | 71 | 70 / 0 / 1 | 70 / 0 / 1 | 70 / 0 / 1 |
 | console | 56 | 56 | 56 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 42 / 0 / 14 |
-| continuation | 4 | 3 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| continuation | 4 | 3 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
 | crypto | 8 | 7 | 8 | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | device | 86 | 86 | 86 | 86 | 86 / 0 / 0 | 86 / 0 / 0 | 86 / 0 / 0 |
 | dialogs | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | engines | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
-| events | 37 | 34 | 36 | 36 | 5 / 1 / 31 | 5 / 1 / 31 | 5 / 1 / 31 |
+| events | 37 | 34 | 36 | 36 | 36 / 1 / 0 | 36 / 1 / 0 | 5 / 1 / 31 |
 | files | 34 | 34 | 34 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 34 / 0 / 0 |
 | files.batchRename | 17 | 17 | 17 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
 | floaty | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
@@ -130,7 +130,7 @@
 | imgui | 524 | 0 | 0 | 0 | 0 / 1 / 523 | 0 / 1 / 523 | 0 / 1 / 523 |
 | installer | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
-| keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 12 / 0 / 0 |
+| keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | mediainfo | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
@@ -138,17 +138,17 @@
 | mime | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | notice | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | notice.channel | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 0 / 0 / 6 | 0 / 0 / 6 |
-| ocr.mlkit | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
-| ocr.paddle | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
-| ocr.rapid | 2 | 2 | 2 | 2 | 0 / 0 / 2 | 0 / 0 / 2 | 0 / 0 / 2 |
+| ocr | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 0 / 0 / 6 |
+| ocr.mlkit | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
+| ocr.paddle | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
+| ocr.rapid | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
 | opencc | 33 | 33 | 33 | 33 | 33 / 0 / 0 | 33 / 0 / 0 | 33 / 0 / 0 |
 | pinyin | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | pinyin4j | 3 | 3 | 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
 | plugins | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 3 / 1 / 0 | 3 / 1 / 0 |
 | plugins.tools | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | powerManager | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
-| qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
+| qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
 | recorder | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sensors | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
@@ -164,8 +164,8 @@
 | sysprops | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | tasks | 20 | 20 | 20 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
-| threads | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
-| timers | 18 | 18 | 18 | 18 | 10 / 6 / 2 | 10 / 6 / 2 | 10 / 0 / 8 |
+| threads | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
+| timers | 18 | 18 | 18 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 10 / 0 / 8 |
 | toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 1 / 0 / 0 |
 | tts | 35 | 35 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 40 | 36 | 36 | 36 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
@@ -177,7 +177,7 @@
 | util.versionCodes | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | web | 4 | 4 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | workManager | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
-| yolo | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
+| yolo | 1 | 1 | 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
 | zip | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 
 ## 差异行
@@ -192,47 +192,40 @@
 | `TODO` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `back` | bridged | pending | capability-gated |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `click` | bridged | pending | capability-gated |
-| `detect` | pending | pending | pending |
-| `existsAll` | pending | pending | pending |
-| `existsOne` | pending | pending | pending |
-| `gesture` | bridged | pending | capability-gated |
-| `gestureAsync` | pending | pending | pending |
-| `gestures` | pending | pending | pending |
-| `gesturesAsync` | pending | pending | pending |
-| `home` | bridged | pending | capability-gated |
-| `input` | pending | pending | pending |
+| `detect` | bridged | bridged | pending |
+| `existsAll` | bridged | bridged | pending |
+| `existsOne` | bridged | bridged | pending |
+| `gestureAsync` | bridged | bridged | pending |
+| `gestures` | bridged | bridged | pending |
+| `gesturesAsync` | bridged | bridged | pending |
+| `input` | bridged | bridged | pending |
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isUiThread` | pending | pending | local-shim |
-| `keepAlive` | pending | pending | pending |
-| `longClick` | bridged | pending | capability-gated |
-| `loop` | pending | pending | pending |
+| `keepAlive` | local-shim | local-shim | pending |
+| `loop` | local-shim | local-shim | pending |
 | `newInjectableWebClient` | pending | pending | pending |
 | `newInjectableWebView` | pending | pending | pending |
 | `newWebSocket` | pending | pending | pending |
-| `notifications` | bridged | pending | pending |
-| `pickup` | pending | pending | pending |
-| `powerDialog` | bridged | pending | pending |
-| `press` | pending | pending | pending |
-| `quickSettings` | bridged | pending | pending |
-| `recents` | bridged | pending | pending |
-| `retry` | pending | pending | pending |
-| `scrollDown` | pending | pending | pending |
-| `scrollUp` | pending | pending | pending |
+| `notifications` | bridged | bridged | pending |
+| `pickup` | bridged | bridged | pending |
+| `powerDialog` | bridged | bridged | pending |
+| `press` | bridged | bridged | pending |
+| `quickSettings` | bridged | bridged | pending |
+| `recents` | bridged | bridged | pending |
+| `retry` | bridged | bridged | pending |
+| `scrollDown` | bridged | bridged | pending |
+| `scrollUp` | bridged | bridged | pending |
 | `setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `setText` | bridged | pending | capability-gated |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `sleep` | bridged | pending | pending |
-| `splitScreen` | bridged | pending | pending |
-| `swipe` | bridged | pending | capability-gated |
-| `sync` | pending | pending | pending |
+| `sleep` | bridged | bridged | pending |
+| `splitScreen` | bridged | bridged | pending |
+| `sync` | local-shim | local-shim | pending |
 | `toString` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `toastError` | pending | pending | capability-gated |
 | `toastInfo` | pending | pending | capability-gated |
@@ -245,8 +238,8 @@
 | `toastverbose` | pending | pending | capability-gated |
 | `toastwarn` | pending | pending | capability-gated |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `wait` | pending | pending | pending |
-| `wait.async` | pending | pending | pending |
+| `wait` | bridged | bridged | pending |
+| `wait.async` | bridged | bridged | pending |
 
 ### App#
 
@@ -1371,9 +1364,9 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `VolatileDispose#blockedGet` | pending | pending | pending |
-| `VolatileDispose#blockedGetOrThrow` | pending | pending | pending |
-| `VolatileDispose#setAndNotify` | pending | pending | pending |
+| `VolatileDispose#blockedGet` | local-shim | local-shim | pending |
+| `VolatileDispose#blockedGetOrThrow` | local-shim | local-shim | pending |
+| `VolatileDispose#setAndNotify` | local-shim | local-shim | pending |
 
 ### WebSocket#
 
@@ -1435,100 +1428,93 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `YoloDetector#close` | pending | pending | pending |
-| `YoloDetector#detect` | pending | pending | pending |
+| `YoloDetector#close` | bridged | bridged | pending |
+| `YoloDetector#detect` | bridged | bridged | pending |
 
 ### auto
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `auto.clearCache` | pending | pending | pending |
-| `auto.clearFlags` | pending | pending | pending |
-| `auto.currentActivity` | pending | pending | pending |
-| `auto.currentComponent` | pending | pending | pending |
-| `auto.currentPackage` | pending | pending | pending |
-| `auto.disable` | pending | pending | pending |
-| `auto.dump` | pending | pending | pending |
-| `auto.enable` | pending | pending | pending |
-| `auto.exists` | pending | pending | pending |
-| `auto.explain` | pending | pending | pending |
-| `auto.findWindowRoots` | pending | pending | pending |
-| `auto.findWindows` | pending | pending | pending |
-| `auto.getWindowRoot` | pending | pending | pending |
-| `auto.hasInstance` | pending | pending | pending |
-| `auto.hasService` | pending | pending | pending |
-| `auto.isOperational` | pending | pending | pending |
-| `auto.isRunning` | pending | pending | pending |
-| `auto.launchSettings` | pending | pending | pending |
-| `auto.registerEvent` | pending | pending | pending |
-| `auto.registerEvents` | pending | pending | pending |
-| `auto.removeEvent` | pending | pending | pending |
-| `auto.removeEvents` | pending | pending | pending |
-| `auto.root` | pending | pending | pending |
-| `auto.rootInActiveWindow` | pending | pending | pending |
-| `auto.service` | pending | pending | pending |
-| `auto.services` | pending | pending | pending |
-| `auto.setFlags` | pending | pending | pending |
-| `auto.setMode` | pending | pending | pending |
-| `auto.setWindowFilter` | pending | pending | pending |
-| `auto.start` | pending | pending | pending |
-| `auto.state` | pending | pending | pending |
-| `auto.stateListener` | pending | pending | pending |
-| `auto.stats` | pending | pending | pending |
-| `auto.stop` | pending | pending | pending |
-| `auto.wait` | pending | pending | pending |
-| `auto.waitFor` | pending | pending | pending |
-| `auto.windowRoots` | pending | pending | pending |
-| `auto.windows` | pending | pending | pending |
+| `auto.clearCache` | bridged | bridged | pending |
+| `auto.clearFlags` | bridged | bridged | pending |
+| `auto.currentActivity` | bridged | bridged | pending |
+| `auto.currentComponent` | bridged | bridged | pending |
+| `auto.currentPackage` | bridged | bridged | pending |
+| `auto.disable` | bridged | bridged | pending |
+| `auto.dump` | bridged | bridged | pending |
+| `auto.enable` | bridged | bridged | pending |
+| `auto.exists` | bridged | bridged | pending |
+| `auto.explain` | bridged | bridged | pending |
+| `auto.findWindowRoots` | bridged | bridged | pending |
+| `auto.findWindows` | bridged | bridged | pending |
+| `auto.getWindowRoot` | bridged | bridged | pending |
+| `auto.hasInstance` | bridged | bridged | pending |
+| `auto.hasService` | bridged | bridged | pending |
+| `auto.isOperational` | bridged | bridged | pending |
+| `auto.isRunning` | bridged | bridged | pending |
+| `auto.launchSettings` | bridged | bridged | pending |
+| `auto.registerEvent` | bridged | bridged | pending |
+| `auto.registerEvents` | bridged | bridged | pending |
+| `auto.removeEvent` | bridged | bridged | pending |
+| `auto.removeEvents` | bridged | bridged | pending |
+| `auto.root` | bridged | bridged | pending |
+| `auto.rootInActiveWindow` | bridged | bridged | pending |
+| `auto.service` | bridged | bridged | pending |
+| `auto.services` | bridged | bridged | pending |
+| `auto.setFlags` | bridged | bridged | pending |
+| `auto.setMode` | bridged | bridged | pending |
+| `auto.setWindowFilter` | bridged | bridged | pending |
+| `auto.start` | bridged | bridged | pending |
+| `auto.state` | bridged | bridged | pending |
+| `auto.stateListener` | bridged | bridged | pending |
+| `auto.stats` | bridged | bridged | pending |
+| `auto.stop` | bridged | bridged | pending |
+| `auto.wait` | bridged | bridged | pending |
+| `auto.waitFor` | bridged | bridged | pending |
+| `auto.windowRoots` | bridged | bridged | pending |
+| `auto.windows` | bridged | bridged | pending |
 
 ### automator
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `automator.accessibilityAllApps` | pending | pending | pending |
-| `automator.accessibilityButton` | pending | pending | pending |
-| `automator.accessibilityButtonChooser` | pending | pending | pending |
-| `automator.accessibilityShortcut` | pending | pending | pending |
-| `automator.back` | bridged | pending | capability-gated |
-| `automator.captureScreen` | pending | pending | pending |
-| `automator.click` | bridged | pending | capability-gated |
-| `automator.dismissNotificationShade` | pending | pending | pending |
-| `automator.ensureService` | pending | pending | pending |
-| `automator.gesture` | bridged | pending | capability-gated |
-| `automator.gestureAsync` | pending | pending | pending |
-| `automator.gestures` | pending | pending | pending |
-| `automator.gesturesAsync` | pending | pending | pending |
-| `automator.headsetHook` | pending | pending | pending |
-| `automator.headsethook` | pending | pending | pending |
-| `automator.home` | bridged | pending | capability-gated |
-| `automator.input` | pending | pending | pending |
-| `automator.isServiceRunning` | pending | pending | pending |
-| `automator.lockScreen` | bridged | pending | pending |
-| `automator.longClick` | bridged | pending | capability-gated |
-| `automator.notifications` | bridged | pending | pending |
-| `automator.powerDialog` | bridged | pending | pending |
-| `automator.press` | pending | pending | pending |
-| `automator.quickSettings` | bridged | pending | pending |
-| `automator.recents` | pending | pending | pending |
-| `automator.retry` | pending | pending | pending |
-| `automator.scrollDown` | pending | pending | pending |
-| `automator.scrollUp` | pending | pending | pending |
-| `automator.setText` | bridged | pending | capability-gated |
-| `automator.splitScreen` | bridged | pending | pending |
-| `automator.swipe` | bridged | pending | capability-gated |
-| `automator.switchToInputMethod` | pending | pending | pending |
-| `automator.switchToInputMethodWithId` | pending | pending | pending |
-| `automator.takeScreenshot` | bridged | pending | pending |
-| `automator.waitForService` | pending | pending | pending |
+| `automator.accessibilityAllApps` | bridged | bridged | pending |
+| `automator.accessibilityButton` | bridged | bridged | pending |
+| `automator.accessibilityButtonChooser` | bridged | bridged | pending |
+| `automator.accessibilityShortcut` | bridged | bridged | pending |
+| `automator.captureScreen` | bridged | bridged | pending |
+| `automator.dismissNotificationShade` | bridged | bridged | pending |
+| `automator.ensureService` | bridged | bridged | pending |
+| `automator.gestureAsync` | bridged | bridged | pending |
+| `automator.gestures` | bridged | bridged | pending |
+| `automator.gesturesAsync` | bridged | bridged | pending |
+| `automator.headsetHook` | bridged | bridged | pending |
+| `automator.headsethook` | bridged | bridged | pending |
+| `automator.input` | bridged | bridged | pending |
+| `automator.isServiceRunning` | bridged | bridged | pending |
+| `automator.lockScreen` | bridged | bridged | pending |
+| `automator.notifications` | bridged | bridged | pending |
+| `automator.powerDialog` | bridged | bridged | pending |
+| `automator.press` | bridged | bridged | pending |
+| `automator.quickSettings` | bridged | bridged | pending |
+| `automator.recents` | bridged | bridged | pending |
+| `automator.retry` | bridged | bridged | pending |
+| `automator.scrollDown` | bridged | bridged | pending |
+| `automator.scrollUp` | bridged | bridged | pending |
+| `automator.splitScreen` | bridged | bridged | pending |
+| `automator.switchToInputMethod` | bridged | bridged | pending |
+| `automator.switchToInputMethodWithId` | bridged | bridged | pending |
+| `automator.takeScreenshot` | bridged | bridged | pending |
+| `automator.waitForService` | bridged | bridged | pending |
 
 ### barcode
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `barcode.detect` | bridged | pending | pending |
-| `barcode.detectAll` | bridged | pending | pending |
-| `barcode.recognizeText` | bridged | pending | pending |
-| `barcode.recognizeTexts` | bridged | pending | pending |
+| `barcode.detect` | bridged | bridged | pending |
+| `barcode.detectAll` | bridged | bridged | pending |
+| `barcode.recognizeText` | bridged | bridged | pending |
+| `barcode.recognizeTexts` | bridged | bridged | pending |
 
 ### base64
 
@@ -1580,10 +1566,10 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `continuation.await` | pending | pending | pending |
-| `continuation.create` | pending | pending | pending |
-| `continuation.delay` | pending | pending | pending |
-| `continuation.enabled` | pending | pending | pending |
+| `continuation.await` | local-shim | local-shim | pending |
+| `continuation.create` | local-shim | local-shim | pending |
+| `continuation.delay` | local-shim | local-shim | pending |
+| `continuation.enabled` | local-shim | local-shim | pending |
 
 ### crypto
 
@@ -1603,37 +1589,37 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `events.__asEmitter__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `events.addListener` | pending | pending | pending |
-| `events.broadcast` | pending | pending | pending |
-| `events.emit` | pending | pending | pending |
-| `events.emitSticky` | pending | pending | pending |
-| `events.emitter` | pending | pending | pending |
-| `events.eventNames` | pending | pending | pending |
-| `events.getMaxListeners` | pending | pending | pending |
-| `events.getTimer` | pending | pending | pending |
-| `events.getTouchEventTimeout` | pending | pending | pending |
-| `events.listenerCount` | pending | pending | pending |
-| `events.listeners` | pending | pending | pending |
-| `events.observeTouch` | pending | pending | pending |
-| `events.onKeyDown` | pending | pending | pending |
-| `events.onKeyUp` | pending | pending | pending |
-| `events.onNotification` | pending | pending | pending |
-| `events.onToast` | pending | pending | pending |
-| `events.onTouch` | pending | pending | pending |
-| `events.onceKeyDown` | pending | pending | pending |
-| `events.onceKeyUp` | pending | pending | pending |
-| `events.prependListener` | pending | pending | pending |
-| `events.prependOnceListener` | pending | pending | pending |
-| `events.removeAllKeyDownListeners` | pending | pending | pending |
-| `events.removeAllKeyUpListeners` | pending | pending | pending |
-| `events.removeAllListeners` | pending | pending | pending |
-| `events.removeAllTouchListeners` | pending | pending | pending |
-| `events.removeListener` | pending | pending | pending |
-| `events.removeNotificationObserver` | pending | pending | pending |
-| `events.removeToastObserver` | pending | pending | pending |
-| `events.setKeyInterceptionEnabled` | pending | pending | pending |
-| `events.setMaxListeners` | pending | pending | pending |
-| `events.setTouchEventTimeout` | pending | pending | pending |
+| `events.addListener` | bridged | bridged | pending |
+| `events.broadcast` | bridged | bridged | pending |
+| `events.emit` | bridged | bridged | pending |
+| `events.emitSticky` | bridged | bridged | pending |
+| `events.emitter` | bridged | bridged | pending |
+| `events.eventNames` | bridged | bridged | pending |
+| `events.getMaxListeners` | bridged | bridged | pending |
+| `events.getTimer` | bridged | bridged | pending |
+| `events.getTouchEventTimeout` | bridged | bridged | pending |
+| `events.listenerCount` | bridged | bridged | pending |
+| `events.listeners` | bridged | bridged | pending |
+| `events.observeTouch` | bridged | bridged | pending |
+| `events.onKeyDown` | bridged | bridged | pending |
+| `events.onKeyUp` | bridged | bridged | pending |
+| `events.onNotification` | bridged | bridged | pending |
+| `events.onToast` | bridged | bridged | pending |
+| `events.onTouch` | bridged | bridged | pending |
+| `events.onceKeyDown` | bridged | bridged | pending |
+| `events.onceKeyUp` | bridged | bridged | pending |
+| `events.prependListener` | bridged | bridged | pending |
+| `events.prependOnceListener` | bridged | bridged | pending |
+| `events.removeAllKeyDownListeners` | bridged | bridged | pending |
+| `events.removeAllKeyUpListeners` | bridged | bridged | pending |
+| `events.removeAllListeners` | bridged | bridged | pending |
+| `events.removeAllTouchListeners` | bridged | bridged | pending |
+| `events.removeListener` | bridged | bridged | pending |
+| `events.removeNotificationObserver` | bridged | bridged | pending |
+| `events.removeToastObserver` | bridged | bridged | pending |
+| `events.setKeyInterceptionEnabled` | bridged | bridged | pending |
+| `events.setMaxListeners` | bridged | bridged | pending |
+| `events.setTouchEventTimeout` | bridged | bridged | pending |
 
 ### files.batchRename
 
@@ -2241,23 +2227,6 @@
 | `imgui.withTreeNode` | pending | pending | pending |
 | `imgui.withWindow` | pending | pending | pending |
 
-### keys
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `keys.BACK` | bridged | pending | local-shim |
-| `keys.HOME` | bridged | pending | local-shim |
-| `keys.MENU` | bridged | pending | local-shim |
-| `keys.VOLUME_DOWN` | bridged | pending | local-shim |
-| `keys.VOLUME_UP` | bridged | pending | local-shim |
-| `keys.back` | bridged | pending | local-shim |
-| `keys.home` | bridged | pending | local-shim |
-| `keys.menu` | bridged | pending | local-shim |
-| `keys.volumeDown` | bridged | pending | local-shim |
-| `keys.volumeUp` | bridged | pending | local-shim |
-| `keys.volume_down` | bridged | pending | local-shim |
-| `keys.volume_up` | bridged | pending | local-shim |
-
 ### memory
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2268,33 +2237,33 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ocr.detect` | bridged | pending | pending |
-| `ocr.mode` | bridged | pending | pending |
-| `ocr.recognizeText` | bridged | pending | pending |
-| `ocr.summary` | bridged | pending | pending |
-| `ocr.tap` | bridged | pending | pending |
-| `ocr.toString` | bridged | pending | pending |
+| `ocr.detect` | bridged | bridged | pending |
+| `ocr.mode` | bridged | bridged | pending |
+| `ocr.recognizeText` | bridged | bridged | pending |
+| `ocr.summary` | bridged | bridged | pending |
+| `ocr.tap` | bridged | bridged | pending |
+| `ocr.toString` | bridged | bridged | pending |
 
 ### ocr.mlkit
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ocr.mlkit.detect` | pending | pending | pending |
-| `ocr.mlkit.recognizeText` | pending | pending | pending |
+| `ocr.mlkit.detect` | bridged | bridged | pending |
+| `ocr.mlkit.recognizeText` | bridged | bridged | pending |
 
 ### ocr.paddle
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ocr.paddle.detect` | pending | pending | pending |
-| `ocr.paddle.recognizeText` | pending | pending | pending |
+| `ocr.paddle.detect` | bridged | bridged | pending |
+| `ocr.paddle.recognizeText` | bridged | bridged | pending |
 
 ### ocr.rapid
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ocr.rapid.detect` | pending | pending | pending |
-| `ocr.rapid.recognizeText` | pending | pending | pending |
+| `ocr.rapid.detect` | bridged | bridged | pending |
+| `ocr.rapid.recognizeText` | bridged | bridged | pending |
 
 ### plugins
 
@@ -2306,10 +2275,10 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `qrcode.detect` | bridged | pending | pending |
-| `qrcode.detectAll` | bridged | pending | pending |
-| `qrcode.recognizeText` | bridged | pending | pending |
-| `qrcode.recognizeTexts` | bridged | pending | pending |
+| `qrcode.detect` | bridged | bridged | pending |
+| `qrcode.detectAll` | bridged | bridged | pending |
+| `qrcode.recognizeText` | bridged | bridged | pending |
+| `qrcode.recognizeTexts` | bridged | bridged | pending |
 
 ### speech
 
@@ -2364,14 +2333,14 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `threads.atomic` | pending | pending | pending |
-| `threads.currentThread` | pending | pending | pending |
-| `threads.disposable` | pending | pending | pending |
-| `threads.interrupt` | pending | pending | pending |
-| `threads.lock` | pending | pending | pending |
-| `threads.pool` | pending | pending | pending |
-| `threads.shutDownAll` | pending | pending | pending |
-| `threads.start` | pending | pending | pending |
+| `threads.atomic` | local-shim | local-shim | pending |
+| `threads.currentThread` | local-shim | local-shim | pending |
+| `threads.disposable` | local-shim | local-shim | pending |
+| `threads.interrupt` | local-shim | local-shim | pending |
+| `threads.lock` | local-shim | local-shim | pending |
+| `threads.pool` | local-shim | local-shim | pending |
+| `threads.shutDownAll` | local-shim | local-shim | pending |
+| `threads.start` | local-shim | local-shim | pending |
 
 ### timers
 
@@ -2380,10 +2349,10 @@
 | `timers.clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | pending |
 | `timers.clearInterval` | not-portable: runtime-native | not-portable: runtime-native | pending |
 | `timers.clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.keepAlive` | pending | pending | pending |
+| `timers.keepAlive` | local-shim | local-shim | pending |
 | `timers.setImmediate` | not-portable: runtime-native | not-portable: runtime-native | pending |
 | `timers.setInterval` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.setIntervalExt` | pending | pending | pending |
+| `timers.setIntervalExt` | local-shim | local-shim | pending |
 | `timers.setTimeout` | not-portable: runtime-native | not-portable: runtime-native | pending |
 
 ### toast
@@ -2458,4 +2427,4 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `yolo.load` | pending | pending | pending |
+| `yolo.load` | bridged | bridged | pending |
