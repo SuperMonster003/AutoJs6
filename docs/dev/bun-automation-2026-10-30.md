@@ -73,9 +73,34 @@ Desktop checks:
 - Host: BunAutomationPolicyTest 18, RuntimeAutomationBridgeCapabilityTest 6, RuntimeFlowPolicyTest 8; `check-bun-automation-family.mjs` (members automator 55, auto 38, keys 12, ocr 6, barcode 4, qrcode 4, yolo 1, threads 9, continuation 4, timers 4; factory routes 37, ocr.control 3, barcode.control 4, yolo.control 3) and `check-runtime-events.mjs`; test_runtime_matrix 45 tests (test_p4_4); `check.py --matrix --strict-arity --docs-support` with Ace in an export of host HEAD with the KSP metadata of 77e94eb5b (the host sources after it only touch engine / plugin files).
 - TS `verify-runtime-declarations.mjs` and Ace `verify-runtime-api-coverage.mjs --fresh` (4736 queries).
 
+## Q179 (b) and Q180 (a)
+
+The maintainer decided both after the runs above (2026-10-30 17:4x):
+
+- Q180 (a): `Threads.internalPool` compares corePoolSize with the real upper bound (host 29537a241), so Rhino also treats a missing maxPoolSize as no limit, as the shared factory does; `{corePoolSize: 3, maxPoolSize: 2}` still throws in all three.
+- Q179 (b), not the recommended option: auto.waitFor / automator.waitForService end the whole execution on a timeout, as exit() does, and the promise never settles; keepAlive / timers.keepAlive return a numeric id for clearTimeout / clearInterval; continuation.enabled is false. Bun copies these members from Node's shared factory, so Node d656265f changes the factory with its declarations, HOST-API and cases, and Bun 7f25ae7 synchronizes it. The device run of Node is left to P3.5.
+
+Device: Xiaomi 23046RP50C, serial `968e9f18`, Android 15 / API 35, the host's accessibility service off (Bun needs API 33, the Redmi of the first runs was not connected).
+
+| Package | Before | During | After |
+|---|---|---|---|
+| org.autojs.autojs6 | 6.8.0 (5935) debug, md5 `742b4497ce2a3bc68ff79686aeffcdf8` | debug arm64 of host 29537a241, md5 `b3b7a68f6204322dc22b0bf82a536e3d` | reinstalled, same md5 |
+| Bun runtime plugin | 0.2.5 (118), md5 `555d45afcde4c611cb7665909313152b` | 0.21.0 (296) debug arm64 of Bun 7f25ae7, md5 `6860bd5a4cc2d46a856a6f09a31a2e4d` | reinstalled, same md5 |
+
+| Run | Rhino | Bun main | Bun Worker |
+|---|---|---|---|
+| compare `--cases` continuation.enabled, timers.keepAlive, threads.pool, threads.pool.noMax, threads.pool.sizes | 5 / 5 | 5 pass | 5 pass |
+| timeout: auto.waitFor(1000), automator.waitForService(1000) | 2 / 2 | 2 / 2 | not run |
+| denied (20 cases, timers.keepAlive added) | - | 20 pass | 20 pass |
+
+The timeout run passes when only the line before the wait reaches the console: neither the line after the wait nor a 6 s timer armed before it runs. A Worker's wait ends the execution as a Worker's exit() does.
+
+Not repeated: the full compare, which needs the accessibility service on (54 cases now, threads.pool.noMax is new). No other member changed, and neither did the path of auto.waitFor with the service running.
+
+`--cases` skips the accessibility check, so it is for local members. The `timeout` phase stops when the service is on.
+
 ## Leftovers
 
 - Flow#await / Flow#sync stay pending (Q31).
-- threads.pool without maxPoolSize means no upper bound, as in Node (same shared factory), while Rhino throws IllegalArgumentException (Q180, undecided; `{corePoolSize: 3, maxPoolSize: 2}` throws in all three).
 - In the matrix a Bun cell names one grant, the one whose method table routes the member. press / swipe / gesture* (accessibility.gesture), auto.start and the other service members (accessibility.service), captureScreen (screen.capture) and events.observeKey / observeTouch and the other observe* members (their events.* grant) need a second grant, checked per call before the host and listed in host-api.md; the denied run covers them.
 - The flow namespace's own rows show flow.control. Flow's waits read the nodes over accessibility.control as the selector functions do; the selector rows now show accessibility.control, the flow rows are left to the flow family (Q28).

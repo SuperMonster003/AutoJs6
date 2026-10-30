@@ -17,7 +17,7 @@ Phases (all take --serial; record / install / restore / verify / grant also --st
   record / install --apk P=PATH / restore / verify   as in device_bun_js_tools.py
   grant --set on|off|restore --only G ...           set (or restore) host Bun grants
   compare [--modes main,worker] [--report FILE]     Rhino, then a Bun main script and a Bun Worker, with the grants of
-                                                     GRANTS on
+          [--cases ID ...]                           GRANTS on; --cases runs only those cases
   denied [--modes main,worker] [--report FILE]      Bun only, with QUERY_GRANTS on and the others of GRANTS off: the
                                                      entries that need a grant that is off reject NOT_GRANTED with
                                                      missingCapabilities before the host (Q181 (a) - Q183 (a)), the
@@ -259,12 +259,13 @@ def service_running(serial):
 
 
 def compare(args):
-    if not service_running(args.serial):
+    if not args.cases and not service_running(args.serial):
         print(f"the accessibility service of {base.HOST} is not enabled: ask the maintainer to enable it, then run compare again")
         sys.exit(2)
-    table = case_list(args)
+    table = [case for case in case_list(args) if not args.cases or case[0] in args.cases]
     run = uuid.uuid4().hex[:8]
-    script = f"var AJ6_RUN = '{run}';\n" + cases_source(args) + encoder(args) + base.EMIT_JS + RHINO_JS
+    subset = f"AUTOMATION_CASES = AUTOMATION_CASES.filter(function (c) {{ return {json.dumps(args.cases)}.indexOf(c[0]) >= 0; }});\n" if args.cases else ""
+    script = f"var AJ6_RUN = '{run}';\n" + cases_source(args) + subset + encoder(args) + base.EMIT_JS + RHINO_JS
     rhino = base.run_script(args.serial, f"p44_rhino_{run}.js", script, run, args.wait)
     modes, results = run_bun(args, [case[2] for case in table])
     host = base.package_state(args.serial, base.HOST) or {}
@@ -355,6 +356,7 @@ def main():
     parser.add_argument("--report", type=Path, help="compare / denied: write the counts and failures as JSON")
     parser.add_argument("--show", type=int, default=40, help="failing cases printed per mode")
     parser.add_argument("--only", nargs="*", default=[], help="grant: the grants to change")
+    parser.add_argument("--cases", nargs="*", default=[], help="compare: only these case ids (no accessibility check: for local members)")
     parser.add_argument("--set", choices=["on", "off", "restore"], help="grant: the value to set")
     parser.add_argument("--wait", type=int, default=300)
     parser.add_argument("--apk", action="append", default=[], help="install: package=path")

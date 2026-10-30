@@ -71,7 +71,7 @@ Host 307655f10 (the structure check is in CI since 94c21be6f): pending Node main
 
 - Bun column: P4.4 (host e2d824545 / 7bb11982c).
 - Flow#await / Flow#sync: Q31.
-- Q179 (D-1 / D-8 / continuation forms): applied as recommended, awaiting confirmation.
-- Q180: threads.pool without maxPoolSize; Rhino's Threads.internalPool compares corePoolSize with the raw maxPoolSize (0 = unbounded), so any corePoolSize > 0 throws there; Node treats it as unbounded.
+- Q179: the maintainer chose (b) on 2026-10-30, Node d656265f changes the shared factory after this report: a timeout of auto.waitFor / automator.waitForService ends the execution, keepAlive returns a numeric id and continuation.enabled is false (see bun-automation-2026-10-30). The sections above describe the first form; the device run of Node is left to P3.5.
+- Q180: decided (a), host 29537a241: Threads.internalPool compares corePoolSize with the real upper bound, so Rhino treats a missing maxPoolSize as unbounded as Node does.
 - Bun: `tools/host-client/sync-events.mjs` has to copy the broadcast change of 079579ec into host-client.mjs (the GENERATED EVENT FACADES; its `--check` fails until then).
 - auto.setFlags: Rhino's useUsageStats / useShell change how current* read the foreground app; Node's auto.current* use accessibility (HOST-API).

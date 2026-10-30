@@ -379,7 +379,7 @@ P3.4 落点 (2026-10-30, api-cov-p3-4; 矩阵与基线宿主 307655f10): 本族 
 | 行 | Node main | Node Worker | 待决 |
 |---|---|---|---|
 | Flow#await, Flow#sync | pending | pending | Q31 (Flow 的同步等待形态) |
-| threads.pool (缺 maxPoolSize 时) | local-shim (视为不限) | local-shim (视为不限) | Q180 (Rhino 抛 IllegalArgumentException; 推荐修宿主) |
+| threads.pool (缺 maxPoolSize 时) | local-shim (视为不限) | local-shim (视为不限) | 已决 Q180 (a): 宿主 29537a241 修复, Rhino 也视为不限 |
 
 另: 授权按 Q178 (a) 新增 accessibility.service (auto.start / stop / launchSettings / clearCache), events.key.intercept, events.touch (三者不被父能力隐含) 与 yolo; press / swipe / gesture* 需 accessibility.gesture, back / home / recents 之外的全局动作需 keys. threads.start 为同线程异步任务 (Q175 (a)), atomic / lock 经 SharedArrayBuffer 跨 Worker (Q176 (a)), 本族 Rhino 全局装到 globalThis (Q177 (a)), waitFor 超时以 ERR_AUTOJS6_TIMEOUT 拒绝等 Promise 形态按 Q179 (a) 先行. 真机 BH900ASK9E (Sony G8441, Android 9 / API 28, 宿主 debug 5935 = e2d824545, Node debug 340 = 8fc9c801 + 079579ec 的 node_bridge_sources.cpp): Rhino 44 / 44, Node main / ESM / 嵌套 Worker 各 53 通过, 未声明能力 8 通过; 装回原包并核对 md5; 对照时发现 auto.setFlags 的 useUsageStats 在 Rhino 中要求使用情况访问权限 (缺时抛 SecurityException 并打开设置页), Node 的标志只记在线程内 (只有模式与 appWindowsFallback 传给宿主), 写进 HOST-API 的差异; threads.pool 的 corePoolSize 大于 maxPoolSize 改为同 Rhino 抛 RangeError (Node 079579ec). 报告 [runtime-automation-2026-10-30](../dev/runtime-automation-2026-10-30.md).
 
@@ -388,11 +388,13 @@ P4.4 落点 (2026-10-30, api-cov-p4-4; 矩阵与基线宿主 7bb11982c, selector
 | 项 | Bun | 待决 |
 |---|---|---|
 | Flow#await, Flow#sync | pending | Q31 (Flow 的同步等待形态) |
-| threads.pool (缺 maxPoolSize 时) | local-shim (视为不限, 同 Node) | Q180 (Rhino 抛 IllegalArgumentException; 推荐修宿主) |
+| threads.pool (缺 maxPoolSize 时) | local-shim (视为不限, 同 Node) | 已决 Q180 (a): 宿主 29537a241 修复, Rhino 也视为不限 |
 | 矩阵中的第二授权 | press / swipe / gesture* (accessibility.gesture), auto.start 等服务管理 (accessibility.service), automator.captureScreen (screen.capture), events.observeKey / observeTouch 等 (各自的 events.* 授权) 记一个授权 | 无; 矩阵按方法表归属记一个授权, 第二授权在访问宿主前按次检查, 写在 host-api.md, 拒绝轮真机覆盖 |
 | flow 命名空间行 | flow.control | 无 (flow 族, Q28); flow 的等待读节点同样走 accessibility.control, 本批只更正了 selector 的 4 行 |
 
 另: Bun 经 sync-automation-family.mjs 同步 Node 的 __autojs6_create_automation (automator / auto / keys / threads / continuation / timers / yolo / selector / ocr 的 Rhino 层 / 全局), sync-events.mjs / sync-system.mjs 同步其依赖的 events / system 工厂, 三者 --check 在 Bun CI 与宿主 check-bun-automation-family.mjs 中运行. Node 能力名映射为 Bun 授权, 授权关闭时访问宿主前 reject NOT_GRANTED 并带 missingCapabilities; selector 经 flow 的调用层 reject, 只带 error.capability. 宿主 BunAutomationBridge 路由 295 -> 314 个方法, accessibility.control 只多开 Rhino 用到的 captureScreenImage / dump / explain (Q185 (a)). 真机 (Redmi 22120RN86C, API 33) 首轮发现两处 Node 共享工厂问题: threads.pool 的 corePoolSize > maxPoolSize 不抛错 (Node 079579ec), broadcast 首次 on() 打开会话时立即 emit 会丢 (Node c54d4592, 本批复测即其真机验证); 复测 53 例 Rhino 与 Bun main / Worker 全部一致, 拒绝轮 19 / 19, 报告 [bun-automation-2026-10-30](../dev/bun-automation-2026-10-30.md).
+
+Q179 (b) / Q180 (a) 落实 (2026-10-30, 维护者 17:4x 拍板, api-cov-p4-4): auto.waitFor / automator.waitForService 超时结束整个执行, keepAlive / timers.keepAlive 返回数字 id, continuation.enabled 为 false (Node 共享工厂 d656265f, Bun 7f25ae7; 矩阵的状态与入口不变, MATRIX 与基线不改); 宿主 Threads.internalPool 与实际上限比较 (29537a241), threads.pool 缺 maxPoolSize 时 Rhino / Node / Bun 一致. Node 真机复测归 P3.5.
 
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 

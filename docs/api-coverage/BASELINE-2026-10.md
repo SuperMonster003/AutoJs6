@@ -1258,3 +1258,33 @@ d.ts (TS fa26b8b / 8f8ec07):
 | Bun 插件 | fa46dda | host-api.md selector 授权名 |
 | 宿主 | ac3ffd91e | 报告 bun-automation-2026-10-30 |
 | 宿主 | (本节所在提交) | 本节, ROADMAP P4.4 落点, REVIEW 7.1 P4.4 落点 |
+
+### 18.5 Q179 (b) / Q180 (a) 落实 (2026-10-30, 维护者 17:4x 拍板, 调度转 api-cov-p4-4)
+
+- Q180 (a): 宿主 Threads.internalPool 改与实际上限比较, maxPoolSize 0 (含缺省) 视为不限, 给出正数时 corePoolSize 更大仍抛错. Rhino / Node / Bun 三方一致.
+- Q179 (b), 非推荐: auto.waitFor / automator.waitForService 超时结束整个执行 (与 exit() 相同, Promise 不再落定), keepAlive / timers.keepAlive 返回数字 id (可交给 clearTimeout / clearInterval), continuation.enabled 为 false; 其余照 (a) (loop() 只警告, Worker 的 sleep 为 Promise). Bun 的这些成员同步自 Node 共享工厂, 故改 Node 工厂再同步. Node 的 d.ts, HOST-API 与对照用例随 d656265f 一并更新, 只差 Node 真机复测, 归 P3.5.
+- 矩阵: 状态与入口不变, MATRIX.md 与 pending 基线未改.
+
+| 项 | 结果 |
+| --- | --- |
+| 宿主单测 (HEAD 29537a241) | ThreadsPoolSizesTest 4, CoreRuntimeModulesTest 11 通过 |
+| Node 桌面 | test-automation-rhino.js 19 项通过 |
+| Bun 桌面 (7f25ae7) | host-client 等 17 个 node --test 文件 100 项通过; sync-automation-family / sync-events / sync-system --check 通过; types.mts 无诊断 |
+| 真机 968e9f18 (Xiaomi 23046RP50C, API 35; 宿主 debug 5935 = 29537a241, Bun debug 296 = 7f25ae7), 本地成员对照 | continuation.enabled, timers.keepAlive, threads.pool, threads.pool.noMax, threads.pool.sizes: Rhino 5 / 5, Bun main / Worker 各 5 / 5 |
+| 同上, 超时轮 (宿主无障碍服务关闭) | auto.waitFor(1000), automator.waitForService(1000): Rhino 与 Bun main 各 2 / 2, 等待之后的代码与等待之前排的 6 s 定时器都未执行 |
+| 同上, 拒绝轮 (只开 events.observe) | Bun main / Worker 各 20 / 20 (新增 timers.keepAlive 返回 number) |
+| 设备恢复 | 宿主 md5 742b4497, Bun 118 md5 555d45af, 与记录一致; 12 个授权 absent; 运行目录已删 |
+| HEAD 副本 `E:/.cache/aj6-p4-4-head7` (宿主 5102dbe42, KSP 同副本, Node d656265f, Bun 7f25ae7, 文档 894d87b, TS 45a9346, Ace e4d9b63) | `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) 的唯一失败是 api/imgui.md 的运行时块: 它来自另一会话的 imgui 提交 5102dbe42 新增的矩阵行 (pending 577 -> 626), 文档站尚未同步; 只在副本中重新生成运行时块 (仅该页变化) 后退出码 0. test_runtime_matrix 45 项, check-bun-automation-family, check-runtime-automation, Ace generate --check / verify --fresh, TS sync --check / verify 通过 |
+
+未重跑: 54 例全量对照 (需要维护者打开宿主无障碍服务); 上一次全量是 18.3 的 53 例. 本次改动只涉及上表的成员, auto.waitFor 服务已开时的路径没有改. Bun Worker 的超时结束与 Worker 的 exit() 相同, 未单独上真机.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 29537a241 | Threads.internalPool, ThreadsPoolSizesTest, changelog fix 一条, 真机脚本 timeout 阶段 |
+| Node 插件 | d656265f | 共享工厂, d.ts, HOST-API, 对照用例, 桌面用例 |
+| Bun 插件 | 7f25ae7 | 同步共享工厂与声明, host-api.md, 测试 |
+| TS | 45a9346 | 同步 Node / Bun 声明 |
+| Ace | e4d9b63 | 内置声明 |
+| 文档 | 894d87b | threads.md, changelog, 生成物 |
+| Offline Docs | c2ea529 | 同步生成页, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, 附录 C Q179 / Q180, ROADMAP P4.4 遗留, REVIEW 7.1, 两份报告, 真机脚本 --cases |
