@@ -253,6 +253,7 @@ class OcrModulesTest {
             "ocr.detect([NaN, 0])" to RANGE,
             "ocr.mlkit({ engine: 5 })" to TYPE,
             "ocr.paddle.detect({ mergeLine: 0 })" to TYPE,
+            "ocr.paddle.recognizeText({ useCls: 'off' })" to TYPE,
             "ocr.rapid({ boxScoreThresh: NaN })" to RANGE,
         )
 

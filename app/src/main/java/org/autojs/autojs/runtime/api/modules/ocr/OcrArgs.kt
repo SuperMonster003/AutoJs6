@@ -91,7 +91,7 @@ internal object OcrArgs {
         if (engine == null) fields["mode"].let { if (!ScriptArgs.isNullish(it)) mode(function, runtime, it, "options.mode") }
         fields.string("engineId", "engine", "variant", "profile", "imageFormat").boolean("useRaw", "raw").int("imageQuality")
         if (engine != OcrMode.MLKIT) fields.int("detLongSize").number("scoreThreshold")
-        if (engine == null || engine == OcrMode.PADDLE) fields.int("cpuThreadNum", "detLimitSideLen").boolean("useSlim", "useOpenCL", "mergeLine", "splitWords", "useWordSegmentation")
+        if (engine == null || engine == OcrMode.PADDLE) fields.int("cpuThreadNum", "detLimitSideLen").boolean("useSlim", "useOpenCL", "useCls", "mergeLine", "splitWords", "useWordSegmentation")
         if (engine == null || engine == OcrMode.RAPID) fields.int("maxSideLen").number("boxScoreThresh")
     }
 

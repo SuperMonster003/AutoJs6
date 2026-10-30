@@ -141,6 +141,9 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
             val variant = options.inquire(PaddleOcrOptionExtraKeys.VARIANT, ::coerceString, "")
             val profile = options.inquire(PaddleOcrOptionExtraKeys.PROFILE, ::coerceString, "")
             val detLimitSideLen = options.inquire(PaddleOcrOptionExtraKeys.DET_LIMIT_SIDE_LEN, ::coerceIntNumber, 0)
+            // Only a given value is passed on, so a plugin without the classifier keeps its own default.
+            // zh-CN: 只传递脚本给出的值, 不带分类器的插件保持自己的默认行为.
+            val useCls = options.inquire(PaddleOcrOptionExtraKeys.USE_CLS) { coerceBoolean(it, true) }
 
             val extras = Bundle()
             engineId.takeIf { it.isNotBlank() }?.let { extras.putString(PaddleOcrOptionExtraKeys.ENGINE_ID, it) }
@@ -150,6 +153,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
             if (detLimitSideLen > 0) {
                 extras.putInt(PaddleOcrOptionExtraKeys.DET_LIMIT_SIDE_LEN, detLimitSideLen)
             }
+            useCls?.let { extras.putBoolean(PaddleOcrOptionExtraKeys.USE_CLS, it) }
             if (useRaw && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
             }
