@@ -693,9 +693,21 @@ both checks compare with:
   the empty JVM prefix every dotted `###` heading and every table row starting with a code name counts,
   so the Java and Kotlin pages keep other tables (error codes) without that form.
 
-CI checks out the four public plugin repositories and runs the script after the unit tests. Type stubs
-(`.pyi`, LuaLS meta, Java / Kotlin stubs for Ace, roadmap P5.2e) become another surface checked against
-the same list: a reader per stub kind next to `check_page`, with the stub paths in the same policy entries.
+- stubs (roadmap P5.2e): each policy entry's `stubs` maps a surface to a path, `plugin` in the plugin
+  checkout and `ace` / `ace-index` in the Ace Editor checkout (`--ace`, else `AUTOJS6_ACE_EDITOR_ROOT`,
+  else the sibling directory). The stub must name exactly the listed API: Python
+  `docs/python/types/autojs6/*.pyi` and its Ace copy (public definitions of `__init__.pyi` and the
+  submodules it re-exports, signatures with defaults written as `...`), Lua `docs/types/autojs.lua` and its
+  Ace copy (LuaLS `---@meta`: `function autojs.x(...)` and assigned values), the Java Entry API jar Ace gives
+  ECJ (read like the AAR) and the `AutoJsJvmEntry` / `Jvm*` modules and class globals of Ace's Java and
+  Kotlin indices (parameter counts). A missing checkout prints `stubs skipped`, a checkout without the stub fails.
+- host (appendix C Q109 (c)): `hostApi` names the host's `JvmEntryApi.kt`; every type and method of the
+  plugin's frozen AAR must be declared there with the same parameter count (`host FAIL` otherwise). Host
+  methods an older Entry API lacks are printed as `host-only` (Kotlin, at Entry API 2, lacks `args` and
+  `clipboard`).
+
+CI checks out the four public plugin repositories and the Ace Editor and runs the script after the unit
+tests.
 
 ## Physical-device checks
 

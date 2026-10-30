@@ -183,7 +183,11 @@
       "kind": "python-package",
       "source": "app/src/main/python/autojs6",
       "page": "pythonRuntime",
-      "prefix": "autojs6."
+      "prefix": "autojs6.",
+      "stubs": {
+        "plugin": "docs/python/types/autojs6",
+        "ace": "tools/ace-lsp/python-worker/autojs6-stubs/autojs6"
+      }
     },
     "java": {
       "repository": "AutoJs6-Plugin-Java-Runtime",
@@ -191,7 +195,12 @@
       "source": "protocol/jvm-source-api.aar",
       "entry": "org/autojs/plugin/jvmsource/api/AutoJsJvmEntry",
       "page": "javaRuntime",
-      "prefix": ""
+      "prefix": "",
+      "hostApi": "plugin-api/jvm-source-api/src/main/java/org/autojs/plugin/jvmsource/api/JvmEntryApi.kt",
+      "stubs": {
+        "ace": "app/src/main/assets/java/autojs6/jvm-entry-api.jar",
+        "ace-index": "app/src/main/assets/editor/ace-builds-1.44.0/autojs6/indices/java.js"
+      }
     },
     "kotlin": {
       "repository": "AutoJs6-Plugin-Kotlin-Runtime",
@@ -199,7 +208,11 @@
       "source": "protocol/jvm-source-api.aar",
       "entry": "org/autojs/plugin/jvmsource/api/AutoJsJvmEntry",
       "page": "kotlinRuntime",
-      "prefix": ""
+      "prefix": "",
+      "hostApi": "plugin-api/jvm-source-api/src/main/java/org/autojs/plugin/jvmsource/api/JvmEntryApi.kt",
+      "stubs": {
+        "ace-index": "app/src/main/assets/editor/ace-builds-1.44.0/autojs6/indices/kotlin.js"
+      }
     },
     "lua": {
       "repository": "AutoJs6-Plugin-Lua-Runtime",
@@ -207,7 +220,11 @@
       "source": "app/src/main/cpp/lua_runtime_jni.cpp",
       "function": "install_autojs_module",
       "page": "luaRuntime",
-      "prefix": "autojs."
+      "prefix": "autojs.",
+      "stubs": {
+        "plugin": "docs/types/autojs.lua",
+        "ace": "app/src/main/assets/luals/autojs6/autojs.lua"
+      }
     }
   },
   "pluginExports": {

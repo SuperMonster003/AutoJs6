@@ -138,15 +138,88 @@ class CheckPageTest(unittest.TestCase):
         self.assertEqual(runtimes.check_page(page, "", listed), ["Console.log(message) differs from (String, int[]) -> boolean"])
 
 
+class StubsTest(unittest.TestCase):
+    def test_python_stub_package(self):
+        with tempfile.TemporaryDirectory() as temp:
+            package = Path(temp)
+            (package / "__init__.pyi").write_text("from . import mod as mod\nfrom .errors import Boom as Boom\nimport os\n\n\n"
+                                                  "def toast(text: str) -> None: ...\n\n\ndef _hidden() -> None: ...\n", encoding="utf-8")
+            (package / "mod.pyi").write_text("import builtins\nfrom typing import Final\n\nLIMIT: Final[int]\n\n\n"
+                                             "def run(path: str, *, limit: int = ...) -> builtins.list[str]: ...\n", encoding="utf-8")
+            (package / "errors.pyi").write_text("class Boom(RuntimeError): ...\n\n\nclass Other(RuntimeError): ...\n", encoding="utf-8")
+            names = runtimes.read_python_stubs(package)
+        self.assertEqual(names, {"functions": {"mod.run": "(path: str, *, limit: int=...) -> list[str]", "toast": "(text: str) -> None"},
+                                 "constants": ["mod.LIMIT"], "classes": ["Boom"]})
+        listed = {"functions": {"mod.run": "(path: str, *, limit: int=LIMIT) -> list[str]", "toast": "(text: str) -> None"},
+                  "constants": ["mod.LIMIT"], "classes": ["Boom"]}
+        view = runtimes.stub_view(names, package), runtimes.stub_view(listed, package)
+        self.assertEqual(runtimes.differences(*view), [])
+        listed["functions"]["mod.run"] = "(path: str, limit: int=LIMIT) -> list[str]"
+        self.assertEqual(runtimes.differences(runtimes.stub_view(names, package), runtimes.stub_view(listed, package)), ["~mod.run"])
+
+    def test_lua_meta_definitions(self):
+        with tempfile.TemporaryDirectory() as temp:
+            Path(temp, "autojs.lua").write_text("---@meta autojs\nlocal autojs = {}\n---@type table\nautojs.arguments = {}\n"
+                                                "autojs.console = {}\nfunction autojs.console.log(text) end\n"
+                                                "function autojs.now() end\nreturn autojs\n", encoding="utf-8")
+            names = runtimes.read_lua_meta(Path(temp, "autojs.lua"), "autojs.")
+        self.assertEqual(names, {"functions": {"console.log": None, "now": None}, "values": ["arguments"]})
+
+    def test_jvm_language_index(self):
+        index = {"globals": [{"name": "JvmAppApi", "type": "class"}, {"name": "View", "type": "class"}],
+                 "modules": {"JvmAppApi": [{"name": "launch", "signature": "JvmAppApi.launch(packageName: String): boolean"}],
+                             "View": [{"name": "post", "signature": "View.post(action: Runnable): boolean"}]}}
+        with tempfile.TemporaryDirectory() as temp:
+            Path(temp, "java.js").write_text('(function(global) {\n    registry["java"] = ' + runtimes.json.dumps(index) + ';\n})(window);\n',
+                                             encoding="utf-8")
+            names = runtimes.read_jvm_index(Path(temp, "java.js"))
+        self.assertEqual(names, {"functions": {"JvmAppApi.launch": 1}, "types": ["JvmAppApi"]})
+        listed = {"functions": {"JvmAppApi.launch": "(String) -> boolean"}, "types": ["JvmAppApi"]}
+        self.assertEqual(runtimes.differences(names["functions"], runtimes.stub_view(listed, Path("java.js"))), ["-JvmAppApi"])
+
+    def test_host_entry_api(self):
+        with tempfile.TemporaryDirectory() as temp:
+            Path(temp, "JvmEntryApi.kt").write_text("fun interface AutoJsJvmEntry {\n    @Throws(Exception::class)\n"
+                                                    "    fun run(context: JvmScriptContext): Any?\n}\n\ninterface JvmScriptContext {\n"
+                                                    "    fun args(): Map<String, Any?>\n    fun sleep(millis: Long)\n"
+                                                    "    fun isCancellationRequested(): Boolean = true\n}\n\n"
+                                                    "class JvmCancellationException @JvmOverloads constructor(\n    message: String = \"x\",\n) : Exception(message)\n",
+                                                    encoding="utf-8")
+            names = runtimes.read_host_entry_api(Path(temp, "JvmEntryApi.kt"))
+        self.assertEqual(names, {"AutoJsJvmEntry": None, "AutoJsJvmEntry.run": 1, "JvmScriptContext": None, "JvmScriptContext.args": 0,
+                                 "JvmScriptContext.sleep": 1, "JvmScriptContext.isCancellationRequested": 0, "JvmCancellationException": None})
+
+
 class MainTest(unittest.TestCase):
+    def test_plugin_methods_must_exist_in_the_host_entry_api(self):
+        api = "org/autojs/plugin/jvmsource/api/"
+        jar = io.BytesIO()
+        with zipfile.ZipFile(jar, "w") as archive:
+            archive.writestr(api + "AutoJsJvmEntry.class", class_file(api + "AutoJsJvmEntry", [("run", f"(L{api}JvmScriptContext;)Ljava/lang/Object;", 0x401, [])]))
+            archive.writestr(api + "JvmScriptContext.class", class_file(api + "JvmScriptContext", [("sleep", "(J)V", 0x401, []), ("extra", "()V", 0x401, [])]))
+        with tempfile.TemporaryDirectory() as temp:
+            Path(temp, "plugin", "protocol").mkdir(parents=True)
+            with zipfile.ZipFile(Path(temp, "plugin", "protocol", "jvm-source-api.aar"), "w") as aar:
+                aar.writestr("classes.jar", jar.getvalue())
+            entry_api = Path(temp, "host", "plugin-api/jvm-source-api/src/main/java/org/autojs/plugin/jvmsource/api/JvmEntryApi.kt")
+            entry_api.parent.mkdir(parents=True)
+            entry_api.write_text("fun interface AutoJsJvmEntry {\n    fun run(context: JvmScriptContext): Any?\n}\n\n"
+                                 "interface JvmScriptContext {\n    fun sleep(millis: Long)\n    fun toast(message: String)\n}\n", encoding="utf-8")
+            plugins = [f"--plugin={name}={temp}/none" for name in ("python", "kotlin", "lua")] + [f"--plugin=java={temp}/plugin"]
+            result = subprocess.run([sys.executable, str(HERE / "language_runtimes.py"), "--host", f"{temp}/host", "--documentation", temp,
+                                     "--ace", f"{temp}/none", *plugins], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("host FAIL: JvmScriptContext.extra not in JvmEntryApi.kt", result.stdout)
+
     def test_without_checkouts_everything_is_skipped(self):
         with tempfile.TemporaryDirectory() as temp:
             plugins = [f"--plugin={name}={temp}/none" for name in ("python", "java", "kotlin", "lua")]
-            result = subprocess.run([sys.executable, str(HERE / "language_runtimes.py"), "--documentation", temp, *plugins],
-                                    capture_output=True, text=True)
+            result = subprocess.run([sys.executable, str(HERE / "language_runtimes.py"), "--documentation", temp, "--ace", f"{temp}/none",
+                                     *plugins], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout.count("source skipped"), 4)
         self.assertEqual(result.stdout.count("doc skipped"), 4)
+        self.assertEqual(result.stdout.count("stubs skipped"), 7)
 
 
 if __name__ == "__main__":

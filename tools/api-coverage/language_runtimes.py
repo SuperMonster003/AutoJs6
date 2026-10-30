@@ -16,8 +16,13 @@ the registration source and the documentation page. language-runtimes.json is th
   rest. Names missing from the page, API headings or rows the list lacks and a missing page fail;
   without the documentation checkout: skipped.
 
-P5.2e adds the type stubs (.pyi, LuaLS meta, Java / Kotlin stubs) as another surface checked against the
-same list (a reader per stub kind next to check_page).
+- stubs (P5.2e): the type stubs in the plugin checkout and their copies in the Ace Editor checkout must
+  name exactly the listed API: a .pyi package (public definitions; signatures with defaults written as ...),
+  a LuaLS ---@meta file (functions and assigned values), a jar of the entry classes (read as the AAR) or an
+  Ace language index (modules and class globals of the listed types, parameter counts). Without the
+  checkout: skipped.
+- host (Q109 (c)): every type and method of a plugin's frozen AAR must exist, with the same parameter count,
+  in the host's JvmEntryApi.kt; host methods the plugin's older Entry API lacks are only printed.
 """
 import argparse
 import ast
@@ -31,6 +36,7 @@ import sys
 import zipfile
 
 HERE = Path(__file__).resolve().parent
+JVM_INDEX_NAME = re.compile(r"^(?:AutoJsJvmEntry|Jvm[A-Z]\w*)$")
 LIST = HERE / "language-runtimes.json"
 HEADING = re.compile(r"^### ([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+)(?:\((.*)\))?\s*$")
 ROW = re.compile(r"^\| `([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)` \|")
@@ -109,7 +115,9 @@ def jvm_signature(descriptor):
 
 
 def read_jvm(root, config):
-    with zipfile.ZipFile(root / config["source"]) as aar, zipfile.ZipFile(io.BytesIO(aar.read("classes.jar"))) as jar:
+    path = root / config["source"]
+    with zipfile.ZipFile(path) as archive:
+        jar = zipfile.ZipFile(io.BytesIO(archive.read("classes.jar"))) if path.suffix == ".aar" else archive
         classes = {name[:-6]: class_info(jar.read(name)) for name in jar.namelist() if name.endswith(".class")}
     package, names, pending, seen = config["entry"].rsplit("/", 1)[0] + "/", {"functions": {}, "types": []}, [config["entry"]], set()
     while pending:
@@ -168,6 +176,98 @@ def read_lua(root, config):
 READERS = {"python-package": read_python, "jvm-entry-aar": read_jvm, "lua-module": read_lua}
 
 
+def stub_form(signature):
+    """A Python signature with every default written as ... and builtins.<name> as <name>, as the .pyi stubs spell it."""
+    node = ast.parse(f"def f{signature}: ...").body[0]
+    node.args.defaults = [ast.Constant(...) for _ in node.args.defaults]
+    node.args.kw_defaults = [item and ast.Constant(...) for item in node.args.kw_defaults]
+    return (ast.unparse(node.args).join("()") + (" -> " + ast.unparse(node.returns) if node.returns else "")).replace("builtins.", "")
+
+
+def jvm_arity(signature):
+    return signature.count(",") + (signature[1] != ")")
+
+
+def read_python_stubs(package):
+    """Public definitions of __init__.pyi and of the submodules it re-exports (`from . import x as x`)."""
+    names = {"functions": {}, "constants": [], "classes": []}
+
+    def body(name):
+        return ast.parse((package / f"{name}.pyi").read_text(encoding="utf-8")).body
+
+    def add(prefix, node):
+        target = node.target if isinstance(node, ast.AnnAssign) else node.targets[0] if isinstance(node, ast.Assign) else node
+        name = getattr(target, "name", None) or getattr(target, "id", None) or "_"
+        if name.startswith("_") or not isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AnnAssign, ast.Assign)):
+            return
+        if isinstance(node, ast.FunctionDef):
+            signature = ast.unparse(node.args).join("()") + (" -> " + ast.unparse(node.returns) if node.returns else "")
+            names["functions"][prefix + name] = stub_form(signature)
+        else:
+            names["classes" if isinstance(node, ast.ClassDef) else "constants"].append(prefix + name)
+
+    for node in body("__init__"):
+        for alias in node.names if isinstance(node, ast.ImportFrom) and node.level == 1 else ():
+            if alias.asname == alias.name:
+                for child in body(node.module or alias.name):
+                    if node.module is None or getattr(child, "name", None) == alias.name:
+                        add("" if node.module else alias.name + ".", child)
+        add("", node)
+    return names
+
+
+def read_lua_meta(path, prefix):
+    """Functions (`function autojs.x.y(...)`) and assigned values that are not a table of functions."""
+    text, module = path.read_text(encoding="utf-8"), re.escape(prefix)
+    functions = {name: None for name in re.findall(rf"^function {module}([\w.]+)\(", text, re.M)}
+    assigned = re.findall(rf"^{module}([\w.]+) = ", text, re.M)
+    return {"functions": functions, "values": [name for name in assigned if not any(item.startswith(name + ".") for item in functions)]}
+
+
+def read_jvm_index(path):
+    """Modules and class globals of an Ace language index named like the JVM Entry API, with parameter counts."""
+    text = path.read_text(encoding="utf-8")
+    index = json.loads(text[text.index("] = {") + 4:text.rindex("};") + 1])
+    names = {"functions": {}, "types": [item["name"] for item in index["globals"] if item["type"] == "class" and JVM_INDEX_NAME.match(item["name"])]}
+    for module, members in index["modules"].items():
+        for member in members if JVM_INDEX_NAME.match(module) else ():
+            names["functions"][f"{module}.{member['name']}"] = len(python_parameters(re.search(r"\((.*)\)", member["signature"]).group(1)))
+    return names
+
+
+def read_stubs(path, config):
+    if path.suffix == ".js":
+        return read_jvm_index(path)
+    if path.suffix == ".jar":
+        return read_jvm(path.parent, dict(config, source=path.name))
+    return read_lua_meta(path, config["prefix"]) if path.suffix == ".lua" else read_python_stubs(path)
+
+
+def stub_view(names, path):
+    """Listed or stub names as a stub surface can carry them: .pyi signatures, parameter counts of an index."""
+    view = flat(names)
+    if path.suffix == ".js":
+        return {key: jvm_arity(value) if isinstance(value, str) and value.startswith("(") else value for key, value in view.items()}
+    return {key: stub_form(value) if not path.suffix and isinstance(value, str) and value.startswith("(") else value for key, value in view.items()}
+
+
+def differences(found, stored):
+    return ([f"+{key}" for key in found if key not in stored] + [f"-{key}" for key in stored if key not in found]
+            + [f"~{key}" for key in found if key in stored and found[key] != stored[key]])
+
+
+def read_host_entry_api(path):
+    """Type names and Type.method parameter counts the host's JvmEntryApi.kt declares (Q109 (c))."""
+    names, owner = {}, None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if match := re.match(r"(?:fun )?(?:interface|class) (\w+)", line):
+            owner = match.group(1)
+            names[owner] = None
+        elif owner and (match := re.match(r"\s+fun (\w+)\(([^)]*)\)", line)):
+            names[f"{owner}.{match.group(1)}"] = len([item for item in re.sub(r"<[^<>]*>", "", match.group(2)).split(",") if item.strip()])
+    return names
+
+
 def flat(names):
     """{name: signature (functions) or kind} of one runtime's names."""
     return {key: value for kind, items in names.items() if kind != "kind"
@@ -207,10 +307,12 @@ def main():
     parser.add_argument("--host", type=Path, default=HERE.parents[1])
     parser.add_argument("--documentation", type=Path, help="AutoJs6-Documentation checkout (default: AUTOJS6_DOCUMENTATION_ROOT, else the sibling directory)")
     parser.add_argument("--plugin", action="append", default=[], metavar="NAME=PATH", help="Checkout of one runtime plugin (default: policy.json)")
+    parser.add_argument("--ace", type=Path, help="AutoJs6-Plugin-Ace-Editor checkout (default: AUTOJS6_ACE_EDITOR_ROOT, else the sibling directory)")
     parser.add_argument("--write", action="store_true", help="Rewrite language-runtimes.json from the plugin checkouts that exist")
     args = parser.parse_args()
     host = args.host.resolve()
     docs = (args.documentation or Path(os.environ.get("AUTOJS6_DOCUMENTATION_ROOT") or host.parent / "AutoJs6-Documentation")).resolve()
+    ace = (args.ace or Path(os.environ.get("AUTOJS6_ACE_EDITOR_ROOT") or host.parent / "AutoJs6-Plugin-Ace-Editor")).resolve()
     runtimes = json.loads((HERE / "policy.json").read_text(encoding="utf-8"))["languageRuntimes"]
     roots = {name: host.parent / config["repository"] for name, config in runtimes.items()} | dict(item.split("=", 1) for item in args.plugin)
     listed = json.loads(LIST.read_text(encoding="utf-8")) if LIST.is_file() else {"schema": "autojs6-language-runtimes-v1", "runtimes": {}}
@@ -221,12 +323,26 @@ def main():
             names = READERS[config["kind"]](root, config)
             if args.write:
                 listed["runtimes"][name] = names
-            source, stored = flat(names), flat(listed["runtimes"].get(name, {}))
-            changed = ([f"+{key}" for key in source if key not in stored] + [f"-{key}" for key in stored if key not in source]
-                       + [f"~{key}" for key in source if key in stored and source[key] != stored[key]])
+            changed = differences(flat(names), flat(listed["runtimes"].get(name, {})))
             result.append(f"source FAIL: {' '.join(changed)} against language-runtimes.json (run --write)" if changed else "source pass")
+            if config.get("hostApi"):
+                host_api, plugin = read_host_entry_api(host / config["hostApi"]), flat(names)
+                foreign = [key for key, value in plugin.items() if key not in host_api or (value.startswith("(") and jvm_arity(value) != host_api[key])]
+                newer = sorted(set(host_api) - set(plugin))
+                result.append(f"host FAIL: {', '.join(foreign)} not in {Path(config['hostApi']).name}" if foreign
+                              else "host subset pass" + (f" (host-only: {', '.join(newer)})" if newer else ""))
         else:
             result.append(f"source skipped (no {root / config['source']})")
+        for surface, stub in config.get("stubs", {}).items():
+            checkout = ace if surface.startswith("ace") else root
+            path = checkout / stub
+            if checkout.is_dir() and not path.exists():
+                result.append(f"{surface} stubs FAIL: no {stub}")
+            elif path.exists():
+                changed = differences(stub_view(read_stubs(path, config), path), stub_view(listed["runtimes"].get(name, {}), path))
+                result.append(f"{surface} stubs FAIL ({stub}): {' '.join(changed)}" if changed else f"{surface} stubs pass")
+            else:
+                result.append(f"{surface} stubs skipped (no {path})")
         entry = dict(listed["runtimes"].get(name, {}), kind=config["kind"])
         page = docs / "api" / f"{config['page']}.md"
         if page.is_file():
