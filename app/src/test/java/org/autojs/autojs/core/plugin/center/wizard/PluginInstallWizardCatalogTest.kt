@@ -79,12 +79,16 @@ class PluginInstallWizardCatalogTest {
             order,
         )
         assertFalse(PluginInstallWizardCatalog.entries.any { it.category == PluginInstallWizardCategory.OTHERS })
-        assertEquals(49, PluginInstallWizardCatalog.entries.size)
+        assertEquals(50, PluginInstallWizardCatalog.entries.size)
     }
 
     @Test
     fun lookupByPackageName() {
         val prefix = "io.github.supermonster003.autojs6.plugin."
+        val paddleLite = PluginInstallWizardCatalog.find(prefix + "paddleocr.v3.paddlelite")
+        assertEquals(PluginInstallWizardCategory.IMAGE, paddleLite?.category)
+        assertEquals("Paddle OCR PP OCRv3 Paddle Lite", paddleLite?.fallbackTitle)
+        assertEquals(false, paddleLite?.inStandard)
         assertEquals("Three Maple Image", PluginInstallWizardCatalog.find(prefix + "three.maple.image")?.fallbackTitle)
         assertEquals("Three Stack Archive", PluginInstallWizardCatalog.find(prefix + "three.stack.archive")?.fallbackTitle)
         assertEquals("Three Hanzi CC", PluginInstallWizardCatalog.find(prefix + "three.hanzi.cc")?.fallbackTitle)

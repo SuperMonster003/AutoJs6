@@ -101,6 +101,7 @@ object PluginInstallWizardCatalog {
         entry(official("mlkitocr"), "MLKit OCR", IMAGE, standard = true),
         entry(official("opencv"), "OpenCV", IMAGE, standard = true),
         entry(official("paddleocr.v3"), "Paddle OCR PP OCRv3", IMAGE),
+        entry(official("paddleocr.v3.paddlelite"), "Paddle OCR PP OCRv3 Paddle Lite", IMAGE),
         entry(official("paddleocr.v4.mobile"), "Paddle OCR PP OCRv4", IMAGE),
         entry(official("paddleocr.v5"), "Paddle OCR PP OCRv5", IMAGE, standard = true),
         entry(official("paddleocr.v6.small"), "Paddle OCR PP OCRv6", IMAGE, standard = true),

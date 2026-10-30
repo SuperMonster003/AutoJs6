@@ -220,6 +220,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` MCP Server 插件, 用于通过 MCP 客户端访问 AutoJs6 的脚本, 文件及设备操作能力 (入口: 主页抽屉/插件中心)
 * `新增` 3-Shell Terminal 插件, 提供终端能力 (入口: 主页抽屉, 项目工具栏, 文件管理器目录菜单)
 * `新增` 3-Macaw Speech 插件, 用于离线语音识别, 唤醒词检测及语音合成, 可注册为系统 TTS 引擎, 语音模型按需下载 (入口: 插件中心/插件安装向导)
+* `新增` Paddle OCR PP-OCRv3 Paddle Lite 插件, 用于继续提供基于 Paddle Lite 的 PP-OCRv3 文字识别 (Paddle OCR PP-OCRv3 插件 2.0.0 起改用 ONNX Runtime), 可与之同时安装, 脚本可用 `variant: "v3-paddle-lite"` 指定 (入口: 插件中心/插件安装向导)
+* `新增` ocr 模块 Paddle 引擎的 useCls 选项参数, 用于在检测与识别之间运行文字方向分类, 以识别旋转 180 度的文本行 (默认关闭; 需要 Paddle OCR PP-OCRv3 插件 2.0.0 及以上, 打包应用同样适用)
 * `新增` Node.js Runtime 插件, 用于运行 Node.js 文件及项目 (支持 "nodejs" 模式参数及 .node.js/.cjs/.mjs 文件)
 * `新增` Python Runtime 插件, 用于运行 Python 文件及项目, 支持模块入口, 执行超时及预置标准输入
 * `新增` Lua Runtime 插件, 用于运行 Lua 脚本
@@ -246,6 +248,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` ui.inflate 方法支持编译后的 XML TSX 布局及其 onClick 回调绑定
 * `新增` flow 模块及 waitAsync 全局方法, 用于异步等待与链式操作, 支持分支, 循环, 超时, 重试及取消 (参阅 项目文档 > [流程](https://docs.autojs6.com/#/flow))
 * `新增` terminal 全局对象, 用于终端会话管理, 可见执行与输出监听, 支持等待输出及退出码 (需要 3-Shell Terminal 插件) (参阅 示例代码 > 终端)
+* `新增` imgui 全局对象, 用于以 Dear ImGui 构建悬浮窗及全屏即时模式界面, 插件启用后直接使用, 首次调用成员时加载插件; 原有 plugins.load("io.github.supermonster003.autojs6.plugin.imgui") 写法返回同一对象 (需要 ImGui 插件)
 * `新增` shell.spawn/shizuku.spawn 方法, 用于以进程运行命令并实时读取输出, 支持逐行读取, output/errorOutput/exit 事件, 写入 stdin, 限时等待及结束进程 (连同其启动的子进程), 脚本结束时自动结束进程 (adb 选项与 shizuku.spawn 需要 Shizuku, root 选项需要 Root 权限)
 * `新增` Shell 构造器支持选项对象 { cmd, root, adb, pty, env, cwd } (兼容 Auto.js Pro), 以此创建的 Shell 基于管道运行并提供 getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult 方法, 可经 Shizuku (adb 选项) 运行, 其 execAndWaitFor 按退出码标记分割每条命令的输出
 * `新增` shell.spawn 及选项构造的 Shell 支持 pty 选项, 用于在伪终端上运行命令, 使 getevent/awk 等在管道上缓冲输出的程序逐行输出 (stderr 并入 stdout)
@@ -259,6 +262,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` files.batchRename 方法, 用于按查找与替换, 正则表达式, 计数器, 日期变量, 照片元数据 (EXIF / XMP) 及汉字转拼音批量重命名文件与文件夹, 支持预览方案, 不访问文件的名称试算, 命名预设, 冲突处理策略, 进度回调, 撤销及历史记录的查询与清理 (需要 Batch Rename 插件, 照片元数据, 汉字转拼音与命名预设需要 1.1.0 及以上版本) (参阅 项目文档 > [文件](https://docs.autojs6.com/#/files))
 * `新增` gallery 模块, 用于通过 3-Maple Image 插件选择, 查看, 编辑及转换图片, 读取与写入的文件限于脚本自身可访问的路径 (需要 3-Maple Image 插件 3.4.0 及以上) (参阅 项目文档 > [相册](https://docs.autojs6.com/#/gallery))
 * `新增` speech 模块, 用于离线语音识别, 语音活动检测, 唤醒词检测及语音合成, 支持麦克风听写会话, 唤醒词会话 (可在唤醒后自动听写), 识别 WAV 文件或 PCM 数据, 合成到 WAV 文件, 通过插件引擎朗读文本及管理语音模型, 读取与写入的文件限于脚本自身可访问的路径; 麦克风会话在 AutoJs6 位于前台时开启后, 应用退到后台或熄屏仍可继续收音 (需要 3-Macaw Speech 插件) (参阅 示例代码 > 3-Macaw Speech)
+* `新增` speech.speaker 模块, 用于说话人识别, 可注册说话人的声音, 判断一段录音是否出自某人 (验证) 或在已注册的人中找出最像的一位 (辨认); 声纹只保存在插件内, 脚本只得到名字与相似度分数 (需要 3-Macaw Speech 插件 1.3.0 及以上) (参阅 示例代码 > 3-Macaw Speech)
+* `新增` speech.diarize/detectLanguage/tag 方法, 用于离线分析音频文件: 找出谁在什么时候说话 (说话人分离, 可按已注册的声纹取名), 识别说话的语种, 以及听出录音里的声音类别 (说话, 音乐, 狗叫, 雨声等), 均带进度回调与 Async 形式 (需要 3-Macaw Speech 插件 1.3.0 及以上) (参阅 示例代码 > 3-Macaw Speech)
 * `新增` yolo 模块, 用于通过 YOLO 插件加载模型并进行目标检测 (参阅 项目文档 > [YOLO](https://docs.autojs6.com/#/yolo))
 * `新增` tts 模块, 用于文本转语音 (参阅 项目文档 > [文本转语音](https://docs.autojs6.com/#/tts))
 * `新增` settings 模块, 用于读取及修改应用设置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (参阅 项目文档 > [设置](https://docs.autojs6.com/#/settings))
@@ -348,6 +353,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` 打包应用支持 Node.js 项目及脚本, 运行时需要 Node.js Runtime 插件 (未安装时显示安装引导)
 * `新增` 打包应用支持在构建时编译 Rhino TypeScript 项目, 并支持加密编译产物及附加 Source Map
 * `新增` 打包应用配置支持显示或隐藏日志及设置启动器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
+* `新增` 打包应用支持 ONNX Runtime 版 Paddle OCR PP-OCRv3 插件 (2.0.0 及以上), 与 Paddle Lite 版同时安装时优先打包 ONNX Runtime 版, 并自动附带其依赖的 OpenCV 插件运行库 (需要已安装 OpenCV 插件)
 * `新增` VSCode 插件连接支持二维码扫描, 配对确认及局域网发现 (需要 VSCode 插件 1.1.0+)
 * `新增` VSCode 插件支持远程文件管理及设备脚本运行, 大文件传输支持进度显示 (需要 VSCode 插件 1.1.0+)
 * `新增` 客户端模式及服务端模式增加连接管理器, 支持查看连接状态, 管理客户端及访问地址历史记录
@@ -369,6 +375,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `新增` Node.js/Bun: WebView 页面加载与 JavaScript 返回值, Drawer 侧栏, Toolbar 导航与菜单, ViewPager 页面及异步原生事件
 * `新增` Node.js/Bun: WebView HTTP(S) 下载, 系统文件选择及异步 WebViewClient/WebChromeClient 回调, 支持原生导航和资源规则
 * `新增` Node.js/Bun: WebView 完整照片拍摄, 保存和目录选择, 文档字节读取, blob/data 分块下载及所选位置输出
+* `新增` Node.js 项目的 node.timeoutMs 执行期限配置 (project.json), 未设置或为 0 时 Node.js 脚本及项目与 Rhino 脚本一样不限运行时长
 * `新增` Bun 项目的 timeoutMs 执行期限配置, 适用于等待拍照或文件操作的脚本及打包应用
 * `新增` Node.js/Bun: WebView 视频拍摄与前台 AAC/M4A 录音, 支持媒体参数, 可配置选择等待时限和临时文件清理
 * `新增` WebView getUserMedia/MediaRecorder 流式音视频, 支持等待网页 Promise, 显式申请 Android 媒体权限及 Worker 生命周期管理
@@ -456,6 +463,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` images.resize 方法传入错误参数时可能导致应用崩溃的问题
 * `修复` images 部分方法可能提前回收图像, 泄漏原生内存或回收其他脚本图像的问题
 * `修复` colors.isSimilar/images.detectColor 的 hs 算法结果错误, 以及 colors.rgb/rgba 无法正确处理小数或百分比分量的问题
+* `修复` Color 对象的 toHex/toInt/alpha/toHsv/isSimilar/blend/build 等方法, images.getSimilarity 及 http 请求的 client 选项参数出错时, 脚本以 ClassCastException 异常结束且无法被 try/catch 捕获的问题
 * `修复` images.isEqual/mse/ncc/isGrayscale 等方法的比较结果及灰度或 RGBA 图像处理异常
 * `修复` images.invert 丢失透明度, ImageWrapper#saveTo 红蓝通道颠倒及 images.clip 越界区域处理错误
 * `修复` images.load 等方法可能未关闭连接或释放临时图像资源的问题
@@ -614,6 +622,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` opencc 模块支持转换类型查询, 批量转换及链式转换
 * `优化` ocr 模块默认按 ML Kit/Paddle/Rapid 顺序选择可用引擎, 并支持显式指定或恢复自动选择
 * `优化` Node.js 插件等经宿主桥接调用的 ocr 模块在未指定 engine 时按 ML Kit/Paddle/Rapid 顺序自动选择已启用的引擎, 不再固定要求 ML Kit OCR 插件
+* `优化` ocr 模块 Paddle 引擎的 profile 选项参数参与插件选择, 只选用声明了相同 profile 的插件 (如 Paddle OCR PP-OCRv3 语种包的 zh/en/zh-hant/ja/ko 及 PP-OCRv4 的 mobile/server/mobile-en, 不区分大小写), 没有匹配的插件时错误消息列出已安装插件提供的 profile
+* `优化` ocr 模块 Paddle 引擎有多个插件符合条件且未调整变体优先级时, 同代插件 (如 PP-OCRv3 的 ONNX Runtime 版各语种包与 Paddle Lite 版) 优先选用插件声明的推荐默认插件 (PP-OCRv3 中文版), 其次按包名排序, 选择结果不再取决于插件的发现顺序
 * `优化` 宿主桥接层 accessibility 模块增加 captureScreenImage 方法, 以无障碍截图 (不可用时回退屏幕捕获) 生成会话内图像句柄, 供 MCP Server 等插件会话直接用于条码识别与找图找色; 插件会话可同时持有的图像句柄数由 4 提高为并发调用数的两倍
 * `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接读取图片 (image.readImage) 时, 最长边超过 4096 px 的图片按 2 的幂降采样解码, 结果附 scale 与原图尺寸, 避免相册大图耗尽宿主内存; Node.js 插件脚本不受影响
 * `优化` MCP Server 与 3-Stove Agent 等面向模型的插件会话经桥接按路径读取图片与媒体信息 (image.readImage, mediainfo) 时限制在工作目录内, 写入 (image.saveImage) 同样只限工作目录; 请求声明 files.shared_read 且 AutoJs6 持有所有文件访问权限时可只读访问共享存储 (不含 Android/data 与 Android/obb), files.list 与 files.stat 也可按同一令牌列出共享存储; Node.js 插件脚本不受影响
