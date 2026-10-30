@@ -1,6 +1,8 @@
 package org.autojs.autojs.engine
 
 import android.content.Context
+import android.os.Bundle
+import android.os.Process
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
@@ -27,6 +29,29 @@ internal object NodePluginTestHarness {
 
     fun assumePersistentRuntimeEnabled(label: String = "persistent Node.js runtime plugin instrumentation") =
         assumePluginRuntimeAvailable(label)
+
+    /**
+     * The plugin runs scripts in a pool of runtime slot processes (plugin 1.32.0, 4cd3a0e2): before the first execution
+     * no slot is warm and the top-level pid is -1, so a probe identifies the plugin by its dispatcher process.
+     */
+    fun assertRemotePluginProcess(label: String, runtimeInfo: Bundle) {
+        val dispatcherPid = runtimeInfo.getInt("dispatcherPid", -1)
+        assertTrue(
+            "$label: the plugin did not report a remote dispatcher PID: $runtimeInfo",
+            dispatcherPid > 0 && dispatcherPid != Process.myPid(),
+        )
+    }
+
+    /** [pid] belongs to one of the plugin's warm runtime slot processes, per a fresh probe. */
+    fun assertRanInRuntimeSlot(label: String, pid: Int) {
+        val runtimeInfo = runBlocking { NodeJsRuntimePluginHost.probe(targetContext) }
+        @Suppress("DEPRECATION")
+        val slotPids = runtimeInfo.getParcelableArrayList<Bundle>("slots").orEmpty().map { it.getInt("pid", -1) }
+        assertTrue(
+            "$label: pid $pid is not a runtime slot process of the plugin: $runtimeInfo",
+            pid > 0 && pid != Process.myPid() && pid in slotPids,
+        )
+    }
 
     fun settlePluginRuntime() = Unit
 

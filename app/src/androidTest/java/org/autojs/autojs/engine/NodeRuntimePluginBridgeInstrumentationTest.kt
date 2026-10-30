@@ -525,13 +525,20 @@ class NodeRuntimePluginBridgeInstrumentationTest {
         // toast + setText + getText + put + get + getAppName are one dispatch each. Since the host shell
         // streams (9d8c48c7d), shell.exec is spawn + closeInput + drain polls up to the exit event, and the
         // number of polls depends on how fast the command exits, so the drains are counted from the responses.
+        // Plugin 2.0.0 also registers the store's name with the storages registry on its first put (one more dispatch).
         val dispatchCount = result.nativeValues["embedded_script.bridge_live_dispatch_count"]?.toIntOrNull()
         val responses = JSONArray(result.nativeValues["embedded_script.bridge_live_responses_json"] ?: "[]")
         val drainCount = (0 until responses.length()).count { responses.optJSONObject(it)?.opt("result") is JSONArray }
+        val registryDispatches = if (installedNodePluginMajorVersion() >= 2) 1 else 0
         assertEquals("Every dispatch must be retained: $responses", dispatchCount, responses.length())
         assertTrue("shell.exec must drain at least once: $responses", drainCount >= 1)
-        assertEquals("Dispatches besides the shell drains: $responses", 8, checkNotNull(dispatchCount) - drainCount)
+        assertEquals("Dispatches besides the shell drains: $responses", 8 + registryDispatches, checkNotNull(dispatchCount) - drainCount)
     }
+
+    private fun installedNodePluginMajorVersion(): Int =
+        context.packageManager.getPackageInfo("io.github.supermonster003.autojs6.plugin.nodejs", 0)
+            .versionName.orEmpty().substringBefore('.').toIntOrNull() ?: 0
+
     /**
      * M3.2: coordinate swipe reaches AccessibilityService.dispatchGesture
      * through the live bridge behind the dedicated accessibility.gesture

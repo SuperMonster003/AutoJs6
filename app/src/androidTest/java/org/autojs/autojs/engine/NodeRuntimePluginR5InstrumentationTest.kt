@@ -1,6 +1,5 @@
 package org.autojs.autojs.engine
 
-import android.os.Process
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
 import org.autojs.plugin.nodejs.api.NodeJsRuntimeContract
@@ -38,8 +37,7 @@ class NodeRuntimePluginR5InstrumentationTest {
         assertTrue(runtimeInfo.getBoolean("persistentProcessRuntime", false))
         assertTrue(runtimeInfo.getBoolean("dedicatedRuntimeProcess", false))
         assertEquals(1, runtimeInfo.getInt("maxConcurrentExecutions", -1))
-        val runtimePid = runtimeInfo.getInt(NodeJsRuntimeContract.KEY_PID, -1)
-        assertTrue("plugin probe did not report a remote PID: $runtimePid", runtimePid > 0 && runtimePid != Process.myPid())
+        NodePluginTestHarness.assertRemotePluginProcess("R5 live plugin preflight", runtimeInfo)
 
         val workDir = freshWorkDir("preflight")
         try {
@@ -49,7 +47,7 @@ class NodeRuntimePluginR5InstrumentationTest {
                 source = "\"nodejs\"; console.log(\"r5.preflight=\" + process.pid);",
             )
             assertPluginSucceeded("R5 live plugin preflight", result)
-            assertEquals(runtimePid, result.pid)
+            NodePluginTestHarness.assertRanInRuntimeSlot("R5 live plugin preflight", result.pid)
             assertEquals("plugin", result.nativeValues[PLUGIN_DIAGNOSTICS_SOURCE_KEY])
             assertEquals("true", result.nativeValues[PLUGIN_PERSISTENT_RUNTIME_KEY])
             assertEquals("1", result.nativeValues[PLUGIN_MAX_CONCURRENT_KEY])

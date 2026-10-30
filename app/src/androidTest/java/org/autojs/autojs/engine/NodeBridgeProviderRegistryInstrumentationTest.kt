@@ -13,7 +13,7 @@ class NodeBridgeProviderRegistryInstrumentationTest {
     fun providerRegistryDefinesPhase7LiveProviderSurface() {
         val definitions = NodeBridgeProviderRegistry.definitionsById
 
-        assertEquals(28, definitions.size)
+        assertEquals(29, definitions.size)
         assertProvider(
             id = "agent",
             modules = listOf(NodeBridgeModules.AGENT),
@@ -68,13 +68,18 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             capabilities = listOf(NodeBridgePermissionManifest.PINYIN4J),
         )
         assertProvider(
+            id = "opencc",
+            modules = listOf(NodeBridgeModules.OPENCC),
+            capabilities = listOf(NodeBridgePermissionManifest.OPENCC),
+        )
+        assertProvider(
             id = "notifications",
             modules = listOf(NodeBridgeModules.NOTIFICATIONS),
             capabilities = listOf(NodeBridgePermissionManifest.NOTIFICATIONS, NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS),
         )
         assertProvider(
             id = "device",
-            modules = listOf(NodeBridgeModules.DEVICE),
+            modules = listOf(NodeBridgeModules.DEVICE, NodeBridgeModules.SCREEN_METRICS),
             capabilities = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER),
         )
         assertProvider(
@@ -138,7 +143,10 @@ class NodeBridgeProviderRegistryInstrumentationTest {
             healthById.getValue("fetch").status,
         )
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("ocr").status)
-        assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("barcode").status)
+        assertEquals(
+            if (org.autojs.autojs.core.plugin.barcode.BarcodePluginHost.queryServiceCount(context) > 0) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.UNAVAILABLE,
+            healthById.getValue("barcode").status,
+        )
         assertEquals(NodeBridgeProviderStatus.AVAILABLE, healthById.getValue("media_projection").status)
         assertEquals(
             if (org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost.isAvailable(context)) NodeBridgeProviderStatus.AVAILABLE else NodeBridgeProviderStatus.DEGRADED,

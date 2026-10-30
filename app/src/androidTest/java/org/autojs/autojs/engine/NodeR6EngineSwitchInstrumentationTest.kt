@@ -16,6 +16,7 @@ import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runners.MethodSorters
+import org.mozilla.javascript.Undefined
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -118,7 +119,12 @@ class NodeR6EngineSwitchInstrumentationTest {
     private fun assertLegacyRhinoExecution(label: String, observation: EngineObservation) {
         assertEquals("$label did not use the production Rhino engine", LoopBasedJavaScriptEngine::class.java, observation.engineClass)
         assertEquals("$label source routing drifted", JavaScriptSource.ENGINE, observation.sourceEngineName)
-        assertEquals("$label unexpectedly returned a loop-engine result", null, observation.result)
+        // The completion value of the source's last expression statement, files.write(...): null before files moved to
+        // the new script module layer (augment P3.4), undefined since. Either way not a Node exit code.
+        assertTrue(
+            "$label unexpectedly returned a loop-engine result: ${observation.result}",
+            observation.result == null || observation.result === Undefined.instance,
+        )
         assertTrue("$label unexpectedly exposed native Node diagnostics", observation.nativeValues.isEmpty())
     }
 
