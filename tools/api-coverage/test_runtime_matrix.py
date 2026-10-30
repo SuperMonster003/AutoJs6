@@ -648,8 +648,8 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
         self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
         # The groups the maintainer kept pending for P3 / P4 (app.launchDual came with P3.1a, test_p3_1a; engines.execScript
-        # in Workers with P3.1b, test_p3_1b).
-        for name in ['auto.waitFor', 'threads.start', 'keepAlive', 'ui.layout']:
+        # in Workers with P3.1b, test_p3_1b; auto.waitFor, threads.start and keepAlive with P3.4, test_p3_4).
+        for name in ['ui.layout']:
             self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
 
@@ -713,6 +713,43 @@ class RepositoryTest(unittest.TestCase):
         for row in family:
             for column in ['node_main', 'node_worker']:
                 self.assertNotEqual(row[column]['status'], 'pending', (row['id'], column))
+
+    def test_p3_4(self):
+        # The automation family: the autojs6: modules of the shared automation factory in both threads (automator with the
+        # gesture and service capabilities, auto, threads / continuation / timers local, yolo, selector, qrcode), Rhino's events
+        # members on autojs6:events (Q18), keys codes, ocr modes, the global sleep / wait (wait.async through the member alias)
+        # and the family's globals in their owner modules (Q177 (a)); VolatileDispose / YoloDetector through their handle types.
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status, module, via, capabilities in [
+                ('automator.click', 'bridged', 'autojs6:automator', 'same-name', None), ('click', 'bridged', 'autojs6:automator', 'owner-module', None),
+                ('press', 'bridged', 'autojs6:automator', 'owner-module', ['accessibility', 'accessibility.gesture']),
+                ('auto.start', 'bridged', 'autojs6:auto', 'same-name', ['accessibility', 'accessibility.service']),
+                ('auto.waitFor', 'bridged', 'autojs6:auto', 'same-name', None), ('auto.enable', 'bridged', 'autojs6:auto', 'same-name', None),
+                ('threads.start', 'local-shim', 'autojs6:threads', 'same-name', None), ('sync', 'local-shim', 'autojs6:threads', 'owner-module', None),
+                ('continuation.enabled', 'local-shim', 'autojs6:continuation', 'same-name', None),
+                ('keepAlive', 'local-shim', 'autojs6:timers', 'owner-module', None), ('timers.setIntervalExt', 'local-shim', 'autojs6:timers', 'same-name', None),
+                ('yolo.load', 'bridged', 'autojs6:yolo', 'same-name', ['image', 'yolo']), ('pickup', 'bridged', 'autojs6:selector', 'owner-module', None),
+                ('qrcode.detect', 'bridged', 'autojs6:qrcode', 'same-name', None), ('keys.HOME', 'bridged', 'autojs6:keys', 'same-name', None),
+                ('ocr.mlkit.detect', 'bridged', 'ocr', 'same-name', None), ('events.emitSticky', 'bridged', 'autojs6:events', 'same-name', None),
+                ('events.observeTouch', 'bridged', 'autojs6:events', 'same-name', ['events', 'events.touch']),
+                ('wait', 'bridged', 'autojs6:system', 'global-module', None), ('wait.async', 'bridged', 'autojs6:system', 'member-alias', None),
+                ('VolatileDispose#blockedGet', 'local-shim', 'autojs6:threads', 'handle-type', None),
+                ('YoloDetector#detect', 'bridged', 'autojs6:yolo', 'handle-type', None)]:
+            for column in ['node_main', 'node_worker']:
+                cell = rows[name][column]
+                self.assertEqual((cell['status'], cell['module'], cell['via'], cell.get('capabilities')), (status, module, via, capabilities), (name, column))
+        # Rhino's sleep: autojs6:compat on the main thread (the first global module that has it), autojs6:system in Workers.
+        self.assertEqual((rows['sleep']['node_main']['module'], rows['sleep']['node_worker']['module']), ('autojs6:compat', 'autojs6:system'))
+        family = [row for row in self.matrix['rows'] if (row['module'] or row['ownerModule'] or '').split('.')[0] in
+                  ('automator', 'auto', 'threads', 'continuation', 'yolo', 'selector', 'qrcode', 'keys', 'ocr', 'events')
+                  or row['object'] in ('VolatileDispose', 'YoloDetector')]
+        self.assertGreaterEqual(len(family), 170)
+        for row in family:
+            for column in ['node_main', 'node_worker']:
+                self.assertNotEqual(row[column]['status'], 'pending', (row['id'], column))
+        # Q31: Flow#await / Flow#sync stay pending (appendix D).
+        for column in ['node_main', 'node_worker']:
+            self.assertEqual((rows['Flow#await'][column]['status'], rows['Flow#sync'][column]['status']), ('pending', 'pending'))
 
     def test_p3_2a(self):
         # The shared JS tools core: local-shim on the main thread and in Workers, global data functions through autojs6:global.
