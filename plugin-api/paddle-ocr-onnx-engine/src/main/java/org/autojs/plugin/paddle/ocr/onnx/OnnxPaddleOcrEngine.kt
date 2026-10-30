@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.autojs.plugin.paddle.ocr.onnx.model.OCRResult
+import org.autojs.plugin.paddle.ocr.onnx.model.OCRRunResult
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -32,15 +32,13 @@ class OnnxPaddleOcrEngine(
 
     private var loaded: PaddleOCR? = null
 
-    @Volatile
-    private var openClNoticeLogged = false
-
     fun recognizeText(bitmap: Bitmap, options: OcrOptions): List<String> {
-        return run(bitmap, options).map { it.text }
+        return run(bitmap, options).results.map { it.text }
     }
 
     fun detect(bitmap: Bitmap, options: OcrOptions): List<OcrResult> {
-        return run(bitmap, options).map { it.toOcrResult() }
+        val runResult = run(bitmap, options)
+        return runResult.results.map { it.toOcrResult(runResult.executionProvider) }
     }
 
     fun release() {
@@ -54,17 +52,13 @@ class OnnxPaddleOcrEngine(
         }
     }
 
-    private fun run(bitmap: Bitmap, options: OcrOptions): List<OCRResult> {
-        if (options.useOpenCL && !openClNoticeLogged) {
-            openClNoticeLogged = true
-            Log.i(TAG, "useOpenCL is ignored by the embedded ONNX Runtime engine (CPU execution provider)")
-        }
+    private fun run(bitmap: Bitmap, options: OcrOptions): OCRRunResult {
         val key = sessionKeyOf(options, slimAvailable)
         val config = runConfigOf(options)
         // Sessions are not shared across threads while the cached engine may be swapped.
         // zh-CN: 缓存的引擎可能被替换, 因此会话不跨线程并发使用.
         synchronized(lock) {
-            return obtain(key).recognize(bitmap, config).results
+            return obtain(key).recognize(bitmap, config)
         }
     }
 
@@ -76,8 +70,8 @@ class OnnxPaddleOcrEngine(
         val root = if (key.slim) OnnxPaddleOcrAssets.SLIM_ROOT else OnnxPaddleOcrAssets.ROOT
         return PaddleOCR.create(
             context = appContext,
-            config = PaddleOCRConfig(),
-            engineConfig = EngineConfig(numThreads = key.threads),
+            config = PaddleOCRConfig(useCls = key.useCls),
+            engineConfig = EngineConfig(numThreads = key.threads, useNnapi = key.useNnapi),
             detModelAssetPath = "$root/${OnnxPaddleOcrAssets.DET_MODEL}",
             recModelAssetPath = "$root/${OnnxPaddleOcrAssets.REC_MODEL}",
             // The character dictionary and the classifier are shared by both precisions.
@@ -97,49 +91,71 @@ class OnnxPaddleOcrEngine(
     data class SessionKey(
         val slim: Boolean,
         val threads: Int,
+        val useNnapi: Boolean,
         val useCls: Boolean,
     )
 
     companion object {
 
-        private const val TAG = "OnnxPaddleOcrEngine"
+        const val DEFAULT_THREADS = 4
 
         const val DEFAULT_DET_LIMIT_SIDE_LEN = 960
+
+        const val DEFAULT_REC_SCORE_THRESH = 0.1f
+
+        // Detection tuning extras, same keys and defaults as the plugin (and the v4 engine).
+        // zh-CN: 检测调参 extras, 键名与缺省值与插件 (及 v4 引擎) 相同.
+        const val EXTRA_DET_LIMIT_TYPE = "detLimitType"
+        const val EXTRA_DET_MAX_SIDE_LIMIT = "detMaxSideLimit"
+        const val EXTRA_DET_THRESH = "detThresh"
+        const val EXTRA_DET_BOX_THRESH = "detBoxThresh"
+        const val EXTRA_DET_UNCLIP_RATIO = "detUnclipRatio"
+        const val EXTRA_REC_BATCH_SIZE = "recBatchSize"
 
         fun sessionKeyOf(options: OcrOptions, slimAvailable: Boolean): SessionKey = SessionKey(
             // useSlim falls back to fp32 when the slim models are not packaged.
             // zh-CN: slim 模型未打包时 useSlim 回退到 fp32.
             slim = options.useSlim && slimAvailable,
-            threads = options.cpuThreadNum.coerceAtLeast(0),
+            // 0 or a negative count uses 4 threads, the default of the Paddle Lite v3 engine.
+            // zh-CN: 0 或负数使用 4 个线程, 与 Paddle Lite 版 v3 引擎的缺省值一致.
+            threads = options.cpuThreadNum.takeIf { it > 0 } ?: DEFAULT_THREADS,
+            // useOpenCL requests the NNAPI execution provider; sessions fall back to CPU when it is unavailable.
+            // zh-CN: useOpenCL 请求 NNAPI 执行提供器; 不可用时会话回退到 CPU.
+            useNnapi = options.useOpenCL,
             // The classifier only runs when the script asks for it.
             // zh-CN: 仅在脚本要求时运行方向分类.
             useCls = options.extras?.getBoolean(PaddleOcrOptionExtraKeys.USE_CLS, false) == true,
         )
 
         /**
-         * Per-call settings (D25): det `limit_side_len` from extras, then `detLongSize`, then 960
-         * with `limit_type = max`; recognition score filter from `scoreThreshold` (default 0).
-         * zh-CN: 每次调用的设置 (D25): det `limit_side_len` 依次取 extras, `detLongSize`, 960,
-         * `limit_type = max`; 识别分数过滤取 `scoreThreshold` (默认 0).
+         * Per-call settings (D25): det `limit_side_len` from extras, then `detLongSize`, then 960;
+         * det tuning from the [EXTRA_DET_LIMIT_TYPE] family of extras; recognition score filter from
+         * `scoreThreshold`, 0.1 when the host leaves it unset (-1) as the Paddle Lite v3 engine does.
+         * zh-CN: 每次调用的设置 (D25): det `limit_side_len` 依次取 extras, `detLongSize`, 960;
+         * det 调参取 [EXTRA_DET_LIMIT_TYPE] 等 extras; 识别分数过滤取 `scoreThreshold`, 宿主未设置 (-1) 时为 0.1, 与 Paddle Lite 版 v3 引擎一致.
          */
         fun runConfigOf(options: OcrOptions): PaddleOCRConfig {
-            val extraLimit = options.extras?.getInt(PaddleOcrOptionExtraKeys.DET_LIMIT_SIDE_LEN, 0) ?: 0
+            val extras = options.extras
+            val extraLimit = extras?.getInt(PaddleOcrOptionExtraKeys.DET_LIMIT_SIDE_LEN, 0) ?: 0
             val limitSideLen = when {
                 extraLimit > 0 -> extraLimit
                 options.detLongSize > 0 -> options.detLongSize
                 else -> DEFAULT_DET_LIMIT_SIDE_LEN
             }
-            return PaddleOCRConfig(
+            val defaults = PaddleOCRConfig(detBoxThresh = 0.5f, detUnclipRatio = 1.6f)
+            return defaults.copy(
                 detLimitSideLen = limitSideLen,
-                detLimitType = "max",
-                detThresh = 0.3f,
-                detBoxThresh = 0.5f,
-                detUnclipRatio = 1.6f,
-                recScoreThresh = options.scoreThreshold.takeIf { it >= 0f } ?: 0f,
+                detLimitType = extras?.getString(EXTRA_DET_LIMIT_TYPE) ?: defaults.detLimitType,
+                detMaxSideLimit = extras?.getInt(EXTRA_DET_MAX_SIDE_LIMIT, 0)?.takeIf { it > 0 } ?: defaults.detMaxSideLimit,
+                detThresh = extras?.getFloat(EXTRA_DET_THRESH, defaults.detThresh) ?: defaults.detThresh,
+                detBoxThresh = extras?.getFloat(EXTRA_DET_BOX_THRESH, defaults.detBoxThresh) ?: defaults.detBoxThresh,
+                detUnclipRatio = extras?.getFloat(EXTRA_DET_UNCLIP_RATIO, defaults.detUnclipRatio) ?: defaults.detUnclipRatio,
+                recScoreThresh = options.scoreThreshold.takeIf { it >= 0f } ?: DEFAULT_REC_SCORE_THRESH,
+                recBatchSize = (extras?.getInt(EXTRA_REC_BATCH_SIZE, 1) ?: 1).coerceAtLeast(1),
             )
         }
 
-        private fun OCRResult.toOcrResult(): OcrResult {
+        private fun OCRResult.toOcrResult(executionProvider: String): OcrResult {
             val points = box.points
             val quad = FloatArray(points.size * 2)
             points.forEachIndexed { index, point ->
@@ -155,11 +171,17 @@ class OnnxPaddleOcrEngine(
                     ceil(points.maxOf { it.x }).toInt(),
                     ceil(points.maxOf { it.y }).toInt(),
                 )
-                result.extras = Bundle().apply { putFloatArray(EXTRA_QUAD, quad) }
+                result.extras = Bundle().apply {
+                    putFloatArray(EXTRA_QUAD, quad)
+                    putString(EXTRA_EXECUTION_PROVIDER, executionProvider)
+                }
             }
         }
 
         const val EXTRA_QUAD = "quad"
+
+        /** `cpu` or `nnapi`, the execution provider the sessions actually run on (same key as the plugin). */
+        const val EXTRA_EXECUTION_PROVIDER = "executionProvider"
     }
 }
 

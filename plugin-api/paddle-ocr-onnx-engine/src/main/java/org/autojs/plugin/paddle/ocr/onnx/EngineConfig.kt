@@ -16,4 +16,6 @@ package org.autojs.plugin.paddle.ocr.onnx
 
 data class EngineConfig(
     val numThreads: Int = 4,
+    /** Requests the NNAPI execution provider; sessions fall back to CPU when it is unavailable. */
+    val useNnapi: Boolean = false,
 )

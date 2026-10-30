@@ -29,9 +29,9 @@ class OCREngine(
     context: Context,
     private val config: PaddleOCRConfig,
     engineConfig: EngineConfig,
-    detModelAsset: String = "models/det/inference.onnx",
-    recModelAsset: String = "models/rec/inference.onnx",
-    recConfigAsset: String = "models/rec/inference.yml",
+    detModelAsset: String = "models/ppocrv3/det/inference.onnx",
+    recModelAsset: String = "models/ppocrv3/rec/inference.onnx",
+    recConfigAsset: String = "models/ppocrv3/rec/inference.yml",
     clsModelAsset: String? = null,
 ) {
     private val ortManager = ORTSessionManager(context, engineConfig)
@@ -39,10 +39,12 @@ class OCREngine(
     private val recognitionEngine: RecognitionEngine
     private val classificationEngine: ClassificationEngine?
     val coldLoadTimeMs: Long get() = ortManager.coldLoadTimeMs
+    val executionProvider: String get() = ortManager.executionProvider
 
     init {
         val configured = try {
-            ortManager.loadModels(detModelAsset, recModelAsset, clsModelAsset)
+            // The orientation model is only loaded when the stage is enabled.
+            ortManager.loadModels(detModelAsset, recModelAsset, clsModelAsset?.takeIf { config.useCls })
             val recModelConfig = ModelConfig.parse(context, recConfigAsset)
             recModelConfig
         } catch (t: Throwable) {
@@ -51,7 +53,11 @@ class OCREngine(
         }
         detectionEngine = DetectionEngine(ortManager, config)
         recognitionEngine = RecognitionEngine(ortManager, configured.characterList)
-        classificationEngine = if (ortManager.hasClassifier) ClassificationEngine(ortManager) else null
+        classificationEngine = if (ortManager.hasClassifier) {
+            ClassificationEngine(ortManager, config.clsThresh, config.clsBatchSize)
+        } else {
+            null
+        }
     }
 
     /** [config] overrides the construction-time settings for this call only (models are not reloaded). */
@@ -95,13 +101,17 @@ class OCREngine(
                 detPostprocessMs = detResult.postprocessMs,
                 detInputShape = detResult.inputShape,
                 coldLoadTimeMs = ortManager.coldLoadTimeMs,
+                executionProvider = ortManager.executionProvider,
             )
         }
 
         // 2. Sort boxes
         val sortedBoxes = BoxSorter.sortInReadingOrder(boxes)
 
-        // 3. Crop and recognize text regions
+        // 3. Crop every text region, classify orientation, then recognize in batches
+        val crops = mutableListOf<org.opencv.core.Mat>()
+        val cropBoxIndices = mutableListOf<Int>()
+        var totalClsMs = 0L
         var totalRecPreMs = 0L
         var totalRecInfMs = 0L
         var totalRecPostMs = 0L
@@ -111,63 +121,62 @@ class OCREngine(
         val perLineRecMs = mutableListOf<Long>()
         val batchSize = config.recBatchSize.coerceAtLeast(1)
 
-        var i = 0
-        while (i < sortedBoxes.size) {
-            val batchCrops = mutableListOf<org.opencv.core.Mat>()
-            val batchBoxIndices = mutableListOf<Int>()
-            var next = i
-            while (next < sortedBoxes.size && batchCrops.size < batchSize) {
-                val crop = QuadTextCrop.crop(srcMat, sortedBoxes[next])
+        try {
+            for (index in sortedBoxes.indices) {
+                val crop = QuadTextCrop.crop(srcMat, sortedBoxes[index])
                 if (crop.rows() > 0 && crop.cols() > 0) {
-                    batchCrops.add(crop)
-                    batchBoxIndices.add(next)
+                    crops.add(crop)
+                    cropBoxIndices.add(index)
                 } else {
                     crop.release()
                 }
-                next++
             }
 
-            try {
-                if (batchCrops.isNotEmpty()) {
-                    // det -> (cls) -> rec: upside-down lines are turned upright before recognition.
-                    // zh-CN: det -> (cls) -> rec: 倒置的文本行在识别前转正.
-                    classificationEngine?.rotateUpsideDown(batchCrops)
-                    val batchResult = recognitionEngine.recognize(batchCrops)
-                    totalRecPreMs += batchResult.preprocessMs
-                    totalRecInfMs += batchResult.inferenceMs
-                    totalRecPostMs += batchResult.postprocessMs
-                    totalRecMs += batchResult.timeMs
-                    recInputShapes.add(batchResult.inputShape)
-                    if (batchSize == 1) {
-                        perLineRecMs.add(batchResult.timeMs)
-                    }
+            classificationEngine?.let { engine ->
+                if (crops.isNotEmpty()) {
+                    totalClsMs = engine.classifyAndRotate(crops).timeMs
+                }
+            }
 
-                    for (j in batchResult.texts.indices) {
-                        val boxIdx = batchBoxIndices[j]
-                        val (text, confidence) = batchResult.texts[j]
-                        if (confidence >= config.recScoreThresh) {
-                            allResults.add(
-                                OCRResult(
-                                    box = sortedBoxes[boxIdx],
-                                    text = text,
-                                    confidence = confidence,
-                                )
+            var i = 0
+            while (i < crops.size) {
+                val next = minOf(i + batchSize, crops.size)
+                val batchResult = recognitionEngine.recognize(crops.subList(i, next))
+                totalRecPreMs += batchResult.preprocessMs
+                totalRecInfMs += batchResult.inferenceMs
+                totalRecPostMs += batchResult.postprocessMs
+                totalRecMs += batchResult.timeMs
+                recInputShapes.add(batchResult.inputShape)
+                if (batchSize == 1) {
+                    perLineRecMs.add(batchResult.timeMs)
+                }
+
+                for (j in batchResult.texts.indices) {
+                    val boxIdx = cropBoxIndices[i + j]
+                    val (text, confidence) = batchResult.texts[j]
+                    if (confidence >= config.recScoreThresh) {
+                        allResults.add(
+                            OCRResult(
+                                box = sortedBoxes[boxIdx],
+                                text = text,
+                                confidence = confidence,
                             )
-                        }
+                        )
                     }
                 }
-            } finally {
-                batchCrops.forEach { it.release() }
+                i = next
             }
-            i = next
+        } finally {
+            crops.forEach { it.release() }
         }
 
         val totalElapsed = System.currentTimeMillis() - totalStart
-        val pipelineOverhead = totalElapsed - detResult.timeMs - totalRecMs
+        val pipelineOverhead = totalElapsed - detResult.timeMs - totalClsMs - totalRecMs
 
         return OCREngineResult(
             results = allResults,
             detectionTimeMs = detResult.timeMs,
+            classificationTimeMs = totalClsMs,
             recognitionTimeMs = totalRecMs,
             totalTimeMs = totalElapsed,
             lineCount = allResults.size,
@@ -179,6 +188,7 @@ class OCREngine(
             recPostprocessMs = totalRecPostMs,
             pipelineOverheadMs = pipelineOverhead,
             coldLoadTimeMs = ortManager.coldLoadTimeMs,
+            executionProvider = ortManager.executionProvider,
             detInputShape = detResult.inputShape,
             recInputShapes = recInputShapes,
             perLineRecMs = perLineRecMs,

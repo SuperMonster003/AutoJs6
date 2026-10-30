@@ -7,18 +7,21 @@ application itself never runs it: inside AutoJs6, `ocr.paddle` binds the install
 ## Source
 
 The pipeline under `org.autojs.plugin.paddle.ocr.onnx` (everything except `OnnxPaddleOcrEngine.kt`)
-is copied from `libs/ppocr-android-sdk` of `AutoJs6-Plugin-Paddle-OCR-PP-OCRv4` (318ecb3), which is
-derived from PaddleOCR (Apache License 2.0, the per-file headers are kept). Changes made here:
+is copied from `libs/ppocr-android-sdk` of `AutoJs6-Plugin-Paddle-OCR-PP-OCRv3` (b9fa0cc, roadmap
+P1.2), which is derived from PaddleOCR (Apache License 2.0, the per-file headers are kept). Changes
+made here:
 
-- Package renamed from `com.paddle.ocr` to `org.autojs.plugin.paddle.ocr.onnx`.
-- `PaddleOCR` is a blocking API without coroutines; `recognize` accepts a per-call `PaddleOCRConfig`.
+- Package renamed from `io.github.supermonster003.autojs6.plugin.paddleocr.v3.sdk` to
+  `org.autojs.plugin.paddle.ocr.onnx`.
+- `PaddleOCR` is a blocking API without coroutines; `recognize` accepts a per-call `PaddleOCRConfig`,
+  so detection and score settings change without reloading the models.
 - `OpenCVUtils` is removed: the caller loads OpenCV through the host (`OpenCvPluginHost`).
-- Text line orientation classification (`ClassificationEngine`, `ClsPreprocessor`) runs between
-  detection and recognition when a cls model is given.
-- `EngineConfig.numThreads <= 0` keeps the ONNX Runtime default thread count.
 
-Pending: sync with the PP-OCRv3 plugin SDK (`AutoJs6-Plugin-Paddle-OCR-PP-OCRv3`, roadmap P1.2) once
-it is final, so both sides share the cls, slim and NNAPI behaviour.
+`OnnxPaddleOcrEngine` maps `OcrOptions` as the plugin's `PpOcrV3EngineSettings.resolve` does (roadmap
+D25): 0 or negative `cpuThreadNum` -> 4 threads, `useSlim` -> slim det / rec when packaged,
+`useOpenCL` -> NNAPI execution provider with CPU fallback (result extras `executionProvider`),
+`scoreThreshold` -1 -> 0.1, extras `useCls` -> orientation classification, and the same det tuning
+extras. When the plugin SDK changes, copy it again and keep the changes above.
 
 ## Native libraries
 

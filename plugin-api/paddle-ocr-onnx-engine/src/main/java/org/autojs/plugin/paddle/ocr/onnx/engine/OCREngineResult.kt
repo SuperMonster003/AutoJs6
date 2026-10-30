@@ -20,6 +20,7 @@ data class OCREngineResult(
     val results: List<OCRResult>,
     val detectionTimeMs: Long,
     val recognitionTimeMs: Long,
+    val classificationTimeMs: Long = 0,
     val totalTimeMs: Long,
     val lineCount: Int,
     // Detailed per-stage timing
@@ -31,6 +32,7 @@ data class OCREngineResult(
     val recPostprocessMs: Long = 0,
     val pipelineOverheadMs: Long = 0,
     val coldLoadTimeMs: Long = 0,
+    val executionProvider: String = ExecutionProviders.CPU,
     // Input tensor shapes
     val detInputShape: List<Int> = emptyList(),
     val recInputShapes: List<List<Int>> = emptyList(),

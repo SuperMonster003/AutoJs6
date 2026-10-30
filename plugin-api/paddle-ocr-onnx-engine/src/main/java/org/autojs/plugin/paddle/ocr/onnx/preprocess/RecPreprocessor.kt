@@ -14,92 +14,71 @@
 
 package org.autojs.plugin.paddle.ocr.onnx.preprocess
 
-import org.opencv.core.Core
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
-import kotlin.math.ceil
 
 data class RecPreprocessResult(
     val tensorData: FloatArray,
     val shape: LongArray,
 )
 
+/**
+ * PP-OCRv3 text-line preprocessing (PaddleOCR 2.7): crops stay BGR, are resized to height 48
+ * with their aspect ratio kept, normalized to (x / 255 - 0.5) / 0.5 and right-padded with zeros.
+ */
 object RecPreprocessor {
-    private const val FIXED_HEIGHT = 48
-    private const val MAX_IMG_W = 3200
 
+    /** Recognition batch: the tensor width is [TextLineResize.recBatchWidth] of the crops. */
     fun preprocessBatch(crops: List<Mat>): RecPreprocessResult {
-        // Convert BGR to RGB and resize to fixed height while preserving aspect ratio
-        val resizedMats = mutableListOf<Mat>()
-        for (crop in crops) {
-            // Convert BGR to RGB (model expects RGB input)
-            val rgb = Mat()
-            Imgproc.cvtColor(crop, rgb, Imgproc.COLOR_BGR2RGB)
-            val h = rgb.rows()
-            val w = rgb.cols()
-            val aspectRatio = if (h > 0) w.toDouble() / h else 1.0
-            val newW = ceil(FIXED_HEIGHT * aspectRatio).toInt().coerceAtMost(MAX_IMG_W)
-            val dst = Mat()
-            Imgproc.resize(rgb, dst, Size(newW.toDouble(), FIXED_HEIGHT.toDouble()), 0.0, 0.0, Imgproc.INTER_LINEAR)
-            rgb.release()
-            resizedMats.add(dst)
+        val targetWidth = TextLineResize.recBatchWidth(crops.map { it.cols() to it.rows() })
+        return preprocess(crops, targetWidth)
+    }
+
+    /** Orientation batch: every crop goes into a fixed [TextLineResize.CLS_WIDTH] wide tensor. */
+    fun preprocessClsBatch(crops: List<Mat>): RecPreprocessResult {
+        return preprocess(crops, TextLineResize.CLS_WIDTH)
+    }
+
+    private fun preprocess(crops: List<Mat>, targetWidth: Int): RecPreprocessResult {
+        val height = TextLineResize.HEIGHT
+        val plane = height * targetWidth
+        val tensorData = FloatArray(crops.size * 3 * plane)
+        crops.forEachIndexed { index, crop ->
+            val resizedWidth = TextLineResize.resizedWidth(crop.cols(), crop.rows(), targetWidth)
+            writeNormalized(crop, resizedWidth, targetWidth, tensorData, index * 3 * plane)
         }
-
-        // Convert to float and normalize: (x / 255 - 0.5) / 0.5 = x / 127.5 - 1
-        val floatMats = mutableListOf<Mat>()
-        for (mat in resizedMats) {
-            val floatMat = Mat(mat.rows(), mat.cols(), CvType.CV_32FC3)
-            mat.convertTo(floatMat, CvType.CV_32F)
-            // Use Scalar with all 3 channels set — single-value Scalar only sets val[0]!
-            Core.divide(floatMat, org.opencv.core.Scalar(127.5, 127.5, 127.5), floatMat)
-            Core.subtract(floatMat, org.opencv.core.Scalar(1.0, 1.0, 1.0), floatMat)
-
-            floatMats.add(floatMat)
-            mat.release()  // Release resized mat
-        }
-        resizedMats.clear()
-
-        val maxW = floatMats.maxOf { it.cols() }
-        val n = floatMats.size
-
-        // Pad to max width
-        val paddedMats = mutableListOf<Mat>()
-        for (mat in floatMats) {
-            if (mat.cols() == maxW) {
-                paddedMats.add(mat)
-            } else {
-                val padded = Mat(FIXED_HEIGHT, maxW, CvType.CV_32FC3, org.opencv.core.Scalar(0.0))
-                val roi = padded.submat(0, FIXED_HEIGHT, 0, mat.cols())
-                mat.copyTo(roi)
-                roi.release()
-                mat.release()
-                paddedMats.add(padded)
-            }
-        }
-        floatMats.clear()
-
-        // Build tensor data
-        val channelSize = FIXED_HEIGHT * maxW
-        val tensorData = FloatArray(n * 3 * channelSize)
-        for (b in 0 until n) {
-            val mat = paddedMats[b]
-            val channels = mutableListOf<Mat>()
-            Core.split(mat, channels)
-            for (c in 0..2) {
-                val buf = FloatArray(channelSize)
-                channels[c].get(0, 0, buf)
-                System.arraycopy(buf, 0, tensorData, (b * 3 + c) * channelSize, channelSize)
-                channels[c].release()
-            }
-            mat.release()
-        }
-        paddedMats.clear()
-
         return RecPreprocessResult(
             tensorData = tensorData,
-            shape = longArrayOf(n.toLong(), 3, FIXED_HEIGHT.toLong(), maxW.toLong()),
+            shape = longArrayOf(crops.size.toLong(), 3, height.toLong(), targetWidth.toLong()),
         )
+    }
+
+    private fun writeNormalized(crop: Mat, resizedWidth: Int, targetWidth: Int, dest: FloatArray, offset: Int) {
+        val height = TextLineResize.HEIGHT
+        val resized = Mat()
+        val floatMat = Mat()
+        try {
+            Imgproc.resize(crop, resized, Size(resizedWidth.toDouble(), height.toDouble()), 0.0, 0.0, Imgproc.INTER_LINEAR)
+            // (x / 255 - 0.5) / 0.5 == x / 127.5 - 1
+            resized.convertTo(floatMat, CvType.CV_32FC3, 1.0 / 127.5, -1.0)
+            val hwc = FloatArray(height * resizedWidth * 3)
+            floatMat.get(0, 0, hwc)
+            val plane = height * targetWidth
+            for (y in 0 until height) {
+                val srcRow = y * resizedWidth * 3
+                val dstRow = offset + y * targetWidth
+                for (x in 0 until resizedWidth) {
+                    val src = srcRow + x * 3
+                    dest[dstRow + x] = hwc[src]
+                    dest[dstRow + plane + x] = hwc[src + 1]
+                    dest[dstRow + 2 * plane + x] = hwc[src + 2]
+                }
+            }
+        } finally {
+            floatMat.release()
+            resized.release()
+        }
     }
 }

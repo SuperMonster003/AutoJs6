@@ -112,17 +112,26 @@ class PaddleOcrEmbeddedEngineTest {
             scoreThreshold = -1f
         }
         assertEquals(
-            OnnxPaddleOcrEngine.SessionKey(slim = false, threads = 4, useCls = false),
+            OnnxPaddleOcrEngine.SessionKey(slim = false, threads = 4, useNnapi = false, useCls = false),
             OnnxPaddleOcrEngine.sessionKeyOf(defaults, slimAvailable = false),
         )
         assertTrue(OnnxPaddleOcrEngine.sessionKeyOf(defaults, slimAvailable = true).slim)
         assertFalse(OnnxPaddleOcrEngine.sessionKeyOf(defaults.apply { useSlim = false }, slimAvailable = true).slim)
-        assertEquals(0, OnnxPaddleOcrEngine.sessionKeyOf(defaults.apply { cpuThreadNum = -2 }, slimAvailable = true).threads)
+        assertEquals(
+            OnnxPaddleOcrEngine.DEFAULT_THREADS,
+            OnnxPaddleOcrEngine.sessionKeyOf(defaults.apply { cpuThreadNum = -2 }, slimAvailable = true).threads,
+        )
+        assertTrue(OnnxPaddleOcrEngine.sessionKeyOf(defaults.apply { useOpenCL = true }, slimAvailable = true).useNnapi)
 
         val config = OnnxPaddleOcrEngine.runConfigOf(defaults)
         assertEquals(OnnxPaddleOcrEngine.DEFAULT_DET_LIMIT_SIDE_LEN, config.detLimitSideLen)
         assertEquals("max", config.detLimitType)
-        assertEquals(0f, config.recScoreThresh)
+        assertEquals(4000, config.detMaxSideLimit)
+        assertEquals(0.3f, config.detThresh)
+        assertEquals(0.5f, config.detBoxThresh)
+        assertEquals(1.6f, config.detUnclipRatio)
+        assertEquals(1, config.recBatchSize)
+        assertEquals(OnnxPaddleOcrEngine.DEFAULT_REC_SCORE_THRESH, config.recScoreThresh)
 
         val tuned = OnnxPaddleOcrEngine.runConfigOf(defaults.apply {
             detLongSize = 1280
@@ -130,6 +139,7 @@ class PaddleOcrEmbeddedEngineTest {
         })
         assertEquals(1280, tuned.detLimitSideLen)
         assertEquals(0.6f, tuned.recScoreThresh)
+        assertEquals(0f, OnnxPaddleOcrEngine.runConfigOf(defaults.apply { scoreThreshold = 0f }).recScoreThresh)
     }
 
 }

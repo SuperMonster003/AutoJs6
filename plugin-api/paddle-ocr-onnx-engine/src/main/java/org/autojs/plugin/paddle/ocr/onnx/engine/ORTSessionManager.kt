@@ -18,6 +18,8 @@ import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import android.content.Context
+import android.os.Build
+import android.util.Log
 import org.autojs.plugin.paddle.ocr.onnx.EngineConfig
 import org.autojs.plugin.paddle.ocr.onnx.model.OCRError
 import java.io.File
@@ -37,61 +39,79 @@ class ORTSessionManager(
     var coldLoadTimeMs: Long = 0
         private set
 
+    /** [ExecutionProviders.CPU] or [ExecutionProviders.NNAPI], whichever the sessions were created with. */
+    var executionProvider: String = ExecutionProviders.CPU
+        private set
+
     val hasClassifier: Boolean get() = clsSession != null
 
     fun loadModels(detAssetPath: String, recAssetPath: String, clsAssetPath: String? = null) {
         val loadStart = System.currentTimeMillis()
-        env = OrtEnvironment.getEnvironment()
-        val opts = OrtSession.SessionOptions().apply {
-            setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
-            // 0 or a negative count keeps the ONNX Runtime default (one thread per physical core).
-            // zh-CN: 0 或负数沿用 ONNX Runtime 默认值 (每个物理核心一个线程).
-            if (config.numThreads > 0) setIntraOpNumThreads(config.numThreads)
+        val ortEnv = OrtEnvironment.getEnvironment()
+        env = ortEnv
+        // Keep models out of the Java heap by materializing each asset once and letting
+        // ONNX Runtime map the file instead of copying a byte array.
+        val detModel = materializeModelAsset(detAssetPath)
+        val recModel = materializeModelAsset(recAssetPath)
+        val clsModel = clsAssetPath?.let { materializeModelAsset(it) }
+        if (ExecutionProviders.shouldRequestNnapi(config.useNnapi, Build.VERSION.SDK_INT)) {
+            try {
+                createSessions(ortEnv, detModel, recModel, clsModel, nnapi = true)
+                executionProvider = ExecutionProviders.NNAPI
+            } catch (t: Throwable) {
+                closeSessions()
+                Log.w(TAG, "NNAPI execution provider unavailable, using CPU: $t")
+                createSessions(ortEnv, detModel, recModel, clsModel, nnapi = false)
+                executionProvider = ExecutionProviders.CPU
+            }
+        } else {
+            if (config.useNnapi) {
+                Log.i(TAG, "NNAPI needs Android 8.1 (API ${ExecutionProviders.NNAPI_MIN_SDK}), using CPU")
+            }
+            createSessions(ortEnv, detModel, recModel, clsModel, nnapi = false)
+            executionProvider = ExecutionProviders.CPU
         }
-        try {
-            val ortEnv = env ?: throw OCRError.ModelLoadFailed("OCR", Exception("Environment not initialized"))
-            // Server-class models exceed 100 MB; keep them out of the Java heap by materializing the
-            // asset once and letting ONNX Runtime map the file instead of copying a byte array.
-            val detModel = materializeModelAsset(detAssetPath)
-            val recModel = materializeModelAsset(recAssetPath)
-            try {
-                detSession = ortEnv.createSession(detModel.absolutePath, opts)
-            } catch (t: Throwable) {
-                throw OCRError.ModelLoadFailed("detection", t)
-            }
-            try {
-                recSession = ortEnv.createSession(recModel.absolutePath, opts)
-            } catch (t: Throwable) {
-                detSession?.close()
-                detSession = null
-                throw OCRError.ModelLoadFailed("recognition", t)
-            }
+        coldLoadTimeMs = System.currentTimeMillis() - loadStart
+        Log.i(TAG, "Sessions ready on $executionProvider in $coldLoadTimeMs ms (cls ${if (clsModel != null) "on" else "off"})")
+    }
 
-            detInputName = try {
-                detSession!!.inputNames.iterator().next()
-            } catch (t: Throwable) {
-                throw OCRError.ModelLoadFailed("detection", t)
+    private fun createSessions(ortEnv: OrtEnvironment, detModel: File, recModel: File, clsModel: File?, nnapi: Boolean) {
+        val opts = OrtSession.SessionOptions()
+        try {
+            opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
+            opts.setIntraOpNumThreads(config.numThreads)
+            if (nnapi) {
+                opts.addNnapi()
             }
-            recInputName = try {
-                recSession!!.inputNames.iterator().next()
-            } catch (t: Throwable) {
-                throw OCRError.ModelLoadFailed("recognition", t)
+            detSession = createSession(ortEnv, detModel, opts, "detection")
+            detInputName = firstInputName(detSession!!, "detection")
+            recSession = createSession(ortEnv, recModel, opts, "recognition")
+            recInputName = firstInputName(recSession!!, "recognition")
+            if (clsModel != null) {
+                clsSession = createSession(ortEnv, clsModel, opts, "classification")
+                clsInputName = firstInputName(clsSession!!, "classification")
             }
-            if (clsAssetPath != null) {
-                clsSession = try {
-                    ortEnv.createSession(materializeModelAsset(clsAssetPath).absolutePath, opts)
-                } catch (t: Throwable) {
-                    throw OCRError.ModelLoadFailed("classification", t)
-                }
-                clsInputName = try {
-                    clsSession!!.inputNames.iterator().next()
-                } catch (t: Throwable) {
-                    throw OCRError.ModelLoadFailed("classification", t)
-                }
-            }
-            coldLoadTimeMs = System.currentTimeMillis() - loadStart
+        } catch (t: Throwable) {
+            closeSessions()
+            throw t
         } finally {
             opts.close()
+        }
+    }
+
+    private fun createSession(ortEnv: OrtEnvironment, model: File, opts: OrtSession.SessionOptions, modelName: String): OrtSession {
+        return try {
+            ortEnv.createSession(model.absolutePath, opts)
+        } catch (t: Throwable) {
+            throw OCRError.ModelLoadFailed(modelName, t)
+        }
+    }
+
+    private fun firstInputName(session: OrtSession, modelName: String): String {
+        return try {
+            session.inputNames.iterator().next()
+        } catch (t: Throwable) {
+            throw OCRError.ModelLoadFailed(modelName, t)
         }
     }
 
@@ -120,6 +140,11 @@ class ORTSessionManager(
     }
 
     fun release() {
+        closeSessions()
+        env = null
+    }
+
+    private fun closeSessions() {
         try {
             detSession?.close()
         } finally {
@@ -132,7 +157,6 @@ class ORTSessionManager(
                     clsSession?.close()
                 } finally {
                     clsSession = null
-                    env = null
                 }
             }
         }
@@ -141,7 +165,6 @@ class ORTSessionManager(
     /**
      * Copies an APK model asset into app-private storage (once per installed APK version) and
      * returns the file, so sessions can be created from a path that ONNX Runtime memory-maps.
-     * Reading a 90-110 MB asset into a byte array exhausts the default 256 MB Java heap.
      */
     private fun materializeModelAsset(assetPath: String): File {
         return try {
@@ -167,6 +190,7 @@ class ORTSessionManager(
     }
 
     private companion object {
+        const val TAG = "ORTSessionManager"
         const val COPY_BUFFER_BYTES = 1 shl 20
     }
 

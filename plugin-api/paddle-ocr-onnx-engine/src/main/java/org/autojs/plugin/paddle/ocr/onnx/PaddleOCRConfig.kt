@@ -16,8 +16,8 @@ package org.autojs.plugin.paddle.ocr.onnx
 
 data class PaddleOCRConfig(
     val detImgMode: String = "BGR",
-    val detLimitSideLen: Int = 64,
-    val detLimitType: String = "min",
+    val detLimitSideLen: Int = 960,
+    val detLimitType: String = "max",
     val detMaxSideLimit: Int = 4000,
     val detThresh: Float = 0.3f,
     val detBoxThresh: Float = 0.6f,
@@ -28,4 +28,7 @@ data class PaddleOCRConfig(
     val detBoxType: String = "quad",
     val recScoreThresh: Float = 0.0f,
     val recBatchSize: Int = 1,
+    val useCls: Boolean = false,
+    val clsThresh: Float = 0.9f,
+    val clsBatchSize: Int = 6,
 )

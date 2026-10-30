@@ -31,6 +31,9 @@ class PaddleOCR private constructor(
     /** Time spent loading ONNX models (milliseconds). */
     val coldLoadTimeMs: Long get() = engine.coldLoadTimeMs
 
+    /** Execution provider the sessions run on: `cpu` or `nnapi`. */
+    val executionProvider: String get() = engine.executionProvider
+
     companion object {
 
         fun create(
@@ -75,6 +78,7 @@ class PaddleOCR private constructor(
     private fun OCREngineResult.toRunResult() = OCRRunResult(
         results = results,
         detectionTimeMs = detectionTimeMs,
+        classificationTimeMs = classificationTimeMs,
         recognitionTimeMs = recognitionTimeMs,
         totalTimeMs = totalTimeMs,
         lineCount = lineCount,
@@ -86,6 +90,7 @@ class PaddleOCR private constructor(
         recPostprocessMs = recPostprocessMs,
         pipelineOverheadMs = pipelineOverheadMs,
         coldLoadTimeMs = coldLoadTimeMs,
+        executionProvider = executionProvider,
         detInputShape = detInputShape,
         recInputShapes = recInputShapes,
         perLineRecMs = perLineRecMs,
