@@ -1127,3 +1127,43 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 文档 | ab68155 / 9567ec3 | 15 页运行时支持表, changelog / progress (zh-Hans); 生成物 |
 | Offline Docs | a0f2265 | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.3 勾选与落点 / 附录 C Q104 / Q106 / Q164 - Q169, REVIEW 7.1 P3.3 落点 |
+
+## 17. P3.4 Node 自动化族 (2026-10-30, 子会话 api-cov-p3-4)
+
+### 17.1 做了什么
+
+- 本族 (automator / auto / keys / ocr / barcode / qrcode / yolo / YoloDetector#, threads / continuation / timers / VolatileDispose# / 全局 sleep / wait, selector 全局 / Flow#, events 的 Q18 原型行) 在 Node main / Worker 两列 pending 清零, 只剩 Flow#await / Flow#sync (Q31). 设计 Q175 - Q178 全选推荐; Q179 (Promise 形态) 已按推荐先行待确认; 真机发现的 threads.pool 差异登记 Q180.
+- Node 插件: 共享工厂 `__autojs6_create_automation` 供主线程与 Worker (CJS / ESM / 嵌套) 共用, 入口 autojs6:automator / auto / threads / continuation / timers / yolo / selector / qrcode, keys / ocr / autojs6:events / autojs6:system 补 Rhino 成员, 本族 Rhino 全局装到 globalThis (Q177 (a)); 能力目录 31 个操作与 4 个能力; d.ts (automation.d.ts 等), HOST-API, 桌面对照 18 项, 真机对照脚本 tools/nodejs/api/automation.
+- 宿主: RuntimeAutomationBridge (automator / auto / yolo) 与 NodeAutomationObservers (events 新会话), 能力 accessibility.service / events.key.intercept / events.touch (不被父能力隐含, Q178 (a)) 与 yolo; runtime-policy.json 加 returnedObjects VolatileDispose / YoloDetector 与 wait.async 成员别名; 结构脚本 check-runtime-automation.mjs 接入 CI "Script API coverage"; test_runtime_matrix.py 加 test_p3_4, test_p1_4 去掉已覆盖的三行.
+
+### 17.2 前后数字
+
+| 项 | 改动前 (宿主 a5c55974a) | 改动后 (宿主 307655f10) |
+| --- | --- | --- |
+| pending 基线 Node 主线程 / Worker | 814 / 867 | 680 / 681 (本族 134 / 186 -> 0, 剩 Flow#await / Flow#sync) |
+| 本族行 Node 主线程 / Worker | 187 行, pending 134 / 186 | pending 0 / 0 (Flow# 2 行另计, Q31) |
+| Ace 运行时查询 | 4293 (Node main 1172, Worker 1127) | 4577 (Node main 1291, Worker 1287) |
+| 文档运行时支持表 | - | 13 页重生成 (automator, barcode, continuation, events, flow, global, keys, ocr, qrcode, threads, timers, uiSelectorType, yolo) |
+
+### 17.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-api-cov-p3-4-head` (宿主 a5c55974a + 本批改动, KSP 同副本, Node b77c28cb): `check.py --matrix --strict-arity --docs-support` (含 Ace) 退出码 0; api-coverage 单测通过 (test_runtime_matrix 42 项).
+- check-runtime-automation.mjs (`{"hostMembers":180,"globals":29,"eventsPrototype":36,"hostRoutes":31,"capabilities":4,"hostApi":true}`) 通过; Node 插件桌面对照 test-automation-rhino.js 18 项通过 (CI 清单 128 / 128); TS verify-runtime-declarations 与 Ace verify-runtime-api-coverage.mjs --fresh 通过.
+- 真机 BH900ASK9E (Sony G8441, Android 9 / API 28, 宿主 debug 5935 = e2d824545, Node debug 340 = 8fc9c801 + 079579ec 的 node_bridge_sources.cpp): Rhino 44 / 44, Node main / ESM / 嵌套 Worker 各 53 通过, 未声明能力 8 通过; 装回原包并核对 md5. 报告 [runtime-automation-2026-10-30](../dev/runtime-automation-2026-10-30.md).
+
+### 17.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 1468ec8d9 | 附录 C Q175 - Q179 |
+| 宿主 | 0feda5cfc | RuntimeAutomationBridge, NodeAutomationObservers, 4 个能力, 单测 |
+| Node 插件 | 9736c852 | 共享工厂, Worker 接线, 能力目录, d.ts, HOST-API, 桌面对照测试 |
+| Node 插件 | b77c28cb | auto.enable / disable 别名 |
+| Node 插件 | 079579ec | threads.pool 的 corePoolSize / maxPoolSize 校验, HOST-API 差异, 真机对照脚本 tools/nodejs/api/automation |
+| 宿主 | 307655f10 | MATRIX.md, pending-baseline.json, runtime-policy.json |
+| 宿主 | 9c46485a8 / 94c21be6f | check-runtime-automation.mjs, test_p3_4, CI |
+| TS | bdaf3da | 同步 Node 运行时声明 |
+| Ace | 2285938 / bc80847 | 内置 Node 运行时声明, 运行时查询表 4293 -> 4577 |
+| 文档 | efaad8e / 6e0936c | 13 页运行时支持表, changelog / progress, 生成物 |
+| Offline Docs | 28fa851 | 同步生成页, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.4 勾选与落点 / 附录 C Q180, REVIEW 7.1 P3.4 落点 |
