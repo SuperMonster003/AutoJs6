@@ -46,6 +46,7 @@
 - 现状 (逐工具, 共 12): 文档 部分 2/12 (只有 `opencc_convert` 与 `imagequant_quantize` 在 plugins.md 示例里出现, 无标题), d.ts 无 0/12 (只在注释举例), Ace 无 0/12, Node 无 0/12, Bun 无 0/12. 插件 README 列出了 Hanzi-CC / Yolo / Macaw 的工具, Stack-Archive 只在 changelog 提到.
 - 通用入口: `plugins.tools` 的 4 个函数已在分母, 文档 / d.ts / Ace 4/4, Node main / Worker / Bun 各 pending 4 (由 P3 / P4 处理). Node 的 `plugins` 模块是 Node 自己的本地 JS 插件管理器, 与宿主同名不同义.
 - 文档错误: `AutoJs6-Documentation/api/plugins.md` 第 306 行的 `imagequant_quantize` 示例写 `colors: 16` 与 `outputs: { image: ... }`, 实际参数名是 `maxColors`, 输出名是 `png`; 宿主 `PluginToolSchema` 会以 "is not a parameter of this tool" 拒绝 `colors`.
+- P5.2a (2026-10-30) 之后: Macaw 1.3.0 开发中的 P8.4 (6520621) 又加了 `speech_diarize`, `speech_detect_language`, `speech_tag`, 官方工具共 15 个; 工具表与五处现状见第 10 节附表 (附录 C Q156).
 - 建议: 不逐工具进矩阵. 工具是动态目录 (随插件版本变化, 如 Macaw 1.3.0 新增两个说话人工具; 非官方插件也能提供), 参数签名本身是 JSON Schema 并由宿主调用前校验. 改为 plugins.md 增加 "官方插件工具表" (12 行: 名称, 提供插件, 最低版本, 参数, 输出, 可从各 catalog 生成) 并修正上面的示例; d.ts 可加工具名字面量联合 (保留 string 后备) 只用于补全, 不计覆盖. 详见 Q2-2.
 
 ### 2.3 JS 运行时的自有入口 (Node / Bun / QuickJS)
@@ -248,7 +249,7 @@ AutoJs6-Plugin-Bundled-Libraries, AutoJs6-Plugin-Three-Paper-PDF, AutoJs6-Plugin
 
 | 批次 | 插件 | 内容 | 改动仓库 | 设备与插件安装 | 依赖 / 并行 |
 |---|---|---|---|---|---|
-| P5.2a 工具表 [静态 + 1 台核对] | Three-Hanzi-CC, Yolo-NCNN, Image-Quantization, Three-Stack-Archive, Three-Macaw-Speech (5) | plugins.md "官方插件工具表" 12 行 (名称, 提供插件, 最低版本, 参数, 输出), 修正第 306 行示例 (`maxColors`, 输出 `png`); d.ts / Ace 加工具名字面量联合 (保留 string, 不计覆盖); 生成离线文档 | Documentation, Offline-Docs, TS 声明, Ace | 一台主力设备 (Redmi 或 Xiaomi) 装齐 5 个插件, `plugins.tools.list()` 核对名称与参数; Macaw 的两个说话人工具需 1.3.0 构建 (未发布时表内最低版本写 1.3.0 并只核对其余 10 个) | 可与 P5.2b / P5.2c / P5.2d 并行; Ace 索引重建与 P5.2b 排队 |
+| P5.2a 工具表 [静态 + 1 台核对] | Three-Hanzi-CC, Yolo-NCNN, Image-Quantization, Three-Stack-Archive, Three-Macaw-Speech (5) | plugins.md "官方插件工具表" 12 行 (名称, 提供插件, 最低版本, 参数, 输出), 修正第 306 行示例 (`maxColors`, 输出 `png`); d.ts / Ace 加工具名字面量联合 (保留 string, 不计覆盖); 生成离线文档 | Documentation, Offline-Docs, TS 声明, Ace | 一台主力设备 (Redmi 或 Xiaomi) 装齐 5 个插件, `plugins.tools.list()` 核对名称与参数; Macaw 的两个说话人工具需 1.3.0 构建 (未发布时表内最低版本写 1.3.0 并只核对其余 10 个) | 可与 P5.2b / P5.2c / P5.2d 并行; Ace 索引重建与 P5.2b 排队; 落点 (2026-10-30, api-cov-p5-2a): 文档 014ed75 (工具表 + 示例) / 8998510 (changelog / progress) / c1c2fe2 (生成物), Offline Docs 20253b2, TS e6cb1a5, Ace ee1144b, 宿主 c0b3a686e (Ace 补全源); 工具 15 个 (Macaw P8.4 新增 3 个, Q156), 真机 OnePlus 63751f63 list() 15 / 15 通过, 附表见第 10 节 |
 | P5.2b JS 运行时附表 [静态] | NodeJs-Runtime, Bun-Runtime, QuickJS-Runtime (3) | runtimeApis.md 加 "运行时自有接口" 小节 (按组表格: Node 12 组 110 条, Bun 12 条, QuickJS 7 条, 重点写 scriptArgs); Node `worker_threads.WorkerPool` 补 d.ts (Node 插件 `docs/nodejs/types/autojs6-node`, TS 声明 autojs6-node 同步, Ace 捆绑副本); 本文件加附表 | Documentation, Offline-Docs, Node 插件 (d.ts), TS 声明, Ace | 无 | 与 P3 系列错开 Node 插件 d.ts 文件 (共享 checkout 先在 locks.md 登记); 落点 (2026-10-30, api-cov-p5-2b): 文档 b31e71b / 62455f7 / 10bc48b, Offline Docs 836e334, Node 9e6e1a32, TS baf2100, Ace 79a115b |
 | P5.2c 宿主分母补漏 [静态] | MLKit-OCR / Paddle / Rapid 系列, MLKit-Barcode, Three-Block-Compose (只作来源) | Q74: `returned-objects.json` 加 OcrResult# 与 WrappedBarcode# (producers 写 ocr.detect 系列与 barcode.detect 系列), 约 +27 行; Q75: `extract_exports.py` 读 compose-ui-api 目录契约 (V1Catalog / ComposeUiV2 / ComposeModifier) 生成 83 行, 核对五处覆盖; 重新生成 MATRIX.md 与 pending-baseline | 宿主 tools/api-coverage, docs/api-coverage | 无 | MATRIX 重新生成与同期其他子会话排队; 新增行若有 pending 交对应 P3 / P4 批次; 落点 (2026-10-30, api-cov-p5-2c): 宿主 efa050e2b (来源与返回对象) / e50f26694 (MATRIX 与基线) / 552f2b489 (typeScope) / a211654e7 (Ace 索引源), TS 6c93f5d, Ace cd6f5f6 / 81e6fe6, 文档 78a1f70 / 62af947, Offline Docs 69438ca; 新增 110 行 (矩阵 2836 -> 2946), pending 469 / 538 / 558 -> 477 / 546 / 566 (ComposeNode# 8 个快捷属性, 交 P3.3 / P4.3, Q104); compose 其余返回对象另登记 Q106 |
 | P5.2d 语言运行时文档与门禁 [静态] | Python-Runtime, Java-Runtime, Kotlin-Runtime, Lua-Runtime (4) | 文档站新增语言运行时 API 页 (Python 46 函数 + 常量 / 异常, Java 17, Kotlin 13, Lua 12, 签名 + 示例); Q77 静态门禁 (tools/api-coverage 新检查约 120 行 + CI 一步, 先校验文档标题); autojs4Runtime.md 可选补差异指引 (Q76) | Documentation, Offline-Docs, 宿主 tools/api-coverage | 无 | 可与 P5.2a / b / c 并行. 落点 (2026-10-30, api-cov-p5-2d): 宿主 3fa1fc8ad (门禁 + 名称清单 + CI), 文档 fee509b (四页 + autojs4Runtime 指引) / 4e9a3d7 (生成物), Offline Docs a25a1ff; 附表见 2.4 节末 |
@@ -286,3 +287,33 @@ P5.3 收尾时 bump 被改到的仓库 (D19): 文档 / Offline-Docs / TS 声明 
 合计: 文档 132/132 (P5.1 时 Node 0/110, Bun 5/12 仅正文提及, QuickJS 0/7); d.ts 与 Ace 各 125/125 适用条目 (Node 113 + Bun 12; P5.1 时 Node 109/110, 缺 WorkerPool), QuickJS 7 条按 Q2-3 (a) 不适用. 无 "缺".
 
 维护: 运行时插件增删自有入口时同步本表与 runtimeApis.md 的对应表格. 本表不在 `check.py` 门禁内 (Q2-3 (a) 未加附表校验); Node / Bun 的宿主模块成员仍由矩阵的 Node / Bun 列衡量.
+
+## 10. 官方插件工具表附表 (P5.2a, 2026-10-30)
+
+按 Q2-2 (a), `plugins.tools` 的官方插件工具不进矩阵分母, 在本表跟踪. 文档 = 文档站 `api/plugins.md` "插件工具" 节下的 "官方插件工具表" (每个工具一个表格行: 说明, 提供插件, 最低插件版本, 参数 (类型, 必填 / 默认), 结果字段与文件 / 目录输出; 文档 014ed75); d.ts = TS 声明 `declarations/autojs6/aj6-int-plugins.d.ts` 的 `Plugins.OfficialToolName` 字面量联合, `call` / `callAsync` 的 `name` 改为 `ToolName = OfficialToolName | (string & {})` (仍接受任意字符串, 只为补全, 不计覆盖; TS e6cb1a5); Ace = 捆绑副本同一文件, 静态索引与 `lib.autojs6.d.ts` 的签名随之改为 `ToolName` (Ace ee1144b, 宿主补全源 c0b3a686e). Node / Bun 不新增 (Q2-2 (a); 通用 4 个函数仍由 P3 / P4 的矩阵列衡量).
+
+参数与输出取自各插件仓库工具目录源码 (只读): Hanzi-CC `OpenccToolCatalog.kt` (02d31bd), Yolo-NCNN `tool/YoloToolCatalog.kt` (d8639af), Image-Quantization `tool/ImageQuantToolCatalog.kt` (1ab9fe3), Stack-Archive `tool/ArchiveToolCatalog.kt` (2a32b30), Macaw `tool/SpeechToolCatalog.kt` (1294e22; `SpeechLimits` 常量取宿主 `plugin-api/speech-api`). 最低插件版本 = 首次加入该工具的提交所在的 VERSION_NAME. 计数: 15 个工具 (第 2.2 节与 Q2-2 记 12 个, 之后 Macaw 1.3.0 的 P8.4 (6520621) 新增 `speech_diarize` / `speech_detect_language` / `speech_tag`, 见附录 C Q156). 最低版本中只有 Macaw 1.2.0 已发布 (官方索引: Hanzi-CC 2.0.0, Yolo 0.1.3, Image-Quantization 1.0.3, Stack-Archive 3.0.0, Macaw 1.2.0), 表内照写版本号, 不标 "未发布" (附录 C Q157).
+
+真机核对 (2026-10-30, OnePlus 63751f63 OPD2413 API 35, 宿主 debug 5935; 已装 Hanzi-CC 2.1.0 / 145, Yolo 0.2.0 / 62, Image-Quantization 1.1.0 / 43, Stack-Archive 3.1.0 / 127, Macaw 1.3.0 / 154 debug, 本会话未装卸任何包): Rhino 脚本比对 `plugins.tools.list()` 与目录源码的工具名, 提供方包名, 参数名, `type`, `x-autojs6-type`, `default`, `required` 与输出名 / `kind`, 15 / 15 通过; `plugins.tools.providers()` 中 5 个提供方均为 `available` / `official`. 设备上另有第三方工具示例 javasample / ktsample 的 6 个工具 (`user_granted`), 不属官方工具表. 脚本 `device_tool_table.py` 存于共享笔记目录 (`p5-2a-device_tool_table.py`), 用 `check -s <serial> --expected <catalogs.json>` 重跑 (catalogs.json 由同目录 `p5-2a-extract_catalogs.py` 从各插件仓库的目录源码求值生成).
+
+| 工具 | 提供插件 (版本, HEAD) | 最低插件版本 | 参数个数 | 文档行 | d.ts | Ace | 真机 list() |
+|---|---|---|---:|---|---|---|---|
+| `opencc_convert` | 3-Hanzi CC (2.1.0 / 150, 02d31bd) | 2.1.0 (f7cd98d) | 2 | 有 | 有 | 有 | 通过 |
+| `yolo_detect` | AutoJs6 YOLO NCNN (0.2.0 / 63, d8639af) | 0.2.0 (c8a0a0e) | 6 | 有 | 有 | 有 | 通过 |
+| `imagequant_quantize` | Image Quantization (1.1.0 / 43, 1ab9fe3) | 1.1.0 (1ab9fe3) | 9 | 有 (示例参数名已修正: `maxColors`, 输出 `png`) | 有 | 有 | 通过 |
+| `archive_list` | 3-Stack Archive (3.1.0 / 131, 2a32b30) | 3.1.0 (3246acc) | 5 | 有 | 有 | 有 | 通过 |
+| `archive_read` | 同上 | 3.1.0 (3246acc) | 4 | 有 | 有 | 有 | 通过 |
+| `archive_extract` | 同上 | 3.1.0 (3246acc) | 3 | 有 | 有 | 有 | 通过 |
+| `speech_listen` | 3-Macaw Speech (1.3.0 / 156 开发中, 1294e22) | 1.2.0 (e2ddd72) | 6 | 有 | 有 | 有 | 通过 |
+| `speech_speak` | 同上 | 1.2.0 (e2ddd72) | 5 | 有 | 有 | 有 | 通过 |
+| `speech_transcribe` | 同上 | 1.2.0 (e2ddd72) | 3 | 有 | 有 | 有 | 通过 |
+| `speech_synthesize` | 同上 | 1.2.0 (e2ddd72) | 5 | 有 | 有 | 有 | 通过 |
+| `speech_speaker_verify` | 同上 | 1.3.0 (P8.3, 806aae5) | 3 | 有 | 有 | 有 | 通过 |
+| `speech_speaker_identify` | 同上 | 1.3.0 (P8.3, 806aae5) | 3 | 有 | 有 | 有 | 通过 |
+| `speech_diarize` | 同上 | 1.3.0 (P8.4, 6520621) | 4 | 有 | 有 | 有 | 通过 |
+| `speech_detect_language` | 同上 | 1.3.0 (P8.4, 6520621) | 2 | 有 | 有 | 有 | 通过 |
+| `speech_tag` | 同上 | 1.3.0 (P8.4, 6520621) | 2 | 有 | 有 | 有 | 通过 |
+
+合计: 文档 15/15 (P5.1 时 2/12, 仅示例提及), d.ts 15/15 与 Ace 15/15 (只为补全, 不计覆盖; P5.1 时 0/12), 真机 15/15. 无 "缺".
+
+维护: 插件增删工具或改参数时, 同步 plugins.md 工具表, `OfficialToolName` (TS 声明, 再按 Q23 导入 Ace) 与本表; 本表不在 `check.py` 门禁内 (Q2-2 (a) 未加附表校验), 漂移靠真机脚本重跑发现.
