@@ -61,6 +61,7 @@ internal class BunHostCapabilityBroker(
     private val callExecutor = BunHostCallExecutor()
     private val coordinates = RuntimeCoordinateBridge()
     private val console = RuntimeConsoleBridge(consoleProvider, workingDirectory)
+    private val consoleOutput = BunConsoleOutput { level, text -> consoleProvider().println(level, text) }
     private val pinyin by lazy { AndroidNodePinyinBackend(appContext) }
     private val pinyin4j by lazy { AndroidNodePinyin4jBackend(appContext) }
     private val opencc by lazy { AndroidNodeOpenccBackend(appContext) }
@@ -116,8 +117,9 @@ internal class BunHostCapabilityBroker(
 
     private fun execute(callId: String, capability: String, json: String, callback: IBunHostCapabilityCallback) {
         if (closed.get()) return
-        // Flow, speech, EPUB and mail stream without a finite script-call budget.
-        val isStreaming = capability in setOf(BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL)
+        // Flow, speech, EPUB and mail stream without a finite script-call budget, and so does console output (console.control,
+        // api-coverage P4.3), whose text has a budget of its own.
+        val isStreaming = capability in setOf(BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL, BunHostCapabilityGrants.CONSOLE_CONTROL)
         val outcome = if (!isStreaming && calls.incrementAndGet() > BunRuntimeContract.MAX_HOST_CALLS_PER_EXECUTION) {
             val identity=Binder.clearCallingIdentity()
             try { synchronized(imageScopeLock) { imageProvider }?.let { it.closeShellProcesses(); it.closeEventResources(); it.closeDeviceDialogResources(); it.closeAndroidObjects(); it.closeJavaObjects() } } finally { Binder.restoreCallingIdentity(identity) }
@@ -215,7 +217,10 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.SCREEN_CAPTURE -> screenCaptureCall(request)
             BunHostCapabilityGrants.SCREEN_RECORD -> screenRecordingCall(request)
             BunHostCapabilityGrants.SCREEN_METRICS -> methodCall(request, coordinates::invoke)
-            BunHostCapabilityGrants.CONSOLE_CONTROL -> methodCall(request, console::invoke)
+            BunHostCapabilityGrants.CONSOLE_CONTROL -> if (request.opt("method") == BunConsoleOutput.METHOD) {
+                if (consoleOutput.println(parseMethodCall(request).second)) Outcome.Success(JSONObject().put("value", JSONObject.NULL).toString())
+                else Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED, "Console output exceeds ${BunRuntimeContract.MAX_OUTPUT_BYTES} bytes per run")
+            } else methodCall(request, console::invoke)
             else -> Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_UNKNOWN_CAPABILITY, "Capability is not implemented by this host")
         }
         if (outcome is Outcome.Success && outcome.json.toByteArray(Charsets.UTF_8).size > BunRuntimeContract.MAX_HOST_CALL_RESULT_BYTES) {
