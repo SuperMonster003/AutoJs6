@@ -89,7 +89,7 @@ for (const row of globals) check(row.ownerModule || 'global', row.member, row.ki
 assert(globals.length >= GLOBALS.size, `global rows ${globals.length} < ${GLOBALS.size}`);
 
 // Workers build the family from the shared factory and list its members; the dotted capabilities are never implied.
-assert(/function __autojs6_worker_host_modules\([^)]*, createApp, createSystem\)/.test(source), 'Worker host modules take createSystem');
+assert(/function __autojs6_worker_host_modules\([^)]*, createApp, createSystem[,)]/.test(source), 'Worker host modules take createSystem');
 assert(source.includes('__autojs6_create_system.toString()'), 'Worker preload receives the system factory');
 const table = source.slice(source.indexOf('hostModuleMethods: {'), source.indexOf('\n          },', source.indexOf('hostModuleMethods: {')));
 for (const name of ['autojs', 'installer', 'memory', 'settings', 'sysprops', 'power_manager', 'system', 'engines']) {

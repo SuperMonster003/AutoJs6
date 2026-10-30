@@ -30,6 +30,13 @@ const LIBRARIES = ['axios', 'dayjs', 'pangu', 'cheerio', 'i18n', 'Color', 'open'
 // check-bun-system.mjs checks.
 const SYSTEM_GLOBALS = ['currentPackage', 'currentActivity', 'currentComponent', 'waitForActivity', 'waitForPackage', 'exit', 'stop', 'isRunning',
   'isStopped', 'isShuttingDown', 'notStopped', 'requiresApi', 'requiresAutojsVersion', 'setScreenMetrics', 'getClip', 'setClip', 'WIDTH', 'HEIGHT', 'isAutoJs6'];
+// And the globals of the UI family (P4.3, checked by check-bun-ui-family.mjs) and of the automation family (P4.4, checked
+// by check-bun-automation-family.mjs).
+const UI_GLOBALS = ['isUiThread', 'toastLog', 'toastVerbose', 'toastInfo', 'toastWarn', 'toastError', 'toastlog', 'toastverbose', 'toastinfo', 'toastwarn',
+  'toasterror', 'newWebSocket', 'newInjectableWebView', 'newInjectableWebClient', 'ComposeError'];
+const AUTOMATION_GLOBALS = ['back', 'home', 'recents', 'notifications', 'quickSettings', 'powerDialog', 'splitScreen', 'click', 'longClick', 'press', 'swipe',
+  'gesture', 'gestureAsync', 'gestures', 'gesturesAsync', 'scrollUp', 'scrollDown', 'input', 'setText', 'pickup', 'detect', 'existsAll', 'existsOne', 'wait',
+  'sleep', 'keepAlive', 'loop', 'retry', 'sync'];
 const groups = [
   ['util', host.util, ['unwrapJavaObject']], ['util.inspect', host.util.inspect], ['util.java', host.util.java], ['util.morseCode', host.util.morseCode],
   ['util.version', host.util.version], ['util.versionCodes', host.util.versionCodes], ['species', host.species], ['s13n', host.s13n],
@@ -65,7 +72,7 @@ for (const name of GLOBALS) {
   assert.equal(typeof host.global[name], 'function', `Missing global ${name}`);
   assert(declared(name), `Missing declaration of global ${name}`);
 }
-assert.deepEqual(Object.keys(host.global).sort(), [...GLOBALS, ...LIBRARIES, ...SYSTEM_GLOBALS].sort(), 'Bun global data functions and library getters (Q61 / Q64)');
+assert.deepEqual(Object.keys(host.global).sort(), [...GLOBALS, ...LIBRARIES, ...SYSTEM_GLOBALS, ...UI_GLOBALS, ...AUTOMATION_GLOBALS].sort(), 'Bun global data functions and library getters (Q61 / Q64)');
 for (const name of LIBRARIES) assert(declared(name), `Missing declaration of global ${name}`);
 assert.equal(host.global.axios.VERSION, '1.1.2', 'global.axios is the host axios library');
 for (const [client, name] of [['util', 'RuntimeUtil'], ['species', 'RuntimeSpecies'], ['global', 'RuntimeGlobal'], ['s13n', 'RuntimeS13n'], ['cvt', 'RuntimeConverter'], ['fmt', 'RuntimeFormatter'], ['jsox', 'RuntimeJsox']]) {
