@@ -26,7 +26,7 @@ internal class NodeEventObservers(private val context: Context) {
     private var destroyed = false
 
     @Synchronized
-    fun observe(kind: String, stream: NodeBridgeEventStream?): Session {
+    fun observe(kind: String, stream: NodeBridgeEventStream?, params: JSONObject? = null): Session {
         check(!destroyed) { "The script has ended." }
         sessions.entries.removeAll { it.value.closed }
         val session = Session(stream?.subscriptionId ?: "events-${UUID.randomUUID()}", kind, stream)
@@ -43,6 +43,11 @@ internal class NodeEventObservers(private val context: Context) {
                     { session.close("accessibility-disconnected") },
                 )
                 "broadcast" -> attachBroadcasts(session)
+                "a11yEvent" -> NodeAutomationObservers.attachAccessibilityEvents(session, params ?: JSONObject())
+                "a11yState" -> NodeAutomationObservers.attachServiceState(session)
+                "touch" -> NodeAutomationObservers.attachTouches(context, session, params ?: JSONObject())
+                "keyIntercept" -> NodeAutomationObservers.attachKeyInterception(session, params ?: JSONObject())
+                "scriptBroadcast" -> NodeAutomationObservers.attachScriptBroadcasts(session)
                 else -> throw IllegalArgumentException("Unknown event source: $kind")
             }
             sessions[session.id] = session

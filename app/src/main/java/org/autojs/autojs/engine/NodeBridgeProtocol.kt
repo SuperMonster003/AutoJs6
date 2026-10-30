@@ -718,6 +718,9 @@ object NodeBridgeModules {
     const val PLUGIN_TOOLS = NodeBridgePermissionManifest.PLUGIN_TOOLS
     const val EVENTS = NodeBridgePermissionManifest.EVENTS
     const val KEYS = NodeBridgePermissionManifest.KEYS
+    const val AUTOMATOR = RuntimeAutomationBridge.AUTOMATOR
+    const val AUTO = RuntimeAutomationBridge.AUTO
+    const val YOLO = RuntimeAutomationBridge.YOLO
 
     val toastMethods = setOf("showToast", "toast")
     val pluginToolsMethods = setOf("list", "invoke", "cancel")
@@ -845,7 +848,15 @@ object NodeBridgeModules {
     val filesMethods = setOf("list", "stat", "read", "write", "mkdir", "rename", "delete")
     val consoleMethods = setOf("tail") + RuntimeConsoleBridge.METHODS
     val screenMetricsMethods = RuntimeCoordinateBridge.METHODS
-    val eventsMethods = setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close")
+    val eventsMethods = setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close") + automationEventsMethods
+
+    /**
+     * The event sources of Rhino's automation family (api-coverage P3.4, [NodeAutomationObservers]): accessibility events and
+     * the service state of auto, touches, key interception and Rhino's cross-script broadcast of events.
+     * zh-CN: Rhino 自动化族的事件源 (api-coverage P3.4): auto 的无障碍事件与服务状态, 触摸, 按键拦截与 events 的跨脚本广播.
+     */
+    val automationEventsMethods: Set<String>
+        get() = setOf("observeAccessibility", "observeAccessibilityState", "observeTouch", "interceptKeys", "observeScriptBroadcasts", "sendScriptBroadcast")
 
     val supportedMethodsByModule: Map<String, Set<String>> = mapOf(
         TOAST to toastMethods,
@@ -901,7 +912,7 @@ object NodeBridgeModules {
         FILES to filesMethods,
         CONSOLE to consoleMethods,
         PLUGIN_TOOLS to pluginToolsMethods,
-    ) + RuntimeSystemBridge.methodsByModule
+    ) + RuntimeSystemBridge.methodsByModule + RuntimeAutomationBridge.methodsByModule
 
     fun supports(module: String, method: String): Boolean {
         return supportedMethodsByModule[module]?.contains(method) == true
@@ -1019,6 +1030,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val calendarTasks = RuntimeTasksBridge(appContext,engineInfo.cwd)
     private val systemBridge = lazy { RuntimeSystemBridge(appContext, ::resolveAndroidFile) }
     private val deviceBridge = lazy { RuntimeDeviceBridge(appContext) }
+    private val automationBridge = lazy { RuntimeAutomationBridge(appContext, ::resolveAndroidFile, ::automationBitmap) }
     private val systemExecutor = Executors.newCachedThreadPool { task ->
         Thread(task, "AutoJs6NodeSystem").apply { isDaemon = true }
     }
@@ -1250,6 +1262,7 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
             request.module == NodeBridgeModules.DEVICE && request.method in RuntimeDeviceBridge.methods -> dispatchDeviceRhino(request, auditedCallback)
+            request.module in RuntimeAutomationBridge.methodsByModule.keys && NodeBridgeModules.supports(request.module, request.method) -> dispatchAutomation(request, auditedCallback)
             request.module == NodeBridgeModules.DEVICE && (request.method in NodeBridgeModules.deviceMethods || request.method in NodeBridgeModules.deviceRhinoControls) ->
                 dispatchDevice(request, auditedCallback)
             request.module == NodeBridgeModules.SCREEN_METRICS && request.method in NodeBridgeModules.screenMetricsMethods -> dispatchOnMain(request, auditedCallback) {
@@ -1402,6 +1415,7 @@ class AndroidNodeBridgeCapabilityProvider(
         imageExecutor.shutdownNow()
         systemExecutor.shutdownNow()
         if (systemBridge.isInitialized()) systemBridge.value.close()
+        if (automationBridge.isInitialized()) automationBridge.value.close()
         screenCapture.close()
         deviceControls.close()
         eventObservers.closeAll()
@@ -1575,6 +1589,18 @@ class AndroidNodeBridgeCapabilityProvider(
      */
     private fun dispatchDeviceRhino(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) =
         dispatchOnSystemThread(request, callback) { deviceBridge.value.invoke(request.method, request.argsArray()) }
+
+    /**
+     * Rhino's automator, auto and yolo members of [RuntimeAutomationBridge] (api-coverage P3.4), on the system threads: gestures
+     * wait for the system's result, the service management and YOLO sessions block.
+     * zh-CN: [RuntimeAutomationBridge] 的 Rhino automator, auto 与 yolo 成员 (api-coverage P3.4), 在系统线程池执行: 手势等待系统结果, 服务管理与 YOLO 会话会阻塞.
+     */
+    private fun dispatchAutomation(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) =
+        dispatchOnSystemThread(request, callback) { automationBridge.value.invoke(request.module, request.method, request.argsArray()) }
+
+    /** The bitmap of an active image handle of this execution, for YOLO detection (api-coverage P3.4). */
+    private fun automationBitmap(id: String): Bitmap =
+        requireNotNull(imageHandles[id]) { "Image handle is not active or has been recycled: $id" }.bitmap
 
     private fun dispatchOnSystemThread(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit, block: () -> Any?) {
         val task = Runnable {
@@ -4503,15 +4529,26 @@ class AndroidNodeBridgeCapabilityProvider(
                 when (request.method) {
                     "close" -> callback(NodeBridgeResponse.success(request.id, eventObservers.close(request.argsArray().optString(0), "closed").toString()))
                     "drainEvents" -> callback(NodeBridgeResponse.success(request.id, eventObservers.drain(request.argsArray().optString(0)).toString()))
+                    "sendScriptBroadcast" -> {
+                        val args = request.argsArray()
+                        val values = args.optJSONArray(1) ?: JSONArray()
+                        org.autojs.autojs.core.broadcast.Broadcast.send(args.getString(0), Array(values.length()) { NodeAutomationObservers.javaValue(values.opt(it)) })
+                        callback(NodeBridgeResponse.success(request.id, "true"))
+                    }
                     else -> {
                         val kind = when (request.method) {
                             "observeNotification" -> "notification"
                             "observeToast" -> "toast"
                             "observeKey" -> "key"
+                            "observeAccessibility" -> "a11yEvent"
+                            "observeAccessibilityState" -> "a11yState"
+                            "observeTouch" -> "touch"
+                            "interceptKeys" -> "keyIntercept"
+                            "observeScriptBroadcasts" -> "scriptBroadcast"
                             else -> "broadcast"
                         }
                         val stream = NodeBridgeEventStream.forRequest(request, "events-${UUID.randomUUID()}", callback)
-                        val session = eventObservers.observe(kind, stream)
+                        val session = eventObservers.observe(kind, stream, request.argsArray().optJSONObject(0))
                         val result = session.toJson()
                         stream?.acknowledge(result) ?: callback(NodeBridgeResponse.success(request.id, result.toString()))
                     }

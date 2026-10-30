@@ -92,6 +92,12 @@ object NodeBridgePermissionManifest {
     const val EVENTS_TOAST = "events.toast"
     const val EVENTS_KEY = "events.key"
     const val KEYS = "keys"
+    // Rhino automation family (api-coverage P3.4, Q178 (a)): managing the accessibility service, intercepting keys and observing
+    // touches (Root / Shizuku) are never implied by their parent capability; YOLO detector sessions need their own.
+    const val ACCESSIBILITY_SERVICE = "accessibility.service"
+    const val EVENTS_KEY_INTERCEPT = "events.key.intercept"
+    const val EVENTS_TOUCH = "events.touch"
+    const val YOLO = "yolo"
     // Rhino system information family (api-coverage P3.1b, Q133 (b)): one capability per module, the state-changing calls
     // need the dotted one as well, which the module capability never implies.
     const val AUTOJS = "autojs"
@@ -200,6 +206,10 @@ object NodeBridgePermissionManifest {
         EVENTS_TOAST,
         EVENTS_KEY,
         KEYS,
+        ACCESSIBILITY_SERVICE,
+        EVENTS_KEY_INTERCEPT,
+        EVENTS_TOUCH,
+        YOLO,
         AUTOJS,
         AUTOJS_CONTROL,
         SETTINGS,
@@ -618,8 +628,12 @@ object NodeBridgePermissionManifest {
                 "observeNotification" -> listOf(EVENTS, EVENTS_NOTIFICATION)
                 "observeToast" -> listOf(EVENTS, EVENTS_TOAST)
                 "observeKey" -> listOf(EVENTS, EVENTS_KEY)
+                "observeAccessibility", "observeAccessibilityState" -> listOf(ACCESSIBILITY)
+                "observeTouch" -> listOf(EVENTS, EVENTS_TOUCH)
+                "interceptKeys" -> listOf(EVENTS, EVENTS_KEY, EVENTS_KEY_INTERCEPT)
                 else -> listOf(EVENTS)
             }
+            in RuntimeAutomationBridge.methodsByModule.keys -> RuntimeAutomationBridge.capabilities(module, method, argsJson)
             else -> emptyList()
         }
         return required.map(::normalizeCapability).distinct()
@@ -698,7 +712,11 @@ object NodeBridgePermissionManifest {
             required == MEMORY_DUMP ||
             required == INSTALLER_MUTATE ||
             // M3.2: coordinate gestures are never implied by "accessibility".
-            required == ACCESSIBILITY_GESTURE
+            required == ACCESSIBILITY_GESTURE ||
+            // api-coverage P3.4 (Q178 (a)).
+            required == ACCESSIBILITY_SERVICE ||
+            required == EVENTS_KEY_INTERCEPT ||
+            required == EVENTS_TOUCH
         ) {
             return required in declared
         }
