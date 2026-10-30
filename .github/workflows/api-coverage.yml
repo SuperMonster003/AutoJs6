@@ -200,6 +200,7 @@ jobs:
           node tools/api-coverage/check-bun-app-shell.mjs
           node tools/api-coverage/check-bun-system.mjs
           node tools/api-coverage/check-bun-device-media.mjs
+          node tools/api-coverage/check-bun-automation-family.mjs
       - name: Check language runtime APIs against their documentation pages, type stubs and the host Entry API
         working-directory: AutoJs6
         run: python tools/api-coverage/language_runtimes.py

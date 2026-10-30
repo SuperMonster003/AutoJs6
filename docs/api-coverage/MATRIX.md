@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1376 | 368 | 0 | 1046 | 0 | 680 |
-| Node Worker | 1375 | 365 | 0 | 1049 | 0 | 681 |
-| Bun | 0 | 326 | 1266 | 1043 | 0 | 835 |
+| Node main | 1468 | 368 | 0 | 1046 | 0 | 588 |
+| Node Worker | 1467 | 365 | 0 | 1049 | 0 | 589 |
+| Bun | 0 | 349 | 1416 | 1049 | 0 | 656 |
 
 | 列 | 取值 |
 |---|---|
@@ -23,7 +23,7 @@
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
-拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 5 / Node Worker 5 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
+拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
 名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 524 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
@@ -40,7 +40,7 @@
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
 | native-memory-watch | not-portable: runtime-native | 1 | 1 | 1 | FinalizationRegistry (a callback once the object is collected), node:v8 writeHeapSnapshot / getHeapStatistics; in Bun bun:jsc heapStats / generateHeapSnapshot |
-| native-timers | not-portable: runtime-native | 0 | 0 | 6 | global setTimeout / setInterval / setImmediate and their clear functions |
+| native-timers | not-portable: runtime-native | 0 | 0 | 12 | global setTimeout / setInterval / setImmediate and their clear functions |
 | obsoleted-functions | not-portable: obsoleted | 2 | 2 | 2 |  |
 | rhino-engine | not-portable: rhino-only | 0 | 1 | 1 |  |
 
@@ -50,7 +50,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | 类型 (ksp) | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 180 / 13 / 15 | 179 / 13 / 16 | 167 / 13 / 28 |
+| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 184 / 13 / 11 | 183 / 13 / 12 | 190 / 13 / 5 |
 | AgentRun# | 14 | 7 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -58,7 +58,7 @@
 | Canvas# | 54 | 54 | 54 | - | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 29 | 29 | - | 29 | 29 / 0 / 0 | 29 / 0 / 0 | 29 / 0 / 0 |
 | ComposeModifier# | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
-| ComposeNode# | 8 | 8 | 8 | - | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
+| ComposeNode# | 8 | 8 | 8 | - | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
 | ConsoleConfigurator# | 52 | 50 | 52 | - | 0 | 0 / 52 / 0 | 0 / 52 / 0 | 0 / 52 / 0 |
 | ContinuationCreator# | 3 | 3 | 3 | - | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | - | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
@@ -96,34 +96,34 @@
 | UiObject# | 141 | 139 | 141 | - | 140 | 0 / 141 / 0 | 0 / 141 / 0 | 0 / 141 / 0 |
 | UiObjectCollection# | 70 | 69 | 70 | - | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
 | UiSelector# | 186 | 186 | 186 | - | 186 | 0 / 186 / 0 | 0 / 186 / 0 | 0 / 186 / 0 |
-| VolatileDispose# | 3 | 3 | 3 | - | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 0 / 0 / 3 |
+| VolatileDispose# | 3 | 3 | 3 | - | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
 | WebSocket# | 24 | 24 | 24 | - | 0 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
 | WrappedBarcode# | 22 | 22 | 22 | - | 22 | 0 / 22 / 0 | 0 / 22 / 0 | 0 / 22 / 0 |
-| YoloDetector# | 2 | 2 | 2 | - | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
+| YoloDetector# | 2 | 2 | 2 | - | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | Zip# | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | ai | 6 | 6 | 6 | 5 / 5 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 41 / 41 | 43 | 43 / 0 / 0 | 43 / 0 / 0 | 43 / 0 / 0 |
-| auto | 38 | 38 | 38 | 34 / 35 | 38 | 38 / 0 / 0 | 38 / 0 / 0 | 0 / 0 / 38 |
+| auto | 38 | 38 | 38 | 34 / 35 | 38 | 38 / 0 / 0 | 38 / 0 / 0 | 38 / 0 / 0 |
 | autojs | 21 | 21 | 21 | 21 / 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | autojs.version | 7 | 7 | 7 | 7 / 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
-| automator | 54 | 54 | 54 | 34 / 34 | 54 | 54 / 0 / 0 | 54 / 0 / 0 | 26 / 0 / 28 |
-| barcode | 4 | 4 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
+| automator | 54 | 54 | 54 | 34 / 34 | 54 | 54 / 0 / 0 | 54 / 0 / 0 | 54 / 0 / 0 |
+| barcode | 4 | 4 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | base64 | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | colors | 82 | 82 | 82 | 81 / 81 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | colors.theme | 9 | 9 | 9 | 9 / 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
-| compose | 71 | 71 | 71 | - | 71 | 70 / 0 / 1 | 70 / 0 / 1 | 70 / 0 / 1 |
-| console | 56 | 56 | 56 | 15 / 15 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 42 / 0 / 14 |
-| continuation | 4 | 3 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
+| compose | 71 | 71 | 71 | - | 71 | 71 / 0 / 0 | 71 / 0 / 0 | 70 / 0 / 1 |
+| console | 56 | 56 | 56 | 15 / 15 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 55 / 0 / 1 |
+| continuation | 4 | 3 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | crypto | 8 | 7 | 8 | - | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 / 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | device | 86 | 86 | 86 | 25 / 25 | 86 | 86 / 0 / 0 | 86 / 0 / 0 | 86 / 0 / 0 |
 | dialogs | 9 | 9 | 9 | 1 / 1 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | engines | 8 | 8 | 8 | 7 / 7 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | epub | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
-| events | 37 | 34 | 36 | - | 36 | 36 / 1 / 0 | 36 / 1 / 0 | 5 / 1 / 31 |
+| events | 37 | 34 | 36 | - | 36 | 36 / 1 / 0 | 36 / 1 / 0 | 36 / 1 / 0 |
 | files | 34 | 34 | 34 | 4 / 4 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 34 / 0 / 0 |
 | files.batchRename | 17 | 17 | 17 | 7 / 7 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
-| floaty | 8 | 8 | 8 | 6 / 6 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
+| floaty | 8 | 8 | 8 | 6 / 6 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
 | flow | 55 | 55 | 55 | 55 / 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
 | fmt.bytes | 6 | 6 | 6 | 6 / 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | gallery | 11 | 11 | 11 | - | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
@@ -140,17 +140,17 @@
 | mime | 5 | 5 | 5 | - | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | notice | 7 | 7 | 7 | 7 / 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | notice.channel | 6 | 6 | 6 | 6 / 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| ocr | 6 | 6 | 6 | 5 / 5 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 0 / 0 / 6 |
-| ocr.mlkit | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
-| ocr.paddle | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
-| ocr.rapid | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 0 / 2 |
+| ocr | 6 | 6 | 6 | 5 / 5 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
+| ocr.mlkit | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
+| ocr.paddle | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
+| ocr.rapid | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | opencc | 33 | 33 | 33 | 33 / 33 | 33 | 33 / 0 / 0 | 33 / 0 / 0 | 33 / 0 / 0 |
 | pinyin | 16 | 16 | 16 | 5 / 5 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | pinyin4j | 3 | 3 | 3 | 3 / 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
 | plugins | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 3 / 1 / 0 | 3 / 1 / 0 |
 | plugins.tools | 4 | 4 | 4 | 1 / 1 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | powerManager | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
-| qrcode | 4 | 4 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
+| qrcode | 4 | 4 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | recorder | 7 | 7 | 7 | - | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | s13n | 5 | 5 | 5 | 4 / 4 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sensors | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
@@ -165,21 +165,21 @@
 | storages | 5 | 5 | 5 | 5 / 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sysprops | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | tasks | 20 | 20 | 20 | 8 / 17 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
-| terminal | 20 | 20 | 20 | - | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
-| threads | 8 | 8 | 8 | 4 / 4 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
-| timers | 18 | 18 | 18 | 4 / 10 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 10 / 0 / 8 |
-| toast | 1 | 1 | 1 | 1 / 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 1 / 0 / 0 |
+| terminal | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 0 / 0 / 20 |
+| threads | 8 | 8 | 8 | 4 / 4 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
+| timers | 18 | 18 | 18 | 4 / 10 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 12 / 6 / 0 |
+| toast | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | tts | 35 | 35 | 35 | 35 / 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
-| ui | 40 | 36 | 36 | 25 / 25 | 36 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
+| ui | 40 | 36 | 36 | 25 / 25 | 36 | 35 / 4 / 1 | 35 / 4 / 1 | 3 / 4 / 33 |
 | util | 54 | 54 | 54 | 47 / 47 | 54 | 48 / 6 / 0 | 48 / 6 / 0 | 48 / 6 / 0 |
 | util.inspect | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | util.java | 6 | 6 | 6 | 3 / 3 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | util.morseCode | 3 | 3 | 3 | 3 / 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
 | util.version | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | util.versionCodes | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
-| web | 4 | 4 | 4 | 3 / 3 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
+| web | 4 | 4 | 4 | 3 / 3 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
 | workManager | 11 | 11 | 11 | 2 / 9 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
-| yolo | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
+| yolo | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | zip | 5 | 5 | 5 | 5 / 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 
 ## 差异行
@@ -190,44 +190,23 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ComposeError` | pending | pending | pending |
+| `ComposeError` | bridged | bridged | pending |
 | `TODO` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `detect` | bridged | bridged | pending |
-| `existsAll` | bridged | bridged | pending |
-| `existsOne` | bridged | bridged | pending |
-| `gestureAsync` | bridged | bridged | pending |
-| `gestures` | bridged | bridged | pending |
-| `gesturesAsync` | bridged | bridged | pending |
-| `input` | bridged | bridged | pending |
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isUiThread` | pending | pending | local-shim |
-| `keepAlive` | local-shim | local-shim | pending |
-| `loop` | local-shim | local-shim | pending |
-| `newInjectableWebClient` | pending | pending | pending |
-| `newInjectableWebView` | pending | pending | pending |
-| `newWebSocket` | pending | pending | pending |
-| `notifications` | bridged | bridged | pending |
-| `pickup` | bridged | bridged | pending |
-| `powerDialog` | bridged | bridged | pending |
-| `press` | bridged | bridged | pending |
-| `quickSettings` | bridged | bridged | pending |
-| `recents` | bridged | bridged | pending |
-| `retry` | bridged | bridged | pending |
-| `scrollDown` | bridged | bridged | pending |
-| `scrollUp` | bridged | bridged | pending |
+| `newInjectableWebClient` | bridged | bridged | pending |
+| `newInjectableWebView` | bridged | bridged | pending |
+| `newWebSocket` | bridged | bridged | pending |
 | `setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `sleep` | bridged | bridged | pending |
-| `splitScreen` | bridged | bridged | pending |
-| `sync` | local-shim | local-shim | pending |
 | `toString` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `toastError` | pending | pending | capability-gated |
 | `toastInfo` | pending | pending | capability-gated |
@@ -240,8 +219,6 @@
 | `toastverbose` | pending | pending | capability-gated |
 | `toastwarn` | pending | pending | capability-gated |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `wait` | bridged | bridged | pending |
-| `wait.async` | bridged | bridged | pending |
 
 ### App#
 
@@ -321,14 +298,14 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ComposeNode#alpha` | pending | pending | pending |
-| `ComposeNode#bg` | pending | pending | pending |
-| `ComposeNode#contentDescription` | pending | pending | pending |
-| `ComposeNode#h` | pending | pending | pending |
-| `ComposeNode#padding` | pending | pending | pending |
-| `ComposeNode#testTag` | pending | pending | pending |
-| `ComposeNode#w` | pending | pending | pending |
-| `ComposeNode#weight` | pending | pending | pending |
+| `ComposeNode#alpha` | bridged | bridged | pending |
+| `ComposeNode#bg` | bridged | bridged | pending |
+| `ComposeNode#contentDescription` | bridged | bridged | pending |
+| `ComposeNode#h` | bridged | bridged | pending |
+| `ComposeNode#padding` | bridged | bridged | pending |
+| `ComposeNode#testTag` | bridged | bridged | pending |
+| `ComposeNode#w` | bridged | bridged | pending |
+| `ComposeNode#weight` | bridged | bridged | pending |
 
 ### ConsoleConfigurator#
 
@@ -1362,14 +1339,6 @@
 | `UiSelector#waitFor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
-### VolatileDispose#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `VolatileDispose#blockedGet` | local-shim | local-shim | pending |
-| `VolatileDispose#blockedGetOrThrow` | local-shim | local-shim | pending |
-| `VolatileDispose#setAndNotify` | local-shim | local-shim | pending |
-
 ### WebSocket#
 
 | 行 id | Node main | Node Worker | Bun |
@@ -1426,98 +1395,6 @@
 | `WrappedBarcode#getWifi` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `WrappedBarcode#value` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
-### YoloDetector#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `YoloDetector#close` | bridged | bridged | pending |
-| `YoloDetector#detect` | bridged | bridged | pending |
-
-### auto
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `auto.clearCache` | bridged | bridged | pending |
-| `auto.clearFlags` | bridged | bridged | pending |
-| `auto.currentActivity` | bridged | bridged | pending |
-| `auto.currentComponent` | bridged | bridged | pending |
-| `auto.currentPackage` | bridged | bridged | pending |
-| `auto.disable` | bridged | bridged | pending |
-| `auto.dump` | bridged | bridged | pending |
-| `auto.enable` | bridged | bridged | pending |
-| `auto.exists` | bridged | bridged | pending |
-| `auto.explain` | bridged | bridged | pending |
-| `auto.findWindowRoots` | bridged | bridged | pending |
-| `auto.findWindows` | bridged | bridged | pending |
-| `auto.getWindowRoot` | bridged | bridged | pending |
-| `auto.hasInstance` | bridged | bridged | pending |
-| `auto.hasService` | bridged | bridged | pending |
-| `auto.isOperational` | bridged | bridged | pending |
-| `auto.isRunning` | bridged | bridged | pending |
-| `auto.launchSettings` | bridged | bridged | pending |
-| `auto.registerEvent` | bridged | bridged | pending |
-| `auto.registerEvents` | bridged | bridged | pending |
-| `auto.removeEvent` | bridged | bridged | pending |
-| `auto.removeEvents` | bridged | bridged | pending |
-| `auto.root` | bridged | bridged | pending |
-| `auto.rootInActiveWindow` | bridged | bridged | pending |
-| `auto.service` | bridged | bridged | pending |
-| `auto.services` | bridged | bridged | pending |
-| `auto.setFlags` | bridged | bridged | pending |
-| `auto.setMode` | bridged | bridged | pending |
-| `auto.setWindowFilter` | bridged | bridged | pending |
-| `auto.start` | bridged | bridged | pending |
-| `auto.state` | bridged | bridged | pending |
-| `auto.stateListener` | bridged | bridged | pending |
-| `auto.stats` | bridged | bridged | pending |
-| `auto.stop` | bridged | bridged | pending |
-| `auto.wait` | bridged | bridged | pending |
-| `auto.waitFor` | bridged | bridged | pending |
-| `auto.windowRoots` | bridged | bridged | pending |
-| `auto.windows` | bridged | bridged | pending |
-
-### automator
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `automator.accessibilityAllApps` | bridged | bridged | pending |
-| `automator.accessibilityButton` | bridged | bridged | pending |
-| `automator.accessibilityButtonChooser` | bridged | bridged | pending |
-| `automator.accessibilityShortcut` | bridged | bridged | pending |
-| `automator.captureScreen` | bridged | bridged | pending |
-| `automator.dismissNotificationShade` | bridged | bridged | pending |
-| `automator.ensureService` | bridged | bridged | pending |
-| `automator.gestureAsync` | bridged | bridged | pending |
-| `automator.gestures` | bridged | bridged | pending |
-| `automator.gesturesAsync` | bridged | bridged | pending |
-| `automator.headsetHook` | bridged | bridged | pending |
-| `automator.headsethook` | bridged | bridged | pending |
-| `automator.input` | bridged | bridged | pending |
-| `automator.isServiceRunning` | bridged | bridged | pending |
-| `automator.lockScreen` | bridged | bridged | pending |
-| `automator.notifications` | bridged | bridged | pending |
-| `automator.powerDialog` | bridged | bridged | pending |
-| `automator.press` | bridged | bridged | pending |
-| `automator.quickSettings` | bridged | bridged | pending |
-| `automator.recents` | bridged | bridged | pending |
-| `automator.retry` | bridged | bridged | pending |
-| `automator.scrollDown` | bridged | bridged | pending |
-| `automator.scrollUp` | bridged | bridged | pending |
-| `automator.splitScreen` | bridged | bridged | pending |
-| `automator.switchToInputMethod` | bridged | bridged | pending |
-| `automator.switchToInputMethodWithId` | bridged | bridged | pending |
-| `automator.takeScreenshot` | bridged | bridged | pending |
-| `automator.waitForService` | bridged | bridged | pending |
-
-### barcode
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `barcode.detect` | bridged | bridged | pending |
-| `barcode.detectAll` | bridged | bridged | pending |
-| `barcode.recognizeText` | bridged | bridged | pending |
-| `barcode.recognizeTexts` | bridged | bridged | pending |
-
 ### base64
 
 | 行 id | Node main | Node Worker | Bun |
@@ -1543,35 +1420,13 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `compose.ComposeError` | pending | pending | pending |
+| `compose.ComposeError` | bridged | bridged | pending |
 
 ### console
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `console.build` | pending (rejects) | pending (rejects) | pending |
-| `console.input` | pending (rejects) | pending (rejects) | pending |
-| `console.isShowing` | pending | pending | pending |
-| `console.rawInput` | pending (rejects) | pending (rejects) | pending |
-| `console.resetBackgroundAlpha` | pending | pending | pending |
-| `console.resetContentBackgroundAlpha` | pending | pending | pending |
-| `console.resetTitleBackgroundAlpha` | pending | pending | pending |
-| `console.setAvoidStatusBar` | pending | pending | pending |
-| `console.setColorful` | pending | pending | pending |
-| `console.setGravity` | pending | pending | pending |
-| `console.setInputVisible` | pending | pending | pending |
-| `console.setTimeFormat` | pending | pending | pending |
-| `console.setTimeVisible` | pending | pending | pending |
-| `console.setTouchThrough` | pending | pending | pending |
-
-### continuation
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `continuation.await` | local-shim | local-shim | pending |
-| `continuation.create` | local-shim | local-shim | pending |
-| `continuation.delay` | local-shim | local-shim | pending |
-| `continuation.enabled` | local-shim | local-shim | pending |
+| `console.build` | bridged | bridged | pending |
 
 ### crypto
 
@@ -1591,37 +1446,6 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `events.__asEmitter__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `events.addListener` | bridged | bridged | pending |
-| `events.broadcast` | bridged | bridged | pending |
-| `events.emit` | bridged | bridged | pending |
-| `events.emitSticky` | bridged | bridged | pending |
-| `events.emitter` | bridged | bridged | pending |
-| `events.eventNames` | bridged | bridged | pending |
-| `events.getMaxListeners` | bridged | bridged | pending |
-| `events.getTimer` | bridged | bridged | pending |
-| `events.getTouchEventTimeout` | bridged | bridged | pending |
-| `events.listenerCount` | bridged | bridged | pending |
-| `events.listeners` | bridged | bridged | pending |
-| `events.observeTouch` | bridged | bridged | pending |
-| `events.onKeyDown` | bridged | bridged | pending |
-| `events.onKeyUp` | bridged | bridged | pending |
-| `events.onNotification` | bridged | bridged | pending |
-| `events.onToast` | bridged | bridged | pending |
-| `events.onTouch` | bridged | bridged | pending |
-| `events.onceKeyDown` | bridged | bridged | pending |
-| `events.onceKeyUp` | bridged | bridged | pending |
-| `events.prependListener` | bridged | bridged | pending |
-| `events.prependOnceListener` | bridged | bridged | pending |
-| `events.removeAllKeyDownListeners` | bridged | bridged | pending |
-| `events.removeAllKeyUpListeners` | bridged | bridged | pending |
-| `events.removeAllListeners` | bridged | bridged | pending |
-| `events.removeAllTouchListeners` | bridged | bridged | pending |
-| `events.removeListener` | bridged | bridged | pending |
-| `events.removeNotificationObserver` | bridged | bridged | pending |
-| `events.removeToastObserver` | bridged | bridged | pending |
-| `events.setKeyInterceptionEnabled` | bridged | bridged | pending |
-| `events.setMaxListeners` | bridged | bridged | pending |
-| `events.setTouchEventTimeout` | bridged | bridged | pending |
 
 ### files.batchRename
 
@@ -1649,14 +1473,14 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `floaty.checkPermission` | pending | pending | pending |
-| `floaty.closeAll` | pending | pending | pending |
-| `floaty.ensurePermission` | pending | pending | pending |
-| `floaty.getClip` | pending | pending | pending |
-| `floaty.hasPermission` | pending | pending | pending |
-| `floaty.rawWindow` | pending | pending | pending |
-| `floaty.requestPermission` | pending | pending | pending |
-| `floaty.window` | pending | pending | pending |
+| `floaty.checkPermission` | bridged | bridged | pending |
+| `floaty.closeAll` | bridged | bridged | pending |
+| `floaty.ensurePermission` | bridged | bridged | pending |
+| `floaty.getClip` | bridged | bridged | pending |
+| `floaty.hasPermission` | bridged | bridged | pending |
+| `floaty.rawWindow` | bridged | bridged | pending |
+| `floaty.requestPermission` | bridged | bridged | pending |
+| `floaty.window` | bridged | bridged | pending |
 
 ### gallery
 
@@ -2235,52 +2059,11 @@
 |---|---|---|---|
 | `memory.watch` | not-portable: runtime-native (native-memory-watch) | not-portable: runtime-native (native-memory-watch) | not-portable: runtime-native (native-memory-watch) |
 
-### ocr
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ocr.detect` | bridged | bridged | pending |
-| `ocr.mode` | bridged | bridged | pending |
-| `ocr.recognizeText` | bridged | bridged | pending |
-| `ocr.summary` | bridged | bridged | pending |
-| `ocr.tap` | bridged | bridged | pending |
-| `ocr.toString` | bridged | bridged | pending |
-
-### ocr.mlkit
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ocr.mlkit.detect` | bridged | bridged | pending |
-| `ocr.mlkit.recognizeText` | bridged | bridged | pending |
-
-### ocr.paddle
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ocr.paddle.detect` | bridged | bridged | pending |
-| `ocr.paddle.recognizeText` | bridged | bridged | pending |
-
-### ocr.rapid
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ocr.rapid.detect` | bridged | bridged | pending |
-| `ocr.rapid.recognizeText` | bridged | bridged | pending |
-
 ### plugins
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `plugins.load` | local-shim | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) |
-
-### qrcode
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `qrcode.detect` | bridged | bridged | pending |
-| `qrcode.detectAll` | bridged | bridged | pending |
-| `qrcode.recognizeText` | bridged | bridged | pending |
-| `qrcode.recognizeTexts` | bridged | bridged | pending |
 
 ### speech
 
@@ -2310,100 +2093,79 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `terminal.TerminalError` | pending | pending | pending |
-| `terminal.close` | pending | pending | pending |
-| `terminal.closeAll` | pending | pending | pending |
-| `terminal.closeAllAsync` | pending | pending | pending |
-| `terminal.closeAsync` | pending | pending | pending |
-| `terminal.env` | pending | pending | pending |
-| `terminal.envAsync` | pending | pending | pending |
-| `terminal.exec` | pending | pending | pending |
-| `terminal.execAsync` | pending | pending | pending |
-| `terminal.isAvailable` | pending | pending | pending |
-| `terminal.isAvailableAsync` | pending | pending | pending |
-| `terminal.npm` | pending | pending | pending |
-| `terminal.open` | pending | pending | pending |
-| `terminal.openAsync` | pending | pending | pending |
-| `terminal.session` | pending | pending | pending |
-| `terminal.sessions` | pending | pending | pending |
-| `terminal.sessionsAsync` | pending | pending | pending |
-| `terminal.show` | pending | pending | pending |
-| `terminal.showAsync` | pending | pending | pending |
-| `terminal.state` | pending | pending | pending |
-
-### threads
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `threads.atomic` | local-shim | local-shim | pending |
-| `threads.currentThread` | local-shim | local-shim | pending |
-| `threads.disposable` | local-shim | local-shim | pending |
-| `threads.interrupt` | local-shim | local-shim | pending |
-| `threads.lock` | local-shim | local-shim | pending |
-| `threads.pool` | local-shim | local-shim | pending |
-| `threads.shutDownAll` | local-shim | local-shim | pending |
-| `threads.start` | local-shim | local-shim | pending |
+| `terminal.TerminalError` | bridged | bridged | pending |
+| `terminal.close` | bridged | bridged | pending |
+| `terminal.closeAll` | bridged | bridged | pending |
+| `terminal.closeAllAsync` | bridged | bridged | pending |
+| `terminal.closeAsync` | bridged | bridged | pending |
+| `terminal.env` | bridged | bridged | pending |
+| `terminal.envAsync` | bridged | bridged | pending |
+| `terminal.exec` | bridged | bridged | pending |
+| `terminal.execAsync` | bridged | bridged | pending |
+| `terminal.isAvailable` | bridged | bridged | pending |
+| `terminal.isAvailableAsync` | bridged | bridged | pending |
+| `terminal.npm` | bridged | bridged | pending |
+| `terminal.open` | bridged | bridged | pending |
+| `terminal.openAsync` | bridged | bridged | pending |
+| `terminal.session` | bridged | bridged | pending |
+| `terminal.sessions` | bridged | bridged | pending |
+| `terminal.sessionsAsync` | bridged | bridged | pending |
+| `terminal.show` | bridged | bridged | pending |
+| `terminal.showAsync` | bridged | bridged | pending |
+| `terminal.state` | bridged | bridged | pending |
 
 ### timers
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `timers.clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.clearInterval` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.keepAlive` | local-shim | local-shim | pending |
-| `timers.setImmediate` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.setInterval` | not-portable: runtime-native | not-portable: runtime-native | pending |
-| `timers.setIntervalExt` | local-shim | local-shim | pending |
-| `timers.setTimeout` | not-portable: runtime-native | not-portable: runtime-native | pending |
-
-### toast
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `toast.dismissAll` | pending | pending | capability-gated |
+| `timers.clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
+| `timers.clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
+| `timers.clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
+| `timers.setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
+| `timers.setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
+| `timers.setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 
 ### ui
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ui.R` | pending | pending | pending |
-| `ui.Widget` | pending | pending | pending |
+| `ui.R` | bridged | bridged | pending |
+| `ui.Widget` | bridged | bridged | pending |
 | `ui.__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__inflate__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__widgets__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `ui.backgroundColor` | pending | pending | pending |
-| `ui.bindingContext` | pending | pending | pending |
-| `ui.emitter` | pending | pending | pending |
-| `ui.findById` | pending | pending | pending |
-| `ui.findByStringId` | pending | pending | pending |
-| `ui.finish` | pending | pending | pending |
-| `ui.getNavigationBarHeight` | pending | pending | pending |
-| `ui.getStatusBarHeight` | pending | pending | pending |
-| `ui.getVisibleNavigationBarHeight` | pending | pending | pending |
-| `ui.getVisibleStatusBarHeight` | pending | pending | pending |
-| `ui.isUiThread` | pending | pending | pending |
-| `ui.keepScreenOn` | pending | pending | pending |
-| `ui.layout` | pending | pending | pending |
-| `ui.layoutFile` | pending | pending | pending |
+| `ui.backgroundColor` | bridged | bridged | pending |
+| `ui.bindingContext` | bridged | bridged | pending |
+| `ui.emitter` | bridged | bridged | pending |
+| `ui.findById` | bridged | bridged | pending |
+| `ui.findByStringId` | bridged | bridged | pending |
+| `ui.finish` | bridged | bridged | pending |
+| `ui.getNavigationBarHeight` | bridged | bridged | pending |
+| `ui.getStatusBarHeight` | bridged | bridged | pending |
+| `ui.getVisibleNavigationBarHeight` | bridged | bridged | pending |
+| `ui.getVisibleStatusBarHeight` | bridged | bridged | pending |
+| `ui.isUiThread` | bridged | bridged | pending |
+| `ui.keepScreenOn` | bridged | bridged | pending |
+| `ui.layout` | bridged | bridged | pending |
+| `ui.layoutFile` | bridged | bridged | pending |
 | `ui.layoutInflater` | pending | pending | pending |
-| `ui.navigationBarColor` | pending | pending | pending |
-| `ui.navigationBarHeight` | pending | pending | pending |
-| `ui.navigationBarIconLight` | pending | pending | pending |
-| `ui.navigationBarIconLightBy` | pending | pending | pending |
-| `ui.post` | pending | pending | pending |
-| `ui.registerWidget` | pending | pending | pending |
-| `ui.root` | pending | pending | pending |
-| `ui.run` | pending | pending | pending |
-| `ui.setContentView` | pending | pending | pending |
-| `ui.statusBarColor` | pending | pending | pending |
-| `ui.statusBarHeight` | pending | pending | pending |
-| `ui.statusBarIconLight` | pending | pending | pending |
-| `ui.statusBarIconLightBy` | pending | pending | pending |
-| `ui.useAndroidLayout` | pending | pending | pending |
-| `ui.visibleNavigationBarHeight` | pending | pending | pending |
-| `ui.visibleStatusBarHeight` | pending | pending | pending |
+| `ui.navigationBarColor` | bridged | bridged | pending |
+| `ui.navigationBarHeight` | bridged | bridged | pending |
+| `ui.navigationBarIconLight` | bridged | bridged | pending |
+| `ui.navigationBarIconLightBy` | bridged | bridged | pending |
+| `ui.post` | bridged | bridged | pending |
+| `ui.registerWidget` | bridged | bridged | pending |
+| `ui.root` | bridged | bridged | pending |
+| `ui.run` | bridged | bridged | pending |
+| `ui.setContentView` | bridged | bridged | pending |
+| `ui.statusBarColor` | bridged | bridged | pending |
+| `ui.statusBarHeight` | bridged | bridged | pending |
+| `ui.statusBarIconLight` | bridged | bridged | pending |
+| `ui.statusBarIconLightBy` | bridged | bridged | pending |
+| `ui.useAndroidLayout` | bridged | bridged | pending |
+| `ui.visibleNavigationBarHeight` | bridged | bridged | pending |
+| `ui.visibleStatusBarHeight` | bridged | bridged | pending |
 
 ### util
 
@@ -2420,13 +2182,7 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `web.ByteString` | pending | pending | pending |
-| `web.newInjectableWebClient` | pending | pending | pending |
-| `web.newInjectableWebView` | pending | pending | pending |
-| `web.newWebSocket` | pending | pending | pending |
-
-### yolo
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `yolo.load` | bridged | bridged | pending |
+| `web.ByteString` | bridged | bridged | pending |
+| `web.newInjectableWebClient` | bridged | bridged | pending |
+| `web.newInjectableWebView` | bridged | bridged | pending |
+| `web.newWebSocket` | bridged | bridged | pending |
