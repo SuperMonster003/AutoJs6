@@ -813,6 +813,9 @@ dependencies /* Unclassified */ {
     // Plugin API: Paddle OCR Engine
     implementation(project(":plugin-api:paddle-ocr-engine"))
 
+    // Plugin API: Paddle OCR ONNX Runtime Engine
+    implementation(project(":plugin-api:paddle-ocr-onnx-engine"))
+
     // Plugin API: Rapid OCR Engine
     implementation(project(":plugin-api:rapid-ocr-engine"))
 
@@ -1303,6 +1306,9 @@ android {
 
         jniLibs {
             useLegacyPackaging = true
+            // ONNX Runtime natives come from the Paddle OCR plugin when an application is packaged (D20).
+            // zh-CN: ONNX Runtime 原生库在打包应用时从 Paddle OCR 插件复制 (D20).
+            excludes += listOf("**/libonnxruntime.so", "**/libonnxruntime4j_jni.so")
         }
     }
 

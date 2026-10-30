@@ -127,6 +127,7 @@ private val pluginApi = listOf(
     "yolo-api",
     "paddle-ocr-api",
     "paddle-ocr-engine",
+    "paddle-ocr-onnx-engine",
     "rapid-ocr-engine",
     "screen-color-picker-api",
     "mcp-server-api",

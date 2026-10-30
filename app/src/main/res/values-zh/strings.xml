@@ -385,6 +385,7 @@
     <string name="error_download_interrupted">下载中断</string>
     <string name="error_editor_encoding_validation_incomplete">文件编码验证尚未完成. 保存前请打开文件编码并使用重新加载或转换.</string>
     <string name="error_email_taken">邮箱已被占用</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">内置 Paddle OCR (ONNX Runtime) 缺少原生库: %1$s, 请在打包时勾选并注入 Paddle OCR 后重试.</string>
     <string name="error_empty_broadcast_selection">需至少选择一个广播事件</string>
     <string name="error_empty_github_release_assets">无可供下载的 GitHub 发行版资源</string>
     <string name="error_empty_shell_command">命令为空</string>

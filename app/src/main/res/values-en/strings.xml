@@ -386,6 +386,7 @@
     <string name="error_download_interrupted">Download interrupted</string>
     <string name="error_editor_encoding_validation_incomplete">File encoding validation is incomplete. Choose File encoding and use Reload or Convert before saving.</string>
     <string name="error_email_taken">The e-mail is taken</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">Embedded Paddle OCR (ONNX Runtime) is missing native libraries: %1$s. Please re-package with Paddle OCR enabled.</string>
     <string name="error_empty_broadcast_selection">At least one broadcast must be selected</string>
     <string name="error_empty_github_release_assets">No GitHub release assets to download</string>
     <string name="error_empty_shell_command">Command is empty</string>

@@ -22,6 +22,13 @@ core-ktx = "1.15.0"
 #purpose : Compatibility of java.time.* for Android API Level < 26 (Android 8.0) [O]
 desugar = "2.1.5"
 
+#strictly : 1.21.1
+#purpose  : Java API of the embedded Paddle OCR (PP-OCRv3) engine in packaged applications
+#because  : Must match the libonnxruntime*.so copied from the Paddle OCR PP-OCRv3 plugin (its ROADMAP D14)
+#since    : Oct 30, 2026 (by SuperMonster003)
+#noinspection NewerVersionAvailable,GradleDependency
+onnxruntime-android = "1.21.1"
+
 activity-ktx = "1.12.2"
 animated-svg-view = "1.0.6"
 annotation = "1.9.1"
@@ -135,6 +142,7 @@ localbroadcastmanager = { module = "androidx.localbroadcastmanager:localbroadcas
 material = { module = "com.google.android.material:material", version.ref = "material" }
 materialprogressbar = { module = "me.zhanghai.android.materialprogressbar:library", version.ref = "materialprogressbar" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+onnxruntime-android = { module = "com.microsoft.onnxruntime:onnxruntime-android", version.ref = "onnxruntime-android" }
 org-json = { module = "org.json:json", version.ref = "org-json" }
 paho-android-service = { module = "org.eclipse.paho:org.eclipse.paho.android.service", version.ref = "paho-android-service" }
 paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "paho-client-mqttv3" }
