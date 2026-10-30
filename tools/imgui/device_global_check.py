@@ -112,6 +112,14 @@ if (EXPECT_MISSING) {
         assert(typeof imgui.listClipper === 'function' && typeof imgui.ListClipper === 'function', 'listClipper / ListClipper');
         return 'listClipper, ListClipper';
     });
+    check('r3 names', function () {
+        var names = ['showMetricsWindow', 'ShowIDStackToolWindow', 'dragFloat3', 'SliderInt2', 'dragFloatRange2', 'SliderAngle',
+            'tableGetSortSpecs', 'TableGetSortSpecs', 'ints'];
+        var missing = names.filter(function (name) { return typeof imgui[name] !== 'function'; });
+        assert(missing.length === 0, 'missing ' + missing.join(', '));
+        assert(imgui.SortDirection && imgui.SortDirection.Descending === 2, 'SortDirection');
+        return names.length + ' functions, SortDirection';
+    });
     check('backend', function () {
         var caps = imgui.getBackendCapabilities();
         assert(caps && typeof caps === 'object', 'caps = ' + caps);

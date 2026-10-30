@@ -5290,10 +5290,42 @@ imgui.DragFloat	EW-	function name='DragFloat' length=0
 imgui.DragFloat.arity	--C	number '0'
 imgui.DragFloat.length	--C	number '0'
 imgui.DragFloat.name	--C	string 'DragFloat'
+imgui.DragFloat2	EW-	function name='DragFloat2' length=0
+imgui.DragFloat2.arity	--C	number '0'
+imgui.DragFloat2.length	--C	number '0'
+imgui.DragFloat2.name	--C	string 'DragFloat2'
+imgui.DragFloat3	EW-	function name='DragFloat3' length=0
+imgui.DragFloat3.arity	--C	number '0'
+imgui.DragFloat3.length	--C	number '0'
+imgui.DragFloat3.name	--C	string 'DragFloat3'
+imgui.DragFloat4	EW-	function name='DragFloat4' length=0
+imgui.DragFloat4.arity	--C	number '0'
+imgui.DragFloat4.length	--C	number '0'
+imgui.DragFloat4.name	--C	string 'DragFloat4'
+imgui.DragFloatRange2	EW-	function name='DragFloatRange2' length=0
+imgui.DragFloatRange2.arity	--C	number '0'
+imgui.DragFloatRange2.length	--C	number '0'
+imgui.DragFloatRange2.name	--C	string 'DragFloatRange2'
 imgui.DragInt	EW-	function name='DragInt' length=0
 imgui.DragInt.arity	--C	number '0'
 imgui.DragInt.length	--C	number '0'
 imgui.DragInt.name	--C	string 'DragInt'
+imgui.DragInt2	EW-	function name='DragInt2' length=0
+imgui.DragInt2.arity	--C	number '0'
+imgui.DragInt2.length	--C	number '0'
+imgui.DragInt2.name	--C	string 'DragInt2'
+imgui.DragInt3	EW-	function name='DragInt3' length=0
+imgui.DragInt3.arity	--C	number '0'
+imgui.DragInt3.length	--C	number '0'
+imgui.DragInt3.name	--C	string 'DragInt3'
+imgui.DragInt4	EW-	function name='DragInt4' length=0
+imgui.DragInt4.arity	--C	number '0'
+imgui.DragInt4.length	--C	number '0'
+imgui.DragInt4.name	--C	string 'DragInt4'
+imgui.DragIntRange2	EW-	function name='DragIntRange2' length=0
+imgui.DragIntRange2.arity	--C	number '0'
+imgui.DragIntRange2.length	--C	number '0'
+imgui.DragIntRange2.name	--C	string 'DragIntRange2'
 imgui.DrawFlags	EAG--	accessor
 imgui.DrawListLayer	EAG--	accessor
 imgui.Dummy	EW-	function name='Dummy' length=0
@@ -5460,10 +5492,34 @@ imgui.InputFloat	EW-	function name='InputFloat' length=0
 imgui.InputFloat.arity	--C	number '0'
 imgui.InputFloat.length	--C	number '0'
 imgui.InputFloat.name	--C	string 'InputFloat'
+imgui.InputFloat2	EW-	function name='InputFloat2' length=0
+imgui.InputFloat2.arity	--C	number '0'
+imgui.InputFloat2.length	--C	number '0'
+imgui.InputFloat2.name	--C	string 'InputFloat2'
+imgui.InputFloat3	EW-	function name='InputFloat3' length=0
+imgui.InputFloat3.arity	--C	number '0'
+imgui.InputFloat3.length	--C	number '0'
+imgui.InputFloat3.name	--C	string 'InputFloat3'
+imgui.InputFloat4	EW-	function name='InputFloat4' length=0
+imgui.InputFloat4.arity	--C	number '0'
+imgui.InputFloat4.length	--C	number '0'
+imgui.InputFloat4.name	--C	string 'InputFloat4'
 imgui.InputInt	EW-	function name='InputInt' length=0
 imgui.InputInt.arity	--C	number '0'
 imgui.InputInt.length	--C	number '0'
 imgui.InputInt.name	--C	string 'InputInt'
+imgui.InputInt2	EW-	function name='InputInt2' length=0
+imgui.InputInt2.arity	--C	number '0'
+imgui.InputInt2.length	--C	number '0'
+imgui.InputInt2.name	--C	string 'InputInt2'
+imgui.InputInt3	EW-	function name='InputInt3' length=0
+imgui.InputInt3.arity	--C	number '0'
+imgui.InputInt3.length	--C	number '0'
+imgui.InputInt3.name	--C	string 'InputInt3'
+imgui.InputInt4	EW-	function name='InputInt4' length=0
+imgui.InputInt4.arity	--C	number '0'
+imgui.InputInt4.length	--C	number '0'
+imgui.InputInt4.name	--C	string 'InputInt4'
 imgui.InputText	EW-	function name='InputText' length=0
 imgui.InputText.arity	--C	number '0'
 imgui.InputText.length	--C	number '0'
@@ -5787,27 +5843,80 @@ imgui.SetWindowFontScale	EW-	function name='SetWindowFontScale' length=0
 imgui.SetWindowFontScale.arity	--C	number '0'
 imgui.SetWindowFontScale.length	--C	number '0'
 imgui.SetWindowFontScale.name	--C	string 'SetWindowFontScale'
+imgui.ShowAboutWindow	EW-	function name='ShowAboutWindow' length=0
+imgui.ShowAboutWindow.arity	--C	number '0'
+imgui.ShowAboutWindow.length	--C	number '0'
+imgui.ShowAboutWindow.name	--C	string 'ShowAboutWindow'
+imgui.ShowDebugLogWindow	EW-	function name='ShowDebugLogWindow' length=0
+imgui.ShowDebugLogWindow.arity	--C	number '0'
+imgui.ShowDebugLogWindow.length	--C	number '0'
+imgui.ShowDebugLogWindow.name	--C	string 'ShowDebugLogWindow'
 imgui.ShowDemoWindow	EW-	function name='ShowDemoWindow' length=0
 imgui.ShowDemoWindow.arity	--C	number '0'
 imgui.ShowDemoWindow.length	--C	number '0'
 imgui.ShowDemoWindow.name	--C	string 'ShowDemoWindow'
+imgui.ShowIDStackToolWindow	EW-	function name='ShowIDStackToolWindow' length=0
+imgui.ShowIDStackToolWindow.arity	--C	number '0'
+imgui.ShowIDStackToolWindow.length	--C	number '0'
+imgui.ShowIDStackToolWindow.name	--C	string 'ShowIDStackToolWindow'
+imgui.ShowMetricsWindow	EW-	function name='ShowMetricsWindow' length=0
+imgui.ShowMetricsWindow.arity	--C	number '0'
+imgui.ShowMetricsWindow.length	--C	number '0'
+imgui.ShowMetricsWindow.name	--C	string 'ShowMetricsWindow'
+imgui.ShowStyleEditor	EW-	function name='ShowStyleEditor' length=0
+imgui.ShowStyleEditor.arity	--C	number '0'
+imgui.ShowStyleEditor.length	--C	number '0'
+imgui.ShowStyleEditor.name	--C	string 'ShowStyleEditor'
+imgui.ShowUserGuide	EW-	function name='ShowUserGuide' length=0
+imgui.ShowUserGuide.arity	--C	number '0'
+imgui.ShowUserGuide.length	--C	number '0'
+imgui.ShowUserGuide.name	--C	string 'ShowUserGuide'
 imgui.SingleChoice	EW-	function name='SingleChoice' length=0
 imgui.SingleChoice.arity	--C	number '0'
 imgui.SingleChoice.length	--C	number '0'
 imgui.SingleChoice.name	--C	string 'SingleChoice'
+imgui.SliderAngle	EW-	function name='SliderAngle' length=0
+imgui.SliderAngle.arity	--C	number '0'
+imgui.SliderAngle.length	--C	number '0'
+imgui.SliderAngle.name	--C	string 'SliderAngle'
 imgui.SliderFlags	EAG--	accessor
 imgui.SliderFloat	EW-	function name='SliderFloat' length=0
 imgui.SliderFloat.arity	--C	number '0'
 imgui.SliderFloat.length	--C	number '0'
 imgui.SliderFloat.name	--C	string 'SliderFloat'
+imgui.SliderFloat2	EW-	function name='SliderFloat2' length=0
+imgui.SliderFloat2.arity	--C	number '0'
+imgui.SliderFloat2.length	--C	number '0'
+imgui.SliderFloat2.name	--C	string 'SliderFloat2'
+imgui.SliderFloat3	EW-	function name='SliderFloat3' length=0
+imgui.SliderFloat3.arity	--C	number '0'
+imgui.SliderFloat3.length	--C	number '0'
+imgui.SliderFloat3.name	--C	string 'SliderFloat3'
+imgui.SliderFloat4	EW-	function name='SliderFloat4' length=0
+imgui.SliderFloat4.arity	--C	number '0'
+imgui.SliderFloat4.length	--C	number '0'
+imgui.SliderFloat4.name	--C	string 'SliderFloat4'
 imgui.SliderInt	EW-	function name='SliderInt' length=0
 imgui.SliderInt.arity	--C	number '0'
 imgui.SliderInt.length	--C	number '0'
 imgui.SliderInt.name	--C	string 'SliderInt'
+imgui.SliderInt2	EW-	function name='SliderInt2' length=0
+imgui.SliderInt2.arity	--C	number '0'
+imgui.SliderInt2.length	--C	number '0'
+imgui.SliderInt2.name	--C	string 'SliderInt2'
+imgui.SliderInt3	EW-	function name='SliderInt3' length=0
+imgui.SliderInt3.arity	--C	number '0'
+imgui.SliderInt3.length	--C	number '0'
+imgui.SliderInt3.name	--C	string 'SliderInt3'
+imgui.SliderInt4	EW-	function name='SliderInt4' length=0
+imgui.SliderInt4.arity	--C	number '0'
+imgui.SliderInt4.length	--C	number '0'
+imgui.SliderInt4.name	--C	string 'SliderInt4'
 imgui.SmallButton	EW-	function name='SmallButton' length=0
 imgui.SmallButton.arity	--C	number '0'
 imgui.SmallButton.length	--C	number '0'
 imgui.SmallButton.name	--C	string 'SmallButton'
+imgui.SortDirection	EAG--	accessor
 imgui.Spacing	EW-	function name='Spacing' length=0
 imgui.Spacing.arity	--C	number '0'
 imgui.Spacing.length	--C	number '0'
@@ -5834,6 +5943,10 @@ imgui.TabItemFlags	EAG--	accessor
 imgui.TableBgTarget	EAG--	accessor
 imgui.TableColumnFlags	EAG--	accessor
 imgui.TableFlags	EAG--	accessor
+imgui.TableGetSortSpecs	EW-	function name='TableGetSortSpecs' length=0
+imgui.TableGetSortSpecs.arity	--C	number '0'
+imgui.TableGetSortSpecs.length	--C	number '0'
+imgui.TableGetSortSpecs.name	--C	string 'TableGetSortSpecs'
 imgui.TableHeadersRow	EW-	function name='TableHeadersRow' length=0
 imgui.TableHeadersRow.arity	--C	number '0'
 imgui.TableHeadersRow.length	--C	number '0'
@@ -6128,10 +6241,42 @@ imgui.dragFloat	EW-	function name='dragFloat' length=0
 imgui.dragFloat.arity	--C	number '0'
 imgui.dragFloat.length	--C	number '0'
 imgui.dragFloat.name	--C	string 'dragFloat'
+imgui.dragFloat2	EW-	function name='dragFloat2' length=0
+imgui.dragFloat2.arity	--C	number '0'
+imgui.dragFloat2.length	--C	number '0'
+imgui.dragFloat2.name	--C	string 'dragFloat2'
+imgui.dragFloat3	EW-	function name='dragFloat3' length=0
+imgui.dragFloat3.arity	--C	number '0'
+imgui.dragFloat3.length	--C	number '0'
+imgui.dragFloat3.name	--C	string 'dragFloat3'
+imgui.dragFloat4	EW-	function name='dragFloat4' length=0
+imgui.dragFloat4.arity	--C	number '0'
+imgui.dragFloat4.length	--C	number '0'
+imgui.dragFloat4.name	--C	string 'dragFloat4'
+imgui.dragFloatRange2	EW-	function name='dragFloatRange2' length=0
+imgui.dragFloatRange2.arity	--C	number '0'
+imgui.dragFloatRange2.length	--C	number '0'
+imgui.dragFloatRange2.name	--C	string 'dragFloatRange2'
 imgui.dragInt	EW-	function name='dragInt' length=0
 imgui.dragInt.arity	--C	number '0'
 imgui.dragInt.length	--C	number '0'
 imgui.dragInt.name	--C	string 'dragInt'
+imgui.dragInt2	EW-	function name='dragInt2' length=0
+imgui.dragInt2.arity	--C	number '0'
+imgui.dragInt2.length	--C	number '0'
+imgui.dragInt2.name	--C	string 'dragInt2'
+imgui.dragInt3	EW-	function name='dragInt3' length=0
+imgui.dragInt3.arity	--C	number '0'
+imgui.dragInt3.length	--C	number '0'
+imgui.dragInt3.name	--C	string 'dragInt3'
+imgui.dragInt4	EW-	function name='dragInt4' length=0
+imgui.dragInt4.arity	--C	number '0'
+imgui.dragInt4.length	--C	number '0'
+imgui.dragInt4.name	--C	string 'dragInt4'
+imgui.dragIntRange2	EW-	function name='dragIntRange2' length=0
+imgui.dragIntRange2.arity	--C	number '0'
+imgui.dragIntRange2.length	--C	number '0'
+imgui.dragIntRange2.name	--C	string 'dragIntRange2'
 imgui.dummy	EW-	function name='dummy' length=0
 imgui.dummy.arity	--C	number '0'
 imgui.dummy.length	--C	number '0'
@@ -6304,10 +6449,34 @@ imgui.inputFloat	EW-	function name='inputFloat' length=0
 imgui.inputFloat.arity	--C	number '0'
 imgui.inputFloat.length	--C	number '0'
 imgui.inputFloat.name	--C	string 'inputFloat'
+imgui.inputFloat2	EW-	function name='inputFloat2' length=0
+imgui.inputFloat2.arity	--C	number '0'
+imgui.inputFloat2.length	--C	number '0'
+imgui.inputFloat2.name	--C	string 'inputFloat2'
+imgui.inputFloat3	EW-	function name='inputFloat3' length=0
+imgui.inputFloat3.arity	--C	number '0'
+imgui.inputFloat3.length	--C	number '0'
+imgui.inputFloat3.name	--C	string 'inputFloat3'
+imgui.inputFloat4	EW-	function name='inputFloat4' length=0
+imgui.inputFloat4.arity	--C	number '0'
+imgui.inputFloat4.length	--C	number '0'
+imgui.inputFloat4.name	--C	string 'inputFloat4'
 imgui.inputInt	EW-	function name='inputInt' length=0
 imgui.inputInt.arity	--C	number '0'
 imgui.inputInt.length	--C	number '0'
 imgui.inputInt.name	--C	string 'inputInt'
+imgui.inputInt2	EW-	function name='inputInt2' length=0
+imgui.inputInt2.arity	--C	number '0'
+imgui.inputInt2.length	--C	number '0'
+imgui.inputInt2.name	--C	string 'inputInt2'
+imgui.inputInt3	EW-	function name='inputInt3' length=0
+imgui.inputInt3.arity	--C	number '0'
+imgui.inputInt3.length	--C	number '0'
+imgui.inputInt3.name	--C	string 'inputInt3'
+imgui.inputInt4	EW-	function name='inputInt4' length=0
+imgui.inputInt4.arity	--C	number '0'
+imgui.inputInt4.length	--C	number '0'
+imgui.inputInt4.name	--C	string 'inputInt4'
 imgui.inputText	EW-	function name='inputText' length=0
 imgui.inputText.arity	--C	number '0'
 imgui.inputText.length	--C	number '0'
@@ -6320,6 +6489,10 @@ imgui.int	EW-	function name='int' length=0
 imgui.int.arity	--C	number '0'
 imgui.int.length	--C	number '0'
 imgui.int.name	--C	string 'int'
+imgui.ints	EW-	function name='ints' length=0
+imgui.ints.arity	--C	number '0'
+imgui.ints.length	--C	number '0'
+imgui.ints.name	--C	string 'ints'
 imgui.invisibleButton	EW-	function name='invisibleButton' length=0
 imgui.invisibleButton.arity	--C	number '0'
 imgui.invisibleButton.length	--C	number '0'
@@ -6632,22 +6805,74 @@ imgui.setWindowFontScale	EW-	function name='setWindowFontScale' length=0
 imgui.setWindowFontScale.arity	--C	number '0'
 imgui.setWindowFontScale.length	--C	number '0'
 imgui.setWindowFontScale.name	--C	string 'setWindowFontScale'
+imgui.showAboutWindow	EW-	function name='showAboutWindow' length=0
+imgui.showAboutWindow.arity	--C	number '0'
+imgui.showAboutWindow.length	--C	number '0'
+imgui.showAboutWindow.name	--C	string 'showAboutWindow'
+imgui.showDebugLogWindow	EW-	function name='showDebugLogWindow' length=0
+imgui.showDebugLogWindow.arity	--C	number '0'
+imgui.showDebugLogWindow.length	--C	number '0'
+imgui.showDebugLogWindow.name	--C	string 'showDebugLogWindow'
 imgui.showDemoWindow	EW-	function name='showDemoWindow' length=0
 imgui.showDemoWindow.arity	--C	number '0'
 imgui.showDemoWindow.length	--C	number '0'
 imgui.showDemoWindow.name	--C	string 'showDemoWindow'
+imgui.showIdStackToolWindow	EW-	function name='showIdStackToolWindow' length=0
+imgui.showIdStackToolWindow.arity	--C	number '0'
+imgui.showIdStackToolWindow.length	--C	number '0'
+imgui.showIdStackToolWindow.name	--C	string 'showIdStackToolWindow'
+imgui.showMetricsWindow	EW-	function name='showMetricsWindow' length=0
+imgui.showMetricsWindow.arity	--C	number '0'
+imgui.showMetricsWindow.length	--C	number '0'
+imgui.showMetricsWindow.name	--C	string 'showMetricsWindow'
+imgui.showStyleEditor	EW-	function name='showStyleEditor' length=0
+imgui.showStyleEditor.arity	--C	number '0'
+imgui.showStyleEditor.length	--C	number '0'
+imgui.showStyleEditor.name	--C	string 'showStyleEditor'
+imgui.showUserGuide	EW-	function name='showUserGuide' length=0
+imgui.showUserGuide.arity	--C	number '0'
+imgui.showUserGuide.length	--C	number '0'
+imgui.showUserGuide.name	--C	string 'showUserGuide'
 imgui.singleChoice	EW-	function name='singleChoice' length=0
 imgui.singleChoice.arity	--C	number '0'
 imgui.singleChoice.length	--C	number '0'
 imgui.singleChoice.name	--C	string 'singleChoice'
+imgui.sliderAngle	EW-	function name='sliderAngle' length=0
+imgui.sliderAngle.arity	--C	number '0'
+imgui.sliderAngle.length	--C	number '0'
+imgui.sliderAngle.name	--C	string 'sliderAngle'
 imgui.sliderFloat	EW-	function name='sliderFloat' length=0
 imgui.sliderFloat.arity	--C	number '0'
 imgui.sliderFloat.length	--C	number '0'
 imgui.sliderFloat.name	--C	string 'sliderFloat'
+imgui.sliderFloat2	EW-	function name='sliderFloat2' length=0
+imgui.sliderFloat2.arity	--C	number '0'
+imgui.sliderFloat2.length	--C	number '0'
+imgui.sliderFloat2.name	--C	string 'sliderFloat2'
+imgui.sliderFloat3	EW-	function name='sliderFloat3' length=0
+imgui.sliderFloat3.arity	--C	number '0'
+imgui.sliderFloat3.length	--C	number '0'
+imgui.sliderFloat3.name	--C	string 'sliderFloat3'
+imgui.sliderFloat4	EW-	function name='sliderFloat4' length=0
+imgui.sliderFloat4.arity	--C	number '0'
+imgui.sliderFloat4.length	--C	number '0'
+imgui.sliderFloat4.name	--C	string 'sliderFloat4'
 imgui.sliderInt	EW-	function name='sliderInt' length=0
 imgui.sliderInt.arity	--C	number '0'
 imgui.sliderInt.length	--C	number '0'
 imgui.sliderInt.name	--C	string 'sliderInt'
+imgui.sliderInt2	EW-	function name='sliderInt2' length=0
+imgui.sliderInt2.arity	--C	number '0'
+imgui.sliderInt2.length	--C	number '0'
+imgui.sliderInt2.name	--C	string 'sliderInt2'
+imgui.sliderInt3	EW-	function name='sliderInt3' length=0
+imgui.sliderInt3.arity	--C	number '0'
+imgui.sliderInt3.length	--C	number '0'
+imgui.sliderInt3.name	--C	string 'sliderInt3'
+imgui.sliderInt4	EW-	function name='sliderInt4' length=0
+imgui.sliderInt4.arity	--C	number '0'
+imgui.sliderInt4.length	--C	number '0'
+imgui.sliderInt4.name	--C	string 'sliderInt4'
 imgui.smallButton	EW-	function name='smallButton' length=0
 imgui.smallButton.arity	--C	number '0'
 imgui.smallButton.length	--C	number '0'
@@ -6680,6 +6905,10 @@ imgui.styleColorsLight	EW-	function name='styleColorsLight' length=0
 imgui.styleColorsLight.arity	--C	number '0'
 imgui.styleColorsLight.length	--C	number '0'
 imgui.styleColorsLight.name	--C	string 'styleColorsLight'
+imgui.tableGetSortSpecs	EW-	function name='tableGetSortSpecs' length=0
+imgui.tableGetSortSpecs.arity	--C	number '0'
+imgui.tableGetSortSpecs.length	--C	number '0'
+imgui.tableGetSortSpecs.name	--C	string 'tableGetSortSpecs'
 imgui.tableHeadersRow	EW-	function name='tableHeadersRow' length=0
 imgui.tableHeadersRow.arity	--C	number '0'
 imgui.tableHeadersRow.length	--C	number '0'

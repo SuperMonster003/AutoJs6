@@ -17,7 +17,7 @@ object ImguiNames {
 
     /** Functions of the plugin API, camelCase (the `with*` scope helpers and the window / dialog helpers included). */
     val FUNCTIONS: List<String> = listOf(
-        "bool", "float", "int", "string", "ref", "floats", "bytes", "strings", "version", "getBackendCapabilities", "listExamples",
+        "bool", "float", "int", "string", "ref", "floats", "ints", "bytes", "strings", "version", "getBackendCapabilities", "listExamples",
         "getExampleSource", "runExample", "colorU32", "icon", "setNextWindowPos", "setNextWindowSize", "setNextWindowSizeConstraints",
         "setNextWindowBgAlpha", "setKeyboardFocusHere", "begin", "end", "beginChild", "endChild", "getWindowPos", "getWindowSize",
         "getContentRegionAvail", "getCursorPos", "setCursorPos", "text", "textWrapped", "textColored", "button", "smallButton", "checkbox",
@@ -43,7 +43,11 @@ object ImguiNames {
         "withPopupModal", "withContextItem", "withContextWindow", "withTooltip", "withItemTooltip", "withMenuBar", "withMenu", "withListBox",
         "withCombo", "withGroup", "withDisabled", "withId", "logWindow", "toast", "alert", "confirm", "singleChoice", "multiChoice", "statsOverlay",
         "dataTable", "createWindow", "closeWindow", "launchFloaty", "launch", "launchPrivileged", "addButtonEx", "setTouchable", "setMoreTouch",
-        "setGlobalAlpha", "setSecure", "collapseWindow", "expandWindow", "getComponent", "dp", "px", "listClipper",
+        "setGlobalAlpha", "setSecure", "collapseWindow", "expandWindow", "getComponent", "dp", "px", "listClipper", "showMetricsWindow",
+        "showDebugLogWindow", "showIdStackToolWindow", "showStyleEditor", "showAboutWindow", "showUserGuide", "dragFloat2", "dragFloat3",
+        "dragFloat4", "dragInt2", "dragInt3", "dragInt4", "sliderFloat2", "sliderFloat3", "sliderFloat4", "sliderInt2", "sliderInt3", "sliderInt4",
+        "inputFloat2", "inputFloat3", "inputFloat4", "inputInt2", "inputInt3", "inputInt4", "dragFloatRange2", "dragIntRange2", "sliderAngle",
+        "tableGetSortSpecs",
     )
 
     /** PascalCase aliases of [FUNCTIONS] (`Begin` for `begin`, `PushID` for `pushId`), functions as well. */
@@ -71,15 +75,18 @@ object ImguiNames {
         "IsItemDeactivatedAfterEdit", "IsItemFocused", "IsItemVisible", "IsWindowHovered", "IsWindowFocused", "IsWindowCollapsed",
         "IsWindowAppearing", "GetMousePos", "IsMouseDown", "IsMouseClicked", "IsMouseDoubleClicked", "IsMouseReleased", "IsMouseDragging",
         "GetMouseDragDelta", "ResetMouseDragDelta", "CalcTextSize", "GetFrameHeight", "GetFrameHeightWithSpacing", "GetTextLineHeight",
-        "GetTextLineHeightWithSpacing", "Dp", "Px", "ListClipper",
+        "GetTextLineHeightWithSpacing", "Dp", "Px", "ListClipper", "ShowMetricsWindow", "ShowDebugLogWindow", "ShowIDStackToolWindow",
+        "ShowStyleEditor", "ShowAboutWindow", "ShowUserGuide", "DragFloat2", "DragFloat3", "DragFloat4", "DragInt2", "DragInt3", "DragInt4",
+        "SliderFloat2", "SliderFloat3", "SliderFloat4", "SliderInt2", "SliderInt3", "SliderInt4", "InputFloat2", "InputFloat3", "InputFloat4",
+        "InputInt2", "InputInt3", "InputInt4", "DragFloatRange2", "DragIntRange2", "SliderAngle", "TableGetSortSpecs",
     )
 
     /** Constant groups of the plugin API (flag and enum tables, theme and font names), read through getters. */
     val CONSTANTS: List<String> = listOf(
         "Limits", "BackendStatus", "Cond", "WindowFlags", "InputTextFlags", "SliderFlags", "TreeNodeFlags", "SelectableFlags", "TabBarFlags",
         "TabItemFlags", "MouseButton", "ChildFlags", "ComboFlags", "PopupFlags", "HoveredFlags", "FocusedFlags", "ColorEditFlags", "TableFlags",
-        "TableColumnFlags", "TableRowFlags", "TableBgTarget", "Col", "StyleVar", "Themes", "Appearance", "Fonts", "TextureFlags", "DrawListLayer",
-        "DrawFlags", "TouchMode", "WindowMode", "LogLevel", "ToastPosition", "Icons", "Dir", "ButtonFlags", "Key", "density",
+        "TableColumnFlags", "TableRowFlags", "TableBgTarget", "SortDirection", "Col", "StyleVar", "Themes", "Appearance", "Fonts", "TextureFlags",
+        "DrawListLayer", "DrawFlags", "TouchMode", "WindowMode", "LogLevel", "ToastPosition", "Icons", "Dir", "ButtonFlags", "Key", "density",
     )
 
 }
