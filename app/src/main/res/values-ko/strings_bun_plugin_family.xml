@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">Batch Rename 플러그인으로 파일을 일괄 이름 변경하고, 배치를 취소하며, 기록과 프리셋을 관리하도록 허용합니다.</string>
+    <string name="summary_bun_gallery_control_grant">3-Maple Image 플러그인으로 이미지를 선택, 보기, 편집, 변환하도록 허용합니다.</string>
+    <string name="summary_bun_theme_control_grant">AutoJs6 테마 색상을 읽고 변경하도록 허용합니다 (색상 라이브러리 활성화 포함).</string>
+    <string name="text_bun_batchrename_control_grant">Bun 일괄 이름 변경</string>
+    <string name="text_bun_gallery_control_grant">Bun 갤러리</string>
+    <string name="text_bun_theme_control_grant">Bun 테마 색상</string>
+</resources>

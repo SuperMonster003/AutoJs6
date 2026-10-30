@@ -73,6 +73,10 @@ object NodeBridgePermissionManifest {
     const val AI = "ai"
     const val AI_AGENT = "ai.agent"
     const val EPUB = "epub"
+    /** Rhino's colors.theme, gallery and files.batchRename, one capability each (api-coverage Q195 (a)). zh-CN: Rhino 的 colors.theme, gallery 与 files.batchRename, 各一个能力 (api-coverage Q195 (a)). */
+    const val THEME = "theme"
+    const val GALLERY = "gallery"
+    const val BATCH_RENAME = "batch_rename"
     const val SPEECH = "speech"
     const val TTS = "tts"
     const val JAVA_INTEROP = "java_interop"
@@ -190,6 +194,9 @@ object NodeBridgePermissionManifest {
         AI,
         AI_AGENT,
         EPUB,
+        THEME,
+        GALLERY,
+        BATCH_RENAME,
         SPEECH,
         TTS,
         JAVA_INTEROP,
@@ -615,6 +622,9 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.AI -> listOf(AI)
             NodeBridgeModules.AI_AGENT -> listOf(AI_AGENT)
             NodeBridgeModules.EPUB -> listOf(EPUB)
+            NodeBridgeModules.THEME -> listOf(THEME)
+            NodeBridgeModules.GALLERY -> listOf(GALLERY)
+            NodeBridgeModules.BATCH_RENAME -> listOf(BATCH_RENAME)
             NodeBridgeModules.SPEECH -> listOf(SPEECH)
             NodeBridgeModules.TTS -> listOf(TTS)
             NodeBridgeModules.JAVA -> listOf(JAVA_INTEROP)

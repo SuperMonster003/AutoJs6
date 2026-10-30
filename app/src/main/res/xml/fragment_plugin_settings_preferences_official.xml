@@ -439,6 +439,30 @@
             app:summary="@string/summary_bun_epub_control_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_theme_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_theme_control_grant"
+            app:summary="@string/summary_bun_theme_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_gallery_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_gallery_control_grant"
+            app:summary="@string/summary_bun_gallery_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_batchrename_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_batchrename_control_grant"
+            app:summary="@string/summary_bun_batchrename_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_speech_control_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"

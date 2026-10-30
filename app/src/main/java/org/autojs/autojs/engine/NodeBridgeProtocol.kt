@@ -727,6 +727,10 @@ object NodeBridgeModules {
     const val YOLO = RuntimeAutomationBridge.YOLO
     /** The 3-Shell Terminal module (api-coverage P3.3, Q167 (a)). zh-CN: 3-Shell Terminal 模块 (api-coverage P3.3, Q167 (a)). */
     const val TERMINAL = NodeBridgePermissionManifest.TERMINAL
+    /** Rhino's colors.theme, gallery and files.batchRename (api-coverage Q80 - Q82 (a)). zh-CN: Rhino 的 colors.theme, gallery 与 files.batchRename (api-coverage Q80 - Q82 (a)). */
+    const val THEME = NodeBridgePermissionManifest.THEME
+    const val GALLERY = NodeBridgePermissionManifest.GALLERY
+    const val BATCH_RENAME = NodeBridgePermissionManifest.BATCH_RENAME
 
     /** `dismissAll` cancels the execution's toasts (api-coverage P3.3). zh-CN: `dismissAll` 取消本执行的 toast (api-coverage P3.3). */
     val toastMethods = setOf("showToast", "toast", "dismissAll")
@@ -921,6 +925,9 @@ object NodeBridgeModules {
         FILES to filesMethods,
         CONSOLE to consoleMethods,
         TERMINAL to terminalMethods,
+        THEME to RuntimeThemeBridge.METHODS,
+        GALLERY to RuntimeOperationClients.METHODS,
+        BATCH_RENAME to RuntimeOperationClients.METHODS,
         PLUGIN_TOOLS to pluginToolsMethods,
     ) + RuntimeSystemBridge.methodsByModule + RuntimeAutomationBridge.methodsByModule
 
@@ -1025,6 +1032,15 @@ class AndroidNodeBridgeCapabilityProvider(
     private var epubScopeClosed = false
     private val epubBridge = lazy { RuntimeEpubBridge(appContext, engineInfo.cwd) }
     internal fun closeEpubClient(id: String) { if (epubBridge.isInitialized()) epubBridge.value.closeClient(id) }
+    private val themeBridge = lazy { RuntimeThemeBridge { engineInfo.sourceName.ifBlank { null } } }
+    private val galleryScopeLock = Any()
+    private var galleryScopeClosed = false
+    private val galleryBridge = lazy { RuntimeGalleryBridge(appContext, ::resolveAndroidFile) }
+    internal fun closeGalleryClient(id: String) { if (galleryBridge.isInitialized()) galleryBridge.value.closeClient(id) }
+    private val batchRenameScopeLock = Any()
+    private var batchRenameScopeClosed = false
+    private val batchRenameBridge = lazy { RuntimeBatchRenameBridge(appContext, ::resolveAndroidFile) }
+    internal fun closeBatchRenameClient(id: String) { if (batchRenameBridge.isInitialized()) batchRenameBridge.value.closeClient(id) }
     private val terminalScopeLock = Any()
     private var terminalScopeClosed = false
     private val terminalBridge = lazy { RuntimeTerminalBridge(appContext, engineInfo.cwd) }
@@ -1322,6 +1338,18 @@ class AndroidNodeBridgeCapabilityProvider(
                 if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("EPUB execution has ended")))
                 else bridge.dispatch(request, auditedCallback)
             }
+            request.module == NodeBridgeModules.THEME && request.method in RuntimeThemeBridge.METHODS ->
+                dispatchOnSystemThread(request, auditedCallback) { themeBridge.value.invoke(request.method, request.argsArray()) }
+            request.module == NodeBridgeModules.GALLERY && request.method in RuntimeOperationClients.METHODS -> {
+                val bridge = synchronized(galleryScopeLock) { if (galleryScopeClosed) null else galleryBridge.value }
+                if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Gallery execution has ended")))
+                else bridge.dispatch(request, auditedCallback)
+            }
+            request.module == NodeBridgeModules.BATCH_RENAME && request.method in RuntimeOperationClients.METHODS -> {
+                val bridge = synchronized(batchRenameScopeLock) { if (batchRenameScopeClosed) null else batchRenameBridge.value }
+                if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Batch rename execution has ended")))
+                else bridge.dispatch(request, auditedCallback)
+            }
             request.module == NodeBridgeModules.SPEECH && request.method in RuntimeSpeechBridge.methods -> {
                 val bridge = synchronized(speechScopeLock) { if (speechScopeClosed) null else speechBridge.value }
                 if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Speech execution has ended")))
@@ -1422,6 +1450,8 @@ class AndroidNodeBridgeCapabilityProvider(
         synchronized(aiScopeLock) { aiScopeClosed = true; if (aiBridge.isInitialized()) aiBridge.value.close() }
         synchronized(aiAgentScopeLock) { aiAgentScopeClosed = true; if (aiAgentBridge.isInitialized()) aiAgentBridge.value.close() }
         synchronized(epubScopeLock) { epubScopeClosed = true; if (epubBridge.isInitialized()) epubBridge.value.close() }
+        synchronized(galleryScopeLock) { galleryScopeClosed = true; if (galleryBridge.isInitialized()) galleryBridge.value.close() }
+        synchronized(batchRenameScopeLock) { batchRenameScopeClosed = true; if (batchRenameBridge.isInitialized()) batchRenameBridge.value.close() }
         synchronized(speechScopeLock) { speechScopeClosed = true; if (speechBridge.isInitialized()) speechBridge.value.close() }
         synchronized(ttsScopeLock) { ttsScopeClosed = true; if (ttsBridge.isInitialized()) ttsBridge.value.close() }
         if (composeBridge.isInitialized()) composeBridge.value.close()

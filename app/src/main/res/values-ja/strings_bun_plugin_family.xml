@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">Batch Rename プラグインでファイルを一括リネームし, バッチの取り消しと履歴やプリセットの管理を許可します.</string>
+    <string name="summary_bun_gallery_control_grant">3-Maple Image プラグインで画像の選択, 表示, 編集, 変換を許可します.</string>
+    <string name="summary_bun_theme_control_grant">AutoJs6 のテーマカラーの読み取りと変更 (カラーライブラリの有効化を含む) を許可します.</string>
+    <string name="text_bun_batchrename_control_grant">Bun 一括リネーム</string>
+    <string name="text_bun_gallery_control_grant">Bun ギャラリー</string>
+    <string name="text_bun_theme_control_grant">Bun テーマカラー</string>
+</resources>

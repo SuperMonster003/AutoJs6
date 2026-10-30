@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">Autoriser le renommage de fichiers par lots via le plugin Batch Rename, l\'annulation des lots et la gestion de leur historique et de leurs préréglages.</string>
+    <string name="summary_bun_gallery_control_grant">Autoriser la sélection, l\'affichage, la modification et la conversion d\'images via le plugin 3-Maple Image.</string>
+    <string name="summary_bun_theme_control_grant">Autoriser la lecture et la modification de la couleur du thème d\'AutoJs6, y compris l\'activation de bibliothèques de couleurs.</string>
+    <string name="text_bun_batchrename_control_grant">Renommage par lots Bun</string>
+    <string name="text_bun_gallery_control_grant">Galerie Bun</string>
+    <string name="text_bun_theme_control_grant">Couleur du thème Bun</string>
+</resources>

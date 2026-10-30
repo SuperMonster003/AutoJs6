@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">允许通过 Batch Rename 插件批量重命名文件, 撤销批次并管理其历史记录与预设.</string>
+    <string name="summary_bun_gallery_control_grant">允许通过 3-Maple Image 插件选择, 查看, 编辑与转换图片.</string>
+    <string name="summary_bun_theme_control_grant">允许读取和修改 AutoJs6 主题色, 包括激活色库.</string>
+    <string name="text_bun_batchrename_control_grant">Bun 批量重命名</string>
+    <string name="text_bun_gallery_control_grant">Bun 相册</string>
+    <string name="text_bun_theme_control_grant">Bun 主题色</string>
+</resources>

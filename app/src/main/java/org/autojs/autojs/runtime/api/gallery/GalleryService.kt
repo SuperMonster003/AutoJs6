@@ -25,7 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 工作目录的路径规则. [close] 在脚本退出时运行: 等待中的选择器与编辑器被结束 (其输出被丢弃), 跟随中的查看器结束会话但不关闭用户正在看的查看器.
  * 插件可用性拒绝 (`PLUGIN_UNAVAILABLE`, `PLUGIN_DISABLED`, `PLUGIN_INCOMPATIBLE`) 在技术信息前加上插件中心的本地化提示.
  */
-class GalleryService(context: Context, private val scriptRuntime: ScriptRuntime) : Closeable {
+class GalleryService(context: Context, private val resolver: (String) -> String) : Closeable {
+
+    constructor(context: Context, scriptRuntime: ScriptRuntime) : this(context, { path -> scriptRuntime.files.path(path) ?: path })
 
     /** A session the service ends on script exit. zh-CN: 脚本退出时由服务结束的会话. */
     internal fun interface Task {
@@ -46,7 +48,7 @@ class GalleryService(context: Context, private val scriptRuntime: ScriptRuntime)
         get() = tasks.size
 
     /** A script path resolved against the script's working directory; absolute paths pass through. zh-CN: 相对脚本工作目录解析的脚本路径; 绝对路径原样通过. */
-    fun resolvePath(path: String): String = scriptRuntime.files.path(path) ?: path
+    fun resolvePath(path: String): String = resolver(path)
 
     /** Whether a compatible, enabled gallery plugin answers right now; never throws. zh-CN: 当前是否有兼容且启用的相册插件应答; 从不抛出. */
     suspend fun isAvailable(): Boolean = GalleryPluginHost.isAvailable(appContext)

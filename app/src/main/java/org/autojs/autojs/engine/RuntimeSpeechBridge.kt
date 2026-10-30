@@ -163,6 +163,17 @@ internal class RuntimeSpeechBridge(private val context: Context, private val cwd
                     val parsed = SpeechScriptArguments.detectVoice(args.json(1))
                     withAudio(args, parsed.sampleRate) { SpeechPluginHost.detectVoiceFile(context, it, parsed.request) }
                 }
+                "diarize", "diarizeAsync" -> SpeechPluginHost.diarizeFile(context, path(args.json(0)), SpeechScriptArguments.diarize(args.json(1)), progress)
+                "detectLanguage", "detectLanguageAsync" -> SpeechPluginHost.detectLanguage(context, path(args.json(0)), SpeechScriptArguments.detectLanguage(args.json(1)), progress)
+                "tag", "tagAsync" -> SpeechPluginHost.tagAudio(context, path(args.json(0)), SpeechScriptArguments.tag(args.json(1)), progress)
+                "speaker.enroll", "speaker.enrollAsync" -> {
+                    val parsed = SpeechScriptArguments.enroll(args.json(0), args.json(1), args.json(2))
+                    SpeechPluginHost.enrollSpeaker(context, parsed.paths.map { path(com.google.gson.JsonPrimitive(it)) }, parsed.request)
+                }
+                "speaker.verify", "speaker.verifyAsync" -> SpeechPluginHost.verifySpeaker(context, path(args.json(1)), SpeechScriptArguments.verify(args.json(0), args.json(2)))
+                "speaker.identify", "speaker.identifyAsync" -> SpeechPluginHost.identifySpeaker(context, path(args.json(0)), SpeechScriptArguments.identify(args.json(1)))
+                "speaker.list" -> SpeechPluginHost.listSpeakers(context)
+                "speaker.remove" -> SpeechPluginHost.removeSpeaker(context, SpeechScriptArguments.speakerName(args.json(0), "name"))
                 "synthesize", "synthesizeAsync" -> SpeechPluginHost.synthesizeToFile(context,
                     SpeechScriptArguments.synthesize(args.json(0), args.json(2)), path(args.json(1)))
                 "speak" -> speak(args)
@@ -393,7 +404,9 @@ internal class RuntimeSpeechBridge(private val context: Context, private val cwd
         val methods = setOf("open", "start", "poll", "cancel", "uploadBegin", "uploadChunk", "uploadDiscard", "close")
         val operations = setOf("isAvailable", "capabilities", "recognize", "recognizeAsync", "detectVoice", "listen", "wake",
             "synthesize", "synthesizeAsync", "speak", "models.list", "models.install", "models.installAsync", "models.importFile",
-            "models.remove", "models.setDefault", "models.getDefault", "models.refreshCatalog", "session.stop", "session.cancel", "session.feed")
+            "models.remove", "models.setDefault", "models.getDefault", "models.refreshCatalog", "session.stop", "session.cancel", "session.feed",
+            "diarize", "diarizeAsync", "detectLanguage", "detectLanguageAsync", "tag", "tagAsync", "speaker.enroll", "speaker.enrollAsync",
+            "speaker.verify", "speaker.verifyAsync", "speaker.identify", "speaker.identifyAsync", "speaker.list", "speaker.remove")
 
         private fun JSONArray.json(index: Int): JsonElement? =
             if (isNull(index)) null else JsonParser.parseString(NodeBridgeJson.valueToJson(get(index)))

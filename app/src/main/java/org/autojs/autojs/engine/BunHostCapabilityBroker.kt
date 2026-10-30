@@ -122,7 +122,7 @@ internal class BunHostCapabilityBroker(
         if (closed.get()) return
         // Flow, speech, EPUB and mail stream without a finite script-call budget, and so does console output (console.control,
         // api-coverage P4.3), whose text has a budget of its own.
-        val isStreaming = capability in setOf(BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL, BunHostCapabilityGrants.CONSOLE_CONTROL)
+        val isStreaming = capability in setOf(BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL, BunHostCapabilityGrants.GALLERY_CONTROL, BunHostCapabilityGrants.BATCHRENAME_CONTROL, BunHostCapabilityGrants.CONSOLE_CONTROL)
         val outcome = if (!isStreaming && calls.incrementAndGet() > BunRuntimeContract.MAX_HOST_CALLS_PER_EXECUTION) {
             val identity=Binder.clearCallingIdentity()
             try { synchronized(imageScopeLock) { imageProvider }?.let { it.closeShellProcesses(); it.closeEventResources(); it.closeDeviceDialogResources(); it.closeAndroidObjects(); it.closeJavaObjects() } } finally { Binder.restoreCallingIdentity(identity) }
@@ -189,6 +189,7 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.AUTOJS_CONTROL, BunHostCapabilityGrants.SETTINGS_CONTROL, BunHostCapabilityGrants.SYSPROPS_CONTROL, BunHostCapabilityGrants.MEMORY_CONTROL,
             BunHostCapabilityGrants.INSTALLER_CONTROL, BunHostCapabilityGrants.ENGINES_CONTROL, BunHostCapabilityGrants.PLUGIN_TOOLS_CONTROL,
             BunHostCapabilityGrants.OCR_CONTROL, BunHostCapabilityGrants.BARCODE_CONTROL, BunHostCapabilityGrants.YOLO_CONTROL,
+            BunHostCapabilityGrants.THEME_CONTROL, BunHostCapabilityGrants.GALLERY_CONTROL, BunHostCapabilityGrants.BATCHRENAME_CONTROL,
             BunHostCapabilityGrants.TERMINAL_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.FILES_CONTROL -> {
                 try {

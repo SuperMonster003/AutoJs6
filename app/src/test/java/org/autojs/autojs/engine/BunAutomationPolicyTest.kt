@@ -29,8 +29,8 @@ class BunAutomationPolicyTest {
         // media playback 6 and the media library scan 1 (P4.1c), Rhino's device members 30 (keepAwake / cancelVibration and the 28
         // RuntimeDeviceBridge routes, P3.1c / P4.1c), the automation event sources 6, ocr 3, barcode 4, yolo 3, the accessibility
         // screenshot of automator.captureScreen and auto.dump / explain (P4.4, Q185 (a); automator / auto are second modules of
-        // accessibility.control), the terminal 15 (P4.3).
-        assertEquals(329,BunAutomationBridge.methods.values.sumOf{it.size})
+        // accessibility.control), the terminal 15 (P4.3), the theme color 9, gallery 5 and batch rename 5 (P4.5, Q195 (a)).
+        assertEquals(348,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))

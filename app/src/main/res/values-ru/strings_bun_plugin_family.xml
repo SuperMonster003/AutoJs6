@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">Разрешить пакетное переименование файлов через плагин Batch Rename, отмену пакетов и управление их историей и пресетами.</string>
+    <string name="summary_bun_gallery_control_grant">Разрешить выбор, просмотр, редактирование и преобразование изображений через плагин 3-Maple Image.</string>
+    <string name="summary_bun_theme_control_grant">Разрешить чтение и изменение цвета темы AutoJs6, включая активацию библиотек цветов.</string>
+    <string name="text_bun_batchrename_control_grant">Пакетное переименование Bun</string>
+    <string name="text_bun_gallery_control_grant">Галерея Bun</string>
+    <string name="text_bun_theme_control_grant">Цвет темы Bun</string>
+</resources>

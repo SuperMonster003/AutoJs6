@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">السماح بإعادة تسمية الملفات دفعة واحدة عبر إضافة Batch Rename وإلغاء الدفعات وإدارة سجلها وإعداداتها المسبقة.</string>
+    <string name="summary_bun_gallery_control_grant">السماح باختيار الصور وعرضها وتحريرها وتحويلها عبر إضافة 3-Maple Image.</string>
+    <string name="summary_bun_theme_control_grant">السماح بقراءة لون سمة AutoJs6 وتغييره, بما في ذلك تفعيل مكتبات الألوان.</string>
+    <string name="text_bun_batchrename_control_grant">إعادة التسمية الدفعية في Bun</string>
+    <string name="text_bun_gallery_control_grant">معرض الصور في Bun</string>
+    <string name="text_bun_theme_control_grant">لون السمة في Bun</string>
+</resources>

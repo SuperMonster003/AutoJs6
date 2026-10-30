@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">Permite renombrar archivos por lotes con el complemento Batch Rename, deshacer lotes y gestionar su historial y preajustes.</string>
+    <string name="summary_bun_gallery_control_grant">Permite elegir, ver, editar y convertir imágenes con el complemento 3-Maple Image.</string>
+    <string name="summary_bun_theme_control_grant">Permite leer y cambiar el color del tema de AutoJs6, incluida la activación de bibliotecas de colores.</string>
+    <string name="text_bun_batchrename_control_grant">Renombrado por lotes de Bun</string>
+    <string name="text_bun_gallery_control_grant">Galería de Bun</string>
+    <string name="text_bun_theme_control_grant">Color del tema de Bun</string>
+</resources>

@@ -155,12 +155,14 @@ internal class BunAutomationBridge(
         val aiAgent = job.capability == Grants.AGENT_CONTROL && job.method == "open"
         val ai = job.capability == Grants.AI_CONTROL && job.method == "open"
         val epub = job.capability == Grants.EPUB_CONTROL && job.method == "open"
+        val gallery = job.capability == Grants.GALLERY_CONTROL && job.method == "open"
+        val batchRename = job.capability == Grants.BATCHRENAME_CONTROL && job.method == "open"
         val speech = job.capability == Grants.SPEECH_CONTROL && job.method == "open"
         val tts = job.capability == Grants.TTS_CONTROL && job.method == "open"
         val javaObject = job.capability == Grants.JAVA_INTEROP
         val androidObject=job.capability==Grants.ANDROID_OBJECTS && job.method in setOf("createPaint","createColorStateList")
         val task=job.capability==Grants.TASKS_CONTROL && job.method in setOf("addTimedTask","addIntentTask")
-        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject && !tts && !speech && !aiAgent && !ai && !epub && !mail && !flow && !yolo) { job.future.cancel(false); return }
+        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject && !tts && !speech && !aiAgent && !ai && !epub && !gallery && !batchRename && !mail && !flow && !yolo) { job.future.cancel(false); return }
         // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
@@ -169,6 +171,8 @@ internal class BunAutomationBridge(
                 if (aiAgent) { provider().closeAiAgentClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (ai) { provider().closeAiClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (epub) { provider().closeEpubClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
+                if (gallery) { provider().closeGalleryClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
+                if (batchRename) { provider().closeBatchRenameClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (speech) { provider().closeSpeechClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (tts) { provider().closeTtsClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (javaObject) { provider().releaseJavaResult(response.resultJson); return@runCatching }
@@ -211,6 +215,10 @@ internal class BunAutomationBridge(
             if (Grants.AI_CONTROL in grants) add(NodeBridgePermissionManifest.AI)
             if (Grants.AGENT_CONTROL in grants) add(NodeBridgePermissionManifest.AI_AGENT)
             if (Grants.EPUB_CONTROL in grants) add(NodeBridgePermissionManifest.EPUB)
+            // Rhino's colors.theme, gallery and files.batchRename (api-coverage Q195 (a)).
+            if (Grants.THEME_CONTROL in grants) add(NodeBridgePermissionManifest.THEME)
+            if (Grants.GALLERY_CONTROL in grants) add(NodeBridgePermissionManifest.GALLERY)
+            if (Grants.BATCHRENAME_CONTROL in grants) add(NodeBridgePermissionManifest.BATCH_RENAME)
             if (Grants.SPEECH_CONTROL in grants) add(NodeBridgePermissionManifest.SPEECH)
             if (Grants.TTS_CONTROL in grants) add(NodeBridgePermissionManifest.TTS)
             if (Grants.MEDIAINFO_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA))
@@ -296,6 +304,9 @@ internal class BunAutomationBridge(
             Grants.AI_CONTROL to RuntimeAiBridge.methods,
             Grants.AGENT_CONTROL to RuntimeAgentBridge.methods,
             Grants.EPUB_CONTROL to RuntimeEpubBridge.methods,
+            Grants.THEME_CONTROL to RuntimeThemeBridge.METHODS,
+            Grants.GALLERY_CONTROL to RuntimeOperationClients.METHODS,
+            Grants.BATCHRENAME_CONTROL to RuntimeOperationClients.METHODS,
             Grants.SPEECH_CONTROL to RuntimeSpeechBridge.methods,
             Grants.TTS_CONTROL to RuntimeTtsBridge.methods,
             Grants.MEDIAINFO_CONTROL to NodeBridgeModules.mediainfoMethods,
@@ -346,7 +357,7 @@ internal class BunAutomationBridge(
             Grants.NOTIFICATIONS_POST to mapOf(RuntimeSystemBridge.NOTICE to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.NOTICE)),
             Grants.DEVICE_CONTROL to mapOf(RuntimeSystemBridge.POWER_MANAGER to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.POWER_MANAGER)),
         )
-        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.MEDIA_CONTROL to NodeBridgeModules.MEDIA,Grants.MEDIA_LIBRARY to NodeBridgeModules.MEDIA_STORE,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
+        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.THEME_CONTROL to NodeBridgeModules.THEME,Grants.GALLERY_CONTROL to NodeBridgeModules.GALLERY,Grants.BATCHRENAME_CONTROL to NodeBridgeModules.BATCH_RENAME,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.MEDIA_CONTROL to NodeBridgeModules.MEDIA,Grants.MEDIA_LIBRARY to NodeBridgeModules.MEDIA_STORE,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
             Grants.AUTOJS_CONTROL to RuntimeSystemBridge.AUTOJS, Grants.SETTINGS_CONTROL to RuntimeSystemBridge.SETTINGS, Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.SYSPROPS,
             Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES,
             Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.PLUGIN_TOOLS,

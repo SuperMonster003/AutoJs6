@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_batchrename_control_grant">允許透過 Batch Rename 外掛程式批次重新命名檔案, 復原批次並管理其歷史記錄與預設.</string>
+    <string name="summary_bun_gallery_control_grant">允許透過 3-Maple Image 外掛程式選擇, 檢視, 編輯與轉換圖片.</string>
+    <string name="summary_bun_theme_control_grant">允許讀取和修改 AutoJs6 主題色, 包括啟用色庫.</string>
+    <string name="text_bun_batchrename_control_grant">Bun 批次重新命名</string>
+    <string name="text_bun_gallery_control_grant">Bun 相簿</string>
+    <string name="text_bun_theme_control_grant">Bun 主題色</string>
+</resources>

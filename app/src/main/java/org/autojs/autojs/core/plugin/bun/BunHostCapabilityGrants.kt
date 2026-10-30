@@ -111,6 +111,11 @@ object BunHostCapabilityGrants {
     const val FLOATY_RAW = "floaty.raw"
     const val FLOATY_TOUCH = "floaty.touch"
 
+    // Rhino's colors.theme, gallery and files.batchRename (api-coverage Q195 (a)): one grant per Node capability.
+    const val THEME_CONTROL = "theme.control"
+    const val GALLERY_CONTROL = "gallery.control"
+    const val BATCHRENAME_CONTROL = "batchrename.control"
+
     // Not a grant (api-coverage Q139 (b)): offered with every capability broker, it lets a script end its own execution
     // (exit / stop from a Worker); no other execution is reachable through it.
     const val EXECUTION_CONTROL = "execution.control"
@@ -124,6 +129,9 @@ object BunHostCapabilityGrants {
 
     /** The UI family grants in contract order (api-coverage P4.3, Q3 (a) / Q173 (a)). */
     val UI_FAMILY = listOf(TERMINAL_CONTROL, FLOATY_CONTROL, FLOATY_RAW, FLOATY_TOUCH)
+
+    /** The grants of the theme color and of the gallery and batch rename plugins in contract order (api-coverage Q195 (a)). */
+    val PLUGIN_FAMILY = listOf(THEME_CONTROL, GALLERY_CONTROL, BATCHRENAME_CONTROL)
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
     private const val KEY_HOST_INFO = "host_info"
@@ -318,6 +326,17 @@ object BunHostCapabilityGrants {
         setGranted(context, capability, granted)
     }
 
+    /** A grant of [PLUGIN_FAMILY] (api-coverage Q195 (a)), off by default. */
+    fun isPluginFamilyGranted(context: Context, capability: String): Boolean {
+        require(capability in PLUGIN_FAMILY) { "Not a plugin family grant: $capability" }
+        return isGranted(context, capability, false)
+    }
+
+    fun setPluginFamilyGranted(context: Context, capability: String, granted: Boolean) {
+        require(capability in PLUGIN_FAMILY) { "Not a plugin family grant: $capability" }
+        setGranted(context, capability, granted)
+    }
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -395,6 +414,7 @@ object BunHostCapabilityGrants {
         SYSTEM_FAMILY.filterTo(this) { isSystemFamilyGranted(context, it) }
         AUTOMATION_FAMILY.filterTo(this) { isAutomationFamilyGranted(context, it) }
         UI_FAMILY.filterTo(this) { isUiFamilyGranted(context, it) }
+        PLUGIN_FAMILY.filterTo(this) { isPluginFamilyGranted(context, it) }
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -409,7 +429,7 @@ object BunHostCapabilityGrants {
         granted.take(limit.coerceIn(1, BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT) - 1) + EXECUTION_CONTROL
 
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
-        val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
+        val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, THEME_CONTROL, GALLERY_CONTROL, BATCHRENAME_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
             SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL, MEDIA_CONTROL, MEDIA_LIBRARY, DEVICE_IDENTIFIERS) + SYSTEM_FAMILY + AUTOMATION_FAMILY + UI_FAMILY
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
