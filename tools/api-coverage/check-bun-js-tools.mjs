@@ -26,6 +26,10 @@ const exported = hostExports();
 // family adds Color and open (P4.2b, checked by check-bun-files-data.mjs).
 const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies'];
 const LIBRARIES = ['axios', 'dayjs', 'pangu', 'cheerio', 'i18n', 'Color', 'open'];
+// host.global also carries the global system functions of the system information family (P4.1b), which
+// check-bun-system.mjs checks.
+const SYSTEM_GLOBALS = ['currentPackage', 'currentActivity', 'currentComponent', 'waitForActivity', 'waitForPackage', 'exit', 'stop', 'isRunning',
+  'isStopped', 'isShuttingDown', 'notStopped', 'requiresApi', 'requiresAutojsVersion', 'setScreenMetrics', 'getClip', 'setClip', 'WIDTH', 'HEIGHT', 'isAutoJs6'];
 const groups = [
   ['util', host.util, ['unwrapJavaObject']], ['util.inspect', host.util.inspect], ['util.java', host.util.java], ['util.morseCode', host.util.morseCode],
   ['util.version', host.util.version], ['util.versionCodes', host.util.versionCodes], ['species', host.species], ['s13n', host.s13n],
@@ -61,7 +65,7 @@ for (const name of GLOBALS) {
   assert.equal(typeof host.global[name], 'function', `Missing global ${name}`);
   assert(declared(name), `Missing declaration of global ${name}`);
 }
-assert.deepEqual(Object.keys(host.global).sort(), [...GLOBALS, ...LIBRARIES].sort(), 'Bun global data functions and library getters (Q61 / Q64)');
+assert.deepEqual(Object.keys(host.global).sort(), [...GLOBALS, ...LIBRARIES, ...SYSTEM_GLOBALS].sort(), 'Bun global data functions and library getters (Q61 / Q64)');
 for (const name of LIBRARIES) assert(declared(name), `Missing declaration of global ${name}`);
 assert.equal(host.global.axios.VERSION, '1.1.2', 'global.axios is the host axios library');
 for (const [client, name] of [['util', 'RuntimeUtil'], ['species', 'RuntimeSpecies'], ['global', 'RuntimeGlobal'], ['s13n', 'RuntimeS13n'], ['cvt', 'RuntimeConverter'], ['fmt', 'RuntimeFormatter'], ['jsox', 'RuntimeJsox']]) {
