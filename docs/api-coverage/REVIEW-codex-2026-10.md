@@ -396,6 +396,19 @@ P4.4 落点 (2026-10-30, api-cov-p4-4; 矩阵与基线宿主 7bb11982c, selector
 
 Q179 (b) / Q180 (a) 落实 (2026-10-30, 维护者 17:4x 拍板, api-cov-p4-4): auto.waitFor / automator.waitForService 超时结束整个执行, keepAlive / timers.keepAlive 返回数字 id, continuation.enabled 为 false (Node 共享工厂 d656265f, Bun 7f25ae7; 矩阵的状态与入口不变, MATRIX 与基线不改); 宿主 Threads.internalPool 与实际上限比较 (29537a241), threads.pool 缺 maxPoolSize 时 Rhino / Node / Bun 一致. Node 真机复测归 P3.5.
 
+P3.5 / P4.5 补缺 A 落点 (2026-10-31, api-cov-p45-bridges; 矩阵与基线宿主 5c9f86933): 本批 Node main / Worker / Bun 各 52 -> 0 (全列 626 -> 574), 其中 colors.theme 9, gallery 11, files.batchRename 17, speech.speaker 8, Q114 的 speech.diarize / detectLanguage / tag 及 Async 6, 共 51 行, 另 1 行为 B 的 global.TODO. Node 列 bridged, Bun 列 capability-gated.
+
+| 项 | Node main / Worker | Bun | 待决 |
+|---|---|---|---|
+| colors.theme 9 行 | bridged (能力 theme) | theme.control | Q195 |
+| gallery 11 行 + GalleryViewSession | bridged (能力 gallery) | gallery.control | Q195, Q197 |
+| files.batchRename 17 行 | bridged (能力 batch_rename) | batchrename.control | Q195 |
+| speech.speaker 8 行, Q114 6 行 | bridged (能力 speech) | speech.control | 无 |
+| 打包应用的 gallery / files.batchRename | 调不到插件 (同 Rhino) | 同左 | Q196 |
+| 同步形态 | Rhino 的 x 与 xAsync 都返回 Promise, 差异只在 view / viewAsync 的兑现时机 | 同左 | 无 |
+
+另: 共享工厂 __autojs6_create_plugin_family 经 sync-plugin-family.mjs 进 Bun, 与 P3.3 / P3.4 同一做法; GalleryViewSession 的声明列出自己用到的 EventEmitter 成员, 因为 TS 仓库的校验环境没有 Node 类型.
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).

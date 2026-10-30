@@ -1288,3 +1288,43 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 文档 | 894d87b | threads.md, changelog, 生成物 |
 | Offline Docs | c2ea529 | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 附录 C Q179 / Q180, ROADMAP P4.4 遗留, REVIEW 7.1, 两份报告, 真机脚本 --cases |
+
+## 19. P3.5 / P4.5 补缺 A (2026-10-31, 子会话 api-cov-p45-bridges)
+
+### 19.1 做了什么
+
+- Q80 (a) colors.theme, Q81 (a) gallery, Q82 (a) files.batchRename: 宿主新桥接模块 theme / gallery / batch_rename, Node main, Worker 与 Bun 共用; gallery 与 batch_rename 经执行级操作客户端 RuntimeOperationClients (open / start / poll / cancel / close), 查看器是事件流, 仿 epub 阅读会话.
+- Q114: speech.diarize / detectLanguage / tag 及 Async 与 speech.speaker 的 Node / Bun 入口.
+- Q195 (已按推荐先行): 三项能力各一, Bun 3 个授权默认关闭, 插件中心 3 个开关与 11 份文案.
+
+### 19.2 前后数字
+
+| 项 | 改动前 | 改动后 |
+| --- | --- | --- |
+| pending 基线 (Node main / Worker / Bun) | 626 / 626 / 626 | 574 / 574 / 574 (imgui 572, Flow#await / Flow#sync 2) |
+| BunAutomationBridge 路由方法 | 329 | 348 (theme 9, gallery 5, batch_rename 5) |
+| Ace 运行时查询 | 5289 (行 1996) | 5478 (行 2052) |
+| 文档运行时支持表 | - | color, files, gallery, global, speech 5 页 |
+
+### 19.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-api-cov-p45-bridges-head` (宿主 c46a5cef8, KSP 取同一副本的 script-modules.json, 其后宿主只改文档与脚本; Node 8a627e32, Bun 547c215, 文档 83aaaa4, TS d27bff0, Ace 92061b9): `check.py --metadata ... --matrix --strict-arity --strict-types --docs-support` 退出码 0, failures 空, Node d.ts 差异 33 且 unreviewed 0.
+- api-coverage 单测 121 例通过 (跳过 3), check-runtime-plugin-family.mjs, check-runtime-speech.mjs, Node 与 Bun 的 CI 结构脚本全部退出码 0, 宿主 5 个相关测试类 32 例全过.
+- TS `sync-runtime-declarations.mjs --check` changed 0, verify-api-coverage / verify-runtime-declarations 通过 (declarations 95); Ace `verify-runtime-api-coverage.mjs --fresh` 通过 (queries 6655, 矩阵查询 5478).
+- 真机 OnePlus 63751f63 (OPD2413, Android 15, API 35; 宿主 debug 5935, Node debug 356, Bun debug 335, 3-Maple Image 198, Batch Rename 49, 3-Macaw Speech 165): 第二轮 Rhino 78 / 78, Node main 78 / 78, Node Worker 77 / 78, Bun main / Worker 各 78 / 78; 拒绝轮 Node main / Worker, Bun main / Worker 各 20 / 20. Worker 差的一例与第一轮 Rhino 的一例是同一种偶发无应答 (Q197). 证据 docs/dev/runtime-plugin-family-2026-10-31.md.
+- 恢复: 宿主, Node, Maple, Batch Rename, Macaw 的 md5 与记录一致, Bun 卸载, 4 个授权 absent, 推送文件已删. Sony QV710AF65F 只装过 Node / Maple / Batch Rename 后原样恢复 (Bun 需要 API 33, 该机 API 31, 且已被 paddle-ocr-v3-p6-1 占用, 未跑用例).
+
+### 19.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 7b01dc338 | 桥接模块, 授权, 插件中心开关, 单测 |
+| 宿主 | b925fc903 / c46a5cef8 | runtime-policy, runtime_matrix, 结构脚本, 真机脚本 |
+| 宿主 | 5c9f86933 | MATRIX.md, pending-baseline.json |
+| Node 插件 | 8736d145 / 4d1b1682 / 40727858 / 8a627e32 | 共享工厂, colors.theme, speech 成员, d.ts, HOST-API, 桌面用例 |
+| Bun 插件 | 90646af / 9e0c5cd / 547c215 | 同步共享工厂与声明, host-api.md, 配额豁免, 测试 |
+| TS | c3828a4 / d27bff0 | 同步 Node / Bun 声明 |
+| Ace | 685cf30 / 92061b9 | 内置声明, 运行时查询表 |
+| 文档 | 01c88de / 83aaaa4 | 运行时 API 新节, 5 页支持表, changelog / progress, 生成物 |
+| Offline Docs | 7e519e0 | 同步生成页, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP 落点, 附录 C Q195 - Q197, REVIEW 7.1 |
