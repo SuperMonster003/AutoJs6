@@ -103,7 +103,9 @@
       "autojs": ["autojs.control"], "engines": ["engines.control"], "installer": ["installer.control"], "memory": ["memory.control"],
       "powerManager": ["device.control"], "settings": ["settings.control"], "sysprops": ["sysprops.control"],
       "_noteP44": "P4.4 (Q181 (a) / Q183 (a)): automator and auto are second modules of accessibility.control (gestures also accessibility.gesture, the service management accessibility.service), qrcode shares barcode.control, the selector functions probe through flow.control",
-      "automator": ["accessibility.control"], "auto": ["accessibility.control"], "qrcode": ["barcode.control"], "selector": ["flow.control"]
+      "automator": ["accessibility.control"], "auto": ["accessibility.control"], "qrcode": ["barcode.control"], "selector": ["flow.control"],
+      "_noteP43": "P4.3 (Q3 (a) / Q173 (a)): terminal sessions through terminal.control; floaty windows through floaty.control, raw windows also floaty.raw and getClip clipboard.control (memberCapabilities); web has no grant of its own (memberCapabilities)",
+      "terminal": ["terminal.control"], "floaty": ["floaty.control", "floaty.raw", "clipboard.control"]
     },
     "memberCapabilities": {
       "_note": "Q12 (a): namespace members missing from HOST_API_METHODS whose namespace has several related grants; the grant of the host-client.mjs call they wrap (2026-10-25, api-coverage P1.1). P4.2a: members of a local namespace (no related grant) that call the host through another grant, capability-gated by it",
@@ -293,7 +295,17 @@
       "media.musicSeekTo": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the seekTo route"},
       "media.isMusicPlaying": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"},
       "media.getMusicDuration": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"},
-      "media.getMusicCurrentPosition": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"}
+      "media.getMusicCurrentPosition": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"},
+      "floaty.window": {"capability": "floaty.control", "basis": "P4.3 (Q173 (a)): the shared UI facade calls the floaty window routes through floaty.control"},
+      "floaty.closeAll": {"capability": "floaty.control", "basis": "P4.3 (Q173 (a)): the shared UI facade calls the floaty window routes through floaty.control"},
+      "floaty.hasPermission": {"capability": "floaty.control", "basis": "P4.3 (Q173 (a)): over the ui.overlay hasPermission route"},
+      "floaty.checkPermission": {"capability": "floaty.control", "basis": "P4.3 (Q173 (a)): over the ui.overlay hasPermission route"},
+      "floaty.requestPermission": {"capability": "floaty.control", "basis": "P4.3 (Q173 (a)): over the ui.overlay openPermissionSettings route"},
+      "floaty.ensurePermission": {"capability": "floaty.control", "basis": "P4.3 (Q173 (a)): over the ui.overlay hasPermission / openPermissionSettings routes"},
+      "floaty.rawWindow": {"capability": "floaty.raw", "basis": "P4.3 (Q173 (a)): floatyRawWindow needs floaty.raw besides floaty.control"},
+      "floaty.getClip": {"capability": "clipboard.control", "basis": "P4.3: over the clipboard getText long-wait route, as Node"},
+      "web.newInjectableWebView": {"capability": "ui.layout", "basis": "P4.3 (Q174 (a)): the WebView is inflated and driven through the ui.layout view routes"},
+      "web.newInjectableWebClient": {"capability": "ui.layout", "basis": "P4.3 (Q174 (a)): the client of a WebView of the ui.layout view routes"}
     },
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",
@@ -357,16 +369,17 @@
     "YoloDetector": {"node": {"module": "autojs6:yolo", "type": "YoloDetector"}, "bun": {"namespace": "yolo", "type": "RuntimeYolo.YoloDetector", "capability": "yolo.control"}},
     "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}, "bun": {"namespace": "zip", "type": "RuntimeZip.Zip", "capability": "java.interop"}},
     "_p33Note": "Q106 (a) / Q166 (a) / Q168 (a), P3.3: the compose session, floating window, state and ref, and the Rhino Java objects ConsoleConfigurator, FloatyWindow / RawWindow, WebSocket and InjectableWebView / InjectableWebClient, whose Node facades are runtime handles compared member by member; their Bun mappings come with P4.3",
-    "ComposeSession": {"node": {"module": "autojs6:compose", "type": "Session"}},
-    "ComposeFloatyWindow": {"node": {"module": "autojs6:compose", "type": "FloatySession"}},
-    "ComposeState": {"node": {"module": "autojs6:compose", "type": "State<unknown>"}},
-    "ComposeRef": {"node": {"module": "autojs6:compose", "type": "Ref"}},
-    "ConsoleConfigurator": {"node": {"module": "console", "type": "ConsoleConfigurator"}},
-    "FloatyWindow": {"node": {"module": "autojs6:floaty", "type": "FloatyWindow"}},
-    "RawWindow": {"node": {"module": "autojs6:floaty", "type": "RawWindow"}},
-    "WebSocket": {"node": {"module": "autojs6:web", "type": "WebSocket"}},
-    "InjectableWebView": {"node": {"module": "autojs6:web", "type": "InjectableWebView"}},
-    "InjectableWebClient": {"node": {"module": "autojs6:web", "type": "InjectableWebClient"}}
+    "_p43Note": "P4.3 (Q173 (a) / Q174 (a)): the Bun handles of the shared UI facade; RawWindow comes from floaty.rawWindow (floaty.raw), the injectable WebView and client are views of the ui.layout routes (namespace ui), WebSocket is Bun's own (no grant)",
+    "ComposeSession": {"node": {"module": "autojs6:compose", "type": "Session"}, "bun": {"namespace": "compose", "type": "RuntimeCompose.Session", "capability": "ui.compose"}},
+    "ComposeFloatyWindow": {"node": {"module": "autojs6:compose", "type": "FloatySession"}, "bun": {"namespace": "compose", "type": "RuntimeCompose.FloatySession", "capability": "ui.compose"}},
+    "ComposeState": {"node": {"module": "autojs6:compose", "type": "State<unknown>"}, "bun": {"namespace": "compose", "type": "RuntimeCompose.State<unknown>", "capability": "ui.compose"}},
+    "ComposeRef": {"node": {"module": "autojs6:compose", "type": "Ref"}, "bun": {"namespace": "compose", "type": "RuntimeCompose.Ref", "capability": "ui.compose"}},
+    "ConsoleConfigurator": {"node": {"module": "console", "type": "ConsoleConfigurator"}, "bun": {"namespace": "console", "type": "RuntimeConsole.ConsoleConfigurator", "capability": "console.control"}},
+    "FloatyWindow": {"node": {"module": "autojs6:floaty", "type": "FloatyWindow"}, "bun": {"namespace": "floaty", "type": "RuntimeFloaty.FloatyWindow", "capability": "floaty.control"}},
+    "RawWindow": {"node": {"module": "autojs6:floaty", "type": "RawWindow"}, "bun": {"namespace": "floaty", "type": "RuntimeFloaty.RawWindow", "capability": "floaty.raw"}},
+    "WebSocket": {"node": {"module": "autojs6:web", "type": "WebSocket"}, "bun": {"namespace": "web", "type": "RuntimeWeb.WebSocket"}},
+    "InjectableWebView": {"node": {"module": "autojs6:web", "type": "InjectableWebView"}, "bun": {"namespace": "ui", "type": "RuntimeWeb.InjectableWebView", "capability": "ui.layout"}},
+    "InjectableWebClient": {"node": {"module": "autojs6:web", "type": "InjectableWebClient"}, "bun": {"namespace": "ui", "type": "RuntimeWeb.InjectableWebClient", "capability": "ui.layout"}}
   },
   "exclusions": [
     {

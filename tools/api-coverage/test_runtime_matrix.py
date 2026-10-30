@@ -836,6 +836,38 @@ class RepositoryTest(unittest.TestCase):
             self.assertEqual(rows[name]['bun']['status'], 'pending', name)
         self.assertEqual(rows['util.class']['bun']['status'], 'not-portable')
 
+    def test_p4_3(self):
+        # The Bun UI family: the shared UI facade of the client with the content view and window members behind ui.layout
+        # (Q164 (a)), floaty behind floaty.control (rawWindow floaty.raw, getClip clipboard.control, Q173 (a)), terminal behind
+        # terminal.control (Q3 (a)), the injectable WebView and client behind ui.layout and newWebSocket on Bun's WebSocket
+        # (Q174 (a)), console.build / rawInput behind console.control, ComposeError and ComposeNode's accessors (Q104) behind
+        # ui.compose; the facade's handles (Q106 (a) / Q166 (a) / Q168 (a)) through their Bun handle types.
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status, capability in [('ui.layout', 'capability-gated', 'ui.layout'), ('ui.statusBarColor', 'capability-gated', 'ui.layout'),
+                                         ('ui.bindingContext', 'capability-gated', 'ui.layout'), ('floaty.window', 'capability-gated', 'floaty.control'),
+                                         ('floaty.rawWindow', 'capability-gated', 'floaty.raw'), ('floaty.getClip', 'capability-gated', 'clipboard.control'),
+                                         ('terminal.exec', 'capability-gated', 'terminal.control'), ('terminal.npm', 'capability-gated', 'terminal.control'),
+                                         ('web.newInjectableWebView', 'capability-gated', 'ui.layout'), ('newInjectableWebClient', 'capability-gated', 'ui.layout'),
+                                         ('web.newWebSocket', 'local-shim', None), ('newWebSocket', 'local-shim', None), ('web.ByteString', 'local-shim', None),
+                                         ('console.build', 'capability-gated', 'console.control'), ('console.input', 'capability-gated', 'console.control'),
+                                         ('ComposeError', 'capability-gated', 'ui.compose'), ('ComposeNode#w', 'capability-gated', 'ui.compose'),
+                                         ('ComposeNode#append', 'capability-gated', 'ui.compose'), ('ComposeSession#update', 'capability-gated', 'ui.compose'),
+                                         ('ConsoleConfigurator#setTitle', 'capability-gated', 'console.control'),
+                                         ('FloatyWindow#setPosition', 'capability-gated', 'floaty.control'), ('RawWindow#setTouchable', 'capability-gated', 'floaty.raw'),
+                                         ('WebSocket#send', 'local-shim', None), ('InjectableWebClient#injectAndWait', 'capability-gated', 'ui.layout')]:
+            self.assertEqual((rows[name]['bun']['status'], rows[name]['bun'].get('capability')), (status, capability), name)
+        self.assertEqual({rows[name]['bun']['via'] for name in ['ComposeNode#w', 'ComposeSession#update', 'FloatyWindow#setPosition', 'WebSocket#send']},
+                         {'handle-type'})
+        # ui.layoutInflater is Rhino's Java LayoutInflater (Q169 (a)).
+        self.assertEqual(rows['ui.layoutInflater']['bun']['status'], 'not-portable')
+        handles = ('ComposeNode', 'ComposeSession', 'ComposeFloatyWindow', 'ComposeState', 'ComposeRef', 'ConsoleConfigurator', 'FloatyWindow',
+                   'RawWindow', 'WebSocket', 'InjectableWebView', 'InjectableWebClient')
+        family = [row for row in self.matrix['rows'] if (row['module'] or row['ownerModule'] or '').split('.')[0] in
+                  ('ui', 'floaty', 'web', 'terminal', 'console', 'toast', 'compose') or row['object'] in handles]
+        self.assertGreaterEqual(len(family), 370)
+        for row in family:
+            self.assertNotEqual(row['bun']['status'], 'pending', row['id'])
+
     def test_p5_2f1(self):
         # Q122 - Q124: the host imgui module is in the denominator, pending in every runtime column except the internal __pluginId.
         rows = {row['id']: row for row in self.matrix['rows'] if row['kind'] == 'export' and row['module'].split('.')[0] == 'imgui'}

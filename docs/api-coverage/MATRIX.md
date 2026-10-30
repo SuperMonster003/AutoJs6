@@ -11,7 +11,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Node main | 1628 | 368 | 0 | 944 | 0 | 577 |
 | Node Worker | 1628 | 365 | 0 | 947 | 0 | 577 |
-| Bun | 0 | 349 | 1430 | 1050 | 0 | 688 |
+| Bun | 0 | 376 | 1617 | 947 | 0 | 577 |
 
 | 列 | 取值 |
 |---|---|
@@ -21,7 +21,7 @@
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 993 / differs 23 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: java-prototype-objects shadowed (node_main, 103), java-prototype-objects shadowed (node_worker, 103).
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: java-prototype-objects shadowed (bun, 103), java-prototype-objects shadowed (node_main, 103), java-prototype-objects shadowed (node_worker, 103).
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
@@ -36,7 +36,7 @@
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
 | java-prototype-layout-inflater | not-portable: java-prototype | 1 | 1 | 1 | ui.inflate / ui.createView |
-| java-prototype-objects | not-portable: java-prototype | 882 | 882 | 985 |  |
+| java-prototype-objects | not-portable: java-prototype | 882 | 882 | 882 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
@@ -51,31 +51,31 @@
 
 | 模块 | 行 | doc 标题 | d.ts | 类型 (ksp) | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 194 / 13 / 1 | 194 / 13 / 1 | 190 / 13 / 5 |
+| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 194 / 13 / 1 | 194 / 13 / 1 | 194 / 13 / 1 |
 | AgentRun# | 14 | 7 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | Arrayx | 15 | 15 | 15 | 15 / 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 15 / 0 / 0 |
 | Canvas# | 54 | 54 | 54 | - | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 29 | 29 | - | 29 | 29 / 0 / 0 | 29 / 0 / 0 | 29 / 0 / 0 |
-| ComposeFloatyWindow# | 18 | 13 | 18 | - | 18 | 18 / 0 / 0 | 18 / 0 / 0 | 0 / 0 / 18 |
+| ComposeFloatyWindow# | 18 | 13 | 18 | - | 18 | 18 / 0 / 0 | 18 / 0 / 0 | 18 / 0 / 0 |
 | ComposeModifier# | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
-| ComposeNode# | 28 | 28 | 28 | - | 28 | 28 / 0 / 0 | 28 / 0 / 0 | 14 / 0 / 14 |
-| ComposeRef# | 1 | 0 | 1 | - | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
-| ComposeSession# | 7 | 7 | 7 | - | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 0 / 0 / 7 |
-| ComposeState# | 1 | 1 | 1 | - | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
-| ConsoleConfigurator# | 52 | 50 | 52 | - | 0 | 52 / 0 / 0 | 52 / 0 / 0 | 0 / 52 / 0 |
+| ComposeNode# | 28 | 28 | 28 | - | 28 | 28 / 0 / 0 | 28 / 0 / 0 | 28 / 0 / 0 |
+| ComposeRef# | 1 | 0 | 1 | - | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
+| ComposeSession# | 7 | 7 | 7 | - | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
+| ComposeState# | 1 | 1 | 1 | - | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
+| ConsoleConfigurator# | 52 | 50 | 52 | - | 0 | 52 / 0 / 0 | 52 / 0 / 0 | 52 / 0 / 0 |
 | ContinuationCreator# | 3 | 3 | 3 | - | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | - | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
 | Dialog# | 96 | 19 | 96 | - | 3 | 0 / 96 / 0 | 0 / 96 / 0 | 0 / 96 / 0 |
 | EpubBook# | 14 | 14 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | EpubReaderSession# | 34 | 34 | 34 | - | 32 | 0 / 34 / 0 | 0 / 34 / 0 | 0 / 34 / 0 |
-| FloatyWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 0 / 12 / 0 |
+| FloatyWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
 | Flow# | 106 | 25 | 106 | - | 106 | 104 / 0 / 2 | 104 / 0 / 2 | 104 / 0 / 2 |
 | ImageFeatures# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | ImageWrapper# | 15 | 15 | 15 | - | 6 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
-| InjectableWebClient# | 2 | 2 | 2 | - | 0 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 2 / 0 |
-| InjectableWebView# | 1 | 1 | 1 | - | 0 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 1 / 0 |
+| InjectableWebClient# | 2 | 2 | 2 | - | 0 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
+| InjectableWebView# | 1 | 1 | 1 | - | 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | IntentTask# | 19 | 0 | 19 | - | 0 | 0 / 19 / 0 | 0 / 19 / 0 | 0 / 19 / 0 |
 | MailClient# | 53 | 53 | 53 | - | 53 | 53 / 0 / 0 | 53 / 0 / 0 | 53 / 0 / 0 |
 | Mat# | 3 | 0 | 3 | - | 0 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
@@ -88,7 +88,7 @@
 | PWritableTextFile# | 6 | 6 | 6 | - | 0 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
 | PngQuantizationFileResult# | 5 | 3 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PngQuantizationResult# | 5 | 3 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
-| RawWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 0 / 12 / 0 |
+| RawWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
 | ScreenCaptureOptions# | 5 | 5 | 5 | - | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | ScriptEngine# | 16 | 16 | 16 | - | 0 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
 | ScriptExecution# | 12 | 12 | 12 | - | 0 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
@@ -102,7 +102,7 @@
 | UiObjectCollection# | 70 | 69 | 70 | - | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
 | UiSelector# | 186 | 186 | 186 | - | 186 | 0 / 186 / 0 | 0 / 186 / 0 | 0 / 186 / 0 |
 | VolatileDispose# | 3 | 3 | 3 | - | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
-| WebSocket# | 24 | 24 | 24 | - | 0 | 24 / 0 / 0 | 24 / 0 / 0 | 0 / 24 / 0 |
+| WebSocket# | 24 | 24 | 24 | - | 0 | 24 / 0 / 0 | 24 / 0 / 0 | 24 / 0 / 0 |
 | WrappedBarcode# | 22 | 22 | 22 | - | 22 | 0 / 22 / 0 | 0 / 22 / 0 | 0 / 22 / 0 |
 | YoloDetector# | 2 | 2 | 2 | - | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | Zip# | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
@@ -116,8 +116,8 @@
 | base64 | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | colors | 82 | 82 | 82 | 81 / 81 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | colors.theme | 9 | 9 | 9 | 9 / 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
-| compose | 71 | 71 | 71 | - | 71 | 71 / 0 / 0 | 71 / 0 / 0 | 70 / 0 / 1 |
-| console | 56 | 56 | 56 | 15 / 15 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 55 / 0 / 1 |
+| compose | 71 | 71 | 71 | - | 71 | 71 / 0 / 0 | 71 / 0 / 0 | 71 / 0 / 0 |
+| console | 56 | 56 | 56 | 15 / 15 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | continuation | 4 | 3 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | crypto | 8 | 7 | 8 | - | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 / 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
@@ -128,7 +128,7 @@
 | events | 37 | 34 | 36 | - | 36 | 36 / 1 / 0 | 36 / 1 / 0 | 36 / 1 / 0 |
 | files | 34 | 34 | 34 | 4 / 4 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 34 / 0 / 0 |
 | files.batchRename | 17 | 17 | 17 | 7 / 7 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
-| floaty | 8 | 8 | 8 | 6 / 6 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
+| floaty | 8 | 8 | 8 | 6 / 6 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | flow | 55 | 55 | 55 | 55 / 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
 | fmt.bytes | 6 | 6 | 6 | 6 / 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | gallery | 11 | 11 | 11 | - | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
@@ -170,19 +170,19 @@
 | storages | 5 | 5 | 5 | 5 / 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sysprops | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | tasks | 20 | 20 | 20 | 8 / 17 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
-| terminal | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 0 / 0 / 20 |
+| terminal | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | threads | 8 | 8 | 8 | 4 / 4 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | timers | 18 | 18 | 18 | 4 / 10 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 12 / 6 / 0 |
 | toast | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | tts | 35 | 35 | 35 | 35 / 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
-| ui | 40 | 36 | 36 | 25 / 25 | 36 | 35 / 5 / 0 | 35 / 5 / 0 | 3 / 5 / 32 |
+| ui | 40 | 36 | 36 | 25 / 25 | 36 | 35 / 5 / 0 | 35 / 5 / 0 | 35 / 5 / 0 |
 | util | 54 | 54 | 54 | 47 / 47 | 54 | 48 / 6 / 0 | 48 / 6 / 0 | 48 / 6 / 0 |
 | util.inspect | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | util.java | 6 | 6 | 6 | 3 / 3 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | util.morseCode | 3 | 3 | 3 | 3 / 3 | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
 | util.version | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | util.versionCodes | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
-| web | 4 | 4 | 4 | 3 / 3 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 0 / 0 / 4 |
+| web | 4 | 4 | 4 | 3 / 3 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | workManager | 11 | 11 | 11 | 2 / 9 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | yolo | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | zip | 5 | 5 | 5 | 5 / 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
@@ -195,7 +195,6 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ComposeError` | bridged | bridged | pending |
 | `TODO` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
@@ -205,9 +204,6 @@
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `newInjectableWebClient` | bridged | bridged | pending |
-| `newInjectableWebView` | bridged | bridged | pending |
-| `newWebSocket` | bridged | bridged | pending |
 | `setImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
@@ -287,129 +283,6 @@
 | `Canvas#skew` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `Canvas#toImage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `Canvas#translate` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### ComposeFloatyWindow#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ComposeFloatyWindow#close` | bridged | bridged | pending |
-| `ComposeFloatyWindow#disableFocus` | bridged | bridged | pending |
-| `ComposeFloatyWindow#getHeight` | bridged | bridged | pending |
-| `ComposeFloatyWindow#getWidth` | bridged | bridged | pending |
-| `ComposeFloatyWindow#getX` | bridged | bridged | pending |
-| `ComposeFloatyWindow#getY` | bridged | bridged | pending |
-| `ComposeFloatyWindow#isClosed` | bridged | bridged | pending |
-| `ComposeFloatyWindow#on` | bridged | bridged | pending |
-| `ComposeFloatyWindow#post` | bridged | bridged | pending |
-| `ComposeFloatyWindow#requestFocus` | bridged | bridged | pending |
-| `ComposeFloatyWindow#root` | bridged | bridged | pending |
-| `ComposeFloatyWindow#session` | bridged | bridged | pending |
-| `ComposeFloatyWindow#setAdjustEnabled` | bridged | bridged | pending |
-| `ComposeFloatyWindow#setPosition` | bridged | bridged | pending |
-| `ComposeFloatyWindow#setSize` | bridged | bridged | pending |
-| `ComposeFloatyWindow#setTouchable` | bridged | bridged | pending |
-| `ComposeFloatyWindow#showSnackbar` | bridged | bridged | pending |
-| `ComposeFloatyWindow#update` | bridged | bridged | pending |
-
-### ComposeNode#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ComposeNode#alpha` | bridged | bridged | pending |
-| `ComposeNode#bg` | bridged | bridged | pending |
-| `ComposeNode#children` | bridged | bridged | pending |
-| `ComposeNode#contentDescription` | bridged | bridged | pending |
-| `ComposeNode#h` | bridged | bridged | pending |
-| `ComposeNode#key` | bridged | bridged | pending |
-| `ComposeNode#nodeId` | bridged | bridged | pending |
-| `ComposeNode#padding` | bridged | bridged | pending |
-| `ComposeNode#parent` | bridged | bridged | pending |
-| `ComposeNode#testTag` | bridged | bridged | pending |
-| `ComposeNode#toString` | bridged | bridged | pending |
-| `ComposeNode#type` | bridged | bridged | pending |
-| `ComposeNode#w` | bridged | bridged | pending |
-| `ComposeNode#weight` | bridged | bridged | pending |
-
-### ComposeRef#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ComposeRef#current` | bridged | bridged | pending |
-
-### ComposeSession#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ComposeSession#close` | bridged | bridged | pending |
-| `ComposeSession#isClosed` | bridged | bridged | pending |
-| `ComposeSession#on` | bridged | bridged | pending |
-| `ComposeSession#post` | bridged | bridged | pending |
-| `ComposeSession#root` | bridged | bridged | pending |
-| `ComposeSession#showSnackbar` | bridged | bridged | pending |
-| `ComposeSession#update` | bridged | bridged | pending |
-
-### ComposeState#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ComposeState#value` | bridged | bridged | pending |
-
-### ConsoleConfigurator#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `ConsoleConfigurator#contentBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentTextColors` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#exitOnCloseTimeout` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#gravity` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isAvoidStatusBar` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isColorful` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isExitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isInputVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isTimeVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isTouchable` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#position` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setAvoidStatusBar` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setColorful` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentTextColors` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setExitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setGravity` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setInputVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setPosition` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTextColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTimeFormat` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTimeVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitle` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleIconsTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleTextColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTouchThrough` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTouchable` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#show` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#size` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#timeFormat` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#title` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleIconsTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleTextColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### ContinuationCreator#
 
@@ -615,23 +488,6 @@
 | `EpubReaderSession#state` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `EpubReaderSession#title` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
-### FloatyWindow#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `FloatyWindow#close` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#disableFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#exitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#findView` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#height` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#isAdjustEnabled` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#requestFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#setPosition` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#setSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#width` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#x` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#y` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-
 ### Flow#
 
 | 行 id | Node main | Node Worker | Bun |
@@ -673,19 +529,6 @@
 | `ImageWrapper#shoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ImageWrapper#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ImageWrapper#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### InjectableWebClient#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `InjectableWebClient#inject` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `InjectableWebClient#injectAndWait` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-
-### InjectableWebView#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `InjectableWebView#inject` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### IntentTask#
 
@@ -810,23 +653,6 @@
 | `PngQuantizationResult#quality` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `PngQuantizationResult#quantizationError` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `PngQuantizationResult#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### RawWindow#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `RawWindow#close` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#disableFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#exitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#findView` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#height` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#requestFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#setPosition` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#setSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#setTouchable` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#width` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#x` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#y` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### ScreenCaptureOptions#
 
@@ -1386,35 +1212,6 @@
 | `UiSelector#waitFor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `UiSelector#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
-### WebSocket#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `WebSocket#addListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#cancel` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#client` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#close` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#emit` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#emitSticky` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#eventNames` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#exitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#getMaxListeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#getTimer` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#listenerCount` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#listeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#on` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#once` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#prependListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#prependOnceListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#queueSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#rebuild` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#removeAllListeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#removeListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#request` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#send` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#setMaxListeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#url` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
-
 ### WrappedBarcode#
 
 | 行 id | Node main | Node Worker | Bun |
@@ -1463,18 +1260,6 @@
 | `colors.theme.set` | pending | pending | pending |
 | `colors.theme.state` | pending | pending | pending |
 
-### compose
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `compose.ComposeError` | bridged | bridged | pending |
-
-### console
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `console.build` | bridged | bridged | pending |
-
 ### crypto
 
 | 行 id | Node main | Node Worker | Bun |
@@ -1515,19 +1300,6 @@
 | `files.batchRename.previewAsync` | pending | pending | pending |
 | `files.batchRename.undo` | pending | pending | pending |
 | `files.batchRename.undoAsync` | pending | pending | pending |
-
-### floaty
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `floaty.checkPermission` | bridged | bridged | pending |
-| `floaty.closeAll` | bridged | bridged | pending |
-| `floaty.ensurePermission` | bridged | bridged | pending |
-| `floaty.getClip` | bridged | bridged | pending |
-| `floaty.hasPermission` | bridged | bridged | pending |
-| `floaty.rawWindow` | bridged | bridged | pending |
-| `floaty.requestPermission` | bridged | bridged | pending |
-| `floaty.window` | bridged | bridged | pending |
 
 ### gallery
 
@@ -2136,31 +1908,6 @@
 | `speech.speaker.verify` | pending | pending | pending |
 | `speech.speaker.verifyAsync` | pending | pending | pending |
 
-### terminal
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `terminal.TerminalError` | bridged | bridged | pending |
-| `terminal.close` | bridged | bridged | pending |
-| `terminal.closeAll` | bridged | bridged | pending |
-| `terminal.closeAllAsync` | bridged | bridged | pending |
-| `terminal.closeAsync` | bridged | bridged | pending |
-| `terminal.env` | bridged | bridged | pending |
-| `terminal.envAsync` | bridged | bridged | pending |
-| `terminal.exec` | bridged | bridged | pending |
-| `terminal.execAsync` | bridged | bridged | pending |
-| `terminal.isAvailable` | bridged | bridged | pending |
-| `terminal.isAvailableAsync` | bridged | bridged | pending |
-| `terminal.npm` | bridged | bridged | pending |
-| `terminal.open` | bridged | bridged | pending |
-| `terminal.openAsync` | bridged | bridged | pending |
-| `terminal.session` | bridged | bridged | pending |
-| `terminal.sessions` | bridged | bridged | pending |
-| `terminal.sessionsAsync` | bridged | bridged | pending |
-| `terminal.show` | bridged | bridged | pending |
-| `terminal.showAsync` | bridged | bridged | pending |
-| `terminal.state` | bridged | bridged | pending |
-
 ### timers
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2176,43 +1923,11 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ui.R` | bridged | bridged | pending |
-| `ui.Widget` | bridged | bridged | pending |
 | `ui.__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__inflate__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `ui.__widgets__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `ui.backgroundColor` | bridged | bridged | pending |
-| `ui.bindingContext` | bridged | bridged | pending |
-| `ui.emitter` | bridged | bridged | pending |
-| `ui.findById` | bridged | bridged | pending |
-| `ui.findByStringId` | bridged | bridged | pending |
-| `ui.finish` | bridged | bridged | pending |
-| `ui.getNavigationBarHeight` | bridged | bridged | pending |
-| `ui.getStatusBarHeight` | bridged | bridged | pending |
-| `ui.getVisibleNavigationBarHeight` | bridged | bridged | pending |
-| `ui.getVisibleStatusBarHeight` | bridged | bridged | pending |
-| `ui.isUiThread` | bridged | bridged | pending |
-| `ui.keepScreenOn` | bridged | bridged | pending |
-| `ui.layout` | bridged | bridged | pending |
-| `ui.layoutFile` | bridged | bridged | pending |
 | `ui.layoutInflater` | not-portable: java-prototype (java-prototype-layout-inflater) | not-portable: java-prototype (java-prototype-layout-inflater) | not-portable: java-prototype (java-prototype-layout-inflater) |
-| `ui.navigationBarColor` | bridged | bridged | pending |
-| `ui.navigationBarHeight` | bridged | bridged | pending |
-| `ui.navigationBarIconLight` | bridged | bridged | pending |
-| `ui.navigationBarIconLightBy` | bridged | bridged | pending |
-| `ui.post` | bridged | bridged | pending |
-| `ui.registerWidget` | bridged | bridged | pending |
-| `ui.root` | bridged | bridged | pending |
-| `ui.run` | bridged | bridged | pending |
-| `ui.setContentView` | bridged | bridged | pending |
-| `ui.statusBarColor` | bridged | bridged | pending |
-| `ui.statusBarHeight` | bridged | bridged | pending |
-| `ui.statusBarIconLight` | bridged | bridged | pending |
-| `ui.statusBarIconLightBy` | bridged | bridged | pending |
-| `ui.useAndroidLayout` | bridged | bridged | pending |
-| `ui.visibleNavigationBarHeight` | bridged | bridged | pending |
-| `ui.visibleStatusBarHeight` | bridged | bridged | pending |
 
 ### util
 
@@ -2224,12 +1939,3 @@
 | `util.toRegularAndApply` | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) |
 | `util.toRegularAndCall` | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) | not-portable: obsoleted (obsoleted-functions) |
 | `util.unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-
-### web
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `web.ByteString` | bridged | bridged | pending |
-| `web.newInjectableWebClient` | bridged | bridged | pending |
-| `web.newInjectableWebView` | bridged | bridged | pending |
-| `web.newWebSocket` | bridged | bridged | pending |
