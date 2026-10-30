@@ -93,15 +93,23 @@ class BunAutomationPolicyTest {
             NodeBridgePermissionManifest.missingCapabilities(powerGrants, NodeBridgePermissionManifest.requiredCapabilitiesFor("power_manager", method)))
     }
 
-    // Q137 (a): plugintools.control lists and calls the tools; USER_GRANTED providers also need plugintools.usergranted.
-    @Test fun pluginToolsGrantsMapToNodePluginToolsAndUserGrantedStaysSeparate() {
+    // Q137 (a) / Q162 (a): plugintools.control lists and calls the tools of every provider, USER_GRANTED ones included as in
+    // Rhino and Node; there is no second grant.
+    @Test fun pluginToolsGrantMapsToNodePluginToolsWithoutASecondGrant() {
         assertEquals(listOf("plugin_tools"), BunAutomationBridge.nodeCapabilities(listOf(Grants.PLUGIN_TOOLS_CONTROL)))
-        assertEquals(listOf("plugin_tools", "plugin_tools.user_granted"),
-            BunAutomationBridge.nodeCapabilities(listOf(Grants.PLUGIN_TOOLS_CONTROL, Grants.PLUGIN_TOOLS_USER_GRANTED)))
         assertEquals(NodeBridgeModules.pluginToolsMethods, BunAutomationBridge.methods[Grants.PLUGIN_TOOLS_CONTROL])
         for (method in NodeBridgeModules.pluginToolsMethods)
             assertEquals(listOf("plugin_tools"), NodeBridgePermissionManifest.requiredCapabilitiesFor("plugin_tools", method))
         assertEquals(listOf("files", "files.write"), BunAutomationBridge.nodeCapabilities(listOf(Grants.FILES_CONTROL)))
+        assertEquals(12, Grants.SYSTEM_FAMILY.size)
+        assertEquals(listOf(Grants.PLUGIN_TOOLS_CONTROL), Grants.SYSTEM_FAMILY.filter { it.startsWith("plugintools.") })
+    }
+
+    // Q139 (b): execution.control goes with every broker and is no grant, so neither a switch nor project.json names it.
+    @Test fun executionControlIsNotAGrant() {
+        assertFalse(Grants.EXECUTION_CONTROL in Grants.SYSTEM_FAMILY)
+        assertNull(BunAutomationBridge.methods[Grants.EXECUTION_CONTROL])
+        assertThrows(IllegalArgumentException::class.java) { Grants.validatePackagedCapabilities(listOf(Grants.EXECUTION_CONTROL)) }
     }
 
     // api-coverage P4.1c (Q152 (a)): Rhino's media module, its playback and the media library scan as the Node capabilities.
@@ -151,7 +159,7 @@ class BunAutomationPolicyTest {
     // dotted lowercase words, so a grant ID with an underscore would break every script while that grant is on.
     @Test fun systemFamilyGrantIdsPassThePluginCapabilityIdPattern() {
         val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
-        for (capability in Grants.SYSTEM_FAMILY) assertTrue(capability, pattern.matches(capability))
+        for (capability in Grants.SYSTEM_FAMILY + Grants.EXECUTION_CONTROL) assertTrue(capability, pattern.matches(capability))
     }
 
 }

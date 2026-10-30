@@ -9,7 +9,6 @@
     <string name="summary_bun_memory_control_grant">Permitir leer el diagnóstico de memoria de AutoJs6 y solicitar la recolección de basura</string>
     <string name="summary_bun_memory_dump_grant">Permitir escribir volcados de montón de AutoJs6 en archivos</string>
     <string name="summary_bun_plugintools_control_grant">Permitir listar y llamar las herramientas que ofrecen los plugins instalados</string>
-    <string name="summary_bun_plugintools_usergranted_grant">Permitir también las herramientas de plugins de terceros autorizados por el usuario</string>
     <string name="summary_bun_settings_control_grant">Permitir leer y exportar los ajustes de AutoJs6</string>
     <string name="summary_bun_settings_write_grant">Permitir activar o desactivar ajustes de AutoJs6</string>
     <string name="summary_bun_sysprops_control_grant">Permitir leer las propiedades del sistema Android</string>
@@ -22,7 +21,6 @@
     <string name="text_bun_memory_control_grant">Diagnóstico de memoria</string>
     <string name="text_bun_memory_dump_grant">Volcados de montón</string>
     <string name="text_bun_plugintools_control_grant">Herramientas de plugins</string>
-    <string name="text_bun_plugintools_usergranted_grant">Herramientas de plugins autorizados por el usuario</string>
     <string name="text_bun_settings_control_grant">Ajustes de AutoJs6</string>
     <string name="text_bun_settings_write_grant">Cambios de ajustes de AutoJs6</string>
     <string name="text_bun_sysprops_control_grant">Propiedades del sistema</string>

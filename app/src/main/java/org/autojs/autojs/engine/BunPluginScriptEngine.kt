@@ -53,6 +53,8 @@ class BunPluginScriptEngine internal constructor(
     private val selectedRuntime = AtomicReference<BunRuntimePluginClient.Selection?>()
 
     private val activeExecutionId = AtomicReference<String?>()
+    // The error of exit(error) in a Bun Worker (api-coverage Q139 (b)); the execution fails with it instead of stopping.
+    private val scriptStopMessage = AtomicReference<String?>()
 
     override fun put(name: String, value: Any?) = Unit
 
@@ -147,6 +149,7 @@ class BunPluginScriptEngine internal constructor(
                     }
                 }
                 if (stopped.get() || result.getBoolean(BunRuntimeContract.KEY_CANCELLED)) {
+                    scriptStopMessage.get()?.let { throw BunRuntimeExecutionException(it) }
                     throw ScriptInterruptedException()
                 }
                 if (!result.getBoolean(BunRuntimeContract.KEY_SUCCEEDED)) {
@@ -255,7 +258,10 @@ class BunPluginScriptEngine internal constructor(
         if (granted.isEmpty()) return null
         val config = getTag(ExecutionConfig.tag) as? ExecutionConfig
         val spawnDepth = (config?.getArgument(NodeBridgeEngineInfo.SPAWN_DEPTH_ARGUMENT) as? Number)?.toInt()?.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH) ?: 0
-        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, granted, { executionConsole }, cwd(), config?.agentExecutionState, spawnDepth, sourceName)
+        // execution.control is not a grant: a script may always end its own execution (exit / stop in a Worker, Q139 (b)).
+        val capabilities = if (granted.size < BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT) granted + BunHostCapabilityGrants.EXECUTION_CONTROL else granted
+        return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, capabilities, { executionConsole }, cwd(),
+            config?.agentExecutionState, spawnDepth, sourceName, ::stopFromScript)
     }
 
     private fun supportsCapabilityBridge(selection: BunRuntimePluginClient.Selection): Boolean =
@@ -264,6 +270,13 @@ class BunPluginScriptEngine internal constructor(
 
     private fun semanticFile(source: JavaScriptFileSource): File =
         source.overriddenFullPath?.takeIf(String::isNotBlank)?.let(::File) ?: source.file
+
+    // exit / stop of a Bun Worker through execution.control (api-coverage Q139 (b)): ends this execution as forceStop does;
+    // with a message (exit(error)) the execution fails with it, as the exit code of a main thread's exit(error) makes it fail.
+    private fun stopFromScript(message: String?) {
+        if (message != null) scriptStopMessage.compareAndSet(null, message)
+        forceStop()
+    }
 
     override fun forceStop() {
         stopped.set(true)

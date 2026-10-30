@@ -120,13 +120,14 @@ internal class BunAutomationBridge(
 
     /**
      * The capabilities a request declares: those of the route, and for plugin tools (Q137 (a)) the optional tokens the
-     * tool bridge looks for (USER_GRANTED providers, screen inputs, file inputs and outputs) when their grants are on.
+     * tool bridge looks for: USER_GRANTED providers always (Q162 (a), as Rhino and Node), screen inputs, file inputs and
+     * outputs when their grants are on.
      */
     private fun permissions(module: String, method: String, args: JSONArray): List<String> {
         val required = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString())
         if (module != NodeBridgeModules.PLUGIN_TOOLS) return required
         return required + buildList {
-            if (Grants.PLUGIN_TOOLS_USER_GRANTED in grants) add(NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED)
+            add(NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED)
             if (Grants.SCREEN_CAPTURE in grants) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)
             if (Grants.FILES_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.FILES, NodeBridgePermissionManifest.FILES_WRITE))
         }
@@ -250,7 +251,7 @@ internal class BunAutomationBridge(
             Grants.MEMORY_CONTROL to NodeBridgePermissionManifest.MEMORY, Grants.MEMORY_DUMP to NodeBridgePermissionManifest.MEMORY_DUMP,
             Grants.INSTALLER_CONTROL to NodeBridgePermissionManifest.INSTALLER, Grants.INSTALLER_MUTATE to NodeBridgePermissionManifest.INSTALLER_MUTATE,
             Grants.ENGINES_CONTROL to NodeBridgePermissionManifest.ENGINES, Grants.ENGINES_EXEC to NodeBridgePermissionManifest.ENGINES_EXEC,
-            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgePermissionManifest.PLUGIN_TOOLS, Grants.PLUGIN_TOOLS_USER_GRANTED to NodeBridgePermissionManifest.PLUGIN_TOOLS_USER_GRANTED,
+            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgePermissionManifest.PLUGIN_TOOLS,
         )
         private val engineStartMethods = setOf("execScript", "execScriptFile", "execAutoFile")
         /** Installs and uninstalls wait for the user like Node's installer (15 min and 5 s); plugin tools run as long. */

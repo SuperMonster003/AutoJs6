@@ -49,6 +49,8 @@ internal class BunHostCapabilityBroker(
     private val spawnDepth: Int = 0,
     // The script's name as the plugin reports it (engines.myEngine of api-coverage P4.1b).
     private val sourceName: String = "",
+    // Ends this execution, as a failure with the message when there is one (execution.control, api-coverage Q139 (b)).
+    private val stopExecution: ((String?) -> Unit)? = null,
 ) {
     private val exported = ExportedBroker(this)
     private val appContext = context.applicationContext ?: context
@@ -196,6 +198,7 @@ internal class BunHostCapabilityBroker(
                 require(method in if (compose) RuntimeComposeBridge.methods else NodeBridgeModules.uiMethods) { "Unsupported UI operation" }
                 awaitImageCall(if (compose) NodeBridgeModules.COMPOSE else NodeBridgeModules.UI, method, args)
             }
+            BunHostCapabilityGrants.EXECUTION_CONTROL -> executionCall(request)
             BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO -> deviceInfo(request)
             BunRuntimeContract.HOST_CAPABILITY_UI_TOAST -> toast(request)
             BunHostCapabilityGrants.TEXT_PINYIN -> textCall(request, NodeBridgeModules.PINYIN, PINYIN_METHODS) {
@@ -419,6 +422,23 @@ internal class BunHostCapabilityBroker(
     }
 
     /** `{"text": string, "duration"?: "short" | "long"}`; text is trimmed, 1..1024 UTF-8 bytes, newlines only. */
+    /**
+     * exit / stop of a script thread that cannot end the execution itself (a Bun Worker, api-coverage Q139 (b)): `stop`
+     * with an optional message ends this execution as the host's stop does, or as a failure with that message. The call
+     * is answered before the engine stops, which happens on another thread.
+     */
+    private fun executionCall(request: JSONObject): Outcome {
+        val (method, args) = parseMethodCall(request)
+        require(method == "stop") { "Unsupported execution operation" }
+        require(args.length() <= 1) { "execution.stop takes at most a message" }
+        val message = args.opt(0).takeUnless { it == null || it === JSONObject.NULL }
+            ?.let { requireNotNull(it as? String) { "execution.stop message must be a string" } }
+        val stop = stopExecution
+            ?: return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_NOT_GRANTED, "This execution cannot be stopped from the script")
+        Thread({ stop(message?.take(MAX_STOP_MESSAGE_CHARS)) }, "bun-execution-stop").start()
+        return Outcome.Success(JSONObject().put("value", JSONObject.NULL).toString())
+    }
+
     private fun toast(request: JSONObject): Outcome {
         val keys = request.keys().asSequence().toSet()
         if (TOAST_TEXT_KEY !in keys || !TOAST_KEYS.containsAll(keys)) {
@@ -476,6 +496,7 @@ internal class BunHostCapabilityBroker(
 
     private companion object {
         const val MAX_CALL_ID_CHARS = 256
+        const val MAX_STOP_MESSAGE_CHARS = 16_384
         val PINYIN_METHODS = setOf("convert", "simple", "compare", "compact", "fromCodePoint", "fromPhrase")
         val PINYIN4J_METHODS = setOf("of", "as", "readings")
         const val IMAGE_CALL_TIMEOUT_MILLIS = 9_000L

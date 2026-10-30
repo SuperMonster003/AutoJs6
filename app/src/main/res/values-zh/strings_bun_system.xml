@@ -9,7 +9,6 @@
     <string name="summary_bun_memory_control_grant">允许读取 AutoJs6 的内存诊断并请求垃圾回收</string>
     <string name="summary_bun_memory_dump_grant">允许把 AutoJs6 的堆转储写入文件</string>
     <string name="summary_bun_plugintools_control_grant">允许列出并调用已安装插件提供的工具</string>
-    <string name="summary_bun_plugintools_usergranted_grant">另外允许由用户授权的第三方插件提供的工具</string>
     <string name="summary_bun_settings_control_grant">允许读取与导出 AutoJs6 设置</string>
     <string name="summary_bun_settings_write_grant">允许开启或关闭 AutoJs6 设置</string>
     <string name="summary_bun_sysprops_control_grant">允许读取 Android 系统属性</string>
@@ -22,7 +21,6 @@
     <string name="text_bun_memory_control_grant">内存诊断</string>
     <string name="text_bun_memory_dump_grant">堆转储</string>
     <string name="text_bun_plugintools_control_grant">插件工具</string>
-    <string name="text_bun_plugintools_usergranted_grant">用户授权插件的工具</string>
     <string name="text_bun_settings_control_grant">AutoJs6 设置</string>
     <string name="text_bun_settings_write_grant">AutoJs6 设置修改</string>
     <string name="text_bun_sysprops_control_grant">系统属性</string>
