@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_floaty_control_grant">Permite mostrar ventanas flotantes sobre otras aplicaciones y comprobar o solicitar el permiso para mostrarse sobre otras aplicaciones; las ventanas sin marco y las que dejan pasar los toques necesitan sus propios permisos.</string>
+    <string name="summary_bun_floaty_raw_grant">Permite ventanas flotantes sin el marco redimensionable; no está incluido en las ventanas flotantes.</string>
+    <string name="summary_bun_floaty_touch_grant">Permite que las ventanas flotantes dejen pasar los toques a las aplicaciones de abajo; no está incluido en las ventanas flotantes.</string>
+    <string name="summary_bun_terminal_control_grant">Permite abrir y controlar sesiones del complemento de terminal y ejecutar comandos en ellas; no está incluido en los permisos de shell.</string>
+    <string name="text_bun_floaty_control_grant">Ventanas flotantes de Bun</string>
+    <string name="text_bun_floaty_raw_grant">Ventanas flotantes sin marco de Bun</string>
+    <string name="text_bun_floaty_touch_grant">Ventanas flotantes de Bun que dejan pasar los toques</string>
+    <string name="text_bun_terminal_control_grant">Sesiones de terminal de Bun</string>
+</resources>

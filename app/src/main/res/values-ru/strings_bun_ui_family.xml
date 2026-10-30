@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_floaty_control_grant">Разрешает показывать плавающие окна поверх других приложений и проверять или запрашивать разрешение на показ поверх других приложений; для окон без рамки и пропускающих касания нужны отдельные разрешения.</string>
+    <string name="summary_bun_floaty_raw_grant">Разрешает плавающие окна без рамки изменения размера; не входит в плавающие окна.</string>
+    <string name="summary_bun_floaty_touch_grant">Разрешает плавающим окнам пропускать касания к приложениям под ними; не входит в плавающие окна.</string>
+    <string name="summary_bun_terminal_control_grant">Разрешает открывать сеансы плагина терминала, управлять ими и выполнять в них команды; не входит в разрешения shell.</string>
+    <string name="text_bun_floaty_control_grant">Плавающие окна в Bun</string>
+    <string name="text_bun_floaty_raw_grant">Плавающие окна без рамки в Bun</string>
+    <string name="text_bun_floaty_touch_grant">Плавающие окна, пропускающие касания, в Bun</string>
+    <string name="text_bun_terminal_control_grant">Сеансы терминала в Bun</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_floaty_control_grant">Allow showing floating windows over other apps and checking or requesting the display over other apps permission; raw and touch-through windows need their own grants.</string>
+    <string name="summary_bun_floaty_raw_grant">Allow raw floating windows without the resizable frame; not implied by floating windows.</string>
+    <string name="summary_bun_floaty_touch_grant">Allow floating windows to pass touches through to the apps below; not implied by floating windows.</string>
+    <string name="summary_bun_terminal_control_grant">Allow opening and controlling terminal plugin sessions and running commands in them; not implied by the shell grants.</string>
+    <string name="text_bun_floaty_control_grant">Bun floating windows</string>
+    <string name="text_bun_floaty_raw_grant">Bun raw floating windows</string>
+    <string name="text_bun_floaty_touch_grant">Bun touch-through floating windows</string>
+    <string name="text_bun_terminal_control_grant">Bun terminal sessions</string>
+</resources>

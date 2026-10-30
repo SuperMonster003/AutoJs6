@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_floaty_control_grant">Autorise l\'affichage de fenêtres flottantes par-dessus les autres applications et la vérification ou la demande de l\'autorisation correspondante; les fenêtres sans cadre et celles qui laissent passer les touchers ont leurs propres autorisations.</string>
+    <string name="summary_bun_floaty_raw_grant">Autorise les fenêtres flottantes sans cadre redimensionnable; non inclus dans les fenêtres flottantes.</string>
+    <string name="summary_bun_floaty_touch_grant">Autorise les fenêtres flottantes à laisser passer les touchers vers les applications en dessous; non inclus dans les fenêtres flottantes.</string>
+    <string name="summary_bun_terminal_control_grant">Autorise l\'ouverture et le contrôle des sessions du plugin de terminal et l\'exécution de commandes dans celles-ci; non inclus dans les autorisations shell.</string>
+    <string name="text_bun_floaty_control_grant">Fenêtres flottantes Bun</string>
+    <string name="text_bun_floaty_raw_grant">Fenêtres flottantes sans cadre Bun</string>
+    <string name="text_bun_floaty_touch_grant">Fenêtres flottantes Bun traversées par les touchers</string>
+    <string name="text_bun_terminal_control_grant">Sessions de terminal Bun</string>
+</resources>

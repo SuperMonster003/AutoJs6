@@ -63,6 +63,7 @@ internal class BunHostCapabilityBroker(
     private val coordinates = RuntimeCoordinateBridge()
     private val console = RuntimeConsoleBridge(consoleProvider, workingDirectory)
     private val consoleOutput = BunConsoleOutput { level, text -> consoleProvider().println(level, text) }
+    private val consoleInput = BunConsoleInput(console::requestInput)
     private val pinyin by lazy { AndroidNodePinyinBackend(appContext) }
     private val pinyin4j by lazy { AndroidNodePinyin4jBackend(appContext) }
     private val opencc by lazy { AndroidNodeOpenccBackend(appContext) }
@@ -91,6 +92,7 @@ internal class BunHostCapabilityBroker(
         exported.clear()
         callExecutor.close()
         automation.close()
+        consoleInput.close()
         synchronized(captureLock) { captureAttempt = null; captureId = null }
         val provider = synchronized(imageScopeLock) { imageProvider.also { imageProvider = null } }
         provider?.destroy(NodeBridgeError.processDead("Bun execution finished"))
@@ -186,7 +188,8 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL, BunHostCapabilityGrants.SHELL_CONTROL, BunHostCapabilityGrants.EVENTS_OBSERVE, BunHostCapabilityGrants.NOTIFICATIONS_POST, BunHostCapabilityGrants.DEVICE_CONTROL, BunHostCapabilityGrants.DEVICE_AUDIO, BunHostCapabilityGrants.DIALOGS_CONTROL, BunHostCapabilityGrants.ANDROID_OBJECTS, BunHostCapabilityGrants.TASKS_CONTROL, BunHostCapabilityGrants.JAVA_INTEROP, BunHostCapabilityGrants.TTS_CONTROL, BunHostCapabilityGrants.MEDIAINFO_CONTROL, BunHostCapabilityGrants.MEDIA_CONTROL, BunHostCapabilityGrants.MEDIA_LIBRARY, BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL,
             BunHostCapabilityGrants.AUTOJS_CONTROL, BunHostCapabilityGrants.SETTINGS_CONTROL, BunHostCapabilityGrants.SYSPROPS_CONTROL, BunHostCapabilityGrants.MEMORY_CONTROL,
             BunHostCapabilityGrants.INSTALLER_CONTROL, BunHostCapabilityGrants.ENGINES_CONTROL, BunHostCapabilityGrants.PLUGIN_TOOLS_CONTROL,
-            BunHostCapabilityGrants.OCR_CONTROL, BunHostCapabilityGrants.BARCODE_CONTROL, BunHostCapabilityGrants.YOLO_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.OCR_CONTROL, BunHostCapabilityGrants.BARCODE_CONTROL, BunHostCapabilityGrants.YOLO_CONTROL,
+            BunHostCapabilityGrants.TERMINAL_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.FILES_CONTROL -> {
                 try {
                     val (method, args) = parseMethodCall(request)
@@ -199,8 +202,19 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.UI_LAYOUT, BunHostCapabilityGrants.UI_COMPOSE -> {
                 val (method, args) = parseMethodCall(request)
                 val compose = capability == BunHostCapabilityGrants.UI_COMPOSE
-                require(method in if (compose) RuntimeComposeBridge.methods else NodeBridgeModules.uiMethods) { "Unsupported UI operation" }
+                require(method in if (compose) RuntimeComposeBridge.methods else NodeBridgeModules.uiMethods - FLOATY_WINDOW_METHODS) { "Unsupported UI operation" }
                 awaitImageCall(if (compose) NodeBridgeModules.COMPOSE else NodeBridgeModules.UI, method, args)
+            }
+            // Floating windows (api-coverage P4.3, Q173 (a)): Node's floaty routes with the views and events of their windows,
+            // and the display over other apps permission; raw windows and setTouchable also need floaty.raw / floaty.touch
+            // (BunAutomationBridge.nodeCapabilities). Activity windows stay with ui.layout.
+            BunHostCapabilityGrants.FLOATY_CONTROL -> {
+                val (method, args) = parseMethodCall(request)
+                if (method in FLOATY_PERMISSION_METHODS) awaitImageCall(NodeBridgeModules.UI_OVERLAY, method, args)
+                else {
+                    require(method in NodeBridgeModules.uiMethods - ACTIVITY_WINDOW_METHODS) { "Unsupported floating window operation" }
+                    awaitImageCall(NodeBridgeModules.UI, method, args)
+                }
             }
             BunHostCapabilityGrants.EXECUTION_CONTROL -> executionCall(request)
             BunRuntimeContract.HOST_CAPABILITY_DEVICE_INFO -> deviceInfo(request)
@@ -219,10 +233,12 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.SCREEN_CAPTURE -> screenCaptureCall(request)
             BunHostCapabilityGrants.SCREEN_RECORD -> screenRecordingCall(request)
             BunHostCapabilityGrants.SCREEN_METRICS -> methodCall(request, coordinates::invoke)
-            BunHostCapabilityGrants.CONSOLE_CONTROL -> if (request.opt("method") == BunConsoleOutput.METHOD) {
-                if (consoleOutput.println(parseMethodCall(request).second)) Outcome.Success(JSONObject().put("value", JSONObject.NULL).toString())
-                else Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED, "Console output exceeds ${BunRuntimeContract.MAX_OUTPUT_BYTES} bytes per run")
-            } else methodCall(request, console::invoke)
+            BunHostCapabilityGrants.CONSOLE_CONTROL -> when (request.opt("method")) {
+                BunConsoleOutput.METHOD -> if (consoleOutput.println(parseMethodCall(request).second)) Outcome.Success(JSONObject().put("value", JSONObject.NULL).toString())
+                    else Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED, "Console output exceeds ${BunRuntimeContract.MAX_OUTPUT_BYTES} bytes per run")
+                in BunConsoleInput.METHODS -> methodCall(request, consoleInput::invoke)
+                else -> methodCall(request, console::invoke)
+            }
             else -> Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_UNKNOWN_CAPABILITY, "Capability is not implemented by this host")
         }
         if (outcome is Outcome.Success && outcome.json.toByteArray(Charsets.UTF_8).size > BunRuntimeContract.MAX_HOST_CALL_RESULT_BYTES) {
@@ -312,7 +328,7 @@ internal class BunHostCapabilityBroker(
         imagesProvider().dispatch(NodeBridgeRequest(
             id = "$executionId-image-${UUID.randomUUID()}", module = module, method = method,
             argsJson = args.toString(), timeoutMs = IMAGE_CALL_TIMEOUT_MILLIS,
-            permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method),
+            permissions = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args.toString()),
         )) { response -> result.complete(response) }
         return try {
             bridgeResponse(result.get(IMAGE_CALL_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS))
@@ -550,6 +566,9 @@ internal class BunHostCapabilityBroker(
         val IMAGE_FILE_METHODS = setOf("readImage", "saveImage", "imread", "load", "quantizeToFile", "recycle")
         val SCREEN_CAPTURE_METHODS = setOf("requestScreenCapture", "getRequestResult", "captureScreen", "stopScreenCapture", "getScreenCaptureOptions")
         val SCREEN_RECORD_METHODS = setOf("start", "stop", "cancel", "getStatus")
+        val FLOATY_WINDOW_METHODS = setOf("floatyWindow", "floatyRawWindow", "floatyControl", "floatyCloseAll")
+        val ACTIVITY_WINDOW_METHODS = setOf("showLayout", "windowControl", "barHeight")
+        val FLOATY_PERMISSION_METHODS = setOf("hasPermission", "openPermissionSettings")
         const val TOAST_TEXT_KEY = "text"
         const val TOAST_DURATION_KEY = "duration"
         const val TOAST_DURATION_SHORT = "short"

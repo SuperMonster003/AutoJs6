@@ -614,6 +614,38 @@
             app:title="@string/text_bun_ui_compose_grant"
             app:summary="@string/summary_bun_ui_compose_grant" />
 
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_terminal_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_terminal_control_grant"
+            app:summary="@string/summary_bun_terminal_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_floaty_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_floaty_control_grant"
+            app:summary="@string/summary_bun_floaty_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_floaty_raw_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_floaty_raw_grant"
+            app:summary="@string/summary_bun_floaty_raw_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_floaty_touch_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_floaty_touch_grant"
+            app:summary="@string/summary_bun_floaty_touch_grant" />
+
 
     </org.autojs.autojs.theme.preference.ThemeColorPreferenceCategory>
 

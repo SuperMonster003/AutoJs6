@@ -29,8 +29,8 @@ class BunAutomationPolicyTest {
         // media playback 6 and the media library scan 1 (P4.1c), Rhino's device members 30 (keepAwake / cancelVibration and the 28
         // RuntimeDeviceBridge routes, P3.1c / P4.1c), the automation event sources 6, ocr 3, barcode 4, yolo 3, the accessibility
         // screenshot of automator.captureScreen and auto.dump / explain (P4.4, Q185 (a); automator / auto are second modules of
-        // accessibility.control).
-        assertEquals(314,BunAutomationBridge.methods.values.sumOf{it.size})
+        // accessibility.control), the terminal 15 (P4.3).
+        assertEquals(329,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -174,7 +174,7 @@ class BunAutomationPolicyTest {
     // dotted lowercase words, so a grant ID with an underscore would break every script while that grant is on.
     @Test fun systemFamilyGrantIdsPassThePluginCapabilityIdPattern() {
         val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
-        for (capability in Grants.SYSTEM_FAMILY + Grants.AUTOMATION_FAMILY + Grants.EXECUTION_CONTROL) assertTrue(capability, pattern.matches(capability))
+        for (capability in Grants.SYSTEM_FAMILY + Grants.AUTOMATION_FAMILY + Grants.UI_FAMILY + Grants.EXECUTION_CONTROL) assertTrue(capability, pattern.matches(capability))
     }
 
     // api-coverage P4.4 (Q181 (a) / Q182 (a) / Q183 (a)): automator / auto are second modules of accessibility.control; presses and
@@ -245,6 +245,44 @@ class BunAutomationPolicyTest {
             Grants.AUTOMATION_FAMILY)
         assertTrue(Grants.AUTOMATION_FAMILY.none { it in Grants.SYSTEM_FAMILY })
         assertEquals(Grants.AUTOMATION_FAMILY, Grants.validatePackagedCapabilities(Grants.AUTOMATION_FAMILY))
+    }
+
+    // api-coverage P4.3 (Q3 (a), Q167 (a)): terminal.control is Node's terminal alone, through the long-wait task routes, and no
+    // shell grant implies it.
+    @Test fun terminalGrantMapsToNodeTerminalOnly() {
+        assertEquals(listOf("terminal"), BunAutomationBridge.nodeCapabilities(listOf(Grants.TERMINAL_CONTROL)))
+        assertFalse("terminal" in BunAutomationBridge.nodeCapabilities(listOf(Grants.SHELL_CONTROL, Grants.SHELL_ROOT, Grants.SHELL_SHIZUKU)))
+        assertEquals(NodeBridgeModules.terminalMethods, BunAutomationBridge.methods[Grants.TERMINAL_CONTROL])
+        assertEquals(15, NodeBridgeModules.terminalMethods.size)
+        for (method in NodeBridgeModules.terminalMethods) assertEquals(method, listOf("terminal"), NodeBridgePermissionManifest.requiredCapabilitiesFor("terminal", method))
+        // exec / npmRun with wait and waitFor wait 10 min by default in Rhino.
+        assertEquals(905_000L, BunAutomationBridge.maxTimeout(Grants.TERMINAL_CONTROL))
+    }
+
+    // api-coverage P4.3 (Q173 (a)): floaty.control opens Node's floaty routes and the display over other apps permission; raw windows
+    // and setTouchable need floaty.raw / floaty.touch, which floaty.control never implies and which open nothing alone.
+    @Test fun floatingWindowsNeedFloatyControlAndTheirOwnGrants() {
+        val missing = { method: String, args: String, grants: List<String> -> NodeBridgePermissionManifest.missingCapabilities(
+            BunAutomationBridge.nodeCapabilities(grants), NodeBridgePermissionManifest.requiredCapabilitiesFor("ui", method, args)) }
+        val control = listOf(Grants.FLOATY_CONTROL)
+        for (method in listOf("floatyWindow", "floatyCloseAll", "inflate", "findView", "viewUpdate", "drainEvents", "close"))
+            assertEquals(method, emptyList<String>(), missing(method, "[]", control))
+        assertEquals(emptyList<String>(), missing("floatyControl", """["floaty-1", "setPosition", 0, 0]""", control))
+        assertEquals(listOf("floaty.raw"), missing("floatyRawWindow", "[]", control))
+        assertEquals(listOf("floaty.touch"), missing("floatyControl", """["floaty-1", "setTouchable", false]""", control))
+        assertEquals(emptyList<String>(), missing("floatyRawWindow", "[]", control + Grants.FLOATY_RAW))
+        assertEquals(emptyList<String>(), missing("floatyControl", """["floaty-1", "setTouchable", false]""", control + Grants.FLOATY_TOUCH))
+        for (method in listOf("hasPermission", "openPermissionSettings")) assertEquals(method, emptyList<String>(), NodeBridgePermissionManifest.missingCapabilities(
+            BunAutomationBridge.nodeCapabilities(control), NodeBridgePermissionManifest.requiredCapabilitiesFor("ui.overlay", method)))
+        assertEquals(emptyList<String>(), BunAutomationBridge.nodeCapabilities(listOf(Grants.FLOATY_RAW, Grants.FLOATY_TOUCH)))
+        assertFalse("ui.overlay" in BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL, Grants.EVENTS_OBSERVE, Grants.DIALOGS_CONTROL)))
+    }
+
+    // api-coverage P4.3 (Q3 (a) / Q173 (a)): four default-off grants, each a switch of its own and declarable in project.json.
+    @Test fun uiFamilyGrantsAreDistinctAndPackageable() {
+        assertEquals(listOf("terminal.control", "floaty.control", "floaty.raw", "floaty.touch"), Grants.UI_FAMILY)
+        assertTrue(Grants.UI_FAMILY.none { it in Grants.SYSTEM_FAMILY || it in Grants.AUTOMATION_FAMILY })
+        assertEquals(Grants.UI_FAMILY, Grants.validatePackagedCapabilities(Grants.UI_FAMILY))
     }
 
 }

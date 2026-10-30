@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_floaty_control_grant">다른 앱 위에 플로팅 창을 표시하고 다른 앱 위에 표시 권한을 확인하거나 요청하는 것을 허용합니다. 원시 창과 터치 통과 창은 별도의 권한이 필요합니다.</string>
+    <string name="summary_bun_floaty_raw_grant">크기 조절 테두리가 없는 원시 플로팅 창을 허용합니다. 플로팅 창 권한에 포함되지 않습니다.</string>
+    <string name="summary_bun_floaty_touch_grant">플로팅 창이 터치를 아래 앱으로 통과시키는 것을 허용합니다. 플로팅 창 권한에 포함되지 않습니다.</string>
+    <string name="summary_bun_terminal_control_grant">터미널 플러그인 세션을 열고 제어하며 그 안에서 명령을 실행하는 것을 허용합니다. Shell 권한에 포함되지 않습니다.</string>
+    <string name="text_bun_floaty_control_grant">Bun 플로팅 창</string>
+    <string name="text_bun_floaty_raw_grant">Bun 원시 플로팅 창</string>
+    <string name="text_bun_floaty_touch_grant">Bun 터치 통과 플로팅 창</string>
+    <string name="text_bun_terminal_control_grant">Bun 터미널 세션</string>
+</resources>

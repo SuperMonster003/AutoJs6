@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_floaty_control_grant">允許在其他應用程式上層顯示懸浮窗, 並查詢或申請懸浮窗許可權; 原始懸浮窗與觸控穿透需要各自的授權.</string>
+    <string name="summary_bun_floaty_raw_grant">允許顯示沒有可調整外框的原始懸浮窗; 不被懸浮窗授權隱含.</string>
+    <string name="summary_bun_floaty_touch_grant">允許懸浮窗讓觸控穿透到下層應用程式; 不被懸浮窗授權隱含.</string>
+    <string name="summary_bun_terminal_control_grant">允許開啟與控制終端外掛的工作階段並在其中執行命令; 不被 Shell 授權隱含.</string>
+    <string name="text_bun_floaty_control_grant">Bun 懸浮窗</string>
+    <string name="text_bun_floaty_raw_grant">Bun 原始懸浮窗</string>
+    <string name="text_bun_floaty_touch_grant">Bun 觸控穿透懸浮窗</string>
+    <string name="text_bun_terminal_control_grant">Bun 終端工作階段</string>
+</resources>

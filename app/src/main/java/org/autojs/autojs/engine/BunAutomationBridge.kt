@@ -56,7 +56,8 @@ internal class BunAutomationBridge(
             try {
                 val response = job.future.get(remaining.coerceIn(0L, 750L), TimeUnit.MILLISECONDS)
                 synchronized(jobs) { jobs.remove(id) }
-                if (!response.ok && capability == Grants.AGENT_CONTROL)
+                // Agent and terminal failures reach the script with their own codes (TerminalError, api-coverage P4.3).
+                if (!response.ok && (capability == Grants.AGENT_CONTROL || capability == Grants.TERMINAL_CONTROL))
                     return success(JSONObject().put("done", true).put("error", response.error?.toJsonObject()))
                 return if (response.ok) success(JSONObject().put("done", true).put("value", org.json.JSONTokener(response.resultJson ?: "null").nextValue())) else response
             } catch (_: TimeoutException) {
@@ -257,6 +258,15 @@ internal class BunAutomationBridge(
             if (Grants.YOLO_CONTROL in grants) add(NodeBridgePermissionManifest.YOLO)
             if (Grants.NOTIFICATIONS_POST in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS)
             if (Grants.NOTIFICATIONS_SETTINGS in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS)
+            // Sessions of the terminal plugin (api-coverage P4.3): never implied by the shell grants, as Node's terminal (Q167 (a)).
+            if (Grants.TERMINAL_CONTROL in grants) add(NodeBridgePermissionManifest.TERMINAL)
+            // Floating windows (api-coverage P4.3, Q173 (a)): Node's ui routes of floaty windows with the display over other apps
+            // permission; raw windows and setTouchable need floaty.raw / floaty.touch, which floaty.control never implies.
+            if (Grants.FLOATY_CONTROL in grants) {
+                addAll(listOf(NodeBridgePermissionManifest.UI, NodeBridgePermissionManifest.UI_OVERLAY, NodeBridgePermissionManifest.UI_OVERLAY_PERMISSION))
+                if (Grants.FLOATY_RAW in grants) add(NodeBridgePermissionManifest.FLOATY_RAW)
+                if (Grants.FLOATY_TOUCH in grants) add(NodeBridgePermissionManifest.FLOATY_TOUCH)
+            }
             // The system and engines family (api-coverage P4.1b, Q136 (a)): the Bun grant of each Node capability of Q133 (b).
             systemCapabilities.forEach { (grant, capability) -> if (grant in grants) add(capability) }
             // settings.export and plugin tool outputs write files as the files.write of Node, tool inputs read them as its
@@ -273,8 +283,12 @@ internal class BunAutomationBridge(
             Grants.PLUGIN_TOOLS_CONTROL to NodeBridgePermissionManifest.PLUGIN_TOOLS,
         )
         private val engineStartMethods = setOf("execScript", "execScriptFile", "execAutoFile")
-        /** Installs and uninstalls wait for the user like Node's installer (15 min and 5 s); plugin tools run as long. */
-        fun maxTimeout(capability: String): Long = if (capability == Grants.INSTALLER_CONTROL || capability == Grants.PLUGIN_TOOLS_CONTROL) 905_000L else 120_000L
+        /**
+         * Installs and uninstalls wait for the user like Node's installer (15 min and 5 s); plugin tools run as long, and so do
+         * terminal commands and waitFor (10 min by default in Rhino, api-coverage P4.3).
+         */
+        fun maxTimeout(capability: String): Long =
+            if (capability == Grants.INSTALLER_CONTROL || capability == Grants.PLUGIN_TOOLS_CONTROL || capability == Grants.TERMINAL_CONTROL) 905_000L else 120_000L
         val gestureMethods = setOf("swipe", "gesture")
         val methods = mapOf(
             Grants.FLOW_CONTROL to RuntimeFlowBridge.methods,
@@ -319,6 +333,7 @@ internal class BunAutomationBridge(
             Grants.INSTALLER_CONTROL to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.INSTALLER),
             Grants.ENGINES_CONTROL to NodeBridgeModules.enginesMethods,
             Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.pluginToolsMethods,
+            Grants.TERMINAL_CONTROL to NodeBridgeModules.terminalMethods,
         )
         /**
          * Second Node modules of a grant, with their methods: the notice extras of notifications.post, powerManager of device.control,
@@ -335,6 +350,7 @@ internal class BunAutomationBridge(
             Grants.AUTOJS_CONTROL to RuntimeSystemBridge.AUTOJS, Grants.SETTINGS_CONTROL to RuntimeSystemBridge.SETTINGS, Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.SYSPROPS,
             Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES,
             Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.PLUGIN_TOOLS,
-            Grants.OCR_CONTROL to NodeBridgeModules.OCR, Grants.BARCODE_CONTROL to NodeBridgeModules.BARCODE, Grants.YOLO_CONTROL to NodeBridgeModules.YOLO)
+            Grants.OCR_CONTROL to NodeBridgeModules.OCR, Grants.BARCODE_CONTROL to NodeBridgeModules.BARCODE, Grants.YOLO_CONTROL to NodeBridgeModules.YOLO,
+            Grants.TERMINAL_CONTROL to NodeBridgeModules.TERMINAL)
     }
 }

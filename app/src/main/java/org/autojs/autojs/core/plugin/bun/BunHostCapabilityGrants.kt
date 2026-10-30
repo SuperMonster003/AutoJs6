@@ -103,6 +103,14 @@ object BunHostCapabilityGrants {
     const val BARCODE_CONTROL = "barcode.control"
     const val YOLO_CONTROL = "yolo.control"
 
+    // The UI family (api-coverage P4.3): sessions of the terminal plugin, the terminal capability of Node (Q167 (a)), never
+    // implied by the shell grants (Q3 (a)); floating windows with the display over other apps permission, whose raw and
+    // touch-through forms floaty.control does not imply (Q173 (a)).
+    const val TERMINAL_CONTROL = "terminal.control"
+    const val FLOATY_CONTROL = "floaty.control"
+    const val FLOATY_RAW = "floaty.raw"
+    const val FLOATY_TOUCH = "floaty.touch"
+
     // Not a grant (api-coverage Q139 (b)): offered with every capability broker, it lets a script end its own execution
     // (exit / stop from a Worker); no other execution is reachable through it.
     const val EXECUTION_CONTROL = "execution.control"
@@ -113,6 +121,9 @@ object BunHostCapabilityGrants {
 
     /** The automation family grants in contract order (api-coverage P4.4, Q181 (a) / Q182 (a)). */
     val AUTOMATION_FAMILY = listOf(ACCESSIBILITY_SERVICE, EVENTS_TOUCH, EVENTS_KEY_INTERCEPT, OCR_CONTROL, BARCODE_CONTROL, YOLO_CONTROL)
+
+    /** The UI family grants in contract order (api-coverage P4.3, Q3 (a) / Q173 (a)). */
+    val UI_FAMILY = listOf(TERMINAL_CONTROL, FLOATY_CONTROL, FLOATY_RAW, FLOATY_TOUCH)
 
     /** Read-only host info snapshot: host package, version and advisory locale/build date. */
     private const val KEY_HOST_INFO = "host_info"
@@ -296,6 +307,17 @@ object BunHostCapabilityGrants {
         setGranted(context, capability, granted)
     }
 
+    /** A grant of [UI_FAMILY] (api-coverage P4.3), off by default. */
+    fun isUiFamilyGranted(context: Context, capability: String): Boolean {
+        require(capability in UI_FAMILY) { "Not a UI family grant: $capability" }
+        return isGranted(context, capability, false)
+    }
+
+    fun setUiFamilyGranted(context: Context, capability: String, granted: Boolean) {
+        require(capability in UI_FAMILY) { "Not a UI family grant: $capability" }
+        setGranted(context, capability, granted)
+    }
+
     fun isConsoleControlGranted(context: Context): Boolean = isGranted(context, CONSOLE_CONTROL, false)
     fun setConsoleControlGranted(context: Context, granted: Boolean) = setGranted(context, CONSOLE_CONTROL, granted)
 
@@ -372,6 +394,7 @@ object BunHostCapabilityGrants {
         if (isTasksControlGranted(context)) add(TASKS_CONTROL)
         SYSTEM_FAMILY.filterTo(this) { isSystemFamilyGranted(context, it) }
         AUTOMATION_FAMILY.filterTo(this) { isAutomationFamilyGranted(context, it) }
+        UI_FAMILY.filterTo(this) { isUiFamilyGranted(context, it) }
         if (isConsoleControlGranted(context)) add(CONSOLE_CONTROL)
         }
     }
@@ -388,7 +411,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL, MEDIA_CONTROL, MEDIA_LIBRARY, DEVICE_IDENTIFIERS) + SYSTEM_FAMILY + AUTOMATION_FAMILY
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL, MEDIA_CONTROL, MEDIA_LIBRARY, DEVICE_IDENTIFIERS) + SYSTEM_FAMILY + AUTOMATION_FAMILY + UI_FAMILY
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()
