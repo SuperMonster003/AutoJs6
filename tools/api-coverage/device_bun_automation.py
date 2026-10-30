@@ -22,6 +22,9 @@ Phases (all take --serial; record / install / restore / verify / grant also --st
                                                      entries that need a grant that is off reject NOT_GRANTED with
                                                      missingCapabilities before the host (Q181 (a) - Q183 (a)), the
                                                      local members still answer
+  timeout [--report FILE]                           with the host's accessibility service off: auto.waitFor and
+                                                     automator.waitForService end the whole execution in Rhino and in a
+                                                     Bun main script (Q179 (b)): nothing after the wait runs
 
 Typical run: record, install the candidate host and Bun APKs, grant --set on --only (GRANTS), compare, grant --set off
 --only (GRANTS without QUERY_GRANTS), denied, grant --set restore --only (GRANTS), restore. No dialog is answered here
@@ -66,7 +69,8 @@ DENIED_CASES = [
     # Local members answer without grants.
     ["keys.codes", "[keys.home, keys.BACK, keys.volume_down]", {"equals": [3, 4, 25]}],
     ["threads.atomic", "threads.atomic(1).incrementAndGet()", {"equals": 2}],
-    ["continuation.enabled", "continuation.enabled", {"equals": True}],
+    ["continuation.enabled", "continuation.enabled", {"equals": False}],
+    ["timers.keepAlive", "(() => { const id = timers.keepAlive(); clearInterval(id); return typeof id; })()", {"equals": "number"}],
     ["events.emitter", "(() => { const e = events.emitter(); let v = 0; e.on('p44', x => { v = x; }); e.emit('p44', 7); return v; })()", {"equals": 7}],
     ["global.sleep", "system.sleep(10).then(() => 'ok')", {"equals": "ok"}],
 ]
@@ -136,6 +140,26 @@ async function aj6Run(env, cases, emit) {
         emit(i, result);
     }
 }
+"""
+# The timeout run: index 0 before the wait, 1 after it, 2 from a timer armed before it; only 0 may arrive (Q179 (b)).
+TIMEOUT_SECONDS = 12
+TIMEOUT_RHINO_JS = """
+aj6Emit(AJ6_RUN, 0, {ok: 'before'});
+setTimeout(function () { aj6Emit(AJ6_RUN, 2, {ok: 'timer'}); aj6Emit(AJ6_RUN, -1, {done: 1}); }, 6000);
+AJ6_WAIT;
+aj6Emit(AJ6_RUN, 1, {ok: 'after'});
+aj6Emit(AJ6_RUN, -1, {done: 1});
+"""
+TIMEOUT_BUN_JS = """
+(async () => {
+    const {createHostClient} = await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);
+    const host = await createHostClient();
+    aj6Emit(AJ6_RUN, 0, {ok: 'before'});
+    setTimeout(() => { aj6Emit(AJ6_RUN, 2, {ok: 'timer'}); aj6Emit(AJ6_RUN, -1, {done: 1}); }, 6000);
+    await host.AJ6_WAIT;
+    aj6Emit(AJ6_RUN, 1, {ok: 'after'});
+    aj6Emit(AJ6_RUN, -1, {done: 1});
+})().catch(e => { aj6Emit(AJ6_RUN, 3, {error: String(e && e.stack || e)}); aj6Emit(AJ6_RUN, -1, {done: 1}); });
 """
 
 
@@ -302,9 +326,27 @@ def denied(args):
     finish(args, report, failed)
 
 
+def timeout(args):
+    if service_running(args.serial):
+        print(f"the accessibility service of {base.HOST} is enabled: the timeout run needs it off")
+        sys.exit(2)
+    report, failed = {}, 0
+    for wait in ("auto.waitFor(1000)", "automator.waitForService(1000)"):
+        for side, template, name in (("rhino", TIMEOUT_RHINO_JS, "p44_rhino"), ("bun", TIMEOUT_BUN_JS, "p44_bun")):
+            run = uuid.uuid4().hex[:8]
+            body = encoder(args) + base.EMIT_JS + template.replace("AJ6_WAIT", wait)
+            script = f"var AJ6_RUN = '{run}';\n" + body if side == "rhino" else f'"bun";\nconst AJ6_RUN = \'{run}\';\n' + body
+            results = base.run_script(args.serial, f"{name}_{run}.js", script, run, TIMEOUT_SECONDS)
+            verdict = "pass" if sorted(results) == [0] else f"got {sorted(results)} {json.dumps(results.get(3, ''))[:300]}"
+            report[f"{side} {wait}"] = verdict
+            failed += verdict != "pass"
+            print(f"{side} {wait}: {verdict}")
+    finish(args, report, failed)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("phase", choices=["record", "install", "restore", "verify", "grant", "compare", "denied"])
+    parser.add_argument("phase", choices=["record", "install", "restore", "verify", "grant", "compare", "denied", "timeout"])
     parser.add_argument("--serial", required=True)
     parser.add_argument("--state", type=Path, help="private state directory (APK copies, recorded grants)")
     parser.add_argument("--bun", type=Path, default=HERE.parents[2] / "AutoJs6-Plugin-Bun-Runtime", help="Bun runtime checkout")
@@ -325,7 +367,7 @@ def main():
     if args.phase == "grant" and (not args.set or not args.only):
         parser.error("grant needs --set and --only")
     {"record": base.record, "install": base.install, "restore": base.restore, "verify": base.verify, "grant": base.grant,
-     "compare": compare, "denied": denied}[args.phase](args)
+     "compare": compare, "denied": denied, "timeout": timeout}[args.phase](args)
 
 
 if __name__ == "__main__":

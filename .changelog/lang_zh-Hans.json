@@ -228,6 +228,7 @@
         "脚本对话框在线程结束时关闭可能导致应用崩溃的问题",
         "停止带有 setInterval 定时器的脚本时偶尔显示 \"Unable to schedule a timer callback because its looper is exiting\" 错误的问题",
         "取消定时器或停止子线程后, 过期回调可能阻止脚本自动结束的问题",
+        "threads.pool 指定 corePoolSize 但未指定 maxPoolSize 时抛出 IllegalArgumentException 的问题",
         "threads.start 创建的子线程全部结束后脚本偶尔不会自动结束的问题",
         "停止脚本时其子线程仍在处理图像可能导致应用崩溃的问题",
         "floaty.window/rawWindow 的聚焦相关方法在脚本线程调用时可能出现线程异常的问题",

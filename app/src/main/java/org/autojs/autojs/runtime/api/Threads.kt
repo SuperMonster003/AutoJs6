@@ -84,7 +84,7 @@ class Threads(private val scriptRuntime: ScriptRuntime) {
         if (niceMaximumPoolSize == 0) {
             niceMaximumPoolSize = Int.MAX_VALUE
         }
-        require(corePoolSize <= maximumPoolSize) { "Property corePoolSize ($corePoolSize) should not be greater than maximumPoolSize ($maximumPoolSize)" }
+        require(corePoolSize <= niceMaximumPoolSize) { "Property corePoolSize ($corePoolSize) should not be greater than maximumPoolSize ($maximumPoolSize)" }
         synchronized(threadPools) {
             return ThreadPool(corePoolSize, niceMaximumPoolSize, keepAliveTime, threadPools.size, this).also {
                 threadPools.add(it)
