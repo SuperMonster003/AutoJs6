@@ -116,6 +116,9 @@ CLAUDE.md
 !/tools/imgui/
 !/tools/imgui/**
 /tools/imgui/__pycache__/
+!/tools/paddle-ocr-v3/
+!/tools/paddle-ocr-v3/**
+/tools/paddle-ocr-v3/__pycache__/
 
 /gradle/wrappers/backup/
 
