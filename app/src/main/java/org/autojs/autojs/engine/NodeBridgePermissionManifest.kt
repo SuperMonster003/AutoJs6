@@ -54,6 +54,8 @@ object NodeBridgePermissionManifest {
     const val ANDROID_OBJECTS = "android.objects"
     const val TASKS = "tasks"
     const val DEVICE_POWER = "device.power"
+    // Rhino's device hardware identifiers (api-coverage P3.1c, Q146 (a)): never implied by "device".
+    const val DEVICE_IDENTIFIERS = "device.identifiers"
     const val SHELL = "shell"
     const val SHELL_ROOT = "shell.root"
     const val SHELL_SHIZUKU = "shell.shizuku"
@@ -163,6 +165,7 @@ object NodeBridgePermissionManifest {
         ANDROID_OBJECTS,
         TASKS,
         DEVICE_POWER,
+        DEVICE_IDENTIFIERS,
         SHELL,
         SHELL_ROOT,
         SHELL_SHIZUKU,
@@ -315,6 +318,7 @@ object NodeBridgePermissionManifest {
         TASKS to listOf("android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.WAKE_LOCK", "android.permission.SCHEDULE_EXACT_ALARM"),
         DEVICE to listOf("android.permission.WAKE_LOCK", "android.permission.VIBRATE"),
         DEVICE_POWER to listOf("android.permission.WRITE_SETTINGS", "android.permission.WAKE_LOCK"),
+        DEVICE_IDENTIFIERS to listOf("android.permission.READ_PHONE_STATE"),
         MEDIA_AUDIO to listOf("android.permission.MODIFY_AUDIO_SETTINGS"),
         SHELL_SHIZUKU to listOf("moe.shizuku.manager.permission.API_V23"),
         NOTIFICATIONS to listOf(ANDROID_PERMISSION_POST_NOTIFICATIONS),
@@ -578,7 +582,8 @@ object NodeBridgePermissionManifest {
             NodeBridgeModules.SCREEN_METRICS -> listOf(DEVICE)
             NodeBridgeModules.DEVICE -> when (method) {
                 "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings",
-                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope" -> listOf(DEVICE, DEVICE_POWER)
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "keepAwake", "cancelKeepingAwake", "closeScope" -> listOf(DEVICE, DEVICE_POWER)
+                in RuntimeDeviceBridge.methods -> RuntimeDeviceBridge.capabilities(method)
                 else -> listOf(DEVICE)
             }
             NodeBridgeModules.SHELL -> shellRequiredCapabilities(method, argsJson)
@@ -668,6 +673,7 @@ object NodeBridgePermissionManifest {
             required == SHELL_SHIZUKU ||
             required == NOTIFICATIONS_SETTINGS ||
             required == DEVICE_POWER ||
+            required == DEVICE_IDENTIFIERS ||
             required == EVENTS_NOTIFICATION ||
             required == EVENTS_TOAST ||
             required == EVENTS_KEY ||

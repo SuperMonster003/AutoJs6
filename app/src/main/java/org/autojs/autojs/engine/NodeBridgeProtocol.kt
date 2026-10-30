@@ -821,6 +821,8 @@ object NodeBridgeModules {
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info",
         "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope")
+    /** Rhino's keepAwake / keepScreenDim and cancelVibration for the Node device module (api-coverage P3.1c); not in Bun's device.control grant. */
+    val deviceRhinoControls = setOf("keepAwake", "cancelVibration")
     val shellMethods = setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission")
     val fetchMethods = setOf("request")
     val websocketMethods = setOf("connect", "send", "close", "drainEvents")
@@ -875,7 +877,7 @@ object NodeBridgeModules {
         COMPOSE to RuntimeComposeBridge.methods,
         UI_OVERLAY to uiOverlayMethods,
         CLIPBOARD to clipboardMethods,
-        DEVICE to deviceMethods,
+        DEVICE to deviceMethods + deviceRhinoControls + RuntimeDeviceBridge.methods,
         SCREEN_METRICS to screenMetricsMethods,
         EVENTS to eventsMethods,
         KEYS to keysMethods,
@@ -1016,6 +1018,7 @@ class AndroidNodeBridgeCapabilityProvider(
     private val androidObjects = RuntimeAndroidObjects(appContext,engineInfo.cwd)
     private val calendarTasks = RuntimeTasksBridge(appContext,engineInfo.cwd)
     private val systemBridge = lazy { RuntimeSystemBridge(appContext, ::resolveAndroidFile) }
+    private val deviceBridge = lazy { RuntimeDeviceBridge(appContext) }
     private val systemExecutor = Executors.newCachedThreadPool { task ->
         Thread(task, "AutoJs6NodeSystem").apply { isDaemon = true }
     }
@@ -1246,7 +1249,9 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.UI && request.method in NodeBridgeModules.uiMethods -> dispatchUi(request, auditedCallback)
             request.module == NodeBridgeModules.UI_OVERLAY && request.method in NodeBridgeModules.uiOverlayMethods -> dispatchUiOverlay(request, auditedCallback)
             request.module == NodeBridgeModules.CLIPBOARD && request.method in NodeBridgeModules.clipboardMethods -> dispatchClipboard(request, auditedCallback)
-            request.module == NodeBridgeModules.DEVICE && request.method in NodeBridgeModules.deviceMethods -> dispatchDevice(request, auditedCallback)
+            request.module == NodeBridgeModules.DEVICE && request.method in RuntimeDeviceBridge.methods -> dispatchDeviceRhino(request, auditedCallback)
+            request.module == NodeBridgeModules.DEVICE && (request.method in NodeBridgeModules.deviceMethods || request.method in NodeBridgeModules.deviceRhinoControls) ->
+                dispatchDevice(request, auditedCallback)
             request.module == NodeBridgeModules.SCREEN_METRICS && request.method in NodeBridgeModules.screenMetricsMethods -> dispatchOnMain(request, auditedCallback) {
                 try {
                     NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(coordinateBridge.invoke(request.method, request.argsArray())))
@@ -1560,10 +1565,21 @@ class AndroidNodeBridgeCapabilityProvider(
      * powerManager through [RuntimeSystemBridge], on threads of their own because some calls block (installer, memory.collect, settings.export).
      * zh-CN: Rhino 系统信息族 (P3.1b) 经 [RuntimeSystemBridge] 执行, 使用独立的线程池, 因为部分调用会阻塞 (installer, memory.collect, settings.export).
      */
-    private fun dispatchSystem(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+    private fun dispatchSystem(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) =
+        dispatchOnSystemThread(request, callback) { systemBridge.value.invoke(request.module, request.method, request.argsArray()) }
+
+    /**
+     * Rhino's device members of [RuntimeDeviceBridge] (api-coverage P3.1c), on the same threads: pointer location goes through a Root or
+     * Shizuku shell and the shared device id through a content provider.
+     * zh-CN: [RuntimeDeviceBridge] 的 Rhino device 成员 (api-coverage P3.1c), 在同一线程池执行: 指针位置经 Root 或 Shizuku shell, 共享设备 id 经内容提供者.
+     */
+    private fun dispatchDeviceRhino(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) =
+        dispatchOnSystemThread(request, callback) { deviceBridge.value.invoke(request.method, request.argsArray()) }
+
+    private fun dispatchOnSystemThread(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit, block: () -> Any?) {
         val task = Runnable {
             val response = try {
-                NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(systemBridge.value.invoke(request.module, request.method, request.argsArray())))
+                NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(block()))
             } catch (error: Throwable) {
                 NodeBridgeResponse.failure(request.id, when (error) {
                     is SecurityException -> NodeBridgeError.permissionDenied(error.message ?: "Android permission denied.", request.module, request.method)
@@ -4514,15 +4530,18 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun dispatchDevice(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         dispatchOnMain(request, callback) {
             when (request.method) {
-                "setBrightness", "setBrightnessMode", "keepScreenOn", "cancelKeepingAwake", "closeScope" -> runCatching {
-                    val value = request.argsArray().opt(0)
-                    if (request.method !in setOf("cancelKeepingAwake", "closeScope")) require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toLong().toDouble()) {
+                "setBrightness", "setBrightnessMode", "keepScreenOn", "keepAwake", "cancelKeepingAwake", "closeScope" -> runCatching {
+                    val args = request.argsArray()
+                    val value = args.opt(0)
+                    // Rhino's keepScreenOn() without a timeout holds the lock until cancelKeepingAwake or the end of the execution (api-coverage P3.1c).
+                    if (request.method !in setOf("cancelKeepingAwake", "closeScope") && !(request.method == "keepScreenOn" && args.isNull(0))) require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toLong().toDouble()) {
                         "device.${request.method} requires an integer."
                     }
                     when (request.method) {
                         "setBrightness" -> { require((value as Number).toLong() in 0..255); deviceControls.setBrightness(value.toInt()) }
                         "setBrightnessMode" -> { require((value as Number).toLong() in 0..1); deviceControls.setBrightnessMode(value.toInt()) }
-                        "keepScreenOn" -> deviceControls.keepScreenOn((value as Number).toLong(), request.argsArray().optString(1))
+                        "keepScreenOn" -> deviceControls.keepScreenOn(optionalTimeoutArg(request, 0), args.optString(1))
+                        "keepAwake" -> deviceControls.keepAwake((value as Number).toInt(), optionalTimeoutArg(request, 1), args.optString(2))
                         "closeScope" -> deviceControls.closeScope(request.argsArray().optString(0))
                         else -> deviceControls.cancelKeepingAwake(request.argsArray().optString(0))
                     }
@@ -4551,7 +4570,15 @@ class AndroidNodeBridgeCapabilityProvider(
                     deviceAccessFailure(request, error)
                 }
                 "vibrate" -> runCatching {
-                    vibrateDevice(request.firstLongArg())
+                    // A timing array (the delay first) plays a waveform once, as Rhino's device.vibrate(timings) (api-coverage P3.1c).
+                    val timings = request.argsArray().optJSONArray(0)
+                    if (timings != null) vibrateDevicePattern(LongArray(timings.length()) { timings.getLong(it) }) else vibrateDevice(request.firstLongArg())
+                    NodeBridgeResponse.success(request.id, "null")
+                }.getOrElse { error ->
+                    deviceAccessFailure(request, error)
+                }
+                "cancelVibration" -> runCatching {
+                    vibrator()?.cancel()
                     NodeBridgeResponse.success(request.id, "null")
                 }.getOrElse { error ->
                     deviceAccessFailure(request, error)
@@ -5772,19 +5799,41 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         val duration = durationMs.coerceAtMost(10_000L)
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (appContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator
-        } else {
-            appContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-        } ?: return
-        if (!vibrator.hasVibrator()) {
-            return
-        }
+        val vibrator = vibrator() ?: return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
             vibrator.vibrate(duration)
         }
+    }
+
+    /** Rhino's Device.doVibrate(long[]): off / on timings starting with the delay, played once. */
+    @Suppress("DEPRECATION")
+    private fun vibrateDevicePattern(timings: LongArray) {
+        require(timings.all { it >= 0L }) { "device.vibrate timings must not be negative." }
+        val vibrator = vibrator() ?: return
+        if (timings.isEmpty()) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createWaveform(timings, -1))
+        } else {
+            vibrator.vibrate(timings, -1)
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun vibrator(): Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (appContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator
+    } else {
+        appContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+    }?.takeIf { it.hasVibrator() }
+
+    /** An optional positive integer timeout argument (null when absent), as device.keepScreenOn / keepAwake take it. */
+    private fun optionalTimeoutArg(request: NodeBridgeRequest, index: Int): Long? {
+        val args = request.argsArray()
+        if (args.isNull(index)) return null
+        val value = args.get(index)
+        require(value is Number && value.toDouble().isFinite() && value.toDouble() == value.toLong().toDouble()) { "device.${request.method} requires an integer timeout." }
+        return value.toLong()
     }
 
     private fun launchPackage(packageName: String): Boolean {
@@ -8522,15 +8571,17 @@ private data class ControlledSensorRequestDescriptor(
                     ),
                 )
             val type = payload.optString("type", "").trim().lowercase(Locale.US)
-            val sensorType = ControlledSensorPolicy.allowedSensorTypes[type]
+            val sensorType = ControlledSensorPolicy.sensorType(type)
                 ?: return ControlledSensorRequestDescriptor(
                     error = NodeBridgeError.invalidRequest(
-                        message = "sensors.${request.method} supports only accelerometer, gyroscope, and light.",
+                        message = "sensors.${request.method} does not know the sensor type: $type.",
                         module = request.module,
                         method = request.method,
                     ),
                 )
-            val samplingIntervalMs = parseLong(
+            // Rhino's sensors.delay (normal 3, ui 2, game 1, fastest 0) picks Android's rate; fastest stays at the bridge minimum (api-coverage P3.1c, Q147 (a)).
+            val delay = (payload.opt("delay") as? Number)?.toInt()?.takeIf { it in ControlledSensorPolicy.rhinoDelays.keys }
+            val samplingIntervalMs = delay?.let { ControlledSensorPolicy.rhinoDelays.getValue(it).second } ?: parseLong(
                 payload.opt("samplingIntervalMs"),
                 fallback = ControlledSensorPolicy.DEFAULT_SAMPLING_INTERVAL_MS,
             ).coerceIn(ControlledSensorPolicy.MIN_SAMPLING_INTERVAL_MS, ControlledSensorPolicy.MAX_SAMPLING_INTERVAL_MS)
@@ -8547,7 +8598,8 @@ private data class ControlledSensorRequestDescriptor(
                     type = type,
                     sensorType = sensorType,
                     samplingIntervalMs = samplingIntervalMs,
-                    samplingPeriodUs = (samplingIntervalMs * 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                    samplingPeriodUs = delay?.let { ControlledSensorPolicy.rhinoDelays.getValue(it).first }
+                        ?: (samplingIntervalMs * 1000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
                     timeoutMs = timeoutMs,
                     maxQueueSize = maxQueueSize,
                 ),
@@ -8581,10 +8633,32 @@ private object ControlledSensorPolicy {
     const val DEFAULT_MAX_QUEUE_SIZE = 16
     const val HARD_MAX_QUEUE_SIZE = 64
 
+    /** Rhino's sensor names (org.autojs.autojs.runtime.api.Sensors, api-coverage P3.1c): this table first, then any Sensor.TYPE_<NAME> constant. */
+    @Suppress("DEPRECATION") // TYPE_ORIENTATION is in Rhino's table.
     val allowedSensorTypes: Map<String, Int> = linkedMapOf(
         "accelerometer" to Sensor.TYPE_ACCELEROMETER,
+        "ambient_temperature" to Sensor.TYPE_AMBIENT_TEMPERATURE,
+        "gravity" to Sensor.TYPE_GRAVITY,
         "gyroscope" to Sensor.TYPE_GYROSCOPE,
         "light" to Sensor.TYPE_LIGHT,
+        "linear_acceleration" to Sensor.TYPE_LINEAR_ACCELERATION,
+        "magnetic_field" to Sensor.TYPE_MAGNETIC_FIELD,
+        "orientation" to Sensor.TYPE_ORIENTATION,
+        "pressure" to Sensor.TYPE_PRESSURE,
+        "proximity" to Sensor.TYPE_PROXIMITY,
+        "relative_humidity" to Sensor.TYPE_RELATIVE_HUMIDITY,
+        "temperature" to Sensor.TYPE_AMBIENT_TEMPERATURE,
+    )
+
+    fun sensorType(name: String): Int? = allowedSensorTypes[name]
+        ?: runCatching { Sensor::class.java.getField("TYPE_" + name.uppercase(Locale.ROOT)).getInt(null) }.getOrNull()
+
+    /** Rhino's delay constants: the samplingPeriodUs given to Android and the interval reported in milliseconds (fastest as game, Q147 (a)). */
+    val rhinoDelays: Map<Int, Pair<Int, Long>> = mapOf(
+        SensorManager.SENSOR_DELAY_NORMAL to (SensorManager.SENSOR_DELAY_NORMAL to 200L),
+        SensorManager.SENSOR_DELAY_UI to (SensorManager.SENSOR_DELAY_UI to 67L),
+        SensorManager.SENSOR_DELAY_GAME to (SensorManager.SENSOR_DELAY_GAME to 20L),
+        SensorManager.SENSOR_DELAY_FASTEST to (SensorManager.SENSOR_DELAY_GAME to 20L),
     )
 
     fun sensorInfoJson(type: String, sensor: Sensor): JSONObject {

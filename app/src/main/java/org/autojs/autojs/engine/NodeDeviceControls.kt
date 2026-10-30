@@ -1,10 +1,11 @@
 package org.autojs.autojs.engine
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.PowerManager
 import android.provider.Settings
 
-/** Each runtime client owns its timed wake lock; execution shutdown releases every lock. */
+/** Each runtime client owns its wake lock (timed, or held until cancelled); execution shutdown releases every lock. */
 internal class NodeDeviceControls(private val context: Context) {
     private val wakeLocks = linkedMapOf<String, PowerManager.WakeLock>()
     private val closedScopes = hashSetOf<String>()
@@ -27,17 +28,25 @@ internal class NodeDeviceControls(private val context: Context) {
         check(Settings.System.putInt(context.contentResolver, key, value)) { "Android did not accept the requested setting." }
     }
 
-    @Synchronized
     @Suppress("DEPRECATION")
-    fun keepScreenOn(timeoutMs: Long, scope: String = "") {
+    fun keepScreenOn(timeoutMs: Long?, scope: String = "") =
+        keepAwake(PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP, timeoutMs, scope, "device.keepScreenOn")
+
+    /**
+     * Rhino's device.keepAwake (api-coverage P3.1c): one wake lock per scope with the given PowerManager flags, replacing the
+     * scope's previous one as Rhino's single lock does; without a timeout it is held until cancelKeepingAwake or the execution ends.
+     */
+    @Synchronized
+    @SuppressLint("WakelockTimeout") // Held until cancelKeepingAwake or close(), as Rhino's keepAwake(flags).
+    fun keepAwake(flags: Int, timeoutMs: Long?, scope: String = "", name: String = "device.keepAwake") {
         check(!closed && scope !in closedScopes) { "The script has ended." }
-        require(timeoutMs > 0) { "device.keepScreenOn requires a positive timeout in milliseconds." }
+        require(timeoutMs == null || timeoutMs > 0) { "$name requires a positive timeout in milliseconds." }
         cancelKeepingAwake(scope)
         val manager = checkNotNull(context.getSystemService(Context.POWER_SERVICE) as? PowerManager)
-        wakeLocks[scope] = manager.newWakeLock(
-            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
-            "AutoJs6:NodeScreen",
-        ).apply { setReferenceCounted(false); acquire(timeoutMs) }
+        wakeLocks[scope] = manager.newWakeLock(flags, "AutoJs6:NodeScreen").apply {
+            setReferenceCounted(false)
+            if (timeoutMs == null) acquire() else acquire(timeoutMs)
+        }
     }
 
     @Synchronized
