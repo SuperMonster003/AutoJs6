@@ -96,6 +96,10 @@ for (const name of ['autojs', 'installer', 'memory', 'settings', 'sysprops', 'po
   assert(new RegExp(`(^|[\\s,{])${name}\\s*:\\s*Object\\.keys\\(`).test(table), `Worker table entry ${name}`);
 }
 assert(/plugins\s*:\s*\[[^\]]*"extend"[^\]]*"tools"/.test(table), 'Worker table entry plugins with extend* and tools');
+// Q135 (b): the global system functions and R are also globals, installed by the main thread and by Workers.
+assert.deepEqual(system.installGlobals({}), [...Object.keys(system.system), 'R'], 'installGlobals installs the system members and R');
+assert(source.includes('if (methods.system) system.installGlobals(globalThis);'), 'Workers install the system globals');
+assert(/__autojs6_install_autojs_global\(\);\s*__autojs6_install_system_globals\(\);/.test(source), 'The main thread installs the system globals');
 const CAPABILITIES = ['autojs', 'autojs.control', 'settings', 'settings.write', 'sysprops', 'memory', 'memory.dump', 'installer', 'installer.mutate'];
 const implied = part('  function __autojs6_bridge_declares_capability(');
 for (const name of ['autojs.control', 'settings.write', 'memory.dump', 'installer.mutate']) assert(implied.includes(`"${name}"`), `${name} never implied`);
@@ -123,4 +127,4 @@ assert(policy.exclusions.some(rule => rule.match.includes('memory.watch')), 'mem
 
 const hostApi = read(resolve(node, 'docs/HOST-API.md'));
 assert(hostApi.includes('## 系统信息与引擎族的 Rhino 对照'), 'HOST-API section of the system information family');
-console.log(JSON.stringify({hostMembers: members, globals: globals.length, workerSystem: true, capabilities: CAPABILITIES.length, hostApi: true}));
+console.log(JSON.stringify({hostMembers: members, globals: globals.length, workerSystem: true, globalThis: true, capabilities: CAPABILITIES.length, hostApi: true}));

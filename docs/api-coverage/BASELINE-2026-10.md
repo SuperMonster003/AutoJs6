@@ -907,3 +907,19 @@ d.ts (TS fa26b8b / 8f8ec07):
 | TS | f86a8bc | 同步 Bun host client 声明 |
 | Ace | f42f0be / 7b83ecb | 内置 Bun 声明; 运行时查询表 3908 -> 4012 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P4.1b 落点 / 附录 C Q136-Q140 / 附录 D D-22 的 Bun 列, REVIEW 7.1 P4.1b 落点 |
+
+### 13.6 Q135 改选 (b) (2026-10-30, 子会话 api-cov-p3-1b)
+
+- 维护者 2026-10-30 08:3x 对 Q135 选 (b) (非推荐): getRootMode 返回 Rhino 的 RootMode 对象 (setRootMode 接受), 全局系统函数与 R 同时装到 globalThis (主线程与 Worker 的访问器, 赋值即替换; autojs6:system 保留), notice.channel 省略 id 时用当前脚本全名 (项目为入口文件名, 如 main.js), plugin_tools 隐含 plugin_tools.user_granted. 其余 (a) 项保持.
+- 数字: 矩阵, pending 与文档 / d.ts / Ace 列不变 (Node main 825 / Worker 887); Ace 运行时查询表不变 (4012).
+- 验收: Node 桌面测试 12 / 12, CI 中的 Node api 测试 181 / 181; 宿主 check-runtime-system.mjs (新增全局安装检查) 与 check-runtime-app-shell.mjs 通过; TS `npm test` 与 Ace `verify-runtime-api-coverage.mjs --fresh` 通过. 真机 968e9f18 (宿主 debug 5935 = fde89093f 导出, Node debug 329 = 6c2fae29 导出): Rhino 51 / 51, Node main / ESM / 嵌套 Worker 各 51 通过, 未声明能力 7 通过; 装回原包并核对 md5.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| Node 插件 | 6c2fae29 | 门面, d.ts, HOST-API, 桌面测试, 真机用例 |
+| Node 插件 | a4d11a16 | 默认渠道用例比对各自的文件名 |
+| 文档 | ab83aaa / e3b658e | changelog 一句, 生成物 |
+| Offline Docs | cffced9 | 同步生成页, 版本不变 |
+| TS | 4a5b382 | 同步 Node 运行时声明 |
+| Ace | a57d699 | 内置 Node 运行时声明 |
+| 宿主 | (本节所在提交) | 本节, check-runtime-system.mjs, 报告, ROADMAP 附录 C Q135 / P3.1b 行, REVIEW 7.1 |
