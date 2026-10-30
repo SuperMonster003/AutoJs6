@@ -679,7 +679,8 @@ the documentation page and the name prefix used there. `language-runtimes.json` 
 both checks compare with:
 
 - source: the names the checkout registers. `python-package`: `__all__` of `autojs6/__init__.py` and of
-  each submodule it lists (functions with their signatures, constants, classes). `jvm-entry-aar`: the
+  each submodule it lists (functions with their signatures, constants with their values, classes; a value is
+  a literal or `+ - * //` of earlier constants, anything else is listed as `...`). `jvm-entry-aar`: the
   plugin's frozen `protocol/jvm-source-api.aar` (Java is at Entry API 4, Kotlin at Entry API 2, so the
   host's current `JvmEntryApi.kt` cannot stand for both), every public type and non-synthetic method
   reachable from `AutoJsJvmEntry` through the parameter, return and thrown types of its package.
@@ -697,7 +698,8 @@ both checks compare with:
   checkout and `ace` / `ace-index` in the Ace Editor checkout (`--ace`, else `AUTOJS6_ACE_EDITOR_ROOT`,
   else the sibling directory). The stub must name exactly the listed API: Python
   `docs/python/types/autojs6/*.pyi` and its Ace copy (public definitions of `__init__.pyi` and the
-  submodules it re-exports, signatures with defaults written as `...`), Lua `docs/types/autojs.lua` and its
+  submodules it re-exports, signatures with defaults written as `...`, constants with the plugin's value as
+  `NAME: Final = 64`, appendix C Q142 (b)), Lua `docs/types/autojs.lua` and its
   Ace copy (LuaLS `---@meta`: `function autojs.x(...)` and assigned values), the Java Entry API jar Ace gives
   ECJ (read like the AAR) and the `AutoJsJvmEntry` / `Jvm*` modules and class globals of Ace's Java and
   Kotlin indices (parameter counts). A missing checkout prints `stubs skipped`, a checkout without the stub fails.

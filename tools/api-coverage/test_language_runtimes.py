@@ -77,12 +77,15 @@ class ReadersTest(unittest.TestCase):
             package.mkdir()
             (package / "__init__.py").write_text('from . import mod\nfrom .errors import Boom\n\n\ndef toast(text: str) -> None:\n    pass\n\n\n'
                                                  '__all__ = ("mod", "toast", "Boom")\n', encoding="utf-8")
-            (package / "mod.py").write_text('__all__ = ["LIMIT", "run"]\nLIMIT = 3\n\n\ndef run(path: str, *, limit: int = LIMIT) -> bool:\n    pass\n\n\n'
+            (package / "mod.py").write_text('__all__ = ["LIMIT", "BYTES", "HALF", "TITLE", "LIVE", "run"]\nLIMIT = 3\nBYTES = 4 * 1024\n'
+                                            'HALF = (BYTES + 1) // 2\nTITLE: str = "pkg"\nLIVE = now()\n\n\n'
+                                            'def run(path: str, *, limit: int = LIMIT) -> bool:\n    pass\n\n\n'
                                             'def hidden():\n    pass\n', encoding="utf-8")
             (package / "errors.py").write_text("__all__ = ['Boom']\n\n\nclass Boom(RuntimeError):\n    pass\n", encoding="utf-8")
             names = runtimes.read_python(Path(temp), {"source": "pkg"})
         self.assertEqual(names, {"functions": {"mod.run": "(path: str, *, limit: int=LIMIT) -> bool", "toast": "(text: str) -> None"},
-                                 "constants": ["mod.LIMIT"], "classes": ["Boom"]})
+                                 "constants": {"mod.LIMIT": "3", "mod.BYTES": "4096", "mod.HALF": "2048", "mod.TITLE": "'pkg'", "mod.LIVE": "..."},
+                                 "classes": ["Boom"]})
 
     def test_lua_module_table(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -116,7 +119,7 @@ class ReadersTest(unittest.TestCase):
 
 class CheckPageTest(unittest.TestCase):
     PYTHON = {"kind": "python-package", "functions": {"mod.run": "(path: str, *, limit: int=LIMIT) -> bool", "toast": "(text: str) -> None"},
-              "constants": ["mod.LIMIT"], "classes": ["Boom"]}
+              "constants": {"mod.LIMIT": "3"}, "classes": ["Boom"]}
     PAGE = ("# Python\n\n## pkg.mod\n\n### pkg.mod.run(path, *, limit=pkg.mod.LIMIT)\n\n### pkg.toast(text)\n\n"
             "| 常量 | 值 |\n| --- | --- |\n| `pkg.mod.LIMIT` | `3` |\n| `pkg.Boom` | RuntimeError |\n| `OTHER_CODE` | x |\n")
 
@@ -144,18 +147,20 @@ class StubsTest(unittest.TestCase):
             package = Path(temp)
             (package / "__init__.pyi").write_text("from . import mod as mod\nfrom .errors import Boom as Boom\nimport os\n\n\n"
                                                   "def toast(text: str) -> None: ...\n\n\ndef _hidden() -> None: ...\n", encoding="utf-8")
-            (package / "mod.pyi").write_text("import builtins\nfrom typing import Final\n\nLIMIT: Final[int]\n\n\n"
+            (package / "mod.pyi").write_text("import builtins\nfrom typing import Final\n\nLIMIT: Final = 3\nTITLE: Final[str]\n\n\n"
                                              "def run(path: str, *, limit: int = ...) -> builtins.list[str]: ...\n", encoding="utf-8")
             (package / "errors.pyi").write_text("class Boom(RuntimeError): ...\n\n\nclass Other(RuntimeError): ...\n", encoding="utf-8")
             names = runtimes.read_python_stubs(package)
         self.assertEqual(names, {"functions": {"mod.run": "(path: str, *, limit: int=...) -> list[str]", "toast": "(text: str) -> None"},
-                                 "constants": ["mod.LIMIT"], "classes": ["Boom"]})
+                                 "constants": {"mod.LIMIT": "3", "mod.TITLE": "..."}, "classes": ["Boom"]})
         listed = {"functions": {"mod.run": "(path: str, *, limit: int=LIMIT) -> list[str]", "toast": "(text: str) -> None"},
-                  "constants": ["mod.LIMIT"], "classes": ["Boom"]}
+                  "constants": {"mod.LIMIT": "3", "mod.TITLE": "..."}, "classes": ["Boom"]}
         view = runtimes.stub_view(names, package), runtimes.stub_view(listed, package)
         self.assertEqual(runtimes.differences(*view), [])
         listed["functions"]["mod.run"] = "(path: str, limit: int=LIMIT) -> list[str]"
-        self.assertEqual(runtimes.differences(runtimes.stub_view(names, package), runtimes.stub_view(listed, package)), ["~mod.run"])
+        listed["constants"] = {"mod.LIMIT": "4", "mod.TITLE": "'pkg'"}  # Q142 (b): a stub value that differs or is missing
+        self.assertEqual(runtimes.differences(runtimes.stub_view(names, package), runtimes.stub_view(listed, package)),
+                         ["~mod.run", "~mod.LIMIT", "~mod.TITLE"])
 
     def test_lua_meta_definitions(self):
         with tempfile.TemporaryDirectory() as temp:

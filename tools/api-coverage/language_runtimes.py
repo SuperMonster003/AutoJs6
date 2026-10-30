@@ -7,7 +7,7 @@ names, per plugin, the checkout (a sibling directory name or a local path; --plu
 the registration source and the documentation page. language-runtimes.json is the committed name list:
 
 - source: the names the plugin checkout registers, compared with the list (--write rewrites it). Python:
-  `__all__` of the package and of its submodules (functions with their signatures, constants, classes);
+  `__all__` of the package and of its submodules (functions with their signatures, constants with their values, classes);
   java / kotlin: the frozen protocol/jvm-source-api.aar, every public type and method reachable from the
   entry interface through parameter, return and thrown types of its package; lua: the table the C
   function builds (stack simulation of lua_newtable / lua_setfield). Without the checkout: skipped.
@@ -17,7 +17,8 @@ the registration source and the documentation page. language-runtimes.json is th
   without the documentation checkout: skipped.
 
 - stubs (P5.2e): the type stubs in the plugin checkout and their copies in the Ace Editor checkout must
-  name exactly the listed API: a .pyi package (public definitions; signatures with defaults written as ...),
+  name exactly the listed API: a .pyi package (public definitions; signatures with defaults written as ...;
+  constants with the plugin's values, Q142 (b)),
   a LuaLS ---@meta file (functions and assigned values), a jar of the entry classes (read as the AAR) or an
   Ace language index (modules and class globals of the listed types, parameter counts). Without the
   checkout: skipped.
@@ -28,6 +29,7 @@ import argparse
 import ast
 import io
 import json
+import operator
 import os
 from pathlib import Path
 import re
@@ -43,8 +45,28 @@ ROW = re.compile(r"^\| `([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)` \|")
 JVM_TYPES = {"Z": "boolean", "B": "byte", "C": "char", "S": "short", "I": "int", "J": "long", "F": "float", "D": "double", "V": "void"}
 
 
+def constant_values(body):
+    """repr() of the module-level constants of a module body (Q142 (b)): literals and + - * // of earlier constants."""
+    values, operators = {}, {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul, ast.FloorDiv: operator.floordiv}
+
+    def value(node):
+        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float, str)):
+            return node.value
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+            return -value(node.operand)
+        return values[node.id] if isinstance(node, ast.Name) else operators[type(node.op)](value(node.left), value(node.right))
+
+    for node in body:
+        target = node.target if isinstance(node, ast.AnnAssign) else node.targets[0] if isinstance(node, ast.Assign) and len(node.targets) == 1 else None
+        try:
+            values[target.id] = value(node.value)
+        except (AttributeError, KeyError, TypeError, ZeroDivisionError):
+            pass
+    return {name: repr(item) for name, item in values.items()}
+
+
 def read_python(root, config):
-    names = {"functions": {}, "constants": [], "classes": []}
+    names = {"functions": {}, "constants": {}, "classes": []}
 
     def module_items(path):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -53,24 +75,29 @@ def read_python(root, config):
         defined = {getattr(node, "name", None) or getattr(getattr(node, "target", None), "id", None)
                    or getattr(node.targets[0], "id", None): node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Assign, ast.AnnAssign))}
         imported = {alias.asname or alias.name: node.module for node in tree.body if isinstance(node, ast.ImportFrom) and node.level == 1 for alias in node.names}
-        return exported, defined, imported
+        return exported, defined, imported, constant_values(tree.body)
 
-    def add(prefix, name, node):
+    def add(prefix, name, node, values):
         if isinstance(node, ast.FunctionDef):
             signature = ast.unparse(node.args).join("()") + (" -> " + ast.unparse(node.returns) if node.returns else "")
             names["functions"][prefix + name] = signature
+        elif isinstance(node, ast.ClassDef):
+            names["classes"].append(prefix + name)
         else:
-            names["classes" if isinstance(node, ast.ClassDef) else "constants"].append(prefix + name)
+            names["constants"][prefix + name] = values.get(name, "...")
 
     package = root / config["source"]
-    exported, defined, imported = module_items(package / "__init__.py")
+    exported, defined, imported, values = module_items(package / "__init__.py")
     for name in exported:
         if (package / f"{name}.py").is_file() and imported.get(name) is None:
-            sub_exported, sub_defined, _ = module_items(package / f"{name}.py")
+            sub_exported, sub_defined, _, sub_values = module_items(package / f"{name}.py")
             for member in sub_exported:
-                add(name + ".", member, sub_defined[member])
+                add(name + ".", member, sub_defined[member], sub_values)
+        elif name in defined:
+            add("", name, defined[name], values)
         else:
-            add("", name, defined[name] if name in defined else module_items(package / f"{imported[name]}.py")[1][name])
+            source = module_items(package / f"{imported[name]}.py")
+            add("", name, source[1][name], source[3])
     return names
 
 
@@ -189,13 +216,14 @@ def jvm_arity(signature):
 
 
 def read_python_stubs(package):
-    """Public definitions of __init__.pyi and of the submodules it re-exports (`from . import x as x`)."""
-    names = {"functions": {}, "constants": [], "classes": []}
+    """Public definitions of __init__.pyi and of the submodules it re-exports (`from . import x as x`); constants
+    carry the value they are assigned (`NAME: Final = 64`), "..." without one."""
+    names = {"functions": {}, "constants": {}, "classes": []}
 
     def body(name):
         return ast.parse((package / f"{name}.pyi").read_text(encoding="utf-8")).body
 
-    def add(prefix, node):
+    def add(prefix, node, values):
         target = node.target if isinstance(node, ast.AnnAssign) else node.targets[0] if isinstance(node, ast.Assign) else node
         name = getattr(target, "name", None) or getattr(target, "id", None) or "_"
         if name.startswith("_") or not isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AnnAssign, ast.Assign)):
@@ -203,16 +231,20 @@ def read_python_stubs(package):
         if isinstance(node, ast.FunctionDef):
             signature = ast.unparse(node.args).join("()") + (" -> " + ast.unparse(node.returns) if node.returns else "")
             names["functions"][prefix + name] = stub_form(signature)
+        elif isinstance(node, ast.ClassDef):
+            names["classes"].append(prefix + name)
         else:
-            names["classes" if isinstance(node, ast.ClassDef) else "constants"].append(prefix + name)
+            names["constants"][prefix + name] = values.get(name, "...")
 
-    for node in body("__init__"):
+    init = body("__init__")
+    for node in init:
         for alias in node.names if isinstance(node, ast.ImportFrom) and node.level == 1 else ():
             if alias.asname == alias.name:
-                for child in body(node.module or alias.name):
+                children = body(node.module or alias.name)
+                for child in children:
                     if node.module is None or getattr(child, "name", None) == alias.name:
-                        add("" if node.module else alias.name + ".", child)
-        add("", node)
+                        add("" if node.module else alias.name + ".", child, constant_values(children))
+        add("", node, constant_values(init))
     return names
 
 
