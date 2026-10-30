@@ -17,7 +17,8 @@ const prototypeFiles=['cwd','create','createIfNotExists','createWithDirs','readB
 assert(prototypeFiles.every(name=>HOST_API_METHODS['files.control'].includes(name)),'Bun files.control lacks a Rhino files prototype member');
 // The path helpers and open / toFile of the shared JS tools core run in the client (P4.2b).
 const coreFiles=['join','getName','getExtension','getNameWithoutExtension','getHumanReadableSize','formatSizeWithUnit','nonNullPath','open','toFile'];
-const publicFiles=[...nodeFiles.matchAll(/^\s+(\w+)\([^\n]+\): (?!never;)/gm)].map(m=>m[1]).filter(name=>!prototypeFiles.includes(name)).sort();
+// files.batchRename has its own interfaces ahead of FilesModule and its own bridge (check-runtime-plugin-family.mjs).
+const publicFiles=[...nodeFiles.slice(nodeFiles.indexOf('export interface FilesModule')).matchAll(/^\s+(\w+)\([^\n]+\): (?!never;)/gm)].map(m=>m[1]).filter(name=>!prototypeFiles.includes(name)).sort();
 assert.deepEqual(publicFiles,[...HOST_API_METHODS['files.control'].filter(name=>!prototypeFiles.includes(name)),...coreFiles].sort());
 const automation=fs.readFileSync(path.join(root,'app/src/main/java/org/autojs/autojs/engine/BunAutomationBridge.kt'),'utf8');
 assert.deepEqual(names(automation.match(/Grants.STORAGE_CONTROL to setOf\(([^)]*)\)/)[1]),[...HOST_API_METHODS['storage.control']].sort());

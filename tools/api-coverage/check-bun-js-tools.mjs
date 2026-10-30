@@ -24,8 +24,8 @@ const exported = hostExports();
 // util.unwrapJavaObject stays not-portable (java-prototype). Of the library getters of the global object, axios is the
 // embedded host axios (Q64 (b), P4.2b); dayjs / pangu / cheerio / i18n follow the shared core (Q61). The files and data
 // family adds Color and open (P4.2b, checked by check-bun-files-data.mjs).
-const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies'];
-const LIBRARIES = ['axios', 'dayjs', 'pangu', 'cheerio', 'i18n', 'Color', 'open'];
+const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies', 'TODO'];
+const LIBRARIES =['axios', 'dayjs', 'pangu', 'cheerio', 'i18n', 'Color', 'open'];
 // host.global also carries the global system functions of the system information family (P4.1b), which
 // check-bun-system.mjs checks.
 const SYSTEM_GLOBALS = ['currentPackage', 'currentActivity', 'currentComponent', 'waitForActivity', 'waitForPackage', 'exit', 'stop', 'isRunning',

@@ -108,7 +108,7 @@ assert(!installed.includes('click') && target.click === 'kept' && target.back ==
 assert(source.includes('__autojs6_system_global_names.concat(__autojs6_limited_automation().installGlobals(globalThis))'), 'The main thread installs the globals');
 assert(source.includes('if (methods.automator) automation().installGlobals(globalThis);'), 'Workers install the globals');
 // Workers: the factory in the preload, the table entries and the forwarded modules.
-assert(source.includes('__autojs6_create_system.toString() + ", " + __autojs6_create_automation.toString() + ");"'), 'Worker preload receives the automation factory');
+assert(source.includes('__autojs6_create_system.toString() + ", " + __autojs6_create_automation.toString() + ", "'), 'Worker preload receives the automation factory');
 const table = source.slice(source.indexOf('hostModuleMethods: {'), source.indexOf('\n          },', source.indexOf('hostModuleMethods: {')));
 for (const name of ['automator', 'auto', 'threads', 'continuation', 'timers', 'yolo', 'selector', 'keys', 'ocr', 'barcode', 'qrcode']) {
   assert(new RegExp(`(^|[\\s,{])${name}\\s*:\\s*Object\\.keys\\(`).test(table), `Worker table entry ${name}`);

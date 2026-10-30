@@ -2,8 +2,8 @@
 // client are current (sync-mediainfo.mjs: the Node runtime's mediainfo declarations; sync-axios.mjs: the axios 1.1.2
 // of Q64 (b), from the Bundled Libraries plugin since host 67ef4c1a5; the shared JS tools core with colors / zip / mime
 // / recorder is checked by check-bun-js-tools.mjs), every member of the Rhino files prototype and every registered
-// files / mediainfo / colors / zip / mime / recorder / storages export (but colors.theme, files.batchRename and gallery,
-// appendix C Q80 - Q82) and the global open / Color / libraries are members of the client, the mediainfo.control methods equal the host's Node bridge mediainfo methods, the grant
+// files / mediainfo / colors / zip / mime / recorder / storages export and the global open / Color / libraries are
+// members of the client, the mediainfo.control methods equal the host's Node bridge mediainfo methods, the grant
 // is registered in the host (BunHostCapabilityGrants, Plugin Center switch in 11 languages) and declared in
 // host-client.d.mts, and docs/host-api.md describes the members. The values are compared with Rhino by
 // tools/api-coverage/device_bun_js_tools.py --cases tools/api-coverage/device_bun_files_data_cases.js (device).
@@ -34,11 +34,11 @@ const prototypeMembers = module => {
 };
 const sorted = values => [...new Set(values)].sort();
 
-// Left for the decisions of appendix C Q80 (colors.theme), Q81 (gallery) and Q82 (files.batchRename).
-const PENDING = {colors: ['theme'], files: ['batchRename']};
-assert(!('gallery' in host), 'gallery waits for Q81');
+// The bridges of colors.theme (Q80), gallery (Q81) and files.batchRename (Q82) landed with the plugin family (P4.5).
+assert('gallery' in host, 'Bun host lacks gallery');
+assert('theme' in host.colors, 'Bun colors lacks theme');
 // files: the Rhino prototype members and the registered exports (open / toFile follow the shared core).
-const files = sorted([...prototypeMembers('files'), ...exported.names('files')]).filter(name => !PENDING.files.includes(name));
+const files = sorted([...prototypeMembers('files'), ...exported.names('files')]);
 assert.deepEqual(files.filter(name => !(name in host.files)), [], 'Rhino files members missing from host.files');
 assert.equal(typeof host.files.sdcardPath === 'string' || host.files.sdcardPath === null, true, 'files.sdcardPath is a string (null without device-info.json)');
 
@@ -48,11 +48,10 @@ const counts = {};
 // mime and recorder are Rhino prototype modules (Q18), the others registered modules.
 const PROTOTYPE_MODULES = ['mime', 'recorder'];
 for (const [module, value] of Object.entries(members)) {
-  const names = (PROTOTYPE_MODULES.includes(module) ? prototypeMembers(module) : exported.names(module)).filter(name => !(PENDING[module] || []).includes(name));
+  const names = PROTOTYPE_MODULES.includes(module) ? prototypeMembers(module) : exported.names(module);
   assert.deepEqual(names.filter(name => !(name in value)), [], `Rhino ${module} members missing from host.${module}`);
   counts[module] = names.length;
 }
-for (const name of PENDING.colors) assert(!(name in host.colors), `colors.${name} waits for its decision`);
 assert.equal(typeof host.zip, 'function', 'host.zip is callable like Rhino zip');
 assert.equal(typeof host.recorder, 'function', 'host.recorder is callable like Rhino recorder');
 assert.equal(host.global.open, host.files.open, 'the global open is files.open');

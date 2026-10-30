@@ -20,8 +20,8 @@ const main = create({...host, axios: () => ({})}), worker = create(host);
 const exported = hostExports();
 // util.unwrapJavaObject stays not-portable (java-prototype). The global object also has the Q61 libraries and Rhino's
 // global open / Color (P3.2b, check-runtime-files-data.mjs).
-const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies'];
-const LATER = ['cheerio', 'dayjs', 'i18n', 'pangu', 'open', 'Color'];
+const GLOBALS = ['random', 'randomInt', 'randomFloat', 'isInteger', 'isPrimitive', 'isObject', 'isReference', 'isBigInt', 'isEmptyObject', 'isObjectSpecies', 'TODO'];
+const LATER =['cheerio', 'dayjs', 'i18n', 'pangu', 'open', 'Color'];
 const groups = [
   ['util', main.util, ['unwrapJavaObject']], ['util.inspect', main.util.inspect], ['util.java', main.util.java], ['util.morseCode', main.util.morseCode],
   ['util.version', main.util.version], ['util.versionCodes', main.util.versionCodes], ['species', main.species], ['s13n', main.s13n],

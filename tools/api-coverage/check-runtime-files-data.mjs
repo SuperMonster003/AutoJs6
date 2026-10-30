@@ -3,8 +3,8 @@
 // EpubBook#toString have an entry in the Node runtime (colors / files / mime / recorder / zip in the shared JS tools
 // core of node_bridge_sources.cpp, storages / mediainfo / epub in their bridge facades), a Node declaration and a
 // Worker table entry, and autojs6:global has the Rhino global libraries (Q61), open and Color. colors.theme (Q80),
-// gallery (Q81) and files.batchRename (Q82) wait for host bridge modules (P3.5). The values are compared with Rhino by
-// the Node repository's tools/nodejs/api/files-data (unit tests and device_files_data.py).
+// gallery (Q81) and files.batchRename (Q82) are checked by check-runtime-plugin-family.mjs. The values are compared with
+// Rhino by the Node repository's tools/nodejs/api/files-data (unit tests and device_files_data.py).
 import assert from 'node:assert/strict';
 import fs, {readFileSync} from 'node:fs';
 import path, {resolve, dirname} from 'node:path';
