@@ -1144,7 +1144,7 @@ object RemoteApkBuildRequestPreparer {
         progressListener: ((ApkBuildProgress) -> Unit)?,
     ): List<SelectedPluginArtifact> {
         val selectedLabels = projectConfig.libs.toSet()
-        return ApkBuildLibrary.entries.mapNotNull { lib ->
+        val artifacts = ApkBuildLibrary.entries.mapNotNull { lib ->
             ensureNotCancelled(cancelSignal)
             if (!lib.isPlugin || lib.label !in selectedLabels) {
                 return@mapNotNull null
@@ -1155,6 +1155,32 @@ object RemoteApkBuildRequestPreparer {
             // Every plugin keeps its own payload; same-named libraries are resolved by content (P1.1).
             SelectedPluginArtifact(lib, serviceInfo, variant)
         }
+        return withRequiredOpenCvRuntime(context, artifacts, cancelSignal, progressListener)
+    }
+
+    /**
+     * Variants whose Java code runs on the OpenCV plugin runtime (Paddle OCR on ONNX Runtime) also package
+     * the OpenCV plugin artifact, so the packaged application records and loads that runtime.
+     */
+    private fun withRequiredOpenCvRuntime(
+        context: Context,
+        artifacts: List<SelectedPluginArtifact>,
+        cancelSignal: AtomicBoolean?,
+        progressListener: ((ApkBuildProgress) -> Unit)?,
+    ): List<SelectedPluginArtifact> {
+        val dependent = artifacts.firstOrNull { it.variant.requiresOpenCvPluginRuntime } ?: return artifacts
+        if (artifacts.any { it.library == ApkBuildLibrary.OPENCV }) {
+            return artifacts
+        }
+        val openCv = ApkBuildLibrary.OPENCV
+        notifyProgress(progressListener, "Resolving plugin artifacts", "${openCv.label} (${dependent.library.label})")
+        val (serviceInfo, variant) = try {
+            selectPluginServiceOrThrow(context, openCv, openCv.requirePlugin(), cancelSignal, progressListener)
+        } catch (e: IOException) {
+            throw IOException(context.getString(R.string.error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin, e.message.orEmpty()), e)
+        }
+        notifyProgress(progressListener, "Selected plugin", "${openCv.label}: ${serviceInfo.packageName} (${variant.variant.orEmpty()})")
+        return artifacts + SelectedPluginArtifact(openCv, serviceInfo, variant)
     }
 
     private fun selectPluginServiceOrThrow(
@@ -1194,7 +1220,7 @@ object RemoteApkBuildRequestPreparer {
         }
 
         if (lib == ApkBuildLibrary.PADDLE_OCR) {
-            // D10: packaged applications only run the embedded PP-OCRv3 (Paddle Lite) engine.
+            // D10: packaged applications only run the embedded PP-OCRv3 engines (ONNX Runtime or Paddle Lite).
             throw IOException(context.getString(R.string.error_apk_paddle_ocr_requires_pp_ocrv3_plugin))
         }
         val variantList = plugin.variants.joinToString("/") { it.variant.orEmpty() }
@@ -1229,9 +1255,47 @@ object RemoteApkBuildRequestPreparer {
                 null
             }
                 ?: return@mapNotNull null
-            resolvePluginVariant(plugin, info, service)?.let { variant -> service to variant }
+            resolvePluginVariant(plugin, info, service)
+                ?.let { variant -> resolveVariantByPackagedAssets(context, plugin, service, variant) }
+                ?.let { variant -> service to variant }
         }
         return ApkBuildLibraryCatalog.selectBestPluginVariantCandidate(candidates, plugin.variants)
+    }
+
+    /**
+     * An older release may report a variant whose payload it does not carry: Paddle OCR PP-OCRv3 1.0.x
+     * reports "v3" under the package that the ONNX Runtime release took over, yet ships the Paddle Lite
+     * assets. The variant then follows the required assets the plugin APK actually contains.
+     */
+    private fun resolveVariantByPackagedAssets(
+        context: Context,
+        plugin: ApkPluginLibrary,
+        serviceInfo: ServiceInfo,
+        matched: ApkPluginLibraryVariant,
+    ): ApkPluginLibraryVariant {
+        if (plugin.variants.size < 2) {
+            return matched
+        }
+        val apkPaths = try {
+            installedCode(
+                context,
+                serviceInfo.packageName,
+                PackagedNativeLibraryPolicy.Source(serviceInfo.packageName, serviceInfo.packageName),
+            ).apkPaths
+        } catch (_: Throwable) {
+            return matched
+        }
+        val entryNames = apkPaths.flatMap { apkPath ->
+            runCatching { ZipFile(apkPath).use { apk -> apk.entries().toList().map { it.name.replace('\\', '/') } } }.getOrDefault(emptyList())
+        }
+        fun ApkPluginLibraryVariant.hasRequiredAssets(): Boolean = assetsToInclude.first.all { prefix ->
+            val zipPrefix = toAssetZipPrefix(prefix)
+            entryNames.any { name -> name == zipPrefix || name.startsWith("$zipPrefix/") }
+        }
+        if (matched.hasRequiredAssets()) {
+            return matched
+        }
+        return plugin.variants.firstOrNull { it != matched && it.assetsToInclude.first.isNotEmpty() && it.hasRequiredAssets() } ?: matched
     }
 
     private fun resolvePluginVariant(

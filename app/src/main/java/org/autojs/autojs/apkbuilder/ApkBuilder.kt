@@ -442,12 +442,14 @@ constructor(
             infos: List<Pair<T, PluginLibVariant>>,
             supportedVariants: List<PluginLibVariant>,
         ): Pair<T, PluginLibVariant>? {
-            val supportedVariantKeys = supportedVariants
-                .map { it.variant.normalizedPluginVariantKey() }
-                .toSet()
+            // Same order as ApkBuildLibraryCatalog.selectBestPluginVariantCandidate.
+            val supportedVariantOrder = with(ApkBuildLibraryCatalog) { supportedVariants.supportedVariantOrder { it.variant } }
             return infos
-                .filter { (_, info) -> info.variant.normalizedPluginVariantKey() in supportedVariantKeys }
-                .maxByOrNull { (_, info) -> info.variant.pluginVariantNumber() }
+                .filter { (_, info) -> info.variant.normalizedPluginVariantKey() in supportedVariantOrder }
+                .maxWithOrNull(
+                    compareBy<Pair<T, PluginLibVariant>> { (_, info) -> info.variant.pluginVariantNumber() }
+                        .thenByDescending { (_, info) -> supportedVariantOrder.getValue(info.variant.normalizedPluginVariantKey()) }
+                )
                 ?: infos.firstOrNull()
         }
 

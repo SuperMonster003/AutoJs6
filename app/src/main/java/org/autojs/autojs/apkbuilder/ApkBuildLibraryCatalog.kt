@@ -113,11 +113,28 @@ enum class ApkBuildLibrary(
             onServiceConnected = { binder: IBinder ->
                 IOcrPlugin.Stub.asInterface(binder).info
             },
-            // Packaged applications run the embedded Paddle Lite engine only. PP-OCRv4 / v5 / v6
-            // plugins use ONNX pipelines that exist in their own processes, so they are not packaged.
+            // Packaged applications run an embedded PP-OCRv3 engine: the ONNX Runtime plugin (2.0.0+,
+            // variant "v3", every language flavor) comes first, the Paddle Lite plugin ("v3-paddle-lite")
+            // second, and the embedded engine picks its runtime from the packaged assets. PP-OCRv4 / v5 / v6
+            // plugins keep their ONNX pipelines in their own processes, so they are not packaged.
             variants = listOf(
                 ApkPluginLibraryVariant(
                     variant = "v3",
+                    assetsToInclude = listOf(
+                        "assets/models/ppocrv3/",
+                    ) to listOf(
+                        "assets/models/ppocrv3-slim/",
+                    ),
+                    libsToInclude = listOf(
+                        "libonnxruntime.so",
+                        "libonnxruntime4j_jni.so",
+                        "libc++_shared.so",
+                    ),
+                    neededOnlyLibsToInclude = listOf(OpenCvPluginContract.NATIVE_LIBRARY_FILE_NAME),
+                    requiresOpenCvPluginRuntime = true,
+                ),
+                ApkPluginLibraryVariant(
+                    variant = "v3-paddle-lite",
                     assetsToInclude = listOf(
                         "assets/labels/ppocr_keys_v1.txt",
                         "assets/models/ocr_v3_for_cpu/",
@@ -324,6 +341,11 @@ data class ApkPluginLibraryVariant(
      * private static OpenCV and need no such file (opencv-ocr-runtime-decoupling-roadmap.md, D12).
      */
     val neededOnlyLibsToInclude: List<String> = emptyList(),
+    /**
+     * The variant's Java code loads OpenCV through the OpenCV plugin runtime, so the packager adds the
+     * OpenCV plugin artifact even when the project does not select OpenCV (ONNX Runtime Paddle OCR).
+     */
+    val requiresOpenCvPluginRuntime: Boolean = false,
 )
 
 object ApkBuildLibraryCatalog {
@@ -334,13 +356,25 @@ object ApkBuildLibraryCatalog {
         infos: List<Pair<T, ApkPluginLibraryVariant>>,
         supportedVariants: List<ApkPluginLibraryVariant>,
     ): Pair<T, ApkPluginLibraryVariant>? {
-        val supportedVariantKeys = supportedVariants
-            .map { it.variant.normalizedPluginVariantKey() }
-            .toSet()
+        // The higher variant number wins (Rapid OCR pp-ocrv6 over pp-ocrv3); equal numbers follow the
+        // supported list order (Paddle OCR v3 on ONNX Runtime before v3-paddle-lite).
+        val supportedVariantOrder = supportedVariants.supportedVariantOrder { it.variant }
         return infos
-            .filter { (_, info) -> info.variant.normalizedPluginVariantKey() in supportedVariantKeys }
-            .maxByOrNull { (_, info) -> info.variant.pluginVariantNumber() }
+            .filter { (_, info) -> info.variant.normalizedPluginVariantKey() in supportedVariantOrder }
+            .maxWithOrNull(
+                compareBy<Pair<T, ApkPluginLibraryVariant>> { (_, info) -> info.variant.pluginVariantNumber() }
+                    .thenByDescending { (_, info) -> supportedVariantOrder.getValue(info.variant.normalizedPluginVariantKey()) }
+            )
             ?: infos.firstOrNull()
+    }
+
+    internal fun <V> List<V>.supportedVariantOrder(variantOf: (V) -> String?): Map<String?, Int> {
+        val order = LinkedHashMap<String?, Int>()
+        forEachIndexed { index, variant ->
+            val key = variantOf(variant).normalizedPluginVariantKey()
+            if (key !in order) order[key] = index
+        }
+        return order
     }
 
     private fun String?.normalizedPluginVariantKey(): String? {

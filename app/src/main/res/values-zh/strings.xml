@@ -321,6 +321,7 @@
     <string name="error_apk_native_cxx_runtime_too_old">%1$s (来自 %2$s) 需要比 %3$s 提供的 libc++_shared.so 更新的 C++ 运行时. 缺少 %4$d 个符号, 例如 %5$s. 请升级提供旧版运行时的插件.</string>
     <string name="error_apk_native_library_conflict">原生库 %1$s 在 %2$s 与 %3$s 中的内容不同. 打包 APK 只能包含其中一份. 请升级其中一个插件, 或取消勾选其中一个库.</string>
     <string name="error_apk_native_opencv_runtime_conflict">%2$s 自带的 %1$s 与 OpenCV 插件提供的不同. 请将 %2$s 升级到私有链接 OpenCV 的版本, 或取消勾选其中一个库.</string>
+    <string name="error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin">打包 Paddle OCR (ONNX Runtime) 还需要 OpenCV 插件提供原生运行库. 请安装并启用 OpenCV 插件后重试. (%1$s)</string>
     <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">打包应用仅支持 Paddle OCR (PP-OCRv3) 插件. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 插件只能在 AutoJs6 中使用. 请安装并启用 PP-OCRv3 插件后重试.</string>
     <string name="error_app_not_installed">应用未安装</string>
     <string name="error_app_not_installed_with_name">应用未安装: \"%s\"</string>

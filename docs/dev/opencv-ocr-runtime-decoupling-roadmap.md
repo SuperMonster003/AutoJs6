@@ -81,7 +81,7 @@
 | D7 | 来源记录不再引用 OpenCV 插件 | OCR 仓库的来源清单直接记录 OpenCV 上游标签与提交, NDK 版本, 构建选项与逐 ABI 哈希. 历史更新日志中 "来源: AutoJs6-Plugin-OpenCV" 等条目作为历史事实保留. |
 | D8 | OpenCV 插件仓库无需改代码 | 本 Roadmap 不修改 OpenCV 插件的发现契约, 原生库或发布流程. |
 | D9 | 旧版 OCR 插件按字节比对 (附录 A Q1 -> a) | 未解耦的旧版 OCR 插件与 OpenCV 同时勾选时, 两份 `libopencv_java4.so` 字节相同则只保留一份; 内容不同则终止打包, 错误信息列出两个来源并提示升级 OCR 插件. 由 P1.1 的通用同名冲突检测实现. |
-| D10 | 打包 APK 不支持 Paddle OCR v4-v6 (附录 A Q2 -> a) | 打包器的 Paddle OCR 只接受 v3 插件, 不再复制 v4-v6 的模型, ONNX Runtime 与 OpenCV. 只装有 v4-v6 时给出可操作的错误. v4-v6 继续在宿主应用中经 Binder 使用 (D6). |
+| D10 | 打包 APK 不支持 Paddle OCR v4-v6 (附录 A Q2 -> a) | 打包器的 Paddle OCR 只接受 v3 插件, 不再复制 v4-v6 的模型, ONNX Runtime 与 OpenCV. 只装有 v4-v6 时给出可操作的错误. v4-v6 继续在宿主应用中经 Binder 使用 (D6). (2026-10-30 加注: PP-OCRv3 插件 2.0.0 改为 ONNX Runtime 流水线, 打包目录的 Paddle OCR 改为两个 v3 变体, ONNX Runtime 版 `v3` 优先, Paddle Lite 版 `v3-paddle-lite` 其次; 打包 ONNX Runtime 版时一并带入 OpenCV 插件的运行时. v4-v6 仍不打包, 错误文案不变. 见 AutoJs6-Plugin-Paddle-OCR-PP-OCRv3 ROADMAP D8 / D21) |
 | D11 | 私有 OpenCV 取自官方 SDK 静态库 (附录 A Q3 -> a) | OCR 引擎库静态链接 OpenCV 官方 Android SDK 发布包中的静态库 (TBB 并行后端, 无 OpenMP 引用). 各 OCR 仓库自带下载与 SHA-256 校验步骤, 来源清单记录上游版本, 下载地址与哈希. |
 | D12 | 不新增私有 OpenCV 声明 (附录 A Q4 -> 按产物判断) | 打包器直接依据插件 APK 的实际内容区分新旧插件: 是否携带 `libopencv_java4.so`, 引擎库是否 NEEDED 它. 插件端无需新增 meta-data 或 capability. |
 

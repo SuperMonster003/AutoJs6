@@ -22,6 +22,7 @@ class PackagedNativeLibraryPolicyTest {
     private val openCv = Source("OpenCV", "io.github.supermonster003.autojs6.plugin.opencv", "1.1.4")
     private val paddle = Source("Paddle OCR", "io.github.supermonster003.autojs6.plugin.paddleocr.v3", "1.0.5")
     private val rapid = Source("Rapid OCR", "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv6", "1.0.6")
+    private val paddleOnnx = Source("Paddle OCR", "io.github.supermonster003.autojs6.plugin.paddleocr.v3", "2.0.0")
 
     private val elf = HashMap<File, ElfDynamicInfo>()
 
@@ -67,6 +68,31 @@ class PackagedNativeLibraryPolicyTest {
             assertEquals("lib/arm64-v8a/libopencv_java4.so", conflict.entryName)
             assertEquals(openCv, conflict.first)
             assertEquals(rapid, conflict.second)
+        }
+    }
+
+    @Test
+    fun onnxRuntimeSharedByRapidOcrAndPaddleOcrIsPackagedOnce() {
+        // Both plugins take libonnxruntime.so from the same onnxruntime-android release; only the
+        // ONNX Runtime Paddle OCR plugin ships the Java binding libonnxruntime4j_jni.so.
+        val fromRapid = candidate("libonnxruntime.so", rapid, "ort")
+        val fromPaddle = candidate("libonnxruntime.so", paddleOnnx, "ort")
+        val jni = candidate("libonnxruntime4j_jni.so", paddleOnnx, "jni")
+
+        val selected = resolve(fromRapid, fromPaddle, jni).sortedBy { it.entryName }
+
+        assertEquals(listOf("lib/arm64-v8a/libonnxruntime.so", "lib/arm64-v8a/libonnxruntime4j_jni.so"), selected.map { it.entryName })
+        assertEquals(listOf(rapid, paddleOnnx), selected.first().sources)
+        assertEquals(listOf(paddleOnnx), selected.last().sources)
+    }
+
+    @Test
+    fun differentOnnxRuntimeBuildsStopTheBuild() {
+        try {
+            resolve(candidate("libonnxruntime.so", rapid, "ort-a"), candidate("libonnxruntime.so", paddleOnnx, "ort-b"))
+            fail("Expected a conflict")
+        } catch (conflict: Failure.Conflict) {
+            assertEquals("lib/arm64-v8a/libonnxruntime.so", conflict.entryName)
         }
     }
 
