@@ -69,7 +69,7 @@ class BunAutomationDeviceTest {
             eq((await rejects(()=>a.swipe(1,1,2,2,100))).code,'NOT_GRANTED','Gesture grant');
             async function raw(cap,body){const response=await fetch('http://autojs6/v1/'+cap,{unix:process.env.AUTOJS6_HOST_BRIDGE_SOCKET,method:'POST',body:JSON.stringify(body)});return response.status;}
             eq(await raw('accessibility.control',{action:'start',method:'gesture',args:[100,[[1,1],[2,2]]]}),403,'Raw gesture');
-            eq(await raw('accessibility.control',{action:'start',method:'dump',args:[]}),400,'Internal diagnostics');
+            eq(await raw('accessibility.control',{action:'start',method:'inspectNode',args:[]}),400,'Internal diagnostics');
             eq(await raw('app.control',{action:'start',method:'readDoc',args:['runtimeApis']}),400,'Internal app route');
             eq(await raw('app.control',{action:'start',method:3,args:[]}),400,'Invalid method type');
             eq(await raw('clipboard.control',{action:'start',method:'getText',args:'invalid'}),400,'Invalid argument list');

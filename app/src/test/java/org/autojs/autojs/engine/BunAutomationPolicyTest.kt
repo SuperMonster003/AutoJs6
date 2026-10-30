@@ -24,12 +24,13 @@ class BunAutomationPolicyTest {
         assertEquals(listOf("clipboard"),BunAutomationBridge.nodeCapabilities(listOf(Grants.CLIPBOARD_CONTROL)))
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
-        assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
+        assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
         // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 and plugin tools 3 (P4.1b),
         // media playback 6 and the media library scan 1 (P4.1c), Rhino's device members 30 (keepAwake / cancelVibration and the 28
-        // RuntimeDeviceBridge routes, P3.1c / P4.1c), the automation event sources 6, ocr 3, barcode 4 and yolo 3 (P4.4; automator /
-        // auto are second modules of accessibility.control).
-        assertEquals(311,BunAutomationBridge.methods.values.sumOf{it.size})
+        // RuntimeDeviceBridge routes, P3.1c / P4.1c), the automation event sources 6, ocr 3, barcode 4, yolo 3, the accessibility
+        // screenshot of automator.captureScreen and auto.dump / explain (P4.4, Q185 (a); automator / auto are second modules of
+        // accessibility.control).
+        assertEquals(314,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -200,6 +201,11 @@ class BunAutomationPolicyTest {
         }
         // Without accessibility.control the service grant opens nothing.
         assertEquals(emptyList<String>(), BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_SERVICE)))
+        // automator.captureScreen (the service's screenshot) also needs screen.capture; the broker adds image.
+        val capture = NodeBridgePermissionManifest.requiredCapabilitiesFor("accessibility", "captureScreenImage", "[]")
+        assertEquals(listOf("screen_capture"), NodeBridgePermissionManifest.missingCapabilities(control + NodeBridgePermissionManifest.IMAGE, capture))
+        assertEquals(emptyList<String>(), NodeBridgePermissionManifest.missingCapabilities(
+            BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL, Grants.SCREEN_CAPTURE)) + NodeBridgePermissionManifest.IMAGE, capture))
     }
 
     // api-coverage P4.4: the automation event sources ride events.observe; accessibility events need accessibility.control, touches

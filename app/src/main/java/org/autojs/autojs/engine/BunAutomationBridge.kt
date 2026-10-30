@@ -234,6 +234,8 @@ internal class BunAutomationBridge(
                 if (Grants.ACCESSIBILITY_GESTURE in grants) add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE)
                 // The service management of auto (Q182 (a)): never implied by accessibility.control.
                 if (Grants.ACCESSIBILITY_SERVICE in grants) add(NodeBridgePermissionManifest.ACCESSIBILITY_SERVICE)
+                // automator.captureScreen, the service's own screenshot (Android 11+), is a screen capture as Node has it.
+                if (Grants.SCREEN_CAPTURE in grants) add(NodeBridgePermissionManifest.SCREEN_CAPTURE)
             }
             if (Grants.CLIPBOARD_CONTROL in grants) add(NodeBridgePermissionManifest.CLIPBOARD)
             if (Grants.STORAGE_CONTROL in grants) add(NodeBridgePermissionManifest.STORAGE)
@@ -302,7 +304,9 @@ internal class BunAutomationBridge(
             Grants.NOTIFICATIONS_POST to setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings"),
             Grants.APP_CONTROL to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo",
                 "resolvePackage", "getUserProfiles", "getInstalledPackages", "getApkInfo", "getAppByAlias", "sendLocalBroadcastSync"),
-            Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "flowProbe", "flowForeground", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture"),
+            // captureScreenImage (automator.captureScreen) and dump / explain (auto.dump / explain, api-coverage P4.4, Q185 (a))
+            // serve Rhino's members; the other agent diagnostics stay internal.
+            Grants.ACCESSIBILITY_CONTROL to setOf("isEnabled", "ensureEnabled", "click", "back", "home", "recentApps", "findByText", "clickText", "findOne", "findAll", "flowProbe", "flowForeground", "longClick", "setText", "scrollForward", "scrollBackward", "swipe", "gesture", "captureScreenImage", "dump", "explain"),
             Grants.CLIPBOARD_CONTROL to setOf("getText", "setText", "hasText"),
             Grants.STORAGE_CONTROL to setOf("get", "put", "remove", "clear", "keys", "contains"),
             Grants.SHELL_CONTROL to setOf("exec", "spawn", "open", "drain", "write", "closeInput", "kill", "close", "getAccess", "requestShizukuPermission"),
