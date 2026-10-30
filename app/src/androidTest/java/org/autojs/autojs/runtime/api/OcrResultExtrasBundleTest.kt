@@ -3,10 +3,13 @@ package org.autojs.autojs.runtime.api
 import android.graphics.Rect
 import android.os.Bundle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.autojs.autojs.engine.toOcrResultsJson
+import org.json.JSONArray
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.autojs.plugin.paddle.ocr.api.OcrResult as PluginOcrResult
 
 /**
  * The Bundle side of `OcrResult.extras`: top-level values, nested bundles, values of unsupported types.
@@ -49,6 +52,30 @@ class OcrResultExtrasBundleTest {
     fun absentAndEmptyBundlesGiveEmptyObjects() {
         assertTrue(OcrResultExtras.toScriptObject(null as Bundle?).isEmpty())
         assertTrue(OcrResultExtras.toScriptObject(Bundle()).isEmpty())
+    }
+
+    @Test
+    fun theBridgeSendsTheConvertedBundleWithTheRegionOffset() {
+        val result = PluginOcrResult().apply {
+            text = "text"
+            confidence = 0.5f
+            bounds = Rect(1, 2, 3, 4)
+            extras = Bundle().apply {
+                putFloatArray("quad", floatArrayOf(1f, 2f, 3f, 2f, 3f, 4f, 1f, 4f))
+                putString("executionProvider", "nnapi")
+                putBundle("nested", Bundle().apply { putInt("value", 1) })
+                putParcelable("rect", Rect(1, 2, 3, 4))
+            }
+        }
+        val item = JSONArray(listOf(result).toOcrResultsJson(10, 20)).getJSONObject(0)
+
+        assertEquals(11, item.getJSONObject("bounds").getInt("left"))
+        val extras = item.getJSONObject("extras")
+        assertEquals(setOf("executionProvider", "nested", "quad"), extras.keys().asSequence().toSet())
+        val quad = extras.getJSONArray("quad")
+        assertEquals(listOf(11.0, 22.0, 13.0, 22.0, 13.0, 24.0, 11.0, 24.0), List(quad.length(), quad::getDouble))
+        assertEquals("nnapi", extras.getString("executionProvider"))
+        assertEquals(1, extras.getJSONObject("nested").getInt("value"))
     }
 
 }

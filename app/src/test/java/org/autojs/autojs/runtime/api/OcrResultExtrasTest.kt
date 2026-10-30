@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api
 
 import android.graphics.Rect
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -134,6 +135,55 @@ class OcrResultExtrasTest {
         assertNumbers(listOf(11.0, 22.0, 13.0, 24.0), extras["quad"])
         assertEquals("cpu", extras["executionProvider"])
         OcrResultExtras.offsetQuad(scriptObject("other" to 1), 10, 20)
+    }
+
+    @Test
+    fun jsonFollowsTheScriptObjectRules() {
+        val json = OcrResultExtras.toJson(
+            normalize(
+                "executionProvider" to "cpu",
+                "flag" to true,
+                "count" to 3,
+                "ratio" to 0.5f,
+                "nothing" to null,
+                "nested" to mapOf("items" to listOf(1, "a", null)),
+                "dropped" to Any(),
+            ),
+            0,
+            0,
+        )
+        assertEquals(setOf("count", "executionProvider", "flag", "nested", "nothing", "ratio"), json.keys().asSequence().toSet())
+        assertEquals("cpu", json.getString("executionProvider"))
+        assertTrue(json.getBoolean("flag"))
+        assertEquals(3, json.getInt("count"))
+        assertEquals(0.5, json.getDouble("ratio"), 0.0)
+        assertTrue(json.isNull("nothing"))
+        val items = json.getJSONObject("nested").getJSONArray("items")
+        assertEquals(3, items.length())
+        assertEquals("a", items.getString(1))
+        assertTrue(items.isNull(2))
+    }
+
+    @Test
+    fun jsonQuadFollowsTheRegionOffset() {
+        val json = OcrResultExtras.toJson(normalize("quad" to floatArrayOf(1f, 2f, 3f, 4f), "executionProvider" to "cpu"), 10, 20)
+        val quad = json.getJSONArray("quad")
+        assertEquals(listOf(11.0, 22.0, 13.0, 24.0), List(quad.length(), quad::getDouble))
+        assertEquals("cpu", json.getString("executionProvider"))
+        assertEquals("other", OcrResultExtras.toJson(normalize("other" to "other"), 10, 20).getString("other"))
+    }
+
+    @Test
+    fun jsonHasNoNonFiniteNumbers() {
+        val json = OcrResultExtras.toJson(normalize("nan" to Double.NaN, "items" to doubleArrayOf(1.0, Double.POSITIVE_INFINITY)), 0, 0)
+        assertTrue(json.isNull("nan"))
+        assertTrue(json.getJSONArray("items").isNull(1))
+        assertTrue(JSONObject(json.toString()).isNull("nan"))
+    }
+
+    @Test
+    fun emptyExtrasGiveAnEmptyJsonObject() {
+        assertEquals("{}", OcrResultExtras.toJson(emptyMap(), 10, 20).toString())
     }
 
     @Test

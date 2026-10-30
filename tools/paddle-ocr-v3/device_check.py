@@ -3,9 +3,13 @@ AutoJs6-Plugin-Paddle-OCR-PP-OCRv3, ROADMAP.md P2.2 and P3.5).
 
     py -3 -I tools/paddle-ocr-v3/device_check.py coexistence -s SERIAL [--install APK ...] [--screenshot PNG]
     py -3 -I tools/paddle-ocr-v3/device_check.py packaging -s SERIAL --group GROUP [--install APK ...] [--uninstall PKG ...]
+    py -3 -I tools/paddle-ocr-v3/device_check.py extras -s SERIAL [--runtime rhino|node|bun]
 
 extras (Q20 (c)), with both plugins and Rapid OCR installed: OcrResult.extras of each path (quad, executionProvider,
-  region offset, mergeLine, Paddle Lite, Rapid) and profile selection through ocr.detect.
+  region offset, mergeLine, Paddle Lite, Rapid) and profile selection through ocr.detect. --runtime node / bun (Q26 (b))
+  runs the same paths in a script of that runtime (ocr_runs_runtime.js), needs its plugin and has no mergeLine; the
+  extras are frozen there, a Worker repeats the default run, and useOpenCL must reach NNAPI. Bun's ocr.control grant is
+  switched on for the run and restored afterwards.
 
 coexistence (P2.2), with Paddle Lite 1.1.0 and the ONNX Runtime 2.0.0 plugin installed side by side:
   installed   both packages and their versions
@@ -34,6 +38,7 @@ Prints one line per check with PASS / FAIL / INFO and key values; recognized tex
 the receipts under --out. Temporary files on the device are removed afterwards.
 """
 import argparse
+import base64
 import difflib
 import hashlib
 import json
@@ -44,6 +49,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 import zipfile
 
 HOST = "org.autojs.autojs6"
@@ -66,6 +72,7 @@ RESULT = "paddle-ocr-v3-runs.json"
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNS_SCRIPT = Path(__file__).with_name("ocr_runs.js")
+RUNTIME_SCRIPT = Path(__file__).with_name("ocr_runs_runtime.js")
 SAMPLES = ROOT.parent / "AutoJs6-Plugin-Paddle-OCR-PP-OCRv3" / "app" / "src" / "androidTest" / "assets" / "samples"
 
 SELECT = re.compile(r"^\s*(\d+)\.(\d+)\s.*select: (\S+) \(variant ([^)]*)\) for (.*)$", re.M)
@@ -246,8 +253,41 @@ def coexistence(args, device, samples, expected):
     return ok
 
 
+def runtime_entries(args, runs, samples):
+    """The entries of [runs] in a Node.js or Bun script by run id, with its Worker repeat of the default run as "worker"."""
+    sys.path.insert(0, str(ROOT / "tools" / "api-coverage"))
+    import device_bun_js_tools as runtimes
+
+    runtimes.DEVICE_DIR = "/sdcard/Download/aj6-paddle-ocr-v3"
+    run = uuid.uuid4().hex[:8]
+    config = {"image": base64.b64encode((samples / "zh.png").read_bytes()).decode(), "runs": runs, "worker": "default"}
+    script = ('"nodejs";\n' if args.runtime == "node" else '"bun";\n') \
+        + f"const AJ6_RUNTIME = '{args.runtime}', AJ6_RUN = '{run}', AJ6_CONFIG = {json.dumps(config)};\n" \
+        + runtimes.EMIT_JS + RUNTIME_SCRIPT.read_text("utf-8")
+    # A Node script declares its bridge capabilities in the project.json next to it.
+    project = {"name": "aj6-paddle-ocr-v3", "type": "node", "main": "main.js", "node": {"permissions": ["image", "ocr"]}}
+    with tempfile.TemporaryDirectory() as state:
+        grant = argparse.Namespace(serial=args.serial, state=Path(state), only=["ocr.control"], set="on")
+        if args.runtime == "bun":
+            runtimes.grant(grant)
+        try:
+            if args.runtime == "node":
+                results = runtimes.run_script(args.serial, project["main"], script, run, args.timeout,
+                                              {"project.json": json.dumps(project).encode()})
+            else:
+                results = runtimes.run_script(args.serial, f"paddle_ocr_v3_bun_{run}.js", script, run, args.timeout)
+        finally:
+            if args.runtime == "bun":
+                grant.set = "restore"
+                runtimes.grant(grant)
+    entries = {entry["id"]: entry for index, entry in results.items() if index >= 0}
+    for run_id in [item["id"] for item in runs] + ["worker"]:
+        entries.setdefault(run_id, {"error": results.get(-2, {}).get("error", f"no result within {args.timeout} s")})
+    return entries
+
+
 def extras(args, device, samples, expected):
-    """OcrResult.extras and profile selection from a script (roadmap Q20 (c))."""
+    """OcrResult.extras and profile selection from a script (roadmap Q20 (c), Node.js and Bun Q26 (b))."""
     zh = {"useSlim": False}
     runs = [
         {"id": "default", "file": "zh.png", "options": {**zh, "variant": "v3"}, "detect": "paddle"},
@@ -259,13 +299,17 @@ def extras(args, device, samples, expected):
         {"id": "auto profile zh", "file": "zh.png", "options": {**zh, "engine": "paddle-ocr", "profile": "zh"}, "detect": "auto"},
         {"id": "auto profile missing", "file": "zh.png", "options": {**zh, "engine": "paddle-ocr", "profile": "no-such"}, "detect": "auto"},
     ]
-    for run in runs:
-        run["repeat"] = 1
-    config = {"dir": WORK_DIR, "output": RESULT, "priority": False, "runs": runs}
-    result = run_script(device, config, samples, args.timeout)
-    if result is None or "error" in result:
-        return report("host script", False, (result or {}).get("error", f"no result within {args.timeout} s"))
-    entries = {entry["id"]: entry for entry in result["runs"]}
+    rhino = args.runtime == "rhino"
+    if rhino:
+        for run in runs:
+            run["repeat"] = 1
+        config = {"dir": WORK_DIR, "output": RESULT, "priority": False, "runs": runs}
+        result = run_script(device, config, samples, args.timeout)
+        if result is None or "error" in result:
+            return report("host script", False, (result or {}).get("error", f"no result within {args.timeout} s"))
+        entries = {entry["id"]: entry for entry in result["runs"]}
+    else:
+        entries = runtime_entries(args, [run for run in runs if run["id"] != "mergeLine"], samples)
 
     def items(run_id):
         return entries[run_id].get("results") or []
@@ -281,19 +325,27 @@ def extras(args, device, samples, expected):
         return all(left - 1 <= x <= right + 1 for x in item["quad"][0::2]) and             all(top - 1 <= y <= bottom + 1 for y in item["quad"][1::2])
 
     ok = report("default quad and provider", quads_valid("default") and provider("default") == ["cpu"],
-                f"{len(items('default'))} results, quad {len((items('default') or [{}])[0].get('quad') or [])}, {provider('default')}")
-    ok &= report("useOpenCL provider", provider("useOpenCL") in (["nnapi"], ["cpu"]), provider("useOpenCL"))
+                f"{len(items('default'))} results, quad {len((items('default') or [{}])[0].get('quad') or [])}, {provider('default')}"
+                + (f", {entries['default']['error'][:300]}" if "error" in entries["default"] else ""))
+    ok &= report("useOpenCL provider", provider("useOpenCL") in (["nnapi"], ["cpu"]) if rhino else provider("useOpenCL") == ["nnapi"],
+                 provider("useOpenCL"))
     ok &= report("region quad follows bounds", quads_valid("region") and all(map(in_bounds, items("region"))),
                  f"{len(items('region'))} results, first bounds {(items('region') or [{}])[0].get('bounds')}")
-    multi = [item for item in items("mergeLine") if item["quad"] is None]
-    ok &= report("mergeLine keeps provider", provider("mergeLine") == ["cpu"],
-                 f"{len(items('mergeLine'))} lines, {len(multi)} merged from several parts, {provider('mergeLine')}")
+    if rhino:
+        multi = [item for item in items("mergeLine") if item["quad"] is None]
+        ok &= report("mergeLine keeps provider", provider("mergeLine") == ["cpu"],
+                     f"{len(items('mergeLine'))} lines, {len(multi)} merged from several parts, {provider('mergeLine')}")
+    else:
+        ok &= report("extras frozen", all(item["frozen"] for item in items("default") + items("region")),
+                     f"{len(items('default')) + len(items('region'))} results")
+        ok &= report("worker quad and provider", quads_valid("worker") and provider("worker") == ["cpu"],
+                     f"{len(items('worker'))} results, {provider('worker')}" + (f", {entries['worker']['error'][:300]}" if "error" in entries["worker"] else ""))
     ok &= report("paddle lite object", "results" in entries["paddle lite"],
                  entries["paddle lite"].get("error", str(sorted({k for item in items("paddle lite") for k in item["keys"]}))))
     ok &= report("rapid object", "results" in entries["rapid"],
                  entries["rapid"].get("error", str(sorted({k for item in items("rapid") for k in item["keys"]}))))
     ok &= report("auto profile match", bool(items("auto profile zh")), f"{len(items('auto profile zh'))} results")
-    ok &= report("auto profile miss", "error" in entries["auto profile missing"],
+    ok &= report("auto profile miss", "no-such" in entries["auto profile missing"].get("error", ""),
                  entries["auto profile missing"].get("error", "no error")[:120])
     return ok
 
@@ -520,6 +572,7 @@ def main():
     parser.add_argument("--install", action="append", default=[], help="APK installed first (repeatable)")
     parser.add_argument("--uninstall", action="append", default=[], help="package uninstalled first (repeatable, packaging)")
     parser.add_argument("--group", choices=sorted(GROUPS), help="packaging group")
+    parser.add_argument("--runtime", choices=("rhino", "node", "bun"), default="rhino", help="extras: the script runtime")
     parser.add_argument("--abi", help="packaged ABI, defaults to the primary device ABI")
     parser.add_argument("--screenshot", type=Path, help="coexistence: save a Plugin Center screenshot")
     parser.add_argument("--min-similarity", type=float, default=0.8)

@@ -85,6 +85,7 @@ import org.autojs.autojs.core.pref.SettingsJson
 import org.autojs.autojs.core.pref.optString
 import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.inrt.InrtToastVisibilityGuard
+import org.autojs.autojs.runtime.api.OcrResultExtras
 import org.autojs.autojs.runtime.api.ScriptToast
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.IntentUtils
@@ -3016,6 +3017,7 @@ class AndroidNodeBridgeCapabilityProvider(
             extras.putString(PaddleOcrOptionExtraKeys.IMAGE_FORMAT, it)
         }
         return OcrOptions().apply {
+            this.useOpenCL = options.optBoolean("useOpenCL", false)
             this.extras = extras.takeIf { !it.isEmpty } ?: Bundle()
         }
     }
@@ -7904,7 +7906,7 @@ private class ControlledOcrDiagnostics {
     )
 }
 
-private fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
+internal fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
     val results = JSONArray()
     forEach { result ->
         val bounds = result.bounds
@@ -7921,7 +7923,7 @@ private fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int): 
                     .put("bottom", bounds.bottom + offsetY),
             )
         }
-        results.put(item)
+        results.put(item.put("extras", OcrResultExtras.toJson(result.extras, offsetX, offsetY)))
     }
     return results.toString()
 }

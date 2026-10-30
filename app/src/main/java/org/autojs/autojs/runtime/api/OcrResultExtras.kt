@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import org.autojs.autojs.util.RhinoUtils.newNativeArray
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
+import org.json.JSONArray
+import org.json.JSONObject
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
 import org.mozilla.javascript.ScriptableObject
@@ -38,6 +40,21 @@ internal object OcrResultExtras {
     }
 
     /**
+     * The extras of an engine result as the JSON object the Node.js and Bun bridge sends, with `quad` moved by the region
+     * offset. The values follow the same rules as the script object, except that JSON has no NaN or infinity, so those
+     * numbers become null.
+     *
+     * zh-CN: 引擎结果的 extras 转为 Node.js / Bun 桥发送的 JSON 对象, quad 按区域偏移量平移. 取值规则与脚本对象相同, 但 JSON 没有 NaN 和无穷大, 这些数字转为 null.
+     */
+    fun toJson(bundle: Bundle?, dx: Int, dy: Int): JSONObject = toJson(fromBundle(bundle), dx, dy)
+
+    internal fun toJson(values: Map<String, Any?>, dx: Int, dy: Int): JSONObject {
+        val quad = values[KEY_QUAD] as? List<*> ?: return toJsonValue(values) as JSONObject
+        val moved = quad.mapIndexed { index, value -> if (value is Number) moved(value, index, dx, dy) else value }
+        return toJsonValue(values + (KEY_QUAD to moved)) as JSONObject
+    }
+
+    /**
      * The extras of a line merged from [parts]: the keys whose values are equal in every part, so per-segment values
      * such as `quad` leave and per-call values such as `executionProvider` stay.
      *
@@ -64,9 +81,11 @@ internal object OcrResultExtras {
         val quad = extras[KEY_QUAD] as? NativeArray ?: return
         for (index in quad.indices) {
             val value = quad[index] as? Number ?: continue
-            quad.put(index, quad, value.toDouble() + if (index % 2 == 0) dx else dy)
+            quad.put(index, quad, moved(value, index, dx, dy))
         }
     }
+
+    private fun moved(value: Number, index: Int, dx: Int, dy: Int) = value.toDouble() + if (index % 2 == 0) dx else dy
 
     internal fun fromBundle(bundle: Bundle?): Map<String, Any?> {
         bundle ?: return emptyMap()
@@ -135,6 +154,16 @@ internal object OcrResultExtras {
     private fun toScriptValue(value: Any?): Any? = when (value) {
         is Map<*, *> -> toScriptObject(value as Map<String, Any?>)
         is List<*> -> newNativeArray(value.map(::toScriptValue).toTypedArray())
+        else -> value
+    }
+
+    private fun toJsonValue(value: Any?): Any = when (value) {
+        null -> JSONObject.NULL
+        is Map<*, *> -> JSONObject().also { target ->
+            value.forEach { (key, item) -> target.put(key as String, toJsonValue(item)) }
+        }
+        is List<*> -> JSONArray().also { target -> value.forEach { target.put(toJsonValue(it)) } }
+        is Double -> value.takeIf { it.isFinite() } ?: JSONObject.NULL
         else -> value
     }
 
