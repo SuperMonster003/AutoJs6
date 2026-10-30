@@ -40,6 +40,8 @@ The 23 Bun grants: absent before, absent after. The run directory `/sdcard/Downl
 
 Device values both engines agree on: `autojs.isRootAvailable()` false with root mode AUTO_DETECT (Rhino's RootMode object in both: key, description, toString, name(), ordinal()), installer queries [true, false, true], powerManager [false, false], 5 plugin tools.
 
+The run above used the cases of Node 6c2fae29. Node a4d11a16 then made the default channel case compare each runtime's own file name (Rhino `p31b_rhino_<run>.js` through `P31B_RUN`, Node a project's `main.js`); host a5e9cb96b gives the Rhino script `P31B_RUN` and the Bun case its own single file `p31b_bun_<run>.js`. Compare again with those cases (host debug of a5e9cb96b, md5 `108550636e20ffd9e8c2848c9ce604e2`; Bun 0.21.0 (296) of d500a2d, md5 `4b4bfea9211ada6dfd25006a8cae035f`): Rhino 54 / 54, Bun main / Worker 54 / 54 each; grants and packages restored as above.
+
 Earlier runs: before the rework (host a268b1526, Bun 1383a79 with e6b4296, Node cases of 08781cee) 49 / 49 in Rhino and in each Bun thread, denied 16 / 16; the first (host 81f809d05 / Bun ef7e030) failed every Bun case while the plugin tools grants were on (the underscore IDs above); the second (host a268b1526 / Bun 1383a79) passed 48 / 49 in each thread, `global.metrics` gave 720 x 1569 against Rhino's 720 x 1650 (the window size above), fixed by Bun e6b4296.
 
 Commands (host checkout, `--state` a private directory; GRANTS and QUERY_GRANTS are the lists in the script):
