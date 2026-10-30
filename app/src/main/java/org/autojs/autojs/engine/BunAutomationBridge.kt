@@ -142,7 +142,8 @@ internal class BunAutomationBridge(
         val database = job.capability == Grants.DATABASE_CONTROL && job.method == "open"
         val shell = job.capability == Grants.SHELL_CONTROL && job.method in setOf("spawn","open")
         val sensor = job.capability == Grants.SENSORS_CONTROL && job.method == "subscribe"
-        val events = job.capability == Grants.EVENTS_OBSERVE && job.method.startsWith("observe")
+        val events = job.capability == Grants.EVENTS_OBSERVE && (job.method.startsWith("observe") || job.method == "interceptKeys")
+        val yolo = job.capability == Grants.YOLO_CONTROL && job.method == "load"
         val notification = job.capability == Grants.NOTIFICATIONS_POST && job.method == "notify"
         if (job.capability == Grants.DIALOGS_CONTROL) provider().cancelDialogRequest(job.id)
         val awake = job.capability == Grants.DEVICE_CONTROL && job.method in setOf("keepScreenOn", "keepAwake")
@@ -158,7 +159,7 @@ internal class BunAutomationBridge(
         val javaObject = job.capability == Grants.JAVA_INTEROP
         val androidObject=job.capability==Grants.ANDROID_OBJECTS && job.method in setOf("createPaint","createColorStateList")
         val task=job.capability==Grants.TASKS_CONTROL && job.method in setOf("addTimedTask","addIntentTask")
-        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject && !tts && !speech && !aiAgent && !ai && !epub && !mail && !flow) { job.future.cancel(false); return }
+        if (!database && !sensor && !shell && !events && !notification && !awake && !androidObject && !task && !javaObject && !tts && !speech && !aiAgent && !ai && !epub && !mail && !flow && !yolo) { job.future.cancel(false); return }
         // Preserve late creation replies so cancelled callers cannot strand native resources.
         job.future.whenComplete { response, _ ->
             if (response?.ok == true) runCatching {
@@ -170,6 +171,11 @@ internal class BunAutomationBridge(
                 if (speech) { provider().closeSpeechClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (tts) { provider().closeTtsClient(JSONObject(response.resultJson.orEmpty()).getString("id")); return@runCatching }
                 if (javaObject) { provider().releaseJavaResult(response.resultJson); return@runCatching }
+                if (yolo) {
+                    provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), NodeBridgeModules.YOLO, "close",
+                        JSONArray().put(JSONObject(response.resultJson.orEmpty()).getString("id")).toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.YOLO))) {}
+                    return@runCatching
+                }
                 if(androidObject || task) {
                     val value=JSONObject(response.resultJson.orEmpty())
                     provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(),if(task)NodeBridgeModules.TASKS else NodeBridgeModules.ANDROID_OBJECTS,
@@ -222,8 +228,12 @@ internal class BunAutomationBridge(
                 NodeBridgePermissionManifest.APP_SETTINGS, NodeBridgePermissionManifest.APP_ACTIVITY, NodeBridgePermissionManifest.APP_QUERY))
             if (Grants.ACCESSIBILITY_CONTROL in grants) {
                 add(NodeBridgePermissionManifest.ACCESSIBILITY)
-                if (Grants.FLOW_CONTROL in grants) add(NodeBridgePermissionManifest.KEYS)
+                // Rhino's automator global actions (api-coverage P4.4, Q183 (a)) come with accessibility.control, as the flow
+                // tools' keys did with flow.control.
+                add(NodeBridgePermissionManifest.KEYS)
                 if (Grants.ACCESSIBILITY_GESTURE in grants) add(NodeBridgePermissionManifest.ACCESSIBILITY_GESTURE)
+                // The service management of auto (Q182 (a)): never implied by accessibility.control.
+                if (Grants.ACCESSIBILITY_SERVICE in grants) add(NodeBridgePermissionManifest.ACCESSIBILITY_SERVICE)
             }
             if (Grants.CLIPBOARD_CONTROL in grants) add(NodeBridgePermissionManifest.CLIPBOARD)
             if (Grants.STORAGE_CONTROL in grants) add(NodeBridgePermissionManifest.STORAGE)
@@ -236,6 +246,13 @@ internal class BunAutomationBridge(
             if (Grants.EVENTS_NOTIFICATION in grants) add(NodeBridgePermissionManifest.EVENTS_NOTIFICATION)
             if (Grants.EVENTS_TOAST in grants) add(NodeBridgePermissionManifest.EVENTS_TOAST)
             if (Grants.EVENTS_KEY in grants) add(NodeBridgePermissionManifest.EVENTS_KEY)
+            // Touches (Root / Shizuku) and key interception (api-coverage P4.4, Q182 (a)): never implied by events.observe / events.key.
+            if (Grants.EVENTS_TOUCH in grants) add(NodeBridgePermissionManifest.EVENTS_TOUCH)
+            if (Grants.EVENTS_KEY_INTERCEPT in grants) add(NodeBridgePermissionManifest.EVENTS_KEY_INTERCEPT)
+            // Recognition (api-coverage P4.4, Q181 (a)): the image the request names is the execution's own handle.
+            if (Grants.OCR_CONTROL in grants) add(NodeBridgePermissionManifest.OCR)
+            if (Grants.BARCODE_CONTROL in grants) add(NodeBridgePermissionManifest.BARCODE)
+            if (Grants.YOLO_CONTROL in grants) add(NodeBridgePermissionManifest.YOLO)
             if (Grants.NOTIFICATIONS_POST in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS)
             if (Grants.NOTIFICATIONS_SETTINGS in grants) add(NodeBridgePermissionManifest.NOTIFICATIONS_SETTINGS)
             // The system and engines family (api-coverage P4.1b, Q136 (a)): the Bun grant of each Node capability of Q133 (b).
@@ -276,7 +293,12 @@ internal class BunAutomationBridge(
             Grants.DEVICE_CONTROL to NodeBridgeModules.deviceMethods + NodeBridgeModules.deviceRhinoControls + RuntimeDeviceBridge.methods,
             Grants.DEVICE_AUDIO to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "setAudioStreamVolume"),
             Grants.DIALOGS_CONTROL to NodeBridgeModules.dialogsMethods,
-            Grants.EVENTS_OBSERVE to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),
+            // Rhino's automation event sources (api-coverage P4.4): auto.registerEvent / stateListener (also accessibility.control),
+            // touches (events.touch), key interception (events.key and events.key.intercept) and the scripts' broadcast.
+            Grants.EVENTS_OBSERVE to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close") + NodeBridgeModules.automationEventsMethods,
+            Grants.OCR_CONTROL to NodeBridgeModules.ocrMethods,
+            Grants.BARCODE_CONTROL to NodeBridgeModules.barcodeMethods,
+            Grants.YOLO_CONTROL to RuntimeAutomationBridge.methodsByModule.getValue(RuntimeAutomationBridge.YOLO),
             Grants.NOTIFICATIONS_POST to setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings"),
             Grants.APP_CONTROL to setOf("launchPackage", "launchApp", "openAppSetting", "startActivity", "getPackageName", "getAppName", "isInstalled", "viewFile", "editFile", "startService", "sendBroadcast", "getInstalledApps", "getPackageInfo",
                 "resolvePackage", "getUserProfiles", "getInstalledPackages", "getApkInfo", "getAppByAlias", "sendLocalBroadcastSync"),
@@ -294,14 +316,21 @@ internal class BunAutomationBridge(
             Grants.ENGINES_CONTROL to NodeBridgeModules.enginesMethods,
             Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.pluginToolsMethods,
         )
-        /** Second Node modules of a grant, with their methods: the notice extras of notifications.post, powerManager of device.control. */
+        /**
+         * Second Node modules of a grant, with their methods: the notice extras of notifications.post, powerManager of device.control,
+         * Rhino's automator and auto of accessibility.control (api-coverage P4.4, Q183 (a); presses and gestures also need
+         * accessibility.gesture, the service management accessibility.service).
+         */
         val extraModules = mapOf(
+            Grants.ACCESSIBILITY_CONTROL to mapOf(RuntimeAutomationBridge.AUTOMATOR to RuntimeAutomationBridge.methodsByModule.getValue(RuntimeAutomationBridge.AUTOMATOR),
+                RuntimeAutomationBridge.AUTO to RuntimeAutomationBridge.methodsByModule.getValue(RuntimeAutomationBridge.AUTO)),
             Grants.NOTIFICATIONS_POST to mapOf(RuntimeSystemBridge.NOTICE to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.NOTICE)),
             Grants.DEVICE_CONTROL to mapOf(RuntimeSystemBridge.POWER_MANAGER to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.POWER_MANAGER)),
         )
         private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.MEDIA_CONTROL to NodeBridgeModules.MEDIA,Grants.MEDIA_LIBRARY to NodeBridgeModules.MEDIA_STORE,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
             Grants.AUTOJS_CONTROL to RuntimeSystemBridge.AUTOJS, Grants.SETTINGS_CONTROL to RuntimeSystemBridge.SETTINGS, Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.SYSPROPS,
             Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES,
-            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.PLUGIN_TOOLS)
+            Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.PLUGIN_TOOLS,
+            Grants.OCR_CONTROL to NodeBridgeModules.OCR, Grants.BARCODE_CONTROL to NodeBridgeModules.BARCODE, Grants.YOLO_CONTROL to NodeBridgeModules.YOLO)
     }
 }

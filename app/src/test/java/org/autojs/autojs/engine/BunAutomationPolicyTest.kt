@@ -19,16 +19,17 @@ class BunAutomationPolicyTest {
     }
     @Test fun gesturesNeedBothGrantsAndClipboardDoesNotGrantOtherAutomation() {
         assertEquals(emptyList<String>(),BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_GESTURE)))
-        assertEquals(listOf("accessibility"),BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL)))
-        assertEquals(listOf("accessibility","accessibility.gesture"),BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL,Grants.ACCESSIBILITY_GESTURE)))
+        assertEquals(listOf("accessibility","keys"),BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL)))
+        assertEquals(listOf("accessibility","keys","accessibility.gesture"),BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL,Grants.ACCESSIBILITY_GESTURE)))
         assertEquals(listOf("clipboard"),BunAutomationBridge.nodeCapabilities(listOf(Grants.CLIPBOARD_CONTROL)))
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
         // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 and plugin tools 3 (P4.1b),
         // media playback 6 and the media library scan 1 (P4.1c), Rhino's device members 30 (keepAwake / cancelVibration and the 28
-        // RuntimeDeviceBridge routes, P3.1c / P4.1c).
-        assertEquals(295,BunAutomationBridge.methods.values.sumOf{it.size})
+        // RuntimeDeviceBridge routes, P3.1c / P4.1c), the automation event sources 6, ocr 3, barcode 4 and yolo 3 (P4.4; automator /
+        // auto are second modules of accessibility.control).
+        assertEquals(311,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -173,6 +174,63 @@ class BunAutomationPolicyTest {
     @Test fun systemFamilyGrantIdsPassThePluginCapabilityIdPattern() {
         val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
         for (capability in Grants.SYSTEM_FAMILY + Grants.AUTOMATION_FAMILY + Grants.EXECUTION_CONTROL) assertTrue(capability, pattern.matches(capability))
+    }
+
+    // api-coverage P4.4 (Q181 (a) / Q182 (a) / Q183 (a)): automator / auto are second modules of accessibility.control; presses and
+    // gestures also need accessibility.gesture, the service management accessibility.service, which accessibility.control never implies.
+    @Test fun automatorAndAutoFollowTheAccessibilityGrants() {
+        val modules = BunAutomationBridge.extraModules.getValue(Grants.ACCESSIBILITY_CONTROL)
+        assertEquals(RuntimeAutomationBridge.methodsByModule.getValue("automator"), modules["automator"])
+        assertEquals(RuntimeAutomationBridge.methodsByModule.getValue("auto"), modules["auto"])
+        val all = BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL, Grants.ACCESSIBILITY_GESTURE, Grants.ACCESSIBILITY_SERVICE))
+        val control = BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_CONTROL))
+        for ((module, methods) in modules) for (method in methods) {
+            for (action in listOf("back", "lockScreen", "accessibilityButton")) {
+                val args = if (method == "globalAction") """["$action"]""" else "[]"
+                val required = NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method, args)
+                assertEquals("$module.$method", emptyList<String>(), NodeBridgePermissionManifest.missingCapabilities(all, required))
+                val missing = NodeBridgePermissionManifest.missingCapabilities(control, required)
+                val expected = when {
+                    module == "automator" && method in setOf("press", "gestures") -> listOf("accessibility.gesture")
+                    module == "auto" && method in setOf("start", "stop", "launchSettings", "clearCache") -> listOf("accessibility.service")
+                    else -> emptyList()
+                }
+                assertEquals("$module.$method", expected, missing)
+            }
+        }
+        // Without accessibility.control the service grant opens nothing.
+        assertEquals(emptyList<String>(), BunAutomationBridge.nodeCapabilities(listOf(Grants.ACCESSIBILITY_SERVICE)))
+    }
+
+    // api-coverage P4.4: the automation event sources ride events.observe; accessibility events need accessibility.control, touches
+    // events.touch, key interception events.key and events.key.intercept (Q182 (a)), recognition its own grant (Q181 (a)).
+    @Test fun automationEventsAndRecognitionNeedTheirOwnGrants() {
+        val events = BunAutomationBridge.methods.getValue(Grants.EVENTS_OBSERVE)
+        assertTrue(events.containsAll(NodeBridgeModules.automationEventsMethods))
+        val observe = BunAutomationBridge.nodeCapabilities(listOf(Grants.EVENTS_OBSERVE))
+        val missing = { method: String, grants: List<String> -> NodeBridgePermissionManifest.missingCapabilities(BunAutomationBridge.nodeCapabilities(grants),
+            NodeBridgePermissionManifest.requiredCapabilitiesFor("events", method)) }
+        assertEquals(listOf("events.touch"), missing("observeTouch", listOf(Grants.EVENTS_OBSERVE)))
+        assertEquals(emptyList<String>(), missing("observeTouch", listOf(Grants.EVENTS_OBSERVE, Grants.EVENTS_TOUCH)))
+        assertEquals(listOf("events.key", "events.key.intercept"), missing("interceptKeys", listOf(Grants.EVENTS_OBSERVE)))
+        assertEquals(listOf("events.key.intercept"), missing("interceptKeys", listOf(Grants.EVENTS_OBSERVE, Grants.EVENTS_KEY)))
+        assertEquals(emptyList<String>(), missing("interceptKeys", listOf(Grants.EVENTS_OBSERVE, Grants.EVENTS_KEY, Grants.EVENTS_KEY_INTERCEPT)))
+        assertEquals(listOf("accessibility"), missing("observeAccessibility", listOf(Grants.EVENTS_OBSERVE)))
+        assertEquals(emptyList<String>(), missing("observeAccessibilityState", listOf(Grants.EVENTS_OBSERVE, Grants.ACCESSIBILITY_CONTROL)))
+        for (method in listOf("observeScriptBroadcasts", "sendScriptBroadcast")) assertEquals(method, emptyList<String>(), missing(method, listOf(Grants.EVENTS_OBSERVE)))
+        assertEquals(listOf("events"), observe)
+        // The broker's provider always declares image, so the recognition grants add only their own capability.
+        assertEquals(listOf("ocr"), BunAutomationBridge.nodeCapabilities(listOf(Grants.OCR_CONTROL)))
+        assertEquals(listOf("barcode"), BunAutomationBridge.nodeCapabilities(listOf(Grants.BARCODE_CONTROL)))
+        assertEquals(listOf("yolo"), BunAutomationBridge.nodeCapabilities(listOf(Grants.YOLO_CONTROL)))
+        assertEquals(NodeBridgeModules.ocrMethods, BunAutomationBridge.methods[Grants.OCR_CONTROL])
+        assertEquals(NodeBridgeModules.barcodeMethods, BunAutomationBridge.methods[Grants.BARCODE_CONTROL])
+        assertEquals(RuntimeAutomationBridge.methodsByModule.getValue("yolo"), BunAutomationBridge.methods[Grants.YOLO_CONTROL])
+        for ((grant, module) in listOf(Grants.OCR_CONTROL to "ocr", Grants.BARCODE_CONTROL to "barcode", Grants.YOLO_CONTROL to "yolo")) {
+            val declared = BunAutomationBridge.nodeCapabilities(listOf(grant)) + NodeBridgePermissionManifest.IMAGE
+            for (method in BunAutomationBridge.methods.getValue(grant)) assertEquals("$module.$method", emptyList<String>(),
+                NodeBridgePermissionManifest.missingCapabilities(declared, NodeBridgePermissionManifest.requiredCapabilitiesFor(module, method)))
+        }
     }
 
     // api-coverage P4.4 (Q181 (a) / Q182 (a)): six default-off grants, each a switch of its own and declarable in project.json.

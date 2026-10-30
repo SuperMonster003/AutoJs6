@@ -184,7 +184,8 @@ internal class BunHostCapabilityBroker(
             BunHostCapabilityGrants.CLIPBOARD_CONTROL, BunHostCapabilityGrants.STORAGE_CONTROL,
             BunHostCapabilityGrants.DATABASE_CONTROL, BunHostCapabilityGrants.SENSORS_CONTROL, BunHostCapabilityGrants.SHELL_CONTROL, BunHostCapabilityGrants.EVENTS_OBSERVE, BunHostCapabilityGrants.NOTIFICATIONS_POST, BunHostCapabilityGrants.DEVICE_CONTROL, BunHostCapabilityGrants.DEVICE_AUDIO, BunHostCapabilityGrants.DIALOGS_CONTROL, BunHostCapabilityGrants.ANDROID_OBJECTS, BunHostCapabilityGrants.TASKS_CONTROL, BunHostCapabilityGrants.JAVA_INTEROP, BunHostCapabilityGrants.TTS_CONTROL, BunHostCapabilityGrants.MEDIAINFO_CONTROL, BunHostCapabilityGrants.MEDIA_CONTROL, BunHostCapabilityGrants.MEDIA_LIBRARY, BunHostCapabilityGrants.AGENT_CONTROL, BunHostCapabilityGrants.AI_CONTROL, BunHostCapabilityGrants.FLOW_CONTROL, BunHostCapabilityGrants.SPEECH_CONTROL, BunHostCapabilityGrants.MAIL_CONTROL, BunHostCapabilityGrants.EPUB_CONTROL,
             BunHostCapabilityGrants.AUTOJS_CONTROL, BunHostCapabilityGrants.SETTINGS_CONTROL, BunHostCapabilityGrants.SYSPROPS_CONTROL, BunHostCapabilityGrants.MEMORY_CONTROL,
-            BunHostCapabilityGrants.INSTALLER_CONTROL, BunHostCapabilityGrants.ENGINES_CONTROL, BunHostCapabilityGrants.PLUGIN_TOOLS_CONTROL -> bridgeResponse(automation.invoke(capability, request))
+            BunHostCapabilityGrants.INSTALLER_CONTROL, BunHostCapabilityGrants.ENGINES_CONTROL, BunHostCapabilityGrants.PLUGIN_TOOLS_CONTROL,
+            BunHostCapabilityGrants.OCR_CONTROL, BunHostCapabilityGrants.BARCODE_CONTROL, BunHostCapabilityGrants.YOLO_CONTROL -> bridgeResponse(automation.invoke(capability, request))
             BunHostCapabilityGrants.FILES_CONTROL -> {
                 try {
                     val (method, args) = parseMethodCall(request)
