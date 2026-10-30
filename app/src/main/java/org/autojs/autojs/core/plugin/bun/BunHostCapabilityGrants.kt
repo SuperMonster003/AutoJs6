@@ -351,6 +351,15 @@ object BunHostCapabilityGrants {
         }
     }
 
+    /**
+     * The capability IDs one request offers (api-coverage Q170 (a)): the [granted] IDs in contract order and
+     * execution.control, at most [limit] of them, the plugin's advertised bound (MAX_HOST_CAPABILITY_COUNT, else the legacy
+     * 64). execution.control keeps its place; the grants past the bound are not offered, so the plugin's parser never
+     * rejects the whole request.
+     */
+    fun offeredCapabilities(granted: List<String>, limit: Int): List<String> =
+        granted.take(limit.coerceIn(1, BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT) - 1) + EXECUTION_CONTROL
+
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,

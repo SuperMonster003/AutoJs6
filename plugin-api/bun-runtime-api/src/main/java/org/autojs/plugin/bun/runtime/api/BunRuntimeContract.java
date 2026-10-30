@@ -54,8 +54,14 @@ public final class BunRuntimeContract {
     public static final int HOST_CAPABILITY_BRIDGE_VERSION = 1;
     /** Environment variable that carries the absolute path of the bridge unix socket inside the Bun process. */
     public static final String HOST_BRIDGE_ENVIRONMENT_VARIABLE = "AUTOJS6_HOST_BRIDGE_SOCKET";
-    /** Upper bound of granted capability IDs in one request. */
-    public static final int MAX_HOST_CAPABILITY_COUNT = 64;
+    /**
+     * Upper bound of granted capability IDs in one request a plugin built with this contract accepts. The plugin
+     * advertises it as {@link BunPluginCapabilityKeys#MAX_HOST_CAPABILITY_COUNT}, and the host offers no more than the
+     * advertised bound (api-coverage Q170 (a)).
+     */
+    public static final int MAX_HOST_CAPABILITY_COUNT = 128;
+    /** The bound of a plugin that advertises none: built with an earlier contract, its request parser rejects a longer list. */
+    public static final int LEGACY_MAX_HOST_CAPABILITY_COUNT = 64;
     /** Upper bound of one capability ID; IDs match {@code [a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+} (at least one dot, so no ID collides with the bridge info path). */
     public static final int MAX_HOST_CAPABILITY_ID_BYTES = 64;
     /** Upper bound of one call request JSON document (HTTP body and broker request alike). */

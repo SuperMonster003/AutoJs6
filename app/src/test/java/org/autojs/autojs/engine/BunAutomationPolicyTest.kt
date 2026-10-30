@@ -1,6 +1,7 @@
 package org.autojs.autojs.engine
 
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants as Grants
+import org.autojs.plugin.bun.runtime.api.BunRuntimeContract
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -110,6 +111,18 @@ class BunAutomationPolicyTest {
         assertFalse(Grants.EXECUTION_CONTROL in Grants.SYSTEM_FAMILY)
         assertNull(BunAutomationBridge.methods[Grants.EXECUTION_CONTROL])
         assertThrows(IllegalArgumentException::class.java) { Grants.validatePackagedCapabilities(listOf(Grants.EXECUTION_CONTROL)) }
+    }
+
+    // api-coverage Q170 (a): a request offers at most the plugin's bound, execution.control included; a plugin that advertises
+    // no bound keeps the 64 of its request parser.
+    @Test fun offeredCapabilitiesKeepExecutionControlWithinThePluginBound() {
+        val granted = (1..70).map { "ns.cap$it" }
+        val legacy = Grants.offeredCapabilities(granted, BunRuntimeContract.LEGACY_MAX_HOST_CAPABILITY_COUNT)
+        assertEquals(granted.take(63) + Grants.EXECUTION_CONTROL, legacy)
+        assertEquals(granted + Grants.EXECUTION_CONTROL, Grants.offeredCapabilities(granted, BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT))
+        assertEquals(BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT, Grants.offeredCapabilities((1..200).map { "ns.cap$it" }, 1000).size)
+        assertEquals(listOf(Grants.EXECUTION_CONTROL), Grants.offeredCapabilities(granted, 0))
+        assertEquals(listOf(Grants.UI_LAYOUT, Grants.EXECUTION_CONTROL), Grants.offeredCapabilities(listOf(Grants.UI_LAYOUT), 64))
     }
 
     // api-coverage P4.1c (Q152 (a)): Rhino's media module, its playback and the media library scan as the Node capabilities.

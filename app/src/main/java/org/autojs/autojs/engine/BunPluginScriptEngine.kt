@@ -259,7 +259,12 @@ class BunPluginScriptEngine internal constructor(
         val config = getTag(ExecutionConfig.tag) as? ExecutionConfig
         val spawnDepth = (config?.getArgument(NodeBridgeEngineInfo.SPAWN_DEPTH_ARGUMENT) as? Number)?.toInt()?.coerceIn(0, NodeBridgeEngineInfo.MAX_SPAWN_DEPTH) ?: 0
         // execution.control is not a grant: a script may always end its own execution (exit / stop in a Worker, Q139 (b)).
-        val capabilities = if (granted.size < BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT) granted + BunHostCapabilityGrants.EXECUTION_CONTROL else granted
+        // The request carries at most the plugin's bound (Q170 (a)); a plugin that advertises none parses 64 at most.
+        val limit = selection.discovered.pluginInfo?.capabilities
+            ?.getInt(BunPluginCapabilityKeys.MAX_HOST_CAPABILITY_COUNT, BunRuntimeContract.LEGACY_MAX_HOST_CAPABILITY_COUNT)
+            ?: BunRuntimeContract.LEGACY_MAX_HOST_CAPABILITY_COUNT
+        val capabilities = BunHostCapabilityGrants.offeredCapabilities(granted, limit)
+        if (capabilities.size <= granted.size) Log.w(TAG, "Bun grants past the plugin's bound of $limit are not offered: ${granted.drop(capabilities.size - 1)}")
         return BunHostCapabilityBroker(appContext, selection.providerUid, executionId, capabilities, { executionConsole }, cwd(),
             config?.agentExecutionState, spawnDepth, sourceName, ::stopFromScript)
     }

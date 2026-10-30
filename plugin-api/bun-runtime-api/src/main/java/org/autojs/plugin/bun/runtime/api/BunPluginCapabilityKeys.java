@@ -12,6 +12,8 @@ public final class BunPluginCapabilityKeys {
     public static final String SUPPORTS_WORKSPACE_ARCHIVE = "org.autojs.plugin.bun.SUPPORTS_WORKSPACE_ARCHIVE";
     public static final String SUPPORTS_HOST_INFO = "org.autojs.plugin.bun.SUPPORTS_HOST_INFO";
     public static final String SUPPORTS_HOST_CAPABILITY_BRIDGE = "org.autojs.plugin.bun.SUPPORTS_HOST_CAPABILITY_BRIDGE";
+    /** Int: the most granted capability IDs one request may carry (BunRuntimeContract.MAX_HOST_CAPABILITY_COUNT of the plugin's contract). */
+    public static final String MAX_HOST_CAPABILITY_COUNT = "org.autojs.plugin.bun.MAX_HOST_CAPABILITY_COUNT";
 
     private BunPluginCapabilityKeys() {
     }
