@@ -692,6 +692,28 @@ class RepositoryTest(unittest.TestCase):
             self.assertEqual((rows['memory.watch'][column]['status'], rows['memory.watch'][column]['reason']), ('not-portable', 'runtime-native'))
         self.assertEqual(rows['plugins.load']['node_worker']['status'], 'not-portable')
 
+    def test_p3_1c(self):
+        # The device, sensors and media family: the shared device / sensors factories in both threads (the startup snapshot
+        # with Rhino's fields, Q148 (a)), Rhino's device queries over RuntimeDeviceBridge with device.identifiers (Q146 (a)),
+        # Rhino's sensor names and delays (Q147 (a)) and Rhino's media members in autojs6:media, forwarded by Workers (Q149 (a)).
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, module, capabilities in [
+                ('device.baseOS', 'autojs6:device', None), ('device.manufacturers', 'autojs6:device', None),
+                ('device.getIMEI', 'autojs6:device', ['device', 'device.identifiers']),
+                ('device.keepAwake', 'autojs6:device', ['device', 'device.power']), ('device.vibrate', 'autojs6:device', ['device']),
+                ('sensors.register', 'autojs6:sensors', None), ('sensors.delay', 'autojs6:sensors', None),
+                ('sensors.once', 'autojs6:sensors', ['sensors']), ('media.playMusic', 'autojs6:media', None),
+                ('media.scanFile', 'autojs6:media', None)]:
+            for column in ['node_main', 'node_worker']:
+                cell = rows[name][column]
+                self.assertEqual((cell['status'], cell['module'], cell['via'], cell.get('capabilities')),
+                                 ('bridged', module, 'same-name', capabilities), (name, column))
+        family = [row for row in self.matrix['rows'] if (row['module'] or row['ownerModule'] or '').split('.')[0] in ('device', 'sensors', 'media')]
+        self.assertGreaterEqual(len(family), 116)
+        for row in family:
+            for column in ['node_main', 'node_worker']:
+                self.assertNotEqual(row[column]['status'], 'pending', (row['id'], column))
+
     def test_p3_2a(self):
         # The shared JS tools core: local-shim on the main thread and in Workers, global data functions through autojs6:global.
         rows = {row['id']: row for row in self.matrix['rows']}
