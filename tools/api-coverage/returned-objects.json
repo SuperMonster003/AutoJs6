@@ -190,8 +190,29 @@
     },
     {
       "object": "ComposeNode", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeNodeNativeObject", "memberSource": "plugin:compose", "catalog": "shortcuts",
-      "producers": ["compose.createElement"], "catalogProducers": true, "probe": "compose.Text.()", "documentation": ["composeNodeType", "composeModifierType"],
-      "note": "Q75 (a), P5.2c: the catalogue shortcut accessors every node defines (w / h / padding / bg / weight / alpha / testTag / contentDescription, also accepted as props); the node's own members (type, set, append, ...) and the catalogue property accessors are not listed yet (Q106)"
+      "producers": ["compose.createElement"], "catalogProducers": true, "probe": "compose.TextField.()", "documentation": ["composeNodeType", "composeModifierType"],
+      "members": ["type", "key", "nodeId", "parent", "children", "set", "get", "append", "insert", "remove", "replace", "clear", "slot", "on", "off", "focus", "blur", "scrollTo", "edit", "toString"],
+      "note": "Q75 (a), P5.2c: the catalogue shortcut accessors every node defines (w / h / padding / bg / weight / alpha / testTag / contentDescription, also accepted as props); Q106 (a), P3.3: members adds the node's own members (ComposeNodeNativeObject's properties and operations); the probe is a TextField node, whose type also declares edit (text fields only); the catalogue property accessors of each component are not listed"
+    },
+    {
+      "object": "ComposeSession", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeScriptSession", "memberSource": "augment-prototype",
+      "producers": ["compose.mount", "compose.attach", "compose.dialog"], "probe": "compose.mount.()", "documentation": ["composeSessionType"],
+      "note": "Q106 (a), P3.3: the session compose.mount / attach / dialog return"
+    },
+    {
+      "object": "ComposeFloatyWindow", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeFloatyWindow", "memberSource": "augment-prototype",
+      "producers": ["compose.floaty"], "probe": "compose.floaty.()", "documentation": ["composeFloatyWindowType"],
+      "note": "Q106 (a), P3.3: the floating window compose.floaty returns"
+    },
+    {
+      "object": "ComposeState", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeReactiveRuntime.State", "memberSource": "augment-prototype",
+      "producers": ["compose.state"], "probe": "compose.state.()", "documentation": ["composeStateType"],
+      "note": "Q106 (a), P3.3"
+    },
+    {
+      "object": "ComposeRef", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeRef", "memberSource": "augment-prototype",
+      "producers": ["compose.ref"], "probe": "compose.ref.()", "documentation": ["compose"],
+      "note": "Q106 (a), P3.3"
     }
   ],
   "prototypes": [

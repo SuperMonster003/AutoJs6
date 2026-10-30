@@ -628,9 +628,8 @@ class RepositoryTest(unittest.TestCase):
 
     def test_p1_5(self):
         rows = {row['id']: row for row in self.matrix['rows']}
-        # Q26: an entry that only rejects stays pending (console.input, D-7); the dual-app entries left with P3.1a (test_p3_1a).
-        for column in ['node_main', 'node_worker']:
-            self.assertEqual((rows['console.input'][column]['status'], rows['console.input'][column].get('rejects')), ('pending', True), column)
+        # Q26: an entry that only rejects stays pending; console.input (D-7) left with P3.3 (Q165 (a), test_p3_3), the dual-app
+        # entries with P3.1a (test_p3_1a).
         # Q27: every MailClient member has a runtime handle member.
         mail = [row for row in self.matrix['rows'] if row['object'] == 'MailClient']
         self.assertTrue(mail)
@@ -647,10 +646,9 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual((rows['http.client']['bun']['rule'], rows['http.client']['bun']['reason']), ('http-java-objects', 'java-prototype'))
         self.assertEqual(rows['http.postJson']['bun']['reason'], 'runtime-native')
         self.assertEqual(rows['plugins.load']['node_worker']['rule'], 'rhino-engine')
-        # The groups the maintainer kept pending for P3 / P4 (app.launchDual came with P3.1a, test_p3_1a; engines.execScript
-        # in Workers with P3.1b, test_p3_1b; auto.waitFor, threads.start and keepAlive with P3.4, test_p3_4).
-        for name in ['ui.layout']:
-            self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
+        # The groups the maintainer kept pending for P3 / P4 all came: app.launchDual with P3.1a (test_p3_1a), engines.execScript
+        # in Workers with P3.1b (test_p3_1b), auto.waitFor, threads.start and keepAlive with P3.4 (test_p3_4), ui.layout in Workers
+        # with P3.3 (test_p3_3).
         self.assertEqual(rows['Mathx.sum']['node_main']['status'], 'local-shim')
 
     def test_p3_1a(self):
@@ -713,6 +711,46 @@ class RepositoryTest(unittest.TestCase):
         for row in family:
             for column in ['node_main', 'node_worker']:
                 self.assertNotEqual(row[column]['status'], 'pending', (row['id'], column))
+
+    def test_p3_3(self):
+        # The UI family: Rhino's ui members (the content view and window members, D-17 / Q164 (a)), autojs6:floaty / web /
+        # terminal of the shared UI factory (terminal with its own capability, Q167 (a)), console input and build (Q165 (a) /
+        # Q166 (a)), the leveled toasts and the family's globals in their modules (member aliases); the Rhino Java objects
+        # ConsoleConfigurator, the floaty windows, WebSocket and the injectable WebView / client (Q168 (a)) and the compose
+        # objects of Q104 / Q106 through their handle types; ui.layoutInflater excluded with the Java prototypes (Q169 (a)).
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status, module, via, capabilities in [
+                ('ui.layout', 'bridged', 'autojs6:ui', 'same-name', None), ('ui.statusBarColor', 'bridged', 'autojs6:ui', 'same-name', None),
+                ('ui.emitter', 'bridged', 'autojs6:ui', 'same-name', None), ('floaty.rawWindow', 'bridged', 'autojs6:floaty', 'same-name', None),
+                ('web.newWebSocket', 'bridged', 'autojs6:web', 'same-name', None), ('terminal.open', 'bridged', 'autojs6:terminal', 'same-name', ['terminal']),
+                ('console.rawInput', 'bridged', 'autojs6:console', 'same-name', ['console']), ('console.build', 'bridged', 'autojs6:console', 'same-name', None),
+                ('console.input', 'bridged', 'autojs6:console', 'same-name', None),
+                ('toast.dismissAll', 'bridged', 'toast', 'same-name', ['toast']), ('toastlog', 'bridged', 'toast', 'member-alias', None),
+                ('isUiThread', 'bridged', 'ui', 'member-alias', None), ('ComposeError', 'bridged', 'autojs6:compose', 'member-alias', None),
+                ('newWebSocket', 'bridged', 'autojs6:web', 'member-alias', None),
+                ('ConsoleConfigurator#setTitle', 'bridged', 'console', 'handle-type', None), ('FloatyWindow#isAdjustEnabled', 'bridged', 'autojs6:floaty', 'handle-type', None),
+                ('RawWindow#setTouchable', 'bridged', 'autojs6:floaty', 'handle-type', None), ('WebSocket#send', 'bridged', 'autojs6:web', 'handle-type', None),
+                ('InjectableWebView#inject', 'bridged', 'autojs6:web', 'handle-type', None), ('ComposeNode#parent', 'bridged', 'autojs6:compose', 'handle-type', None),
+                ('ComposeNode#w', 'bridged', 'autojs6:compose', 'handle-type', None), ('ComposeSession#showSnackbar', 'bridged', 'autojs6:compose', 'handle-type', None),
+                ('ComposeFloatyWindow#setAdjustEnabled', 'bridged', 'autojs6:compose', 'handle-type', None),
+                ('ComposeState#value', 'bridged', 'autojs6:compose', 'handle-type', None), ('ComposeRef#current', 'bridged', 'autojs6:compose', 'handle-type', None)]:
+            for column in ['node_main', 'node_worker']:
+                cell = rows[name][column]
+                self.assertEqual((cell['status'], cell['module'], cell['via'], cell.get('capabilities')), (status, module, via, capabilities), (name, column))
+        for column in ['node_main', 'node_worker', 'bun']:
+            cell = rows['ui.layoutInflater'][column]
+            self.assertEqual((cell['status'], cell['reason'], cell['equivalent']), ('not-portable', 'java-prototype', 'ui.inflate / ui.createView'))
+        objects = ('ConsoleConfigurator', 'FloatyWindow', 'RawWindow', 'WebSocket', 'InjectableWebView', 'InjectableWebClient',
+                   'ComposeNode', 'ComposeSession', 'ComposeFloatyWindow', 'ComposeState', 'ComposeRef')
+        family = [row for row in self.matrix['rows'] if (row['module'] or row['ownerModule'] or '').split('.')[0] in
+                  ('ui', 'console', 'toast', 'floaty', 'web', 'terminal', 'compose') or row['object'] in objects]
+        self.assertGreaterEqual(len(family), 370)
+        for row in family:
+            for column in ['node_main', 'node_worker']:
+                self.assertNotEqual(row[column]['status'], 'pending', (row['id'], column))
+        # Q106 (a): the compose objects' members are rows (20 own members of ComposeNode next to its 8 shortcut accessors).
+        counts = {name: sum(row['object'] == name for row in family) for name in objects[6:]}
+        self.assertEqual(counts, {'ComposeNode': 28, 'ComposeSession': 7, 'ComposeFloatyWindow': 18, 'ComposeState': 1, 'ComposeRef': 1})
 
     def test_p3_4(self):
         # The automation family: the autojs6: modules of the shared automation factory in both threads (automator with the

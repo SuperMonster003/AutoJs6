@@ -62,7 +62,23 @@
       "waitForEvent": {"module": "autojs6:flow", "member": "waitForEvent"},
       "waitForIdle": {"module": "autojs6:flow", "member": "waitForIdle"},
       "waitForNotification": {"module": "autojs6:flow", "member": "waitForNotification"},
-      "waitForToast": {"module": "autojs6:flow", "member": "waitForToast"}
+      "waitForToast": {"module": "autojs6:flow", "member": "waitForToast"},
+      "_p33Note": "P3.3: Rhino's UI family globals, installed on globalThis in main threads and Workers, are members of their modules",
+      "toastLog": {"module": "toast", "member": "toastLog"},
+      "toastlog": {"module": "toast", "member": "toastLog"},
+      "toastInfo": {"module": "toast", "member": "toastInfo"},
+      "toastinfo": {"module": "toast", "member": "toastInfo"},
+      "toastWarn": {"module": "toast", "member": "toastWarn"},
+      "toastwarn": {"module": "toast", "member": "toastWarn"},
+      "toastError": {"module": "toast", "member": "toastError"},
+      "toasterror": {"module": "toast", "member": "toastError"},
+      "toastVerbose": {"module": "toast", "member": "toastVerbose"},
+      "toastverbose": {"module": "toast", "member": "toastVerbose"},
+      "isUiThread": {"module": "ui", "member": "isUiThread"},
+      "ComposeError": {"module": "autojs6:compose", "member": "ComposeError"},
+      "newWebSocket": {"module": "autojs6:web", "member": "newWebSocket"},
+      "newInjectableWebView": {"module": "autojs6:web", "member": "newInjectableWebView"},
+      "newInjectableWebClient": {"module": "autojs6:web", "member": "newInjectableWebClient"}
     }
   },
   "bun": {
@@ -328,7 +344,7 @@
     "_note": "Q27 (a), maintainer 2026-10-25: augment-prototype objects with a runtime handle type, compared member by member (node: declaring module and type in docs/nodejs/types/autojs6-node; bun: the host client namespace producing the handle, its type in host-client.d.mts and the grant of the producing call); type arguments only feed the Ace queries",
     "AgentRun": {"node": {"module": "autojs6:ai", "type": "AgentRun"}, "bun": {"namespace": "ai", "type": "RuntimeAi.AgentRun", "capability": "agent.control"}},
     "AiSession": {"node": {"module": "autojs6:ai", "type": "Session"}, "bun": {"namespace": "ai", "type": "RuntimeAi.Session", "capability": "ai.control"}},
-    "_composeNote": "Q75 (a), P5.2c: ComposeModifier and ComposeNode list the Compose catalogue modifiers and shortcut accessors (memberSource plugin:compose); the runtimes' compose facades declare the modifier chain (Node's RuntimeCompose.Modifier is a global type the compose module does not export: typeScope global), while their nodes take the shortcuts only as props (SharedProps) and have no shortcut accessors: those 8 rows stay pending per column and are handed to P3.3 / P4.3 (UI family), appendix C Q104",
+    "_composeNote": "Q75 (a), P5.2c: ComposeModifier and ComposeNode list the Compose catalogue modifiers and shortcut accessors (memberSource plugin:compose); the runtimes' compose facades declare the modifier chain (Node's RuntimeCompose.Modifier is a global type the compose module does not export: typeScope global), and their nodes the shortcut accessors since P3.3 (Node, appendix C Q104; Bun with P4.3)",
     "ComposeModifier": {"node": {"module": "autojs6:compose", "type": "RuntimeCompose.Modifier", "typeScope": "global"}, "bun": {"namespace": "compose", "type": "RuntimeCompose.Modifier", "capability": "ui.compose"}},
     "ComposeNode": {"node": {"module": "autojs6:compose", "type": "Node"}, "bun": {"namespace": "compose", "type": "RuntimeCompose.Node", "capability": "ui.compose"}},
     "Color": {"node": {"module": "colors", "type": "Color"}, "bun": {"namespace": "colors", "type": "RuntimeColors.Color"}},
@@ -339,7 +355,18 @@
     "Storage": {"node": {"module": "storages", "type": "StorageStore"}, "bun": {"namespace": "storages", "type": "RuntimeStorage.StorageStore", "capability": "storage.control"}},
     "VolatileDispose": {"node": {"module": "autojs6:threads", "type": "VolatileDispose"}, "bun": {"namespace": "threads", "type": "RuntimeThreads.VolatileDispose"}},
     "YoloDetector": {"node": {"module": "autojs6:yolo", "type": "YoloDetector"}, "bun": {"namespace": "yolo", "type": "RuntimeYolo.YoloDetector", "capability": "yolo.control"}},
-    "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}, "bun": {"namespace": "zip", "type": "RuntimeZip.Zip", "capability": "java.interop"}}
+    "Zip": {"node": {"module": "autojs6:zip", "type": "Zip"}, "bun": {"namespace": "zip", "type": "RuntimeZip.Zip", "capability": "java.interop"}},
+    "_p33Note": "Q106 (a) / Q166 (a) / Q168 (a), P3.3: the compose session, floating window, state and ref, and the Rhino Java objects ConsoleConfigurator, FloatyWindow / RawWindow, WebSocket and InjectableWebView / InjectableWebClient, whose Node facades are runtime handles compared member by member; their Bun mappings come with P4.3",
+    "ComposeSession": {"node": {"module": "autojs6:compose", "type": "Session"}},
+    "ComposeFloatyWindow": {"node": {"module": "autojs6:compose", "type": "FloatySession"}},
+    "ComposeState": {"node": {"module": "autojs6:compose", "type": "State<unknown>"}},
+    "ComposeRef": {"node": {"module": "autojs6:compose", "type": "Ref"}},
+    "ConsoleConfigurator": {"node": {"module": "console", "type": "ConsoleConfigurator"}},
+    "FloatyWindow": {"node": {"module": "autojs6:floaty", "type": "FloatyWindow"}},
+    "RawWindow": {"node": {"module": "autojs6:floaty", "type": "RawWindow"}},
+    "WebSocket": {"node": {"module": "autojs6:web", "type": "WebSocket"}},
+    "InjectableWebView": {"node": {"module": "autojs6:web", "type": "InjectableWebView"}},
+    "InjectableWebClient": {"node": {"module": "autojs6:web", "type": "InjectableWebClient"}}
   },
   "exclusions": [
     {
@@ -358,6 +385,15 @@
       "equivalent": "java module handles (java.create / java.callInstance / java.callStatic)",
       "override": true,
       "source": "appendix D D-11, maintainer 2026-10-29 (P1.4 question 5); override since P3.2a: the global isJavaClass / isJavaPackage placements stay excluded as decided although the owner module species covers them on Node"
+    },
+    {
+      "id": "java-prototype-layout-inflater",
+      "match": ["ui.layoutInflater"],
+      "columns": ["node_main", "node_worker", "bun"],
+      "status": "not-portable", "reason": "java-prototype",
+      "equivalent": "ui.inflate / ui.createView",
+      "note": "Rhino's DynamicLayoutInflater (a Java object of ui's script prototype); the runtimes inflate XML through the host",
+      "source": "appendix C Q169 (a) (P3.3), the class of appendix D D-11"
     },
     {
       "id": "java-introspection",

@@ -627,7 +627,8 @@ Java objects whose members are not enumerated)).
 - `policy`: the `members` of the entry.
 - `plugin:<name>`: the list `catalog` of a plugin contract source (`policy.json` `pluginExports`, below):
   the Compose catalogue modifiers of `ComposeModifier`, its shortcut accessors of `ComposeNode`;
-  `catalogProducers` makes every row the source adds a producer.
+  `catalogProducers` makes every row the source adds a producer; `members` adds the names the object defines
+  itself (the properties and operations of `ComposeNode`, appendix C Q106 (a)).
 
 `check.py` checks every member (and its aliases) by name against the
 documentation pages, the d.ts type of `<probe>.<member>` and Ace completion, in a

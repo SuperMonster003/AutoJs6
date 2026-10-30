@@ -17,7 +17,8 @@ Member list sources:
 - policy: the members the file lists.
 - plugin:<name>: the members a plugin contract lists (policy.json pluginExports, plugin_exports.py; P5.2c), the list
   named by `catalog` (the Compose catalogue modifiers of ComposeModifier, the shortcuts of ComposeNode);
-  `catalogProducers` makes every row the source adds a producer. Without the contract checkout the object is skipped.
+  `catalogProducers` makes every row the source adds a producer, `members` adds the names the object defines itself (the
+  properties and operations of ComposeNode, Q106 (a)). Without the contract checkout the object is skipped.
 
 The name-level gate (gate()) checks every member against the object's documentation pages, the d.ts type of
 a probe expression (`<probe>.<member>`) and Ace completion, in a separate surface run whose failures are
@@ -648,6 +649,9 @@ def attach(host, result, metadata=None, config=CONFIG):
                 problems.append(f'{entry["object"]}: catalog {entry.get("catalog")} is not a list of {entry["memberSource"]}')
                 continue
             members = [dict(m) for m in plugin['members'][entry['catalog']]]
+            # `members` (Q106 (a)): the names the object defines itself next to the contract list (ComposeNode's own members).
+            listed = {m['name'] for m in members}
+            members += [{'name': n, 'kind': 'Functions', 'source': None, 'line': None, 'arity': None} for n in entry.get('members', []) if n not in listed]
             item.update(source=plugin['root'], complete=True)
         else:
             members = [{'name': n, 'kind': 'Functions', 'source': None, 'line': None, 'arity': None} for n in entry['members']]

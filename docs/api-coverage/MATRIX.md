@@ -1,27 +1,27 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3470 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3517 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3470 行 (显式导出 1962, 原型成员 205, 返回对象成员 1303).
+数据源: ksp, 3517 行 (显式导出 1962, 原型成员 205, 返回对象成员 1350).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1468 | 368 | 0 | 1046 | 0 | 588 |
-| Node Worker | 1467 | 365 | 0 | 1049 | 0 | 589 |
-| Bun | 0 | 349 | 1416 | 1049 | 0 | 656 |
+| Node main | 1628 | 368 | 0 | 944 | 0 | 577 |
+| Node Worker | 1628 | 365 | 0 | 947 | 0 | 577 |
+| Bun | 0 | 349 | 1430 | 1050 | 0 | 688 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 532 / mention 268 / heading 2670 / signature 0 / example 0 |
-| dts | none 533 / name 1690 / arity 319 / typed 928 |
-| ace | none 938 / semantic 898 / static 1634 |
+| doc | none 532 / mention 274 / heading 2711 / signature 0 / example 0 |
+| dts | none 533 / name 1737 / arity 319 / typed 928 |
+| ace | none 938 / semantic 945 / static 1634 |
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 993 / differs 23 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: java-prototype-objects shadowed (node_main, 103), java-prototype-objects shadowed (node_worker, 103).
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
@@ -35,7 +35,8 @@
 | internal-exports | not-portable: rhino-only | 10 | 10 | 10 |  |
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
-| java-prototype-objects | not-portable: java-prototype | 985 | 985 | 985 |  |
+| java-prototype-layout-inflater | not-portable: java-prototype | 1 | 1 | 1 | ui.inflate / ui.createView |
+| java-prototype-objects | not-portable: java-prototype | 882 | 882 | 985 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
@@ -50,27 +51,31 @@
 
 | 模块 | 行 | doc 标题 | d.ts | 类型 (ksp) | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 184 / 13 / 11 | 183 / 13 / 12 | 190 / 13 / 5 |
+| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 194 / 13 / 1 | 194 / 13 / 1 | 190 / 13 / 5 |
 | AgentRun# | 14 | 7 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | Arrayx | 15 | 15 | 15 | 15 / 15 | 15 | 15 / 0 / 0 | 15 / 0 / 0 | 15 / 0 / 0 |
 | Canvas# | 54 | 54 | 54 | - | 0 | 0 / 54 / 0 | 0 / 54 / 0 | 0 / 54 / 0 |
 | Color# | 29 | 29 | 29 | - | 29 | 29 / 0 / 0 | 29 / 0 / 0 | 29 / 0 / 0 |
+| ComposeFloatyWindow# | 18 | 13 | 18 | - | 18 | 18 / 0 / 0 | 18 / 0 / 0 | 0 / 0 / 18 |
 | ComposeModifier# | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
-| ComposeNode# | 8 | 8 | 8 | - | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 0 / 0 / 8 |
-| ConsoleConfigurator# | 52 | 50 | 52 | - | 0 | 0 / 52 / 0 | 0 / 52 / 0 | 0 / 52 / 0 |
+| ComposeNode# | 28 | 28 | 28 | - | 28 | 28 / 0 / 0 | 28 / 0 / 0 | 14 / 0 / 14 |
+| ComposeRef# | 1 | 0 | 1 | - | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
+| ComposeSession# | 7 | 7 | 7 | - | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 0 / 0 / 7 |
+| ComposeState# | 1 | 1 | 1 | - | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 0 / 1 |
+| ConsoleConfigurator# | 52 | 50 | 52 | - | 0 | 52 / 0 / 0 | 52 / 0 / 0 | 0 / 52 / 0 |
 | ContinuationCreator# | 3 | 3 | 3 | - | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
 | Database# | 51 | 51 | 51 | - | 2 | 0 / 51 / 0 | 0 / 51 / 0 | 0 / 51 / 0 |
 | Dialog# | 96 | 19 | 96 | - | 3 | 0 / 96 / 0 | 0 / 96 / 0 | 0 / 96 / 0 |
 | EpubBook# | 14 | 14 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | EpubReaderSession# | 34 | 34 | 34 | - | 32 | 0 / 34 / 0 | 0 / 34 / 0 | 0 / 34 / 0 |
-| FloatyWindow# | 12 | 12 | 12 | - | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
+| FloatyWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 0 / 12 / 0 |
 | Flow# | 106 | 25 | 106 | - | 106 | 104 / 0 / 2 | 104 / 0 / 2 | 104 / 0 / 2 |
 | ImageFeatures# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | ImageWrapper# | 15 | 15 | 15 | - | 6 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
-| InjectableWebClient# | 2 | 2 | 2 | - | 0 | 0 / 2 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
-| InjectableWebView# | 1 | 1 | 1 | - | 0 | 0 / 1 / 0 | 0 / 1 / 0 | 0 / 1 / 0 |
+| InjectableWebClient# | 2 | 2 | 2 | - | 0 | 2 / 0 / 0 | 2 / 0 / 0 | 0 / 2 / 0 |
+| InjectableWebView# | 1 | 1 | 1 | - | 0 | 1 / 0 / 0 | 1 / 0 / 0 | 0 / 1 / 0 |
 | IntentTask# | 19 | 0 | 19 | - | 0 | 0 / 19 / 0 | 0 / 19 / 0 | 0 / 19 / 0 |
 | MailClient# | 53 | 53 | 53 | - | 53 | 53 / 0 / 0 | 53 / 0 / 0 | 53 / 0 / 0 |
 | Mat# | 3 | 0 | 3 | - | 0 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
@@ -83,7 +88,7 @@
 | PWritableTextFile# | 6 | 6 | 6 | - | 0 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
 | PngQuantizationFileResult# | 5 | 3 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PngQuantizationResult# | 5 | 3 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
-| RawWindow# | 12 | 12 | 12 | - | 12 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
+| RawWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 0 / 12 / 0 |
 | ScreenCaptureOptions# | 5 | 5 | 5 | - | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | ScriptEngine# | 16 | 16 | 16 | - | 0 | 0 / 16 / 0 | 0 / 16 / 0 | 0 / 16 / 0 |
 | ScriptExecution# | 12 | 12 | 12 | - | 0 | 0 / 12 / 0 | 0 / 12 / 0 | 0 / 12 / 0 |
@@ -97,7 +102,7 @@
 | UiObjectCollection# | 70 | 69 | 70 | - | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
 | UiSelector# | 186 | 186 | 186 | - | 186 | 0 / 186 / 0 | 0 / 186 / 0 | 0 / 186 / 0 |
 | VolatileDispose# | 3 | 3 | 3 | - | 3 | 3 / 0 / 0 | 3 / 0 / 0 | 3 / 0 / 0 |
-| WebSocket# | 24 | 24 | 24 | - | 0 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
+| WebSocket# | 24 | 24 | 24 | - | 0 | 24 / 0 / 0 | 24 / 0 / 0 | 0 / 24 / 0 |
 | WrappedBarcode# | 22 | 22 | 22 | - | 22 | 0 / 22 / 0 | 0 / 22 / 0 | 0 / 22 / 0 |
 | YoloDetector# | 2 | 2 | 2 | - | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | Zip# | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
@@ -170,7 +175,7 @@
 | timers | 18 | 18 | 18 | 4 / 10 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 12 / 6 / 0 |
 | toast | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | tts | 35 | 35 | 35 | 35 / 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
-| ui | 40 | 36 | 36 | 25 / 25 | 36 | 35 / 4 / 1 | 35 / 4 / 1 | 3 / 4 / 33 |
+| ui | 40 | 36 | 36 | 25 / 25 | 36 | 35 / 5 / 0 | 35 / 5 / 0 | 3 / 5 / 32 |
 | util | 54 | 54 | 54 | 47 / 47 | 54 | 48 / 6 / 0 | 48 / 6 / 0 | 48 / 6 / 0 |
 | util.inspect | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | util.java | 6 | 6 | 6 | 3 / 3 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
@@ -200,7 +205,6 @@
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `isUiThread` | pending | pending | local-shim |
 | `newInjectableWebClient` | bridged | bridged | pending |
 | `newInjectableWebView` | bridged | bridged | pending |
 | `newWebSocket` | bridged | bridged | pending |
@@ -208,16 +212,6 @@
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `toString` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `toastError` | pending | pending | capability-gated |
-| `toastInfo` | pending | pending | capability-gated |
-| `toastLog` | bridged | pending | capability-gated |
-| `toastVerbose` | pending | pending | capability-gated |
-| `toastWarn` | pending | pending | capability-gated |
-| `toasterror` | pending | pending | capability-gated |
-| `toastinfo` | pending | pending | capability-gated |
-| `toastlog` | pending | pending | capability-gated |
-| `toastverbose` | pending | pending | capability-gated |
-| `toastwarn` | pending | pending | capability-gated |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 
 ### App#
@@ -294,75 +288,128 @@
 | `Canvas#toImage` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `Canvas#translate` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
+### ComposeFloatyWindow#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ComposeFloatyWindow#close` | bridged | bridged | pending |
+| `ComposeFloatyWindow#disableFocus` | bridged | bridged | pending |
+| `ComposeFloatyWindow#getHeight` | bridged | bridged | pending |
+| `ComposeFloatyWindow#getWidth` | bridged | bridged | pending |
+| `ComposeFloatyWindow#getX` | bridged | bridged | pending |
+| `ComposeFloatyWindow#getY` | bridged | bridged | pending |
+| `ComposeFloatyWindow#isClosed` | bridged | bridged | pending |
+| `ComposeFloatyWindow#on` | bridged | bridged | pending |
+| `ComposeFloatyWindow#post` | bridged | bridged | pending |
+| `ComposeFloatyWindow#requestFocus` | bridged | bridged | pending |
+| `ComposeFloatyWindow#root` | bridged | bridged | pending |
+| `ComposeFloatyWindow#session` | bridged | bridged | pending |
+| `ComposeFloatyWindow#setAdjustEnabled` | bridged | bridged | pending |
+| `ComposeFloatyWindow#setPosition` | bridged | bridged | pending |
+| `ComposeFloatyWindow#setSize` | bridged | bridged | pending |
+| `ComposeFloatyWindow#setTouchable` | bridged | bridged | pending |
+| `ComposeFloatyWindow#showSnackbar` | bridged | bridged | pending |
+| `ComposeFloatyWindow#update` | bridged | bridged | pending |
+
 ### ComposeNode#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `ComposeNode#alpha` | bridged | bridged | pending |
 | `ComposeNode#bg` | bridged | bridged | pending |
+| `ComposeNode#children` | bridged | bridged | pending |
 | `ComposeNode#contentDescription` | bridged | bridged | pending |
 | `ComposeNode#h` | bridged | bridged | pending |
+| `ComposeNode#key` | bridged | bridged | pending |
+| `ComposeNode#nodeId` | bridged | bridged | pending |
 | `ComposeNode#padding` | bridged | bridged | pending |
+| `ComposeNode#parent` | bridged | bridged | pending |
 | `ComposeNode#testTag` | bridged | bridged | pending |
+| `ComposeNode#toString` | bridged | bridged | pending |
+| `ComposeNode#type` | bridged | bridged | pending |
 | `ComposeNode#w` | bridged | bridged | pending |
 | `ComposeNode#weight` | bridged | bridged | pending |
+
+### ComposeRef#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ComposeRef#current` | bridged | bridged | pending |
+
+### ComposeSession#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ComposeSession#close` | bridged | bridged | pending |
+| `ComposeSession#isClosed` | bridged | bridged | pending |
+| `ComposeSession#on` | bridged | bridged | pending |
+| `ComposeSession#post` | bridged | bridged | pending |
+| `ComposeSession#root` | bridged | bridged | pending |
+| `ComposeSession#showSnackbar` | bridged | bridged | pending |
+| `ComposeSession#update` | bridged | bridged | pending |
+
+### ComposeState#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ComposeState#value` | bridged | bridged | pending |
 
 ### ConsoleConfigurator#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `ConsoleConfigurator#contentBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentTextColors` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#contentTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#exitOnCloseTimeout` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#gravity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isAvoidStatusBar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isColorful` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isExitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isInputVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isTimeVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#isTouchable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#position` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setAvoidStatusBar` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setColorful` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentTextColors` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setContentTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setExitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setGravity` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setInputVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setPosition` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTextColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTimeFormat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTimeVisible` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitle` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleIconsTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleTextColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTitleTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTouchThrough` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#setTouchable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#show` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#timeFormat` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#title` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleBackgroundAlpha` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleBackgroundColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleBackgroundTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleIconsTint` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleTextColor` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `ConsoleConfigurator#titleTextSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentTextColors` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#contentTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#exitOnCloseTimeout` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#gravity` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isAvoidStatusBar` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isColorful` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isExitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isInputVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isTimeVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#isTouchable` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#position` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setAvoidStatusBar` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setColorful` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentTextColors` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setContentTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setExitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setGravity` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setInputVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setPosition` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTextColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTimeFormat` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTimeVisible` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitle` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleIconsTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleTextColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTitleTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTouchThrough` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#setTouchable` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#show` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#size` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#timeFormat` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#title` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleBackgroundAlpha` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleBackgroundColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleBackgroundTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleIconsTint` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleTextColor` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `ConsoleConfigurator#titleTextSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### ContinuationCreator#
 
@@ -572,18 +619,18 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `FloatyWindow#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#disableFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#exitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#findView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#isAdjustEnabled` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#requestFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#setPosition` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#setSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#x` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `FloatyWindow#y` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#close` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#disableFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#exitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#findView` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#height` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#isAdjustEnabled` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#requestFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#setPosition` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#setSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#width` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#x` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `FloatyWindow#y` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### Flow#
 
@@ -631,14 +678,14 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `InjectableWebClient#inject` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `InjectableWebClient#injectAndWait` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `InjectableWebClient#inject` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `InjectableWebClient#injectAndWait` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### InjectableWebView#
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `InjectableWebView#inject` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `InjectableWebView#inject` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### IntentTask#
 
@@ -768,18 +815,18 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `RawWindow#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#disableFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#exitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#findView` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#height` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#requestFocus` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#setPosition` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#setSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#setTouchable` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#x` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `RawWindow#y` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#close` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#disableFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#exitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#findView` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#height` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#requestFocus` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#setPosition` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#setSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#setTouchable` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#width` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#x` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `RawWindow#y` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### ScreenCaptureOptions#
 
@@ -1343,30 +1390,30 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `WebSocket#addListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#cancel` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#client` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#close` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#emit` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#emitSticky` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#eventNames` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#exitOnClose` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#getMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#getTimer` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#listenerCount` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#listeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#on` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#once` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#prependListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#prependOnceListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#queueSize` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#rebuild` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#removeAllListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#removeListener` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#request` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#send` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#setMaxListeners` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `WebSocket#url` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#addListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#cancel` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#client` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#close` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#emit` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#emitSticky` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#eventNames` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#exitOnClose` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#getMaxListeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#getTimer` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#listenerCount` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#listeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#on` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#once` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#prependListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#prependOnceListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#queueSize` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#rebuild` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#removeAllListeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#removeListener` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#request` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#send` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#setMaxListeners` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
+| `WebSocket#url` | bridged | bridged | not-portable: java-prototype (java-prototype-objects) |
 
 ### WrappedBarcode#
 
@@ -2149,7 +2196,7 @@
 | `ui.keepScreenOn` | bridged | bridged | pending |
 | `ui.layout` | bridged | bridged | pending |
 | `ui.layoutFile` | bridged | bridged | pending |
-| `ui.layoutInflater` | pending | pending | pending |
+| `ui.layoutInflater` | not-portable: java-prototype (java-prototype-layout-inflater) | not-portable: java-prototype (java-prototype-layout-inflater) | not-portable: java-prototype (java-prototype-layout-inflater) |
 | `ui.navigationBarColor` | bridged | bridged | pending |
 | `ui.navigationBarHeight` | bridged | bridged | pending |
 | `ui.navigationBarIconLight` | bridged | bridged | pending |

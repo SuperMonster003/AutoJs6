@@ -196,6 +196,7 @@ jobs:
           node tools/api-coverage/check-runtime-system.mjs
           node tools/api-coverage/check-runtime-device-media.mjs
           node tools/api-coverage/check-runtime-automation.mjs
+          node tools/api-coverage/check-runtime-ui.mjs
           node tools/api-coverage/check-bun-js-tools.mjs
           node tools/api-coverage/check-bun-files-data.mjs
           node tools/api-coverage/check-bun-app-shell.mjs
