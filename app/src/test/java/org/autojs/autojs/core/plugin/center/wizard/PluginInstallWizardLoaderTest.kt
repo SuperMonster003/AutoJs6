@@ -74,6 +74,29 @@ class PluginInstallWizardLoaderTest {
     }
 
     @Test
+    fun paddleLiteRowFollowsTheOnnxRuntimePaddleOcrRow() {
+        val prefix = "io.github.supermonster003.autojs6.plugin."
+        val items = PluginInstallWizardLoader.buildItems(
+            entries = listOf(
+                entry(prefix + "paddleocr.v4.mobile"),
+                entry(prefix + "paddleocr.v3.paddlelite", title = ""),
+                entry(prefix + "paddleocr.v3"),
+            ),
+            isInstalled = { false },
+            deviceAbis = listOf("arm64-v8a"),
+            pageSize = 4096L,
+        )
+        assertEquals(
+            listOf("paddleocr.v3", "paddleocr.v3.paddlelite", "paddleocr.v4.mobile").map { prefix + it },
+            items.map { it.packageName },
+        )
+        val lite = items[1]
+        assertEquals("Paddle OCR PP OCRv3 Paddle Lite", lite.title)
+        assertEquals(PluginInstallWizardCategory.IMAGE, lite.category)
+        assertFalse(lite.inStandard || lite.inMinimal)
+    }
+
+    @Test
     fun compatibilityFlagsComeFromAbisAndNativeAlignment() {
         val items = PluginInstallWizardLoader.buildItems(
             entries = listOf(
