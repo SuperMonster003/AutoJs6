@@ -1166,7 +1166,7 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 宿主 | 14943b3a6 | 真机脚本 device_bun_ui.py |
 | Bun 插件 | b01cc86 / 22a2035 / 37a5f5c | 同步 Node 079579ec (P3.4 请求), 4ed3a670 / 370f4088 / c54d4592, 0e1e6d14 |
 | 宿主 | 7e559a409 | check-bun-js-tools.mjs 与 check-runtime-system.mjs 的过期期望 |
-| 文档 | dfa8a0e / 4edcb9b, fbdb103 / 555777b, b5def97 / 9c4fb16 | console / keys, toast / global, UI 族 13 页的运行时表与 changelog / progress (zh-Hans); 生成物 |
+| 文档 | 0933341 / 4edcb9b, fbdb103 / 555777b, b5def97 / 9c4fb16 | console / keys, toast / global, UI 族 13 页的运行时表与 changelog / progress (zh-Hans); 生成物 |
 | Offline Docs | 9a9bb42 / 772cc3e / 7610517 | 同步生成页, 版本不变 |
 | TS | 836ae70 / be281ba | 同步 Bun host client 声明 |
 | Ace | 6700992 / cd85152, 8d0877c / c5009db | 内置 Bun 声明; 运行时查询表 4253 -> 4293, 5079 -> 5289 |
