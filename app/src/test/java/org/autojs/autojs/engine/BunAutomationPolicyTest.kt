@@ -91,7 +91,7 @@ class BunAutomationPolicyTest {
             NodeBridgePermissionManifest.missingCapabilities(powerGrants, NodeBridgePermissionManifest.requiredCapabilitiesFor("power_manager", method)))
     }
 
-    // Q137 (a): plugin_tools.control lists and calls the tools; USER_GRANTED providers also need plugin_tools.user_granted.
+    // Q137 (a): plugintools.control lists and calls the tools; USER_GRANTED providers also need plugintools.usergranted.
     @Test fun pluginToolsGrantsMapToNodePluginToolsAndUserGrantedStaysSeparate() {
         assertEquals(listOf("plugin_tools"), BunAutomationBridge.nodeCapabilities(listOf(Grants.PLUGIN_TOOLS_CONTROL)))
         assertEquals(listOf("plugin_tools", "plugin_tools.user_granted"),
@@ -100,6 +100,13 @@ class BunAutomationPolicyTest {
         for (method in NodeBridgeModules.pluginToolsMethods)
             assertEquals(listOf("plugin_tools"), NodeBridgePermissionManifest.requiredCapabilitiesFor("plugin_tools", method))
         assertEquals(listOf("files", "files.write"), BunAutomationBridge.nodeCapabilities(listOf(Grants.FILES_CONTROL)))
+    }
+
+    // The plugin's request parser (BunExecutionRequestParser) rejects the whole execution when a granted capability ID is not
+    // dotted lowercase words, so a grant ID with an underscore would break every script while that grant is on.
+    @Test fun systemFamilyGrantIdsPassThePluginCapabilityIdPattern() {
+        val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
+        for (capability in Grants.SYSTEM_FAMILY) assertTrue(capability, pattern.matches(capability))
     }
 
 }

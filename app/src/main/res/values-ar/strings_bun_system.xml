@@ -8,8 +8,8 @@
     <string name="summary_bun_installer_mutate_grant">السماح بتثبيت الحزم وإلغاء تثبيتها وتغيير المثبت الافتراضي; قد يظل تأكيد Android مطلوبا</string>
     <string name="summary_bun_memory_control_grant">السماح بقراءة تشخيص ذاكرة AutoJs6 وطلب جمع البيانات المهملة</string>
     <string name="summary_bun_memory_dump_grant">السماح بكتابة تفريغات كومة AutoJs6 إلى ملفات</string>
-    <string name="summary_bun_plugin_tools_control_grant">السماح بسرد الأدوات التي توفرها الاضافات المثبتة واستدعائها</string>
-    <string name="summary_bun_plugin_tools_user_granted_grant">السماح أيضا بأدوات الاضافات الخارجية التي صرح بها المستخدم</string>
+    <string name="summary_bun_plugintools_control_grant">السماح بسرد الأدوات التي توفرها الاضافات المثبتة واستدعائها</string>
+    <string name="summary_bun_plugintools_usergranted_grant">السماح أيضا بأدوات الاضافات الخارجية التي صرح بها المستخدم</string>
     <string name="summary_bun_settings_control_grant">السماح بقراءة إعدادات AutoJs6 وتصديرها</string>
     <string name="summary_bun_settings_write_grant">السماح بتشغيل إعدادات AutoJs6 أو إيقافها</string>
     <string name="summary_bun_sysprops_control_grant">السماح بقراءة خصائص نظام Android</string>
@@ -21,8 +21,8 @@
     <string name="text_bun_installer_mutate_grant">تثبيت الحزم</string>
     <string name="text_bun_memory_control_grant">تشخيص الذاكرة</string>
     <string name="text_bun_memory_dump_grant">تفريغات الكومة</string>
-    <string name="text_bun_plugin_tools_control_grant">أدوات الاضافات</string>
-    <string name="text_bun_plugin_tools_user_granted_grant">أدوات الاضافات المصرح بها من المستخدم</string>
+    <string name="text_bun_plugintools_control_grant">أدوات الاضافات</string>
+    <string name="text_bun_plugintools_usergranted_grant">أدوات الاضافات المصرح بها من المستخدم</string>
     <string name="text_bun_settings_control_grant">إعدادات AutoJs6</string>
     <string name="text_bun_settings_write_grant">تغيير إعدادات AutoJs6</string>
     <string name="text_bun_sysprops_control_grant">خصائص النظام</string>

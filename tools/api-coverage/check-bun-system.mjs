@@ -27,7 +27,7 @@ const sdk = await import(pathToFileURL(resolve(bun, 'app/src/main/assets/autojs6
 // A client with every grant of the family but engines.control (which asks the host for its record first): building it
 // and reading its members must not reach the host except for the app identity.
 const FAMILY = ['autojs.control', 'autojs.manage', 'settings.control', 'settings.write', 'sysprops.control', 'memory.control', 'memory.dump',
-  'installer.control', 'installer.mutate', 'engines.control', 'engines.exec', 'plugin_tools.control', 'plugin_tools.user_granted'];
+  'installer.control', 'installer.mutate', 'engines.control', 'engines.exec', 'plugintools.control', 'plugintools.usergranted'];
 async function client(capabilities, calls = []) {
   return sdk.createHostClient({socket: 'coverage', fetch: async (url, init) => {
     if (url.endsWith('/info')) return Response.json({ok: true, bridgeVersion: 1, capabilities, limits: {}});
@@ -110,7 +110,7 @@ for (const [capability, key] of [['autojs.control', 'AUTOJS'], ['settings.contro
   assert.deepEqual([...sdk.HOST_API_METHODS[capability]].sort(), routes(key), `${capability}: client / RuntimeSystemBridge drift`);
   assert(new RegExp(`Grants\\.${capability.split('.')[0].toUpperCase()}_CONTROL to RuntimeSystemBridge\\.methodsByModule\\.getValue\\(RuntimeSystemBridge\\.${key}\\)`).test(bridge), `${capability} host white list`);
 }
-for (const [capability, key] of [['engines.control', 'engines'], ['plugin_tools.control', 'pluginTools']]) {
+for (const [capability, key] of [['engines.control', 'engines'], ['plugintools.control', 'pluginTools']]) {
   assert.deepEqual([...sdk.HOST_API_METHODS[capability]].sort(), names(protocol.match(new RegExp(`val ${key}Methods = setOf\\(([^)]*)\\)`))[1]), `${capability}: client / host drift`);
 }
 assert(/Grants\.ENGINES_CONTROL to NodeBridgeModules\.enginesMethods/.test(bridge) && /Grants\.PLUGIN_TOOLS_CONTROL to NodeBridgeModules\.pluginToolsMethods/.test(bridge), 'engines / plugin tools white lists');
@@ -141,7 +141,7 @@ for (const [name, call, missing] of [
   ['engines.execScriptFile', () => denied.engines.execScriptFile('a.js'), 'engines.exec'],
   ['powerManager.requestIgnoreBatteryOptimizations', () => denied.powerManager.requestIgnoreBatteryOptimizations(), 'device.power'],
   ['notice.launchSettings', () => denied.notifications.launchSettings(), 'notifications.settings'],
-  ['plugins.tools.call', () => denied.plugins.tools.call('t'), 'plugin_tools.control'],
+  ['plugins.tools.call', () => denied.plugins.tools.call('t'), 'plugintools.control'],
 ]) {
   await assert.rejects(call(), error => error.code === 'NOT_GRANTED' && error.missingCapabilities.includes(missing), `${name} without grants`);
 }
@@ -151,8 +151,8 @@ const policy = JSON.parse(read(resolve(root, 'tools/api-coverage/runtime-policy.
 assert(policy.bun.namespaceAliases.workManager.includes('tasks'), 'Bun workManager alias tasks');
 assert(policy.exclusions.find(rule => rule.id === 'native-memory-watch').columns.includes('bun'), 'memory.watch not-portable for Bun (Q140 (a))');
 const hostApi = read(resolve(bun, 'docs/host-api.md'));
-for (const name of ['autojs.manage', 'settings.write', 'memory.dump', 'installer.mutate', 'engines.exec', 'plugin_tools.user_granted', 'AUTOJS6_HOST_INFO_FILE', 'myEngine']) {
+for (const name of ['autojs.manage', 'settings.write', 'memory.dump', 'installer.mutate', 'engines.exec', 'plugintools.usergranted', 'AUTOJS6_HOST_INFO_FILE', 'myEngine']) {
   assert(hostApi.includes(name), `Bun docs/host-api.md describes ${name}`);
 }
-console.log(JSON.stringify({members, globals: globals.length, grants: FAMILY.length, routes: Object.fromEntries(['autojs.control', 'installer.control', 'engines.control', 'plugin_tools.control']
+console.log(JSON.stringify({members, globals: globals.length, grants: FAMILY.length, routes: Object.fromEntries(['autojs.control', 'installer.control', 'engines.control', 'plugintools.control']
   .map(name => [name, sdk.HOST_API_METHODS[name].length])), declarations: 'type-checked', hostApi: true}));

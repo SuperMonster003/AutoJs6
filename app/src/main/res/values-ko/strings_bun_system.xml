@@ -8,8 +8,8 @@
     <string name="summary_bun_installer_mutate_grant">패키지 설치와 제거, 기본 설치 프로그램 변경 허용; Android 확인이 여전히 필요할 수 있음</string>
     <string name="summary_bun_memory_control_grant">AutoJs6의 메모리 진단 읽기와 가비지 컬렉션 요청 허용</string>
     <string name="summary_bun_memory_dump_grant">AutoJs6의 힙 덤프를 파일에 쓰기 허용</string>
-    <string name="summary_bun_plugin_tools_control_grant">설치된 플러그인이 제공하는 도구의 목록 조회와 호출 허용</string>
-    <string name="summary_bun_plugin_tools_user_granted_grant">사용자가 허용한 서드파티 플러그인의 도구도 허용</string>
+    <string name="summary_bun_plugintools_control_grant">설치된 플러그인이 제공하는 도구의 목록 조회와 호출 허용</string>
+    <string name="summary_bun_plugintools_usergranted_grant">사용자가 허용한 서드파티 플러그인의 도구도 허용</string>
     <string name="summary_bun_settings_control_grant">AutoJs6 설정 읽기와 내보내기 허용</string>
     <string name="summary_bun_settings_write_grant">AutoJs6 설정 켜기 또는 끄기 허용</string>
     <string name="summary_bun_sysprops_control_grant">Android 시스템 속성 읽기 허용</string>
@@ -21,8 +21,8 @@
     <string name="text_bun_installer_mutate_grant">패키지 설치</string>
     <string name="text_bun_memory_control_grant">메모리 진단</string>
     <string name="text_bun_memory_dump_grant">힙 덤프</string>
-    <string name="text_bun_plugin_tools_control_grant">플러그인 도구</string>
-    <string name="text_bun_plugin_tools_user_granted_grant">사용자가 허용한 플러그인의 도구</string>
+    <string name="text_bun_plugintools_control_grant">플러그인 도구</string>
+    <string name="text_bun_plugintools_usergranted_grant">사용자가 허용한 플러그인의 도구</string>
     <string name="text_bun_settings_control_grant">AutoJs6 설정</string>
     <string name="text_bun_settings_write_grant">AutoJs6 설정 변경</string>
     <string name="text_bun_sysprops_control_grant">시스템 속성</string>

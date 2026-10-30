@@ -8,8 +8,8 @@
     <string name="summary_bun_installer_mutate_grant">パッケージのインストールとアンインストール, 既定のインストーラーの変更を許可; Android の確認が必要な場合があります</string>
     <string name="summary_bun_memory_control_grant">AutoJs6 のメモリ診断の読み取りとガベージコレクションの要求を許可</string>
     <string name="summary_bun_memory_dump_grant">AutoJs6 のヒープダンプのファイルへの書き込みを許可</string>
-    <string name="summary_bun_plugin_tools_control_grant">インストール済みプラグインが提供するツールの一覧取得と呼び出しを許可</string>
-    <string name="summary_bun_plugin_tools_user_granted_grant">ユーザーが許可したサードパーティプラグインのツールも許可</string>
+    <string name="summary_bun_plugintools_control_grant">インストール済みプラグインが提供するツールの一覧取得と呼び出しを許可</string>
+    <string name="summary_bun_plugintools_usergranted_grant">ユーザーが許可したサードパーティプラグインのツールも許可</string>
     <string name="summary_bun_settings_control_grant">AutoJs6 の設定の読み取りとエクスポートを許可</string>
     <string name="summary_bun_settings_write_grant">AutoJs6 の設定のオンとオフの切り替えを許可</string>
     <string name="summary_bun_sysprops_control_grant">Android のシステムプロパティの読み取りを許可</string>
@@ -21,8 +21,8 @@
     <string name="text_bun_installer_mutate_grant">パッケージのインストール</string>
     <string name="text_bun_memory_control_grant">メモリ診断</string>
     <string name="text_bun_memory_dump_grant">ヒープダンプ</string>
-    <string name="text_bun_plugin_tools_control_grant">プラグインツール</string>
-    <string name="text_bun_plugin_tools_user_granted_grant">ユーザーが許可したプラグインのツール</string>
+    <string name="text_bun_plugintools_control_grant">プラグインツール</string>
+    <string name="text_bun_plugintools_usergranted_grant">ユーザーが許可したプラグインのツール</string>
     <string name="text_bun_settings_control_grant">AutoJs6 の設定</string>
     <string name="text_bun_settings_write_grant">AutoJs6 の設定の変更</string>
     <string name="text_bun_sysprops_control_grant">システムプロパティ</string>
