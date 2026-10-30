@@ -243,6 +243,7 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                     engineId = options?.inquire(PaddleOcrOptionExtraKeys.ENGINE_ID, ::coerceString, "")?.takeIf { it.isNotBlank() },
                     engine = options?.inquire(PaddleOcrOptionExtraKeys.ENGINE, ::coerceString, "")?.takeIf { it.isNotBlank() },
                     variant = options?.inquire(PaddleOcrOptionExtraKeys.VARIANT, ::coerceString, "")?.takeIf { it.isNotBlank() },
+                    profile = options?.inquire(PaddleOcrOptionExtraKeys.PROFILE, ::coerceString, "")?.takeIf { it.isNotBlank() },
                     moduleLabel = "ML Kit OCR / Paddle OCR / Rapid OCR",
                     automatic = true,
                 )

@@ -2955,6 +2955,7 @@ class AndroidNodeBridgeCapabilityProvider(
                         engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE),
                         variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
+                        profile = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.PROFILE),
                         moduleLabel = OCR_MODULE_LABEL,
                         automatic = true,
                     ) }
