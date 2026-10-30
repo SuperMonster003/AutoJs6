@@ -5105,10 +5105,22 @@ imeEnter.arity	--C	number '0'
 imeEnter.length	--C	number '0'
 imeEnter.name	--C	string 'imeEnter'
 imgui	EW-	object [object Object] proto=[object Object] ctor=Object Object.prototype
+imgui.AcceptDragDropPayload	EW-	function name='AcceptDragDropPayload' length=0
+imgui.AcceptDragDropPayload.arity	--C	number '0'
+imgui.AcceptDragDropPayload.length	--C	number '0'
+imgui.AcceptDragDropPayload.name	--C	string 'AcceptDragDropPayload'
 imgui.AddButtonEx	EW-	function name='AddButtonEx' length=0
 imgui.AddButtonEx.arity	--C	number '0'
 imgui.AddButtonEx.length	--C	number '0'
 imgui.AddButtonEx.name	--C	string 'AddButtonEx'
+imgui.AddMouseButtonEvent	EW-	function name='AddMouseButtonEvent' length=0
+imgui.AddMouseButtonEvent.arity	--C	number '0'
+imgui.AddMouseButtonEvent.length	--C	number '0'
+imgui.AddMouseButtonEvent.name	--C	string 'AddMouseButtonEvent'
+imgui.AddMousePosEvent	EW-	function name='AddMousePosEvent' length=0
+imgui.AddMousePosEvent.arity	--C	number '0'
+imgui.AddMousePosEvent.length	--C	number '0'
+imgui.AddMousePosEvent.name	--C	string 'AddMousePosEvent'
 imgui.Alert	EW-	function name='Alert' length=0
 imgui.Alert.arity	--C	number '0'
 imgui.Alert.length	--C	number '0'
@@ -5139,6 +5151,14 @@ imgui.BeginDisabled	EW-	function name='BeginDisabled' length=0
 imgui.BeginDisabled.arity	--C	number '0'
 imgui.BeginDisabled.length	--C	number '0'
 imgui.BeginDisabled.name	--C	string 'BeginDisabled'
+imgui.BeginDragDropSource	EW-	function name='BeginDragDropSource' length=0
+imgui.BeginDragDropSource.arity	--C	number '0'
+imgui.BeginDragDropSource.length	--C	number '0'
+imgui.BeginDragDropSource.name	--C	string 'BeginDragDropSource'
+imgui.BeginDragDropTarget	EW-	function name='BeginDragDropTarget' length=0
+imgui.BeginDragDropTarget.arity	--C	number '0'
+imgui.BeginDragDropTarget.length	--C	number '0'
+imgui.BeginDragDropTarget.name	--C	string 'BeginDragDropTarget'
 imgui.BeginGroup	EW-	function name='BeginGroup' length=0
 imgui.BeginGroup.arity	--C	number '0'
 imgui.BeginGroup.length	--C	number '0'
@@ -5286,6 +5306,7 @@ imgui.Dp	EW-	function name='Dp' length=0
 imgui.Dp.arity	--C	number '0'
 imgui.Dp.length	--C	number '0'
 imgui.Dp.name	--C	string 'Dp'
+imgui.DragDropFlags	EAG--	accessor
 imgui.DragFloat	EW-	function name='DragFloat' length=0
 imgui.DragFloat.arity	--C	number '0'
 imgui.DragFloat.length	--C	number '0'
@@ -5348,6 +5369,14 @@ imgui.EndDisabled	EW-	function name='EndDisabled' length=0
 imgui.EndDisabled.arity	--C	number '0'
 imgui.EndDisabled.length	--C	number '0'
 imgui.EndDisabled.name	--C	string 'EndDisabled'
+imgui.EndDragDropSource	EW-	function name='EndDragDropSource' length=0
+imgui.EndDragDropSource.arity	--C	number '0'
+imgui.EndDragDropSource.length	--C	number '0'
+imgui.EndDragDropSource.name	--C	string 'EndDragDropSource'
+imgui.EndDragDropTarget	EW-	function name='EndDragDropTarget' length=0
+imgui.EndDragDropTarget.arity	--C	number '0'
+imgui.EndDragDropTarget.length	--C	number '0'
+imgui.EndDragDropTarget.name	--C	string 'EndDragDropTarget'
 imgui.EndGroup	EW-	function name='EndGroup' length=0
 imgui.EndGroup.arity	--C	number '0'
 imgui.EndGroup.length	--C	number '0'
@@ -5398,6 +5427,10 @@ imgui.GetBackgroundDrawList	EW-	function name='GetBackgroundDrawList' length=0
 imgui.GetBackgroundDrawList.arity	--C	number '0'
 imgui.GetBackgroundDrawList.length	--C	number '0'
 imgui.GetBackgroundDrawList.name	--C	string 'GetBackgroundDrawList'
+imgui.GetClipboardText	EW-	function name='GetClipboardText' length=0
+imgui.GetClipboardText.arity	--C	number '0'
+imgui.GetClipboardText.length	--C	number '0'
+imgui.GetClipboardText.name	--C	string 'GetClipboardText'
 imgui.GetComponent	EW-	function name='GetComponent' length=0
 imgui.GetComponent.arity	--C	number '0'
 imgui.GetComponent.length	--C	number '0'
@@ -5410,6 +5443,10 @@ imgui.GetCursorPos	EW-	function name='GetCursorPos' length=0
 imgui.GetCursorPos.arity	--C	number '0'
 imgui.GetCursorPos.length	--C	number '0'
 imgui.GetCursorPos.name	--C	string 'GetCursorPos'
+imgui.GetDragDropPayload	EW-	function name='GetDragDropPayload' length=0
+imgui.GetDragDropPayload.arity	--C	number '0'
+imgui.GetDragDropPayload.length	--C	number '0'
+imgui.GetDragDropPayload.name	--C	string 'GetDragDropPayload'
 imgui.GetExampleSource	EW-	function name='GetExampleSource' length=0
 imgui.GetExampleSource.arity	--C	number '0'
 imgui.GetExampleSource.length	--C	number '0'
@@ -5426,6 +5463,14 @@ imgui.GetFrameHeightWithSpacing	EW-	function name='GetFrameHeightWithSpacing' le
 imgui.GetFrameHeightWithSpacing.arity	--C	number '0'
 imgui.GetFrameHeightWithSpacing.length	--C	number '0'
 imgui.GetFrameHeightWithSpacing.name	--C	string 'GetFrameHeightWithSpacing'
+imgui.GetKeyName	EW-	function name='GetKeyName' length=0
+imgui.GetKeyName.arity	--C	number '0'
+imgui.GetKeyName.length	--C	number '0'
+imgui.GetKeyName.name	--C	string 'GetKeyName'
+imgui.GetKeyPressedAmount	EW-	function name='GetKeyPressedAmount' length=0
+imgui.GetKeyPressedAmount.arity	--C	number '0'
+imgui.GetKeyPressedAmount.length	--C	number '0'
+imgui.GetKeyPressedAmount.name	--C	string 'GetKeyPressedAmount'
 imgui.GetMouseDragDelta	EW-	function name='GetMouseDragDelta' length=0
 imgui.GetMouseDragDelta.arity	--C	number '0'
 imgui.GetMouseDragDelta.length	--C	number '0'
@@ -5488,6 +5533,7 @@ imgui.Indent	EW-	function name='Indent' length=0
 imgui.Indent.arity	--C	number '0'
 imgui.Indent.length	--C	number '0'
 imgui.Indent.name	--C	string 'Indent'
+imgui.InputFlags	EAG--	accessor
 imgui.InputFloat	EW-	function name='InputFloat' length=0
 imgui.InputFloat.arity	--C	number '0'
 imgui.InputFloat.length	--C	number '0'
@@ -5577,6 +5623,22 @@ imgui.IsItemVisible	EW-	function name='IsItemVisible' length=0
 imgui.IsItemVisible.arity	--C	number '0'
 imgui.IsItemVisible.length	--C	number '0'
 imgui.IsItemVisible.name	--C	string 'IsItemVisible'
+imgui.IsKeyChordPressed	EW-	function name='IsKeyChordPressed' length=0
+imgui.IsKeyChordPressed.arity	--C	number '0'
+imgui.IsKeyChordPressed.length	--C	number '0'
+imgui.IsKeyChordPressed.name	--C	string 'IsKeyChordPressed'
+imgui.IsKeyDown	EW-	function name='IsKeyDown' length=0
+imgui.IsKeyDown.arity	--C	number '0'
+imgui.IsKeyDown.length	--C	number '0'
+imgui.IsKeyDown.name	--C	string 'IsKeyDown'
+imgui.IsKeyPressed	EW-	function name='IsKeyPressed' length=0
+imgui.IsKeyPressed.arity	--C	number '0'
+imgui.IsKeyPressed.length	--C	number '0'
+imgui.IsKeyPressed.name	--C	string 'IsKeyPressed'
+imgui.IsKeyReleased	EW-	function name='IsKeyReleased' length=0
+imgui.IsKeyReleased.arity	--C	number '0'
+imgui.IsKeyReleased.length	--C	number '0'
+imgui.IsKeyReleased.name	--C	string 'IsKeyReleased'
 imgui.IsMouseClicked	EW-	function name='IsMouseClicked' length=0
 imgui.IsMouseClicked.arity	--C	number '0'
 imgui.IsMouseClicked.length	--C	number '0'
@@ -5656,6 +5718,7 @@ imgui.MenuItem	EW-	function name='MenuItem' length=0
 imgui.MenuItem.arity	--C	number '0'
 imgui.MenuItem.length	--C	number '0'
 imgui.MenuItem.name	--C	string 'MenuItem'
+imgui.Mod	EAG--	accessor
 imgui.MouseButton	EAG--	accessor
 imgui.MultiChoice	EW-	function name='MultiChoice' length=0
 imgui.MultiChoice.arity	--C	number '0'
@@ -5677,6 +5740,10 @@ imgui.PlotLines	EW-	function name='PlotLines' length=0
 imgui.PlotLines.arity	--C	number '0'
 imgui.PlotLines.length	--C	number '0'
 imgui.PlotLines.name	--C	string 'PlotLines'
+imgui.PopClipRect	EW-	function name='PopClipRect' length=0
+imgui.PopClipRect.arity	--C	number '0'
+imgui.PopClipRect.length	--C	number '0'
+imgui.PopClipRect.name	--C	string 'PopClipRect'
 imgui.PopFont	EW-	function name='PopFont' length=0
 imgui.PopFont.arity	--C	number '0'
 imgui.PopFont.length	--C	number '0'
@@ -5702,6 +5769,10 @@ imgui.ProgressBar	EW-	function name='ProgressBar' length=0
 imgui.ProgressBar.arity	--C	number '0'
 imgui.ProgressBar.length	--C	number '0'
 imgui.ProgressBar.name	--C	string 'ProgressBar'
+imgui.PushClipRect	EW-	function name='PushClipRect' length=0
+imgui.PushClipRect.arity	--C	number '0'
+imgui.PushClipRect.length	--C	number '0'
+imgui.PushClipRect.name	--C	string 'PushClipRect'
 imgui.PushFont	EW-	function name='PushFont' length=0
 imgui.PushFont.arity	--C	number '0'
 imgui.PushFont.length	--C	number '0'
@@ -5759,10 +5830,18 @@ imgui.SeparatorText	EW-	function name='SeparatorText' length=0
 imgui.SeparatorText.arity	--C	number '0'
 imgui.SeparatorText.length	--C	number '0'
 imgui.SeparatorText.name	--C	string 'SeparatorText'
+imgui.SetClipboardText	EW-	function name='SetClipboardText' length=0
+imgui.SetClipboardText.arity	--C	number '0'
+imgui.SetClipboardText.length	--C	number '0'
+imgui.SetClipboardText.name	--C	string 'SetClipboardText'
 imgui.SetCursorPos	EW-	function name='SetCursorPos' length=0
 imgui.SetCursorPos.arity	--C	number '0'
 imgui.SetCursorPos.length	--C	number '0'
 imgui.SetCursorPos.name	--C	string 'SetCursorPos'
+imgui.SetDragDropPayload	EW-	function name='SetDragDropPayload' length=0
+imgui.SetDragDropPayload.arity	--C	number '0'
+imgui.SetDragDropPayload.length	--C	number '0'
+imgui.SetDragDropPayload.name	--C	string 'SetDragDropPayload'
 imgui.SetGlobalAlpha	EW-	function name='SetGlobalAlpha' length=0
 imgui.SetGlobalAlpha.arity	--C	number '0'
 imgui.SetGlobalAlpha.length	--C	number '0'
@@ -5779,6 +5858,10 @@ imgui.SetMoreTouch	EW-	function name='SetMoreTouch' length=0
 imgui.SetMoreTouch.arity	--C	number '0'
 imgui.SetMoreTouch.length	--C	number '0'
 imgui.SetMoreTouch.name	--C	string 'SetMoreTouch'
+imgui.SetNextItemShortcut	EW-	function name='SetNextItemShortcut' length=0
+imgui.SetNextItemShortcut.arity	--C	number '0'
+imgui.SetNextItemShortcut.length	--C	number '0'
+imgui.SetNextItemShortcut.name	--C	string 'SetNextItemShortcut'
 imgui.SetNextItemWidth	EW-	function name='SetNextItemWidth' length=0
 imgui.SetNextItemWidth.arity	--C	number '0'
 imgui.SetNextItemWidth.length	--C	number '0'
@@ -5843,6 +5926,10 @@ imgui.SetWindowFontScale	EW-	function name='SetWindowFontScale' length=0
 imgui.SetWindowFontScale.arity	--C	number '0'
 imgui.SetWindowFontScale.length	--C	number '0'
 imgui.SetWindowFontScale.name	--C	string 'SetWindowFontScale'
+imgui.Shortcut	EW-	function name='Shortcut' length=0
+imgui.Shortcut.arity	--C	number '0'
+imgui.Shortcut.length	--C	number '0'
+imgui.Shortcut.name	--C	string 'Shortcut'
 imgui.ShowAboutWindow	EW-	function name='ShowAboutWindow' length=0
 imgui.ShowAboutWindow.arity	--C	number '0'
 imgui.ShowAboutWindow.length	--C	number '0'
@@ -6039,11 +6126,23 @@ imgui.WantCaptureMouse.length	--C	number '0'
 imgui.WantCaptureMouse.name	--C	string 'WantCaptureMouse'
 imgui.WindowFlags	EAG--	accessor
 imgui.WindowMode	EAG--	accessor
+imgui.WithDragDropSource	EW-	function name='WithDragDropSource' length=0
+imgui.WithDragDropSource.arity	--C	number '0'
+imgui.WithDragDropSource.length	--C	number '0'
+imgui.WithDragDropSource.name	--C	string 'WithDragDropSource'
+imgui.WithDragDropTarget	EW-	function name='WithDragDropTarget' length=0
+imgui.WithDragDropTarget.arity	--C	number '0'
+imgui.WithDragDropTarget.length	--C	number '0'
+imgui.WithDragDropTarget.name	--C	string 'WithDragDropTarget'
 imgui.WithFont	EW-	function name='WithFont' length=0
 imgui.WithFont.arity	--C	number '0'
 imgui.WithFont.length	--C	number '0'
 imgui.WithFont.name	--C	string 'WithFont'
 imgui.__pluginId	EAG--	accessor
+imgui.acceptDragDropPayload	EW-	function name='acceptDragDropPayload' length=0
+imgui.acceptDragDropPayload.arity	--C	number '0'
+imgui.acceptDragDropPayload.length	--C	number '0'
+imgui.acceptDragDropPayload.name	--C	string 'acceptDragDropPayload'
 imgui.addButtonEx	EW-	function name='addButtonEx' length=0
 imgui.addButtonEx.arity	--C	number '0'
 imgui.addButtonEx.length	--C	number '0'
@@ -6056,6 +6155,14 @@ imgui.addKeyEvent	EW-	function name='addKeyEvent' length=0
 imgui.addKeyEvent.arity	--C	number '0'
 imgui.addKeyEvent.length	--C	number '0'
 imgui.addKeyEvent.name	--C	string 'addKeyEvent'
+imgui.addMouseButtonEvent	EW-	function name='addMouseButtonEvent' length=0
+imgui.addMouseButtonEvent.arity	--C	number '0'
+imgui.addMouseButtonEvent.length	--C	number '0'
+imgui.addMouseButtonEvent.name	--C	string 'addMouseButtonEvent'
+imgui.addMousePosEvent	EW-	function name='addMousePosEvent' length=0
+imgui.addMousePosEvent.arity	--C	number '0'
+imgui.addMousePosEvent.length	--C	number '0'
+imgui.addMousePosEvent.name	--C	string 'addMousePosEvent'
 imgui.addMouseWheel	EW-	function name='addMouseWheel' length=0
 imgui.addMouseWheel.arity	--C	number '0'
 imgui.addMouseWheel.length	--C	number '0'
@@ -6088,6 +6195,14 @@ imgui.beginDisabled	EW-	function name='beginDisabled' length=0
 imgui.beginDisabled.arity	--C	number '0'
 imgui.beginDisabled.length	--C	number '0'
 imgui.beginDisabled.name	--C	string 'beginDisabled'
+imgui.beginDragDropSource	EW-	function name='beginDragDropSource' length=0
+imgui.beginDragDropSource.arity	--C	number '0'
+imgui.beginDragDropSource.length	--C	number '0'
+imgui.beginDragDropSource.name	--C	string 'beginDragDropSource'
+imgui.beginDragDropTarget	EW-	function name='beginDragDropTarget' length=0
+imgui.beginDragDropTarget.arity	--C	number '0'
+imgui.beginDragDropTarget.length	--C	number '0'
+imgui.beginDragDropTarget.name	--C	string 'beginDragDropTarget'
 imgui.beginGroup	EW-	function name='beginGroup' length=0
 imgui.beginGroup.arity	--C	number '0'
 imgui.beginGroup.length	--C	number '0'
@@ -6297,6 +6412,14 @@ imgui.endDisabled	EW-	function name='endDisabled' length=0
 imgui.endDisabled.arity	--C	number '0'
 imgui.endDisabled.length	--C	number '0'
 imgui.endDisabled.name	--C	string 'endDisabled'
+imgui.endDragDropSource	EW-	function name='endDragDropSource' length=0
+imgui.endDragDropSource.arity	--C	number '0'
+imgui.endDragDropSource.length	--C	number '0'
+imgui.endDragDropSource.name	--C	string 'endDragDropSource'
+imgui.endDragDropTarget	EW-	function name='endDragDropTarget' length=0
+imgui.endDragDropTarget.arity	--C	number '0'
+imgui.endDragDropTarget.length	--C	number '0'
+imgui.endDragDropTarget.name	--C	string 'endDragDropTarget'
 imgui.endGroup	EW-	function name='endGroup' length=0
 imgui.endGroup.arity	--C	number '0'
 imgui.endGroup.length	--C	number '0'
@@ -6357,6 +6480,10 @@ imgui.getBackgroundDrawList	EW-	function name='getBackgroundDrawList' length=0
 imgui.getBackgroundDrawList.arity	--C	number '0'
 imgui.getBackgroundDrawList.length	--C	number '0'
 imgui.getBackgroundDrawList.name	--C	string 'getBackgroundDrawList'
+imgui.getClipboardText	EW-	function name='getClipboardText' length=0
+imgui.getClipboardText.arity	--C	number '0'
+imgui.getClipboardText.length	--C	number '0'
+imgui.getClipboardText.name	--C	string 'getClipboardText'
 imgui.getComponent	EW-	function name='getComponent' length=0
 imgui.getComponent.arity	--C	number '0'
 imgui.getComponent.length	--C	number '0'
@@ -6369,6 +6496,10 @@ imgui.getCursorPos	EW-	function name='getCursorPos' length=0
 imgui.getCursorPos.arity	--C	number '0'
 imgui.getCursorPos.length	--C	number '0'
 imgui.getCursorPos.name	--C	string 'getCursorPos'
+imgui.getDragDropPayload	EW-	function name='getDragDropPayload' length=0
+imgui.getDragDropPayload.arity	--C	number '0'
+imgui.getDragDropPayload.length	--C	number '0'
+imgui.getDragDropPayload.name	--C	string 'getDragDropPayload'
 imgui.getExampleSource	EW-	function name='getExampleSource' length=0
 imgui.getExampleSource.arity	--C	number '0'
 imgui.getExampleSource.length	--C	number '0'
@@ -6385,6 +6516,14 @@ imgui.getFrameHeightWithSpacing	EW-	function name='getFrameHeightWithSpacing' le
 imgui.getFrameHeightWithSpacing.arity	--C	number '0'
 imgui.getFrameHeightWithSpacing.length	--C	number '0'
 imgui.getFrameHeightWithSpacing.name	--C	string 'getFrameHeightWithSpacing'
+imgui.getKeyName	EW-	function name='getKeyName' length=0
+imgui.getKeyName.arity	--C	number '0'
+imgui.getKeyName.length	--C	number '0'
+imgui.getKeyName.name	--C	string 'getKeyName'
+imgui.getKeyPressedAmount	EW-	function name='getKeyPressedAmount' length=0
+imgui.getKeyPressedAmount.arity	--C	number '0'
+imgui.getKeyPressedAmount.length	--C	number '0'
+imgui.getKeyPressedAmount.name	--C	string 'getKeyPressedAmount'
 imgui.getMouseDragDelta	EW-	function name='getMouseDragDelta' length=0
 imgui.getMouseDragDelta.arity	--C	number '0'
 imgui.getMouseDragDelta.length	--C	number '0'
@@ -6541,6 +6680,22 @@ imgui.isItemVisible	EW-	function name='isItemVisible' length=0
 imgui.isItemVisible.arity	--C	number '0'
 imgui.isItemVisible.length	--C	number '0'
 imgui.isItemVisible.name	--C	string 'isItemVisible'
+imgui.isKeyChordPressed	EW-	function name='isKeyChordPressed' length=0
+imgui.isKeyChordPressed.arity	--C	number '0'
+imgui.isKeyChordPressed.length	--C	number '0'
+imgui.isKeyChordPressed.name	--C	string 'isKeyChordPressed'
+imgui.isKeyDown	EW-	function name='isKeyDown' length=0
+imgui.isKeyDown.arity	--C	number '0'
+imgui.isKeyDown.length	--C	number '0'
+imgui.isKeyDown.name	--C	string 'isKeyDown'
+imgui.isKeyPressed	EW-	function name='isKeyPressed' length=0
+imgui.isKeyPressed.arity	--C	number '0'
+imgui.isKeyPressed.length	--C	number '0'
+imgui.isKeyPressed.name	--C	string 'isKeyPressed'
+imgui.isKeyReleased	EW-	function name='isKeyReleased' length=0
+imgui.isKeyReleased.arity	--C	number '0'
+imgui.isKeyReleased.length	--C	number '0'
+imgui.isKeyReleased.name	--C	string 'isKeyReleased'
 imgui.isMouseClicked	EW-	function name='isMouseClicked' length=0
 imgui.isMouseClicked.arity	--C	number '0'
 imgui.isMouseClicked.length	--C	number '0'
@@ -6637,6 +6792,10 @@ imgui.plotLines	EW-	function name='plotLines' length=0
 imgui.plotLines.arity	--C	number '0'
 imgui.plotLines.length	--C	number '0'
 imgui.plotLines.name	--C	string 'plotLines'
+imgui.popClipRect	EW-	function name='popClipRect' length=0
+imgui.popClipRect.arity	--C	number '0'
+imgui.popClipRect.length	--C	number '0'
+imgui.popClipRect.name	--C	string 'popClipRect'
 imgui.popFont	EW-	function name='popFont' length=0
 imgui.popFont.arity	--C	number '0'
 imgui.popFont.length	--C	number '0'
@@ -6661,6 +6820,10 @@ imgui.progressBar	EW-	function name='progressBar' length=0
 imgui.progressBar.arity	--C	number '0'
 imgui.progressBar.length	--C	number '0'
 imgui.progressBar.name	--C	string 'progressBar'
+imgui.pushClipRect	EW-	function name='pushClipRect' length=0
+imgui.pushClipRect.arity	--C	number '0'
+imgui.pushClipRect.length	--C	number '0'
+imgui.pushClipRect.name	--C	string 'pushClipRect'
 imgui.pushFont	EW-	function name='pushFont' length=0
 imgui.pushFont.arity	--C	number '0'
 imgui.pushFont.length	--C	number '0'
@@ -6721,10 +6884,18 @@ imgui.separatorText	EW-	function name='separatorText' length=0
 imgui.separatorText.arity	--C	number '0'
 imgui.separatorText.length	--C	number '0'
 imgui.separatorText.name	--C	string 'separatorText'
+imgui.setClipboardText	EW-	function name='setClipboardText' length=0
+imgui.setClipboardText.arity	--C	number '0'
+imgui.setClipboardText.length	--C	number '0'
+imgui.setClipboardText.name	--C	string 'setClipboardText'
 imgui.setCursorPos	EW-	function name='setCursorPos' length=0
 imgui.setCursorPos.arity	--C	number '0'
 imgui.setCursorPos.length	--C	number '0'
 imgui.setCursorPos.name	--C	string 'setCursorPos'
+imgui.setDragDropPayload	EW-	function name='setDragDropPayload' length=0
+imgui.setDragDropPayload.arity	--C	number '0'
+imgui.setDragDropPayload.length	--C	number '0'
+imgui.setDragDropPayload.name	--C	string 'setDragDropPayload'
 imgui.setGlobalAlpha	EW-	function name='setGlobalAlpha' length=0
 imgui.setGlobalAlpha.arity	--C	number '0'
 imgui.setGlobalAlpha.length	--C	number '0'
@@ -6741,6 +6912,10 @@ imgui.setMoreTouch	EW-	function name='setMoreTouch' length=0
 imgui.setMoreTouch.arity	--C	number '0'
 imgui.setMoreTouch.length	--C	number '0'
 imgui.setMoreTouch.name	--C	string 'setMoreTouch'
+imgui.setNextItemShortcut	EW-	function name='setNextItemShortcut' length=0
+imgui.setNextItemShortcut.arity	--C	number '0'
+imgui.setNextItemShortcut.length	--C	number '0'
+imgui.setNextItemShortcut.name	--C	string 'setNextItemShortcut'
 imgui.setNextItemWidth	EW-	function name='setNextItemWidth' length=0
 imgui.setNextItemWidth.arity	--C	number '0'
 imgui.setNextItemWidth.length	--C	number '0'
@@ -6805,6 +6980,10 @@ imgui.setWindowFontScale	EW-	function name='setWindowFontScale' length=0
 imgui.setWindowFontScale.arity	--C	number '0'
 imgui.setWindowFontScale.length	--C	number '0'
 imgui.setWindowFontScale.name	--C	string 'setWindowFontScale'
+imgui.shortcut	EW-	function name='shortcut' length=0
+imgui.shortcut.arity	--C	number '0'
+imgui.shortcut.length	--C	number '0'
+imgui.shortcut.name	--C	string 'shortcut'
 imgui.showAboutWindow	EW-	function name='showAboutWindow' length=0
 imgui.showAboutWindow.arity	--C	number '0'
 imgui.showAboutWindow.length	--C	number '0'
@@ -7021,6 +7200,14 @@ imgui.withDisabled	EW-	function name='withDisabled' length=0
 imgui.withDisabled.arity	--C	number '0'
 imgui.withDisabled.length	--C	number '0'
 imgui.withDisabled.name	--C	string 'withDisabled'
+imgui.withDragDropSource	EW-	function name='withDragDropSource' length=0
+imgui.withDragDropSource.arity	--C	number '0'
+imgui.withDragDropSource.length	--C	number '0'
+imgui.withDragDropSource.name	--C	string 'withDragDropSource'
+imgui.withDragDropTarget	EW-	function name='withDragDropTarget' length=0
+imgui.withDragDropTarget.arity	--C	number '0'
+imgui.withDragDropTarget.length	--C	number '0'
+imgui.withDragDropTarget.name	--C	string 'withDragDropTarget'
 imgui.withFont	EW-	function name='withFont' length=0
 imgui.withFont.arity	--C	number '0'
 imgui.withFont.length	--C	number '0'

@@ -120,6 +120,17 @@ if (EXPECT_MISSING) {
         assert(imgui.SortDirection && imgui.SortDirection.Descending === 2, 'SortDirection');
         return names.length + ' functions, SortDirection';
     });
+    check('r4 names', function () {
+        var names = ['isKeyPressed', 'Shortcut', 'getClipboardText', 'SetClipboardText', 'beginDragDropSource', 'AcceptDragDropPayload',
+            'withDragDropTarget', 'pushClipRect', 'PopClipRect', 'addMousePosEvent', 'AddMouseButtonEvent'];
+        var missing = names.filter(function (name) { return typeof imgui[name] !== 'function'; });
+        assert(missing.length === 0, 'missing ' + missing.join(', '));
+        assert(imgui.Mod && imgui.Mod.Ctrl === 1 << 12, 'Mod');
+        assert(imgui.InputFlags && imgui.InputFlags.Repeat === 1, 'InputFlags');
+        assert(imgui.DragDropFlags && imgui.DragDropFlags.SourceAllowNullID === 8, 'DragDropFlags');
+        assert(imgui.Key && imgui.Key.F12 === 583, 'Key.F12');
+        return names.length + ' functions, Mod, InputFlags, DragDropFlags';
+    });
     check('backend', function () {
         var caps = imgui.getBackendCapabilities();
         assert(caps && typeof caps === 'object', 'caps = ' + caps);

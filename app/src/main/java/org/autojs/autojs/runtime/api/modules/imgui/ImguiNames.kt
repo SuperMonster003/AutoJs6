@@ -47,7 +47,10 @@ object ImguiNames {
         "showDebugLogWindow", "showIdStackToolWindow", "showStyleEditor", "showAboutWindow", "showUserGuide", "dragFloat2", "dragFloat3",
         "dragFloat4", "dragInt2", "dragInt3", "dragInt4", "sliderFloat2", "sliderFloat3", "sliderFloat4", "sliderInt2", "sliderInt3", "sliderInt4",
         "inputFloat2", "inputFloat3", "inputFloat4", "inputInt2", "inputInt3", "inputInt4", "dragFloatRange2", "dragIntRange2", "sliderAngle",
-        "tableGetSortSpecs",
+        "tableGetSortSpecs", "addMousePosEvent", "addMouseButtonEvent", "isKeyDown", "isKeyPressed", "isKeyReleased", "getKeyPressedAmount", "getKeyName",
+        "isKeyChordPressed", "shortcut", "setNextItemShortcut", "getClipboardText", "setClipboardText", "beginDragDropSource", "setDragDropPayload",
+        "endDragDropSource", "beginDragDropTarget", "acceptDragDropPayload", "endDragDropTarget", "getDragDropPayload", "withDragDropSource",
+        "withDragDropTarget", "pushClipRect", "popClipRect",
     )
 
     /** PascalCase aliases of [FUNCTIONS] (`Begin` for `begin`, `PushID` for `pushId`), functions as well. */
@@ -79,6 +82,10 @@ object ImguiNames {
         "ShowStyleEditor", "ShowAboutWindow", "ShowUserGuide", "DragFloat2", "DragFloat3", "DragFloat4", "DragInt2", "DragInt3", "DragInt4",
         "SliderFloat2", "SliderFloat3", "SliderFloat4", "SliderInt2", "SliderInt3", "SliderInt4", "InputFloat2", "InputFloat3", "InputFloat4",
         "InputInt2", "InputInt3", "InputInt4", "DragFloatRange2", "DragIntRange2", "SliderAngle", "TableGetSortSpecs",
+        "AddMousePosEvent", "AddMouseButtonEvent", "IsKeyDown", "IsKeyPressed", "IsKeyReleased", "GetKeyPressedAmount", "GetKeyName",
+        "IsKeyChordPressed", "Shortcut", "SetNextItemShortcut", "GetClipboardText", "SetClipboardText", "BeginDragDropSource", "SetDragDropPayload",
+        "EndDragDropSource", "BeginDragDropTarget", "AcceptDragDropPayload", "EndDragDropTarget", "GetDragDropPayload", "WithDragDropSource",
+        "WithDragDropTarget", "PushClipRect", "PopClipRect",
     )
 
     /** Constant groups of the plugin API (flag and enum tables, theme and font names), read through getters. */
@@ -87,6 +94,7 @@ object ImguiNames {
         "TabItemFlags", "MouseButton", "ChildFlags", "ComboFlags", "PopupFlags", "HoveredFlags", "FocusedFlags", "ColorEditFlags", "TableFlags",
         "TableColumnFlags", "TableRowFlags", "TableBgTarget", "SortDirection", "Col", "StyleVar", "Themes", "Appearance", "Fonts", "TextureFlags",
         "DrawListLayer", "DrawFlags", "TouchMode", "WindowMode", "LogLevel", "ToastPosition", "Icons", "Dir", "ButtonFlags", "Key", "density",
+        "Mod", "InputFlags", "DragDropFlags",
     )
 
 }

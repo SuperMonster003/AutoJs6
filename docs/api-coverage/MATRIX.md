@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3518 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3567 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3518 行 (显式导出 1962, 原型成员 205, 返回对象成员 1351).
+数据源: ksp, 3567 行 (显式导出 2011, 原型成员 205, 返回对象成员 1351).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1628 | 368 | 0 | 945 | 0 | 577 |
-| Node Worker | 1628 | 365 | 0 | 948 | 0 | 577 |
-| Bun | 0 | 376 | 1617 | 948 | 0 | 577 |
+| Node main | 1628 | 368 | 0 | 945 | 0 | 626 |
+| Node Worker | 1628 | 365 | 0 | 948 | 0 | 626 |
+| Bun | 0 | 376 | 1617 | 948 | 0 | 626 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 532 / mention 274 / heading 2712 / signature 0 / example 0 |
-| dts | none 533 / name 1738 / arity 319 / typed 928 |
-| ace | none 938 / semantic 946 / static 1634 |
+| doc | none 581 / mention 274 / heading 2712 / signature 0 / example 0 |
+| dts | none 582 / name 1738 / arity 319 / typed 928 |
+| ace | none 987 / semantic 946 / static 1634 |
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 993 / differs 23 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
@@ -25,7 +25,7 @@
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
-名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 524 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
+名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 573 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
 ## 排除规则
 
@@ -134,7 +134,7 @@
 | gallery | 11 | 11 | 11 | - | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | http | 21 | 20 | 20 | 20 / 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 79 / 79 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| imgui | 524 | 0 | 0 | - | 0 | 0 / 1 / 523 | 0 / 1 / 523 | 0 / 1 / 523 |
+| imgui | 573 | 0 | 0 | - | 0 | 0 / 1 / 572 | 0 / 1 / 572 | 0 / 1 / 572 |
 | installer | 16 | 16 | 16 | - | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 / 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
@@ -1348,7 +1348,10 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
+| `imgui.AcceptDragDropPayload` | pending | pending | pending |
 | `imgui.AddButtonEx` | pending | pending | pending |
+| `imgui.AddMouseButtonEvent` | pending | pending | pending |
+| `imgui.AddMousePosEvent` | pending | pending | pending |
 | `imgui.Alert` | pending | pending | pending |
 | `imgui.AlignTextToFramePadding` | pending | pending | pending |
 | `imgui.Appearance` | pending | pending | pending |
@@ -1358,6 +1361,8 @@
 | `imgui.BeginChild` | pending | pending | pending |
 | `imgui.BeginCombo` | pending | pending | pending |
 | `imgui.BeginDisabled` | pending | pending | pending |
+| `imgui.BeginDragDropSource` | pending | pending | pending |
+| `imgui.BeginDragDropTarget` | pending | pending | pending |
 | `imgui.BeginGroup` | pending | pending | pending |
 | `imgui.BeginItemTooltip` | pending | pending | pending |
 | `imgui.BeginListBox` | pending | pending | pending |
@@ -1400,6 +1405,7 @@
 | `imgui.DestroyTexture` | pending | pending | pending |
 | `imgui.Dir` | pending | pending | pending |
 | `imgui.Dp` | pending | pending | pending |
+| `imgui.DragDropFlags` | pending | pending | pending |
 | `imgui.DragFloat` | pending | pending | pending |
 | `imgui.DragFloat2` | pending | pending | pending |
 | `imgui.DragFloat3` | pending | pending | pending |
@@ -1417,6 +1423,8 @@
 | `imgui.EndChild` | pending | pending | pending |
 | `imgui.EndCombo` | pending | pending | pending |
 | `imgui.EndDisabled` | pending | pending | pending |
+| `imgui.EndDragDropSource` | pending | pending | pending |
+| `imgui.EndDragDropTarget` | pending | pending | pending |
 | `imgui.EndGroup` | pending | pending | pending |
 | `imgui.EndListBox` | pending | pending | pending |
 | `imgui.EndMenu` | pending | pending | pending |
@@ -1431,13 +1439,17 @@
 | `imgui.Fonts` | pending | pending | pending |
 | `imgui.GetBackendCapabilities` | pending | pending | pending |
 | `imgui.GetBackgroundDrawList` | pending | pending | pending |
+| `imgui.GetClipboardText` | pending | pending | pending |
 | `imgui.GetComponent` | pending | pending | pending |
 | `imgui.GetContentRegionAvail` | pending | pending | pending |
 | `imgui.GetCursorPos` | pending | pending | pending |
+| `imgui.GetDragDropPayload` | pending | pending | pending |
 | `imgui.GetExampleSource` | pending | pending | pending |
 | `imgui.GetForegroundDrawList` | pending | pending | pending |
 | `imgui.GetFrameHeight` | pending | pending | pending |
 | `imgui.GetFrameHeightWithSpacing` | pending | pending | pending |
+| `imgui.GetKeyName` | pending | pending | pending |
+| `imgui.GetKeyPressedAmount` | pending | pending | pending |
 | `imgui.GetMouseDragDelta` | pending | pending | pending |
 | `imgui.GetMousePos` | pending | pending | pending |
 | `imgui.GetScrollMaxX` | pending | pending | pending |
@@ -1455,6 +1467,7 @@
 | `imgui.Image` | pending | pending | pending |
 | `imgui.ImageButton` | pending | pending | pending |
 | `imgui.Indent` | pending | pending | pending |
+| `imgui.InputFlags` | pending | pending | pending |
 | `imgui.InputFloat` | pending | pending | pending |
 | `imgui.InputFloat2` | pending | pending | pending |
 | `imgui.InputFloat3` | pending | pending | pending |
@@ -1478,6 +1491,10 @@
 | `imgui.IsItemFocused` | pending | pending | pending |
 | `imgui.IsItemHovered` | pending | pending | pending |
 | `imgui.IsItemVisible` | pending | pending | pending |
+| `imgui.IsKeyChordPressed` | pending | pending | pending |
+| `imgui.IsKeyDown` | pending | pending | pending |
+| `imgui.IsKeyPressed` | pending | pending | pending |
+| `imgui.IsKeyReleased` | pending | pending | pending |
 | `imgui.IsMouseClicked` | pending | pending | pending |
 | `imgui.IsMouseDoubleClicked` | pending | pending | pending |
 | `imgui.IsMouseDown` | pending | pending | pending |
@@ -1500,12 +1517,14 @@
 | `imgui.LogLevel` | pending | pending | pending |
 | `imgui.LogWindow` | pending | pending | pending |
 | `imgui.MenuItem` | pending | pending | pending |
+| `imgui.Mod` | pending | pending | pending |
 | `imgui.MouseButton` | pending | pending | pending |
 | `imgui.MultiChoice` | pending | pending | pending |
 | `imgui.NewLine` | pending | pending | pending |
 | `imgui.OpenPopup` | pending | pending | pending |
 | `imgui.PlotHistogram` | pending | pending | pending |
 | `imgui.PlotLines` | pending | pending | pending |
+| `imgui.PopClipRect` | pending | pending | pending |
 | `imgui.PopFont` | pending | pending | pending |
 | `imgui.PopID` | pending | pending | pending |
 | `imgui.PopItemWidth` | pending | pending | pending |
@@ -1513,6 +1532,7 @@
 | `imgui.PopStyleVar` | pending | pending | pending |
 | `imgui.PopupFlags` | pending | pending | pending |
 | `imgui.ProgressBar` | pending | pending | pending |
+| `imgui.PushClipRect` | pending | pending | pending |
 | `imgui.PushFont` | pending | pending | pending |
 | `imgui.PushID` | pending | pending | pending |
 | `imgui.PushItemWidth` | pending | pending | pending |
@@ -1528,11 +1548,14 @@
 | `imgui.SelectableFlags` | pending | pending | pending |
 | `imgui.Separator` | pending | pending | pending |
 | `imgui.SeparatorText` | pending | pending | pending |
+| `imgui.SetClipboardText` | pending | pending | pending |
 | `imgui.SetCursorPos` | pending | pending | pending |
+| `imgui.SetDragDropPayload` | pending | pending | pending |
 | `imgui.SetGlobalAlpha` | pending | pending | pending |
 | `imgui.SetItemTooltip` | pending | pending | pending |
 | `imgui.SetKeyboardFocusHere` | pending | pending | pending |
 | `imgui.SetMoreTouch` | pending | pending | pending |
+| `imgui.SetNextItemShortcut` | pending | pending | pending |
 | `imgui.SetNextItemWidth` | pending | pending | pending |
 | `imgui.SetNextWindowBgAlpha` | pending | pending | pending |
 | `imgui.SetNextWindowPos` | pending | pending | pending |
@@ -1549,6 +1572,7 @@
 | `imgui.SetTooltip` | pending | pending | pending |
 | `imgui.SetTouchable` | pending | pending | pending |
 | `imgui.SetWindowFontScale` | pending | pending | pending |
+| `imgui.Shortcut` | pending | pending | pending |
 | `imgui.ShowAboutWindow` | pending | pending | pending |
 | `imgui.ShowDebugLogWindow` | pending | pending | pending |
 | `imgui.ShowDemoWindow` | pending | pending | pending |
@@ -1610,11 +1634,16 @@
 | `imgui.WantCaptureMouse` | pending | pending | pending |
 | `imgui.WindowFlags` | pending | pending | pending |
 | `imgui.WindowMode` | pending | pending | pending |
+| `imgui.WithDragDropSource` | pending | pending | pending |
+| `imgui.WithDragDropTarget` | pending | pending | pending |
 | `imgui.WithFont` | pending | pending | pending |
 | `imgui.__pluginId` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
+| `imgui.acceptDragDropPayload` | pending | pending | pending |
 | `imgui.addButtonEx` | pending | pending | pending |
 | `imgui.addInputCharacters` | pending | pending | pending |
 | `imgui.addKeyEvent` | pending | pending | pending |
+| `imgui.addMouseButtonEvent` | pending | pending | pending |
+| `imgui.addMousePosEvent` | pending | pending | pending |
 | `imgui.addMouseWheel` | pending | pending | pending |
 | `imgui.alert` | pending | pending | pending |
 | `imgui.alignTextToFramePadding` | pending | pending | pending |
@@ -1623,6 +1652,8 @@
 | `imgui.beginChild` | pending | pending | pending |
 | `imgui.beginCombo` | pending | pending | pending |
 | `imgui.beginDisabled` | pending | pending | pending |
+| `imgui.beginDragDropSource` | pending | pending | pending |
+| `imgui.beginDragDropTarget` | pending | pending | pending |
 | `imgui.beginGroup` | pending | pending | pending |
 | `imgui.beginItemTooltip` | pending | pending | pending |
 | `imgui.beginListBox` | pending | pending | pending |
@@ -1676,6 +1707,8 @@
 | `imgui.endChild` | pending | pending | pending |
 | `imgui.endCombo` | pending | pending | pending |
 | `imgui.endDisabled` | pending | pending | pending |
+| `imgui.endDragDropSource` | pending | pending | pending |
+| `imgui.endDragDropTarget` | pending | pending | pending |
 | `imgui.endGroup` | pending | pending | pending |
 | `imgui.endListBox` | pending | pending | pending |
 | `imgui.endMenu` | pending | pending | pending |
@@ -1691,13 +1724,17 @@
 | `imgui.framerate` | pending | pending | pending |
 | `imgui.getBackendCapabilities` | pending | pending | pending |
 | `imgui.getBackgroundDrawList` | pending | pending | pending |
+| `imgui.getClipboardText` | pending | pending | pending |
 | `imgui.getComponent` | pending | pending | pending |
 | `imgui.getContentRegionAvail` | pending | pending | pending |
 | `imgui.getCursorPos` | pending | pending | pending |
+| `imgui.getDragDropPayload` | pending | pending | pending |
 | `imgui.getExampleSource` | pending | pending | pending |
 | `imgui.getForegroundDrawList` | pending | pending | pending |
 | `imgui.getFrameHeight` | pending | pending | pending |
 | `imgui.getFrameHeightWithSpacing` | pending | pending | pending |
+| `imgui.getKeyName` | pending | pending | pending |
+| `imgui.getKeyPressedAmount` | pending | pending | pending |
 | `imgui.getMouseDragDelta` | pending | pending | pending |
 | `imgui.getMousePos` | pending | pending | pending |
 | `imgui.getScrollMaxX` | pending | pending | pending |
@@ -1737,6 +1774,10 @@
 | `imgui.isItemFocused` | pending | pending | pending |
 | `imgui.isItemHovered` | pending | pending | pending |
 | `imgui.isItemVisible` | pending | pending | pending |
+| `imgui.isKeyChordPressed` | pending | pending | pending |
+| `imgui.isKeyDown` | pending | pending | pending |
+| `imgui.isKeyPressed` | pending | pending | pending |
+| `imgui.isKeyReleased` | pending | pending | pending |
 | `imgui.isMouseClicked` | pending | pending | pending |
 | `imgui.isMouseDoubleClicked` | pending | pending | pending |
 | `imgui.isMouseDown` | pending | pending | pending |
@@ -1761,12 +1802,14 @@
 | `imgui.openPopup` | pending | pending | pending |
 | `imgui.plotHistogram` | pending | pending | pending |
 | `imgui.plotLines` | pending | pending | pending |
+| `imgui.popClipRect` | pending | pending | pending |
 | `imgui.popFont` | pending | pending | pending |
 | `imgui.popId` | pending | pending | pending |
 | `imgui.popItemWidth` | pending | pending | pending |
 | `imgui.popStyleColor` | pending | pending | pending |
 | `imgui.popStyleVar` | pending | pending | pending |
 | `imgui.progressBar` | pending | pending | pending |
+| `imgui.pushClipRect` | pending | pending | pending |
 | `imgui.pushFont` | pending | pending | pending |
 | `imgui.pushId` | pending | pending | pending |
 | `imgui.pushItemWidth` | pending | pending | pending |
@@ -1782,11 +1825,14 @@
 | `imgui.sendKey` | pending | pending | pending |
 | `imgui.separator` | pending | pending | pending |
 | `imgui.separatorText` | pending | pending | pending |
+| `imgui.setClipboardText` | pending | pending | pending |
 | `imgui.setCursorPos` | pending | pending | pending |
+| `imgui.setDragDropPayload` | pending | pending | pending |
 | `imgui.setGlobalAlpha` | pending | pending | pending |
 | `imgui.setItemTooltip` | pending | pending | pending |
 | `imgui.setKeyboardFocusHere` | pending | pending | pending |
 | `imgui.setMoreTouch` | pending | pending | pending |
+| `imgui.setNextItemShortcut` | pending | pending | pending |
 | `imgui.setNextItemWidth` | pending | pending | pending |
 | `imgui.setNextWindowBgAlpha` | pending | pending | pending |
 | `imgui.setNextWindowPos` | pending | pending | pending |
@@ -1803,6 +1849,7 @@
 | `imgui.setTooltip` | pending | pending | pending |
 | `imgui.setTouchable` | pending | pending | pending |
 | `imgui.setWindowFontScale` | pending | pending | pending |
+| `imgui.shortcut` | pending | pending | pending |
 | `imgui.showAboutWindow` | pending | pending | pending |
 | `imgui.showDebugLogWindow` | pending | pending | pending |
 | `imgui.showDemoWindow` | pending | pending | pending |
@@ -1857,6 +1904,8 @@
 | `imgui.withContextItem` | pending | pending | pending |
 | `imgui.withContextWindow` | pending | pending | pending |
 | `imgui.withDisabled` | pending | pending | pending |
+| `imgui.withDragDropSource` | pending | pending | pending |
+| `imgui.withDragDropTarget` | pending | pending | pending |
 | `imgui.withFont` | pending | pending | pending |
 | `imgui.withGroup` | pending | pending | pending |
 | `imgui.withId` | pending | pending | pending |
