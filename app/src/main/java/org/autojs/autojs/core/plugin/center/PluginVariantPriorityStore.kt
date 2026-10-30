@@ -37,6 +37,7 @@ object PluginVariantPriorityStore {
         candidates: List<T>,
         packageNameOf: (T) -> String,
         variantOf: (T) -> String?,
+        isRecommendedDefault: (T) -> Boolean = { false },
     ): T? {
         if (candidates.isEmpty()) return null
         val order = getOrder(engine)
@@ -44,8 +45,22 @@ object PluginVariantPriorityStore {
             val byPkg = candidates.associateBy { packageNameOf(it) }
             order.firstNotNullOfOrNull { byPkg[it] }?.let { return it }
         }
+        return selectWithoutStoredOrder(candidates, packageNameOf, variantOf, isRecommendedDefault)
+    }
+
+    /**
+     * The higher variant number wins; equal numbers prefer the candidate that the plugin recommends as the default
+     * (OCR plugins declaring `recommendedForMobileDefault`), then the smallest package name.
+     */
+    fun <T> selectWithoutStoredOrder(
+        candidates: List<T>,
+        packageNameOf: (T) -> String,
+        variantOf: (T) -> String?,
+        isRecommendedDefault: (T) -> Boolean = { false },
+    ): T? {
         return candidates.maxWithOrNull(
             compareBy<T> { parseVariantWeight(variantOf(it)) }
+                .thenBy { isRecommendedDefault(it) }
                 .thenByDescending { packageNameOf(it) }
         )
     }

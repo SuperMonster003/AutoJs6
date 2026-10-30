@@ -2201,6 +2201,7 @@
     <string name="text_install_plugin_from_url">Install plugin from \"URL\"</string>
     <string name="text_installable">Installable</string>
     <string name="text_installed">Installed</string>
+    <string name="text_installed_ocr_plugin_profiles">Profiles of the installed OCR plugins: %1$s.</string>
     <string name="text_integrity_verification_failed">Integrity verification failed</string>
     <string name="text_intelligent_mine">Mine</string>
     <string name="text_intelligent_preset_material_day_night">Material day and night</string>

@@ -2202,6 +2202,7 @@
     <string name="text_install_plugin_from_url">从 \"URL\" 安装插件</string>
     <string name="text_installable">可安装</string>
     <string name="text_installed">已安装</string>
+    <string name="text_installed_ocr_plugin_profiles">已安装的 OCR 插件提供的 profile: %1$s.</string>
     <string name="text_integrity_verification_failed">完整性验证失败</string>
     <string name="text_intelligent_mine">我的</string>
     <string name="text_intelligent_preset_material_day_night">材料设计日夜配对</string>

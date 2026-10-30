@@ -79,6 +79,8 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                         engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
                         variant = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
+                        // The profile picks the plugin whose modelProfile matches (e.g. a language pack, D23).
+                        profile = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.PROFILE),
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
                     OcrPluginHost.recognizeText(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
@@ -109,6 +111,8 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                         engineId = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE) ?: ENGINE_PADDLE_OCR,
                         variant = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
+                        // The profile picks the plugin whose modelProfile matches (e.g. a language pack, D23).
+                        profile = parsed.extras.getNonBlankString(PaddleOcrOptionExtraKeys.PROFILE),
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
                     OcrPluginHost.detect(GlobalAppContext.get(), target, image.bitmap, ocrOptions)

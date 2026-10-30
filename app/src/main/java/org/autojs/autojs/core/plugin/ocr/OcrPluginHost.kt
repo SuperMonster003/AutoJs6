@@ -205,8 +205,10 @@ object OcrPluginHost {
         engine: String? = null,
         // e.g. "v5"
         variant: String? = null,
+        // e.g. "ja", compared with the plugin's modelProfile capability
+        profile: String? = null,
     ): Discovered? {
-        return selectDetailed(context, engineId, engine, variant).selected
+        return selectDetailed(context, engineId, engine, variant, profile).selected
     }
 
     suspend fun selectOrThrow(
@@ -217,11 +219,13 @@ object OcrPluginHost {
         engine: String? = null,
         // e.g. "v5"
         variant: String? = null,
+        // e.g. "ja", compared with the plugin's modelProfile capability
+        profile: String? = null,
         moduleLabel: String = MODULE_LABEL_OCR_PLUGIN,
         automatic: Boolean = false,
     ): Discovered {
-        val result = selectDetailed(context, engineId, engine, variant, automatic)
-        return result.selected ?: throw buildSelectionFailure(context, result.discovered, engineId, engine, variant, moduleLabel)
+        val result = selectDetailed(context, engineId, engine, variant, profile, automatic)
+        return result.selected ?: throw buildSelectionFailure(context, result.discovered, engineId, engine, variant, profile, moduleLabel)
     }
 
     private suspend fun selectDetailed(
@@ -229,6 +233,7 @@ object OcrPluginHost {
         engineId: String?,
         engine: String?,
         variant: String?,
+        profile: String?,
         automatic: Boolean = false,
     ): SelectionResult {
         suspend fun discoverCandidates(): List<Discovered> {
@@ -240,11 +245,11 @@ object OcrPluginHost {
             return discoverServices(context, services)
         }
         var discovered = discoverCandidates()
-        selectFrom(discovered, context, engineId, engine, variant, automatic)?.let { return SelectionResult(it, discovered) }
+        selectFrom(discovered, context, engineId, engine, variant, profile, automatic)?.let { return SelectionResult(it, discovered) }
         if (discovered.any { it.error != null }) {
             recoverFailedDiscoveries(context, discovered)
             discovered = discoverCandidates()
-            selectFrom(discovered, context, engineId, engine, variant, automatic)?.let { return SelectionResult(it, discovered) }
+            selectFrom(discovered, context, engineId, engine, variant, profile, automatic)?.let { return SelectionResult(it, discovered) }
         }
         return SelectionResult(null, discovered)
     }
@@ -255,6 +260,7 @@ object OcrPluginHost {
         engineId: String?,
         engine: String?,
         variant: String?,
+        profile: String?,
         automatic: Boolean = false,
     ): Discovered? {
         if (automatic) {
@@ -266,7 +272,7 @@ object OcrPluginHost {
                     else -> variant
                 } else variant
                 if (engine != null && engine != candidateEngine) null
-                else selectFrom(discovered, context, engineId, candidateEngine, candidateVariant)
+                else selectFrom(discovered, context, engineId, candidateEngine, candidateVariant, profile)
             }
         }
         val list = discovered
@@ -275,9 +281,9 @@ object OcrPluginHost {
             .filter { PluginTrustManager.isAuthorized(context, it.serviceInfo.packageName) }
             .filter { isHostVersionCompatible(it.pluginInfo) }
         if (list.isEmpty()) return null
-        if (hasExplicitSelectionCriteria(engineId, engine, variant)) {
+        if (hasExplicitSelectionCriteria(engineId, engine, variant, profile)) {
             val candidates = list.filter { d ->
-                d.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
+                d.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant, profile) } == true
             }
             if (candidates.isEmpty()) return null
             return selectByPriorityWithKeys(
@@ -286,10 +292,7 @@ object OcrPluginHost {
                     engine = engine ?: candidates.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull(),
                     engineId = engineId ?: inferCommonEngineFamily(candidates),
                 ),
-            ) ?: candidates.maxBy {
-                val candidateVariant = it.pluginInfo?.variant ?: return@maxBy 0
-                candidateVariant.replace(Regex("\\D"), "").toIntOrNull() ?: 0
-            }
+            ) ?: selectDefault(candidates)
         }
         val singleEngine = list.mapNotNull { it.pluginInfo?.engine }.distinct().singleOrNull()
         if (!singleEngine.isNullOrBlank()) {
@@ -310,10 +313,15 @@ object OcrPluginHost {
                 ),
             )?.let { return it }
         }
-        return list.maxBy {
-            val variant = it.pluginInfo?.variant ?: return@maxBy 0
-            variant.replace(Regex("\\D"), "").toIntOrNull() ?: 0
-        }
+        return selectDefault(list)
+    }
+
+    private fun selectDefault(candidates: List<Discovered>): Discovered? {
+        return OcrPluginSelection.selectDefault(
+            candidates = candidates,
+            pluginInfoOf = { it.pluginInfo },
+            packageNameOf = { it.serviceInfo.packageName },
+        )
     }
 
     private fun selectByPriorityWithKeys(
@@ -347,6 +355,7 @@ object OcrPluginHost {
             candidates = candidates,
             packageNameOf = { it.serviceInfo.packageName },
             variantOf = { it.pluginInfo?.variant },
+            isRecommendedDefault = { OcrPluginSelection.isRecommendedDefault(it.pluginInfo) },
         )
     }
 
@@ -365,17 +374,21 @@ object OcrPluginHost {
         engineId: String?,
         engine: String?,
         variant: String?,
+        profile: String?,
         moduleLabel: String,
     ): IllegalStateException {
-        val selectionLabel = describeSelection(engineId, engine, variant, moduleLabel)
+        val selectionLabel = describeSelection(engineId, engine, variant, profile, moduleLabel)
+        val installedProfiles = profile?.let {
+            OcrPluginSelection.installedProfiles(discovered.mapNotNull { item -> item.pluginInfo }, engineId, engine, variant)
+        }
         if (discovered.isEmpty()) {
-            return buildUnmatchedSelectionFailure(context, discovered, selectionLabel, engine)
+            return buildUnmatchedSelectionFailure(context, discovered, selectionLabel, engine, installedProfiles)
         }
         val scopedInfoItems = discovered.filter { item ->
-            item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant) } == true
+            item.pluginInfo?.let { matchesSelectionCriteria(it, engineId, engine, variant, profile) } == true
         }
-        if (scopedInfoItems.isEmpty() && hasExplicitSelectionCriteria(engineId, engine, variant)) {
-            return buildUnmatchedSelectionFailure(context, discovered, selectionLabel, engine)
+        if (scopedInfoItems.isEmpty() && hasExplicitSelectionCriteria(engineId, engine, variant, profile)) {
+            return buildUnmatchedSelectionFailure(context, discovered, selectionLabel, engine, installedProfiles)
         }
         val variantList = scopedInfoItems
             .mapNotNull { item ->
@@ -446,6 +459,8 @@ object OcrPluginHost {
         discovered: List<Discovered>,
         selectionLabel: String,
         engine: String?,
+        // Listed when a profile was requested (D23).
+        installedProfiles: List<String>?,
     ): IllegalStateException {
         // Failed discovery cannot establish that the requested plugin is missing.
         val failures = discovered.filter { it.error != null }
@@ -458,10 +473,14 @@ object OcrPluginHost {
             context.getString(R.string.error_failed_to_query_ocr_plugins_for_selection, selectionLabel, details)
         }
         val parts = mutableListOf(message)
+        if (installedProfiles != null) {
+            val profiles = installedProfiles.joinToString(", ").ifEmpty { context.getString(R.string.text_none) }
+            parts += context.getString(R.string.text_installed_ocr_plugin_profiles, profiles)
+        }
         val detectedPlugins = discovered.mapNotNull { item ->
             item.pluginInfo?.let { info ->
                 val name = info.name.ifBlank { item.serviceInfo.packageName }
-                val selection = describeSelection(info.id, info.engine, info.variant, name)
+                val selection = describeSelection(info.id, info.engine, info.variant, OcrPluginSelection.declaredModelProfile(info), name)
                 "$name [$selection; package=${item.serviceInfo.packageName}]"
             }
         }.distinct()
@@ -474,7 +493,7 @@ object OcrPluginHost {
         return IllegalStateException(parts.joinToString("\n"), failures.firstOrNull()?.error)
     }
 
-    private fun describeSelection(engineId: String?, engine: String?, variant: String?, moduleLabel: String): String {
+    private fun describeSelection(engineId: String?, engine: String?, variant: String?, profile: String?, moduleLabel: String): String {
         // The engine option can override the caller's module, so its label must follow the request.
         val label = when (engine) {
             "mlkit-ocr" -> "ML Kit OCR"
@@ -487,6 +506,7 @@ object OcrPluginHost {
             engine?.let { "engine=$it" },
             engineId?.let { "engineId=$it" },
             variant?.let { "variant=$it" },
+            profile?.let { "profile=$it" },
         )
         return if (criteria.isEmpty()) label else "$label (${criteria.joinToString(", ")})"
     }
@@ -496,19 +516,18 @@ object OcrPluginHost {
         engineId: String?,
         engine: String?,
         variant: String?,
+        profile: String?,
     ): Boolean {
-        if (engineId != null && pluginInfo.id != engineId) return false
-        if (engine != null && pluginInfo.engine != engine) return false
-        if (variant != null && pluginInfo.variant != variant) return false
-        return true
+        return OcrPluginSelection.matches(pluginInfo, engineId, engine, variant, profile)
     }
 
     private fun hasExplicitSelectionCriteria(
         engineId: String?,
         engine: String?,
         variant: String?,
+        profile: String?,
     ): Boolean {
-        return engineId != null || engine != null || variant != null
+        return OcrPluginSelection.hasExplicitCriteria(engineId, engine, variant, profile)
     }
 
     private fun isHostVersionCompatible(pluginInfo: PluginInfo?): Boolean {
