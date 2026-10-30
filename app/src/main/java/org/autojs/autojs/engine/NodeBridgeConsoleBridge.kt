@@ -2,6 +2,7 @@ package org.autojs.autojs.engine
 
 import org.autojs.autojs.AutoJs
 import org.autojs.autojs.core.console.ConsoleImpl
+import org.autojs.autojs.core.console.ConsoleInputRequest
 import org.autojs.autojs.core.console.ConsoleLogFormat
 import org.json.JSONArray
 import org.json.JSONObject
@@ -30,8 +31,9 @@ internal class NodeBridgeConsoleBridge(
                 "tail" -> tail(request)
                 in RuntimeConsoleBridge.METHODS -> {
                     val control = checkNotNull(controls) { "Console controls require a script execution" }
-                    control.invoke(request.method, JSONArray(request.argsJson))
-                    NodeBridgeResponse.success(request.id, "null")
+                    // Queries such as isShowing answer with their value; the setters answer null (api-coverage P3.3).
+                    // zh-CN: isShowing 等查询返回其值; setter 返回 null (api-coverage P3.3).
+                    NodeBridgeResponse.success(request.id, NodeBridgeJson.valueToJson(control.invoke(request.method, JSONArray(request.argsJson))))
                 }
                 else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.bridgeUnavailable(request.module, request.method))
             }
@@ -53,6 +55,65 @@ internal class NodeBridgeConsoleBridge(
                 ),
             )
         }
+    }
+
+    private val inputLock = Any()
+    private val pendingInputs = LinkedHashSet<ConsoleInputRequest>()
+    private var inputClosed = false
+
+    /**
+     * `rawInput []`: the asynchronous line read of the execution console (api-coverage P3.3, Q165 (a)). The request joins the
+     * queue of stdin and Rhino's `console.rawInput()` (first come, first served) and [callback] gets the submitted line; a
+     * request cancelled by the end of the execution, a console reset or [close] fails with `ERR_AUTOJS6_BRIDGE_CANCELLED`.
+     * The runtime prints the prompt itself before the call; nothing is printed here.
+     * zh-CN: `rawInput []`: 执行控制台的异步读行 (api-coverage P3.3, Q165 (a)). 请求加入 stdin 与 Rhino `console.rawInput()` 共用的队列 (先到先得),
+     * [callback] 收到提交的那一行; 因执行结束, 控制台重置或 [close] 被取消的请求以 `ERR_AUTOJS6_BRIDGE_CANCELLED` 失败. 提示文字由运行时在调用前自行打印,
+     * 这里不打印.
+     */
+    fun rawInput(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        try {
+            val control = checkNotNull(controls) { "Console input requires a script execution" }
+            require(JSONArray(request.argsJson).length() == 0) { "console.rawInput takes no arguments; print the prompt first" }
+            check(synchronized(inputLock) { !inputClosed }) { "The execution has ended" }
+            val queued = arrayOfNulls<ConsoleInputRequest>(1)
+            // A request cancelled before it is queued (an exiting console) completes inside requestInput.
+            // zh-CN: 入队前即被取消的请求 (控制台正在退出) 会在 requestInput 内部完成.
+            val input = control.requestInput { text ->
+                synchronized(inputLock) { queued[0]?.let(pendingInputs::remove) }
+                callback(
+                    if (text != null) NodeBridgeResponse.success(request.id, JSONObject.quote(text))
+                    else NodeBridgeResponse.failure(request.id, NodeBridgeError.providerFailed(
+                        "console.rawInput was cancelled: the execution ended or the console was reset",
+                        request.module, request.method, code = NodeRuntimeErrorCodes.BRIDGE_CANCELLED,
+                    )),
+                )
+            }
+            val cancelNow = synchronized(inputLock) {
+                queued[0] = input
+                if (!input.isDone) pendingInputs.add(input)
+                inputClosed
+            }
+            if (cancelNow) input.cancel()
+        } catch (error: Throwable) {
+            callback(dispatchFailure(request, error))
+        }
+    }
+
+    /** Cancels the line requests still waiting; later [rawInput] calls fail. zh-CN: 取消仍在等待的输入请求; 之后的 [rawInput] 调用失败. */
+    fun close() {
+        val pending = synchronized(inputLock) {
+            inputClosed = true
+            pendingInputs.toList().also { pendingInputs.clear() }
+        }
+        pending.forEach { it.cancel() }
+    }
+
+    private fun dispatchFailure(request: NodeBridgeRequest, error: Throwable): NodeBridgeResponse = when (error) {
+        is SecurityException -> NodeBridgeResponse.failure(request.id, NodeBridgeError.permissionDenied(error.message ?: "Console permission denied", request.module, request.method))
+        is IllegalArgumentException -> NodeBridgeResponse.failure(request.id, NodeBridgeError.invalidRequest("console.${request.method}: ${error.message}", request.module, request.method))
+        else -> NodeBridgeResponse.failure(request.id, NodeBridgeError.providerFailed(
+            message = error.message ?: error.javaClass.name, module = request.module, method = request.method, stack = error.stackTraceToString(),
+        ))
     }
 
     private fun tail(request: NodeBridgeRequest): NodeBridgeResponse {

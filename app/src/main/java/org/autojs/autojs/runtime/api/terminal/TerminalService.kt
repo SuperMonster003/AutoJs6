@@ -51,8 +51,14 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 注册回调, 因此插件在脚本存续期间保持绑定 (D26). 会话属于插件及其用户而非脚本: [close] 在脚本退出时运行, 拒绝之后的调用, 取消订阅, 丢弃回调与租约, 但不
  * 关闭任何会话; 以 `keepOpen: false` 启动的会话在命令结束时自行结束. 插件可用性拒绝 (`PLUGIN_UNAVAILABLE`, `PLUGIN_INCOMPATIBLE`) 在技术信息前加上插件中心的
  * 本地化提示.
+ *
+ * The working directory comes from [cwdProvider], so the JS runtimes' `terminal` bridge (api-coverage P3.3) owns a service per
+ * execution without a [ScriptRuntime].
+ * zh-CN: 工作目录来自 [cwdProvider], 因此 JS 运行时的 `terminal` 桥接 (api-coverage P3.3) 不需要 [ScriptRuntime] 也能为每次执行持有一个服务.
  */
-class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime) : Closeable {
+class TerminalService(context: Context, private val cwdProvider: () -> String?) : Closeable {
+
+    constructor(context: Context, scriptRuntime: ScriptRuntime) : this(context, { scriptRuntime.files.cwd() })
 
     /** One live output subscription of this script; [cancel] ends it. zh-CN: 本脚本的一个活动输出订阅; [cancel] 结束它. */
     inner class Subscription internal constructor(val id: String, val sessionId: String, internal val pump: TerminalOutputPump) {
@@ -108,7 +114,7 @@ class TerminalService(context: Context, private val scriptRuntime: ScriptRuntime
         get() = subscriptions.size
 
     /** The script's working directory, the default `cwd` of every request. zh-CN: 脚本工作目录, 每个请求的默认 `cwd`. */
-    fun cwd(): String? = scriptRuntime.files.cwd()
+    fun cwd(): String? = cwdProvider()
 
     /** Whether a compatible, enabled and authorized plugin answers right now; never throws. zh-CN: 当前是否有兼容, 启用且已授权的插件应答; 从不抛出. */
     suspend fun isAvailable(): Boolean = runCatching { TerminalPluginHost.isAvailable(appContext) }.getOrDefault(false)

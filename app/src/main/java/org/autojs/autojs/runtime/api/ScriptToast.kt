@@ -88,8 +88,16 @@ object ScriptToast {
     }
 
     @JvmStatic
-    fun dismissAll(scriptRuntime: ScriptRuntime) {
-        val ownerId = scriptRuntime.ownerId
+    fun dismissAll(scriptRuntime: ScriptRuntime) = dismissAll(scriptRuntime.uiHandler.applicationContext, scriptRuntime.ownerId)
+
+    /**
+     * Cancels the toasts [ownerId] queued or is showing; the Node.js bridge passes the owner its toasts were queued with
+     * (api-coverage P3.3).
+     * zh-CN: 取消 [ownerId] 排队中或正在显示的 toast; Node.js 桥接传入其 toast 入队时所用的属主 (api-coverage P3.3).
+     */
+    @JvmStatic
+    fun dismissAll(context: Context, ownerId: String) {
+        val appContext = context.applicationContext
         mainHandler.post {
             queue.removeAll { it.ownerId == ownerId }
 
@@ -105,7 +113,7 @@ object ScriptToast {
                 currentTask = null
                 isShowing = false
 
-                tryShowNextLocked(scriptRuntime.uiHandler.applicationContext)
+                tryShowNextLocked(appContext)
             }
         }
     }

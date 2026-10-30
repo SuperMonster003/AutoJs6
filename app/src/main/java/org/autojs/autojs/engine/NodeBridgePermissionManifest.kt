@@ -59,6 +59,11 @@ object NodeBridgePermissionManifest {
     const val SHELL = "shell"
     const val SHELL_ROOT = "shell.root"
     const val SHELL_SHIZUKU = "shell.shizuku"
+    /**
+     * The 3-Shell Terminal sessions of the `terminal` module (api-coverage P3.3, Q167 (a)); never implied by `shell` or `shell.root`.
+     * zh-CN: `terminal` 模块的 3-Shell Terminal 会话 (api-coverage P3.3, Q167 (a)); 不被 `shell` 或 `shell.root` 隐含.
+     */
+    const val TERMINAL = "terminal"
     const val NETWORK = "network"
     const val RAW_NETWORK = "raw_network"
     const val WORK_MANAGER = "work_manager"
@@ -175,6 +180,7 @@ object NodeBridgePermissionManifest {
         SHELL,
         SHELL_ROOT,
         SHELL_SHIZUKU,
+        TERMINAL,
         NETWORK,
         RAW_NETWORK,
         WORK_MANAGER,
@@ -583,7 +589,8 @@ object NodeBridgePermissionManifest {
                 else -> listOf(NOTIFICATIONS)
             }
             NodeBridgeModules.SENSORS -> listOf(SENSORS)
-            NodeBridgeModules.UI, NodeBridgeModules.COMPOSE -> listOf(UI)
+            NodeBridgeModules.UI -> RuntimeUiWindowControls.requiredCapabilities(method, argsJson)
+            NodeBridgeModules.COMPOSE -> listOf(UI)
             NodeBridgeModules.UI_OVERLAY -> when (method) {
                 "hasPermission", "openPermissionSettings" -> listOf(UI_OVERLAY_PERMISSION)
                 else -> listOf(UI_OVERLAY)
@@ -622,6 +629,7 @@ object NodeBridgePermissionManifest {
                 else -> listOf(FILES)
             }
             NodeBridgeModules.CONSOLE -> listOf(CONSOLE)
+            NodeBridgeModules.TERMINAL -> listOf(TERMINAL)
             in RuntimeSystemBridge.methodsByModule.keys -> RuntimeSystemBridge.capabilities(module, method)
             NodeBridgeModules.PLUGIN_TOOLS -> listOf(PLUGIN_TOOLS)
             NodeBridgeModules.EVENTS -> when (method) {

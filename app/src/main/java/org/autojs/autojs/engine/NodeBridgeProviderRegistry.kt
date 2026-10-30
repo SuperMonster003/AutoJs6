@@ -12,6 +12,7 @@ import org.autojs.autojs.core.accessibility.AccessibilityService as AutoJsAccess
 import org.autojs.autojs.core.plugin.barcode.BarcodePluginHost
 import org.autojs.autojs.core.plugin.ocr.OcrPluginHost
 import org.autojs.autojs.core.plugin.opencv.OpenCvPluginHost
+import org.autojs.autojs.core.plugin.terminal.TerminalPluginInspector
 import org.autojs.autojs.core.plugin.text.Pinyin4jPluginHost
 import org.autojs.autojs.core.plugin.text.PinyinPluginHost
 import org.autojs.autojs.runtime.api.modules.ocr.PaddleOcrEmbeddedEngine
@@ -150,6 +151,7 @@ object NodeBridgeProviderRegistry {
     private const val INPUT_OBSERVER_PROVIDER = "input_observer"
     private const val FILES_PROVIDER = "files"
     private const val CONSOLE_PROVIDER = "console"
+    private const val TERMINAL_PROVIDER = NodeBridgePermissionManifest.TERMINAL
     private const val EVENTS_PROVIDER = "events"
     private const val KEYS_PROVIDER = "keys"
     private const val DIALOGS_PROVIDER = "dialogs"
@@ -336,6 +338,14 @@ object NodeBridgeProviderRegistry {
             capabilities = listOf(NodeBridgePermissionManifest.CONSOLE),
             packagedSupport = packagedSupported("bounded global console tail and script console controls; showing a window requires overlay permission"),
         ),
+        // api-coverage P3.3 (Q167 (a)): sessions of the 3-Shell Terminal plugin behind their own capability.
+        // zh-CN: api-coverage P3.3 (Q167 (a)): 3-Shell Terminal 插件的会话, 使用独立能力.
+        provider(
+            id = TERMINAL_PROVIDER,
+            modules = listOf(NodeBridgeModules.TERMINAL),
+            capabilities = listOf(NodeBridgePermissionManifest.TERMINAL),
+            packagedSupport = packagedProviderDependent("requires the installed, enabled and authorized 3-Shell Terminal plugin; sessions belong to the plugin and outlive the script"),
+        ),
         provider(
             id = RHINO_PROVIDER,
             displayName = "rhino JSON-only shim",
@@ -451,6 +461,8 @@ object NodeBridgeProviderRegistry {
         RHINO_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         FILES_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
         CONSOLE_PROVIDER -> NodeBridgeProviderStatus.AVAILABLE
+        TERMINAL_PROVIDER -> if (runCatching { TerminalPluginInspector.inspect(context).available }.getOrDefault(false)) NodeBridgeProviderStatus.AVAILABLE
+        else NodeBridgeProviderStatus.UNAVAILABLE
         else -> NodeBridgeProviderStatus.UNAVAILABLE
     }
 
@@ -728,6 +740,13 @@ object NodeBridgeProviderRegistry {
             "globalsPolicy" to "no global importClass, importPackage, JavaAdapter, compat.rhino, or unrestricted Rhino globals are installed into V8; Packages/java/android proxies route through the explicit host Java bridge; module import helpers and JavaAdapter return stable unsupported errors",
             "timeoutPolicy" to "timeoutMs is required; provider calls forceStop and destroy before reporting timeout lifecycle",
             "statusReason" to "P12-25 live provider POC is available only for explicit one-shot requests; P12-26 keeps packaged APK execution fail-closed",
+        )
+        TERMINAL_PROVIDER -> linkedMapOf(
+            "liveMethods" to NodeBridgeModules.terminalMethods.joinToString(","),
+            "capability" to NodeBridgePermissionManifest.TERMINAL,
+            "capabilityPolicy" to "terminal is never implied by shell or shell.root",
+            "errorCodes" to "error.code carries the terminal code (PLUGIN_UNAVAILABLE, PLUGIN_INCOMPATIBLE, INVALID_ARGUMENT, SESSION_NOT_FOUND, TIMEOUT, ...)",
+            "cleanupPolicy" to "execution end cancels pending calls and the callback lease; sessions belong to the plugin and stay open",
         )
         else -> emptyMap()
     }

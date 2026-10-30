@@ -721,8 +721,11 @@ object NodeBridgeModules {
     const val AUTOMATOR = RuntimeAutomationBridge.AUTOMATOR
     const val AUTO = RuntimeAutomationBridge.AUTO
     const val YOLO = RuntimeAutomationBridge.YOLO
+    /** The 3-Shell Terminal module (api-coverage P3.3, Q167 (a)). zh-CN: 3-Shell Terminal 模块 (api-coverage P3.3, Q167 (a)). */
+    const val TERMINAL = NodeBridgePermissionManifest.TERMINAL
 
-    val toastMethods = setOf("showToast", "toast")
+    /** `dismissAll` cancels the execution's toasts (api-coverage P3.3). zh-CN: `dismissAll` 取消本执行的 toast (api-coverage P3.3). */
+    val toastMethods = setOf("showToast", "toast", "dismissAll")
     val pluginToolsMethods = setOf("list", "invoke", "cancel")
     val appMethods = setOf(
         "launchPackage",
@@ -819,7 +822,7 @@ object NodeBridgeModules {
     val databaseMethods = setOf("open", "exec", "run", "get", "all", "transaction", "close")
     val notificationsMethods = setOf("notify", "cancel", "cancelAll", "getPermissionStatus", "openSettings")
     val sensorsMethods = setOf("getAvailableSensors", "once", "subscribe", "unsubscribe", "drainEvents")
-    val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents") + RuntimeUiInterop.methods
+    val uiMethods = setOf("showLayout", "update", "batchUpdate", "close", "drainEvents") + RuntimeUiInterop.methods + RuntimeUiWindowControls.METHODS
     val uiOverlayMethods = setOf("show", "update", "drainEvents", "close", "closeAll", "hasPermission", "openPermissionSettings")
     val clipboardMethods = setOf("getText", "setText", "hasText")
     val deviceMethods = setOf("isScreenOn", "wakeUp", "vibrate", "isIgnoringBatteryOptimizations", "openBatteryOptimizationSettings", "info",
@@ -846,7 +849,9 @@ object NodeBridgeModules {
     val rhinoMethods = setOf("run")
     val inputObserverMethods = setOf("observeKeys", "drainEvents", "close", "getAvailableSources")
     val filesMethods = setOf("list", "stat", "read", "write", "mkdir", "rename", "delete")
-    val consoleMethods = setOf("tail") + RuntimeConsoleBridge.METHODS
+    /** `rawInput` answers asynchronously when a line is submitted (api-coverage P3.3). zh-CN: `rawInput` 在提交一行后异步应答 (api-coverage P3.3). */
+    val consoleMethods = setOf("tail", "rawInput") + RuntimeConsoleBridge.METHODS
+    val terminalMethods = RuntimeTerminalBridge.METHODS
     val screenMetricsMethods = RuntimeCoordinateBridge.METHODS
     val eventsMethods = setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close") + automationEventsMethods
 
@@ -911,6 +916,7 @@ object NodeBridgeModules {
         INPUT_OBSERVER to inputObserverMethods,
         FILES to filesMethods,
         CONSOLE to consoleMethods,
+        TERMINAL to terminalMethods,
         PLUGIN_TOOLS to pluginToolsMethods,
     ) + RuntimeSystemBridge.methodsByModule + RuntimeAutomationBridge.methodsByModule
 
@@ -1015,6 +1021,9 @@ class AndroidNodeBridgeCapabilityProvider(
     private var epubScopeClosed = false
     private val epubBridge = lazy { RuntimeEpubBridge(appContext, engineInfo.cwd) }
     internal fun closeEpubClient(id: String) { if (epubBridge.isInitialized()) epubBridge.value.closeClient(id) }
+    private val terminalScopeLock = Any()
+    private var terminalScopeClosed = false
+    private val terminalBridge = lazy { RuntimeTerminalBridge(appContext, engineInfo.cwd) }
     private val speechScopeLock = Any()
     private var speechScopeClosed = false
     private val speechBridge = lazy { RuntimeSpeechBridge(appContext, engineInfo.cwd) }
@@ -1132,12 +1141,13 @@ class AndroidNodeBridgeCapabilityProvider(
         if (policy == null) NodeBridgeFilesBridge(appContext)
         else NodeBridgeFilesBridge(appContext, rootProvider = { policy.workingRoot }, modelPathPolicy = policy)
     }
-    private val consoleBridge by lazy {
+    private val consoleBridgeHolder = lazy {
         NodeBridgeConsoleBridge(controls = if (modelFacingPluginSession) null else RuntimeConsoleBridge(
             consoleProvider = { executionConsole ?: org.autojs.autojs.AutoJs.instance.globalConsole },
             workingDirectory = engineInfo.cwd,
         ))
     }
+    private val consoleBridge by consoleBridgeHolder
     private val coordinateBridge = RuntimeCoordinateBridge()
     private val hostEnginesBridge by lazy { NodeBridgeHostEnginesBridge() }
     private val samplesBridge by lazy { NodeBridgeSamplesBridge(appContext) }
@@ -1224,6 +1234,9 @@ class AndroidNodeBridgeCapabilityProvider(
             return
         }
         when {
+            request.module == NodeBridgeModules.TOAST && request.method == "dismissAll" -> dispatchOnMain(request, auditedCallback) {
+                ScriptToast.dismissAll(appContext, "nodejs@${engineInfo.id}"); NodeBridgeResponse.success(request.id, "null")
+            }
             request.module == NodeBridgeModules.TOAST && request.method in NodeBridgeModules.toastMethods -> dispatchToast(request, auditedCallback)
             request.module == NodeBridgeModules.APP && request.method in NodeBridgeModules.appMethods -> dispatchApp(request, auditedCallback)
             request.module == NodeBridgeModules.ENGINES && request.method in NodeBridgeModules.enginesMethods -> dispatchEngines(request, auditedCallback)
@@ -1320,7 +1333,13 @@ class AndroidNodeBridgeCapabilityProvider(
             request.module == NodeBridgeModules.INPUT_OBSERVER && request.method in NodeBridgeModules.inputObserverMethods -> dispatchInputObserver(request, auditedCallback)
             request.module == NodeBridgeModules.FILES && request.method in NodeBridgeModules.filesMethods -> auditedCallback(filesBridge.dispatch(request))
             request.module == NodeBridgeModules.AGENT && request.method in NodeBridgeModules.agentMethods -> dispatchAgent(request, auditedCallback)
+            request.module == NodeBridgeModules.CONSOLE && request.method == "rawInput" -> consoleBridge.rawInput(request, auditedCallback)
             request.module == NodeBridgeModules.CONSOLE && request.method in NodeBridgeModules.consoleMethods -> auditedCallback(consoleBridge.dispatch(request))
+            request.module == NodeBridgeModules.TERMINAL && request.method in NodeBridgeModules.terminalMethods -> {
+                val bridge = synchronized(terminalScopeLock) { if (terminalScopeClosed) null else terminalBridge.value }
+                if (bridge == null) auditedCallback(NodeBridgeResponse.failure(request.id, NodeBridgeError.processDead("Terminal execution has ended")))
+                else bridge.dispatch(request, auditedCallback)
+            }
             request.module == NodeBridgeModules.PLUGIN_TOOLS && request.method in NodeBridgeModules.pluginToolsMethods -> pluginToolsBridge.value.dispatch(request, auditedCallback)
             else -> auditedCallback(unavailable(request))
         }
@@ -1403,6 +1422,8 @@ class AndroidNodeBridgeCapabilityProvider(
         synchronized(ttsScopeLock) { ttsScopeClosed = true; if (ttsBridge.isInitialized()) ttsBridge.value.close() }
         if (composeBridge.isInitialized()) composeBridge.value.close()
         if (uiInterop.isInitialized()) uiInterop.value.close()
+        synchronized(terminalScopeLock) { terminalScopeClosed = true; if (terminalBridge.isInitialized()) terminalBridge.value.close() }
+        if (consoleBridgeHolder.isInitialized()) consoleBridgeHolder.value.close()
         // UI dispatch receivers stay JNI global roots until system_server collects their proxies; drop their callbacks (C33).
         // zh-CN: UI 分发接收器在 system_server 回收代理之前一直是 JNI 全局根, 在此丢弃它们持有的回调 (C33).
         // A receiver also removes itself on the main thread, so walk the concurrent set instead of copying it (C35).
@@ -1628,7 +1649,7 @@ class AndroidNodeBridgeCapabilityProvider(
 
     private fun dispatchUi(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val args=JSONArray(request.argsJson)
-        if(request.method in RuntimeUiInterop.methods || request.method == "showLayout" && RuntimeUiInterop.isLayout(args.opt(0)) ||
+        if(request.method in RuntimeUiInterop.methods || request.method in RuntimeUiWindowControls.METHODS || request.method == "showLayout" && RuntimeUiInterop.isLayout(args.opt(0)) ||
             uiInterop.isInitialized() && uiInterop.value.ownsWindow(args.optString(0))) {
             uiInterop.value.dispatch(request,callback);return
         }
