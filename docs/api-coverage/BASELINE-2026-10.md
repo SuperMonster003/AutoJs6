@@ -1025,3 +1025,48 @@ d.ts (TS fa26b8b / 8f8ec07):
 | TS | 973963b | 同步 Bun host client 声明, bun-runtime-smoke.ts |
 | Ace | dfa5e9e / b463a2a | 内置 Bun 声明; 运行时查询表 4163 -> 4253 |
 | 宿主 | (本节所在提交) | 本节, 报告, MATRIX.md 策略冲突行, ROADMAP P4.1c 落点 / 附录 C Q151 - Q155, REVIEW 7.1 P4.1c 落点 |
+
+## 15. P2.4 类型级比对 (2026-10-30, 子会话 api-cov-p2-4)
+
+### 15.1 做了什么
+
+- `script-modules.json` (KSP) 的参数, 返回值与访问器类型经 `tools/api-coverage/type-map.json` 映射为 TypeScript 类型, 由 `dts-types.mjs` 用 TypeScript 检查器与 d.ts 比对, 分级 match / refined / coerced (一致), narrow / wide / error (不一致), unmapped (不比: `kotlin.Any?`, 未声明的类, d.ts 为 any 或泛型). 比对范围: 函数 (含别名与全局位置), 访问器, invoke / construct; `@ScriptInstall` 名称 (626) 与 `@ScriptJavaClass` (4) 没有类型. 规则与映射见 README "Types" 和报告 [api-coverage-types-2026-10-30](../dev/api-coverage-types-2026-10-30.md).
+- 门禁: `check.py` 写 types.json 与 summary "types"; `--strict-types` 只拦不安全方向 (参数 error / wide, 返回 error / narrow), 已审例外写 type-map.json `reviewed` (fnmatch 模式, 过期也报失败), 已进 CI (Q187 (a)). 矩阵 dts 列对类型一致且参数个数相符的行记 typed, MATRIX.md 加类型比对汇总行与模块表 "类型 (ksp)" 列.
+- Node: 矩阵 Node main 列已覆盖的行按 module / member 比对 `docs/nodejs/types/autojs6-node`, 返回值与访问器取 Promise 解包, 只报告 (runtime-types.json, summary types.node; Q186 (a)). `node-types.gradle.kts` 不生成 d.ts (只校验 73 份手写声明存在与被引用), 不改, augment 附录 C Q3 第二项由宿主门禁承担.
+- d.ts 修复 (TS aa62341): 不安全方向 3 处 (engines.stopAllAndToast 返回 number, util.deprecate 不返回值, Flow 选择条件去掉 null), 参数窄 17 处补 null (Q189 (b)). 文档原本已与实现一致, 文档与离线文档不改. Q23 重导入 Ace (0a97709), aj6-int-speech.d.ts 保留捆绑版本 (TS d473c8e 属 3-Macaw, 未随本卡导入).
+- 决策: Q186 (a) / Q187 (a) / Q188 (a) (ByteArray 返回按 number[] 算一致) / Q189 (b) (非推荐), Q190 (a) 已按推荐先行待确认.
+
+### 15.2 前后数字
+
+| 项 | 修复前 (TS 973963b) | 修复后 (TS aa62341, 宿主 583ca1b94) |
+| --- | --- | --- |
+| 比对行 (Rhino d.ts) | 1318: typed 1013 / differs 44 / unmapped 257 / no-dts 4 | 1318: typed 1034 / differs 23 / unmapped 257 / no-dts 4 |
+| 参数位置 | match 79 / refined 46 / coerced 9 / narrow 39 / wide 3 / unmapped 1534 | match 81 / refined 63 / coerced 9 / narrow 22 / wide 1 / unmapped 1534 |
+| 返回值与访问器 | match 783 / refined 249 / error 2 / unmapped 280 | match 785 / refined 249 / unmapped 280 |
+| `--strict-types` 失败 | 5 (Q188 前 7) | 0 (已审 23 处) |
+| MATRIX dts 列 | none 533 / name 1774 / arity 1163 / typed 0 | none 533 / name 1690 / arity 319 / typed 928 |
+| MATRIX 类型比对行 | - | typed 993 / differs 23 / unmapped 252 (invoke / construct 41 行不是矩阵行) |
+| Node d.ts (只报告, Node b77c28cb) | - | 覆盖 1744 行中类型行 1101: typed 735 / differs 70 / unmapped 296; 参数 narrow 35 / wide 4, 返回 narrow 12 / wide 3 / error 18 |
+
+- unmapped 原因: `kotlin.Any?` 1765 个位置, ProxyObject / ProxyJavaObject 39, d.ts any 或泛型 8, Set 1, Throwable 1. no-dts 4 行: toString, ui.__autojs6Tsx, ui.__autojs6TsxFragment, WebSocket.() (同 P2.2).
+- 已审 23 处 (type-map.json reviewed): tasks / timers / workManager 的 add*Task 选项 18 处 (null 会被当作空对象, 随后因缺 path / component 抛错, 保持必需, 同第 7 节; Q190 (a)); timers / workManager 的 queryTimedTasks / queryIntentTasks 选项 4 处 (Internal.WorkManager 共享段, 属第十批自动化卡或收尾批); auto.explain 目标 1 处 (wide: Automator.Target 经 Pickup.SingleSelector 收 null, 模块拒绝; 属 P3.4 / P4.4 或收尾批).
+- Node d.ts 差异多为 Node 形态 (images.toBytes / compressToBytes 解出 Uint8Array, 12 个设置页启动函数不返回是否启动, util.dpToPx 等也收字符串, 任务选项不收 null), 清单在 runtime-types.json, 供 Node 卡片处理.
+
+### 15.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-api-cov-p2-4-head` (宿主 9c46485a8 + 本卡工具, KSP 在副本内由 a5c55974a 生成 (其后 app/ 无脚本模块改动), TS bdaf3da, Ace bc80847, 文档 6e0936c, Node b77c28cb, Bun a33e26c (9b40a39 / b01dbe5 为 P4.4 在途, 宿主策略未跟上, 同 307655f10 的取法)).
+- `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) 退出码 0, failures 空; `--write-matrix` 后 MATRIX.md 与 HEAD 只差类型列与汇总行; arity match 1201 / fail 0 / narrower 29 / vararg 60, pending 基线 current (Node main 680 / Worker 681 / Bun 835), 文档运行时支持表 86 页 current. api-coverage 单测 115 通过 (跳过 3; 含 test_kotlin_types.py 12 项), test-dts-types.mjs 27 例通过 (TypeScript 6.0.3).
+- Ace: `generate-runtime-api-queries.mjs --check` (1755 行), `verify-runtime-api-coverage.mjs --fresh`, `verify-api-coverage.mjs` 与宿主 `generate-editor-assets.mjs --check` 通过 (副本内先跑 Ace 的 `:app:generateAutoJs6LspDeclarations`).
+- TS: `verify-api-coverage.mjs` (TypeScript 5.1.3 与 Ace 的 6.0.3), `verify-runtime-declarations.mjs --ace`, verify-colors / verify-terminal / verify-compose-tsx / verify-compose-declaration-body 通过. `sync-runtime-declarations.mjs --check --ace` 在 HEAD 报 Node / Bun 运行时声明过期 (Node automation.d.ts 等, 第十批 P3.4 / P4.4 在途同步), 与本卡改的 Rhino 声明无关.
+- 文档: `normalize-markdown.py --check` 与 `auto-generate.py --check` 通过 (175 个模块, 文档未改). Node 插件 HEAD 副本 `verifyAutoJs6NodeTypeDeclarations typeCheckNodeTypescriptSmoke` 通过.
+
+### 15.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| TS | aa62341 | 12 个 aj6-int d.ts 的参数 / 返回类型 |
+| Ace | 0a97709 | Q23 重导入 12 个 d.ts, autojs6_indices.js, lib.autojs6.d.ts |
+| 宿主 | 00d36fb4f | Ace 补全源 autojs6_indices.source.json |
+| 宿主 | a5c55974a | 附录 C Q156 / Q157 已决, Q186 - Q190 |
+| 宿主 | 583ca1b94 | type-map.json, kotlin_types.py, dts-types.mjs, verify-runtime-types.mjs, 单测, check.py / runtime_matrix.py / verify-surfaces.mjs, README, CI, MATRIX.md, 报告 |
+| 宿主 | (本节所在提交) | 本节, ROADMAP P2.4 落点 |
