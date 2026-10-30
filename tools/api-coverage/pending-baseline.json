@@ -11,7 +11,7 @@
  "counts": {
   "node_main": 814,
   "node_worker": 867,
-  "bun": 847
+  "bun": 835
  },
  "pending": {
   "node_main": [
@@ -2412,7 +2412,6 @@
    "imgui.withTreeNode",
    "imgui.withWindow",
    "input",
-   "isUiThread",
    "keepAlive",
    "loop",
    "newInjectableWebClient",
@@ -2496,17 +2495,6 @@
    "timers.setInterval",
    "timers.setIntervalExt",
    "timers.setTimeout",
-   "toast.dismissAll",
-   "toastError",
-   "toastInfo",
-   "toastLog",
-   "toastVerbose",
-   "toastWarn",
-   "toasterror",
-   "toastinfo",
-   "toastlog",
-   "toastverbose",
-   "toastwarn",
    "ui.R",
    "ui.Widget",
    "ui.backgroundColor",

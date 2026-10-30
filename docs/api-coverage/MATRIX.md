@@ -11,7 +11,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Node main | 1262 | 348 | 0 | 1046 | 0 | 814 |
 | Node Worker | 1209 | 345 | 0 | 1049 | 0 | 867 |
-| Bun | 0 | 325 | 1255 | 1043 | 0 | 847 |
+| Bun | 0 | 326 | 1266 | 1043 | 0 | 835 |
 
 | 列 | 取值 |
 |---|---|
@@ -48,7 +48,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 163 / 13 / 32 | 149 / 13 / 46 | 156 / 13 / 39 |
+| (global) | 208 | 206 | 205 | 205 | 163 / 13 / 32 | 149 / 13 / 46 | 167 / 13 / 28 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -166,7 +166,7 @@
 | terminal | 20 | 20 | 20 | 20 | 0 / 0 / 20 | 0 / 0 / 20 | 0 / 0 / 20 |
 | threads | 8 | 8 | 8 | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
 | timers | 18 | 18 | 18 | 18 | 10 / 6 / 2 | 10 / 6 / 2 | 10 / 0 / 8 |
-| toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 0 / 0 / 1 |
+| toast | 1 | 1 | 1 | 1 | 0 / 0 / 1 | 0 / 0 / 1 | 1 / 0 / 0 |
 | tts | 35 | 35 | 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 40 | 36 | 36 | 36 | 3 / 4 / 33 | 3 / 4 / 33 | 3 / 4 / 33 |
 | util | 54 | 54 | 54 | 54 | 48 / 6 / 0 | 48 / 6 / 0 | 48 / 6 / 0 |
@@ -209,7 +209,7 @@
 | `isJavaClass` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `isUiThread` | pending | pending | pending |
+| `isUiThread` | pending | pending | local-shim |
 | `keepAlive` | pending | pending | pending |
 | `longClick` | bridged | pending | capability-gated |
 | `loop` | pending | pending | pending |
@@ -234,16 +234,16 @@
 | `swipe` | bridged | pending | capability-gated |
 | `sync` | pending | pending | pending |
 | `toString` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `toastError` | pending | pending | pending |
-| `toastInfo` | pending | pending | pending |
-| `toastLog` | bridged | pending | pending |
-| `toastVerbose` | pending | pending | pending |
-| `toastWarn` | pending | pending | pending |
-| `toasterror` | pending | pending | pending |
-| `toastinfo` | pending | pending | pending |
-| `toastlog` | pending | pending | pending |
-| `toastverbose` | pending | pending | pending |
-| `toastwarn` | pending | pending | pending |
+| `toastError` | pending | pending | capability-gated |
+| `toastInfo` | pending | pending | capability-gated |
+| `toastLog` | bridged | pending | capability-gated |
+| `toastVerbose` | pending | pending | capability-gated |
+| `toastWarn` | pending | pending | capability-gated |
+| `toasterror` | pending | pending | capability-gated |
+| `toastinfo` | pending | pending | capability-gated |
+| `toastlog` | pending | pending | capability-gated |
+| `toastverbose` | pending | pending | capability-gated |
+| `toastwarn` | pending | pending | capability-gated |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `wait` | pending | pending | pending |
 | `wait.async` | pending | pending | pending |
@@ -2390,7 +2390,7 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `toast.dismissAll` | pending | pending | pending |
+| `toast.dismissAll` | pending | pending | capability-gated |
 
 ### ui
 
