@@ -940,3 +940,49 @@ d.ts (TS fa26b8b / 8f8ec07):
 | TS / Ace | 34277c8 / 9be5352 | 同步 Bun 声明 |
 | 文档 / Offline Docs | 377ab43 / f5fd465 / 7e0a4c9 | changelog 一句, 生成物 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP 附录 C Q137 - Q140 / Q161 / Q162 与 P4.1b 落点, REVIEW 7.1 |
+
+## 14. P3.1c Node 设备, 传感器与媒体族 (2026-10-30, 子会话 api-cov-p3-1c)
+
+### 14.1 做了什么
+
+- 本族 116 行 (device 86: 显式导出与 Device 原型成员, 含 manufacturers / brands / roms; sensors 21; media 9) 在 Node main / Worker 两列全部 bridged, pending 清零. 设计 Q146 - Q149 全选推荐; Q150 (getTimer) 已按推荐先行待确认.
+- Node 插件: 启动快照 NodeDeviceProfile (Build 字段, pageSize, 市场名, manufacturers / brands / roms 判断, 整屏宽高, 传感器表, Q148 (a)); 共享工厂 `__autojs6_create_device` / `__autojs6_create_sensors` 供主线程与 Worker (CJS / ESM / 嵌套) 共用, sensors 为 Rhino 事件发射器 (Q147 (a)), media 的 Rhino 名称进 autojs6:media, Worker 经主线程转发 (Q149 (a)); 插件清单与能力目录 device.identifiers (Q146 (a)); d.ts, HOST-API, 桌面对照 8 项.
+- 宿主: RuntimeDeviceBridge 路由 Rhino 的设备查询, device.identifiers 能力 (不被 device 隐含), keepAwake / cancelVibration (deviceRhinoControls, 不进 Bun 的 device.control), keepScreenOn 超时可省, vibrate 时序数组, 传感器 Rhino 名称与 delay 档; 结构脚本 check-runtime-device-media.mjs 接入 CI "Script API coverage"; test_runtime_matrix.py 加 test_p3_1c. runtime-policy.json 无需改动.
+
+### 14.2 前后数字
+
+| 项 | 改动前 (宿主 c5ec70ed3, MATRIX 1bef4d983) | 改动后 (宿主 c20e7a36f) |
+| --- | --- | --- |
+| 矩阵行 | 3410 | 3412 (+2 为 imgui ListClipper / listClipper, 宿主 772cff4c6, 不属本批) |
+| pending 基线 Node 主线程 / Worker / Bun | 825 / 887 / 909 | 754 / 807 / 909 (本族 71 / 80 -> 0; Bun 随 P4.1c 的 5249ee3cc 为 819) |
+| MATRIX pending Node 主线程 / Worker | 825 / 887 | 756 / 809 (含 imgui 新增 2 / 2, 不在基线) |
+| bridged Node 主线程 / Worker | 1191 / 1129 | 1262 / 1209 |
+| local-shim / not-portable Node 主线程 / Worker | 348 / 345, 1046 / 1049 | 不变 |
+| 文档 / d.ts / Ace 列 | none 472 / 473 / 878 | none 474 / 475 / 880 (+2 为 imgui) |
+| 文档运行时支持表 | 86 页 | 86 页, device / sensors / media 三页重生成 (Bun 列同时随 P4.1c 更新) |
+| Ace 运行时查询 | 4012 (Node main 1101, Worker 1047) | 4163 (Node main 1172, Worker 1127; Bun 不变) |
+
+- MATRIX.md 为 HEAD 全量重生成, Bun 列含 P4.1c 已提交的 Bun 代码 (Bun 本族 90 格由 P4.1c 收缩基线).
+
+### 14.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p3-1c-acc2` (宿主 5249ee3cc, KSP 取自共享签出 (5c19eeb10 之后 app/ 的模块无改动), Node 74f6dfa8, Bun d500a2d, 文档 f822e43, TS f964495, Ace 05076a9).
+- `check.py --matrix --strict-arity --docs-support` (含 Ace): 本族无失败, MATRIX.md current; 退出码 1 只因 imgui listClipper 的 6 格新 pending (Node main / Worker / Bun 各 2) 与 api/imgui.md 运行时表 (宿主 772cff4c6, 不属本批); policyConflicts 3 为 Bun 的 device.getDensity / getHeight / getWidth 映射未使用 (P4.1c). api-coverage 单测 103 通过 (跳过 3).
+- check-runtime-device-media.mjs (`{"hostMembers":146,"device":86,"sensors":21,"media":9,"sensorNames":12,"deviceRoutes":28,"hostApi":true}`) 通过; Node 插件 CI 的 JS 测试 189 / 189 (含 test-device-media-rhino.js 8 项); Ace `verify-runtime-api-coverage.mjs --fresh` 通过 (4163 条); TS `verify-runtime-declarations.mjs --ace` 通过 (以 Bun 0207cd7 组装的 TS 副本; 共享签出的 Bun 已含 P4.1c 的 media.control, 待其同步 Bun 声明). check-bun-device-media.mjs 报 "host-client.mjs differs from Node sensors facade", 待 P4.1c 同步 74f6dfa8; speech / epub / mail / Bundled Libraries 的检查因副本缺兄弟仓库失败, 只与环境有关.
+- 真机 BH900ASK9E (Sony G8441, Android 9 / API 28, 宿主 debug 5935): Rhino 28 / 28, Node main / ESM / 嵌套 Worker 各 28 通过, 未声明能力 9 通过; 装回原包并核对 md5. 报告 [runtime-device-media-2026-10-30](../dev/runtime-device-media-2026-10-30.md).
+
+### 14.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | bb01a8323 | RuntimeDeviceBridge, device.identifiers, keepAwake / cancelVibration, 传感器 Rhino 名称与 delay, RuntimeDeviceBridgeCapabilityTest |
+| Node 插件 | 3250fa46 | 启动快照, device / sensors / media 共享工厂与 Worker, 能力目录与套件钉住, d.ts, HOST-API, 桌面对照测试 |
+| Node 插件 | 38a6c666 | d.ts 的 autojs6:media 入口 |
+| Node 插件 | 74f6dfa8 | register 先查 sensors 能力, 真机对照脚本 tools/nodejs/api/device-media |
+| 宿主 | 0908a44d2 | check-runtime-device-media.mjs 与 CI, test_p3_1c |
+| 宿主 | c20e7a36f | MATRIX.md 与 pending-baseline.json |
+| TS | f964495 | 同步 Node 运行时声明, node-runtime-smoke.ts |
+| Ace | e74c1e8 / 05076a9 | 内置 Node 运行时声明, 运行时查询表 4012 -> 4163 |
+| 文档 | 9028c38 / f822e43 | 三页运行时支持表, changelog / progress, 生成物 |
+| Offline Docs | 04c53cd | 同步生成页, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.1c 落点与 P3.1 勾选 / 附录 C Q146 - Q150, REVIEW 7.1 P3.1c 落点 |
