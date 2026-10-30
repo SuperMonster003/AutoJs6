@@ -185,6 +185,7 @@ jobs:
           node tools/api-coverage/check-runtime-java-callbacks.mjs
           node tools/api-coverage/check-runtime-tts.mjs
           node tools/api-coverage/check-runtime-speech.mjs
+          node tools/api-coverage/check-runtime-plugin-family.mjs
           node tools/api-coverage/check-runtime-epub.mjs
           node tools/api-coverage/check-runtime-mail.mjs
           node tools/api-coverage/check-runtime-flow.mjs

@@ -178,15 +178,18 @@ class NodeIndex:
                     return name, path, via
         return None
 
-    def status(self, name):
+    def status(self, name, path=''):
         module = bare(name)
+        # A nested object of a local module that talks to its own bridge module (colors.theme, Q80 (a)).
+        if path.split('.')[0] in self.policy.get('bridgedMembers', {}).get(module, ()):
+            return 'bridged', 'bridged'
         status = self.host_api.get(module) or self.host_api.get(module.split('.')[0])
         return ('local-shim' if status == 'local-shim' else 'bridged'), status
 
     def cell(self, name, path, via):
         if not name.startswith(CANONICAL) and name in self.native:
             return {'status': 'not-portable', 'reason': 'runtime-native', 'equivalent': f'{self.native[name]}.{path}', 'module': name, 'member': path, 'via': via}
-        status, host_api = self.status(name)
+        status, host_api = self.status(name, path)
         info = self.modules[name]['members'][path]
         cell = {'status': status, 'module': name, 'member': path, 'async': info['async'], 'via': via}
         if info.get('rejects'):
@@ -266,18 +269,19 @@ class BunIndex:
         return related
 
     def capability(self, namespace, path):
-        """The grant of a namespace member: a related capability whose method table has it, else the only related one,
-        else the explicit `memberCapabilities` mapping (client-side helpers and renamed wrappers of a method-table entry)."""
+        """The grant of a namespace member: a related capability whose method table has it, else the explicit
+        `memberCapabilities` mapping (client-side helpers and renamed wrappers of a method-table entry, a nested object behind
+        its own grant), else the only related one."""
         related = self.related(namespace)
         owners = [name for name in related if path.split('.')[0] in self.methods.get(name, ())]
-        if owners or len(related) == 1:
-            return owners[0] if owners else related[0]
+        if owners:
+            return owners[0]
         key = f'{namespace}.{path}'
         mapped = self.policy.get('memberCapabilities', {}).get(key)
         if mapped:
             self.used.add(key)
             return mapped['capability'] if mapped['capability'] in self.capabilities else None
-        return None
+        return related[0] if len(related) == 1 else None
 
     def cell(self, namespace, path, via):
         """Client members are capability-gated; a namespace without any related capability holds client-side helpers,

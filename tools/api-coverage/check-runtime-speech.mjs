@@ -17,13 +17,9 @@ const types = read(resolve(node, 'docs/nodejs/types/autojs6-node/speech.d.ts'));
 const docs = read(resolve(workspace, 'AutoJs6-Documentation/api/runtimeApis.md')).split('## Node.js / Bun / Worker 的语音识别与模型管理')[1];
 assert(docs, 'Speech runtime documentation');
 const exported = hostExports();
-// Rows the pending baseline still allows on the Node main thread (Q40 (a)) have no facade yet: speech.diarize / detectLanguage / tag and
-// their Async forms wait for P3.5 / P4.5 (Q114 (a)). They are checked again once the baseline drops them.
-const pending = new Set(JSON.parse(read(resolve(root, 'tools/api-coverage/pending-baseline.json'))).pending.node_main);
-let count = 0, deferred = 0;
-for (const [name, api] of [['speech', speech], ['speech.models', speech.models]]) {
+let count = 0;
+for (const [name, api] of [['speech', speech], ['speech.models', speech.models], ['speech.speaker', speech.speaker]]) {
   for (const method of exported.functions(name)) {
-    if (pending.has(`${name}.${method}`)) { deferred++; continue; }
     assert.equal(typeof api[method], 'function', `Missing ${name}.${method}`);
     assert(types.includes(method + '('), `Missing speech declaration ${method}`);
     assert(docs.includes(method), `Missing speech documentation ${method}`); count++;
@@ -32,7 +28,8 @@ for (const [name, api] of [['speech', speech], ['speech.models', speech.models]]
 assert(speech.SpeechError('test', 'MODEL_MISSING') instanceof speech.SpeechError);
 assert(source.includes('for(const id of speechClients)closeSpeech(id)'));
 const host = read(resolve(root, 'app/src/main/java/org/autojs/autojs/engine/RuntimeSpeechBridge.kt'));
-for (const route of ['recognizeFile', 'detectVoiceFile', 'openSession', 'openWakeSession', 'installModel', 'importModel', 'refreshCatalog', 'synthesizeToFile'])
+for (const route of ['recognizeFile', 'detectVoiceFile', 'openSession', 'openWakeSession', 'installModel', 'importModel', 'refreshCatalog', 'synthesizeToFile',
+  'diarizeFile', 'detectLanguage', 'tagAudio', 'enrollSpeaker', 'verifySpeaker', 'identifySpeaker', 'listSpeakers', 'removeSpeaker'])
   assert(host.includes('SpeechPluginHost.' + route), `Native speech provider ${route}`);
 assert(host.includes('scope.cancel()') && host.includes('SpeechAudio.writeWavHeader'));
 const contract=read(resolve(root,'plugin-api/speech-api/src/main/java/org/autojs/plugin/speech/api/SpeechPluginActions.kt'));
@@ -49,4 +46,4 @@ assert(appManifest.includes('<uses-permission android:name="'+literal('PACKAGED_
 assert(appManifest.includes('<action android:name="'+literal('PACKAGED_SPEECH')+'"'));
 const prepare=read(resolve(root,'app/src/main/java/org/autojs/autojs/apkbuilder/template/RemoteApkBuildRequestPreparer.kt'));
 assert.equal(prepare.split('SpeechPluginActions.PACKAGED_PERMISSION').length-1,2,'Both Node and Bun package preparation must retain speech permission');
-console.log(JSON.stringify({rhinoSpeechMethods: count, pendingBaseline: deferred, nodeBunWorker: true, sharedPlugin: true, packagedEntry: true}));
+console.log(JSON.stringify({rhinoSpeechMethods: count, nodeBunWorker: true, sharedPlugin: true, packagedEntry: true}));

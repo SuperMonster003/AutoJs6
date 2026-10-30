@@ -813,9 +813,10 @@ class RepositoryTest(unittest.TestCase):
                 self.assertEqual(rows[name][column]['status'], status, (name, column))
         self.assertEqual({rows[name]['node_worker']['via'] for name in ['Color#argb', 'Zip#addFile', 'Storage#size']}, {'handle-type'})
         self.assertEqual(rows['axios']['node_worker']['module'], 'autojs6:global')
-        # Q80 / Q81 / Q82 (a): host bridge modules in P3.5; Q63 (a): obsoleted.
-        for name in ['colors.theme.get', 'gallery.pick', 'files.batchRename.plan']:
-            self.assertEqual(rows[name]['node_worker']['status'], 'pending', name)
+        # Q80 / Q81 / Q82 (a): host bridge modules of P3.5; Q63 (a): obsoleted.
+        for name in ['colors.theme.get', 'gallery.pick', 'gallery.GalleryError', 'files.batchRename.plan', 'speech.speaker.enroll', 'speech.diarize']:
+            for column in ['node_main', 'node_worker']:
+                self.assertEqual(rows[name][column]['status'], 'bridged', (name, column))
         self.assertEqual(rows['util.toRegularAndCall']['node_main']['status'], 'not-portable')
 
     def test_p4_2b(self):
@@ -832,9 +833,11 @@ class RepositoryTest(unittest.TestCase):
                                          ('mediainfo.get', 'capability-gated', 'mediainfo.control'), ('EpubBook#toString', 'capability-gated', 'epub.control')]:
             self.assertEqual((rows[name]['bun']['status'], rows[name]['bun'].get('capability')), (status, capability), name)
         self.assertEqual({rows[name]['bun']['via'] for name in ['Color#argb', 'Zip#addFile', 'Storage#size']}, {'handle-type'})
-        # Q80 / Q81 / Q82 (a): host bridge modules in P4.5; util.class is excluded by Q118 (a).
-        for name in ['colors.theme.get', 'gallery.pick', 'files.batchRename.plan']:
-            self.assertEqual(rows[name]['bun']['status'], 'pending', name)
+        # Q80 / Q81 / Q82 (a): host bridge modules of P4.5, each behind its own grant (Q195 (a)); util.class is excluded by Q118 (a).
+        for name, capability in [('colors.theme.get', 'theme.control'), ('gallery.pick', 'gallery.control'), ('gallery.GalleryError', 'gallery.control'),
+                                 ('files.batchRename.plan', 'batchrename.control'),
+                                 ('speech.speaker.enroll', 'speech.control'), ('speech.diarize', 'speech.control')]:
+            self.assertEqual((rows[name]['bun']['status'], rows[name]['bun'].get('capability')), ('capability-gated', capability), name)
         self.assertEqual(rows['util.class']['bun']['status'], 'not-portable')
 
     def test_p4_3(self):
