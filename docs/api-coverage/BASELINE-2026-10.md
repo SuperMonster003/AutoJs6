@@ -871,3 +871,39 @@ d.ts (TS fa26b8b / 8f8ec07):
 | Ace | f618e66 | 内置 Node 运行时声明 |
 | Ace | 345c39a | 运行时查询表 3703 -> 3908 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.1b 落点 / 附录 C Q131-Q135 / 附录 D D-22, REVIEW 7.1 P3.1b 落点 |
+
+### 13.5 P4.1b Bun 列 (2026-10-30, 子会话 api-cov-p4-1b)
+
+- 本族在 Bun 列 120 行全部有显式状态, pending 清零. Bun 客户端经 sync-system.mjs 同步 Node 共享工厂, 宿主新增 13 个默认关闭的 Bun 授权 (Q136 (a) / Q137 (a)) 与 BunAutomationBridge 映射; runtime-policy.json 加 workManager -> tasks 别名, 7 个命名空间授权, notice / plugins.tools / 全局 current* 的成员授权, native-memory-watch 加 bun 列 (Q140 (a)); check-bun-system.mjs 接入 CI.
+- 真机发现两处并修正: 插件工具授权 ID 含下划线被 Bun 插件整体拒绝 (改名 plugintools.control / plugintools.usergranted), WIDTH / HEIGHT 取服务窗口尺寸 (改用整屏真实尺寸). 验收发现 check-bun-js-tools.mjs 按 JS 工具族的 17 个成员核对 host.global, 本族加入 19 个全局系统成员后失败, 已修正.
+
+| 项 | 改动前 (宿主 2c997b35d) | 改动后 (宿主 1bef4d983) |
+| --- | --- | --- |
+| 矩阵行 | 3410 | 3410 (不变) |
+| pending Node 主线程 / Worker / Bun | 825 / 887 / 1026 | 825 / 887 / 909 (本族 Bun 117 -> 0) |
+| Bun local-shim / capability-gated / not-portable | 298 / 1044 / 1042 | 313 / 1145 / 1043 (memory.watch, Q140 (a)) |
+| 文档运行时支持表 | 86 页 | 86 页, 本族 13 页的 Bun 列重生成 |
+| Ace 运行时查询 | 3908 (Bun 924) | 4012 (Bun 1028) |
+
+- 本族 Bun 列 120 行: capability-gated 103, local-shim 15, not-portable 2 (memory.watch Q140 (a), plugins.load D-14).
+- 验收: HEAD 导出副本 `E:/.cache/aj6-p4-1b-acc` (宿主 1bef4d983 + 其后的 d4e2bbf0d 检查脚本, KSP 取自 a268b1526 的构建 (其后 app/ 无改动), Node 08781cee, Bun e6b4296, 文档 e1d2dc8, TS f86a8bc, Ace 7b83ecb; 另导出 Bundled Libraries 0e4bd8a, 3-Folio EPUB 34658be, 3-Macaw Speech 1294e22, 3-Stamp Mail 59b8b37 供 CI 同款检查). `check.py --source ksp --matrix --strict-arity --docs-support` (含 Ace) 退出码 0, MATRIX.md / pending-baseline.json current, 运行时支持表 86 页 current; 单元测试 97 个通过 (跳过 3); CI 的 16 个结构脚本全部通过 (check-bun-system.mjs: members 119 / globals 20 / grants 13); Ace generate-runtime-api-queries --check 与 verify-runtime-api-coverage --fresh 通过 (4012 条); TS sync-runtime-declarations --check 与 npm test 通过; Bun host client 测试 75 + 15 通过, 19 个 sync-*.mjs --check 通过.
+- 真机 Redmi 22120RN86C (API 33, 宿主 debug 5935): Rhino 49 / 49, Bun main / Worker 各 49 / 49, 只开查询授权的拒绝轮各 16 / 16; 装回原包并核对 md5. 报告 [bun-system-engines-2026-10-30](../dev/bun-system-engines-2026-10-30.md).
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| Bun 插件 | def82bc | sync-system.mjs, 客户端 createSystemFamily 与授权映射, d.mts, system.test.mjs, CI |
+| Bun 插件 | 73b5201 | host-api.md 授权表与 Bun 差异 (Q138 - Q140) |
+| Bun 插件 | ef7e030 | engines.all / stopAll / stopSelf 无授权时带 missingCapabilities |
+| Bun 插件 | 1383a79 | 插件工具授权 ID 改名跟随 |
+| Bun 插件 | e6b4296 | WIDTH / HEIGHT 与 SetScreenMetrics 缩放用整屏真实尺寸 |
+| 宿主 | 39e240a14 / d4ca4333f / cb3c277ce | 13 个授权与插件中心开关, BunAutomationBridge 映射, 插件工具授权与 905 s 上限 |
+| 宿主 | 81f809d05 | runtime-policy.json, check-bun-system.mjs 与 CI |
+| 宿主 | a268b1526 | 插件工具授权 ID 改为 plugintools.control / plugintools.usergranted, 单测按插件正则校验 |
+| 宿主 | b757c0f9a | 真机脚本 device_bun_system.py |
+| 宿主 | 1bef4d983 | MATRIX.md 与 pending-baseline.json |
+| 宿主 | d4e2bbf0d | check-bun-js-tools.mjs 跟随本族的 host.global 成员 |
+| 文档 | 7d86e0f / e1d2dc8 | 本族 13 页 Bun 列, changelog / progress; 生成物 |
+| Offline Docs | 1dbc566 | 同步生成页, 版本不变 |
+| TS | f86a8bc | 同步 Bun host client 声明 |
+| Ace | f42f0be / 7b83ecb | 内置 Bun 声明; 运行时查询表 3908 -> 4012 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P4.1b 落点 / 附录 C Q136-Q140 / 附录 D D-22 的 Bun 列, REVIEW 7.1 P4.1b 落点 |
