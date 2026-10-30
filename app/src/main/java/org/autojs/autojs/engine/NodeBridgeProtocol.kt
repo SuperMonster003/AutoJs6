@@ -2955,7 +2955,9 @@ class AndroidNodeBridgeCapabilityProvider(
                         engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
                         engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE),
                         variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
-                        profile = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.PROFILE),
+                        // Only the explicit option: lang and model also reach the plugin as its profile, but they do
+                        // not name a plugin's modelProfile ("zh-CN" or "auto" would match no plugin).
+                        profile = options.optNonBlankString(PaddleOcrOptionExtraKeys.PROFILE),
                         moduleLabel = OCR_MODULE_LABEL,
                         automatic = true,
                     ) }
