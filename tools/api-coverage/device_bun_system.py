@@ -54,6 +54,12 @@ SYSTEM_CASES = SYSTEM_CASES.concat([
     ["bun.execScript", null, "engines.execScript('p41b-exec', 'var p41b = 1;').then(r => [typeof r.id, r.spawnDepth])", ["number", 1]],
     ["bun.global.app", null, "[system.isAutoJs6, typeof system.exit, app.autojs === autojs]", [true, "function", true]]
 ]);
+// An omitted notice channel id is the running file's full name (Q135 (b), Node a4d11a16): a Bun script runs as one file,
+// p31b_bun_<run>.js (Node expects the main.js of its project).
+SYSTEM_CASES.forEach(function (c) {
+    if (c[0] === "notice.channel.default") c[2] = "(async () => { const id = await notice.channel.create({name: 'P31B'});" +
+        " const r = await notice.channel.remove(id); return [id === 'p31b_bun_' + P31B_RUN + '.js', r]; })()";
+});
 """
 GRANTS = ["autojs.control", "autojs.manage", "settings.control", "settings.write", "files.control", "sysprops.control", "memory.control",
           "memory.dump", "installer.control", "installer.mutate", "engines.control", "engines.exec", "plugintools.control",
@@ -105,7 +111,7 @@ function aj6Env(host) {
     host.global.install();
     return {autojs: host.autojs, installer: host.installer, memory: host.memory, settings: host.settings, sysprops: host.sysprops,
         powerManager: host.powerManager, system: host.global, notice: host.notifications, engines: host.engines, plugins: host.plugins,
-        app: host.app, dialogs: host.dialogs, APK: AJ6_APK, systemCount, systemKeys, systemIds};
+        app: host.app, dialogs: host.dialogs, APK: AJ6_APK, P31B_RUN: AJ6_RUN_ID, systemCount, systemKeys, systemIds};
 }
 async function aj6Run(env, cases, emit) {
     const names = Object.keys(env), values = names.map(name => env[name]);
@@ -150,7 +156,7 @@ def case_list(args):
 
 
 def bun_script(args, sources, modes, run):
-    common = (f"const AJ6_APK = {json.dumps(APK)}, AJ6_CASES = {json.dumps(sources)}, AJ6_CASE_TIMEOUT_MS = 30000;\n"
+    common = (f"const AJ6_APK = {json.dumps(APK)}, AJ6_CASES = {json.dumps(sources)}, AJ6_CASE_TIMEOUT_MS = 30000, AJ6_RUN_ID = '{run}';\n"
               + cases_source(args) + encoder(args) + base.EMIT_JS + BUN_RUNNER_JS)
     worker = common + """
 self.onmessage = async () => {
@@ -231,7 +237,7 @@ def finish(args, report, failed):
 def compare(args):
     table = case_list(args)
     run = uuid.uuid4().hex[:8]
-    script = f"var AJ6_RUN = '{run}';\nvar APK = {json.dumps(APK)};\n" + cases_source(args) + encoder(args) + base.EMIT_JS + RHINO_JS
+    script = f"var AJ6_RUN = '{run}';\nvar P31B_RUN = AJ6_RUN;\nvar APK = {json.dumps(APK)};\n" + cases_source(args) + encoder(args) + base.EMIT_JS + RHINO_JS
     rhino = run_script(args, f"p31b_rhino_{run}.js", script, run)
     modes, results = run_bun(args, [case[2] for case in table])
     host = base.package_state(args.serial, base.HOST) or {}
