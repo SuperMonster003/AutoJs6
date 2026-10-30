@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">Разрешить воспроизводить, приостанавливать, перематывать и останавливать музыку, а также читать состояние воспроизведения.</string>
+    <string name="summary_bun_media_library_grant">Разрешить добавлять файлы в медиатеку путем их сканирования.</string>
+    <string name="text_bun_media_control_grant">Воспроизведение музыки в Bun</string>
+    <string name="text_bun_media_library_grant">Сканирование медиатеки в Bun</string>
+</resources>

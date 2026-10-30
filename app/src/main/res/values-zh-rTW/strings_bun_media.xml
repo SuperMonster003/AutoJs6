@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">允許播放, 暫停, 跳轉和停止音樂, 以及讀取播放狀態.</string>
+    <string name="summary_bun_media_library_grant">允許透過掃描將檔案加入媒體庫.</string>
+    <string name="text_bun_media_control_grant">Bun 音樂播放</string>
+    <string name="text_bun_media_library_grant">Bun 媒體庫掃描</string>
+</resources>

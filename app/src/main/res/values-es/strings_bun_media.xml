@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">Permitir reproducir, pausar, buscar y detener música y leer el estado de reproducción.</string>
+    <string name="summary_bun_media_library_grant">Permitir añadir archivos a la biblioteca multimedia escaneándolos.</string>
+    <string name="text_bun_media_control_grant">Reproducción de música de Bun</string>
+    <string name="text_bun_media_library_grant">Escaneo de la biblioteca multimedia de Bun</string>
+</resources>

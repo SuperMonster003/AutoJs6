@@ -118,6 +118,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunSpeechControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTtsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunMediainfoControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunMediaControlGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunMediaLibraryGrantPreference: ThemeColorSwitchPreference? = null
     private var bunJavaInteropGrantPreference: ThemeColorSwitchPreference? = null
     private var bunTasksControlGrantPreference: ThemeColorSwitchPreference? = null
     // The system and engines grants of api-coverage P4.1b (Q136), by capability.
@@ -288,6 +290,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunSpeechControlGrantPreference = findPreference("plugin_bun_speech_control_grant")
         bunTtsControlGrantPreference = findPreference("plugin_bun_tts_control_grant")
         bunMediainfoControlGrantPreference = findPreference("plugin_bun_mediainfo_control_grant")
+        bunMediaControlGrantPreference = findPreference("plugin_bun_media_control_grant")
+        bunMediaLibraryGrantPreference = findPreference("plugin_bun_media_library_grant")
         bunJavaInteropGrantPreference = findPreference("plugin_bun_java_interop_grant")
         bunTasksControlGrantPreference = findPreference("plugin_bun_tasks_control_grant")
         BunHostCapabilityGrants.SYSTEM_FAMILY.forEach { capability ->
@@ -535,6 +539,14 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setMediainfoControlGranted(requireContext(), value == true)
             true
         }
+        bunMediaControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setMediaControlGranted(requireContext(), value == true)
+            true
+        }
+        bunMediaLibraryGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setMediaLibraryGranted(requireContext(), value == true)
+            true
+        }
         bunJavaInteropGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setJavaInteropGranted(requireContext(), value == true)
             true
@@ -660,6 +672,8 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunSpeechControlGrantPreference?.isChecked = BunHostCapabilityGrants.isSpeechControlGranted(requireContext())
         bunTtsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTtsControlGranted(requireContext())
         bunMediainfoControlGrantPreference?.isChecked = BunHostCapabilityGrants.isMediainfoControlGranted(requireContext())
+        bunMediaControlGrantPreference?.isChecked = BunHostCapabilityGrants.isMediaControlGranted(requireContext())
+        bunMediaLibraryGrantPreference?.isChecked = BunHostCapabilityGrants.isMediaLibraryGranted(requireContext())
         bunJavaInteropGrantPreference?.isChecked = BunHostCapabilityGrants.isJavaInteropGranted(requireContext())
         bunTasksControlGrantPreference?.isChecked = BunHostCapabilityGrants.isTasksControlGranted(requireContext())
         bunSystemFamilyGrantPreferences.forEach { (capability, preference) ->

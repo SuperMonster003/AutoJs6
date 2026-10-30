@@ -66,6 +66,10 @@ object BunHostCapabilityGrants {
     const val SPEECH_CONTROL = "speech.control"
     const val TTS_CONTROL = "tts.control"
     const val MEDIAINFO_CONTROL = "mediainfo.control"
+    // Rhino's media module (api-coverage P4.1c, Q152 (a)): music playback, and scanFile into the media library, after the
+    // Node capabilities media.playback / media.library.
+    const val MEDIA_CONTROL = "media.control"
+    const val MEDIA_LIBRARY = "media.library"
     const val JAVA_INTEROP = "java.interop"
     const val ANDROID_OBJECTS = "android.objects"
     const val TASKS_CONTROL = "tasks.control"
@@ -231,6 +235,14 @@ object BunHostCapabilityGrants {
     fun isMediainfoControlGranted(context: Context): Boolean = isGranted(context, MEDIAINFO_CONTROL, false)
     fun setMediainfoControlGranted(context: Context, granted: Boolean) = setGranted(context, MEDIAINFO_CONTROL, granted)
 
+    /** Music playback of Rhino's media module (playMusic, pauseMusic, musicSeekTo, isMusicPlaying and so on), api-coverage P4.1c. */
+    fun isMediaControlGranted(context: Context): Boolean = isGranted(context, MEDIA_CONTROL, false)
+    fun setMediaControlGranted(context: Context, granted: Boolean) = setGranted(context, MEDIA_CONTROL, granted)
+
+    /** media.scanFile: adding a file to the media library, api-coverage P4.1c. */
+    fun isMediaLibraryGranted(context: Context): Boolean = isGranted(context, MEDIA_LIBRARY, false)
+    fun setMediaLibraryGranted(context: Context, granted: Boolean) = setGranted(context, MEDIA_LIBRARY, granted)
+
     fun isJavaInteropGranted(context: Context): Boolean = isGranted(context, JAVA_INTEROP, false)
     fun setJavaInteropGranted(context: Context, granted: Boolean) = setGranted(context, JAVA_INTEROP, granted)
 
@@ -319,6 +331,8 @@ object BunHostCapabilityGrants {
         if (isSpeechControlGranted(context)) add(SPEECH_CONTROL)
         if (isTtsControlGranted(context)) add(TTS_CONTROL)
         if (isMediainfoControlGranted(context)) add(MEDIAINFO_CONTROL)
+        if (isMediaControlGranted(context)) add(MEDIA_CONTROL)
+        if (isMediaLibraryGranted(context)) add(MEDIA_LIBRARY)
         if (isJavaInteropGranted(context)) add(JAVA_INTEROP)
         if (isAndroidObjectsGranted(context)) add(ANDROID_OBJECTS)
         if (isTasksControlGranted(context)) add(TASKS_CONTROL)
@@ -330,7 +344,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL) + SYSTEM_FAMILY
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL, MEDIA_CONTROL, MEDIA_LIBRARY) + SYSTEM_FAMILY
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

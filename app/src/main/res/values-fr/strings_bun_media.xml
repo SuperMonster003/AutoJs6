@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">Autoriser à lire, mettre en pause, repositionner et arrêter la musique et à consulter son état de lecture.</string>
+    <string name="summary_bun_media_library_grant">Autoriser à ajouter des fichiers à la médiathèque en les analysant.</string>
+    <string name="text_bun_media_control_grant">Lecture de musique Bun</string>
+    <string name="text_bun_media_library_grant">Analyse de la médiathèque Bun</string>
+</resources>

@@ -407,6 +407,22 @@
             app:summary="@string/summary_bun_mediainfo_control_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_media_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_media_control_grant"
+            app:summary="@string/summary_bun_media_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_media_library_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_media_library_grant"
+            app:summary="@string/summary_bun_media_library_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_java_interop_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"

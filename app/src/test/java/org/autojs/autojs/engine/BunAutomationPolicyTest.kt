@@ -24,8 +24,9 @@ class BunAutomationPolicyTest {
     }
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
-        // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 and plugin tools 3 (P4.1b).
-        assertEquals(258,BunAutomationBridge.methods.values.sumOf{it.size})
+        // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 and plugin tools 3 (P4.1b),
+        // media playback 6 and the media library scan 1 (P4.1c).
+        assertEquals(265,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -100,6 +101,25 @@ class BunAutomationPolicyTest {
         for (method in NodeBridgeModules.pluginToolsMethods)
             assertEquals(listOf("plugin_tools"), NodeBridgePermissionManifest.requiredCapabilitiesFor("plugin_tools", method))
         assertEquals(listOf("files", "files.write"), BunAutomationBridge.nodeCapabilities(listOf(Grants.FILES_CONTROL)))
+    }
+
+    // api-coverage P4.1c (Q152 (a)): Rhino's media module, its playback and the media library scan as the Node capabilities.
+    @Test fun mediaGrantsMapToNodePlaybackAndTheLibraryScan() {
+        val playback = BunAutomationBridge.nodeCapabilities(listOf(Grants.MEDIA_CONTROL))
+        val library = BunAutomationBridge.nodeCapabilities(listOf(Grants.MEDIA_LIBRARY))
+        assertEquals(listOf("media", "media.playback"), playback)
+        assertEquals(listOf("media", "media.library"), library)
+        assertEquals(NodeBridgeModules.mediaPlaybackMethods, BunAutomationBridge.methods[Grants.MEDIA_CONTROL])
+        assertEquals(setOf("scanFile"), BunAutomationBridge.methods[Grants.MEDIA_LIBRARY])
+        for (method in NodeBridgeModules.mediaPlaybackMethods)
+            assertTrue(method, playback.containsAll(NodeBridgePermissionManifest.requiredCapabilitiesFor("media", method)))
+        assertTrue(library.containsAll(NodeBridgePermissionManifest.requiredCapabilitiesFor("media_store", "scanFile")))
+        // Neither grant reaches the audio streams of device.audio or a library change.
+        assertFalse(NodeBridgePermissionManifest.MEDIA_AUDIO in playback + library)
+        assertFalse(NodeBridgePermissionManifest.MEDIA_LIBRARY_MUTATE in playback + library)
+        assertEquals(listOf(Grants.MEDIA_CONTROL, Grants.MEDIA_LIBRARY), Grants.validatePackagedCapabilities(listOf(Grants.MEDIA_CONTROL, Grants.MEDIA_LIBRARY)))
+        val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
+        for (capability in listOf(Grants.MEDIA_CONTROL, Grants.MEDIA_LIBRARY)) assertTrue(capability, pattern.matches(capability))
     }
 
     // The plugin's request parser (BunExecutionRequestParser) rejects the whole execution when a granted capability ID is not

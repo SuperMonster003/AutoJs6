@@ -206,6 +206,9 @@ internal class BunAutomationBridge(
             if (Grants.SPEECH_CONTROL in grants) add(NodeBridgePermissionManifest.SPEECH)
             if (Grants.TTS_CONTROL in grants) add(NodeBridgePermissionManifest.TTS)
             if (Grants.MEDIAINFO_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_METADATA))
+            // Rhino's media module (api-coverage P4.1c, Q152 (a)): playback and the media library scan of Node.
+            if (Grants.MEDIA_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_PLAYBACK))
+            if (Grants.MEDIA_LIBRARY in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_LIBRARY))
             if (Grants.JAVA_INTEROP in grants) add(NodeBridgePermissionManifest.JAVA_INTEROP)
             if (Grants.ANDROID_OBJECTS in grants) add(NodeBridgePermissionManifest.ANDROID_OBJECTS)
             if (Grants.TASKS_CONTROL in grants) add(NodeBridgePermissionManifest.TASKS)
@@ -261,6 +264,8 @@ internal class BunAutomationBridge(
             Grants.SPEECH_CONTROL to RuntimeSpeechBridge.methods,
             Grants.TTS_CONTROL to RuntimeTtsBridge.methods,
             Grants.MEDIAINFO_CONTROL to NodeBridgeModules.mediainfoMethods,
+            Grants.MEDIA_CONTROL to NodeBridgeModules.mediaPlaybackMethods,
+            Grants.MEDIA_LIBRARY to setOf("scanFile"),
             Grants.JAVA_INTEROP to ControlledJavaInteropPolicy.methods,
             Grants.ANDROID_OBJECTS to RuntimeAndroidObjects.methods,
             Grants.TASKS_CONTROL to RuntimeTasksBridge.methods,
@@ -290,7 +295,7 @@ internal class BunAutomationBridge(
             Grants.NOTIFICATIONS_POST to mapOf(RuntimeSystemBridge.NOTICE to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.NOTICE)),
             Grants.DEVICE_CONTROL to mapOf(RuntimeSystemBridge.POWER_MANAGER to RuntimeSystemBridge.methodsByModule.getValue(RuntimeSystemBridge.POWER_MANAGER)),
         )
-        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
+        private val modules = mapOf(Grants.AGENT_CONTROL to NodeBridgeModules.AI_AGENT,Grants.AI_CONTROL to NodeBridgeModules.AI,Grants.FLOW_CONTROL to NodeBridgeModules.FLOW,Grants.MAIL_CONTROL to NodeBridgeModules.MAIL,Grants.EPUB_CONTROL to NodeBridgeModules.EPUB,Grants.SPEECH_CONTROL to NodeBridgeModules.SPEECH,Grants.TTS_CONTROL to NodeBridgeModules.TTS,Grants.MEDIAINFO_CONTROL to NodeBridgeModules.MEDIAINFO,Grants.MEDIA_CONTROL to NodeBridgeModules.MEDIA,Grants.MEDIA_LIBRARY to NodeBridgeModules.MEDIA_STORE,Grants.JAVA_INTEROP to NodeBridgeModules.JAVA,Grants.ANDROID_OBJECTS to NodeBridgeModules.ANDROID_OBJECTS,Grants.TASKS_CONTROL to NodeBridgeModules.TASKS,Grants.DEVICE_CONTROL to NodeBridgeModules.DEVICE, Grants.DEVICE_AUDIO to NodeBridgeModules.MEDIA, Grants.DIALOGS_CONTROL to NodeBridgeModules.DIALOGS, Grants.EVENTS_OBSERVE to NodeBridgeModules.EVENTS, Grants.NOTIFICATIONS_POST to NodeBridgeModules.NOTIFICATIONS, Grants.APP_CONTROL to NodeBridgeModules.APP, Grants.ACCESSIBILITY_CONTROL to NodeBridgeModules.ACCESSIBILITY, Grants.CLIPBOARD_CONTROL to NodeBridgeModules.CLIPBOARD, Grants.STORAGE_CONTROL to NodeBridgeModules.STORAGE, Grants.DATABASE_CONTROL to NodeBridgeModules.DATABASE, Grants.SENSORS_CONTROL to NodeBridgeModules.SENSORS, Grants.SHELL_CONTROL to NodeBridgeModules.SHELL,
             Grants.AUTOJS_CONTROL to RuntimeSystemBridge.AUTOJS, Grants.SETTINGS_CONTROL to RuntimeSystemBridge.SETTINGS, Grants.SYSPROPS_CONTROL to RuntimeSystemBridge.SYSPROPS,
             Grants.MEMORY_CONTROL to RuntimeSystemBridge.MEMORY, Grants.INSTALLER_CONTROL to RuntimeSystemBridge.INSTALLER, Grants.ENGINES_CONTROL to NodeBridgeModules.ENGINES,
             Grants.PLUGIN_TOOLS_CONTROL to NodeBridgeModules.PLUGIN_TOOLS)

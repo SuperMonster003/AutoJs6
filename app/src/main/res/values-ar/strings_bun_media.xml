@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">السماح بتشغيل الموسيقى وإيقافها مؤقتا والانتقال فيها وإيقافها وقراءة حالة التشغيل.</string>
+    <string name="summary_bun_media_library_grant">السماح بإضافة الملفات إلى مكتبة الوسائط عن طريق فحصها.</string>
+    <string name="text_bun_media_control_grant">تشغيل الموسيقى في Bun</string>
+    <string name="text_bun_media_library_grant">فحص مكتبة الوسائط في Bun</string>
+</resources>

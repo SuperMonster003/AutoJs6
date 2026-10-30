@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">允许播放, 暂停, 跳转和停止音乐, 以及读取播放状态.</string>
+    <string name="summary_bun_media_library_grant">允许通过扫描把文件加入媒体库.</string>
+    <string name="text_bun_media_control_grant">Bun 音乐播放</string>
+    <string name="text_bun_media_library_grant">Bun 媒体库扫描</string>
+</resources>

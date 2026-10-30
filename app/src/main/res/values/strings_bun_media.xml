@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">Allow playing, pausing, seeking and stopping music and reading the playback state.</string>
+    <string name="summary_bun_media_library_grant">Allow adding files to the media library by scanning them.</string>
+    <string name="text_bun_media_control_grant">Bun music playback</string>
+    <string name="text_bun_media_library_grant">Bun media library scan</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">음악 재생, 일시 정지, 탐색, 정지와 재생 상태 읽기를 허용합니다.</string>
+    <string name="summary_bun_media_library_grant">파일을 스캔하여 미디어 라이브러리에 추가하는 것을 허용합니다.</string>
+    <string name="text_bun_media_control_grant">Bun 음악 재생</string>
+    <string name="text_bun_media_library_grant">Bun 미디어 라이브러리 스캔</string>
+</resources>

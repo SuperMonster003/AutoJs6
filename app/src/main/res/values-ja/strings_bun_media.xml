@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_media_control_grant">音楽の再生, 一時停止, シーク, 停止と再生状態の取得を許可します.</string>
+    <string name="summary_bun_media_library_grant">ファイルをスキャンしてメディアライブラリに追加することを許可します.</string>
+    <string name="text_bun_media_control_grant">Bun 音楽再生</string>
+    <string name="text_bun_media_library_grant">Bun メディアライブラリのスキャン</string>
+</resources>
