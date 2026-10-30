@@ -923,3 +923,20 @@ d.ts (TS fa26b8b / 8f8ec07):
 | TS | 4a5b382 | 同步 Node 运行时声明 |
 | Ace | a57d699 | 内置 Node 运行时声明 |
 | 宿主 | (本节所在提交) | 本节, check-runtime-system.mjs, 报告, ROADMAP 附录 C Q135 / P3.1b 行, REVIEW 7.1 |
+
+### 13.7 P4.1b 返工: Q139 (b), Q135 (b) 跟随, Q161 (a) / Q162 (a) (2026-10-30, 子会话 api-cov-p4-1b)
+
+- 维护者 08:3x 对 Q139 选 (b) (非推荐), Q138 / Q140 确认 (a), Q135 (b) 由 P4.1b 跟随; 09:1x 在本子会话对跟随中的两处 Bun 特有问题选 Q161 (a) 显式安装方法, Q162 (a) 删第二开关.
+- Bun 客户端同步 Node 6c2fae29 (RootMode 对象, notice.channel 默认取脚本文件名, plugin_tools 隐含 user_granted); host.global.install(target?) 把全局系统函数与 R 装到 globalThis (不可枚举, 不计入 host.global 成员); Worker 的 exit / stop 经宿主 execution.control 结束整个执行 (不是授权, 每个 broker 都带, stop 带消息时执行以该消息失败); plugintools.usergranted 与其插件中心开关删除, 本族授权 13 -> 12.
+- 数字: 本族矩阵行与状态不变 (本族 Bun pending 0; 改动前后都是 capability-gated / local-shim / not-portable, 无新行). 文档运行时支持表与 Ace 运行时查询表不因本节改变.
+- 验收 (HEAD 导出副本 `E:/.cache/aj6-p4-1b-rw/acc`: 宿主 262870051, Bun 0207cd7, Node df2f1f5f, 文档 f5fd465, TS 34277c8, Ace 9be5352, 另 Bundled Libraries 0e4bd8a / 3-Folio EPUB 34658be / 3-Macaw Speech 37966b3 / 3-Stamp Mail 59b8b37; KSP 取宿主 e3689a136 + 本节改动的构建, 其后 runtime/ 与 core/ 只改了 Bun 授权与插件中心): 单元测试 102 个通过 (跳过 3); CI 的 16 个结构脚本全部通过 (check-bun-system.mjs: members 119 / globals 20 / grants 12); TS sync-runtime-declarations --check 与 verify-runtime-declarations 通过; Ace verify-runtime-api-coverage --fresh 通过; Bun host client 测试 118 个与 19 个 sync-*.mjs --check 通过, Bun JVM 单测 66 个, 宿主 BunAutomationPolicyTest 13 个通过. `check.py --source ksp --matrix --strict-arity --docs-support` 在该 HEAD 退出码 1, 失败项都不属本族: imgui.ListClipper / listClipper 6 格新 pending (宿主 772cff4c6 起, 未登记基线), device 17 格已不再 pending 而基线未缩 (P4.1c / P3.1c 进行中), api/device.md 与 api/imgui.md 运行时支持表待重生成, 由此 MATRIX.md 与 Ace 运行时查询表 stale.
+- 真机 Redmi 22120RN86C (API 33, 宿主 debug 5935, Bun 0.21.0 (296)): Rhino 54 / 54, Bun main / Worker 各 54 / 54, 拒绝轮各 16 / 16, Worker exit(error) / stop() 都在主线程下一次报告前结束整个执行, exit(error) 的错误出现在宿主控制台; 23 个授权与原包已还原, md5 一致.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| Bun 插件 | 0207cd7 | 客户端 (Node 6c2fae29 同步, install, Worker exit 经 execution.control), d.mts, host-api.md, sync-system.mjs, system.test.mjs |
+| 宿主 | b2c78ccc5 | execution.control 停止路由, 删 plugintools.usergranted 与开关 (11 语言), BunAutomationPolicyTest |
+| 宿主 | 262870051 | check-bun-system.mjs, runtime-policy 注释, device_bun_system.py |
+| TS / Ace | 34277c8 / 9be5352 | 同步 Bun 声明 |
+| 文档 / Offline Docs | 377ab43 / f5fd465 / 7e0a4c9 | changelog 一句, 生成物 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP 附录 C Q137 - Q140 / Q161 / Q162 与 P4.1b 落点, REVIEW 7.1 |
