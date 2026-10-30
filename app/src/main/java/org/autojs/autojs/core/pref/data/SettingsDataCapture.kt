@@ -34,12 +34,21 @@ object SettingsDataCapture {
      * 无法导入). 无法读取的分类会被略过并记录日志, 设置照常备份; 设备锁定时快捷方式按已存储的状态读取.
      */
     @JvmStatic
-    fun capture(context: Context, categories: Collection<SettingCategory>, time: Long): List<SettingsArchiveWriter.DataFile> {
+    fun capture(context: Context, categories: Collection<SettingCategory>, time: Long): List<SettingsArchiveWriter.DataFile> =
+        readAll(context, categories, time).values.filterNotNull().filter { it.entries > 0 }
+
+    /**
+     * The data file of each data category among [categories], with or without entries, null for a category that cannot
+     * be read, so that the export wizard can tell the two apart. [time] and the threading are those of [capture].
+     * zh-CN: [categories] 中每个数据分类的数据文件, 不论有无条目, 无法读取的分类为 null, 以便导出向导区分两者. [time] 与线程要求同 [capture].
+     */
+    @JvmStatic
+    fun readAll(context: Context, categories: Collection<SettingCategory>, time: Long): Map<SettingCategory, SettingsArchiveWriter.DataFile?> {
         val app = context.applicationContext
         return listOfNotNull(
-            SettingCategory.DATA_SHORTCUTS.takeIf { it in categories }?.let { category -> read(category) { shortcuts(app, time) } },
-            SettingCategory.DATA_COLOR_LIBRARY.takeIf { it in categories }?.let { category -> read(category) { colorLibraries(app, time) } },
-        ).filter { it.entries > 0 }
+            SettingCategory.DATA_SHORTCUTS.takeIf { it in categories }?.let { category -> category to read(category) { shortcuts(app, time) } },
+            SettingCategory.DATA_COLOR_LIBRARY.takeIf { it in categories }?.let { category -> category to read(category) { colorLibraries(app, time) } },
+        ).toMap()
     }
 
     private fun read(category: SettingCategory, read: () -> SettingsArchiveWriter.DataFile) = runCatching(read)

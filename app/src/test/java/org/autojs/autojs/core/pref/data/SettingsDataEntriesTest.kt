@@ -103,6 +103,14 @@ class SettingsDataEntriesTest {
     }
 
     @Test
+    fun aFileWithoutEntriesIsNotWrittenWhateverWasChosen() {
+        val empty = ColorLibraryDataCodec.encode(emptyList(), TIME, ZONE, app)
+        assertNull(SettingsDataEntries.select(empty, null, LATER, ZONE, app))
+        // A stale choice must not reach the decoder, which refuses a document without libraries.
+        assertNull(SettingsDataEntries.select(empty, listOf("0"), LATER, ZONE, app))
+    }
+
+    @Test
     fun onlyTheDataCategoriesAreRefinable() {
         assertTrue(SettingsDataEntries.isRefinable(SettingCategory.DATA_SHORTCUTS))
         assertTrue(SettingsDataEntries.isRefinable(SettingCategory.DATA_COLOR_LIBRARY))

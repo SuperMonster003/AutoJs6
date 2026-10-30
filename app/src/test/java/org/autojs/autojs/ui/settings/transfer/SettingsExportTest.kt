@@ -1,12 +1,18 @@
 package org.autojs.autojs.ui.settings.transfer
 
+import org.autojs.autojs.core.pref.SettingCategory
 import org.autojs.autojs.core.pref.TypedValue
 import org.autojs.autojs.core.pref.archive.SettingsArchive
 import org.autojs.autojs.core.pref.archive.SettingsArchiveException
 import org.autojs.autojs.core.pref.archive.SettingsArchiveManifest
 import org.autojs.autojs.core.pref.archive.SettingsArchiveReader
+import org.autojs.autojs.core.pref.archive.SettingsArchiveWriter
 import org.autojs.autojs.core.pref.archive.SettingsDeviceKey
 import org.autojs.autojs.core.pref.archive.SettingsSnapshot
+import org.autojs.autojs.core.pref.data.ColorLibraryDataCodec
+import org.autojs.autojs.core.pref.data.ShortcutDataCodec
+import org.autojs.autojs.external.shortcut.ShortcutBackupState
+import org.autojs.autojs.theme.library.ColorLibraryJson
 import org.autojs.autojs.ui.settings.transfer.SettingsWizardState.Failure
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -14,6 +20,7 @@ import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.time.ZoneId
 import java.util.zip.ZipInputStream
 
 /**
@@ -66,6 +73,26 @@ class SettingsExportTest {
         assertEquals(Failure.TOO_LARGE, Failure.of(error))
         assertEquals(16L * 1024 * 1024, SettingsArchive.MAX_BYTES)
         assertEquals("16 MB", SettingsTransferMessages.sizeLimit())
+    }
+
+    @Test
+    fun aChosenDataCategoryWithoutEntriesIsLeftOutButOneThatCannotBeReadFails() {
+        val app = ColorLibraryJson.AppInfo("6.8.0", 5781)
+        val zone = ZoneId.of("Asia/Shanghai")
+        val noLibraries = ColorLibraryDataCodec.encode(emptyList(), 0L, zone, app)
+        val libraries = ColorLibraryDataCodec.encode(listOf(ColorLibraryJson.PlainLibrary("灰阶", listOf(ColorLibraryJson.Color(-0x616162)))), 0L, zone, app)
+        val noShortcuts = ShortcutDataCodec.encode(ShortcutBackupState(emptyList()), 0L)
+        val wanted = listOf(SettingCategory.DATA_SHORTCUTS, SettingCategory.DATA_COLOR_LIBRARY)
+
+        val none = mapOf(SettingCategory.DATA_SHORTCUTS to noShortcuts, SettingCategory.DATA_COLOR_LIBRARY to noLibraries)
+        assertEquals(emptyList<SettingsArchiveWriter.DataFile>(), SettingsExporter.dataFiles(wanted, none, emptyMap(), 0L, app))
+
+        val some = mapOf(SettingCategory.DATA_SHORTCUTS to noShortcuts, SettingCategory.DATA_COLOR_LIBRARY to libraries)
+        assertEquals(listOf("data_color_library"), SettingsExporter.dataFiles(wanted, some, emptyMap(), 0L, app).map { it.id })
+
+        val unreadable = mapOf(SettingCategory.DATA_SHORTCUTS to noShortcuts, SettingCategory.DATA_COLOR_LIBRARY to null)
+        val error = assertThrows(IOException::class.java) { SettingsExporter.dataFiles(wanted, unreadable, emptyMap(), 0L, app) }
+        assertEquals("Cannot read the data of data_color_library", error.message)
     }
 
     @Test

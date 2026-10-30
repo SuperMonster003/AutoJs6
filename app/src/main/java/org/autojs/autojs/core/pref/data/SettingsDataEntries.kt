@@ -48,7 +48,8 @@ object SettingsDataEntries {
         zone: ZoneId = ZoneId.systemDefault(),
         app: ColorLibraryJson.AppInfo? = null,
     ): SettingsArchiveWriter.DataFile? {
-        if (ids == null) return file.takeIf { it.entries > 0 }
+        if (file.entries == 0) return null
+        if (ids == null) return file
         val chosen = ids.toSet()
         val selected = when (file.id) {
             ShortcutDataCodec.CATEGORY.id -> {

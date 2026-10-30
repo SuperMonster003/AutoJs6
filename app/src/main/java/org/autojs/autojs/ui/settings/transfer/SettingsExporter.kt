@@ -88,12 +88,24 @@ object SettingsExporter {
     ): List<SettingsArchiveWriter.DataFile> {
         val wanted = categories.filter { it.isData }
         if (wanted.isEmpty()) return emptyList()
-        val captured = SettingsDataCapture.capture(context, wanted, now).associateBy { it.id }
         val app = ColorLibraryJson.AppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
-        return wanted.mapNotNull { category ->
-            val file = captured[category.id] ?: throw IOException("Cannot read the data of ${category.id}")
-            SettingsDataEntries.select(file, refine[category.id], now, app = app)
-        }
+        return dataFiles(wanted, SettingsDataCapture.readAll(context, wanted, now), refine, now, app)
+    }
+
+    /**
+     * The data files of [wanted] out of what [read] holds for them, null for a category that could not be read. Pure (R3).
+     * zh-CN: 从 [read] 中得出 [wanted] 的数据文件, 值为 null 表示该分类无法读取. 纯 JVM (R3).
+     */
+    @JvmStatic
+    fun dataFiles(
+        wanted: List<SettingCategory>,
+        read: Map<SettingCategory, SettingsArchiveWriter.DataFile?>,
+        refine: Map<String, List<String>>,
+        now: Long,
+        app: ColorLibraryJson.AppInfo,
+    ): List<SettingsArchiveWriter.DataFile> = wanted.mapNotNull { category ->
+        val file = read[category] ?: throw IOException("Cannot read the data of ${category.id}")
+        SettingsDataEntries.select(file, refine[category.id], now, app = app)
     }
 
     /**
