@@ -17,6 +17,7 @@ import org.autojs.plugin.bun.runtime.api.IBunHostCapabilityCallback
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.ref.WeakReference
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -57,7 +58,7 @@ internal class BunHostCapabilityBroker(
     private val mainHandler = Handler(Looper.getMainLooper())
     private val closed = AtomicBoolean(false)
     private val calls = AtomicInteger(0)
-    private val toasts = AtomicInteger(0)
+    private val toasts = ShownToasts()
     private val callExecutor = BunHostCallExecutor()
     private val coordinates = RuntimeCoordinateBridge()
     private val console = RuntimeConsoleBridge(consoleProvider, workingDirectory)
@@ -445,10 +446,31 @@ internal class BunHostCapabilityBroker(
         return Outcome.Success(JSONObject().put("value", JSONObject.NULL).toString())
     }
 
+    /**
+     * `{text, duration?, forcible?}` shows a toast, after dismissing this execution's earlier ones when forcible;
+     * `{dismissAll: true}` dismisses them (Rhino's toast.dismissAll, api-coverage P4.3). No per-run limit (Q172 (a)):
+     * Android's toast queue bounds what one app shows.
+     */
     private fun toast(request: JSONObject): Outcome {
         val keys = request.keys().asSequence().toSet()
+        // The Runnables keep what they show and the toast list, not the broker (C13).
+        // zh-CN: Runnable 只保留要显示的内容与 toast 列表, 不保留 broker (C13).
+        val closed = closed
+        val toasts = toasts
+        if (TOAST_DISMISS_ALL_KEY in keys) {
+            if (keys.size != 1 || request.opt(TOAST_DISMISS_ALL_KEY) != true) {
+                return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast dismissAll expects {\"dismissAll\": true}")
+            }
+            if (!mainHandler.post { toasts.dismissAll() }) return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Host UI lane is unavailable")
+            return Outcome.Success("{\"dismissed\":true}")
+        }
         if (TOAST_TEXT_KEY !in keys || !TOAST_KEYS.containsAll(keys)) {
-            return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast expects {\"text\", \"duration\"?}")
+            return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast expects {\"text\", \"duration\"?, \"forcible\"?}")
+        }
+        val forcible = when (val value = request.opt(TOAST_FORCIBLE_KEY)) {
+            null -> false
+            is Boolean -> value
+            else -> return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast forcible must be a boolean")
         }
         val text = (request.opt(TOAST_TEXT_KEY) as? String)?.trim()
             ?: return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast text must be a string")
@@ -464,18 +486,31 @@ internal class BunHostCapabilityBroker(
             TOAST_DURATION_LONG -> Toast.LENGTH_LONG
             else -> return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_INVALID_REQUEST, "ui.toast duration must be \"short\" or \"long\"")
         }
-        if (toasts.incrementAndGet() > MAX_TOAST_CALLS_PER_EXECUTION) {
-            return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_QUOTA_EXCEEDED, "ui.toast allows $MAX_TOAST_CALLS_PER_EXECUTION calls per run")
-        }
-        // The Runnable keeps what it shows, not the broker (C13).
-        // zh-CN: Runnable 只保留要显示的内容, 不保留 broker (C13).
-        val closed = closed
         val appContext = appContext
         val posted = mainHandler.post {
-            if (!closed.get()) Toast.makeText(appContext, text, duration).show()
+            if (!closed.get()) toasts.show(Toast.makeText(appContext, text, duration), forcible)
         }
         if (!posted) return Outcome.Failure(BunRuntimeContract.HOST_CALL_ERROR_HOST_UNAVAILABLE, "Host UI lane is unavailable")
         return Outcome.Success("{\"shown\":true}")
+    }
+
+    /**
+     * The toasts one execution has shown, weakly held for dismissAll; used on the main thread only.
+     * zh-CN: 一次执行显示过的 toast (弱引用), 供 dismissAll 使用; 只在主线程使用.
+     */
+    private class ShownToasts {
+        private val shown = ArrayList<WeakReference<Toast>>()
+
+        fun show(toast: Toast, forcible: Boolean) {
+            if (forcible) dismissAll() else shown.removeAll { it.get() == null }
+            shown += WeakReference(toast)
+            toast.show()
+        }
+
+        fun dismissAll() {
+            shown.forEach { it.get()?.cancel() }
+            shown.clear()
+        }
     }
 
     /**
@@ -519,8 +554,9 @@ internal class BunHostCapabilityBroker(
         const val TOAST_DURATION_KEY = "duration"
         const val TOAST_DURATION_SHORT = "short"
         const val TOAST_DURATION_LONG = "long"
-        val TOAST_KEYS = setOf(TOAST_TEXT_KEY, TOAST_DURATION_KEY)
+        const val TOAST_FORCIBLE_KEY = "forcible"
+        const val TOAST_DISMISS_ALL_KEY = "dismissAll"
+        val TOAST_KEYS = setOf(TOAST_TEXT_KEY, TOAST_DURATION_KEY, TOAST_FORCIBLE_KEY)
         const val MAX_TOAST_TEXT_BYTES = 1024
-        const val MAX_TOAST_CALLS_PER_EXECUTION = 4
     }
 }
