@@ -452,6 +452,8 @@ internal class BunHostCapabilityBroker(
      */
     private fun executionCall(request: JSONObject): Outcome {
         val (method, args) = parseMethodCall(request)
+        // The directory relative paths of host-side calls resolve against: the script's source directory (Q120 (b)).
+        if (method == "cwd") return Outcome.Success(JSONObject().put("value", workingDirectory?.takeIf { it.isNotBlank() } ?: JSONObject.NULL).toString())
         require(method == "stop") { "Unsupported execution operation" }
         require(args.length() <= 1) { "execution.stop takes at most a message" }
         val message = args.opt(0).takeUnless { it == null || it === JSONObject.NULL }
