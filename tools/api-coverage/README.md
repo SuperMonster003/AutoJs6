@@ -584,7 +584,8 @@ Node main (bridged / local-shim with a module and member) against the same Kotli
 types in `docs/nodejs/types/autojs6-node`, return values and accessors awaited
 (the bridge returns promises). Classes have no Node declaration and stay unmapped;
 the counts go to `summary.json` `types.node` and `runtime-types.json`, reported
-only. `node tools/api-coverage/test-dts-types.mjs` checks the levels on a small
+only; `type-map.json` `nodeReviewed` gives the reason of each intended difference
+(`types.node.unreviewed` lists the others, an entry that no longer matches fails). `node tools/api-coverage/test-dts-types.mjs` checks the levels on a small
 declaration file, `test_kotlin_types.py` the mapping, rows and strict failures.
 
 ## Returned objects

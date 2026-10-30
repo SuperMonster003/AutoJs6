@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 import kotlin_types
-from kotlin_types import Mapper, attach, load_map, report, split_generic, strict_failures, summarize
+from kotlin_types import Mapper, attach, load_map, node_reviewed, report, split_generic, strict_failures, summarize
 
 RETURNED = {'objects': [{'object': 'ImageWrapper', 'class': 'org.autojs.autojs.core.image.ImageWrapper', 'probe': 'images.read.()'}]}
 
@@ -114,6 +114,15 @@ class StrictTests(unittest.TestCase):
         failures = strict_failures([row('a.known', [{'level': 'match'}])], self.TABLE)
         self.assertEqual(len(failures), 2)
         self.assertTrue(all(item.startswith('Stale type-map.json reviewed entry') for item in failures))
+
+    def test_node_reviewed_lists_uncovered_and_stale(self):
+        table = {'nodeReviewed': {'entries': {'a.b return': {'level': 'error'}, 'a.gone return': {'level': 'error'}}}}
+        rows = [{'api': 'a.b', 'kind': 'function', 'returns': {'level': 'error'}}, {'api': 'a.c', 'kind': 'function', 'returns': {'level': 'narrow'}}]
+        reviewed, unreviewed, stale = node_reviewed(rows, table)
+        self.assertEqual(reviewed, {'a.b return': 'a.b return'})
+        self.assertEqual([item.split(' (')[0] for item in unreviewed], ['a.c return'])
+        self.assertEqual(len(stale), 1)
+        self.assertIn('a.gone return', stale[0])
 
     def test_summary_and_report(self):
         rows = [row('a.x', [{'level': 'match'}, {'level': 'unmapped', 'reason': 'kotlin.Any?'}], {'level': 'refined'}),

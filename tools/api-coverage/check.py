@@ -210,6 +210,7 @@ def main():
         runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
         # The Node runtime declarations of the covered rows against the same Kotlin types (Q186 (a)): reported only.
         types_summary["node"] = kotlin_types.runtime_report(baseline, matrix, node, typescript, output)
+        failures.extend(types_summary["node"].pop("staleReviewed", []))
         if args.write_pending_baseline:
             refused = runtime_matrix.write_pending_baseline(matrix, host / runtime_matrix.PENDING_BASELINE, args.allow_new_pending,
                                                              args.pending_decision)

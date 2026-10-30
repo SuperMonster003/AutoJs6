@@ -422,6 +422,7 @@
     {
       "id": "java-prototype-objects",
       "match": ["*#*"],
+      "except": ["RawWindow#*", "FloatyWindow#*", "WebSocket#*", "InjectableWebView#*", "InjectableWebClient#*", "ConsoleConfigurator#*", "OcrResult#text", "OcrResult#confidence", "OcrResult#bounds", "OcrResult#extras"],
       "memberSource": "kotlin-class",
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "java-prototype",

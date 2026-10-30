@@ -214,7 +214,20 @@ def report(baseline, output, table=None):
 NODE_COVERED = ('bridged', 'local-shim')
 
 
-def runtime_report(baseline, matrix, node_root, typescript, output):
+def node_reviewed(rows, table):
+    """The differing positions of the Node comparison that type-map.json nodeReviewed covers ({key: pattern}), the ones it
+    does not cover (messages) and the failures for entries no position matches any more."""
+    entries = table.get('nodeReviewed', {}).get('entries', {})
+    found = differing_positions(rows)
+    reviewed = {key: reviewed_entry(entries, key, level) for key, _, level, _ in found if reviewed_entry(entries, key, level)}
+    unreviewed = [message for key, _, _, message in found if key not in reviewed]
+    used = set(reviewed.values())
+    stale = [f"Stale type-map.json nodeReviewed entry (no {entry.get('level')} position matches it): {pattern}; remove it"
+             for pattern, entry in entries.items() if pattern not in used]
+    return reviewed, unreviewed, stale
+
+
+def runtime_report(baseline, matrix, node_root, typescript, output, table=None):
     """Q186 (a): compares the Node runtime declarations (autojs6-node d.ts) of the rows the matrix covers in Node main
     (bridged / local-shim with a module and member) with the same Kotlin types; return values are compared awaited. Writes output/runtime-types.json and returns its summary (reported only)."""
     import subprocess
@@ -233,5 +246,8 @@ def runtime_report(baseline, matrix, node_root, typescript, output):
     data = json.loads((output / 'runtime-types.json').read_text(encoding='utf-8'))
     summary = summarize(data['rows'])
     data['summary'] = summary
+    reviewed, unreviewed, stale = node_reviewed(data['rows'], table or load_map())
+    data['reviewed'], data['unreviewed'] = reviewed, unreviewed
     (output / 'runtime-types.json').write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
-    return dict(summary, compared=len(data['rows']), covered=len(node_of))
+    return dict(summary, compared=len(data['rows']), covered=len(node_of), reviewed=len(reviewed),
+                unreviewed=[item.split(' (')[0] for item in unreviewed], staleReviewed=stale)

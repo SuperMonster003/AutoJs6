@@ -432,7 +432,7 @@ def surface_states(row, documentation, surfaces, ace_checked=True):
 def apply_exclusions(rows, rules):
     """Exclusions fill pending cells only (a rejecting entry's cell keeps `rejects`); a rule matching a covered cell
     is reported as shadowed. A rule with `memberSource` only matches returned-member rows of that source
-    (kotlin-class / augment-prototype)."""
+    (kotlin-class / augment-prototype); `except` lists the patterns a broad rule leaves out, the rows a handle type covers."""
     used, shadowed = Counter(), defaultdict(list)
     for row in rows:
         for column in RUNTIME_COLUMNS:
@@ -440,6 +440,8 @@ def apply_exclusions(rows, rules):
                 if column not in rule.get('columns', RUNTIME_COLUMNS) or not any(fnmatchcase(row['id'], pattern) for pattern in rule['match']):
                     continue
                 if rule.get('memberSource') and row['memberSource'] != rule['memberSource']:
+                    continue
+                if any(fnmatchcase(row['id'], pattern) for pattern in rule.get('except', ())):
                     continue
                 used[rule['id']] += 1
                 cell = row[column]

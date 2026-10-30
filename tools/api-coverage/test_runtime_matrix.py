@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 
+import runtime_matrix
 from runtime_matrix import (MARKDOWN, POLICY_SCHEMA, build, compare_markdown, compare_pending_baseline, default_typescript, gate, generate,
                             markdown_state, parse_host_api, parse_worker_modules, render_markdown, write, write_pending_baseline)
 
@@ -921,6 +922,13 @@ class RepositoryTest(unittest.TestCase):
         self.assertNotIn('files.context', rows)
         self.assertEqual(rows['crypto.digest']['bun']['rule'], 'native-crypto')
         self.assertEqual(self.matrix['summary']['prototypeMembers'], sum(len(p['members']) for p in self.exports['prototypes']))
+
+    def test_except_leaves_rows_of_a_broad_rule_out(self):
+        rows = [{'id': f'{name}#x', 'memberSource': 'kotlin-class', **{column: {'status': status} for column in runtime_matrix.RUNTIME_COLUMNS}}
+                for name, status in (('Handle', 'bridged'), ('Plain', 'pending'))]
+        rule = {'id': 'objects', 'match': ['*#*'], 'memberSource': 'kotlin-class', 'status': 'not-portable', 'reason': 'java-prototype'}
+        self.assertEqual({item['kind'] for item in runtime_matrix.apply_exclusions(rows, [rule])}, {'shadowed'})
+        self.assertEqual(runtime_matrix.apply_exclusions(rows, [dict(rule, id='narrow', **{'except': ['Handle#*']})]), [])
 
 if __name__ == '__main__':
     unittest.main()

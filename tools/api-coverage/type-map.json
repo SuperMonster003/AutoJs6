@@ -46,13 +46,29 @@
   },
   "reviewed": {
     "note": "Known differences with a decision or an owner. Keys are fnmatch patterns of `<api> parameter <n>`, `<api> return` or `<api> value`, each for one level. check.py --strict-types does not fail on a strict-level position an entry covers (Q187 (a)); an entry no differing position matches is stale and fails. Entries on other levels only document the difference (types.json reviewed).",
+    "entries": {}
+  },
+  "nodeReviewed": {
+    "note": "The Node runtime declarations against the same Kotlin types (Q186 (a), reported only): shapes that differ on purpose, keyed as reviewed above with the api of the matrix row. An entry no differing position matches is stale and fails; a difference without an entry is listed in summary types.node.unreviewed.",
     "entries": {
-      "auto.explain parameter 1": {"level": "wide", "reason": "d.ts Automator.Target takes null through Pickup.SingleSelector, the implementation (kotlin.Any) rejects null and undefined; the auto / automator declarations belong to the automation cards of batch 10 (P3.4 / P4.4) or the closing batch (roadmap P2.4 leftovers)"},
-      "tasks.add*Task parameter 1": {"level": "narrow", "reason": "options: NativeObject? = null is replaced by an empty object, which then fails for the missing path / component: required in practice, as the documentation and d.ts write it (BASELINE section 7, Q190 (a))"},
-      "timers.add*Task parameter 1": {"level": "narrow", "reason": "as tasks.add*Task (Q190 (a))"},
-      "workManager.add*Task parameter 1": {"level": "narrow", "reason": "as tasks.add*Task (Q190 (a))"},
-      "timers.query*Tasks parameter 1": {"level": "narrow", "reason": "d.ts Internal.WorkManager (shared with workManager) omits null; timers belongs to the automation cards of batch 10, fixed by them or the closing batch (Q189 (b) leftover)"},
-      "workManager.query*Tasks parameter 1": {"level": "narrow", "reason": "the declaration is the one of timers.query*Tasks (Internal.WorkManager); same leftover"}
+      "*launch*Settings return": {"level": "error", "reason": "resolves nothing and rejects when the page does not start; Rhino returns whether it started"},
+      "*openAppSetting* return": {"level": "error", "reason": "as app.launchSettings"},
+      "*startService return": {"level": "error", "reason": "resolves the started component name or null; Rhino returns nothing"},
+      "colors.toHs* return": {"level": "narrow", "reason": "the float[] handle form resolves a Java handle (D-12); the plain forms return number[]"},
+      "floaty.closeAll return": {"level": "error", "reason": "resolves the number of windows closed (P3.3); Rhino returns nothing"},
+      "images.compressToBytes return": {"level": "error", "reason": "a Uint8Array, Rhino's Java byte[] as a Node binary (Q188 maps it to number[] for the Rhino declarations only)"},
+      "images.toBytes return": {"level": "error", "reason": "as images.compressToBytes"},
+      "images.loadAsync return": {"level": "narrow", "reason": "Kotlin declares Rhino's promise object; Node resolves the image handle or null"},
+      "*requestScreenCaptureAsync return": {"level": "error", "reason": "Kotlin declares Rhino's promise object; Node resolves whether capture is available"},
+      "images.recycle return": {"level": "error", "reason": "resolves nothing and rejects on failure; Rhino returns whether the image was recycled"},
+      "images.saveImage return": {"level": "error", "reason": "resolves nothing and rejects on failure; Rhino returns whether the file was written"},
+      "plugins.tools.callAsync return": {"level": "narrow", "reason": "kotlin.Any is Rhino's promise object; Node resolves the JSON value of the tool"},
+      "shell.checkAccess return": {"level": "error", "reason": "a report per access kind (ShellAccessReport, P3.1a); Rhino returns a boolean"},
+      "storages.removeSync return": {"level": "error", "reason": "resolves nothing; Rhino returns whether the store existed"},
+      "sysprops.get return": {"level": "narrow", "reason": "the platform returns an empty string for a missing property, so null does not reach scripts in either runtime"},
+      "timers.remove*Task return": {"level": "narrow", "reason": "the member is the one of tasks, which resolves a boolean; Rhino's facade of this name returns null for an unknown id"},
+      "workManager.remove*Task return": {"level": "narrow", "reason": "as timers.remove*Task"},
+      "util.*To* parameter 1": {"level": "wide", "reason": "the number conversion of Rhino's arguments takes numeric strings too (case util.dpToPx.string); the Node declaration states it"}
     }
   },
   "strictLevels": {

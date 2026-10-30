@@ -23,8 +23,9 @@ Phases (all take --serial; record / install / restore / verify / grant also --st
                                                      missingCapabilities before the host (Q181 (a) - Q183 (a)), the
                                                      local members still answer
   timeout [--report FILE]                           with the host's accessibility service off: auto.waitFor and
-                                                     automator.waitForService end the whole execution in Rhino and in a
-                                                     Bun main script (Q179 (b)): nothing after the wait runs
+                                                     automator.waitForService end the whole execution in Rhino, in a Bun
+                                                     main script and in a Bun Worker (Q179 (b)): nothing after the wait
+                                                     runs
 
 Typical run: record, install the candidate host and Bun APKs, grant --set on --only (GRANTS), compare, grant --set off
 --only (GRANTS without QUERY_GRANTS), denied, grant --set restore --only (GRANTS), restore. No dialog is answered here
@@ -160,6 +161,27 @@ TIMEOUT_BUN_JS = """
     aj6Emit(AJ6_RUN, 1, {ok: 'after'});
     aj6Emit(AJ6_RUN, -1, {done: 1});
 })().catch(e => { aj6Emit(AJ6_RUN, 3, {error: String(e && e.stack || e)}); aj6Emit(AJ6_RUN, -1, {done: 1}); });
+"""
+TIMEOUT_BUN_WORKER_JS = """
+aj6Emit(AJ6_RUN, 0, {ok: 'before'});
+setTimeout(() => { aj6Emit(AJ6_RUN, 2, {ok: 'timer'}); aj6Emit(AJ6_RUN, -1, {done: 1}); }, 6000);
+const worker = new Worker(URL.createObjectURL(new Blob([`
+self.onmessage = async () => {
+    try {
+        const {createHostClient} = await import(process.env.AUTOJS6_HOST_CLIENT_MODULE);
+        const host = await createHostClient();
+        await host.AJ6_WAIT;
+        postMessage({after: true});
+    } catch (e) {
+        postMessage({error: String(e && e.stack || e)});
+    }
+};
+`], {type: 'text/javascript'})));
+worker.onmessage = event => {
+    aj6Emit(AJ6_RUN, event.data.after ? 1 : 3, event.data.after ? {ok: 'after'} : event.data);
+    aj6Emit(AJ6_RUN, -1, {done: 1});
+};
+worker.postMessage(1);
 """
 
 
@@ -331,9 +353,14 @@ def timeout(args):
     if service_running(args.serial):
         print(f"the accessibility service of {base.HOST} is enabled: the timeout run needs it off")
         sys.exit(2)
+    # With this permission auto.waitFor enables the service itself, so the wait never times out.
+    if "WRITE_SECURE_SETTINGS: granted=true" in base.sample.sh(args.serial, f"dumpsys package {base.HOST}"):
+        print(f"{base.HOST} holds WRITE_SECURE_SETTINGS: the timeout run needs a device where it does not")
+        sys.exit(2)
     report, failed = {}, 0
     for wait in ("auto.waitFor(1000)", "automator.waitForService(1000)"):
-        for side, template, name in (("rhino", TIMEOUT_RHINO_JS, "p44_rhino"), ("bun", TIMEOUT_BUN_JS, "p44_bun")):
+        for side, template, name in (("rhino", TIMEOUT_RHINO_JS, "p44_rhino"), ("bun", TIMEOUT_BUN_JS, "p44_bun"),
+                                     ("bun worker", TIMEOUT_BUN_WORKER_JS, "p44_bun_worker")):
             run = uuid.uuid4().hex[:8]
             body = encoder(args) + base.EMIT_JS + template.replace("AJ6_WAIT", wait)
             script = f"var AJ6_RUN = '{run}';\n" + body if side == "rhino" else f'"bun";\nconst AJ6_RUN = \'{run}\';\n' + body

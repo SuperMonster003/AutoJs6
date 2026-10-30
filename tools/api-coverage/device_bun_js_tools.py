@@ -451,9 +451,6 @@ def verdict(expected, actual, denied):
     it is answered before the Java facade (argument errors, nullish shortcuts)."""
     if "skip" in actual:
         return "skip"
-    # Rhino's interpreter itself failed on this case (a host member rethrowing a checked exception): Bun has to throw.
-    if "rhinoCrash" in expected:
-        return "pass" if "th" in actual else f"Rhino fails on this case, Bun returned {json.dumps(actual.get('ok'), ensure_ascii=False)[:120]}"
     if denied and "th" in actual and actual["th"]["name"] == "NOT_GRANTED":
         return "pass"
     if "th" in expected:
