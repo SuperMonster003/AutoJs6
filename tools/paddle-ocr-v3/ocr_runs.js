@@ -8,7 +8,8 @@
 //   runs     [{ id, file, options, repeat, disable, detect, regionInset }], where disable lists packages switched off in
 //            the Plugin Center store during that run (host only) and switched back afterwards; detect names the module
 //            whose detect runs instead of ocr.paddle ("paddle", "rapid" or "auto" for ocr.detect) and reports each
-//            result's extras and bounds; regionInset restricts it to the image without that many pixels on every edge
+//            result's extras and bounds; regionInset restricts it to the image without that many pixels on every edge;
+//            method "recognizeText" calls that method of the module instead and reports its lines
 // zh-CN: 对脚本旁的样图运行 ocr.paddle 并把识别文本写入 JSON 文件. CONFIG 由 device_check.py 填入, 宿主运行与打包应用共用.
 var CONFIG = __CONFIG__;
 
@@ -39,9 +40,11 @@ threads.start(function () {
             var bounds = item.bounds;
             return {
                 text: String(item.text),
+                confidence: item.confidence,
                 bounds: [bounds.left, bounds.top, bounds.right, bounds.bottom],
                 keys: Object.keys(item.extras).sort(),
                 executionProvider: item.extras.executionProvider,
+                classificationTimeMs: item.extras.classificationTimeMs,
                 quad: item.extras.quad ? Array.prototype.slice.call(item.extras.quad) : null,
             };
         });
@@ -80,7 +83,9 @@ threads.start(function () {
                 try {
                     for (var i = 0; i < run.repeat; i++) {
                         var begin = Date.now();
-                        if (run.detect) {
+                        if (run.method === "recognizeText") {
+                            entry.lines = texts(ocr[run.detect].recognizeText(img, run.options));
+                        } else if (run.detect) {
                             entry.results = detect(run, img);
                             entry.texts = entry.results.map(function (item) { return item.text; });
                         } else {

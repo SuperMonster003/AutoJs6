@@ -4,12 +4,19 @@ AutoJs6-Plugin-Paddle-OCR-PP-OCRv3, ROADMAP.md P2.2 and P3.5).
     py -3 -I tools/paddle-ocr-v3/device_check.py coexistence -s SERIAL [--install APK ...] [--screenshot PNG]
     py -3 -I tools/paddle-ocr-v3/device_check.py packaging -s SERIAL --group GROUP [--install APK ...] [--uninstall PKG ...]
     py -3 -I tools/paddle-ocr-v3/device_check.py extras -s SERIAL [--runtime rhino|node|bun]
+    py -3 -I tools/paddle-ocr-v3/device_check.py options -s SERIAL
 
 extras (Q20 (c)), with both plugins and Rapid OCR installed: OcrResult.extras of each path (quad, executionProvider,
   region offset, mergeLine, Paddle Lite, Rapid) and profile selection through ocr.detect. --runtime node / bun (Q26 (b))
-  runs the same paths in a script of that runtime (ocr_runs_runtime.js), needs its plugin and has no mergeLine; the
-  extras are frozen there, a Worker repeats the default run, and useOpenCL must reach NNAPI. Bun's ocr.control grant is
-  switched on for the run and restored afterwards.
+  runs the same paths in a script of that runtime (ocr_runs_runtime.js) and needs its plugin; the extras are frozen
+  there, a Worker repeats the default run, and useOpenCL must reach NNAPI. Bun's ocr.control grant is switched on for
+  the run and restored afterwards.
+
+options (Q28 (c)), with the ONNX Runtime plugin, Rapid OCR and the Node.js and Bun plugins installed: the recognition
+  options in Rhino, Node.js and Bun on the same images. useSlim shows in the confidences, cpuThreadNum and the other
+  settings in the engine reloads of the plugin log, scoreThreshold and boxScoreThresh in the results they drop, useCls
+  on the rotated sample, and mergeLine on a generated sample (needs Pillow) with a line of two segments above a line
+  of one. Node.js and Bun must return the same results as Rhino in every run, without the timing extras.
 
 coexistence (P2.2), with Paddle Lite 1.1.0 and the ONNX Runtime 2.0.0 plugin installed side by side:
   installed   both packages and their versions
@@ -45,6 +52,7 @@ import json
 from pathlib import Path
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -253,14 +261,15 @@ def coexistence(args, device, samples, expected):
     return ok
 
 
-def runtime_entries(args, runs, samples):
-    """The entries of [runs] in a Node.js or Bun script by run id, with its Worker repeat of the default run as "worker"."""
+def runtime_entries(args, runs, samples, worker="default"):
+    """The entries of [runs] in a Node.js or Bun script by run id, with its Worker repeat of the run [worker] as "worker"."""
     sys.path.insert(0, str(ROOT / "tools" / "api-coverage"))
     import device_bun_js_tools as runtimes
 
     runtimes.DEVICE_DIR = "/sdcard/Download/aj6-paddle-ocr-v3"
     run = uuid.uuid4().hex[:8]
-    config = {"image": base64.b64encode((samples / "zh.png").read_bytes()).decode(), "runs": runs, "worker": "default"}
+    images = {name: base64.b64encode((samples / name).read_bytes()).decode() for name in sorted({run["file"] for run in runs})}
+    config = {"images": images, "runs": runs, "worker": worker}
     script = ('"nodejs";\n' if args.runtime == "node" else '"bun";\n') \
         + f"const AJ6_RUNTIME = '{args.runtime}', AJ6_RUN = '{run}', AJ6_CONFIG = {json.dumps(config)};\n" \
         + runtimes.EMIT_JS + RUNTIME_SCRIPT.read_text("utf-8")
@@ -309,7 +318,7 @@ def extras(args, device, samples, expected):
             return report("host script", False, (result or {}).get("error", f"no result within {args.timeout} s"))
         entries = {entry["id"]: entry for entry in result["runs"]}
     else:
-        entries = runtime_entries(args, [run for run in runs if run["id"] != "mergeLine"], samples)
+        entries = runtime_entries(args, runs, samples)
 
     def items(run_id):
         return entries[run_id].get("results") or []
@@ -331,11 +340,10 @@ def extras(args, device, samples, expected):
                  provider("useOpenCL"))
     ok &= report("region quad follows bounds", quads_valid("region") and all(map(in_bounds, items("region"))),
                  f"{len(items('region'))} results, first bounds {(items('region') or [{}])[0].get('bounds')}")
-    if rhino:
-        multi = [item for item in items("mergeLine") if item["quad"] is None]
-        ok &= report("mergeLine keeps provider", provider("mergeLine") == ["cpu"],
-                     f"{len(items('mergeLine'))} lines, {len(multi)} merged from several parts, {provider('mergeLine')}")
-    else:
+    multi = [item for item in items("mergeLine") if item["quad"] is None]
+    ok &= report("mergeLine keeps provider", provider("mergeLine") == ["cpu"],
+                 f"{len(items('mergeLine'))} lines, {len(multi)} merged from several parts, {provider('mergeLine')}")
+    if not rhino:
         ok &= report("extras frozen", all(item["frozen"] for item in items("default") + items("region")),
                      f"{len(items('default')) + len(items('region'))} results")
         ok &= report("worker quad and provider", quads_valid("worker") and provider("worker") == ["cpu"],
@@ -347,6 +355,176 @@ def extras(args, device, samples, expected):
     ok &= report("auto profile match", bool(items("auto profile zh")), f"{len(items('auto profile zh'))} results")
     ok &= report("auto profile miss", "no-such" in entries["auto profile missing"].get("error", ""),
                  entries["auto profile missing"].get("error", "no error")[:120])
+    return ok
+
+
+MERGE_SAMPLE = "two-segments.png"
+SCORE_THRESHOLD = 0.99
+
+
+def merge_sample(samples, target):
+    """Writes zh.png beside itself without its second line on the right: a line of two segments above a line of one."""
+    from PIL import Image
+
+    image = Image.open(samples / "zh.png").convert("RGB")
+    width, height = image.size
+    background = image.getpixel((0, 0))
+    pixels = image.load()
+    inked = [any(abs(a - b) > 64 for x in range(width) for a, b in zip(pixels[x, y], background)) for y in range(height)]
+    second_line = next(y for y in range(height - 1, 0, -1) if inked[y] and not inked[y - 1])
+    gap = 120
+    canvas = Image.new("RGB", (2 * width + gap, height), background)
+    canvas.paste(image, (0, 0))
+    canvas.paste(image.crop((0, 0, width, second_line - 1)), (width + gap, 0))
+    canvas.save(target)
+
+
+def option_runs():
+    fp32 = {"variant": "v3", "useSlim": False}
+    rapid = {"variant": "v3"}
+
+    def paddle(run_id, file, options, **extra):
+        return {"id": run_id, "file": file, "options": options, "detect": "paddle", **extra}
+
+    def rapid_run(run_id, options):
+        return {"id": run_id, "file": "zh.png", "options": {**rapid, **options}, "detect": "rapid"}
+
+    return [
+        paddle("default", "zh.png", {"variant": "v3"}),
+        paddle("useSlim false", "zh.png", fp32),
+        paddle("useSlim true", "zh.png", {"variant": "v3", "useSlim": True}),
+        paddle("cpuThreadNum", "zh.png", {**fp32, "cpuThreadNum": 2}),
+        paddle("detLongSize", "zh.png", {**fp32, "detLongSize": 160}),
+        paddle("detLimitSideLen", "zh.png", {**fp32, "detLongSize": 160, "detLimitSideLen": 960}),
+        paddle("scoreThreshold", "zh.png", {**fp32, "scoreThreshold": SCORE_THRESHOLD}),
+        paddle("rotated", "zh-rotated.png", fp32),
+        paddle("rotated useCls", "zh-rotated.png", {**fp32, "useCls": True}),
+        paddle("segments", MERGE_SAMPLE, fp32),
+        paddle("mergeLine", MERGE_SAMPLE, {**fp32, "mergeLine": True}),
+        paddle("mergeLine splitWords", MERGE_SAMPLE, {**fp32, "mergeLine": True, "splitWords": True}),
+        paddle("mergeLine recognizeText", MERGE_SAMPLE, {**fp32, "mergeLine": True}, method="recognizeText"),
+        rapid_run("rapid default", {}),
+        rapid_run("rapid maxSideLen", {"maxSideLen": 160}),
+        rapid_run("rapid boxScoreThresh", {"boxScoreThresh": 0.999}),
+        rapid_run("rapid scoreThreshold", {"boxScoreThresh": 0.999, "scoreThreshold": 0.1}),
+    ]
+
+
+def expected_loads(runs):
+    """Engine reloads of the plugin in [runs]: it keeps one engine and rebuilds it when the settings of a call change."""
+    settings = [(options.get("useSlim", True), options.get("cpuThreadNum", 4),
+                 options.get("detLimitSideLen") or options.get("detLongSize") or 960,
+                 options.get("scoreThreshold", -1), options.get("useCls", False))
+                for options in (run["options"] for run in runs if run["detect"] == "paddle")]
+    return sum(previous != current for previous, current in zip(settings, settings[1:]))
+
+
+def signature(entry):
+    """What the same run must return everywhere: the results without the timing extras."""
+    if "error" in entry:
+        return entry["error"]
+    if "lines" in entry:
+        return entry["lines"]
+    return [(item["text"], item["bounds"], round(item["confidence"], 5), item["keys"], item.get("executionProvider"),
+             [round(value, 2) for value in item["quad"]] if item.get("quad") else None) for item in entry.get("results") or []]
+
+
+def count_log(device, log_filter, text, action):
+    """(result of [action], lines with [text] it logged). Streams the log: a 256 KiB ring loses lines of a long run, and the run may clear it."""
+    with tempfile.TemporaryFile() as output:
+        process = subprocess.Popen([device.adb, "-s", device.serial, "logcat", "-v", "raw", "-T", device.now(), "-s", log_filter],
+                                   stdout=output, stderr=subprocess.DEVNULL)
+        try:
+            result = action()
+        finally:
+            time.sleep(1)
+            process.terminate()
+            process.wait(timeout=10)
+        output.seek(0)
+        return result, output.read().count(text.encode())
+
+
+def option_checks(runtime, runs, entries, loads, expected):
+    def items(run_id):
+        return entries[run_id].get("results") or []
+
+    def texts(run_id):
+        return [item["text"] for item in items(run_id)]
+
+    def confidences(run_id):
+        return [round(item["confidence"], 3) for item in items(run_id)]
+
+    def same(first, second):
+        return signature(entries[first]) == signature(entries[second])
+
+    def boxes(run_id):
+        return [item["bounds"] for item in items(run_id)]
+
+    failed = sorted(run["id"] for run in runs if "error" in entries[run["id"]])
+    ok = report(f"{runtime} runs", not failed, f"{len(runs) - len(failed)}/{len(runs)}" + (f", failed: {failed}, {entries[failed[0]]['error'][:300]}" if failed else ""))
+    ok &= report(f"{runtime} useSlim default true", same("default", "useSlim true") and confidences("default") != confidences("useSlim false"),
+                 f"slim {confidences('default')}, fp32 {confidences('useSlim false')}")
+    low, high = expected_loads(runs), expected_loads(runs) + 1
+    ok &= report(f"{runtime} engine reloads", low <= loads <= high, f"{loads}, expected {low} or {high}")
+    ok &= report(f"{runtime} cpuThreadNum", same("cpuThreadNum", "useSlim false"), f"{len(items('cpuThreadNum'))} results")
+    ok &= report(f"{runtime} detLongSize", boxes("detLongSize") != boxes("useSlim false"), f"first {(boxes('detLongSize') or [None])[0]}, 960 {(boxes('useSlim false') or [None])[0]}")
+    ok &= report(f"{runtime} detLimitSideLen wins", same("detLimitSideLen", "useSlim false"), f"{len(items('detLimitSideLen'))} results")
+    kept = confidences("scoreThreshold")
+    ok &= report(f"{runtime} scoreThreshold", len(kept) < len(items("useSlim false")) and all(value >= SCORE_THRESHOLD for value in kept),
+                 f"{len(kept)} of {len(items('useSlim false'))} kept at {SCORE_THRESHOLD}")
+    similarity = line_similarity(expected["zh-rotated"], texts("rotated useCls"))
+    time_ms = [item["classificationTimeMs"] for item in items("rotated useCls")]
+    ok &= report(f"{runtime} useCls", min(similarity) >= 0.8 and min(similarity) > min(line_similarity(expected["zh-rotated"], texts("rotated")))
+                 and any(time_ms),
+                 f"similarity {min(similarity):.2f}, without {min(line_similarity(expected['zh-rotated'], texts('rotated'))):.2f}, classifier {max(time_ms, default=0):.0f} ms")
+    segments, lines = items("segments"), items("mergeLine")
+    merged_text = "".join(sorted(texts("segments")[:2], key=len))
+    ok &= report(f"{runtime} mergeLine", len(segments) == 3 and len(lines) == 2 and lines[0]["text"] == merged_text and lines[0]["quad"] is None
+                 and lines[0]["executionProvider"] == "cpu" and len(lines[1]["quad"] or []) == 8,
+                 f"{len(segments)} segments, {len(lines)} lines, first keys {len(lines[0]['keys']) if lines else 0}, second quad {len(lines[1]['quad'] or []) if len(lines) > 1 else 0}")
+    ok &= report(f"{runtime} splitWords turns mergeLine off", same("mergeLine splitWords", "segments"), f"{len(items('mergeLine splitWords'))} results")
+    text_lines = entries["mergeLine recognizeText"].get("lines") or []
+    ok &= report(f"{runtime} recognizeText does not merge", len(text_lines) == len(segments), f"{len(text_lines)} lines")
+    ok &= report(f"{runtime} rapid maxSideLen", boxes("rapid maxSideLen") != boxes("rapid default"), f"first {(boxes('rapid maxSideLen') or [None])[0]}, default {(boxes('rapid default') or [None])[0]}")
+    ok &= report(f"{runtime} rapid boxScoreThresh", len(items("rapid boxScoreThresh")) < len(items("rapid default")),
+                 f"{len(items('rapid boxScoreThresh'))} of {len(items('rapid default'))} kept")
+    ok &= report(f"{runtime} rapid scoreThreshold wins", same("rapid scoreThreshold", "rapid default"), f"{len(items('rapid scoreThreshold'))} results")
+    return ok
+
+
+def recognition_options(args, device, samples, expected):
+    """The recognition options of Rhino, Node.js and Bun on the same images (roadmap Q28 (c))."""
+    runs = option_runs()
+    outcomes = {}
+    ok = True
+    with tempfile.TemporaryDirectory() as temp:
+        work = Path(temp)
+        for name in ("zh.png", "zh-rotated.png"):
+            shutil.copy(samples / name, work / name)
+        merge_sample(samples, work / MERGE_SAMPLE)
+        for runtime in ("rhino", "node", "bun"):
+            def run_all():
+                if runtime == "rhino":
+                    config = {"dir": WORK_DIR, "output": RESULT, "priority": False, "runs": [{**run, "repeat": 1} for run in runs]}
+                    return run_script(device, config, work, args.timeout)
+                return runtime_entries(argparse.Namespace(**{**vars(args), "runtime": runtime}), runs, work, "mergeLine")
+
+            result, loads = count_log(device, "ORTSessionManager:I", "Sessions ready", run_all)
+            if runtime == "rhino":
+                if result is None or "error" in result:
+                    return report("host script", False, (result or {}).get("error", f"no result within {args.timeout} s"))
+                entries = {entry["id"]: entry for entry in result["runs"]}
+            else:
+                entries = result
+                ok &= report(f"{runtime} worker", signature(entries["worker"]) == signature(entries["mergeLine"]),
+                             entries["worker"].get("error", f"{len(entries['worker'].get('results') or [])} lines")[:300])
+            ok &= option_checks(runtime, runs, entries, loads, expected)
+            outcomes[runtime] = entries
+    for runtime in ("node", "bun"):
+        different = [run["id"] for run in runs if signature(outcomes[runtime][run["id"]]) != signature(outcomes["rhino"][run["id"]])]
+        ok &= report(f"{runtime} equals rhino", not different, f"{len(runs) - len(different)}/{len(runs)} runs" + (f", differ: {different}" if different else ""))
+    args.out.mkdir(parents=True, exist_ok=True)
+    (args.out / "options-receipt.json").write_text(json.dumps(outcomes, ensure_ascii=False, indent=2), "utf-8")
     return ok
 
 
@@ -564,7 +742,7 @@ def packaging(args, device, samples, expected):
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("coexistence", "packaging", "extras"))
+    parser.add_argument("command", choices=("coexistence", "packaging", "extras", "options"))
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--samples", type=Path, default=SAMPLES, help="the plugin's androidTest samples (samples.json)")
@@ -584,7 +762,8 @@ def main():
     samples = {key: value["lines"] for key, value in json.loads((args.samples / "samples.json").read_text("utf-8")).items()}
     print(f"device {args.serial}: {device.shell('getprop ro.product.model')}, API {device.shell('getprop ro.build.version.sdk')}, "
           f"host {device.package(HOST)}", flush=True)
-    ok = {"coexistence": coexistence, "packaging": packaging, "extras": extras}[args.command](args, device, args.samples, samples)
+    command = {"coexistence": coexistence, "packaging": packaging, "extras": extras, "options": recognition_options}[args.command]
+    ok = command(args, device, args.samples, samples)
     print("RESULT", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 
