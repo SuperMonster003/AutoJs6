@@ -62,14 +62,23 @@ internal object OcrResultExtras {
      */
     fun mergeCommon(parts: List<NativeObject>): NativeObject {
         parts.singleOrNull()?.let { return it }
-        val merged = newNativeObject()
-        val first = parts.firstOrNull() ?: return merged
-        first.entries.forEach { (key, value) ->
-            if (parts.all { it.containsKey(key) && deepEquals(it[key], value) }) {
-                ScriptableObject.putProperty(merged, key.toString(), value)
-            }
+        return newNativeObject().also { merged ->
+            commonEntries(parts).forEach { (key, value) -> ScriptableObject.putProperty(merged, key.toString(), value) }
         }
-        return merged
+    }
+
+    /**
+     * [mergeCommon] for the values the Node.js and Bun bridge sends.
+     *
+     * zh-CN: Node.js / Bun 桥发送的取值使用的 [mergeCommon].
+     */
+    fun mergeCommonValues(parts: List<Map<String, Any?>>): Map<String, Any?> {
+        return parts.singleOrNull() ?: commonEntries(parts).associate { (key, value) -> key as String to value }
+    }
+
+    private fun commonEntries(parts: List<Map<*, *>>): List<Map.Entry<*, *>> {
+        val first = parts.firstOrNull() ?: return emptyList()
+        return first.entries.filter { (key, value) -> parts.all { it.containsKey(key) && deepEquals(it[key], value) } }
     }
 
     /**

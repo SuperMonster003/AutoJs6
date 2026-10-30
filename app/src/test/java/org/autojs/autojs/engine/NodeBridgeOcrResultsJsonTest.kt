@@ -32,6 +32,24 @@ class NodeBridgeOcrResultsJsonTest {
         assertEquals("{}", second.getJSONObject("extras").toString())
     }
 
+    @Test
+    fun mergeLineJoinsTheResultsOfALine() {
+        val results = listOf(result("a", 0.5f, rect(0, 0, 10, 20)), result("b", 0.5f, rect(20, 0, 30, 20)), result("c", 0.5f, rect(0, 40, 10, 60)))
+
+        val merged = JSONArray(results.toOcrResultsJson(10, 20, mergeLine = true))
+        assertEquals(listOf("ab", "c"), (0 until merged.length()).map { merged.getJSONObject(it).getString("text") })
+        assertEquals(40, merged.getJSONObject(0).getJSONObject("bounds").getInt("right"))
+        assertEquals("{}", merged.getJSONObject(0).getJSONObject("extras").toString())
+
+        assertEquals(3, JSONArray(results.toOcrResultsJson(10, 20)).length())
+    }
+
+    @Test
+    fun mergeLineLeavesASingleResultWithoutBoundsAsItIs() {
+        val results = JSONArray(listOf(result("a", 0.5f, null)).toOcrResultsJson(0, 0, mergeLine = true))
+        assertFalse(results.getJSONObject(0).has("bounds"))
+    }
+
     private fun result(text: String?, confidence: Float, bounds: Rect?) = PluginOcrResult().also {
         it.text = text
         it.confidence = confidence

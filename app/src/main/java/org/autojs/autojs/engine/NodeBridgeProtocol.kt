@@ -87,11 +87,14 @@ import org.autojs.autojs.external.fileprovider.AppFileProvider
 import org.autojs.autojs.inrt.InrtToastVisibilityGuard
 import org.autojs.autojs.runtime.api.OcrResultExtras
 import org.autojs.autojs.runtime.api.ScriptToast
+import org.autojs.autojs.runtime.api.modules.ocr.OcrCallOptions
+import org.autojs.autojs.runtime.api.modules.ocr.OcrLineMerger
+import org.autojs.autojs.runtime.api.modules.ocr.OcrOptionReader
+import org.autojs.autojs.runtime.api.modules.ocr.toOcrBox
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs6.BuildConfig
 import org.autojs.autojs6.R
-import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult as PluginOcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.autojs.plugin.mediainfo.api.MediainfoSnapshotSchemas
@@ -2947,35 +2950,46 @@ class AndroidNodeBridgeCapabilityProvider(
 
         thread(name = "AutoJs6NodeOcr-${request.id}", isDaemon = true) {
             val response = runCatching {
-                val ocrOptions = buildOcrPluginOptions(options)
-                val results = runBlocking {
+                val resultsJson = runBlocking {
                     // Without an explicit engine, pick the first enabled plugin in ML Kit / Paddle / Rapid
                     // order, the same automatic selection accessibility.readScreenText uses.
                     val target = selectRecognitionProvider { OcrPluginHost.selectOrThrow(
                         context = appContext,
-                        engineId = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
-                        engine = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.ENGINE),
-                        variant = ocrOptions.extras.getNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
+                        engineId = options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID),
+                        engine = options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE),
+                        variant = options.optNonBlankString(PaddleOcrOptionExtraKeys.VARIANT),
                         // Only the explicit option: lang and model also reach the plugin as its profile, but they do
                         // not name a plugin's modelProfile ("zh-CN" or "auto" would match no plugin).
                         profile = options.optNonBlankString(PaddleOcrOptionExtraKeys.PROFILE),
                         moduleLabel = OCR_MODULE_LABEL,
                         automatic = true,
                     ) }
-                    OcrPluginHost.detect(appContext, target, ocrInput.bitmap, ocrOptions, callTimeoutMs = timeoutMs)
+                    // The options depend on the engine, as in Rhino's modules, so they are read once it is known.
+                    val ocrOptions = try {
+                        ocrCallOptions(target.pluginInfo?.engine, options)
+                    } catch (error: IllegalArgumentException) {
+                        throw InvalidOcrOptions(error)
+                    }
+                    OcrPluginHost.detect(appContext, target, ocrInput.bitmap, ocrOptions.toPluginOptions(), callTimeoutMs = timeoutMs)
+                        // Rhino's recognizeText does not merge lines either.
+                        .toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY, ocrOptions.mergeLine && request.method != "recognizeText")
                 }
-                NodeBridgeResponse.success(request.id, results.toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY))
+                NodeBridgeResponse.success(request.id, resultsJson)
             }.getOrElse { error ->
                 ocrDiagnostics.recordFailure()
                 NodeBridgeResponse.failure(
                     request.id,
-                    if (error is RecognitionProviderUnavailable) recognitionUnavailable(request, error) else NodeBridgeError.providerFailed(
-                        message = error.message ?: error.javaClass.name,
-                        module = request.module,
-                        method = request.method,
-                        stack = error.stackTraceToString(),
-                        code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
-                    ),
+                    when (error) {
+                        is RecognitionProviderUnavailable -> recognitionUnavailable(request, error)
+                        is InvalidOcrOptions -> NodeBridgeError.invalidRequest(error.message ?: "AutoJs6 OCR options are invalid.", request.module, request.method)
+                        else -> NodeBridgeError.providerFailed(
+                            message = error.message ?: error.javaClass.name,
+                            module = request.module,
+                            method = request.method,
+                            stack = error.stackTraceToString(),
+                            code = NodeRuntimeErrorCodes.BRIDGE_PROVIDER_FAILED,
+                        )
+                    },
                 )
             }
 
@@ -2988,41 +3002,9 @@ class AndroidNodeBridgeCapabilityProvider(
         }
     }
 
-    private fun buildOcrPluginOptions(options: JSONObject): OcrOptions {
-        val extras = Bundle()
-        options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE_ID)?.let {
-            extras.putString(PaddleOcrOptionExtraKeys.ENGINE_ID, it)
-        }
-        options.optNonBlankString(PaddleOcrOptionExtraKeys.ENGINE)?.let {
-            extras.putString(PaddleOcrOptionExtraKeys.ENGINE, it)
-        }
-        options.optNonBlankString(PaddleOcrOptionExtraKeys.VARIANT)?.let {
-            extras.putString(PaddleOcrOptionExtraKeys.VARIANT, it)
-        }
-        val profile = options.optNonBlankString(PaddleOcrOptionExtraKeys.PROFILE)
-            ?: options.optNonBlankString("lang")
-            ?: options.optNonBlankString("model")
-        profile?.let {
-            extras.putString(PaddleOcrOptionExtraKeys.PROFILE, it)
-        }
-        if ((options.optBoolean("useRaw", true) || options.optBoolean("raw", false)) &&
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
-        ) {
-            extras.putBoolean(PaddleOcrOptionExtraKeys.RAW_IMAGE, true)
-        }
-        options.optInt("imageQuality", -1).takeIf { it > 0 }?.let {
-            extras.putInt(PaddleOcrOptionExtraKeys.IMAGE_QUALITY, it)
-        }
-        options.optNonBlankString("imageFormat")?.let {
-            extras.putString(PaddleOcrOptionExtraKeys.IMAGE_FORMAT, it)
-        }
-        return OcrOptions().apply {
-            this.useOpenCL = options.optBoolean("useOpenCL", false)
-            this.extras = extras.takeIf { !it.isEmpty } ?: Bundle()
-        }
-    }
-
     private class RecognitionProviderUnavailable(cause: IllegalStateException) : RuntimeException(cause.message, cause)
+
+    private class InvalidOcrOptions(cause: IllegalArgumentException) : RuntimeException(cause.message, cause)
 
     private inline fun <T> selectRecognitionProvider(select: () -> T): T = try {
         select()
@@ -3033,10 +3015,6 @@ class AndroidNodeBridgeCapabilityProvider(
     private fun recognitionUnavailable(request: NodeBridgeRequest, error: RecognitionProviderUnavailable) =
         NodeBridgeError.capabilityProviderMissing(request.module, request.method, "an enabled compatible recognition plugin")
             .copy(message = error.message ?: "No compatible recognition plugin is available.")
-
-    private fun Bundle.getNonBlankString(key: String): String? {
-        return getString(key)?.takeIf { it.isNotBlank() }
-    }
 
     private fun dispatchBarcode(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         val args = request.argsArray()
@@ -7906,27 +7884,68 @@ private class ControlledOcrDiagnostics {
     )
 }
 
-internal fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int): String {
+/**
+ * The options of a script call by the rules of [engine], read from the JSON the bridge received. They reach the same
+ * coercion as Rhino's values, so a nested value arrives as text (true as a boolean, no number). lang and model stand in
+ * for profile here, as the plugin's profile.
+ *
+ * zh-CN: 按 [engine] 的规则读取桥收到的 JSON 中的脚本调用选项. 取值经过与 Rhino 相同的强制转换, 嵌套值以文本形式传入 (布尔值为 true, 不是数字). lang 与 model 在此作为 profile 的后备值, 用作插件的 profile.
+ */
+internal fun ocrCallOptions(engine: String?, options: JSONObject) = OcrCallOptions.forEngine(
+    engine,
+    OcrOptionReader { name ->
+        val value = when (name) {
+            PaddleOcrOptionExtraKeys.PROFILE -> options.optNonBlankString(name)
+                ?: options.optNonBlankString("lang")
+                ?: options.optNonBlankString("model")
+            else -> options.opt(name)
+        }
+        when (value) {
+            JSONObject.NULL -> null
+            is JSONObject, is JSONArray -> value.toString()
+            else -> value
+        }
+    },
+)
+
+internal fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int, mergeLine: Boolean = false): String {
+    if (mergeLine && size > 1) {
+        val segments = map { OcrLineMerger.Segment(it.text.orEmpty(), it.confidence, it.bounds?.toOcrBox() ?: OcrLineMerger.Box.EMPTY, OcrResultExtras.fromBundle(it.extras)) }
+        return segments.toMergedOcrResultsJson(offsetX, offsetY)
+    }
     val results = JSONArray()
     forEach { result ->
         val bounds = result.bounds
-        val item = JSONObject()
-            .put("text", result.text.orEmpty())
-            .put("confidence", result.confidence.takeIf { it.isFinite() }?.toDouble() ?: JSONObject.NULL)
+        val item = ocrResultJson(result.text.orEmpty(), result.confidence)
         if (bounds != null) {
-            item.put(
-                "bounds",
-                JSONObject()
-                    .put("left", bounds.left + offsetX)
-                    .put("top", bounds.top + offsetY)
-                    .put("right", bounds.right + offsetX)
-                    .put("bottom", bounds.bottom + offsetY),
-            )
+            item.put("bounds", ocrBoundsJson(bounds.toOcrBox(), offsetX, offsetY))
         }
         results.put(item.put("extras", OcrResultExtras.toJson(result.extras, offsetX, offsetY)))
     }
     return results.toString()
 }
+
+internal fun List<OcrLineMerger.Segment<Map<String, Any?>>>.toMergedOcrResultsJson(offsetX: Int, offsetY: Int): String {
+    val results = JSONArray()
+    OcrLineMerger.merge(this, OcrResultExtras::mergeCommonValues).forEach { line ->
+        results.put(
+            ocrResultJson(line.text, line.confidence)
+                .put("bounds", ocrBoundsJson(line.box, offsetX, offsetY))
+                .put("extras", OcrResultExtras.toJson(line.extras, offsetX, offsetY)),
+        )
+    }
+    return results.toString()
+}
+
+private fun ocrResultJson(text: String, confidence: Float) = JSONObject()
+    .put("text", text)
+    .put("confidence", confidence.takeIf { it.isFinite() }?.toDouble() ?: JSONObject.NULL)
+
+private fun ocrBoundsJson(box: OcrLineMerger.Box, offsetX: Int, offsetY: Int) = JSONObject()
+    .put("left", box.left + offsetX)
+    .put("top", box.top + offsetY)
+    .put("right", box.right + offsetX)
+    .put("bottom", box.bottom + offsetY)
 
 private data class ControlledBarcodeOptions(
     val formats: IntArray,
