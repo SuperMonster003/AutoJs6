@@ -14,7 +14,9 @@ import org.autojs.autojs.rhino.ArgumentGuards
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
+import org.autojs.autojs.runtime.api.OcrResultExtras
 import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
+import org.autojs.autojs.runtime.api.toScriptResult
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceFloatNumber
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
@@ -116,13 +118,11 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
                     OcrPluginHost.detect(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
-                }.map { OcrResult(it.text, it.confidence, it.bounds) }
+                }.map { it.toScriptResult() }
             } else {
                 // Use embedded engine in packaged (INRT) app.
                 // zh-CN: 打包应用 (INRT) 使用内置引擎 (本地推理), 不依赖插件.
-                PaddleOcrEmbeddedEngine.detect(GlobalAppContext.get(), image.bitmap, ocrOptions).map {
-                    OcrResult(it.text, it.confidence, it.bounds)
-                }
+                PaddleOcrEmbeddedEngine.detect(GlobalAppContext.get(), image.bitmap, ocrOptions).map { it.toScriptResult() }
             }
             return if (parsed.mergeLine) mergeByLine(results) else results
         }
@@ -202,6 +202,7 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
             var bounds = Rect()
             var weightSum = 0
             var confidenceSum = 0f
+            var extrasParts = ArrayList<NativeObject>()
             var last = sorted.first()
 
             fun add(r: OcrResult) {
@@ -214,17 +215,19 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                 val weight = max(1, r.text.length)
                 weightSum += weight
                 confidenceSum += r.confidence * weight
+                extrasParts.add(r.extras)
                 last = r
             }
 
             fun flush() {
                 if (text.isNotEmpty()) {
                     val confidence = if (weightSum > 0) confidenceSum / weightSum else 0f
-                    merged.add(OcrResult(text.toString(), confidence, Rect(bounds)))
+                    merged.add(OcrResult(text.toString(), confidence, Rect(bounds), OcrResultExtras.mergeCommon(extrasParts)))
                 }
                 text = StringBuilder()
                 weightSum = 0
                 confidenceSum = 0f
+                extrasParts = ArrayList()
             }
 
             add(last)

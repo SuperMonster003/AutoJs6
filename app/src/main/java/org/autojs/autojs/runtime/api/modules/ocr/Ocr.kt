@@ -21,6 +21,7 @@ import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
+import org.autojs.autojs.runtime.api.OcrResultExtras
 import org.autojs.autojs.runtime.exception.WrappedIllegalArgumentException
 import org.autojs.autojs.util.RhinoUtils.UNDEFINED
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -90,7 +91,12 @@ class Ocr(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         internal fun detectWith(scriptRuntime: ScriptRuntime, overrideMode: OcrMode?, unwrappedArgs: Array<out Any?>): NativeArray {
             return dispatchOcrWith<OcrResult>(scriptRuntime, ::detect.name, unwrappedArgs, overrideMode) { results, rect ->
-                results.apply { forEach { it.bounds.offset(rect.x, rect.y) } }
+                results.apply {
+                    forEach {
+                        it.bounds.offset(rect.x, rect.y)
+                        OcrResultExtras.offsetQuad(it.extras, rect.x, rect.y)
+                    }
+                }
             }.toNativeArray()
         }
 

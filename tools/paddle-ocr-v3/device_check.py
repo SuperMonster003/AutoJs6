@@ -4,6 +4,9 @@ AutoJs6-Plugin-Paddle-OCR-PP-OCRv3, ROADMAP.md P2.2 and P3.5).
     py -3 -I tools/paddle-ocr-v3/device_check.py coexistence -s SERIAL [--install APK ...] [--screenshot PNG]
     py -3 -I tools/paddle-ocr-v3/device_check.py packaging -s SERIAL --group GROUP [--install APK ...] [--uninstall PKG ...]
 
+extras (Q20 (c)), with both plugins and Rapid OCR installed: OcrResult.extras of each path (quad, executionProvider,
+  region offset, mergeLine, Paddle Lite, Rapid) and profile selection through ocr.detect.
+
 coexistence (P2.2), with Paddle Lite 1.1.0 and the ONNX Runtime 2.0.0 plugin installed side by side:
   installed   both packages and their versions
   discovery   both answer the org.autojs.plugin.PADDLE_OCR action
@@ -243,6 +246,58 @@ def coexistence(args, device, samples, expected):
     return ok
 
 
+def extras(args, device, samples, expected):
+    """OcrResult.extras and profile selection from a script (roadmap Q20 (c))."""
+    zh = {"useSlim": False}
+    runs = [
+        {"id": "default", "file": "zh.png", "options": {**zh, "variant": "v3"}, "detect": "paddle"},
+        {"id": "useOpenCL", "file": "zh.png", "options": {**zh, "variant": "v3", "useOpenCL": True}, "detect": "paddle"},
+        {"id": "region", "file": "zh.png", "options": {**zh, "variant": "v3"}, "detect": "paddle", "regionInset": 8},
+        {"id": "mergeLine", "file": "zh.png", "options": {**zh, "variant": "v3", "mergeLine": True}, "detect": "paddle"},
+        {"id": "paddle lite", "file": "zh.png", "options": {**zh, "variant": "v3-paddle-lite"}, "detect": "paddle"},
+        {"id": "rapid", "file": "zh.png", "options": {}, "detect": "rapid"},
+        {"id": "auto profile zh", "file": "zh.png", "options": {**zh, "engine": "paddle-ocr", "profile": "zh"}, "detect": "auto"},
+        {"id": "auto profile missing", "file": "zh.png", "options": {**zh, "engine": "paddle-ocr", "profile": "no-such"}, "detect": "auto"},
+    ]
+    for run in runs:
+        run["repeat"] = 1
+    config = {"dir": WORK_DIR, "output": RESULT, "priority": False, "runs": runs}
+    result = run_script(device, config, samples, args.timeout)
+    if result is None or "error" in result:
+        return report("host script", False, (result or {}).get("error", f"no result within {args.timeout} s"))
+    entries = {entry["id"]: entry for entry in result["runs"]}
+
+    def items(run_id):
+        return entries[run_id].get("results") or []
+
+    def quads_valid(run_id):
+        return items(run_id) and all(len(item["quad"] or []) == 8 for item in items(run_id))
+
+    def provider(run_id):
+        return sorted({item["executionProvider"] for item in items(run_id)}, key=str)
+
+    def in_bounds(item):
+        left, top, right, bottom = item["bounds"]
+        return all(left - 1 <= x <= right + 1 for x in item["quad"][0::2]) and             all(top - 1 <= y <= bottom + 1 for y in item["quad"][1::2])
+
+    ok = report("default quad and provider", quads_valid("default") and provider("default") == ["cpu"],
+                f"{len(items('default'))} results, quad {len((items('default') or [{}])[0].get('quad') or [])}, {provider('default')}")
+    ok &= report("useOpenCL provider", provider("useOpenCL") in (["nnapi"], ["cpu"]), provider("useOpenCL"))
+    ok &= report("region quad follows bounds", quads_valid("region") and all(map(in_bounds, items("region"))),
+                 f"{len(items('region'))} results, first bounds {(items('region') or [{}])[0].get('bounds')}")
+    multi = [item for item in items("mergeLine") if item["quad"] is None]
+    ok &= report("mergeLine keeps provider", provider("mergeLine") == ["cpu"],
+                 f"{len(items('mergeLine'))} lines, {len(multi)} merged from several parts, {provider('mergeLine')}")
+    ok &= report("paddle lite object", "results" in entries["paddle lite"],
+                 entries["paddle lite"].get("error", str(sorted({k for item in items("paddle lite") for k in item["keys"]}))))
+    ok &= report("rapid object", "results" in entries["rapid"],
+                 entries["rapid"].get("error", str(sorted({k for item in items("rapid") for k in item["keys"]}))))
+    ok &= report("auto profile match", bool(items("auto profile zh")), f"{len(items('auto profile zh'))} results")
+    ok &= report("auto profile miss", "error" in entries["auto profile missing"],
+                 entries["auto profile missing"].get("error", "no error")[:120])
+    return ok
+
+
 def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -457,7 +512,7 @@ def packaging(args, device, samples, expected):
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("coexistence", "packaging"))
+    parser.add_argument("command", choices=("coexistence", "packaging", "extras"))
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--samples", type=Path, default=SAMPLES, help="the plugin's androidTest samples (samples.json)")
@@ -476,7 +531,7 @@ def main():
     samples = {key: value["lines"] for key, value in json.loads((args.samples / "samples.json").read_text("utf-8")).items()}
     print(f"device {args.serial}: {device.shell('getprop ro.product.model')}, API {device.shell('getprop ro.build.version.sdk')}, "
           f"host {device.package(HOST)}", flush=True)
-    ok = (coexistence if args.command == "coexistence" else packaging)(args, device, args.samples, samples)
+    ok = {"coexistence": coexistence, "packaging": packaging, "extras": extras}[args.command](args, device, args.samples, samples)
     print("RESULT", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 

@@ -13,6 +13,7 @@ import org.autojs.autojs.rhino.extension.ScriptableObjectExtensions.inquire
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.OcrResult
 import org.autojs.autojs.runtime.api.modules.ocr.Ocr.Companion.OcrMode
+import org.autojs.autojs.runtime.api.toScriptResult
 import org.autojs.autojs.util.RhinoUtils.coerceBoolean
 import org.autojs.autojs.util.RhinoUtils.coerceIntNumber
 import org.autojs.autojs.util.RhinoUtils.coerceString
@@ -71,7 +72,7 @@ class OcrMLKit(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                     moduleLabel = MODULE_LABEL_MLKIT_OCR,
                 )
                 OcrPluginHost.detect(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
-            }.map { OcrResult(it.text, it.confidence, it.bounds) }
+            }.map { it.toScriptResult() }
         }
 
         private fun getOcrOptions(options: NativeObject): OcrOptions {

@@ -5,8 +5,10 @@
 //   output   result file name in the external files directory of the running application
 //   priority whether to report the stored Plugin Center order of paddle-ocr plugins (host only)
 //   open     activity of the running application opened after the runs, for example Plugin Center (host only)
-//   runs     [{ id, file, options, repeat, disable }], where disable lists packages switched off in the Plugin Center
-//            store during that run (host only) and switched back afterwards
+//   runs     [{ id, file, options, repeat, disable, detect, regionInset }], where disable lists packages switched off in
+//            the Plugin Center store during that run (host only) and switched back afterwards; detect names the module
+//            whose detect runs instead of ocr.paddle ("paddle", "rapid" or "auto" for ocr.detect) and reports each
+//            result's extras and bounds; regionInset restricts it to the image without that many pixels on every edge
 // zh-CN: 对脚本旁的样图运行 ocr.paddle 并把识别文本写入 JSON 文件. CONFIG 由 device_check.py 填入, 宿主运行与打包应用共用.
 var CONFIG = __CONFIG__;
 
@@ -25,6 +27,24 @@ threads.start(function () {
         var size = typeof list.size === "function" ? list.size() : list.length;
         for (var i = 0; i < size; i++) out.push(String(typeof list.get === "function" ? list.get(i) : list[i]));
         return out;
+    }
+    function detect(run, img) {
+        var options = Object.assign({}, run.options);
+        if (run.regionInset) {
+            var inset = run.regionInset;
+            options.region = [inset, inset, img.getWidth() - 2 * inset, img.getHeight() - 2 * inset];
+        }
+        var module = run.detect === "auto" ? ocr : ocr[run.detect];
+        return module.detect(img, options).map(function (item) {
+            var bounds = item.bounds;
+            return {
+                text: String(item.text),
+                bounds: [bounds.left, bounds.top, bounds.right, bounds.bottom],
+                keys: Object.keys(item.extras).sort(),
+                executionProvider: item.extras.executionProvider,
+                quad: item.extras.quad ? Array.prototype.slice.call(item.extras.quad) : null,
+            };
+        });
     }
     function mappedLibraries() {
         var lines = java.nio.file.Files.readAllLines(java.nio.file.Paths.get("/proc/self/maps"));
@@ -60,7 +80,12 @@ threads.start(function () {
                 try {
                     for (var i = 0; i < run.repeat; i++) {
                         var begin = Date.now();
-                        entry.texts = texts(ocr.paddle(img, run.options));
+                        if (run.detect) {
+                            entry.results = detect(run, img);
+                            entry.texts = entry.results.map(function (item) { return item.text; });
+                        } else {
+                            entry.texts = texts(ocr.paddle(img, run.options));
+                        }
                         entry.times.push(Date.now() - begin);
                     }
                 } finally {
