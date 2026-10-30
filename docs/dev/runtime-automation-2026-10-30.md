@@ -48,6 +48,8 @@ The first runs found three differences:
 - `threads.pool({corePoolSize: 1})` throws in Rhino: `Threads.internalPool` compares corePoolSize with the raw maxPoolSize (0, which it treats as unbounded only for the executor). Node now throws a RangeError when maxPoolSize is given and corePoolSize is larger (as Rhino), and keeps the pool unbounded without maxPoolSize; Q180 asks whether to fix the host instead.
 - The nested Worker form timed out after the main and ESM forms: both executions stayed alive because the events.broadcast session stayed referenced after `removeAllListeners`, and the third execution did not start within the 180 s wait (alone, or after the ESM form only, it passed). The broadcast session now closes with the last listener (079579ec, desktop test added); a main-thread run of all cases then ends right after the last case.
 
+Afterwards P4.4 found on a Redmi (Bun, the same events factory) that a broadcast emitted right after the first `events.broadcast.on()` could reach the host before the observer was registered and was lost for the script (Rhino registers synchronously); in this run `events.broadcast~` passed in every form. Node c54d4592 makes emit wait for the session that is opening (desktop test of the host call order); it was not re-run on this device.
+
 ## Repeating the checks
 
 ```powershell
