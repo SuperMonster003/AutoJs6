@@ -1070,3 +1070,60 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 宿主 | a5c55974a | 附录 C Q156 / Q157 已决, Q186 - Q190 |
 | 宿主 | 583ca1b94 | type-map.json, kotlin_types.py, dts-types.mjs, verify-runtime-types.mjs, 单测, check.py / runtime_matrix.py / verify-surfaces.mjs, README, CI, MATRIX.md, 报告 |
 | 宿主 | (本节所在提交) | 本节, ROADMAP P2.4 落点 |
+
+## 16. P3.3 Node UI 族 (2026-10-30, 子会话 api-cov-p3-3)
+
+### 16.1 做了什么
+
+- 本族 384 行 (ui 40, console 56, toast 1, floaty 8, web 4, terminal 20, compose 71, 族内全局 26; 返回对象成员 158) 在 Node main / Worker 两列除 7 行 not-portable (内部名 6, ui.layoutInflater) 外全部 bridged, pending 清零. 设计 Q164 / Q165 / Q166 / Q168 维护者选 (a); Q167 (能力 terminal) 与 Q169 (ui.layoutInflater 排除) 已按推荐先行待确认; Q104 (ComposeNode# 快捷访问器) 与 Q106 (a) (compose 返回对象) 随本批实施.
+- 第 0 步 (开工前): imgui 插件 1.13.0 / 1.14.0 的 60 个新名字按 Q122 (a) 计入基线 (宿主 4427aad06, 全列 754 / 807 / 819 -> 814 / 867 / 879), imgui 页运行时表 (文档 cf1a50c / 674b4e7, Offline Docs c678904); 附录 C 落盘 Q150 / Q163 (7d384b19a), 登记 Q164 - Q169 (760879b55).
+- 宿主 77e94eb5b: ui 内容视图 (showLayout Activity 的 contentView, 生命周期与 back_pressed 事件, interceptBack), RuntimeUiWindowControls (windowControl, barHeight), RuntimeFloatyWindow (floatyWindow / floatyRawWindow / floatyControl / floatyCloseAll), RuntimeConsoleBridge (isShowing, 11 个窗口控制, configure, rawInput 经 ConsoleImpl.requestInput), ScriptToast.dismissAll 按执行, RuntimeTerminalBridge 与能力 terminal (宿主清单, 不被 shell / shell.root 隐含); 单测 RuntimeConsoleBridgeConfigureTest / RuntimeTerminalBridgeTest / RuntimeUiWindowControlsTest.
+- Node 插件 8fc9c801: 共享 UI 工厂 tools/nodejs/api/portable-ui-compose.js (sync-ui-compose.js 同步进 cpp, Bun 由 P4.3 同步) 供主线程与 Worker (CJS / ESM / 嵌套) 共用; autojs6:floaty / web / terminal (只认 autojs6: 名); ConsoleConfigurator 52 成员; 族内全局 15 个 (isUiThread, toastLog 等与小写形式, newWebSocket / newInjectableWebView / newInjectableWebClient, ComposeError); 插件清单 TERMINAL, 能力目录 542 个操作与套件钉住; d.ts (ui / console / toast / compose, 新增 floaty / web / terminal); HOST-API "UI 族的 Rhino 对照"; 桌面对照 test-ui-rhino.js 9 项进 build.yml. fc0ca86b: 真机对照脚本 tools/nodejs/api/ui-family (22 例, 未声明能力轮 7 例), HOST-API 注明 waitFor 先于异步 write 启动.
+- 宿主 398ab3930: returned-objects.json 加 ComposeSession 7 / ComposeFloatyWindow 18 / ComposeState 1 / ComposeRef 1 与 ComposeNode 自有 20 成员 (`members`, returned_objects.py 对插件来源合并), runtime-policy.json 的 Node 句柄类型 10 个 (ConsoleConfigurator, FloatyWindow / RawWindow, WebSocket, InjectableWebView / InjectableWebClient 与 compose 四个), 族内全局的成员别名, 单列规则 java-prototype-layout-inflater (Q169, 等价写法 ui.inflate / ui.createView); 结构脚本 check-runtime-ui.mjs 接入 CI "Script API coverage"; test_p3_3, test_p1_4 / test_p1_5 不再保留 ui.layout / console.input 的 pending.
+
+### 16.2 前后数字
+
+| 项 | 改动前 (宿主 307655f10, P3.4 的矩阵) | P4.4 重生成 (宿主 7bb11982c, 已含 Node 8fc9c801) | 改动后 (宿主 398ab3930) |
+| --- | --- | --- | --- |
+| 矩阵行 | 3470 | 3470 | 3517 (+47 为 Q106 的 compose 返回对象: ComposeNode 自有 20, ComposeSession 7, ComposeFloatyWindow 18, ComposeState 1, ComposeRef 1) |
+| pending 基线 Node 主线程 / Worker / Bun | 680 / 681 / 835 | 588 / 589 / 656 | 577 / 577 / 688 (本族 103 / 104 -> 0; Bun +33 为 Q106 新行交 P4.3, -1 为 Q169; P4.3 的 cc3a55f97 后 Bun 577) |
+| bridged Node 主线程 / Worker | 1376 / 1375 | 1468 / 1467 | 1628 / 1628 |
+| not-portable Node 主线程 / Worker | 1046 / 1049 | 1046 / 1049 | 944 / 947 (-103 为 Java 对象成员改记句柄类型 (Q166 / Q168), +1 为 ui.layoutInflater) |
+| local-shim Node 主线程 / Worker | 368 / 365 | 368 / 365 | 不变 |
+| 策略冲突 | 无 | 无 | java-prototype-objects shadowed (Node 主线程 / Worker 各 103): 句柄类型先覆盖这些行, 规则的 `*#*` 仍匹配它们, 门禁不拦 (Bun 列随 P4.3 同样 103) |
+| 文档列 | mention 268 / heading 2670 | 同左 | mention 274 / heading 2711 |
+| d.ts 列 | - (P2.4 前口径) | name 1690 / arity 319 / typed 928 | name 1737 / arity 319 / typed 928 |
+| Ace 列 | semantic 898 | 同左 | semantic 945 |
+| 文档运行时支持表 | - | - | 重生成 15 页 (ui, console, toast, floaty, web, terminal, global, compose, composeNodeType, 新增对象表的 composeSessionType / composeFloatyWindowType / composeStateType, webSocketType, injectableWebViewType / injectableWebClientType), 门禁 89 页 current |
+| Ace 运行时查询 | - | 4736 (Node main 1291, Worker 1287, Node 句柄 308, Bun 句柄 308) | 5079 (Node main 1376, Worker 1373, Node 句柄 466, Bun 句柄 322) |
+
+- 本族 158 行返回对象成员: ConsoleConfigurator 52, WebSocket 24, FloatyWindow / RawWindow 各 12, InjectableWebView 1, InjectableWebClient 2, ComposeNode 28, ComposeSession 7, ComposeFloatyWindow 18, ComposeState / ComposeRef 各 1. not-portable 7 行: ui.__autojs6Tsx / __autojs6TsxFragment / __inflate__ / __widgets__ 与全局 __autojs6Tsx / __autojs6TsxFragment (internal-exports), ui.layoutInflater. canvas 没有运行时模块, Canvas# 54 行维持 java-prototype-objects (D-11).
+- 7bb11982c (P4.4) 以 Node 8fc9c801 重生成时先计入本族 92 / 92 格; 398ab3930 再减 11 / 12 (族内全局别名, Worker 的 ui.layout) 并写入 Q106 / Q166 / Q168 / Q169 的行.
+
+### 16.3 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-api-cov-p3-3-head` (宿主 398ab3930, KSP 取自 77e94eb5b 的构建 (其后宿主源码只有 Bun 桥接改动), Node 8fc9c801 + fc0ca86b 的 ui-family, Bun b01dbe5, 文档 ab68155, TS d1f4cad, Ace 072c938).
+- `check.py --source ksp --strict-arity --matrix --docs-support` (含 Ace): 退出码 0, failures 0; MATRIX.md current, pending 577 / 577 / 688 = 基线, 缺理由 0, 缺能力名 0, 策略冲突 2 (16.2 的 shadowed); 文档运行时表 89 页 current, 未覆盖根 / 对象 0; arity fail 0. api-coverage 单测 117 通过 (跳过 3).
+- check-runtime-ui.mjs: `{"hostMembers":224,"consoleFacade":14,"globals":15,"hostRoutes":66,"capabilities":["terminal"],"hostApi":true}`.
+- Node 插件 (副本为 LF 导出; 共享签出是 CRLF, extract.js 类测试须在 LF 导出上跑): build.yml 的 4 组 JS 测试 137 / 16 / 3 / 61 全部通过 (含 test-ui-rhino.js 9 项), test-ui-compose.js / test-webview.js 通过, d.ts 探针 `tsc --strict` 通过.
+- TS `tools/sync-runtime-declarations.mjs --check --ace` (94 份声明, changed 0) 与 `tools/verify-runtime-declarations.mjs --ace` 通过; Ace `tools/ace-lsp/verify-runtime-api-coverage.mjs --fresh` 通过 (5079 条).
+- 宿主: 合并 HEAD 的副本编译, 3 个新单测与相关单测通过 (77e94eb5b).
+- 真机 968e9f18 (Xiaomi 23046RP50C, Android 15 / API 35; 宿主 debug 5935 与 Node 2.0.0 (340) debug, 借用 P3.4 的构建: 宿主 e2d824545 导出, P3.3 的 12 个宿主源文件与 77e94eb5b 逐字节一致; Node 8fc9c801 + P3.4 的 threads 两行): Rhino 19 / 19, Node main / ESM / 嵌套 Worker 各 22 / 22 (另 3 例 Node 专有), 未声明能力 7 / 7, 最终用例连续两轮通过; 装回原包 (宿主 5935, Node 1.32.0 (292)) 并核对 md5. 报告 [runtime-ui-2026-10-30](../dev/runtime-ui-2026-10-30.md).
+
+### 16.4 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 4427aad06 | 第 0 步: imgui 60 名按 Q122 (a) 计入基线, MATRIX.md |
+| 文档 | cf1a50c / 674b4e7 | 第 0 步: imgui 页运行时表; 生成物 |
+| Offline Docs | c678904 | 第 0 步: 同步生成页, 版本不变 |
+| 宿主 | 7d384b19a / 760879b55 | 附录 C Q150 / Q163 落盘; Q164 - Q169 登记 |
+| 宿主 | 77e94eb5b | UI 族宿主路由, 能力 terminal, 3 个单测 |
+| Node 插件 | 8fc9c801 | 共享 UI 工厂与 Worker, autojs6:floaty / web / terminal, 能力目录与套件钉住, d.ts, HOST-API, 桌面对照与 build.yml |
+| Node 插件 | fc0ca86b | 真机对照脚本 tools/nodejs/api/ui-family, HOST-API 的 waitFor 说明 |
+| 宿主 | 398ab3930 | returned-objects.json (Q106), runtime-policy.json, check-runtime-ui.mjs 与 CI, test_p3_3, MATRIX.md 与 pending-baseline.json |
+| TS | d1f4cad | 同步 Node 运行时声明 (ui / console / toast / compose / floaty / web / terminal) |
+| Ace | b0a3b36 / 072c938 | 内置 Node 运行时声明; 运行时查询表 4736 -> 5079 |
+| 文档 | ab68155 / 9567ec3 | 15 页运行时支持表, changelog / progress (zh-Hans); 生成物 |
+| Offline Docs | a0f2265 | 同步生成页, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.3 勾选与落点 / 附录 C Q104 / Q106 / Q164 - Q169, REVIEW 7.1 P3.3 落点 |
