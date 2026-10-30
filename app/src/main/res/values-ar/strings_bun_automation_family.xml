@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">يسمح بتشغيل خدمة إمكانية الوصول في AutoJs6 وإيقافها وضبطها (الوضع والعلامات); لا يشمله التحكم في إمكانية الوصول.</string>
+    <string name="summary_bun_barcode_control_grant">يسمح بالتعرف على الرموز الشريطية ورموز QR في الصور بإضافة ML Kit Barcode.</string>
+    <string name="summary_bun_events_key_intercept_grant">يسمح باعتراض المفاتيح حتى لا تصل إلى التطبيقات الأخرى; لا تشمله مراقبة أحداث المفاتيح.</string>
+    <string name="summary_bun_events_touch_grant">يسمح بمراقبة لمسات الشاشة عبر Root أو Shizuku; لا تشمله مراقبة أحداث النظام.</string>
+    <string name="summary_bun_ocr_control_grant">يسمح بالتعرف على النصوص في الصور بإضافات OCR المثبتة (ML Kit و Paddle و Rapid).</string>
+    <string name="summary_bun_yolo_control_grant">يسمح بتحميل نماذج YOLO وكشف الأجسام في الصور بإضافة YOLO.</string>
+    <string name="text_bun_accessibility_service_grant">التحكم في خدمة إمكانية الوصول في Bun</string>
+    <string name="text_bun_barcode_control_grant">التعرف على الرموز الشريطية ورموز QR في Bun</string>
+    <string name="text_bun_events_key_intercept_grant">اعتراض أحداث المفاتيح</string>
+    <string name="text_bun_events_touch_grant">مراقبة أحداث اللمس</string>
+    <string name="text_bun_ocr_control_grant">التعرف على النصوص (OCR) في Bun</string>
+    <string name="text_bun_yolo_control_grant">كشف الأجسام بـ YOLO في Bun</string>
+</resources>

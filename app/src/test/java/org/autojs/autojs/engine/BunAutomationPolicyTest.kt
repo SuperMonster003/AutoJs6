@@ -172,7 +172,15 @@ class BunAutomationPolicyTest {
     // dotted lowercase words, so a grant ID with an underscore would break every script while that grant is on.
     @Test fun systemFamilyGrantIdsPassThePluginCapabilityIdPattern() {
         val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
-        for (capability in Grants.SYSTEM_FAMILY + Grants.EXECUTION_CONTROL) assertTrue(capability, pattern.matches(capability))
+        for (capability in Grants.SYSTEM_FAMILY + Grants.AUTOMATION_FAMILY + Grants.EXECUTION_CONTROL) assertTrue(capability, pattern.matches(capability))
+    }
+
+    // api-coverage P4.4 (Q181 (a) / Q182 (a)): six default-off grants, each a switch of its own and declarable in project.json.
+    @Test fun automationFamilyGrantsAreDistinctAndPackageable() {
+        assertEquals(listOf("accessibility.service", "events.touch", "events.key.intercept", "ocr.control", "barcode.control", "yolo.control"),
+            Grants.AUTOMATION_FAMILY)
+        assertTrue(Grants.AUTOMATION_FAMILY.none { it in Grants.SYSTEM_FAMILY })
+        assertEquals(Grants.AUTOMATION_FAMILY, Grants.validatePackagedCapabilities(Grants.AUTOMATION_FAMILY))
     }
 
 }

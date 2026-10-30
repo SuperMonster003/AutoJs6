@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">允許啟動, 停止與設定 AutoJs6 無障礙服務 (模式與旗標); 不被無障礙控制隱含.</string>
+    <string name="summary_bun_barcode_control_grant">允許用 ML Kit Barcode 外掛辨識圖片中的條碼與 QR 碼.</string>
+    <string name="summary_bun_events_key_intercept_grant">允許攔截按鍵, 使其不再傳給其他應用程式; 不被監聽按鍵事件隱含.</string>
+    <string name="summary_bun_events_touch_grant">允許透過 Root 或 Shizuku 監聽螢幕觸控; 不被監聽系統事件隱含.</string>
+    <string name="summary_bun_ocr_control_grant">允許用已安裝的 OCR 外掛 (ML Kit, Paddle, Rapid) 辨識圖片中的文字.</string>
+    <string name="summary_bun_yolo_control_grant">允許用 YOLO 外掛載入模型並偵測圖片中的物件.</string>
+    <string name="text_bun_accessibility_service_grant">Bun 無障礙服務控制</string>
+    <string name="text_bun_barcode_control_grant">Bun 條碼與 QR 碼辨識</string>
+    <string name="text_bun_events_key_intercept_grant">攔截按鍵事件</string>
+    <string name="text_bun_events_touch_grant">監聽觸控事件</string>
+    <string name="text_bun_ocr_control_grant">Bun 文字辨識 (OCR)</string>
+    <string name="text_bun_yolo_control_grant">Bun YOLO 物件偵測</string>
+</resources>

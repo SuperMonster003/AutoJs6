@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">允许启动, 停止与配置 AutoJs6 无障碍服务 (模式与标志); 不被无障碍控制隐含.</string>
+    <string name="summary_bun_barcode_control_grant">允许用 ML Kit Barcode 插件识别图片中的条码与二维码.</string>
+    <string name="summary_bun_events_key_intercept_grant">允许拦截按键, 使其不再传给其他应用; 不被监听按键事件隐含.</string>
+    <string name="summary_bun_events_touch_grant">允许经 Root 或 Shizuku 监听屏幕触摸; 不被监听系统事件隐含.</string>
+    <string name="summary_bun_ocr_control_grant">允许用已安装的 OCR 插件 (ML Kit, Paddle, Rapid) 识别图片中的文字.</string>
+    <string name="summary_bun_yolo_control_grant">允许用 YOLO 插件加载模型并检测图片中的目标.</string>
+    <string name="text_bun_accessibility_service_grant">Bun 无障碍服务控制</string>
+    <string name="text_bun_barcode_control_grant">Bun 条码与二维码识别</string>
+    <string name="text_bun_events_key_intercept_grant">拦截按键事件</string>
+    <string name="text_bun_events_touch_grant">监听触摸事件</string>
+    <string name="text_bun_ocr_control_grant">Bun 文字识别 (OCR)</string>
+    <string name="text_bun_yolo_control_grant">Bun YOLO 目标检测</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">AutoJs6 のユーザー補助サービスの起動, 停止, 設定 (モードとフラグ) を許可します. ユーザー補助の制御には含まれません.</string>
+    <string name="summary_bun_barcode_control_grant">ML Kit Barcode プラグインによる画像内のバーコードと QR コードの認識を許可します.</string>
+    <string name="summary_bun_events_key_intercept_grant">キーを横取りして他のアプリに届かないようにすることを許可します. キーイベントの監視には含まれません.</string>
+    <string name="summary_bun_events_touch_grant">Root または Shizuku を通じた画面タッチの監視を許可します. システムイベントの監視には含まれません.</string>
+    <string name="summary_bun_ocr_control_grant">インストール済みの OCR プラグイン (ML Kit, Paddle, Rapid) による画像内の文字認識を許可します.</string>
+    <string name="summary_bun_yolo_control_grant">YOLO プラグインによるモデルの読み込みと画像内の物体検出を許可します.</string>
+    <string name="text_bun_accessibility_service_grant">Bun ユーザー補助サービスの制御</string>
+    <string name="text_bun_barcode_control_grant">Bun バーコードと QR コードの認識</string>
+    <string name="text_bun_events_key_intercept_grant">キーイベントの横取り</string>
+    <string name="text_bun_events_touch_grant">タッチイベントの監視</string>
+    <string name="text_bun_ocr_control_grant">Bun 文字認識 (OCR)</string>
+    <string name="text_bun_yolo_control_grant">Bun YOLO 物体検出</string>
+</resources>

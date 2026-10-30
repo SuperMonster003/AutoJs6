@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">Permite iniciar, detener y configurar el servicio de accesibilidad de AutoJs6 (su modo e indicadores); no está incluido en los controles de accesibilidad.</string>
+    <string name="summary_bun_barcode_control_grant">Permite reconocer códigos de barras y códigos QR en imágenes con el plugin ML Kit Barcode.</string>
+    <string name="summary_bun_events_key_intercept_grant">Permite interceptar teclas para que no lleguen a otras aplicaciones; no está incluido en la observación de eventos de teclas.</string>
+    <string name="summary_bun_events_touch_grant">Permite observar los toques en la pantalla mediante root o Shizuku; no está incluido en la observación de eventos del sistema.</string>
+    <string name="summary_bun_ocr_control_grant">Permite reconocer texto en imágenes con los plugins de OCR instalados (ML Kit, Paddle, Rapid).</string>
+    <string name="summary_bun_yolo_control_grant">Permite cargar modelos YOLO y detectar objetos en imágenes con el plugin YOLO.</string>
+    <string name="text_bun_accessibility_service_grant">Control del servicio de accesibilidad de Bun</string>
+    <string name="text_bun_barcode_control_grant">Reconocimiento de códigos de barras y QR de Bun</string>
+    <string name="text_bun_events_key_intercept_grant">Interceptar eventos de teclas</string>
+    <string name="text_bun_events_touch_grant">Observar eventos táctiles</string>
+    <string name="text_bun_ocr_control_grant">Reconocimiento de texto (OCR) de Bun</string>
+    <string name="text_bun_yolo_control_grant">Detección de objetos YOLO de Bun</string>
+</resources>

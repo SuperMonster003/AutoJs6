@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">Разрешает запуск, остановку и настройку службы доступности AutoJs6 (режим и флаги); не входит в управление доступностью.</string>
+    <string name="summary_bun_barcode_control_grant">Разрешает распознавать штрихкоды и QR-коды на изображениях плагином ML Kit Barcode.</string>
+    <string name="summary_bun_events_key_intercept_grant">Разрешает перехватывать клавиши, чтобы они не доходили до других приложений; не входит в наблюдение за нажатиями клавиш.</string>
+    <string name="summary_bun_events_touch_grant">Разрешает наблюдать за касаниями экрана через root или Shizuku; не входит в наблюдение за системными событиями.</string>
+    <string name="summary_bun_ocr_control_grant">Разрешает распознавать текст на изображениях установленными плагинами OCR (ML Kit, Paddle, Rapid).</string>
+    <string name="summary_bun_yolo_control_grant">Разрешает загружать модели и обнаруживать объекты на изображениях плагином YOLO.</string>
+    <string name="text_bun_accessibility_service_grant">Управление службой доступности в Bun</string>
+    <string name="text_bun_barcode_control_grant">Распознавание штрихкодов и QR-кодов в Bun</string>
+    <string name="text_bun_events_key_intercept_grant">Перехват нажатий клавиш</string>
+    <string name="text_bun_events_touch_grant">Наблюдение за касаниями</string>
+    <string name="text_bun_ocr_control_grant">Распознавание текста (OCR) в Bun</string>
+    <string name="text_bun_yolo_control_grant">Обнаружение объектов YOLO в Bun</string>
+</resources>

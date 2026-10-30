@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_accessibility_service_grant">AutoJs6 접근성 서비스의 시작, 중지, 설정 (모드와 플래그)을 허용합니다. 접근성 제어에 포함되지 않습니다.</string>
+    <string name="summary_bun_barcode_control_grant">ML Kit Barcode 플러그인으로 이미지 속 바코드와 QR 코드 인식을 허용합니다.</string>
+    <string name="summary_bun_events_key_intercept_grant">키를 가로채 다른 앱에 전달되지 않도록 하는 것을 허용합니다. 키 이벤트 관찰에 포함되지 않습니다.</string>
+    <string name="summary_bun_events_touch_grant">Root 또는 Shizuku를 통한 화면 터치 관찰을 허용합니다. 시스템 이벤트 관찰에 포함되지 않습니다.</string>
+    <string name="summary_bun_ocr_control_grant">설치된 OCR 플러그인 (ML Kit, Paddle, Rapid)으로 이미지 속 텍스트 인식을 허용합니다.</string>
+    <string name="summary_bun_yolo_control_grant">YOLO 플러그인으로 모델을 불러와 이미지 속 객체 감지를 허용합니다.</string>
+    <string name="text_bun_accessibility_service_grant">Bun 접근성 서비스 제어</string>
+    <string name="text_bun_barcode_control_grant">Bun 바코드 및 QR 코드 인식</string>
+    <string name="text_bun_events_key_intercept_grant">키 이벤트 가로채기</string>
+    <string name="text_bun_events_touch_grant">터치 이벤트 관찰</string>
+    <string name="text_bun_ocr_control_grant">Bun 텍스트 인식 (OCR)</string>
+    <string name="text_bun_yolo_control_grant">Bun YOLO 객체 감지</string>
+</resources>

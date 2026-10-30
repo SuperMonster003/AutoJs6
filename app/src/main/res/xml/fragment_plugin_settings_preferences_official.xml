@@ -138,6 +138,30 @@
             app:summary="@string/summary_bun_screen_capture_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_ocr_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_ocr_control_grant"
+            app:summary="@string/summary_bun_ocr_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_barcode_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_barcode_control_grant"
+            app:summary="@string/summary_bun_barcode_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_yolo_control_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_yolo_control_grant"
+            app:summary="@string/summary_bun_yolo_control_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_screen_record_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"
@@ -192,6 +216,14 @@
             app:persistent="false"
             app:title="@string/text_bun_accessibility_gesture_grant"
             app:summary="@string/summary_bun_accessibility_gesture_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_accessibility_service_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_accessibility_service_grant"
+            app:summary="@string/summary_bun_accessibility_service_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_clipboard_control_grant"
@@ -288,6 +320,22 @@
             app:persistent="false"
             app:title="@string/text_bun_events_key_grant"
             app:summary="@string/summary_bun_events_key_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_events_touch_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_events_touch_grant"
+            app:summary="@string/summary_bun_events_touch_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_events_key_intercept_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_events_key_intercept_grant"
+            app:summary="@string/summary_bun_events_key_intercept_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_notifications_post_grant"
