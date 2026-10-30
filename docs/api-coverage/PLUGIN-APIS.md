@@ -98,7 +98,7 @@ Q2-4 纳入的四个语言运行时 API 不进覆盖矩阵, 由文档页与静�
 | Kotlin-Runtime (0.7.3-m10, ea1c21d) | 方法 13 + 类型 6 (Entry API 2, 无 args / clipboard) | `api/kotlinRuntime.md` | 通过: 名称, 参数个数 |
 | Lua-Runtime (0.1.3-rc.2, 9ced281) | 函数 11 + 值 1 (arguments), 共 12 | `api/luaRuntime.md` | 通过: 名称 (C 源码无参数信息) |
 
-类型桩 (Python `.pyi`, LuaLS meta, Java / Kotlin 桩并入 Ace) 已由 P5.2e 补 (2026-10-30, 位置与提交见 8.2 P5.2e 行); 门禁以同一份名称清单为基准比对类型桩与 Ace 副本, 并检查插件 AAR 是宿主 `JvmEntryApi.kt` 的子集 (Q109 (c)), 见 `tools/api-coverage/README.md` "Language runtime APIs (Q77)". AutoJs4 上游 API 不纳入 (Q76), autojs4Runtime.md 只给差异指引.
+类型桩 (Python `.pyi`, LuaLS meta, Java / Kotlin 桩并入 Ace) 已由 P5.2e 补 (2026-10-30, 位置与提交见 8.2 P5.2e 行); 门禁以同一份名称清单为基准比对类型桩与 Ace 副本 (Python 常量连同字面值, Q142 (b)), 并检查插件 AAR 是宿主 `JvmEntryApi.kt` 的子集 (Q109 (c)), 见 `tools/api-coverage/README.md` "Language runtime APIs (Q77)". AutoJs4 上游 API 不纳入 (Q76), autojs4Runtime.md 只给差异指引.
 
 ## 3. 没有自有脚本 API 的插件 (36 个)
 
