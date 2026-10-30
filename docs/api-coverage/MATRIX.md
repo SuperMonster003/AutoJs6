@@ -1,29 +1,29 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3410 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3412 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3410 行 (显式导出 1902, 原型成员 205, 返回对象成员 1303).
+数据源: ksp, 3412 行 (显式导出 1904, 原型成员 205, 返回对象成员 1303).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1191 | 348 | 0 | 1046 | 0 | 825 |
-| Node Worker | 1129 | 345 | 0 | 1049 | 0 | 887 |
-| Bun | 0 | 313 | 1145 | 1043 | 0 | 909 |
+| Node main | 1262 | 348 | 0 | 1046 | 0 | 756 |
+| Node Worker | 1209 | 345 | 0 | 1049 | 0 | 809 |
+| Bun | 0 | 313 | 1235 | 1043 | 0 | 821 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 472 / mention 268 / heading 2670 / signature 0 / example 0 |
-| dts | none 473 / name 1774 / arity 1163 / typed 0 |
-| ace | none 878 / semantic 898 / static 1634 |
+| doc | none 474 / mention 268 / heading 2670 / signature 0 / example 0 |
+| dts | none 475 / name 1774 / arity 1163 / typed 0 |
+| ace | none 880 / semantic 898 / static 1634 |
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: bun.memberCapabilities device.getDensity unused, bun.memberCapabilities device.getHeight unused, bun.memberCapabilities device.getWidth unused.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 5 / Node Worker 5 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
-名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 464 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
+名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 466 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
 ## 排除规则
 
@@ -114,7 +114,7 @@
 | continuation | 4 | 3 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | crypto | 8 | 7 | 8 | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| device | 86 | 86 | 86 | 86 | 35 / 0 / 51 | 35 / 0 / 51 | 25 / 0 / 61 |
+| device | 86 | 86 | 86 | 86 | 86 / 0 / 0 | 86 / 0 / 0 | 86 / 0 / 0 |
 | dialogs | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | engines | 8 | 8 | 8 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | epub | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
@@ -127,12 +127,12 @@
 | gallery | 11 | 11 | 11 | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
 | http | 21 | 20 | 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| imgui | 464 | 0 | 0 | 0 | 0 / 1 / 463 | 0 / 1 / 463 | 0 / 1 / 463 |
+| imgui | 466 | 0 | 0 | 0 | 0 / 1 / 465 | 0 / 1 / 465 | 0 / 1 / 465 |
 | installer | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
-| media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 0 / 0 / 9 | 0 / 0 / 9 |
+| media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | mediainfo | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | memory | 5 | 5 | 5 | 5 | 4 / 1 / 0 | 4 / 1 / 0 | 4 / 1 / 0 |
 | mime | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
@@ -151,7 +151,7 @@
 | qrcode | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 0 / 0 / 4 | 0 / 0 / 4 |
 | recorder | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | s13n | 5 | 5 | 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
-| sensors | 21 | 21 | 21 | 21 | 1 / 0 / 20 | 1 / 0 / 20 | 1 / 0 / 20 |
+| sensors | 21 | 21 | 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | settings | 4 | 4 | 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | shell | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | shizuku | 13 | 8 | 13 | 13 | 13 / 0 / 0 | 13 / 0 / 0 | 13 / 0 / 0 |
@@ -1618,72 +1618,6 @@
 | `crypto.generateKeyPair` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
 | `crypto.toHex` | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) | not-portable: runtime-native (native-crypto) |
 
-### device
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `device.baseOS` | pending | pending | pending |
-| `device.board` | bridged | bridged | pending |
-| `device.bootloader` | bridged | bridged | pending |
-| `device.brand` | bridged | bridged | pending |
-| `device.brands` | pending | pending | pending |
-| `device.buildDisplay` | pending | pending | pending |
-| `device.buildId` | bridged | bridged | pending |
-| `device.cancelVibration` | pending | pending | pending |
-| `device.codename` | pending | pending | pending |
-| `device.device` | pending | pending | pending |
-| `device.digest` | pending | pending | pending |
-| `device.ensureReadPhoneStatePermission` | pending | pending | pending |
-| `device.fingerprint` | bridged | bridged | pending |
-| `device.getAndroidId` | pending | pending | pending |
-| `device.getGatewayAddress` | pending | pending | pending |
-| `device.getIMEI` | pending | pending | pending |
-| `device.getIpAddress` | pending | pending | pending |
-| `device.getIpv6Address` | pending | pending | pending |
-| `device.getMacAddress` | pending | pending | pending |
-| `device.getMarketName` | pending | pending | pending |
-| `device.getOrientation` | pending | pending | pending |
-| `device.getRotation` | pending | pending | pending |
-| `device.getSerial` | pending | pending | pending |
-| `device.getSharedDeviceId` | pending | pending | pending |
-| `device.hardware` | bridged | bridged | pending |
-| `device.hasReadPhoneStatePermission` | pending | pending | pending |
-| `device.imei` | pending | pending | pending |
-| `device.incremental` | pending | pending | pending |
-| `device.isActiveNetworkMetered` | pending | pending | pending |
-| `device.isConnectedOrConnecting` | pending | pending | pending |
-| `device.isManufacturer` | pending | pending | pending |
-| `device.isPointerLocationDisabled` | pending | pending | pending |
-| `device.isPointerLocationEnabled` | pending | pending | pending |
-| `device.isPowerSourceAC` | pending | pending | pending |
-| `device.isPowerSourceDock` | pending | pending | pending |
-| `device.isPowerSourceUSB` | pending | pending | pending |
-| `device.isPowerSourceWireless` | pending | pending | pending |
-| `device.isScreenLandscape` | pending | pending | pending |
-| `device.isScreenOff` | pending | pending | pending |
-| `device.isScreenPortrait` | pending | pending | pending |
-| `device.isWifiAvailable` | pending | pending | pending |
-| `device.keepAwake` | pending | pending | pending |
-| `device.keepScreenDim` | pending | pending | pending |
-| `device.manufacturer` | pending | pending | pending |
-| `device.manufacturers` | pending | pending | pending |
-| `device.model` | bridged | bridged | pending |
-| `device.orientation` | pending | pending | pending |
-| `device.pageSize` | pending | pending | pending |
-| `device.product` | bridged | bridged | pending |
-| `device.release` | bridged | bridged | pending |
-| `device.roms` | pending | pending | pending |
-| `device.rotation` | pending | pending | pending |
-| `device.sdkInt` | bridged | bridged | pending |
-| `device.securityPatch` | pending | pending | pending |
-| `device.serial` | pending | pending | pending |
-| `device.setPointerLocation` | pending | pending | pending |
-| `device.setPointerLocationDisabled` | pending | pending | pending |
-| `device.setPointerLocationEnabled` | pending | pending | pending |
-| `device.summary` | pending | pending | pending |
-| `device.togglePointerLocation` | pending | pending | pending |
-| `device.wakeUpIfNeeded` | pending | pending | pending |
-
 ### events
 
 | 行 id | Node main | Node Worker | Bun |
@@ -1935,6 +1869,7 @@
 | `imgui.LaunchPrivileged` | pending | pending | pending |
 | `imgui.Limits` | pending | pending | pending |
 | `imgui.ListBox` | pending | pending | pending |
+| `imgui.ListClipper` | pending | pending | pending |
 | `imgui.ListExamples` | pending | pending | pending |
 | `imgui.LogLevel` | pending | pending | pending |
 | `imgui.LogWindow` | pending | pending | pending |
@@ -2161,6 +2096,7 @@
 | `imgui.launchFloaty` | pending | pending | pending |
 | `imgui.launchPrivileged` | pending | pending | pending |
 | `imgui.listBox` | pending | pending | pending |
+| `imgui.listClipper` | pending | pending | pending |
 | `imgui.listExamples` | pending | pending | pending |
 | `imgui.logWindow` | pending | pending | pending |
 | `imgui.menuItem` | pending | pending | pending |
@@ -2284,20 +2220,6 @@
 | `keys.volume_down` | bridged | pending | pending |
 | `keys.volume_up` | bridged | pending | pending |
 
-### media
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `media.getMusicCurrentPosition` | bridged | pending | pending |
-| `media.getMusicDuration` | bridged | pending | pending |
-| `media.isMusicPlaying` | bridged | pending | pending |
-| `media.musicSeekTo` | bridged | pending | pending |
-| `media.pauseMusic` | bridged | pending | pending |
-| `media.playMusic` | bridged | pending | pending |
-| `media.resumeMusic` | bridged | pending | pending |
-| `media.scanFile` | bridged | pending | pending |
-| `media.stopMusic` | bridged | pending | pending |
-
 ### memory
 
 | 行 id | Node main | Node Worker | Bun |
@@ -2350,31 +2272,6 @@
 | `qrcode.detectAll` | bridged | pending | pending |
 | `qrcode.recognizeText` | bridged | pending | pending |
 | `qrcode.recognizeTexts` | bridged | pending | pending |
-
-### sensors
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `sensors.addListener` | pending | pending | pending |
-| `sensors.delay` | pending | pending | pending |
-| `sensors.emit` | pending | pending | pending |
-| `sensors.emitSticky` | pending | pending | pending |
-| `sensors.eventNames` | pending | pending | pending |
-| `sensors.getMaxListeners` | pending | pending | pending |
-| `sensors.getSensor` | pending | pending | pending |
-| `sensors.getTimer` | pending | pending | pending |
-| `sensors.ignoresUnsupportedSensor` | pending | pending | pending |
-| `sensors.listenerCount` | pending | pending | pending |
-| `sensors.listeners` | pending | pending | pending |
-| `sensors.on` | pending | pending | pending |
-| `sensors.prependListener` | pending | pending | pending |
-| `sensors.prependOnceListener` | pending | pending | pending |
-| `sensors.register` | pending | pending | pending |
-| `sensors.removeAllListeners` | pending | pending | pending |
-| `sensors.removeListener` | pending | pending | pending |
-| `sensors.setMaxListeners` | pending | pending | pending |
-| `sensors.unregister` | pending | pending | pending |
-| `sensors.unregisterAll` | pending | pending | pending |
 
 ### speech
 
