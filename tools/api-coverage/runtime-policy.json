@@ -102,8 +102,8 @@
       "_noteP41b": "P4.1b (Q136 (a)): the query grant of each system family namespace; the write grants (autojs.manage, settings.write, memory.dump, installer.mutate, engines.exec) admit more of its routes",
       "autojs": ["autojs.control"], "engines": ["engines.control"], "installer": ["installer.control"], "memory": ["memory.control"],
       "powerManager": ["device.control"], "settings": ["settings.control"], "sysprops": ["sysprops.control"],
-      "_noteP44": "P4.4 (Q181 (a) / Q183 (a)): automator and auto are second modules of accessibility.control (gestures also accessibility.gesture, the service management accessibility.service), qrcode shares barcode.control, the selector functions probe through flow.control",
-      "automator": ["accessibility.control"], "auto": ["accessibility.control"], "qrcode": ["barcode.control"], "selector": ["flow.control"],
+      "_noteP44": "P4.4 (Q181 (a) / Q183 (a)): automator and auto are second modules of accessibility.control (gestures also accessibility.gesture, the service management accessibility.service), qrcode shares barcode.control, the selector functions probe with flow's wait, which reads the nodes over accessibility.control (device run, Bun 296)",
+      "automator": ["accessibility.control"], "auto": ["accessibility.control"], "qrcode": ["barcode.control"], "selector": ["accessibility.control"],
       "_noteP43": "P4.3 (Q3 (a) / Q173 (a)): terminal sessions through terminal.control; floaty windows through floaty.control, raw windows also floaty.raw and getClip clipboard.control (memberCapabilities); web has no grant of its own (memberCapabilities)",
       "terminal": ["terminal.control"], "floaty": ["floaty.control", "floaty.raw", "clipboard.control"]
     },
