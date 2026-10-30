@@ -3,9 +3,9 @@
  *
  * speech.detectLanguage 由 3-Macaw Speech 插件 1.3.0 及以上提供: 先在插件首页下载一个语种识别模型, 再下载一个合成模型, 示例用它
  * 合成中文与英文各一句代替真人录音 (合成模型只会一种语言时只合成那一种).
- * 插件先找出录音里有人说话的部分, 切成至多 30 秒的窗, 对前几个窗 (windows, 默认 3, 至多 60) 逐一识别后投票:
- * language 为得票最多的语种 (whisper 的两字母代码, 如 zh, en, ja), candidates 为各语种的得票占比, segments 为每个窗的结果.
- * 换成自己的录音 (WAV, MP3 等) 时, 可选参数 (engines.execScriptFile 的 arguments): file 为录音路径, windows 为投票的窗数,
+ * 插件先找出录音里有人说话的部分, 切成至多 30 秒的窗, 对前几个窗 (windows, 默认 3, 至多 60) 逐句判断 (插件 1.4.0 起; 1.3.0 每个窗判一种):
+ * language 为说话时长最长的语种 (whisper 的两字母代码, 如 zh, en, ja), candidates 为各语种的时长占比, segments 为每句的结果.
+ * 换成自己的录音 (WAV, MP3 等) 时, 可选参数 (engines.execScriptFile 的 arguments): file 为录音路径, windows 为判断的窗数,
  * output 为写入结果摘要 (JSON) 的文件.
  */
 
@@ -52,12 +52,12 @@ if (args.file) {
 let summary = {};
 try {
     samples.forEach((sample) => {
-        /* 长录音多投几窗更稳, 但每窗都要识别 30 秒的音频; detectLanguageAsync 返回 Promise. */
+        /* 长录音多判几窗更稳, 但每句都要判断一次, 窗数越多越慢; detectLanguageAsync 返回 Promise. */
         let options = {};
         if (args.windows) options.windows = Number(args.windows);
         let result = speech.detectLanguage(sample.path, options);
         let votes = result.candidates.map((c) => c.language + ' ' + Math.round(c.score * 100) + '%').join(', ');
-        console.log(sample.name + ':', result.language, '| 得票', votes, '|', result.segments.length, '个窗 | 模型', result.modelId);
+        console.log(sample.name + ':', result.language, '| 时长占比', votes, '|', result.segments.length, '句 | 模型', result.modelId);
         summary[sample.name] = result.language;
     });
 } catch (e) {
