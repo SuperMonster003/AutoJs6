@@ -986,3 +986,42 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 文档 | 9028c38 / f822e43 | 三页运行时支持表, changelog / progress, 生成物 |
 | Offline Docs | 04c53cd | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.1c 落点与 P3.1 勾选 / 附录 C Q146 - Q150, REVIEW 7.1 P3.1c 落点 |
+
+### 14.5 P4.1c Bun 列 (2026-10-30, 子会话 api-cov-p4-1c)
+
+- 本族 116 行 (device 86, sensors 21, media 9) 在 Bun 列全部 capability-gated, pending 清零. Bun 客户端经 sync-device-dialogs.mjs / sync-sensors.mjs 同步 Node 共享工厂 (3250fa46 / 186fcade / 74f6dfa8), 插件把 Rhino 的同步成员写进 device-info.json (BunDeviceProfile), 宿主新增 3 个默认关闭的 Bun 授权 device.identifiers / media.control / media.library (Q152 (a) / Q153 (a)) 与 BunAutomationBridge 映射; runtime-policy.json 加 23 条 bun.memberCapabilities, 删 device.width / height / density 别名及随之无用的 3 条成员授权; check-bun-device-media.mjs 接入 CI. 设计 Q151 - Q155 全选推荐 (Q155 为保持现状).
+- 真机发现: device.info 授权的存储键是 device_info (早于点号命名), 真机脚本按此映射. P3.1c 在 74f6dfa8 把 register 改为先查 sensors 能力 (P4.1c 建议), Bun a0cec4c 随之同步并复测.
+
+| 项 | 改动前 (宿主 d4a7fdc2d, 基线 1bef4d983) | 改动后 (宿主 be312cd9d) |
+| --- | --- | --- |
+| 矩阵行 | 3410 | 3412 (+2 为 imgui ListClipper / listClipper, 宿主 772cff4c6, 不属本批) |
+| pending 基线 Bun | 909 | 819 (本族 90 -> 0: device 61, sensors 20, media 9) |
+| MATRIX pending Bun | 909 | 821 (含 imgui 新增 2, 不在基线) |
+| Bun local-shim / capability-gated / not-portable | 313 / 1145 / 1043 | 313 / 1235 / 1043 |
+| 策略冲突 | 0 | 0 (中间 3 条: 删别名后 device.getDensity / getHeight / getWidth 的成员授权未使用, be312cd9d 删去) |
+| 文档运行时支持表 | 86 页 | 86 页, device / sensors / media 三页的 Bun 列随 P3.1c 9028c38 重生成 |
+| Ace 运行时查询 | 4163 (Bun 1028) | 4253 (Bun 1118) |
+| Bun 授权 (全开) | 59 + execution.control | 62 + execution.control = 63, 插件上限 64 |
+
+- 本族 Bun 列 116 行: device.control 48, device.info 27, device.audio 9, device.identifiers 2, sensors.control 21, media.control 8, media.library 1. 标识符路由与 keepAwake / 指针位置的第二授权 (device.identifiers / device.power) 不进矩阵, 写在 host-api.md, 由拒绝轮覆盖.
+- 验收: HEAD 导出副本 `E:/.cache/aj6-p4-1c-head4` (宿主 a2985a2b6 + be312cd9d 的 runtime-policy.json, KSP 取自 10:00 的构建 (其后 app/ 的 runtime 源码无改动), Node 4d3a18f6, Bun a0cec4c, 文档 567f906, TS 973963b, Ace dfa5e9e). `check.py --matrix --strict-arity --docs-support` (含 Ace): 本族无失败, 策略冲突 0, 缺能力名 0, `--write-matrix` 后 MATRIX.md 只有策略冲突一行变化 (随本节提交); 退出码 1 只因 imgui listClipper 的 6 格新 pending (Node main / Worker / Bun 各 2) 与 api/imgui.md 运行时表 (宿主 772cff4c6, 不属本批, 同 14.3). api-coverage 单测 103 通过 (跳过 3). 结构脚本 check-bun-device-media.mjs (`{"members":{"device":86,"sensors":21,"media":9},"routes":{"device.control":41,"media.control":6,"media.library":1},"declarations":"type-checked","hostApi":true}`), check-bun-sensors / check-runtime-device-dialogs / check-runtime-device-media / check-bun-automation / check-runtime-bridges / check-bun-system / check-bun-js-tools 通过. Ace `generate-runtime-api-queries.mjs --check` 与 `verify-runtime-api-coverage.mjs --fresh` 通过 (4253 条); TS `sync-runtime-declarations.mjs --check --ace` 与 `verify-runtime-declarations.mjs --ace` 通过. Bun host client 测试 124 / 124, sync-device-dialogs / sync-sensors `--check` 对 Node HEAD 通过, types.mts `tsc --strict` 通过; JVM 单测 BunDeviceProfileTest 4 与 BunHostClientModuleTest 7 (Bun e89ed66), 宿主 BunAutomationPolicyTest 13 与 RuntimeDeviceBridgeCapabilityTest 3 (c4208e76e).
+- 真机 Redmi 22120RN86C (Android 13 / API 33, 宿主 debug 5935, Bun 0.21.0 (296) debug of a0cec4c): Rhino 28 / 28, Bun main / Worker 各 28 / 28, 只开 device.control 的拒绝轮各 13 / 13 (d500a2d 首轮 28 / 28 与 12 / 12); 7 个授权恢复为 absent, 装回原包并核对 md5. 报告 [bun-device-media-2026-10-30](../dev/bun-device-media-2026-10-30.md).
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| Bun 插件 | 4c43eed | 17 个同步 Build 字段, device-media.test.mjs 进 CI, host-api.md 小节草稿 |
+| Bun 插件 | 975a1ed | deviceCall 与授权映射, device.control 41 个方法, media.control / media.library 路由 |
+| Bun 插件 | e89ed66 | BunDeviceProfile 写 device-info.json 的快照与传感器表, JVM 单测 |
+| Bun 插件 | d500a2d | 同步 Node 共享工厂, 客户端快照成员与 getter, host.media, d.mts, host-api.md, 测试 |
+| Bun 插件 | a0cec4c | 同步 Node 74f6dfa8 的 register 顺序 |
+| 宿主 | bad0bb8bf / c4208e76e | media.control / media.library / device.identifiers 授权与插件中心开关 11 语言, BunAutomationBridge 映射, 策略单测 |
+| 宿主 | e3689a136 / 8760e52ef | runtime-policy.json 23 条, check-bun-device-media.mjs 与 CI, check-bun-sensors.mjs 跟随 Rhino 层 |
+| 宿主 | 62e337a08 | check-runtime-device-dialogs.mjs 比对 Bun 的 device.control / media.control / media.library |
+| 宿主 | 5249ee3cc | pending-baseline.json (Bun 909 -> 819) |
+| 宿主 | a2985a2b6 | 真机脚本 device_bun_device_media.py |
+| 宿主 | be312cd9d | 删 3 条未使用的 bun.memberCapabilities |
+| 文档 | 12c10d1 / 567f906 | changelog 的 Bun 一句; 生成物 |
+| Offline Docs | befdf5e | 同步生成页, 版本不变 |
+| TS | 973963b | 同步 Bun host client 声明, bun-runtime-smoke.ts |
+| Ace | dfa5e9e / b463a2a | 内置 Bun 声明; 运行时查询表 4163 -> 4253 |
+| 宿主 | (本节所在提交) | 本节, 报告, MATRIX.md 策略冲突行, ROADMAP P4.1c 落点 / 附录 C Q151 - Q155, REVIEW 7.1 P4.1c 落点 |

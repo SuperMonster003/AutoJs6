@@ -339,6 +339,16 @@ P3.1c 落点 (2026-10-30, api-cov-p3-1c; 矩阵与基线宿主 c20e7a36f): 本�
 
 另: 授权按 Q146 (a) 新增 device.identifiers (7 个硬件标识符成员, 不被 device 隐含), keepAwake / keepScreenDim / 指针位置用 device + device.power, 播放用 media.playback, scanFile 用 media.library; device 的 Build 字段, pageSize, 判断与传感器表来自插件进程启动快照 (Q148 (a)), 其余查询经宿主 RuntimeDeviceBridge 返回 Promise; sensors 为 Rhino 事件发射器, register 同步, fastest 夹到 20 ms, 宿主同时订阅上限 4 不变 (Q147 (a)); media 的 9 个 Rhino 名称进 autojs6:media, Worker 经主线程转发 (Q149 (a)). 与 Rhino 的其余差异 (查询返回 Promise, imei / serial 每次读取都问宿主, playMusic / scanFile 有返回值, getSensor 为属性快照) 写进 HOST-API 与 d.ts. 真机 (Sony G8441, API 28) 28 例 Rhino 与 Node main / ESM / 嵌套 Worker 全部一致.
 
+P4.1c 落点 (2026-10-30, api-cov-p4-1c; 基线宿主 5249ee3cc, MATRIX 的 Bun 列随 P3.1c 的 c20e7a36f 写入): 本族 Bun 90 -> 0 (全列 909 -> 819, 差额全部来自本族; Node 754 / 807 不变). 本族 116 行 (device 86, sensors 21, media 9) 的 Bun 列全部 capability-gated: device.control 48 (查询, getter, Rhino 控制类; 标识符与指针 / 常亮另需 device.identifiers / device.power, 每次调用检查), device.info 27 (同步快照成员, Q151 (a) / Q154 (a)), device.audio 9, device.identifiers 2 (imei / serial getter, Q153 (a)), sensors.control 21, media.control 8 / media.library 1 (Q152 (a)). 遗留:
+
+| 项 | Bun | 待决 |
+|---|---|---|
+| Bun 授权总数 | 全开时 62 个授权 + execution.control = 63, 插件上限 64 | 无; 现余 1 个位置, 下一个新授权用满 64, 再加 1 个 (第 64 个授权) 时宿主会去掉 execution.control (P4.1b), 之后的批次新增授权前需评估合并或提高上限 |
+| 矩阵中的第二授权 | getIMEI 等标识符路由, keepAwake / 指针位置显示 device.control | 无; 矩阵按方法表归属记一个授权, 第二授权 (device.identifiers / device.power) 写在 host-api.md, 拒绝轮真机覆盖 |
+| sensors.getTimer | capability-gated (本线程的 Timer, 共享工厂) | Q150 (随 Node, 已按推荐先行待确认) |
+
+另: Bun 经 sync-device-dialogs.mjs / sync-sensors.mjs 同步 Node 共享工厂 (3250fa46 / 186fcade / 74f6dfa8), Node 能力名映射为 Bun 授权, 授权关闭时访问宿主前 reject NOT_GRANTED 并带 missingCapabilities. 同步快照由插件每次执行写进 device-info.json (BunDeviceProfile, 与 Node 的 NodeDeviceProfile 同值), device.info 关闭时快照成员不存在, roms 只剩宿主路由 isBackgroundStartGranted, getSensor 返回 null; register 在 sensors.control 关闭时先于传感器列表抛 NOT_GRANTED (随 Node 74f6dfa8, P4.1c 建议). device.info 授权的存储键是 device_info (早于点号命名), 真机脚本按此映射. device.width / height / density 由 getWidth 等的 Promise 别名改为同步快照值, 3 条别名与随之无用的 bun.memberCapabilities 已删 (宿主 8760e52ef / be312cd9d). 真机 (Redmi 22120RN86C, API 33) 28 例 Rhino 与 Bun main / Worker 全部一致, 只开 device.control 的拒绝轮 13 / 13, 报告 [bun-device-media-2026-10-30](../dev/bun-device-media-2026-10-30.md).
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).

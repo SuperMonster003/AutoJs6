@@ -19,7 +19,7 @@
 | dts | none 475 / name 1774 / arity 1163 / typed 0 |
 | ace | none 880 / semantic 898 / static 1634 |
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: bun.memberCapabilities device.getDensity unused, bun.memberCapabilities device.getHeight unused, bun.memberCapabilities device.getWidth unused.
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 5 / Node Worker 5 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
