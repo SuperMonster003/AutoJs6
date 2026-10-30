@@ -1,0 +1,63 @@
+{
+  "description": "Kotlin type -> TypeScript type of the P2.4 type comparison (README \"Types\"). script-modules.json gives the Kotlin type of every parameter, return value and accessor of a @ScriptFunction / @ScriptGetter / @ScriptProperty (and of callable modules); kotlin_types.py maps each to a descriptor with this table, verify-surfaces.mjs (dts-types.mjs) compares it with the d.ts type. A nullable Kotlin type (`?`) adds null, and undefined for parameters (the OrNull converters take both). nominal is the type the d.ts is expected to say; accepted (parameters only, default nominal) is what the ScriptArgs converter takes; returns (default nominal) is the type of a returned value after ScriptArgs.toJs; open marks a nominal type that carries no detail (a d.ts type inside it is a refinement, not a narrower type).",
+  "kotlin": {
+    "kotlin.String": {"nominal": "string", "accepted": "string | number | boolean | object", "note": "ScriptArgs.string converts numbers, booleans and script objects with toString; only null / undefined and symbols are rejected"},
+    "kotlin.CharSequence": {"nominal": "string", "accepted": "string | number | boolean | object", "note": "as kotlin.String"},
+    "kotlin.Boolean": {"nominal": "boolean"},
+    "kotlin.Double": {"nominal": "number", "accepted": "number | `${number}`", "note": "ScriptArgs.double also takes numeric strings (roadmap appendix E of augment)"},
+    "kotlin.Float": {"nominal": "number", "accepted": "number | `${number}`"},
+    "kotlin.Int": {"nominal": "number", "accepted": "number | `${number}`", "note": "an integral value; the range is checked at run time, not by the type"},
+    "kotlin.Long": {"nominal": "number", "accepted": "number | `${number}`"},
+    "kotlin.Number": {"nominal": "number", "accepted": "number | `${number}`"},
+    "kotlin.Any": {"nominal": "{}", "returns": "{} | undefined", "open": true, "note": "a parameter takes any value but null and undefined (ScriptArgs.nonNullish); a return value is any value but null (Undefined.instance is a non-null Kotlin value); only the nullability is compared"},
+    "kotlin.Unit": {"nominal": "undefined", "note": "the generated binding returns undefined (ScriptArgs.undefined); d.ts void counts as undefined"},
+    "kotlin.Nothing": {"nominal": "never"},
+    "kotlin.ByteArray": {"nominal": "readonly number[]", "returns": "number[]", "note": "parameters take a Java byte[] or an array of numbers (ScriptArgs.bytes); a returned byte[] stays a Java array, which the d.ts writes number[] by convention (Q188 (a))"},
+    "org.mozilla.javascript.NativeArray": {"nominal": "readonly unknown[]", "open": true, "note": "arrays are compared regardless of readonly (a d.ts T[] or readonly T[] is a refinement)"},
+    "org.mozilla.javascript.NativeObject": {"nominal": "object", "open": true, "note": "a plain script object; d.ts option and result interfaces are refinements"},
+    "org.mozilla.javascript.Scriptable": {"nominal": "object", "open": true},
+    "org.mozilla.javascript.ScriptableObject": {"nominal": "object", "open": true},
+    "org.mozilla.javascript.Callable": {"nominal": "Function", "open": true, "note": "d.ts callback signatures are refinements"},
+    "org.mozilla.javascript.Function": {"nominal": "Function", "open": true},
+    "org.mozilla.javascript.BaseFunction": {"nominal": "Function", "open": true},
+    "org.mozilla.javascript.Undefined": {"nominal": "undefined"}
+  },
+  "collections": {
+    "list": ["kotlin.collections.List", "kotlin.collections.MutableList", "kotlin.collections.Collection", "kotlin.collections.Iterable"],
+    "map": ["kotlin.collections.Map", "kotlin.collections.MutableMap"],
+    "note": "Parameters (ScriptArgs.list / map) take a script array or Java list, a plain object or Java map: readonly unknown[] / object. Returned lists become script arrays of the mapped element type (RhinoUtils.toJsValue; unknown when the element is not mapped), compared as readonly arrays, returned maps with string keys plain objects (object)."
+  },
+  "unmapped": {
+    "kotlin.Any?": "no type: the parameter takes any script value, the function checks it itself (raw parameter) or returns any value",
+    "org.autojs.autojs.rhino.ProxyObject": "a dynamic script object whose members the implementation defines at run time",
+    "org.autojs.autojs.rhino.ProxyJavaObject": "a dynamic script object whose members the implementation defines at run time",
+    "kotlin.collections.Set": "returned as a Java Set: RhinoUtils.toJsValue converts only arrays, lists and string-keyed maps",
+    "kotlin.collections.MutableSet": "returned as a Java Set (see kotlin.collections.Set)"
+  },
+  "javaClasses": "A Java or Kotlin class in returned-objects.json is compared with the d.ts type of the object's probe; any other class with the d.ts type of its qualified name (`org.opencv.core.Point`); a class the d.ts does not declare is unmapped (java-undeclared). Generic arguments of a class are dropped. Classes are open: a d.ts subtype (PReadableTextFile for PFileInterface) is a refinement.",
+  "levels": {
+    "match": "the d.ts type equals the implementation type (assignable both ways)",
+    "refined": "the d.ts type is a refinement inside the implementation type: literal types of a primitive, an interface for object / Function / {}, an array of a known element for an array, a tuple for an array, with the same nullability",
+    "coerced": "parameters only: the d.ts type is outside the nominal type but inside what the converter accepts (number for a String parameter)",
+    "narrow": "the d.ts type is a proper part of the implementation type: for a parameter it rejects values the implementation takes (often null for a nullable parameter; harmless), for a return value it omits values the implementation returns (null; unsafe)",
+    "wide": "the d.ts type reaches outside the implementation type: for a parameter it allows values the implementation rejects (null for a non-null parameter; unsafe), for a return value it declares values the implementation never returns (harmless)",
+    "error": "the d.ts type and the implementation type are disjoint",
+    "unmapped": "not compared: no Kotlin type (kotlin.Any?, @ScriptInstall names), a dynamic or undeclared class, or a d.ts any / unknown / unconstrained type parameter (reason dts-any)"
+  },
+  "reviewed": {
+    "note": "Known differences with a decision or an owner. Keys are fnmatch patterns of `<api> parameter <n>`, `<api> return` or `<api> value`, each for one level. check.py --strict-types does not fail on a strict-level position an entry covers (Q187 (a)); an entry no differing position matches is stale and fails. Entries on other levels only document the difference (types.json reviewed).",
+    "entries": {
+      "auto.explain parameter 1": {"level": "wide", "reason": "d.ts Automator.Target takes null through Pickup.SingleSelector, the implementation (kotlin.Any) rejects null and undefined; the auto / automator declarations belong to the automation cards of batch 10 (P3.4 / P4.4) or the closing batch (roadmap P2.4 leftovers)"},
+      "tasks.add*Task parameter 1": {"level": "narrow", "reason": "options: NativeObject? = null is replaced by an empty object, which then fails for the missing path / component: required in practice, as the documentation and d.ts write it (BASELINE section 7, Q190 (a))"},
+      "timers.add*Task parameter 1": {"level": "narrow", "reason": "as tasks.add*Task (Q190 (a))"},
+      "workManager.add*Task parameter 1": {"level": "narrow", "reason": "as tasks.add*Task (Q190 (a))"},
+      "timers.query*Tasks parameter 1": {"level": "narrow", "reason": "d.ts Internal.WorkManager (shared with workManager) omits null; timers belongs to the automation cards of batch 10, fixed by them or the closing batch (Q189 (b) leftover)"},
+      "workManager.query*Tasks parameter 1": {"level": "narrow", "reason": "the declaration is the one of timers.query*Tasks (Internal.WorkManager); same leftover"}
+    }
+  },
+  "strictLevels": {
+    "params": ["error", "wide"],
+    "returns": ["error", "narrow"],
+    "note": "check.py --strict-types fails on these (the unsafe directions); without it the comparison is reported only (roadmap P2.4, decision Q187)"
+  }
+}

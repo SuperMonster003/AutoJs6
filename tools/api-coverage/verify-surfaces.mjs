@@ -7,6 +7,7 @@ import {createRequire} from "node:module";
 import {spawnSync} from "node:child_process";
 import {performance} from "node:perf_hooks";
 import {signatureArities} from "./dts-signatures.mjs";
+import {compareTypes, declarationText, typeExpressions} from "./dts-types.mjs";
 
 const options = {};
 for (let i = 2; i < process.argv.length; i++) {
@@ -29,17 +30,22 @@ const assets = path.join(options.ace, lock.assetRoot, "autojs6");
 const require = createRequire(import.meta.url);
 const ts = require(options.typescript || path.join(assets, "typescript/typescript.js"));
 const queryFile = path.join(options.output, "__coverage_query__.ts");
+// The query file declares the TypeScript types of the Kotlin types to compare (P2.4, dts-types.mjs).
+const typeRows = baseline.typeRows || [];
+const typeTexts = typeExpressions(typeRows);
+const queryText = typeRows.length ? declarationText(typeTexts) : "";
 const compilerOptions = {noEmit: true, skipLibCheck: true, strict: true, target: ts.ScriptTarget.ES2020, lib: ["lib.es2020.d.ts"], types: []};
 const host = ts.createCompilerHost(compilerOptions);
 const readFile = host.readFile.bind(host), exists = host.fileExists.bind(host);
-host.readFile = file => path.resolve(file) === queryFile ? "" : readFile(file);
+host.readFile = file => path.resolve(file) === queryFile ? queryText : readFile(file);
 host.fileExists = file => path.resolve(file) === queryFile || exists(file);
 const program = ts.createProgram([path.join(options.declarations, "declarations/autojs6/index.d.ts"), queryFile], compilerOptions, host);
 const checker = program.getTypeChecker();
 const source = program.getSourceFile(queryFile);
 const globals = new Map(checker.getSymbolsInScope(source, ts.SymbolFlags.Value).map(symbol => [symbol.name, symbol]));
 
-function typeOf(api) {
+// {status} of an API path, with the d.ts type object (`type`) when it resolves.
+function resolve(api) {
     const parts = api.split(".");
     let symbol = globals.get(parts.shift());
     if (!symbol) return {status: "missing-global"};
@@ -63,8 +69,14 @@ function typeOf(api) {
             type = checker.getTypeOfSymbolAtLocation(symbol, source);
         }
     }
-    if (type.flags & ts.TypeFlags.Any) return {status: "any", type: checker.typeToString(type)};
-    return {status: "explicit", type: checker.typeToString(type), ...signatureArities(ts, checker, type)};
+    return {status: type.flags & ts.TypeFlags.Any ? "any" : "explicit", type};
+}
+
+function typeOf(api) {
+    const {status, type} = resolve(api);
+    if (status === "any") return {status, type: checker.typeToString(type)};
+    if (status !== "explicit") return {status};
+    return {status, type: checker.typeToString(type), ...signatureArities(ts, checker, type)};
 }
 
 function session(text) {
@@ -89,6 +101,10 @@ function completionNames(provider, text, prefix, staticProvider = false) {
 }
 
 const rows = queries.map(api => ({api, declaration: typeOf(api)}));
+const types = compareTypes({ts, checker, source, texts: typeTexts, typeOf: api => {
+    const found = resolve(api);
+    return found.status === "explicit" || found.status === "any" ? found.type : null;
+}}, typeRows);
 let temp;
 try {
     if (!options.skipAce) {
@@ -144,6 +160,8 @@ try {
     const report = {typescript: ts.version, count: rows.length, aceChecked: !options.skipAce, failures, deferred, rows};
     fs.mkdirSync(options.output, {recursive: true});
     fs.writeFileSync(path.join(options.output, "surfaces.json"), JSON.stringify(report, null, 2) + "\n");
+    // Reported only: check.py --strict-types fails on the unsafe levels (kotlin_types.py).
+    if (typeRows.length) fs.writeFileSync(path.join(options.output, "types.json"), JSON.stringify({typescript: ts.version, rows: types}, null, 2) + "\n");
     console.log(JSON.stringify({queriedPaths: rows.length, failingPaths: failures.length, deferredPaths: deferred.length, failures: failures.map(({api, declaration, aceDefault, aceAllGroups, aceStatic}) => ({api, declaration: declaration.status, aceDefault, aceAllGroups, aceStatic}))}, null, 2));
     if (failures.length) process.exitCode = 1;
 } finally {

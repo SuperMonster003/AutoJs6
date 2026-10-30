@@ -180,7 +180,8 @@ jobs:
         working-directory: AutoJs6
         run: |
           python -m unittest discover -s tools/api-coverage -p 'test_*.py'
-          python tools/api-coverage/check.py --source ksp --matrix --strict-arity --docs-support
+          node tools/api-coverage/test-dts-types.mjs
+          python tools/api-coverage/check.py --source ksp --matrix --strict-arity --strict-types --docs-support
           node tools/api-coverage/check-runtime-java-callbacks.mjs
           node tools/api-coverage/check-runtime-tts.mjs
           node tools/api-coverage/check-runtime-speech.mjs

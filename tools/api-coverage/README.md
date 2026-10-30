@@ -219,7 +219,7 @@ recorded in the JSON `sources`.
 ### In CI
 
 The `Script API coverage` workflow runs `check.py --source ksp --matrix
---strict-arity --docs-support` (roadmap Q14 / Q16 (a), P2.5) and uploads
+--strict-arity --strict-types --docs-support` (roadmap Q14 / Q16 (a), P2.5, Q187 (a)) and uploads
 `runtime-matrix.json` and `summary.json` as the `runtime-coverage-matrix` artifact
 (the whole report directory, `docs-support.json` included, stays in
 `script-api-coverage`). The documentation tables are checked against the
@@ -243,7 +243,9 @@ in the Ace plugin (it reads the host report by default) when a covered entry cha
 and `node generator/runtime-support.js` (then its usual generation) in the
 documentation repository when a page's table changed.
 `--strict-arity` fails only on d.ts overloads disjoint from the implementation
-arity; `wider` / `narrower` stay warnings in `arity.json`.
+arity; `wider` / `narrower` stay warnings in `arity.json`. `--strict-types` fails
+only on the unsafe type levels that `type-map.json` `reviewed` does not cover
+(see "Types"); the Node declarations comparison is reported only.
 
 Runtime entries are declared entries, not behavior proofs (Rhino-equivalent
 behavior is reviewed in P1). The sources, all at the paths the roadmap names:
@@ -526,6 +528,64 @@ current Kotlin registration (`differs`), and undeclared varargs whose Kotlin
 implementation has a guard (`vararg-undeclared`, possibly a missing annotation);
 the new module layer may narrow arities on purpose, so these are leads for the
 augment roadmap, not failures.
+
+## Types
+
+`kotlin_types.py` (roadmap P2.4, the second step of decision D9) reads the Kotlin
+type script-modules.json gives every parameter, return value and accessor of a
+`@ScriptFunction`, `@ScriptGetter` and `@ScriptProperty`, and the invoke /
+construct overloads of callable modules, and maps each with `type-map.json` to a
+descriptor: a TypeScript type (`kotlin`, `collections`), a class of
+`returned-objects.json` (compared with the d.ts type of its probe), another class
+(looked up by its qualified name in the d.ts, `org.opencv.core.Point`), or
+`unmapped` with a reason (`kotlin.Any?`, dynamic `ProxyObject`, a Java `Set`).
+`exports.json` carries them as `typeRows`; `@ScriptInstall` names have no types
+(`typeStats.notTyped`). For parameters the table separates the `nominal` type
+(what the d.ts is expected to say) from the `accepted` one (what the `ScriptArgs`
+converter takes: numbers for a String parameter, numeric strings for a Double);
+a nullable Kotlin type adds `null`, and `undefined` for parameters; `open` marks
+types without detail (`object`, `Function`, `{}`, arrays, classes), inside which a
+more specific d.ts type is a refinement.
+
+`verify-surfaces.mjs` declares those TypeScript types in its query file and
+`dts-types.mjs` compares them with the d.ts parameter types of each position (over
+all overloads; the `undefined` of an optional parameter is left to the arity
+comparison) and the d.ts return types (a `void` result is `undefined`). It writes
+`types.json`; `check.py` adds the summary, the per-module counts and the strict
+failures, and puts the counts into `summary.json` `types`:
+
+| level | parameter | return value / accessor |
+|---|---|---|
+| `match` | equal (assignable both ways) | equal |
+| `refined` | inside the nominal type, with its null | a refinement: literals of a primitive, an interface in `object`, a subclass, a tuple or array of a known element |
+| `coerced` | outside the nominal type but accepted by the converter | - |
+| `narrow` | rejects values the implementation takes (usually `null`; harmless) | omits values the implementation returns (usually `null`; unsafe) |
+| `wide` | takes values the implementation rejects (unsafe) | declares values never returned (harmless) |
+| `error` | disjoint | disjoint |
+| `unmapped` | not compared: no Kotlin type, an undeclared class, or a d.ts `any` / `unknown` / unresolved type parameter (`dts-any`) | same |
+
+A row is `typed` when at least one position was compared and none differs,
+`differs` when one is `narrow`, `wide` or `error`; `no-dts` rows have no d.ts
+signature. The matrix `dts` column is `typed` for a `typed` row whose arity is
+`match` / `wider` (accessors have no arity), and MATRIX.md gives the typed /
+compared counts per module (column "类型 (ksp)").
+
+`--strict-types` (in CI since Q187 (a)) fails on the unsafe directions,
+`type-map.json` `strictLevels`: parameters `error` / `wide`, return values `error` /
+`narrow`. `type-map.json` `reviewed` lists known differences with an owner or a
+decision (fnmatch patterns of `<api> parameter <n>`, `<api> return`,
+`<api> value`, each for one level): they do not fail, and an entry no position
+matches any more is stale and fails. Entries on non-strict levels only document
+the difference (`types.json` `reviewed`).
+
+With `--matrix` (or `--docs-support`) `check.py` also compares the Node runtime
+declarations (Q186 (a); `verify-runtime-types.mjs`): the rows the matrix covers in
+Node main (bridged / local-shim with a module and member) against the same Kotlin
+types in `docs/nodejs/types/autojs6-node`, return values and accessors awaited
+(the bridge returns promises). Classes have no Node declaration and stay unmapped;
+the counts go to `summary.json` `types.node` and `runtime-types.json`, reported
+only. `node tools/api-coverage/test-dts-types.mjs` checks the levels on a small
+declaration file, `test_kotlin_types.py` the mapping, rows and strict failures.
 
 ## Returned objects
 

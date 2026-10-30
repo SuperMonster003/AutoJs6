@@ -419,6 +419,10 @@ def surface_states(row, documentation, surfaces, ace_checked=True):
         else:
             arity = surface.get('arity') if isinstance(surface.get('arity'), dict) else {}
             states['dts'] = 'arity' if arity.get('status') in ('match', 'wider') else 'name'
+            # P2.4: parameter / return types consistent with script-modules.json (check.py adds the types.json status);
+            # accessors have no arity row.
+            if surface.get('types') == 'typed' and (states['dts'] == 'arity' or not arity):
+                states['dts'] = 'typed'
         if ace_checked:
             completes = surface and surface.get('aceDefault') and surface.get('aceAllGroups')
             states['ace'] = ('static' if surface.get('aceStatic') else 'semantic') if completes else 'none'
@@ -487,6 +491,8 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
         row['rhino'] = 'native'
         row.update({column: None for column in ['doc', 'dts', 'ace']})
         row.update(surface_states(row, documentation, surfaces, ace_checked))
+        # The type comparison status (typed / differs / unmapped / no-dts) of rows with Kotlin types, else None.
+        row['types'] = (surfaces.get(row['id']) or {}).get('types') if surfaces is not None else None
         if row['kind'] in ('export', 'prototype-member'):
             group = [by_id[other] for other in row['aliases']]
             row['node_main'] = node.lookup(row, group) or {'status': 'pending'}
@@ -520,6 +526,8 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
                     'pending': {column: by_column[column]['pending'] for column in RUNTIME_COLUMNS},
                     'rejects': {column: sum(bool(row[column].get('rejects')) for row in rows) for column in RUNTIME_COLUMNS},
                     'missingReasons': missing_reasons(rows), 'missingCapabilities': missing_capabilities(rows), 'policyConflicts': conflicts,
+                    # P2.4 type comparison of the rows with Kotlin types (None without the check.py report).
+                    'types': dict(sorted(Counter(row['types'] for row in rows if row['types']).items())) if surfaces is not None else None,
                     # policy.json deferredNameGate (Q115 (a)): doc / dts / ace gaps of these module roots do not fail check.py yet.
                     'deferredNameGate': {root: {'rows': sum((row['module'] or row['ownerModule'] or 'global').split('.')[0] == root
                                                             for row in rows if row['kind'] != 'returned-member'), 'note': note}
@@ -568,6 +576,11 @@ def render_markdown(matrix):
     for column in ['doc', 'dts', 'ace']:
         counts = summary['byColumn'][column]
         lines.append(f'| {column} | ' + (' / '.join(f'{value} {count}' for value, count in counts.items()) if counts else '未运行 (缺 check.py 报告)') + ' |')
+    if summary.get('types') is not None:
+        types = summary['types']
+        lines += ['', '类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): '
+                  + ' / '.join(f'{status} {types.get(status, 0)}' for status in ('typed', 'differs', 'unmapped', 'no-dts'))
+                  + ' 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).']
     rules = defaultdict(lambda: Counter())
     for row in matrix['rows']:
         for column in RUNTIME_COLUMNS:
@@ -599,12 +612,15 @@ def render_markdown(matrix):
     for row in matrix['rows']:
         modules[row['object'] + '#' if row['kind'] == 'returned-member' else row['module'] or '(global)'].append(row)
     lines += ['', '## 按模块汇总', '', '运行时列为 覆盖 (bridged / local-shim / capability-gated) / 排除 (not-portable / denied) / pending; '
-              'doc 为有标题的行数, d.ts 为声明可解析的行数, Ace 为默认与全组补全都命中的行数.', '',
-              '| 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |', '|---|---:|---:|---:|---:|---|---|---|']
+              'doc 为有标题的行数, d.ts 为声明可解析的行数, 类型 (ksp) 为参数 / 返回类型与 script-modules.json 一致的行数 / 有可比类型的行数 (P2.4), '
+              'Ace 为默认与全组补全都命中的行数.', '',
+              '| 模块 | 行 | doc 标题 | d.ts | 类型 (ksp) | Ace | Node main | Node Worker | Bun |', '|---|---:|---:|---:|---:|---:|---|---|---|']
     for module in sorted(modules):
         items = modules[module]
         counts = [str(sum(row[column] in hits for row in items)) if items[0][column] is not None else '-'
                   for column, hits in [('doc', {'heading', 'signature', 'example'}), ('dts', {'name', 'arity', 'typed'}), ('ace', {'semantic', 'static'})]]
+        compared = sum(row.get('types') in ('typed', 'differs') for row in items)
+        counts.insert(2, f"{sum(row.get('types') == 'typed' for row in items)} / {compared}" if compared else '-')
         runtime = [' / '.join(str(sum(cell_code(row, column) == code for row in items)) for code in ('ok', 'excluded', 'pending')) for column in RUNTIME_COLUMNS]
         lines.append(f"| {module} | {len(items)} | " + ' | '.join(counts + runtime) + ' |')
     lines += ['', '## 差异行', '', '只列至少一个运行时列不是覆盖状态的行.']

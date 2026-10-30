@@ -17,6 +17,7 @@ import arity
 import docs_support
 from extract_exports import extract
 import returned_objects
+import kotlin_types
 
 HERE = Path(__file__).resolve().parent
 # Markdown backslash escapes, as the documentation generator drops them from headings (`\_\_name\_\_` is `__name__`).
@@ -100,6 +101,8 @@ def main():
     parser.add_argument("--skip-ace", action="store_true", help="Explicitly check only source docs and canonical types")
     parser.add_argument("--metadata", type=Path, help="script-modules.json (default: the KSP output of :app:kspAppDebugKotlin)")
     parser.add_argument("--strict-arity", action="store_true", help="Fail on d.ts overloads disjoint from the implementation arity (default: report only)")
+    parser.add_argument("--strict-types", action="store_true",
+                        help="Fail on d.ts parameter / return types on the unsafe levels of type-map.json strictLevels (default: report only; P2.4)")
     parser.add_argument("--source", choices=["auto", "ksp", "kotlin"], default="auto",
                         help="Exports from script-modules.json (ksp, required in CI), the Kotlin registrations (kotlin), or ksp when the file exists (auto)")
     parser.add_argument("--matrix", action="store_true",
@@ -128,7 +131,7 @@ def main():
     output = (args.output or host / "build/reports/api-coverage").resolve()
     output.mkdir(parents=True, exist_ok=True)
     policy = json.loads((HERE / "policy.json").read_text(encoding="utf-8"))
-    baseline = extract(host, args.metadata, args.source, policy)
+    baseline = kotlin_types.attach(host, extract(host, args.metadata, args.source, policy), args.metadata)
     failures = []
     if not baseline["modules"] or not baseline["records"]:
         failures.append("No runtime exports extracted")
@@ -164,6 +167,7 @@ def main():
     contract = subprocess.run(contract_command, check=False)
     if contract.returncode:
         failures.append("Shell process/options/event contract differs from native source or Ace copies")
+    (output / "types.json").unlink(missing_ok=True)  # written again only when there are type rows (P2.4)
     result = subprocess.run(command, check=False)
     if result.returncode:
         failures.append("TypeScript/Ace surface checks failed; see surfaces.json")
@@ -171,6 +175,10 @@ def main():
     deferred_summary, deferred_failures = deferred_names(baseline, documented, json.loads(surfaces_path.read_text(encoding="utf-8")) if surfaces_path.is_file() else {}, policy)
     failures.extend(deferred_failures)
     arity_summary = arity.report(host, baseline, output)
+    # Parameter / return types against script-modules.json (P2.4): types.json, reported only unless --strict-types.
+    types_summary = kotlin_types.report(baseline, output)
+    if args.strict_types:
+        failures.extend("d.ts type differs from the implementation: " + item for item in json.loads((output / "types.json").read_text(encoding="utf-8"))["strict"])
     if args.strict_arity:
         failures.extend("d.ts overloads disjoint from the implementation arity: " + row["api"] for row in json.loads((output / "arity.json").read_text(encoding="utf-8"))["rows"] if row["status"] == "fail")
     # Members of returned objects (P0.4) and of module prototypes (Q18): name-level failures since P2.3, like the exports.
@@ -194,8 +202,14 @@ def main():
         typescript = args.typescript.resolve() if args.typescript else runtime_matrix.default_typescript(ace)
         surfaces = json.loads((output / "surfaces.json").read_text(encoding="utf-8"))
         surfaces["rows"] += returned_surfaces
+        # The d.ts column is "typed" where the type comparison found the row consistent (P2.4).
+        type_status = {row["api"]: row["status"] for row in json.loads((output / "types.json").read_text(encoding="utf-8"))["rows"]} if (output / "types.json").is_file() else {}
+        for row in surfaces["rows"]:
+            row["types"] = type_status.get(row["api"])
         matrix = runtime_matrix.generate(host, node, bun, typescript, output, exports=baseline, documentation=documented + returned_docs, surfaces=surfaces)
         runtime_matrix.write(matrix, output, host / runtime_matrix.MARKDOWN if args.write_matrix else None)
+        # The Node runtime declarations of the covered rows against the same Kotlin types (Q186 (a)): reported only.
+        types_summary["node"] = kotlin_types.runtime_report(baseline, matrix, node, typescript, output)
         if args.write_pending_baseline:
             refused = runtime_matrix.write_pending_baseline(matrix, host / runtime_matrix.PENDING_BASELINE, args.allow_new_pending,
                                                              args.pending_decision)
@@ -214,7 +228,7 @@ def main():
         "deferredNameGate": deferred_summary,
         "queriedPaths": len(baseline["queries"]), "aceChecked": not args.skip_ace,
         "dataSource": baseline["dataSource"]["kind"], "unresolved": len(baseline["unresolved"]),
-        "arity": arity_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"]),
+        "arity": arity_summary, "types": types_summary, "returnedObjects": dict(returned_summary, problems=baseline["returnedObjectsStats"]["problems"] + baseline["prototypesStats"]["problems"]),
         "pluginExports": {name: {key: item[key] for key in ("status", "root", "reason", "counts") if key in item} for name, item in baseline["pluginExports"].items()},
         "matrix": matrix_summary,
         "docsSupport": docs_summary,
