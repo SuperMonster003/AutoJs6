@@ -70,6 +70,7 @@
       "automator": ["accessibility"],
       "notice": ["notifications"],
       "timers": ["tasks"],
+      "workManager": ["tasks"],
       "_note": "P4.2a: Mathx / Arrayx / Numberx are the mathx / arrayx / numberx objects of host.jsox (dotted alias: namespace.member prefix)",
       "Mathx": ["jsox.mathx"],
       "Arrayx": ["jsox.arrayx"],
@@ -80,7 +81,10 @@
       "compose": ["ui.compose"], "coordinates": ["screen.metrics"], "images": ["image.process", "image.files", "screen.capture"],
       "opencc": ["text.opencc"], "pinyin": ["text.pinyin"], "pinyin4j": ["text.pinyin4j"], "screenRecorder": ["screen.record"],
       "shizuku": ["shell.shizuku"], "sqlite": ["database.control"], "storages": ["storage.control"], "ui": ["ui.layout"],
-      "zip": ["java.interop"]
+      "zip": ["java.interop"],
+      "_noteP41b": "P4.1b (Q136 (a)): the query grant of each system family namespace; the write grants (autojs.manage, settings.write, memory.dump, installer.mutate, engines.exec) admit more of its routes",
+      "autojs": ["autojs.control"], "engines": ["engines.control"], "installer": ["installer.control"], "memory": ["memory.control"],
+      "powerManager": ["device.control"], "settings": ["settings.control"], "sysprops": ["sysprops.control"]
     },
     "memberCapabilities": {
       "_note": "Q12 (a): namespace members missing from HOST_API_METHODS whose namespace has several related grants; the grant of the host-client.mjs call they wrap (2026-10-25, api-coverage P1.1). P4.2a: members of a local namespace (no related grant) that call the host through another grant, capability-gated by it",
@@ -166,7 +170,28 @@
       "util.morseCode.vibrate": {"capability": "java.interop", "basis": "client-side argument checks, then the Java facade (host.java), returns a Promise: vibrates through the facade (Device / Vibrator of the host)"},
       "colors.toColorStateList": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: creates an android.content.res.ColorStateList through the Java facade"},
       "colors.setPaintColor": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: sets the ARGB of an android.graphics.Paint through the Java facade"},
-      "colors.extract": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: reads the pixels of an image or Bitmap and quantizes them through the Java facade"}
+      "colors.extract": {"capability": "java.interop", "basis": "P4.2b: shared JS tools core, returns a Promise: reads the pixels of an image or Bitmap and quantizes them through the Java facade"},
+      "notifications.config": {"capability": "notifications.post", "basis": "P4.1b: notice.config, the local presets of notify in this thread"},
+      "notifications.isEnabled": {"capability": "notifications.post", "basis": "P4.1b: notice route isEnabled under notifications.post"},
+      "notifications.ensureEnabled": {"capability": "notifications.settings", "basis": "P4.1b: notice route ensureEnabled, which opens the settings page"},
+      "notifications.launchSettings": {"capability": "notifications.settings", "basis": "P4.1b: notice route launchSettings"},
+      "notifications.getBuilder": {"capability": "java.interop", "basis": "P4.1b: NotificationUtils.getSimpleBuilder through the Java facade"},
+      "notifications.builder": {"capability": "java.interop", "basis": "P4.1b: getter of getBuilder (the Java facade)"},
+      "notifications.channel.create": {"capability": "notifications.post", "basis": "P4.1b: notice route channelCreate"},
+      "notifications.channel.createIfNeeded": {"capability": "notifications.post", "basis": "P4.1b: notice routes channelContains and channelCreate"},
+      "notifications.channel.contains": {"capability": "notifications.post", "basis": "P4.1b: notice route channelContains"},
+      "notifications.channel.get": {"capability": "notifications.post", "basis": "P4.1b: notice route channelGet"},
+      "notifications.channel.getAll": {"capability": "notifications.post", "basis": "P4.1b: notice route channelGetAll"},
+      "notifications.channel.remove": {"capability": "notifications.post", "basis": "P4.1b: notice route channelRemove"},
+      "plugins.tools.list": {"capability": "plugin_tools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route list; USER_GRANTED providers also need plugin_tools.user_granted"},
+      "plugins.tools.providers": {"capability": "plugin_tools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route list"},
+      "plugins.tools.call": {"capability": "plugin_tools.control", "basis": "P4.1b (Q137 (a)): plugin_tools route invoke"},
+      "plugins.tools.callAsync": {"capability": "plugin_tools.control", "basis": "P4.1b (Q137 (a)): alias of call"},
+      "global.currentPackage": {"capability": "accessibility.control", "basis": "P4.1b: the auto mode tries shell.shizuku, shell.root, then the accessibility flowForeground route"},
+      "global.currentActivity": {"capability": "accessibility.control", "basis": "P4.1b: as currentPackage"},
+      "global.currentComponent": {"capability": "accessibility.control", "basis": "P4.1b: as currentPackage"},
+      "global.waitForActivity": {"capability": "accessibility.control", "basis": "P4.1b: polls currentActivity"},
+      "global.waitForPackage": {"capability": "accessibility.control", "basis": "P4.1b: polls currentPackage"}
     },
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",
@@ -311,11 +336,11 @@
     {
       "id": "native-memory-watch",
       "match": ["memory.watch"],
-      "columns": ["node_main", "node_worker"],
+      "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "runtime-native",
-      "equivalent": "FinalizationRegistry (a callback once the object is collected), node:v8 writeHeapSnapshot / getHeapStatistics",
-      "note": "memory.watch hands a Rhino object to the host leak watcher; objects of the plugin's V8 heap are not host objects (memory.snapshot / collect / retained / dumpHeap are bridged)",
-      "source": "appendix D D-22, maintainer 2026-10-29 (Q134 (a))"
+      "equivalent": "FinalizationRegistry (a callback once the object is collected), node:v8 writeHeapSnapshot / getHeapStatistics; in Bun bun:jsc heapStats / generateHeapSnapshot",
+      "note": "memory.watch hands a Rhino object to the host leak watcher; objects of the plugin's V8 / JavaScriptCore heap are not host objects (memory.snapshot / collect / retained / dumpHeap are bridged)",
+      "source": "appendix D D-22, maintainer 2026-10-29 (Q134 (a)); the Bun column since P4.1b (Q140 (a))"
     },
     {
       "id": "native-crypto",
