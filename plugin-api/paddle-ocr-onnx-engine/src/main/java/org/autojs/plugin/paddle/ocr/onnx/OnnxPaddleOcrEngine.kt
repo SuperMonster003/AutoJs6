@@ -111,11 +111,9 @@ class OnnxPaddleOcrEngine(
             // zh-CN: slim 模型未打包时 useSlim 回退到 fp32.
             slim = options.useSlim && slimAvailable,
             threads = options.cpuThreadNum.coerceAtLeast(0),
-            useCls = options.extras?.let { extras ->
-                if (extras.containsKey(PaddleOcrOptionExtraKeys.USE_CLS)) {
-                    extras.getBoolean(PaddleOcrOptionExtraKeys.USE_CLS, true)
-                } else null
-            } ?: true,
+            // The classifier only runs when the script asks for it.
+            // zh-CN: 仅在脚本要求时运行方向分类.
+            useCls = options.extras?.getBoolean(PaddleOcrOptionExtraKeys.USE_CLS, false) == true,
         )
 
         /**

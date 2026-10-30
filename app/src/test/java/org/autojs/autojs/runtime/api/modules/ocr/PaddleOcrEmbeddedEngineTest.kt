@@ -112,7 +112,7 @@ class PaddleOcrEmbeddedEngineTest {
             scoreThreshold = -1f
         }
         assertEquals(
-            OnnxPaddleOcrEngine.SessionKey(slim = false, threads = 4, useCls = true),
+            OnnxPaddleOcrEngine.SessionKey(slim = false, threads = 4, useCls = false),
             OnnxPaddleOcrEngine.sessionKeyOf(defaults, slimAvailable = false),
         )
         assertTrue(OnnxPaddleOcrEngine.sessionKeyOf(defaults, slimAvailable = true).slim)
