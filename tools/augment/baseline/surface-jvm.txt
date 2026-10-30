@@ -5583,6 +5583,10 @@ imgui.ListBox	EW-	function name='ListBox' length=0
 imgui.ListBox.arity	--C	number '0'
 imgui.ListBox.length	--C	number '0'
 imgui.ListBox.name	--C	string 'ListBox'
+imgui.ListClipper	EW-	function name='ListClipper' length=0
+imgui.ListClipper.arity	--C	number '0'
+imgui.ListClipper.length	--C	number '0'
+imgui.ListClipper.name	--C	string 'ListClipper'
 imgui.ListExamples	EW-	function name='ListExamples' length=0
 imgui.ListExamples.arity	--C	number '0'
 imgui.ListExamples.length	--C	number '0'
@@ -6424,6 +6428,10 @@ imgui.listBox	EW-	function name='listBox' length=0
 imgui.listBox.arity	--C	number '0'
 imgui.listBox.length	--C	number '0'
 imgui.listBox.name	--C	string 'listBox'
+imgui.listClipper	EW-	function name='listClipper' length=0
+imgui.listClipper.arity	--C	number '0'
+imgui.listClipper.length	--C	number '0'
+imgui.listClipper.name	--C	string 'listClipper'
 imgui.listExamples	EW-	function name='listExamples' length=0
 imgui.listExamples.arity	--C	number '0'
 imgui.listExamples.length	--C	number '0'

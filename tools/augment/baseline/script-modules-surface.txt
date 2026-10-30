@@ -1320,6 +1320,7 @@ install imgui:LaunchFloaty	kind="function" attributes=4 global="NONE" target=nul
 install imgui:LaunchPrivileged	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:Limits	kind="getter" attributes=4 global="NONE" target=null arity=null
 install imgui:ListBox	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:ListClipper	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:ListExamples	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:LogLevel	kind="getter" attributes=4 global="NONE" target=null arity=null
 install imgui:LogWindow	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1546,6 +1547,7 @@ install imgui:launch	kind="function" attributes=4 global="NONE" target=null arit
 install imgui:launchFloaty	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:launchPrivileged	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:listBox	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:listClipper	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:listExamples	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:logWindow	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:menuItem	kind="function" attributes=4 global="NONE" target=null arity=null
