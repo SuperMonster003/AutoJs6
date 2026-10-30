@@ -1128,6 +1128,50 @@ d.ts (TS fa26b8b / 8f8ec07):
 | Offline Docs | a0f2265 | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P3.3 勾选与落点 / 附录 C Q104 / Q106 / Q164 - Q169, REVIEW 7.1 P3.3 落点 |
 
+### 16.5 P4.3 Bun 列 (2026-10-30, 子会话 api-cov-p4-3)
+
+- 本族 384 行 (口径同 16.1) 在 Bun 列除 7 行 not-portable 外全部 capability-gated 或 local-shim, pending 清零. Bun 客户端经 sync-ui-compose.js / sync-ui-family.mjs 同步 Node 8fc9c801 的共享 UI 工厂, uiCall 把 Node 能力名映射为 Bun 授权, 授权关闭时访问宿主前 reject NOT_GRANTED 并带 missingCapabilities. 宿主新增 4 个默认关闭的 Bun 授权 terminal.control / floaty.control / floaty.raw / floaty.touch (Q3 (a) / Q173 (a)) 与 BunAutomationBridge / broker 映射, Bun 授权上限 64 -> 128 (Q170 (a)); runtime-policy.json (bun) 加 namespaceCapabilities terminal / floaty, memberCapabilities 10 (floaty 8, web.newInjectableWebView / newInjectableWebClient), returnedObjects 10 个句柄的 Bun 映射; check-bun-ui-family.mjs 接入 CI. 设计 Q170 - Q174 维护者全选 (a).
+- 分三步落矩阵: console 输出 (D-10, 401a16e9c), toast 族 (Q172 (a), 63b4c3c71), 其余 (cc3a55f97); console 窗口控制 13 格由 P4.4 的 7bb11982c 以 Bun b01dbe5 重生成时计入.
+- 真机发现: ui.toast 授权的存储键是 ui_toast, 真机脚本按此映射 (首轮拒绝轮 toast.dismissAll 因此误放行, 修正后通过); 首轮合并运行时 Worker 全部缺失, 原因是共享 facade 的 WebSocket cancel 在失败的连接上递归, Bun 进程退出 (Node 4ed3a670 修复, Bun 22a2035 同步后复测通过).
+
+| 项 | 改动前 (宿主 4427aad06, P3.3 第 0 步) | 改动后 (宿主 cc3a55f97, HEAD 7e559a409 不变) |
+| --- | --- | --- |
+| 矩阵行 | 3470 | 3517 (+47 为 P3.3 的 Q106 compose 返回对象) |
+| pending 基线 Bun | 879 | 577 (本族 156 -> 0; 其余为 P4.4 自动化族, P3.3 净增 32) |
+| Bun local-shim / capability-gated / not-portable | 313 / 1235 / 1043 | 376 / 1617 / 947 (not-portable -103 为句柄类型, +1 为 ui.layoutInflater, +6 为 P4.4 的 timers) |
+| 策略冲突 | 无 | java-prototype-objects shadowed (bun, 103), Node 两列同 (16.2) |
+| 文档运行时支持表 | - | 89 页 current; console / keys / toast / global 与 UI 族 13 页的 Bun 列重生成 |
+| Ace 运行时查询 | 4253 (本批前两步) / 5079 (P3.3 后) | 4293 / 5289 |
+| Bun 授权 (全开) | 62 + execution.control = 63, 上限 64 | 72 + execution.control = 73, 上限 128 (本批 4 个, 其余为 P4.4) |
+
+- 本族 Bun 列 384 行: ui.compose 127, console.control 117, ui.layout 42, terminal.control 20, floaty.control 18, floaty.raw 13, ui.toast 11, clipboard.control 1, local-shim 28, not-portable 7.
+- 验收: HEAD 导出副本 `E:/.cache/aj6-api-cov-p4-3-head` (宿主 7e559a409 的 docs / tools / app/src, KSP 取自 5bdb4d56a 的构建 (其后宿主 app/src 无改动), Node 4ed3a670, Bun 37a5f5c, 文档 ca10c2e, TS be281ba, Ace c5009db). `check.py --matrix --strict-arity --docs-support` (含 Ace): 退出码 0, failures 0, pending 577 / 577 / 577 = 基线; api-coverage 单测 119 通过 (跳过 3). CI 的 23 个结构脚本全部通过, 其中 check-bun-ui-family.mjs `{"members":{"ui":35,"floaty":8,"web":7,"terminal":20},"handles":{...11 个句柄...},"routes":{"terminal":15,"floaty":4},"declarations":"type-checked","hostApi":true}`; check-bun-app-shell / check-bun-js-tools / check-runtime-system 三个原先失败 (Bun 未同步 Node 0e1e6d14, 两个结构脚本期望过期), 由 Bun 37a5f5c 与宿主 7e559a409 修正. Bun host client 测试 146 / 146; TS `sync-runtime-declarations.mjs --check --ace` (94 份, changed 0) 与 `verify-runtime-declarations.mjs --ace` 通过; Ace `generate-runtime-api-queries.mjs --check` 与 `verify-runtime-api-coverage.mjs --fresh` 通过 (5289 条). 宿主单测在合并 HEAD 的副本通过: BunAutomationPolicyTest / BunConsoleInputTest / RuntimeTerminalBridgeTest / StaticReferenceGuardTest (5bdb4d56a), BunConsoleOutputTest / BunRuntimeContractTest (6c2b19446 / 2a948fa6a); Bun `:app:testDebugUnitTest` 与 verifyApiArtifacts 通过 (a33e26c).
+- 真机 968e9f18 (Xiaomi 23046RP50C, Android 15 / API 35; 宿主 debug 5935 (5bdb4d56a 的 HEAD 副本构建), Bun 0.21.0 (296) debug of 22a2035): Rhino 22 / 22, Bun main / Worker 同一次执行各 22 / 22, 只开 floaty.control / shell.control 的拒绝轮各 13 / 13 (首轮 Bun 802beee: main / Worker 分开运行各 22 / 22, 拒绝轮 13 / 13); 10 个授权恢复为 absent, 装回原包 (宿主 5935, Bun 0.2.5 (118)) 并核对 md5. 报告 [bun-ui-2026-10-30](../dev/bun-ui-2026-10-30.md).
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 0abd12f79 / 90f5bb5ca | 附录 C Q170 / Q171; Q172 - Q174 |
+| 宿主 | bcabd0452 | Q170: 契约上限 128, 旧插件 64, offeredCapabilities, 单测 |
+| 宿主 | 6c2b19446 | BunConsoleOutput (console.control 的输出不计调用上限, 单条 8 MiB), 单测 |
+| Bun 插件 | d632532 | host.console 输出 11 与全局 console 名 9, console-output.test.mjs 进 CI |
+| 宿主 | 401a16e9c | 基线与 MATRIX (Bun 879 -> 847) |
+| Bun 插件 | f96f2b8 | toast 族: host.toast 的 Rhino 参数与 dismissAll, host.global 的 toastXxx 10 与 isUiThread, toast-family.test.mjs 进 CI |
+| 宿主 | 2a948fa6a / 4b2e74244 / 63b4c3c71 | broker 的 toast (去上限, forcible, dismissAll); 开关文案 11 语言; runtime-policy 与基线 (Bun 847 -> 835) |
+| Bun 插件 | a33e26c | AAR 上限 128, PluginInfo 声明上限 |
+| Bun 插件 | b01dbe5 | console 窗口控制 12, configure, rawInput / input |
+| 宿主 | 5bdb4d56a | terminal.control / floaty.control / floaty.raw / floaty.touch 与 console.rawInput, 插件中心开关 11 语言, 策略单测 |
+| Bun 插件 | 802beee / fba1cb3 | 同步 Node 8fc9c801 的共享 UI 族, uiCall 授权映射, Bun 自带 WebSocket, ui-family.test.mjs 进 CI, d.mts 与 host-api.md; HostCapability 加 4 项 |
+| Node 插件 | 4895ff4d | sync-ui-compose.js 的 Bun 段落边界 |
+| 宿主 | cc3a55f97 | runtime-policy.json, check-bun-ui-family.mjs 与 CI, test_p4_3, MATRIX.md 与 pending-baseline.json (Bun 688 -> 577) |
+| 宿主 | 14943b3a6 | 真机脚本 device_bun_ui.py |
+| Bun 插件 | b01cc86 / 22a2035 / 37a5f5c | 同步 Node 079579ec (P3.4 请求), 4ed3a670 / 370f4088 / c54d4592, 0e1e6d14 |
+| 宿主 | 7e559a409 | check-bun-js-tools.mjs 与 check-runtime-system.mjs 的过期期望 |
+| 文档 | dfa8a0e / 4edcb9b, fbdb103 / 555777b, b5def97 / 9c4fb16 | console / keys, toast / global, UI 族 13 页的运行时表与 changelog / progress (zh-Hans); 生成物 |
+| Offline Docs | 9a9bb42 / 772cc3e / 7610517 | 同步生成页, 版本不变 |
+| TS | 836ae70 / be281ba | 同步 Bun host client 声明 |
+| Ace | 6700992 / cd85152, 8d0877c / c5009db | 内置 Bun 声明; 运行时查询表 4253 -> 4293, 5079 -> 5289 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP P4.3 落点, REVIEW 7.1 P4.3 落点 |
+
 ## 17. P3.4 Node 自动化族 (2026-10-30, 子会话 api-cov-p3-4)
 
 ### 17.1 做了什么

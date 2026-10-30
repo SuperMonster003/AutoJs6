@@ -360,6 +360,20 @@ P3.3 落点 (2026-10-30, api-cov-p3-3; 矩阵与基线宿主 398ab3930): 本族 
 
 另: ui 按 Q164 (a) 映射到每个执行一个内容视图 (showLayout Activity 的 contentView), layout / layoutFile / setContentView 返回 Promise, XML id 在 Promise 完成前解析为原生 View 句柄, 设置内容的线程的 emitter 收 Activity 生命周期与 back_pressed, registerWidget / Widget / bindingContext / R 本地处理, isUiThread 恒 false; 窗口成员 (R7) 记到内容窗口, 栏高每次读取都问宿主. console 按 Q165 (a) / Q166 (a): rawInput 返回 Promise (宿主 ConsoleImpl.requestInput, 随执行取消), input 在调用线程求值, build 返回本地 ConsoleConfigurator (52 成员), show 一次宿主调用 console.configure. floaty / web 的句柄照 Rhino 成员名实现 (Q168 (a)), rawWindow 另需 floaty.raw, setTouchable 需 floaty.touch. terminal 经宿主 TerminalService 与新能力 terminal (Q167 (a), 不被 shell / shell.root 隐含); waitFor 从调用时订阅 (同 Rhino), write 与 waitFor 是两次异步调用, 等输出的脚本先启动 waitFor 再 write (HOST-API 已注明). compose 的 ComposeError 与节点自有成员 / 快捷访问器 (Q104) 进共享工厂, 会话 / 悬浮窗 / state / ref 按句柄类型比对 (Q106 (a)). 与 Rhino 的其余差异 (宿主调用返回 Promise, Node 线程不是 Android UI 线程, R 返回引用串, 每个线程都有 emitter, Compose 悬浮窗同 Rhino 的 raw 窗口, toast 系列以 null 完成) 写进 HOST-API 与 d.ts. 真机 (Xiaomi 23046RP50C, API 35) 19 例 Rhino 与 Node main / ESM / 嵌套 Worker 一致, 另 3 例 Node 专有 (内容视图, R, emitter) 按固定值通过; 未声明能力轮 7 例.
 
+P4.3 落点 (2026-10-30, api-cov-p4-3; 矩阵与基线宿主 cc3a55f97): 本族 Bun 156 -> 0 (起始 124 + P3.3 交来的 Q106 新行 33 - Q169 1; 全列 879 -> 577, 其余差额为 P4.4 自动化族). 本族 384 行 (同 P3.3 的口径: ui 40, console 56, toast 1, floaty 8, web 4, terminal 20, compose 71, 族内全局 26; 返回对象成员 158) 的 Bun 列: capability-gated 349 (ui.compose 127, console.control 117, ui.layout 42, terminal.control 20, floaty.control 18, floaty.raw 13, ui.toast 11, clipboard.control 1), local-shim 28 (newWebSocket / web.newWebSocket / ByteString 与 WebSocket 24 个成员, isUiThread), not-portable 7 (同 Node). 遗留:
+
+| 行 | Bun | 待决 |
+|---|---|---|
+| ui.layoutInflater | not-portable (java-prototype) | Q169 (随 Node, 已按推荐先行待确认; 等价写法 ui.inflate / ui.createView) |
+| ui 内部名 4 与全局 __autojs6Tsx / __autojs6TsxFragment | not-portable (rhino-only) | 无 (既有规则) |
+| Canvas# 54 行 | not-portable (java-prototype) | 无 (D-11) |
+| 策略冲突 | java-prototype-objects shadowed 103 格 | 无; 同 P3.3, 句柄类型先覆盖这些行, 门禁不拦 |
+| Bun 授权总数 | 全开时 72 个授权 + execution.control = 73, 上限 128 (Q170 (a)); 本批新增 terminal.control / floaty.control / floaty.raw / floaty.touch | 无; 旧插件 (未声明上限) 仍按 64 截断, 先保留 execution.control |
+| toast 系列的完成值 | Bun 以 ui.toast 的结果 `{shown}` 完成, Node 以 null 完成 | 无 (Q172 (a) 的实现; 写在 host-api.md) |
+| floaty.control 的范围 | ui.layout 关闭时, 悬浮窗的视图路由 (findView, 视图属性) 也经 floaty.control | 无; 只开 floaty.control 的拒绝轮覆盖, 矩阵按方法表记 floaty.control |
+
+另: Bun 经 sync-ui-compose.js (Node 侧, 4895ff4d 修了 Bun 段落边界) 与 sync-ui-family.mjs 同步 Node 8fc9c801 的共享 UI 工厂, uiCall 把 Node 能力名映射为 Bun 授权, 授权关闭时访问宿主前 reject NOT_GRANTED 并带 missingCapabilities (terminal 的 TerminalError 不包装这类错误, 随 Node 370f4088). terminal.control 不被 shell.control 隐含 (Q3 (a)), 经 BunAutomationBridge 的长任务 (超时夹到 905 s). host.console 的输出函数在 console.control 关闭时写 Bun stdout / stderr (Q171 (a)), console.control 的输出调用不计每次执行的调用上限. ui.toast 授权的存储键是 ui_toast (早于点号命名), 真机脚本按此映射. 首轮真机合并运行时 Worker 全部缺失: 共享 facade 的 WebSocket cancel 在已失败的连接上递归 (1307 次监听调用后 RangeError 未捕获, Bun 进程退出), P3.3 在 Node 4ed3a670 修复, Bun 22a2035 同步后同一次执行 main / Worker 各 22 / 22. 顺带: Bun 37a5f5c 同步 Node 0e1e6d14 (node-26 M25.3) 的 shell closeInput, 宿主 7e559a409 修 check-bun-js-tools.mjs (本族与 P4.4 的全局) 与 check-runtime-system.mjs (P3.4 的 createAutomation 参数) 两个过期的结构脚本期望. 真机 (Xiaomi 23046RP50C, API 35) 22 例 Rhino 与 Bun main / Worker 全部一致, 拒绝轮 13 / 13, 报告 [bun-ui-2026-10-30](../dev/bun-ui-2026-10-30.md).
+
 P3.4 落点 (2026-10-30, api-cov-p3-4; 矩阵与基线宿主 307655f10): 本族 Node main 134 -> 0, Worker 186 -> 0 (全列 814 / 867 -> 680 / 681, 差额全部来自本族; Bun 列见 P4.4). 本族 automator / auto / keys / ocr / barcode / qrcode / yolo / YoloDetector#, threads / continuation / timers / VolatileDispose# / 全局 sleep / wait, selector 全局 / Flow#, events (Q18 原型行) 的 Node main 与 Worker 两列: 宿主路由为 bridged, 本地实现 (threads / continuation / timers 的 keepAlive / setIntervalExt, VolatileDispose#) 为 local-shim, wait.async 经 member-alias 对到 autojs6:system 的 wait. 遗留:
 
 | 行 | Node main | Node Worker | 待决 |
