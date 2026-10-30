@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1628 | 368 | 0 | 945 | 0 | 626 |
-| Node Worker | 1628 | 365 | 0 | 948 | 0 | 626 |
-| Bun | 0 | 376 | 1617 | 948 | 0 | 626 |
+| Node main | 1632 | 368 | 0 | 941 | 0 | 626 |
+| Node Worker | 1632 | 365 | 0 | 944 | 0 | 626 |
+| Bun | 0 | 376 | 1621 | 944 | 0 | 626 |
 
 | 列 | 取值 |
 |---|---|
@@ -21,7 +21,7 @@
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 993 / differs 23 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: java-prototype-objects shadowed (bun, 103), java-prototype-objects shadowed (node_main, 103), java-prototype-objects shadowed (node_worker, 103).
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: java-prototype-objects shadowed (bun, 107), java-prototype-objects shadowed (node_main, 107), java-prototype-objects shadowed (node_worker, 107).
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
@@ -36,7 +36,7 @@
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
 | java-prototype-layout-inflater | not-portable: java-prototype | 1 | 1 | 1 | ui.inflate / ui.createView |
-| java-prototype-objects | not-portable: java-prototype | 883 | 883 | 883 |  |
+| java-prototype-objects | not-portable: java-prototype | 879 | 879 | 879 |  |
 | native-base64 | not-portable: runtime-native | 0 | 2 | 2 | Buffer.from(text).toString("base64") / Buffer.from(data, "base64"), atob / btoa |
 | native-crypto | not-portable: runtime-native | 8 | 8 | 8 | node:crypto KeyObject / generateKeyPair, WebCrypto (globalThis.crypto.subtle) |
 | native-http | not-portable: runtime-native | 16 | 16 | 18 | global fetch (Node / Bun), node:http; autojs6:fetch for host proxy / certificate policy |
@@ -83,7 +83,7 @@
 | Mathx | 23 | 23 | 23 | 23 / 23 | 23 | 23 / 0 / 0 | 23 / 0 / 0 | 23 / 0 / 0 |
 | Numberx | 14 | 14 | 14 | 14 / 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | ObjectFrame# | 15 | 15 | 15 | - | 15 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
-| OcrResult# | 6 | 6 | 6 | - | 6 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
+| OcrResult# | 6 | 6 | 6 | - | 6 | 4 / 2 / 0 | 4 / 2 / 0 | 4 / 2 / 0 |
 | PReadableTextFile# | 5 | 5 | 5 | - | 0 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
 | PWritableTextFile# | 6 | 6 | 6 | - | 0 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
 | PngQuantizationFileResult# | 5 | 3 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
@@ -607,12 +607,8 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `OcrResult#bounds` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `OcrResult#compareTo` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `OcrResult#confidence` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `OcrResult#extras` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `OcrResult#label` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-| `OcrResult#text` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 
 ### PReadableTextFile#
 

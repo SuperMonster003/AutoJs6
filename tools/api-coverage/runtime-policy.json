@@ -379,7 +379,9 @@
     "RawWindow": {"node": {"module": "autojs6:floaty", "type": "RawWindow"}, "bun": {"namespace": "floaty", "type": "RuntimeFloaty.RawWindow", "capability": "floaty.raw"}},
     "WebSocket": {"node": {"module": "autojs6:web", "type": "WebSocket"}, "bun": {"namespace": "web", "type": "RuntimeWeb.WebSocket"}},
     "InjectableWebView": {"node": {"module": "autojs6:web", "type": "InjectableWebView"}, "bun": {"namespace": "ui", "type": "RuntimeWeb.InjectableWebView", "capability": "ui.layout"}},
-    "InjectableWebClient": {"node": {"module": "autojs6:web", "type": "InjectableWebClient"}, "bun": {"namespace": "ui", "type": "RuntimeWeb.InjectableWebClient", "capability": "ui.layout"}}
+    "InjectableWebClient": {"node": {"module": "autojs6:web", "type": "InjectableWebClient"}, "bun": {"namespace": "ui", "type": "RuntimeWeb.InjectableWebClient", "capability": "ui.layout"}},
+    "_ocrNote": "paddle-ocr-v3 Q26 (b): the ocr results of Node and Bun are plain frozen objects with text, confidence, bounds and extras (toOcrResultsJson); label and compareTo stay Rhino's",
+    "OcrResult": {"node": {"module": "ocr", "type": "OcrResult"}, "bun": {"namespace": "ocr", "type": "RuntimeOcr.OcrResult", "capability": "ocr.control"}}
   },
   "exclusions": [
     {
