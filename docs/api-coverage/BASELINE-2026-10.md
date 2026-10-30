@@ -1276,7 +1276,7 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 设备恢复 | 宿主 md5 742b4497, Bun 118 md5 555d45af, 与记录一致; 12 个授权 absent; 运行目录已删 |
 | HEAD 副本 `E:/.cache/aj6-p4-4-head7` (宿主 5102dbe42, KSP 同副本, Node d656265f, Bun 7f25ae7, 文档 894d87b, TS 45a9346, Ace e4d9b63) | `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) 的唯一失败是 api/imgui.md 的运行时块: 它来自另一会话的 imgui 提交 5102dbe42 新增的矩阵行 (pending 577 -> 626), 文档站尚未同步; 只在副本中重新生成运行时块 (仅该页变化) 后退出码 0. test_runtime_matrix 45 项, check-bun-automation-family, check-runtime-automation, Ace generate --check / verify --fresh, TS sync --check / verify 通过 |
 
-未重跑: 54 例全量对照 (需要维护者打开宿主无障碍服务); 上一次全量是 18.3 的 53 例. 本次改动只涉及上表的成员, auto.waitFor 服务已开时的路径没有改. Bun Worker 的超时结束与 Worker 的 exit() 相同, 未单独上真机.
+已由收口 B 重跑 (Q194 (a), 第 20 节): Redmi Rhino 54 / 54, Bun main / Worker 各 54 / 54, 拒绝轮 20 / 20; 超时轮含 Bun Worker, 在只读 AVD_API_33 上 6 / 6, 因为 Redmi 的宿主有 WRITE_SECURE_SETTINGS, 走不到超时.
 
 | 仓库 | 提交 | 内容 |
 |---|---|---|
@@ -1328,3 +1328,67 @@ d.ts (TS fa26b8b / 8f8ec07):
 | 文档 | 01c88de / 83aaaa4 | 运行时 API 新节, 5 页支持表, changelog / progress, 生成物 |
 | Offline Docs | 7e519e0 | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP 落点, 附录 C Q195 - Q197, REVIEW 7.1 |
+
+## 20. P3.5 / P4.5 收口 B 与矩阵清零结论 (2026-10-31, 子会话 api-cov-p35-closeout)
+
+### 20.1 矩阵清零结论
+
+Node main, Node Worker, Bun 三列的 pending 基线都是 574 行, 由下表构成, 此外没有 pending 行. 其余行都已 bridged, local-shim, capability-gated, 或有附录 D 的排除理由.
+
+| 项 | 每列行数 | 归属 | 理由 |
+| --- | --- | --- | --- |
+| imgui 模块 | 572 | P5.2f-2 (不属本批) | Q115 (a): imgui 看板的 R 系列还在改 API, P5.2f-1 只纳入矩阵, 基线与门禁, 其余等 R 系列稳定后做 |
+| Flow#await, Flow#sync | 2 | Q31, Q202 待拍板 | Rhino 里阻塞到流程结束, 运行时 Flow 句柄是 thenable, 用 `await flow`. Q31 的决定是保持 pending 并在句柄补同名成员, P3.4 / P4.4 没有补, 本卡按卡片保持 pending, 由 Q202 决定补或长期保留 |
+
+矩阵里 Q31 只剩这 2 行: 其他 12 个成员已由 P3 / P4 的句柄批次补齐.
+
+### 20.2 做了什么
+
+- Q190 (b): add*Task 18 处的 d.ts options 补 null, query*Tasks 4 处与 auto.explain 1 处跟随; Node 门面接受 null; type-map reviewed 撤销; Ace 重导入 (同时带上 TS d473c8e 的 speech).
+- Node d.ts 与 runtime-types.json 差异 69 行: 修 36 行, 其余 33 行写进 type-map.json 的 nodeReviewed 并带理由, check.py 的 staleReviewed 同时看这张表.
+- Q120 (b): 见附录 C. 另加 process.cwd() 与脚本源目录的文档小节 (文档 e1105d9).
+- Q127 (a): 宿主含 Q116 修复后重录 15 例, 共享核心去掉 InvocationTargetException 模拟, 比对去掉 rhinoCrash 分支.
+- Q179 (b): Node 真机复测, 修退出信号与定时器两处.
+- Q194 (a): Bun 自动化族全量重跑.
+- 全局 TODO: Node / Bun 全局, Worker 全局表, 声明改 void 对齐宿主 TS.
+- java-prototype-objects: 规则支持 `except`, RawWindow, FloatyWindow, WebSocket, InjectableWebView, InjectableWebClient, ConsoleConfigurator 与 OcrResult 的已桥接成员退出规则, 不再被规则遮蔽 (107 格).
+- flow / mail / epub / tts 三列核对: 全部覆盖, Flow 仅 await / sync pending, EpubReaderSession 34 行与 TtsUtterance 23 行是 not-portable. speech 归补缺 A.
+- 修补缺 A 留下的过期断言: test-colors, test-automation-rhino, 以及 check-runtime-automation, check-runtime-js-tools, check-bun-js-tools, check-bun-files-data, check-bun-storage.
+
+超出卡片字面的改动: tasks null 与 sysprops null 的门面修正, setIntervalExt 返回数字 id, 新属性 hostCwd, process.exit 清定时器 (Q201), 以及上面的断言修正.
+
+### 20.3 前后数字
+
+| 项 | 改动前 | 改动后 |
+| --- | --- | --- |
+| pending 基线 (Node main / Worker / Bun) | 626 / 626 / 626 | 574 / 574 / 574 (补缺 A 51 行 + TODO 1 行) |
+| Node d.ts 差异 | 69, 未审 69 | 33, 全部 nodeReviewed, unreviewed 0, compared 1234 |
+| type-map reviewed (Q190) | 18 处 | 0 |
+| java-prototype-objects 遮蔽格 | 107 | 0 |
+| 设备比对只要求抛错的 Color 用例 | 15 | 0 |
+
+### 20.4 验收
+
+- HEAD 导出副本 `E:/.cache/aj6-p35-head` (宿主 a9f7acd07, KSP 取同一副本的 script-modules.json; Node fde5c5a8, Bun 24a66fe, TS 8f8adff, Ace 3af850c): `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) 退出码 0, failures 空, MATRIX.md 与 pending-baseline.json 与 HEAD 无差异. 文档到 70b79f6 后复跑, 结果相同.
+- api-coverage 单测 121 例通过 (跳过 3), 全部 check-runtime-* / check-bun-* / check-ui-* 通过, Node 桌面测试 153 + 16 + 3 + 62, Bun host client 测试 150 全过, sync-*.mjs --check 全过.
+- TS sync --check changed 0, verify-runtime-declarations 通过 (declarations 95), verify-api-coverage 在真实仓库退出码 0; Ace verify-runtime-api-coverage --fresh 通过, verify-api-coverage 在真实仓库退出码 0. 文档 auto-generate --check 当前.
+- 真机结果与设备恢复见 docs/dev/runtime-closeout-2026-10-31.md. 重录脚本改动后的 rhino 阶段在 Xiaomi 968e9f18 上复跑 633 / 633 (只验证脚本, 该机宿主与录制值错误名全同, 差异只在堆栈文本).
+- 未验证: Bun d12edff 的超时路径只过桌面; process.exit 清定时器只在 x86_64 模拟器验证, 未在 arm64 真机复测, 未跑 Node AndroidTest 冒烟.
+
+### 20.5 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | ad62a8859 | execution.control 答复 cwd, 不需授权 |
+| 宿主 | 89bbda2a6 | nodeReviewed, reviewed 撤销, except, device_relative_paths.py, Bun Worker 超时轮 |
+| 宿主 | a9f7acd07 | 5 个结构脚本, 补全源索引 |
+| Node 插件 | ef0458f9 / 2eab83dd / c028aa90 / 2f645450 / fde5c5a8 | Q120, tasks / sysprops null, setIntervalExt, HOST-API, 声明 |
+| Node 插件 | 26bfcc7f / ce517535 | Q127, TODO, 真机脚本, 重录 |
+| Node 插件 | 5c1ce68b / 2025b2e1 | Q179 复测的两处修复 |
+| Bun 插件 | 7623080 / fafc993 / 05bc2f6 / 9286a8f / 24a66fe | Q120 同步与 host-api.md |
+| Bun 插件 | 42c47aa / 288f6ca / d12edff | Q127, TODO, Q179 同步 |
+| TS | 752b0e5 / 8f8adff | 任务声明, 同步运行时声明 |
+| Ace | 819eb87 / 3af850c | 重导入, 捆绑声明 |
+| 文档 | e1105d9 / 70b79f6 | 相对路径小节, 生成物 |
+| Offline Docs | 4c099cb | 同步生成页, 版本不变 |
+| 宿主 | (本节所在提交) | 本节, 报告, ROADMAP 落点, 附录 C, REVIEW 7.1 |

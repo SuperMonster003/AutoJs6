@@ -394,7 +394,7 @@ P4.4 落点 (2026-10-30, api-cov-p4-4; 矩阵与基线宿主 7bb11982c, selector
 
 另: Bun 经 sync-automation-family.mjs 同步 Node 的 __autojs6_create_automation (automator / auto / keys / threads / continuation / timers / yolo / selector / ocr 的 Rhino 层 / 全局), sync-events.mjs / sync-system.mjs 同步其依赖的 events / system 工厂, 三者 --check 在 Bun CI 与宿主 check-bun-automation-family.mjs 中运行. Node 能力名映射为 Bun 授权, 授权关闭时访问宿主前 reject NOT_GRANTED 并带 missingCapabilities; selector 经 flow 的调用层 reject, 只带 error.capability. 宿主 BunAutomationBridge 路由 295 -> 314 个方法, accessibility.control 只多开 Rhino 用到的 captureScreenImage / dump / explain (Q185 (a)). 真机 (Redmi 22120RN86C, API 33) 首轮发现两处 Node 共享工厂问题: threads.pool 的 corePoolSize > maxPoolSize 不抛错 (Node 079579ec), broadcast 首次 on() 打开会话时立即 emit 会丢 (Node c54d4592, 本批复测即其真机验证); 复测 53 例 Rhino 与 Bun main / Worker 全部一致, 拒绝轮 19 / 19, 报告 [bun-automation-2026-10-30](../dev/bun-automation-2026-10-30.md).
 
-Q179 (b) / Q180 (a) 落实 (2026-10-30, 维护者 17:4x 拍板, api-cov-p4-4): auto.waitFor / automator.waitForService 超时结束整个执行, keepAlive / timers.keepAlive 返回数字 id, continuation.enabled 为 false (Node 共享工厂 d656265f, Bun 7f25ae7; 矩阵的状态与入口不变, MATRIX 与基线不改); 宿主 Threads.internalPool 与实际上限比较 (29537a241), threads.pool 缺 maxPoolSize 时 Rhino / Node / Bun 一致. Node 真机复测归 P3.5.
+Q179 (b) / Q180 (a) 落实 (2026-10-30, 维护者 17:4x 拍板, api-cov-p4-4): auto.waitFor / automator.waitForService 超时结束整个执行, keepAlive / timers.keepAlive 返回数字 id, continuation.enabled 为 false (Node 共享工厂 d656265f, Bun 7f25ae7; 矩阵的状态与入口不变, MATRIX 与基线不改); 宿主 Threads.internalPool 与实际上限比较 (29537a241), threads.pool 缺 maxPoolSize 时 Rhino / Node / Bun 一致. Node 真机复测已由 P3.5 收口 B 完成 (BASELINE 第 20 节).
 
 P3.5 / P4.5 补缺 A 落点 (2026-10-31, api-cov-p45-bridges; 矩阵与基线宿主 5c9f86933): 本批 Node main / Worker / Bun 各 52 -> 0 (全列 626 -> 574), 其中 colors.theme 9, gallery 11, files.batchRename 17, speech.speaker 8, Q114 的 speech.diarize / detectLanguage / tag 及 Async 6, 共 51 行, 另 1 行为 B 的 global.TODO. Node 列 bridged, Bun 列 capability-gated.
 
@@ -408,6 +408,16 @@ P3.5 / P4.5 补缺 A 落点 (2026-10-31, api-cov-p45-bridges; 矩阵与基线宿
 | 同步形态 | Rhino 的 x 与 xAsync 都返回 Promise, 差异只在 view / viewAsync 的兑现时机 | 同左 | 无 |
 
 另: 共享工厂 __autojs6_create_plugin_family 经 sync-plugin-family.mjs 进 Bun, 与 P3.3 / P3.4 同一做法; GalleryViewSession 的声明列出自己用到的 EventEmitter 成员, 因为 TS 仓库的校验环境没有 Node 类型.
+
+P3.5 / P4.5 收口 B 落点 (2026-10-31, api-cov-p35-closeout; 矩阵与基线不变, 仍是宿主 5c9f86933): 三列只剩下表的 pending 行, 结论与理由见 BASELINE 第 20 节, 真机见 docs/dev/runtime-closeout-2026-10-31.md. P4.4 的 54 例全量与 Bun Worker 超时轮已重跑 (Q194 (a)).
+
+| 项 | Node main / Worker | Bun | 待决 |
+|---|---|---|---|
+| imgui 572 行 | pending | pending | P5.2f-2 |
+| Flow#await, Flow#sync | pending | pending | Q31, Q202 |
+| new Worker(__filename), 项目无 package.json | 抛 SyntaxError, 既有缺陷 | 不涉及 | Q200 |
+| process.exit 清已排定时器 | 已实施 | 不涉及 | Q201 |
+| Node 超时轮的 arm64 真机与 AndroidTest 冒烟 | 未跑 | - | P3.6 收尾时跑 |
 
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
