@@ -868,6 +868,39 @@ class RepositoryTest(unittest.TestCase):
         for row in family:
             self.assertNotEqual(row['bun']['status'], 'pending', row['id'])
 
+    def test_p4_4(self):
+        # The Bun automation family: Node's shared automation factory in the client, automator / auto as second modules of
+        # accessibility.control (Q183 (a)), threads / continuation / timers / keys local, yolo / ocr / barcode / qrcode behind
+        # yolo.control / ocr.control / barcode.control (Q181 (a)), the selector functions over flow's wait (accessibility.control),
+        # Rhino's events members behind the events grants (Q182 (a)), the family's globals on host.global (Q184 (a)) and the
+        # VolatileDispose / YoloDetector handles; Rhino's timers.setTimeout and the five others are Bun's own timers (D-9).
+        rows = {row['id']: row for row in self.matrix['rows']}
+        for name, status, capability in [('automator.click', 'capability-gated', 'accessibility.control'), ('click', 'capability-gated', 'accessibility.control'),
+                                         ('automator.captureScreen', 'capability-gated', 'accessibility.control'),
+                                         ('auto.start', 'capability-gated', 'accessibility.control'), ('auto.dump', 'capability-gated', 'accessibility.control'),
+                                         ('threads.start', 'local-shim', None), ('sync', 'local-shim', None), ('continuation.enabled', 'local-shim', None),
+                                         ('keepAlive', 'local-shim', None), ('timers.setIntervalExt', 'local-shim', None), ('keys.HOME', 'local-shim', None),
+                                         ('timers.addDailyTask', 'capability-gated', 'tasks.control'), ('yolo.load', 'capability-gated', 'yolo.control'),
+                                         ('ocr.mlkit.detect', 'capability-gated', 'ocr.control'), ('barcode.detect', 'capability-gated', 'barcode.control'),
+                                         ('qrcode.detect', 'capability-gated', 'barcode.control'), ('pickup', 'capability-gated', 'accessibility.control'),
+                                         ('events.emitSticky', 'capability-gated', 'events.observe'), ('events.onKeyDown', 'capability-gated', 'events.key'),
+                                         ('events.onTouch', 'capability-gated', 'events.touch'),
+                                         ('events.setKeyInterceptionEnabled', 'capability-gated', 'events.key.intercept'),
+                                         ('sleep', 'local-shim', None), ('wait', 'local-shim', None), ('wait.async', 'local-shim', None),
+                                         ('VolatileDispose#blockedGet', 'local-shim', None), ('YoloDetector#detect', 'capability-gated', 'yolo.control')]:
+            self.assertEqual((rows[name]['bun']['status'], rows[name]['bun'].get('capability')), (status, capability), name)
+        self.assertEqual({rows[name]['bun']['via'] for name in ['VolatileDispose#blockedGet', 'YoloDetector#detect']}, {'handle-type'})
+        self.assertEqual((rows['click']['bun']['namespace'], rows['sleep']['bun']['namespace']), ('automator', 'global'))
+        self.assertEqual((rows['timers.setTimeout']['bun']['status'], rows['timers.setTimeout']['bun']['rule']), ('not-portable', 'native-timers'))
+        family = [row for row in self.matrix['rows'] if (row['module'] or row['ownerModule'] or '').split('.')[0] in
+                  ('automator', 'auto', 'threads', 'continuation', 'timers', 'yolo', 'selector', 'qrcode', 'barcode', 'keys', 'ocr', 'events')
+                  or row['object'] in ('VolatileDispose', 'YoloDetector')]
+        self.assertGreaterEqual(len(family), 240)
+        for row in family:
+            self.assertNotEqual(row['bun']['status'], 'pending', row['id'])
+        # Q31: Flow#await / Flow#sync stay pending (appendix D).
+        self.assertEqual((rows['Flow#await']['bun']['status'], rows['Flow#sync']['bun']['status']), ('pending', 'pending'))
+
     def test_p5_2f1(self):
         # Q122 - Q124: the host imgui module is in the denominator, pending in every runtime column except the internal __pluginId.
         rows = {row['id']: row for row in self.matrix['rows'] if row['kind'] == 'export' and row['module'].split('.')[0] == 'imgui'}
