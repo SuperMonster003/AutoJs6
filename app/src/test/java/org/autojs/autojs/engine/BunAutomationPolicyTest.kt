@@ -25,8 +25,9 @@ class BunAutomationPolicyTest {
     @Test fun publicAutomationDoesNotExposeInternalAgentRoutes() {
         assertFalse(BunAutomationBridge.methods.values.flatten().any{it in setOf("dump","inspectNode","readScreenText","readDoc","pluginCapabilities","currentWindow")})
         // 194, then app.control +6 (P4.1a), mediainfo.control 4 (P4.2b), the system and engines family 51 and plugin tools 3 (P4.1b),
-        // media playback 6 and the media library scan 1 (P4.1c).
-        assertEquals(265,BunAutomationBridge.methods.values.sumOf{it.size})
+        // media playback 6 and the media library scan 1 (P4.1c), Rhino's device members 30 (keepAwake / cancelVibration and the 28
+        // RuntimeDeviceBridge routes, P3.1c / P4.1c).
+        assertEquals(295,BunAutomationBridge.methods.values.sumOf{it.size})
     }
     @Test fun devicePowerAudioAndDialogGrantsRemainIndependent() {
         assertEquals(listOf("device"),BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)))
@@ -120,6 +121,30 @@ class BunAutomationPolicyTest {
         assertEquals(listOf(Grants.MEDIA_CONTROL, Grants.MEDIA_LIBRARY), Grants.validatePackagedCapabilities(listOf(Grants.MEDIA_CONTROL, Grants.MEDIA_LIBRARY)))
         val pattern = Regex("""[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+""")
         for (capability in listOf(Grants.MEDIA_CONTROL, Grants.MEDIA_LIBRARY)) assertTrue(capability, pattern.matches(capability))
+    }
+
+    // api-coverage P4.1c (Q153 (a)): the hardware identifiers need device.identifiers on top of device.control, the pointer
+    // location switches and keepAwake device.power, as the Node capabilities of Q146 (a).
+    @Test fun deviceIdentifiersNeedTheirOwnGrantAndTheRhinoDeviceRoutesFollowNode() {
+        assertEquals(listOf("device.identifiers"), BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_IDENTIFIERS)))
+        val device = BunAutomationBridge.methods.getValue(Grants.DEVICE_CONTROL)
+        assertTrue(device.containsAll(RuntimeDeviceBridge.methods + NodeBridgeModules.deviceRhinoControls))
+        val control = BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL)).toSet()
+        val identifiers = BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL, Grants.DEVICE_IDENTIFIERS)).toSet()
+        val power = BunAutomationBridge.nodeCapabilities(listOf(Grants.DEVICE_CONTROL, Grants.DEVICE_POWER)).toSet()
+        for (method in listOf("getIMEI", "getSerial", "getAndroidId", "getMacAddress", "getSharedDeviceId")) {
+            val required = NodeBridgePermissionManifest.requiredCapabilitiesFor("device", method)
+            assertFalse(method, control.containsAll(required))
+            assertTrue(method, identifiers.containsAll(required))
+        }
+        for (method in listOf("keepAwake", "setPointerLocation", "togglePointerLocation")) {
+            val required = NodeBridgePermissionManifest.requiredCapabilitiesFor("device", method)
+            assertFalse(method, control.containsAll(required))
+            assertTrue(method, power.containsAll(required))
+        }
+        for (method in listOf("summary", "getRotation", "isPowerSourceAC", "getIpAddress", "isPointerLocationEnabled", "isBackgroundStartGranted", "cancelVibration"))
+            assertTrue(method, control.containsAll(NodeBridgePermissionManifest.requiredCapabilitiesFor("device", method)))
+        assertEquals(listOf(Grants.DEVICE_IDENTIFIERS), Grants.validatePackagedCapabilities(listOf(Grants.DEVICE_IDENTIFIERS)))
     }
 
     // The plugin's request parser (BunExecutionRequestParser) rejects the whole execution when a granted capability ID is not

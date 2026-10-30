@@ -108,6 +108,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
     private var bunDeviceControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDevicePowerGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDeviceAudioGrantPreference: ThemeColorSwitchPreference? = null
+    private var bunDeviceIdentifiersGrantPreference: ThemeColorSwitchPreference? = null
     private var bunDialogsControlGrantPreference: ThemeColorSwitchPreference? = null
     private var bunAndroidObjectsGrantPreference: ThemeColorSwitchPreference? = null
     private var bunFlowControlGrantPreference: ThemeColorSwitchPreference? = null
@@ -280,6 +281,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDeviceControlGrantPreference = findPreference("plugin_bun_device_control_grant")
         bunDevicePowerGrantPreference = findPreference("plugin_bun_device_power_grant")
         bunDeviceAudioGrantPreference = findPreference("plugin_bun_device_audio_grant")
+        bunDeviceIdentifiersGrantPreference = findPreference("plugin_bun_device_identifiers_grant")
         bunDialogsControlGrantPreference = findPreference("plugin_bun_dialogs_control_grant")
         bunAndroidObjectsGrantPreference = findPreference("plugin_bun_android_objects_grant")
         bunFlowControlGrantPreference = findPreference("plugin_bun_flow_control_grant")
@@ -499,6 +501,10 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
             BunHostCapabilityGrants.setDeviceAudioGranted(requireContext(), value == true)
             true
         }
+        bunDeviceIdentifiersGrantPreference?.setOnPreferenceChangeListener { _, value ->
+            BunHostCapabilityGrants.setDeviceIdentifiersGranted(requireContext(), value == true)
+            true
+        }
         bunDialogsControlGrantPreference?.setOnPreferenceChangeListener { _, value ->
             BunHostCapabilityGrants.setDialogsControlGranted(requireContext(), value == true)
             true
@@ -662,6 +668,7 @@ class PluginSettingsFragment : PreferenceFragmentCompat() {
         bunDeviceControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceControlGranted(requireContext())
         bunDevicePowerGrantPreference?.isChecked = BunHostCapabilityGrants.isDevicePowerGranted(requireContext())
         bunDeviceAudioGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceAudioGranted(requireContext())
+        bunDeviceIdentifiersGrantPreference?.isChecked = BunHostCapabilityGrants.isDeviceIdentifiersGranted(requireContext())
         bunDialogsControlGrantPreference?.isChecked = BunHostCapabilityGrants.isDialogsControlGranted(requireContext())
         bunAndroidObjectsGrantPreference?.isChecked = BunHostCapabilityGrants.isAndroidObjectsGranted(requireContext())
         bunFlowControlGrantPreference?.isChecked = BunHostCapabilityGrants.isFlowControlGranted(requireContext())

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_device_identifiers_grant">السماح بقراءة معرفات العتاد مثل IMEI والرقم التسلسلي و Android ID وعنوان MAC ومعرف الجهاز المشترك; تظل أذونات Android سارية.</string>
+    <string name="text_bun_device_identifiers_grant">معرفات الجهاز في Bun</string>
+</resources>

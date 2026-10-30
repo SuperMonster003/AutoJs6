@@ -56,6 +56,8 @@ object BunHostCapabilityGrants {
     const val DEVICE_CONTROL = "device.control"
     const val DEVICE_POWER = "device.power"
     const val DEVICE_AUDIO = "device.audio"
+    // The hardware identifiers of Rhino's device module (api-coverage P4.1c, Q153 (a)), after Node's device.identifiers.
+    const val DEVICE_IDENTIFIERS = "device.identifiers"
     const val DIALOGS_CONTROL = "dialogs.control"
 
     const val FLOW_CONTROL = "flow.control"
@@ -210,6 +212,10 @@ object BunHostCapabilityGrants {
     fun isDeviceAudioGranted(context: Context): Boolean = isGranted(context, DEVICE_AUDIO, false)
     fun setDeviceAudioGranted(context: Context, granted: Boolean) = setGranted(context, DEVICE_AUDIO, granted)
 
+    /** IMEI, serial, Android ID, MAC address and the shared device id (device.getIMEI / imei and so on), api-coverage P4.1c. */
+    fun isDeviceIdentifiersGranted(context: Context): Boolean = isGranted(context, DEVICE_IDENTIFIERS, false)
+    fun setDeviceIdentifiersGranted(context: Context, granted: Boolean) = setGranted(context, DEVICE_IDENTIFIERS, granted)
+
     fun isDialogsControlGranted(context: Context): Boolean = isGranted(context, DIALOGS_CONTROL, false)
     fun setDialogsControlGranted(context: Context, granted: Boolean) = setGranted(context, DIALOGS_CONTROL, granted)
 
@@ -322,6 +328,7 @@ object BunHostCapabilityGrants {
         if (isDeviceControlGranted(context)) add(DEVICE_CONTROL)
         if (isDevicePowerGranted(context)) add(DEVICE_POWER)
         if (isDeviceAudioGranted(context)) add(DEVICE_AUDIO)
+        if (isDeviceIdentifiersGranted(context)) add(DEVICE_IDENTIFIERS)
         if (isDialogsControlGranted(context)) add(DIALOGS_CONTROL)
         if (isFlowControlGranted(context)) add(FLOW_CONTROL)
         if (isMailControlGranted(context)) add(MAIL_CONTROL)
@@ -344,7 +351,7 @@ object BunHostCapabilityGrants {
     internal fun validatePackagedCapabilities(capabilities: List<String>): List<String> {
         val supported = setOf(AGENT_CONTROL, AI_CONTROL, FLOW_CONTROL, MAIL_CONTROL, EPUB_CONTROL, SPEECH_CONTROL, TTS_CONTROL, UI_LAYOUT, UI_COMPOSE, "ui.toast", "device.info", TEXT_PINYIN, TEXT_PINYIN4J,
             TEXT_OPENCC, IMAGE_PROCESS, IMAGE_FILES, SCREEN_CAPTURE, SCREEN_RECORD, SCREEN_RECORD_MICROPHONE,
-            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL, MEDIA_CONTROL, MEDIA_LIBRARY) + SYSTEM_FAMILY
+            SCREEN_RECORD_PLAYBACK, SCREEN_METRICS, CONSOLE_CONTROL, APP_CONTROL, ACCESSIBILITY_CONTROL, ACCESSIBILITY_GESTURE, CLIPBOARD_CONTROL, FILES_CONTROL, STORAGE_CONTROL, DATABASE_CONTROL, SENSORS_CONTROL, SHELL_CONTROL, SHELL_ROOT, SHELL_SHIZUKU, EVENTS_OBSERVE, EVENTS_NOTIFICATION, EVENTS_TOAST, EVENTS_KEY, NOTIFICATIONS_POST, NOTIFICATIONS_SETTINGS, DEVICE_CONTROL, DEVICE_POWER, DEVICE_AUDIO, DIALOGS_CONTROL, ANDROID_OBJECTS, TASKS_CONTROL, JAVA_INTEROP, MEDIAINFO_CONTROL, MEDIA_CONTROL, MEDIA_LIBRARY, DEVICE_IDENTIFIERS) + SYSTEM_FAMILY
         require(capabilities.size <= supported.size && capabilities.all { it in supported }) { "Unknown Bun host capability in project.json" }
         require(capabilities.distinct().size == capabilities.size) { "Duplicate Bun host capability in project.json" }
         return capabilities.toList()

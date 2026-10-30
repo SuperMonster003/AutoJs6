@@ -144,7 +144,7 @@ internal class BunAutomationBridge(
         val events = job.capability == Grants.EVENTS_OBSERVE && job.method.startsWith("observe")
         val notification = job.capability == Grants.NOTIFICATIONS_POST && job.method == "notify"
         if (job.capability == Grants.DIALOGS_CONTROL) provider().cancelDialogRequest(job.id)
-        val awake = job.capability == Grants.DEVICE_CONTROL && job.method == "keepScreenOn"
+        val awake = job.capability == Grants.DEVICE_CONTROL && job.method in setOf("keepScreenOn", "keepAwake")
         val mail = job.capability == Grants.MAIL_CONTROL && job.method == "open"
         val flow = job.capability == Grants.FLOW_CONTROL && job.method == "open"
         if (job.capability == Grants.AGENT_CONTROL && job.method == "requestAccess")
@@ -178,7 +178,7 @@ internal class BunAutomationBridge(
                 }
                 if (awake) {
                     provider().dispatch(NodeBridgeRequest(UUID.randomUUID().toString(), NodeBridgeModules.DEVICE, "cancelKeepingAwake",
-                        JSONArray().put(JSONArray(job.argsJson).optString(1)).toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER))) {}
+                        JSONArray().put(JSONArray(job.argsJson).optString(if (job.method == "keepAwake") 2 else 1)).toString(), 5000, permissions = listOf(NodeBridgePermissionManifest.DEVICE, NodeBridgePermissionManifest.DEVICE_POWER))) {}
                     return@runCatching
                 }
                 if (notification) {
@@ -215,6 +215,7 @@ internal class BunAutomationBridge(
             if (Grants.DEVICE_CONTROL in grants) add(NodeBridgePermissionManifest.DEVICE)
             if (Grants.DEVICE_POWER in grants) add(NodeBridgePermissionManifest.DEVICE_POWER)
             if (Grants.DEVICE_AUDIO in grants) addAll(listOf(NodeBridgePermissionManifest.MEDIA, NodeBridgePermissionManifest.MEDIA_AUDIO))
+            if (Grants.DEVICE_IDENTIFIERS in grants) add(NodeBridgePermissionManifest.DEVICE_IDENTIFIERS)
             if (Grants.DIALOGS_CONTROL in grants) add(NodeBridgePermissionManifest.DIALOGS)
             if (Grants.APP_CONTROL in grants) addAll(listOf(NodeBridgePermissionManifest.APP, NodeBridgePermissionManifest.APP_LAUNCH,
                 NodeBridgePermissionManifest.APP_SETTINGS, NodeBridgePermissionManifest.APP_ACTIVITY, NodeBridgePermissionManifest.APP_QUERY))
@@ -269,7 +270,9 @@ internal class BunAutomationBridge(
             Grants.JAVA_INTEROP to ControlledJavaInteropPolicy.methods,
             Grants.ANDROID_OBJECTS to RuntimeAndroidObjects.methods,
             Grants.TASKS_CONTROL to RuntimeTasksBridge.methods,
-            Grants.DEVICE_CONTROL to NodeBridgeModules.deviceMethods,
+            // Rhino's device members (api-coverage P4.1c): keepAwake / cancelVibration and the RuntimeDeviceBridge queries; the
+            // identifiers also need device.identifiers, keepAwake and the pointer location switches device.power (Node capabilities).
+            Grants.DEVICE_CONTROL to NodeBridgeModules.deviceMethods + NodeBridgeModules.deviceRhinoControls + RuntimeDeviceBridge.methods,
             Grants.DEVICE_AUDIO to setOf("getAudioStreamVolume", "getAudioStreamMaxVolume", "setAudioStreamVolume"),
             Grants.DIALOGS_CONTROL to NodeBridgeModules.dialogsMethods,
             Grants.EVENTS_OBSERVE to setOf("observeNotification", "observeToast", "observeKey", "observeBroadcasts", "drainEvents", "close"),

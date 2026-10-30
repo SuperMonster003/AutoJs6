@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_device_identifiers_grant">Permitir leer identificadores de hardware como el IMEI, el número de serie, el Android ID, la dirección MAC y el ID de dispositivo compartido; los permisos de Android siguen aplicándose.</string>
+    <string name="text_bun_device_identifiers_grant">Identificadores del dispositivo de Bun</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_device_identifiers_grant">IMEI, シリアル番号, Android ID, MAC アドレス, 共有デバイス ID などのハードウェア識別子の読み取りを許可します. Android の権限は引き続き適用されます.</string>
+    <string name="text_bun_device_identifiers_grant">Bun デバイス識別子</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_device_identifiers_grant">允許讀取 IMEI, 序號, Android ID, MAC 位址與共用裝置 ID 等硬體識別碼; 仍受 Android 權限限制.</string>
+    <string name="text_bun_device_identifiers_grant">Bun 裝置識別碼</string>
+</resources>

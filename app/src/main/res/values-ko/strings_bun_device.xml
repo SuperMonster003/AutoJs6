@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_device_identifiers_grant">IMEI, 일련번호, Android ID, MAC 주소, 공유 기기 ID 등 하드웨어 식별자 읽기를 허용합니다. Android 권한은 계속 적용됩니다.</string>
+    <string name="text_bun_device_identifiers_grant">Bun 기기 식별자</string>
+</resources>

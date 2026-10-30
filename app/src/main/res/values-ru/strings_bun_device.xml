@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="summary_bun_device_identifiers_grant">Разрешить чтение аппаратных идентификаторов: IMEI, серийного номера, Android ID, MAC-адреса и общего идентификатора устройства; разрешения Android по-прежнему действуют.</string>
+    <string name="text_bun_device_identifiers_grant">Идентификаторы устройства в Bun</string>
+</resources>

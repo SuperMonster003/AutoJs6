@@ -330,6 +330,14 @@
             app:summary="@string/summary_bun_device_audio_grant" />
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:key="plugin_bun_device_identifiers_grant"
+            app:defaultValue="false"
+            app:layout="@layout/preference_custom"
+            app:persistent="false"
+            app:title="@string/text_bun_device_identifiers_grant"
+            app:summary="@string/summary_bun_device_identifiers_grant" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:key="plugin_bun_dialogs_control_grant"
             app:defaultValue="false"
             app:layout="@layout/preference_custom"
