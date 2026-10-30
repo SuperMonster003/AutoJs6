@@ -364,7 +364,7 @@ P4.3 落点 (2026-10-30, api-cov-p4-3; 矩阵与基线宿主 cc3a55f97): 本族 
 
 | 行 | Bun | 待决 |
 |---|---|---|
-| ui.layoutInflater | not-portable (java-prototype) | Q169 (随 Node, 已按推荐先行待确认; 等价写法 ui.inflate / ui.createView) |
+| ui.layoutInflater | not-portable (java-prototype) | Q169 (随 Node, 2026-10-30 17:4x 维护者选 (a); 等价写法 ui.inflate / ui.createView) |
 | ui 内部名 4 与全局 __autojs6Tsx / __autojs6TsxFragment | not-portable (rhino-only) | 无 (既有规则) |
 | Canvas# 54 行 | not-portable (java-prototype) | 无 (D-11) |
 | 策略冲突 | java-prototype-objects shadowed 103 格 | 无; 同 P3.3, 句柄类型先覆盖这些行, 门禁不拦 |
