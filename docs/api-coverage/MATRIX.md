@@ -9,19 +9,19 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1632 | 368 | 0 | 941 | 0 | 626 |
-| Node Worker | 1632 | 365 | 0 | 944 | 0 | 626 |
-| Bun | 0 | 376 | 1621 | 944 | 0 | 626 |
+| Node main | 1683 | 369 | 0 | 941 | 0 | 574 |
+| Node Worker | 1683 | 366 | 0 | 944 | 0 | 574 |
+| Bun | 0 | 377 | 1672 | 944 | 0 | 574 |
 
 | 列 | 取值 |
 |---|---|
 | doc | none 581 / mention 274 / heading 2712 / signature 0 / example 0 |
-| dts | none 582 / name 1738 / arity 319 / typed 928 |
+| dts | none 582 / name 1738 / arity 314 / typed 933 |
 | ace | none 987 / semantic 946 / static 1634 |
 
-类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 993 / differs 23 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
+类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 1016 / differs 0 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
-排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: java-prototype-objects shadowed (bun, 107), java-prototype-objects shadowed (node_main, 107), java-prototype-objects shadowed (node_worker, 107).
+排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
@@ -51,7 +51,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | 类型 (ksp) | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 194 / 13 / 1 | 194 / 13 / 1 | 194 / 13 / 1 |
+| (global) | 208 | 206 | 205 | 154 / 154 | 205 | 195 / 13 / 0 | 195 / 13 / 0 | 195 / 13 / 0 |
 | AgentRun# | 14 | 7 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -108,14 +108,14 @@
 | Zip# | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | ai | 6 | 6 | 6 | 5 / 5 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
 | app | 43 | 43 | 43 | 41 / 41 | 43 | 43 / 0 / 0 | 43 / 0 / 0 | 43 / 0 / 0 |
-| auto | 38 | 38 | 38 | 34 / 35 | 38 | 38 / 0 / 0 | 38 / 0 / 0 | 38 / 0 / 0 |
+| auto | 38 | 38 | 38 | 35 / 35 | 38 | 38 / 0 / 0 | 38 / 0 / 0 | 38 / 0 / 0 |
 | autojs | 21 | 21 | 21 | 21 / 21 | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | autojs.version | 7 | 7 | 7 | 7 / 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
 | automator | 54 | 54 | 54 | 34 / 34 | 54 | 54 / 0 / 0 | 54 / 0 / 0 | 54 / 0 / 0 |
 | barcode | 4 | 4 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | base64 | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 0 / 2 / 0 | 0 / 2 / 0 |
 | colors | 82 | 82 | 82 | 81 / 81 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| colors.theme | 9 | 9 | 9 | 9 / 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
+| colors.theme | 9 | 9 | 9 | 9 / 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | compose | 71 | 71 | 71 | - | 71 | 71 / 0 / 0 | 71 / 0 / 0 | 71 / 0 / 0 |
 | console | 56 | 56 | 56 | 15 / 15 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | continuation | 4 | 3 | 4 | 2 / 2 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
@@ -127,11 +127,11 @@
 | epub | 21 | 21 | 21 | - | 21 | 21 / 0 / 0 | 21 / 0 / 0 | 21 / 0 / 0 |
 | events | 37 | 34 | 36 | - | 36 | 36 / 1 / 0 | 36 / 1 / 0 | 36 / 1 / 0 |
 | files | 34 | 34 | 34 | 4 / 4 | 34 | 34 / 0 / 0 | 34 / 0 / 0 | 34 / 0 / 0 |
-| files.batchRename | 17 | 17 | 17 | 7 / 7 | 17 | 0 / 0 / 17 | 0 / 0 / 17 | 0 / 0 / 17 |
+| files.batchRename | 17 | 17 | 17 | 7 / 7 | 17 | 17 / 0 / 0 | 17 / 0 / 0 | 17 / 0 / 0 |
 | floaty | 8 | 8 | 8 | 6 / 6 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | flow | 55 | 55 | 55 | 55 / 55 | 55 | 55 / 0 / 0 | 55 / 0 / 0 | 55 / 0 / 0 |
 | fmt.bytes | 6 | 6 | 6 | 6 / 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
-| gallery | 11 | 11 | 11 | - | 11 | 0 / 0 / 11 | 0 / 0 / 11 | 0 / 0 / 11 |
+| gallery | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | http | 21 | 20 | 20 | 20 / 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 79 / 79 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | imgui | 573 | 0 | 0 | - | 0 | 0 / 1 / 572 | 0 / 1 / 572 | 0 / 1 / 572 |
@@ -163,16 +163,16 @@
 | shell | 11 | 11 | 11 | 11 / 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | shizuku | 13 | 8 | 13 | 8 / 8 | 13 | 13 / 0 / 0 | 13 / 0 / 0 | 13 / 0 / 0 |
 | species | 37 | 37 | 37 | 37 / 37 | 37 | 37 / 0 / 0 | 37 / 0 / 0 | 37 / 0 / 0 |
-| speech | 17 | 17 | 17 | - | 17 | 11 / 0 / 6 | 11 / 0 / 6 | 11 / 0 / 6 |
+| speech | 17 | 17 | 17 | - | 17 | 17 / 0 / 0 | 17 / 0 / 0 | 17 / 0 / 0 |
 | speech.models | 8 | 8 | 8 | - | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
-| speech.speaker | 8 | 8 | 8 | - | 8 | 0 / 0 / 8 | 0 / 0 / 8 | 0 / 0 / 8 |
+| speech.speaker | 8 | 8 | 8 | - | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
 | sqlite | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | storages | 5 | 5 | 5 | 5 / 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 | sysprops | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
-| tasks | 20 | 20 | 20 | 8 / 17 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
+| tasks | 20 | 20 | 20 | 17 / 17 | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | terminal | 20 | 20 | 20 | - | 20 | 20 / 0 / 0 | 20 / 0 / 0 | 20 / 0 / 0 |
 | threads | 8 | 8 | 8 | 4 / 4 | 8 | 8 / 0 / 0 | 8 / 0 / 0 | 8 / 0 / 0 |
-| timers | 18 | 18 | 18 | 4 / 10 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 12 / 6 / 0 |
+| timers | 18 | 18 | 18 | 10 / 10 | 18 | 12 / 6 / 0 | 12 / 6 / 0 | 12 / 6 / 0 |
 | toast | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | tts | 35 | 35 | 35 | 35 / 35 | 35 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 |
 | ui | 40 | 36 | 36 | 25 / 25 | 36 | 35 / 5 / 0 | 35 / 5 / 0 | 35 / 5 / 0 |
@@ -183,7 +183,7 @@
 | util.version | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | util.versionCodes | 4 | 4 | 4 | 4 / 4 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
 | web | 4 | 4 | 4 | 3 / 3 | 4 | 4 / 0 / 0 | 4 / 0 / 0 | 4 / 0 / 0 |
-| workManager | 11 | 11 | 11 | 2 / 9 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
+| workManager | 11 | 11 | 11 | 9 / 9 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | yolo | 1 | 1 | 1 | 1 / 1 | 1 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | zip | 5 | 5 | 5 | 5 / 5 | 5 | 5 / 0 / 0 | 5 / 0 / 0 | 5 / 0 / 0 |
 
@@ -195,7 +195,6 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `TODO` | pending | pending | pending |
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
@@ -1243,20 +1242,6 @@
 | `base64.decode` | local-shim | not-portable: runtime-native (native-base64) | not-portable: runtime-native (native-base64) |
 | `base64.encode` | local-shim | not-portable: runtime-native (native-base64) | not-portable: runtime-native (native-base64) |
 
-### colors.theme
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `colors.theme.activate` | pending | pending | pending |
-| `colors.theme.current` | pending | pending | pending |
-| `colors.theme.deactivate` | pending | pending | pending |
-| `colors.theme.get` | pending | pending | pending |
-| `colors.theme.libraries` | pending | pending | pending |
-| `colors.theme.next` | pending | pending | pending |
-| `colors.theme.reset` | pending | pending | pending |
-| `colors.theme.set` | pending | pending | pending |
-| `colors.theme.state` | pending | pending | pending |
-
 ### crypto
 
 | 行 id | Node main | Node Worker | Bun |
@@ -1275,44 +1260,6 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `events.__asEmitter__` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-
-### files.batchRename
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `files.batchRename.BatchRenameError` | pending | pending | pending |
-| `files.batchRename.apply` | pending | pending | pending |
-| `files.batchRename.applyAsync` | pending | pending | pending |
-| `files.batchRename.clearHistory` | pending | pending | pending |
-| `files.batchRename.deleteHistory` | pending | pending | pending |
-| `files.batchRename.history` | pending | pending | pending |
-| `files.batchRename.importPresets` | pending | pending | pending |
-| `files.batchRename.importPresetsAsync` | pending | pending | pending |
-| `files.batchRename.isAvailable` | pending | pending | pending |
-| `files.batchRename.plan` | pending | pending | pending |
-| `files.batchRename.planAsync` | pending | pending | pending |
-| `files.batchRename.presets` | pending | pending | pending |
-| `files.batchRename.presetsAsync` | pending | pending | pending |
-| `files.batchRename.preview` | pending | pending | pending |
-| `files.batchRename.previewAsync` | pending | pending | pending |
-| `files.batchRename.undo` | pending | pending | pending |
-| `files.batchRename.undoAsync` | pending | pending | pending |
-
-### gallery
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `gallery.GalleryError` | pending | pending | pending |
-| `gallery.convert` | pending | pending | pending |
-| `gallery.convertAsync` | pending | pending | pending |
-| `gallery.edit` | pending | pending | pending |
-| `gallery.editAsync` | pending | pending | pending |
-| `gallery.isAvailable` | pending | pending | pending |
-| `gallery.isAvailableAsync` | pending | pending | pending |
-| `gallery.pick` | pending | pending | pending |
-| `gallery.pickAsync` | pending | pending | pending |
-| `gallery.view` | pending | pending | pending |
-| `gallery.viewAsync` | pending | pending | pending |
 
 ### http
 
@@ -1929,30 +1876,6 @@
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
 | `plugins.load` | local-shim | not-portable: rhino-only (rhino-engine) | not-portable: rhino-only (rhino-engine) |
-
-### speech
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `speech.detectLanguage` | pending | pending | pending |
-| `speech.detectLanguageAsync` | pending | pending | pending |
-| `speech.diarize` | pending | pending | pending |
-| `speech.diarizeAsync` | pending | pending | pending |
-| `speech.tag` | pending | pending | pending |
-| `speech.tagAsync` | pending | pending | pending |
-
-### speech.speaker
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `speech.speaker.enroll` | pending | pending | pending |
-| `speech.speaker.enrollAsync` | pending | pending | pending |
-| `speech.speaker.identify` | pending | pending | pending |
-| `speech.speaker.identifyAsync` | pending | pending | pending |
-| `speech.speaker.list` | pending | pending | pending |
-| `speech.speaker.remove` | pending | pending | pending |
-| `speech.speaker.verify` | pending | pending | pending |
-| `speech.speaker.verifyAsync` | pending | pending | pending |
 
 ### timers
 
