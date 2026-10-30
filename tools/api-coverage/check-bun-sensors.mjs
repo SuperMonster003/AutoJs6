@@ -19,5 +19,8 @@ const workers=new Function('return ('+section('  function __autojs6_worker_host_
 const {EventEmitter}=await import('node:events');
 const modules=workers(async()=>[],{sensors:['policy','getAvailableSensors','once','subscribe']},{},[],console,undefined,undefined,undefined,undefined,factory,EventEmitter);
 assert.deepEqual([...modules.keys()],['sensors']);
-assert.deepEqual(Object.keys(modules.get('sensors')).sort(),['getAvailableSensors','once','policy','subscribe']);
+// Rhino's sensors layer over subscribe (api-coverage P3.1c / P4.1c, Q147 (a)): an event emitter with register / getSensor.
+const keys=Object.keys(modules.get('sensors'));
+for(const name of ['getAvailableSensors','once','policy','subscribe','delay','register','getSensor','unregister','unregisterAll','ignoresUnsupportedSensor',
+  'on','addListener','emit','emitSticky','removeListener','removeAllListeners','listeners','listenerCount','eventNames','getMaxListeners','setMaxListeners','getTimer'])assert(keys.includes(name),'sensors.'+name);
 console.log('Sensors coverage: 5 native routes, shared main/Worker/Bun facade and synchronized types');

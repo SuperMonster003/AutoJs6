@@ -209,7 +209,34 @@
       "device.incremental": {"capability": "device.info", "basis": "P4.1c: Build field of device-info.json"},
       "device.baseOS": {"capability": "device.info", "basis": "P4.1c: Build field of device-info.json"},
       "device.securityPatch": {"capability": "device.info", "basis": "P4.1c: Build field of device-info.json"},
-      "device.codename": {"capability": "device.info", "basis": "P4.1c: Build field of device-info.json"}
+      "device.codename": {"capability": "device.info", "basis": "P4.1c: Build field of device-info.json"},
+      "_noteP41cFamily": "P4.1c (Q148 (a) / Q152 (a) - Q154 (a)): the rest of the device snapshot, the Promise getters, client-side wrappers of device routes and Rhino's media names over the playback routes",
+      "device.width": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.height": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.density": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.pageSize": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.digest": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.getMarketName": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.isManufacturer": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.manufacturers": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.brands": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): startup snapshot of device-info.json"},
+      "device.roms": {"capability": "device.info", "basis": "P4.1c (Q154 (a)): the isXxx checks of the snapshot; roms.isBackgroundStartGranted is a device.control route"},
+      "device.rotation": {"capability": "device.control", "basis": "P4.1c (Q148 (a)): Promise getter over getRotation"},
+      "device.orientation": {"capability": "device.control", "basis": "P4.1c (Q148 (a)): Promise getter over getOrientation"},
+      "device.imei": {"capability": "device.identifiers", "basis": "P4.1c (Q153 (a)): Promise getter over getIMEI"},
+      "device.serial": {"capability": "device.identifiers", "basis": "P4.1c (Q153 (a)): Promise getter over getSerial"},
+      "device.keepScreenDim": {"capability": "device.control", "basis": "P4.1c: the keepAwake route with SCREEN_DIM flags, also device.power"},
+      "device.setPointerLocationEnabled": {"capability": "device.control", "basis": "P4.1c: the setPointerLocation route, also device.power"},
+      "device.setPointerLocationDisabled": {"capability": "device.control", "basis": "P4.1c: the setPointerLocation route, also device.power"},
+      "device.wakeUpIfNeeded": {"capability": "device.control", "basis": "P4.1c: isScreenOn, then wakeUp"},
+      "media.playMusic": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the play route"},
+      "media.pauseMusic": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the pause route"},
+      "media.resumeMusic": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the resume route"},
+      "media.stopMusic": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the stop route"},
+      "media.musicSeekTo": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the seekTo route"},
+      "media.isMusicPlaying": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"},
+      "media.getMusicDuration": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"},
+      "media.getMusicCurrentPosition": {"capability": "media.control", "basis": "P4.1c (Q152 (a)): over the getPlaybackStatus route"}
     },
     "memberAliases": {
       "_note": "Q28 (a), maintainer 2026-10-25: the automator Toolkit helpers and their global placements share the flow implementation (REVIEW R9); Node / Bun only have the flow.* asynchronous versions",
@@ -252,10 +279,7 @@
       "waitForNotification": {"namespace": "flow", "member": "waitForNotification"},
       "waitForToast": {"namespace": "flow", "member": "waitForToast"},
       "getClip": {"namespace": "clipboard", "member": "getText"},
-      "setClip": {"namespace": "clipboard", "member": "setText"},
-      "device.density": {"namespace": "device", "member": "getDensity"},
-      "device.height": {"namespace": "device", "member": "getHeight"},
-      "device.width": {"namespace": "device", "member": "getWidth"}
+      "setClip": {"namespace": "clipboard", "member": "setText"}
     }
   },
   "returnedObjects": {
