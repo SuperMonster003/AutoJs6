@@ -11,7 +11,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | Node main | 1262 | 348 | 0 | 1046 | 0 | 814 |
 | Node Worker | 1209 | 345 | 0 | 1049 | 0 | 867 |
-| Bun | 0 | 313 | 1235 | 1043 | 0 | 879 |
+| Bun | 0 | 325 | 1255 | 1043 | 0 | 847 |
 
 | 列 | 取值 |
 |---|---|
@@ -48,7 +48,7 @@
 
 | 模块 | 行 | doc 标题 | d.ts | Ace | Node main | Node Worker | Bun |
 |---|---:|---:|---:|---:|---|---|---|
-| (global) | 208 | 206 | 205 | 205 | 163 / 13 / 32 | 149 / 13 / 46 | 147 / 13 / 48 |
+| (global) | 208 | 206 | 205 | 205 | 163 / 13 / 32 | 149 / 13 / 46 | 156 / 13 / 39 |
 | AgentRun# | 14 | 7 | 14 | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | AiSession# | 11 | 11 | 11 | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | App# | 10 | 10 | 10 | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
@@ -110,7 +110,7 @@
 | colors | 82 | 82 | 82 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
 | colors.theme | 9 | 9 | 9 | 9 | 0 / 0 / 9 | 0 / 0 / 9 | 0 / 0 / 9 |
 | compose | 71 | 71 | 71 | 71 | 70 / 0 / 1 | 70 / 0 / 1 | 70 / 0 / 1 |
-| console | 56 | 56 | 56 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 31 / 0 / 25 |
+| console | 56 | 56 | 56 | 56 | 42 / 0 / 14 | 42 / 0 / 14 | 42 / 0 / 14 |
 | continuation | 4 | 3 | 4 | 4 | 0 / 0 / 4 | 0 / 0 / 4 | 0 / 0 / 4 |
 | crypto | 8 | 7 | 8 | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
 | cvt.bytes | 6 | 6 | 6 | 6 | 6 / 0 / 0 | 6 / 0 / 0 | 6 / 0 / 0 |
@@ -130,7 +130,7 @@
 | imgui | 524 | 0 | 0 | 0 | 0 / 1 / 523 | 0 / 1 / 523 | 0 / 1 / 523 |
 | installer | 16 | 16 | 16 | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
-| keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 0 / 0 / 12 |
+| keys | 12 | 12 | 12 | 12 | 12 / 0 / 0 | 0 / 0 / 12 | 12 / 0 / 0 |
 | mail | 56 | 56 | 56 | 56 | 56 / 0 / 0 | 56 / 0 / 0 | 56 / 0 / 0 |
 | media | 9 | 9 | 9 | 9 | 9 / 0 / 0 | 9 / 0 / 0 | 9 / 0 / 0 |
 | mediainfo | 7 | 7 | 7 | 7 | 7 / 0 / 0 | 7 / 0 / 0 | 7 / 0 / 0 |
@@ -193,13 +193,11 @@
 | `__autojs6Tsx` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `__autojs6TsxFragment` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
 | `back` | bridged | pending | capability-gated |
-| `clearConsole` | bridged | bridged | pending |
 | `clearImmediate` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `clearTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `click` | bridged | pending | capability-gated |
 | `detect` | pending | pending | pending |
-| `err` | bridged | bridged | pending |
 | `existsAll` | pending | pending | pending |
 | `existsOne` | pending | pending | pending |
 | `gesture` | bridged | pending | capability-gated |
@@ -213,19 +211,15 @@
 | `isJavaPackage` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
 | `isUiThread` | pending | pending | pending |
 | `keepAlive` | pending | pending | pending |
-| `launchConsole` | bridged | bridged | pending |
-| `log` | bridged | bridged | pending |
 | `longClick` | bridged | pending | capability-gated |
 | `loop` | pending | pending | pending |
 | `newInjectableWebClient` | pending | pending | pending |
 | `newInjectableWebView` | pending | pending | pending |
 | `newWebSocket` | pending | pending | pending |
 | `notifications` | bridged | pending | pending |
-| `openConsole` | bridged | bridged | pending |
 | `pickup` | pending | pending | pending |
 | `powerDialog` | bridged | pending | pending |
 | `press` | pending | pending | pending |
-| `print` | bridged | bridged | pending |
 | `quickSettings` | bridged | pending | pending |
 | `recents` | bridged | pending | pending |
 | `retry` | pending | pending | pending |
@@ -235,7 +229,6 @@
 | `setInterval` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
 | `setText` | bridged | pending | capability-gated |
 | `setTimeout` | not-portable: runtime-native | not-portable: runtime-native | not-portable: runtime-native (native-timers) |
-| `showConsole` | bridged | bridged | pending |
 | `sleep` | bridged | pending | pending |
 | `splitScreen` | bridged | pending | pending |
 | `swipe` | bridged | pending | capability-gated |
@@ -252,10 +245,8 @@
 | `toastverbose` | pending | pending | pending |
 | `toastwarn` | pending | pending | pending |
 | `unwrapJavaObject` | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) | not-portable: java-prototype (java-prototype) |
-| `verbose` | bridged | bridged | pending |
 | `wait` | pending | pending | pending |
 | `wait.async` | pending | pending | pending |
-| `warn` | bridged | bridged | pending |
 
 ### App#
 
@@ -1570,15 +1561,9 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `console.assert` | bridged | bridged | pending |
 | `console.build` | pending (rejects) | pending (rejects) | pending |
-| `console.error` | bridged | bridged | pending |
-| `console.info` | bridged | bridged | pending |
 | `console.input` | pending (rejects) | pending (rejects) | pending |
 | `console.isShowing` | pending | pending | pending |
-| `console.log` | bridged | bridged | pending |
-| `console.print` | bridged | bridged | pending |
-| `console.printAllStackTrace` | bridged | bridged | pending |
 | `console.rawInput` | pending (rejects) | pending (rejects) | pending |
 | `console.resetBackgroundAlpha` | pending | pending | pending |
 | `console.resetContentBackgroundAlpha` | pending | pending | pending |
@@ -1590,11 +1575,6 @@
 | `console.setTimeFormat` | pending | pending | pending |
 | `console.setTimeVisible` | pending | pending | pending |
 | `console.setTouchThrough` | pending | pending | pending |
-| `console.time` | bridged | bridged | pending |
-| `console.timeEnd` | bridged | bridged | pending |
-| `console.trace` | bridged | bridged | pending |
-| `console.verbose` | bridged | bridged | pending |
-| `console.warn` | bridged | bridged | pending |
 
 ### continuation
 
@@ -2265,18 +2245,18 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `keys.BACK` | bridged | pending | pending |
-| `keys.HOME` | bridged | pending | pending |
-| `keys.MENU` | bridged | pending | pending |
-| `keys.VOLUME_DOWN` | bridged | pending | pending |
-| `keys.VOLUME_UP` | bridged | pending | pending |
-| `keys.back` | bridged | pending | pending |
-| `keys.home` | bridged | pending | pending |
-| `keys.menu` | bridged | pending | pending |
-| `keys.volumeDown` | bridged | pending | pending |
-| `keys.volumeUp` | bridged | pending | pending |
-| `keys.volume_down` | bridged | pending | pending |
-| `keys.volume_up` | bridged | pending | pending |
+| `keys.BACK` | bridged | pending | local-shim |
+| `keys.HOME` | bridged | pending | local-shim |
+| `keys.MENU` | bridged | pending | local-shim |
+| `keys.VOLUME_DOWN` | bridged | pending | local-shim |
+| `keys.VOLUME_UP` | bridged | pending | local-shim |
+| `keys.back` | bridged | pending | local-shim |
+| `keys.home` | bridged | pending | local-shim |
+| `keys.menu` | bridged | pending | local-shim |
+| `keys.volumeDown` | bridged | pending | local-shim |
+| `keys.volumeUp` | bridged | pending | local-shim |
+| `keys.volume_down` | bridged | pending | local-shim |
+| `keys.volume_up` | bridged | pending | local-shim |
 
 ### memory
 
