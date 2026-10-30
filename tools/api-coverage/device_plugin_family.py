@@ -10,7 +10,8 @@ match by name and code. Only counts, failing case ids and short values are print
 
 The picker and the editor are ended by a new viewer (SESSION_REPLACED), so no phase needs anybody at the device, unless
 the plugin asks for its photo permission first: that dialog is the maintainer's. The theme color of the host is set back
-to the one read at the start of each run.
+to the one read at the start of each run. The renamed batches are deleted from the history, and the preset aj6-p45 stays
+in Batch Rename (no script API removes a preset).
 
 Phases (all take --serial; record / install / restore / verify / grant also --state, a private directory):
   record / install --apk P=PATH / restore / verify   as in device_bun_js_tools.py, for the host and five plugins
@@ -359,6 +360,12 @@ def compare(args):
     finish(args, report, failed)
 
 
+def names(actual, capability):
+    """The rejection names [capability]: SpeechError has no capability fields, its message does."""
+    message = actual.get("message", "")
+    return actual.get("capability") == capability or actual.get("missing") == [capability] or message.endswith(": " + capability) or f": {capability};" in message
+
+
 def denied(args):
     report, failed = {"forms": {}}, 0
     sources = [[case[0], case[1]] for case in DENIED_CASES]
@@ -380,11 +387,11 @@ def denied(args):
             elif missing is None:
                 result = "pass" if actual.get("ok") == "X" else f"expected X, got {json.dumps(actual)[:160]}"
             elif form.startswith("node"):
-                result = "pass" if actual.get("code") == "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED" and actual.get("missing") == [missing] else \
+                result = "pass" if actual.get("code") == "ERR_AUTOJS6_BRIDGE_CAPABILITY_NOT_DECLARED" and names(actual, missing) else \
                     f"expected {missing} undeclared, got {json.dumps(actual)[:200]}"
             else:
                 grant = BUN_GRANT[missing]
-                result = "pass" if actual.get("code") == "NOT_GRANTED" and (actual.get("capability") == grant or actual.get("missing") == [grant]) else \
+                result = "pass" if actual.get("code") == "NOT_GRANTED" and names(actual, grant) else \
                     f"expected {grant} not granted, got {json.dumps(actual)[:200]}"
             counts["pass" if result == "pass" else "fail"] += 1
             if result != "pass":
