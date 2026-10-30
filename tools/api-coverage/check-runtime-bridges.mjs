@@ -18,7 +18,9 @@ const read = file => fs.readFileSync(file, 'utf8');
 const source = read(path.join(nodeRoot, 'app/src/main/cpp/node_bridge_sources.cpp'));
 const sorted = values => [...new Set(values)].sort();
 function methods(file, name) {
-  const match = read(path.join(engine, file)).match(new RegExp(`val ${name}(?:\\s*:[^=\\n]+)?\\s*= setOf\\(([\\s\\S]*?)\\)`));
+  // Full-line comments inside a set may hold parentheses (RuntimeConsoleBridge.METHODS, api-coverage P3.3).
+  const text = read(path.join(engine, file)).replace(/^[ \t]*\/\/.*$/gm, '');
+  const match = text.match(new RegExp(`val ${name}(?:\\s*:[^=\\n]+)?\\s*= setOf\\(([\\s\\S]*?)\\)`));
   assert.ok(match, `Host method set changed: ${file}:${name}`);
   return sorted(Array.from(match[1].matchAll(/"([^"\r\n]+)"/g), item => item[1]));
 }
@@ -58,7 +60,10 @@ const node = create((module,method,args) => {
 const bun = await import(pathToFileURL(path.join(bunRoot,'app/src/main/assets/autojs6/host-client.mjs')).href);
 const keys = object => Object.keys(object).filter(key => typeof object[key] === 'function');
 const aliases = {showConsole:'show',openConsole:'show',launchConsole:'launch',clearConsole:'clear'};
-const controls = keys(node.console).filter(key => String(node.console[key]).includes('"console"')).map(key => aliases[key] || key);
+// rawInput answers asynchronously through NodeBridgeConsoleBridge (consoleMethods = tail, rawInput + METHODS, api-coverage P3.3).
+const controls = keys(node.console).filter(key => key !== 'rawInput' && String(node.console[key]).includes('"console"')).map(key => aliases[key] || key);
+// console.build(options) records in the shared UI family; its show() is the host's configure (Q166 (a), check-runtime-ui.mjs).
+if (String(node.console.build).includes('.console.build(options)') && source.includes('call("console", "configure"')) controls.push('configure');
 const groups = [
   ['text.pinyin',methods('NodeBridgeProtocol.kt','pinyinMethods'),keys(node.pinyin)],
   ['text.pinyin4j',methods('NodeBridgeProtocol.kt','pinyin4jMethods'),keys(node.pinyin4j)],
@@ -171,7 +176,7 @@ for (const name of conversionTypes) {
 }
 const protocol = read(path.join(engine,'NodeBridgeProtocol.kt'));
 assert.match(protocol,/SCREEN_METRICS to screenMetricsMethods/);
-assert.match(protocol,/consoleMethods = setOf\("tail"\) \+ RuntimeConsoleBridge\.METHODS/);
+assert.match(protocol,/consoleMethods = setOf\("tail", "rawInput"\) \+ RuntimeConsoleBridge\.METHODS/);
 const index = read(path.join(nodeRoot,'docs/nodejs/types/autojs6-node/index.d.ts'));
 assert.match(index,/input_observer\.d\.ts/);
 assert.match(index,/screen_metrics\.d\.ts/);
