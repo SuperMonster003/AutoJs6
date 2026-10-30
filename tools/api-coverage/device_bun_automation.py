@@ -46,7 +46,7 @@ GRANTS = ["accessibility.control", "accessibility.gesture", "accessibility.servi
 QUERY_GRANTS = ["events.observe"]
 # The denied run: [id, Bun expression, expected] where expected is {missing: [...]} (NOT_GRANTED before the host, the
 # missing grants compared as a set), {notGranted: grant} (NOT_GRANTED in the client's call layer, which names the grant in
-# error.capability: host.flow and the selector functions over it), {ok: true} (any value) or {equals: value}.
+# error.capability: the selector functions over flow's wait), {ok: true} (any value) or {equals: value}.
 DENIED_CASES = [
     ["automator.click", "automator.click('p44_none_text')", {"missing": ["accessibility.control"]}],
     ["global.back", "system.back()", {"missing": ["accessibility.control"]}],
@@ -61,7 +61,8 @@ DENIED_CASES = [
     ["ocr.paddle.detect", "ocr.paddle.detect({id: 'p44', __autojs6ImageHandle: 'p44'})", {"missing": ["ocr.control"]}],
     ["qrcode.recognizeText", "qrcode.recognizeText({id: 'p44', __autojs6ImageHandle: 'p44'})", {"missing": ["barcode.control"]}],
     ["yolo.load", "yolo.load('/sdcard/Download/p44-none', {component: 'p44.none/p44.None'})", {"missing": ["yolo.control"]}],
-    ["selector.pickup", "selector.pickup('p44_none_text')", {"notGranted": "flow.control"}],
+    # The selector functions probe with flow's wait, which reads the nodes over accessibility.control (host b23220775).
+    ["selector.pickup", "selector.pickup('p44_none_text')", {"notGranted": "accessibility.control"}],
     # Local members answer without grants.
     ["keys.codes", "[keys.home, keys.BACK, keys.volume_down]", {"equals": [3, 4, 25]}],
     ["threads.atomic", "threads.atomic(1).incrementAndGet()", {"equals": 2}],
