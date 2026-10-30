@@ -1110,7 +1110,7 @@
     <string name="text_bun_ui_compose_grant">Compose 介面</string>
     <string name="text_bun_ui_layout_grant">UI 佈局</string>
     <string name="text_bun_ui_toast_grant">Toast 訊息</string>
-    <string name="summary_bun_ui_toast_grant">允許 Bun 腳本透過能力橋彈出簡短的 Toast 訊息 (ui.toast, 每次執行至多 4 條); 下次執行起生效</string>
+    <string name="summary_bun_ui_toast_grant">允許 Bun 腳本透過能力橋彈出簡短的 Toast 訊息 (ui.toast); 下次執行起生效</string>
     <string name="text_bun_device_info_grant">裝置資訊</string>
     <string name="summary_bun_device_info_grant">允許 Bun 腳本透過能力橋讀取裝置品牌, 型號與 Android 版本 (device.info, 不含識別碼); 下次執行起生效</string>
     <string name="summary_plugin_show_official_plugins">展示官方倉庫中的可在線安裝插件</string>

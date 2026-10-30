@@ -1114,7 +1114,7 @@
     <string name="text_bun_ui_compose_grant">Compose UI</string>
     <string name="text_bun_ui_layout_grant">UI レイアウト</string>
     <string name="text_bun_ui_toast_grant">Toast メッセージ</string>
-    <string name="summary_bun_ui_toast_grant">Bun スクリプトが機能ブリッジを通じて短い Toast メッセージを表示できるようにします (ui.toast, 1 回の実行につき最大 4 件); 次回の実行から適用</string>
+    <string name="summary_bun_ui_toast_grant">Bun スクリプトが機能ブリッジを通じて短い Toast メッセージを表示できるようにします (ui.toast); 次回の実行から適用</string>
     <string name="text_bun_device_info_grant">デバイス情報</string>
     <string name="summary_bun_device_info_grant">Bun スクリプトが機能ブリッジを通じてデバイスのブランド, モデル, Android バージョンを読み取れるようにします (device.info, 識別子は含まない); 次回の実行から適用</string>
     <string name="summary_plugin_show_official_plugins">公式リポジトリ内のオンラインインストール可能プラグインを表示します</string>

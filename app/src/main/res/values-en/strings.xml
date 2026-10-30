@@ -1112,7 +1112,7 @@
     <string name="text_bun_ui_compose_grant">Compose UI</string>
     <string name="text_bun_ui_layout_grant">UI layouts</string>
     <string name="text_bun_ui_toast_grant">Toast messages</string>
-    <string name="summary_bun_ui_toast_grant">Let Bun scripts show short toast messages through the capability bridge (ui.toast, at most 4 per run); applies from the next run</string>
+    <string name="summary_bun_ui_toast_grant">Let Bun scripts show short toast messages through the capability bridge (ui.toast); applies from the next run</string>
     <string name="text_bun_device_info_grant">Device info</string>
     <string name="summary_bun_device_info_grant">Let Bun scripts read the device brand, model and Android version through the capability bridge (device.info, no identifiers); applies from the next run</string>
     <string name="summary_plugin_show_official_plugins">Display online-installable plugins from the official repositories</string>

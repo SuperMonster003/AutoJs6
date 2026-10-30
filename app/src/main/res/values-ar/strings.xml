@@ -1115,7 +1115,7 @@
     <string name="text_bun_ui_compose_grant">واجهة Compose</string>
     <string name="text_bun_ui_layout_grant">تخطيطات الواجهة</string>
     <string name="text_bun_ui_toast_grant">رسائل Toast</string>
-    <string name="summary_bun_ui_toast_grant">السماح لـ Bun scripts بعرض رسائل Toast قصيرة عبر جسر القدرات (ui.toast, بحد أقصى 4 لكل تشغيل); تسري من التشغيل التالي</string>
+    <string name="summary_bun_ui_toast_grant">السماح لـ Bun scripts بعرض رسائل Toast قصيرة عبر جسر القدرات (ui.toast); تسري من التشغيل التالي</string>
     <string name="text_bun_device_info_grant">معلومات الجهاز</string>
     <string name="summary_bun_device_info_grant">السماح لـ Bun scripts بقراءة علامة الجهاز وطرازه وإصدار Android عبر جسر القدرات (device.info, بدون معرّفات); تسري من التشغيل التالي</string>
     <string name="summary_plugin_show_official_plugins">عرض الاضافات القابلة للتثبيت عبر الانترنت من المستودعات الرسمية</string>

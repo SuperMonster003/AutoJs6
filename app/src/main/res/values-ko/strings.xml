@@ -1115,7 +1115,7 @@
     <string name="text_bun_ui_compose_grant">Compose UI</string>
     <string name="text_bun_ui_layout_grant">UI 레이아웃</string>
     <string name="text_bun_ui_toast_grant">Toast 메시지</string>
-    <string name="summary_bun_ui_toast_grant">Bun 스크립트가 기능 브리지를 통해 짧은 Toast 메시지를 표시하도록 허용합니다 (ui.toast, 실행당 최대 4개); 다음 실행부터 적용</string>
+    <string name="summary_bun_ui_toast_grant">Bun 스크립트가 기능 브리지를 통해 짧은 Toast 메시지를 표시하도록 허용합니다 (ui.toast); 다음 실행부터 적용</string>
     <string name="text_bun_device_info_grant">기기 정보</string>
     <string name="summary_bun_device_info_grant">Bun 스크립트가 기능 브리지를 통해 기기 브랜드, 모델, Android 버전을 읽도록 허용합니다 (device.info, 식별자 제외); 다음 실행부터 적용</string>
     <string name="summary_plugin_show_official_plugins">공식 저장소의 온라인 설치 가능 플러그인을 표시합니다</string>

@@ -1113,7 +1113,7 @@
     <string name="text_bun_ui_compose_grant">Interfaz Compose</string>
     <string name="text_bun_ui_layout_grant">Diseños de interfaz</string>
     <string name="text_bun_ui_toast_grant">Mensajes toast</string>
-    <string name="summary_bun_ui_toast_grant">Permitir que los scripts Bun muestren mensajes toast breves mediante el puente de capacidades (ui.toast, máximo 4 por ejecución); se aplica a partir de la próxima ejecución</string>
+    <string name="summary_bun_ui_toast_grant">Permitir que los scripts Bun muestren mensajes toast breves mediante el puente de capacidades (ui.toast); se aplica a partir de la próxima ejecución</string>
     <string name="text_bun_device_info_grant">Información del dispositivo</string>
     <string name="summary_bun_device_info_grant">Permitir que los scripts Bun lean la marca, el modelo y la versión de Android del dispositivo mediante el puente de capacidades (device.info, sin identificadores); se aplica a partir de la próxima ejecución</string>
     <string name="summary_plugin_show_official_plugins">Mostrar plugins instalables en línea de los repositorios oficiales</string>

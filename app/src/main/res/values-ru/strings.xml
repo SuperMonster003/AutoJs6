@@ -1113,7 +1113,7 @@
     <string name="text_bun_ui_compose_grant">Интерфейс Compose</string>
     <string name="text_bun_ui_layout_grant">Макеты интерфейса</string>
     <string name="text_bun_ui_toast_grant">Toast-сообщения</string>
-    <string name="summary_bun_ui_toast_grant">Разрешить Bun-скриптам показывать короткие toast-сообщения через мост возможностей (ui.toast, не более 4 за запуск); действует со следующего запуска</string>
+    <string name="summary_bun_ui_toast_grant">Разрешить Bun-скриптам показывать короткие toast-сообщения через мост возможностей (ui.toast); действует со следующего запуска</string>
     <string name="text_bun_device_info_grant">Сведения об устройстве</string>
     <string name="summary_bun_device_info_grant">Разрешить Bun-скриптам читать марку, модель и версию Android устройства через мост возможностей (device.info, без идентификаторов); действует со следующего запуска</string>
     <string name="summary_plugin_show_official_plugins">Показывать онлайн-устанавливаемые плагины из официальных репозиториев</string>
