@@ -260,9 +260,9 @@ class Collector:
 FOREGROUND = False
 
 
-def run_script(serial, name, text, run, wait, extra=None):
-    """Pushes [text] (and the [extra] files, name to bytes), starts it with RunIntentActivity and returns the results of
-    run [run] by index."""
+def run_script(serial, name, text, run, wait, extra=None, launch=()):
+    """Pushes [text] (and the [extra] files, name to bytes), starts it with RunIntentActivity (with the [launch] extras)
+    and returns the results of run [run] by index."""
     local = HERE / "__pycache__" / name
     local.parent.mkdir(exist_ok=True)
     local.write_text(text, encoding="utf-8")
@@ -284,7 +284,7 @@ def run_script(serial, name, text, run, wait, extra=None):
             sample.adb(serial, "shell", "monkey", "-p", HOST, "-c", "android.intent.category.LAUNCHER", "1", check=False)
             time.sleep(2)
         time.sleep(0.5)
-        sample.adb(serial, "shell", "am", "start", "-n", f"{HOST}/{RUN_ACTIVITY}", "-e", "path", remote)
+        sample.adb(serial, "shell", "am", "start", "-n", f"{HOST}/{RUN_ACTIVITY}", "-e", "path", remote, *launch)
         if not collector.done.wait(wait):
             print(f"warning: {name}: {len(collector.results)} results before the timeout", file=sys.stderr)
     finally:

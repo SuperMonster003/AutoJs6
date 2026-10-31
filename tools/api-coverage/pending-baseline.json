@@ -11,14 +11,12 @@
   "Q122"
  ],
  "counts": {
-  "node_main": 574,
-  "node_worker": 574,
-  "bun": 574
+  "node_main": 572,
+  "node_worker": 572,
+  "bun": 572
  },
  "pending": {
   "node_main": [
-   "Flow#await",
-   "Flow#sync",
    "imgui.AcceptDragDropPayload",
    "imgui.AddButtonEx",
    "imgui.AddMouseButtonEvent",
@@ -593,8 +591,6 @@
    "imgui.withWindow"
   ],
   "node_worker": [
-   "Flow#await",
-   "Flow#sync",
    "imgui.AcceptDragDropPayload",
    "imgui.AddButtonEx",
    "imgui.AddMouseButtonEvent",
@@ -1169,8 +1165,6 @@
    "imgui.withWindow"
   ],
   "bun": [
-   "Flow#await",
-   "Flow#sync",
    "imgui.AcceptDragDropPayload",
    "imgui.AddButtonEx",
    "imgui.AddMouseButtonEvent",

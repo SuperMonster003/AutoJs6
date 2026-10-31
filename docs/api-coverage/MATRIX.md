@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1683 | 369 | 0 | 941 | 0 | 574 |
-| Node Worker | 1683 | 366 | 0 | 944 | 0 | 574 |
-| Bun | 0 | 377 | 1672 | 944 | 0 | 574 |
+| Node main | 1685 | 369 | 0 | 941 | 0 | 572 |
+| Node Worker | 1685 | 366 | 0 | 944 | 0 | 572 |
+| Bun | 0 | 377 | 1674 | 944 | 0 | 572 |
 
 | 列 | 取值 |
 |---|---|
@@ -71,7 +71,7 @@
 | EpubBook# | 14 | 14 | 14 | - | 14 | 14 / 0 / 0 | 14 / 0 / 0 | 14 / 0 / 0 |
 | EpubReaderSession# | 34 | 34 | 34 | - | 32 | 0 / 34 / 0 | 0 / 34 / 0 | 0 / 34 / 0 |
 | FloatyWindow# | 12 | 12 | 12 | - | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
-| Flow# | 106 | 25 | 106 | - | 106 | 104 / 0 / 2 | 104 / 0 / 2 | 104 / 0 / 2 |
+| Flow# | 106 | 25 | 106 | - | 106 | 106 / 0 / 0 | 106 / 0 / 0 | 106 / 0 / 0 |
 | ImageFeatures# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | ImageWrapper# | 15 | 15 | 15 | - | 6 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
 | InjectableWebClient# | 2 | 2 | 2 | - | 0 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
@@ -486,13 +486,6 @@
 | `EpubReaderSession#setPreferences` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `EpubReaderSession#state` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `EpubReaderSession#title` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
-
-### Flow#
-
-| 行 id | Node main | Node Worker | Bun |
-|---|---|---|---|
-| `Flow#await` | pending | pending | pending |
-| `Flow#sync` | pending | pending | pending |
 
 ### ImageFeatures#
 
