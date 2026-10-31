@@ -64,10 +64,13 @@ Repeated on the final commits (AVD_API_33, x86_64 debug packages of Node fde5c5a
 The conformance class uses `process.exit` in 18 places, so it covers the change to the timers on the paths that already had
 tests.
 
-Not verified:
+Not verified at the time, both closed on 2026-11-01 by the closeout card (`tools/api-coverage/device_flow_terminals.py`, Redmi
+bek749scrwv4wo8h, arm64, API 33, debug packages of Node 400b27cf and Bun 13bfd2e):
 
-- `process.exit()` clearing timers on an arm64 device. The change is JavaScript in the shared core, and it ran on x86_64.
-- `new Worker(__filename)` in a project without package.json throws SyntaxError (Q200). It is older than this batch.
+- `process.exit()` clearing timers on an arm64 device: 7 / 7 (control, timeout, interval, immediate, from-timer, from-promise,
+  with-worker). Q201 keeps the change as it was.
+- `new Worker(__filename)` in a project without package.json threw SyntaxError (Q200): fixed by Node bd80f768, the load hook
+  now checks that the found file is a package.json. 1 / 1 on the same device.
 
 ## Restoration
 

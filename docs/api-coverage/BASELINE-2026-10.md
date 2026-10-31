@@ -1342,6 +1342,8 @@ Node main, Node Worker, Bun 三列的 pending 基线都是 574 行, 由下表构
 
 矩阵里 Q31 只剩这 2 行: 其他 12 个成员已由 P3 / P4 的句柄批次补齐.
 
+后续: Q202 (a) 已补这 2 行, pending 572 / 572 / 572, 只剩 imgui, 见第 21 节.
+
 ### 20.2 做了什么
 
 - Q190 (b): add*Task 18 处的 d.ts options 补 null, query*Tasks 4 处与 auto.explain 1 处跟随; Node 门面接受 null; type-map reviewed 撤销; Ace 重导入 (同时带上 TS d473c8e 的 speech).
@@ -1374,7 +1376,7 @@ Node main, Node Worker, Bun 三列的 pending 基线都是 574 行, 由下表构
 - TS sync --check changed 0, verify-runtime-declarations 通过 (declarations 95), verify-api-coverage 在真实仓库退出码 0; Ace verify-runtime-api-coverage --fresh 通过, verify-api-coverage 在真实仓库退出码 0. 文档 auto-generate --check 当前.
 - 真机结果与设备恢复见 docs/dev/runtime-closeout-2026-10-31.md. 重录脚本改动后的 rhino 阶段在 Xiaomi 968e9f18 上复跑 633 / 633 (只验证脚本, 该机宿主与录制值错误名全同, 差异只在堆栈文本).
 - 终版包复跑 (AVD_API_33, x86_64 debug, Node fde5c5a8, Bun 24a66fe): Bun 超时轮 6 / 6; Node AndroidTest SimpleRunSmokeTest, ExecutionModeLifecycleSmokeTest, NpmEcosystemSmokeTest, NodeRuntimePluginAndroidConformanceTest 全类 OK (37 tests).
-- 未验证: process.exit 清定时器未在 arm64 真机复测 (改动是共享 JS, 已在 x86_64 验证).
+- 未验证: process.exit 清定时器未在 arm64 真机复测 (改动是共享 JS, 已在 x86_64 验证). 后续: 2026-11-01 在 Redmi (arm64, API 33) 复测 7 / 7, 见第 21 节.
 
 ### 20.5 提交
 
