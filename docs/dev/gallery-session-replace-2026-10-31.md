@@ -118,3 +118,10 @@ py -3.12 -I tools/api-coverage/device_gallery_replace.py run --serial SERIAL --f
 The Node runs need the permissions and the Bun runs the grants of device_plugin_family.py (`grant --set on --only ...`). A bare
 Bun script is limited to 60 s, so the script runs Bun as a project with `bun.timeoutMs`. Steps that fail for a lost token take
 60 s each.
+
+## Device state afterwards
+
+OnePlus 63751f63 is back on what it had before this batch, checked by md5: host 5935 (b958b46599fe2c7188b58a84a1705553), Node
+340 (648d7ac693f6902528f6a280de41e906), 3-Maple Image (8fed17c5839aaa7ff560c7406a5126e6), Batch Rename
+(814cff596957d573c04211dfb30a7ba1), Bun Runtime not installed, the four script control grants absent. 3-Macaw Speech is not part
+of this record: another session reinstalled it during this batch, and it stays as that session left it.
