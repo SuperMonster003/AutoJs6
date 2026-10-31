@@ -762,6 +762,7 @@ Function.prototype.arguments	-AGSC	accessor
 Function.prototype.arity	--C	number '0'
 Function.prototype.bind	-WC	function name='bind' length=1
 Function.prototype.call	-WC	function name='call' length=1
+Function.prototype.caller	-AGSC	accessor
 Function.prototype.constructor	-WC	function name='Function' length=1
 Function.prototype.length	--C	number '0'
 Function.prototype.name	--C	string ''
