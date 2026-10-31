@@ -50,7 +50,8 @@ object ImguiNames {
         "tableGetSortSpecs", "addMousePosEvent", "addMouseButtonEvent", "isKeyDown", "isKeyPressed", "isKeyReleased", "getKeyPressedAmount", "getKeyName",
         "isKeyChordPressed", "shortcut", "setNextItemShortcut", "getClipboardText", "setClipboardText", "beginDragDropSource", "setDragDropPayload",
         "endDragDropSource", "beginDragDropTarget", "acceptDragDropPayload", "endDragDropTarget", "getDragDropPayload", "withDragDropSource",
-        "withDragDropTarget", "pushClipRect", "popClipRect",
+        "withDragDropTarget", "pushClipRect", "popClipRect", "beginMultiSelect", "endMultiSelect", "setNextItemSelectionUserData",
+        "isItemToggledSelection", "selectionStorage",
     )
 
     /** PascalCase aliases of [FUNCTIONS] (`Begin` for `begin`, `PushID` for `pushId`), functions as well. */
@@ -85,7 +86,8 @@ object ImguiNames {
         "AddMousePosEvent", "AddMouseButtonEvent", "IsKeyDown", "IsKeyPressed", "IsKeyReleased", "GetKeyPressedAmount", "GetKeyName",
         "IsKeyChordPressed", "Shortcut", "SetNextItemShortcut", "GetClipboardText", "SetClipboardText", "BeginDragDropSource", "SetDragDropPayload",
         "EndDragDropSource", "BeginDragDropTarget", "AcceptDragDropPayload", "EndDragDropTarget", "GetDragDropPayload", "WithDragDropSource",
-        "WithDragDropTarget", "PushClipRect", "PopClipRect",
+        "WithDragDropTarget", "PushClipRect", "PopClipRect", "BeginMultiSelect", "EndMultiSelect", "SetNextItemSelectionUserData",
+        "IsItemToggledSelection", "SelectionStorage",
     )
 
     /** Constant groups of the plugin API (flag and enum tables, theme and font names), read through getters. */
@@ -94,7 +96,7 @@ object ImguiNames {
         "TabItemFlags", "MouseButton", "ChildFlags", "ComboFlags", "PopupFlags", "HoveredFlags", "FocusedFlags", "ColorEditFlags", "TableFlags",
         "TableColumnFlags", "TableRowFlags", "TableBgTarget", "SortDirection", "Col", "StyleVar", "Themes", "Appearance", "Fonts", "TextureFlags",
         "DrawListLayer", "DrawFlags", "TouchMode", "WindowMode", "LogLevel", "ToastPosition", "Icons", "Dir", "ButtonFlags", "Key", "density",
-        "Mod", "InputFlags", "DragDropFlags",
+        "Mod", "InputFlags", "DragDropFlags", "MultiSelectFlags",
     )
 
 }

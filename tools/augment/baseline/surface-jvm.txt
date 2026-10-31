@@ -5179,6 +5179,10 @@ imgui.BeginMenuBar	EW-	function name='BeginMenuBar' length=0
 imgui.BeginMenuBar.arity	--C	number '0'
 imgui.BeginMenuBar.length	--C	number '0'
 imgui.BeginMenuBar.name	--C	string 'BeginMenuBar'
+imgui.BeginMultiSelect	EW-	function name='BeginMultiSelect' length=0
+imgui.BeginMultiSelect.arity	--C	number '0'
+imgui.BeginMultiSelect.length	--C	number '0'
+imgui.BeginMultiSelect.name	--C	string 'BeginMultiSelect'
 imgui.BeginPopup	EW-	function name='BeginPopup' length=0
 imgui.BeginPopup.arity	--C	number '0'
 imgui.BeginPopup.length	--C	number '0'
@@ -5393,6 +5397,10 @@ imgui.EndMenuBar	EW-	function name='EndMenuBar' length=0
 imgui.EndMenuBar.arity	--C	number '0'
 imgui.EndMenuBar.length	--C	number '0'
 imgui.EndMenuBar.name	--C	string 'EndMenuBar'
+imgui.EndMultiSelect	EW-	function name='EndMultiSelect' length=0
+imgui.EndMultiSelect.arity	--C	number '0'
+imgui.EndMultiSelect.length	--C	number '0'
+imgui.EndMultiSelect.name	--C	string 'EndMultiSelect'
 imgui.EndPopup	EW-	function name='EndPopup' length=0
 imgui.EndPopup.arity	--C	number '0'
 imgui.EndPopup.length	--C	number '0'
@@ -5619,6 +5627,10 @@ imgui.IsItemHovered	EW-	function name='IsItemHovered' length=0
 imgui.IsItemHovered.arity	--C	number '0'
 imgui.IsItemHovered.length	--C	number '0'
 imgui.IsItemHovered.name	--C	string 'IsItemHovered'
+imgui.IsItemToggledSelection	EW-	function name='IsItemToggledSelection' length=0
+imgui.IsItemToggledSelection.arity	--C	number '0'
+imgui.IsItemToggledSelection.length	--C	number '0'
+imgui.IsItemToggledSelection.name	--C	string 'IsItemToggledSelection'
 imgui.IsItemVisible	EW-	function name='IsItemVisible' length=0
 imgui.IsItemVisible.arity	--C	number '0'
 imgui.IsItemVisible.length	--C	number '0'
@@ -5724,6 +5736,7 @@ imgui.MultiChoice	EW-	function name='MultiChoice' length=0
 imgui.MultiChoice.arity	--C	number '0'
 imgui.MultiChoice.length	--C	number '0'
 imgui.MultiChoice.name	--C	string 'MultiChoice'
+imgui.MultiSelectFlags	EAG--	accessor
 imgui.NewLine	EW-	function name='NewLine' length=0
 imgui.NewLine.arity	--C	number '0'
 imgui.NewLine.length	--C	number '0'
@@ -5822,6 +5835,10 @@ imgui.Selectable.arity	--C	number '0'
 imgui.Selectable.length	--C	number '0'
 imgui.Selectable.name	--C	string 'Selectable'
 imgui.SelectableFlags	EAG--	accessor
+imgui.SelectionStorage	EW-	function name='SelectionStorage' length=0
+imgui.SelectionStorage.arity	--C	number '0'
+imgui.SelectionStorage.length	--C	number '0'
+imgui.SelectionStorage.name	--C	string 'SelectionStorage'
 imgui.Separator	EW-	function name='Separator' length=0
 imgui.Separator.arity	--C	number '0'
 imgui.Separator.length	--C	number '0'
@@ -5858,6 +5875,10 @@ imgui.SetMoreTouch	EW-	function name='SetMoreTouch' length=0
 imgui.SetMoreTouch.arity	--C	number '0'
 imgui.SetMoreTouch.length	--C	number '0'
 imgui.SetMoreTouch.name	--C	string 'SetMoreTouch'
+imgui.SetNextItemSelectionUserData	EW-	function name='SetNextItemSelectionUserData' length=0
+imgui.SetNextItemSelectionUserData.arity	--C	number '0'
+imgui.SetNextItemSelectionUserData.length	--C	number '0'
+imgui.SetNextItemSelectionUserData.name	--C	string 'SetNextItemSelectionUserData'
 imgui.SetNextItemShortcut	EW-	function name='SetNextItemShortcut' length=0
 imgui.SetNextItemShortcut.arity	--C	number '0'
 imgui.SetNextItemShortcut.length	--C	number '0'
@@ -6223,6 +6244,10 @@ imgui.beginMenuBar	EW-	function name='beginMenuBar' length=0
 imgui.beginMenuBar.arity	--C	number '0'
 imgui.beginMenuBar.length	--C	number '0'
 imgui.beginMenuBar.name	--C	string 'beginMenuBar'
+imgui.beginMultiSelect	EW-	function name='beginMultiSelect' length=0
+imgui.beginMultiSelect.arity	--C	number '0'
+imgui.beginMultiSelect.length	--C	number '0'
+imgui.beginMultiSelect.name	--C	string 'beginMultiSelect'
 imgui.beginPopup	EW-	function name='beginPopup' length=0
 imgui.beginPopup.arity	--C	number '0'
 imgui.beginPopup.length	--C	number '0'
@@ -6436,6 +6461,10 @@ imgui.endMenuBar	EW-	function name='endMenuBar' length=0
 imgui.endMenuBar.arity	--C	number '0'
 imgui.endMenuBar.length	--C	number '0'
 imgui.endMenuBar.name	--C	string 'endMenuBar'
+imgui.endMultiSelect	EW-	function name='endMultiSelect' length=0
+imgui.endMultiSelect.arity	--C	number '0'
+imgui.endMultiSelect.length	--C	number '0'
+imgui.endMultiSelect.name	--C	string 'endMultiSelect'
 imgui.endPopup	EW-	function name='endPopup' length=0
 imgui.endPopup.arity	--C	number '0'
 imgui.endPopup.length	--C	number '0'
@@ -6676,6 +6705,10 @@ imgui.isItemHovered	EW-	function name='isItemHovered' length=0
 imgui.isItemHovered.arity	--C	number '0'
 imgui.isItemHovered.length	--C	number '0'
 imgui.isItemHovered.name	--C	string 'isItemHovered'
+imgui.isItemToggledSelection	EW-	function name='isItemToggledSelection' length=0
+imgui.isItemToggledSelection.arity	--C	number '0'
+imgui.isItemToggledSelection.length	--C	number '0'
+imgui.isItemToggledSelection.name	--C	string 'isItemToggledSelection'
 imgui.isItemVisible	EW-	function name='isItemVisible' length=0
 imgui.isItemVisible.arity	--C	number '0'
 imgui.isItemVisible.length	--C	number '0'
@@ -6872,6 +6905,10 @@ imgui.selectable	EW-	function name='selectable' length=0
 imgui.selectable.arity	--C	number '0'
 imgui.selectable.length	--C	number '0'
 imgui.selectable.name	--C	string 'selectable'
+imgui.selectionStorage	EW-	function name='selectionStorage' length=0
+imgui.selectionStorage.arity	--C	number '0'
+imgui.selectionStorage.length	--C	number '0'
+imgui.selectionStorage.name	--C	string 'selectionStorage'
 imgui.sendKey	EW-	function name='sendKey' length=0
 imgui.sendKey.arity	--C	number '0'
 imgui.sendKey.length	--C	number '0'
@@ -6912,6 +6949,10 @@ imgui.setMoreTouch	EW-	function name='setMoreTouch' length=0
 imgui.setMoreTouch.arity	--C	number '0'
 imgui.setMoreTouch.length	--C	number '0'
 imgui.setMoreTouch.name	--C	string 'setMoreTouch'
+imgui.setNextItemSelectionUserData	EW-	function name='setNextItemSelectionUserData' length=0
+imgui.setNextItemSelectionUserData.arity	--C	number '0'
+imgui.setNextItemSelectionUserData.length	--C	number '0'
+imgui.setNextItemSelectionUserData.name	--C	string 'setNextItemSelectionUserData'
 imgui.setNextItemShortcut	EW-	function name='setNextItemShortcut' length=0
 imgui.setNextItemShortcut.arity	--C	number '0'
 imgui.setNextItemShortcut.length	--C	number '0'

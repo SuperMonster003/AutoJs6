@@ -1207,6 +1207,7 @@ install imgui:BeginItemTooltip	kind="function" attributes=4 global="NONE" target
 install imgui:BeginListBox	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:BeginMenu	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:BeginMenuBar	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:BeginMultiSelect	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:BeginPopup	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:BeginPopupContextItem	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:BeginPopupContextWindow	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1268,6 +1269,7 @@ install imgui:EndGroup	kind="function" attributes=4 global="NONE" target=null ar
 install imgui:EndListBox	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:EndMenu	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:EndMenuBar	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:EndMultiSelect	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:EndPopup	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:EndTabBar	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:EndTabItem	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1329,6 +1331,7 @@ install imgui:IsItemDeactivatedAfterEdit	kind="function" attributes=4 global="NO
 install imgui:IsItemEdited	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:IsItemFocused	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:IsItemHovered	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:IsItemToggledSelection	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:IsItemVisible	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:IsKeyChordPressed	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:IsKeyDown	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1359,6 +1362,7 @@ install imgui:MenuItem	kind="function" attributes=4 global="NONE" target=null ar
 install imgui:Mod	kind="getter" attributes=4 global="NONE" target=null arity=null
 install imgui:MouseButton	kind="getter" attributes=4 global="NONE" target=null arity=null
 install imgui:MultiChoice	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:MultiSelectFlags	kind="getter" attributes=4 global="NONE" target=null arity=null
 install imgui:NewLine	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:OpenPopup	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:PlotHistogram	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1385,6 +1389,7 @@ install imgui:RunExample	kind="function" attributes=4 global="NONE" target=null 
 install imgui:SameLine	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:Selectable	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SelectableFlags	kind="getter" attributes=4 global="NONE" target=null arity=null
+install imgui:SelectionStorage	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:Separator	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SeparatorText	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetClipboardText	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1394,6 +1399,7 @@ install imgui:SetGlobalAlpha	kind="function" attributes=4 global="NONE" target=n
 install imgui:SetItemTooltip	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetKeyboardFocusHere	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetMoreTouch	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:SetNextItemSelectionUserData	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextItemShortcut	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextItemWidth	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextWindowBgAlpha	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1498,6 +1504,7 @@ install imgui:beginItemTooltip	kind="function" attributes=4 global="NONE" target
 install imgui:beginListBox	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:beginMenu	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:beginMenuBar	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:beginMultiSelect	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:beginPopup	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:beginPopupContextItem	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:beginPopupContextWindow	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1552,6 +1559,7 @@ install imgui:endGroup	kind="function" attributes=4 global="NONE" target=null ar
 install imgui:endListBox	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:endMenu	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:endMenuBar	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:endMultiSelect	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:endPopup	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:endTabBar	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:endTabItem	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1612,6 +1620,7 @@ install imgui:isItemDeactivatedAfterEdit	kind="function" attributes=4 global="NO
 install imgui:isItemEdited	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:isItemFocused	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:isItemHovered	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:isItemToggledSelection	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:isItemVisible	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:isKeyChordPressed	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:isKeyDown	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1661,6 +1670,7 @@ install imgui:resetMouseDragDelta	kind="function" attributes=4 global="NONE" tar
 install imgui:runExample	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:sameLine	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:selectable	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:selectionStorage	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:sendKey	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:separator	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:separatorText	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1671,6 +1681,7 @@ install imgui:setGlobalAlpha	kind="function" attributes=4 global="NONE" target=n
 install imgui:setItemTooltip	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setKeyboardFocusHere	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setMoreTouch	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:setNextItemSelectionUserData	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextItemShortcut	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextItemWidth	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextWindowBgAlpha	kind="function" attributes=4 global="NONE" target=null arity=null

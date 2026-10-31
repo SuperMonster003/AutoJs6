@@ -99,8 +99,8 @@ if (EXPECT_MISSING) {
     });
     check('examples', function () {
         var list = imgui.listExamples();
-        assert(list && list.length === 9, 'length = ' + (list && list.length));
-        return 'length=9';
+        assert(list && list.length === 10, 'length = ' + (list && list.length));
+        return 'length=10';
     });
     check('units', function () {
         var density = imgui.density;
@@ -130,6 +130,17 @@ if (EXPECT_MISSING) {
         assert(imgui.DragDropFlags && imgui.DragDropFlags.SourceAllowNullID === 8, 'DragDropFlags');
         assert(imgui.Key && imgui.Key.F12 === 583, 'Key.F12');
         return names.length + ' functions, Mod, InputFlags, DragDropFlags';
+    });
+    check('r6 names', function () {
+        var names = ['beginMultiSelect', 'EndMultiSelect', 'setNextItemSelectionUserData', 'IsItemToggledSelection', 'selectionStorage',
+            'SelectionStorage'];
+        var missing = names.filter(function (name) { return typeof imgui[name] !== 'function'; });
+        assert(missing.length === 0, 'missing ' + missing.join(', '));
+        assert(imgui.MultiSelectFlags && imgui.MultiSelectFlags.ClearOnEscape === 1 << 9, 'MultiSelectFlags');
+        var selection = imgui.selectionStorage();
+        selection.apply([{type: 'setRange', selected: true, rangeFirstItem: 2, rangeLastItem: 4, rangeDirection: 1}]);
+        assert(selection.size === 3 && selection.has(3), 'selectionStorage size = ' + selection.size);
+        return names.length + ' functions, MultiSelectFlags, selectionStorage';
     });
     check('backend', function () {
         var caps = imgui.getBackendCapabilities();
