@@ -5,6 +5,7 @@ AutoJs6-Plugin-Paddle-OCR-PP-OCRv3, ROADMAP.md P2.2 and P3.5).
     py -3 -I tools/paddle-ocr-v3/device_check.py packaging -s SERIAL --group GROUP [--install APK ...] [--uninstall PKG ...]
     py -3 -I tools/paddle-ocr-v3/device_check.py extras -s SERIAL [--runtime rhino|node|bun]
     py -3 -I tools/paddle-ocr-v3/device_check.py options -s SERIAL
+    py -3 -I tools/paddle-ocr-v3/device_check.py rtl-merge -s SERIAL
 
 extras (Q20 (c)), with both plugins and Rapid OCR installed: OcrResult.extras of each path (quad, executionProvider,
   region offset, mergeLine, Paddle Lite, Rapid) and profile selection through ocr.detect. --runtime node / bun (Q26 (b))
@@ -17,6 +18,10 @@ options (Q28 (c)), with the ONNX Runtime plugin, Rapid OCR and the Node.js and B
   settings in the engine reloads of the plugin log, scoreThreshold and boxScoreThresh in the results they drop, useCls
   on the rotated sample, and mergeLine on a generated sample (needs Pillow) with a line of two segments above a line
   of one. Node.js and Bun must return the same results as Rhino in every run, without the timing extras.
+
+rtl-merge (Q60 (a)), with the arabic plugin and the Node.js and Bun plugins installed: mergeLine on the arabic sample in
+  Rhino, Node.js and Bun. The segments of a line must join from the right edge, a line must not be one the left edges
+  give, the lines must read like the sample, and Node.js and Bun must return the same results as Rhino.
 
 coexistence (P2.2), with Paddle Lite 1.1.0 and the ONNX Runtime 2.0.0 plugin installed side by side:
   installed   both packages and their versions
@@ -38,6 +43,8 @@ and compares its texts with the same runs in the host app. Groups:
   no-opencv  the OpenCV plugin switched off: the build stops with the "requires the OpenCV plugin" error
   lite       only Paddle Lite 1.1.0: the packaged app runs the Paddle Lite engine
   old        the old Paddle OCR v3 1.0.x under the ONNX Runtime package name: the packager falls back to v3-paddle-lite
+  arabic     the arabic plugin: the embedded engine reads right-to-left text in reading order and mergeLine joins from
+             the right, with the same text as the plugin in the host app (roadmap Q60 (a))
 
 Prerequisites: the debug host and its test APK, and an APK Builder Template plugin built from a Runtime Kit of the
 same host (`:app:generateRuntimeKit`, then that repository with -Pautojs.apkBuilder.templatePlugin.runtimeKitDir).
@@ -68,6 +75,7 @@ TEMPLATE = "org.autojs.plugin.apkbuilder.template"
 PADDLE_PREFIX = "io.github.supermonster003.autojs6.plugin.paddleocr."
 ORT = PADDLE_PREFIX + "v3"
 LITE = ORT + ".paddlelite"
+ARABIC = ORT + ".arabic"
 RAPID_V3 = "io.github.supermonster003.autojs6.plugin.rapidocr.ppocrv3"
 OPENCV = "io.github.supermonster003.autojs6.plugin.opencv"
 ACTION = "org.autojs.plugin.PADDLE_OCR"
@@ -97,6 +105,12 @@ ORT_RUNS = [
 ]
 LITE_RUNS = [("fp32", "zh", {"useSlim": False}), ("slim", "zh", {"useSlim": True})]
 QUICK_RUNS = [("fp32", "zh", {"useSlim": False})]
+# fp32 comes back last, so that every run loads its models and shows them in the log.
+ARABIC_RUNS = [
+    ("fp32", "arabic", {"useSlim": False}),
+    ("slim", "arabic", {"useSlim": True}),
+    ("mergeLine", "arabic", {"useSlim": False, "mergeLine": True}),
+]
 # Runs whose text is informational: the rotated sample is not expected to read without the classifier.
 INFO_RUNS = {"rotated"}
 
@@ -109,6 +123,7 @@ GROUPS = {
     "lite": {"enable": [LITE], "variant": "v3-paddle-lite", "runs": LITE_RUNS, "engine": "paddle_light"},
     "old": {"enable": [ORT], "variant": "v3-paddle-lite", "runs": LITE_RUNS, "engine": "paddle_light",
             "oldPlugin": True},
+    "arabic": {"enable": [ARABIC], "variant": "v3", "hostOptions": {"profile": "arabic"}, "runs": ARABIC_RUNS, "engine": "onnxruntime"},
 }
 
 
@@ -200,7 +215,9 @@ def run_script(device, config, samples, timeout):
 
 def runs_config(runs, output, directory, extra=None, repeat=1):
     return {"dir": directory, "output": output, "priority": False,
-            "runs": [{"id": run_id, "file": f"{sample}.png", "options": {**options, **(extra or {})}, "repeat": repeat}
+            "runs": [{"id": run_id, "file": f"{sample}.png", "options": {**options, **(extra or {})}, "repeat": repeat,
+                      # ocr.paddle only returns text, the lines are merged by detect.
+                      **({"detect": "paddle"} if options.get("mergeLine") else {})}
                      for run_id, sample, options in runs]}
 
 
@@ -492,6 +509,66 @@ def option_checks(runtime, runs, entries, loads, expected):
     return ok
 
 
+def merged_from(segments, key):
+    """The lines of [segments] joined in the order of [key], by OcrLineMerger's rule for one line."""
+    def same_line(a, b):
+        return abs((a[1] + a[3]) // 2 - (b[1] + b[3]) // 2) < max(a[3] - a[1], b[3] - b[1]) // 2
+
+    lines = []
+    for item in sorted(segments, key=lambda segment: segment["bounds"][3]):
+        line = next((line for line in lines if same_line(line[0]["bounds"], item["bounds"])), None)
+        lines.append([item]) if line is None else line.append(item)
+    return ["".join(item["text"] for item in sorted(line, key=key)) for line in lines]
+
+
+def rtl_merge(args, device, samples, expected):
+    """mergeLine on the arabic sample in Rhino, Node.js and Bun (roadmap Q60 (a))."""
+    versions = device.package(ARABIC)
+    report("arabic plugin", bool(versions), f"{versions[0]} ({versions[1]})" if versions else "missing")
+    if not versions:
+        return False
+    options = {"variant": "v3", "profile": "arabic", "useSlim": False}
+    runs = [
+        {"id": "segments", "file": "arabic.png", "options": options, "detect": "paddle"},
+        {"id": "mergeLine", "file": "arabic.png", "options": {**options, "mergeLine": True}, "detect": "paddle"},
+        {"id": "mergeLine recognizeText", "file": "arabic.png", "options": {**options, "mergeLine": True}, "detect": "paddle", "method": "recognizeText"},
+    ]
+    ok = True
+    outcomes = {}
+    for runtime in ("rhino", "node", "bun"):
+        if runtime == "rhino":
+            result = run_script(device, {"dir": WORK_DIR, "output": RESULT, "priority": False, "runs": [{**run, "repeat": 1} for run in runs]}, samples, args.timeout)
+            if result is None or "error" in result:
+                return report("host script", False, (result or {}).get("error", f"no result within {args.timeout} s"))
+            entries = {entry["id"]: entry for entry in result["runs"]}
+        else:
+            entries = runtime_entries(argparse.Namespace(**{**vars(args), "runtime": runtime}), runs, samples, "mergeLine")
+            ok &= report(f"{runtime} worker", signature(entries["worker"]) == signature(entries["mergeLine"]),
+                         entries["worker"].get("error", f"{len(entries['worker'].get('results') or [])} lines")[:300])
+        failed = sorted(run["id"] for run in runs if "error" in entries[run["id"]])
+        ok &= report(f"{runtime} runs", not failed, f"{len(runs) - len(failed)}/{len(runs)}" + (f", {entries[failed[0]]['error'][:300]}" if failed else ""))
+        outcomes[runtime] = entries
+        if failed:
+            continue
+        segments, lines = entries["segments"]["results"], entries["mergeLine"]["results"]
+        merged = [item["text"] for item in lines]
+        from_right = merged_from(segments, lambda item: -item["bounds"][2])
+        from_left = merged_from(segments, lambda item: item["bounds"][0])
+        similarity = line_similarity(expected["arabic"], merged)
+        ok &= report(f"{runtime} lines", len(segments) > len(lines) == len(expected["arabic"]), f"{len(segments)} segments, {len(lines)} lines")
+        ok &= report(f"{runtime} reading order", merged == from_right and merged != from_left,
+                     f"from the right {'yes' if merged == from_right else 'no'}, from the left {'yes' if merged == from_left else 'no'}")
+        ok &= report(f"{runtime} similarity", min(similarity) >= args.min_similarity, f"min {min(similarity):.2f}")
+        ok &= report(f"{runtime} recognizeText does not merge", len(entries["mergeLine recognizeText"].get("lines") or []) == len(segments),
+                     f"{len(entries['mergeLine recognizeText'].get('lines') or [])} lines")
+    for runtime in ("node", "bun"):
+        different = [run["id"] for run in runs if signature(outcomes[runtime][run["id"]]) != signature(outcomes["rhino"][run["id"]])]
+        ok &= report(f"{runtime} equals rhino", not different, f"{len(runs) - len(different)}/{len(runs)} runs" + (f", differ: {different}" if different else ""))
+    args.out.mkdir(parents=True, exist_ok=True)
+    (args.out / "rtl-merge-receipt.json").write_text(json.dumps(outcomes, ensure_ascii=False, indent=2), "utf-8")
+    return ok
+
+
 def recognition_options(args, device, samples, expected):
     """The recognition options of Rhino, Node.js and Bun on the same images (roadmap Q28 (c))."""
     runs = option_runs()
@@ -703,13 +780,15 @@ def packaging(args, device, samples, expected):
                      f"{len(loading)} ONNX Runtime engine loads logged")
         host = None
         if not group.get("oldPlugin"):
-            host = run_script(device, runs_config(group["runs"], RESULT, WORK_DIR, {"variant": group["variant"]}), samples, args.timeout)
+            host = run_script(device, runs_config(group["runs"], RESULT, WORK_DIR, {"variant": group["variant"], **group.get("hostOptions", {})}), samples, args.timeout)
         receipt["host"] = host
         host_runs = {entry["id"]: entry for entry in (host or {}).get("runs", [])}
         for entry in result["runs"]:
             run_id = entry["id"]
             sample = next(s for i, s, _ in group["runs"] if i == run_id)
             ok &= check_texts(f"packaged {run_id}", entry, expected[sample], args.min_similarity, run_id in INFO_RUNS)
+            if run_id == "mergeLine":
+                ok &= report("packaged mergeLine lines", len(entry.get("texts", [])) == len(expected[sample]), f"{len(entry.get('texts', []))} lines")
             details = []
             if engine == "onnxruntime":
                 load = in_window(loading, entry)
@@ -742,7 +821,7 @@ def packaging(args, device, samples, expected):
 def main():
     sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("coexistence", "packaging", "extras", "options"))
+    parser.add_argument("command", choices=("coexistence", "packaging", "extras", "options", "rtl-merge"))
     parser.add_argument("-s", "--serial", required=True)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--samples", type=Path, default=SAMPLES, help="the plugin's androidTest samples (samples.json)")
@@ -762,7 +841,7 @@ def main():
     samples = {key: value["lines"] for key, value in json.loads((args.samples / "samples.json").read_text("utf-8")).items()}
     print(f"device {args.serial}: {device.shell('getprop ro.product.model')}, API {device.shell('getprop ro.build.version.sdk')}, "
           f"host {device.package(HOST)}", flush=True)
-    command = {"coexistence": coexistence, "packaging": packaging, "extras": extras, "options": recognition_options}[args.command]
+    command = {"coexistence": coexistence, "packaging": packaging, "extras": extras, "options": recognition_options, "rtl-merge": rtl_merge}[args.command]
     ok = command(args, device, args.samples, samples)
     print("RESULT", "PASS" if ok else "FAIL")
     return 0 if ok else 1
