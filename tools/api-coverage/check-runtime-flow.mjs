@@ -25,7 +25,11 @@ for (const name of names) {
   assert(types.includes(name + ':') || types.includes(name + '(') || types.includes(name + '<'), 'Missing type '+name);
   assert(docs.includes(name), 'Missing documentation '+name);
 }
-for (const name of ['sync','await']) assert.equal(flow.Flow.prototype[name], undefined, name);
+for (const name of ['sync','await']) {
+  assert.equal(typeof flow.Flow.prototype[name], 'function', name);
+  assert(types.includes(name + '('), name + ' declaration');
+  assert(docs.includes(name + '('), name + ' documentation');
+}
 const scopedActions = ['within','scope','press','swipe','gesture','gestures'];
 for (const name of scopedActions) {
   assert.equal(typeof flow.Flow.prototype[name], 'function', name);

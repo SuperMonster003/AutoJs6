@@ -786,9 +786,9 @@ class RepositoryTest(unittest.TestCase):
         for row in family:
             for column in ['node_main', 'node_worker']:
                 self.assertNotEqual(row[column]['status'], 'pending', (row['id'], column))
-        # Q31: Flow#await / Flow#sync stay pending (appendix D).
+        # Q202: Flow#await / Flow#sync are Promise members of the handle.
         for column in ['node_main', 'node_worker']:
-            self.assertEqual((rows['Flow#await'][column]['status'], rows['Flow#sync'][column]['status']), ('pending', 'pending'))
+            self.assertEqual((rows['Flow#await'][column]['status'], rows['Flow#sync'][column]['status']), ('bridged', 'bridged'))
 
     def test_p3_2a(self):
         # The shared JS tools core: local-shim on the main thread and in Workers, global data functions through autojs6:global.
@@ -902,8 +902,8 @@ class RepositoryTest(unittest.TestCase):
         self.assertGreaterEqual(len(family), 240)
         for row in family:
             self.assertNotEqual(row['bun']['status'], 'pending', row['id'])
-        # Q31: Flow#await / Flow#sync stay pending (appendix D).
-        self.assertEqual((rows['Flow#await']['bun']['status'], rows['Flow#sync']['bun']['status']), ('pending', 'pending'))
+        # Q202: Flow#await / Flow#sync are Promise members of the handle.
+        self.assertEqual((rows['Flow#await']['bun']['status'], rows['Flow#sync']['bun']['status']), ('capability-gated', 'capability-gated'))
 
     def test_p5_2f1(self):
         # Q122 - Q124: the host imgui module is in the denominator, pending in every runtime column except the internal __pluginId.
