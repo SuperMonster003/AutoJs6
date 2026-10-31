@@ -45,11 +45,16 @@ object GalleryActivityLauncher {
             this.component = component
             addCategory(Intent.CATEGORY_DEFAULT)
             putExtra(GalleryActions.EXTRA_SESSION_TOKEN, token)
-            // An Activity of a replaced session may still be on top of its task: it must receive the
-            // new token through onNewIntent instead of being brought to the front unchanged.
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            if (context !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(launchFlags(context is Activity))
         }
+
+    /**
+     * Every session gets an Activity of its own. The Activity of a replaced session may still be finishing and that of a
+     * viewer left to the user stays in its task: a launch that reached either would only bring the task to the front or hand
+     * over a new intent, the token would reach nobody and the session would wait for its claim timeout (api-coverage Q197).
+     */
+    internal fun launchFlags(fromActivity: Boolean): Int =
+        if (fromActivity) 0 else Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 
     fun launch(context: Context, packageName: String, token: String) {
         val intent = intent(context, resolve(context, packageName), token)

@@ -132,7 +132,10 @@ the modification time when the image has no capture time).
 1. The host opens a session with an `IGalleryCallback` and reads the token from `getState`.
 2. The host resolves the single exported Activity of the plugin package that answers
    `org.autojs.plugin.GALLERY_SESSION_OPEN` (category `DEFAULT`) and starts it with an explicit
-   component and `org.autojs.plugin.gallery.extra.SESSION_TOKEN` as the only extra.
+   component and `org.autojs.plugin.gallery.extra.SESSION_TOKEN` as the only extra. Every start
+   opens a new task, so each session gets a new Activity and the token arrives in `onCreate`,
+   never through `onNewIntent`, even while the Activity of an earlier session is still finishing
+   or stays open under a viewer left to the user.
 3. The Activity claims the session with the token (once; a second claim or an unknown token
    finishes the Activity). A session not claimed within 60 s closes with reason `timeout`.
 4. Events follow on the callback, with a generation per session and a sequence number that grows
