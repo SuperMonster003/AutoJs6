@@ -15,10 +15,13 @@
 package org.autojs.plugin.paddle.ocr.onnx.model
 
 import android.content.Context
+import org.autojs.plugin.paddle.ocr.onnx.postprocess.CTCDecoder
 import org.autojs.plugin.paddle.ocr.onnx.util.YamlUtils
 
 data class ModelConfig(
     val characterList: List<String>,
+    /** The recognizer reads a right-to-left script, see [CTCDecoder.toLogicalOrder]. */
+    val reverse: Boolean = false,
 ) {
     companion object {
         fun parse(context: Context, assetPath: String): ModelConfig {
@@ -38,7 +41,12 @@ data class ModelConfig(
                 if (lastOrNull() != " ") add(" ")
             }
 
-            return ModelConfig(characterList = charListWithSpace)
+            return ModelConfig(characterList = charListWithSpace, reverse = readReverse(content))
+        }
+
+        // The plugin's scripts/prepare_ppocrv3_assets.py writes this key above character_dict, only for arabic.
+        fun readReverse(content: String): Boolean {
+            return content.lineSequence().takeWhile { it.trim() != "character_dict:" }.any { it.trim() == "reverse: true" }
         }
 
         private fun extractCharacterDict(content: String, assetPath: String): List<String> {

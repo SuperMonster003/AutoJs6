@@ -45,6 +45,14 @@ class NodeBridgeOcrResultsJsonTest {
     }
 
     @Test
+    fun mergeLineJoinsARightToLeftLineFromTheRight() {
+        val results = listOf(result("a", 0.5f, rect(20, 0, 30, 20)), result("b", 0.5f, rect(0, 0, 10, 20)))
+
+        assertEquals("ab", JSONArray(results.toOcrResultsJson(0, 0, mergeLine = true, rightToLeft = true)).getJSONObject(0).getString("text"))
+        assertEquals("ba", JSONArray(results.toOcrResultsJson(0, 0, mergeLine = true)).getJSONObject(0).getString("text"))
+    }
+
+    @Test
     fun mergeLineLeavesASingleResultWithoutBoundsAsItIs() {
         val results = JSONArray(listOf(result("a", 0.5f, null)).toOcrResultsJson(0, 0, mergeLine = true))
         assertFalse(results.getJSONObject(0).has("bounds"))

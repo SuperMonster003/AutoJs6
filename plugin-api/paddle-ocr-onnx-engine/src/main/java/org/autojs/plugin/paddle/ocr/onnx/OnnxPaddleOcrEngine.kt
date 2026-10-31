@@ -1,6 +1,7 @@
 package org.autojs.plugin.paddle.ocr.onnx
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.Bundle
@@ -8,8 +9,10 @@ import android.util.Log
 import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
+import org.autojs.plugin.paddle.ocr.onnx.model.ModelConfig
 import org.autojs.plugin.paddle.ocr.onnx.model.OCRResult
 import org.autojs.plugin.paddle.ocr.onnx.model.OCRRunResult
+import java.io.IOException
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -225,4 +228,17 @@ object OnnxPaddleOcrAssets {
         "libonnxruntime.so",
         "libonnxruntime4j_jni.so",
     )
+
+    /**
+     * Whether the recognizer in [assets] reads a right-to-left script, by the switch the engine itself reads. The host's
+     * line merge asks this of the packaged models and of an installed plugin with this layout alike.
+     * zh-CN: [assets] 中的识别模型是否读取从右到左的文字, 依据引擎自身读取的开关. 宿主的行合并对打包的模型与采用此布局的已安装插件都这样判定.
+     */
+    fun isRightToLeft(assets: AssetManager): Boolean {
+        return try {
+            assets.open("$ROOT/$REC_CONFIG").bufferedReader().use { ModelConfig.readReverse(it.readText()) }
+        } catch (_: IOException) {
+            false
+        }
+    }
 }

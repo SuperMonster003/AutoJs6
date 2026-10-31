@@ -16,8 +16,14 @@ package org.autojs.plugin.paddle.ocr.onnx.postprocess
 
 object CTCDecoder {
     private const val BLANK_IDX = 0
+    private const val LEFT_TO_RIGHT_RUN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 :*./%+-"
 
-    fun decode(output: FloatArray, shape: LongArray, characterList: List<String>): List<Pair<String, Float>> {
+    fun decode(
+        output: FloatArray,
+        shape: LongArray,
+        characterList: List<String>,
+        reverse: Boolean = false,
+    ): List<Pair<String, Float>> {
         val batchSize = shape[0].toInt()
         val timeSteps = shape[1].toInt()
         val numClasses = shape[2].toInt()
@@ -59,8 +65,28 @@ object CTCDecoder {
             }
 
             val confidence = if (keptProbs.isNotEmpty()) keptProbs.average().toFloat() else 0f
-            results.add(Pair(sb.toString(), confidence))
+            results.add(Pair(if (reverse) toLogicalOrder(sb.toString()) else sb.toString(), confidence))
         }
         return results
+    }
+
+    /**
+     * PaddleOCR BaseRecLabelDecode.pred_reverse: an arabic recognizer reads its crop from the left,
+     * so the text is mirrored, except that runs of Latin letters and digits stay readable.
+     */
+    fun toLogicalOrder(text: String): String {
+        val parts = mutableListOf<String>()
+        val run = StringBuilder()
+        for (ch in text) {
+            if (ch in LEFT_TO_RIGHT_RUN) {
+                run.append(ch)
+            } else {
+                if (run.isNotEmpty()) parts.add(run.toString())
+                parts.add(ch.toString())
+                run.clear()
+            }
+        }
+        if (run.isNotEmpty()) parts.add(run.toString())
+        return parts.asReversed().joinToString("")
     }
 }

@@ -21,6 +21,7 @@ import org.opencv.core.Mat
 class RecognitionEngine(
     private val ortManager: ORTSessionManager,
     private val characterList: List<String>,
+    private val reverse: Boolean = false,
 ) {
     data class RecognitionResult(
         val texts: List<Pair<String, Float>>,
@@ -44,7 +45,7 @@ class RecognitionEngine(
 
         // Postprocess (CTC decode)
         val postStart = System.currentTimeMillis()
-        val decoded = CTCDecoder.decode(outputData, outputShape, characterList)
+        val decoded = CTCDecoder.decode(outputData, outputShape, characterList, reverse)
         val postprocessMs = System.currentTimeMillis() - postStart
 
         val inputShape = preResult.shape.map { it.toInt() }

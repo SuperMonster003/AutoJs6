@@ -38,6 +38,7 @@ class OCREngine(
     private val detectionEngine: DetectionEngine
     private val recognitionEngine: RecognitionEngine
     private val classificationEngine: ClassificationEngine?
+    private val rightToLeft: Boolean
     val coldLoadTimeMs: Long get() = ortManager.coldLoadTimeMs
     val executionProvider: String get() = ortManager.executionProvider
 
@@ -52,7 +53,8 @@ class OCREngine(
             throw t
         }
         detectionEngine = DetectionEngine(ortManager, config)
-        recognitionEngine = RecognitionEngine(ortManager, configured.characterList)
+        recognitionEngine = RecognitionEngine(ortManager, configured.characterList, configured.reverse)
+        rightToLeft = configured.reverse
         classificationEngine = if (ortManager.hasClassifier) {
             ClassificationEngine(ortManager, config.clsThresh, config.clsBatchSize)
         } else {
@@ -106,7 +108,7 @@ class OCREngine(
         }
 
         // 2. Sort boxes
-        val sortedBoxes = BoxSorter.sortInReadingOrder(boxes)
+        val sortedBoxes = BoxSorter.sortInReadingOrder(boxes, rightToLeft)
 
         // 3. Crop every text region, classify orientation, then recognize in batches
         val crops = mutableListOf<org.opencv.core.Mat>()

@@ -35,6 +35,32 @@ class OcrLineMergerTest {
     }
 
     @Test
+    fun aRightToLeftLineJoinsFromTheRight() {
+        val lines = OcrLineMerger.merge(
+            listOf(
+                segment("second", Box(50, 40, 100, 60)),
+                segment("world", Box(0, 2, 40, 22)),
+                segment("hello ", Box(50, 0, 100, 20)),
+            ),
+            OcrResultExtras::mergeCommonValues,
+            rightToLeft = true,
+        )
+        assertEquals(listOf("hello world", "second"), lines.map { it.text })
+        assertEquals(Box(0, 0, 100, 22), lines[0].box)
+    }
+
+    @Test
+    fun aRightToLeftLineComparesTheRightEdges() {
+        // The left edges alone would give the opposite order.
+        val line = OcrLineMerger.merge(
+            listOf(segment("b", Box(10, 0, 50, 20)), segment("a", Box(0, 0, 60, 20))),
+            OcrResultExtras::mergeCommonValues,
+            rightToLeft = true,
+        ).single()
+        assertEquals("ab", line.text)
+    }
+
+    @Test
     fun theLineConfidenceIsWeightedByTextLength() {
         val line = merge(
             segment("abc", Box(0, 0, 30, 20), confidence = 1f),

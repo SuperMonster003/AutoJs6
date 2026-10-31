@@ -8,7 +8,7 @@ application itself never runs it: inside AutoJs6, `ocr.paddle` binds the install
 
 The pipeline under `org.autojs.plugin.paddle.ocr.onnx` (everything except `OnnxPaddleOcrEngine.kt`)
 is copied from `libs/ppocr-android-sdk` of `AutoJs6-Plugin-Paddle-OCR-PP-OCRv3` (b9fa0cc, roadmap
-P1.2), which is derived from PaddleOCR (Apache License 2.0, the per-file headers are kept). Changes
+P1.2, and 6a782ce for right-to-left recognition, roadmap Q60), which is derived from PaddleOCR (Apache License 2.0, the per-file headers are kept). Changes
 made here:
 
 - Package renamed from `io.github.supermonster003.autojs6.plugin.paddleocr.v3.sdk` to
@@ -22,6 +22,10 @@ D25): 0 or negative `cpuThreadNum` -> 4 threads, `useSlim` -> slim det / rec whe
 `useOpenCL` -> NNAPI execution provider with CPU fallback (result extras `executionProvider`),
 `scoreThreshold` -1 -> 0.1, extras `useCls` -> orientation classification, and the same det tuning
 extras. When the plugin SDK changes, copy it again and keep the changes above.
+
+`OnnxPaddleOcrAssets.isRightToLeft` reads the `reverse` switch of `rec/inference.yml`, for the packaged
+models and for an installed plugin of this layout alike, so the host's `mergeLine` and the decoder
+follow one source.
 
 ## Native libraries
 

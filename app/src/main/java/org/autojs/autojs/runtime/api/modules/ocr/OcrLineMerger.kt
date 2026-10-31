@@ -36,16 +36,19 @@ internal object OcrLineMerger {
 
     }
 
-    data class Segment<E>(val text: String, val confidence: Float, val box: Box, val extras: E) : Comparable<Segment<E>> {
-        override fun compareTo(other: Segment<E>) = compare(box, other.box)
-    }
+    data class Segment<E>(val text: String, val confidence: Float, val box: Box, val extras: E)
 
     /**
-     * Reading order: boxes on one line by their left edge, otherwise by their bottom edge.
+     * Reading order: boxes on one line by their left edge, or from the right by their right edge when the text is
+     * [rightToLeft], otherwise by their bottom edge.
      *
-     * zh-CN: 阅读顺序: 同一行按左边界, 否则按下边界.
+     * zh-CN: 阅读顺序: 同一行按左边界, 文本 [rightToLeft] 时按右边界从右往左, 否则按下边界.
      */
-    fun compare(a: Box, b: Box) = if (a.isSameLine(b)) a.left - b.left else a.bottom - b.bottom
+    fun compare(a: Box, b: Box, rightToLeft: Boolean = false) = when {
+        !a.isSameLine(b) -> a.bottom - b.bottom
+        rightToLeft -> b.right - a.right
+        else -> a.left - b.left
+    }
 
     /**
      * The [segments] in reading order, with neighbours on one line joined. The confidence of a line is weighted by the
@@ -53,9 +56,9 @@ internal object OcrLineMerger {
      *
      * zh-CN: 将 [segments] 按阅读顺序排列, 并合并相邻的同行片段. 行的置信度按片段文本长度加权, 片段的 extras 由 [mergeExtras] 合并.
      */
-    fun <E> merge(segments: List<Segment<E>>, mergeExtras: (List<E>) -> E): List<Segment<E>> {
+    fun <E> merge(segments: List<Segment<E>>, mergeExtras: (List<E>) -> E, rightToLeft: Boolean = false): List<Segment<E>> {
         if (segments.size <= 1) return segments
-        val sorted = segments.sorted()
+        val sorted = segments.sortedWith { a, b -> compare(a.box, b.box, rightToLeft) }
         val merged = ArrayList<Segment<E>>(sorted.size)
 
         var text = StringBuilder()

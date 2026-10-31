@@ -32,6 +32,12 @@ internal object PaddleOcrEmbeddedEngine {
         }
     }
 
+    /**
+     * Whether the packaged recognizer reads a right-to-left script; the Paddle Lite assets have no such model.
+     * zh-CN: 打包的识别模型是否读取从右到左的文字; Paddle Lite 资产没有这类模型.
+     */
+    fun isRightToLeft(context: Context) = OnnxPaddleOcrAssets.isRightToLeft(context.assets)
+
     private fun getEngine(context: Context): EmbeddedEngine {
         // Lazily initialize embedded engine.
         // zh-CN: 懒初始化内置引擎.

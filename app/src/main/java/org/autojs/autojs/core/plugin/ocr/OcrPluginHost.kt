@@ -47,6 +47,7 @@ import org.autojs.plugin.paddle.ocr.api.OcrOptions
 import org.autojs.plugin.paddle.ocr.api.OcrResult
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrOptionExtraKeys
 import org.autojs.plugin.paddle.ocr.api.PaddleOcrPluginCapabilityKeys
+import org.autojs.plugin.paddle.ocr.onnx.OnnxPaddleOcrAssets
 import java.io.FileDescriptor
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -196,6 +197,15 @@ object OcrPluginHost {
             results
         }
     }
+
+    /**
+     * Whether the plugin's recognizer reads a right-to-left script, by the switch in its models that the embedded engine
+     * reads too (paddle-ocr-v3 Q60). A plugin with another asset layout counts as left-to-right.
+     * zh-CN: 插件的识别模型是否读取从右到左的文字, 依据其模型中内嵌引擎同样读取的开关 (paddle-ocr-v3 Q60). 其他资产布局的插件视为从左到右.
+     */
+    fun isRightToLeft(context: Context, target: Discovered) = runCatching {
+        OnnxPaddleOcrAssets.isRightToLeft(context.createPackageContext(target.serviceInfo.packageName, 0).assets)
+    }.getOrDefault(false)
 
     suspend fun select(
         context: Context,

@@ -70,7 +70,10 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
             ApkBuilder.Lib.PADDLE_OCR.ensureLibFiles(OcrMode.PADDLE.value)
             val parsed = OcrCallOptions.paddle(options.toOcrOptionReader())
             val ocrOptions = parsed.toPluginOptions()
-            val results = if (!isInrt) {
+            // An arabic recognizer reads from the right, so its segments join from the right (paddle-ocr-v3 Q60).
+            // zh-CN: 阿拉伯语识别模型从右往左阅读, 其片段也从右往左合并 (paddle-ocr-v3 Q60).
+            fun List<OcrResult>.mergedIfAsked(isRightToLeft: () -> Boolean) = if (parsed.mergeLine) mergeByLine(this, isRightToLeft()) else this
+            return if (!isInrt) {
                 runBlocking(scriptRuntime.coroutineContext) {
                     val target = selectedPlugin ?: OcrPluginHost.selectOrThrow(
                         context = GlobalAppContext.get(),
@@ -82,18 +85,22 @@ class OcrPaddle(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                         moduleLabel = MODULE_LABEL_PADDLE_OCR,
                     )
                     OcrPluginHost.detect(GlobalAppContext.get(), target, image.bitmap, ocrOptions)
-                }.map { it.toScriptResult() }
+                        .map { it.toScriptResult() }
+                        .mergedIfAsked { OcrPluginHost.isRightToLeft(GlobalAppContext.get(), target) }
+                }
             } else {
                 // Use embedded engine in packaged (INRT) app.
                 // zh-CN: 打包应用 (INRT) 使用内置引擎 (本地推理), 不依赖插件.
-                PaddleOcrEmbeddedEngine.detect(GlobalAppContext.get(), image.bitmap, ocrOptions).map { it.toScriptResult() }
+                PaddleOcrEmbeddedEngine.detect(GlobalAppContext.get(), image.bitmap, ocrOptions)
+                    .map { it.toScriptResult() }
+                    .mergedIfAsked { PaddleOcrEmbeddedEngine.isRightToLeft(GlobalAppContext.get()) }
             }
-            return if (parsed.mergeLine) mergeByLine(results) else results
         }
 
-        private fun mergeByLine(results: List<OcrResult>): List<OcrResult> = OcrLineMerger.merge(
+        private fun mergeByLine(results: List<OcrResult>, rightToLeft: Boolean): List<OcrResult> = OcrLineMerger.merge(
             results.map { OcrLineMerger.Segment(it.text, it.confidence, it.bounds.toOcrBox(), it.extras) },
             OcrResultExtras::mergeCommon,
+            rightToLeft,
         ).map { OcrResult(it.text, it.confidence, it.box.toRect(), it.extras) }
 
     }

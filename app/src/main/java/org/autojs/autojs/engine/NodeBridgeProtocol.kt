@@ -3000,9 +3000,10 @@ class AndroidNodeBridgeCapabilityProvider(
                     } catch (error: IllegalArgumentException) {
                         throw InvalidOcrOptions(error)
                     }
+                    // Rhino's recognizeText does not merge lines either.
+                    val mergeLine = ocrOptions.mergeLine && request.method != "recognizeText"
                     OcrPluginHost.detect(appContext, target, ocrInput.bitmap, ocrOptions.toPluginOptions(), callTimeoutMs = timeoutMs)
-                        // Rhino's recognizeText does not merge lines either.
-                        .toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY, ocrOptions.mergeLine && request.method != "recognizeText")
+                        .toOcrResultsJson(ocrInput.offsetX, ocrInput.offsetY, mergeLine, mergeLine && OcrPluginHost.isRightToLeft(appContext, target))
                 }
                 NodeBridgeResponse.success(request.id, resultsJson)
             }.getOrElse { error ->
@@ -7938,10 +7939,10 @@ internal fun ocrCallOptions(engine: String?, options: JSONObject) = OcrCallOptio
     },
 )
 
-internal fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int, mergeLine: Boolean = false): String {
+internal fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int, mergeLine: Boolean = false, rightToLeft: Boolean = false): String {
     if (mergeLine && size > 1) {
         val segments = map { OcrLineMerger.Segment(it.text.orEmpty(), it.confidence, it.bounds?.toOcrBox() ?: OcrLineMerger.Box.EMPTY, OcrResultExtras.fromBundle(it.extras)) }
-        return segments.toMergedOcrResultsJson(offsetX, offsetY)
+        return segments.toMergedOcrResultsJson(offsetX, offsetY, rightToLeft)
     }
     val results = JSONArray()
     forEach { result ->
@@ -7955,9 +7956,9 @@ internal fun List<PluginOcrResult>.toOcrResultsJson(offsetX: Int, offsetY: Int, 
     return results.toString()
 }
 
-internal fun List<OcrLineMerger.Segment<Map<String, Any?>>>.toMergedOcrResultsJson(offsetX: Int, offsetY: Int): String {
+internal fun List<OcrLineMerger.Segment<Map<String, Any?>>>.toMergedOcrResultsJson(offsetX: Int, offsetY: Int, rightToLeft: Boolean = false): String {
     val results = JSONArray()
-    OcrLineMerger.merge(this, OcrResultExtras::mergeCommonValues).forEach { line ->
+    OcrLineMerger.merge(this, OcrResultExtras::mergeCommonValues, rightToLeft).forEach { line ->
         results.put(
             ocrResultJson(line.text, line.confidence)
                 .put("bounds", ocrBoundsJson(line.box, offsetX, offsetY))
