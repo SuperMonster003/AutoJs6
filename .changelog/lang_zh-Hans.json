@@ -12,6 +12,8 @@
         "Node.js 的 pinyin/pinyin4j 和控制台窗口控制方法改为异步宿主调用, 脚本需使用 await 等待结果"
       ],
       "feature": [
+        "Rhino 引擎支持 ES2015+ class 语法, 包括字段, 静态块, 私有名, 以及继承 Error/Array/Map 等内建类型 (参阅 项目文档 > [类语法](https://docs.autojs6.com/#/classSyntax))",
+        "Rhino 脚本的 class 可继承 Java 类与接口 (如 class Worker extends java.lang.Thread), 支持 super 调用 Java 父类方法, 受保护成员, 多接口 (extends JavaAdapter(Base, I1, I2)); View 子类实例可使用 attr/on 等控件方法; 不能继承 final 类或覆盖 final 方法 (参阅 项目文档 > [类语法](https://docs.autojs6.com/#/classSyntax))",
         "Node.js/Bun/Worker 的 ai.agent 任务控制与事件, 注册脚本上下文和结果回传, 以及打包应用的独立授权",
         "Node.js, Bun 与 Worker 的 Flow within/scope 范围继承, 罗盘导航和结果投影, 以及 press/swipe/gesture/gestures 手势重载",
         "Node.js, Bun 及 Worker 的 flow 异步链与条件/稳定性等待, 支持分支取消, 单步骤重试及宿主界面快照; Node.js, Bun 及 Worker 的 Flow 高级点击, 滚动, 输入, 列表采集与真实事件等待, 支持监听就绪, 快照校验和取消",
@@ -432,6 +434,8 @@
         "插件信息对话框分别显示插件支持的 ABI 及当前安装包的 ABI",
         "缓存 Rhino 运行时初始化数据以提升脚本启动效率, 并提升大型数组打印效率及低版本安卓系统的 Java 反射兼容性",
         "Rhino 引擎同步上游, 支持 new.target, for...of/for...in 循环头部的 const 声明及 Uint8Array 的 Base64/Hex 转换方法 (如 Uint8Array.fromBase64 及 toHex 方法), 并改进作用域, TypedArray 与调试器兼容性",
+        "Rhino 数组解构, 展开, for...of 及 Proxy/Reflect/with/TypedArray 的行为与 ECMAScript 规范一致: 调用实参展开 f(...args) 与逻辑赋值短路可用, 严格模式下 Proxy 的 set trap 返回 false 时赋值抛出 TypeError, 没有 Symbol.iterator 的类数组对象解构时抛出 TypeError",
+        "BigInt.asIntN/asUintN 及 DataView 的 setBigInt64/setBigUint64 传入 Number 时抛出 TypeError (此前自动转换), 需写为 BigInt(x)",
         "为 const 声明的变量重新赋值时, 非严格模式下同样抛出 TypeError (与 ECMAScript 规范及 Node.js 一致), 不再静默忽略",
         "ArrayBuffer, DataView, TypedArray, 正则表达式及解构等 28 条引擎错误消息补齐 9 种语言的翻译",
         "runtime.loadJar 方法支持借助 DEX Compiler 插件加载 JAR 文件, 并提供编译诊断与失败回退 (实验性, 默认关闭)",
