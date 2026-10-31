@@ -419,6 +419,8 @@ P3.5 / P4.5 收口 B 落点 (2026-10-31, api-cov-p35-closeout; 矩阵与基线�
 | process.exit 清已排定时器 | 已实施 | 不涉及 | Q201 |
 | process.exit 清定时器的 arm64 真机 | 未跑, 已在 x86_64 验证 | 不涉及 | 随 P3.6 收尾的真机验证 |
 
+P2.6 / P3.6 / P4.6 收尾落点 (2026-11-01, api-cov-closeout-bump): Flow#await, Flow#sync 已补 (Q202 (a)), pending 572 / 572 / 572 只剩 imgui; new Worker(__filename) 已修 (Q200 (a), Node bd80f768); process.exit 清定时器保持 (Q201 (a)), arm64 真机 7 / 7. 见 BASELINE 第 21 节.
+
 ### 7.2 Q18 原型成员增量 (P2.3, 2026-10-29)
 
 P2.3 第 1 步把 22 个 `@ScriptPrototype` 模块的原型成员纳入分母 (Q18 (a), 宿主 b027777bc / d41ebd872): 矩阵 2739 -> 2943 行 (显式导出 1377, 原型成员 205, 返回对象成员 1362 -> 1361, 少的 1 行是嵌套类构造参数误计的 `TtsUtterance#utterance`). 原型成员行 id 与显式导出同形 (`files.isFile`), 运行时三列按显式导出的方式查找; 被模块自身导出遮蔽的 65 个名字不计, 98 个 Java 内部成员 exclude (Q56), 常量表与 global 的 Java 类代理不逐个计入 (Q55). 新增 pending Node main 133 / Node Worker 155 / Bun 158 (643 / 832 / 791 -> 776 / 987 / 949), 已登记看板待决 Q54 后写入 `pending-baseline.json`. 原型成员中已有入口的: Node main 60 / Worker 38 / Bun 41 (device 31 行: Build 字段, 音量, 亮度, 电量与内存, 唤醒; events 的 observeKey / observeNotification / observeToast / on / once; sensors.once; ui.view; files 13 行在 Node main 与 Bun 记 local-shim; media 9 行只在 Node main); 由已决规则排除的: crypto 6 行 (native-crypto), timers 的 Node 6 行 (nativeModules 记 runtime-native).

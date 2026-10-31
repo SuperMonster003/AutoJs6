@@ -1395,3 +1395,76 @@ Node main, Node Worker, Bun 三列的 pending 基线都是 574 行, 由下表构
 | 文档 | e1105d9 / 70b79f6 | 相对路径小节, 生成物 |
 | Offline Docs | 4c099cb | 同步生成页, 版本不变 |
 | 宿主 | (本节所在提交) | 本节, 报告, ROADMAP 落点, 附录 C, REVIEW 7.1 |
+
+## 21. P2.6 / P3.6 / P4.6 阶段收尾 (2026-11-01, 子会话 api-cov-closeout-bump)
+
+### 21.1 结论
+
+pending 基线 574 / 574 / 574 -> 572 / 572 / 572, 三列只剩 imgui 模块 (Q213 (b) 的排除规则由后续小卡落地). Flow# 的 106 行三列全部覆盖, 文档运行时支持表不再有待补项.
+
+### 21.2 做了什么
+
+- Q200 (a): Worker 的 load 钩子判断文件名是 package.json 再解析, 项目没有 package.json 时 new Worker(__filename) 不再抛 SyntaxError. 新桌面用例 test-worker-entry.js 进 Node CI, 在旧源码上复现 SyntaxError.
+- Q202 (a): 共享工厂的 Flow 句柄补 await() 与 sync(timeout?), 都返回 Promise, 不阻塞脚本线程; sync 超时以 TIMEOUT 拒绝 (step 与 reason 都是 sync), 链继续运行, 同 Rhino. d.ts (TS, Node, Bun), Ace 捆绑声明, 文档 runtimeApis 与 flowType, 结构脚本 check-runtime-flow 与矩阵单测同步.
+- Q201 (a): arm64 复测通过, 保持现状.
+- 宿主 VERSION_BUILD 按 COMMON_AGENTS 校正: 4283 -> 4899, versionCode 5935 -> 6551. 之前比提交数少 614, 超出容差 10.
+- Node 声明的最低宿主保持 3923 (Q206 (a) 已先行).
+- 文档站 changelog: 新增 Flow 一条; 去掉同一版本里已过期的 "仍待补" 4 处; `.changelog/lang_zh-Hans.json` 从 10-30 起落后 api/changelog.md 37 条, 本卡同步 (`{{}}` 改写为 "双花括号", 否则模板解析失败).
+- 各仓库 changelog 只写 zh-Hans (维护者同步其他语言). TS, Ace, Bun 与文档的 generate_markdown 有跨语言校验, 本卡用同一渲染函数跳过校验生成, 这 4 个仓库的 `--check` 在其他语言同步前失败, Node 通过.
+
+### 21.3 版本
+
+| 仓库 | 改动前 | 改动后 | 提交 |
+|---|---|---|---|
+| TS 声明 | 4.85.0 | 4.86.0 | 42291f0 |
+| Ace | 2.47.0 / 345 | 2.48.0 / 388, 捆绑声明 4.86.0 | 3b975b7 |
+| Node | 2.0.0 / 356 | 2.1.0 / 370 | 867fad8c |
+| Bun | 0.21.0 / 335 | 0.22.0 / 346 | c214d93 |
+| 宿主 | 6.8.0 / 4283 (versionCode 5935) | 6.8.0 / 4899 (versionCode 6551) | 6f2e66ca3 |
+| 文档 | versionCode 171 | versionCode 172 | 80aeade |
+| Offline Docs | 6.8.40 / 219 | 6.8.40 / 242 (VERSION_NAME 未发布, 生成器保留) | 556d7b2 |
+
+### 21.4 真机
+
+Redmi bek749scrwv4wo8h (arm64, API 33), 调试包: 宿主共享签出 2026-10-31 22:34 构建, Node 400b27cf, Bun 13bfd2e. 脚本 `tools/api-coverage/device_flow_terminals.py`.
+
+| 轮 | 结果 |
+|---|---|
+| flow, Rhino 录制 | 11 / 11 (await.rejected 与 Node / Bun 不同, 登记 Q205) |
+| flow, Node main + Worker | 22 / 22 |
+| flow, Bun main + Worker | 22 / 22 |
+| entry (Q200) | 1 / 1 |
+| exit (Q201): control, timeout, interval, immediate, from-timer, from-promise, with-worker | 7 / 7 |
+
+设备还原: 宿主 5935 md5 b958b465, Bun 293 md5 bbfca1f6, Node 291 md5 a8811d17 全部一致, 宿主授权列表无差异, enabled_accessibility_services 与开始时相同 (开始时宿主无障碍是开着的, 与 10-31 报告的 "off" 不同, 按现状还原). Redmi 宿主有 WRITE_SECURE_SETTINGS 且 Shizuku 在运行, 所以 Q201 用专门用例, 没走 waitFor 超时路径.
+
+### 21.5 验收
+
+HEAD 导出副本 `E:/.cache/aj6-closeout-bump-head` (宿主 6f2e66ca3, KSP 取同一副本 10-31 23:56 的 script-modules.json, 其后 app/src 无变动; 文档 80aeade, TS 42291f0, Ace 3b975b7, Node 867fad8c, Bun c214d93):
+
+- `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出码 0, failures 空, pending 572 / 572 / 572, MATRIX.md 与 pending-baseline.json current, 文档 89 页 current, 未覆盖 0 / 0, Node d.ts unreviewed 0.
+- api-coverage 单测 121 例通过 (跳过 3), test-dts-types 27 例, 全部 check-runtime-* / check-bun-* / check-ui-* 退出码 0, language_runtimes 退出码 0 (副本无语言运行时兄弟仓库, 源码比对跳过).
+- Ace: generate-runtime-api-queries --check 未变, verify-runtime-api-coverage --fresh 通过, verify-api-coverage 在真实仓库通过.
+- TS: sync-runtime-declarations --check changed 0, verify-runtime-declarations 与 verify-api-coverage 通过.
+- Node 桌面用例 155 + 16 + 3 + 62 + 41 全过, Bun host client 151 全过, sync-*.mjs --check 全过.
+- 文档 normalize-markdown --check changed 0, auto-generate --check 当前.
+
+### 21.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 5d582fdd1 | 附录 C 六行已决 |
+| 宿主 | 5e99f75c6 / bdccf53fb | 结构脚本, 单测, MATRIX, 基线, device_flow_terminals.py |
+| 宿主 | 31d087541 / 6f2e66ca3 | 复测记录, Q205 / Q206, 构建号 |
+| Node 插件 | bd80f768 / 400b27cf / 867fad8c | Q200, Q202, 2.1.0 |
+| Bun 插件 | 13bfd2e / c214d93 | Q202, 0.22.0 |
+| TS | e23a852 / 42291f0 | 声明, 4.86.0 |
+| Ace | 237f40d / 142bf6f / 3b975b7 | 捆绑声明, 查询清单, 2.48.0 |
+| 文档 | 22c697e / b804db5 / 6834d14 / 80aeade | runtimeApis, flowType 表, changelog, 生成物 |
+| Offline Docs | 556d7b2 | 同步生成页, 构建号 |
+| 宿主 | (本节所在提交) | 本节, ROADMAP 落点, REVIEW 7.1 |
+
+### 21.7 观察, 未改
+
+- `tools/nodejs/api/test-worker-host-modules.js` 在 HEAD 上本来就失败 (console.input 的断言过期), 不在 Node CI.
+- Node 的 test-flow.js / test-flow-tools.js / test-worker-flow.js 不在 Node CI 的 build.yml 里, 只由本节这类手动门禁覆盖.
