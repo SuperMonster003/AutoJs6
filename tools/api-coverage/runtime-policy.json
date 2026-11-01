@@ -424,7 +424,7 @@
       "match": ["imgui.*"],
       "columns": ["node_main", "node_worker", "bun"],
       "status": "not-portable", "reason": "rhino-only",
-      "equivalent": "engines.execScript of a Rhino script that opens the imgui window; events.broadcast between the two scripts (documentation imgui page)",
+      "equivalent": "engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts",
       "note": "frame calls must return synchronously on the thread that opened the frame, the plugin itself runs in Rhino, and every host call of Node / Bun is a Promise; new imgui names fall under this rule, imgui.__pluginId stays with internal-exports (docs/api-coverage/IMGUI-PLAN.md 2.1)",
       "source": "appendix D D-23, maintainer 2026-11-01 (Q213 (b), Q214 (a))"
     },
