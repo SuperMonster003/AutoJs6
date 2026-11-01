@@ -231,6 +231,7 @@
 * `修复` 停止带有 setInterval 定时器的脚本时偶尔显示 "Unable to schedule a timer callback because its looper is exiting" 错误的问题
 * `修复` 取消定时器或停止子线程后, 过期回调可能阻止脚本自动结束的问题
 * `修复` threads.pool 指定 corePoolSize 但未指定 maxPoolSize 时抛出 IllegalArgumentException 的问题
+* `修复` 协程中 Promise / Flow 的 await 方法, continuation.await 及 resumeError 恢复的 await 遇到拒绝时把错误作为返回值交回而不在调用处抛出的问题; 脚本未捕获时现在以该错误结束
 * `修复` threads.start 创建的子线程全部结束后脚本偶尔不会自动结束的问题
 * `修复` 停止脚本时其子线程仍在处理图像可能导致应用崩溃的问题
 * `修复` floaty.window/rawWindow 的聚焦相关方法在脚本线程调用时可能出现线程异常的问题
