@@ -7,11 +7,14 @@ Phases:
   entry  new Worker(__filename) in a Node project without a package.json (Q200).
   exit   process.exit() leaves no armed global timer behind (Q201), with a control run that shows the harness sees a timer;
          needs no accessibility service, so it also works on devices where the timeout of auto.waitFor cannot be reached.
+  rejection  Rhino await() in a coroutine throws the rejection at the call (Q205): promise.await(), flow.await(),
+         continuation.await(promise) and cont.await() after resumeError, in a background script and in UI mode. What no script
+         catches ends the script with its error and leaves the host process alive: throwing it crashed the app until 6.3.4.
 
 Only one line per check is printed; the pushed directory is removed afterwards. The packages are recorded and restored by
 the record / restore phases of device_bun_js_tools.py.
 
-Usage: device_flow_terminals.py --serial SERIAL [--phases flow,entry,exit] [--runtimes rhino,node,bun] [--report FILE]
+Usage: device_flow_terminals.py --serial SERIAL [--phases flow,entry,exit,rejection] [--runtimes rhino,node,bun] [--report FILE]
 Expects host 6.8.0 with the Node and Bun plugins installed. Flow chains that stay local need no Bun grant.
 """
 import argparse
@@ -73,9 +76,6 @@ EXPECTED = {
     "await.value": {"ok": 6},
     "await.rejected": {"th": ["RangeError", None, None, None]},
 }
-
-# Q205: in a continuation Rhino's await() hands a rejection back as its value (an Error, {} as JSON) instead of throwing it.
-RHINO_DIFFERENCES = {"await.rejected": {"ok": {}}}
 
 RHINO_MAIN = """
 "use strict";
@@ -170,6 +170,72 @@ EXIT_CASES = {
 }
 EXIT_WAIT_SECONDS = 4
 
+# Every check gives {ok: value} or {th: [typeof, name, message]}. MODE is empty in a background script and "ui"; in UI mode.
+REJECTION_MAIN = """
+MODE
+const AJ6_RUN = 'RUN';
+EMIT
+var out = {};
+var check = function (name, run) {
+    try {
+        out[name] = {ok: run()};
+    } catch (e) {
+        var object = e !== null && e !== undefined;
+        out[name] = {th: [typeof e, object && e.name !== undefined ? String(e.name) : null, object && e.message !== undefined ? String(e.message) : String(e)]};
+    }
+};
+var rejected = function (reason) { return Promise.reject(reason); };
+var thrower = function () { throw new RangeError('boom'); };
+check('promise', function () { return rejected(new RangeError('boom')).await(); });
+check('continuation', function () { return continuation.await(rejected(new RangeError('boom'))); });
+check('flow', function () { return flow.of(1).map(thrower).await(); });
+check('text', function () { return rejected('text').await(); });
+check('null', function () { return rejected(null).await(); });
+check('later', function () { return new Promise(function (_, reject) { setTimeout(function () { reject(new Error('later')); }, 50); }).await(); });
+check('thread', function () { return new Promise(function (_, reject) { threads.start(function () { reject(new Error('thread')); }); }).await(); });
+check('resumeError', function () { var cont = continuation.create(); setTimeout(function () { cont.resumeError(new Error('direct')); }, 20); return cont.await(); });
+check('resumeError.thread', function () { var cont = continuation.create(); threads.start(function () { cont.resumeError(new Error('direct')); }); return cont.await(); });
+check('resolved', function () { return Promise.resolve(5).await(); });
+check('afterwards', function () { var seen = []; try { rejected(1).await(); } catch (e) { seen.push(e); } try { seen.push(Promise.resolve(2).await()); } finally { seen.push(3); } return seen; });
+aj6Emit(AJ6_RUN, 0, out);
+aj6Emit(AJ6_RUN, -1, {done: 1});
+exit();
+"""
+REJECTION_EXPECTED = {
+    "promise": {"th": ["object", "RangeError", "boom"]},
+    "continuation": {"th": ["object", "RangeError", "boom"]},
+    "flow": {"th": ["object", "RangeError", "boom"]},
+    "text": {"th": ["string", None, "text"]},
+    "null": {"th": ["object", None, "null"]},
+    "later": {"th": ["object", "Error", "later"]},
+    "thread": {"th": ["object", "Error", "thread"]},
+    "resumeError": {"th": ["object", "Error", "direct"]},
+    "resumeError.thread": {"th": ["object", "Error", "direct"]},
+    "resolved": {"ok": 5},
+    "afterwards": {"ok": [1, 2, 3]},
+}
+
+# Index 0 runs at once. 1 follows the failing await and 2 comes from a timer: neither may run once the script has ended.
+UNCAUGHT_MAIN = """
+MODE
+const AJ6_RUN = 'RUN';
+EMIT
+aj6Emit(AJ6_RUN, 0, {ok: 'before'});
+setTimeout(function () { aj6Emit(AJ6_RUN, 2, {ok: 'late'}); }, 1500);
+var aj6Message = 'aj6-uncaught-RUN';
+BODY
+aj6Emit(AJ6_RUN, 1, {ok: 'not reached'});
+"""
+UNCAUGHT_CASES = {
+    "promise": "Promise.reject(new Error(aj6Message)).await();",
+    "continuation": "continuation.await(Promise.reject(new Error(aj6Message)));",
+    "flow": "flow.of(1).map(function () { throw new Error(aj6Message); }).await();",
+    "resumeError": "var cont = continuation.create(); setTimeout(function () { cont.resumeError(new Error(aj6Message)); }, 20); cont.await();",
+    "resumeError.thread": "var cont = continuation.create(); threads.start(function () { cont.resumeError(new Error(aj6Message)); }); cont.await();",
+    "after await": "Promise.resolve(1).await(); throw new Error(aj6Message);",
+}
+UNCAUGHT_WAIT_SECONDS = 4
+
 
 def project(name, permissions=()):
     return {"project.json": json.dumps({"name": name, "type": "node", "main": "main.js",
@@ -189,7 +255,7 @@ def verdicts(report, runtime, forms, results):
     for index, form in forms:
         out = results.get(index) or {}
         for name, expected in EXPECTED.items():
-            ok = out.get(name) == (RHINO_DIFFERENCES.get(name, expected) if runtime == "rhino" else expected)
+            ok = out.get(name) == expected
             report[f"{runtime} {form} {name}"] = "pass" if ok else json.dumps(out.get(name, out.get("error", "missing")), ensure_ascii=False)[:220]
             failed += not ok
     if 2 in results:
@@ -198,14 +264,16 @@ def verdicts(report, runtime, forms, results):
     return failed
 
 
+# Rhino's await() needs the continuation feature, which reaches the engine only through a project launch.
+RHINO_PROJECT = json.dumps({"name": "flow-terminals", "versionName": "1.0.0", "versionCode": 1, "packageName": "org.autojs.flowterminals",
+                            "main": "main.js", "useFeatures": ["continuation"]}).encode("utf-8")
+RHINO_LAUNCH = ("-e", "path", base.DEVICE_DIR, "-e", "source_kind", "autojs_project_v1", "-e", "project_root", base.DEVICE_DIR)
+
+
 def phase_flow(serial, report, runtimes):
     failed = 0
-    # Rhino's await() needs the continuation feature, which reaches the engine only through a project launch.
-    rhino_project = json.dumps({"name": "flow-terminals", "versionName": "1.0.0", "versionCode": 1, "packageName": "org.autojs.flowterminals",
-                                "main": "main.js", "useFeatures": ["continuation"]}).encode("utf-8")
-    rhino_launch = ("-e", "path", base.DEVICE_DIR, "-e", "source_kind", "autojs_project_v1", "-e", "project_root", base.DEVICE_DIR)
     for runtime, template, forms, extra, launch in (
-            ("rhino", RHINO_MAIN, ((0, "main"),), {"project.json": rhino_project}, rhino_launch),
+            ("rhino", RHINO_MAIN, ((0, "main"),), {"project.json": RHINO_PROJECT}, RHINO_LAUNCH),
             ("node", NODE_MAIN, ((0, "main"), (1, "worker")), project("flow-terminals"), ()),
             ("bun", BUN_MAIN, ((0, "main"), (1, "worker")), None, ())):
         if runtime not in runtimes:
@@ -236,16 +304,44 @@ def phase_exit(serial, report, _runtimes):
     return failed
 
 
+def host_pid(serial):
+    return base.sample.adb(serial, "shell", f"pidof {base.HOST}", check=False).strip()
+
+
+def phase_rejection(serial, report, _runtimes):
+    failed = 0
+    for mode, directive in (("background", ""), ("ui", '"ui";')):
+        run = uuid.uuid4().hex[:8]
+        text = source(REJECTION_MAIN.replace("MODE", directive), run)
+        out = base.run_script(serial, "main.js", text, run, 30, {"project.json": RHINO_PROJECT}, RHINO_LAUNCH).get(0) or {}
+        for name, expected in REJECTION_EXPECTED.items():
+            ok = out.get(name) == expected
+            report[f"rhino {mode} {name}"] = "pass" if ok else json.dumps(out.get(name, "missing"), ensure_ascii=False)[:220]
+            failed += not ok
+        for name, body in UNCAUGHT_CASES.items():
+            run = uuid.uuid4().hex[:8]
+            before = host_pid(serial)
+            text = source(UNCAUGHT_MAIN.replace("MODE", directive).replace("BODY", body), run)
+            results = base.run_script(serial, "main.js", text, run, UNCAUGHT_WAIT_SECONDS, {"project.json": RHINO_PROJECT}, RHINO_LAUNCH)
+            got = sorted(index for index in results if index >= 0)
+            logged = base.sample.adb(serial, "shell", f"logcat -d -t 3000 | grep -c aj6-uncaught-{run}", check=False).strip() not in ("", "0")
+            alive = host_pid(serial) == before
+            ok = got == [0] and logged and alive
+            report[f"rhino {mode} uncaught {name}"] = "pass" if ok else f"got {got}, logged {logged}, host alive {alive}"
+            failed += not ok
+    return failed
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--serial", required=True)
-    parser.add_argument("--phases", default="flow,entry,exit")
+    parser.add_argument("--phases", default="flow,entry,exit,rejection")
     parser.add_argument("--runtimes", default="rhino,node,bun", help="flow: the runtimes to run")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     sys.stdout.reconfigure(errors="backslashreplace")
     report, failed = {}, 0
-    phases = {"flow": phase_flow, "entry": phase_entry, "exit": phase_exit}
+    phases = {"flow": phase_flow, "entry": phase_entry, "exit": phase_exit, "rejection": phase_rejection}
     for phase in args.phases.split(","):
         before = len(report)
         count = phases[phase](args.serial, report, args.runtimes.split(","))
