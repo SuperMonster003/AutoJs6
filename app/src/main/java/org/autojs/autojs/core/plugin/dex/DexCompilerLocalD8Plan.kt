@@ -37,24 +37,6 @@ internal class DexCompilerLocalD8Plan(
         )
     }
 
-    /** API 24/25 CLI form. Program is last; classpath and runtime-library order are preserved. */
-    fun commandLine(outputDirectory: File): List<String> = buildList {
-        add("--output")
-        add(outputDirectory.absolutePath)
-        add("--release")
-        add("--min-api")
-        add(minimumApi.toString())
-        orderedRuntimeLibraries.forEach { library ->
-            add("--lib")
-            add(library.absolutePath)
-        }
-        orderedClasspath.forEach { classpathJar ->
-            add("--classpath")
-            add(classpathJar.absolutePath)
-        }
-        add(program.absolutePath)
-    }
-
     companion object {
         /** Must track the pinned app dependency in gradle/libs.versions.toml. */
         const val COMPILER_IDENTITY = "com.android.tools:r8:8.13.17/D8/release/dex-indexed"

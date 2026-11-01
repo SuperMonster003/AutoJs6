@@ -112,7 +112,7 @@ commonmark = { module = "com.github.atlassian.commonmark-java:commonmark", versi
 commonmark-ext-heading-anchor = { module = "com.github.atlassian.commonmark-java:commonmark-ext-heading-anchor", version.ref = "commonmark" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
-desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
+desugar = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugar" }
 easywindow = { module = "com.github.getActivity:EasyWindow", version.ref = "easywindow" }
 emoji2 = { module = "androidx.emoji2:emoji2", version.ref = "emoji2" }
 eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }

@@ -16,10 +16,10 @@ import java.util.zip.ZipFile
 /**
  * The D8 half of [ClassFileDexer] on a plain JVM: the same `com.android.tools.r8` the host bundles turns class files
  * into the `classes*.dex` layout `DexClassLoader` reads, and reports bad input as an exception rather than exiting.
- * The legacy dx half only exists for API 24 / 25 and is covered on the API 24 emulator (size roadmap P5.1).
+ * The legacy dx half only exists for API 24 / 25 and is covered by `ClassFileDexerDeviceTest` on an API 24 emulator.
  * zh-CN: 在纯 JVM 上测试 [ClassFileDexer] 的 D8 部分: 宿主打包的同一个 `com.android.tools.r8` 把 class 文件转成
  * `DexClassLoader` 读取的 `classes*.dex` 布局, 坏输入以异常报告而不是退出进程. 旧版 dx 部分只服务 API 24 / 25,
- * 由 API 24 模拟器覆盖 (体积 roadmap P5.1).
+ * 由 API 24 模拟器上的 `ClassFileDexerDeviceTest` 覆盖.
  */
 class ClassFileDexerTest {
 

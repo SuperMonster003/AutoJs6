@@ -8,35 +8,6 @@ import java.io.File
 class DexCompilerLocalD8PlanTest {
 
     @Test
-    fun api24CliKeepsLibrariesAndClasspathOrderedWithProgramLast() {
-        val program = File("program.jar").absoluteFile
-        val firstClasspath = File("first-classpath.jar").absoluteFile
-        val secondClasspath = File("second-classpath.jar").absoluteFile
-        val firstLibrary = File("first-runtime.jar").absoluteFile
-        val secondLibrary = File("second-runtime.jar").absoluteFile
-        val output = File("dex-output").absoluteFile
-        val plan = plan(
-            program = program,
-            classpath = listOf(firstClasspath, secondClasspath),
-            runtimeLibraries = listOf(firstLibrary, secondLibrary),
-        )
-
-        assertEquals(
-            listOf(
-                "--output", output.absolutePath,
-                "--release",
-                "--min-api", "24",
-                "--lib", firstLibrary.absolutePath,
-                "--lib", secondLibrary.absolutePath,
-                "--classpath", firstClasspath.absolutePath,
-                "--classpath", secondClasspath.absolutePath,
-                program.absolutePath,
-            ),
-            plan.commandLine(output),
-        )
-    }
-
-    @Test
     fun cacheIdentityCoversInputSetMinApiCompilerAndExactOrderedRuntime() {
         val baseline = DexCompilerLocalD8SemanticKey.sha256(
             inputSetSha256 = "11".repeat(32),

@@ -3,9 +3,10 @@
 Usage: py -3.12 -I tools/rhino/build_class_fixtures.py [--build-tools DIR]
 
 javac (--release 8) compiles tools/rhino/fixtures/*.java; RhinoClassDexFixture goes through d8 (--min-api 24) into a dex
-file, RhinoClassJarFixture stays a jar, which the host dexes when it loads it. The class in the jar is marked as class
-file version 51: API 24 and 25 dex it with legacy dx 1.7.0, which refuses version 52, and the fixture uses nothing of
-Java 8. Paste the two strings into FIXTURE_DEX and FIXTURE_JAR of app/src/androidTest/assets/rhino/class-syntax-cases.js.
+file, the other two stay jars, which the host dexes when it loads them. RhinoClassJarFixture is marked as class file
+version 51 and uses nothing of Java 8; RhinoClassJava8Fixture keeps version 52 and has a lambda, a method reference and
+default and static interface methods. Paste the three strings into FIXTURE_DEX, FIXTURE_JAR and FIXTURE_JAR_JAVA8 of
+app/src/androidTest/assets/rhino/class-syntax-cases.js.
 """
 import argparse
 import base64
@@ -40,8 +41,12 @@ def main():
             data = bytearray((work / f"classes/{PACKAGE}/RhinoClassJarFixture.class").read_bytes())
             data[6:8] = CLASS_FILE_VERSION.to_bytes(2, "big")
             jar.writestr(f"{PACKAGE}/RhinoClassJarFixture.class", bytes(data))
+        with zipfile.ZipFile(work / "fixture-java8.jar", "w", zipfile.ZIP_DEFLATED) as jar:
+            for path in sorted((work / f"classes/{PACKAGE}").glob("RhinoClassJava8Fixture*.class")):
+                jar.write(path, f"{PACKAGE}/{path.name}")
         print("FIXTURE_DEX =", base64.b64encode((work / "dex/classes.dex").read_bytes()).decode())
         print("FIXTURE_JAR =", base64.b64encode((work / "fixture.jar").read_bytes()).decode())
+        print("FIXTURE_JAR_JAVA8 =", base64.b64encode((work / "fixture-java8.jar").read_bytes()).decode())
 
 
 if __name__ == "__main__":

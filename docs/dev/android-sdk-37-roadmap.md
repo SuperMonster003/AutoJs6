@@ -746,7 +746,7 @@ Android 16 的 `RESTRICT_LOCAL_NETWORK` 与 `NEARBY_WIFI_DEVICES` 测试流程�
 - 本机 `android-36/android.jar` 有 4 个 `android/hardware/fingerprint/*.class`, `android-37.0/android.jar` 为 0 (SOURCE: [复核记录](evidence/android-sdk-37-review-20260913.md)); 这证明 SDK 编译符号移除, 不等于设备运行时一定无此类. `InputMethodManager.SHOW_IMPLICIT` 之外的弃用由 lint 逐版跟踪.
 - APK 签名方案 v3.2 (混合后量子, ML-DSA) 对内置 APK 打包器 / `modules/apk-signer` 是可选能力, 与本次无关.
 - Advanced Protection Mode 对无障碍服务的限制若被实测确认, 需要在用户文档 FAQ 与插件中心 "无障碍兼容" 页面长期维护说明.
-- P2.3 在 API 24 发现既有 JAR 编译器边界: 本地 D8 引用系统尚无的 `java.nio.file.Paths`, legacy dx 回退拒绝 Java 8 class major 52; Java 6 major 50 夹具可正常转换与加载. 后续独立修复旧系统编译器兼容性及失败诊断, 不因本次原始 DEX 目录修复或 API 37 冒烟通过而宣称此限制已解除. 见 [P2.3 证据](evidence/android-sdk-37-p23-20260913.md#jar-夹具与既有限制).
+- P2.3 在 API 24 发现既有 JAR 编译器边界: 本地 D8 引用系统尚无的 `java.nio.file.Paths`, legacy dx 回退拒绝 Java 8 class major 52; Java 6 major 50 夹具可正常转换与加载. 后续独立修复旧系统编译器兼容性及失败诊断, 不因本次原始 DEX 目录修复或 API 37 冒烟通过而宣称此限制已解除 (2026-11-01 已解除, 见 [loadjar-d8-api24-20261101.md](evidence/loadjar-d8-api24-20261101.md)). 见 [P2.3 证据](evidence/android-sdk-37-p23-20260913.md#jar-夹具与既有限制).
 - 旧 `PythonRuntimeRealPluginDiagnosticTest` 的 R2 诊断对当前 0.5.2 插件返回 `INVALID_REQUEST/SESSION_OPEN`, Parcel enable / disable 均可复现. 源码显示它协商新协议后调用不带 host broker 的旧 openSession, provider 在协议 1.5+ 要求 broker. 后续按该诊断的协议验收范围维护; P2.7 使用当前生产 PythonPluginScriptEngine 已完成三个条件的实际 CPython 往返, 没有删除或掩盖旧诊断失败. 见 [失败探索](evidence/android-sdk-37-p27-20260913.md#5-失败探索与处理).
 
 ---

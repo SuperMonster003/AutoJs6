@@ -76,6 +76,9 @@ class RhinoClassSyntaxDeviceTest {
     fun extendsClassFromLoadJar() = assertCase("extendsClassFromLoadJar")
 
     @Test
+    fun extendsJava8ClassFromLoadJar() = assertCase("extendsJava8ClassFromLoadJar")
+
+    @Test
     fun viewSubclassInUiMode() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val directory = File(context.cacheDir, "rhino-class-ui-${UUID.randomUUID()}")

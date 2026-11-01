@@ -664,10 +664,10 @@ dependencies /* Unclassified */ {
     implementation(project(":libs:jackpal-androidterm-emulatorview-1_0_42"))
     implementation(project(":libs:jackpal-androidterm-1_0_70"))
 
-    // Legacy dx, API 24 / 25 only: D8 (libs.r8, used on API 26+) needs java.nio.file, which those API levels lack
-    // without the nio desugar variant; see docs/dev/evidence/apk-size-p5-dexer-20260918.md (size roadmap Q10).
-    // zh-CN: 仅供 API 24 / 25 的旧版 dx: D8 (libs.r8, API 26+ 使用) 需要 java.nio.file, 没有 nio 脱糖变体时这两个 API
-    // 级别不具备; 见 docs/dev/evidence/apk-size-p5-dexer-20260918.md (体积 roadmap Q10).
+    // Legacy dx, API 24 / 25 only: the fallback of D8 (libs.r8) and the first converter of generated classes there; see
+    // docs/dev/evidence/loadjar-d8-api24-20261101.md.
+    // zh-CN: 仅供 API 24 / 25 的旧版 dx: 这两个 API 级别上 D8 (libs.r8) 的回退与生成类的首选转换器; 见
+    // docs/dev/evidence/loadjar-d8-api24-20261101.md.
     implementation(files("$rootDir/libs/com-legacy-android-dx-1_7_0.jar"))
 
     // OpenCV Java API. The native runtime is supplied by the official OpenCV plugin.
@@ -963,8 +963,8 @@ dependencies /* Desugar */ {
     // zh-CN: 更新检查曾依赖 github-api (org.kohsuke) 及 Jackson Databind, Commons IO, Commons Lang3;
     // 现在经 OkHttp + Gson 直接访问 GitHub REST API (network/github/GitHubReleaseClient), 见 docs/dev/apk-size-reduction-roadmap.md P2.
 
-    // Desugar (java.time and other Java 8+ library APIs on API 24 / 25)
-    // zh-CN: Desugar (API 24 / 25 上的 java.time 等 Java 8+ 类库 API)
+    // Desugar (java.time and other Java 8+ library APIs on API 24 / 25; the nio variant adds the java.nio.file of D8)
+    // zh-CN: Desugar (API 24 / 25 上的 java.time 等 Java 8+ 类库 API; nio 变体补上 D8 所需的 java.nio.file)
     coreLibraryDesugaring(libs.desugar)
 }
 

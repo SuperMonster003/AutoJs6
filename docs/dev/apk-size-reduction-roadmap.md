@@ -38,7 +38,7 @@
 | D15 | 资源优化进入 (Q6, 2026-09-17) | P6.6: 仅无损 WebP 转换与 lint `UnusedResources` 驱动的删除, 不重绘. | 执行结果 (2026-09-18): 见 P6.6; AOSP 动画集未裁剪, 见 Q11.
 | D16 | `com.stardust` 兼容包保留 (Q7, 2026-09-17) | P6.8 关闭; SpongyCastle 去留等 P4.2 设备证据 (Q8), 流程不变. |
 | D17 | log4j 代理类以自有实现同名提供 (Q9 方案 a, 2026-09-18) | P6.2 (d): `LogConfigurator` / `Level` / `LogManager` 三个脚本全局代理类由自有实现提供, 覆盖文档化用法 (`LogConfigurator` 的 fileName / filePattern / maxFileSize / maxBackupSize / rootLevel / configure(); `Level` 常量; `LogManager.getLogger(name)` / `getRootLogger()` 的 debug / info / warn / error / fatal); 其余 log4j API 不再提供, 文档与 d.ts 同步. |
-| D18 | 旧版 dx 1.7.0 保留给 Android 7.x (Q10 方案 c, 2026-09-18) | P5.3 关闭: `libs/com-legacy-android-dx-1_7_0.jar` 继续作为 API 24 / 25 唯一的 class -> dex 转换器 (`rhino/ClassFileDexer.kt` 在 API 26+ 走 D8); 不引入 `desugar_jdk_libs_nio`, 不放弃 7.x 动态类加载; 约 0.17 MiB APK 记为长期成本, 7.x 退出支持时再删. |
+| D18 | 旧版 dx 1.7.0 保留给 Android 7.x (Q10 方案 c, 2026-09-18; 2026-11-01 由 [loadjar-d8-api24-20261101.md](evidence/loadjar-d8-api24-20261101.md) 取代: 改用 `desugar_jdk_libs_nio`, D8 在 7.x 可运行, 旧版 dx 转为回退与生成类的首选) | P5.3 关闭: `libs/com-legacy-android-dx-1_7_0.jar` 继续作为 API 24 / 25 唯一的 class -> dex 转换器 (`rhino/ClassFileDexer.kt` 在 API 26+ 走 D8); 不引入 `desugar_jdk_libs_nio`, 不放弃 7.x 动态类加载; 约 0.17 MiB APK 记为长期成本, 7.x 退出支持时再删. |
 | D19 | `res/anim` AOSP 动画集保留为脚本目录 (Q11 方案 a, 2026-09-18) | 203 个 anim 资源不裁剪 (131 个视图动画 + 61 个 animator + 9 个插值器 + 2 个状态列表动画, 连同 51 个 interpolator 与相关 integer / dimen); 文档 `uiAttributes.md` 新增「动画资源」一节列出 131 个可用 `@anim/` 名称 (4 个 `activity_*` 需 API 31+), 文档仓库提交 `a0234d0`; 后续新增动画资源时同步该清单. |
 
 ---

@@ -115,12 +115,12 @@ The current host has a real extraction boundary rather than a speculative one:
   (986,233 bytes raw); `com-android-dx-1_14.jar` (1,030,064 bytes raw) was
   removed by the APK size roadmap (P5.1).
 - `app/src/main/java/org/autojs/autojs/rhino/AndroidClassLoader.kt` implements
-  the active conversion path through `ClassFileDexer`. On API 26+ every
-  conversion (`loadJar()`, `loadAar()`, `defineClass()`) runs D8, with one
-  retry on a zip4j re-packed copy for `loadJar()`. On API 24 / 25 D8 cannot run
-  at all (it needs `java.nio.file`, which the plain `desugar_jdk_libs` variant
-  does not provide), so legacy dx serves those two API levels only; see
-  `docs/dev/evidence/apk-size-p5-dexer-20260918.md`.
+  the active conversion path through `ClassFileDexer`. `loadJar()` and
+  `loadAar()` run D8 on every API level, with one retry on a zip4j re-packed
+  copy for `loadJar()`; `defineClass()` runs D8 on API 26+. On API 24 / 25 D8
+  gets `java.nio.file` from `desugar_jdk_libs_nio`, and legacy dx stays as the
+  fallback of D8 and as the first converter of generated classes; see
+  `docs/dev/evidence/loadjar-d8-api24-20261101.md`.
 - The D8 path uses the current device API as `minApi`, adds readable runtime
   boot libraries, accepts multi-DEX output, and packages multiple
   `classes*.dex` files for `DexClassLoader`.

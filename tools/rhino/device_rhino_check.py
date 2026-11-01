@@ -5,7 +5,8 @@ Usage: py -3.12 -I -u tools/rhino/device_rhino_check.py -s SERIAL [-s SERIAL ...
 Meant for a Rhino jar update (Rhino-For-AutoJs6 AGENTS.md, section 5): the production script engine, block scoping and
 the Uint8Array Base64 / hex methods (RhinoConstScopingDeviceTest), class syntax and classes that extend Java classes
 (RhinoClassSyntaxDeviceTest), Unicode property escapes, ui XML bindings, Java reflection and class loading, images.resize
-arguments, and the script looper cases that need neither accessibility nor the overlay permission. Run it on API 24 as
+arguments, the class file converters and the desugared java.nio.file (ClassFileDexerDeviceTest, JavaNioDesugarDeviceTest),
+and the script looper cases that need neither accessibility nor the overlay permission. Run it on API 24 as
 well, the release the Android fallbacks of Rhino exist for.
 
 With --install the debug APK and its test APK built by :app:assembleAppDebug :app:assembleAppDebugAndroidTest are
@@ -51,6 +52,8 @@ DEFAULT_CLASSES = [
     "org.autojs.autojs.runtime.api.modules.images.ImagesResizeRhinoInstrumentationTest",
     "org.autojs.autojs.rhino.KotlinReflectionDeviceTest",
     "org.autojs.autojs.rhino.AndroidClassLoaderRawDexDeviceTest",
+    "org.autojs.autojs.rhino.ClassFileDexerDeviceTest",
+    "org.autojs.autojs.rhino.JavaNioDesugarDeviceTest",
 ] + [
     f"{LOOPER}#{name}"
     for name in (

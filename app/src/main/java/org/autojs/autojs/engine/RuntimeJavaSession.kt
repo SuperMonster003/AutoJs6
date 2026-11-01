@@ -204,7 +204,7 @@ internal class RuntimeJavaSession(
             val directory=File(root(),UUID.randomUUID().toString()).apply { check(mkdirs()) }
             val jar=File(directory,"adapter.jar")
             ZipOutputStream(jar.outputStream()).use { out -> out.putNextEntry(ZipEntry(name.replace('.','/')+".class"));out.write(RuntimeJavaSubclassGenerator.generate(name,base,interfaces,methods));out.closeEntry() }
-            val dex=File(directory,"compiled.jar");ClassFileDexer.convertToDexJar(jar,dex,directory)
+            val dex=File(directory,"compiled.jar");ClassFileDexer.convertGeneratedToDexJar(jar,dex,directory)
             val safe=readonly(dex,File(directory,"code.jar"));check(jar.delete());check(dex.delete());check(!closed)
             val loader=DexClassLoader(safe.path,directory.path,null,latestLoader);val type=loader.loadClass(name);latestLoader=loader
             definitions[type]=Definition(type,methods,registration)
