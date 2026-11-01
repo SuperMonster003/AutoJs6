@@ -7,6 +7,8 @@
 - 宿主 HEAD 94057fe64 (ImguiNames 最后改于 5102dbe42): `FUNCTIONS` 282 + `ALIASES` 248 + `CONSTANTS` 42 = 572, 与 pending-baseline.json 的 imgui 572 行差集为空. 看板写的 573 含内部导出 `imgui.__pluginId` (Q123, 已是 not-portable).
 - 插件 HEAD dc96dc3 (v1.16.0, tag b3ddd02). 名称取自该提交的 `imgui.d.ts` 与 `index.js`.
 
+第 1 - 3 节的数字都是这个基准下的. R6 已于 2026-11-01 落地 (见 1.4), pending 现为 583 / 583 / 583, 第 4 节用落地后的数字.
+
 卡片写于 R5 进行中, 下列几处与实际不符, 本文以实际为准:
 
 | 卡片的说法 | 实际 |
@@ -68,11 +70,13 @@ imgui 的返回对象目前没有进矩阵, 成员合计约 228 个. PLUGIN-APIS
 | StatsOverlay | 6 | 继承 Component |
 | Toast | 5 | 继承 Component |
 
-这些是插件 `index.js` 构造的 JS 对象, 而 returned_objects.py 只认 `kotlin-class` 与 `augment-prototype` 两种成员来源, 登记它们要新增一种来源 (Q217).
+这些是插件 `index.js` 构造的 JS 对象. returned_objects.py 现有四种成员来源: `kotlin-class`, `augment-prototype`, `plugin:<name>` (P5.2c, 只有 Compose 在用) 和 entry 里直接写的 `members` 列表. 登记它们走 `plugin:imgui`, 要改的是 plugin_exports.py (Q217, 做法见第 4 节卡 D). 第 1 版写成 "只认两种, 要新增来源" 是错的, 已更正. R6 新增的 SelectionStorage 与 MultiSelectIO 没有计入 228.
 
-### 1.4 在途的 R6 (工作区未提交, 会话 local_3c4bb372)
+### 1.4 R6 (写盘点时在途, 2026-11-01 已落地)
 
 R6 新增 11 行: beginMultiSelect / endMultiSelect (帧内容器), setNextItemSelectionUserData / isItemToggledSelection (查询), selectionStorage (值引用), 各带 PascalCase 别名, 外加常量组 MultiSelectFlags. 落地后 imgui 公开名称 583, 含 `__pluginId` 584 行. R7 的 Roadmap 条目没有新全局名的计划.
+
+落地情况: 插件 v1.17.0 (a536bc2, 01:24), 宿主登记 5aa0a1b8a (01:55, pending 572 -> 583). ImguiNames 现为 `FUNCTIONS` 287 + `ALIASES` 253 + `CONSTANTS` 43 = 583.
 
 ## 2. Node / Bun 形态方案
 
@@ -146,7 +150,7 @@ R6 新增 11 行: beginMultiSelect / endMultiSelect (帧内容器), setNextItemS
 | TS 声明仓库 | 完全没有 imgui, 也没有引用插件 d.ts | 新建 `declarations/autojs6/aj6-int-imgui.d.ts`, 由插件 `imgui.d.ts` (R6 后约 1860 行) 改写, capture 的返回类型接到宿主 ImageWrapper. 方案 (b) 下 autojs6-node / autojs6-bun 不需要声明 | 0.5 个子会话 |
 | Ace 捆绑声明 | 完全没有 imgui | 同步 aj6-int-imgui.d.ts, 跑 `:app:generateAutoJs6LspDeclarations`, 查询清单约 +583 | 与 TS 同卡 |
 | Offline Docs | imgui.html 与文档站 blob 相同 (46df5d20), 已同步 | 无, 随文档生成脚本更新 | 无额外工作 |
-| 门禁 | policy.json `deferredNameGate.imgui` 暂缓 | 三面补齐后该项会被判 stale, 必须删除 | 1 行, 随最后一张卡 |
+| 门禁 | policy.json `deferredNameGate.imgui` 暂缓, 只管模块根的行, 不管返回对象成员 | 三面补齐后该项会被判 stale, 必须删除 | 1 行, 随 B / C 中后完成的卡 |
 
 插件侧素材: `imgui.d.ts` 现有 333 行注释, R7.1 要求每个公开成员至少一行 JSDoc 并把 39 处 `unknown` 清零, R7.3 产出给 P5.2f 的移交清单, 所以文档与声明都应等 R7. README (25 KB), LIMITS.md, THREADING.md, MULTI-WINDOW.md 可作正文来源, ALIASES.md 由 `tools/generate_aliases_doc.py` 生成, 可直接转成别名表.
 
@@ -154,21 +158,110 @@ PLUGIN-APIS.md 8.2 的旧估算 (约 349 个标题, 194 个别名, 约 85 个成
 
 ## 4. 实施卡
 
-按第 6 节的拍板结果定稿, 卡片由调度会话发. 工作量是估算.
+按第 6 节的拍板结果定稿, 调度会话照此写卡片 prompt. 工作量是估算. 四张卡的共同约束: 只本地提交, 不推送不发版 (D6), 版本号留阶段收尾, 共享文件在 locks.md 登记并错开.
 
-| 卡 | 内容 | 开始条件 | 工作量 |
+| 卡 | 开始条件 | 并行 | 工作量 |
 |---|---|---|---|
-| A. 排除规则 | `imgui.*` 按 `rhino-only` 写进 runtime-policy.json 与附录 D 新组, 三列 not-portable, pending 清零 (R6 落地后含它的 11 行), 重生成运行时表, 文档写逃生口. 先核实 2.3 未核实的三点, 真机冒烟 Node 与 Bun 各一次 | R6 提交后, 不等 R7 (收尾卡已于 2026-11-01 01:5x 完成) | 1 张小卡, 手写约 60 行 |
-| B. 文档 | returned_objects.py 新增 JS 对象成员来源, 登记 228 个成员 (R6 / R7 后以当时的数量为准); api/imgui.md 正文约 5000 行, 对象页约 2500 行, 挂侧栏 / 目录, zh-Hans changelog | R7 发布后 | 约 1.5 个子会话, 工具约 50-80 行加测试 |
-| C. 声明 | 新建 `aj6-int-imgui.d.ts`, 同步 Ace, 跑 `:app:generateAutoJs6LspDeclarations` | R7 发布后, 与 B 并行 | 约 0.5 个子会话 |
-| D. 收口 | 删 `deferredNameGate.imgui`, 勾 P5.2 | B 与 C 完成后 | 1 行, 可并入后完成的那张卡 |
+| A. 排除规则 | 现在就能发: 收尾卡已完成, R6 已落地 | 可与 R7 同时做 | 1 张小卡, 手写约 60 行 |
+| B. 文档 | A 完成且 R7 发布后 | 与 C 并行 | 约 1.5 个子会话, 文档约 7500 行 |
+| C. 声明 | R7 发布后 | 与 B 并行 | 约 0.5 个子会话 |
+| D. 成员登记与收口 | B 与 C 都完成后 | 最后做 | 约 0.5 个子会话, 工具约 50-80 行加测试 |
 
-两点要在卡片里写明:
+B 要等 A, 因为两张卡都改 `api/imgui.md`, 而且 B 的正文要引用 A 定下的逃生口写法.
 
-- 成员行不能进 pending. Q40 (a) 规定 pending-baseline.json 只减不增, 所以 B 登记成员时, 这些行在 Node / Bun 列必须同时被 `rhino-only` 规则覆盖. `imgui.*` 能否匹配成员行取决于成员行的命名, 本次没有核实, B 要先确认, 不匹配就在附录 D 同组补一条规则.
-- 成员行的文档与 d.ts 门禁在 B, C 期间可能互相卡住: `deferredNameGate.imgui` 是否覆盖成员行, 本次没有核实. 不覆盖时, B 与 C 里后提交成员来源的一方要等另一方, 或者先把工具改动留到两边都就绪.
+### 卡 A: 排除规则
 
-B 与 C 都会动 ROADMAP 与矩阵生成文件, 共享文件要在 locks.md 登记并错开.
+范围:
+
+- `imgui.*` 在 node_main, node_worker, bun 三列记 not-portable / `rhino-only`, pending 583 -> 0. 规则写 `equivalent` 字段指向 `engines.execScript`, 矩阵的等价写法列读它.
+- 核实 2.3 未核实的三点, 定出 Node / Bun 主脚本与 Rhino 脚本的通信写法, 写进 `api/imgui.md`.
+- 不动 `deferredNameGate.imgui`, 不动 doc / d.ts / Ace 列.
+
+文件:
+
+- 宿主: `tools/api-coverage/runtime-policy.json` (放在 `internal-exports` 之后; 每格取首条命中的规则, `imgui.__pluginId` 仍归 `internal-exports`), `pending-baseline.json` 与 `docs/api-coverage/MATRIX.md` (`check.py --write-matrix --write-pending-baseline` 生成), ROADMAP 附录 D 新增 D-23 行.
+- 文档站: `api/imgui.md` 加逃生口约 30 行, 运行时表用 `node generator/runtime-support.js` 重生成, 再跑 `generator/auto-generate-for-autojs6.bat`. Offline Docs 随之更新.
+- Ace: 查询文件有变化时跑 `node tools/ace-lsp/generate-runtime-api-queries.mjs`.
+- 冒烟脚本写成 `tools/api-coverage/` 下可复用的 `device_*.py`, 只输出通过 / 失败与关键数值.
+
+验收:
+
+1. `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, pending 0 / 0 / 0, imgui 583 行三列都是 not-portable / `rhino-only`.
+2. `tools/api-coverage` 单测全过, Ace `generate-runtime-api-queries.mjs --check --host ../AutoJs6` 过.
+3. 真机冒烟 Node 与 Bun 各一次: `engines.execScript` 启动 Rhino 脚本, imgui 窗口打开, 帧回调运行, 脚本结束后窗口关闭. Bun 要有 `engines.exec` 授权, 手机上的确认对话框由维护者点.
+4. 文档里的逃生口示例就是冒烟跑过的代码.
+5. 2.3 的三点有不成立时, 写明并改文档写法. Q213 (b) 不变, 排除规则照常落地.
+
+### 卡 B: 文档
+
+范围:
+
+- `api/imgui.md` 正文: 287 个函数 + 43 个常量 = 330 个标题, 253 个别名入表 (插件 `tools/generate_aliases_doc.py` 的 ALIASES.md 可直接转), 约 5000 行. R7 若增减名称, 以发布后的 ImguiNames 为准.
+- 对象页约 2500 行: 第 1.3 节的 9 个对象, 加 R6 新增的 SelectionStorage / MultiSelectIO. 页名沿用 `composeNodeType` 的写法, 例如 `imguiSessionType`.
+- 挂侧栏 / 目录 (Q125), 只写 zh-Hans changelog.
+- 素材: R7.3 的移交清单, d.ts 的 JSDoc, README, LIMITS.md, THREADING.md, MULTI-WINDOW.md, examples/.
+
+文件:
+
+- 文档站: `api/imgui.md`, 新建 `api/imgui*Type.md`, `api/toc.md`, `.changelog/lang_zh-Hans.json` 与 `api/changelog.md`.
+- Offline Docs: 由 `generator/auto-generate-for-autojs6.bat` 更新.
+- 宿主: 只有把模块根的名称拆到别的页时, 才要在 `tools/api-coverage/policy.json` 加 `documentationModules.imgui`.
+
+验收:
+
+1. check.py 报告里 `deferredNameGate.imgui.missingDocumentation` 为 0, 标题行数不少于 330.
+2. 文档生成 `--check` 当前, Offline Docs 的 imgui.html 与文档站 blob 相同.
+3. 示例代码取自插件 examples/, 新写的示例要上真机跑过.
+4. 运行时表保持卡 A 的结果, 正文开头写明 Node / Bun 走逃生口.
+
+### 卡 C: 声明
+
+范围:
+
+- 由插件 `app/src/main/assets/types/imgui.d.ts` (R7 版) 改写 `aj6-int-imgui.d.ts`, capture 的返回类型接到宿主 ImageWrapper.
+- 每个返回对象都要能从调用表达式解析到成员 (例如 `imgui.createWindow.().setFps`), 卡 D 的 probe 靠这一点.
+- autojs6-node / autojs6-bun 不加声明 (Q213).
+
+文件:
+
+- TS 仓库: `declarations/autojs6/aj6-int-imgui.d.ts`, `declarations/autojs6/index.d.ts` 的引用.
+- Ace: `app/src/main/assets/editor/ace-builds-1.44.0/autojs6/types/autojs6/aj6-int-imgui.d.ts`, `:app:generateAutoJs6LspDeclarations` 生成的聚合与索引, `tools/ace-lsp/generate-runtime-api-queries.mjs` 生成的查询清单 (约 +583).
+
+验收:
+
+1. check.py 报告里 `deferredNameGate.imgui.failingPaths` 为 0, `--strict-arity --strict-types` 退出 0.
+2. TS `npm test` 与 `tools/sync-runtime-declarations.mjs --check --ace` 过.
+3. Ace `generate-runtime-api-queries.mjs --check --host ../AutoJs6` 与 `verify-runtime-api-coverage.mjs --fresh` 过.
+4. 插件全部示例以 `tsc --strict` 对照这份声明通过.
+
+B 与 C 中后完成的卡要在同一次提交里删掉 `deferredNameGate.imgui`. 三面都补齐后该项还在, check.py 会判 stale 失败.
+
+### 卡 D: 成员登记与收口
+
+这张卡必须最后做, 原因是 `returned_objects.gate` 不看 `deferredNameGate`: 成员行一登记, doc / d.ts / Ace 缺任何一项, check.py 就失败. 第 1 版把登记放进文档卡是错的, 已更正.
+
+范围:
+
+- `plugin_exports.py` 新增一种 kind, 从插件 `imgui.d.ts` 读各接口的成员 (含 extends Component 继承的). `returned_objects.py` 已支持 `plugin:<name>`, 不用改.
+- 新增规则 `match: ["*#*"]`, `memberSource: "plugin:imgui"`, not-portable / `rhino-only`. 成员行的 id 是 `<对象>#<成员>`, `imgui.*` 匹配不到. 这条规则要和成员行同时落地, 否则新行是 pending, 违反 Q40 (a) 只减不增.
+- API coverage workflow 加 `AutoJs6-Plugin-ImGui` 的检出. 现在 CI 没有检出这个仓库, 缺了它 `plugin:imgui` 会被整个跳过, 门禁等于没有.
+- 勾选 P5.2, ROADMAP 写落点.
+
+不用 entry 里直接写 `members` 列表的做法: 它不用改工具, 但插件以后增减成员时门禁发现不了.
+
+文件:
+
+- `tools/api-coverage/plugin_exports.py`, `test_plugin_exports.py`.
+- `tools/api-coverage/policy.json`: `pluginExports.imgui`, root 用 `../AutoJs6-Plugin-ImGui/app/src/main/assets/types`, 并给 `rootEnvironment`.
+- `tools/api-coverage/returned-objects.json`: 11 个对象, 名称加 Imgui 前缀 (`ImguiSession` 等) 以免撞名, 各写 memberSource, catalog, producers, probe, documentation.
+- `tools/api-coverage/runtime-policy.json`, `docs/api-coverage/MATRIX.md`, ROADMAP 与附录 D 的 D-23 行, `.github/workflows/api-coverage.yml`.
+
+验收:
+
+1. check.py 全部开关退出 0, returned-objects 报告 failures 为空, 成员数与插件 d.ts 一致.
+2. pending 保持 0 / 0 / 0, 矩阵分母增加的行数等于成员数.
+3. 临时在 d.ts 副本加一个成员, check.py 失败, 证明门禁生效 (不提交).
+4. 单测全过, 含新 kind 的读取与缺仓库时 skipped 两例.
 
 ## 5. 待决事项
 
@@ -183,9 +276,11 @@ B 与 C 都会动 ROADMAP 与矩阵生成文件, 共享文件要在 locks.md 登
 ## 6. 拍板结果
 
 - Q213: 已决 (2026-11-01 00:2x), 维护者看过四个方案的代码写法对比后选 (b) 整体排除, 文档写 `engines.execScript` 逃生口, 推荐项.
-- Q214: 已决 (2026-11-01 19:1x), 选 (a) `rhino-only`, 推荐项.
-- Q215: 已决 (2026-11-01 19:1x), 选 (a) R6 提交后立刻发排除规则小卡, 不等 R7, 推荐项. 收尾卡已于 01:5x 完成.
-- Q216: 已决 (2026-11-01 19:1x), 选 (a) R7 发布后文档卡与声明卡并行, 推荐项.
-- Q217: 已决 (2026-11-01 19:1x), 选 (a) 228 个对象成员登记进矩阵分母, 推荐项.
+- Q214: 已决 (2026-11-01 01:1x), 选 (a) `rhino-only`, 推荐项.
+- Q215: 已决 (2026-11-01 01:1x), 选 (a) 收尾卡与 R6 提交后立刻发排除规则小卡, 不等 R7, 推荐项. 这两个条件都已满足.
+- Q216: 已决 (2026-11-01 01:1x), 选 (a) R7 发布后文档卡与声明卡并行, 推荐项.
+- Q217: 已决 (2026-11-01 01:1x), 选 (a) 228 个对象成员登记进矩阵分母, 推荐项. 实施时改 plugin_exports.py, 不改 returned_objects.py, 工作量估算不变, 但要排在文档与声明之后 (第 4 节卡 D).
 
-这四项与 Q213 一起决定了第 4 节的实施卡划分.
+Q214 - Q217 是维护者在调度会话选定的, 2026-11-01 19:1x 在本会话逐题再选, 结果相同.
+
+本会话问 Q215 时选项里写了 "R6 还在进行", 这个说法已过时: R6 当时已落地. 依据的看板 imgui.md 行没有更新. 结论不受影响, 只是小卡不用再等.
