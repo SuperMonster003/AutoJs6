@@ -533,5 +533,15 @@
       "equivalent": "Buffer.from(text).toString(\"base64\") / Buffer.from(data, \"base64\"), atob / btoa",
       "source": "appendix D D-9, maintainer 2026-10-29 (P1.4 question 2)"
     }
+  ],
+  "minApi": [
+    {
+      "id": "bun-plugin-min-sdk",
+      "columns": ["bun"],
+      "match": ["*"],
+      "minApi": 33,
+      "reason": "Bun 插件 minSdk 33: 官方二进制调用 close_range, Android 12L 及更早系统的应用 seccomp 以 SIGSYS 结束进程, API 28 实测 INSTALL_FAILED_OLDER_SDK",
+      "source": "P6.1, docs/api-coverage/P6-1-MINAPI-2026-11-01.md"
+    }
   ]
 }

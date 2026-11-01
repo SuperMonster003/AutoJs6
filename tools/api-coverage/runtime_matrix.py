@@ -460,6 +460,28 @@ def apply_exclusions(rows, rules):
     return conflicts
 
 
+def apply_min_api(rows, rules):
+    """minApi rules (P6.1) annotate cells a runtime covers but cannot serve below an API level. The status stays, so the
+    annotation is neither pending nor an exclusion; a rule that covers no cell, or has no level or reason, is a conflict."""
+    conflicts, summary = [], {}
+    for rule in rules:
+        if not isinstance(rule.get('minApi'), int) or not rule.get('reason'):
+            conflicts.append({'rule': rule['id'], 'kind': 'invalid'})
+            continue
+        cells = Counter()
+        for row in rows:
+            if not any(fnmatchcase(row['id'], pattern) for pattern in rule['match']) or any(fnmatchcase(row['id'], pattern) for pattern in rule.get('except', ())):
+                continue
+            for column in rule.get('columns', RUNTIME_COLUMNS):
+                if row[column]['status'] in COVERED:
+                    row[column] = row[column] | {'minApi': max(rule['minApi'], row[column].get('minApi', 0)), 'minApiRule': rule['id']}
+                    cells[column] += 1
+        if not cells:
+            conflicts.append({'rule': rule['id'], 'kind': 'unused'})
+        summary[rule['id']] = {'minApi': rule['minApi'], 'match': rule['match'], 'reason': rule['reason'], 'cells': dict(cells)}
+    return conflicts, summary
+
+
 def missing_reasons(rows):
     result = []
     for row in rows:
@@ -510,6 +532,8 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
             row['node_worker'] = 'node' in mapping and node.returned(row, mapping['node'], worker=True) or {'status': 'pending'}
             row['bun'] = 'bun' in mapping and bun.returned(row, mapping['bun']) or {'status': 'pending'}
     conflicts = apply_exclusions(rows, policy.get('exclusions', []))
+    limits, min_api = apply_min_api(rows, policy.get('minApi', []))
+    conflicts += limits
     objects = {row['object'] for row in rows}
     conflicts += [{'rule': f'returnedObjects {name}', 'kind': 'unused'} for name in sorted(returned) if not name.startswith('_') and name not in objects]
     conflicts += [{'rule': f'bun.memberCapabilities {key}', 'kind': 'unused'}
@@ -532,6 +556,7 @@ def build(exports, policy, policy_json, node_surfaces, bun_surfaces, host_api, w
                     'pending': {column: by_column[column]['pending'] for column in RUNTIME_COLUMNS},
                     'rejects': {column: sum(bool(row[column].get('rejects')) for row in rows) for column in RUNTIME_COLUMNS},
                     'missingReasons': missing_reasons(rows), 'missingCapabilities': missing_capabilities(rows), 'policyConflicts': conflicts,
+                    'minApi': min_api,
                     # P2.4 type comparison of the rows with Kotlin types (None without the check.py report).
                     'types': dict(sorted(Counter(row['types'] for row in rows if row['types']).items())) if surfaces is not None else None,
                     # policy.json deferredNameGate (Q115 (a)): doc / dts / ace gaps of these module roots do not fail check.py yet.
@@ -614,6 +639,12 @@ def render_markdown(matrix):
         cell = policy_rows[rule]
         lines.append(f"| {rule} | {cell['status']}: {cell.get('reason', '?')} | " + ' | '.join(str(rules[rule][column]) for column in RUNTIME_COLUMNS)
                      + f" | {cell.get('equivalent', '')} |")
+    if summary.get('minApi'):
+        lines += ['', '## 最低 API 标注', '', '状态不变, 不算 pending 也不算排除: 该入口在标注的 API 级别以下不可用 (P6.1, runtime-policy.json minApi).', '',
+                  '| 规则 | minApi | 匹配 | Node main | Node Worker | Bun | 理由 |', '|---|---:|---|---:|---:|---:|---|']
+        for rule, item in sorted(summary['minApi'].items()):
+            lines.append(f"| {rule} | {item['minApi']} | {' '.join(f'`{pattern}`' for pattern in item['match'])} | "
+                         + ' | '.join(str(item['cells'].get(column, 0)) for column in RUNTIME_COLUMNS) + f" | {item['reason']} |")
     modules = defaultdict(list)
     for row in matrix['rows']:
         modules[row['object'] + '#' if row['kind'] == 'returned-member' else row['module'] or '(global)'].append(row)

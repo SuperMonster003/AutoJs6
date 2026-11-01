@@ -272,6 +272,30 @@ class StatusTest(unittest.TestCase):
         override['exclusions'][4]['reason'] = 'obsoleted'
         self.assertNotIn('database.close', {item['id'] for item in matrix(policy=override)['summary']['missingReasons']})
 
+    def test_min_api(self):
+        policy = copy.deepcopy(POLICY)
+        policy['minApi'] = [{'id': 'bun-sdk', 'columns': ['bun'], 'match': ['*'], 'minApi': 33, 'reason': 'plugin minSdk 33'},
+                            {'id': 'no-cell', 'match': ['nothing.*'], 'minApi': 30, 'reason': 'matches no row'},
+                            {'id': 'no-level', 'match': ['images.*'], 'reason': 'no level'}]
+        result = matrix(policy=policy)
+        rows = {row['id']: row for row in result['rows']}
+        # The status stays: a covered cell gains the level, a pending or excluded cell does not.
+        self.assertEqual(rows['captureScreen']['bun']['status'], 'capability-gated')
+        self.assertEqual((rows['captureScreen']['bun']['minApi'], rows['captureScreen']['bun']['minApiRule']), (33, 'bun-sdk'))
+        self.assertEqual(rows['files.read']['bun']['status'], 'pending')
+        self.assertNotIn('minApi', rows['files.read']['bun'])
+        self.assertNotIn('minApi', rows['images.read']['node_main'])
+        self.assertEqual(result['summary']['pending'], self.matrix['summary']['pending'])
+        conflicts = result['summary']['policyConflicts']
+        self.assertIn({'rule': 'no-cell', 'kind': 'unused'}, conflicts)
+        self.assertIn({'rule': 'no-level', 'kind': 'invalid'}, conflicts)
+        self.assertEqual(result['summary']['minApi']['bun-sdk']['minApi'], 33)
+        self.assertGreater(result['summary']['minApi']['bun-sdk']['cells']['bun'], 0)
+        text = render_markdown(result)
+        self.assertIn('## 最低 API 标注', text)
+        self.assertRegex(text, r'\| bun-sdk \| 33 \| `\*` \| 0 \| 0 \| \d+ \| plugin minSdk 33 \|')
+        self.assertNotIn('## 最低 API 标注', render_markdown(self.matrix))
+
     def test_surface_columns(self):
         self.assertEqual((self.rows['images.read']['doc'], self.rows['images.read']['dts'], self.rows['images.read']['ace']), ('heading', 'arity', 'static'))
         self.assertEqual((self.rows['images.getSize']['doc'], self.rows['images.getSize']['dts'], self.rows['images.getSize']['ace']), ('mention', 'name', 'semantic'))

@@ -358,7 +358,8 @@ the Ace runtime queries join on them.
     "rejects": {"node_main": 0, "node_worker": 0, "bun": 0},  // cells of entries that only reject (Q26)
     "missingReasons": [],      // excluded cells without a valid reason / equivalent
     "missingCapabilities": [], // Bun capability-gated cells without a capability (fails --matrix)
-    "policyConflicts": []      // exclusion rules shadowed by a real runtime entry, unused rules
+    "policyConflicts": [],     // exclusion rules shadowed by a real runtime entry, unused rules, minApi rules that match nothing or lack a level or reason
+    "minApi": {}               // minApi rules: level, match, reason, annotated cells per column (P6.1)
   },
   "rows": [ROW]                // sorted by id
 }
@@ -410,6 +411,16 @@ exclusion rule carry `rule` (and `note` when the rule has one) instead.
 `reason` is one of `security`, `sync-only`, `java-prototype`, `runtime-native`,
 `runtime-builtin`, `rhino-only`, `ui-thread`; a `runtime-native` cell must carry
 `equivalent`.
+
+### Minimum API annotations (P6.1)
+
+`runtime-policy.json` `minApi` lists entries a runtime covers but cannot serve below
+an API level. A rule has `id`, `match` (patterns over row ids, like an exclusion),
+optional `columns` and `except`, the integer `minApi` and a `reason`. Covered cells it
+matches gain `minApi` and `minApiRule`; the status stays, so the annotation is neither
+pending nor an exclusion, and it is not a way to clear a pending cell. `MATRIX.md`
+lists the rules under "最低 API 标注". New rules come from device evidence
+(`docs/api-coverage/P6-1-MINAPI-*.md`); the host's own minimum is 24.
 
 ### Inputs from P0.3 and P0.4
 
@@ -774,6 +785,12 @@ CI checks out the four public plugin repositories and the Ace Editor and runs th
 tests.
 
 ## Physical-device checks
+
+`device_p6_1_minapi.py` is the P6.1 sampling on the lowest roadmap device (G8441, API
+28). It reuses the Node harnesses, `device_plugin_family.py` and the P1.2 cases of
+`device_sample_a.py`, prints one line per sampled entry, and proves the Bun API 33
+limit by installing the real APK (`bun-limit`). The host's runtime device suites run
+below API 33 through `runtimeModes`, which leaves the Bun mode out.
 
 Build and install matching current host and instrumentation APKs with `adb install
 -r -t`, plus the current Ace plugin APK. Select APKs using `output-metadata.json`
