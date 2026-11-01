@@ -906,14 +906,16 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual((rows['Flow#await']['bun']['status'], rows['Flow#sync']['bun']['status']), ('capability-gated', 'capability-gated'))
 
     def test_p5_2f1(self):
-        # Q122 - Q124: the host imgui module is in the denominator, pending in every runtime column except the internal __pluginId.
+        # Q122 - Q124: the host imgui module is in the denominator. Q213 (b) / Q214 (a): its public names are rhino-only in every
+        # runtime column, the internal __pluginId stays with its own rule.
         rows = {row['id']: row for row in self.matrix['rows'] if row['kind'] == 'export' and row['module'].split('.')[0] == 'imgui'}
         if not rows:
             self.skipTest('the imgui installs come from the KSP metadata')
         self.assertEqual(rows['imgui.__pluginId']['node_main'].get('rule'), 'internal-exports')
         public = [row for name, row in rows.items() if name != 'imgui.__pluginId']
         for column in ['node_main', 'node_worker', 'bun']:
-            self.assertEqual({row[column]['status'] for row in public}, {'pending'}, column)
+            self.assertEqual({(row[column]['status'], row[column].get('reason'), row[column].get('rule')) for row in public},
+                             {('not-portable', 'rhino-only', 'imgui-rhino-only')}, column)
         self.assertEqual(self.matrix['summary']['deferredNameGate']['imgui']['rows'], len(rows))
 
     def test_p2_3(self):
