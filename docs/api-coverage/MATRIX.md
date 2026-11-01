@@ -9,9 +9,9 @@
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1685 | 369 | 0 | 941 | 0 | 583 |
-| Node Worker | 1685 | 366 | 0 | 944 | 0 | 583 |
-| Bun | 0 | 377 | 1674 | 944 | 0 | 583 |
+| Node main | 1685 | 369 | 0 | 1524 | 0 | 0 |
+| Node Worker | 1685 | 366 | 0 | 1527 | 0 | 0 |
+| Bun | 0 | 377 | 1674 | 1527 | 0 | 0 |
 
 | 列 | 取值 |
 |---|---|
@@ -32,6 +32,7 @@
 | 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |
 |---|---|---:|---:|---:|---|
 | http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
+| imgui-rhino-only | not-portable: rhino-only | 583 | 583 | 583 | engines.execScript of a Rhino script that opens the imgui window; events.broadcast between the two scripts (documentation imgui page) |
 | internal-exports | not-portable: rhino-only | 10 | 10 | 10 |  |
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
@@ -134,7 +135,7 @@
 | gallery | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | http | 21 | 20 | 20 | 20 / 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 79 / 79 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| imgui | 584 | 0 | 0 | - | 0 | 0 / 1 / 583 | 0 / 1 / 583 | 0 / 1 / 583 |
+| imgui | 584 | 0 | 0 | - | 0 | 0 / 584 / 0 | 0 / 584 / 0 | 0 / 584 / 0 |
 | installer | 16 | 16 | 16 | - | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 / 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
@@ -1284,590 +1285,590 @@
 
 | 行 id | Node main | Node Worker | Bun |
 |---|---|---|---|
-| `imgui.AcceptDragDropPayload` | pending | pending | pending |
-| `imgui.AddButtonEx` | pending | pending | pending |
-| `imgui.AddMouseButtonEvent` | pending | pending | pending |
-| `imgui.AddMousePosEvent` | pending | pending | pending |
-| `imgui.Alert` | pending | pending | pending |
-| `imgui.AlignTextToFramePadding` | pending | pending | pending |
-| `imgui.Appearance` | pending | pending | pending |
-| `imgui.ArrowButton` | pending | pending | pending |
-| `imgui.BackendStatus` | pending | pending | pending |
-| `imgui.Begin` | pending | pending | pending |
-| `imgui.BeginChild` | pending | pending | pending |
-| `imgui.BeginCombo` | pending | pending | pending |
-| `imgui.BeginDisabled` | pending | pending | pending |
-| `imgui.BeginDragDropSource` | pending | pending | pending |
-| `imgui.BeginDragDropTarget` | pending | pending | pending |
-| `imgui.BeginGroup` | pending | pending | pending |
-| `imgui.BeginItemTooltip` | pending | pending | pending |
-| `imgui.BeginListBox` | pending | pending | pending |
-| `imgui.BeginMenu` | pending | pending | pending |
-| `imgui.BeginMenuBar` | pending | pending | pending |
-| `imgui.BeginMultiSelect` | pending | pending | pending |
-| `imgui.BeginPopup` | pending | pending | pending |
-| `imgui.BeginPopupContextItem` | pending | pending | pending |
-| `imgui.BeginPopupContextWindow` | pending | pending | pending |
-| `imgui.BeginPopupModal` | pending | pending | pending |
-| `imgui.BeginTabBar` | pending | pending | pending |
-| `imgui.BeginTabItem` | pending | pending | pending |
-| `imgui.BeginTable` | pending | pending | pending |
-| `imgui.BeginTooltip` | pending | pending | pending |
-| `imgui.Bullet` | pending | pending | pending |
-| `imgui.BulletText` | pending | pending | pending |
-| `imgui.Button` | pending | pending | pending |
-| `imgui.ButtonFlags` | pending | pending | pending |
-| `imgui.CalcTextSize` | pending | pending | pending |
-| `imgui.Checkbox` | pending | pending | pending |
-| `imgui.ChildFlags` | pending | pending | pending |
-| `imgui.CloseCurrentPopup` | pending | pending | pending |
-| `imgui.CloseWindow` | pending | pending | pending |
-| `imgui.Col` | pending | pending | pending |
-| `imgui.CollapseWindow` | pending | pending | pending |
-| `imgui.CollapsingHeader` | pending | pending | pending |
-| `imgui.ColorButton` | pending | pending | pending |
-| `imgui.ColorEdit3` | pending | pending | pending |
-| `imgui.ColorEdit4` | pending | pending | pending |
-| `imgui.ColorEditFlags` | pending | pending | pending |
-| `imgui.ColorPicker3` | pending | pending | pending |
-| `imgui.ColorPicker4` | pending | pending | pending |
-| `imgui.ColorU32` | pending | pending | pending |
-| `imgui.Combo` | pending | pending | pending |
-| `imgui.ComboFlags` | pending | pending | pending |
-| `imgui.Cond` | pending | pending | pending |
-| `imgui.Confirm` | pending | pending | pending |
-| `imgui.CreateTexture` | pending | pending | pending |
-| `imgui.CreateWindow` | pending | pending | pending |
-| `imgui.DataTable` | pending | pending | pending |
-| `imgui.DestroyTexture` | pending | pending | pending |
-| `imgui.Dir` | pending | pending | pending |
-| `imgui.Dp` | pending | pending | pending |
-| `imgui.DragDropFlags` | pending | pending | pending |
-| `imgui.DragFloat` | pending | pending | pending |
-| `imgui.DragFloat2` | pending | pending | pending |
-| `imgui.DragFloat3` | pending | pending | pending |
-| `imgui.DragFloat4` | pending | pending | pending |
-| `imgui.DragFloatRange2` | pending | pending | pending |
-| `imgui.DragInt` | pending | pending | pending |
-| `imgui.DragInt2` | pending | pending | pending |
-| `imgui.DragInt3` | pending | pending | pending |
-| `imgui.DragInt4` | pending | pending | pending |
-| `imgui.DragIntRange2` | pending | pending | pending |
-| `imgui.DrawFlags` | pending | pending | pending |
-| `imgui.DrawListLayer` | pending | pending | pending |
-| `imgui.Dummy` | pending | pending | pending |
-| `imgui.End` | pending | pending | pending |
-| `imgui.EndChild` | pending | pending | pending |
-| `imgui.EndCombo` | pending | pending | pending |
-| `imgui.EndDisabled` | pending | pending | pending |
-| `imgui.EndDragDropSource` | pending | pending | pending |
-| `imgui.EndDragDropTarget` | pending | pending | pending |
-| `imgui.EndGroup` | pending | pending | pending |
-| `imgui.EndListBox` | pending | pending | pending |
-| `imgui.EndMenu` | pending | pending | pending |
-| `imgui.EndMenuBar` | pending | pending | pending |
-| `imgui.EndMultiSelect` | pending | pending | pending |
-| `imgui.EndPopup` | pending | pending | pending |
-| `imgui.EndTabBar` | pending | pending | pending |
-| `imgui.EndTabItem` | pending | pending | pending |
-| `imgui.EndTable` | pending | pending | pending |
-| `imgui.EndTooltip` | pending | pending | pending |
-| `imgui.ExpandWindow` | pending | pending | pending |
-| `imgui.FocusedFlags` | pending | pending | pending |
-| `imgui.Fonts` | pending | pending | pending |
-| `imgui.GetBackendCapabilities` | pending | pending | pending |
-| `imgui.GetBackgroundDrawList` | pending | pending | pending |
-| `imgui.GetClipboardText` | pending | pending | pending |
-| `imgui.GetComponent` | pending | pending | pending |
-| `imgui.GetContentRegionAvail` | pending | pending | pending |
-| `imgui.GetCursorPos` | pending | pending | pending |
-| `imgui.GetDragDropPayload` | pending | pending | pending |
-| `imgui.GetExampleSource` | pending | pending | pending |
-| `imgui.GetForegroundDrawList` | pending | pending | pending |
-| `imgui.GetFrameHeight` | pending | pending | pending |
-| `imgui.GetFrameHeightWithSpacing` | pending | pending | pending |
-| `imgui.GetKeyName` | pending | pending | pending |
-| `imgui.GetKeyPressedAmount` | pending | pending | pending |
-| `imgui.GetMouseDragDelta` | pending | pending | pending |
-| `imgui.GetMousePos` | pending | pending | pending |
-| `imgui.GetScrollMaxX` | pending | pending | pending |
-| `imgui.GetScrollMaxY` | pending | pending | pending |
-| `imgui.GetScrollX` | pending | pending | pending |
-| `imgui.GetScrollY` | pending | pending | pending |
-| `imgui.GetTextLineHeight` | pending | pending | pending |
-| `imgui.GetTextLineHeightWithSpacing` | pending | pending | pending |
-| `imgui.GetWindowDrawList` | pending | pending | pending |
-| `imgui.GetWindowPos` | pending | pending | pending |
-| `imgui.GetWindowSize` | pending | pending | pending |
-| `imgui.HoveredFlags` | pending | pending | pending |
-| `imgui.Icon` | pending | pending | pending |
-| `imgui.Icons` | pending | pending | pending |
-| `imgui.Image` | pending | pending | pending |
-| `imgui.ImageButton` | pending | pending | pending |
-| `imgui.Indent` | pending | pending | pending |
-| `imgui.InputFlags` | pending | pending | pending |
-| `imgui.InputFloat` | pending | pending | pending |
-| `imgui.InputFloat2` | pending | pending | pending |
-| `imgui.InputFloat3` | pending | pending | pending |
-| `imgui.InputFloat4` | pending | pending | pending |
-| `imgui.InputInt` | pending | pending | pending |
-| `imgui.InputInt2` | pending | pending | pending |
-| `imgui.InputInt3` | pending | pending | pending |
-| `imgui.InputInt4` | pending | pending | pending |
-| `imgui.InputText` | pending | pending | pending |
-| `imgui.InputTextFlags` | pending | pending | pending |
-| `imgui.InputTextMultiline` | pending | pending | pending |
-| `imgui.InvisibleButton` | pending | pending | pending |
-| `imgui.IsAnyItemActive` | pending | pending | pending |
-| `imgui.IsAnyItemHovered` | pending | pending | pending |
-| `imgui.IsItemActivated` | pending | pending | pending |
-| `imgui.IsItemActive` | pending | pending | pending |
-| `imgui.IsItemClicked` | pending | pending | pending |
-| `imgui.IsItemDeactivated` | pending | pending | pending |
-| `imgui.IsItemDeactivatedAfterEdit` | pending | pending | pending |
-| `imgui.IsItemEdited` | pending | pending | pending |
-| `imgui.IsItemFocused` | pending | pending | pending |
-| `imgui.IsItemHovered` | pending | pending | pending |
-| `imgui.IsItemToggledSelection` | pending | pending | pending |
-| `imgui.IsItemVisible` | pending | pending | pending |
-| `imgui.IsKeyChordPressed` | pending | pending | pending |
-| `imgui.IsKeyDown` | pending | pending | pending |
-| `imgui.IsKeyPressed` | pending | pending | pending |
-| `imgui.IsKeyReleased` | pending | pending | pending |
-| `imgui.IsMouseClicked` | pending | pending | pending |
-| `imgui.IsMouseDoubleClicked` | pending | pending | pending |
-| `imgui.IsMouseDown` | pending | pending | pending |
-| `imgui.IsMouseDragging` | pending | pending | pending |
-| `imgui.IsMouseReleased` | pending | pending | pending |
-| `imgui.IsPopupOpen` | pending | pending | pending |
-| `imgui.IsWindowAppearing` | pending | pending | pending |
-| `imgui.IsWindowCollapsed` | pending | pending | pending |
-| `imgui.IsWindowFocused` | pending | pending | pending |
-| `imgui.IsWindowHovered` | pending | pending | pending |
-| `imgui.Key` | pending | pending | pending |
-| `imgui.LabelText` | pending | pending | pending |
-| `imgui.Launch` | pending | pending | pending |
-| `imgui.LaunchFloaty` | pending | pending | pending |
-| `imgui.LaunchPrivileged` | pending | pending | pending |
-| `imgui.Limits` | pending | pending | pending |
-| `imgui.ListBox` | pending | pending | pending |
-| `imgui.ListClipper` | pending | pending | pending |
-| `imgui.ListExamples` | pending | pending | pending |
-| `imgui.LogLevel` | pending | pending | pending |
-| `imgui.LogWindow` | pending | pending | pending |
-| `imgui.MenuItem` | pending | pending | pending |
-| `imgui.Mod` | pending | pending | pending |
-| `imgui.MouseButton` | pending | pending | pending |
-| `imgui.MultiChoice` | pending | pending | pending |
-| `imgui.MultiSelectFlags` | pending | pending | pending |
-| `imgui.NewLine` | pending | pending | pending |
-| `imgui.OpenPopup` | pending | pending | pending |
-| `imgui.PlotHistogram` | pending | pending | pending |
-| `imgui.PlotLines` | pending | pending | pending |
-| `imgui.PopClipRect` | pending | pending | pending |
-| `imgui.PopFont` | pending | pending | pending |
-| `imgui.PopID` | pending | pending | pending |
-| `imgui.PopItemWidth` | pending | pending | pending |
-| `imgui.PopStyleColor` | pending | pending | pending |
-| `imgui.PopStyleVar` | pending | pending | pending |
-| `imgui.PopupFlags` | pending | pending | pending |
-| `imgui.ProgressBar` | pending | pending | pending |
-| `imgui.PushClipRect` | pending | pending | pending |
-| `imgui.PushFont` | pending | pending | pending |
-| `imgui.PushID` | pending | pending | pending |
-| `imgui.PushItemWidth` | pending | pending | pending |
-| `imgui.PushStyleColor` | pending | pending | pending |
-| `imgui.PushStyleVar` | pending | pending | pending |
-| `imgui.Px` | pending | pending | pending |
-| `imgui.RadioButton` | pending | pending | pending |
-| `imgui.Ref` | pending | pending | pending |
-| `imgui.ResetMouseDragDelta` | pending | pending | pending |
-| `imgui.RunExample` | pending | pending | pending |
-| `imgui.SameLine` | pending | pending | pending |
-| `imgui.Selectable` | pending | pending | pending |
-| `imgui.SelectableFlags` | pending | pending | pending |
-| `imgui.SelectionStorage` | pending | pending | pending |
-| `imgui.Separator` | pending | pending | pending |
-| `imgui.SeparatorText` | pending | pending | pending |
-| `imgui.SetClipboardText` | pending | pending | pending |
-| `imgui.SetCursorPos` | pending | pending | pending |
-| `imgui.SetDragDropPayload` | pending | pending | pending |
-| `imgui.SetGlobalAlpha` | pending | pending | pending |
-| `imgui.SetItemTooltip` | pending | pending | pending |
-| `imgui.SetKeyboardFocusHere` | pending | pending | pending |
-| `imgui.SetMoreTouch` | pending | pending | pending |
-| `imgui.SetNextItemSelectionUserData` | pending | pending | pending |
-| `imgui.SetNextItemShortcut` | pending | pending | pending |
-| `imgui.SetNextItemWidth` | pending | pending | pending |
-| `imgui.SetNextWindowBgAlpha` | pending | pending | pending |
-| `imgui.SetNextWindowPos` | pending | pending | pending |
-| `imgui.SetNextWindowSize` | pending | pending | pending |
-| `imgui.SetNextWindowSizeConstraints` | pending | pending | pending |
-| `imgui.SetScrollHereX` | pending | pending | pending |
-| `imgui.SetScrollHereY` | pending | pending | pending |
-| `imgui.SetScrollX` | pending | pending | pending |
-| `imgui.SetScrollY` | pending | pending | pending |
-| `imgui.SetSecure` | pending | pending | pending |
-| `imgui.SetStyleColor` | pending | pending | pending |
-| `imgui.SetStyleProperties` | pending | pending | pending |
-| `imgui.SetTheme` | pending | pending | pending |
-| `imgui.SetTooltip` | pending | pending | pending |
-| `imgui.SetTouchable` | pending | pending | pending |
-| `imgui.SetWindowFontScale` | pending | pending | pending |
-| `imgui.Shortcut` | pending | pending | pending |
-| `imgui.ShowAboutWindow` | pending | pending | pending |
-| `imgui.ShowDebugLogWindow` | pending | pending | pending |
-| `imgui.ShowDemoWindow` | pending | pending | pending |
-| `imgui.ShowIDStackToolWindow` | pending | pending | pending |
-| `imgui.ShowMetricsWindow` | pending | pending | pending |
-| `imgui.ShowStyleEditor` | pending | pending | pending |
-| `imgui.ShowUserGuide` | pending | pending | pending |
-| `imgui.SingleChoice` | pending | pending | pending |
-| `imgui.SliderAngle` | pending | pending | pending |
-| `imgui.SliderFlags` | pending | pending | pending |
-| `imgui.SliderFloat` | pending | pending | pending |
-| `imgui.SliderFloat2` | pending | pending | pending |
-| `imgui.SliderFloat3` | pending | pending | pending |
-| `imgui.SliderFloat4` | pending | pending | pending |
-| `imgui.SliderInt` | pending | pending | pending |
-| `imgui.SliderInt2` | pending | pending | pending |
-| `imgui.SliderInt3` | pending | pending | pending |
-| `imgui.SliderInt4` | pending | pending | pending |
-| `imgui.SmallButton` | pending | pending | pending |
-| `imgui.SortDirection` | pending | pending | pending |
-| `imgui.Spacing` | pending | pending | pending |
-| `imgui.StatsOverlay` | pending | pending | pending |
-| `imgui.StyleColorsClassic` | pending | pending | pending |
-| `imgui.StyleColorsDark` | pending | pending | pending |
-| `imgui.StyleColorsLight` | pending | pending | pending |
-| `imgui.StyleVar` | pending | pending | pending |
-| `imgui.TabBarFlags` | pending | pending | pending |
-| `imgui.TabItemFlags` | pending | pending | pending |
-| `imgui.TableBgTarget` | pending | pending | pending |
-| `imgui.TableColumnFlags` | pending | pending | pending |
-| `imgui.TableFlags` | pending | pending | pending |
-| `imgui.TableGetSortSpecs` | pending | pending | pending |
-| `imgui.TableHeadersRow` | pending | pending | pending |
-| `imgui.TableNextColumn` | pending | pending | pending |
-| `imgui.TableNextRow` | pending | pending | pending |
-| `imgui.TableRowFlags` | pending | pending | pending |
-| `imgui.TableSetBgColor` | pending | pending | pending |
-| `imgui.TableSetColumnIndex` | pending | pending | pending |
-| `imgui.TableSetupColumn` | pending | pending | pending |
-| `imgui.TableSetupScrollFreeze` | pending | pending | pending |
-| `imgui.Text` | pending | pending | pending |
-| `imgui.TextColored` | pending | pending | pending |
-| `imgui.TextDisabled` | pending | pending | pending |
-| `imgui.TextWrapped` | pending | pending | pending |
-| `imgui.TextureFlags` | pending | pending | pending |
-| `imgui.Themes` | pending | pending | pending |
-| `imgui.Toast` | pending | pending | pending |
-| `imgui.ToastPosition` | pending | pending | pending |
-| `imgui.Toggle` | pending | pending | pending |
-| `imgui.ToggleSwitch` | pending | pending | pending |
-| `imgui.TouchMode` | pending | pending | pending |
-| `imgui.TreeNode` | pending | pending | pending |
-| `imgui.TreeNodeEx` | pending | pending | pending |
-| `imgui.TreeNodeFlags` | pending | pending | pending |
-| `imgui.TreePop` | pending | pending | pending |
-| `imgui.Unindent` | pending | pending | pending |
-| `imgui.VSliderFloat` | pending | pending | pending |
-| `imgui.VSliderInt` | pending | pending | pending |
-| `imgui.WantCaptureMouse` | pending | pending | pending |
-| `imgui.WindowFlags` | pending | pending | pending |
-| `imgui.WindowMode` | pending | pending | pending |
-| `imgui.WithDragDropSource` | pending | pending | pending |
-| `imgui.WithDragDropTarget` | pending | pending | pending |
-| `imgui.WithFont` | pending | pending | pending |
+| `imgui.AcceptDragDropPayload` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.AddButtonEx` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.AddMouseButtonEvent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.AddMousePosEvent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Alert` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.AlignTextToFramePadding` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Appearance` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ArrowButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BackendStatus` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Begin` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginChild` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginCombo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginDragDropSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginDragDropTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginGroup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginItemTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginListBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginMenu` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginMenuBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginMultiSelect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginPopupContextItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginPopupContextWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginPopupModal` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginTabBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginTabItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BeginTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Bullet` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.BulletText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Button` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ButtonFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CalcTextSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Checkbox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ChildFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CloseCurrentPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CloseWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Col` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CollapseWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CollapsingHeader` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorEdit3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorEdit4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorEditFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorPicker3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorPicker4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ColorU32` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Combo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ComboFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Cond` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Confirm` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CreateTexture` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.CreateWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DataTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DestroyTexture` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Dir` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Dp` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragDropFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragFloat2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragFloat3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragFloat4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragFloatRange2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragInt2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragInt3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragInt4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DragIntRange2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DrawFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.DrawListLayer` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Dummy` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.End` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndChild` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndCombo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndDragDropSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndDragDropTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndGroup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndListBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndMenu` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndMenuBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndMultiSelect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndTabBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndTabItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.EndTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ExpandWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.FocusedFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Fonts` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetBackendCapabilities` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetBackgroundDrawList` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetClipboardText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetComponent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetContentRegionAvail` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetCursorPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetDragDropPayload` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetExampleSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetForegroundDrawList` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetFrameHeight` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetFrameHeightWithSpacing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetKeyName` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetKeyPressedAmount` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetMouseDragDelta` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetMousePos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetScrollMaxX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetScrollMaxY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetScrollX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetScrollY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetTextLineHeight` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetTextLineHeightWithSpacing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetWindowDrawList` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetWindowPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.GetWindowSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.HoveredFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Icon` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Icons` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Image` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ImageButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Indent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputFloat2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputFloat3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputFloat4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputInt2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputInt3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputInt4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputTextFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InputTextMultiline` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.InvisibleButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsAnyItemActive` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsAnyItemHovered` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemActivated` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemActive` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemClicked` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemDeactivated` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemDeactivatedAfterEdit` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemEdited` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemFocused` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemHovered` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemToggledSelection` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsItemVisible` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsKeyChordPressed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsKeyDown` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsKeyPressed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsKeyReleased` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsMouseClicked` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsMouseDoubleClicked` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsMouseDown` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsMouseDragging` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsMouseReleased` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsPopupOpen` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsWindowAppearing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsWindowCollapsed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsWindowFocused` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.IsWindowHovered` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Key` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.LabelText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Launch` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.LaunchFloaty` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.LaunchPrivileged` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Limits` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ListBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ListClipper` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ListExamples` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.LogLevel` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.LogWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.MenuItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Mod` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.MouseButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.MultiChoice` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.MultiSelectFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.NewLine` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.OpenPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PlotHistogram` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PlotLines` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopClipRect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopFont` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopID` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopStyleColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopStyleVar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PopupFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ProgressBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PushClipRect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PushFont` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PushID` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PushItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PushStyleColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.PushStyleVar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Px` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.RadioButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Ref` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ResetMouseDragDelta` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.RunExample` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SameLine` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Selectable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SelectableFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SelectionStorage` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Separator` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SeparatorText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetClipboardText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetCursorPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetDragDropPayload` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetGlobalAlpha` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetItemTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetKeyboardFocusHere` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetMoreTouch` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextItemSelectionUserData` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextItemShortcut` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextWindowBgAlpha` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextWindowPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextWindowSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextWindowSizeConstraints` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetScrollHereX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetScrollHereY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetScrollX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetScrollY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetSecure` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetStyleColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetStyleProperties` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetTheme` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetTouchable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetWindowFontScale` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Shortcut` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowAboutWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowDebugLogWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowDemoWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowIDStackToolWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowMetricsWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowStyleEditor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ShowUserGuide` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SingleChoice` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderAngle` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderFloat2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderFloat3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderFloat4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderInt2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderInt3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SliderInt4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SmallButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SortDirection` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Spacing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.StatsOverlay` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.StyleColorsClassic` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.StyleColorsDark` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.StyleColorsLight` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.StyleVar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TabBarFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TabItemFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableBgTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableColumnFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableGetSortSpecs` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableHeadersRow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableNextColumn` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableNextRow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableRowFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableSetBgColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableSetColumnIndex` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableSetupColumn` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TableSetupScrollFreeze` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Text` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TextColored` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TextDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TextWrapped` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TextureFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Themes` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Toast` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ToastPosition` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Toggle` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ToggleSwitch` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TouchMode` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TreeNode` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TreeNodeEx` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TreeNodeFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.TreePop` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.Unindent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.VSliderFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.VSliderInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.WantCaptureMouse` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.WindowFlags` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.WindowMode` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.WithDragDropSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.WithDragDropTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.WithFont` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.__pluginId` | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) | not-portable: rhino-only (internal-exports) |
-| `imgui.acceptDragDropPayload` | pending | pending | pending |
-| `imgui.addButtonEx` | pending | pending | pending |
-| `imgui.addInputCharacters` | pending | pending | pending |
-| `imgui.addKeyEvent` | pending | pending | pending |
-| `imgui.addMouseButtonEvent` | pending | pending | pending |
-| `imgui.addMousePosEvent` | pending | pending | pending |
-| `imgui.addMouseWheel` | pending | pending | pending |
-| `imgui.alert` | pending | pending | pending |
-| `imgui.alignTextToFramePadding` | pending | pending | pending |
-| `imgui.arrowButton` | pending | pending | pending |
-| `imgui.begin` | pending | pending | pending |
-| `imgui.beginChild` | pending | pending | pending |
-| `imgui.beginCombo` | pending | pending | pending |
-| `imgui.beginDisabled` | pending | pending | pending |
-| `imgui.beginDragDropSource` | pending | pending | pending |
-| `imgui.beginDragDropTarget` | pending | pending | pending |
-| `imgui.beginGroup` | pending | pending | pending |
-| `imgui.beginItemTooltip` | pending | pending | pending |
-| `imgui.beginListBox` | pending | pending | pending |
-| `imgui.beginMenu` | pending | pending | pending |
-| `imgui.beginMenuBar` | pending | pending | pending |
-| `imgui.beginMultiSelect` | pending | pending | pending |
-| `imgui.beginPopup` | pending | pending | pending |
-| `imgui.beginPopupContextItem` | pending | pending | pending |
-| `imgui.beginPopupContextWindow` | pending | pending | pending |
-| `imgui.beginPopupModal` | pending | pending | pending |
-| `imgui.beginTabBar` | pending | pending | pending |
-| `imgui.beginTabItem` | pending | pending | pending |
-| `imgui.beginTable` | pending | pending | pending |
-| `imgui.beginTooltip` | pending | pending | pending |
-| `imgui.bool` | pending | pending | pending |
-| `imgui.bullet` | pending | pending | pending |
-| `imgui.bulletText` | pending | pending | pending |
-| `imgui.button` | pending | pending | pending |
-| `imgui.bytes` | pending | pending | pending |
-| `imgui.calcTextSize` | pending | pending | pending |
-| `imgui.checkbox` | pending | pending | pending |
-| `imgui.closeCurrentPopup` | pending | pending | pending |
-| `imgui.closeWindow` | pending | pending | pending |
-| `imgui.collapseWindow` | pending | pending | pending |
-| `imgui.collapsingHeader` | pending | pending | pending |
-| `imgui.colorButton` | pending | pending | pending |
-| `imgui.colorEdit3` | pending | pending | pending |
-| `imgui.colorEdit4` | pending | pending | pending |
-| `imgui.colorPicker3` | pending | pending | pending |
-| `imgui.colorPicker4` | pending | pending | pending |
-| `imgui.colorU32` | pending | pending | pending |
-| `imgui.combo` | pending | pending | pending |
-| `imgui.confirm` | pending | pending | pending |
-| `imgui.createTexture` | pending | pending | pending |
-| `imgui.createWindow` | pending | pending | pending |
-| `imgui.dataTable` | pending | pending | pending |
-| `imgui.density` | pending | pending | pending |
-| `imgui.destroyTexture` | pending | pending | pending |
-| `imgui.dp` | pending | pending | pending |
-| `imgui.dragFloat` | pending | pending | pending |
-| `imgui.dragFloat2` | pending | pending | pending |
-| `imgui.dragFloat3` | pending | pending | pending |
-| `imgui.dragFloat4` | pending | pending | pending |
-| `imgui.dragFloatRange2` | pending | pending | pending |
-| `imgui.dragInt` | pending | pending | pending |
-| `imgui.dragInt2` | pending | pending | pending |
-| `imgui.dragInt3` | pending | pending | pending |
-| `imgui.dragInt4` | pending | pending | pending |
-| `imgui.dragIntRange2` | pending | pending | pending |
-| `imgui.dummy` | pending | pending | pending |
-| `imgui.end` | pending | pending | pending |
-| `imgui.endChild` | pending | pending | pending |
-| `imgui.endCombo` | pending | pending | pending |
-| `imgui.endDisabled` | pending | pending | pending |
-| `imgui.endDragDropSource` | pending | pending | pending |
-| `imgui.endDragDropTarget` | pending | pending | pending |
-| `imgui.endGroup` | pending | pending | pending |
-| `imgui.endListBox` | pending | pending | pending |
-| `imgui.endMenu` | pending | pending | pending |
-| `imgui.endMenuBar` | pending | pending | pending |
-| `imgui.endMultiSelect` | pending | pending | pending |
-| `imgui.endPopup` | pending | pending | pending |
-| `imgui.endTabBar` | pending | pending | pending |
-| `imgui.endTabItem` | pending | pending | pending |
-| `imgui.endTable` | pending | pending | pending |
-| `imgui.endTooltip` | pending | pending | pending |
-| `imgui.expandWindow` | pending | pending | pending |
-| `imgui.float` | pending | pending | pending |
-| `imgui.floats` | pending | pending | pending |
-| `imgui.framerate` | pending | pending | pending |
-| `imgui.getBackendCapabilities` | pending | pending | pending |
-| `imgui.getBackgroundDrawList` | pending | pending | pending |
-| `imgui.getClipboardText` | pending | pending | pending |
-| `imgui.getComponent` | pending | pending | pending |
-| `imgui.getContentRegionAvail` | pending | pending | pending |
-| `imgui.getCursorPos` | pending | pending | pending |
-| `imgui.getDragDropPayload` | pending | pending | pending |
-| `imgui.getExampleSource` | pending | pending | pending |
-| `imgui.getForegroundDrawList` | pending | pending | pending |
-| `imgui.getFrameHeight` | pending | pending | pending |
-| `imgui.getFrameHeightWithSpacing` | pending | pending | pending |
-| `imgui.getKeyName` | pending | pending | pending |
-| `imgui.getKeyPressedAmount` | pending | pending | pending |
-| `imgui.getMouseDragDelta` | pending | pending | pending |
-| `imgui.getMousePos` | pending | pending | pending |
-| `imgui.getScrollMaxX` | pending | pending | pending |
-| `imgui.getScrollMaxY` | pending | pending | pending |
-| `imgui.getScrollX` | pending | pending | pending |
-| `imgui.getScrollY` | pending | pending | pending |
-| `imgui.getTextLineHeight` | pending | pending | pending |
-| `imgui.getTextLineHeightWithSpacing` | pending | pending | pending |
-| `imgui.getWindowDrawList` | pending | pending | pending |
-| `imgui.getWindowPos` | pending | pending | pending |
-| `imgui.getWindowSize` | pending | pending | pending |
-| `imgui.icon` | pending | pending | pending |
-| `imgui.image` | pending | pending | pending |
-| `imgui.imageButton` | pending | pending | pending |
-| `imgui.indent` | pending | pending | pending |
-| `imgui.inputFloat` | pending | pending | pending |
-| `imgui.inputFloat2` | pending | pending | pending |
-| `imgui.inputFloat3` | pending | pending | pending |
-| `imgui.inputFloat4` | pending | pending | pending |
-| `imgui.inputInt` | pending | pending | pending |
-| `imgui.inputInt2` | pending | pending | pending |
-| `imgui.inputInt3` | pending | pending | pending |
-| `imgui.inputInt4` | pending | pending | pending |
-| `imgui.inputText` | pending | pending | pending |
-| `imgui.inputTextMultiline` | pending | pending | pending |
-| `imgui.int` | pending | pending | pending |
-| `imgui.ints` | pending | pending | pending |
-| `imgui.invisibleButton` | pending | pending | pending |
-| `imgui.isAnyItemActive` | pending | pending | pending |
-| `imgui.isAnyItemHovered` | pending | pending | pending |
-| `imgui.isItemActivated` | pending | pending | pending |
-| `imgui.isItemActive` | pending | pending | pending |
-| `imgui.isItemClicked` | pending | pending | pending |
-| `imgui.isItemDeactivated` | pending | pending | pending |
-| `imgui.isItemDeactivatedAfterEdit` | pending | pending | pending |
-| `imgui.isItemEdited` | pending | pending | pending |
-| `imgui.isItemFocused` | pending | pending | pending |
-| `imgui.isItemHovered` | pending | pending | pending |
-| `imgui.isItemToggledSelection` | pending | pending | pending |
-| `imgui.isItemVisible` | pending | pending | pending |
-| `imgui.isKeyChordPressed` | pending | pending | pending |
-| `imgui.isKeyDown` | pending | pending | pending |
-| `imgui.isKeyPressed` | pending | pending | pending |
-| `imgui.isKeyReleased` | pending | pending | pending |
-| `imgui.isMouseClicked` | pending | pending | pending |
-| `imgui.isMouseDoubleClicked` | pending | pending | pending |
-| `imgui.isMouseDown` | pending | pending | pending |
-| `imgui.isMouseDragging` | pending | pending | pending |
-| `imgui.isMouseReleased` | pending | pending | pending |
-| `imgui.isPopupOpen` | pending | pending | pending |
-| `imgui.isWindowAppearing` | pending | pending | pending |
-| `imgui.isWindowCollapsed` | pending | pending | pending |
-| `imgui.isWindowFocused` | pending | pending | pending |
-| `imgui.isWindowHovered` | pending | pending | pending |
-| `imgui.labelText` | pending | pending | pending |
-| `imgui.launch` | pending | pending | pending |
-| `imgui.launchFloaty` | pending | pending | pending |
-| `imgui.launchPrivileged` | pending | pending | pending |
-| `imgui.listBox` | pending | pending | pending |
-| `imgui.listClipper` | pending | pending | pending |
-| `imgui.listExamples` | pending | pending | pending |
-| `imgui.logWindow` | pending | pending | pending |
-| `imgui.menuItem` | pending | pending | pending |
-| `imgui.multiChoice` | pending | pending | pending |
-| `imgui.newLine` | pending | pending | pending |
-| `imgui.openPopup` | pending | pending | pending |
-| `imgui.plotHistogram` | pending | pending | pending |
-| `imgui.plotLines` | pending | pending | pending |
-| `imgui.popClipRect` | pending | pending | pending |
-| `imgui.popFont` | pending | pending | pending |
-| `imgui.popId` | pending | pending | pending |
-| `imgui.popItemWidth` | pending | pending | pending |
-| `imgui.popStyleColor` | pending | pending | pending |
-| `imgui.popStyleVar` | pending | pending | pending |
-| `imgui.progressBar` | pending | pending | pending |
-| `imgui.pushClipRect` | pending | pending | pending |
-| `imgui.pushFont` | pending | pending | pending |
-| `imgui.pushId` | pending | pending | pending |
-| `imgui.pushItemWidth` | pending | pending | pending |
-| `imgui.pushStyleColor` | pending | pending | pending |
-| `imgui.pushStyleVar` | pending | pending | pending |
-| `imgui.px` | pending | pending | pending |
-| `imgui.radioButton` | pending | pending | pending |
-| `imgui.ref` | pending | pending | pending |
-| `imgui.resetMouseDragDelta` | pending | pending | pending |
-| `imgui.runExample` | pending | pending | pending |
-| `imgui.sameLine` | pending | pending | pending |
-| `imgui.selectable` | pending | pending | pending |
-| `imgui.selectionStorage` | pending | pending | pending |
-| `imgui.sendKey` | pending | pending | pending |
-| `imgui.separator` | pending | pending | pending |
-| `imgui.separatorText` | pending | pending | pending |
-| `imgui.setClipboardText` | pending | pending | pending |
-| `imgui.setCursorPos` | pending | pending | pending |
-| `imgui.setDragDropPayload` | pending | pending | pending |
-| `imgui.setGlobalAlpha` | pending | pending | pending |
-| `imgui.setItemTooltip` | pending | pending | pending |
-| `imgui.setKeyboardFocusHere` | pending | pending | pending |
-| `imgui.setMoreTouch` | pending | pending | pending |
-| `imgui.setNextItemSelectionUserData` | pending | pending | pending |
-| `imgui.setNextItemShortcut` | pending | pending | pending |
-| `imgui.setNextItemWidth` | pending | pending | pending |
-| `imgui.setNextWindowBgAlpha` | pending | pending | pending |
-| `imgui.setNextWindowPos` | pending | pending | pending |
-| `imgui.setNextWindowSize` | pending | pending | pending |
-| `imgui.setNextWindowSizeConstraints` | pending | pending | pending |
-| `imgui.setScrollHereX` | pending | pending | pending |
-| `imgui.setScrollHereY` | pending | pending | pending |
-| `imgui.setScrollX` | pending | pending | pending |
-| `imgui.setScrollY` | pending | pending | pending |
-| `imgui.setSecure` | pending | pending | pending |
-| `imgui.setStyleColor` | pending | pending | pending |
-| `imgui.setStyleProperties` | pending | pending | pending |
-| `imgui.setTheme` | pending | pending | pending |
-| `imgui.setTooltip` | pending | pending | pending |
-| `imgui.setTouchable` | pending | pending | pending |
-| `imgui.setWindowFontScale` | pending | pending | pending |
-| `imgui.shortcut` | pending | pending | pending |
-| `imgui.showAboutWindow` | pending | pending | pending |
-| `imgui.showDebugLogWindow` | pending | pending | pending |
-| `imgui.showDemoWindow` | pending | pending | pending |
-| `imgui.showIdStackToolWindow` | pending | pending | pending |
-| `imgui.showMetricsWindow` | pending | pending | pending |
-| `imgui.showStyleEditor` | pending | pending | pending |
-| `imgui.showUserGuide` | pending | pending | pending |
-| `imgui.singleChoice` | pending | pending | pending |
-| `imgui.sliderAngle` | pending | pending | pending |
-| `imgui.sliderFloat` | pending | pending | pending |
-| `imgui.sliderFloat2` | pending | pending | pending |
-| `imgui.sliderFloat3` | pending | pending | pending |
-| `imgui.sliderFloat4` | pending | pending | pending |
-| `imgui.sliderInt` | pending | pending | pending |
-| `imgui.sliderInt2` | pending | pending | pending |
-| `imgui.sliderInt3` | pending | pending | pending |
-| `imgui.sliderInt4` | pending | pending | pending |
-| `imgui.smallButton` | pending | pending | pending |
-| `imgui.spacing` | pending | pending | pending |
-| `imgui.statsOverlay` | pending | pending | pending |
-| `imgui.string` | pending | pending | pending |
-| `imgui.strings` | pending | pending | pending |
-| `imgui.styleColorsClassic` | pending | pending | pending |
-| `imgui.styleColorsDark` | pending | pending | pending |
-| `imgui.styleColorsLight` | pending | pending | pending |
-| `imgui.tableGetSortSpecs` | pending | pending | pending |
-| `imgui.tableHeadersRow` | pending | pending | pending |
-| `imgui.tableNextColumn` | pending | pending | pending |
-| `imgui.tableNextRow` | pending | pending | pending |
-| `imgui.tableSetBgColor` | pending | pending | pending |
-| `imgui.tableSetColumnIndex` | pending | pending | pending |
-| `imgui.tableSetupColumn` | pending | pending | pending |
-| `imgui.tableSetupScrollFreeze` | pending | pending | pending |
-| `imgui.text` | pending | pending | pending |
-| `imgui.textColored` | pending | pending | pending |
-| `imgui.textDisabled` | pending | pending | pending |
-| `imgui.textWrapped` | pending | pending | pending |
-| `imgui.toast` | pending | pending | pending |
-| `imgui.toggle` | pending | pending | pending |
-| `imgui.toggleSwitch` | pending | pending | pending |
-| `imgui.treeNode` | pending | pending | pending |
-| `imgui.treeNodeEx` | pending | pending | pending |
-| `imgui.treePop` | pending | pending | pending |
-| `imgui.unindent` | pending | pending | pending |
-| `imgui.vSliderFloat` | pending | pending | pending |
-| `imgui.vSliderInt` | pending | pending | pending |
-| `imgui.version` | pending | pending | pending |
-| `imgui.wantCaptureMouse` | pending | pending | pending |
-| `imgui.wantTextInput` | pending | pending | pending |
-| `imgui.withChild` | pending | pending | pending |
-| `imgui.withCombo` | pending | pending | pending |
-| `imgui.withContextItem` | pending | pending | pending |
-| `imgui.withContextWindow` | pending | pending | pending |
-| `imgui.withDisabled` | pending | pending | pending |
-| `imgui.withDragDropSource` | pending | pending | pending |
-| `imgui.withDragDropTarget` | pending | pending | pending |
-| `imgui.withFont` | pending | pending | pending |
-| `imgui.withGroup` | pending | pending | pending |
-| `imgui.withId` | pending | pending | pending |
-| `imgui.withItemTooltip` | pending | pending | pending |
-| `imgui.withListBox` | pending | pending | pending |
-| `imgui.withMenu` | pending | pending | pending |
-| `imgui.withMenuBar` | pending | pending | pending |
-| `imgui.withPopup` | pending | pending | pending |
-| `imgui.withPopupModal` | pending | pending | pending |
-| `imgui.withTabBar` | pending | pending | pending |
-| `imgui.withTabItem` | pending | pending | pending |
-| `imgui.withTable` | pending | pending | pending |
-| `imgui.withTooltip` | pending | pending | pending |
-| `imgui.withTreeNode` | pending | pending | pending |
-| `imgui.withWindow` | pending | pending | pending |
+| `imgui.acceptDragDropPayload` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.addButtonEx` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.addInputCharacters` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.addKeyEvent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.addMouseButtonEvent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.addMousePosEvent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.addMouseWheel` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.alert` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.alignTextToFramePadding` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.arrowButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.begin` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginChild` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginCombo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginDragDropSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginDragDropTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginGroup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginItemTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginListBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginMenu` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginMenuBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginMultiSelect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginPopupContextItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginPopupContextWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginPopupModal` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginTabBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginTabItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.beginTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.bool` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.bullet` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.bulletText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.button` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.bytes` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.calcTextSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.checkbox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.closeCurrentPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.closeWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.collapseWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.collapsingHeader` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.colorButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.colorEdit3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.colorEdit4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.colorPicker3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.colorPicker4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.colorU32` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.combo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.confirm` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.createTexture` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.createWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dataTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.density` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.destroyTexture` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dp` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragFloat2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragFloat3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragFloat4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragFloatRange2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragInt2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragInt3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragInt4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dragIntRange2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.dummy` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.end` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endChild` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endCombo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endDragDropSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endDragDropTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endGroup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endListBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endMenu` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endMenuBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endMultiSelect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endTabBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endTabItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.endTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.expandWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.float` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.floats` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.framerate` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getBackendCapabilities` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getBackgroundDrawList` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getClipboardText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getComponent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getContentRegionAvail` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getCursorPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getDragDropPayload` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getExampleSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getForegroundDrawList` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getFrameHeight` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getFrameHeightWithSpacing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getKeyName` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getKeyPressedAmount` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getMouseDragDelta` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getMousePos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getScrollMaxX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getScrollMaxY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getScrollX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getScrollY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getTextLineHeight` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getTextLineHeightWithSpacing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getWindowDrawList` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getWindowPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.getWindowSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.icon` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.image` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.imageButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.indent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputFloat2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputFloat3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputFloat4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputInt2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputInt3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputInt4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.inputTextMultiline` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.int` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ints` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.invisibleButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isAnyItemActive` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isAnyItemHovered` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemActivated` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemActive` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemClicked` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemDeactivated` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemDeactivatedAfterEdit` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemEdited` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemFocused` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemHovered` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemToggledSelection` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isItemVisible` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isKeyChordPressed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isKeyDown` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isKeyPressed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isKeyReleased` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isMouseClicked` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isMouseDoubleClicked` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isMouseDown` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isMouseDragging` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isMouseReleased` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isPopupOpen` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isWindowAppearing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isWindowCollapsed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isWindowFocused` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.isWindowHovered` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.labelText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.launch` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.launchFloaty` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.launchPrivileged` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.listBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.listClipper` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.listExamples` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.logWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.menuItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.multiChoice` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.newLine` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.openPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.plotHistogram` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.plotLines` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.popClipRect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.popFont` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.popId` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.popItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.popStyleColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.popStyleVar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.progressBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.pushClipRect` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.pushFont` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.pushId` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.pushItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.pushStyleColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.pushStyleVar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.px` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.radioButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.ref` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.resetMouseDragDelta` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.runExample` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sameLine` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.selectable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.selectionStorage` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sendKey` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.separator` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.separatorText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setClipboardText` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setCursorPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setDragDropPayload` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setGlobalAlpha` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setItemTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setKeyboardFocusHere` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setMoreTouch` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextItemSelectionUserData` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextItemShortcut` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextWindowBgAlpha` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextWindowPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextWindowSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextWindowSizeConstraints` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setScrollHereX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setScrollHereY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setScrollX` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setScrollY` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setSecure` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setStyleColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setStyleProperties` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setTheme` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setTouchable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setWindowFontScale` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.shortcut` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showAboutWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showDebugLogWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showDemoWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showIdStackToolWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showMetricsWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showStyleEditor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.showUserGuide` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.singleChoice` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderAngle` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderFloat2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderFloat3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderFloat4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderInt2` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderInt3` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.sliderInt4` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.smallButton` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.spacing` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.statsOverlay` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.string` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.strings` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.styleColorsClassic` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.styleColorsDark` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.styleColorsLight` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableGetSortSpecs` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableHeadersRow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableNextColumn` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableNextRow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableSetBgColor` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableSetColumnIndex` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableSetupColumn` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.tableSetupScrollFreeze` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.text` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.textColored` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.textDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.textWrapped` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.toast` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.toggle` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.toggleSwitch` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.treeNode` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.treeNodeEx` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.treePop` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.unindent` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.vSliderFloat` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.vSliderInt` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.version` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.wantCaptureMouse` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.wantTextInput` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withChild` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withCombo` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withContextItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withContextWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withDisabled` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withDragDropSource` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withDragDropTarget` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withFont` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withGroup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withId` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withItemTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withListBox` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withMenu` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withMenuBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withPopup` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withPopupModal` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withTabBar` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withTabItem` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withTable` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withTooltip` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withTreeNode` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.withWindow` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 
 ### memory
 
