@@ -16,7 +16,7 @@ class RuntimeViewComponentsDeviceTest {
     private val fixture = RuntimeUiComposeDeviceTest()
     private val harness = CaptureWorkerBridgeDeviceTest()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val modes = listOf("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
+    private val modes = runtimeModes("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
     private val evidence = JSONArray()
 
     @Test fun webPagesJavaScriptAndHistoryAcrossRuntimes() = fixture.grants {

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 class RuntimeUiInteropDeviceTest {
     private val fixture = RuntimeUiComposeDeviceTest()
     private val harness = CaptureWorkerBridgeDeviceTest()
-    private val modes = listOf("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
+    private val modes = runtimeModes("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
 
     @Test fun xmlAttachAndNativeClickAcrossRuntimeModes() = fixture.grants {
         for (mode in modes) fixture.interact(mode, """
@@ -83,7 +83,7 @@ class RuntimeUiInteropDeviceTest {
 
     @Test fun xmlAttachmentAndBorrowedViewSurviveRotation() = fixture.grants {
         harness.withFixture {
-            for(mode in listOf("node","worker","bun")) {
+            for(mode in runtimeModes("node","worker","bun")) {
                 harness.automation.setRotation(UiAutomation.ROTATION_FREEZE_0)
                 val executor=Executors.newSingleThreadExecutor()
                 try {

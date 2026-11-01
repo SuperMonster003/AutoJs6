@@ -22,7 +22,7 @@ import java.util.UUID
 class OpenccImageBridgeDeviceTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val global get() = AutoJs.instance.globalConsole
-    private val kinds = listOf("node-cjs", "node-esm", "bun")
+    private val kinds = runtimeModes("node-cjs", "node-esm", "bun")
     private val evidence = JSONArray()
 
     @Test fun nodeWorkerCanUseOpenccAndImagesThroughItsDocumentedBridge() = withGrants {

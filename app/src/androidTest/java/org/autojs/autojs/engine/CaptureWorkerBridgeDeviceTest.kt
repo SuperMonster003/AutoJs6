@@ -15,6 +15,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.hardware.display.DisplayManager
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.Settings
@@ -39,6 +40,11 @@ import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+
+/** The Bun plugin has minSdk 33: its binary calls close_range, which the app seccomp filter of older systems kills. */
+internal val bunRuntimeAvailable get()=Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU
+/** The given execution modes without "bun" where it cannot run, so that the suites also run on the minimum API. */
+internal fun runtimeModes(vararg modes:String)=modes.filter{it!="bun"||bunRuntimeAvailable}
 
 /** Captures only an owned solid-color fixture; uses the real Android consent dialog. */
 class CaptureWorkerBridgeDeviceTest {

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 class RuntimeUiComposeDeviceTest {
     private val harness = CaptureWorkerBridgeDeviceTest()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val modes = listOf("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
+    private val modes = runtimeModes("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
     private val evidence = JSONArray()
 
     @Test fun layoutsBindingsAndClicksAcrossRuntimeModes() = grants {
@@ -70,6 +70,7 @@ class RuntimeUiComposeDeviceTest {
             assertTrue(result.toString(), result.getBoolean("closed")); assertEquals(0, result.getInt("sessions"))
             evidence.put(JSONObject().put("mode", mode).put("result", result))
         }
+        if (!bunRuntimeAvailable) { write("ownership"); return@grants }
         BunHostCapabilityGrants.setUiLayoutGranted(context, false)
         BunHostCapabilityGrants.setUiComposeGranted(context, false)
         val denied = harness.execute("bun", """
@@ -131,7 +132,7 @@ class RuntimeUiComposeDeviceTest {
 
     @Test fun composeStateAndTextSurviveActivityRotation() = grants {
         harness.withFixture {
-            for(mode in listOf("node","worker","bun")) {
+            for(mode in runtimeModes("node","worker","bun")) {
                 harness.automation.setRotation(android.app.UiAutomation.ROTATION_FREEZE_0)
                 val display=(context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay
                 harness.await("Portrait display") { display.rotation==android.view.Surface.ROTATION_0 }

@@ -17,7 +17,7 @@ class RuntimeXmlViewDeviceTest {
     private val fixture = RuntimeUiComposeDeviceTest()
     private val harness = CaptureWorkerBridgeDeviceTest()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
-    private val modes = listOf("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
+    private val modes = runtimeModes("node", "node-esm", "worker", "worker-esm", "worker-nested", "bun")
     private val evidence = JSONArray()
 
     @Test fun commonXmlWidgetsAndOrderedPropertiesAcrossRuntimes() = fixture.grants {
@@ -112,7 +112,7 @@ class RuntimeXmlViewDeviceTest {
 
     @Test fun xmlPropertiesAndComposeSurviveRotation() = fixture.grants {
         harness.withFixture {
-            for (mode in listOf("node","worker","bun")) {
+            for (mode in runtimeModes("node","worker","bun")) {
                 harness.automation.setRotation(UiAutomation.ROTATION_FREEZE_0)
                 val executor=Executors.newSingleThreadExecutor()
                 try {
@@ -174,7 +174,7 @@ class RuntimeXmlViewDeviceTest {
     }
 
     @Test fun dimensionsWeightsAndRelativeRulesAffectTheActualLayout() = fixture.grants {
-        for (mode in listOf("node","worker","bun")) {
+        for (mode in runtimeModes("node","worker","bun")) {
             val executor=Executors.newSingleThreadExecutor()
             try {
                 val future=executor.submit<JSONObject>{fixture.run(mode,"""

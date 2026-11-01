@@ -26,7 +26,7 @@ class AdvancedImageBridgeDeviceTest {
     private val context get()=instrumentation.targetContext
     private val harness=CaptureWorkerBridgeDeviceTest()
     private val capabilities=listOf("image","screen_capture","network","device")
-    private val modes=listOf("node","node-esm","worker-cjs","worker-esm","worker-nested","bun")
+    private val modes=runtimeModes("node","node-esm","worker-cjs","worker-esm","worker-nested","bun")
     private val fixture get()=instrumentation.context.assets.open("advanced-images.js").bufferedReader().use{it.readText()}
 
     @Test fun filtersColorsMetricsAndEncodingAcrossAllExecutionModes()=matrix("filters")
@@ -48,7 +48,7 @@ class AdvancedImageBridgeDeviceTest {
         val bitmap=fixtureImage("filters");val source=File(folder,"source.png")
         try{
             source.outputStream().use{bitmap.compress(Bitmap.CompressFormat.PNG,100,it)}
-            for(kind in listOf("node","bun"))harness.execute(kind,"""
+            for(kind in runtimeModes("node","bun"))harness.execute(kind,"""
                 const path=${JSONObject.quote(source.path)},image=await images.readImage(path),handles=[image];
                 const features=await images.detectAndComputeFeatures(image,{method:'ORB',maxFeatures:20});handles.push(features);
                 try{
@@ -128,7 +128,7 @@ class AdvancedImageBridgeDeviceTest {
     }
 
     @Test fun asyncCaptureAliasAndOptionsUseTheRealCaptureSession()=grants {
-        for(kind in listOf("node","bun"))harness.withFixture {
+        for(kind in runtimeModes("node","bun"))harness.withFixture {
             val pool=Executors.newSingleThreadExecutor()
             try{
                 val future=pool.submit<JSONObject>{harness.execute(kind,"""
