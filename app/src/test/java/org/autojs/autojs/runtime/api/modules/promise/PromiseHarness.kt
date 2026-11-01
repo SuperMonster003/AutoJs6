@@ -2,6 +2,7 @@ package org.autojs.autojs.runtime.api.modules.promise
 
 import org.autojs.autojs.core.looper.SettlementLatch
 import org.autojs.autojs.rhino.TopLevelScope
+import org.autojs.autojs.rhino.extension.AnyExtensions.isJsNullish
 import org.autojs.autojs.runtime.api.modules.bootstrap.ContinuationPrototype
 import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
@@ -26,7 +27,7 @@ import org.mozilla.javascript.ScriptRuntime as RhinoScriptRuntime
  * A single script thread runs a timer in virtual time (`setImmediate` and `setTimeout` ordered by due time, then by
  * posting, as `core/looper/Timer`) and each callback as a top call that lets a coroutine suspending again through (Q23).
  * `continuation` captures real Rhino continuations as `augment/continuation/Creator` and `rhino/continuation/Continuation`
- * do (`resumeError` resumes with the error value after "popException", as `Continuation.Result.handle`; another thread
+ * do (`resumeError` throws the error at the suspended call, as `Continuation` does; another thread
  * posts the resume, as Q98 has it), with the host's [ContinuationPrototype]. `runtime.loopers.newSettlementLatch()` is a
  * real [SettlementLatch] over the timer. `otherThread(fn)` calls `fn` on another Java thread with its own Context and no
  * timer (a binder thread, a Java thread): `setImmediate` there posts to the script timer, as `Timers.setImmediate` falls
@@ -167,8 +168,14 @@ class PromiseHarness(val impl: Impl) : AutoCloseable {
         }
 
         fun resumeError(error: Any?) {
-            log += "popException " + Context.toString(error)
-            resume(error)
+            require(!error.isJsNullish()) { "resumeError must be non-nullish" }
+            if (thread === Thread.currentThread()) resumeErrorHere(Context.getCurrentContext(), error)
+            else post(0) { try { resumeErrorHere(cx, error) } catch (_: ContinuationPending) {} }
+        }
+
+        private fun resumeErrorHere(c: Context, error: Any?) {
+            val p = checkNotNull(pending) { "resume called without suspend" }.continuation
+            c.resumeContinuationWithError(p, scope, error)
         }
     }
 

@@ -281,7 +281,7 @@ class Timer {
                 callback
             }
             try {
-                runPosted(callback)
+                runPosted({ mLooper == Looper.getMainLooper() }, { mRuntime.get()?.exit(it) }, callback)
             } finally {
                 synchronized(this@Timer) {
                     mPendingCallbacks.remove(this)
@@ -332,20 +332,14 @@ class Timer {
         }
 
         /**
-         * Runs a runnable posted through [postDelayed]. A [ContinuationPending] does not reach the looper, for the same reason as
-         * in [runCallback]: `Continuation.resumeWith` posts the resume when it is called on another thread, and a coroutine
-         * suspending again there formerly crashed the app on the main looper (docs/augment/ROADMAP.md Q23).
+         * Runs a runnable posted through [postDelayed], as [runCallback] does: `Continuation.resumeWith` posts the resume when it is
+         * called on another thread. A coroutine suspending again there, or an error that the resumed script does not catch, reached
+         * the looper and crashed the app on the main looper (docs/augment/ROADMAP.md Q23, docs/api-coverage/ROADMAP.md Q205).
          *
-         * zh-CN: 运行经 [postDelayed] 投递的 Runnable. 与 [runCallback] 同理, ContinuationPending 不会抛到 Looper: 在其他线程调用 `Continuation.resumeWith` 时
-         * 会投递恢复操作, 协程在其中再次挂起时, 原先会在主 Looper 上使应用崩溃 (docs/augment/ROADMAP.md Q23).
+         * zh-CN: 像 [runCallback] 一样运行经 [postDelayed] 投递的 Runnable: 在其他线程调用 `Continuation.resumeWith` 时会投递恢复操作. 协程在其中再次挂起,
+         * 或恢复后的脚本未捕获的错误, 原先会抛到 Looper 并在主 Looper 上使应用崩溃 (docs/augment/ROADMAP.md Q23, docs/api-coverage/ROADMAP.md Q205).
          */
-        internal fun runPosted(r: Runnable) {
-            try {
-                r.run()
-            } catch (_: ContinuationPending) {
-                /* Suspended again, see above. */
-            }
-        }
+        internal fun runPosted(isOnMainLooper: () -> Boolean, exit: (Throwable) -> Unit, r: Runnable) = runCallback(isOnMainLooper, exit, r::run)
 
         private fun currentOrPreparedLooper(): Looper {
             LooperHelper.prepare()

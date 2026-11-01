@@ -44,11 +44,11 @@ class PromiseDifferentialTest {
         // Q97: `FlowNativeObject.await` suspends through PromiseSuspension (it worked for the module's Promise as well).
         // zh-CN: Q97: FlowNativeObject.await 经 PromiseSuspension 挂起 (对原模块的 Promise 同样有效).
         Impl.entries.forEach { impl ->
-            assertEquals(impl.name, "(suspended) ; kotlin await k ; later 3 ; rejected ; popException Error: no ; got Error: no", runOne(impl, """
+            assertEquals(impl.name, "(suspended) ; kotlin await k ; later 3 ; rejected ; caught Error: no", runOne(impl, """
                 log('kotlin await ' + kotlinAwait(Promise.resolve('k')));
                 log('later ' + kotlinAwait(new Promise(r => setTimeout(() => r(3), 5))));
                 log('rejected');
-                log('got ' + kotlinAwait(Promise.reject(new Error('no'))));
+                try { log('got ' + kotlinAwait(Promise.reject(new Error('no')))); } catch (e) { log('caught ' + e); }
             """))
         }
     }
@@ -80,6 +80,11 @@ class PromiseDifferentialTest {
 
         /** What [PromiseConstructor] knowingly does differently (appendix E "Promise (路线 A)"). */
         val KNOWN = mapOf(
+            // Q205 of docs/api-coverage/ROADMAP.md: await() throws a rejection at the call (it handed it back as its value after a
+            // toast); no `try` is around this one, so the script ends with it.
+            "K1-await-basic" to "(suspended) ; await 7 ; await later t ; task error: JavaScriptException Error: no",
+            // Q205: no "popException" of a resume that fails; the failure stays a warning about the unhandled rejection.
+            "K6-await-in-then" to "inner await error JavaException: java.lang.IllegalStateException: Ca ; warn Possible Unhandled Promise Rejection: JavaException: java.lang.IllegalStateException: resume called without suspend",
             // Q96: no own `_state` / `_handled` / `_value` / `_deferreds`.
             "C2-surface-instance" to " [object Object] [object Object] true true",
             // Settling what is not an instance does nothing; the module wrote `_state` on it and failed in `_.finale`.

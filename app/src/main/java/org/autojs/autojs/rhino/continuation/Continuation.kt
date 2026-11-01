@@ -7,8 +7,10 @@ import org.autojs.autojs.util.StringUtils.str
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
+import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.VarScope
+import org.mozilla.javascript.WrappedException
 
 class Continuation internal constructor(val context: AutoJsContext, val scope: VarScope, private val post: (Runnable) -> Unit) {
 
@@ -28,14 +30,6 @@ class Continuation internal constructor(val context: AutoJsContext, val scope: V
 
             @JvmStatic
             fun failure(error: Any?) = Result(null, error)
-
-            @JvmStatic
-            fun handle(o: Any?) = when (o) {
-                is Result -> o.error?.also {
-                    ScriptRuntime.popException(Context.toString(it))
-                } ?: o.result
-                else -> o
-            }
 
             @JvmStatic
             fun getOrThrow(o: Any?) = when (o) {
@@ -80,11 +74,24 @@ class Continuation internal constructor(val context: AutoJsContext, val scope: V
         }
     }
 
+    /**
+     * Restores the script at its suspended call, which returns the result or throws the error there, so that a `try` around
+     * `await()` catches it (docs/api-coverage/ROADMAP.md Q205). Rhino resumed a continuation with a value only, and the Java
+     * stack of [suspend] is gone by now: since 6.3.4, when throwing crashed the app on the main looper, the error was the value
+     * of `await()` after a toast. What the script does not catch now exits the script (`Timer.runCallback`).
+     * zh-CN: 在挂起的调用处恢复脚本, 该调用返回结果或抛出错误, 因此 await() 外的 try 能捕获它 (docs/api-coverage/ROADMAP.md Q205). Rhino 原本只能以值恢复续体,
+     * 而此时 [suspend] 的 Java 栈已不存在: 6.3.4 起 (当时抛出会在主 Looper 上使应用崩溃), 错误在弹出提示后成为 await() 的返回值. 现在脚本未捕获的错误会结束脚本 (`Timer.runCallback`).
+     */
     private fun resume(result: Result) {
         val continuation = pending?.continuation ?: throw IllegalStateException(
             str(R.string.error_continuation_resume_called_without_suspend)
         )
-        context.resumeContinuation(continuation, scope, Result.handle(result))
+        when (val error = result.error) {
+            null -> context.resumeContinuation(continuation, scope, result.result)
+            is RhinoException -> context.resumeContinuationWithError(continuation, scope, error)
+            is Throwable -> context.resumeContinuationWithError(continuation, scope, WrappedException(error))
+            else -> context.resumeContinuationWithError(continuation, scope, error)
+        }
     }
 
     companion object {

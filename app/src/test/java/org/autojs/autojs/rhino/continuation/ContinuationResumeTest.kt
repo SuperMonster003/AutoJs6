@@ -4,7 +4,9 @@ import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.rhino.TopLevelScope
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before
@@ -13,6 +15,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.ContinuationPending
+import org.mozilla.javascript.JavaScriptException
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.VarScope
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -95,8 +98,43 @@ class ContinuationResumeTest {
         assertEquals("here,done", steps())
     }
 
-    private fun suspendScript() {
-        val script = cx.compileString("steps.push(suspendHere()); steps.push('done');", "main", 1, null)
+    @Test
+    fun aFailureThrowsAtTheSuspendedCall() {
+        suspendScript("try { steps.push(suspendHere()); } catch (e) { steps.push('caught ' + e); } steps.push('done');")
+        continuation.resumeWith(Continuation.Result.failure("rejected"))
+        assertEquals("caught rejected,done", steps())
+        assertFalse(cx.hasPendingContinuation())
+    }
+
+    @Test
+    fun aFailureNoScriptCatchesLeavesTheResume() {
+        suspendScript()
+        val thrown = assertThrows(JavaScriptException::class.java) { continuation.resumeWith(Continuation.Result.failure("rejected")) }
+        assertEquals("rejected", thrown.value)
+        assertEquals("", steps())
+        assertFalse(cx.hasPendingContinuation())
+    }
+
+    @Test
+    fun aJavaFailureIsCaughtAsAnyJavaException() {
+        suspendScript("try { suspendHere(); } catch (e) { steps.push(e.javaException.getMessage()); }")
+        continuation.resumeWith(Continuation.Result.failure(IllegalStateException("from java")))
+        assertEquals("from java", steps())
+    }
+
+    @Test
+    fun aFailureFromAnotherThreadThrowsOnTheTimer() {
+        suspendScript("try { suspendHere(); } catch (e) { steps.push('caught ' + e); }")
+        val worker = Thread { continuation.resumeWith(Continuation.Result.failure("later")) }
+        worker.start()
+        worker.join()
+        assertEquals("", steps())
+        runTimer()
+        assertEquals("caught later", steps())
+    }
+
+    private fun suspendScript(source: String = "steps.push(suspendHere()); steps.push('done');") {
+        val script = cx.compileString(source, "main", 1, null)
         try {
             cx.executeScriptWithContinuations(script, scope)
             fail("The script did not suspend")

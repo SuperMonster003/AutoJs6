@@ -13,6 +13,7 @@ import org.mozilla.javascript.BaseFunction
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ContinuationPending
+import org.mozilla.javascript.JavaScriptException
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.mozilla.javascript.VarScope
@@ -92,11 +93,11 @@ class TimerContinuationTest {
 
         // Continuation.resumeWith posts the resume when it is called on another thread; it runs outside any top call.
         // zh-CN: 在其他线程调用 Continuation.resumeWith 时会投递恢复操作, 它在任何顶层调用之外运行.
-        Timer.runPosted { cx.resumeContinuation(pendings.last().continuation, scope, "posted") }
+        posted { cx.resumeContinuation(pendings.last().continuation, scope, "posted") }
         assertEquals(2, pendings.size)
-        Timer.runPosted { cx.resumeContinuation(pendings.last().continuation, scope, "again") }
+        posted { cx.resumeContinuation(pendings.last().continuation, scope, "again") }
         assertEquals(3, pendings.size)
-        Timer.runPosted { cx.resumeContinuation(pendings.last().continuation, scope, "last") }
+        posted { cx.resumeContinuation(pendings.last().continuation, scope, "last") }
         assertEquals("posted,again,last,done", steps())
     }
 
@@ -117,12 +118,25 @@ class TimerContinuationTest {
         assertTrue(exits.isEmpty())
 
         try {
-            Timer.runPosted { throw error }
+            posted { throw error }
             fail("A failure of a posted runnable must propagate")
         } catch (e: IllegalStateException) {
             assertSame(error, e)
         }
     }
+
+    @Test
+    fun anErrorOfAResumedScriptExitsTheScriptOnTheMainLooperInsteadOfCrashingTheApp() {
+        // docs/api-coverage/ROADMAP.md Q205: the error of a rejected await() that no script catches, resumed from another thread.
+        // zh-CN: docs/api-coverage/ROADMAP.md Q205: 脚本未捕获的 await() 拒绝, 由其他线程恢复.
+        suspendScript()
+
+        Timer.runPosted({ true }, { exits += it }) { cx.resumeContinuationWithError(pendings.last().continuation, scope, "rejected") }
+
+        assertEquals("rejected", (exits.single() as JavaScriptException).value)
+    }
+
+    private fun posted(r: Runnable) = Timer.runPosted({ false }, { exits += it }, r)
 
     private fun suspendScript() {
         val script = cx.compileString(

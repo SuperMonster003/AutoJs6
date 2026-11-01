@@ -27,9 +27,9 @@ class Creator(scriptRuntime: ScriptRuntime, scope: Scriptable? = null) {
          * engines.myEngine().hasFeature('continuation'); // false
          * Object.create(runtime.createContinuation()).suspend(); // throw error
          */
-        val result = mContinuation.suspend()
-
-        return Continuation.Result.handle(result)
+        // The script resumes at this call, not here: Continuation.resumeWith gives it its result or throws its error.
+        // zh-CN: 脚本在此调用处恢复, 而不是在这里继续: Continuation.resumeWith 交回结果或抛出错误.
+        return mContinuation.suspend()
     }
 
     fun resumeError(error: Any?) {

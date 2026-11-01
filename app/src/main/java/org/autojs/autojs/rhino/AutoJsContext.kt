@@ -70,6 +70,11 @@ class AutoJsContext(factory: ContextFactory?) : Context(factory) {
         return super.resumeContinuation(continuation, scope, functionResult)
     }
 
+    override fun resumeContinuationWithError(continuation: Any, scope: VarScope?, error: Any?): Any {
+        continuations.remove(continuation)
+        return super.resumeContinuationWithError(continuation, scope, error)
+    }
+
     fun hasPendingContinuation(): Boolean {
         return continuations.isNotEmpty()
     }
