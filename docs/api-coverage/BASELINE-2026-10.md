@@ -1522,3 +1522,53 @@ HEAD 副本: `check.py --source ksp --matrix --strict-arity --strict-types --doc
 | 文档 | 5e0724d | 生成物 (由同时提交的宿主小修卡一起重生成) |
 | Offline Docs | 08fcf64 | 捆绑页 (同上) |
 | 宿主 | (本节所在提交) | 本节, ROADMAP 落点, IMGUI-PLAN |
+
+## 23. Q205 (a): Rhino 续体模式 await() 遇拒绝改为抛出 (2026-11-01, 子会话 api-cov-q205-await)
+
+### 23.1 结论
+
+Rhino 续体模式 (项目启动, `continuation` 特性) 下, promise.await(), flow.await(), continuation.await(rejected), resumeError 恢复的 cont.await(), 以及经同一路径等待的 http 请求, 遇拒绝都在调用处抛出拒绝原因, 不再把 Error 当返回值交回. 原因是 Error 就抛该 Error, 不是 Error 也抛出, catch 拿到原值. 超时与链继续运行等语义不变. 脚本没有捕获时以该错误结束, UI 模式下应用也不崩溃, 这正是 6.3.4 当年改成返回值想避开的问题.
+
+### 23.2 根因与改动
+
+- 根因: `rhino/continuation/Continuation.kt` 的 `resume()` 经 `Result.handle` 取值后调 `resumeContinuation`, 失败分支返回 error 本身. 挂起后 Kotlin 栈已丢, `Creator.await` 里的 handle 执行不到. 上游恢复路径只有 `setCallResult`, 没有抛出通路; `ACallFrame.parentFrame` 是 final, 宿主拼不出帧, 所以根治要动 fork.
+- 历史: 原 JS 模块是 `throw result.error`, 6.3.4 Alpha2 (ee1fb8a6af, 2023-10-03) 改成 popException + return, 同版 changelog 修的是 "使用协程特性运行项目产生未捕获异常致使应用崩溃的问题".
+- fork (维护者 19:4x 选定 "fork 加 API, 换 jar"): 新 `Context.resumeContinuationWithError`, 由 `Interpreter.restartContinuationWithError` 与 `ContinuationJump.throwResult` 在挂起的调用处抛出; 新文件 `ContinuationError`, 新测试 `ContinuationResumeErrorTest`, 钩子登记 725 行. 补丁基于 fork 7b3ddf3c1, 入库见 23.6.
+- 宿主 956a09fa8: jar 3393229 -> 3394845 字节, sha256 `a5049a70ff381e171d795dcb311cbd41f7ad6244528378a058c739684e197385`. `Continuation.resume` 改走新 API, 删 `Result.handle`; `AutoJsContext` 同样从续体表移除; `Timer.runPosted` 让主 Looper 上恢复时抛出的错误走 exit, 不抛到 Looper; `ContinuationPrototype` 在 Promise 反应里恢复时, 脚本未捕获的错误经 setImmediate 抛出, 不再落入 `.catch(resumeError)` 二次恢复同一续体.
+
+### 23.3 单测
+
+| 范围 | 结果 |
+|---|---|
+| fork `:rhino:test` | 4404 例, 0 失败, 4 跳过 |
+| fork `:tests` Continuation / Generator | 37 例, 0 失败 |
+| fork HooksRegistryTest | 通过 |
+| 宿主全量 testAppDebugUnitTest | 6040 例, 2 失败, 27 跳过 |
+
+新增与调整: `AwaitRejectionTest` 12 例, `ContinuationResumeTest` +4, `TimerContinuationTest` +1, `PromiseHarness` 的 resumeError 真抛, `PromiseDifferentialTest` 的 KNOWN 加 K1 / K6.
+
+宿主 2 个失败都与本卡无关: `GalleryLateOpeningTest` 重跑通过; `IdleWaiterTest` 是真实时钟断言 (睡眠 10 - 30 ms 后数事件), 3 组 Gradle 并行时两次失败, 失败的用例还不相同 (aBusyStreamTimesOut, eventsPostponeTheQuietPeriod), 它不依赖 Rhino, Timer 或续体. 21:07 在同一副本 (含修复与新 jar) 重跑 7 / 7 通过.
+
+### 23.4 真机
+
+Redmi bek749scrwv4wo8h (arm64, API 33), 调试包: 宿主 6551 md5 0bf64799 (HEAD 副本 + 本修复), Node 370 md5 3f5a96a9, Bun 346 md5 ec1cdd4a. 脚本 `tools/api-coverage/device_flow_terminals.py` (d2f21e771), 去掉了 RHINO_DIFFERENCES, 新增 rejection 阶段.
+
+| 轮 | 修复后 | 原宿主 5935 对照 |
+|---|---|---|
+| flow, Rhino 录制 | 11 / 11, await.rejected 抛出 | - |
+| flow, Node main + Worker | 22 / 22 | - |
+| flow, Bun main + Worker | 22 / 22 | - |
+| rejection, 后台 + UI 模式各 11 项捕获 + 6 项未捕获 | 34 / 34 | 0 / 34 |
+
+- 未捕获项: 修复后只收到索引 0, 错误进日志, 宿主 pid 不变. 原宿主收到 [0, 1, 2] 或 [0, 2], 脚本带着错误值跑完.
+- 捕获项在原宿主全部缺结果, 未细查, 推测是 `Promise.reject(null).await()` 不恢复.
+- 设备还原: 宿主 5935 md5 b958b465, Bun 293 md5 bbfca1f6, Node 291 md5 a8811d17 全部一致, `/sdcard/Download` 无 aj6- 残留.
+
+### 23.5 文档与 changelog
+
+- 文档 a989c94 (`api/continuation.md`), d6fe7a8 (重生成, 生成器按惯例自增 versionCode 174 -> 175); Offline Docs e7a9e40 (VERSION_BUILD 244 -> 245).
+- 宿主 3ab7e8d49: zh-Hans changelog 加一条修复. 依据: 返回错误值的行为自 6.3.4 起已发布, promise.await 与 cont.await 都受影响; 只有 flow.await 是 6.8.0 新增.
+
+### 23.6 遗留
+
+- fork 补丁未入 fork 仓库: 共享签出自 19:28 起处于 rhino-p8 的上游合并中. 补丁在共享笔记 `api-cov-q205-fork.patch` (430 行, 6 个文件), 宿主 jar 已含此 API, 补丁入库前从 fork 重建 jar 会让宿主编译失败. 登记 Q223.
