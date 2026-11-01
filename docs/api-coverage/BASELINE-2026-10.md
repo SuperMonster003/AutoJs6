@@ -1572,3 +1572,23 @@ Redmi bek749scrwv4wo8h (arm64, API 33), 调试包: 宿主 6551 md5 0bf64799 (HEA
 ### 23.6 遗留
 
 - fork 补丁未入 fork 仓库: 共享签出自 19:28 起处于 rhino-p8 的上游合并中. 补丁在共享笔记 `api-cov-q205-fork.patch` (430 行, 6 个文件), 宿主 jar 已含此 API, 补丁入库前从 fork 重建 jar 会让宿主编译失败. 登记 Q223.
+
+## 24. P6.1 最低版本抽样 (2026-11-01, 子会话 api-cov-p6-1-minapi)
+
+### 24.1 结论
+
+设备 G8441 (API 28), 报告 [P6-1-MINAPI-2026-11-01.md](P6-1-MINAPI-2026-11-01.md). 抽样 26 项 (9 族) Node main / Worker 全过, P1.2 图像 9 / 9, UI 11 / 11, 截图 2 / 2 全过, Bun 全列按 API 33 记限制. pending 不变 (0 / 0 / 0, 标注不改状态).
+
+### 24.2 minApi 标注规则
+
+`runtime-policy.json` 新增 `minApi` 列表: 覆盖状态的单元格带上 `minApi` 与 `minApiRule`, 状态不变, 不算 pending 也不算排除, 不能用来清 pending; 规则不命中单元格或缺级别 / 理由时记策略冲突. `MATRIX.md` 新增 "最低 API 标注" 节. 现有 1 条规则 `bun-plugin-min-sdk` (Bun 列, 匹配 `*`, minApi 33, 2051 格): 插件 minSdk 33, 官方二进制调用 close_range, Android 12L 及更早的应用 seccomp 以 SIGSYS 结束进程. Node main / Worker 没有标注: 本轮失败项都不是 API 28 限制.
+
+### 24.3 修复与新待决
+
+- 宿主 6d9fd7546: `NotificationChannel.hasUserSetImportance` 是 API 29 方法, RuntimeSystemBridge 与 Channel.kt 的判断写成 API 28, Android 9 上读渠道抛 NoSuchMethodError. 改为 API 29, Node main / Worker 复测 51 / 51.
+- 宿主 f14ed8d93 / 6d9fd7546: 设备套件在 API 33 以下跳过 Bun 模式 (`runtimeModes`, `bunRuntimeAvailable`).
+- Q227 terminal waitFor 与 write 的竞态 (需拍板), Q228 插件进程存储授权入口 (已按推荐先行待确认).
+
+### 24.4 提交
+
+宿主 f14ed8d93 / 6d9fd7546 / 3c9c5b0bc / d584ca619; MATRIX.md 由 3e45564eb 带上标注节; Node 5587b94e; 文档 716dac1.
