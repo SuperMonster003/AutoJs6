@@ -290,7 +290,7 @@ internal class RuntimeSystemBridge(
         put("canBypassDnd", channel.canBypassDnd())
         put("canShowBadge", channel.canShowBadge())
         put("group", channel.group ?: JSONObject.NULL)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) put("hasUserSetImportance", channel.hasUserSetImportance())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) put("hasUserSetImportance", channel.hasUserSetImportance())
     }
 
     private fun cwd(): String? = resolveFile(".")?.path

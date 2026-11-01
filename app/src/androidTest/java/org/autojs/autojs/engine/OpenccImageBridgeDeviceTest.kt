@@ -158,6 +158,7 @@ class OpenccImageBridgeDeviceTest {
             """.trimIndent())
             execute(kind, "await rejects(() => images.pixel(${result.getJSONObject("handle")},0,0)); return {staleRejected:true};")
         }
+        if (!bunRuntimeAvailable) { writeEvidence("transport-grants"); return@withGrants }
         val file = File(context.cacheDir,"image-bridge-large-${UUID.randomUUID()}.png")
         try {
             file.writeBytes(Base64.decode(encoded,Base64.DEFAULT))

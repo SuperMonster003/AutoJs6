@@ -147,7 +147,7 @@ class Channel(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                 when (k) {
                     "name", "description" -> {}
                     "importance" -> when {
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && get(scriptRuntime, arrayOf(id))?.hasUserSetImportance() == true -> {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && get(scriptRuntime, arrayOf(id))?.hasUserSetImportance() == true -> {
                             warn(scriptRuntime, "Property \"$k\" for channel with ID \"$id\" will not take effect, as the user has altered importance on this channel")
                         }
                         importance != null && importance > (get(scriptRuntime, arrayOf(id))?.importance ?: Int.MIN_VALUE) -> {
